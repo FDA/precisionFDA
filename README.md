@@ -15,4 +15,15 @@ changes coming soon.
 * Test framework TBD
 * Template language TBD (ERB vs HAML, etc)
 * Coffeescript
-* RVM for managing ruby version as well as gems
+* [RVM](https://rvm.io/) for managing ruby version
+* [Bundler](http://bundler.io/) for managing gem dependencies
+
+## Setting up your development environment
+1. If using gnome-terminal, https://rvm.io/integration/gnome-terminal
+1. Install rubygems 2.4.6
+    * Ubuntu: ""
+1. Install SQLite
+    * Ubuntu: `apt-get install sqlite3`
+    * Mac: `brew install sqlite3`
+1. `./setup_dev_env.sh`
+1. `rvm use 2.2.1 --default`
