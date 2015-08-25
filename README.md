@@ -7,7 +7,7 @@ diagnostic testing. This project is still VERY young, so expect a lot of
 changes coming soon.
 
 ## Tech stack
-* Ruby 2.2
+* Ruby 2.2.3
 * Rails 4.2
 * SQLite3 in development,  Mysql 5.6.26 in production
 
@@ -26,9 +26,9 @@ changes coming soon.
     1. [Ubuntu only] `gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3`
     1. `curl -sSL https://get.rvm.io | bash -s stable`
     1. Source the rvm file mentioned in the previous command or open a new terminal before proceeding
-1. Install and use ruby 2.2.1
-    1. `rvm install ruby-2.2.1`
-    1. `rvm use 2.2.1 --default`
+1. Install and use ruby 2.2.3
+    1. `rvm install ruby-2.2.3`
+    1. `rvm use 2.2.3 --default`
 1. Install builder and gems
     1. `gem install bundler --version 1.10.6`
     1. `bundle install`
