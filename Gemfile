@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+# Bundler. The tool that manages all of our gems
+gem 'bundler', '1.10.6'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.3'
