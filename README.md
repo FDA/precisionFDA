@@ -9,7 +9,7 @@ changes coming soon.
 ## Tech stack
 * Ruby 2.2
 * Rails 4.2
-* SQLite in development,  Mysql 5.6.26 in production
+* SQLite3 in development,  Mysql 5.6.26 in production
 
 ## Tooling
 * Test framework TBD
