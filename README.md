@@ -8,7 +8,7 @@ changes coming soon.
 
 ## Tech stack
 * Ruby 2.2.3
-* Rails 4.2
+* Rails 4.2.3
 * SQLite3 in development,  Mysql 5.6.26 in production
 
 ## Tooling
