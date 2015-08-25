@@ -20,6 +20,7 @@ changes coming soon.
 
 ## Setting up your development environment
 1. If using gnome-terminal, https://rvm.io/integration/gnome-terminal
+1. [OS X only] `xcode-select --install`
 1. Set up RVM
     1. [Ubuntu only] `gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3`
     1. `curl -sSL https://get.rvm.io | bash -s stable`
