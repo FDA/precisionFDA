@@ -19,7 +19,8 @@ changes coming soon.
 * [Bundler](http://bundler.io/) for managing gem dependencies
 
 ## Setting up your development environment
-1. If using gnome-terminal, https://rvm.io/integration/gnome-terminal
+1. `git clone git@github.com:dnanexus/precision-fda.git && cd precision-fda`
+1. [Ubuntu only] If using gnome-terminal, https://rvm.io/integration/gnome-terminal
 1. [OS X only] `xcode-select --install`
 1. Set up RVM
     1. [Ubuntu only] `gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3`
