@@ -1,0 +1,24 @@
+{
+  "name": "precision-fda",
+  "version": "0.0.1",
+  "homepage": "https://github.com/dnanexus/precision-fda",
+  "authors": [
+    "Fahd Butt <fbutt@dnanexus.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "vendor/assets/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "2.1.4",
+    "bootstrap-sass": "3.3.5",
+    "lodash": "3.10.1",
+    "moment": " 2.10.6",
+    "fontawesome": "4.4.0"
+  }
+}

@@ -1,0 +1,2 @@
+module BiospecimensHelper
+end
