@@ -1,0 +1,32 @@
+<ul class="nav-links nav nav-pills">
+  <li class="<%= 'active' if params[:controller] == 'overview' %>" role="presentation">
+    <%= link_to root_path do %>
+      <div class="nav-icon fa fa-2x fa-home"></div>
+      <div class="nav-pill-title">Overview</div>
+    <% end %>
+  </li>
+  <li class="<%= 'active' if params[:controller] == 'comparisons' %>" role="presentation">
+    <%= link_to comparisons_path do %>
+      <div class="nav-icon fa fa-2x fa-bullseye"></div>
+      <div class="nav-pill-title">Comparisons</div>
+    <% end %>
+  </li>
+  <li class="<%= 'active' if params[:controller] == 'files' %>" role="presentation">
+    <%= link_to files_path do %>
+      <div class="nav-icon fa fa-2x fa-files-o"></div>
+      <div class="nav-pill-title">Files</div>
+    <% end %>
+  </li>
+  <li class="<%= 'active' if params[:controller] == 'apps' %>" role="presentation">
+    <%= link_to apps_path do %>
+      <div class="nav-icon fa fa-2x fa-cubes"></div>
+      <div class="nav-pill-title">Apps</div>
+    <% end %>
+  </li>
+  <li class="<%= 'active' if params[:controller] == 'biospecimens' %>" role="presentation">
+    <%= link_to biospecimens_path do %>
+      <div class="nav-icon fa fa-2x fa-flask"></div>
+      <div class="nav-pill-title">Biospecimens</div>
+    <% end %>
+  </li>
+</ul>
