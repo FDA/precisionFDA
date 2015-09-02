@@ -5,25 +5,23 @@
     <div class="pfda-2-pane-sidebar col-sm-6">
       <%= render "_partials/toolbar", toolbar: @apps_toolbar %>
       <div class="list-group">
-        <a href="#" class="list-group-item active">
+        <a href="<%= apps_path() %>" class="list-group-item <%= @apps_list[:active] == nil ? 'active' : '' %>">
           All Apps
         </a>
         <a href="#" class="list-group-item disabled">
           Community Apps
         </a>
-        <a href="#" class="list-group-item">BWA</a>
-        <a href="#" class="list-group-item">GATK</a>
-        <a href="#" class="list-group-item">FASTQ Injector</a>
+        <%= render "_partials/apps_list_group", apps: @apps_list[:community], active: @apps_list[:active] %>
         <a href="#" class="list-group-item disabled">
           Your Apps
         </a>
-        <a href="#" class="list-group-item">My Custom App</a>
+        <%= render "_partials/apps_list_group", apps: @apps_list[:custom], active: @apps_list[:active] %>
       </div>
     </div>
     <div class="pfda-2-pane-content col-sm-18">
       <div class="panel">
         <%= render "_partials/toolbar", toolbar: @jobs_toolbar %>
-        <%= render "_partials/grid", grid: @grid %>
+        <%= render "_partials/grid", grid: @jobs_list %>
       </div>
     </div>
   </div>

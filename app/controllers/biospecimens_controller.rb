@@ -2,7 +2,7 @@ class BiospecimensController < ApplicationController
   def index
     @toolbar = {
       fixed: [
-        {icon: "fa fa-plus-square fa-fw", label: "Add Biospecimen", link: "#"}
+        {icon: "fa fa-plus-square fa-fw", label: "Add Biospecimen", link: new_biospecimen_path}
       ]
     }
 
@@ -37,5 +37,8 @@ class BiospecimensController < ApplicationController
   end
 
   def show
+  end
+
+  def new
   end
 end

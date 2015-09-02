@@ -2,7 +2,7 @@ class FilesController < ApplicationController
   def index
     @toolbar = {
       fixed: [
-        {icon: "fa fa-plus-square fa-fw", label: "Add Files", link: "#"}
+        {icon: "fa fa-plus-square fa-fw", label: "Add Files", link: new_file_path}
       ]
     }
 
@@ -31,5 +31,8 @@ class FilesController < ApplicationController
   end
 
   def show
+  end
+
+  def new
   end
 end

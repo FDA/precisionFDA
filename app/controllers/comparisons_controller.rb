@@ -2,7 +2,7 @@ class ComparisonsController < ApplicationController
   def index
     @toolbar = {
       fixed: [
-        {icon: "fa fa-bolt fa-fw", label: "Run Comparison", link: "#"}
+        {icon: "fa fa-bolt fa-fw", label: "Run Comparison", link: new_comparison_path}
       ]
     }
 
@@ -37,5 +37,8 @@ class ComparisonsController < ApplicationController
   end
 
   def show
+  end
+
+  def new
   end
 end
