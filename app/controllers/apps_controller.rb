@@ -1,18 +1,32 @@
 class AppsController < ApplicationController
   def index
+    app = params[:app]
+
+    @apps_list = {
+      community: [
+        {name:"bwa", display: "BWA", link: appjobs_path("bwa")},
+        {name:"gatk", display: "GATK", link: appjobs_path("gatk")},
+        {name:"fastq_injector", display: "FASTQ Injector", link: appjobs_path("fastq_injector")}
+      ],
+      custom: [
+        {name:"mycustom", display: "My Custom App", link: appjobs_path("mycustom")}
+      ],
+      active: app
+    }
+
     @apps_toolbar = {
       fixed: [
-        {icon: "fa fa-plus-square fa-fw", label: "Add App", link: "#"}
+        {icon: "fa fa-plus-square fa-fw", label: "Add App", link: new_app_path}
       ]
     }
 
     @jobs_toolbar = {
       fixed: [
-        {icon: "fa fa-bolt fa-fw", label: "Run App", link: "#"}
+        {icon: "fa fa-bolt fa-fw", label: "Run App", link: new_job_path}
       ]
     }
 
-    @grid = {
+    @jobs_list = {
       header: [
         {field: "state", display: "State"},
         {field: "name", display: "Name"},

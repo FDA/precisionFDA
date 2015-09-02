@@ -9,6 +9,8 @@ Rails.application.routes.draw do
   resources :jobs
   get 'overview/index'
 
+  get '/apps/jobs/:app', to: 'apps#index', as: 'appjobs'
+
   # You can have the root of your site routed with "root"
   root 'overview#index'
 

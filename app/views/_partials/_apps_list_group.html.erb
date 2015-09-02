@@ -1,0 +1,7 @@
+<% apps.each do |app| %>
+  <a href="<%= app[:link] %>"
+    class="list-group-item app-<%= app[:name] %> <%= app[:name] == active ? 'active' : ''%>" 
+    data-app="<%= app[:name] %>">
+    <%= app[:display] %>
+  </a>
+<% end %>
