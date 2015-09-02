@@ -1,12 +1,12 @@
 <table class="pfda-table table">
-  <% if @grid.has_key?(:header) %>
+  <% if grid.has_key?(:header) %>
     <thead>
       <tr>
         <th class="col-checkbox">
           <input type="checkbox">
         </th>
 
-        <% @grid[:header].each do |col| %>
+        <% grid[:header].each do |col| %>
           <th class="<%= col[:field] %>">
             <%= col[:display] %>
           </th>
@@ -15,8 +15,8 @@
     </thead>
   <% end %>
   <tbody>
-    <% if @grid.has_key?(:rows) %>
-      <% @grid[:rows].each do |row| %>
+    <% if grid.has_key?(:rows) %>
+      <% grid[:rows].each do |row| %>
         <tr class="">
           <td class="col-checkbox">
             <input type="checkbox">

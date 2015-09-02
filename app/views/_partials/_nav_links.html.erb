@@ -1,4 +1,4 @@
-<ul class="nav-links nav nav-pills">
+<ul class="nav-links nav navbar-nav">
   <li class="<%= 'active' if params[:controller] == 'overview' %>" role="presentation">
     <%= link_to root_path do %>
       <div class="nav-icon fa fa-2x fa-home"></div>
@@ -28,5 +28,18 @@
       <div class="nav-icon fa fa-2x fa-flask"></div>
       <div class="nav-pill-title">Biospecimens</div>
     <% end %>
+  </li>
+</ul>
+
+<ul class="nav navbar-nav navbar-right">
+  <li><a href="#">API</a></li>
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Doogie Howser <span class="caret"></span></a>
+    <ul class="dropdown-menu">
+      <li><a href="#">Profile</a></li>
+      <li><a href="#">Settings</a></li>
+      <li role="separator" class="divider"></li>
+      <li><a href="#">Log Out</a></li>
+    </ul>
   </li>
 </ul>
