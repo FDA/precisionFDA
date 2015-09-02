@@ -1,4 +1,5 @@
 <% content_for :title do %>Files<% end %>
 
-<h1>Files#index</h1>
-<p>Find me in app/views/files/index.html.erb</p>
+<%= render "_partials/toolbar", toolbar: @toolbar  %>
+
+<%= render "_partials/grid", grid: @grid %>

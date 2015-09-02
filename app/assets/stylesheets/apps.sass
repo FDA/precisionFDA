@@ -1,3 +1,36 @@
-// Place all the styles related to the apps controller here.
-// They will automatically be included in application.css.
-// You can use Sass here: http://sass-lang.com/
+@import "_common"
+
+.controller-apps
+  .state-running
+    color: $brand-running-color
+    background-color: $brand-running-bg
+
+  .state-done
+    color: $brand-done-color
+    background-color: $brand-done-bg
+
+  .state-failed
+    color: $brand-failed-color
+    background-color: $brand-failed-bg
+
+  .pfda-table
+    .col-state
+      width: 100px
+
+  .pfda-2-pane-sidebar
+    .list-group
+      border-radius: 0
+      a.list-group-item
+        border: 0
+        border-radius: 0
+        background-color: transparent
+        color: $brand-blue-secondary
+        &:hover
+          background-color: lighten($brand-blue-dark, 10%)
+
+        &.disabled, &.disabled:hover
+          color: $text-muted
+          background-color: transparent
+        &.active, &.active:hover
+          color: $brand-blue-primary
+          background-color: $body-bg

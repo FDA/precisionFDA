@@ -1,0 +1,57 @@
+@import "_common"
+
+.flash_notice, .flash_alert
+  padding: 8px 35px 8px 14px
+  margin-bottom: 20px
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5)
+  border: 1px solid #fbeed5
+  -webkit-border-radius: 4px
+  -moz-border-radius: 4px
+  border-radius: 4px
+  font-size: 14px
+  line-height: 20px
+
+.flash_notice
+  background-color: #dff0d8
+  border-color: #d6e9c6
+  color: #468847
+
+.flash_alert
+  background-color: #f2dede
+  border-color: #eed3d7
+  color: $brand-red-secondary
+
+// TOOLBAR
+.pfda-toolbar
+  padding: $padding-large-vertical $padding-large-horizontal
+  border-bottom: 1px solid $table-border-color
+
+// BUTTONS
+.btn.btn-default
+  .fa
+    color: $brand-red-primary
+  &:hover, &:focus, &:active, &.active
+    background-color: $brand-blue-subtle
+    border-color: $brand-blue-secondary
+
+// TABLE
+.pfda-table.table
+  > thead > tr > th
+    color: $brand-blue-tertiary
+    text-transform: uppercase
+    font-size: 12px
+    font-weight: 300
+
+.col-checkbox
+  width: 28px
+
+.pfda-table
+  margin-bottom: 0
+  .fa
+    color: $brand-blue-tertiary
+
+.pfda-2-pane-wrapper
+  background-color: $brand-blue-dark
+  .pfda-2-pane-content
+    min-height: 500px
+    background-color: $body-bg

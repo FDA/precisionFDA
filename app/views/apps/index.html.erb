@@ -1,4 +1,28 @@
 <% content_for :title do %>Apps<% end %>
 
-<h1>Apps#index</h1>
-<p>Find me in app/views/apps/index.html.erb</p>
+<%= render "_partials/toolbar", toolbar: @toolbar  %>
+
+<div class="pfda-2-pane-wrapper container-fluid">
+  <div class="row">
+    <div class="pfda-2-pane-sidebar col-sm-6">
+      <div class="list-group">
+        <a href="#" class="list-group-item active">
+          All Apps
+        </a>
+        <a href="#" class="list-group-item disabled">
+          Community Apps
+        </a>
+        <a href="#" class="list-group-item">BWA</a>
+        <a href="#" class="list-group-item">GATK</a>
+        <a href="#" class="list-group-item">FASTQ Injector</a>
+        <a href="#" class="list-group-item disabled">
+          Your Apps
+        </a>
+        <a href="#" class="list-group-item">My Custom App</a>
+      </div>
+    </div>
+    <div class="pfda-2-pane-content col-sm-18">
+      <%= render "_partials/grid", grid: @grid %>
+    </div>
+  </div>
+</div>

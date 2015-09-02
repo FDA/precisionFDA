@@ -9,15 +9,7 @@
  * compiled file so the styles you add here take precedence over styles defined in any styles
  * defined in the other CSS/SCSS files in this directory. It is generally better to create a new
  * file per style scope.
+ *= require_self
+ *= require_tree .
  *
  */
-
-// "bootstrap-sprockets" must be imported before "bootstrap" and "bootstrap/variables"
-$icon-font-path: "bootstrap-sass/assets/fonts/bootstrap/"
-@import "bootstrap-sass/assets/stylesheets/_bootstrap-sprockets.scss"
-@import "bootstrap-sass/assets/stylesheets/_bootstrap.scss"
-
-$fa-font-path: "fontawesome/fonts/"
-@import "fontawesome/scss/font-awesome.scss"
-
-@import "nav.sass"
