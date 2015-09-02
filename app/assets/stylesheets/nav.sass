@@ -1,8 +1,34 @@
+@import "_common"
+
 .navbar
-  margin-bottom: 0
+  padding-left: $navbar-padding-horizontal
+  padding-right: $navbar-padding-horizontal
+  
+.navbar-brand
+  font-family: $brand-font-family
+  letter-spacing: -1px
+  font-weight: 300
+  &:hover
+    .brand-fda-highlight
+      color: $brand-red-primary
+
 
 .nav-links
   text-align: center
-  padding: 10px
+  padding: $padding-large-vertical $padding-large-horizontal
+  border-bottom: 1px solid $table-border-color
+
   .nav-icon
     margin-bottom: 5px
+
+  li > a
+    color: $brand-blue-tertiary
+    font-weight: 300
+    min-width: 100px
+
+  li.active
+    > a, > a:hover, > a:focus
+      background-color: transparent
+      color: $brand-red-primary
+      .nav-icon
+        color: $brand-red-primary

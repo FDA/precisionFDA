@@ -1,0 +1,6 @@
+<a class="btn btn-default" href="<%= btn[:link] %>" role="button">
+  <% if btn.has_key?(:icon) %>
+    <span class="<%= btn[:icon] %>"></span>
+  <% end %>
+  <%= btn[:label] %>
+</a>
