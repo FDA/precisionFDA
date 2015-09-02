@@ -35,4 +35,7 @@ class BiospecimensController < ApplicationController
       ]
     }
   end
+
+  def show
+  end
 end

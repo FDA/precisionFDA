@@ -1,10 +1,9 @@
 <% content_for :title do %>Apps<% end %>
 
-<%= render "_partials/toolbar", toolbar: @toolbar  %>
-
 <div class="pfda-2-pane-wrapper container-fluid">
   <div class="row">
     <div class="pfda-2-pane-sidebar col-sm-6">
+      <%= render "_partials/toolbar", toolbar: @apps_toolbar %>
       <div class="list-group">
         <a href="#" class="list-group-item active">
           All Apps
@@ -22,7 +21,10 @@
       </div>
     </div>
     <div class="pfda-2-pane-content col-sm-18">
-      <%= render "_partials/grid", grid: @grid %>
+      <div class="panel">
+        <%= render "_partials/toolbar", toolbar: @jobs_toolbar %>
+        <%= render "_partials/grid", grid: @grid %>
+      </div>
     </div>
   </div>
 </div>

@@ -1,8 +1,14 @@
 class AppsController < ApplicationController
   def index
-    @toolbar = {
+    @apps_toolbar = {
       fixed: [
-        {icon: "fa fa-plus-square fa-fw", label: "Add an App", link: "#"}
+        {icon: "fa fa-plus-square fa-fw", label: "Add App", link: "#"}
+      ]
+    }
+
+    @jobs_toolbar = {
+      fixed: [
+        {icon: "fa fa-bolt fa-fw", label: "Run App", link: "#"}
       ]
     }
 
@@ -38,5 +44,8 @@ class AppsController < ApplicationController
         ]
       ]
     }
+  end
+
+  def show
   end
 end
