@@ -1,0 +1,41 @@
+# == Schema Information
+#
+# Table name: user_files
+#
+#  id             :integer          not null, primary key
+#  dxid           :string
+#  project        :string
+#  name           :string
+#  state          :string
+#  description    :text
+#  user_id        :integer
+#  biospecimen_id :integer
+#  public         :boolean
+#  file_size      :integer
+#  created_at     :datetime         not null
+#  updated_at     :datetime         not null
+#
+
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  dxid: MyString
+  project: MyString
+  name: MyString
+  state: MyString
+  description: MyText
+  user_id: 
+  biospecimen_id: 
+  public: false
+  file_size: 1
+
+two:
+  dxid: MyString
+  project: MyString
+  name: MyString
+  state: MyString
+  description: MyText
+  user_id: 
+  biospecimen_id: 
+  public: false
+  file_size: 1

@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+
+  get 'login' => 'main#login'
+  get 'return_from_login' => 'main#return_from_login'
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -7,12 +11,11 @@ Rails.application.routes.draw do
   resources :comparisons
   resources :files
   resources :jobs
-  get 'overview/index'
 
   get '/apps/jobs/:app', to: 'apps#index', as: 'appjobs'
 
   # You can have the root of your site routed with "root"
-  root 'overview#index'
+  root 'main#index'
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

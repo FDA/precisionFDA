@@ -25,6 +25,9 @@ gem 'jbuilder', '~> 2.0'
 # bundle exec rake doc:rails generates the API under doc/api.
 gem 'sdoc', '~> 0.4.0', group: :doc
 
+# Annotate models
+gem 'annotate', '~> 2.6.6'
+
 # Use thin
 gem 'thin'
 
