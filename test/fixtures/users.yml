@@ -1,0 +1,41 @@
+# == Schema Information
+#
+# Table name: users
+#
+#  id                          :integer          not null, primary key
+#  dxuser                      :string
+#  private_files_project       :string
+#  public_files_project        :string
+#  private_comparisons_project :string
+#  public_comparisons_project  :string
+#  open_files_count            :integer
+#  closing_files_count         :integer
+#  pending_comparisons_count   :integer
+#  schema_version              :integer
+#  created_at                  :datetime         not null
+#  updated_at                  :datetime         not null
+#
+
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  id: 
+  dxuser: MyString
+  private_files_project: MyString
+  public_files_project: MyString
+  private_comparisons_project: MyString
+  public_comparisons_project: MyString
+  open_files_count: 1
+  closing_files_count: 1
+  pending_comparisons_count: 1
+
+two:
+  id: 
+  dxuser: MyString
+  private_files_project: MyString
+  public_files_project: MyString
+  private_comparisons_project: MyString
+  public_comparisons_project: MyString
+  open_files_count: 1
+  closing_files_count: 1
+  pending_comparisons_count: 1

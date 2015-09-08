@@ -1,0 +1,25 @@
+# == Schema Information
+#
+# Table name: users
+#
+#  id                          :integer          not null, primary key
+#  dxuser                      :string
+#  private_files_project       :string
+#  public_files_project        :string
+#  private_comparisons_project :string
+#  public_comparisons_project  :string
+#  open_files_count            :integer
+#  closing_files_count         :integer
+#  pending_comparisons_count   :integer
+#  schema_version              :integer
+#  created_at                  :datetime         not null
+#  updated_at                  :datetime         not null
+#
+
+require 'test_helper'
+
+class UserTest < ActiveSupport::TestCase
+  # test "the truth" do
+  #   assert true
+  # end
+end

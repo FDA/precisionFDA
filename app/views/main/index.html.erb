@@ -5,4 +5,7 @@
     <h1>WELCOME to precisionFDA</h1>
     <p>Your community for NGS assay evaluation</p>
   </div>
+  <% if @context.logged_in? %>
+    <%= debug @user_describe %>
+  <% end %>
 </div>
