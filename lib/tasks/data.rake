@@ -26,6 +26,18 @@ namespace :data do
         schema_version: 1
       )
 
+      fahd = User.find_or_initialize_by(dxuser: "fahdoo_fda1")
+      fahd.update!(
+        private_files_project: "project-Bgj75980Y9XQKxQK809G6KGK",
+        public_files_project: "project-Bgj759Q0XKbz5zzJ489Kb8gY",
+        private_comparisons_project: "project-Bgj75980byj44J962j98g8qB",
+        public_comparisons_project: "project-Bgj759Q0QXYVz65ZBJjpjPBz",
+        open_files_count: 0,
+        closing_files_count: 0,
+        pending_comparisons_count: 0,
+        schema_version: 1
+      )
+
       na12878 = Biospecimen.find_or_initialize_by(name: "NA12878")
       na12878.update!(description: "CEPH/Utah pedigree 1463, mother of proband", user_id: george.id)
 
