@@ -60,15 +60,17 @@ class MainController < ApplicationController
         admin_api = DNAnexusAPI.new("BEI5ErikmLb8kmQUPiHz7JB78reoftSL")
         admin_api.call("org-precisionfda.users", "invite", {invitee: "user-#{username}", suppressEmailNotification: true})
 
-        User.create!(dxuser: username, \
-                     private_files_project: private_files_project,
-                     public_files_project: public_files_project,
-                     private_comparisons_project: private_comparisons_project,
-                     public_comparisons_project: public_comparisons_project,
-                     open_files_count: 0, \
-                     closing_files_count: 0, \
-                     pending_comparisons_count: 0, \
-                     schema_version: User::CURRENT_SCHEMA)
+        User.create!(
+          dxuser: username,
+          private_files_project: private_files_project,
+          public_files_project: public_files_project,
+          private_comparisons_project: private_comparisons_project,
+          public_comparisons_project: public_comparisons_project,
+          open_files_count: 0,
+          closing_files_count: 0,
+          pending_comparisons_count: 0,
+          schema_version: User::CURRENT_SCHEMA
+        )
       end
     end
 
