@@ -20,6 +20,9 @@ changes coming soon.
 
 ## Coding conventions
 * Parameters that are hash literals must be wrapped in curly braces unless they are the only parameter to the function
+```ruby
+myFn({foo: "bar"}, true)
+```
 * Parameters that are hash literals with more than 3 keys should be expressed over multiple lines, with one key per line, indented 2 spaces.
 ```ruby
 model.update!(
