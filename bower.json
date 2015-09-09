@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "homepage": "https://github.com/dnanexus/precision-fda",
   "authors": [
-    "Fahd Butt <fbutt@dnanexus.com>"
+    "Fahd Butt <fbutt@dnanexus.com>",
+    "Evan Worley <evan@dnanexus.com>"
   ],
   "license": "MIT",
   "ignore": [
