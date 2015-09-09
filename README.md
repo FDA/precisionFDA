@@ -18,6 +18,17 @@ changes coming soon.
 * [RVM](https://rvm.io/) for managing ruby version
 * [Bundler](http://bundler.io/) for managing gem dependencies
 
+## Coding conventions
+* Parameters that are hash literals must be wrapped in curly braces unless they are the only parameter to the function
+* Parameters that are hash literals with more than 3 keys should be expressed over multiple lines, with one key per line, indented 2 spaces.
+```ruby
+model.update!(
+  name: "Model name",
+  state: "CA",
+  gender: "male"
+)
+```
+
 ## Setting up your development environment
 1. `git clone git@github.com:dnanexus/precision-fda.git && cd precision-fda`
 1. [Ubuntu only] If using gnome-terminal, https://rvm.io/integration/gnome-terminal
