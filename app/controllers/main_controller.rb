@@ -9,7 +9,7 @@ class MainController < ApplicationController
   end
 
   def login
-    @remote_login_url = "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=asimenos&redirect_uri=#{URI.encode(OAUTH2_REDIRECT_URI)}"
+    @remote_login_url = "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=precision_fda&redirect_uri=#{URI.encode(OAUTH2_REDIRECT_URI)}"
   end
 
   def return_from_login
