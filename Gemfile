@@ -28,6 +28,9 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # Annotate models
 gem 'annotate', '~> 2.6.6'
 
+# WiceGrid is a Rails grid plugin: https://github.com/leikind/wice_grid
+gem "wice_grid", '3.6.0.pre4'
+
 # Use thin
 gem 'thin'
 
@@ -50,4 +53,3 @@ group :development, :test do
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
 end
-

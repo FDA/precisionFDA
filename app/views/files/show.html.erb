@@ -1,11 +1,52 @@
 <div class="page-header">
-  <h1><span class="fa fa-file-o fa-fw"></span> File ABC</h1>
+  <h1><span class="fa fa-file-o fa-fw"></span> <%= @file.name %></h1>
 </div>
 
 <div class="container-fluid">
-  <div class="panel panel-default">
-    <div class="panel-body">
-      [Metadata]
-    </div>
+  <div class="metadata-section">
+    <ul class="list-group">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Access</h5>
+        <p class="list-group-item-text">
+          <span class="fa fa-fw <%= @file.public ? 'fa-globe' : 'fa-lock' %>"></span>
+          <%= @file.public ? "Public" : "Private" %>
+        </p>
+      </li>
+      <% if @file.description %>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Description</h5>
+        <p class="list-group-item-text"><%= @file.description %></p>
+      </li>
+      <% end %>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">File Size</h5>
+        <p class="list-group-item-text"><%= number_to_human_size(@file.file_size) %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">State</h5>
+        <p class="list-group-item-text"><%= @file.state %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Created</h5>
+        <p class="list-group-item-text"><%= @file.created_at.to_s(:db) %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Updated</h5>
+        <p class="list-group-item-text"><%= @file.updated_at.to_s(:db) %></p>
+      </li>
+    </ul>
+
+    <ul class="list-group">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Added by</h5>
+        <p class="list-group-item-text"><%= @file.user.dxuser %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Biospecimen</h5>
+        <p class="list-group-item-text">
+          <%= link_to(@file.biospecimen.name, biospecimen_path(@file.biospecimen.id)) %>
+        </p>
+      </li>
+    </ul>
   </div>
 </div>

@@ -6,31 +6,17 @@ class FilesController < ApplicationController
       ]
     }
 
-    @grid = {
-      header: [
-        {field: "name", display: "Name"},
-        {field: "size", display: "Size"},
-        {field: "created", display: "Created"},
-        {field: "addedBy", display: "Added by"}
-      ],
-      rows: [
-        [
-          {field: "name", display: "File A", icon: "fa fa-lock fa-fw", link: "#"},
-          {field: "size", display: "10 GB"},
-          {field: "created", display: "8/15/2015"},
-          {field: "addedBy", display: "Doogie Howser"}
-        ],
-        [
-          {field: "name", display: "File B", link: "#"},
-          {field: "size", display: "5 GB"},
-          {field: "created", display: "6/8/2015"},
-          {field: "addedBy", display: "Doogie Howser"}
-        ]
-      ]
-    }
+    user_files = UserFile.where("user_files.user_id = ? OR user_files.public = ?", @context.user_id, true)
+    @files_grid = initialize_grid(user_files,
+      include: [:user, :biospecimen],
+      order: 'user_files.id',
+      order_direction: 'desc',
+      per_page: 100
+    )
   end
 
   def show
+    @file = UserFile.find_by("user_files.id = ? AND (user_files.user_id = ? OR user_files.public = ?)", params[:id], @context.user_id, true)
   end
 
   def new

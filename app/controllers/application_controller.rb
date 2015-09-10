@@ -7,17 +7,18 @@ class ApplicationController < ActionController::Base
 
   # Decode context
   before_action :decode_context
-  
+
   # Require login
   before_action :require_login
 
   private
 
   def decode_context
-    @context = Context.new(session[:username], session[:token], session[:expiration])
+    @context = Context.new(session[:user_id], session[:username], session[:token], session[:expiration])
   end
 
-  def save_session(username, token, expiration)
+  def save_session(user_id, username, token, expiration)
+    session[:user_id] = user_id
     session[:username] = username
     session[:token] = token
     session[:expiration] = expiration

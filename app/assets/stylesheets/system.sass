@@ -23,7 +23,7 @@
 
 // TOOLBAR
 .pfda-toolbar
-  padding: $padding-large-vertical $padding-large-horizontal
+  padding: $padding-large-horizontal
   border-bottom: 1px solid $table-border-color
 
 // BUTTONS
@@ -93,6 +93,35 @@
           border-left: 5px solid $brand-red-primary
           padding-left: 10px // list-group padding minus border left width
 
+// WICE-GRID
+.wice-grid.table
+  margin-bottom: 0
+
+  .fa
+    color: $brand-blue-tertiary
+
+  > thead > tr > th
+    color: $text-muted
+    text-transform: uppercase
+    font-size: 12px
+    font-weight: 500
+    a
+      color: $brand-blue-tertiary
+
+  > tbody > tr > td, > thead > tr > th
+    border-left: 0
+    border-right: 0
+
+  td.sel, th.sel
+    width: 28px
+
+  .wg-filter-row
+    background-color: $gray-lighter
+
+  .pagination_status
+    float: right
+    color: $brand-blue-tertiary
+
 // MISC
 .page-header
   margin: 0
@@ -113,6 +142,11 @@
 
   main .container-fluid
     padding: $padding-large-vertical $padding-base-horizontal
+
+  .list-group-item-heading
+    color: $brand-blue-tertiary
+    text-transform: uppercase
+    font-weight: 300
 
 .pfda-action-new
   .page-header
