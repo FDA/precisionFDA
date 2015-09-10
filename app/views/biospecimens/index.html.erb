@@ -14,7 +14,7 @@
   g.column name: 'Description', attribute: 'description'
 
   g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |biospecimen|
-    biospecimen.user.dxuser
+    link_to(biospecimen.user.dxuser, user_path(biospecimen.user.dxuser))
   end
 
   g.column name: 'Updated', attribute: 'updated_at', auto_reload: true, filter_type: :standard do |biospecimen|

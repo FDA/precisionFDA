@@ -1,0 +1,15 @@
+<% content_for :title do %>Users<% end %>
+
+<%= grid(@users_grid, show_filters: :when_filtered) do |g|
+  g.blank_slate partial:  "_partials/empty_grid"
+
+  g.action_column
+
+  g.column name: 'Username', attribute: 'dxuser' do |user|
+    link_to(user.dxuser, user_path(user.dxuser))
+  end
+
+  g.column name: 'Joined', attribute: 'created_at', auto_reload: true, filter_type: :standard do |user|
+    user.created_at.to_s(:db)
+  end
+end -%>

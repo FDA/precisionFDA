@@ -18,13 +18,14 @@
 .nav-links
   text-align: center
 
-  .nav-icon
-    margin-bottom: 5px
-
   li > a
     color: $brand-blue-tertiary
     font-weight: 300
     min-width: 100px
+
+    .nav-icon
+      margin-bottom: 5px
+      font-size: 28px
 
   li.active
     > a, > a:hover, > a:focus
@@ -32,3 +33,12 @@
       color: $brand-red-primary
       .nav-icon
         color: $brand-red-primary
+
+@media (max-width: $screen-sm-max)
+  .nav-links
+    li > a
+      min-width: 0
+
+@media (max-width: $screen-sm-min)
+  .navbar-nav, .navbar-nav .dropdown a
+    text-align: center

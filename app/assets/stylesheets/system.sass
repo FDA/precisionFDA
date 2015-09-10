@@ -122,12 +122,25 @@
     float: right
     color: $brand-blue-tertiary
 
+  .custom-dropdown-container
+    .custom-dropdown
+      width: calc(100% - 30px)
+      display: inline-block
+    .clickable
+      width: 25px
+      display: inline-block
+      text-align: center
+
+  .clickable
+    cursor: pointer
+
 // MISC
 .page-header
   margin: 0
   padding: $padding-large-vertical*2 $padding-large-horizontal
   h1
     margin: 0
+    word-wrap: break-word
 
 // ACTIONS
 .pfda-action-index
@@ -137,8 +150,9 @@
 
 .pfda-action-show
   .page-header
-    background-color: $brand-blue-dark
+    background-color:  $brand-blue-subtler
     color: $brand-blue-tertiary
+    padding: $padding-large-vertical * 3 $padding-large-horizontal
 
   main .container-fluid
     padding: $padding-large-vertical $padding-base-horizontal
@@ -148,10 +162,14 @@
     text-transform: uppercase
     font-weight: 300
 
+  .list-group-item-text
+    font-size: 19px
+
 .pfda-action-new
   .page-header
     background-color: $brand-red-primary
     color: #fff
+    padding: $padding-large-vertical * 3 $padding-large-horizontal
 
   main .container-fluid
     padding: $padding-large-vertical $padding-base-horizontal
