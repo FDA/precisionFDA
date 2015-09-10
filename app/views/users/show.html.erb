@@ -1,0 +1,14 @@
+<div class="page-header">
+  <h1><span class="fa fa-smile-o  fa-fw"></span> <%= @user.dxuser %></h1>
+</div>
+
+<div class="container-fluid">
+  <div class="metadata-section">
+    <ul class="list-group">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Joined</h5>
+        <p class="list-group-item-text"><%= @user.created_at.to_s(:db) %></p>
+      </li>
+    </ul>
+  </div>
+</div>

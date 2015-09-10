@@ -39,7 +39,9 @@
     <ul class="list-group">
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Added by</h5>
-        <p class="list-group-item-text"><%= @file.user.dxuser %></p>
+        <p class="list-group-item-text">
+          <%= link_to(@file.user.dxuser, user_path(@file.user.dxuser))  %>
+        </p>
       </li>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Biospecimen</h5>

@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-
   get 'login' => 'main#login'
   get 'return_from_login' => 'main#return_from_login'
 
@@ -13,6 +12,9 @@ Rails.application.routes.draw do
   resources :jobs
 
   get '/apps/jobs/:app', to: 'apps#index', as: 'appjobs'
+
+  get '/users', to: 'users#index'
+  get "/users/:username", to: 'users#show', constraints: { username: /[^\/]*/ }, as: 'user'
 
   # You can have the root of your site routed with "root"
   root 'main#index'
