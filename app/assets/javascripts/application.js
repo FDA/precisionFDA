@@ -14,4 +14,5 @@
 //= require jquery_ujs
 //= require turbolinks
 //= require bootstrap-sass/assets/javascripts/bootstrap-sprockets
+//= require wice_grid
 //= require_tree .

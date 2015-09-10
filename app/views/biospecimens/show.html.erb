@@ -1,11 +1,31 @@
 <div class="page-header">
-  <h1><span class="fa fa-flask fa-fw"></span> Biospecimen ABC</h1>
+  <h1><span class="fa fa-flask fa-fw"></span> <%= @biospecimen.name %></h1>
 </div>
 
 <div class="container-fluid">
-  <div class="panel panel-default">
-    <div class="panel-body">
-      [Metadata]
-    </div>
+  <div class="metadata-section">
+    <ul class="list-group">
+      <% if @biospecimen.description %>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Description</h5>
+        <p class="list-group-item-text"><%= @biospecimen.description %></p>
+      </li>
+      <% end %>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Created</h5>
+        <p class="list-group-item-text"><%= @biospecimen.created_at.to_s(:db) %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Updated</h5>
+        <p class="list-group-item-text"><%= @biospecimen.updated_at.to_s(:db) %></p>
+      </li>
+    </ul>
+
+    <ul class="list-group">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Added by</h5>
+        <p class="list-group-item-text"><%= @biospecimen.user.dxuser %></p>
+      </li>
+    </ul>
   </div>
 </div>

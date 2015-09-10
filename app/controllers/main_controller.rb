@@ -41,9 +41,11 @@ class MainController < ApplicationController
     #
     # For now there is this stub to create the user model and do all actions upon first user login. This requires
     # some stored credentials for the org-precisionfda.users admin.
-    # 
+    #
+    user = nil
     User.transaction do
-      if !User.exists?(dxuser: username)
+      user = User.find_by(dxuser: username)
+      if user == nil
         api = DNAnexusAPI.new(token)
         # TODO: If any of these (or the transaction) fail, there will be debris
         # Private files
@@ -60,7 +62,7 @@ class MainController < ApplicationController
         admin_api = DNAnexusAPI.new("BEI5ErikmLb8kmQUPiHz7JB78reoftSL")
         admin_api.call("org-precisionfda.users", "invite", {invitee: "user-#{username}", suppressEmailNotification: true})
 
-        User.create!(
+        user = User.create!(
           dxuser: username,
           private_files_project: private_files_project,
           public_files_project: public_files_project,
@@ -75,7 +77,7 @@ class MainController < ApplicationController
     end
 
     # Log in
-    save_session(username, token, expiration_time)
+    save_session(user.id, username, token, expiration_time) if user
 
     redirect_to root_path
   end

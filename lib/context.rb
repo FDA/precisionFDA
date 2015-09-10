@@ -4,15 +4,16 @@
 #
 
 class Context
-  attr_accessor :username, :token, :expiration
+  attr_accessor :user_id, :username, :token, :expiration
 
-  def initialize(username, token, expiration)
+  def initialize(user_id, username, token, expiration)
+    @user_id = user_id
     @username = username
     @token = token
     @expiration = expiration
   end
 
   def logged_in?
-    return (@username.present? && @token.present? && @expiration.present? && ((@expiration - Time.now.to_i) > 5.minutes))
+    return (@user_id.present? && @username.present? && @token.present? && @expiration.present? && ((@expiration - Time.now.to_i) > 5.minutes))
   end
 end
