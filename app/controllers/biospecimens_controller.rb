@@ -5,7 +5,7 @@ class BiospecimensController < ApplicationController
         {icon: "fa fa-plus-square fa-fw", label: "Add Biospecimen", link: new_biospecimen_path}
       ]
     }
-    
+
     @biospecimens = initialize_grid(Biospecimen,
       order: 'id',
       order_direction: 'desc',

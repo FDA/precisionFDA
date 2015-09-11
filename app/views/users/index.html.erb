@@ -9,6 +9,14 @@
     link_to(user.dxuser, user_path(user.dxuser))
   end
 
+  g.column name: '# of Files' do |user|
+    link_to(user.user_files.size, "#{files_path()}?grid[f][users.dxuser]=#{user.dxuser}")
+  end
+
+  g.column name: '# of Biospecimen' do |user|
+    link_to(user.biospecimens.size, "#{biospecimens_path()}?grid[f][users.dxuser]=#{user.dxuser}")
+  end
+
   g.column name: 'Joined', attribute: 'created_at', auto_reload: true, filter_type: :standard do |user|
     user.created_at.to_s(:db)
   end

@@ -94,6 +94,7 @@
           padding-left: 10px // list-group padding minus border left width
 
 // WICE-GRID
+$select-width: 28px
 .wice-grid.table
   margin-bottom: 0
 
@@ -112,8 +113,11 @@
     border-left: 0
     border-right: 0
 
+  &.table-striped > tbody > tr:nth-of-type(odd)
+    background-color: transparent
+
   td.sel, th.sel
-    width: 28px
+    width: $select-width
 
   .wg-filter-row
     background-color: $gray-lighter
@@ -134,6 +138,14 @@
   .clickable
     cursor: pointer
 
+  .extra-row
+    border-top: 2px solid #fff
+    td
+      padding-top: 0
+    .description
+      margin-left: $select-width
+      color: $text-muted
+
 // MISC
 .page-header
   margin: 0
@@ -142,11 +154,14 @@
     margin: 0
     word-wrap: break-word
 
+.empty-grid
+  padding: $padding-large-vertical $padding-large-horizontal
+
 // ACTIONS
 .pfda-action-index
   .jumbotron
     background-color: $brand-blue-secondary
-    color: #fff
+    color: $brand-blue-subtler
 
 .pfda-action-show
   .page-header

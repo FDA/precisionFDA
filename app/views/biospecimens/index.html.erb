@@ -5,13 +5,27 @@
 <%= grid(@biospecimens, show_filters: :when_filtered) do |g|
   g.blank_slate partial:  "_partials/empty_grid"
 
+  g.after_row do |biospecimen, num_cols|
+    if biospecimen.description
+      content_tag(:tr,
+        content_tag(:td,
+          content_tag(:div, biospecimen.description, class: 'description'),
+        colspan: num_cols),
+      class: 'extra-row')
+    else
+      nil
+    end
+  end
+
   g.action_column
 
   g.column name: 'Name', attribute: 'name' do |biospecimen|
     link_to(biospecimen.name, biospecimen_path(biospecimen.id))
   end
 
-  g.column name: 'Description', attribute: 'description'
+  g.column name: '# of Files' do |biospecimen|
+    link_to(biospecimen.user_files.size, "#{files_path()}?grid[f][biospecimen.name]=#{biospecimen.name}")
+  end
 
   g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |biospecimen|
     link_to(biospecimen.user.dxuser, user_path(biospecimen.user.dxuser))

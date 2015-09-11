@@ -5,6 +5,18 @@
 <%= grid(@files_grid, show_filters: :when_filtered) do |g|
   g.blank_slate partial:  "_partials/empty_grid"
 
+  g.after_row do |file, num_cols|
+    if file.description
+      content_tag(:tr,
+        content_tag(:td,
+          content_tag(:div, file.description, class: 'description'),
+        colspan: num_cols),
+      class: 'extra-row')
+    else
+      nil
+    end
+  end
+
   g.action_column
 
   g.column name: 'Name', attribute: 'name' do |file|
@@ -15,8 +27,6 @@
     display += link_to(file.name, file_path(file.id))
     raw display
   end
-
-  g.column name: 'Description', attribute: 'description'
 
   g.column name: 'Size', attribute: 'file_size' do |file|
      number_to_human_size(file.file_size)
