@@ -28,7 +28,7 @@
   end
 
   g.column name: '# of Files' do |biospecimen|
-    link_to(biospecimen.user_files.size, "#{files_path()}?grid[f][biospecimen.name]=#{biospecimen.name}")
+    link_to(biospecimen.user_files.where(public: true).size, "#{files_path()}?grid[f][biospecimen.name]=#{biospecimen.name}")
   end
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |file|
