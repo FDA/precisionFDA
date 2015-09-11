@@ -28,7 +28,7 @@ class MainController < ApplicationController
     # Extract username
     full_username = result["user_id"]
     raise unless full_username.start_with?("user-")
-    username = full_username[5..-1]
+    username = full_username[/^user-(.+)$/, 1]
 
     # Extract expiration date
     expiration_duration = result["expires_in"].to_i
