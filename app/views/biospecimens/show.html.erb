@@ -14,7 +14,7 @@
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Files</h5>
         <p class="list-group-item-text">
-          <%= link_to(@biospecimen.user_files.size, "#{files_path()}?grid[f][biospecimen.name]=#{@biospecimen.name}")  %>
+          <%= link_to(@biospecimen.user_files.where(public: true).size, "#{files_path()}?grid[f][biospecimen.name]=#{@biospecimen.name}")  %>
         </p>
       </li>
     </ul>
