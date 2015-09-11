@@ -26,5 +26,6 @@ class User < ActiveRecord::Base
   # lower will get migrated.
   CURRENT_SCHEMA = 1
 
-  
+  has_many :biospecimens
+  has_many :user_files
 end

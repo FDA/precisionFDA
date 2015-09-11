@@ -4,13 +4,14 @@
 
 <div class="container-fluid">
   <div class="metadata-section">
+
+    <% if @biospecimen.description %>
+    <p class="lead">
+      <%= @biospecimen.description %>
+    </p>
+    <% end %>
+
     <ul class="list-group">
-      <% if @biospecimen.description %>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Description</h5>
-        <p class="list-group-item-text"><%= @biospecimen.description %></p>
-      </li>
-      <% end %>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Created</h5>
         <p class="list-group-item-text"><%= @biospecimen.created_at.to_s(:db) %></p>
@@ -18,6 +19,15 @@
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Updated</h5>
         <p class="list-group-item-text"><%= @biospecimen.updated_at.to_s(:db) %></p>
+      </li>
+    </ul>
+
+    <ul class="list-group">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Files</h5>
+        <p class="list-group-item-text">
+          <%= link_to(@biospecimen.user_files.size, "#{files_path()}?grid[f][biospecimen.name]=#{@biospecimen.name}")  %>
+        </p>
       </li>
     </ul>
 

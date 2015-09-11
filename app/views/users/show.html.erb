@@ -10,5 +10,20 @@
         <p class="list-group-item-text"><%= @user.created_at.to_s(:db) %></p>
       </li>
     </ul>
+
+    <ul class="list-group">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Files</h5>
+        <p class="list-group-item-text">
+          <%= link_to(@user.user_files.size, "#{files_path()}?grid[f][users.dxuser]=#{@user.dxuser}")  %>
+        </p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Biospecimens</h5>
+        <p class="list-group-item-text">
+          <%= link_to(@user.biospecimens.size, "#{biospecimens_path()}?grid[f][users.dxuser]=#{@user.dxuser}")  %>
+        </p>
+      </li>
+    </ul>
   </div>
 </div>

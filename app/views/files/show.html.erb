@@ -4,6 +4,13 @@
 
 <div class="container-fluid">
   <div class="metadata-section">
+
+    <% if @file.description %>
+    <p class="lead">
+      <%= @file.description %>
+    </p>
+    <% end %>
+
     <ul class="list-group">
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Access</h5>
@@ -12,12 +19,6 @@
           <%= @file.public ? "Public" : "Private" %>
         </p>
       </li>
-      <% if @file.description %>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Description</h5>
-        <p class="list-group-item-text"><%= @file.description %></p>
-      </li>
-      <% end %>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">File Size</h5>
         <p class="list-group-item-text"><%= number_to_human_size(@file.file_size) %></p>
