@@ -12,6 +12,21 @@
   <div class="metadata-section">
     <ul class="list-group">
       <li class="list-group-item">
+        <h5 class="list-group-item-heading">Biospecimen</h5>
+        <p class="list-group-item-text">
+          <%= link_to(@file.biospecimen.name, biospecimen_path(@file.biospecimen.id)) %>
+        </p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Added by</h5>
+        <p class="list-group-item-text">
+          <%= link_to(@file.user.dxuser, user_path(@file.user.dxuser))  %>
+        </p>
+      </li>
+    </ul>
+
+    <ul class="list-group">
+      <li class="list-group-item">
         <h5 class="list-group-item-heading">Access</h5>
         <p class="list-group-item-text">
           <span class="fa fa-fw <%= @file.public ? 'fa-globe' : 'fa-lock' %>"></span>
@@ -33,21 +48,6 @@
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Updated</h5>
         <p class="list-group-item-text"><%= @file.updated_at.to_s(:db) %></p>
-      </li>
-    </ul>
-
-    <ul class="list-group">
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Added by</h5>
-        <p class="list-group-item-text">
-          <%= link_to(@file.user.dxuser, user_path(@file.user.dxuser))  %>
-        </p>
-      </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Biospecimen</h5>
-        <p class="list-group-item-text">
-          <%= link_to(@file.biospecimen.name, biospecimen_path(@file.biospecimen.id)) %>
-        </p>
       </li>
     </ul>
   </div>

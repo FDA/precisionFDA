@@ -10,20 +10,6 @@
 
 <div class="container-fluid">
   <div class="metadata-section">
-
-
-
-    <ul class="list-group">
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Created</h5>
-        <p class="list-group-item-text"><%= @biospecimen.created_at.to_s(:db) %></p>
-      </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Updated</h5>
-        <p class="list-group-item-text"><%= @biospecimen.updated_at.to_s(:db) %></p>
-      </li>
-    </ul>
-
     <ul class="list-group">
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Files</h5>
@@ -39,6 +25,17 @@
         <p class="list-group-item-text">
           <%= link_to(@biospecimen.user.dxuser, user_path(@biospecimen.user.dxuser))  %>
         </p>
+      </li>
+    </ul>
+
+    <ul class="list-group">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Created</h5>
+        <p class="list-group-item-text"><%= @biospecimen.created_at.to_s(:db) %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Updated</h5>
+        <p class="list-group-item-text"><%= @biospecimen.updated_at.to_s(:db) %></p>
       </li>
     </ul>
   </div>
