@@ -23,19 +23,19 @@
     link_to(biospecimen.name, biospecimen_path(biospecimen.id))
   end
 
-  g.column name: '# of Files' do |biospecimen|
-    link_to(biospecimen.user_files.size, "#{files_path()}?grid[f][biospecimen.name]=#{biospecimen.name}")
-  end
-
   g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |biospecimen|
     link_to(biospecimen.user.dxuser, user_path(biospecimen.user.dxuser))
   end
 
-  g.column name: 'Updated', attribute: 'updated_at', auto_reload: true, filter_type: :standard do |biospecimen|
-    biospecimen.updated_at.to_s(:db)
+  g.column name: '# of Files' do |biospecimen|
+    link_to(biospecimen.user_files.size, "#{files_path()}?grid[f][biospecimen.name]=#{biospecimen.name}")
   end
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |file|
     file.created_at.to_s(:db)
+  end
+
+  g.column name: 'Updated', attribute: 'updated_at', auto_reload: true, filter_type: :standard do |biospecimen|
+    biospecimen.updated_at.to_s(:db)
   end
 end -%>
