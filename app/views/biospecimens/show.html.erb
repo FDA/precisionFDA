@@ -1,15 +1,17 @@
 <div class="page-header">
-  <h1><span class="fa fa-flask fa-fw"></span> <%= @biospecimen.name %></h1>
+  <h1><span class="fa fa-flask fa-fw"></span><%= @biospecimen.name %></h1>
+
+  <% if @biospecimen.description %>
+  <div class="description">
+    <%= @biospecimen.description %>
+  </div>
+  <% end %>
 </div>
 
 <div class="container-fluid">
   <div class="metadata-section">
 
-    <% if @biospecimen.description %>
-    <p class="lead">
-      <%= @biospecimen.description %>
-    </p>
-    <% end %>
+
 
     <ul class="list-group">
       <li class="list-group-item">
