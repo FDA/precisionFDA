@@ -28,6 +28,9 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # Annotate models
 gem 'annotate', '~> 2.6.6'
 
+# Support for OR queries (needed for UserFile.accessible_by)
+gem 'activerecord_any_of'
+
 # WiceGrid is a Rails grid plugin: https://github.com/leikind/wice_grid
 gem "wice_grid", '3.6.0.pre4'
 

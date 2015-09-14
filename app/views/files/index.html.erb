@@ -24,12 +24,14 @@
     if !file.public
       display = "<span class='fa fa-lock fa-fw'></span> "
     end
-    display += link_to(file.name, file_path(file.id))
+    display += link_to(file.name, file_path(file.dxid))
     raw display
   end
 
   g.column name: 'Biospecimen', attribute: 'name', assoc: :biospecimen do |file|
-    link_to(file.biospecimen.name, biospecimen_path(file.biospecimen.id))
+    if file.biospecimen_id.present?
+      link_to(file.biospecimen.name, biospecimen_path(file.biospecimen.id))
+    end
   end
 
   g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |file|
