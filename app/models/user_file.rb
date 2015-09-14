@@ -19,4 +19,10 @@
 class UserFile < ActiveRecord::Base
   belongs_to :user
   belongs_to :biospecimen
+
+  def self.accessible_by(user_id)
+    raise unless user_id.present?
+    return where.any_of(user_id: user_id, public: true)
+  end
+
 end

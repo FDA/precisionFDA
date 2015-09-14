@@ -14,7 +14,7 @@
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Biospecimen</h5>
         <p class="list-group-item-text">
-          <%= link_to(@file.biospecimen.name, biospecimen_path(@file.biospecimen.id)) %>
+          <%= link_to(@file.biospecimen.name, biospecimen_path(@file.biospecimen.id)) if @file.biospecimen_id.present? %>
         </p>
       </li>
       <li class="list-group-item">

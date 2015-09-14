@@ -1,23 +1,34 @@
 Rails.application.routes.draw do
-  get 'login' => 'main#login'
-  get 'return_from_login' => 'main#return_from_login'
+  #
+  # Remove the ability to switch formats (i.e. /foo vs /foo.json or /foo.xml)
+  # by wrapping everything into a scope
+  #
+  scope(format: false) do
+    get 'login' => 'main#login'
+    get 'return_from_login' => 'main#return_from_login'
 
-  # The priority is based upon order of creation: first created -> highest priority.
-  # See how all your routes lay out with "rake routes".
+    # API
+    post '/api/create_file', to: 'api#create_file'
+    post '/api/get_upload_url', to: 'api#get_upload_url'
+    post '/api/close_file', to: 'api#close_file'
 
-  resources :apps
-  resources :biospecimens
-  resources :comparisons
-  resources :files
-  resources :jobs
+    # The priority is based upon order of creation: first created -> highest priority.
+    # See how all your routes lay out with "rake routes".
 
-  get '/apps/jobs/:app', to: 'apps#index', as: 'appjobs'
+    resources :apps
+    resources :biospecimens
+    resources :comparisons
+    resources :files
+    resources :jobs
 
-  get '/users', to: 'users#index'
-  get "/users/:username", to: 'users#show', constraints: { username: /[^\/]*/ }, as: 'user'
+    get '/apps/jobs/:app', to: 'apps#index', as: 'appjobs'
 
-  # You can have the root of your site routed with "root"
-  root 'main#index'
+    get '/users', to: 'users#index'
+    get "/users/:username", to: 'users#show', constraints: { username: /[^\/]*/ }, as: 'user'
+
+    # You can have the root of your site routed with "root"
+    root 'main#index'
+  end
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

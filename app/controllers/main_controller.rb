@@ -3,7 +3,6 @@ class MainController < ApplicationController
 
   def index
     if @context.logged_in?
-      require 'dnanexus_api'
       @user_describe = DNAnexusAPI.new(@context.token).call("user-#{@context.username}", "describe")
     end
   end
@@ -16,9 +15,6 @@ class MainController < ApplicationController
     # Ensure we were sent here from DNAnexus
     # TODO: Add referrer check
     raise unless params[:code].present? && params[:code].is_a?(String)
-
-    require 'dnanexus_auth'
-    require 'dnanexus_api'
 
     # Exchange the code for a token
     result = DNAnexusAuth.new(DNANEXUS_AUTHSERVER_URI).post_form("oauth2/token", {grant_type: "authorization_code", code: params[:code], redirect_uri: OAUTH2_REDIRECT_URI})

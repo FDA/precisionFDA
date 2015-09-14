@@ -8,6 +8,6 @@ class UsersController < ApplicationController
   end
 
   def show
-    @user = User.find_by("dxuser = ?", params[:username])
+    @user = User.find_by!(dxuser: params[:username])
   end
 end

@@ -10,7 +10,7 @@
   end
 
   g.column name: '# of Files' do |user|
-    link_to(user.user_files.where(public: true).size, "#{files_path()}?grid[f][users.dxuser]=#{user.dxuser}")
+    link_to(user.user_files.accessible_by(@context.user_id).size, "#{files_path()}?grid[f][users.dxuser]=#{user.dxuser}")
   end
 
   g.column name: '# of Biospecimen' do |user|
