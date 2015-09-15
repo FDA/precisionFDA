@@ -34,6 +34,9 @@ gem 'activerecord_any_of'
 # WiceGrid is a Rails grid plugin: https://github.com/leikind/wice_grid
 gem "wice_grid", '3.6.0.pre4'
 
+# Page-specific javascript for Rails done right
+gem "paloma", "4.2.1"
+
 # Use thin
 gem 'thin'
 
