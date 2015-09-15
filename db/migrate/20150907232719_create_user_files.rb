@@ -1,18 +1,19 @@
 class CreateUserFiles < ActiveRecord::Migration
   def change
     create_table :user_files do |t|
-      t.string :dxid
-      t.string :project
-      t.string :name
-      t.string :state
+      t.string :dxid, required: true
+      t.string :project, required: true
+      t.string :name, required: true
+      t.string :state, required: true
       t.text :description
-      t.belongs_to :user, index: true, foreign_key: true
+      t.belongs_to :user, index: true, foreign_key: true, required: true
       t.belongs_to :biospecimen, index: true, foreign_key: true
-      t.boolean :public
-      t.integer :file_size, limit: 8
+      t.boolean :public, required: true
+      t.integer :file_size, limit: 8, required: true
 
       t.timestamps null: false
     end
+
     add_index :user_files, :state
   end
 end
