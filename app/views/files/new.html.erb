@@ -3,10 +3,10 @@
 </div>
 
 <div class="container-fluid">
-  <div class="section-metadata panel panel-default">
+  <div class="section-files panel panel-default">
     <div class="panel-body">
-      <form class="form">
-        <div class="form-group">
+      <form class="form form-upload-files">
+        <div class="section-metadata form-group">
           <label class="control-label text-muted">Set Biospecimen (optional)</label>
           <div class="control-group">
             <select class="field-biospecimen form-control">
@@ -17,22 +17,21 @@
             </select>
           </div>
         </div>
+        <div class="form-group">
+          <label class="control-label">Files</label>
+          <div class="control-group">
+            <span class="btn btn-primary btn-browse-files">
+                Browse files for upload... <input class="event-browse-files" type='file' multiple required>
+            </span>
+
+            <button class="btn btn-primary event-upload-files hide">
+              <span class="fa fa-cloud-upload fa-fw"></span> Upload
+            </button>
+            <button class="btn btn-default event-clear-files hide">Clear files</button>
+          </div>
+          <div class="upload-state hide"></div>
+        </div>
       </form>
-    </div>
-  </div>
-
-  <div class="section-files panel panel-default">
-    <div class="panel-heading">
-      <span class="btn btn-primary btn-browse-files">
-          Browse files for upload... <input class="event-browse-files" type='file' multiple required>
-      </span>
-
-      <button class="btn btn-primary event-upload-files hide">
-        <span class="fa fa-cloud-upload fa-fw"></span> Upload
-      </button>
-      <button class="btn btn-default event-clear-files hide">Clear files</button>
-
-      <div class="upload-state hide"></div>
     </div>
 
     <ul class="list-group list-files hide"></ul>
