@@ -10,12 +10,12 @@ class FilesController < ApplicationController
     User.sync_files!(@context.user_id, @context.token)
 
     user_files = UserFile.accessible_by(@context.user_id)
-    @files_grid = initialize_grid(user_files,
+    @files_grid = initialize_grid(user_files,{
       include: [:user, :biospecimen],
       order: 'user_files.id',
       order_direction: 'desc',
       per_page: 100
-    )
+    })
   end
 
   def show

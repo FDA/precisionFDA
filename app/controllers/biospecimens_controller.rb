@@ -6,15 +6,15 @@ class BiospecimensController < ApplicationController
       ]
     }
 
-    @biospecimens = initialize_grid(Biospecimen,
+    @biospecimens = initialize_grid(Biospecimen,{
       order: 'id',
       order_direction: 'desc',
       per_page: 100
-    )
+    })
   end
 
   def show
-    @biospecimen = Biospecimen.find_by("biospecimen.id = ?", params[:id])
+    @biospecimen = Biospecimen.find_by_id(params[:id])
   end
 
   def new
