@@ -1,5 +1,5 @@
 <div class="page-header">
-  <h1><span class="fa fa-file-o fa-fw"></span> <%= @file.name %></h1>
+  <h1><span class="fa fa-file-o fa-fw"></span><%= @file.name %></h1>
 
   <% if @file.description %>
   <div class="description">
@@ -14,7 +14,11 @@
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Biospecimen</h5>
         <p class="list-group-item-text">
-          <%= link_to(@file.biospecimen.name, biospecimen_path(@file.biospecimen.id)) if @file.biospecimen_id.present? %>
+          <% if @file.biospecimen_id.present? %>
+            <%= link_to(@file.biospecimen.name, biospecimen_path(@file.biospecimen.id))  %>
+          <% else %>
+            <span class="text-muted">None</span>
+          <% end %>
         </p>
       </li>
       <li class="list-group-item">

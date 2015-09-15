@@ -1,16 +1,41 @@
 <div class="page-header clearfix">
   <h1 class="pull-left"><span class="fa fa-file fa-fw"></span> Upload File(s)</h1>
-  <div class="pull-right">
-    <a class="btn btn-default btn-lg" id="upload-button">
-      <span class="fa fa-cloud-upload fa-fw"></span> UPLOAD
-    </a>
-  </div>
 </div>
 
 <div class="container-fluid">
-  <div class="panel panel-default">
+  <div class="section-metadata panel panel-default">
     <div class="panel-body">
-      <input type='file' multiple=multiple id="upload-input">
+      <form class="form">
+        <div class="form-group">
+          <label class="control-label text-muted">Set Biospecimen (optional)</label>
+          <div class="control-group">
+            <select class="field-biospecimen form-control">
+                <option></option>
+              <% @biospecimens.each do |biospecimen| %>
+                <option value="<%= biospecimen.id %>"><%= biospecimen.name %><%= biospecimen.description ? " - #{biospecimen.description}" : "" %></option>
+              <% end %>
+            </select>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
+
+  <div class="section-files panel panel-default">
+    <div class="panel-heading">
+      <span class="btn btn-primary btn-browse-files">
+          Browse files for upload... <input class="event-browse-files" type='file' multiple required>
+      </span>
+
+      <button class="btn btn-primary event-upload-files hide">
+        <span class="fa fa-cloud-upload fa-fw"></span> Upload
+      </button>
+      <button class="btn btn-default event-clear-files hide">Clear files</button>
+
+      <div class="upload-state hide"></div>
+    </div>
+
+    <ul class="list-group list-files hide"></ul>
+  </div>
+
 </div>
