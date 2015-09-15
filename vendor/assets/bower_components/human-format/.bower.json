@@ -1,0 +1,31 @@
+{
+  "name": "human-format",
+  "main": "index.js",
+  "version": "0.5.0",
+  "authors": [
+    "Julien Fontanet <julien.fontanet@isonoe.net>"
+  ],
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "license": "ISC",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "homepage": "https://github.com/julien-f/human-format",
+  "_release": "0.5.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.5.0",
+    "commit": "4d4fb9bd54684a8866579b3f32206372a885fc94"
+  },
+  "_source": "git://github.com/julien-f/human-format.git",
+  "_target": "0.5.0",
+  "_originalSource": "human-format"
+}
