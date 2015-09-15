@@ -41,7 +41,7 @@ class MainController < ApplicationController
     user = nil
     User.transaction do
       user = User.find_by(dxuser: username)
-      if user == nil
+      if user.nil?
         api = DNAnexusAPI.new(token)
         # TODO: If any of these (or the transaction) fail, there will be debris
         # Private files
@@ -73,7 +73,7 @@ class MainController < ApplicationController
     end
 
     # Log in
-    save_session(user.id, username, token, expiration_time) if user
+    save_session(user.id, username, token, expiration_time)
 
     redirect_to root_path
   end
