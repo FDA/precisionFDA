@@ -83,6 +83,8 @@ GEM
     multi_json (1.11.2)
     nokogiri (1.6.6.2)
       mini_portile (~> 0.6.0)
+    paloma (4.2.1)
+      jquery-rails
     rack (1.6.4)
     rack-test (0.6.3)
       rack (>= 1.0)
@@ -169,6 +171,7 @@ DEPENDENCIES
   coffee-rails (~> 4.1.0)
   jbuilder (~> 2.0)
   jquery-rails
+  paloma (= 4.2.1)
   rails (= 4.2.3)
   sass-rails (~> 5.0)
   sdoc (~> 0.4.0)
