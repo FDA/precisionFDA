@@ -1,4 +1,14 @@
-ComparisonsController = Paloma.controller('Comparisons')
+class ComparisonsNewView
+  constructor: () ->
 
+#########################################################
+#
+#
+# PALOMA CONTROLLER
+#
+#
+#########################################################
+
+ComparisonsController = Paloma.controller('Comparisons')
 ComparisonsController::new = ->
-  console.log "Comparisons New"
+  new ComparisonsNewView()

@@ -19,11 +19,12 @@
   display: block
 
 .file-description
-  background-color: transparent
-  border-color: transparent
-  outline: 0
-  box-shadow: none
-  margin-left: -$padding-base-horizontal
+  &, &:focus, &:active
+    background-color: transparent
+    border-color: transparent
+    outline: 0
+    box-shadow: none
+    padding-left: 0
 
 .list-files
   margin-top: 0
@@ -40,3 +41,7 @@
       bottom: 2px
       opacity: 0.2
       height: auto
+
+form
+  .form-group:last-child
+    margin-bottom: 0

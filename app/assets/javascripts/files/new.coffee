@@ -1,47 +1,55 @@
-FilesController = Paloma.controller('Files')
+class FilesNewView
+  constructor: () ->
+    @files = []
+    @metadata = {}
 
-FilesController::new = ->
-  $btnBrowse = $(".btn-browse-files")
-  $inputBrowse = $('.event-browse-files')
-  $upload = $('.event-upload-files')
-  $clear = $('.event-clear-files')
+    $form = $(".form-upload-files")
+    $btnBrowse = $(".btn-browse-files")
+    $inputBrowse = $('.event-browse-files')
+    $upload = $('.event-upload-files')
+    $clear = $('.event-clear-files')
 
-  files = null
-  $inputBrowse.change (e) ->
-    files = e.target.files
-    displayFiles(files)
-    $btnBrowse.addClass("hide")
-    $upload.removeClass("hide")
-    $clear.removeClass("hide")
+    $inputBrowse.change (e) =>
+      @files = e.target.files
+      @displayFiles()
+      $btnBrowse.addClass("hide")
+      $upload.removeClass("hide")
+      $clear.removeClass("hide")
 
-  $upload.click ->
+    $upload.click @handleUpload
+    $form.submit @handleUpload
+
+    $clear.click ->
+      $inputBrowse.replaceWith($inputBrowse.val('').clone(true))
+      $(".list-files").empty().addClass("hide")
+
+      $upload.addClass("hide")
+      $clear.addClass("hide")
+      $btnBrowse.removeClass("hide")
+
+  handleClear: (e) ->
+
+  handleUpload: (e) =>
+    e.preventDefault()
+    $upload = $('.event-upload-files')
+    $clear = $('.event-clear-files')
     $upload.addClass("hide")
     $clear.addClass("hide")
     $(".section-metadata .form-control").addClass("disabled").attr("disabled", true)
     $(".section-files .panel-heading .upload-state").removeClass("hide").html("Uploading...")
 
-    metadata = {}
-
     biospecimen_id = parseInt($(".field-biospecimen").val(), 10)
-    metadata.biospecimen_id = biospecimen_id if !_.isEmpty(biospecimen_id)
+    @metadata.biospecimen_id = biospecimen_id if !_.isEmpty(biospecimen_id)
 
-    uploadFiles(files, metadata)
+    @uploadFiles()
 
-  $clear.click ->
-    $inputBrowse.replaceWith($inputBrowse.val('').clone(true))
-    $(".list-files").empty().addClass("hide")
-
-    $upload.addClass("hide")
-    $clear.addClass("hide")
-    $btnBrowse.removeClass("hide")
-
-  displayFiles = (files) ->
-    return if files.length == 0
+  displayFiles: () ->
+    return if @files.length == 0
     $filesList = $(".list-files")
     $filesList.removeClass("hide")
 
-    for file, i in files
-      console.log file
+    for file, i in @files
+      #TODO: Use some templating engine to render this instead
       $filesList.append("""
         <li class='list-group-item' data-name='#{file.name}' data-index='#{i}'>
           <h4 class='list-group-item-heading'>#{file.name} &middot; <small>#{file.type || 'File'}</small> &middot;  <small>#{humanFormat(file.size, {unit: 'B'})}</small></h4>
@@ -55,20 +63,21 @@ FilesController::new = ->
         </li>
       """)
 
-  uploadFiles = (files, metadata) ->
+  uploadFiles: () ->
     uploadCounter = 0
+    filesLength = @files.length
     doneFn = ($file) ->
       uploadCounter++
       $file.addClass("list-group-item-success").find(".progress").addClass("hide")
 
-      if uploadCounter == files.length
+      if uploadCounter == filesLength
           $(".section-files .panel-heading .upload-state").html("#{uploadCounter} upload(s) complete")
 
-    for file, i in files
+    for file, i in @files
       $file = $("[data-index=#{i}]")
       $file.find(".progress").removeClass("hide")
 
-      _metadata = _.assign({}, metadata)
+      _metadata = _.assign({}, @metadata)
       $description = $file.find(".file-description")
       description = $description.val()
       if !_.isEmpty(description)
@@ -76,10 +85,10 @@ FilesController::new = ->
       else
         $description.hide()
 
-      do ($file) ->
-        uploadFile(file, _metadata, () -> doneFn($file))
+      do ($file) =>
+        @uploadFile(file, _metadata, () -> doneFn($file))
 
-  uploadFile = (file, metadata, cb) ->
+  uploadFile: (file, metadata, cb) ->
     MAX_FILE_SIZE = 5497558138880
     DEFAULT_CHUNK_SIZE = 104857600
     NUM_CHUNKS_CUTOFF = 10000
@@ -99,11 +108,11 @@ FilesController::new = ->
     Precision.api '/api/create_file', params, (res) =>
       id = res.id
 
-      uploadChunks = (index, offset) ->
+      uploadChunks = (index, offset) =>
         this_chunk_size = chunk_size
         if offset + this_chunk_size > size
           this_chunk_size = size - offset
-        calculateMD5 file, offset, this_chunk_size, (md5) ->
+        @calculateMD5 file, offset, this_chunk_size, (md5) ->
           Precision.api '/api/get_upload_url', {
             'id': id
             'index': index
@@ -134,8 +143,7 @@ FilesController::new = ->
       uploadChunks 1, 0
 
   #Spark MD5
-
-  calculateMD5 = (file, offset, len, cb) ->
+  calculateMD5: (file, offset, len, cb) ->
     blobSlice = File::slice or File::mozSlice or File::webkitSlice
     chunkSize = 2097152
     chunks = Math.ceil(len / chunkSize)
@@ -160,3 +168,15 @@ FilesController::new = ->
       alert 'Error reading file'
 
     loadNext()
+
+#########################################################
+#
+#
+# PALOMA CONTROLLER
+#
+#
+#########################################################
+
+FilesController = Paloma.controller('Files')
+FilesController::new = ->
+  new FilesNewView()
