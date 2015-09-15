@@ -47,12 +47,12 @@ ActiveRecord::Schema.define(version: 20150907232719) do
     t.string   "public_files_project"
     t.string   "private_comparisons_project"
     t.string   "public_comparisons_project"
-    t.integer  "open_files_count"
-    t.integer  "closing_files_count"
-    t.integer  "pending_comparisons_count"
-    t.integer  "schema_version"
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
+    t.integer  "open_files_count",            default: 0
+    t.integer  "closing_files_count",         default: 0
+    t.integer  "pending_comparisons_count",   default: 0
+    t.integer  "schema_version",              default: 1
+    t.datetime "created_at",                              null: false
+    t.datetime "updated_at",                              null: false
   end
 
   add_index "users", ["dxuser"], name: "index_users_on_dxuser", unique: true
