@@ -29,5 +29,6 @@ class FilesController < ApplicationController
   end
 
   def new
+    @biospecimens = Biospecimen.all
   end
 end

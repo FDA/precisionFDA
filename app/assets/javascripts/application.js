@@ -14,5 +14,9 @@
 //= require jquery_ujs
 //= require turbolinks
 //= require bootstrap-sass/assets/javascripts/bootstrap-sprockets
+//= require human-format
+//= require lodash
+//= require moment
 //= require wice_grid
+//= require SparkMD5
 //= require_tree .

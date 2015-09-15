@@ -35,7 +35,9 @@ class ApiController < ApplicationController
     end
 
     description = params["description"]
-    raise unless description.nil? || description.is_a?("String")
+    if !description.nil?
+      raise unless description.is_a?(String)
+    end
 
     project = User.find(@context.user_id).private_files_project
     dxid = DNAnexusAPI.new(@context.token).("file", "new", {"name": params["name"], "project": project})["id"]
