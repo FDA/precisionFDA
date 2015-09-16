@@ -1,1 +1,131 @@
 @import "_common"
+
+$withHeight: 75px
+$comparator-border-color: lighten($brand-blue-tertiary, 25%)
+
+.pfda-controller-comparisons.pfda-action-new main
+  .page-header
+    h1
+      margin-bottom: 16px
+
+  form.comparison-metadata
+    input, textarea
+      background-color: rgba(255, 255, 255, 0.8)
+      &:focus, &:active
+        background-color: #fff
+
+    .form-group:last-child
+      margin: 0
+
+  .help-block
+    text-align: center
+    margin: 20px 0 30px
+
+  .variants
+    // inline-block hack
+    font-size: 0
+
+  .variant-left, .variant-right
+    font-size: $font-size-base
+    display: inline-block
+    position: relative
+    width: 50%
+    height: 100%
+    vertical-align: middle
+    border: 4px solid $comparator-border-color
+    padding: $withHeight/2 $withHeight/2 0
+    background-color: $brand-blue-subtler
+
+    &.active
+      background-color: #fff
+
+    .variant-title
+      text-align: center
+      margin: 20px 0
+      color: $brand-blue-tertiary
+
+  .variant-left
+    border-top-left-radius: $border-radius-base
+    border-right-width: 2px
+
+  .variant-right
+    border-top-right-radius: $border-radius-base
+    border-left-width: 0
+
+    &:before
+      content: "with"
+      position: absolute
+      top: 50%
+      right: 100%
+      height: $withHeight
+      width: $withHeight
+      margin-top: -$withHeight/2
+      margin-right: -$withHeight/2
+      background-color: darken($brand-blue-primary, 10%)
+      color: $brand-blue-secondary
+      text-align: center
+      line-height: $withHeight
+      border-radius: $withHeight
+      font-family: $font-family-serif
+      font-style: italic
+      font-weight: 300
+      font-size: 19px
+      z-index: 1
+
+  .nav-files.nav-tabs
+    @include flexbox
+    @include align-items(flex-end)
+    border-bottom: 0
+
+    .file-label
+      margin-bottom: 0
+      font-size: 16px
+
+    .file-info
+      @include text-overflow
+      color: lighten($brand-blue-tertiary, 10%)
+      margin-bottom: 0
+      font-weight: 300
+
+    .required
+      .fa
+        color: $brand-red-primary
+
+      .file-info
+        color: $brand-blue-tertiary
+
+    > li
+      @include flex-grow(1)
+      @include text-overflow
+      min-width: 20%
+      margin-bottom: 0
+
+    > li > a
+      border-bottom: 0
+      text-align: center
+      cursor: pointer
+
+      &:hover, &:focus
+        background-color: lighten($brand-blue-subtler, 1%)
+
+    > li.active > a
+      background-color: $comparator-border-color
+      border-color: $comparator-border-color
+      color: $brand-red-primary
+      cursor: default
+
+      .file-label
+        font-weight: bold
+      .file-info
+        color: darken($brand-blue-tertiary, 20%)
+
+  .file-selector
+    .table.wice-grid
+      border-top-left-radius: 0
+      border-top-right-radius: 0
+      border: 4px solid $comparator-border-color
+      border-top: 0
+
+    .btn-select-file
+      padding: 3px $padding-base-horizontal
+      margin: -3px 0

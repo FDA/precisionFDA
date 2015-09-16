@@ -1,7 +1,3 @@
-<% content_for :title do %>Files<% end %>
-
-<%= render "_partials/toolbar", toolbar: @toolbar  %>
-
 <%= grid(@files_grid, show_filters: :when_filtered) do |g|
   g.blank_slate partial:  "_partials/empty_grid"
 
@@ -16,8 +12,6 @@
       nil
     end
   end
-
-  g.action_column
 
   g.column name: 'Name', attribute: 'name' do |file|
     display = ""
@@ -55,5 +49,12 @@
   g.column name: 'Access', attribute: 'public',
     custom_filter: {'Public' => "t", 'Private' => "f"} do |file|
     file.public ? "Public" : "Private"
+  end
+
+  if @grid_options && @grid_options.has_key?(:action)
+    action = @grid_options[:action]
+    g.column do |file|
+      link_to(action[:label], action[:path], class: action[:className], data: {file_id: file.id})
+    end
   end
 end -%>

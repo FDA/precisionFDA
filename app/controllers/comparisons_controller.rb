@@ -40,5 +40,23 @@ class ComparisonsController < ApplicationController
   end
 
   def new
+    # Refresh state of files, if needed
+    User.sync_files!(@context.user_id, @context.token)
+
+    @grid_options = {
+      action: {
+        label: "Select",
+        path: "#",
+        className: "btn btn-primary btn-sm btn-block btn-select-file event-select-file"
+      }
+    }
+
+    user_files = UserFile.accessible_by(@context.user_id)
+    @files_grid = initialize_grid(user_files,{
+      include: [:user, :biospecimen],
+      order: 'user_files.id',
+      order_direction: 'desc',
+      per_page: 100
+    })
   end
 end
