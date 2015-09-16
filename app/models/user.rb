@@ -28,6 +28,7 @@ class User < ActiveRecord::Base
 
   has_many :biospecimens
   has_many :user_files
+  has_many :comparisons
 
   def self.sync_file!(user_id, file_id, token)
     # TODO: Loop until transaction succeeds

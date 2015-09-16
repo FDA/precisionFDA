@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150907232719) do
+ActiveRecord::Schema.define(version: 20150915224521) do
 
   create_table "biospecimen", force: :cascade do |t|
     t.string   "name"
@@ -22,6 +22,32 @@ ActiveRecord::Schema.define(version: 20150907232719) do
   end
 
   add_index "biospecimen", ["user_id"], name: "index_biospecimen_on_user_id"
+
+  create_table "comparison_inputs", force: :cascade do |t|
+    t.integer "comparison_id"
+    t.integer "user_file_id"
+    t.string  "role"
+  end
+
+  add_index "comparison_inputs", ["comparison_id"], name: "index_comparison_inputs_on_comparison_id"
+  add_index "comparison_inputs", ["user_file_id"], name: "index_comparison_inputs_on_user_file_id"
+
+  create_table "comparisons", force: :cascade do |t|
+    t.string   "name"
+    t.text     "description"
+    t.integer  "user_id"
+    t.boolean  "public"
+    t.string   "state"
+    t.string   "dxjobid"
+    t.string   "project"
+    t.text     "meta"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "comparisons", ["public"], name: "index_comparisons_on_public"
+  add_index "comparisons", ["state"], name: "index_comparisons_on_state"
+  add_index "comparisons", ["user_id"], name: "index_comparisons_on_user_id"
 
   create_table "user_files", force: :cascade do |t|
     t.string   "dxid"
@@ -47,12 +73,12 @@ ActiveRecord::Schema.define(version: 20150907232719) do
     t.string   "public_files_project"
     t.string   "private_comparisons_project"
     t.string   "public_comparisons_project"
-    t.integer  "open_files_count",            default: 0
-    t.integer  "closing_files_count",         default: 0
-    t.integer  "pending_comparisons_count",   default: 0
-    t.integer  "schema_version",              default: 1
-    t.datetime "created_at",                              null: false
-    t.datetime "updated_at",                              null: false
+    t.integer  "open_files_count"
+    t.integer  "closing_files_count"
+    t.integer  "pending_comparisons_count"
+    t.integer  "schema_version"
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
   end
 
   add_index "users", ["dxuser"], name: "index_users_on_dxuser", unique: true
