@@ -59,4 +59,72 @@ class ComparisonsController < ApplicationController
       per_page: 100
     })
   end
+
+  def new2
+    # Temporary route for a barebones comparison submission form
+    # (Doesn't bother with refreshing state)
+    @files = UserFile.accessible_by(@context.user_id)
+  end
+
+  def create
+
+    param! :comparison, Hash do |c|
+      c.param! :name, String, {required: true}
+      c.param! :description, String, {default: ""}
+      c.param! :test_vcf_dxid, String, {required: true}
+      c.param! :test_tbi_dxid, String, {required: true}
+      c.param! :test_bed_dxid, String
+      c.param! :ref_vcf_dxid, String, {required: true}
+      c.param! :ref_tbi_dxid, String, {required: true}
+      c.param! :ref_bed_dxid, String
+    end
+
+    comp_params = params[:comparison]
+
+    # TODO: Decide what happens for files not in "closed" state
+
+    files = {}
+    # Required files
+    ["test_vcf", "test_tbi", "ref_vcf", "ref_tbi"].each do |role|
+      files[role] = UserFile.accessible_by(@context.user_id).find_by!(dxid: comp_params["#{role}_dxid"])
+    end
+    # Optional files
+    ["test_bed", "ref_bed"].each do |role|
+      if comp_params["#{role}_dxid"].present?
+        files[role] = UserFile.accessible_by(@context.user_id).find_by!(dxid: comp_params["#{role}_dxid"])
+      end
+    end
+
+    project = User.find(@context.user_id).private_comparisons_project
+    run_input = {
+      name: comp_params[:name],
+      project: project,
+      input: Hash[files.map {|k,v| [k, {"$dnanexus_link": {project: v.project, id: v.dxid}}]}]
+    }
+    jobid = DNAnexusAPI.new(@context.token).call(Comparison::DEFAULT_APP, "run", run_input)["id"]
+
+    opts = {
+      name: comp_params[:name],
+      description: comp_params[:description],
+      user_id: @context.user_id,
+      public: false,
+      state: "pending",
+      dxjobid: jobid,
+      project: project,
+      meta: {}.to_json
+    }
+
+    User.transaction do
+      comparison = Comparison.create!(opts)
+      files.each_key do |role|
+        comparison.inputs.create!(user_file_id: files[role].id, role: role)
+      end
+      user = User.find(@context.user_id)
+      user.pending_comparisons_count = user.pending_comparisons_count + 1
+      user.save!
+    end
+
+    redirect_to :comparisons
+
+  end
 end

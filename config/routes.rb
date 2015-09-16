@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   scope(format: false) do
     get 'login' => 'main#login'
     get 'return_from_login' => 'main#return_from_login'
+    get '/comparisons/new2' => 'comparisons#new2'
 
     # API
     post '/api/create_file', to: 'api#create_file'
