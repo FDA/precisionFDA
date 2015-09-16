@@ -1,16 +1,58 @@
+<% content_for :title do %>Comparator<% end %>
+
 <div class="page-header clearfix">
-  <h1 class="pull-left"><span class="fa fa-bolt fa-fw"></span>Run Comparison</h1>
-  <div class="pull-right">
-    <a class="btn btn-default btn-lg">
-      <span class="fa fa-bolt fa-fw"></span> RUN
-    </a>
-  </div>
+  <h1><span class="fa fa-crosshairs fa-fw"></span>Precision Comparator</h1>
+  <form class="comparison-metadata">
+    <div class="form-group">
+      <input type="text" class="form-control input-lg" placeholder="Name this comparison..." autofocus>
+    </div>
+    <div class="form-group">
+      <textarea rows="3" class="form-control input-lg" placeholder="Describe this comparison..."></textarea>
+    </div>
+  </form>
 </div>
 
 <div class="container-fluid">
-  <div class="panel panel-default">
-    <div class="panel-body">
-      [Metadata]
+  <p class="lead help-block"><strong>Select files</strong> for the comparison and reference variants</p>
+  <div class="variants">
+    <div class="variant-left active">
+      <h2 class="variant-title">Comparison Variant</h2>
+      <ul class="nav-files nav nav-tabs">
+        <li class="required active"><a>
+          <p class="file-label"><span class="fa fa-file-o"></span> VCF</p>
+          <p class="file-info">Required</p>
+        </a></li>
+        <li class="required"><a>
+          <p class="file-label"><span class="fa fa-file-o"></span> TBI</p>
+          <p class="file-info">Required</p>
+        </a></li>
+        <li><a>
+          <p class="file-label"><span class="fa fa-file-o"></span> BED</p>
+          <p class="file-info">Optional</p>
+        </a></li>
+      </ul>
     </div>
+
+    <div class="variant-right">
+      <h2 class="variant-title">Reference Variant</h2>
+      <ul class="nav-files nav nav-tabs">
+        <li class="required"><a>
+          <p class="file-label"><span class="fa fa-file-o"></span> VCF</p>
+          <p class="file-info">Required</p>
+        </a></li>
+        <li class="required"><a>
+          <p class="file-label"><span class="fa fa-file-o"></span> TBI</p>
+          <p class="file-info">Required</p>
+        </a></li>
+        <li><a>
+          <p class="file-label"><span class="fa fa-file-o"></span> BED</p>
+          <p class="file-info">Optional</p>
+        </a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="file-selector">
+    <%= render "_partials/grid_files", files_grid: @files_grid  %>
   </div>
 </div>

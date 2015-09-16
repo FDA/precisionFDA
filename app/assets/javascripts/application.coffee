@@ -15,6 +15,7 @@
 #= require turbolinks
 #= require bootstrap-sass/assets/javascripts/bootstrap-sprockets
 #= require human-format
+#= require knockout
 #= require lodash
 #= require moment
 #= require wice_grid
