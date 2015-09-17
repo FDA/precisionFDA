@@ -17,8 +17,6 @@
     end
   end
 
-  g.action_column
-
   g.column name: 'Name', attribute: 'name' do |biospecimen|
     link_to(biospecimen.name, biospecimen_path(biospecimen.id))
   end

@@ -1,17 +1,39 @@
+<% content_for :title do %><%= @comparison.name %><% end %>
+
 <div class="page-header">
-  <h1><span class="fa fa-bullseye fa-fw"></span>Comparison ABC</h1>
+  <h1><span class="fa fa-crosshairs fa-fw"></span><%= @comparison.name %></h1>
+
+  <% if @comparison.description %>
+  <div class="description">
+    <%= @comparison.description %>
+  </div>
+  <% end %>
 </div>
 
 <div class="container-fluid">
-  <div class="panel panel-warning">
-    <div class="panel-heading">
-      <h3 class="panel-title">91%</h3>
-    </div>
-  </div>
+  <div class="metadata-section">
+    <ul class="list-group">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Added by</h5>
+        <p class="list-group-item-text">
+          <%= link_to(@comparison.user.dxuser, user_path(@comparison.user.dxuser))  %>
+        </p>
+      </li>
+    </ul>
 
-  <div class="panel panel-default">
-    <div class="panel-body">
-      [Metadata]
-    </div>
+    <ul class="list-group">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">State</h5>
+        <p class="list-group-item-text"><%= @comparison.state %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Created</h5>
+        <p class="list-group-item-text"><%= @comparison.created_at.to_s(:db) %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Updated</h5>
+        <p class="list-group-item-text"><%= @comparison.updated_at.to_s(:db) %></p>
+      </li>
+    </ul>
   </div>
 </div>
