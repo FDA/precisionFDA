@@ -6,37 +6,16 @@ class ComparisonsController < ApplicationController
       ]
     }
 
-    @grid = {
-      header: [
-        {field: "comparison", display: "Comparison"},
-        {field: "variant", display: "Variant"},
-        {field: "reference", display: "Reference Variant"},
-        {field: "score", display: "Score"},
-        {field: "created", display: "Created"},
-        {field: "addedBy", display: "Added by"}
-      ],
-      rows: [
-        [
-          {field: "comparison", display: "Comparison ABC", icon: "fa fa-lock fa-fw", link: "#"},
-          {field: "variant", display: "variant_123.vcf.gz", link: "#"},
-          {field: "reference", display: "reference_variant.vcf.gz", link: "#"},
-          {field: "score", display: "92%"},
-          {field: "created", display: "8/15/2015"},
-          {field: "addedBy", display: "Doogie Howser", link: "#"}
-        ],
-        [
-          {field: "comparison", display: "Comparison XYZ", link: "#"},
-          {field: "variant", display: "variant_516.vcf.gz", link: "#"},
-          {field: "reference", display: "reference_variant_2.vcf.gz", link: "#"},
-          {field: "score", display: "95%"},
-          {field: "created", display: "4/15/2015"},
-          {field: "addedBy", display: "Doogie Howser", link: "#"}
-        ]
-      ]
-    }
+    comparisons = Comparison.accessible_by(@context.user_id)
+    @comparisons_grid = initialize_grid(comparisons,{
+      order: 'comparisons.id',
+      order_direction: 'desc',
+      per_page: 100
+    })
   end
 
   def show
+    @comparison = Comparison.accessible_by(@context.user_id).find_by!(id: params[:id])
   end
 
   def new
