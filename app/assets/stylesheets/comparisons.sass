@@ -3,55 +3,31 @@
 $withHeight: 100px
 $comparator-border-color: lighten($brand-blue-tertiary, 25%)
 
-.pfda-controller-comparisons.pfda-action-new main
-  .nav-comparisons
-    margin-bottom: 20px
-    li > a
-      font-weight: 18px
-      text-transform: uppercase
-
-  form
-    input, textarea
-      &:not(.required)
-        background-color: $brand-blue-subtler
-
-    .form-group:last-child
-      margin: 0
-
-  .help-block
-    text-align: center
-    margin: 20px 0 30px
-
-
-  .affix-container
-    left: $padding-base-horizontal
-    right: $padding-base-horizontal
-
+.pfda-controller-comparisons main
   .variants
-    // inline-block hack
-    font-size: 0
+    @include flexbox
+    @include align-items(stretch)
+    @include align-content(center)
     position: relative
-
-  .variant-left, .variant-right
-    font-size: $font-size-base
-    display: inline-block
-    position: relative
-    width: 50%
-    height: 100%
-    vertical-align: middle
     border: 4px solid $comparator-border-color
     border-bottom-width: 1px
+    border-radius: $border-radius-base
+    border-bottom-left-radius: 0
+    border-bottom-right-radius: 0
+
+  .variant-test, .variant-ref
+    position: relative
+    width: 50%
+    vertical-align: middle
     padding: 10px $withHeight
 
-  .variant-left
+  .variant-test
     background-color: $brand-blue-subtler
-    border-top-left-radius: $border-radius-base
-    border-right-width: 2px
+    border-right: 1px solid $comparator-border-color
 
-  .variant-right
+  .variant-ref
     background-color: darken($brand-blue-subtler, 3%)
-    border-top-right-radius: $border-radius-base
-    border-left-width: 0
+    border-left: 1px solid $comparator-border-color
 
   .variants-circle
     position: absolute
@@ -146,6 +122,9 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
       .fa
         color: $brand-blue-dark
 
+        &.access-icon
+          color: $brand-blue-tertiary
+
     > li
       @include text-overflow
       margin-bottom: $padding-large-vertical
@@ -160,6 +139,59 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
       .active
         .file-info
           color: $brand-red-primary
+
+@media (max-width: $screen-sm-max)
+  .pfda-controller-comparisons main
+    .variants
+      @include flex-direction(column)
+
+      .variant-test,
+      .variant-ref
+        width: 100%
+
+      .variant-test
+        padding-bottom: $withHeight/2
+        border-right-width: 0
+        border-bottom: 1px solid $comparator-border-color
+
+      .variant-ref
+        padding-top: $withHeight/2
+        border-left-width: 0
+        border-top: 1px solid $comparator-border-color
+
+
+@media (max-width: $screen-xs-max)
+  .pfda-controller-comparisons main
+    .variants
+
+      .variant-test,
+      .variant-ref
+        padding-left: 10px
+        padding-right: 10px
+
+.pfda-controller-comparisons.pfda-action-new main
+  .nav-comparisons
+    margin-bottom: 20px
+    li > a
+      font-weight: 18px
+      text-transform: uppercase
+
+  form
+    input, textarea
+      &:not(.required)
+        background-color: $brand-blue-subtler
+
+    .form-group:last-child
+      margin: 0
+
+  .help-block
+    text-align: center
+    margin: 20px 0 30px
+
+
+  .affix-container
+    left: $padding-base-horizontal
+    right: $padding-base-horizontal
 
   .files-filter
     background-color: $comparator-border-color
@@ -196,3 +228,9 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
         .dropdown-menu
           a
             cursor: pointer
+
+.pfda-controller-comparisons.pfda-action-show main
+  .variants
+    margin-bottom: 20px
+    border-radius: $border-radius-base
+    border-bottom-width: 4px

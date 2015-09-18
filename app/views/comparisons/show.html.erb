@@ -12,6 +12,32 @@
 
 <div class="container-fluid">
   <div class="metadata-section">
+    <div class="variants">
+      <div class="variant-test">
+        <h2 class="variant-title">Test Variant</h2>
+        <ul class="variant-inputs list-unstyled">
+          <%= render "_partials/variant_file", file: @test_vcf, title: "VCF", required: true, classes: "required active"  %>
+          <%= render "_partials/variant_file", file: @test_tbi, title: "TBI", required: true, classes: "required active"  %>
+          <%= render "_partials/variant_file", file: @test_bed, title: "BED", required: false, classes: "active"  %>
+        </ul>
+      </div>
+
+      <div class="variant-ref">
+        <h2 class="variant-title">Benchmark Variant</h2>
+        <ul class="variant-inputs list-unstyled">
+          <%= render "_partials/variant_file", file: @ref_vcf, title: "VCF", required: true, classes: "required active"  %>
+          <%= render "_partials/variant_file", file: @ref_tbi, title: "TBI", required: true, classes: "required active"  %>
+          <%= render "_partials/variant_file", file: @ref_bed, title: "BED", required: false, classes: "active"  %>
+        </ul>
+      </div>
+
+      <div class="variants-circle">
+          <div class="variants-circle-with">
+            with
+          </div>
+      </div>
+    </div>
+
     <ul class="list-group">
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Added by</h5>
