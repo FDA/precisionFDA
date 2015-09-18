@@ -111,7 +111,6 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
 
     .file-info
       @include text-overflow
-      color: lighten($brand-blue-tertiary, 10%)
       font-weight: 300
       display: inline-block
 
@@ -134,11 +133,9 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
       .file-label
         color: $brand-blue-dark
 
-      .file-info
-        color: $brand-red-primary
 
     .active
-      .fa, .file-info
+      .fa
         color: $brand-blue-dark
 
     > li
@@ -148,6 +145,14 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
       &:last-child
         margin-bottom: 0
 
+      &:not(.active)
+        .file-info
+          color: lighten($brand-blue-tertiary, 10%)
+
+      .active
+        .file-info
+          color: $brand-red-primary
+          
   .files-selector
     .files-filter
       background-color: $comparator-border-color
@@ -178,7 +183,7 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
 
       .cell-file-selections
         text-align: right
-        
+
       .cell-file-actions
         .dropdown-menu
           a

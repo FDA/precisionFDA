@@ -20,7 +20,12 @@
           </div>
           <div class="variant-input-cell">
             <a class="close event-unselect-file" data-bind="visible: active">&times;</a>
-            <span class="file-info" data-bind="text: label"></span>
+            <!-- ko if: active() -->
+              <a target="_blank" class="file-info" data-bind="text: input().name, attr: {href: '/files/' + input().dxid}"></a>
+            <!-- /ko -->
+            <!-- ko if: !active() -->
+              <span class="file-info">Select a file from below</span>
+            <!-- /ko -->
           </div>
         </li>
       </ul>
@@ -36,8 +41,13 @@
           </div>
           <div class="variant-input-cell">
             <a class="close event-unselect-file" data-bind="visible: active">&times;</a>
-            <span class="file-info" data-bind="text: label"></span>
-          </div>
+            <!-- ko if: active() -->
+              <a target="_blank" class="file-info" data-bind="text: input().name, attr: {href: '/files/' + input().dxid}"></a>
+            <!-- /ko -->
+            <!-- ko if: !active() -->
+              <span class="file-info">Select a file from below</span>
+            <!-- /ko -->
+            </div>
         </li>
       </ul>
     </div>
@@ -86,7 +96,7 @@
             </div>
           </td>
           <td class="cell-file-name">
-            <span data-bind="text: name"></span>
+            <a target="_blank" data-bind="text: name, attr: {href: '/files/' + dxid}"></a>
           </td>
           <td class="cell-file-selections" data-bind="foreach: inputModels">
             <span class="label label-info" data-bind="text: category + ': ' + title"></span>

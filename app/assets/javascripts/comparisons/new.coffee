@@ -122,12 +122,6 @@ class VariantInputModel
     @active = ko.computed(=>
       !_.isEmpty(@input())
     )
-    @label = ko.computed(=>
-      if @input()?
-        @input().name
-      else
-        "Select a file from below"
-    )
 
 
 
