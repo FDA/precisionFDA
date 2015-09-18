@@ -1,0 +1,64 @@
+<% content_for :title do %>Files<% end %>
+
+<%= render "_partials/toolbar", toolbar: @toolbar  %>
+
+<%= grid(@files_grid, show_filters: :when_filtered) do |g|
+  g.blank_slate partial:  "_partials/empty_grid"
+
+  g.after_row do |file, num_cols|
+    if file.description
+      content_tag(:tr,
+        content_tag(:td,
+          content_tag(:div, file.description, class: 'description'),
+        colspan: num_cols),
+      class: 'extra-row')
+    else
+      nil
+    end
+  end
+
+  g.column name: 'Name', attribute: 'name' do |file|
+    display = ""
+    if !file.public
+      display = "<span class='fa fa-lock fa-fw'></span> "
+    end
+    display += link_to(file.name, file_path(file.dxid))
+    raw display
+  end
+
+  g.column name: 'Biospecimen', attribute: 'name', assoc: :biospecimen do |file|
+    if file.biospecimen_id.present?
+      link_to(file.biospecimen.name, biospecimen_path(file.biospecimen.id))
+    end
+  end
+
+  g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |file|
+    link_to(file.user.dxuser, user_path(file.user.dxuser))
+  end
+
+  g.column name: 'Size', attribute: 'file_size' do |file|
+     number_to_human_size(file.file_size)
+  end
+
+  g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |file|
+    file.created_at.to_s(:db)
+  end
+
+  g.column name: 'Updated', attribute: 'updated_at', auto_reload: true, filter_type: :standard do |file|
+    file.updated_at.to_s(:db)
+  end
+
+  g.column name: 'State', attribute: 'state', custom_filter: :auto
+
+  g.column name: 'Access', attribute: 'public',
+    custom_filter: {'Public' => "t", 'Private' => "f"} do |file|
+    file.public ? "Public" : "Private"
+  end
+
+  if @grid_options && @grid_options.has_key?(:action)
+    action = @grid_options[:action]
+    g.column do |file|
+      link_to(action[:label], action[:path], class: action[:className], data: {file_id: file.id})
+    end
+  end
+end -%>
