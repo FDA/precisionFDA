@@ -1,4 +1,4 @@
-<% content_for :title do %><%= @user.name %><% end %>
+<% content_for :title do %><%= @user.dxuser %><% end %>
 
 <div class="page-header">
   <h1><span class="fa fa-smile-o  fa-fw"></span><%= @user.dxuser %></h1>
@@ -6,7 +6,7 @@
 
 <div class="container-fluid">
   <div class="metadata-section">
-    <ul class="list-group">
+    <ul class="list-group list-group-inline">
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Files</h5>
         <p class="list-group-item-text">
@@ -21,7 +21,7 @@
       </li>
     </ul>
 
-    <ul class="list-group">
+    <ul class="list-group list-group-inline">
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Joined</h5>
         <p class="list-group-item-text"><%= @user.created_at.to_s(:db) %></p>

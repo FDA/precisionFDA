@@ -27,7 +27,7 @@
 
 <div class="container-fluid">
   <div class="metadata-section">
-    <ul class="list-group">
+    <ul class="list-group list-group-inline">
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Biospecimen</h5>
         <p class="list-group-item-text">
@@ -46,11 +46,11 @@
       </li>
     </ul>
 
-    <ul class="list-group">
+    <ul class="list-group list-group-inline">
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Access</h5>
         <p class="list-group-item-text">
-          <span class="fa fa-fw <%= @file.public ? 'fa-globe' : 'fa-lock' %>"></span>
+          <span class="fa <%= @file.public ? 'fa-globe' : 'fa-lock' %>"></span>
           <%= @file.public ? "Public" : "Private" %>
         </p>
       </li>
@@ -71,5 +71,26 @@
         <p class="list-group-item-text"><%= @file.updated_at.to_s(:db) %></p>
       </li>
     </ul>
+
+    <% if @comparisons.size > 0 %>
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <h3 class="panel-title">Comparisons</h3>
+      </div>
+      <div class="list-group">
+        <% @comparisons.each do |comparison| %>
+          <%= link_to comparison_path(comparison.id), class: "list-group-item" do %>
+            <span class="fa fa-crosshairs"></span>
+            <span class="list-group-item-name"><%= comparison.name %></span>
+
+            <% if comparison.description != "" %>
+              <span class="glue">&middot;</span>
+              <span class="list-group-item-description"><%= comparison.description %></span>
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+    <% end %>
   </div>
 </div>
