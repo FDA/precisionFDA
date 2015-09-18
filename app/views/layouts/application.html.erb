@@ -8,7 +8,7 @@
     <%= render "_partials/navbar" %>
   </header>
   <main role="main">
-    <%= render '_partials/messages' %>
+    <%= render partial: "_partials/messages", flash: flash %>
     <%= yield %>
   </main>
   <footer>

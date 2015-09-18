@@ -1,31 +1,15 @@
 // TODO: Move related classes into separate stylesheets
 @import "_common"
 
-.flash_notice, .flash_alert
-  padding: 8px 35px 8px 14px
-  margin-bottom: 20px
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5)
-  border: 1px solid #fbeed5
-  -webkit-border-radius: 4px
-  -moz-border-radius: 4px
-  border-radius: 4px
-  font-size: 14px
-  line-height: 20px
+body > main > .alert
+  margin: 10px 10px 20px 10px
 
-.flash_notice
-  background-color: #dff0d8
-  border-color: #d6e9c6
-  color: #468847
-
-.flash_alert
-  background-color: #f2dede
-  border-color: #eed3d7
-  color: $brand-red-secondary
 
 // TOOLBAR
 .pfda-toolbar
   padding: $padding-large-horizontal
   border-bottom: 1px solid $table-border-color
+  @include clearfix
 
 // BUTTONS
 .btn.btn-default
