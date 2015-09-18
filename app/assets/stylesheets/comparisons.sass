@@ -22,6 +22,11 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
     text-align: center
     margin: 20px 0 30px
 
+
+  .affix-container
+    left: $padding-base-horizontal
+    right: $padding-base-horizontal
+
   .variants
     // inline-block hack
     font-size: 0
@@ -102,7 +107,7 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
 
   .variant-title
     text-align: center
-    margin: 0 0 20px
+    margin: $padding-large-vertical 0 20px
     color: $brand-blue-tertiary
 
   .variant-inputs
@@ -133,6 +138,9 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
       .file-label
         color: $brand-blue-dark
 
+      &:not(.active)
+        .file-info
+          color: $brand-red-primary
 
     .active
       .fa
@@ -153,11 +161,11 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
         .file-info
           color: $brand-red-primary
 
-  .files-selector
-    .files-filter
-      background-color: $comparator-border-color
-      border: 4px solid $comparator-border-color
+  .files-filter
+    background-color: $comparator-border-color
+    border: 4px solid $comparator-border-color
 
+  .files-selector
     .table
       border-radius: $border-radius-base
       border-top-left-radius: 0
