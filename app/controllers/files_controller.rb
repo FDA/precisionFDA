@@ -31,4 +31,16 @@ class FilesController < ApplicationController
   def new
     @biospecimens = Biospecimen.all
   end
+
+  # TODO: Delete file on DNANEXUS API
+  # FIXME: If a file is connected to a comparison you can't delete it?
+  def destroy
+    @file = UserFile.accessible_by(@context.user_id).find_by!(dxid: params[:id])
+    filename = @file.name
+    if @file
+      @file.destroy
+      flash[:success] = "File \"#{filename}\" has been successfully deleted"
+      redirect_to files_path
+    end
+  end
 end
