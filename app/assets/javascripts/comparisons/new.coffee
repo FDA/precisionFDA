@@ -155,3 +155,8 @@ ComparisonsController::new = ->
   })
 
   $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
+
+  $(window).resize(() ->
+    $affixContainer.affix('checkPosition')
+    $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
+  )

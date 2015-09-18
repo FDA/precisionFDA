@@ -16,6 +16,13 @@ class ComparisonsController < ApplicationController
 
   def show
     @comparison = Comparison.accessible_by(@context.user_id).find_by!(id: params[:id])
+
+    @test_vcf = @comparison.input("test_vcf").user_file
+    @test_tbi = @comparison.input("test_tbi").user_file
+    @test_bed = @comparison.input("test_bed").user_file if @comparison.input("test_bed")
+    @ref_vcf = @comparison.input("ref_vcf").user_file
+    @ref_tbi = @comparison.input("ref_tbi").user_file
+    @ref_bed = @comparison.input("ref_bed").user_file if @comparison.input("ref_bed")
   end
 
   def new

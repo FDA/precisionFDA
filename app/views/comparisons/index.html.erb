@@ -29,11 +29,34 @@
     link_to(comparison.user.dxuser, user_path(comparison.user.dxuser))
   end
 
-  # g.column name: 'Test Variant' do |comparison|
-  #   input = comparison.inputs
-  #   debug input
+  # g.column name: 'Files' do |comparison|
+  #   debug comparison.inputs
   #   # link_to(comparison.user_files.accessible_by(@context.user_id).size, file_path())
   # end
+
+  g.column name: 'Test Variant' do |comparison|
+    file = comparison.input("test_vcf").user_file
+    display = ""
+    if !file.public
+      display = "<span class='fa fa-lock fa-fw'></span> "
+    else
+      display = "<span class='fa fa-globe fa-fw'></span> "
+    end
+    display += link_to(file.name, file_path(file.dxid))
+    raw display
+  end
+
+  g.column name: 'Benchmark' do |comparison|
+    file = comparison.input("ref_vcf").user_file
+    display = ""
+    if !file.public
+      display = "<span class='fa fa-lock fa-fw'></span> "
+    else
+      display = "<span class='fa fa-globe fa-fw'></span> "
+    end
+    display += link_to(file.name, file_path(file.dxid))
+    raw display
+  end
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |file|
     file.created_at.to_s(:db)
