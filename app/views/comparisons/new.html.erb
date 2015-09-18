@@ -88,7 +88,9 @@
           <td class="cell-file-name">
             <span data-bind="text: name"></span>
           </td>
-          <td class="cell-file-selections"></td>
+          <td class="cell-file-selections" data-bind="foreach: inputModels">
+            <span class="label label-info" data-bind="text: category + ': ' + title"></span>
+          </td>
         </tr>
       </tbody>
     </table>

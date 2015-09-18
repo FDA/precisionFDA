@@ -14,7 +14,7 @@ class ComparisonsNewView
 
     @activeInput = ko.observable("test_vcf")
 
-    @testVariant = new VariantModel({
+    @testVariant = new VariantModel("Test", {
       inputSpec: [
         {
           name: "test_vcf"
@@ -34,7 +34,7 @@ class ComparisonsNewView
       ]
     })
 
-    @refVariant = new VariantModel({
+    @refVariant = new VariantModel("Benchmark", {
       inputSpec: [
         {
           name: "ref_vcf"
@@ -76,21 +76,19 @@ class ComparisonsNewView
         fileModels.push(new FileModel(file))
       @files(fileModels)
 
-  selectInput: (e) =>
-    e.preventDefault()
-    inputModel = ko.dataFor(e.currentTarget)
-    @activeInput(inputModel.name)
-    return false
-
   selectFile: (e) =>
     e.preventDefault()
     inputModel = ko.dataFor(e.currentTarget)
     fileModel = ko.contextFor(e.currentTarget).$parent
+    # TODO: add/remove input models from associated files
+    # fileModel.inputModels.push(inputModel)
     inputModel.input(fileModel)
 
   unselectFile: (e) =>
     e.preventDefault()
     inputModel = ko.dataFor(e.currentTarget)
+    # TODO: add/remove input models from associated files
+    # fileModel.inputModels.remove(inputModel)
     inputModel.input(null)
     return false
 
@@ -102,18 +100,17 @@ class FileModel
     @id = file.id
     @dxid = file.dxid
     @name = file.name
-    @selected = ko.observable(false)
-    @inputName = ko.observable()
+    @inputModels = ko.observableArray()
 
 class VariantModel
-  constructor: (app) ->
-    inputs = _.map(app.inputSpec, (input) ->
-      new VariantInputModel(input)
+  constructor: (@category, app) ->
+    inputs = _.map(app.inputSpec, (input) =>
+      new VariantInputModel(@category, input)
     )
     @inputs = ko.observableArray(inputs)
 
 class VariantInputModel
-  constructor: (input) ->
+  constructor: (@category, input) ->
     @name = input.name
     @title = input.title
     @required = input.required ? true
