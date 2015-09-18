@@ -1,5 +1,6 @@
-<% flash.each do |name, msg| %>
-  <% if msg.is_a?(String) %>
-    <%= content_tag :div, msg, :class => "flash_#{name}" %>
-  <% end %>
+<% flash.each do |type, message| %>
+  <div class="alert <%= bootstrap_class_for(type) %> fade in">
+    <button class="close" data-dismiss="alert">×</button>
+    <%= message %>
+  </div>
 <% end %>
