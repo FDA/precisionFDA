@@ -171,13 +171,42 @@ $select-width: 28px
     font-weight: 300
     font-size: 18px
 
-  .list-group-item-heading
+  .list-group.list-group-inline
+    margin-bottom: $padding-large-vertical
+
+    li
+      display: inline-block
+      margin-right: $padding-base-horizontal
+      border: 0
+      border-radius: 3
+
+  .list-group-item-heading, .panel-title
     color: $brand-blue-tertiary
     text-transform: uppercase
     font-weight: 300
 
   .list-group-item-text
     font-size: 19px
+
+  .panel
+    a.list-group-item
+      color: $link-color
+
+      .fa
+        color: $brand-blue-tertiary
+
+      &:hover
+        color: $link-hover-color
+
+      .glue
+        color: lighten($text-muted, 10%)
+        padding: 0 2px
+
+      .list-group-item-name
+        font-weight: bold
+
+      .list-group-item-description
+        color: $text-muted
 
 .pfda-action-new
   .page-header

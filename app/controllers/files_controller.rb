@@ -26,6 +26,8 @@ class FilesController < ApplicationController
       User.sync_file!(@context.user_id, @file.id, @context.token)
       @file.reload
     end
+
+    @comparisons = @file.comparisons.order(created_at: :desc)
   end
 
   def new
