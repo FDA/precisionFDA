@@ -5,7 +5,9 @@ Rails.application.routes.draw do
   #
   scope(format: false) do
     get 'login' => 'main#login'
+    delete 'logout' => 'main#destroy'
     get 'return_from_login' => 'main#return_from_login'
+
     get '/comparisons/new2' => 'comparisons#new2'
 
     # API

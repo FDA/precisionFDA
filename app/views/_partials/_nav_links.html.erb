@@ -37,10 +37,9 @@
     <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><%= @context.username %> <span class="caret"></span></a>
       <ul class="dropdown-menu">
-        <li><a href="#">Profile</a></li>
-        <li><a href="#">Settings</a></li>
+        <li><%= link_to "Profile", user_path(@context.username) %></li>
         <li role="separator" class="divider"></li>
-        <li><a href="/logout">Log Out</a></li>
+        <li><%= link_to "Log out", logout_path, method: :delete %></li>
       </ul>
     </li>
   <% else %>

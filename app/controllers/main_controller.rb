@@ -7,6 +7,12 @@ class MainController < ApplicationController
     end
   end
 
+  def destroy
+    save_session(nil, nil, nil, nil)
+    flash[:success] = "You were successfully logged out of precisionFDA"
+    redirect_to root_url
+  end
+
   def login
     @remote_login_url = "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=precision_fda&redirect_uri=#{URI.encode(OAUTH2_REDIRECT_URI)}"
   end
