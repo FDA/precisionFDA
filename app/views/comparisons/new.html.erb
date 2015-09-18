@@ -9,67 +9,71 @@
     <strong data-bind="text: areAllInputsSet() ? 'Run' : 'Set up'"></strong> your comparison
   </p>
 
-  <div class="variants">
-    <div class="variant-left">
-      <h2 class="variant-title">Test Variant</h2>
-      <ul class="variant-inputs list-unstyled" data-bind="foreach: testVariant.inputs">
-        <li data-bind="css: {required: required, active: active}">
-          <div class="variant-input-cell">
-            <div class="file-label"><span class="fa fa-fw fa-file-o"></span> <span data-bind="text: title"></span></div>
-            <div class="file-optional" data-bind="visible: !required">Optional</div>
-          </div>
-          <div class="variant-input-cell">
-            <a class="close event-unselect-file" data-bind="visible: active">&times;</a>
-            <!-- ko if: active() -->
-              <a target="_blank" class="file-info" data-bind="text: input().name, attr: {href: '/files/' + input().dxid}"></a>
-            <!-- /ko -->
-            <!-- ko if: !active() -->
-              <span class="file-info">Select a file from below</span>
-            <!-- /ko -->
-          </div>
-        </li>
-      </ul>
-    </div>
-
-    <div class="variant-right">
-      <h2 class="variant-title">Benchmark Variant</h2>
-      <ul class="variant-inputs list-unstyled" data-bind="foreach: refVariant.inputs">
-        <li data-bind="css: {required: required, active: active}">
-          <div class="variant-input-cell">
-            <div class="file-label"><span class="fa fa-fw fa-file-o"></span> <span data-bind="text: title"></span></div>
-            <div class="file-optional" data-bind="visible: !required">Optional</div>
-          </div>
-          <div class="variant-input-cell">
-            <a class="close event-unselect-file" data-bind="visible: active">&times;</a>
-            <!-- ko if: active() -->
-              <a target="_blank" class="file-info" data-bind="text: input().name, attr: {href: '/files/' + input().dxid}"></a>
-            <!-- /ko -->
-            <!-- ko if: !active() -->
-              <span class="file-info">Select a file from below</span>
-            <!-- /ko -->
-            </div>
-        </li>
-      </ul>
-    </div>
-
-    <div class="variants-circle">
-      <!-- ko if: areAllInputsSet -->
-        <a class="variants-circle-compare" data-toggle="modal" data-target="#comparison-modal">
-          compare
-        </a>
-      <!-- /ko -->
-      <!-- ko if: !areAllInputsSet() -->
-        <div class="variants-circle-with">
-          with
+  <div class="affix-spacer">
+    <div class="affix-container">
+      <div class="variants">
+        <div class="variant-left">
+          <h2 class="variant-title">Test Variant</h2>
+          <ul class="variant-inputs list-unstyled" data-bind="foreach: testVariant.inputs">
+            <li data-bind="css: {required: required, active: active}">
+              <div class="variant-input-cell">
+                <div class="file-label"><span class="fa fa-fw fa-file-o"></span> <span data-bind="text: title"></span></div>
+                <div class="file-optional" data-bind="visible: !required">Optional</div>
+              </div>
+              <div class="variant-input-cell">
+                <a class="close event-unselect-file" data-bind="visible: active">&times;</a>
+                <!-- ko if: active() -->
+                  <a target="_blank" class="file-info" data-bind="text: input().name, attr: {href: '/files/' + input().dxid}"></a>
+                <!-- /ko -->
+                <!-- ko if: !active() -->
+                  <span class="file-info">Select a file from below</span>
+                <!-- /ko -->
+              </div>
+            </li>
+          </ul>
         </div>
-      <!-- /ko -->
+
+        <div class="variant-right">
+          <h2 class="variant-title">Benchmark Variant</h2>
+          <ul class="variant-inputs list-unstyled" data-bind="foreach: refVariant.inputs">
+            <li data-bind="css: {required: required, active: active}">
+              <div class="variant-input-cell">
+                <div class="file-label"><span class="fa fa-fw fa-file-o"></span> <span data-bind="text: title"></span></div>
+                <div class="file-optional" data-bind="visible: !required">Optional</div>
+              </div>
+              <div class="variant-input-cell">
+                <a class="close event-unselect-file" data-bind="visible: active">&times;</a>
+                <!-- ko if: active() -->
+                  <a target="_blank" class="file-info" data-bind="text: input().name, attr: {href: '/files/' + input().dxid}"></a>
+                <!-- /ko -->
+                <!-- ko if: !active() -->
+                  <span class="file-info">Select a file from below</span>
+                <!-- /ko -->
+                </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="variants-circle">
+          <!-- ko if: areAllInputsSet -->
+            <a class="variants-circle-compare" data-toggle="modal" data-target="#comparison-modal">
+              compare
+            </a>
+          <!-- /ko -->
+          <!-- ko if: !areAllInputsSet() -->
+            <div class="variants-circle-with">
+              with
+            </div>
+          <!-- /ko -->
+        </div>
+      </div>
+      <div class="files-filter">
+        <input type="text" class="form-control input-lg" placeholder="Filter..." data-bind="textInput: filterQuery" />
+      </div>
     </div>
   </div>
 
   <div class="files-selector table-responsive">
-    <div class="files-filter">
-      <input type="text" class="form-control input-lg" placeholder="Filter..." data-bind="textInput: filterQuery" />
-    </div>
     <table class="files-table table">
       <tbody data-bind="foreach: files.filtered">
         <tr>

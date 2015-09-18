@@ -146,3 +146,12 @@ ComparisonsController::new = ->
     e.preventDefault()
     $(this).tab('show')
   )
+
+  # Affix the variants comparator and filter
+  $affixContainer = $container.find(".affix-container")
+  $affixContainer.affix({
+    offset:
+      top: $affixContainer.offset().top
+  })
+
+  $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
