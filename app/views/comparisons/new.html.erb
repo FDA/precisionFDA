@@ -83,13 +83,13 @@
                 <li class="dropdown-header">Set for Test Variant</li>
                 <!-- ko foreach: $root.testVariant.inputs -->
                   <li>
-                    <a class="event-select-file"><span data-bind="text: title"></span></a>
+                    <a class="event-select-file"><span data-bind="text: category + ' ' + title"></span></a>
                   </li>
                 <!-- /ko -->
                 <li class="dropdown-header">Set for Benchmark Variant</li>
                 <!-- ko foreach: $root.refVariant.inputs -->
                   <li>
-                    <a class="event-select-file"><span data-bind="text: title"></span></a>
+                    <a class="event-select-file"><span data-bind="text: category + ' ' + title"></span></a>
                   </li>
                 <!-- /ko -->
               </ul>
