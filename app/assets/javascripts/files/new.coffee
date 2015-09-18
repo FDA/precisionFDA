@@ -27,8 +27,6 @@ class FilesNewView
       $clear.addClass("hide")
       $btnBrowse.removeClass("hide")
 
-  handleClear: (e) ->
-
   handleUpload: (e) =>
     e.preventDefault()
     $upload = $('.event-upload-files')
@@ -38,8 +36,10 @@ class FilesNewView
     $(".section-metadata .form-control").addClass("disabled").attr("disabled", true)
     $(".section-files .panel-heading .upload-state").removeClass("hide").html("Uploading...")
 
-    biospecimen_id = parseInt($(".field-biospecimen").val(), 10)
-    @metadata.biospecimen_id = biospecimen_id if !_.isEmpty(biospecimen_id)
+    biospecimen_id = $(".field-biospecimen").val()
+    if !_.isEmpty(biospecimen_id)
+      biospecimen_id = parseInt(biospecimen_id, 10)
+      @metadata.biospecimen_id = biospecimen_id
 
     @uploadFiles()
 
@@ -77,7 +77,7 @@ class FilesNewView
       $file = $("[data-index=#{i}]")
       $file.find(".progress").removeClass("hide")
 
-      _metadata = _.assign({}, @metadata)
+      _metadata = _.clone(@metadata)
       $description = $file.find(".file-description")
       description = $description.val()
       if !_.isEmpty(description)
