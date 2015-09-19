@@ -20,7 +20,7 @@ class UserFile < ActiveRecord::Base
   belongs_to :user
   belongs_to :biospecimen
   has_many :comparison_inputs
-  has_many :comparisons, {through: :comparison_inputs, dependent: :restrict_with_exception}
+  has_many :comparisons, -> { distinct }, {through: :comparison_inputs, dependent: :restrict_with_exception}
 
   def self.accessible_by(user_id)
     raise unless user_id.present?

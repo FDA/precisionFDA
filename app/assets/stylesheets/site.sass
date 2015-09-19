@@ -36,6 +36,13 @@ body > main > .alert
   .fa
     color: $brand-blue-tertiary
 
+.panel
+  .panel-table
+    .table, .table-bordered > tfoot > tr > td
+      border: 0
+
+// PANES
+
 .pfda-2-pane-wrapper
   background-color: $brand-blue-dark
   .pfda-2-pane-content
@@ -130,6 +137,9 @@ $select-width: 28px
     .description
       color: $text-muted
 
+  .current
+    font-weight: bold
+
 // MISC
 .page-header
   margin: 0
@@ -157,19 +167,19 @@ $select-width: 28px
     p
       font-weight: 300
 
-.pfda-action-show
+.pfda-action-show main
   .page-header
     background-color: $brand-blue-subtler
     color: $brand-blue-tertiary
     padding: $padding-large-vertical * 3 $padding-large-horizontal
 
-  main .container-fluid
-    padding: $padding-large-vertical $padding-base-horizontal
+    .description
+      margin-left: 46px
+      font-weight: 300
+      font-size: 18px
 
-  .description
-    margin-left: 46px
-    font-weight: 300
-    font-size: 18px
+  .container-fluid
+    padding: $padding-large-vertical $padding-base-horizontal
 
   .list-group.list-group-inline
     margin-bottom: $padding-large-vertical
@@ -208,11 +218,11 @@ $select-width: 28px
       .list-group-item-description
         color: $text-muted
 
-.pfda-action-new
+.pfda-action-new main
   .page-header
     background-color: darken($brand-blue-primary, 10%)
     color: #fff
     padding: $padding-large-vertical * 3 $padding-large-horizontal
 
-  main .container-fluid
+  .container-fluid
     padding: $padding-large-vertical $padding-base-horizontal

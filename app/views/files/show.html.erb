@@ -56,7 +56,7 @@
       </li>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">File Size</h5>
-        <p class="list-group-item-text"><%= number_to_human_size(@file.file_size) %></p>
+        <p class="list-group-item-text"><%= number_to_human_size(@file.file_size || 0) %></p>
       </li>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">State</h5>
@@ -72,25 +72,73 @@
       </li>
     </ul>
 
-    <% if @comparisons.size > 0 %>
     <div class="panel panel-default">
-      <div class="panel-body">
+      <div class="panel-heading">
         <h3 class="panel-title">Comparisons</h3>
       </div>
-      <div class="list-group">
-        <% @comparisons.each do |comparison| %>
-          <%= link_to comparison_path(comparison.id), class: "list-group-item" do %>
-            <span class="fa fa-crosshairs"></span>
-            <span class="list-group-item-name"><%= comparison.name %></span>
+      <div class="panel-table">
+        <%= grid(@comparisons_grid, show_filters: :when_filtered) do |g|
+          g.blank_slate partial:  "_partials/empty_grid"
 
-            <% if comparison.description != "" %>
-              <span class="glue">&middot;</span>
-              <span class="list-group-item-description"><%= comparison.description %></span>
-            <% end %>
-          <% end %>
-        <% end %>
+          g.after_row do |comparison, num_cols|
+            if comparison.description
+              content_tag(:tr,
+                content_tag(:td,
+                  content_tag(:div, comparison.description, class: 'description'),
+                colspan: num_cols),
+              class: 'extra-row')
+            else
+              nil
+            end
+          end
+
+          g.column name: 'Name', attribute: 'name' do |comparison|
+            link_to(comparison.name, comparison_path(comparison.id))
+          end
+
+          g.column name: 'State', attribute: 'state' do |comparison|
+            comparison.state
+          end
+
+          g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |comparison|
+            link_to(comparison.user.dxuser, user_path(comparison.user.dxuser))
+          end
+
+          g.column name: 'Test Variant' do |comparison|
+            file = comparison.input("test_vcf").user_file
+            display = ""
+            if !file.public
+              display = "<span class='fa fa-lock fa-fw'></span> "
+            else
+              display = "<span class='fa fa-globe fa-fw'></span> "
+            end
+
+            if file.id == @file.id
+              display += "<span class='current'>#{file.name}</span>"
+            else
+              display += link_to(file.name, file_path(file.dxid))
+            end
+            raw display
+          end
+
+          g.column name: 'Benchmark' do |comparison|
+            file = comparison.input("ref_vcf").user_file
+            display = ""
+            if !file.public
+              display = "<span class='fa fa-lock fa-fw'></span> "
+            else
+              display = "<span class='fa fa-globe fa-fw'></span> "
+            end
+
+            if file.id == @file.id
+              display += "<span class='current'>#{file.name}</span>"
+            else
+              display += link_to(file.name, file_path(file.dxid))
+            end
+            raw display
+          end
+        end -%>
       </div>
     </div>
-    <% end %>
   </div>
 </div>

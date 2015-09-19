@@ -29,11 +29,6 @@
     link_to(comparison.user.dxuser, user_path(comparison.user.dxuser))
   end
 
-  # g.column name: 'Files' do |comparison|
-  #   debug comparison.inputs
-  #   # link_to(comparison.user_files.accessible_by(@context.user_id).size, file_path())
-  # end
-
   g.column name: 'Test Variant' do |comparison|
     file = comparison.input("test_vcf").user_file
     display = ""

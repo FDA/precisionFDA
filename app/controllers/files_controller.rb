@@ -27,7 +27,11 @@ class FilesController < ApplicationController
       @file.reload
     end
 
-    @comparisons = @file.comparisons.order(created_at: :desc)
+    @comparisons_grid = initialize_grid(@file.comparisons,{
+      order: 'comparisons.id',
+      order_direction: 'desc',
+      per_page: 10
+    })
   end
 
   def new
