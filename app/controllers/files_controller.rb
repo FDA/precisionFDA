@@ -38,15 +38,37 @@ class FilesController < ApplicationController
     @biospecimens = Biospecimen.all
   end
 
-  # TODO: Delete file on DNANEXUS API
-  # FIXME: If a file is connected to a comparison you can't delete it?
   def destroy
     @file = UserFile.accessible_by(@context.user_id).find_by!(dxid: params[:id])
-    filename = @file.name
+
     if @file
-      @file.destroy
-      flash[:success] = "File \"#{filename}\" has been successfully deleted"
-      redirect_to files_path
+      projectID = @file.project
+      dxid = @file.dxid
+      filename = @file.name
+
+      if @file.comparisons.size == 0
+        # Delete from dB
+        UserFile.transaction do
+          @file.destroy
+        end
+
+        if @file.destroyed?
+          # Delete on DNANEXUS API
+          DNAnexusAPI.new(@context.token).(projectID, "removeObjects", objects: [dxid])
+
+          # On Success
+          flash[:success] = "File \"#{filename}\" has been successfully deleted"
+          redirect_to files_path
+          return
+        else
+          flash[:error] = "Sorry, the file \"#{filename}\" could not be deleted"
+        end
+      else
+        flash[:error] = "Sorry, the file \"#{filename}\" could not be deleted as it is used in a comparison"
+      end
+    else
+      flash[:error] = "The file with id \"#{ params[:id]}\" could not be found"
     end
+    redirect_to file_path(@file.dxid)
   end
 end

@@ -1,100 +1,101 @@
+class FileModel
+  constructor: (file) ->
+    @file = file
+    @description = ko.observable()
+    @state = ko.observable()
+    @sizeFormatted = humanFormat(file.size, {unit: 'B'})
+
+    @isDescriptionVisible = ko.computed(=>
+      !@state()? || @state()? && !_.isEmpty(@description())
+    )
+    @isProgressVisible = ko.computed(=>
+      @state() == "uploading"
+    )
+    @classes = ko.computed(=>
+      if @state() == "done"
+        return "list-group-item-success"
+    )
+
+    @dataUploaded = ko.observable(0)
+    @progressPercentFormatted = ko.computed(=>
+      if file.size == 0
+        if @dataUploaded() == file.size() then "100%" else 0
+      else
+        "#{@dataUploaded()/file.size * 100}%"
+    )
+
 class FilesNewView
   constructor: () ->
-    @files = []
-    @metadata = {}
+    @files = ko.observableArray()
+    @biospecimen = ko.observable()
 
-    $form = $(".form-upload-files")
-    $btnBrowse = $(".btn-browse-files")
-    $inputBrowse = $('.event-browse-files')
-    $upload = $('.event-upload-files')
-    $clear = $('.event-clear-files')
+    @isBrowseVisible = ko.computed(=>
+      @files().length == 0
+    )
 
-    $inputBrowse.change (e) =>
-      @files = e.target.files
-      @displayFiles()
-      $btnBrowse.addClass("hide")
-      $upload.removeClass("hide")
-      $clear.removeClass("hide")
+    @isUploadVisible = ko.computed(=>
+      @files().length > 0
+    )
 
-    $upload.click @handleUpload
-    $form.submit @handleUpload
+    @isClearVisible = ko.computed(=>
+      @files().length > 0
+    )
 
-    $clear.click ->
-      $inputBrowse.replaceWith($inputBrowse.val('').clone(true))
-      $(".list-files").empty().addClass("hide")
+    @uploadState = ko.observable()
+    @isUploadStateVisible = ko.computed(=>
+      @uploadState()?
+    )
+    @uploadStateDisplay = ko.computed(=>
+      switch @uploadState()
+        when "uploading"
+          "Uploading..."
+        when "done"
+          "Upload(s) complete"
+    )
 
-      $upload.addClass("hide")
-      $clear.addClass("hide")
-      $btnBrowse.removeClass("hide")
+  handleInputChange: (e) =>
+    @files(new FileModel(file) for file in e.target.files)
+
+  handleClear: (e) =>
+    e.preventDefault()
+    @files([])
+    @uploadState(false)
 
   handleUpload: (e) =>
     e.preventDefault()
-    $upload = $('.event-upload-files')
-    $clear = $('.event-clear-files')
-    $upload.addClass("hide")
-    $clear.addClass("hide")
-    $(".section-metadata .form-control").addClass("disabled").attr("disabled", true)
-    $(".section-files .panel-heading .upload-state").removeClass("hide").html("Uploading...")
-
-    biospecimen_id = $(".field-biospecimen").val()
-    if !_.isEmpty(biospecimen_id)
-      biospecimen_id = parseInt(biospecimen_id, 10)
-      @metadata.biospecimen_id = biospecimen_id
-
     @uploadFiles()
 
-  displayFiles: () ->
-    return if @files.length == 0
-    $filesList = $(".list-files")
-    $filesList.removeClass("hide")
-
-    for file, i in @files
-      #TODO: Use some templating engine to render this instead
-      $filesList.append("""
-        <li class='list-group-item' data-name='#{file.name}' data-index='#{i}'>
-          <h4 class='list-group-item-heading'>#{file.name} &middot; <small>#{file.type || 'File'}</small> &middot;  <small>#{humanFormat(file.size, {unit: 'B'})}</small></h4>
-          <div class='list-group-item-text'>
-            <input type='text' class='file-description form-control' placeholder='Add description...'>
-          </div>
-          <div class='progress hide'>
-            <div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%'>
-            </div>
-          </div>
-        </li>
-      """)
-
   uploadFiles: () ->
+    @uploadState("uploading")
     uploadCounter = 0
-    filesLength = @files.length
-    doneFn = ($file) ->
+    files = @files.peek()
+    filesLength = files.length
+    doneFn = (fileModel) =>
       uploadCounter++
-      $file.addClass("list-group-item-success").find(".progress").addClass("hide")
+      fileModel.state("done")
+      @uploadState("done") if uploadCounter == filesLength
 
-      if uploadCounter == filesLength
-          $(".section-files .panel-heading .upload-state").html("#{uploadCounter} upload(s) complete")
+    biospecimen_id = parseInt($("[name=biospecimen_id]").val(), 10)
+    for fileModel, i in files
+      metadata = {}
+      if _.isFinite(biospecimen_id)
+        metadata.biospecimen_id = biospecimen_id
 
-    for file, i in @files
-      $file = $("[data-index=#{i}]")
-      $file.find(".progress").removeClass("hide")
-
-      _metadata = _.clone(@metadata)
-      $description = $file.find(".file-description")
-      description = $description.val()
+      description = fileModel.description()
       if !_.isEmpty(description)
-        _metadata.description = description
-      else
-        $description.hide()
+        metadata.description = description
 
-      do ($file) =>
-        @uploadFile(file, _metadata, () -> doneFn($file))
+      do (fileModel) =>
+        fileModel.state("uploading")
+        @uploadFile(fileModel, metadata, () -> doneFn(fileModel))
 
-  uploadFile: (file, metadata, cb) ->
+  uploadFile: (fileModel, metadata, cb) ->
     MAX_FILE_SIZE = 5497558138880
     DEFAULT_CHUNK_SIZE = 104857600
     NUM_CHUNKS_CUTOFF = 10000
 
     #TODO: Ensure this works for files of size 0
-    size = file.size
+    size = fileModel.file.size
     if size > MAX_FILE_SIZE
       alert 'File size is greater than 5TB! Skipping that file...'
       return cb()
@@ -104,7 +105,7 @@ class FilesNewView
       chunk_size = Math.ceil(size * 1.0 / NUM_CHUNKS_CUTOFF)
       num_chunks = Math.ceil(size * 1.0 / chunk_size)
 
-    params = _.assign(metadata, {'name': file.name})
+    params = _.assign(metadata, {'name': fileModel.file.name})
     Precision.api '/api/create_file', params, (res) =>
       id = res.id
 
@@ -112,7 +113,7 @@ class FilesNewView
         this_chunk_size = chunk_size
         if offset + this_chunk_size > size
           this_chunk_size = size - offset
-        @calculateMD5 file, offset, this_chunk_size, (md5) ->
+        @calculateMD5 fileModel.file, offset, this_chunk_size, (md5) ->
           Precision.api '/api/get_upload_url', {
             'id': id
             'index': index
@@ -121,7 +122,7 @@ class FilesNewView
           }, (res) ->
             $.ajax res.url,
               'contentType': 'application/octet-stream'
-              'data': file.slice(offset, offset + this_chunk_size)
+              'data': fileModel.file.slice(offset, offset + this_chunk_size)
               'error': (xhr, status, err) ->
                 alert 'ERROR! XHR status = ' + status + ', error = ' + err
                 return
@@ -130,6 +131,7 @@ class FilesNewView
               'processData': false
               'success': (data, status, xhr) ->
                 offset += this_chunk_size
+                fileModel.dataUploaded(offset)
                 if offset == size
                   closeFile()
                 else
@@ -179,4 +181,17 @@ class FilesNewView
 
 FilesController = Paloma.controller('Files')
 FilesController::new = ->
-  new FilesNewView()
+  $container = $("body")
+  viewModel = new FilesNewView()
+  ko.applyBindings(viewModel, $container[0])
+
+  $form = $container.find(".form-upload-files")
+  $btnBrowse = $container.find(".btn-browse-files")
+  $inputBrowse = $container.find('.event-browse-files')
+  $upload = $container.find('.event-upload-files')
+  $clear = $container.find('.event-clear-files')
+
+  $inputBrowse.change viewModel.handleInputChange
+  $upload.click viewModel.handleUpload
+  $form.submit viewModel.handleUpload
+  $clear.click viewModel.handleClear

@@ -18,9 +18,11 @@
   </div>
 
   <div class="btn-group pull-right">
+    <% if @file.comparisons.size == 0 %>
       <%= link_to file_path(@file.dxid), method: :delete, data: { confirm: 'Are you certain you want to delete this?' }, class: "btn btn-danger" do %>
         <span class="fa fa-trash"> Delete
       <% end %>
+    <% end %>
   </div>
 </div>
 <% end %>
