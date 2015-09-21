@@ -135,7 +135,7 @@ class VariantInputModel
 
 ComparisonsController = Paloma.controller('Comparisons')
 ComparisonsController::new = ->
-  $container = $("[data-controller=comparisons][data-action=new]")
+  $container = $("body")
   viewModel = new ComparisonsNewView()
   ko.applyBindings(viewModel, $container[0])
 
