@@ -8,6 +8,9 @@ namespace :data do
         public_files_project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
         private_comparisons_project: "project-BgbZ27Q0bYz6475PP42gjbP9",
         public_comparisons_project: "project-BgbZ2800zZqp0qk1Qj2VvKP2",
+        open_files_count: 0,
+        closing_files_count: 0,
+        pending_comparisons_count: 0,
         schema_version: 1
       )
 
@@ -17,6 +20,9 @@ namespace :data do
         public_files_project: "project-Bgggq7j003pzF4zY50967jQv",
         private_comparisons_project: "project-Bgggq7Q0fPx7Fj1JFxjZFYP3",
         public_comparisons_project: "project-Bgggq8009FP0KxQK809G6Bjg",
+        open_files_count: 0,
+        closing_files_count: 0,
+        pending_comparisons_count: 0,
         schema_version: 1
       )
 
@@ -26,6 +32,9 @@ namespace :data do
         public_files_project: "project-Bgj759Q0XKbz5zzJ489Kb8gY",
         private_comparisons_project: "project-Bgj75980byj44J962j98g8qB",
         public_comparisons_project: "project-Bgj759Q0QXYVz65ZBJjpjPBz",
+        open_files_count: 0,
+        closing_files_count: 0,
+        pending_comparisons_count: 0,
         schema_version: 1
       )
 
