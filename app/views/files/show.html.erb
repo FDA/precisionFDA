@@ -3,7 +3,7 @@
 <div class="page-header">
   <h1><span class="fa fa-file-o fa-fw"></span><%= @file.name %></h1>
 
-  <% if @file.description %>
+  <% if !@file.description.blank? %>
   <div class="description">
     <%= @file.description %>
   </div>
