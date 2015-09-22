@@ -91,7 +91,6 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
       color: lighten($brand-blue-tertiary, 5%)
 
     .file-info
-      @include text-overflow
       font-weight: 300
       display: inline-block
 
@@ -126,9 +125,9 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
           color: $brand-blue-tertiary
 
     > li
-      @include text-overflow
       margin-bottom: $padding-large-vertical
-
+      white-space: nowrap
+      
       &:last-child
         margin-bottom: 0
 
