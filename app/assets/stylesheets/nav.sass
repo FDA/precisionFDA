@@ -9,10 +9,9 @@
   font-weight: 300
   font-size: 20px
   letter-spacing: -1px
+  display: block
   &:hover
-    .brand-fda-highlight
-      color: $brand-red-primary
-
+    opacity: 0.9
 
 .nav-links
   text-align: center
@@ -33,11 +32,22 @@
       .nav-icon
         color: $brand-red-primary
 
-@media (max-width: $screen-sm-max)
-  .nav-links
-    li > a
-      min-width: 0
 
 @media (max-width: $screen-sm-min)
   .navbar-nav, .navbar-nav .dropdown a
     text-align: center
+
+  .navbar-brand
+    padding-top: 10px
+    padding-bottom: 10px
+
+@media (min-width: $screen-sm-min)
+  .navbar-brand
+    height: auto
+    padding-top: 20px
+    padding-bottom: 30px
+
+@media (max-width: $screen-sm-max)
+  .nav-links
+    li > a
+      min-width: 0
