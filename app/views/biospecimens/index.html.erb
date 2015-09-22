@@ -6,7 +6,7 @@
   g.blank_slate partial:  "_partials/empty_grid"
 
   g.after_row do |biospecimen, num_cols|
-    if biospecimen.description
+    if !biospecimen.description.blank?
       content_tag(:tr,
         content_tag(:td,
           content_tag(:div, biospecimen.description, class: 'description'),
