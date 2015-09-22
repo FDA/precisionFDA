@@ -1,19 +1,30 @@
 class FileModel
   constructor: (file) ->
+    @id = ko.observable()
     @file = file
     @description = ko.observable()
     @state = ko.observable()
     @sizeFormatted = humanFormat(file.size, {unit: 'B'})
 
+    @path = ko.computed(=>
+      "/files/#{@id()}" if @id()?
+    )
+
+    @isUploading = ko.computed(=>
+      @state() == "UPLOADING"
+    )
+    @isDone = ko.computed(=>
+      @state() == "DONE"
+    )
     @isDescriptionVisible = ko.computed(=>
       !@state()? || @state()? && !_.isEmpty(@description())
     )
     @isProgressVisible = ko.computed(=>
-      @state() == "uploading"
+      @isUploading()
     )
+
     @classes = ko.computed(=>
-      if @state() == "done"
-        return "list-group-item-success"
+      "list-group-item-success" if @isDone()
     )
 
     @dataUploaded = ko.observable(0)
@@ -47,9 +58,9 @@ class FilesNewView
     )
     @uploadStateDisplay = ko.computed(=>
       switch @uploadState()
-        when "uploading"
+        when "UPLOADING"
           "Uploading..."
-        when "done"
+        when "DONE"
           "Upload(s) complete"
     )
 
@@ -66,14 +77,14 @@ class FilesNewView
     @uploadFiles()
 
   uploadFiles: () ->
-    @uploadState("uploading")
+    @uploadState("UPLOADING")
     uploadCounter = 0
     files = @files.peek()
     filesLength = files.length
     doneFn = (fileModel) =>
       uploadCounter++
-      fileModel.state("done")
-      @uploadState("done") if uploadCounter == filesLength
+      fileModel.state("DONE")
+      @uploadState("DONE") if uploadCounter == filesLength
 
     biospecimen_id = parseInt($("[name=biospecimen_id]").val(), 10)
     for fileModel, i in files
@@ -86,7 +97,7 @@ class FilesNewView
         metadata.description = description
 
       do (fileModel) =>
-        fileModel.state("uploading")
+        fileModel.state("UPLOADING")
         @uploadFile(fileModel, metadata, () -> doneFn(fileModel))
 
   uploadFile: (fileModel, metadata, cb) ->
@@ -108,6 +119,7 @@ class FilesNewView
     params = _.assign(metadata, {'name': fileModel.file.name})
     Precision.api '/api/create_file', params, (res) =>
       id = res.id
+      fileModel.id(id)
 
       uploadChunks = (index, offset) =>
         this_chunk_size = chunk_size
@@ -181,17 +193,12 @@ class FilesNewView
 
 FilesController = Paloma.controller('Files')
 FilesController::new = ->
-  $container = $("body")
+  $container = $("body main")
   viewModel = new FilesNewView()
   ko.applyBindings(viewModel, $container[0])
 
-  $form = $container.find(".form-upload-files")
-  $btnBrowse = $container.find(".btn-browse-files")
-  $inputBrowse = $container.find('.event-browse-files')
-  $upload = $container.find('.event-upload-files')
-  $clear = $container.find('.event-clear-files')
-
-  $inputBrowse.change viewModel.handleInputChange
-  $upload.click viewModel.handleUpload
-  $form.submit viewModel.handleUpload
-  $clear.click viewModel.handleClear
+  $container
+    .on("change.files.new", ".event-browse-files", (e) -> viewModel.handleInputChange(e))
+    .on("submit.files.new", ".form-upload-files", (e) -> viewModel.handleUpload(e))
+    .on("click.files.new", ".event-upload-files", (e) -> viewModel.handleUpload(e))
+    .on("click.files.new", ".event-clear-files", (e) -> viewModel.handleClear(e))

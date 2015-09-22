@@ -135,17 +135,14 @@ class VariantInputModel
 
 ComparisonsController = Paloma.controller('Comparisons')
 ComparisonsController::new = ->
-  $container = $("body")
+  $container = $("body main")
   viewModel = new ComparisonsNewView()
   ko.applyBindings(viewModel, $container[0])
 
-  $container.on("click.comparisons.new", ".event-select-input", viewModel.selectInput)
-  $container.on("click.comparisons.new", ".event-select-file", viewModel.selectFile)
-  $container.on("click.comparisons.new", ".event-unselect-file", viewModel.unselectFile)
-  $container.on("click.comparisons.new", ".event-comparison-tabs [data-toggle='tab']", (e) ->
-    e.preventDefault()
-    $(this).tab('show')
-  )
+  $container
+    .on("click.comparisons_new", ".event-select-input", (e) -> viewModel.selectInput(e))
+    .on("click.comparisons.new", ".event-select-file", (e) -> viewModel.selectFile(e))
+    .on("click.comparisons.new", ".event-unselect-file", (e) -> viewModel.unselectFile(e))
 
   # Affix the variants comparator and filter
   $affixContainer = $container.find(".affix-container")
