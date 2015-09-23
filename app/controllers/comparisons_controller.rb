@@ -15,7 +15,7 @@ class ComparisonsController < ApplicationController
   end
 
   def show
-    @comparison = Comparison.accessible_by(@context.user_id).find_by!(id: params[:id])
+    @comparison = Comparison.accessible_by(@context.user_id).find(params[:id])
 
     @test_vcf = @comparison.input("test_vcf").user_file
     @test_tbi = @comparison.input("test_tbi").user_file
@@ -112,5 +112,15 @@ class ComparisonsController < ApplicationController
 
     redirect_to :comparisons
 
+  end
+
+  def destroy
+    @comparison = Comparison.accessible_by(@context.user_id).find(params[:id])
+    
+    # TODO: This comparison has outputs, those need to be deleted
+    @comparison.destroy
+
+    flash[:success] = "Comparison \"#{@comparison.name}\" has been successfully deleted"
+    redirect_to :comparisons
   end
 end
