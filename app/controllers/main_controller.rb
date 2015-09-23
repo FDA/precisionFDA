@@ -8,7 +8,7 @@ class MainController < ApplicationController
   end
 
   def destroy
-    save_session(nil, nil, nil, nil)
+    reset_session
     flash[:success] = "You were successfully logged out of precisionFDA"
     redirect_to root_url
   end
