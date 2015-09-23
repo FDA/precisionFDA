@@ -3,7 +3,7 @@ class MainController < ApplicationController
 
   def index
     if @context.logged_in?
-      @user_describe = DNAnexusAPI.new(@context.token).call("user-#{@context.username}", "describe")
+      @debug_info = "Debugging information from your cookie\nRails user id: #{@context.user_id}\nDNAnexus username: #{@context.username}\nDNAnexus token: #{@context.token}\nDNAnexus credentials expiration: #{Time.at(@context.expiration).to_s}"
     end
   end
 
