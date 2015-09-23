@@ -60,7 +60,7 @@ class User < ActiveRecord::Base
   private
 
   def self.sync_state(result, file, user)
-    if result["statusCode"] == "404"
+    if result["statusCode"] == 404
       # File was deleted by the DNAnexus stale file daemon; delete it on our end as well
       if file.state == "open"
         user.open_files_count = user.open_files_count - 1
