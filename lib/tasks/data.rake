@@ -60,6 +60,77 @@ namespace :data do
         public: true,
         file_size: 230078
       )
+
+      UserFile.find_or_initialize_by(dxid: "file-BgxXXV80y0y3z439qGf92VpJ").update!(
+        project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
+        name: "NA12878-Garvan-Vial1.hc.vqsr.vcf.gz.tbi",
+        state: "closed",
+        user_id: george.id,
+        biospecimen_id: na12878.id,
+        public: true,
+        file_size: 1657263
+      )
+
+      UserFile.find_or_initialize_by(dxid: "file-BgxXXq80ffYk1jkQpxXYgkxv").update!(
+        project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
+        name: "NA12878-Garvan-Vial1.hc.vqsr.vcf.gz",
+        state: "closed",
+        user_id: george.id,
+        biospecimen_id: na12878.id,
+        public: true,
+        file_size: 265168616
+      )
+
+      UserFile.find_or_initialize_by(dxid: "file-BgxXQQQ0109KGGkjvbgkkB4X").update!(
+        project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
+        name: "NA12878-NISTv2.19.bed",
+        state: "closed",
+        user_id: george.id,
+        biospecimen_id: na12878.id,
+        public: true,
+        file_size: 76811421
+      )
+
+      UserFile.find_or_initialize_by(dxid: "file-BgxXQY001095gqgxpVgf1g2Q").update!(
+        project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
+        name: "NA12878-NISTv2.19.vcf.gz",
+        state: "closed",
+        user_id: george.id,
+        biospecimen_id: na12878.id,
+        public: true,
+        file_size: 344226513
+      )
+
+      UserFile.find_or_initialize_by(dxid: "file-BgxXQq801099JpB8kVgZYzFb").update!(
+        project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
+        name: "NA12878-NISTv2.19.vcf.gz.tbi",
+        state: "closed",
+        user_id: george.id,
+        biospecimen_id: na12878.id,
+        public: true,
+        file_size: 1476961
+      )
+
+      UserFile.find_or_initialize_by(dxid: "file-Bb1FG900bZ430X20Zk86Y6V3").update!(
+        project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
+        name: "SRR504516.vcf.gz",
+        state: "closed",
+        user_id: george.id,
+        biospecimen_id: na12878.id,
+        public: true,
+        file_size: 2307445
+      )
+
+      UserFile.find_or_initialize_by(dxid: "file-Bb1FG9Q0bZ4Gvj6fYk858Py1").update!(
+        project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
+        name: "SRR504516.vcf.gz.tbi",
+        state: "closed",
+        user_id: george.id,
+        biospecimen_id: na12878.id,
+        public: true,
+        file_size: 230078
+      )
+
     end
   end
 end
