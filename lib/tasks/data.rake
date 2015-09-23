@@ -2,6 +2,7 @@ namespace :data do
   desc "Seed basic entities into the database"
   task seed_models: :environment do
     User.transaction do
+
       george = User.find_or_initialize_by(dxuser: "george.fdauser")
       george.update!(
         private_files_project: "project-BgbZ27Q0F3xvq3JgY02VGpb3",
@@ -14,6 +15,16 @@ namespace :data do
         schema_version: 1
       )
 
+      dx = Org.find_or_initialize_by(handle: 'dnanexus')
+      dx.update!(
+        name: "DNAnexus, Inc.",
+        admin_id: george.id
+      )
+
+      george.update!(
+        org_id: dx.id
+      )
+
       evan = User.find_or_initialize_by(dxuser: "eworley.fda")
       evan.update!(
         private_files_project: "project-Bgggq7Q0VvgYy1K3GbjpPfG5",
@@ -23,6 +34,7 @@ namespace :data do
         open_files_count: 0,
         closing_files_count: 0,
         pending_comparisons_count: 0,
+        org_id: dx.id,
         schema_version: 1
       )
 
@@ -35,6 +47,7 @@ namespace :data do
         open_files_count: 0,
         closing_files_count: 0,
         pending_comparisons_count: 0,
+        org_id: dx.id,
         schema_version: 1
       )
 

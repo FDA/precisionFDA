@@ -14,6 +14,7 @@
 #  schema_version              :integer
 #  created_at                  :datetime         not null
 #  updated_at                  :datetime         not null
+#  org_id                      :integer
 #
 
 class User < ActiveRecord::Base
@@ -29,6 +30,7 @@ class User < ActiveRecord::Base
   has_many :biospecimens
   has_many :user_files
   has_many :comparisons
+  belongs_to :org
 
   def self.sync_file!(user_id, file_id, token)
     # TODO: Loop until transaction succeeds

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150915224521) do
+ActiveRecord::Schema.define(version: 20150923230348) do
 
   create_table "biospecimen", force: :cascade do |t|
     t.string   "name"
@@ -49,6 +49,17 @@ ActiveRecord::Schema.define(version: 20150915224521) do
   add_index "comparisons", ["state"], name: "index_comparisons_on_state"
   add_index "comparisons", ["user_id"], name: "index_comparisons_on_user_id"
 
+  create_table "orgs", force: :cascade do |t|
+    t.string   "handle"
+    t.string   "name"
+    t.integer  "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "orgs", ["admin_id"], name: "index_orgs_on_admin_id"
+  add_index "orgs", ["handle"], name: "index_orgs_on_handle", unique: true
+
   create_table "user_files", force: :cascade do |t|
     t.string   "dxid"
     t.string   "project"
@@ -79,8 +90,10 @@ ActiveRecord::Schema.define(version: 20150915224521) do
     t.integer  "schema_version"
     t.datetime "created_at",                  null: false
     t.datetime "updated_at",                  null: false
+    t.integer  "org_id"
   end
 
   add_index "users", ["dxuser"], name: "index_users_on_dxuser", unique: true
+  add_index "users", ["org_id"], name: "index_users_on_org_id"
 
 end

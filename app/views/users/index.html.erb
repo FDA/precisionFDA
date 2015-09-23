@@ -9,6 +9,10 @@
     link_to(user.dxuser, user_path(user.dxuser))
   end
 
+  g.column name: 'Organization', attribute: 'org_id' do |user|
+    user.org ? user.org.name : ""
+  end
+
   g.column name: '# of Files' do |user|
     link_to(user.user_files.accessible_by(@context.user_id).size, "#{files_path()}?grid[f][users.dxuser]=#{user.dxuser}")
   end
