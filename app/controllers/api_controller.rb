@@ -50,7 +50,7 @@ class ApiController < ApplicationController
                        description: description,
                        user_id: @context.user_id,
                        biospecimen_id: biospecimen_id,
-                       parent: @context.user,
+                       parent: User.find(@context.user_id),
                        public: false)
       # Must get a fresh user inside the transaction
       user = User.find(@context.user_id)
