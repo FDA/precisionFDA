@@ -12,5 +12,5 @@
 
 class Org < ActiveRecord::Base
   has_many :users
-  belongs_to :admin, class_name: "User"
+  belongs_to :admin, {class_name: 'User'}
 end

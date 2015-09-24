@@ -6,6 +6,8 @@ class ComparisonsController < ApplicationController
       ]
     }
 
+    User.sync_comparisons!(@context.user_id, @context.token)
+
     comparisons = Comparison.accessible_by(@context.user_id)
     @comparisons_grid = initialize_grid(comparisons,{
       order: 'comparisons.id',
@@ -16,6 +18,10 @@ class ComparisonsController < ApplicationController
 
   def show
     @comparison = Comparison.accessible_by(@context.user_id).find(params[:id])
+    if @comparison.state == "pending"
+      User.sync_comparison!(@context.user_id, @comparison.id, @context.token)
+      @comparison.reload
+    end
 
     @test_vcf = @comparison.input("test_vcf").user_file
     @test_tbi = @comparison.input("test_tbi").user_file
@@ -116,6 +122,8 @@ class ComparisonsController < ApplicationController
 
   def destroy
     @comparison = Comparison.accessible_by(@context.user_id).find(params[:id])
+
+    raise if @comparison.state == "pending"
     
     # TODO: This comparison has outputs, those need to be deleted
     @comparison.destroy

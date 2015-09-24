@@ -14,6 +14,8 @@
 #  file_size      :integer
 #  created_at     :datetime         not null
 #  updated_at     :datetime         not null
+#  parent_id      :integer
+#  parent_type    :string
 #
 
 require 'test_helper'

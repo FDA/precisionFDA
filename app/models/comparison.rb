@@ -30,6 +30,13 @@ class Comparison < ActiveRecord::Base
   # objects associated with this comparison
   has_many :inputs, {class_name: "ComparisonInput", dependent: :destroy}
 
+  # comparison.outputs => returns the UserFile objects that are
+  # part of the comparison outputs. These UserFile objects have
+  # 'parent' set to this comparison, hence do not participate
+  # in usual UserFile queries as they don't match the default
+  # scope of UserFile (which is set to 'parent_type != Comparison')
+  has_many :outputs, {class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent', unscoped: true}
+
   def self.accessible_by(user_id)
     raise unless user_id.present?
     return where.any_of(user_id: user_id, public: true)
@@ -41,5 +48,9 @@ class Comparison < ActiveRecord::Base
 
   def input!(role)
     inputs.where(role: role).take!
+  end
+
+  def meta_hash
+    JSON.parse(meta)
   end
 end
