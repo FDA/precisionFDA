@@ -39,7 +39,7 @@ class User < ActiveRecord::Base
       file = user.user_files.find(file_id) # Re-check file id
       if file.state != "closed"
         result = DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: [file.dxid]})["results"][0]
-        sync_state(result, file, user)
+        sync_file_state(result, file, user)
       end
     end
   end
@@ -52,7 +52,48 @@ class User < ActiveRecord::Base
         # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
         UserFile.where(user_id: user_id).where.not(state: "closed").all.each_slice(1000) do |files|
           DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
-            sync_state(result, files[i], user)
+            sync_file_state(result, files[i], user)
+          end
+        end
+      end
+    end
+  end
+
+  def self.sync_comparison!(user_id, comparison_id, token)
+    # TODO: Loop until transaction succeeds
+    User.transaction do
+      user = User.find(user_id)
+      comparison = user.comparisons.find(comparison_id) # Re-check file id
+      if comparison.state == "pending"
+        result = DNAnexusAPI.new(token).call("system", "findJobs", {
+          includeSubjobs: false,
+          id: [comparison.dxjobid],
+          project: user.private_comparisons_project,
+          parentJob: nil,
+          parentAnalysis: nil,
+          describe: true
+        })["results"][0]
+        sync_comparison_state(result, comparison, user, token)
+      end
+    end
+  end
+
+  def self.sync_comparisons!(user_id, token)
+    # TODO: Loop until transaction succeeds
+    User.transaction do
+      user = User.find(user_id)
+      if user.pending_comparisons_count != 0
+        # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
+        Comparison.where(user_id: user_id).where(state: "pending").all.each_slice(1000) do |comparisons|
+          DNAnexusAPI.new(token).call("system", "findJobs", {
+            includeSubjobs: false,
+            id: comparisons.map(&:dxjobid),
+            project: user.private_comparisons_project,
+            parentJob: nil,
+            parentAnalysis: nil,
+            describe: true
+          })["results"].each_with_index do |result, i|
+            sync_comparison_state(result, comparisons[i], user, token)
           end
         end
       end
@@ -61,7 +102,7 @@ class User < ActiveRecord::Base
 
   private
 
-  def self.sync_state(result, file, user)
+  def self.sync_file_state(result, file, user)
     if result["statusCode"] == 404
       # File was deleted by the DNAnexus stale file daemon; delete it on our end as well
       if file.state == "open"
@@ -84,5 +125,38 @@ class User < ActiveRecord::Base
       # TODO we should never be here
       raise
     end
+  end
+
+  def self.sync_comparison_state(result, comparison, user, token)
+    state = result["describe"]["state"]
+    return unless ((state == "done") || (state == "failed"))
+    user.pending_comparisons_count = user.pending_comparisons_count - 1
+    user.save!
+    comparison.state = state
+    if state == "done"
+      comparison.meta = result["describe"]["output"]["meta"].to_json
+      output_keys = []
+      output_ids = []
+      result["describe"]["output"].keys.each do |key|
+        next if key == "meta"
+        output_keys << key
+        output_ids << result["describe"]["output"][key]["$dnanexus_link"]
+      end
+      DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: output_ids})["results"].each_with_index do |result, i|
+        raise unless result["describe"].present? && result["describe"]["state"] == "closed"
+        UserFile.unscoped.create!(
+          dxid: output_ids[i],
+          project: user.private_comparisons_project,
+          name: result["describe"]["name"],
+          state: 'closed',
+          description: output_keys[i],
+          user_id: user.id,
+          public: false,
+          file_size: result["describe"]["size"],
+          parent: comparison
+        )
+      end
+    end
+    comparison.save!
   end
 end
