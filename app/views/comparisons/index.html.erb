@@ -8,9 +8,9 @@
   g.after_row do |comparison, num_cols|
     if !comparison.description.blank?
       content_tag(:tr,
-        content_tag(:td,
+        content_tag(:td, nil, {class: "col-state state-#{comparison.state}"}).concat(content_tag(:td,
           content_tag(:div, comparison.description, class: 'description'),
-        colspan: num_cols),
+        colspan: num_cols - 1)),
       class: 'extra-row')
     else
       nil
