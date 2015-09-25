@@ -24,7 +24,7 @@ class ComparisonsController < ApplicationController
       @comparison.reload
     end
 
-    @metadata = ActiveSupport::JSON.decode(@comparison.meta)
+    @meta = ActiveSupport::JSON.decode(@comparison.meta)
 
     @test_vcf = @comparison.input("test_vcf").user_file
     @test_tbi = @comparison.input("test_tbi").user_file
@@ -33,7 +33,7 @@ class ComparisonsController < ApplicationController
     @ref_tbi = @comparison.input("ref_tbi").user_file
     @ref_bed = @comparison.input("ref_bed").user_file if @comparison.input("ref_bed")
 
-    js meta: @metadata
+    js meta: @meta
   end
 
   def new

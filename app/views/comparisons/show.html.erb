@@ -35,34 +35,34 @@
 <% end %>
 
 <div class="container-fluid">
-  <div class="metadata-section">
+  <div class="meta-section">
 
     <div class="panel panel-warning">
       <div class="panel-heading comparison-summary">
         <ul class="list-group list-group-inline">
           <li class="list-group-item">
             <h5 class="list-group-item-heading">Precision</h5>
-            <p class="list-group-item-text"><%= number_to_percentage(@metadata["precision"].to_f * 100, strip_insignificant_zeros: true) %></p>
+            <p class="list-group-item-text"><%= number_to_percentage(@meta["precision"].to_f * 100, strip_insignificant_zeros: true) %></p>
           </li>
           <li class="list-group-item">
             <h5 class="list-group-item-heading">Recall</h5>
-            <p class="list-group-item-text"><%= number_to_percentage(@metadata["recall"].to_f * 100, strip_insignificant_zeros: true) %></p>
+            <p class="list-group-item-text"><%= number_to_percentage(@meta["recall"].to_f * 100, strip_insignificant_zeros: true) %></p>
           </li>
           <li class="list-group-item">
             <h5 class="list-group-item-heading">F-Measure</h5>
-            <p class="list-group-item-text"><%= number_to_percentage(@metadata["f-measure"].to_f * 100, strip_insignificant_zeros: true) %></p>
+            <p class="list-group-item-text"><%= number_to_percentage(@meta["f-measure"].to_f * 100, strip_insignificant_zeros: true) %></p>
           </li>
           <li class="list-group-item">
             <h5 class="list-group-item-heading">True-Positive</h5>
-            <p class="list-group-item-text"><%= number_with_delimiter(@metadata["true-pos"].to_i, delimiter: ",") %></p>
+            <p class="list-group-item-text"><%= number_with_delimiter(@meta["true-pos"].to_i, delimiter: ",") %></p>
           </li>
           <li class="list-group-item">
             <h5 class="list-group-item-heading">False-Positive</h5>
-            <p class="list-group-item-text"><%= number_with_delimiter(@metadata["false-pos"].to_i, delimiter: ",") %></p>
+            <p class="list-group-item-text"><%= number_with_delimiter(@meta["false-pos"].to_i, delimiter: ",") %></p>
           </li>
           <li class="list-group-item">
             <h5 class="list-group-item-heading">False-Negative</h5>
-            <p class="list-group-item-text"><%= number_with_delimiter(@metadata["false-neg"].to_i, delimiter: ",") %></p>
+            <p class="list-group-item-text"><%= number_with_delimiter(@meta["false-neg"].to_i, delimiter: ",") %></p>
           </li>
         </ul>
       </div>
@@ -96,6 +96,13 @@
       </div>
     </div>
 
+    <div class="panel panel-default meta">
+      <div class="panel-body">
+        <h3>PRECISION&nbsp;&nbsp;<i>vs</i>&nbsp;&nbsp;SENSITIVITY</h3>
+        <div class="roc-chart svg-container"></div>
+      </div>
+    </div>
+
     <ul class="list-group list-group-inline">
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Added by</h5>
@@ -108,7 +115,7 @@
     <ul class="list-group list-group-inline">
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Runtime</h5>
-        <p class="list-group-item-text"><%= humanizeSeconds(@metadata["runtime_sec"]) %></p>
+        <p class="list-group-item-text"><%= humanizeSeconds(@meta["runtime_sec"]) %></p>
       </li>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Created</h5>
