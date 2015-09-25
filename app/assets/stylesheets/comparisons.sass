@@ -14,6 +14,7 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
     border-radius: $border-radius-base
     border-bottom-left-radius: 0
     border-bottom-right-radius: 0
+    overflow-x: hidden
 
   .variant-test, .variant-ref
     position: relative
@@ -139,6 +140,11 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
         .file-info
           color: $brand-red-primary
 
+@media (max-width: $screen-xs-max)
+  .variant-title
+    margin: 0 auto 5px
+    font-size: $font-size-h4
+
 @media (max-width: $screen-sm-max)
   .pfda-controller-comparisons main
     .variants
@@ -229,7 +235,31 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
             cursor: pointer
 
 .pfda-controller-comparisons.pfda-action-show main
+  .page-header
+    .label,
+    .fa,
+    .name
+      vertical-align: middle
+      display: inline-block
+    .label
+      font-size: $font-size-h4
+      padding: 3px $padding-base-horizontal
+      line-height: $line-height-base
+      margin-left: -5px
+
+  .comparison-summary.panel-heading
+    padding-bottom: 0
+    .list-group.list-group-inline
+      margin-bottom: 0
+      text-align: center
+      .list-group-item
+        background-color: transparentize(#fff, 0.5)
+        padding: $padding-large-vertical*2 $padding-base-horizontal
+        margin-bottom: $padding-large-vertical
+        .list-group-item-text
+          font-size: $font-size-h1
+          font-weight: 300
+
   .variants
-    margin-bottom: 20px
     border-radius: $border-radius-base
     border-bottom-width: 4px

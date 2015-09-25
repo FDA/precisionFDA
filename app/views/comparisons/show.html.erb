@@ -1,7 +1,16 @@
 <% content_for :title do %><%= @comparison.name %><% end %>
 
 <div class="page-header">
-  <h1><span class="fa fa-crosshairs fa-fw"></span><%= @comparison.name %></h1>
+  <h1>
+    <span class="fa fa-crosshairs"></span>
+    <% case @comparison.state
+      when "failed" %>
+      <span class="label label-danger"><%= @comparison.state.upcase %></span>
+    <% when "pending" %>
+      <span class="label label-warning"> <%= @comparison.state.upcase %></span>
+    <% end %>
+    <span class="name"><%= @comparison.name %></span>
+  </h1>
 
   <% if !@comparison.description.blank? %>
   <div class="description">
@@ -27,29 +36,63 @@
 
 <div class="container-fluid">
   <div class="metadata-section">
-    <div class="variants">
-      <div class="variant-test">
-        <h2 class="variant-title">Test Variant</h2>
-        <ul class="variant-inputs list-unstyled">
-          <%= render "_partials/variant_file", file: @test_vcf, title: "VCF", required: true, classes: "required active"  %>
-          <%= render "_partials/variant_file", file: @test_tbi, title: "TBI", required: true, classes: "required active"  %>
-          <%= render "_partials/variant_file", file: @test_bed, title: "BED", required: false, classes: "active"  %>
+
+    <div class="panel panel-warning">
+      <div class="panel-heading comparison-summary">
+        <ul class="list-group list-group-inline">
+          <li class="list-group-item">
+            <h5 class="list-group-item-heading">Precision</h5>
+            <p class="list-group-item-text"><%= number_to_percentage(@metadata["precision"].to_f * 100, strip_insignificant_zeros: true) %></p>
+          </li>
+          <li class="list-group-item">
+            <h5 class="list-group-item-heading">Recall</h5>
+            <p class="list-group-item-text"><%= number_to_percentage(@metadata["recall"].to_f * 100, strip_insignificant_zeros: true) %></p>
+          </li>
+          <li class="list-group-item">
+            <h5 class="list-group-item-heading">F-Measure</h5>
+            <p class="list-group-item-text"><%= number_to_percentage(@metadata["f-measure"].to_f * 100, strip_insignificant_zeros: true) %></p>
+          </li>
+          <li class="list-group-item">
+            <h5 class="list-group-item-heading">True-Positive</h5>
+            <p class="list-group-item-text"><%= number_with_delimiter(@metadata["true-pos"].to_i, delimiter: ",") %></p>
+          </li>
+          <li class="list-group-item">
+            <h5 class="list-group-item-heading">False-Positive</h5>
+            <p class="list-group-item-text"><%= number_with_delimiter(@metadata["false-pos"].to_i, delimiter: ",") %></p>
+          </li>
+          <li class="list-group-item">
+            <h5 class="list-group-item-heading">False-Negative</h5>
+            <p class="list-group-item-text"><%= number_with_delimiter(@metadata["false-neg"].to_i, delimiter: ",") %></p>
+          </li>
         </ul>
       </div>
 
-      <div class="variant-ref">
-        <h2 class="variant-title">Benchmark Variant</h2>
-        <ul class="variant-inputs list-unstyled">
-          <%= render "_partials/variant_file", file: @ref_vcf, title: "VCF", required: true, classes: "required active"  %>
-          <%= render "_partials/variant_file", file: @ref_tbi, title: "TBI", required: true, classes: "required active"  %>
-          <%= render "_partials/variant_file", file: @ref_bed, title: "BED", required: false, classes: "active"  %>
-        </ul>
-      </div>
-
-      <div class="variants-circle">
-          <div class="variants-circle-with">
-            with
+      <div class="panel-body">
+        <div class="variants">
+          <div class="variant-test">
+            <h2 class="variant-title">Test Variant</h2>
+            <ul class="variant-inputs list-unstyled">
+              <%= render "_partials/variant_file", file: @test_vcf, title: "VCF", required: true, classes: "required active"  %>
+              <%= render "_partials/variant_file", file: @test_tbi, title: "TBI", required: true, classes: "required active"  %>
+              <%= render "_partials/variant_file", file: @test_bed, title: "BED", required: false, classes: "active"  %>
+            </ul>
           </div>
+
+          <div class="variant-ref">
+            <h2 class="variant-title">Benchmark Variant</h2>
+            <ul class="variant-inputs list-unstyled">
+              <%= render "_partials/variant_file", file: @ref_vcf, title: "VCF", required: true, classes: "required active"  %>
+              <%= render "_partials/variant_file", file: @ref_tbi, title: "TBI", required: true, classes: "required active"  %>
+              <%= render "_partials/variant_file", file: @ref_bed, title: "BED", required: false, classes: "active"  %>
+            </ul>
+          </div>
+
+          <div class="variants-circle">
+              <div class="variants-circle-with">
+                with
+              </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -64,8 +107,8 @@
 
     <ul class="list-group list-group-inline">
       <li class="list-group-item">
-        <h5 class="list-group-item-heading">State</h5>
-        <p class="list-group-item-text"><%= @comparison.state %></p>
+        <h5 class="list-group-item-heading">Runtime</h5>
+        <p class="list-group-item-text"><%= humanizeSeconds(@metadata["runtime_sec"]) %></p>
       </li>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Created</h5>

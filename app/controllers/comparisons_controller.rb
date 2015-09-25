@@ -18,10 +18,13 @@ class ComparisonsController < ApplicationController
 
   def show
     @comparison = Comparison.accessible_by(@context.user_id).find(params[:id])
+
     if @comparison.state == "pending"
       User.sync_comparison!(@context.user_id, @comparison.id, @context.token)
       @comparison.reload
     end
+
+    @metadata = ActiveSupport::JSON.decode(@comparison.meta)
 
     @test_vcf = @comparison.input("test_vcf").user_file
     @test_tbi = @comparison.input("test_tbi").user_file
@@ -29,6 +32,8 @@ class ComparisonsController < ApplicationController
     @ref_vcf = @comparison.input("ref_vcf").user_file
     @ref_tbi = @comparison.input("ref_tbi").user_file
     @ref_bed = @comparison.input("ref_bed").user_file if @comparison.input("ref_bed")
+
+    js meta: @metadata
   end
 
   def new
@@ -124,7 +129,7 @@ class ComparisonsController < ApplicationController
     @comparison = Comparison.accessible_by(@context.user_id).find(params[:id])
 
     raise if @comparison.state == "pending"
-    
+
     # TODO: This comparison has outputs, those need to be deleted
     @comparison.destroy
 
