@@ -14,6 +14,7 @@
 #= require jquery_ujs
 #= require turbolinks
 #= require bootstrap-sass/assets/javascripts/bootstrap-sprockets
+#= require d3
 #= require human-format
 #= require knockout
 #= require lodash
