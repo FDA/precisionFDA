@@ -17,12 +17,12 @@
     end
   end
 
-  g.column name: 'Name', attribute: 'name' do |comparison|
-    link_to(comparison.name, comparison_path(comparison.id))
+  g.column name: 'State', attribute: 'state' do |comparison|
+    [comparison.state, {class: "col-state state-#{comparison.state}"}]
   end
 
-  g.column name: 'State', attribute: 'state' do |comparison|
-    comparison.state
+  g.column name: 'Name', attribute: 'name' do |comparison|
+    link_to(comparison.name, comparison_path(comparison.id))
   end
 
   g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |comparison|
