@@ -8,7 +8,7 @@ body > main > .alert
 // TOOLBAR
 .pfda-toolbar
   background-color: $brand-blue-subtler
-  padding: $padding-large-horizontal
+  padding: $padding-base-horizontal
   border-bottom: 1px solid $table-border-color
   @include clearfix
 
@@ -90,7 +90,8 @@ body > main > .alert
 .page-header
   margin: 0
   padding: $padding-large-vertical*2 $padding-large-horizontal
-  h1
+  .page-title
+    font-size: $font-size-h2
     margin: 0
     word-wrap: break-word
 
@@ -117,7 +118,6 @@ body > main > .alert
   .page-header
     background-color: $brand-blue-subtler
     color: $brand-blue-tertiary
-    padding: $padding-large-vertical * 3 $padding-large-horizontal
 
     .description
       font-weight: 300
@@ -133,7 +133,7 @@ body > main > .alert
       display: inline-block
       margin-right: $padding-base-horizontal
       border: 0
-      border-radius: 3
+      border-radius: $border-radius-base
 
   .list-group-item-heading, .panel-title
     color: $brand-blue-tertiary
