@@ -7,7 +7,7 @@ class LineChart
       left: 100
 
     width = $(selector).width()
-    height = 350
+    height = width
 
     @w = width  - @margin.left - @margin.right
     @h = height - @margin.top - @margin.bottom
