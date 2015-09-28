@@ -2,9 +2,9 @@ class LineChart
   constructor: (selector, dataset, @options) ->
     @margin =
       top: 20
-      right: 50
-      bottom: 50
-      left: 100
+      right: 20
+      bottom: 75
+      left: 75
 
     width = $(selector).width()
     height = width
@@ -62,7 +62,7 @@ class LineChart
     @svg.append('text')
       .attr('class', 'y axis-label')
       .attr('text-anchor', 'middle')
-      .attr('y', 20-@margin.left)
+      .attr('y', 10-@margin.left)
       .attr('x', -@h/2)
       .attr('transform', 'rotate(-90)')
       .text(@options.yParams.label)
@@ -86,11 +86,17 @@ class LineChart
               .scale(@x)
               .orient('bottom')
               .tickFormat((d) => d3.format(@options.xParams.format)(d))
+              .innerTickSize(-@h)
+              .outerTickSize(0)
+              .tickPadding(10)
 
     yAxis = d3.svg.axis()
               .scale(@y)
               .orient('left')
               .tickFormat((d) => d3.format(@options.yParams.format)(d))
+              .innerTickSize(-@w)
+              .outerTickSize(0)
+              .tickPadding(10)
 
     @svg.select('g.x.axis').call(xAxis)
     @svg.select('g.y.axis').call(yAxis)
