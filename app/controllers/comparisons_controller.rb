@@ -33,7 +33,7 @@ class ComparisonsController < ApplicationController
     @ref_tbi = @comparison.input("ref_tbi").user_file
     @ref_bed = @comparison.input("ref_bed").user_file if @comparison.input("ref_bed")
 
-    js meta: @meta
+    js meta: @meta, state: @comparison.state
   end
 
   def new

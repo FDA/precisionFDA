@@ -1,19 +1,15 @@
 <% content_for :title do %>Comparator<% end %>
 
 <div class="page-header clearfix">
-  <h1><span class="fa fa-crosshairs fa-fw"></span>Precision Comparator</h1>
+  <div class="page-title"><span class="fa fa-crosshairs fa-fw"></span><span data-bind="text: areAllInputsSet() ? 'Run' : 'Set up'"></span> your comparison</div>
 </div>
 
 <div class="container-fluid">
-  <p class="lead help-block">
-    <strong data-bind="text: areAllInputsSet() ? 'Run' : 'Set up'"></strong> your comparison
-  </p>
-
   <div class="affix-spacer">
     <div class="affix-container">
       <div class="variants">
         <div class="variant-test">
-          <h2 class="variant-title">Test Variant</h2>
+          <div class="variant-title">Test Variant</div>
           <ul class="variant-inputs list-unstyled" data-bind="foreach: testVariant.inputs">
             <li data-bind="css: {required: required, active: active}">
               <div class="variant-input-cell">
@@ -34,7 +30,7 @@
         </div>
 
         <div class="variant-ref">
-          <h2 class="variant-title">Benchmark Variant</h2>
+          <div class="variant-title">Benchmark Variant</div>
           <ul class="variant-inputs list-unstyled" data-bind="foreach: refVariant.inputs">
             <li data-bind="css: {required: required, active: active}">
               <div class="variant-input-cell">

@@ -27,7 +27,7 @@ class FilesController < ApplicationController
       @file.reload
     end
 
-    @comparisons_grid = initialize_grid(@file.comparisons,{
+    @comparisons_grid = initialize_grid(@file.comparisons.accessible_by(@context.user_id), {
       order: 'comparisons.id',
       order_direction: 'desc',
       per_page: 10

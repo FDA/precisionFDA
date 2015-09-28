@@ -1,22 +1,22 @@
-class ROCChart
-  constructor: (dataset) ->
+class LineChart
+  constructor: (selector, dataset, @options) ->
     @margin =
-      top: 50
+      top: 20
       right: 50
       bottom: 50
       left: 100
 
-    width = $(".roc-chart").width()
-    height = 500
+    width = $(selector).width()
+    height = 350
 
     @w = width  - @margin.left - @margin.right
     @h = height - @margin.top - @margin.bottom
 
-    xValues = _.map(dataset, 'sensitivity')
-    yValues = _.map(dataset, 'precision')
+    xValues = _.map(dataset, @options.xParams.key)
+    yValues = _.map(dataset, @options.yParams.key)
 
-    xDomain = [d3.min(xValues) * 0.95, d3.max(xValues) * 1.05]
-    yDomain = [d3.min(yValues) * 0.95, d3.max(yValues) * 1.05]
+    xDomain = [@options.xParams.min ? d3.min(xValues), @options.xParams.max ? d3.max(xValues)]
+    yDomain = [@options.yParams.min ? d3.min(yValues), @options.yParams.max ? d3.max(yValues)]
 
     @x = d3.scale.linear()
       .domain(xDomain)
@@ -26,7 +26,7 @@ class ROCChart
       .domain(yDomain)
       .rangeRound([@h, 0])
 
-    @svg = d3.select('.roc-chart')
+    @svg = d3.select(selector)
         .append('svg:svg')
           # .attr('width', width)
           # .attr('height', height)
@@ -39,11 +39,14 @@ class ROCChart
     @renderAxis()
     @renderLine(dataset)
 
+  # Options:
+  # xKey
+  # yKey
   renderLine: (dataset) ->
     lineGenerator = d3.svg.line()
-      .x((d) => @x(d.sensitivity))
-      .y((d) => @y(d.precision))
-      .interpolate('basis')
+      .x((d) => @x(d[@options.xParams.key]))
+      .y((d) => @y(d[@options.yParams.key]))
+      .interpolate('linear')
 
     g = @svg.selectAll('g.lines')
           .data([dataset])
@@ -62,14 +65,14 @@ class ROCChart
       .attr('y', 20-@margin.left)
       .attr('x', -@h/2)
       .attr('transform', 'rotate(-90)')
-      .text('% Precision')
+      .text(@options.yParams.label)
 
     @svg.append('text')
       .attr('class', 'x axis-label')
       .attr('text-anchor', 'middle')
       .attr('y', @h + @margin.bottom - 10)
       .attr('x', @w/2)
-      .text('% Sensitivity')
+      .text(@options.xParams.label)
 
     @svg.append('svg:g')
       .attr('class', 'x axis')
@@ -82,12 +85,12 @@ class ROCChart
     xAxis = d3.svg.axis()
               .scale(@x)
               .orient('bottom')
-              .tickFormat((d) -> d3.format(".2%")(d))
+              .tickFormat((d) => d3.format(@options.xParams.format)(d))
 
     yAxis = d3.svg.axis()
               .scale(@y)
               .orient('left')
-              .tickFormat((d) -> d3.format(".2%")(d))
+              .tickFormat((d) => d3.format(@options.yParams.format)(d))
 
     @svg.select('g.x.axis').call(xAxis)
     @svg.select('g.y.axis').call(yAxis)
@@ -103,16 +106,27 @@ class ROCChart
 ComparisonsController = Paloma.controller('Comparisons')
 ComparisonsController::show = ->
   $container = $("body main")
-  meta = @params.meta
-  rocDataset = _.map(meta["weighted_roc"]["data"], (datum) ->
-    return {
-      precision: parseFloat(datum[4])
-      sensitivity: parseFloat(datum[5])
-    }
-  )
+  if @params.state == "done"
+    meta = @params.meta
+    dataset = _.map(meta["weighted_roc"]["data"], (datum) ->
+      datumObject = {}
+      for datakey, i in meta["weighted_roc"]["header"]
+        if _.includes(["f_measure", "precision", "sensitivity"], datakey)
+          datumObject[datakey] = parseFloat(datum[i])
+        else
+          datumObject[datakey] = parseInt(datum[i])
+      return datumObject
+    )
 
-  rocChart = new ROCChart(rocDataset)
-
-
-  # viewModel = new ComparisonShowView(@params.meta)
-  # ko.applyBindings(viewModel, $container[0])
+    new LineChart(".chart-precision-sensitivity", dataset, {
+      yParams:
+        key: 'precision'
+        label: '% Precision'
+        format: 'p'
+        max: 1
+      xParams:
+        key: 'sensitivity'
+        label: '% Sensitivity'
+        format: 'p'
+        max: 1
+    })

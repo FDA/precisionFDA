@@ -25,10 +25,12 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
   .variant-test
     background-color: $brand-blue-subtler
     border-right: 1px solid $comparator-border-color
+    padding-left: 10px
 
   .variant-ref
     background-color: darken($brand-blue-subtler, 3%)
     border-left: 1px solid $comparator-border-color
+    padding-right: 10px
 
   .variants-circle
     position: absolute
@@ -83,8 +85,8 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
       min-width: 100px
 
   .variant-title
-    text-align: center
-    margin: $padding-large-vertical 0 20px
+    font-size: $font-size-h3
+    margin: $padding-large-vertical 0
     color: $brand-blue-tertiary
 
   .variant-inputs
@@ -245,7 +247,6 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
       font-size: $font-size-h4
       padding: 3px $padding-base-horizontal
       line-height: $line-height-base
-      margin-left: -5px
 
   .comparison-summary.panel-heading
     padding-bottom: 0
@@ -253,7 +254,7 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
       margin-bottom: 0
       text-align: center
       .list-group-item
-        background-color: transparentize(#fff, 0.5)
+        background-color: transparent
         padding: $padding-large-vertical*2 $padding-base-horizontal
         margin-bottom: $padding-large-vertical
         .list-group-item-text
@@ -261,5 +262,19 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
           font-weight: 300
 
   .variants
+    margin-top: $padding-large-vertical
     border-radius: $border-radius-base
-    border-bottom-width: 4px
+    border-width: 2px
+
+  .meta-stats
+    .list-group-item
+      @include flexbox
+      @include align-items(center)
+      @include justify-content(space-between)
+
+      .list-group-item-heading
+        margin: 0
+
+      .list-group-item-text
+        text-align: right
+        font-size: $font-size-h3
