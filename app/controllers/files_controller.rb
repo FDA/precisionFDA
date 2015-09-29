@@ -28,6 +28,8 @@ class FilesController < ApplicationController
     end
 
     if @file.parent_type != "Comparison"
+      User.sync_comparisons!(@context.user_id, @context.token)
+
       @comparisons_grid = initialize_grid(@file.comparisons.accessible_by(@context.user_id), {
         order: 'comparisons.id',
         order_direction: 'desc',
