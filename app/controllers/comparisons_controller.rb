@@ -9,7 +9,7 @@ class ComparisonsController < ApplicationController
     User.sync_comparisons!(@context.user_id, @context.token)
 
     comparisons = Comparison.accessible_by(@context.user_id)
-    @comparisons_grid = initialize_grid(comparisons,{
+    @comparisons_grid = initialize_grid(comparisons, {
       order: 'comparisons.id',
       order_direction: 'desc',
       per_page: 100
@@ -33,6 +33,11 @@ class ComparisonsController < ApplicationController
     @ref_tbi = @comparison.input("ref_tbi").user_file
     @ref_bed = @comparison.input("ref_bed").user_file if @comparison.input("ref_bed")
 
+    @outputs_grid = initialize_grid(@comparison.outputs, {
+      order: 'name',
+      order_direction: 'asc'
+    })
+
     js meta: @meta, state: @comparison.state
   end
 
@@ -48,7 +53,7 @@ class ComparisonsController < ApplicationController
       }
     }
 
-    user_files = UserFile.accessible_by(@context.user_id)
+    user_files = UserFile.real_files.accessible_by(@context.user_id)
     @files_grid = initialize_grid(user_files,{
       include: [:user, :biospecimen],
       order: 'user_files.id',
@@ -60,7 +65,7 @@ class ComparisonsController < ApplicationController
   def new2
     # Temporary route for a barebones comparison submission form
     # (Doesn't bother with refreshing state)
-    @files = UserFile.accessible_by(@context.user_id)
+    @files = UserFile.real_files.accessible_by(@context.user_id)
   end
 
   def create
@@ -83,12 +88,12 @@ class ComparisonsController < ApplicationController
     files = {}
     # Required files
     ["test_vcf", "test_tbi", "ref_vcf", "ref_tbi"].each do |role|
-      files[role] = UserFile.accessible_by(@context.user_id).find_by!(dxid: comp_params["#{role}_dxid"])
+      files[role] = UserFile.real_files.accessible_by(@context.user_id).find_by!(dxid: comp_params["#{role}_dxid"])
     end
     # Optional files
     ["test_bed", "ref_bed"].each do |role|
       if comp_params["#{role}_dxid"].present?
-        files[role] = UserFile.accessible_by(@context.user_id).find_by!(dxid: comp_params["#{role}_dxid"])
+        files[role] = UserFile.real_files.accessible_by(@context.user_id).find_by!(dxid: comp_params["#{role}_dxid"])
       end
     end
 

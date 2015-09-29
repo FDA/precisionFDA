@@ -9,7 +9,7 @@ class ApiController < ApplicationController
   end
 
   def list_files
-    result = UserFile.accessible_by(@context.user_id).map do |file|
+    result = UserFile.real_files.accessible_by(@context.user_id).map do |file|
       f = file.as_json
       f["username"] = file.user["dxuser"]
       #TODO assumes biospecimens are all public
@@ -74,7 +74,7 @@ class ApiController < ApplicationController
     id = params["id"]
     raise unless id.is_a?(String) && id != ""
 
-    file = UserFile.find_by!(dxid: id, state: "open", user_id: @context.user_id)
+    file = UserFile.real_files.find_by!(dxid: id, state: "open", user_id: @context.user_id)
 
     result = DNAnexusAPI.new(@context.token).(id, "upload", {size: size, md5: md5, index: index})
 
@@ -85,7 +85,7 @@ class ApiController < ApplicationController
     id = params["id"]
     raise unless id.is_a?(String) && id != ""
 
-    file = UserFile.find_by!(dxid: id, user_id: @context.user_id)
+    file = UserFile.real_files.find_by!(dxid: id, user_id: @context.user_id)
     if file.state == "open"
       DNAnexusAPI.new(@context.token).(id, "close")
       User.transaction do

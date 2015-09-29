@@ -1,7 +1,7 @@
 <% content_for :title do %><%= @file.name %><% end %>
 
 <div class="page-header">
-  <div class="page-title"><span class="fa fa-file-o"></span><%= @file.name %></div>
+  <div class="page-title"><span class="fa fa-file-o"></span> <%= @file.name %></div>
 
   <% if !@file.description.blank? %>
   <div class="description">
@@ -30,22 +30,26 @@
 <div class="container-fluid">
   <div class="metadata-section">
     <ul class="list-group list-group-inline">
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Biospecimen</h5>
-        <p class="list-group-item-text">
-          <% if @file.biospecimen_id.present? %>
-            <%= link_to(@file.biospecimen.name, biospecimen_path(@file.biospecimen.id))  %>
-          <% else %>
-            <span class="text-muted">None</span>
-          <% end %>
-        </p>
-      </li>
+      <% if @comparison %>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Comparison</h5>
+          <p class="list-group-item-text"><%= link_to(@comparison.name, comparison_path(@comparison.id))  %></p>
+        </li>
+      <% end %>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Added by</h5>
         <p class="list-group-item-text">
           <%= link_to(@file.user.dxuser, user_path(@file.user.dxuser))  %>
         </p>
       </li>
+      <% if @file.biospecimen_id.present? %>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Biospecimen</h5>
+        <p class="list-group-item-text">
+            <%= link_to(@file.biospecimen.name, biospecimen_path(@file.biospecimen.id))  %>
+        </p>
+      </li>
+      <% end %>
     </ul>
 
     <ul class="list-group list-group-inline">
@@ -74,73 +78,75 @@
       </li>
     </ul>
 
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">Comparisons</h3>
+    <% if @comparisons_grid %>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Comparisons</h3>
+        </div>
+        <div class="panel-table">
+          <%= grid(@comparisons_grid, show_filters: :when_filtered) do |g|
+            g.blank_slate partial:  "_partials/empty_grid"
+
+            g.after_row do |comparison, num_cols|
+              if !comparison.description.blank?
+                content_tag(:tr,
+                  content_tag(:td, nil, {class: "col-state state-#{comparison.state}"}).concat(content_tag(:td,
+                    content_tag(:div, comparison.description, class: 'description'),
+                  colspan: num_cols - 1)),
+                class: 'extra-row')
+              else
+                nil
+              end
+            end
+
+            g.column name: 'State', attribute: 'state' do |comparison|
+              [comparison.state, {class: "col-state state-#{comparison.state}"}]
+            end
+
+            g.column name: 'Name', attribute: 'name' do |comparison|
+              link_to(comparison.name, comparison_path(comparison.id))
+            end
+
+            g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |comparison|
+              link_to(comparison.user.dxuser, user_path(comparison.user.dxuser))
+            end
+
+            g.column name: 'Test Variant' do |comparison|
+              file = comparison.input("test_vcf").user_file
+              display = ""
+              if !file.public
+                display = "<span class='fa fa-lock fa-fw'></span> "
+              else
+                display = "<span class='fa fa-globe fa-fw'></span> "
+              end
+
+              if file.id == @file.id
+                display += "<span class='current'>#{file.name}</span>"
+              else
+                display += link_to(file.name, file_path(file.dxid))
+              end
+              raw display
+            end
+
+            g.column name: 'Benchmark' do |comparison|
+              file = comparison.input("ref_vcf").user_file
+              display = ""
+              if !file.public
+                display = "<span class='fa fa-lock fa-fw'></span> "
+              else
+                display = "<span class='fa fa-globe fa-fw'></span> "
+              end
+
+              if file.id == @file.id
+                display += "<span class='current'>#{file.name}</span>"
+              else
+                display += link_to(file.name, file_path(file.dxid))
+              end
+              raw display
+            end
+          end -%>
+        </div>
       </div>
-      <div class="panel-table">
-        <%= grid(@comparisons_grid, show_filters: :when_filtered) do |g|
-          g.blank_slate partial:  "_partials/empty_grid"
-
-          g.after_row do |comparison, num_cols|
-            if !comparison.description.blank?
-              content_tag(:tr,
-                content_tag(:td, nil, {class: "col-state state-#{comparison.state}"}).concat(content_tag(:td,
-                  content_tag(:div, comparison.description, class: 'description'),
-                colspan: num_cols - 1)),
-              class: 'extra-row')
-            else
-              nil
-            end
-          end
-
-          g.column name: 'State', attribute: 'state' do |comparison|
-            [comparison.state, {class: "col-state state-#{comparison.state}"}]
-          end
-
-          g.column name: 'Name', attribute: 'name' do |comparison|
-            link_to(comparison.name, comparison_path(comparison.id))
-          end
-
-          g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |comparison|
-            link_to(comparison.user.dxuser, user_path(comparison.user.dxuser))
-          end
-
-          g.column name: 'Test Variant' do |comparison|
-            file = comparison.input("test_vcf").user_file
-            display = ""
-            if !file.public
-              display = "<span class='fa fa-lock fa-fw'></span> "
-            else
-              display = "<span class='fa fa-globe fa-fw'></span> "
-            end
-
-            if file.id == @file.id
-              display += "<span class='current'>#{file.name}</span>"
-            else
-              display += link_to(file.name, file_path(file.dxid))
-            end
-            raw display
-          end
-
-          g.column name: 'Benchmark' do |comparison|
-            file = comparison.input("ref_vcf").user_file
-            display = ""
-            if !file.public
-              display = "<span class='fa fa-lock fa-fw'></span> "
-            else
-              display = "<span class='fa fa-globe fa-fw'></span> "
-            end
-
-            if file.id == @file.id
-              display += "<span class='current'>#{file.name}</span>"
-            else
-              display += link_to(file.name, file_path(file.dxid))
-            end
-            raw display
-          end
-        end -%>
-      </div>
-    </div>
+    <% end %>
   </div>
 </div>

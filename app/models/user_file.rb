@@ -25,7 +25,9 @@ class UserFile < ActiveRecord::Base
   has_many :comparison_inputs
   has_many :comparisons, -> { distinct }, {through: :comparison_inputs, dependent: :restrict_with_exception}
 
-  default_scope { where.not(parent_type: 'Comparison') }
+  def self.real_files
+    return where.not(parent_type: 'Comparison')
+  end
 
   def self.accessible_by(user_id)
     raise unless user_id.present?

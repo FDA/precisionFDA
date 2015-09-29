@@ -48,15 +48,29 @@ class LineChart
       .y((d) => @y(d[@options.yParams.key]))
       .interpolate('linear')
 
-    g = @svg.selectAll('g.lines')
+    $g = @svg.selectAll('g.lines')
           .data([dataset])
         .enter()
           .append('g')
           .attr('class', 'lines')
 
-    lineGraph = g.append('path')
+    $lineGraph = $g.append('path')
                   .attr('class', 'line')
                   .attr('d', lineGenerator)
+
+    $g.append('g')
+        .attr('class', 'circles')
+      .selectAll(".circle")
+        .data((d) -> d)
+      .enter().append("svg:circle")
+        .attr("class", "circle")
+        .attr("cx", lineGenerator.x())
+        .attr("cy", lineGenerator.y())
+        .attr('r', 3.5)
+      .on('mouseover', (d, i, key) ->
+      )
+      .on('mouseout', (d, i, key) ->
+      )
 
   renderAxis: () ->
     @svg.append('text')
