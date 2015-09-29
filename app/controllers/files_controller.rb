@@ -27,6 +27,8 @@ class FilesController < ApplicationController
       @file.reload
     end
 
+    User.sync_comparisons!(@context.user_id, @context.token)
+
     @comparisons_grid = initialize_grid(@file.comparisons.accessible_by(@context.user_id), {
       order: 'comparisons.id',
       order_direction: 'desc',
