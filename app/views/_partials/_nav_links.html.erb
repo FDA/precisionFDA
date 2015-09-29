@@ -23,10 +23,10 @@
       <div class="nav-pill-title">Apps</div>
     <% end %>
   </li>
-  <li class="<%= 'active' if params[:controller] == 'biospecimens' %>" role="presentation">
-    <%= link_to biospecimens_path do %>
-      <div class="nav-icon fa fa-2x fa-flask"></div>
-      <div class="nav-pill-title">Biospecimens</div>
+  <li class="<%= 'active' if params[:controller] == 'notes' %>" role="presentation">
+    <%= link_to notes_path do %>
+      <div class="nav-icon fa fa-2x fa-sticky-note"></div>
+      <div class="nav-pill-title">Notes</div>
     <% end %>
   </li>
 </ul>

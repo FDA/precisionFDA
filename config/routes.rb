@@ -24,6 +24,7 @@ Rails.application.routes.draw do
     resources :comparisons
     resources :files
     resources :jobs
+    resources :notes
 
     get '/apps/jobs/:app', to: 'apps#index', as: 'appjobs'
 
