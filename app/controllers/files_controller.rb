@@ -9,7 +9,7 @@ class FilesController < ApplicationController
     # Refresh state of files, if needed
     User.sync_files!(@context.user_id, @context.token)
 
-    user_files = UserFile.accessible_by(@context.user_id)
+    user_files = UserFile.real_files.accessible_by(@context.user_id)
     @files_grid = initialize_grid(user_files,{
       include: [:user, :biospecimen],
       order: 'user_files.id',
@@ -27,11 +27,15 @@ class FilesController < ApplicationController
       @file.reload
     end
 
-    @comparisons_grid = initialize_grid(@file.comparisons.accessible_by(@context.user_id), {
-      order: 'comparisons.id',
-      order_direction: 'desc',
-      per_page: 10
-    })
+    if @file.parent_type != "Comparison"
+      @comparisons_grid = initialize_grid(@file.comparisons.accessible_by(@context.user_id), {
+        order: 'comparisons.id',
+        order_direction: 'desc',
+        per_page: 10
+      })
+    else
+      @comparison = @file.parent
+    end
   end
 
   def new
@@ -39,7 +43,7 @@ class FilesController < ApplicationController
   end
 
   def destroy
-    @file = UserFile.accessible_by(@context.user_id).find_by!(dxid: params[:id])
+    @file = UserFile.real_files.accessible_by(@context.user_id).find_by!(dxid: params[:id])
 
     if @file
       projectID = @file.project

@@ -14,11 +14,21 @@ svg.chart
 
   .line
     fill: none
-    stroke: $brand-blue-primary
+    stroke: $brand-blue-secondary
     stroke-width: 2.5px
 
   .tick line
     opacity: 0.2
+
+  .circle
+    fill: darken($brand-blue-primary, 1%)
+    stroke: transparent
+    stroke-width: 20px
+    @include transition(stroke-width 250ms linear, fill 150ms linear)
+    &:hover, .active
+      fill: $brand-red-primary
+      stroke: transparentize($brand-blue-secondary, 0.75)
+      stroke-width: 25px
 
 .pfda-charts
   .pfda-chart

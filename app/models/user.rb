@@ -28,7 +28,7 @@ class User < ActiveRecord::Base
   CURRENT_SCHEMA = 1
 
   has_many :biospecimens
-  has_many :user_files
+  has_many :user_files, {class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'}
   has_many :comparisons
   belongs_to :org
 
@@ -50,7 +50,7 @@ class User < ActiveRecord::Base
       user = User.find(user_id)
       if (user.open_files_count != 0) || (user.closing_files_count != 0)
         # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-        UserFile.where(user_id: user_id).where.not(state: "closed").all.each_slice(1000) do |files|
+        UserFile.real_files.where(user_id: user_id).where.not(state: "closed").all.each_slice(1000) do |files|
           DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
             sync_file_state(result, files[i], user)
           end
@@ -144,7 +144,7 @@ class User < ActiveRecord::Base
       end
       DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: output_ids})["results"].each_with_index do |result, i|
         raise unless result["describe"].present? && result["describe"]["state"] == "closed"
-        UserFile.unscoped.create!(
+        UserFile.create!(
           dxid: output_ids[i],
           project: user.private_comparisons_project,
           name: result["describe"]["name"],

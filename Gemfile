@@ -34,9 +34,6 @@ gem 'activerecord_any_of'
 # Parameter validation for the API
 gem 'rails_param'
 
-# Unscoped associations
-gem 'unscoped_associations'
-
 # WiceGrid is a Rails grid plugin: https://github.com/leikind/wice_grid
 gem "wice_grid", '3.6.0.pre4'
 

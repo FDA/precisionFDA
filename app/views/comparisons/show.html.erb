@@ -104,6 +104,30 @@
     </li>
   </ul>
 
+  <div class="comparison-outputs panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Outputs</h3>
+    </div>
+    <div class="panel-table">
+
+      <%= grid(@outputs_grid) do |g|
+        g.blank_slate partial:  "_partials/empty_grid"
+
+        g.column name: 'Name' do |file|
+          link_to(file.name, file_path(file.dxid))
+        end
+
+        g.column name: 'Size' do |file|
+           number_to_human_size(file.file_size)
+        end
+
+        g.column name: 'Created', auto_reload: true, filter_type: :standard do |file|
+          file.created_at.to_s(:db)
+        end
+      end -%>
+    </div>
+  </div>
+
   <ul class="list-group list-group-inline">
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Added by</h5>
