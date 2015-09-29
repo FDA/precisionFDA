@@ -78,16 +78,12 @@ class ComparisonsNewView
     e.preventDefault()
     inputModel = ko.dataFor(e.currentTarget)
     fileModel = ko.contextFor(e.currentTarget).$parent
-    # TODO: add/remove input models from associated files
-    # fileModel.inputModels.push(inputModel)
-    inputModel.input(fileModel)
+    inputModel.file(fileModel)
 
   unselectFile: (e) =>
     e.preventDefault()
     inputModel = ko.dataFor(e.currentTarget)
-    # TODO: add/remove input models from associated files
-    # fileModel.inputModels.remove(inputModel)
-    inputModel.input(null)
+    inputModel.file(null)
     return false
 
   submitForm: (e) =>
@@ -98,7 +94,6 @@ class FileModel
     @id = file.id
     @dxid = file.dxid
     @name = file.name
-    @inputModels = ko.observableArray()
 
 class VariantModel
   constructor: (@category, app) ->
@@ -112,13 +107,13 @@ class VariantInputModel
     @name = input.name
     @title = input.title
     @required = input.required ? true
-    @input = ko.observable()
+    @file = ko.observable()
     @dxid = ko.computed(=>
-      input = @input()
-      input.dxid if input?
+      file = @file()
+      file.dxid if file?
     )
     @active = ko.computed(=>
-      !_.isEmpty(@input())
+      !_.isEmpty(@file())
     )
 
 
@@ -143,8 +138,8 @@ ComparisonsController::new = ->
       refVCFModel = _.find(viewModel.refVariant.inputs(), (input) -> input.name == "ref_vcf")
 
       if testVCFModel? && refVCFModel? && !viewModel.name()?
-        testName = testVCFModel.input().name.replace /\.vcf\.gz/i, ""
-        refName = refVCFModel.input().name.replace /\.vcf\.gz/i, ""
+        testName = testVCFModel.file().name.replace /\.vcf\.gz/i, ""
+        refName = refVCFModel.file().name.replace /\.vcf\.gz/i, ""
 
         viewModel.name("#{testName} vs #{refName}")
   )

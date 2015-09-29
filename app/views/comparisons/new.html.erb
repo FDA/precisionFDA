@@ -19,7 +19,7 @@
               <div class="variant-input-cell">
                 <a class="close event-unselect-file" data-bind="visible: active">&times;</a>
                 <!-- ko if: active() -->
-                  <a target="_blank" class="file-info" data-bind="text: input().name, attr: {href: '/files/' + input().dxid}"></a>
+                  <a target="_blank" class="file-info" data-bind="text: file().name, attr: {href: '/files/' + file().dxid}"></a>
                 <!-- /ko -->
                 <!-- ko if: !active() -->
                   <span class="file-info">Select a file from below</span>
@@ -40,7 +40,7 @@
               <div class="variant-input-cell">
                 <a class="close event-unselect-file" data-bind="visible: active">&times;</a>
                 <!-- ko if: active() -->
-                  <a target="_blank" class="file-info" data-bind="text: input().name, attr: {href: '/files/' + input().dxid}"></a>
+                  <a target="_blank" class="file-info" data-bind="text: file().name, attr: {href: '/files/' + file().dxid}"></a>
                 <!-- /ko -->
                 <!-- ko if: !active() -->
                   <span class="file-info">Select a file from below</span>
@@ -75,31 +75,40 @@
         <tr>
           <td class="cell-file-actions">
             <div class="dropdown">
-              <button class="btn btn-default btn-sm btn-block btn-select-file" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Select
+              <button class="btn btn-primary btn-sm btn-block btn-select-file" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Assign
                 <span class="caret"></span>
               </button>
-              <ul class="dropdown-menu">
-                <li class="dropdown-header">Set for Test Variant</li>
-                <!-- ko foreach: $root.testVariant.inputs -->
-                  <li>
-                    <a class="event-select-file"><span data-bind="text: category + ' ' + title"></span></a>
-                  </li>
-                <!-- /ko -->
-                <li class="dropdown-header">Set for Benchmark Variant</li>
-                <!-- ko foreach: $root.refVariant.inputs -->
-                  <li>
-                    <a class="event-select-file"><span data-bind="text: category + ' ' + title"></span></a>
-                  </li>
-                <!-- /ko -->
+              <ul class="dropdown-menu clearfix">
+                <div class="pull-left">
+                  <li class="dropdown-header">Set for Test Variant</li>
+                  <!-- ko foreach: $root.testVariant.inputs -->
+                    <li data-bind="css: {disabled: active, active: active() && $parent.dxid == file().dxid }">
+                      <a class="event-select-file"><span data-bind="text: category + ' ' + title"></span></a>
+                    </li>
+                  <!-- /ko -->
+                </div>
+                <div class="pull-right">
+                  <li class="dropdown-header">Set for Benchmark Variant</li>
+                  <!-- ko foreach: $root.refVariant.inputs -->
+                    <li data-bind="css: {disabled: active, active: active() && $parent.dxid == file().dxid }">
+                      <a class="event-select-file"><span data-bind="text: category + ' ' + title"></span></a>
+                    </li>
+                  <!-- /ko -->
+                </div>
               </ul>
             </div>
           </td>
           <td class="cell-file-name">
             <a target="_blank" data-bind="text: name, attr: {href: '/files/' + dxid}"></a>
           </td>
-          <td class="cell-file-selections" data-bind="foreach: inputModels">
-            <span class="label label-info" data-bind="text: category + ': ' + title"></span>
+          <td class="cell-file-selections">
+            <!-- ko foreach: $root.testVariant.inputs -->
+              <span class="label label-primary" data-bind="visible: active() && $parent.dxid == file().dxid, text: category + ' ' + title"></span>
+            <!-- /ko -->
+            <!-- ko foreach: $root.refVariant.inputs -->
+              <span class="label label-info" data-bind="visible: active() && $parent.dxid == file().dxid, text: category + ' ' + title"></span>
+            <!-- /ko -->
           </td>
         </tr>
       </tbody>

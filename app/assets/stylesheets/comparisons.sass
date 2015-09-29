@@ -142,34 +142,35 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
         .file-info
           color: $brand-red-primary
 
-@media (max-width: $screen-xs-max)
-  .variant-title
-    margin: 0 auto 5px
-    font-size: $font-size-h4
-
-@media (max-width: $screen-sm-max)
-  .pfda-controller-comparisons main
-    .variants
-      @include flex-direction(column)
-
-      .variant-test,
-      .variant-ref
-        width: 100%
-        padding-left: 10px
-        padding-right: 10px
-
-      .variant-test
-        padding-bottom: $withHeight/2
-        border-right-width: 0
-        border-bottom: 1px solid $comparator-border-color
-
-      .variant-ref
-        padding-top: $withHeight/2
-        border-left-width: 0
-        border-top: 1px solid $comparator-border-color
-
-
 .pfda-controller-comparisons.pfda-action-new main
+  padding-bottom: 150px
+  .cell-file-actions
+    .dropdown-menu
+      min-width: 350px
+      padding: $padding-small-vertical $padding-small-horizontal
+      li > a
+        display: block
+        padding: $padding-base-vertical $padding-base-horizontal
+        color: $link-color
+        border-radius: $border-radius-base
+        text-decoration: none
+        &:hover
+          background-color: $dropdown-link-hover-bg
+        color: $link-hover-color
+
+      li.disabled > a
+        color: lighten($dropdown-link-disabled-color, 10%)
+
+      li.active > a, li.active > a:hover
+        background-color: $brand-blue-secondary
+        color: $dropdown-link-active-color
+
+      li.dropdown-header
+        padding: $padding-base-vertical $padding-base-horizontal
+
+  .cell-file-name > a
+    color: $brand-blue-dark
+
   .nav-comparisons
     margin-bottom: 20px
     li > a
@@ -271,3 +272,35 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
       .list-group-item-text
         text-align: right
         font-size: $font-size-h3
+
+@media (max-width: $screen-xs-max)
+  .variant-title
+    margin: 0 auto 5px
+    font-size: $font-size-h4
+
+@media (max-width: $screen-sm-max)
+  .pfda-controller-comparisons.pfda-action-new
+    .affix
+      position: relative !important
+      left: 0 !important
+      right: 0 !important
+
+  .pfda-controller-comparisons main
+    .variants
+      @include flex-direction(column)
+
+      .variant-test,
+      .variant-ref
+        width: 100%
+        padding-left: 10px
+        padding-right: 10px
+
+      .variant-test
+        padding-bottom: $withHeight/2
+        border-right-width: 0
+        border-bottom: 1px solid $comparator-border-color
+
+      .variant-ref
+        padding-top: $withHeight/2
+        border-left-width: 0
+        border-top: 1px solid $comparator-border-color
