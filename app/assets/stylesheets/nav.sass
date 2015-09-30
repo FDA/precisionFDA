@@ -13,22 +13,25 @@
   &:hover
     opacity: 0.9
 
-.nav-links
+.navbar-inverse .navbar-nav.nav-links
   text-align: center
 
   li > a
-    color: $brand-blue-tertiary
-    font-weight: 300
+    color: $brand-blue-secondary
+    font-weight: 400
     min-width: 100px
 
     .nav-icon
       margin-bottom: 5px
       font-size: 28px
 
+    &:hover
+      color: lighten($brand-blue-secondary, 20%)
+
   li.active
     > a, > a:hover, > a:focus
       background-color: transparent
-      color: $brand-red-primary
+      color: #fff
       .nav-icon
         color: $brand-red-primary
 

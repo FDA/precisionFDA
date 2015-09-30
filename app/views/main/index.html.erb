@@ -3,9 +3,39 @@
 <div class="jumbotron">
   <div class="container">
     <h1>WELCOME to precisionFDA</h1>
-    <p>Your community for NGS assay evaluation</p>
+    <p class="lead">Your community for NGS assay evaluation</p>
   </div>
-  <% if @context.logged_in? %>
-    <%= debug @debug_info %>
-  <% end %>
+</div>
+
+<div class="showcase">
+  <h2>Get started</h2>
+  <div class="row">
+    <div class="col-sm-11">
+      <div class="list-group">
+        <a class="list-group-item" href="<%= notes_path() %>">
+          <div class="list-group-item-heading"><span class="fa fa-sticky-note"></span> Notes</div>
+          <div class="list-group-item-text">Notes let you describe and communicate a collection of attachments</div>
+        </a>
+        <a class="list-group-item" href="<%= files_path() %>">
+          <div class="list-group-item-heading"><span class="fa fa-files-o"></span> Files</div>
+          <div class="list-group-item-text">Files are data you can upload to the platform and can be used in your comparison analyses
+          <br/><br/>
+          Keep files private or share them with the precisionFDA community</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="col-sm-11 col-sm-offset-1">
+      <div class="list-group">
+        <a class="list-group-item" href="<%= comparisons_path() %>">
+          <div class="list-group-item-heading"><span class="fa fa-bullseye"></span> Comparisons</div>
+          <div class="list-group-item-text">A comparison is an analysis of two results derived from the same biospecimen, one of which serves as a reference</div>
+        </a>
+        <a class="list-group-item" href="<%= apps_path() %>">
+          <div class="list-group-item-heading"><span class="fa fa-cubes"></span> Apps</div>
+          <div class="list-group-item-text">Apps are executable scripts that you can run in the cloud</div>
+        </a>
+      </div>
+    </div>
+  </div>
 </div>
