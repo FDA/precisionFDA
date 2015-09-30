@@ -6,7 +6,7 @@ class AppsController < ApplicationController
       community: [
         {name:"bwa", display: "BWA", link: appjobs_path("bwa")},
         {name:"gatk", display: "GATK", link: appjobs_path("gatk")},
-        {name:"fastq_injector", display: "FASTQ Injector", link: appjobs_path("fastq_injector")}
+        {name:"art", display: "ART FASTQ Generator", link: appjobs_path("art")}
       ],
       custom: [
         {name:"mycustom", display: "My Custom App", link: appjobs_path("mycustom")}
