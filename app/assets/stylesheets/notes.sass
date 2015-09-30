@@ -1,1 +1,57 @@
 @import "_common"
+
+.pfda-controller-notes.pfda-action-show main
+  .pfda-2-pane-sidebar
+    thead, tfoot
+      display: none
+
+    .panel, .panel-default > .panel-heading
+      background-color: transparent
+      border-color: transparent
+      color: $brand-blue-tertiary
+
+    .panel-heading
+      padding: $padding-xs-vertical
+
+    table > tbody > tr > td
+      border-color: transparent
+      padding: $padding-xs-vertical
+
+    .sidebar-title
+      color: $brand-blue-subtle
+      font-size: 14px
+      font-weight: bold
+      margin: 10px 0 20px
+      text-transform: uppercase
+
+  .pfda-2-pane-content
+    border-radius: $border-radius-base
+
+.note-content-markdown
+  padding: 50px
+  font-size: 16px
+  line-height: 1.5
+
+  a, a:hover
+    text-decoration: none
+
+  a.widget-inline, a.widget-card
+    background-color: $brand-blue-subtler
+    padding: 2px
+    border-radius: $border-radius-small
+    &:hover
+      background-color: darken($brand-blue-subtler, 2%)
+
+  a.widget-card
+    display: block
+    background-color: $brand-blue-subtler
+    padding: $padding-base-vertical $padding-base-horizontal
+    border: 1px solid darken($brand-blue-subtler, 5%)
+
+    .widget-card-title
+      font-weight: bold
+      font-size: $font-size-h4
+
+    .widget-card-content
+      font-size: $font-size-h5
+      color: $brand-blue-tertiary
