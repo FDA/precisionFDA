@@ -1,11 +1,95 @@
+<% content_for :title do %><%= @title %><% end %>
+
 <div class="page-header">
-  <div class="page-title"><span class="fa fa-sticky-note"></span> My Note</div>
+  <div class="page-title"><span class="fa fa-sticky-note"></span> <%= @name %></div>
 </div>
 
-<div class="container-fluid">
-  <div class="panel panel-default">
-    <div class="panel-body">
-      [Metadata]
+<div class="pfda-toolbar clearfix">
+  <div class="btn-group pull-right">
+    <a class="btn btn-primary" href="#">Attach</a>
+    <a class="btn btn-primary" href="#">Edit</a>
+    <a class="btn btn-primary" href="#">Publish</a>
+    <a class="btn btn-danger" href="#">Delete</a>
+  </div>
+</div>
+
+
+<div class="pfda-2-pane-wrapper container-fluid">
+  <div class="row">
+    <div class="pfda-2-pane-sidebar col-sm-9">
+      <div class="sidebar-title"><span class="fa fa-paperclip"></span> Attachments</div>
+      <% if !@comparisons.blank? %>
+      <div class="note-comparison panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Comparisons</h3>
+        </div>
+        <div class="panel-table">
+          <%= grid(@comparisons_grid) do |g|
+            g.column name: 'Name' do |comparison|
+              link_to(comparison.name, file_path(comparison.id))
+            end
+
+            g.column name: 'Created' do |comparison|
+              comparison.created_at.to_s(:db)
+            end
+          end -%>
+        </div>
+      </div>
+      <% end %>
+
+      <% if !@files.blank? %>
+      <div class="note-files panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Files</h3>
+        </div>
+        <div class="panel-table">
+          <%= grid(@files_grid) do |g|
+            g.column name: 'Name' do |file|
+              link_to(file.name, file_path(file.dxid))
+            end
+
+            g.column name: 'Size' do |file|
+               number_to_human_size(file.file_size)
+            end
+
+            g.column name: 'Created', auto_reload: true, filter_type: :standard do |file|
+              file.created_at.to_s(:db)
+            end
+          end -%>
+        </div>
+      </div>
+      <% end %>
+    </div>
+    <div class="note-content pfda-2-pane-content col-sm-14 col-sm-offset-1">
+      <div class="note-content-markdown">
+
+        <% if params[:id].to_i == 1 %>
+          <p class="lead text-muted">
+            <a href="#">Edit</a> this note
+          </p>
+        <% end %>
+        <% if params[:id].to_i == 2 %>
+          <p>This is an example of running a comparison on precisionFDA<p>
+          <h3>Upload test file and find benchmark</h3>
+          <p>We uploaded our test vcf <a class="widget-inline" href="<%= file_path(@test_vcf.dxid) %>"><span class="fa fa-file"></span> <%= @test_vcf.name %></a> (along with its corresponding .tbi) and compared it to an existing public benchmark <a class="widget-inline" href="<%= file_path(@ref_vcf.dxid) %>"><span class="fa fa-file"></span> <%= @ref_vcf.name %></a>
+          </p>
+
+          <h3>Run the comparison</h3>
+          <p>Then we ran this comparison and got the results:</p>
+          <a class="widget-card" href="<%= comparison_path(@comparison.id) %>">
+            <div class="widget-card-title">
+              <span class="fa fa-crosshairs"></span> <%= @comparison.name %>
+            </div>
+            <div class="widget-card-content">
+              Precision: <%= number_to_percentage(@meta["precision"].to_f * 100, strip_insignificant_zeros: true) %>
+              <br/>
+              Sensitivity: <%= number_to_percentage(@meta["recall"].to_f * 100, strip_insignificant_zeros: true) %>
+              <br/>
+              Score: <%= number_to_percentage(@meta["score"].to_f * 100, strip_insignificant_zeros: true) %>
+            </div>
+          </a>
+        <% end %>
+      </div>
     </div>
   </div>
 </div>

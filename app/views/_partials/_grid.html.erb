@@ -2,10 +2,6 @@
   <% if grid.has_key?(:header) %>
     <thead>
       <tr>
-        <th class="col-checkbox">
-          <input type="checkbox">
-        </th>
-
         <% grid[:header].each do |col| %>
           <th class="<%= col[:field] %>">
             <%= col[:display] %>
@@ -18,9 +14,6 @@
     <% if grid.has_key?(:rows) %>
       <% grid[:rows].each do |row| %>
         <tr class="">
-          <td class="col-checkbox">
-            <input type="checkbox">
-          </td>
           <% row.each do |col| %>
             <td class="col-<%= col[:field] %> <%= col[:classes] %>">
               <% if col.has_key?(:icon) %>
