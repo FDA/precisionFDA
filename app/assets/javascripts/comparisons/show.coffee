@@ -7,7 +7,7 @@ class LineChart
       left: 75
 
     width = $(selector).width()
-    height = width
+    height = window.innerHeight/2
 
     @w = width  - @margin.left - @margin.right
     @h = height - @margin.top - @margin.bottom
@@ -67,10 +67,6 @@ class LineChart
         .attr("cx", lineGenerator.x())
         .attr("cy", lineGenerator.y())
         .attr('r', 3.5)
-      .on('mouseover', (d, i, key) ->
-      )
-      .on('mouseout', (d, i, key) ->
-      )
 
   renderAxis: () ->
     @svg.append('text')
