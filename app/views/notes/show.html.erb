@@ -69,13 +69,13 @@
           </p>
         <% end %>
         <% if params[:id].to_i == 2 %>
-          <p>This is an example of running a comparison on precisionFDA<p>
-          <h3>Upload test file and find benchmark</h3>
-          <p>We uploaded our test vcf <a class="widget-inline" href="<%= file_path(@test_vcf.dxid) %>"><span class="fa fa-file"></span> <%= @test_vcf.name %></a> (along with its corresponding .tbi) and compared it to an existing public benchmark <a class="widget-inline" href="<%= file_path(@ref_vcf.dxid) %>"><span class="fa fa-file"></span> <%= @ref_vcf.name %></a>
+          <p>What percentage of NA12878 variants can be recovered using one lane of HiSeq X Ten sequencing?</p>
+          <h3>Experimental setup</h3>
+          <p>NA12878 material was sequenced on one lane of HiSeq X Ten using the HiSeq X Ten Reagent Kit v2.5. The reads were mapped against hs37d5 with BWA-MEM; variation calling was performed with GATK 3.3 (best practices). The resulting <a class="widget-inline" href="<%= file_path(@test_vcf.dxid) %>"><span class="fa fa-file"></span> <%= @test_vcf.name %></a> was compared against <a class="widget-inline" href="<%= file_path(@ref_vcf.dxid) %>"><span class="fa fa-file"></span> <%= @ref_vcf.name %></a> and <a class="widget-inline" href="<%= file_path(@ref_vcf2.dxid) %>"><span class="fa fa-file"></span> <%= @ref_vcf2.name %></a>.
           </p>
 
-          <h3>Run the comparison</h3>
-          <p>Then we ran this comparison and got the results:</p>
+          <h3>Results</h3>
+          <p>In <a class="widget-inline" href="<%= comparison_path(@comparison.id) %>"><span class="fa fa-crosshairs"></span> <%= @comparison.name %></a> we noted that there are 3,123,990 true positives, 21,846 false positives and 27,029 false negatives.</p>
           <a class="widget-card" href="<%= comparison_path(@comparison.id) %>">
             <div class="widget-card-title">
               <span class="fa fa-crosshairs"></span> <%= @comparison.name %>
@@ -85,7 +85,7 @@
               <br/>
               Sensitivity: <%= number_to_percentage(@meta["recall"].to_f * 100, strip_insignificant_zeros: true) %>
               <br/>
-              Score: <%= number_to_percentage(@meta["score"].to_f * 100, strip_insignificant_zeros: true) %>
+              F-Measure: <%= number_to_percentage(@meta["f-measure"].to_f * 100, strip_insignificant_zeros: true) %>
             </div>
           </a>
         <% end %>
