@@ -1,16 +1,86 @@
 <div class="page-header clearfix">
-  <h1 class="pull-left"><span class="fa fa-cube fa-fw"></span> Run App</h1>
-  <div class="pull-right">
-    <a class="btn btn-default btn-lg">
-      <span class="fa fa-bolt fa-fw"></span> RUN
-    </a>
+  <div class="page-title"><span class="fa fa-cube"></span> Set up ART Illumina Read Simulation</div>
+</div>
+
+<div class="pfda-toolbar">
+  <div class="btn-group pull-right">
+    <a href="#" class="btn btn-danger"><span class="fa fa-bolt"></span> Run App</a>
   </div>
 </div>
 
 <div class="container-fluid">
   <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4>App parameters</h4>
+    </div>
     <div class="panel-body">
-      [Metadata]
+      <form class="form-horizontal">
+        <div class="form-group required">
+          <label class="col-sm-4 control-label">Coverage level to stimulate</label>
+          <div class="col-sm-10 col-sm-offset-1">
+            <input type="text" class="form-control" placeholder="10">
+          </div>
+        </div>
+        <div class="form-group required">
+          <label class="col-sm-4 control-label">Read length to stimulate</label>
+          <div class="col-sm-10 col-sm-offset-1">
+            <input type="text" class="form-control" placeholder="150">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-4 control-label">Sequencing system</label>
+          <div class="col-sm-10 col-sm-offset-1">
+            <select class="form-control">
+              <option>Select...</option>
+              <option>Genome Analyzer I</option>
+              <option>Genome Analyzer II</option>
+              <option>HiSeq 1000</option>
+              <option>HiSeq 2000</option>
+              <option>HiSeq 2500</option>
+              <option>MiSeq</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group required">
+          <label class="col-sm-4 control-label">Paired reads</label>
+          <div class="col-sm-10 col-sm-offset-1">
+            <div class="btn-group">
+              <a href="#" class="btn btn-default">True</a>
+              <a href="#" class="btn btn-default active">False (default)</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-4 control-label">Mean fragment size</label>
+          <div class="col-sm-10 col-sm-offset-1">
+            <input type="text" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-4 control-label">Mean fragment size</label>
+          <div class="col-sm-10 col-sm-offset-1">
+            <input type="text" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-4 control-label">Fragment size standard deviation</label>
+          <div class="col-sm-10 col-sm-offset-1">
+            <input type="text" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-4 control-label">Output label</label>
+          <div class="col-sm-10 col-sm-offset-1">
+            <input type="text" class="form-control">
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 </div>
