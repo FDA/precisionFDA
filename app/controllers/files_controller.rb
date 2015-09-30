@@ -44,6 +44,24 @@ class FilesController < ApplicationController
     @biospecimens = Biospecimen.all
   end
 
+  def download
+    @file = UserFile.accessible_by(@context.user_id).find_by!(dxid: params[:id])
+    logger.debug params
+
+    # Refresh state of file, if needed
+    if @file.state != "closed"
+      User.sync_file!(@context.user_id, @file.id, @context.token)
+      @file.reload
+    end
+
+    if @file.state != "closed"
+      flash[:error] = "Files can only be downloaded if they are in the 'closed' state"
+      redirect_to file_path(@file.dxid)
+    else
+      redirect_to DNAnexusAPI.new(@context.token).call(@file.dxid, "download", {filename: @file.name, project: @file.project, preauthenticated: true})["url"] + (params[:inline] == "true" ? '?inline' : '')
+    end
+  end
+
   def destroy
     @file = UserFile.real_files.accessible_by(@context.user_id).find_by!(dxid: params[:id])
 

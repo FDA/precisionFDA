@@ -34,4 +34,8 @@ class UserFile < ActiveRecord::Base
     return where.any_of(user_id: user_id, public: true)
   end
 
+  def deletable?
+    return (comparisons.count == 0) && (parent_type == "User")
+  end
+
 end

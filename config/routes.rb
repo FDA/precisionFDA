@@ -22,7 +22,9 @@ Rails.application.routes.draw do
     resources :apps
     resources :biospecimens
     resources :comparisons
-    resources :files
+    resources :files do
+      post 'download', on: :member
+    end
     resources :jobs
     resources :notes
 
