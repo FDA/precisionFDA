@@ -58,6 +58,14 @@ class LineChart
                   .attr('class', 'line')
                   .attr('d', lineGenerator)
 
+    $tooltip = d3.select("body")
+    	.append("div")
+      .attr('class', 'chart-tip')
+    	.style("position", "absolute")
+    	.style("z-index", "10")
+    	.style("visibility", "hidden")
+    	.text("")
+
     $g.append('g')
         .attr('class', 'circles')
       .selectAll(".circle")
@@ -67,6 +75,24 @@ class LineChart
         .attr("cx", lineGenerator.x())
         .attr("cy", lineGenerator.y())
         .attr('r', 3.5)
+        .on("mouseover", (d) ->
+          $tooltip
+            .text("Score: #{d['score']}")
+            .style("visibility", "visible")
+        )
+      	.on("mousemove", () ->
+          $tooltip.style("top", (event.pageY-50)+"px").style("left",(event.pageX)+"px")
+        )
+      	.on("mouseout", () ->
+          $tooltip.style("visibility", "hidden").text("")
+        )
+
+      # TODO: refactor this
+      # .append("text")
+      #   .attr('class', 'tip')
+      #   .text((d) -> d3.format('%')(d['score']))
+      #   .attr("x", lineGenerator.x())
+      #   .attr("y", lineGenerator.y())
 
   renderAxis: () ->
     @svg.append('text')
