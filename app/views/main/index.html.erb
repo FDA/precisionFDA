@@ -12,15 +12,15 @@
   <div class="row">
     <div class="col-sm-11">
       <div class="list-group">
-        <a class="list-group-item" href="<%= notes_path() %>">
-          <div class="list-group-item-heading"><span class="fa fa-sticky-note"></span> Notes</div>
-          <div class="list-group-item-text">Notes let you describe and communicate a collection of attachments</div>
-        </a>
         <a class="list-group-item" href="<%= files_path() %>">
           <div class="list-group-item-heading"><span class="fa fa-files-o"></span> Files</div>
-          <div class="list-group-item-text">Files are data you can upload to the platform and can be used in your comparison analyses
+          <div class="list-group-item-text">Files are data you can upload to the platform and use as input to apps or comparisons.
           <br/><br/>
-          Keep files private or share them with the precisionFDA community</div>
+          Keep files private or share them with the precisionFDA community.</div>
+        </a>
+        <a class="list-group-item" href="<%= apps_path() %>">
+          <div class="list-group-item-heading"><span class="fa fa-cubes"></span> Apps</div>
+          <div class="list-group-item-text">Apps are executable scripts that you can run in the cloud.</div>
         </a>
       </div>
     </div>
@@ -29,11 +29,11 @@
       <div class="list-group">
         <a class="list-group-item" href="<%= comparisons_path() %>">
           <div class="list-group-item-heading"><span class="fa fa-bullseye"></span> Comparisons</div>
-          <div class="list-group-item-text">A comparison is an analysis of two results derived from the same biospecimen, one of which serves as a reference</div>
+          <div class="list-group-item-text">A comparison quantifies the similarity between two VCF files, a test set and a benchmark set.</div>
         </a>
-        <a class="list-group-item" href="<%= apps_path() %>">
-          <div class="list-group-item-heading"><span class="fa fa-cubes"></span> Apps</div>
-          <div class="list-group-item-text">Apps are executable scripts that you can run in the cloud</div>
+        <a class="list-group-item" href="<%= notes_path() %>">
+          <div class="list-group-item-heading"><span class="fa fa-sticky-note"></span> Notes</div>
+          <div class="list-group-item-text">Notes let you describe and communicate a collection of attachments.</div>
         </a>
       </div>
     </div>
