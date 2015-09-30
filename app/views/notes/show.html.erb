@@ -81,11 +81,11 @@
               <span class="fa fa-crosshairs"></span> <%= @comparison.name %>
             </div>
             <div class="widget-card-content">
+              Score: <%= number_to_percentage(@meta["score"].to_f * 100, strip_insignificant_zeros: true) %>
+              <br/>
               Precision: <%= number_to_percentage(@meta["precision"].to_f * 100, strip_insignificant_zeros: true) %>
               <br/>
               Sensitivity: <%= number_to_percentage(@meta["recall"].to_f * 100, strip_insignificant_zeros: true) %>
-              <br/>
-              Score: <%= number_to_percentage(@meta["score"].to_f * 100, strip_insignificant_zeros: true) %>
             </div>
           </a>
         <% end %>
