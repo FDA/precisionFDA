@@ -14,18 +14,18 @@ class NotesController < ApplicationController
       ],
       rows: [
         [
-          {field: "name", display: "PrecisionFDA Best Practices", link: note_path(1)},
-          {field: "created", display: "5/15/2015"},
+          {field: "name", display: "PrecisionFDA Benchmark VCFs", link: note_path(1)},
+          {field: "created", display: "9/17/2015"},
           {field: "addedBy", display: "George Asimenos", link: user_path("george.fdauser")}
         ],
         [
-          {field: "name", display: "Setting up your first comparison", link: note_path(1)},
-          {field: "created", display: "2/15/2015"},
+          {field: "name", display: "Studying NA12878 from an Illumina X Ten via the precisionFDA lens", link: note_path(1)},
+          {field: "created", display: "9/16/2015"},
           {field: "addedBy", display: "George Asimenos", link: user_path("george.fdauser")}
         ],
         [
-          {field: "name", display: "The NA12878 Biospcimen", link: note_path(1)},
-          {field: "created", display: "1/15/2015"},
+          {field: "name", display: "How related are NA12878 and NA12877?", link: note_path(1)},
+          {field: "created", display: "9/15/2015"},
           {field: "addedBy", display: "George Asimenos", link: user_path("george.fdauser")}
         ]
       ]
