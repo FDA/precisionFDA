@@ -38,11 +38,7 @@ CKEDITOR.plugins.add 'attachment',
           @setData('attachment-type', 'inline')
 
         this.on 'doubleclick', ->
-          type = @data['attachment-type']
-          if type == 'inline'
-            type = 'card'
-          else
-            type = 'inline'
+          type = if @data['attachment-type'] == 'inline' then 'card' else 'inline'
           @setData('attachment-type', type)
       data: () ->
         @element.removeClass('attachment-card')
