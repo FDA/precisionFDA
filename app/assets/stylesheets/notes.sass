@@ -56,3 +56,43 @@
     .widget-card-content
       font-size: $font-size-h5
       color: $brand-blue-tertiary
+
+.pfda-controller-notes.pfda-action-new main
+  .page-header
+    background-color: $brand-blue-subtler
+
+    .btn-default
+      border: 1px solid #ddd
+
+      &:not(.disabled):hover
+        border: 1px solid $link-color
+
+  .page-title
+    .input-group-addon
+      background-color: darken($brand-blue-primary, 10%)
+      border-color: $brand-blue-primary
+      color: $brand-blue-subtle
+      font-size: 30px
+
+  .note-editor
+    padding: 10px
+    border: 1px solid #ccc
+    border-radius: $border-radius-base
+    min-height: 400px
+    box-shadow: inset 0px 1px 2px rgba(0, 0, 0, 0.25)
+
+  .attachments
+    padding-right: $padding-base-horizontal
+
+    .attachment-inline
+      padding: $padding-small-vertical $padding-small-horizontal
+      &:hover
+        background-color: $brand-blue-subtler
+        cursor: move
+        cursor: -webkit-grab
+        cursor: -moz-grab
+
+      a
+        padding: $padding-xs-vertical $padding-xs-horizontal
+        &:hover
+          background-color: $brand-blue-subtle

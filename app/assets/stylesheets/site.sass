@@ -1,9 +1,11 @@
 // TODO: Move related classes into separate stylesheets
 @import "_common"
 
+a, a:hover
+  text-decoration: none
+
 body > main > .alert
   margin: 10px 10px 20px 10px
-
 
 // TOOLBAR
 .pfda-toolbar
@@ -16,10 +18,11 @@ body > main > .alert
 .btn.btn-default
   .fa
     color: $brand-red-primary
-  &:hover, &:focus, &:active, &.active
-    color: $brand-blue-primary
-    background-color: $brand-blue-subtle
-    border-color: $brand-blue-secondary
+  &:not(.disabled)
+    &:hover, &:focus, &:active, &.active
+      color: $brand-blue-primary
+      background-color: $brand-blue-subtle
+      border-color: $brand-blue-secondary
 
 // TABLE
 .pfda-table.table

@@ -75,6 +75,10 @@ class NotesController < ApplicationController
         order_direction: 'asc',
         conditions: {id: @files.map(&:id)}
       })
+    elsif params[:id].to_i == 99
     end
+  end
+
+  def new
   end
 end

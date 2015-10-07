@@ -1,0 +1,34 @@
+@import "_common"
+
+.cke_widget_element
+  &.attachment
+    display: inline-block
+    background-color: $brand-blue-subtler
+    &:hover, &:focus
+      background-color: darken($brand-blue-subtler, 5%)
+
+    .fa
+      color: $brand-blue-tertiary
+
+  &.attachment-inline
+    border-radius: $border-radius-small
+    padding: 2px
+    margin: 0 2px
+
+    .attachment-info-score
+      display: none
+
+  &.attachment-card
+    border: 1px solid $brand-blue-subtle
+    border-radius: $border-radius-base
+    padding: $padding-base-vertical $padding-base-horizontal
+    margin: 0 $padding-base-horizontal 0 2px
+
+    a.name, .fa
+      font-size: $font-size-h4
+
+    .attachment-info-score
+      display: block
+      text-align: center
+      padding: 4px
+      font-size: $font-size-h2
