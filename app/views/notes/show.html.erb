@@ -1,4 +1,4 @@
-<% content_for :title do %><%= @title %><% end %>
+<% content_for :title do %><%= @note.title %><% end %>
 
 <% if @note[:user_id] == @context.user_id %>
   <div class="pfda-toolbar clearfix">
@@ -22,10 +22,12 @@
     <div class="btn-toolbar pull-right" data-bind="visible: editing()" style="display: none;">
       <div class="btn-group">
         <a class="btn btn-default" data-bind="click: cancel">Cancel</a>
-        <a class="btn btn-primary" data-bind="click: save">Save</a>
+        <a class="btn btn-primary" data-bind="click: save, css: {disabled: !isFormReady()}">Save</a>
       </div>
       <div class="btn-group">
-        <a class="btn btn-default"><span class="fa fa-trash"></span> Delete</a>
+        <%= link_to note_path(@note), method: :delete, data: { confirm: 'Are you certain you want to delete this?' }, class: "btn btn-danger" do %>
+          <span class="fa fa-trash"></span> Delete
+        <% end %>
       </div>
     </div>
   </div>
@@ -38,7 +40,10 @@
         <span class="fa fa-sticky-note"></span> <span class="note-title" data-bind="text: title"><%= @name %></span>
       <!-- /ko -->
       <!-- ko if: editing() -->
-        <input class="form-control input-lg" name="title" placeholder="Note title..." data-bind="textInput: title.cache" />
+      <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-sticky-note"></span> </span>
+        <input class="form-control" name="title" placeholder="Note title..." data-bind="textInput: title.cache" />
+      </div>
       <!-- /ko -->
     </div>
     <div class="note-flexbox">
@@ -53,7 +58,7 @@
             </div>
             <% @comparisons.each do |item| %>
               <div class="list-group-item attachment" data-attachment='<%= comparison_path(item.id) %>' data-bind="attr: {draggable: editing}">
-                <span class="fa fa-crosshairs"></span> <%= link_to(item.name, comparison_path(item.id)) %>
+                <span class="fa fa-area-chart"></span> <%= link_to(item.name, comparison_path(item.id), tabindex: "-1") %>
               </div>
             <% end %>
           </div>
@@ -66,7 +71,7 @@
             </div>
             <% @files.each do |item| %>
               <div class="list-group-item attachment" data-attachment='<%= file_path(item.dxid) %>' data-bind="attr: {draggable: editing}">
-                <span class="fa fa-file-o"></span> <%= link_to(item.name, file_path(item.dxid)) %>
+                <span class="fa fa-file-o"></span> <%= link_to(item.name, file_path(item.dxid), tabindex: "-1") %>
               </div>
             <% end %>
           </div>
@@ -75,32 +80,7 @@
       </div>
       <div class="note-pane">
         <div id="note-editor" class="note-content">
-          <% if params[:id].to_i == 1 %>
-            <p class="lead text-muted">
-              <a href="#">Edit</a> this note
-            </p>
-          <% end %>
-          <% if params[:id].to_i == 2 %>
-            <p>What percentage of NA12878 variants can be recovered using one lane of HiSeq X Ten sequencing?</p>
-            <h3>Experimental setup</h3>
-            <p>NA12878 material was sequenced on one lane of HiSeq X Ten using the HiSeq X Ten Reagent Kit v2.5. The reads were mapped against hs37d5 with BWA-MEM; variation calling was performed with GATK 3.3 (best practices). The resulting <a class="widget-inline" href="<%= file_path(@test_vcf.dxid) %>"><span class="fa fa-file"></span> <%= @test_vcf.name %></a> was compared against <a class="widget-inline" href="<%= file_path(@ref_vcf.dxid) %>"><span class="fa fa-file"></span> <%= @ref_vcf.name %></a> and <a class="widget-inline" href="<%= file_path(@ref_vcf2.dxid) %>"><span class="fa fa-file"></span> <%= @ref_vcf2.name %></a>.
-            </p>
-
-            <h3>Results</h3>
-            <p>In <a class="widget-inline" href="<%= comparison_path(@comparison.id) %>"><span class="fa fa-crosshairs"></span> <%= @comparison.name %></a> we noted that there are 3,123,990 true positives, 21,846 false positives and 27,029 false negatives.</p>
-            <a class="widget-card" href="<%= comparison_path(@comparison.id) %>">
-              <div class="widget-card-title">
-                <span class="fa fa-crosshairs"></span> <%= @comparison.name %>
-              </div>
-              <div class="widget-card-content">
-                Precision: <%= number_to_percentage(@meta["precision"].to_f * 100, strip_insignificant_zeros: true) %>
-                <br/>
-                Sensitivity: <%= number_to_percentage(@meta["recall"].to_f * 100, strip_insignificant_zeros: true) %>
-                <br/>
-                F-Measure: <%= number_to_percentage(@meta["f-measure"].to_f * 100, strip_insignificant_zeros: true) %>
-              </div>
-            </a>
-          <% end %>
+          <%= raw @note.content %>
         </div>
       </div>
     </div>

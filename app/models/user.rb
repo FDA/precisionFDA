@@ -30,6 +30,7 @@ class User < ActiveRecord::Base
   has_many :biospecimens
   has_many :user_files, {class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'}
   has_many :comparisons
+  has_many :notes
   belongs_to :org
 
   def self.sync_file!(user_id, file_id, token)

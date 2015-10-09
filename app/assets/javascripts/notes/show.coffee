@@ -25,16 +25,21 @@ ckConfig =
   autoGrow_minHeight: 400
   autoGrow_onStartup: true
 
-class NoteEditorModel
-  constructor: (title, content = '') ->
-    @noteInstance = null
-    @content = content
+class NoteModel
+  constructor: (note) ->
+    @editorInstance = null
+
+    @id = note.id
+    @slug = note.slug
+    @content = note.content ? ''
+    @title = ko.observable(note.title)
+    @title.cache = ko.observable(note.title)
+
+    @saving = ko.observable(false)
     @editing = ko.observable(false)
-    @title = ko.observable(title)
-    @title.cache = ko.observable(title)
 
     @isFormReady = ko.computed(() =>
-      !_.isEmpty(@title.cache())
+      !_.isEmpty(@title.cache()) && !@saving()
     )
 
   toggleEdit: () ->
@@ -44,12 +49,30 @@ class NoteEditorModel
   save: () ->
     @toggleEdit()
     @title(@title.cache())
-    @content = @noteInstance.getData()
-    @noteInstance.destroy()
+    @content = @editorInstance.getData()
+    @editorInstance.destroy()
+    @saving(true)
+
+    params =
+      note:
+        content: @content
+        title: @title()
+
+    $.ajax("/notes/#{@slug}", {
+      method: "PUT"
+      data: params
+    }).done((res) =>
+      if res.note.slug != @slug
+        window.location.replace("/notes/#{res.note.slug}")
+    ).fail((error) ->
+      console.error(error)
+    ).always(() =>
+      @saving(false)
+    )
 
   cancel: () ->
-    @noteInstance.setData(@content)
-    @noteInstance.destroy(true)
+    @editorInstance.setData(@content)
+    @editorInstance.destroy(true)
     @toggleEdit()
     @title.cache(@title())
 
@@ -66,65 +89,74 @@ NotesController::show = ->
   params = @params
   $container = $("body main")
 
-  noteEditorModel = new NoteEditorModel(params.title)
-  ko.applyBindings(noteEditorModel, $container[0])
+  noteModel = new NoteModel(params.note)
+  ko.applyBindings(noteModel, $container[0])
 
-  # Prepare data for CKEDITOR
-  params.comparisons = _.map(params.comparisons, (comparison) ->
-    comparison.type = "comparison"
-    comparison.icon = "fa fa-crosshairs"
-    comparison.path = "/comparisons/#{comparison.id}"
-    return comparison
-  )
+  if params.note?
+    $(window).on('beforeunload', () ->
+      if noteModel.editing()
+        "If you leave this page you will lose your unsaved changes."
+      else
+        return
+    )
 
-  params.files = _.map(params.files, (file) ->
-    file.type = "file"
-    file.icon = "fa fa-file-o"
-    file.path = "/files/#{file.dxid}"
-    return file
-  )
+    # Prepare data for CKEDITOR
+    params.comparisons = _.map(params.comparisons, (comparison) ->
+      comparison.type = "comparison"
+      comparison.icon = "fa fa-area-chart"
+      comparison.path = "/comparisons/#{comparison.id}"
+      return comparison
+    )
 
-  $container.on('click', '.note-attachments .attachment a', (e) -> e.preventDefault())
+    params.files = _.map(params.files, (file) ->
+      file.type = "file"
+      file.icon = "fa fa-file-o"
+      file.path = "/files/#{file.dxid}"
+      return file
+    )
 
-  $container.on('click', '.event-edit', (e) ->
-    noteEditorModel.toggleEdit()
+    $container.on('click', '.note-editing .note-attachments .attachment a', (e) -> e.preventDefault())
+    $container.on('click', 'a[data-method=delete]', (e) -> noteModel.cancel())
 
-    # When an item in the contact list is dragged, copy its data into drag and drop data transfer.
-    # This data is later read by the editor#paste listener in the attachment-inline plugin defined above.
-    CKEDITOR.document.getById('note-attachments').on 'dragstart', (evt) ->
-      # The target may be some element inside the draggable div (e.g. the image), so get the div.h-card.
-      target = evt.data.getTarget().getAscendant((el) ->
-        el.hasClass?('attachment')
-      , true)
-      # Initialization of CKEditor data transfer facade is a necessary step to extend and unify native
-      # browser capabilities. For instance, Internet Explorer does not support any other data type than 'text' and 'URL'.
-      # Note: evt is an instance of CKEDITOR.dom.event, not a native event.
-      CKEDITOR.plugins.clipboard.initDragDataTransfer evt
-      dataTransfer = evt.data.dataTransfer
-      # Pass an object with contact details. Based on it, the editor#paste listener in the attachment-inline plugin
-      # will create HTML to be inserted into the editor. We could set text/html here as well, but:
-      # * It is a more elegant and logical solution that this logic is kept in the attachment-inline plugin.
-      # * We do not know now where the content will be dropped and the HTML to be inserted
-      # might vary depending on the drop target.
-      data = target.data('attachment').split("/")
-      attachmentType = data[1]
-      attachmentID = data[2]
-      attachmentData = _.find(params[attachmentType], (item) ->
-        switch attachmentType
-          when "files"
-            item.dxid == attachmentID
-          else
-            item.id == parseInt(attachmentID)
-      )
-      dataTransfer.setData 'attachment', attachmentData
-      # We need to set some normal data types to backup values for two reasons:
-      # * In some browsers this is necessary to enable drag and drop into text in editor.
-      # * The content may be dropped in another place than the editor.
-      dataTransfer.setData 'text/html', target.getText()
+    $container.on('click', '.event-edit', (e) ->
+      noteModel.toggleEdit()
 
-    NOTE_INSTANCE_NAME = 'note-editor'
-    CKEDITOR.disableAutoInline = true
-    CKEDITOR.inline(NOTE_INSTANCE_NAME, ckConfig)
-    noteInstance = CKEDITOR.instances[NOTE_INSTANCE_NAME]
-    noteEditorModel.noteInstance = noteInstance
-  )
+      # When an item in the contact list is dragged, copy its data into drag and drop data transfer.
+      # This data is later read by the editor#paste listener in the attachment-inline plugin defined above.
+      CKEDITOR.document.getById('note-attachments').on 'dragstart', (evt) ->
+        # The target may be some element inside the draggable div (e.g. the image), so get the div.h-card.
+        target = evt.data.getTarget().getAscendant((el) ->
+          el.hasClass?('attachment')
+        , true)
+        # Initialization of CKEditor data transfer facade is a necessary step to extend and unify native
+        # browser capabilities. For instance, Internet Explorer does not support any other data type than 'text' and 'URL'.
+        # Note: evt is an instance of CKEDITOR.dom.event, not a native event.
+        CKEDITOR.plugins.clipboard.initDragDataTransfer evt
+        dataTransfer = evt.data.dataTransfer
+        # Pass an object with contact details. Based on it, the editor#paste listener in the attachment-inline plugin
+        # will create HTML to be inserted into the editor. We could set text/html here as well, but:
+        # * It is a more elegant and logical solution that this logic is kept in the attachment-inline plugin.
+        # * We do not know now where the content will be dropped and the HTML to be inserted
+        # might vary depending on the drop target.
+        data = target.data('attachment').split("/")
+        attachmentType = data[1]
+        attachmentID = data[2]
+        attachmentData = _.find(params[attachmentType], (item) ->
+          switch attachmentType
+            when "files"
+              item.dxid == attachmentID
+            else
+              item.id == parseInt(attachmentID)
+        )
+        dataTransfer.setData 'attachment', attachmentData
+        # We need to set some normal data types to backup values for two reasons:
+        # * In some browsers this is necessary to enable drag and drop into text in editor.
+        # * The content may be dropped in another place than the editor.
+        dataTransfer.setData 'text/html', target.getText()
+
+      NOTE_INSTANCE_NAME = 'note-editor'
+      CKEDITOR.disableAutoInline = true
+      CKEDITOR.inline(NOTE_INSTANCE_NAME, ckConfig)
+      editorInstance = CKEDITOR.instances[NOTE_INSTANCE_NAME]
+      noteModel.editorInstance = editorInstance
+    )

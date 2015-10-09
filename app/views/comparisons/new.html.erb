@@ -1,7 +1,7 @@
 <% content_for :title do %>Comparator<% end %>
 
 <div class="page-header clearfix">
-  <div class="page-title"><span class="fa fa-crosshairs fa-fw"></span><span data-bind="text: areAllInputsSet() ? 'Run' : 'Set up'"></span> your comparison</div>
+  <div class="page-title"><span class="fa fa-area-chart fa-fw"></span><span data-bind="text: areAllInputsSet() ? 'Run' : 'Set up'"></span> your comparison</div>
 </div>
 
 <div class="container-fluid">
@@ -144,7 +144,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-          <button type="button" name="submit" class="btn btn-primary disabled" data-bind="disabled: !isFormReady(), css: {disabled: !isFormReady()}, click: submitForm"><span class="fa fa-crosshairs"></span> Start Comparison</button>
+          <button type="button" name="submit" class="btn btn-primary disabled" data-bind="disabled: !isFormReady(), css: {disabled: !isFormReady()}, click: submitForm"><span class="fa fa-area-chart"></span> Start Comparison</button>
         </div>
       </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

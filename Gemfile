@@ -40,6 +40,10 @@ gem "wice_grid", '3.6.0.pre4'
 # Page-specific javascript for Rails done right
 gem "paloma", "4.2.1"
 
+# FriendlyId is the "Swiss Army bulldozer" of slugging and permalink plugins for Active Record.
+# It lets you create pretty URLs and work with human-friendly strings as if they were numeric ids.
+gem 'friendly_id', '~> 5.1.0'
+
 # Use thin
 gem 'thin'
 
