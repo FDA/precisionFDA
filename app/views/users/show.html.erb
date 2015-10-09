@@ -14,15 +14,15 @@
         </p>
       </li>
       <li class="list-group-item">
-        <h5 class="list-group-item-heading">Biospecimens</h5>
-        <p class="list-group-item-text">
-          <%= link_to(@user.biospecimens.size, "#{biospecimens_path()}?grid[f][users.dxuser]=#{@user.dxuser}")  %>
-        </p>
-      </li>
-      <li class="list-group-item">
         <h5 class="list-group-item-heading">Comparisons</h5>
         <p class="list-group-item-text">
           <%= link_to(@user.comparisons.size, "#{comparisons_path()}?grid[f][users.dxuser]=#{@user.dxuser}")  %>
+        </p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Notes</h5>
+        <p class="list-group-item-text">
+          <%= link_to(@user.notes.size, "#{notes_path()}?grid[f][users.dxuser]=#{@user.dxuser}")  %>
         </p>
       </li>
     </ul>
