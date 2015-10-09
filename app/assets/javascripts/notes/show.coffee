@@ -48,7 +48,7 @@ class NoteModel
 
   save: () ->
     @toggleEdit()
-    @title(@title.cache())
+    @title(_.trim(@title.cache()))
     @content = @editorInstance.getData()
     @editorInstance.destroy()
     @saving(true)
