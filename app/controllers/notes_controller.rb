@@ -6,70 +6,72 @@ class NotesController < ApplicationController
       ]
     }
 
-    @notes_list = {
-      header: [
-        {field: "name", display: "Name"},
-        {field: "created", display: "Created"},
-        {field: "addedBy", display: "Added by"}
-      ],
-      rows: [
-        [
-          {field: "name", display: "PrecisionFDA Benchmark VCFs", link: note_path(1)},
-          {field: "created", display: "9/17/2015"},
-          {field: "addedBy", display: "George Asimenos", link: user_path("george.fdauser")}
-        ],
-        [
-          {field: "name", display: "Taking NA12878 from a HiSeq X Ten via the precisionFDA lens", link: note_path(2)},
-          {field: "created", display: "9/16/2015"},
-          {field: "addedBy", display: "George Asimenos", link: user_path("george.fdauser")}
-        ],
-        [
-          {field: "name", display: "How related are NA12878 and NA12877?", link: note_path(3)},
-          {field: "created", display: "9/15/2015"},
-          {field: "addedBy", display: "George Asimenos", link: user_path("george.fdauser")}
-        ]
-      ]
-    }
+    notes = Note.accessible_by(@context.user_id)
+    @notes_grid = initialize_grid(notes, {
+      order: 'notes.title',
+      order_direction: 'asc',
+      per_page: 100
+    })
   end
 
   def show
-    @note = {
-      title: "My first note",
-      id: params[:id].to_i,
-      user_id: @context.user_id
-    }
+    @note = Note.accessible_by(@context.user_id).friendly.find(params[:id])
 
-    if params[:id].to_i == 1
-      @name = "PrecisionFDA Benchmark VCFs"
-
-      @comparisons = Comparison.accessible_by(@context.user_id)
-      @files = UserFile.real_files.accessible_by(@context.user_id).where(id: [15, 16, 17, 43, 44, 45])
-    elsif params[:id].to_i == 2
-      @name = "Taking NA12878 from a HiSeq X Ten via the precisionFDA lens"
-
-      @comparisons = Comparison.accessible_by(@context.user_id).where(id: [5, 8])
-
-      @comparison = Comparison.find(5)
-      @comparison2 = Comparison.find(8)
-      @meta = ActiveSupport::JSON.decode(@comparison.meta)
-      @meta2 = ActiveSupport::JSON.decode(@comparison2.meta)
-      @test_vcf = @comparison.input('test_vcf').user_file
-      @ref_vcf = @comparison.input('ref_vcf').user_file
-      @ref_vcf2 = @comparison2.input('ref_vcf').user_file
-
-      # NOTE: Make this be a query for both INPUT and OUTPUT UserFiles
-      @files = @comparison.user_files.all + @comparison2.user_files.all
-    elsif params[:id].to_i == 99
-      @comparisons = Comparison.accessible_by(@context.user_id)
-      @files = UserFile.real_files.accessible_by(@context.user_id)
-      # @apps = App.accessible_by(@context.user_id)
-    end
+    @comparisons = Comparison.accessible_by(@context.user_id)
+    @files = UserFile.real_files.accessible_by(@context.user_id)
 
     if @note[:user_id] == @context.user_id
-      js title: @note[:title], comparisons: @comparisons, files: @files
+      js note: @note, comparisons: @comparisons, files: @files
     end
   end
 
   def new
+    @note = Note.new({
+      title: "Untitled Note (#{DateTime.now.strftime("%Y-%m-%d %H:%M:%S")})",
+      user_id: @context.user_id,
+      public: false
+    })
+
+    @note.save
+    redirect_to @note
   end
+
+  def update
+    updated = false
+    note = Note.friendly.find(params[:id])
+    if note[:user_id] == @context.user_id
+      Note.transaction do
+        params = note_params()
+        if params[:title] != note[:title]
+          params[:slug] = nil
+        end
+        if note.update!(params)
+          updated = true
+          note.reload
+        end
+      end
+    end
+
+    render json: {
+      success: updated,
+      note: {
+        id: note.id,
+        slug: note.slug
+      }
+    }
+  end
+
+  def destroy
+    note = Note.where(user_id: @context.user_id).friendly.find(params[:id])
+
+    note.destroy
+
+    flash[:success] = "Note \"#{note.title}\" has been successfully deleted"
+    redirect_to :notes
+  end
+
+  private
+    def note_params
+      params.require(:note).permit(:title, :content, :public)
+    end
 end

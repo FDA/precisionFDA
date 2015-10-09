@@ -7,14 +7,18 @@
 
   .note-titlebar
     padding: $padding-large-vertical $padding-base-horizontal
-    font-size: $font-size-h3
-    font-weight: 300
-    color: $brand-blue-dark
     background-color: #fff
     border-bottom: 1px solid $brand-blue-subtle
     border-radius: $border-radius-base
     border-bottom-left-radius: 0
     border-bottom-right-radius: 0
+
+    &, & input
+      font-size: $font-size-h3
+      font-weight: 300
+      color: $brand-blue-dark
+      line-height: $line-height-base
+      height: auto
 
   .note-flexbox
     @include flexbox
@@ -74,7 +78,12 @@
 
     .note-titlebar
       padding: 0
+      .input-group-addon
+        border: 0
+        background: transparent
+        font-size: $font-size-h3
       input
+        padding: $padding-large-vertical $padding-base-horizontal
         box-shadow: inset 0px 0px 0px 5px $brand-highlight
         border: 0
         border-radius: $border-radius-base
