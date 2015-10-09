@@ -1,94 +1,107 @@
 <% content_for :title do %><%= @title %><% end %>
 
-<div class="page-header">
-  <div class="page-title"><span class="fa fa-sticky-note"></span> <%= @name %></div>
-</div>
-
-<div class="pfda-toolbar clearfix">
-  <div class="btn-group pull-right">
-    <a class="btn btn-primary" href="#">Attach</a>
-    <a class="btn btn-primary" href="#">Edit</a>
-    <a class="btn btn-primary" href="#">Publish</a>
-    <a class="btn btn-danger" href="#">Delete</a>
-  </div>
-</div>
-
-
-<div class="pfda-2-pane-wrapper container-fluid">
-  <div class="row">
-    <div class="pfda-2-pane-sidebar col-sm-9">
-      <div class="sidebar-title"><span class="fa fa-paperclip"></span> Attachments</div>
-      <% if !@comparisons.blank? %>
-      <div class="note-comparison panel panel-default">
-        <div class="panel-heading">
-          <h3 class="panel-title">Comparisons</h3>
-        </div>
-        <div class="panel-table">
-          <%= grid(@comparisons_grid) do |g|
-            g.column name: 'Name' do |comparison|
-              link_to(comparison.name, file_path(comparison.id))
-            end
-
-            g.column name: 'Created' do |comparison|
-              comparison.created_at.to_s(:db)
-            end
-          end -%>
-        </div>
+<% if @note[:user_id] == @context.user_id %>
+  <div class="pfda-toolbar clearfix">
+    <div class="btn-toolbar pull-right" data-bind="visible: !editing()">
+      <div class="btn-group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+           Attach <span class="caret"></span>
+         </button>
+         <ul class="dropdown-menu">
+           <li class="hide"><a href="#">Apps</a></li>
+           <li><a href="#">Comparisons</a></li>
+           <li><a href="#">Files</a></li>
+           <li class="hide"><a href="#">Users</a></li>
+         </ul>
       </div>
-      <% end %>
-
-      <% if !@files.blank? %>
-      <div class="note-files panel panel-default">
-        <div class="panel-heading">
-          <h3 class="panel-title">Files</h3>
-        </div>
-        <div class="panel-table">
-          <%= grid(@files_grid) do |g|
-            g.column name: 'Name' do |file|
-              link_to(file.name, file_path(file.dxid))
-            end
-
-            g.column name: 'Size' do |file|
-               number_to_human_size(file.file_size)
-            end
-
-            g.column name: 'Created', auto_reload: true, filter_type: :standard do |file|
-              file.created_at.to_s(:db)
-            end
-          end -%>
-        </div>
+      <div class="btn-group">
+        <a class="btn btn-default event-edit">Edit</a>
+        <a class="btn btn-default">Publish</a>
       </div>
-      <% end %>
     </div>
-    <div class="note-content pfda-2-pane-content col-sm-14 col-sm-offset-1">
-      <div class="note-content-markdown">
+    <div class="btn-toolbar pull-right" data-bind="visible: editing()" style="display: none;">
+      <div class="btn-group">
+        <a class="btn btn-default" data-bind="click: cancel">Cancel</a>
+        <a class="btn btn-primary" data-bind="click: save">Save</a>
+      </div>
+      <div class="btn-group">
+        <a class="btn btn-default"><span class="fa fa-trash"></span> Delete</a>
+      </div>
+    </div>
+  </div>
+<% end %>
 
-        <% if params[:id].to_i == 1 %>
-          <p class="lead text-muted">
-            <a href="#">Edit</a> this note
-          </p>
-        <% end %>
-        <% if params[:id].to_i == 2 %>
-          <p>What percentage of NA12878 variants can be recovered using one lane of HiSeq X Ten sequencing?</p>
-          <h3>Experimental setup</h3>
-          <p>NA12878 material was sequenced on one lane of HiSeq X Ten using the HiSeq X Ten Reagent Kit v2.5. The reads were mapped against hs37d5 with BWA-MEM; variation calling was performed with GATK 3.3 (best practices). The resulting <a class="widget-inline" href="<%= file_path(@test_vcf.dxid) %>"><span class="fa fa-file"></span> <%= @test_vcf.name %></a> was compared against <a class="widget-inline" href="<%= file_path(@ref_vcf.dxid) %>"><span class="fa fa-file"></span> <%= @ref_vcf.name %></a> and <a class="widget-inline" href="<%= file_path(@ref_vcf2.dxid) %>"><span class="fa fa-file"></span> <%= @ref_vcf2.name %></a>.
-          </p>
+<div class="note-container container-fluid">
+  <div class="note" data-bind="css: {'note-editing': editing}">
+    <div class="note-titlebar">
+      <!-- ko if: !editing() -->
+        <span class="fa fa-sticky-note"></span> <span class="note-title" data-bind="text: title"><%= @name %></span>
+      <!-- /ko -->
+      <!-- ko if: editing() -->
+        <input class="form-control input-lg" name="title" placeholder="Note title..." data-bind="textInput: title.cache" />
+      <!-- /ko -->
+    </div>
+    <div class="note-flexbox">
+      <div class="note-sidebar">
+        <div id="note-attachments" class="note-attachments">
+          <div class="note-section-title"><span class="fa fa-paperclip"></span> Attachments</div>
 
-          <h3>Results</h3>
-          <p>In <a class="widget-inline" href="<%= comparison_path(@comparison.id) %>"><span class="fa fa-crosshairs"></span> <%= @comparison.name %></a> we noted that there are 3,123,990 true positives, 21,846 false positives and 27,029 false negatives.</p>
-          <a class="widget-card" href="<%= comparison_path(@comparison.id) %>">
-            <div class="widget-card-title">
-              <span class="fa fa-crosshairs"></span> <%= @comparison.name %>
+          <% if !@comparisons.blank? %>
+          <div class="note-comparison list-group">
+            <div class="list-group-item">
+              <div class="list-group-item-heading">Comparisons</div>
             </div>
-            <div class="widget-card-content">
-              Precision: <%= number_to_percentage(@meta["precision"].to_f * 100, strip_insignificant_zeros: true) %>
-              <br/>
-              Sensitivity: <%= number_to_percentage(@meta["recall"].to_f * 100, strip_insignificant_zeros: true) %>
-              <br/>
-              F-Measure: <%= number_to_percentage(@meta["f-measure"].to_f * 100, strip_insignificant_zeros: true) %>
+            <% @comparisons.each do |item| %>
+              <div class="list-group-item attachment" data-attachment='<%= comparison_path(item.id) %>' data-bind="attr: {draggable: editing}">
+                <span class="fa fa-crosshairs"></span> <%= link_to(item.name, comparison_path(item.id)) %>
+              </div>
+            <% end %>
+          </div>
+          <% end %>
+
+          <% if !@files.blank? %>
+          <div class="note-files list-group">
+            <div class="list-group-item">
+              <div class="list-group-item-heading">Files</div>
             </div>
-          </a>
-        <% end %>
+            <% @files.each do |item| %>
+              <div class="list-group-item attachment" data-attachment='<%= file_path(item.dxid) %>' data-bind="attr: {draggable: editing}">
+                <span class="fa fa-file-o"></span> <%= link_to(item.name, file_path(item.dxid)) %>
+              </div>
+            <% end %>
+          </div>
+          <% end %>
+        </div>
+      </div>
+      <div class="note-pane">
+        <div id="note-editor" class="note-content">
+          <% if params[:id].to_i == 1 %>
+            <p class="lead text-muted">
+              <a href="#">Edit</a> this note
+            </p>
+          <% end %>
+          <% if params[:id].to_i == 2 %>
+            <p>What percentage of NA12878 variants can be recovered using one lane of HiSeq X Ten sequencing?</p>
+            <h3>Experimental setup</h3>
+            <p>NA12878 material was sequenced on one lane of HiSeq X Ten using the HiSeq X Ten Reagent Kit v2.5. The reads were mapped against hs37d5 with BWA-MEM; variation calling was performed with GATK 3.3 (best practices). The resulting <a class="widget-inline" href="<%= file_path(@test_vcf.dxid) %>"><span class="fa fa-file"></span> <%= @test_vcf.name %></a> was compared against <a class="widget-inline" href="<%= file_path(@ref_vcf.dxid) %>"><span class="fa fa-file"></span> <%= @ref_vcf.name %></a> and <a class="widget-inline" href="<%= file_path(@ref_vcf2.dxid) %>"><span class="fa fa-file"></span> <%= @ref_vcf2.name %></a>.
+            </p>
+
+            <h3>Results</h3>
+            <p>In <a class="widget-inline" href="<%= comparison_path(@comparison.id) %>"><span class="fa fa-crosshairs"></span> <%= @comparison.name %></a> we noted that there are 3,123,990 true positives, 21,846 false positives and 27,029 false negatives.</p>
+            <a class="widget-card" href="<%= comparison_path(@comparison.id) %>">
+              <div class="widget-card-title">
+                <span class="fa fa-crosshairs"></span> <%= @comparison.name %>
+              </div>
+              <div class="widget-card-content">
+                Precision: <%= number_to_percentage(@meta["precision"].to_f * 100, strip_insignificant_zeros: true) %>
+                <br/>
+                Sensitivity: <%= number_to_percentage(@meta["recall"].to_f * 100, strip_insignificant_zeros: true) %>
+                <br/>
+                F-Measure: <%= number_to_percentage(@meta["f-measure"].to_f * 100, strip_insignificant_zeros: true) %>
+              </div>
+            </a>
+          <% end %>
+        </div>
       </div>
     </div>
   </div>

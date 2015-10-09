@@ -33,32 +33,21 @@ class NotesController < ApplicationController
   end
 
   def show
-    @toolbar = {
-      fixed: [
-        {label: "Edit", link: "#"},
-        {label: "Publish", link: "#"}
-      ]
+    @note = {
+      title: "My first note",
+      id: params[:id].to_i,
+      user_id: @context.user_id
     }
 
     if params[:id].to_i == 1
       @name = "PrecisionFDA Benchmark VCFs"
 
-      comparisons = Comparison.accessible_by(@context.user_id)
-      # NOTE: Get benchmark vcfs
+      @comparisons = Comparison.accessible_by(@context.user_id)
       @files = UserFile.real_files.accessible_by(@context.user_id).where(id: [15, 16, 17, 43, 44, 45])
-      @files_grid = initialize_grid(@files, {
-        order: 'name',
-        order_direction: 'asc',
-      })
     elsif params[:id].to_i == 2
       @name = "Taking NA12878 from a HiSeq X Ten via the precisionFDA lens"
 
-      @comparisons = Comparison.accessible_by(@context.user_id)
-      @comparisons_grid = initialize_grid(@comparisons, {
-        order: 'name',
-        order_direction: 'asc',
-        conditions: {id: [5,8]}
-      })
+      @comparisons = Comparison.accessible_by(@context.user_id).where(id: [5, 8])
 
       @comparison = Comparison.find(5)
       @comparison2 = Comparison.find(8)
@@ -70,12 +59,14 @@ class NotesController < ApplicationController
 
       # NOTE: Make this be a query for both INPUT and OUTPUT UserFiles
       @files = @comparison.user_files.all + @comparison2.user_files.all
-      @files_grid = initialize_grid(UserFile, {
-        order: 'name',
-        order_direction: 'asc',
-        conditions: {id: @files.map(&:id)}
-      })
     elsif params[:id].to_i == 99
+      @comparisons = Comparison.accessible_by(@context.user_id)
+      @files = UserFile.real_files.accessible_by(@context.user_id)
+      # @apps = App.accessible_by(@context.user_id)
+    end
+
+    if @note[:user_id] == @context.user_id
+      js title: @note[:title], comparisons: @comparisons, files: @files
     end
   end
 
