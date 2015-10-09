@@ -23,30 +23,29 @@
   .note-flexbox
     @include flexbox
     @include align-items(stretch)
+    background-color: lighten($brand-blue-subtler, 1%)
 
   .note-sidebar
     max-width: 400px
+    border-left: 1px solid $brand-blue-subtle
+    border-top-right-radius: $border-radius-base
+    border-bottom-right-radius: $border-radius-base
+    padding: $padding-base-vertical $padding-base-horizontal
 
   .note-pane
     width: 100%
-    background-color: lighten($brand-blue-subtler, 1%)
 
     .note-content
       margin: 10px
       padding: 40px
       font-size: 16px
       line-height: 1.5
-      min-height: 300px
+      min-height: 400px
       background-color: #fff
       border: 1px solid darken($brand-blue-subtler, 5%)
       border-radius: $border-radius-small
 
   .note-attachments
-    border-right: 1px solid $brand-blue-subtle
-    border-top-left-radius: $border-radius-base
-    border-bottom-left-radius: $border-radius-base
-    padding: $padding-base-vertical $padding-base-horizontal
-
     .list-group
       padding-right: $padding-xs-horizontal
 
@@ -97,3 +96,8 @@
           cursor: move
           cursor: -webkit-grab
           cursor: -moz-grab
+
+@media (max-width: $screen-sm-max)
+  .note-flexbox
+    /* On small screens, we are no longer using row direction but column */
+    @include flex-direction(column)

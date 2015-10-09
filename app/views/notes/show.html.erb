@@ -47,6 +47,11 @@
       <!-- /ko -->
     </div>
     <div class="note-flexbox">
+      <div class="note-pane">
+        <div id="note-editor" class="note-content">
+          <%= raw @note.content %>
+        </div>
+      </div>
       <div class="note-sidebar">
         <div id="note-attachments" class="note-attachments">
           <div class="note-section-title"><span class="fa fa-paperclip"></span> Attachments</div>
@@ -76,11 +81,6 @@
             <% end %>
           </div>
           <% end %>
-        </div>
-      </div>
-      <div class="note-pane">
-        <div id="note-editor" class="note-content">
-          <%= raw @note.content %>
         </div>
       </div>
     </div>
