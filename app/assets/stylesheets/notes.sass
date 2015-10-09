@@ -1,98 +1,90 @@
 @import "_common"
 
 .pfda-controller-notes.pfda-action-show main
-  .pfda-2-pane-sidebar
-    thead, tfoot
-      display: none
+  .note
+    border: 1px solid $gray-lighter
+    border-radius: $border-radius-base
 
-    .panel, .panel-default > .panel-heading
+  .note-titlebar
+    padding: $padding-large-vertical $padding-base-horizontal
+    font-size: $font-size-h3
+    font-weight: 300
+    color: $brand-blue-dark
+    background-color: #fff
+    border-bottom: 1px solid $brand-blue-subtle
+    border-radius: $border-radius-base
+    border-bottom-left-radius: 0
+    border-bottom-right-radius: 0
+
+  .note-flexbox
+    @include flexbox
+    @include align-items(stretch)
+
+  .note-sidebar
+    max-width: 400px
+
+  .note-pane
+    width: 100%
+    background-color: lighten($brand-blue-subtler, 1%)
+
+    .note-content
+      margin: 10px
+      padding: 40px
+      font-size: 16px
+      line-height: 1.5
+      min-height: 300px
+      background-color: #fff
+      border: 1px solid darken($brand-blue-subtler, 5%)
+      border-radius: $border-radius-small
+
+  .note-attachments
+    border-right: 1px solid $brand-blue-subtle
+    border-top-left-radius: $border-radius-base
+    border-bottom-left-radius: $border-radius-base
+    padding: $padding-base-vertical $padding-base-horizontal
+
+    .list-group
+      padding-right: $padding-xs-horizontal
+
+    .list-group-item
+      color: $brand-blue-tertiary
       background-color: transparent
       border-color: transparent
-      color: $brand-blue-tertiary
+      padding: $padding-xs-vertical $padding-xs-horizontal
+      @include text-overflow
 
-    .panel-heading
-      padding: $padding-xs-vertical
-
-    table > tbody > tr > td
-      border-color: transparent
-      padding: $padding-xs-vertical 4px
-      font-size: 13px
-
-    .sidebar-title
-      color: $brand-blue-subtle
-      font-size: 14px
-      font-weight: bold
-      margin: 10px 0 20px
-      text-transform: uppercase
-
-  .pfda-2-pane-content
-    border-radius: $border-radius-base
-
-.note-content-markdown
-  padding: 50px
-  font-size: 16px
-  line-height: 1.5
-
-  a, a:hover
-    text-decoration: none
-
-  a.widget-inline, a.widget-card
-    background-color: $brand-blue-subtler
-    padding: 2px
-    border-radius: $border-radius-small
-    &:hover
-      background-color: darken($brand-blue-subtler, 2%)
-
-  a.widget-card
-    display: block
-    background-color: $brand-blue-subtler
-    padding: $padding-base-vertical $padding-base-horizontal
-    border: 1px solid darken($brand-blue-subtler, 5%)
-
-    .widget-card-title
-      font-weight: bold
-      font-size: $font-size-h4
-
-    .widget-card-content
-      font-size: $font-size-h5
-      color: $brand-blue-tertiary
-
-.pfda-controller-notes.pfda-action-new main
-  .page-header
-    background-color: $brand-blue-subtler
-
-    .btn-default
-      border: 1px solid #ddd
-
-      &:not(.disabled):hover
-        border: 1px solid $link-color
-
-  .page-title
-    .input-group-addon
-      background-color: darken($brand-blue-primary, 10%)
-      border-color: $brand-blue-primary
-      color: $brand-blue-subtle
-      font-size: 30px
-
-  .note-editor
-    padding: 10px
-    border: 1px solid #ccc
-    border-radius: $border-radius-base
-    min-height: 400px
-    box-shadow: inset 0px 1px 2px rgba(0, 0, 0, 0.25)
-
-  .attachments
-    padding-right: $padding-base-horizontal
-
-    .attachment-inline
-      padding: $padding-small-vertical $padding-small-horizontal
-      &:hover
-        background-color: $brand-blue-subtler
-        cursor: move
-        cursor: -webkit-grab
-        cursor: -moz-grab
+      .list-group-item-heading
+        margin: 0
+        padding: $padding-base-vertical 0
 
       a
         padding: $padding-xs-vertical $padding-xs-horizontal
-        &:hover
-          background-color: $brand-blue-subtle
+
+  .note-section-title
+    color: $brand-blue-tertiary
+    font-size: 14px
+    font-weight: bold
+    margin: 5px 0 10px
+    text-transform: uppercase
+
+  .note-editing
+    .note-content
+      box-shadow: inset 0px 0px 0px 5px $brand-highlight
+      // inset 0 0 0px 20px #E8EEF5
+
+    .note-titlebar
+      padding: 0
+      input
+        box-shadow: inset 0px 0px 0px 5px $brand-highlight
+        border: 0
+        border-radius: $border-radius-base
+        border-bottom-left-radius: 0
+        border-bottom-right-radius: 0
+
+    .note-attachments
+      .list-group-item
+        &[draggable=true]:hover
+          border: 1px dotted #ccc
+          cursor: move
+          cursor: -webkit-grab
+          cursor: -moz-grab
