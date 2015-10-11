@@ -95,6 +95,7 @@ class ApiController < ApplicationController
           user = User.find(@context.user_id)
           user.open_files_count = user.open_files_count - 1
           user.closing_files_count = user.closing_files_count + 1
+          user.save!
           file.state = "closing"
           file.save!
         end
