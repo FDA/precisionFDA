@@ -19,16 +19,17 @@ Rails.application.routes.draw do
     # The priority is based upon order of creation: first created -> highest priority.
     # See how all your routes lay out with "rake routes".
 
-    resources :apps
+    resources :apps do
+      resources :jobs, shallow: true, except: :index
+      get 'jobs', on: :member, to: 'apps#index'
+      get 'jobs/new2', on: :member, to: 'jobs#new2'
+    end
     resources :biospecimens
     resources :comparisons
     resources :files do
       post 'download', on: :member
     end
-    resources :jobs
     resources :notes
-
-    get '/apps/jobs/:app', to: 'apps#index', as: 'appjobs'
 
     get '/users', to: 'users#index'
     get "/users/:username", to: 'users#show', constraints: { username: /[^\/]*/ }, as: 'user'

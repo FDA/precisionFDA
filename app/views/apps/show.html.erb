@@ -1,11 +1,11 @@
 <div class="page-header">
-  <div class="page-title"><span class="fa fa-cube"></span>App ABC</div>
+  <div class="page-title"><span class="fa fa-cube"></span> <%= @app.title %></div>
 </div>
 
 <div class="container-fluid">
   <div class="panel panel-default">
     <div class="panel-body">
-      [Metadata]
+      <%= debug @app.as_json %>
     </div>
   </div>
 </div>

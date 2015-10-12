@@ -64,6 +64,7 @@ class MainController < ApplicationController
         admin_api = DNAnexusAPI.new("BEI5ErikmLb8kmQUPiHz7JB78reoftSL")
         admin_api.call("org-precisionfda.users", "invite", {invitee: "user-#{username}", suppressEmailNotification: true})
 
+        # TODO: For now put in dnanexus org
         user = User.create!(
           dxuser: username,
           private_files_project: private_files_project,
@@ -73,13 +74,15 @@ class MainController < ApplicationController
           open_files_count: 0,
           closing_files_count: 0,
           pending_comparisons_count: 0,
+          pending_jobs_count: 0,
+          org_id: Org.find_by(handle: 'dnanexus').id,
           schema_version: User::CURRENT_SCHEMA
         )
       end
     end
 
     # Log in
-    save_session(user.id, username, token, expiration_time)
+    save_session(user.id, username, token, expiration_time, user.org_id)
 
     redirect_to root_path
   end

@@ -25,6 +25,8 @@ class UserFile < ActiveRecord::Base
   has_many :comparison_inputs
   has_many :comparisons, -> { distinct }, {through: :comparison_inputs, dependent: :restrict_with_exception}
 
+  has_and_belongs_to_many :jobs_as_input, {join_table: "job_inputs", class_name: "Job"}
+
   def self.real_files
     return where.not(parent_type: 'Comparison')
   end

@@ -14,14 +14,15 @@ class ApplicationController < ActionController::Base
   private
 
   def decode_context
-    @context = Context.new(session[:user_id], session[:username], session[:token], session[:expiration])
+    @context = Context.new(session[:user_id], session[:username], session[:token], session[:expiration], session[:org_id])
   end
 
-  def save_session(user_id, username, token, expiration)
+  def save_session(user_id, username, token, expiration, org_id)
     session[:user_id] = user_id
     session[:username] = username
     session[:token] = token
     session[:expiration] = expiration
+    session[:org_id] = org_id
   end
 
   def require_login

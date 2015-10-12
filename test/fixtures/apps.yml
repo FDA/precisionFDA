@@ -1,0 +1,53 @@
+# == Schema Information
+#
+# Table name: apps
+#
+#  id         :integer          not null, primary key
+#  dxid       :string
+#  series     :string
+#  project    :string
+#  version    :string
+#  is_latest  :boolean
+#  is_applet  :boolean
+#  name       :string
+#  title      :string
+#  readme     :text
+#  user_id    :integer
+#  scope      :string
+#  spec       :text
+#  internal   :text
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#
+
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  dxid: MyString
+  series: MyString
+  project: MyString
+  version: MyString
+  is_latest: false
+  is_applet: false
+  name: MyString
+  title: MyString
+  readme: MyText
+  user_id: 
+  scope: MyString
+  spec: MyText
+  internal: MyText
+
+two:
+  dxid: MyString
+  series: MyString
+  project: MyString
+  version: MyString
+  is_latest: false
+  is_applet: false
+  name: MyString
+  title: MyString
+  readme: MyText
+  user_id: 
+  scope: MyString
+  spec: MyText
+  internal: MyText

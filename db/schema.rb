@@ -11,7 +11,31 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151009181205) do
+ActiveRecord::Schema.define(version: 20151011220723) do
+
+  create_table "apps", force: :cascade do |t|
+    t.string   "dxid"
+    t.string   "series"
+    t.string   "project"
+    t.string   "version"
+    t.boolean  "is_latest"
+    t.boolean  "is_applet"
+    t.string   "name"
+    t.string   "title"
+    t.text     "readme"
+    t.integer  "user_id"
+    t.string   "scope"
+    t.text     "spec"
+    t.text     "internal"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "apps", ["dxid"], name: "index_apps_on_dxid"
+  add_index "apps", ["is_applet"], name: "index_apps_on_is_applet"
+  add_index "apps", ["is_latest"], name: "index_apps_on_is_latest"
+  add_index "apps", ["scope"], name: "index_apps_on_scope"
+  add_index "apps", ["user_id"], name: "index_apps_on_user_id"
 
   create_table "biospecimen", force: :cascade do |t|
     t.string   "name"
@@ -61,6 +85,36 @@ ActiveRecord::Schema.define(version: 20151009181205) do
   add_index "friendly_id_slugs", ["slug", "sluggable_type"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type"
   add_index "friendly_id_slugs", ["sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_id"
   add_index "friendly_id_slugs", ["sluggable_type"], name: "index_friendly_id_slugs_on_sluggable_type"
+
+  create_table "job_inputs", force: :cascade do |t|
+    t.integer "job_id"
+    t.integer "user_file_id"
+  end
+
+  add_index "job_inputs", ["job_id"], name: "index_job_inputs_on_job_id"
+  add_index "job_inputs", ["user_file_id"], name: "index_job_inputs_on_user_file_id"
+
+  create_table "jobs", force: :cascade do |t|
+    t.string   "dxid"
+    t.string   "series"
+    t.integer  "app_id"
+    t.string   "project"
+    t.text     "spec"
+    t.text     "run_data"
+    t.text     "describe"
+    t.text     "provenance"
+    t.text     "app_meta"
+    t.string   "state"
+    t.string   "name"
+    t.integer  "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "jobs", ["app_id"], name: "index_jobs_on_app_id"
+  add_index "jobs", ["dxid"], name: "index_jobs_on_dxid"
+  add_index "jobs", ["series"], name: "index_jobs_on_series"
+  add_index "jobs", ["user_id"], name: "index_jobs_on_user_id"
 
   create_table "notes", force: :cascade do |t|
     t.string   "title"
@@ -119,6 +173,7 @@ ActiveRecord::Schema.define(version: 20151009181205) do
     t.datetime "created_at",                  null: false
     t.datetime "updated_at",                  null: false
     t.integer  "org_id"
+    t.integer  "pending_jobs_count"
   end
 
   add_index "users", ["dxuser"], name: "index_users_on_dxuser", unique: true

@@ -12,6 +12,7 @@ namespace :data do
         open_files_count: 0,
         closing_files_count: 0,
         pending_comparisons_count: 0,
+        pending_jobs_count: 0,
         schema_version: 1
       )
 
@@ -34,6 +35,7 @@ namespace :data do
         open_files_count: 0,
         closing_files_count: 0,
         pending_comparisons_count: 0,
+        pending_jobs_count: 0,
         org_id: dx.id,
         schema_version: 1
       )
@@ -47,6 +49,7 @@ namespace :data do
         open_files_count: 0,
         closing_files_count: 0,
         pending_comparisons_count: 0,
+        pending_jobs_count: 0,
         org_id: dx.id,
         schema_version: 1
       )
@@ -151,6 +154,93 @@ namespace :data do
         public: true,
         parent: george,
         file_size: 230078
+      )
+
+      App.find_or_initialize_by(dxid: "app-george-fdauser-pfda-debug").update!(
+        series: "george-fdauser-pfda-debug",
+        project: nil,
+        version: "1.0.0",
+        is_latest: true,
+        is_applet: false,
+        name: "pfda-debug",
+        title: "Example App 4 Debugging",
+        readme: "This is an example application. Here you would normally see a big README (format TBD; markdown or CKeditor?).",
+        user_id: george.id,
+        scope: "public",
+        spec: {
+          input_spec: [
+            {
+              "name": "required_file",
+              "class": "file",
+              "optional": false,
+              "patterns": ["*.bed"],
+              "label": "Required file",
+              "help": "Enter here a file that we will use blah blah."
+            },
+            {
+              "name": "optional_file",
+              "class": "file",
+              "optional": true,
+              "patterns": ["*.bed"],
+              "label": "Optional file",
+              "help": "Enter here an optional file that we will use blah blah bloh. If you supply this file, we'll do this and that."
+            },
+            {
+              "name": "required_number",
+              "class": "int",
+              "optional": false,
+              "label": "Number of apples",
+              "help": "How many apples would you like to eat?"
+            },
+            {
+              "name": "required_default_number",
+              "class": "int",
+              "optional": false,
+              "label": "Number of oranges",
+              "default": 40,
+              "help": "How many oranges would you like to eat?"
+            },
+            {
+              "name": "optional_string",
+              "class": "string",
+              "optional": true,
+              "label": "Prefix",
+              "help": "Enter the prefix for the generated files"
+            },
+            {
+              "name": "trim",
+              "class": "boolean",
+              "optional": false,
+              "label": "Trim reads?",
+              "help": "If selected, reads will be trimmed."
+            },
+            {
+              "name": "required_string",
+              "class": "string",
+              "optional": false,
+              "label": "Instrument",
+              "help": "Choose the instrument you'd like to simulate",
+              "choices": ["MiSeq", "HiSeq 2500"]
+            }
+          ],
+          output_spec: [
+            {
+              "name": "fastq",
+              "class": "file",
+              "optional": false,
+              "patterns": ["*.fastq.gz"],
+              "label": "Generated fastq",
+              "help": "The generated fastq file"
+            }
+          ],
+          internet_access: false,
+          instance_type: "mem1_ssd1_x4"
+        },
+        internal: {
+          ordered_assets: [],
+          packages: [],
+          code: "#!/bin/bash\necho hello"
+        }
       )
 
     end
