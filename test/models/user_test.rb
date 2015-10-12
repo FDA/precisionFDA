@@ -15,6 +15,7 @@
 #  created_at                  :datetime         not null
 #  updated_at                  :datetime         not null
 #  org_id                      :integer
+#  pending_jobs_count          :integer
 #
 
 require 'test_helper'

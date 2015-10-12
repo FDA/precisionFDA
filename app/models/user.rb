@@ -15,6 +15,7 @@
 #  created_at                  :datetime         not null
 #  updated_at                  :datetime         not null
 #  org_id                      :integer
+#  pending_jobs_count          :integer
 #
 
 class User < ActiveRecord::Base
@@ -31,6 +32,8 @@ class User < ActiveRecord::Base
   has_many :user_files, {class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'}
   has_many :comparisons
   has_many :notes
+  has_many :apps
+  has_many :jobs
   belongs_to :org
 
   def self.sync_file!(user_id, file_id, token)
