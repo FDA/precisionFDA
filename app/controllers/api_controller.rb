@@ -104,4 +104,131 @@ class ApiController < ApplicationController
 
     render json: {}
   end
+
+  def run_app
+    # App id should be a string
+    id = params["id"]
+    raise unless id.is_a?(String) && id != ""
+
+    # Name should be a nonempty string
+    name = params["name"]
+    raise unless name.is_a?(String) && name != ""
+
+    # Inputs should be a hash (more checks later)
+    inputs = params["inputs"]
+    raise unless inputs.is_a?(Hash)
+
+    # App should exist and be accessible
+    @app = App.accessible_by(@context.user_id, @context.org_id).find_by!(dxid: id)
+
+    # Inputs should be compatible
+    # (The following also normalizes them)
+    run_inputs = {}
+    dx_run_input = {}
+    input_file_ids = []
+    @app.input_spec.each do |input|
+      key = input["name"]
+      optional = (input["optional"] == true)
+      has_default = input.has_key?("default")
+      default = input["default"]
+      klass = input["class"]
+      choices = input["choices"]
+
+      if inputs.has_key?(key)
+        value = inputs[key]
+      elsif has_default
+        value = default
+      elsif optional
+        # No given value and no default, but input is optional; move on
+        next
+      else
+        # Required input is missing
+        raise
+      end
+
+      # Check compatibility with choices
+      raise if choices.present? && !choices.include?(value)
+
+      if klass == "file"
+        raise unless value.is_a?(String)
+        # TODO decide if we will allow ComparisonOutput files to partake as inputs
+        # ie if we need .real_files scope below
+        raise unless UserFile.accessible_by(@context.user_id).where(dxid: value).count == 1
+        dxvalue = {"$dnanexus_link" => value}
+        input_file_ids << value
+      elsif klass == "int"
+        raise unless value.is_a?(Numeric) && (value.to_i == value)
+        value = value.to_i
+      elsif klass == "float"
+        raise unless value.is_a?(Numeric)
+      elsif klass == "boolean"
+        raise unless value == true || value == false
+      elsif klass == "string"
+        raise unless value.is_a?(String)
+      end
+
+      run_inputs[key] = value
+      dx_run_input[key] = dxvalue || value
+    end
+
+    # User can override the instance type
+    if params.has_key?("instance_type")
+      raise unless Job::INSTANCE_TYPES.has_key?(params["instance_type"]) #Checks also that it's a string
+      run_instance_type = params["instance_type"]
+    end
+
+    project = User.find(@context.user_id).private_files_project
+
+    # TODO: Timeout policy
+    api_input = {
+      name: name,
+      input: dx_run_input,
+      project: project
+    }
+    if run_instance_type.present?
+      api_input[:systemRequirements] = {main: {instanceType: Job::INSTANCE_TYPES[run_instance_type]}}
+    end
+
+    # Run the app
+    jobid = DNAnexusAPI.new(@context.token).call(@app.dxid, "run", api_input)["id"]
+
+    # Create job record
+    opts = {
+      dxid: jobid,
+      series: @app.series,
+      app_id: @app.id,
+      project: project,
+      spec: @app.spec,
+      run_inputs: run_inputs,
+      app_meta: {version: @app.version, name: @app.name, title: @app.title, user_id: @app.user_id},
+      state: "idle",
+      name: name,
+      describe: {},
+      user_id: @context.user_id
+    }
+    if run_instance_type.present?
+      opts[:run_instance_type] = run_instance_type
+    end
+    provenance = {jobid => {app_version: @app.version, app_name: @app.name, app_title: @app.title, app_user_id: @app.user_id, app_id: @app.id, inputs: run_inputs}}
+    input_file_ids.uniq!
+    UserFile.accessible_by(@context.user_id).where(id: input_file_ids).find_each do |file|
+      if file.parent_type == "Job"
+        parent_job = file.parent
+        provenance.merge!(parent_job.provenance)
+        provenance[file.dxid] = parent_job.dxid
+      end
+    end
+    opts[:provenance] = provenance
+
+    User.transaction do
+      job = Job.create!(opts)
+      job.input_file_ids = input_file_ids
+      job.save!
+      user = User.find(@context.user_id)
+      user.pending_jobs_count = user.pending_jobs_count + 1
+      user.save!
+    end
+
+    render json: {id: dxid}
+  end
 end
