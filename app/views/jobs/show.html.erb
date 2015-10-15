@@ -1,11 +1,62 @@
+<% content_for :title do %><%= @job.name %><% end %>
+
 <div class="page-header">
-  <h1><span class="fa fa-tasks"></span>Job ABC</h1>
+  <div class="page-title">
+    <% case @job.state
+      when "failed" %>
+      <span class="label label-danger"><%= @job.state.upcase %></span>
+    <% when "pending" %>
+      <span class="label label-warning"> <%= @job.state.upcase %></span>
+    <% end %>
+    <span class="name"><%= @job.name %></span>
+  </div>
 </div>
 
+<% if @job.user_id == @context.user_id %>
+<div class="pfda-toolbar">
+  <div class="btn-group pull-left">
+    <!-- TODO: Edit job action -->
+    <!-- TODO: Public job action -->
+  </div>
+
+  <div class="btn-group pull-right">
+    <% if @job.deletable? %>
+      <%= link_to job_path(@job.dxid), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
+        <span class="fa fa-trash"></span> Terminate
+      <% end %>
+    <% end %>
+  </div>
+</div>
+<% end %>
+
 <div class="container-fluid">
-  <div class="panel panel-default">
-    <div class="panel-body">
-      [Metadata]
-    </div>
+  <div class="metadata-section">
+    <ul class="list-group list-group-inline">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">App</h5>
+        <p class="list-group-item-text"><%= link_to(@job.app.title, app_path(@job.app.dxid))  %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Added by</h5>
+        <p class="list-group-item-text">
+          <%= link_to(@job.user.dxuser, user_path(@job.user.dxuser))  %>
+        </p>
+      </li>
+    </ul>
+
+    <ul class="list-group list-group-inline">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">State</h5>
+        <p class="list-group-item-text"><%= @job.state %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Created</h5>
+        <p class="list-group-item-text"><%= @job.created_at.to_s(:db) %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Updated</h5>
+        <p class="list-group-item-text"><%= @job.updated_at.to_s(:db) %></p>
+      </li>
+    </ul>
   </div>
 </div>
