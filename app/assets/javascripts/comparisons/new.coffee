@@ -69,10 +69,7 @@ class ComparisonsNewView
 
   getFiles: (params = {}) ->
     Precision.api '/api/list_files', params, (files) =>
-      fileModels = []
-      for file in files
-        fileModels.push(new FileModel(file))
-      @files(fileModels)
+      @files(_.map(files, (file) -> new FileModel(file)))
 
   selectFile: (e) =>
     e.preventDefault()
@@ -88,12 +85,6 @@ class ComparisonsNewView
 
   submitForm: (e) =>
     $("#comparison-modal form").submit()
-
-class FileModel
-  constructor: (file) ->
-    @id = file.id
-    @dxid = file.dxid
-    @name = file.name
 
 class VariantModel
   constructor: (@category, app) ->
@@ -116,7 +107,11 @@ class VariantInputModel
       !_.isEmpty(@file())
     )
 
-
+class FileModel
+  constructor: (file) ->
+    @id = file.id
+    @dxid = file.dxid
+    @name = file.name
 
 #########################################################
 #

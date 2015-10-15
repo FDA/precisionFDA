@@ -21,46 +21,20 @@ class AppsController < ApplicationController
     if @app.present?
       @jobs_toolbar = {
         fixed: [
+          {icon: "fa fa-cube fa-fw", label: "View App", link: app_path(@app.dxid)},
           {icon: "fa fa-bolt fa-fw", label: "Run App", link: new_app_job_path(@app.dxid)}
         ]
       }
 
-      @jobs = Job.find_by(user_id: @context.user_id, series: @app.series)
-
-      #TODO Remove the below
-      @jobs_list = {
-        header: [
-          {field: "state", display: "State"},
-          {field: "name", display: "Name"},
-          {field: "duration", display: "Duration"},
-          {field: "created", display: "Created"},
-          {field: "addedBy", display: "Launched by"}
-        ],
-        rows: [
-          [
-            {field: "state", display: "Running", classes: "state-running"},
-            {field: "name", display: "ART whole-genome 150bp", link: "#"},
-            {field: "duration", display: "5 min"},
-            {field: "created", display: "9/17/2015"},
-            {field: "addedBy", display: "george.fdauser", link: "#"}
-          ],
-          [
-            {field: "state", display: "Done", classes: "state-done"},
-            {field: "name", display: "ART HiSeq 1000 simulation", link: "#"},
-            {field: "duration", display: "20 min"},
-            {field: "created", display: "9/16/2015"},
-            {field: "addedBy", display: "george.fdauser", link: "#"}
-          ],
-          [
-            {field: "state", display: "Failed", classes: "state-failed"},
-            {field: "name", display: "ART HiSeq 1000 simulation", link: "#"},
-            {field: "duration", display: "1 min"},
-            {field: "created", display: "9/15/2015"},
-            {field: "addedBy", display: "george.fdauser", link: "#"}
-          ]
-        ]
-      }
+      jobs = Job.where(user_id: @context.user_id, series: @app.series)
+    else
+      jobs = Job.where(user_id: @context.user_id)
     end
+    @jobs_grid = initialize_grid(jobs, {
+      order: 'jobs.id',
+      order_direction: 'desc',
+      per_page: 100
+    })
   end
 
   def show

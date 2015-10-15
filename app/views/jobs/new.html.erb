@@ -1,79 +1,102 @@
+<% content_for :title do %>Run <%= @app.title %><% end %>
+
 <div class="page-header clearfix">
-  <div class="page-title"><span class="fa fa-cube"></span> Set up ART Illumina Read Simulation</div>
+  <div class="page-title"><span class="fa fa-cube"></span> Set up <%= @app.title %></div>
 </div>
 
 <div class="pfda-toolbar">
   <div class="btn-group pull-right">
-    <a href="#" class="btn btn-danger"><span class="fa fa-bolt"></span> Run App</a>
+    <button type="button" class="btn" data-bind="css: {disabled: !isRunnable(), 'btn-default': !isRunnable(), 'btn-danger': isRunnable()}, attr: {disabled: !isRunnable()}"><span class="fa fa-bolt"></span> Run App</button>
   </div>
 </div>
 
 <div class="container-fluid">
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h4>App parameters</h4>
+  <form class="form form-horizontal">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>Configure</h4>
+      </div>
+      <div class="panel-body">
+        <div class="form-group required">
+          <label class= "col-sm-4 control-label" for="name">Name</label>
+          <div class="col-sm-10 col-sm-offset-1">
+            <input type="text" name="name" class="form-control" placeholder="Enter a name for this job" data-bind="textInput: name">
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="panel-body">
-      <form class="form-horizontal">
-        <div class="form-group required">
-          <label class="col-sm-4 control-label">Coverage level to simulate</label>
-          <div class="col-sm-10 col-sm-offset-1">
-            <input type="text" class="form-control" placeholder="10">
-          </div>
-        </div>
-        <div class="form-group required">
-          <label class="col-sm-4 control-label">Read length to simulate</label>
-          <div class="col-sm-10 col-sm-offset-1">
-            <input type="text" class="form-control" placeholder="150">
-          </div>
-        </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>Inputs</h4>
+      </div>
+      <div class="panel-body">
+        <!-- ko foreach: inputFields -->
+        <div class="form-group" data-bind="css: {required: isRequired}">
+          <label class= "col-sm-4 control-label" data-bind="text: label, attr: {title: help}"></label>
+          <div class="col-sm-10 col-sm-offset-1" data-bind="css: 'field-'+klass">
+            <!-- ko if: klass == 'string' -->
+              <!-- ko if: choices -->
+                <select class="form-control" data-bind="options: choices, optionsCaption: !defaultValue ? 'Select...' : undefined, value: valueDisplay, disable: $root.busy"></select>
+              <!-- /ko -->
 
-        <div class="form-group">
-          <label class="col-sm-4 control-label">Sequencing system</label>
-          <div class="col-sm-10 col-sm-offset-1">
-            <select class="form-control">
-              <option>Select...</option>
-              <option>Genome Analyzer I</option>
-              <option>Genome Analyzer II</option>
-              <option>HiSeq 1000</option>
-              <option>HiSeq 2000</option>
-              <option>HiSeq 2500</option>
-              <option>MiSeq</option>
-            </select>
+              <!-- ko ifnot: choices -->
+                <input type="text" class="form-control" data-bind="textInput: valueDisplay, attr: {name: name, placeholder: placeholder, disable: $root.busy}">
+              <!-- /ko -->
+            <!-- /ko -->
+
+            <!-- ko if: klass == 'int' -->
+              <input type="text" class="form-control" data-bind="textInput: valueDisplay, attr: {name: name, placeholder: placeholder, disable: $root.busy}">
+            <!-- /ko -->
+
+            <!-- ko if: klass == 'boolean' -->
+              <div class="btn-group">
+                <button class="btn btn-default" data-bind="css: {active: value() === true, is_default: defaultValue === true}, click: toggleTrue, disable: $root.busy">True</button>
+                <button class="btn btn-default" data-bind="css: {active: value() === false, is_default: defaultValue === false}, click: toggleFalse, disable: $root.busy">False</button>
+              </div>
+            <!-- /ko -->
+
+            <!-- ko if: klass == 'file' -->
+              <button class="btn btn-primary" data-bind="text: valueDisplay, attr: {name: name, disable: $root.busy}, css: { 'btn-primary': isRequired, 'btn-default': isOptional}, click: openFileSelector">Select file...</button>
+            <!-- /ko -->
           </div>
         </div>
+        <!-- /ko -->
+      </div>
+    </div>
+  </form>
+</div>
 
-        <div class="form-group required">
-          <label class="col-sm-4 control-label">Paired reads</label>
-          <div class="col-sm-10 col-sm-offset-1">
-            <div class="btn-group">
-              <a href="#" class="btn btn-default">True</a>
-              <a href="#" class="btn btn-default active">False (default)</a>
+<div class="file-selector-modal modal fade" data-bind="with: fileSelector">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Select file</h4>
+      </div>
+      <div class="modal-body">
+        <!-- ko if: !busy() -->
+          <!-- ko if: files().length > 0 -->
+          <div class="list-group" data-bind="foreach: files">
+            <div class="list-group-item radio">
+              <label>
+                <input type="radio" data-bind="checked: $parent.selected, value: $data.dxid, checkedValue: $data">
+                <span data-bind="text: name"></span>
+              </label>
             </div>
           </div>
-        </div>
-
-        <div class="form-group">
-          <label class="col-sm-4 control-label">Mean fragment size</label>
-          <div class="col-sm-10 col-sm-offset-1">
-            <input type="text" class="form-control">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="col-sm-4 control-label">Fragment size standard deviation</label>
-          <div class="col-sm-10 col-sm-offset-1">
-            <input type="text" class="form-control">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="col-sm-4 control-label">Output label</label>
-          <div class="col-sm-10 col-sm-offset-1">
-            <input type="text" class="form-control">
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
+          <!-- /ko -->
+          <!-- ko if: files().length == 0 -->
+            <div class="alert alert-warning">No files found</div>
+          <!-- /ko -->
+        <!-- /ko -->
+        <!-- ko if: busy() -->
+          <div class="precision-loading alert text-muted">Loading...</div>
+        <!-- /ko -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-bind="click: save">Save changes</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
