@@ -59,7 +59,13 @@
       </li>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Duration</h5>
-        <p class="list-group-item-text"><%= humanizeSeconds(@job.runtime) %></p>
+        <p class="list-group-item-text">
+          <% if @job.runtime > 0 %>
+            <%= humanizeSeconds(@job.runtime) %>
+          <% else %>
+            &mdash;
+          <% end %>
+        </p>
       </li>
     </ul>
   </div>

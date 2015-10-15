@@ -1,12 +1,12 @@
 <% content_for :title do %>Run <%= @app.title %><% end %>
 
 <div class="page-header clearfix">
-  <div class="page-title"><span class="fa fa-cube"></span> Set up <%= @app.title %></div>
+  <div class="page-title"><span class="fa fa-cube"></span> Run <%= @app.title %></div>
 </div>
 
 <div class="pfda-toolbar">
   <div class="btn-group pull-right">
-    <button type="button" class="btn" data-bind="css: {disabled: !isRunnable(), 'btn-default': !isRunnable(), 'btn-danger': isRunnable()}, attr: {disabled: !isRunnable()}"><span class="fa fa-bolt"></span> Run App</button>
+    <button type="button" class="btn" data-bind="css: {disabled: !isRunnable(), 'btn-default': !isRunnable(), 'btn-danger': isRunnable()}, attr: {disabled: !isRunnable()}, disable: !isRunnable(), click: run"><span class="fa fa-bolt"></span> <span data-bind="text: running() ? 'Running...':'Run App'"></span></button>
   </div>
 </div>
 
@@ -18,9 +18,19 @@
       </div>
       <div class="panel-body">
         <div class="form-group required">
-          <label class= "col-sm-4 control-label" for="name">Name</label>
+          <label class= "col-sm-4 control-label" for="name">Job Name</label>
           <div class="col-sm-10 col-sm-offset-1">
             <input type="text" name="name" class="form-control" placeholder="Enter a name for this job" data-bind="textInput: name">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class= "col-sm-4 control-label" for="instance_type">Instance Type</label>
+          <div class="col-sm-10 col-sm-offset-1">
+            <select name="instance_type" class="form-control" data-bind="options: availableInstances,
+                   optionsText: 'label',
+                   optionsValue: 'value',
+                   value: instanceType,
+                   optionsCaption: 'Choose...'"></select>
           </div>
         </div>
       </div>
@@ -30,7 +40,7 @@
         <h4>Inputs</h4>
       </div>
       <div class="panel-body">
-        <!-- ko foreach: inputFields -->
+        <!-- ko foreach: inputModels -->
         <div class="form-group" data-bind="css: {required: isRequired}">
           <label class= "col-sm-4 control-label" data-bind="text: label, attr: {title: help}"></label>
           <div class="col-sm-10 col-sm-offset-1" data-bind="css: 'field-'+klass">
@@ -56,7 +66,10 @@
             <!-- /ko -->
 
             <!-- ko if: klass == 'file' -->
-              <button class="btn btn-primary" data-bind="text: valueDisplay, attr: {name: name, disable: $root.busy}, css: { 'btn-primary': isRequired, 'btn-default': isOptional}, click: openFileSelector">Select file...</button>
+              <button class="btn btn-info" data-bind="text: valueDisplay, attr: {name: name, disable: $root.busy}, click: openFileSelector">Select file...</button>
+              <!-- ko if: value -->
+                <button class="btn btn-link" data-bind="click: clear">Clear</button>
+              <!-- /ko -->
             <!-- /ko -->
           </div>
         </div>
@@ -71,15 +84,19 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Select file</h4>
+        <h4 class="modal-title">
+          Select file for <strong data-bind="text: inputModel() ? inputModel().label : ''"></strong>
+          <br>
+          <small data-bind="text: inputModel() ? inputModel().help : ''"></small>
+        </h4>
       </div>
       <div class="modal-body">
         <!-- ko if: !busy() -->
           <!-- ko if: files().length > 0 -->
           <div class="list-group" data-bind="foreach: files">
-            <div class="list-group-item radio">
+            <div class="list-group-item" data-bind="css: $parent.type">
               <label>
-                <input type="radio" data-bind="checked: $parent.selected, value: $data.dxid, checkedValue: $data">
+                <input data-bind="checked: $parent.selected, checkedValue: $data, attr: {type: $parent.type}, click: onSelect">
                 <span data-bind="text: name"></span>
               </label>
             </div>
@@ -94,8 +111,8 @@
         <!-- /ko -->
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" data-bind="click: save">Save changes</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-bind="click: save, css: {disabled: !canSave()}, disable: !canSave()">Select</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
