@@ -125,7 +125,7 @@ class ApiController < ApplicationController
     # (The following also normalizes them)
     run_inputs = {}
     dx_run_input = {}
-    input_file_ids = []
+    input_file_dxids = []
     @app.input_spec.each do |input|
       key = input["name"]
       optional = (input["optional"] == true)
@@ -155,7 +155,7 @@ class ApiController < ApplicationController
         # ie if we need .real_files scope below
         raise unless UserFile.accessible_by(@context.user_id).where(dxid: value).count == 1
         dxvalue = {"$dnanexus_link" => value}
-        input_file_ids << value
+        input_file_dxids << value
       elsif klass == "int"
         raise unless value.is_a?(Numeric) && (value.to_i == value)
         value = value.to_i
@@ -210,13 +210,15 @@ class ApiController < ApplicationController
       opts[:run_instance_type] = run_instance_type
     end
     provenance = {jobid => {app_version: @app.version, app_name: @app.name, app_title: @app.title, app_user_id: @app.user_id, app_id: @app.id, inputs: run_inputs}}
-    input_file_ids.uniq!
-    UserFile.accessible_by(@context.user_id).where(id: input_file_ids).find_each do |file|
+    input_file_dxids.uniq!
+    input_file_ids = []
+    UserFile.accessible_by(@context.user_id).where(dxid: input_file_dxids).find_each do |file|
       if file.parent_type == "Job"
         parent_job = file.parent
         provenance.merge!(parent_job.provenance)
         provenance[file.dxid] = parent_job.dxid
       end
+      input_file_ids << file.id
     end
     opts[:provenance] = provenance
 
@@ -229,6 +231,6 @@ class ApiController < ApplicationController
       user.save!
     end
 
-    render json: {id: dxid}
+    render json: {id: jobid}
   end
 end
