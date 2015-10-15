@@ -4,7 +4,6 @@
 <hr>
 <%= form_for @job, url: app_jobs_path(@app.dxid) do |f| %>
 
-  <%= debug @job %>
   <%= f.label :name, "Name" %>
   <%= f.text_field :name %>
 
@@ -42,3 +41,39 @@
   <% end %>
   <%= f.submit "Run App" %>
 <% end %>
+
+<br>
+<button type="button" id="btn" onclick="tst();">Test</button>
+
+<script>
+function apiCall(route, input, cb) {
+  $.ajax(route, {
+    "contentType": "application/json",
+    "data": JSON.stringify(input),
+    "dataType": "json",
+    "error": function(xhr, status, err) { alert("ERROR! XHR status = " + status + ", error = " + err); },
+    "jsonp": false,
+    "method": "POST",
+    "mimeType": "application/json",
+    "processData": false,
+    "success": function(data, status, xhr) { cb(data); }
+  });
+}
+function tst() {
+  var input = {
+    id: "app-BjPzf380zBFQBf9qg0X7BfBx",
+    name: "my first job",
+    inputs: {
+      "required_file": "file-Bj61YZ80F3xq5Vq58bK5PVz1",
+      "required_number": 3,
+      "trim": false,
+      "required_string": "MiSeq",
+      "optional_file": "file-Bj6114Q0F3xzYQ9G9VK67bVX"
+    }
+  };
+  apiCall("/api/run_app", input, function(res) {
+    console.dir(res);
+  })
+}
+
+</script>

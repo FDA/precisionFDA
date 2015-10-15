@@ -156,13 +156,14 @@ namespace :data do
         file_size: 230078
       )
 
-      App.find_or_initialize_by(dxid: "app-george-fdauser-pfda-debug").update!(
-        series: "george-fdauser-pfda-debug",
+      App.find_or_initialize_by(title: "Example App 4 Debugging").update!(
+        series: "-george.fdauser-debug",
+        dxid: "app-BjPzf380zBFQBf9qg0X7BfBx",
         project: nil,
         version: "1.0.0",
         is_latest: true,
         is_applet: false,
-        name: "pfda-debug",
+        name: "debug",
         title: "Example App 4 Debugging",
         readme: "This is an example application. Here you would normally see a big README (format TBD; markdown or CKeditor?).",
         user_id: george.id,
@@ -231,10 +232,18 @@ namespace :data do
               "patterns": ["*.fastq.gz"],
               "label": "Generated fastq",
               "help": "The generated fastq file"
+            },
+            {
+              "name": "fastq2",
+              "class": "file",
+              "optional": true,
+              "patterns": ["*.fastq.gz"],
+              "label": "Right generated fastq",
+              "help": "The second generated fastq file (if at all)"
             }
           ],
           internet_access: false,
-          instance_type: "mem1_ssd1_x4"
+          instance_type: "baseline-4"
         },
         internal: {
           ordered_assets: [],

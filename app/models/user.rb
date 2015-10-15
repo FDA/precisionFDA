@@ -109,11 +109,11 @@ class User < ActiveRecord::Base
     User.transaction do
       user = User.find(user_id)
       job = user.jobs.find(job_id) # Re-check job id
-      if !Job::TERMINAL_STATES.include?(job.state)
+      if !job.terminal?
         result = DNAnexusAPI.new(token).call("system", "findJobs", {
           includeSubjobs: false,
           id: [job.dxid],
-          project: user.private_jobs_project,
+          project: user.private_files_project,
           parentJob: nil,
           parentAnalysis: nil,
           describe: true
@@ -207,44 +207,49 @@ class User < ActiveRecord::Base
 
   def self.sync_job_state(result, job, user, token)
     state = result["describe"]["state"]
-    return unless Job::TERMINAL_STATES.include?(state)
-    user.pending_jobs_count = user.pending_jobs_count - 1
-    user.save!
-    job.state = state
-    job.describe = result["describe"]
-    if state == "done"
-      output = result["describe"]["output"]
-      output_file_ids = []
-      output.each_key do |key|
-        #TODO handle arrays later
-        raise if output[key].is_a?(Array)
-        if output[key].is_a?(Hash)
-          raise unless output[key].has_key?("$dnanexus_link")
-          output_file_id = output[key]["$dnanexus_link"]
-          output_file_ids << output_file_id
-          output[key] = output_file_id
+    if Job::TERMINAL_STATES.include?(state)
+      user.pending_jobs_count = user.pending_jobs_count - 1
+      user.save!
+      job.state = state
+      job.describe = result["describe"]
+      if state == "done"
+        output = result["describe"]["output"]
+        output_file_ids = []
+        output.each_key do |key|
+          #TODO handle arrays later
+          raise if output[key].is_a?(Array)
+          if output[key].is_a?(Hash)
+            raise unless output[key].has_key?("$dnanexus_link")
+            output_file_id = output[key]["$dnanexus_link"]
+            output_file_ids << output_file_id
+            output[key] = output_file_id
+          end
         end
-      end
-      output_file_ids.uniq!
-      if !output_file_ids.empty?
-        output_file_ids.each_slice(1000) do |slice_of_file_ids|
-          DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: slice_of_file_ids})["results"].each_with_index do |result, i|
-            raise unless result["describe"].present? && result["describe"]["state"] == "closed"
-            UserFile.create!(
-              dxid: slice_of_file_ids[i],
-              project: user.private_files_project,
-              name: result["describe"]["name"],
-              state: 'closed',
-              description: "",
-              user_id: user.id,
-              public: false,
-              file_size: result["describe"]["size"],
-              parent: job
-            )
+        output_file_ids.uniq!
+        if !output_file_ids.empty?
+          output_file_ids.each_slice(1000) do |slice_of_file_ids|
+            DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: slice_of_file_ids})["results"].each_with_index do |result, i|
+              raise unless result["describe"].present? && result["describe"]["state"] == "closed"
+              UserFile.create!(
+                dxid: slice_of_file_ids[i],
+                project: user.private_files_project,
+                name: result["describe"]["name"],
+                state: 'closed',
+                description: "",
+                user_id: user.id,
+                public: false,
+                file_size: result["describe"]["size"],
+                parent: job
+              )
+            end
           end
         end
       end
+      job.save!
+    elsif state != job.state
+      job.state = state
+      job.describe = result["describe"]
+      job.save!
     end
-    job.save!
   end
 end

@@ -18,6 +18,7 @@ class AppsController < ApplicationController
       ]
     }
 
+    User.sync_jobs!(@context.user_id, @context.token)
     if @app.present?
       @jobs_toolbar = {
         fixed: [
