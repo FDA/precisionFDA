@@ -7,7 +7,9 @@
       when "failed" %>
       <span class="label label-danger"><%= @comparison.state.upcase %></span>
     <% when "pending" %>
-      <span class="label label-warning"> <%= @comparison.state.upcase %></span>
+      <span class="label label-warning"> <%= @comparison.state.upcase %></span
+    <% when "done" %>
+      <span class="label label-success"> <%= @comparison.state.upcase %></span>
     <% end %>
     <span class="name"><%= @comparison.name %></span>
   </div>

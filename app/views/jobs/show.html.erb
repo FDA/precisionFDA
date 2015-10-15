@@ -2,11 +2,14 @@
 
 <div class="page-header">
   <div class="page-title">
+    <span class="fa fa-tasks"></span>
     <% case @job.state
       when "failed" %>
       <span class="label label-danger"><%= @job.state.upcase %></span>
     <% when "pending" %>
       <span class="label label-warning"> <%= @job.state.upcase %></span>
+    <% when "done" %>
+      <span class="label label-success"> <%= @job.state.upcase %></span>
     <% end %>
     <span class="name"><%= @job.name %></span>
   </div>
