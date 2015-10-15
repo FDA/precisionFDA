@@ -2,47 +2,6 @@
 
 <div>Run <%= @app.title %></div>
 <hr>
-<%= form_for @job, url: app_jobs_path(@app.dxid) do |f| %>
-
-  <%= f.label :name, "Name" %>
-  <%= f.text_field :name %>
-
-  <hr>
-
-  <div> Inputs: </div>
-  <%= f.fields_for :run_inputs do |f| %>
-    <% @app.input_spec.each do |input| %>
-      <%
-      is_required = (input['optional'] != true)
-      default = input['default']
-      klass = input['class']
-      label = input['label']
-      help = input['help']
-      name = input['name']
-      choices = input['choices']
-      %>
-      <div>
-      <%= f.label name, label, title: help %>
-      <% if klass == 'string' %>
-        <% if choices.present? %>
-          <%= f.select(name, choices, include_blank: !is_required, :prompt => 'Select...') %>
-        <% else %>
-          <%= f.text_field name %>
-        <% end %>
-      <% elsif klass == 'int' %>
-        <%= f.text_field name %>
-      <% elsif klass == 'boolean' %>
-        <%= f.check_box name %>
-      <% elsif klass == 'file' %>
-        <%= f.collection_select(name, @files, :dxid, :name, :prompt => 'Select...') %>
-      <% end %>
-      </div>
-    <% end %>
-  <% end %>
-  <%= f.submit "Run App" %>
-<% end %>
-
-<br>
 <button type="button" id="btn" onclick="tst();">Test</button>
 
 <script>
@@ -64,11 +23,10 @@ function tst() {
     id: "app-BjPzf380zBFQBf9qg0X7BfBx",
     name: "my first job",
     inputs: {
-      "required_file": "file-Bj61YZ80F3xq5Vq58bK5PVz1",
+      "required_file": "file-Bb1FG9Q0bZ4Gvj6fYk858Py1",
       "required_number": 3,
       "trim": false,
-      "required_string": "MiSeq",
-      "optional_file": "file-Bj6114Q0F3xzYQ9G9VK67bVX"
+      "required_string": "MiSeq"
     }
   };
   apiCall("/api/run_app", input, function(res) {
