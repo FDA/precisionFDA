@@ -20,7 +20,7 @@
   </div>
 
   <div class="btn-group pull-right">
-    <% if @job.deletable? %>
+    <% if !@job.terminal? %>
       <%= link_to job_path(@job.dxid), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
         <span class="fa fa-trash"></span> Terminate
       <% end %>
@@ -34,10 +34,10 @@
     <ul class="list-group list-group-inline">
       <li class="list-group-item">
         <h5 class="list-group-item-heading">App</h5>
-        <p class="list-group-item-text"><%= link_to(@job.app.title, app_path(@job.app.dxid))  %></p>
+        <p class="list-group-item-text"><%= App.where(dxid: @job.app_dxid).exists? ? link_to(@job.app.title, app_path(@job.app.dxid)) : (@job.app_title + " (" + @job.app_dxid + ")")  %></p>
       </li>
       <li class="list-group-item">
-        <h5 class="list-group-item-heading">Added by</h5>
+        <h5 class="list-group-item-heading">Launched by</h5>
         <p class="list-group-item-text">
           <%= link_to(@job.user.dxuser, user_path(@job.user.dxuser))  %>
         </p>
@@ -54,8 +54,12 @@
         <p class="list-group-item-text"><%= @job.created_at.to_s(:db) %></p>
       </li>
       <li class="list-group-item">
-        <h5 class="list-group-item-heading">Updated</h5>
-        <p class="list-group-item-text"><%= @job.updated_at.to_s(:db) %></p>
+        <h5 class="list-group-item-heading">Instance type</h5>
+        <p class="list-group-item-text"><%= @job.resolved_instance_type %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Duration</h5>
+        <p class="list-group-item-text"><%= humanizeSeconds(@job.runtime) %></p>
       </li>
     </ul>
   </div>

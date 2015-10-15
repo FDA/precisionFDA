@@ -25,25 +25,29 @@
           end
 
           g.column name: 'Name', attribute: 'name' do |job|
-            link_to(job.name, job_path(job.id))
+            link_to(job.name, job_path(job.dxid))
           end
 
-          if @app.present?
+          if !@app.present?
             g.column name: 'App', attribute: 'title', assoc: :app  do |job|
-              link_to(job.app.title, app_path(job.app))
+              if App.where(dxid: job.app_dxid).exists?
+                link_to(job.app.title, app_path(job.app.dxid))
+              else
+                job.app_title + " (" + job.app_dxid + ")"
+              end
             end
-          end
-
-          g.column name: 'Launched by', attribute: 'dxuser', assoc: :user do |job|
-            link_to(job.user.dxuser, user_path(job.user.dxuser))
           end
 
           g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |job|
             job.created_at.to_s(:db)
           end
 
+          g.column name: 'Instance type' do |job|
+            job.resolved_instance_type
+          end
+
           g.column name: 'Duration' do |job|
-            humanizeSeconds(job.updated_at - job.created_at)
+            humanizeSeconds(job.runtime)
           end
         end -%>
       </div>

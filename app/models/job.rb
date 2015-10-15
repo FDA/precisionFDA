@@ -28,7 +28,7 @@ class Job < ActiveRecord::Base
   store :spec, {accessors: [ :input_spec, :output_spec, :internet_access, :instance_type ], coder: JSON}
   store :describe, {coder: JSON}
   store :run_data, {accessors: [ :run_inputs, :run_outputs, :run_instance_type ], coder: JSON}
-  store :app_meta, {coder: JSON}
+  store :app_meta, {accessors: [ :app_version, :app_name, :app_title, :app_user_id, :app_dxid ], coder: JSON}
   store :provenance, {coder: JSON}
 
   INSTANCE_TYPES = {
@@ -51,4 +51,19 @@ class Job < ActiveRecord::Base
 
   TERMINAL_STATES = ["terminated", "done", "failed"]
 
+  def resolved_instance_type
+    run_instance_type || instance_type
+  end
+
+  def terminal?
+    TERMINAL_STATES.include?(state)
+  end
+
+  def runtime
+    if describe.has_key?("startedRunning") && describe.has_key?("stoppedRunning")
+      (describe["stoppedRunning"] - describe["startedRunning"]) / 1000
+    else
+      0
+    end
+  end
 end

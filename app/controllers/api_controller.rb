@@ -153,7 +153,7 @@ class ApiController < ApplicationController
         raise unless value.is_a?(String)
         # TODO decide if we will allow ComparisonOutput files to partake as inputs
         # ie if we need .real_files scope below
-        raise unless UserFile.accessible_by(@context.user_id).where(dxid: value).count == 1
+        raise unless UserFile.accessible_by(@context.user_id).where(dxid: value).exists?
         dxvalue = {"$dnanexus_link" => value}
         input_file_dxids << value
       elsif klass == "int"
@@ -200,7 +200,11 @@ class ApiController < ApplicationController
       project: project,
       spec: @app.spec,
       run_inputs: run_inputs,
-      app_meta: {version: @app.version, name: @app.name, title: @app.title, user_id: @app.user_id},
+      app_version: @app.version,
+      app_name: @app.name,
+      app_title: @app.title,
+      app_user_id: @app.user_id,
+      app_dxid: @app.dxid,
       state: "idle",
       name: name,
       describe: {},
