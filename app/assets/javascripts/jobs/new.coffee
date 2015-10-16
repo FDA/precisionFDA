@@ -1,6 +1,5 @@
 class JobsNewView
   constructor: (app) ->
-    @id = app.id
     @dxid = app.dxid
     @inputSpec = app.spec.input_spec
     @outputSpec = app.spec.output_spec
