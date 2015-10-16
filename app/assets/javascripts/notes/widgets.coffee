@@ -47,7 +47,7 @@ CKEDITOR.plugins.add 'attachment',
           @element.addClass('attachment-card')
         else
           @element.addClass('attachment-inline')
-      allowedContent: 'span(!attachment, attachment-*); span(attachment-info-*); a[href](!name); span(!fa, !fa-*)'
+      allowedContent: 'span(!attachment); span(attachment-*); a[href](!name); span(!fa, !fa-*)'
       requiredContent: 'span(attachment)'
       pathName: 'attachment'
       upcast: (el) ->
@@ -63,15 +63,49 @@ CKEDITOR.plugins.add 'attachment',
 
       switch attachment.type
         when 'comparison'
-          if !_.isEmpty(attachment.score)
-            scoreHTML = "<span class='attachment-info-score'>#{attachment.score}</span>"
-          else
-            scoreHTML = ''
-          evt.data.dataValue = """
-            <span class='attachment'>
+          inlineHTML = """
+            <span class='attachment-inline-show'>
               <span class='#{attachment.icon}'>&nbsp;</span>
               <a class='name' href='#{attachment.path}'>#{attachment.name}</a>
-              #{scoreHTML}
+            </span>
+          """
+          cardHTML = """
+            <span class='attachment-card-show'>
+              <span class='#{attachment.icon}'>&nbsp;</span>
+              <a class='name' href='#{attachment.path}'>#{attachment.name}</a>
+              <span class='attachment-meta'>
+                <span class='attachment-meta-stat'>
+                  <span class='attachment-meta-stat-value'>
+                    #{attachment.stats.precision}
+                  </span>
+                  <span class='attachment-meta-stat-label'>
+                    Precision
+                  </span>
+                </span>
+                <span class='attachment-meta-stat'>
+                  <span class='attachment-meta-stat-value'>
+                    #{attachment.stats.recall}
+                  </span>
+                  <span class='attachment-meta-stat-label'>
+                    Recall
+                  </span>
+                </span>
+                <span class='attachment-meta-stat'>
+                  <span class='attachment-meta-stat-value'>
+                    #{attachment.stats['f-measure']}
+                  </span>
+                  <span class='attachment-meta-stat-label'>
+                    F-Measure
+                  </span>
+                </span>
+              </span>
+            </span>
+          """
+
+          evt.data.dataValue = """
+            <span class='attachment'>
+              #{inlineHTML}
+              #{cardHTML}
             </span>
           """
         else

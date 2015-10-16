@@ -105,6 +105,9 @@ NotesController::show = ->
       comparison.type = "comparison"
       comparison.icon = "fa fa-area-chart"
       comparison.path = "/comparisons/#{comparison.id}"
+      comparison.stats.precision = "#{parseFloat(comparison.stats.precision) * 100}%"
+      comparison.stats.recall = "#{parseFloat(comparison.stats.recall) * 100}%"
+      comparison.stats['f-measure'] = "#{parseFloat(comparison.stats['f-measure']) * 100}%"
       return comparison
     )
 
