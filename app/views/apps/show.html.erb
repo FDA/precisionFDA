@@ -17,6 +17,10 @@
 
     <ul class="list-group list-group-inline">
       <li class="list-group-item">
+        <h5 class="list-group-item-heading">ID</h5>
+        <p class="list-group-item-text"><%= @app.dxid %></p>
+      </li>
+      <li class="list-group-item">
         <h5 class="list-group-item-heading">Scope</h5>
         <p class="list-group-item-text">
           <span class="fa <%= @app.scope == 'public' ? 'fa-globe' : 'fa-lock' %>"></span>
@@ -30,6 +34,17 @@
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Created</h5>
         <p class="list-group-item-text"><%= @app.created_at.to_s(:db) %></p>
+      </li>
+    </ul>
+
+    <ul class="list-group list-group-inline">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Default instance type</h5>
+        <p class="list-group-item-text"><%= @app.instance_type %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Has Internet access</h5>
+        <p class="list-group-item-text"><%= @app.internet_access ? "Yes" : "No" %></p>
       </li>
     </ul>
   </div>
