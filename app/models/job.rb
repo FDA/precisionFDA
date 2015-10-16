@@ -60,6 +60,10 @@ class Job < ActiveRecord::Base
     TERMINAL_STATES.include?(state)
   end
 
+  def done?
+    state == "done"
+  end
+
   def runtime
     if describe.has_key?("startedRunning") && describe.has_key?("stoppedRunning")
       (describe["stoppedRunning"] - describe["startedRunning"]) / 1000
