@@ -20,7 +20,7 @@
 .pfda-controller-apps.pfda-action-show
   .app-readme-group
     padding: 50px
-    
+
   .app-spec-group
     background-color: $brand-blue-subtler
 
@@ -36,20 +36,25 @@
     margin-bottom: 10px
 
   .table-spec
+    td
+      vertical-align: baseline
+
     .spec-label
       font-weight: bold
 
     .spec-name
       font-family: $font-family-monospace
+      font-size: 12px
 
     .spec-class
       font-family: $font-family-monospace
       color: $brand-blue-tertiary
+      font-size: 12px
 
     .spec-required
-      color: $text-muted
       text-transform: uppercase
-      font-size: 11px
+      font-size: 10px
+      background-color: lighten($brand-blue-tertiary, 10%)
 
     .spec-default
       font-family: $font-family-monospace
