@@ -11,7 +11,7 @@ class FilesController < ApplicationController
 
     user_files = UserFile.real_files.accessible_by(@context.user_id)
     @files_grid = initialize_grid(user_files,{
-      include: [:user, :biospecimen],
+      include: [:user],
       order: 'user_files.id',
       order_direction: 'desc',
       per_page: 100
