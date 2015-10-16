@@ -1,11 +1,45 @@
+<% content_for :title do %><%= @app.name %><% end %>
+
 <div class="page-header">
   <div class="page-title"><span class="fa fa-cube"></span> <%= @app.title %></div>
 </div>
 
 <div class="container-fluid">
-  <div class="panel panel-default">
-    <div class="panel-body">
-      <%= debug @app.as_json %>
+  <div class="metadata-section">
+    <ul class="list-group list-group-inline">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Added by</h5>
+        <p class="list-group-item-text">
+          <%= link_to(@app.user.dxuser, user_path(@app.user.dxuser))  %>
+        </p>
+      </li>
+    </ul>
+
+    <ul class="list-group list-group-inline">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Scope</h5>
+        <p class="list-group-item-text">
+          <span class="fa <%= @app.scope == 'public' ? 'fa-globe' : 'fa-lock' %>"></span>
+          <%= @app.scope == 'public' ? "Public" : "Private" %>
+        </p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Version</h5>
+        <p class="list-group-item-text"><%= @app.version %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Created</h5>
+        <p class="list-group-item-text"><%= @app.created_at.to_s(:db) %></p>
+      </li>
+    </ul>
+  </div>
+
+  <div class="list-group">
+    <div class="list-group-item app-readme-group">
+      <%= raw @app.readme %>
+    </div>
+    <div class="list-group-item app-spec-group">
+      <%= render "_partials/app_spec_tables", specs: @app.spec %>
     </div>
   </div>
 </div>

@@ -1,0 +1,24 @@
+<div class="app-spec">
+  <div class="row">
+    <div class="app-spec-column col-sm-12">
+      <div class="spec-heading">Input</div>
+      <div class="table-responsive">
+        <table class="table table-spec table-spec-input">
+          <tbody>
+            <%= render "_partials/app_spec_rows", spec: specs[:input_spec] %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="app-spec-column col-sm-12">
+      <div class="spec-heading">Output</div>
+      <div class="table-responsive">
+        <table class="table table-spec table-spec-output">
+          <tbody>
+            <%= render "_partials/app_spec_rows", spec: specs[:output_spec] %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
