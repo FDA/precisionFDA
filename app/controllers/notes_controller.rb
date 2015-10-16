@@ -17,11 +17,11 @@ class NotesController < ApplicationController
   def show
     @note = Note.accessible_by(@context.user_id).friendly.find(params[:id])
 
-    @comparisons = Comparison.accessible_by(@context.user_id)
+    @comparisons = Comparison.accessible_by(@context.user_id).where(state: "done")
     @files = UserFile.real_files.accessible_by(@context.user_id)
 
     if @note[:user_id] == @context.user_id
-      js note: @note.slice(:id, :slug, :content, :title), comparisons: (@comparisons.map { |c| c.slice(:id, :name)}), files: (@files.map { |f| f.slice(:dxid, :name)})
+      js note: @note.slice(:id, :slug, :content, :title), comparisons: (@comparisons.map { |c| c.slice(:id, :name, :stats)}), files: (@files.map { |f| f.slice(:dxid, :name)})
     end
   end
 
