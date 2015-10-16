@@ -24,6 +24,7 @@ class Job < ActiveRecord::Base
   belongs_to :user
 
   has_and_belongs_to_many :input_files, {join_table: "job_inputs", class_name: "UserFile"}
+  has_many :output_files, as: :parent, class_name: "UserFile"
 
   store :spec, {accessors: [ :input_spec, :output_spec, :internet_access, :instance_type ], coder: JSON}
   store :describe, {coder: JSON}
