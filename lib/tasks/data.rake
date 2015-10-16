@@ -252,6 +252,105 @@ namespace :data do
         }
       )
 
+      App.find_or_initialize_by(series: "-george.fdauser-hive-insilico").update!(
+        title: "HIVE Insilico for GRCh37",
+        dxid: "app-BjQ66800jQkv905pkvXG9k7v",
+        project: nil,
+        version: "1.0.0",
+        is_latest: true,
+        is_applet: false,
+        name: "hive-insilico",
+        readme: "HIVE Insilico is a FASTQ generator that can simulate single- or paired-end sequencing from the GRCh37 human reference genome.",
+        user_id: george.id,
+        scope: "public",
+        spec: {
+          input_spec: [
+            {
+              "patterns": [ "*.vcf", "*.vcf.gz" ],
+              "label": "Variants VCF",
+              "help": "A VCF file with the variants to spike in to the simulated reads.",
+              "name": "variants_vcf",
+              "class": "file"
+            },
+            {
+              "patterns": ["*.bed"],
+              "class": "file",
+              "name": "targets_bed",
+              "label": "Targets BED",
+              "optional": true,
+              "help": "A BED file containing intervals in the reference genome from which to simulate reads."
+            },
+            {
+              "name": "number_of_reads",
+              "class": "int",
+              "default": 1000000,
+              "label": "Number of reads to generate",
+              "help": "The number of reads (or read pairs, if paired-end is chosen) to generate."
+            },
+            {
+              "name": "read_length",
+              "class": "int",
+              "default": 100,
+              "label": "Read length",
+              "help": "The length of the reads to simulate.",
+            },
+            {
+              "name": "paired_end",
+              "class": "boolean",
+              "default": true,
+              "label": "Simulate paired-end reads?",
+              "help": "If selected, the app will generate two FASTQ files, simulating a paired-end sequencing experiment.",
+            },
+            {
+              "name": "min_paired_size",
+              "label": "Minimum paired-end fragment size",
+              "class": "int",
+              "default": 180,
+              "help": "The minimum size of the fragments to simulate paired-end sequencing from. (Subtracting two times the read length from this value will yield the minimum distance between the two reads.)"
+            },
+            {
+              "name": "max_paired_size",
+              "label": "Maximum paired-end fragment size",
+              "class": "int",
+              "default": 250,
+              "help": "The maximum size of the fragments to simulate paired-end sequencing from. (Subtracting two times the read length from this value will yield the maximum distance between the two reads.)"
+            },
+            {
+              "name": "output_prefix",
+              "label": "Prefix for output files",
+              "class": "string",
+              "optional": true,
+              "help": "A prefix to use when naming the output files."
+            }
+          ],
+          output_spec: [
+            {
+              "name": "fastq",
+              "class": "file",
+              "optional": false,
+              "patterns": ["*.fastq.gz"],
+              "label": "Generated FASTQ",
+              "help": "The generated fastq file"
+            },
+            {
+              "name": "fastq2",
+              "class": "file",
+              "optional": true,
+              "patterns": ["*.fastq.gz"],
+              "label": "Second generated FASTQ",
+              "help": "The second generated fastq file (if paired-end sequencing is selected)"
+            }
+          ],
+          internet_access: false,
+          instance_type: "baseline-8"
+        },
+        internal: {
+          ordered_assets: [],
+          packages: ["libmysqlclient18"],
+          code: "#!/bin/bash\necho hello"
+        }
+      )
+
     end
   end
 end
