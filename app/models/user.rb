@@ -244,6 +244,7 @@ class User < ActiveRecord::Base
             end
           end
         end
+        job.run_outputs = output
       end
       job.save!
     elsif state != job.state
