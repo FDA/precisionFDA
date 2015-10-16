@@ -53,4 +53,8 @@ class Comparison < ActiveRecord::Base
   def meta_hash
     JSON.parse(meta)
   end
+
+  def stats
+    meta_hash.slice("precision", "recall", "f-measure", "true-pos", "false-pos", "false-neg")
+  end
 end
