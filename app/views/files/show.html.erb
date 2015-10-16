@@ -55,6 +55,8 @@
             <% else %>
               <span class='fa fa-lock fa-fw'></span> <%= @file.parent.dxid %>
             <% end %>
+          <% elsif @file.parent_type == "Comparison" %>
+            <span class='fa fa-area-chart fa-fw'></span> <%= link_to(@file.parent.name, comparison_path(@file.parent_id)) %>
           <% else %>
             Uploaded
           <% end %>
