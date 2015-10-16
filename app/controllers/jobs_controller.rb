@@ -25,14 +25,16 @@ class JobsController < ApplicationController
       end
     end
 
-    @job.output_spec.each do |spec|
-      @job.run_outputs.each do |name, value|
-        if spec[:name] == name
-          item = {spec: spec, value: value}
-          if spec[:class] == 'file'
-            item[:file] = UserFile.where(dxid: item[:value])
+    if @job.done?
+      @job.output_spec.each do |spec|
+        @job.run_outputs.each do |name, value|
+          if spec[:name] == name
+            item = {spec: spec, value: value}
+            if spec[:class] == 'file'
+              item[:file] = UserFile.where(dxid: item[:value])
+            end
+            @outputs.push(item)
           end
-          @outputs.push(item)
         end
       end
     end
