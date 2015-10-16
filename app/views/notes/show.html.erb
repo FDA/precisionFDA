@@ -52,9 +52,9 @@
           <%= raw @note.content %>
         </div>
       </div>
-      <div class="note-sidebar">
+      <div class="note-sidebar" data-bind="visible: editing">
         <div id="note-attachments" class="note-attachments">
-          <div class="note-section-title"><span class="fa fa-paperclip"></span> Attachments</div>
+          <div class="note-section-title hide"><span class="fa fa-paperclip"></span> Attachments</div>
 
           <% if !@comparisons.blank? %>
           <div class="note-comparison list-group">

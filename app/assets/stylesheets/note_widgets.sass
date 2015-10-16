@@ -8,13 +8,16 @@
     .fa
       color: $brand-blue-tertiary
 
+    .attachment-card-show, .attachment-inline-show
+      display: none
+
     &.attachment-inline
       border-radius: $border-radius-small
       padding: 2px
       margin: 0 2px
 
-      .attachment-info-score
-        display: none
+      .attachment-inline-show
+        display: inline
 
     &.attachment-card
       border: 1px solid $brand-blue-subtle
@@ -25,8 +28,23 @@
       a.name, .fa
         font-size: $font-size-h4
 
-      .attachment-info-score
+      .attachment-card-show
+        display: inline
+
+      .attachment-meta
         display: block
-        text-align: center
-        padding: 4px
-        font-size: $font-size-h2
+        text-align: right
+        .attachment-meta-stat
+          display: inline-block
+          margin: 0 5px
+
+          .attachment-meta-stat-value
+            display: block
+            font-size: 20px
+
+          .attachment-meta-stat-label
+            display: block
+            color: $brand-blue-tertiary
+            text-transform: uppercase
+            font-size: 12px
+            font-weight: 300
