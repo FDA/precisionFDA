@@ -40,25 +40,33 @@
 <div class="container-fluid">
   <div class="metadata-section">
     <ul class="list-group list-group-inline">
-      <% if @comparison %>
-        <li class="list-group-item">
-          <h5 class="list-group-item-heading">Comparison</h5>
-          <p class="list-group-item-text"><%= link_to(@comparison.name, comparison_path(@comparison.id))  %></p>
-        </li>
-      <% end %>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Added by</h5>
         <p class="list-group-item-text">
           <%= link_to(@file.user.dxuser, user_path(@file.user.dxuser))  %>
         </p>
       </li>
-      <% if @file.biospecimen_id.present? %>
       <li class="list-group-item">
-        <h5 class="list-group-item-heading">Biospecimen</h5>
+        <h5 class="list-group-item-heading">Origin</h5>
         <p class="list-group-item-text">
-            <%= link_to(@file.biospecimen.name, biospecimen_path(@file.biospecimen.id))  %>
+          <% if @file.parent_type == "Job" %>
+            <% if @file.parent.user_id == @context.user_id %>
+              <span class='fa fa-tasks fa-fw'></span> <%= link_to(@file.parent.name, job_path(@file.parent.dxid)) %>
+            <% else %>
+              <span class='fa fa-lock fa-fw'></span> <%= @file.parent.dxid %>
+            <% end %>
+          <% else %>
+            Uploaded
+          <% end %>
         </p>
       </li>
+      <% if @file.biospecimen_id.present? %>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Biospecimen</h5>
+          <p class="list-group-item-text">
+              <%= link_to(@file.biospecimen.name, biospecimen_path(@file.biospecimen.id))  %>
+          </p>
+        </li>
       <% end %>
     </ul>
 
