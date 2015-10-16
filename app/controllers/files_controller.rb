@@ -46,7 +46,6 @@ class FilesController < ApplicationController
 
   def download
     @file = UserFile.accessible_by(@context.user_id).find_by!(dxid: params[:id])
-    logger.debug params
 
     # Refresh state of file, if needed
     if @file.state != "closed"
