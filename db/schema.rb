@@ -166,12 +166,12 @@ ActiveRecord::Schema.define(version: 20151011220723) do
     t.string   "public_files_project"
     t.string   "private_comparisons_project"
     t.string   "public_comparisons_project"
-    t.integer  "open_files_count"
-    t.integer  "closing_files_count"
-    t.integer  "pending_comparisons_count"
+    t.integer  "open_files_count",            default: 0
+    t.integer  "closing_files_count",         default: 0
+    t.integer  "pending_comparisons_count",   default: 0
     t.integer  "schema_version"
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
+    t.datetime "created_at",                              null: false
+    t.datetime "updated_at",                              null: false
     t.integer  "org_id"
     t.integer  "pending_jobs_count"
   end
