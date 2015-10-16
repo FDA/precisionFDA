@@ -1,21 +1,20 @@
 <% spec.each do |item| %>
   <tr>
     <td>
-      <p class="spec-name"><%= item[:name] %></p>
-    </td>
-    <td>
       <p class="spec-class"><%= item[:class] %></p>
     </td>
     <td class="spec-info">
-      <p class="clearfix">
-        <span class="spec-label"><%= item[:label] %></span>
-        <% if !item[:optional] %> <label class="spec-required label label-info pull-right">Required</label><% end %>
-      </p>
+      <p class="spec-label"><%= item[:label] %></p>
       <p class="spec-help"><%= item[:help] %></p>
       <% if !item[:patterns].blank? %>
         <p class="spec-patterns">Patterns: <%= item[:patterns].map(&:inspect).join(', ') %></p>
       <% end %>
-      <% if !item[:default].blank? %><p class="spec-default">Default: <%= item[:default] %><% end %></p>
+      <% if !item[:default].blank? %>
+        <p class="spec-default">Default: <%= item[:default] %></p>
+      <% end %>
+    </td>
+    <td>
+      <% if !item[:optional] %> <label class="spec-required label label-info">Required</label><% end %>
     </td>
   </tr>
 <% end %>

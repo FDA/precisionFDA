@@ -10,6 +10,32 @@ class JobsController < ApplicationController
       User.sync_job!(@context.user_id, @job.id, @context.token)
       @job.reload
     end
+
+    @inputs = []
+    @outputs = []
+    @job.input_spec.each do |spec|
+      @job.run_inputs.each do |name, value|
+        if spec[:name] == name
+          item = {spec: spec, value: value}
+          if spec[:class] == 'file'
+            item[:file] = UserFile.where(dxid: item[:value])
+          end
+          @inputs.push(item)
+        end
+      end
+    end
+
+    @job.output_spec.each do |spec|
+      @job.run_outputs.each do |name, value|
+        if spec[:name] == name
+          item = {spec: spec, value: value}
+          if spec[:class] == 'file'
+            item[:file] = UserFile.where(dxid: item[:value])
+          end
+          @outputs.push(item)
+        end
+      end
+    end
   end
 
   def new

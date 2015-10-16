@@ -29,12 +29,14 @@ $select-width: 28px
       font-weight: bold
       font-size: 10px
       vertical-align: middle
+      color: $state-warning-text
+      background-color: $state-warning-bg
+      &.state-running
+        color: #fff
+        background-color: $brand-blue-primary
       &.state-done
         color: $state-success-text
         background-color: $state-success-bg
-      &.state-pending
-        color: $state-warning-text
-        background-color: $state-warning-bg
       &.state-failed, &.state-error
         color: $state-danger-text
         background-color: $state-danger-bg
