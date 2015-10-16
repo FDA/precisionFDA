@@ -41,6 +41,32 @@ class ComparisonsController < ApplicationController
     js meta: @meta, state: @comparison.state
   end
 
+  def visualize
+    comparison = Comparison.accessible_by(@context.user_id).find(params[:id])
+    if comparison.state != "done"
+      flash[:error] = "You can only visualize comparisons in the 'done' state"
+      redirect_to comparison_path(comparison.id)
+      return
+    end
+
+    api = DNAnexusAPI.new(@context.token)
+    files = []
+    comparison.outputs.each do |file|
+      /(^f[pn]).vcf.gz(.tbi)?$/.match(file.name) do |matches|
+        if matches[1] == 'fp'
+          name = "FP (only in " + comparison.input("test_vcf").user_file.name + ")" + matches[2].to_s
+        else
+          name = "FN (only in " + comparison.input("ref_vcf").user_file.name + ")" + matches[2].to_s
+        end
+        url = api.call(file.dxid, "download", {filename: file.name, project: file.project, preauthenticated: true})["url"]
+        files << {name: name, url: url}
+      end
+    end
+    @files_json = files.to_json
+
+    render layout: false
+  end
+
   def new
     # Refresh state of files, if needed
     User.sync_files!(@context.user_id, @context.token)
