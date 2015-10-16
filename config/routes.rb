@@ -26,7 +26,9 @@ Rails.application.routes.draw do
       get 'jobs/new2', on: :member, to: 'jobs#new2'
     end
     resources :biospecimens
-    resources :comparisons
+    resources :comparisons do
+      get 'visualize', on: :member
+    end
     resources :files do
       post 'download', on: :member
     end

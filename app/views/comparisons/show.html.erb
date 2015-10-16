@@ -24,6 +24,9 @@
 <% if @comparison.user_id == @context.user_id %>
 <div class="pfda-toolbar">
   <div class="btn-group pull-left">
+    <%= link_to visualize_comparison_path(@comparison.id), class: "btn btn-primary" do %>
+      <span class="fa fa-sliders"></span> Visualize
+    <% end %>
     <!-- TODO: Edit comparison action -->
     <!-- TODO: Public comparison action -->
   </div>
