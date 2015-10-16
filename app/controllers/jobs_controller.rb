@@ -13,17 +13,14 @@ class JobsController < ApplicationController
   end
 
   def new
-    # Note that if this was new instead of new2, the params would be :app_id instead of :id
     @app = App.accessible_by(@context.user_id, @context.org_id).find_by(dxid: params[:app_id])
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
       redirect_to apps_path
       return
     end
-    @job = Job.new
-    @job.app = @app
 
-    js app: @app.slice(:id, :dxid, :series, :spec, :title)
+    js app: @app.slice(:dxid, :spec, :title)
   end
 
   def new2
