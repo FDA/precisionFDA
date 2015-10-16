@@ -34,8 +34,11 @@
     font-weight: 400
     font-size: $font-size-h5
     margin-bottom: 10px
-
+    padding-left: 8px
+    
   .table-spec
+    &.table-striped > tbody > tr:nth-of-type(odd)
+      background-color: darken($brand-blue-subtler, 2%)
     td
       vertical-align: baseline
 

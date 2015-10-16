@@ -1,11 +1,22 @@
 // TODO: Move related classes into separate stylesheets
 @import "_common"
 
+
+html, body
+  height: 100%
+
 a, a:hover
   text-decoration: none
 
 body > main > .alert
   margin: 10px
+
+.fa
+  color: $brand-blue-tertiary
+
+.btn-primary, .btn-warning, .btn-danger
+  .fa
+    color: #fff
 
 // TOOLBAR
 .pfda-toolbar
@@ -47,14 +58,19 @@ body > main > .alert
 
 // PANES
 
-.pfda-2-pane-wrapper
-  background-color: $brand-blue-dark
-  .pfda-2-pane-content
-    min-height: 500px
-    background-color: $body-bg
-    padding-left: $padding-xs-horizontal
+.pfda-pane-wrapper
+  @include flexbox
+  height: 100%
 
-  .pfda-2-pane-sidebar
+  .pfda-pane-content
+    @include flex(1)
+    background-color: $body-bg
+
+  .pfda-pane-sidebar
+    @include flex(0 300px)
+    width: 300px
+    min-height: 500px
+    background-color: $brand-blue-dark
     .pfda-toolbar
       background-color: $brand-blue-dark
       border-bottom-color: lighten($brand-blue-dark, 10%)

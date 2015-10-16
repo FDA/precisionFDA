@@ -6,10 +6,10 @@
     <% case @comparison.state
       when "failed" %>
       <span class="label label-danger"><%= @comparison.state.upcase %></span>
-    <% when "pending" %>
-      <span class="label label-warning"> <%= @comparison.state.upcase %></span
     <% when "done" %>
       <span class="label label-success"> <%= @comparison.state.upcase %></span>
+    <% else %>
+      <span class="label label-warning"> <%= @comparison.state.upcase %></span>
     <% end %>
     <span class="name"><%= @comparison.name %></span>
   </div>
@@ -119,7 +119,9 @@
         g.blank_slate partial:  "_partials/empty_grid"
 
         g.column name: 'Name' do |file|
-          link_to(file.name, file_path(file.dxid))
+          display = "<span class='fa fa-file-o fa-fw'></span> "
+          display += link_to(file.name, file_path(file.dxid))
+          raw display
         end
 
         g.column name: 'Size' do |file|

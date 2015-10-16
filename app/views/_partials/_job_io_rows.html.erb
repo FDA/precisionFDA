@@ -1,0 +1,19 @@
+<% items.each do |item| %>
+  <tr>
+    <td class="job-io-label" title="<%= item[:spec][:help] %>">
+      <%= item[:spec][:label] %>
+    </td>
+    <td class="job-io-value">
+      <% if item[:spec][:class] == 'file' %>
+        <span class="fa fa-file-o"></span>
+        <% if item[:file].exists? %>
+          <%= link_to(item[:file].first.name, file_path(item[:file].first.dxid)) %>
+        <% else %>
+          <%= item[:value] %>
+        <% end %>
+      <% else %>
+        <%= item[:value] %>
+      <% end %>
+    </td>
+  </tr>
+<% end %>

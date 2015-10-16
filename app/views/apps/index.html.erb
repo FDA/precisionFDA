@@ -1,56 +1,58 @@
 <% content_for :title do %>Apps<% end %>
 
-<div class="pfda-2-pane-wrapper container-fluid">
-  <div class="row">
-    <div class="pfda-2-pane-sidebar col-sm-6">
-      <%= render "_partials/toolbar", toolbar: @apps_toolbar %>
-      <div class="list-group">
-        <a href="<%= apps_path() %>" class="list-group-item <%= @app.nil? ? 'active' : '' %>">
-          All Apps
-        </a>
-        <%= render "_partials/apps_list_group", apps: @apps, active: @app.try(:series) %>
-      </div>
+<div class="pfda-pane-wrapper container-fluid">
+  <div class="pfda-pane-sidebar">
+    <%= render "_partials/toolbar", toolbar: @apps_toolbar %>
+    <div class="list-group">
+      <a href="<%= apps_path() %>" class="list-group-item <%= @app.nil? ? 'active' : '' %>">
+        All Apps
+      </a>
+      <%= render "_partials/apps_list_group", apps: @apps, active: @app.try(:series) %>
     </div>
-    <div class="pfda-2-pane-content col-sm-18">
-      <div class="panel">
-        <% if @jobs_toolbar.present? %>
-          <%= render "_partials/toolbar", toolbar: @jobs_toolbar %>
-        <% end %>
+  </div>
+  <div class="pfda-pane-content">
+    <div class="panel">
+      <% if @jobs_toolbar.present? %>
+        <%= render "_partials/toolbar", toolbar: @jobs_toolbar %>
+      <% end %>
 
-        <%= grid(@jobs_grid, show_filters: :when_filtered) do |g|
-          g.blank_slate partial:  "_partials/empty_grid"
+      <%= grid(@jobs_grid, show_filters: :when_filtered) do |g|
+        g.blank_slate partial:  "_partials/empty_grid"
 
-          g.column name: 'State', attribute: 'state' do |job|
-            [job.state, {class: "col-state state-#{job.state}"}]
-          end
+        g.column name: 'State', attribute: 'state' do |job|
+          [job.state, {class: "col-state state-#{job.state}"}]
+        end
 
-          g.column name: 'Name', attribute: 'name' do |job|
-            link_to(job.name, job_path(job.dxid))
-          end
+        g.column name: 'Job', attribute: 'name' do |job|
+          display = "<span class='fa fa-tasks fa-fw'></span> "
+          display += link_to(job.name, job_path(job.dxid))
+          raw display
+        end
 
-          if !@app.present?
-            g.column name: 'App', attribute: 'title', assoc: :app  do |job|
-              if App.where(dxid: job.app_dxid).exists?
-                link_to(job.app.title, app_path(job.app.dxid))
-              else
-                job.app_title + " (" + job.app_dxid + ")"
-              end
+        if !@app.present?
+          g.column name: 'App', attribute: 'title', assoc: :app  do |job|
+            display = "<span class='fa fa-cube fa-fw'></span> "
+            if App.where(dxid: job.app_dxid).exists?
+              display += link_to(job.app.title, app_path(job.app.dxid))
+            else
+              display += job.app_title + " (" + job.app_dxid + ")"
             end
+            raw display
           end
+        end
 
-          g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |job|
-            job.created_at.to_s(:db)
-          end
+        g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |job|
+          job.created_at.to_s(:db)
+        end
 
-          g.column name: 'Instance type' do |job|
-            job.resolved_instance_type
-          end
+        g.column name: 'Instance type' do |job|
+          job.resolved_instance_type
+        end
 
-          g.column name: 'Duration' do |job|
-            humanizeSeconds(job.runtime)
-          end
-        end -%>
-      </div>
+        g.column name: 'Duration' do |job|
+          humanizeSeconds(job.runtime)
+        end
+      end -%>
     </div>
   </div>
 </div>

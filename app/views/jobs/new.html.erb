@@ -66,7 +66,7 @@
             <!-- /ko -->
 
             <!-- ko if: klass == 'file' -->
-              <button class="btn btn-info" data-bind="text: valueDisplay, attr: {name: name, disable: $root.busy}, click: openFileSelector">Select file...</button>
+              <button class="btn btn-info" data-bind="text: valueDisplay, attr: {name: name, disable: $root.busy}, click: openFileSelector, css: { 'btn-info': !value(), 'btn-default': value}">Select file...</button>
               <!-- ko if: value -->
                 <button class="btn btn-link" data-bind="click: clear">Clear</button>
               <!-- /ko -->
