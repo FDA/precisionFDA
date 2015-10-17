@@ -21,7 +21,7 @@
   <% end %>
 </div>
 
-<% if @comparison.user_id == @context.user_id %>
+<% if @comparison.user_id == @context.user_id && @comparison.state == 'done' %>
 <div class="pfda-toolbar">
   <div class="btn-group pull-left">
     <%= link_to visualize_comparison_path(@comparison.id), class: "btn btn-primary" do %>
@@ -66,6 +66,7 @@
     </div>
   </div>
 
+  <% if @comparison.state == 'done' %>
   <div class="row">
     <div class="col-sm-8 col-sm-offset-3 col-md-6 col-md-offset-5">
       <ul class="meta-stats list-group">
@@ -143,6 +144,8 @@
       </p>
     </li>
   </ul>
+
+  <% end %>
 
   <ul class="list-group list-group-inline">
     <li class="list-group-item">
