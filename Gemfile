@@ -65,8 +65,8 @@ group :development, :test do
   gem 'thin'
 end
 
-group :production do
-  gem 'mysql2', '~> 0.3.18'
-  # Use Unicorn as the app server
-  gem 'unicorn', '~> 4.9.0'
-end
+# group :production do
+#   gem 'mysql2', '~> 0.3.18'
+#   # Use Unicorn as the app server
+#   gem 'unicorn', '~> 4.9.0'
+# end
