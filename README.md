@@ -45,6 +45,6 @@ model.update!(
     1. `rvm use 2.2.3 --default`
 1. Install builder and gems
     1. `gem install bundler --version 1.10.6`
-    1. `bundle install` (Alternatively, if you don't want your gems to be tainted, do `bundle install --deployment`. This will install gems in ./vendor/bundle. Binaries in those gems will not be in your path by default, but you can run them via `bundle exec <cmd>`, i.e. `bundle exec thin`)
+    1. `bundle install --without production` (Alternatively, if you don't want your gems to be tainted, do `bundle install --deployment`. This will install gems in ./vendor/bundle. Binaries in those gems will not be in your path by default, but you can run them via `bundle exec <cmd>`, i.e. `bundle exec thin`)
 1. `thin --ssl start` (or, if you followed the "Alternatively" path above, `bundle exec thin --ssl start`)
 1. Visit https://localhost:3000 (don't forget the HTTPS) and ignore any certificate warnings. For example, in Chrome click "advanced" on the lower left and then click "proceed" below.
