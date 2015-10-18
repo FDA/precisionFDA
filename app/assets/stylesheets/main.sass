@@ -5,22 +5,58 @@
   margin-bottom: 20px
 
 .pfda-controller-main.pfda-action-index main
+  .jumbotron
+    background-color: mix($brand-blue-dark, $brand-blue-primary, 50%)
+    background-image: url("particles2.png")
+    background-repeat: no-repeat
+    background-size: cover
+    background-position: 50% 50%
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1)
+    height: 500px
+    position: relative
+
+    .container
+      position: absolute
+      top: 50%
+      left: 0
+      right: 0
+      margin-top: -150px
+      padding: 50px
+      text-align: center
+
+      h1, p
+        text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.75)
+        color: $brand-blue-subtler
+
+      h1
+        font-weight: 200
+        font-size: 72px
+
+      p
+        font-weight: bold
+        font-size: 24px
+
   .showcase
     padding: 20px 50px
 
-    .list-group
-      margin-top: 20px
-
-    .list-group-item
+    .showcase-item
+      @include flexbox
+      @include align-items(top)
       min-height: 250px
 
-      .list-group-item-heading
-        font-size: $font-size-h4
-        text-transform: uppercase
+      .showcase-icon
+        min-width: 110px
+
+        .fa
+          font-size: 75px
+          color: $brand-red-primary
+
+      .showcase-heading
+        font-size: $font-size-h3
         color: $brand-blue-tertiary
         font-weight: 300
+        text-transform: uppercase
 
-      .list-group-item-text
-        font-size: $font-size-h3
-        font-weight: 300
+      .lead
+        font-weight: 500
         color: $text-muted
