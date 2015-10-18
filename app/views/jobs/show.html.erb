@@ -17,13 +17,14 @@
   </div>
 </div>
 
-<% if @job.user_id == @context.user_id %>
 <div class="pfda-toolbar">
   <div class="btn-group pull-left">
-    <!-- TODO: Edit job action -->
-    <!-- TODO: Public job action -->
+    <%= link_to new_app_job_path(@job.app.dxid), class: "btn btn-default" do %>
+      <span class="fa fa-bolt"></span> Run App: <%= @job.app.title %>
+    <% end %>
   </div>
 
+  <% if @job.user_id == @context.user_id %>
   <div class="btn-group pull-right">
     <% if !@job.terminal? %>
       <%= link_to job_path(@job.dxid), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
@@ -31,8 +32,8 @@
       <% end %>
     <% end %>
   </div>
+  <% end %>
 </div>
-<% end %>
 
 <div class="container-fluid">
   <div class="metadata-section">

@@ -4,6 +4,14 @@
   <div class="page-title"><span class="fa fa-cube"></span> <%= @app.title %></div>
 </div>
 
+<div class="pfda-toolbar">
+  <div class="btn-group">
+    <%= link_to new_app_job_path(@app.dxid), class: "btn btn-default" do %>
+      <span class="fa fa-bolt"></span> Run App
+    <% end %>
+  </div>
+</div>
+
 <div class="container-fluid">
   <div class="metadata-section">
     <ul class="list-group list-group-inline">
