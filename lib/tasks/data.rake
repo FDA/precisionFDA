@@ -254,9 +254,9 @@ namespace :data do
 
       App.find_or_initialize_by(series: "-george.fdauser-hive-insilico").update!(
         title: "HIVE Insilico for GRCh37",
-        dxid: "app-BjQ66800jQkv905pkvXG9k7v",
+        dxid: "app-BjX5P2001F27gX51vZb6BYpf",
         project: nil,
-        version: "1.0.0",
+        version: "1.0.3",
         is_latest: true,
         is_applet: false,
         name: "hive-insilico",
@@ -286,6 +286,20 @@ namespace :data do
               "default": 1000000,
               "label": "Number of reads to generate",
               "help": "The number of reads (or read pairs, if paired-end is chosen) to generate."
+            },
+            {
+              "name": "padding",
+              "class": "int",
+              "optional": true,
+              "label": "Padding to add around targets",
+              "help": "The number of bases to pad each target interval, to aid in simulation when targets are smaller than the read length."
+            },
+            {
+              "name": "noise",
+              "class": "int",
+              "optional": true,
+              "label": "Noise (%) to simulate",
+              "help": "The amount of white noise to simulate. A value of 1 means that 1% of white noise will be added."
             },
             {
               "name": "read_length",
@@ -347,6 +361,124 @@ namespace :data do
         internal: {
           ordered_assets: [],
           packages: ["libmysqlclient18"],
+          code: "#!/bin/bash\necho hello"
+        }
+      )
+
+      App.find_or_initialize_by(series: "-george.fdauser-bwa-freebayes").update!(
+        title: "BWA-MEM and FreeBayes",
+        dxid: "app-BjX5k5Q0FVJ7gX51vZb6BYq0",
+        project: nil,
+        version: "1.0.0",
+        is_latest: true,
+        is_applet: false,
+        name: "bwa-freebayes",
+        readme: "A mapping and variation calling pipeline that uses the following steps:<p>&nbsp;</p><p><ul><li>BWA-MEM (v0.7.12-r1039), to map reads to the GRCh37 reference genome.</li><li>Bamsormadup (v2.0.8) to sort and deduplicate the mappings.</li><li>FreeBayes (v0.9.20) to call variants.</li></ul></p><p>This app supports several options. See each individual options's help for more information.</p>",
+        user_id: george.id,
+        scope: "public",
+        spec: {
+          input_spec: [
+            {
+              "name": "reads",
+              "label": "Reads",
+              "help": "A file, in gzipped FASTQ format, with the first read mates to be mapped.",
+              "class": "file",
+              "patterns": ["*.fq.gz", "*.fastq.gz"]
+            },
+            {
+              "name": "reads2",
+              "label": "Reads (second mates)",
+              "help": "A file, in gzipped FASTQ format, with the second read mates to be mapped.",
+              "class": "file",
+              "optional": true,
+              "patterns": ["*.fq.gz", "*.fastq.gz"]
+            },
+            {
+              "name": "sample",
+              "label": "Sample ID",
+              "help": "A string (without spaces) describing the sample, which will appear in the read group information in the BAM file and in the sample information in the VCF file.",
+              "class": "string"
+            },
+            {
+              "name": "read_group_id",
+              "label": "Read group ID",
+              "help": "(Optional) A string (without spaces) denoting the read group id (usually a flowcell and a lane) which will appear in the read group information in the BAM file. If not given, the read group id will be assigned the same value as the sample id.",
+              "class": "string",
+              "optional": true
+            },
+            {
+              "name": "mark_as_secondary",
+              "label": "Mark shorter split hits as secondary?",
+              "help": "If long reads are split among multiple locations in the genome (because different parts of the same read align to different locations), select this to mark the shorter ones as secondary alignments. This will ensure better compatibility with tools that are not designed for multiple primary split alignments. This will supply the '-M' option to 'bwa mem'.",
+              "class": "boolean",
+              "optional": true,
+              "default": true
+            },
+            {
+              "name": "standard_filters",
+              "label": "Apply standard FreeBayes filters?",
+              "help": "Select this to use stringent input base and mapping quality filters, which may reduce false positives. This will supply the '--standard-filters' option to FreeBayes.",
+              "class": "boolean",
+              "default": true
+            },
+            {
+              "name": "normalize_variants",
+              "label": "Normalize variants representation?",
+              "help": "Select this to use 'bcftools norm' in order to normalize the variants representation, which may help with downstream compatibility.",
+              "class": "boolean",
+              "default": true
+            },
+            {
+              "name": "parallelized",
+              "label": "Perform FreeBayes parallelization?",
+              "help": "Select this to parallelize freebayes using multiple threads. This will use the 'freebayes-parallel' script from the FreeBayes package, with a granularity of 3 million base pairs. WARNING: This option may be incompatible with certain advanced command-line options.",
+              "class": "boolean",
+              "default": true
+            },
+            {
+              "name": "genotype_qualities",
+              "label": "Report VCF genotype qualities?",
+              "help": "Select this to have freebayes report genotype qualities.",
+              "class": "boolean",
+              "default": true
+            }
+          ],
+          output_spec: [
+            {
+              "name": "sorted_bam",
+              "label": "Sorted mappings",
+              "help": "A coordinate-sorted BAM file with the resulting mappings.",
+              "class": "file",
+              "patterns": ["*.bam"]
+            },
+            {
+              "name": "sorted_bai",
+              "label": "Sorted mappings index",
+              "help": "The associated BAM index file.",
+              "class": "file",
+              "patterns": ["*.bai"]
+            },
+            {
+              "name": "variants_vcfgz",
+              "label": "Variants",
+              "help": "A bgzipped VCF file with the called variants.",
+              "class": "file",
+              "patterns": ["*.vcf.gz"]
+            },
+            {
+              "name": "variants_tbi",
+              "label": "Variants index",
+              "help": "A tabix index (TBI) file with the associated variants index.",
+              "class": "file",
+              "patterns": ["*.tbi"]
+            }
+          ],
+          internet_access: false,
+          instance_type: "baseline-32"
+        },
+        internal: {
+          ordered_assets: [],
+          packages: [],
           code: "#!/bin/bash\necho hello"
         }
       )
