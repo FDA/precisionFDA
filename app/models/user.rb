@@ -89,15 +89,16 @@ class User < ActiveRecord::Base
       if user.pending_comparisons_count != 0
         # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
         Comparison.where(user_id: user_id).where(state: "pending").all.each_slice(1000) do |comparisons|
+          comparisons_hash = comparisons.map { |c| [c.dxjobid, c] }.to_h
           DNAnexusAPI.new(token).call("system", "findJobs", {
             includeSubjobs: false,
-            id: comparisons.map(&:dxjobid),
+            id: comparisons_hash.keys,
             project: user.private_comparisons_project,
             parentJob: nil,
             parentAnalysis: nil,
             describe: true
-          })["results"].each_with_index do |result, i|
-            sync_comparison_state(result, comparisons[i], user, token)
+          })["results"].each do |result|
+            sync_comparison_state(result, comparisons_hash[result["id"]], user, token)
           end
         end
       end
@@ -130,15 +131,16 @@ class User < ActiveRecord::Base
       if user.pending_jobs_count != 0
         # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
         Job.where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs|
+          jobs_hash = jobs.map { |j| [j.dxid, j] }.to_h
           DNAnexusAPI.new(token).call("system", "findJobs", {
             includeSubjobs: false,
-            id: jobs.map(&:dxid),
+            id: jobs_hash.keys,
             project: user.private_files_project,
             parentJob: nil,
             parentAnalysis: nil,
             describe: true
-          })["results"].each_with_index do |result, i|
-            sync_job_state(result, jobs[i], user, token)
+          })["results"].each do |result|
+            sync_job_state(result, jobs_hash[result["id"]], user, token)
           end
         end
       end
