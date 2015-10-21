@@ -15,13 +15,17 @@ class NotesController < ApplicationController
   end
 
   def show
-    @note = Note.accessible_by(@context.user_id).friendly.find(params[:id])
+    @note = Note.accessible_by(@context.user_id).find(params[:id])
 
-    @comparisons = Comparison.accessible_by(@context.user_id).where(state: "done")
-    @files = UserFile.real_files.accessible_by(@context.user_id)
+    if request.path != note_path(@note)
+      redirect_to @note
+    else
+      @comparisons = Comparison.accessible_by(@context.user_id).where(state: "done")
+      @files = UserFile.real_files.accessible_by(@context.user_id)
 
-    if @note[:user_id] == @context.user_id
-      js note: @note.slice(:id, :slug, :content, :title), comparisons: (@comparisons.map { |c| c.slice(:id, :name, :stats)}), files: (@files.map { |f| f.slice(:dxid, :name)})
+      if @note[:user_id] == @context.user_id
+        js note: @note.slice(:id, :slug, :content, :title), comparisons: (@comparisons.map { |c| c.slice(:id, :name, :stats)}), files: (@files.map { |f| f.slice(:dxid, :name)})
+      end
     end
   end
 
@@ -38,13 +42,10 @@ class NotesController < ApplicationController
 
   def update
     updated = false
-    note = Note.friendly.find(params[:id])
+    note = Note.find(params[:id])
     if note[:user_id] == @context.user_id
       Note.transaction do
         params = note_params()
-        if params[:title] != note[:title]
-          params[:slug] = nil
-        end
         if note.update!(params)
           updated = true
           note.reload
@@ -56,13 +57,13 @@ class NotesController < ApplicationController
       success: updated,
       note: {
         id: note.id,
-        slug: note.slug
-      }
+      },
+      path: note_path(note)
     }
   end
 
   def destroy
-    note = Note.where(user_id: @context.user_id).friendly.find(params[:id])
+    note = Note.where(user_id: @context.user_id).find(params[:id])
 
     note.destroy
 
