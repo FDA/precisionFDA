@@ -13,8 +13,6 @@
 #
 
 class Note < ActiveRecord::Base
-  extend FriendlyId
-  friendly_id :slug_candidates, use: :slugged
   belongs_to :user
 
   def self.accessible_by(user_id)
@@ -22,9 +20,7 @@ class Note < ActiveRecord::Base
     return where.any_of(user_id: user_id, public: true)
   end
 
-  def slug_candidates
-    [
-      :title
-    ]
+  def to_param
+    "#{id}-#{title.parameterize}"
   end
 end

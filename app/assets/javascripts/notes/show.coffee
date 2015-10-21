@@ -58,12 +58,11 @@ class NoteModel
         content: @content
         title: @title()
 
-    $.ajax("/notes/#{@slug}", {
+    $.ajax("/notes/#{@id}", {
       method: "PUT"
       data: params
     }).done((res) =>
-      if res.note.slug != @slug
-        window.location.replace("/notes/#{res.note.slug}")
+      window.location.replace(res.path) if window.location.pathname != res.path  
     ).fail((error) ->
       console.error(error)
     ).always(() =>
