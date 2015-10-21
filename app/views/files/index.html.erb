@@ -56,10 +56,6 @@
     file.created_at.to_s(:db)
   end
 
-  g.column name: 'Updated', attribute: 'updated_at', auto_reload: true, filter_type: :standard do |file|
-    file.updated_at.to_s(:db)
-  end
-
   g.column name: 'State', attribute: 'state', custom_filter: :auto
 
   g.column name: 'Access', attribute: 'public',
