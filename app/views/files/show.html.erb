@@ -41,6 +41,10 @@
   <div class="metadata-section">
     <ul class="list-group list-group-inline">
       <li class="list-group-item">
+        <h5 class="list-group-item-heading">ID</h5>
+        <p class="list-group-item-text"><%= @file.dxid %></p>
+      </li>
+      <li class="list-group-item">
         <h5 class="list-group-item-heading">Added by</h5>
         <p class="list-group-item-text">
           <%= link_to(@file.user.dxuser, user_path(@file.user.dxuser))  %>
@@ -92,10 +96,7 @@
         <h5 class="list-group-item-heading">Created</h5>
         <p class="list-group-item-text"><%= @file.created_at.to_s(:db) %></p>
       </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Updated</h5>
-        <p class="list-group-item-text"><%= @file.updated_at.to_s(:db) %></p>
-      </li>
+\
     </ul>
 
     <% if @comparisons_grid %>
