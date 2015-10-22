@@ -19,7 +19,7 @@ class FilesController < ApplicationController
   end
 
   def show
-    @file = UserFile.accessible_by(@context.user_id).includes(:user, :biospecimen).find_by!(dxid: params[:id])
+    @file = UserFile.accessible_by(@context.user_id).includes(:user).find_by!(dxid: params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
@@ -41,7 +41,6 @@ class FilesController < ApplicationController
   end
 
   def new
-    @biospecimens = Biospecimen.all
   end
 
   def download

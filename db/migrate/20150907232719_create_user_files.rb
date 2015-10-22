@@ -7,7 +7,6 @@ class CreateUserFiles < ActiveRecord::Migration
       t.string :state, required: true
       t.text :description
       t.belongs_to :user, index: true, foreign_key: true, required: true
-      t.belongs_to :biospecimen, index: true, foreign_key: true
       t.boolean :public, required: true
       t.integer :file_size, limit: 8, required: true
 

@@ -54,15 +54,11 @@ namespace :data do
         schema_version: 1
       )
 
-      na12878 = Biospecimen.find_or_initialize_by(name: "NA12878")
-      na12878.update!(description: "CEPH/Utah pedigree 1463, mother of proband", user_id: george.id)
-
       UserFile.unscoped.find_or_initialize_by(dxid: "file-Bb1FG900bZ430X20Zk86Y6V3").update!(
         project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
         name: "SRR504516.vcf.gz",
         state: "closed",
         user_id: george.id,
-        biospecimen_id: na12878.id,
         public: true,
         parent: george,
         file_size: 2307445
@@ -73,7 +69,6 @@ namespace :data do
         name: "SRR504516.vcf.gz.tbi",
         state: "closed",
         user_id: george.id,
-        biospecimen_id: na12878.id,
         public: true,
         parent: george,
         file_size: 230078
@@ -84,7 +79,6 @@ namespace :data do
         name: "NA12878-Garvan-Vial1.hc.vqsr.vcf.gz.tbi",
         state: "closed",
         user_id: george.id,
-        biospecimen_id: na12878.id,
         public: true,
         parent: george,
         file_size: 1657263
@@ -95,7 +89,6 @@ namespace :data do
         name: "NA12878-Garvan-Vial1.hc.vqsr.vcf.gz",
         state: "closed",
         user_id: george.id,
-        biospecimen_id: na12878.id,
         public: true,
         parent: george,
         file_size: 265168616
@@ -106,7 +99,6 @@ namespace :data do
         name: "NA12878-NISTv2.19.bed",
         state: "closed",
         user_id: george.id,
-        biospecimen_id: na12878.id,
         public: true,
         parent: george,
         file_size: 76811421
@@ -117,7 +109,6 @@ namespace :data do
         name: "NA12878-NISTv2.19.vcf.gz",
         state: "closed",
         user_id: george.id,
-        biospecimen_id: na12878.id,
         public: true,
         parent: george,
         file_size: 344226513
@@ -128,7 +119,6 @@ namespace :data do
         name: "NA12878-NISTv2.19.vcf.gz.tbi",
         state: "closed",
         user_id: george.id,
-        biospecimen_id: na12878.id,
         public: true,
         parent: george,
         file_size: 1476961
@@ -139,7 +129,6 @@ namespace :data do
         name: "SRR504516.vcf.gz",
         state: "closed",
         user_id: george.id,
-        biospecimen_id: na12878.id,
         public: true,
         parent: george,
         file_size: 2307445
@@ -150,7 +139,6 @@ namespace :data do
         name: "SRR504516.vcf.gz.tbi",
         state: "closed",
         user_id: george.id,
-        biospecimen_id: na12878.id,
         public: true,
         parent: george,
         file_size: 230078

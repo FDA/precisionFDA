@@ -37,16 +37,6 @@ ActiveRecord::Schema.define(version: 20151011220723) do
   add_index "apps", ["scope"], name: "index_apps_on_scope"
   add_index "apps", ["user_id"], name: "index_apps_on_user_id"
 
-  create_table "biospecimen", force: :cascade do |t|
-    t.string   "name"
-    t.text     "description"
-    t.integer  "user_id"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
-  end
-
-  add_index "biospecimen", ["user_id"], name: "index_biospecimen_on_user_id"
-
   create_table "comparison_inputs", force: :cascade do |t|
     t.integer "comparison_id"
     t.integer "user_file_id"
@@ -133,16 +123,14 @@ ActiveRecord::Schema.define(version: 20151011220723) do
     t.string   "state"
     t.text     "description"
     t.integer  "user_id"
-    t.integer  "biospecimen_id"
     t.boolean  "public"
-    t.integer  "file_size",      limit: 8
-    t.datetime "created_at",               null: false
-    t.datetime "updated_at",               null: false
+    t.integer  "file_size",   limit: 8
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
     t.integer  "parent_id"
     t.string   "parent_type"
   end
 
-  add_index "user_files", ["biospecimen_id"], name: "index_user_files_on_biospecimen_id"
   add_index "user_files", ["parent_type", "parent_id"], name: "index_user_files_on_parent_type_and_parent_id"
   add_index "user_files", ["state"], name: "index_user_files_on_state"
   add_index "user_files", ["user_id"], name: "index_user_files_on_user_id"
