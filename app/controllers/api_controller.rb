@@ -12,11 +12,6 @@ class ApiController < ApplicationController
     result = UserFile.real_files.accessible_by(@context.user_id).map do |file|
       f = file.as_json
       f["username"] = file.user["dxuser"]
-      #TODO assumes biospecimens are all public
-      f["biospecimen"] = file.biospecimen.as_json
-      if f["biospecimen"].present?
-        f["biospecimen"]["username"] = file.biospecimen.user["dxuser"]
-      end
       f
     end
 
@@ -26,13 +21,6 @@ class ApiController < ApplicationController
   def create_file
     name = params["name"]
     raise unless name.is_a?(String) && name != ""
-
-    biospecimen_id = params["biospecimen_id"]
-    if !biospecimen_id.nil?
-      raise unless biospecimen_id.is_a?(Fixnum)
-      # TODO: For now assume all biospecimens are public
-      biospecimen = Biospecimen.find(params["biospecimen_id"])
-    end
 
     description = params["description"]
     if !description.nil?
@@ -49,7 +37,6 @@ class ApiController < ApplicationController
                        state: "open",
                        description: description,
                        user_id: @context.user_id,
-                       biospecimen_id: biospecimen_id,
                        parent: User.find(@context.user_id),
                        public: false)
       # Must get a fresh user inside the transaction

@@ -38,7 +38,6 @@ class FileModel
 class FilesNewView
   constructor: () ->
     @files = ko.observableArray()
-    @biospecimen = ko.observable()
 
     @isBrowseVisible = ko.computed(=>
       @files().length == 0
@@ -86,11 +85,8 @@ class FilesNewView
       fileModel.state("DONE")
       @uploadState("DONE") if uploadCounter == filesLength
 
-    biospecimen_id = parseInt($("[name=biospecimen_id]").val(), 10)
     for fileModel, i in files
       metadata = {}
-      if _.isFinite(biospecimen_id)
-        metadata.biospecimen_id = biospecimen_id
 
       description = fileModel.description()
       if !_.isEmpty(description)

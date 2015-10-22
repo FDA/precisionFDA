@@ -8,9 +8,9 @@
 #  public_files_project        :string
 #  private_comparisons_project :string
 #  public_comparisons_project  :string
-#  open_files_count            :integer
-#  closing_files_count         :integer
-#  pending_comparisons_count   :integer
+#  open_files_count            :integer          default(0)
+#  closing_files_count         :integer          default(0)
+#  pending_comparisons_count   :integer          default(0)
 #  schema_version              :integer
 #  created_at                  :datetime         not null
 #  updated_at                  :datetime         not null
@@ -28,7 +28,6 @@ class User < ActiveRecord::Base
   # lower will get migrated.
   CURRENT_SCHEMA = 1
 
-  has_many :biospecimens
   has_many :user_files, {class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'}
   has_many :comparisons
   has_many :notes
