@@ -25,13 +25,16 @@
   </div>
 
   <% if @job.user_id == @context.user_id %>
-  <div class="btn-group pull-right">
-    <% if !@job.terminal? %>
-      <%= link_to job_path(@job.dxid), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
-        <span class="fa fa-trash"></span> Terminate
+    <div class="btn-group pull-right">
+      <% if !@job.terminal? %>
+        <%= link_to job_path(@job.dxid), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
+          <span class="fa fa-trash"></span> Terminate
+        <% end %>
       <% end %>
-    <% end %>
-  </div>
+      <%= link_to log_job_path(@job.dxid), class: "btn btn-primary" do %>
+        <span class="fa fa-file-code-o"></span> View Log
+      <% end %>
+    </div>
   <% end %>
 </div>
 

@@ -40,6 +40,55 @@ class JobsController < ApplicationController
     end
   end
 
+  def log
+    @job = Job.find_by(user_id: @context.user_id, dxid: params[:id])
+    if @job.nil?
+      flash[:error] = "Sorry, this job does not exist or is not accessible by you"
+      redirect_to apps_path
+      return
+    end
+    if !@job.terminal?
+      User.sync_job!(@context.user_id, @job.id, @context.token)
+      @job.reload
+    end
+
+    uri = URI(DNANEXUS_APISERVER_URI)
+
+    raw_socket = TCPSocket.new(uri.host, uri.port)
+    socket = OpenSSL::SSL::SSLSocket.new(raw_socket)
+    socket.connect
+    handshake = WebSocket::Handshake::Client.new(url: "wss://#{uri.host}:#{uri.port}/#{@job.dxid}/getLog/websocket")
+    socket.write(handshake.to_s)
+
+    while !handshake.finished?
+      handshake << socket.readline
+    end
+    raise unless handshake.valid?
+    frame = WebSocket::Frame::Outgoing::Server.new(version: handshake.version, data: {access_token: @context.token, token_type: "Bearer", tail: false}.to_json, type: :text).to_s
+    socket.write(frame)
+
+    srv = WebSocket::Frame::Incoming::Server.new(version: handshake.version)
+
+    @log_times = []
+    @log_levels = []
+    @log_contents = []
+    while true do
+      data = socket.getc
+      break if data.nil? || data.empty?
+      srv << data
+      while (msg = srv.next) do
+        msg = JSON.parse(msg.to_s)
+        # source, msg, timestamp, level, job, line|
+        # source=SYSTEM, msg=END_LOG
+        raise if msg["code"]
+        return if msg["source"] == "SYSTEM" && msg["msg"] == "END_LOG"
+        @log_times << msg["timestamp"]
+        @log_levels << msg["level"]
+        @log_contents << msg["msg"]
+      end
+    end
+  end
+
   def new
     @app = App.accessible_by(@context.user_id, @context.org_id).find_by(dxid: params[:app_id])
     if @app.nil?

@@ -21,7 +21,11 @@ Rails.application.routes.draw do
     # See how all your routes lay out with "rake routes".
 
     resources :apps do
-      resources :jobs, shallow: true, except: :index
+      resources :jobs, shallow: true, except: :index do
+        member do
+          get 'log'
+        end
+      end
       get 'jobs', on: :member, to: 'apps#index'
       get 'jobs/new2', on: :member, to: 'jobs#new2'
     end
