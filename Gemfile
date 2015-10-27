@@ -38,6 +38,9 @@ gem "wice_grid", '3.6.0.pre4'
 # Page-specific javascript for Rails done right
 gem "paloma", "4.2.1"
 
+# Websocket support (for fetching logs)
+gem "websocket"
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

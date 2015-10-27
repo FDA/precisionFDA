@@ -1,0 +1,42 @@
+<% content_for :title do %><%= @job.name %><% end %>
+
+<div class="page-header">
+  <div class="page-title">
+    <span class="fa fa-tasks"></span>
+    <% case @job.state
+      when "failed" %>
+      <span class="label label-danger"><%= @job.state.upcase %></span>
+    <% when "done" %>
+      <span class="label label-success"> <%= @job.state.upcase %></span>
+    <% when "running" %>
+      <span class="label label-primary"> <%= @job.state.upcase %></span>
+    <% else %>
+      <span class="label label-warning"> <%= @job.state.upcase %></span>
+    <% end %>
+    <span class="name"><%= @job.name %></span>
+  </div>
+</div>
+
+<div class="pfda-toolbar">
+  <div class="btn-group pull-left">
+    <%= link_to new_app_job_path(@job.app.dxid), class: "btn btn-default" do %>
+      <span class="fa fa-bolt"></span> Run App: <%= @job.app.title %>
+    <% end %>
+  </div>
+
+  <% if @job.user_id == @context.user_id %>
+    <div class="btn-group pull-right">
+      <% if !@job.terminal? %>
+        <%= link_to job_path(@job.dxid), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
+          <span class="fa fa-trash"></span> Terminate
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<div style="font-family: 'PT Mono'; padding: 10px">
+  <% @log_contents.each_with_index do |msg, i| %>
+    <div><%= msg %></div>
+  <% end %>
+</div>
