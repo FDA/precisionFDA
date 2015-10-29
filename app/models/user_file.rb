@@ -17,6 +17,25 @@
 #  parent_type :string
 #
 
+# Parent types:
+# ------------
+# User (for files externally uploaded)
+# Job (for files generated from a job)
+# Asset (for app assets)
+# Comparison (for files generated from a comparison)
+# 
+# Feature matrix
+#
+#                                | U | J | A | C
+# -------------------------------+---+---+---+---
+# Shows up in files#index        | Y | Y | N | N
+# Shows up in files#show         | Y | Y | N | Y
+# Can be deleted independently   | Y | Y | * | N
+# 
+# To help with the above, we define the following scopes
+# real_files: U || J
+# not_assets: U || J || C
+#
 class UserFile < ActiveRecord::Base
   belongs_to :user
   belongs_to :parent, {polymorphic: true}
@@ -26,7 +45,11 @@ class UserFile < ActiveRecord::Base
   has_and_belongs_to_many :jobs_as_input, {join_table: "job_inputs", class_name: "Job"}
 
   def self.real_files
-    return where.not(parent_type: 'Comparison')
+    return where(parent_type: ['User', 'Job'])
+  end
+
+  def self.not_assets
+    return where.not(parent_type: 'Asset')
   end
 
   def self.accessible_by(user_id)
@@ -35,7 +58,7 @@ class UserFile < ActiveRecord::Base
   end
 
   def deletable?
-    return (comparisons.count == 0) && (parent_type == "User")
+    return (comparisons.count == 0) && ((parent_type == "User") || (parent_type == "Job"))
   end
 
 end

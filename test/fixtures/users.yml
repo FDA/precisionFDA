@@ -16,6 +16,8 @@
 #  updated_at                  :datetime         not null
 #  org_id                      :integer
 #  pending_jobs_count          :integer
+#  open_assets_count           :integer
+#  closing_assets_count        :integer
 #
 
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html

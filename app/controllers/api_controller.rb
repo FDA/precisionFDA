@@ -18,6 +18,15 @@ class ApiController < ApplicationController
     render json: result
   end
 
+  # Inputs:
+  #
+  # name (string, required, nonempty)
+  # description (string, optional)
+  #
+  # Outputs:
+  #
+  # id (string, "file-xxxx")
+  #
   def create_file
     name = params["name"]
     raise unless name.is_a?(String) && name != ""
@@ -48,6 +57,74 @@ class ApiController < ApplicationController
     render json: {id: dxid}
   end
 
+  # Inputs:
+  #
+  # name (string, required, nonempty)
+  # description (string, optional)
+  # paths (array:string, required)
+  #
+  # Outputs:
+  #
+  # id (string, "file-xxxx")
+  #
+  def create_asset
+    name = params["name"]
+    raise unless name.is_a?(String) && name != ""
+    raise unless ((name.end_with?(".tar") && name.size > ".tar".size) || (name.end_with?(".tar.gz") && name.size > ".tar.gz".size))
+
+    description = params["description"]
+    if !description.nil?
+      raise unless description.is_a?(String)
+    end
+
+    paths = params["paths"]
+    raise unless paths.is_a?(Array) && !paths.empty? && paths.size < 100000
+    paths.each_key do |path|
+      raise unless path.is_a?(String) && path != "" && path.size < 4096
+    end
+
+    project = User.find(@context.user_id).private_files_project
+    dxid = DNAnexusAPI.new(@context.token).("file", "new", {"name": params["name"], "project": project})["id"]
+
+    User.transaction do
+      asset = Asset.create!(dxid: dxid,
+                            project: project,
+                            name: name,
+                            state: "open",
+                            description: description,
+                            user_id: @context.user_id,
+                            public: false)
+      asset.parent = asset
+      asset.save!
+      paths.each do |path|
+        name = path.split('/').last
+        if name == "" || name == "." || name == ".."
+          name = nil
+        end
+        asset.archive_entries.create!(path: path, name: name)
+      end
+      # Must get a fresh user inside the transaction
+      user = User.find(@context.user_id)
+      user.open_assets_count = user.open_assets_count + 1
+      user.save!
+    end
+
+    render json: {id: dxid}
+  end
+
+  # Inputs:
+  #
+  # size (int, required)
+  # md5 (string, required)
+  # index (int, required)
+  # id (string, required)
+  #
+  # Outputs:
+  #
+  # url (string, where HTTP PUT must be performed)
+  # expires (int, timestamp)
+  # headers (hash of string key/values, headers must be given to HTTP PUT)
+  #
   def get_upload_url
     size = params["size"]
     raise unless size.is_a?(Fixnum)
@@ -61,18 +138,24 @@ class ApiController < ApplicationController
     id = params["id"]
     raise unless id.is_a?(String) && id != ""
 
-    file = UserFile.real_files.find_by!(dxid: id, state: "open", user_id: @context.user_id)
+    file = UserFile.find_by!(dxid: id, state: "open", user_id: @context.user_id)
 
     result = DNAnexusAPI.new(@context.token).(id, "upload", {size: size, md5: md5, index: index})
 
     render json: result
   end
 
+  # Inputs:
+  #
+  # id (string, required)
+  #
+  # Outputs: nothing (empty hash)
+  #
   def close_file
     id = params["id"]
     raise unless id.is_a?(String) && id != ""
 
-    file = UserFile.real_files.find_by!(dxid: id, user_id: @context.user_id)
+    file = UserFile.find_by!(dxid: id, user_id: @context.user_id, parent_type: "User")
     if file.state == "open"
       DNAnexusAPI.new(@context.token).(id, "close")
       User.transaction do
@@ -82,6 +165,36 @@ class ApiController < ApplicationController
           user = User.find(@context.user_id)
           user.open_files_count = user.open_files_count - 1
           user.closing_files_count = user.closing_files_count + 1
+          user.save!
+          file.state = "closing"
+          file.save!
+        end
+      end
+    end
+
+    render json: {}
+  end
+
+  # Inputs:
+  #
+  # id (string, required)
+  #
+  # Outputs: nothing (empty hash)
+  #
+  def close_asset
+    id = params["id"]
+    raise unless id.is_a?(String) && id != ""
+
+    file = Asset.find_by!(dxid: id, user_id: @context.user_id)
+    if file.state == "open"
+      DNAnexusAPI.new(@context.token).(id, "close")
+      User.transaction do
+        # Must recheck inside the transaction
+        file.reload
+        if file.state == "open"
+          user = User.find(@context.user_id)
+          user.open_assets_count = user.open_assets_count - 1
+          user.closing_assets_count = user.closing_assets_count + 1
           user.save!
           file.state = "closing"
           file.save!
@@ -140,7 +253,7 @@ class ApiController < ApplicationController
         raise unless value.is_a?(String)
         # TODO decide if we will allow ComparisonOutput files to partake as inputs
         # ie if we need .real_files scope below
-        raise unless UserFile.accessible_by(@context.user_id).where(dxid: value).exists?
+        raise unless UserFile.real_files.accessible_by(@context.user_id).where(dxid: value).exists?
         dxvalue = {"$dnanexus_link" => value}
         input_file_dxids << value
       elsif klass == "int"

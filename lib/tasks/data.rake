@@ -11,10 +11,12 @@ namespace :data do
         public_comparisons_project: "project-BgbZ2800zZqp0qk1Qj2VvKP2",
         open_files_count: 0,
         closing_files_count: 0,
+        open_assets_count: 0,
+        closing_assets_count: 0,
         pending_comparisons_count: 0,
         pending_jobs_count: 0,
         schema_version: 1
-      )
+      ) if george.new_record?
 
       dx = Org.find_or_initialize_by(handle: 'dnanexus')
       dx.update!(
@@ -34,11 +36,13 @@ namespace :data do
         public_comparisons_project: "project-Bgggq8009FP0KxQK809G6Bjg",
         open_files_count: 0,
         closing_files_count: 0,
+        open_assets_count: 0,
+        closing_assets_count: 0,
         pending_comparisons_count: 0,
         pending_jobs_count: 0,
         org_id: dx.id,
         schema_version: 1
-      )
+      ) if evan.new_record?
 
       fahd = User.find_or_initialize_by(dxuser: "fahdoo_fda1")
       fahd.update!(
@@ -48,13 +52,15 @@ namespace :data do
         public_comparisons_project: "project-Bgj759Q0QXYVz65ZBJjpjPBz",
         open_files_count: 0,
         closing_files_count: 0,
+        open_assets_count: 0,
+        closing_assets_count: 0,
         pending_comparisons_count: 0,
         pending_jobs_count: 0,
         org_id: dx.id,
         schema_version: 1
-      )
+      ) if fahd.new_record?
 
-      UserFile.unscoped.find_or_initialize_by(dxid: "file-Bb1FG900bZ430X20Zk86Y6V3").update!(
+      UserFile.find_or_initialize_by(dxid: "file-Bb1FG900bZ430X20Zk86Y6V3").update!(
         project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
         name: "SRR504516.vcf.gz",
         state: "closed",
@@ -64,7 +70,7 @@ namespace :data do
         file_size: 2307445
       )
 
-      UserFile.unscoped.find_or_initialize_by(dxid: "file-Bb1FG9Q0bZ4Gvj6fYk858Py1").update!(
+      UserFile.find_or_initialize_by(dxid: "file-Bb1FG9Q0bZ4Gvj6fYk858Py1").update!(
         project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
         name: "SRR504516.vcf.gz.tbi",
         state: "closed",
@@ -74,7 +80,7 @@ namespace :data do
         file_size: 230078
       )
 
-      UserFile.unscoped.find_or_initialize_by(dxid: "file-BgxXXV80y0y3z439qGf92VpJ").update!(
+      UserFile.find_or_initialize_by(dxid: "file-BgxXXV80y0y3z439qGf92VpJ").update!(
         project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
         name: "NA12878-Garvan-Vial1.hc.vqsr.vcf.gz.tbi",
         state: "closed",
@@ -84,7 +90,7 @@ namespace :data do
         file_size: 1657263
       )
 
-      UserFile.unscoped.find_or_initialize_by(dxid: "file-BgxXXq80ffYk1jkQpxXYgkxv").update!(
+      UserFile.find_or_initialize_by(dxid: "file-BgxXXq80ffYk1jkQpxXYgkxv").update!(
         project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
         name: "NA12878-Garvan-Vial1.hc.vqsr.vcf.gz",
         state: "closed",
@@ -94,7 +100,7 @@ namespace :data do
         file_size: 265168616
       )
 
-      UserFile.unscoped.find_or_initialize_by(dxid: "file-BgxXQQQ0109KGGkjvbgkkB4X").update!(
+      UserFile.find_or_initialize_by(dxid: "file-BgxXQQQ0109KGGkjvbgkkB4X").update!(
         project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
         name: "NA12878-NISTv2.19.bed",
         state: "closed",
@@ -104,7 +110,7 @@ namespace :data do
         file_size: 76811421
       )
 
-      UserFile.unscoped.find_or_initialize_by(dxid: "file-BgxXQY001095gqgxpVgf1g2Q").update!(
+      UserFile.find_or_initialize_by(dxid: "file-BgxXQY001095gqgxpVgf1g2Q").update!(
         project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
         name: "NA12878-NISTv2.19.vcf.gz",
         state: "closed",
@@ -114,7 +120,7 @@ namespace :data do
         file_size: 344226513
       )
 
-      UserFile.unscoped.find_or_initialize_by(dxid: "file-BgxXQq801099JpB8kVgZYzFb").update!(
+      UserFile.find_or_initialize_by(dxid: "file-BgxXQq801099JpB8kVgZYzFb").update!(
         project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
         name: "NA12878-NISTv2.19.vcf.gz.tbi",
         state: "closed",
@@ -124,25 +130,69 @@ namespace :data do
         file_size: 1476961
       )
 
-      UserFile.unscoped.find_or_initialize_by(dxid: "file-Bb1FG900bZ430X20Zk86Y6V3").update!(
+      UserFile.find_or_initialize_by(dxid: "file-Bj5j9F80F3xy8PxYFVK0yk6x").update!(
         project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
-        name: "SRR504516.vcf.gz",
+        name: "NA12878-Illumina-PlatinumGenome-8.0.1.vcf.gz.tbi",
         state: "closed",
         user_id: george.id,
         public: true,
         parent: george,
-        file_size: 2307445
+        file_size: 1596316
       )
 
-      UserFile.unscoped.find_or_initialize_by(dxid: "file-Bb1FG9Q0bZ4Gvj6fYk858Py1").update!(
+      UserFile.find_or_initialize_by(dxid: "file-Bj5j4280F3xg3ZKKBVKJJz3j").update!(
         project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
-        name: "SRR504516.vcf.gz.tbi",
+        name: "NA12878-Illumina-PlatinumGenome-8.0.1.bed",
         state: "closed",
         user_id: george.id,
         public: true,
         parent: george,
-        file_size: 230078
+        file_size: 121456246
       )
+
+      UserFile.find_or_initialize_by(dxid: "file-Bj5j7xj0F3xxYj3j8vK3YX9j").update!(
+        project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
+        name: "NA12878-Illumina-PlatinumGenome-8.0.1.vcf.gz",
+        state: "closed",
+        user_id: george.id,
+        public: true,
+        parent: george,
+        file_size: 51177456
+      )
+
+      asset = Asset.find_or_initialize_by(dxid: "file-Bjjgz7j0F3YfQF4vFQk3bYVv")
+      asset.update!(
+        project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
+        name: "htslib-1.2.1.tar.gz",
+        state: "closed",
+        user_id: george.id,
+        public: true,
+        file_size: 622187,
+        description: "Contains the bgzip and tabix executables.\n\nExample usage: tabix -p vcf <file>"
+      )
+      asset.update!(parent_id: asset.id)
+      asset.archive_entries.find_or_create_by(path: "./", name: nil)
+      asset.archive_entries.find_or_create_by(path: "./usr/", name: "usr")
+      asset.archive_entries.find_or_create_by(path: "./usr/bin/", name: "bin")
+      asset.archive_entries.find_or_create_by(path: "./usr/bin/bgzip", name: "bgzip")
+      asset.archive_entries.find_or_create_by(path: "./usr/bin/htsfile", name: "htsfile")
+      asset.archive_entries.find_or_create_by(path: "./usr/bin/tabix", name: "tabix")
+
+      asset = Asset.find_or_initialize_by(dxid: "file-Bjjgz880F3YXfp83GQkGp3yK")
+      asset.update!(
+        project: "project-BgbZ27j0F3Yb1f8XQQ2z1xjQ",
+        name: "samtools-1.2.tar.gz",
+        state: "closed",
+        user_id: george.id,
+        public: true,
+        file_size: 372046,
+        description: "Contains the samtools executable."
+      )
+      asset.update!(parent_id: asset.id)
+      asset.archive_entries.find_or_create_by(path: "./", name: nil)
+      asset.archive_entries.find_or_create_by(path: "./usr/", name: "usr")
+      asset.archive_entries.find_or_create_by(path: "./usr/bin/", name: "bin")
+      asset.archive_entries.find_or_create_by(path: "./usr/bin/samtools", name: "samtools")
 
       App.find_or_initialize_by(title: "Example App 4 Debugging").update!(
         series: "-george.fdauser-debug",

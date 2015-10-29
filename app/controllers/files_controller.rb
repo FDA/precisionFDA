@@ -19,7 +19,7 @@ class FilesController < ApplicationController
   end
 
   def show
-    @file = UserFile.accessible_by(@context.user_id).includes(:user).find_by!(dxid: params[:id])
+    @file = UserFile.not_assets.accessible_by(@context.user_id).includes(:user).find_by!(dxid: params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
@@ -44,11 +44,16 @@ class FilesController < ApplicationController
   end
 
   def download
+    # Allow assets as well
     @file = UserFile.accessible_by(@context.user_id).find_by!(dxid: params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
-      User.sync_file!(@context.user_id, @file.id, @context.token)
+      if @file.parent_type == "Asset"
+        User.sync_asset!(@context.user_id, @file.id, @context.token)
+      else
+        User.sync_file!(@context.user_id, @file.id, @context.token)
+      end
       @file.reload
     end
 
