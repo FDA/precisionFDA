@@ -16,6 +16,8 @@
 #  updated_at                  :datetime         not null
 #  org_id                      :integer
 #  pending_jobs_count          :integer
+#  open_assets_count           :integer
+#  closing_assets_count        :integer
 #
 
 class User < ActiveRecord::Base
@@ -28,18 +30,24 @@ class User < ActiveRecord::Base
   # lower will get migrated.
   CURRENT_SCHEMA = 1
 
-  has_many :user_files, {class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'}
+  has_many :uploaded_files, {class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'}
+  has_many :user_files
+  has_many :assets
   has_many :comparisons
   has_many :notes
   has_many :apps
   has_many :jobs
   belongs_to :org
 
+  def real_files
+    user_files.real_files
+  end
+
   def self.sync_file!(user_id, file_id, token)
     # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)
-      file = user.user_files.find(file_id) # Re-check file id
+      file = user.uploaded_files.find(file_id) # Re-check file id
       if file.state != "closed"
         result = DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: [file.dxid]})["results"][0]
         sync_file_state(result, file, user)
@@ -53,9 +61,36 @@ class User < ActiveRecord::Base
       user = User.find(user_id)
       if (user.open_files_count != 0) || (user.closing_files_count != 0)
         # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-        UserFile.real_files.where(user_id: user_id).where.not(state: "closed").all.each_slice(1000) do |files|
+        user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
           DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
             sync_file_state(result, files[i], user)
+          end
+        end
+      end
+    end
+  end
+
+  def self.sync_asset!(user_id, file_id, token)
+    # TODO: Loop until transaction succeeds
+    User.transaction do
+      user = User.find(user_id)
+      file = user.assets.find(file_id) # Re-check file id
+      if file.state != "closed"
+        result = DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: [file.dxid]})["results"][0]
+        sync_asset_state(result, file, user)
+      end
+    end
+  end
+
+  def self.sync_assets!(user_id, token)
+    # TODO: Loop until transaction succeeds
+    User.transaction do
+      user = User.find(user_id)
+      if (user.open_assets_count != 0) || (user.closing_assets_count != 0)
+        # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
+        user.assets.where.not(state: "closed").all.each_slice(1000) do |files|
+          DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
+            sync_asset_state(result, files[i], user)
           end
         end
       end
@@ -165,6 +200,31 @@ class User < ActiveRecord::Base
         raise unless ((state == "closed") && (file.state == "closing"))
         file.update!(state: state, file_size: result["describe"]["size"])
         user.closing_files_count = user.closing_files_count - 1
+        user.save!
+      end
+    else
+      # TODO we should never be here
+      raise
+    end
+  end
+
+  def self.sync_asset_state(result, file, user)
+    if result["statusCode"] == 404
+      # File was deleted by the DNAnexus stale file daemon; delete it on our end as well
+      if file.state == "open"
+        user.open_assets_count = user.open_assets_count - 1
+      else
+        user.closing_assets_count = user.closing_assets_count - 1
+      end
+      user.save!
+      file.destroy!
+    elsif result["describe"].present?
+      state = result["describe"]["state"]
+      if state != file.state
+        # TODO the following should never fail
+        raise unless ((state == "closed") && (file.state == "closing"))
+        file.update!(state: state, file_size: result["describe"]["size"])
+        user.closing_assets_count = user.closing_assets_count - 1
         user.save!
       end
     else

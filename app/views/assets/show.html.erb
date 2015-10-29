@@ -1,0 +1,78 @@
+<% content_for :title do %><%= @asset.prefix %><% end %>
+
+<div class="page-header">
+  <div class="page-title"><span class="fa fa-asset-o"></span> <%= @asset.prefix %></div>
+
+</div>
+
+<div class="pfda-toolbar">
+  <div class="btn-group pull-right">
+    <% if @asset.state == "closed" %>
+      <%= link_to download_file_path(@asset.dxid), method: :post, class: "btn btn-primary" do %>
+        <span class="fa fa-download"></span> Download
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <div class="metadata-section">
+    <ul class="list-group list-group-inline">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">ID</h5>
+        <p class="list-group-item-text"><%= @asset.dxid %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Added by</h5>
+        <p class="list-group-item-text">
+          <%= link_to(@asset.user.dxuser, user_path(@asset.user.dxuser))  %>
+        </p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Archive name</h5>
+        <p class="list-group-item-text">
+          <%= @asset.name %>
+        </p>
+      </li>
+    </ul>
+
+    <ul class="list-group list-group-inline">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Access</h5>
+        <p class="list-group-item-text">
+          <span class="fa <%= @asset.public ? 'fa-globe' : 'fa-lock' %>"></span>
+          <%= @asset.public ? "Public" : "Private" %>
+        </p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">File Size</h5>
+        <p class="list-group-item-text"><%= number_to_human_size(@asset.file_size || 0) %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">State</h5>
+        <p class="list-group-item-text"><%= @asset.state %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Created</h5>
+        <p class="list-group-item-text"><%= @asset.created_at.to_s(:db) %></p>
+      </li>
+    </ul>
+
+    <div>
+      <hr>
+      <div>Description:</div>
+      <div class="description">
+        <%= @asset.description %>
+      </div>
+      <hr>
+    </div>
+
+    <div>
+      <div>Archive contents:</div>
+      <% @asset.archive_entries.each do |archive_entry| %>
+        <div><%= archive_entry.path %></div>
+      <% end %>
+    </div>
+
+  </div>
+</div>

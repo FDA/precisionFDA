@@ -1,0 +1,46 @@
+# == Schema Information
+#
+# Table name: user_files
+#
+#  id          :integer          not null, primary key
+#  dxid        :string
+#  project     :string
+#  name        :string
+#  state       :string
+#  description :text
+#  user_id     :integer
+#  public      :boolean
+#  file_size   :integer
+#  created_at  :datetime         not null
+#  updated_at  :datetime         not null
+#  parent_id   :integer
+#  parent_type :string
+#
+
+#
+# To avoid creating another class, Asset is simply inherited from UserFile.
+#
+# An asset is a file archive (*.tar or *.tar.gz), together with a readme
+# (stored in the "description" field of the UserFile model). The archive
+# contents are stored using the ArchiveEntry model, and can be used for
+# searching through assets in the UI.
+#
+class Asset < UserFile
+  default_scope { where(parent_type: "Asset") }
+
+  has_many :archive_entries, dependent: :destroy
+
+  def prefix
+    name.chomp(".gz").chomp(".tar")
+  end
+
+  def suffix
+    if name.end_in?(".tar.gz")
+      return ".tar.gz"
+    elsif name.end_in?(".tar")
+      return ".tar"
+    else
+      raise "Found an asset that is not a .tar[.gz]"
+    end
+  end
+end

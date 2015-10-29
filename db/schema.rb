@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151011220723) do
+ActiveRecord::Schema.define(version: 20151029011611) do
 
   create_table "apps", force: :cascade do |t|
     t.string   "dxid"
@@ -36,6 +36,15 @@ ActiveRecord::Schema.define(version: 20151011220723) do
   add_index "apps", ["is_latest"], name: "index_apps_on_is_latest"
   add_index "apps", ["scope"], name: "index_apps_on_scope"
   add_index "apps", ["user_id"], name: "index_apps_on_user_id"
+
+  create_table "archive_entries", force: :cascade do |t|
+    t.text    "path"
+    t.string  "name"
+    t.integer "asset_id"
+  end
+
+  add_index "archive_entries", ["asset_id"], name: "index_archive_entries_on_asset_id"
+  add_index "archive_entries", ["name"], name: "index_archive_entries_on_name"
 
   create_table "comparison_inputs", force: :cascade do |t|
     t.integer "comparison_id"
@@ -149,6 +158,8 @@ ActiveRecord::Schema.define(version: 20151011220723) do
     t.datetime "updated_at",                              null: false
     t.integer  "org_id"
     t.integer  "pending_jobs_count"
+    t.integer  "open_assets_count"
+    t.integer  "closing_assets_count"
   end
 
   add_index "users", ["dxuser"], name: "index_users_on_dxuser", unique: true

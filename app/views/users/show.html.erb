@@ -10,7 +10,7 @@
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Files</h5>
         <p class="list-group-item-text">
-          <%= link_to(@user.user_files.accessible_by(@context.user_id).size, "#{files_path()}?grid[f][users.dxuser]=#{@user.dxuser}")  %>
+          <%= link_to(@user.real_files.accessible_by(@context.user_id).size, "#{files_path()}?grid[f][users.dxuser]=#{@user.dxuser}")  %>
         </p>
       </li>
       <li class="list-group-item">
