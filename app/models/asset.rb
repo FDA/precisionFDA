@@ -30,6 +30,11 @@ class Asset < UserFile
 
   has_many :archive_entries, dependent: :destroy
 
+  def self.with_search_keyword(prefix)
+    prefix = sanitize_sql_like(prefix)
+    return joins(:archive_entries).where("(archive_entries.name LIKE ? OR user_files.name LIKE ?)", "#{prefix}%", "%#{prefix}%")
+  end
+
   def prefix
     name.chomp(".gz").chomp(".tar")
   end
