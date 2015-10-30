@@ -339,6 +339,44 @@ class ApiController < ApplicationController
   end
 
   def create_app
-    #name, title, readme, input_spec, output_spec, internet_access, instance_type, ordered_assets, packages, code
+    #name, title, readme, input_spec, output_spec, internet_access, instance_type, ordered_assets, packages, code, is_new
+  end
+
+  # Inputs
+  #
+  # id (string, required): the dxid of the asset to describe
+  #
+  # Outputs:
+  #
+  # description (string): the markdown README of the asset
+  # archive_entries (array:string): a list of "paths" included in the archive
+  #
+  def describe_asset
+    # App id should be a string
+    id = params["id"]
+    raise unless id.is_a?(String) && id != ""
+
+    asset = Asset.accessible_by(@context.user_id).find_by!(dxid: id)
+
+    render json: {
+      description: asset.description || "",
+      archive_entries: asset.archive_entries.map(&:path)
+    }
+  end
+
+  # Inputs
+  #
+  # prefix (string, required): the prefix to search for
+  #
+  # Outputs:
+  #
+  # ids (array:string): the matchin asset dxids
+  def search_assets
+    # Prefix should be a string with at least three characters
+    prefix = params["prefix"]
+    raise unless prefix.is_a?(String) && prefix.size >= 3
+
+    ids = Asset.accessible_by(@context.user_id).with_search_keyword(prefix).select(:dxid).distinct.limit(1000).map(&:dxid)
+    render json: { ids: ids }
   end
 end

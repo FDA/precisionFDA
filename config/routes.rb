@@ -16,6 +16,8 @@ Rails.application.routes.draw do
     post '/api/close_file', to: 'api#close_file'
     post '/api/list_files', to: 'api#list_files'
     post '/api/run_app', to: 'api#run_app'
+    post '/api/describe_asset', to: 'api#describe_asset'
+    post '/api/search_assets', to: 'api#search_assets'
 
     # The priority is based upon order of creation: first created -> highest priority.
     # See how all your routes lay out with "rake routes".
