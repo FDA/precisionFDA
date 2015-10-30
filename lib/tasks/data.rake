@@ -194,14 +194,11 @@ namespace :data do
       asset.archive_entries.find_or_create_by(path: "./usr/bin/", name: "bin")
       asset.archive_entries.find_or_create_by(path: "./usr/bin/samtools", name: "samtools")
 
-      App.find_or_initialize_by(title: "Example App 4 Debugging").update!(
-        series: "-george.fdauser-debug",
+      series = AppSeries.find_or_create_by(dxid: "app--george.fdauser-debug", name: "debug", user_id: george.id, scope: "public")
+      app = App.find_or_initialize_by(app_series_id: series.id); app.update!(
         dxid: "app-BjPzf380zBFQBf9qg0X7BfBx",
-        project: nil,
         version: "1.0.0",
-        is_latest: true,
-        is_applet: false,
-        name: "debug",
+        revision: 1,
         title: "Example App 4 Debugging",
         readme: "This is an example application. Here you would normally see a big README (format TBD; markdown or CKeditor?).",
         user_id: george.id,
@@ -289,15 +286,14 @@ namespace :data do
           code: "#!/bin/bash\necho hello"
         }
       )
+      series.update!(latest_revision_app_id: app.id, latest_version_app_id: app.id)
 
-      App.find_or_initialize_by(series: "-george.fdauser-hive-insilico").update!(
-        title: "HIVE Insilico for GRCh37",
+      series = AppSeries.find_or_create_by(dxid: "app--george.fdauser-hive-insilico", name: "hive-insilico", user_id: george.id, scope: "public")
+      app = App.find_or_initialize_by(app_series_id: series.id); app.update!(
         dxid: "app-BjX5P2001F27gX51vZb6BYpf",
-        project: nil,
         version: "1.0.3",
-        is_latest: true,
-        is_applet: false,
-        name: "hive-insilico",
+        title: "HIVE Insilico for GRCh37",
+        revision: 3,
         readme: "HIVE Insilico is a FASTQ generator that can simulate single- or paired-end sequencing from the GRCh37 human reference genome.",
         user_id: george.id,
         scope: "public",
@@ -402,15 +398,14 @@ namespace :data do
           code: "#!/bin/bash\necho hello"
         }
       )
+      series.update!(latest_revision_app_id: app.id, latest_version_app_id: app.id)
 
-      App.find_or_initialize_by(series: "-george.fdauser-bwa-freebayes").update!(
+      series = AppSeries.find_or_create_by(dxid: "app--george.fdauser-bwa-freebayes", name: "bwa-freebayes", user_id: george.id, scope: "public")
+      app = App.find_or_initialize_by(app_series_id: series.id); app.update!(
         title: "BWA-MEM and FreeBayes",
         dxid: "app-BjX5k5Q0FVJ7gX51vZb6BYq0",
-        project: nil,
         version: "1.0.0",
-        is_latest: true,
-        is_applet: false,
-        name: "bwa-freebayes",
+        revision: 1,
         readme: "A mapping and variation calling pipeline that uses the following steps:<p>&nbsp;</p><p><ul><li>BWA-MEM (v0.7.12-r1039), to map reads to the GRCh37 reference genome.</li><li>Bamsormadup (v2.0.8) to sort and deduplicate the mappings.</li><li>FreeBayes (v0.9.20) to call variants.</li></ul></p><p>This app supports several options. See each individual options's help for more information.</p>",
         user_id: george.id,
         scope: "public",
@@ -520,6 +515,7 @@ namespace :data do
           code: "#!/bin/bash\necho hello"
         }
       )
+      series.update!(latest_revision_app_id: app.id, latest_version_app_id: app.id)
 
     end
   end

@@ -7,7 +7,7 @@
       <a href="<%= apps_path() %>" class="list-group-item <%= @app.nil? ? 'active' : '' %>">
         All Apps
       </a>
-      <%= render "_partials/apps_list_group", apps: @apps, active: @app.try(:series) %>
+      <%= render "_partials/apps_list_group", apps: @apps, active: @app.try(:app_series_id) %>
     </div>
   </div>
   <div class="pfda-pane-content">
@@ -32,11 +32,7 @@
         if !@app.present?
           g.column name: 'App', attribute: 'title', assoc: :app  do |job|
             display = "<span class='fa fa-cube fa-fw'></span> "
-            if App.where(dxid: job.app_dxid).exists?
-              display += link_to(job.app.title, app_path(job.app.dxid))
-            else
-              display += job.app_title + " (" + job.app_dxid + ")"
-            end
+            display += link_to(job.app.title, app_path(job.app.dxid))
             raw display
           end
         end

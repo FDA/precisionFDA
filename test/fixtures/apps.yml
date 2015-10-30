@@ -2,22 +2,19 @@
 #
 # Table name: apps
 #
-#  id         :integer          not null, primary key
-#  dxid       :string
-#  series     :string
-#  project    :string
-#  version    :string
-#  is_latest  :boolean
-#  is_applet  :boolean
-#  name       :string
-#  title      :string
-#  readme     :text
-#  user_id    :integer
-#  scope      :string
-#  spec       :text
-#  internal   :text
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
+#  id            :integer          not null, primary key
+#  dxid          :string
+#  version       :string
+#  revision      :integer
+#  title         :string
+#  readme        :text
+#  user_id       :integer
+#  scope         :string
+#  spec          :text
+#  internal      :text
+#  created_at    :datetime         not null
+#  updated_at    :datetime         not null
+#  app_series_id :integer
 #
 
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html

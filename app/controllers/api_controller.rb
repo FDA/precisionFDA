@@ -295,16 +295,10 @@ class ApiController < ApplicationController
     # Create job record
     opts = {
       dxid: jobid,
-      series: @app.series,
+      app_series_id: @app.app_series_id,
       app_id: @app.id,
       project: project,
-      spec: @app.spec,
       run_inputs: run_inputs,
-      app_version: @app.version,
-      app_name: @app.name,
-      app_title: @app.title,
-      app_user_id: @app.user_id,
-      app_dxid: @app.dxid,
       state: "idle",
       name: name,
       describe: {},
@@ -313,7 +307,7 @@ class ApiController < ApplicationController
     if run_instance_type.present?
       opts[:run_instance_type] = run_instance_type
     end
-    provenance = {jobid => {app_version: @app.version, app_name: @app.name, app_title: @app.title, app_user_id: @app.user_id, app_id: @app.id, inputs: run_inputs}}
+    provenance = {jobid => {app_dxid: @app.dxid, app_id: @app.id, inputs: run_inputs}}
     input_file_dxids.uniq!
     input_file_ids = []
     UserFile.accessible_by(@context.user_id).where(dxid: input_file_dxids).find_each do |file|

@@ -36,6 +36,7 @@ class User < ActiveRecord::Base
   has_many :comparisons
   has_many :notes
   has_many :apps
+  has_many :app_series
   has_many :jobs
   belongs_to :org
 

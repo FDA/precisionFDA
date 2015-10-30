@@ -43,7 +43,7 @@
     <ul class="list-group list-group-inline">
       <li class="list-group-item">
         <h5 class="list-group-item-heading">App</h5>
-        <p class="list-group-item-text"><%= App.where(dxid: @job.app_dxid).exists? ? link_to(@job.app.title, app_path(@job.app.dxid)) : (@job.app_title + " (" + @job.app_dxid + ")")  %></p>
+        <p class="list-group-item-text"><%= link_to(@job.app.title, app_path(@job.app.dxid)) %></p>
       </li>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Launched by</h5>

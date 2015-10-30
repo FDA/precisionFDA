@@ -2,21 +2,19 @@
 #
 # Table name: jobs
 #
-#  id         :integer          not null, primary key
-#  dxid       :string
-#  series     :string
-#  app_id     :integer
-#  project    :string
-#  spec       :text
-#  run_data   :text
-#  describe   :text
-#  provenance :text
-#  app_meta   :text
-#  state      :string
-#  name       :string
-#  user_id    :integer
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
+#  id            :integer          not null, primary key
+#  dxid          :string
+#  app_id        :integer
+#  project       :string
+#  run_data      :text
+#  describe      :text
+#  provenance    :text
+#  state         :string
+#  name          :string
+#  user_id       :integer
+#  created_at    :datetime         not null
+#  updated_at    :datetime         not null
+#  app_series_id :integer
 #
 
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
