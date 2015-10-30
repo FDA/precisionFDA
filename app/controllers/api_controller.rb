@@ -205,6 +205,12 @@ class ApiController < ApplicationController
     render json: {}
   end
 
+  # Inputs
+  #
+  # id (string, required): the dxid of the app to run
+  # name (string, required): the name of the job
+  # inputs (hash, required): the inputs
+  # instance_type (string, optional): override of the default instance type
   def run_app
     # App id should be a string
     id = params["id"]
@@ -330,5 +336,9 @@ class ApiController < ApplicationController
     end
 
     render json: {id: jobid}
+  end
+
+  def create_app
+    name, title, readme, input_spec, output_spec, internet_access, instance_type, ordered_assets, packages, code
   end
 end

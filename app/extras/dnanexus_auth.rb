@@ -1,7 +1,3 @@
-require 'net/https'
-require 'json'
-require 'uri'
-
 class DNAnexusAuth
   def initialize(authserver_url)
     @authserver_url = authserver_url
