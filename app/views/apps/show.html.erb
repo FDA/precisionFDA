@@ -1,15 +1,100 @@
 <% content_for :title do %><%= @app.title %><% end %>
 
-<div class="page-header">
-  <div class="page-title"><span class="fa fa-cube"></span> <%= @app.title %></div>
+<div class="page-header clearfix">
+  <div class="page-title pull-left"><span class="fa fa-cube"></span> <%= @app.title %></div>
+
+  <% if @app.scope == 'private'  %>
+  <div class="pull-right">
+    <a class="btn btn-default btn-lg" href="#TODO">
+      <span class="fa fa-users"></span> Publish
+    </a>
+  </div>
+  <% end %>
 </div>
 
 <div class="pfda-toolbar">
   <div class="btn-group">
-    <%= link_to new_app_job_path(@app.dxid), class: "btn btn-default" do %>
+    <div class="btn-group">
+      <button type="button" class="btn btn-default btn-default-version dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <% if @app.user_id == @context.user_id %>
+          <span class="text-muted">Revision:</span>
+          <span class="app-revision"><%= @app.revision %></span>
+          <% if @app.released? %>
+            <% if @app.app_series.latest_version_app_id == @app.id %>
+              <span class="app-label-version label label-success"><%= @app.version %></span>
+            <% else %>
+              <span class="app-label-version label label-default"><%= @app.version %></span>
+            <% end %>
+          <% end %>
+          <% if @app.app_series.latest_revision_app_id == @app.id %>
+            <span class="app-label-latest label label-info">Latest</span>
+          <% end %>
+        <% else %>
+          <span class="text-muted">Release:</span>
+          <span class="app-release"><%= @app.version %></span>
+          <% if @app.app_series.latest_version_app_id == @app.id %>
+            <span class="app-label-latest label label-success">Latest</span>
+          <% end %>
+        <% end %>
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+        <% if @apps.size == 0 %>
+          <li class="dropdown-header">
+            No releases available
+          </li>
+        <% else %>
+          <li class="dropdown-header"><%= @app.user_id == @context.user_id ? "Revisions" : "Releases" %></li>
+          <% @apps.each do |app| %>
+            <li class="<% if app.dxid == params[:id] %>active<% end %>">
+              <a href="<%= app_path(app.dxid) %>" class="clearfix">
+                <% if @app.user_id == @context.user_id %>
+                  <span class="app-revision"><%= app.revision %></span>
+                  <% if app.app_series.latest_revision_app_id == app.id %>
+                    <span class="app-label-latest label label-info pull-right">Latest</span>
+                  <% end %>
+                  <% if app.released? %>
+                    <% if app.app_series.latest_version_app_id == app.id %>
+                      <span class="app-label-version label label-success pull-right"><%= app.version %></span>
+                    <% else %>
+                      <span class="app-label-version label label-default pull-right"><%= app.version %></span>
+                    <% end %>
+                  <% end %>
+                <% else %>
+                  <% if app.app_series.latest_version_app_id == app.id %>
+                    <span class="app-label-version"><%= app.version %></span>
+                    <span class="app-label-version label label-success">Latest</span>
+                  <% else %>
+                    <span class="app-label-version"><%= app.version %></span>
+                  <% end %>
+                <% end %>
+              </a>
+            </li>
+          <% end %>
+        <% end %>
+      </ul>
+    </div>
+    <% if @app.user_id == @context.user_id && @latestRevision.present? %>
+    <a class="btn btn-default" href="<%= edit_app_path(@latestRevision.dxid) %>">
+      <span class="fa fa-edit"></span> Edit Latest Revision
+    </a>
+    <% end %>
+    <a class="btn btn-default" href="<%= edit_app_path(@app.dxid) %>">
+      <span class="fa fa-code-fork"></span> Fork Version
+    </a>
+    <% if !@app.released? %>
+    <button class="btn btn-default">
+      <span class="fa fa-tag"></span> Release Version
+    </button>
+    <% end %>
+  </div>
+
+  <div class="btn-group pull-right">
+    <%= link_to new_app_job_path(@app.dxid), class: "btn btn-primary" do %>
       <span class="fa fa-bolt"></span> Run App
     <% end %>
   </div>
+
 </div>
 
 <div class="container-fluid">
@@ -36,8 +121,15 @@
         </p>
       </li>
       <li class="list-group-item">
+        <h5 class="list-group-item-heading">Revision</h5>
+        <p class="list-group-item-text"><%= @app.revision %></p>
+      </li>
+
+      <li class="list-group-item">
         <h5 class="list-group-item-heading">Version</h5>
-        <p class="list-group-item-text"><%= @app.version %></p>
+        <p class="list-group-item-text">
+          <%= @app.version.blank? ? "Unreleased" : @app.version %>
+        </p>
       </li>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Created</h5>

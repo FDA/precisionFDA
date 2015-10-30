@@ -1,30 +1,3 @@
-ckConfig =
-  height: 400
-  extraPlugins: 'widget,autogrow,attachment'
-  toolbarGroups: [
-    {name: 'clipboard', groups: ['clipboard', 'undo']}
-    {name: 'styles', groups: ['styles']}
-    {name: 'basicstyles', groups: ['basicstyles', 'cleanup']}
-    {name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align', 'bidi', 'paragraph']}
-    {name: 'links', groups: ['links']}
-    {name: 'insert', groups: ['insert']}
-    {name: 'editing', groups: ['find', 'selection', 'spellchecker', 'editing']}
-    {name: 'forms', groups: ['forms']}
-    {name: 'tools', groups: ['tools']}
-    {name: 'document', groups: ['mode', 'document', 'doctools']}
-    {name: 'others', groups: ['others']}
-    {name: 'colors', groups: ['colors']}
-    {name: 'about', groups: ['about']}
-  ]
-  removeButtons: 'Subscript,Superscript,Cut,Copy,Paste,PasteText,PasteFromWord,SpecialChar,Source,Strike,Underline,Styles,About,Scayt'
-  on:
-    insertElement: (e) ->
-      el = $(e.data.$)
-      if (el.is('table'))
-        el.addClass('table table-bordered').removeAttr('cellpadding').removeAttr('cellspacing')
-  autoGrow_minHeight: 400
-  autoGrow_onStartup: true
-
 class NoteModel
   constructor: (note) ->
     @editorInstance = null
@@ -62,7 +35,7 @@ class NoteModel
       method: "PUT"
       data: params
     }).done((res) =>
-      window.location.replace(res.path) if window.location.pathname != res.path  
+      window.location.replace(res.path) if window.location.pathname != res.path
     ).fail((error) ->
       console.error(error)
     ).always(() =>
@@ -158,7 +131,7 @@ NotesController::show = ->
 
       NOTE_INSTANCE_NAME = 'note-editor'
       CKEDITOR.disableAutoInline = true
-      CKEDITOR.inline(NOTE_INSTANCE_NAME, ckConfig)
+      CKEDITOR.inline(NOTE_INSTANCE_NAME, Precision.CK_CONFIG)
       editorInstance = CKEDITOR.instances[NOTE_INSTANCE_NAME]
       noteModel.editorInstance = editorInstance
     )

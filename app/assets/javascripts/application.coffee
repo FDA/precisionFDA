@@ -24,4 +24,5 @@
 #= require wice_grid
 #= require SparkMD5
 #= require paloma
+#= require knockout-ace/knockout-ace
 #= require_tree .

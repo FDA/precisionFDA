@@ -1,0 +1,33 @@
+@import "_common"
+
+.btn-default-version
+  font-weight: bold
+  color: $brand-blue-dark
+
+  > *
+    font-weight: normal
+
+.btn-static
+  padding: $padding-base-vertical $padding-base-horizontal
+  display: inline-block
+  float: left
+
+.btn-primary, .btn-warning, .btn-danger, .btn-success
+  .fa
+    color: #fff
+
+.btn.btn-default
+  .fa
+    color: $brand-red-primary
+  &:not(.disabled)
+    &:hover, &:focus, &:active, &.active
+      color: $brand-blue-primary
+      background-color: $brand-blue-subtle
+      border-color: $brand-blue-secondary
+
+.dropdown-menu
+  > li > a
+    cursor: pointer
+
+    .label
+      margin: 2px 0 0 4px

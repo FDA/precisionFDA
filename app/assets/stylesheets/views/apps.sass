@@ -24,6 +24,13 @@
   .app-spec-group
     background-color: $brand-blue-subtler
 
+  .app-revision, .app-release
+    font-weight: bold
+
+  .dropdown
+    .app-revision
+      min-width: 50px
+
 .app-spec
   .app-spec-column
     padding: 0 $padding-large-horizontal $padding-small-vertical 0
@@ -35,7 +42,7 @@
     font-size: $font-size-h5
     margin-bottom: 10px
     padding-left: 8px
-    
+
   .table-spec
     &.table-striped > tbody > tr:nth-of-type(odd)
       background-color: darken($brand-blue-subtler, 2%)
@@ -68,3 +75,30 @@
       font-family: $font-family-monospace
       color: $text-muted
       font-size: 11px
+
+.pfda-controller-apps.pfda-action-edit
+  .section-io
+    .section-io-input
+      padding-right: $padding-base-horizontal
+    .section-io-output
+      padding-left: $padding-base-horizontal
+
+  .section-readme
+    .panel-body
+      padding: 0
+      background: $brand-blue-subtler
+
+    .readme-editor
+      background: #fff
+      margin: 10px
+      padding: 10px
+      border: 1px solid darken($brand-blue-subtle, 2%)
+      min-height: 300px
+      border-radius: $border-radius-base
+
+.pfda-controller-apps
+  .page-title
+    .app-version
+      color: $text-muted
+      &:before
+        content: 'v'

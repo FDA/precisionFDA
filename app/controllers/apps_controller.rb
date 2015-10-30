@@ -41,10 +41,41 @@ class AppsController < ApplicationController
 
   def show
     @app = App.accessible_by(@context.user_id, @context.org_id).find_by(dxid: params[:id])
+
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
       redirect_to apps_path
       return
+
+    else
+      if @app.user_id == @context.user_id
+        @apps = App.accessible_by(@context.user_id, @context.org_id).where(app_series_id: @app.app_series_id).order(revision: :desc)
+        @latestRevision = @apps.select { |app| app.id == @app.app_series.latest_revision_app_id}.first
+      else
+        @apps = App.accessible_by(@context.user_id, @context.org_id).released.where(app_series_id: @app.app_series_id).order(revision: :desc)
+      end
+    end
+  end
+
+  def new
+
+  end
+
+  def edit
+    @app = App.editable_by(@context.user_id).find_by(dxid: params[:id])
+    if @app.nil?
+      flash[:error] = "Sorry, this app does not exist or is not accessible by you"
+      redirect_to apps_path
+      return
+    else
+      isLatest = @app.id == @app.app_series.latest_revision_app_id ? true : false
+      if !isLatest
+        @app = App.find_by(id: @app.app_series.latest_revision_app_id)
+        redirect_to edit_app_path(@app.dxid)
+        return
+      else
+        js app: @app.slice(:dxid, :name, :title, :version, :revision, :readme, :spec, :internal)
+      end
     end
   end
 end

@@ -30,6 +30,11 @@ class App < ActiveRecord::Base
     return where.any_of({user_id: user_id}, {scope: "public"}, {scope: org_id.to_s})
   end
 
+  def self.editable_by(user_id)
+    raise unless user_id.present?
+    return where(user_id: user_id)
+  end
+
   def self.released
     where.not(version: nil)
   end
@@ -41,5 +46,4 @@ class App < ActiveRecord::Base
   def released?
     version.present?
   end
-
 end

@@ -26,23 +26,7 @@ class JobsNewView
       return !@busy() && isConfigReady && areInputsReady
     )
 
-    @availableInstances = [
-      {value: "baseline-2", label: "Baseline 2"}
-      {value: "baseline-4", label: "Baseline 4"}
-      {value: "baseline-8", label: "Baseline 8"}
-      {value: "baseline-16", label: "Baseline 16"}
-      {value: "baseline-32", label: "Baseline 32"}
-      {value: "himem-2", label: "High Mem 2"}
-      {value: "himem-4", label: "High Mem 4"}
-      {value: "himem-8", label: "High Mem 8"}
-      {value: "himem-16", label: "High Mem 16"}
-      {value: "himem-32", label: "High Mem 32"}
-      {value: "hidisk-2", label: "High Disk 2"}
-      {value: "hidisk-4", label: "High Disk 4"}
-      {value: "hidisk-8", label: "High Disk 8"}
-      {value: "hidisk-16", label: "High Disk 16"}
-      {value: "hidisk-32", label: "High Disk 32"}
-    ]
+    @availableInstances = Precision.INSTANCES
     @defaultInstanceType = app.spec.instance_type
     @instanceType = ko.observable(app.spec.instance_type)
 
