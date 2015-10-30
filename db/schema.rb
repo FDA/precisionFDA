@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151029231659) do
+ActiveRecord::Schema.define(version: 20151030012134) do
 
   create_table "app_series", force: :cascade do |t|
     t.string   "dxid"
@@ -49,6 +49,7 @@ ActiveRecord::Schema.define(version: 20151029231659) do
   add_index "apps", ["dxid"], name: "index_apps_on_dxid"
   add_index "apps", ["scope"], name: "index_apps_on_scope"
   add_index "apps", ["user_id"], name: "index_apps_on_user_id"
+  add_index "apps", ["version"], name: "index_apps_on_version"
 
   create_table "archive_entries", force: :cascade do |t|
     t.text    "path"

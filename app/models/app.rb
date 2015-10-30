@@ -30,6 +30,10 @@ class App < ActiveRecord::Base
     return where.any_of({user_id: user_id}, {scope: "public"}, {scope: org_id.to_s})
   end
 
+  def self.released
+    where.not(version: nil)
+  end
+
   def name
     app_series.name
   end

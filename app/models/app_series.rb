@@ -24,4 +24,8 @@ class AppSeries < ActiveRecord::Base
     raise unless user_id.present? && org_id.present?
     return where.any_of({user_id: user_id}, {scope: "public"}, {scope: org_id.to_s})
   end
+
+  def released
+    apps.released
+  end
 end
