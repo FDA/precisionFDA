@@ -339,6 +339,6 @@ class ApiController < ApplicationController
   end
 
   def create_app
-    name, title, readme, input_spec, output_spec, internet_access, instance_type, ordered_assets, packages, code
+    #name, title, readme, input_spec, output_spec, internet_access, instance_type, ordered_assets, packages, code
   end
 end
