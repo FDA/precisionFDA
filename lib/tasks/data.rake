@@ -517,6 +517,170 @@ namespace :data do
       )
       series.update!(latest_revision_app_id: app.id, latest_version_app_id: app.id)
 
+      series = AppSeries.find_or_create_by(dxid: "app--fahdoo_fda1-debug", name: "debug", user_id: fahd.id, scope: "public")
+      app = App.find_or_initialize_by(app_series_id: series.id, revision: 1); app.update!(
+        dxid: "app-1234",
+        version: "1.0.0",
+        revision: 1,
+        title: "Fahd's Example App",
+        readme: "This is an *example* application.",
+        user_id: fahd.id,
+        scope: "public",
+        spec: {
+          input_spec: [
+            {
+              "name": "required_file",
+              "class": "file",
+              "optional": false,
+              "patterns": ["*.bed"],
+              "label": "Required file",
+              "help": "Enter here a file that we will use blah blah."
+            },
+            {
+              "name": "optional_file",
+              "class": "file",
+              "optional": true,
+              "patterns": ["*.bed"],
+              "label": "Optional file",
+              "help": "Enter here an optional file that we will use blah blah bloh. If you supply this file, we'll do this and that."
+            },
+            {
+              "name": "required_number",
+              "class": "int",
+              "optional": false,
+              "label": "Number of apples",
+              "help": "How many apples would you like to eat?"
+            },
+            {
+              "name": "required_default_number",
+              "class": "int",
+              "optional": false,
+              "label": "Number of oranges",
+              "default": 40,
+              "help": "How many oranges would you like to eat?"
+            },
+            {
+              "name": "optional_string",
+              "class": "string",
+              "optional": true,
+              "label": "Prefix",
+              "help": "Enter the prefix for the generated files"
+            },
+            {
+              "name": "trim",
+              "class": "boolean",
+              "optional": false,
+              "label": "Trim reads?",
+              "help": "If selected, reads will be trimmed."
+            },
+            {
+              "name": "required_string",
+              "class": "string",
+              "optional": false,
+              "label": "Instrument",
+              "help": "Choose the instrument you'd like to simulate",
+              "choices": ["MiSeq", "HiSeq 2500"]
+            }
+          ],
+          output_spec: [
+            {
+              "name": "fastq",
+              "class": "file",
+              "optional": false,
+              "patterns": ["*.fastq.gz"],
+              "label": "Generated fastq",
+              "help": "The generated fastq file"
+            },
+            {
+              "name": "fastq2",
+              "class": "file",
+              "optional": true,
+              "patterns": ["*.fastq.gz"],
+              "label": "Right generated fastq",
+              "help": "The second generated fastq file (if at all)"
+            }
+          ],
+          internet_access: false,
+          instance_type: "baseline-4"
+        },
+        internal: {
+          ordered_assets: [],
+          packages: [],
+          code: "#!/bin/bash\necho hello"
+        }
+      )
+      series.update!(latest_revision_app_id: app.id, latest_version_app_id: app.id)
+
+      # Add a new revision
+      app2 = App.find_or_initialize_by(app_series_id: series.id, revision: 2); app2.update!(
+        dxid: "app-2345",
+        version: nil,
+        revision: 2,
+        title: "Fahd's Example App",
+        readme: "This is an *updated* README",
+        user_id: fahd.id,
+        scope: "public",
+        spec: {
+          input_spec: [
+            {
+              "name": "required_file",
+              "class": "file",
+              "optional": false,
+              "patterns": ["*.bed"],
+              "label": "Required file",
+              "help": "Enter here a file that we will use blah blah."
+            },
+            {
+              "name": "required_number",
+              "class": "int",
+              "optional": false,
+              "label": "Number of apples",
+              "help": "How many apples would you like to eat?"
+            },
+            {
+              "name": "required_default_number",
+              "class": "int",
+              "optional": false,
+              "label": "Number of oranges",
+              "default": 40,
+              "help": "How many oranges would you like to eat?"
+            },
+            {
+              "name": "trim",
+              "class": "boolean",
+              "optional": false,
+              "label": "Trim reads?",
+              "help": "If selected, reads will be trimmed."
+            },
+            {
+              "name": "required_string",
+              "class": "string",
+              "optional": false,
+              "label": "Instrument",
+              "help": "Choose the instrument you'd like to simulate",
+              "choices": ["MiSeq", "HiSeq 2500"]
+            }
+          ],
+          output_spec: [
+            {
+              "name": "fastq",
+              "class": "file",
+              "optional": false,
+              "patterns": ["*.fastq.gz"],
+              "label": "Generated fastq",
+              "help": "The generated fastq file"
+            }
+          ],
+          internet_access: false,
+          instance_type: "baseline-4"
+        },
+        internal: {
+          ordered_assets: [],
+          packages: [],
+          code: "#!/bin/bash\necho hello, goodbye"
+        }
+      )
+      series.update!(latest_revision_app_id: app2.id)
     end
   end
 end

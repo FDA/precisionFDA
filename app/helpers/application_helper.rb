@@ -1,6 +1,6 @@
 module ApplicationHelper
   def page_title(separator = " – ")
-    [content_for(:title), 'precisionFDA'].compact.join(separator)
+    [content_for(:title), 'precisionFDA'].compact.join(separator).html_safe
   end
 
   def bootstrap_class_for flash_type

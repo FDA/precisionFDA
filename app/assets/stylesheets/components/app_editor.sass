@@ -1,0 +1,44 @@
+@import "_common"
+
+.app-editor
+  padding: $padding-base-vertical 0
+
+  .nav-tabs
+    padding-left: $padding-base-horizontal
+  .tab-content
+    padding: $padding-large-vertical $padding-base-horizontal
+//   height: 100%
+//   width: 100%
+//   @include flexbox
+//   @include flex-direction(column)
+//   @include align-items(stretch)
+//   @include align-content(stretch)
+//
+//   .ace-editor-section
+//     position: relative
+//     width: 50%
+//     @include flex(1)
+//     @include flex-direction(row)
+//     .ace_editor
+//       position: absolute
+//       top: 0
+//       bottom: 0
+//       left: 0
+//       right: 0
+
+.section-io
+  .list-group-item-heading
+    margin: 5px 10px 0 0
+    text-transform: uppercase
+    font-weight: 300
+    color: $brand-blue-tertiary
+
+.table-io
+  margin: 0
+  > tbody
+    > tr.app-io-field
+      > td
+        vertical-align: middle
+
+  .io-field-class
+    font-family: $font-family-monospace
