@@ -1,6 +1,3 @@
-require 'net/https'
-require 'json'
-
 class DNAnexusAPI
   def initialize(bearer_token, apiserver_url = DNANEXUS_APISERVER_URI)
     @bearer_token = bearer_token
