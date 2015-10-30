@@ -11,29 +11,42 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151029011611) do
+ActiveRecord::Schema.define(version: 20151029231659) do
+
+  create_table "app_series", force: :cascade do |t|
+    t.string   "dxid"
+    t.string   "name"
+    t.integer  "latest_revision_app_id"
+    t.integer  "latest_version_app_id"
+    t.integer  "user_id"
+    t.string   "scope"
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+  end
+
+  add_index "app_series", ["dxid"], name: "index_app_series_on_dxid"
+  add_index "app_series", ["latest_revision_app_id"], name: "index_app_series_on_latest_revision_app_id"
+  add_index "app_series", ["latest_version_app_id"], name: "index_app_series_on_latest_version_app_id"
+  add_index "app_series", ["scope"], name: "index_app_series_on_scope"
+  add_index "app_series", ["user_id"], name: "index_app_series_on_user_id"
 
   create_table "apps", force: :cascade do |t|
     t.string   "dxid"
-    t.string   "series"
-    t.string   "project"
     t.string   "version"
-    t.boolean  "is_latest"
-    t.boolean  "is_applet"
-    t.string   "name"
+    t.integer  "revision"
     t.string   "title"
     t.text     "readme"
     t.integer  "user_id"
     t.string   "scope"
     t.text     "spec"
     t.text     "internal"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+    t.integer  "app_series_id"
   end
 
+  add_index "apps", ["app_series_id"], name: "index_apps_on_app_series_id"
   add_index "apps", ["dxid"], name: "index_apps_on_dxid"
-  add_index "apps", ["is_applet"], name: "index_apps_on_is_applet"
-  add_index "apps", ["is_latest"], name: "index_apps_on_is_latest"
   add_index "apps", ["scope"], name: "index_apps_on_scope"
   add_index "apps", ["user_id"], name: "index_apps_on_user_id"
 
@@ -82,24 +95,23 @@ ActiveRecord::Schema.define(version: 20151029011611) do
 
   create_table "jobs", force: :cascade do |t|
     t.string   "dxid"
-    t.string   "series"
     t.integer  "app_id"
     t.string   "project"
-    t.text     "spec"
     t.text     "run_data"
     t.text     "describe"
     t.text     "provenance"
-    t.text     "app_meta"
     t.string   "state"
     t.string   "name"
     t.integer  "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+    t.integer  "app_series_id"
   end
 
   add_index "jobs", ["app_id"], name: "index_jobs_on_app_id"
+  add_index "jobs", ["app_series_id"], name: "index_jobs_on_app_series_id"
   add_index "jobs", ["dxid"], name: "index_jobs_on_dxid"
-  add_index "jobs", ["series"], name: "index_jobs_on_series"
+  add_index "jobs", ["state"], name: "index_jobs_on_state"
   add_index "jobs", ["user_id"], name: "index_jobs_on_user_id"
 
   create_table "notes", force: :cascade do |t|

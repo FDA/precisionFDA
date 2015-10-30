@@ -27,7 +27,6 @@ Rails.application.routes.draw do
         end
       end
       get 'jobs', on: :member, to: 'apps#index'
-      get 'jobs/new2', on: :member, to: 'jobs#new2'
     end
     resources :comparisons do
       get 'visualize', on: :member

@@ -1,6 +1,6 @@
 <% apps.each do |app| %>
   <a href="<%= app_jobs_path(app.dxid) %>"
-    class="list-group-item app-<%= app.series %> <%= app.series == active ? 'active' : ''%>" 
+    class="list-group-item app-<%= app.app_series_id %> <%= app.app_series_id == active ? 'active' : ''%>" 
     data-app="<%= app.dxid %>">
     <%= app.title %>
   </a>

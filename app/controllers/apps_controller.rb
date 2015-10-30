@@ -10,7 +10,8 @@ class AppsController < ApplicationController
       end
     end
 
-    @apps = App.accessible_by(@context.user_id, @context.org_id).where(is_latest: true, is_applet: false)
+    series = AppSeries.accessible_by(@context.user_id, @context.org_id)
+    @apps = series.map { |s| s.user_id == @context.user_id ? s.latest_revision_app : s.latest_version_app }.reject(&:nil?)
 
     @apps_toolbar = {
       fixed: [
@@ -27,7 +28,7 @@ class AppsController < ApplicationController
         ]
       }
 
-      jobs = Job.where(user_id: @context.user_id, series: @app.series)
+      jobs = Job.where(user_id: @context.user_id, app_series_id: @app.app_series_id)
     else
       jobs = Job.where(user_id: @context.user_id)
     end
