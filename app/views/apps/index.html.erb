@@ -2,7 +2,11 @@
 
 <div class="pfda-pane container-fluid">
   <div class="pfda-pane-sidebar">
-    <%= render "_partials/toolbar", toolbar: @apps_toolbar %>
+    <div class="pfda-toolbar">
+      <div class="btn-group">
+        <a class="btn btn-default" href="<%= new_app_path %>"><span class="fa fa-plus-square fa-fw"></span> Create App</a>
+      </div>
+    </div>
     <div class="list-group">
       <a href="<%= apps_path() %>" class="list-group-item <%= @app.nil? ? 'active' : '' %>">
         All Apps

@@ -88,12 +88,6 @@ class ComparisonsController < ApplicationController
     })
   end
 
-  def new2
-    # Temporary route for a barebones comparison submission form
-    # (Doesn't bother with refreshing state)
-    @files = UserFile.real_files.accessible_by(@context.user_id)
-  end
-
   def create
 
     param! :comparison, Hash do |c|

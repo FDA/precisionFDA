@@ -13,12 +13,6 @@ class AppsController < ApplicationController
     series = AppSeries.accessible_by(@context.user_id, @context.org_id)
     @apps = series.map { |s| s.user_id == @context.user_id ? s.latest_revision_app : s.latest_version_app }.reject(&:nil?)
 
-    @apps_toolbar = {
-      fixed: [
-        {icon: "fa fa-plus-square fa-fw", label: "Add App", link: new_app_path}
-      ]
-    }
-
     User.sync_jobs!(@context.user_id, @context.token)
     if @app.present?
       @jobs_toolbar = {
@@ -57,10 +51,6 @@ class AppsController < ApplicationController
     end
   end
 
-  def new
-
-  end
-
   def edit
     @app = App.editable_by(@context.user_id).find_by(dxid: params[:id])
     if @app.nil?
@@ -78,4 +68,10 @@ class AppsController < ApplicationController
       end
     end
   end
+end
+
+def new
+  @app = App.new(user_id: @context[:user_id])
+
+  js :edit, app: @app.slice(:dxid, :name, :title, :version, :revision, :readme, :spec, :internal)
 end

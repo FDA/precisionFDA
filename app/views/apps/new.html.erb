@@ -1,1 +1,10 @@
-Placeholder for apps#new
+<% content_for :title do %>Create New App<% end %>
+
+<div class="page-header">
+  <div class="page-title">
+    <span class="fa fa-cube"></span>
+    Create New App
+  </div>
+</div>
+
+<%= render "_partials/app_editor", app: @app %>
