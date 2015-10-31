@@ -1,12 +1,35 @@
 @import "_common"
 
 .app-editor
-  padding: $padding-base-vertical 0
+  .alert-access
+    margin: 0
+    position: absolute
+    right: 10px
+    color: $state-info-text
 
   .nav-tabs
+    padding-top: $padding-base-vertical
     padding-left: $padding-base-horizontal
+
   .tab-content
     padding: $padding-large-vertical $padding-base-horizontal
+
+  .form-inline
+    .form-group
+      margin-right: 20px
+
+    label
+      font-weight: normal
+      text-transform: uppercase
+      color: $brand-blue-tertiary
+      margin-right: 10px
+
+    .form-control-static
+      font-weight: bold
+
+    input[type="text"]
+      min-width: 400px
+
 //   height: 100%
 //   width: 100%
 //   @include flexbox

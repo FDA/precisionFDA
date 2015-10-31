@@ -1,0 +1,221 @@
+<div class="app-editor">
+  <div class="pfda-toolbar">
+    <form class="form-inline">
+      <div class="form-group">
+        <label>Name</label>
+        <p class="form-control-static" style="display: none" data-bind="text: name, visible: !isNewApp"></p>
+        <input type="text" class="form-control" style="display: none" placeholder="Enter app name (e.g. app_name)" data-bind="textInput: name, visible: isNewApp" />
+      </div>
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" class="form-control" placeholder="Enter app title" data-bind="textInput: title" />
+      </div>
+      <div class="pull-right">
+        <span class="btn-static text-muted" data-bind="visible: isSaveReady() && false" style="display: none">Unsaved changes</span>
+        <div class="btn-group">
+          <button class="btn btn-primary" data-bind="click: save, disable: !isSaveReady(), css: {'disabled': !isSaveReady()}">
+            <span class="fa fa-save"></span> <span data-bind="text: saveButtonText"></span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="alert alert-access">
+    <span class="fa fa-lock"></span> App revisions are <strong>private</strong> until released
+  </div>
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active">
+        <a href="#app-io-spec" aria-controls="app-io-spec" role="tab" data-toggle="tab"><span class="fa fa-puzzle-piece"></span> I/O Spec</a>
+    </li>
+    <li role="presentation">
+        <a href="#app-environment" aria-controls="app-environment" role="tab" data-toggle="tab"><span class="fa fa-database"></span> VM Environment</a>
+    </li>
+    <li role="presentation">
+        <a href="#app-script" aria-controls="app-script" role="tab" data-toggle="tab"><span class="fa fa-code"></span> Script</a>
+    </li>
+    <li role="presentation">
+        <a href="#app-readme" aria-controls="app-readme" role="tab" data-toggle="tab"><span class="fa fa-info-circle"></span> README</a>
+    </li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="app-io-spec">
+      <div class="section-io">
+        <div class="section-io-input">
+          <div class="list-group">
+            <div class="list-group-item clearfix">
+              <div class="list-group-item-heading pull-left">Inputs</div>
+              <div class="btn-group pull-left">
+                <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <span class="fa fa-plus"></span> Add Input Field <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" data-bind="foreach: availableInputClasses">
+                  <li><a data-bind="text: label, click: $root.addInputField"></a></li>
+                </ul>
+              </div>
+            </div>
+            <!-- ko if: inputs().length > 0 -->
+              <div class="list-group-item">
+                <table class="table table-io">
+                  <thead>
+                    <th>Class</th>
+                    <th>Name</th>
+                    <th>Label</th>
+                    <th>Optional?</th>
+                    <th>Default Value</th>
+                    <th>Help text</th>
+                    <th></th>
+                  </thead>
+                  <tbody>
+                  <!-- ko foreach: inputs -->
+                    <tr class="app-io-field" data-bind="template: { name: 'io-field-'+klass()}"></tr>
+                  <!-- /ko -->
+                  </tbody>
+                </table>
+              </div>
+            <!-- /ko -->
+            <!-- ko if: inputs().length == 0 -->
+              <div class="list-group-item">
+                <span class="text-muted">No inputs defined</span>
+              </div>
+            <!-- /ko -->
+          </div>
+        </div>
+        <div class="section-io-input">
+          <div class="list-group">
+            <div class="list-group-item clearfix">
+              <div class="list-group-item-heading pull-left">Outputs</div>
+              <div class="btn-group pull-left">
+                <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <span class="fa fa-plus"></span> Add Output Field <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" data-bind="foreach: availableOutputClasses">
+                  <li><a data-bind="text: label, click: $root.addOutputField"></a></li>
+                </ul>
+              </div>
+            </div>
+            <!-- ko if: outputs().length > 0 -->
+              <div class="list-group-item">
+                <table class="table table-io">
+                  <thead>
+                    <tr>
+                      <th>Class</th>
+                      <th>Name</th>
+                      <th>Label</th>
+                      <th>Optional?</th>
+                      <th>Default Value</th>
+                      <th>Help text</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  <!-- ko foreach: outputs -->
+                    <tr class="app-io-field" data-bind="template: { name: 'io-field-'+klass()}"></tr>
+                  <!-- /ko -->
+                  </tbody>
+                </table>
+              </div>
+            <!-- /ko -->
+            <!-- ko if: outputs().length == 0 -->
+              <div class="list-group-item">
+                <span class="text-muted">No outputs defined</span>
+              </div>
+            <!-- /ko -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="app-environment">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <form class="form-horizontal">
+            <div class="form-group">
+              <label class="col-sm-4 control-label">Internet Access?</label>
+              <div class="col-sm-10 col-sm-offset-1 checkbox">
+                <label>
+                  <input type="checkbox" data-bind="checked: internetAccess"/>
+                </label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="col-sm-4 control-label">Default Instance</label>
+              <div class="col-sm-10 col-sm-offset-1">
+                <select name="instance_type" class="form-control" data-bind="options: availableInstances,
+                       optionsText: 'label',
+                       optionsValue: 'value',
+                       value: instanceType"></select>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="app-script">
+      <div class="ace-editor-section">
+        <div id="script-editor" data-bind="ace: code, aceOptions: { mode: 'sh', theme: 'monokai', opts: {maxLines: Infinity} }"></div>
+      </div>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="app-readme">
+      <div class="ace-editor-section">
+        <div id="readme-editor" data-bind="ace: readme, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity} }"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/html" id="io-field-file">
+  <td class="io-field-class">file</td>
+  <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name"/></td>
+  <td class="io-field-label"><input type="text" class="form-control" data-bind="textInput: label"/></td>
+  <td class="io-field-optional"><div class="io-checkbox"><input type="checkbox" data-bind="checked: isOptional"/></div></td>
+  <td class="io-field-default"><input type="text" class="form-control" data-bind="textInput: defaultValue" placeholder="file-XXXX"/></td>
+  <td class="io-field-help"><input type="text" class="form-control" data-bind="textInput: help"/></td>
+  <td class="io-field-remove"><button class="btn btn-link" data-bind="click: remove"><span class="fa fa-times"></fa></button></td>
+</script>
+
+<script type="text/html" id="io-field-string">
+  <td class="io-field-class">string</td>
+  <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name"/></td>
+  <td class="io-field-label"><input type="text" class="form-control" data-bind="textInput: label"/></td>
+  <td class="io-field-optional"><div class="io-checkbox"><input type="checkbox" data-bind="checked: isOptional"/></div></td>
+  <td class="io-field-default"><input type="text" class="form-control" data-bind="textInput: defaultValue"/></td>
+  <td class="io-field-help"><input type="text" class="form-control" data-bind="textInput: help"/></td>
+  <td class="io-field-remove"><button class="btn btn-link" data-bind="click: remove"><span class="fa fa-times"></fa></button></td>
+</script>
+
+<script type="text/html" id="io-field-int">
+  <td class="io-field-class">int</td>
+  <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name"/></td>
+  <td class="io-field-label"><input type="text" class="form-control" data-bind="textInput: label"/></td>
+  <td class="io-field-optional"><div class="io-checkbox"><input type="checkbox" data-bind="checked: isOptional"/></div></td>
+  <td class="io-field-default"><input type="text" class="form-control" data-bind="textInput: defaultValue"/></td>
+  <td class="io-field-help"><input type="text" class="form-control" data-bind="textInput: help"/></td>
+  <td class="io-field-remove"><button class="btn btn-link" data-bind="click: remove"><span class="fa fa-times"></fa></button></td>
+</script>
+
+<script type="text/html" id="io-field-float">
+  <td class="io-field-class">float</td>
+  <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name"/></td>
+  <td class="io-field-label"><input type="text" class="form-control" data-bind="textInput: label"/></td>
+  <td class="io-field-optional"><div class="io-checkbox"><input type="checkbox" data-bind="checked: isOptional"/></div></td>
+  <td class="io-field-default"><input type="text" class="form-control" data-bind="textInput: defaultValue"/></td>
+  <td class="io-field-help"><input type="text" class="form-control" data-bind="textInput: help"/></td>
+  <td class="io-field-remove"><button class="btn btn-link" data-bind="click: remove"><span class="fa fa-times"></fa></button></td>
+</script>
+
+<script type="text/html" id="io-field-boolean">
+  <td class="io-field-class">boolean</td>
+  <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name"/></td>
+  <td class="io-field-label"><input type="text" class="form-control" data-bind="textInput: label"/></td>
+  <td class="io-field-optional"><div class="io-checkbox"><input type="checkbox" data-bind="checked: isOptional"/></div></td>
+  <td class="io-field-default"><input type="text" class="form-control" data-bind="textInput: defaultValue"/></td>
+  <td class="io-field-help"><input type="text" class="form-control" data-bind="textInput: help"/></td>
+  <td class="io-field-remove"><button class="btn btn-link" data-bind="click: remove"><span class="fa fa-times"></fa></button></td>
+</script>
