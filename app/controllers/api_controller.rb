@@ -211,6 +211,11 @@ class ApiController < ApplicationController
   # name (string, required): the name of the job
   # inputs (hash, required): the inputs
   # instance_type (string, optional): override of the default instance type
+  #
+  # Outputs
+  #
+  # id (string): the dxid of the resulting job
+  #
   def run_app
     # App id should be a string
     id = params["id"]
@@ -338,8 +343,218 @@ class ApiController < ApplicationController
     render json: {id: jobid}
   end
 
+  # Inputs
+  #
+  # name, title, readme, input_spec, output_spec, internet_access, instance_type, ordered_assets, packages, code, is_new
+  #
+  # Outputs
+  #
+  # id (string, only on success): the id of the created app, if success
+  # failure (string, only on failure): a message that can be shown to the user due to failure
   def create_app
-    #name, title, readme, input_spec, output_spec, internet_access, instance_type, ordered_assets, packages, code, is_new
+    begin
+      name = params["name"]
+      fail "The app 'name' must be a nonempty string." unless name.is_a?(String) && name != ""
+      fail "The app 'name' can only contain the characters A-Z, a-z, 0-9, '.' (period), '_' (underscore) and '-' (dash)." unless name =~ /^[a-zA-Z0-9._-]+$/
+
+      title = params["title"]
+      fail "The app 'title' must be a nonempty string." unless title.is_a?(String) && title != ""
+
+      readme = params["readme"]
+      fail "The app 'Readme' must be a string." unless readme.is_a?(String)
+
+      internet_access = params["internet_access"]
+      fail "The app 'Internet Access' must be a boolean, true or false." unless ((internet_access == true) || (internet_access == false))
+
+      instance_type = params["instance_type"]
+      fail "The app 'instance type' must be one of: #{Job::INSTANCE_TYPES.keys.join(', ')}." unless Job::INSTANCE_TYPES.include?(instance_type)
+
+      ordered_assets = params["ordered_assets"] || []
+      fail "The app 'assets' must be an array of asset ids (strings)." unless ordered_assets.is_a?(Array) && ordered_assets.all? { |a| a.is_a?(String) }
+
+      packages = params["packages"] || []
+      fail "The app 'packages' must be an array of package names (strings)." unless packages.is_a?(Array) && packages.all? { |a| a.is_a?(String) }
+
+      packages.sort!.uniq!
+
+      packages.each do |package|
+        fail "The package '#{package}' is not a valid Ubuntu package." unless App::UBUNTU_PACKAGES.bsearch { |p| package <=> p }
+      end
+
+      code = params["code"]
+      fail "The app 'code' must be a string." unless code.is_a?(String)
+
+      is_new = params["is_new"] == true
+
+      input_spec = params["input_spec"] || []
+      fail "The app 'input spec' must be an array of hashes." unless input_spec.is_a?(Array) && input_spec.all? { |s| s.is_a?(Hash) }
+      inputs_seen = Set.new
+      input_spec = input_spec.each_with_index.map do |spec, i|
+
+        i_name = spec["name"]
+        fail "The #{(i+1).ordinalize} input is missing a name." unless i_name.is_a?(String) && i_name != ""
+        fail "The input name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
+        fail "Duplicate definitions for the input named '#{i_name}'." if inputs_seen.include?(i_name)
+        inputs_seen << i_name
+
+        i_class = spec["class"]
+        fail "The input named '#{i_name}' is missing a type." unless i_class.is_a?(String) && i_class != ""
+        fail "The input named '#{i_name}' contains an invalid type. Valid types are: #{App::VALID_IO_CLASSES.join(', ')}." unless App::VALID_IO_CLASSES.include?(i_class)
+
+        i_optional = spec["optional"]
+        fail "The input named '#{i_name}' is missing the 'optional' designation." unless (i_optional == true || i_optional == false)
+
+        i_label = spec["label"]
+        fail "The input named '#{i_name}' is missing a label." unless i_label.is_a?(String)
+
+        i_help = spec["help"]
+        fail "The input named '#{i_name}' is missing help text." unless i_help.is_a?(String)
+
+        i_default = spec["default"]
+        if !i_default.nil?
+          fail "The default value provided for the input named '#{name}' is not of the right type." unless compatible(i_default, i_class)
+          # Fix for JSON ambiguity of float/int for ints.
+          i_default = i_default.to_i if i_class == "int"
+        end
+
+        i_choices = spec["choices"]
+        if !i_choices.nil?
+          fail "The 'choices' (possible values) provided for the input named '#{i_name}' were not a nonempty array." unless i_choices.is_a?(Array) && !i_choices.empty?
+          fail "The 'choices' (possible values) provided for the input named '#{i_name}' were incompatible with the input type." unless i_choices.all? { |choice| compatible(choice, i_class) }
+          fail "You cannot provide 'choices' (possible values) for the input named '#{i_name}' because it's not of type 'string' or 'int' or 'float'." unless ["string", "int", "float"].include?(i_class)
+          i_choices.uniq!
+        end
+        
+        i_patterns = spec["patterns"]
+        if !i_patterns.nil?
+          fail "You cannot provide filename patterns for the non-file input named '#{i_name}'." unless i_class == "file"
+          fail "The filename patterns provided for the input named '#{i_name}' were not a nonempty array of nonempty strings." unless i_patterns.is_a?(Array) && !i_patterns.empty? && i_patterns.none?(&:empty?)
+          i_patterns.uniq!
+        end
+
+        ret = {"name": i_name, "class": i_class, "optional": i_optional, "label": i_label, "help": i_help}
+        ret["default"] = i_default unless i_default.nil?
+        ret["choices"] = i_choices unless i_choices.nil?
+        ret["patterns"] = i_patterns unless i_patterns.nil?
+        ret
+      end
+
+      output_spec = params["output_spec"] || []
+      fail "The app 'output spec' must be an array of hashes." unless output_spec.is_a?(Array) && output_spec.all? { |s| s.is_a?(Hash) }
+      outputs_seen = Set.new
+      output_spec = output_spec.each_with_index.map do |spec, i|
+        i_name = spec["name"]
+        fail "The #{(i+1).ordinalize} output is missing a name." unless i_name.is_a?(String) && i_name != ""
+        fail "The output name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
+        fail "Duplicate definitions for the output named '#{i_name}'." if outputs_seen.include?(i_name)
+        outputs_seen << i_name
+
+        i_class = spec["class"]
+        fail "The output named '#{i_name}' is missing a type." unless i_class.is_a?(String) && i_class != ""
+        fail "The output named '#{i_name}' contains an invalid type. Valid types are: #{App::VALID_IO_CLASSES.join(', ')}." unless App::VALID_IO_CLASSES.include?(i_class)
+
+        i_optional = spec["optional"]
+        fail "The output named '#{i_name}' is missing the 'optional' designation." unless (i_optional == true || i_optional == false)
+
+        i_label = spec["label"]
+        fail "The output named '#{i_name}' is missing a label." unless i_label.is_a?(String)
+
+        i_help = spec["help"]
+        fail "The output named '#{i_name}' is missing help text." unless i_help.is_a?(String)
+
+        i_patterns = spec["patterns"]
+        if !i_patterns.nil?
+          fail "You cannot provide filename patterns for the non-file output named '#{i_name}'." unless i_class == "file"
+          fail "The filename patterns provided for the output named '#{i_name}' were not a nonempty array of nonempty strings." unless i_patterns.is_a?(Array) && !i_patterns.empty? && i_patterns.none?(&:empty?)
+          i_patterns.uniq!
+        end
+
+        ret = {"name": i_name, "class": i_class, "optional": i_optional, "label": i_label, "help": i_help}
+        ret["patterns"] = i_patterns unless i_patterns.nil?
+        ret
+      end
+
+      app = nil
+      App.transaction do
+        ordered_assets.each do |asset_dxid|
+          fail "The app asset with id '#{asset_dxid}' does not exist or is not accessible by you." unless Asset.accessible_by(@context.user_id).where(dxid: asset_dxid).exists?
+        end
+        app_series_dxid = AppSeries.construct_dxid(@context.username, name)
+        app_series = AppSeries.find_by(dxid: app_series_dxid)
+        if is_new
+          fail "You already have an app by the name '#{name}'." unless app_series.nil?
+          app_series = AppSeries.create!(
+            dxid: app_series_dxid,
+            name: name,
+            latest_revision_app_id: nil,
+            latest_version_app_id: nil,
+            user_id: @context.user_id,
+            scope: "private"
+          )
+          revision = 1
+        else
+          fail "You don't have an app by the name '#{name}'." if app_series.nil?
+          revision = app_series.latest_revision_app.revision + 1
+        end
+        
+        api = DNAnexusAPI.new(@context.token)
+        project = User.find(@context.user_id).private_files_project
+        applet_dxid = api.call("applet", "new", {
+          project: project,
+          inputSpec: input_spec.map { |spec| spec.reject { |key,value| key == "default" || key == "choices" } },
+          outputSpec: output_spec,
+          runSpec: {
+            code: code_remap(code),
+            interpreter: "bash",
+            systemRequirements: {
+              "*" => {instanceType: Job::INSTANCE_TYPES[instance_type]}
+            },
+            distribution: "Ubuntu",
+            release: "14.04",
+            execDepends: packages.map { |p| {name: p}}
+          },
+          dxapi: "1.0.0",
+          access: internet_access ? {network: ["*"]} : {}
+        })["id"]
+        dxid = api.call("app", "new", {
+          applet: applet_dxid,
+          name: AppSeries.construct_dxname(@context.username, name),
+          title: title + " ",
+          summary: " ",
+          description: readme + " ",
+          version: "r#{revision}-#{SecureRandom.hex(3)}",
+          resources: ordered_assets,
+          openSource: true,
+          access: internet_access ? {network: ["*"]} : {}
+        })["id"]
+        api.call(project, "removeObjects", {objects: [applet_dxid]})
+        app = App.create!(
+          dxid: dxid,
+          version: nil,
+          revision: revision,
+          title: title,
+          readme: readme,
+          user_id: @context.user_id,
+          scope: "private",
+          app_series_id: app_series.id,
+          input_spec: input_spec,
+          output_spec: output_spec,
+          internet_access: internet_access,
+          instance_type: instance_type,
+          ordered_assets: ordered_assets,
+          packages: packages,
+          code: code
+        )
+        app.asset_ids = Asset.accessible_by(@context.user_id).where(dxid: ordered_assets).select(:id).map(&:id)
+        app.save!
+        app_series.update!(latest_revision_app_id: app.id)
+      end
+
+      render json: {id: app.dxid}
+
+    rescue ApiError => e
+      render json: {failure: e.message}
+    end
   end
 
   # Inputs
@@ -360,7 +575,7 @@ class ApiController < ApplicationController
 
     render json: {
       description: asset.description || "",
-      archive_entries: asset.archive_entries.map(&:path)
+      archive_entries: asset.archive_entries.map(&:path).reject { |p| p.end_with?("/") }
     }
   end
 
@@ -371,6 +586,7 @@ class ApiController < ApplicationController
   # Outputs:
   #
   # ids (array:string): the matchin asset dxids
+  #
   def search_assets
     # Prefix should be a string with at least three characters
     prefix = params["prefix"]
@@ -378,5 +594,30 @@ class ApiController < ApplicationController
 
     ids = Asset.accessible_by(@context.user_id).with_search_keyword(prefix).select(:dxid).distinct.limit(1000).map(&:dxid)
     render json: { ids: ids }
+  end
+
+  protected
+
+  def fail(msg)
+    raise ApiError, msg
+  end
+
+  def code_remap(code)
+    # TODO: Add prologue + epilogue
+    code
+  end
+
+  def compatible(value, klass)
+    if klass == "file"
+      return value.is_a?(String)
+    elsif klass == "int"
+      return value.is_a?(Numeric) && (value.to_i == value)
+    elsif klass == "float"
+      return value.is_a?(Numeric)
+    elsif klass == "boolean"
+      return value == true || value == false
+    elsif klass == "string"
+      return value.is_a?(String)
+    end
   end
 end

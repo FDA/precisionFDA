@@ -25,6 +25,14 @@ class AppSeries < ActiveRecord::Base
     return where.any_of({user_id: user_id}, {scope: "public"}, {scope: org_id.to_s})
   end
 
+  def self.construct_dxid(username, name)
+    "app-#{construct_dxname(username, name)}"
+  end
+
+  def self.construct_dxname(username, name)
+    "-#{username}-#{name}"
+  end
+
   def released
     apps.released
   end

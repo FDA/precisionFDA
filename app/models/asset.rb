@@ -30,6 +30,8 @@ class Asset < UserFile
 
   has_many :archive_entries, dependent: :destroy
 
+  has_and_belongs_to_many :apps, {join_table: "apps_assets"}
+
   def self.with_search_keyword(prefix)
     prefix = sanitize_sql_like(prefix)
     return joins(:archive_entries).where("(archive_entries.name LIKE ? OR user_files.name LIKE ?)", "#{prefix}%", "%#{prefix}%")
