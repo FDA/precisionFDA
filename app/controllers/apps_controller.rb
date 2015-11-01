@@ -68,10 +68,7 @@ class AppsController < ApplicationController
       end
     end
   end
-end
 
-def new
-  @app = App.new(user_id: @context[:user_id])
-
-  js :edit, app: @app.slice(:dxid, :name, :title, :version, :revision, :readme, :spec, :internal)
+  def new
+  end
 end
