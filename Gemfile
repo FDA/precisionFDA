@@ -41,6 +41,9 @@ gem "paloma", "4.2.1"
 # Websocket support (for fetching logs)
 gem "websocket"
 
+# Semantic versioning parsing
+gem "semverly"
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
