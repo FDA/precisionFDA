@@ -22,6 +22,7 @@ do ->
       editor.setReadOnly true if options.readOnly
 
       editor.$blockScrolling = Infinity
+      editor.getSession().setTabSize(2)
       editor.setOptions options.opts
       editor.setValue value
       editor.gotoLine 0
