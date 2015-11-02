@@ -11,7 +11,7 @@
         <input type="text" class="form-control" placeholder="Enter app title" data-bind="textInput: title" />
       </div>
       <div class="pull-right">
-        <span class="btn-static text-muted" data-bind="visible: isSaveReady() && false" style="display: none">Unsaved changes</span>
+        <span class="btn-static text-muted" data-bind="visible: !isNewApp" style="display: none"><span data-bind="text: 'Revision ' + revision()"></span>&nbsp;<span class="fa fa-long-arrow-right fa-fw"></span></span>
         <div class="btn-group">
           <button class="btn btn-primary" data-bind="click: save, disable: !isSaveReady(), css: {'disabled': !isSaveReady()}">
             <span class="fa fa-save"></span> <span data-bind="text: saveButtonText"></span>
@@ -65,14 +65,22 @@
                     <th>Class</th>
                     <th>Name</th>
                     <th>Label</th>
-                    <th>Optional?</th>
                     <th>Default Value</th>
                     <th>Help text</th>
+                    <th>Optional?</th>
                     <th></th>
                   </thead>
                   <tbody>
                   <!-- ko foreach: inputs -->
-                    <tr class="app-io-field" data-bind="template: { name: 'io-field-'+klass()}"></tr>
+                    <tr class="app-io-field">
+                      <td class="io-field-class" data-bind="text: klass"></td>
+                      <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name" placeholder="enter_input_name"/></td>
+                      <td class="io-field-label"><input type="text" class="form-control" data-bind="textInput: label" placeholder="Enter Input Label"/></td>
+                      <td class="io-field-default" data-bind="template: { name: 'io-field-'+klass()}"></td>
+                      <td class="io-field-help"><input type="text" class="form-control" data-bind="textInput: help" placeholder="Enter help text for this field"/></td>
+                      <td class="io-field-optional"><div class="io-checkbox"><input type="checkbox" data-bind="checked: isOptional"/></div></td>
+                      <td class="io-field-remove"><button class="btn btn-link" data-bind="click: remove"><span class="fa fa-times"></fa></button></td>
+                    </tr>
                   <!-- /ko -->
                   </tbody>
                 </table>
@@ -106,15 +114,21 @@
                       <th>Class</th>
                       <th>Name</th>
                       <th>Label</th>
-                      <th>Optional?</th>
-                      <th>Default Value</th>
                       <th>Help text</th>
+                      <th>Optional?</th>
                       <th></th>
                     </tr>
                   </thead>
                   <tbody>
                   <!-- ko foreach: outputs -->
-                    <tr class="app-io-field" data-bind="template: { name: 'io-field-'+klass()}"></tr>
+                    <tr class="app-io-field">
+                      <td class="io-field-class" data-bind="text: klass"></td>
+                      <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name" placeholder="enter_output_name"/></td>
+                      <td class="io-field-label"><input type="text" class="form-control" data-bind="textInput: label" placeholder="Enter Output Label"/></td>
+                      <td class="io-field-help"><input type="text" class="form-control" data-bind="textInput: help" placeholder="Enter help text for this output"/></td>
+                      <td class="io-field-optional"><div class="io-checkbox"><input type="checkbox" data-bind="checked: isOptional"/></div></td>
+                      <td class="io-field-remove"><button class="btn btn-link" data-bind="click: remove"><span class="fa fa-times"></fa></button></td>
+                    </tr>
                   <!-- /ko -->
                   </tbody>
                 </table>
@@ -171,51 +185,28 @@
 </div>
 
 <script type="text/html" id="io-field-file">
-  <td class="io-field-class">file</td>
-  <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name"/></td>
-  <td class="io-field-label"><input type="text" class="form-control" data-bind="textInput: label"/></td>
-  <td class="io-field-optional"><div class="io-checkbox"><input type="checkbox" data-bind="checked: isOptional"/></div></td>
-  <td class="io-field-default"><input type="text" class="form-control" data-bind="textInput: defaultValue" placeholder="file-XXXX"/></td>
-  <td class="io-field-help"><input type="text" class="form-control" data-bind="textInput: help"/></td>
-  <td class="io-field-remove"><button class="btn btn-link" data-bind="click: remove"><span class="fa fa-times"></fa></button></td>
+  <input type="text" class="form-control" data-bind="textInput: defaultValue" placeholder="file-XXXX"/>
 </script>
 
 <script type="text/html" id="io-field-string">
-  <td class="io-field-class">string</td>
-  <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name"/></td>
-  <td class="io-field-label"><input type="text" class="form-control" data-bind="textInput: label"/></td>
-  <td class="io-field-optional"><div class="io-checkbox"><input type="checkbox" data-bind="checked: isOptional"/></div></td>
-  <td class="io-field-default"><input type="text" class="form-control" data-bind="textInput: defaultValue"/></td>
-  <td class="io-field-help"><input type="text" class="form-control" data-bind="textInput: help"/></td>
-  <td class="io-field-remove"><button class="btn btn-link" data-bind="click: remove"><span class="fa fa-times"></fa></button></td>
+  <input type="text" class="form-control" data-bind="textInput: defaultValue"/>
 </script>
 
 <script type="text/html" id="io-field-int">
-  <td class="io-field-class">int</td>
-  <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name"/></td>
-  <td class="io-field-label"><input type="text" class="form-control" data-bind="textInput: label"/></td>
-  <td class="io-field-optional"><div class="io-checkbox"><input type="checkbox" data-bind="checked: isOptional"/></div></td>
-  <td class="io-field-default"><input type="text" class="form-control" data-bind="textInput: defaultValue"/></td>
-  <td class="io-field-help"><input type="text" class="form-control" data-bind="textInput: help"/></td>
-  <td class="io-field-remove"><button class="btn btn-link" data-bind="click: remove"><span class="fa fa-times"></fa></button></td>
+  <input type="text" class="form-control" data-bind="textInput: defaultValue"/>
 </script>
 
 <script type="text/html" id="io-field-float">
-  <td class="io-field-class">float</td>
-  <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name"/></td>
-  <td class="io-field-label"><input type="text" class="form-control" data-bind="textInput: label"/></td>
-  <td class="io-field-optional"><div class="io-checkbox"><input type="checkbox" data-bind="checked: isOptional"/></div></td>
-  <td class="io-field-default"><input type="text" class="form-control" data-bind="textInput: defaultValue"/></td>
-  <td class="io-field-help"><input type="text" class="form-control" data-bind="textInput: help"/></td>
-  <td class="io-field-remove"><button class="btn btn-link" data-bind="click: remove"><span class="fa fa-times"></fa></button></td>
+  <input type="text" class="form-control" data-bind="textInput: defaultValue"/>
 </script>
 
 <script type="text/html" id="io-field-boolean">
-  <td class="io-field-class">boolean</td>
-  <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name"/></td>
-  <td class="io-field-label"><input type="text" class="form-control" data-bind="textInput: label"/></td>
-  <td class="io-field-optional"><div class="io-checkbox"><input type="checkbox" data-bind="checked: isOptional"/></div></td>
-  <td class="io-field-default"><input type="text" class="form-control" data-bind="textInput: defaultValue"/></td>
-  <td class="io-field-help"><input type="text" class="form-control" data-bind="textInput: help"/></td>
-  <td class="io-field-remove"><button class="btn btn-link" data-bind="click: remove"><span class="fa fa-times"></fa></button></td>
+  <div class="btn-group">
+    <label class="btn btn-default" data-bind="css: {active: defaultValue == 'true'}">
+      <input type="radio" data-bind="attr: {name: id, value: 'true'}, checked: defaultValue" autocomplete="off"> True
+    </label>
+    <label class="btn btn-default" data-bind="css: {active: defaultValue == 'false'}">
+      <input type="radio" data-bind="attr: {name: id, value: 'false'}, checked: defaultValue" autocomplete="off"> False
+    </label>
+  </div>
 </script>

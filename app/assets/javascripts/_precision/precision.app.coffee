@@ -5,9 +5,6 @@ class AppEditorModel
     @saving = ko.observable(false)
     @error = ko.observable()
 
-    @scriptEditor = null
-    @readmeEditor = null
-
     @dxid = app?.dxid
     @name = ko.observable(app?.name)
 
@@ -61,9 +58,9 @@ class AppEditorModel
     # TODO: Forking
     @saveButtonText = ko.computed(=>
       if @saving()
-        if @isNewApp then "Creating..." else "Saving revision #{parseInt(@revision())}..."
+        if @isNewApp then "Creating..." else "Saving Revision #{parseInt(@revision()) + 1}..."
       else
-        if @isNewApp then "Create" else "Save revision #{parseInt(@revision())}"
+        if @isNewApp then "Create" else "Save Revision #{parseInt(@revision() + 1)}"
     )
 
   addInputField: (data, event) =>
@@ -94,7 +91,6 @@ class AppEditorModel
 
     Precision.api('/api/create_app', params)
       .done((data) =>
-        console.log data
         if data.id
           window.location.replace("/apps/#{data.id}")
         else if data.failure
@@ -116,7 +112,14 @@ class IOModel
     @help = ko.observable(spec.help)
     @label = ko.observable(spec.label)
     @name = ko.observable(spec.name)
-    @defaultValue = ko.observable(spec.default)
+    if spec.class == 'boolean'
+      if spec.default == true
+        defaultValue = 'true'
+      else if spec.default == false
+        defaultValue = 'false'
+    else
+      defaultValue = spec.default
+    @defaultValue = ko.observable(defaultValue)
     @isOptional = ko.observable(spec.optional ? false)
     # @patterns = ko.observable(spec.patterns)
     # @choices = ko.observable(spec.choices)
@@ -130,33 +133,15 @@ class IOModel
     io = if @ioType == "input" then @viewModel.inputs else @viewModel.outputs
     io.remove((ioItem) => ioItem.id == item.id)
 
-  # Boolean Functions
-  toggleTrue: (e) ->
-    if @defaultValue() == true
-      @defaultValue(null)
-    else
-      @defaultValue(true)
-    $(".field-boolean .btn").blur()
-
-  toggleFalse: (e) ->
-    if @defaultValue() == false
-      @defaultValue(null)
-    else
-      @defaultValue(false)
-    $(".field-boolean .btn").blur()
-
   getDataForSave: () ->
     data =
       class: @klass.peek()
       help: @help.peek()
       label: @label.peek()
       name: @name.peek()
+      optional: @isOptional()
 
-    if @ioType == "input"
-      data = _.extend(data, {
-        default: @getValueForDefault()
-        optional: @isOptional()
-      })
+    data.default = @getValueForDefault() if @ioType == "input"
 
     return data
 
@@ -193,6 +178,11 @@ class IOModel
               value = parseFloat(value)
             when 'file'
               value = value.dxid
+            when 'boolean'
+              if value == 'true'
+                value = true
+              else if value == 'false'
+                value = false
             else
               value
       catch error

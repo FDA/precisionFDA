@@ -15,11 +15,13 @@ class AppsController < ApplicationController
 
     User.sync_jobs!(@context.user_id, @context.token)
     if @app.present?
+      fixed_actions = []
+      fixed_actions.push({icon: "fa fa-cube fa-fw", label: "View App", link: app_path(@app.dxid)})
+      fixed_actions.push({icon: "fa fa-edit fa-fw", label: "Edit App", link: edit_app_path(@app.dxid)}) if @app.user_id == @context.user_id
+      fixed_actions.push({icon: "fa fa-bolt fa-fw", label: "Run App", link: new_app_job_path(@app.dxid)})
+
       @jobs_toolbar = {
-        fixed: [
-          {icon: "fa fa-cube fa-fw", label: "View App", link: app_path(@app.dxid)},
-          {icon: "fa fa-bolt fa-fw", label: "Run App", link: new_app_job_path(@app.dxid)}
-        ]
+        fixed: fixed_actions
       }
 
       jobs = Job.where(user_id: @context.user_id, app_series_id: @app.app_series_id)
