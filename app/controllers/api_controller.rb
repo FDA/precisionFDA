@@ -393,7 +393,7 @@ class ApiController < ApplicationController
 
         i_name = spec["name"]
         fail "The #{(i+1).ordinalize} input is missing a name." unless i_name.is_a?(String) && i_name != ""
-        fail "The input name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
+        fail "The input name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless i_name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
         fail "Duplicate definitions for the input named '#{i_name}'." if inputs_seen.include?(i_name)
         inputs_seen << i_name
 
