@@ -58,21 +58,26 @@
       </li>
     </ul>
 
-    <div>
-      <hr>
-      <div>Description:</div>
-      <div class="description">
-        <%= @asset.description %>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        Description
       </div>
-      <hr>
+      <div class="panel-body">
+        <p class="lead"><%= @asset.description %></p>
+      </div>
     </div>
 
-    <div>
-      <div>Archive contents (files only):</div>
-      <% @asset.file_paths.each do |path| %>
-        <div><%= path %></div>
-      <% end %>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        Archive Contents <small>(files only)</small>
+      </div>
+      <div class="list-group">
+        <% @asset.file_paths.each do |path| %>
+          <div class="list-group-item">
+            <%= path %>
+          </div>
+        <% end %>
+      </div>
     </div>
-
   </div>
 </div>
