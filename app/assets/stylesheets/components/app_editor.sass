@@ -4,7 +4,7 @@
   .error-section
     .alert
       margin: $padding-base-vertical $padding-base-horizontal 0
-      
+
   .access-info
     margin: 0
     position: absolute
@@ -70,3 +70,27 @@
 
   .io-field-class
     font-family: $font-family-monospace
+
+.assets-modal
+  .modal-body
+    padding: 0
+
+    .list-group
+      border-radius: 0
+      .list-group-item
+        border-radius: 0
+        &:first-child
+          border-top: 0
+
+        &.active
+          background-color: $brand-blue-subtle
+          color: $brand-blue-dark
+          border-color: $list-group-border
+
+        &:hover:not(.active)
+          a
+            visibility: visible
+
+        a
+          color: $brand-blue-tertiary
+          visibility: hidden

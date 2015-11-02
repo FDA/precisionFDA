@@ -27,7 +27,7 @@
           <br>
           <ul class="list-group" data-bind="foreach: assets">
            <li class="list-group-item clearfix">
-             <span data-bind="text: name"></span> <button class="pull-right btn-link fa fa-times" data-bind="click: $root.removeAsset"></button>
+             <a data-bind="attr: {href: '/assets/' + dxid}" target="_blank"><span class="fa fa-file-zip-o"></span> <span data-bind="text: name"></span></a>  <button class="pull-right btn-link btn-link-danger fa fa-times" data-bind="click: $root.removeAsset"></button>
            </li>
          </ul>
          <!-- /ko -->
@@ -53,7 +53,7 @@
           <br>
           <ul class="list-group" data-bind="foreach: packages">
             <li class="list-group-item clearfix">
-              <span data-bind="text: $data"></span> <button class="pull-right btn-link fa fa-times" data-bind="click: $root.removePackage"></button>
+              <a data-bind="attr: {href: 'http://packages.ubuntu.com/' + $data}, text: $data" target="_blank"></a> <button class="pull-right btn-link btn-link-danger fa fa-times" data-bind="click: $root.removePackage"></button>
             </li>
           </ul>
         </div>
@@ -64,23 +64,43 @@
 
 <!-- Modal -->
 <div class="modal assets-modal fade" id="assets-modal" data-bind="with: assetsSelector">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">Select Assets for your VM Environment</h4>
       </div>
       <div class="modal-body">
-        <ul class="list-group" data-bind="foreach: assets.filtered">
-          <li class="list-group-item">
-            <div class="checkbox clearfix">
-              <label>
-                <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.assets.selected"> <span data-bind="text: name"></span>
-              </label>
-              <a class="pull-right fa fa-fw fa-info-circle" href="/assets/" data-bind="attr: {href: '/assets/' + dxid}" target="_blank"></a>
+        <div class="row">
+          <ul class="list-group col-md-8" data-bind="foreach: assets.filtered">
+            <li class="list-group-item" data-bind="css: {active: $parent.previewedAsset() && $parent.previewedAsset().dxid == dxid}">
+              <div class="checkbox clearfix">
+                <label>
+                  <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.assets.selected"> <span data-bind="text: name"></span>
+                </label>
+                <a class="pull-right" data-bind="click: $parent.previewAsset">Detail <span class="fa fa-fw fa-chevron-right"></span></a>
+              </div>
+            </li>
+          </ul>
+
+          <!-- Tab panes -->
+          <div class="tab-content col-md-16">
+            <div role="tabpanel" class="tab-pane active">
+              <!-- ko if: previewedAsset() -->
+                <!-- ko if: previewedAsset().describe() -->
+                  <div class="lead">
+                    <a href="/assets/" data-bind="text: previewedAsset().name, attr: {href: '/assets/' + previewedAsset().dxid}" target="_blank"></a>
+                  </div>
+                  <p class="lead" data-bind="text: previewedAsset().describe().description"></p>
+                  <div class="h4">Archive Contents</div>
+                  <ul data-bind="foreach: previewedAsset().describe().archive_entries">
+                    <li data-bind="text: $data"></li>
+                  </ul>
+                <!-- /ko -->
+              <!-- /ko -->
             </div>
-          </li>
-        </ul>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
