@@ -1,0 +1,71 @@
+<div class="app-editor">
+  <div class="pfda-toolbar">
+    <form class="form-inline">
+      <div class="form-group">
+        <label>Name</label>
+        <p class="form-control-static" style="display: none" data-bind="text: name, visible: !isNewApp"></p>
+        <input type="text" class="form-control" style="display: none" placeholder="Enter app name (e.g. app_name)" data-bind="textInput: name, visible: isNewApp" />
+      </div>
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" class="form-control" placeholder="Enter app title" data-bind="textInput: title" />
+      </div>
+      <div class="pull-right">
+        <span class="btn-static text-muted" data-bind="visible: !isNewApp" style="display: none"><span data-bind="text: 'Revision ' + revision()"></span>&nbsp;<span class="fa fa-long-arrow-right fa-fw"></span></span>
+        <div class="btn-group">
+          <button class="btn btn-primary" data-bind="click: save, disable: !isSaveReady(), css: {'disabled': !isSaveReady()}">
+            <span class="fa fa-save"></span> <span data-bind="text: saveButtonText"></span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="error-section" data-bind="visible: errorMessage">
+    <div class="alert alert-danger">
+      <strong>Please fix the issue and retry:</strong> <span data-bind="text: errorMessage"></span>
+    </div>
+  </div>
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active">
+        <a href="#app-io-spec" aria-controls="app-io-spec" role="tab" data-toggle="tab"><span class="fa fa-puzzle-piece"></span> I/O Spec</a>
+    </li>
+    <li role="presentation">
+        <a href="#app-environment" aria-controls="app-environment" role="tab" data-toggle="tab"><span class="fa fa-database"></span> VM Environment</a>
+    </li>
+    <li role="presentation">
+        <a href="#app-script" aria-controls="app-script" role="tab" data-toggle="tab"><span class="fa fa-code"></span> Script</a>
+    </li>
+    <li role="presentation">
+        <a href="#app-readme" aria-controls="app-readme" role="tab" data-toggle="tab"><span class="fa fa-info-circle"></span> README</a>
+    </li>
+    <div class="access-info">
+      <span class="fa fa-lock"></span> App revisions are <strong>private</strong> until released
+    </div>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="app-io-spec">
+      <%= render "apps/editor.io" %>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="app-environment">
+      <%= render "apps/editor.environment" %>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="app-script">
+      <div class="ace-editor-section">
+        <div id="script-editor" data-bind="ace: code, aceOptions: { mode: 'sh', theme: 'monokai', opts: {maxLines: Infinity} }"></div>
+      </div>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="app-readme">
+      <div class="ace-editor-section">
+        <div id="readme-editor" data-bind="ace: readme, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity} }"></div>
+      </div>
+    </div>
+  </div>
+</div>

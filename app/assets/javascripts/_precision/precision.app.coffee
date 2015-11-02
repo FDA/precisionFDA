@@ -3,7 +3,7 @@
 class AppEditorModel
   constructor: (app, @isNewApp) ->
     @saving = ko.observable(false)
-    @error = ko.observable()
+    @errorMessage = ko.observable()
 
     @dxid = app?.dxid
     @name = ko.observable(app?.name)
@@ -14,6 +14,7 @@ class AppEditorModel
     @code = ko.observable(app?.internal.code)
     @assets = ko.observableArray(app?.internal.ordered_assets)
     @packages = ko.observableArray(app?.internal.packages)
+    @packageToAdd = ko.observable("")
 
     @inputSpec = app?.spec.input_spec
     @outputSpec = app?.spec.output_spec
@@ -63,6 +64,14 @@ class AppEditorModel
         if @isNewApp then "Create" else "Save Revision #{parseInt(@revision() + 1)}"
     )
 
+  addPackage: ->
+    if @packageToAdd() != '' and @packages.indexOf(@packageToAdd()) < 0
+      @packages.push _.trim(@packageToAdd())
+    @packageToAdd ''
+
+  removePackage: (packageText) =>
+    @packages.remove(packageText)
+
   addInputField: (data, event) =>
     @inputs.push(new IOModel({class: data.class}, "input", this))
 
@@ -94,9 +103,8 @@ class AppEditorModel
         if data.id
           window.location.replace("/apps/#{data.id}")
         else if data.failure
-          #TODO: alert message
+          @errorMessage(data.failure)
           console.error(data.failure)
-          @error(data.failure)
       )
       .fail((error) =>
         console.error(error)

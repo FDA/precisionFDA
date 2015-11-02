@@ -1,0 +1,42 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <form class="form-horizontal">
+      <div class="form-group">
+        <label class="col-sm-4 control-label">Internet Access?</label>
+        <div class="col-sm-10 col-sm-offset-1 checkbox">
+          <label>
+            <input type="checkbox" data-bind="checked: internetAccess"/>
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-4 control-label">Default Instance</label>
+        <div class="col-sm-10 col-sm-offset-1">
+          <select name="instance_type" class="form-control" data-bind="options: availableInstances,
+                 optionsText: 'label',
+                 optionsValue: 'value',
+                 value: instanceType"></select>
+        </div>
+      </div>
+    </form>
+    <form class="form-horizontal" data-bind="submit: addPackage">
+      <div class="form-group">
+        <label class="col-sm-4 control-label">Ubuntu Packages</label>
+        <div class="col-sm-10 col-sm-offset-1">
+          <div class="input-group">
+            <input type="text" class="form-control" data-bind='value: packageToAdd, valueUpdate: "afterkeydown"' placeholder="Package name" />
+            <div class="input-group-addon input-group-addon-thin">
+              <button class="btn btn-link fa fa-plus" type="submit" data-bind="enable: packageToAdd().length > 0"></button>
+            </div>
+          </div>
+          <br>
+          <ul class="list-group" data-bind="foreach: packages">
+            <li class="list-group-item clearfix">
+              <span data-bind="text: $data"></span> <button class="pull-right btn-link fa fa-times" data-bind="click: $root.removePackage"></button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

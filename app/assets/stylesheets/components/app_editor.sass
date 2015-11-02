@@ -1,7 +1,11 @@
 @import "_common"
 
 .app-editor
-  .alert-access
+  .error-section
+    .alert
+      margin: $padding-base-vertical $padding-base-horizontal 0
+      
+  .access-info
     margin: 0
     position: absolute
     right: 10px
@@ -10,6 +14,7 @@
   .nav-tabs
     padding-top: $padding-base-vertical
     padding-left: $padding-base-horizontal
+    position: relative
 
   .tab-content
     padding: $padding-large-vertical $padding-base-horizontal
