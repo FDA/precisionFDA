@@ -412,7 +412,7 @@ class ApiController < ApplicationController
 
         i_default = spec["default"]
         if !i_default.nil?
-          fail "The default value provided for the input named '#{name}' is not of the right type." unless compatible(i_default, i_class)
+          fail "The default value provided for the input named '#{i_name}' is not of the right type." unless compatible(i_default, i_class)
           # Fix for JSON ambiguity of float/int for ints.
           i_default = i_default.to_i if i_class == "int"
         end
@@ -445,7 +445,7 @@ class ApiController < ApplicationController
       output_spec = output_spec.each_with_index.map do |spec, i|
         i_name = spec["name"]
         fail "The #{(i+1).ordinalize} output is missing a name." unless i_name.is_a?(String) && i_name != ""
-        fail "The output name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
+        fail "The output name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless i_name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
         fail "Duplicate definitions for the output named '#{i_name}'." if outputs_seen.include?(i_name)
         outputs_seen << i_name
 
