@@ -28,6 +28,12 @@ class AssetsModel
       $('.assets-modal').modal('handleUpdate')
     )
 
+    @previewedAsset = ko.observable()
+
+    $(".assets-modal").on("click", ".list-group-item", (e) =>
+      @previewAsset(ko.dataFor(e.currentTarget))
+    )
+
   createAssetModels: (assets) =>
     _.map(assets, (asset) -> new AssetModel(asset))
 
@@ -50,6 +56,10 @@ class AssetsModel
   saveAssets: () =>
     @assets.saved(@assets.selected.peek())
 
+  previewAsset: (assetModel) =>
+    @previewedAsset(assetModel)
+    assetModel.getDescribe()
+
 class AssetModel
   constructor: (asset) ->
     @dxid = asset.dxid
@@ -57,8 +67,11 @@ class AssetModel
     @describe = ko.observable()
 
   getDescribe: () ->
-    Precision.api '/api/describe_asset', {id: @id}, (describe) =>
-      @describe(describe)
+    if _.isEmpty(@describe.peek())
+      Precision.api '/api/describe_asset', {id: @dxid}, (describe) =>
+        @describe(describe)
+        $('.assets-modal').modal('handleUpdate')
+
 
 window.Precision ||= {}
 window.Precision.models || = {}
