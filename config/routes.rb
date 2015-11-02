@@ -8,14 +8,13 @@ Rails.application.routes.draw do
     delete 'logout' => 'main#destroy'
     get 'return_from_login' => 'main#return_from_login'
 
-    get '/comparisons/new2' => 'comparisons#new2'
-
     # API
     post '/api/create_file', to: 'api#create_file'
     post '/api/get_upload_url', to: 'api#get_upload_url'
     post '/api/close_file', to: 'api#close_file'
     post '/api/list_files', to: 'api#list_files'
     post '/api/run_app', to: 'api#run_app'
+    post '/api/list_assets', to: 'api#list_assets'
     post '/api/describe_asset', to: 'api#describe_asset'
     post '/api/search_assets', to: 'api#search_assets'
     post '/api/create_app', to: 'api#create_app'

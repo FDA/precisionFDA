@@ -21,7 +21,7 @@
     </form>
   </div>
 
-  <div class="error-section" data-bind="visible: errorMessage">
+  <div class="error-section" data-bind="visible: errorMessage" style="display: none">
     <div class="alert alert-danger">
       <strong>Please fix the issue and retry:</strong> <span data-bind="text: errorMessage"></span>
     </div>
@@ -30,16 +30,16 @@
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active">
-        <a href="#app-io-spec" aria-controls="app-io-spec" role="tab" data-toggle="tab"><span class="fa fa-puzzle-piece"></span> I/O Spec</a>
+        <a href="#app-io-spec" aria-controls="app-io-spec" role="tab" data-toggle="tab"><span class="fa fa-fw fa-puzzle-piece"></span> I/O Spec</a>
     </li>
     <li role="presentation">
-        <a href="#app-environment" aria-controls="app-environment" role="tab" data-toggle="tab"><span class="fa fa-database"></span> VM Environment</a>
+        <a href="#app-environment" aria-controls="app-environment" role="tab" data-toggle="tab"><span class="fa fa-fw fa-database"></span> VM Environment</a>
     </li>
     <li role="presentation">
-        <a href="#app-script" aria-controls="app-script" role="tab" data-toggle="tab"><span class="fa fa-code"></span> Script</a>
+        <a href="#app-script" aria-controls="app-script" role="tab" data-toggle="tab"><span class="fa fa-fw fa-code"></span> Script</a>
     </li>
     <li role="presentation">
-        <a href="#app-readme" aria-controls="app-readme" role="tab" data-toggle="tab"><span class="fa fa-info-circle"></span> README</a>
+        <a href="#app-readme" aria-controls="app-readme" role="tab" data-toggle="tab"><span class="fa fa-fw fa-info-circle"></span> README</a>
     </li>
     <div class="access-info">
       <span class="fa fa-lock"></span> App revisions are <strong>private</strong> until released
