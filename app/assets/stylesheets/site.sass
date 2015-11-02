@@ -5,8 +5,9 @@
 html, body
   height: 100%
 
-a, a:hover
+a, a:hover, a:focus
   text-decoration: none
+  outline: none
 
 body > main > .alert
   margin: 10px
@@ -99,7 +100,7 @@ body > main > .alert
       border: 0
       border-radius: $border-radius-base
 
-  .list-group-item-heading, .panel-title
+  .list-group-item-heading, .panel-title, .panel-heading
     color: $brand-blue-tertiary
     text-transform: uppercase
     font-weight: 300
