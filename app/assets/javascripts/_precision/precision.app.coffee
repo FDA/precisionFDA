@@ -126,7 +126,7 @@ class AppEditorModel
   save: () ->
     @title(_.trim(@title.peek()))
     @saving(true)
-
+    @errorMessage(null)
     params =
       is_new: @isNewApp
       name: @name.peek()
