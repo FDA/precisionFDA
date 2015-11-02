@@ -559,9 +559,11 @@ class ApiController < ApplicationController
 
   # Inputs
   #
-  # ids (string, optional): the dxids of the assets
+  # ids (array:string, optional): the dxids of the assets
   #
   # Outputs:
+  #
+  # An array of hashes, each of which contains the following:
   #
   # dxid (string)
   # name (string)
@@ -575,10 +577,13 @@ class ApiController < ApplicationController
       assets = Asset.accessible_by(@context.user_id)
     end
 
+    result = assets.select(:dxid, :name).map do |asset|
+      {dxid: asset.dxid, name: asset.prefix }
+    end
 
-
-    result = assets.map do |asset|
-      asset.slice(:dxid, :name).as_json
+    if !ids.nil?
+      # This would happen if an asset becomes inaccessible
+      raise unless ids.size == result.size
     end
 
     render json: result
@@ -603,7 +608,7 @@ class ApiController < ApplicationController
 
     render json: {
       description: asset.description || "",
-      archive_entries: asset.archive_entries.map(&:path).reject { |p| p.end_with?("/") }
+      archive_entries: asset.file_paths
     }
   end
 
@@ -613,7 +618,7 @@ class ApiController < ApplicationController
   #
   # Outputs:
   #
-  # ids (array:string): the matchin asset dxids
+  # ids (array:string): the matching asset dxids
   #
   def search_assets
     # Prefix should be a string with at least three characters

@@ -37,6 +37,10 @@ class Asset < UserFile
     return joins(:archive_entries).where("(archive_entries.name LIKE ? OR user_files.name LIKE ?)", "#{prefix}%", "%#{prefix}%")
   end
 
+  def file_paths
+    archive_entries.map(&:path).reject { |p| p.end_with?("/") }
+  end
+
   def prefix
     name.chomp(".gz").chomp(".tar")
   end
