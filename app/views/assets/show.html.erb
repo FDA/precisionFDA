@@ -68,9 +68,9 @@
     </div>
 
     <div>
-      <div>Archive contents:</div>
-      <% @asset.archive_entries.each do |archive_entry| %>
-        <div><%= archive_entry.path %></div>
+      <div>Archive contents (files only):</div>
+      <% @asset.file_paths.each do |path| %>
+        <div><%= path %></div>
       <% end %>
     </div>
 
