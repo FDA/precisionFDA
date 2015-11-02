@@ -12,7 +12,19 @@ class AppEditorModel
     @revision = ko.observable(app?.revision)
     @readme = ko.observable(app?.readme)
     @code = ko.observable(app?.internal.code)
-    @assets = ko.observableArray(app?.internal.ordered_assets)
+
+    # Assets
+    @assetsSelector = new Precision.models.AssetsModel
+    @assets = ko.observableArray()
+    if app?.internal.ordered_assets.length > 0
+      Precision.api '/api/list_assets', {ids: app.internal.ordered_assets}, (assets) =>
+        @assets(_.map(@assetsSelector.createAssetModels(assets)))
+
+    @assetsSelector.assets.saved.subscribe((assetsSaved) =>
+      @assets(assetsSaved)
+    )
+
+    # Packages
     @packages = ko.observableArray(app?.internal.packages)
     @packageToAdd = ko.observable("")
 
@@ -48,11 +60,8 @@ class AppEditorModel
       {class: "boolean", label: "Boolean"}
     ]
 
-    # TODO: make dirty update when fields are changed
-    @dirty = ko.observable(true)
-
     @isSaveReady = ko.computed(=>
-      return false if @saving() || !@dirty()
+      return false if @saving()
       return !_.isEmpty(@title()) && !_.isEmpty(@name())
     )
 
@@ -64,6 +73,18 @@ class AppEditorModel
         if @isNewApp then "Create" else "Save Revision #{parseInt(@revision() + 1)}"
     )
 
+  onOpenAssetsModal: ->
+    # Set up a subscription for when the assets will be loaded,
+    # then set the selected assets
+    if @assetsSelector.assets.peek().length == 0
+      sub = @assetsSelector.assets.subscribe((assets) =>
+        @assetsSelector.setSelected(@assets.peek())
+        sub.dispose()
+      )
+      @assetsSelector.getAssets()
+    else
+      @assetsSelector.setSelected(@assets.peek())
+
   addPackage: ->
     if @packageToAdd() != '' and @packages.indexOf(@packageToAdd()) < 0
       @packages.push _.trim(@packageToAdd())
@@ -72,18 +93,22 @@ class AppEditorModel
   removePackage: (packageText) =>
     @packages.remove(packageText)
 
+  removeAsset: (asset) =>
+    @assets.remove(asset)
+
   addInputField: (data, event) =>
     @inputs.push(new IOModel({class: data.class}, "input", this))
 
   addOutputField: (data, event) =>
     @outputs.push(new IOModel({class: data.class}, "output", this))
 
+  getAssetsForSave: () ->
+    assets = @assets.peek()
+    return _.map(assets, 'dxid') if assets.length > 0
+
   save: () ->
     @title(_.trim(@title.peek()))
-
     @saving(true)
-
-  # name, title, readme, input_spec, output_spec, internet_access, instance_type, ordered_assets, packages, code, is_new
 
     params =
       is_new: @isNewApp
@@ -94,7 +119,7 @@ class AppEditorModel
       output_spec: _.map(@outputs.peek(), (outputModel) -> outputModel.getDataForSave())
       internet_access: @internetAccess.peek()
       instance_type: @instanceType.peek()
-      ordered_assets: @assets.peek()
+      ordered_assets: @getAssetsForSave()
       packages: @packages.peek()
       code: @code.peek() ? ""
 
@@ -105,11 +130,10 @@ class AppEditorModel
         else if data.failure
           @errorMessage(data.failure)
           console.error(data.failure)
+          @saving(false)
       )
       .fail((error) =>
         console.error(error)
-      )
-      .always(() =>
         @saving(false)
       )
 

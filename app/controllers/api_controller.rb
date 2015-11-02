@@ -424,7 +424,7 @@ class ApiController < ApplicationController
           fail "You cannot provide 'choices' (possible values) for the input named '#{i_name}' because it's not of type 'string' or 'int' or 'float'." unless ["string", "int", "float"].include?(i_class)
           i_choices.uniq!
         end
-        
+
         i_patterns = spec["patterns"]
         if !i_patterns.nil?
           fail "You cannot provide filename patterns for the non-file input named '#{i_name}'." unless i_class == "file"
@@ -496,7 +496,7 @@ class ApiController < ApplicationController
           fail "You don't have an app by the name '#{name}'." if app_series.nil?
           revision = app_series.latest_revision_app.revision + 1
         end
-        
+
         api = DNAnexusAPI.new(@context.token)
         project = User.find(@context.user_id).private_files_project
         applet_dxid = api.call("applet", "new", {
@@ -559,6 +559,34 @@ class ApiController < ApplicationController
 
   # Inputs
   #
+  # ids (string, optional): the dxids of the assets
+  #
+  # Outputs:
+  #
+  # dxid (string)
+  # name (string)
+  #
+  def list_assets
+    ids = params[:ids]
+    if !ids.nil?
+      raise unless ids.is_a?(Array) && ids.all? { |id| id.is_a?(String) }
+      assets = Asset.accessible_by(@context.user_id).where(dxid: ids)
+    else
+      assets = Asset.accessible_by(@context.user_id)
+    end
+
+
+
+    result = assets.map do |asset|
+      asset.slice(:dxid, :name).as_json
+    end
+
+    render json: result
+  end
+
+
+  # Inputs
+  #
   # id (string, required): the dxid of the asset to describe
   #
   # Outputs:
@@ -587,7 +615,7 @@ class ApiController < ApplicationController
   #
   # ids (array:string): the matchin asset dxids
   #
-  def search_assets
+  def search_asset
     # Prefix should be a string with at least three characters
     prefix = params["prefix"]
     raise unless prefix.is_a?(String) && prefix.size >= 3
