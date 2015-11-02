@@ -7,8 +7,8 @@
 #########################################################
 
 AppsController = Paloma.controller('Apps')
-AppsController::new = ->
+AppsController::fork = ->
   $container = $("body main")
-  viewModel = new Precision.models.AppEditorModel(@params.app, true)
+  viewModel = new Precision.models.AppEditorModel(@params.app, 'fork')
 
   ko.applyBindings(viewModel, $container[0])

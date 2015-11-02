@@ -30,6 +30,9 @@ Rails.application.routes.draw do
         end
       end
       get 'jobs', on: :member, to: 'apps#index'
+      member do
+        get 'fork'
+      end
     end
     resources :comparisons do
       get 'visualize', on: :member

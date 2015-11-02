@@ -1,7 +1,8 @@
 #TODO: version semvar validation
 
 class AppEditorModel
-  constructor: (app, @isNewApp) ->
+  constructor: (app, @mode = 'edit') ->
+    @isNewApp = @mode != 'edit'
     @saving = ko.observable(false)
     @errorMessage = ko.observable()
 
@@ -65,12 +66,28 @@ class AppEditorModel
       return !_.isEmpty(@title()) && !_.isEmpty(@name())
     )
 
-    # TODO: Forking
     @saveButtonText = ko.computed(=>
-      if @saving()
-        if @isNewApp then "Creating..." else "Saving Revision #{parseInt(@revision()) + 1}..."
-      else
-        if @isNewApp then "Create" else "Save Revision #{parseInt(@revision() + 1)}"
+      saving = @saving()
+      switch @mode
+        when 'new'
+          if saving then "Creating..." else "Create"
+        when 'fork'
+          if saving then "Forking..." else "Fork"
+        else
+          if saving
+            "Saving Revision #{parseInt(@revision()) + 1}..."
+          else
+            "Save Revision #{parseInt(@revision() + 1)}"
+    )
+
+    @saveIcon = ko.computed(=>
+      switch @mode
+        when 'new'
+          "fa fa-plus"
+        when 'fork'
+          "fa fa-code-fork"
+        else
+          "fa fa-save"
     )
 
   onOpenAssetsModal: ->
