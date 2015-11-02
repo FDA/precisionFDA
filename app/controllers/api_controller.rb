@@ -615,7 +615,7 @@ class ApiController < ApplicationController
   #
   # ids (array:string): the matchin asset dxids
   #
-  def search_asset
+  def search_assets
     # Prefix should be a string with at least three characters
     prefix = params["prefix"]
     raise unless prefix.is_a?(String) && prefix.size >= 3
