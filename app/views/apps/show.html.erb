@@ -76,15 +76,15 @@
     </div>
     <% if @app.user_id == @context.user_id && @latestRevision.present? %>
     <a class="btn btn-default" href="<%= edit_app_path(@latestRevision.dxid) %>">
-      <span class="fa fa-edit"></span> Edit Latest Revision
+      <span class="fa fa-edit"></span> Edit <small>(Revision <%= @latestRevision.revision %>)</small>
     </a>
     <% end %>
-    <a class="btn btn-default" href="<%= edit_app_path(@app.dxid) %>">
-      <span class="fa fa-code-fork"></span> Fork Version
+    <a class="btn btn-default" href="<%= fork_app_path(@app.dxid) %>">
+      <span class="fa fa-code-fork"></span> Fork
     </a>
     <% if !@app.released? %>
     <button class="btn btn-default">
-      <span class="fa fa-tag"></span> Release Version
+      <span class="fa fa-tag"></span> Release
     </button>
     <% end %>
   </div>

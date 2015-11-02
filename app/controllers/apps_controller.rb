@@ -73,4 +73,15 @@ class AppsController < ApplicationController
 
   def new
   end
+
+  def fork
+    @app = App.accessible_by(@context.user_id, @context.org_id).find_by(dxid: params[:id])
+    if @app.nil?
+      flash[:error] = "Sorry, you do not have permissions to fork this app"
+      redirect_to apps_path
+      return
+    else
+      js app: @app.slice(:dxid, :name, :title, :version, :revision, :readme, :spec, :internal)
+    end
+  end
 end

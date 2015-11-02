@@ -14,7 +14,7 @@
         <span class="btn-static text-muted" data-bind="visible: !isNewApp" style="display: none"><span data-bind="text: 'Revision ' + revision()"></span>&nbsp;<span class="fa fa-long-arrow-right fa-fw"></span></span>
         <div class="btn-group">
           <button class="btn btn-primary" data-bind="click: save, disable: !isSaveReady(), css: {'disabled': !isSaveReady()}">
-            <span class="fa fa-save"></span> <span data-bind="text: saveButtonText"></span>
+            <span data-bind="css: saveIcon"></span> <span data-bind="text: saveButtonText"></span>
           </button>
         </div>
       </div>
@@ -41,7 +41,7 @@
     <li role="presentation">
         <a href="#app-readme" aria-controls="app-readme" role="tab" data-toggle="tab"><span class="fa fa-fw fa-info-circle"></span> README</a>
     </li>
-    <div class="access-info">
+    <div class="access-info" data-bind="visible: !isNewApp" style="display: none">
       <span class="fa fa-lock"></span> App revisions are <strong>private</strong> until released
     </div>
   </ul>
