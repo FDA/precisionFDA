@@ -65,7 +65,7 @@ namespace :data do
         name: "SRR504516.vcf.gz",
         state: "closed",
         user_id: george.id,
-        public: true,
+        scope: "public",
         parent: george,
         file_size: 2307445
       )
@@ -75,7 +75,7 @@ namespace :data do
         name: "SRR504516.vcf.gz.tbi",
         state: "closed",
         user_id: george.id,
-        public: true,
+        scope: "public",
         parent: george,
         file_size: 230078
       )
@@ -85,7 +85,7 @@ namespace :data do
         name: "NA12878-Garvan-Vial1.hc.vqsr.vcf.gz.tbi",
         state: "closed",
         user_id: george.id,
-        public: true,
+        scope: "public",
         parent: george,
         file_size: 1657263
       )
@@ -95,7 +95,7 @@ namespace :data do
         name: "NA12878-Garvan-Vial1.hc.vqsr.vcf.gz",
         state: "closed",
         user_id: george.id,
-        public: true,
+        scope: "public",
         parent: george,
         file_size: 265168616
       )
@@ -105,7 +105,7 @@ namespace :data do
         name: "NA12878-NISTv2.19.bed",
         state: "closed",
         user_id: george.id,
-        public: true,
+        scope: "public",
         parent: george,
         file_size: 76811421
       )
@@ -115,7 +115,7 @@ namespace :data do
         name: "NA12878-NISTv2.19.vcf.gz",
         state: "closed",
         user_id: george.id,
-        public: true,
+        scope: "public",
         parent: george,
         file_size: 344226513
       )
@@ -125,7 +125,7 @@ namespace :data do
         name: "NA12878-NISTv2.19.vcf.gz.tbi",
         state: "closed",
         user_id: george.id,
-        public: true,
+        scope: "public",
         parent: george,
         file_size: 1476961
       )
@@ -135,7 +135,7 @@ namespace :data do
         name: "NA12878-Illumina-PlatinumGenome-8.0.1.vcf.gz.tbi",
         state: "closed",
         user_id: george.id,
-        public: true,
+        scope: "public",
         parent: george,
         file_size: 1596316
       )
@@ -145,7 +145,7 @@ namespace :data do
         name: "NA12878-Illumina-PlatinumGenome-8.0.1.bed",
         state: "closed",
         user_id: george.id,
-        public: true,
+        scope: "public",
         parent: george,
         file_size: 121456246
       )
@@ -155,7 +155,7 @@ namespace :data do
         name: "NA12878-Illumina-PlatinumGenome-8.0.1.vcf.gz",
         state: "closed",
         user_id: george.id,
-        public: true,
+        scope: "public",
         parent: george,
         file_size: 51177456
       )
@@ -166,7 +166,7 @@ namespace :data do
         name: "htslib-1.2.1.tar.gz",
         state: "closed",
         user_id: george.id,
-        public: true,
+        scope: "public",
         file_size: 622187,
         description: "Contains the bgzip and tabix executables.\n\nExample usage: tabix -p vcf <file>"
       )
@@ -184,7 +184,7 @@ namespace :data do
         name: "samtools-1.2.tar.gz",
         state: "closed",
         user_id: george.id,
-        public: true,
+        scope: "public",
         file_size: 372046,
         description: "Contains the samtools executable."
       )
