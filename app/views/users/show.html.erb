@@ -10,19 +10,19 @@
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Files</h5>
         <p class="list-group-item-text">
-          <%= link_to(@user.real_files.accessible_by(@context.user_id).size, "#{files_path()}?grid[f][users.dxuser]=#{@user.dxuser}")  %>
+          <%= link_to(@user.real_files.accessible_by(@context).size, "#{files_path()}?grid[f][users.dxuser]=#{@user.dxuser}")  %>
         </p>
       </li>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Comparisons</h5>
         <p class="list-group-item-text">
-          <%= link_to(@user.comparisons.size, "#{comparisons_path()}?grid[f][users.dxuser]=#{@user.dxuser}")  %>
+          <%= link_to(@user.comparisons.accessible_by(@context).size, "#{comparisons_path()}?grid[f][users.dxuser]=#{@user.dxuser}")  %>
         </p>
       </li>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Notes</h5>
         <p class="list-group-item-text">
-          <%= link_to(@user.notes.size, "#{notes_path()}?grid[f][users.dxuser]=#{@user.dxuser}")  %>
+          <%= link_to(@user.notes.accessible_by(@context).size, "#{notes_path()}?grid[f][users.dxuser]=#{@user.dxuser}")  %>
         </p>
       </li>
     </ul>

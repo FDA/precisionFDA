@@ -32,7 +32,7 @@
   g.column name: 'Test Variant' do |comparison|
     file = comparison.input("test_vcf").user_file
     display = ""
-    if !file.public
+    if !file.public?
       display = "<span class='fa fa-lock fa-fw'></span> "
     else
       display = "<span class='fa fa-globe fa-fw'></span> "
@@ -44,7 +44,7 @@
   g.column name: 'Benchmark' do |comparison|
     file = comparison.input("ref_vcf").user_file
     display = ""
-    if !file.public
+    if !file.public?
       display = "<span class='fa fa-lock fa-fw'></span> "
     else
       display = "<span class='fa fa-globe fa-fw'></span> "

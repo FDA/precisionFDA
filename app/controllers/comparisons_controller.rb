@@ -8,7 +8,7 @@ class ComparisonsController < ApplicationController
 
     User.sync_comparisons!(@context.user_id, @context.token)
 
-    comparisons = Comparison.accessible_by(@context.user_id)
+    comparisons = Comparison.accessible_by(@context)
     @comparisons_grid = initialize_grid(comparisons, {
       order: 'comparisons.id',
       order_direction: 'desc',
@@ -17,7 +17,7 @@ class ComparisonsController < ApplicationController
   end
 
   def show
-    @comparison = Comparison.accessible_by(@context.user_id).find(params[:id])
+    @comparison = Comparison.accessible_by(@context).find(params[:id])
 
     if @comparison.state == "pending"
       User.sync_comparison!(@context.user_id, @comparison.id, @context.token)
@@ -42,7 +42,7 @@ class ComparisonsController < ApplicationController
   end
 
   def visualize
-    comparison = Comparison.accessible_by(@context.user_id).find(params[:id])
+    comparison = Comparison.accessible_by(@context).find(params[:id])
     if comparison.state != "done"
       flash[:error] = "You can only visualize comparisons in the 'done' state"
       redirect_to comparison_path(comparison.id)
@@ -79,7 +79,7 @@ class ComparisonsController < ApplicationController
       }
     }
 
-    user_files = UserFile.real_files.accessible_by(@context.user_id)
+    user_files = UserFile.real_files.accessible_by(@context)
     @files_grid = initialize_grid(user_files,{
       include: [:user],
       order: 'user_files.id',
@@ -108,12 +108,12 @@ class ComparisonsController < ApplicationController
     files = {}
     # Required files
     ["test_vcf", "test_tbi", "ref_vcf", "ref_tbi"].each do |role|
-      files[role] = UserFile.real_files.accessible_by(@context.user_id).find_by!(dxid: comp_params["#{role}_dxid"])
+      files[role] = UserFile.real_files.accessible_by(@context).find_by!(dxid: comp_params["#{role}_dxid"])
     end
     # Optional files
     ["test_bed", "ref_bed"].each do |role|
       if comp_params["#{role}_dxid"].present?
-        files[role] = UserFile.real_files.accessible_by(@context.user_id).find_by!(dxid: comp_params["#{role}_dxid"])
+        files[role] = UserFile.real_files.accessible_by(@context).find_by!(dxid: comp_params["#{role}_dxid"])
       end
     end
 
@@ -129,7 +129,7 @@ class ComparisonsController < ApplicationController
       name: comp_params[:name],
       description: comp_params[:description],
       user_id: @context.user_id,
-      public: false,
+      scope: "private",
       state: "pending",
       dxjobid: jobid,
       project: project,
@@ -151,7 +151,7 @@ class ComparisonsController < ApplicationController
   end
 
   def destroy
-    @comparison = Comparison.accessible_by(@context.user_id).find(params[:id])
+    @comparison = Comparison.accessible_by(@context).find(params[:id])
 
     raise if @comparison.state == "pending"
 

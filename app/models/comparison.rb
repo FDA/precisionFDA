@@ -6,16 +6,17 @@
 #  name        :string
 #  description :text
 #  user_id     :integer
-#  public      :boolean
 #  state       :string
 #  dxjobid     :string
 #  project     :string
 #  meta        :text
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
+#  scope       :string
 #
 
 class Comparison < ActiveRecord::Base
+  include Permissions
 
   DEFAULT_APP = "app-pfda-compare"
 
@@ -36,11 +37,6 @@ class Comparison < ActiveRecord::Base
   # in usual UserFile queries as they don't match the default
   # scope of UserFile (which is set to 'parent_type != Comparison')
   has_many :outputs, {class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'}
-
-  def self.accessible_by(user_id)
-    raise unless user_id.present?
-    return where.any_of(user_id: user_id, public: true)
-  end
 
   def input(role)
     inputs.where(role: role).take

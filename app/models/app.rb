@@ -18,6 +18,8 @@
 #
 
 class App < ActiveRecord::Base
+  include Permissions
+
   belongs_to :user
   belongs_to :app_series
   has_many :jobs
@@ -28,16 +30,6 @@ class App < ActiveRecord::Base
   store :internal, accessors: [ :ordered_assets, :packages, :code ], coder: JSON
 
   VALID_IO_CLASSES = ["file", "string", "boolean", "int", "float"]
-
-  def self.accessible_by(user_id, org_id)
-    raise unless user_id.present? && org_id.present?
-    return where.any_of({user_id: user_id}, {scope: "public"}, {scope: org_id.to_s})
-  end
-
-  def self.editable_by(user_id)
-    raise unless user_id.present?
-    return where(user_id: user_id)
-  end
 
   def self.released
     where.not(version: nil)

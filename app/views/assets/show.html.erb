@@ -40,8 +40,8 @@
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Access</h5>
         <p class="list-group-item-text">
-          <span class="fa <%= @asset.public ? 'fa-globe' : 'fa-lock' %>"></span>
-          <%= @asset.public ? "Public" : "Private" %>
+          <span class="fa <%= @asset.public? ? 'fa-globe' : 'fa-lock' %>"></span>
+          <%= @asset.public? ? "Public" : "Private" %>
         </p>
       </li>
       <li class="list-group-item">

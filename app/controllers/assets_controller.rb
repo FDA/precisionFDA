@@ -3,7 +3,7 @@ class AssetsController < ApplicationController
     # Refresh state of assets, if needed
     User.sync_assets!(@context.user_id, @context.token)
 
-    assets = Asset.accessible_by(@context.user_id)
+    assets = Asset.accessible_by(@context)
     @assets_grid = initialize_grid(assets,{
       include: [:user],
       order: 'user_files.id',
@@ -13,7 +13,7 @@ class AssetsController < ApplicationController
   end
 
   def show
-    @asset = Asset.accessible_by(@context.user_id).includes(:archive_entries).find_by!(dxid: params[:id])
+    @asset = Asset.accessible_by(@context).includes(:archive_entries).find_by!(dxid: params[:id])
 
     # Refresh state of asset, if needed
     if @asset.state != "closed"

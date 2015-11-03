@@ -8,6 +8,11 @@
 #  admin_id   :integer
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
+#  address    :text
+#  duns       :string
+#  phone      :string
+#  state      :string
+#  singular   :boolean
 #
 
 class Org < ActiveRecord::Base

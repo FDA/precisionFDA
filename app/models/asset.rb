@@ -9,12 +9,12 @@
 #  state       :string
 #  description :text
 #  user_id     :integer
-#  public      :boolean
 #  file_size   :integer
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #  parent_id   :integer
 #  parent_type :string
+#  scope       :string
 #
 
 #
