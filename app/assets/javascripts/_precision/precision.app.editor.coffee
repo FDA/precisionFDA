@@ -1,5 +1,3 @@
-#TODO: version semvar validation
-
 class AppEditorModel
   constructor: (app, @mode = 'edit') ->
     @isNewApp = @mode != 'edit'
