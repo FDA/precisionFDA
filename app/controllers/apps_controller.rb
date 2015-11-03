@@ -47,6 +47,7 @@ class AppsController < ApplicationController
       if @app.user_id == @context.user_id
         @apps = App.accessible_by(@context.user_id, @context.org_id).where(app_series_id: @app.app_series_id).order(revision: :desc)
         @latestRevision = @apps.select { |app| app.id == @app.app_series.latest_revision_app_id}.first
+        js app: @app.slice(:dxid), releaseable: true
       else
         @apps = App.accessible_by(@context.user_id, @context.org_id).released.where(app_series_id: @app.app_series_id).order(revision: :desc)
       end
