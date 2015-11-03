@@ -6,7 +6,7 @@ class NotesController < ApplicationController
       ]
     }
 
-    notes = Note.accessible_by(@context.user_id)
+    notes = Note.accessible_by(@context)
     @notes_grid = initialize_grid(notes, {
       order: 'notes.title',
       order_direction: 'asc',
@@ -15,13 +15,13 @@ class NotesController < ApplicationController
   end
 
   def show
-    @note = Note.accessible_by(@context.user_id).find(params[:id])
+    @note = Note.accessible_by(@context).find(params[:id])
 
     if request.path != note_path(@note)
       redirect_to @note
     else
-      @comparisons = Comparison.accessible_by(@context.user_id).where(state: "done")
-      @files = UserFile.real_files.accessible_by(@context.user_id)
+      @comparisons = Comparison.accessible_by(@context).where(state: "done")
+      @files = UserFile.real_files.accessible_by(@context)
 
       if @note[:user_id] == @context.user_id
         js note: @note.slice(:id, :slug, :content, :title), comparisons: (@comparisons.map { |c| c.slice(:id, :name, :stats)}), files: (@files.map { |f| f.slice(:dxid, :name)})
@@ -33,7 +33,7 @@ class NotesController < ApplicationController
     @note = Note.new({
       title: "Untitled Note (#{DateTime.now.strftime("%Y-%m-%d %H:%M:%S")})",
       user_id: @context.user_id,
-      public: false
+      scope: "private"
     })
 
     @note.save
@@ -72,7 +72,8 @@ class NotesController < ApplicationController
   end
 
   private
-    def note_params
-      params.require(:note).permit(:title, :content, :public)
-    end
+
+  def note_params
+    params.require(:note).permit(:title, :content)
+  end
 end

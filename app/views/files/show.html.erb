@@ -72,8 +72,8 @@
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Access</h5>
         <p class="list-group-item-text">
-          <span class="fa <%= @file.public ? 'fa-globe' : 'fa-lock' %>"></span>
-          <%= @file.public ? "Public" : "Private" %>
+          <span class="fa <%= @file.public? ? 'fa-globe' : 'fa-lock' %>"></span>
+          <%= @file.public? ? "Public" : "Private" %>
         </p>
       </li>
       <li class="list-group-item">
@@ -126,7 +126,7 @@
             g.column name: 'Test Variant' do |comparison|
               file = comparison.input("test_vcf").user_file
               display = ""
-              if !file.public
+              if !file.public?
                 display = "<span class='fa fa-lock fa-fw'></span> "
               else
                 display = "<span class='fa fa-globe fa-fw'></span> "
@@ -143,7 +143,7 @@
             g.column name: 'Benchmark' do |comparison|
               file = comparison.input("ref_vcf").user_file
               display = ""
-              if !file.public
+              if !file.public?
                 display = "<span class='fa fa-lock fa-fw'></span> "
               else
                 display = "<span class='fa fa-globe fa-fw'></span> "

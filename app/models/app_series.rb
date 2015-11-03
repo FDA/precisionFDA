@@ -14,16 +14,13 @@
 #
 
 class AppSeries < ActiveRecord::Base
+  include Permissions
+
   has_many :apps
   has_many :jobs
   belongs_to :latest_revision_app, class_name: 'App'
   belongs_to :latest_version_app, class_name: 'App'
   belongs_to :user
-
-  def self.accessible_by(user_id, org_id)
-    raise unless user_id.present? && org_id.present?
-    return where.any_of({user_id: user_id}, {scope: "public"}, {scope: org_id.to_s})
-  end
 
   def self.construct_dxid(username, name)
     "app-#{construct_dxname(username, name)}"

@@ -18,6 +18,11 @@
 #  pending_jobs_count          :integer
 #  open_assets_count           :integer
 #  closing_assets_count        :integer
+#  first_name                  :string
+#  last_name                   :string
+#  email                       :string
+#  normalized_email            :string
+#  last_login                  :datetime
 #
 
 class User < ActiveRecord::Base
@@ -42,6 +47,14 @@ class User < ActiveRecord::Base
 
   def real_files
     user_files.real_files
+  end
+
+  def can_provision_accounts?
+    org.admin_id == id && !org.singular
+  end
+
+  def self.validate_email(email)
+    /^(([^<>()\[\]\\.,;:\s@\"]+(\.[^<>()\[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/ =~ email
   end
 
   def self.sync_file!(user_id, file_id, token)
@@ -258,7 +271,7 @@ class User < ActiveRecord::Base
           state: 'closed',
           description: output_keys[i],
           user_id: user.id,
-          public: false,
+          scope: 'private',
           file_size: result["describe"]["size"],
           parent: comparison
         )
@@ -299,7 +312,7 @@ class User < ActiveRecord::Base
                 state: 'closed',
                 description: "",
                 user_id: user.id,
-                public: false,
+                scope: 'private',
                 file_size: result["describe"]["size"],
                 parent: job
               )

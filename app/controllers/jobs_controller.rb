@@ -90,7 +90,7 @@ class JobsController < ApplicationController
   end
 
   def new
-    @app = App.accessible_by(@context.user_id, @context.org_id).find_by(dxid: params[:app_id])
+    @app = App.accessible_by(@context).find_by(dxid: params[:app_id])
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
       redirect_to apps_path

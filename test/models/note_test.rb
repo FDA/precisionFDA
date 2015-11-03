@@ -6,10 +6,10 @@
 #  title      :string
 #  slug       :string
 #  content    :text
-#  public     :boolean
 #  user_id    :integer
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
+#  scope      :string
 #
 
 require 'test_helper'

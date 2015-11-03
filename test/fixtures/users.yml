@@ -18,6 +18,11 @@
 #  pending_jobs_count          :integer
 #  open_assets_count           :integer
 #  closing_assets_count        :integer
+#  first_name                  :string
+#  last_name                   :string
+#  email                       :string
+#  normalized_email            :string
+#  last_login                  :datetime
 #
 
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html

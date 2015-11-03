@@ -2,7 +2,7 @@ class AppsController < ApplicationController
   def index
     @app = nil
     if params[:id].present?
-      @app = App.accessible_by(@context.user_id, @context.org_id).find_by(dxid: params[:id])
+      @app = App.accessible_by(@context).find_by(dxid: params[:id])
       if @app.nil?
         flash[:error] = "Sorry, this app does not exist or is not accessible by you"
         redirect_to apps_path
@@ -10,7 +10,7 @@ class AppsController < ApplicationController
       end
     end
 
-    series = AppSeries.accessible_by(@context.user_id, @context.org_id)
+    series = AppSeries.accessible_by(@context)
     @apps = series.map { |s| s.user_id == @context.user_id ? s.latest_revision_app : s.latest_version_app }.reject(&:nil?)
 
     User.sync_jobs!(@context.user_id, @context.token)
@@ -36,7 +36,7 @@ class AppsController < ApplicationController
   end
 
   def show
-    @app = App.accessible_by(@context.user_id, @context.org_id).find_by(dxid: params[:id])
+    @app = App.accessible_by(@context).find_by(dxid: params[:id])
 
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
@@ -45,17 +45,17 @@ class AppsController < ApplicationController
 
     else
       if @app.user_id == @context.user_id
-        @apps = App.accessible_by(@context.user_id, @context.org_id).where(app_series_id: @app.app_series_id).order(revision: :desc)
+        @apps = App.accessible_by(@context).where(app_series_id: @app.app_series_id).order(revision: :desc)
         @latestRevision = @apps.select { |app| app.id == @app.app_series.latest_revision_app_id}.first
         js app: @app.slice(:dxid), releaseable: true
       else
-        @apps = App.accessible_by(@context.user_id, @context.org_id).released.where(app_series_id: @app.app_series_id).order(revision: :desc)
+        @apps = App.accessible_by(@context).released.where(app_series_id: @app.app_series_id).order(revision: :desc)
       end
     end
   end
 
   def edit
-    @app = App.editable_by(@context.user_id).find_by(dxid: params[:id])
+    @app = App.editable_by(@context).find_by(dxid: params[:id])
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
       redirect_to apps_path
@@ -76,7 +76,7 @@ class AppsController < ApplicationController
   end
 
   def fork
-    @app = App.accessible_by(@context.user_id, @context.org_id).find_by(dxid: params[:id])
+    @app = App.accessible_by(@context).find_by(dxid: params[:id])
     if @app.nil?
       flash[:error] = "Sorry, you do not have permissions to fork this app"
       redirect_to apps_path

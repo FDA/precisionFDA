@@ -9,7 +9,7 @@ class ApiController < ApplicationController
   end
 
   def list_files
-    result = UserFile.real_files.accessible_by(@context.user_id).map do |file|
+    result = UserFile.real_files.accessible_by(@context).map do |file|
       f = file.as_json
       f["username"] = file.user["dxuser"]
       f
@@ -47,7 +47,7 @@ class ApiController < ApplicationController
                        description: description,
                        user_id: @context.user_id,
                        parent: User.find(@context.user_id),
-                       public: false)
+                       scope: 'private')
       # Must get a fresh user inside the transaction
       user = User.find(@context.user_id)
       user.open_files_count = user.open_files_count + 1
@@ -93,7 +93,7 @@ class ApiController < ApplicationController
                             state: "open",
                             description: description,
                             user_id: @context.user_id,
-                            public: false)
+                            scope: 'private')
       asset.parent = asset
       asset.save!
       paths.each do |path|
@@ -230,7 +230,7 @@ class ApiController < ApplicationController
     raise unless inputs.is_a?(Hash)
 
     # App should exist and be accessible
-    @app = App.accessible_by(@context.user_id, @context.org_id).find_by!(dxid: id)
+    @app = App.accessible_by(@context).find_by!(dxid: id)
 
     # Inputs should be compatible
     # (The following also normalizes them)
@@ -264,7 +264,7 @@ class ApiController < ApplicationController
         raise unless value.is_a?(String)
         # TODO decide if we will allow ComparisonOutput files to partake as inputs
         # ie if we need .real_files scope below
-        raise unless UserFile.real_files.accessible_by(@context.user_id).where(dxid: value).exists?
+        raise unless UserFile.real_files.accessible_by(@context).where(dxid: value).exists?
         dxvalue = {"$dnanexus_link" => value}
         input_file_dxids << value
       elsif klass == "int"
@@ -321,7 +321,7 @@ class ApiController < ApplicationController
     provenance = {jobid => {app_dxid: @app.dxid, app_id: @app.id, inputs: run_inputs}}
     input_file_dxids.uniq!
     input_file_ids = []
-    UserFile.accessible_by(@context.user_id).where(dxid: input_file_dxids).find_each do |file|
+    UserFile.accessible_by(@context).where(dxid: input_file_dxids).find_each do |file|
       if file.parent_type == "Job"
         parent_job = file.parent
         provenance.merge!(parent_job.provenance)
@@ -477,7 +477,7 @@ class ApiController < ApplicationController
       app = nil
       App.transaction do
         ordered_assets.each do |asset_dxid|
-          fail "The app asset with id '#{asset_dxid}' does not exist or is not accessible by you." unless Asset.accessible_by(@context.user_id).where(dxid: asset_dxid).exists?
+          fail "The app asset with id '#{asset_dxid}' does not exist or is not accessible by you." unless Asset.accessible_by(@context).where(dxid: asset_dxid).exists?
         end
         app_series_dxid = AppSeries.construct_dxid(@context.username, name)
         app_series = AppSeries.find_by(dxid: app_series_dxid)
@@ -545,7 +545,7 @@ class ApiController < ApplicationController
           packages: packages,
           code: code
         )
-        app.asset_ids = Asset.accessible_by(@context.user_id).where(dxid: ordered_assets).select(:id).map(&:id)
+        app.asset_ids = Asset.accessible_by(@context).where(dxid: ordered_assets).select(:id).map(&:id)
         app.save!
         app_series.update!(latest_revision_app_id: app.id)
       end
@@ -623,9 +623,9 @@ class ApiController < ApplicationController
     ids = params[:ids]
     if !ids.nil?
       raise unless ids.is_a?(Array) && ids.all? { |id| id.is_a?(String) }
-      assets = Asset.accessible_by(@context.user_id).where(dxid: ids)
+      assets = Asset.accessible_by(@context).where(dxid: ids)
     else
-      assets = Asset.accessible_by(@context.user_id)
+      assets = Asset.accessible_by(@context)
     end
 
     result = assets.select(:dxid, :name).map do |asset|
@@ -655,7 +655,7 @@ class ApiController < ApplicationController
     id = params["id"]
     raise unless id.is_a?(String) && id != ""
 
-    asset = Asset.accessible_by(@context.user_id).find_by!(dxid: id)
+    asset = Asset.accessible_by(@context).find_by!(dxid: id)
 
     render json: {
       description: asset.description || "",
@@ -676,7 +676,7 @@ class ApiController < ApplicationController
     prefix = params["prefix"]
     raise unless prefix.is_a?(String) && prefix.size >= 3
 
-    ids = Asset.accessible_by(@context.user_id).with_search_keyword(prefix).select(:dxid).distinct.limit(1000).map(&:dxid)
+    ids = Asset.accessible_by(@context).with_search_keyword(prefix).select(:dxid).distinct.limit(1000).map(&:dxid)
     render json: { ids: ids }
   end
 

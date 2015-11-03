@@ -7,7 +7,7 @@
   </div>
   <div class="variant-input-cell">
     <% if file %>
-      <span class='access-icon fa fa-fw <%= file.public ? "fa-globe" : "fa-lock" %>'></span>
+      <span class='access-icon fa fa-fw <%= file.public? ? "fa-globe" : "fa-lock" %>'></span>
       <%= link_to(file.name, file_path(file.dxid))%>
     <% else %>
       <span class="text-muted">Not set</span>

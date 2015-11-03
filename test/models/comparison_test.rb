@@ -6,13 +6,13 @@
 #  name        :string
 #  description :text
 #  user_id     :integer
-#  public      :boolean
 #  state       :string
 #  dxjobid     :string
 #  project     :string
 #  meta        :text
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
+#  scope       :string
 #
 
 require 'test_helper'

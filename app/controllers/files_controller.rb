@@ -9,7 +9,7 @@ class FilesController < ApplicationController
     # Refresh state of files, if needed
     User.sync_files!(@context.user_id, @context.token)
 
-    user_files = UserFile.real_files.accessible_by(@context.user_id)
+    user_files = UserFile.real_files.accessible_by(@context)
     @files_grid = initialize_grid(user_files,{
       include: [:user],
       order: 'user_files.id',
@@ -19,7 +19,7 @@ class FilesController < ApplicationController
   end
 
   def show
-    @file = UserFile.not_assets.accessible_by(@context.user_id).includes(:user).find_by!(dxid: params[:id])
+    @file = UserFile.not_assets.accessible_by(@context).includes(:user).find_by!(dxid: params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
@@ -30,7 +30,7 @@ class FilesController < ApplicationController
     if @file.parent_type != "Comparison"
       User.sync_comparisons!(@context.user_id, @context.token)
 
-      @comparisons_grid = initialize_grid(@file.comparisons.accessible_by(@context.user_id), {
+      @comparisons_grid = initialize_grid(@file.comparisons.accessible_by(@context), {
         order: 'comparisons.id',
         order_direction: 'desc',
         per_page: 10
@@ -45,7 +45,7 @@ class FilesController < ApplicationController
 
   def download
     # Allow assets as well
-    @file = UserFile.accessible_by(@context.user_id).find_by!(dxid: params[:id])
+    @file = UserFile.accessible_by(@context).find_by!(dxid: params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
@@ -66,7 +66,7 @@ class FilesController < ApplicationController
   end
 
   def destroy
-    @file = UserFile.real_files.accessible_by(@context.user_id).find_by!(dxid: params[:id])
+    @file = UserFile.real_files.accessible_by(@context).find_by!(dxid: params[:id])
 
     if @file
       projectID = @file.project

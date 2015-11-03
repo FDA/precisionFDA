@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151031032659) do
+ActiveRecord::Schema.define(version: 20151103023838) do
 
   create_table "app_series", force: :cascade do |t|
     t.string   "dxid"
@@ -81,16 +81,16 @@ ActiveRecord::Schema.define(version: 20151031032659) do
     t.string   "name"
     t.text     "description"
     t.integer  "user_id"
-    t.boolean  "public"
     t.string   "state"
     t.string   "dxjobid"
     t.string   "project"
     t.text     "meta"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
+    t.string   "scope"
   end
 
-  add_index "comparisons", ["public"], name: "index_comparisons_on_public"
+  add_index "comparisons", ["scope"], name: "index_comparisons_on_scope"
   add_index "comparisons", ["state"], name: "index_comparisons_on_state"
   add_index "comparisons", ["user_id"], name: "index_comparisons_on_user_id"
 
@@ -127,12 +127,13 @@ ActiveRecord::Schema.define(version: 20151031032659) do
     t.string   "title"
     t.string   "slug"
     t.text     "content"
-    t.boolean  "public"
     t.integer  "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string   "scope"
   end
 
+  add_index "notes", ["scope"], name: "index_notes_on_scope"
   add_index "notes", ["user_id"], name: "index_notes_on_user_id"
 
   create_table "orgs", force: :cascade do |t|
@@ -141,6 +142,11 @@ ActiveRecord::Schema.define(version: 20151031032659) do
     t.integer  "admin_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text     "address"
+    t.string   "duns"
+    t.string   "phone"
+    t.string   "state"
+    t.boolean  "singular"
   end
 
   add_index "orgs", ["admin_id"], name: "index_orgs_on_admin_id"
@@ -153,15 +159,16 @@ ActiveRecord::Schema.define(version: 20151031032659) do
     t.string   "state"
     t.text     "description"
     t.integer  "user_id"
-    t.boolean  "public"
     t.integer  "file_size",   limit: 8
     t.datetime "created_at",            null: false
     t.datetime "updated_at",            null: false
     t.integer  "parent_id"
     t.string   "parent_type"
+    t.string   "scope"
   end
 
   add_index "user_files", ["parent_type", "parent_id"], name: "index_user_files_on_parent_type_and_parent_id"
+  add_index "user_files", ["scope"], name: "index_user_files_on_scope"
   add_index "user_files", ["state"], name: "index_user_files_on_state"
   add_index "user_files", ["user_id"], name: "index_user_files_on_user_id"
 
@@ -181,9 +188,15 @@ ActiveRecord::Schema.define(version: 20151031032659) do
     t.integer  "pending_jobs_count"
     t.integer  "open_assets_count"
     t.integer  "closing_assets_count"
+    t.string   "first_name"
+    t.string   "last_name"
+    t.string   "email"
+    t.string   "normalized_email"
+    t.datetime "last_login"
   end
 
   add_index "users", ["dxuser"], name: "index_users_on_dxuser", unique: true
+  add_index "users", ["normalized_email"], name: "index_users_on_normalized_email"
   add_index "users", ["org_id"], name: "index_users_on_org_id"
 
 end

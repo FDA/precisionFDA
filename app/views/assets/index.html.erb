@@ -5,7 +5,7 @@
 
   g.column name: 'Name', attribute: 'name' do |file|
     display = ""
-    if file.public
+    if file.public?
       display = "<span class='fa fa-globe fa-fw'></span> "
     else
       display = "<span class='fa fa-fw'></span> "
@@ -28,8 +28,8 @@
 
   g.column name: 'State', attribute: 'state', custom_filter: :auto
 
-  g.column name: 'Access', attribute: 'public',
-    custom_filter: {'Public' => "t", 'Private' => "f"} do |file|
-    file.public ? "Public" : "Private"
+  g.column name: 'Access', attribute: 'scope',
+    custom_filter: {'Public' => "public", 'Private' => "private"} do |file|
+    file.public? ? "Public" : "Private"
   end
 end -%>
