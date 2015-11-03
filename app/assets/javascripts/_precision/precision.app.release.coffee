@@ -8,6 +8,7 @@ class AppReleaseModel
     )
 
   submitRelease: () ->
+    return if !@isReleaseEnabled()
     @saving(true)
     @errorMessage(null)
     params =
