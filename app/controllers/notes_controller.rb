@@ -24,7 +24,7 @@ class NotesController < ApplicationController
       @files = UserFile.real_files.accessible_by(@context)
 
       if @note[:user_id] == @context.user_id
-        js note: @note.slice(:id, :slug, :content, :title), comparisons: (@comparisons.map { |c| c.slice(:id, :name, :stats)}), files: (@files.map { |f| f.slice(:dxid, :name)})
+        js note: @note.slice(:id, :content, :title), comparisons: (@comparisons.map { |c| c.slice(:id, :name, :stats)}), files: (@files.map { |f| f.slice(:dxid, :name)})
       end
     end
   end

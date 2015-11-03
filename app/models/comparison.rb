@@ -38,6 +38,9 @@ class Comparison < ActiveRecord::Base
   # scope of UserFile (which is set to 'parent_type != Comparison')
   has_many :outputs, {class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'}
 
+  has_many :notes, {through: :attachments}
+  has_many :attachments, {as: :item}
+
   def input(role)
     inputs.where(role: role).take
   end

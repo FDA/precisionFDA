@@ -4,7 +4,6 @@
 #
 #  id         :integer          not null, primary key
 #  title      :string
-#  slug       :string
 #  content    :text
 #  user_id    :integer
 #  created_at :datetime         not null
@@ -16,14 +15,12 @@
 
 one:
   title: MyString
-  slug: MyString
   content: MyText
   public: false
   user_id: 
 
 two:
   title: MyString
-  slug: MyString
   content: MyText
   public: false
   user_id: 

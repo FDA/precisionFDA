@@ -3,7 +3,6 @@ class NoteModel
     @editorInstance = null
 
     @id = note.id
-    @slug = note.slug
     @content = note.content ? ''
     @title = ko.observable(note.title)
     @title.cache = ko.observable(note.title)
