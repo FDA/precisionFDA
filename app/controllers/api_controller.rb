@@ -524,6 +524,7 @@ class ApiController < ApplicationController
           description: readme + " ",
           version: "r#{revision}-#{SecureRandom.hex(3)}",
           resources: ordered_assets,
+          details: {ordered_assets: ordered_assets},
           openSource: true,
           access: internet_access ? {network: ["*"]} : {}
         })["id"]
