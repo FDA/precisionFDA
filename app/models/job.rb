@@ -25,6 +25,9 @@ class Job < ActiveRecord::Base
   has_and_belongs_to_many :input_files, {join_table: "job_inputs", class_name: "UserFile"}
   has_many :output_files, as: :parent, class_name: "UserFile"
 
+  has_many :notes, {through: :attachments}
+  has_many :attachments, {as: :item}
+
   store :describe, {coder: JSON}
   store :run_data, {accessors: [ :run_inputs, :run_outputs, :run_instance_type ], coder: JSON}
   store :provenance, {coder: JSON}

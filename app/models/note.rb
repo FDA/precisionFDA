@@ -4,7 +4,6 @@
 #
 #  id         :integer          not null, primary key
 #  title      :string
-#  slug       :string
 #  content    :text
 #  user_id    :integer
 #  created_at :datetime         not null
@@ -16,8 +15,21 @@ class Note < ActiveRecord::Base
   include Permissions
 
   belongs_to :user
+  has_many :attachments
+  has_many :apps, {through: :attachments, source: :item, source_type: 'App'}
+  has_many :comparisons, {through: :attachments, source: :item, source_type: 'Comparison'}
+  has_many :jobs, {through: :attachments, source: :item, source_type: 'Job'}
+  has_many :files, {through: :attachments, source: :item, source_type: 'UserFile'}
 
   def to_param
     "#{id}-#{title.parameterize}"
+  end
+
+  def real_files
+    files.real_files
+  end
+
+  def assets
+    files.where(parent_type: "Asset")
   end
 end

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151103023838) do
+ActiveRecord::Schema.define(version: 20151103202135) do
 
   create_table "app_series", force: :cascade do |t|
     t.string   "dxid"
@@ -67,6 +67,15 @@ ActiveRecord::Schema.define(version: 20151103023838) do
 
   add_index "archive_entries", ["asset_id"], name: "index_archive_entries_on_asset_id"
   add_index "archive_entries", ["name"], name: "index_archive_entries_on_name"
+
+  create_table "attachments", force: :cascade do |t|
+    t.integer "note_id"
+    t.integer "item_id"
+    t.string  "item_type"
+  end
+
+  add_index "attachments", ["item_type", "item_id"], name: "index_attachments_on_item_type_and_item_id"
+  add_index "attachments", ["note_id"], name: "index_attachments_on_note_id"
 
   create_table "comparison_inputs", force: :cascade do |t|
     t.integer "comparison_id"
@@ -125,7 +134,6 @@ ActiveRecord::Schema.define(version: 20151103023838) do
 
   create_table "notes", force: :cascade do |t|
     t.string   "title"
-    t.string   "slug"
     t.text     "content"
     t.integer  "user_id"
     t.datetime "created_at", null: false
