@@ -183,12 +183,14 @@ class IOModel
   getDataForSave: () ->
     data =
       class: @klass.peek()
-      help: @help.peek()
-      label: @label.peek()
+      help: @help.peek() ? ""
+      label: @label.peek() ? ""
       name: @name.peek()
-      optional: @isOptional()
+      optional: @isOptional() ? false
 
-    data.default = @getValueForDefault() if @ioType == "input"
+    if @ioType == "input"
+      defaultValue = @getValueForDefault()
+      data.default = defaultValue if defaultValue?
 
     return data
 
