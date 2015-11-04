@@ -6,6 +6,16 @@ class AppEditorModel
 
     @dxid = app?.dxid
     @name = ko.observable(app?.name)
+    @name.cache = ko.computed(
+      read: () =>
+        @name()
+      write: (name) =>
+        name = _.trim(name.toLowerCase())
+                   .replace(/\s+/g, "-")
+                   .replace(/[^a-zA-Z0-9\-\_]+/g,"")
+
+        @name(name)
+    )
 
     @title = ko.observable(app?.title)
     @revision = ko.observable(app?.revision)
@@ -88,17 +98,26 @@ class AppEditorModel
           "fa fa-save"
     )
 
+    @isContentVisible = ko.computed(=>
+      if @isNewApp
+        return !_.isEmpty(@name()) && !_.isEmpty(@title())
+      else
+        true
+    )
+
   onOpenAssetsModal: ->
     # Set up a subscription for when the assets will be loaded,
     # then set the selected assets
     if @assetsSelector.assets.peek().length == 0
       sub = @assetsSelector.assets.subscribe((assets) =>
         @assetsSelector.setSelected(@assets.peek())
+        @assetsSelector.previewAsset(_.first(@assetsSelector.assets()))
         sub.dispose()
       )
       @assetsSelector.getAssets()
     else
       @assetsSelector.setSelected(@assets.peek())
+      @assetsSelector.previewAsset(_.first(@assetsSelector.assets()))
 
   addPackage: ->
     if @packageToAdd() != '' and @packages.indexOf(@packageToAdd()) < 0
@@ -123,6 +142,7 @@ class AppEditorModel
 
   save: () ->
     @title(_.trim(@title.peek()))
+    @name(_.trim(@name.peek())) if @isNewApp
     @saving(true)
     @errorMessage(null)
     params =

@@ -21,17 +21,17 @@
       <div class="form-group">
         <label class="col-sm-4 control-label">Assets</label>
         <div class="col-sm-10 col-sm-offset-1">
-          <button class="btn btn-default" data-toggle="modal" data-target="#assets-modal" data-bind="click: onOpenAssetsModal"><span class="fa fa-files-o"></span> Select assets...</button>
-          <!-- ko if: assets().length -->
-          <br>
-          <br>
-          <ul class="list-group" data-bind="foreach: assets">
-           <li class="list-group-item clearfix">
-             <a data-bind="attr: {href: '/assets/' + dxid}" target="_blank"><span class="fa fa-file-zip-o"></span> <span data-bind="text: name"></span></a>  <button class="pull-right btn-link btn-link-danger fa fa-times" data-bind="click: $root.removeAsset"></button>
-           </li>
-         </ul>
-         <!-- /ko -->
-
+          <div class="list-group">
+            <div class="list-group-item list-group-item-header">
+              <button class="btn btn-default btn-block" data-toggle="modal" data-target="#assets-modal" data-bind="click: onOpenAssetsModal"><span class="fa fa-files-o"></span> Select assets...
+              </button>
+            </div>
+            <!-- ko foreach: assets -->
+            <div class="list-group-item clearfix">
+              <a data-bind="attr: {href: '/assets/' + dxid}" target="_blank"><span class="fa fa-file-zip-o"></span> <span data-bind="text: name"></span></a>  <button class="pull-right btn-link btn-link-danger fa fa-times" data-bind="click: $root.removeAsset"></button>
+            </div>
+            <!-- /ko -->
+         </div>
         </div>
       </div>
     </form>
@@ -41,19 +41,25 @@
           Ubuntu Packages
         </label>
         <div class="col-sm-10 col-sm-offset-1">
-          <div class="input-group">
-            <input type="text" class="form-control" data-bind='value: packageToAdd, valueUpdate: "afterkeydown"' placeholder="Package name" />
-            <div class="input-group-btn">
-              <button class="btn btn-primary" type="submit" data-bind="enable: packageToAdd().length > 0, css: {disabled: packageToAdd().length == 0}">
-                <span class="fa fa-plus"></span>
-              </button>
-            </div>
-          </div>
-          <p class="help-block text-right"><small><strong>TIP:</strong> Find packages within the <strong>trusty</strong> distribution using <a href="http://packages.ubuntu.com" target="_blank">Ubuntu Package Search <span class="fa fa-external-link"></span></a></small></p>
-          <ul class="list-group" data-bind="foreach: packages">
-            <li class="list-group-item clearfix">
-              <a data-bind="attr: {href: 'http://packages.ubuntu.com/' + $data}, text: $data" target="_blank"></a> <button class="pull-right btn-link btn-link-danger fa fa-times" data-bind="click: $root.removePackage"></button>
+          <ul class="list-group">
+            <li class="list-group-item list-group-item-header">
+              <div class="input-group">
+                <input type="text" class="form-control" data-bind='value: packageToAdd, valueUpdate: "afterkeydown"' placeholder="Package name" />
+                <div class="input-group-btn">
+                  <button class="btn btn-primary" type="submit" data-bind="enable: packageToAdd().length > 0, css: {disabled: packageToAdd().length == 0}">
+                    <span class="fa fa-plus"></span>
+                  </button>
+                </div>
+              </div>
+              <p class="help-block text-right"><small><strong>TIP:</strong> Find packages within the <strong>trusty</strong> distribution using <a href="http://packages.ubuntu.com" target="_blank">Ubuntu Package Search <span class="fa fa-external-link"></span></a></small></p>
             </li>
+            <!-- ko foreach: packages -->
+            <li class="list-group-item clearfix">
+              <a data-bind="attr: {href: 'http://packages.ubuntu.com/' + $data}" target="_blank">
+                <span class="fa fa-file-code-o"></span> <span data-bind="text: $data"></span>
+              </a> <button class="pull-right btn-link btn-link-danger fa fa-times" data-bind="click: $root.removePackage"></button>
+            </li>
+            <!-- /ko -->
           </ul>
         </div>
       </div>
@@ -103,7 +109,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal" data-bind="click: saveAssets">Update</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" data-bind="click: saveAssets">Select</button>
       </div>
     </div>
   </div>

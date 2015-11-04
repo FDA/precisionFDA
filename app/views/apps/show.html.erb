@@ -150,9 +150,11 @@
   </div>
 
   <div class="list-group">
+    <% if !@app.readme.blank? %>
     <div class="list-group-item app-readme-group">
       <%= raw @app.readme %>
     </div>
+    <% end %>
     <div class="list-group-item app-spec-group">
       <div class="app-spec">
         <div class="row">

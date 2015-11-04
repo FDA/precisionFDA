@@ -6,6 +6,7 @@
     <p class="lead">A community platform for NGS assay evaluation and regulatory science exploration.</p>
     <% if !@context.logged_in? %>
       <a class="btn btn-default btn-lg" href="<%= @remote_login_url %>"><span class="fa fa-sign-in"></span> Log in to precisionFDA</a>
+      <a class="btn btn-success btn-lg" href="#"><span class="fa fa-user-plus"></span> Request Access</span></a>
     <% end %>
   </div>
 </div>
