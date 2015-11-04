@@ -7,6 +7,14 @@ class AppsController < ApplicationController
         flash[:error] = "Sorry, this app does not exist or is not accessible by you"
         redirect_to apps_path
         return
+      else
+        if @app.user_id == @context.user_id
+          @revisions = App.accessible_by(@context).where(app_series_id: @app.app_series_id).order(revision: :desc)
+          @latestRevision = @revisions.select { |app| app.id == @app.app_series.latest_revision_app_id}.first
+          js app: @app.slice(:dxid), releaseable: true
+        else
+          @revisions = App.accessible_by(@context).released.where(app_series_id: @app.app_series_id).order(revision: :desc)
+        end
       end
     end
 
@@ -15,15 +23,6 @@ class AppsController < ApplicationController
 
     User.sync_jobs!(@context.user_id, @context.token)
     if @app.present?
-      fixed_actions = []
-      fixed_actions.push({icon: "fa fa-cube fa-fw", label: "View App", link: app_path(@app.dxid)})
-      fixed_actions.push({icon: "fa fa-edit fa-fw", label: "Edit App", link: edit_app_path(@app.dxid)}) if @app.user_id == @context.user_id
-      fixed_actions.push({icon: "fa fa-bolt fa-fw", label: "Run App", link: new_app_job_path(@app.dxid)})
-
-      @jobs_toolbar = {
-        fixed: fixed_actions
-      }
-
       jobs = Job.where(user_id: @context.user_id, app_series_id: @app.app_series_id)
     else
       jobs = Job.where(user_id: @context.user_id)

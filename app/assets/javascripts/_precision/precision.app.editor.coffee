@@ -161,7 +161,7 @@ class AppEditorModel
     Precision.api('/api/create_app', params)
       .done((data) =>
         if data.id
-          window.location.replace("/apps/#{data.id}")
+          window.location.replace("/apps/#{data.id}/jobs")
         else if data.failure
           @errorMessage(data.failure)
           console.error(data.failure)
