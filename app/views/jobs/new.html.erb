@@ -1,12 +1,9 @@
 <% content_for :title do %>Run <%= @app.title %><% end %>
 
 <div class="page-header clearfix">
-  <div class="page-title"><span class="fa fa-cube"></span> Run <%= @app.title %></div>
-</div>
-
-<div class="pfda-toolbar">
+  <div class="page-title pull-left"><span class="fa fa-cube"></span> Run <%= @app.title %></div>
   <div class="btn-group pull-right">
-    <button type="button" class="btn" data-bind="css: {disabled: !isRunnable(), 'btn-default': !isRunnable(), 'btn-danger': isRunnable()}, attr: {disabled: !isRunnable()}, disable: !isRunnable(), click: run"><span class="fa fa-bolt"></span> <span data-bind="text: running() ? 'Running...':'Run App'"></span></button>
+    <button type="button" class="btn btn-lg" data-bind="css: {disabled: !isRunnable(), 'btn-default': !isRunnable(), 'btn-danger': isRunnable()}, attr: {disabled: !isRunnable()}, disable: !isRunnable(), click: run"><span class="fa fa-bolt"></span> <span data-bind="text: running() ? 'Running...':'Run App'"></span></button>
   </div>
 </div>
 

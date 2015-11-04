@@ -22,7 +22,7 @@ class AppReleaseModel
           console.error(data.failure)
           @saving(false)
         else
-          window.location.replace("/apps/#{@dxid}")
+          window.location.replace("/apps/#{@dxid}/jobs")
       )
       .fail((error) =>
         console.error(error)
