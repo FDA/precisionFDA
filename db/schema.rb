@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151103202135) do
+ActiveRecord::Schema.define(version: 20151104030847) do
 
   create_table "app_series", force: :cascade do |t|
     t.string   "dxid"
@@ -124,11 +124,13 @@ ActiveRecord::Schema.define(version: 20151103202135) do
     t.datetime "created_at",    null: false
     t.datetime "updated_at",    null: false
     t.integer  "app_series_id"
+    t.string   "scope"
   end
 
   add_index "jobs", ["app_id"], name: "index_jobs_on_app_id"
   add_index "jobs", ["app_series_id"], name: "index_jobs_on_app_series_id"
   add_index "jobs", ["dxid"], name: "index_jobs_on_dxid"
+  add_index "jobs", ["scope"], name: "index_jobs_on_scope"
   add_index "jobs", ["state"], name: "index_jobs_on_state"
   add_index "jobs", ["user_id"], name: "index_jobs_on_user_id"
 

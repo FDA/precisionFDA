@@ -41,6 +41,10 @@ class Comparison < ActiveRecord::Base
   has_many :notes, {through: :attachments}
   has_many :attachments, {as: :item}
 
+  def uid
+    "comparison-" + dxjobid.sub(/^job-/, '')
+  end
+
   def input(role)
     inputs.where(role: role).take
   end
@@ -55,5 +59,9 @@ class Comparison < ActiveRecord::Base
 
   def stats
     meta_hash.slice("precision", "recall", "f-measure", "true-pos", "false-pos", "false-neg")
+  end
+
+  def publishable_by?(context)
+    user_id == context.user_id && scope != "public" && state == "done"
   end
 end

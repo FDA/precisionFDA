@@ -26,13 +26,18 @@
 
   <% if @job.user_id == @context.user_id %>
     <div class="btn-group pull-right">
+      <%= link_to log_job_path(@job.dxid), class: "btn btn-primary" do %>
+        <span class="fa fa-file-code-o"></span> View Log
+      <% end %>
+      <% if @job.publishable_by?(@context) %>
+        <%= link_to publish_path + "?" + {id: @job.dxid}.to_param, method: :post, class: "btn btn-primary" do %>
+          <span class="fa fa-bullhorn"></span> Publish
+        <% end %>
+      <% end %>
       <% if !@job.terminal? %>
         <%= link_to job_path(@job.dxid), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
           <span class="fa fa-trash"></span> Terminate
         <% end %>
-      <% end %>
-      <%= link_to log_job_path(@job.dxid), class: "btn btn-primary" do %>
-        <span class="fa fa-file-code-o"></span> View Log
       <% end %>
     </div>
   <% end %>
