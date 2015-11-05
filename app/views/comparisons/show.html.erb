@@ -28,6 +28,11 @@
       <span class="fa fa-sliders"></span> Visualize
     <% end %>
     <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
+    <% if @comparison.publishable_by?(@context) %>
+      <%= link_to publish_path + "?" + {id: 'comparison-' + @comparison.id.to_s}.to_param, method: :post, class: "btn btn-primary" do %>
+        <span class="fa fa-bullhorn"></span> Publish
+      <% end %>
+    <% end %>
   </div>
 
   <div class="btn-group pull-right">
@@ -104,7 +109,7 @@
 
   <ul class="list-group pfda-charts row">
     <li class="list-group-item pfda-chart chart-precision-sensitivity col-sm-18 col-sm-offset-3 col-md-14 col-md-offset-5">
-      <div class="list-group-item-heading"><small>Roc curve for</small> PRECISION <small>vs</small> SENSITIVITY <small>per GQ score</small></div>
+      <div class="list-group-item-heading"><small>Curve for</small> PRECISION <small>vs</small> SENSITIVITY <small>per GQ score</small></div>
       <div class="svg-container"></div>
     </li>
   </ul>

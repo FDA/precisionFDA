@@ -15,6 +15,7 @@
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
 #  app_series_id :integer
+#  scope         :string
 #
 
 require 'test_helper'

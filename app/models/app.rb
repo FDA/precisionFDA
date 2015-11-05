@@ -37,6 +37,10 @@ class App < ActiveRecord::Base
     where.not(version: nil)
   end
 
+  def uid
+    dxid
+  end
+
   def name
     app_series.name
   end
