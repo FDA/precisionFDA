@@ -16,7 +16,9 @@
       </div>
       <div class="btn-group">
         <a class="btn btn-default event-edit">Edit</a>
-        <a class="btn btn-default">Publish</a>
+        <% if @note.publishable_by?(@context) %>
+          <a class="btn btn-default">Publish</a>
+        <% end %>
       </div>
     </div>
     <div class="btn-toolbar pull-right" data-bind="visible: editing()" style="display: none;">

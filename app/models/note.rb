@@ -21,6 +21,10 @@ class Note < ActiveRecord::Base
   has_many :jobs, {through: :attachments, source: :item, source_type: 'Job'}
   has_many :files, {through: :attachments, source: :item, source_type: 'UserFile'}
 
+  def uid
+    "note-#{id}"
+  end
+
   def to_param
     "#{id}-#{title.parameterize}"
   end
@@ -31,5 +35,9 @@ class Note < ActiveRecord::Base
 
   def assets
     files.where(parent_type: "Asset")
+  end
+
+  def publishable_by?(context)
+    user_id == context.user_id && scope != "public"
   end
 end

@@ -1,5 +1,5 @@
 class MainController < ApplicationController
-  skip_before_action :require_login
+  skip_before_action :require_login, {except: :publish}
 
   def index
     if @context.logged_in?
@@ -88,4 +88,78 @@ class MainController < ApplicationController
 
     redirect_to root_path
   end
+
+  def publish
+    id = params[:id]
+    raise "Missing id in publish route" unless id.is_a?(String) && id.present?
+
+    if id =~ /^(job|app|file)-(.{24})$/
+      klass = {
+        "job" => Job,
+        "app" => App,
+        "file" => UserFile,
+        "note" => Note
+      }[$1]
+      record = klass.find_by!(dxid: id, user_id: @context.user_id)
+      @graph = self.send("publish_#{$1}", record)
+    elsif id =~ /^comparison-(\d+)$/
+      # Transitional until comparisons get real dxids
+      id = $1.to_i
+      comparison = Comparison.find_by!(id: id, user_id: @context.user_id)
+      @graph = publish_comparison(comparison)
+    elsif id =~ /^note-(\d+)$/
+      id = $1.to_i
+      note = Note.find_by!(id: id, user_id: @context.user_id)
+      @graph = publish_note(note)
+    else
+      raise "Invalid id '#{id}' in publish route"
+    end
+
+  end
+
+  private
+
+  def publish_job(job)
+    if job.user_id != @context.user_id 
+      return [job, []]
+    else
+      return [job, [publish_app(job.app)] + job.input_files.map { |file| publish_file(file) }]
+    end
+  end
+
+  def publish_app(app)
+    if app.user_id != @context.user_id
+      return [app, []]
+    else
+      return [app, app.assets.map { |asset| publish_file(asset) }]
+    end
+  end
+
+  def publish_file(file)
+    raise "Unpublishable file" if file.parent_type == "Comparison"
+    if file.user_id != @context.user_id || file.parent_type == "User" || file.parent_type == "Asset"
+      return [file, []]
+    else # File comes from owned job
+      return [file, [publish_job(file.parent)]]
+    end
+  end
+
+  def publish_comparison(comparison)
+    if comparison.user_id != @context.user_id
+      return [comparison, []]
+    else
+      return [comparison, comparison.user_files.map { |file| publish_file(file) }]
+    end
+  end
+
+  def publish_note(note)
+    if note.user_id != @context.user_id
+      return [note, []]
+    else
+      return [note, note.attachments.map { |attachment|
+        self.send("publish_#{attachment.item_type.downcase.sub(/^user/, '')}", attachment)
+      }]
+    end
+  end
+
 end

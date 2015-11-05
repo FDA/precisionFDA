@@ -15,9 +15,12 @@
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
 #  app_series_id :integer
+#  scope         :string
 #
 
 class Job < ActiveRecord::Base
+  include Permissions
+
   belongs_to :app
   belongs_to :user
   belongs_to :app_series
@@ -52,6 +55,10 @@ class Job < ActiveRecord::Base
 
   TERMINAL_STATES = ["terminated", "done", "failed"]
 
+  def uid
+    dxid
+  end
+
   def resolved_instance_type
     run_instance_type || instance_type
   end
@@ -78,5 +85,9 @@ class Job < ActiveRecord::Base
 
   def output_spec
     app.output_spec
+  end
+
+  def publishable_by?(context)
+    user_id == context.user_id && scope != "public" && terminal?
   end
 end
