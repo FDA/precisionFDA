@@ -38,6 +38,14 @@ class JobsController < ApplicationController
         end
       end
     end
+
+    @notes_grid = initialize_grid(@job.notes.accessible_by(@context), {
+      order: 'notes.id',
+      order_direction: 'desc',
+      per_page: 10
+    })
+
+    js id: @job.id
   end
 
   def log

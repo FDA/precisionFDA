@@ -9,7 +9,9 @@
 AppsController = Paloma.controller('Apps')
 AppsController::show = ->
   $container = $("body main")
-  viewModel = {}
+  viewModel = {
+    noteAttachModel: new Precision.models.NoteAttachModel(@params.app.id, 'App')
+  }
   if @params.releaseable
     viewModel.appReleaseModel = new Precision.models.AppReleaseModel(@params.app.dxid)
 

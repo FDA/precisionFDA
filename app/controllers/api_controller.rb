@@ -641,7 +641,6 @@ class ApiController < ApplicationController
     render json: result
   end
 
-
   # Inputs
   #
   # id (string, required): the dxid of the asset to describe
@@ -679,6 +678,81 @@ class ApiController < ApplicationController
 
     ids = Asset.accessible_by(@context).with_search_keyword(prefix).select(:dxid).distinct.limit(1000).map(&:dxid)
     render json: { ids: ids }
+  end
+
+
+  # Inputs
+  #
+  # TODO: only show notes that haven't been attached to an item
+  #
+  # Outputs:
+  #
+  # An array of hashes, each of which contains the following:
+  #
+  # id (integer)
+  # slug (string)
+  # title (string)
+  #
+
+  def list_notes
+    notes = Note.accessible_by(@context)
+
+    result = notes.select(:id, :to_param, :title).map do |note|
+      {id: note.id, slug: note.to_param, title: note.title }
+    end
+
+    render json: result
+  end
+
+  # Inputs
+  #
+  # id (number, required): the id of the note to describe
+  #
+  # Outputs:
+  #
+  # content (string): the markdown README of the note
+  #
+  def describe_note
+    id = params[:id]
+    raise unless id.is_a?(Numeric) && id != ""
+
+    note = Note.accessible_by(@context).find_by!(id: id)
+
+    render json: {
+      content: note.content || ""
+    }
+  end
+
+  # Use this to add multiple objects of the same type to a note
+  # or multiple notes to an object
+  def attach_to_notes
+    note_ids = params[:note_ids]
+    raise unless note_ids.is_a?(Array) && note_ids.all? { |id| id.is_a?(Numeric) }
+
+    item_ids = params[:item_ids]
+    raise unless item_ids.is_a?(Array) && item_ids.all? { |id| id.is_a?(Numeric) }
+
+    item_type = params[:item_type]
+    raise unless item_type.is_a?(String) && ["App", "Comparison", "Job", "UserFile"].include?(item_type)
+
+    notes_added = {}
+    items_added = {}
+    Note.transaction do
+      note_ids.each do |note_id|
+        note = Note.accessible_by(@context).find_by!(id: note_id)
+        item_ids.each do |item_id|
+          note.attachments.find_or_create_by(item_id: item_id, item_type: item_type)
+          items_added[item_id] = true
+        end
+        notes_added[note_id] = true
+        note.save
+      end
+    end
+
+    render json: {
+      notes_added: notes_added,
+      items_added: items_added
+    }
   end
 
   protected

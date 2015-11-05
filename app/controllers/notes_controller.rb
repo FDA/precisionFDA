@@ -20,11 +20,17 @@ class NotesController < ApplicationController
     if request.path != note_path(@note)
       redirect_to @note
     else
-      @comparisons = Comparison.accessible_by(@context).where(state: "done")
-      @files = UserFile.real_files.accessible_by(@context)
+      @comparisons = @note.comparisons.accessible_by(@context)
+      @files = @note.real_files.accessible_by(@context)
+      @apps = @note.apps.accessible_by(@context)
+      @jobs = @note.jobs
 
       if @note[:user_id] == @context.user_id
-        js note: @note.slice(:id, :content, :title), comparisons: (@comparisons.map { |c| c.slice(:id, :name, :stats)}), files: (@files.map { |f| f.slice(:dxid, :name)})
+        js note: @note.slice(:id, :content, :title),
+           comparisons: (@comparisons.map { |o| o.slice(:id, :name, :stats)}),
+           files: (@files.map { |o| o.slice(:dxid, :name)}),
+           apps: (@apps.map { |o| o.slice(:dxid, :title)}),
+           jobs: (@jobs.map { |o| o.slice(:dxid, :name)})
       end
     end
   end

@@ -12,8 +12,7 @@
 
 <div class="pfda-toolbar">
   <div class="btn-group pull-left">
-    <!-- TODO: Edit file action -->
-    <!-- TODO: Public file action -->
+    <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
   </div>
 
   <div class="btn-group pull-right">
@@ -157,6 +156,18 @@
               raw display
             end
           end -%>
+        </div>
+      </div>
+    <% end %>
+
+
+    <% if @notes_grid.present? %>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Notes attached to</h3>
+        </div>
+        <div class="panel-table">
+          <%= render "notes/grid", notes_grid: @notes_grid %>
         </div>
       </div>
     <% end %>

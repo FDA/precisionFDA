@@ -35,7 +35,7 @@
   .note-pane
     width: 100%
 
-    .note-content
+    .note-content, .markdown-preview-section
       margin: 10px
       padding: 40px
       font-size: 16px
@@ -73,10 +73,6 @@
   .note-editing
     .note-content
       box-shadow: inset 0px 0px 0px 5px $brand-highlight
-      // inset 0 0 0px 20px #E8EEF5
-
-    .note-pane
-      margin-top: 34px
 
     .note-titlebar
       padding: 0
@@ -99,6 +95,7 @@
           cursor: move
           cursor: -webkit-grab
           cursor: -moz-grab
+
 
 @media (max-width: $screen-sm-max)
   .note-flexbox

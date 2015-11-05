@@ -20,3 +20,22 @@
   text-transform: uppercase
   font-weight: 300
 
+.list-group-selector
+  border-radius: 0
+  .list-group-item
+    border-radius: 0
+    &:first-child
+      border-top: 0
+
+    &.active
+      background-color: $brand-blue-subtle
+      color: $brand-blue-dark
+      border-color: $list-group-border
+
+    &:hover:not(.active)
+      a
+        visibility: visible
+
+    a
+      color: $brand-blue-tertiary
+      visibility: hidden

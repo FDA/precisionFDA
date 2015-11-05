@@ -38,6 +38,14 @@ class FilesController < ApplicationController
     else
       @comparison = @file.parent
     end
+
+    @notes_grid = initialize_grid(@file.notes.accessible_by(@context), {
+      order: 'notes.id',
+      order_direction: 'desc',
+      per_page: 10
+    })
+
+    js id: @file.id
   end
 
   def new

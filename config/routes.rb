@@ -19,6 +19,9 @@ Rails.application.routes.draw do
     post '/api/search_assets', to: 'api#search_assets'
     post '/api/create_app', to: 'api#create_app'
     post '/api/release_app', to: 'api#release_app'
+    post '/api/list_notes', to: 'api#list_notes'
+    post '/api/describe_note', to: 'api#describe_note'
+    post '/api/attach_to_notes', to: 'api#attach_to_notes'
 
     # The priority is based upon order of creation: first created -> highest priority.
     # See how all your routes lay out with "rake routes".
