@@ -19,8 +19,8 @@
 
 <div class="pfda-toolbar">
   <div class="btn-group">
-    <%= link_to app_jobs_path(@job.app.dxid), class: "btn btn-default" do %>
-      <span class="fa fa-long-arrow-left"></span> Back to <%= @job.app.title %>
+    <%= link_to new_app_job_path(@job.app.dxid), class: "btn btn-default" do %>
+      <span class="fa fa-bolt"></span> Run New Job
     <% end %>
     <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
   </div>
