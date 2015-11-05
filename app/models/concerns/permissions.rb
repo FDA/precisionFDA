@@ -21,6 +21,10 @@ module Permissions
     user_id == context.user_id
   end
 
+  def publishable_by?(context)
+    user_id == context.user_id && scope != "public"
+  end
+
   def public?
     scope == "public"
   end

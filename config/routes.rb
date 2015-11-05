@@ -7,6 +7,7 @@ Rails.application.routes.draw do
     get 'login' => 'main#login'
     delete 'logout' => 'main#destroy'
     get 'return_from_login' => 'main#return_from_login'
+    post 'publish' => 'main#publish'
 
     # API
     post '/api/create_file', to: 'api#create_file'

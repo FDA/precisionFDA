@@ -31,6 +31,7 @@
 # Shows up in files#index        | Y | Y | N | N
 # Shows up in files#show         | Y | Y | N | Y
 # Can be deleted independently   | Y | Y | * | N
+# Can be published independently | Y | Y | Y | N
 # 
 # To help with the above, we define the following scopes
 # real_files: U || J
@@ -56,8 +57,16 @@ class UserFile < ActiveRecord::Base
     return where.not(parent_type: 'Asset')
   end
 
+  def uid
+    dxid
+  end
+
   def deletable?
     return (comparisons.count == 0) && ((parent_type == "User") || (parent_type == "Job"))
+  end
+
+  def publishable_by?(context)
+    user_id == context.user_id && scope != "public" && parent_type != "Comparison" && state == "closed"
   end
 
 end
