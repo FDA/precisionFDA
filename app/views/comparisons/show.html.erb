@@ -23,12 +23,11 @@
 
 <% if @comparison.user_id == @context.user_id && @comparison.state == 'done' %>
 <div class="pfda-toolbar">
-  <div class="btn-group pull-left">
+  <div class="btn-group">
     <%= link_to visualize_comparison_path(@comparison.id), class: "btn btn-primary" do %>
       <span class="fa fa-sliders"></span> Visualize
     <% end %>
-    <!-- TODO: Edit comparison action -->
-    <!-- TODO: Public comparison action -->
+    <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
   </div>
 
   <div class="btn-group pull-right">
@@ -161,4 +160,15 @@
       <p class="list-group-item-text"><%= @comparison.updated_at.to_s(:db) %></p>
     </li>
   </ul>
+
+  <% if @notes_grid.present? %>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Notes attached to</h3>
+      </div>
+      <div class="panel-table">
+        <%= render "notes/grid", notes_grid: @notes_grid %>
+      </div>
+    </div>
+  <% end %>
 </div>

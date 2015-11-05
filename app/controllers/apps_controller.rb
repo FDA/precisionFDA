@@ -1,5 +1,6 @@
 class AppsController < ApplicationController
   def index
+    js_param = {}
     @app = nil
     if params[:id].present?
       @app = App.accessible_by(@context).find_by(dxid: params[:id])
@@ -11,11 +12,18 @@ class AppsController < ApplicationController
         if @app.user_id == @context.user_id
           @revisions = App.accessible_by(@context).where(app_series_id: @app.app_series_id).order(revision: :desc)
           @latestRevision = @revisions.select { |app| app.id == @app.app_series.latest_revision_app_id}.first
-          js app: @app.slice(:dxid), releaseable: true
+          js_param[:releaseable] = true
         else
           @revisions = App.accessible_by(@context).released.where(app_series_id: @app.app_series_id).order(revision: :desc)
         end
+
+        @notes_grid = initialize_grid(@app.notes.accessible_by(@context), {
+          order: 'notes.id',
+          order_direction: 'desc',
+          per_page: 10
+        })
       end
+      js_param[:app] = @app.slice(:id, :dxid)
     end
 
     series = AppSeries.accessible_by(@context)
@@ -32,25 +40,36 @@ class AppsController < ApplicationController
       order_direction: 'desc',
       per_page: 100
     })
+
+    js js_param
   end
 
   def show
+    js_param = {}
     @app = App.accessible_by(@context).find_by(dxid: params[:id])
 
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
       redirect_to apps_path
       return
-
     else
       if @app.user_id == @context.user_id
-        @apps = App.accessible_by(@context).where(app_series_id: @app.app_series_id).order(revision: :desc)
-        @latestRevision = @apps.select { |app| app.id == @app.app_series.latest_revision_app_id}.first
-        js app: @app.slice(:dxid), releaseable: true
+        @revisions = App.accessible_by(@context).where(app_series_id: @app.app_series_id).order(revision: :desc)
+        @latestRevision = @revisions.select { |app| app.id == @app.app_series.latest_revision_app_id}.first
+        js_param[:releaseable] = true
       else
-        @apps = App.accessible_by(@context).released.where(app_series_id: @app.app_series_id).order(revision: :desc)
+        @revisions = App.accessible_by(@context).released.where(app_series_id: @app.app_series_id).order(revision: :desc)
       end
     end
+
+    @notes_grid = initialize_grid(@app.notes.accessible_by(@context), {
+      order: 'notes.id',
+      order_direction: 'desc',
+      per_page: 10
+    })
+
+    js_param[:app] = @app.slice(:id, :dxid)
+    js js_param
   end
 
   def edit

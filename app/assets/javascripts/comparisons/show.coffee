@@ -172,3 +172,10 @@ ComparisonsController::show = ->
         format: 'p'
         max: 1
     })
+
+  viewModel = {
+    noteAttachModel: new Precision.models.NoteAttachModel(@params.id, 'Comparison')
+  }
+
+  ko.applyBindings(viewModel, $container[0])
+

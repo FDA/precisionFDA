@@ -4,17 +4,6 @@
   <div class="pfda-toolbar clearfix">
     <div class="btn-toolbar pull-right" data-bind="visible: !editing()">
       <div class="btn-group">
-        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-           Attach <span class="caret"></span>
-         </button>
-         <ul class="dropdown-menu">
-           <li class="hide"><a href="#">Apps</a></li>
-           <li><a href="#">Comparisons</a></li>
-           <li><a href="#">Files</a></li>
-           <li class="hide"><a href="#">Users</a></li>
-         </ul>
-      </div>
-      <div class="btn-group">
         <a class="btn btn-default event-edit">Edit</a>
         <a class="btn btn-default">Publish</a>
       </div>
@@ -48,11 +37,13 @@
     </div>
     <div class="note-flexbox">
       <div class="note-pane">
-        <div id="note-editor" class="note-content">
-          <%= raw @note.content %>
+        <div class="ace-editor-section" data-bind="visible: editing()" style="display: none">
+          <div id="note-editor" data-bind="ace: content.cache, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity, setWrapBehavioursEnabled: true}}"></div>
+        </div>
+        <div class="markdown-preview-section" data-bind="visible: !editing(), html: content">
         </div>
       </div>
-      <div class="note-sidebar" data-bind="visible: editing">
+      <div class="note-sidebar">
         <div id="note-attachments" class="note-attachments">
           <div class="note-section-title hide"><span class="fa fa-paperclip"></span> Attachments</div>
 
@@ -77,6 +68,32 @@
             <% @files.each do |item| %>
               <div class="list-group-item attachment" data-attachment='<%= file_path(item.dxid) %>' data-bind="attr: {draggable: editing}">
                 <span class="fa fa-file-o"></span> <%= link_to(item.name, file_path(item.dxid), tabindex: "-1") %>
+              </div>
+            <% end %>
+          </div>
+          <% end %>
+
+          <% if !@apps.blank? %>
+          <div class="note-apps list-group">
+            <div class="list-group-item">
+              <div class="list-group-item-heading">Apps</div>
+            </div>
+            <% @apps.each do |item| %>
+              <div class="list-group-item attachment" data-attachment='<%= app_path(item.dxid) %>' data-bind="attr: {draggable: editing}">
+                <span class="fa fa-cube"></span> <%= link_to(item.name, app_jobs_path(item.dxid), tabindex: "-1") %>
+              </div>
+            <% end %>
+          </div>
+          <% end %>
+
+          <% if !@jobs.blank? %>
+          <div class="note-jobs list-group">
+            <div class="list-group-item">
+              <div class="list-group-item-heading">Jobs</div>
+            </div>
+            <% @jobs.each do |item| %>
+              <div class="list-group-item attachment" data-attachment='<%= job_path(item.dxid) %>' data-bind="attr: {draggable: editing}">
+                <span class="fa fa-tasks"></span> <%= link_to(item.name, job_path(item.dxid), tabindex: "-1") %>
               </div>
             <% end %>
           </div>

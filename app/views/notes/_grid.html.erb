@@ -1,0 +1,15 @@
+<%= grid(@notes_grid, show_filters: :when_filtered) do |g|
+  g.blank_slate partial:  "_partials/empty_grid"
+
+  g.column name: 'Title', attribute: 'title' do |note|
+    link_to(note.title, note_path(note))
+  end
+
+  g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |note|
+    link_to(note.user.dxuser, user_path(note.user.dxuser))
+  end
+
+  g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |note|
+    note.created_at.to_s(:db)
+  end
+end -%>

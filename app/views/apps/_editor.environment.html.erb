@@ -75,9 +75,9 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">Select Assets for your VM Environment</h4>
       </div>
-      <div class="modal-body">
+      <div class="modal-body modal-body-padless">
         <div class="row">
-          <ul class="list-group col-md-8" data-bind="foreach: assets.filtered">
+          <ul class="list-group list-group-selector col-md-8" data-bind="foreach: assets.filtered">
             <li class="list-group-item" data-bind="css: {active: $parent.previewedAsset() && $parent.previewedAsset().dxid == dxid}">
               <div class="checkbox clearfix">
                 <label>
@@ -90,7 +90,7 @@
 
           <!-- Tab panes -->
           <div class="tab-content col-md-16">
-            <div role="tabpanel" class="tab-pane active">
+            <div role="tabpanel" class="tab-pane tab-pane-preview active">
               <!-- ko if: previewedAsset() -->
                 <!-- ko if: previewedAsset().describe() -->
                   <div class="lead">

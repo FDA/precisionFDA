@@ -76,30 +76,37 @@
     <% end %>
   </div>
 
+  <div class="btn-group">
+    <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
+  </div>
+
   <div class="btn-group pull-right">
     <%= link_to new_app_job_path(@app.dxid), class: "btn btn-primary" do %>
-      <span class="fa fa-bolt"></span> Run App
+      <span class="fa fa-bolt"></span> Run App&nbsp;&nbsp;<span class="badge"><%= @app.version ? "v#{@app.version}" : "rev#{@app.revision}" %></span>
     <% end %>
   </div>
 </div>
 
 <!-- Nav tabs -->
 <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+  <% if @jobs_grid.present? %>
   <li role="presentation" class="active">
-      <a href="#app-job" aria-controls="app-job" role="tab" data-toggle="tab"><span class="fa fa-fw fa-tasks"></span>
-        <span class="tab-label">Jobs</span>
-      </a>
+    <a href="#app-job" aria-controls="app-job" role="tab" data-toggle="tab"><span class="fa fa-fw fa-tasks"></span>
+      <span class="tab-label">Jobs</span>
+    </a>
   </li>
-  <li role="presentation">
-      <a href="#app-about" aria-controls="app-about" role="tab" data-toggle="tab"><span class="fa fa-fw fa-info"></span>
-        <span class="tab-label">About</span>
-      </a>
+  <% end %>
+  <li role="presentation" class="<% if !@jobs_grid.present? %>active<% end %>">
+    <a href="#app-about" aria-controls="app-about" role="tab" data-toggle="tab"><span class="fa fa-fw fa-info"></span>
+      <span class="tab-label">About</span>
+    </a>
   </li>
 </ul>
 <% end %>
 
 <!-- Tab panes -->
 <div class="tab-content">
+  <% if @jobs_grid.present? %>
   <div role="tabpanel" class="tab-pane active" id="app-job">
     <div class="panel">
       <%= grid(@jobs_grid, show_filters: :when_filtered) do |g|
@@ -153,9 +160,10 @@
       end -%>
     </div>
   </div>
+  <% end %>
 
   <% if @app.present? %>
-  <div role="tabpanel" class="tab-pane tab-pane-padded" id="app-about">
+  <div role="tabpanel" class="tab-pane tab-pane-padded <% if !@jobs_grid.present? %>active<% end %>" id="app-about">
     <div class="metadata-section">
       <ul class="list-group list-group-inline">
         <li class="list-group-item">
@@ -236,6 +244,18 @@
         </div>
       </div>
     </div>
+
+    <% if @notes_grid.present? %>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Notes attached to</h3>
+        </div>
+        <div class="panel-table">
+          <%= render "notes/grid", notes_grid: @notes_grid %>
+        </div>
+      </div>
+    <% end %>
+
   </div>
   <% end %>
 </div>
