@@ -17,13 +17,19 @@ do ->
         element.id = 'knockout-ace-' + init_id
         init_id = init_id + 1
       editor = ace.edit(element.id)
+      ace.require("ace/ext/language_tools")
       editor.setTheme 'ace/theme/' + options.theme if options.theme
       editor.getSession().setMode 'ace/mode/' + options.mode if options.mode
       editor.setReadOnly true if options.readOnly
 
       editor.$blockScrolling = Infinity
       editor.getSession().setTabSize(2)
-      editor.setOptions options.opts
+      editor.setOptions _.defaults({
+        enableBasicAutocompletion: true
+        enableSnippets: true,
+        enableLiveAutocompletion: false
+      }, options.opts)
+
       editor.setValue value
       editor.gotoLine 0
 
