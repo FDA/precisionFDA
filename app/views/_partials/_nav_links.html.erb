@@ -1,3 +1,4 @@
+<% if @context.logged_in? %>
 <ul class="nav-links nav navbar-nav">
   <li class="<%= 'active' if params[:controller] == 'main' %>" role="presentation">
     <%= link_to root_path do %>
@@ -30,11 +31,13 @@
     <% end %>
   </li>
 </ul>
+<% end %>
 
 <ul class="nav navbar-nav navbar-right">
   <% if @context.logged_in? %>
     <li><%= link_to("Feedback", "https://docs.google.com/forms/d/1zfGoy-4C9kLbHHg0Y-6iQoI3fdGq1IfugV9fXCqOBfY/viewform?entry.2135861629=#{@context.username}&entry.864840924", target: "_blank") %></li>
   <% else %>
+    <li><%= link_to("Learn more", "#TBD", target: "_blank") %></li>
     <li><%= link_to("Feedback", "https://docs.google.com/forms/d/1zfGoy-4C9kLbHHg0Y-6iQoI3fdGq1IfugV9fXCqOBfY/viewform", target: "_blank") %></li>
   <% end %>
   <li><a href="#">Docs</a></li>
@@ -50,5 +53,4 @@
   <% else %>
     <li><a href="/login">Log In</a></li>
   <% end %>
-
 </ul>

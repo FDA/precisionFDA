@@ -3,7 +3,7 @@
 <head>
   <%= render "_partials/header" %>
 </head>
-<body class="pfda-controller-<%= controller_name %> pfda-action-<%= action_name %>" data-controller="<%= controller_name %>" data-action="<%= action_name %>">
+<body class="pfda-controller-<%= controller_name %> pfda-action-<%= action_name %> <% if !@context.logged_in? %>pfda-guest<% else %>pfda-user<% end %>">
   <header>
     <%= render "_partials/navbar" %>
   </header>
