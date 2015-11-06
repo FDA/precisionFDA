@@ -40,9 +40,9 @@
     <div class="note-flexbox">
       <div class="note-pane">
         <div class="ace-editor-section" data-bind="visible: editing()" style="display: none">
-          <div id="note-editor" data-bind="ace: content.cache, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity, setWrapBehavioursEnabled: true}}"></div>
+          <div id="note-editor" data-bind="ace: content.cache, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity, setWrapBehavioursEnabled: true, wrap: 'free'}}"></div>
         </div>
-        <div class="markdown-preview-section" data-bind="visible: !editing(), html: content">
+        <div class="note-display" data-bind="visible: !editing(), html: content.display">
         </div>
       </div>
       <div class="note-sidebar">
@@ -82,7 +82,7 @@
             </div>
             <% @apps.each do |item| %>
               <div class="list-group-item attachment" data-attachment='<%= app_path(item.dxid) %>' data-bind="attr: {draggable: editing}">
-                <span class="fa fa-cube"></span> <%= link_to(item.name, app_jobs_path(item.dxid), tabindex: "-1") %>
+                <span class="fa fa-cube"></span> <%= link_to(item.title, app_jobs_path(item.dxid), tabindex: "-1") %>
               </div>
             <% end %>
           </div>

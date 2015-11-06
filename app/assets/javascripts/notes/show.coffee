@@ -1,9 +1,16 @@
 class NoteModel
   constructor: (note) ->
     @noteEditor = null
+    md = new Remarkable({
+      linkify: true
+    })
+
     @id = note.id
     @content = ko.observable(note.content)
     @content.cache = ko.observable(note.content)
+    @content.display = ko.computed(() =>
+      md.render(@content())
+    )
     @title = ko.observable(note.title)
     @title.cache = ko.observable(note.title)
 
@@ -66,12 +73,13 @@ NotesController::show = ->
   noteModel.toggleEdit() if _.isEmpty(noteModel.content())
 
   if params.note?
-    $(window).on('beforeunload', () ->
-      if noteModel.editing()
-        "If you leave this page you will lose your unsaved changes."
-      else
-        return
-    )
+    # FIXME: Only works on refresh
+    # $(window).on('beforeunload', () ->
+    #   if noteModel.editing()
+    #     "If you leave this page you will lose your unsaved changes."
+    #   else
+    #     return
+    # )
 
     $container.on('click', '.note-editing .note-attachments .attachment a', (e) -> e.preventDefault())
 
