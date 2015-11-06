@@ -5,56 +5,63 @@
     <h1>WELCOME to precisionFDA</h1>
     <p class="lead">A community platform for NGS assay evaluation and regulatory science exploration.</p>
     <% if !@context.logged_in? %>
-      <a class="btn btn-default btn-lg" href="<%= @remote_login_url %>"><span class="fa fa-sign-in"></span> Log in to precisionFDA</a>
-      <a class="btn btn-success btn-lg" href="#"><span class="fa fa-user-plus"></span> Request Access</span></a>
+
+
     <% end %>
   </div>
 </div>
 
+<% if !@context.logged_in? %>
+<div class="guest-actions text-center">
+  <div class="btn-group">
+    <a class="btn btn-default btn-lg" href="#TBD">Learn more</a>
+    <a class="btn btn-success btn-lg" href="#"><span class="fa fa-user-plus"></span> Request Access</span></a>
+  </div>
+  <a class="btn btn-primary btn-lg" href="<%= @remote_login_url %>"><span class="fa fa-sign-in"></span> Log in</a>
+</div>
+<% end %>
+
 <div class="showcase container">
   <div class="row">
-    <div class="col-sm-11">
-      <div class="showcase-item">
-        <div class="showcase-icon">
-          <span class="fa fa-files-o"></span>
-        </div>
-        <div class="showcase-content">
-          <div class="showcase-heading">Files</div>
-          <p class="lead">Files are data you can upload to the platform and use as input to apps or comparisons, and can publish to the community.</p>
-        </div>
+    <div class="showcase-item col-md-6">
+      <div class="showcase-icon">
+        <span class="fa fa-files-o"></span>
       </div>
-      <div class="showcase-item">
-        <div class="showcase-icon">
-          <span class="fa fa-cubes"></span>
-        </div>
-        <div class="showcase-content">
-          <div class="showcase-heading">Apps</div>
-          <p class="lead">Apps are executable scripts that you can run in the cloud.</p>
-        </div>
+      <div class="showcase-content">
+        <div class="showcase-heading">Files</div>
+        <p class="lead">Files are data you can upload to the platform and use as input to apps or comparisons</p>
       </div>
     </div>
 
-    <div class="col-sm-11 col-sm-offset-1">
-      <div class="showcase-item">
-        <div class="showcase-icon">
-          <span class="fa fa-bullseye"></span>
-        </div>
-        <div class="showcase-content">
-          <div class="showcase-heading">Comparisons</div>
-          <p class="lead">A comparison quantifies the similarity between two VCF files: a test set and a benchmark set.</p>
-        </div>
+    <div class="showcase-item col-md-6">
+      <div class="showcase-icon">
+        <span class="fa fa-bullseye"></span>
       </div>
+      <div class="showcase-content">
+        <div class="showcase-heading">Comparisons</div>
+        <p class="lead">A comparison quantifies the similarity between two VCF files: a test set and a benchmark set</p>
+      </div>
+    </div>
 
-      <div class="showcase-item">
-        <div class="showcase-icon">
-          <span class="fa fa-sticky-note"></span>
-        </div>
-        <div class="showcase-content">
-          <div class="showcase-heading">Notes</div>
-          <p class="lead">
-            Notes let you describe and communicate a collection of attachments.
-          </p>
-        </div>
+    <div class="showcase-item col-md-6">
+      <div class="showcase-icon">
+        <span class="fa fa-cubes"></span>
+      </div>
+      <div class="showcase-content">
+        <div class="showcase-heading">Apps</div>
+        <p class="lead">Apps are executable scripts that you can run in the cloud to perform custom analysis</p>
+      </div>
+    </div>
+
+    <div class="showcase-item col-md-6">
+      <div class="showcase-icon">
+        <span class="fa fa-sticky-note"></span>
+      </div>
+      <div class="showcase-content">
+        <div class="showcase-heading">Notes</div>
+        <p class="lead">
+          Notes let you communicate your analysis procedure and what data you used to accomplish it
+        </p>
       </div>
     </div>
   </div>

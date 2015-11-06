@@ -4,6 +4,14 @@
   margin-top: 20px
   margin-bottom: 20px
 
+.pfda-guest
+  &.pfda-controller-main.pfda-action-index
+    .navbar
+      background-color: transparent
+      position: absolute
+      width: 100%
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5)
+
 .pfda-controller-main.pfda-action-index main
   .jumbotron
     background-color: mix($brand-blue-dark, $brand-blue-primary, 50%)
@@ -12,15 +20,10 @@
     background-size: cover
     background-position: 50% 50%
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1)
-    height: 500px
     position: relative
+    margin: 0
 
     .container
-      position: absolute
-      top: 50%
-      left: 0
-      right: 0
-      margin-top: -150px
       padding: 50px
       text-align: center
 
@@ -36,17 +39,37 @@
         font-weight: bold
         font-size: 24px
 
+      @media (max-width: $screen-xs-max)
+        h1
+          font-size: 48px
+        p
+          font-size: 18px
+
+  .guest-actions
+    padding: 20px
+    background-color: $brand-blue-subtler
+    border-bottom: 1px solid $hr-border
+
+    .btn-group
+      margin-right: 10px
+
+    @media (max-width: $screen-xs-max)
+      .btn
+        margin-top: 10px
+        width: 100%
+
   .showcase
     padding: 20px 50px
 
     .showcase-item
-      @include flexbox
-      @include align-items(top)
       min-height: 250px
+      padding: 0 10px
+      text-align: center
+
+      @media (max-width: $screen-md-max)
+        margin-bottom: 30px
 
       .showcase-icon
-        min-width: 110px
-
         .fa
           font-size: 75px
           color: $brand-red-primary
@@ -56,7 +79,15 @@
         color: $brand-blue-tertiary
         font-weight: 300
         text-transform: uppercase
+        margin: 10px 0
 
       .lead
+        font-size: 18px
         font-weight: 500
         color: $text-muted
+
+
+        @media (max-width: $screen-md-max)
+          font-size: 22px
+
+
