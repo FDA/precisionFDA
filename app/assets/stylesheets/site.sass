@@ -15,6 +15,9 @@ a, a:hover, a:focus
 body > main > .alert
   margin: 10px
 
+ul, menu, dir
+  -webkit-padding-start: 20px
+
 .fa
   color: $brand-blue-tertiary
 
@@ -47,6 +50,16 @@ body > main > .alert
       border: 0
 
 // MISC
+.metadata-header
+  background-color: $brand-blue-subtler
+  border-bottom: 1px solid darken($brand-blue-subtler, 5%)
+  .list-group
+    margin-bottom: 0
+  .list-group-item
+    background-color: transparent
+    .list-group-item-text
+      color: $brand-blue-tertiary
+
 .page-header
   margin: 0
   padding: $padding-large-vertical*2 $padding-large-horizontal

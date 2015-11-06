@@ -21,6 +21,7 @@
 #= require lodash
 #= require moment
 #= require wice_grid
+#= require remarkable
 #= require SparkMD5
 #= require paloma
 #= require knockout-ace/knockout-ace

@@ -23,7 +23,7 @@ class AppsController < ApplicationController
           per_page: 10
         })
       end
-      js_param[:app] = @app.slice(:id, :dxid)
+      js_param[:app] = @app.slice(:id, :dxid, :readme)
     end
 
     series = AppSeries.accessible_by(@context)

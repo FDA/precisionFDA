@@ -25,6 +25,7 @@
     "knockout": "~3.3.0",
     "lodash": "~3.10.1",
     "moment": " ~2.10.6",
-    "sass-flex-mixin": "~1.0.1"
+    "sass-flex-mixin": "~1.0.1",
+    "remarkable": "~1.6.0"
   }
 }

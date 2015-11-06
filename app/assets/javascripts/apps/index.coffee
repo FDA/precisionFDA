@@ -1,3 +1,16 @@
+class AppIndexModel
+  constructor: (app, releaseable) ->
+    md = new Remarkable({
+      linkify: true
+    })
+
+    if app?
+      @noteAttachModel = new Precision.models.NoteAttachModel(app.id, 'App')
+      @readmeDisplay = md.render(app.readme)
+
+    if releaseable
+      @appReleaseModel = new Precision.models.AppReleaseModel(app.dxid)
+
 #########################################################
 #
 #
@@ -9,11 +22,6 @@
 AppsController = Paloma.controller('Apps')
 AppsController::index = ->
   $container = $("body main")
-  viewModel = {}
-  if @params.app?
-    viewModel.noteAttachModel = new Precision.models.NoteAttachModel(@params.app.id, 'App')
-
-    if @params.releaseable
-      viewModel.appReleaseModel = new Precision.models.AppReleaseModel(@params.app.dxid)
+  viewModel = new AppIndexModel(@params.app, @params.releaseable)
 
   ko.applyBindings(viewModel, $container[0])

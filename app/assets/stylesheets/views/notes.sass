@@ -34,10 +34,15 @@
 
   .note-pane
     width: 100%
+    position: relative
 
-    .note-content, .markdown-preview-section
+    .ace-editor-section
       margin: 10px
-      padding: 40px
+      min-height: 400px
+
+    .note-display
+      margin: 10px
+      padding: 20px
       font-size: 16px
       line-height: 1.5
       min-height: 400px
@@ -71,9 +76,6 @@
     text-transform: uppercase
 
   .note-editing
-    .note-content
-      box-shadow: inset 0px 0px 0px 5px $brand-highlight
-
     .note-titlebar
       padding: 0
       .input-group-addon

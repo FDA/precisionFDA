@@ -1,0 +1,37 @@
+{
+  "name": "remarkable",
+  "main": "dist/remarkable.js",
+  "homepage": "https://github.com/jonschlinkert/remarkable",
+  "description": "Markdown parser, done right. Commonmark support, extensions, syntax plugins, high speed - all in one.",
+  "keywords": [
+    "markdown",
+    "md",
+    "commonmark",
+    "parser"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "benchmark",
+    "bower_components",
+    "coverage",
+    "demo",
+    "lib",
+    "node_modules",
+    "support",
+    "test",
+    "Makefile",
+    "index*"
+  ],
+  "version": "1.6.0",
+  "_release": "1.6.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "1.6.0",
+    "commit": "aa5f51fab9f96f1d615a5e0be292bc0e9e294470"
+  },
+  "_source": "git://github.com/jonschlinkert/remarkable.git",
+  "_target": "~1.6.0",
+  "_originalSource": "remarkable",
+  "_direct": true
+}
