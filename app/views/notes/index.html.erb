@@ -1,19 +1,43 @@
 <% content_for :title do %>Notes<% end %>
 
-<%= render "_partials/toolbar", toolbar: @notes_toolbar %>
+<div class="pfda-toolbar">
+  <div class="btn-group">
+    <a class="btn btn-default" href="<%= new_note_path %>">
+      <span class="fa fa-sticky-note fa-fw"></span> New Note
+    </a>
+  </div>
+</div>
 
-<%= grid(@notes_grid, show_filters: :when_filtered) do |g|
-  g.blank_slate partial:  "_partials/empty_grid"
-
-  g.column name: 'Title', attribute: 'title' do |note|
-    link_to(note.title, note_path(note))
-  end
-
-  g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |note|
-    link_to(note.user.dxuser, user_path(note.user.dxuser))
-  end
-
-  g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |note|
-    note.created_at.to_s(:db)
-  end
-end -%>
+<div class="container-fluid">
+  <div class="pfda-blocks">
+    <% @notes.each do |note| %>
+      <a class="pfda-block pfda-block-has-metadata thumbnail" href="<%= note_path(note) %>">
+        <div class="caption">
+          <div class="pfda-block-title">
+            <%= truncate(note.title, :length => 40,  :separator => ' ')%>
+          </div>
+          <div class="pfda-block-blurb">
+            <%= truncate(note.content, :length => 200,  :separator => ' ')%>
+          </div>
+          <div class="pfda-block-metadata">
+            <ul class="list-inline">
+              <% if note.files.count > 0 %>
+                <li title="Files"><span class="pfda-block-metadata-value"><%= note.files.count %></span> <span class="fa fa-files-o"></span></li>
+              <% end %>
+              <% if note.comparisons.count > 0 %>
+                <li title="Comparisons"><span class="pfda-block-metadata-value"><%= note.comparisons.count %></span> <span class="fa fa-bullseye"></span></li>
+              <% end %>
+              <% if note.apps.count > 0 %>
+                <li title="Apps"><span class="pfda-block-metadata-value"><%= note.apps.count %></span> <span class="fa fa-cubes"></span></li>
+              <% end %>
+              <% if note.jobs.count > 0 %>
+                <li title="Jobs"><span class="pfda-block-metadata-value"><%= note.jobs.count %></span> <span class="fa fa-tasks"></span></li>
+              <% end %>
+              <li class="pull-right"><small><%= note.user.dxuser %></small></li>
+            </ul>
+          </div>
+        </div>
+      </a>
+    <% end %>
+  </div>
+</div>

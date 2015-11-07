@@ -1,17 +1,6 @@
 class NotesController < ApplicationController
   def index
-    @notes_toolbar = {
-      fixed: [
-        {icon: "fa fa-sticky-note fa-fw", label: "New Note", link: new_note_path}
-      ]
-    }
-
-    notes = Note.accessible_by(@context)
-    @notes_grid = initialize_grid(notes, {
-      order: 'notes.title',
-      order_direction: 'asc',
-      per_page: 100
-    })
+    @notes = Note.accessible_by(@context).order(id: :desc)
   end
 
   def show

@@ -1,0 +1,46 @@
+@import "_common"
+
+.pfda-blocks
+  @include flexbox
+  @include flex-wrap(wrap)
+  @include justify-content(center)
+  @include align-items(stretch)
+  @include align-content(stretch)
+
+  .pfda-block
+    position: relative
+    width: 300px
+    margin: 20px 10px 0px
+    overflow: hidden
+
+    &:hover
+      .pfda-block-title
+        color: $brand-blue-primary
+
+    .pfda-block-title
+      font-size: 26px
+      font-weight: 700
+
+    .pfda-block-blurb
+      color: $text-muted
+
+    &.pfda-block-has-metadata
+      padding-bottom: 32px
+
+      .pfda-block-metadata
+        background-color: $brand-blue-subtler
+        position: absolute
+        bottom: 0
+        left: 0
+        right: 0
+        height: 30px
+        padding: $padding-base-vertical $padding-base-horizontal
+        border-top: 1px solid $list-group-border
+        color: lighten($brand-blue-tertiary, 10%)
+        border-bottom-left-radius: $border-radius-base
+        border-bottom-right-radius: $border-radius-base
+
+        .pfda-block-metadata-value
+          font-size: 12px
+          font-weight: 900
+          color: $gray-darker
