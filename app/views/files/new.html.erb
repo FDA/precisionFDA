@@ -1,31 +1,32 @@
 <% content_for :title do %>Upload File(s)<% end %>
 
 <div class="page-header clearfix">
-  <div class="page-title pull-left"><span class="fa fa-file fa-fw"></span> Upload File(s)</div>
+  <div class="page-title"><span class="fa fa-file fa-fw"></span> File Upload</div>
+</div>
+
+<div class="pfda-toolbar">
+  <form class="form form-upload-files">
+    <div class="form-group text-centered">
+      <div class="control-group">
+        <span class="btn btn-primary btn-lg btn-browse-files" data-bind="visible: isBrowseVisible, disable: disableActions">
+          <span class="fa fa-files-o"></span> Browse files for upload... <input class="event-browse-files" type='file' multiple required>
+        </span>
+
+        <button class="btn btn-success btn-lg event-upload-files" style="display:none;" data-bind="visible: isUploadVisible, disable: disableActions">
+          <span class="fa fa-cloud-upload fa-fw"></span> Upload all
+        </button>
+        <button class="btn btn-link btn-lg event-clear-files" style="display:none;" data-bind="visible: isClearVisible, disable: disableActions">Restart</button>
+      </div>
+    </div>
+  </form>
 </div>
 
 <div class="container-fluid">
-  <div class="section-files panel panel-default">
-    <div class="panel-body">
-      <form class="form form-upload-files">
-        <div class="form-group">
-          <label class="control-label">Files <span class="upload-state label" style="display:none;" data-bind="visible: isUploadStateVisible, text: uploadStateDisplay"></span></label>
-
-          <div class="control-group">
-            <span class="btn btn-primary btn-browse-files" data-bind="visible: isBrowseVisible">
-                Browse files for upload... <input class="event-browse-files" type='file' multiple required>
-            </span>
-
-            <button class="btn btn-primary event-upload-files" style="display:none;" data-bind="visible: isUploadVisible">
-              <span class="fa fa-cloud-upload fa-fw"></span> Upload
-            </button>
-            <button class="btn btn-default event-clear-files" style="display:none;" data-bind="visible: isClearVisible">Clear files</button>
-          </div>
-        </div>
-      </form>
+  <div class="section-files panel panel-info">
+    <div class="panel-heading">
+      <span class="upload-state panel-title" data-bind="text: uploadStateDisplay"></span>
     </div>
-
-    <ul class="list-group list-files" style="display:none;" data-bind="visible: files().length > 0, foreach: files">
+    <ul class="list-group list-files" data-bind="foreach: files">
       <li class='list-group-item' data-bind="css: classes">
         <div class='list-group-item-text clearfix'>
           <!-- ko if: !isDone() || !path() -->
