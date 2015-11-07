@@ -1,2 +1,23 @@
+@import "_common"
+
 .modal-body-padless
   padding: 0
+
+.modal-body-search-selector
+  @include flexbox
+
+  .list-group
+    width: 250px
+    height: 500px
+    overflow: auto
+    margin: 0
+
+  .tab-content
+    position: absolute
+    top: 0px
+    right: 0px
+    bottom: 0
+    left: 250px
+    overflow: auto
+    margin-left: -1px
+    border-left: 1px solid $list-group-border

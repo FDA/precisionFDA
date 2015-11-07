@@ -1,0 +1,57 @@
+<!-- Modal -->
+<div class="modal assets-modal fade" id="assets-modal" data-bind="with: assetsSelector">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Selected Assets for your VM Environment</h4>
+      </div>
+      <div class="modal-body modal-body-search-selector modal-body-padless">
+        <ul class="list-group list-group-selector">
+          <li class="list-group-item">
+            <div class="has-feedback">
+              <label class="control-label sr-only">Search assets</label>
+              <input type="text" data-bind="textInput: query" class="form-control" placeholder="Search assets" autofocus/>
+              <span class="form-control-feedback" aria-hidden="true" data-bind="css: loading() ? 'fa fa-spinner fa-spin':'fa fa-search'"></span>
+            </div>
+          </li>
+          <li class="list-group-item text-muted" data-bind="visible: !loading() && assets.filtered().length == 0">
+            No assets found <a class="pull-right" data-bind="click: clearQuery">Clear query</a>
+          </li>
+          <!-- ko foreach: assets.filtered -->
+          <li class="list-group-item item-asset" data-bind="css: {active: $parent.previewedAsset() && $parent.previewedAsset().dxid == dxid}">
+            <div class="checkbox clearfix">
+              <label>
+                <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.assets.selected"> <span class="fa fa-file-zip-o"></span> <span data-bind="text: name"></span>
+              </label>
+              <span class="pull-right list-preview-icon" data-bind="click: $parent.previewAsset"><span class="fa fa-fw fa-chevron-right"></span></span>
+            </div>
+          </li>
+          <!-- /ko -->
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane tab-pane-preview active">
+            <!-- ko if: previewedAsset() -->
+              <!-- ko if: previewedAsset().describe() -->
+                <div class="h1">
+                  <a href="/assets/" data-bind="text: previewedAsset().name, attr: {href: '/assets/' + previewedAsset().dxid}" target="_blank"></a>
+                </div>
+                <p class="lead" data-bind="text: previewedAsset().describe().description"></p>
+                <div class="h4">Archive Contents</div>
+                <ul data-bind="foreach: previewedAsset().describe().archive_entries">
+                  <li data-bind="text: $data"></li>
+                </ul>
+              <!-- /ko -->
+            <!-- /ko -->
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" data-bind="click: saveAssets">Update Selection <span class="badge" data-bind="text: _.size(assets.selected())"></span></button>
+      </div>
+    </div>
+  </div>
+</div>

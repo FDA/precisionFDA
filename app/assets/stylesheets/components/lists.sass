@@ -33,9 +33,8 @@
       border-color: $list-group-border
 
     &:hover:not(.active)
-      a
-        visibility: visible
+      .list-preview-icon .fa
+        color: $brand-blue-tertiary
 
-    a
-      color: $brand-blue-tertiary
-      visibility: hidden
+    .list-preview-icon .fa
+      color: lighten($brand-blue-tertiary, 15%)
