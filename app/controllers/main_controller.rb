@@ -89,6 +89,19 @@ class MainController < ApplicationController
     redirect_to root_path
   end
 
+  def request_access
+    param! :user, Hash do |c|
+      c.param! :first_name, String, {required: true}
+      c.param! :last_name, String, {required: true}
+      c.param! :email, String, {required: true}
+      c.param! :org, String
+      c.param! :has_no_org, Numeric
+      c.param! :address, String, {required: true}
+      c.param! :phone, String, {required: true}
+      c.param! :duns, String
+    end
+  end
+
   def publish
     id = params[:id]
     raise "Missing id in publish route" unless id.is_a?(String) && id.present?
@@ -120,7 +133,7 @@ class MainController < ApplicationController
   private
 
   def publish_job(job)
-    if job.user_id != @context.user_id 
+    if job.user_id != @context.user_id
       return [job, []]
     else
       return [job, [publish_app(job.app)] + job.input_files.map { |file| publish_file(file) }]

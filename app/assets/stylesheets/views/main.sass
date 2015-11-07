@@ -11,6 +11,7 @@
       position: absolute
       width: 100%
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5)
+      border: 0
 
 .pfda-controller-main.pfda-action-index main
   .jumbotron
@@ -24,7 +25,7 @@
     margin: 0
 
     .container
-      padding: 50px
+      padding: 75px 20px
       text-align: center
 
       h1, p
@@ -54,9 +55,13 @@
       margin-right: 10px
 
     @media (max-width: $screen-xs-max)
+      .btn-group
+        margin-right: 0
+
       .btn
         margin-top: 10px
         width: 100%
+        border-radius: $btn-border-radius-large
 
   .showcase
     padding: 20px 50px
@@ -90,4 +95,18 @@
         @media (max-width: $screen-md-max)
           font-size: 22px
 
+.pfda-controller-main.pfda-action-request_access main
+  .page-title
+    color: $brand-blue-tertiary
 
+  form
+    margin-top: 20px
+    padding: 10px
+
+    .form-group-lg
+      .checkbox
+        height: 46px
+        padding: 11px 16px
+        font-size: 18px
+        line-height: 1.3333333
+        border-radius: 3px
