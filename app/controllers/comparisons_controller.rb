@@ -1,11 +1,5 @@
 class ComparisonsController < ApplicationController
   def index
-    @toolbar = {
-      fixed: [
-        {icon: "fa fa-bolt fa-fw", label: "Run Comparison", link: new_comparison_path}
-      ]
-    }
-
     User.sync_comparisons!(@context.user_id, @context.token)
 
     comparisons = Comparison.accessible_by(@context)

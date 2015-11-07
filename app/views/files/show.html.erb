@@ -15,7 +15,8 @@
     <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
   </div>
 
-  <div class="btn-group pull-right">
+  <div class="pull-right">
+    <div class="btn-group">
     <% if @file.state == "closed" %>
       <%= link_to download_file_path(@file.dxid, inline: true), method: :post, class: "btn btn-primary" do %>
         <span class="fa fa-external-link"></span> Open
@@ -26,17 +27,23 @@
         <span class="fa fa-download"></span> Download
       <% end %>
     <% end %>
+
     <% if @file.user_id == @context.user_id %>
       <% if @file.publishable_by?(@context) %>
-        <%= link_to publish_path + "?" + {id: @file.dxid}.to_param, method: :post, class: "btn btn-primary" do %>
+        <%= link_to publish_path + "?" + {id: @file.dxid}.to_param, method: :post, class: "btn btn-success" do %>
           <span class="fa fa-bullhorn"></span> Publish
         <% end %>
       <% end %>
+    <% end %>
+    </div>
+    <% if @file.user_id == @context.user_id %>
+    <div class="btn-group">
       <% if @file.deletable? %>
         <%= link_to file_path(@file.dxid), method: :delete, data: { confirm: 'Are you certain you want to delete this?' }, class: "btn btn-danger" do %>
           <span class="fa fa-trash"></span> Delete
         <% end %>
       <% end %>
+    </div>
     <% end %>
   </div>
 </div>

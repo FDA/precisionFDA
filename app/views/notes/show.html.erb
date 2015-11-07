@@ -4,9 +4,9 @@
   <div class="pfda-toolbar clearfix">
     <div class="btn-toolbar pull-right" data-bind="visible: !editing()">
       <div class="btn-group">
-        <a class="btn btn-default event-edit">Edit</a>
+        <a class="btn btn-primary event-edit"><span class="fa fa-edit"></span> Edit</a>
         <% if @note.publishable_by?(@context) %>
-          <a class="btn btn-default">Publish</a>
+          <a class="btn btn-success"><span class="fa fa-bullhorn"></span> Publish</a>
         <% end %>
       </div>
     </div>

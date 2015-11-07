@@ -1,6 +1,12 @@
 <% content_for :title do %>Comparisons<% end %>
 
-<%= render "_partials/toolbar", toolbar: @toolbar  %>
+<div class="pfda-toolbar">
+  <div class="btn-group">
+    <a class="btn btn-default" href="<%= new_comparison_path %>">
+      <span class="fa fa-bolt fa-fw"></span>Run Comparison
+    </a>
+  </div>
+</div>
 
 <%= grid(@comparisons_grid, show_filters: :when_filtered) do |g|
   g.blank_slate partial:  "_partials/empty_grid"
