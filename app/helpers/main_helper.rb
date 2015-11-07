@@ -40,7 +40,7 @@ module MainHelper
     deps = graph[1]
     deps.each do |dep|
       s += graph_edges(dep)
-      s += "g.setEdge(#{item.uid.inspect}, #{dep[0].uid.inspect}, {label: ''});\n"
+      s += "g.setEdge(#{dep[0].uid.inspect}, #{item.uid.inspect}, {label: ''});\n"
     end
     s
   end

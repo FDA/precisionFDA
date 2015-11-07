@@ -170,7 +170,7 @@ class MainController < ApplicationController
       return [note, []]
     else
       return [note, note.attachments.map { |attachment|
-        self.send("publish_#{attachment.item_type.downcase.sub(/^user/, '')}", attachment)
+        self.send("publish_#{attachment.item_type.downcase.sub(/^user/, '')}", attachment.item)
       }]
     end
   end

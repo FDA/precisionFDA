@@ -20,6 +20,8 @@ Rails.application.routes.draw do
     post '/api/list_assets', to: 'api#list_assets'
     post '/api/describe_asset', to: 'api#describe_asset'
     post '/api/search_assets', to: 'api#search_assets'
+    post '/api/create_asset', to: 'api#create_asset'
+    post '/api/close_asset', to: 'api#close_asset'
     post '/api/create_app', to: 'api#create_app'
     post '/api/release_app', to: 'api#release_app'
     post '/api/list_notes', to: 'api#list_notes'
