@@ -2,7 +2,6 @@ class FileModel
   constructor: (file) ->
     @id = ko.observable()
     @file = file
-    @description = ko.observable()
     @state = ko.observable()
     @sizeFormatted = humanFormat(file.size, {unit: 'B'})
 
@@ -15,9 +14,6 @@ class FileModel
     )
     @isDone = ko.computed(=>
       @state() == "DONE"
-    )
-    @isDescriptionVisible = ko.computed(=>
-      !@state()? || @state()? && !_.isEmpty(@description())
     )
     @isProgressVisible = ko.computed(=>
       @isUploading()
@@ -39,21 +35,9 @@ class FilesNewView
   constructor: () ->
     @files = ko.observableArray()
 
-    @isBrowseVisible = ko.computed(=>
-      @files().length == 0
-    )
-
-    @isUploadVisible = ko.computed(=>
-      @files().length > 0
-    )
-
-    @isClearVisible = ko.computed(=>
-      @files().length > 0
-    )
-
     @uploadState = ko.observable()
     @isUploadStateVisible = ko.computed(=>
-      @uploadState()?
+      !_.isEmpty(@uploadState())
     )
     @uploadStateDisplay = ko.computed(=>
       switch @uploadState()
@@ -61,6 +45,24 @@ class FilesNewView
           "Uploading..."
         when "DONE"
           "Upload(s) complete"
+        else
+          "#{@files().length} file(s) selected"
+    )
+
+    @isBrowseVisible = ko.computed(=>
+      @files().length == 0
+    )
+
+    @isUploadVisible = ko.computed(=>
+      @files().length > 0 && @uploadState() != "DONE"
+    )
+
+    @isClearVisible = ko.computed(=>
+      @files().length > 0
+    )
+
+    @disableActions = ko.computed(=>
+      @uploadState() == "UPLOADING"
     )
 
   handleInputChange: (e) =>
@@ -87,10 +89,6 @@ class FilesNewView
 
     for fileModel, i in files
       metadata = {}
-
-      description = fileModel.description()
-      if !_.isEmpty(description)
-        metadata.description = description
 
       do (fileModel) =>
         fileModel.state("UPLOADING")
