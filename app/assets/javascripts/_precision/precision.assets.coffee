@@ -7,31 +7,40 @@ class AssetsModel
     @assets.filtered = ko.computed(=>
       assets = @assets()
       query = @query()
-      if query?
+      if !_.isEmpty(query)
         assetsSearchIDs = @assets.searchedIDs()
         if assetsSearchIDs.length
           return _.filter(assets, (asset) -> _.includes(assetsSearchIDs, asset.dxid))
         else
-          regexp = new RegExp(query, "i")
-          return _.filter(assets, (asset) -> asset.name.match regexp)
+          return _.filter(assets, (asset) -> asset.name.match(query))
       else
         return assets
     )
     @assets.selected = ko.observableArray()
     @assets.saved = ko.observableArray()
 
+    @previewedAsset = ko.observable()
+
     @isQuerySearchable = ko.computed(=>
       return @query()?.length >= 3
     )
 
-    @assets.filtered.subscribe((filtered) ->
+    $(".assets-modal").on("click", ".item-asset", (e) =>
+      @previewAsset(ko.dataFor(e.currentTarget))
+    )
+
+    @assets.filtered.subscribe((filtered) =>
+      assetFound = _.first(@assets.filtered())
+      @previewAsset(assetFound) if assetFound?
       $('.assets-modal').modal('handleUpdate')
     )
 
-    @previewedAsset = ko.observable()
-
-    $(".assets-modal").on("click", ".list-group-item", (e) =>
-      @previewAsset(ko.dataFor(e.currentTarget))
+    @query.subscribe((query) =>
+      if @isQuerySearchable()
+        @loading(true)
+        @searchAssets()
+      else
+        @assets.searchedIDs([])
     )
 
   createAssetModels: (assets) =>
@@ -43,11 +52,12 @@ class AssetsModel
       @loading(false)
       @assets(@createAssetModels(assets))
 
-  searchAssets: () =>
-    @loading(true)
+  searchAssets: _.debounce(() ->
     Precision.api '/api/search_assets', {prefix: @query.peek()}, (result) =>
       @loading(false)
+      @previewedAsset(null)
       @assets.searchedIDs(result.ids)
+  , 500)
 
   setSelected: (selectedAssets) ->
     ids = _.map(selectedAssets, 'dxid')
@@ -59,6 +69,9 @@ class AssetsModel
   previewAsset: (assetModel) =>
     @previewedAsset(assetModel)
     assetModel.getDescribe()
+
+  clearQuery: () =>
+    @query("")
 
 class AssetModel
   constructor: (asset) ->
