@@ -32,11 +32,8 @@ class ComparisonsController < ApplicationController
       order_direction: 'asc'
     })
 
-    @notes_grid = initialize_grid(@comparison.notes.accessible_by(@context), {
-      order: 'notes.id',
-      order_direction: 'desc',
-      per_page: 10
-    })
+    @notes = @comparison.notes.accessible_by(@context).order(id: :desc)
+
 
     js id: @comparison.id, meta: @meta, state: @comparison.state
   end

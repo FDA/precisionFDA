@@ -39,11 +39,7 @@ class JobsController < ApplicationController
       end
     end
 
-    @notes_grid = initialize_grid(@job.notes.accessible_by(@context), {
-      order: 'notes.id',
-      order_direction: 'desc',
-      per_page: 10
-    })
+    @notes = @job.notes.accessible_by(@context).order(id: :desc)
 
     js id: @job.id
   end

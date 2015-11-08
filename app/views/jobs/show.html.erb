@@ -17,6 +17,37 @@
   </div>
 </div>
 
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">App</h5>
+      <p class="list-group-item-text"><%= link_to(@job.app.title, app_jobs_path(@job.app.dxid)) %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Launched by</h5>
+      <p class="list-group-item-text">
+        <%= link_to(@job.user.dxuser, user_path(@job.user.dxuser))  %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">ID</h5>
+      <p class="list-group-item-text"><%= @job.dxid %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Created</h5>
+      <p class="list-group-item-text"><%= @job.created_at.to_s(:db) %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Instance type</h5>
+      <p class="list-group-item-text"><%= @job.resolved_instance_type %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Duration</h5>
+      <p class="list-group-item-text"><%= humanizeSeconds(@job.runtime) %></p>
+    </li>
+  </ul>
+</div>
+
 <div class="pfda-toolbar">
   <div class="btn-group">
     <%= link_to new_app_job_path(@job.app.dxid), class: "btn btn-default" do %>
@@ -44,40 +75,25 @@
   <% end %>
 </div>
 
-<div class="container-fluid">
-  <div class="metadata-section">
-    <ul class="list-group list-group-inline">
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">App</h5>
-        <p class="list-group-item-text"><%= link_to(@job.app.title, app_jobs_path(@job.app.dxid)) %></p>
-      </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Launched by</h5>
-        <p class="list-group-item-text">
-          <%= link_to(@job.user.dxuser, user_path(@job.user.dxuser))  %>
-        </p>
-      </li>
-    </ul>
+<!-- Nav tabs -->
+<ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+  <li role="presentation" class="active">
+    <a href="#tab-spec" aria-controls="tab-spec" role="tab" data-toggle="tab"><span class="fa fa-fw fa-puzzle-piece"></span>
+      <span class="tab-label">Inputs and Outputs</span>
+    </a>
+  </li>
+  <% if @notes.count > 0 %>
+  <li role="presentation">
+    <a href="#tab-notes" aria-controls="tab-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
+      <span class="tab-label">Notes <span class="badge"><%= @notes.count %></span></span>
+    </a>
+  </li>
+  <% end %>
+</ul>
 
-    <ul class="list-group list-group-inline">
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">ID</h5>
-        <p class="list-group-item-text"><%= @job.dxid %></p>
-      </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Created</h5>
-        <p class="list-group-item-text"><%= @job.created_at.to_s(:db) %></p>
-      </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Instance type</h5>
-        <p class="list-group-item-text"><%= @job.resolved_instance_type %></p>
-      </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Duration</h5>
-        <p class="list-group-item-text"><%= humanizeSeconds(@job.runtime) %></p>
-      </li>
-    </ul>
-
+<!-- Tab panes -->
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-spec">
     <div class="list-group">
       <div class="list-group-item job-io">
         <div class="row">
@@ -102,16 +118,11 @@
         </div>
       </div>
     </div>
-
-    <% if @notes_grid.present? %>
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h3 class="panel-title">Notes attached to</h3>
-        </div>
-        <div class="panel-table">
-          <%= render "notes/grid", notes_grid: @notes_grid %>
-        </div>
-      </div>
-    <% end %>
   </div>
+
+  <% if @notes.present? && @notes.count > 0 %>
+  <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-notes">
+    <%= render "notes/blocks", notes: @notes %>
+  </div>
+  <% end %>
 </div>

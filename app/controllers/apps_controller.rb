@@ -17,11 +17,7 @@ class AppsController < ApplicationController
           @revisions = App.accessible_by(@context).released.where(app_series_id: @app.app_series_id).order(revision: :desc)
         end
 
-        @notes_grid = initialize_grid(@app.notes.accessible_by(@context), {
-          order: 'notes.id',
-          order_direction: 'desc',
-          per_page: 10
-        })
+        @notes = @app.notes.accessible_by(@context).order(id: :desc)
       end
       js_param[:app] = @app.slice(:id, :dxid, :readme)
     end
@@ -62,11 +58,7 @@ class AppsController < ApplicationController
       end
     end
 
-    @notes_grid = initialize_grid(@app.notes.accessible_by(@context), {
-      order: 'notes.id',
-      order_direction: 'desc',
-      per_page: 10
-    })
+    @notes = @app.notes.accessible_by(@context).order(id: :desc)
 
     js_param[:app] = @app.slice(:id, :dxid)
     js js_param

@@ -10,6 +10,56 @@
   <% end %>
 </div>
 
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Access</h5>
+      <p class="list-group-item-text">
+        <span class="fa <%= @file.public? ? 'fa-globe' : 'fa-lock' %>"></span>
+        <%= @file.public? ? "Public" : "Private" %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">ID</h5>
+      <p class="list-group-item-text"><%= @file.dxid %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Added by</h5>
+      <p class="list-group-item-text">
+        <%= link_to(@file.user.dxuser, user_path(@file.user.dxuser))  %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Origin</h5>
+      <p class="list-group-item-text">
+        <% if @file.parent_type == "Job" %>
+          <% if @file.parent.user_id == @context.user_id %>
+            <span class='fa fa-tasks fa-fw'></span> <%= link_to(@file.parent.name, job_path(@file.parent.dxid)) %>
+          <% else %>
+            <span class='fa fa-lock fa-fw'></span> <%= @file.parent.dxid %>
+          <% end %>
+        <% elsif @file.parent_type == "Comparison" %>
+          <span class='fa fa-area-chart fa-fw'></span> <%= link_to(@file.parent.name, comparison_path(@file.parent_id)) %>
+        <% else %>
+          Uploaded
+        <% end %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">File Size</h5>
+      <p class="list-group-item-text"><%= number_to_human_size(@file.file_size || 0) %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">State</h5>
+      <p class="list-group-item-text"><%= @file.state %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Created</h5>
+      <p class="list-group-item-text"><%= @file.created_at.to_s(:db) %></p>
+    </li>
+  </ul>
+</div>
+
 <div class="pfda-toolbar">
   <div class="btn-group pull-left">
     <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
@@ -48,140 +98,97 @@
   </div>
 </div>
 
-<div class="container-fluid">
-  <div class="metadata-section">
-    <ul class="list-group list-group-inline">
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">ID</h5>
-        <p class="list-group-item-text"><%= @file.dxid %></p>
-      </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Added by</h5>
-        <p class="list-group-item-text">
-          <%= link_to(@file.user.dxuser, user_path(@file.user.dxuser))  %>
-        </p>
-      </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Origin</h5>
-        <p class="list-group-item-text">
-          <% if @file.parent_type == "Job" %>
-            <% if @file.parent.user_id == @context.user_id %>
-              <span class='fa fa-tasks fa-fw'></span> <%= link_to(@file.parent.name, job_path(@file.parent.dxid)) %>
-            <% else %>
-              <span class='fa fa-lock fa-fw'></span> <%= @file.parent.dxid %>
-            <% end %>
-          <% elsif @file.parent_type == "Comparison" %>
-            <span class='fa fa-area-chart fa-fw'></span> <%= link_to(@file.parent.name, comparison_path(@file.parent_id)) %>
-          <% else %>
-            Uploaded
-          <% end %>
-        </p>
-      </li>
-    </ul>
-
-    <ul class="list-group list-group-inline">
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Access</h5>
-        <p class="list-group-item-text">
-          <span class="fa <%= @file.public? ? 'fa-globe' : 'fa-lock' %>"></span>
-          <%= @file.public? ? "Public" : "Private" %>
-        </p>
-      </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">File Size</h5>
-        <p class="list-group-item-text"><%= number_to_human_size(@file.file_size || 0) %></p>
-      </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">State</h5>
-        <p class="list-group-item-text"><%= @file.state %></p>
-      </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Created</h5>
-        <p class="list-group-item-text"><%= @file.created_at.to_s(:db) %></p>
-      </li>
-    </ul>
-
-    <% if @comparisons_grid %>
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h3 class="panel-title">Comparisons</h3>
-        </div>
-        <div class="panel-table">
-          <%= grid(@comparisons_grid, show_filters: :when_filtered) do |g|
-            g.blank_slate partial:  "_partials/empty_grid"
-
-            g.after_row do |comparison, num_cols|
-              if !comparison.description.blank?
-                content_tag(:tr,
-                  content_tag(:td, nil, {class: "col-state state-#{comparison.state}"}).concat(content_tag(:td,
-                    content_tag(:div, comparison.description, class: 'description'),
-                  colspan: num_cols - 1)),
-                class: 'extra-row')
-              else
-                nil
-              end
-            end
-
-            g.column name: 'State', attribute: 'state' do |comparison|
-              [comparison.state, {class: "col-state state-#{comparison.state}"}]
-            end
-
-            g.column name: 'Name', attribute: 'name' do |comparison|
-              link_to(comparison.name, comparison_path(comparison.id))
-            end
-
-            g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |comparison|
-              link_to(comparison.user.dxuser, user_path(comparison.user.dxuser))
-            end
-
-            g.column name: 'Test Variant' do |comparison|
-              file = comparison.input("test_vcf").user_file
-              display = ""
-              if !file.public?
-                display = "<span class='fa fa-lock fa-fw'></span> "
-              else
-                display = "<span class='fa fa-globe fa-fw'></span> "
-              end
-
-              if file.id == @file.id
-                display += "<span class='current'>#{file.name}</span>"
-              else
-                display += link_to(file.name, file_path(file.dxid))
-              end
-              raw display
-            end
-
-            g.column name: 'Benchmark' do |comparison|
-              file = comparison.input("ref_vcf").user_file
-              display = ""
-              if !file.public?
-                display = "<span class='fa fa-lock fa-fw'></span> "
-              else
-                display = "<span class='fa fa-globe fa-fw'></span> "
-              end
-
-              if file.id == @file.id
-                display += "<span class='current'>#{file.name}</span>"
-              else
-                display += link_to(file.name, file_path(file.dxid))
-              end
-              raw display
-            end
-          end -%>
-        </div>
-      </div>
+<% if @notes.count > 0 || @comparisons_grid.present? && @comparisons_grid.count > 0 %>
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+    <% if @notes.count > 0 %>
+    <li role="presentation">
+      <a href="#tab-notes" aria-controls="tab-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
+        <span class="tab-label">Notes <span class="badge"><%= @notes.count %></span></span>
+      </a>
+    </li>
     <% end %>
+    <% if @comparisons_grid.present? && @comparisons_grid.count > 0 %>
+    <li role="presentation">
+      <a href="#tab-comparisons" aria-controls="tab-comparisons" role="tab" data-toggle="tab"><span class="fa fa-fw fa-area-chart"></span>
+        <span class="tab-label">Comparisons  <span class="badge"><%= @comparisons_grid.count %></span></span>
+      </a>
+    </li>
+    <% end %>
+  </ul>
 
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <% if @notes.count > 0 %>
+    <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-notes">
+      <%= render "notes/blocks", notes: @notes %>
+    </div>
+    <% end %>
+    <% if @comparisons_grid.present? && @comparisons_grid.count > 0 %>
+    <div role="tabpanel" class="tab-pane" id="tab-comparisons">
+      <div class="panel">
+        <%= grid(@comparisons_grid, show_filters: :when_filtered) do |g|
+          g.blank_slate partial:  "_partials/empty_grid"
 
-    <% if @notes_grid.present? %>
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h3 class="panel-title">Notes attached to</h3>
-        </div>
-        <div class="panel-table">
-          <%= render "notes/grid", notes_grid: @notes_grid %>
-        </div>
+          g.after_row do |comparison, num_cols|
+            if !comparison.description.blank?
+              content_tag(:tr,
+                content_tag(:td, nil, {class: "col-state state-#{comparison.state}"}).concat(content_tag(:td,
+                  content_tag(:div, comparison.description, class: 'description'),
+                colspan: num_cols - 1)),
+              class: 'extra-row')
+            else
+              nil
+            end
+          end
+
+          g.column name: 'State', attribute: 'state' do |comparison|
+            [comparison.state, {class: "col-state state-#{comparison.state}"}]
+          end
+
+          g.column name: 'Name', attribute: 'name' do |comparison|
+            link_to(comparison.name, comparison_path(comparison.id))
+          end
+
+          g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |comparison|
+            link_to(comparison.user.dxuser, user_path(comparison.user.dxuser))
+          end
+
+          g.column name: 'Test Variant' do |comparison|
+            file = comparison.input("test_vcf").user_file
+            display = ""
+            if !file.public?
+              display = "<span class='fa fa-lock fa-fw'></span> "
+            else
+              display = "<span class='fa fa-globe fa-fw'></span> "
+            end
+
+            if file.id == @file.id
+              display += "<span class='current'>#{file.name}</span>"
+            else
+              display += link_to(file.name, file_path(file.dxid))
+            end
+            raw display
+          end
+
+          g.column name: 'Benchmark' do |comparison|
+            file = comparison.input("ref_vcf").user_file
+            display = ""
+            if !file.public?
+              display = "<span class='fa fa-lock fa-fw'></span> "
+            else
+              display = "<span class='fa fa-globe fa-fw'></span> "
+            end
+
+            if file.id == @file.id
+              display += "<span class='current'>#{file.name}</span>"
+            else
+              display += link_to(file.name, file_path(file.dxid))
+            end
+            raw display
+          end
+        end -%>
       </div>
     <% end %>
   </div>
-</div>
+<% end %>
