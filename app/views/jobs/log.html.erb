@@ -13,14 +13,14 @@
     <% else %>
       <span class="label label-warning"> <%= @job.state.upcase %></span>
     <% end %>
-    <span class="name"><%= @job.name %></span>
+    <span class="name"><%= link_to @job.name, job_path(@job.dxid) %></span>
   </div>
 </div>
 
 <div class="pfda-toolbar">
   <div class="btn-group pull-left">
-    <%= link_to new_app_job_path(@job.app.dxid), class: "btn btn-default" do %>
-      <span class="fa fa-bolt"></span> Run App: <%= @job.app.title %>
+    <%= link_to log_job_path(@job.dxid), class: "btn btn-default", data: {no_turbolink: true} do %>
+      <span class="fa fa-refresh"></span> Refresh
     <% end %>
   </div>
 
@@ -35,8 +35,4 @@
   <% end %>
 </div>
 
-<div style="font-family: 'PT Mono'; padding: 10px">
-  <% @log_contents.each_with_index do |msg, i| %>
-    <div><%= msg %></div>
-  <% end %>
-</div>
+<div style="font-family: 'PT Mono'; margin: 10px; white-space: pre-wrap"><%= @log_contents.join("\n") %></div>
