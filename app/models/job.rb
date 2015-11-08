@@ -71,6 +71,18 @@ class Job < ActiveRecord::Base
     state == "done"
   end
 
+  def failed?
+    state == "failed"
+  end
+
+  def failure_message
+    if failed? && describe.has_key?("failureMessage")
+      describe["failureMessage"]
+    else
+      ""
+    end
+  end
+
   def runtime
     if describe.has_key?("startedRunning") && describe.has_key?("stoppedRunning")
       (describe["stoppedRunning"] - describe["startedRunning"]) / 1000

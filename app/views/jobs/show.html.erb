@@ -68,7 +68,7 @@
       <% end %>
       <% if !@job.terminal? %>
         <%= link_to job_path(@job.dxid), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
-          <span class="fa fa-trash"></span> Terminate
+          <span class="fa fa-times-circle"></span> Terminate
         <% end %>
       <% end %>
     </div>
@@ -82,6 +82,13 @@
       <span class="tab-label">Inputs and Outputs</span>
     </a>
   </li>
+  <% if @job.failed? %>
+  <li role="presentation">
+    <a href="#tab-error" aria-controls="tab-error" role="tab" data-toggle="tab"><span class="fa fa-fw fa-exclamation-triangle"></span>
+      <span class="tab-label">Error</span>
+    </a>
+  </li>
+  <% end %>
   <% if @notes.count > 0 %>
   <li role="presentation">
     <a href="#tab-notes" aria-controls="tab-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
@@ -120,6 +127,12 @@
     </div>
   </div>
 
+  <% if @job.failed? %>
+  <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-error">
+    <p>The execution failed with the following error message:</p>
+    <p><%= @job.failure_message %></p>
+  </div>
+  <% end %>
   <% if @notes.present? && @notes.count > 0 %>
   <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-notes">
     <%= render "notes/blocks", notes: @notes %>
