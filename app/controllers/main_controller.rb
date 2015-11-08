@@ -90,15 +90,11 @@ class MainController < ApplicationController
   end
 
   def request_access
-    param! :user, Hash do |c|
-      c.param! :first_name, String, {required: true}
-      c.param! :last_name, String, {required: true}
-      c.param! :email, String, {required: true}
-      c.param! :org, String
-      c.param! :has_no_org, Numeric
-      c.param! :address, String, {required: true}
-      c.param! :phone, String, {required: true}
-      c.param! :duns, String
+    @invitation = Invitation.new
+    if request.post?
+      p = params.require(:invitation).permit(:first_name, :last_name, :email, :org, :duns, :address, :phone, :singular)
+      p[:ip] = request.remote_ip.to_s
+      @invitation = Invitation.create(p)
     end
   end
 
