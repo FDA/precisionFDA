@@ -25,3 +25,7 @@ AppsController::index = ->
   viewModel = new AppIndexModel(@params.app, @params.releaseable)
 
   ko.applyBindings(viewModel, $container[0])
+
+  $container.find('[data-toggle="tooltip"]').tooltip({
+    container: 'body'
+  })
