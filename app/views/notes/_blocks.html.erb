@@ -1,0 +1,31 @@
+<div class="pfda-blocks">
+  <% @notes.each do |note| %>
+    <a class="pfda-block pfda-block-has-metadata thumbnail" href="<%= note_path(note) %>">
+      <div class="caption">
+        <div class="pfda-block-title">
+          <%= truncate(note.title, :length => 40,  :separator => ' ')%>
+        </div>
+        <div class="pfda-block-blurb">
+          <%= truncate(note.content, :length => 200,  :separator => ' ')%>
+        </div>
+        <div class="pfda-block-metadata">
+          <ul class="list-inline">
+            <% if note.files.count > 0 %>
+              <li title="Files"><span class="pfda-block-metadata-value"><%= note.files.count %></span> <span class="fa fa-files-o"></span></li>
+            <% end %>
+            <% if note.comparisons.count > 0 %>
+              <li title="Comparisons"><span class="pfda-block-metadata-value"><%= note.comparisons.count %></span> <span class="fa fa-bullseye"></span></li>
+            <% end %>
+            <% if note.apps.count > 0 %>
+              <li title="Apps"><span class="pfda-block-metadata-value"><%= note.apps.count %></span> <span class="fa fa-cubes"></span></li>
+            <% end %>
+            <% if note.jobs.count > 0 %>
+              <li title="Jobs"><span class="pfda-block-metadata-value"><%= note.jobs.count %></span> <span class="fa fa-tasks"></span></li>
+            <% end %>
+            <li class="pull-right"><small><%= note.user.dxuser %></small></li>
+          </ul>
+        </div>
+      </div>
+    </a>
+  <% end %>
+</div>

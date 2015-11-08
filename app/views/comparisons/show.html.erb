@@ -21,6 +21,26 @@
   <% end %>
 </div>
 
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Added by</h5>
+      <p class="list-group-item-text">
+        <%= link_to(@comparison.user.dxuser, user_path(@comparison.user.dxuser))  %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Runtime</h5>
+      <p class="list-group-item-text"><%= humanizeSeconds(@meta["runtime_sec"]) %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Created</h5>
+      <p class="list-group-item-text"><%= @comparison.created_at.to_s(:db) %></p>
+    </li>
+  </ul>
+
+</div>
+
 <% if @comparison.user_id == @context.user_id && @comparison.state == 'done' %>
 <div class="pfda-toolbar">
   <div class="btn-group">
@@ -47,83 +67,104 @@
 </div>
 <% end %>
 
-<div class="container-fluid">
-  <div class="variants panel">
-    <div class="variant-test">
-      <div class="variant-title">Test Variant</div>
-      <ul class="variant-inputs list-unstyled">
-        <%= render "_partials/variant_file", file: @test_vcf, title: "VCF", required: true, classes: "required active"  %>
-        <%= render "_partials/variant_file", file: @test_tbi, title: "TBI", required: true, classes: "required active"  %>
-        <%= render "_partials/variant_file", file: @test_bed, title: "BED", required: false, classes: "active"  %>
-      </ul>
+<!-- Nav tabs -->
+<ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+  <li role="presentation" class="active">
+    <a href="#tab-results" aria-controls="tab-results" role="tab" data-toggle="tab"><span class="fa fa-fw fa-area-chart"></span>
+      <span class="tab-label">Results</span>
+    </a>
+  </li>
+  <li role="presentation">
+    <a href="#tab-outputs" aria-controls="tab-outputs" role="tab" data-toggle="tab"><span class="fa fa-fw fa-puzzle-piece"></span>
+      <span class="tab-label">Outputs</span>
+    </a>
+  </li>
+  <% if @notes.count > 0 %>
+  <li role="presentation">
+    <a href="#tab-notes" aria-controls="tab-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
+      <span class="tab-label">Notes <span class="badge"><%= @notes.count %></span></span>
+    </a>
+  </li>
+  <% end %>
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane tab-pane-padded active" id="tab-results">
+    <div class="variants panel">
+      <div class="variant-test">
+        <div class="variant-title">Test Variant</div>
+        <ul class="variant-inputs list-unstyled">
+          <%= render "_partials/variant_file", file: @test_vcf, title: "VCF", required: true, classes: "required active"  %>
+          <%= render "_partials/variant_file", file: @test_tbi, title: "TBI", required: true, classes: "required active"  %>
+          <%= render "_partials/variant_file", file: @test_bed, title: "BED", required: false, classes: "active"  %>
+        </ul>
+      </div>
+
+      <div class="variant-ref">
+        <div class="variant-title">Benchmark Variant</div>
+        <ul class="variant-inputs list-unstyled">
+          <%= render "_partials/variant_file", file: @ref_vcf, title: "VCF", required: true, classes: "required active"  %>
+          <%= render "_partials/variant_file", file: @ref_tbi, title: "TBI", required: true, classes: "required active"  %>
+          <%= render "_partials/variant_file", file: @ref_bed, title: "BED", required: false, classes: "active"  %>
+        </ul>
+      </div>
+
+      <div class="variants-circle">
+          <div class="variants-circle-with">
+            with
+          </div>
+      </div>
     </div>
 
-    <div class="variant-ref">
-      <div class="variant-title">Benchmark Variant</div>
-      <ul class="variant-inputs list-unstyled">
-        <%= render "_partials/variant_file", file: @ref_vcf, title: "VCF", required: true, classes: "required active"  %>
-        <%= render "_partials/variant_file", file: @ref_tbi, title: "TBI", required: true, classes: "required active"  %>
-        <%= render "_partials/variant_file", file: @ref_bed, title: "BED", required: false, classes: "active"  %>
-      </ul>
+    <% if @comparison.state == 'done' %>
+    <div class="row">
+      <div class="col-sm-8 col-sm-offset-3 col-md-6 col-md-offset-5">
+        <ul class="meta-stats list-group">
+          <li class="list-group-item">
+            <h5 class="list-group-item-heading">Precision</h5>
+            <p class="list-group-item-text"><%= number_to_percentage(@meta["precision"].to_f * 100, strip_insignificant_zeros: true) %></p>
+          </li>
+          <li class="list-group-item">
+            <h5 class="list-group-item-heading">Recall</h5>
+            <p class="list-group-item-text"><%= number_to_percentage(@meta["recall"].to_f * 100, strip_insignificant_zeros: true) %></p>
+          </li>
+          <li class="list-group-item">
+            <h5 class="list-group-item-heading">F-Measure</h5>
+            <p class="list-group-item-text"><%= number_to_percentage(@meta["f-measure"].to_f * 100, strip_insignificant_zeros: true) %></p>
+          </li>
+        </ul>
+
+      </div>
+      <div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-2">
+        <ul class="meta-stats list-group">
+          <li class="list-group-item">
+            <h5 class="list-group-item-heading">True-Positives</h5>
+            <p class="list-group-item-text"><%= number_with_delimiter(@meta["true-pos"].to_i, delimiter: ",") %></p>
+          </li>
+          <li class="list-group-item">
+            <h5 class="list-group-item-heading">False-Positives</h5>
+            <p class="list-group-item-text"><%= number_with_delimiter(@meta["false-pos"].to_i, delimiter: ",") %></p>
+          </li>
+          <li class="list-group-item">
+            <h5 class="list-group-item-heading">False-Negatives</h5>
+            <p class="list-group-item-text"><%= number_with_delimiter(@meta["false-neg"].to_i, delimiter: ",") %></p>
+          </li>
+        </ul>
+      </div>
     </div>
 
-    <div class="variants-circle">
-        <div class="variants-circle-with">
-          with
-        </div>
-    </div>
+    <ul class="list-group pfda-charts row">
+      <li class="list-group-item pfda-chart chart-precision-sensitivity col-sm-18 col-sm-offset-3 col-md-14 col-md-offset-5">
+        <div class="list-group-item-heading"><small>Curve for</small> PRECISION <small>vs</small> SENSITIVITY <small>per GQ score</small></div>
+        <div class="svg-container"></div>
+      </li>
+    </ul>
   </div>
+  <% end %>
 
   <% if @comparison.state == 'done' %>
-  <div class="row">
-    <div class="col-sm-8 col-sm-offset-3 col-md-6 col-md-offset-5">
-      <ul class="meta-stats list-group">
-        <li class="list-group-item">
-          <h5 class="list-group-item-heading">Precision</h5>
-          <p class="list-group-item-text"><%= number_to_percentage(@meta["precision"].to_f * 100, strip_insignificant_zeros: true) %></p>
-        </li>
-        <li class="list-group-item">
-          <h5 class="list-group-item-heading">Recall</h5>
-          <p class="list-group-item-text"><%= number_to_percentage(@meta["recall"].to_f * 100, strip_insignificant_zeros: true) %></p>
-        </li>
-        <li class="list-group-item">
-          <h5 class="list-group-item-heading">F-Measure</h5>
-          <p class="list-group-item-text"><%= number_to_percentage(@meta["f-measure"].to_f * 100, strip_insignificant_zeros: true) %></p>
-        </li>
-      </ul>
-
-    </div>
-    <div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-2">
-      <ul class="meta-stats list-group">
-        <li class="list-group-item">
-          <h5 class="list-group-item-heading">True-Positives</h5>
-          <p class="list-group-item-text"><%= number_with_delimiter(@meta["true-pos"].to_i, delimiter: ",") %></p>
-        </li>
-        <li class="list-group-item">
-          <h5 class="list-group-item-heading">False-Positives</h5>
-          <p class="list-group-item-text"><%= number_with_delimiter(@meta["false-pos"].to_i, delimiter: ",") %></p>
-        </li>
-        <li class="list-group-item">
-          <h5 class="list-group-item-heading">False-Negatives</h5>
-          <p class="list-group-item-text"><%= number_with_delimiter(@meta["false-neg"].to_i, delimiter: ",") %></p>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <ul class="list-group pfda-charts row">
-    <li class="list-group-item pfda-chart chart-precision-sensitivity col-sm-18 col-sm-offset-3 col-md-14 col-md-offset-5">
-      <div class="list-group-item-heading"><small>Curve for</small> PRECISION <small>vs</small> SENSITIVITY <small>per GQ score</small></div>
-      <div class="svg-container"></div>
-    </li>
-  </ul>
-
-  <div class="comparison-outputs panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Outputs</h3>
-    </div>
-    <div class="panel-table">
-
+  <div class="tab-pane" id="tab-outputs">
+    <div class="comparison-outputs panel">
       <%= grid(@outputs_grid) do |g|
         g.blank_slate partial:  "_partials/empty_grid"
 
@@ -143,41 +184,11 @@
       end -%>
     </div>
   </div>
-
-  <ul class="list-group list-group-inline">
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Added by</h5>
-      <p class="list-group-item-text">
-        <%= link_to(@comparison.user.dxuser, user_path(@comparison.user.dxuser))  %>
-      </p>
-    </li>
-  </ul>
-
   <% end %>
 
-  <ul class="list-group list-group-inline">
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Runtime</h5>
-      <p class="list-group-item-text"><%= humanizeSeconds(@meta["runtime_sec"]) %></p>
-    </li>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Created</h5>
-      <p class="list-group-item-text"><%= @comparison.created_at.to_s(:db) %></p>
-    </li>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Updated</h5>
-      <p class="list-group-item-text"><%= @comparison.updated_at.to_s(:db) %></p>
-    </li>
-  </ul>
-
-  <% if @notes_grid.present? %>
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">Notes attached to</h3>
-      </div>
-      <div class="panel-table">
-        <%= render "notes/grid", notes_grid: @notes_grid %>
-      </div>
-    </div>
+  <% if @notes.count > 0 %>
+  <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-notes">
+    <%= render "notes/blocks", notes: @notes %>
+  </div>
   <% end %>
 </div>

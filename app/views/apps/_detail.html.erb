@@ -141,10 +141,10 @@
     </a>
   </li>
   <% end %>
-  <% if @notes_grid.present? %>
+  <% if @notes.present? && @notes.count > 0 %>
   <li role="presentation">
     <a href="#app-notes" aria-controls="app-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
-      <span class="tab-label">NOTES</span>
+      <span class="tab-label">NOTES <span class="badge"><%= @notes.count %></span></span>
     </a>
   </li>
   <% end %>
@@ -259,11 +259,9 @@
     </div>
     <% end %>
 
-    <% if @notes_grid.present? %>
-    <div role="tabpanel" class="tab-pane" id="app-notes">
-      <div class="panel">
-        <%= render "notes/grid", notes_grid: @notes_grid %>
-      </div>
+    <% if @notes.present? && @notes.count > 0 %>
+    <div role="tabpanel" class="tab-pane tab-pane-padded" id="app-notes">
+      <%= render "notes/blocks", notes: @notes %>
     </div>
     <% end %>
   <% end %>
