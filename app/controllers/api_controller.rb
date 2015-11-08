@@ -498,7 +498,8 @@ class ApiController < ApplicationController
         end
 
         api = DNAnexusAPI.new(@context.token)
-        project = User.find(@context.user_id).private_files_project
+        user = User.find(@context.user_id)
+        project = user.private_files_project
         applet_dxid = api.call("applet", "new", {
           project: project,
           inputSpec: input_spec.map { |spec| spec.reject { |key,value| key == "default" || key == "choices" } },
@@ -526,6 +527,7 @@ class ApiController < ApplicationController
           resources: ordered_assets,
           details: {ordered_assets: ordered_assets},
           openSource: false,
+          billTo: Rails.env.development? ? "user-#{@context.username}" : user.billto,
           access: internet_access ? {network: ["*"]} : {}
         })["id"]
         api.call(project, "removeObjects", {objects: [applet_dxid]})

@@ -18,4 +18,9 @@
 class Org < ActiveRecord::Base
   has_many :users
   belongs_to :admin, {class_name: 'User'}
+
+  def dxorg
+    raise if handle.empty?
+    "org-pfda..#{handle}"
+  end
 end
