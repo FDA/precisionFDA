@@ -95,9 +95,11 @@
       </ul>
     </div>
     <% if @app.user_id == @context.user_id && @latestRevision.present? %>
-    <a class="btn btn-default <% if @latestRevision.dxid != @app.dxid %>disabled<% end %>" href="<%= edit_app_path(@latestRevision.dxid) %>">
-      <span class="fa fa-edit"></span> Edit
-    </a>
+    <div class="btn-group" <% if @latestRevision.dxid != @app.dxid %>data-toggle="tooltip" data-placement="top" title="Only latest revision is editable"<% end %>>
+      <a class="btn btn-default <% if @latestRevision.dxid != @app.dxid %>disabled<% end %>" href="<%= edit_app_path(@latestRevision.dxid) %>">
+        <span class="fa fa-edit"></span> Edit
+      </a>
+    </div>
     <% end %>
     <a class="btn btn-default" href="<%= fork_app_path(@app.dxid) %>">
       <span class="fa fa-code-fork"></span> Fork

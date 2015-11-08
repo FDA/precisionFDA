@@ -16,3 +16,7 @@ AppsController::show = ->
     viewModel.appReleaseModel = new Precision.models.AppReleaseModel(@params.app.dxid)
 
   ko.applyBindings(viewModel, $container[0])
+
+  $container.find('[data-toggle="tooltip"]').tooltip({
+    container: 'body'
+  })
