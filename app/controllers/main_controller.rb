@@ -38,55 +38,38 @@ class MainController < ApplicationController
     expiration_duration = result["expires_in"].to_i
     expiration_time = Time.now.to_i + expiration_duration
 
-    #
-    # TODO: In the future, the FDA may provision accounts, at which point the system will partially initialize
-    # the user model (and, using the FDA's credentials, add the user to org-precisionfda.users). Then, when the
-    # user logs in for the first time, the system will use the user's credentials to create all requires projects.
-    #
-    # For now there is this stub to create the user model and do all actions upon first user login. This requires
-    # some stored credentials for the org-precisionfda.users admin.
-    #
-    user = nil
-    User.transaction do
-      user = User.find_by(dxuser: username)
-      if user.nil?
-        api = DNAnexusAPI.new(token)
-        # TODO: If any of these (or the transaction) fail, there will be debris
-        # Private files
-        private_files_project = api.call("project", "new", {name: "precisionfda-personal-files-#{username}"})["id"]
-        # Private comparisons
-        private_comparisons_project = api.call("project", "new", {name: "precisionfda-personal-comparisons-#{username}"})["id"]
-        # Public files
-        public_files_project = api.call("project", "new", {name: "precisionfda-public-files-#{username}"})["id"]
-        api.call(public_files_project, "invite", {invitee: "org-precisionfda.users", level: "VIEW", suppressEmailNotification: true})
-        # Public comparisons
-        public_comparisons_project = api.call("project", "new", {name: "precisionfda-public-comparisons-#{username}"})["id"]
-        api.call(public_comparisons_project, "invite", {invitee: "org-precisionfda.users", level: "VIEW", suppressEmailNotification: true})
-        # Add user to org-precisionfda.users so they gain access to others' public projects
-        admin_api = DNAnexusAPI.new("BEI5ErikmLb8kmQUPiHz7JB78reoftSL")
-        admin_api.call("org-precisionfda.users", "invite", {invitee: "user-#{username}", suppressEmailNotification: true})
+    user = User.find_by(dxuser: username)
+    if user.nil?
+      render "_partials/_error", status: 403, locals: {message: "ERROR: You cannot use an existing DNAnexus account (#{username}) to log into precisionFDA. You need to apply for and obtain a separate precisionFDA account."}
+    else
+      User.transaction do
+        user.reload
+        if user.last_login.nil? && user.private_files_project.nil?
+          api = DNAnexusAPI.new(token)
+          # Private files
+          private_files_project = api.call("project", "new", {name: "precisionfda-personal-files-#{username}", billTo: user.billto})["id"]
+          # Private comparisons
+          private_comparisons_project = api.call("project", "new", {name: "precisionfda-personal-comparisons-#{username}", billTo: user.billto})["id"]
+          # Public files
+          public_files_project = api.call("project", "new", {name: "precisionfda-public-files-#{username}"}, billTo: user.billto)["id"]
+          api.call(public_files_project, "invite", {invitee: ORG_EVERYONE, level: "VIEW", suppressEmailNotification: true})
+          # Public comparisons
+          public_comparisons_project = api.call("project", "new", {name: "precisionfda-public-comparisons-#{username}"}, billTo: user.billto)["id"]
+          api.call(public_comparisons_project, "invite", {invitee: ORG_EVERYONE, level: "VIEW", suppressEmailNotification: true})
+          # User settings
+          api.call(full_username, "update", {policies: {emailWhenJobComplete: "never"}})
 
-        # TODO: For now put in dnanexus org
-        user = User.create!(
-          dxuser: username,
-          private_files_project: private_files_project,
-          public_files_project: public_files_project,
-          private_comparisons_project: private_comparisons_project,
-          public_comparisons_project: public_comparisons_project,
-          open_files_count: 0,
-          closing_files_count: 0,
-          pending_comparisons_count: 0,
-          pending_jobs_count: 0,
-          org_id: Org.find_by(handle: 'dnanexus').id,
-          schema_version: User::CURRENT_SCHEMA
-        )
+          user.private_files_project = private_files_project
+          user.private_comparisons_project = private_comparisons_project
+          user.public_files_project = public_files_project
+          user.public_comparisons_project = public_comparisons_project
+        end
+        user.last_login = Time.now
+        user.save!
       end
+      save_session(user.id, username, token, expiration_time, user.org_id)
+      redirect_to root_path
     end
-
-    # Log in
-    save_session(user.id, username, token, expiration_time, user.org_id)
-
-    redirect_to root_path
   end
 
   def request_access

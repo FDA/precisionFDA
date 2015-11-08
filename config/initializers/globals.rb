@@ -3,9 +3,6 @@
 # by using: if Rails.env.development? { .... }
 #
 
-DNANEXUS_AUTHSERVER_URI = "https://stagingauth.dnanexus.com/"
-DNANEXUS_APISERVER_URI = "https://stagingapi.dnanexus.com/"
-
 if Rails.env.development?
   OAUTH2_REDIRECT_URI = "https://localhost:3000/return_from_login"
   OAUTH2_CLIENT_ID = "precision_fda"
@@ -14,4 +11,9 @@ else
   OAUTH2_CLIENT_ID = "precision_fda_gov"
 end
 
+# The following depend on whether we are talking
+# to staging or not
+DNANEXUS_AUTHSERVER_URI = "https://stagingauth.dnanexus.com/"
+DNANEXUS_APISERVER_URI = "https://stagingapi.dnanexus.com/"
 APPKIT_TGZ = "project-BgxXF600109B227BjbgZPY87:/appkit.tgz"
+ORG_EVERYONE = "org-precisionfda"
