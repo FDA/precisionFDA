@@ -525,7 +525,7 @@ class ApiController < ApplicationController
           version: "r#{revision}-#{SecureRandom.hex(3)}",
           resources: ordered_assets,
           details: {ordered_assets: ordered_assets},
-          openSource: true,
+          openSource: false,
           access: internet_access ? {network: ["*"]} : {}
         })["id"]
         api.call(project, "removeObjects", {objects: [applet_dxid]})
@@ -762,8 +762,13 @@ class ApiController < ApplicationController
   end
 
   def code_remap(code)
-    # TODO: Add prologue + epilogue
-    code
+    return <<END_OF_CODE
+dx cat #{APPKIT_TGZ} | tar -z -x -C / --no-same-owner --no-same-permissions -f -
+source /usr/lib/app-prologue
+#{code}
+{ set +x; } 2>/dev/null
+source /usr/lib/app-epilogue
+END_OF_CODE
   end
 
   def compatible(value, klass)

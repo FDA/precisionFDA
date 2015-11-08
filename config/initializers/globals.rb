@@ -13,3 +13,5 @@ else
   OAUTH2_REDIRECT_URI = "https://precision.fda.gov/return_from_login"
   OAUTH2_CLIENT_ID = "precision_fda_gov"
 end
+
+APPKIT_TGZ = "project-BgxXF600109B227BjbgZPY87:/appkit.tgz"
