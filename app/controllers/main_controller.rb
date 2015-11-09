@@ -75,7 +75,12 @@ class MainController < ApplicationController
     if request.post?
       p = params.require(:invitation).permit(:first_name, :last_name, :email, :org, :duns, :address, :phone, :singular, :humanizer_answer, :humanizer_question_id)
       p[:ip] = request.remote_ip.to_s
-      @invitation = Invitation.create(p)
+      Invitation.transaction do
+        @invitation = Invitation.create(p)
+        if @invitation.persisted?
+          NotificationsMailer.invitation_email(@invitation).deliver_now!
+        end
+      end
     end
   end
 
