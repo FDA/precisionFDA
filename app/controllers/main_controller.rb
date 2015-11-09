@@ -4,8 +4,6 @@ class MainController < ApplicationController
   def index
     if @context.logged_in?
       @debug_info = "Debugging information from your cookie\nRails user id: #{@context.user_id}\nDNAnexus username: #{@context.username}\nDNAnexus token: #{@context.token}\nDNAnexus credentials expiration: #{Time.at(@context.expiration).to_s}"
-    else
-      @remote_login_url = "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=#{OAUTH2_CLIENT_ID}&redirect_uri=#{URI.encode(OAUTH2_REDIRECT_URI)}"
     end
   end
 
@@ -16,7 +14,7 @@ class MainController < ApplicationController
   end
 
   def login
-    @remote_login_url = "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=#{OAUTH2_CLIENT_ID}&redirect_uri=#{URI.encode(OAUTH2_REDIRECT_URI)}"
+    redirect_to "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=#{OAUTH2_CLIENT_ID}&redirect_uri=#{URI.encode(OAUTH2_REDIRECT_URI)}"
   end
 
   def return_from_login

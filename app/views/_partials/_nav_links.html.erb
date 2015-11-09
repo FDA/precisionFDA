@@ -31,26 +31,17 @@
     <% end %>
   </li>
 </ul>
-<% end %>
 
 <ul class="nav navbar-nav navbar-right">
-  <% if @context.logged_in? %>
-    <li><%= link_to("Feedback", "https://docs.google.com/forms/d/1zfGoy-4C9kLbHHg0Y-6iQoI3fdGq1IfugV9fXCqOBfY/viewform?entry.2135861629=#{@context.username}&entry.864840924", target: "_blank") %></li>
-  <% else %>
-    <li><%= link_to("Learn more", "#TBD", target: "_blank") %></li>
-    <li><%= link_to("Feedback", "https://docs.google.com/forms/d/1zfGoy-4C9kLbHHg0Y-6iQoI3fdGq1IfugV9fXCqOBfY/viewform", target: "_blank") %></li>
-  <% end %>
+  <li><%= link_to("Feedback", "https://docs.google.com/forms/d/1zfGoy-4C9kLbHHg0Y-6iQoI3fdGq1IfugV9fXCqOBfY/viewform?entry.2135861629=#{@context.username}&entry.864840924", target: "_blank") %></li>
   <li><a href="#">Docs</a></li>
-  <% if @context.logged_in? %>
-    <li class="dropdown">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><%= @context.username %> <span class="caret"></span></a>
-      <ul class="dropdown-menu">
-        <li><%= link_to "Profile", user_path(@context.username) %></li>
-        <li role="separator" class="divider"></li>
-        <li><%= link_to "Log out", logout_path, method: :delete %></li>
-      </ul>
-    </li>
-  <% else %>
-    <li><a href="/login">Log In</a></li>
-  <% end %>
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><%= @context.username %> <span class="caret"></span></a>
+    <ul class="dropdown-menu">
+      <li><%= link_to "Profile", user_path(@context.username) %></li>
+      <li role="separator" class="divider"></li>
+      <li><%= link_to "Log out", logout_path, method: :delete %></li>
+    </ul>
+  </li>
 </ul>
+<% end %>

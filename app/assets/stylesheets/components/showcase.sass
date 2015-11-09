@@ -1,0 +1,33 @@
+@import "_common"
+
+.showcase
+  padding: 100px 50px
+
+  .showcase-item
+    min-height: 250px
+    padding: 0 10px
+    text-align: center
+
+    @media (max-width: $screen-md-max)
+      margin-bottom: 30px
+
+    .showcase-icon
+      .fa
+        font-size: 75px
+        color: $brand-red-primary
+
+    .showcase-heading
+      font-size: $font-size-h3
+      color: $brand-blue-tertiary
+      font-weight: 300
+      text-transform: uppercase
+      margin: 10px 0
+
+    .lead
+      font-size: 18px
+      font-weight: 500
+      color: $text-muted
+
+
+      @media (max-width: $screen-md-max)
+        font-size: 22px
