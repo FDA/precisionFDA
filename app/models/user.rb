@@ -61,6 +61,14 @@ class User < ActiveRecord::Base
     /^(([^<>()\[\]\\.,;:\s@\"]+(\.[^<>()\[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/ =~ email
   end
 
+  def self.construct_username(first, last)
+    "#{first.downcase.gsub(/[^a-z]/, '')}.#{last.downcase.gsub(/[^a-z]/, '')}"
+  end
+
+  def self.authserver_acceptable?(username)
+    username.size >= 3 && username.size <= 255 && username =~ /^[a-z][0-9a-z_\.]{2,}$/
+  end
+
   def self.sync_file!(user_id, file_id, token)
     # TODO: Loop until transaction succeeds
     User.transaction do
