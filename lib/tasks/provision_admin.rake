@@ -75,7 +75,19 @@ namespace :provision do
     #api.call("org", "new", {handle: dxorghandle, name: org[:name]})
     
     puts "Updating org with billing info"
-    #auth.call(dxorg, "updateBillingInfo", {email: "precisionfda-support@dnanexus.com", name: "Elaine Johanson", companyName: "FDA", address1: "10903 New Hampshire Ave", city: "Silver Spring", state: "MD", postCode: "20993", country: "USA", phone: "(888) 463-6332")
+    billing_info = {
+      email: "precisionfda-support@dnanexus.com",
+      name: "Elaine Johanson",
+      companyName: "FDA",
+      address1: "10903 New Hampshire Ave",
+      address2: "Bldg. 32 room 2254",
+      city: "Silver Spring",
+      state: "MD",
+      postCode: "20993",
+      country: "USA",
+      phone: "(301) 706-1836"
+    }
+    #auth.call(dxorg, "updateBillingInfo", billing_info)
 
     puts "Provisioning user (username: #{user[:dxuser]}, final id: #{dxuserid})"
     #auth.call("user", "new", {username: user[:dxuser], email: user[:email], first: user[:first_name], last: user[:last_name], billTo: ORG_EVERYONE)
