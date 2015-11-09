@@ -1,5 +1,7 @@
 @import "_common"
 
+$note-background: lighten($brand-blue-subtler, 1%)
+
 .pfda-controller-notes.pfda-action-show main
   .note
     border: 1px solid $gray-lighter
@@ -23,7 +25,7 @@
   .note-flexbox
     @include flexbox
     @include align-items(stretch)
-    background-color: lighten($brand-blue-subtler, 1%)
+    background-color: $note-background
 
   .note-sidebar
     max-width: 400px
@@ -41,14 +43,12 @@
       min-height: 400px
 
     .note-display
-      margin: 10px
       padding: 20px
       font-size: 16px
       line-height: 1.5
       min-height: 400px
       background-color: #fff
-      border: 1px solid darken($brand-blue-subtler, 5%)
-      border-radius: $border-radius-small
+      border-bottom-left-radius: $border-radius-small
 
   .note-attachments
     .list-group
@@ -67,6 +67,11 @@
 
       a
         padding: $padding-xs-vertical $padding-xs-horizontal
+        display: inline-block
+
+      .btn-remove
+        display: none
+        float: right
 
   .note-section-title
     color: $brand-blue-tertiary
@@ -92,14 +97,34 @@
 
     .note-attachments
       .list-group-item
-        &[draggable=true]:hover
+        position: relative
+        padding-right: 15px
+        &.attachment:hover
           border: 1px dotted #ccc
           cursor: move
           cursor: -webkit-grab
           cursor: -moz-grab
 
+        .btn-remove
+          display: inherit
+          position: absolute
+          right: 0
+          top: 3px
+          background: $note-background
+
+        &.removed
+          a.item-name
+            text-decoration: line-through
+          .btn-remove
+            color: $link-color
+            &:hover
+              color: $link-hover-color
 
 @media (max-width: $screen-sm-max)
-  .note-flexbox
-    /* On small screens, we are no longer using row direction but column */
-    @include flex-direction(column)
+  .pfda-controller-notes.pfda-action-show main
+    .note-flexbox
+      /* On small screens, we are no longer using row direction but column */
+      @include flex-direction(column)
+
+    .note-sidebar
+      max-width: none

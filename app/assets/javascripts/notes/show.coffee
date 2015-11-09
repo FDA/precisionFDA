@@ -1,5 +1,5 @@
 class NoteModel
-  constructor: (note) ->
+  constructor: (note, attachments) ->
     @noteEditor = null
     md = new Remarkable({
       linkify: true
@@ -21,6 +21,65 @@ class NoteModel
       !_.isEmpty(@title.cache()) && !@saving()
     )
 
+    @files = new AttachmentsModel({
+      heading: 'Files'
+      className: 'attachment-files'
+      iconClass: 'fa fa-files-o'
+      items: _.map(attachments.files, (item) ->
+        _item =
+          type: 'UserFile'
+          id: item.id
+          name: item.name
+          path: "/files/#{item.dxid}"
+        return new ItemModel(_item)
+      )
+    })
+
+    @comparisons = new AttachmentsModel({
+      heading: 'Comparisons'
+      className: 'attachment-comparisons'
+      iconClass: 'fa fa-area-chart'
+      items: _.map(attachments.comparisons, (item) ->
+        _item =
+          type: 'Comparison'
+          id: item.id
+          name: item.name
+          path: "/comparisons/#{item.id}"
+          detail: item.stats
+        return new ItemModel(_item)
+      )
+    })
+
+    @apps = new AttachmentsModel({
+      heading: 'Apps'
+      className: 'attachment-apps'
+      iconClass: 'fa fa-cubes'
+      items: _.map(attachments.apps, (item) ->
+        _item =
+          type: 'App'
+          id: item.id
+          name: item.title
+          path: "/apps/#{item.dxid}/jobs"
+        return new ItemModel(_item)
+      )
+    })
+
+    @jobs = new AttachmentsModel({
+      heading: 'Jobs'
+      className: 'attachment-jobs'
+      iconClass: 'fa fa-tasks'
+      items: _.map(attachments.jobs, (item) ->
+        _item =
+          type: 'Job'
+          id: item.id
+          name: item.name
+          path: "/jobs/#{item.dxid}"
+        return new ItemModel(_item)
+      )
+    })
+
+    @attachments = [@files, @comparisons, @apps, @jobs]
+
   toggleEdit: () ->
     @editing(!@editing())
     @noteEditor.resize()
@@ -31,10 +90,19 @@ class NoteModel
     @content(@content.cache())
     @saving(true)
 
+    allItemModels = _.flatten(_.map(@attachments, (attachmentSection) -> attachmentSection.items()))
+    attachmentsToSave = []
+    for item in allItemModels
+      if item.removed.cache()
+        item.removed(true)
+      else
+        attachmentsToSave.push({id: item.id, type: item.type})
+
     params =
       note:
         content: @content.peek()
         title: @title.peek()
+      attachments: attachmentsToSave
 
     $.ajax("/notes/#{@id}", {
       method: "PUT"
@@ -52,6 +120,31 @@ class NoteModel
     @title.cache(@title())
     @content.cache(@content())
 
+    allItemModels = _.flatten(_.map(@attachments, (attachmentSection) -> attachmentSection.items()))
+    for item in allItemModels
+      if item.removed.cache()
+        item.removed.cache(false)
+
+class AttachmentsModel
+  constructor: (attachments) ->
+    @heading = attachments.heading
+    @className = attachments.className
+    @iconClass = attachments.iconClass
+    @items = ko.observableArray(attachments.items)
+
+class ItemModel
+  constructor: (item) ->
+    @type = item.type
+    @id = item.id
+    @name = item.name
+    @path = item.path
+    @detail = item.detail
+    @removed = ko.observable(false)
+    @removed.cache = ko.observable(false)
+
+  toggleRemove: () ->
+    @removed.cache(!@removed.cache())
+
 #########################################################
 #
 #
@@ -65,7 +158,7 @@ NotesController::show = ->
   params = @params
   $container = $("body main")
 
-  noteModel = new NoteModel(params.note)
+  noteModel = new NoteModel(params.note, params.attachments)
   ko.applyBindings(noteModel, $container[0])
 
   noteModel.noteEditor = ko.aceEditors.get('note-editor')
