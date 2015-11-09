@@ -9,7 +9,7 @@
     </div>
     <div class="list-group">
       <a href="<%= apps_path() %>" class="list-group-item <%= @app.nil? ? 'active' : '' %>">
-        Jobs for All Apps
+        <span class="fa fa-tasks"></span> Jobs for All Apps
       </a>
       <%= render "_partials/apps_list_group", apps: @apps, active: @app.try(:app_series_id) %>
     </div>

@@ -40,66 +40,29 @@
     <div class="note-flexbox">
       <div class="note-pane">
         <div class="ace-editor-section" data-bind="visible: editing()" style="display: none">
-          <div id="note-editor" data-bind="ace: content.cache, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity, setWrapBehavioursEnabled: true, wrap: 'free'}}"></div>
+          <div id="note-editor" class="ace-rounded" data-bind="ace: content.cache, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity, setWrapBehavioursEnabled: true, wrap: 'free'}}"></div>
         </div>
         <div class="note-display" data-bind="visible: !editing(), html: content.display">
         </div>
       </div>
       <div class="note-sidebar">
         <div id="note-attachments" class="note-attachments">
-          <div class="note-section-title hide"><span class="fa fa-paperclip"></span> Attachments</div>
+          <div class="note-section-title"><span class="fa fa-paperclip"></span> Attachments</div>
 
-          <% if !@comparisons.blank? %>
-          <div class="note-comparison list-group">
+          <!-- ko foreach: attachments -->
+          <div class="list-group" data-bind="visible: items().length > 0, css: className">
             <div class="list-group-item">
-              <div class="list-group-item-heading">Comparisons</div>
+              <div class="list-group-item-heading" data-bind="text: heading"></div>
             </div>
-            <% @comparisons.each do |item| %>
-              <div class="list-group-item attachment" data-attachment='<%= comparison_path(item.id) %>' data-bind="attr: {draggable: editing}">
-                <span class="fa fa-area-chart"></span> <%= link_to(item.name, comparison_path(item.id), tabindex: "-1") %>
+            <!-- ko foreach: items -->
+              <div class="list-group-item attachment" data-bind="attr: {'item-id': id, 'item-type': type}, css: {removed:removed.cache}, visible: !removed() && !(removed.cache() && !$root.editing())">
+                <span data-bind="css: $parent.iconClass"></span>
+                <a class="item-name" data-bind="text: name, attr: {href: path}" tabindex="-1" ></a>
+                <a class="btn btn-link btn-link-danger btn-remove pull-right" data-bind="click: toggleRemove, css: removed.cache() ? 'fa fa-plus' : 'fa fa-times'"></a>
               </div>
-            <% end %>
+            <!-- /ko -->
           </div>
-          <% end %>
-
-          <% if !@files.blank? %>
-          <div class="note-files list-group">
-            <div class="list-group-item">
-              <div class="list-group-item-heading">Files</div>
-            </div>
-            <% @files.each do |item| %>
-              <div class="list-group-item attachment" data-attachment='<%= file_path(item.dxid) %>' data-bind="attr: {draggable: editing}">
-                <span class="fa fa-file-o"></span> <%= link_to(item.name, file_path(item.dxid), tabindex: "-1") %>
-              </div>
-            <% end %>
-          </div>
-          <% end %>
-
-          <% if !@apps.blank? %>
-          <div class="note-apps list-group">
-            <div class="list-group-item">
-              <div class="list-group-item-heading">Apps</div>
-            </div>
-            <% @apps.each do |item| %>
-              <div class="list-group-item attachment" data-attachment='<%= app_path(item.dxid) %>' data-bind="attr: {draggable: editing}">
-                <span class="fa fa-cube"></span> <%= link_to(item.title, app_jobs_path(item.dxid), tabindex: "-1") %>
-              </div>
-            <% end %>
-          </div>
-          <% end %>
-
-          <% if !@jobs.blank? %>
-          <div class="note-jobs list-group">
-            <div class="list-group-item">
-              <div class="list-group-item-heading">Jobs</div>
-            </div>
-            <% @jobs.each do |item| %>
-              <div class="list-group-item attachment" data-attachment='<%= job_path(item.dxid) %>' data-bind="attr: {draggable: editing}">
-                <span class="fa fa-tasks"></span> <%= link_to(item.name, job_path(item.dxid), tabindex: "-1") %>
-              </div>
-            <% end %>
-          </div>
-          <% end %>
+          <!-- /ko -->
         </div>
       </div>
     </div>
