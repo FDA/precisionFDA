@@ -19,8 +19,12 @@ class Org < ActiveRecord::Base
   has_many :users
   belongs_to :admin, {class_name: 'User'}
 
-  def dxorg
-    raise if handle.empty?
+  def self.construct_dxorg(handle)
+    raise unless handle.present? && handle =~ /^[0-9a-z][0-9a-z_.]*$/
     "org-pfda..#{handle}"
+  end
+
+  def dxorg
+    Org.construct_dxorg(handle)
   end
 end
