@@ -13,6 +13,9 @@ class MainController < ApplicationController
     redirect_to root_url
   end
 
+  def about
+  end
+
   def login
     redirect_to "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=#{OAUTH2_CLIENT_ID}&redirect_uri=#{URI.encode(OAUTH2_REDIRECT_URI)}"
   end
