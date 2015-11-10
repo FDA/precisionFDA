@@ -21,11 +21,12 @@ if ENV["DNANEXUS_BACKEND"] == "production"
   APPKIT_TGZ = "project-BgxXF600109B227BjbgZPY87:/appkit.tgz"
   ORG_EVERYONE = "org-precisionfda"
   ADMIN_TOKEN = ENV["ADMIN_TOKEN"]
+  DEFAULT_COMPARISON_APP = "app-pfda-comparator"
 else
   DNANEXUS_AUTHSERVER_URI = "https://stagingauth.dnanexus.com/"
   DNANEXUS_APISERVER_URI = "https://stagingapi.dnanexus.com/"
-  APPKIT_TGZ = "project-BgxXF600109B227BjbgZPY87:/appkit.tgz"
-  # The following need to be changed on Monday Nov 9
+  APPKIT_TGZ = "project-Bk0YZkj0YkbBg6bk38PzQkVV:/appkit.tgz"
   ORG_EVERYONE = "org-precisionfda"
-  ADMIN_TOKEN = "BEI5ErikmLb8kmQUPiHz7JB78reoftSL"
+  ADMIN_TOKEN = ENV["ADMIN_TOKEN"]
+  DEFAULT_COMPARISON_APP = "app-pfda-comparator"
 end
