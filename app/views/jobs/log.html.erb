@@ -35,4 +35,8 @@
   <% end %>
 </div>
 
-<div style="font-family: 'PT Mono'; margin: 10px; white-space: pre-wrap"><%= @log_contents.join("\n") %></div>
+<div class="container-fluid">
+  <div class="job-log panel panel-default">
+    <%= @log_contents.join("\n") %>
+  </div>
+</div>

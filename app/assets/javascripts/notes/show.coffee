@@ -163,8 +163,6 @@ NotesController::show = ->
 
   noteModel.noteEditor = ko.aceEditors.get('note-editor')
 
-  noteModel.toggleEdit() if _.isEmpty(noteModel.content())
-
   if params.note?
     # FIXME: Only works on refresh
     # $(window).on('beforeunload', () ->
@@ -180,21 +178,3 @@ NotesController::show = ->
 
     $container.on('click', '.event-edit', (e) ->
       noteModel.toggleEdit())
-
-    # # Prepare data for CKEDITOR
-    # params.comparisons = _.map(params.comparisons, (comparison) ->
-    #   comparison.type = "comparison"
-    #   comparison.icon = "fa fa-area-chart"
-    #   comparison.path = "/comparisons/#{comparison.id}"
-    #   comparison.stats.precision = "#{parseFloat(comparison.stats.precision) * 100}%"
-    #   comparison.stats.recall = "#{parseFloat(comparison.stats.recall) * 100}%"
-    #   comparison.stats['f-measure'] = "#{parseFloat(comparison.stats['f-measure']) * 100}%"
-    #   return comparison
-    # )
-
-    # params.files = _.map(params.files, (file) ->
-    #   file.type = "file"
-    #   file.icon = "fa fa-file-o"
-    #   file.path = "/files/#{file.dxid}"
-    #   return file
-    # )

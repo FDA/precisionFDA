@@ -50,9 +50,6 @@
 
 <div class="pfda-toolbar">
   <div class="btn-group">
-    <%= link_to new_app_job_path(@job.app.dxid), class: "btn btn-default" do %>
-      <span class="fa fa-bolt"></span> Run New Job
-    <% end %>
     <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
   </div>
 
@@ -60,6 +57,9 @@
     <div class="btn-group pull-right">
       <%= link_to log_job_path(@job.dxid), class: "btn btn-primary" do %>
         <span class="fa fa-file-code-o"></span> View Log
+      <% end %>
+      <%= link_to new_app_job_path(@job.app.dxid), class: "btn btn-success" do %>
+        <span class="fa fa-bolt"></span> Run App &nbsp;&nbsp;<span class="badge"><%= @job.app.version ? "v#{@job.app.version}" : "rev#{@job.app.revision}" %></span>
       <% end %>
       <% if @job.publishable_by?(@context) %>
         <%= link_to publish_path + "?" + {id: @job.dxid}.to_param, method: :post, class: "btn btn-success" do %>
@@ -129,8 +129,16 @@
 
   <% if @job.failed? %>
   <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-error">
-    <p>The execution failed with the following error message:</p>
-    <p><%= @job.failure_message %></p>
+    <div class="row">
+      <div class="panel panel-danger panel-job-failed col-md-12 col-md-offset-6">
+        <div class="panel-heading">
+          The execution failed with the following error message
+        </div>
+        <div class="panel-body">
+          <div class="text-monospace"><%= @job.failure_message %></pre>
+        </div>
+      </div>
+    </div>
   </div>
   <% end %>
   <% if @notes.present? && @notes.count > 0 %>

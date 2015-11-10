@@ -49,8 +49,8 @@ class AppEditorModel
     @internetAccess = ko.observable(app?.spec.internet_access ? false)
 
     @availableInstances = Precision.INSTANCES
-    @defaultInstanceType = app?.spec.instance_type
-    @instanceType = ko.observable(app?.spec.instance_type)
+    @defaultInstanceType = app?.spec.instance_type ? "baseline-8"
+    @instanceType = ko.observable(@defaultInstanceType)
 
     @availableInputClasses = [
       {class: "file", label: "File"}
