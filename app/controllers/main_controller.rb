@@ -49,10 +49,10 @@ class MainController < ApplicationController
           # Private comparisons
           private_comparisons_project = api.call("project", "new", {name: "precisionfda-personal-comparisons-#{username}", billTo: user.billto})["id"]
           # Public files
-          public_files_project = api.call("project", "new", {name: "precisionfda-public-files-#{username}"}, billTo: user.billto)["id"]
+          public_files_project = api.call("project", "new", {name: "precisionfda-public-files-#{username}", billTo: user.billto})["id"]
           api.call(public_files_project, "invite", {invitee: ORG_EVERYONE, level: "VIEW", suppressEmailNotification: true})
           # Public comparisons
-          public_comparisons_project = api.call("project", "new", {name: "precisionfda-public-comparisons-#{username}"}, billTo: user.billto)["id"]
+          public_comparisons_project = api.call("project", "new", {name: "precisionfda-public-comparisons-#{username}", billTo: user.billto})["id"]
           api.call(public_comparisons_project, "invite", {invitee: ORG_EVERYONE, level: "VIEW", suppressEmailNotification: true})
           # User settings
           api.call(full_username, "update", {policies: {emailWhenJobComplete: "never"}})
