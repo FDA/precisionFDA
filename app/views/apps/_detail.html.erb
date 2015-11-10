@@ -104,7 +104,7 @@
     <a class="btn btn-default" href="<%= fork_app_path(@app.dxid) %>">
       <span class="fa fa-code-fork"></span> Fork
     </a>
-    <% if !@app.released? %>
+    <% if !@app.released? && false %>
     <button class="btn btn-default" data-toggle="modal" data-target="#app-release-modal">
       <span class="fa fa-tag"></span> Release
     </button>
@@ -116,7 +116,7 @@
   </div>
 
   <div class="btn-group pull-right">
-    <%= link_to new_app_job_path(@app.dxid), class: "btn btn-primary" do %>
+    <%= link_to new_app_job_path(@app.dxid), class: "btn btn-success" do %>
       <span class="fa fa-bolt"></span> Run App&nbsp;&nbsp;<span class="badge"><%= @app.version ? "v#{@app.version}" : "rev#{@app.revision}" %></span>
     <% end %>
   </div>

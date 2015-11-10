@@ -1,50 +1,26 @@
 <% content_for :title do %>Publisher<% end %>
 
-<style>
-.node rect {
-    stroke: #333;
-    fill: #fff;
-}
+<div class="container">
+  <div class="alert alert-warning">
+    <p class="lead"><span class="fa fa-fw fa-info-circle"></span> Thank you for your interest in publishing. This feature has not been rolled out yet.</p>
+    <p>In the meantime, you can review the dependency graph of the item you want to publish below. The item you want to publish is represented in the root of the graph, and its dependencies (if any) are represented as nodes below. Nodes marked in green are already public.
+    </p>
+    <p><strong>This rendering is experimental</strong></p>
+  </div>
+</div>
 
-.edgePath path {
-    stroke: #333;
-    fill: #333;
-    stroke-width: 1.5px;
-}
+<div class="publisher-canvas-wrapper">
+  <svg class="publisher-canvas"><g/></svg>
+</div>
 
-g.public > rect {
-  fill: #00ffd0;
-}
-
-g.not_yours > rect {
-  fill: #ff00d0;
-}
-
-tspan {
-  font-size: 11pt;
-  color: #333;
-}
-
-.boxy {
-  padding: 10pt;
-}
-</style>
-<script src="https://d3js.org/d3.v3.min.js"></script>
 <script src="https://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js"></script>
-<div class="boxy">Thank you for your interest in publishing. This feature has not been rolled out yet. In the meantime, you can review the dependency graph of the item you want to publish below. The item you want to publish is represented in the root of the graph, and its dependencies (if any) are represented as nodes below. (This rendering is experimental). Nodes marked in green are already public.
-</div>
-
-<div class="boxy">
-  <svg><g/></svg>
-</div>
-
 <script>
 var g = new dagreD3.graphlib.Graph().setGraph({});
 
 <%= raw graph_nodes(@graph) %>
 <%= raw graph_edges(@graph) %>
 
-var svg = d3.select("svg"),
+var svg = d3.select("svg.publisher-canvas"),
     inner = svg.select("g");
 
 var render = new dagreD3.render();

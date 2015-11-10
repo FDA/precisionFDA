@@ -2,7 +2,7 @@
 
 <% if @note[:user_id] == @context.user_id %>
   <div class="pfda-toolbar clearfix">
-    <div class="btn-toolbar pull-right" data-bind="visible: !editing()">
+    <div class="btn-toolbar pull-right" data-bind="visible: !editing()" style="display: none">
       <div class="btn-group">
         <a class="btn btn-primary event-edit"><span class="fa fa-edit"></span> Edit</a>
         <% if @note.publishable_by?(@context) %>
@@ -27,15 +27,13 @@
 <div class="note-container container-fluid">
   <div class="note" data-bind="css: {'note-editing': editing}">
     <div class="note-titlebar">
-      <!-- ko if: !editing() -->
+      <div data-bind="visible: !editing()" style="display: none">
         <span class="fa fa-sticky-note"></span> <span class="note-title" data-bind="text: title"><%= @name %></span>
-      <!-- /ko -->
-      <!-- ko if: editing() -->
-      <div class="input-group">
+      </div>
+      <div class="input-group" data-bind="visible: editing()" style="display: none">
         <span class="input-group-addon"><span class="fa fa-sticky-note"></span> </span>
         <input class="form-control" name="title" placeholder="Note title..." data-bind="textInput: title.cache" />
       </div>
-      <!-- /ko -->
     </div>
     <div class="note-flexbox">
       <div class="note-pane">
