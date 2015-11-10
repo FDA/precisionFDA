@@ -10,6 +10,8 @@ Rails.application.routes.draw do
     post 'publish' => 'main#publish'
     get 'request_access' => 'main#request_access'
     post 'request_access' => 'main#request_access'
+    get 'about' => 'main#about'
+    get 'about/:section' => 'main#about'
 
     # API
     post '/api/create_file', to: 'api#create_file'
