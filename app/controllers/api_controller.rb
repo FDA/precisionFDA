@@ -79,7 +79,7 @@ class ApiController < ApplicationController
 
     paths = params["paths"]
     raise unless paths.is_a?(Array) && !paths.empty? && paths.size < 100000
-    paths.each_key do |path|
+    paths.each do |path|
       raise unless path.is_a?(String) && path != "" && path.size < 4096
     end
 
@@ -96,6 +96,7 @@ class ApiController < ApplicationController
                             scope: 'private')
       asset.parent = asset
       asset.save!
+      asset.update!(parent_type: "Asset")
       paths.each do |path|
         name = path.split('/').last
         if name == "" || name == "." || name == ".."

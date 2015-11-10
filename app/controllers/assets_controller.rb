@@ -3,7 +3,8 @@ class AssetsController < ApplicationController
     # Refresh state of assets, if needed
     User.sync_assets!(@context.user_id, @context.token)
 
-    assets = Asset.accessible_by(@context)
+    # Wice seems to not like the default_scope of Asset
+    assets = UserFile.where(parent_type: "Asset").accessible_by(@context)
     @assets_grid = initialize_grid(assets,{
       include: [:user],
       order: 'user_files.id',
