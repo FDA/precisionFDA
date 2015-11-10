@@ -120,7 +120,7 @@ class ComparisonsController < ApplicationController
       project: project,
       input: Hash[files.map {|k,v| [k, {"$dnanexus_link": {project: v.project, id: v.dxid}}]}]
     }
-    jobid = DNAnexusAPI.new(@context.token).call(Comparison::DEFAULT_APP, "run", run_input)["id"]
+    jobid = DNAnexusAPI.new(@context.token).call(DEFAULT_COMPARISON_APP, "run", run_input)["id"]
 
     opts = {
       name: comp_params[:name],

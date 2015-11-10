@@ -18,8 +18,6 @@
 class Comparison < ActiveRecord::Base
   include Permissions
 
-  DEFAULT_APP = "app-pfda-compare"
-
   # comparison.user => returns the user who created the comparison
   belongs_to :user
 
