@@ -30,59 +30,143 @@
 <% end %>
 
 <div class="showcase container">
-  <div class="row">
-    <div class="showcase-item col-md-6">
-      <div class="showcase-icon">
-        <span class="fa fa-files-o"></span>
-      </div>
-      <div class="showcase-content">
-        <div class="showcase-heading">Files</div>
-        <p class="lead">
-          Backed by cloud storage, precisionFDA lets you upload your own files (or generate them through running apps); publish reference data or any other files; and browse other members' contributions.
-        </p>
-      </div>
+  <div class="showcase-item">
+    <div class="showcase-icon">
+      <span class="fa fa-files-o"></span>
     </div>
-
-    <div class="showcase-item col-md-6">
-      <div class="showcase-icon">
-        <span class="fa fa-bullseye"></span>
-      </div>
-      <div class="showcase-content">
-        <div class="showcase-heading">Comparisons</div>
-        <p class="lead">
-          Quantify the similarity between two sets of genomic variants (VCF files). Compare your own test set (for a given biospecimen) to established benchmark sets.
-        </p>
-      </div>
+    <div class="showcase-content">
+      <div class="showcase-heading">Files</div>
+      <ul class="list-unstyled lead">
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-cloud-upload"></span>
+          </div>
+          <div class="media-body">
+            <strong>Upload</strong> your own files on clould storage
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-bolt"></span>
+          </div>
+          <div class="media-body">
+            <strong>Generate</strong> files through running apps
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-bullhorn"></span>
+          </div>
+          <div class="media-body">
+            <strong>Publish</strong> reference data or any other files
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-list-alt"></span>
+          </div>
+          <div class="media-body">
+            <strong>Browse</strong> other members' contributions
+          </div>
+        </li>
+      </ul>
     </div>
+  </div>
 
-    <div class="showcase-item col-md-6">
-      <div class="showcase-icon">
-        <span class="fa fa-cubes"></span>
-      </div>
-      <div class="showcase-content">
-        <div class="showcase-heading">Apps</div>
-        <p class="lead">
-          Run mapping and variation calling pipelines or other Linux-based software apps on the cloud. Contribute your own software and scripts and let others explore them.
-        </p>
-      </div>
+  <div class="showcase-item">
+    <div class="showcase-icon">
+      <span class="fa fa-bullseye"></span>
     </div>
+    <div class="showcase-content">
+      <div class="showcase-heading">Comparisons</div>
+      <ul class="list-unstyled lead">
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-signal"></span>
+          </div>
+          <div class="media-body">
+            <strong>Quantify</strong> the similarity between two sets of genomic variants (VCF files)
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-balance-scale"></span>
+          </div>
+          <div class="media-body">
+            <strong>Compare</strong> your own test set (for a given biospecimen) to established benchmark sets
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
 
-    <div class="showcase-item col-md-6">
-      <div class="showcase-icon">
-        <span class="fa fa-sticky-note"></span>
-      </div>
-      <div class="showcase-content">
-        <div class="showcase-heading">Notes</div>
-        <p class="lead">
-          Write and publish rich notes describing your thoughts and your work, and attach any files, comparisons or apps. See what others are doing and reproduce their workflows.
-        </p>
-      </div>
+  <div class="showcase-item">
+    <div class="showcase-icon">
+      <span class="fa fa-cubes"></span>
+    </div>
+    <div class="showcase-content">
+      <div class="showcase-heading">Apps</div>
+      <ul class="list-unstyled lead">
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-bolt"></span>
+          </div>
+          <div class="media-body">
+            <strong>Run</strong> mapping and variation calling pipelines or other Linux-based software apps on the cloud
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-code"></span>
+          </div>
+          <div class="media-body">
+            <strong>Contribute</strong> your own software and scripts and let others explore them
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="showcase-item">
+    <div class="showcase-icon">
+      <span class="fa fa-sticky-note"></span>
+    </div>
+    <div class="showcase-content">
+      <div class="showcase-heading">Notes</div>
+      <ul class="list-unstyled lead">
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-edit"></span>
+          </div>
+          <div class="media-body">
+            <strong>Write and publish</strong> rich notes describing your thoughts and your work
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-paperclip"></span>
+          </div>
+          <div class="media-body">
+            <strong>Attach</strong> any files, comparisons or apps
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-copy"></span>
+          </div>
+          <div class="media-body">
+            <strong>See</strong> what others are doing and reproduce their workflows
+          </div>
+        </li>
+      </ul>
     </div>
   </div>
 </div>
 
+<hr>
+
 <div class="below-fold-actions">
   <a class="btn btn-primary btn-lg" href="<%= about_path %>">
-    <span class="fa fa-info"></span> Learn more
+    <span class="fa fa-info-circle"></span> Learn more about precisionFDA
   </a>
 </div>
