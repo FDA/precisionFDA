@@ -1,6 +1,7 @@
 @import "_common"
 
 .nav.nav-tabs
+  background-color: $brand-blue-subtler
   .tab-label
     text-transform: uppercase
   .tab-help
@@ -11,8 +12,11 @@
   &.nav-tabs-padded
     padding: $padding-base-vertical $padding-base-horizontal 0
 
+  &.nav-tabs-center
+    margin: auto
+
   .badge
-    color: lighten($brand-blue-tertiary, 15%)
+    color: lighten($brand-blue-tertiary, 10%)
     padding: 3px
     background-color: transparent
 
@@ -25,3 +29,4 @@
 
   &.tab-pane-padded-xl
     padding: $padding-large-vertical*2 $padding-large-horizontal*2
+

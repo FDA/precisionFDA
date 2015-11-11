@@ -58,7 +58,7 @@
       <%= link_to log_job_path(@job.dxid), class: "btn btn-primary" do %>
         <span class="fa fa-file-code-o"></span> View Log
       <% end %>
-      <%= link_to new_app_job_path(@job.app.dxid), class: "btn btn-success" do %>
+      <%= link_to new_app_job_path(@job.app.dxid), class: "btn btn-primary" do %>
         <span class="fa fa-bolt"></span> Run App &nbsp;&nbsp;<span class="badge"><%= @job.app.version ? "v#{@job.app.version}" : "rev#{@job.app.revision}" %></span>
       <% end %>
       <% if @job.publishable_by?(@context) %>

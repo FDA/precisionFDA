@@ -8,10 +8,22 @@
 
 <div class="container-fluid">
   <!-- Nav tabs -->
-  <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
-    <li role="presentation" class="<% if !params[:section].present? || params[:section] == 'why' %>active<% end %>"><a href="<%= about_path %>/why" aria-controls="why" role="tab">Why</a></li>
-    <li role="presentation" class="<% if params[:section] == 'what' %>active<% end %>"><a href="<%= about_path %>/what" aria-controls="what" role="tab">What</a></li>
-    <li role="presentation" class="<% if params[:section] == 'who' %>active<% end %>"><a href="<%= about_path %>/who" aria-controls="who" role="tab">Who</a></li>
+  <ul class="nav nav-tabs nav-tabs-padded  nav-justified" role="tablist">
+    <li role="presentation" class="<% if !params[:section].present? || params[:section] == 'why' %>active<% end %>">
+      <a href="<%= about_path %>/why" aria-controls="why" role="tab">
+        <span class="tab-label">Why?</span>
+      </a>
+    </li>
+    <li role="presentation" class="<% if params[:section] == 'what' %>active<% end %>">
+      <a href="<%= about_path %>/what" aria-controls="what" role="tab">
+        <span class="tab-label">What?</span>
+      </a>
+    </li>
+    <li role="presentation" class="<% if params[:section] == 'who' %>active<% end %>">
+      <a href="<%= about_path %>/who" aria-controls="who" role="tab">
+        <span class="tab-label">Who?</span>
+      </a>
+    </li>
   </ul>
 </div>
 
@@ -20,7 +32,7 @@
   <div class="tab-content">
     <div role="tabpanel" class="tab-pane tab-pane-padded tab-pane-padded-xl <% if !params[:section].present? || params[:section] == 'why' %>active<% end %>" id="why">
       <div class="row">
-        <div class="h2 text-primary">
+        <div class="lead lead-intro text-primary">
           The Food and Drug Administration (FDA) plays an integral role in President Obama’s <a href="https://www.whitehouse.gov/precision-medicine">Precision Medicine Initiative</a>, which foresees the day when an individual’s medical care will be tailored in part based on their unique characteristics and genetic make-up.
         </div>
         <hr>
@@ -40,7 +52,7 @@
 
     </div>
     <div role="tabpanel" class="tab-pane tab-pane-padded tab-pane-padded-xl <% if params[:section] == 'what' %>active<% end %>" id="what">
-      <div class="h2 text-primary">
+      <div class="lead lead-intro text-primary">
         PrecisionFDA provides the genomics community with a secure, cloud-based platform where participants can access and share datasets, analysis pipelines, and bioinformatics tools, in order to benchmark their approaches and advance regulatory science.
       </div>
       <hr>
@@ -51,7 +63,7 @@
         PrecisionFDA provides a private area where participants (individuals or organizations) can conduct genome analysis and comparison against reference material, and a community area where they can publish and share results, reference materials, and tools. The precisionFDA community continues to grow and includes:
       </p>
 
-      <ul class="lead lead-bold">
+      <ul class="lead lead-regular">
         <li>Genome Test or Software Providers</li>
         <li>Standards-making Bodies</li>
         <li>Pharmaceutical &amp; Biotechnology Companies</li>
@@ -62,7 +74,7 @@
       </ul>
     </div>
     <div role="tabpanel" class="tab-pane tab-pane-padded tab-pane-padded-xl <% if params[:section] == 'who' %>active<% end %>" id="who">
-      <div class="h2 text-primary">
+      <div class="lead lead-intro text-primary">
         PrecisionFDA is an initiative in the Office of Health Informatics (OHI) at the Food and Drug Administration led by the Chief Health Informatics Officer (CHIO), Dr. Taha Kass-Hout, MD, MS.
       </div>
       <hr>
@@ -91,7 +103,7 @@
         The team also wishes to thank the following individuals for their significant contributions to the effort:
       </p>
 
-      <ul class="list list-inline list-bricks lead">
+      <ul class="list list-inline list-bricks lead lead-regular">
         <li>Vincent Amatrudo</li>
         <li>Angela Anderson*</li>
         <li>Rob Califf</li>
