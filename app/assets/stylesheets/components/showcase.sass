@@ -3,14 +3,26 @@
 .showcase
   position: relative
   padding: 100px 50px
+  @include flexbox
+  @include justify-content(space-between)
+  @include align-items(stretch)
+
+  @media (max-width: $screen-md-max)
+    @include flex-wrap(wrap)
+
+  @media (max-width: $screen-sm-max)
+    @include flex-direction(column)
 
   .showcase-item
-    min-height: 250px
-    padding: 0 10px
+    padding: 0 20px
     text-align: center
 
     @media (max-width: $screen-md-max)
+      width: 50%
       margin-bottom: 30px
+
+    @media (max-width: $screen-sm-max)
+      width: 100%
 
     .showcase-icon
       .fa
@@ -25,10 +37,11 @@
       margin: 10px 0
 
     .lead
-      font-size: 18px
+      font-size: 16px
       font-weight: 500
       color: $text-muted
+      text-align: left
 
 
-      @media (max-width: $screen-md-max)
-        font-size: 22px
+      @media (max-width: $screen-sm-max)
+        font-size: 18px
