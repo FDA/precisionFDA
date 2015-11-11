@@ -152,7 +152,7 @@ $table-border-color:            #ddd !default;
 
 $btn-font-weight:                normal !default;
 
-$btn-default-color:              $brand-blue-secondary !default;
+$btn-default-color:              $brand-blue-primary !default;
 $btn-default-bg:                 #fff !default;
 $btn-default-border:             $brand-blue-subtle !default;
 
@@ -403,7 +403,7 @@ $navbar-inverse-bg:                         $brand-blue-primary !default;
 $navbar-inverse-border:                     darken($navbar-inverse-bg, 10%) !default;
 
 // Inverted navbar links
-$navbar-inverse-link-color:                 $brand-blue-secondary !default;
+$navbar-inverse-link-color:                 darken($brand-blue-subtler, 3%) !default;
 $navbar-inverse-link-hover-color:           #fff !default;
 $navbar-inverse-link-hover-bg:              transparent !default;
 $navbar-inverse-link-active-color:          $navbar-inverse-link-hover-color !default;
