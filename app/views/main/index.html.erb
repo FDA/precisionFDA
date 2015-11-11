@@ -7,7 +7,7 @@
         <%= image_tag("precisionFDA.white.navbar-guest.png") %>
       </div>
       <div class="btn-player-wrapper">
-        <a class="btn-player fa fa-play-circle" title="Play video introducing precisionFDA mission"></a>
+        <a class="btn-player fa fa-play-circle" title="Introducing precisionFDA"></a>
         <div class="jumbovideo">
           <div class="jumbovideo-player-wrapper">
             <div id="ytplayer" class="jumbovideo-player"></div>
@@ -163,8 +163,6 @@
   </div>
 </div>
 
-<hr>
-
 <div class="below-fold-actions">
   <a class="btn btn-primary btn-lg" href="<%= about_path %>">
     <span class="fa fa-info-circle"></span> Learn more about precisionFDA
@@ -172,3 +170,5 @@
   <br>
   <a class="btn btn-link btn-lg" href="https://docs.google.com/forms/d/1zfGoy-4C9kLbHHg0Y-6iQoI3fdGq1IfugV9fXCqOBfY/viewform" target="_blank"><span class="fa fa-fw fa-commenting-o"></span> Feedback</a>
 </div>
+
+<%= render "_partials/fda_footer" %>

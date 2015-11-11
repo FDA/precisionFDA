@@ -12,6 +12,7 @@ Rails.application.routes.draw do
     post 'request_access' => 'main#request_access'
     get 'about' => 'main#about'
     get 'about/:section' => 'main#about'
+    get 'terms' => 'main#terms'
 
     # API
     post '/api/create_file', to: 'api#create_file'
