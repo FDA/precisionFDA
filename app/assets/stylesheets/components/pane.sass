@@ -21,10 +21,10 @@
     .btn.btn-default
       background-color: transparent
       border-color: lighten($brand-blue-dark, 10%)
+      color: $brand-blue-secondary
 
       &:hover, &:focus, &:active, &.active
-        color: $brand-blue-primary
-        background-color: $brand-blue-subtle
+        background-color: darken($brand-blue-dark, 2%)
         border-color: $brand-blue-secondary
 
     .list-group
@@ -35,7 +35,7 @@
         background-color: transparent
         color: $brand-blue-secondary
         &:hover
-          background-color: lighten($brand-blue-dark, 10%)
+          background-color: lighten($brand-blue-dark, 5%)
 
         &.disabled, &.disabled:hover
           color: $brand-blue-tertiary
