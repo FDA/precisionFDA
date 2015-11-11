@@ -25,7 +25,7 @@ ul, menu, dir
 .pfda-toolbar
   background-color: $brand-blue-subtler
   padding: $padding-base-horizontal
-  border-bottom: 1px solid $table-border-color
+  border-bottom: 1px solid $border-header-color
   @include clearfix
 
 // TABLE
@@ -52,31 +52,14 @@ ul, menu, dir
 // MISC
 .metadata-header
   background-color: $brand-blue-subtler
-  border-bottom: 1px solid darken($brand-blue-subtler, 5%)
+  border-bottom: 1px solid $border-header-color
   .list-group
     margin-bottom: 0
   .list-group-item
     background-color: transparent
     .list-group-item-text
       color: $brand-blue-tertiary
-
-.page-header
-  margin: 0
-  padding: $padding-large-vertical*2 $padding-large-horizontal
-  .page-title
-    font-size: $font-size-h2
-    margin: 0
-    word-wrap: break-word
-
-    .label,
-    .fa,
-    .name
-      vertical-align: middle
-      display: inline-block
-    .label
-      font-size: $font-size-h4
-      padding: 3px $padding-base-horizontal
-      line-height: $line-height-base
+      font-size: 16px
 
 .affix
   position: fixed !important
@@ -86,24 +69,7 @@ ul, menu, dir
   z-index: 10
 
 // ACTIONS
-.pfda-action-index main
-  .page-header
-    background-color: $brand-blue-subtler
-    color: $brand-blue-tertiary
-
-    .description
-      font-weight: 300
-      font-size: 18px
-
 .pfda-action-show main
-  .page-header
-    background-color: $brand-blue-subtler
-    color: $brand-blue-tertiary
-
-    .description
-      font-weight: 300
-      font-size: 18px
-
   .container-fluid
     padding: $padding-large-vertical $padding-base-horizontal
 
@@ -129,8 +95,6 @@ ul, menu, dir
 
 .pfda-action-new main
   .page-header
-    background-color: $brand-blue-subtler
-    color: $brand-blue-tertiary
     padding: $padding-large-vertical * 3 $padding-large-horizontal
 
   .container-fluid
