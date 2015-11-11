@@ -1,7 +1,7 @@
 <% content_for :title do %>About precisionFDA<% end %>
 
 <div class="page-header">
-  <div class="page-title">
+  <div class="page-title text-center">
     About precisionFDA
   </div>
 </div>
@@ -12,16 +12,25 @@
     <li role="presentation" class="<% if !params[:section].present? || params[:section] == 'why' %>active<% end %>">
       <a href="<%= about_path %>/why" aria-controls="why" role="tab">
         <span class="tab-label">Why?</span>
+        <span class="tab-help">Background and motivation</span>
       </a>
     </li>
     <li role="presentation" class="<% if params[:section] == 'what' %>active<% end %>">
       <a href="<%= about_path %>/what" aria-controls="what" role="tab">
         <span class="tab-label">What?</span>
+        <span class="tab-help">A genomics community and platform</span>
       </a>
     </li>
     <li role="presentation" class="<% if params[:section] == 'who' %>active<% end %>">
       <a href="<%= about_path %>/who" aria-controls="who" role="tab">
         <span class="tab-label">Who?</span>
+        <span class="tab-help">The team behind the initiative</span>
+      </a>
+    </li>
+    <li role="presentation" class="<% if params[:section] == 'how' %>active<% end %>">
+      <a href="<%= about_path %>/how" aria-controls="how" role="tab">
+        <span class="tab-label">How?</span>
+        <span class="tab-help">Learn how to use the features</span>
       </a>
     </li>
   </ul>
@@ -30,7 +39,8 @@
 <div class="container">
   <!-- Tab panes -->
   <div class="tab-content">
-    <div role="tabpanel" class="tab-pane tab-pane-padded tab-pane-padded-xl <% if !params[:section].present? || params[:section] == 'why' %>active<% end %>" id="why">
+    <% if !params[:section].present? || params[:section] == 'why' %>
+    <div role="tabpanel" class="tab-pane tab-pane-padded tab-pane-padded-xl active" id="why">
       <div class="row">
         <div class="lead lead-intro text-primary">
           The Food and Drug Administration (FDA) plays an integral role in President Obama’s <a href="https://www.whitehouse.gov/precision-medicine">Precision Medicine Initiative</a>, which foresees the day when an individual’s medical care will be tailored in part based on their unique characteristics and genetic make-up.
@@ -49,9 +59,10 @@
           </p>
         </div>
       </div>
-
     </div>
-    <div role="tabpanel" class="tab-pane tab-pane-padded tab-pane-padded-xl <% if params[:section] == 'what' %>active<% end %>" id="what">
+    <% end %>
+    <% if params[:section] == 'what' %>
+    <div role="tabpanel" class="tab-pane tab-pane-padded tab-pane-padded-xl active" id="what">
       <div class="lead lead-intro text-primary">
         PrecisionFDA provides the genomics community with a secure, cloud-based platform where participants can access and share datasets, analysis pipelines, and bioinformatics tools, in order to benchmark their approaches and advance regulatory science.
       </div>
@@ -73,7 +84,9 @@
         <li>FDA &amp; Other Government Agencies</li>
       </ul>
     </div>
-    <div role="tabpanel" class="tab-pane tab-pane-padded tab-pane-padded-xl <% if params[:section] == 'who' %>active<% end %>" id="who">
+    <% end %>
+    <% if params[:section] == 'who' %>
+    <div role="tabpanel" class="tab-pane tab-pane-padded tab-pane-padded-xl active" id="who">
       <div class="lead lead-intro text-primary">
         PrecisionFDA is an initiative in the Office of Health Informatics (OHI) at the Food and Drug Administration led by the Chief Health Informatics Officer (CHIO), Dr. Taha Kass-Hout, MD, MS.
       </div>
@@ -128,8 +141,13 @@
 
       <br>
       <p class="text-muted">*Contractor to FDA’s Office of Health Informatics</p>
-
     </div>
+    <% end %>
+    <% if params[:section] == 'how' %>
+    <div role="tabpanel" class="tab-pane tab-pane-padded tab-pane-padded-xl active" id="how">
+      <%= render "main/docs" %>
+    </div>
+    <% end %>
   </div>
 </div>
 
@@ -148,3 +166,5 @@
   </div>
 </div>
 <% end %>
+
+<%= render "_partials/fda_footer" %>
