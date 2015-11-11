@@ -23,10 +23,11 @@
           <div role="tabpanel" class="tab-pane tab-pane-preview active">
             <!-- ko if: previewedNote() -->
               <!-- ko if: previewedNote().content() -->
-                <div class="h1">
+                <div class="h2">
                   <a href="/assets/" data-bind="text: previewedNote().title, attr: {href: '/notes/' + previewedNote().slug}" target="_blank"></a>
                 </div>
-                <p class="lead" data-bind="text: previewedNote().content"></p>
+                <hr>
+                <div data-bind="text: previewedNote().content"></div>
               <!-- /ko -->
             <!-- /ko -->
           </div>

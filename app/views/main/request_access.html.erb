@@ -53,13 +53,13 @@
           </div>
         </div>
         <div class="form-group form-group-lg">
-          <%= label_tag :last_name, "Last name", class: 'control-label col-sm-4' %>
+          <%= f.label :last_name, "Last name", class: 'control-label col-sm-4' %>
           <div class="col-sm-10 col-sm-offset-1">
             <%= f.text_field :last_name, class: 'form-control input-lg', required: 'required' %>
           </div>
         </div>
         <div class="form-group form-group-lg">
-          <%= label_tag :email, "Email address", class: 'control-label col-sm-4' %>
+          <%= f.label :email, "Email address", class: 'control-label col-sm-4' %>
           <div class="col-sm-10 col-sm-offset-1">
             <%= f.email_field :email, class: 'form-control input-lg', required: 'required' %>
           </div>
@@ -84,19 +84,19 @@
           </div>
         </div>
         <div class="form-group form-group-lg">
-          <%= label_tag :address, "Address", class: 'control-label col-sm-4' %>
+          <%= f.label :address, "Address", class: 'control-label col-sm-4' %>
           <div class="col-sm-10 col-sm-offset-1">
             <%= f.text_field :address, class: 'form-control input-lg', required: 'required' %>
           </div>
         </div>
         <div class="form-group form-group-lg">
-          <%= label_tag :phone, "Phone #", class: 'control-label col-sm-4' %>
+          <%= f.label :phone, "Phone #", class: 'control-label col-sm-4' %>
           <div class="col-sm-10 col-sm-offset-1">
             <%= f.telephone_field :phone, class: 'form-control input-lg', required: 'required' %>
           </div>
         </div>
         <div class="form-group form-group-lg form-group-optional">
-          <%= label_tag :duns, "DUNS #", class: 'control-label col-sm-4' %>
+          <%= f.label :duns, "DUNS #", class: 'control-label col-sm-4' %>
           <div class="col-sm-10 col-sm-offset-1">
             <%= f.text_field :duns, class: 'form-control input-lg' %>
           </div>
@@ -108,7 +108,7 @@
           </div>
         </div>
         <div class="form-group form-group-lg">
-          <%= label_tag :humanizer_answer, "Answer", class: 'control-label col-sm-4' %>
+          <%= f.label :humanizer_answer, "Answer", class: 'control-label col-sm-4' %>
           <div class="col-sm-10 col-sm-offset-1">
             <%= f.text_field :humanizer_answer, class: 'form-control input-lg', required: 'required' %>
           </div>
