@@ -4,10 +4,11 @@
   <div class="jumbotron jumbotron-landing jumbotron-landing-guest jumbotron-particles">
     <div class="container">
       <div class="pfda-brand">
-        <%= image_tag("precisionFDA.white.navbar-guest.png") %>
+        <%= image_tag("precisionFDA.white.navbar-guest.png", alt: "Welcome to PrecisionFDA") %>
       </div>
       <div class="btn-player-wrapper">
-        <a class="btn-player fa fa-play-circle" title="Introducing precisionFDA"></a>
+        <a class="btn-player fa fa-play-circle" aria-label="Play precisionFDA Introduction Video">
+        </a>
         <div class="jumbovideo">
           <div class="jumbovideo-player-wrapper">
             <div id="ytplayer" class="jumbovideo-player"></div>
@@ -32,14 +33,14 @@
 <div class="showcase container">
   <div class="showcase-item">
     <div class="showcase-icon">
-      <span class="fa fa-sticky-note"></span>
+      <span class="fa fa-sticky-note" aria-hidden="true"></span>
     </div>
     <div class="showcase-content">
       <div class="showcase-heading">Notes</div>
       <ul class="list-unstyled lead">
         <li class="media">
           <div class="media-left">
-            <span class="fa fa-fw fa-edit"></span>
+            <span class="fa fa-fw fa-edit" aria-hidden="true"></span>
           </div>
           <div class="media-body">
             <strong>Write and publish</strong> rich notes describing your thoughts and your work
@@ -47,7 +48,7 @@
         </li>
         <li class="media">
           <div class="media-left">
-            <span class="fa fa-fw fa-paperclip"></span>
+            <span class="fa fa-fw fa-paperclip" aria-hidden="true"></span>
           </div>
           <div class="media-body">
             <strong>Attach</strong> any files, comparisons, or apps
@@ -55,7 +56,7 @@
         </li>
         <li class="media">
           <div class="media-left">
-            <span class="fa fa-fw fa-copy"></span>
+            <span class="fa fa-fw fa-copy" aria-hidden="true"></span>
           </div>
           <div class="media-body">
             <strong>Read</strong> what others are reporting and reproduce their workflows
@@ -66,14 +67,14 @@
   </div>
   <div class="showcase-item">
     <div class="showcase-icon">
-      <span class="fa fa-files-o"></span>
+      <span class="fa fa-files-o" aria-hidden="true"></span>
     </div>
     <div class="showcase-content">
       <div class="showcase-heading">Files</div>
       <ul class="list-unstyled lead">
         <li class="media">
           <div class="media-left">
-            <span class="fa fa-fw fa-cloud-upload"></span>
+            <span class="fa fa-fw fa-cloud-upload" aria-hidden="true"></span>
           </div>
           <div class="media-body">
             <strong>Upload</strong> your own files on cloud storage
@@ -81,7 +82,7 @@
         </li>
         <li class="media">
           <div class="media-left">
-            <span class="fa fa-fw fa-bolt"></span>
+            <span class="fa fa-fw fa-bolt" aria-hidden="true"></span>
           </div>
           <div class="media-body">
             <strong>Generate</strong> files through running apps
@@ -89,7 +90,7 @@
         </li>
         <li class="media">
           <div class="media-left">
-            <span class="fa fa-fw fa-bullhorn"></span>
+            <span class="fa fa-fw fa-bullhorn" aria-hidden="true"></span>
           </div>
           <div class="media-body">
             <strong>Publish</strong> reference data or any other files
@@ -97,7 +98,7 @@
         </li>
         <li class="media">
           <div class="media-left">
-            <span class="fa fa-fw fa-list-alt"></span>
+            <span class="fa fa-fw fa-list-alt" aria-hidden="true"></span>
           </div>
           <div class="media-body">
             <strong>Browse</strong> other members' contributions
@@ -116,7 +117,7 @@
       <ul class="list-unstyled lead">
         <li class="media">
           <div class="media-left">
-            <span class="fa fa-fw fa-signal"></span>
+            <span class="fa fa-fw fa-signal" aria-hidden="true"></span>
           </div>
           <div class="media-body">
             <strong>Quantify</strong> the similarity between two sets of genomic variants (VCF files)
@@ -124,7 +125,7 @@
         </li>
         <li class="media">
           <div class="media-left">
-            <span class="fa fa-fw fa-balance-scale"></span>
+            <span class="fa fa-fw fa-balance-scale" aria-hidden="true"></span>
           </div>
           <div class="media-body">
             <strong>Compare</strong> your own test set (for a given biospecimen) to established benchmark sets
@@ -143,7 +144,7 @@
       <ul class="list-unstyled lead">
         <li class="media">
           <div class="media-left">
-            <span class="fa fa-fw fa-bolt"></span>
+            <span class="fa fa-fw fa-bolt" aria-hidden="true"></span>
           </div>
           <div class="media-body">
             <strong>Run</strong> mapping and variation calling pipelines or other Linux-based software apps on the cloud
@@ -151,7 +152,7 @@
         </li>
         <li class="media">
           <div class="media-left">
-            <span class="fa fa-fw fa-code"></span>
+            <span class="fa fa-fw fa-code" aria-hidden="true"></span>
           </div>
           <div class="media-body">
             <strong>Contribute</strong> your own software and scripts and let others explore them
@@ -164,11 +165,11 @@
 
 <div class="below-fold-actions">
   <a class="btn btn-primary btn-lg" href="<%= about_path %>">
-    <span class="fa fa-info-circle"></span> Learn more about precisionFDA
+    <span class="fa fa-info-circle" aria-hidden="true"></span> Learn more about precisionFDA
   </a>
   <br>
-  <a class="btn btn-link btn-lg" href="mailto:precisionfda@fda.hhs.gov"><span class="fa fa-fw fa-commenting-o"></span> Feedback</a>
-  <a class="btn btn-link btn-lg hide" href="https://docs.google.com/forms/d/1zfGoy-4C9kLbHHg0Y-6iQoI3fdGq1IfugV9fXCqOBfY/viewform" target="_blank"><span class="fa fa-fw fa-commenting-o"></span> Feedback</a>
+  <a class="btn btn-link btn-lg" href="mailto:precisionfda@fda.hhs.gov"><span class="fa fa-fw fa-commenting-o" aria-hidden="true"></span> Feedback</a>
+  <a class="btn btn-link btn-lg hide" href="https://docs.google.com/forms/d/1zfGoy-4C9kLbHHg0Y-6iQoI3fdGq1IfugV9fXCqOBfY/viewform" target="_blank"><span class="fa fa-fw fa-commenting-o" aria-hidden="true"></span> Feedback</a>
 </div>
 
 <%= render "_partials/fda_footer" %>
