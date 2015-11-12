@@ -9,11 +9,10 @@ window.onYouTubePlayerAPIReady = ->
       autoplay: 0
       controls: 2
       enablejsapi: 1
-      loop: 1
+      loop: 0
       playlist: 'kn4J4bqJG2Q'
       modestbranding: 1
       rel: 0
-      playsinline: 1
       showinfo: 0
     events:
       'onReady': (event) ->
