@@ -14,6 +14,8 @@ Rails.application.routes.draw do
     get 'about/:section' => 'main#about'
     get 'terms' => 'main#terms'
 
+    get 'exception_test' => "main#exception_test"
+
     # API
     post '/api/create_file', to: 'api#create_file'
     post '/api/get_upload_url', to: 'api#get_upload_url'
