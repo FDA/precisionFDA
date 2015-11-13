@@ -7,8 +7,12 @@ class NotificationsMailer < ApplicationMailer
   #
   def invitation_email(invitation)
     @invitation = invitation
+    recipients = ["precisionfda-support@dnanexus.com"]
+    if ENV["DNANEXUS_BACKEND"] == "production"
+      recipients << "precisionfda@fda.hhs.gov"
+    end
 
-    mail to: ["precisionfda-support@dnanexus.com", "precisionfda@fda.hhs.gov"],
+    mail to: recipients,
          reply_to: "precisionfda-support@dnanexus.com",
          subject: "New access request from #{invitation.first_name} #{invitation.last_name}"
   end
