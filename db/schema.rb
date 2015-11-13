@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151107231431) do
+ActiveRecord::Schema.define(version: 20151113182148) do
 
   create_table "app_series", force: :cascade do |t|
     t.string   "dxid"
@@ -115,6 +115,7 @@ ActiveRecord::Schema.define(version: 20151107231431) do
     t.string   "ip"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text     "extras"
   end
 
   create_table "job_inputs", force: :cascade do |t|
