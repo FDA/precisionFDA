@@ -16,6 +16,10 @@ class MainController < ApplicationController
   def about
   end
 
+  def exception_test
+    raise "This is an intentionally raised exception for testing email notification. Please contact Evan with any concerns"
+  end
+
   def login
     redirect_to "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=#{OAUTH2_CLIENT_ID}&redirect_uri=#{URI.encode(OAUTH2_REDIRECT_URI)}"
   end
