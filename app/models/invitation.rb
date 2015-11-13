@@ -14,6 +14,7 @@
 #  ip         :string
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
+#  extras     :text
 #
 
 class Invitation < ActiveRecord::Base
@@ -22,4 +23,6 @@ class Invitation < ActiveRecord::Base
   validates :singular, inclusion: [true, false]
   validates :org, presence: {message: "can't be blank unless you represent yourself"}, unless: :singular
   require_human_on :create
+
+  store :extras, accessors: [ :req_reason, :req_data, :req_software ], coder: JSON
 end
