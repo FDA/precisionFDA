@@ -15,9 +15,6 @@
         su root root
         <% end -%>
         <% if node[:logrotate][:postrotate] -%>
-        BUCKET=<%= node[:logrotate][:postrotate][:bucket] %>
-        APP_NAME=<%= node[:logrotate][:postrotate][:app] %>
-        INSTANCE_ID=`curl --silent http://169.254.169.254/latest/meta-data/instance-id | sed -e "s/i-//"`
-        /usr/bin/s3cmd -m text/plain sync /srv/www/${APP_NAME}/shared/log/*audit.log*.gz s3://${BUCKET}/${INSTANCE_ID}/
+        /usr/bin/s3cmd -m text/plain sync /srv/www/<%= node[:logrotate][:postrotate][:app] %>/shared/log/*audit.log*.gz s3://<%= node[:logrotate][:postrotate][:bucket] %>/$(curl --silent http://169.254.169.254/latest/meta-data/instance-id | sed -e "s/i-//")/
         <% end -%>
 }
