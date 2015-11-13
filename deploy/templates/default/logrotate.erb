@@ -15,6 +15,8 @@
         su root root
         <% end -%>
         <% if node[:logrotate][:postrotate] -%>
+        postrotate
         /usr/bin/s3cmd -m text/plain sync /srv/www/<%= node[:logrotate][:postrotate][:app] %>/shared/log/*audit.log*.gz s3://<%= node[:logrotate][:postrotate][:bucket] %>/$(curl --silent http://169.254.169.254/latest/meta-data/instance-id | sed -e "s/i-//")/
+        endscript
         <% end -%>
 }
