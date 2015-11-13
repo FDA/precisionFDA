@@ -1,13 +1,16 @@
 class NoteModel
   constructor: (note, attachments) ->
     @noteEditor = null
-    md = new Remarkable({
+    md = new Remarkable('full', {
       linkify: true
     })
 
     @id = note.id
     @content = ko.observable(note.content)
     @content.cache = ko.observable(note.content)
+    @content.preview = ko.computed(() =>
+      md.render(@content.cache())
+    )
     @content.display = ko.computed(() =>
       md.render(@content())
     )
