@@ -757,6 +757,46 @@ class ApiController < ApplicationController
     }
   end
 
+  def update_note
+    id = params[:id].to_i
+    raise unless id.is_a?(Integer)
+
+    title = params[:note][:title]
+    raise unless title.is_a?(String)
+
+    content = params[:note][:content] || ""
+    raise unless content.is_a?(String)
+
+    attachments = params[:note][:attachments] || []
+    raise unless attachments.is_a?(Array)
+
+    updated = false
+    note = Note.find(params[:id])
+    if note[:user_id] == @context.user_id
+      Note.transaction do
+        note.attachments.destroy_all
+        attachments.each do |attachment|
+          # NOTE: I'm not sure why its send attachments in such a format
+          note.attachments.find_or_create_by(item_id: attachment[:id].to_i, item_type: attachment[:type])
+        end
+
+        params = {title: title, content: content}
+        if note.update!(params)
+          updated = true
+          note.reload
+        end
+      end
+    end
+
+    render json: {
+      success: updated,
+      note: {
+        id: note.id,
+      },
+      path: note_path(note)
+    }
+  end
+
   protected
 
   def fail(msg)

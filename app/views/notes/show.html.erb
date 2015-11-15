@@ -51,11 +51,11 @@
               <p class="help-block text-right">Format with <a href="https://jonschlinkert.github.io/remarkable/demo/" target="_blank">Markdown syntax <span class="fa fa-external-link-square" aria-hidden='true'></span></a></p>
             </div>
             <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-note-preview">
-              <div class="note-preview" data-bind="html: content.preview"></div>
+              <div class="note-preview pfda-md-rendered" data-bind="html: content.preview"></div>
             </div>
           </div>
         </div>
-        <div class="note-display" data-bind="visible: !editing(), html: content.display">
+        <div class="note-display pfda-md-rendered" data-bind="visible: !editing(), html: content.display">
         </div>
       </div>
       <div class="note-sidebar">

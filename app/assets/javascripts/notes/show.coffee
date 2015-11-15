@@ -1,18 +1,15 @@
 class NoteModel
   constructor: (note, attachments) ->
     @noteEditor = null
-    md = new Remarkable('full', {
-      linkify: true
-    })
 
     @id = note.id
     @content = ko.observable(note.content)
     @content.cache = ko.observable(note.content)
     @content.preview = ko.computed(() =>
-      md.render(@content.cache())
+      Precision.md.render(@content.cache())
     )
     @content.display = ko.computed(() =>
-      md.render(@content())
+      Precision.md.render(@content())
     )
     @title = ko.observable(note.title)
     @title.cache = ko.observable(note.title)
@@ -102,21 +99,20 @@ class NoteModel
         attachmentsToSave.push({id: item.id, type: item.type})
 
     params =
+      id: @id
       note:
         content: @content.peek()
         title: @title.peek()
-      attachments: attachmentsToSave
+        attachments: attachmentsToSave
 
-    $.ajax("/notes/#{@id}", {
-      method: "PUT"
-      data: params
-    }).done((res) =>
-      window.location.replace(res.path) if window.location.pathname != res.path
-    ).fail((error) ->
-      console.error(error)
-    ).always(() =>
-      @saving(false)
-    )
+    Precision.api("/api/update_note/", params)
+      .done((res) ->
+        window.location.replace(res.path) if window.location.pathname != res.path
+      ).fail((error) ->
+        console.error(error)
+      ).always(() =>
+        @saving(false)
+      )
 
   cancel: () ->
     @toggleEdit()

@@ -22,12 +22,15 @@
         <div class="tab-content">
           <div role="tabpanel" class="tab-pane tab-pane-preview active">
             <!-- ko if: previewedNote() -->
+              <div class="h2">
+                <a href="/assets/" data-bind="text: previewedNote().title, attr: {href: '/notes/' + previewedNote().slug}" target="_blank"></a>
+              </div>
+              <hr>
               <!-- ko if: previewedNote().content() -->
-                <div class="h2">
-                  <a href="/assets/" data-bind="text: previewedNote().title, attr: {href: '/notes/' + previewedNote().slug}" target="_blank"></a>
-                </div>
-                <hr>
-                <div data-bind="text: previewedNote().content"></div>
+              <div class="pfda-md-rendered" data-bind="html: previewedNote().content"></div>
+              <!-- /ko -->
+              <!-- ko if: !previewedNote().content() -->
+                <div class="alert alert-warning">No content written for this note</div>
               <!-- /ko -->
             <!-- /ko -->
           </div>

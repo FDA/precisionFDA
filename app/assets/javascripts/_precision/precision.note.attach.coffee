@@ -102,7 +102,7 @@ class NoteModel
   getDescribe: () ->
     if _.isEmpty(@content.peek())
       Precision.api '/api/describe_note', {id: @id}, (describe) =>
-        @content(describe.content)
+        @content(Precision.md.render(describe.content))
         @parentModel.handleUpdate()
 
 

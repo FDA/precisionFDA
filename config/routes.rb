@@ -32,6 +32,7 @@ Rails.application.routes.draw do
     post '/api/list_notes', to: 'api#list_notes'
     post '/api/describe_note', to: 'api#describe_note'
     post '/api/attach_to_notes', to: 'api#attach_to_notes'
+    post '/api/update_note', to: 'api#update_note'
 
     # The priority is based upon order of creation: first created -> highest priority.
     # See how all your routes lay out with "rake routes".
