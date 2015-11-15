@@ -112,6 +112,7 @@ namespace :provision do
       u = User.create!(user)
       o.update!(admin_id: u.id)
     end
+    AUDIT_LOGGER.info("A new user and organization have been created: user=#{u.as_json}, org=#{o.as_json}")
 
     # The following is required, otherwise rake continues
     # parsing the command line options and tries to run tasks
