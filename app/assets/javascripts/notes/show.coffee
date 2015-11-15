@@ -162,6 +162,8 @@ NotesController::show = ->
 
   noteModel.noteEditor = ko.aceEditors.get('note-editor')
 
+  noteModel.toggleEdit() if params.edit?
+
   if params.note?
     # FIXME: Only works on refresh
     # $(window).on('beforeunload', () ->
