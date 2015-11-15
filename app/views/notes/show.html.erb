@@ -61,7 +61,6 @@
       <div class="note-sidebar">
         <div id="note-attachments" class="note-attachments">
           <div class="note-section-title"><span class="fa fa-paperclip"></span> Attachments</div>
-
           <!-- ko foreach: attachments -->
           <div class="list-group" data-bind="visible: items().length > 0, css: className">
             <div class="list-group-item">
@@ -76,6 +75,9 @@
             <!-- /ko -->
           </div>
           <!-- /ko -->
+          <div class="alert alert-warning" data-bind="visible: editing" style="display: none">
+            <span class="fa fa-info-circle"></span> <strong>Attaching within a note is currently under-development.</strong> <small>You can "Attach to Note" from any comparison, file, job, or app</small>
+          </div>
         </div>
       </div>
     </div>

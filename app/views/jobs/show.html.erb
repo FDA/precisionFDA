@@ -135,13 +135,14 @@
           The execution failed with the following error message
         </div>
         <div class="panel-body">
-          <div class="text-monospace"><%= @job.failure_message %></pre>
+          <div class="text-monospace"><%= @job.failure_message %></div>
         </div>
       </div>
     </div>
   </div>
   <% end %>
-  <% if @notes.present? && @notes.count > 0 %>
+
+  <% if @notes.count > 0 %>
   <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-notes">
     <%= render "notes/blocks", notes: @notes %>
   </div>

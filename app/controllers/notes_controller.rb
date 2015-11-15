@@ -20,7 +20,7 @@ class NotesController < ApplicationController
         apps: (apps.map { |o| o.slice(:id, :dxid, :title)}),
         jobs: (jobs.map { |o| o.slice(:id, :dxid, :name)})
       }
-      js note: @note.slice(:id, :content, :title), attachments: attachments
+      js note: @note.slice(:id, :content, :title), attachments: attachments, edit: params[:edit]
     end
   end
 
@@ -32,7 +32,7 @@ class NotesController < ApplicationController
       scope: "private"
     )
 
-    redirect_to @note
+    redirect_to note_path(@note, edit: true)
   end
 
   def destroy
