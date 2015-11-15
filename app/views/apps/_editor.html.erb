@@ -71,7 +71,7 @@
 
       <div role="tabpanel" class="tab-pane tab-pane-padded" id="app-script">
         <div class="ace-editor-section">
-          <div id="script-editor" class="ace-rounded" data-bind="ace: code, aceOptions: { mode: 'sh', theme: 'monokai', opts: {maxLines: Infinity} }"></div>
+          <div id="script-editor" class="ace-rounded" data-bind="ace: code, aceOptions: { mode: 'sh', theme: 'monokai', opts: {maxLines: Infinity, wrap: 'free'} }"></div>
         </div>
       </div>
 
@@ -86,7 +86,7 @@
           <!-- Tab panes -->
           <div class="tab-content">
             <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-readme-editor">
-              <div id="readme-editor" class="ace-rounded" data-bind="ace: readme, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity, setWrapBehavioursEnabled: true, wrap: 'free'}}"></div>
+              <div id="readme-editor" class="ace-rounded" data-bind="ace: readme, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity, wrap: 'free'}}"></div>
               <p class="help-block text-right">Format with <a href="https://jonschlinkert.github.io/remarkable/demo/" target="_blank">Markdown syntax <span class="fa fa-external-link-square" aria-hidden='true'></span></a></p>
             </div>
             <div role="tabpanel" class="tab-pane tab-pane-padded-lg" id="tab-readme-preview">
