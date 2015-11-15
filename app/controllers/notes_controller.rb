@@ -12,7 +12,7 @@ class NotesController < ApplicationController
       comparisons = @note.comparisons.accessible_by(@context)
       files = @note.real_files.accessible_by(@context)
       apps = @note.apps.accessible_by(@context)
-      jobs = @note.jobs
+      jobs = @note.jobs.accessible_by(@context)
 
       attachments = {
         comparisons: (comparisons.map { |o| o.slice(:id, :name, :stats)}),
@@ -25,13 +25,13 @@ class NotesController < ApplicationController
   end
 
   def new
-    @note = Note.new({
+    # TODO: GET routes should not have side-effects; convert this to a POST
+    @note = Note.create!(
       title: "Untitled Note (#{DateTime.now.strftime("%Y-%m-%d %H:%M:%S")})",
       user_id: @context.user_id,
       scope: "private"
-    })
+    )
 
-    @note.save
     redirect_to @note
   end
 
