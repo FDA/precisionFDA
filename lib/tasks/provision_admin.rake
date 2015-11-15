@@ -98,6 +98,8 @@ namespace :provision do
     puts "Inviting user #{dxuserid} to org #{ORG_EVERYONE} as a member"
     api.call(ORG_EVERYONE, "invite", {invitee: dxuserid, level: 'MEMBER', allowBillableActivities: false, appAccess: true, projectAccess: 'VIEW', suppressEmailNotification: true})
 
+    o = nil
+    u = nil
     User.transaction do
       org[:state] = "complete"
       o = Org.create!(org)
