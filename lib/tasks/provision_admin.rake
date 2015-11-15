@@ -76,7 +76,7 @@ namespace :provision do
     
     puts "Updating org with billing info"
     billing_info = {
-      email: "precisionfda-support@dnanexus.com",
+      email: "Elaine.Johanson@fda.hhs.gov",
       name: "Elaine Johanson",
       companyName: "FDA",
       address1: "10903 New Hampshire Ave",
@@ -87,7 +87,7 @@ namespace :provision do
       country: "USA",
       phone: "(301) 706-1836"
     }
-    auth.call(dxorg, "updateBillingInformation", {billingInformation: billing_info})
+    auth.call(dxorg, "updateBillingInformation", {billingInformation: billing_info, autoConfirm: '4edkfpbg'})
 
     puts "Provisioning user (username: #{user[:dxuser]}, final id: #{dxuserid})"
     auth.call("user", "new", {username: user[:dxuser], email: user[:email], first: user[:first_name], last: user[:last_name], billTo: ORG_EVERYONE})
