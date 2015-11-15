@@ -68,6 +68,7 @@ namespace :provision do
     puts "Inviting user #{dxuserid} to org #{ORG_EVERYONE} as a member"
     api.call(ORG_EVERYONE, "invite", {invitee: dxuserid, level: 'MEMBER', allowBillableActivities: false, appAccess: true, projectAccess: 'VIEW', suppressEmailNotification: true})
 
+    u = nil
     User.transaction do
       user[:org_id] = o.id
       user[:schema_version] = User::CURRENT_SCHEMA
