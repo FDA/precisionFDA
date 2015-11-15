@@ -696,11 +696,10 @@ class ApiController < ApplicationController
   # slug (string)
   # title (string)
   #
-
   def list_notes
     notes = Note.accessible_by(@context)
 
-    result = notes.select(:id, :to_param, :title).map do |note|
+    result = notes.select(:id, :title).map do |note|
       {id: note.id, slug: note.to_param, title: note.title }
     end
 
