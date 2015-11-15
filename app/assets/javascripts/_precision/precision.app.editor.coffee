@@ -1,9 +1,5 @@
 class AppEditorModel
   constructor: (app, @mode = 'edit') ->
-    md = new Remarkable('full', {
-      linkify: true
-    })
-
     @isNewApp = @mode != 'edit'
     @saving = ko.observable(false)
     @errorMessage = ko.observable()
@@ -25,7 +21,7 @@ class AppEditorModel
     @revision = ko.observable(app?.revision)
     @readme = ko.observable(app?.readme)
     @readme.preview = ko.computed(=>
-      md.render(@readme())
+      Precision.md.render(@readme())
     )
     @code = ko.observable(app?.internal.code)
 

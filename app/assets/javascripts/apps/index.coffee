@@ -1,12 +1,8 @@
 class AppIndexModel
   constructor: (app, releaseable) ->
-    md = new Remarkable({
-      linkify: true
-    })
-
     if app?
       @noteAttachModel = new Precision.models.NoteAttachModel(app.id, 'App')
-      @readmeDisplay = md.render(app.readme)
+      @readmeDisplay = Precision.md.render(app.readme)
 
     if releaseable
       @appReleaseModel = new Precision.models.AppReleaseModel(app.dxid)

@@ -39,6 +39,16 @@
     .list-preview-icon .fa
       color: lighten($brand-blue-tertiary, 15%)
 
+.list-group-item-removeable
+  .btn-link-danger
+    visibility: hidden
+    padding: 3px
+    border: 0
+
+  &:hover
+    .btn-link-danger
+      visibility: visible
+
 .list-inline
   &.list-inline-padding-vertical
     li

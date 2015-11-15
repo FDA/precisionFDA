@@ -27,8 +27,8 @@
               </button>
             </div>
             <!-- ko foreach: assets -->
-            <div class="list-group-item clearfix">
-              <a data-bind="attr: {href: '/assets/' + dxid}" target="_blank"><span class="fa fa-file-zip-o"></span> <span data-bind="text: name"></span></a>  <button class="pull-right btn-link btn-link-danger fa fa-times" data-bind="click: $root.removeAsset"></button>
+            <div class="list-group-item list-group-item-removeable clearfix">
+              <a data-bind="attr: {href: '/assets/' + dxid}" target="_blank"><span class="fa fa-file-zip-o"></span> <span data-bind="text: name"></span></a>  <a class="pull-right btn btn-link btn-link-danger fa fa-times" data-bind="click: $root.removeAsset"></a>
             </div>
             <!-- /ko -->
          </div>
@@ -54,10 +54,10 @@
               <p class="help-block text-right"><small><strong>TIP:</strong> Find packages within the <strong>trusty</strong> distribution using <a href="http://packages.ubuntu.com" target="_blank">Ubuntu Package Search <span class="fa fa-external-link"></span></a></small></p>
             </li>
             <!-- ko foreach: packages -->
-            <li class="list-group-item clearfix">
+            <li class="list-group-item list-group-item-removeable clearfix">
               <a data-bind="attr: {href: 'http://packages.ubuntu.com/' + $data}" target="_blank">
                 <span class="fa fa-file-code-o"></span> <span data-bind="text: $data"></span>
-              </a> <button class="pull-right btn-link btn-link-danger fa fa-times" data-bind="click: $root.removePackage"></button>
+              </a> <a class="pull-right btn btn-link btn-link-danger fa fa-times" data-bind="click: $root.removePackage"></a>
             </li>
             <!-- /ko -->
           </ul>

@@ -35,40 +35,6 @@ class NotesController < ApplicationController
     redirect_to @note
   end
 
-  def update
-    id = params[:id].to_i
-    raise unless id.is_a?(Integer)
-
-    attachments = params[:attachments]
-    # raise unless attachments.is_a?(Array)
-
-    updated = false
-    note = Note.find(params[:id])
-    if note[:user_id] == @context.user_id
-      Note.transaction do
-        note.attachments.destroy_all
-        attachments.each do |attachment|
-          # NOTE: I'm not sure why its send attachments in such a format
-          note.attachments.find_or_create_by(item_id: attachment[1][:id].to_i, item_type: attachment[1][:type])
-        end
-
-        params = note_params()
-        if note.update!(params)
-          updated = true
-          note.reload
-        end
-      end
-    end
-
-    render json: {
-      success: updated,
-      note: {
-        id: note.id,
-      },
-      path: note_path(note)
-    }
-  end
-
   def destroy
     note = Note.where(user_id: @context.user_id).find(params[:id])
 
@@ -76,11 +42,5 @@ class NotesController < ApplicationController
 
     flash[:success] = "Note \"#{note.title}\" has been successfully deleted"
     redirect_to :notes
-  end
-
-  private
-
-  def note_params
-    params.require(:note).permit(:title, :content)
   end
 end
