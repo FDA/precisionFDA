@@ -79,6 +79,7 @@ namespace :provision do
       user[:closing_assets_count] = 0
       u = User.create!(user)
     end
+    AUDIT_LOGGER.info("A new user has been created under the '#{o.handle}' organization: user=#{u.as_json}")
 
     # The following is required, otherwise rake continues
     # parsing the command line options and tries to run tasks
