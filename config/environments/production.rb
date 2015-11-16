@@ -81,4 +81,14 @@ Rails.application.configure do
 
   # SSL
   config.force_ssl = true
+
+  # Email us when an exception occurs
+
+  Rails.application.config.middleware.use ExceptionNotification::Rack,
+    :email => {
+      :email_prefix => "[PrecisionFDA]",
+      :sender_address => %{"notifier" <notification@dnanexus.com>},
+      :exception_recipients => %w{precisionfda-dev@dnanexus.com},
+      :email_format => :html
+  }
 end

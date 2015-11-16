@@ -21,5 +21,7 @@ class AssetsController < ApplicationController
       User.sync_asset!(@context.user_id, @asset.id, @context.token)
       @asset.reload
     end
+
+    js asset: @asset.slice(:description)
   end
 end

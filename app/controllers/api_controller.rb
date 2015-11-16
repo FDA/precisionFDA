@@ -478,7 +478,7 @@ class ApiController < ApplicationController
       app = nil
       App.transaction do
         ordered_assets.each do |asset_dxid|
-          fail "The app asset with id '#{asset_dxid}' does not exist or is not accessible by you." unless Asset.accessible_by(@context).where(dxid: asset_dxid).exists?
+          fail "The app asset with id '#{asset_dxid}' does not exist or is not accessible by you." unless Asset.closed.accessible_by(@context).where(dxid: asset_dxid).exists?
         end
         app_series_dxid = AppSeries.construct_dxid(@context.username, name)
         app_series = AppSeries.find_by(dxid: app_series_dxid)
@@ -627,9 +627,9 @@ class ApiController < ApplicationController
     ids = params[:ids]
     if !ids.nil?
       raise unless ids.is_a?(Array) && ids.all? { |id| id.is_a?(String) }
-      assets = Asset.accessible_by(@context).where(dxid: ids)
+      assets = Asset.closed.accessible_by(@context).where(dxid: ids)
     else
-      assets = Asset.accessible_by(@context)
+      assets = Asset.closed.accessible_by(@context)
     end
 
     result = assets.select(:dxid, :name).map do |asset|
@@ -679,7 +679,7 @@ class ApiController < ApplicationController
     prefix = params["prefix"]
     raise unless prefix.is_a?(String) && prefix.size >= 3
 
-    ids = Asset.accessible_by(@context).with_search_keyword(prefix).select(:dxid).distinct.limit(1000).map(&:dxid)
+    ids = Asset.closed.accessible_by(@context).with_search_keyword(prefix).select(:dxid).distinct.limit(1000).map(&:dxid)
     render json: { ids: ids }
   end
 
@@ -696,11 +696,10 @@ class ApiController < ApplicationController
   # slug (string)
   # title (string)
   #
-
   def list_notes
     notes = Note.accessible_by(@context)
 
-    result = notes.select(:id, :to_param, :title).map do |note|
+    result = notes.select(:id, :title).map do |note|
       {id: note.id, slug: note.to_param, title: note.title }
     end
 
@@ -755,6 +754,46 @@ class ApiController < ApplicationController
     render json: {
       notes_added: notes_added,
       items_added: items_added
+    }
+  end
+
+  def update_note
+    id = params[:id].to_i
+    raise unless id.is_a?(Integer)
+
+    title = params[:note][:title]
+    raise unless title.is_a?(String)
+
+    content = params[:note][:content] || ""
+    raise unless content.is_a?(String)
+
+    attachments = params[:note][:attachments] || []
+    raise unless attachments.is_a?(Array)
+
+    updated = false
+    note = Note.find(params[:id])
+    if note[:user_id] == @context.user_id
+      Note.transaction do
+        note.attachments.destroy_all
+        attachments.each do |attachment|
+          # NOTE: I'm not sure why its send attachments in such a format
+          note.attachments.find_or_create_by(item_id: attachment[:id].to_i, item_type: attachment[:type])
+        end
+
+        params = {title: title, content: content}
+        if note.update!(params)
+          updated = true
+          note.reload
+        end
+      end
+    end
+
+    render json: {
+      success: updated,
+      note: {
+        id: note.id,
+      },
+      path: note_path(note)
     }
   end
 

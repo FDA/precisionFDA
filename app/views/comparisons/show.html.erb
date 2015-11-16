@@ -92,7 +92,7 @@
   <div class="tab-pane tab-pane-padded active" id="tab-results">
     <div class="variants panel">
       <div class="variant-test">
-        <div class="variant-title">Test Variant</div>
+        <div class="variant-title">Test Set</div>
         <ul class="variant-inputs list-unstyled">
           <%= render "_partials/variant_file", file: @test_vcf, title: "VCF", required: true, classes: "required active"  %>
           <%= render "_partials/variant_file", file: @test_tbi, title: "TBI", required: true, classes: "required active"  %>
@@ -101,7 +101,7 @@
       </div>
 
       <div class="variant-ref">
-        <div class="variant-title">Benchmark Variant</div>
+        <div class="variant-title">Benchmark Set</div>
         <ul class="variant-inputs list-unstyled">
           <%= render "_partials/variant_file", file: @ref_vcf, title: "VCF", required: true, classes: "required active"  %>
           <%= render "_partials/variant_file", file: @ref_tbi, title: "TBI", required: true, classes: "required active"  %>

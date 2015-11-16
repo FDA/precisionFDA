@@ -14,6 +14,7 @@
 #  ip         :string
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
+#  extras     :text
 #
 
 require 'test_helper'

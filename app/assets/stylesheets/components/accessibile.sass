@@ -1,0 +1,57 @@
+@import "_common"
+
+.accessible
+  a:not(.btn)
+    color: $accessible-link-color
+    &:hover, &:focus, &:active
+      color: $accessible-link-hover-color
+
+  .text-primary
+    color: $accessible-brand-blue-primary
+
+  .nav
+    &.nav-tabs
+      .tab-help
+        color: $accessible-text-muted
+
+  .page-header
+    .page-title
+      color: $accessible-brand-blue-primary
+
+.accessible-text-muted
+  color: $accessible-text-muted
+
+.accessible-btn-default
+  @include button-variant($btn-default-color, $btn-default-bg, $btn-default-border)
+
+  .fa
+    color: $accessible-brand-red-primary
+
+  &:hover
+    background-color: $brand-blue-subtle
+
+.accessible-btn-primary
+  @include button-variant($btn-primary-color, $accessible-btn-primary-bg, $accessible-btn-primary-bg)
+
+.accessible-btn-success
+  @include button-variant($accessible-btn-success-color, $accessible-btn-success-bg, $accessible-btn-success-bg)
+
+.accessible-btn-warning
+  @include button-variant($accessible-btn-warning-color, $accessible-btn-warning-bg, $accessible-btn-warning-bg)
+
+.accessible-btn-danger
+  @include button-variant($accessible-btn-danger-color, $accessible-btn-danger-bg, $accessible-btn-danger-bg)
+
+.accessible-btn-link
+  color: $accessible-link-color
+
+  &:hover,
+  &:focus
+    color: $accessible-link-hover-color
+
+.nav.navbar-nav
+  .accessible-btn-link
+    color: #e2f1ff
+    &:hover,
+    &:focus
+      color: #fff

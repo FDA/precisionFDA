@@ -14,6 +14,10 @@ window.Precision.api = (route, input, successCallback, errorCallback) ->
     error: (xhr, status, err) ->
       if errorCallback? then errorCallback(status, err) else console.error(status, err)
 
+window.Precision.md = new Remarkable('full', {
+  linkify: true
+})
+
 window.Precision.CK_CONFIG =
   height: 400
   extraPlugins: 'widget,autogrow,attachment'

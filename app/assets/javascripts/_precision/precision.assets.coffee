@@ -25,6 +25,24 @@ class AssetsModel
       return @query()?.length >= 3
     )
 
+    @queryActionClasses = ko.computed(=>
+      if @loading()
+        return 'disabled'
+      else if !_.isEmpty(@query())
+        return 'btn-link-danger'
+      else
+        return 'disabled'
+    )
+
+    @queryIconClasses = ko.computed(=>
+      if @loading()
+        return 'fa fa-spinner fa-spin'
+      else if !_.isEmpty(@query())
+        return 'fa fa-times'
+      else
+        return 'fa fa-search'
+    )
+
     $(".assets-modal").on("click", ".item-asset", (e) =>
       @previewAsset(ko.dataFor(e.currentTarget))
     )
@@ -38,7 +56,7 @@ class AssetsModel
     @query.subscribe((query) =>
       if @isQuerySearchable()
         @loading(true)
-        @searchAssets()
+        @searchAssets(query)
       else
         @assets.searchedIDs([])
     )
@@ -52,8 +70,8 @@ class AssetsModel
       @loading(false)
       @assets(@createAssetModels(assets))
 
-  searchAssets: _.debounce(() ->
-    Precision.api '/api/search_assets', {prefix: @query.peek()}, (result) =>
+  searchAssets: _.debounce((query) ->
+    Precision.api '/api/search_assets', {prefix: query}, (result) =>
       @loading(false)
       @previewedAsset(null)
       @assets.searchedIDs(result.ids)
@@ -70,6 +88,9 @@ class AssetsModel
     @previewedAsset(assetModel)
     assetModel.getDescribe()
 
+  queryAction: () =>
+    @clearQuery() if !_.isEmpty(@query())
+
   clearQuery: () =>
     @query("")
 
@@ -77,12 +98,16 @@ class AssetModel
   constructor: (asset) ->
     @dxid = asset.dxid
     @name = asset.name
-    @describe = ko.observable()
+    @descriptionDisplay = ko.observable()
+    @archiveEntries = ko.observableArray()
+    @described = ko.observable(false)
 
   getDescribe: () ->
-    if _.isEmpty(@describe.peek())
+    if !@described.peek()
       Precision.api '/api/describe_asset', {id: @dxid}, (describe) =>
-        @describe(describe)
+        @descriptionDisplay(Precision.md.render(describe.description))
+        @archiveEntries(describe.archive_entries)
+        @described(true)
         $('.assets-modal').modal('handleUpdate')
 
 

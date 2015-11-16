@@ -57,12 +57,16 @@ class UserFile < ActiveRecord::Base
     return where.not(parent_type: 'Asset')
   end
 
+  def self.closed
+    return where(state: 'closed')
+  end
+
   def uid
     dxid
   end
 
   def deletable?
-    return (comparisons.count == 0) && ((parent_type == "User") || (parent_type == "Job"))
+    return ((parent_type == "User") || (parent_type == "Job"))
   end
 
   def publishable_by?(context)

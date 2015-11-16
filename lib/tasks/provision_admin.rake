@@ -76,7 +76,7 @@ namespace :provision do
     
     puts "Updating org with billing info"
     billing_info = {
-      email: "precisionfda-support@dnanexus.com",
+      email: "Elaine.Johanson@fda.hhs.gov",
       name: "Elaine Johanson",
       companyName: "FDA",
       address1: "10903 New Hampshire Ave",
@@ -87,7 +87,7 @@ namespace :provision do
       country: "USA",
       phone: "(301) 706-1836"
     }
-    auth.call(dxorg, "updateBillingInformation", {billingInformation: billing_info})
+    auth.call(dxorg, "updateBillingInformation", {billingInformation: billing_info, autoConfirm: '4edkfpbg'})
 
     puts "Provisioning user (username: #{user[:dxuser]}, final id: #{dxuserid})"
     auth.call("user", "new", {username: user[:dxuser], email: user[:email], first: user[:first_name], last: user[:last_name], billTo: ORG_EVERYONE})
@@ -98,6 +98,8 @@ namespace :provision do
     puts "Inviting user #{dxuserid} to org #{ORG_EVERYONE} as a member"
     api.call(ORG_EVERYONE, "invite", {invitee: dxuserid, level: 'MEMBER', allowBillableActivities: false, appAccess: true, projectAccess: 'VIEW', suppressEmailNotification: true})
 
+    o = nil
+    u = nil
     User.transaction do
       org[:state] = "complete"
       o = Org.create!(org)
@@ -112,6 +114,7 @@ namespace :provision do
       u = User.create!(user)
       o.update!(admin_id: u.id)
     end
+    AUDIT_LOGGER.info("A new user and organization have been created: user=#{u.as_json}, org=#{o.as_json}")
 
     # The following is required, otherwise rake continues
     # parsing the command line options and tries to run tasks

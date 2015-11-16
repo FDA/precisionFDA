@@ -20,6 +20,9 @@ class AppEditorModel
     @title = ko.observable(app?.title)
     @revision = ko.observable(app?.revision)
     @readme = ko.observable(app?.readme)
+    @readme.preview = ko.computed(=>
+      Precision.md.render(@readme())
+    )
     @code = ko.observable(app?.internal.code)
 
     # Assets
