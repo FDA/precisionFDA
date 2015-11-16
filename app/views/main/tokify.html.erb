@@ -1,4 +1,14 @@
 <% content_for :title do %>Key<% end %>
 
-<div style="padding:20px 40px; class=lead">This authorization key can be used for the next 24h. Please keep it safe:</div>
-<div class="alert alert-warning" style="color: black; max-width: 600px; word-wrap: break-word; margin: 20px; padding:20px; font-size: 10px; font-family: 'PT Mono', Menlo, Monaco, Consolas, 'Courier New', monospace"><%= @key %></div>
+<div class="container container-padded">
+  <div class="row">
+    <div class="col-md-12 col-md-offset-6">
+      <p class="lead">
+        This authorization key can be used for the next 24h.
+        <br>
+        Please keep it safe:
+      </p>
+      <div class="alert alert-warning text-monospace h5" style="color: black; word-wrap: break-word;"><%= @key %></div>
+    </div>
+  </div>
+</div>
