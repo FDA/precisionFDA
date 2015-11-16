@@ -30,12 +30,14 @@
 # -------------------------------+---+---+---+---
 # Shows up in files#index        | Y | Y | N | N
 # Shows up in files#show         | Y | Y | N | Y
-# Can be deleted independently   | Y | Y | * | N
+# Can be deleted independently   | Y | Y | Y | N
 # Can be published independently | Y | Y | Y | N
+# Can be attached independently  | Y | Y | Y | N
 # 
 # To help with the above, we define the following scopes
 # real_files: U || J
 # not_assets: U || J || C
+# independent: U || J || A
 #
 class UserFile < ActiveRecord::Base
   include Permissions
@@ -55,6 +57,10 @@ class UserFile < ActiveRecord::Base
 
   def self.not_assets
     return where.not(parent_type: 'Asset')
+  end
+
+  def self.independent
+    return where.not(parent_type: 'Comparison')
   end
 
   def self.closed

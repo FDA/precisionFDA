@@ -1,10 +1,7 @@
 class MainController < ApplicationController
-  skip_before_action :require_login, {except: :publish}
+  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access]}
 
   def index
-    if @context.logged_in?
-      @debug_info = "Debugging information from your cookie\nRails user id: #{@context.user_id}\nDNAnexus username: #{@context.username}\nDNAnexus token: #{@context.token}\nDNAnexus credentials expiration: #{Time.at(@context.expiration).to_s}"
-    end
   end
 
   def destroy
@@ -123,6 +120,12 @@ class MainController < ApplicationController
       raise "Invalid id '#{id}' in publish route"
     end
 
+  end
+
+  def tokify
+    context = @context.as_json
+    context["expiration"] = [context["expiration"], Time.now.to_i + 1.day].min
+    @key = rails_encryptor.encrypt_and_sign({context: context}.to_json)
   end
 
   private

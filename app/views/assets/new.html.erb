@@ -1,0 +1,17 @@
+<% content_for :title do %>Upload Asset<% end %>
+
+<div style="padding: 15px">
+  <p>To upload assets, follow these simple steps:<p>
+  <ul>
+    <li>Prepare your asset's content.<br> Assets are simple tarballs that get uncompressed in the root folder of the VM.
+    Therefore, create a fake root folder and assemble your files underneath it.<br>
+    For example, place binaries in fake_root/usr/bin,
+    and working directory files in fake_root/work/.</li>
+    <li>Write a short readme file describing the asset. Use the <a href="https://jonschlinkert.github.io/remarkable/demo/">Markdown syntax</a>.<br>
+    For inspiration on how to write useful readme files, see some of the existing assets published by the precisionFDA team.</li>
+    <li>Download the precisionFDA asset upload helper tool.</li>
+    <li><%= link_to "Click here to obtain an authorization key", tokify_path, method: :post %>, valid for use on the command line for 24h.</li>
+    <li>Run the precisionFDA asset upload helper tool: <code>python pfda_upload_asset --auth key --name my_asset.tar.gz --root /path/to/fake_root --readme my_asset.txt</code><br>
+    This command will archive the contents of the fake root into the named tarball, and upload it to precisionFDA along with the contents of the readme file.</li>
+  </ul>
+</div>
