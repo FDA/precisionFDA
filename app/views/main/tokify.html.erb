@@ -1,3 +1,4 @@
 <% content_for :title do %>Key<% end %>
 
-<div class="lead">Your key is <%= @key %> and it will expire in 24h.</div>
+<div style="padding:20px 40px; class=lead">This authorization key can be used for the next 24h. Please keep it safe:</div>
+<div class="alert alert-warning" style="color: black; max-width: 600px; word-wrap: break-word; margin: 20px; padding:20px; font-size: 10px; font-family: 'PT Mono', Menlo, Monaco, Consolas, 'Courier New', monospace"><%= @key %></div>
