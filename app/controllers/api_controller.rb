@@ -2,6 +2,8 @@ class ApiController < ApplicationController
   # TODO change all of this when this API will be called from the command-line.
   # For now don't skip the :require_login middleware, since this API is called from the web.
   skip_before_action :verify_authenticity_token
+  skip_before_action :require_login
+  before_action :require_api_login
 
   before_action :enforce_json_post
 
@@ -638,7 +640,8 @@ class ApiController < ApplicationController
 
     if !ids.nil?
       # This would happen if an asset becomes inaccessible
-      raise unless ids.size == result.size
+      # For now silently drop the asset -- allows for asset deletion
+      # raise unless ids.size == result.size
     end
 
     render json: result
