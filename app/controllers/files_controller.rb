@@ -12,7 +12,7 @@ class FilesController < ApplicationController
     user_files = UserFile.real_files.accessible_by(@context)
     @files_grid = initialize_grid(user_files,{
       include: [:user],
-      order: 'user_files.id',
+      order: 'user_files.created_at',
       order_direction: 'desc',
       per_page: 100
     })
