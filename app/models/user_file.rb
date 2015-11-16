@@ -66,7 +66,7 @@ class UserFile < ActiveRecord::Base
   end
 
   def deletable?
-    return (comparisons.count == 0) && ((parent_type == "User") || (parent_type == "Job"))
+    return ((parent_type == "User") || (parent_type == "Job"))
   end
 
   def publishable_by?(context)

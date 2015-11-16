@@ -70,46 +70,31 @@ class FilesController < ApplicationController
   end
 
   def destroy
-    @file = UserFile.real_files.accessible_by(@context).find_by!(dxid: params[:id])
+    @file = UserFile.real_files.where(user_id: @context.user_id).find_by!(dxid: params[:id])
 
-    if @file
-      projectID = @file.project
-      dxid = @file.dxid
-      filename = @file.name
+    UserFile.transaction do
+      @file.reload
 
-      if @file.comparisons.size == 0
-        # Delete from dB
-        UserFile.transaction do
-          @file.reload
-          if @file.state == "open"
-            user = User.find(@context.user_id)
-            user.open_files_count = user.open_files_count - 1
-            user.save!
-          elsif @file.state == "closing"
-            user = User.find(@context.user_id)
-            user.closing_files_count = user.closing_files_count - 1
-            user.save!
-          end
-          @file.destroy
-        end
-
-        if @file.destroyed?
-          # Delete on DNANEXUS API
-          DNAnexusAPI.new(@context.token).(projectID, "removeObjects", objects: [dxid])
-
-          # On Success
-          flash[:success] = "File \"#{filename}\" has been successfully deleted"
-          redirect_to files_path
-          return
-        else
-          flash[:error] = "Sorry, the file \"#{filename}\" could not be deleted"
-        end
-      else
-        flash[:error] = "Sorry, the file \"#{filename}\" could not be deleted as it is used in a comparison"
+      if @file.comparisons.count > 0
+        flash[:error] = "This file cannot be deleted because it participates in one or more comparisons. Please delete all the comparisons first."
+        redirect_to file_path(@file.dxid)
+        return
       end
-    else
-      flash[:error] = "The file with id \"#{ params[:id]}\" could not be found"
+      if @file.state == "open"
+        user = User.find(@context.user_id)
+        user.open_files_count = user.open_files_count - 1
+        user.save!
+      elsif @file.state == "closing"
+        user = User.find(@context.user_id)
+        user.closing_files_count = user.closing_files_count - 1
+        user.save!
+      end
+      @file.destroy
     end
-    redirect_to file_path(@file.dxid)
+
+    DNAnexusAPI.new(@context.token).call(@file.project, "removeObjects", objects: [@file.dxid])
+
+    flash[:success] = "File \"#{@file.name}\" has been successfully deleted"
+    redirect_to files_path
   end
 end
