@@ -154,7 +154,7 @@
             link_to(comparison.user.dxuser, user_path(comparison.user.dxuser))
           end
 
-          g.column name: 'Test Variant' do |comparison|
+          g.column name: 'Test set' do |comparison|
             file = comparison.input("test_vcf").user_file
             display = ""
             if !file.public?
@@ -171,7 +171,7 @@
             raw display
           end
 
-          g.column name: 'Benchmark' do |comparison|
+          g.column name: 'Benchmark set' do |comparison|
             file = comparison.input("ref_vcf").user_file
             display = ""
             if !file.public?
