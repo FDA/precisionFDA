@@ -638,7 +638,8 @@ class ApiController < ApplicationController
 
     if !ids.nil?
       # This would happen if an asset becomes inaccessible
-      raise unless ids.size == result.size
+      # For now silently drop the asset -- allows for asset deletion
+      # raise unless ids.size == result.size
     end
 
     render json: result
