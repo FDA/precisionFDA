@@ -41,7 +41,7 @@
 
 </div>
 
-<% if @comparison.user_id == @context.user_id && @comparison.state == 'done' %>
+<% if @comparison.state == 'done' %>
 <div class="pfda-toolbar">
   <div class="btn-group">
     <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
