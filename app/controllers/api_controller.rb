@@ -700,7 +700,7 @@ class ApiController < ApplicationController
   # title (string)
   #
   def list_notes
-    notes = Note.accessible_by(@context)
+    notes = Note.where(user_id: @context.user_id)
 
     result = notes.select(:id, :title).map do |note|
       {id: note.id, slug: note.to_param, title: note.title }
