@@ -1,5 +1,10 @@
 class AssetsController < ApplicationController
   def index
+    @toolbar = {
+      fixed: [
+        {icon: "fa fa-plus-square fa-fw", label: "Add Assets", link: new_asset_path}
+      ]
+    }
     # Refresh state of assets, if needed
     User.sync_assets!(@context.user_id, @context.token)
 
@@ -11,6 +16,9 @@ class AssetsController < ApplicationController
       order_direction: 'desc',
       per_page: 100
     })
+  end
+
+  def new
   end
 
   def show

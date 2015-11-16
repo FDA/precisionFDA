@@ -1,5 +1,7 @@
 <% content_for :title do %>Assets<% end %>
 
+<%= render "_partials/toolbar", toolbar: @toolbar  %>
+
 <%= grid(@assets_grid, show_filters: :when_filtered) do |g|
   g.blank_slate partial:  "_partials/empty_grid"
 
