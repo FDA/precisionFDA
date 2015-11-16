@@ -55,7 +55,7 @@ Rails.application.routes.draw do
       post 'download', on: :member
     end
     resources :notes
-    resources :assets, only: ['show', 'index', 'destroy']
+    resources :assets, only: ['show', 'index', 'destroy'], path: '/app_assets'
 
     get '/users', to: 'users#index'
     get "/users/:username", to: 'users#show', constraints: { username: /[^\/]*/ }, as: 'user'
