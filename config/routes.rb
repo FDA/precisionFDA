@@ -13,6 +13,7 @@ Rails.application.routes.draw do
     get 'about' => 'main#about'
     get 'about/:section' => 'main#about'
     get 'terms' => 'main#terms'
+    post 'tokify' => 'main#tokify'
 
     get 'exception_test' => "main#exception_test"
 
@@ -55,7 +56,7 @@ Rails.application.routes.draw do
       post 'download', on: :member
     end
     resources :notes
-    resources :assets, only: ['show', 'index', 'destroy'], path: '/app_assets'
+    resources :assets, only: ['show', 'index', 'destroy', 'new'], path: '/app_assets'
 
     get '/users', to: 'users#index'
     get "/users/:username", to: 'users#show', constraints: { username: /[^\/]*/ }, as: 'user'
