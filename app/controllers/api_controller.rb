@@ -478,7 +478,7 @@ class ApiController < ApplicationController
       app = nil
       App.transaction do
         ordered_assets.each do |asset_dxid|
-          fail "The app asset with id '#{asset_dxid}' does not exist or is not accessible by you." unless Asset.accessible_by(@context).where(dxid: asset_dxid).exists?
+          fail "The app asset with id '#{asset_dxid}' does not exist or is not accessible by you." unless Asset.closed.accessible_by(@context).where(dxid: asset_dxid).exists?
         end
         app_series_dxid = AppSeries.construct_dxid(@context.username, name)
         app_series = AppSeries.find_by(dxid: app_series_dxid)
@@ -627,9 +627,9 @@ class ApiController < ApplicationController
     ids = params[:ids]
     if !ids.nil?
       raise unless ids.is_a?(Array) && ids.all? { |id| id.is_a?(String) }
-      assets = Asset.accessible_by(@context).where(dxid: ids)
+      assets = Asset.closed.accessible_by(@context).where(dxid: ids)
     else
-      assets = Asset.accessible_by(@context)
+      assets = Asset.closed.accessible_by(@context)
     end
 
     result = assets.select(:dxid, :name).map do |asset|
@@ -679,7 +679,7 @@ class ApiController < ApplicationController
     prefix = params["prefix"]
     raise unless prefix.is_a?(String) && prefix.size >= 3
 
-    ids = Asset.accessible_by(@context).with_search_keyword(prefix).select(:dxid).distinct.limit(1000).map(&:dxid)
+    ids = Asset.closed.accessible_by(@context).with_search_keyword(prefix).select(:dxid).distinct.limit(1000).map(&:dxid)
     render json: { ids: ids }
   end
 
