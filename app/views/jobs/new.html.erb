@@ -3,7 +3,7 @@
 <div class="page-header clearfix">
   <div class="page-title pull-left"><span class="fa fa-cube"></span> Run <%= @app.title %></div>
   <div class="btn-group pull-right">
-    <button type="button" class="btn btn-lg" data-bind="css: {disabled: !isRunnable(), 'btn-default': !isRunnable(), 'btn-danger': isRunnable()}, attr: {disabled: !isRunnable()}, disable: !isRunnable(), click: run"><span class="fa fa-bolt"></span> <span data-bind="text: running() ? 'Running...':'Run App'"></span></button>
+    <button type="button" class="btn btn-lg" data-bind="css: {disabled: !isRunnable(), 'btn-default': !isRunnable(), 'btn-primary': isRunnable()}, attr: {disabled: !isRunnable()}, disable: !isRunnable(), click: run"><span class="fa fa-bolt"></span> <span data-bind="text: running() ? 'Running...':'Run App'"></span></button>
   </div>
 </div>
 
