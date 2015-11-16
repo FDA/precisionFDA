@@ -12,7 +12,7 @@ class NotesController < ApplicationController
       comparisons = @note.comparisons.accessible_by(@context)
       files = @note.real_files.accessible_by(@context)
       apps = @note.apps.accessible_by(@context)
-      jobs = @note.jobs
+      jobs = @note.jobs.accessible_by(@context)
 
       attachments = {
         comparisons: (comparisons.map { |o| o.slice(:id, :name, :stats)}),
@@ -20,53 +20,19 @@ class NotesController < ApplicationController
         apps: (apps.map { |o| o.slice(:id, :dxid, :title)}),
         jobs: (jobs.map { |o| o.slice(:id, :dxid, :name)})
       }
-      js note: @note.slice(:id, :content, :title), attachments: attachments
+      js note: @note.slice(:id, :content, :title), attachments: attachments, edit: params[:edit]
     end
   end
 
   def new
-    @note = Note.new({
+    # TODO: GET routes should not have side-effects; convert this to a POST
+    @note = Note.create!(
       title: "Untitled Note (#{DateTime.now.strftime("%Y-%m-%d %H:%M:%S")})",
       user_id: @context.user_id,
       scope: "private"
-    })
+    )
 
-    @note.save
-    redirect_to @note
-  end
-
-  def update
-    id = params[:id].to_i
-    raise unless id.is_a?(Integer)
-
-    attachments = params[:attachments]
-    # raise unless attachments.is_a?(Array)
-
-    updated = false
-    note = Note.find(params[:id])
-    if note[:user_id] == @context.user_id
-      Note.transaction do
-        note.attachments.destroy_all
-        attachments.each do |attachment|
-          # NOTE: I'm not sure why its send attachments in such a format
-          note.attachments.find_or_create_by(item_id: attachment[1][:id].to_i, item_type: attachment[1][:type])
-        end
-
-        params = note_params()
-        if note.update!(params)
-          updated = true
-          note.reload
-        end
-      end
-    end
-
-    render json: {
-      success: updated,
-      note: {
-        id: note.id,
-      },
-      path: note_path(note)
-    }
+    redirect_to note_path(@note, edit: true)
   end
 
   def destroy
@@ -76,11 +42,5 @@ class NotesController < ApplicationController
 
     flash[:success] = "Note \"#{note.title}\" has been successfully deleted"
     redirect_to :notes
-  end
-
-  private
-
-  def note_params
-    params.require(:note).permit(:title, :content)
   end
 end

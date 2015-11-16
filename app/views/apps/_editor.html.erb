@@ -27,9 +27,9 @@
     </div>
   </div>
 
-  <div class="editor-content" data-bind="visible: isContentVisible" style="display; none">
+  <div class="editor-content" data-bind="visible: isContentVisible" style="display: none">
     <!-- Nav tabs -->
-    <ul class="nav nav-tabs" role="tablist">
+    <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
       <li role="presentation" class="active">
           <a href="#app-io-spec" aria-controls="app-io-spec" role="tab" data-toggle="tab"><span class="fa fa-fw fa-puzzle-piece"></span>
             <span class="tab-label">I/O Spec</span>
@@ -61,23 +61,38 @@
 
     <!-- Tab panes -->
     <div class="tab-content">
-      <div role="tabpanel" class="tab-pane active" id="app-io-spec">
+      <div role="tabpanel" class="tab-pane tab-pane-padded active" id="app-io-spec">
         <%= render "apps/editor.io" %>
       </div>
 
-      <div role="tabpanel" class="tab-pane" id="app-environment">
+      <div role="tabpanel" class="tab-pane tab-pane-padded" id="app-environment">
         <%= render "apps/editor.environment" %>
       </div>
 
-      <div role="tabpanel" class="tab-pane" id="app-script">
+      <div role="tabpanel" class="tab-pane tab-pane-padded" id="app-script">
         <div class="ace-editor-section">
-          <div id="script-editor" class="ace-rounded" data-bind="ace: code, aceOptions: { mode: 'sh', theme: 'monokai', opts: {maxLines: Infinity} }"></div>
+          <div id="script-editor" class="ace-rounded" data-bind="ace: code, aceOptions: { mode: 'sh', theme: 'monokai', opts: {maxLines: Infinity, wrap: 'free'} }"></div>
         </div>
       </div>
 
       <div role="tabpanel" class="tab-pane" id="app-readme">
         <div class="ace-editor-section">
-          <div id="readme-editor" class="ace-rounded" data-bind="ace: readme, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity}}"></div>
+          <!-- Nav tabs -->
+          <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+            <li role="presentation" class="active"><a href="#tab-readme-editor" aria-controls="tab-readme-editor" role="tab" data-toggle="tab">Edit Readme</a></li>
+            <li role="presentation"><a href="#tab-readme-preview" aria-controls="tab-readme-preview" role="tab" data-toggle="tab">Preview</a></li>
+          </ul>
+
+          <!-- Tab panes -->
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-readme-editor">
+              <div id="readme-editor" class="ace-rounded" data-bind="ace: readme, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity, wrap: 'free'}}"></div>
+              <p class="help-block text-right">Format with <a href="https://jonschlinkert.github.io/remarkable/demo/" target="_blank">Markdown syntax <span class="fa fa-external-link-square" aria-hidden='true'></span></a></p>
+            </div>
+            <div role="tabpanel" class="tab-pane tab-pane-padded-lg" id="tab-readme-preview">
+              <div class="readme-preview pfda-md-rendered" data-bind="html: readme.preview"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

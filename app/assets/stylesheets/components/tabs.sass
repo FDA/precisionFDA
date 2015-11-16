@@ -2,6 +2,7 @@
 
 .nav.nav-tabs
   background-color: $brand-blue-subtler
+
   .tab-label
     text-transform: uppercase
   .tab-help
@@ -22,12 +23,18 @@
       padding-top: $padding-large-vertical
       padding-bottom: $padding-large-vertical
 
+    .tab-help
+      font-size: 65%
+
   .badge
     color: lighten($brand-blue-tertiary, 10%)
     padding: 3px
     background-color: transparent
 
 .tab-pane
+  .nav.nav-tabs
+    background-color: #fff
+
   &.tab-pane-padded, &.tab-pane-preview
     padding: $padding-base-vertical $padding-base-horizontal
 

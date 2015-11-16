@@ -14,6 +14,8 @@ Rails.application.routes.draw do
     get 'about/:section' => 'main#about'
     get 'terms' => 'main#terms'
 
+    get 'exception_test' => "main#exception_test"
+
     # API
     post '/api/create_file', to: 'api#create_file'
     post '/api/get_upload_url', to: 'api#get_upload_url'
@@ -30,6 +32,7 @@ Rails.application.routes.draw do
     post '/api/list_notes', to: 'api#list_notes'
     post '/api/describe_note', to: 'api#describe_note'
     post '/api/attach_to_notes', to: 'api#attach_to_notes'
+    post '/api/update_note', to: 'api#update_note'
 
     # The priority is based upon order of creation: first created -> highest priority.
     # See how all your routes lay out with "rake routes".

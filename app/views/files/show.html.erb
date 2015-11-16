@@ -61,9 +61,11 @@
 </div>
 
 <div class="pfda-toolbar">
+  <% if @file.parent_type != "Comparison" %>
   <div class="btn-group pull-left">
     <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
   </div>
+  <% end %>
 
   <div class="pull-right">
     <div class="btn-group">
@@ -154,7 +156,7 @@
             link_to(comparison.user.dxuser, user_path(comparison.user.dxuser))
           end
 
-          g.column name: 'Test Variant' do |comparison|
+          g.column name: 'Test set' do |comparison|
             file = comparison.input("test_vcf").user_file
             display = ""
             if !file.public?
@@ -171,7 +173,7 @@
             raw display
           end
 
-          g.column name: 'Benchmark' do |comparison|
+          g.column name: 'Benchmark set' do |comparison|
             file = comparison.input("ref_vcf").user_file
             display = ""
             if !file.public?

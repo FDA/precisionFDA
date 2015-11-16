@@ -68,6 +68,7 @@ namespace :provision do
     puts "Inviting user #{dxuserid} to org #{ORG_EVERYONE} as a member"
     api.call(ORG_EVERYONE, "invite", {invitee: dxuserid, level: 'MEMBER', allowBillableActivities: false, appAccess: true, projectAccess: 'VIEW', suppressEmailNotification: true})
 
+    u = nil
     User.transaction do
       user[:org_id] = o.id
       user[:schema_version] = User::CURRENT_SCHEMA
@@ -79,6 +80,7 @@ namespace :provision do
       user[:closing_assets_count] = 0
       u = User.create!(user)
     end
+    AUDIT_LOGGER.info("A new user has been created under the '#{o.handle}' organization: user=#{u.as_json}")
 
     # The following is required, otherwise rake continues
     # parsing the command line options and tries to run tasks

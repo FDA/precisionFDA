@@ -8,12 +8,17 @@ class MainController < ApplicationController
   end
 
   def destroy
+    AUDIT_LOGGER.info("User #{session[:username]} logged out")
     reset_session
     flash[:success] = "You were successfully logged out of precisionFDA"
     redirect_to root_url
   end
 
   def about
+  end
+
+  def exception_test
+    raise "This is an intentionally raised exception for testing email notification. Please contact Evan with any concerns"
   end
 
   def login
@@ -41,6 +46,7 @@ class MainController < ApplicationController
 
     user = User.find_by(dxuser: username)
     if user.nil?
+      AUDIT_LOGGER.info("User #{username} attempted to log in from an existing DNAnexus account")
       render "_partials/_error", status: 403, locals: {message: "ERROR: You cannot use an existing DNAnexus account (#{username}) to log into precisionFDA. You need to apply for and obtain a separate precisionFDA account."}
     else
       User.transaction do
@@ -64,11 +70,14 @@ class MainController < ApplicationController
           user.private_comparisons_project = private_comparisons_project
           user.public_files_project = public_files_project
           user.public_comparisons_project = public_comparisons_project
+
+          AUDIT_LOGGER.info("User #{username} logged in for the first time")
         end
         user.last_login = Time.now
         user.save!
       end
       save_session(user.id, username, token, expiration_time, user.org_id)
+      AUDIT_LOGGER.info("User #{username} logged in")
       redirect_to root_path
     end
   end
@@ -76,8 +85,9 @@ class MainController < ApplicationController
   def request_access
     @invitation = Invitation.new
     if request.post?
-      p = params.require(:invitation).permit(:first_name, :last_name, :email, :org, :duns, :address, :phone, :singular, :humanizer_answer, :humanizer_question_id)
+      p = params.require(:invitation).permit(:first_name, :last_name, :email, :org, :duns, :address, :phone, :singular, :req_reason, :req_data, :req_software, :humanizer_answer, :humanizer_question_id)
       p[:ip] = request.remote_ip.to_s
+      AUDIT_LOGGER.info("Access requested: #{p.to_json}")
       Invitation.transaction do
         @invitation = Invitation.create(p)
         if @invitation.persisted?

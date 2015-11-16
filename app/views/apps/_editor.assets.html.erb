@@ -9,10 +9,13 @@
       <div class="modal-body modal-body-search-selector modal-body-padless">
         <ul class="list-group list-group-selector">
           <li class="list-group-item">
-            <div class="has-feedback">
-              <label class="control-label sr-only">Search assets</label>
+            <div class="input-group">
               <input type="text" data-bind="textInput: query" class="form-control" placeholder="Search assets" autofocus/>
-              <span class="form-control-feedback" aria-hidden="true" data-bind="css: loading() ? 'fa fa-spinner fa-spin':'fa fa-search'"></span>
+              <span class="input-group-btn">
+                <a class="btn btn-link" data-bind="click: queryAction, css: queryActionClasses">
+                  <span data-bind="css: queryIconClasses"></span>
+                </a>
+              </span>
             </div>
           </li>
           <li class="list-group-item text-muted" data-bind="visible: !loading() && assets.filtered().length == 0">
@@ -34,16 +37,21 @@
         <div class="tab-content">
           <div role="tabpanel" class="tab-pane tab-pane-preview active">
             <!-- ko if: previewedAsset() -->
-              <!-- ko if: previewedAsset().describe() -->
-                <div class="h1">
-                  <a href="/assets/" data-bind="text: previewedAsset().name, attr: {href: '/assets/' + previewedAsset().dxid}" target="_blank"></a>
-                </div>
-                <p class="lead" data-bind="text: previewedAsset().describe().description"></p>
-                <div class="h4">Archive Contents</div>
-                <ul data-bind="foreach: previewedAsset().describe().archive_entries">
-                  <li data-bind="text: $data"></li>
-                </ul>
+              <div class="h2">
+                <a href="/assets/" data-bind="text: previewedAsset().name, attr: {href: '/assets/' + previewedAsset().dxid}" target="_blank"></a>
+              </div>
+              <hr>
+              <!-- ko if: previewedAsset().descriptionDisplay() -->
+              <div class="pfda-md-rendered" data-bind="html: previewedAsset().descriptionDisplay"></div>
               <!-- /ko -->
+              <!-- ko if: !previewedAsset().descriptionDisplay() -->
+                <div class="alert alert-warning">No description written for this asset</div>
+              <!-- /ko -->
+              <hr>
+              <div class="h4">Archive Contents</div>
+              <ul data-bind="foreach: previewedAsset().archiveEntries()">
+                <li data-bind="text: $data"></li>
+              </ul>
             <!-- /ko -->
           </div>
         </div>
