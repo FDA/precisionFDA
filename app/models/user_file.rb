@@ -57,6 +57,10 @@ class UserFile < ActiveRecord::Base
     return where.not(parent_type: 'Asset')
   end
 
+  def self.closed
+    return where(state: 'closed')
+  end
+
   def uid
     dxid
   end
