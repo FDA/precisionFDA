@@ -45,6 +45,10 @@
       <h5 class="list-group-item-heading">Duration</h5>
       <p class="list-group-item-text"><%= humanizeSeconds(@job.runtime) %></p>
     </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Energy Consumed</h5>
+      <p class="list-group-item-text"><span class="fa fa-industry"></span> <%= @job.energy %></p>
+    </li>
   </ul>
 </div>
 
