@@ -13,7 +13,9 @@ Submitted information:
   Reason: <%= @invitation.req_reason %>
   Data: <%= @invitation.req_data %>
   Software: <%= @invitation.req_software %>
-
+  Research intent? <%= !!@invitation.research_intent %>
+  Clinical intent? <%= !!@invitation.clinical_intent %>
+  
 Additional system information:
 
   Client IP address: <%= @invitation.ip %>
