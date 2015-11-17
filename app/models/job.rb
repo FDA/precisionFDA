@@ -91,6 +91,14 @@ class Job < ActiveRecord::Base
     end
   end
 
+  def energy
+    if describe.has_key?("totalPrice")
+      ((describe["totalPrice"] * 400 + 5).to_i / 5.0).to_i * 5
+    else
+      0
+    end
+  end
+
   def input_spec
     app.input_spec
   end
