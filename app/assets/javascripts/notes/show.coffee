@@ -84,6 +84,12 @@ class NoteModel
     @editing(!@editing())
     @noteEditor.resize()
 
+    if @editing()
+      Precision.bind.save(this, @save)
+      Precision.bind.traps()
+    else
+      Precision.unbind.traps()
+
   save: () ->
     @toggleEdit()
     @title(_.trim(@title.cache()))
@@ -165,14 +171,6 @@ NotesController::show = ->
   noteModel.toggleEdit() if params.edit?
 
   if params.note?
-    # FIXME: Only works on refresh
-    # $(window).on('beforeunload', () ->
-    #   if noteModel.editing()
-    #     "If you leave this page you will lose your unsaved changes."
-    #   else
-    #     return
-    # )
-
     $container.on('click', '.note-editing .note-attachments .attachment a', (e) -> e.preventDefault())
 
     $container.on('click', 'a[data-method=delete]', (e) -> noteModel.cancel())

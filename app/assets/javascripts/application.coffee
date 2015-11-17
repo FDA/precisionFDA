@@ -25,4 +25,6 @@
 #= require SparkMD5
 #= require paloma
 #= require knockout-ace/knockout-ace
+#= require mousetrap/mousetrap.min
+#= require mousetrap/mousetrap-global-bind.min
 #= require_tree .
