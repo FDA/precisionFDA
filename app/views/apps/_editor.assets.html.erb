@@ -22,7 +22,7 @@
             </div>
           </li>
           <li class="list-group-item text-muted" data-bind="visible: !loading() && assets.filtered().length == 0">
-            No assets found <a class="pull-right" data-bind="click: clearQuery">Clear query</a>
+            No assets found <a class="pull-right" data-bind="click: clearQuery, visible: !_.isEmpty(query())">Clear query</a>
           </li>
           <!-- ko foreach: assets.filtered -->
           <li class="list-group-item item-asset" data-bind="css: {active: $parent.previewedAsset() && $parent.previewedAsset().dxid == dxid}">
