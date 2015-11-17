@@ -82,7 +82,7 @@ class MainController < ApplicationController
   def request_access
     @invitation = Invitation.new
     if request.post?
-      p = params.require(:invitation).permit(:first_name, :last_name, :email, :org, :duns, :address, :phone, :singular, :req_reason, :req_data, :req_software, :humanizer_answer, :humanizer_question_id)
+      p = params.require(:invitation).permit(:first_name, :last_name, :email, :org, :duns, :address, :phone, :singular, :req_reason, :req_data, :req_software, :research_intent, :clinical_intent, :humanizer_answer, :humanizer_question_id)
       p[:ip] = request.remote_ip.to_s
       AUDIT_LOGGER.info("Access requested: #{p.to_json}")
       Invitation.transaction do
