@@ -108,6 +108,9 @@ class AppEditorModel
         true
     )
 
+    Precision.bind.save(this, @save)
+    Precision.bind.traps()
+
   onOpenAssetsModal: ->
     # Set up a subscription for when the assets will be loaded,
     # then set the selected assets
@@ -164,6 +167,7 @@ class AppEditorModel
     Precision.api('/api/create_app', params)
       .done((data) =>
         if data.id
+          Precision.unbind.traps()
           window.location.replace("/apps/#{data.id}/jobs")
         else if data.failure
           @errorMessage(data.failure)
