@@ -24,5 +24,5 @@ class Invitation < ActiveRecord::Base
   validates :org, presence: {message: "can't be blank unless you represent yourself"}, unless: :singular
   require_human_on :create
 
-  store :extras, accessors: [ :req_reason, :req_data, :req_software ], coder: JSON
+  store :extras, accessors: [ :req_reason, :req_data, :req_software, :research_intent, :clinical_intent ], coder: JSON
 end
