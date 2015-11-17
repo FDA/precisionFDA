@@ -20,7 +20,7 @@
 class Invitation < ActiveRecord::Base
   include Humanizer
   validates :first_name, :last_name, :email, :address, :phone, :req_reason, presence: true
-  validates :singular, inclusion: [true, false]
+  validates :singular, :research_intent, :clinical_intent, inclusion: [true, false]
   validates :org, presence: {message: "can't be blank unless you represent yourself"}, unless: :singular
   require_human_on :create
 

@@ -14,6 +14,8 @@
   <tr><td>Request reason:</td><td><%= @invitation.req_reason %></td></tr>
   <tr><td>Has Data:</td><td><%= @invitation.req_data %></td></tr>
   <tr><td>Has Software:</td><td><%= @invitation.req_software %></td></tr>
+  <tr><td>Research intent?</td><td><%= !!@invitation.research_intent %></td></tr>
+  <tr><td>Clinical intent?</td><td><%= !!@invitation.clinical_intent %></td></tr>
 </table>
 
 <h4>Additional system information:</h4>
