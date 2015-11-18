@@ -228,7 +228,7 @@
         <p>The app specification may designate which inputs are required and which are optional, and may provide default values for some of them. Required inputs are rendered in bold text, and the "Run App" button on the upper right will turn blue once all the required inputs have been provided.</p>
         <p>Additional help for each input (if provided by the app author) can be shown by hovering over the input label.</p>
         <p>It is a good idea to give a unique name to this execution, describing what it is about. You can do so by editing the "Job Name" textbox at the top. The box is pre-filled with the app's name as a starting point.</p>
-        <p>The app author has designated a specific hardware configuration (instance type) for the app to run on by default. If you need to change it (for example, if you are providing very large files, and the default instance type would cause the app to run out of hard disk space), then select a different instance type from the dropdown. See the <a href="#apps-instance-types">available instance types</a> for more info.</p>
+        <p>The app author has designated a specific hardware configuration (instance type) for the app to run on by default. If you need to change it (for example, if you are providing very large files, and the default instance type would cause the app to run out of hard disk space), then select a different instance type from the dropdown. See the <a href="#dev-instance-types">available instance types</a> for more info.</p>
         <p>Once you click the "Run App" button on the upper right, the system will generate a new job that encapsulates that particular execution.</p>
       </div>
 
@@ -280,13 +280,124 @@
         <p>After the job has started running, you can review its log by clicking the "View Log" button. The log shows each line of the app script as it is being executed, and any messages generated in the Linux "standard output" or "standard error" streams. In addition, every 10 minutes the log shows a status line with memory, CPU, hard drive, and network bandwidth utilization. If you are looking at the logs while the job is running, click the "Refresh" button (or simply refresh the web page) to fetch any log updates &mdash; the page does not update itself in real time.</p>
         <p>If the job is running (or queued for execution), you can terminate it by clicking the "Terminate" button.</p>
       </div>
-      <div id="apps-new" class="h2">Creating a new app</div>
+      <div id="dev" class="h1">Creating Apps</div>
       <div class="bs-docs-section">
         <p>To create a new app, click "Create App" in the Apps page. The following section walks you through important concepts of app development.</p>
       </div>
-      <div id="apps-name" class="h3">App naming conventions</div>
+      <div id="dev-name" class="h2">App naming conventions</div>
       <div class="bs-docs-section">
-        <p>We are still in the process of completing this section of the documentation. Please check back soon.</p>
+        <p>Apps have a machine-readable name that cannot contain spaces (such as "bwa-freebayes") and a human-readable title (such as "BWA-MEM and FreeBayes"). Among apps that you create, names need to be unique (you cannot author two distinct apps with the same name). This restriction is only per-user, meaning that you can still create an app with the same name as someone else's app. In fact, the system encourages you to use someone else's app as a starting point and make further tweaks and save it as your own app (a process called "<strong>forking</strong>" an app). This model was inspired from the model of GitHub repositories.</p>
+      </div>
+      <div id="dev-io" class="h2">Input and Output spec</div>
+      <div class="bs-docs-section">
+        <p>Apps require an input/output specification, which mandates what inputs they need from the user, and what outputs they are expected to generate. Note that an "input" is anything that needs to be received from the user and which can potentially vary between executions. These can be not only input files but also numerical or boolean values, and strings. In that sense, the "inputs" can be used both for receiving data to operate on as well as receiving configuration parameters. Each input field has the following properties:</p>
+        <table class="table table-bordered">
+          <thead>
+            <th>Property</th>
+            <th>Explanation</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Class</td>
+              <td>The kind of input. There are exactly five classes supported: file, string, integer, float and boolean.</td>
+            </tr>
+            <tr>
+              <td>Name</td>
+              <td>A machine-readable name for this input (no spaces allowed). The system will create a shell variable named after this, for your script to use.</td>
+            </tr>
+            <tr>
+              <td>Label</td>
+              <td>A human-readable label for this input. The system uses this to render the form that users see when launching the app.</td>
+            </tr>
+            <tr>
+              <td>Help text</td>
+              <td>Additional help text describing what this input field is about. The system shows this help text in the app details page, in the job details page, and upon hovering on an input during app launch.</td>
+            </tr>
+            <tr>
+              <td>Default value</td>
+              <td>A default value that this field will be pre-filled with when users launch the app. (You are not required to provide defaults; do so only if you need to guide users in choosing the right values.)</td>
+            </tr>
+            <tr>
+              <td>Optional?</td>
+              <td>Whether this field is optional or required. When launching an app, users must fill all required fields before they can continue.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>For example, let's consider an app which takes a BED file with genomic intervals, and extends each interval's coordinates by adding a fixed amount of padding on both sides. Here's an example of input spec:</p>
+        <table class="table table-bordered">
+          <thead>
+            <th>Property</th>
+            <th>Value for 1st input</th>
+            <th>Value for 2nd input</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Class</td>
+              <td>file</td>
+              <td>integer</td>
+            </tr>
+            <tr>
+              <td>Name</td>
+              <td>intervals</td>
+              <td>padding</td>
+            </tr>
+            <tr>
+              <td>Label</td>
+              <td>BED file with intervals</td>
+              <td>Padding amount to add</td>
+            </tr>
+            <tr>
+              <td>Help text</td>
+              <td>The BED file whose genomic intervals will be extended.</td>
+              <td>The number of base pairs to extend each interval along both directions.</td>
+            </tr>
+            <tr>
+              <td>Default value</td>
+              <td></td>
+              <td>10</td>
+            </tr>
+            <tr>
+              <td>Optional?</td>
+              <td>false</td>
+              <td>false</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>The output specification is similar to the input specification (but with no default values). When creating an app, you specify what kind of inputs your app is expected to create, and define names and labels for them. When your script runs, it is responsible for generating the respective outputs. If an output is marked as optional, your script is not required to produce it. See the <a href="#dev-script">app shell script</a> section for more information. To continue our aforementioned example, here is a potential output specification for our example app:</p>
+
+        <table class="table table-bordered">
+          <thead>
+            <th>Property</th>
+            <th>Value for 1st output</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Class</td>
+              <td>file</td>
+            </tr>
+            <tr>
+              <td>Name</td>
+              <td>padded_intervals</td>
+            </tr>
+            <tr>
+              <td>Label</td>
+              <td>Padded BED result</td>
+            </tr>
+            <tr>
+              <td>Help text</td>
+              <td>The generated BED file with the padded genomic intervals.</td>
+            </tr>
+            <tr>
+              <td>Optional?</td>
+              <td>false</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+      <div id="dev-vm-env" class="h2">VM Environment</div>
+      <div class="bs-docs-section">
+        <p>Apps run inside a virtual machine (VM); a computer on the cloud with a specific environment.
       </div>
 
       <div id="notes" class="h1">Notes</div>
@@ -330,12 +441,14 @@
               <li><a href="#apps-listing">Listing apps</a></li>
               <li><a href="#apps-run">Running an app</a></li>
               <li><a href="#job-details">Job details and logs</a></li>
-              <li>
-                <a href="#apps-new">Creating a new app</a>
-                <ul class="nav">
-                  <li><a href="#apps-name">App naming conventions</a></li>
-                </ul>
-              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#dev">Creating Apps</a>
+            <ul class="nav">
+              <li><a href="#dev-name">App naming conventions</a></li>
+              <li><a href="#dev-io">Input and Output spec</a></li>
+              <li><a href="#dev-vm-env">VM Environment</a></li>
             </ul>
           </li>
           <li>
