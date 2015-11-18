@@ -634,7 +634,7 @@ class ApiController < ApplicationController
       assets = Asset.closed.accessible_by(@context)
     end
 
-    result = assets.select(:dxid, :name).map do |asset|
+    result = assets.order(:name).select(:dxid, :name).map do |asset|
       {dxid: asset.dxid, name: asset.prefix }
     end
 
@@ -682,7 +682,7 @@ class ApiController < ApplicationController
     prefix = params["prefix"]
     raise unless prefix.is_a?(String) && prefix.size >= 3
 
-    ids = Asset.closed.accessible_by(@context).with_search_keyword(prefix).select(:dxid).distinct.limit(1000).map(&:dxid)
+    ids = Asset.closed.accessible_by(@context).with_search_keyword(prefix).order(:name).select(:dxid).distinct.limit(1000).map(&:dxid)
     render json: { ids: ids }
   end
 
