@@ -12,8 +12,8 @@ class AssetsController < ApplicationController
     assets = Asset.unscoped.accessible_by(@context)
     @assets_grid = initialize_grid(assets,{
       include: [:user],
-      order: 'user_files.id',
-      order_direction: 'desc',
+      order: 'user_files.name',
+      order_direction: 'asc',
       per_page: 100
     })
   end
