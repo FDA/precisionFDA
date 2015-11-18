@@ -50,7 +50,7 @@ class Job < ActiveRecord::Base
     "hidisk-4" => "mem1_ssd2_x4",
     "hidisk-8" => "mem1_ssd2_x8",
     "hidisk-16" => "mem1_ssd2_x16",
-    "hidisk-32" => "mem1_ssd2_x32"
+    "hidisk-36" => "mem1_ssd2_x36"
   }
 
   TERMINAL_STATES = ["terminated", "done", "failed"]
