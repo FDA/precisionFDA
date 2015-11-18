@@ -60,7 +60,7 @@ window.Precision.INSTANCES = [
   {value: "hidisk-4", label: "High Disk 4"}
   {value: "hidisk-8", label: "High Disk 8"}
   {value: "hidisk-16", label: "High Disk 16"}
-  {value: "hidisk-32", label: "High Disk 32"}
+  {value: "hidisk-36", label: "High Disk 36"}
 ]
 
 $(document).on 'page:load', ->
