@@ -1,7 +1,7 @@
-<% content_for :title do %>Upload Asset<% end %>
+<% content_for :title do %>Add Assets<% end %>
 
 <div class="page-header clearfix">
-  <div class="page-title"><span class="fa fa-file-zip-o fa-fw"></span> Asset Upload</div>
+  <div class="page-title"><span class="fa fa-file-zip-o fa-fw"></span> Add Assets</div>
 </div>
 
 <div class="container container-padded">
@@ -14,7 +14,7 @@
         <li class="list-group-item">
           <div class="lead">
             Prepare your asset's content.
-            <small class="help-block">Assets are simply tarballs that get uncompressed in the root folder of the computer where an app runs. Therefore, create a fake root folder and assemble your files underneath it. For additional details, see <%= link_to "the Asset section in the Docs", (about_path + "/how#app-assets") %>.</small>
+            <small class="help-block">Assets are simply tarballs that get uncompressed in the root folder of the computer where an app runs. Therefore, create a fake root folder and assemble your files underneath it. For additional details, see <%= link_to "Your own assets", (about_path + "/how#dev-own-assets") %> in the precisionFDA documentation guide.</small>
           </div>
           <blockquote>
             For example, place binaries in <code>fake_root/usr/bin</code>,
@@ -22,7 +22,7 @@
             and working directory files in <code>fake_root/work/</code>.
           </blockquote>
           <div class="lead">
-            <small class="help-block">Need to compile binaries in a compatible environment? <a href="https://dl.dnanex.us/F/D/VbBjXYXG6PB3Qkx15PGxBBjZ32P3xpk2x3BG1v7V/precisionFDA-50GB-dev-vmi.ova">Download the precisionFDA virtual machine image</a> and load it into <a href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a> to instantiate an environment similar to the one that apps get when they run on the cloud. Use <code>ubuntu</code> as the username and <code>precisionfda</code> as the password.
+            <small class="help-block">Need to compile binaries in a compatible environment? <a href="https://dl.dnanex.us/F/D/0gjB0F2bfpYpj8266xZ9VYfJbBBY7JFQ5VgKXPXx/PrecisionFDA-50GB-dev-vm-nopass.ova">Download the precisionFDA virtual machine image</a> and load it into <a href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a> to instantiate an environment similar to the one that apps get when they run on the cloud. Power on the machine and log in as the <code>ubuntu</code> user (no password is required to log in).
             </small>
           </div>
         </li>
@@ -30,12 +30,12 @@
           <div class="lead">
             Write a short readme file describing the asset. Use the <a target="_blank" href="https://jonschlinkert.github.io/remarkable/demo/">Markdown syntax</a>.
             <small class="help-block">
-              For inspiration on how to write useful readme files, see some of the existing assets published by the precisionFDA team.
+              For inspiration on how to write useful readme files, see some of the existing assets published by the precisionFDA team, and consult <%= link_to "Your own assets", (about_path + "/how#dev-own-assets") %> in the precisionFDA documentation guide for a markdown template.
             </small>
           </div>
         </li>
         <li class="list-group-item">
-          <div class="lead"><a class="btn btn-primary btn-lg" href="https://dl.dnanex.us/F/D/j7qZ1Vjp40G8VX258jvQvyzjZQzJ8BXpp22F4xgk/pfda-upload-asset-1.0.tar.gz"><span class="fa fa-download"></span> Download</a> the precisionFDA asset upload helper tool.</div>
+          <div class="lead"><a class="btn btn-primary btn-lg" href="https://dl.dnanex.us/F/D/j5J4pZxJgG81zqPKfkG6XJVj9K1Q9VK0zG2Zxv2B/pfda-upload-asset-1.0.1.tar.gz"><span class="fa fa-download"></span> Download</a> the precisionFDA asset upload helper tool.</div>
         </li>
         <li class="list-group-item">
           <div class="lead">
@@ -49,7 +49,7 @@
           <div class="lead">
             Run the precisionFDA asset upload helper tool:
             <br>
-            <code>./pfda-upload-asset --auth KEY --name my-asset.tar.gz --root /path/to/fake_root --readme my-asset.txt</code>
+            <small><code class="small">./pfda-upload-asset --auth KEY --name my-asset.tar.gz --root /path/to/fake_root --readme my-asset.txt</code></small>
             <small class="help-block">
               This command will archive the contents of the fake root into the named tarball, and upload it to precisionFDA along with the contents of the readme file.
             </small>
