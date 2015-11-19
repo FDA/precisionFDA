@@ -36,7 +36,7 @@ class UsersController < ApplicationController
             users = [org.admin] + org.users.order(:dxuser).all.reject { |u| u.id == org.admin_id }
             users.each do |user|
               role = user.id == org.admin_id ? "Admin:" : "Member:"
-              sheet.add_row [role, "", user.dxuser, user.first_name, user.last_name, user.email, user.created_at.strftime("%Y-%m-%d %H:%M"), user.last_login.strftime("%Y-%m-%d %H:%M")]
+              sheet.add_row [role, "", user.dxuser, user.first_name, user.last_name, user.email, user.created_at.strftime("%Y-%m-%d %H:%M"), user.last_login ? user.last_login.strftime("%Y-%m-%d %H:%M") : ""]
             end
             sheet.add_row
           end
