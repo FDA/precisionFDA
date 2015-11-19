@@ -3,10 +3,9 @@
 .alert-help-block
   padding: 10px
   margin-bottom: 10px
-  background-color: lighten($alert-warning-bg, 3%)
-  border-radius: $border-radius-small
-  border-left: 5px solid $alert-warning-border
-  color: $alert-warning-text
+  background-color: #f9f9f9
+  border-left: 5px solid #e5e5e5
+  color: $text-muted
   text-align: left
 
   > *
@@ -14,6 +13,26 @@
 
   .external-link-indicator
     display: none
+
+  &.alert-help-info
+    background-color: lighten($alert-info-bg, 5%)
+    border-color: $alert-info-border
+    color: $alert-info-text
+
+  &.alert-help-warning
+    background-color: lighten($alert-warning-bg, 3%)
+    border-color: $alert-warning-border
+    color: $alert-warning-text
+
+  &.alert-help-success
+    background-color: lighten($alert-success-bg, 5%)
+    border-color: $alert-success-border
+    color: $alert-success-text
+
+  &.alert-help-danger
+    background-color: lighten($alert-danger-bg, 5%)
+    border-color: $alert-danger-border
+    color: $alert-danger-text
 
 .simple-help, .alert-help-block
   a
