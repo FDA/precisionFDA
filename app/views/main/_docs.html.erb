@@ -314,7 +314,7 @@
             </tr>
             <tr>
               <td>Help text</td>
-              <td>Additional help text describing what this input field is about. The system shows this help text in the app details page, in the job details page, and upon hovering on an input during app launch.</td>
+              <td>Additional help text describing what this input field is about. The system shows this help text in the app details page ("spec" tab), and upon hovering on an input during app launch.</td>
             </tr>
             <tr>
               <td>Default value</td>
@@ -722,7 +722,29 @@ emit padded_intervals "$intervals_prefix".padded.bed</pre></p>
       <div class="bs-docs-section">
         <p>The Notes section lets you write and publish rich notes describing your thoughts and your work; for example, you can discuss how you used files, comparisons, and apps&mdash;which you can also attach to the note&mdash;to prove a certain point or to document a procedure. You can read what others have reported and access their attachments to take a closer look at their work or even reproduce it on your own.</p>
 
-        <p>We are still in the process of completing this section of the documentation. Please check back soon.</p>
+        <p>Notes are listed as cards, with their title at the top, a preview of their text in the middle, and the author at the bottom. If there are any attachments, the attached item counts are also displayed. The following icons are used to denote each collection: <span class="fa fa-files-o"> </span> = Files, <span class="fa fa-bullseye"> </span> = Comparisons, <span class="fa fa-tasks"> </span> = Jobs, <span class="fa fa-cubes"> </span> = Apps, and <span class="fa fa-file-archive-o"> </span> = Assets.</p>
+      </div>
+      <div id="notes-edit" class="h2">Editing notes</div>
+      <div class="bs-docs-section">
+        <p>Notes are written using <a href="https://jonschlinkert.github.io/remarkable/demo/">Markdown syntax</a>. While editing a note, you can switch between editing the Markdown content and previewing the result. The editing mode also allows you to remove any attachments. When you are happy with your edits, click Save to store your changes.</p>
+
+        <p>To attach an item (such as a file, an app, a job, a comparison, or an asset) to a note, navigate to the page of that item and click "Attach to Note". A list of all the notes authored by you will pop up. Select one or more notes and click Attach.</p>
+
+        <div class="alert alert-warning">
+          <span class="fa fa-warning" aria-hidden="true"></span> <strong>NOTE:</strong> Do not simultaneously keep the note editor open in editing mode in one browser window, while attaching items in another browser window. Unless you cancel editing and refresh the page, the pending editor window is not automatically informed of any changes by other windows, and when you finally hit "Save" it may overwrite the attachments.
+        </div>
+      </div>
+      <div id="notes-ideas" class="h2">Ideas for using notes</div>
+      <div class="bs-docs-section">
+        <p>Notes often function as a way to document information about their attachments. For that reason, when you visit the page of an item that has been attached to one or more notes, the system will show a "Notes" tab containing all related notes.</p>
+        
+        <p>When publishing items (like files or comparisons) to the precisionFDA community, it's a good idea to also publish a note describing why you are contributing these items and what you expect community members to do with them. This way, when someone stumbles upon a published item of yours, they can look up the relevant note to learn more.</p>
+
+        <div class="alert alert-info">
+          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> Notes can also function as organizational structures, i.e. as "virtual folders" which contain the attached items. For example, you can create a "scrapbook" note and while browsing the rest of the website, if you come across an interesting item, attach it to your scrapbook.
+        </div>
+
+        <p>Tell us how you'd like this feature to evolve. Are you interested in the ability to comment on other people's notes? Would you care to "subscribe" to a note and get notifications when it changes? Should notes be collaboratively edited? <a href="mailto:precisionfda@fda.hhs.gov">Drop us a note</a> (no pun intended!) with your ideas and suggestions.</p>
       </div>
     </div>
 
@@ -776,6 +798,10 @@ emit padded_intervals "$intervals_prefix".padded.bed</pre></p>
           </li>
           <li>
             <a href="#notes">Notes</a>
+            <ul class="nav">
+              <li><a href="#notes-edit">Editing notes</a></li>
+              <li><a href="#notes-ideas">Ideas for using notes</a></li>
+            </ul>
           </li>
         </ul>
       </nav>

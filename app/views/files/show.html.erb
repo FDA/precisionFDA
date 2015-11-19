@@ -123,7 +123,7 @@
   <div class="tab-content">
     <% if @notes.count > 0 %>
     <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-notes">
-      <%= render "notes/blocks", notes: @notes %>
+      <%= render "notes/cards", notes: @notes %>
     </div>
     <% end %>
     <% if @comparisons_grid.present? && @comparisons_grid.count > 0 %>

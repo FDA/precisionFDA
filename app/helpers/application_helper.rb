@@ -31,4 +31,13 @@ module ApplicationHelper
       }.compact.reverse.join(' ')
     end
   end
+
+  def alert_help(text, path, prompt = "Need help?")
+    prompt = "<span class='alert-help-prompt'>#{prompt}</span>" if !prompt.blank?
+    raw """
+    <div class='alert alert-help-block'>
+      <span class='fa fa-question-circle' aria-hidden='true'></span>#{prompt}<a href='#{path}' target='_blank'>#{text} <small class='external-link-indicator' aria-hidden='true'><span class='fa fa-external-link' ></span></small></a>
+    </div>
+    """
+  end
 end
