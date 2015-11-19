@@ -637,7 +637,7 @@ The following produces `file.vcf.gz` and `file.vcf.tbi`:
 
 ```
 bgzip file.vcf
-tabix -p file.vcf.gz
+tabix -p vcf file.vcf.gz
 ```
 
 ### Links
@@ -707,7 +707,7 @@ https://github.com/samtools/htslib/releases/tag/1.2.1</pre>
         <p>The system defines the prefix variable because it can be often used to name results. In our example app, we can name the padded intervals <code>"$intervals_prefix".padded.bed</code>.</p>
         <p>Your script needs to communicate back to the system its outputs. This is handled via a helper utility called <code>emit</code>. Use it as follows:</p>
         <ul>
-          <li>For string, integer, float and boolean outputs, type <code>emit&nbsp;&nbsp;<em>field</em>&nbsp;&nbsp;<em>value</em></code>. For example, if you've defined an output field called <code>qc_pass</code> of boolean type, use <code>emit qc_fail true</code> to set it to true.</li>
+          <li>For string, integer, float and boolean outputs, type <code>emit&nbsp;&nbsp;<em>field</em>&nbsp;&nbsp;<em>value</em></code>. For example, if you've defined an output field called <code>qc_pass</code> of boolean type, use <code>emit qc_pass true</code> to set it to true.</li>
           <li>For file outputs, type <code>emit&nbsp;&nbsp;<em>field</em>&nbsp;&nbsp;<em>filename</em></code>. This command will upload the particular file from the local hard disk of the virtual machine onto the cloud storage, and assign it to that field.</li>
         </ul>
         <p>To put it all together, here is what the script would look like for our example app:</p>
