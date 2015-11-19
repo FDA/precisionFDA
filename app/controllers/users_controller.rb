@@ -17,4 +17,45 @@ class UsersController < ApplicationController
   def show
     @user = User.find_by!(dxuser: params[:username])
   end
+
+  def report
+    @user = User.find_by!(dxuser: params[:username])
+    unless @context.user_id == @user.id && @user.can_run_reports?
+      redirect_to user_path(params[:username])
+      return
+    end
+    Axlsx::Package.new do |p|
+      p.use_autowidth = true
+      p.workbook.add_worksheet(:name => "Users") do |sheet|
+        sheet.add_row ["", "", "username", "first name", "last name", "email", "last login"]
+        Org.order(:name).all.each do |org|
+          ["name", "handle", "address", "phone"].each do |label|
+            sheet.add_row ["Organization #{label}:", org.send(label)]
+          end
+          users = [org.admin] + org.users.order(:dxuser).all.reject { |u| u.id == org.admin_id }
+          users.each do |user|
+            role = user.id == org.admin_id ? "Admin:" : "Member:"
+            last_login = user.last_login.nil? ? "" : Class.new.extend(ApplicationHelper).humanizeSeconds(Time.now - user.last_login)
+            sheet.add_row [role, "", user.dxuser, user.first_name, user.last_name, user.email, last_login]
+          end
+          sheet.add_row
+        end
+      end
+      Time.use_zone ActiveSupport::TimeZone.new('America/New_York') do
+        p.workbook.add_worksheet(:name => "Requests") do |sheet|
+          sheet.add_row ["time", "first name", "last name", "email", "organization", "self-represent?", "address", "phone", "duns", "research?", "clinical?", "has data?", "has software?", "reason" ]
+          Invitation.find_each do |inv|
+            row = []
+            row << inv.created_at.strftime("%Y-%m-%d-%H:%M")
+            row += [inv.first_name, inv.last_name, inv.email, inv.org, inv.singular, inv.address, inv.phone, inv.duns, inv.research_intent, inv.clinical_intent, inv.req_data, inv.req_software, inv.req_reason]
+            sheet.add_row row
+          end
+        end
+        filename = Time.now.strftime("precisionfda-report-%Y-%m-%d-%H:%M.xlsx")
+
+        send_data p.to_stream.read, filename: filename, type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        return
+      end
+    end
+  end
 end
