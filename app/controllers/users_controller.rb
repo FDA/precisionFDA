@@ -50,7 +50,7 @@ class UsersController < ApplicationController
             sheet.add_row row
           end
         end
-        filename = Time.now.strftime("precisionfda-report-%Y-%m-%d-%H:%M.xlsx")
+        filename = Time.current.strftime("precisionfda-report-%Y-%m-%d.xlsx")
 
         send_data p.to_stream.read, filename: filename, type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         return
