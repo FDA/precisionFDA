@@ -36,7 +36,7 @@ class UsersController < ApplicationController
             users = [org.admin] + org.users.order(:dxuser).all.reject { |u| u.id == org.admin_id }
             users.each do |user|
               role = user.id == org.admin_id ? "Admin:" : "Member:"
-              sheet.add_row [role, "", user.dxuser, user.first_name, user.last_name, user.email, user.created_at, user.last_login]
+              sheet.add_row [role, "", user.dxuser, user.first_name, user.last_name, user.email, user.created_at.strftime("%Y-%m-%d %H:%M"), user.last_login.strftime("%Y-%m-%d %H:%M")]
             end
             sheet.add_row
           end
@@ -45,7 +45,7 @@ class UsersController < ApplicationController
           sheet.add_row ["time", "first name", "last name", "email", "organization", "self-represent?", "address", "phone", "duns", "research?", "clinical?", "has data?", "has software?", "reason" ]
           Invitation.find_each do |inv|
             row = []
-            row << inv.created_at.strftime("%Y-%m-%d-%H:%M")
+            row << inv.created_at.strftime("%Y-%m-%d %H:%M")
             row += [inv.first_name, inv.last_name, inv.email, inv.org, inv.singular, inv.address, inv.phone, inv.duns, inv.research_intent, inv.clinical_intent, inv.req_data, inv.req_software, inv.req_reason]
             sheet.add_row row
           end
