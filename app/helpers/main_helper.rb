@@ -45,6 +45,18 @@ module MainHelper
     s
   end
 
+  def tutorial_complete?(count)
+    return count > 0
+  end
+
+  def tutorial_state(count)
+    state = "warning"
+    if count > 0
+      state = "default"
+    end
+    return state
+  end
+
   private
 
   def graph_nodes_recursive(nodes, graph)
