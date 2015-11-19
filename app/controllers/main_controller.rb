@@ -2,6 +2,13 @@ class MainController < ApplicationController
   skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access]}
 
   def index
+    if @context.logged_in?
+      @notes_count = Note.where(user_id: @context.user_id).count
+      @files_count = UserFile.real_files.where(user_id: @context.user_id).count
+      @comparisons_count = Comparison.where(user_id: @context.user_id).count
+      @apps_count = App.where(user_id: @context.user_id).count
+      @jobs_count = Job.where(user_id: @context.user_id).count
+    end
   end
 
   def destroy
