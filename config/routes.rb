@@ -60,6 +60,7 @@ Rails.application.routes.draw do
 
     get '/users', to: 'users#index'
     get "/users/:username", to: 'users#show', constraints: { username: /[^\/]*/ }, as: 'user'
+    post "/users/:username/report", to: 'users#report', constraints: { username: /[^\/]*/ }, as: 'report_user'
 
     # You can have the root of your site routed with "root"
     root 'main#index'

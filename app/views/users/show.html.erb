@@ -42,4 +42,7 @@
 
     </ul>
   </div>
+  <% if @user.can_run_reports? && @user.id == @context.user_id %>
+    <div class="lead"><%= link_to("Generate report", report_user_path(@user.dxuser), method: 'post') %></div>
+  <% end %>
 </div>

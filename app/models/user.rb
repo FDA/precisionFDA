@@ -61,6 +61,14 @@ class User < ActiveRecord::Base
     "#{first_name} #{last_name}"
   end
 
+  def can_run_reports?
+    if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
+      dxuser == "elaine.johanson"
+    else
+      org.handle == "precisionfda"
+    end
+  end
+
   def self.validate_email(email)
     /^(([^<>()\[\]\\.,;:\s@\"]+(\.[^<>()\[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/ =~ email
   end
