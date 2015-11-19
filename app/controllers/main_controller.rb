@@ -8,6 +8,7 @@ class MainController < ApplicationController
       @comparisons_count = Comparison.where(user_id: @context.user_id).count
       @apps_count = App.where(user_id: @context.user_id).count
       @jobs_count = Job.where(user_id: @context.user_id).count
+      @assets_count = Asset.where(user_id: @context.user_id).count
     end
   end
 
