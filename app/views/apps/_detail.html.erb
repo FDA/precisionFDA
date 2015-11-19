@@ -36,6 +36,7 @@
   <div class="btn-group">
     <div class="btn-group">
       <button type="button" class="btn btn-default btn-default-version dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="fa fa-history" aria-hidden="true"></span>
         <% if @app.user_id == @context.user_id %>
           <span class="text-muted">Revision:</span>
           <span class="app-revision"><%= @app.revision %></span>
@@ -263,7 +264,7 @@
 
     <% if @notes.present? && @notes.count > 0 %>
     <div role="tabpanel" class="tab-pane tab-pane-padded" id="app-notes">
-      <%= render "notes/blocks", notes: @notes %>
+      <%= render "notes/cards", notes: @notes %>
     </div>
     <% end %>
   <% end %>

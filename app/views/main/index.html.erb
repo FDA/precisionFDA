@@ -1,27 +1,7 @@
 <% content_for :title do %>Overview<% end %>
 
 <% if !@context.logged_in? %>
-  <h1 class="sr-only">Welcome to precisionFDA</h1>
-  <div class="jumbotron jumbotron-landing jumbotron-landing-guest jumbotron-particles">
-    <div class="container">
-      <div class="pfda-brand">
-        <%= image_tag("precisionFDA.white.navbar-guest.png", alt: "Welcome to PrecisionFDA") %>
-      </div>
-      <div class="btn-player-wrapper">
-        <a class="btn-player fa fa-play-circle" aria-label="Play precisionFDA Introduction Video">
-        </a>
-        <div class="jumbovideo">
-          <div class="jumbovideo-player-wrapper">
-            <div id="ytplayer" class="jumbovideo-player"></div>
-          </div>
-        </div>
-      </div>
-      <div class="guest-actions">
-        <p class="lead">A community platform for NGS assay evaluation and regulatory science exploration.</p>
-        <%= render "_partials/guest_actions" %>
-      </div>
-    </div>
-  </div>
+  <%= render "main/landing" %>
 <% else %>
   <div class="jumbotron jumbotron-landing jumbotron-particles">
     <div class="container">
@@ -29,141 +9,114 @@
       <p class="lead">A community platform for NGS assay evaluation and regulatory science exploration.</p>
     </div>
   </div>
+  <div class="container">
+    <div class="pfda-cards pfda-tutorial">
+      <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@notes_count) %>">
+        <div class="pfda-card-header">
+          <div class="pfda-card-title">
+            Create a Note
+          </div>
+        </div>
+        <div class="pfda-card-body">
+          Write and publish rich notes describing your thoughts and your work
+        </div>
+        <div class="pfda-card-footer pull-right">
+          <a class="btn btn-link" href="about/how/#notes">Learn</a>
+          <a class="btn btn-primary" href="<%= new_note_path %>">Create <%= 'first' if !tutorial_complete?(@notes_count) %> note</a>
+        </div>
+      </div>
+
+      <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@files_count) %>">
+        <div class="pfda-card-header">
+          <div class="pfda-card-title">
+            Upload a File
+          </div>
+        </div>
+        <div class="pfda-card-body">
+          Upload files to your private space to use as inputs for apps or comparisons
+        </div>
+        <div class="pfda-card-footer pull-right">
+          <a class="btn btn-link" href="about/how/#files">Learn</a>
+          <a class="btn btn-primary" href="<%= new_file_path %>">Upload <%= 'first' if !tutorial_complete?(@files_count) %> file</a>
+        </div>
+      </div>
+
+      <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@comparisons_count) %>">
+        <div class="pfda-card-header">
+          <div class="pfda-card-title">
+            Run a Comparison
+          </div>
+        </div>
+        <div class="pfda-card-body">
+          Look at the differences between a test set and a benchmark set of genomic variants
+        </div>
+        <div class="pfda-card-footer pull-right">
+          <a class="btn btn-link" href="about/how/#comparisons">Learn</a>
+          <a class="btn btn-primary" href="<%= new_comparison_path %>">Run <%= 'first' if !tutorial_complete?(@comparisons_count) %> comparison</a>
+        </div>
+      </div>
+
+      <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@jobs_count) %>">
+        <div class="pfda-card-header">
+          <div class="pfda-card-title">
+            Launch an App
+          </div>
+        </div>
+        <div class="pfda-card-body">
+          Run bioinformatics or other Linux-based software on the cloud
+        </div>
+        <div class="pfda-card-footer pull-right">
+          <a class="btn btn-link" href="about/how/#apps-listing">Learn</a>
+          <a class="btn btn-primary" href="<%= apps_path %>">Launch <%= 'first' if !tutorial_complete?(@jobs_count) %> app</a>
+        </div>
+      </div>
+
+      <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@assets_count) %>">
+        <div class="pfda-card-header">
+          <div class="pfda-card-title">
+            Add an Asset
+          </div>
+        </div>
+        <div class="pfda-card-body">
+          Contribute a tarball with software that can be used by apps
+        </div>
+        <div class="pfda-card-footer pull-right">
+          <a class="btn btn-link" href="about/how/#dev-assets">Learn</a>
+          <a class="btn btn-primary" href="<%= assets_path %>">Add <%= 'first' if !tutorial_complete?(@assets_count) %> asset</a>
+        </div>
+      </div>
+
+      <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@apps_count) %>">
+        <div class="pfda-card-header">
+          <div class="pfda-card-title">
+            Create your own app
+          </div>
+        </div>
+        <div class="pfda-card-body">
+          Combine assets with a shell script, and achieve just about anything
+        </div>
+        <div class="pfda-card-footer pull-right">
+          <a class="btn btn-link" href="about/how/#dev">Learn</a>
+          <a class="btn btn-primary" href="<%= new_app_path %>">Create <%= 'first' if !tutorial_complete?(@apps_count) %> app</a>
+        </div>
+      </div>
+
+      <a class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-success-solid" href="<%= about_path %>/how">
+        <div class="pfda-card-header lead text-center">
+          Ready to learn more?
+        </div>
+        <div class="pfda-card-body pfda-card-body-icon">
+          <span class="fa fa-map-o" aria-hidden="true"></span>
+        </div>
+        <div class="pfda-card-footer lead lead-bold text-center">
+          Read our Docs
+        </div>
+      </a>
+    </div>
+  </div>
 <% end %>
 
-<div class="showcase container">
-  <div class="showcase-item">
-    <div class="showcase-icon">
-      <span class="fa fa-sticky-note" aria-hidden="true"></span>
-    </div>
-    <div class="showcase-content">
-      <div class="showcase-heading">Notes</div>
-      <ul class="list-unstyled lead">
-        <li class="media">
-          <div class="media-left">
-            <span class="fa fa-fw fa-edit" aria-hidden="true"></span>
-          </div>
-          <div class="media-body">
-            <strong>Write and publish</strong> rich notes describing your thoughts and your work
-          </div>
-        </li>
-        <li class="media">
-          <div class="media-left">
-            <span class="fa fa-fw fa-paperclip" aria-hidden="true"></span>
-          </div>
-          <div class="media-body">
-            <strong>Attach</strong> any files, comparisons, or apps
-          </div>
-        </li>
-        <li class="media">
-          <div class="media-left">
-            <span class="fa fa-fw fa-copy" aria-hidden="true"></span>
-          </div>
-          <div class="media-body">
-            <strong>Read</strong> what others are reporting and reproduce their workflows
-          </div>
-        </li>
-      </ul>
-    </div>
-  </div>
-  <div class="showcase-item">
-    <div class="showcase-icon">
-      <span class="fa fa-files-o" aria-hidden="true"></span>
-    </div>
-    <div class="showcase-content">
-      <div class="showcase-heading">Files</div>
-      <ul class="list-unstyled lead">
-        <li class="media">
-          <div class="media-left">
-            <span class="fa fa-fw fa-cloud-upload" aria-hidden="true"></span>
-          </div>
-          <div class="media-body">
-            <strong>Upload</strong> your own files on cloud storage
-          </div>
-        </li>
-        <li class="media">
-          <div class="media-left">
-            <span class="fa fa-fw fa-bolt" aria-hidden="true"></span>
-          </div>
-          <div class="media-body">
-            <strong>Generate</strong> files through running apps
-          </div>
-        </li>
-        <li class="media">
-          <div class="media-left">
-            <span class="fa fa-fw fa-bullhorn" aria-hidden="true"></span>
-          </div>
-          <div class="media-body">
-            <strong>Publish</strong> reference data or any other files
-          </div>
-        </li>
-        <li class="media">
-          <div class="media-left">
-            <span class="fa fa-fw fa-list-alt" aria-hidden="true"></span>
-          </div>
-          <div class="media-body">
-            <strong>Browse</strong> other members' contributions
-          </div>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="showcase-item">
-    <div class="showcase-icon">
-      <span class="fa fa-bullseye"></span>
-    </div>
-    <div class="showcase-content">
-      <div class="showcase-heading">Comparisons</div>
-      <ul class="list-unstyled lead">
-        <li class="media">
-          <div class="media-left">
-            <span class="fa fa-fw fa-signal" aria-hidden="true"></span>
-          </div>
-          <div class="media-body">
-            <strong>Quantify</strong> the similarity between two sets of genomic variants (VCF files)
-          </div>
-        </li>
-        <li class="media">
-          <div class="media-left">
-            <span class="fa fa-fw fa-balance-scale" aria-hidden="true"></span>
-          </div>
-          <div class="media-body">
-            <strong>Compare</strong> your own test set (for a given biospecimen) to established benchmark sets
-          </div>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="showcase-item">
-    <div class="showcase-icon">
-      <span class="fa fa-cubes"></span>
-    </div>
-    <div class="showcase-content">
-      <div class="showcase-heading">Apps</div>
-      <ul class="list-unstyled lead">
-        <li class="media">
-          <div class="media-left">
-            <span class="fa fa-fw fa-bolt" aria-hidden="true"></span>
-          </div>
-          <div class="media-body">
-            <strong>Run</strong> mapping and variation calling pipelines or other Linux-based software apps on the cloud
-          </div>
-        </li>
-        <li class="media">
-          <div class="media-left">
-            <span class="fa fa-fw fa-code" aria-hidden="true"></span>
-          </div>
-          <div class="media-body">
-            <strong>Contribute</strong> your own software and scripts and let others explore them
-          </div>
-        </li>
-      </ul>
-    </div>
-  </div>
-</div>
-
+<% if !@context.logged_in? %>
 <div class="below-fold-actions">
   <a class="btn accessible-btn-primary btn-lg" href="<%= about_path %>">
     <span class="fa fa-info-circle" aria-hidden="true"></span> Learn more about precisionFDA
@@ -172,5 +125,6 @@
   <a class="btn accessible-btn-link btn-lg" href="mailto:precisionfda@fda.hhs.gov"><span class="fa fa-fw fa-commenting-o" aria-hidden="true"></span> Feedback</a>
   <a class="btn accessible-btn-link btn-lg hide" href="https://docs.google.com/forms/d/1zfGoy-4C9kLbHHg0Y-6iQoI3fdGq1IfugV9fXCqOBfY/viewform" target="_blank"><span class="fa fa-fw fa-commenting-o" aria-hidden="true"></span> Feedback</a>
 </div>
+<% end %>
 
 <%= render "_partials/fda_footer" %>

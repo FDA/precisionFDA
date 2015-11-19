@@ -47,7 +47,7 @@
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Energy Consumed</h5>
-      <p class="list-group-item-text"><span class="fa fa-industry"></span> <%= @job.energy %></p>
+      <p class="list-group-item-text"><span class="fa fa-industry"></span> <%= @job.terminal? ? @job.energy : 'TBD' %></p>
     </li>
   </ul>
 </div>
@@ -148,7 +148,7 @@
 
   <% if @notes.count > 0 %>
   <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-notes">
-    <%= render "notes/blocks", notes: @notes %>
+    <%= render "notes/cards", notes: @notes %>
   </div>
   <% end %>
 </div>

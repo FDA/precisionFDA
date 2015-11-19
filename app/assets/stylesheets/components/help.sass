@@ -1,0 +1,29 @@
+@import "_common"
+
+.alert-help-block
+  padding: 10px
+  margin-bottom: 10px
+  background-color: lighten($alert-warning-bg, 3%)
+  border-radius: $border-radius-small
+  border-left: 5px solid $alert-warning-border
+  color: $alert-warning-text
+  text-align: left
+
+  > *
+    margin-right: 5px
+
+  .external-link-indicator
+    display: none
+
+.simple-help, .alert-help-block
+  a
+    color: $brand-info // alt: #02bfe7
+    &:hover
+      color: darken($brand-info, 10%)
+      .external-link-indicator
+        display: inline
+
+.simple-help
+  font-size: 85%
+  .fa
+    color: $brand-blue-tertiary
