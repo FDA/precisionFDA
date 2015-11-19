@@ -26,22 +26,21 @@ class UsersController < ApplicationController
     end
     Axlsx::Package.new do |p|
       p.use_autowidth = true
-      p.workbook.add_worksheet(:name => "Users") do |sheet|
-        sheet.add_row ["", "", "username", "first name", "last name", "email", "last login"]
-        Org.order(:name).all.each do |org|
-          ["name", "handle", "address", "phone"].each do |label|
-            sheet.add_row ["Organization #{label}:", org.send(label)]
-          end
-          users = [org.admin] + org.users.order(:dxuser).all.reject { |u| u.id == org.admin_id }
-          users.each do |user|
-            role = user.id == org.admin_id ? "Admin:" : "Member:"
-            last_login = user.last_login.nil? ? "" : Class.new.extend(ApplicationHelper).humanizeSeconds(Time.now - user.last_login)
-            sheet.add_row [role, "", user.dxuser, user.first_name, user.last_name, user.email, last_login]
-          end
-          sheet.add_row
-        end
-      end
       Time.use_zone ActiveSupport::TimeZone.new('America/New_York') do
+        p.workbook.add_worksheet(:name => "Users") do |sheet|
+          sheet.add_row ["", "", "username", "first name", "last name", "email", "provisioned at", "last login"]
+          Org.order(:name).all.each do |org|
+            ["name", "handle", "address", "phone"].each do |label|
+              sheet.add_row ["Organization #{label}:", org.send(label)]
+            end
+            users = [org.admin] + org.users.order(:dxuser).all.reject { |u| u.id == org.admin_id }
+            users.each do |user|
+              role = user.id == org.admin_id ? "Admin:" : "Member:"
+              sheet.add_row [role, "", user.dxuser, user.first_name, user.last_name, user.email, user.created_at, user.last_login]
+            end
+            sheet.add_row
+          end
+        end
         p.workbook.add_worksheet(:name => "Requests") do |sheet|
           sheet.add_row ["time", "first name", "last name", "email", "organization", "self-represent?", "address", "phone", "duns", "research?", "clinical?", "has data?", "has software?", "reason" ]
           Invitation.find_each do |inv|
