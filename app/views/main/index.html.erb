@@ -29,15 +29,15 @@
       <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@files_count) %>">
         <div class="pfda-card-header">
           <div class="pfda-card-title">
-            Add Files
+            Upload a File
           </div>
         </div>
         <div class="pfda-card-body">
-          Upload files to your private space to run apps or comparisons on them
+          Upload files to your private space to use as inputs for apps or comparisons
         </div>
         <div class="pfda-card-footer pull-right">
           <a class="btn btn-link" href="about/how/#files">Learn</a>
-          <a class="btn btn-primary" href="<%= new_file_path %>">Upload <%= 'first' if !tutorial_complete?(@files_count) %> files</a>
+          <a class="btn btn-primary" href="<%= new_file_path %>">Upload <%= 'first' if !tutorial_complete?(@files_count) %> file</a>
         </div>
       </div>
 
@@ -48,41 +48,56 @@
           </div>
         </div>
         <div class="pfda-card-body">
-          Compare two variant sets; a test set and a benchmark set
+          Look at the differences between a test set and a benchmark set of genomic variants
         </div>
         <div class="pfda-card-footer pull-right">
           <a class="btn btn-link" href="about/how/#comparisons">Learn</a>
-          <a class="btn btn-primary" href="<%= new_comparison_path %>">Start <%= 'first' if !tutorial_complete?(@comparisons_count) %> comparison</a>
+          <a class="btn btn-primary" href="<%= new_comparison_path %>">Run <%= 'first' if !tutorial_complete?(@comparisons_count) %> comparison</a>
         </div>
       </div>
 
-      <div class="hide pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@jobs_count) %>">
+      <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@jobs_count) %>">
         <div class="pfda-card-header">
           <div class="pfda-card-title">
-            Run an App
+            Launch an App
           </div>
         </div>
         <div class="pfda-card-body">
-          Run mapping and variation calling pipelines or other Linux-based software on the cloud
+          Run bioinformatics or other Linux-based software on the cloud
         </div>
         <div class="pfda-card-footer pull-right">
-          <a class="btn btn-link" href="about/how/#apps-run">Learn</a>
+          <a class="btn btn-link" href="about/how/#apps-listing">Learn</a>
           <a class="btn btn-primary" href="<%= apps_path %>">Launch <%= 'first' if !tutorial_complete?(@jobs_count) %> app</a>
         </div>
       </div>
 
-      <div class="hide pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@apps_count) %>">
+      <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@assets_count) %>">
         <div class="pfda-card-header">
           <div class="pfda-card-title">
-            Build your own App
+            Add an Asset
           </div>
         </div>
         <div class="pfda-card-body">
-            Add or write your own software to run custom sripts on the cloud
+          Contribute a tarball with software that can be used by apps
         </div>
         <div class="pfda-card-footer pull-right">
-          <a class="btn btn-link" href="about/how/#apps">Learn</a>
-          <a class="btn btn-primary" href="<%= new_app_path %>">Build <%= 'first' if !tutorial_complete?(@apps_count) %> app</a>
+          <a class="btn btn-link" href="about/how/#dev-assets">Learn</a>
+          <a class="btn btn-primary" href="<%= assets_path %>">Add <%= 'first' if !tutorial_complete?(@assets_count) %> asset</a>
+        </div>
+      </div>
+
+      <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@apps_count) %>">
+        <div class="pfda-card-header">
+          <div class="pfda-card-title">
+            Create your own app
+          </div>
+        </div>
+        <div class="pfda-card-body">
+          Combine assets with a shell script, and achieve just about anything
+        </div>
+        <div class="pfda-card-footer pull-right">
+          <a class="btn btn-link" href="about/how/#dev">Learn</a>
+          <a class="btn btn-primary" href="<%= new_app_path %>">Create <%= 'first' if !tutorial_complete?(@apps_count) %> app</a>
         </div>
       </div>
 
