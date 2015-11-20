@@ -31,7 +31,7 @@
           <div role="tabpanel" class="tab-pane tab-pane-preview active" data-bind="visible: notes.filtered().length">
             <!-- ko if: previewedNote() -->
               <div class="h2">
-                <a href="/assets/" data-bind="text: previewedNote().title, attr: {href: '/notes/' + previewedNote().slug}" target="_blank"></a>
+                <a href="/notes/" data-bind="text: previewedNote().title, attr: {href: '/notes/' + previewedNote().slug}" target="_blank"></a>
               </div>
               <hr>
               <!-- ko if: previewedNote().content() -->
