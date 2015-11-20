@@ -211,7 +211,7 @@ class IOModel
               parseFloat(rawChoice)
             else
               _.trim(rawChoice)
-          choices.push(choice) if !_.isNaN(choice)
+          choices.push(choice) if !_.isNaN(choice) && choice != ""
         @choices(choices)
     })
     @choicesPlaceholder = ko.computed(=>
