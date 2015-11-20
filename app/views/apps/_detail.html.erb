@@ -137,7 +137,7 @@
       <span class="tab-label">Spec</span>
     </a>
   </li>
-  <% if @app.present? && !@app.readme.blank? %>
+  <% if !@app.readme.blank? %>
   <li role="presentation">
     <a href="#app-readme" aria-controls="app-readme" role="tab" data-toggle="tab"><span class="fa fa-fw fa-info"></span>
       <span class="tab-label">README</span>
@@ -216,6 +216,14 @@
       end -%>
     </div>
   </div>
+  <% elsif %>
+    <% if !@app.present? %>
+    <div role="tabpanel" class="tab-pane tab-pane-padded active" id="app-job">
+      <div class="alert alert-info">
+        You haven't run any apps yet. <a href="<%= about_path %>/how#apps">Learn more about apps and how to run them</a>
+      </div>
+    </div>
+    <% end %>
   <% end %>
 
   <% if @app.present? %>
