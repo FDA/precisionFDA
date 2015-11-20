@@ -104,6 +104,10 @@ class InputModel
               @value(value)
     )
 
+    @needsToBeSet = ko.computed(=>
+      return !@value()? && @isRequired
+    )
+
   # Boolean Functions
   toggleTrue: (e) ->
     if @value() == true

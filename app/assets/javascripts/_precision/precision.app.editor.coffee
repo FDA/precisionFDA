@@ -196,12 +196,37 @@ class IOModel
     @defaultValue = ko.observable(defaultValue)
     @isOptional = ko.observable(spec.optional ? false)
     # @patterns = ko.observable(spec.patterns)
-    # @choices = ko.observable(spec.choices)
+    @choices = ko.observableArray(spec.choices)
+    @choicesValue = ko.computed({
+      read: () =>
+        @choices().join(', ')
+      write: (choicesEntered) =>
+        choices = []
+        rawChoices = _.trim(choicesEntered).split(',')
+        for rawChoice in rawChoices
+          choice = switch @klass()
+            when 'int'
+              parseInt(rawChoice, 10)
+            when 'float'
+              parseFloat(rawChoice)
+            else
+              _.trim(rawChoice)
+          choices.push(choice) if !_.isNaN(choice)
+        @choices(choices)
+    })
+    @choicesPlaceholder = ko.computed(=>
+      "Optional comma separated #{@klass()}s"
+    )
+
+    @isChoicesVisible = ko.observable(spec.choices?)
 
     @error = ko.observable()
 
     @isClassAnArray = ko.computed =>
       @klass().indexOf('array') == 0
+
+  toggleChoices: () ->
+    @isChoicesVisible(!@isChoicesVisible())
 
   remove: (item) ->
     io = if @ioType == "input" then @viewModel.inputs else @viewModel.outputs
@@ -214,6 +239,7 @@ class IOModel
       label: @label.peek() ? ""
       name: @name.peek()
       optional: @isOptional() ? false
+      choices: @choices() ? []
 
     if @ioType == "input"
       defaultValue = @getValueForDefault()
