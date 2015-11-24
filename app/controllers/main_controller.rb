@@ -107,29 +107,20 @@ class MainController < ApplicationController
   def publish
     id = params[:id]
     raise "Missing id in publish route" unless id.is_a?(String) && id.present?
+    @graph = get_graph(id)
+    if params[:uids]
+      uids = params[:uids]
+      raise "The object 'uids' must be a hash of object ids (strings) with value 'on'." unless uids.is_a?(Hash) && uids.all? { |uid, checked| uid.is_a?(String) && checked == "on" }
 
-    if id =~ /^(job|app|file)-(.{24})$/
-      klass = {
-        "job" => Job,
-        "app" => App,
-        "file" => UserFile,
-        "note" => Note
-      }[$1]
-      record = klass.find_by!(dxid: id, user_id: @context.user_id)
-      @graph = self.send("publish_#{$1}", record)
-    elsif id =~ /^comparison-(\d+)$/
-      # Transitional until comparisons get real dxids
-      id = $1.to_i
-      comparison = Comparison.find_by!(id: id, user_id: @context.user_id)
-      @graph = publish_comparison(comparison)
-    elsif id =~ /^note-(\d+)$/
-      id = $1.to_i
-      note = Note.find_by!(id: id, user_id: @context.user_id)
-      @graph = publish_note(note)
-    else
-      raise "Invalid id '#{id}' in publish route"
+      #TODO: Iterate through uids and publish them, then redirect to 'id' with a success alert
     end
+    js graph: slice_node(@graph)
+  end
 
+  def history
+    id = params[:id]
+    raise "Missing id in publish route" unless id.is_a?(String) && id.present?
+    @graph = get_graph(id)
   end
 
   def tokify
@@ -139,6 +130,43 @@ class MainController < ApplicationController
   end
 
   private
+
+  def get_graph(id)
+    if id =~ /^(job|app|file)-(.{24})$/
+      klass = {
+        "job" => Job,
+        "app" => App,
+        "file" => UserFile,
+        "note" => Note
+      }[$1]
+      record = klass.find_by!(dxid: id, user_id: @context.user_id)
+      graph = self.send("publish_#{$1}", record)
+    elsif id =~ /^comparison-(\d+)$/
+      # Transitional until comparisons get real dxids
+      id = $1.to_i
+      comparison = Comparison.find_by!(id: id, user_id: @context.user_id)
+      graph = publish_comparison(comparison)
+    elsif id =~ /^note-(\d+)$/
+      id = $1.to_i
+      note = Note.find_by!(id: id, user_id: @context.user_id)
+      graph = publish_note(note)
+    else
+      raise "Invalid id '#{id}' in publish route"
+    end
+    return graph
+  end
+
+  def slice_node(node)
+    children = node[1]
+    if children.length > 0
+      children = children.map {|child| slice_node(child)}
+    end
+    node_sliced = node[0].slice(:uid, :user_id, :title, :scope)
+    node_sliced[:owned] = node_sliced[:user_id] == @context.user_id
+    node_sliced[:class] = node[0].class.name.demodulize
+    # node_sliced[:path] = node[0].path
+    return [node_sliced, children]
+  end
 
   def publish_job(job)
     if job.user_id != @context.user_id

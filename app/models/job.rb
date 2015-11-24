@@ -59,6 +59,10 @@ class Job < ActiveRecord::Base
     dxid
   end
 
+  def title
+    name
+  end
+  
   def resolved_instance_type
     run_instance_type || instance_type
   end

@@ -43,6 +43,10 @@ class Comparison < ActiveRecord::Base
     "comparison-" + dxjobid.sub(/^job-/, '')
   end
 
+  def title
+    name
+  end
+  
   def input(role)
     inputs.where(role: role).take
   end
