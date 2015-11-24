@@ -5,7 +5,7 @@ module MainHelper
     s = "<tr><td>"
     s += "&nbsp;&nbsp;" * depth
     if item.accessible_by?(@context)
-      s += h(item.name) + " (" + item.uid + ")"
+      s += h(item.try(:name) || item.try(:title)) + " (" + item.uid + ")"
     else
       s += item.uid
     end

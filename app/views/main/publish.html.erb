@@ -1,31 +1,50 @@
 <% content_for :title do %>Publisher<% end %>
 
-<div class="container">
-  <div class="alert alert-warning">
-    <p class="lead"><span class="fa fa-fw fa-info-circle"></span> Thank you for your interest in publishing. This feature has not been rolled out yet.</p>
-    <p>In the meantime, you can review the dependency graph of the item you want to publish below. The item you want to publish is represented in the very bottom of the graph, and its dependencies (if any) are represented as nodes above it. Nodes marked in green are already public.
-    </p>
-    <p><strong>This rendering is experimental</strong></p>
+
+<%= form_for :main, url: publish_path do |f| %>
+<input type="hidden" data-bind="attr: {name: 'id'}, value: rootID" />
+<div class="container container-padded">
+  <div class='pfda-help-block pfda-help-info'>
+    <span class='fa fa-info-circle' aria-hidden='true'></span> <strong>TIP</strong> For the best experience when publishing your object also publish its immediate related objects so that the community can reproduce your workflow more easily.
+  </div>
+  <div class="list-group">
+    <div class="list-group-item list-group-item-header">
+      <div class="btn-group">
+        <button class="btn btn-success" type="submit" name="submit">Publish Selected Objects</button>
+      </div>
+    </div>
+    <ul class="list-group list-group-nested" data-bind="template: { name: 'tree-element', foreach: treeRoot }"></ul>
   </div>
 </div>
+<% end %>
 
-<div class="publisher-canvas-wrapper">
-  <svg class="publisher-canvas"><g/></svg>
-</div>
-
-<script src="https://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js"></script>
-<script>
-var g = new dagreD3.graphlib.Graph().setGraph({});
-
-<%= raw graph_nodes(@graph) %>
-<%= raw graph_edges(@graph) %>
-
-var svg = d3.select("svg.publisher-canvas"),
-    inner = svg.select("g");
-
-var render = new dagreD3.render();
-render(inner, g);
-
-svg.attr("height", g.graph().height + 2);
-svg.attr("width", g.graph().width + 2);
+<script id="tree-element" type="text/html">
+  <li class="list-group-item" data-bind="css: {'list-group-item-muted': !publish(), 'list-group-item-default': publish()}">
+    <div class="media">
+      <div class="media-left">
+      <!-- ko if: !isPublished -->
+        <!-- ko if: isOwned -->
+          <label class="btn btn-xs" data-bind="css: {'btn-default': !publish(), 'btn-success': publish(), 'disabled': isRoot}">
+            <input type="checkbox" data-bind="checked: publish, disable: isRoot, attr: {name: 'uids[' + uid + ']'}"/> Publish <span class="descendent-publish-indicator fa fa-circle" data-bind="visible: !publish() && childrenToPublishCount() > 0" style="display: none;"></span>
+          </label>
+        <!-- /ko -->
+        <!-- ko if: !isOwned -->
+          <label class="label label-danger-text">Not Permitted</label>
+        <!-- /ko -->
+      <!-- /ko -->
+      <!-- ko if: isPublished -->
+        <label class="label label-success-text">Published</label>
+      <!-- /ko -->
+      </div>
+      <div class="media-body">
+        <span data-bind="css: iconClass"></span> <span class="object-title" data-bind="text: title"></span>
+        <ul class="list-group" data-bind="visible: publish() && !_.isEmpty(children())">
+          <li class="list-group-item">
+            <small class="text-uppercase">Related objects</small> <small class="text-muted"><strong>(Publishing is recommended)</strong></small>
+          </li>
+          <!-- ko template: { name: 'tree-element', foreach: children } --><!-- /ko -->
+        </ul>
+      </div>
+    </div>
+  </li>
 </script>
