@@ -36,7 +36,7 @@ module ApplicationHelper
     prompt = "<span class='pfda-help-prompt'>#{h(prompt)}</span>" if !prompt.blank?
     raw """
     <div class='pfda-help-block'>
-      <span class='fa fa-question-circle' aria-hidden='true'></span>#{h(prompt)}<a href='#{path}' target='_blank'>#{h(text)} <small class='external-link-indicator' aria-hidden='true'><span class='fa fa-external-link' ></span></small></a>
+      <span class='fa fa-question-circle' aria-hidden='true'></span>#{prompt}<a href='#{path}' target='_blank'>#{h(text)} <small class='external-link-indicator' aria-hidden='true'><span class='fa fa-external-link' ></span></small></a>
     </div>
     """
   end
