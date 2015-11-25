@@ -40,11 +40,15 @@ class Comparison < ActiveRecord::Base
   has_many :attachments, {as: :item}
 
   def uid
-    "comparison-" + dxjobid.sub(/^job-/, '')
+    "comparison-#{id}"
   end
 
   def title
     name
+  end
+
+  def klass
+    "comparison"
   end
   
   def input(role)

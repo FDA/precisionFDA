@@ -33,8 +33,8 @@ class App < ActiveRecord::Base
 
   VALID_IO_CLASSES = ["file", "string", "boolean", "int", "float"]
 
-  def self.released
-    where.not(version: nil)
+  def self.published
+    where(scope: 'public')
   end
 
   def uid
@@ -45,8 +45,16 @@ class App < ActiveRecord::Base
     app_series.name
   end
 
-  def released?
+  def klass
+    "app"
+  end
+
+  def versioned?
     version.present?
+  end
+
+  def publishable_by?(context)
+    user_id == context.user_id && scope != "public"
   end
 
   UBUNTU_PACKAGES = %w(

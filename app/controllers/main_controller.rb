@@ -136,10 +136,9 @@ class MainController < ApplicationController
       klass = {
         "job" => Job,
         "app" => App,
-        "file" => UserFile,
-        "note" => Note
+        "file" => UserFile
       }[$1]
-      record = klass.find_by!(dxid: id, user_id: @context.user_id)
+      record = klass.accessible_by(@context).find_by!(dxid: id)
       graph = self.send("publish_#{$1}", record)
     elsif id =~ /^comparison-(\d+)$/
       # Transitional until comparisons get real dxids
@@ -151,7 +150,7 @@ class MainController < ApplicationController
       note = Note.find_by!(id: id, user_id: @context.user_id)
       graph = publish_note(note)
     else
-      raise "Invalid id '#{id}' in publish route"
+      raise "Invalid id '#{id}' in get_graph"
     end
     return graph
   end
@@ -169,45 +168,45 @@ class MainController < ApplicationController
   end
 
   def publish_job(job)
-    if job.user_id != @context.user_id
-      return [job, []]
-    else
+    if job.accessible_by?(@context)
       return [job, [publish_app(job.app)] + job.input_files.map { |file| publish_file(file) }]
+    else
+      return [job, []]
     end
   end
 
   def publish_app(app)
-    if app.user_id != @context.user_id
-      return [app, []]
-    else
+    if app.accessible_by?(@context)
       return [app, app.assets.map { |asset| publish_file(asset) }]
+    else
+      return [app, []]
     end
   end
 
   def publish_file(file)
-    raise "Unpublishable file" if file.parent_type == "Comparison"
-    if file.user_id != @context.user_id || file.parent_type == "User" || file.parent_type == "Asset"
-      return [file, []]
-    else # File comes from owned job
+    raise "Unpublishable file '#{file.uid}'" if file.parent_type == "Comparison"
+    if file.accessible_by?(@context) && file.parent_type == "Job"
       return [file, [publish_job(file.parent)]]
+    else
+      return [file, []]
     end
   end
 
   def publish_comparison(comparison)
-    if comparison.user_id != @context.user_id
-      return [comparison, []]
-    else
+    if comparison.accessible_by?(@context)
       return [comparison, comparison.user_files.map { |file| publish_file(file) }]
+    else
+      return [comparison, []]
     end
   end
 
   def publish_note(note)
-    if note.user_id != @context.user_id
-      return [note, []]
-    else
+    if note.accessible_by?(@context)
       return [note, note.attachments.map { |attachment|
         self.send("publish_#{attachment.item_type.downcase.sub(/^user/, '')}", attachment.item)
       }]
+    else
+      return [note, []]
     end
   end
 

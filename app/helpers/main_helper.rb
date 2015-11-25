@@ -64,19 +64,11 @@ module MainHelper
     deps = graph[1]
     uid = item.uid
     if !nodes.has_key?(uid)
-      nodes[uid] = {label: item_type(item) + ": " + (item.accessible_by?(@context) ? (item.try(:name) || item.try(:title)) : item.uid), class: item.public? ? 'public' : (item.user_id == @context.user_id ? 'own' : 'not_yours')}
+      nodes[uid] = {labelType: 'html', label: unilink(item), class: item.public? ? 'public' : (item.user_id == @context.user_id ? 'own' : 'not_yours')}
     end
     deps.each do |dep|
       graph_nodes_recursive(nodes, dep)
     end
-  end
-
-  def item_type(item)
-    type = item.class.to_s
-    if type == "UserFile"
-      type = item.parent_type == "Asset" ? "Asset" : "File"
-    end
-    type
   end
 
 end

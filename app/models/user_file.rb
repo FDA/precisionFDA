@@ -72,7 +72,11 @@ class UserFile < ActiveRecord::Base
   end
 
   def title
-    name
+    parent_type == "Asset" ? prefix : name
+  end
+
+  def klass
+    parent_type == "Asset" ? "asset" : "file"
   end
 
   def deletable?

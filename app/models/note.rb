@@ -25,6 +25,10 @@ class Note < ActiveRecord::Base
     "note-#{id}"
   end
 
+  def klass
+    "note"
+  end
+
   def to_param
     "#{id}-#{title.parameterize}"
   end
