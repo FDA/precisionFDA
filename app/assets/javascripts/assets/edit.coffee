@@ -1,11 +1,11 @@
 class AssetModel
   constructor: (asset) ->
     @id = asset.id
-    @description = asset.description
-    @descriptionDisplay = Precision.md.render(@description)
+    @description = ko.observable(asset.description)
+    @description.preview = ko.computed(=>
+      Precision.md.render(@description())
+    )
 
-    @noteAttachModel = new Precision.models.NoteAttachModel(@id, 'UserFile')
-    
 #########################################################
 #
 #
@@ -15,7 +15,7 @@ class AssetModel
 #########################################################
 
 AssetsController = Paloma.controller('Assets')
-AssetsController::show = ->
+AssetsController::edit = ->
   $container = $("body main")
 
   assetModel = new AssetModel(@params.asset)
