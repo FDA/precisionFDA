@@ -1,4 +1,4 @@
-class NoteModel
+class NoteViewModel
   constructor: (note, attachments) ->
     @noteEditor = null
 
@@ -78,7 +78,21 @@ class NoteModel
       )
     })
 
-    @attachments = [@files, @comparisons, @apps, @jobs]
+    @assets = new AttachmentsModel({
+      heading: 'Assets'
+      className: 'attachment-assets'
+      iconClass: 'fa fa-file-zip-o'
+      items: _.map(attachments.assets, (item) ->
+        _item =
+          type: 'UserFile'
+          id: item.id
+          name: item.name
+          path: "/app_assets/#{item.dxid}"
+        return new ItemModel(_item)
+      )
+    })
+
+    @attachments = [@files, @comparisons, @apps, @jobs, @assets]
 
   toggleEdit: () ->
     @editing(!@editing())
@@ -163,7 +177,7 @@ NotesController::show = ->
   params = @params
   $container = $("body main")
 
-  noteModel = new NoteModel(params.note, params.attachments)
+  noteModel = new NoteViewModel(params.note, params.attachments)
   ko.applyBindings(noteModel, $container[0])
 
   noteModel.noteEditor = ko.aceEditors.get('note-editor')

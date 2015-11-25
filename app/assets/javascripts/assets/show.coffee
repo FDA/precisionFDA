@@ -1,6 +1,9 @@
 class AssetModel
   constructor: (asset) ->
-    @descriptionDisplay = Precision.md.render(asset.description)
+    @id = asset.id
+    @description = asset.description
+    @descriptionDisplay = Precision.md.render(@description)
+    @noteAttachModel = new Precision.models.NoteAttachModel(@id, 'UserFile')
 
 #########################################################
 #
