@@ -64,6 +64,11 @@
           <% end %>
         </div>
       <% end %>
+      <% if @asset.publishable_by?(@context) %>
+        <%= link_to publish_path + "?" + {id: @asset.uid}.to_param, method: :post, class: "btn btn-success" do %>
+          <span class="fa fa-bullhorn"></span> Publish
+        <% end %>
+      <% end %>
     </div>
     <% if @asset.user_id == @context.user_id %>
       <div class="btn-group">
@@ -104,7 +109,7 @@
             <div class="list-group-item-heading">Archive Contents <small>(files only)</small></div>
           </li>
           <% @asset.file_paths.each do |path| %>
-            <li class="list-group-item"><span class="fa fa-file-zip-o"></span> <%= path %></li>
+            <li class="list-group-item"><%= path %></li>
           <% end %>
         </ul>
       </div>
