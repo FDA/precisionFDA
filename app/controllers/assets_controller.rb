@@ -35,8 +35,27 @@ class AssetsController < ApplicationController
     js asset: @asset.slice(:uid, :id, :description)
   end
 
+  def edit
+    @asset = Asset.editable_by(@context).includes(:archive_entries).find_by!(dxid: params[:id])
+
+    js asset: @asset.slice(:uid, :id, :description)
+  end
+
+  def update
+    @asset = Asset.editable_by(@context).includes(:archive_entries).find_by!(dxid: params[:id])
+
+    if @asset.update_attributes(asset_params)
+      # Handle a successful update.
+      flash[:success] = "Asset updated"
+      redirect_to asset_path(@asset.dxid)
+    else
+      flash[:error] = "Error: Could not update the asset. Please try again."
+      render 'edit'
+    end
+  end
+
   def destroy
-    @file = Asset.where(user_id: @context.user_id).find_by!(dxid: params[:id])
+    @file = Asset.editable_by(@context).find_by!(dxid: params[:id])
 
     UserFile.transaction do
       @file.reload
@@ -58,4 +77,9 @@ class AssetsController < ApplicationController
     flash[:success] = "Asset \"#{@file.prefix}\" has been successfully deleted"
     redirect_to assets_path
   end
+
+  private
+    def asset_params
+      params.require(:asset).permit(:description)
+    end
 end

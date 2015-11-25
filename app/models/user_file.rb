@@ -86,5 +86,4 @@ class UserFile < ActiveRecord::Base
   def publishable_by?(context)
     user_id == context.user_id && scope != "public" && parent_type != "Comparison" && state == "closed"
   end
-
 end
