@@ -57,6 +57,13 @@
           <span class="fa fa-download"></span> Download
         <% end %>
       <% end %>
+      <% if @asset.user_id == @context.user_id %>
+        <div class="btn-group">
+          <%= link_to edit_asset_path(@asset.dxid), class: "btn btn-primary" do %>
+            <span class="fa fa-edit"></span> Edit
+          <% end %>
+        </div>
+      <% end %>
     </div>
     <% if @asset.user_id == @context.user_id %>
       <div class="btn-group">

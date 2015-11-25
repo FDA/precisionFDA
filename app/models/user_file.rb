@@ -23,7 +23,7 @@
 # Job (for files generated from a job)
 # Asset (for app assets)
 # Comparison (for files generated from a comparison)
-# 
+#
 # Feature matrix
 #
 #                                | U | J | A | C
@@ -33,7 +33,7 @@
 # Can be deleted independently   | Y | Y | Y | N
 # Can be published independently | Y | Y | Y | N
 # Can be attached independently  | Y | Y | Y | N
-# 
+#
 # To help with the above, we define the following scopes
 # real_files: U || J
 # not_assets: U || J || C
@@ -78,5 +78,4 @@ class UserFile < ActiveRecord::Base
   def publishable_by?(context)
     user_id == context.user_id && scope != "public" && parent_type != "Comparison" && state == "closed"
   end
-
 end
