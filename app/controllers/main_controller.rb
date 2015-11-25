@@ -107,7 +107,7 @@ class MainController < ApplicationController
   def publish
     id = params[:id]
     raise "Missing id in publish route" unless id.is_a?(String) && id.present?
-    @graph = get_graph(id)
+    @graph = get_graph(id, true)
     if params[:uids]
       uids = params[:uids]
       raise "The object 'uids' must be a hash of object ids (strings) with value 'on'." unless uids.is_a?(Hash) && uids.all? { |uid, checked| uid.is_a?(String) && checked == "on" }
@@ -119,8 +119,8 @@ class MainController < ApplicationController
 
   def history
     id = params[:id]
-    raise "Missing id in publish route" unless id.is_a?(String) && id.present?
-    @graph = get_graph(id)
+    raise "Missing id in history route" unless id.is_a?(String) && id.present?
+    @graph = get_graph(id, false)
   end
 
   def tokify
@@ -131,7 +131,7 @@ class MainController < ApplicationController
 
   private
 
-  def get_graph(id)
+  def get_graph(id, perform_check)
     if id =~ /^(job|app|file)-(.{24})$/
       klass = {
         "job" => Job,
@@ -139,15 +139,33 @@ class MainController < ApplicationController
         "file" => UserFile
       }[$1]
       record = klass.accessible_by(@context).find_by!(dxid: id)
+      if perform_check && !record.publishable_by?(@context)
+        # may happen if job is not done or file is not closed
+        flash[:error] = "This item cannot be published in this state."
+        redirect_to pathify(record)
+        return
+      end
       graph = self.send("publish_#{$1}", record)
     elsif id =~ /^comparison-(\d+)$/
       # Transitional until comparisons get real dxids
       id = $1.to_i
       comparison = Comparison.find_by!(id: id, user_id: @context.user_id)
+      if perform_check && !comparison.publishable_by?(@context)
+        # may happen if comparison is not done
+        flash[:error] = "This comparison cannot be published in this state."
+        redirect_to pathify(comparison)
+        return
+      end
       graph = publish_comparison(comparison)
     elsif id =~ /^note-(\d+)$/
       id = $1.to_i
       note = Note.find_by!(id: id, user_id: @context.user_id)
+      if perform_check && !note.publishable_by?(@context)
+        # should never happen
+        flash[:error] = "This note cannot be published in this state."
+        redirect_to pathify(note)
+        return
+      end
       graph = publish_note(note)
     else
       raise "Invalid id '#{id}' in get_graph"
