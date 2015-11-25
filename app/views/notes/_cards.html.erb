@@ -13,16 +13,19 @@
         <div class="pfda-card-metadata">
           <ul class="list-inline">
             <% if note.real_files.count > 0 %>
-              <li title="Files"><span class="pfda-card-metadata-value"><%= note.real_files.count %></span> <span class="fa fa-files-o"></span></li>
+              <li title="Files"><span class="pfda-card-metadata-value"><%= note.real_files.count %></span> <span class="fa fa-files-o" aria-hidden="true"></span></li>
             <% end %>
             <% if note.comparisons.count > 0 %>
-              <li title="Comparisons"><span class="pfda-card-metadata-value"><%= note.comparisons.count %></span> <span class="fa fa-bullseye"></span></li>
+              <li title="Comparisons"><span class="pfda-card-metadata-value"><%= note.comparisons.count %></span> <span class="fa fa-bullseye" aria-hidden="true"></span></li>
             <% end %>
             <% if note.apps.count > 0 %>
-              <li title="Apps"><span class="pfda-card-metadata-value"><%= note.apps.count %></span> <span class="fa fa-cubes"></span></li>
+              <li title="Apps"><span class="pfda-card-metadata-value"><%= note.apps.count %></span> <span class="fa fa-cubes" aria-hidden="true"></span></li>
             <% end %>
             <% if note.jobs.count > 0 %>
-              <li title="Jobs"><span class="pfda-card-metadata-value"><%= note.jobs.count %></span> <span class="fa fa-tasks"></span></li>
+              <li title="Jobs"><span class="pfda-card-metadata-value"><%= note.jobs.count %></span> <span class="fa fa-tasks" aria-hidden="true"></span></li>
+            <% end %>
+            <% if note.assets.count > 0 %>
+              <li title="Assets"><span class="pfda-card-metadata-value"><%= note.assets.count %></span> <span class="fa fa-file-zip-o" aria-hidden="true"></span></li>
             <% end %>
             <li class="pull-right"><small><%= note.user.dxuser %></small></li>
           </ul>

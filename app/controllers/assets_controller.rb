@@ -30,7 +30,9 @@ class AssetsController < ApplicationController
       @asset.reload
     end
 
-    js asset: @asset.slice(:description)
+    @notes = @asset.notes.accessible_by(@context).order(id: :desc)
+
+    js asset: @asset.slice(:uid, :id, :description)
   end
 
   def destroy

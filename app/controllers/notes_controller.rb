@@ -13,12 +13,14 @@ class NotesController < ApplicationController
       files = @note.real_files.accessible_by(@context)
       apps = @note.apps.accessible_by(@context)
       jobs = @note.jobs.accessible_by(@context)
+      assets = @note.assets.accessible_by(@context)
 
       attachments = {
         comparisons: (comparisons.map { |o| o.slice(:id, :name, :stats)}),
         files: (files.map { |o| o.slice(:id, :dxid, :name)}),
         apps: (apps.map { |o| o.slice(:id, :dxid, :title)}),
-        jobs: (jobs.map { |o| o.slice(:id, :dxid, :name)})
+        jobs: (jobs.map { |o| o.slice(:id, :dxid, :name)}),
+        assets: (assets.map { |o| o.slice(:id, :dxid, :name)}),
       }
       js note: @note.slice(:id, :content, :title), attachments: attachments, edit: params[:edit]
     end
