@@ -72,7 +72,7 @@ class UserFile < ActiveRecord::Base
   end
 
   def title
-    parent_type == "Asset" ? prefix : name
+    parent_type == "Asset" ? self.becomes(Asset).prefix : name
   end
 
   def klass
