@@ -41,8 +41,19 @@
           color: $brand-blue-secondary
           &:hover
             background-color: lighten($brand-blue-dark, 5%)
+
+          &.active, &.active:hover
+            color: $brand-blue-secondary
+            background-color: #ffffff
+            border-left-color: $brand-red-primary
+            .text-muted
+              color: mix(#aaa, $link-color, 75%)
+
         .list-group-item
           color: mix(#aaa, $link-color, 75%)
+
+        + .list-group
+          border-top-color: lighten($brand-blue-dark, 5%)
 
     .list-group
       border-radius: 0
@@ -77,5 +88,5 @@
         .text-muted
           color: mix(#aaa, $link-color, 75%)
 
-    .list-group + .list-group
-      border-top: 1px solid $border-default-color
+      + .list-group
+        border-top: 1px solid $border-default-color
