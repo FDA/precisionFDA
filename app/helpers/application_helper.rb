@@ -60,32 +60,13 @@ module ApplicationHelper
     end
   end
 
-  def pathify(item)
-    case item.klass
-    when "file"
-      file_path(item.dxid)
-    when "note"
-      note_path(item)
-    when "app"
-      app_path(item.dxid)
-    when "job"
-      job_path(item.dxid)
-    when "asset"
-      asset_path(item.dxid)
-    when "comparison"
-      comparison_path(item)
-    else
-      raise "Unknown class #{item.klass}"
-    end
-  end
-
   # Valid options
   # icon_class: "fa-fw fa-2x"  # Appends to span class
   # globe: true                # Uses globe-vs-nothing instead of fa_class(item) as icon
   # nolink: true               # Show a label, not a link
   #
   def unilink(item, opts = {})
-    icon = opts[:globe] ? (item.public? ? "fa-globe" : "fa-fw") : fa_class(item)
+    icon = opts[:globe] ? (item.public? ? "fa-globe" : "fa-lock") : fa_class(item)
     icon_span = content_tag(:span, " ", class: "fa #{icon} #{opts[:icon_class]}") + " "
     if item.accessible_by?(@context)
       opts[:nolink] ? icon_span + item.title : link_to(icon_span + item.title, pathify(item))
