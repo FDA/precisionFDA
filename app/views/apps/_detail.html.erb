@@ -2,6 +2,10 @@
 <div class="metadata-section metadata-header">
   <ul class="list-group list-group-inline">
     <li class="list-group-item">
+      <h5 class="list-group-item-heading">name</h5>
+      <p class="list-group-item-text"><%= @app.name %></p>
+    </li>
+    <li class="list-group-item">
       <h5 class="list-group-item-heading">Added by</h5>
       <p class="list-group-item-text">
         <%= link_to(@app.user.dxuser, user_path(@app.user.dxuser)) %>
