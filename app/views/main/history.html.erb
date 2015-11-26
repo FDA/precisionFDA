@@ -1,0 +1,20 @@
+<div class="publisher-canvas-wrapper">
+  <svg class="publisher-canvas"><g/></svg>
+</div>
+
+<script src="https://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js"></script>
+<script>
+var g = new dagreD3.graphlib.Graph().setGraph({});
+
+<%= raw graph_nodes(@graph) %>
+<%= raw graph_edges(@graph) %>
+
+var svg = d3.select("svg.publisher-canvas"),
+    inner = svg.select("g");
+
+var render = new dagreD3.render();
+render(inner, g);
+
+svg.attr("height", g.graph().height + 2);
+svg.attr("width", g.graph().width + 2);
+</script>

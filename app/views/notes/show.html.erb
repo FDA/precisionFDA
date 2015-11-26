@@ -6,7 +6,7 @@
       <div class="btn-group">
         <a class="btn btn-primary event-edit"><span class="fa fa-edit"></span> Edit</a>
         <% if @note.publishable_by?(@context) %>
-          <%= link_to publish_path + "?" + {id: 'note-' + @note.id.to_s}.to_param, method: :post, class: "btn btn-success" do %>
+          <%= link_to publish_path + "?" + {id: @note.uid}.to_param, method: :post, class: "btn btn-success" do %>
             <span class="fa fa-bullhorn"></span> Publish
           <% end %>
         <% end %>

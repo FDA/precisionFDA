@@ -32,14 +32,8 @@
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Origin</h5>
       <p class="list-group-item-text">
-        <% if @file.parent_type == "Job" %>
-          <% if @file.parent.user_id == @context.user_id %>
-            <span class='fa fa-tasks fa-fw'></span> <%= link_to(@file.parent.name, job_path(@file.parent.dxid)) %>
-          <% else %>
-            <span class='fa fa-lock fa-fw'></span> <%= @file.parent.dxid %>
-          <% end %>
-        <% elsif @file.parent_type == "Comparison" %>
-          <span class='fa fa-area-chart fa-fw'></span> <%= link_to(@file.parent.name, comparison_path(@file.parent_id)) %>
+        <% if @file.parent_type != "User" %>
+          <%= unilink(@file.parent) %>
         <% else %>
           Uploaded
         <% end %>
@@ -82,7 +76,7 @@
 
     <% if @file.user_id == @context.user_id %>
       <% if @file.publishable_by?(@context) %>
-        <%= link_to publish_path + "?" + {id: @file.dxid}.to_param, method: :post, class: "btn btn-success" do %>
+        <%= link_to publish_path + "?" + {id: @file.uid}.to_param, method: :post, class: "btn btn-success" do %>
           <span class="fa fa-bullhorn"></span> Publish
         <% end %>
       <% end %>
@@ -149,7 +143,7 @@
           end
 
           g.column name: 'Name', attribute: 'name' do |comparison|
-            link_to(comparison.name, comparison_path(comparison.id))
+            unilinkfw(comparison, globe: true)
           end
 
           g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |comparison|
@@ -158,36 +152,12 @@
 
           g.column name: 'Test set' do |comparison|
             file = comparison.input("test_vcf").user_file
-            display = ""
-            if !file.public?
-              display = "<span class='fa fa-lock fa-fw'></span> "
-            else
-              display = "<span class='fa fa-globe fa-fw'></span> "
-            end
-
-            if file.id == @file.id
-              display += "<span class='current'>#{file.name}</span>"
-            else
-              display += link_to(file.name, file_path(file.dxid))
-            end
-            raw display
+            unilinkfw(file, nolink: file.id == @file.id)
           end
 
           g.column name: 'Benchmark set' do |comparison|
             file = comparison.input("ref_vcf").user_file
-            display = ""
-            if !file.public?
-              display = "<span class='fa fa-lock fa-fw'></span> "
-            else
-              display = "<span class='fa fa-globe fa-fw'></span> "
-            end
-
-            if file.id == @file.id
-              display += "<span class='current'>#{file.name}</span>"
-            else
-              display += link_to(file.name, file_path(file.dxid))
-            end
-            raw display
+            unilinkfw(file, nolink: file.id == @file.id)
           end
         end -%>
       </div>

@@ -71,6 +71,14 @@ class UserFile < ActiveRecord::Base
     dxid
   end
 
+  def title
+    parent_type == "Asset" ? self.becomes(Asset).prefix : name
+  end
+
+  def klass
+    parent_type == "Asset" ? "asset" : "file"
+  end
+
   def deletable?
     return ((parent_type == "User") || (parent_type == "Job"))
   end

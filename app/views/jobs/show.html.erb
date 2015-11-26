@@ -21,7 +21,7 @@
   <ul class="list-group list-group-inline">
     <li class="list-group-item">
       <h5 class="list-group-item-heading">App</h5>
-      <p class="list-group-item-text"><%= link_to(@job.app.title, app_jobs_path(@job.app.dxid)) %></p>
+      <p class="list-group-item-text"><%= unilink(@job.app) %></p>
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Launched by</h5>
@@ -47,7 +47,7 @@
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Energy Consumed</h5>
-      <p class="list-group-item-text"><span class="fa fa-industry"></span> <%= @job.terminal? ? @job.energy : 'TBD' %></p>
+      <p class="list-group-item-text"><span class="fa fa-industry"></span> <%= @job.energy_string %></p>
     </li>
   </ul>
 </div>
@@ -66,7 +66,7 @@
         <span class="fa fa-bolt"></span> Run App &nbsp;&nbsp;<span class="badge"><%= @job.app.version ? "v#{@job.app.version}" : "rev#{@job.app.revision}" %></span>
       <% end %>
       <% if @job.publishable_by?(@context) %>
-        <%= link_to publish_path + "?" + {id: @job.dxid}.to_param, method: :post, class: "btn btn-success" do %>
+        <%= link_to publish_path + "?" + {id: @job.uid}.to_param, method: :post, class: "btn btn-success" do %>
           <span class="fa fa-bullhorn"></span> Publish
         <% end %>
       <% end %>

@@ -18,7 +18,7 @@ class JobsController < ApplicationController
         if spec[:name] == name
           item = {spec: spec, value: value}
           if spec[:class] == 'file'
-            item[:file] = UserFile.where(dxid: item[:value])
+            item[:file] = UserFile.find_by(dxid: item[:value])
           end
           @inputs.push(item)
         end
@@ -31,7 +31,7 @@ class JobsController < ApplicationController
           if spec[:name] == name
             item = {spec: spec, value: value}
             if spec[:class] == 'file'
-              item[:file] = UserFile.where(dxid: item[:value])
+              item[:file] = UserFile.find_by(dxid: item[:value])
             end
             @outputs.push(item)
           end
