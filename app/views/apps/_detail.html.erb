@@ -22,7 +22,7 @@
     </li>
     <% end %>
     <li class="list-group-item">
-      <h5 class="list-group-item-heading">Scope</h5>
+      <h5 class="list-group-item-heading">Access</h5>
       <p class="list-group-item-text">
         <span class="fa <%= @app.public? ? 'fa-globe' : 'fa-lock' %>"></span>
         <%= @app.public? ? "Public" : "Private" %>
@@ -198,6 +198,11 @@
 
         g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |job|
           job.created_at.to_s(:db)
+        end
+
+        g.column name: 'Access', attribute: 'scope',
+          custom_filter: {'Public' => "public", 'Private' => "private"} do |job|
+          job.public? ? "Public" : "Private"
         end
       end -%>
     </div>
