@@ -30,7 +30,15 @@ class AppSeries < ActiveRecord::Base
     "-#{username}-#{name}"
   end
 
-  def released
-    apps.released
+  def accessible_revisions(context)
+    apps.accessible_by(context).order(revision: :desc)
+  end
+
+  def latest_accessible(context)
+    accessible_by?(context) ? latest_revision_app : latest_version_app
+  end
+
+  def published
+    apps.published
   end
 end

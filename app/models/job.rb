@@ -59,6 +59,14 @@ class Job < ActiveRecord::Base
     dxid
   end
 
+  def title
+    name
+  end
+
+  def klass
+    "job"
+  end
+  
   def resolved_instance_type
     run_instance_type || instance_type
   end
@@ -95,8 +103,12 @@ class Job < ActiveRecord::Base
     if describe.has_key?("totalPrice")
       ((describe["totalPrice"] * 400 + 5).to_i / 5.0).to_i * 5
     else
-      0
+      nil
     end
+  end
+
+  def energy_string
+    (energy || "TBD").to_s
   end
 
   def input_spec

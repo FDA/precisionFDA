@@ -5,9 +5,8 @@
     </td>
     <td class="job-io-value job-io-class-<%= item[:spec][:class] %>">
       <% if item[:spec][:class] == 'file' %>
-        <span class="fa fa-file-o"></span>
-        <% if item[:file].exists? %>
-          <%= link_to(item[:file].first.name, file_path(item[:file].first.dxid)) %>
+        <% if item[:file].present? %>
+          <%= unilink(item[:file]) %>
         <% else %>
           <%= item[:value] %>
         <% end %>

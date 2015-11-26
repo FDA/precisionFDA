@@ -2,6 +2,10 @@
 <div class="metadata-section metadata-header">
   <ul class="list-group list-group-inline">
     <li class="list-group-item">
+      <h5 class="list-group-item-heading">name</h5>
+      <p class="list-group-item-text"><%= @app.name %></p>
+    </li>
+    <li class="list-group-item">
       <h5 class="list-group-item-heading">Added by</h5>
       <p class="list-group-item-text">
         <%= link_to(@app.user.dxuser, user_path(@app.user.dxuser)) %>
@@ -18,7 +22,7 @@
     </li>
     <% end %>
     <li class="list-group-item">
-      <h5 class="list-group-item-heading">Scope</h5>
+      <h5 class="list-group-item-heading">Access</h5>
       <p class="list-group-item-text">
         <span class="fa <%= @app.public? ? 'fa-globe' : 'fa-lock' %>"></span>
         <%= @app.public? ? "Public" : "Private" %>
@@ -36,56 +40,39 @@
     <div class="btn-group">
       <button type="button" class="btn btn-default btn-default-version dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <span class="fa fa-history" aria-hidden="true"></span>
-        <% if @app.user_id == @context.user_id %>
-          <span class="text-muted">Revision:</span>
-          <span class="app-revision"><%= @app.revision %></span>
-          <% if @app.released? %>
-            <% if @app.app_series.latest_version_app_id == @app.id %>
-              <span class="app-label-version label label-success"><%= @app.version %></span>
-            <% else %>
-              <span class="app-label-version label label-default"><%= @app.version %></span>
-            <% end %>
+        <span class="text-muted">Revision:</span>
+        <span class="app-revision"><%= @app.revision %></span>
+        <% if @app.versioned? %>
+          <% if @app.id == @revisions.first.id %>
+            <span class="app-label-version label label-success"><%= @app.version %></span>
+          <% else %>
+            <span class="app-label-version label label-default"><%= @app.version %></span>
           <% end %>
-          <% if @app.app_series.latest_revision_app_id == @app.id %>
-            <span class="app-label-latest label label-info">Latest</span>
-          <% end %>
-        <% else %>
-          <span class="text-muted">Release:</span>
-          <span class="app-release"><%= @app.version %></span>
-          <% if @app.app_series.latest_version_app_id == @app.id %>
-            <span class="app-label-latest label label-success">Latest</span>
-          <% end %>
+        <% end %>
+        <% if @app.id == @revisions.first.id %>
+          <span class="app-label-latest label label-info">Latest</span>
         <% end %>
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu">
-        <% if @revisions.size == 0 %>
+        <% if @revisions.size == 0 # Should be impossible %>
           <li class="dropdown-header">
-            No releases available
+            None available
           </li>
         <% else %>
-          <li class="dropdown-header"><%= @app.user_id == @context.user_id ? "Revisions" : "Releases" %></li>
+          <li class="dropdown-header">Revisions</li>
           <% @revisions.each do |app| %>
             <li class="<% if app.dxid == params[:id] %>active<% end %>">
               <a href="<%= app_jobs_path(app.dxid) %>" class="clearfix">
-                <% if @app.user_id == @context.user_id %>
-                  <span class="app-revision"><%= app.revision %></span>
-                  <% if app.app_series.latest_revision_app_id == app.id %>
-                    <span class="app-label-latest label label-info pull-right">Latest</span>
-                  <% end %>
-                  <% if app.released? %>
-                    <% if app.app_series.latest_version_app_id == app.id %>
-                      <span class="app-label-version label label-success pull-right"><%= app.version %></span>
-                    <% else %>
-                      <span class="app-label-version label label-default pull-right"><%= app.version %></span>
-                    <% end %>
-                  <% end %>
-                <% else %>
-                  <% if app.app_series.latest_version_app_id == app.id %>
-                    <span class="app-label-version"><%= app.version %></span>
-                    <span class="app-label-version label label-success">Latest</span>
+                <span class="app-revision"><%= app.revision %></span>
+                <% if @revisions.first.id == app.id %>
+                  <span class="app-label-latest label label-info pull-right">Latest</span>
+                <% end %>
+                <% if app.versioned? %>
+                  <% if @revisions.first.id == app.id %>
+                    <span class="app-label-version label label-success pull-right"><%= app.version %></span>
                   <% else %>
-                    <span class="app-label-version"><%= app.version %></span>
+                    <span class="app-label-version label label-default pull-right"><%= app.version %></span>
                   <% end %>
                 <% end %>
               </a>
@@ -94,9 +81,9 @@
         <% end %>
       </ul>
     </div>
-    <% if @app.user_id == @context.user_id && @latestRevision.present? %>
-    <div class="btn-group" <% if @latestRevision.dxid != @app.dxid %>data-toggle="tooltip" data-placement="top" title="Only latest revision is editable"<% end %>>
-      <a class="btn btn-default <% if @latestRevision.dxid != @app.dxid %>disabled<% end %>" href="<%= edit_app_path(@latestRevision.dxid) %>">
+    <% if @app.editable_by?(@context) %>
+    <div class="btn-group" <% if @revisions.first.dxid != @app.dxid %>data-toggle="tooltip" data-placement="top" title="Only latest revision is editable"<% end %>>
+      <a class="btn btn-default <% if @revisions.first.dxid != @app.dxid %>disabled<% end %>" href="<%= edit_app_path(@revisions.first.dxid) %>">
         <span class="fa fa-edit"></span> Edit
       </a>
     </div>
@@ -104,10 +91,10 @@
     <a class="btn btn-default" href="<%= fork_app_path(@app.dxid) %>">
       <span class="fa fa-code-fork"></span> Fork
     </a>
-    <% if !@app.released? && false %>
-    <button class="btn btn-default" data-toggle="modal" data-target="#app-release-modal">
-      <span class="fa fa-tag"></span> Release
-    </button>
+    <% if @app.publishable_by?(@context) %>
+      <%= link_to publish_path + "?" + {id: @app.uid}.to_param, method: :post, class: "btn btn-success" do %>
+        <span class="fa fa-bullhorn"></span> Publish
+      <% end %>
     <% end %>
   </div>
 
@@ -163,7 +150,7 @@
 
         if @app.present?
           g.row_attributes do |job|
-            if job.app.revision == @app.revision
+            if job.app_id == @app.id
               {class: 'job-revision-active'}
             end
           end
@@ -174,27 +161,23 @@
         end
 
         g.column name: 'Job', attribute: 'name' do |job|
-          display = "<span class='fa fa-tasks fa-fw'></span> "
-          display += link_to(job.name, job_path(job.dxid))
-          raw display
+          unilinkfw(job)
         end
 
         if !@app.present?
           g.column name: 'App', attribute: 'title', assoc: :app  do |job|
-            display = "<span class='fa fa-cube fa-fw'></span> "
-            display += link_to(job.app.title, app_jobs_path(job.app.dxid))
-            raw display
+            unilinkfw(job.app)
           end
         end
 
-        if @app.present? && @app.user_id == @context.user_id
+        if @app.present?
           g.column name: 'Revision', attribute: 'revision', assoc: :app do |job|
             job.app.revision
           end
         end
 
         if @app.present?
-          g.column name: 'Release', attribute: 'version', assoc: :app do |job|
+          g.column name: 'Version', attribute: 'version', assoc: :app do |job|
             if !job.app.version.blank?
               job.app.version
             end
@@ -209,8 +192,17 @@
           humanizeSeconds(job.runtime)
         end
 
+        g.column name: 'Energy Consumption' do |job|
+          content_tag(:span, " ", class: "fa fa-industry fa-fw") + " " + job.energy_string
+        end
+
         g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |job|
           job.created_at.to_s(:db)
+        end
+
+        g.column name: 'Access', attribute: 'scope',
+          custom_filter: {'Public' => "public", 'Private' => "private"} do |job|
+          job.public? ? "Public" : "Private"
         end
       end -%>
     </div>
@@ -276,7 +268,3 @@
     <% end %>
   <% end %>
 </div>
-
-<% if @app.present? && @app.user_id == @context.user_id %>
-  <%= render "apps/release.html.erb", app: @app %>
-<% end %>
