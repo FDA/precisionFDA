@@ -94,10 +94,10 @@ class MainController < ApplicationController
       p[:ip] = request.remote_ip.to_s
       p[:research_intent] = (p[:research_intent] == "1")
       p[:clinical_intent] = (p[:clinical_intent] == "1")
-      AUDIT_LOGGER.info("Access requested: #{p.to_json}")
       Invitation.transaction do
         @invitation = Invitation.create(p)
         if @invitation.persisted?
+          AUDIT_LOGGER.info("Access requested: #{p.to_json}")
           NotificationsMailer.invitation_email(@invitation).deliver_now!
         end
       end
@@ -107,20 +107,161 @@ class MainController < ApplicationController
   def publish
     id = params[:id]
     raise "Missing id in publish route" unless id.is_a?(String) && id.present?
-    @graph = get_graph(id, true)
+
     if params[:uids]
       uids = params[:uids]
       raise "The object 'uids' must be a hash of object ids (strings) with value 'on'." unless uids.is_a?(Hash) && uids.all? { |uid, checked| uid.is_a?(String) && checked == "on" }
 
-      #TODO: Iterate through uids and publish them, then redirect to 'id' with a success alert
+      items = ([id] + uids.keys).uniq.map { |uid| item_from_uid(uid) }.reject { |item| item.public? }
+      raise "Unpublishable items detected" unless items.all? { |item| item.publishable_by?(@context) }
+
+      # Comparisons
+      comparisons = items.select { |item| item.klass == "comparison" }
+
+      # Files to publish:
+      # - All real_files selected by the user
+      # - All assets selected by the user
+      # - All comparison outputs (published separately as they are in another project)
+      files = items.select { |item| item.klass == "file" || item.klass == "asset" }
+      comparison_files = comparisons.map(&:outputs).flatten
+
+      # Notes
+      notes = items.select { |item| item.klass == "note" }
+
+      # Jobs
+      jobs = items.select { |item| item.klass == "job" }
+
+      # Apps
+      apps = items.select { |item| item.klass == "app" }
+
+      # To minimize the opportunity for inconsistency, publishing is performed in
+      # chunks of transactions, with priority for items requiring DNAnexus calls.
+      #
+      api = DNAnexusAPI.new(@context.token)
+      user = User.find(@context.user_id)
+
+      # Files
+      if files.size > 0
+        # Ensure API availability
+        api.call("system", "greet")
+
+        files.each do |file|
+          raise "Consistency check failure for file #{file.dxid}" unless file.project == user.private_files_project
+        end
+
+        # First, copy files to public project
+        api.call(user.private_files_project, "clone", {objects: files.map(&:dxid), project: user.public_files_project})
+        # Update database
+        UserFile.transaction do
+          files.each do |file|
+            file.reload
+            file.update!(scope: 'public', project: user.public_files_project)
+          end
+        end
+        # Then, remove files from private project
+        api.call(user.private_files_project, "removeObjects", {objects: files.map(&:dxid)})
+      end
+
+      # Comparisons
+      if comparisons.size > 0
+        # Ensure API availability
+        api.call("system", "greet")
+
+        comparison_files.each do |file|
+          raise "Consistency check failure for file #{file.dxid}" unless file.project == user.private_comparisons_project
+        end
+
+        # First, copy files to public project
+        api.call(user.private_comparisons_project, "clone", {objects: comparison_files.map(&:dxid), project: user.public_comparisons_project})
+        # Update database
+        UserFile.transaction do
+          comparison_files.each do |file|
+            file.reload
+            file.update!(scope: 'public', project: user.public_comparisons_project)
+          end
+          comparisons.each do |comparison|
+            comparison.reload
+            comparison.update!(scope: 'public')
+          end
+        end
+        # Then, remove files from private project
+        api.call(user.private_comparisons_project, "removeObjects", {objects: comparison_files.map(&:dxid)})
+      end
+
+      # Apps
+      apps.each do |app|
+        # Ensure API availability
+        api.call("system", "greet")
+
+        api.call(app.dxid, 'addAuthorizedUsers', {"authorizedUsers": [ORG_EVERYONE]})
+        api.call(app.dxid, "publish")
+        App.transaction do
+          app.reload
+          app.update!(scope: 'public')
+          series = app.app_series
+          series_updates = {}
+          series_updates[:scope] = 'public' unless series.public?
+          series_updates[:latest_version_app_id] = app.id unless series.latest_version_app_id.present? && series.latest_version_app.revision > app.revision
+          series.update!(series_updates) if series_updates.present?
+        end
+      end
+
+      # Jobs
+      if jobs.size > 0
+        Job.transaction do
+          jobs.each do |job|
+            job.reload
+            job.update!(scope: 'public')
+          end
+        end
+      end
+
+      # Notes
+      if notes.size > 0
+        Note.transaction do
+          notes.each do |note|
+            note.reload
+            note.update!(scope: 'public')
+          end
+        end
+      end
+
+      flash[:success] = "Your #{uids.size > 1 ? 'items have' : 'item has'} been published."
+      redirect_to pathify(item_from_uid(id))
+      return
     end
-    js graph: slice_node(@graph)
+
+    item = item_from_uid(id)
+    if !item.editable_by?(@context)
+      flash[:error] = "This item is not owned by you"
+      redirect_to :back
+      return
+    end
+    if item.public?
+      flash[:error] = "This item is already public"
+      redirect_to pathify(item)
+      return
+    end
+    if !item.publishable_by?(@context)
+      flash[:error] = "This item cannot be published in this state."
+      redirect_to pathify(item)
+      return
+    end
+
+    graph = get_graph(item)
+    js graph: slice_node(graph)
   end
 
   def history
     id = params[:id]
     raise "Missing id in history route" unless id.is_a?(String) && id.present?
-    @graph = get_graph(id, false)
+    item = item_from_uid(id)
+    if !item.accessible_by?(@context)
+      flash[:error] = "This item is not accessible by you"
+      redirect_to :back
+      return
+    end
+    @graph = get_graph(item)
   end
 
   def tokify
@@ -131,46 +272,84 @@ class MainController < ApplicationController
 
   private
 
-  def get_graph(id, perform_check)
-    if id =~ /^(job|app|file)-(.{24})$/
+  def item_from_uid(uid)
+    if uid =~ /^(job|app|file)-(.{24})$/
       klass = {
         "job" => Job,
         "app" => App,
         "file" => UserFile
       }[$1]
-      record = klass.accessible_by(@context).find_by!(dxid: id)
-      if perform_check && !record.publishable_by?(@context)
-        # may happen if job is not done or file is not closed
-        flash[:error] = "This item cannot be published in this state."
-        redirect_to pathify(record)
-        return
+      record = klass.find_by!(dxid: uid)
+      if klass == "file" && record.parent_type == "Asset"
+        record = record.becomes(Asset)
       end
-      graph = self.send("publish_#{$1}", record)
-    elsif id =~ /^comparison-(\d+)$/
+      return record
+    elsif uid =~ /^comparison-(\d+)$/
       # Transitional until comparisons get real dxids
       id = $1.to_i
-      comparison = Comparison.find_by!(id: id, user_id: @context.user_id)
-      if perform_check && !comparison.publishable_by?(@context)
-        # may happen if comparison is not done
-        flash[:error] = "This comparison cannot be published in this state."
-        redirect_to pathify(comparison)
-        return
-      end
-      graph = publish_comparison(comparison)
-    elsif id =~ /^note-(\d+)$/
+      return Comparison.find_by!(id: id)
+    elsif uid =~ /^note-(\d+)$/
       id = $1.to_i
-      note = Note.find_by!(id: id, user_id: @context.user_id)
-      if perform_check && !note.publishable_by?(@context)
-        # should never happen
-        flash[:error] = "This note cannot be published in this state."
-        redirect_to pathify(note)
-        return
-      end
-      graph = publish_note(note)
+      return Note.find_by!(id: id)
     else
-      raise "Invalid id '#{id}' in get_graph"
+      raise "Invalid id '#{uid}' in item_from_uid"
     end
-    return graph
+  end
+
+  def get_graph(root)
+    klass = root.klass
+    if klass == "asset"
+      klass = "file"
+    end
+    self.send("get_subgraph_of_#{klass}", root)
+  end
+
+  def get_subgraph_of_job(job)
+    if job.accessible_by?(@context)
+      return [job, [get_subgraph_of_app(job.app)] + job.input_files.map { |file| get_subgraph_of_file(file) }]
+    else
+      return [job, []]
+    end
+  end
+
+  def get_subgraph_of_app(app)
+    if app.accessible_by?(@context)
+      return [app, app.assets.map { |asset| get_subgraph_of_file(asset) }]
+    else
+      return [app, []]
+    end
+  end
+
+  def get_subgraph_of_file(file)
+    if file.accessible_by?(@context)
+      if file.parent_type == "Job"
+        return [file, [get_subgraph_of_job(file.parent)]]
+      elsif file.parent_type == "Comparison"
+        return [file, [get_subgraph_of_job(file.parent)]]
+      else #Asset or user-uploaded file
+        return [file, []]
+      end
+    else
+      return [file, []]
+    end
+  end
+
+  def get_subgraph_of_comparison(comparison)
+    if comparison.accessible_by?(@context)
+      return [comparison, comparison.user_files.map { |file| get_subgraph_of_file(file) }]
+    else
+      return [comparison, []]
+    end
+  end
+
+  def get_subgraph_of_note(note)
+    if note.accessible_by?(@context)
+      return [note, note.attachments.map { |attachment|
+        self.send("get_subgraph_of_#{attachment.item_type.downcase.sub(/^user/, '')}", attachment.item)
+      }]
+    else
+      return [note, []]
+    end
   end
 
   def slice_node(node)
@@ -185,47 +364,5 @@ class MainController < ApplicationController
     return [node_sliced, children]
   end
 
-  def publish_job(job)
-    if job.accessible_by?(@context)
-      return [job, [publish_app(job.app)] + job.input_files.map { |file| publish_file(file) }]
-    else
-      return [job, []]
-    end
-  end
-
-  def publish_app(app)
-    if app.accessible_by?(@context)
-      return [app, app.assets.map { |asset| publish_file(asset) }]
-    else
-      return [app, []]
-    end
-  end
-
-  def publish_file(file)
-    raise "Unpublishable file '#{file.uid}'" if file.parent_type == "Comparison"
-    if file.accessible_by?(@context) && file.parent_type == "Job"
-      return [file, [publish_job(file.parent)]]
-    else
-      return [file, []]
-    end
-  end
-
-  def publish_comparison(comparison)
-    if comparison.accessible_by?(@context)
-      return [comparison, comparison.user_files.map { |file| publish_file(file) }]
-    else
-      return [comparison, []]
-    end
-  end
-
-  def publish_note(note)
-    if note.accessible_by?(@context)
-      return [note, note.attachments.map { |attachment|
-        self.send("publish_#{attachment.item_type.downcase.sub(/^user/, '')}", attachment.item)
-      }]
-    else
-      return [note, []]
-    end
-  end
 
 end

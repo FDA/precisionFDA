@@ -9,6 +9,8 @@ class ApplicationController < ActionController::Base
   # Require login
   before_action :require_login
 
+  helper_method :pathify
+
   private
 
   def decode_context
@@ -57,5 +59,24 @@ class ApplicationController < ActionController::Base
     secret = key_generator.generate_key(config.action_dispatch.encrypted_cookie_salt)
     sign_secret = key_generator.generate_key(config.action_dispatch.encrypted_signed_cookie_salt)
     encryptor = ActiveSupport::MessageEncryptor.new(secret, sign_secret)
+  end
+
+  def pathify(item)
+    case item.klass
+    when "file"
+      file_path(item.dxid)
+    when "note"
+      note_path(item)
+    when "app"
+      app_path(item.dxid)
+    when "job"
+      job_path(item.dxid)
+    when "asset"
+      asset_path(item.dxid)
+    when "comparison"
+      comparison_path(item)
+    else
+      raise "Unknown class #{item.klass}"
+    end
   end
 end
