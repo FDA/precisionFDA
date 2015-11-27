@@ -37,11 +37,11 @@ class AssetsModel
 
     @queryIconClasses = ko.computed(=>
       if @loading()
-        return 'fa fa-spinner fa-spin'
+        return 'fa fa-fw fa-spinner fa-spin'
       else if !_.isEmpty(@query())
-        return 'fa fa-times'
+        return 'fa fa-fw fa-times'
       else
-        return 'fa fa-search'
+        return 'fa fa-fw fa-search'
     )
 
     $(".assets-modal").on("click", ".item-asset", (e) =>
