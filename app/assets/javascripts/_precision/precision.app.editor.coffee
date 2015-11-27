@@ -114,16 +114,14 @@ class AppEditorModel
   onOpenAssetsModal: ->
     # Set up a subscription for when the assets will be loaded,
     # then set the selected assets
-    if @assetsSelector.assets.peek().length == 0
-      sub = @assetsSelector.assets.subscribe((assets) =>
-        @assetsSelector.setSelected(@assets.peek())
-        @assetsSelector.previewAsset(_.first(@assetsSelector.assets()))
-        sub.dispose()
-      )
-      @assetsSelector.getAssets()
-    else
-      @assetsSelector.setSelected(@assets.peek())
+
+    sub = @assetsSelector.assets.subscribe((assets) =>
+      selectedAssets = _.union(@assets.peek(), @assetsSelector.assets.selected.peek())
+      @assetsSelector.setSelected(selectedAssets)
       @assetsSelector.previewAsset(_.first(@assetsSelector.assets()))
+      sub.dispose()
+    )
+    @assetsSelector.getAssets()
 
   addPackage: ->
     if @packageToAdd() != '' and @packages.indexOf(@packageToAdd()) < 0
