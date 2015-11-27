@@ -700,7 +700,7 @@ class ApiController < ApplicationController
   # title (string)
   #
   def list_notes
-    notes = Note.where(user_id: @context.user_id)
+    notes = Note.editable_by(@context)
 
     result = notes.select(:id, :title).map do |note|
       {id: note.id, slug: note.to_param, title: note.title }
@@ -728,8 +728,19 @@ class ApiController < ApplicationController
     }
   end
 
-  # Use this to add multiple objects of the same type to a note
-  # or multiple notes to an object
+  # Use this to add multiple items of the same type to a note
+  # or multiple notes to an item
+  # Inputs
+  #
+  # note_ids (Array[integer], required): array of note ids
+  # item_ids (Array[integer], required): array of item ids
+  # item_type (string, required): type of string from App, Comparison, Job, or UserFile
+  #
+  # Outputs:
+  #
+  # notes_added (Array[integer])
+  # items_added (Array[integer])
+  #
   def attach_to_notes
     note_ids = params[:note_ids]
     raise unless note_ids.is_a?(Array) && note_ids.all? { |id| id.is_a?(Numeric) }
@@ -744,7 +755,7 @@ class ApiController < ApplicationController
     items_added = {}
     Note.transaction do
       note_ids.each do |note_id|
-        note = Note.accessible_by(@context).find_by!(id: note_id)
+        note = Note.editable_by(@context).find_by!(id: note_id)
         item_ids.each do |item_id|
           note.attachments.find_or_create_by(item_id: item_id, item_type: item_type)
           items_added[item_id] = true
@@ -760,6 +771,24 @@ class ApiController < ApplicationController
     }
   end
 
+  # Inputs
+  #
+  # id (integer, required): note id
+  # note (object, required)
+  #   title (string): note title
+  #   content (string): note content
+  # attachments_to_save (Array[Hash]):
+  #   id: id of item
+  #   type: type of item
+  # attachments_to_delete (Array[Hash]):
+  #   id: id of item
+  #   type: type of item
+  #
+  # Outputs:
+  # success (boolean)
+  # note (id)
+  # path (string): the human readable path of the note (which could have changed if the title changed)
+  #
   def update_note
     id = params[:id].to_i
     raise unless id.is_a?(Integer)
