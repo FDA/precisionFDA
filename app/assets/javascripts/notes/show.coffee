@@ -112,18 +112,21 @@ class NoteViewModel
 
     allItemModels = _.flatten(_.map(@attachments, (attachmentSection) -> attachmentSection.items()))
     attachmentsToSave = []
+    attachmentsToDelete = []
     for item in allItemModels
       if item.removed.cache()
+        attachmentsToDelete.push({id: parseInt(item.id, 10), type: item.type})
         item.removed(true)
       else
-        attachmentsToSave.push({id: item.id, type: item.type})
+        attachmentsToSave.push({id: parseInt(item.id, 10), type: item.type})
 
     params =
       id: @id
       note:
         content: @content.peek()
         title: @title.peek()
-        attachments: attachmentsToSave
+        attachmentsToSave: attachmentsToSave
+        attachmentsToDelete: attachmentsToDelete
 
     Precision.api("/api/update_note/", params)
       .done((res) ->
