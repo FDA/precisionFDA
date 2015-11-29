@@ -34,6 +34,13 @@
       <p class="list-group-item-text"><%= @job.dxid %></p>
     </li>
     <li class="list-group-item">
+      <h5 class="list-group-item-heading">Access</h5>
+      <p class="list-group-item-text">
+        <span class="fa <%= @job.public? ? 'fa-globe' : 'fa-lock' %>"></span>
+        <%= @job.public? ? "Public" : "Private" %>
+      </p>
+    </li>
+    <li class="list-group-item">
       <h5 class="list-group-item-heading">Created</h5>
       <p class="list-group-item-text"><%= @job.created_at.to_s(:db) %></p>
     </li>
@@ -57,26 +64,28 @@
     <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
   </div>
 
-  <% if @job.user_id == @context.user_id %>
-    <div class="btn-group pull-right">
+  <div class="btn-group pull-right">
+    <% if @job.user_id == @context.user_id %>
       <%= link_to log_job_path(@job.dxid), class: "btn btn-primary" do %>
         <span class="fa fa-file-code-o"></span> View Log
       <% end %>
+    <% end %>
+    <% if @job.app.accessible_by?(@context) %>
       <%= link_to new_app_job_path(@job.app.dxid), class: "btn btn-primary" do %>
         <span class="fa fa-bolt"></span> Run App &nbsp;&nbsp;<span class="badge"><%= @job.app.version ? "v#{@job.app.version}" : "rev#{@job.app.revision}" %></span>
       <% end %>
-      <% if @job.publishable_by?(@context) %>
-        <%= link_to publish_path + "?" + {id: @job.uid}.to_param, method: :post, class: "btn btn-success" do %>
-          <span class="fa fa-bullhorn"></span> Publish
-        <% end %>
+    <% end %>
+    <% if @job.publishable_by?(@context) %>
+      <%= link_to publish_path + "?" + {id: @job.uid}.to_param, method: :post, class: "btn btn-success" do %>
+        <span class="fa fa-bullhorn"></span> Publish
       <% end %>
-      <% if !@job.terminal? %>
-        <%= link_to job_path(@job.dxid), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
-          <span class="fa fa-times-circle"></span> Terminate
-        <% end %>
+    <% end %>
+    <% if @job.user_id == @context.user_id && !@job.terminal? %>
+      <%= link_to job_path(@job.dxid), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
+        <span class="fa fa-times-circle"></span> Terminate
       <% end %>
-    </div>
-  <% end %>
+    <% end %>
+  </div>
 </div>
 
 <!-- Nav tabs -->
