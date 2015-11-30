@@ -9,33 +9,65 @@
   .pfda-pane-content
     @include flex(1)
     background-color: $body-bg
+    &.pfda-pane-content-padded
+      padding: $padding-base-horizontal
 
   .pfda-pane-sidebar
     @include flex(0 300px)
     width: 300px
     min-height: 500px
-    background-color: $brand-blue-dark
-    .pfda-toolbar
-      background-color: $brand-blue-dark
-      border-bottom-color: lighten($brand-blue-dark, 10%)
-    .btn.btn-default
-      background-color: transparent
-      border-color: lighten($brand-blue-dark, 10%)
-      color: $brand-blue-secondary
+    background-color: darken(desaturate($brand-blue-subtler, 25%), 3%)
+    border-right: 1px solid $border-default-color
 
-      &:hover, &:focus, &:active, &.active
-        background-color: darken($brand-blue-dark, 2%)
-        border-color: $brand-blue-secondary
+    &.pfda-pane-sidebar-padded
+      padding: $padding-base-horizontal
+
+    &.pfda-pane-sidebar-dark
+      background-color: $brand-blue-dark
+      .pfda-toolbar
+        background-color: $brand-blue-dark
+        border-bottom-color: lighten($brand-blue-dark, 10%)
+      .btn.btn-default
+        background-color: transparent
+        border-color: lighten($brand-blue-dark, 10%)
+        color: $brand-blue-secondary
+
+        &:hover, &:focus, &:active, &.active
+          background-color: darken($brand-blue-dark, 2%)
+          border-color: $brand-blue-secondary
+
+      .list-group
+        a.list-group-item
+          color: $brand-blue-secondary
+          &:hover
+            background-color: lighten($brand-blue-dark, 5%)
+
+          &.active, &.active:hover
+            color: $brand-blue-secondary
+            background-color: #ffffff
+            border-left-color: $brand-red-primary
+            .text-muted
+              color: mix(#aaa, $link-color, 75%)
+
+        .list-group-item
+          color: mix(#aaa, $link-color, 75%)
+
+        + .list-group
+          border-top-color: lighten($brand-blue-dark, 5%)
 
     .list-group
       border-radius: 0
-      a.list-group-item
+      margin: 0
+      .list-group-item
         border: 0
         border-radius: 0
         background-color: transparent
+        color: mix($text-muted, $link-color, 75%)
+
+      a.list-group-item
         color: $brand-blue-secondary
         &:hover
-          background-color: lighten($brand-blue-dark, 5%)
+          background-color: $brand-blue-subtler
 
         &.disabled, &.disabled:hover
           color: $brand-blue-tertiary
@@ -45,10 +77,16 @@
           font-weight: 300
           margin-top: $padding-large-vertical
         &.active, &.active:hover
-          color: $brand-blue-primary
-          background-color: $body-bg
-          border-left: 5px solid $brand-red-primary
+          background-color: $brand-blue-secondary
+          color: #ffffff
+          border-left: 5px solid $brand-blue-primary
           padding-left: 10px // list-group padding minus border left width
+          margin-right: -1px
+          .text-muted
+            color: mix(#fff, $link-color, 85%)
 
         .text-muted
           color: mix(#aaa, $link-color, 75%)
+
+      + .list-group
+        border-top: 1px solid $border-default-color

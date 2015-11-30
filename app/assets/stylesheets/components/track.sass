@@ -1,0 +1,29 @@
+@import "_common"
+
+.track-canvas-wrapper
+  padding: 50px 25px
+  text-align: center
+  overflow-x: auto
+
+svg.track-canvas
+  .node rect
+    stroke: #333
+    fill: #f5f5f5
+    stroke-width: 1.5px
+    stroke: #fff
+    border-radius: $border-radius-base
+
+  g.public > rect
+    fill: #dff0d8
+
+  g.not_yours > rect
+    fill: #f2dede
+
+  .edgePath path
+    stroke: #333
+    fill: #333
+    stroke-width: 1.5px
+
+  tspan, foreignobject
+    font-size: 13px
+    color: #333

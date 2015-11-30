@@ -9,16 +9,18 @@ class NotesController < ApplicationController
     if request.path != note_path(@note)
       redirect_to @note
     else
-      comparisons = @note.comparisons.accessible_by(@context)
-      files = @note.real_files.accessible_by(@context)
-      apps = @note.apps.accessible_by(@context)
-      jobs = @note.jobs.accessible_by(@context)
+      comparisons = @note.comparisons
+      files = @note.real_files
+      apps = @note.apps
+      jobs = @note.jobs
+      assets = @note.assets
 
       attachments = {
-        comparisons: (comparisons.map { |o| o.slice(:id, :name, :stats)}),
-        files: (files.map { |o| o.slice(:id, :dxid, :name)}),
-        apps: (apps.map { |o| o.slice(:id, :dxid, :title)}),
-        jobs: (jobs.map { |o| o.slice(:id, :dxid, :name)})
+        comparisons: (comparisons.map { |o| o.context_slice(@context, :title)}),
+        files: (files.map { |o| o.context_slice(@context, :title)}),
+        apps: (apps.map { |o| o.context_slice(@context, :title)}),
+        jobs: (jobs.map { |o| o.context_slice(@context, :title)}),
+        assets: (assets.map { |o| o.context_slice(@context, :title)}),
       }
       js note: @note.slice(:id, :content, :title), attachments: attachments, edit: params[:edit]
     end

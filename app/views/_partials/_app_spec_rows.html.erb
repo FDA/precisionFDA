@@ -12,6 +12,9 @@
       <% if !item[:default].blank? %>
         <p class="spec-default">Default: <%= item[:default] %></p>
       <% end %>
+      <% if !item[:choices].blank? %>
+        <p class="spec-choices">Choices: <%= item[:choices].to_s %></p>
+      <% end %>
     </td>
     <td>
       <% if !item[:optional] %> <label class="spec-required label label-info">Required</label><% end %>

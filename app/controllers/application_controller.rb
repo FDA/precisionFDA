@@ -9,6 +9,8 @@ class ApplicationController < ActionController::Base
   # Require login
   before_action :require_login
 
+  helper_method :pathify
+
   private
 
   def decode_context
@@ -57,5 +59,48 @@ class ApplicationController < ActionController::Base
     secret = key_generator.generate_key(config.action_dispatch.encrypted_cookie_salt)
     sign_secret = key_generator.generate_key(config.action_dispatch.encrypted_signed_cookie_salt)
     encryptor = ActiveSupport::MessageEncryptor.new(secret, sign_secret)
+  end
+
+  def pathify(item)
+    case item.klass
+    when "file"
+      file_path(item.dxid)
+    when "note"
+      note_path(item)
+    when "app"
+      app_path(item.dxid)
+    when "job"
+      job_path(item.dxid)
+    when "asset"
+      asset_path(item.dxid)
+    when "comparison"
+      comparison_path(item)
+    else
+      raise "Unknown class #{item.klass}"
+    end
+  end
+
+  def item_from_uid(uid)
+    if uid =~ /^(job|app|file)-(.{24})$/
+      klass = {
+        "job" => Job,
+        "app" => App,
+        "file" => UserFile
+      }[$1]
+      record = klass.find_by!(dxid: uid)
+      if klass == "file" && record.parent_type == "Asset"
+        record = record.becomes(Asset)
+      end
+      return record
+    elsif uid =~ /^comparison-(\d+)$/
+      # Transitional until comparisons get real dxids
+      id = $1.to_i
+      return Comparison.find_by!(id: id)
+    elsif uid =~ /^note-(\d+)$/
+      id = $1.to_i
+      return Note.find_by!(id: id)
+    else
+      raise "Invalid id '#{uid}' in item_from_uid"
+    end
   end
 end
