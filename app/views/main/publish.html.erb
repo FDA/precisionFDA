@@ -25,9 +25,14 @@
       <div class="media-left">
       <!-- ko if: !isPublished -->
         <!-- ko if: isOwned -->
-          <label class="btn btn-xs" data-bind="css: {'btn-default': !publish(), 'btn-success': publish(), 'disabled': isRoot}">
-            <input type="checkbox" data-bind="checked: publish, disable: isRoot, attr: {name: 'uids[' + uid + ']'}"/> Publish <span class="descendent-publish-indicator fa fa-circle" data-bind="visible: !publish() && childrenToPublishCount() > 0" style="display: none;"></span>
-          </label>
+          <!-- ko if: isPublishable -->
+            <label class="btn btn-xs" data-bind="css: {'btn-default': !publish(), 'btn-success': publish(), 'disabled': isRoot}">
+              <input type="checkbox" data-bind="checked: publish, disable: isRoot, attr: {name: 'uids[' + uid + ']'}"/> Publish <span class="descendent-publish-indicator fa fa-circle" data-bind="visible: !publish() && childrenToPublishCount() > 0" style="display: none;"></span>
+            </label>
+          <!-- /ko -->
+          <!-- ko if: !isPublishable -->
+            <label class="label label-danger-text">Can't publish while pending</label>
+          <!-- /ko -->
         <!-- /ko -->
         <!-- ko if: !isOwned -->
           <label class="label label-danger-text">Not Permitted</label>

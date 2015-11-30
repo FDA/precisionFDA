@@ -333,9 +333,10 @@ class MainController < ApplicationController
     if children.length > 0
       children = children.map {|child| slice_node(child)}
     end
-    node_sliced = node[0].slice(:uid, :user_id, :title, :scope)
-    node_sliced[:owned] = node_sliced[:user_id] == @context.user_id
+    node_sliced = node[0].slice(:uid, :title, :scope)
+    node_sliced[:owned] = node[0].editable_by?(@context)
     node_sliced[:class] = node[0].class.name.demodulize
+    node_sliced[:publishable] = node[0].publishable_by?(@context)
     # node_sliced[:path] = node[0].path
     return [node_sliced, children]
   end

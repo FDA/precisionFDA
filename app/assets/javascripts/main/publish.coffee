@@ -12,6 +12,7 @@ class PublishViewModel
 
 class NodeModel
   constructor: (node, children, @isRoot) ->
+    @klass = node.class
     @uid = node.uid
     @title = node.name || node.title
     @children = ko.observableArray(children)
@@ -25,6 +26,7 @@ class NodeModel
     )
     @isPublished = node.scope == 'public'
     @isOwned = node.owned
+    @isPublishable = node.publishable
 
     @publish = ko.observable(@isRoot)
 
