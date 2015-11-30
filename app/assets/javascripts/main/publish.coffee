@@ -36,7 +36,7 @@ class NodeModel
                   when 'Job'
                     'fa fa-fw fa-tasks'
                   when 'Comparison'
-                    'fa fa-fw fa-bullseye'
+                    'fa fa-fw fa-area-chart'
                   when 'Asset'
                     'fa fa-fw fa-file-zip-o'
                   else
