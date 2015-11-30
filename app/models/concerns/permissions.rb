@@ -30,7 +30,7 @@ module Permissions
   end
 
   def context_slice(context, *args)
-    wrapper = {uid: uid, class: klass, item: accessible_by?(context) ? self.slice(*args) : nil}
+    wrapper = {uid: uid, klass: klass, item: accessible_by?(context) ? self.slice(*args) : nil}
   end
 
 end

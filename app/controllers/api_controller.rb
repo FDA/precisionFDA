@@ -773,62 +773,51 @@ class ApiController < ApplicationController
 
   # Inputs
   #
-  # id (integer, required): note id
-  # note (object, required)
-  #   title (string): note title
-  #   content (string): note content
-  # attachments_to_save (Array[Hash]):
-  #   id: id of item
-  #   type: type of item
-  # attachments_to_delete (Array[Hash]):
-  #   id: id of item
-  #   type: type of item
+  # id (integer, required): the id of the note to be updated
+  # title (string): the updated note title
+  # content (string): the updated note content
+  # attachments_to_save (string array): an array of one or more object uids to be "ensured"
+  # attachments_to_delete (string array): an array of one or more object uids to be removed
   #
   # Outputs:
-  # success (boolean)
-  # note (id)
+  # id: the note id
   # path (string): the human readable path of the note (which could have changed if the title changed)
   #
   def update_note
     id = params[:id].to_i
     raise unless id.is_a?(Integer)
 
-    title = params[:note][:title]
+    title = params[:title]
     raise unless title.is_a?(String)
 
-    content = params[:note][:content] || ""
+    content = params[:content] || ""
     raise unless content.is_a?(String)
 
-    attachments_to_save = params[:note][:attachmentsToSave] || []
+    attachments_to_save = params[:attachments_to_save] || []
     raise unless attachments_to_save.is_a?(Array)
 
-    attachments_to_delete = params[:note][:attachmentsToDelete] || []
+    attachments_to_delete = params[:attachments_to_delete] || []
     raise unless attachments_to_delete.is_a?(Array)
 
-    updated = false
-    note = Note.editable_by(@context).find(params[:id])
-
+    note = nil
     Note.transaction do
-      attachments_to_save.each do |attachment|
-        note.attachments.find_or_create_by(item_id: attachment[:id], item_type: attachment[:type])
+      note = Note.editable_by(@context).find_by!(id: params[:id])
+
+      attachments_to_save.each do |uid|
+        item = item_from_uid(uid)
+        note.attachments.find_or_create_by(item: item)
       end
 
-      attachments_to_delete.each do |attachment|
-        note.attachments.where(item_id: attachment[:id], item_type: attachment[:type]).destroy_all
+      attachments_to_delete.each do |uid|
+        item = item_from_uid(uid)
+        note.attachments.where(item: item).destroy_all
       end
 
-      params = {title: title, content: content}
-      if note.update!(params)
-        updated = true
-        note.reload
-      end
+      note.update!(title: title, content: content)
     end
 
     render json: {
-      success: updated,
-      note: {
-        id: note.id,
-      },
+      id: note.id,
       path: note_path(note)
     }
   end

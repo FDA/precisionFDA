@@ -24,14 +24,9 @@ class NoteViewModel
     @files = new AttachmentsModel({
       heading: 'Files'
       className: 'attachment-files'
-      iconClass: 'fa fa-files-o'
-      items: _.map(attachments.files, (item) ->
-        _item =
-          type: 'UserFile'
-          id: item.id
-          name: item.name
-          path: "/files/#{item.dxid}"
-        return new ItemModel(_item)
+      iconClass: 'fa fa-file-o'
+      items: _.map(attachments.files, (wrapper) ->
+        return new ItemModel(wrapper)
       )
     })
 
@@ -39,28 +34,17 @@ class NoteViewModel
       heading: 'Comparisons'
       className: 'attachment-comparisons'
       iconClass: 'fa fa-area-chart'
-      items: _.map(attachments.comparisons, (item) ->
-        _item =
-          type: 'Comparison'
-          id: item.id
-          name: item.name
-          path: "/comparisons/#{item.id}"
-          detail: item.stats
-        return new ItemModel(_item)
+      items: _.map(attachments.comparisons, (wrapper) ->
+        return new ItemModel(wrapper)
       )
     })
 
     @apps = new AttachmentsModel({
       heading: 'Apps'
       className: 'attachment-apps'
-      iconClass: 'fa fa-cubes'
-      items: _.map(attachments.apps, (item) ->
-        _item =
-          type: 'App'
-          id: item.id
-          name: item.title
-          path: "/apps/#{item.dxid}/jobs"
-        return new ItemModel(_item)
+      iconClass: 'fa fa-cube'
+      items: _.map(attachments.apps, (wrapper) ->
+        return new ItemModel(wrapper)
       )
     })
 
@@ -68,13 +52,8 @@ class NoteViewModel
       heading: 'Jobs'
       className: 'attachment-jobs'
       iconClass: 'fa fa-tasks'
-      items: _.map(attachments.jobs, (item) ->
-        _item =
-          type: 'Job'
-          id: item.id
-          name: item.name
-          path: "/jobs/#{item.dxid}"
-        return new ItemModel(_item)
+      items: _.map(attachments.jobs, (wrapper) ->
+        return new ItemModel(wrapper)
       )
     })
 
@@ -82,13 +61,8 @@ class NoteViewModel
       heading: 'Assets'
       className: 'attachment-assets'
       iconClass: 'fa fa-file-zip-o'
-      items: _.map(attachments.assets, (item) ->
-        _item =
-          type: 'UserFile'
-          id: item.id
-          name: item.name
-          path: "/app_assets/#{item.dxid}"
-        return new ItemModel(_item)
+      items: _.map(attachments.assets, (wrapper) ->
+        return new ItemModel(wrapper)
       )
     })
 
@@ -115,18 +89,17 @@ class NoteViewModel
     attachmentsToDelete = []
     for item in allItemModels
       if item.removed.cache()
-        attachmentsToDelete.push({id: parseInt(item.id, 10), type: item.type})
+        attachmentsToDelete.push(item.uid)
         item.removed(true)
       else
-        attachmentsToSave.push({id: parseInt(item.id, 10), type: item.type})
+        attachmentsToSave.push(item.uid)
 
     params =
       id: @id
-      note:
-        content: @content.peek()
-        title: @title.peek()
-        attachmentsToSave: attachmentsToSave
-        attachmentsToDelete: attachmentsToDelete
+      content: @content.peek()
+      title: @title.peek()
+      attachments_to_save: attachmentsToSave
+      attachments_to_delete: attachmentsToDelete
 
     Precision.api("/api/update_note/", params)
       .done((res) ->
@@ -155,12 +128,17 @@ class AttachmentsModel
     @items = ko.observableArray(attachments.items)
 
 class ItemModel
-  constructor: (item) ->
-    @type = item.type
-    @id = item.id
-    @name = item.name
-    @path = item.path
-    @detail = item.detail
+  constructor: (wrapper) ->
+    @klass = wrapper.klass
+    @uid = wrapper.uid
+    @name = wrapper.item?.title ? wrapper.uid
+    @path = if wrapper.item? then (switch wrapper.klass
+      when "app" then "/apps/#{wrapper.uid}/jobs"
+      when "asset" then "/app_assets/#{wrapper.uid}"
+      when "comparison" then "/comparisons/#{wrapper.uid.replace /^comparison-/, ''}"
+      when "file" then "/files/#{wrapper.uid}"
+      when "job" then "/jobs/#{wrapper.uid}"
+      else null) else null
     @removed = ko.observable(false)
     @removed.cache = ko.observable(false)
 
