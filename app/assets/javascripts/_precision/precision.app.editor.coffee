@@ -2,6 +2,7 @@ class AppEditorModel
   constructor: (app, @mode = 'edit') ->
     @isNewApp = @mode != 'edit'
     @saving = ko.observable(false)
+    @loading = ko.observable(false)
     @errorMessage = ko.observable()
 
     @dxid = app?.dxid
@@ -29,8 +30,10 @@ class AppEditorModel
     @assetsSelector = new Precision.models.AssetsModel
     @assets = ko.observableArray()
     if app?.internal.ordered_assets.length > 0
+      @loading(true)
       Precision.api '/api/list_assets', {ids: app.internal.ordered_assets}, (assets) =>
         @assets(_.map(@assetsSelector.createAssetModels(assets)))
+        @loading(false)
 
     @assetsSelector.assets.saved.subscribe((assetsSaved) =>
       @assets(assetsSaved)
@@ -73,7 +76,7 @@ class AppEditorModel
     ]
 
     @isSaveReady = ko.computed(=>
-      return false if @saving()
+      return false if @saving() || @loading()
       return !_.isEmpty(@title()) && !_.isEmpty(@name())
     )
 
