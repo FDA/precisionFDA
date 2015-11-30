@@ -252,13 +252,13 @@ class MainController < ApplicationController
     js graph: slice_node(graph)
   end
 
-  def history
+  def track
     id = params[:id]
-    raise "Missing id in history route" unless id.is_a?(String) && id.present?
+    raise "Missing id in track route" unless id.is_a?(String) && id.present?
     item = item_from_uid(id)
     if !item.accessible_by?(@context)
       flash[:error] = "This item is not accessible by you"
-      redirect_to :back
+      redirect_to :root
       return
     end
     @graph = get_graph(item)
@@ -301,7 +301,7 @@ class MainController < ApplicationController
       if file.parent_type == "Job"
         return [file, [get_subgraph_of_job(file.parent)]]
       elsif file.parent_type == "Comparison"
-        return [file, [get_subgraph_of_job(file.parent)]]
+        return [file, [get_subgraph_of_comparison(file.parent)]]
       else #Asset or user-uploaded file
         return [file, []]
       end

@@ -56,31 +56,31 @@
 
 <div class="pfda-toolbar">
   <% if @file.parent_type != "Comparison" %>
-  <div class="btn-group pull-left">
-    <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
-  </div>
+    <div class="btn-group pull-left">
+      <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
+    </div>
   <% end %>
 
   <div class="pull-right">
     <div class="btn-group">
-    <% if @file.state == "closed" %>
-      <%= link_to download_file_path(@file.dxid, inline: true), method: :post, class: "btn btn-primary" do %>
-        <span class="fa fa-external-link"></span> Open
+      <% if @file.state == "closed" %>
+        <%= link_to download_file_path(@file.dxid, inline: true), method: :post, class: "btn btn-primary" do %>
+          <span class="fa fa-external-link"></span> Open
+        <% end %>
       <% end %>
-    <% end %>
-    <% if @file.state == "closed" %>
-      <%= link_to download_file_path(@file.dxid), method: :post, class: "btn btn-primary" do %>
-        <span class="fa fa-download"></span> Download
+      <% if @file.state == "closed" %>
+        <%= link_to download_file_path(@file.dxid), method: :post, class: "btn btn-primary" do %>
+          <span class="fa fa-download"></span> Download
+        <% end %>
       <% end %>
-    <% end %>
-
-    <% if @file.user_id == @context.user_id %>
+      <%= link_to track_path(id: @file.uid), class: "btn btn-primary", data: {no_turbolink: true} do %>
+        <span class="fa fa-flip-vertical fa-sitemap"></span> Track
+      <% end %>
       <% if @file.publishable_by?(@context) %>
         <%= link_to publish_path + "?" + {id: @file.uid}.to_param, method: :post, class: "btn btn-success" do %>
           <span class="fa fa-bullhorn"></span> Publish
         <% end %>
       <% end %>
-    <% end %>
     </div>
     <% if @file.user_id == @context.user_id %>
     <div class="btn-group">
