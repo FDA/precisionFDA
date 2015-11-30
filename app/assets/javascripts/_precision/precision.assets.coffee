@@ -62,6 +62,9 @@ class AssetsModel
         @assets.searchedIDs([])
     )
 
+  createAssetModels: (assets) =>
+    _.map(assets, (asset) -> new AssetModel(asset))
+
   updateAssetModels: (assets) =>
     @assets(_.map(assets, (asset) -> new AssetModel(asset)))
 
