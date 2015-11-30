@@ -23,10 +23,10 @@
 <div class="showcase container">
   <div class="showcase-item">
     <div class="showcase-icon">
-      <span class="fa fa-sticky-note" aria-hidden="true"></span>
+      <a href="<%= about_path %>/how#notes"><span class="fa fa-sticky-note" aria-hidden="true"></span></a>
     </div>
     <div class="showcase-content">
-      <div class="showcase-heading">Notes</div>
+      <div class="showcase-heading"><a href="<%= about_path %>/how#notes">Notes</a></div>
       <ul class="list-unstyled lead">
         <li class="media">
           <div class="media-left">
@@ -52,15 +52,23 @@
             <strong>Read</strong> what others are reporting and reproduce their workflows
           </div>
         </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-book" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <a href="<%= about_path %>/how#notes">Learn more</a>
+          </div>
+        </li>
       </ul>
     </div>
   </div>
   <div class="showcase-item">
     <div class="showcase-icon">
-      <span class="fa fa-files-o" aria-hidden="true"></span>
+      <a href="<%= about_path %>/how#files"><span class="fa fa-files-o" aria-hidden="true"></span></a>
     </div>
     <div class="showcase-content">
-      <div class="showcase-heading">Files</div>
+      <div class="showcase-heading"><a href="<%= about_path %>/how#files">Files</a></div>
       <ul class="list-unstyled lead">
         <li class="media">
           <div class="media-left">
@@ -94,16 +102,24 @@
             <strong>Browse</strong> other members' contributions
           </div>
         </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-book" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <a href="<%= about_path %>/how#files">Learn more</a>
+          </div>
+        </li>
       </ul>
     </div>
   </div>
 
   <div class="showcase-item">
     <div class="showcase-icon">
-      <span class="fa fa-bullseye"></span>
+      <a href="<%= about_path %>/how#comparisons"><span class="fa fa-bullseye"></span></a>
     </div>
     <div class="showcase-content">
-      <div class="showcase-heading">Comparisons</div>
+      <div class="showcase-heading"><a href="<%= about_path %>/how#comparisons">Comparisons</a></div>
       <ul class="list-unstyled lead">
         <li class="media">
           <div class="media-left">
@@ -121,16 +137,24 @@
             <strong>Compare</strong> your own test set (for a given biospecimen) to established benchmark sets
           </div>
         </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-book" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <a href="<%= about_path %>/how#comparisons">Learn more</a>
+          </div>
+        </li>
       </ul>
     </div>
   </div>
 
   <div class="showcase-item">
     <div class="showcase-icon">
-      <span class="fa fa-cubes"></span>
+      <a href="<%= about_path %>/how#apps"><span class="fa fa-cubes"></span></a>
     </div>
     <div class="showcase-content">
-      <div class="showcase-heading">Apps</div>
+      <div class="showcase-heading"><a href="<%= about_path %>/how#apps">Apps</a></div>
       <ul class="list-unstyled lead">
         <li class="media">
           <div class="media-left">
@@ -146,6 +170,14 @@
           </div>
           <div class="media-body">
             <strong>Contribute</strong> your own software and scripts and let others explore them
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-book" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <a href="<%= about_path %>/how#apps">Learn more</a>
           </div>
         </li>
       </ul>

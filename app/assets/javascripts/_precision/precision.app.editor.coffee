@@ -2,6 +2,7 @@ class AppEditorModel
   constructor: (app, @mode = 'edit') ->
     @isNewApp = @mode != 'edit'
     @saving = ko.observable(false)
+    @loading = ko.observable(false)
     @errorMessage = ko.observable()
 
     @dxid = app?.dxid
@@ -29,8 +30,10 @@ class AppEditorModel
     @assetsSelector = new Precision.models.AssetsModel
     @assets = ko.observableArray()
     if app?.internal.ordered_assets.length > 0
+      @loading(true)
       Precision.api '/api/list_assets', {ids: app.internal.ordered_assets}, (assets) =>
         @assets(_.map(@assetsSelector.createAssetModels(assets)))
+        @loading(false)
 
     @assetsSelector.assets.saved.subscribe((assetsSaved) =>
       @assets(assetsSaved)
@@ -73,7 +76,7 @@ class AppEditorModel
     ]
 
     @isSaveReady = ko.computed(=>
-      return false if @saving()
+      return false if @saving() || @loading()
       return !_.isEmpty(@title()) && !_.isEmpty(@name())
     )
 
@@ -114,16 +117,14 @@ class AppEditorModel
   onOpenAssetsModal: ->
     # Set up a subscription for when the assets will be loaded,
     # then set the selected assets
-    if @assetsSelector.assets.peek().length == 0
-      sub = @assetsSelector.assets.subscribe((assets) =>
-        @assetsSelector.setSelected(@assets.peek())
-        @assetsSelector.previewAsset(_.first(@assetsSelector.assets()))
-        sub.dispose()
-      )
-      @assetsSelector.getAssets()
-    else
-      @assetsSelector.setSelected(@assets.peek())
+
+    sub = @assetsSelector.assets.subscribe((assets) =>
+      selectedAssets = _.union(@assets.peek(), @assetsSelector.assets.selected.peek())
+      @assetsSelector.setSelected(selectedAssets)
       @assetsSelector.previewAsset(_.first(@assetsSelector.assets()))
+      sub.dispose()
+    )
+    @assetsSelector.getAssets()
 
   addPackage: ->
     if @packageToAdd() != '' and @packages.indexOf(@packageToAdd()) < 0
@@ -196,12 +197,37 @@ class IOModel
     @defaultValue = ko.observable(defaultValue)
     @isOptional = ko.observable(spec.optional ? false)
     # @patterns = ko.observable(spec.patterns)
-    # @choices = ko.observable(spec.choices)
+    @choices = ko.observableArray(spec.choices)
+    @choicesValue = ko.computed({
+      read: () =>
+        @choices().join(', ')
+      write: (choicesEntered) =>
+        choices = []
+        rawChoices = _.trim(choicesEntered).split(',')
+        for rawChoice in rawChoices
+          choice = switch @klass()
+            when 'int'
+              parseInt(rawChoice, 10)
+            when 'float'
+              parseFloat(rawChoice)
+            else
+              _.trim(rawChoice)
+          choices.push(choice) if !_.isNaN(choice) && choice != ""
+        @choices(choices)
+    })
+    @choicesPlaceholder = ko.computed(=>
+      "Optional comma separated #{@klass()}s"
+    )
+
+    @isChoicesVisible = ko.observable(spec.choices?)
 
     @error = ko.observable()
 
     @isClassAnArray = ko.computed =>
       @klass().indexOf('array') == 0
+
+  toggleChoices: () ->
+    @isChoicesVisible(!@isChoicesVisible())
 
   remove: (item) ->
     io = if @ioType == "input" then @viewModel.inputs else @viewModel.outputs
@@ -214,6 +240,7 @@ class IOModel
       label: @label.peek() ? ""
       name: @name.peek()
       optional: @isOptional() ? false
+      choices: @choices() ? []
 
     if @ioType == "input"
       defaultValue = @getValueForDefault()

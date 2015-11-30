@@ -1,6 +1,7 @@
 class AssetsModel
   constructor: () ->
     @loading = ko.observable(false)
+    @refreshing = ko.observable(false)
     @query = ko.observable()
     @assets = ko.observableArray()
     @assets.searchedIDs = ko.observableArray()
@@ -36,11 +37,11 @@ class AssetsModel
 
     @queryIconClasses = ko.computed(=>
       if @loading()
-        return 'fa fa-spinner fa-spin'
+        return 'fa fa-fw fa-spinner fa-spin'
       else if !_.isEmpty(@query())
-        return 'fa fa-times'
+        return 'fa fa-fw fa-times'
       else
-        return 'fa fa-search'
+        return 'fa fa-fw fa-search'
     )
 
     $(".assets-modal").on("click", ".item-asset", (e) =>
@@ -64,11 +65,21 @@ class AssetsModel
   createAssetModels: (assets) =>
     _.map(assets, (asset) -> new AssetModel(asset))
 
+  updateAssetModels: (assets) =>
+    @assets(_.map(assets, (asset) -> new AssetModel(asset)))
+
   getAssets: () =>
-    @loading(true)
-    Precision.api '/api/list_assets', {}, (assets) =>
-      @loading(false)
-      @assets(@createAssetModels(assets))
+    if !@loading()
+      @loading(true)
+      Precision.api '/api/list_assets', {}, (assets) =>
+        @loading(false)
+        @refreshing(false)
+        @updateAssetModels(assets)
+        @setSelected(@assets.selected.peek())
+
+  refreshAssets: () ->
+    @refreshing(true)
+    @getAssets()
 
   searchAssets: _.debounce((query) ->
     Precision.api '/api/search_assets', {prefix: query}, (result) =>
@@ -101,10 +112,13 @@ class AssetModel
     @descriptionDisplay = ko.observable()
     @archiveEntries = ko.observableArray()
     @described = ko.observable(false)
+    @loading = ko.observable(false)
 
   getDescribe: () ->
-    if !@described.peek()
+    if !@described.peek() && !@loading()
+      @loading(true)
       Precision.api '/api/describe_asset', {id: @dxid}, (describe) =>
+        @loading(false)
         @descriptionDisplay(Precision.md.render(describe.description))
         @archiveEntries(describe.archive_entries)
         @described(true)

@@ -52,8 +52,11 @@
       <%= link_to visualize_comparison_path(@comparison.id), class: "btn btn-primary" do %>
         <span class="fa fa-sliders"></span> Visualize
       <% end %>
+      <%= link_to track_path(id: @comparison.uid), class: "btn btn-primary", data: {no_turbolink: true} do %>
+        <span class="fa fa-flip-vertical fa-sitemap"></span> Track
+      <% end %>
       <% if @comparison.publishable_by?(@context) %>
-        <%= link_to publish_path + "?" + {id: 'comparison-' + @comparison.id.to_s}.to_param, method: :post, class: "btn btn-success" do %>
+        <%= link_to publish_path + "?" + {id: @comparison.uid}.to_param, method: :post, class: "btn btn-success" do %>
           <span class="fa fa-bullhorn"></span> Publish
         <% end %>
       <% end %>
@@ -171,13 +174,11 @@
         g.blank_slate partial:  "_partials/empty_grid"
 
         g.column name: 'Name' do |file|
-          display = "<span class='fa fa-file-o fa-fw'></span> "
-          display += link_to(file.name, file_path(file.dxid))
-          raw display
+          unilinkfw(file)
         end
 
         g.column name: 'Size' do |file|
-           number_to_human_size(file.file_size)
+          number_to_human_size(file.file_size)
         end
 
         g.column name: 'Created', auto_reload: true, filter_type: :standard do |file|

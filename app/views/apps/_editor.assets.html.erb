@@ -12,11 +12,14 @@
       <div class="modal-body modal-body-search-selector modal-body-padless">
         <ul class="list-group list-group-selector">
           <li class="list-group-item">
-            <div class="input-group">
+            <div class="input-group input-group-search">
               <input type="text" data-bind="textInput: query" class="form-control" placeholder="Search assets" autofocus/>
               <span class="input-group-btn">
                 <a class="btn btn-link" data-bind="click: queryAction, css: queryActionClasses">
                   <span data-bind="css: queryIconClasses"></span>
+                </a>
+                <a class="btn btn-link" data-bind="click: refreshAssets">
+                  <span class="fa fa-fw fa-refresh"></span>
                 </a>
               </span>
             </div>
@@ -41,7 +44,7 @@
           <div role="tabpanel" class="tab-pane tab-pane-preview active">
             <!-- ko if: previewedAsset() -->
               <div class="h2">
-                <a href="/assets/" data-bind="text: previewedAsset().name, attr: {href: '/assets/' + previewedAsset().dxid}" target="_blank"></a>
+                <a href="/app_assets/" data-bind="text: previewedAsset().name, attr: {href: '/app_assets/' + previewedAsset().dxid}" target="_blank"></a>
               </div>
               <hr>
               <!-- ko if: previewedAsset().descriptionDisplay() -->

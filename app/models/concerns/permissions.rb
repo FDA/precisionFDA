@@ -29,4 +29,8 @@ module Permissions
     scope == "public"
   end
 
+  def context_slice(context, *args)
+    wrapper = {uid: uid, klass: klass, item: accessible_by?(context) ? self.slice(*args) : nil}
+  end
+
 end

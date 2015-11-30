@@ -700,7 +700,7 @@ class ApiController < ApplicationController
   # title (string)
   #
   def list_notes
-    notes = Note.where(user_id: @context.user_id)
+    notes = Note.editable_by(@context)
 
     result = notes.select(:id, :title).map do |note|
       {id: note.id, slug: note.to_param, title: note.title }
@@ -728,8 +728,19 @@ class ApiController < ApplicationController
     }
   end
 
-  # Use this to add multiple objects of the same type to a note
-  # or multiple notes to an object
+  # Use this to add multiple items of the same type to a note
+  # or multiple notes to an item
+  # Inputs
+  #
+  # note_ids (Array[integer], required): array of note ids
+  # item_ids (Array[integer], required): array of item ids
+  # item_type (string, required): type of string from App, Comparison, Job, or UserFile
+  #
+  # Outputs:
+  #
+  # notes_added (Array[integer])
+  # items_added (Array[integer])
+  #
   def attach_to_notes
     note_ids = params[:note_ids]
     raise unless note_ids.is_a?(Array) && note_ids.all? { |id| id.is_a?(Numeric) }
@@ -744,7 +755,7 @@ class ApiController < ApplicationController
     items_added = {}
     Note.transaction do
       note_ids.each do |note_id|
-        note = Note.accessible_by(@context).find_by!(id: note_id)
+        note = Note.editable_by(@context).find_by!(id: note_id)
         item_ids.each do |item_id|
           note.attachments.find_or_create_by(item_id: item_id, item_type: item_type)
           items_added[item_id] = true
@@ -760,42 +771,53 @@ class ApiController < ApplicationController
     }
   end
 
+  # Inputs
+  #
+  # id (integer, required): the id of the note to be updated
+  # title (string): the updated note title
+  # content (string): the updated note content
+  # attachments_to_save (string array): an array of one or more object uids to be "ensured"
+  # attachments_to_delete (string array): an array of one or more object uids to be removed
+  #
+  # Outputs:
+  # id: the note id
+  # path (string): the human readable path of the note (which could have changed if the title changed)
+  #
   def update_note
     id = params[:id].to_i
     raise unless id.is_a?(Integer)
 
-    title = params[:note][:title]
+    title = params[:title]
     raise unless title.is_a?(String)
 
-    content = params[:note][:content] || ""
+    content = params[:content] || ""
     raise unless content.is_a?(String)
 
-    attachments = params[:note][:attachments] || []
-    raise unless attachments.is_a?(Array)
+    attachments_to_save = params[:attachments_to_save] || []
+    raise unless attachments_to_save.is_a?(Array)
 
-    updated = false
-    note = Note.find(params[:id])
-    if note[:user_id] == @context.user_id
-      Note.transaction do
-        note.attachments.destroy_all
-        attachments.each do |attachment|
-          # NOTE: I'm not sure why its send attachments in such a format
-          note.attachments.find_or_create_by(item_id: attachment[:id].to_i, item_type: attachment[:type])
-        end
+    attachments_to_delete = params[:attachments_to_delete] || []
+    raise unless attachments_to_delete.is_a?(Array)
 
-        params = {title: title, content: content}
-        if note.update!(params)
-          updated = true
-          note.reload
-        end
+    note = nil
+    Note.transaction do
+      note = Note.editable_by(@context).find_by!(id: params[:id])
+
+      attachments_to_save.each do |uid|
+        item = item_from_uid(uid)
+        note.attachments.find_or_create_by(item: item)
       end
+
+      attachments_to_delete.each do |uid|
+        item = item_from_uid(uid)
+        note.attachments.where(item: item).destroy_all
+      end
+
+      note.update!(title: title, content: content)
     end
 
     render json: {
-      success: updated,
-      note: {
-        id: note.id,
-      },
+      id: note.id,
       path: note_path(note)
     }
   end

@@ -1,59 +1,55 @@
 <% content_for :title do %>Add Assets<% end %>
 
 <div class="page-header clearfix">
-  <div class="page-title"><span class="fa fa-file-zip-o fa-fw"></span> Add Assets</div>
+  <div class="page-title"><span class="fa fa-file-zip-o fa-fw"></span> Steps to upload your Assets</div>
 </div>
 
 <div class="container container-padded">
   <div class="row">
     <div class="panel panel-default col-md-16 col-md-offset-4">
-      <div class="panel-heading">
-        To upload assets, follow these simple steps:
-      </div>
       <ul class="list-group">
         <li class="list-group-item">
-          <div class="lead">
-            Prepare your asset's content.
-            <small class="help-block">Assets are simply tarballs that get uncompressed in the root folder of the computer where an app runs. Therefore, create a fake root folder and assemble your files underneath it. For additional details, see <%= link_to "Your own assets", (about_path + "/how#dev-own-assets") %> in the precisionFDA documentation guide.</small>
-          </div>
-          <blockquote>
-            For example, place binaries in <code>fake_root/usr/bin</code>,
+          <p class="list-group-item-heading lead">Step 1 <strong class="text-regular">Prepare your asset's content</strong></p>
+          <p>Assets are simply tarballs that get uncompressed in the root folder of the computer where an app runs. Therefore, create a fake root folder and assemble your files underneath it. For additional details, see <a target="_blank" href="<%= about_path + "/how#dev-own-assets" %>"><span class="fa fa-book"></span> Your own assets</a> in the precisionFDA documentation guide.</p>
+          <p class="help-block">
+            For example, place binaries in <code>fake_root/usr/bin</code>, and working directory files in <code>fake_root/work/</code>.
+          </p>
+          <div class="pfda-help-block pfda-help-info">
+            <strong>Need to compile binaries in a compatible environment?</strong>
             <br>
-            and working directory files in <code>fake_root/work/</code>.
-          </blockquote>
-          <div class="lead">
-            <small class="help-block">Need to compile binaries in a compatible environment? <a href="https://dl.dnanex.us/F/D/0gjB0F2bfpYpj8266xZ9VYfJbBBY7JFQ5VgKXPXx/PrecisionFDA-50GB-dev-vm-nopass.ova">Download the precisionFDA virtual machine image</a> and load it into <a href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a> to instantiate an environment similar to the one that apps get when they run on the cloud. Power on the machine and log in as the <code>ubuntu</code> user (no password is required to log in).
-            </small>
+            <a class="btn btn-default btn-sm" href="https://dl.dnanex.us/F/D/0gjB0F2bfpYpj8266xZ9VYfJbBBY7JFQ5VgKXPXx/PrecisionFDA-50GB-dev-vm-nopass.ova"><span class="fa fa-clone"></span> Download the precisionFDA virtual machine image</a> and load it into <a href="https://www.virtualbox.org/wiki/Downloads" target="_blank">VirtualBox</a> to instantiate an environment similar to the one that apps get when they run on the cloud. Power on the machine and log in as the <code>ubuntu</code> user (no password is required to log in).
           </div>
         </li>
         <li class="list-group-item">
-          <div class="lead">
-            Write a short readme file describing the asset. Use the <a target="_blank" href="https://jonschlinkert.github.io/remarkable/demo/">Markdown syntax</a>.
-            <small class="help-block">
-              For inspiration on how to write useful readme files, see some of the existing assets published by the precisionFDA team, and consult <%= link_to "Your own assets", (about_path + "/how#dev-own-assets") %> in the precisionFDA documentation guide for a markdown template.
-            </small>
-          </div>
+          <p class="list-group-item-heading lead">Step 2 <strong class="text-regular">Write a short readme file describing the asset</strong></p>
+          <p>Use the <a target="_blank" href="https://jonschlinkert.github.io/remarkable/demo/">Markdown syntax</a> to format your readme.
+          <p class="pfda-help-block pfda-help-info">
+            For inspiration on how to write useful readme files, see some of the existing assets published by the precisionFDA team, and consult <a target="_blank" href="<%= about_path + "/how#dev-own-assets" %>"><span class="fa fa-book"></span> Your own assets</a> in the precisionFDA documentation guide for a markdown template.
+          </p>
         </li>
         <li class="list-group-item">
-          <div class="lead"><a class="btn btn-primary btn-lg" href="https://dl.dnanex.us/F/D/j5J4pZxJgG81zqPKfkG6XJVj9K1Q9VK0zG2Zxv2B/pfda-upload-asset-1.0.1.tar.gz"><span class="fa fa-download"></span> Download</a> the precisionFDA asset upload helper tool.</div>
-        </li>
-        <li class="list-group-item">
-          <div class="lead">
-            <%= link_to "Click here to obtain an authorization key", tokify_path, method: :post, target: "_blank" %>.
-            <small class="help-block">
-              Valid for use on the command line for 24h.
-            </small>
-          </div>
-        </li>
-        <li class="list-group-item">
-          <div class="lead">
-            Run the precisionFDA asset upload helper tool:
+          <p class="list-group-item-heading lead">Step 3 <strong class="text-regular">Download Asset Upload Helper Tool</strong></p>
+          <a class="btn btn-primary btn-lg btn-box" href="https://dl.dnanex.us/F/D/j5J4pZxJgG81zqPKfkG6XJVj9K1Q9VK0zG2Zxv2B/pfda-upload-asset-1.0.1.tar.gz">
+            <span class="fa fa-download"></span>
             <br>
-            <small><code class="small">./pfda-upload-asset --auth KEY --name my-asset.tar.gz --root /path/to/fake_root --readme my-asset.txt</code></small>
-            <small class="help-block">
-              This command will archive the contents of the fake root into the named tarball, and upload it to precisionFDA along with the contents of the readme file.
-            </small>
-          </div>
+            Download Asset Upload Helper
+          </a>
+        </li>
+        <li class="list-group-item">
+          <p class="list-group-item-heading lead">Step 4 <strong class="text-regular">Get your Authorization Key</strong></p>
+          <p><a href="<%= tokify_path %>" data-method="post" class="btn btn-default" target="_blank">
+            <span class="fa fa-key"></span> Generate Authorization Key
+          </a></p>
+          <p class="pfda-help-block pfda-help-warning">
+            <strong><span class="fa fa-warning"></span> Note:</strong> The key is valid for use on the command line for only 24 hours
+          </p>
+        </li>
+        <li class="list-group-item">
+          <p class="list-group-item-heading lead">Step 5 <strong class="text-regular">Run the precisionFDA asset upload helper tool</strong></p>
+          <p class="help-block">
+            This command will archive the contents of the fake root into the named tarball, and upload it to precisionFDA along with the contents of the readme file.
+          </p>
+          <code class="p">./pfda-upload-asset --auth KEY --name my-asset.tar.gz --root /path/to/fake_root --readme my-asset.txt</code>
         </li>
       </ul>
     </div>

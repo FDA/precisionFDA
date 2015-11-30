@@ -6,14 +6,7 @@
   g.blank_slate partial:  "_partials/empty_grid"
 
   g.column name: 'Name', attribute: 'name' do |file|
-    display = ""
-    if file.public?
-      display = "<span class='fa fa-globe fa-fw'></span> "
-    else
-      display = "<span class='fa fa-fw'></span> "
-    end
-    display += link_to(file.prefix, asset_path(file.dxid))
-    raw display
+    unilinkfw(file, globe: true)
   end
 
   g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |file|

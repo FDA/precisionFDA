@@ -8,6 +8,7 @@ Rails.application.routes.draw do
     delete 'logout' => 'main#destroy'
     get 'return_from_login' => 'main#return_from_login'
     post 'publish' => 'main#publish'
+    get 'track' => 'main#track'
     get 'request_access' => 'main#request_access'
     post 'request_access' => 'main#request_access'
     get 'about' => 'main#about'
@@ -56,7 +57,7 @@ Rails.application.routes.draw do
       post 'download', on: :member
     end
     resources :notes
-    resources :assets, only: ['show', 'index', 'destroy', 'new'], path: '/app_assets'
+    resources :assets, path: '/app_assets'
 
     get '/users', to: 'users#index'
     get "/users/:username", to: 'users#show', constraints: { username: /[^\/]*/ }, as: 'user'

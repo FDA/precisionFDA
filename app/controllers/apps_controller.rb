@@ -9,21 +9,13 @@ class AppsController < ApplicationController
         redirect_to apps_path
         return
       else
-        if @app.user_id == @context.user_id
-          @revisions = App.accessible_by(@context).where(app_series_id: @app.app_series_id).order(revision: :desc)
-          @latestRevision = @revisions.select { |app| app.id == @app.app_series.latest_revision_app_id}.first
-          js_param[:releaseable] = true
-        else
-          @revisions = App.accessible_by(@context).released.where(app_series_id: @app.app_series_id).order(revision: :desc)
-        end
-
+        @revisions = @app.app_series.accessible_revisions(@context).select(:title, :id, :dxid, :revision, :version)
         @notes = @app.notes.accessible_by(@context).order(id: :desc)
       end
       js_param[:app] = @app.slice(:id, :dxid, :readme)
     end
 
-    series = AppSeries.accessible_by(@context)
-    @apps = series.map { |s| s.user_id == @context.user_id ? s.latest_revision_app : s.latest_version_app }.reject(&:nil?)
+    @apps = AppSeries.accessible_by(@context).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
 
     User.sync_jobs!(@context.user_id, @context.token)
     if @app.present?
@@ -41,27 +33,17 @@ class AppsController < ApplicationController
   end
 
   def show
-    js_param = {}
     @app = App.accessible_by(@context).find_by(dxid: params[:id])
-
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
       redirect_to apps_path
       return
-    else
-      if @app.user_id == @context.user_id
-        @revisions = App.accessible_by(@context).where(app_series_id: @app.app_series_id).order(revision: :desc)
-        @latestRevision = @revisions.select { |app| app.id == @app.app_series.latest_revision_app_id}.first
-        js_param[:releaseable] = true
-      else
-        @revisions = App.accessible_by(@context).released.where(app_series_id: @app.app_series_id).order(revision: :desc)
-      end
     end
 
+    @revisions = @app.app_series.accessible_revisions(@context).select(:title, :id, :dxid, :revision, :version)
     @notes = @app.notes.accessible_by(@context).order(id: :desc)
 
-    js_param[:app] = @app.slice(:id, :dxid)
-    js js_param
+    js app: @app.slice(:id, :dxid)
   end
 
   def edit
