@@ -28,7 +28,7 @@ $note-background: lighten($brand-blue-subtler, 1%)
     background-color: $note-background
 
   .note-sidebar
-    min-width: 200px
+    min-width: 300px
     max-width: 400px
     border-left: 1px solid $brand-blue-subtle
     border-top-right-radius: $border-radius-base
@@ -60,19 +60,14 @@ $note-background: lighten($brand-blue-subtler, 1%)
       background-color: transparent
       border-color: transparent
       padding: $padding-xs-vertical $padding-xs-horizontal
-      @include text-overflow
 
       .list-group-item-heading
         margin: 0
         padding: $padding-base-vertical 0
 
-      a, .item-name
-        padding: $padding-xs-vertical $padding-xs-horizontal
-        display: inline-block
-
       .btn-remove
         display: none
-        float: right
+        padding: 0 3px
 
   .note-section-title
     color: $brand-blue-tertiary

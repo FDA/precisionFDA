@@ -73,14 +73,22 @@
             </div>
             <!-- ko foreach: items -->
               <div class="list-group-item attachment" data-bind="attr: {'item-uid': uid, 'item-klass': klass}, css: {removed:removed.cache}, visible: !removed() && !(removed.cache() && !$root.editing())">
-                <span data-bind="css: $parent.iconClass"></span>
-                <!-- ko if: path -->
-                  <a class="item-name" data-bind="text: name, attr: {href: path}" tabindex="-1" ></a>
-                <!-- /ko -->
-                <!-- ko ifnot: path -->
-                  <span class="item-name" data-bind="text: uid" tabindex="-1" ></span>
-                <!-- /ko -->
-                <a class="btn btn-link btn-link-danger btn-remove pull-right" data-bind="click: toggleRemove, css: removed.cache() ? 'fa fa-plus' : 'fa fa-times'"></a>
+                <div class="media">
+                  <div class="media-left">
+                    <span data-bind="css: $parent.iconClass"></span>
+                  </div>
+                  <div class="media-body">
+                    <!-- ko if: path -->
+                      <a class="item-name" data-bind="text: name, attr: {href: path}" tabindex="-1" ></a>
+                    <!-- /ko -->
+                    <!-- ko ifnot: path -->
+                      <span class="item-name" data-bind="text: uid" tabindex="-1" ></span>
+                    <!-- /ko -->
+                  </div>
+                  <div class="media-right">
+                    <a class="btn btn-link btn-link-danger btn-remove" data-bind="click: toggleRemove, css: removed.cache() ? 'fa fa-plus' : 'fa fa-times'"></a>
+                  </div>
+                </div>
               </div>
             <!-- /ko -->
           </div>
