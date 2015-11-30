@@ -1,19 +1,23 @@
 @import "_common"
 
-.publisher-canvas-wrapper
-  padding: 10px
+.track-canvas-wrapper
+  padding: 50px 25px
   text-align: center
+  overflow-x: auto
 
-svg.publisher-canvas
+svg.track-canvas
+  .node rect
+    stroke: #333
+    fill: #f5f5f5
+    stroke-width: 1.5px
+    stroke: #fff
+    border-radius: $border-radius-base
+
   g.public > rect
     fill: #dff0d8
 
   g.not_yours > rect
     fill: #f2dede
-
-  .node rect
-    stroke: #333
-    fill: #fff
 
   .edgePath path
     stroke: #333
