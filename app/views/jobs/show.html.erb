@@ -70,6 +70,9 @@
         <span class="fa fa-file-code-o"></span> View Log
       <% end %>
     <% end %>
+    <%= link_to track_path(id: @job.uid), class: "btn btn-primary", data: {no_turbolink: true} do %>
+      <span class="fa fa-flip-vertical fa-sitemap"></span> Track
+    <% end %>
     <% if @job.app.accessible_by?(@context) %>
       <%= link_to new_app_job_path(@job.app.dxid), class: "btn btn-primary" do %>
         <span class="fa fa-bolt"></span> Run App &nbsp;&nbsp;<span class="badge"><%= @job.app.version ? "v#{@job.app.version}" : "rev#{@job.app.revision}" %></span>

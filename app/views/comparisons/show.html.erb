@@ -52,6 +52,9 @@
       <%= link_to visualize_comparison_path(@comparison.id), class: "btn btn-primary" do %>
         <span class="fa fa-sliders"></span> Visualize
       <% end %>
+      <%= link_to track_path(id: @comparison.uid), class: "btn btn-primary", data: {no_turbolink: true} do %>
+        <span class="fa fa-flip-vertical fa-sitemap"></span> Track
+      <% end %>
       <% if @comparison.publishable_by?(@context) %>
         <%= link_to publish_path + "?" + {id: @comparison.uid}.to_param, method: :post, class: "btn btn-success" do %>
           <span class="fa fa-bullhorn"></span> Publish

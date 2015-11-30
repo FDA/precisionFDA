@@ -8,7 +8,7 @@ Rails.application.routes.draw do
     delete 'logout' => 'main#destroy'
     get 'return_from_login' => 'main#return_from_login'
     post 'publish' => 'main#publish'
-    get 'history' => 'main#history'
+    get 'track' => 'main#track'
     get 'request_access' => 'main#request_access'
     post 'request_access' => 'main#request_access'
     get 'about' => 'main#about'
