@@ -255,13 +255,13 @@ class MainController < ApplicationController
   def track
     id = params[:id]
     raise "Missing id in track route" unless id.is_a?(String) && id.present?
-    item = item_from_uid(id)
-    if !item.accessible_by?(@context)
+    @item = item_from_uid(id)
+    if !@item.accessible_by?(@context)
       flash[:error] = "This item is not accessible by you"
       redirect_to :root
       return
     end
-    @graph = get_graph(item)
+    @graph = get_graph(@item)
   end
 
   def tokify
@@ -340,6 +340,4 @@ class MainController < ApplicationController
     # node_sliced[:path] = node[0].path
     return [node_sliced, children]
   end
-
-
 end

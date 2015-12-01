@@ -1,11 +1,21 @@
-<div class="track-intro">
-  <%= alert_help("Learn more about tracking", "#{about_path}/how#track") %>
-</div>
-<div class="track-canvas-wrapper">
-  <svg class="track-canvas"><g/></svg>
+<% content_for :title do %>Track <%= @item.title %><% end %>
+
+<div class="page-header">
+  <div class="page-title"><span class="fa fa-flip-vertical fa-sitemap"></span> Track Graph for <small><%= unilink(@item) %></small></div>
 </div>
 
-<script src="https://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js"></script>
+<div class="container-fluid container-padded">
+  <div class="track-intro">
+    <%= alert_help("Learn more about tracking", "#{about_path}/how#track") %>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="track-canvas-wrapper">
+      <svg class="track-canvas"><g></g></svg>
+    </div>
+  </div>
+</div>
+
 <script>
 var g = new dagreD3.graphlib.Graph().setGraph({});
 
@@ -16,6 +26,7 @@ var svg = d3.select("svg.track-canvas"),
     inner = svg.select("g");
 
 var render = new dagreD3.render();
+
 render(inner, g);
 
 svg.attr("height", g.graph().height + 2);

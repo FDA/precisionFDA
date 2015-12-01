@@ -4,7 +4,7 @@
 <%= form_for :main, url: publish_path do |f| %>
 <input type="hidden" data-bind="attr: {name: 'id'}, value: rootID" />
 <input type="hidden" data-bind="attr: {name: 'uids[' + rootID +']'}, value: 'on'" />
-<div class="container container-padded">
+<div class="container container-padded-v">
   <div class='pfda-help-block'>
     <span class='fa fa-exclamation-triangle' aria-hidden='true'></span> Publishing items makes them publicly visible. <%= link_to("Review important information about publishing, and learn why it's a good idea to also publish related items.", "#{about_path}/how#publish", target: '_blank') %>
   </div>
