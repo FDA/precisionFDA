@@ -5,8 +5,8 @@
 <input type="hidden" data-bind="attr: {name: 'id'}, value: rootID" />
 <input type="hidden" data-bind="attr: {name: 'uids[' + rootID +']'}, value: 'on'" />
 <div class="container container-padded">
-  <div class='pfda-help-block pfda-help-info'>
-    <span class='fa fa-info-circle' aria-hidden='true'></span> <strong>TIP</strong> For the best experience when publishing your object also publish its immediate related objects so that the community can reproduce your workflow more easily.
+  <div class='pfda-help-block'>
+    <span class='fa fa-exclamation-triangle' aria-hidden='true'></span> Publishing items makes them publicly visible. <%= link_to("Review important information about publishing, and learn why it's a good idea to also publish related items.", "#{about_path}/how#publish", target: '_blank') %>
   </div>
   <div class="list-group">
     <div class="list-group-item list-group-item-header">
