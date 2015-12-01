@@ -63,7 +63,7 @@
           <li class="dropdown-header">Revisions</li>
           <% @revisions.each do |app| %>
             <li class="<% if app.dxid == params[:id] %>active<% end %>">
-              <a href="<%= app_jobs_path(app.dxid) %>" class="clearfix">
+              <a href="<%= action_name == 'index' ? app_jobs_path(app.dxid) : app_path(app.dxid) %>" class="clearfix">
                 <span class="app-revision"><%= app.revision %></span>
                 <% if @revisions.first.id == app.id %>
                   <span class="app-label-latest label label-info pull-right">Latest</span>
@@ -94,11 +94,6 @@
     <%= link_to track_path(id: @app.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
       <span class="fa fa-flip-vertical fa-sitemap"></span> Track
     <% end %>
-    <% if @app.publishable_by?(@context) %>
-      <%= link_to publish_path + "?" + {id: @app.uid}.to_param, method: :post, class: "btn btn-success" do %>
-        <span class="fa fa-bullhorn"></span> Publish
-      <% end %>
-    <% end %>
   </div>
 
   <div class="btn-group">
@@ -108,6 +103,11 @@
   <div class="btn-group pull-right">
     <%= link_to new_app_job_path(@app.dxid), class: "btn btn-primary" do %>
       <span class="fa fa-bolt"></span> Run App&nbsp;&nbsp;<span class="badge"><%= @app.version ? "v#{@app.version}" : "rev#{@app.revision}" %></span>
+    <% end %>
+    <% if @app.publishable_by?(@context) %>
+      <%= link_to publish_path + "?" + {id: @app.uid}.to_param, method: :post, class: "btn btn-success" do %>
+        <span class="fa fa-bullhorn"></span> Publish
+      <% end %>
     <% end %>
   </div>
 </div>
