@@ -1,5 +1,16 @@
 @import "_common"
 
+$track_private-color: $gray-light
+$track_public-color: $brand-green-primary
+$track_not_yours-color: $brand-red-primary
+
+.bg-track_private
+  background-color: $track_private-color
+.bg-track_public
+  background-color: $track_public-color
+.bg-track_not_yours
+  background-color: $track_not_yours-color
+
 .track-canvas-wrapper
   padding: $padding-large-horizontal
   text-align: center
@@ -10,23 +21,33 @@
 
 svg.track-canvas
   .node rect
-    stroke: #333
-    fill: #f5f5f5
-    stroke-width: 1.5px
-    stroke: #fff
+    fill: transparent
+
+  .node
+    .label
+      padding: 0
+
+  .node foreignobject > div
+    background-color: $gray-lighter
     border-radius: $border-radius-base
+    box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.9)
+    border-left: 10px solid $track_private-color
+    padding: 8px
+    margin-left: -4px
 
-  g.public > rect
-    fill: #dff0d8
+  g.public foreignobject > div
+    background-color: $state-success-bg
+    border-left-color: $track_public-color
 
-  g.not_yours > rect
-    fill: #f2dede
+  g.not_yours foreignobject > div
+    background-color: $state-danger-bg
+    border-left-color: $track_not_yours-color
 
   .edgePath path
-    stroke: #333
-    fill: #333
+    stroke: $brand-blue-tertiary
+    fill: $brand-blue-tertiary
     stroke-width: 1.5px
 
   tspan, foreignobject
     font-size: 13px
-    color: #333
+    color: $brand-blue-tertiary
