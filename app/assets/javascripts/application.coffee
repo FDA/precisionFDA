@@ -15,10 +15,13 @@
 #= require jquery_ujs
 #= require turbolinks
 #= require bootstrap-sass/assets/javascripts/bootstrap-sprockets
+#= require lodash
+#= require graphlib
 #= require d3
+#= require dagre
+#= require dagre-d3
 #= require human-format
 #= require knockout
-#= require lodash
 #= require moment
 #= require wice_grid
 #= require remarkable
