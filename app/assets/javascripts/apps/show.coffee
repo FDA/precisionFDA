@@ -1,3 +1,12 @@
+class AppShowModel
+  constructor: (app, releaseable) ->
+    if app?
+      @noteAttachModel = new Precision.models.NoteAttachModel(app.id, 'App')
+      @readmeDisplay = Precision.md.render(app.readme)
+
+    if releaseable
+      @appReleaseModel = new Precision.models.AppReleaseModel(app.dxid)
+
 #########################################################
 #
 #
@@ -9,11 +18,7 @@
 AppsController = Paloma.controller('Apps')
 AppsController::show = ->
   $container = $("body main")
-  viewModel = {
-    noteAttachModel: new Precision.models.NoteAttachModel(@params.app.id, 'App')
-  }
-  if @params.releaseable
-    viewModel.appReleaseModel = new Precision.models.AppReleaseModel(@params.app.dxid)
+  viewModel = new AppShowModel(@params.app, @params.releaseable)
 
   ko.applyBindings(viewModel, $container[0])
 
