@@ -28,7 +28,6 @@ class AppsController < ApplicationController
       order_direction: 'desc',
       per_page: 100
     })
-
     js js_param
   end
 
@@ -42,8 +41,7 @@ class AppsController < ApplicationController
 
     @revisions = @app.app_series.accessible_revisions(@context).select(:title, :id, :dxid, :revision, :version)
     @notes = @app.notes.accessible_by(@context).order(id: :desc)
-
-    js app: @app.slice(:id, :dxid)
+    js app: @app.slice(:id, :dxid, :readme)
   end
 
   def edit
