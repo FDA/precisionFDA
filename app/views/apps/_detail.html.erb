@@ -91,13 +91,13 @@
     <a class="btn btn-default" href="<%= fork_app_path(@app.dxid) %>">
       <span class="fa fa-code-fork"></span> Fork
     </a>
-    <%= link_to track_path(id: @app.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
-      <span class="fa fa-flip-vertical fa-sitemap"></span> Track
-    <% end %>
   </div>
 
   <div class="btn-group">
     <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
+    <%= link_to track_path(id: @app.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
+      <span class="fa fa-flip-vertical fa-sitemap"></span> Track
+    <% end %>
   </div>
 
   <div class="btn-group pull-right">

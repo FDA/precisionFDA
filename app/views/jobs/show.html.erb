@@ -61,18 +61,20 @@
 
 <div class="pfda-toolbar">
   <div class="btn-group">
-    <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
-  </div>
-
-  <div class="btn-group pull-right">
     <% if @job.user_id == @context.user_id %>
-      <%= link_to log_job_path(@job.dxid), class: "btn btn-primary" do %>
+      <%= link_to log_job_path(@job.dxid), class: "btn btn-default" do %>
         <span class="fa fa-file-code-o"></span> View Log
       <% end %>
     <% end %>
-    <%= link_to track_path(id: @job.uid), class: "btn btn-primary", data: {no_turbolink: true} do %>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
+    <%= link_to track_path(id: @job.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
       <span class="fa fa-flip-vertical fa-sitemap"></span> Track
     <% end %>
+  </div>
+
+  <div class="btn-group pull-right">
     <% if @job.app.accessible_by?(@context) %>
       <%= link_to new_app_job_path(@job.app.dxid), class: "btn btn-primary" do %>
         <span class="fa fa-bolt"></span> Run App &nbsp;&nbsp;<span class="badge"><%= @job.app.version ? "v#{@job.app.version}" : "rev#{@job.app.revision}" %></span>
