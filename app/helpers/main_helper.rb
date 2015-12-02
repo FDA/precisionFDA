@@ -64,7 +64,7 @@ module MainHelper
     deps = graph[1]
     uid = item.uid
     if !nodes.has_key?(uid)
-      nodes[uid] = {labelType: 'html', label: unilinkfw(item), class: item.public? ? 'public' : (item.user_id == @context.user_id ? 'own' : 'not_yours')}
+      nodes[uid] = {labelType: 'html', label: content_tag(:div, unilinkfw(item), class: 'track-box'), class: item.public? ? 'public' : (item.user_id == @context.user_id ? 'own' : 'not_yours')}
     end
     deps.each do |dep|
       graph_nodes_recursive(nodes, dep)
