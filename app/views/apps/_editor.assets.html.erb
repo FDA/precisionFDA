@@ -29,11 +29,17 @@
           </li>
           <!-- ko foreach: assets.filtered -->
           <li class="list-group-item item-asset" data-bind="css: {active: $parent.previewedAsset() && $parent.previewedAsset().dxid == dxid}">
-            <div class="checkbox clearfix">
-              <label>
-                <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.assets.selected"> <span class="fa fa-file-zip-o"></span> <span data-bind="text: name"></span>
-              </label>
-              <span class="pull-right list-preview-icon" data-bind="click: $parent.previewAsset"><span class="fa fa-fw fa-chevron-right"></span></span>
+            <div class="media">
+              <div class="media-body">
+                <div class="checkbox clearfix">
+                  <label>
+                    <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.assets.selected"> <span class="fa fa-file-zip-o"></span> <span  class="word-break-all" data-bind="text: name"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="media-right">
+                <span class="list-preview-icon" data-bind="click: $parent.previewAsset"><span class="fa fa-fw fa-chevron-right"></span></span>
+              </div>
             </div>
           </li>
           <!-- /ko -->

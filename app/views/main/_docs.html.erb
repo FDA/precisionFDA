@@ -660,7 +660,7 @@ tabix -p vcf file.vcf.gz
 
 ### Links
 
-http://www.htslib.org/doc/tabix-1.2.1.html  
+http://www.htslib.org/doc/tabix-1.2.1.html
 https://github.com/samtools/htslib/releases/tag/1.2.1</pre>
         <p>Download the precisionFDA asset uploader helper tool by clicking the button in the "Add Assets" page. The downloaded archive contains a single python script, <code>pfda-upload-asset</code>, which you can run to upload the asset. (NOTE: It requires the python 'requests' package, so ensure you have that available in your environment). The tool requires an "authentication key" in order to authenticate the client against the precisionFDA system. You can get a key by clicking the respective link in the "Add Assets" page. For your security, the key is valid for 24h.</p>
         <p>Run <code>./pfda-upload-asset --auth KEY --name my-asset.tar.gz --root /path/to/fake_root --readme my-asset.txt</code>. This command will archive the contents of the fake root into the named tarball, and upload it to precisionFDA along with the contents of the readme file. The tarball name must end in either <code>.tar.gz</code> or <code>.tar</code> (in which latter case it will not be compressed).</p>
@@ -762,7 +762,7 @@ emit padded_intervals "$intervals_prefix".padded.bed</pre></p>
       <div id="notes-ideas" class="h2">Ideas for using notes</div>
       <div class="bs-docs-section">
         <p>Notes often function as a way to document information about their attachments. For that reason, when you visit the page of an item that has been attached to one or more notes, the system will show a "Notes" tab containing all related notes.</p>
-        
+
         <p>When publishing items (like files or comparisons) to the precisionFDA community, it's a good idea to also publish a note describing why you are contributing these items and what you expect community members to do with them. This way, when someone stumbles upon a published item of yours, they can look up the relevant note to learn more. For more information, see <a href="#publish">Publishing</a>.</p>
 
         <div class="alert alert-info">
@@ -816,15 +816,15 @@ emit padded_intervals "$intervals_prefix".padded.bed</pre></p>
           </thead>
           <tbody>
             <tr>
-              <td><svg class="track-canvas" width="40" height="20"><g class="public"><rect width="40" height="20"></rect></g></svg></td>
+              <td class="bg-track_public"></td>
               <td>The item is public.</td>
             </tr>
             <tr>
-              <td><svg class="track-canvas" width="40" height="20"><g class="node"><rect width="40" height="20"></rect></g></svg></td>
+              <td class="bg-track_private"></td>
               <td>The item is private and owned by you.</td>
             </tr>
             <tr>
-              <td><svg class="track-canvas" width="40" height="20"><g class="not_yours"><rect width="40" height="20"></rect></g></svg></td>
+              <td class="bg-track_not_yours"></td>
               <td>The item is private and owned by someone else.</td>
             </tr>
           </tbody>
