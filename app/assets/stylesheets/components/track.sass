@@ -27,19 +27,19 @@ svg.track-canvas
     .label
       padding: 0
 
-  .node foreignobject > div
+  .node foreignobject .track-box
     background-color: $gray-lighter
     border-radius: $border-radius-base
-    box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.9)
+    box-shadow: 2px 2px 9px rgba(0, 0, 0, 0.4)
     border-left: 10px solid $track_private-color
     padding: 8px
-    margin-left: -4px
+    box-sizing: border-box
 
-  g.public foreignobject > div
+  g.public foreignobject .track-box
     background-color: $state-success-bg
     border-left-color: $track_public-color
 
-  g.not_yours foreignobject > div
+  g.not_yours foreignobject .track-box
     background-color: $state-danger-bg
     border-left-color: $track_not_yours-color
 
