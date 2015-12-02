@@ -16,11 +16,17 @@
 
           <!-- ko foreach: notes.filtered -->
           <li class="list-group-item" data-bind="css: {active: $parent.previewedNote() && $parent.previewedNote().id == id}">
-            <div class="checkbox clearfix">
-              <label>
-                <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.notes.selected"> <span data-bind="text: title"></span>
-              </label>
-              <span class="pull-right list-preview-icon" data-bind="click: $parent.preview"><span class="fa fa-fw fa-chevron-right"></span></span>
+            <div class="media">
+              <div class="media-body">
+                <div class="checkbox clearfix">
+                  <label>
+                    <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.notes.selected"> <span class="word-break-all" data-bind="text: title"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="media-right">
+                <span class="list-preview-icon" data-bind="click: $parent.preview"><span class="fa fa-fw fa-chevron-right"></span></span>
+              </div>
             </div>
           </li>
           <!-- /ko -->
