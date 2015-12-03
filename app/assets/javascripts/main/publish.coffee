@@ -12,9 +12,9 @@ class PublishViewModel
 
 class NodeModel
   constructor: (node, children, @isRoot) ->
-    @klass = node.class
+    @klass = node.klass
     @uid = node.uid
-    @title = node.name || node.title
+    @title = node.title
     @children = ko.observableArray(children)
     @childrenToPublishCount = ko.computed(=>
       _.reduce(@children(), (total, child) ->
@@ -24,21 +24,23 @@ class NodeModel
         return total
       , 0)
     )
-    @isPublished = node.scope == 'public'
+    @isPublished = node.public
     @isOwned = node.owned
     @isPublishable = node.publishable
 
     @publish = ko.observable(@isRoot)
 
-    @iconClass = switch node.class
-                  when 'App'
+    @iconClass = switch node.klass
+                  when 'app'
                     'fa fa-fw fa-cube'
-                  when 'Job'
+                  when 'job'
                     'fa fa-fw fa-tasks'
-                  when 'Comparison'
+                  when 'comparison'
                     'fa fa-fw fa-area-chart'
-                  when 'Asset'
+                  when 'asset'
                     'fa fa-fw fa-file-zip-o'
+                  when 'note'
+                    'fa fa-fw fa-sticky-note'
                   else
                     'fa fa-fw fa-file-o'
 #########################################################
