@@ -148,12 +148,31 @@ class ComparisonsController < ApplicationController
   end
 
   def destroy
-    @comparison = Comparison.accessible_by(@context).find(params[:id])
+    @comparison = Comparison.editable_by(@context).find(params[:id])
 
-    raise if @comparison.state == "pending"
+    projects = nil
+    file_ids = nil
+    Comparison.transaction do
+      @comparison.reload
 
-    # TODO: This comparison has outputs, those need to be deleted
-    @comparison.destroy
+      # Only allow deletion of comparisons in terminal states, so we don't have to worry about job termination, etc.
+      raise if @comparison.state == "pending"
+
+      if @comparison.outputs.size > 0
+        # Ensure consistency (all files should be in the private or public comparison project)
+        projects = @comparison.outputs.map(&:project).uniq
+        raise unless projects.size == 1
+
+        file_ids = @comparison.outputs.map(&:dxid)
+      end
+
+      @comparison.outputs.destroy_all
+      @comparison.destroy
+    end
+
+    if file_ids.present?
+      DNAnexusAPI.new(@context.token).call(projects[0], "removeObjects", {objects: file_ids})
+    end
 
     flash[:success] = "Comparison \"#{@comparison.name}\" has been successfully deleted"
     redirect_to :comparisons

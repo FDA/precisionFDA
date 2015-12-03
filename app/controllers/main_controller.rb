@@ -249,7 +249,7 @@ class MainController < ApplicationController
     end
 
     graph = get_graph(item)
-    js graph: slice_node(graph)
+    js graph: publisher_js_prepare(graph)
   end
 
   def track
@@ -328,16 +328,15 @@ class MainController < ApplicationController
     end
   end
 
-  def slice_node(node)
-    children = node[1]
-    if children.length > 0
-      children = children.map {|child| slice_node(child)}
-    end
-    node_sliced = node[0].slice(:uid, :title, :scope)
-    node_sliced[:owned] = node[0].editable_by?(@context)
-    node_sliced[:class] = node[0].class.name.demodulize
-    node_sliced[:publishable] = node[0].publishable_by?(@context)
-    # node_sliced[:path] = node[0].path
-    return [node_sliced, children]
+  def publisher_js_prepare(node)
+    item = node[0].slice(:uid, :klass)
+    item[:title] = node[0].accessible_by?(@context) ? node[0].title : node[0].uid
+    item[:owned] = node[0].editable_by?(@context)
+    item[:public] = node[0].public?
+    item[:publishable] = node[0].publishable_by?(@context)
+
+    children = node[1].map { |child| publisher_js_prepare(child) }
+
+    return [item, children]
   end
 end

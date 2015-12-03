@@ -55,14 +55,14 @@
 </div>
 
 <div class="pfda-toolbar">
-  <% if @file.parent_type != "Comparison" %>
-    <div class="btn-group pull-left">
+  <div class="btn-group pull-left">
+    <% if @file.parent_type != "Comparison" %>
       <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
-      <%= link_to track_path(id: @file.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
-        <span class="fa fa-flip-vertical fa-sitemap"></span> Track
-      <% end %>
-    </div>
-  <% end %>
+    <% end %>
+    <%= link_to track_path(id: @file.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
+      <span class="fa fa-flip-vertical fa-sitemap"></span> Track
+    <% end %>
+  </div>
 
   <div class="pull-right">
     <div class="btn-group">

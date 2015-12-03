@@ -27,21 +27,22 @@ svg.track-canvas
     .label
       padding: 0
 
-  .node foreignobject .track-box
-    background-color: $gray-lighter
-    border-radius: $border-radius-base
-    box-shadow: 2px 2px 9px rgba(0, 0, 0, 0.4)
-    border-left: 10px solid $track_private-color
-    padding: 8px
-    box-sizing: border-box
+    .track-box
+      background-color: $gray-lighter
+      border-radius: $border-radius-base
+      box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.2)
+      border: 1px solid #ccc
+      border-left: 10px solid $track_private-color
+      padding: 8px
+      box-sizing: border-box
 
-  g.public foreignobject .track-box
-    background-color: $state-success-bg
-    border-left-color: $track_public-color
+    &.public .track-box
+      background-color: $state-success-bg
+      border-left-color: $track_public-color
 
-  g.not_yours foreignobject .track-box
-    background-color: $state-danger-bg
-    border-left-color: $track_not_yours-color
+    &.not_yours .track-box
+      background-color: $state-danger-bg
+      border-left-color: $track_not_yours-color
 
   .edgePath path
     stroke: $brand-blue-tertiary
