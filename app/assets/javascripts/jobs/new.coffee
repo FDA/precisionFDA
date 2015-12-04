@@ -16,11 +16,7 @@ class JobsNewView
     @isRunnable = ko.computed(() =>
       isConfigReady = !_.isEmpty(@name())
       areInputsReady = _.every(@inputModels(), (inputModel) ->
-        hasError = inputModel.error()?
-        hasData = inputModel.getDataForRun()? && inputModel.getDataForRun() != ''
-        hasDefault = inputModel.defaultValue?
-        isRequired = inputModel.isRequired
-        return !hasError && (!isRequired || (isRequired && (hasData || hasDefault)))
+        inputModel.isReady()
       )
 
       return !@busy() && isConfigReady && areInputsReady
@@ -104,8 +100,16 @@ class InputModel
               @value(value)
     )
 
+    @isReady = ko.computed(=>
+      hasError = @error()?
+      hasData = @getDataForRun()? && @getDataForRun() != ''
+      hasDefault = @defaultValue?
+      isRequired = @isRequired
+      return !hasError && (!isRequired || (isRequired && (hasData || hasDefault)))
+    )
+
     @needsToBeSet = ko.computed(=>
-      return !@value()? && @isRequired
+      return @isRequired && !@isReady()
     )
 
   # Boolean Functions
@@ -249,3 +253,16 @@ JobsController::new = ->
   $container = $("body main")
   viewModel = new JobsNewView(@params.app)
   ko.applyBindings(viewModel, $container[0])
+
+  $affixContainer = $container.find(".affix-container")
+  $affixContainer.affix({
+    offset:
+      top: $affixContainer.offset().top
+  })
+
+  $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
+
+  $(window).resize(() ->
+    $affixContainer.affix('checkPosition')
+    $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
+  )
