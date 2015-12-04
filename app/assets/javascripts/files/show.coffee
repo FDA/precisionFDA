@@ -14,3 +14,7 @@ FilesController::show = ->
   }
 
   ko.applyBindings(viewModel, $container[0])
+
+  $tabs = $container.find(".nav-tabs > li")
+  if $tabs.length > 0 && !$tabs.hasClass("active")
+    $tabs.first().find("a[data-toggle='tab']").trigger("click")
