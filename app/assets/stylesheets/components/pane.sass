@@ -19,6 +19,14 @@
     background-color: darken(desaturate($brand-blue-subtler, 25%), 3%)
     border-right: 1px solid $border-default-color
 
+    &.pfda-pane-sidebar-padded-v
+      padding-top: $padding-base-vertical
+      padding-bottom: $padding-base-vertical
+
+    &.pfda-pane-sidebar-padded-h
+      padding-left: $padding-base-horizontal
+      padding-right: $padding-base-horizontal
+
     &.pfda-pane-sidebar-padded
       padding: $padding-base-horizontal
 
@@ -37,20 +45,32 @@
           border-color: $brand-blue-secondary
 
       .list-group
+        padding-top: $padding-small-vertical
+        padding-bottom: $padding-small-vertical
+
         a.list-group-item
           color: $brand-blue-secondary
+
           &:hover
             background-color: lighten($brand-blue-dark, 5%)
 
           &.active, &.active:hover
             color: $brand-blue-secondary
             background-color: #ffffff
-            border-left-color: $brand-red-primary
+            box-shadow: -5px 2px 3px rgba(0, 0, 0, 0.2)
+
             .text-muted
               color: mix(#aaa, $link-color, 75%)
 
         .list-group-item
           color: mix(#aaa, $link-color, 75%)
+          margin-bottom: 5px
+
+          &:last-child
+            margin-bottom: 0
+
+          &.list-group-item-header
+            color: #efefef
 
         + .list-group
           border-top-color: lighten($brand-blue-dark, 5%)
@@ -58,14 +78,21 @@
     .list-group
       border-radius: 0
       margin: 0
+
       .list-group-item
         border: 0
         border-radius: 0
         background-color: transparent
         color: mix($text-muted, $link-color, 75%)
 
+        &.list-group-item-header
+          font-size: 85%
+          font-weight: bold
+          text-transform: uppercase
+
       a.list-group-item
         color: $brand-blue-secondary
+
         &:hover
           background-color: $brand-blue-subtler
 
@@ -76,10 +103,10 @@
           font-size: 12px
           font-weight: 300
           margin-top: $padding-large-vertical
+
         &.active, &.active:hover
           background-color: $brand-blue-secondary
           color: #ffffff
-          border-left: 5px solid $brand-blue-primary
           padding-left: 10px // list-group padding minus border left width
           margin-right: -1px
           .text-muted

@@ -1,6 +1,19 @@
 class NotesController < ApplicationController
   def index
-    @notes = Note.accessible_by(@context).order(id: :desc)
+    @notes = Note.editable_by(@context).order(id: :desc)
+  end
+
+  def featured
+    org = Org.featured
+    if org
+      @notes = Note.accessible_by(@context).joins(:user).where(:users => { :org_id => org.id }).order(id: :desc)
+    end
+    render :index
+  end
+
+  def explore
+    @notes = Note.accessible_by_public.order(id: :desc)
+    render :index
   end
 
   def show

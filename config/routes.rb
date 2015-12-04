@@ -49,15 +49,27 @@ Rails.application.routes.draw do
       member do
         get 'fork'
       end
+      get 'featured', on: :collection, as: 'featured'
+      get 'explore', on: :collection, as: 'explore'
     end
     resources :comparisons do
       get 'visualize', on: :member
+      get 'featured', on: :collection, as: 'featured'
+      get 'explore', on: :collection, as: 'explore'
     end
     resources :files do
       post 'download', on: :member
+      get 'featured', on: :collection, as: 'featured'
+      get 'explore', on: :collection, as: 'explore'
     end
-    resources :notes
-    resources :assets, path: '/app_assets'
+    resources :notes do
+      get 'featured', on: :collection, as: 'featured'
+      get 'explore', on: :collection, as: 'explore'
+    end
+    resources :assets, path: '/app_assets' do
+      get 'featured', on: :collection, as: 'featured'
+      get 'explore', on: :collection, as: 'explore'
+    end
 
     get '/users', to: 'users#index'
     get "/users/:username", to: 'users#show', constraints: { username: /[^\/]*/ }, as: 'user'
