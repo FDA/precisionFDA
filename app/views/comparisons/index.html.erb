@@ -1,56 +1,83 @@
 <% content_for :title do %>Comparisons<% end %>
 
 <div class="pfda-toolbar">
-  <div class="btn-group">
-    <a class="btn btn-default" href="<%= new_comparison_path %>">
+  <div class="btn-group pull-right">
+    <a class="btn btn-primary" href="<%= new_comparison_path %>">
       <span class="fa fa-bolt fa-fw"></span>Run Comparison
     </a>
   </div>
+  <ul class="nav nav-pills nav-pills-sm">
+    <li class="<% if action_name == 'index' %>active<% end %>">
+      <%= link_to comparisons_path do %>
+        <span class="fa fa-bullseye"></span> <span class="pill-label">My Comparisons</span>
+      <% end %>
+    </li>
+    <li class="<% if action_name == 'featured' %>active<% end %>">
+      <%= link_to featured_comparisons_path do %>
+        <span class="fa fa-flag"></span> <span class="pill-label">Featured</span>
+      <% end %>
+    </li>
+    <li class="<% if action_name == 'explore' %>active<% end %>">
+      <%= link_to explore_comparisons_path do %>
+        <span class="fa fa-globe"></span> <span class="pill-label">Explore</span>
+      <% end %>
+    </li>
+  </ul>
 </div>
 
-<%= grid(@comparisons_grid, show_filters: :when_filtered) do |g|
-  g.blank_slate partial:  "_partials/empty_grid"
+<% if @comparisons_grid.present? %>
+  <%= grid(@comparisons_grid, show_filters: :when_filtered) do |g|
+    g.blank_slate partial:  "_partials/empty_grid"
 
-  g.after_row do |comparison, num_cols|
-    if !comparison.description.blank?
-      content_tag(:tr,
-        content_tag(:td, nil, {class: "col-state state-#{comparison.state}"}).concat(content_tag(:td,
-          content_tag(:div, comparison.description, class: 'description'),
-        colspan: num_cols - 1)),
-      class: 'extra-row')
-    else
-      nil
+    g.after_row do |comparison, num_cols|
+      if !comparison.description.blank?
+        content_tag(:tr,
+          content_tag(:td, nil, {class: "col-state state-#{comparison.state}"}).concat(content_tag(:td,
+            content_tag(:div, comparison.description, class: 'description'),
+          colspan: num_cols - 1)),
+        class: 'extra-row')
+      else
+        nil
+      end
     end
-  end
 
-  g.column name: 'State', attribute: 'state' do |comparison|
-    [comparison.state, {class: "col-state state-#{comparison.state}"}]
-  end
+    g.column name: 'State', attribute: 'state' do |comparison|
+      [comparison.state, {class: "col-state state-#{comparison.state}"}]
+    end
 
-  g.column name: 'Name', attribute: 'name' do |comparison|
-    unilinkfw(comparison, globe: true)
-  end
+    g.column name: 'Name', attribute: 'name' do |comparison|
+      unilinkfw(comparison, globe: true)
+    end
 
-  g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |comparison|
-    link_to(comparison.user.dxuser, user_path(comparison.user.dxuser))
-  end
+    g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |comparison|
+      link_to(comparison.user.dxuser, user_path(comparison.user.dxuser))
+    end
 
-  g.column name: 'Test set' do |comparison|
-    file = comparison.input("test_vcf").user_file
-    unilinkfw(file)
-  end
+    g.column name: 'Test set' do |comparison|
+      file = comparison.input("test_vcf").user_file
+      unilinkfw(file)
+    end
 
-  g.column name: 'Benchmark set' do |comparison|
-    file = comparison.input("ref_vcf").user_file
-    unilinkfw(file)
-  end
+    g.column name: 'Benchmark set' do |comparison|
+      file = comparison.input("ref_vcf").user_file
+      unilinkfw(file)
+    end
 
-  g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |comparison|
-    comparison.created_at.to_s(:db)
-  end
+    g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |comparison|
+      comparison.created_at.to_s(:db)
+    end
 
-  g.column name: 'Access', attribute: 'scope',
-    custom_filter: {'Public' => "public", 'Private' => "private"} do |comparison|
-    comparison.public? ? "Public" : "Private"
-  end
-end -%>
+    g.column name: 'Access', attribute: 'scope',
+      custom_filter: {'Public' => "public", 'Private' => "private"} do |comparison|
+      comparison.public? ? "Public" : "Private"
+    end
+  end -%>
+<% else %>
+  <div class="alert alert-info">
+    <% if action_name == 'index' %>
+      <span class="fa fa-info-circle"></span> Comparison you run will show up here. Meanwhile, check out our <%= link_to "Featured Comparisons", featured_comparisons_path %> or <%= link_to "explore community contributions", explore_comparisons_path %>
+    <% else %>
+      We couldn't find any comparisons here
+    <% end %>
+  </div>
+<% end %>

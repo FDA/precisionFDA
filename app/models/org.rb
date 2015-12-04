@@ -24,6 +24,10 @@ class Org < ActiveRecord::Base
     "org-pfda..#{handle}"
   end
 
+  def self.featured
+    Org.find_by(handle: 'precisionfda')
+  end
+
   def dxorg
     Org.construct_dxorg(handle)
   end

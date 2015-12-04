@@ -24,31 +24,12 @@
   </ul>
 </div>
 
-<div class="pfda-pane container-fluid">
-  <div class="pfda-pane-sidebar pfda-pane-sidebar-dark">
-    <div class="list-group">
-      <a href="<%= apps_path() %>" class="list-group-item <%= @app.nil? ? 'active' : '' %>">
-        <span class="fa fa-tasks"></span> All My Jobs
-      </a>
+<% if @apps.present? && @apps.count > 0 %>
+  <%= render "apps/cards", apps: @apps %>
+<% else %>
+  <div class="container-fluid container-padded">
+    <div class="alert alert-info">
+      We couldn't find any apps here
     </div>
-    <% if @my_apps.count > 0 %>
-    <div class="list-group list-group-condensed-sm">
-      <li class="list-group-item list-group-item-header">
-        My Apps
-      </li>
-      <%= render "_partials/apps_list_group", apps: @my_apps, active: @app.try(:app_series_id) %>
-    </div>
-    <% end %>
-    <% if @ran_apps.count > 0 %>
-    <div class="list-group list-group-condensed-sm">
-      <li class="list-group-item list-group-item-header">
-        Community Apps Ran
-      </li>
-      <%= render "_partials/apps_list_group", apps: @ran_apps, active: @app.try(:app_series_id) %>
-    </div>
-    <% end %>
   </div>
-  <div class="pfda-pane-content">
-    <%= render "/apps/detail", app: @app, jobs_grid: @jobs_grid %>
-  </div>
-</div>
+<% end %>

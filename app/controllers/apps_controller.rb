@@ -15,7 +15,10 @@ class AppsController < ApplicationController
       js_param[:app] = @app.slice(:id, :dxid, :readme)
     end
 
-    @apps = AppSeries.accessible_by(@context).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
+    @my_apps = AppSeries.editable_by(@context).order(name: :asc).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
+
+    @ran_apps = AppSeries.accessible_by(@context).order(name: :asc).where.not(user_id: @context.user_id).joins(:jobs).where(:jobs => { :user_id => @context.user_id }).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
+
 
     User.sync_jobs!(@context.user_id, @context.token)
     if @app.present?
@@ -31,6 +34,19 @@ class AppsController < ApplicationController
     js js_param
   end
 
+  def featured
+    org = Org.featured
+    if org
+      @apps = AppSeries.accessible_by(@context).order(name: :asc).joins(:user).where(:users => { :org_id => org.id }).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
+    end
+    render :list
+  end
+
+  def explore
+    @apps = AppSeries.accessible_by_public.order(name: :asc).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
+    render :list
+  end
+
   def show
     @app = App.accessible_by(@context).find_by(dxid: params[:id])
     if @app.nil?
@@ -41,6 +57,16 @@ class AppsController < ApplicationController
 
     @revisions = @app.app_series.accessible_revisions(@context).select(:title, :id, :dxid, :revision, :version)
     @notes = @app.notes.accessible_by(@context).order(id: :desc)
+
+    User.sync_jobs!(@context.user_id, @context.token)
+
+    jobs = Job.where(user_id: @context.user_id, app_series_id: @app.app_series_id)
+    @jobs_grid = initialize_grid(jobs, {
+      order: 'jobs.id',
+      order_direction: 'desc',
+      per_page: 100
+    })
+
     js app: @app.slice(:id, :dxid, :readme)
   end
 
