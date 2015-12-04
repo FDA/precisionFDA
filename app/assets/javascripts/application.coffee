@@ -15,6 +15,7 @@
 #= require jquery_ujs
 #= require turbolinks
 #= require bootstrap-sass/assets/javascripts/bootstrap-sprockets
+#= require jquery-ui
 #= require lodash
 #= require graphlib
 #= require d3
@@ -22,6 +23,7 @@
 #= require dagre-d3
 #= require human-format
 #= require knockout
+#= require knockout-sortable
 #= require moment
 #= require wice_grid
 #= require remarkable
