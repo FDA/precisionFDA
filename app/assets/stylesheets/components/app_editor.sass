@@ -30,25 +30,6 @@
     input[type="text"]
       min-width: 400px
 
-//   height: 100%
-//   width: 100%
-//   @include flexbox
-//   @include flex-direction(column)
-//   @include align-items(stretch)
-//   @include align-content(stretch)
-//
-//   .ace-editor-section
-//     position: relative
-//     width: 50%
-//     @include flex(1)
-//     @include flex-direction(row)
-//     .ace_editor
-//       position: absolute
-//       top: 0
-//       bottom: 0
-//       left: 0
-//       right: 0
-
 .section-io
   .list-group-item-heading
     margin: 5px 10px 0 0
@@ -60,6 +41,17 @@
   margin: 0
   > tbody
     > tr.app-io-field
+      cursor: move
+      &:hover
+        background-color: $brand-blue-subtler
+
+      &.ui-sortable-helper
+        width: 100%
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.25)
+        background-color: #fff
+        > td
+          border: 0
+
       > td
         vertical-align: middle
 

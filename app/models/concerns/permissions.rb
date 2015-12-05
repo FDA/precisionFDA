@@ -11,6 +11,10 @@ module Permissions
       raise unless context.user_id.present?
       where(user_id: context.user_id)
     end
+
+    def accessible_by_public
+      where(scope: "public")
+    end
   end
 
   def accessible_by?(context)

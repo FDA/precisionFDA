@@ -2,12 +2,35 @@ class ComparisonsController < ApplicationController
   def index
     User.sync_comparisons!(@context.user_id, @context.token)
 
-    comparisons = Comparison.accessible_by(@context)
+    comparisons = Comparison.editable_by(@context)
     @comparisons_grid = initialize_grid(comparisons, {
       order: 'comparisons.id',
       order_direction: 'desc',
       per_page: 100
     })
+  end
+
+  def featured
+    org = Org.featured
+    if org
+      comparisons = Comparison.accessible_by(@context).joins(:user).where(:users => { :org_id => org.id })
+      @comparisons_grid = initialize_grid(comparisons, {
+        order: 'comparisons.id',
+        order_direction: 'desc',
+        per_page: 100
+      })
+    end
+    render :index
+  end
+
+  def explore
+    comparisons = Comparison.accessible_by_public
+    @comparisons_grid = initialize_grid(comparisons, {
+      order: 'comparisons.id',
+      order_direction: 'desc',
+      per_page: 100
+    })
+    render :index
   end
 
   def show

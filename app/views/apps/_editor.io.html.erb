@@ -24,8 +24,7 @@
             <th class="io-optional">Optional?</th>
             <th></th>
           </thead>
-          <tbody>
-          <!-- ko foreach: inputs -->
+          <tbody data-bind="sortable: {data: inputs, allowDrop: false}">
             <tr class="app-io-field">
               <td class="io-field-class" data-bind="text: klass"></td>
               <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name" placeholder="enter_input_name"/></td>
@@ -47,7 +46,6 @@
               <td class="io-field-optional"><div class="io-checkbox"><input type="checkbox" data-bind="checked: isOptional"/></div></td>
               <td class="io-field-remove text-right"><a class="btn btn-link btn-link-danger fa fa-times" data-bind="click: remove"></a></td>
             </tr>
-          <!-- /ko -->
           </tbody>
         </table>
       <!-- /ko -->
@@ -84,8 +82,7 @@
               <th></th>
             </tr>
           </thead>
-          <tbody>
-          <!-- ko foreach: outputs -->
+          <tbody data-bind="sortable: {data: outputs, allowDrop: false}">
             <tr class="app-io-field">
               <td class="io-field-class" data-bind="text: klass"></td>
               <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name" placeholder="enter_output_name"/></td>
@@ -95,7 +92,6 @@
               <td class="io-field-optional"><div class="io-checkbox"><input type="checkbox" data-bind="checked: isOptional"/></div></td>
               <td class="io-field-remove text-right"><a class="btn btn-link btn-link-danger fa fa-times" data-bind="click: remove"></a></td>
             </tr>
-          <!-- /ko -->
           </tbody>
         </table>
       <!-- /ko -->

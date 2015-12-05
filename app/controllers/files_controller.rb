@@ -1,21 +1,41 @@
 class FilesController < ApplicationController
   def index
-    @toolbar = {
-      fixed: [
-        {icon: "fa fa-plus-square fa-fw", label: "Add Files", link: new_file_path}
-      ]
-    }
-
     # Refresh state of files, if needed
     User.sync_files!(@context.user_id, @context.token)
 
-    user_files = UserFile.real_files.accessible_by(@context)
+    user_files = UserFile.real_files.editable_by(@context)
     @files_grid = initialize_grid(user_files,{
       include: [:user],
       order: 'user_files.created_at',
       order_direction: 'desc',
       per_page: 100
     })
+  end
+
+  def featured
+    org = Org.featured
+    if org
+      user_files = UserFile.real_files.accessible_by(@context).joins(:user).where(:users => { :org_id => org.id })
+
+      @files_grid = initialize_grid(user_files,{
+        include: [:user],
+        order: 'user_files.created_at',
+        order_direction: 'desc',
+        per_page: 100
+      })
+    end
+    render :index
+  end
+
+  def explore
+    user_files = UserFile.real_files.accessible_by_public
+    @files_grid = initialize_grid(user_files,{
+      include: [:user],
+      order: 'user_files.created_at',
+      order_direction: 'desc',
+      per_page: 100
+    })
+    render :index
   end
 
   def show
