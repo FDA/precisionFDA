@@ -25,7 +25,6 @@
     min-width: 100px
 
     .nav-icon
-      margin-bottom: 5px
       font-size: 28px
 
     &:hover, &:hover .nav-icon
@@ -38,6 +37,12 @@
       .nav-icon
         color: $brand-red-primary
 
+.navbar-nav
+  @media (min-width: $grid-float-breakpoint)
+    > li
+      > a
+        padding-top:    10px
+        padding-bottom: 10px
 
 @media (max-width: $screen-sm-min)
   .navbar-nav, .navbar-nav .dropdown a
@@ -50,8 +55,8 @@
 @media (min-width: $screen-sm-min)
   .navbar-brand
     height: auto
-    padding-top: 20px
-    padding-bottom: 30px
+    padding-top: 10px
+    padding-bottom: 20px
 
 @media (max-width: $screen-sm-max)
   .navbar-inverse .navbar-nav.nav-links

@@ -16,11 +16,7 @@ class JobsNewView
     @isRunnable = ko.computed(() =>
       isConfigReady = !_.isEmpty(@name())
       areInputsReady = _.every(@inputModels(), (inputModel) ->
-        hasError = inputModel.error()?
-        hasData = inputModel.getDataForRun()? && inputModel.getDataForRun() != ''
-        hasDefault = inputModel.defaultValue?
-        isRequired = inputModel.isRequired
-        return !hasError && (!isRequired || (isRequired && (hasData || hasDefault)))
+        inputModel.isReady()
       )
 
       return !@busy() && isConfigReady && areInputsReady
@@ -72,7 +68,7 @@ class InputModel
 
     @isClassAnArray = @klass.indexOf('array') == 0
 
-    @error = ko.observable()
+    @error = ko.observable(null)
 
     @value = ko.observable()
     @valueDisplay = ko.computed(
@@ -104,8 +100,17 @@ class InputModel
               @value(value)
     )
 
+    @isReady = ko.computed(=>
+      @value()
+      hasDefault = @defaultValue?
+      isRequired = @isRequired
+      hasData = @getDataForRun()? && @getDataForRun() != ''
+      hasError = @error() != null
+      return !hasError && (!isRequired || (isRequired && (hasData || hasDefault)))
+    )
+
     @needsToBeSet = ko.computed(=>
-      return !@value()? && @isRequired
+      return @isRequired && !@isReady()
     )
 
   # Boolean Functions
@@ -138,13 +143,20 @@ class InputModel
           value = value.replace(/(^\s*,)|(,\s*$)/g, '') # Remove any trailing/leading commas
           value = _.map(value.split(','), (data) =>
             data = $.trim(data) # Remove trailing/leading whitespace
-            data = switch @klass
-                    when 'int'
-                      parseInt(data, 10)
-                    when 'float'
-                      parseFloat(data)
-                    else
-                      data
+            _data = data
+            switch @klass
+              when 'int'
+                data = parseInt(data, 10)
+                if _data != data.toString()
+                  @error("#{_data} is not a valid integer")
+                else
+                  @error(null)
+              when 'float'
+                data = parseFloat(data)
+                if _data != data.toString()
+                  @error("#{_data} is not a valid integer")
+                else
+                  @error(null)
           )
         else if @klass == "hash" && _.isString(value)
           if value.length > 0
@@ -155,11 +167,20 @@ class InputModel
           else
             value = undefined
         else
+          _value = value
           switch @klass
             when 'int'
               value = parseInt(value, 10)
+              if _value != value.toString()
+                @error("#{_value} is not a valid integer")
+              else
+                @error(null)
             when 'float'
               value = parseFloat(value)
+              if _value != value.toString()
+                @error("#{_value} is not a valid float")
+              else
+                @error(null)
             when 'file'
               value = value.dxid
             else
@@ -249,3 +270,16 @@ JobsController::new = ->
   $container = $("body main")
   viewModel = new JobsNewView(@params.app)
   ko.applyBindings(viewModel, $container[0])
+
+  $affixContainer = $container.find(".affix-container")
+  $affixContainer.affix({
+    offset:
+      top: $affixContainer.offset().top
+  })
+
+  $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
+
+  $(window).resize(() ->
+    $affixContainer.affix('checkPosition')
+    $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
+  )

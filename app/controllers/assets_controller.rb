@@ -1,21 +1,42 @@
 class AssetsController < ApplicationController
   def index
-    @toolbar = {
-      fixed: [
-        {icon: "fa fa-plus-square fa-fw", label: "Add Assets", link: new_asset_path}
-      ]
-    }
     # Refresh state of assets, if needed
     User.sync_assets!(@context.user_id, @context.token)
 
     # Wice seems to not like the default_scope of Asset
-    assets = Asset.unscoped.accessible_by(@context)
+    assets = Asset.unscoped.editable_by(@context)
     @assets_grid = initialize_grid(assets,{
       include: [:user],
       order: 'user_files.name',
       order_direction: 'asc',
       per_page: 100
     })
+  end
+
+  def featured
+    org = Org.featured
+    if org
+      assets = Asset.unscoped.accessible_by(@context).joins(:user).where(:users => { :org_id => org.id })
+
+      @assets_grid = initialize_grid(assets,{
+        include: [:user],
+        order: 'user_files.name',
+        order_direction: 'asc',
+        per_page: 100
+      })
+    end
+    render :index
+  end
+
+  def explore
+    assets = Asset.unscoped.accessible_by_public
+    @assets_grid = initialize_grid(assets,{
+      include: [:user],
+      order: 'user_files.name',
+      order_direction: 'asc',
+      per_page: 100
+    })
+    render :index
   end
 
   def new

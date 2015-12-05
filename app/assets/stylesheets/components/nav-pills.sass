@@ -1,0 +1,97 @@
+@import "_common"
+
+$nav-pill-border-size: 3px
+
+.nav.nav-pills
+  //Inline block hack
+  font-size: 0
+  > li
+    float: none
+    display: inline-block
+    margin: 0
+    // Move border above baseline, assuming border is below
+    margin-top: -$nav-pill-border-size + 1
+
+    &.nav-pill-btn
+      padding: $padding-base-vertical $padding-base-horizontal
+    > a:not(.btn)
+      font-size: $font-size-base
+      background-color: transparent
+      border: 0
+      border-bottom: $nav-pill-border-size solid transparent
+      color: $text-muted
+      border-radius: 0
+      font-weight: bold
+
+      &:hover
+        background-color: transparent
+        border-bottom-color: lighten($brand-red-primary, 15%)
+        color: $link-hover-color
+
+    &.active
+      > a, > a:hover
+        background-color: transparent
+        border-bottom-color: $brand-red-primary
+        color: $link-color
+
+  .pill-label
+    text-transform: uppercase
+
+  .pill-help
+    font-size: 85%
+    color: $brand-blue-tertiary
+    display: block
+
+  &.nav-pills-theme-light
+    background-color: $brand-blue-subtler
+
+  &.nav-pills-bordered
+    border-bottom: $nav-pill-border-size solid $border-header-color
+
+  &.nav-pills-padded
+    padding: $padding-base-vertical $padding-base-horizontal 0
+    &.nav-pills-sm
+      padding: $padding-small-vertical $padding-small-horizontal 0
+    &.nav-pills-lg
+      padding: ($padding-large-vertical * 2) $padding-large-horizontal 0
+
+  &.nav-pills-center
+    margin: auto
+    text-align: center
+
+  &.nav-pills-sm
+    > li > a
+      font-size: $font-size-small
+      padding-top: $padding-small-vertical
+      padding-bottom: $padding-small-vertical
+
+    .pill-help
+      font-size: 65%
+
+  &.nav-pills-lg
+    > li > a
+      font-size: $font-size-large
+      padding-top: $padding-large-vertical
+      padding-bottom: $padding-large-vertical
+
+    .pill-help
+      font-size: 65%
+
+  &.nav-pills-spaced-v
+    padding-top: 30px
+    margin-bottom: 30px
+
+  .badge
+    color: lighten($brand-blue-tertiary, 10%)
+    padding: 3px
+    background-color: transparent
+
+.pfda-toolbar
+  .nav.nav-pills, .nav.nav-pills.nav-pills-center
+    margin-bottom: -($padding-base-horizontal + 1)
+
+  .btn-group + .nav-pills
+    margin-top: $padding-base-horizontal
+
+  .btn-group.pull-right + .nav-pills
+    margin-top: $padding-base-horizontal + $padding-base-vertical + 1
