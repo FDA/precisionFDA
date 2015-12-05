@@ -1,12 +1,7 @@
 <% content_for :title do %>Comparisons<% end %>
 
 <div class="pfda-toolbar">
-  <div class="btn-group pull-right">
-    <a class="btn btn-primary" href="<%= new_comparison_path %>">
-      <span class="fa fa-bolt fa-fw"></span>Run Comparison
-    </a>
-  </div>
-  <ul class="nav nav-pills nav-pills-sm">
+  <ul class="nav nav-pills nav-pills-center nav-pills-sm">
     <li class="<% if action_name == 'index' %>active<% end %>">
       <%= link_to comparisons_path do %>
         <span class="fa fa-bullseye"></span> <span class="pill-label">My Comparisons</span>
@@ -23,6 +18,14 @@
       <% end %>
     </li>
   </ul>
+</div>
+
+<div class="pfda-toolbar">
+  <div class="btn-group">
+    <a class="btn btn-primary" href="<%= new_comparison_path %>">
+      <span class="fa fa-bolt fa-fw"></span>Run Comparison
+    </a>
+  </div>
 </div>
 
 <% if @comparisons_grid.present? %>
