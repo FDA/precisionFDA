@@ -67,6 +67,10 @@ class Comparison < ActiveRecord::Base
     meta_hash.slice("precision", "recall", "f-measure", "true-pos", "false-pos", "false-neg")
   end
 
+  def deletable?
+    state != "pending"
+  end
+
   def publishable_by?(context)
     user_id == context.user_id && scope != "public" && state == "done"
   end
