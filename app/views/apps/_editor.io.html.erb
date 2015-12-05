@@ -24,7 +24,7 @@
             <th class="io-optional">Optional?</th>
             <th></th>
           </thead>
-          <tbody data-bind="sortable: inputs">
+          <tbody data-bind="sortable: {data: inputs, allowDrop: false}">
             <tr class="app-io-field">
               <td class="io-field-class" data-bind="text: klass"></td>
               <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name" placeholder="enter_input_name"/></td>
@@ -82,7 +82,7 @@
               <th></th>
             </tr>
           </thead>
-          <tbody data-bind="sortable: outputs">
+          <tbody data-bind="sortable: {data: outputs, allowDrop: false}">
             <tr class="app-io-field">
               <td class="io-field-class" data-bind="text: klass"></td>
               <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name" placeholder="enter_output_name"/></td>
