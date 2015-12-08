@@ -133,7 +133,7 @@ class ItemModel
     @uid = wrapper.uid
     @name = wrapper.item?.title ? wrapper.uid
     @path = if wrapper.item? then (switch wrapper.klass
-      when "app" then "/apps/#{wrapper.uid}/jobs"
+      when "app" then "/apps/#{wrapper.uid}"
       when "asset" then "/app_assets/#{wrapper.uid}"
       when "comparison" then "/comparisons/#{wrapper.uid.replace /^comparison-/, ''}"
       when "file" then "/files/#{wrapper.uid}"
