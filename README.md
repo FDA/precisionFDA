@@ -48,3 +48,8 @@ model.update!(
     1. `bundle install --without production` (Alternatively, if you don't want your gems to be tainted, do `bundle install --deployment`. This will install gems in ./vendor/bundle. Binaries in those gems will not be in your path by default, but you can run them via `bundle exec <cmd>`, i.e. `bundle exec thin`)
 1. `thin --ssl start` (or, if you followed the "Alternatively" path above, `bundle exec thin --ssl start`)
 1. Visit https://localhost:3000 (don't forget the HTTPS) and ignore any certificate warnings. For example, in Chrome click "advanced" on the lower left and then click "proceed" below.
+
+## Operations
+Log in to https://console.aws.amazon.com/opsworks/home?region=us-east-1 to manage OpsWorks
+
+We use turnout to take precisionFDA into or out of a maintenance window (See https://github.com/biola/turnout). "rake maintenance:start reason="We're down for maintenance." and "rake maintenance:end".
