@@ -52,4 +52,6 @@ model.update!(
 ## Operations
 Log in to https://console.aws.amazon.com/opsworks/home?region=us-east-1 to manage OpsWorks
 
-We use turnout to take precisionFDA into or out of a maintenance window (See https://github.com/biola/turnout). "rake maintenance:start reason="We're down for maintenance." and "rake maintenance:end".
+We use turnout to take precisionFDA into or out of a maintenance window (See https://github.com/biola/turnout).
+* rake maintenance:start reason="We're down for maintenance.
+* rake maintenance:end
