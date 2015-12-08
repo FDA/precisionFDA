@@ -35,7 +35,7 @@ class AppSeries < ActiveRecord::Base
   end
 
   def latest_accessible(context)
-    accessible_by?(context) ? latest_revision_app : latest_version_app
+    editable_by?(context) ? latest_revision_app : latest_version_app
   end
 
   def published
