@@ -15,6 +15,7 @@ Rails.application.routes.draw do
     get 'about/:section' => 'main#about'
     get 'terms' => 'main#terms'
     post 'tokify' => 'main#tokify'
+    get 'guidelines' => 'main#guidelines'
 
     get 'exception_test' => "main#exception_test"
 

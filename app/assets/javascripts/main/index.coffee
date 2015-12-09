@@ -44,3 +44,29 @@ MainController::index = ->
     Precision.player.playVideo()
     $(e.target).closest(".btn-player-wrapper").addClass("player-playing")
   )
+
+  $modal = $("#guidelines-modal")
+  if @params['show_guidelines'] && $modal.length > 0
+    $modal.modal({
+      backdrop: 'static'
+      keyboard: false
+    }).modal('show')
+
+    $modal.on("shown.bs.modal", () =>
+      Precision.carousel.setHeight("#guidelines-carousel")
+    )
+
+    $carousel = $modal.find('.carousel')
+    $carousel.on('slid.bs.carousel', (e) =>
+      $(".btn-previous").addClass('hide')
+      $(".btn-next").addClass('hide')
+      $(".btn-done").addClass('hide')
+      if $carousel.find(".item:last").is('.active')
+        $(".btn-previous").removeClass('hide')
+        $(".btn-done").removeClass('hide')
+      else if $carousel.find(".item:first").is('.active')
+        $(".btn-next").removeClass('hide')
+      else
+        $(".btn-previous").removeClass('hide')
+        $(".btn-next").removeClass('hide')
+    )
