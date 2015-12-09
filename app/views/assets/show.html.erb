@@ -11,6 +11,12 @@
       <p class="list-group-item-text"><%= @asset.dxid %></p>
     </li>
     <li class="list-group-item">
+      <h5 class="list-group-item-heading">Org</h5>
+      <p class="list-group-item-text">
+        <%= @asset.user.org.handle %>
+      </p>
+    </li>
+    <li class="list-group-item">
       <h5 class="list-group-item-heading">Added by</h5>
       <p class="list-group-item-text">
         <%= link_to(@asset.user.dxuser, user_path(@asset.user.dxuser))  %>

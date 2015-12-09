@@ -3,12 +3,9 @@
     <a class="pfda-card pfda-card-list pfda-card-padded" href="<%= note_path(note) %>">
       <div class="pfda-card-header">
         <div class="pfda-card-title">
-          <%= truncate(note.title, :length => 40,  :separator => ' ')%>
+          <%= unilink(note, {globe: true, nolink: true}) %>
         </div>
       </div>
-      <!-- <div class="pfda-card-body">
-        <%= truncate(note.content, :length => 200,  :separator => ' ')%>
-      </div> -->
       <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
         <li><%= note.user.org.handle %>/<%= note.user.dxuser %></li>
         <li><%= note.created_at.to_s(:db) %></li>
