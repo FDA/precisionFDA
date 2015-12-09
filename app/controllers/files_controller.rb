@@ -5,10 +5,10 @@ class FilesController < ApplicationController
 
     user_files = UserFile.real_files.editable_by(@context)
     @files_grid = initialize_grid(user_files,{
-      include: [:user],
       order: 'user_files.created_at',
       order_direction: 'desc',
-      per_page: 100
+      per_page: 100,
+      include: [:user, {user: :org}]
     })
   end
 
@@ -18,10 +18,10 @@ class FilesController < ApplicationController
       user_files = UserFile.real_files.accessible_by(@context).joins(:user).where(:users => { :org_id => org.id })
 
       @files_grid = initialize_grid(user_files,{
-        include: [:user],
         order: 'user_files.created_at',
         order_direction: 'desc',
-        per_page: 100
+        per_page: 100,
+        include: [:user, {user: :org}]
       })
     end
     render :index
@@ -30,10 +30,10 @@ class FilesController < ApplicationController
   def explore
     user_files = UserFile.real_files.accessible_by_public
     @files_grid = initialize_grid(user_files,{
-      include: [:user],
       order: 'user_files.created_at',
       order_direction: 'desc',
-      per_page: 100
+      per_page: 100,
+      include: [:user, {user: :org}]
     })
     render :index
   end
