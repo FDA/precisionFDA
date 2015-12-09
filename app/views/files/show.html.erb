@@ -117,7 +117,7 @@
   <!-- Tab panes -->
   <div class="tab-content">
     <% if @notes.count > 0 %>
-    <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-notes">
+    <div role="tabpanel" class="tab-pane" id="tab-notes">
       <%= render "notes/cards", notes: @notes %>
     </div>
     <% end %>
