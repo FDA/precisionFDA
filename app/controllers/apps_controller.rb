@@ -37,13 +37,23 @@ class AppsController < ApplicationController
   def featured
     org = Org.featured
     if org
-      @apps = AppSeries.accessible_by(@context).order(name: :asc).joins(:user).where(:users => { :org_id => org.id }).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
+      @apps_grid = initialize_grid(AppSeries.accessible_by_public.joins(:user).where(:users => { :org_id => org.id }), {
+        order: 'created_at',
+        order_direction: 'desc',
+        per_page: 100,
+        include: [{user: :org}, :latest_version_app]
+      })
     end
     render :list
   end
 
   def explore
-    @apps = AppSeries.accessible_by_public.order(name: :asc).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
+    @apps_grid = initialize_grid(AppSeries.accessible_by_public, {
+      order: 'created_at',
+      order_direction: 'desc',
+      per_page: 100,
+      include: [{user: :org}, :latest_version_app]
+    })
     render :list
   end
 
