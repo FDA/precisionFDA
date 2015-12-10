@@ -63,6 +63,20 @@ window.Precision.INSTANCES = [
   {value: "hidisk-36", label: "High Disk 36"}
 ]
 
+window.Precision.carousel =
+  # Source: http://jsfiddle.net/technotarek/gXN2u/
+  setHeight: (id) ->
+    slideHeight = []
+    $(id + ' .item').each ->
+      # add all slide heights to an array
+      slideHeight.push $(this).height()
+    # find the tallest item
+    max = Math.max.apply(null, slideHeight)
+    # set the slide's height
+    $(id + ' .carousel-content').each ->
+      $(this).css 'height', max + 'px'
+
+
 $(document).on 'page:load', ->
   Paloma.executeHook()
   Paloma.engine.start()

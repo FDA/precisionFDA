@@ -8,6 +8,12 @@
   padding-top: 10px
   padding-bottom: 10px
 
+  &.pfda-cards-list
+    padding: 0
+
+  &.pfda-cards-centered
+    @include align-items(center)
+
   .pfda-card
     position: relative
     margin: 10px 10px
@@ -27,6 +33,11 @@
       opacity: 0.5
       text-align: center
 
+    &.pfda-card-list
+      width: 100%
+      margin: 0
+      border-bottom: 1px solid lighten($border-default-color, 5%)
+
     &.pfda-card-padded
       padding: $padding-base-horizontal
 
@@ -37,7 +48,7 @@
       border: 1px solid $border-default-color
 
     &.pfda-card-default
-      background-color: #f0f0f0
+      background-color: #fafafa
       color: $text-color
 
     &.pfda-card-success
@@ -70,10 +81,11 @@
       color: $state-danger-text
       border-color: $state-danger-border
 
-    &.pfda-card-has-metadata
+    &.pfda-card-sticky-metadata
       padding-bottom: 32px
 
       .pfda-card-metadata
+        color: lighten($brand-blue-tertiary, 10%)
         background-color: $brand-blue-subtler
         position: absolute
         bottom: 0
@@ -82,14 +94,21 @@
         height: 30px
         padding: $padding-base-vertical $padding-base-horizontal
         border-top: 1px solid $list-group-border
-        color: lighten($brand-blue-tertiary, 10%)
         border-bottom-left-radius: $border-radius-base
         border-bottom-right-radius: $border-radius-base
-
         .pfda-card-metadata-value
-          font-size: 12px
-          font-weight: 900
           color: $gray-darker
+
+    .pfda-card-metadata
+      color: $brand-blue-tertiary
+      margin-bottom: 0
+      &.pfda-card-metadata-fw-indent
+        margin-left: 25px
+        
+      .pfda-card-metadata-value
+        font-size: 12px
+        font-weight: 900
+        color: $gray-dark
 
   a.pfda-card
     .pfda-card-title
@@ -97,6 +116,15 @@
     &:hover
       .pfda-card-title
         color: $link-hover-color
+
+    &.pfda-card-list:hover
+      background-color: lighten($brand-blue-subtler, 1%)
+
+    &.pfda-card-success-solid:hover
+      background-color: darken($btn-success-bg, 5%)
+
+    &.pfda-card-warning-solid:hover
+      background-color: darken($btn-warning-bg, 5%)
 
 .container
   .pfda-cards
@@ -111,20 +139,19 @@
 
 .container-fluid
   .pfda-cards
-    .pfda-card
+    .pfda-card:not(.pfda-card-list)
       width: 100%
       @media (min-width: $screen-sm-min)
         width: 300px
 
 // Sane default, views can override depending on their use
 .pfda-tutorial.pfda-cards
+  .pfda-card
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15)
+
   .pfda-card-body
     min-height: 100px
 
   .pfda-card-body-icon
     line-height: 100px
     min-height: 100px
-
-  a.pfda-card.pfda-card-success-solid
-    &:hover
-      background-color: darken($btn-success-bg, 5%)

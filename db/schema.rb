@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151113182148) do
+ActiveRecord::Schema.define(version: 20151209002112) do
 
   create_table "app_series", force: :cascade do |t|
     t.string   "dxid"
@@ -218,6 +218,7 @@ ActiveRecord::Schema.define(version: 20151113182148) do
     t.string   "email"
     t.string   "normalized_email"
     t.datetime "last_login"
+    t.text     "extras"
   end
 
   add_index "users", ["dxuser"], name: "index_users_on_dxuser", unique: true

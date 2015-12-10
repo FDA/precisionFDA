@@ -1,7 +1,8 @@
 class MainController < ApplicationController
-  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms]}
+  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines]}
 
   def index
+    show_guidelines = false
     if @context.logged_in?
       @notes_count = Note.where(user_id: @context.user_id).count
       @files_count = UserFile.real_files.where(user_id: @context.user_id).count
@@ -9,7 +10,17 @@ class MainController < ApplicationController
       @apps_count = App.where(user_id: @context.user_id).count
       @jobs_count = Job.where(user_id: @context.user_id).count
       @assets_count = Asset.where(user_id: @context.user_id).count
+      User.transaction do
+        user = User.find(@context.user_id)
+        if !user.has_seen_guidelines
+          user.has_seen_guidelines = true
+          user.save!
+          show_guidelines = true
+        end
+      end
     end
+
+    js show_guidelines: show_guidelines
   end
 
   def destroy
@@ -20,6 +31,9 @@ class MainController < ApplicationController
   end
 
   def about
+  end
+
+  def guidelines
   end
 
   def exception_test

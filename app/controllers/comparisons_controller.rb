@@ -6,7 +6,8 @@ class ComparisonsController < ApplicationController
     @comparisons_grid = initialize_grid(comparisons, {
       order: 'comparisons.id',
       order_direction: 'desc',
-      per_page: 100
+      per_page: 100,
+      include: [:user, {user: :org}]
     })
   end
 
@@ -17,7 +18,8 @@ class ComparisonsController < ApplicationController
       @comparisons_grid = initialize_grid(comparisons, {
         order: 'comparisons.id',
         order_direction: 'desc',
-        per_page: 100
+        per_page: 100,
+        include: [:user, {user: :org}]
       })
     end
     render :index
@@ -28,7 +30,8 @@ class ComparisonsController < ApplicationController
     @comparisons_grid = initialize_grid(comparisons, {
       order: 'comparisons.id',
       order_direction: 'desc',
-      per_page: 100
+      per_page: 100,
+      include: [:user, {user: :org}]
     })
     render :index
   end
