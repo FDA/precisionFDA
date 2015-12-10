@@ -14,31 +14,29 @@
           <p class="help-block">
             For example, place binaries in <code>fake_root/usr/bin</code>, and working directory files in <code>fake_root/work/</code>.
           </p>
-          <div class="pfda-help-block pfda-help-info">
+          <div class="pfda-help-block">
             <strong>Need to compile binaries in a compatible environment?</strong>
             <br>
-            <a class="btn btn-default btn-sm" href="https://dl.dnanex.us/F/D/0gjB0F2bfpYpj8266xZ9VYfJbBBY7JFQ5VgKXPXx/PrecisionFDA-50GB-dev-vm-nopass.ova"><span class="fa fa-clone"></span> Download the precisionFDA virtual machine image</a> and load it into <a href="https://www.virtualbox.org/wiki/Downloads" target="_blank">VirtualBox</a> to instantiate an environment similar to the one that apps get when they run on the cloud. Power on the machine and log in as the <code>ubuntu</code> user (no password is required to log in).
+            <a class="btn btn-primary btn-sm" href="https://dl.dnanex.us/F/D/0gjB0F2bfpYpj8266xZ9VYfJbBBY7JFQ5VgKXPXx/PrecisionFDA-50GB-dev-vm-nopass.ova"><span class="fa fa-clone"></span> Download the precisionFDA virtual machine image</a> and load it into <a href="https://www.virtualbox.org/wiki/Downloads" target="_blank">VirtualBox</a> to instantiate an environment similar to the one that apps get when they run on the cloud. Power on the machine and log in as the <code>ubuntu</code> user (no password is required to log in).
           </div>
         </li>
         <li class="list-group-item">
           <p class="list-group-item-heading lead">Step 2 <strong class="text-regular">Write a short readme file describing the asset</strong></p>
           <p>Use the <a target="_blank" href="https://jonschlinkert.github.io/remarkable/demo/">Markdown syntax</a> to format your readme.
-          <p class="pfda-help-block pfda-help-info">
+          <p class="pfda-help-block">
             For inspiration on how to write useful readme files, see some of the existing assets published by the precisionFDA team, and consult <a target="_blank" href="<%= about_path + "/how#dev-own-assets" %>"><span class="fa fa-book"></span> Your own assets</a> in the precisionFDA documentation guide for a markdown template.
           </p>
         </li>
         <li class="list-group-item">
           <p class="list-group-item-heading lead">Step 3 <strong class="text-regular">Download Asset Upload Helper Tool</strong></p>
-          <p><a class="btn btn-primary btn-lg btn-box" href="https://dl.dnanex.us/F/D/YGG2VbQPf6fjbj49P0jBGQxgvgVy40F0JkpzJB2Q/pfda-upload-asset-1.0.2.tar.gz">
-            <span class="fa fa-download"></span>
-            <br>
-            Download Asset Upload Helper v1.0.2
+          <p><a class="btn btn-primary btn-lg" href="https://dl.dnanex.us/F/D/YGG2VbQPf6fjbj49P0jBGQxgvgVy40F0JkpzJB2Q/pfda-upload-asset-1.0.2.tar.gz">
+            <span class="fa fa-download"></span> Download Asset Upload Helper v1.0.2
           </a></p>
           <p>Version 1.0.2 (12/3/2015): Multi-threaded uploading, for faster uploading of large assets.</p>
         </li>
         <li class="list-group-item">
           <p class="list-group-item-heading lead">Step 4 <strong class="text-regular">Get your Authorization Key</strong></p>
-          <p><a href="<%= tokify_path %>" data-method="post" class="btn btn-default" target="_blank">
+          <p><a href="<%= tokify_path %>" data-method="post" class="btn btn-primary btn-lg" target="_blank">
             <span class="fa fa-key"></span> Generate Authorization Key
           </a></p>
           <p class="pfda-help-block pfda-help-warning">

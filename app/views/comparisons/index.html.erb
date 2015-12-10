@@ -52,6 +52,10 @@
       unilinkfw(comparison, globe: true)
     end
 
+    g.column name: 'Org', attribute: 'handle', assoc: [:user, :org] do |comparison|
+      comparison.user.org.handle
+    end
+
     g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |comparison|
       link_to(comparison.user.dxuser, user_path(comparison.user.dxuser))
     end

@@ -45,6 +45,8 @@ class User < ActiveRecord::Base
   has_many :jobs
   belongs_to :org
 
+  store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
+
   def real_files
     user_files.real_files
   end

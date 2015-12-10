@@ -73,6 +73,19 @@
       padding-top: 10px
       padding-bottom: 10px
 
+  &.list-inline-bullets
+    vertical-align: middle
+    li
+      padding-right: 0px
+    li
+      &::after
+        content: '\B7'
+        padding-left: 7px
+
+    li:last-of-type
+      &::after
+        content: ''
+
 .list-alt-even
   li:nth-of-type(even)
     color: $text-muted
