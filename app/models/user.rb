@@ -47,6 +47,10 @@ class User < ActiveRecord::Base
 
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 
+  def klass
+    "user"
+  end
+
   def real_files
     user_files.real_files
   end

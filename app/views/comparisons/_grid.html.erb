@@ -1,0 +1,50 @@
+<%= grid(comparisons_grid, show_filters: :when_filtered) do |g|
+  g.blank_slate partial:  "_partials/empty_grid"
+
+  g.after_row do |comparison, num_cols|
+    if !comparison.description.blank?
+      content_tag(:tr,
+        content_tag(:td, nil, {class: "col-state state-#{comparison.state}"}).concat(content_tag(:td,
+          content_tag(:div, comparison.description, class: 'description'),
+        colspan: num_cols - 1)),
+      class: 'extra-row')
+    else
+      nil
+    end
+  end
+
+  g.column name: 'State', attribute: 'state' do |comparison|
+    [comparison.state, {class: "col-state state-#{comparison.state}"}]
+  end
+
+  g.column name: 'Name', attribute: 'name' do |comparison|
+    unilinkfw(comparison, globe: true)
+  end
+
+  g.column name: 'Org', attribute: 'handle', assoc: [:user, :org] do |comparison|
+    comparison.user.org.handle
+  end
+
+  g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |comparison|
+    link_to(comparison.user.dxuser, user_path(comparison.user.dxuser))
+  end
+
+  g.column name: 'Test set' do |comparison|
+    file = comparison.input("test_vcf").user_file
+    unilinkfw(file)
+  end
+
+  g.column name: 'Benchmark set' do |comparison|
+    file = comparison.input("ref_vcf").user_file
+    unilinkfw(file)
+  end
+
+  g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |comparison|
+    comparison.created_at.to_s(:db)
+  end
+
+  g.column name: 'Access', attribute: 'scope',
+    custom_filter: {'Public' => "public", 'Private' => "private"} do |comparison|
+    comparison.public? ? "Public" : "Private"
+  end
+end -%>
