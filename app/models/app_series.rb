@@ -22,6 +22,10 @@ class AppSeries < ActiveRecord::Base
   belongs_to :latest_version_app, class_name: 'App'
   belongs_to :user
 
+  def klass
+    "app"
+  end
+
   def self.construct_dxid(username, name)
     "app-#{construct_dxname(username, name)}"
   end
