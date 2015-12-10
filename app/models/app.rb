@@ -24,7 +24,7 @@ class App < ActiveRecord::Base
   belongs_to :app_series
   has_many :jobs
   has_many :notes, {through: :attachments}
-  has_many :attachments, {as: :item}
+  has_many :attachments, {as: :item, dependent: :destroy}
 
   has_and_belongs_to_many :assets, {join_table: 'apps_assets'}
 

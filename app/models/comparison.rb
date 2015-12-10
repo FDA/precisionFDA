@@ -37,7 +37,7 @@ class Comparison < ActiveRecord::Base
   has_many :outputs, {class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'}
 
   has_many :notes, {through: :attachments}
-  has_many :attachments, {as: :item}
+  has_many :attachments, {as: :item, dependent: :destroy}
 
   def uid
     "comparison-#{id}"
