@@ -45,7 +45,7 @@ class UserFile < ActiveRecord::Base
   belongs_to :user
   belongs_to :parent, {polymorphic: true}
   has_many :notes, {through: :attachments}
-  has_many :attachments, {as: :item}
+  has_many :attachments, {as: :item, dependent: :destroy}
   has_many :comparison_inputs
   has_many :comparisons, -> { distinct }, {through: :comparison_inputs, dependent: :restrict_with_exception}
 
