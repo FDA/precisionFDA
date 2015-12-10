@@ -1,48 +1,92 @@
 <% content_for :title do %><%= @user.dxuser %><% end %>
 
 <div class="page-header">
-  <div class="page-title"><span class="fa fa-user"></span> <%= @user.dxuser %></div>
+  <div class="page-title"><span class="fa fa-user"></span> <%= @user.full_name %> <small>(<%= @user.dxuser %>)</small></div>
 </div>
 
-<div class="container-fluid">
-  <div class="metadata-section">
-    <ul class="list-group list-group-inline">
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Files</h5>
-        <p class="list-group-item-text">
-          <%= link_to(@user.real_files.accessible_by(@context).size, "#{files_path()}?grid[f][users.dxuser]=#{@user.dxuser}")  %>
-        </p>
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Joined</h5>
+      <p class="list-group-item-text"><%= @user.created_at.to_s(:db) %></p>
       </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Comparisons</h5>
-        <p class="list-group-item-text">
-          <%= link_to(@user.comparisons.accessible_by(@context).size, "#{comparisons_path()}?grid[f][users.dxuser]=#{@user.dxuser}")  %>
-        </p>
-      </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Notes</h5>
-        <p class="list-group-item-text">
-          <%= link_to(@user.notes.accessible_by(@context).size, "#{notes_path()}?grid[f][users.dxuser]=#{@user.dxuser}")  %>
-        </p>
-      </li>
-    </ul>
 
-    <ul class="list-group list-group-inline">
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Joined</h5>
-        <p class="list-group-item-text"><%= @user.created_at.to_s(:db) %></p>
-        </li>
+    <% if @user.org_id.present? %>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Organization</h5>
+      <p class="list-group-item-text"><%= @user.org.name %></p>
+    </li>
+    <% end %>
 
-      <% if @user.org_id.present? %>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Organization</h5>
-        <p class="list-group-item-text"><%= @user.org.name %></p>
-      </li>
-      <% end %>
-
-    </ul>
+  </ul>
+</div>
+<% if @user.can_run_reports? && @user.id == @context.user_id %>
+  <div class="pfda-toolbar">
+    <%= link_to("Generate report", report_user_path(@user.dxuser), method: 'post', class: 'btn btn-primary') %>
   </div>
-  <% if @user.can_run_reports? && @user.id == @context.user_id %>
-    <div class="lead"><%= link_to("Generate report", report_user_path(@user.dxuser), method: 'post') %></div>
+<% end %>
+
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+  <% if @notes.present? && @notes.count > 0 %>
+  <li role="presentation">
+    <a href="#tab-notes" aria-controls="tab-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
+      <span class="tab-label">Notes <span class="badge"><%= @notes.count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @files_grid.present? && @files_grid.count > 0 %>
+  <li role="presentation">
+    <a href="#tab-files" aria-controls="tab-files" role="tab" data-toggle="tab"><span class="fa fa-fw fa-file-o"></span>
+      <span class="tab-label">Files <span class="badge"><%= @files_grid.count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @comparisons_grid.present? && @comparisons_grid.count > 0 %>
+  <li role="presentation">
+    <a href="#tab-comparisons" aria-controls="tab-comparisons" role="tab" data-toggle="tab"><span class="fa fa-fw fa-area-chart"></span>
+      <span class="tab-label">Comparisons <span class="badge"><%= @comparisons_grid.count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @apps_grid.present? && @apps_grid.count > 0 %>
+  <li role="presentation">
+    <a href="#tab-apps" aria-controls="tab-apps" role="tab" data-toggle="tab"><span class="fa fa-fw fa-cube"></span>
+      <span class="tab-label">Apps <span class="badge"><%= @apps_grid.count %></span></span>
+    </a>
+  </li>
+  <% end %>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+  <% if @notes.present? && @notes.count > 0 %>
+    <div role="tabpanel" class="tab-pane" id="tab-notes">
+      <div class="panel">
+        <%= render "notes/cards", notes: @notes %>
+      </div>
+    </div>
+  <% end %>
+  <% if @files_grid.present? && @files_grid.count > 0 %>
+    <div role="tabpanel" class="tab-pane" id="tab-files">
+      <div class="panel">
+        <%= render "files/grid", files_grid: @files_grid %>
+      </div>
+    </div>
+  <% end %>
+  <% if @comparisons_grid.present? && @comparisons_grid.count > 0 %>
+    <div role="tabpanel" class="tab-pane" id="tab-comparisons">
+      <div class="panel">
+        <%= render "comparisons/grid", comparisons_grid: @comparisons_grid %>
+      </div>
+    </div>
+  <% end %>
+  <% if @apps_grid.present? && @apps_grid.count > 0 %>
+    <div role="tabpanel" class="tab-pane" id="tab-apps">
+      <div class="panel">
+        <%= render "apps/grid", apps_grid: @apps_grid %>
+      </div>
+    </div>
   <% end %>
 </div>
