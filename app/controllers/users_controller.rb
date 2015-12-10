@@ -16,6 +16,29 @@ class UsersController < ApplicationController
 
   def show
     @user = User.find_by!(dxuser: params[:username])
+
+    @notes = @user.notes.accessible_by_public.order(id: :desc)
+
+    @files_grid = initialize_grid(@user.real_files.accessible_by_public, {
+      order: 'user_files.created_at',
+      order_direction: 'desc',
+      per_page: 25,
+      include: [:user, {user: :org}]
+    })
+
+    @comparisons_grid = initialize_grid(@user.comparisons.accessible_by_public, {
+      order: 'comparisons.id',
+      order_direction: 'desc',
+      per_page: 25,
+      include: [:user, {user: :org}]
+    })
+
+    @apps_grid = initialize_grid(@user.app_series.accessible_by_public, {
+      order: 'app_series.created_at',
+      order_direction: 'desc',
+      per_page: 25,
+      include: [{user: :org}, :latest_version_app]
+    })
   end
 
   def report

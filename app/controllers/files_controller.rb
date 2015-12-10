@@ -53,7 +53,8 @@ class FilesController < ApplicationController
       @comparisons_grid = initialize_grid(@file.comparisons.accessible_by(@context), {
         order: 'comparisons.id',
         order_direction: 'desc',
-        per_page: 10
+        per_page: 100,
+        include: [:user, {user: :org}]
       })
     else
       @comparison = @file.parent
