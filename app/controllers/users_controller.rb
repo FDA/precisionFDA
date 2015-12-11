@@ -33,8 +33,8 @@ class UsersController < ApplicationController
       include: [:user, {user: :org}]
     })
 
-    @apps_grid = initialize_grid(@user.app_series.accessible_by_public, {
-      order: 'app_series.created_at',
+    @apps_grid = initialize_grid(@user.app_series.accessible_by_public.joins(:latest_version_app), {
+      order: 'apps.created_at',
       order_direction: 'desc',
       per_page: 25,
       include: [{user: :org}, :latest_version_app]
