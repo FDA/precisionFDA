@@ -38,7 +38,7 @@ class AppsController < ApplicationController
     org = Org.featured
     if org
       @apps_grid = initialize_grid(AppSeries.accessible_by_public.joins(:user).where(:users => { :org_id => org.id }), {
-        order: 'created_at',
+        order: 'apps.created_at',
         order_direction: 'desc',
         per_page: 100,
         include: [{user: :org}, :latest_version_app]
@@ -48,8 +48,8 @@ class AppsController < ApplicationController
   end
 
   def explore
-    @apps_grid = initialize_grid(AppSeries.accessible_by_public, {
-      order: 'created_at',
+    @apps_grid = initialize_grid(AppSeries.accessible_by_public.joins(:latest_version_app), {
+      order: 'apps.created_at',
       order_direction: 'desc',
       per_page: 100,
       include: [{user: :org}, :latest_version_app]
