@@ -20,6 +20,7 @@ class UsersController < ApplicationController
     @notes = @user.notes.accessible_by_public.order(id: :desc)
 
     @files_grid = initialize_grid(@user.real_files.accessible_by_public, {
+      name: 'files',
       order: 'user_files.created_at',
       order_direction: 'desc',
       per_page: 25,
@@ -27,6 +28,7 @@ class UsersController < ApplicationController
     })
 
     @comparisons_grid = initialize_grid(@user.comparisons.accessible_by_public, {
+      name: 'comparisons',
       order: 'comparisons.id',
       order_direction: 'desc',
       per_page: 25,
@@ -34,6 +36,7 @@ class UsersController < ApplicationController
     })
 
     @apps_grid = initialize_grid(@user.app_series.accessible_by_public.joins(:latest_version_app), {
+      name: 'apps',
       order: 'apps.created_at',
       order_direction: 'desc',
       per_page: 25,
