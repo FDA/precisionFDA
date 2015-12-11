@@ -27,6 +27,7 @@ class AppsController < ApplicationController
       jobs = Job.where(user_id: @context.user_id)
     end
     @jobs_grid = initialize_grid(jobs, {
+      name: 'jobs',
       order: 'jobs.id',
       order_direction: 'desc',
       per_page: 100
@@ -38,6 +39,7 @@ class AppsController < ApplicationController
     org = Org.featured
     if org
       @apps_grid = initialize_grid(AppSeries.accessible_by_public.joins(:user).where(:users => { :org_id => org.id }), {
+        name: 'apps',
         order: 'apps.created_at',
         order_direction: 'desc',
         per_page: 100,
@@ -49,6 +51,7 @@ class AppsController < ApplicationController
 
   def explore
     @apps_grid = initialize_grid(AppSeries.accessible_by_public.joins(:latest_version_app), {
+      name: 'apps',
       order: 'apps.created_at',
       order_direction: 'desc',
       per_page: 100,
@@ -72,6 +75,7 @@ class AppsController < ApplicationController
 
     jobs = Job.where(user_id: @context.user_id, app_series_id: @app.app_series_id)
     @jobs_grid = initialize_grid(jobs, {
+      name: 'jobs',
       order: 'jobs.id',
       order_direction: 'desc',
       per_page: 100

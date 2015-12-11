@@ -4,6 +4,7 @@ class ComparisonsController < ApplicationController
 
     comparisons = Comparison.editable_by(@context)
     @comparisons_grid = initialize_grid(comparisons, {
+      name: 'comparisons',
       order: 'comparisons.id',
       order_direction: 'desc',
       per_page: 100,
@@ -16,6 +17,7 @@ class ComparisonsController < ApplicationController
     if org
       comparisons = Comparison.accessible_by(@context).joins(:user).where(:users => { :org_id => org.id })
       @comparisons_grid = initialize_grid(comparisons, {
+        name: 'comparisons',
         order: 'comparisons.id',
         order_direction: 'desc',
         per_page: 100,
@@ -28,6 +30,7 @@ class ComparisonsController < ApplicationController
   def explore
     comparisons = Comparison.accessible_by_public
     @comparisons_grid = initialize_grid(comparisons, {
+      name: 'comparisons',
       order: 'comparisons.id',
       order_direction: 'desc',
       per_page: 100,
