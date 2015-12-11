@@ -25,8 +25,8 @@
     link_to(series.user.dxuser, user_path(series.user.dxuser))
   end
 
-  g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |series|
-    series.created_at.to_s(:db)
+  g.column name: 'Created', attribute: 'created_at', assoc: :latest_version_app, auto_reload: true, filter_type: :standard do |series|
+    series.latest_version_app.created_at.to_s(:db)
   end
 
   g.column name: 'Access', attribute: 'scope',
