@@ -5,6 +5,7 @@ class FilesController < ApplicationController
 
     user_files = UserFile.real_files.editable_by(@context)
     @files_grid = initialize_grid(user_files,{
+      name: 'files',
       order: 'user_files.created_at',
       order_direction: 'desc',
       per_page: 100,
@@ -18,6 +19,7 @@ class FilesController < ApplicationController
       user_files = UserFile.real_files.accessible_by(@context).joins(:user).where(:users => { :org_id => org.id })
 
       @files_grid = initialize_grid(user_files,{
+        name: 'files',
         order: 'user_files.created_at',
         order_direction: 'desc',
         per_page: 100,
@@ -30,6 +32,7 @@ class FilesController < ApplicationController
   def explore
     user_files = UserFile.real_files.accessible_by_public
     @files_grid = initialize_grid(user_files,{
+      name: 'files',
       order: 'user_files.created_at',
       order_direction: 'desc',
       per_page: 100,
@@ -51,6 +54,7 @@ class FilesController < ApplicationController
       User.sync_comparisons!(@context.user_id, @context.token)
 
       @comparisons_grid = initialize_grid(@file.comparisons.accessible_by(@context), {
+        name: 'comparisons',
         order: 'comparisons.id',
         order_direction: 'desc',
         per_page: 100,
