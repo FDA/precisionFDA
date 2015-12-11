@@ -72,9 +72,10 @@ Rails.application.routes.draw do
       get 'explore', on: :collection, as: 'explore'
     end
 
+    user_constraints = { username: /[^\/]*/ }
     get '/users', to: 'users#index'
-    get "/users/:username", to: 'users#show', constraints: { username: /[^\/]*/ }, as: 'user'
-    post "/users/:username/report", to: 'users#report', constraints: { username: /[^\/]*/ }, as: 'report_user'
+    post "/users/:username/report", to: 'users#report', constraints: user_constraints, as: 'report_user'
+    get "/users/:username(/:tab)", to: 'users#show', constraints: user_constraints, as: 'user'
 
     # You can have the root of your site routed with "root"
     root 'main#index'
