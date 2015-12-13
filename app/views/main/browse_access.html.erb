@@ -1,6 +1,7 @@
 <div class="row">
   <div class="login-alert alert alert-warning col-md-10 col-md-offset-7">
-    <h4>To proceed and access this site <%= link_to("click here", browse_access_path(code: @code), method: 'post') %></h4>
+    <% d = ((@invitation.expires_at - Time.now) / 1.day).round -%>
+    <h4>To proceed and access this site <%= link_to("click here", browse_access_path(code: @invitation.code), method: 'post') %>. Your access will expire in <%= (d > 1) ? "#{d} days" : (d == 1 ? "1 day" : "less than a day") %> from now.</h4>
 
     <hr>
     <div class="help-block">
