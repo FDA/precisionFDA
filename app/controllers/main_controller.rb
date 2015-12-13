@@ -1,5 +1,8 @@
 class MainController < ApplicationController
-  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines]}
+  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines, :browse_access, :destroy]}
+
+  skip_before_action :require_login,     only: [:track]
+  before_action :require_login_or_guest, only: [:track]
 
   def index
     show_guidelines = false
@@ -24,7 +27,9 @@ class MainController < ApplicationController
   end
 
   def destroy
-    AUDIT_LOGGER.info("User #{session[:username]} logged out")
+    if @context.logged_in?
+      AUDIT_LOGGER.info("User #{session[:username]} logged out")
+    end
     reset_session
     flash[:success] = "You were successfully logged out of precisionFDA"
     redirect_to root_url
@@ -41,7 +46,11 @@ class MainController < ApplicationController
   end
 
   def login
-    redirect_to "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=#{OAUTH2_CLIENT_ID}&redirect_uri=#{URI.encode(OAUTH2_REDIRECT_URI)}"
+    if @context.guest?
+      render "_partials/_error", status: 403, locals: {message: "You are currently browsing precisionFDA as a guest. To log in and complete this action, you need a user account. Contact precisionfda@fda.hhs.gov if you need to upgrade to a user account with contributor-level access."}
+    else
+      redirect_to "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=#{OAUTH2_CLIENT_ID}&redirect_uri=#{URI.encode(OAUTH2_REDIRECT_URI)}"
+    end
   end
 
   def return_from_login
@@ -108,12 +117,32 @@ class MainController < ApplicationController
       p[:ip] = request.remote_ip.to_s
       p[:research_intent] = (p[:research_intent] == "1")
       p[:clinical_intent] = (p[:clinical_intent] == "1")
+      p[:state] = "guest"
+      p[:email] = p[:email].to_s.strip
+      p[:code] = SecureRandom.uuid
       Invitation.transaction do
         @invitation = Invitation.create(p)
         if @invitation.persisted?
           AUDIT_LOGGER.info("Access requested: #{p.to_json}")
           NotificationsMailer.invitation_email(@invitation).deliver_now!
+          NotificationsMailer.guest_access_email(@invitation).deliver_now!
         end
+      end
+    end
+  end
+
+  def browse_access
+    if @context.logged_in_or_guest?
+      redirect_to root_path
+    else
+      @code = params[:code].to_s
+      invitation = Invitation.find_by(code: @code, state: "guest")
+      if invitation.blank?
+        render "_partials/_error", status: 403, locals: {message: "Invalid access code. If you believe this is an error, contact precisionFDA support."}
+      elsif request.post?
+        save_session(-1, "Guest", "INVALID", Time.now.to_i + 7.days, -1)
+        AUDIT_LOGGER.info("Browse access granted for #{invitation.email}")
+        redirect_to root_path
       end
     end
   end

@@ -1,7 +1,7 @@
 <% content_for :title do %>Overview<% end %>
 
 <%= render "_partials/browser_support_script" %>
-<% if !@context.logged_in? %>
+<% if !@context.logged_in_or_guest? %>
   <%= render "main/landing" %>
 <% else %>
   <div class="jumbotron jumbotron-landing">
@@ -130,7 +130,7 @@
   </div>
 <% end %>
 
-<% if !@context.logged_in? %>
+<% if !@context.logged_in_or_guest? %>
 <div class="below-fold-actions">
   <a class="btn accessible-btn-primary btn-lg" href="<%= about_path %>">
     <span class="fa fa-info-circle" aria-hidden="true"></span> Learn more about precisionFDA

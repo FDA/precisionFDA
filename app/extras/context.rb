@@ -15,6 +15,14 @@ class Context
   end
 
   def logged_in?
-    return (@user_id.present? && @username.present? && @token.present? && @expiration.present? && ((@expiration - Time.now.to_i) > 5.minutes) && @org_id.present?)
+    return (@user_id.present? && @username.present? && @token.present? && @expiration.present? && ((@expiration - Time.now.to_i) > 5.minutes) && @org_id.present?) && !guest?
+  end
+
+  def guest?
+    return (@user_id == -1 && @username == "Guest" && @token == "INVALID" && @expiration.present? && ((@expiration - Time.now.to_i) > 5.minutes) && @org_id == -1)
+  end
+
+  def logged_in_or_guest?
+    return logged_in? || guest?
   end
 end

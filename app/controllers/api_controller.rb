@@ -3,7 +3,8 @@ class ApiController < ApplicationController
   # For now don't skip the :require_login middleware, since this API is called from the web.
   skip_before_action :verify_authenticity_token
   skip_before_action :require_login
-  before_action :require_api_login
+  before_action :require_api_login, except: [:list_assets, :describe_asset, :search_assets]
+  before_action :require_api_login_or_guest, only: [:list_assets, :describe_asset, :search_assets]
 
   before_action :enforce_json_post
 

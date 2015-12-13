@@ -1,7 +1,15 @@
 class FilesController < ApplicationController
+  skip_before_action :require_login,     only: [:index, :featured, :explore, :show]
+  before_action :require_login_or_guest, only: [:index, :featured, :explore, :show]
+
   def index
+    if @context.guest?
+      redirect_to explore_files_path
+      return
+    end
+
     # Refresh state of files, if needed
-    User.sync_files!(@context.user_id, @context.token)
+    User.sync_files!(@context)
 
     user_files = UserFile.real_files.editable_by(@context)
     @files_grid = initialize_grid(user_files,{
@@ -46,12 +54,12 @@ class FilesController < ApplicationController
 
     # Refresh state of file, if needed
     if @file.state != "closed"
-      User.sync_file!(@context.user_id, @file.id, @context.token)
+      User.sync_file!(@context, @file.id)
       @file.reload
     end
 
     if @file.parent_type != "Comparison"
-      User.sync_comparisons!(@context.user_id, @context.token)
+      User.sync_comparisons!(@context)
 
       @comparisons_grid = initialize_grid(@file.comparisons.accessible_by(@context), {
         name: 'comparisons',
@@ -79,9 +87,9 @@ class FilesController < ApplicationController
     # Refresh state of file, if needed
     if @file.state != "closed"
       if @file.parent_type == "Asset"
-        User.sync_asset!(@context.user_id, @file.id, @context.token)
+        User.sync_asset!(@context, @file.id)
       else
-        User.sync_file!(@context.user_id, @file.id, @context.token)
+        User.sync_file!(@context, @file.id)
       end
       @file.reload
     end

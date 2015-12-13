@@ -1,5 +1,13 @@
 class AppsController < ApplicationController
+  skip_before_action :require_login,     only: [:index, :featured, :explore, :show, :fork, :new]
+  before_action :require_login_or_guest, only: [:index, :featured, :explore, :show, :fork, :new]
+
   def index
+    if @context.guest?
+      redirect_to explore_apps_path
+      return
+    end
+
     js_param = {}
     @app = nil
     if params[:id].present?
@@ -20,11 +28,11 @@ class AppsController < ApplicationController
     @ran_apps = AppSeries.accessible_by(@context).order(name: :asc).where.not(user_id: @context.user_id).joins(:jobs).where(:jobs => { :user_id => @context.user_id }).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
 
 
-    User.sync_jobs!(@context.user_id, @context.token)
+    User.sync_jobs!(@context)
     if @app.present?
-      jobs = Job.where(user_id: @context.user_id, app_series_id: @app.app_series_id)
+      jobs = @app.app_series.jobs.editable_by(@context)
     else
-      jobs = Job.where(user_id: @context.user_id)
+      jobs = Job.editable_by(@context)
     end
     @jobs_grid = initialize_grid(jobs, {
       name: 'jobs',
@@ -71,9 +79,9 @@ class AppsController < ApplicationController
     @revisions = @app.app_series.accessible_revisions(@context).select(:title, :id, :dxid, :revision, :version)
     @notes = @app.notes.accessible_by(@context).order(id: :desc)
 
-    User.sync_jobs!(@context.user_id, @context.token)
+    User.sync_jobs!(@context)
 
-    jobs = Job.where(user_id: @context.user_id, app_series_id: @app.app_series_id)
+    jobs = @app.app_series.jobs.editable_by(@context)
     @jobs_grid = initialize_grid(jobs, {
       name: 'jobs',
       order: 'jobs.id',
@@ -91,10 +99,8 @@ class AppsController < ApplicationController
       redirect_to apps_path
       return
     else
-      isLatest = @app.id == @app.app_series.latest_revision_app_id ? true : false
-      if !isLatest
-        @app = App.find_by(id: @app.app_series.latest_revision_app_id)
-        redirect_to edit_app_path(@app.dxid)
+      if @app.id != @app.app_series.latest_revision_app_id
+        redirect_to edit_app_path(@app.app_series.latest_revision_app.dxid)
         return
       else
         js app: @app.slice(:dxid, :name, :title, :version, :revision, :readme, :spec, :internal)
