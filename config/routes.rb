@@ -75,7 +75,6 @@ Rails.application.routes.draw do
     end
 
     user_constraints = { username: /[^\/]*/ }
-    get '/users', to: 'users#index'
     post "/users/:username/report", to: 'users#report', constraints: user_constraints, as: 'report_user'
     get "/users/:username(/:tab)", to: 'users#show', constraints: user_constraints, as: 'user'
 
