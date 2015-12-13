@@ -565,57 +565,6 @@ class ApiController < ApplicationController
 
   # Inputs
   #
-  # id: the dxid of the app to release
-  # version: the app version to attach to this app (must be semver 2.0 compliant)
-  #
-  # Outputs
-  #
-  #
-  # id (string, only on success): the same dxid returned back
-  # failure (string, only on failure): a message that can be shown to the user due to failure
-  def release_app
-    begin
-      id = params["id"]
-      fail "A nonempty app id string is required." unless id.is_a?(String) && id != ""
-
-      version = params["version"]
-      fail "A nonempty version string is required." unless version.is_a?(String) && version != ""
-
-      semver = SemVer.parse(version)
-      fail "The given version ('#{version}') does not follow the Semantic Versioning (semver-2.0.0) conventions." if semver.nil?
-
-      App.transaction do
-        app = App.find_by(user_id: @context.user_id, dxid: id)
-        fail "The given app id was not found or is not owned by you." if app.nil?
-        fail "The given app is already released." if app.released?
-
-        # Version conflict check
-        app.app_series.released.select(:version).each do |other_app|
-          other_semver = SemVer.parse(other_app.version)
-          raise if other_semver.nil? # Should never happen
-          if semver == other_semver
-            if version == other_app.version
-              fail "There is already another revision released as that exact version."
-            else
-              fail "There is already another revision released as a semantically equivalent version ('#{other_app.version}')."
-            end
-          end
-        end
-
-        app.update!(version: version)
-        app.app_series.update!(latest_version_app_id: app.id)
-        DNAnexusAPI.new(@context.token).call(app.dxid, "publish")
-      end
-
-      render json: {id: id}
-
-    rescue ApiError => e
-      render json: {failure: e.message}
-    end
-  end
-
-  # Inputs
-  #
   # ids (array:string, optional): the dxids of the assets
   #
   # Outputs:
