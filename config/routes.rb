@@ -32,7 +32,6 @@ Rails.application.routes.draw do
     post '/api/create_asset', to: 'api#create_asset'
     post '/api/close_asset', to: 'api#close_asset'
     post '/api/create_app', to: 'api#create_app'
-    post '/api/release_app', to: 'api#release_app'
     post '/api/list_notes', to: 'api#list_notes'
     post '/api/describe_note', to: 'api#describe_note'
     post '/api/attach_to_notes', to: 'api#attach_to_notes'
