@@ -16,4 +16,34 @@ class DNAnexusAPI
     end
   end
 
+  def user_exists?(username)
+    begin
+      call("user-#{username}", "describe")
+    rescue Net::HTTPServerException => e
+      if e.message =~ /^404/
+        return false
+      end
+      raise e
+    end
+    return true
+  end
+
+  def self.email_exists?(email)
+    api = self.new(ADMIN_TOKEN)
+    begin
+      api.call(ORG_DUMMY, "invite", {invitee: email, suppressEmailNotification: true})
+    rescue Net::HTTPServerException => e
+      if e.message =~ /^404/
+        return false
+      end
+      raise e
+    end
+    api.call(ORG_DUMMY, "findMembers")["results"].each do |result|
+      if result["level"] == "MEMBER"
+        api.call(ORG_DUMMY, "removeMember", {user: result["id"]})
+      end
+    end
+    return true
+  end
+
 end

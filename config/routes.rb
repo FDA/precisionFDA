@@ -4,6 +4,8 @@ Rails.application.routes.draw do
   # by wrapping everything into a scope
   #
   scope(format: false) do
+
+    # Main controller
     get 'login' => 'main#login'
     delete 'logout' => 'main#destroy'
     get 'return_from_login' => 'main#return_from_login'
@@ -16,7 +18,6 @@ Rails.application.routes.draw do
     get 'terms' => 'main#terms'
     post 'tokify' => 'main#tokify'
     get 'guidelines' => 'main#guidelines'
-
     get 'exception_test' => "main#exception_test"
 
     # API
@@ -37,8 +38,9 @@ Rails.application.routes.draw do
     post '/api/attach_to_notes', to: 'api#attach_to_notes'
     post '/api/update_note', to: 'api#update_note'
 
-    # The priority is based upon order of creation: first created -> highest priority.
-    # See how all your routes lay out with "rake routes".
+    # Profile
+    get 'profile', to: 'profile#index'
+    post 'profile/provision_user', to: 'profile#provision_user', as: 'provision_user'
 
     resources :apps do
       resources :jobs, shallow: true, except: :index do
