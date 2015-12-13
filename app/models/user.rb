@@ -55,8 +55,12 @@ class User < ActiveRecord::Base
     user_files.real_files
   end
 
+  def singular?
+    org_id.blank? || org.singular
+  end
+
   def can_provision_accounts?
-    org.admin_id == id && !org.singular
+    !singular? && org.admin_id == id
   end
 
   def billto
