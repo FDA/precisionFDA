@@ -87,4 +87,12 @@ module ApplicationHelper
     unilink(item, local_opts)
   end
 
+  def guest_hide
+    'style="display: none"'.html_safe if @context.guest?
+  end
+
+  def guest_disable
+    'disabled="true"'.html_safe if @context.guest?
+  end
+
 end
