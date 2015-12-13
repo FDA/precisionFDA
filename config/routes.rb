@@ -13,6 +13,8 @@ Rails.application.routes.draw do
     get 'track' => 'main#track'
     get 'request_access' => 'main#request_access'
     post 'request_access' => 'main#request_access'
+    get 'browse_access' => 'main#browse_access'
+    post 'browse_access' => 'main#browse_access'
     get 'about' => 'main#about'
     get 'about/:section' => 'main#about'
     get 'terms' => 'main#terms'

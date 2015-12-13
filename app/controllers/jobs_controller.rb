@@ -1,4 +1,7 @@
 class JobsController < ApplicationController
+  skip_before_action :require_login,     only: [:show]
+  before_action :require_login_or_guest, only: [:show]
+
   def show
     @job = Job.accessible_by(@context).includes(:user).find_by!(dxid: params[:id])
     if @job.nil?
@@ -7,7 +10,7 @@ class JobsController < ApplicationController
       return
     end
     if !@job.terminal?
-      User.sync_job!(@context.user_id, @job.id, @context.token)
+      User.sync_job!(@context, @job.id)
       @job.reload
     end
 
@@ -45,14 +48,14 @@ class JobsController < ApplicationController
   end
 
   def log
-    @job = Job.find_by(user_id: @context.user_id, dxid: params[:id])
+    @job = Job.editable_by(@context).find_by(dxid: params[:id])
     if @job.nil?
       flash[:error] = "Sorry, this job does not exist or its log is not accessible by you"
       redirect_to apps_path
       return
     end
     if !@job.terminal?
-      User.sync_job!(@context.user_id, @job.id, @context.token)
+      User.sync_job!(@context, @job.id)
       @job.reload
     end
 

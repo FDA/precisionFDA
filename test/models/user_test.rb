@@ -23,6 +23,7 @@
 #  email                       :string
 #  normalized_email            :string
 #  last_login                  :datetime
+#  extras                      :text
 #
 
 require 'test_helper'

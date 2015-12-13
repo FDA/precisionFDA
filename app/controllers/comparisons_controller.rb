@@ -1,6 +1,14 @@
 class ComparisonsController < ApplicationController
+  skip_before_action :require_login,     only: [:index, :featured, :explore, :show]
+  before_action :require_login_or_guest, only: [:index, :featured, :explore, :show]
+
   def index
-    User.sync_comparisons!(@context.user_id, @context.token)
+    if @context.guest?
+      redirect_to explore_comparisons_path
+      return
+    end
+
+    User.sync_comparisons!(@context)
 
     comparisons = Comparison.editable_by(@context)
     @comparisons_grid = initialize_grid(comparisons, {
@@ -43,7 +51,7 @@ class ComparisonsController < ApplicationController
     @comparison = Comparison.accessible_by(@context).find(params[:id])
 
     if @comparison.state == "pending"
-      User.sync_comparison!(@context.user_id, @comparison.id, @context.token)
+      User.sync_comparison!(@context, @comparison.id)
       @comparison.reload
     end
 
@@ -62,7 +70,6 @@ class ComparisonsController < ApplicationController
     })
 
     @notes = @comparison.notes.accessible_by(@context).order(id: :desc)
-
 
     js id: @comparison.id, meta: @meta, state: @comparison.state
   end
