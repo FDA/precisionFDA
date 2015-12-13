@@ -37,4 +37,12 @@ class Invitation < ActiveRecord::Base
       errors.add(:email, "is invalid")
     end
   end
+
+  def expires_at
+    [created_at, Time.zone.local(2015, 12, 15)].max + 30.days
+  end
+
+  def expired?
+    expires_at <= Time.now
+  end
 end

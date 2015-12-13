@@ -20,7 +20,7 @@ module ApplicationHelper
 
   def humanizeSeconds secs
     secs = secs.to_i
-    if secs == 0
+    if secs <= 0
       return "N/A"
     else
       [[60, :seconds], [60, :minutes], [24, :hours], [1000, :days]].map{ |count, name|

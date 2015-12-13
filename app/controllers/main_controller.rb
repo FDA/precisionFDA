@@ -134,16 +134,25 @@ class MainController < ApplicationController
   def browse_access
     if @context.logged_in_or_guest?
       redirect_to root_path
-    else
-      @code = params[:code].to_s
-      invitation = Invitation.find_by(code: @code, state: "guest")
-      if invitation.blank?
-        render "_partials/_error", status: 403, locals: {message: "Invalid access code. If you believe this is an error, contact precisionFDA support."}
-      elsif request.post?
-        save_session(-1, "Guest", "INVALID", Time.now.to_i + 7.days, -1)
-        AUDIT_LOGGER.info("Browse access granted for #{invitation.email}")
-        redirect_to root_path
-      end
+      return
+    end
+
+    code = params[:code].to_s
+    @invitation = Invitation.find_by(code: code, state: "guest")
+    if @invitation.blank?
+      render "_partials/_error", status: 403, locals: {message: "Invalid access code. If you believe this is an error, contact precisionFDA support."}
+      return
+    end
+
+    if @invitation.expired?
+      render "_partials/_error", status: 403, locals: {message: "Your access code is expired. If you believe this is an error, contact precisionFDA support."}
+      return
+    end
+
+    if request.post?
+      save_session(-1, "Guest-#{@invitation.id}", "INVALID", @invitation.expires_at.to_i, -1)
+      AUDIT_LOGGER.info("Browse access granted for #{@invitation.email} (id #{@invitation.id})")
+      redirect_to root_path
     end
   end
 
