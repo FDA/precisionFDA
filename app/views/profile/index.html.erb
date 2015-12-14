@@ -63,8 +63,29 @@
         end -%>
       </div>
       <% if @user.can_provision_accounts? %>
-        <%= link_to(content_tag(:span, "", class: "fa fa-plus") + " Provision new user under this organization", provision_user_path, method: 'post', class: 'btn btn-primary') %>
+        <%= link_to(content_tag(:span, "", class: "fa fa-plus") + " Provision new user under \"#{@user.org.name}\"", provision_user_path, method: 'post', class: 'btn btn-primary') %>
       <% end %>
     </div>
   </div>
+<% end %>
+
+<% if @user.can_administer_site? %>
+  <div class="infoframe-outer">
+    <div class="infoframe-inner">
+      <h4 class="infoframe-title">Site Administration</h3>
+      <ul class="list-group infoframe-inline">
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Users</h5>
+          <p class="list-group-item-text"><%= User.count %></p>
+        </li>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Orgs</h5>
+          <p class="list-group-item-text"><%= Org.count %></p>
+        </li>
+      </ul>
+      <%= link_to(content_tag(:span, "", class: "fa fa-plus") + " Provision new organization & admin", provision_org_path, method: 'post', class: 'btn btn-primary') %>
+      <%= link_to(content_tag(:span, "", class: "fa fa-file-excel-o") + " Generate report", run_report_path, method: 'post', class: 'btn btn-default') %>
+    </div>
+  </div>
+
 <% end %>

@@ -28,6 +28,18 @@ class DNAnexusAPI
     return true
   end
 
+  def entity_exists?(entity)
+    begin
+      call(entity.to_s, "describe")
+    rescue Net::HTTPServerException => e
+      if e.message =~ /^404/
+        return false
+      end
+      raise e
+    end
+    return true
+  end
+
   def self.email_exists?(email)
     api = self.new(ADMIN_TOKEN)
     begin

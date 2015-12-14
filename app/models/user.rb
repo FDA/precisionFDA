@@ -72,7 +72,7 @@ class User < ActiveRecord::Base
     "#{first_name} #{last_name}"
   end
 
-  def can_run_reports?
+  def can_administer_site?
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
       dxuser == "elaine.johanson"
     else
