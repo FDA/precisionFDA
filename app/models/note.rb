@@ -42,6 +42,10 @@ class Note < ActiveRecord::Base
   end
 
   def publishable_by?(context)
-    user_id == context.user_id && scope != "public"
+    if context.guest?
+      false
+    else
+      user_id == context.user_id && scope != "public"
+    end
   end
 end

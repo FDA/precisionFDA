@@ -3,13 +3,21 @@ module Permissions
 
   module ClassMethods
     def accessible_by(context)
-      raise unless context.user_id.present? && context.org_id.present?
-      where.any_of({user_id: context.user_id}, {scope: "public"}, {scope: context.org_id.to_s})
+      if context.guest?
+        accessible_by_public
+      else
+        raise unless context.user_id.present? && context.org_id.present?
+        where.any_of({user_id: context.user_id}, {scope: "public"}, {scope: context.org_id.to_s})
+      end
     end
 
     def editable_by(context)
-      raise unless context.user_id.present?
-      where(user_id: context.user_id)
+      if context.guest?
+        none
+      else
+        raise unless context.user_id.present?
+        where(user_id: context.user_id)
+      end
     end
 
     def accessible_by_public
@@ -18,15 +26,27 @@ module Permissions
   end
 
   def accessible_by?(context)
-    user_id == context.user_id || scope == "public" || scope == context.org_id.to_s
+    if context.guest?
+      scope == "public"
+    else
+      user_id == context.user_id || scope == "public" || scope == context.org_id.to_s
+    end
   end
 
   def editable_by?(context)
-    user_id == context.user_id
+    if context.guest?
+      false
+    else
+      user_id == context.user_id
+    end
   end
 
   def publishable_by?(context)
-    user_id == context.user_id && scope != "public"
+    if context.guest?
+      false
+    else
+      user_id == context.user_id && scope != "public"
+    end
   end
 
   def public?
