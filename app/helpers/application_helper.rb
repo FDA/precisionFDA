@@ -20,7 +20,7 @@ module ApplicationHelper
 
   def humanizeSeconds secs
     secs = secs.to_i
-    if secs == 0
+    if secs <= 0
       return "N/A"
     else
       [[60, :seconds], [60, :minutes], [24, :hours], [1000, :days]].map{ |count, name|
@@ -85,6 +85,14 @@ module ApplicationHelper
       local_opts[:icon_class] = "fa-fw"
     end
     unilink(item, local_opts)
+  end
+
+  def guest_hide
+    'style="display: none"'.html_safe if @context.guest?
+  end
+
+  def guest_disable
+    'disabled="true"'.html_safe if @context.guest?
   end
 
 end

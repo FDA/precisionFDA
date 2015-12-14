@@ -46,15 +46,15 @@ module MainHelper
   end
 
   def tutorial_complete?(count)
-    return count > 0
+    return count.nil? || count > 0
   end
 
   def tutorial_state(count)
-    state = "warning"
-    if count > 0
-      state = "default"
+    if count.nil? || count > 0
+      return "default"
+    else
+      return "warning"
     end
-    return state
   end
 
   private

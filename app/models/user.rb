@@ -23,6 +23,7 @@
 #  email                       :string
 #  normalized_email            :string
 #  last_login                  :datetime
+#  extras                      :text
 #
 
 class User < ActiveRecord::Base
@@ -91,7 +92,10 @@ class User < ActiveRecord::Base
     username.size >= 3 && username.size <= 255 && username =~ /^[a-z][0-9a-z_\.]{2,}$/
   end
 
-  def self.sync_file!(user_id, file_id, token)
+  def self.sync_file!(context, file_id)
+    return if context.guest?
+    user_id = context.user_id
+    token = context.token
     # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)
@@ -103,7 +107,10 @@ class User < ActiveRecord::Base
     end
   end
 
-  def self.sync_files!(user_id, token)
+  def self.sync_files!(context)
+    return if context.guest?
+    user_id = context.user_id
+    token = context.token
     # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)
@@ -118,7 +125,10 @@ class User < ActiveRecord::Base
     end
   end
 
-  def self.sync_asset!(user_id, file_id, token)
+  def self.sync_asset!(context, file_id)
+    return if context.guest?
+    user_id = context.user_id
+    token = context.token
     # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)
@@ -130,7 +140,10 @@ class User < ActiveRecord::Base
     end
   end
 
-  def self.sync_assets!(user_id, token)
+  def self.sync_assets!(context)
+    return if context.guest?
+    user_id = context.user_id
+    token = context.token
     # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)
@@ -145,7 +158,10 @@ class User < ActiveRecord::Base
     end
   end
 
-  def self.sync_comparison!(user_id, comparison_id, token)
+  def self.sync_comparison!(context, comparison_id)
+    return if context.guest?
+    user_id = context.user_id
+    token = context.token
     # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)
@@ -164,7 +180,10 @@ class User < ActiveRecord::Base
     end
   end
 
-  def self.sync_comparisons!(user_id, token)
+  def self.sync_comparisons!(context)
+    return if context.guest?
+    user_id = context.user_id
+    token = context.token
     # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)
@@ -187,7 +206,10 @@ class User < ActiveRecord::Base
     end
   end
 
-  def self.sync_job!(user_id, job_id, token)
+  def self.sync_job!(context, job_id)
+    return if context.guest?
+    user_id = context.user_id
+    token = context.token
     # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)
@@ -206,7 +228,10 @@ class User < ActiveRecord::Base
     end
   end
 
-  def self.sync_jobs!(user_id, token)
+  def self.sync_jobs!(context)
+    return if context.guest?
+    user_id = context.user_id
+    token = context.token
     # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)

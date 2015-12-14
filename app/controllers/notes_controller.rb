@@ -1,5 +1,13 @@
 class NotesController < ApplicationController
+  skip_before_action :require_login,     only: [:index, :featured, :explore, :show]
+  before_action :require_login_or_guest, only: [:index, :featured, :explore, :show]
+
   def index
+    if @context.guest?
+      redirect_to explore_notes_path
+      return
+    end
+
     @notes = Note.editable_by(@context).order(id: :desc)
   end
 

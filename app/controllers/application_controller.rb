@@ -32,24 +32,44 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def require_api_login
-    if !@context.logged_in?
-      auth = request.headers["Authorization"]
-      if auth.is_a?(String) && auth =~ /^Key (.+)$/
-        key = $1
-        begin
-          decrypted = JSON.parse(rails_encryptor.decrypt_and_verify(key))
-          if decrypted.is_a?(Hash) && decrypted["context"].is_a?(Hash)
-            fields = [:user_id, :username, :token, :expiration, :org_id].map { |f| decrypted["context"][f.to_s] }
-            @context = Context.new(*fields)
-          end
-        rescue
-        end
+  def require_login_or_guest
+    unless @context.logged_in_or_guest?
+      redirect_to login_url
+    end
+  end
+
+  def require_api_login_or_guest
+    if !@context.logged_in_or_guest?
+      process_authorization_header
+
+      if !@context.logged_in?
+        render status: :unauthorized, json: {failure: "Authentication failure"}
       end
     end
+  end
 
+  def require_api_login
     if !@context.logged_in?
-      render status: :unauthorized, json: {failure: "Authentication failure"}
+      process_authorization_header
+
+      if !@context.logged_in?
+        render status: :unauthorized, json: {failure: "Authentication failure"}
+      end
+    end
+  end
+
+  def process_authorization_header
+    auth = request.headers["Authorization"]
+    if auth.is_a?(String) && auth =~ /^Key (.+)$/
+      key = $1
+      begin
+        decrypted = JSON.parse(rails_encryptor.decrypt_and_verify(key))
+        if decrypted.is_a?(Hash) && decrypted["context"].is_a?(Hash)
+          fields = [:user_id, :username, :token, :expiration, :org_id].map { |f| decrypted["context"][f.to_s] }
+          @context = Context.new(*fields)
+        end
+      rescue
+      end
     end
   end
 

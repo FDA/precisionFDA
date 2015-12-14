@@ -1,7 +1,7 @@
 <% content_for :title do %>Overview<% end %>
 
 <%= render "_partials/browser_support_script" %>
-<% if !@context.logged_in? %>
+<% if !@context.logged_in_or_guest? %>
   <%= render "main/landing" %>
 <% else %>
   <div class="jumbotron jumbotron-landing">
@@ -12,6 +12,101 @@
 
     <div class="container">
       <div class="pfda-cards pfda-tutorial text-left">
+
+        <% if @context.guest? %>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              Read Notes
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            Read what others are reporting describing their thoughts and their work
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#notes">Learn</a>
+            <a class="btn btn-primary" href="<%= explore_notes_path %>">Read notes</a>
+          </div>
+        </div>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              Browse Files
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            Browse the datasets have been publicly shared with the precisionFDA community
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#files">Learn</a>
+            <a class="btn btn-primary" href="<%= explore_files_path %>">Browse files</a>
+          </div>
+        </div>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              View Comparisons
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            View the differences between test sets and benchmark sets of genomic variants
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#comparisons">Learn</a>
+            <a class="btn btn-primary" href="<%= explore_comparisons_path %>">View comparisons</a>
+          </div>
+        </div>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              Explore Apps
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            Have a look at bioinformatics apps &mdash; and even study their scripts by clicking "Fork".
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#apps-listing">Learn</a>
+            <a class="btn btn-primary" href="<%= explore_apps_path %>">Explore apps</a>
+          </div>
+        </div>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              Browse Assets
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            Browse the collection of software assets that are used as building blocks in apps.
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#dev-assets">Learn</a>
+            <a class="btn btn-primary" href="<%= explore_assets_path %>">Browse assets</a>
+          </div>
+        </div>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@apps_count) %>">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              Try the app editor
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            Find out how easy it is to assemble an app (read-only; results not saved)
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#dev">Learn</a>
+            <a class="btn btn-primary" href="<%= new_app_path %>">Try!</a>
+          </div>
+        </div>
+
+        <% else %>
+
         <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@notes_count) %>">
           <div class="pfda-card-header">
             <div class="pfda-card-title">
@@ -102,6 +197,8 @@
           </div>
         </div>
 
+        <% end %>
+
         <a class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-success-solid" href="<%= about_path %>/how">
           <div class="pfda-card-header lead text-center">
             Ready to learn more?
@@ -130,7 +227,7 @@
   </div>
 <% end %>
 
-<% if !@context.logged_in? %>
+<% if !@context.logged_in_or_guest? %>
 <div class="below-fold-actions">
   <a class="btn accessible-btn-primary btn-lg" href="<%= about_path %>">
     <span class="fa fa-info-circle" aria-hidden="true"></span> Learn more about precisionFDA
