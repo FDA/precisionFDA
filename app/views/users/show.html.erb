@@ -20,11 +20,6 @@
 
   </ul>
 </div>
-<% if @user.can_run_reports? && @user.id == @context.user_id %>
-  <div class="pfda-toolbar">
-    <%= link_to("Generate report", report_user_path(@user.dxuser), method: 'post', class: 'btn btn-primary') %>
-  </div>
-<% end %>
 
 <!-- Nav tabs -->
 <ul class="nav nav-tabs nav-tabs-padded" role="tablist">

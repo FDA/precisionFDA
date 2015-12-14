@@ -42,6 +42,8 @@ Rails.application.routes.draw do
     # Profile
     get 'profile', to: 'profile#index'
     post 'profile/provision_user', to: 'profile#provision_user', as: 'provision_user'
+    post 'profile/provision_org', to: 'profile#provision_org', as: 'provision_org'
+    post 'profile/run_report', to: 'profile#run_report', as: 'run_report'
 
     resources :apps do
       resources :jobs, shallow: true, except: :index do
@@ -76,7 +78,6 @@ Rails.application.routes.draw do
     end
 
     user_constraints = { username: /[^\/]*/ }
-    post "/users/:username/report", to: 'users#report', constraints: user_constraints, as: 'report_user'
     get "/users/:username(/:tab)", to: 'users#show', constraints: user_constraints, as: 'user'
 
     # You can have the root of your site routed with "root"

@@ -45,4 +45,8 @@ class Invitation < ActiveRecord::Base
   def expired?
     expires_at <= Time.now
   end
+
+  def org_handle
+    org.downcase.gsub(/[^a-z]/, '')
+  end
 end
