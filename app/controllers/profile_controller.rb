@@ -147,7 +147,7 @@ class ProfileController < ApplicationController
       @error = "There is already an organization with that handle"
     elsif @org.present? && Org.find_by(name: @org).present?
       @error = "There is already an organization with that name"
-    elsif @org.present? ^ @org_handle.present?
+    elsif @org.present? != @org_handle.present?
       @error = "You must either provide both the organization name and the handle (for org admins), or leave them both empty (for self-represented)."
     end
 
@@ -185,7 +185,7 @@ class ProfileController < ApplicationController
       if @suggested_username == params[:suggested_username]
         @state = "step4"
 
-        raise unless @org.present? ^ @org_handle.present?
+        raise unless @org.present? == @org_handle.present?
 
         singular = false
         if !@org_handle.present?
