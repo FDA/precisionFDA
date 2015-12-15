@@ -98,7 +98,9 @@ class FilesController < ApplicationController
       flash[:error] = "Files can only be downloaded if they are in the 'closed' state"
       redirect_to file_path(@file.dxid)
     else
-      redirect_to DNAnexusAPI.new(@context.token).call(@file.dxid, "download", {filename: @file.name, project: @file.project, preauthenticated: true})["url"] + (params[:inline] == "true" ? '?inline' : '')
+      opts = {project: @file.project, preauthenticated: true}
+      opts[:filename] = @file.name if params[:inline] != "true"
+      redirect_to DNAnexusAPI.new(@context.token).call(@file.dxid, "download", opts)["url"] + (params[:inline] == "true" ? '?inline' : '')
     end
   end
 
