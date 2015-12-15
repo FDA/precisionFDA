@@ -1,0 +1,11 @@
+<div class="row">
+  <div class="login-alert alert alert-warning col-md-10 col-md-offset-7">
+    <% d = ((@invitation.expires_at - Time.now) / 1.day).round -%>
+    <h4>To proceed and access this site <%= link_to("click here", browse_access_path(code: @invitation.code), method: 'post') %>. Your access will expire in <%= (d > 1) ? "#{d} days" : (d == 1 ? "1 day" : "less than a day") %>. Thank you for your interest in precisionFDA!</h4>
+
+    <hr>
+    <div class="help-block">
+      <small>By continuing, you are accessing a U.S. Government information system. Usage of precisionFDA may be monitored, recorded, and subject to audit. Your use of precisionFDA indicates your consent to monitoring and recording of precisionFDA usage, and if such monitoring reveals possible criminal activity, precisionFDA personnel may provide such monitoring as evidence to law enforcement officials. Any unauthorized use of the system is prohibited and subject to criminal and civil penalties.</small>
+    </div>
+  </div>
+</div>

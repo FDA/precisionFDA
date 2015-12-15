@@ -72,6 +72,10 @@ class Comparison < ActiveRecord::Base
   end
 
   def publishable_by?(context)
-    user_id == context.user_id && scope != "public" && state == "done"
+    if context.guest?
+      false
+    else
+      user_id == context.user_id && scope != "public" && state == "done"
+    end
   end
 end

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151209002112) do
+ActiveRecord::Schema.define(version: 20151213040641) do
 
   create_table "app_series", force: :cascade do |t|
     t.string   "dxid"
@@ -116,7 +116,15 @@ ActiveRecord::Schema.define(version: 20151209002112) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text     "extras"
+    t.integer  "user_id"
+    t.string   "state"
+    t.string   "code"
   end
+
+  add_index "invitations", ["code"], name: "index_invitations_on_code", unique: true
+  add_index "invitations", ["email"], name: "index_invitations_on_email"
+  add_index "invitations", ["state"], name: "index_invitations_on_state"
+  add_index "invitations", ["user_id"], name: "index_invitations_on_user_id"
 
   create_table "job_inputs", force: :cascade do |t|
     t.integer "job_id"

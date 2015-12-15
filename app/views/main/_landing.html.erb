@@ -2,7 +2,7 @@
 <div class="jumbotron jumbotron-landing jumbotron-landing-guest jumbotron-particles">
   <div class="container">
     <div class="pfda-brand">
-      <%= image_tag("precisionFDA.white.navbar-guest.png", alt: "Welcome to PrecisionFDA") %>
+      <%= image_tag("precisionFDA.white.navbar-guest.png", alt: "Welcome to PrecisionFDA", height: "60px") %>
     </div>
     <div class="btn-player-wrapper">
       <a class="btn-player fa fa-play-circle" aria-label="Play precisionFDA Introduction Video">
@@ -20,7 +20,11 @@
   </div>
 </div>
 
-<div class="showcase container">
+<div class="showcase showcase-shadow-jumbo container">
+  <%= render "_partials/quotes" %>
+</div>
+
+<div class="showcase showcase-padded showcase-flex showcase-shadow container">
   <div class="showcase-item">
     <div class="showcase-icon">
       <a href="<%= about_path %>/how#notes"><span class="fa fa-sticky-note" aria-hidden="true"></span></a>
@@ -182,5 +186,21 @@
         </li>
       </ul>
     </div>
+  </div>
+</div>
+
+
+<div class="container-fluid container-padded pfda-participants-section gradient-blue-sky">
+  <div class="h2 text-center text-uppercase">Community Participants</div>
+  <div class="pfda-participants">
+    <% @participants.each do |participant| %>
+      <div class="pfda-participant" title="<%= participant[:name] %>" data-toggle="tooltip">
+        <%= image_tag participant[:logo], alt: participant[:name], height: participant[:height], class: participant[:classes] %>
+      </div>
+    <% end %>
+  </div>
+  <hr>
+  <div class="lead text-center">
+    The comparison framework uses open-source software by <%= image_tag "participants/rtg.png", alt: "Real Time Genomics", title: "Real Time Genomics", height: "50px", "data-toggle": "tooltip" %></div>
   </div>
 </div>
