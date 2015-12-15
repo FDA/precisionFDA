@@ -22,9 +22,9 @@
 
 <div class="pfda-toolbar">
   <div class="btn-group">
-    <a class="btn btn-primary" href="<%= new_note_path %>">
+    <%= link_to notes_path(), class: 'btn btn-primary', method: :post do %>
       <span class="fa fa-plus fa-fw"></span> New Note
-    </a>
+    <% end %>
   </div>
 </div>
 
