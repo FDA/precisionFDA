@@ -1,0 +1,52 @@
+<div class="email-body branded client-precisionfda" style="background-color: #cadde9; font-family: Lato, 'Lucida Grande', Helvetica, Arial; min-width: 600px; text-align: center;">
+  <!-- // Begin Template Header \\ -->
+  <div id="headerContainer" style="background-color: #eef4f8; border-bottom-color: #b8d1e2; border-bottom-style: solid; border-bottom-width: 1px;">
+    <div class="container" style="margin: auto; padding: 20px 0; width: 600px;">
+      <table class="headerContent" border="0" cellpadding="0" cellspacing="0" width="560" style="color: #373737; font-family: 'Helvetica Neue', Helvetica, Arial; font-size: 16px; font-weight: bold; line-height: 100%; margin: 0 auto; padding: 0; text-align: left; vertical-align: middle;">
+          <tr>
+              <td class="headerBrand">
+                  <a class="brand" href="https://precision.fda.gov" target="_blank" style="color: #1f70b5; display: inline-block; font-weight: bold; text-decoration: none;"><img class="headerImage" src="https://precision.fda.gov/assets/precisionFDA.email.dark.png" style="border: none; font-size: 14px; font-weight: bold; height: auto; line-height: 100%; max-height: 50px; max-width: 300px; outline: none; text-decoration: none; text-transform: capitalize;"></a>
+              </td>
+              <td class="headerTemplateType" style="color: #94bad3; font-weight: 200; text-align: right;">
+                <span class="type">Your Access Request</span>
+              </td>
+          </tr>
+      </table>
+    </div>
+  </div>
+  <!-- // End Template Header \\ -->
+
+  <!-- // Begin Template Body \\ -->
+  <div id="bodyContainer">
+    <div class="container" style="margin: auto; padding: 20px 0; width: 600px;">
+      <!-- // Begin Module: Standard Content \\ -->
+
+      <table class="bodyContent section-default" border="0" cellpadding="20" cellspacing="0" width="560" style="background-color: #f2f7fa; border: 1px solid #a6c6da; border-radius: 4px; margin: 0 auto; margin-top: 0; padding-bottom: 0;">
+          <tr class="section-heading" style="color: #767676; font-family: 'Helvetica Neue', Helvetica, Arial; font-size: 30px; font-weight: 400; line-height: 100%; text-align: center; text-transform: none;">
+            <td style="border-bottom: 1px solid #e0ebf2; padding: 20px;">
+              <span>Your precisionFDA browse access</span>
+            </td>
+          </tr>
+          <tr>
+              <td valign="top">
+                  <div class="section-content" style="color: #505050; font-family: 'Helvetica Neue', Helvetica, Arial; font-size: 14px; line-height: 150%; text-align: left;">
+                    <p style="color: #212121;">Dear <%= @invitation.first_name %> <%= @invitation.last_name %>,</p>
+
+                    <p style="color: #212121;">Thank you for your interest in the precisionFDA beta project. As a first step, we have granted you "browse access" to the precisionFDA community. Below you will find your personal link, which you can use to browse the public areas of precisionFDA for the next 30 days -- no user account is required. This link is personal; if you know of others who need access, please ask them to file their own requests.</p>
+
+                    <p style="color: #212121;"><strong><a href="https://precision.fda.gov/browse_access?code=<%= @invitation.code %>" style="color: #1f70b5; font-weight: bold; text-decoration: underline;">Click here to browse precisionFDA.</a></strong></p>
+
+                    <p style="color: #212121;">Note: PrecisionFDA is a beta regulatory research sandbox and is intended to inform a broad community. As you browse precisionFDA, you may become interested in obtaining a precisionFDA user account, in order to be able to actively contribute. In that case, please contact PrecisionFDA@fda.hhs.gov with your plan. Community members who have committed to providing information and programs that can be useful in our initial focus of NGS Clinical Test Development and Validation will be assessed for contributor level access.</p>
+
+                    <p style="color: #212121;">We are looking forward to seeing you on-line!</p>
+                    <p style="color: #212121; text-align: right">&mdash;The precisionFDA team</p>
+                  </div>
+              </td>
+          </tr>
+      </table>
+
+    </div>
+  </div>
+  <!-- // End Template Body \\ -->
+
+</div>

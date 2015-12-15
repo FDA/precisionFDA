@@ -4,13 +4,13 @@ window.Precision.player = null
 window.onYouTubePlayerAPIReady = ->
   window.Precision.player = new YT.Player('ytplayer',
     width: '100%'
-    videoId: 'kn4J4bqJG2Q'
+    videoId: 'e5qOVz9EIuc'
     playerVars:
       autoplay: 0
       controls: 2
       enablejsapi: 1
       loop: 0
-      playlist: 'kn4J4bqJG2Q'
+      playlist: 'e5qOVz9EIuc'
       modestbranding: 1
       rel: 0
       showinfo: 0
@@ -44,6 +44,54 @@ MainController::index = ->
     Precision.player.playVideo()
     $(e.target).closest(".btn-player-wrapper").addClass("player-playing")
   )
+
+  $tooltips = $container.find("[data-toggle='tooltip']")
+  if $tooltips.length > 0
+    $tooltips.tooltip({container: 'body'})
+
+  if $container.find("#quotes-carousel").length > 0
+    Precision.carousel.setHeight("#quotes-carousel")
+    pause = false
+    percent = 0
+    barInterval = null
+    intervalTime = 30
+    readingMS = 5000
+    WPM = 400
+    $bar = $('.transition-timer-carousel-progress-bar')
+    $crsl = $('.carousel')
+    $active = $crsl.find('.item.active')
+
+    progressBarCarousel = ->
+      if !pause
+        percent += (intervalTime/readingMS * 100)
+        if percent >= 100
+          $bar.css width: '100%'
+          percent = 0
+          clearInterval(barInterval)
+          $crsl.carousel 'next'
+        else
+          $bar.css width: percent + '%'
+
+    restart = (e, $active) ->
+      $active = $(e.relatedTarget) if e?
+      text = $active.find('.pfda-quote-content').text()
+      if _.size(text) > 0
+        clearInterval(barInterval)
+        percent = 0
+        readingMinutes = _.size(text.split(' '))/WPM
+        readingMS = readingMinutes * 60 * 1000
+        barInterval = setInterval(progressBarCarousel, intervalTime)
+
+    $crsl
+      .on('slid.bs.carousel', restart)
+      .on(
+        mouseenter: ->
+          pause = true
+        mouseleave: ->
+          pause = false
+      )
+
+    restart(null, $active)
 
   $modal = $("#guidelines-modal")
   if @params['show_guidelines'] && $modal.length > 0

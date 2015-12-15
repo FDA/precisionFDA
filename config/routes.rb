@@ -4,6 +4,8 @@ Rails.application.routes.draw do
   # by wrapping everything into a scope
   #
   scope(format: false) do
+
+    # Main controller
     get 'login' => 'main#login'
     delete 'logout' => 'main#destroy'
     get 'return_from_login' => 'main#return_from_login'
@@ -11,12 +13,13 @@ Rails.application.routes.draw do
     get 'track' => 'main#track'
     get 'request_access' => 'main#request_access'
     post 'request_access' => 'main#request_access'
+    get 'browse_access' => 'main#browse_access'
+    post 'browse_access' => 'main#browse_access'
     get 'about' => 'main#about'
     get 'about/:section' => 'main#about'
     get 'terms' => 'main#terms'
     post 'tokify' => 'main#tokify'
     get 'guidelines' => 'main#guidelines'
-
     get 'exception_test' => "main#exception_test"
 
     # API
@@ -31,14 +34,16 @@ Rails.application.routes.draw do
     post '/api/create_asset', to: 'api#create_asset'
     post '/api/close_asset', to: 'api#close_asset'
     post '/api/create_app', to: 'api#create_app'
-    post '/api/release_app', to: 'api#release_app'
     post '/api/list_notes', to: 'api#list_notes'
     post '/api/describe_note', to: 'api#describe_note'
     post '/api/attach_to_notes', to: 'api#attach_to_notes'
     post '/api/update_note', to: 'api#update_note'
 
-    # The priority is based upon order of creation: first created -> highest priority.
-    # See how all your routes lay out with "rake routes".
+    # Profile
+    get 'profile', to: 'profile#index'
+    post 'profile/provision_user', to: 'profile#provision_user', as: 'provision_user'
+    post 'profile/provision_org', to: 'profile#provision_org', as: 'provision_org'
+    post 'profile/run_report', to: 'profile#run_report', as: 'run_report'
 
     resources :apps do
       resources :jobs, shallow: true, except: :index do
@@ -73,8 +78,6 @@ Rails.application.routes.draw do
     end
 
     user_constraints = { username: /[^\/]*/ }
-    get '/users', to: 'users#index'
-    post "/users/:username/report", to: 'users#report', constraints: user_constraints, as: 'report_user'
     get "/users/:username(/:tab)", to: 'users#show', constraints: user_constraints, as: 'user'
 
     # You can have the root of your site routed with "root"

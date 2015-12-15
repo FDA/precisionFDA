@@ -1,15 +1,18 @@
 class MainController < ApplicationController
-  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines]}
+  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines, :browse_access, :destroy]}
+
+  skip_before_action :require_login,     only: [:track]
+  before_action :require_login_or_guest, only: [:track]
 
   def index
     show_guidelines = false
     if @context.logged_in?
-      @notes_count = Note.where(user_id: @context.user_id).count
-      @files_count = UserFile.real_files.where(user_id: @context.user_id).count
-      @comparisons_count = Comparison.where(user_id: @context.user_id).count
-      @apps_count = App.where(user_id: @context.user_id).count
-      @jobs_count = Job.where(user_id: @context.user_id).count
-      @assets_count = Asset.where(user_id: @context.user_id).count
+      @notes_count = Note.editable_by(@context).count
+      @files_count = UserFile.real_files.editable_by(@context).count
+      @comparisons_count = Comparison.editable_by(@context).count
+      @apps_count = App.editable_by(@context).count
+      @jobs_count = Job.editable_by(@context).count
+      @assets_count = Asset.editable_by(@context).count
       User.transaction do
         user = User.find(@context.user_id)
         if !user.has_seen_guidelines
@@ -18,13 +21,49 @@ class MainController < ApplicationController
           show_guidelines = true
         end
       end
+    else
+      @participants = [
+        # orgs
+        { logo: "participants/23andme.png", name: "23andMe"},
+        { logo: "participants/aha.png", name: "American Heart Association"},
+        { logo: "participants/baylor.png", name: "Baylor College of Medicine"},
+        { logo: "participants/broad.png", name: "Broad Institute"},
+        { logo: "participants/cdc.png", name: "Centers for Disease Control and Prevention"},
+        # caredx?
+        # childrens health?
+        { logo: "participants/counsyl.png", name: "Counsyl"},
+        { logo: "participants/dnanexus.png", name: "DNAnexus"},
+        { logo: "participants/emory.png", name: "Emory Genetics Lab"},
+        # { logo: "participants/frontline.png", name: "Frontline Genomics"},
+        { logo: "participants/garvan.png", name: "Garvan"},
+        { logo: "participants/genedx.png", name: "GeneDx"},
+        { logo: "participants/humanlongevity.png", name: "Human Longevity Inc."},
+        { logo: "participants/illumina.png", name: "Illumina"},
+        { logo: "participants/intel.png", name: "Intel"},
+        # invitae
+        # labcorp
+        { logo: "participants/natera.png", name: "Natera"},
+        { logo: "participants/nist.png", name: "NIST"},
+        { logo: "participants/nih.png", name: "NIH"},
+        { logo: "participants/ostp.png", name: "White House Office of Science and Technology Policy"},
+        { logo: "participants/personalis.png", name: "Personalis"},
+        { logo: "participants/roche.png", name: "Roche"},
+        { logo: "participants/seracare.png", name: "Seracare"},
+        # individuals
+        { logo: "participants/russ.altman.jpg", name: "Dr. Russ Altman", classes: "img-circle"},
+        { logo: "participants/euan.ashley.jpg", name: "Dr. Euan Ashley", classes: "img-circle"},
+        { logo: "participants/hans.nelsen.jpg", name: "Hans Nelsen", classes: "img-circle"}
+      ]
+      @participants = @participants.shuffle
     end
 
     js show_guidelines: show_guidelines
   end
 
   def destroy
-    AUDIT_LOGGER.info("User #{session[:username]} logged out")
+    if @context.logged_in?
+      AUDIT_LOGGER.info("User #{session[:username]} logged out")
+    end
     reset_session
     flash[:success] = "You were successfully logged out of precisionFDA"
     redirect_to root_url
@@ -41,7 +80,11 @@ class MainController < ApplicationController
   end
 
   def login
-    redirect_to "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=#{OAUTH2_CLIENT_ID}&redirect_uri=#{URI.encode(OAUTH2_REDIRECT_URI)}"
+    if @context.guest?
+      render "_partials/_error", status: 403, locals: {message: "You are currently browsing precisionFDA as a guest. To log in and complete this action, you need a user account. Contact precisionfda@fda.hhs.gov if you need to upgrade to a user account with contributor-level access."}
+    else
+      redirect_to "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=#{OAUTH2_CLIENT_ID}&redirect_uri=#{URI.encode(OAUTH2_REDIRECT_URI)}"
+    end
   end
 
   def return_from_login
@@ -108,13 +151,42 @@ class MainController < ApplicationController
       p[:ip] = request.remote_ip.to_s
       p[:research_intent] = (p[:research_intent] == "1")
       p[:clinical_intent] = (p[:clinical_intent] == "1")
+      p[:state] = "guest"
+      p[:email] = p[:email].to_s.strip
+      p[:code] = SecureRandom.uuid
       Invitation.transaction do
         @invitation = Invitation.create(p)
         if @invitation.persisted?
           AUDIT_LOGGER.info("Access requested: #{p.to_json}")
           NotificationsMailer.invitation_email(@invitation).deliver_now!
+          NotificationsMailer.guest_access_email(@invitation).deliver_now!
         end
       end
+    end
+  end
+
+  def browse_access
+    if @context.logged_in_or_guest?
+      redirect_to root_path
+      return
+    end
+
+    code = params[:code].to_s
+    @invitation = Invitation.find_by(code: code, state: "guest")
+    if @invitation.blank?
+      render "_partials/_error", status: 403, locals: {message: "Invalid access code. If you believe this is an error, contact precisionFDA support."}
+      return
+    end
+
+    if @invitation.expired?
+      render "_partials/_error", status: 403, locals: {message: "Your access code is expired. If you believe this is an error, contact precisionFDA support."}
+      return
+    end
+
+    if request.post?
+      save_session(-1, "Guest-#{@invitation.id}", "INVALID", @invitation.expires_at.to_i, -1)
+      AUDIT_LOGGER.info("Browse access granted for #{@invitation.email} (id #{@invitation.id})")
+      redirect_to root_path
     end
   end
 

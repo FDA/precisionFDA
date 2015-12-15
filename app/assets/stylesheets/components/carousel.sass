@@ -27,8 +27,8 @@
         background-color: $gray-lighter
 
       &.active
-        border-color: $text-color
-        background-color: $text-color
+        border-color: $link-color
+        background-color: $link-color
 
         &.carousel-indicator-blue
           border-color: $brand-info
@@ -99,3 +99,43 @@
 
   .carousel-control
     z-index: 2
+
+.carousel-indicators.carousel-indicators-logo, .carousel-indicators-logo
+  list-style: none
+  margin-top: -35px
+  background-color: #fff
+  padding-bottom: $padding-base-vertical
+  @include flexbox
+  @include flex-wrap(wrap)
+  @include align-items(center)
+  @include align-content(center)
+  @include justify-content(space-around)
+
+  li
+    @include flex-grow(1)
+    margin: 5px 10px
+    width: auto
+    height: auto
+    text-indent: 0
+    border: 0
+    cursor: pointer
+
+    &.active
+      background-color: transparent
+
+    &:not(.active)
+      opacity: 0.35
+
+      &:hover
+        background-color: transparent
+        opacity: 0.75
+
+.transition-timer-carousel-progress-bar
+  height: 3px
+  background-color: $brand-blue-primary
+  width: 0%
+  margin: 0px 0px 0px 0px
+  border: none
+  z-index: 11
+  position: relative
+  margin-top: 10px

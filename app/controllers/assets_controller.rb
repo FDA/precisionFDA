@@ -1,7 +1,14 @@
 class AssetsController < ApplicationController
+  skip_before_action :require_login,     only: [:index, :featured, :explore, :show, :new]
+  before_action :require_login_or_guest, only: [:index, :featured, :explore, :show, :new]
   def index
+    if @context.guest?
+      redirect_to explore_assets_path
+      return
+    end
+
     # Refresh state of assets, if needed
-    User.sync_assets!(@context.user_id, @context.token)
+    User.sync_assets!(@context)
 
     # Wice seems to not like the default_scope of Asset
     assets = Asset.unscoped.editable_by(@context)
@@ -50,7 +57,7 @@ class AssetsController < ApplicationController
 
     # Refresh state of asset, if needed
     if @asset.state != "closed"
-      User.sync_asset!(@context.user_id, @asset.id, @context.token)
+      User.sync_asset!(@context, @asset.id)
       @asset.reload
     end
 
@@ -103,7 +110,8 @@ class AssetsController < ApplicationController
   end
 
   private
-    def asset_params
-      params.require(:asset).permit(:description)
-    end
+
+  def asset_params
+    params.require(:asset).permit(:description)
+  end
 end
