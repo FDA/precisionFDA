@@ -22,7 +22,7 @@
 
 <div class="pfda-toolbar">
   <div class="btn-group">
-    <%= link_to notes_path(), class: 'btn btn-primary', method: :post do %>
+    <%= link_to notes_path(), class: 'btn btn-primary', method: :post, data: {disable_with: "Creating Note..."} do %>
       <span class="fa fa-plus fa-fw"></span> New Note
     <% end %>
   </div>
