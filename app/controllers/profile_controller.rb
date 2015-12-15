@@ -187,11 +187,11 @@ class ProfileController < ApplicationController
 
         raise unless @org.present? == @org_handle.present?
 
-        singular = false
+        @singular = false
         if !@org_handle.present?
           @org = "#{@first_name} #{@last_name} (#{@suggested_username})"
           @org_handle = @suggested_username
-          singular = true
+          @singular = true
         end
 
         dxuserid = "user-#{@suggested_username}"
@@ -207,7 +207,7 @@ class ProfileController < ApplicationController
         raise "We did not expect org name '#{@org}' to exist in the database" if Org.find_by(name: @org).present?
         raise "We did not expect org handle '#{@org_handle}' to exist in the database" if Org.find_by(handle: @org_handle).present?
 
-        AUDIT_LOGGER.info("The system is about to start provisioning admin '#{@suggested_username}' and org '#{@org_handle}'#{singular ? ' (self-represented)' : ''} initiated by '#{@user.dxuser}'")
+        AUDIT_LOGGER.info("The system is about to start provisioning admin '#{@suggested_username}' and org '#{@org_handle}'#{@singular ? ' (self-represented)' : ''} initiated by '#{@user.dxuser}'")
         papi.call("org", "new", {handle: dxorghandle, name: @org})
         billing_info = {
           email: "Elaine.Johanson@fda.hhs.gov",
@@ -235,7 +235,7 @@ class ProfileController < ApplicationController
           org[:address] = @address
           org[:duns] = @duns
           org[:phone] = @phone
-          org[:singular] = singular
+          org[:singular] = @singular
           org[:state] = "complete"
           o = Org.create!(org)
 
@@ -258,7 +258,6 @@ class ProfileController < ApplicationController
         end
         Invitation.find(@inv.to_i).update(user_id: u.id)
         AUDIT_LOGGER.info("A new admin and organization have been created: user=#{u.as_json}, org=#{o.as_json} by '#{@user.dxuser}'")
-        @state = "step4"
       end
     end
   end
