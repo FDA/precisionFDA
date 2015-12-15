@@ -13,10 +13,10 @@
 #= require polyfills
 #= require vendor
 #= require jquery
+#= require jquery-ui
 #= require jquery_ujs
 #= require turbolinks
 #= require bootstrap-sass/assets/javascripts/bootstrap-sprockets
-#= require jquery-ui
 #= require lodash
 #= require graphlib
 #= require d3
