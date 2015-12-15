@@ -256,7 +256,7 @@ class ProfileController < ApplicationController
           u = User.create!(user)
           o.update!(admin_id: u.id)
         end
-        Invitation.find(@inv.to_i).update(user_id => u.id)
+        Invitation.find(@inv.to_i).update(user_id: => u.id)
         AUDIT_LOGGER.info("A new admin and organization have been created: user=#{u.as_json}, org=#{o.as_json} by '#{@user.dxuser}'")
         @state = "step4"
       end
