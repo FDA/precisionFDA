@@ -196,7 +196,7 @@
   </div>
 <% elsif @state == "step4" %>
   <div class="container-padded">
-    <p>You have successfully provisioned <%= @org_handle.blank? ? "self-represented" : ("organization <strong>".html_safe + @org_handle + "</strong> and admin".html_safe) %> username <strong><%= @suggested_username %></strong>. An activation email will be sent to <%= @email %> with further instructions.</p>
+    <p>You have successfully provisioned <%= @singular ? "self-represented" : ("organization <strong>".html_safe + @org_handle + "</strong> and admin".html_safe) %> username <strong><%= @suggested_username %></strong>. An activation email will be sent to <%= @email %> with further instructions.</p>
     <%= link_to("Back to profile", profile_path, class: "btn btn-primary") %>
   </div>
 <% end %>
