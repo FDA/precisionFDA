@@ -222,7 +222,7 @@ class ProfileController < ApplicationController
           phone: "(301) 706-1836"
         }
         auth.call(dxorg, "updateBillingInformation", {billingInformation: billing_info, autoConfirm: BILLING_CONFIRMATION})
-        auth.call("user", "new", {username: @suggested_username, email: @email, first: @first, last: @last, billTo: ORG_EVERYONE})
+        auth.call("user", "new", {username: @suggested_username, email: @email, first: @first_name, last: @last_name, billTo: ORG_EVERYONE})
         papi.call(dxorg, "invite", {invitee: dxuserid, level: 'ADMIN', suppressEmailNotification: true})
         papi.call(ORG_EVERYONE, "invite", {invitee: dxuserid, level: 'MEMBER', allowBillableActivities: false, appAccess: true, projectAccess: 'VIEW', suppressEmailNotification: true})
 
@@ -249,8 +249,8 @@ class ProfileController < ApplicationController
           user[:pending_jobs_count] = 0
           user[:open_assets_count] = 0
           user[:closing_assets_count] = 0
-          user[:first_name] = @first
-          user[:last_name] = @last
+          user[:first_name] = @first_name
+          user[:last_name] = @last_name
           user[:email] = @email
           user[:normalized_email] = @normalized_email
           u = User.create!(user)
