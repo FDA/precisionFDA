@@ -25,7 +25,6 @@ class Invitation < ActiveRecord::Base
   validates :first_name, :last_name, :email, :address, :phone, :req_reason, presence: true
   validates :singular, :research_intent, :clinical_intent, inclusion: [true, false]
   validates :org, presence: {message: "can't be blank unless you represent yourself"}, unless: :singular
-  validates :email, uniqueness: {case_sensitive: false, message: 'is already associated with an existing access request'}, on: :create
   validate :valid_email, on: :create
   require_human_on :create
   belongs_to :user
