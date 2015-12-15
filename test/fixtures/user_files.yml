@@ -26,7 +26,6 @@ one:
   state: MyString
   description: MyText
   user_id: 
-  public: false
   file_size: 1
 
 two:
@@ -36,5 +35,4 @@ two:
   state: MyString
   description: MyText
   user_id: 
-  public: false
   file_size: 1
