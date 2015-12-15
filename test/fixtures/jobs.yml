@@ -22,14 +22,12 @@
 
 one:
   dxid: MyString
-  series: MyString
+  app_series: MyString
   app_id: 
   project: MyString
-  spec: MyText
   run_data: MyText
   describe: MyText
   provenance: MyText
-  app_meta: MyText
   state: MyString
   name: MyString
   user_id: 
@@ -37,14 +35,12 @@ one:
 
 two:
   dxid: MyString
-  series: MyString
+  app_series: MyString
   app_id: 
   project: MyString
-  spec: MyText
   run_data: MyText
   describe: MyText
   provenance: MyText
-  app_meta: MyText
   state: MyString
   name: MyString
   user_id: 

@@ -1,9 +1,9 @@
 require 'test_helper'
 
 class ProfileControllerTest < ActionController::TestCase
-  test "should get index" do
+  test "index without auth should redirect to login url" do
     get :index
-    assert_response :success
+    assert_redirected_to login_url
   end
 
 end
