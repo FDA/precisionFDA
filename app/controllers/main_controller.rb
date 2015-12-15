@@ -49,6 +49,7 @@ class MainController < ApplicationController
         { logo: "participants/personalis.png", name: "Personalis"},
         { logo: "participants/roche.png", name: "Roche"},
         { logo: "participants/seracare.png", name: "Seracare"},
+        { logo: "participants/us-house-of-representatives.png", name: "US House of Representatives"},
         # individuals
         { logo: "participants/russ.altman.jpg", name: "Dr. Russ Altman", classes: "img-circle"},
         { logo: "participants/euan.ashley.jpg", name: "Dr. Euan Ashley", classes: "img-circle"},

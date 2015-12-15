@@ -47,7 +47,7 @@ class NotesController < ApplicationController
     end
   end
 
-  def new
+  def create
     # TODO: GET routes should not have side-effects; convert this to a POST
     @note = Note.create!(
       title: "Untitled Note (#{DateTime.now.strftime("%Y-%m-%d %H:%M:%S")})",
