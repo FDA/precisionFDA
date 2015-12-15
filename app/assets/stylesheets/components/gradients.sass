@@ -1,0 +1,31 @@
+@import "_common"
+
+@mixin gradient-horizontal($left, $right, $fallback)
+  background: $fallback /* fallback for old browsers */
+  background: -webkit-linear-gradient(to left, $right , $left) /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to left, $right , $left) /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+
+.gradient-moonrise
+  @include gradient-horizontal(#D6A4A4, #DAE2F8, #DAE2F8)
+
+.gradient-curiosity
+  @include gradient-horizontal(#859398, #283048, #283048)
+
+.gradient-endless-river
+  @include gradient-horizontal(#185a9d, #43cea2, #185a9d)
+
+.gradient-cloudy
+  @include gradient-horizontal(#ECE9E6, #FFFFFF, #ECE9E6)
+
+.gradient-blue-sky
+  @include gradient-horizontal($brand-blue-subtler, #FFFFFF, $brand-blue-subtler)
+
+.gradient-influenza
+  @include gradient-horizontal(#480048, #C04848, #C04848)
+
+.gradient-bluesky
+  @include gradient-horizontal($brand-blue-secondary, lighten($brand-blue-secondary, 10%), $brand-blue-secondary)
+
+.gradient-bluesky-dark
+  @include gradient-horizontal($brand-blue-dark, #143b5d, $brand-blue-dark)

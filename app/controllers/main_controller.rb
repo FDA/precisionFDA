@@ -7,12 +7,12 @@ class MainController < ApplicationController
   def index
     show_guidelines = false
     if @context.logged_in?
-      @notes_count = Note.where(user_id: @context.user_id).count
-      @files_count = UserFile.real_files.where(user_id: @context.user_id).count
-      @comparisons_count = Comparison.where(user_id: @context.user_id).count
-      @apps_count = App.where(user_id: @context.user_id).count
-      @jobs_count = Job.where(user_id: @context.user_id).count
-      @assets_count = Asset.where(user_id: @context.user_id).count
+      @notes_count = Note.editable_by(@context).count
+      @files_count = UserFile.real_files.editable_by(@context).count
+      @comparisons_count = Comparison.editable_by(@context).count
+      @apps_count = App.editable_by(@context).count
+      @jobs_count = Job.editable_by(@context).count
+      @assets_count = Asset.editable_by(@context).count
       User.transaction do
         user = User.find(@context.user_id)
         if !user.has_seen_guidelines
@@ -21,6 +21,40 @@ class MainController < ApplicationController
           show_guidelines = true
         end
       end
+    else
+      @participants = [
+        # orgs
+        { logo: "participants/23andme.png", name: "23andMe"},
+        { logo: "participants/aha.png", name: "American Heart Association"},
+        { logo: "participants/baylor.png", name: "Baylor College of Medicine"},
+        { logo: "participants/broad.png", name: "Broad Institute"},
+        { logo: "participants/cdc.png", name: "Centers for Disease Control and Prevention"},
+        # caredx?
+        # childrens health?
+        { logo: "participants/counsyl.png", name: "Counsyl"},
+        { logo: "participants/dnanexus.png", name: "DNAnexus"},
+        { logo: "participants/emory.png", name: "Emory Genetics Lab"},
+        # { logo: "participants/frontline.png", name: "Frontline Genomics"},
+        { logo: "participants/garvan.png", name: "Garvan"},
+        { logo: "participants/genedx.png", name: "GeneDx"},
+        { logo: "participants/humanlongevity.png", name: "Human Longevity Inc."},
+        { logo: "participants/illumina.png", name: "Illumina"},
+        { logo: "participants/intel.png", name: "Intel"},
+        # invitae
+        # labcorp
+        { logo: "participants/natera.png", name: "Natera"},
+        { logo: "participants/nist.png", name: "NIST"},
+        { logo: "participants/nih.png", name: "NIH"},
+        { logo: "participants/ostp.png", name: "White House Office of Science and Technology Policy"},
+        { logo: "participants/personalis.png", name: "Personalis"},
+        { logo: "participants/roche.png", name: "Roche"},
+        { logo: "participants/seracare.png", name: "Seracare"},
+        # individuals
+        { logo: "participants/russ.altman.jpg", name: "Dr. Russ Altman", classes: "img-circle"},
+        { logo: "participants/euan.ashley.jpg", name: "Dr. Euan Ashley", classes: "img-circle"},
+        { logo: "participants/hans.nelsen.jpg", name: "Hans Nelsen", classes: "img-circle"}
+      ]
+      @participants = @participants.shuffle
     end
 
     js show_guidelines: show_guidelines
