@@ -82,6 +82,10 @@
           <h5 class="list-group-item-heading">Orgs</h5>
           <p class="list-group-item-text"><%= Org.count %></p>
         </li>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Requests</h5>
+          <p class="list-group-item-text"><%= Invitation.count %></p>
+        </li>
       </ul>
       <%= link_to(content_tag(:span, "", class: "fa fa-plus") + " Provision new organization & admin", provision_org_path, method: 'post', class: 'btn btn-primary') %>
       <%= link_to(content_tag(:span, "", class: "fa fa-file-excel-o") + " Generate report", run_report_path, method: 'post', class: 'btn btn-default') %>
