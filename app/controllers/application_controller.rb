@@ -39,23 +39,31 @@ class ApplicationController < ActionController::Base
   end
 
   def require_api_login_or_guest
-    if !@context.logged_in_or_guest?
+    if @context.logged_in_or_guest?
+      if verify_authenticity_token
+        return
+      end
+    else
       process_authorization_header
-
-      if !@context.logged_in?
-        render status: :unauthorized, json: {failure: "Authentication failure"}
+      if @context.logged_in?
+        return
       end
     end
+    render status: :unauthorized, json: {failure: "Authentication failure"}
   end
 
   def require_api_login
-    if !@context.logged_in?
+    if @context.logged_in?
+      if verify_authenticity_token
+        return
+      end
+    else
       process_authorization_header
-
-      if !@context.logged_in?
-        render status: :unauthorized, json: {failure: "Authentication failure"}
+      if @context.logged_in?
+        return
       end
     end
+    render status: :unauthorized, json: {failure: "Authentication failure"}
   end
 
   def process_authorization_header
