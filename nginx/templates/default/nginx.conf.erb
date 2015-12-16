@@ -9,6 +9,9 @@ events {
 }
 
 http {
+  server {
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+  }
   include       <%= node[:nginx][:dir] %>/mime.types;
   default_type  application/octet-stream;
 
