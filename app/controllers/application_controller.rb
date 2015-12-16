@@ -40,7 +40,7 @@ class ApplicationController < ActionController::Base
 
   def require_api_login_or_guest
     if @context.logged_in_or_guest?
-      if verify_authenticity_token
+      if verified_request?
         return
       end
     else
@@ -54,7 +54,7 @@ class ApplicationController < ActionController::Base
 
   def require_api_login
     if @context.logged_in?
-      if verify_authenticity_token
+      if verified_request?
         return
       end
     else
