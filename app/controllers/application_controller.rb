@@ -11,7 +11,13 @@ class ApplicationController < ActionController::Base
 
   helper_method :pathify
 
+  rescue_from ActionView::MissingTemplate, with: :missing_template
+
   private
+
+  def missing_template
+    render nothing: true, status: 406
+  end
 
   def decode_context
     @context = Context.new(session[:user_id], session[:username], session[:token], session[:expiration], session[:org_id])
