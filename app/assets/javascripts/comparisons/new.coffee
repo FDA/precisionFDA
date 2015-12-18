@@ -99,9 +99,9 @@ class VariantInputModel
     @title = input.title
     @required = input.required ? true
     @file = ko.observable()
-    @dxid = ko.computed(=>
+    @uid = ko.computed(=>
       file = @file()
-      file.dxid if file?
+      file.uid if file?
     )
     @active = ko.computed(=>
       !_.isEmpty(@file())
@@ -109,8 +109,7 @@ class VariantInputModel
 
 class FileModel
   constructor: (file) ->
-    @id = file.id
-    @dxid = file.dxid
+    @uid = file.uid
     @name = file.name
 
 #########################################################
