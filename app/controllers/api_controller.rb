@@ -12,10 +12,9 @@ class ApiController < ApplicationController
   end
 
   def list_files
-    result = UserFile.real_files.accessible_by(@context).map do |file|
-      f = file.as_json
-      f["username"] = file.user["dxuser"]
-      f
+    result = []
+    UserFile.real_files.accessible_by(@context).find_each do |file|
+      result << {uid: file.uid, name: file.name}
     end
 
     render json: result
