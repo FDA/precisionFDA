@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-  <%= render "_partials/header" %>
+  <%= render "_partials/head" %>
 </head>
   <body class="pfda-controller-<%= controller_name %> pfda-action-<%= action_name %> <% if !@context.logged_in_or_guest? %>pfda-guest<% else %>pfda-user<% end %>" <%= yield(:body_attributes) %>>
   <header>
