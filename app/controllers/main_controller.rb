@@ -29,19 +29,14 @@ class MainController < ApplicationController
         { logo: "participants/baylor.png", name: "Baylor College of Medicine"},
         { logo: "participants/broad.png", name: "Broad Institute"},
         { logo: "participants/cdc.png", name: "Centers for Disease Control and Prevention"},
-        # caredx?
-        # childrens health?
         { logo: "participants/counsyl.png", name: "Counsyl"},
         { logo: "participants/dnanexus.png", name: "DNAnexus"},
         { logo: "participants/emory.png", name: "Emory Genetics Lab"},
-        # { logo: "participants/frontline.png", name: "Frontline Genomics"},
         { logo: "participants/garvan.png", name: "Garvan"},
         { logo: "participants/genedx.png", name: "GeneDx"},
         { logo: "participants/humanlongevity.png", name: "Human Longevity Inc."},
         { logo: "participants/illumina.png", name: "Illumina"},
         { logo: "participants/intel.png", name: "Intel"},
-        # invitae
-        # labcorp
         { logo: "participants/natera.png", name: "Natera"},
         { logo: "participants/nist.png", name: "NIST"},
         { logo: "participants/nih.png", name: "NIH"},
@@ -53,7 +48,9 @@ class MainController < ApplicationController
         # individuals
         { logo: "participants/russ.altman.jpg", name: "Dr. Russ Altman", classes: "img-circle"},
         { logo: "participants/euan.ashley.jpg", name: "Dr. Euan Ashley", classes: "img-circle"},
-        { logo: "participants/hans.nelsen.jpg", name: "Hans Nelsen", classes: "img-circle"}
+        { logo: "participants/hans.nelsen.jpg", name: "Hans Nelsen", classes: "img-circle"},
+        { logo: "participants/dennis.wall.jpg", name: "Dr. Dennis P. Wall", classes: "img-circle"},
+        { logo: "participants/peter.tonellato.jpg", name: "Dr. Peter Tonellato", classes: "img-circle"}
       ]
       @participants = @participants.shuffle
     end
