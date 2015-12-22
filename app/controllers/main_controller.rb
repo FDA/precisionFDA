@@ -49,8 +49,9 @@ class MainController < ApplicationController
         { logo: "participants/russ.altman.jpg", name: "Dr. Russ Altman", classes: "img-circle"},
         { logo: "participants/euan.ashley.jpg", name: "Dr. Euan Ashley", classes: "img-circle"},
         { logo: "participants/hans.nelsen.jpg", name: "Hans Nelsen", classes: "img-circle"},
+        { logo: "participants/snehit.prabhu.jpg", name: "Dr. Snehit Prabhu", classes: "img-circle"},
         { logo: "participants/dennis.wall.jpg", name: "Dr. Dennis P. Wall", classes: "img-circle"},
-        { logo: "participants/peter.tonellato.jpg", name: "Dr. Peter Tonellato", classes: "img-circle"}
+        { logo: "participants/peter.tonellato.jpg", name: "Dr. Peter Tonellato", classes: "img-circle"},
       ]
       @participants = @participants.shuffle
     end
