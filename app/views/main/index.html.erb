@@ -118,7 +118,9 @@
           </div>
           <div class="pfda-card-footer pull-right">
             <a class="btn btn-link" href="about/how/#notes">Learn</a>
-            <a class="btn btn-primary" href="<%= new_note_path %>">Create <%= 'first' if !tutorial_complete?(@notes_count) %> note</a>
+            <%= link_to notes_path(), class: 'btn btn-primary', method: :post, data: {disable_with: "Creating Note..."} do %>
+              Create <%= 'first' if !tutorial_complete?(@notes_count) %> note
+            <% end %>
           </div>
         </div>
 
