@@ -96,7 +96,6 @@ class User < ActiveRecord::Base
     return if context.guest?
     user_id = context.user_id
     token = context.token
-    # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)
       file = user.uploaded_files.find(file_id) # Re-check file id
@@ -111,7 +110,6 @@ class User < ActiveRecord::Base
     return if context.guest?
     user_id = context.user_id
     token = context.token
-    # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)
       if (user.open_files_count != 0) || (user.closing_files_count != 0)
@@ -129,7 +127,6 @@ class User < ActiveRecord::Base
     return if context.guest?
     user_id = context.user_id
     token = context.token
-    # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)
       file = user.assets.find(file_id) # Re-check file id
@@ -144,7 +141,6 @@ class User < ActiveRecord::Base
     return if context.guest?
     user_id = context.user_id
     token = context.token
-    # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)
       if (user.open_assets_count != 0) || (user.closing_assets_count != 0)
@@ -162,7 +158,6 @@ class User < ActiveRecord::Base
     return if context.guest?
     user_id = context.user_id
     token = context.token
-    # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)
       comparison = user.comparisons.find(comparison_id) # Re-check comparison id
@@ -184,7 +179,6 @@ class User < ActiveRecord::Base
     return if context.guest?
     user_id = context.user_id
     token = context.token
-    # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)
       if user.pending_comparisons_count != 0
@@ -210,7 +204,6 @@ class User < ActiveRecord::Base
     return if context.guest?
     user_id = context.user_id
     token = context.token
-    # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)
       job = user.jobs.find(job_id) # Re-check job id
@@ -232,7 +225,6 @@ class User < ActiveRecord::Base
     return if context.guest?
     user_id = context.user_id
     token = context.token
-    # TODO: Loop until transaction succeeds
     User.transaction do
       user = User.find(user_id)
       if user.pending_jobs_count != 0
@@ -269,14 +261,14 @@ class User < ActiveRecord::Base
     elsif result["describe"].present?
       state = result["describe"]["state"]
       if state != file.state
-        # TODO the following should never fail
+        # NOTE the following should never fail
         raise unless ((state == "closed") && (file.state == "closing"))
         file.update!(state: state, file_size: result["describe"]["size"])
         user.closing_files_count = user.closing_files_count - 1
         user.save!
       end
     else
-      # TODO we should never be here
+      # NOTE we should never be here
       raise
     end
   end
@@ -294,14 +286,14 @@ class User < ActiveRecord::Base
     elsif result["describe"].present?
       state = result["describe"]["state"]
       if state != file.state
-        # TODO the following should never fail
+        # NOTE the following should never fail
         raise unless ((state == "closed") && (file.state == "closing"))
         file.update!(state: state, file_size: result["describe"]["size"])
         user.closing_assets_count = user.closing_assets_count - 1
         user.save!
       end
     else
-      # TODO we should never be here
+      # NOTE we should never be here
       raise
     end
   end
@@ -350,7 +342,7 @@ class User < ActiveRecord::Base
         output = result["describe"]["output"]
         output_file_ids = []
         output.each_key do |key|
-          #TODO handle arrays later
+          # TODO handle arrays later
           raise if output[key].is_a?(Array)
           if output[key].is_a?(Hash)
             raise unless output[key].has_key?("$dnanexus_link")
