@@ -16,11 +16,9 @@
 one:
   title: MyString
   content: MyText
-  public: false
   user_id: 
 
 two:
   title: MyString
   content: MyText
-  public: false
   user_id: 

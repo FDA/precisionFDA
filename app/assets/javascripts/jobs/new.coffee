@@ -147,13 +147,13 @@ class InputModel
             switch @klass
               when 'int'
                 data = parseInt(data, 10)
-                if _data != data.toString()
+                if _.isString(_data) && _data != data.toString()
                   @error("#{_data} is not a valid integer")
                 else
                   @error(null)
               when 'float'
                 data = parseFloat(data)
-                if _data != data.toString()
+                if _.isString(_data) && _data != data.toString()
                   @error("#{_data} is not a valid integer")
                 else
                   @error(null)
@@ -171,18 +171,18 @@ class InputModel
           switch @klass
             when 'int'
               value = parseInt(value, 10)
-              if _value != value.toString()
+              if _.isString(_value) && _value != value.toString()
                 @error("#{_value} is not a valid integer")
               else
                 @error(null)
             when 'float'
               value = parseFloat(value)
-              if _value != value.toString()
+              if _.isString(_value) && _value != value.toString()
                 @error("#{_value} is not a valid float")
               else
                 @error(null)
             when 'file'
-              value = value.dxid
+              value = value.uid
             else
               value
       catch error
@@ -234,9 +234,9 @@ class FileSelector
       if value?
         files = @files.peek()
         if !_.isArray(value)
-          foundValue = _.find(files, (file) -> file.dxid == value.dxid)
+          foundValue = _.find(files, (file) -> file.uid == value.uid)
         else
-          foundValue = _.map(value, (v) -> _.find(files, (file) -> file.dxid == v.dxid))
+          foundValue = _.map(value, (v) -> _.find(files, (file) -> file.uid == v.uid))
         @selected(foundValue)
     )
     @modal.modal('show')
@@ -248,10 +248,8 @@ class FileSelector
 
 class FileModel
   constructor: (file, @selectorModel) ->
-    @id = file.id
-    @dxid = file.dxid
+    @uid = file.uid
     @name = file.name
-    @project = file.project
     @type = @selectorModel.type()
 
   onSelect: () =>
