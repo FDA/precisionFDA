@@ -30,7 +30,7 @@
 
 one:
   id: 
-  dxuser: MyString
+  dxuser: UserOne
   private_files_project: MyString
   public_files_project: MyString
   private_comparisons_project: MyString
@@ -40,7 +40,7 @@ one:
   pending_comparisons_count: 1
 
 two:
-  id: 
+  id: UserTwo
   dxuser: MyString
   private_files_project: MyString
   public_files_project: MyString

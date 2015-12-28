@@ -108,12 +108,12 @@ class ComparisonsController < ApplicationController
     param! :comparison, Hash do |c|
       c.param! :name, String, {required: true}
       c.param! :description, String, {default: ""}
-      c.param! :test_vcf_dxid, String, {required: true}
-      c.param! :test_tbi_dxid, String, {required: true}
-      c.param! :test_bed_dxid, String
-      c.param! :ref_vcf_dxid, String, {required: true}
-      c.param! :ref_tbi_dxid, String, {required: true}
-      c.param! :ref_bed_dxid, String
+      c.param! :test_vcf_uid, String, {required: true}
+      c.param! :test_tbi_uid, String, {required: true}
+      c.param! :test_bed_uid, String
+      c.param! :ref_vcf_uid, String, {required: true}
+      c.param! :ref_tbi_uid, String, {required: true}
+      c.param! :ref_bed_uid, String
     end
 
     comp_params = params[:comparison]
@@ -123,12 +123,12 @@ class ComparisonsController < ApplicationController
     files = {}
     # Required files
     ["test_vcf", "test_tbi", "ref_vcf", "ref_tbi"].each do |role|
-      files[role] = UserFile.real_files.accessible_by(@context).find_by!(dxid: comp_params["#{role}_dxid"])
+      files[role] = UserFile.real_files.accessible_by(@context).find_by!(dxid: comp_params["#{role}_uid"])
     end
     # Optional files
     ["test_bed", "ref_bed"].each do |role|
-      if comp_params["#{role}_dxid"].present?
-        files[role] = UserFile.real_files.accessible_by(@context).find_by!(dxid: comp_params["#{role}_dxid"])
+      if comp_params["#{role}_uid"].present?
+        files[role] = UserFile.real_files.accessible_by(@context).find_by!(dxid: comp_params["#{role}_uid"])
       end
     end
 
@@ -136,7 +136,7 @@ class ComparisonsController < ApplicationController
     run_input = {
       name: comp_params[:name],
       project: project,
-      input: Hash[files.map {|k,v| [k, {"$dnanexus_link": {project: v.project, id: v.dxid}}]}]
+      input: Hash[files.map {|k,v| [k, {"$dnanexus_link": {project: v.project, id: v.uid}}]}]
     }
     jobid = DNAnexusAPI.new(@context.token).call(DEFAULT_COMPARISON_APP, "run", run_input)["id"]
 

@@ -51,7 +51,9 @@
 <% else %>
   <ul class="nav navbar-nav navbar-right">
     <li>
-      <a class="btn accessible-btn-link btn-lg" href="<%= login_path %>"><span class="fa fa-fw fa-sign-in" aria-hidden="true"></span> Log in</a>
+      <%= link_to login_path, class: "btn accessible-btn-link btn-lg", data: {no_turbolink: true} do %>
+        <span class="fa fa-fw fa-sign-in" aria-hidden="true"></span> Log in
+      <% end %>
     </li>
   </ul>
 <% end %>

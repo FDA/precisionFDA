@@ -21,7 +21,6 @@ one:
   name: MyString
   description: MyText
   user_id: 
-  public: false
   state: MyString
   meta: MyText
 
@@ -29,6 +28,5 @@ two:
   name: MyString
   description: MyText
   user_id: 
-  public: false
   state: MyString
   meta: MyText

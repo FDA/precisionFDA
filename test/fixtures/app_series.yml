@@ -18,15 +18,14 @@
 one:
   dxid: MyString
   name: MyString
-  latest_revision_app_id_id: 
-  latest_version_app_id_id: 
-  user_id_id: 
+  latest_version_app_id:
+  user_id:
   scope: MyString
 
 two:
   dxid: MyString
   name: MyString
-  latest_revision_app_id_id: 
-  latest_version_app_id_id: 
-  user_id_id: 
+  latest_revision_app_id: 
+  latest_version_app_id: 
+  user_id: 
   scope: MyString

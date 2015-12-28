@@ -21,12 +21,8 @@
 
 one:
   dxid: MyString
-  series: MyString
-  project: MyString
+  app_series: MyString
   version: MyString
-  is_latest: false
-  is_applet: false
-  name: MyString
   title: MyString
   readme: MyText
   user_id: 
@@ -36,12 +32,8 @@ one:
 
 two:
   dxid: MyString
-  series: MyString
-  project: MyString
+  app_series: MyString
   version: MyString
-  is_latest: false
-  is_applet: false
-  name: MyString
   title: MyString
   readme: MyText
   user_id: 
