@@ -45,11 +45,25 @@ table[data-sortable] th[data-sorted="true"]:after {
 }
 /* line 43, ../sass/_sortable.sass */
 table[data-sortable] th[data-sorted-direction="descending"]:after {
-  border-top-color: black;
+  border-top-color: inherit;
   margin-top: 8px;
 }
 /* line 47, ../sass/_sortable.sass */
 table[data-sortable] th[data-sorted-direction="ascending"]:after {
-  border-bottom-color: black;
+  border-bottom-color: inherit;
   margin-top: 3px;
+}
+
+/* line 5, ../sass/sortable-theme-light.sass */
+table[data-sortable].sortable-theme-light {
+  color: #333333;
+  background: #f2f2f2;
+}
+/* line 9, ../sass/sortable-theme-light.sass */
+table[data-sortable].sortable-theme-light tbody td {
+  border-top: 1px solid #e0e0e0;
+}
+/* line 12, ../sass/sortable-theme-light.sass */
+table[data-sortable].sortable-theme-light th[data-sorted="true"] {
+  background: #e0e0e0;
 }
