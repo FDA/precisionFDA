@@ -1,4 +1,34 @@
 class ApplicationController < ActionController::Base
+  # Secure headers
+  SecureHeaders::Configuration.default do |config|
+    config.hsts = "max-age=#{20.years.to_i}"
+    config.x_frame_options = "DENY"
+    config.x_content_type_options = "nosniff"
+    config.x_xss_protection = "1; mode=block"
+    config.x_download_options = "noopen"
+    config.x_permitted_cross_domain_policies = "none"
+    config.csp = {
+      base_uri: %w('self'),
+      block_all_mixed_content: true, # see [http://www.w3.org/TR/mixed-content/](http://www.w3.org/TR/mixed-content/)
+      child_src: %w('self' https://www.youtube.com blob:),
+      connect_src: %w('self' https://s3.amazonaws.com/dnanexus-platform-upload-stg/ https://s3.amazonaws.com/dnanexus-platform-upload-prod/ https://stagingdl.dnanex.us https://dl.dnanex.us https://api.dnanexus.com),
+      default_src: %w(https: 'self'),
+      font_src: %w('self' https://fonts.gstatic.com https://cdnjs.cloudflare.com/ajax/libs/font-awesome/),
+      form_action: %w('self'),
+      frame_ancestors: %w('none'),
+      frame_src: %w(https://www.youtube.com),
+      img_src: %w(* data:),
+      media_src: %w('self'),
+      object_src: %w('self'),
+      plugin_types: %w(application/x-shockwave-flash),
+      script_src: %w('self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://cdnjs.cloudflare.com https://www.youtube.com https://s.ytimg.com https://dnanexus.github.io),
+      style_src: %w('self' 'unsafe-inline' https://fonts.googleapis.com https://dnanexus.github.io https://cdnjs.cloudflare.com/ajax/libs/font-awesome/),
+      report_only: true,
+      report_uri: %w(https://report-uri.io/report/dc95b34a080e9c95bbce7c3e6aed6234)
+    }
+
+  end
+
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
