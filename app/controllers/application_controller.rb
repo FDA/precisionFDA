@@ -11,10 +11,10 @@ class ApplicationController < ActionController::Base
       base_uri: %w('self'),
       block_all_mixed_content: true, # see [http://www.w3.org/TR/mixed-content/](http://www.w3.org/TR/mixed-content/)
       child_src: %w('self' https://www.youtube.com blob:),
-      connect_src: %w('self' https://s3.amazonaws.com/dnanexus-platform-upload-stg/ https://s3.amazonaws.com/dnanexus-platform-upload-prod/ https://stagingdl.dnanex.us https://dl.dnanex.us https://api.dnanexus.com),
+      connect_src: %w('self' https://s3.amazonaws.com https://stagingdl.dnanex.us https://dl.dnanex.us https://api.dnanexus.com),
       default_src: %w(https: 'self'),
-      font_src: %w('self' https://fonts.gstatic.com https://cdnjs.cloudflare.com/ajax/libs/font-awesome/),
-      form_action: %w('self'),
+      font_src: %w('self' https://fonts.gstatic.com https://cdnjs.cloudflare.com),
+      form_action: %w('self' https://stagingdl.dnanex.us https://dl.dnanex.us),
       frame_ancestors: %w('none'),
       frame_src: %w(https://www.youtube.com),
       img_src: %w(* data:),
@@ -22,7 +22,7 @@ class ApplicationController < ActionController::Base
       object_src: %w('self'),
       plugin_types: %w(application/x-shockwave-flash),
       script_src: %w('self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://cdnjs.cloudflare.com https://www.youtube.com https://s.ytimg.com https://dnanexus.github.io),
-      style_src: %w('self' 'unsafe-inline' https://fonts.googleapis.com https://dnanexus.github.io https://cdnjs.cloudflare.com/ajax/libs/font-awesome/),
+      style_src: %w('self' 'unsafe-inline' https://fonts.googleapis.com https://dnanexus.github.io https://cdnjs.cloudflare.com),
       report_only: true,
       report_uri: %w(https://report-uri.io/report/dc95b34a080e9c95bbce7c3e6aed6234)
     }
