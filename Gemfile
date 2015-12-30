@@ -53,6 +53,9 @@ gem "humanizer"
 # Excel spreadsheet generation
 gem 'axlsx'
 
+# Secure headers
+gem 'secure_headers', '>= 3.0.0.pre2'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
