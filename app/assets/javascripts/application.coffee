@@ -29,6 +29,7 @@
 #= require wice_grid
 #= require remarkable
 #= require SparkMD5
+#= require sortable/js/sortable
 #= require paloma
 #= require knockout-ace/knockout-ace
 #= require mousetrap/mousetrap.min

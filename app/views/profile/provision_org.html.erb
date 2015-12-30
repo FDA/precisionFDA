@@ -10,7 +10,7 @@
   <%= form_tag(provision_org_path, method: 'post', class: "form container-padded") do -%>
     <%= button_tag(content_tag(:span, "", class: "fa fa-forward") + " Next", class: "btn btn-primary") %>
     <%= hidden_field_tag("state", @state) %>
-    <table class="table table-hover">
+    <table class="table table-hover sortable-theme-minimal" data-sortable>
       <thead>
         <tr>
           <th>Select</th>
