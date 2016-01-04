@@ -35,7 +35,6 @@
 <ul class="nav navbar-nav navbar-right">
   <li>
     <a href="mailto:precisionfda@fda.hhs.gov"><span class="fa fa-fw fa-commenting-o"></span> Feedback</a>
-    <a class="hide" href="https://docs.google.com/forms/d/1zfGoy-4C9kLbHHg0Y-6iQoI3fdGq1IfugV9fXCqOBfY/viewform?entry.2135861629=#{@context.username}&entry.864840924" target="_blank"><span class="fa fa-fw fa-commenting-o"></span> Feedback</a>
   </li>
   <li><a href="<%= guidelines_path %>"><span class="fa fa-fw fa-institution"></span> Guidelines</a></li>
   <li><a href="<%= about_path %>/how"><span class="fa fa-fw fa-book"></span> Docs</a></li>
@@ -44,7 +43,7 @@
     <ul class="dropdown-menu">
       <li><%= link_to "Profile", profile_path %></li>
       <li role="separator" class="divider"></li>
-      <li><%= link_to "Log out", logout_path, method: :delete %></li>
+      <li><%= link_to "Log out", logout_path, method: :delete, data: {no_turbolink: true} %></li>
     </ul>
   </li>
 </ul>
