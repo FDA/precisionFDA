@@ -74,7 +74,7 @@ class User < ActiveRecord::Base
 
   def can_administer_site?
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
-      dxuser == "elaine.johanson"
+      dxuser == "elaine.johanson" || dxuser == "ruth.bandler"
     else
       org.handle == "precisionfda"
     end
