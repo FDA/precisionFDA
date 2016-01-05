@@ -31,6 +31,14 @@
 #= require SparkMD5
 #= require sortable/js/sortable
 #= require paloma
+#= require ace-builds/src-min-noconflict/ace
+#= require ace-builds/src-min-noconflict/theme-monokai
+#= require ace-builds/src-min-noconflict/theme-textmate
+#= require ace-builds/src-min-noconflict/mode-sh
+#= require ace-builds/src-min-noconflict/mode-markdown
+#= require ace-builds/src-min-noconflict/ext-language_tools
+#= require ace-builds/src-min-noconflict/snippets/sh
+#= require ace-builds/src-min-noconflict/snippets/markdown
 #= require knockout-ace/knockout-ace
 #= require mousetrap/mousetrap.min
 #= require mousetrap/mousetrap-global-bind.min
