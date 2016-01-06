@@ -26,7 +26,7 @@ class FileModel
     @dataUploaded = ko.observable(0)
     @progressPercentFormatted = ko.computed(=>
       if file.size == 0
-        if @dataUploaded() == file.size() then "100%" else 0
+        if @dataUploaded() == file.size then "100%" else 0
       else
         "#{@dataUploaded()/file.size * 100}%"
     )
