@@ -21,7 +21,7 @@ class NotificationsMailer < ApplicationMailer
     @invitation = invitation
 
     mail to: @invitation.email,
-         from: 'precisionFDA <PrecisionFDA@fda.hhs.gov>',
+         from: 'PrecisionFDA <PrecisionFDA@fda.hhs.gov>',
          bcc: "precisionfda-support@dnanexus.com",
          reply_to: "PrecisionFDA@fda.hhs.gov",
          subject: "Your precisionFDA access request"
