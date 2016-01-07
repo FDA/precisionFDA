@@ -118,8 +118,6 @@ class ComparisonsController < ApplicationController
 
     comp_params = params[:comparison]
 
-    # TODO: Decide what happens for files not in "closed" state
-
     files = {}
     # Required files
     ["test_vcf", "test_tbi", "ref_vcf", "ref_tbi"].each do |role|

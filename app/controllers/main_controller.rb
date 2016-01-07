@@ -94,7 +94,6 @@ class MainController < ApplicationController
 
   def return_from_login
     # Ensure we were sent here from DNAnexus
-    # TODO: Add referrer check
     raise unless params[:code].present? && params[:code].is_a?(String)
 
     # Exchange the code for a token

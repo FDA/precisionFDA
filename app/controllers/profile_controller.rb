@@ -224,6 +224,7 @@ class ProfileController < ApplicationController
         auth.call(dxorg, "updateBillingInformation", {billingInformation: billing_info, autoConfirm: BILLING_CONFIRMATION})
         auth.call("user", "new", {username: @suggested_username, email: @email, first: @first_name, last: @last_name, billTo: ORG_EVERYONE})
         papi.call(dxorg, "invite", {invitee: dxuserid, level: 'ADMIN', suppressEmailNotification: true})
+        papi.call(dxorg, "removeMember", {user: "user-precisionfda.admin"})
         papi.call(ORG_EVERYONE, "invite", {invitee: dxuserid, level: 'MEMBER', allowBillableActivities: false, appAccess: true, projectAccess: 'VIEW', suppressEmailNotification: true})
 
         o = nil
@@ -320,4 +321,3 @@ private
   end
 
 end
-
