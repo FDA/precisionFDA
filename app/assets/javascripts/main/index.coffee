@@ -31,19 +31,20 @@ MainController = Paloma.controller('Main')
 MainController::index = ->
   $container = $("body main")
 
-  # Load the IFrame Player API code asynchronously.
-  tag = document.createElement('script')
+  if $('body.pfda-guest').length > 0
+    # Load the IFrame Player API code asynchronously.
+    tag = document.createElement('script')
 
-  tag.src = 'https://www.youtube.com/player_api'
-  firstScriptTag = document.getElementsByTagName('script')[0]
-  firstScriptTag.parentNode.insertBefore tag, firstScriptTag
-  # Replace the 'ytplayer' element with an <iframe> and
-  # YouTube player after the API code downloads.
+    tag.src = 'https://www.youtube.com/player_api'
+    firstScriptTag = document.getElementsByTagName('script')[0]
+    firstScriptTag.parentNode.insertBefore tag, firstScriptTag
+    # Replace the 'ytplayer' element with an <iframe> and
+    # YouTube player after the API code downloads.
 
-  $container.on("click", ".btn-player", (e) ->
-    Precision.player.playVideo()
-    $(e.target).closest(".btn-player-wrapper").addClass("player-playing")
-  )
+    $container.on("click", ".btn-player", (e) ->
+      Precision.player.playVideo()
+      $(e.target).closest(".btn-player-wrapper").addClass("player-playing")
+    )
 
   $tooltips = $container.find("[data-toggle='tooltip']")
   if $tooltips.length > 0

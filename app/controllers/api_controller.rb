@@ -1,6 +1,4 @@
 class ApiController < ApplicationController
-  # TODO change all of this when this API will be called from the command-line.
-  # For now don't skip the :require_login middleware, since this API is called from the web.
   skip_before_action :verify_authenticity_token
   skip_before_action :require_login
   before_action :require_api_login, except: [:list_assets, :describe_asset, :search_assets, :list_notes]
@@ -265,8 +263,6 @@ class ApiController < ApplicationController
 
       if klass == "file"
         raise unless value.is_a?(String)
-        # TODO decide if we will allow ComparisonOutput files to partake as inputs
-        # ie if we need .real_files scope below
         raise unless UserFile.real_files.accessible_by(@context).where(dxid: value).exists?
         dxvalue = {"$dnanexus_link" => value}
         input_file_dxids << value
@@ -293,11 +289,11 @@ class ApiController < ApplicationController
 
     project = User.find(@context.user_id).private_files_project
 
-    # TODO: Timeout policy
     api_input = {
       name: name,
       input: dx_run_input,
-      project: project
+      project: project,
+      timeoutPolicyByExecutable: {@app.dxid => {"*" => {"days" => 2}}}
     }
     if run_instance_type.present?
       api_input[:systemRequirements] = {main: {instanceType: Job::INSTANCE_TYPES[run_instance_type]}}
@@ -638,7 +634,7 @@ class ApiController < ApplicationController
 
   # Inputs
   #
-  # TODO: only show notes that haven't been attached to an item
+  # -
   #
   # Outputs:
   #
