@@ -1,0 +1,19 @@
+/var/log/nginx/*.log {
+        daily
+        missingok
+        rotate 52
+        compress
+        delaycompress
+        notifempty
+        create 0640 www-data adm
+        sharedscripts
+        prerotate
+                if [ -d /etc/logrotate.d/httpd-prerotate ]; then \
+                        run-parts /etc/logrotate.d/httpd-prerotate; \
+                fi \
+        endscript
+        postrotate
+                [ -s /run/nginx.pid ] && kill -USR1 `cat /run/nginx.pid`
+                AWS_ACCESS_KEY_ID=<%= node[:logrotate][:postrotate][:aws_access_key_id] %> AWS_SECRET_ACCESS_KEY=<%= node[:logrotate][:postrotate][:aws_secret_access_key] %> aws s3 sync /var/log/nginx/ s3://<%= node[:logrotate][:postrotate][:log_bucket] %>/$(curl --silent http://169.254.169.254/latest/meta-data/instance-id)/ --region us-east-1 --exclude "*" --include "*.log*.gz"
+        endscript
+}
