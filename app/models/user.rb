@@ -44,9 +44,22 @@ class User < ActiveRecord::Base
   has_many :apps
   has_many :app_series
   has_many :jobs
+  has_many :discussions
+  has_many :answers
   belongs_to :org
 
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
+
+  include Gravtastic
+  gravtastic :secure => true, :default => "identicon"
+
+  acts_as_voter
+  acts_as_followable
+  acts_as_follower
+
+  def uid
+    "user-#{id}"
+  end
 
   def klass
     "user"
@@ -70,6 +83,10 @@ class User < ActiveRecord::Base
 
   def full_name
     "#{first_name} #{last_name}"
+  end
+
+  def initials
+    "#{first_name[0]}#{last_name[0]}"
   end
 
   def can_administer_site?

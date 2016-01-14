@@ -15,6 +15,7 @@
 #  parent_id   :integer
 #  parent_type :string
 #  scope       :string
+#  license     :text
 #
 
 #

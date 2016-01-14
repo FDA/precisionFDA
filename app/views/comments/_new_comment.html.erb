@@ -1,0 +1,9 @@
+<%= form_for :comment, url: url, html: {class: 'form form-horizontal'} do |f| %>
+  <%= render "_partials/form_errors", object: object %>
+  <div class="form-group">
+    <%= f.text_area :body, class: "form-control", rows: 5, placeholder: "Comment..." %>
+  </div>
+  <div class="form-group">
+    <%= f.submit "Comment", class: 'btn btn-primary', data: {disable_with: "Commenting..."} %>
+  </div>
+<% end %>

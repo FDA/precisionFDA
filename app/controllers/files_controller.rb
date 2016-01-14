@@ -72,8 +72,8 @@ class FilesController < ApplicationController
       @comparison = @file.parent
     end
 
-    @notes = @file.notes.accessible_by(@context).order(id: :desc)
-
+    @notes = @file.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
+    @answers = @file.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
     js id: @file.id
   end
 
