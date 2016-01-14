@@ -69,7 +69,9 @@ class ComparisonsController < ApplicationController
       order_direction: 'asc'
     })
 
-    @notes = @comparison.notes.accessible_by(@context).order(id: :desc)
+    @notes = @comparison.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
+    @answers = @comparison.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
+
 
     js id: @comparison.id, meta: @meta, state: @comparison.state
   end

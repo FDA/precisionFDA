@@ -195,7 +195,7 @@ class MainController < ApplicationController
     end
 
     if request.post?
-      save_session(-1, "Guest-#{@invitation.id}", "INVALID", @invitation.expires_at.to_i, -1)
+      save_session(-1, "Guest-#{@invitation.id}", "INVALID", @invitation.expires_at.to_i, -1, nil)
       AUDIT_LOGGER.info("Browse access granted for #{@invitation.email} (id #{@invitation.id})")
       redirect_to root_path
     end
@@ -224,6 +224,12 @@ class MainController < ApplicationController
 
       # Notes
       notes = items.select { |item| item.klass == "note" }
+
+      # Discussions
+      discussions = items.select { |item| item.klass == "discussion" }
+
+      # Answers
+      answers = items.select { |item| item.klass == "answer" }
 
       # Jobs
       jobs = items.select { |item| item.klass == "job" }
@@ -323,6 +329,26 @@ class MainController < ApplicationController
         end
       end
 
+      # Discussions
+      if discussions.size > 0
+        Discussion.transaction do
+          discussions.each do |discussion|
+            discussion.reload
+            discussion.note.update!(scope: 'public')
+          end
+        end
+      end
+
+      # Answers
+      if answers.size > 0
+        Answer.transaction do
+          answers.each do |answer|
+            answer.reload
+            answer.note.update!(scope: 'public')
+          end
+        end
+      end
+
       flash[:success] = "Your #{uids.size > 1 ? 'items have' : 'item has'} been published."
       redirect_to pathify(item_from_uid(id))
       return
@@ -373,7 +399,12 @@ class MainController < ApplicationController
     klass = root.klass
     if klass == "asset"
       klass = "file"
+    elsif klass == "answer"
+      klass = "note"
+    elsif klass == "discussion"
+      klass = "note"
     end
+
     self.send("get_subgraph_of_#{klass}", root)
   end
 

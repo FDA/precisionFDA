@@ -11,7 +11,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151213040641) do
+ActiveRecord::Schema.define(version: 20160209214447) do
+
+  create_table "accepted_licenses", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "asset_id"
+  end
+
+  add_index "accepted_licenses", ["asset_id"], name: "index_accepted_licenses_on_asset_id"
+  add_index "accepted_licenses", ["user_id"], name: "index_accepted_licenses_on_user_id"
+
+  create_table "answers", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "discussion_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+    t.integer  "note_id"
+  end
+
+  add_index "answers", ["discussion_id"], name: "index_answers_on_discussion_id"
+  add_index "answers", ["note_id"], name: "index_answers_on_note_id"
+  add_index "answers", ["user_id"], name: "index_answers_on_user_id"
 
   create_table "app_series", force: :cascade do |t|
     t.string   "dxid"
@@ -77,6 +97,23 @@ ActiveRecord::Schema.define(version: 20151213040641) do
   add_index "attachments", ["item_type", "item_id"], name: "index_attachments_on_item_type_and_item_id"
   add_index "attachments", ["note_id"], name: "index_attachments_on_note_id"
 
+  create_table "comments", force: :cascade do |t|
+    t.integer  "commentable_id"
+    t.string   "commentable_type"
+    t.string   "title"
+    t.text     "body"
+    t.string   "subject"
+    t.integer  "user_id",          null: false
+    t.integer  "parent_id"
+    t.integer  "lft"
+    t.integer  "rgt"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "comments", ["commentable_id", "commentable_type"], name: "index_comments_on_commentable_id_and_commentable_type"
+  add_index "comments", ["user_id"], name: "index_comments_on_user_id"
+
   create_table "comparison_inputs", force: :cascade do |t|
     t.integer "comparison_id"
     t.integer "user_file_id"
@@ -102,6 +139,29 @@ ActiveRecord::Schema.define(version: 20151213040641) do
   add_index "comparisons", ["scope"], name: "index_comparisons_on_scope"
   add_index "comparisons", ["state"], name: "index_comparisons_on_state"
   add_index "comparisons", ["user_id"], name: "index_comparisons_on_user_id"
+
+  create_table "discussions", force: :cascade do |t|
+    t.integer  "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer  "note_id"
+  end
+
+  add_index "discussions", ["note_id"], name: "index_discussions_on_note_id"
+  add_index "discussions", ["user_id"], name: "index_discussions_on_user_id"
+
+  create_table "follows", force: :cascade do |t|
+    t.integer  "followable_id",                   null: false
+    t.string   "followable_type",                 null: false
+    t.integer  "follower_id",                     null: false
+    t.string   "follower_type",                   null: false
+    t.boolean  "blocked",         default: false, null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "follows", ["followable_id", "followable_type"], name: "fk_followables"
+  add_index "follows", ["follower_id", "follower_type"], name: "fk_follows"
 
   create_table "invitations", force: :cascade do |t|
     t.string   "first_name"
@@ -164,6 +224,7 @@ ActiveRecord::Schema.define(version: 20151213040641) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string   "scope"
+    t.string   "note_type"
   end
 
   add_index "notes", ["scope"], name: "index_notes_on_scope"
@@ -198,6 +259,7 @@ ActiveRecord::Schema.define(version: 20151213040641) do
     t.integer  "parent_id"
     t.string   "parent_type"
     t.string   "scope"
+    t.text     "license"
   end
 
   add_index "user_files", ["parent_type", "parent_id"], name: "index_user_files_on_parent_type_and_parent_id"
@@ -232,5 +294,20 @@ ActiveRecord::Schema.define(version: 20151213040641) do
   add_index "users", ["dxuser"], name: "index_users_on_dxuser", unique: true
   add_index "users", ["normalized_email"], name: "index_users_on_normalized_email"
   add_index "users", ["org_id"], name: "index_users_on_org_id"
+
+  create_table "votes", force: :cascade do |t|
+    t.integer  "votable_id"
+    t.string   "votable_type"
+    t.integer  "voter_id"
+    t.string   "voter_type"
+    t.boolean  "vote_flag"
+    t.string   "vote_scope"
+    t.integer  "vote_weight"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "votes", ["votable_id", "votable_type", "vote_scope"], name: "index_votes_on_votable_id_and_votable_type_and_vote_scope"
+  add_index "votes", ["voter_id", "voter_type", "vote_scope"], name: "index_votes_on_voter_id_and_voter_type_and_vote_scope"
 
 end

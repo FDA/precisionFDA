@@ -1,0 +1,51 @@
+<% content_for :title do %>Your answer to "<%= @discussion.title %>"<% end %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-left text-muted">
+      <%= link_to image_tag(@answer.user.gravatar_url, class: 'img-circle', height: '50px'), user_path(@answer.user.dxuser) %>
+    </div>
+    <div class="media-body">
+      <div class="pfda-answer-meta">
+        <div class="pfda-answer-user">
+          <%= link_to("#{@answer.user.full_name}'s", user_path(@answer.user.dxuser)) %> (<%= @answer.user.org.name %>) <%= @answer.scope == 'public' ? 'answer' : 'draft answer' %> to
+        </div>
+        <div class="pfda-answer-to-discussion">
+          <%= link_to(@discussion.title, discussion_path(@discussion)) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pfda-toolbar clearfix">
+  <div class="btn-toolbar">
+    <% if @answer.public? %>
+      <%= render "_partials/upvote_link", classes: "btn btn-default", item: @answer %>
+      <%= link_to discussion_answer_comments_path(@discussion, @answer), class: 'btn btn-link' do %>
+        <span class="fa fa-comment"></span> Comment | <%= @answer.comment_threads.size %>
+      <% end %>
+    <% else %>
+      <span class="btn-static"><span class="fa fa-lock"></span> This answer has not been published yet</span>
+    <% end %>
+
+    <% if @answer.editable_by?(@context) %>
+    <div class="btn-group pull-right">
+      <%= link_to edit_discussion_answer_path(@discussion, @answer.user.dxuser), class: "btn btn-primary" do %>
+        <span class="fa fa-edit"></span> Edit
+      <% end %>
+      <% if @answer.note.publishable_by?(@context) %>
+        <%= link_to publish_path + "?" + {id: @answer.uid}.to_param, method: :post, class: "btn btn-success" do %>
+          <span class="fa fa-bullhorn"></span> Publish
+        <% end %>
+      <% end %>
+    </div>
+    <% end %>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <div class="pfda-answer-content">
+    <%= render "notes/note" %>
+  </div>
+</div>

@@ -44,6 +44,49 @@
   .fa
     font-size: 50px
 
+.btn-upvote
+  min-width: 60px
+
+  .upvote-label:after
+    content: 'Upvote'
+
+  .upvote-count
+    margin: 5px 0
+
+  &.active:not(.disabled)
+    font-weight: bold
+    color: $brand-red-primary
+
+    &.btn-default
+      background-color: $brand-highlight
+      border-color: darken($brand-highlight, 10%)
+      color: $brand-red-primary
+
+    .upvote-label:after
+      content: 'Upvoted'
+
+.btn-follow
+  min-width: 60px
+
+  .follow-label:after
+    content: 'Follow'
+
+  .follow-count
+    margin: 5px 0
+
+  &.active:not(.disabled)
+    font-weight: bold
+
+    &.btn-default
+      background-color: $gray-subtle
+      color: $text-muted
+      border-color: $gray-lighter
+
+      .fa
+        color: $text-muted
+
+    .follow-label:after
+      content: 'Followed'
 
 .dropdown-menu
   max-height: 300px
@@ -61,3 +104,23 @@
 
 .btn-xs .badge
   font-size: 75%
+
+.btn-circle-singleline
+  border-radius: 50%
+  text-align: center
+  border: 1px solid $link-color
+  display: inline-block
+
+  &.btn-circle-singleline-25
+    width: 25px
+    height: 25px
+    line-height: 25px
+    font-size: 75%
+
+  &.btn-circle-singleline-50
+    width: 50px
+    height: 50px
+    line-height: 50px
+
+  &:hover
+    border-color: $link-hover-color

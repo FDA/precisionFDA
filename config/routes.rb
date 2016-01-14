@@ -38,6 +38,10 @@ Rails.application.routes.draw do
     post '/api/describe_note', to: 'api#describe_note'
     post '/api/attach_to_notes', to: 'api#attach_to_notes'
     post '/api/update_note', to: 'api#update_note'
+    post '/api/upvote', to: 'api#upvote'
+    post '/api/remove_upvote', to: 'api#remove_upvote'
+    post '/api/follow', to: 'api#follow'
+    post '/api/unfollow', to: 'api#unfollow'
 
     # Profile
     get 'profile', to: 'profile#index'
@@ -80,6 +84,12 @@ Rails.application.routes.draw do
     resources :challenges do
       get 'consistency', on: :collection
       get 'join', on: :member
+    end
+    resources :discussions do
+      resources :answers do
+        resources :comments
+      end
+      resources :comments
     end
 
     user_constraints = { username: /[^\/]*/ }

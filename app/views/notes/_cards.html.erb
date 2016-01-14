@@ -1,6 +1,6 @@
 <div class="pfda-cards pfda-cards-list">
-  <% @notes.each do |note| %>
-    <a class="pfda-card pfda-card-list pfda-card-padded" href="<%= note_path(note) %>">
+  <% notes.each do |note| %>
+    <a class="pfda-card pfda-card-list pfda-card-padded" href="<%= note_path(note.to_param) %>">
       <div class="pfda-card-header">
         <div class="pfda-card-title">
           <%= unilinkfw(note, {globe: true, nolink: true}) %>
@@ -27,4 +27,7 @@
       </ul>
     </a>
   <% end %>
+</div>
+<div class="paginate-container">
+  <%= paginate notes, :theme => 'twitter-bootstrap-3', :param_name => :notes_page %>
 </div>
