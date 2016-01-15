@@ -1,0 +1,49 @@
+en:
+  humanizer:
+    validation:
+      error: is incorrect
+    questions:
+      - question: Two plus two?
+        answers: ["4", "four"]
+      - question: What does the A stand for in DNA?
+        answer: acid
+      - question: What does the F stand for in FDA?
+        answer: food
+      - question: What does the D stand for in FDA?
+        answer: drug
+      - question: What does the A stand for in FDA?
+        answer: administration
+      - question: What is the number before twelve?
+        answers: ["11", "eleven"]
+      - question: Five times two is what?
+        answers: ["10", "ten"]
+      - question: "Insert the next number in this sequence: 10, 11, 12, 13, 14, .."
+        answers: ["15", "fifteen"]
+      - question: "What is five times five?"
+        answers: ["25", "twenty-five", "twenty five"]
+      - question: "Ten divided by two is what?"
+        answers: ["5", "five"]
+      - question: What day comes after Monday?
+        answer: "tuesday"
+      - question: What is the last month of the year?
+        answer: "december"
+      - question: How many minutes are in an hour?
+        answers: ["60", "sixty"]
+      - question: What is the opposite of down?
+        answer: "up"
+      - question: What is the opposite of north?
+        answer: "south"
+      - question: What is the opposite of south?
+        answer: "north"
+      - question: What is 4 times four?
+        answers: ["16", "sixteen"]
+      - question: What number comes after 20?
+        answers: ["21", "twenty-one", "twenty one"]
+      - question: What month comes before July?
+        answer: "june"
+      - question: What is fifteen divided by three?
+        answer: ["five", "5"]
+      - question: What is 14 minus 4?
+        answers: ["10", "ten"]
+      - question: "What comes next? Monday, Tuesday, Wednesday.."
+        answer: "thursday"

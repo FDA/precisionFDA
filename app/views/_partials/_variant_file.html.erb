@@ -1,0 +1,15 @@
+<li class="<%= classes %>">
+  <div class="variant-input-cell">
+    <div class="file-label"><span class="fa fa-fw fa-file-o"></span> <span><%= title %></span></div>
+    <% if !required  %>
+      <div class="file-optional">Optional</div>
+    <% end %>
+  </div>
+  <div class="variant-input-cell">
+    <% if file %>
+      <%= unilinkfw(file, globe: true, icon_class: 'access-icon') %>
+    <% else %>
+      <span class="text-muted">Not set</span>
+    <% end %>
+  </div>
+</li>

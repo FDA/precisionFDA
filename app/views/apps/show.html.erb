@@ -1,0 +1,9 @@
+<% content_for :title do %><%= @app.title %><% end %>
+
+<div class="page-header clearfix">
+  <div class="page-title"><span class="fa fa-cube"></span> <%= @app.title %></div>
+</div>
+
+<div class="pfda-pane-content">
+  <%= render "/apps/detail", app: @app %>
+</div>

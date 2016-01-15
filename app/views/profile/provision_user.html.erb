@@ -1,0 +1,105 @@
+<% content_for :title do %>New user<% end %>
+
+<div class="page-header">
+  <div class="page-title">New user</div>
+</div>
+
+<div>&nbsp;</div>
+
+<% if @state == "step1" %>
+  <%= form_tag(provision_user_path, method: 'post', class: "form form-horizontal") do -%>
+    <%= hidden_field_tag("state", @state) %>
+    <% if @error.present? %>
+      <div class="form-group">
+        <div class="alert alert-danger col-md-offset-5 col-md-10">
+          <strong><span class="fa fa-warning"></span> <%= @error %></strong>
+        </div>
+      </div>
+    <% end %>
+    <div class="form-group">
+      <div class="col-sm-offset-5 col-sm-10">
+        <span class="h4 text-uppercase text-primary">New user account information</span>
+      </div>
+    </div>
+    <hr>
+    <div class="form-group">
+      <%= label_tag "first", "First name", class: 'control-label col-sm-4' %>
+      <div class="col-sm-offset-1 col-sm-10">
+        <%= text_field_tag "first", @first, class: 'form-control', placeholder: '', required: 'required' %>
+      </div>
+    </div>
+    <div class="form-group">
+      <%= label_tag "last", "Last name", class: 'control-label col-sm-4' %>
+      <div class="col-sm-offset-1 col-sm-10">
+        <%= text_field_tag "last", @last, class: 'form-control', placeholder: '', required: 'required' %>
+      </div>
+    </div>
+    <div class="form-group">
+      <%= label_tag "email", "Email address", class: 'control-label col-sm-4' %>
+      <div class="col-sm-offset-1 col-sm-10">
+        <%= email_field_tag "email", @email, class: 'form-control', required: 'required' %>
+      </div>
+    </div>
+    <div class="form-group">
+      <%= label_tag "org", "Organization", class: 'control-label col-sm-4' %>
+      <div class="col-sm-offset-1 col-sm-10">
+        <%= text_field_tag "org", @user.org.name, class: 'form-control', disabled: true %>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-sm-offset-5 col-sm-10">
+        <%= button_tag(content_tag(:span, "", class: "fa fa-forward") + " Next", class: "btn btn-primary") %>
+      </div>
+    </div>
+  <% end %>
+<% elsif @state == "step2" %>
+  <div class="container-padded">
+    <p> You entered the following information: </p>
+    <dl class="dl-horizontal">
+      <dt>First name:</dt>
+      <dd><%= @first %></dd>
+      <dt>Last name:</dt>
+      <dd><%= @last %></dd>
+      <dt>Email:</dt>
+      <dd><%= @email %></dd>
+    </dl>
+    <p> Internal precisionFDA policies require that usernames be formed according to the pattern "<em>first_name.last_name</em>", using only lowercase English letters. </p>
+    <p> Based on the information you provided, the system will allocate the following: </p>
+    <dl class="dl-horizontal">
+      <dt>Suggested username:</dt>
+      <dd><%= @suggested_username %></dd>
+    </dl>
+    <% @warnings.each do |warning| %>
+      <div class="alert alert-danger">
+        <strong><span class="fa fa-warning"></span> <%= warning %></strong>
+      </div>
+    <% end %>
+    <p> You are about to provision username <strong><%= @suggested_username %></strong> under your organization (<strong><%= @user.org.name %></strong>). This action cannot be undone. </p>
+    <div class="clearfix">
+      <%= form_tag(provision_user_path, method: 'post', class: "pull-left") do -%>
+        <%= hidden_field_tag("state", "step0") %>
+        <%= hidden_field_tag("first", @first) %>
+        <%= hidden_field_tag("last", @last) %>
+        <%= hidden_field_tag("email", @email) %>
+        <%= button_tag(content_tag(:span, "", class: "fa fa-backward") + " Back", class: "btn btn-default") %>
+      <% end -%>
+      <%= form_tag(provision_user_path, method: 'post', class: "pull-left") do -%>
+        <%= hidden_field_tag("state", "step2") %>
+        <%= hidden_field_tag("first", @first) %>
+        <%= hidden_field_tag("last", @last) %>
+        <%= hidden_field_tag("email", @email) %>
+        <%= hidden_field_tag("suggested_username", @suggested_username) %>
+        <% opts = {class: "btn btn-primary", data: {disable_with: "Please wait..."}} -%>
+        <% opts[:data][:confirm] = "Are you sure? The system has detected one or more warnings shown on the page. Only proceed if you believe you have addressed these warnings." if @warnings.present? -%>
+        <%= button_tag(content_tag(:span, "", class: "fa fa-plus-circle") + " Provision", opts) %>
+      <% end -%>
+    </div>
+  </div>
+<% elsif @state == "step3" %>
+  <div class="container-padded">
+    <p>You have successfully provisioned username <strong><%= @suggested_username %></strong> under your organization (<strong><%= @user.org.name %></strong>). An activation email will be sent to <%= @email %> with further instructions.</p>
+    <%= link_to("Back to profile", profile_path, class: "btn btn-primary") %>
+  </div>
+<% end %>
+

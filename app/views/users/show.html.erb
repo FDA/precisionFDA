@@ -1,0 +1,86 @@
+<% content_for :title do %><%= @user.dxuser %><% end %>
+
+<div class="page-header">
+  <div class="page-title"><span class="fa fa-user"></span> <%= @user.full_name %> <small>(<%= @user.dxuser %>)</small></div>
+</div>
+
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Joined</h5>
+      <p class="list-group-item-text"><%= @user.created_at.to_s(:db) %></p>
+      </li>
+
+    <% if @user.org_id.present? %>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Organization</h5>
+      <p class="list-group-item-text"><%= @user.org.name %></p>
+    </li>
+    <% end %>
+
+  </ul>
+</div>
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+  <% if @counts[:notes] > 0 %>
+  <li role="presentation" class="<%= params[:tab] == 'notes' ? 'active' : '' %>">
+    <a href="<%= user_path(@user.dxuser, 'notes') %>" aria-controls="tab-notes"><span class="fa fa-fw fa-sticky-note"></span>
+      <span class="tab-label">Notes <span class="badge"><%= @counts[:notes] %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @counts[:files] > 0 %>
+  <li role="presentation" class="<%= params[:tab] == 'files' ? 'active' : '' %>">
+    <a href="<%= user_path(@user.dxuser, 'files') %>" aria-controls="tab-files"><span class="fa fa-fw fa-file-o"></span>
+      <span class="tab-label">Files <span class="badge"><%= @counts[:files] %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @counts[:comparisons] > 0 %>
+  <li role="presentation" class="<%= params[:tab] == 'comparisons' ? 'active' : '' %>">
+    <a href="<%= user_path(@user.dxuser, 'comparisons') %>" aria-controls="tab-comparisons"><span class="fa fa-fw fa-area-chart"></span>
+      <span class="tab-label">Comparisons <span class="badge"><%= @counts[:comparisons] %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @counts[:apps] > 0 %>
+  <li role="presentation" class="<%= params[:tab] == 'apps' ? 'active' : '' %>">
+    <a href="<%= user_path(@user.dxuser, 'apps') %>" aria-controls="tab-apps"><span class="fa fa-fw fa-cube"></span>
+      <span class="tab-label">Apps <span class="badge"><%= @counts[:apps] %></span></span>
+    </a>
+  </li>
+  <% end %>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+  <% if defined?(@notes) %>
+    <div role="tabpanel" class="tab-pane <%= params[:tab] == 'notes' ? 'active' : '' %>" id="tab-notes">
+      <div class="panel">
+        <%= render "notes/cards", notes: @notes %>
+      </div>
+    </div>
+  <% end %>
+  <% if defined?(@files_grid) %>
+    <div role="tabpanel" class="tab-pane <%= params[:tab] == 'files' ? 'active' : '' %>" id="tab-files">
+      <div class="panel">
+        <%= render "files/grid", files_grid: @files_grid %>
+      </div>
+    </div>
+  <% end %>
+  <% if defined?(@comparisons_grid) %>
+    <div role="tabpanel" class="tab-pane <%= params[:tab] == 'comparisons' ? 'active' : '' %>" id="tab-comparisons">
+      <div class="panel">
+        <%= render "comparisons/grid", comparisons_grid: @comparisons_grid %>
+      </div>
+    </div>
+  <% end %>
+  <% if defined?(@apps_grid) %>
+    <div role="tabpanel" class="tab-pane <%= params[:tab] == 'apps' ? 'active' : '' %>" id="tab-apps">
+      <div class="panel">
+        <%= render "apps/grid", apps_grid: @apps_grid %>
+      </div>
+    </div>
+  <% end %>
+</div>

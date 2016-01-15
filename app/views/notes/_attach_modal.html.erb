@@ -1,0 +1,61 @@
+<script id="template-note-attach-modal" type="text/html">
+<div class="modal note-attach-modal fade" id="note-attach-modal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Select a note to attach to</h4>
+      </div>
+      <div class="modal-body modal-body-search-selector modal-body-padless">
+        <ul class="list-group list-group-selector">
+          <!-- ko if: !loading() && notes.filtered().length == 0 -->
+            <li class="list-group-item text-muted">
+              No notes found. <a href="<%= new_note_path %>">Create a note</a>
+            </li>
+          <!-- /ko -->
+
+          <!-- ko foreach: notes.filtered -->
+          <li class="list-group-item" data-bind="css: {active: $parent.previewedNote() && $parent.previewedNote().id == id}">
+            <div class="media">
+              <div class="media-body">
+                <div class="checkbox clearfix">
+                  <label>
+                    <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.notes.selected"> <span class="word-break-all" data-bind="text: title"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="media-right">
+                <span class="list-preview-icon" data-bind="click: $parent.preview"><span class="fa fa-fw fa-chevron-right"></span></span>
+              </div>
+            </div>
+          </li>
+          <!-- /ko -->
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane tab-pane-preview active" data-bind="visible: notes.filtered().length">
+            <!-- ko if: previewedNote() -->
+              <div class="h2">
+                <a href="/notes/" data-bind="text: previewedNote().title, attr: {href: '/notes/' + previewedNote().slug}" target="_blank"></a>
+              </div>
+              <hr>
+              <!-- ko if: previewedNote().content() -->
+              <div class="pfda-md-rendered" data-bind="html: previewedNote().content"></div>
+              <!-- /ko -->
+              <div style="display: none" data-bind="visible: !previewedNote().content()">
+                <div data-bind="visible: !loading()" style="display: none">No content written for this note</div>
+                <div data-bind="visible: loading()" style="display: none">Loading...</div>
+              </div>
+            <!-- /ko -->
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-bind="click: attach, enable: canAttach, text: attachText">Attach</button>
+      </div>
+    </div>
+  </div>
+</div>
+</script>

@@ -1,0 +1,292 @@
+<% content_for :title do %>Overview<% end %>
+
+<%= render "_partials/browser_support_script" %>
+<% if !@context.logged_in_or_guest? %>
+  <%= render "main/landing" %>
+<% else %>
+  <div class="jumbotron jumbotron-landing">
+    <div class="container">
+      <h1>WELCOME to precisionFDA</h1>
+      <p class="lead lead-bold">A community platform for NGS assay evaluation and regulatory science exploration.</p>
+    </div>
+
+    <div class="container">
+      <div class="pfda-cards pfda-tutorial text-left">
+
+        <% if @context.guest? %>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              Read Notes
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            Read what others are reporting describing their thoughts and their work
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#notes">Learn</a>
+            <a class="btn btn-primary" href="<%= explore_notes_path %>">Read notes</a>
+          </div>
+        </div>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              Browse Files
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            Browse the datasets have been publicly shared with the precisionFDA community
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#files">Learn</a>
+            <a class="btn btn-primary" href="<%= explore_files_path %>">Browse files</a>
+          </div>
+        </div>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              View Comparisons
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            View the differences between test sets and benchmark sets of genomic variants
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#comparisons">Learn</a>
+            <a class="btn btn-primary" href="<%= explore_comparisons_path %>">View comparisons</a>
+          </div>
+        </div>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              Explore Apps
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            Have a look at bioinformatics apps &mdash; and even study their scripts by clicking "Fork".
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#apps-listing">Learn</a>
+            <a class="btn btn-primary" href="<%= explore_apps_path %>">Explore apps</a>
+          </div>
+        </div>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              Browse Assets
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            Browse the collection of software assets that are used as building blocks in apps.
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#dev-assets">Learn</a>
+            <a class="btn btn-primary" href="<%= explore_assets_path %>">Browse assets</a>
+          </div>
+        </div>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@apps_count) %>">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              Try the app editor
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            Find out how easy it is to assemble an app (read-only; results not saved)
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#dev">Learn</a>
+            <a class="btn btn-primary" href="<%= new_app_path %>">Try!</a>
+          </div>
+        </div>
+
+        <% else %>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@notes_count) %>">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              Create a Note
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            Write and publish rich notes describing your thoughts and your work
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#notes">Learn</a>
+            <%= link_to notes_path(), class: 'btn btn-primary', method: :post, data: {disable_with: "Creating Note..."} do %>
+              Create <%= 'first' if !tutorial_complete?(@notes_count) %> note
+            <% end %>
+          </div>
+        </div>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@files_count) %>">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              Upload a File
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            Upload files to your private space to use as inputs for apps or comparisons
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#files">Learn</a>
+            <a class="btn btn-primary" href="<%= new_file_path %>">Upload <%= 'first' if !tutorial_complete?(@files_count) %> file</a>
+          </div>
+        </div>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@comparisons_count) %>">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              Run a Comparison
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            Look at the differences between a test set and a benchmark set of genomic variants
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#comparisons">Learn</a>
+            <a class="btn btn-primary" href="<%= new_comparison_path %>">Run <%= 'first' if !tutorial_complete?(@comparisons_count) %> comparison</a>
+          </div>
+        </div>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@jobs_count) %>">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              Launch an App
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            Run bioinformatics or other Linux-based software on the cloud
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#apps-listing">Learn</a>
+            <a class="btn btn-primary" href="<%= apps_path %>">Launch <%= 'first' if !tutorial_complete?(@jobs_count) %> app</a>
+          </div>
+        </div>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@assets_count) %>">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              Add an Asset
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            Contribute a tarball with software that can be used by apps
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#dev-assets">Learn</a>
+            <a class="btn btn-primary" href="<%= new_asset_path %>">Add <%= 'first' if !tutorial_complete?(@assets_count) %> asset</a>
+          </div>
+        </div>
+
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@apps_count) %>">
+          <div class="pfda-card-header">
+            <div class="pfda-card-title">
+              Create your own app
+            </div>
+          </div>
+          <div class="pfda-card-body">
+            Combine assets with a shell script, and achieve just about anything
+          </div>
+          <div class="pfda-card-footer pull-right">
+            <a class="btn btn-link" href="about/how/#dev">Learn</a>
+            <a class="btn btn-primary" href="<%= new_app_path %>">Create <%= 'first' if !tutorial_complete?(@apps_count) %> app</a>
+          </div>
+        </div>
+
+        <% end %>
+
+        <a class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-success-solid" href="<%= about_path %>/how">
+          <div class="pfda-card-header lead text-center">
+            Ready to learn more?
+          </div>
+          <div class="pfda-card-body pfda-card-body-icon">
+            <span class="fa fa-map-o" aria-hidden="true"></span>
+          </div>
+          <div class="pfda-card-footer lead lead-bold text-center">
+            Read our Docs
+          </div>
+        </a>
+
+        <a class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-warning-solid" href="<%= guidelines_path %>">
+          <div class="pfda-card-header lead text-center">
+            Understand our
+          </div>
+          <div class="pfda-card-body pfda-card-body-icon">
+            <span class="fa fa-institution" aria-hidden="true"></span>
+          </div>
+          <div class="pfda-card-footer lead lead-bold text-center">
+            Community Guidelines
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% if !@context.logged_in_or_guest? %>
+<div class="below-fold-actions">
+  <a class="btn accessible-btn-primary btn-lg" href="<%= about_path %>">
+    <span class="fa fa-info-circle" aria-hidden="true"></span> Learn more about precisionFDA
+  </a>
+  <br>
+  <a class="btn accessible-btn-link btn-lg" href="mailto:precisionfda@fda.hhs.gov"><span class="fa fa-fw fa-commenting-o" aria-hidden="true"></span> Feedback</a>
+  <a class="btn accessible-btn-link btn-lg hide" href="https://docs.google.com/forms/d/1zfGoy-4C9kLbHHg0Y-6iQoI3fdGq1IfugV9fXCqOBfY/viewform" target="_blank"><span class="fa fa-fw fa-commenting-o" aria-hidden="true"></span> Feedback</a>
+</div>
+<% end %>
+
+<!-- Modal -->
+<div class="modal fade" id="guidelines-modal" tabindex="-1" role="dialog" aria-labelledby="guidelines-modal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h3 class="modal-title"><span class="fa fa-institution" aria-hidden="true"></span> Community Guidelines</h3>
+      </div>
+      <div class="modal-body">
+        <div id="guidelines-carousel" class="carousel carousel-text carousel-text-padded-lg slide" data-interval="false" data-wrap="false">
+          <!-- Wrapper for slides -->
+          <div class="row">
+            <div class="col-md-offset-3 col-md-18">
+              <!-- Indicators -->
+              <ol class="carousel-indicators">
+                <li data-target="#guidelines-carousel" class="carousel-indicator-green active"></li>
+                <li data-target="#guidelines-carousel" class="carousel-indicator-blue"></li>
+                <li data-target="#guidelines-carousel" class="carousel-indicator-red"></li>
+              </ol>
+
+              <br>
+
+              <%= render "_partials/guidelines_content" %>
+
+              <br>
+
+              <!-- Controls -->
+              <div class="guideline-controls text-right">
+                <a class="btn btn-lg btn-link btn-previous hide" href="#guidelines-carousel" role="button" data-slide="prev">
+                  <span class="carousel-control-text">Previous</span>
+                </a>
+                <a class="btn btn-lg btn-primary btn-next" href="#guidelines-carousel" role="button" data-slide="next">
+                  <span class="carousel-control-text">Next</span>
+                </a>
+                <a type="button" class="btn btn-lg btn-success btn-done hide" data-dismiss="modal">I Agree</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-sm-offset-6 col-sm-12">
+            <div class="help-block">Additional information available in our <%= link_to "Terms of Service", terms_path %>.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= render "_partials/fda_footer" %>

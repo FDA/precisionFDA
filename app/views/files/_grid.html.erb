@@ -1,0 +1,50 @@
+<%= grid(files_grid, show_filters: :when_filtered) do |g|
+  g.blank_slate partial:  "_partials/empty_grid"
+
+  g.after_row do |file, num_cols|
+    if !file.description.blank?
+      content_tag(:tr,
+        content_tag(:td,
+          content_tag(:div, file.description, class: 'description'),
+        colspan: num_cols),
+      class: 'extra-row')
+    else
+      nil
+    end
+  end
+
+  g.column name: 'Name', attribute: 'name' do |file|
+    unilinkfw(file, globe: true)
+  end
+
+  g.column name: 'Org', attribute: 'handle', assoc: [:user, :org] do |file|
+    file.user.org.handle
+  end
+
+  g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |file|
+    link_to(file.user.dxuser, user_path(file.user.dxuser))
+  end
+
+  g.column name: 'Size', attribute: 'file_size' do |file|
+    number_to_human_size(file.file_size)
+  end
+
+  g.column name: 'Origin' do |file|
+    if file.parent_type != "User"
+      unilinkfw(file.parent)
+    else
+      "Uploaded"
+    end
+  end
+
+  g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |file|
+    file.created_at.to_s(:db)
+  end
+
+  g.column name: 'State', attribute: 'state', custom_filter: :auto
+
+  g.column name: 'Access', attribute: 'scope',
+    custom_filter: {'Public' => "public", 'Private' => "private"} do |file|
+    file.public? ? "Public" : "Private"
+  end
+end -%>

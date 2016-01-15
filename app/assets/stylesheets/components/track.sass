@@ -1,0 +1,54 @@
+@import "_common"
+
+$track_private-color: $gray-light
+$track_public-color: $brand-green-primary
+$track_not_yours-color: $brand-red-primary
+
+.bg-track_private
+  background-color: $track_private-color
+.bg-track_public
+  background-color: $track_public-color
+.bg-track_not_yours
+  background-color: $track_not_yours-color
+
+.track-canvas-wrapper
+  padding: $padding-large-horizontal
+  text-align: center
+  overflow-x: auto
+
+.track-intro
+  margin-bottom: $padding-large-vertical
+
+svg.track-canvas
+  .node rect
+    fill: transparent
+
+  .node
+    .label
+      padding: 0
+
+    .track-box
+      background-color: $gray-lighter
+      border-radius: $border-radius-base
+      box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.2)
+      border: 1px solid #ccc
+      border-left: 10px solid $track_private-color
+      padding: 8px
+      box-sizing: border-box
+
+    &.public .track-box
+      background-color: $state-success-bg
+      border-left-color: $track_public-color
+
+    &.not_yours .track-box
+      background-color: $state-danger-bg
+      border-left-color: $track_not_yours-color
+
+  .edgePath path
+    stroke: $brand-blue-tertiary
+    fill: $brand-blue-tertiary
+    stroke-width: 1.5px
+
+  tspan, foreignobject
+    font-size: 13px
+    color: $brand-blue-tertiary

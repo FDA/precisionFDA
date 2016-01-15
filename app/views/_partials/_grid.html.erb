@@ -1,0 +1,33 @@
+<table class="pfda-table table">
+  <% if grid.has_key?(:header) %>
+    <thead>
+      <tr>
+        <% grid[:header].each do |col| %>
+          <th class="<%= col[:field] %>">
+            <%= col[:display] %>
+          </th>
+        <% end %>
+      </tr>
+    </thead>
+  <% end %>
+  <tbody>
+    <% if grid.has_key?(:rows) %>
+      <% grid[:rows].each do |row| %>
+        <tr class="">
+          <% row.each do |col| %>
+            <td class="col-<%= col[:field] %> <%= col[:classes] %>">
+              <% if col.has_key?(:icon) %>
+                <span class="<%= col[:icon] %>"></span>
+              <% end %>
+              <% if col.has_key?(:link) %>
+                <%= link_to(col[:display], col[:link]) %>
+              <% else %>
+                <%= col[:display] %>
+              <% end %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>

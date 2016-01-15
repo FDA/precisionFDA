@@ -1,0 +1,168 @@
+<% content_for :title do %><%= @job.name %><% end %>
+
+<div class="page-header">
+  <div class="page-title">
+    <span class="fa fa-tasks"></span>
+    <% case @job.state
+      when "failed" %>
+      <span class="label label-danger"><%= @job.state.upcase %></span>
+    <% when "done" %>
+      <span class="label label-success"> <%= @job.state.upcase %></span>
+    <% when "running" %>
+      <span class="label label-primary"> <%= @job.state.upcase %></span>
+    <% else %>
+      <span class="label label-warning"> <%= @job.state.upcase %></span>
+    <% end %>
+    <span class="name"><%= @job.name %></span>
+  </div>
+</div>
+
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">App</h5>
+      <p class="list-group-item-text"><%= unilink(@job.app) %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Launched by</h5>
+      <p class="list-group-item-text">
+        <%= link_to(@job.user.dxuser, user_path(@job.user.dxuser))  %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">ID</h5>
+      <p class="list-group-item-text"><%= @job.dxid %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Access</h5>
+      <p class="list-group-item-text">
+        <span class="fa <%= @job.public? ? 'fa-globe' : 'fa-lock' %>"></span>
+        <%= @job.public? ? "Public" : "Private" %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Created</h5>
+      <p class="list-group-item-text"><%= @job.created_at.to_s(:db) %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Instance type</h5>
+      <p class="list-group-item-text"><%= @job.resolved_instance_type %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Duration</h5>
+      <p class="list-group-item-text"><%= humanizeSeconds(@job.runtime) %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Energy Consumed</h5>
+      <p class="list-group-item-text"><span class="fa fa-industry"></span> <%= @job.energy_string %></p>
+    </li>
+  </ul>
+</div>
+
+<div class="pfda-toolbar">
+  <div class="btn-group">
+    <% if @job.user_id == @context.user_id %>
+      <%= link_to log_job_path(@job.dxid), class: "btn btn-default" do %>
+        <span class="fa fa-file-code-o"></span> View Log
+      <% end %>
+    <% end %>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
+    <%= link_to track_path(id: @job.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
+      <span class="fa fa-flip-vertical fa-sitemap"></span> Track
+    <% end %>
+  </div>
+
+  <div class="btn-group pull-right">
+    <% if @job.app.accessible_by?(@context) %>
+      <%= link_to new_app_job_path(@job.app.dxid), class: "btn btn-primary" do %>
+        <span class="fa fa-bolt"></span> Run App &nbsp;&nbsp;<span class="badge"><%= @job.app.version ? "v#{@job.app.version}" : "rev#{@job.app.revision}" %></span>
+      <% end %>
+    <% end %>
+    <% if @job.publishable_by?(@context) %>
+      <%= link_to publish_path + "?" + {id: @job.uid}.to_param, method: :post, class: "btn btn-success" do %>
+        <span class="fa fa-bullhorn"></span> Publish
+      <% end %>
+    <% end %>
+    <% if @job.user_id == @context.user_id && !@job.terminal? %>
+      <%= link_to job_path(@job.dxid), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
+        <span class="fa fa-times-circle"></span> Terminate
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+  <li role="presentation" class="active">
+    <a href="#tab-spec" aria-controls="tab-spec" role="tab" data-toggle="tab"><span class="fa fa-fw fa-puzzle-piece"></span>
+      <span class="tab-label">Inputs and Outputs</span>
+    </a>
+  </li>
+  <% if @job.failed? %>
+  <li role="presentation">
+    <a href="#tab-error" aria-controls="tab-error" role="tab" data-toggle="tab"><span class="fa fa-fw fa-exclamation-triangle"></span>
+      <span class="tab-label">Error</span>
+    </a>
+  </li>
+  <% end %>
+  <% if @notes.count > 0 %>
+  <li role="presentation">
+    <a href="#tab-notes" aria-controls="tab-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
+      <span class="tab-label">Notes <span class="badge"><%= @notes.count %></span></span>
+    </a>
+  </li>
+  <% end %>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-spec">
+    <div class="list-group">
+      <div class="list-group-item job-io">
+        <div class="row">
+          <div class="job-io-column col-md-12">
+            <div class="job-io-heading">Inputs</div>
+            <table class="table table-striped table-job-io table-job-io-input">
+              <tbody>
+                <%= render "_partials/job_io_rows", items: @inputs %>
+              </tbody>
+            </table>
+          </div>
+          <% if @job.done? %>
+          <div class="job-io-column col-md-12">
+            <div class="job-io-heading">Outputs</div>
+            <table class="table table-striped table-job-io table-job-io-output">
+              <tbody>
+                <%= render "_partials/job_io_rows", items: @outputs %>
+              </tbody>
+            </table>
+          </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if @job.failed? %>
+  <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-error">
+    <div class="row">
+      <div class="panel panel-danger panel-job-failed col-md-12 col-md-offset-6">
+        <div class="panel-heading">
+          The execution failed with the following error message
+        </div>
+        <div class="panel-body">
+          <div class="text-monospace"><%= @job.failure_message %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <% end %>
+
+  <% if @notes.count > 0 %>
+  <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-notes">
+    <%= render "notes/cards", notes: @notes %>
+  </div>
+  <% end %>
+</div>

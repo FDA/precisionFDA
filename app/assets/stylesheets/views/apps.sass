@@ -1,0 +1,102 @@
+@import "_common"
+
+.pfda-controller-apps
+  .state-running
+    color: $brand-running-color
+    background-color: $brand-running-bg
+
+  .state-done
+    color: $brand-done-color
+    background-color: $brand-done-bg
+
+  .state-failed
+    color: $brand-failed-color
+    background-color: $brand-failed-bg
+
+  .pfda-table
+    .col-state
+      width: 100px
+
+  .job-revision-active
+    font-weight: bold
+
+.pfda-controller-apps.pfda-action-show
+  .app-readme-group
+    padding: 50px
+
+  .app-spec-group
+    background-color: $brand-blue-subtler
+
+  .app-revision, .app-release
+    font-weight: bold
+
+  .dropdown
+    .app-revision
+      min-width: 50px
+
+.app-spec
+  .app-spec-column
+    padding: 0 $padding-large-horizontal $padding-small-vertical 0
+
+  .spec-heading
+    color: $brand-blue-tertiary
+    text-transform: uppercase
+    font-weight: 400
+    font-size: $font-size-h5
+    margin-bottom: 10px
+    padding-left: 8px
+
+  .table-spec
+    &.table-striped > tbody > tr:nth-of-type(odd)
+      background-color: darken($brand-blue-subtler, 2%)
+    td
+      vertical-align: baseline
+
+    .spec-label
+      font-weight: bold
+
+    .spec-name
+      font-family: $font-family-monospace
+      font-size: 12px
+
+    .spec-class
+      font-family: $font-family-monospace
+      color: $brand-blue-tertiary
+      font-size: 12px
+
+    .spec-required
+      text-transform: uppercase
+      font-size: 10px
+      background-color: lighten($brand-blue-tertiary, 10%)
+
+    .spec-default, .spec-patterns, .spec-choices
+      font-family: $font-family-monospace
+      color: $text-muted
+      font-size: 11px
+
+.pfda-controller-apps.pfda-action-edit
+  .section-readme
+    .panel-body
+      padding: 0
+      background: $brand-blue-subtler
+
+    .readme-editor
+      background: #fff
+      margin: 10px
+      padding: 10px
+      border: 1px solid darken($brand-blue-subtle, 2%)
+      min-height: 300px
+      border-radius: $border-radius-base
+
+.pfda-controller-apps
+  .page-title
+    .app-version
+      color: $text-muted
+      &:before
+        content: 'v'
+
+.pfda-controller-apps
+  &.pfda-action-index, &.pfda-action-featured, &.pfda-action-explore
+    .pfda-pane-content
+      .pfda-toolbar, .metadata-header, .nav.nav-tabs
+        background-color: #fff

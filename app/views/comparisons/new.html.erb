@@ -1,0 +1,153 @@
+<% content_for :title do %>Comparator<% end %>
+
+<div class="page-header clearfix">
+  <div class="page-title"><span class="fa fa-area-chart fa-fw"></span><span data-bind="text: areAllInputsSet() ? 'Run' : 'Set up'"></span> your comparison</div>
+</div>
+
+<div class="container-fluid">
+  <%= alert_help("Learn more about creating new comparisons", "#{about_path}/how#comparisons-new") %>
+  <div class="affix-spacer">
+    <div class="affix-container affix-container-padded">
+      <div class="variants">
+        <div class="variant-test">
+          <div class="variant-title">Test Set</div>
+          <ul class="variant-inputs list-unstyled" data-bind="foreach: testVariant.inputs">
+            <li data-bind="css: {required: required, active: active}">
+              <div class="variant-input-cell">
+                <div class="file-label"><span class="fa fa-fw fa-file-o"></span> <span data-bind="text: title"></span></div>
+                <div class="file-optional" data-bind="visible: !required">Optional</div>
+              </div>
+              <div class="variant-input-cell">
+                <a class="close event-unselect-file" data-bind="visible: active">&times;</a>
+                <!-- ko if: active() -->
+                  <a target="_blank" class="file-info" data-bind="text: file().name, attr: {href: '/files/' + file().uid}"></a>
+                <!-- /ko -->
+                <!-- ko if: !active() -->
+                  <span class="file-info">Select a file from below</span>
+                <!-- /ko -->
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="variant-ref">
+          <div class="variant-title">Benchmark Set</div>
+          <ul class="variant-inputs list-unstyled" data-bind="foreach: refVariant.inputs">
+            <li data-bind="css: {required: required, active: active}">
+              <div class="variant-input-cell">
+                <div class="file-label"><span class="fa fa-fw fa-file-o"></span> <span data-bind="text: title"></span></div>
+                <div class="file-optional" data-bind="visible: !required">Optional</div>
+              </div>
+              <div class="variant-input-cell">
+                <a class="close event-unselect-file" data-bind="visible: active">&times;</a>
+                <!-- ko if: active() -->
+                  <a target="_blank" class="file-info" data-bind="text: file().name, attr: {href: '/files/' + file().uid}"></a>
+                <!-- /ko -->
+                <!-- ko if: !active() -->
+                  <span class="file-info">Select a file from below</span>
+                <!-- /ko -->
+                </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="variants-circle">
+          <!-- ko if: areAllInputsSet -->
+            <a class="variants-circle-compare" data-toggle="modal" data-target="#comparison-modal">
+              compare
+            </a>
+          <!-- /ko -->
+          <!-- ko if: !areAllInputsSet() -->
+            <div class="variants-circle-with">
+              with
+            </div>
+          <!-- /ko -->
+        </div>
+      </div>
+      <div class="files-filter">
+        <input type="text" class="form-control input-lg" placeholder="Filter..." data-bind="textInput: filterQuery" />
+      </div>
+    </div>
+  </div>
+
+  <div class="files-selector">
+    <table class="files-table table">
+      <tbody data-bind="foreach: files.filtered">
+        <tr>
+          <td class="cell-file-actions">
+            <div class="dropdown">
+              <button class="btn btn-primary btn-sm btn-block btn-select-file" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Assign
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu clearfix">
+                <div class="pull-left">
+                  <li class="dropdown-header">Test Set Files</li>
+                  <!-- ko foreach: $root.testVariant.inputs -->
+                    <li data-bind="css: {disabled: active, active: active() && $parent.uid == file().uid }">
+                      <a class="event-select-file"><span data-bind="text: category + ' ' + title"></span></a>
+                    </li>
+                  <!-- /ko -->
+                </div>
+                <div class="pull-right">
+                  <li class="dropdown-header">Benchmark Set Files</li>
+                  <!-- ko foreach: $root.refVariant.inputs -->
+                    <li data-bind="css: {disabled: active, active: active() && $parent.uid == file().uid }">
+                      <a class="event-select-file"><span data-bind="text: category + ' ' + title"></span></a>
+                    </li>
+                  <!-- /ko -->
+                </div>
+              </ul>
+            </div>
+          </td>
+          <td class="cell-file-name">
+            <a target="_blank" data-bind="text: name, attr: {href: '/files/' + uid}"></a>
+          </td>
+          <td class="cell-file-selections">
+            <!-- ko foreach: $root.testVariant.inputs -->
+              <span class="label label-primary" data-bind="visible: active() && $parent.uid == file().uid, text: category + ' ' + title"></span>
+            <!-- /ko -->
+            <!-- ko foreach: $root.refVariant.inputs -->
+              <span class="label label-info" data-bind="visible: active() && $parent.uid == file().uid, text: category + ' ' + title"></span>
+            <!-- /ko -->
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="comparison-modal" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Confirm Comparison</h4>
+        </div>
+        <div class="modal-body">
+          <%= form_for :comparison, url: comparisons_path do |f| %>
+            <div class="form-group">
+              <input data-bind="textInput: name" type="text" class="form-control required input-lg" name="comparison[name]" placeholder="Name this comparison..." autofocus>
+            </div>
+            <div class="form-group">
+              <textarea data-bind="textInput: description" rows="3" class="form-control input-lg" name="comparison[description]" placeholder="Describe this comparison (optional)..."></textarea>
+            </div>
+            <!-- ko foreach: testVariant.inputs -->
+              <!-- ko if: active && uid -->
+                <input type="hidden" data-bind="attr: {name: 'comparison[' + name + '_uid]'}, value: uid"/>
+              <!-- /ko -->
+            <!-- /ko -->
+            <!-- ko foreach: refVariant.inputs -->
+              <!-- ko if: active && uid -->
+                <input type="hidden" data-bind="attr: {name: 'comparison[' + name + '_uid]'}, value: uid"/>
+              <!-- /ko -->
+            <!-- /ko -->
+          <% end %>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" name="submit" class="btn btn-primary disabled" data-bind="disabled: !isFormReady(), css: {disabled: !isFormReady()}, click: submitForm"><span class="fa fa-area-chart"></span> Start Comparison</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+</div>

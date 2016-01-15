@@ -1,0 +1,29 @@
+$brand-blue-primary: #1F70B5;
+$brand-blue-secondary: #63A5DE; //#49a0ef; // #60acf1;
+$brand-blue-tertiary: #8198BC;
+$brand-blue-subtle: #E3F3FC;
+$brand-blue-subtler: #F4F8FD;
+$brand-blue-dark: #343E4D;
+
+$brand-green-primary: #56d699; //#6BDBA5; //#31c97f;
+
+$brand-red-primary: #EB776F;
+$brand-red-secondary: #821A1D;
+
+$brand-highlight: #FFF6E4;
+
+$brand-sidebar-bg: #5F718C;
+
+$brand-running-bg: #F0F9FD;
+$brand-running-color: #2071B5;
+$brand-failed-bg: #FFEEED;
+$brand-failed-color: #821A1D;
+$brand-done-bg: #fff;
+$brand-done-color: darken($brand-green-primary, 5%);
+
+$brand-font-family:  "Quicksand", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif !default;
+
+$nav-height: 74px;
+
+$border-header-color: darken($brand-blue-subtler, 4%);
+$border-default-color: #ddd;

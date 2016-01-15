@@ -1,0 +1,64 @@
+@import "_common"
+
+.navbar
+  padding-left: $navbar-padding-horizontal
+  padding-right: $navbar-padding-horizontal
+
+  .nav-icon
+    color: $navbar-inverse-link-color
+
+.navbar-brand
+  font-family: $brand-font-family
+  font-weight: 300
+  font-size: 20px
+  letter-spacing: -1px
+  display: block
+  &:hover
+    opacity: 0.9
+
+.navbar-inverse .navbar-nav.nav-links
+  text-align: center
+
+  li > a
+    color: $navbar-inverse-link-color
+    font-weight: 400
+    min-width: 100px
+
+    .nav-icon
+      font-size: 28px
+
+    &:hover, &:hover .nav-icon
+      color: $brand-blue-subtler
+
+  li.active
+    > a, > a:hover, > a:focus
+      background-color: transparent
+      color: #fff
+      .nav-icon
+        color: $brand-red-primary
+
+.navbar-nav
+  @media (min-width: $grid-float-breakpoint)
+    > li
+      > a
+        padding-top:    10px
+        padding-bottom: 10px
+
+@media (max-width: $screen-sm-min)
+  .navbar-nav, .navbar-nav .dropdown a
+    text-align: center
+
+  .navbar-brand
+    padding-top: 10px
+    padding-bottom: 10px
+
+@media (min-width: $screen-sm-min)
+  .navbar-brand
+    height: auto
+    padding-top: 10px
+    padding-bottom: 20px
+
+@media (max-width: $screen-sm-max)
+  .navbar-inverse .navbar-nav.nav-links
+    li > a
+      min-width: 0

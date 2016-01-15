@@ -1,0 +1,10 @@
+<% content_for :title do %>Create New App<% end %>
+
+<div class="page-header">
+  <div class="page-title">
+    <span class="fa fa-cube"></span>
+    Create App <small data-bind="text: title"></small>
+  </div>
+</div>
+
+<%= render "apps/editor", app: @app %>

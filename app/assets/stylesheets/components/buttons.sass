@@ -1,0 +1,63 @@
+@import "_common"
+
+.btn-default-version
+  font-weight: bold
+  color: $brand-blue-dark
+
+  > *
+    font-weight: normal
+
+.btn-static
+  padding: $padding-base-vertical $padding-base-horizontal
+  display: inline-block
+  float: left
+
+.btn-success
+  .fa
+    color: $btn-success-color
+
+.btn.btn-default
+  font-weight: bold
+  .fa
+    color: $brand-red-primary
+  &:not(.disabled)
+    &:hover, &:focus, &:active, &.active
+      color: $brand-blue-primary
+      background-color: $brand-blue-subtler
+      border-color: $brand-blue-secondary
+
+.btn-link, .btn-link:hover, .btn-link:focus
+  text-decoration: none
+
+.btn-link-light
+  color: rgba(#fff, 0.9)
+  &:hover
+    color: #fff
+
+.btn-link-danger
+  color: $brand-blue-tertiary
+  &:hover
+    color: $brand-red-primary
+
+.btn-box
+  text-align: center
+  .fa
+    font-size: 50px
+
+
+.dropdown-menu
+  max-height: 300px
+  overflow: auto
+  > li > a
+    cursor: pointer
+
+    .label
+      margin: 2px 0 0 4px
+
+.below-fold-actions
+  padding: 20px 10px 10px
+  border-top: 1px solid $border-default-color
+  text-align: center
+
+.btn-xs .badge
+  font-size: 75%

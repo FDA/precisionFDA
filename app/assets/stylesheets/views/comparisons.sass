@@ -1,0 +1,294 @@
+@import "_common"
+
+$withHeight: 100px
+$comparator-border-color: lighten($brand-blue-tertiary, 25%)
+
+.pfda-controller-comparisons main
+  .variants
+    @include flexbox
+    @include align-items(stretch)
+    @include align-content(center)
+    position: relative
+    border: 4px solid $comparator-border-color
+    border-bottom-width: 1px
+    border-radius: $border-radius-base
+    border-bottom-left-radius: 0
+    border-bottom-right-radius: 0
+    overflow-x: hidden
+
+  .variant-test, .variant-ref
+    position: relative
+    width: 50%
+    vertical-align: middle
+    padding: 10px $withHeight
+
+  .variant-test
+    background-color: $brand-blue-subtler
+    border-right: 1px solid $comparator-border-color
+    padding-left: 10px
+
+  .variant-ref
+    background-color: darken($brand-blue-subtler, 3%)
+    border-left: 1px solid $comparator-border-color
+    padding-right: 10px
+
+  .variants-circle
+    position: absolute
+    top: 50%
+    right: 50%
+    height: $withHeight
+    width: $withHeight
+    margin-top: -$withHeight/2
+    margin-right: -$withHeight/2
+
+    text-align: center
+    line-height: $withHeight
+    z-index: 1
+
+    > *
+      border-radius: $withHeight
+      height: 100%
+      width: 100%
+      display: block
+      border: 2px solid $comparator-border-color
+
+    .variants-circle-with
+      background-color: #fff
+      color: $brand-blue-tertiary
+      font-family: $font-family-serif
+      font-style: italic
+      font-weight: 300
+      font-size: 19px
+
+    .variants-circle-compare
+      background-color: $brand-blue-primary
+      color: #fff
+      font-size: 16px
+      text-transform: uppercase
+      font-weight: bold
+      cursor: pointer
+      border-color: darken($brand-blue-primary, 10%)
+
+      &:hover
+        background-color: darken($brand-blue-primary, 10%)
+        text-decoration: none
+
+      &:active
+        background-color: darken($brand-blue-primary, 20%)
+
+  .variant-input-cell
+    display: inline-block
+    vertical-align: top
+    font-size: 16px
+
+    &:first-child
+      min-width: 100px
+
+  .variant-title
+    font-size: $font-size-h3
+    margin: $padding-large-vertical 0
+    color: $brand-blue-tertiary
+
+  .variant-inputs
+    .file-label
+      color: lighten($brand-blue-tertiary, 5%)
+
+    .file-info
+      font-weight: 300
+      display: inline-block
+
+    .close
+      display: inline-block
+      margin-right: 5px
+      float: none
+      vertical-align: top
+
+    .file-optional
+      color: lighten($brand-blue-tertiary, 15%)
+      font-size: 12px
+      text-transform: uppercase
+      margin-left: 25px
+
+    .required
+      .fa
+        color: $brand-red-primary
+
+      .file-label
+        color: $brand-blue-dark
+
+      &:not(.active)
+        .file-info
+          color: $brand-red-primary
+
+    .active
+      .fa
+        color: $brand-blue-dark
+
+        &.access-icon
+          color: $brand-blue-tertiary
+
+    > li
+      margin-bottom: $padding-large-vertical
+      white-space: nowrap
+
+      &:last-child
+        margin-bottom: 0
+
+      &:not(.active)
+        .file-info
+          color: lighten($brand-blue-tertiary, 10%)
+
+      .active
+        .file-info
+          color: $brand-red-primary
+
+.pfda-controller-comparisons.pfda-action-new main
+  padding-bottom: 150px
+  .cell-file-actions
+    .dropdown-menu
+      min-width: 350px
+      padding: $padding-small-vertical $padding-small-horizontal
+      li > a
+        display: block
+        padding: $padding-base-vertical $padding-base-horizontal
+        color: $link-color
+        border-radius: $border-radius-base
+        text-decoration: none
+        &:hover
+          background-color: $dropdown-link-hover-bg
+        color: $link-hover-color
+
+      li.disabled > a
+        color: lighten($dropdown-link-disabled-color, 10%)
+
+      li.active > a, li.active > a:hover
+        background-color: $brand-blue-secondary
+        color: $dropdown-link-active-color
+
+      li.dropdown-header
+        padding: $padding-base-vertical $padding-base-horizontal
+
+  .cell-file-name > a
+    color: $brand-blue-dark
+
+  .nav-comparisons
+    margin-bottom: 20px
+    li > a
+      font-weight: 18px
+      text-transform: uppercase
+
+  form
+    input, textarea
+      &:not(.required)
+        background-color: $brand-blue-subtler
+
+    .form-group:last-child
+      margin: 0
+
+  .help-block
+    text-align: center
+    margin: 20px 0 30px
+
+  .files-filter
+    background-color: $comparator-border-color
+    border: 4px solid $comparator-border-color
+
+  .files-selector
+    .table
+      border-radius: $border-radius-base
+      border-top-left-radius: 0
+      border-top-right-radius: 0
+      border: 4px solid $comparator-border-color
+      border-top: 0
+
+      > tbody > tr
+        &:hover
+          background-color: $table-bg-hover
+
+        > td
+          border-left: 0
+          border-right: 0
+
+          &.cell-file-actions
+            width: 100px
+            text-align: right
+            padding: 2px
+
+            .btn-select-file
+              padding: 6px $padding-base-horizontal
+
+      .cell-file-selections
+        text-align: right
+
+      .cell-file-actions
+        .dropdown-menu
+          a
+            cursor: pointer
+
+.pfda-controller-comparisons.pfda-action-show main
+  .comparison-summary.panel-heading
+    padding-bottom: 0
+    .list-group.list-group-inline
+      margin-bottom: 0
+      text-align: center
+      .list-group-item
+        background-color: transparent
+        padding: $padding-large-vertical*2 $padding-base-horizontal
+        margin-bottom: $padding-large-vertical
+        .list-group-item-text
+          font-size: $font-size-h1
+          font-weight: 300
+
+  .variants
+    margin-top: $padding-large-vertical
+    border-radius: $border-radius-base
+    border-width: 2px
+
+  .meta-stats
+    .list-group-item
+      @include flexbox
+      @include align-items(center)
+      @include justify-content(space-between)
+
+      .list-group-item-heading
+        margin: 0
+
+      .list-group-item-text
+        text-align: right
+        font-size: $font-size-h3
+
+  .comparison-outputs
+    tfoot
+      display: none
+
+@media (max-width: $screen-xs-max)
+  .variant-title
+    margin: 0 auto 5px
+    font-size: $font-size-h4
+
+@media (max-width: $screen-sm-max)
+  .pfda-controller-comparisons.pfda-action-new
+    .affix
+      position: relative !important
+      left: 0 !important
+      right: 0 !important
+
+  .pfda-controller-comparisons main
+    .variants
+      @include flex-direction(column)
+
+      .variant-test,
+      .variant-ref
+        width: 100%
+        padding-left: 10px
+        padding-right: 10px
+
+      .variant-test
+        padding-bottom: $withHeight/2
+        border-right-width: 0
+        border-bottom: 1px solid $comparator-border-color
+
+      .variant-ref
+        padding-top: $withHeight/2
+        border-left-width: 0
+        border-top: 1px solid $comparator-border-color

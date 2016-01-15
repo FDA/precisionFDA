@@ -1,0 +1,30 @@
+<div class="pfda-cards pfda-cards-list">
+  <% @notes.each do |note| %>
+    <a class="pfda-card pfda-card-list pfda-card-padded" href="<%= note_path(note) %>">
+      <div class="pfda-card-header">
+        <div class="pfda-card-title">
+          <%= unilinkfw(note, {globe: true, nolink: true}) %>
+        </div>
+      </div>
+      <ul class="pfda-card-metadata pfda-card-metadata-glued pfda-card-metadata-fw-indent list-inline list-inline-bullets">
+        <li><%= note.user.org.handle %>/<%= note.user.dxuser %></li>
+        <li><%= note.created_at.to_s(:db) %></li>
+        <% if note.real_files.count > 0 %>
+          <li title="Files"><span class="pfda-card-metadata-value"><%= note.real_files.count %></span> <span class="fa fa-files-o" aria-hidden="true"></span></li>
+        <% end %>
+        <% if note.comparisons.count > 0 %>
+          <li title="Comparisons"><span class="pfda-card-metadata-value"><%= note.comparisons.count %></span> <span class="fa fa-bullseye" aria-hidden="true"></span></li>
+        <% end %>
+        <% if note.apps.count > 0 %>
+          <li title="Apps"><span class="pfda-card-metadata-value"><%= note.apps.count %></span> <span class="fa fa-cubes" aria-hidden="true"></span></li>
+        <% end %>
+        <% if note.jobs.count > 0 %>
+          <li title="Jobs"><span class="pfda-card-metadata-value"><%= note.jobs.count %></span> <span class="fa fa-tasks" aria-hidden="true"></span></li>
+        <% end %>
+        <% if note.assets.count > 0 %>
+          <li title="Assets"><span class="pfda-card-metadata-value"><%= note.assets.count %></span> <span class="fa fa-file-zip-o" aria-hidden="true"></span></li>
+        <% end %>
+      </ul>
+    </a>
+  <% end %>
+</div>

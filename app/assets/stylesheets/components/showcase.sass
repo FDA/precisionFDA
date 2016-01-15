@@ -1,0 +1,63 @@
+@import "_common"
+
+.showcase
+  position: relative
+
+  &.showcase-padded
+    padding: 100px 50px
+
+  &.showcase-flex
+    @include flexbox
+    @include justify-content(space-between)
+    @include align-items(stretch)
+
+    @media (max-width: $screen-md-max)
+      @include flex-wrap(wrap)
+
+    @media (max-width: $screen-sm-max)
+      @include flex-direction(column)
+
+  .showcase-item
+    padding: 0 20px
+    text-align: center
+
+    @media (max-width: $screen-md-max)
+      width: 50%
+      margin-bottom: 30px
+
+    @media (max-width: $screen-sm-max)
+      width: 100%
+
+    .showcase-icon
+      .fa
+        font-size: 75px
+        color: $accessible-brand-red-primary
+
+      a:hover
+        .fa
+          color: darken($accessible-brand-red-primary, 5%)
+
+    .showcase-heading
+      font-size: $font-size-h3
+      color: $accessible-brand-blue-primary
+      font-weight: 500
+      text-transform: uppercase
+      margin: 10px 0
+
+    .lead
+      font-size: 16px
+      font-weight: 500
+      color: $accessible-text-muted
+      text-align: left
+
+      @media (max-width: $screen-sm-max)
+        font-size: 18px
+
+  &.showcase-shadow-jumbo
+    box-shadow: 0px -10px 20px rgba(0, 0, 0, 0.2)
+
+  &.showcase-shadow
+    box-shadow: 0px -10px 15px rgba(0, 0, 0, 0.2)
+
+  + .showcase-shadow
+    box-shadow: 0px -10px 20px rgba(0, 0, 0, 0.1)

@@ -1,0 +1,95 @@
+<% content_for :title do %>Profile<% end %>
+
+<div class="page-header">
+  <div class="page-title">Profile</div>
+</div>
+
+<div class="infoframe-outer">
+  <div class="infoframe-inner">
+    <h4 class="infoframe-title">About your account</h3>
+    <ul class="list-group infoframe-inline">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Username</h5>
+        <p class="list-group-item-text"><%= @user.dxuser %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Name</h5>
+        <p class="list-group-item-text"><%= @user.full_name %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Email</h5>
+        <p class="list-group-item-text"><%= @user.email %></p>
+      </li>
+    </ul>
+    <%= link_to(content_tag(:span, "", class: "fa fa-lock") + " Change password", "#{DNANEXUS_PLATFORM_URI}profile/#{@user.dxuser}/changePassword?client_id=precision_fda_gov", class: 'btn btn-primary') %>
+    <%= link_to(content_tag(:span, "", class: "fa fa-user") + " View public profile", user_path(@user.dxuser), class: 'btn btn-default') %>
+  </div>
+</div>
+
+<% if !@user.singular? %>
+  <div class="infoframe-outer">
+    <div class="infoframe-inner">
+      <h4 class="infoframe-title">About your organization</h3>
+      <ul class="list-group infoframe-inline">
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Handle</h5>
+          <p class="list-group-item-text"><%= @user.org.handle %></p>
+        </li>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Name</h5>
+          <p class="list-group-item-text"><%= @user.org.name %></p>
+        </li>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Administrator</h5>
+          <p class="list-group-item-text"><%= @user.org.admin.full_name %></p>
+        </li>
+      </ul>
+
+      <div class="infoframe-grid">
+        <%= grid(@users_grid, show_filters: :when_filtered) do |g|
+          g.blank_slate partial:  "_partials/empty_grid"
+
+          g.column name: 'Username', attribute: 'dxuser' do |user|
+            link_to(user.dxuser, user_path(user.dxuser))
+          end
+
+          g.column name: 'Name' do |user|
+            user.full_name
+          end
+
+          g.column name: 'Joined', attribute: 'created_at', auto_reload: true, filter_type: :standard do |user|
+            user.created_at.to_s(:db)
+          end
+        end -%>
+      </div>
+      <% if @user.can_provision_accounts? %>
+        <%= link_to(content_tag(:span, "", class: "fa fa-plus") + " Provision new user under \"#{@user.org.name}\"", provision_user_path, method: 'post', class: 'btn btn-primary') %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<% if @user.can_administer_site? %>
+  <div class="infoframe-outer">
+    <div class="infoframe-inner">
+      <h4 class="infoframe-title">Site Administration</h3>
+      <ul class="list-group infoframe-inline">
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Contributors</h5>
+          <p class="list-group-item-text"><%= User.count %></p>
+        </li>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Contributor Orgs</h5>
+          <p class="list-group-item-text"><%= Org.count %></p>
+        </li>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Browse Access</h5>
+          <p class="list-group-item-text"><%= Invitation.count %></p>
+        </li>
+      </ul>
+      <%= link_to(content_tag(:span, "", class: "fa fa-plus") + " Provision new organization & admin", provision_org_path, method: 'post', class: 'btn btn-primary') %>
+      <%= link_to(content_tag(:span, "", class: "fa fa-file-excel-o") + " Generate report", run_report_path, method: 'post', class: 'btn btn-default') %>
+    </div>
+  </div>
+
+<% end %>

@@ -1,0 +1,79 @@
+@import "_common"
+
+// WICE-GRID
+$select-width: 28px
+.wice-grid.table
+  margin-bottom: 0
+
+  .fa
+    color: $brand-blue-tertiary
+
+  > thead > tr > th
+    color: $text-muted
+    text-transform: uppercase
+    font-size: 12px
+    font-weight: 500
+    a
+      color: $brand-blue-tertiary
+
+  > tbody > tr > td, > thead > tr > th
+    border-left: 0
+    border-right: 0
+
+  &.table-striped > tbody > tr:nth-of-type(odd)
+    background-color: transparent
+
+  > tbody > tr, &.table-striped > tbody > tr:nth-of-type(odd)
+    .col-state
+      text-transform: uppercase
+      font-weight: bold
+      font-size: 10px
+      vertical-align: middle
+      color: $state-warning-text
+      background-color: $state-warning-bg
+      &.state-running
+        color: #fff
+        background-color: $brand-blue-primary
+      &.state-done
+        color: $state-success-text
+        background-color: $state-success-bg
+      &.state-failed, &.state-error
+        color: $state-danger-text
+        background-color: $state-danger-bg
+
+  td.sel, th.sel
+    width: $select-width
+
+  .wg-filter-row
+    background-color: $gray-lighter
+
+  .pagination_status
+    float: right
+    color: $brand-blue-tertiary
+
+  .custom-dropdown-container
+    .custom-dropdown
+      width: calc(100% - 30px)
+      display: inline-block
+    .clickable
+      width: 25px
+      display: inline-block
+      text-align: center
+
+  .clickable
+    cursor: pointer
+
+  .extra-row
+    border-top: 2px solid transparent
+    td
+      padding-top: 0
+    .description
+      color: $text-muted
+
+  .current
+    font-weight: bold
+
+.empty-grid
+  padding: $padding-large-vertical $padding-large-horizontal
+  .alert
+    margin-bottom: 0

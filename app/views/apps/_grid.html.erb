@@ -1,0 +1,48 @@
+<%= grid(apps_grid, show_filters: :when_filtered) do |g|
+  g.blank_slate partial:  "_partials/empty_grid"
+
+  g.column name: 'Name', attribute: 'name' do |series|
+    series.name
+  end
+
+  g.column name: 'Title', attribute: 'title', assoc: :latest_version_app do |series|
+    unilink(series.latest_version_app)
+  end
+
+  g.column name: 'Revision', attribute: 'revision', assoc: :latest_version_app do |series|
+    series.latest_version_app.revision
+  end
+
+  g.column name: 'Explorers' do |series|
+    series.jobs.select(:user_id).distinct.count
+  end
+
+  g.column name: 'Org', attribute: 'handle', assoc: [:user, :org] do |series|
+    series.user.org.handle
+  end
+
+  g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |series|
+    link_to(series.user.dxuser, user_path(series.user.dxuser))
+  end
+
+  g.column name: 'Created', attribute: 'created_at', assoc: :latest_version_app, auto_reload: true, filter_type: :standard do |series|
+    series.latest_version_app.created_at.to_s(:db)
+  end
+
+  g.column name: 'Access', attribute: 'scope',
+    custom_filter: {'Public' => "public", 'Private' => "private"} do |series|
+    series.public? ? "Public" : "Private"
+  end
+
+  g.column name: 'Ran by you?' do |series|
+    app_ids = series.jobs.where(user_id: @context.user_id).select(:app_id).distinct.map(&:app_id)
+    if app_ids.include?(series.latest_version_app_id)
+      "Yes"
+    elsif app_ids.present?
+      "Not this revision"
+    else
+      link_to "Try", new_app_job_path(series.latest_version_app.dxid), class: 'btn btn-primary btn-xs'
+    end
+  end
+
+end -%>

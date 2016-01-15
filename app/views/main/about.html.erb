@@ -1,0 +1,174 @@
+<% content_for :title do %>About precisionFDA<% end %>
+
+<div class="accessible">
+  <div class="page-header">
+    <div class="page-title text-center">
+      About precisionFDA
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs nav-tabs-padded nav-tabs-lg nav-justified" role="tablist">
+      <li role="presentation" class="<% if !params[:section].present? || params[:section] == 'why' %>active<% end %>">
+        <a href="<%= about_path %>/why" aria-controls="why" role="tab">
+          <span class="tab-label">Why?</span>
+          <span class="tab-help">Background and motivation</span>
+        </a>
+      </li>
+      <li role="presentation" class="<% if params[:section] == 'what' %>active<% end %>">
+        <a href="<%= about_path %>/what" aria-controls="what" role="tab">
+          <span class="tab-label">What?</span>
+          <span class="tab-help">A genomics community and platform</span>
+        </a>
+      </li>
+      <li role="presentation" class="<% if params[:section] == 'who' %>active<% end %>">
+        <a href="<%= about_path %>/who" aria-controls="who" role="tab">
+          <span class="tab-label">Who?</span>
+          <span class="tab-help">The team behind the initiative</span>
+        </a>
+      </li>
+      <li role="presentation" class="<% if params[:section] == 'how' %>active<% end %>">
+        <a href="<%= about_path %>/how" aria-controls="how" role="tab">
+          <span class="tab-label">How?</span>
+          <span class="tab-help">Learn how to use the features</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="container">
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <% if !params[:section].present? || params[:section] == 'why' %>
+      <div role="tabpanel" class="tab-pane tab-pane-padded tab-pane-padded-xl active" id="why">
+        <div class="row">
+          <div class="lead lead-intro text-primary">
+            The Food and Drug Administration (FDA) plays an integral role in President Obama’s <a href="https://www.whitehouse.gov/precision-medicine">Precision Medicine Initiative</a>, which foresees the day when an individual’s medical care will be tailored in part based on their unique characteristics and genetic make-up.
+          </div>
+          <hr>
+          <div class="col-md-12">
+            <p class="lead">To accelerate progress towards this vision, in July 2014, FDA’s Chief Health Informatics Officer (CHIO), <a href="http://www.fda.gov<%= about_path %>FDA/CentersOffices/ucm349836.htm">Taha Kass-Hout, M.D.</a>, began investigating the concept of a research and development portal that would allow community members to test, pilot, and validate existing and new bioinformatics approaches for processing the vast amount of genomic data that is collected using Next Generation Sequencing (NGS) technology.
+            </p>
+            <p class="lead">
+              After conducting market research, collaborating with FDA’s <a href="http://www.fda.gov<%= about_path %>FDA/CentersOffices/OfficeofMedicalProductsandTobacco/CDRH/">Center for Devices and Radiological Health</a> and assembling a project team, the precisionFDA project was initiated on July 22, 2015 with a scheduled beta launch date of December 15, 2015.
+            </p>
+          </div>
+          <div class="col-md-11 col-md-offset-1">
+            <p class="text-center">
+              <img src="/assets/beta-release.png" class="img-responsive img-thumbnail" alt="Beta release Timeline: Beta launch on Dec 2015">
+            </p>
+          </div>
+        </div>
+      </div>
+      <% end %>
+      <% if params[:section] == 'what' %>
+      <div role="tabpanel" class="tab-pane tab-pane-padded tab-pane-padded-xl active" id="what">
+        <div class="lead lead-intro text-primary">
+          PrecisionFDA provides the genomics community with a secure, cloud-based platform where participants can access and share datasets, analysis pipelines, and bioinformatics tools, in order to benchmark their approaches and advance regulatory science.
+        </div>
+        <hr>
+        <p class="lead">
+          While precisionFDA does not serve a regulatory role, it is expected to generate knowledge to inform future regulatory pathways and decision making.
+        </p>
+        <p class="lead">
+          PrecisionFDA provides a private area where participants (individuals or organizations) can conduct genome analysis and comparison against reference material, and a community area where they can publish and share results, reference materials, and tools. The precisionFDA community continues to grow and includes:
+        </p>
+
+        <ul class="lead lead-regular">
+          <li>Genome Test or Software Providers</li>
+          <li>Standards-making Bodies</li>
+          <li>Pharmaceutical &amp; Biotechnology Companies</li>
+          <li>Healthcare Providers</li>
+          <li>Academic Medical Centers</li>
+          <li>Researchers</li>
+          <li>Patients</li>
+          <li>FDA &amp; Other Government Agencies</li>
+        </ul>
+      </div>
+      <% end %>
+      <% if params[:section] == 'who' %>
+      <div role="tabpanel" class="tab-pane tab-pane-padded tab-pane-padded-xl active" id="who">
+        <div class="lead lead-intro text-primary">
+          PrecisionFDA is an initiative in the Office of Health Informatics (OHI) at the Food and Drug Administration led by the Chief Health Informatics Officer (CHIO), Dr. Taha Kass-Hout, MD, MS.
+        </div>
+        <hr>
+        <p class="lead">
+          The core project team consists of the following individuals, in alphabetical order:
+        </p>
+
+        <ul class="list list-inline list-bricks lead lead-bold">
+          <li>George Asimenos*</li>
+          <li>Ruth Bandler</li>
+          <li>Adam Berger</li>
+          <li>Fahd Butt*</li>
+          <li>Elaine Johanson</li>
+          <li>Taha Kass-Hout</li>
+          <li>Xueying (Sharon) Liang</li>
+          <li>David Litwack</li>
+          <li>Elizabeth Mansfield</li>
+          <li>Omar Serang*</li>
+          <li>David Shaywitz*</li>
+          <li>Zivana Tezak</li>
+        </ul>
+
+        <hr>
+
+        <p class="lead">
+          The team also wishes to thank the following individuals for their significant contributions to the effort:
+        </p>
+
+        <ul class="list list-inline list-bricks lead lead-regular">
+          <li>Vincent Amatrudo</li>
+          <li>Angela Anderson*</li>
+          <li>Rob Califf</li>
+          <li>Mohammed (Sohail) Chaudhry</li>
+          <li>Stephanie Devaney</li>
+          <li>Amber Griffin</li>
+          <li>Letria Hall</li>
+          <li>Walter Harris</li>
+          <li>Sally Howard</li>
+          <li>Sean Hanlon</li>
+          <li>Farhan Khan</li>
+          <li>Bruce Kuhlik</li>
+          <li>Margaret Leizear</li>
+          <li>DJ Patil</li>
+          <li>Shawn Porter</li>
+          <li>Karen Riley</li>
+          <li>Alyson Saben</li>
+          <li>Jeff Shuren</li>
+          <li>Vahan Simonyan</li>
+          <li>Todd Simpson</li>
+          <li>Sean Wybenga</li>
+        </ul>
+
+        <br>
+        <p class="text-muted">*Contractor to FDA’s Office of Health Informatics</p>
+      </div>
+      <% end %>
+      <% if params[:section] == 'how' %>
+      <div role="tabpanel" class="tab-pane tab-pane-padded tab-pane-padded-xl active" id="how">
+        <%= render "main/docs" %>
+      </div>
+      <% end %>
+    </div>
+  </div>
+
+  <% if !@context.logged_in_or_guest? %>
+  <hr>
+
+  <div class="container">
+    <div class="panel panel-info text-center">
+      <div class="panel-body">
+        <p class="lead lead-bold">This program is in beta at this time.</p>
+        <p class="lead">For further information and to express interest in participating please submit our request access form.</p>
+      </div>
+      <div class="panel-body">
+        <a class="btn accessible-btn-success btn-lg" href="/request_access"><span class="fa fa-user-plus" aria-hidden="true"></span> Request Access</a>
+      </div>
+    </div>
+  </div>
+  <% end %>
+</div>
+
+<%= render "_partials/fda_footer" %>

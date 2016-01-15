@@ -1,0 +1,206 @@
+<h1 class="sr-only">Welcome to precisionFDA</h1>
+<div class="jumbotron jumbotron-landing jumbotron-landing-guest jumbotron-particles">
+  <div class="container">
+    <div class="pfda-brand">
+      <%= image_tag("precisionFDA.white.navbar-guest.png", alt: "Welcome to PrecisionFDA", height: "60px") %>
+    </div>
+    <div class="btn-player-wrapper">
+      <a class="btn-player fa fa-play-circle" aria-label="Play precisionFDA Introduction Video">
+      </a>
+      <div class="jumbovideo">
+        <div class="jumbovideo-player-wrapper">
+          <div id="ytplayer" class="jumbovideo-player"></div>
+        </div>
+      </div>
+    </div>
+    <div class="guest-actions">
+      <p class="lead">A community platform for NGS assay evaluation and regulatory science exploration.</p>
+      <%= render "_partials/guest_actions" %>
+    </div>
+  </div>
+</div>
+
+<div class="showcase showcase-shadow-jumbo container">
+  <%= render "_partials/quotes" %>
+</div>
+
+<div class="showcase showcase-padded showcase-flex showcase-shadow container">
+  <div class="showcase-item">
+    <div class="showcase-icon">
+      <a href="<%= about_path %>/how#notes"><span class="fa fa-sticky-note" aria-hidden="true"></span></a>
+    </div>
+    <div class="showcase-content">
+      <div class="showcase-heading"><a href="<%= about_path %>/how#notes">Notes</a></div>
+      <ul class="list-unstyled lead">
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-edit" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <strong>Write and publish</strong> rich notes describing your thoughts and your work
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-paperclip" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <strong>Attach</strong> any files, comparisons, or apps
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-copy" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <strong>Read</strong> what others are reporting and reproduce their workflows
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-book" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <a href="<%= about_path %>/how#notes">Learn more</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="showcase-item">
+    <div class="showcase-icon">
+      <a href="<%= about_path %>/how#files"><span class="fa fa-files-o" aria-hidden="true"></span></a>
+    </div>
+    <div class="showcase-content">
+      <div class="showcase-heading"><a href="<%= about_path %>/how#files">Files</a></div>
+      <ul class="list-unstyled lead">
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-cloud-upload" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <strong>Upload</strong> your own files on cloud storage
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-bolt" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <strong>Generate</strong> files through running apps
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-bullhorn" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <strong>Publish</strong> reference data or any other files
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-list-alt" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <strong>Browse</strong> other members' contributions
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-book" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <a href="<%= about_path %>/how#files">Learn more</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="showcase-item">
+    <div class="showcase-icon">
+      <a href="<%= about_path %>/how#comparisons"><span class="fa fa-bullseye"></span></a>
+    </div>
+    <div class="showcase-content">
+      <div class="showcase-heading"><a href="<%= about_path %>/how#comparisons">Comparisons</a></div>
+      <ul class="list-unstyled lead">
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-signal" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <strong>Quantify</strong> the similarity between two sets of genomic variants (VCF files)
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-balance-scale" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <strong>Compare</strong> your own test set (for a given biospecimen) to established benchmark sets
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-book" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <a href="<%= about_path %>/how#comparisons">Learn more</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="showcase-item">
+    <div class="showcase-icon">
+      <a href="<%= about_path %>/how#apps"><span class="fa fa-cubes"></span></a>
+    </div>
+    <div class="showcase-content">
+      <div class="showcase-heading"><a href="<%= about_path %>/how#apps">Apps</a></div>
+      <ul class="list-unstyled lead">
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-bolt" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <strong>Run</strong> mapping and variation calling pipelines or other Linux-based software apps on the cloud
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-code" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <strong>Contribute</strong> your own software and scripts and let others explore them
+          </div>
+        </li>
+        <li class="media">
+          <div class="media-left">
+            <span class="fa fa-fw fa-book" aria-hidden="true"></span>
+          </div>
+          <div class="media-body">
+            <a href="<%= about_path %>/how#apps">Learn more</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="container-fluid container-padded pfda-participants-section gradient-blue-sky">
+  <div class="h2 text-center text-uppercase">Community Participants</div>
+  <div class="pfda-participants">
+    <% @participants.each do |participant| %>
+      <div class="pfda-participant" title="<%= participant[:name] %>" data-toggle="tooltip">
+        <%= image_tag participant[:logo], alt: participant[:name], height: participant[:height], class: participant[:classes] %>
+      </div>
+    <% end %>
+  </div>
+  <hr>
+  <div class="lead text-center">
+    The comparison framework uses open-source software by <%= image_tag "participants/rtg.png", alt: "Real Time Genomics", title: "Real Time Genomics", height: "50px", "data-toggle": "tooltip" %></div>
+  </div>
+</div>

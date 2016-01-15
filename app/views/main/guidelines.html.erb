@@ -1,0 +1,37 @@
+<% content_for :title do %>Community Guidelines<% end %>
+
+<div class="page-header">
+  <div class="page-title"><span class="fa fa-institution" aria-hidden="true"></span> Community Guidelines</div>
+</div>
+
+<div class="container container-padded">
+  <div id="guidelines-carousel" class="carousel carousel-text carousel-text-padded-lg slide" data-interval="false">
+    <!-- Wrapper for slides -->
+    <div style="width: 70%; margin: auto">
+      <!-- Indicators -->
+      <ol class="carousel-indicators">
+        <li data-target="#guidelines-carousel" data-slide-to="0" class="carousel-indicator-green active"></li>
+        <li data-target="#guidelines-carousel" data-slide-to="1" class="carousel-indicator-blue"></li>
+        <li data-target="#guidelines-carousel" data-slide-to="2" class="carousel-indicator-red"></li>
+      </ol>
+
+      <%= render "_partials/guidelines_content" %>
+    </div>
+
+    <!-- Controls -->
+    <a class="left carousel-control" href="#guidelines-carousel" role="button" data-slide="prev">
+      <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+      <span class="sr-only">Previous</span>
+    </a>
+    <a class="right carousel-control" href="#guidelines-carousel" role="button" data-slide="next">
+      <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+      <span class="sr-only">Next</span>
+    </a>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-sm-offset-6 col-sm-12">
+      <div class="help-block">Additional information available in our <%= link_to "Terms of Service", terms_path %>.</div>
+    </div>
+  </div>
+</div>

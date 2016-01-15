@@ -1,0 +1,15 @@
+// Read: Speeding Up Page Load Time In Rails
+// http://itreallymatters.net/post/45763483826/speeding-up-page-load-time-in-rails#.VeYWZZZViko
+
+// "bootstrap-sprockets" must be imported before "bootstrap" and "bootstrap/variables"
+@import "variables/_brand_variables.scss";
+
+$icon-font-path: "bootstrap-sass/assets/fonts/bootstrap/";
+@import "bootstrap-sass/assets/stylesheets/_bootstrap-sprockets.scss";
+@import "variables/_bootstrap_variables.scss";
+@import "bootstrap-sass/assets/stylesheets/_bootstrap.scss";
+
+$fa-font-path: "fontawesome/fonts/";
+@import "fontawesome/scss/font-awesome.scss";
+
+@import "sortable/sass/sortable-theme-bootstrap.sass";

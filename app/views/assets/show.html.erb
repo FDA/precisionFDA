@@ -1,0 +1,129 @@
+<% content_for :title do %><%= @asset.prefix %><% end %>
+
+<div class="page-header">
+  <div class="page-title"><span class="fa fa-file-zip-o"></span> <%= @asset.prefix %></div>
+</div>
+
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">ID</h5>
+      <p class="list-group-item-text"><%= @asset.dxid %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Org</h5>
+      <p class="list-group-item-text">
+        <%= @asset.user.org.handle %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Added by</h5>
+      <p class="list-group-item-text">
+        <%= link_to(@asset.user.dxuser, user_path(@asset.user.dxuser))  %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Archive name</h5>
+      <p class="list-group-item-text">
+        <%= @asset.name %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Access</h5>
+      <p class="list-group-item-text">
+        <span class="fa <%= @asset.public? ? 'fa-globe' : 'fa-lock' %>"></span>
+        <%= @asset.public? ? "Public" : "Private" %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">File Size</h5>
+      <p class="list-group-item-text"><%= number_to_human_size(@asset.file_size || 0) %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">State</h5>
+      <p class="list-group-item-text"><%= @asset.state %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Created</h5>
+      <p class="list-group-item-text"><%= @asset.created_at.to_s(:db) %></p>
+    </li>
+  </ul>
+</div>
+
+<div class="pfda-toolbar">
+  <div class="pull-left">
+    <div class="btn-group">
+      <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
+    </div>
+  </div>
+  <div class="pull-right">
+    <div class="btn-group">
+      <% if @asset.state == "closed" %>
+        <%= link_to download_file_path(@asset.dxid), method: :post, class: "btn btn-primary" do %>
+          <span class="fa fa-download"></span> Download
+        <% end %>
+      <% end %>
+      <% if @asset.user_id == @context.user_id %>
+        <div class="btn-group">
+          <%= link_to edit_asset_path(@asset.dxid), class: "btn btn-primary" do %>
+            <span class="fa fa-edit"></span> Edit
+          <% end %>
+        </div>
+      <% end %>
+      <% if @asset.publishable_by?(@context) %>
+        <%= link_to publish_path + "?" + {id: @asset.uid}.to_param, method: :post, class: "btn btn-success" do %>
+          <span class="fa fa-bullhorn"></span> Publish
+        <% end %>
+      <% end %>
+    </div>
+    <% if @asset.user_id == @context.user_id %>
+      <div class="btn-group">
+        <%= link_to asset_path(@asset.dxid), method: :delete, data: { confirm: 'Are you certain you want to delete this?' }, class: "btn btn-danger" do %>
+          <span class="fa fa-trash"></span> Delete
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+  <li role="presentation" class="active">
+    <a href="#tab-description" aria-controls="tab-description" role="tab" data-toggle="tab"><span class="fa fa-fw fa-info-circle"></span>
+      <span class="tab-label">Description</span>
+    </a>
+  </li>
+  <% if @notes.count > 0 %>
+  <li role="presentation">
+    <a href="#tab-notes" aria-controls="tab-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
+      <span class="tab-label">Notes <span class="badge"><%= @notes.count %></span></span>
+    </a>
+  </li>
+  <% end %>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane active" id="tab-description">
+    <div class="pfda-pane">
+      <div class="pfda-pane-content pfda-pane-content-padded">
+        <div class="pfda-md-rendered" data-bind="html: descriptionDisplay"></div>
+      </div>
+      <div class="pfda-pane-sidebar pfda-pane-sidebar-padded">
+        <ul class="list-group list-group-condensed">
+          <li class="list-group-item">
+            <div class="list-group-item-heading">Archive Contents <small>(files only)</small></div>
+          </li>
+          <% @asset.file_paths.each do |path| %>
+            <li class="list-group-item"><%= path %></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <% if @notes.count > 0 %>
+  <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-notes">
+    <%= render "notes/cards", notes: @notes %>
+  </div>
+  <% end %>
+</div>

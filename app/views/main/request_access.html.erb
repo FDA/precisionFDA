@@ -1,0 +1,195 @@
+<% content_for :title do %>Request Access<% end %>
+
+<div class="page-header">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-offset-5 col-sm-10">
+        <div class="page-title">
+          <div class="">Request Access to precisionFDA</div>
+        </div>
+        <hr>
+        <div class="description">
+          <% if @invitation.new_record? %>
+            <p class="lead">
+              Thank you for your interest!
+              <br>
+              <small>
+                To request access, please leave your information below.
+              </small>
+            </p>
+          <% else %>
+            <p class="lead text-success">
+              <span class="fa fa-check"></span> Thank you! Your request has been registered. Check your email for additional instructions.
+            </p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if @invitation.new_record? %>
+  <div class="container">
+    <div class="row">
+      <%= form_for @invitation, url: request_access_path, html: {class: "form form-horizontal"} do |f| %>
+        <% if @invitation.errors.any? %>
+          <div class="form-group form-group-lg">
+            <div class="alert alert-danger col-md-offset-5 col-md-10">
+              <strong><span class="fa fa-warning"></span> Please correct the following errors:</strong>
+              <ul>
+                <% @invitation.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        <% end %>
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            <span class="h4 text-uppercase text-primary">About me</span>
+          </div>
+        </div>
+        <hr>
+        <div class="form-group form-group-lg">
+          <%= f.label :first_name, "First name", class: 'control-label col-sm-4' %>
+          <div class="col-sm-offset-1 col-sm-10">
+            <%= f.text_field :first_name, class: 'form-control input-lg', placeholder: '', required: 'required' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <%= f.label :last_name, "Last name", class: 'control-label col-sm-4' %>
+          <div class="col-sm-offset-1 col-sm-10">
+            <%= f.text_field :last_name, class: 'form-control input-lg', required: 'required' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <%= f.label :email, "Email address", class: 'control-label col-sm-4' %>
+          <div class="col-sm-offset-1 col-sm-10">
+            <%= f.email_field :email, class: 'form-control input-lg', required: 'required' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <%= f.label :org, "Organization", class: 'control-label col-sm-4' %>
+          <div class="col-sm-offset-1 col-sm-5">
+            <%= f.text_field :org, class: 'form-control input-lg' %>
+          </div>
+          <div class="col-sm-offset-1 col-sm-8">
+            <div class="checkbox">
+              <label>
+                <%= f.check_box :singular %>
+                I do not represent any organization
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <%= f.label :address, "Address", class: 'control-label col-sm-4' %>
+          <div class="col-sm-offset-1 col-sm-10">
+            <%= f.text_field :address, class: 'form-control input-lg', required: 'required' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <%= f.label :phone, "Phone #", class: 'control-label col-sm-4' %>
+          <div class="col-sm-offset-1 col-sm-10">
+            <%= f.telephone_field :phone, class: 'form-control input-lg', required: 'required' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg form-group-optional">
+          <%= f.label :duns, "DUNS #", class: 'control-label col-sm-4' %>
+          <div class="col-sm-offset-1 col-sm-10">
+            <%= f.text_field :duns, class: 'form-control input-lg', placeholder: 'Optional' %>
+          </div>
+        </div>
+
+        <br>
+        <br>
+
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            <span class="h4 text-uppercase text-primary">My Interest in precisionFDA</span>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            <strong>Tell us a bit more about your goals / reasons why are requesting access:</strong>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            <%= f.text_field :req_reason, class: 'form-control input-lg', required: 'required' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg form-group-optional">
+          <div class="col-sm-offset-5 col-sm-10">
+            Do you have any data to contribute? If so, list below.
+          </div>
+        </div>
+        <div class="form-group form-group-lg form-group-optional">
+          <div class="col-sm-offset-5 col-sm-10">
+            <%= f.text_field :req_data, class: 'form-control input-lg', placeholder: 'Optional' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            Do you have any software to contribute? If so, list below.
+          </div>
+        </div>
+        <div class="form-group form-group-lg form-group-optional">
+          <div class="col-sm-offset-5 col-sm-10">
+            <%= f.text_field :req_software, class: 'form-control input-lg', placeholder: 'Optional' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            Ultimately, what do you see as your intended use for precisionFDA?
+            <div class="checkbox">
+              <label class="checkbox-inline">
+                <%= f.check_box :research_intent %>
+                Research use
+              </label>
+              <label class="checkbox-inline">
+                <%= f.check_box :clinical_intent %>
+                Clinical use
+              </label>
+            </div>
+          </div>
+        </div>
+        <br>
+        <br>
+
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            <span class="h4 text-uppercase text-primary">Submit Request</span>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            <strong>Prove you are not a robot by answering the following question:</strong>
+            <br>
+            <mark class="lead"><%= @invitation.humanizer_question %></mark>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <%= f.label :humanizer_answer, "Answer", class: 'control-label col-sm-4' %>
+          <div class="col-sm-10 col-sm-offset-1">
+            <%= f.text_field :humanizer_answer, class: 'form-control input-lg', required: 'required' %>
+          </div>
+          <%= f.hidden_field :humanizer_question_id %>
+        </div>
+        <div class="form-group form-group-lg">
+            <div class="col-sm-offset-5 col-sm-10">
+              <%= f.submit "Request Access to precisionFDA", class: "btn btn-lg accessible-btn-success", data: {disable_with: "Requesting..."} %>
+            </div>
+         </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<%= render "_partials/fda_footer" %>

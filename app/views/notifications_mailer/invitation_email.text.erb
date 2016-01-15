@@ -1,0 +1,25 @@
+Access Request
+
+Submitted information:
+
+  First name: <%= @invitation.first_name %>
+  Last name: <%= @invitation.last_name %>
+  Email: <%= @invitation.email %>
+  Organization: <%= @invitation.org %>
+  Self-representing? <%= !!@invitation.singular %>
+  Address: <%= @invitation.address %>
+  Phone: <%= @invitation.phone %>
+  DUNS: <%= @invitation.duns %>
+  Reason: <%= @invitation.req_reason %>
+  Data: <%= @invitation.req_data %>
+  Software: <%= @invitation.req_software %>
+  Research intent? <%= !!@invitation.research_intent %>
+  Clinical intent? <%= !!@invitation.clinical_intent %>
+  
+Additional system information:
+
+  Client IP address: <%= @invitation.ip %>
+  Geolocation: <%= "http://ip-api.com/\##{@invitation.ip}" %>
+  Email acceptable? <%= !!User.validate_email(@invitation.email) %>
+  Potential username: <%= User.construct_username(@invitation.first_name, @invitation.last_name) %>
+  Username acceptable? <%= !!User.authserver_acceptable?(User.construct_username(@invitation.first_name, @invitation.last_name)) %>

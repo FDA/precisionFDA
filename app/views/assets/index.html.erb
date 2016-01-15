@@ -1,0 +1,70 @@
+<% content_for :title do %>Assets<% end %>
+
+<div class="pfda-toolbar">
+  <ul class="nav nav-pills nav-pills-center nav-pills-sm">
+    <li class="<% if action_name == 'index' %>active<% end %>">
+      <%= link_to assets_path do %>
+        <span class="fa fa-file-zip-o"></span> <span class="pill-label">My Assets</span>
+      <% end %>
+    </li>
+    <li class="<% if action_name == 'featured' %>active<% end %>">
+      <%= link_to featured_assets_path do %>
+        <span class="fa fa-flag"></span> <span class="pill-label">Featured</span>
+      <% end %>
+    </li>
+    <li class="<% if action_name == 'explore' %>active<% end %>">
+      <%= link_to explore_assets_path do %>
+        <span class="fa fa-globe"></span> <span class="pill-label">Explore</span>
+      <% end %>
+    </li>
+  </ul>
+</div>
+
+<div class="pfda-toolbar">
+  <div class="btn-group">
+    <a class="btn btn-primary" href="<%= new_asset_path %>">
+      <span class="fa fa-plus-square fa-fw"></span> Create Assets
+    </a>
+  </div>
+</div>
+
+<% if @assets_grid.present? %>
+  <%= grid(@assets_grid, show_filters: :when_filtered) do |g|
+    g.blank_slate partial:  "_partials/empty_grid"
+
+    g.column name: 'Name', attribute: 'name' do |file|
+      unilinkfw(file, globe: true)
+    end
+
+    g.column name: 'Org', attribute: 'handle', assoc: [:user, :org] do |file|
+      file.user.org.handle
+    end
+
+    g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |file|
+      link_to(file.user.dxuser, user_path(file.user.dxuser))
+    end
+
+    g.column name: 'Size', attribute: 'file_size' do |file|
+      number_to_human_size(file.file_size)
+    end
+
+    g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |file|
+      file.created_at.to_s(:db)
+    end
+
+    g.column name: 'State', attribute: 'state', custom_filter: :auto
+
+    g.column name: 'Access', attribute: 'scope',
+      custom_filter: {'Public' => "public", 'Private' => "private"} do |file|
+      file.public? ? "Public" : "Private"
+    end
+  end -%>
+<% else %>
+  <div class="alert alert-info">
+    <% if action_name == 'index' %>
+      <span class="fa fa-info-circle"></span> Assets you add will show up here. Meanwhile, check out our <%= link_to "Featured Assets", featured_assets_path %> or <%= link_to "explore community contributions", explore_assets_path %>
+    <% else %>
+      We couldn't find any assets here
+    <% end %>
+  </div>
+<% end %>

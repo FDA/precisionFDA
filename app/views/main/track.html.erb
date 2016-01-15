@@ -1,0 +1,34 @@
+<% content_for :title do %>Track <%= @item.title %><% end %>
+
+<div class="page-header">
+  <div class="page-title"><span class="fa fa-flip-vertical fa-sitemap"></span> Track  <small><%= unilink(@item) %></small></div>
+</div>
+
+<div class="container-fluid container-padded">
+  <div class="track-intro">
+    <%= alert_help("Learn more about tracking", "#{about_path}/how#track") %>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="track-canvas-wrapper">
+      <svg class="track-canvas"><g></g></svg>
+    </div>
+  </div>
+</div>
+
+<script>
+var g = new dagreD3.graphlib.Graph().setGraph({});
+
+<%= raw graph_nodes(@graph) %>
+<%= raw graph_edges(@graph) %>
+
+var svg = d3.select("svg.track-canvas"),
+    inner = svg.select("g");
+
+var render = new dagreD3.render();
+
+render(inner, g);
+
+svg.attr("height", g.graph().height + 2);
+svg.attr("width", g.graph().width + 2);
+</script>

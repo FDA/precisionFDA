@@ -1,0 +1,49 @@
+@import "_common"
+
+.pfda-help-block
+  padding: 10px
+  margin-bottom: 10px
+  background-color: #f9f9f9
+  border-left: 5px solid #e5e5e5
+  color: $text-muted
+  text-align: left
+
+  > *
+    margin-right: 5px
+
+  .external-link-indicator
+    display: none
+
+  &.pfda-help-info
+    background-color: lighten($alert-info-bg, 5%)
+    border-color: $alert-info-border
+    color: $alert-info-text
+
+  &.pfda-help-warning
+    background-color: lighten($alert-warning-bg, 3%)
+    border-color: $alert-warning-border
+    color: $alert-warning-text
+
+  &.pfda-help-success
+    background-color: lighten($alert-success-bg, 5%)
+    border-color: $alert-success-border
+    color: $alert-success-text
+
+  &.pfda-help-danger
+    background-color: lighten($alert-danger-bg, 5%)
+    border-color: $alert-danger-border
+    color: $alert-danger-text
+
+.pfda-help-link, .pfda-help-block
+  a:not(.btn)
+    font-weight: bold
+    color: $brand-info // alt: #02bfe7
+    &:hover
+      color: darken($brand-info, 10%)
+      .external-link-indicator
+        display: inline
+
+.pfda-help-link
+  font-size: 85%
+  .fa
+    color: $brand-blue-tertiary

@@ -1,0 +1,97 @@
+@import "_common"
+
+.login-alert
+  margin-top: 20px
+  margin-bottom: 20px
+
+.pfda-guest
+  &.pfda-controller-main.pfda-action-index
+    .navbar
+      display: none
+
+    .pfda-brand
+      padding: 30px 0
+      text-align: center
+      display: block
+
+    .showcase
+      padding-bottom: 50px
+      margin-top: -75px
+      border-top-left-radius: $border-radius-base
+      border-top-right-radius: $border-radius-base
+      background-color: #fff
+
+      .pfda-quotes
+        border-top-left-radius: $border-radius-base
+        border-top-right-radius: $border-radius-base
+        background-color: $gray-subtle
+        padding-top: 20px
+        .img-responsive
+          max-height: 75px
+          text-align: right
+
+      + .showcase
+        padding-top: 50px
+        margin-top: -50px
+
+    .guest-actions
+      text-align: center
+      padding: 20px
+
+      &.guest-actions-shadowed
+        background-color: rgba(0, 0, 0, 0.05)
+
+      @media (max-width: $screen-xs-max)
+        .btn-group
+          margin-right: 0
+
+        .btn
+          margin-top: 10px
+          width: 100%
+          border-radius: $btn-border-radius-large
+
+.pfda-controller-main.pfda-action-request_access main
+  .error
+    padding: 10px
+    margin: 10px
+
+  form
+    margin-top: 20px
+    padding: 10px
+
+    .form-group-lg
+      .checkbox
+        height: 46px
+        padding: 11px 16px 11px 0
+        font-size: 18px
+        line-height: 1.3333333
+        border-radius: 3px
+
+.pfda-controller-main.pfda-action-publish main
+  .media-left
+    min-width: 105px
+
+  .list-group-item-default
+    > .media > .media-body > .object-title
+      font-weight: bold
+
+  .btn-default
+    background-color: transparent
+
+  .descendent-publish-indicator
+    color: $brand-green-primary
+
+.pfda-controller-main.pfda-action-index main
+  .pfda-tutorial
+    .pfda-card-body
+      min-height: 100px
+
+#about-docs
+  position: relative
+
+#guidelines-modal
+  .carousel-indicators li
+    cursor: default
+
+    &:not(.active):hover
+      background: #fff

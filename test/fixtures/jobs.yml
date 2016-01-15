@@ -1,0 +1,47 @@
+# == Schema Information
+#
+# Table name: jobs
+#
+#  id            :integer          not null, primary key
+#  dxid          :string
+#  app_id        :integer
+#  project       :string
+#  run_data      :text
+#  describe      :text
+#  provenance    :text
+#  state         :string
+#  name          :string
+#  user_id       :integer
+#  created_at    :datetime         not null
+#  updated_at    :datetime         not null
+#  app_series_id :integer
+#  scope         :string
+#
+
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  dxid: MyString
+  app_series: MyString
+  app_id: 
+  project: MyString
+  run_data: MyText
+  describe: MyText
+  provenance: MyText
+  state: MyString
+  name: MyString
+  user_id: 
+  scope: MyString
+
+two:
+  dxid: MyString
+  app_series: MyString
+  app_id: 
+  project: MyString
+  run_data: MyText
+  describe: MyText
+  provenance: MyText
+  state: MyString
+  name: MyString
+  user_id: 
+  scope: MyString
