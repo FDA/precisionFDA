@@ -85,10 +85,11 @@ Rails.application.configure do
   # Email us when an exception occurs
 
   Rails.application.config.middleware.use ExceptionNotification::Rack,
+    :ignore_if => ->(env, exception) { ip = env["HTTP_X_FORWARDED_FOR"]; ip == "73.158.44.186" || ip == "76.191.184.242" || IPAddr.new("64.39.96.0/20").include?(IPAddr.new(ip)) rescue false },
     :email => {
       :email_prefix => "[PrecisionFDA]",
       :sender_address => %{"notifier" <notification@dnanexus.com>},
       :exception_recipients => %w{precisionfda-dev@dnanexus.com},
       :email_format => :html
-  }
+    }
 end
