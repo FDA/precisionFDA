@@ -30,6 +30,7 @@ class MainController < ApplicationController
         { logo: "participants/broad.png", name: "Broad Institute"},
         { logo: "participants/cdc.png", name: "Centers for Disease Control and Prevention"},
         { logo: "participants/counsyl.png", name: "Counsyl"},
+        { logo: "participants/crystal_genetics.png", name: "Crystal Genetics"},
         { logo: "participants/dnanexus.png", name: "DNAnexus"},
         { logo: "participants/emory.png", name: "Emory Genetics Lab"},
         { logo: "participants/garvan.png", name: "Garvan"},
