@@ -17,5 +17,8 @@
 /tmp
 *.swp
 
-* Ignore generated assets
-public/assets
+# Ignore generated assets
+/public/assets
+
+# Ignore deployed gems
+/vendor/bundle
