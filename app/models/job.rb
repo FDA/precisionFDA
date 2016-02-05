@@ -68,7 +68,7 @@ class Job < ActiveRecord::Base
   end
   
   def resolved_instance_type
-    run_instance_type || instance_type
+    run_instance_type || app.instance_type
   end
 
   def terminal?
