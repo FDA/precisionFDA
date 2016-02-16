@@ -193,6 +193,14 @@
 <div class="container-fluid container-padded pfda-participants-section gradient-blue-sky">
   <div class="h2 text-center text-uppercase">Community Participants</div>
   <div class="pfda-participants">
+    <% @participant_orgs.each do |org| %>
+      <div class="pfda-participant" title="<%= org[:name] %>" data-toggle="tooltip">
+        <%= image_tag org[:logo], alt: org[:name], height: org[:height], class: org[:classes] %>
+      </div>
+    <% end %>
+  </div>
+  <hr>
+  <div class="pfda-participants">
     <% @participants.each do |participant| %>
       <div class="pfda-participant" title="<%= participant[:name] %>" data-toggle="tooltip">
         <%= image_tag participant[:logo], alt: participant[:name], height: participant[:height], class: participant[:classes] %>

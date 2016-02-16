@@ -22,7 +22,7 @@ class MainController < ApplicationController
         end
       end
     else
-      @participants = [
+      @participant_orgs = [
         # orgs
         { logo: "participants/23andme.png", name: "23andMe"},
         { logo: "participants/aha.png", name: "American Heart Association"},
@@ -45,8 +45,12 @@ class MainController < ApplicationController
         { logo: "participants/personalis.png", name: "Personalis"},
         { logo: "participants/pharmgkb.png", name: "PharmGKB"},
         { logo: "participants/roche.png", name: "Roche"},
+        { logo: "participants/sequenom.png", name: "Sequenom"},
         { logo: "participants/seracare.png", name: "Seracare"},
-        { logo: "participants/us-house-of-representatives.png", name: "US House of Representatives"},
+        { logo: "participants/us-house-of-representatives.png", name: "US House of Representatives"}
+      ]
+
+      @participants =  [
         # individuals
         { logo: "participants/russ_altman.jpg", name: "Dr. Russ Altman", classes: "img-circle"},
         { logo: "participants/euan_ashley.jpg", name: "Dr. Euan Ashley", classes: "img-circle"},
@@ -58,8 +62,10 @@ class MainController < ApplicationController
         { logo: "participants/dennis_wall.jpg", name: "Dr. Dennis P. Wall", classes: "img-circle"},
         { logo: "participants/mark_woon.jpg", name: "Mark Woon", classes: "img-circle"},
         { logo: "participants/mark_wright.jpg", name: "Dr. Mark Wright", classes: "img-circle"},
-        { logo: "participants/peter_tonellato.jpg", name: "Dr. Peter Tonellato", classes: "img-circle"},
+        { logo: "participants/peter_tonellato.jpg", name: "Dr. Peter Tonellato", classes: "img-circle"}
       ]
+
+      @participant_orgs = @participant_orgs.shuffle
       @participants = @participants.shuffle
     end
 
