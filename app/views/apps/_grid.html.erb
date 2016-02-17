@@ -34,7 +34,7 @@
     series.public? ? "Public" : "Private"
   end
 
-  g.column name: 'Ran by you?' do |series|
+  g.column name: 'Run by you?' do |series|
     app_ids = series.jobs.where(user_id: @context.user_id).select(:app_id).distinct.map(&:app_id)
     if app_ids.include?(series.latest_version_app_id)
       "Yes"
