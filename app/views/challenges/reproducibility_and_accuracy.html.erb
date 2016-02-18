@@ -102,7 +102,7 @@
         <li>By comparing each of your three VCF files to the NIST (Genome in a Bottle) VCF, you will get estimates for accuracy.</li>
       </ul>
       <p>
-        The complete set of these five comparisons constitutes your submission entry to the challenge. Each comparison outputs several metrics (such as precision*, recall*, f-measure, or number of non-common variants), which will be used to rank you among the other participants, within eight different categories. Winners** in each category will be recognized on the precisionFDA website.
+        The complete set of these five comparisons constitutes your submission entry to the challenge. Each comparison outputs several metrics (such as precision<a href="#footnotes">*</a>, recall<a href="#footnotes">*</a>, f-measure, or number of non-common variants), which will be used to rank you among the other participants, within eight different categories. Winners<a href="#footnotes">**</a> in each category will be recognized on the precisionFDA website.
       </p>
       <p>
         The challenge runs until April 25, 2015. 
@@ -230,8 +230,131 @@
   <p class="copy">
     NOTE: As discussed above, you are requested to repeatedly run your pipeline on the same input (for the Garvan pair of FASTQ files). Methods that are perfectly deterministic are expected to produce the same results when run on the same inputs; under such circumstances, it’s possible for the Garvan VCF to be identical to the Garvan Rerun VCF.
   </p>
+
   <p class="copy">
-  If you are running your pipeline in your own environment, upload the three generated files to precisionFDA. Additional information on uploading files is available at the <a href="https://precision.fda.gov/about/how#files-uploading">precisionFDA docs</a>.
+    If you are running your pipeline in your own environment, upload the three generated files to precisionFDA. Additional information on uploading files is available at the <a href="https://precision.fda.gov/about/how#files-uploading">precisionFDA docs</a>.
+  </p>
+
+  <h4>Bringing your pipeline to precisionFDA</h4>
+  <p class="copy">
+    Instead of running your pipeline in your own environment, you have the option of bringing your pipeline to precisionFDA and running it on the cloud. To do that, you must create one or more apps on precisionFDA that encapsulate the actions performed in your pipeline. To create an app, you can provide Linux executables and an accompanying shell script to be run inside an Ubuntu VM on the cloud. The precisionFDA website contains <a href="https://precision.fda.gov/about/how#dev">extensive documentation</a> on how to create apps, and you can also click the <strong>Fork</strong> button on an existing app (such as the <a href="https://precision.fda.gov/apps/app-BpF9YGQ0bxjbjk6Fx1F0KJF0">bwa_mem_bamsormadup</a> one) to use it as starting point for developing your own.
+  </p>
+
+  <p class="copy">
+    Bringing your pipeline to precisionFDA has an important advantage: you can, at your discretion, share it with the community, so that others can take a look at it and reproduce your results – and perhaps build upon it and further improve it.
+  </p>
+
+  <h4>Conducting the reproducibility and accuracy comparisons</h4>
+  <p class="copy">
+    Regardless of how you generate your VCFs (whether in your own environment or directly on precisionFDA), the next step is to conduct a total of five comparisons to evaluate reproducibility and accuracy.
+  </p>
+  <p class="copy">
+    The precisionFDA comparison framework makes use of <a href="https://github.com/RealTimeGenomics/rtg-tools">vcfeval</a> by Real Time Genomics (<a href="http://biorxiv.org/content/biorxiv/early/2015/08/03/023754.full.pdf">Cleary et al., 2015</a>) to perform a pairwise comparison between a test VCF and a benchmark VCF, optionally constrained within certain coordinates provided by BED files (a test BED and a benchmark BED). For more information consult the <a href="https://precision.fda.gov/about/how#comparisons">precisionFDA docs</a>. The following table summarizes the required comparisons:
+  </p>
+
+  <table class="table table-bordered table-rounded">
+    <tr>
+      <td>Comparison</td>
+      <td>Test VCF</td>
+      <td>Test BED</td>
+      <td>Benchmark VCF</td>
+      <td>Benchmark BED</td>
+    </tr>
+    <tr>
+      <td>Reproducibility Comparison #1</td>
+      <td>Garvan VCF</td>
+      <td>-</td>
+      <td>Garvan Rerun VCF</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td>Reproducibility Comparison #2</td>
+      <td>Garvan VCF (<em>or</em> Garvan Rerun VCF)</td>
+      <td>-</td>
+      <td>HLI VCF</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td>Accuracy Comparison #1a</td>
+      <td>Garvan VCF</td>
+      <td>-</td>
+      <td>NIST v2.19 VCF</td>
+      <td>NIST v2.19 BED</td>
+    </tr>
+    <tr>
+      <td>Accuracy Comparison #1b</td>
+      <td>Garvan Rerun VCF</td>
+      <td>-</td>
+      <td>NIST v2.19 VCF</td>
+      <td>NIST v2.19 BED</td>
+    </tr>
+    <tr>
+      <td>Accuracy Comparison #2</td>
+      <td>HLI VCF</td>
+      <td>-</td>
+      <td>NIST v2.19 VCF</td>
+      <td>NIST v2.19 BED</td>
+    </tr>
+  </table>
+
+  <p class="copy">
+  <strong>Reproducibility comparison #1</strong> is between your Garvan VCF and your Garvan Rerun VCF; it is meant to evaluate the reproducibility of your pipeline when running it repeatedly on the same FASTQ input.
+  </p>
+  <p class="copy">
+  <strong>Reproducibility comparison #2</strong> is between your Garvan VCF (or, at your discretion, its Rerun) and your HLI VCF; it is meant to evaluate reproducibility across different sequencing sites, where the same sequencing instrument and sample were used (but with potentially different sequencing conditions and parameters).
+  </p>
+  <p class="copy">
+  <strong>Accuracy comparisons #1a, #1b and #2</strong> are between each of your VCF files and the NIST v2.19 (Genome in a Bottle) reference VCF file, constrained within the coordinates of the accompanying NIST v2.19 BED file. The precisionFDA website provides <a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb65P0v2VPbfYPZ">NA12878-NISTv2.19.vcf.gz</a> (to be used as benchmark VCF) and <a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb4p8J8kkXpYZ4P">NA12878-NISTv2.19.bed</a> (to be used as benchmark BED). These comparisons are meant to estimate the accuracy of your pipeline within the “confident” regions of the Genome in a Bottle “golden truth” dataset – therefore you must leave the test BED entry blank. <strong>IMPORTANT</strong>: All three comparisons must meet a precision<a href="#footnotes">*</a> and recall<a href="#footnotes">*</a> threshold of at least 90%. (For the reasoning behind this, consult the section “Determining the winners” below).
+  </p>
+  <h4>Submitting your entry</h4>
+  <p class="copy">
+  This challenge has been posted to the precisionFDA “Discussions” section in the form of a question [LINK TBD]. Discussion answers can include rich text formatting, as well as attachments such as files or comparisons. You can leverage this functionality to submit your entry by filling in your answer to the question.
+  </p>
+  <p class="copy">
+  In your answer’s text, please identify whether you are participating as an individual or as part of the team (and, if it is a team effort, don’t forget to identify the members of your team). Write a description of the pipeline used to obtain the results, and if possible identify the name, version and command-line parameters of the mapper and variant caller invoked in your pipeline.
+  </p>
+  <p class="copy">
+  <strong>NOTE</strong>: If you opted to bring your pipeline to precisionFDA, and your VCFs were generated by running one or more precisionFDA apps, the system will automatically prompt you to share the details of these executions when publishing your answer (see below). In that case, your text only needs to provide a high-level summary, because the exact software invocations will be available to the community via the system’s sharing mechanism. 
+  </p>
+  <p class="copy">
+  Once you save your answer, it is initially private (and only visible to you). You can go back at any point and edit it, so we encourage you to start drafting it right away, and revise it as you make progress. Once your instantiate your answer, you can attach your comparisons to it – visit each of your comparisons and click Attach, then select your answer. Your entry must contain the five comparisons (as outlined in the previous section) in order to be considered valid.
+  </p>
+  <p class="copy">
+  Once you are comfortable with your answer, you can publish it so that others can see it (and don’t worry – you can still edit it or update its attachments even after publication). When publishing, the system will ask if you want to publish the VCF files that were input to the comparisons; please choose that option to ensure that these files are shared with the precisionFDA community. Entries that do not have their VCF files published will not be considered valid. If you used apps on precisionFDA (instead of generating these VCF files externally), please choose the option to share the underlying jobs, apps, and app assets.
+  </p>
+  <h4>Determining the winners</h4>
+  <p class="copy">
+    Winners<a href="#footnotes">**</a> will be recognized on the precisionFDA website. Awards will be given to the following categories:
+  </p>
+  <ul>
+    <li>Lowest count of unique/non-reproducible variants (“false positives” + “false negatives”) in reproducibility comparison #1. If there are several submissions with a count of zero, an “honorable mention” will be awarded to each one.</li>
+    <li>Lowest count of unique/non-reproducible variants (“false positives” + “false negatives”) in reproducibility comparison #2.</li>
+    <li>Highest precision<a href="#footnotes">*</a> in accuracy comparisons #1a/#1b.</li>
+    <li>Highest recall<a href="#footnotes">*</a> in accuracy comparisons #1a/#1b.</li>
+    <li>Highest f-measure in accuracy comparisons #1a/#1b.</li>
+    <li>Highest precision<a href="#footnotes">*</a> in accuracy comparison #2.</li>
+    <li>Highest recall<a href="#footnotes">*</a> in accuracy comparison #2.</li>
+    <li>Highest f-measure in accuracy comparison #2.</li>
+  </ul>
+  <p class="copy">
+  <strong>NOTE</strong>: It is possible for a pipeline to try to reach maximum precision<a href="#footnotes">*</a> by being trivially strict or maximum recall<a href="#footnotes">*</a> by being trivially lenient. To avoid very extreme entries, and to ensure fairness in the competition, the challenge requires that all submitted accuracy comparisons reach a minimum threshold of 90% for each of the precision<a href="#footnotes">*</a> and the recall<a href="#footnotes">*</a> statistics. Entries that do not meet this criteria will not be considered valid.
+  </p>
+  <h4>Extra credit</h4>
+  <p class="copy">
+  <strong>Give us your thoughts on the following topic, and be acknowledged on the precisionFDA website as a precisionFDA Innovation Leader.</strong> 
+  </p>
+  <p class="copy">
+  Comparing VCF results is a difficult problem (partly due to the fact that the same variant can be represented in many ways), but becomes more tractable for the case of a pairwise comparison. The reproducibility portion of this challenge leverages the precisionFDA pairwise comparison framework to assess the similarity between two pipeline invocations at a time, but extending it beyond two trials may not be as straightforward.
+  </p>
+  <p class="copy">
+  How would you assess reproducibility across more than two repeated experiments? What is an ideal method for comparing multiple (more than two) VCF files? How tractable is a seemingly simple calculation such as “count the number of variants that are common (reproducible) among a set of VCF files”?
+  </p>
+  <h4 id="footnotes">Footnotes</h4>
+  <p class="copy">
+  * The terminology currently used in the precisionFDA comparison output (such as "precision" and "recall") is not necessarily harmonized with definitions used by ISO, CLSI, or FDA, but are terms commonly used by NGS software developers.
+  </p>
+  <p class="copy">
+  ** Winning a precisionFDA challenge is an acknowledgement by the precisionFDA community and does not imply FDA endorsement of any organization, tool, software, etc.
   </p>
 
 </div>
