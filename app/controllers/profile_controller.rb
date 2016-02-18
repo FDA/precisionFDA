@@ -210,7 +210,7 @@ class ProfileController < ApplicationController
         AUDIT_LOGGER.info("The system is about to start provisioning admin '#{@suggested_username}' and org '#{@org_handle}'#{@singular ? ' (self-represented)' : ''} initiated by '#{@user.dxuser}'")
         papi.call("org", "new", {handle: dxorghandle, name: @org})
         billing_info = {
-          email: "Elaine.Johanson@fda.hhs.gov",
+          email: "billing@dnanexus.com",
           name: "Elaine Johanson",
           companyName: "FDA",
           address1: "10903 New Hampshire Ave",
