@@ -1,0 +1,164 @@
+<% content_for :title do %>PrecisionFDA Reproducibility and Accuracy Challenge<% end %>
+
+<div class="jumbotron jumbotron-challenges">
+  <div class="container container-fluid">
+    <div class="tiltview-description">
+      <h1>
+        <span class="challenge-title-muted">PrecisionFDA</span>
+        <br>
+        Reproducibility & Accuracy Challenge
+      </h1>
+      <p>Engage and improve DNA test results with our first community challenge</p>
+
+      <br>
+      <br>
+      <div class="text-center">
+        <a class="btn btn-success btn-lg text-uppercase" href="#" role="button">
+          <span class="fa fa-trophy fa-4x" aria-hidden="true"></span>
+          <br>
+          Join the Challenge
+          <br>
+          <small class="text-danger"><strong><%= distance_of_time_in_words_to_now(DateTime.civil(2016,4,25)) %></strong> remaining</small>
+        </a>
+      </div>
+    </div>
+    <div class="tiltview col" aria-hidden="true">
+      <%= image_tag("challenges/challenge-april-25-2016.png", alt: "PrecisionFDA Reproducibility and Accuracy Challenge", class: "img-responsive img-thumbnail") %>
+    </div>
+  </div>
+</div>
+
+<div class="container container-padded">
+  <div class="pfda-challenge-intro">
+    <div class="lead-intro">The <strong>Food and Drug Administration (FDA)</strong> calls on the genomics community to further assess, compare, and improve techniques used in DNA testing by launching the first precisionFDA challenge.</div>
+
+    <div class="copy row">
+      <div class="col-md-24">
+        <p>
+          President Obama’s Precision Medicine Initiative envisions a day when an individual’s medical care will be tailored in part based on their unique characteristics and genetic make-up. But with the rapid rise in the use of whole-genome sequencing in a variety of clinical settings, from identification of disease-related variants to genome-tailored therapies, reproducibility and accuracy are critical to the promises of precision medicine.
+        </p>
+
+        <p>
+          The goal of the FDA’s first precisionFDA challenge is to push the genomics community to advance quality standards and achieve more consistent and accurate results in the context of whole human genome sequencing, advancing the goal of better personalized care.
+        </p>
+
+        <p>
+          PrecisionFDA invites all innovators to take the challenge and assess their analytical software on the supplied reference human datasets. Participation is instrumental in helping the community prepare for the coming genomic data revolution.
+        </p>
+
+        <hr>
+
+        <div class="text-muted text-center">
+          <p>Challenge Time Period</p>
+          <p><strong>February 25, 2016 through April 25, 2016</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="text-center">
+    <a class="btn btn-default btn-lg" href="#details"><span class="fa fa-fw  fa-long-arrow-down"  aria-hidden="true"></span> Learn more</a>
+  </div>
+
+  <br>
+
+  <div class="well">
+    <h3 class="text-uppercase">At a glance</h3>
+
+    <div class="lead">
+      <p>
+        In the context of whole human genome sequencing, software pipelines typically rely on mapping sequencing reads to a reference genome and subsequently identifying variants (differences). One way of assessing the performance of such pipelines is by using well-characterized datasets such as Genome in a Bottle’s NA12878.
+      </p>
+      <p>
+        By supplying NA12878 whole-genome sequencing read datasets (FASTQ), and a framework for comparing variant call format (VCF) results, this challenge provides a common frame of reference for measuring the reproducibility and accuracy of participants’ software.
+      </p>
+    </div>
+
+    <hr>
+
+    <div class="pfda-challange-diagram text-center">
+      <%= image_tag("challenges/challenge-april-25-2016.png", alt: "PrecisionFDA Reproducibility and Accuracy Challenge", class: "img-responsive img-thumbnail") %>
+    </div>
+
+    <hr>
+
+    <div class="lead">
+      <p>
+        The challenge begins with two precisionFDA-provided input datasets, corresponding to whole-genome sequencing of the human NA12878 sample on two different sites. Your mission is to process these FASTQ files through your mapping and variation calling pipeline and create VCF files. For one of the datasets, you are required to do a rerun of your pipeline and obtain a rerun VCF as well. You can generate those results on your own environment, and upload them to precisionFDA, or you can bring your pipeline into precisionFDA and run it on the cloud.
+      </p>
+      <p>
+        Regardless of how you generate your VCF files, you will subsequently use the precisionFDA comparison framework to conduct several pairwise comparisons:
+      </p>
+      <ul>
+        <li>By comparing the rerun VCF to the original one, you will evaluate your pipeline’s reproducibility with respect to the same exact input file.</li>
+        <li>By comparing the VCF files of the two datasets, you will evaluate reproducibility on the same sample across different sites.</li>
+        <li>By comparing each of your three VCF files to the NIST (Genome in a Bottle) VCF, you will get estimates for accuracy.</li>
+      </ul>
+      <p>
+        The complete set of these five comparisons constitutes your submission entry to the challenge. Each comparison outputs several metrics (such as precision, recall, f-measure, or number of non-common variants), which will be used to rank you among the other participants, within eight different categories. Winners* in each category will be recognized on the precisionFDA website.
+      </p>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="container container-padded" id="details">
+  <h3>Challenge details</h3>
+
+  <h4>Getting on the precisionFDA website</h4>
+  <p class="copy">
+    If you do not yet have a contributor account on precisionFDA, file an access request with your complete information, and indicate that you are entering the challenge. Your request will be pending until approved by the FDA. In the meantime, you will receive an email with a link to access the precisionFDA website in browse (guest) mode. Once the FDA approves your request, you will receive another email with your contributor account information.
+  </p>
+
+  <h4>Locating and understanding the input files</h4>
+  <p class="copy">
+    The starting point for this challenge consists of two datasets, corresponding to whole-genome sequencing of the NA12878 sample on an Illumina HiSeq X Ten instrument across two different sites. For each dataset, a pair of gzipped FASTQ files is provided. The following table summarizes key information for each dataset:
+  </p>
+
+  <table class="table table-bordered table-rounded">
+    <tr>
+      <td>Dataset/Site</td>
+      <td>Garvan</td>
+      <td>HLI</td>
+    </tr>
+    <tr>
+      <td>Files</td>
+      <td>
+        <a target="_blank" href="https://precision.fda.gov/files/file-Bk512Y00BpP45gyZG98KBqzQ">NA12878-Garvan-Vial1_R1.fastq.gz</a>
+        <br>
+        <a target="_blank" href="https://precision.fda.gov/files/file-Bk518Gj0Kpg3Xgzpg87Kx2jb">NA12878-Garvan-Vial1_R2.fastq.gz</a>
+      </td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Library Prep</td>
+      <td>TruSeq Nano DNA</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Read Length</td>
+      <td>2x150bp</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Insert Size</td>
+      <td>350bp</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Instrument</td>
+      <td>HiSeq X (one lane)</td>
+      <td></td>
+    </tr>
+  </table>
+
+  <p class="copy">
+    In the next step you will need to process these FASTQ files through your pipeline to generate VCF files. This can be done either by downloading the files and running your pipeline on your own environment, or by bringing your pipeline into precisionFDA and running it on the cloud. If you will be working on your own environment, download these datasets by visiting the links above and clicking the Download button.
+  </p>
+
+  <h4>Running your pipeline on your own environment</h4>
+
+</div>

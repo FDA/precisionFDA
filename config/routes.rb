@@ -76,6 +76,9 @@ Rails.application.routes.draw do
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
     end
+    resources :challenges do
+      get 'reproducability-and-accuracy', on: :collection
+    end
 
     user_constraints = { username: /[^\/]*/ }
     get "/users/:username(/:tab)", to: 'users#show', constraints: user_constraints, as: 'user'
