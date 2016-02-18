@@ -77,7 +77,7 @@ Rails.application.routes.draw do
       get 'explore', on: :collection, as: 'explore'
     end
     resources :challenges do
-      get 'reproducability-and-accuracy', on: :collection
+      get 'reproducibility-and-accuracy', on: :collection
     end
 
     user_constraints = { username: /[^\/]*/ }
