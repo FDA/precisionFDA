@@ -18,7 +18,7 @@
           <br>
           Join the Challenge
           <br>
-          <small><strong><%= distance_of_time_in_words_to_now(DateTime.civil(2016,4,25)) %> remaining</strong></small>
+          <small><strong><%= distance_of_time_in_words_to_now(DateTime.civil(2016,1,25)) %> remaining</strong></small>
         </a>
       </div>
     </div>
@@ -91,7 +91,7 @@
 
     <div class="copy">
       <p>
-        The challenge begins with two precisionFDA-provided input datasets, corresponding to whole-genome sequencing of the human NA12878 sample on two different sites. Your mission is to process these FASTQ files through your mapping and variation calling pipeline and create VCF files. For one of the datasets, you are required to do a rerun of your pipeline and obtain a rerun VCF as well. You can generate those results on your own environment, and upload them to precisionFDA, or you can bring your pipeline into precisionFDA and run it on the cloud.
+        The challenge begins with two precisionFDA-provided input datasets, corresponding to whole-genome sequencing of the NA12878 human sample on two different sequencing sites. Your mission is to process these FASTQ files through your mapping and variation calling pipeline and create VCF files. For one of the datasets, you are required to do a rerun of your pipeline and obtain a rerun VCF as well. You can generate those results on your own environment, and upload them to precisionFDA, or you can bring your pipeline into precisionFDA and run it on the cloud.
       </p>
       <p>
         Regardless of how you generate your VCF files, you will subsequently use the precisionFDA comparison framework to conduct several pairwise comparisons:
@@ -102,7 +102,10 @@
         <li>By comparing each of your three VCF files to the NIST (Genome in a Bottle) VCF, you will get estimates for accuracy.</li>
       </ul>
       <p>
-        The complete set of these five comparisons constitutes your submission entry to the challenge. Each comparison outputs several metrics (such as precision, recall, f-measure, or number of non-common variants), which will be used to rank you among the other participants, within eight different categories. Winners* in each category will be recognized on the precisionFDA website.
+        The complete set of these five comparisons constitutes your submission entry to the challenge. Each comparison outputs several metrics (such as precision*, recall*, f-measure, or number of non-common variants), which will be used to rank you among the other participants, within eight different categories. Winners** in each category will be recognized on the precisionFDA website.
+      </p>
+      <p>
+        The challenge runs until April 25, 2015. 
       </p>
     </div>
   </div>
@@ -115,12 +118,12 @@
 
   <h4>Getting on the precisionFDA website</h4>
   <p class="copy">
-    If you do not yet have a contributor account on precisionFDA, file an access request with your complete information, and indicate that you are entering the challenge. Your request will be pending until approved by the FDA. In the meantime, you will receive an email with a link to access the precisionFDA website in browse (guest) mode. Once the FDA approves your request, you will receive another email with your contributor account information.
+  If you do not yet have a contributor account on precisionFDA, <a href="/request_access">file an access request</a> with your complete information, and indicate that you are entering the challenge. Your request will be pending until approved by the FDA. In the meantime, you will receive an email with a link to access the precisionFDA website in browse (guest) mode. Once the FDA approves your request, you will receive another email with your contributor account information.
   </p>
 
   <h4>Locating and understanding the input files</h4>
   <p class="copy">
-    The starting point for this challenge consists of two datasets, corresponding to whole-genome sequencing of the NA12878 sample on an Illumina HiSeq X Ten instrument across two different sites. For each dataset, a pair of gzipped FASTQ files is provided. The following table summarizes key information for each dataset:
+    The starting point for this challenge consists of two datasets, corresponding to whole-genome sequencing of the NA12878 sample on an Illumina HiSeq X Ten instrument across two different sites (Garvan and HLI). A pair of gzipped FASTQ files is provided for each dataset. The following table summarizes key information for each dataset:
   </p>
 
   <table class="table table-bordered table-rounded">
@@ -161,9 +164,74 @@
   </table>
 
   <p class="copy">
+    We would like to thank the Garvan Institute of Medical Research, and the Human Longevity Institute, for contributing these input files.
+  </p>
+
+  <p class="copy">
     In the next step you will need to process these FASTQ files through your pipeline to generate VCF files. This can be done either by downloading the files and running your pipeline on your own environment, or by bringing your pipeline into precisionFDA and running it on the cloud. If you will be working on your own environment, download these datasets by visiting the links above and clicking the Download button.
   </p>
 
-  <h4>Running your pipeline on your own environment</h4>
+  <h4>Running your pipeline</h4>
+
+  <p class="copy">
+    After familiarizing yourself with the input files, you will need to process them through your mapping and variation calling pipeline to generate corresponding VCF files. Your pipeline must call variants across the whole genome. Each invocation of your pipeline must take as input a pair of FASTQ files and produce a VCF file containing exactly one genotyped sample. Results must be reported on GRCh37 human coordinates (i.e. chromosomes named 1, 2, ..., X, Y, and MT). You are strongly encouraged to compress each VCF file with bgzip, to reduce the file size.
+  </p>
+
+  <table class="table table-bordered table-rounded">
+    <tr>
+      <td>DO</td>
+      <td>DON'T</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="fa fa-check"></span> Use GRCh37<br>
+        <span class="fa fa-check"></span> Call variants across the whole genome<br>
+        <span class="fa fa-check"></span> Compress with bgzip<br>
+      </td>
+      <td>
+        <span class="fa fa-times"></span> Use hg19 or GRCh38<br>
+        <span class="fa fa-times"></span> Call variants only in specific regions<br>
+        <span class="fa fa-times"></span> Generate a gVCF<br>
+      </td>
+    </tr>
+  </table>
+
+  <p class="copy">
+  You must invoke your pipeline three times: 1) invoke it on the Garvan pair of FASTQ files to obtain a Garvan VCF; 2) re-invoke it on the same Garvan pair of FASTQ files to obtain a Garvan Rerun VCF; 3) invoke it on the HLI pair of FASTQ files to obtain an HLI VCF.
+  </p>
+
+  <table class="table table-bordered table-rounded">
+    <tr>
+      <td>Invocation</td>
+      <td>Input dataset (FASTQ pair)</td>
+      <td>Output dataset</td>
+      <td>Example output filename</td>
+    </tr>
+    <tr>
+      <td>#1</td>
+      <td>Garvan</td>
+      <td>Garvan VCF</td>
+      <td>YourName-Garvan.vcf.gz</td>
+    </tr>
+    <tr>
+      <td>#2</td>
+      <td>Garvan</td>
+      <td>Garvan Rerun VCF</td>
+      <td>YourName-Garvan-rerun.vcf.gz</td>
+    </tr>
+    <tr>
+      <td>#3</td>
+      <td>HLI</td>
+      <td>HLI VCF</td>
+      <td>YourName-HLI.vcf.gz</td>
+    </tr>
+  </table>
+
+  <p class="copy">
+    NOTE: As discussed above, you are requested to repeatedly run your pipeline on the same input (for the Garvan pair of FASTQ files). Methods that are perfectly deterministic are expected to produce the same results when run on the same inputs; under such circumstances, it’s possible for the Garvan VCF to be identical to the Garvan Rerun VCF.
+  </p>
+  <p class="copy">
+  If you are running your pipeline in your own environment, upload the three generated files to precisionFDA. Additional information on uploading files is available at the <a href="https://precision.fda.gov/about/how#files-uploading">precisionFDA docs</a>.
+  </p>
 
 </div>
