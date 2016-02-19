@@ -94,7 +94,7 @@
         In the context of whole human genome sequencing, software pipelines typically rely on mapping sequencing reads to a reference genome and subsequently identifying variants (differences). One way of assessing the performance of such pipelines is by using well-characterized datasets such as Genome in a Bottle’s NA12878.
       </p>
       <p>
-        By supplying NA12878 whole-genome sequencing read datasets (FASTQ), and a framework for comparing variant call format (VCF) results, this challenge provides a common frame of reference for measuring some of the aspects of reproducibility and accuracy of participants’ software.
+        By supplying NA12878 whole-genome sequencing read datasets (FASTQ), and a framework for comparing variant call format (VCF) results, this challenge provides a common frame of reference for measuring some of the aspects of reproducibility and accuracy of participants’ pipelines.
       </p>
     </div>
 
@@ -108,7 +108,7 @@
 
     <div class="copy">
       <p>
-        The challenge begins with two precisionFDA-provided input datasets, corresponding to whole-genome sequencing of the NA12878 human sample on two different sequencing sites. Your mission is to process these FASTQ files through your mapping and variation calling pipeline and create VCF files. For one of the datasets, you are required to do a rerun of your pipeline and obtain a rerun VCF as well. You can generate those results on your own environment, and upload them to precisionFDA, or you can bring your pipeline into precisionFDA and run it on the cloud.
+        The challenge begins with two precisionFDA-provided input datasets, corresponding to whole-genome sequencing of the NA12878 human sample at two different sequencing sites. Your mission is to process these FASTQ files through your mapping and variation calling pipeline and create VCF files. For one of the datasets, you are required to do a rerun of your pipeline and obtain a rerun VCF as well. You can generate those results on your own environment, and upload them to precisionFDA, or you can bring your pipeline into precisionFDA and run it on the cloud.
       </p>
       <p>
         Regardless of how you generate your VCF files, you will subsequently use the precisionFDA comparison framework to conduct several pairwise comparisons:
@@ -161,7 +161,7 @@
       <div id="collapseInputFiles" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingInputFiles">
         <div class="panel-body">
           <p class="copy">
-            The starting point for this challenge consists of two datasets, corresponding to whole-genome sequencing of the NA12878 sample on an Illumina HiSeq X Ten instrument across two different sites (Garvan and HLI). A pair of gzipped FASTQ files is provided for each dataset. The following table summarizes key information for each dataset:
+            The starting point for this challenge consists of two datasets, corresponding to whole-genome sequencing of the NA12878 sample on an Illumina HiSeq X Ten instrument at two different sites (Garvan and HLI). A pair of gzipped FASTQ files is provided for each dataset. The following table summarizes key information for each dataset:
           </p>
 
           <table class="table table-bordered table-rounded">
@@ -204,7 +204,7 @@
           </table>
 
           <p class="copy">
-            We would like to thank the Garvan Institute of Medical Research, and the Human Longevity Institute, for contributing these input files.
+            We would like to thank the Garvan Institute of Medical Research, and Human Longevity, Inc., for contributing these input files.
           </p>
 
           <p class="copy">
@@ -398,7 +398,7 @@
               <ul>
                 <li>are between each of your VCF files and the NIST v2.19 (Genome in a Bottle) reference VCF file, constrained within the coordinates of the accompanying NIST v2.19 BED file.</li>
                 <li>The precisionFDA website provides <a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb65P0v2VPbfYPZ">NA12878-NISTv2.19.vcf.gz</a> (to be used as benchmark VCF) and <a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb4p8J8kkXpYZ4P">NA12878-NISTv2.19.bed</a> (to be used as benchmark BED).</li>
-                <li>These comparisons are meant to estimate the accuracy of your pipeline within the “confident” regions of the Genome in a Bottle “golden truth” dataset – therefore you must leave the test BED entry blank.</li>
+                <li>These comparisons are meant to estimate the accuracy of your pipeline within the “confident” regions of the Genome in a Bottle “gold standard” dataset – therefore you must leave the test BED entry blank.</li>
               </ul>
             </div>
           </div>
