@@ -14,10 +14,10 @@
       <br>
       <div class="row">
         <div class="col-sm-6 col-xs-24">
-          <a class="btn <%= @btn_class %> btn-lg text-uppercase" href="<%= join_challenge_path(@discussion[:id]) %>" role="button">
+          <a class="btn btn-join <%= @btn_class %> btn-lg text-uppercase" href="<%= join_challenge_path(@discussion[:id]) %>" role="button">
             <div class="media">
               <div class="media-left">
-                <span class="fa fa-trophy fa-3x" aria-hidden="true"></span>
+                <span class="fa fa-trophy" aria-hidden="true"></span>
               </div>
               <div class="media-body text-left">
                 <% if !@challenge[:active] %>
