@@ -14,7 +14,7 @@
       <br>
       <div class="row">
         <div class="col-sm-6 col-xs-24">
-          <a class="btn accessible-btn-warning btn-lg text-uppercase" href="<%= join_challenge_path(@discussion[:id]) %>" role="button">
+          <a class="btn <%= @btn_class %> btn-lg text-uppercase" href="<%= join_challenge_path(@discussion[:id]) %>" role="button">
             <div class="media">
               <div class="media-left">
                 <span class="fa fa-trophy fa-3x" aria-hidden="true"></span>
@@ -34,7 +34,7 @@
                   <% end %>
                   <br>
                   <div class="time-remaining">
-                    <%= distance_of_time_in_words_to_now(DateTime.civil(2016,4,25)) %> remaining
+                    <%= distance_of_time_in_words_to_now(@challengedEndDate) %> remaining
                   </div>
                 <% end %>
               </div>

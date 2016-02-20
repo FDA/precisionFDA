@@ -9,10 +9,20 @@ class ChallengesController < ApplicationController
       id: 1
     }
 
+    @challengedEndDate = DateTime.new(2016,4,25).in_time_zone.end_of_day
+
     @challenge = {
-      active: DateTime.now.in_time_zone < DateTime.new(2016,4,25).in_time_zone.end_of_day,
+      active: DateTime.now.in_time_zone < @challengedEndDate,
       joined: false
     }
+
+    if DateTime.now.in_time_zone < @challengedEndDate.months_ago(2)
+      @btn_class = "accessible-btn-success"
+    elsif DateTime.now.in_time_zone < @challengedEndDate.months_ago(1)
+      @btn_class = "accessible-btn-warning"
+    else
+      @btn_class = "accessible-btn-danger"
+    end
   end
 
   def join
