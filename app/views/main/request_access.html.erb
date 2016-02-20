@@ -16,7 +16,10 @@
               <small>
                 To request access, please leave your information below.
               </small>
+              <br>
+              <small>If you already have an account, proceed to <%= link_to "Log In", login_path, class: "btn btn-primary btn-sm" %></small>
             </p>
+
           <% else %>
             <p class="lead text-success">
               <span class="fa fa-check"></span> Thank you! Your request has been registered. Check your email for additional instructions.

@@ -13,16 +13,30 @@
       <br>
       <br>
       <div class="row">
-        <div class="col-sm-offset-9 col-sm-6 col-xs-24">
-          <a class="btn btn-success btn-lg text-uppercase" href="#" role="button">
+        <div class="col-sm-6 col-xs-24">
+          <a class="btn accessible-btn-warning btn-lg text-uppercase" href="<%= join_challenge_path(@discussion[:id]) %>" role="button">
             <div class="media">
               <div class="media-left">
                 <span class="fa fa-trophy fa-3x" aria-hidden="true"></span>
               </div>
-              <div class="media-body">
-                Join the Challenge
-                <br>
-                <small><strong><%= distance_of_time_in_words_to_now(DateTime.civil(2016,4,25)) %> remaining</strong></small>
+              <div class="media-body text-left">
+                <% if !@challenge[:active] %>
+                  Challenge Closed
+                  <br>
+                  <small class="time-remaining">
+                    View Responses
+                  </small>
+                <% else %>
+                  <% if @challenge[:joined] %>
+                    Challenge Joined!
+                  <% else %>
+                    Join the Challenge
+                  <% end %>
+                  <br>
+                  <div class="time-remaining">
+                    <%= distance_of_time_in_words_to_now(DateTime.civil(2016,4,25)) %> remaining
+                  </div>
+                <% end %>
               </div>
             </div>
           </a>
@@ -64,7 +78,7 @@
 
     <div class="text-muted text-center">
       <p>Challenge Time Period</p>
-      <p><strong>February 25, 2016 through April 25, 2016</strong></p>
+      <p><mark>February 25, 2016 through April 25, 2016</mark></p>
     </div>
   </div>
 
@@ -87,7 +101,7 @@
     <hr>
 
     <div class="pfda-challenge-diagram">
-      <%= link_to image_tag("challenges/pFDA-Challenge-Diagram", alt: "PrecisionFDA Consistency Challenge", class: "img-responsive img-thumbnail"), image_path("challenges/pFDA-Challenge-Diagram") %>
+      <%= link_to image_tag("challenges/pFDA-Challenge-Diagram", alt: "PrecisionFDA Consistency Challenge", class: "img-responsive"), image_path("challenges/pFDA-Challenge-Diagram") %>
     </div>
 
     <hr>
@@ -213,7 +227,7 @@
             After familiarizing yourself with the input files, you will need to process them through your mapping and variation calling pipeline to generate corresponding VCF files. Your pipeline must call variants across the whole genome. Each invocation of your pipeline must take as input a pair of FASTQ files and produce a VCF file containing exactly one genotyped sample. Results must be reported on GRCh37 human coordinates (i.e. chromosomes named 1, 2, ..., X, Y, and MT). You are strongly encouraged to compress each VCF file with bgzip, to reduce the file size.
           </p>
 
-          <table class="table table-bordered table-rounded">
+          <table class="table">
             <thead>
               <tr>
                 <th class="text-success">DO</th>
@@ -364,15 +378,31 @@
             </tbody>
           </table>
 
-          <p class="copy">
-            <span class="fa fa-area-graph" aria-hidden="true"></span> <strong>Reproducibility comparison #1</strong> is between your Garvan VCF and your Garvan Rerun VCF; it is meant to evaluate the reproducibility of your pipeline when running it repeatedly on the same FASTQ input.
-          </p>
-          <p class="copy">
-            <span class="fa fa-area-graph" aria-hidden="true"></span> <strong>Reproducibility comparison #2</strong> is between your Garvan VCF (or, at your discretion, its Rerun) and your HLI VCF; it is meant to evaluate reproducibility across different sequencing sites, where the same sequencing instrument and sample were used (but with potentially different sequencing conditions and parameters).
-          </p>
-          <p class="copy">
-            <span class="fa fa-area-graph" aria-hidden="true"></span> <strong>Accuracy comparisons #1a, #1b and #2</strong> are between each of your VCF files and the NIST v2.19 (Genome in a Bottle) reference VCF file, constrained within the coordinates of the accompanying NIST v2.19 BED file. The precisionFDA website provides <a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb65P0v2VPbfYPZ">NA12878-NISTv2.19.vcf.gz</a> (to be used as benchmark VCF) and <a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb4p8J8kkXpYZ4P">NA12878-NISTv2.19.bed</a> (to be used as benchmark BED). These comparisons are meant to estimate the accuracy of your pipeline within the “confident” regions of the Genome in a Bottle “golden truth” dataset – therefore you must leave the test BED entry blank.
-          </p>
+          <div class="row">
+            <div class="col-sm-7">
+              <h4><span class="fa fa-area-graph" aria-hidden="true"></span> Reproducibility comparison #1</h4>
+              <ul>
+                <li>is between your Garvan VCF and your Garvan Rerun VCF;</li>
+                <li>it is meant to evaluate the reproducibility of your pipeline when running it repeatedly on the same FASTQ input.</li>
+              </ul>
+            </div>
+            <div class="col-sm-7 col-sm-offset-1">
+              <h4><span class="fa fa-area-graph" aria-hidden="true"></span> Reproducibility comparison #2</h4>
+              <ul>
+                <li>is between your Garvan VCF (or, at your discretion, its Rerun) and your HLI VCF;</li>
+                <li>it is meant to evaluate reproducibility across different sequencing sites, where the same sequencing instrument and sample were used (but with potentially different sequencing conditions and parameters).</li>
+              </ul>
+            </div>
+            <div class="col-sm-7 col-sm-offset-1">
+              <h4><span class="fa fa-area-graph" aria-hidden="true"></span> Accuracy comparisons #1a, #1b and #2</h4>
+              <ul>
+                <li>are between each of your VCF files and the NIST v2.19 (Genome in a Bottle) reference VCF file, constrained within the coordinates of the accompanying NIST v2.19 BED file.</li>
+                <li>The precisionFDA website provides <a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb65P0v2VPbfYPZ">NA12878-NISTv2.19.vcf.gz</a> (to be used as benchmark VCF) and <a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb4p8J8kkXpYZ4P">NA12878-NISTv2.19.bed</a> (to be used as benchmark BED).</li>
+                <li>These comparisons are meant to estimate the accuracy of your pipeline within the “confident” regions of the Genome in a Bottle “golden truth” dataset – therefore you must leave the test BED entry blank.</li>
+              </ul>
+            </div>
+          </div>
+
           <div class="bs-callout bs-callout-warning">
             <strong>IMPORTANT</strong>
             <p>All three comparisons must meet a precision<a href="#footnotes">*</a> and recall<a href="#footnotes">*</a> threshold of at least 90%. (For the reasoning behind this, consult the section “Determining the winners” below).</p>
@@ -396,9 +426,10 @@
           <p class="copy">
             In your answer’s text, please identify whether you are participating as an individual or as part of the team (and, if it is a team effort, don’t forget to identify the members of your team). Write a description of the pipeline used to obtain the results, and identify the name, version and command-line parameters of the mapper and variant caller invoked in your pipeline.
           </p>
-          <p class="copy">
-            <strong>NOTE</strong>: If you opted to bring your pipeline to precisionFDA (which is the preferred way), and your VCFs were generated by running one or more precisionFDA apps, the system will automatically prompt you to share the details of these executions when publishing your answer (see below). In that case, your text only needs to provide a high-level summary, because the exact software invocations will be available to the community via the system’s sharing mechanism.
-          </p>
+          <div class="bs-callout bs-callout-info">
+            <strong>NOTE</strong>
+            <p>If you opted to bring your pipeline to precisionFDA (which is the preferred way), and your VCFs were generated by running one or more precisionFDA apps, the system will automatically prompt you to share the details of these executions when publishing your answer (see below). In that case, your text only needs to provide a high-level summary, because the exact software invocations will be available to the community via the system’s sharing mechanism.</p>
+          </div>
           <p class="copy">
             Once you save your answer, it is initially private (and only visible to you). You can go back at any point and edit it, so we encourage you to start drafting it right away, and revise it as you make progress. Once your instantiate your answer, you can attach your comparisons to it – visit each of your comparisons and click Attach, then select your answer. Your entry must contain the five comparisons (as outlined in the previous section) in order to be considered valid.
           </p>
@@ -421,17 +452,32 @@
           <p class="copy">
             Winners<a href="#footnotes">**</a> will be recognized on the precisionFDA website. Awards will be given to the following categories:
           </p>
-          <ul>
-            <li>Lowest count of unique/non-reproducible variants (“false positives” + “false negatives”) in reproducibility comparison #1. If there are several submissions with a count of zero, an “honorable mention” will be awarded to each one.</li>
-            <li>Lowest count of unique/non-reproducible variants (“false positives” + “false negatives”) in reproducibility comparison #2.</li>
-            <li>Highest precision<a href="#footnotes">*</a> in accuracy comparisons #1a/#1b.</li>
-            <li>Highest recall<a href="#footnotes">*</a> in accuracy comparisons #1a/#1b.</li>
-            <li>Highest f-measure in accuracy comparisons #1a/#1b.</li>
-            <li>Highest precision<a href="#footnotes">*</a> in accuracy comparison #2.</li>
-            <li>Highest recall<a href="#footnotes">*</a> in accuracy comparison #2.</li>
-            <li>Highest f-measure in accuracy comparison #2.</li>
+
+          <h4><span class="fa fa-area-graph" aria-hidden="true"></span> Reproducibility comparison #1</h4>
+          <ul class="list-group">
+            <li class="list-group-item">Lowest count of unique/non-reproducible variants (“false positives” + “false negatives”). If there are several submissions with a count of zero, an “honorable mention” will be awarded to each one.</li>
           </ul>
-          <div class="bs-callout bs-callout-warning">
+
+          <h4><span class="fa fa-area-graph" aria-hidden="true"></span> Reproducibility comparison #2</h4>
+          <ul class="list-group">
+            <li class="list-group-item">Lowest count of unique/non-reproducible variants (“false positives” + “false negatives”)</li>
+          </ul>
+
+          <h4><span class="fa fa-area-graph" aria-hidden="true"></span> Accuracy comparisons #1a and #1b</h4>
+          <ul class="list-group">
+            <li class="list-group-item">Highest precision<a href="#footnotes">*</a></li>
+            <li class="list-group-item">Highest recall<a href="#footnotes">*</a></li>
+            <li class="list-group-item">Highest f-measure</li>
+          </ul>
+
+          <h4><span class="fa fa-area-graph" aria-hidden="true"></span> Accuracy comparisons #2</h4>
+          <ul class="list-group">
+            <li class="list-group-item">Highest precision<a href="#footnotes">*</a></li>
+            <li class="list-group-item">Highest recall<a href="#footnotes">*</a></li>
+            <li class="list-group-item">Highest f-measure</li>
+          </ul>
+
+          <div class="bs-callout bs-callout-info">
             <strong>NOTE</strong>
             <p>It is possible for a pipeline to try to reach maximum precision<a href="#footnotes">*</a> by being trivially strict or maximum recall<a href="#footnotes">*</a> by being trivially lenient. To avoid very extreme entries, and to ensure fairness in the competition, the challenge requires that all submitted accuracy comparisons reach a minimum threshold of 90% for each of the precision<a href="#footnotes">*</a> and the recall<a href="#footnotes">*</a> statistics. Entries that do not meet this criteria will not be considered valid.</p>
           </div>

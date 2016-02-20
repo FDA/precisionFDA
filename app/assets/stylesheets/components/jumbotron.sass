@@ -9,8 +9,9 @@
   h1, h2, h3, h4, h5, p
     color: $brand-blue-subtle
 
-  a:hover, .btn-link:hover
-    color: white
+  a:not(.btn)
+    &:hover
+      color: white
 
   .text-muted
     color: $brand-blue-tertiary

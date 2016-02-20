@@ -16,20 +16,28 @@
     opacity: 0.25
     width: 100%
 
-  .pfda-card
-    @include flex-grow(1)
-
-    .challenge-card-icon
-      text-align: center
-      margin-bottom: $padding-large-vertical
+  .well
+    background-color: $brand-blue-subtler
+    border-color: $brand-blue-subtle
 
   .jumbotron
     position: relative
     overflow: hidden
 
+  .time-remaining
+    font-weight: 300
+    font-size: 18px
+
   .pfda-challenge-intro
     .lead-intro
       margin: 50px 0
+
+    .pfda-card
+      @include flex-grow(1)
+
+      .challenge-card-icon
+        text-align: center
+        margin-bottom: $padding-large-vertical*2
 
   .pfda-challenge-diagram
     text-align: center
