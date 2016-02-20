@@ -78,6 +78,7 @@ Rails.application.routes.draw do
     end
     resources :challenges do
       get 'consistency', on: :collection
+      get 'join', on: :member
     end
 
     user_constraints = { username: /[^\/]*/ }
