@@ -65,6 +65,7 @@ Rails.application.routes.draw do
     end
     resources :files do
       post 'download', on: :member
+      post 'link', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
     end
