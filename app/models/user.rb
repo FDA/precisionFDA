@@ -305,7 +305,9 @@ class User < ActiveRecord::Base
     user.save!
     comparison.state = state
     if state == "done"
-      comparison.meta = result["describe"]["output"]["meta"].to_json
+      temp_meta = result["describe"]["output"]["meta"]
+      temp_meta["weighted_roc"]["data"] = temp_meta["weighted_roc"]["data"].last(100)
+      comparison.meta = temp_meta.to_json
       output_keys = []
       output_ids = []
       result["describe"]["output"].keys.each do |key|
