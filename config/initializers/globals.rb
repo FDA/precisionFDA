@@ -22,7 +22,7 @@ if ENV["DNANEXUS_BACKEND"] == "production"
   ORG_EVERYONE = "org-precisionfda"
   ORG_DUMMY = "org-precisionfda.dummy"
   ADMIN_TOKEN = ENV["ADMIN_TOKEN"]
-  DEFAULT_COMPARISON_APP = "app-pfda-comparator"
+  DEFAULT_COMPARISON_APP = "app-pfda-comparator/0.2.3"
 else
   DNANEXUS_AUTHSERVER_URI = "https://stagingauth.dnanexus.com/"
   DNANEXUS_APISERVER_URI = "https://stagingapi.dnanexus.com/"
@@ -31,6 +31,6 @@ else
   ORG_EVERYONE = "org-precisionfda"
   ORG_DUMMY = "org-precisionfda.dummy"
   ADMIN_TOKEN = ENV["ADMIN_TOKEN"]
-  DEFAULT_COMPARISON_APP = "app-pfda-comparator"
+  DEFAULT_COMPARISON_APP = "app-pfda-comparator/0.2.3"
 end
 BILLING_CONFIRMATION = ENV["BILLING_CONFIRMATION"]
