@@ -149,10 +149,10 @@ ComparisonsController = Paloma.controller('Comparisons')
 ComparisonsController::show = ->
   $container = $("body main")
   if @params.state == "done"
-    meta = @params.meta
-    dataset = _.map(meta["weighted_roc"]["data"], (datum) ->
+    roc = @params.roc
+    dataset = _.map(roc["data"], (datum) ->
       datumObject = {}
-      for datakey, i in meta["weighted_roc"]["header"]
+      for datakey, i in roc["header"]
         if _.includes(["f_measure", "precision", "sensitivity"], datakey)
           datumObject[datakey] = parseFloat(datum[i])
         else

@@ -73,7 +73,11 @@
             </tr>
             <tr>
               <td>Download</td>
-              <td>Download the file.</td>
+              <td>Download the file right away via your browser.</td>
+            </tr>
+            <tr>
+              <td>Authorized URL</td>
+              <td>Generate an authorized URL via which the file can be downloaded non-interactively.</td>
             </tr>
             <tr>
               <td>Track</td>
@@ -95,13 +99,13 @@
       <div class="bs-docs-section">
         <p>The concept of comparing two sets of variants (VCF files) is central to the exploration of regulatory science, and to the evaluation of NGS assays; it is therefore represented as a first-class entity on precisionFDA.</p>
 
-        <p>The problem of comparing VCF files constitutes an active area of research. The precisionFDA building crew is represented in the Global Alliance for Genomics and Health (GA4GH) Benchmarking Task Team, which is expected (within the next year) to provide recommendations and/or software solutions for comparing VCFs and for counting, classifying, and reporting results. We are looking forward to incorporating that work into precisionFDA, when it becomes available. In the meantime, we have put together an initial VCF comparison framework which you can use as of now on precisionFDA.</p>
+        <p>The problem of comparing VCF files constitutes an active area of research. The precisionFDA building crew is represented in the Global Alliance for Genomics and Health (GA4GH) Benchmarking Task Team, which is expected to provide recommendations and/or software solutions for comparing VCFs and for counting, classifying, and reporting results. We are looking forward to incorporating that work into precisionFDA, when it becomes available. In the meantime, we have put together an initial VCF comparison framework which you can use as of now on precisionFDA. It is based on <a href="https://github.com/RealTimeGenomics/rtg-tools/releases/tag/3.5.1">vcfeval 3.5.1</a> by Real Time Genomics (<a href="http://biorxiv.org/content/biorxiv/early/2015/08/03/023754.full.pdf">Cleary et al., 2015</a>), and conceptually resembles "Comparison Method #3" of <a href="https://github.com/ga4gh/benchmarking-tools/blob/c9026448db16798684d1b89404cee764389f43f6/doc/standards/GA4GHBenchmarkingDefinitionsandPerformanceStratification.md">the GA4GH benchmarking definitions</a>.</p>
 
         <p>This initial framework compares two variant sets; a <em>test set</em> and a <em>benchmark set</em>. The underlying comparison methodology is mostly symmetric with respect to each assignment; however, reporting of the results is based on the assumption that the benchmark set represents the truth, and that the test set represents predictions. Therefore, the results of a comparison constitute an implicit evaluation of the performance of whatever method was used to generate the predictions.</p>
       </div>
       <div id="comparisons-new" class="h2">Creating a new comparison</div>
       <div class="bs-docs-section">
-        <p>To create a new comparison, click "Run Comparison". Set up your comparison by choosing a VCF (*.vcf.gz) file and an associated TBI (*.vcf.gz.tbi) file for your test set, as well as a VCF+TBI file for your benchmark set. To choose files, locate the file you want to use and click the "Assign" button to its left, then designate the role of that file and the set that it belongs to. You can filter files by typing a keyword inside the "Filter..." box, to more quickly locate the files you want to choose. (This setup procedure is work in progress, and we expect to further simplify it in an upcoming update).</p>
+        <p>To create a new comparison, click "Run Comparison". Set up your comparison by choosing VCF (*.vcf or *.vcf.gz) files for your test and benchmark sets.</p>
 
         <p>The comparison currently only works with VCF files reported on the GRCh37 human assembly, using the "GRCh37/b37" naming conventions (i.e. chromosomes named 1, 2, ..., X, Y, and MT). It is <u>not compatible</u> with the "hg19" naming conventions (i.e. with chromosomes named chr1, chr2, ..., chrX, chrY and chrM). In addition, please note that the hg19 "chrM" sequence has different length and content that the GRCh37 "MT" sequence, so the two aren't comparable anyway.</p>
 
@@ -131,7 +135,7 @@
           <tbody>
             <tr>
               <td>True positives</td>
-              <td>The number of variants found in the test set that match exactly the benchmark set.</td>
+              <td>The number of variants found in the benchmark set that match exactly the test set.</td>
             </tr>
             <tr>
               <td>False positives</td>
@@ -910,7 +914,7 @@ emit padded_intervals "$intervals_prefix".padded.bed</pre></p>
             </tr>
             <tr>
               <td>File</td>
-              <td>The file will appear in everyone's list of available files. Users will be able to download the file and use it as input in their jobs.</td>
+              <td>The file will appear in everyone's list of available files. Users will be able to download the file or use it as input in their jobs.</td>
             </tr>
             <tr>
               <td>Job</td>
@@ -981,7 +985,7 @@ emit padded_intervals "$intervals_prefix".padded.bed</pre></p>
             <ul class="nav">
               <li><a href="#files-list">Listing files</a></li>
               <li><a href="#files-uploading">Uploading files</a></li>
-              <li><a href="#files-origin">Tracking file origin</a></li>
+              <li><a href="#files-origin">Examining file origin</a></li>
               <li><a href="#files-details">File details</a></li>
             </ul>
           </li>

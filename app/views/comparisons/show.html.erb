@@ -113,7 +113,6 @@
         <div class="variant-title">Test Set</div>
         <ul class="variant-inputs list-unstyled">
           <%= render "_partials/variant_file", file: @test_vcf, title: "VCF", required: true, classes: "required active"  %>
-          <%= render "_partials/variant_file", file: @test_tbi, title: "TBI", required: true, classes: "required active"  %>
           <%= render "_partials/variant_file", file: @test_bed, title: "BED", required: false, classes: "active"  %>
         </ul>
       </div>
@@ -122,7 +121,6 @@
         <div class="variant-title">Benchmark Set</div>
         <ul class="variant-inputs list-unstyled">
           <%= render "_partials/variant_file", file: @ref_vcf, title: "VCF", required: true, classes: "required active"  %>
-          <%= render "_partials/variant_file", file: @ref_tbi, title: "TBI", required: true, classes: "required active"  %>
           <%= render "_partials/variant_file", file: @ref_bed, title: "BED", required: false, classes: "active"  %>
         </ul>
       </div>
