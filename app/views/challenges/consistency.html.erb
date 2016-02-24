@@ -57,19 +57,19 @@
       <div class="pfda-card pfda-card-rounded pfda-card-padded">
         <div class="pfda-card-body">
           <div class="challenge-card-icon"><span class="fa fa-sliders fa-4x" aria-hidden="true"></span></div>
-          President Obama’s Precision Medicine Initiative envisions a day when an individual's medical care will be tailored in part based on their unique characteristics and genetic make-up. But with the rapid rise in the use of whole-genome sequencing in a variety of clinical settings, from identification of disease-related variants to genome-tailored therapies, reproducibility and accuracy of the results we are getting from these technologies are critical to the promises of precision medicine.
+          President Obama’s Precision Medicine Initiative envisions a day when an individual's medical care will be tailored in part based on their unique characteristics and genetic make-up.
         </div>
       </div>
       <div class="pfda-card pfda-card-rounded pfda-card-padded">
         <div class="pfda-card-body">
           <div class="challenge-card-icon"><span class="fa fa-flask fa-4x" aria-hidden="true"></span></div>
-          The goal of the FDA's first precisionFDA challenge is to push the genomics community to advance quality standards and achieve more consistent results in the context of whole human genome sequencing, advancing the goal of better personalized care.
+          The goal of the FDA's first precisionFDA challenge is to engage the genomics community in advancing the quality standards in order to achieve more consistent results in the context of genetic tests (related to whole human genome sequencing), advancing the goal of better personalized care.
         </div>
       </div>
       <div class="pfda-card pfda-card-rounded pfda-card-padded">
         <div class="pfda-card-body">
           <div class="challenge-card-icon"><span class="fa fa-usb fa-rotate-90 fa-4x" aria-hidden="true"></span></div>
-          PrecisionFDA invites all innovators to take the challenge and assess their analytical software on the supplied reference human datasets. Participation is instrumental in helping the community prepare for the coming genomic data revolution.
+          PrecisionFDA invites all innovators to take the challenge and assess their software on the supplied reference human datasets. Participation is voluntary, but instrumental in helping the community prepare for the coming genomic data revolution.
         </div>
       </div>
     </div>
@@ -108,7 +108,7 @@
 
     <div class="copy">
       <p>
-        The challenge begins with two precisionFDA-provided input datasets, corresponding to whole-genome sequencing of the NA12878 human sample at two different sequencing sites. Your mission is to process these FASTQ files through your mapping and variation calling pipeline and create VCF files. For one of the datasets, you are required to do a rerun of your pipeline and obtain a rerun VCF as well. You can generate those results on your own environment, and upload them to precisionFDA, or you can bring your pipeline into precisionFDA and run it on the cloud.
+        The challenge begins with two precisionFDA-provided input datasets, corresponding to whole-genome sequencing of the NA12878 human sample at two different sequencing sites. Your mission is to process these FASTQ files through your mapping and variation calling pipeline and create VCF files. For one of the datasets, you are required to do a rerun of your pipeline and obtain a rerun VCF as well. You can generate those results on your own environment, and upload them to precisionFDA, or you can reconstruct your pipeline on precisionFDA and run it on the cloud.
       </p>
       <p>
         Regardless of how you generate your VCF files, you will subsequently use the precisionFDA comparison framework to conduct several pairwise comparisons:
@@ -116,10 +116,10 @@
       <ul>
         <li>By comparing the rerun VCF to the original one, you will evaluate your pipeline’s reproducibility with respect to the same exact input file.</li>
         <li>By comparing the VCF files of the two datasets, you will evaluate reproducibility on the same sample across different sites.</li>
-        <li>By comparing each of your three VCF files to the NIST (Genome in a Bottle) VCF, you will get estimates for accuracy.</li>
+        <li>By comparing each of your three VCF files to the NIST (Genome in a Bottle) benchmark VCF, you will get estimates for accuracy.</li>
       </ul>
       <p>
-        The complete set of these five comparisons constitutes your submission entry to the challenge. Each comparison outputs several metrics (such as precision<a href="#footnotes">*</a>, recall<a href="#footnotes">*</a>, f-measure, or number of non-common variants), which will be used to rank you among the other participants, within eight different categories. Winners<a href="#footnotes">**</a> in each category will be recognized on the precisionFDA website.
+      The complete set of these five comparisons constitutes your submission entry to the challenge. Each comparison outputs several metrics (such as precision<a href="#footnotes">*</a>, recall<a href="#footnotes">*</a>, f-measure, or number of non-common variants), which will be used to rank you among the other participants, within eight different categories. Winners<a href="#footnotes">**</a> in each category will be recognized on the precisionFDA website. Therefore, we hope you are willing to share your experience with others to further enhance the community's effort to ensure consistency of tests. 
       </p>
       <p>
         The challenge runs until April 25, 2015.
@@ -145,7 +145,10 @@
       <div id="collapseGettingOn" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingGettingOn">
         <div class="panel-body">
           <p class="copy">
-          If you do not yet have a contributor account on precisionFDA, <a href="/request_access">file an access request</a> with your complete information, and indicate that you are entering the challenge. Your request will be pending until approved by precisionFDA. In the meantime, you will receive an email with a link to access the precisionFDA website in browse (guest) mode. Once precisionFDA approves your request, you will receive another email with your contributor account information.
+          If you do not yet have a contributor account on precisionFDA, <a href="/request_access">file an access request</a> with your complete information, and indicate that you are entering the challenge. The FDA acts as steward to providing the precisionFDA service to the community and ensuring proper use of the resources, so your request will be initially pending. In the meantime, you will receive an email with a link to access the precisionFDA website in browse (guest) mode. Once approved, you will receive another email with your contributor account information.
+          </p>
+          <p class="copy">
+          With your contributor account you can use the features required to participate in the challenge (such as transfer files or run comparisons). Everything you do on precisionFDA is initially private to you (not accessible to the FDA or the rest of the community) until you choose to publicize it. So you can immediately start working on the challenge in private, and whenever you are ready you can officially publish your results as your challenge entry.
           </p>
         </div>
       </div>
@@ -172,33 +175,42 @@
             </thead>
             <tbody>
               <tr>
+                <td>Contributor</td>
+                <td>Garvan Institute of Medical Research</td>
+                <td>Human Longevity, Inc.</td>
+              </tr>
+              <tr>
                 <td>Files</td>
                 <td>
                   <a class="btn btn-link" target="_blank" href="https://precision.fda.gov/files/file-Bk512Y00BpP45gyZG98KBqzQ"><span class="fa fa-file-o" aria-hidden="true"></span> NA12878-Garvan-Vial1_R1.fastq.gz</a>
                   <br>
                   <a class="btn btn-link" target="_blank" href="https://precision.fda.gov/files/file-Bk518Gj0Kpg3Xgzpg87Kx2jb"><span class="fa fa-file-o" aria-hidden="true"></span> NA12878-Garvan-Vial1_R2.fastq.gz</a>
                 </td>
-                <td></td>
+                <td>
+                  <a class="btn btn-link" target="_blank" href="https://precision.fda.gov/files/file-Bq6P9k00qbVXjqGjv0364Y6q"><span class="fa fa-file-o" aria-hidden="true"></span> TSNano_1lane_L008_13801_NA12878_R1_001.fastq.gz</a>
+                  <br>
+                  <a class="btn btn-link" target="_blank" href="https://precision.fda.gov/files/file-Bq6ZpxQ0qbVy7x5f2GXpqzKx"><span class="fa fa-file-o" aria-hidden="true"></span> TSNano_1lane_L008_13801_NA12878_R2_001.fastq.gz</a>
+                </td>
               </tr>
               <tr>
                 <td>Library Prep</td>
-                <td>TruSeq Nano DNA</td>
-                <td></td>
+                <td>TruSeq Nano DNA Library Prep kit, v2.5, with no sample multiplexing</td>
+                <td>TruSeq Nano DNA Library Prep kit, v2.5, with no sample multiplexing</td>
               </tr>
               <tr>
                 <td>Read Length</td>
                 <td>2x150bp</td>
-                <td></td>
+                <td>2x150bp</td>
               </tr>
               <tr>
                 <td>Insert Size</td>
                 <td>350bp</td>
-                <td></td>
+                <td>350bp</td>
               </tr>
               <tr>
                 <td>Instrument</td>
                 <td>HiSeq X (one lane)</td>
-                <td></td>
+                <td>HiSeq X (one lane)</td>
               </tr>
             </tbody>
           </table>
@@ -208,7 +220,7 @@
           </p>
 
           <p class="copy">
-            In the next step you will need to process these FASTQ files through your pipeline to generate VCF files. This can be done either by downloading the files and running your pipeline on your own environment, or by bringing your pipeline into precisionFDA and running it on the cloud. If you will be working on your own environment, download these datasets by visiting the links above and clicking the Download button.
+          In the next step you will need to process these FASTQ files through your pipeline to generate VCF files. This can be done either by downloading the files and running your pipeline on your own environment, or by reconstructing your pipeline on precisionFDA and running it on the cloud. If you will be working on your own environment, download these datasets by visiting the links above and clicking the <strong>Download</strong> button (web-browser download, not recommended for large files) or the <strong>Authorized URL</strong> button.
           </p>
         </div>
       </div>
@@ -285,11 +297,11 @@
 
           <div class="bs-callout bs-callout-info">
             <strong>NOTE</strong>
-            <p>As discussed above, you are requested to repeatedly run your pipeline on the same input (for the Garvan pair of FASTQ files). Methods that are perfectly deterministic are expected to produce the same results when run on the same inputs; under such circumstances, it’s possible for the Garvan VCF to be identical to the Garvan Rerun VCF.</p>
+            <p>As discussed above, you are requested to repeatedly run your pipeline on the same input (for the Garvan pair of FASTQ files). Perfectly deterministic methods are expected to produce the same results when run on the same inputs; under such circumstances, it’s possible for the Garvan VCF to be identical to the Garvan Rerun VCF.</p>
           </div>
 
           <p class="copy">
-            If you are running your pipeline in your own environment, upload the three generated files to precisionFDA. Additional information on uploading files is available at the <a href="https://precision.fda.gov/about/how#files-uploading">precisionFDA docs</a>.
+            If you are running your pipeline in your own environment, upload the three generated files to precisionFDA. Additional information on uploading files is available at the <a href="https://precision.fda.gov/about/how#files-uploading">precisionFDA docs</a>. Your uploaded files are private, until you are ready to share them with the community (see "Submitting your entry" below).
           </p>
         </div>
       </div>
@@ -298,18 +310,18 @@
       <div class="panel-heading" role="tab" id="headingBringPipeline">
         <h4 class="panel-title">
           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseBringPipeline" aria-expanded="false" aria-controls="collapseBringPipeline">
-            Bringing your pipeline to precisionFDA
+            (Optional) Reconstructing your pipeline on precisionFDA
           </a>
         </h4>
       </div>
       <div id="collapseBringPipeline" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingBringPipeline">
         <div class="panel-body">
           <p class="copy">
-            Besides running your pipeline in your own environment, you have the additional option of bringing your pipeline to precisionFDA and running it on the cloud. To do that, you must create one or more apps on precisionFDA that encapsulate the actions performed in your pipeline. To create an app, you can provide Linux executables and an accompanying shell script to be run inside an Ubuntu VM on the cloud. The precisionFDA website contains <a href="https://precision.fda.gov/about/how#dev">extensive documentation</a> on how to create apps, and you can also click the <strong>Fork</strong> button on an existing app (such as the <a href="https://precision.fda.gov/apps/app-BpF9YGQ0bxjbjk6Fx1F0KJF0">bwa_mem_bamsormadup</a> one) to use it as starting point for developing your own.
+            Besides running your pipeline in your own environment, you have the additional option of reconstructing your pipeline on precisionFDA and running it on the cloud. To do that, you must create one or more apps on precisionFDA that encapsulate the actions performed in your pipeline. To create an app, you can provide Linux executables and an accompanying shell script to be run inside an Ubuntu VM on the cloud. The precisionFDA website contains <a href="https://precision.fda.gov/about/how#dev">extensive documentation</a> on how to create apps, and you can also click the <strong>Fork</strong> button on an existing app (such as <a href="https://precision.fda.gov/apps/app-BpF9YGQ0bxjbjk6Fx1F0KJF0">bwa_mem_bamsormadup</a>) to use it as starting point for developing your own.
           </p>
 
           <p class="copy">
-            Bringing your pipeline to precisionFDA has an important advantage: you can, at your discretion, share it with the community, so that others can take a look at it and reproduce your results – and perhaps build upon it and further improve it.
+            Constructing your pipeline on precisionFDA has an important advantage: you can, at your discretion, share it with the community, so that others can take a look at it and reproduce your results – and perhaps build upon it and further improve it.
           </p>
         </div>
       </div>
@@ -358,22 +370,22 @@
                 <td>Accuracy Comparison #1a</td>
                 <td>Garvan VCF</td>
                 <td>-</td>
-                <td>NIST v2.19 VCF</td>
-                <td>NIST v2.19 BED</td>
+                <td><a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb65P0v2VPbfYPZ">NIST v2.19 VCF</a></td>
+                <td><a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb4p8J8kkXpYZ4P">NIST v2.19 BED</a></td>
               </tr>
               <tr>
                 <td>Accuracy Comparison #1b</td>
                 <td>Garvan Rerun VCF</td>
                 <td>-</td>
-                <td>NIST v2.19 VCF</td>
-                <td>NIST v2.19 BED</td>
+                <td><a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb65P0v2VPbfYPZ">NIST v2.19 VCF</a></td>
+                <td><a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb4p8J8kkXpYZ4P">NIST v2.19 BED</a></td>
               </tr>
               <tr>
                 <td>Accuracy Comparison #2</td>
                 <td>HLI VCF</td>
                 <td>-</td>
-                <td>NIST v2.19 VCF</td>
-                <td>NIST v2.19 BED</td>
+                <td><a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb65P0v2VPbfYPZ">NIST v2.19 VCF</a></td>
+                <td><a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb4p8J8kkXpYZ4P">NIST v2.19 BED</a></td>
               </tr>
             </tbody>
           </table>
@@ -394,19 +406,24 @@
               </ul>
             </div>
             <div class="col-sm-7 col-sm-offset-1">
-              <h4><span class="fa fa-area-graph" aria-hidden="true"></span> Accuracy comparisons #1a, #1b and #2</h4>
+              <h4><span class="fa fa-area-graph" aria-hidden="true"></span> Accuracy comparisons</h4>
               <ul>
-                <li>are between each of your VCF files and the NIST v2.19 (Genome in a Bottle) reference VCF file, constrained within the coordinates of the accompanying NIST v2.19 BED file.</li>
+                <li>are between each of your VCF files and the NIST v2.19 (Genome in a Bottle) benchmark VCF file, constrained within the coordinates of the accompanying NIST v2.19 BED file.</li>
                 <li>The precisionFDA website provides <a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb65P0v2VPbfYPZ">NA12878-NISTv2.19.vcf.gz</a> (to be used as benchmark VCF) and <a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb4p8J8kkXpYZ4P">NA12878-NISTv2.19.bed</a> (to be used as benchmark BED).</li>
                 <li>These comparisons are meant to estimate the accuracy of your pipeline within the “confident” regions of the Genome in a Bottle “gold standard” dataset – therefore you must leave the test BED entry blank.</li>
               </ul>
             </div>
           </div>
 
+          <p class="copy">
+            Your comparisons are private, until you are ready to share them with the community (see "Submitting your entry" below).
+          </p>
+
           <div class="bs-callout bs-callout-warning">
             <strong>IMPORTANT</strong>
-            <p>All three comparisons must meet a precision<a href="#footnotes">*</a> and recall<a href="#footnotes">*</a> threshold of at least 90%. (For the reasoning behind this, consult the section “Determining the winners” below).</p>
+            <p>All three accuracy comparisons must meet a precision<a href="#footnotes">*</a> and recall<a href="#footnotes">*</a> threshold of at least 90%. (For the reasoning behind this, consult the section “Determining the winners” below).</p>
           </div>
+
         </div>
       </div>
     </div>
@@ -428,13 +445,13 @@
           </p>
           <div class="bs-callout bs-callout-info">
             <strong>NOTE</strong>
-            <p>If you opted to bring your pipeline to precisionFDA (which is the preferred way), and your VCFs were generated by running one or more precisionFDA apps, the system will automatically prompt you to share the details of these executions when publishing your answer (see below). In that case, your text only needs to provide a high-level summary, because the exact software invocations will be available to the community via the system’s sharing mechanism.</p>
+            <p>If you opted to construct your pipeline on precisionFDA, and your VCFs were generated by running one or more precisionFDA apps, the system will automatically prompt you to share the details of these executions when publishing your answer (see below). In that case, your text only needs to provide a high-level summary, because the exact software invocations will be available to the community via the system’s sharing mechanism.</p>
           </div>
           <p class="copy">
-            Once you save your answer, it is initially private (and only visible to you). You can go back at any point and edit it, so we encourage you to start drafting it right away, and revise it as you make progress. Once your instantiate your answer, you can attach your comparisons to it – visit each of your comparisons and click Attach, then select your answer. Your entry must contain the five comparisons (as outlined in the previous section) in order to be considered valid.
+            Once you save your answer, it is initially private (and only visible to you). You can go back at any point and edit it, so we encourage you to start drafting it right away, and revise it as you make progress. Once you instantiate your answer, you can attach your comparisons to it – visit each of your comparisons and click Attach, then select your answer. Your entry must contain the five comparisons (as outlined in the previous section) in order to be considered valid.
           </p>
           <p class="copy">
-            Once you are comfortable with your answer, you can publish it so that others can see it (and don’t worry – you can still edit it or update its attachments even after publication). When publishing, the system will ask if you want to publish the VCF files that were input to the comparisons; please choose that option to ensure that these files are shared with the precisionFDA community. Entries that do not have their VCF files published will not be considered valid. If you used apps on precisionFDA (instead of generating these VCF files externally), please choose the option to share the underlying jobs, apps, and app assets.
+            Once you are comfortable with your answer, you can publish it so that others can see it (and don’t worry – you can still edit it or update its attachments even after publication). When publishing, the system will ask if you want to publish the comparisons, as well as the VCF files that were input to the comparisons; please choose that option to ensure that these artifacts are shared with the precisionFDA community. Entries that do not have their comparisons and VCF files published will not be considered valid. If you used apps on precisionFDA (instead of generating these VCF files externally), please choose the option to share the underlying jobs, apps, and app assets.
           </p>
         </div>
       </div>
@@ -450,12 +467,12 @@
       <div id="collapseWinners" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingWinners">
         <div class="panel-body">
           <p class="copy">
-            Winners<a href="#footnotes">**</a> will be recognized on the precisionFDA website. Awards will be given to the following categories:
+            Winners<a href="#footnotes">**</a> will be recognized on the precisionFDA website, for achievements in the following eight categories:
           </p>
 
           <h4><span class="fa fa-area-graph" aria-hidden="true"></span> Reproducibility comparison #1</h4>
           <ul class="list-group">
-            <li class="list-group-item">Lowest count of unique/non-reproducible variants (“false positives” + “false negatives”). If there are several submissions with a count of zero, an “honorable mention” will be awarded to each one.</li>
+            <li class="list-group-item">Lowest count of unique/non-reproducible variants (“false positives” + “false negatives”). If there are several submissions with a count of zero, an “honorable mention” will be recognized for each one.</li>
           </ul>
 
           <h4><span class="fa fa-area-graph" aria-hidden="true"></span> Reproducibility comparison #2</h4>
@@ -477,9 +494,13 @@
             <li class="list-group-item">Highest f-measure</li>
           </ul>
 
+          <p>
+          For more information about these metrics (precision, recall, f-measure, etc.) consult the <a href="https://precision.fda.gov/about/how#comparisons-results">precisionFDA docs</a>.
+          </p>
+
           <div class="bs-callout bs-callout-info">
             <strong>NOTE</strong>
-            <p>It is possible for a pipeline to try to reach maximum precision<a href="#footnotes">*</a> by being trivially strict or maximum recall<a href="#footnotes">*</a> by being trivially lenient. To avoid very extreme entries, and to ensure fairness in the competition, the challenge requires that all submitted accuracy comparisons reach a minimum threshold of 90% for each of the precision<a href="#footnotes">*</a> and the recall<a href="#footnotes">*</a> statistics. Entries that do not meet this criteria will not be considered valid.</p>
+            <p>It is possible for a pipeline to try to reach maximum precision<a href="#footnotes">*</a> by being trivially strict, or maximum recall<a href="#footnotes">*</a> by being trivially lenient. To avoid very extreme entries, and to ensure fairness in the competition, the challenge requires that all submitted accuracy comparisons reach a minimum threshold of 90% for each of the precision<a href="#footnotes">*</a> and the recall<a href="#footnotes">*</a> statistics. Entries that do not meet this criteria will not be considered valid.</p>
           </div>
         </div>
       </div>
@@ -495,7 +516,7 @@
       <div id="collapseExtra" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingExtra">
         <div class="panel-body">
           <p class="copy">
-            <strong>Contribute your thoughts (and any relevant software) on the following topic, and be acknowledged on the precisionFDA website as a precisionFDA Innovation Leader.</strong>
+            <strong>Share your thoughts with the community (and any relevant software) on the following topic, and be acknowledged on the precisionFDA website as a precisionFDA Innovation Leader.</strong>
           </p>
           <p class="copy">
             Comparing VCF results is a difficult problem (partly due to the fact that the same variant can be represented in many ways), but becomes more tractable for the case of a pairwise comparison. The reproducibility portion of this challenge leverages the precisionFDA pairwise comparison framework to assess the similarity between two pipeline invocations at a time, but extending it beyond two trials may not be as straightforward.
