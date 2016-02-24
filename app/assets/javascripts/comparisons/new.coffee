@@ -56,7 +56,7 @@ class ComparisonsNewView
         id: 1
         name: "consistency"
         title: "Consistency Challenge"
-        actionLabel: "Assign NIST v2.19 reference files"
+        actionLabel: "Compare to NIST"
       }, this)
     ]
 
