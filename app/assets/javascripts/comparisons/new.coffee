@@ -16,7 +16,7 @@ class ComparisonsNewView
           label: "BED"
           class: "file"
           optional: true
-          patterns: ["*.vcf.bed"]
+          patterns: ["*.bed"]
         }
       ]
     })
@@ -35,7 +35,7 @@ class ComparisonsNewView
           label: "BED"
           class: "file"
           optional: true
-          patterns: ["*.vcf.bed"]
+          patterns: ["*.bed"]
         }
       ]
     })
@@ -56,7 +56,7 @@ class ComparisonsNewView
         id: 1
         name: "consistency"
         title: "Consistency Challenge"
-        actionLabel: "Compare to NIST"
+        actionLabel: "Compare to NA12878-NISTv2.19"
       }, this)
     ]
 
