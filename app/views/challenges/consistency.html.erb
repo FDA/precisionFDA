@@ -444,7 +444,7 @@
       <div id="collapseSubmitEntry" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSubmitEntry">
         <div class="panel-body">
           <p class="copy">
-            This challenge has been posted to the precisionFDA “Discussions” section in the form of a question [LINK TBD]. Discussion answers can include rich text formatting, as well as attachments such as files or comparisons. You can leverage this functionality to submit your entry by filling in your answer to the question.
+            <%= !@discussion.nil? ? link_to("This challenge has been posted to the precisionFDA “Discussions” section", discussion_path(@discussion)) : "" %>. Discussion answers can include rich text formatting, as well as attachments such as files or comparisons. You can leverage this functionality to submit your entry by filling in your answer to the question.
           </p>
           <p class="copy">
             In your answer’s text, please identify whether you are participating as an individual or as part of the team (and, if it is a team effort, don’t forget to identify the members of your team). Write a description of the pipeline used to obtain the results, and identify the name, version and command-line parameters of the mapper and variant caller invoked in your pipeline.
