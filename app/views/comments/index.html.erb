@@ -12,6 +12,7 @@
 
   <hr>
 
+  <% if !@context.guest? %>
   <div class="row pfda-comment">
     <div class="col-sm-12">
       <div class="media">
@@ -30,4 +31,5 @@
       </div>
     </div>
   </div>
+  <% end %>
 </div>
