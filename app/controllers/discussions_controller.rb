@@ -66,11 +66,12 @@ class DiscussionsController < ApplicationController
     discussion = Discussion.editable_by(@context).find(params[:id])
 
     Discussion.transaction do
-      if !discussion.note.nil?
-        discussion.note.destroy
-        discussion.answers.delete_all
-      end
+      note = discussion.note
+      discussion.answers.delete_all
       discussion.destroy
+      if note.present?
+        note.destroy
+      end
     end
 
     flash[:success] = "Discussion \"#{discussion.title}\" has been successfully deleted"
