@@ -89,6 +89,10 @@ class User < ActiveRecord::Base
     "#{first_name[0]}#{last_name[0]}"
   end
 
+  def is_self(context)
+    id == context.user_id
+  end
+
   def can_administer_site?
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
       dxuser == "elaine.johanson" || dxuser == "ruth.bandler"

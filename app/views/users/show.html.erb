@@ -1,15 +1,32 @@
 <% content_for :title do %><%= @user.dxuser %><% end %>
 
 <div class="page-header">
-  <div class="page-title"><%= image_tag(@user.gravatar_url, class: 'img-circle', height: '48px') %> <%= @user.full_name %> (<%= @user.dxuser %>)</div>
+  <div class="media">
+    <div class="media-left">
+      <% if @user.is_self(@context) %>
+        <%= link_to(image_tag(@user.gravatar_url, class: 'img-circle', height: '48px'), "http://en.gravatar.com/emails/", title: "Edit profile image on Gravatar", target: "_blank") %>
+        <br>
+        <%= link_to "http://en.gravatar.com/emails/", class: "edit-gravatar-text", title: "Edit profile image on Gravatar", target: "_blank" do %>
+          Edit <span class="fa fa-external-link"></span>
+        <% end %>
+      <% else %>
+        <%= image_tag(@user.gravatar_url, class: 'img-circle', height: '48px') %>
+      <% end %>
+    </div>
+    <div class="media-body">
+      <div class="page-title">
+        <%= @user.full_name %>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="metadata-section metadata-header">
   <ul class="list-group list-group-inline">
     <li class="list-group-item">
-      <h5 class="list-group-item-heading">Joined</h5>
-      <p class="list-group-item-text"><%= @user.created_at.to_s(:db) %></p>
-      </li>
+      <h5 class="list-group-item-heading">Username</h5>
+      <p class="list-group-item-text"><%= @user.dxuser %></p>
+    </li>
 
     <% if @user.org_id.present? %>
     <li class="list-group-item">
@@ -17,7 +34,10 @@
       <p class="list-group-item-text"><%= @user.org.name %></p>
     </li>
     <% end %>
-
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Joined</h5>
+      <p class="list-group-item-text"><%= @user.created_at.to_s(:db) %></p>
+    </li>
   </ul>
 </div>
 

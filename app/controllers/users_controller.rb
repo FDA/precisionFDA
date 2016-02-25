@@ -7,7 +7,7 @@ class UsersController < ApplicationController
 
     @counts = {
       notes: @user.notes.real_notes.accessible_by_public.order(id: :desc).count,
-      discussions: @user.discussions.accessible_by_public.order(id: :desc).count,
+      discussions: @user.notes.accessible_by_public.discussions.order(id: :desc).count,
       answers: @user.notes.accessible_by_public.answers.order(id: :desc).count,
       files: @user.real_files.accessible_by_public.count,
       comparisons: @user.comparisons.accessible_by_public.count,

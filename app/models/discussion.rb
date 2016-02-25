@@ -65,6 +65,15 @@ class Discussion < ActiveRecord::Base
   end
 
   def self.accessible_by(context)
-    joins(:note).where.any_of({user_id: context.user_id}, {notes: {scope: "public"}}, {notes: {scope: context.org_id.to_s}})
+    if context.guest?
+      accessible_by_public
+    else
+      raise unless context.user_id.present? && context.org_id.present?
+      joins(:note).where.any_of({user_id: context.user_id}, {notes: {scope: "public"}}, {notes: {scope: context.org_id.to_s}})
+    end
+  end
+
+  def self.accessible_by_public
+    joins(:note).where(notes: {scope: "public"})
   end
 end
