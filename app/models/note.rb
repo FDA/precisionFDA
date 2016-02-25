@@ -16,8 +16,8 @@ class Note < ActiveRecord::Base
   include Permissions
 
   belongs_to :user
-  has_one :answer, dependent: :destroy
-  has_one :discussion, dependent: :destroy
+  has_one :answer
+  has_one :discussion
   has_many :attachments, {dependent: :destroy}
   has_many :apps, {through: :attachments, source: :item, source_type: 'App'}
   has_many :comparisons, {through: :attachments, source: :item, source_type: 'Comparison'}

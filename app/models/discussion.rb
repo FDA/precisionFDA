@@ -14,7 +14,7 @@ class Discussion < ActiveRecord::Base
 
   belongs_to :user
   has_many :answers, dependent: :destroy
-  belongs_to :note
+  belongs_to :note, dependent: :destroy
 
   acts_as_commentable
   acts_as_votable

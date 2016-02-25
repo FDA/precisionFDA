@@ -15,7 +15,7 @@ class Answer < ActiveRecord::Base
   validates :discussion_id, uniqueness: {scope: :user_id}
   belongs_to :user
   belongs_to :discussion
-  belongs_to :note
+  belongs_to :note, dependent: :destroy
 
   acts_as_commentable
   acts_as_votable
