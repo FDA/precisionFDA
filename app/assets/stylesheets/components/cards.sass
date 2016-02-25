@@ -79,6 +79,11 @@
       color: $state-info-text
       border-color: $state-info-border
 
+    &.pfda-card-info-solid
+      background-color: $btn-info-bg
+      color: $btn-info-color
+      border-color: $btn-info-border
+
     &.pfda-card-danger
       background-color: $state-danger-bg
       color: $state-danger-text
@@ -108,8 +113,11 @@
       &.pfda-card-metadata-fw-indent
         margin-left: 25px
 
+      &.pfda-card-metadata-small
+        font-size: $font-size-small
+
       .pfda-card-metadata-value
-        font-size: 12px
+        font-size: $font-size-small
         font-weight: 900
         color: $gray-dark
 
@@ -129,6 +137,12 @@
     &.pfda-card-warning-solid:hover
       background-color: darken($btn-warning-bg, 5%)
 
+.pfda-cards:not(.pfda-cards-list)
+  .pfda-card
+    width: 100%
+    @media (min-width: $screen-sm-min)
+      width: 300px
+
 .container
   .pfda-cards
     .pfda-card
@@ -140,12 +154,6 @@
       @media (min-width: $screen-lg-min)
         width: calc(25% - 20px)
 
-.container-fluid
-  .pfda-cards
-    .pfda-card:not(.pfda-card-list)
-      width: 100%
-      @media (min-width: $screen-sm-min)
-        width: 300px
 
 // Sane default, views can override depending on their use
 .pfda-tutorial.pfda-cards

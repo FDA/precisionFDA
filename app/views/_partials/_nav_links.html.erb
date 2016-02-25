@@ -6,6 +6,12 @@
       <div class="nav-pill-title">Overview</div>
     <% end %>
   </li>
+  <li class="<%= 'active' if params[:controller] == 'discussions' || params[:controller] == 'answers' %>" role="presentation">
+    <%= link_to discussions_path do %>
+      <div class="nav-icon fa fa-2x fa-comments-o"></div>
+      <div class="nav-pill-title">Discussions</div>
+    <% end %>
+  </li>
   <li class="<%= 'active' if params[:controller] == 'notes' %>" role="presentation">
     <%= link_to notes_path do %>
       <div class="nav-icon fa fa-2x fa-sticky-note"></div>
@@ -24,7 +30,7 @@
       <div class="nav-pill-title">Comparisons</div>
     <% end %>
   </li>
-  <li class="<%= 'active' if params[:controller] == 'apps' || params[:controller] == 'jobs'%>" role="presentation">
+  <li class="<%= 'active' if params[:controller] == 'apps' || params[:controller] == 'jobs' || params[:controller] == 'assets' %>" role="presentation">
     <%= link_to apps_path do %>
       <div class="nav-icon fa fa-2x fa-cubes"></div>
       <div class="nav-pill-title">Apps</div>
@@ -46,6 +52,7 @@
       <li><%= link_to "Log out", logout_path, method: :delete, data: {no_turbolink: true} %></li>
     </ul>
   </li>
+  <li><%= link_to image_tag(@context.gravatar_url, class: 'img-circle', height: '48px'), user_path(@context.username) %></li>
 </ul>
 <% else %>
   <ul class="nav navbar-nav navbar-right">

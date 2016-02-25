@@ -1,0 +1,12 @@
+<ul class="list-inline list-inline-padding-vertical">
+  <% followers.each do |follower| %>
+  <li title="<%= follower.full_name %> (<%= follower.org.name %>)" data-toggle="tooltip">
+    <%= link_to image_tag(follower.gravatar_url, class: 'img-circle', height: '50px'), user_path(follower.dxuser), class: 'pfda-follower', data: { follower_uid: follower.uid, followable_uid: followable.uid } %>
+  </li>
+  <% end %>
+  <% if !followers.exists?(@context.user_id) %>
+    <li title="<%= @context.user.full_name %> (<%= @context.user.org.name %>)" data-toggle="tooltip" style="display: none">
+      <%= link_to image_tag(@context.user.gravatar_url, class: 'img-circle', height: '50px'), user_path(@context.user.dxuser), class: 'pfda-follower', data: { follower_uid: @context.user.uid, followable_uid: followable.uid } %>
+    </li>
+  <% end %>
+</ul>

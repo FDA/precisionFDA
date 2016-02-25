@@ -57,7 +57,7 @@
 <div class="pfda-toolbar">
   <div class="btn-group">
     <% if @comparison.state == 'done' %>
-      <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
+      <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to...</button>
     <% end %>
     <%= link_to track_path(id: @comparison.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
       <span class="fa fa-flip-vertical fa-sitemap"></span> Track
@@ -97,10 +97,17 @@
       <span class="tab-label">Outputs</span>
     </a>
   </li>
-  <% if @notes.count > 0 %>
+  <% if @notes.total_count > 0 %>
   <li role="presentation">
     <a href="#tab-notes" aria-controls="tab-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
-      <span class="tab-label">Notes <span class="badge"><%= @notes.count %></span></span>
+      <span class="tab-label">Notes <span class="badge"><%= @notes.total_count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @answers.count > 0 %>
+  <li role="presentation">
+    <a href="#tab-answers" aria-controls="tab-answers" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comments-o"></span>
+      <span class="tab-label">Answers <span class="badge"><%= @answers.count %></span></span>
     </a>
   </li>
   <% end %>
@@ -203,6 +210,12 @@
   <% if @notes.count > 0 %>
   <div role="tabpanel" class="tab-pane" id="tab-notes">
     <%= render "notes/cards", notes: @notes %>
+  </div>
+  <% end %>
+
+  <% if @answers.count > 0 %>
+  <div role="tabpanel" class="tab-pane" id="tab-answers">
+    <%= render "answers/cards", answers: @answers, show_discussion: true %>
   </div>
   <% end %>
 </div>
