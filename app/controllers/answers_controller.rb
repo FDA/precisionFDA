@@ -62,8 +62,9 @@ class AnswersController < ApplicationController
     discussion_id = answer.discussion.id
 
     Answer.transaction do
-      answer.note.destroy
+      note = answer.note
       answer.destroy
+      note.destroy
     end
 
     flash[:success] = "Answer has been successfully deleted"
