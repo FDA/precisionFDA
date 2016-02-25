@@ -55,13 +55,11 @@ class ComparisonsController < ApplicationController
       @comparison.reload
     end
 
-    @meta = ActiveSupport::JSON.decode(@comparison.meta)
+    @meta = @comparison.meta
 
     @test_vcf = @comparison.input("test_vcf").user_file
-    @test_tbi = @comparison.input("test_tbi").user_file
     @test_bed = @comparison.input("test_bed").user_file if @comparison.input("test_bed")
     @ref_vcf = @comparison.input("ref_vcf").user_file
-    @ref_tbi = @comparison.input("ref_tbi").user_file
     @ref_bed = @comparison.input("ref_bed").user_file if @comparison.input("ref_bed")
 
     @outputs_grid = initialize_grid(@comparison.outputs, {
@@ -69,9 +67,11 @@ class ComparisonsController < ApplicationController
       order_direction: 'asc'
     })
 
-    @notes = @comparison.notes.accessible_by(@context).order(id: :desc)
+    @notes = @comparison.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
+    @answers = @comparison.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
+    @discussions = @comparison.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
 
-    js id: @comparison.id, meta: @meta, state: @comparison.state
+    js id: @comparison.id, roc: @meta["weighted_roc"], state: @comparison.state
   end
 
   def visualize
@@ -109,10 +109,8 @@ class ComparisonsController < ApplicationController
       c.param! :name, String, {required: true}
       c.param! :description, String, {default: ""}
       c.param! :test_vcf_uid, String, {required: true}
-      c.param! :test_tbi_uid, String, {required: true}
       c.param! :test_bed_uid, String
       c.param! :ref_vcf_uid, String, {required: true}
-      c.param! :ref_tbi_uid, String, {required: true}
       c.param! :ref_bed_uid, String
     end
 
@@ -120,7 +118,7 @@ class ComparisonsController < ApplicationController
 
     files = {}
     # Required files
-    ["test_vcf", "test_tbi", "ref_vcf", "ref_tbi"].each do |role|
+    ["test_vcf", "ref_vcf"].each do |role|
       files[role] = UserFile.real_files.accessible_by(@context).find_by!(dxid: comp_params["#{role}_uid"])
     end
     # Optional files
@@ -146,7 +144,7 @@ class ComparisonsController < ApplicationController
       state: "pending",
       dxjobid: jobid,
       project: project,
-      meta: {}.to_json
+      meta: {}
     }
 
     User.transaction do

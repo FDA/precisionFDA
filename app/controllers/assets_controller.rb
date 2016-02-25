@@ -61,7 +61,9 @@ class AssetsController < ApplicationController
       @asset.reload
     end
 
-    @notes = @asset.notes.accessible_by(@context).order(id: :desc)
+    @notes = @asset.notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
+    @answers = @asset.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
+    @discussions = @asset.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
 
     js asset: @asset.slice(:uid, :id, :description)
   end

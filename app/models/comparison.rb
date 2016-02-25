@@ -39,6 +39,8 @@ class Comparison < ActiveRecord::Base
   has_many :notes, {through: :attachments}
   has_many :attachments, {as: :item, dependent: :destroy}
 
+  store :meta, {coder: JSON}
+
   def uid
     "comparison-#{id}"
   end
@@ -59,12 +61,8 @@ class Comparison < ActiveRecord::Base
     inputs.where(role: role).take!
   end
 
-  def meta_hash
-    JSON.parse(meta)
-  end
-
   def stats
-    meta_hash.slice("precision", "recall", "f-measure", "true-pos", "false-pos", "false-neg")
+    meta.slice("precision", "recall", "f-measure", "true-pos", "false-pos", "false-neg")
   end
 
   def deletable?

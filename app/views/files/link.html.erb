@@ -1,0 +1,16 @@
+<% content_for :title do %>Authorized URL for <%= @file.name %><% end %>
+
+<div class="container container-padded-v">
+  <div class="row">
+    <div class="col-md-18 col-md-offset-2">
+      <p class="h3">Authorized URL for <%= @file.name %></p>
+      <p>
+      The following pre-authorized URL can be used to download the contents of the file, with no additional credentials required.
+      </p>
+      <p>
+      The URL is valid for the next 24 hours. Do not share this URL with unauthorized parties.
+      </p>
+      <div class="alert alert-warning text-monospace h5" style="word-break: break-all;"><%= @url %></div>
+    </div>
+  </div>
+</div>

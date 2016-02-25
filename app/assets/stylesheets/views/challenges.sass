@@ -1,0 +1,51 @@
+@import "_common"
+
+.pfda-controller-challenges
+  a
+    font-weight: bold
+
+  h3
+    text-transform: uppercase
+    color: darken($brand-blue-tertiary, 15%)
+    margin-bottom: $padding-large-vertical*2
+
+  .challenge-title-muted
+    opacity: 0.65
+
+  .tiltview
+    opacity: 0.25
+    width: 100%
+
+  .well
+    background-color: $brand-blue-subtler
+    border-color: $brand-blue-subtle
+
+  .btn-join
+    .fa
+      font-size: 48px
+    .time-remaining
+      font-weight: 300
+      font-size: 18px
+
+  .pfda-challenge-intro
+    .lead-intro
+      margin: 50px 0
+
+    .pfda-card
+      @include flex-grow(1)
+
+      .challenge-card-icon
+        text-align: center
+        margin-bottom: $padding-large-vertical*2
+
+  .pfda-challenge-diagram
+    text-align: center
+    padding: 0 25px
+
+  #accordion
+    .panel-title
+      text-transform: none
+      color: $link-color
+
+      &:hover
+        color: $link-hover-color

@@ -19,6 +19,10 @@ class Org < ActiveRecord::Base
   has_many :users
   belongs_to :admin, {class_name: 'User'}
 
+  def real_org?
+    !singular
+  end
+
   def self.construct_dxorg(handle)
     raise unless handle.present? && handle =~ /^[0-9a-z][0-9a-z_.]*$/
     "org-pfda..#{handle}"
@@ -26,6 +30,10 @@ class Org < ActiveRecord::Base
 
   def self.featured
     Org.find_by(handle: 'precisionfda')
+  end
+
+  def self.real_orgs
+    return where(singular: false)
   end
 
   def dxorg

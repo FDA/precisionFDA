@@ -6,6 +6,12 @@
   @include flexbox
   height: 100%
 
+  .pfda-pane-content + .pfda-pane-sidebar
+    border-left: 1px solid $border-default-color
+
+  .pfda-pane-sidebar + .pfda-pane-content
+    border-right: 1px solid $border-default-color
+
   .pfda-pane-content
     @include flex(1)
     background-color: $body-bg
@@ -17,7 +23,6 @@
     width: 300px
     min-height: 500px
     background-color: darken(desaturate($brand-blue-subtler, 25%), 3%)
-    border-right: 1px solid $border-default-color
 
     &.pfda-pane-sidebar-padded-v
       padding-top: $padding-base-vertical
@@ -29,6 +34,9 @@
 
     &.pfda-pane-sidebar-padded
       padding: $padding-base-horizontal
+
+    &.pfda-pane-sidebar-minimal
+      background-color: transparent
 
     &.pfda-pane-sidebar-dark
       background-color: $brand-blue-dark
@@ -102,7 +110,6 @@
         &.active, &.active:hover
           background-color: $brand-blue-secondary
           color: #ffffff
-          padding-left: 10px // list-group padding minus border left width
           .text-muted
             color: mix(#fff, $link-color, 75%)
 

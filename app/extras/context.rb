@@ -14,6 +14,15 @@ class Context
     @org_id = org_id
   end
 
+  def user
+    raise "context.user called for guest context" if guest?
+    return User.find(@user_id)
+  end
+
+  def gravatar_url
+    guest? ? "https://secure.gravatar.com/avatar/00000000000000000000000000000000.png?d=mm&r=PG" : user.gravatar_url
+  end
+
   def logged_in?
     return (@user_id.present? && @username.present? && @token.present? && @expiration.present? && ((@expiration - Time.now.to_i) > 5.minutes) && @org_id.present?) && (@user_id != -1 && @token != "INVALID" && @org_id != -1)
   end
