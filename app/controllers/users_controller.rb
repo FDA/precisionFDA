@@ -17,6 +17,10 @@ class UsersController < ApplicationController
     if !params.has_key?(:tab)
       if @counts[:notes] > 0
         params[:tab] = 'notes'
+      elsif @counts[:discussions] > 0
+        params[:tab] = 'discussions'
+      elsif @counts[:answers] > 0
+        params[:tab] = 'answers'
       elsif @counts[:files] > 0
         params[:tab] = 'files'
       elsif @counts[:comparisons] > 0
