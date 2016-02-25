@@ -4,32 +4,47 @@ class CommentsController < ApplicationController
 
   def index
     @itemsFromParams = get_item_array_from_params
-    @item =  @itemsFromParams.last
-    @item_path = pathify(@item)
-    @item_comments_path = pathify_comments(@item)
-    @comments = @item.root_comments.page params[:comments_page]
+    @item = @itemsFromParams.last
+    if @item.accessible_by?(@context)
+      @item_path = pathify(@item)
+      @item_comments_path = pathify_comments(@item)
+      @comments = @item.root_comments.page params[:comments_page]
+    else
+      flash[:error] = "You do not have permissions to comment on this item"
+      redirect_to root_url
+    end
   end
 
   def show
     @itemsFromParams = get_item_array_from_params
-    @item =  @itemsFromParams.last
-    @item_path = pathify(@item)
-    @item_comments_path = pathify_comments(@item)
-    @comment = Comment.find_by(id: params[:id], user_id: @context.user_id)
+    @item = @itemsFromParams.last
+    if @item.accessible_by?(@context)
+      @item_path = pathify(@item)
+      @item_comments_path = pathify_comments(@item)
+      @comment = Comment.find_by!(id: params[:id], user_id: @context.user_id)
+    else
+      flash[:error] = "You do not have permissions to see this comment"
+      redirect_to root_url
+    end
   end
 
   def edit
     @itemsFromParams = get_item_array_from_params
-    @item =  @itemsFromParams.last
-    @item_path = pathify(@item)
-    @item_comments_path = pathify_comments(@item)
-    @comment = Comment.find_by(id: params[:id], user_id: @context.user_id)
+    @item = @itemsFromParams.last
+    if @item.accessible_by?(@context)
+      @item_path = pathify(@item)
+      @item_comments_path = pathify_comments(@item)
+      @comment = Comment.find_by!(id: params[:id], user_id: @context.user_id)
+    else
+      flash[:error] = "You do not have permissions to edit this comment"
+      redirect_to root_url
+    end
   end
 
   def create
     if request.post?
       itemsFromParams = get_item_array_from_params
-      item =  itemsFromParams.last
+      item = itemsFromParams.last
       item_comments_path = pathify_comments(item)
       c = comment_params
       if item.present?

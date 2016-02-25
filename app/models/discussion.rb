@@ -13,7 +13,7 @@ class Discussion < ActiveRecord::Base
   include Permissions
 
   belongs_to :user
-  has_many :answers
+  has_many :answers, dependent: :destroy
   belongs_to :note
 
   acts_as_commentable

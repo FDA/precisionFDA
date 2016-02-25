@@ -8,25 +8,22 @@ class ChallengesController < ApplicationController
   end
 
   def consistency
-    @discussion = Discussion.accessible_by_public.find_by(id: CONSISTENCY_DISCUSSION_ID)
+    @discussion = Discussion.find_by(id: CONSISTENCY_DISCUSSION_ID)
 
-    if !@discussion.nil?
-      @challengedEndDate = CONSISTENCY_CHALLENGE_END_DATE
+    @challengedEndDate = CONSISTENCY_CHALLENGE_END_DATE
 
-      @challenge = {
-        active: CONSISTENCY_CHALLENGE_ACTIVE,
-        joined: @context.logged_in? && @discussion.followed_by?(@context.user)
-      }
+    @challenge = {
+      launched: !@discussion.nil? && @discussion.public?,
+      active: CONSISTENCY_CHALLENGE_ACTIVE,
+      joined: @context.logged_in? && !@discussion.nil? && @discussion.followed_by?(@context.user)
+    }
 
-      if DateTime.now.in_time_zone < @challengedEndDate.months_ago(2)
-        @btn_class = "accessible-btn-success"
-      elsif DateTime.now.in_time_zone < @challengedEndDate.months_ago(1)
-        @btn_class = "accessible-btn-warning"
-      else
-        @btn_class = "accessible-btn-danger"
-      end
+    if DateTime.now.in_time_zone < @challengedEndDate.months_ago(2)
+      @btn_class = "accessible-btn-success"
+    elsif DateTime.now.in_time_zone < @challengedEndDate.months_ago(1)
+      @btn_class = "accessible-btn-warning"
     else
-      redirect_to root_path
+      @btn_class = "accessible-btn-danger"
     end
   end
 

@@ -212,8 +212,8 @@ class ApplicationController < ActionController::Base
     if params[:discussion_id].present?
       discussion = Discussion.find(params[:discussion_id])
       if params[:answer_id].present?
-        user = User.find_by(dxuser: params[:answer_id])
-        answer = Answer.find_by(discussion_id: params[:discussion_id], user_id: user.id)
+        user = User.find_by!(dxuser: params[:answer_id])
+        answer = Answer.find_by!(discussion_id: params[:discussion_id], user_id: user.id)
         return [discussion, answer]
       else
         return [discussion]

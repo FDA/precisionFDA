@@ -11,7 +11,9 @@ class DiscussionsController < ApplicationController
     @answers = @discussion.answers.accessible_by(@context).page params[:answers_page]
     @followers = @discussion.user_followers.limit(20)
     orgs = @discussion.user_followers.map(&:org)
-    @follower_orgs = orgs.uniq { |org| org.id }.sort_by!{ |org| org.name.downcase }.first(20)
+    orgs = orgs.uniq { |org| org.id }.sort_by!{ |org| org.name.downcase }
+
+    @follower_orgs = orgs.select{ |org| org.real_org? }.first(20)
 
     if request.path != discussion_path(@discussion)
       redirect_to @discussion
