@@ -1,0 +1,97 @@
+class DiscussionsController < ApplicationController
+  skip_before_action :require_login,     only: [:index, :show]
+  before_action :require_login_or_guest, only: [:index, :show]
+
+  def index
+    @discussions = Discussion.accessible_by(@context).order(id: :desc).page params[:discussions_page]
+  end
+
+  def show
+    @discussion = Discussion.accessible_by(@context).find(params[:id])
+    @answers = @discussion.answers.accessible_by(@context).page params[:answers_page]
+    @followers = @discussion.user_followers.limit(20)
+    orgs = @discussion.user_followers.map(&:org)
+    @follower_orgs = orgs.uniq { |org| org.id }.sort_by!{ |org| org.name.downcase }.first(20)
+
+    if request.path != discussion_path(@discussion)
+      redirect_to @discussion
+    else
+      js note_js(@discussion.note)
+    end
+  end
+
+  def edit
+    @user = User.find(@context.user_id)
+    @discussion = Discussion.editable_by(@context).find(params[:id])
+    @note = @discussion.note
+
+    if @discussion.nil?
+      flash[:error] = "Sorry, this discussion is not editable by you"
+      redirect_to discussion_path(@discussion)
+      return
+    end
+
+    js note_js(@note)
+  end
+
+  def create
+    if request.post?
+      Note.transaction do
+        note = Note.create!({
+          user_id: @context.user_id,
+          scope: "private",
+          note_type: "Discussion"
+        })
+        Discussion.transaction do
+          @discussion = Discussion.create!(
+            user_id: @context.user_id,
+            note_id: note.id
+          )
+          @context.user.follow(@discussion)
+        end
+      end
+      @discussion.reload
+      if @discussion.nil?
+        flash[:error] = "Sorry, a discussion could not be started"
+        redirect_to discussions_path()
+      else
+        redirect_to edit_discussion_path(@discussion)
+      end
+    end
+  end
+
+  # FIXME: What's the correct strategy for deleting associated answers? Should the answers also be deleted
+  # or kept around? If the latter, then update the answer#show to handle a deleted discussion
+  def destroy
+    discussion = Discussion.editable_by(@context).find(params[:id])
+
+    Discussion.transaction do
+      if !discussion.note.nil?
+        discussion.note.destroy
+        discussion.answers.delete_all
+      end
+      discussion.destroy
+    end
+
+    flash[:success] = "Discussion \"#{discussion.title}\" has been successfully deleted"
+    redirect_to :discussions
+  end
+
+  private
+    def note_js(note)
+      comparisons = note.comparisons
+      files = note.real_files
+      apps = note.apps
+      jobs = note.jobs
+      assets = note.assets
+
+      attachments = {
+        comparisons: (comparisons.map { |o| o.context_slice(@context, :title)}),
+        files: (files.map { |o| o.context_slice(@context, :title)}),
+        apps: (apps.map { |o| o.context_slice(@context, :title)}),
+        jobs: (jobs.map { |o| o.context_slice(@context, :title)}),
+        assets: (assets.map { |o| o.context_slice(@context, :title)}),
+      }
+      return {note: note.slice(:id, :content, :title), attachments: attachments, edit: params[:edit], editable: note.editable_by?(@context)}
+    end
+end

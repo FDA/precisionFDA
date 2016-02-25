@@ -1,0 +1,12 @@
+<% content_for :title do %>Comment for <%= @item.klass %>: <%= @item.title %><% end %>
+
+<div class="page-header">
+  <div class="page-title">
+    <span class="fa fa-comment"></span> Comment for <%= @item.klass %>: 
+     <%= link_to @item.title, @item_comments_path %>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <%= render "comments/comments", comments: [@comment], item: @item %>
+</div>

@@ -189,6 +189,37 @@
   </div>
 </div>
 
+<% if show_consistency_challenge %>
+  <div class="jumbotron jumbotron-challenges tiltview-container">
+    <div class="container container-fluid">
+      <div class="tiltview-description">
+        <p class="lead-intro">
+          <span class="challenge-title-muted">Introducing</span>
+          <br>
+          <strong>The PrecisionFDA Consistency Challenge</strong>
+        </p>
+
+        <div class="row">
+          <div class="col-sm-6 col-xs-24">
+            <a class="btn btn-default btn-lg" href="<%= consistency_challenges_path %>">
+              <div class="media">
+                <div class="media-left">
+                  <span class="fa fa-trophy" aria-hidden="true"></span>
+                </div>
+                <div class="media-body text-left">
+                  Learn more about the challenge
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="tiltview col" aria-hidden="true">
+        <%= image_tag("challenges/pFDA-Challenge-Diagram", alt: "PrecisionFDA Consistency Challenge", class: "img-responsive img-thumbnail") %>
+      </div>
+    </div>
+  </div>
+<% end %>
 
 <div class="container-fluid container-padded pfda-participants-section gradient-blue-sky">
   <div class="h2 text-center text-uppercase">Community Participants</div>

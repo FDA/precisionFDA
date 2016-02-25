@@ -77,6 +77,13 @@ window.Precision.carousel =
       $(this).css 'height', max + 'px'
 
 
+onDocumentReady = ->
+  Precision.upvote.on()
+  Precision.follow.on()
+
+$(document).ready(onDocumentReady)
+
 $(document).on 'page:load', ->
   Paloma.executeHook()
   Paloma.engine.start()
+  onDocumentReady()

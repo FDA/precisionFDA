@@ -9,6 +9,7 @@
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #  scope      :string
+#  note_type  :string
 #
 
 require 'test_helper'

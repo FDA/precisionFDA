@@ -130,7 +130,11 @@ class ApplicationController < ActionController::Base
     when "file"
       file_path(item.dxid)
     when "note"
-      note_path(item)
+      if item.note_type == "Answer"
+        discussion_answer_path(item.discussion, item.user.dxuser)
+      else
+        note_path(item)
+      end
     when "app"
       app_path(item.dxid)
     when "job"
@@ -139,6 +143,39 @@ class ApplicationController < ActionController::Base
       asset_path(item.dxid)
     when "comparison"
       comparison_path(item)
+    when "discussion"
+      discussion_path(item)
+    when "answer"
+      discussion_answer_path(item.discussion, item.user.dxuser)
+    when "user"
+      user_path(item.dxuser)
+    else
+      raise "Unknown class #{item.klass}"
+    end
+  end
+
+  def pathify_comments(item)
+    case item.klass
+    when "file"
+      file_comments_path(item.dxid)
+    when "note"
+      if item.note_type == "Answer"
+        discussion_answer_comments_path(item.discussion, item.user.dxuser)
+      else
+        note_comments_path(item)
+      end
+    when "app"
+      app_comments_path(item.dxid)
+    when "job"
+      job_comments_path(item.dxid)
+    when "asset"
+      asset_comments_path(item.dxid)
+    when "comparison"
+      comparison_comments_path(item)
+    when "discussion"
+      discussion_comments_path(item)
+    when "answer"
+      discussion_answer_comments_path(item.discussion, item.user.dxuser)
     else
       raise "Unknown class #{item.klass}"
     end
@@ -156,15 +193,34 @@ class ApplicationController < ActionController::Base
         record = record.becomes(Asset)
       end
       return record
-    elsif uid =~ /^comparison-(\d+)$/
-      # Transitional until comparisons get real dxids
-      id = $1.to_i
-      return Comparison.find_by!(id: id)
-    elsif uid =~ /^note-(\d+)$/
-      id = $1.to_i
-      return Note.find_by!(id: id)
+    elsif uid =~ /^(comparison|note|discussion|answer|user)-(\d+)$/
+      klass = {
+        "comparison" => Comparison,
+        "note" => Note,
+        "discussion" => Discussion,
+        "answer" => Answer,
+        "user" => User
+      }[$1]
+      id = $2.to_i
+      return klass.find_by!(id: id)
     else
       raise "Invalid id '#{uid}' in item_from_uid"
     end
+  end
+
+  def get_item_array_from_params
+    if params[:discussion_id].present?
+      discussion = Discussion.find(params[:discussion_id])
+      if params[:answer_id].present?
+        user = User.find_by(dxuser: params[:answer_id])
+        answer = Answer.find_by(discussion_id: params[:discussion_id], user_id: user.id)
+        return [discussion, answer]
+      else
+        return [discussion]
+      end
+    elsif params[:note_id].present?
+      return [Note.find(params[:note_id])]
+    end
+    return
   end
 end
