@@ -72,7 +72,7 @@
             <span class="fa fa-edit"></span> Write an Answer
           <% end %>
         <% else %>
-          <%= link_to edit_discussion_answer_path(@discussion, @discussion.answer_for_user(@context.user_id).user.dxuser), class: "btn btn-default btn-block" do %>
+          <%= link_to edit_discussion_answer_path(@discussion, @context.username), class: "btn btn-default btn-block" do %>
             <span class="fa fa-edit"></span> Edit your answer
           <% end %>
         <% end %>
@@ -98,21 +98,6 @@
       </li>
     </div>
     <% end %>
-    <!-- <div class="list-group">
-      <li class="list-group-item list-group-item-header">
-        Topics
-      </li>
-      <li class="list-group-item">
-        <ul class="list-inline list-inline-bullets">
-          <li>
-            <a href="">NA12878</a>
-          </li>
-          <li>
-            <a href="">References</a>
-          </li>
-        </ul>
-      </li>
-    </div> -->
   </div>
 </div>
 <% end %>
