@@ -104,10 +104,17 @@
     </a>
   </li>
   <% end %>
-  <% if @answers.count > 0 %>
+  <% if @discussions.total_count > 0 %>
   <li role="presentation">
-    <a href="#tab-answers" aria-controls="tab-answers" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comments-o"></span>
-      <span class="tab-label">Answers <span class="badge"><%= @answers.count %></span></span>
+    <a href="#tab-discussions" aria-controls="tab-discussions" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comments-o"></span>
+      <span class="tab-label">Discussions <span class="badge"><%= @discussions.total_count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @answers.total_count > 0 %>
+  <li role="presentation">
+    <a href="#tab-answers" aria-controls="tab-answers" role="tab" data-toggle="tab"><span class="fa fa-fw fa-commenting"></span>
+      <span class="tab-label">Answers <span class="badge"><%= @answers.total_count %></span></span>
     </a>
   </li>
   <% end %>
@@ -207,13 +214,19 @@
   </div>
   <% end %>
 
-  <% if @notes.count > 0 %>
+  <% if @notes.total_count > 0 %>
   <div role="tabpanel" class="tab-pane" id="tab-notes">
     <%= render "notes/cards", notes: @notes %>
   </div>
   <% end %>
 
-  <% if @answers.count > 0 %>
+  <% if @discussions.total_count > 0 %>
+  <div role="tabpanel" class="tab-pane" id="tab-discussions">
+    <%= render "discussions/cards", discussions: @discussions %>
+  </div>
+  <% end %>
+
+  <% if @answers.total_count > 0 %>
   <div role="tabpanel" class="tab-pane" id="tab-answers">
     <%= render "answers/cards", answers: @answers, show_discussion: true %>
   </div>

@@ -74,6 +74,7 @@ class FilesController < ApplicationController
 
     @notes = @file.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @file.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
+    @discussions = @file.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
     js id: @file.id
   end
 
