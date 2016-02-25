@@ -1,0 +1,12 @@
+<% if object.errors.any? %>
+<div class="form-group form-group-lg">
+  <div class="alert alert-danger col-md-offset-5 col-md-10">
+    <strong><span class="fa fa-warning"></span> Please correct the following errors:</strong>
+    <ul>
+      <% object.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+</div>
+<% end %>

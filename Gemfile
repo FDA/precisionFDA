@@ -56,6 +56,22 @@ gem 'axlsx'
 # Secure headers
 gem 'secure_headers', '>= 3.0.0.pre2'
 
+# Add comments on any model
+gem 'acts_as_commentable_with_threading'
+
+# Add voting on any model
+gem 'acts_as_votable'
+
+# Gravatar profile image helper
+gem 'gravtastic'
+
+# Adds pagination support to models
+gem 'kaminari'
+gem 'bootstrap-kaminari-views'
+
+# Allows models to follow each other
+gem 'acts_as_follower'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

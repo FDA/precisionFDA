@@ -44,9 +44,22 @@ class User < ActiveRecord::Base
   has_many :apps
   has_many :app_series
   has_many :jobs
+  has_many :discussions
+  has_many :answers
   belongs_to :org
 
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
+
+  include Gravtastic
+  gravtastic :secure => true, :default => "mm"
+
+  acts_as_voter
+  acts_as_followable
+  acts_as_follower
+
+  def uid
+    "user-#{id}"
+  end
 
   def klass
     "user"
@@ -70,6 +83,14 @@ class User < ActiveRecord::Base
 
   def full_name
     "#{first_name} #{last_name}"
+  end
+
+  def initials
+    "#{first_name[0]}#{last_name[0]}"
+  end
+
+  def is_self(context)
+    id == context.user_id
   end
 
   def can_administer_site?
@@ -307,7 +328,7 @@ class User < ActiveRecord::Base
     if state == "done"
       temp_meta = result["describe"]["output"]["meta"]
       temp_meta["weighted_roc"]["data"] = temp_meta["weighted_roc"]["data"].last(100)
-      comparison.meta = temp_meta.to_json
+      comparison.meta = temp_meta
       output_keys = []
       output_ids = []
       result["describe"]["output"].keys.each do |key|

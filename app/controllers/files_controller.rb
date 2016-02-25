@@ -72,8 +72,9 @@ class FilesController < ApplicationController
       @comparison = @file.parent
     end
 
-    @notes = @file.notes.accessible_by(@context).order(id: :desc)
-
+    @notes = @file.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
+    @answers = @file.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
+    @discussions = @file.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
     js id: @file.id
   end
 
@@ -99,8 +100,31 @@ class FilesController < ApplicationController
       redirect_to file_path(@file.dxid)
     else
       opts = {project: @file.project, preauthenticated: true}
-      opts[:filename] = @file.name if params[:inline] != "true"
+      opts[:filename] = @file.name
       redirect_to DNAnexusAPI.new(@context.token).call(@file.dxid, "download", opts)["url"] + (params[:inline] == "true" ? '?inline' : '')
+    end
+  end
+
+  def link
+    # Allow assets as well, thought not currently exposed in the UI
+    @file = UserFile.accessible_by(@context).find_by!(dxid: params[:id])
+
+    # Refresh state of file, if needed
+    if @file.state != "closed"
+      if @file.parent_type == "Asset"
+        User.sync_asset!(@context, @file.id)
+      else
+        User.sync_file!(@context, @file.id)
+      end
+      @file.reload
+    end
+
+    if @file.state != "closed"
+      flash[:error] = "Files can only be downloaded if they are in the 'closed' state"
+      redirect_to file_path(@file.dxid)
+    else
+      opts = {project: @file.project, preauthenticated: true, filename: @file.name, duration: 86400}
+      @url = DNAnexusAPI.new(@context.token).call(@file.dxid, "download", opts)["url"]
     end
   end
 

@@ -1,62 +1,48 @@
 class ComparisonsNewView
   constructor: () ->
-    @filterQuery = ko.observable()
-    @files = ko.observableArray()
-    @files.filtered = ko.computed(=>
-      files = _.sortBy(@files(), 'name')
-      query = @filterQuery()
-      if query?
-        regexp = new RegExp(query, "i")
-        return _.filter(files, (file) -> file.name.match regexp)
-      else
-        files
-    )
+    @fileSelector = new Precision.models.FilesSelectorModel()
 
-    @testVariant = new VariantModel("Test", {
+    @testVariant = new VariantViewModel(this, "Test", {
       inputSpec: [
         {
           name: "test_vcf"
-          title: "VCF"
-          required: true
-        }
-        {
-          name: "test_tbi"
-          title: "TBI"
-          required: true
+          label: "VCF"
+          class: "file"
+          optional: false
+          patterns: ["*.vcf.gz", "*.vcf"]
         }
         {
           name: "test_bed"
-          title: "BED"
-          required: false
+          label: "BED"
+          class: "file"
+          optional: true
+          patterns: ["*.bed"]
         }
       ]
     })
 
-    @refVariant = new VariantModel("Benchmark", {
+    @refVariant = new VariantViewModel(this, "Benchmark", {
       inputSpec: [
         {
           name: "ref_vcf"
-          title: "VCF"
-          required: true
-        }
-        {
-          name: "ref_tbi"
-          title: "TBI"
-          required: true
+          label: "VCF"
+          class: "file"
+          optional: false
+          patterns: ["*.vcf.gz", "*.vcf"]
         }
         {
           name: "ref_bed"
-          title: "BED"
-          required: false
+          label: "BED"
+          class: "file"
+          optional: true
+          patterns: ["*.bed"]
         }
       ]
     })
 
     @areAllInputsSet = ko.computed(() =>
-      inputs = @refVariant.inputs().concat(@testVariant.inputs())
-      _.all(inputs, (inputModel) ->
-        return (inputModel.required && inputModel.active()) || !inputModel.required
-      )
+      inputModels = @refVariant.inputs().concat(@testVariant.inputs())
+      _.every(inputModels, (inputModel) -> inputModel.isReady())
     )
 
     @name = ko.observable()
@@ -65,52 +51,41 @@ class ComparisonsNewView
       !_.isEmpty(@name())
     )
 
-    @getFiles()
-
-  getFiles: (params = {}) ->
-    Precision.api '/api/list_files', params, (files) =>
-      @files(_.map(files, (file) -> new FileModel(file)))
-
-  selectFile: (e) =>
-    e.preventDefault()
-    inputModel = ko.dataFor(e.currentTarget)
-    fileModel = ko.contextFor(e.currentTarget).$parent
-    inputModel.file(fileModel)
-
-  unselectFile: (e) =>
-    e.preventDefault()
-    inputModel = ko.dataFor(e.currentTarget)
-    inputModel.file(null)
-    return false
+    @challenges = [
+      new ChallengeViewModel({
+        id: 1
+        name: "consistency"
+        title: "Consistency Challenge"
+        actionLabel: "Compare to NA12878-NISTv2.19"
+      }, this)
+    ]
 
   submitForm: (e) =>
     $("#comparison-modal form").submit()
 
-class VariantModel
-  constructor: (@category, app) ->
+class ChallengeViewModel
+  constructor: (challenge, @viewModel) ->
+    @id = challenge.id
+    @name = challenge.name
+    @title = challenge.title
+    @actionLabel = challenge.actionLabel
+
+  assignChallengeFiles: () ->
+    refVCFModel = _.find(@viewModel.refVariant.inputs(), (input) -> input.name == "ref_vcf")
+    refBEDModel = _.find(@viewModel.refVariant.inputs(), (input) -> input.name == "ref_bed")
+
+    if @name == "consistency"
+      refVCFModel.value(Precision.challenges.consistency.benchmark.VCF)
+      refBEDModel.value(Precision.challenges.consistency.benchmark.BED)
+
+
+class VariantViewModel
+  constructor: (viewModel, @category, app) ->
     inputs = _.map(app.inputSpec, (input) =>
-      new VariantInputModel(@category, input)
+      new Precision.models.AppInputModel(input, viewModel)
+      # new VariantInputModel(@category, input)
     )
     @inputs = ko.observableArray(inputs)
-
-class VariantInputModel
-  constructor: (@category, input) ->
-    @name = input.name
-    @title = input.title
-    @required = input.required ? true
-    @file = ko.observable()
-    @uid = ko.computed(=>
-      file = @file()
-      file.uid if file?
-    )
-    @active = ko.computed(=>
-      !_.isEmpty(@file())
-    )
-
-class FileModel
-  constructor: (file) ->
-    @uid = file.uid
-    @name = file.name
 
 #########################################################
 #
@@ -132,27 +107,27 @@ ComparisonsController::new = ->
       refVCFModel = _.find(viewModel.refVariant.inputs(), (input) -> input.name == "ref_vcf")
 
       if testVCFModel? && refVCFModel? && !viewModel.name()?
-        testName = testVCFModel.file().name.replace /\.vcf\.gz/i, ""
-        refName = refVCFModel.file().name.replace /\.vcf\.gz/i, ""
+        testName = testVCFModel.value().name.replace /\.vcf\.gz/i, ""
+        refName = refVCFModel.value().name.replace /\.vcf\.gz/i, ""
 
         viewModel.name("#{testName} vs #{refName}")
   )
 
-  $container
-    .on("click.comparisons_new", ".event-select-input", (e) -> viewModel.selectInput(e))
-    .on("click.comparisons.new", ".event-select-file", (e) -> viewModel.selectFile(e))
-    .on("click.comparisons.new", ".event-unselect-file", (e) -> viewModel.unselectFile(e))
+  # $container
+  #   .on("click.comparisons_new", ".event-select-input", (e) -> viewModel.selectInput(e))
+  #   .on("click.comparisons.new", ".event-select-file", (e) -> viewModel.selectFile(e))
+  #   .on("click.comparisons.new", ".event-unselect-file", (e) -> viewModel.unselectFile(e))
 
-  # Affix the variants comparator and filter
-  $affixContainer = $container.find(".affix-container")
-  $affixContainer.affix({
-    offset:
-      top: $affixContainer.offset().top
-  })
-
-  $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
-
-  $(window).resize(() ->
-    $affixContainer.affix('checkPosition')
-    $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
-  )
+  # # Affix the variants comparator and filter
+  # $affixContainer = $container.find(".affix-container")
+  # $affixContainer.affix({
+  #   offset:
+  #     top: $affixContainer.offset().top
+  # })
+  #
+  # $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
+  #
+  # $(window).resize(() ->
+  #   $affixContainer.affix('checkPosition')
+  #   $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
+  # )

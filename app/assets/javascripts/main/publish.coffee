@@ -41,6 +41,10 @@ class NodeModel
                     'fa fa-fw fa-file-zip-o'
                   when 'note'
                     'fa fa-fw fa-sticky-note'
+                  when 'discussion'
+                    'fa fa-fw fa-comments-o'
+                  when 'answer'
+                    'fa fa-fw fa-commenting'
                   else
                     'fa fa-fw fa-file-o'
 #########################################################

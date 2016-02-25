@@ -641,14 +641,24 @@ class ApiController < ApplicationController
   # An array of hashes, each of which contains the following:
   #
   # id (integer)
-  # slug (string)
+  # path (string)
   # title (string)
+  # note_type: (string)
   #
   def list_notes
-    notes = Note.editable_by(@context)
+    notes = Note.editable_by(@context).order(note_type: :asc, title: :asc)
 
-    result = notes.select(:id, :title).map do |note|
-      {id: note.id, slug: note.to_param, title: note.title }
+    result = notes.map do |note|
+      title = note.title
+      path = note_path(note.to_param)
+      if !note.note_type.nil?
+        if note.note_type == 'Answer'
+          path = discussion_answer_path(note.answer.discussion, note.user.dxuser)
+        elsif note.note_type == 'Discussion'
+          path = discussion_path(note.discussion)
+        end
+      end
+      {id: note.id, path: path, title: title, note_type: note.note_type }
     end
 
     render json: result
@@ -765,6 +775,108 @@ class ApiController < ApplicationController
       id: note.id,
       path: note_path(note)
     }
+  end
+
+  # Inputs
+  #
+  # uid (string, required): the uid of the item to upvote
+  #
+  # Outputs:
+  # uid (string): the uid of the item
+  # upvote_count (integer): latest upvote count for item
+  #
+  def upvote
+    uid = params["uid"]
+    raise unless uid.is_a?(String) && uid != ""
+
+    item = item_from_uid(uid)
+    if item.accessible_by?(@context) && ["discussion", "answer"].include?(item.klass)
+      item.liked_by(@context.user)
+      render json: {
+        uid: uid,
+        upvote_count: item.get_upvotes.size
+      }
+    else
+      raise "#{uid} is not accessible by you"
+    end
+  end
+
+  # Inputs
+  #
+  # uid (string, required): the uid of the item to remove an upvote
+  #
+  # Outputs:
+  # uid (string): the uid of the item
+  # upvote_count (integer): latest upvote count for item
+  #
+  def remove_upvote
+    uid = params["uid"]
+    raise unless uid.is_a?(String) && uid != ""
+
+    item = item_from_uid(uid)
+    if item.accessible_by?(@context) && ["discussion", "answer"].include?(item.klass)
+      item.unliked_by(@context.user)
+      render json: {
+        uid: uid,
+        upvote_count: item.get_upvotes.size
+      }
+    else
+      raise "#{uid} is not accessible by you"
+    end
+  end
+
+  # Inputs
+  #
+  # followable_uid (string, required): the uid of the item to follow
+  #
+  # Outputs:
+  # followable_uid (stired): the uid of the item followed
+  # follower_uid (string): the uid of the follower
+  # follow_count (integer): latest count of follows on the followable item
+  #
+  def follow
+    followable_uid = params["followable_uid"]
+    raise unless followable_uid.is_a?(String) && followable_uid != ""
+
+    followable = item_from_uid(followable_uid)
+    follower = @context.user
+    if followable.accessible_by?(@context) && ["discussion"].include?(followable.klass)
+      follower.follow(followable)
+      render json: {
+        followable_uid: followable_uid,
+        follower_uid: follower.uid,
+        follow_count: followable.followers_by_type_count(follower.class.name)
+      }
+    else
+      raise "You do not have permission to follow this object"
+    end
+  end
+
+  # Inputs
+  #
+  # follow_uid (string, required): the uid of the item to unfollow
+  #
+  # Outputs:
+  # follow_uid (string): the uid of the item unfollowed
+  # follower_uid (string): the uid of the follower
+  # follow_count (integer): latest count of follows on the followable item
+  #
+  def unfollow
+    followable_uid = params["followable_uid"]
+    raise unless followable_uid.is_a?(String) && followable_uid != ""
+
+    followable = item_from_uid(followable_uid)
+    follower = @context.user
+    if followable.accessible_by?(@context) && ["discussion"].include?(followable.klass)
+      follower.stop_following(followable)
+      render json: {
+        followable_uid: followable_uid,
+        follower_uid: follower.uid,
+        follow_count: followable.followers_by_type_count(follower.class.name)
+      }
+    else
+      raise "You do not have permission to unfollow this object"
+    end
   end
 
   protected

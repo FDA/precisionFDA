@@ -42,8 +42,9 @@ class JobsController < ApplicationController
       end
     end
 
-    @notes = @job.notes.accessible_by(@context).order(id: :desc)
-
+    @notes = @job.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
+    @answers = @job.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
+    @discussions = @job.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
     js id: @job.id
   end
 

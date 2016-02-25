@@ -57,7 +57,7 @@
 <div class="pfda-toolbar">
   <div class="btn-group">
     <% if @comparison.state == 'done' %>
-      <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
+      <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to...</button>
     <% end %>
     <%= link_to track_path(id: @comparison.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
       <span class="fa fa-flip-vertical fa-sitemap"></span> Track
@@ -97,10 +97,24 @@
       <span class="tab-label">Outputs</span>
     </a>
   </li>
-  <% if @notes.count > 0 %>
+  <% if @notes.total_count > 0 %>
   <li role="presentation">
     <a href="#tab-notes" aria-controls="tab-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
-      <span class="tab-label">Notes <span class="badge"><%= @notes.count %></span></span>
+      <span class="tab-label">Notes <span class="badge"><%= @notes.total_count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @discussions.total_count > 0 %>
+  <li role="presentation">
+    <a href="#tab-discussions" aria-controls="tab-discussions" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comments-o"></span>
+      <span class="tab-label">Discussions <span class="badge"><%= @discussions.total_count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @answers.total_count > 0 %>
+  <li role="presentation">
+    <a href="#tab-answers" aria-controls="tab-answers" role="tab" data-toggle="tab"><span class="fa fa-fw fa-commenting"></span>
+      <span class="tab-label">Answers <span class="badge"><%= @answers.total_count %></span></span>
     </a>
   </li>
   <% end %>
@@ -113,7 +127,6 @@
         <div class="variant-title">Test Set</div>
         <ul class="variant-inputs list-unstyled">
           <%= render "_partials/variant_file", file: @test_vcf, title: "VCF", required: true, classes: "required active"  %>
-          <%= render "_partials/variant_file", file: @test_tbi, title: "TBI", required: true, classes: "required active"  %>
           <%= render "_partials/variant_file", file: @test_bed, title: "BED", required: false, classes: "active"  %>
         </ul>
       </div>
@@ -122,7 +135,6 @@
         <div class="variant-title">Benchmark Set</div>
         <ul class="variant-inputs list-unstyled">
           <%= render "_partials/variant_file", file: @ref_vcf, title: "VCF", required: true, classes: "required active"  %>
-          <%= render "_partials/variant_file", file: @ref_tbi, title: "TBI", required: true, classes: "required active"  %>
           <%= render "_partials/variant_file", file: @ref_bed, title: "BED", required: false, classes: "active"  %>
         </ul>
       </div>
@@ -202,9 +214,21 @@
   </div>
   <% end %>
 
-  <% if @notes.count > 0 %>
+  <% if @notes.total_count > 0 %>
   <div role="tabpanel" class="tab-pane" id="tab-notes">
     <%= render "notes/cards", notes: @notes %>
+  </div>
+  <% end %>
+
+  <% if @discussions.total_count > 0 %>
+  <div role="tabpanel" class="tab-pane" id="tab-discussions">
+    <%= render "discussions/cards", discussions: @discussions %>
+  </div>
+  <% end %>
+
+  <% if @answers.total_count > 0 %>
+  <div role="tabpanel" class="tab-pane" id="tab-answers">
+    <%= render "answers/cards", answers: @answers, show_discussion: true %>
   </div>
   <% end %>
 </div>

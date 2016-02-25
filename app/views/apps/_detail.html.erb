@@ -100,7 +100,7 @@
   </div>
 
   <div class="btn-group">
-    <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
+    <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to...</button>
     <%= link_to track_path(id: @app.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
       <span class="fa fa-flip-vertical fa-sitemap"></span> Track
     <% end %>
@@ -139,10 +139,24 @@
     </a>
   </li>
   <% end %>
-  <% if @notes.present? && @notes.count > 0 %>
+  <% if @notes.present? && @notes.total_count > 0 %>
   <li role="presentation">
     <a href="#app-notes" aria-controls="app-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
-      <span class="tab-label">NOTES <span class="badge"><%= @notes.count %></span></span>
+      <span class="tab-label">NOTES <span class="badge"><%= @notes.total_count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @discussions.present? && @discussions.total_count > 0 %>
+  <li role="presentation">
+    <a href="#tab-discussions" aria-controls="tab-discussions" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comments-o"></span>
+      <span class="tab-label">Discussions <span class="badge"><%= @discussions.total_count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @answers.present? && @answers.total_count > 0 %>
+  <li role="presentation">
+    <a href="#tab-answers" aria-controls="tab-answers" role="tab" data-toggle="tab"><span class="fa fa-fw fa-commenting"></span>
+      <span class="tab-label">Answers <span class="badge"><%= @answers.total_count %></span></span>
     </a>
   </li>
   <% end %>
@@ -272,9 +286,21 @@
     </div>
     <% end %>
 
-    <% if @notes.present? && @notes.count > 0 %>
+    <% if @notes.present? && @notes.total_count > 0 %>
     <div role="tabpanel" class="tab-pane tab-pane-padded" id="app-notes">
       <%= render "notes/cards", notes: @notes %>
+    </div>
+    <% end %>
+
+    <% if @discussions.present? && @discussions.total_count > 0 %>
+    <div role="tabpanel" class="tab-pane" id="tab-discussions">
+      <%= render "discussions/cards", discussions: @discussions %>
+    </div>
+    <% end %>
+
+    <% if @answers.present? && @answers.total_count > 0 %>
+    <div role="tabpanel" class="tab-pane" id="tab-answers">
+      <%= render "answers/cards", answers: @answers, show_discussion: true %>
     </div>
     <% end %>
   <% end %>

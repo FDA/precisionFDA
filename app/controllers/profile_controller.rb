@@ -210,7 +210,7 @@ class ProfileController < ApplicationController
         AUDIT_LOGGER.info("The system is about to start provisioning admin '#{@suggested_username}' and org '#{@org_handle}'#{@singular ? ' (self-represented)' : ''} initiated by '#{@user.dxuser}'")
         papi.call("org", "new", {handle: dxorghandle, name: @org})
         billing_info = {
-          email: "Elaine.Johanson@fda.hhs.gov",
+          email: "billing@dnanexus.com",
           name: "Elaine Johanson",
           companyName: "FDA",
           address1: "10903 New Hampshire Ave",
@@ -295,7 +295,7 @@ class ProfileController < ApplicationController
               u = User.where.any_of({first_name: inv.first_name, last_name: inv.last_name}, {normalized_email: inv.email.downcase.strip}).take
               row << (u ? "maybe #{u.dxuser}" : "")
             end
-            row += [inv.first_name, inv.last_name, inv.email, inv.org, inv.singular, inv.address, inv.phone, inv.duns, inv.research_intent, inv.clinical_intent, inv.req_data, inv.req_software, inv.req_reason]
+            row += [inv.first_name, inv.last_name, inv.email, inv.org, inv.singular, inv.address, inv.phone, inv.duns, inv.consistency_challenge_intent, inv.research_intent, inv.clinical_intent, inv.req_data, inv.req_software, inv.req_reason]
             sheet.add_row row
           end
         end

@@ -1,0 +1,67 @@
+@import "_common"
+
+.tiltview-container
+  position: relative
+  
+.tiltview-description
+  position: relative
+  z-index: 1000
+
+.tiltview
+  z-index: 1
+  position: absolute
+  left: 50%
+  width: 50%
+  top: 50%
+  -webkit-transform-style: preserve-3d
+  transform-style: preserve-3d
+  -webkit-transform: translateY(-50%) rotateX(60deg) rotateZ(35deg)
+  transform: translateY(-50%) rotateX(60deg) rotateZ(35deg)
+
+.tiltview a
+  outline: 1px solid transparent
+
+.tiltview a,
+.tiltview a img
+  max-width: 100%
+  display: block
+  margin: 0 auto
+
+.tiltview a:first-child
+  margin-bottom: 30px
+
+.tiltview.row a
+  width: 48%
+  width: calc(50% - 15px)
+  margin: 0
+
+.tiltview.row a:nth-child(2)
+  left: 50%
+  left: calc(50% + 15px)
+  position: absolute
+  top: 0
+
+/* Fallback for no 3D Transforms and no preserve-3d */
+.no-csstransformspreserve3d .show .tiltview a,
+.no-csstransformspreserve3d .hide .tiltview a,
+.no-csstransforms3d .show .tiltview a,
+.no-csstransforms3d .hide .tiltview a
+  -webkit-animation: none !important
+  animation: none !important
+
+.no-csstransforms3d .tiltview.col
+  top: -50%
+
+.no-csstransforms3d .tiltview.row
+  top: 20px
+
+/* Some media queries */
+@media (max-width: $screen-md-max)
+  .tiltview
+    width: 100%
+    left: 0
+    pointer-events: none
+
+@media (max-width: $screen-sm-max)
+  .tiltview
+    top: 0

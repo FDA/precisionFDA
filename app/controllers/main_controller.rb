@@ -6,8 +6,10 @@ class MainController < ApplicationController
 
   def index
     show_guidelines = false
+    @show_consistency_challenge = CONSISTENCY_CHALLENGE_ACTIVE && Discussion.accessible_by_public.find_by(id: CONSISTENCY_DISCUSSION_ID)
+
     if @context.logged_in?
-      @notes_count = Note.editable_by(@context).count
+      @notes_count = Note.real_notes.editable_by(@context).count
       @files_count = UserFile.real_files.editable_by(@context).count
       @comparisons_count = Comparison.editable_by(@context).count
       @apps_count = App.editable_by(@context).count
@@ -22,7 +24,7 @@ class MainController < ApplicationController
         end
       end
     else
-      @participants = [
+      @participant_orgs = [
         # orgs
         { logo: "participants/23andme.png", name: "23andMe"},
         { logo: "participants/aha.png", name: "American Heart Association"},
@@ -45,8 +47,12 @@ class MainController < ApplicationController
         { logo: "participants/personalis.png", name: "Personalis"},
         { logo: "participants/pharmgkb.png", name: "PharmGKB"},
         { logo: "participants/roche.png", name: "Roche"},
+        { logo: "participants/sequenom.png", name: "Sequenom"},
         { logo: "participants/seracare.png", name: "Seracare"},
-        { logo: "participants/us-house-of-representatives.png", name: "US House of Representatives"},
+        { logo: "participants/us-house-of-representatives.png", name: "US House of Representatives"}
+      ]
+
+      @participants =  [
         # individuals
         { logo: "participants/russ_altman.jpg", name: "Dr. Russ Altman", classes: "img-circle"},
         { logo: "participants/euan_ashley.jpg", name: "Dr. Euan Ashley", classes: "img-circle"},
@@ -58,8 +64,10 @@ class MainController < ApplicationController
         { logo: "participants/dennis_wall.jpg", name: "Dr. Dennis P. Wall", classes: "img-circle"},
         { logo: "participants/mark_woon.jpg", name: "Mark Woon", classes: "img-circle"},
         { logo: "participants/mark_wright.jpg", name: "Dr. Mark Wright", classes: "img-circle"},
-        { logo: "participants/peter_tonellato.jpg", name: "Dr. Peter Tonellato", classes: "img-circle"},
+        { logo: "participants/peter_tonellato.jpg", name: "Dr. Peter Tonellato", classes: "img-circle"}
       ]
+
+      @participant_orgs = @participant_orgs.shuffle
       @participants = @participants.shuffle
     end
 
@@ -145,15 +153,16 @@ class MainController < ApplicationController
       end
       save_session(user.id, username, token, expiration_time, user.org_id)
       AUDIT_LOGGER.info("User #{username} logged in")
-      redirect_to root_path
+      redirect_to root_url
     end
   end
 
   def request_access
     @invitation = Invitation.new
     if request.post?
-      p = params.require(:invitation).permit(:first_name, :last_name, :email, :org, :duns, :address, :phone, :singular, :req_reason, :req_data, :req_software, :research_intent, :clinical_intent, :humanizer_answer, :humanizer_question_id)
+      p = params.require(:invitation).permit(:first_name, :last_name, :email, :org, :duns, :address, :phone, :singular, :consistency_challenge_intent, :req_reason, :req_data, :req_software, :research_intent, :clinical_intent, :humanizer_answer, :humanizer_question_id)
       p[:ip] = request.remote_ip.to_s
+      p[:consistency_challenge_intent] = (p[:consistency_challenge_intent] == "1")
       p[:research_intent] = (p[:research_intent] == "1")
       p[:clinical_intent] = (p[:clinical_intent] == "1")
       p[:state] = "guest"
@@ -172,7 +181,7 @@ class MainController < ApplicationController
 
   def browse_access
     if @context.logged_in_or_guest?
-      redirect_to root_path
+      redirect_to root_url
       return
     end
 
@@ -191,7 +200,7 @@ class MainController < ApplicationController
     if request.post?
       save_session(-1, "Guest-#{@invitation.id}", "INVALID", @invitation.expires_at.to_i, -1)
       AUDIT_LOGGER.info("Browse access granted for #{@invitation.email} (id #{@invitation.id})")
-      redirect_to root_path
+      redirect_to root_url
     end
   end
 
@@ -218,6 +227,12 @@ class MainController < ApplicationController
 
       # Notes
       notes = items.select { |item| item.klass == "note" }
+
+      # Discussions
+      discussions = items.select { |item| item.klass == "discussion" }
+
+      # Answers
+      answers = items.select { |item| item.klass == "answer" }
 
       # Jobs
       jobs = items.select { |item| item.klass == "job" }
@@ -317,6 +332,26 @@ class MainController < ApplicationController
         end
       end
 
+      # Discussions
+      if discussions.size > 0
+        Discussion.transaction do
+          discussions.each do |discussion|
+            discussion.reload
+            discussion.note.update!(scope: 'public')
+          end
+        end
+      end
+
+      # Answers
+      if answers.size > 0
+        Answer.transaction do
+          answers.each do |answer|
+            answer.reload
+            answer.note.update!(scope: 'public')
+          end
+        end
+      end
+
       flash[:success] = "Your #{uids.size > 1 ? 'items have' : 'item has'} been published."
       redirect_to pathify(item_from_uid(id))
       return
@@ -367,7 +402,12 @@ class MainController < ApplicationController
     klass = root.klass
     if klass == "asset"
       klass = "file"
+    elsif klass == "answer"
+      klass = "note"
+    elsif klass == "discussion"
+      klass = "note"
     end
+
     self.send("get_subgraph_of_#{klass}", root)
   end
 
