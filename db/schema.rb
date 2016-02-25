@@ -13,14 +13,6 @@
 
 ActiveRecord::Schema.define(version: 20160209214447) do
 
-  create_table "accepted_licenses", force: :cascade do |t|
-    t.integer "user_id"
-    t.integer "asset_id"
-  end
-
-  add_index "accepted_licenses", ["asset_id"], name: "index_accepted_licenses_on_asset_id"
-  add_index "accepted_licenses", ["user_id"], name: "index_accepted_licenses_on_user_id"
-
   create_table "answers", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "discussion_id"
@@ -259,7 +251,6 @@ ActiveRecord::Schema.define(version: 20160209214447) do
     t.integer  "parent_id"
     t.string   "parent_type"
     t.string   "scope"
-    t.text     "license"
   end
 
   add_index "user_files", ["parent_type", "parent_id"], name: "index_user_files_on_parent_type_and_parent_id"
