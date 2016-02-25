@@ -62,21 +62,13 @@ class DiscussionsController < ApplicationController
     end
   end
 
-  # FIXME: What's the correct strategy for deleting associated answers? Should the answers also be deleted
-  # or kept around? If the latter, then update the answer#show to handle a deleted discussion
   def destroy
     discussion = Discussion.editable_by(@context).find(params[:id])
+    title = discussion.title
 
-    Discussion.transaction do
-      note = discussion.note
-      discussion.answers.delete_all
-      discussion.destroy
-      if note.present?
-        note.destroy
-      end
-    end
+    discussion.destroy
 
-    flash[:success] = "Discussion \"#{discussion.title}\" has been successfully deleted"
+    flash[:success] = "Discussion \"#{title}\" has been successfully deleted"
     redirect_to :discussions
   end
 

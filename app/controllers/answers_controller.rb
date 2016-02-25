@@ -61,13 +61,9 @@ class AnswersController < ApplicationController
 
   def destroy
     answer = Answer.editable_by(@context).find_by!(discussion_id: params[:discussion_id], user_id: @context.user_id)
-    discussion_id = answer.discussion.id
+    discussion_id = answer.discussion_id
 
-    Answer.transaction do
-      note = answer.note
-      answer.destroy
-      note.destroy
-    end
+    answer.destroy
 
     flash[:success] = "Answer has been successfully deleted"
     redirect_to discussion_path(discussion_id)
