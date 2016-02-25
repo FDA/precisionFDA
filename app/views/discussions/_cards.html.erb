@@ -16,7 +16,7 @@
             <div class="media-body">
               <div class="text-muted">
                 <%= link_to image_tag(discussion.user.gravatar_url, class: 'img-circle', height: '25px'), user_path(discussion.user.dxuser) %>
-                <%= link_to(discussion.user.full_name, user_path(discussion.user.dxuser)) %> (<%= discussion.user.org.name %>) <%= discussion.public? ? "asked" : "unpublished discussion" %>
+                <%= link_to(discussion.user.full_name, user_path(discussion.user.dxuser)) %> (<%= discussion.user.org.name %>) <%= discussion.public? ? "posted" : "unpublished discussion" %>
               </div>
               <div class="pfda-card-title">
                 <a href="<%= discussion_path(discussion.id) %>"><%= discussion.title %></a>

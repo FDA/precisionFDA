@@ -23,7 +23,7 @@ window.Precision.follow =
         .done((data) =>
           $target.removeClass("active")
           $target.find(".follow-count").text(data.follow_count)
-          $follower.hide()
+          $follower.parent().hide()
         )
         .fail((error) =>
           console.error(error)
@@ -36,7 +36,7 @@ window.Precision.follow =
         .done((data) =>
           $target.addClass("active")
           $target.find(".follow-count").text(data.follow_count)
-          $follower.show()
+          $follower.parent().show()
         )
         .fail((error) =>
           console.error(error)

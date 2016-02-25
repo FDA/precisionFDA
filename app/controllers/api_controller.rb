@@ -820,7 +820,6 @@ class ApiController < ApplicationController
   # Inputs
   #
   # followable_uid (string, required): the uid of the item to follow
-  # follower_uid (string, required): the uid of the follower
   #
   # Outputs:
   # followable_uid (stired): the uid of the item followed
@@ -831,23 +830,23 @@ class ApiController < ApplicationController
     followable_uid = params["followable_uid"]
     raise unless followable_uid.is_a?(String) && followable_uid != ""
 
-    follower_uid = params["follower_uid"]
-    raise unless follower_uid.is_a?(String) && follower_uid != ""
-
     followable = item_from_uid(followable_uid)
-    follower = item_from_uid(follower_uid)
-    follower.follow(followable)
-    render json: {
-      followable_uid: followable_uid,
-      follower_uid: follower_uid,
-      follow_count: followable.followers_by_type_count(follower.class.name)
-    }
+    follower = @context.user
+    if followable.accessible_by?(@context)
+      follower.follow(followable)
+      render json: {
+        followable_uid: followable_uid,
+        follower_uid: follower.uid,
+        follow_count: followable.followers_by_type_count(follower.class.name)
+      }
+    else
+      raise "You do not have permission to follow this object"
+    end
   end
 
   # Inputs
   #
   # follow_uid (string, required): the uid of the item to unfollow
-  # follower_uid (string, required): the uid of the follower
   #
   # Outputs:
   # follow_uid (string): the uid of the item unfollowed
@@ -858,17 +857,18 @@ class ApiController < ApplicationController
     followable_uid = params["followable_uid"]
     raise unless followable_uid.is_a?(String) && followable_uid != ""
 
-    follower_uid = params["follower_uid"]
-    raise unless follower_uid.is_a?(String) && follower_uid != ""
-
     followable = item_from_uid(followable_uid)
-    follower = item_from_uid(follower_uid)
-    follower.stop_following(followable)
-    render json: {
-      followable_uid: followable_uid,
-      follower_uid: follower_uid,
-      follow_count: followable.followers_by_type_count(follower.class.name)
-    }
+    follower = @context.user
+    if followable.accessible_by?(@context)
+      follower.stop_following(followable)
+      render json: {
+        followable_uid: followable_uid,
+        follower_uid: follower.uid,
+        follow_count: followable.followers_by_type_count(follower.class.name)
+      }
+    else
+      raise "You do not have permission to unfollow this object"
+    end
   end
 
   protected

@@ -78,11 +78,9 @@
         <% end %>
         <%= render "_partials/follow_link", classes: "btn btn-default btn-block", item: @discussion %>
       </li>
-      <% if @followers.size > 0 %>
       <li class="list-group-item">
         <%= render "_partials/followers", followers: @followers, followable: @discussion %>
       </li>
-      <% end %>
     </div>
     <% if @follower_orgs.size > 0 %>
     <div class="list-group">
