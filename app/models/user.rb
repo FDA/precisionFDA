@@ -51,7 +51,7 @@ class User < ActiveRecord::Base
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 
   include Gravtastic
-  gravtastic :secure => true, :default => "identicon"
+  gravtastic :secure => true, :default => "mm"
 
   acts_as_voter
   acts_as_followable
