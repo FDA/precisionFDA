@@ -120,7 +120,6 @@ class NoteModel
 
     Precision.api("/api/update_note/", params)
       .done((res) ->
-        # window.location.replace(res.path) if window.location.pathname != res.path
       ).fail((error) ->
         console.error(error)
       ).always(() =>

@@ -9,13 +9,14 @@ class AnswersController < ApplicationController
 
   def show
     username = params[:id]
-    user = User.find_by_dxuser(username)
+    user = User.find_by!(dxuser: username)
     @answer = Answer.where(discussion_id: params[:discussion_id], user_id: user.id).take
-    @discussion = @answer.discussion
 
     if @answer.nil?
       flash[:error] = "Sorry, this answer is not accessible"
       redirect_to discussions_path()
+    else
+      @discussion = @answer.discussion
     end
 
     js note_js(@answer.note)
@@ -24,13 +25,13 @@ class AnswersController < ApplicationController
   def edit
     @user = User.find(@context.user_id)
     @answer = Answer.editable_by(@context).where(discussion_id: params[:discussion_id], user_id: @user.id).take
-    @note = @answer.note
-    @discussion = @answer.discussion
 
     if @answer.nil?
       flash[:error] = "Sorry, this answer is not editable by you"
-      redirect_to discussion_answer_path(@answer.discussion.id, @answer.user.dxuser)
-      return
+      redirect_to discussion_path(params[:discussion_id])
+    else
+      @note = @answer.note
+      @discussion = @answer.discussion
     end
 
     js note_js(@note)
@@ -45,10 +46,11 @@ class AnswersController < ApplicationController
           note_type: "Answer"
         })
         Answer.transaction do
+          discussion = Discussion.accessible_by(@context).find(params[:discussion_id])
           @answer = Answer.create!(
             user_id: @context.user_id,
             note_id: note.id,
-            discussion_id: params[:discussion_id]
+            discussion_id: discussion.id
           )
         end
       end
@@ -58,7 +60,7 @@ class AnswersController < ApplicationController
   end
 
   def destroy
-    answer = Answer.editable_by(@context).where(discussion_id: params[:discussion_id], user_id: @context.user_id).take
+    answer = Answer.editable_by(@context).find_by!(discussion_id: params[:discussion_id], user_id: @context.user_id)
     discussion_id = answer.discussion.id
 
     Answer.transaction do

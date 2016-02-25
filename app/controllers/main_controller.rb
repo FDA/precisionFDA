@@ -153,7 +153,7 @@ class MainController < ApplicationController
       end
       save_session(user.id, username, token, expiration_time, user.org_id)
       AUDIT_LOGGER.info("User #{username} logged in")
-      redirect_to root_path
+      redirect_to root_url
     end
   end
 
@@ -181,7 +181,7 @@ class MainController < ApplicationController
 
   def browse_access
     if @context.logged_in_or_guest?
-      redirect_to root_path
+      redirect_to root_url
       return
     end
 
@@ -198,9 +198,9 @@ class MainController < ApplicationController
     end
 
     if request.post?
-      save_session(-1, "Guest-#{@invitation.id}", "INVALID", @invitation.expires_at.to_i, -1, nil)
+      save_session(-1, "Guest-#{@invitation.id}", "INVALID", @invitation.expires_at.to_i, -1)
       AUDIT_LOGGER.info("Browse access granted for #{@invitation.email} (id #{@invitation.id})")
-      redirect_to root_path
+      redirect_to root_url
     end
   end
 

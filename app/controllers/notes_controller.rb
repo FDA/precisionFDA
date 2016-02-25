@@ -29,6 +29,8 @@ class NotesController < ApplicationController
 
     if @note.note_type == "Answer"
       redirect_to discussion_answer_path(@note.discussion, @note.user.dxuser)
+    elsif @note.note_type == "Discussion"
+      redirect_to discussion_path(@note.discussion)
     elsif request.path != note_path(@note)
       redirect_to @note
     else
@@ -42,6 +44,8 @@ class NotesController < ApplicationController
       redirect_to note_path(@note)
     elsif @note.note_type == "Answer"
       redirect_to discussion_answer_path(@note.discussion, @note.user.dxuser)
+    elsif @note.note_type == "Discussion"
+      redirect_to discussion_path(@note.discussion)
     end
     js note_js(@note)
   end
@@ -64,7 +68,7 @@ class NotesController < ApplicationController
   def destroy
     note = Note.editable_by(@context).find(params[:id])
 
-    if note.note_type != "Answer"
+    if note.real_note?
       note.destroy
       flash[:success] = "Note \"#{note.title}\" has been successfully deleted"
     end

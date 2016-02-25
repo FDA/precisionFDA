@@ -790,11 +790,15 @@ class ApiController < ApplicationController
     raise unless uid.is_a?(String) && uid != ""
 
     item = item_from_uid(uid)
-    item.liked_by(@context.user)
-    render json: {
-      uid: uid,
-      upvote_count: item.get_upvotes.size
-    }
+    if item.accessible_by?(@context) && ["discussion", "answer"].include?(item.klass)
+      item.liked_by(@context.user)
+      render json: {
+        uid: uid,
+        upvote_count: item.get_upvotes.size
+      }
+    else
+      raise "#{uid} is not accessible by you"
+    end
   end
 
   # Inputs
@@ -810,11 +814,15 @@ class ApiController < ApplicationController
     raise unless uid.is_a?(String) && uid != ""
 
     item = item_from_uid(uid)
-    item.unliked_by(@context.user)
-    render json: {
-      uid: uid,
-      upvote_count: item.get_upvotes.size
-    }
+    if item.accessible_by?(@context) && ["discussion", "answer"].include?(item.klass)
+      item.unliked_by(@context.user)
+      render json: {
+        uid: uid,
+        upvote_count: item.get_upvotes.size
+      }
+    else
+      raise "#{uid} is not accessible by you"
+    end
   end
 
   # Inputs
@@ -832,7 +840,7 @@ class ApiController < ApplicationController
 
     followable = item_from_uid(followable_uid)
     follower = @context.user
-    if followable.accessible_by?(@context)
+    if followable.accessible_by?(@context) && ["discussion"].include?(followable.klass)
       follower.follow(followable)
       render json: {
         followable_uid: followable_uid,
@@ -859,7 +867,7 @@ class ApiController < ApplicationController
 
     followable = item_from_uid(followable_uid)
     follower = @context.user
-    if followable.accessible_by?(@context)
+    if followable.accessible_by?(@context) && ["discussion"].include?(followable.klass)
       follower.stop_following(followable)
       render json: {
         followable_uid: followable_uid,

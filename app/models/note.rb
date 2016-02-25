@@ -16,8 +16,8 @@ class Note < ActiveRecord::Base
   include Permissions
 
   belongs_to :user
-  has_one :answer
-  has_one :discussion
+  has_one :answer, dependent: :destroy
+  has_one :discussion, dependent: :destroy
   has_many :attachments, {dependent: :destroy}
   has_many :apps, {through: :attachments, source: :item, source_type: 'App'}
   has_many :comparisons, {through: :attachments, source: :item, source_type: 'Comparison'}
@@ -52,6 +52,10 @@ class Note < ActiveRecord::Base
     else
       "#{id}-#{title.parameterize}"
     end
+  end
+
+  def real_note?
+    note_type.nil?
   end
 
   def self.real_notes
