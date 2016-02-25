@@ -85,8 +85,8 @@ Rails.application.routes.draw do
       get 'consistency', on: :collection
       get 'join', on: :member
     end
-    resources :discussions do
-      resources :answers do
+    resources :discussions, constraints: {answer_id: /[^\/]+/ } do
+      resources :answers, constraints: {id: /[^\/]+/} do
         resources :comments
       end
       resources :comments
