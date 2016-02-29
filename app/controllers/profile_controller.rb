@@ -108,7 +108,7 @@ class ProfileController < ApplicationController
     @inv = params[:inv].to_s.strip
     if @state == "" || @inv.blank? || (@inv.to_i.to_s != @inv) || (@invitation = Invitation.find(@inv.to_i)).blank?
       @state = "step1"
-      @invitations = Invitation.select(:id, :first_name, :last_name, :email, :org, :singular, :address, :phone, :duns, :user_id).order(id: :desc)
+      @invitations = Invitation.select(:id, :first_name, :last_name, :email, :org, :singular, :address, :phone, :duns, :user_id, :consistency_challenge_intent).order(id: :desc)
       return
     end
 
@@ -285,7 +285,7 @@ class ProfileController < ApplicationController
           end
         end
         p.workbook.add_worksheet(:name => "Requests") do |sheet|
-          sheet.add_row ["time", "in_system?", "first name", "last name", "email", "organization", "self-represent?", "address", "phone", "duns", "research?", "clinical?", "has data?", "has software?", "reason" ]
+          sheet.add_row ["time", "in_system?", "first name", "last name", "email", "organization", "self-represent?", "address", "phone", "duns", "research?", "clinical?", "has data?", "has software?", "reason", "consistency challenge?" ]
           Invitation.includes(:user).find_each do |inv|
             row = []
             row << inv.created_at.strftime("%Y-%m-%d %H:%M")
@@ -295,7 +295,7 @@ class ProfileController < ApplicationController
               u = User.where.any_of({first_name: inv.first_name, last_name: inv.last_name}, {normalized_email: inv.email.downcase.strip}).take
               row << (u ? "maybe #{u.dxuser}" : "")
             end
-            row += [inv.first_name, inv.last_name, inv.email, inv.org, inv.singular, inv.address, inv.phone, inv.duns, inv.consistency_challenge_intent, inv.research_intent, inv.clinical_intent, inv.req_data, inv.req_software, inv.req_reason]
+            row += [inv.first_name, inv.last_name, inv.email, inv.org, inv.singular, inv.address, inv.phone, inv.duns, inv.research_intent, inv.clinical_intent, inv.req_data, inv.req_software, inv.req_reason, inv.consistency_challenge_intent]
             sheet.add_row row
           end
         end
