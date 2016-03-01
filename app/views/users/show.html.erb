@@ -45,7 +45,7 @@
   <% if @counts[:discussions] > 0 %>
   <li role="presentation" class="<%= params[:tab] == 'discussions' ? 'active' : '' %>">
     <a href="<%= user_path(@user.dxuser, 'discussions') %>" aria-controls="tab-discussions"><span class="fa fa-fw fa-comments"></span>
-      <span class="tab-label">Questions <span class="badge"><%= @counts[:discussions] %></span></span>
+      <span class="tab-label">Discussions <span class="badge"><%= @counts[:discussions] %></span></span>
     </a>
   </li>
   <% end %>
