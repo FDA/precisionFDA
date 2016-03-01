@@ -108,7 +108,7 @@ class ProfileController < ApplicationController
     @inv = params[:inv].to_s.strip
     if @state == "" || @inv.blank? || (@inv.to_i.to_s != @inv) || (@invitation = Invitation.find(@inv.to_i)).blank?
       @state = "step1"
-      @invitations = Invitation.select(:id, :first_name, :last_name, :email, :org, :singular, :address, :phone, :duns, :user_id, :consistency_challenge_intent).order(id: :desc)
+      @invitations = Invitation.select(:id, :first_name, :last_name, :email, :org, :singular, :address, :phone, :duns, :user_id, :extras).order(id: :desc)
       return
     end
 
