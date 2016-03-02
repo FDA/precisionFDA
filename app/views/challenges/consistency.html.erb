@@ -125,7 +125,7 @@
         <li>By comparing each of your three VCF files to the NIST (Genome in a Bottle) benchmark VCF, you will get estimates for accuracy.</li>
       </ul>
       <p>
-      The complete set of these five comparisons constitutes your submission entry to the challenge. Each comparison outputs several metrics (such as precision<a href="#footnotes">*</a>, recall<a href="#footnotes">*</a>, f-measure, or number of non-common variants), which will be used to rank you among the other participants, within eight different categories. Winners<a href="#footnotes">**</a> in each category will be recognized on the precisionFDA website. Therefore, we hope you are willing to share your experience with others to further enhance the community's effort to ensure consistency of tests.
+      The complete set of these five comparisons constitutes your submission entry to the challenge. Each comparison outputs several metrics (such as precision<a href="#footnotes">*</a>, recall<a href="#footnotes">*</a>, f-measure, or number of non-common variants). Selected participants and winners<a href="#footnotes">**</a> will be recognized on the precisionFDA website. Therefore, we hope you are willing to share your experience with others to further enhance the community's effort to ensure consistency of tests.
       </p>
       <p>
         The challenge runs until April 25, 2015.
@@ -138,6 +138,7 @@
 
 <div class="container container-padded" id="details">
   <h3>Challenge details</h3>
+  <p>Last updated: March 2nd, 2016
 
   <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
@@ -201,16 +202,14 @@
               <tr>
                 <td>Library Prep</td>
                 <td>TruSeq Nano DNA Library Prep kit, v2.5, with no sample multiplexing</td>
-                <td>TruSeq Nano DNA Library Prep kit, v2.5, with no sample multiplexing</td>
+                <td rowspan="3" style="vertical-align: middle">We will update this information as it becomes available</td>
               </tr>
               <tr>
                 <td>Read Length</td>
                 <td>2x150bp</td>
-                <td>2x150bp</td>
               </tr>
               <tr>
                 <td>Insert Size</td>
-                <td>350bp</td>
                 <td>350bp</td>
               </tr>
               <tr>
@@ -473,12 +472,12 @@
       <div id="collapseWinners" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingWinners">
         <div class="panel-body">
           <p class="copy">
-            Winners<a href="#footnotes">**</a> will be recognized on the precisionFDA website, for achievements in the following eight categories:
+            PrecisionFDA will select a number of entries which will receive an acknowledgement for participation in the challenge. Among the selected entries, winners<a href="#footnotes">**</a> will be recognized on the precisionFDA website, for achievements across categories such as:
           </p>
 
           <h4><span class="fa fa-area-graph" aria-hidden="true"></span> Reproducibility comparison #1</h4>
           <ul class="list-group">
-            <li class="list-group-item">Lowest count of unique/non-reproducible variants (“false positives” + “false negatives”). If there are several submissions with a count of zero, an “honorable mention” will be recognized for each one.</li>
+            <li class="list-group-item">Lowest count of unique/non-reproducible variants (“false positives” + “false negatives”).</li>
           </ul>
 
           <h4><span class="fa fa-area-graph" aria-hidden="true"></span> Reproducibility comparison #2</h4>
@@ -506,7 +505,7 @@
 
           <div class="bs-callout bs-callout-info">
             <strong>NOTE</strong>
-            <p>It is possible for a pipeline to try to reach maximum precision<a href="#footnotes">*</a> by being trivially strict, or maximum recall<a href="#footnotes">*</a> by being trivially lenient. To avoid very extreme entries, and to ensure fairness in the competition, the challenge requires that all submitted accuracy comparisons reach a minimum threshold of 90% for each of the precision<a href="#footnotes">*</a> and the recall<a href="#footnotes">*</a> statistics. Entries that do not meet this criteria will not be considered valid.</p>
+            <p>It is possible for a pipeline to try to reach maximum precision<a href="#footnotes">*</a> by being trivially strict, or maximum recall<a href="#footnotes">*</a> by being trivially lenient. To avoid very extreme entries, and to ensure fairness in the competition, the challenge requires that all submitted accuracy comparisons reach a minimum threshold of 90% for each of the precision<a href="#footnotes">*</a> and the recall<a href="#footnotes">*</a> statistics. Entries that do not meet this criteria or are otherwise not deemed valid will not be considered.</p>
           </div>
         </div>
       </div>
