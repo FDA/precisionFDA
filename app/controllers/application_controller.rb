@@ -23,7 +23,7 @@ class ApplicationController < ActionController::Base
       plugin_types: %w(application/x-shockwave-flash),
       script_src: %w('self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://cdnjs.cloudflare.com https://www.youtube.com https://s.ytimg.com https://dnanexus.github.io),
       style_src: %w('self' 'unsafe-inline' https://fonts.googleapis.com https://dnanexus.github.io https://cdnjs.cloudflare.com),
-      report_only: true,
+      report_only: false,
       report_uri: %w(https://report-uri.io/report/dc95b34a080e9c95bbce7c3e6aed6234)
     }
 
