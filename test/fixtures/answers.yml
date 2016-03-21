@@ -15,11 +15,7 @@
 one:
   user_id: 
   discussion_id: 
-  content: MyString
-  scope: MyString
 
 two:
   user_id: 
   discussion_id: 
-  content: MyString
-  scope: MyString
