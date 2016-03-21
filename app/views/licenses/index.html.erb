@@ -1,0 +1,11 @@
+<% content_for :title do %>Licenses<% end %>
+
+<div class="pfda-toolbar">
+  <div class="btn-group">
+    <%= link_to licenses_path(), method: :post, class: 'btn btn-primary', data: {disable_with: "Creating..."} do %>
+      <span class="fa fa-plus fa-fw"></span> Create a License
+    <% end %>
+  </div>
+</div>
+
+<%= render "licenses/grid", licenses_grid: @owned_licenses_grid %>

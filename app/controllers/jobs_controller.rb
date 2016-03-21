@@ -105,7 +105,16 @@ class JobsController < ApplicationController
       return
     end
 
-    js app: @app.slice(:dxid, :spec, :title)
+    licenses_to_accept = []
+    @app.assets.each do |asset|
+      if asset.license.present? && !asset.licensed_by?(@context)
+        licenses_to_accept << {uid: asset.license.uid, id: asset.license.id, title: asset.license.title, content: asset.license.content}
+      end
+    end
+
+    licenses_accepted = @context.user.accepted_licenses.map{|l| l.license_id}
+
+    js app: @app.slice(:dxid, :spec, :title), licenses_to_accept: licenses_to_accept.uniq { |l| l.id}, licenses_accepted: licenses_accepted
   end
 
   def destroy

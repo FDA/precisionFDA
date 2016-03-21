@@ -149,6 +149,8 @@ class ApplicationController < ActionController::Base
       discussion_answer_path(item.discussion, item.user.dxuser)
     when "user"
       user_path(item.dxuser)
+    when "license"
+      license_path(item)
     else
       raise "Unknown class #{item.klass}"
     end
@@ -193,13 +195,14 @@ class ApplicationController < ActionController::Base
         record = record.becomes(Asset)
       end
       return record
-    elsif uid =~ /^(comparison|note|discussion|answer|user)-(\d+)$/
+    elsif uid =~ /^(comparison|note|discussion|answer|user|license)-(\d+)$/
       klass = {
         "comparison" => Comparison,
         "note" => Note,
         "discussion" => Discussion,
         "answer" => Answer,
-        "user" => User
+        "user" => User,
+        "license" => License
       }[$1]
       id = $2.to_i
       return klass.find_by!(id: id)

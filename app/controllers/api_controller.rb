@@ -1,14 +1,18 @@
 class ApiController < ApplicationController
   skip_before_action :verify_authenticity_token
   skip_before_action :require_login
-  before_action :require_api_login, except: [:list_assets, :describe_asset, :search_assets, :list_notes]
+  before_action :require_api_login,        except: [:list_assets, :describe_asset, :search_assets, :list_notes]
   before_action :require_api_login_or_guest, only: [:list_assets, :describe_asset, :search_assets, :list_notes]
 
-  before_action :enforce_json_post
-
-  def enforce_json_post
-  end
-
+  # Inputs:
+  #
+  # (none)
+  #
+  # Outputs:
+  #
+  # An array of hashes, each of which has these fields:
+  # uid (string): the file's unique id (file-xxxxxx)
+  # name (string): the filename
   def list_files
     result = []
     UserFile.real_files.accessible_by(@context).find_each do |file|
@@ -16,6 +20,99 @@ class ApiController < ApplicationController
     end
 
     render json: result
+  end
+
+  # Inputs
+  #
+  # id (string, required): the dxid of the file to describe
+  #
+  # Outputs:
+  #
+  # name (string): file name
+  # state (string): private or public
+  # -- optional --
+  # license (object): license associated with file, if any
+  # license_accepted (boolean): has the user accepted this license if any
+  #
+  def describe_file
+    # App id should be a string
+    id = params["id"]
+    raise unless id.is_a?(String) && id != ""
+
+    file = UserFile.real_files.accessible_by(@context).find_by!(dxid: id)
+
+    response = {
+      name: file.name,
+      state: file.state
+    }
+
+    # TODO: Include license if exists
+    # if params["include"].present?
+    #   if params["include"]["license"]
+    #     response.license = file.license ? file.license.slice(:id, :uid, :title, :content) : nil
+    #     if response.license?
+    #       response.license_accepted = file.license.accepted_licenses.exists?(user_id: @context.user_id)
+    #     end
+    #   end
+    # end
+
+    render json: response
+  end
+
+  # Inputs:
+  #
+  # license_ids (array of license ids, required, nonempty): licenses to accept
+  #
+  # Outputs:
+  #
+  # (none)
+  def accept_licenses
+    license_ids = params["license_ids"]
+    raise unless license_ids.is_a?(Array) && license_ids.all? { |license_id|
+      license_id.is_a?(Numeric) && (license_id.to_i == license_id)} && !license_ids.empty?
+    raise unless License.where(id: license_ids).count == license_ids.count
+
+    AcceptedLicense.transaction do
+      license_ids.each do |license_id|
+        AcceptedLicense.find_or_create_by(license_id: license_id, user_id: @context.user_id)
+      end
+    end
+
+    render json: { accepted_licenses: license_ids }
+  end
+
+  # Use this to associate multiple items to a license
+  #
+  # Inputs
+  #
+  # license_id (integer, required)
+  # items_to_license (Array[string], required): array of object uids
+  #
+  # Outputs:
+  #
+  # license_id (integer)
+  # items_licensed (Array[string]): array of object uids attached to license
+  #
+  def license_items
+    license_id = params["license_id"]
+    raise unless license_id.is_a?(Numeric) && (license_id.to_i == license_id)
+    license = License.editable_by(@context).find(license_id)
+
+    items_to_license = params["items_to_license"]
+    raise unless items_to_license.is_a?(Array) && items_to_license.all? { |item|
+      item.is_a?(String) }
+
+    items_licensed = []
+    LicensedItems.transaction do
+      items_to_license.each do |item_uid|
+        item = item_from_uid(item_uid)
+        if item.editable_by(@context) && ["asset", "file"].include?(item.klass)
+          items_licensed << LicensedItems.find_or_create_by(license_id: license_id, licenseable: item).uid
+        end
+      end
+    end
+
+    render json: { license_id: license_id, items_licensed: items_licensed }
   end
 
   # Inputs:
@@ -233,6 +330,9 @@ class ApiController < ApplicationController
     # App should exist and be accessible
     @app = App.accessible_by(@context).find_by!(dxid: id)
 
+    # Check if asset licenses have been accepeted
+    raise unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
+
     # Inputs should be compatible
     # (The following also normalizes them)
     run_inputs = {}
@@ -263,7 +363,10 @@ class ApiController < ApplicationController
 
       if klass == "file"
         raise unless value.is_a?(String)
-        raise unless UserFile.real_files.accessible_by(@context).where(dxid: value).exists?
+        file = UserFile.real_files.accessible_by(@context).find_by(dxid: value)
+        raise unless !file.nil?
+        raise unless !file.license.present? || file.licensed_by?(@context)
+
         dxvalue = {"$dnanexus_link" => value}
         input_file_dxids << value
       elsif klass == "int"
@@ -580,7 +683,7 @@ class ApiController < ApplicationController
     end
 
     result = assets.order(:name).select(:dxid, :name).map do |asset|
-      {dxid: asset.dxid, name: asset.prefix }
+      {uid: asset.uid, dxid: asset.dxid, name: asset.prefix }
     end
 
     if !ids.nil?

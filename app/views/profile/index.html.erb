@@ -32,8 +32,13 @@
         <p class="list-group-item-text"><%= @user.email %></p>
       </li>
     </ul>
-    <%= link_to(content_tag(:span, "", class: "fa fa-lock") + " Change password", "#{DNANEXUS_PLATFORM_URI}profile/#{@user.dxuser}/changePassword?client_id=precision_fda_gov", class: 'btn btn-primary') %>
-    <%= link_to(content_tag(:span, "", class: "fa fa-user") + " View public profile", user_path(@user.dxuser), class: 'btn btn-default') %>
+    <div class="btn-group">
+      <%= link_to(content_tag(:span, "", class: "fa fa-fw fa-lock") + " Change password", "#{DNANEXUS_PLATFORM_URI}profile/#{@user.dxuser}/changePassword?client_id=precision_fda_gov", class: 'btn btn-primary') %>
+      <%= link_to(content_tag(:span, "", class: "fa fa-fw fa-user") + " View public profile", user_path(@user.dxuser), class: 'btn btn-default') %>
+    </div>
+    <div class="btn-group">
+      <%= link_to(content_tag(:span, "", class: "fa fa-fw fa-legal") + "Manage Licenses", licenses_path, class: 'btn btn-default') %>
+    </div>
   </div>
 </div>
 

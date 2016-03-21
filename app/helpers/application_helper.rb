@@ -59,6 +59,8 @@ module ApplicationHelper
       "fa-file-zip-o"
     when "comparison"
       "fa-area-chart"
+    when "license"
+      "fa-legal"
     else
       raise "Unknown class #{item.klass}"
     end

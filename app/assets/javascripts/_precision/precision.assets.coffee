@@ -107,6 +107,7 @@ class AssetsModel
 
 class AssetModel
   constructor: (asset) ->
+    @uid = asset.uid
     @dxid = asset.dxid
     @name = asset.name
     @descriptionDisplay = ko.observable()
