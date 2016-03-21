@@ -62,6 +62,12 @@ class ComparisonsController < ApplicationController
     @ref_vcf = @comparison.input("ref_vcf").user_file
     @ref_bed = @comparison.input("ref_bed").user_file if @comparison.input("ref_bed")
 
+    if !@ref_vcf.feedback(@context).nil?
+      @feedback = @ref_vcf.feedback(@context)
+    elsif !@test_vcf.feedback(@context).nil?
+      @feedback = @test_vcf.feedback(@context)
+    end
+
     @outputs_grid = initialize_grid(@comparison.outputs, {
       order: 'name',
       order_direction: 'asc'

@@ -86,11 +86,15 @@ class UserFile < ActiveRecord::Base
   end
 
   def feedback(context)
-    if uid == NIST_VCF_UID && context && !context.guest?
-      user_name = URI.encode(context.user.full_name)
-      user_email = URI.encode(context.user.email)
-      user_org = URI.encode(context.user.org.name)
-      return "https://docs.google.com/forms/d/1cF0XoeGbLJUSRC3pvEz36DMdlpWA9nFwUXJA_o-oxrU/viewform?entry.764685280=#{user_name}&entry.1095215913=#{user_email}&entry.451016179=#{user_org}&entry.556919704=NISTv2.19"
+    if uid == NIST_VCF_UID && context
+      if context.guest?
+        return "https://docs.google.com/forms/d/1cF0XoeGbLJUSRC3pvEz36DMdlpWA9nFwUXJA_o-oxrU/viewform?entry.556919704=NISTv2.19"
+      else
+        user_name = URI.encode(context.user.full_name)
+        user_email = URI.encode(context.user.email)
+        user_org = URI.encode(context.user.org.name)
+        return "https://docs.google.com/forms/d/1cF0XoeGbLJUSRC3pvEz36DMdlpWA9nFwUXJA_o-oxrU/viewform?entry.764685280=#{user_name}&entry.1095215913=#{user_email}&entry.451016179=#{user_org}&entry.556919704=NISTv2.19"
+      end
     else
       nil
     end

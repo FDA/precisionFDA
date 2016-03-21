@@ -65,6 +65,13 @@
   </div>
 
   <div class="pull-right">
+    <% if !@feedback.nil? %>
+    <div class="btn-group">
+      <%= link_to @feedback, target: "_blank", class: 'btn btn-primary', data: { confirm: 'You will now be redirected to a form outside of precisionFDA, where you can provide feedback about questionable or possibly incorrect calls in NA12878-NISTv2.19. Any information you submit will be collected by third parties, for which precisionFDA is not responsible.' } do %>
+        <span class="fa fa-external-link fa-fw"></span> Feedback to NIST
+      <% end %>
+    </div>
+    <% end %>
     <div class="btn-group">
       <% if @comparison.state == 'done' %>
         <%= link_to visualize_comparison_path(@comparison.id), class: "btn btn-primary" do %>
