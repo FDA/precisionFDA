@@ -8,13 +8,6 @@
   <div class="variant-input-cell">
     <% if file %>
       <%= unilinkfw(file, globe: true, icon_class: 'access-icon') %>
-      <% if !file.feedback(@context).nil? %>
-        <div class="variant-feedback">
-          <%= link_to file.feedback(@context), target: "_blank", class: 'pfda-help-link', data: { confirm: 'You will now be redirected to a feedback form outside of precisionFDA. Any information you submit will be collected by third parties, for which precisionFDA is not responsible.' } do %>
-            <span class="fa fa-external-link fa-fw"></span> Send feedback about questionable or possibly incorrect calls
-          <% end %>
-        </div>
-      <% end %>
     <% else %>
       <span class="text-muted">Not set</span>
     <% end %>
