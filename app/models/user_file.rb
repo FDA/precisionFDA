@@ -15,7 +15,6 @@
 #  parent_id   :integer
 #  parent_type :string
 #  scope       :string
-#  license     :text
 #
 
 # Parent types:
@@ -42,6 +41,7 @@
 #
 class UserFile < ActiveRecord::Base
   include Permissions
+  include Licenses
 
   belongs_to :user
   belongs_to :parent, {polymorphic: true}
@@ -51,6 +51,10 @@ class UserFile < ActiveRecord::Base
   has_many :comparisons, -> { distinct }, {through: :comparison_inputs, dependent: :restrict_with_exception}
 
   has_and_belongs_to_many :jobs_as_input, {join_table: "job_inputs", class_name: "Job"}
+
+  has_one :licensed_item, {as: :licenseable, dependent: :destroy}
+  has_one :license, {through: :licensed_item}
+  has_many :accepted_licenses, {through: :license}
 
   def self.real_files
     return where(parent_type: ['User', 'Job'])

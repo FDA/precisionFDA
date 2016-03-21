@@ -57,10 +57,10 @@ class FilesSelectorModel
       @busy(false)
     )
 
-  open: (inputModel, value) =>
+  open: (inputModel, value, params) =>
     @inputModel(inputModel)
 
-    @getFiles().done(() =>
+    @getFiles(params).done(() =>
       @modal.modal('handleUpdate')
 
       # Since getFiles creates new FileModels, our existing selection is considered a different object

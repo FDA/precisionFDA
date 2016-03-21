@@ -1,0 +1,31 @@
+<div class="btn-group" role="group">
+  <button class="btn btn-default dropdown-toggle" type="button" id="license-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    <span class="fa fa-legal"></span>
+    <% if item.license.present? %>
+      License Attached: <%= truncate(item.license.title, :length => 25,  :separator => ' ') %>
+    <% else %>
+      Attach License...
+    <% end %>
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="license-menu">
+    <% if item.license.present? %>
+    <li>
+      <%= link_to remove_item_license_path(item.license.id, item.uid), method: :post do %>
+        <span class="fa fa-times"></span> Detach License
+      <% end %>
+    </li>
+    <li role="separator" class="divider"></li>
+    <% end %>
+    <% licenses.each  do |license| %>
+      <% is_licensed_by = item.license.present? && item.license.id == license.id %>
+      <li class="<%= is_licensed_by ? "disabled": "" %>">
+        <% if is_licensed_by %>
+          <a class="disabled"><span class="fa fa-check"></span> <%= license.title %></a>
+        <% else %>
+          <%= link_to license.title, license_item_license_path(license.id, item.uid), method: :post %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+</div>

@@ -280,7 +280,7 @@ class IOModel
             when 'float'
               value = parseFloat(value)
             when 'file'
-              value = value.dxid
+              value = value.dxid ? value
             when 'boolean'
               if value == 'true'
                 value = true

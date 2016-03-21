@@ -5,7 +5,11 @@ class AssetModel
     @description.preview = ko.computed(=>
       Precision.md.render(@description())
     )
-
+    @license = ko.observable(asset.license)
+    @license.preview = ko.computed(=>
+      Precision.md.render(@license())
+    )
+    
 #########################################################
 #
 #

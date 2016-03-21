@@ -83,7 +83,6 @@ class VariantViewModel
   constructor: (viewModel, @category, app) ->
     inputs = _.map(app.inputSpec, (input) =>
       new Precision.models.AppInputModel(input, viewModel)
-      # new VariantInputModel(@category, input)
     )
     @inputs = ko.observableArray(inputs)
 
