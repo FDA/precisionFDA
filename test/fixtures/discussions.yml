@@ -13,12 +13,6 @@
 
 one:
   user_id: 
-  title: MyString
-  description: MyText
-  scope: MyString
 
 two:
   user_id: 
-  title: MyString
-  description: MyText
-  scope: MyString
