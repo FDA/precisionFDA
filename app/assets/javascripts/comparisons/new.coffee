@@ -111,22 +111,3 @@ ComparisonsController::new = ->
 
         viewModel.name("#{testName} vs #{refName}")
   )
-
-  # $container
-  #   .on("click.comparisons_new", ".event-select-input", (e) -> viewModel.selectInput(e))
-  #   .on("click.comparisons.new", ".event-select-file", (e) -> viewModel.selectFile(e))
-  #   .on("click.comparisons.new", ".event-unselect-file", (e) -> viewModel.unselectFile(e))
-
-  # # Affix the variants comparator and filter
-  # $affixContainer = $container.find(".affix-container")
-  # $affixContainer.affix({
-  #   offset:
-  #     top: $affixContainer.offset().top
-  # })
-  #
-  # $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
-  #
-  # $(window).resize(() ->
-  #   $affixContainer.affix('checkPosition')
-  #   $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
-  # )
