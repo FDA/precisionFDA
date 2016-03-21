@@ -5,6 +5,7 @@ class AppInputModel
     @label = spec.label
     @name = spec.name
     @defaultValue = spec.default
+    @defaultFileValue = ko.observable()
     @isOptional = spec.optional
     @isRequired = !@isOptional
     @patterns = spec.patterns
@@ -22,7 +23,18 @@ class AppInputModel
         switch @klass
           when 'file'
             if !@value()?
-              "Select file..."
+              if @defaultValue?
+                if @defaultFileValue()?
+                  @defaultFileValue().name
+                else
+                  params =
+                    id: @defaultValue
+                    include:
+                      license: true
+                  Precision.api('/api/describe_file', params).done((value) => @defaultFileValue(value))
+                  @defaultValue
+              else
+                "Select file..."
             else
               @value().name
           else

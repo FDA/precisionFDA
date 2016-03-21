@@ -47,6 +47,8 @@ class User < ActiveRecord::Base
   has_many :discussions
   has_many :answers
   belongs_to :org
+  has_many :licenses
+  has_many :accepted_licenses
 
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 

@@ -68,32 +68,51 @@
     <%= link_to track_path(id: @file.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
       <span class="fa fa-flip-vertical fa-sitemap"></span> Track
     <% end %>
+    <% if @licenses.present? %>
+      <%= render "licenses/set_dropdown", licenses: @licenses, item: @file %>
+    <% end %>
   </div>
 
   <div class="pull-right">
     <div class="btn-group">
-      <% if @file.state == "closed" %>
-        <%= link_to download_file_path(@file.dxid, inline: true), method: :post, class: "btn btn-primary" do %>
-          <span class="fa fa-external-link"></span> Open
-        <% end %>
-      <% end %>
-      <% if @file.state == "closed" %>
-        <%= link_to download_file_path(@file.dxid), method: :post, class: "btn btn-primary" do %>
-          <span class="fa fa-download"></span> Download
-        <% end %>
-      <% end %>
-      <% if @file.state == "closed" %>
-        <%= link_to link_file_path(@file.dxid), method: :post, class: "btn btn-primary" do %>
-          <span class="fa fa-link"></span> Authorized URL
-        <% end %>
+      <% if @file.license.present? && !@file.licensed_by?(@context) %>
+      <div class="btn-group" title="Accepting the license lets you download and use this file" data-toggle="tooltip">
+      <% else %>
+      <div class="btn-group">
       <% end %>
 
-      <% if @file.publishable_by?(@context) %>
+        <% if @file.license.present? && !@file.licensed_by?(@context) %>
+          <%= link_to accept_license_path(@file.license.id, @file.uid), method: :post, class: "btn btn-success" do %>
+            <span class="fa fa-check"></span> Accept License
+          <% end %>
+        <% end %>
+
+        <% if @file.state == "closed" %>
+          <%= link_to download_file_path(@file.dxid, inline: true), method: :post, class: "btn btn-primary #{@file.license.present? && !@file.licensed_by?(@context) ? 'disabled' : ''}" do %>
+            <span class="fa fa-external-link"></span> Open
+          <% end %>
+        <% end %>
+        <% if @file.state == "closed" %>
+          <%= link_to download_file_path(@file.dxid), method: :post, class: "btn btn-primary #{@file.license.present? && !@file.licensed_by?(@context) ? 'disabled' : ''}" do %>
+            <span class="fa fa-download"></span> Download
+          <% end %>
+        <% end %>
+        <% if @file.state == "closed" %>
+          <%= link_to link_file_path(@file.dxid), method: :post, class: "btn btn-primary #{@file.license.present? && !@file.licensed_by?(@context) ? 'disabled' : ''}" do %>
+            <span class="fa fa-link"></span> Authorized URL
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
+    <% if @file.publishable_by?(@context) %>
+      <div class="btn-group">
         <%= link_to publish_path + "?" + {id: @file.uid}.to_param, method: :post, class: "btn btn-success" do %>
           <span class="fa fa-bullhorn"></span> Publish
         <% end %>
-      <% end %>
-    </div>
+      </div>
+    <% end %>
+
     <% if @file.user_id == @context.user_id %>
     <div class="btn-group">
       <% if @file.deletable? %>
@@ -106,7 +125,7 @@
   </div>
 </div>
 
-<% if @notes.total_count > 0 || @discussions.total_count > 0 || @answers.total_count > 0 || @comparisons_grid.present? && @comparisons_grid.count > 0 %>
+<% if @notes.total_count > 0 || @discussions.total_count > 0 || @answers.total_count > 0 || @comparisons_grid.present? && @comparisons_grid.count > 0 || @file.license.present?  %>
   <!-- Nav tabs -->
   <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
     <% if @notes.total_count > 0 %>
@@ -134,6 +153,13 @@
     <li role="presentation">
       <a href="#tab-comparisons" aria-controls="tab-comparisons" role="tab" data-toggle="tab"><span class="fa fa-fw fa-area-chart"></span>
         <span class="tab-label">Comparisons  <span class="badge"><%= @comparisons_grid.count %></span></span>
+      </a>
+    </li>
+    <% end %>
+    <% if @file.license.present? %>
+    <li role="presentation">
+      <a href="#tab-license" aria-controls="tab-license" role="tab" data-toggle="tab"><span class="fa fa-fw fa-legal"></span>
+        <span class="tab-label">License: <%= truncate(@file.license.title, :length => 25,  :separator => ' ') %></span>
       </a>
     </li>
     <% end %>
@@ -197,6 +223,12 @@
           end
         end -%>
       </div>
+    </div>
+    <% end %>
+    <% if @file.license.present? %>
+    <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-license">
+      <%= render "licenses/tab_pane", license: @file.license %>
+    </div>
     <% end %>
   </div>
 <% end %>

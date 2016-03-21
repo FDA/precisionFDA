@@ -1,0 +1,164 @@
+<% content_for :title do %><%= @license.title %><% end %>
+
+<div class="page-header">
+  <div class="page-title"><span class="fa fa-legal"></span> <%= @license.title %></div>
+</div>
+
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Access</h5>
+      <p class="list-group-item-text">
+        <span class="fa <%= @license.public? ? 'fa-globe' : 'fa-lock' %>"></span>
+        <%= @license.public? ? "Public" : "Private" %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">ID</h5>
+      <p class="list-group-item-text"><%= @license.uid %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Org</h5>
+      <p class="list-group-item-text">
+        <%= @license.user.org.handle %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Added by</h5>
+      <p class="list-group-item-text">
+        <%= link_to(@license.user.dxuser, user_path(@license.user.dxuser))  %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Created</h5>
+      <p class="list-group-item-text"><%= @license.created_at.to_s(:db) %></p>
+    </li>
+  </ul>
+</div>
+
+<div class="pfda-toolbar">
+  <div class="pull-left">
+    <% if !@license.licensed_by?(@context) %>
+      <%= link_to accept_license_path(@license.id), method: :post, class: "btn btn-success" do %>
+        <span class="fa fa-check"></span> Accept License
+      <% end %>
+    <% else %>
+      <span class="btn-static text-success"><span class="fa fa-check"></span> License Accepted</span>
+    <% end %>
+  </div>
+  <div class="pull-right">
+    <% if @license.editable_by?(@context) %>
+      <div class="btn-group">
+        <%= link_to edit_license_path(@license), class: "btn btn-primary" do %>
+          <span class="fa fa-edit"></span> Edit
+        <% end %>
+      </div>
+      <div class="btn-group">
+        <%= link_to license_path(@license), method: :delete, data: { confirm: 'Are you certain you want to delete this?' }, class: "btn btn-danger" do %>
+          <span class="fa fa-trash"></span> Delete
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+  <li role="presentation" class="active">
+    <a href="#tab-license" aria-controls="tab-license" role="tab" data-toggle="tab"><span class="fa fa-fw fa-file-text"></span>
+      <span class="tab-label">License</span>
+    </a>
+  </li>
+  <li role="presentation">
+    <a href="#tab-items" aria-controls="tab-items" role="tab" data-toggle="tab"><span class="fa fa-fw fa-files-o"></span>
+      <span class="tab-label">Items Licensed <span class="badge"><%= @license.licensed_items.count %></span></span>
+    </a>
+  </li>
+  <% if @users.present? %>
+  <li role="presentation">
+    <a href="#tab-users" aria-controls="tab-users" role="tab" data-toggle="tab"><span class="fa fa-fw fa-group"></span>
+      <span class="tab-label">Licensed Users <span class="badge"><%= @users.count %></span></span>
+    </a>
+  </li>
+  <% end %>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-license">
+    <div class="pfda-md-rendered" data-bind="html: licenseDisplay"></div>
+  </div>
+  <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-items">
+    <% if @license.editable_by?(@context) && @license.licensed_items.count > 0 %>
+    <div class="pfda-toolbar pfda-toolbar-transparent">
+      <div class="btn-group pull-right">
+        <%= link_to remove_items_license_path(@license), method: :post, data: { confirm: 'Are you certain you want to detach all items from this license?' }, class: "btn btn-danger" do %>
+          <span class="fa fa-ban"></span> Detach all items <span class="badge"><%= @license.licensed_items.count %></span>
+        <% end %>
+      </div>
+    </div>
+    <br>
+    <% end %>
+
+    <ul class="list-group">
+      <% if @license.licensed_items.count > 0 %>
+        <% @items.each do |item| %>
+          <li class="list-group-item clearfix">
+            <span class="label label-info text-uppercase"><%= item.licenseable.klass %></span> <%= unilinkfw(item.licenseable) %>
+            <% if @license.editable_by?(@context) %>
+            <div class="btn-group pull-right">
+              <%= link_to "Detach", remove_item_license_path(@license.id, item.licenseable.uid, @license.uid), method: :post %>
+            </div>
+            <% end %>
+          </li>
+        <% end %>
+      <% else %>
+        <li class="list-group-item lead text-muted">
+          No item has been attached to this license yet
+        </li>
+      <% end %>
+    </ul>
+  </div>
+  <% if @users.present? %>
+  <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-users">
+    <% if @users.count > 0 %>
+    <div class="pfda-toolbar pfda-toolbar-transparent">
+      <div class="btn-group pull-right">
+        <%= link_to remove_users_license_path(@license), method: :post, data: { confirm: 'Are you certain you want to remove all users from this license?' }, class: "btn btn-danger" do %>
+          <span class="fa fa-ban"></span> Reset licensees <span class="badge"><%= @license.accepted_licenses.count %></span>
+        <% end %>
+      </div>
+    </div>
+    <br>
+    <% end %>
+    <ul class="list-group">
+      <% if @users.count > 0 %>
+        <% @users.each do |user| %>
+        <li class="list-group-item clearfix">
+          <div class="media">
+            <div class="media-left">
+              <%= link_to image_tag(user.gravatar_url, class: 'img-circle', height: '50px'), user_path(user.dxuser) %>
+            </div>
+            <div class="media-body">
+              <div class="license-user-name"><%= link_to(user.full_name, user_path(user.dxuser)) %></div>
+              <div class="license-user-org"><%= user.org.name %></div>
+            </div>
+            <% if @license.editable_by?(@context) %>
+            <div class="media-right">
+              <div class="btn-group pull-right">
+                <%= link_to "Remove", remove_user_license_path(@license.id, user.uid, @license.uid), method: :post %>
+              </div>
+            </div>
+            <% end %>
+          </div>
+        </li>
+        <% end %>
+      <% else %>
+        <li class="list-group-item lead text-muted">
+          No one has accepted this license yet
+        </li>
+      <% end %>
+    </ul>
+  </div>
+  <% end %>
+</div>

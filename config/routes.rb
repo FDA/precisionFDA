@@ -27,6 +27,8 @@ Rails.application.routes.draw do
     post '/api/get_upload_url', to: 'api#get_upload_url'
     post '/api/close_file', to: 'api#close_file'
     post '/api/list_files', to: 'api#list_files'
+    post '/api/describe_file', to: 'api#describe_file'
+    post '/api/accept_licenses', to: 'api#accept_licenses'
     post '/api/run_app', to: 'api#run_app'
     post '/api/list_assets', to: 'api#list_assets'
     post '/api/describe_asset', to: 'api#describe_asset'
@@ -90,6 +92,15 @@ Rails.application.routes.draw do
         resources :comments
       end
       resources :comments
+    end
+
+    resources :licenses do
+      post 'accept(/:redirect_to_uid)', on: :member, action: :accept, as: 'accept'
+      post 'license_item/:item_uid', on: :member, action: :license_item, as: 'license_item'
+      post 'remove_item/:item_uid(/:redirect_to_uid)', on: :member, action: :remove_item, as: 'remove_item'
+      post 'remove_user/:user_uid(/:redirect_to_uid)', on: :member, action: :remove_user, as: 'remove_user'
+      post 'remove_items', on: :member
+      post 'remove_users', on: :member
     end
 
     user_constraints = { username: /[^\/]*/ }

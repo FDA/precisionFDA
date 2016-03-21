@@ -27,7 +27,7 @@
 #= require knockout-sortable
 #= require moment
 #= require wice_grid
-#= require remarkable
+#= require remarkable/remarkable
 #= require SparkMD5
 #= require sortable/js/sortable
 #= require paloma

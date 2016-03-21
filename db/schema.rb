@@ -11,7 +11,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160209214447) do
+ActiveRecord::Schema.define(version: 20160318201740) do
+
+  create_table "accepted_licenses", force: :cascade do |t|
+    t.integer  "license_id"
+    t.integer  "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "accepted_licenses", ["license_id"], name: "index_accepted_licenses_on_license_id"
+  add_index "accepted_licenses", ["user_id"], name: "index_accepted_licenses_on_user_id"
 
   create_table "answers", force: :cascade do |t|
     t.integer  "user_id"
@@ -208,6 +218,29 @@ ActiveRecord::Schema.define(version: 20160209214447) do
   add_index "jobs", ["scope"], name: "index_jobs_on_scope"
   add_index "jobs", ["state"], name: "index_jobs_on_state"
   add_index "jobs", ["user_id"], name: "index_jobs_on_user_id"
+
+  create_table "licensed_items", force: :cascade do |t|
+    t.integer  "license_id"
+    t.integer  "licenseable_id"
+    t.string   "licenseable_type"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
+
+  add_index "licensed_items", ["license_id"], name: "index_licensed_items_on_license_id"
+  add_index "licensed_items", ["licenseable_type", "licenseable_id"], name: "index_licensed_items_on_licenseable_type_and_licenseable_id"
+
+  create_table "licenses", force: :cascade do |t|
+    t.text     "content"
+    t.integer  "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string   "title"
+    t.string   "scope"
+  end
+
+  add_index "licenses", ["scope"], name: "index_licenses_on_scope"
+  add_index "licenses", ["user_id"], name: "index_licenses_on_user_id"
 
   create_table "notes", force: :cascade do |t|
     t.string   "title"

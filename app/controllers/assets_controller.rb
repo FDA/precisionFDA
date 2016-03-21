@@ -65,25 +65,32 @@ class AssetsController < ApplicationController
     @answers = @asset.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
     @discussions = @asset.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
 
-    js asset: @asset.slice(:uid, :id, :description)
+    if @asset.editable_by?(@context)
+      @licenses = License.editable_by(@context)
+    end
+
+    js asset: @asset.slice(:id, :description), license: @asset.license ? @asset.license.slice(:uid, :content) : nil
   end
 
   def edit
     @asset = Asset.editable_by(@context).includes(:archive_entries).find_by!(dxid: params[:id])
 
-    js asset: @asset.slice(:uid, :id, :description)
+    js asset: @asset.slice(:id, :description)
   end
 
   def update
     @asset = Asset.editable_by(@context).includes(:archive_entries).find_by!(dxid: params[:id])
 
-    if @asset.update_attributes(asset_params)
-      # Handle a successful update.
-      flash[:success] = "Asset updated"
-      redirect_to asset_path(@asset.dxid)
-    else
-      flash[:error] = "Error: Could not update the asset. Please try again."
-      render 'edit'
+    Asset.transaction do
+      @asset.reload
+      if @asset.update(asset_params)
+        # Handle a successful update.
+        flash[:success] = "Asset updated"
+        redirect_to asset_path(@asset.dxid)
+      else
+        flash[:error] = "Error: Could not update the asset. Please try again."
+        render 'edit'
+      end
     end
   end
 
@@ -93,7 +100,11 @@ class AssetsController < ApplicationController
     UserFile.transaction do
       @file.reload
 
-      if @file.state == "open"
+      if @file.license.present? && !@file.apps.empty?
+        flash[:error] = "This asset contains a license, and has been included in one or more apps. Deleting it would render the license inaccessible to these apps, breaking reproducibility. You can either first remove the license (allowing these existing apps to run without requiring a license) or contact the precisionFDA team to discuss other options."
+        redirect_to asset_path(@file.dxid)
+        return
+      elsif @file.state == "open"
         user = User.find(@context.user_id)
         user.open_assets_count = user.open_assets_count - 1
         user.save!

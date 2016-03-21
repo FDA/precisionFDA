@@ -59,7 +59,7 @@ class NotesController < ApplicationController
           scope: "private"
         )
       end
-      redirect_to note_path(@note)
+      redirect_to edit_note_path(@note)
     else
       redirect_to notes_path
     end
