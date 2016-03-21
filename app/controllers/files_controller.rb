@@ -72,10 +72,14 @@ class FilesController < ApplicationController
       @comparison = @file.parent
     end
 
+    if @file.editable_by?(@context)
+      @licenses = License.editable_by(@context)
+    end
+
     @notes = @file.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @file.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
     @discussions = @file.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
-    js id: @file.id
+    js file: @file.slice(:uid, :id), license: @file.license ? @file.license.slice(:uid, :content) : nil
   end
 
   def new
@@ -98,6 +102,9 @@ class FilesController < ApplicationController
     if @file.state != "closed"
       flash[:error] = "Files can only be downloaded if they are in the 'closed' state"
       redirect_to file_path(@file.dxid)
+    elsif @file.license.present? && !@file.licensed_by?(@context)
+      flash[:error] = "You must accept the license before you can download this"
+      redirect_to @file.parent_type == "Asset" ? asset_path(@file.dxid) : file_path(@file.dxid)
     else
       opts = {project: @file.project, preauthenticated: true}
       opts[:filename] = @file.name
@@ -122,6 +129,9 @@ class FilesController < ApplicationController
     if @file.state != "closed"
       flash[:error] = "Files can only be downloaded if they are in the 'closed' state"
       redirect_to file_path(@file.dxid)
+    elsif @file.license.present? && !@file.licensed_by?(@context)
+      flash[:error] = "You must accept the license before you can get the download link"
+      redirect_to @file.parent_type == "Asset" ? asset_path(@file.dxid) : file_path(@file.dxid)
     else
       opts = {project: @file.project, preauthenticated: true, filename: @file.name, duration: 86400}
       @url = DNAnexusAPI.new(@context.token).call(@file.dxid, "download", opts)["url"]
