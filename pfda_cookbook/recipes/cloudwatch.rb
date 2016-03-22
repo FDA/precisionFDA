@@ -15,7 +15,7 @@ bash 'cloudwatch_monitor' do
     cp awscreds.template awscreds.conf
     echo "AWSAccessKeyId=#{node[:cloudwatch][:aws_access_key_id]}" >> awscreds.conf
     echo "AWSSecretKey=#{node[:cloudwatch][:aws_secret_access_key]}" >> awscreds.conf
-    echo "*/5 * * * * root /opt/aws-scripts-mon/mon-put-instance-data.pl --disk-space-avail --disk-path=/ --disk-path=/mnt --from-cron" > /etc/cron.d/cloudwatch-monitor
+    echo "*/5 * * * * root /opt/aws-scripts-mon/mon-put-instance-data.pl --disk-space-avail --disk-path=/ --from-cron" > /etc/cron.d/cloudwatch-monitor
     chmod +x /etc/cron.d/cloudwatch-monitor
     /etc/init.d/cron restart
   EOH
