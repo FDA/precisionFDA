@@ -13,10 +13,33 @@ class ApiController < ApplicationController
   # An array of hashes, each of which has these fields:
   # uid (string): the file's unique id (file-xxxxxx)
   # name (string): the filename
+  # scope (string): file scope, "public" or "private"
+  # path (string): file_path of the file
   def list_files
     result = []
     UserFile.real_files.accessible_by(@context).find_each do |file|
-      result << {uid: file.uid, name: file.name}
+      file_describe = {
+        uid: file.uid,
+        name: file.name,
+        scope: file.scope,
+        path: file_path(file.uid)
+      }
+
+      if params["include"].present?
+        if params["include"]["license"]
+          if file.license.present?
+            file_describe[:license] = file.license.slice(:id, :uid)
+            file_describe[:license_accepted] = file.licensed_by?(@context)
+          end
+        end
+        if params["include"]["user"]
+          file_describe[:user] = file.user.slice(:dxuser, :full_name)
+        end
+        if params["include"]["org"]
+          file_describe[:org] = file.user.org.slice(:handle, :name)
+        end
+      end
+      result << file_describe
     end
 
     render json: result
@@ -24,10 +47,11 @@ class ApiController < ApplicationController
 
   # Inputs
   #
-  # id (string, required): the dxid of the file to describe
+  # uid (string, required): the dxid of the file to describe
   #
   # Outputs:
   #
+  # uid (string): file uid
   # name (string): file name
   # state (string): private or public
   # -- optional --
@@ -36,27 +60,58 @@ class ApiController < ApplicationController
   #
   def describe_file
     # App id should be a string
-    id = params["id"]
-    raise unless id.is_a?(String) && id != ""
+    uid = params["uid"]
+    raise unless uid.is_a?(String) && uid != ""
 
-    file = UserFile.real_files.accessible_by(@context).find_by!(dxid: id)
+    file = item_from_uid(uid)
+    raise unless file.klass == "file" && file.accessible_by?(@context)
 
-    response = {
+    file_describe = {
+      uid: file.uid,
       name: file.name,
       state: file.state
     }
 
-    # TODO: Include license if exists
-    # if params["include"].present?
-    #   if params["include"]["license"]
-    #     response.license = file.license ? file.license.slice(:id, :uid, :title, :content) : nil
-    #     if response.license?
-    #       response.license_accepted = file.license.accepted_licenses.exists?(user_id: @context.user_id)
-    #     end
-    #   end
-    # end
+    if params["include"].present?
+      if params["include"]["license"]
+        if file.license.present?
+          file_describe[:license] = file.license.slice(:id, :uid)
+          file_describe[:license_accepted] = file.licensed_by?(@context)
+        end
+      end
+    end
 
-    render json: response
+    render json: file_describe
+
+  end
+
+  # Inputs
+  #
+  # uid (string, required): the uid of the license to describe
+  #
+  # Outputs:
+  #
+  # uid (string)
+  # title (string)
+  # content (string)
+  # accepted (boolean)
+
+  def describe_license
+    # App id should be a string
+    uid = params["uid"]
+    raise unless uid.is_a?(String) && uid != ""
+
+    license = item_from_uid(uid)
+    raise unless license.klass == "license" && license.accessible_by?(@context)
+
+    license_describe = {
+      uid: license.uid,
+      title: license.title,
+      content: license.content,
+      accepted: license.licensed_by?(@context)
+    }
+
+    render json: license_describe
   end
 
   # Inputs:
@@ -315,134 +370,138 @@ class ApiController < ApplicationController
   # id (string): the dxid of the resulting job
   #
   def run_app
-    # App id should be a string
-    id = params["id"]
-    raise unless id.is_a?(String) && id != ""
+    begin
+      # App id should be a string
+      id = params["id"]
+      fail "App ID is not a string" unless id.is_a?(String) && id != ""
 
-    # Name should be a nonempty string
-    name = params["name"]
-    raise unless name.is_a?(String) && name != ""
+      # Name should be a nonempty string
+      name = params["name"]
+      fail "Name should be a non-empty string" unless name.is_a?(String) && name != ""
 
-    # Inputs should be a hash (more checks later)
-    inputs = params["inputs"]
-    raise unless inputs.is_a?(Hash)
+      # Inputs should be a hash (more checks later)
+      inputs = params["inputs"]
+      fail "Inputs should be a hash" unless inputs.is_a?(Hash)
 
-    # App should exist and be accessible
-    @app = App.accessible_by(@context).find_by!(dxid: id)
+      # App should exist and be accessible
+      @app = App.accessible_by(@context).find_by!(dxid: id)
 
-    # Check if asset licenses have been accepeted
-    raise unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
+      # Check if asset licenses have been accepeted
+      fail "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
 
-    # Inputs should be compatible
-    # (The following also normalizes them)
-    run_inputs = {}
-    dx_run_input = {}
-    input_file_dxids = []
-    @app.input_spec.each do |input|
-      key = input["name"]
-      optional = (input["optional"] == true)
-      has_default = input.has_key?("default")
-      default = input["default"]
-      klass = input["class"]
-      choices = input["choices"]
+      # Inputs should be compatible
+      # (The following also normalizes them)
+      run_inputs = {}
+      dx_run_input = {}
+      input_file_dxids = []
+      @app.input_spec.each do |input|
+        key = input["name"]
+        optional = (input["optional"] == true)
+        has_default = input.has_key?("default")
+        default = input["default"]
+        klass = input["class"]
+        choices = input["choices"]
 
-      if inputs.has_key?(key)
-        value = inputs[key]
-      elsif has_default
-        value = default
-      elsif optional
-        # No given value and no default, but input is optional; move on
-        next
-      else
-        # Required input is missing
-        raise
+        if inputs.has_key?(key)
+          value = inputs[key]
+        elsif has_default
+          value = default
+        elsif optional
+          # No given value and no default, but input is optional; move on
+          next
+        else
+          # Required input is missing
+          fail "#{key}: required input is missing"
+        end
+
+        # Check compatibility with choices
+        fail "#{key}: incompatiblity with choices" if choices.present? && !choices.include?(value)
+
+        if klass == "file"
+          fail "#{key}: input file value is not a string" unless value.is_a?(String)
+          file = UserFile.real_files.accessible_by(@context).find_by(dxid: value)
+          fail "#{key}: input file is not accessible or does not exist" unless !file.nil?
+          fail "#{key}: input file's license must be accepted" unless !file.license.present? || file.licensed_by?(@context)
+
+          dxvalue = {"$dnanexus_link" => value}
+          input_file_dxids << value
+        elsif klass == "int"
+          fail "#{key}: value is not an integer" unless value.is_a?(Numeric) && (value.to_i == value)
+          value = value.to_i
+        elsif klass == "float"
+          fail "#{key}: value is not a float" unless value.is_a?(Numeric)
+        elsif klass == "boolean"
+          fail "#{key}: value is not a boolean" unless value == true || value == false
+        elsif klass == "string"
+          fail "#{key}: value is not a string" unless value.is_a?(String)
+        end
+
+        run_inputs[key] = value
+        dx_run_input[key] = dxvalue || value
       end
 
-      # Check compatibility with choices
-      raise if choices.present? && !choices.include?(value)
-
-      if klass == "file"
-        raise unless value.is_a?(String)
-        file = UserFile.real_files.accessible_by(@context).find_by(dxid: value)
-        raise unless !file.nil?
-        raise unless !file.license.present? || file.licensed_by?(@context)
-
-        dxvalue = {"$dnanexus_link" => value}
-        input_file_dxids << value
-      elsif klass == "int"
-        raise unless value.is_a?(Numeric) && (value.to_i == value)
-        value = value.to_i
-      elsif klass == "float"
-        raise unless value.is_a?(Numeric)
-      elsif klass == "boolean"
-        raise unless value == true || value == false
-      elsif klass == "string"
-        raise unless value.is_a?(String)
+      # User can override the instance type
+      if params.has_key?("instance_type")
+        fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.has_key?(params["instance_type"]) #Checks also that it's a string
+        run_instance_type = params["instance_type"]
       end
 
-      run_inputs[key] = value
-      dx_run_input[key] = dxvalue || value
-    end
+      project = User.find(@context.user_id).private_files_project
 
-    # User can override the instance type
-    if params.has_key?("instance_type")
-      raise unless Job::INSTANCE_TYPES.has_key?(params["instance_type"]) #Checks also that it's a string
-      run_instance_type = params["instance_type"]
-    end
-
-    project = User.find(@context.user_id).private_files_project
-
-    api_input = {
-      name: name,
-      input: dx_run_input,
-      project: project,
-      timeoutPolicyByExecutable: {@app.dxid => {"*" => {"days" => 2}}}
-    }
-    if run_instance_type.present?
-      api_input[:systemRequirements] = {main: {instanceType: Job::INSTANCE_TYPES[run_instance_type]}}
-    end
-
-    # Run the app
-    jobid = DNAnexusAPI.new(@context.token).call(@app.dxid, "run", api_input)["id"]
-
-    # Create job record
-    opts = {
-      dxid: jobid,
-      app_series_id: @app.app_series_id,
-      app_id: @app.id,
-      project: project,
-      run_inputs: run_inputs,
-      state: "idle",
-      name: name,
-      describe: {},
-      user_id: @context.user_id
-    }
-    if run_instance_type.present?
-      opts[:run_instance_type] = run_instance_type
-    end
-    provenance = {jobid => {app_dxid: @app.dxid, app_id: @app.id, inputs: run_inputs}}
-    input_file_dxids.uniq!
-    input_file_ids = []
-    UserFile.accessible_by(@context).where(dxid: input_file_dxids).find_each do |file|
-      if file.parent_type == "Job"
-        parent_job = file.parent
-        provenance.merge!(parent_job.provenance)
-        provenance[file.dxid] = parent_job.dxid
+      api_input = {
+        name: name,
+        input: dx_run_input,
+        project: project,
+        timeoutPolicyByExecutable: {@app.dxid => {"*" => {"days" => 2}}}
+      }
+      if run_instance_type.present?
+        api_input[:systemRequirements] = {main: {instanceType: Job::INSTANCE_TYPES[run_instance_type]}}
       end
-      input_file_ids << file.id
-    end
-    opts[:provenance] = provenance
 
-    User.transaction do
-      job = Job.create!(opts)
-      job.input_file_ids = input_file_ids
-      job.save!
-      user = User.find(@context.user_id)
-      user.pending_jobs_count = user.pending_jobs_count + 1
-      user.save!
-    end
+      # Run the app
+      jobid = DNAnexusAPI.new(@context.token).call(@app.dxid, "run", api_input)["id"]
 
-    render json: {id: jobid}
+      # Create job record
+      opts = {
+        dxid: jobid,
+        app_series_id: @app.app_series_id,
+        app_id: @app.id,
+        project: project,
+        run_inputs: run_inputs,
+        state: "idle",
+        name: name,
+        describe: {},
+        user_id: @context.user_id
+      }
+      if run_instance_type.present?
+        opts[:run_instance_type] = run_instance_type
+      end
+      provenance = {jobid => {app_dxid: @app.dxid, app_id: @app.id, inputs: run_inputs}}
+      input_file_dxids.uniq!
+      input_file_ids = []
+      UserFile.accessible_by(@context).where(dxid: input_file_dxids).find_each do |file|
+        if file.parent_type == "Job"
+          parent_job = file.parent
+          provenance.merge!(parent_job.provenance)
+          provenance[file.dxid] = parent_job.dxid
+        end
+        input_file_ids << file.id
+      end
+      opts[:provenance] = provenance
+
+      User.transaction do
+        job = Job.create!(opts)
+        job.input_file_ids = input_file_ids
+        job.save!
+        user = User.find(@context.user_id)
+        user.pending_jobs_count = user.pending_jobs_count + 1
+        user.save!
+      end
+
+      render json: {id: jobid}
+    rescue ApiError => e
+      render json: {failure: e.message}
+    end
   end
 
   # Inputs

@@ -73,7 +73,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-          <button type="button" name="submit" class="btn btn-primary disabled" data-bind="disabled: !isFormReady(), css: {disabled: !isFormReady()}, click: submitForm"><span class="fa fa-area-chart"></span> Start Comparison</button>
+          <button type="button" name="submit" class="btn btn-primary disabled" data-bind="disabled: !isFormReady() || busy(), css: {disabled: !isFormReady() || busy()}, click: submitForm"><span class="fa fa-area-chart"></span> Start Comparison</button>
         </div>
       </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -81,3 +81,4 @@
 </div>
 
 <%= render "files/selector_modal" %>
+<%= render "licenses/selector_modal" %>

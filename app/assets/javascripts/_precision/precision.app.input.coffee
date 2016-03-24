@@ -17,6 +17,8 @@ class AppInputModel
 
     @error = ko.observable(null)
 
+    @licenseToAccept = ko.observable()
+
     @value = ko.observable()
     @valueDisplay = ko.computed(
       read: () =>
@@ -25,13 +27,18 @@ class AppInputModel
             if !@value()?
               if @defaultValue?
                 if @defaultFileValue()?
-                  @defaultFileValue().name
+                  value = @defaultFileValue()
+                  @licenseToAccept(value.license) if value.license? && !value.license_accepted
+                  value.name
                 else
                   params =
-                    id: @defaultValue
+                    uid: @defaultValue
                     include:
                       license: true
-                  Precision.api('/api/describe_file', params).done((value) => @defaultFileValue(value))
+                  Precision.api('/api/describe_file', params).done((value) =>
+                    @defaultFileValue(value)
+                    @licenseToAccept(value.license) if value.license? && !value.license_accepted
+                  )
                   @defaultValue
               else
                 "Select file..."
@@ -44,7 +51,7 @@ class AppInputModel
               @value()
       write: (value) =>
         if !value?
-          @value(@defaultValue)
+          @value(null)
         else
           switch @klass
             when 'boolean'
