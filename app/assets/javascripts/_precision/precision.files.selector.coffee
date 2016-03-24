@@ -47,7 +47,13 @@ class FilesSelectorModel
       regexp = new RegExp(query, "i")
       return _.filter(files, (file) -> file.name.match regexp)
 
-  getFiles: (params = {}) ->
+  getFiles: (params) ->
+    if !params?
+      params =
+        include:
+          license: true
+          user: true
+          org: true
     @busy(true)
     Precision.api('/api/list_files', params, (files) =>
       @files(_.map(files, (file) =>
@@ -77,13 +83,23 @@ class FilesSelectorModel
 
   save: () =>
     value = @selected()
-    @inputModel.peek().value(value)
+    inputModel = @inputModel.peek()
+    inputModel.value(value)
+    inputModel.licenseToAccept(value.license) if value.license? && !value.license_accepted
     @modal.modal('hide')
 
 class FileModel
   constructor: (file, @selectorModel) ->
     @uid = file.uid
     @name = file.name
+    @scope = file.scope
+    @scopeIcon = if file.scope == "public" then "fa fa-fw fa-globe" else "fa fa-fw fa-lock"
+    @path = file.path
+    @license = file.license
+    @license_accepted = file.license_accepted
+    @user = file.user
+    @org = file.org
+
     @type = @selectorModel.type()
 
   onSelect: () =>
@@ -91,5 +107,5 @@ class FileModel
 
 
 window.Precision ||= {}
-window.Precision.models || = {}
+window.Precision.models ||= {}
 window.Precision.models.FilesSelectorModel = FilesSelectorModel
