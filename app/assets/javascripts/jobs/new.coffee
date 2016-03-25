@@ -1,10 +1,13 @@
 class JobsNewView
-  constructor: (app, licenses_to_accept) ->
+  constructor: (app, @asset_licenses_to_accept) ->
     @dxid = app.dxid
     @inputSpec = app.spec.input_spec
     @outputSpec = app.spec.output_spec
 
     @fileSelector = new Precision.models.FilesSelectorModel()
+    @licenseSelector = new Precision.models.LicensesSelectorModel({
+      onAcceptCallback: @run
+    })
 
     @busy = ko.observable(false)
     @running = ko.observable(false)
@@ -26,44 +29,24 @@ class JobsNewView
     @defaultInstanceType = app.spec.instance_type
     @instanceType = ko.observable(app.spec.instance_type)
 
-    if licenses_to_accept.length > 0
-      for license in licenses_to_accept
-        license.licenseHTML = Precision.md.render(license.content)
+  validateLicenses: () ->
+    # Reset licenses and recompute which ones to accept
+    licensesToAccept = @asset_licenses_to_accept ? []
 
-    @licensesToAccept = ko.observableArray(licenses_to_accept)
-    @licensesAccepted = ko.observableArray()
-    @previewedLicense = ko.observable(_.first(licenses_to_accept))
+    for inputModel in @inputModels.peek()
+      license = inputModel.licenseToAccept.peek()
+      licensesToAccept.push(license) if license?
 
-    @areLicensesAccepted = ko.computed(=>
-      @licensesToAccept().length == @licensesAccepted().length
-    )
+    if _.size(licensesToAccept) > 0
+      @licenseSelector.setLicensesToAccept(licensesToAccept)
+      return @licenseSelector.areLicensesAccepted()
+    else
+      return true
 
-  previewLicense: (license) =>
-    @previewedLicense(license)
-
-  toggleLicensesModal: () ->
-    $('.license-modal').modal('toggle')
-
-  acceptLicenses: () ->
-    params =
-      license_ids: _.map(@licensesAccepted(), (license) -> license.id)
-    @busy(true)
-    Precision.api('/api/accept_licenses', params)
-      .done((rs) =>
-        @busy(false)
-        @toggleLicensesModal()
-        @run()
-      )
-      .fail((error) =>
-        @busy(false)
-        #TODO: bootstrap alerts
-        alert "Licenses could not be accepted: #{error.statusText}"
-        console.error error
-      )
-
-  run: () ->
-    if !@areLicensesAccepted()
-      @toggleLicensesModal()
+  run: () =>
+    if !@validateLicenses()
+      @licenseSelector.previewedLicense(_.first(@licenseSelector.licensesToAccept.peek()))
+      @licenseSelector.toggleLicensesModal()
     else
       params =
         id: @dxid
@@ -80,12 +63,17 @@ class JobsNewView
       @running(true)
       Precision.api('/api/run_app', params)
         .done((rs) =>
-          window.location = "/apps/#{@dxid}/jobs"
+          if !rs.failure?
+            window.location = "/apps/#{@dxid}/jobs"
+          else
+            @busy(false)
+            @running(false)
+            alert "App could not be run due to: #{rs.failure}"
+            console.error rs.failure
         )
         .fail((error) =>
           @busy(false)
           @running(false)
-          #TODO: bootstrap alerts
           alert "App could not be run due to: #{error.statusText}"
           console.error error
         )
@@ -118,5 +106,5 @@ JobsController::new = ->
   )
 
   $('.license-modal').on("click", ".list-group-item", (e) =>
-    viewModel.previewLicense(ko.dataFor(e.currentTarget))
+    viewModel.licenseSelector.previewLicense(ko.dataFor(e.currentTarget))
   )
