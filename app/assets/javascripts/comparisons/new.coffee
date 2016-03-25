@@ -1,6 +1,11 @@
 class ComparisonsNewView
   constructor: () ->
+    @busy = ko.observable(false)
+
     @fileSelector = new Precision.models.FilesSelectorModel()
+    @licenseSelector = new Precision.models.LicensesSelectorModel({
+      onAcceptCallback: @submitForm
+    })
 
     @testVariant = new VariantViewModel(this, "Test", {
       inputSpec: [
@@ -60,8 +65,27 @@ class ComparisonsNewView
       }, this)
     ]
 
+  validateLicenses: () ->
+    licensesToAccept = []
+    # Reset licenses and recompute which ones to accept
+    inputModels = @refVariant.inputs().concat(@testVariant.inputs())
+    for inputModel in inputModels
+      license = inputModel.licenseToAccept.peek()
+      licensesToAccept.push(license) if license?
+
+    if _.size(licensesToAccept) > 0
+      @licenseSelector.setLicensesToAccept(licensesToAccept)
+      return @licenseSelector.areLicensesAccepted()
+    else
+      return true
+
   submitForm: (e) =>
-    $("#comparison-modal form").submit()
+    if !@validateLicenses()
+      @licenseSelector.previewedLicense(_.first(@licenseSelector.licensesToAccept.peek()))
+      @licenseSelector.toggleLicensesModal()
+    else
+      $("#comparison-modal form").submit()
+      @busy(true)
 
 class ChallengeViewModel
   constructor: (challenge, @viewModel) ->
@@ -110,4 +134,8 @@ ComparisonsController::new = ->
         refName = refVCFModel.value().name.replace /\.vcf\.gz/i, ""
 
         viewModel.name("#{testName} vs #{refName}")
+  )
+
+  $('.license-modal').on("click", ".list-group-item", (e) =>
+    viewModel.licenseSelector.previewLicense(ko.dataFor(e.currentTarget))
   )

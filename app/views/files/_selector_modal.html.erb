@@ -12,15 +12,22 @@
       <div class="files-filter">
         <input type="text" class="form-control input-lg input-square" placeholder="Filter..." data-bind="textInput: filterQuery" />
       </div>
-      <div class="modal-body">
+      <div class="modal-body modal-body-padless">
 
         <!-- ko if: !busy() -->
           <!-- ko if: files.filtered().length > 0 -->
           <div class="list-group" data-bind="foreach: files.filtered">
             <div class="list-group-item" data-bind="css: $parent.type">
-              <label>
+              <label data-bind="attr: {title: uid}">
                 <input data-bind="checked: $parent.selected, checkedValue: $data, attr: {type: $parent.type}, click: onSelect">
-                <span data-bind="text: name"></span>
+                <span data-bind="css: scopeIcon" aria-hidden="true"></span> <span class="file-name" data-bind="text: name"></span>
+                <div class="file-metadata clearfix">
+                  <ul class="list-inline list-inline-bullets pull-left">
+                    <li data-bind="text: user.full_name"></li>
+                    <li data-bind="text: org.name"></li>
+                  </ul>
+                  <a target="_blank" class="link-muted pull-right" data-bind="attr: {href: path}"><span class="fa fa-external-link"></span> Open</a>
+                </div>
               </label>
             </div>
           </div>

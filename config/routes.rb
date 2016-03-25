@@ -28,6 +28,7 @@ Rails.application.routes.draw do
     post '/api/close_file', to: 'api#close_file'
     post '/api/list_files', to: 'api#list_files'
     post '/api/describe_file', to: 'api#describe_file'
+    post '/api/describe_license', to: 'api#describe_license'
     post '/api/accept_licenses', to: 'api#accept_licenses'
     post '/api/run_app', to: 'api#run_app'
     post '/api/list_assets', to: 'api#list_assets'

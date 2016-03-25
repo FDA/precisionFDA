@@ -16,6 +16,11 @@ a, a:hover, a:focus
     color: $text-muted
     cursor: default
 
+  &.link-muted
+    color: $link-muted-color
+    &:hover
+      color: $link-muted-hover-color
+
 body > main > .alert
   margin: 10px
 
@@ -34,7 +39,7 @@ ul, menu, dir
 
   &.pfda-toolbar-transparent
     background-color: transparent
-    
+
 // TABLE
 .pfda-table.table
   > thead > tr > th
