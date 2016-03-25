@@ -26,16 +26,16 @@ class ApplicationController < ActionController::Base
       report_only: false,
       report_uri: %w(https://report-uri.io/report/dc95b34a080e9c95bbce7c3e6aed6234)
     }
-#    config.hpkp = {
-#      report_only: false,
-#      report_uri: 'https://report-uri.io/report/dc95b34a080e9c95bbce7c3e6aed6234',
-#      max_age: 10.minutes.to_i,
-#      include_subdomains: false,
-#      pins: [
-#        {sha256: 'c56ad02de2ab904ba7005e461b463154c862289f001713e3c92395dc738819eb'},
-#        {sha256: '63bf30f78709b28e3ba7cf8960a4dd518cf7cb76744c1171c98910a5be55ffa0'}
-#      ]
-#    }
+    config.hpkp = {
+      report_only: false,
+      report_uri: 'https://report-uri.io/report/dc95b34a080e9c95bbce7c3e6aed6234',
+      max_age: 10.minutes.to_i,
+      include_subdomains: false,
+      pins: [
+        {sha256: 'OV/2vGzq4A/PlbCUFpy5W2dHmMLPvHZ9N/FVDOPNvQw='},
+        {sha256: 'AGLBxCqwOTXOZg/v14oxVzHbU0GVWr1QlHR7DQqnzvU='}
+      ]
+    }
   end
 
   # Prevent CSRF attacks by raising an exception.
