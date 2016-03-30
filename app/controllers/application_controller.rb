@@ -24,18 +24,25 @@ class ApplicationController < ActionController::Base
       script_src: %w('self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://cdnjs.cloudflare.com https://www.youtube.com https://s.ytimg.com https://dnanexus.github.io),
       style_src: %w('self' 'unsafe-inline' https://fonts.googleapis.com https://dnanexus.github.io https://cdnjs.cloudflare.com),
       report_only: false,
-      report_uri: %w(https://report-uri.io/report/dc95b34a080e9c95bbce7c3e6aed6234)
+      report_uri: %w(https://dc95b34a080e9c95bbce7c3e6aed6234.report-uri.io/r/default/csp/enforce)
     }
     config.hpkp = {
       report_only: false,
-      report_uri: 'https://report-uri.io/report/dc95b34a080e9c95bbce7c3e6aed6234',
-      max_age: 10.minutes.to_i,
-      include_subdomains: false,
-      pins: [
+      report_uri: 'https://dc95b34a080e9c95bbce7c3e6aed6234.report-uri.io/r/default/hpkp/enforce',
+      max_age: 1.minutes.to_i,
+      include_subdomains: false
+    }
+    if ENV["DNANEXUS_BACKEND"] == "production"
+      config.hpkp[:pins] = [
         {sha256: 'OV/2vGzq4A/PlbCUFpy5W2dHmMLPvHZ9N/FVDOPNvQw='},
         {sha256: 'AGLBxCqwOTXOZg/v14oxVzHbU0GVWr1QlHR7DQqnzvU='}
       ]
-    }
+    else
+      config.hpkp[:pins] = [
+        {sha256: 'gtfblKFG3oCmgxfjddilwzBgaudaW3XyH7M90LrfjOU='},
+        {sha256: 'x8W1sshBVav03Hgxxp+PRD5f3xs0yIBmNpph3krjGqM='}
+      ]
+    end
   end
 
   # Prevent CSRF attacks by raising an exception.
