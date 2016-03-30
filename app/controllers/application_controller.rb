@@ -29,7 +29,7 @@ class ApplicationController < ActionController::Base
     config.hpkp = {
       report_only: false,
       report_uri: 'https://dc95b34a080e9c95bbce7c3e6aed6234.report-uri.io/r/default/hpkp/enforce',
-      max_age: 1.minutes.to_i,
+      max_age: 5.minutes.to_i,
       include_subdomains: false
     }
     if ENV["DNANEXUS_BACKEND"] == "production"
