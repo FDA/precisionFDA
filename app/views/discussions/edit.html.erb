@@ -25,9 +25,6 @@
   <div class="btn-toolbar pull-right">
     <%= link_to "Back to discussion", discussion_path(@discussion), class: "btn btn-link" %>
     <a class="btn btn-primary" data-bind="click: save, css: {disabled: !isFormReady()}, text: saveBtnText"></a>
-    <a class="btn btn-danger" href="<%= discussion_path(@discussion) %>" data-bind="css: {disabled: isFormReady()}" data-method="delete" data-confirm="Are you certain you want to delete this discussion?" rel="nofollow">
-      <span class="fa fa-trash"></span> Delete
-    </a>
     <% if @discussion.publishable_by?(@context) %>
       <a class="btn btn-success" href="<%= publish_path + "?" + {id: @discussion.uid}.to_param %>" data-method="post" data-bind="css: {disabled: isFormReady()}" rel="nofollow">
         <span class="fa fa-bullhorn"></span> Publish

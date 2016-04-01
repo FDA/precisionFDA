@@ -78,6 +78,24 @@ class AssetsController < ApplicationController
     js asset: @asset.slice(:id, :description)
   end
 
+  def rename
+    @asset = Asset.editable_by(@context).find_by!(dxid: params[:id])
+    title = asset_params[:title]
+    if title.is_a?(String) && title != ""
+      name = title + @asset.suffix
+      if @asset.rename(name, @context)
+        @asset.reload
+        flash[:success] = "Asset renamed to \"#{@asset.name}\""
+      else
+        flash[:error] = "Asset \"#{@asset.name}\" could not be renamed."
+      end
+    else
+      flash[:error] = "The new name is not a valid string"
+    end
+
+    redirect_to asset_path(@asset.dxid)
+  end
+
   def update
     @asset = Asset.editable_by(@context).includes(:archive_entries).find_by!(dxid: params[:id])
 
@@ -125,6 +143,6 @@ class AssetsController < ApplicationController
   private
 
   def asset_params
-    params.require(:asset).permit(:description)
+    params.require(:asset).permit(:description, :title)
   end
 end

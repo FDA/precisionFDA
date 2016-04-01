@@ -167,6 +167,23 @@ class ComparisonsController < ApplicationController
 
   end
 
+  def rename
+    @comparison = Comparison.editable_by(@context).find_by!(id: params[:id])
+    name = comparison_params[:name]
+    if name.is_a?(String) && name != ""
+      if @comparison.rename(name, @context)
+        @comparison.reload
+        flash[:success] = "Comparison renamed to \"#{@comparison.name}\""
+      else
+        flash[:error] = "Comparison \"#{@comparison.name}\" could not be renamed."
+      end
+    else
+      flash[:error] = "The new name is not a valid string"
+    end
+
+    redirect_to comparison_path(@comparison.id)
+  end
+
   def destroy
     @comparison = Comparison.editable_by(@context).find(params[:id])
 
@@ -197,4 +214,9 @@ class ComparisonsController < ApplicationController
     flash[:success] = "Comparison \"#{@comparison.name}\" has been successfully deleted"
     redirect_to :comparisons
   end
+
+  private
+    def comparison_params
+      params.require(:comparison).permit(:name)
+    end
 end

@@ -111,4 +111,12 @@ class UserFile < ActiveRecord::Base
       user_id == context.user_id && scope != "public" && parent_type != "Comparison" && state == "closed"
     end
   end
+
+  def rename(new_name, context)
+    if DNAnexusAPI.new(context.token).call(dxid, "rename", {project: project, name: new_name})
+      update_attributes(name: new_name)
+    else
+      false
+    end
+  end
 end

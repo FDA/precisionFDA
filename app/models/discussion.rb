@@ -76,4 +76,8 @@ class Discussion < ActiveRecord::Base
   def self.accessible_by_public
     joins(:note).where(notes: {scope: "public"})
   end
+
+  def rename(new_name, context)
+    note.rename(new_name, context)
+  end
 end
