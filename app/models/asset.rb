@@ -46,9 +46,9 @@ class Asset < UserFile
   end
 
   def suffix
-    if name.end_in?(".tar.gz")
+    if name.ends_with?(".tar.gz")
       return ".tar.gz"
-    elsif name.end_in?(".tar")
+    elsif name.ends_with?(".tar")
       return ".tar"
     else
       raise "Found an asset that is not a .tar[.gz]"

@@ -9,12 +9,17 @@
         <%= link_to("#{@discussion.user.full_name}'s", user_path(@discussion.user.dxuser)) %> (<%= @discussion.user.org.name %>) <%= @discussion.scope == 'public' ? 'discussion' : 'draft discussion' %>
       </div>
       <div class="pfda-discussion-title">
-        <% if @discussion.title.blank? %>
+        <% if @discussion.title.blank? && @discussion.editable_by?(@context) %>
           <%= link_to edit_discussion_path(@discussion) do %>
             <span class="fa fa-edit"></span> Edit discussion title
           <% end %>
         <% else %>
           <%= @discussion.title %>
+          <% if @discussion.editable_by?(@context) %>
+            <a class="pfda-rename-item" data-toggle="modal" data-target="#rename-modal">
+              <span class="fa fa-pencil"></span>
+            </a>
+          <% end %>
         <% end %>
       </div>
       <% if !@discussion.content.blank? || @discussion.attachments.count > 0 %>
@@ -40,7 +45,7 @@
     <% end %>
   </div>
 
-  <div class="btn-toolbar pull-right">
+  <div class="pull-right">
     <% if @discussion.editable_by?(@context) %>
       <div class="btn-group">
         <%= link_to edit_discussion_path(@discussion), class: "btn btn-primary" do %>
@@ -52,6 +57,27 @@
             <span class="fa fa-bullhorn"></span> Publish
           <% end %>
         <% end %>
+      </div>
+
+      <div class="btn-group">
+        <div class="dropdown">
+          <button class="btn btn-primary" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="fa fa-cog"></span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
+            <li>
+              <a data-toggle='modal' data-target='#rename-modal'>
+                <span class="fa fa-pencil"></span> Rename
+              </a>
+            </li>
+            <li role="separator" class="divider"></li>
+            <li>
+              <%= link_to discussion_path(@discussion), method: :delete, data: { confirm: 'Are you certain you want to delete this?' } do %>
+                <span class="fa fa-trash"></span> Delete
+              <% end %>
+            </li>
+          </ul>
+        </div>
       </div>
     <% end %>
   </div>
@@ -100,4 +126,8 @@
     <% end %>
   </div>
 </div>
+<% end %>
+
+<% if @discussion.editable_by?(@context) %>
+  <%= render "_partials/modal_rename", item: @discussion, path_to_rename: rename_discussion_path(@discussion.id) %>
 <% end %>

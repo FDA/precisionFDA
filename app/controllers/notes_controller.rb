@@ -50,6 +50,23 @@ class NotesController < ApplicationController
     js note_js(@note)
   end
 
+  def rename
+    @note = Note.editable_by(@context).find_by!(id: params[:id])
+    title = note_params[:title]
+    if title.is_a?(String) && title != ""
+      if @note.rename(title, @context)
+        @note.reload
+        flash[:success] = "Note renamed to \"#{@note.title}\""
+      else
+        flash[:error] = "Note \"#{@note.title}\" could not be renamed."
+      end
+    else
+      flash[:error] = "The new name is not a valid string"
+    end
+
+    redirect_to note_path(@note)
+  end
+
   def create
     if request.post?
       Note.transaction do

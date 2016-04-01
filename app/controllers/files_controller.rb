@@ -138,6 +138,23 @@ class FilesController < ApplicationController
     end
   end
 
+  def rename
+    @file = UserFile.real_files.editable_by(@context).find_by!(dxid: params[:id])
+    name = file_params[:name]
+    if name.is_a?(String) && name != ""
+      if @file.rename(name, @context)
+        @file.reload
+        flash[:success] = "File renamed to \"#{@file.name}\""
+      else
+        flash[:error] = "File \"#{@file.name}\" could not be renamed."
+      end
+    else
+      flash[:error] = "The new name is not a valid string"
+    end
+
+    redirect_to file_path(@file.dxid)
+  end
+
   def destroy
     @file = UserFile.real_files.where(user_id: @context.user_id).find_by!(dxid: params[:id])
 
@@ -166,4 +183,9 @@ class FilesController < ApplicationController
     flash[:success] = "File \"#{@file.name}\" has been successfully deleted"
     redirect_to files_path
   end
+
+  private
+    def file_params
+      params.require(:user_file).permit(:name)
+    end
 end

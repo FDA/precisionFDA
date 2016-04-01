@@ -37,4 +37,8 @@ class License < ActiveRecord::Base
       "#{id}-#{title.parameterize}"
     end
   end
+
+  def rename(new_name, context)
+    update_attributes(title: new_name)
+  end
 end
