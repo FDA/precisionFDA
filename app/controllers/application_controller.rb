@@ -26,23 +26,24 @@ class ApplicationController < ActionController::Base
       report_only: false,
       report_uri: %w(https://dc95b34a080e9c95bbce7c3e6aed6234.report-uri.io/r/default/csp/enforce)
     }
-    config.hpkp = {
+    hpkp = {
       report_only: false,
       report_uri: 'https://dc95b34a080e9c95bbce7c3e6aed6234.report-uri.io/r/default/hpkp/enforce',
       max_age: 5.minutes.to_i,
       include_subdomains: false
     }
     if ENV["DNANEXUS_BACKEND"] == "production"
-      config.hpkp[:pins] = [
+      hpkp[:pins] = [
         {sha256: 'OV/2vGzq4A/PlbCUFpy5W2dHmMLPvHZ9N/FVDOPNvQw='},
         {sha256: 'AGLBxCqwOTXOZg/v14oxVzHbU0GVWr1QlHR7DQqnzvU='}
       ]
     else
-      config.hpkp[:pins] = [
+      hpkp[:pins] = [
         {sha256: 'gtfblKFG3oCmgxfjddilwzBgaudaW3XyH7M90LrfjOU='},
         {sha256: 'x8W1sshBVav03Hgxxp+PRD5f3xs0yIBmNpph3krjGqM='}
       ]
     end
+    config.hpkp = hpkp
   end
 
   # Prevent CSRF attacks by raising an exception.
