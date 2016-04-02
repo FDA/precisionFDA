@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 gem 'bundler', '1.10.6'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.2.5.1'
+gem 'rails', '4.2.6'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
 # Use Uglifier as compressor for JavaScript assets
@@ -54,7 +54,7 @@ gem "humanizer"
 gem 'axlsx'
 
 # Secure headers
-gem 'secure_headers', '>= 3.0.0.pre2'
+gem 'secure_headers'
 
 # Add comments on any model
 gem 'acts_as_commentable_with_threading'
