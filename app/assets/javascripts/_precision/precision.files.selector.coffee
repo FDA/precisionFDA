@@ -1,5 +1,5 @@
 class FilesSelectorModel
-  constructor: () ->
+  constructor: (@opts = {}) ->
     @modal = $(".file-selector-modal")
 
     @selected = ko.observableArray()
@@ -49,11 +49,13 @@ class FilesSelectorModel
 
   getFiles: (params) ->
     if !params?
-      params =
+      params = _.defaults({
         include:
           license: true
           user: true
           org: true
+      }, @opts.params)
+
     @busy(true)
     Precision.api('/api/list_files', params, (files) =>
       @files(_.map(files, (file) =>

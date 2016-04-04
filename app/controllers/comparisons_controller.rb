@@ -110,7 +110,6 @@ class ComparisonsController < ApplicationController
   end
 
   def create
-
     param! :comparison, Hash do |c|
       c.param! :name, String, {required: true}
       c.param! :description, String, {default: ""}
@@ -131,6 +130,16 @@ class ComparisonsController < ApplicationController
     ["test_bed", "ref_bed"].each do |role|
       if comp_params["#{role}_uid"].present?
         files[role] = UserFile.real_files.accessible_by(@context).find_by!(dxid: comp_params["#{role}_uid"])
+      end
+    end
+
+    # Throw error if a file is not in a 'closed' state
+    files.each_key do |role|
+      file = files[role]
+      if file[:state] != "closed"
+        flash[:error] = "File \"#{file[:name]}\" is not in a 'closed' state and cannot be used as a Comparison input."
+        redirect_to new_comparison_path
+        return
       end
     end
 
@@ -164,7 +173,6 @@ class ComparisonsController < ApplicationController
     end
 
     redirect_to :comparisons
-
   end
 
   def rename
