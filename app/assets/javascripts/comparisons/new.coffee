@@ -2,7 +2,10 @@ class ComparisonsNewView
   constructor: () ->
     @busy = ko.observable(false)
 
-    @fileSelector = new Precision.models.FilesSelectorModel()
+    @fileSelector = new Precision.models.FilesSelectorModel({
+      params:
+        states: ["closed"]
+    })
     @licenseSelector = new Precision.models.LicensesSelectorModel({
       onAcceptCallback: @submitForm
     })

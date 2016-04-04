@@ -6,7 +6,7 @@ class ApiController < ApplicationController
 
   # Inputs:
   #
-  # (none)
+  # states (array of strings; optional): the file state/s to be returned "closed", "closing", and/or "open"
   #
   # Outputs:
   #
@@ -17,7 +17,13 @@ class ApiController < ApplicationController
   # path (string): file_path of the file
   def list_files
     result = []
-    UserFile.real_files.accessible_by(@context).find_each do |file|
+    files = UserFile.real_files.accessible_by(@context)
+
+    if params["states"].present? && (params["states"].include?("closed") || params["states"].include?("closing") || params["states"].include?("open"))
+      files = files.where(state: params["states"])
+    end
+
+    files.find_each do |file|
       file_describe = {
         uid: file.uid,
         name: file.name,
