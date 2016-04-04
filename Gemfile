@@ -39,7 +39,7 @@ gem 'rails_param'
 gem "wice_grid", '3.6.0.pre4'
 
 # Page-specific javascript for Rails done right
-gem "paloma", "4.2.1"
+gem "paloma", "5.0.0"
 
 # Websocket support (for fetching logs)
 gem "websocket"
