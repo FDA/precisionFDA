@@ -109,8 +109,7 @@ GEM
     mysql2 (0.3.20)
     nokogiri (1.6.7.2)
       mini_portile2 (~> 2.0.0.rc2)
-    paloma (4.2.1)
-      jquery-rails
+    paloma (5.0.0)
     rack (1.6.4)
     rack-accept (0.4.5)
       rack (>= 0.4)
@@ -226,7 +225,7 @@ DEPENDENCIES
   jquery-rails
   kaminari
   mysql2 (~> 0.3.18)
-  paloma (= 4.2.1)
+  paloma (= 5.0.0)
   rails (= 4.2.6)
   rails_param
   sass-rails (~> 5.0)

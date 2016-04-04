@@ -121,24 +121,25 @@ class VariantViewModel
 #
 #########################################################
 
-ComparisonsController = Paloma.controller('Comparisons')
-ComparisonsController::new = ->
-  $container = $("body main")
-  viewModel = new ComparisonsNewView()
-  ko.applyBindings(viewModel, $container[0])
+ComparisonsController = Paloma.controller('Comparisons',
+  new: ->
+    $container = $("body main")
+    viewModel = new ComparisonsNewView()
+    ko.applyBindings(viewModel, $container[0])
 
-  viewModel.areAllInputsSet.subscribe((areAllInputsSet) ->
-    if areAllInputsSet
-      testVCFModel = _.find(viewModel.testVariant.inputs(), (input) -> input.name == "test_vcf")
-      refVCFModel = _.find(viewModel.refVariant.inputs(), (input) -> input.name == "ref_vcf")
+    viewModel.areAllInputsSet.subscribe((areAllInputsSet) ->
+      if areAllInputsSet
+        testVCFModel = _.find(viewModel.testVariant.inputs(), (input) -> input.name == "test_vcf")
+        refVCFModel = _.find(viewModel.refVariant.inputs(), (input) -> input.name == "ref_vcf")
 
-      if testVCFModel? && refVCFModel? && !viewModel.name()?
-        testName = testVCFModel.value().name.replace /\.vcf\.gz/i, ""
-        refName = refVCFModel.value().name.replace /\.vcf\.gz/i, ""
+        if testVCFModel? && refVCFModel? && !viewModel.name()?
+          testName = testVCFModel.value().name.replace /\.vcf\.gz/i, ""
+          refName = refVCFModel.value().name.replace /\.vcf\.gz/i, ""
 
-        viewModel.name("#{testName} vs #{refName}")
-  )
+          viewModel.name("#{testName} vs #{refName}")
+    )
 
-  $('.license-modal').on("click", ".list-group-item", (e) =>
-    viewModel.licenseSelector.previewLicense(ko.dataFor(e.currentTarget))
-  )
+    $('.license-modal').on("click", ".list-group-item", (e) =>
+      viewModel.licenseSelector.previewLicense(ko.dataFor(e.currentTarget))
+    )
+)

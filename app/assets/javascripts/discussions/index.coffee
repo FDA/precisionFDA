@@ -6,7 +6,8 @@
 #
 #########################################################
 
-DiscussionsController = Paloma.controller('Discussions')
-DiscussionsController::index = ->
-  params = @params
-  $container = $("body main")
+DiscussionsController = Paloma.controller('Discussions',
+  index: ->
+    params = @params
+    $container = $("body main")
+)

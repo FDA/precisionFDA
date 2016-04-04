@@ -15,13 +15,14 @@ class AppIndexModel
 #
 #########################################################
 
-AppsController = Paloma.controller('Apps')
-AppsController::index = ->
-  $container = $("body main")
-  viewModel = new AppIndexModel(@params.app, @params.releaseable)
+AppsController = Paloma.controller('Apps',
+  index: ->
+    $container = $("body main")
+    viewModel = new AppIndexModel(@params.app, @params.releaseable)
 
-  ko.applyBindings(viewModel, $container[0])
+    ko.applyBindings(viewModel, $container[0])
 
-  $container.find('[data-toggle="tooltip"]').tooltip({
-    container: 'body'
-  })
+    $container.find('[data-toggle="tooltip"]').tooltip({
+      container: 'body'
+    })
+)

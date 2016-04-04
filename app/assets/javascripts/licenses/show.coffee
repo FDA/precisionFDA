@@ -11,9 +11,10 @@ class LicenseModel
 #
 #########################################################
 
-LicensesController = Paloma.controller('Licenses')
-LicensesController::show = ->
-  $container = $("body main")
+LicensesController = Paloma.controller('Licenses',
+  show: ->
+    $container = $("body main")
 
-  licenseModel = new LicenseModel(@params.license)
-  ko.applyBindings(licenseModel, $container[0])
+    licenseModel = new LicenseModel(@params.license)
+    ko.applyBindings(licenseModel, $container[0])
+)
