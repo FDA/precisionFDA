@@ -52,7 +52,7 @@ class Comparison < ActiveRecord::Base
   def klass
     "comparison"
   end
-  
+
   def input(role)
     inputs.where(role: role).take
   end
@@ -75,5 +75,9 @@ class Comparison < ActiveRecord::Base
     else
       user_id == context.user_id && scope != "public" && state == "done"
     end
+  end
+
+  def rename(new_name, context)
+    update_attributes(name: new_name)
   end
 end

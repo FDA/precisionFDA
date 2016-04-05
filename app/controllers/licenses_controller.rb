@@ -170,6 +170,23 @@ class LicensesController < ApplicationController
     redirect_to license_path(license)
   end
 
+  def rename
+    @license = License.editable_by(@context).find_by!(id: params[:id])
+    title = license_params[:title]
+    if title.is_a?(String) && title != ""
+      if @license.rename(title, @context)
+        @license.reload
+        flash[:success] = "License renamed to \"#{@license.title}\""
+      else
+        flash[:error] = "License \"#{@license.title}\" could not be renamed."
+      end
+    else
+      flash[:error] = "The new name is not a valid string"
+    end
+
+    redirect_to license_path(@license)
+  end
+
   private
     def license_params
       params.require(:license).permit(:content, :title)

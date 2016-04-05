@@ -185,14 +185,15 @@ class FilesNewView
 #
 #########################################################
 
-FilesController = Paloma.controller('Files')
-FilesController::new = ->
-  $container = $("body main")
-  viewModel = new FilesNewView()
-  ko.applyBindings(viewModel, $container[0])
+FilesController = Paloma.controller('Files',
+  new: ->
+    $container = $("body main")
+    viewModel = new FilesNewView()
+    ko.applyBindings(viewModel, $container[0])
 
-  $container
-    .on("change.files.new", ".event-browse-files", (e) -> viewModel.handleInputChange(e))
-    .on("submit.files.new", ".form-upload-files", (e) -> viewModel.handleUpload(e))
-    .on("click.files.new", ".event-upload-files", (e) -> viewModel.handleUpload(e))
-    .on("click.files.new", ".event-clear-files", (e) -> viewModel.handleClear(e))
+    $container
+      .on("change.files.new", ".event-browse-files", (e) -> viewModel.handleInputChange(e))
+      .on("submit.files.new", ".form-upload-files", (e) -> viewModel.handleUpload(e))
+      .on("click.files.new", ".event-upload-files", (e) -> viewModel.handleUpload(e))
+      .on("click.files.new", ".event-clear-files", (e) -> viewModel.handleClear(e))
+)

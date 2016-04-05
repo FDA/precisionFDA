@@ -64,12 +64,14 @@ window.Precision.carousel =
 
 
 onDocumentReady = ->
+  Paloma.start()
   Precision.upvote.on()
   Precision.follow.on()
 
 $(document).ready(onDocumentReady)
 
 $(document).on 'page:load', ->
-  Paloma.executeHook()
-  Paloma.engine.start()
   onDocumentReady()
+
+$(document).on 'page:restore', ->
+  Paloma.start()

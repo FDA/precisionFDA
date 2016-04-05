@@ -61,6 +61,7 @@ server {
 
 <% if @application[:ssl_support] %>
 server {
+  server_tokens off;
   listen   443;
   server_name <%= @application[:domains].join(" ") %> <%= node[:hostname] %>;
   access_log <%= node[:nginx][:log_dir] %>/<%= @application[:domains].first %>-ssl.access.log;

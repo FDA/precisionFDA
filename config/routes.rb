@@ -66,6 +66,7 @@ Rails.application.routes.draw do
       get 'explore', on: :collection, as: 'explore'
     end
     resources :comparisons do
+      post 'rename', on: :member
       get 'visualize', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
@@ -73,14 +74,17 @@ Rails.application.routes.draw do
     resources :files do
       post 'download', on: :member
       post 'link', on: :member
+      post 'rename', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
     end
     resources :notes do
+      post 'rename', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
     end
     resources :assets, path: '/app_assets' do
+      post 'rename', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
     end
@@ -89,6 +93,7 @@ Rails.application.routes.draw do
       get 'join', on: :member
     end
     resources :discussions, constraints: {answer_id: /[^\/]+/ } do
+      post 'rename', on: :member
       resources :answers, constraints: {id: /[^\/]+/} do
         resources :comments
       end
@@ -102,6 +107,7 @@ Rails.application.routes.draw do
       post 'remove_user/:user_uid(/:redirect_to_uid)', on: :member, action: :remove_user, as: 'remove_user'
       post 'remove_items', on: :member
       post 'remove_users', on: :member
+      post 'rename', on: :member
     end
 
     user_constraints = { username: /[^\/]*/ }

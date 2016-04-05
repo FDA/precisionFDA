@@ -110,7 +110,6 @@ class ComparisonsController < ApplicationController
   end
 
   def create
-
     param! :comparison, Hash do |c|
       c.param! :name, String, {required: true}
       c.param! :description, String, {default: ""}
@@ -131,6 +130,16 @@ class ComparisonsController < ApplicationController
     ["test_bed", "ref_bed"].each do |role|
       if comp_params["#{role}_uid"].present?
         files[role] = UserFile.real_files.accessible_by(@context).find_by!(dxid: comp_params["#{role}_uid"])
+      end
+    end
+
+    # Throw error if a file is not in a 'closed' state
+    files.each_key do |role|
+      file = files[role]
+      if file[:state] != "closed"
+        flash[:error] = "File \"#{file[:name]}\" is not in a 'closed' state and cannot be used as a Comparison input."
+        redirect_to new_comparison_path
+        return
       end
     end
 
@@ -164,7 +173,23 @@ class ComparisonsController < ApplicationController
     end
 
     redirect_to :comparisons
+  end
 
+  def rename
+    @comparison = Comparison.editable_by(@context).find_by!(id: params[:id])
+    name = comparison_params[:name]
+    if name.is_a?(String) && name != ""
+      if @comparison.rename(name, @context)
+        @comparison.reload
+        flash[:success] = "Comparison renamed to \"#{@comparison.name}\""
+      else
+        flash[:error] = "Comparison \"#{@comparison.name}\" could not be renamed."
+      end
+    else
+      flash[:error] = "The new name is not a valid string"
+    end
+
+    redirect_to comparison_path(@comparison.id)
   end
 
   def destroy
@@ -197,4 +222,9 @@ class ComparisonsController < ApplicationController
     flash[:success] = "Comparison \"#{@comparison.name}\" has been successfully deleted"
     redirect_to :comparisons
   end
+
+  private
+    def comparison_params
+      params.require(:comparison).permit(:name)
+    end
 end
