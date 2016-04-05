@@ -36,6 +36,23 @@ class DiscussionsController < ApplicationController
     js note_js(@note)
   end
 
+  def rename
+    @discussion = Discussion.editable_by(@context).find_by!(id: params[:id])
+    title = discussion_params[:title]
+    if title.is_a?(String) && title != ""
+      if @discussion.rename(title, @context)
+        @discussion.reload
+        flash[:success] = "Discussion renamed to \"#{@discussion.title}\""
+      else
+        flash[:error] = "Discussion \"#{@discussion.title}\" could not be renamed."
+      end
+    else
+      flash[:error] = "The new name is not a valid string"
+    end
+
+    redirect_to discussion_path(@discussion)
+  end
+
   def create
     if request.post?
       Note.transaction do
@@ -73,6 +90,10 @@ class DiscussionsController < ApplicationController
   end
 
   private
+    def discussion_params
+      params.require(:discussion).permit(:title)
+    end
+
     def note_js(note)
       comparisons = note.comparisons
       files = note.real_files

@@ -1,6 +1,5 @@
 {
   "name": "knockout",
-  "version": "3.3.0",
   "homepage": "http://knockoutjs.com/",
   "description": "Knockout makes it easier to create rich, responsive UIs with JavaScript",
   "main": "dist/knockout.js",
@@ -23,14 +22,14 @@
     "spec",
     "build/output"
   ],
-  "_release": "3.3.0",
+  "version": "3.4.0",
+  "_release": "3.4.0",
   "_resolution": {
     "type": "version",
-    "tag": "v3.3.0",
-    "commit": "26df265f41b51359e4746d78be51ab05ae2a75c6"
+    "tag": "v3.4.0",
+    "commit": "b294bf04260a4a2033f09868981e026f254a582a"
   },
   "_source": "git://github.com/SteveSanderson/knockout.git",
-  "_target": "~3.3.0",
-  "_originalSource": "knockout",
-  "_direct": true
+  "_target": "~3.4.0",
+  "_originalSource": "knockout"
 }

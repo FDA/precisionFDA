@@ -6,9 +6,10 @@
 #
 #########################################################
 
-AppsController = Paloma.controller('Apps')
-AppsController::new = ->
-  $container = $("body main")
-  viewModel = new Precision.models.AppEditorModel(@params.app, 'new')
+AppsController = Paloma.controller('Apps',
+  new: ->
+    $container = $("body main")
+    viewModel = new Precision.models.AppEditorModel(@params.app, 'new')
 
-  ko.applyBindings(viewModel, $container[0])
+    ko.applyBindings(viewModel, $container[0])
+)

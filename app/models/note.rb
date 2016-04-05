@@ -85,4 +85,8 @@ class Note < ActiveRecord::Base
   def assets
     files.where(parent_type: "Asset")
   end
+
+  def rename(new_name, context)
+    update_attributes(title: new_name)
+  end
 end

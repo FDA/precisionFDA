@@ -6,8 +6,9 @@
 #
 #########################################################
 
-MainController = Paloma.controller('Main')
-MainController::guidelines = ->
-  $container = $("body main")
+MainController = Paloma.controller('Main',
+  guidelines: ->
+    $container = $("body main")
 
-  Precision.carousel.setHeight("#guidelines-carousel")
+    Precision.carousel.setHeight("#guidelines-carousel")
+)

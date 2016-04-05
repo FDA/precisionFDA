@@ -15,13 +15,14 @@ class AppShowModel
 #
 #########################################################
 
-AppsController = Paloma.controller('Apps')
-AppsController::show = ->
-  $container = $("body main")
-  viewModel = new AppShowModel(@params.app, @params.releaseable)
+AppsController = Paloma.controller('Apps',
+  show: ->
+    $container = $("body main")
+    viewModel = new AppShowModel(@params.app, @params.releaseable)
 
-  ko.applyBindings(viewModel, $container[0])
+    ko.applyBindings(viewModel, $container[0])
 
-  $container.find('[data-toggle="tooltip"]').tooltip({
-    container: 'body'
-  })
+    $container.find('[data-toggle="tooltip"]').tooltip({
+      container: 'body'
+    })
+)

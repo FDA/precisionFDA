@@ -55,8 +55,9 @@ class NodeModel
 #
 #########################################################
 
-MainController = Paloma.controller('Main')
-MainController::publish = ->
-  $container = $("body main")
-  publishViewModel = new PublishViewModel(@params.graph)
-  ko.applyBindings(publishViewModel, $container[0])
+MainController = Paloma.controller('Main',
+  publish: ->
+    $container = $("body main")
+    publishViewModel = new PublishViewModel(@params.graph)
+    ko.applyBindings(publishViewModel, $container[0])
+)

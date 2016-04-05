@@ -86,25 +86,26 @@ class JobsNewView
 #
 #########################################################
 
-JobsController = Paloma.controller('Jobs')
-JobsController::new = ->
-  $container = $("body main")
-  viewModel = new JobsNewView(@params.app, @params.licenses_to_accept)
-  ko.applyBindings(viewModel, $container[0])
+JobsController = Paloma.controller('Jobs',
+  new: ->
+    $container = $("body main")
+    viewModel = new JobsNewView(@params.app, @params.licenses_to_accept)
+    ko.applyBindings(viewModel, $container[0])
 
-  $affixContainer = $container.find(".affix-container")
-  $affixContainer.affix({
-    offset:
-      top: $affixContainer.offset().top
-  })
+    $affixContainer = $container.find(".affix-container")
+    $affixContainer.affix({
+      offset:
+        top: $affixContainer.offset().top
+    })
 
-  $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
-
-  $(window).resize(() ->
-    $affixContainer.affix('checkPosition')
     $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
-  )
 
-  $('.license-modal').on("click", ".list-group-item", (e) =>
-    viewModel.licenseSelector.previewLicense(ko.dataFor(e.currentTarget))
-  )
+    $(window).resize(() ->
+      $affixContainer.affix('checkPosition')
+      $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
+    )
+
+    $('.license-modal').on("click", ".list-group-item", (e) =>
+      viewModel.licenseSelector.previewLicense(ko.dataFor(e.currentTarget))
+    )
+)
