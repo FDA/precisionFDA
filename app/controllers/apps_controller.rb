@@ -20,6 +20,7 @@ class AppsController < ApplicationController
         @revisions = @app.app_series.accessible_revisions(@context).select(:title, :id, :dxid, :revision, :version)
         @notes = @app.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
         @answers = @app.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
+        @discussions = @app.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
       end
       js_param[:app] = @app.slice(:id, :dxid, :readme)
     end
