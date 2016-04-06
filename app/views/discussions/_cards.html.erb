@@ -40,8 +40,8 @@
             <div class="media-right">
               <% if discussion.public? %>
                 <%= link_to discussion_path(discussion), class: "btn btn-link btn-answer" do %>
-                  <div class="lead lead-bold answer-count"><%= discussion.answers.size %></div>
-                  <div class="lead text-muted"><small><%= 'answer'.pluralize(discussion.answers.size) %></small></div>
+                  <div class="lead lead-bold answer-count"><%= discussion.answers.accessible_by_public.size %></div>
+                  <div class="lead text-muted"><small><%= 'answer'.pluralize(discussion.answers.accessible_by_public.size) %></small></div>
                 <% end %>
               <% elsif discussion.note.publishable_by?(@context) %>
                 <%= link_to publish_path + "?" + {id: discussion.uid}.to_param, method: :post, class: "btn btn-success" do %>
