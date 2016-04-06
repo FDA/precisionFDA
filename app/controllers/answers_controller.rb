@@ -15,11 +15,11 @@ class AnswersController < ApplicationController
     if @answer.nil?
       flash[:error] = "Sorry, this answer is not accessible"
       redirect_to discussions_path()
+      return
     else
       @discussion = @answer.discussion
+      js note_js(@answer.note)
     end
-
-    js note_js(@answer.note)
   end
 
   def edit
@@ -29,12 +29,12 @@ class AnswersController < ApplicationController
     if @answer.nil?
       flash[:error] = "Sorry, this answer is not editable by you"
       redirect_to discussion_path(params[:discussion_id])
+      return
     else
       @note = @answer.note
       @discussion = @answer.discussion
+      js note_js(@note)
     end
-
-    js note_js(@note)
   end
 
   def create
