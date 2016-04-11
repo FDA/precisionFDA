@@ -5,7 +5,7 @@
         <p class="spec-class"><%= item[:class] %></p>
       </td>
       <td class="spec-info">
-        <p class="spec-label"><%= item[:label] %></p>
+        <p class="spec-label"><%= !item[:label].blank? ? item[:label] : item[:name] %></p>
         <p class="spec-help"><%= item[:help] %></p>
         <% if !item[:patterns].blank? %>
           <p class="spec-patterns">Patterns: <%= item[:patterns].map(&:inspect).join(', ') %></p>
