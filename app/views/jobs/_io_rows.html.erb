@@ -1,7 +1,7 @@
 <% items.each do |item| %>
   <tr>
     <td class="job-io-label" title="<%= item[:spec][:help] %>">
-      <%= item[:spec][:label] %>
+      <%= !item[:spec][:label].blank? ? item[:spec][:label] : item[:spec][:name] %>
     </td>
     <td class="job-io-value job-io-class-<%= item[:spec][:class] %>">
       <% if item[:spec][:class] == 'file' %>
