@@ -262,7 +262,7 @@
                 <div class="spec-heading">Inputs</div>
                 <table class="table table-striped table-spec table-spec-input">
                   <tbody>
-                    <%= render "_partials/app_spec_rows", spec: @app.spec[:input_spec] %>
+                    <%= render "apps/spec_rows", spec: @app.spec[:input_spec] %>
                   </tbody>
                 </table>
               </div>
@@ -270,7 +270,7 @@
                 <div class="spec-heading">Outputs</div>
                 <table class="table table-striped table-spec table-spec-output">
                   <tbody>
-                    <%= render "_partials/app_spec_rows", spec: @app.spec[:output_spec] %>
+                    <%= render "apps/spec_rows", spec: @app.spec[:output_spec] %>
                   </tbody>
                 </table>
               </div>

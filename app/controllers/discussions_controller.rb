@@ -9,11 +9,11 @@ class DiscussionsController < ApplicationController
   def show
     @discussion = Discussion.accessible_by(@context).find(params[:id])
     @answers = @discussion.answers.accessible_by(@context).page params[:answers_page]
-    @followers = @discussion.user_followers.limit(20)
+    @followers = @discussion.user_followers.limit(100)
     orgs = @discussion.user_followers.map(&:org)
     orgs = orgs.uniq { |org| org.id }.sort_by!{ |org| org.name.downcase }
 
-    @follower_orgs = orgs.select{ |org| org.real_org? }.first(20)
+    @follower_orgs = orgs.select{ |org| org.real_org? }.first(100)
 
     if request.path != discussion_path(@discussion)
       redirect_to @discussion
