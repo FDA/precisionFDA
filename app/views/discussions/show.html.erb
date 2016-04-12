@@ -28,7 +28,6 @@
         </div>
       <% end %>
     </div>
-    </div>
   </div>
 </div>
 
@@ -104,6 +103,9 @@
         <% end %>
         <%= render "_partials/follow_link", classes: "btn btn-default btn-block", item: @discussion %>
       </li>
+      <li class="list-group-item list-group-item-header">
+        <%= link_to "Followers", followers_discussion_path(@discussion) %>
+      </li>
       <li class="list-group-item">
         <%= render "_partials/followers", followers: @followers, followable: @discussion %>
       </li>
@@ -111,7 +113,7 @@
     <% if @follower_orgs.size > 0 %>
     <div class="list-group">
       <li class="list-group-item list-group-item-header">
-        Organizations
+        <%= link_to "Organizations", followers_discussion_path(@discussion) %>
       </li>
       <li class="list-group-item">
         <ul class="list-inline list-bricks">
