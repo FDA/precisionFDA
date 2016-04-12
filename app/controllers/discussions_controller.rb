@@ -22,6 +22,11 @@ class DiscussionsController < ApplicationController
     end
   end
 
+  def followers
+    @discussion = Discussion.accessible_by(@context).find(params[:id])
+    @followers = @discussion.user_followers
+  end
+
   def edit
     @user = User.find(@context.user_id)
     @discussion = Discussion.editable_by(@context).find(params[:id])
