@@ -1,6 +1,6 @@
 class DiscussionsController < ApplicationController
-  skip_before_action :require_login,     only: [:index, :show]
-  before_action :require_login_or_guest, only: [:index, :show]
+  skip_before_action :require_login,     only: [:index, :show, :followers]
+  before_action :require_login_or_guest, only: [:index, :show, :followers]
 
   def index
     @discussions = Discussion.accessible_by(@context).order(id: :desc).page params[:discussions_page]
