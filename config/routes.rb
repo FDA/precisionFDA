@@ -93,6 +93,7 @@ Rails.application.routes.draw do
       get 'join', on: :member
     end
     resources :discussions, constraints: {answer_id: /[^\/]+/ } do
+      get 'followers', on: :member
       post 'rename', on: :member
       resources :answers, constraints: {id: /[^\/]+/} do
         resources :comments
