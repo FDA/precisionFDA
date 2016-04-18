@@ -1,0 +1,89 @@
+<%= render "spaces/header" %>
+
+<% if @space.active? %>
+  <div class="pfda-toolbar pfda-toolbar-transparent">
+    <div class="btn-group">
+      <button class="btn btn-default" data-bind="click: objectSelector.open"><span class="fa fa-plus" aria-hidden="true"></span> Move data to space...</button>
+    </div>
+  </div>
+<% end %>
+
+<!-- Tab panes -->
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane tab-pane-padded-lg active" id="tab-data">
+    <% if !@space.active? %>
+      <div class='pfda-help-block'>
+        <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
+        <p>Both host and guest leads must click "Accept space" to activate it.</p>
+      </div>
+      <% if @total_count > 0 %><hr><% end %>
+    <% end %>
+
+    <% if @total_count > 0 %>
+      <% if defined?(@notes_list) %>
+        <div class="panel">
+          <div class="panel-heading">
+            Notes &nbsp;<small class="text-muted"><%= @counts[:notes] %></small>
+          </div>
+          <div class="panel-body">
+            <%= render "notes/cards", notes: @notes_list, scope_icon: false %>
+          </div>
+        </div>
+      <% end %>
+      <% if defined?(@files_grid) %>
+        <div class="panel">
+          <div class="panel-heading">
+            Files &nbsp;<small class="text-muted"><%= @counts[:files] %></small>
+          </div>
+          <div class="panel-body">
+            <%= render "files/grid", files_grid: @files_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
+          </div>
+        </div>
+      <% end %>
+      <% if defined?(@comparisons_grid) %>
+        <div class="panel">
+          <div class="panel-heading">
+            Comparisons &nbsp;<small class="text-muted"><%= @counts[:comparisons] %></small>
+          </div>
+          <div class="panel-body">
+            <%= render "comparisons/grid", comparisons_grid: @comparisons_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
+          </div>
+        </div>
+      <% end %>
+      <% if defined?(@apps_grid) %>
+        <div class="panel">
+          <div class="panel-heading">
+            Apps &nbsp;<small class="text-muted"><%= @counts[:apps] %></small>
+          </div>
+          <div class="panel-body">
+            <%= render "apps/grid", apps_grid: @apps_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
+          </div>
+        </div>
+      <% end %>
+      <% if defined?(@assets_grid) %>
+        <div class="panel">
+          <div class="panel-heading">
+            Assets &nbsp;<small class="text-muted"><%= @counts[:assets] %></small>
+          </div>
+          <div class="panel-body">
+            <%= render "assets/grid", assets_grid: @assets_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
+          </div>
+        </div>
+      <% end %>
+      <% if defined?(@jobs_grid) %>
+        <div class="panel">
+          <div class="panel-heading">
+            Jobs &nbsp;<small class="text-muted"><%= @counts[:jobs] %></small>
+          </div>
+          <div class="panel-body">
+            <%= render "jobs/grid", jobs_grid: @jobs_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<% if @space.active? %>
+  <%= render "_partials/selector_modal" %>
+<% end %>

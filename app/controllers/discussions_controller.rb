@@ -107,11 +107,11 @@ class DiscussionsController < ApplicationController
       assets = note.assets
 
       attachments = {
-        comparisons: (comparisons.map { |o| o.context_slice(@context, :title)}),
-        files: (files.map { |o| o.context_slice(@context, :title)}),
-        apps: (apps.map { |o| o.context_slice(@context, :title)}),
-        jobs: (jobs.map { |o| o.context_slice(@context, :title)}),
-        assets: (assets.map { |o| o.context_slice(@context, :title)}),
+        comparisons: (comparisons.map { |o| describe_for_api(o)}),
+        files: (files.map { |o| describe_for_api(o)}),
+        apps: (apps.map { |o| describe_for_api(o)}),
+        jobs: (jobs.map { |o| describe_for_api(o)}),
+        assets: (assets.map { |o| describe_for_api(o)}),
       }
       return {note: note.slice(:id, :content, :title), attachments: attachments, edit: params[:edit], editable: note.editable_by?(@context)}
     end

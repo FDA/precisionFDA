@@ -15,13 +15,7 @@
 
 <div class="metadata-section metadata-header">
   <ul class="list-group list-group-inline">
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Access</h5>
-      <p class="list-group-item-text">
-        <span class="fa <%= @note.public? ? 'fa-globe' : 'fa-lock' %>"></span>
-        <%= @note.public? ? "Public" : "Private" %>
-      </p>
-    </li>
+    <%= render "_partials/metadata_access", item: @note %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">ID</h5>
       <p class="list-group-item-text"><%= @note.uid %></p>

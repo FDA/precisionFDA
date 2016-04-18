@@ -25,7 +25,9 @@ $note-background: lighten($brand-blue-subtler, 1%)
     border-left: 1px solid $brand-blue-subtle
     border-top-right-radius: $border-radius-base
     border-bottom-right-radius: $border-radius-base
-    padding: $padding-base-vertical $padding-base-horizontal
+
+    &.note-sidebar-padded
+      padding: $padding-base-vertical $padding-base-horizontal
 
   .note-pane
     width: 100%
@@ -56,6 +58,9 @@ $note-background: lighten($brand-blue-subtler, 1%)
       .list-group-item-heading
         margin: 0
         padding: $padding-base-vertical 0
+
+      &.attachment-is-new
+        font-weight: bold
 
   .note-section-title
     color: $brand-blue-tertiary

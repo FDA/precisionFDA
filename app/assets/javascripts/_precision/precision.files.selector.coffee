@@ -49,12 +49,12 @@ class FilesSelectorModel
 
   getFiles: (params) ->
     if !params?
-      params = _.defaults({
+      params = _.defaults(@opts.params, {
         include:
           license: true
           user: true
           org: true
-      }, @opts.params)
+      })
 
     @busy(true)
     Precision.api('/api/list_files', params, (files) =>

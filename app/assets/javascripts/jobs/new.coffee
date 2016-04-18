@@ -4,7 +4,6 @@ class JobsNewView
     @inputSpec = app.spec.input_spec
     @outputSpec = app.spec.output_spec
 
-    @fileSelector = new Precision.models.FilesSelectorModel()
     @licenseSelector = new Precision.models.LicensesSelectorModel({
       onAcceptCallback: @run
     })
@@ -63,18 +62,18 @@ class JobsNewView
       @running(true)
       Precision.api('/api/run_app', params)
         .done((rs) =>
-          if !rs.failure?
+          if !rs.error?
             window.location = "/apps/#{@dxid}/jobs"
           else
             @busy(false)
             @running(false)
-            alert "App could not be run due to: #{rs.failure}"
-            console.error rs.failure
+            alert "#{rs.error.type}: App could not be run due to: #{rs.error.message}"
+            console.error rs.error
         )
         .fail((error) =>
           @busy(false)
           @running(false)
-          alert "App could not be run due to: #{error.statusText}"
+          alert "#{rs.error.type}: App could not be run due to: #{rs.error.message}"
           console.error error
         )
 

@@ -73,6 +73,11 @@ class ComparisonsController < ApplicationController
       order_direction: 'asc'
     })
 
+    @items_from_params = [@comparison]
+    @item_path = pathify(@comparison)
+    @item_comments_path = pathify_comments(@comparison)
+    @comments = @comparison.root_comments.order(id: :desc).page params[:comments_page]
+
     @notes = @comparison.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @comparison.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
     @discussions = @comparison.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]

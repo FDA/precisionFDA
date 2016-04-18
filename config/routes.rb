@@ -23,22 +23,25 @@ Rails.application.routes.draw do
     get 'exception_test' => "main#exception_test"
 
     # API
+    post '/api/publish', to: 'api#publish'
     post '/api/create_file', to: 'api#create_file'
     post '/api/get_upload_url', to: 'api#get_upload_url'
+    post '/api/list_related', to: 'api#list_related'
     post '/api/close_file', to: 'api#close_file'
+    post '/api/describe', to: 'api#describe'
     post '/api/list_files', to: 'api#list_files'
-    post '/api/describe_file', to: 'api#describe_file'
+    post '/api/list_notes', to: 'api#list_notes'
+    post '/api/list_comparisons', to: 'api#list_comparisons'
+    post '/api/list_apps', to: 'api#list_apps'
+    post '/api/list_assets', to: 'api#list_assets'
+    post '/api/list_jobs', to: 'api#list_jobs'
     post '/api/describe_license', to: 'api#describe_license'
     post '/api/accept_licenses', to: 'api#accept_licenses'
     post '/api/run_app', to: 'api#run_app'
-    post '/api/list_assets', to: 'api#list_assets'
-    post '/api/describe_asset', to: 'api#describe_asset'
     post '/api/search_assets', to: 'api#search_assets'
     post '/api/create_asset', to: 'api#create_asset'
     post '/api/close_asset', to: 'api#close_asset'
     post '/api/create_app', to: 'api#create_app'
-    post '/api/list_notes', to: 'api#list_notes'
-    post '/api/describe_note', to: 'api#describe_note'
     post '/api/attach_to_notes', to: 'api#attach_to_notes'
     post '/api/update_note', to: 'api#update_note'
     post '/api/upvote', to: 'api#upvote'
@@ -53,17 +56,21 @@ Rails.application.routes.draw do
     post 'profile/run_report', to: 'profile#run_report', as: 'run_report'
 
     resources :apps do
-      resources :jobs, shallow: true, except: :index do
-        member do
-          get 'log'
-        end
-      end
+      resources :jobs, only: [:new, :create]
       get 'jobs', on: :member, to: 'apps#index'
       member do
         get 'fork'
       end
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
+      resources :comments
+    end
+
+    resources :jobs, except: :index do
+      member do
+        get 'log'
+      end
+      resources :comments
     end
 
     resources :comparisons do
@@ -71,6 +78,7 @@ Rails.application.routes.draw do
       get 'visualize', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
+      resources :comments
     end
 
     resources :files do
@@ -79,18 +87,21 @@ Rails.application.routes.draw do
       post 'rename', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
+      resources :comments
     end
 
     resources :notes do
       post 'rename', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
+      resources :comments
     end
 
     resources :assets, path: '/app_assets' do
       post 'rename', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
+      resources :comments
     end
 
     resources :challenges do
@@ -107,7 +118,6 @@ Rails.application.routes.draw do
       end
       resources :comments
     end
-
     resources :licenses do
       post 'accept(/:redirect_to_uid)', on: :member, action: :accept, as: 'accept'
       post 'license_item/:item_uid', on: :member, action: :license_item, as: 'license_item'
@@ -116,6 +126,14 @@ Rails.application.routes.draw do
       post 'remove_items', on: :member
       post 'remove_users', on: :member
       post 'rename', on: :member
+    end
+    resources :spaces do
+      get 'members', on: :member
+      get 'data', on: :member
+      post 'accept', on: :member
+      post 'rename', on: :member
+      post 'invite', on: :member
+      resources :comments
     end
 
     resources :queries do

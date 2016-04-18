@@ -35,6 +35,8 @@ class Job < ActiveRecord::Base
   store :run_data, {accessors: [ :run_inputs, :run_outputs, :run_instance_type ], coder: JSON}
   store :provenance, {coder: JSON}
 
+  acts_as_commentable
+
   INSTANCE_TYPES = {
     "baseline-2" => "mem1_ssd1_x2",
     "baseline-4" => "mem1_ssd1_x4",
@@ -66,9 +68,13 @@ class Job < ActiveRecord::Base
   def klass
     "job"
   end
-  
+
   def resolved_instance_type
     run_instance_type || app.instance_type
+  end
+
+  def describe_fields
+    ["title"]
   end
 
   def terminal?
@@ -119,11 +125,21 @@ class Job < ActiveRecord::Base
     app.output_spec
   end
 
-  def publishable_by?(context)
-    if context.guest?
-      false
-    else
-      user_id == context.user_id && scope != "public" && terminal?
+  def publishable_by?(context, scope_to_publish_to = "public")
+    core_publishable_by?(context, scope_to_publish_to) && terminal?
+  end 
+
+  def self.publish(jobs, context, scope)
+    count = 0
+    jobs.uniq.each do |job|
+      job.with_lock do
+        if job.publishable_by?(context, scope)
+          job.update!(scope: scope)
+          count += 1
+        end
+      end
     end
+
+    return count
   end
 end

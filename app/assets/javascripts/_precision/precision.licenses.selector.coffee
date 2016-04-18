@@ -71,7 +71,7 @@ class LicenseModel
     )
 
     if !license.title? || !license.content?
-      Precision.api('/api/describe_license', {uid: @uid})
+      Precision.api('/api/describe', {uid: @uid})
         .done((rs) =>
           @title(rs.title)
           @content(rs.content)

@@ -48,12 +48,15 @@ $select-width: 28px
       &.state-running
         color: #fff
         background-color: $brand-blue-primary
-      &.state-done
+      &.state-done, &.state-active
         color: $state-success-text
         background-color: $state-success-bg
       &.state-failed, &.state-error
         color: $state-danger-text
         background-color: $state-danger-bg
+      &.state-inactive
+        color: $text-muted
+        background-color: $gray-subtle
 
   > tbody > tr > td
     &.active-filter

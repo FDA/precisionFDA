@@ -8,7 +8,7 @@
 </div>
 
 <div class="container-fluid container-padded">
-  <%= form_for @comment, url: polymorphic_path(@itemsFromParams + [@comment]), html: {class: 'form form-horizontal'} do |f| %>
+  <%= form_for @comment, url: polymorphic_path(@items_from_params + [@comment]), html: {class: 'form form-horizontal'} do |f| %>
     <%= render "_partials/form_errors", object: @comment %>
 
     <div class="form-group required">

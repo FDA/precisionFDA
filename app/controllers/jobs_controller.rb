@@ -42,6 +42,11 @@ class JobsController < ApplicationController
       end
     end
 
+    @items_from_params = [@job]
+    @item_path = pathify(@job)
+    @item_comments_path = pathify_comments(@job)
+    @comments = @job.root_comments.order(id: :desc).page params[:comments_page]
+
     @notes = @job.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @job.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
     @discussions = @job.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
@@ -108,7 +113,7 @@ class JobsController < ApplicationController
     licenses_to_accept = []
     @app.assets.each do |asset|
       if asset.license.present? && !asset.licensed_by?(@context)
-        licenses_to_accept << {uid: asset.license.uid, id: asset.license.id, title: asset.license.title, content: asset.license.content}
+        licenses_to_accept << describe_for_api(asset.license)
       end
     end
 
