@@ -7,19 +7,21 @@
     </div>
     <div class="media-body">
       <div class="page-title note-editing">
-        Edit
         <div class="note-titlebar">
           <input type="text" class="form-control" name="title" placeholder="Discussion title..." data-bind="textInput: title.cache" />
         </div>
       </div>
+      <% if !@discussion.public? %>
+        <span><span class="fa fa-lock"></span> This discussion has not been published yet</span>
+      <% end %>
     </div>
   </div>
 </div>
 
 <div class="pfda-toolbar clearfix">
   <div class="btn-toolbar pull-left">
-    <% if !@discussion.public? %>
-      <span class="btn-static"><span class="fa fa-lock"></span> This discussion has not been published yet</span>
+    <% if @discussion.editable_by?(@context) %>
+      <button class="btn btn-default" data-bind="click: objectSelector.open"><span class="fa fa-plus" aria-hidden="true"></span> Attach to Discussion...</button>
     <% end %>
   </div>
   <div class="btn-toolbar pull-right">
@@ -36,3 +38,7 @@
 <div class="container-fluid container-padded">
   <%= render "notes/note_edit" %>
 </div>
+
+<% if @discussion.editable_by?(@context) %>
+  <%= render "_partials/selector_modal" %>
+<% end %>

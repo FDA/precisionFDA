@@ -13,13 +13,7 @@
 
 <div class="metadata-section metadata-header">
   <ul class="list-group list-group-inline">
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Access</h5>
-      <p class="list-group-item-text">
-        <span class="fa <%= @license.public? ? 'fa-globe' : 'fa-lock' %>"></span>
-        <%= @license.public? ? "Public" : "Private" %>
-      </p>
-    </li>
+    <%= render "_partials/metadata_access", item: @license %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">ID</h5>
       <p class="list-group-item-text"><%= @license.uid %></p>

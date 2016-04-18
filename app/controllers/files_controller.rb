@@ -76,6 +76,11 @@ class FilesController < ApplicationController
       @licenses = License.editable_by(@context)
     end
 
+    @items_from_params = [@file]
+    @item_path = pathify(@file)
+    @item_comments_path = pathify_comments(@file)
+    @comments = @file.root_comments.order(id: :desc).page params[:comments_page]
+
     @notes = @file.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @file.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
     @discussions = @file.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]

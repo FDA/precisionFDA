@@ -39,7 +39,15 @@ class License < ActiveRecord::Base
     end
   end
 
+  def publishable_by?(context, scope_to_publish_to = "public")
+    false
+  end
+
   def rename(new_name, context)
     update_attributes(title: new_name)
+  end
+
+  def describe_fields
+    ["title", "content"]
   end
 end

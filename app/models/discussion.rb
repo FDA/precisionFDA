@@ -10,6 +10,8 @@
 #
 
 class Discussion < ActiveRecord::Base
+  # This includes permissions but many methods must be redefined
+  # given that the real permissions are mandated by the note
   include Permissions
 
   belongs_to :user
@@ -44,6 +46,10 @@ class Discussion < ActiveRecord::Base
     note.attachments
   end
 
+  def describe_fields
+    ["title", "content"]
+  end
+
   def to_param
     if title.nil?
       id.to_s
@@ -60,16 +66,14 @@ class Discussion < ActiveRecord::Base
     answers.where(user_id: user_id).count > 0
   end
 
-  def accessible_by?(context)
-    note.accessible_by?(context)
-  end
+  # Override some permissions methods
 
   def self.accessible_by(context)
     if context.guest?
       accessible_by_public
     else
-      raise unless context.user_id.present? && context.org_id.present?
-      joins(:note).where.any_of({user_id: context.user_id}, {notes: {scope: "public"}}, {notes: {scope: context.org_id.to_s}})
+      raise unless context.user_id.present? && context.user.present?
+      joins(:note).where.any_of({user_id: context.user_id}, {notes: {scope: "public"}})
     end
   end
 
@@ -77,7 +81,29 @@ class Discussion < ActiveRecord::Base
     joins(:note).where(notes: {scope: "public"})
   end
 
+  def self.accessible_by_space(space)
+    joins(:note).where(notes: {scope: space.uid})
+  end
+
+  def publishable_by?(context, scope_to_publish_to = "public")
+    core_publishable_by?(context, scope_to_publish_to) && scope_to_publish_to == "public"
+  end
+
   def rename(new_name, context)
     note.rename(new_name, context)
+  end
+
+  def self.publish(discussions, context, scope)
+    count = 0
+    discussions.uniq.each do |discussion|
+      discussion.with_lock do
+        if discussion.publishable_by?(context, scope)
+          discussion.note.update!(scope: scope)
+          count += 1
+        end
+      end
+    end
+
+    return count
   end
 end

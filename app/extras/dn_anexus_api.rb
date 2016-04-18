@@ -1,5 +1,6 @@
 class DNAnexusAPI
   def initialize(bearer_token, apiserver_url = DNANEXUS_APISERVER_URI)
+    raise "Bearer is nil" if bearer_token.nil?
     @bearer_token = bearer_token
     @apiserver_url = apiserver_url
   end

@@ -32,6 +32,10 @@ class Asset < UserFile
 
   has_and_belongs_to_many :apps, {join_table: "apps_assets"}
 
+  def self.model_name
+    ActiveModel::Name.new(self, nil, "Asset")
+  end
+
   def self.with_search_keyword(prefix)
     prefix = sanitize_sql_like(prefix)
     return joins(:archive_entries).where("(archive_entries.name LIKE ? OR user_files.name LIKE ?)", "#{prefix}%", "%#{prefix}%")
@@ -54,4 +58,9 @@ class Asset < UserFile
       raise "Found an asset that is not a .tar[.gz]"
     end
   end
+
+  def describe_fields
+    ["title", "name", "prefix", "description", "file_paths"]
+  end
+
 end

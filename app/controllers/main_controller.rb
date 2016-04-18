@@ -16,6 +16,17 @@ class MainController < ApplicationController
     @challenges = [@consistency_challenge, @truth_challenge]
 
     if @context.logged_in?
+      notes = Note.real_notes.accessible_by(@context).limit(10)
+      answers = Answer.accessible_by(@context).limit(10)
+      discussions = Discussion.accessible_by(@context).limit(10)
+      files = UserFile.real_files.accessible_by(@context).limit(10)
+      comparisons = Comparison.accessible_by(@context).limit(10)
+      apps = App.accessible_by(@context).limit(10)
+      jobs = Job.accessible_by(@context).limit(10)
+      assets = Asset.accessible_by(@context).limit(10)
+
+      @feed = (notes + answers + discussions + files + comparisons + apps + jobs + assets).sort_by {|a| a.created_at}.reverse
+
       @notes_count = Note.real_notes.editable_by(@context).count
       @files_count = UserFile.real_files.editable_by(@context).count
       @comparisons_count = Comparison.editable_by(@context).count
@@ -216,22 +227,43 @@ class MainController < ApplicationController
     id = params[:id]
     raise "Missing id in publish route" unless id.is_a?(String) && id.present?
 
+    scope = params[:scope]
+    if scope.nil?
+      scope = "public"
+    elsif scope.is_a?(String)
+      if scope != "public"
+        # Check that scope is a valid scope:
+        # - must be of the form space-xxxx
+        # - must exist in the Space table
+        # - must be accessible by context
+        raise "Publish route called with invalid scope #{scope}" unless scope =~ /^space-(\d+)$/
+        space = Space.find_by(id: $1.to_i)
+        raise "Publish route called with invalid space #{scope}" unless space.present? && space.active? && space.accessible_by?(@context)
+      end
+    else
+      raise "Publish route called with invalid scope #{scope.inspect}"
+    end
+
     if params[:uids]
       uids = params[:uids]
       raise "The object 'uids' must be a hash of object ids (strings) with value 'on'." unless uids.is_a?(Hash) && uids.all? { |uid, checked| uid.is_a?(String) && checked == "on" }
 
-      items = ([id] + uids.keys).uniq.map { |uid| item_from_uid(uid) }.reject { |item| item.public? }
-      raise "Unpublishable items detected" unless items.all? { |item| item.publishable_by?(@context) }
-
-      # Comparisons
-      comparisons = items.select { |item| item.klass == "comparison" }
+      items = ([id] + uids.keys).uniq.map { |uid| item_from_uid(uid) }.reject { |item| item.public? || item.scope == scope }
+      raise "Unpublishable items detected" unless items.all? { |item| item.publishable_by?(@context, scope) }
 
       # Files to publish:
       # - All real_files selected by the user
       # - All assets selected by the user
-      # - All comparison outputs (published separately as they are in another project)
       files = items.select { |item| item.klass == "file" || item.klass == "asset" }
-      comparison_files = comparisons.map(&:outputs).flatten
+
+      # Comparisons
+      comparisons = items.select { |item| item.klass == "comparison" }
+
+      # Apps
+      apps = items.select { |item| item.klass == "app" }
+
+      # Jobs
+      jobs = items.select { |item| item.klass == "job" }
 
       # Notes
       notes = items.select { |item| item.klass == "note" }
@@ -242,137 +274,65 @@ class MainController < ApplicationController
       # Answers
       answers = items.select { |item| item.klass == "answer" }
 
-      # Jobs
-      jobs = items.select { |item| item.klass == "job" }
-
-      # Apps
-      apps = items.select { |item| item.klass == "app" }
-
-      # To minimize the opportunity for inconsistency, publishing is performed in
-      # chunks of transactions, with priority for items requiring DNAnexus calls.
-      #
-      api = DNAnexusAPI.new(@context.token)
-      user = User.find(@context.user_id)
+      published_count = 0
 
       # Files
       if files.size > 0
-        # Ensure API availability
-        api.call("system", "greet")
-
-        files.each do |file|
-          raise "Consistency check failure for file #{file.dxid}" unless file.project == user.private_files_project
-        end
-
-        # First, copy files to public project
-        api.call(user.private_files_project, "clone", {objects: files.map(&:dxid), project: user.public_files_project})
-        # Update database
-        UserFile.transaction do
-          files.each do |file|
-            file.reload
-            file.update!(scope: 'public', project: user.public_files_project)
-          end
-        end
-        # Then, remove files from private project
-        api.call(user.private_files_project, "removeObjects", {objects: files.map(&:dxid)})
+        published_count += UserFile.publish(files, @context, scope)
       end
 
       # Comparisons
       if comparisons.size > 0
-        # Ensure API availability
-        api.call("system", "greet")
-
-        comparison_files.each do |file|
-          raise "Consistency check failure for file #{file.dxid}" unless file.project == user.private_comparisons_project
-        end
-
-        # First, copy files to public project
-        api.call(user.private_comparisons_project, "clone", {objects: comparison_files.map(&:dxid), project: user.public_comparisons_project})
-        # Update database
-        UserFile.transaction do
-          comparison_files.each do |file|
-            file.reload
-            file.update!(scope: 'public', project: user.public_comparisons_project)
-          end
-          comparisons.each do |comparison|
-            comparison.reload
-            comparison.update!(scope: 'public')
-          end
-        end
-        # Then, remove files from private project
-        api.call(user.private_comparisons_project, "removeObjects", {objects: comparison_files.map(&:dxid)})
+        published_count += Comparison.publish(comparisons, @context, scope)
       end
 
       # Apps
-      apps.each do |app|
-        # Ensure API availability
-        api.call("system", "greet")
-
-        api.call(app.dxid, 'addAuthorizedUsers', {"authorizedUsers": [ORG_EVERYONE]})
-        api.call(app.dxid, "publish")
-        App.transaction do
-          app.reload
-          app.update!(scope: 'public')
-          series = app.app_series
-          series_updates = {}
-          series_updates[:scope] = 'public' unless series.public?
-          series_updates[:latest_version_app_id] = app.id unless series.latest_version_app_id.present? && series.latest_version_app.revision > app.revision
-          series.update!(series_updates) if series_updates.present?
-        end
+      if apps.size > 0
+        published_count += AppSeries.publish(apps, @context, scope)
       end
 
       # Jobs
       if jobs.size > 0
-        Job.transaction do
-          jobs.each do |job|
-            job.reload
-            job.update!(scope: 'public')
-          end
-        end
+        published_count += Job.publish(jobs, @context, scope)
       end
 
       # Notes
       if notes.size > 0
-        Note.transaction do
-          notes.each do |note|
-            note.reload
-            note.update!(scope: 'public')
-          end
-        end
+        published_count += Note.publish(notes, @context, scope)
       end
 
       # Discussions
       if discussions.size > 0
-        Discussion.transaction do
-          discussions.each do |discussion|
-            discussion.reload
-            discussion.note.update!(scope: 'public')
-          end
-        end
+        published_count += Discussion.publish(discussions, @context, scope)
       end
 
       # Answers
       if answers.size > 0
-        Answer.transaction do
-          answers.each do |answer|
-            answer.reload
-            answer.note.update!(scope: 'public')
-          end
-        end
+        published_count += Answer.publish(answers, @context, scope)
       end
 
-      flash[:success] = "Your #{uids.size > 1 ? 'items have' : 'item has'} been published."
+      message = "#{published_count}"
+      if published_count != items.count
+        message += " (out of #{items.count})"
+      end
+      if published_count == 1
+        message += " item has been published."
+      else
+        message += " items have been published."
+      end
+      flash[:success] = message
       redirect_to pathify(item_from_uid(id))
       return
     end
 
     item = item_from_uid(id)
     if !item.editable_by?(@context)
-      flash[:error] = "This item is not owned by you"
+      flash[:error] = "This item is not owned by you."
       redirect_to :back
       return
     end
     if item.public?
-      flash[:error] = "This item is already public"
+      flash[:error] = "This item is already public."
       redirect_to pathify(item)
       return
     end
@@ -382,8 +342,11 @@ class MainController < ApplicationController
       return
     end
 
+    @spaces = Space.active.accessible_by(@context)
+    @canDisplaySpacesSelector = @spaces.present? && @spaces.count > 0 && !["discussion", "answer", "license"].include?(item.klass)
+
     graph = get_graph(item)
-    js graph: publisher_js_prepare(graph)
+    js graph: publisher_js_prepare(graph), spaces: @spaces.map {|s| s.slice(:uid, :title)}
   end
 
   def track
@@ -472,6 +435,7 @@ class MainController < ApplicationController
     item[:title] = node[0].accessible_by?(@context) ? node[0].title : node[0].uid
     item[:owned] = node[0].editable_by?(@context)
     item[:public] = node[0].public?
+    item[:in_space] = node[0].in_space?
     item[:publishable] = node[0].publishable_by?(@context)
 
     children = node[1].map { |child| publisher_js_prepare(child) }
