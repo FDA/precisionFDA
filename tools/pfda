@@ -249,10 +249,6 @@ if IS_ASSET:
     if args.asset_root:
         if not os.path.exists(args.asset_root):
             exit('The root directory "{}" does not exist.'.format(args.asset_root) + ". Provide a valid directory path.")
-        for root_dir, dirs, files in os.walk(args.asset_root):
-            filelen = len(files)
-        if filelen == 0:
-            exit('The root directory "{}" does not contain any files.'.format(args.asset_root))
     else:
         exit("Root directory for the asset is required. Provide it as [--root ASSET_ROOT].")
 else:
@@ -327,6 +323,7 @@ def upload_asset(asset_name, asset_directory, asset_readme):
     # read the directory and get the entries for the files existing in all its sub-directories
     file_list = []
     cut_len = len(asset_directory)
+    filelen = 0
     for dirname, dirnames, filenames in os.walk(asset_directory):
         this_dir = dirname[cut_len:]
         if this_dir != '':
@@ -334,6 +331,12 @@ def upload_asset(asset_name, asset_directory, asset_readme):
         for filename in filenames:
             ap = os.path.join(dirname, filename)[cut_len:]
             file_list.append(ap)
+            if filelen == 0:
+                filelen += len(filename)
+
+    if filelen == 0:
+        exit('The root directory "{}" does not contain any files.'.format(asset_directory))
+
     # setup HTTP request retry options
     asset_session = requests.Session()
     asset_session.mount(CREATE_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=MAX_RETRY))
