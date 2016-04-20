@@ -249,6 +249,10 @@ if IS_ASSET:
     if args.asset_root:
         if not os.path.exists(args.asset_root):
             exit('The root directory "{}" does not exist.'.format(args.asset_root) + ". Provide a valid directory path.")
+        for root_dir, dirs, files in os.walk(args.asset_root):
+            filelen = len(files)
+        if filelen == 0:
+            exit('The root directory "{}" does not contain any files.'.format(args.asset_root))
     else:
         exit("Root directory for the asset is required. Provide it as [--root ASSET_ROOT].")
 else:
