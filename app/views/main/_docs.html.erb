@@ -125,7 +125,7 @@
       </div>
       <div id="comparisons-results" class="h2">Understanding comparison results</div>
       <div class="bs-docs-section">
-        <p>Once launching a comparison, it will be queued for execution in the cloud. Its state will change from "idle" to "runnable", then "running" and finally "done" or "failed". Behind the scenes, a virtual cloud computer will run the Real Time Genomics vcfeval software to compare the two variant sets. A comparison can fail if the input files are not in the right format, or if they are not using GRCh37 conventions, or due to other circumstances. (Debugging failed comparisons is a feature planned for inclusion in an upcoming update). A successful comparison will report several metrics, including the following:</p>
+        <p>Once launching a comparison, it will be queued for execution in the cloud. Its state will change from "idle" to "runnable", then "running" and finally "done" or "failed". Behind the scenes, a virtual cloud computer will run the Real Time Genomics vcfeval software to compare the two variant sets. A comparison can fail if the input files are not in the right format, or if they are not using GRCh37 conventions, or due to other circumstances. Debugging failed comparisons is a feature planned for inclusion in an upcoming update; in the meantime, we have also published the comparison framework as an app. If your comparison fails, locate the "VCF Comparison" app in the "Featured Apps" section and run it with the same inputs as your failed comparison. You should be able to access the logs and see the exact source of failure. A successful comparison will report several metrics, including the following:</p>
 
         <table class="table table-bordered">
           <thead>
