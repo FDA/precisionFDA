@@ -51,7 +51,7 @@ logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.E
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-__version__ = "1.0.4"
+__version__ = "1.0.5"
 MAX_THREADS = 6
 THREAD_POOL_FUTURES = set()
 MAX_RETRY = 10
@@ -323,7 +323,7 @@ def upload_asset(asset_name, asset_directory, asset_readme):
     # read the directory and get the entries for the files existing in all its sub-directories
     file_list = []
     cut_len = len(asset_directory)
-    filelen = 0
+    no_files = True
     for dirname, dirnames, filenames in os.walk(asset_directory):
         this_dir = dirname[cut_len:]
         if this_dir != '':
@@ -331,10 +331,9 @@ def upload_asset(asset_name, asset_directory, asset_readme):
         for filename in filenames:
             ap = os.path.join(dirname, filename)[cut_len:]
             file_list.append(ap)
-            if filelen == 0:
-                filelen += len(filename)
+            no_files = False
 
-    if filelen == 0:
+    if no_files:
         exit('The root directory "{}" does not contain any files.'.format(asset_directory))
 
     # setup HTTP request retry options
