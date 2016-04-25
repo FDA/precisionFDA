@@ -189,19 +189,19 @@
   </div>
 </div>
 
-<% if show_consistency_challenge %>
+<% if @show_giab_challenge %>
   <div class="jumbotron jumbotron-challenges tiltview-container">
     <div class="container container-fluid">
       <div class="tiltview-description">
         <p class="lead-intro">
           <span class="challenge-title-muted">Introducing</span>
           <br>
-          <strong>The PrecisionFDA Consistency Challenge</strong>
+          <strong>The PrecisionFDA Genome-in-a-Bottle Challenge</strong>
         </p>
 
         <div class="row">
           <div class="col-sm-6 col-xs-24">
-            <a class="btn btn-default btn-lg" href="<%= consistency_challenges_path %>">
+            <a class="btn btn-default btn-lg" href="<%= giab_challenges_path %>">
               <div class="media">
                 <div class="media-left">
                   <span class="fa fa-trophy" aria-hidden="true"></span>
@@ -215,7 +215,7 @@
         </div>
       </div>
       <div class="tiltview col" aria-hidden="true">
-        <%= image_tag("challenges/pFDA-Challenge-Diagram", alt: "PrecisionFDA Consistency Challenge", class: "img-responsive img-thumbnail") %>
+        <%= image_tag("challenges/pFDA-C2-Diagram", alt: "PrecisionFDA GIAB Challenge", class: "img-responsive img-thumbnail") %>
       </div>
     </div>
   </div>
