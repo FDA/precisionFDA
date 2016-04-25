@@ -2,7 +2,7 @@
 
 <%= render "_partials/browser_support_script" %>
 <% if !@context.logged_in_or_guest? %>
-  <%= render "main/landing", show_consistency_challenge: @show_consistency_challenge %>
+  <%= render "main/landing", show_truth_challenge: @show_truth_challenge %>
 <% else %>
   <div class="jumbotron jumbotron-landing">
     <div class="container">
@@ -213,8 +213,8 @@
           </div>
         </a>
 
-        <% if @show_giab_challenge %>
-        <a class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-info-solid" href="<%= giab_challenges_path %>">
+        <% if @show_truth_challenge %>
+        <a class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-info-solid" href="<%= truth_challenges_path %>">
           <div class="pfda-card-header lead text-center">
             Participate in the
           </div>
@@ -222,7 +222,7 @@
             <span class="fa fa-trophy" aria-hidden="true"></span>
           </div>
           <div class="pfda-card-footer lead lead-bold text-center">
-            GIAB Challenge
+            Truth Challenge (NEW!)
           </div>
         </a>
         <% end %>
