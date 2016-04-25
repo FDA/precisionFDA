@@ -90,6 +90,7 @@ Rails.application.routes.draw do
     end
     resources :challenges do
       get 'consistency', on: :collection
+      get 'giab', on: :collection
       get 'join', on: :member
     end
     resources :discussions, constraints: {answer_id: /[^\/]+/ } do

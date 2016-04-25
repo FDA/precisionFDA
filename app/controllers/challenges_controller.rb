@@ -1,12 +1,13 @@
 class ChallengesController < ApplicationController
-  skip_before_action :require_login, {only: [:index, :consistency, :join]}
+  skip_before_action :require_login, {only: [:index, :consistency, :giab, :join]}
   before_action :require_login_or_guest, only: []
 
   def index
     # TODO: Update when we have a challenge index page
-    redirect_to consistency_challenges_path
+    redirect_to giab_challenges_path
   end
 
+  # Challenge 1 - Consistency
   def consistency
     @discussion = Discussion.find_by(id: CONSISTENCY_DISCUSSION_ID)
 
@@ -21,6 +22,27 @@ class ChallengesController < ApplicationController
     if DateTime.now.in_time_zone < @challengedEndDate.months_ago(2)
       @btn_class = "accessible-btn-success"
     elsif DateTime.now.in_time_zone < @challengedEndDate.months_ago(1)
+      @btn_class = "accessible-btn-warning"
+    else
+      @btn_class = "accessible-btn-danger"
+    end
+  end
+
+  # Challenge 2 - Genome-in-a-Bottle
+  def giab
+    @discussion = Discussion.find_by(id: GIAB_DISCUSSION_ID)
+
+    @challengedEndDate = GIAB_CHALLENGE_END_DATE
+
+    @challenge = {
+      launched: !@discussion.nil? && @discussion.public?,
+      active: GIAB_CHALLENGE_ACTIVE,
+      joined: @context.logged_in? && !@discussion.nil? && @discussion.followed_by?(@context.user)
+    }
+
+    if DateTime.now.in_time_zone < @challengedEndDate.weeks_ago(2)
+      @btn_class = "accessible-btn-success"
+    elsif DateTime.now.in_time_zone < @challengedEndDate.weeks_ago(1)
       @btn_class = "accessible-btn-warning"
     else
       @btn_class = "accessible-btn-danger"

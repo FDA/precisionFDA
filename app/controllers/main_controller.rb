@@ -6,7 +6,7 @@ class MainController < ApplicationController
 
   def index
     show_guidelines = false
-    @show_consistency_challenge = CONSISTENCY_CHALLENGE_ACTIVE && Discussion.accessible_by_public.find_by(id: CONSISTENCY_DISCUSSION_ID)
+    @show_giab_challenge = GIAB_CHALLENGE_ACTIVE && Discussion.accessible_by_public.find_by(id: GIAB_DISCUSSION_ID)
 
     if @context.logged_in?
       @notes_count = Note.real_notes.editable_by(@context).count
@@ -160,9 +160,10 @@ class MainController < ApplicationController
   def request_access
     @invitation = Invitation.new
     if request.post?
-      p = params.require(:invitation).permit(:first_name, :last_name, :email, :org, :duns, :address, :phone, :singular, :consistency_challenge_intent, :req_reason, :req_data, :req_software, :research_intent, :clinical_intent, :humanizer_answer, :humanizer_question_id)
+      p = params.require(:invitation).permit(:first_name, :last_name, :email, :org, :duns, :address, :phone, :singular, :consistency_challenge_intent, :giab_challenge_intent, :req_reason, :req_data, :req_software, :research_intent, :clinical_intent, :humanizer_answer, :humanizer_question_id)
       p[:ip] = request.remote_ip.to_s
       p[:consistency_challenge_intent] = (p[:consistency_challenge_intent] == "1")
+      p[:giab_challenge_intent] = (p[:giab_challenge_intent] == "1")
       p[:research_intent] = (p[:research_intent] == "1")
       p[:clinical_intent] = (p[:clinical_intent] == "1")
       p[:state] = "guest"
