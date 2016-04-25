@@ -74,7 +74,7 @@
       <div role="tabpanel" class="tab-pane tab-pane-padded" id="app-script">
         <div class="ace-editor-section">
           <%= alert_help("Learn more about the app script", "#{about_path}/how#dev-script") %>
-          <div id="script-editor" class="ace-rounded" data-bind="ace: code, aceOptions: { mode: 'sh', theme: 'monokai', opts: {maxLines: Infinity, wrap: 'free'} }"></div>
+          <div id="script-editor" class="ace-rounded" data-bind="ace: code, aceOptions: { mode: 'sh', theme: 'monokai', opts: {maxLines: Infinity, wrap: 'free', newLineMode: 'unix'} }"></div>
         </div>
       </div>
 
