@@ -24,7 +24,7 @@ if ENV["DNANEXUS_BACKEND"] == "production"
   ADMIN_TOKEN = ENV["ADMIN_TOKEN"]
   DEFAULT_COMPARISON_APP = "app-pfda-comparator/0.2.4"
   CONSISTENCY_DISCUSSION_ID = 1
-  GIAB_DISCUSSION_ID = 100000 # TODO: Update this to the discussion id of challenge
+  TRUTH_DISCUSSION_ID = 6
   # Hard-code uid for NA12878-NISTv2.19 for feedback link
   NIST_VCF_UID = "file-Bk50V4Q0qVb65P0v2VPbfYPZ"
 else
@@ -37,7 +37,7 @@ else
   ADMIN_TOKEN = ENV["ADMIN_TOKEN"]
   DEFAULT_COMPARISON_APP = "app-pfda-comparator/0.2.4"
   CONSISTENCY_DISCUSSION_ID = 1
-  GIAB_DISCUSSION_ID = 21 # TODO: Update this to the discussion id of challenge
+  TRUTH_DISCUSSION_ID = 21 # TODO: Update this to the discussion id of challenge
   # Hard-code uid for NA12878-NISTv2.19 for feedback link
   NIST_VCF_UID = "file-Bk0kjkQ0ZP01x1KJqQyqJ7yB"
 end
@@ -48,8 +48,8 @@ CONSISTENCY_CHALLENGE_END_DATE = DateTime.new(2016,4,25).in_time_zone.end_of_day
 CONSISTENCY_CHALLENGE_ACTIVE = DateTime.now.in_time_zone < CONSISTENCY_CHALLENGE_END_DATE
 
 # Challenge 2 - Truth
-GIAB_CHALLENGE_END_DATE = DateTime.new(2016,5,26).in_time_zone.end_of_day + 4.hours
-GIAB_CHALLENGE_ACTIVE = DateTime.now.in_time_zone < GIAB_CHALLENGE_END_DATE
+TRUTH_CHALLENGE_END_DATE = DateTime.new(2016,5,26).in_time_zone.end_of_day + 4.hours
+TRUTH_CHALLENGE_ACTIVE = DateTime.now.in_time_zone < TRUTH_CHALLENGE_END_DATE
 
 # Remove X-Runtime
 Rails.application.config.middleware.delete(Rack::Runtime)
