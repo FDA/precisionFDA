@@ -37,7 +37,7 @@ else
   ADMIN_TOKEN = ENV["ADMIN_TOKEN"]
   DEFAULT_COMPARISON_APP = "app-pfda-comparator/0.2.4"
   CONSISTENCY_DISCUSSION_ID = 1
-  TRUTH_DISCUSSION_ID = 21 # TODO: Update this to the discussion id of challenge
+  TRUTH_DISCUSSION_ID = 4 # TODO: Update this to the discussion id of challenge
   # Hard-code uid for NA12878-NISTv2.19 for feedback link
   NIST_VCF_UID = "file-Bk0kjkQ0ZP01x1KJqQyqJ7yB"
 end
