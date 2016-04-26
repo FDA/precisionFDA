@@ -63,7 +63,7 @@ class ComparisonsNewView
       new ChallengeViewModel({
         id: 1
         name: "consistency"
-        title: "Consistency Challenge"
+        title: "Truth Challenge (HG001)"
         actionLabel: "Compare to NA12878-NISTv2.19"
       }, this)
     ]

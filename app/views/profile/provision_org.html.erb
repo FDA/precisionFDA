@@ -23,7 +23,7 @@
           <th>Address</th>
           <th>Phone</th>
           <th>DUNS</th>
-          <th>Consistency Challenge Intent?</th>
+          <th>Truth Challenge Intent?</th>
         </tr>
       </thead>
       <tbody>
@@ -39,7 +39,7 @@
           <td><%= inv.address %></td>
           <td><%= inv.phone %></td>
           <td><%= inv.duns %></td>
-          <td><%= inv.consistency_challenge_intent ? 'YES' : ('&ndash;'.html_safe) %></td>
+          <td><%= inv.truth_challenge_intent ? 'YES' : ('&ndash;'.html_safe) %></td>
         </tr>
       <% end %>
       </tbody>
