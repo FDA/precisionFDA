@@ -45,11 +45,9 @@ BILLING_CONFIRMATION = ENV["BILLING_CONFIRMATION"]
 
 # Challenge 1 - Consistency
 CONSISTENCY_CHALLENGE_END_DATE = DateTime.new(2016,4,25).in_time_zone.end_of_day + 4.hours
-CONSISTENCY_CHALLENGE_ACTIVE = DateTime.now.in_time_zone < CONSISTENCY_CHALLENGE_END_DATE
 
 # Challenge 2 - Truth
 TRUTH_CHALLENGE_END_DATE = DateTime.new(2016,5,26).in_time_zone.end_of_day + 4.hours
-TRUTH_CHALLENGE_ACTIVE = DateTime.now.in_time_zone < TRUTH_CHALLENGE_END_DATE
 
 # Remove X-Runtime
 Rails.application.config.middleware.delete(Rack::Runtime)
