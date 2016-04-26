@@ -6,7 +6,7 @@ class MainController < ApplicationController
 
   def index
     show_guidelines = false
-    @show_truth_challenge = TRUTH_CHALLENGE_ACTIVE && Discussion.accessible_by_public.find_by(id: TRUTH_DISCUSSION_ID)
+    @show_truth_challenge = (DateTime.now.in_time_zone < TRUTH_CHALLENGE_END_DATE) && Discussion.accessible_by_public.find_by(id: TRUTH_DISCUSSION_ID)
 
     if @context.logged_in?
       @notes_count = Note.real_notes.editable_by(@context).count

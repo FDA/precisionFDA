@@ -15,7 +15,7 @@ class ChallengesController < ApplicationController
 
     @challenge = {
       launched: !@discussion.nil? && @discussion.public?,
-      active: CONSISTENCY_CHALLENGE_ACTIVE,
+      active: DateTime.now.in_time_zone < CONSISTENCY_CHALLENGE_END_DATE,
       joined: @context.logged_in? && !@discussion.nil? && @discussion.followed_by?(@context.user)
     }
 
@@ -36,7 +36,7 @@ class ChallengesController < ApplicationController
 
     @challenge = {
       launched: !@discussion.nil? && @discussion.public?,
-      active: TRUTH_CHALLENGE_ACTIVE,
+      active: DateTime.now.in_time_zone < TRUTH_CHALLENGE_END_DATE,
       joined: @context.logged_in? && !@discussion.nil? && @discussion.followed_by?(@context.user)
     }
 
