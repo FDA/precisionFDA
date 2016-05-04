@@ -40,6 +40,7 @@ class MainController < ApplicationController
         { logo: "participants/humanlongevity.png", name: "Human Longevity Inc."},
         { logo: "participants/illumina.png", name: "Illumina"},
         { logo: "participants/intel.png", name: "Intel"},
+        { logo: "participants/macrogen.png", name: "Macrogen"},
         { logo: "participants/natera.png", name: "Natera"},
         { logo: "participants/nist.png", name: "NIST"},
         { logo: "participants/nih.png", name: "NIH"},
