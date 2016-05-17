@@ -14,6 +14,10 @@
             <%= challenge[:title] %>
           </div>
           <div class="pfda-card-body">
+            <ul class="list-group list-inline list-inline-bullets">
+              <li><%= pluralize(challenge[:answers_count], 'response') %></li>
+              <li><%= pluralize(challenge[:followers_count], 'followers') %></li>
+            </ul>
             <ul class="list-group list-group-condensed-sm list-group-contained">
               <li class="list-group-item <%= challenge[:launched] ? '' : 'list-group-item-muted' %>">
                 <div class="media">
