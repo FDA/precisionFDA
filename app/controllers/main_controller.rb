@@ -11,7 +11,7 @@ class MainController < ApplicationController
 
     @consistency_challenge = {
       path: consistency_challenges_path,
-      title: @consistency_discussion.title,
+      title: "Consistency Challenge",
       image: "challenges/pFDA-C1-Diagram",
       answers_count: @consistency_discussion.answers.accessible_by_public.size,
       followers_count: @consistency_discussion.count_user_followers,
@@ -27,7 +27,7 @@ class MainController < ApplicationController
 
     @truth_challenge = {
       path: truth_challenges_path,
-      title: @truth_discussion.title,
+      title: "Truth Challenge",
       image: "challenges/pFDA-C2-Diagram",
       answers_count: @truth_discussion.answers.accessible_by_public.size,
       followers_count: @truth_discussion.count_user_followers,
