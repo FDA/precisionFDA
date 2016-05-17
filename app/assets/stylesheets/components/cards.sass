@@ -121,6 +121,14 @@
         font-weight: 900
         color: $gray-dark
 
+    .pfda-card-image-banner
+      margin: -15px
+      &.pfda-card-image-banner-top
+        margin-bottom: 0
+
+      &.pfda-card-image-banner-bottom
+        margin-top: 15px
+
   a.pfda-card
     .pfda-card-title
       color: $link-color
@@ -144,7 +152,7 @@
       width: 300px
 
 .container
-  .pfda-cards
+  .pfda-cards:not(.pfda-cards-list)
     .pfda-card
       width: 100%
       @media (min-width: $screen-sm-min)
