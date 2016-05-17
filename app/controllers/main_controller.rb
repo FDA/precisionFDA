@@ -6,7 +6,42 @@ class MainController < ApplicationController
 
   def index
     show_guidelines = false
-    @show_truth_challenge = (DateTime.now.in_time_zone < TRUTH_CHALLENGE_END_DATE) && Discussion.accessible_by_public.find_by(id: TRUTH_DISCUSSION_ID)
+    @consistency_discussion = Discussion.accessible_by_public.find_by(id: CONSISTENCY_DISCUSSION_ID)
+    @truth_discussion = Discussion.accessible_by_public.find_by(id: TRUTH_DISCUSSION_ID)
+
+    @consistency_challenge = {
+      path: consistency_challenges_path,
+      title: "Consistency Challenge",
+      image: "challenges/pFDA-C1-Diagram",
+      answers_count: @consistency_discussion.answers.accessible_by_public.size,
+      followers_count: @consistency_discussion.count_user_followers,
+      launched: !@consistency_discussion.nil? && @consistency_discussion.public?,
+      joined: @context.logged_in? && !@consistency_discussion.nil? && @consistency_discussion.followed_by?(@context.user),
+      start_date: CONSISTENCY_CHALLENGE_START_DATE,
+      end_date: CONSISTENCY_CHALLENGE_END_DATE,
+      results_date: CONSISTENCY_CHALLENGE_RESULTS_DATE,
+      active: DateTime.now.in_time_zone < CONSISTENCY_CHALLENGE_END_DATE,
+      ended: DateTime.now.in_time_zone >= CONSISTENCY_CHALLENGE_END_DATE,
+      results_announced: CONSISTENCY_CHALLENGE_RESULTS_DATE && DateTime.now.in_time_zone >= CONSISTENCY_CHALLENGE_RESULTS_DATE
+    }
+
+    @truth_challenge = {
+      path: truth_challenges_path,
+      title: "Truth Challenge",
+      image: "challenges/pFDA-C2-Diagram",
+      answers_count: @truth_discussion.answers.accessible_by_public.size,
+      followers_count: @truth_discussion.count_user_followers,
+      launched: !@truth_discussion.nil? && @truth_discussion.public?,
+      joined: @context.logged_in? && !@truth_discussion.nil? && @truth_discussion.followed_by?(@context.user),
+      start_date: TRUTH_CHALLENGE_START_DATE,
+      end_date: TRUTH_CHALLENGE_END_DATE,
+      results_date: TRUTH_CHALLENGE_RESULTS_DATE,
+      active: DateTime.now.in_time_zone < TRUTH_CHALLENGE_END_DATE,
+      ended: DateTime.now.in_time_zone >= TRUTH_CHALLENGE_END_DATE,
+      results_announced: TRUTH_CHALLENGE_RESULTS_DATE && DateTime.now.in_time_zone >= TRUTH_CHALLENGE_RESULTS_DATE
+    }
+
+    @challenges = [@consistency_challenge, @truth_challenge]
 
     if @context.logged_in?
       @notes_count = Note.real_notes.editable_by(@context).count
