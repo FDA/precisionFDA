@@ -55,6 +55,17 @@
         opacity: 0.25
         width: 50%
 
+      .container
+        .pfda-cards:not(.pfda-cards-list)
+          .pfda-card
+            width: 100%
+            @media (min-width: $screen-sm-min)
+              width: calc(50% - 20px)
+            @media (min-width: $screen-md-min)
+              width: calc(40% - 20px)
+            @media (min-width: $screen-lg-min)
+              width: calc(30% - 20px)
+
 .pfda-controller-main.pfda-action-request_access main
   .error
     padding: 10px

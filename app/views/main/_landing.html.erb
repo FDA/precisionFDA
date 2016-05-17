@@ -189,40 +189,17 @@
   </div>
 </div>
 
-<% if show_truth_challenge %>
+<% if @consistency_challenge[:launched] || @truth_challenge[:launched]  %>
   <div class="jumbotron jumbotron-challenges tiltview-container">
     <div class="container container-fluid">
-      <div class="tiltview-description">
-        <p class="lead-intro">
-          <span class="challenge-title-muted">NEW: April 26 - May 26</span>
-          <br>
-          <strong>The PrecisionFDA Truth Challenge</strong>
-        </p>
-
-        <div class="row">
-          <div class="col-sm-6 col-xs-24">
-            <a class="btn btn-default btn-lg" href="<%= truth_challenges_path %>">
-              <div class="media">
-                <div class="media-left">
-                  <span class="fa fa-trophy" aria-hidden="true"></span>
-                </div>
-                <div class="media-body text-left">
-                  Learn more about the challenge
-                </div>
-              </div>
-            </a>
-          </div>
-        </div>
-      </div>
-      <div class="tiltview col" aria-hidden="true">
-        <%= image_tag("challenges/pFDA-C2-Diagram", alt: "PrecisionFDA Truth Challenge", class: "img-responsive img-thumbnail") %>
-      </div>
+      <div class="h2 text-center">precisionFDA Challenges</div>
+      <%= render "challenges/cards", challenges: @challenges %>
     </div>
   </div>
 <% end %>
 
 <div class="container-fluid container-padded pfda-participants-section gradient-blue-sky">
-  <div class="h2 text-center text-uppercase">Community Participants</div>
+  <div class="h2 text-center">Community Participants</div>
   <div class="pfda-participants">
     <% @participant_orgs.each do |org| %>
       <div class="pfda-participant" title="<%= org[:name] %>" data-toggle="tooltip">
