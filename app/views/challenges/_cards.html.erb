@@ -34,7 +34,7 @@
                   </div>
                   <div class="media-body">
                     <% if challenge[:active] && !challenge[:ended] %>
-                      <mark><strong><%= distance_of_time_in_words_to_now(challenge[:end_date]) %></strong> left till</mark>
+                      <mark><strong><%= distance_of_time_in_words_to_now(challenge[:end_date]) %></strong> left</mark>
                       <br>
                     <% end %>
                     Submissions closed
@@ -49,7 +49,7 @@
                   </div>
                   <div class="media-body">
                     <% if challenge[:ended] && !challenge[:results_announced] %>
-                      <mark><strong><%= distance_of_time_in_words_to_now(challenge[:results_date]) %></strong> left till</mark>
+                      <mark><strong><%= distance_of_time_in_words_to_now(challenge[:results_date]) %></strong> left</mark>
                       <br>
                     <% end %>
                     Results announced
