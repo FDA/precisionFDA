@@ -2,7 +2,7 @@
 <% challenges.each do |challenge| %>
   <% if challenge[:launched] %>
     <a  href="<%= challenge[:path] %>" class="pfda-card pfda-card-default pfda-card-rounded pfda-card-bordered pfda-card-padded">
-      <div class="image-banner">
+      <div class="pfda-card-image-banner">
         <%= image_tag(challenge[:image], alt: challenge[:title], class: "img-responsive", height: "50px") %>
       </div>
       <div class="media">
