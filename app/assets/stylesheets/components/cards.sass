@@ -50,6 +50,11 @@
     &.pfda-card-bordered
       border: 1px solid $border-default-color
 
+    &.pfda-card-shadow
+      box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5)
+      &:hover
+        box-shadow: 0px 0px 25px rgba(0, 0, 0, 0.9)
+
     &.pfda-card-default
       background-color: #fafafa
       color: $text-color
@@ -127,7 +132,8 @@
         margin-bottom: 0
 
       &.pfda-card-image-banner-bottom
-        margin-top: 15px
+        margin-top: 25px
+        border-top: 3px solid $gray-lighter
 
   a.pfda-card
     .pfda-card-title
