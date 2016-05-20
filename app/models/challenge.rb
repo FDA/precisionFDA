@@ -7,7 +7,7 @@ class Challenge
 
   def self.consistency_results
 
-    entries = JSON.parse(File.read("app/assets/resources/entries.json")).map {|e| OpenStruct.new(e)}
+    entries = JSON.parse(File.read("app/assets/resources/consistency_entries.json")).map {|e| OpenStruct.new(e)}
 
     repro1_order = Proc.new do |e|
       if e.repro1_recognition == "deterministic"
