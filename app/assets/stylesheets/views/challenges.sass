@@ -52,16 +52,27 @@
 
 
 .challenge-badge
-  border-radius: 50px
-  padding: $padding-base-vertical $padding-base-horizontal
   text-transform: uppercase
-  font-size: 20px
+  border-radius: 20px
+  padding: $padding-small-vertical $padding-small-vertical
+  font-size: 12px
+  white-space: nowrap
+
+  &.challenge-badge-lg
+    border-radius: 50px
+    font-size: 20px
+    padding: $padding-base-vertical $padding-base-horizontal
+
   &.challenge-badge-medal
     background-color: $label-warning-bg
     color: #fff
     .fa-inverse
       color: $label-warning-bg
 
-  &.challenge-badge-recognition
+  &.challenge-badge-recognition-highest
     background-color: $label-primary-bg
     color: #fff
+
+  &.challenge-badge-recognition
+    background-color: $state-info-bg
+    color: $state-info-text
