@@ -7,11 +7,11 @@ module ChallengesHelper
     sprintf("%.2f%%", n*100.0)
   end
 
-  def medal_badge(medal)
+  def medal_badge(medal, type = '')
     if medal != ''
       raw """
-        <div class='challenge-badge challenge-badge-medal'>
-          <span class='fa-stack fa-lg'>
+        <div class='challenge-badge challenge-badge-medal #{type == "large" ? "challenge-badge-lg": ""}'>
+          <span class='fa-stack #{type == "large" ? "fa-lg": ""}'>
             <i class='fa fa-certificate fa-stack-2x'></i>
             <i class='fa fa-trophy fa-stack-1x fa-inverse'></i>
           </span>

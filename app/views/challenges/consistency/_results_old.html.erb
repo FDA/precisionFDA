@@ -1,0 +1,245 @@
+<div class="container container-padded">
+  <div class="pfda-challenge-intro">
+    <div class="lead-intro">The precisionFDA Consistency Challenge ran from February 25, 2016 to April 25, 2016, inviting participants to process certain datasets through their NGS processing pipelines and conduct comparisons on precisionFDA. Community members from four different continents embraced the challenge, coming together under one roof, to showcase their methods, share their results, and highlight their insights. We have created this web page to summarize the challenge results and list our recognitions, as well as discuss key conclusions and other interesting findings from this first challenge.</div>
+
+    <div class="h2">Medals</div>
+    <div class="pfda-cards pfda-cards-justify-centered ">
+      <div class="pfda-card pfda-card-rounded pfda-card-padded pfda-card-warning">
+        <div class="pfda-card-body">
+          <div class="challenge-badge challenge-badge-lg challenge-badge-medal">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-certificate fa-stack-2x"></i>
+              <i class="fa fa-trophy fa-stack-1x fa-inverse"></i>
+            </span>
+            Consistency (Overall)
+          </div>
+          <br>
+          <div class="lead">Sentieon</div>
+          <div>raldana-sentieon</div>
+        </div>
+      </div>
+      <div class="pfda-card pfda-card-rounded pfda-card-padded pfda-card-warning">
+        <div class="pfda-card-body">
+          <div class="challenge-badge challenge-badge-lg challenge-badge-medal">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-certificate fa-stack-2x"></i>
+              <i class="fa fa-trophy fa-stack-1x fa-inverse"></i>
+            </span>
+            Reproducibility
+          </div>
+          <br>
+          <div class="lead">Sentieon</div>
+          <div>raldana-sentieon</div>
+        </div>
+      </div>
+      <div class="pfda-card pfda-card-rounded pfda-card-padded pfda-card-warning">
+        <div class="pfda-card-body">
+          <div class="challenge-badge challenge-badge-lg challenge-badge-medal">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-certificate fa-stack-2x"></i>
+              <i class="fa fa-trophy fa-stack-1x fa-inverse"></i>
+            </span>
+            Accuracy
+          </div>
+          <br>
+          <div class="lead">Sanofi-Genzyme</div>
+          <div>dgrover-gatk</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="h2">Overview of Results</div>
+
+  <div>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation" class="active"><a href="#awards" aria-controls="awards" role="tab" data-toggle="tab">Awards</a></li>
+      <li role="presentation"><a href="#datasets" aria-controls="datasets" role="tab" data-toggle="tab">Datasets</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane active" id="awards">
+        <table class="table table-responsive table-condensed table-bordered">
+          <thead>
+            <tr>
+              <th>Label</th>
+              <th>Submitting user</th>
+              <th>Org</th>
+              <th>Medals</th>
+              <th>Repro1</th>
+              <th>Repro2</th>
+              <th>Recall</th>
+              <th>Precision</th>
+              <th>F-measure</th>
+              <th>Other</th>
+            </tr>
+          </thead>
+
+          <% @entries.each do |e| %>
+            <tr>
+              <td><a href="<%= discussion_answer_path("1-precisionfda-consistency-challenge", e.user['dxuser']) %>"><%= e.nickname %></a></td>
+              <td><%= e.user['first_name'] %> <%= e.user['last_name'] %></td>
+              <td><%= e.org['name'] %></td>
+              <td><%= medal_badge(e.award) %></td>
+              <td><%= recognition_badge(e.repro1_recognition.gsub('not-considered','')) %></td>
+              <td><%= recognition_badge(e.repro2_recognition.gsub('not-considered','')) %></td>
+              <td><%= recognition_badge(e.recall_recognition.gsub('not-considered','') )%></td>
+              <td><%= recognition_badge(e.precision_recognition.gsub('not-considered','')) %></td>
+              <td><%= recognition_badge(e.f_measure_recognition.gsub('not-considered','')) %></td>
+              <td><%= recognition_badge(e.other_recognition )%></td>
+            </tr>
+          <% end %>
+        </table>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="datasets">
+        <table class="table table-responsive table-condensed table-bordered">
+          <thead>
+            <tr>
+              <th>Label</th>
+              <th>Submitting user</th>
+              <th>Org</th>
+              <th>VCF Files</th>
+              <th>Comparisons</th>
+            </tr>
+          </thead>
+
+          <% @entries.each do |e| %>
+            <tr>
+              <td><a href="<%= discussion_answer_path("1-precisionfda-consistency-challenge", e.user['dxuser']) %>"><%= e.nickname %></a></td>
+              <td><%= e.user['first_name'] %> <%= e.user['last_name'] %></td>
+              <td><%= e.org['name'] %></td>
+              <td><a href="<%= file_path(e.garvan['dxid']) %>">G1</a>,
+                <a href="<%= file_path(e.rerun['dxid']) %>">G2</a>,
+                <a href="<%= file_path(e.hli['dxid']) %>">H</a></td>
+              <td><a href="<%= comparison_path(e.repro1['id']) %>">R1</a>,
+                  <a href="<%= comparison_path(e.repro2['id']) %>">R2</a>,
+                  <a href="<%= comparison_path(e.acc1a['id']) %>">A1a</a>,
+                  <a href="<%= comparison_path(e.acc1b['id']) %>">A1b</a>,
+                  <a href="<%= comparison_path(e.acc2['id']) %>">A2</a></td>
+            </tr>
+          <% end %>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="h2">Reproducibility across same input</div>
+  <table class="table table-responsive table-condensed table-bordered">
+    <thead>
+      <th>Nickname</th>
+      <th>Repro.1</th>
+      <th>Common (TP)</th>
+      <th>Unique (FP+FN)</th>
+      <th>Recognition</th>
+    </thead>
+    <% @entries.sort_by(&@repro1_order).each do |e| %>
+      <tr>
+        <td><%= e.nickname %></td>
+        <td><a href="<%= comparison_path(e.repro1['id']) %>">Link</a></td>
+        <td class='num'><%= cm e.repro1_true_pos %></td>
+        <td class='num'><%= cm (e.repro1_false_pos + e.repro1_false_neg) %></td>
+        <td><%= recognition_badge(e.repro1_recognition) %></td>
+      </tr>
+    <% end %>
+  </table>
+
+  <div class="h2">Reproducibility across different inputs</div>
+  <table class="table table-responsive table-condensed table-bordered">
+    <thead>
+      <th>Nickname</th>
+      <th>Repro.2</th>
+      <th>Common (TP)</th>
+      <th>Unique (FP+FN)</th>
+      <th>Concordance</th>
+      <th>Recognition</th>
+    </thead>
+    <% @entries.sort_by(&@repro2_order).each do |e| %>
+      <tr>
+        <td><%= e.nickname %></td>
+        <td><a href="<%= comparison_path(e.repro2['id']) %>">Link</a></td>
+        <td class='num'><%= cm e.repro2_true_pos %></td>
+        <td class='num'><%= cm (e.repro2_false_pos + e.repro2_false_neg)%></td>
+        <td><%= pct e.repro2_concordance %></td>
+        <td><%= recognition_badge(e.repro2_recognition) %></td>
+      </tr>
+    <% end %>
+  </table>
+
+  <div class="h2">Recall</div>
+  <table class="table table-responsive table-condensed table-bordered">
+    <thead>
+      <th>Nickname</th>
+      <th>Recall1</th>
+      <th>Recall2</th>
+      <th>Diff from top</th>
+      <th>Recognition</th>
+    </thead>
+    <% @entries.sort_by(&@recall_order).each do |e| %>
+      <tr>
+        <td><%= e.nickname %></td>
+        <td><%= pct e.acc1_recall %></td>
+        <td><%= pct e.acc2_recall %></td>
+        <td><%= e.disqualified ? "-" : pct(e.recall_diff) %></td>
+        <td><%= recognition_badge(e.recall_recognition) %></td>
+      </tr>
+    <% end %>
+  </table>
+
+  <div class="h2">Precision</div>
+  <table class="table table-responsive table-condensed table-bordered">
+    <thead>
+      <th>Nickname</th>
+      <th>Precision1</th>
+      <th>Precision2</th>
+      <th>Diff from top</th>
+      <th>Recognition</th>
+    </thead>
+    <% @entries.sort_by(&@precision_order).each do |e| %>
+      <tr>
+        <td><%= e.nickname %></td>
+        <td><%= pct e.acc1_precision %></td>
+        <td><%= pct e.acc2_precision %></td>
+        <td><%= e.disqualified ? "-" : pct(e.precision_diff) %></td>
+        <td><%= recognition_badge(e.precision_recognition) %></td>
+      </tr>
+    <% end %>
+  </table>
+
+  <div class="h2">F-measure</div>
+  <table class="table table-responsive table-condensed table-bordered">
+    <thead>
+      <th>Nickname</th>
+      <th>F-measure1</th>
+      <th>F-measure2</th>
+      <th>Diff from top</th>
+      <th>Recognition</th>
+    </thead>
+    <% @entries.sort_by(&@f_measure_order).each do |e| %>
+      <tr>
+        <td><%= e.nickname %></td>
+        <td><%= pct e.acc1_f_measure %></td>
+        <td><%= pct e.acc2_f_measure %></td>
+        <td><%= e.disqualified ? "-" : pct(e.f_measure_diff) %></td>
+        <td><%= recognition_badge(e.f_measure_recognition) %></td>
+      </tr>
+    <% end %>
+  </table>
+
+  <div class="h2">Warnings</div>
+  <table class="table table-responsive table-condensed table-bordered">
+    <thead>
+      <th>Nickname</th>
+      <th>Warnings</th>
+    </thead>
+    <% @entries.each do |e| %>
+      <tr>
+        <td><%= e.nickname %></td>
+        <td><%= e.warnings.join("<br>") %></td>
+      </tr>
+    <% end %>
+  </table>
+</div>
