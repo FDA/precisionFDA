@@ -51,47 +51,53 @@
         color: $link-hover-color
 
 
-.challenge-badge
-  text-transform: uppercase
-  border-radius: 20px
-  padding: $padding-xs-vertical $padding-xs-horizontal
-  font-size: 10px
-  white-space: nowrap
-  display: inline-block
+  .challenge-section
+    .h2
+      color: #344967
+      padding: $padding-base-horizontal 0
+      border-bottom: 1px solid $border-default-color
 
-  &.challenge-badge-lg
-    border-radius: 50px
-    font-size: 20px
-    padding: $padding-base-vertical $padding-base-horizontal
+  .challenge-badge
+    text-transform: uppercase
+    border-radius: 20px
+    padding: $padding-xs-vertical $padding-xs-horizontal
+    font-size: 10px
+    white-space: nowrap
+    display: inline-block
 
-  &.challenge-badge-medal
-    background-color: $label-warning-bg
-    color: #fff
-    .fa-inverse
-      color: $label-warning-bg
+    &.challenge-badge-lg
+      border-radius: 50px
+      font-size: 20px
+      padding: $padding-base-vertical $padding-base-horizontal
 
-  &.challenge-badge-recognition-highest
+    &.challenge-badge-medal
+      background-color: $label-warning-bg
+      color: #fff
+      .fa-inverse
+        color: $label-warning-bg
+
+    &.challenge-badge-recognition-highest
+      background-color: $label-primary-bg
+      color: #fff
+
+    &.challenge-badge-recognition
+      background-color: $state-info-bg
+      color: $state-info-text
+
+  .challenge-row-highest
     background-color: $label-primary-bg
     color: #fff
 
-  &.challenge-badge-recognition
+    a
+      color: #fff
+      &:hover
+        color: $link-muted-color
+
+
+  .challenge-row-high
     background-color: $state-info-bg
     color: $state-info-text
 
-.challenge-row-highest
-  background-color: $label-primary-bg
-  color: #fff
-
-  a
-    color: #fff
-    &:hover
-      color: $link-muted-color
-
-
-.challenge-row-high
-  background-color: $state-info-bg
-  color: $state-info-text
-
-.challenge-row-not-considered
-  background-color: $gray-subtle
-  color: $text-muted
+  .challenge-row-not-considered
+    background-color: $gray-subtle
+    color: $text-muted
