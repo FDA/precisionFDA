@@ -895,7 +895,7 @@
             <td><a href="/comparisons/1033">Link</a></td>
             <td class='num'>3,139,985</td>
             <td class='num'>0</td>
-            <td>Footnote #1</td>
+            <td>[#1]</td>
           </tr>
 
           <tr>
@@ -903,7 +903,7 @@
             <td><a href="/comparisons/113">Link</a></td>
             <td class='num'>3,151,019</td>
             <td class='num'>0</td>
-            <td>Footnote #2</td>
+            <td>[#2]</td>
           </tr>
 
           <tr>
@@ -911,7 +911,7 @@
             <td><a href="/comparisons/996">Link</a></td>
             <td class='num'>4,632,204</td>
             <td class='num'>0</td>
-            <td>Footnote #3</td>
+            <td>[#3]</td>
           </tr>
       </table>
     </div>
@@ -1091,7 +1091,7 @@
             <td class='num'>3,151,019</td>
             <td class='num'>0</td>
             <td>100.00%</td>
-            <td>Footnote #4</td>
+            <td>[#4]</td>
           </tr>
 
           <tr>
@@ -1100,7 +1100,7 @@
             <td class='num'>3,097,788</td>
             <td class='num'>57,975</td>
             <td>98.16%</td>
-            <td>Footnote #5</td>
+            <td>[#5]</td>
           </tr>
 
           <tr>
@@ -1109,7 +1109,7 @@
             <td class='num'>3,086,242</td>
             <td class='num'>66,955</td>
             <td>97.88%</td>
-            <td>Footnote #6</td>
+            <td>[#6]</td>
           </tr>
 
           <tr>
@@ -1118,7 +1118,7 @@
             <td class='num'>3,083,646</td>
             <td class='num'>121,074</td>
             <td>96.22%</td>
-            <td>Footnote #6</td>
+            <td>[#6]</td>
           </tr>
 
           <tr>
@@ -1127,7 +1127,7 @@
             <td class='num'>3,064,375</td>
             <td class='num'>259,836</td>
             <td>92.18%</td>
-            <td>Footnote #6</td>
+            <td>[#6]</td>
           </tr>
 
       </table>
@@ -1141,7 +1141,7 @@
     </div>
     <div>
       <p>
-      The fact that concordance is no higher than 91.44% overall is probably indicative of limitations in the sequencing portion of the experiment. Several factors can contribute to decreased concordance, including potentially different batch of starting material from Coriell, and, more importantly, different handling for library preparation. Even if the same library is used, there is also inherent variability in the way sequencing instruments process a library and produce base calls -- including differences in coverage across the whole genome. Nevertheless, it is desirable for NGS pipelines to be somewhat robust to noise or other artifacts, to the extent possible. We would therefore like to recognize the entries that produced results with more than 90% concordance, assigning the "highest-concordance" and "high-concordance" badges.
+      The fact that concordance is no higher than 91.44% overall is probably indicative of limitations in the sequencing portion of the experiment. Several factors can contribute to decreased concordance, including potentially different batch of starting material from Coriell, and, more importantly, different handling for library preparation. Even if the same library is used, there is also inherent variability in the way sequencing instruments process a library and produce base calls &mdash; including differences in coverage across the whole genome. Nevertheless, it is desirable for NGS pipelines to be somewhat robust to noise or other artifacts, to the extent possible. We would therefore like to recognize the entries that produced results with more than 90% concordance, assigning the "highest-concordance" and "high-concordance" badges.
       </p>
       <p>
       Looking across both reproducibility comparisons 1 and 2, we noted that the entry with the highest concordance is also deterministic. We would therefore like to award Overall Reproducibility to the entry submitted by Rafael Aldana et al. from Sentieon.
@@ -1150,7 +1150,19 @@
   </div>
 
   <div class="challenge-section">
-    <div class="h2">Recall, Precision, and F-Measure for Accuracy</div>
+    <div class="h2">Accuracy (Recall, Precision, and F-Measure)</div>
+    <div>
+      <p>
+      The accuracy comparisons 1a, 1b and 2 are quantifying the similarity between participants' results and the NIST (Genome in a Bottle) v2.19 gold standard, within the confident regions provided by NIST/GiaB. Each comparison outputs several metrics, including recall, precision and f-measure.
+      </p>
+      <p>
+      Recall, or sensitivity, reflects the percentage of variants (genotypes) in the NIST/GiaB benchmark set that were exactly called by the challenge participant pipeline in a submitted dataset. Precision, or positive predictive value, reflects the percentage of called variants (genotypes) which match exactly the NIST/GiaB benchmark set. F-measure is the harmonic mean of recall and precision, and is sometimes used as a single combined metric for evaluating overall accuracy.
+      </p>
+      <p>
+      The tables below summarize the results across accuracy comparisons. For each metric, the highest value between accuracy comparisons 1a and 1b is shown (column R1, P1, F1), along with the value for accuracy comparison 2 (columns R2, P2, F2). In each table, the entries are ranked based on the sum of their deltas from the top entry, i.e. for recall based on (99.54% - R1) + (98.92% - R2).
+      </p>
+
+    </div>
     <div class="row">
       <div class="col-md-8">
         <table class="table table-condensed table-bordered table-nowrap">
@@ -1303,14 +1315,14 @@
               <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a></td>
               <td>99.43%</td>
               <td>98.51%</td>
-              <td>-</td>
+              <td>[#7]</td>
             </tr>
 
             <tr class="challenge-row-not-considered">
               <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a></td>
               <td>100.00%</td>
               <td>100.00%</td>
-              <td>-</td>
+              <td>[#8]</td>
             </tr>
           </tbody>
         </table>
@@ -1466,14 +1478,14 @@
               <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a></td>
               <td>99.78%</td>
               <td>99.70%</td>
-              <td>-</td>
+              <td>[#7]</td>
             </tr>
 
             <tr class="challenge-row-not-considered">
               <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a></td>
               <td>100.00%</td>
               <td>100.00%</td>
-              <td>-</td>
+              <td>[#8]</td>
             </tr>
           </tbody>
         </table>
@@ -1628,17 +1640,40 @@
               <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a></td>
               <td>99.61%</td>
               <td>99.10%</td>
-              <td>-</td>
+              <td>[#7]</td>
             </tr>
 
             <tr class="challenge-row-not-considered">
               <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a></td>
               <td>100.00%</td>
               <td>100.00%</td>
-              <td>-</td>
+              <td>[#8]</td>
             </tr>
           </tbody>
         </table>
+      </div>
+      <div class="small">
+        <p>
+        [#7] This entry was not considered because the VCF files were not submitted within the challenge timeframe<br>
+        [#8] This entry was not considered because the entry submitted the NIST benchmark set as the answer
+        </p>
+      </div>
+      <div>
+        <p>
+        Looking at recall, we noticed that most entries did better at Recall1 (Garvan) than Recall2 (HLI) &mdash; sometimes with striking differences (such as the entry labeled "macrogen-gatk"). This may be related to the fact that the Garvan dataset used newer, improved chemistry. We would like to recognize the top 6 entries (sum of deltas from the top less than 1%) assigning the "highest-recall" and "high-recall" badges.
+        </p>
+        <p>
+        A higher precision value means fewer false positives. Filtering criteria and other post-processing techniques are often used to reduce false positives, but sometimes this is at the expense of recall. Pipelines often have to deal with such tradeoffs between recall (sensitivity) and precision (positive predictive value), and different NGS pipelines may be tuned for different goals, depending on the context. Looking at the respective table for precision, the overall good performance of most entries (compared to the recall table) reveals that the majority of pipelines favor precision, especially since it does not show as big of a fluctuation between Precision1 (Garvan) and Precision2 (HLI). We would like to recognize the top 14 entries (sum of deltas from the top less than 1%) assigning the "highest-precision" and "high-precision" badges.
+        </p>
+        <p>
+        Given the performances in precision and recall in the first two tables, it's no surprise that the f-measure is usually slightly higher in the Garvan dataset, and that overall the entries are close (but not as close as in the precision table). We would like to recognize the top 11 entries (sum of deltas from the top less than 1.2%) assigning the "highest-f-measure" and "high-f-measure" badges.
+        </p>
+        <p>
+        We would like to award the Accuracy Award to the entry submitted by Deepak Grover from Sanofi-Genzyme, for achieving the highest accuracy. 
+        </p>
+        <p>
+        We would like to award the Overall Performance award to the entry submitted by Rafael Aldana et. al from Sentieon, for their high performance in both reproducibility and accuracy.
+        </p>
       </div>
     </div>
   </div>
