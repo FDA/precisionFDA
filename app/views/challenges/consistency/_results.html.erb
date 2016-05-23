@@ -1652,4 +1652,70 @@
       </ul>
     </div>
   </div>
+  <div class="container container-padded">
+    <div class="h2">Conclusions and lessons learned</div>
+    <div>
+      <p>Comparisons</p>
+      <p>
+      This challenge used the comparison framework that was available when precisionFDA was first launched. The framework outputs detailed files with the variants of each category, so that anyone can perform downstream calculations or otherwise investigate their false positives or false negatives. This has helped participants better understand the characteristics of their pipelines – an effort that could be improved by more detailed reporting in the comparison output, since the current version of the comparison framework reports only aggregate statistics. As someone pointed out in a separate communication, “showing summary numbers for both SNPs and indels together can hide issues with indel calling behind the fact that SNPs do really well (most pipelines discover most of the easy SNPs)”. In the future, we look forward to more granular reporting, including separate statistics for SNPs versus indels and other types of variations, as well as information on zygosity mismatches. We are working with the GA4GH benchmarking group to incorporate the next generation of comparisons, and you can currently see an early glimpse of that in the <a href="https://precision.fda.gov/apps/explore">GA4GH Benchmarking app</a> on precisionFDA.
+      </p>
+
+      <p>Benchmarking material</p>
+      <p>
+      The challenge used the NIST/GiaB characterization of NA12878 as the benchmark set, as reported on GRCh37. Although NIST relied on different sequencing technologies and software algorithms to generate this dataset, members of the community expressed concerns that the dataset may be "biased towards GATK". Other community feedback mentioned known facts such as that the dataset is not comprehensive enough with respect to indels, that the confidence regions are not covering several genomic areas of clinical importance, and that this dataset does not include copy-number variants or structural variants, or incorporate phasing information. GiaB is aware of the limitations of the existing dataset and is already working to address them. In addition, precisionFDA is collaborating with NIST to engage the community to improve this dataset by incorporating a Feedback button straight into the comparison results page. The government agencies, including FDA, NIST, CDC, and other stakeholders are also collaborating towards the generation of new benchmarking materials.
+      </p>
+      <p>
+      We also received questions around the choice of GRCh37. The performance of pipelines is affected by the reference human sequence, and as one participant put it “once we obtain a perfect (no gaps, no mistakes) reference genome, the performance will be much better”. The current NIST/GiaB release is based on GRCh37, but we are looking forward to using GRCh38 in the future.
+      </p>
+      <p>
+      Study design
+      </p>
+      <p>
+      This first challenge tried to engage the community, while at the same time making use of familiar datasets (such as NIST reference material) and simple evaluations (such as the comparison framework). The main focus was looking at reproducibility, while additionally assessing accuracy, both important concepts in regulatory science.
+      </p>
+      <p>
+      On one hand, as people <a href="https://precision.fda.gov/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">said</a> “if we all approach the challenge in good faith […], this challenge sets the right methodology: (1) examine the software repeatability between runs; (2) examine the reproducibility between datasets of the same DNA sample […]; (3) examine the accuracy against a well-characterized truth set.”; on the other hand, as someone else <a href="https://precision.fda.gov/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">pointed out</a> “a winning entry for this challenge would not necessarily (and in fact is unlikely) to work well on a different sample.”
+      </p>
+      <p>
+      This challenge focused on the consistency of the results obtained from both a single as well as two different runs of the same sample. Although the sample that was used has known “truth data” attached to it for certain kinds of calls (“highly confident calls”), so that the community can at least partially assess the accuracy of the results obtained, the precisionFDA team was primarily focused on the reproducibility. Part of the reasoning behind that has been very eloquently stated by some of the challenge participants – with so few samples that have known “truth” it is very easy to over-fit the results, so “accuracy” obtained does not provide the complete picture. But we also heard, “This is the first time that software repeatability and inter-dataset reproducibility have been put at front and center of judging a genomics pipeline’s quality. Without repeatability and reproducibility, accuracy is at best a one-time stroke of luck”. We are, however, taking a second look at accuracy in the <a href="https://precision.fda.gov/challenges/truth">precisionFDA Truth Challenge</a>.
+      </p>
+
+      <p>
+      Lastly, we acknowledge that the evaluation of the results was confined within certain limits; however, the process (and its limitations) can inform future challenges. For example, we did not factor pipeline runtime or resource consumption into our evaluations.
+      </p>
+
+      <p>
+      Epilogue
+      </p>
+      <p>
+      We want to thank those of you who participated in our first challenge! By participating and putting your results and your thoughts out in the public, you fulfilled the first and most important goal of this challenge &ndash; to engage and get the dialogue started.
+      </p>
+      <p>
+      This challenge created a dataset that people can study further, if they so choose. We have created an archive of 60 VCF files (compressed with bgzip, and accompanied by tabix index files) that is available as a file on precisionFDA. We have also created a similar app asset, which can be included in apps that need direct access to the unarchived VCF files. We are excited to see how the community will use this in the future. Perhaps the results available from the challenge can provide some interesting ideas for precisionFDA and the scientific community to build upon. 
+      </p>
+      <p>
+      In closing, we would like to leave you with several encouraging quotes from our community, which will hopefully inspire all readers to participate in one of our upcoming challenges:
+      </p>
+
+      <p>
+      “When I started working in this industry I felt that everyone claimed that their pipeline was better, but there was no objective way of measuring, so it sounded like an ad for car insurance. I think your challenges will move our industry forward immensely.” – Rafael Aldana, Mountain View, CA
+      </p>
+
+      <p>
+      “I wish to congratulate your team for putting together a bioinformatics challenge like that, it is a nice and unique idea. It can become a significant community resource for NGS work and data in future”. – Deepak Grover, Boston, MA
+      </p>
+
+      <p>
+      “The challenge made me aware of many good software methods, thanks!” – Huang Zhibo, Shenzhen, China.
+      </p>
+
+      <p>
+      “We found this experience is very helpful for us to improve our understanding of our pipeline.” – Sean Li, San Diego, CA
+      </p>
+
+      <p>
+      “We plan on contacting a fellow participant to try their pipeline.” – Aaron Statham, Sydney, Australia
+      </p>
+    </div>
+  </div>
 </div>
