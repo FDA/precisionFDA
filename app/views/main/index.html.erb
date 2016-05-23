@@ -2,7 +2,7 @@
 
 <%= render "_partials/browser_support_script" %>
 <% if !@context.logged_in_or_guest? %>
-  <%= render "main/landing", show_truth_challenge: @show_truth_challenge %>
+  <%= render "main/landing" %>
 <% else %>
   <div class="jumbotron jumbotron-landing">
     <div class="container">
@@ -213,16 +213,30 @@
           </div>
         </a>
 
-        <% if @show_truth_challenge %>
+        <% if @truth_challenge[:launched]  %>
         <a class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-info-solid" href="<%= truth_challenges_path %>">
           <div class="pfda-card-header lead text-center">
-            Participate in the
+            <%= @truth_challenge[:active] ? 'Participate in the' : 'Read responses to the' %>
           </div>
           <div class="pfda-card-body pfda-card-body-icon">
             <span class="fa fa-trophy" aria-hidden="true"></span>
           </div>
           <div class="pfda-card-footer lead lead-bold text-center">
-            Truth Challenge (NEW!)
+            Truth Challenge
+          </div>
+        </a>
+        <% end %>
+
+        <% if @consistency_challenge[:launched]  %>
+        <a class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-info-solid" href="<%= consistency_challenges_path %>">
+          <div class="pfda-card-header lead text-center">
+            <%= @consistency_challenge[:active] ? 'Participate in the' : 'Read responses to the' %>
+          </div>
+          <div class="pfda-card-body pfda-card-body-icon">
+            <span class="fa fa-trophy" aria-hidden="true"></span>
+          </div>
+          <div class="pfda-card-footer lead lead-bold text-center">
+            Consistency Challenge
           </div>
         </a>
         <% end %>
