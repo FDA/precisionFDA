@@ -1,11 +1,14 @@
 <div class="container container-padded">
   <div class="pfda-challenge-intro">
     <div class="lead-intro">The precisionFDA Consistency Challenge ran from February 25, 2016 to April 25, 2016, inviting participants to process certain datasets through their NGS processing pipelines and conduct comparisons on precisionFDA. Community members from four different continents embraced the challenge, coming together under one roof, to showcase their methods, share their results, and highlight their insights. We have created this web page to summarize the challenge results and list our recognitions, as well as discuss key conclusions and other interesting findings from this first challenge.</div>
+  </div>
+</div>
 
-    <div class="challenge-section">
-      <div class="h2">Community Challenge Awards</div>
+<div class="challenge-section challenge-section-highlight pfda-challenge-intro">
+  <div class="container container-padded">
+      <div class="h3 text-center">Community Challenge Awards</div>
       <div class="pfda-cards pfda-cards-justify-centered ">
-        <div class="pfda-card pfda-card-rounded pfda-card-padded pfda-card-warning">
+        <div class="pfda-card pfda-card-warning pfda-card-rounded pfda-card-padded pfda-card-bordered">
           <div class="pfda-card-body">
             <%= medal_badge("Overall performance", "large") %>
             <br><br>
@@ -13,7 +16,7 @@
             <div>Rafael Aldana, Hanying Feng, Brendan Gallagher, Jun Ye</div>
           </div>
         </div>
-        <div class="pfda-card pfda-card-rounded pfda-card-padded pfda-card-warning">
+        <div class="pfda-card pfda-card-warning pfda-card-rounded pfda-card-padded pfda-card-bordered">
           <div class="pfda-card-body">
             <%= medal_badge("Reproducibility", "large") %>
             <br><br>
@@ -21,7 +24,7 @@
             <div>Rafael Aldana, Hanying Feng, Brendan Gallagher, Jun Ye</div>
           </div>
         </div>
-        <div class="pfda-card pfda-card-rounded pfda-card-padded pfda-card-warning">
+        <div class="pfda-card pfda-card-warning pfda-card-rounded pfda-card-padded pfda-card-bordered">
           <div class="pfda-card-body">
             <%= medal_badge("Accuracy", "large") %>
             <br><br>
@@ -32,12 +35,14 @@
       </div>
     </div>
   </div>
+</div>
 
-  <div class="challenge-section">
+<div class="challenge-section">
+  <div class="container container-padded">
     <div class="h2">Overview of Results</div>
 
-     <p>We received a total of 21 entries to the challenge, summarized in the following table.</p>
-     <p>To aid in the presentation of results, we decided to give each entry a unique label, comprised of the name of the submitting user as well as a short mnemonic keyword representing the pipeline. (These keywords are merely indicative of each pipeline's main component, hence somewhat subjective; for a more faithful description of each pipeline, refer to the full text that accompanied each submission by following the label links). Each entry consists of three submitted VCF files (Garvan, Garvan-rerun, and HLI) and five comparisons (reproducibility 1 &amp; 2; accuracy 1a, 1b &amp; 2). The entries are sorted in order of date of submission.</p>
+    <p>We received a total of 21 entries to the challenge, summarized in the following table.</p>
+    <p>To aid in the presentation of results, we decided to give each entry a unique label, comprised of the name of the submitting user as well as a short mnemonic keyword representing the pipeline. (These keywords are merely indicative of each pipeline's main component, hence somewhat subjective; for a more faithful description of each pipeline, refer to the full text that accompanied each submission by following the label links). Each entry consists of three submitted VCF files (Garvan, Garvan-rerun, and HLI) and five comparisons (reproducibility 1 &amp; 2; accuracy 1a, 1b &amp; 2). The entries are sorted in order of date of submission.</p>
 
     <!-- Nav tabs -->
     <ul class="nav nav-tabs nav-tabs-contained" role="tablist">
@@ -610,44 +615,46 @@
         </div>
       </div>
     </div>
+
+    <div class="text-muted small">
+      <p>
+        *ebanks-nist: This entry was not considered because the entry submitted the NIST benchmark set as the answer
+        <br>
+        **rlopez-custom: This entry was not considered because the VCF files were not submitted within the challenge timeframe
+      </p>
+    </div>
+
+    <div>
+      <p>
+      We would like to acknowledge and thank all of those who participated in the precisionFDA Consistency Challenge, for their engagement and contributions. We hope that everyone will feel like a winner. After considering the performance in reproducibility and accuracy comparisons, as well as other parameters, we have decided to hand out recognitions and medals, as illustrated in the table.
+      </p>
+      <p>
+      More specifically, we are recognizing particular entries based on the following:
+      </p>
+      <ul>
+        <li>reproducibility across the same input ("deterministic")</li>
+        <li>reproducibility across different inputs ("highest-concordance", "high-concordance")</li>
+        <li>accuracy ("highest-recall", "high-recall", "highest-precision", "high-precision", "highest-f-measure", "high-f-measure")</li>
+        <li>miscellaneous criteria ("extra-credit", "pfda-apps", "heroic-effort")</li>
+      </ul>
+      <p>
+      For more information about the determination of these recognitions, refer to the respective sections of this web page.
+      </p>
+
+      <p>
+      Finally, we are handing out the following community challenge awards:
+      </p>
+      <ul>
+        <li>Overall Performance, to the entry submitted by Rafael Aldana et al. from Sentieon.</li>
+        <li>Overall Reproducibility, to the entry submitted by Rafael Aldana et al. from Sentieon.</li>
+        <li>Overall Accuracy, to the entry submitted by Deepak Grover from Sanofi-Genzyme.</li>
+      </ul>
+    </div>
   </div>
+</div>
 
-  <div class="text-muted small">
-    <p>
-      *ebanks-nist: This entry was not considered because the entry submitted the NIST benchmark set as the answer
-      <br>
-      **rlopez-custom: This entry was not considered because the VCF files were not submitted within the challenge timeframe
-    </p>
-  </div>
-
-  <div>
-    <p>
-    We would like to acknowledge and thank all of those who participated in the precisionFDA Consistency Challenge, for their engagement and contributions. We hope that everyone will feel like a winner. After considering the performance in reproducibility and accuracy comparisons, as well as other parameters, we have decided to hand out recognitions and medals, as illustrated in the table.
-    </p>
-    <p>
-    More specifically, we are recognizing particular entries based on the following:
-    </p>
-    <ul>
-      <li>reproducibility across the same input ("deterministic")</li>
-      <li>reproducibility across different inputs ("highest-concordance", "high-concordance")</li>
-      <li>accuracy ("highest-recall", "high-recall", "highest-precision", "high-precision", "highest-f-measure", "high-f-measure")</li>
-      <li>miscellaneous criteria ("extra-credit", "pfda-apps", "heroic-effort")</li>
-    </ul>
-    <p>
-    For more information about the determination of these recognitions, refer to the respective sections of this web page.
-    </p>
-
-    <p>
-    Finally, we are handing out the following community challenge awards:
-    </p>
-    <ul>
-      <li>Overall Performance, to the entry submitted by Rafael Aldana et al. from Sentieon.</li>
-      <li>Overall Reproducibility, to the entry submitted by Rafael Aldana et al. from Sentieon.</li>
-      <li>Overall Accuracy, to the entry submitted by Deepak Grover from Sanofi-Genzyme.</li>
-    </ul>
-  </div>
-
-  <div class="challenge-section">
+<div class="challenge-section challenge-section-detail">
+  <div class="container container-padded">
     <div class="h2">Details</div>
     <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
       <div class="panel panel-default">
@@ -1632,7 +1639,7 @@
       </div>
     </div>
   </div>
-  <div class="challenge-section">
+  <div class="container container-padded">
     <div class="h2">Miscellaneous Recognitions</div>
     <div>
       <p>
