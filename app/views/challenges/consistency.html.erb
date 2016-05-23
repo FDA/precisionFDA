@@ -63,12 +63,9 @@
 
 </div>
 
-<!-- Tab panes -->
-<div class="tab-content">
-  <div role="tabpanel" class="tab-pane <%= !params[:tab].present? ? 'active':'' %>" id="info">
-    <%= render "challenges/consistency/info" %>
-  </div>
-  <div role="tabpanel" class="tab-pane <%= params[:tab] == 'results' ? 'active':'' %>" id="results">
-    <%= render "challenges/consistency/results" %>
-  </div>
-</div>
+
+<% if params[:tab] == 'results' %>
+  <%= render "challenges/consistency/results" %>
+<% else %>
+  <%= render "challenges/consistency/info" %>
+<% end %>
