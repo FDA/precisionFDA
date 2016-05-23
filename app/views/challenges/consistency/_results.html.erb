@@ -48,7 +48,7 @@
     <div class="tab-content">
       <div role="tabpanel" class="tab-pane active" id="awards">
         <div class="table-responsive">
-          <table class="table table-condensed table-bordered table-striped table-hover">
+          <table class="table table-condensed table-bordered">
             <thead>
               <tr>
                 <th>Label</th>
@@ -363,7 +363,7 @@
       </div>
       <div role="tabpanel" class="tab-pane" id="datasets">
         <div class="table-responsive">
-          <table class="table table-condensed table-bordered table-striped table-hover">
+          <table class="table table-condensed table-bordered">
             <thead>
               <tr>
                 <th>Label</th>
@@ -737,7 +737,7 @@
     If the exact same pipeline runs twice on the exact same input, does it produce the same output? The reproducibility comparison 1 investigates exactly that, by comparing the Garvan VCF to the Garvan Rerun VCF (which are the results of running the same pipeline on the same sequencing data). In this comparison, true positives represent the common variants, whereas false positives and false negatives represent the unique variants (genotypes) in each file. The following table summarizes the performance of each entry with respect to number of common and unique variants in the reproducibility comparison 1. The entries are sorted by number of unique variants (and subsequently by submission date).
     </div>
     <div class="table-responsive">
-      <table class="table table-condensed table-bordered table-striped table-hover">
+      <table class="table table-condensed table-bordered">
         <tr>
           <td>Nickname</td>
           <td>Repro.1</td>
@@ -931,7 +931,7 @@
       Another question of interest is how reproducible is a result on the same biological sample and instrument but across different sites and library preps. The reproducibility comparison 2 quantifies the amount of similarity between results obtained using the Garvan and HLI datasets respectively. These datasets were generated from Coriell NA12878 DNA on a HiSeq X Ten instrument, but with different versions of the TruSeq Nano DNA Library Prep kit (v2.5 for Garvan; and v1 for HLI), and at different sequencing sites. Just like with reproducibility comparison 1, true positives represent the common variants, whereas false positives and false negatives represent the unique variants (genotypes). We appreciated that a single metric, concordance, defined as (common)/(common+unique) captures the essence of this comparison: it rewards not only a decrease in the number of unique variants, but also an increase in reproducible variants. The following table shows this concordance metric for the reproducibility comparison 2. The entries are sorted by decreasing concordance.
     </div>
     <div class="table-responsive">
-      <table class="table table-condensed table-bordered table-striped table-hover">
+      <table class="table table-condensed table-bordered">
         <tr>
           <td>Nickname</td>
           <td>Repro.2</td>
@@ -1144,682 +1144,502 @@
       The fact that concordance is no higher than 91.44% overall is probably indicative of limitations in the sequencing portion of the experiment. Several factors can contribute to decreased concordance, including potentially different batch of starting material from Coriell, and, more importantly, different handling for library preparation. Even if the same library is used, there is also inherent variability in the way sequencing instruments process a library and produce base calls -- including differences in coverage across the whole genome. Nevertheless, it is desirable for NGS pipelines to be somewhat robust to noise or other artifacts, to the extent possible. We would therefore like to recognize the entries that produced results with more than 90% concordance, assigning the "highest-concordance" and "high-concordance" badges.
       </p>
       <p>
-      Looking across both reproducibility comparisons 1 and 2, we noted that the entry with the highest concordance is also deterministic. We would therefore like to award Overall Reproducibility to the entry submitted by Rafael Aldana et al. from Sentieon. 
+      Looking across both reproducibility comparisons 1 and 2, we noted that the entry with the highest concordance is also deterministic. We would therefore like to award Overall Reproducibility to the entry submitted by Rafael Aldana et al. from Sentieon.
       </p>
     </div>
   </div>
 
   <div class="challenge-section">
-    <div class="h2">Recall</div>
-    <div class="table-responsive">
-      <table class="table table-condensed table-bordered table-striped table-hover">
-        <tr>
-          <td>Nickname</td>
-          <td>Recall1</td>
-          <td>Recall2</td>
-          <td>Diff from top</td>
-          <td>Recognition</td>
-        </tr>
+    <div class="h2">Recall, Precision, and F-Measure for Accuracy</div>
+    <div class="row">
+      <div class="col-md-8">
+        <table class="table table-condensed table-bordered table-nowrap">
+          <thead>
+            <tr>
+              <th colspan="4">Recall</th>
+            </tr>
+            <tr>
+              <th>Nickname</th>
+              <th>R1</th>
+              <th>R2</th>
+              <th>&Delta;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="challenge-row-highest">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/deepak.grover">dgrover-gatk</a></td>
+              <td>99.54%</td>
+              <td>98.92%</td>
+              <td>0.00%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/deepak.grover">dgrover-gatk</a></td>
-            <td>99.54%</td>
-            <td>98.92%</td>
-            <td>0.00%</td>
-            <td><%= recognition_badge('highest-recall') %></td>
-          </tr>
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.mark.2">amark-mixed</a></td>
+              <td>99.46%</td>
+              <td>98.62%</td>
+              <td>0.38%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.mark.2">amark-mixed</a></td>
-            <td>99.46%</td>
-            <td>98.62%</td>
-            <td>0.38%</td>
-            <td><%= recognition_badge('high-recall') %></td>
-          </tr>
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">raldana-sentieon</a></td>
+              <td>99.51%</td>
+              <td>98.54%</td>
+              <td>0.41%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">raldana-sentieon</a></td>
-            <td>99.51%</td>
-            <td>98.54%</td>
-            <td>0.41%</td>
-            <td><%= recognition_badge('high-recall') %></td>
-          </tr>
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/marghoob.mohiyuddin">mmohiyuddin-mixed</a></td>
+              <td>99.40%</td>
+              <td>98.62%</td>
+              <td>0.44%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/marghoob.mohiyuddin">mmohiyuddin-mixed</a></td>
-            <td>99.40%</td>
-            <td>98.62%</td>
-            <td>0.44%</td>
-            <td><%= recognition_badge('high-recall') %></td>
-          </tr>
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jeremy.edwards">jedwards-sentieon</a></td>
+              <td>99.44%</td>
+              <td>98.46%</td>
+              <td>0.56%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jeremy.edwards">jedwards-sentieon</a></td>
-            <td>99.44%</td>
-            <td>98.46%</td>
-            <td>0.56%</td>
-            <td><%= recognition_badge('high-recall') %></td>
-          </tr>
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-dragen</a></td>
+              <td>99.34%</td>
+              <td>98.50%</td>
+              <td>0.62%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-dragen</a></td>
-            <td>99.34%</td>
-            <td>98.50%</td>
-            <td>0.62%</td>
-            <td><%= recognition_badge('high-recall') %></td>
-          </tr>
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/aaron.statham">astatham-gatk</a></td>
+              <td>99.05%</td>
+              <td>98.19%</td>
+              <td>1.22%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/aaron.statham">astatham-gatk</a></td>
-            <td>99.05%</td>
-            <td>98.19%</td>
-            <td>1.22%</td>
-            <td></td>
-          </tr>
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/ayshwarya.subramanian">asubramanian-gatk</a></td>
+              <td>98.91%</td>
+              <td>98.19%</td>
+              <td>1.36%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/ayshwarya.subramanian">asubramanian-gatk</a></td>
-            <td>98.91%</td>
-            <td>98.19%</td>
-            <td>1.36%</td>
-            <td></td>
-          </tr>
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/erik.garrison">egarrison-hhga</a></td>
+              <td>98.91%</td>
+              <td>98.08%</td>
+              <td>1.47%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/erik.garrison">egarrison-hhga</a></td>
-            <td>98.91%</td>
-            <td>98.08%</td>
-            <td>1.47%</td>
-            <td></td>
-          </tr>
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/charles.chapple">cchapple-mixed</a></td>
+              <td>98.95%</td>
+              <td>97.96%</td>
+              <td>1.55%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/charles.chapple">cchapple-mixed</a></td>
-            <td>98.95%</td>
-            <td>97.96%</td>
-            <td>1.55%</td>
-            <td></td>
-          </tr>
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jason.harris">jharris-gatk</a></td>
+              <td>98.82%</td>
+              <td>97.45%</td>
+              <td>2.19%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jason.harris">jharris-gatk</a></td>
-            <td>98.82%</td>
-            <td>97.45%</td>
-            <td>2.19%</td>
-            <td></td>
-          </tr>
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/xiang.li">xli-custom</a></td>
+              <td>98.59%</td>
+              <td>97.56%</td>
+              <td>2.31%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/xiang.li">xli-custom</a></td>
-            <td>98.59%</td>
-            <td>97.56%</td>
-            <td>2.31%</td>
-            <td></td>
-          </tr>
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-genalice</a></td>
+              <td>97.96%</td>
+              <td>96.75%</td>
+              <td>3.75%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-genalice</a></td>
-            <td>97.96%</td>
-            <td>96.75%</td>
-            <td>3.75%</td>
-            <td></td>
-          </tr>
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-gatk</a></td>
+              <td>99.25%</td>
+              <td>94.25%</td>
+              <td>4.96%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-gatk</a></td>
-            <td>99.25%</td>
-            <td>94.25%</td>
-            <td>4.96%</td>
-            <td></td>
-          </tr>
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/mike.lin">mlin-fermikit</a></td>
+              <td>97.32%</td>
+              <td>93.81%</td>
+              <td>7.33%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/mike.lin">mlin-fermikit</a></td>
-            <td>97.32%</td>
-            <td>93.81%</td>
-            <td>7.33%</td>
-            <td></td>
-          </tr>
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/christian.iseli">ciseli-custom</a></td>
+              <td>95.68%</td>
+              <td>94.56%</td>
+              <td>8.22%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/christian.iseli">ciseli-custom</a></td>
-            <td>95.68%</td>
-            <td>94.56%</td>
-            <td>8.22%</td>
-            <td></td>
-          </tr>
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-isaac</a></td>
+              <td>95.26%</td>
+              <td>93.40%</td>
+              <td>9.80%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-isaac</a></td>
-            <td>95.26%</td>
-            <td>93.40%</td>
-            <td>9.80%</td>
-            <td></td>
-          </tr>
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-vqsr</a></td>
+              <td>95.48%</td>
+              <td>90.60%</td>
+              <td>12.38%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-vqsr</a></td>
-            <td>95.48%</td>
-            <td>90.60%</td>
-            <td>12.38%</td>
-            <td></td>
-          </tr>
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">anovak-vg</a></td>
+              <td>93.55%</td>
+              <td>89.99%</td>
+              <td>14.92%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">anovak-vg</a></td>
-            <td>93.55%</td>
-            <td>89.99%</td>
-            <td>14.92%</td>
-            <td></td>
-          </tr>
+            <tr class="challenge-row-not-considered">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a></td>
+              <td>99.43%</td>
+              <td>98.51%</td>
+              <td>-</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a></td>
-            <td>99.43%</td>
-            <td>98.51%</td>
-            <td>-</td>
-            <td>not-considered</td>
-          </tr>
+            <tr class="challenge-row-not-considered">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a></td>
+              <td>100.00%</td>
+              <td>100.00%</td>
+              <td>-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-md-8">
+        <table class="table table-condensed table-bordered table-nowrap">
+          <thead>
+            <tr>
+              <th colspan="4">Precision</th>
+            </tr>
+            <tr>
+              <th>Nickname</th>
+              <th>P1</th>
+              <th>P2</th>
+              <th>&Delta;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="challenge-row-highest">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/deepak.grover">dgrover-gatk</a></td>
+              <td>99.71%</td>
+              <td>99.62%</td>
+              <td>0.00%</td>
+            </tr>
 
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a></td>
-            <td>100.00%</td>
-            <td>100.00%</td>
-            <td>-</td>
-            <td>not-considered</td>
-          </tr>
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jason.harris">jharris-gatk</a></td>
+              <td>99.54%</td>
+              <td>99.61%</td>
+              <td>0.18%</td>
+            </tr>
 
-      </table>
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-vqsr</a></td>
+              <td>99.48%</td>
+              <td>99.56%</td>
+              <td>0.29%</td>
+            </tr>
 
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">raldana-sentieon</a></td>
+              <td>99.43%</td>
+              <td>99.60%</td>
+              <td>0.30%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/erik.garrison">egarrison-hhga</a></td>
+              <td>99.54%</td>
+              <td>99.46%</td>
+              <td>0.33%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-isaac</a></td>
+              <td>99.41%</td>
+              <td>99.47%</td>
+              <td>0.45%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jeremy.edwards">jedwards-sentieon</a></td>
+              <td>99.35%</td>
+              <td>99.47%</td>
+              <td>0.51%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/aaron.statham">astatham-gatk</a></td>
+              <td>99.31%</td>
+              <td>99.47%</td>
+              <td>0.55%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/marghoob.mohiyuddin">mmohiyuddin-mixed</a></td>
+              <td>99.22%</td>
+              <td>99.43%</td>
+              <td>0.68%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/charles.chapple">cchapple-mixed</a></td>
+              <td>99.25%</td>
+              <td>99.39%</td>
+              <td>0.69%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/ayshwarya.subramanian">asubramanian-gatk</a></td>
+              <td>99.12%</td>
+              <td>99.39%</td>
+              <td>0.82%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-gatk</a></td>
+              <td>99.21%</td>
+              <td>99.29%</td>
+              <td>0.83%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.mark.2">amark-mixed</a></td>
+              <td>99.13%</td>
+              <td>99.33%</td>
+              <td>0.87%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-dragen</a></td>
+              <td>99.16%</td>
+              <td>99.20%</td>
+              <td>0.97%</td>
+            </tr>
+
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/mike.lin">mlin-fermikit</a></td>
+              <td>98.63%</td>
+              <td>97.90%</td>
+              <td>2.80%</td>
+            </tr>
+
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-genalice</a></td>
+              <td>98.11%</td>
+              <td>97.76%</td>
+              <td>3.46%</td>
+            </tr>
+
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/xiang.li">xli-custom</a></td>
+              <td>97.86%</td>
+              <td>97.97%</td>
+              <td>3.50%</td>
+            </tr>
+
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/christian.iseli">ciseli-custom</a></td>
+              <td>93.16%</td>
+              <td>95.26%</td>
+              <td>10.91%</td>
+            </tr>
+
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">anovak-vg</a></td>
+              <td>90.17%</td>
+              <td>89.00%</td>
+              <td>20.16%</td>
+            </tr>
+
+            <tr class="challenge-row-not-considered">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a></td>
+              <td>99.78%</td>
+              <td>99.70%</td>
+              <td>-</td>
+            </tr>
+
+            <tr class="challenge-row-not-considered">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a></td>
+              <td>100.00%</td>
+              <td>100.00%</td>
+              <td>-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-md-8">
+        <table class="table table-condensed table-bordered table-nowrap">
+          <thead>
+            <tr>
+              <th colspan="4">F-measure</th>
+            </tr>
+            <tr>
+              <th>Nickname</th>
+              <th>F1</th>
+              <th>F2</th>
+              <th>&Delta;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="challenge-row-highest">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/deepak.grover">dgrover-gatk</a></td>
+              <td>99.62%</td>
+              <td>99.27%</td>
+              <td>0.00%</td>
+            </tr>
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">raldana-sentieon</a></td>
+              <td>99.47%</td>
+              <td>99.06%</td>
+              <td>0.36%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jeremy.edwards">jedwards-sentieon</a></td>
+              <td>99.39%</td>
+              <td>98.97%</td>
+              <td>0.53%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/marghoob.mohiyuddin">mmohiyuddin-mixed</a></td>
+              <td>99.31%</td>
+              <td>99.02%</td>
+              <td>0.56%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.mark.2">amark-mixed</a></td>
+              <td>99.29%</td>
+              <td>98.97%</td>
+              <td>0.63%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-dragen</a></td>
+              <td>99.25%</td>
+              <td>98.85%</td>
+              <td>0.79%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/aaron.statham">astatham-gatk</a></td>
+              <td>99.18%</td>
+              <td>98.82%</td>
+              <td>0.89%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/erik.garrison">egarrison-hhga</a></td>
+              <td>99.22%</td>
+              <td>98.76%</td>
+              <td>0.91%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/ayshwarya.subramanian">asubramanian-gatk</a></td>
+              <td>99.00%</td>
+              <td>98.79%</td>
+              <td>1.10%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/charles.chapple">cchapple-mixed</a></td>
+              <td>99.10%</td>
+              <td>98.67%</td>
+              <td>1.12%</td>
+            </tr>
+
+            <tr class="challenge-row-high">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jason.harris">jharris-gatk</a></td>
+              <td>99.18%</td>
+              <td>98.52%</td>
+              <td>1.19%</td>
+            </tr>
+
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/xiang.li">xli-custom</a></td>
+              <td>98.23%</td>
+              <td>97.76%</td>
+              <td>2.90%</td>
+            </tr>
+
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-gatk</a></td>
+              <td>99.23%</td>
+              <td>96.70%</td>
+              <td>2.96%</td>
+            </tr>
+
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-genalice</a></td>
+              <td>98.04%</td>
+              <td>97.25%</td>
+              <td>3.60%</td>
+            </tr>
+
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/mike.lin">mlin-fermikit</a></td>
+              <td>97.97%</td>
+              <td>95.81%</td>
+              <td>5.11%</td>
+            </tr>
+
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-isaac</a></td>
+              <td>97.29%</td>
+              <td>96.34%</td>
+              <td>5.26%</td>
+            </tr>
+
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-vqsr</a></td>
+              <td>97.44%</td>
+              <td>94.87%</td>
+              <td>6.58%</td>
+            </tr>
+
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/christian.iseli">ciseli-custom</a></td>
+              <td>94.40%</td>
+              <td>94.91%</td>
+              <td>9.58%</td>
+            </tr>
+
+            <tr>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">anovak-vg</a></td>
+              <td>91.83%</td>
+              <td>89.49%</td>
+              <td>17.57%</td>
+            </tr>
+
+            <tr class="challenge-row-not-considered">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a></td>
+              <td>99.61%</td>
+              <td>99.10%</td>
+              <td>-</td>
+            </tr>
+
+            <tr class="challenge-row-not-considered">
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a></td>
+              <td>100.00%</td>
+              <td>100.00%</td>
+              <td>-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-
-  <div class="challenge-section">
-    <div class="h2">Precision</div>
-    <div class="table-responsive">
-      <table class="table table-condensed table-bordered table-striped table-hover">
-        <tr>
-          <td>Nickname</td>
-          <td>Precision1</td>
-          <td>Precision2</td>
-          <td>Diff from top</td>
-          <td>Recognition</td>
-        </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/deepak.grover">dgrover-gatk</a></td>
-            <td>99.71%</td>
-            <td>99.62%</td>
-            <td>0.00%</td>
-            <td><%= recognition_badge('highest-precision') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jason.harris">jharris-gatk</a></td>
-            <td>99.54%</td>
-            <td>99.61%</td>
-            <td>0.18%</td>
-            <td><%= recognition_badge('high-precision') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-vqsr</a></td>
-            <td>99.48%</td>
-            <td>99.56%</td>
-            <td>0.29%</td>
-            <td><%= recognition_badge('high-precision') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">raldana-sentieon</a></td>
-            <td>99.43%</td>
-            <td>99.60%</td>
-            <td>0.30%</td>
-            <td><%= recognition_badge('high-precision') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/erik.garrison">egarrison-hhga</a></td>
-            <td>99.54%</td>
-            <td>99.46%</td>
-            <td>0.33%</td>
-            <td><%= recognition_badge('high-precision') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-isaac</a></td>
-            <td>99.41%</td>
-            <td>99.47%</td>
-            <td>0.45%</td>
-            <td><%= recognition_badge('high-precision') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jeremy.edwards">jedwards-sentieon</a></td>
-            <td>99.35%</td>
-            <td>99.47%</td>
-            <td>0.51%</td>
-            <td><%= recognition_badge('high-precision') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/aaron.statham">astatham-gatk</a></td>
-            <td>99.31%</td>
-            <td>99.47%</td>
-            <td>0.55%</td>
-            <td><%= recognition_badge('high-precision') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/marghoob.mohiyuddin">mmohiyuddin-mixed</a></td>
-            <td>99.22%</td>
-            <td>99.43%</td>
-            <td>0.68%</td>
-            <td><%= recognition_badge('high-precision') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/charles.chapple">cchapple-mixed</a></td>
-            <td>99.25%</td>
-            <td>99.39%</td>
-            <td>0.69%</td>
-            <td><%= recognition_badge('high-precision') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/ayshwarya.subramanian">asubramanian-gatk</a></td>
-            <td>99.12%</td>
-            <td>99.39%</td>
-            <td>0.82%</td>
-            <td><%= recognition_badge('high-precision') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-gatk</a></td>
-            <td>99.21%</td>
-            <td>99.29%</td>
-            <td>0.83%</td>
-            <td><%= recognition_badge('high-precision') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.mark.2">amark-mixed</a></td>
-            <td>99.13%</td>
-            <td>99.33%</td>
-            <td>0.87%</td>
-            <td><%= recognition_badge('high-precision') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-dragen</a></td>
-            <td>99.16%</td>
-            <td>99.20%</td>
-            <td>0.97%</td>
-            <td><%= recognition_badge('high-precision') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/mike.lin">mlin-fermikit</a></td>
-            <td>98.63%</td>
-            <td>97.90%</td>
-            <td>2.80%</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-genalice</a></td>
-            <td>98.11%</td>
-            <td>97.76%</td>
-            <td>3.46%</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/xiang.li">xli-custom</a></td>
-            <td>97.86%</td>
-            <td>97.97%</td>
-            <td>3.50%</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/christian.iseli">ciseli-custom</a></td>
-            <td>93.16%</td>
-            <td>95.26%</td>
-            <td>10.91%</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">anovak-vg</a></td>
-            <td>90.17%</td>
-            <td>89.00%</td>
-            <td>20.16%</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a></td>
-            <td>99.78%</td>
-            <td>99.70%</td>
-            <td>-</td>
-            <td>not-considered</td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a></td>
-            <td>100.00%</td>
-            <td>100.00%</td>
-            <td>-</td>
-            <td>not-considered</td>
-          </tr>
-
-      </table>
-
-    </div>
-  </div>
-
-  <div class="challenge-section">
-    <div class="h2">F-measure</div>
-    <div class="table-responsive">
-      <table class="table table-condensed table-bordered table-striped table-hover">
-        <tr>
-          <td>Nickname</td>
-          <td>F-measure1</td>
-          <td>F-measure2</td>
-          <td>Diff from top</td>
-          <td>Recognition</td>
-        </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/deepak.grover">dgrover-gatk</a></td>
-            <td>99.62%</td>
-            <td>99.27%</td>
-            <td>0.00%</td>
-            <td><%= recognition_badge('highest-f-measure') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">raldana-sentieon</a></td>
-            <td>99.47%</td>
-            <td>99.06%</td>
-            <td>0.36%</td>
-            <td><%= recognition_badge('high-f-measure') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jeremy.edwards">jedwards-sentieon</a></td>
-            <td>99.39%</td>
-            <td>98.97%</td>
-            <td>0.53%</td>
-            <td><%= recognition_badge('high-f-measure') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/marghoob.mohiyuddin">mmohiyuddin-mixed</a></td>
-            <td>99.31%</td>
-            <td>99.02%</td>
-            <td>0.56%</td>
-            <td><%= recognition_badge('high-f-measure') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.mark.2">amark-mixed</a></td>
-            <td>99.29%</td>
-            <td>98.97%</td>
-            <td>0.63%</td>
-            <td><%= recognition_badge('high-f-measure') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-dragen</a></td>
-            <td>99.25%</td>
-            <td>98.85%</td>
-            <td>0.79%</td>
-            <td><%= recognition_badge('high-f-measure') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/aaron.statham">astatham-gatk</a></td>
-            <td>99.18%</td>
-            <td>98.82%</td>
-            <td>0.89%</td>
-            <td><%= recognition_badge('high-f-measure') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/erik.garrison">egarrison-hhga</a></td>
-            <td>99.22%</td>
-            <td>98.76%</td>
-            <td>0.91%</td>
-            <td><%= recognition_badge('high-f-measure') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/ayshwarya.subramanian">asubramanian-gatk</a></td>
-            <td>99.00%</td>
-            <td>98.79%</td>
-            <td>1.10%</td>
-            <td><%= recognition_badge('high-f-measure') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/charles.chapple">cchapple-mixed</a></td>
-            <td>99.10%</td>
-            <td>98.67%</td>
-            <td>1.12%</td>
-            <td><%= recognition_badge('high-f-measure') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jason.harris">jharris-gatk</a></td>
-            <td>99.18%</td>
-            <td>98.52%</td>
-            <td>1.19%</td>
-            <td><%= recognition_badge('high-f-measure') %></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/xiang.li">xli-custom</a></td>
-            <td>98.23%</td>
-            <td>97.76%</td>
-            <td>2.90%</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-gatk</a></td>
-            <td>99.23%</td>
-            <td>96.70%</td>
-            <td>2.96%</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-genalice</a></td>
-            <td>98.04%</td>
-            <td>97.25%</td>
-            <td>3.60%</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/mike.lin">mlin-fermikit</a></td>
-            <td>97.97%</td>
-            <td>95.81%</td>
-            <td>5.11%</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-isaac</a></td>
-            <td>97.29%</td>
-            <td>96.34%</td>
-            <td>5.26%</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-vqsr</a></td>
-            <td>97.44%</td>
-            <td>94.87%</td>
-            <td>6.58%</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/christian.iseli">ciseli-custom</a></td>
-            <td>94.40%</td>
-            <td>94.91%</td>
-            <td>9.58%</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">anovak-vg</a></td>
-            <td>91.83%</td>
-            <td>89.49%</td>
-            <td>17.57%</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a></td>
-            <td>99.61%</td>
-            <td>99.10%</td>
-            <td>-</td>
-            <td>not-considered</td>
-          </tr>
-
-          <tr>
-            <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a></td>
-            <td>100.00%</td>
-            <td>100.00%</td>
-            <td>-</td>
-            <td>not-considered</td>
-          </tr>
-
-      </table>
-
-    </div>
-  </div>
-
-  <div class="challenge-section">
-    <div class="h2">Warnings</div>
-    <div class="table-responsive">
-      <table class="table table-condensed table-bordered table-striped table-hover">
-        <tr>
-          <td>Nickname</td>
-          <td>Warnings</td>
-        </tr>
-
-          <tr>
-            <td>ebanks-nist</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td>raldana-sentieon</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td>dgrover-gatk</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td>jedwards-sentieon</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td>ckim-gatk</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td>ckim-vqsr</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td>ckim-isaac</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td>ckim-dragen</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td>ckim-genalice</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td>mlin-fermikit</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td>ciseli-custom</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td>astatham-gatk</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td>anovak-vg</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td>mmohiyuddin-mixed</td>
-            <td>Rerun VCF file-BvZ1Zb00X24xQ0V341kkb211 appeared 7 days post-deadline</td>
-          </tr>
-
-          <tr>
-            <td>cchapple-mixed</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td>amark-mixed</td>
-            <td>Repro.1 comparison 985 was done by George<br>Repro.2 comparison 986 was done by George<br>Acc.1a comparison 982 was done by George<br>Acc.1b comparison 984 was done by George<br>Acc.2 comparison 983 was done by George</td>
-          </tr>
-
-          <tr>
-            <td>jharris-gatk</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td>asubramanian-gatk</td>
-            <td></td>
-          </tr>
-
-          <tr>
-            <td>egarrison-hhga</td>
-            <td>HLI VCF file-BvYkXzQ0f0fz7fyFq9KgB667 appeared 7 days post-deadline</td>
-          </tr>
-
-          <tr>
-            <td>xli-custom</td>
-            <td>Repro.1 comparison 992 was done by George<br>Repro.2 comparison 993 was done by George</td>
-          </tr>
-
-          <tr>
-            <td>rlopez-custom</td>
-            <td>Garvan VCF file-Bvb8Bk007b4J44Fjx82zx3Zv appeared 9 days post-deadline<br>Rerun VCF file-Bvb8ZZj07b4J19BZpQ2yKPbB appeared 9 days post-deadline<br>HLI VCF file-Bvb9z8007b4GB83FX02vGqfq appeared 9 days post-deadline</td>
-          </tr>
-
-      </table>
-    </div>
-  </div>
-
 </div>
