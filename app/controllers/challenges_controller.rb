@@ -26,8 +26,6 @@ class ChallengesController < ApplicationController
     else
       @btn_class = "accessible-btn-danger"
     end
-
-    @entries, @repro1_order, @repro2_order, @recall_order, @precision_order, @f_measure_order = Challenge.consistency_results
   end
 
   # Challenge 2 - Truth
