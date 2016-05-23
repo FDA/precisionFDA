@@ -7,18 +7,18 @@
       <div class="pfda-cards pfda-cards-justify-centered ">
         <div class="pfda-card pfda-card-rounded pfda-card-padded pfda-card-warning">
           <div class="pfda-card-body">
-            <%= medal_badge("Consistency (Overall)", "large") %>
+            <%= medal_badge("Overall performance", "large") %>
             <br>
-            <div class="lead">Sentieon</div>
-            <div>raldana-sentieon</div>
+            <div class="lead">Sentieon team</div>
+            <div>Rafael Aldana, Hanying Feng, Brendan Gallagher, Jun Ye</div>
           </div>
         </div>
         <div class="pfda-card pfda-card-rounded pfda-card-padded pfda-card-warning">
           <div class="pfda-card-body">
             <%= medal_badge("Reproducibility", "large") %>
             <br>
-            <div class="lead">Sentieon</div>
-            <div>raldana-sentieon</div>
+            <div class="lead">Sentieon team</div>
+            <div>Rafael Aldana, Hanying Feng, Brendan Gallagher, Jun Ye</div>
           </div>
         </div>
         <div class="pfda-card pfda-card-rounded pfda-card-padded pfda-card-warning">
@@ -26,7 +26,7 @@
             <%= medal_badge("Accuracy", "large") %>
             <br>
             <div class="lead">Sanofi-Genzyme</div>
-            <div>dgrover-gatk</div>
+            <div>Deepak Grover</div>
           </div>
         </div>
       </div>
@@ -35,6 +35,8 @@
 
   <div class="challenge-section">
     <div class="h2">Overview of Results</div>
+
+   We received a total of 21 entries to the challenge, summarized in the following table. To aid in the presentation of results, we decided to give each entry a unique label, comprised of the name of the submitting user as well as a short mnemonic keyword representing the pipeline. (These keywords are merely indicative of each pipeline's main component, hence somewhat subjective; for a more faithful description of each pipeline, refer to the full text that accompanied each submission by following the label links). Each entry consists of three submitted VCF files (Garvan, Garvan-rerun, and HLI) and five comparisons (reproducibility 1 &amp; 2; accuracy 1a, 1b &amp; 2). The entries are sorted in order of date of submission.
 
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
@@ -53,7 +55,7 @@
                 <th>Submitter</th>
                 <th>Team</th>
                 <th>Org</th>
-                <th>Medals</th>
+                <th>Awards</th>
                 <th>Repro1</th>
                 <th>Repro2</th>
                 <th>Recall</th>
@@ -64,7 +66,7 @@
             </thead>
 
             <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a></td>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a>*</td>
               <td>Eric Banks</td>
               <td></td>
               <td></td>
@@ -82,7 +84,7 @@
               <td>Rafael Aldana</td>
               <td>Hanying Feng, Brendan Gallagher, Jun Ye</td>
               <td>Sentieon</td>
-              <td><%= medal_badge("Consistency (Overall)") %> <%= medal_badge("Reproducibility") %></td>
+              <td><%= medal_badge("Overall performance") %> <%= medal_badge("Reproducibility") %></td>
               <td><%= recognition_badge('deterministic') %></td>
               <td><%= recognition_badge('highest-concordance') %></td>
               <td><%= recognition_badge('high-recall') %></td>
@@ -235,7 +237,7 @@
               <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">anovak-vg</a></td>
               <td>Adam Novak</td>
               <td>Erik Garrison, Eric Dawson, Glenn Hickey, Mike Lin</td>
-              <td>(multiple)</td>
+              <td>vgteam</td>
               <td></td>
               <td></td>
               <td></td>
@@ -344,7 +346,7 @@
             </tr>
 
             <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a></td>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a>**</td>
               <td>Rene Lopez</td>
               <td>Adrian Sarno</td>
               <td>MyBioinformatician</td>
@@ -365,16 +367,16 @@
             <thead>
               <tr>
                 <th>Label</th>
-                <th>Submitter</th>
-                <th>Team</th>
-                <th>Org</th>
+                <th>Submitting user</th>
+                <th>Other team members</th>
+                <th>Organization</th>
                 <th>VCF Files</th>
                 <th>Comparisons</th>
               </tr>
             </thead>
 
             <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a></td>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a>*</td>
               <td>Eric Banks</td>
               <td></td>
               <td></td>
@@ -674,7 +676,7 @@
             </tr>
 
             <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a></td>
+              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a>**</td>
               <td>Rene Lopez</td>
               <td>Adrian Sarno</td>
               <td>MyBioinformatician</td>
@@ -693,8 +695,47 @@
     </div>
   </div>
 
+  <div>
+    <p class="small">
+    *ebanks-nist: This entry was not considered because the entry submitted the NIST benchmark set as the answer<br>
+    **rlopez-custom: This entry was not considered because the VCF files were not submitted within the challenge timeframe
+    </p>
+  </div>
+
+  <div>
+    <p>
+    We would like to acknowledge and thank all of those who participated in the precisionFDA Consistency Challenge, for their engagement and contributions. We hope that everyone will feel like a winner. After considering the performance in reproducibility and accuracy comparisons, as well as other parameters, we have decided to hand out recognitions and medals, as illustrated in the table.
+    </p>
+    <p>
+    More specifically, we are recognizing particular entries based on the following:
+    </p>
+    <ul>
+      <li>reproducibility across the same input ("deterministic")</li>
+      <li>reproducibility across different inputs ("highest-concordance", "high-concordance")</li>
+      <li>accuracy ("highest-recall", "high-recall", "highest-precision", "high-precision", "highest-f-measure", "high-f-measure")</li>
+      <li>miscellaneous criteria ("extra-credit", "pfda-apps", "heroic-effort")</li>
+    </ul>
+    <p>
+    For more information about the determination of these recognitions, refer to the respective sections of this web page.
+    </p>
+
+    <p>
+    Finally, we are handing out the following community challenge awards:
+    </p>
+    <ul>
+      <li>Overall Performance, to the entry submitted by Rafael Aldana et al. from Sentieon.</li>
+      <li>Overall Reproducibility, to the entry submitted by Rafael Aldana et al. from Sentieon.</li>
+      <li>Overall Accuracy, to the entry submitted by Deepak Grover from Sanofi-Genzyme.</li>
+    </ul>
+  </div>
+
+
+
   <div class="challenge-section">
     <div class="h2">Reproducibility across same input</div>
+    <div>
+    If the exact same pipeline runs twice on the exact same input, does it produce the same output? The reproducibility comparison 1 investigates exactly that, by comparing the Garvan VCF to the Garvan Rerun VCF (which are the results of running the same pipeline on the same sequencing data). In this comparison, true positives represent the common variants, whereas false positives and false negatives represent the unique variants (genotypes) in each file. The following table summarizes the performance of each entry with respect to number of common and unique variants in the reproducibility comparison 1. The entries are sorted by number of unique variants (and subsequently by submission date).
+    </div>
     <div class="table-responsive">
       <table class="table table-condensed table-bordered table-striped table-hover">
         <tr>
@@ -854,7 +895,7 @@
             <td><a href="/comparisons/1033">Link</a></td>
             <td class='num'>3,139,985</td>
             <td class='num'>0</td>
-            <td>not-considered</td>
+            <td>Footnote #1</td>
           </tr>
 
           <tr>
@@ -862,7 +903,7 @@
             <td><a href="/comparisons/113">Link</a></td>
             <td class='num'>3,151,019</td>
             <td class='num'>0</td>
-            <td>not-considered</td>
+            <td>Footnote #2</td>
           </tr>
 
           <tr>
@@ -870,14 +911,25 @@
             <td><a href="/comparisons/996">Link</a></td>
             <td class='num'>4,632,204</td>
             <td class='num'>0</td>
-            <td>not-considered</td>
+            <td>Footnote #3</td>
           </tr>
       </table>
+    </div>
+    <div class="small">
+      [#1] This entry was not considered because the VCF files were not submitted within the challenge timeframe<br>
+      [#2] This entry was not considered because the entry submitted the NIST benchmark set as the answer<br>
+      [#3] This entry was not considered because the Garvan rerun VCF file was not submitted within the challenge timeframe
+    </div>
+    <div>
+      We would like to recognize all entries which exhibited deterministic behavior (zero unique variants). These entries produced identical results across invocations. The remaining entries showed some degree of difference, ranging from a small amount of unique variants all the way to a hundred thousand unique variants. As suggested by some of the participants, the lack of determinism may in part be attributed to parallelization and a few other factors. One participant said: "We think the multi-threading option used during our alignment step can lead to non-deterministic answers and hence, slight variations in results. It would be useful to note how the different entries vary in this result and which factors or differences the community decides really matter in the day-to-day running of a clinical genomics facility." Similarly, another participant said: "Our pipeline, by design, must be 100% repeatable between runs, i.e., have zero run-to-run difference. This can be achieved by rigorous software design: no random numbers, no downsampling, and rigorous parallelization hence zero dependency on the number of threads."
     </div>
   </div>
 
   <div class="challenge-section">
     <div class="h2">Reproducibility across different inputs</div>
+    <div>
+      Another question of interest is how reproducible is a result on the same biological sample and instrument but across different sites and library preps. The reproducibility comparison 2 quantifies the amount of similarity between results obtained using the Garvan and HLI datasets respectively. These datasets were generated from Coriell NA12878 DNA on a HiSeq X Ten instrument, but with different versions of the TruSeq Nano DNA Library Prep kit (v2.5 for Garvan; and v1 for HLI), and at different sequencing sites. Just like with reproducibility comparison 1, true positives represent the common variants, whereas false positives and false negatives represent the unique variants (genotypes). We appreciated that a single metric, concordance, defined as (common)/(common+unique) captures the essence of this comparison: it rewards not only a decrease in the number of unique variants, but also an increase in reproducible variants. The following table shows this concordance metric for the reproducibility comparison 2. The entries are sorted by decreasing concordance.
+    </div>
     <div class="table-responsive">
       <table class="table table-condensed table-bordered table-striped table-hover">
         <tr>
@@ -1039,7 +1091,7 @@
             <td class='num'>3,151,019</td>
             <td class='num'>0</td>
             <td>100.00%</td>
-            <td>not-considered</td>
+            <td>Footnote #4</td>
           </tr>
 
           <tr>
@@ -1048,7 +1100,7 @@
             <td class='num'>3,097,788</td>
             <td class='num'>57,975</td>
             <td>98.16%</td>
-            <td>not-considered</td>
+            <td>Footnote #5</td>
           </tr>
 
           <tr>
@@ -1057,7 +1109,7 @@
             <td class='num'>3,086,242</td>
             <td class='num'>66,955</td>
             <td>97.88%</td>
-            <td>not-considered</td>
+            <td>Footnote #6</td>
           </tr>
 
           <tr>
@@ -1066,7 +1118,7 @@
             <td class='num'>3,083,646</td>
             <td class='num'>121,074</td>
             <td>96.22%</td>
-            <td>not-considered</td>
+            <td>Footnote #6</td>
           </tr>
 
           <tr>
@@ -1075,10 +1127,25 @@
             <td class='num'>3,064,375</td>
             <td class='num'>259,836</td>
             <td>92.18%</td>
-            <td>not-considered</td>
+            <td>Footnote #6</td>
           </tr>
 
       </table>
+    </div>
+    <div class="small">
+      <p>
+      [#4] This entry was not considered because the entry submitted the NIST benchmark set as the answer<br>
+      [#5] This entry was not considered because the VCF files were not submitted within the challenge timeframe<br>
+      [#6] These entries were not considered because they did not call variants across the whole genome
+      </p>
+    </div>
+    <div>
+      <p>
+      The fact that concordance is no higher than 91.44% overall is probably indicative of limitations in the sequencing portion of the experiment. Several factors can contribute to decreased concordance, including potentially different batch of starting material from Coriell, and, more importantly, different handling for library preparation. Even if the same library is used, there is also inherent variability in the way sequencing instruments process a library and produce base calls -- including differences in coverage across the whole genome. Nevertheless, it is desirable for NGS pipelines to be somewhat robust to noise or other artifacts, to the extent possible. We would therefore like to recognize the entries that produced results with more than 90% concordance, assigning the "highest-concordance" and "high-concordance" badges.
+      </p>
+      <p>
+      Looking across both reproducibility comparisons 1 and 2, we noted that the entry with the highest concordance is also deterministic. We would therefore like to award Overall Reproducibility to the entry submitted by Rafael Aldana et al. from Sentieon. 
+      </p>
     </div>
   </div>
 
