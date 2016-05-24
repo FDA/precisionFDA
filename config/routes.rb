@@ -89,8 +89,8 @@ Rails.application.routes.draw do
       get 'explore', on: :collection, as: 'explore'
     end
     resources :challenges do
-      get 'consistency', on: :collection
-      get 'truth', on: :collection
+      get 'consistency(/:tab)', on: :collection, action: :consistency, as: 'consistency'
+      get 'truth(/:tab)', on: :collection, action: :truth, as: 'truth'
       get 'join', on: :member
     end
     resources :discussions, constraints: {answer_id: /[^\/]+/ } do

@@ -3,12 +3,9 @@
 .nav.nav-tabs
   background-color: $brand-blue-subtler
 
-  .tab-label
-    text-transform: uppercase
-  .tab-help
-    font-size: 85%
-    color: $brand-blue-tertiary
-    display: block
+.nav.nav-tabs, .nav.nav-pills
+  &.nav-tabs-contained
+    background-color: transparent
 
   &.nav-tabs-padded
     padding: $padding-base-vertical $padding-base-horizontal 0
@@ -31,6 +28,13 @@
     padding: 3px
     background-color: transparent
 
+  .tab-label
+    text-transform: uppercase
+  .tab-help
+    font-size: 85%
+    color: $brand-blue-tertiary
+    display: block
+
 .tab-pane
   .nav.nav-tabs
     background-color: #fff
@@ -43,4 +47,3 @@
 
   &.tab-pane-padded-xl
     padding: $padding-large-vertical*2 $padding-large-horizontal*2
-
