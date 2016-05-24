@@ -113,10 +113,19 @@
     </div>
 
     <div>
-      <p>To aid in the presentation of results, we decided to give each entry a unique label, comprised of the name of the submitting user as well as a short mnemonic keyword representing the pipeline. (These keywords are merely indicative of each pipeline's main component, hence somewhat subjective; for a more faithful description of each pipeline, refer to the full text that accompanied each submission by following the label links). Each entry consists of three submitted VCF files (Garvan, Garvan-rerun, and HLI) and five comparisons (reproducibility 1 &amp; 2; accuracy 1a, 1b &amp; 2). The entries are sorted in order of date of submission.</p>
+      <p>To aid in the presentation of results, we decided to give each entry a unique label, comprised of the name of the submitting user as well as a short mnemonic keyword representing the pipeline. (These keywords are merely indicative of each pipeline's main component, hence somewhat subjective; for a more faithful description of each pipeline, refer to the full text that accompanied each submission by following the label links). Each entry consists of three submitted VCF files (Garvan, Garvan-rerun, and HLI) and five comparisons (reproducibility 1 &amp; 2; accuracy 1a, 1b &amp; 2), as shown in the "Datasets" tab. The entries are sorted in order of date of submission.</p>
 
       <p>
-      More specifically, we are recognizing particular entries based on the following:
+      We are handing out the following community challenge awards:
+      </p>
+      <ul>
+        <li><%= medal_badge('overall-performance') %> to the entry submitted by Rafael Aldana et al. from Sentieon, for their overall high performance in both reproducibility and accuracy.</li>
+        <li><%= medal_badge('reproducibility') %> to the entry submitted by Rafael Aldana et al. from Sentieon, for achieving the highest concordance and determinism.</li>
+        <li><%= medal_badge('accuracy') %> to the entry submitted by Deepak Grover from Sanofi-Genzyme, for achieving the highest accuracy.</li>
+      </ul>
+
+      <p>
+      We are also recognizing particular entries based on the following:
       </p>
       <ul>
         <li>reproducibility across the same input (<%= recognition_badge('deterministic') %>)</li>
@@ -127,28 +136,19 @@
       <p>
       For more information about the determination of these recognitions, refer to the respective sections of this web page.
       </p>
-
-      <p>
-      Finally, we are handing out the following community challenge awards:
-      </p>
-      <ul>
-        <li>Overall Performance, to the entry submitted by Rafael Aldana et al. from Sentieon.</li>
-        <li>Overall Reproducibility, to the entry submitted by Rafael Aldana et al. from Sentieon.</li>
-        <li>Overall Accuracy, to the entry submitted by Deepak Grover from Sanofi-Genzyme.</li>
-      </ul>
     </div>
   </div>
 </div>
 
 <div class="challenge-section challenge-section-detail">
   <div class="container container-padded">
-    <div class="h2">Awards and Recognitions Detail</div>
+    <div class="h2">Performance and Recognitions Details</div>
     <div class="panel-group accordion" id="detailsAccordion" role="tablist" aria-multiselectable="true">
       <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="headingOne">
           <h4 class="panel-title">
             <a role="button" data-toggle="collapse" data-parent="#detailsAccordion" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-              Reproducibility across same input
+              Reproducibility across the same input
             </a>
           </h4>
         </div>
@@ -200,9 +200,6 @@
               <p>
               The fact that concordance is no higher than 91.44% overall is probably indicative of limitations in the sequencing portion of the experiment. Several factors can contribute to decreased concordance, including potentially different batch of starting material from Coriell, and, more importantly, different handling for library preparation. Even if the same library is used, there is also inherent variability in the way sequencing instruments process a library and produce base calls &mdash; including differences in coverage across the whole genome. Nevertheless, it is desirable for NGS pipelines to be somewhat robust to noise or other artifacts, to the extent possible. We would therefore like to recognize the entries that produced results with more than 90% concordance, assigning the <%= recognition_badge('highest-concordance', false) %> and <%= recognition_badge('high-concordance', false) %> badges.
               </p>
-              <p>
-              Looking across both reproducibility comparisons 1 and 2, we noted that the entry with the highest concordance is also deterministic. We would therefore like to award Overall Reproducibility to the entry submitted by Rafael Aldana et al. from Sentieon.
-              </p>
             </div>
           </div>
         </div>
@@ -242,12 +239,6 @@
               </p>
               <p>
               Given the performances in precision and recall in the first two tables, it's no surprise that the f-measure is usually slightly higher in the Garvan dataset, and that overall the entries are close (but not as close as in the precision table). We would like to recognize the top 11 entries (sum of deltas from the top less than 1.2%) assigning the <%= recognition_badge('highest-f-measure', false) %> and <%= recognition_badge('high-f-measure', false) %> badges.
-              </p>
-              <p>
-              We would like to award the Accuracy Award to the entry submitted by Deepak Grover from Sanofi-Genzyme, for achieving the highest accuracy.
-              </p>
-              <p>
-              We would like to award the Overall Performance award to the entry submitted by Rafael Aldana et. al from Sentieon, for their high performance in both reproducibility and accuracy.
               </p>
             </div>
           </div>
