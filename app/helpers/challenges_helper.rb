@@ -40,20 +40,20 @@ module ChallengesHelper
     end
   end
 
-  def recognition_badge(recognition)
+  def recognition_badge(recognition, trim = true)
     if recognition != ''
       if recognition.include? "highest"
         raw """
           <div class='challenge-badge challenge-badge-recognition-highest'>
             <span class='fa fa-star' aria-hidden='true'></span>
-            Highest
+            #{trim ? 'Highest' : recognition}
           </div>
         """
       elsif recognition.include? "high"
         raw """
           <div class='challenge-badge challenge-badge-recognition'>
             <span class='fa fa-star' aria-hidden='true'></span>
-            High
+            #{trim ? 'High' : recognition}
           </div>
         """
       elsif recognition.include? "not-considered"

@@ -119,10 +119,10 @@
       More specifically, we are recognizing particular entries based on the following:
       </p>
       <ul>
-        <li>reproducibility across the same input ("deterministic")</li>
-        <li>reproducibility across different inputs ("highest-concordance", "high-concordance")</li>
-        <li>accuracy ("highest-recall", "high-recall", "highest-precision", "high-precision", "highest-f-measure", "high-f-measure")</li>
-        <li>miscellaneous criteria ("extra-credit", "pfda-apps", "heroic-effort", "promising")</li>
+        <li>reproducibility across the same input (<%= recognition_badge('deterministic') %>)</li>
+        <li>reproducibility across different inputs (<%= recognition_badge('highest-concordance', false) %>, <%= recognition_badge('high-concordance', false) %>)</li>
+        <li>accuracy (<%= ["highest-recall", "high-recall", "highest-precision", "high-precision", "highest-f-measure", "high-f-measure"].map { |r| recognition_badge(r, false) }.join(", ").html_safe %>)</li>
+        <li>miscellaneous criteria (<%= recognition_badge('extra-credit') %>, <%= recognition_badge('pfda-apps') %>, <%= recognition_badge('heroic-effort') %>, <%= recognition_badge('promising') %>)</li>
       </ul>
       <p>
       For more information about the determination of these recognitions, refer to the respective sections of this web page.
@@ -198,7 +198,7 @@
             </div>
             <div>
               <p>
-                The fact that concordance is no higher than 91.44% overall is probably indicative of limitations in the sequencing portion of the experiment. Several factors can contribute to decreased concordance, including potentially different batch of starting material from Coriell, and, more importantly, different handling for library preparation. Even if the same library is used, there is also inherent variability in the way sequencing instruments process a library and produce base calls &mdash; including differences in coverage across the whole genome. Nevertheless, it is desirable for NGS pipelines to be somewhat robust to noise or other artifacts, to the extent possible. We would therefore like to recognize the entries that produced results with more than 90% concordance, assigning the "highest-concordance" and "high-concordance" badges.
+              The fact that concordance is no higher than 91.44% overall is probably indicative of limitations in the sequencing portion of the experiment. Several factors can contribute to decreased concordance, including potentially different batch of starting material from Coriell, and, more importantly, different handling for library preparation. Even if the same library is used, there is also inherent variability in the way sequencing instruments process a library and produce base calls &mdash; including differences in coverage across the whole genome. Nevertheless, it is desirable for NGS pipelines to be somewhat robust to noise or other artifacts, to the extent possible. We would therefore like to recognize the entries that produced results with more than 90% concordance, assigning the <%= recognition_badge('highest-concordance', false) %> and <%= recognition_badge('high-concordance', false) %> badges.
               </p>
               <p>
               Looking across both reproducibility comparisons 1 and 2, we noted that the entry with the highest concordance is also deterministic. We would therefore like to award Overall Reproducibility to the entry submitted by Rafael Aldana et al. from Sentieon.
@@ -235,13 +235,13 @@
             </div>
             <div>
               <p>
-              Looking at recall, we noticed that most entries did better at Recall1 (Garvan) than Recall2 (HLI) &mdash; sometimes with striking differences (such as the entry labeled "macrogen-gatk"). This may be related to the fact that the Garvan dataset used newer, improved chemistry. We would like to recognize the top 6 entries (sum of deltas from the top less than 1%) assigning the "highest-recall" and "high-recall" badges.
+              Looking at recall, we noticed that most entries did better at Recall1 (Garvan) than Recall2 (HLI) &mdash; sometimes with striking differences (such as the entry labeled "macrogen-gatk"). This may be related to the fact that the Garvan dataset used newer, improved chemistry. We would like to recognize the top 6 entries (sum of deltas from the top less than 1%) assigning the <%= recognition_badge('highest-recall', false) %> and <%= recognition_badge('high-recall', false) %> badges.
               </p>
               <p>
-              A higher precision value means fewer false positives. Filtering criteria and other post-processing techniques are often used to reduce false positives, but sometimes this is at the expense of recall. Pipelines often have to deal with such tradeoffs between recall (sensitivity) and precision (positive predictive value), and different NGS pipelines may be tuned for different goals, depending on the context. Looking at the respective table for precision, the overall good performance of most entries (compared to the recall table) reveals that the majority of pipelines favor precision, especially since it does not show as big of a fluctuation between Precision1 (Garvan) and Precision2 (HLI). We would like to recognize the top 14 entries (sum of deltas from the top less than 1%) assigning the "highest-precision" and "high-precision" badges.
+              A higher precision value means fewer false positives. Filtering criteria and other post-processing techniques are often used to reduce false positives, but sometimes this is at the expense of recall. Pipelines often have to deal with such tradeoffs between recall (sensitivity) and precision (positive predictive value), and different NGS pipelines may be tuned for different goals, depending on the context. Looking at the respective table for precision, the overall good performance of most entries (compared to the recall table) reveals that the majority of pipelines favor precision, especially since it does not show as big of a fluctuation between Precision1 (Garvan) and Precision2 (HLI). We would like to recognize the top 14 entries (sum of deltas from the top less than 1%) assigning the <%= recognition_badge('highest-precision', false) %> and <%= recognition_badge('high-precision', false) %> badges.
               </p>
               <p>
-              Given the performances in precision and recall in the first two tables, it's no surprise that the f-measure is usually slightly higher in the Garvan dataset, and that overall the entries are close (but not as close as in the precision table). We would like to recognize the top 11 entries (sum of deltas from the top less than 1.2%) assigning the "highest-f-measure" and "high-f-measure" badges.
+              Given the performances in precision and recall in the first two tables, it's no surprise that the f-measure is usually slightly higher in the Garvan dataset, and that overall the entries are close (but not as close as in the precision table). We would like to recognize the top 11 entries (sum of deltas from the top less than 1.2%) assigning the <%= recognition_badge('highest-f-measure', false) %> and <%= recognition_badge('high-f-measure', false) %> badges.
               </p>
               <p>
               We would like to award the Accuracy Award to the entry submitted by Deepak Grover from Sanofi-Genzyme, for achieving the highest accuracy.
@@ -268,10 +268,10 @@
             We would like to extend special recognitions to the following entries:
             </p>
             <ul>
-              <li> The "extra-credit" recognition to the entry submitted by Deepak Grover (Sanofi-Genzyme), for answering the extra credit question.</li>
-              <li> The "pfda-apps" recognition to the entry submitted by Mike Lin (DNAnexus Science), for contributing apps to precisionFDA and using them to generate the results of the entry.</li>
-              <li> The "heroic-effort" recognition to the entry submitted by Adam Novak et. al (VGTeam), for using this challenge as an opportunity to push the boundaries of their pipeline. As they <a href="https://precision.fda.gov/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">mentioned</a> in their submission, "vg is a work in progress, and this challenge answer represents the first time it has ever been run on whole genomes. The team sprinted through the weekend preceding the deadline in order to scale up the graph read-mapping and variant-calling algorithms, which had previously been used only on limited test regions".</li>
-              <li> The "promising" recognition to the entry submitted by Rene Lopez et. al (MyBioinformatician)</li>
+              <li> The <%= recognition_badge('extra-credit') %> recognition to the entry submitted by Deepak Grover (Sanofi-Genzyme), for answering the extra credit question.</li>
+              <li> The <%= recognition_badge('pfda-apps') %> recognition to the entry submitted by Mike Lin (DNAnexus Science), for contributing apps to precisionFDA and using them to generate the results of the entry.</li>
+              <li> The <%= recognition_badge('heroic-effort') %> recognition to the entry submitted by Adam Novak et. al (VGTeam), for using this challenge as an opportunity to push the boundaries of their pipeline. As they <a href="https://precision.fda.gov/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">mentioned</a> in their submission, "vg is a work in progress, and this challenge answer represents the first time it has ever been run on whole genomes. The team sprinted through the weekend preceding the deadline in order to scale up the graph read-mapping and variant-calling algorithms, which had previously been used only on limited test regions".</li>
+              <li> The <%= recognition_badge('promising') %> recognition to the entry submitted by Rene Lopez et. al (MyBioinformatician). Although the submission was not received on time, the pipeline's performance characteristics were promising, and we are looking forward to seeing this method applied to future challenges.</li>
             </ul>
           </div>
         </div>
