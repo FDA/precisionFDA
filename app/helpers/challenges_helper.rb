@@ -28,13 +28,13 @@ module ChallengesHelper
         """
       else
         raw """
-          <div class='challenge-badge challenge-badge-medal'>
+          <span class='challenge-badge challenge-badge-medal'>
             <span class='fa-stack' aria-hidden='true'>
               <i class='fa fa-certificate fa-stack-2x'></i>
               <i class='fa fa-trophy fa-stack-1x fa-inverse'></i>
             </span>
             #{medal}
-          </div>
+          </span>
         """
       end
     end
@@ -44,26 +44,26 @@ module ChallengesHelper
     if recognition != ''
       if recognition.include? "highest"
         raw """
-          <div class='challenge-badge challenge-badge-recognition-highest'>
+          <span class='challenge-badge challenge-badge-recognition-highest'>
             <span class='fa fa-star' aria-hidden='true'></span>
             #{trim ? 'Highest' : recognition}
-          </div>
+          </span>
         """
       elsif recognition.include? "high"
         raw """
-          <div class='challenge-badge challenge-badge-recognition'>
+          <span class='challenge-badge challenge-badge-recognition'>
             <span class='fa fa-star' aria-hidden='true'></span>
             #{trim ? 'High' : recognition}
-          </div>
+          </span>
         """
       elsif recognition.include? "not-considered"
         return "Not Considered"
       else
         raw """
-          <div class='challenge-badge challenge-badge-recognition'>
+          <span class='challenge-badge challenge-badge-recognition'>
             <span class='fa fa-star' aria-hidden='true'></span>
             #{recognition}
-          </div>
+          </span>
         """
       end
     end

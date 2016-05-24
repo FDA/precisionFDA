@@ -11,17 +11,11 @@ class ChallengesController < ApplicationController
   def consistency
     @discussion = Discussion.find_by(id: CONSISTENCY_DISCUSSION_ID)
 
-    @challengedEndDate = CONSISTENCY_CHALLENGE_END_DATE
+    @consistency_challenge = Challenge.consistency(@context)
 
-    @challenge = {
-      launched: !@discussion.nil? && @discussion.public?,
-      active: DateTime.now.in_time_zone < CONSISTENCY_CHALLENGE_END_DATE,
-      joined: @context.logged_in? && !@discussion.nil? && @discussion.followed_by?(@context.user)
-    }
-
-    if DateTime.now.in_time_zone < @challengedEndDate.months_ago(2)
+    if DateTime.now.in_time_zone < @consistency_challenge[:end_date].months_ago(2)
       @btn_class = "accessible-btn-success"
-    elsif DateTime.now.in_time_zone < @challengedEndDate.months_ago(1)
+    elsif DateTime.now.in_time_zone < @consistency_challenge[:end_date].months_ago(1)
       @btn_class = "accessible-btn-warning"
     else
       @btn_class = "accessible-btn-danger"
@@ -32,17 +26,11 @@ class ChallengesController < ApplicationController
   def truth
     @discussion = Discussion.find_by(id: TRUTH_DISCUSSION_ID)
 
-    @challengedEndDate = TRUTH_CHALLENGE_END_DATE
+    @truth_challenge = Challenge.truth(@context)
 
-    @challenge = {
-      launched: !@discussion.nil? && @discussion.public?,
-      active: DateTime.now.in_time_zone < TRUTH_CHALLENGE_END_DATE,
-      joined: @context.logged_in? && !@discussion.nil? && @discussion.followed_by?(@context.user)
-    }
-
-    if DateTime.now.in_time_zone < @challengedEndDate.weeks_ago(2)
+    if DateTime.now.in_time_zone < @truth_challenge[:end_date].weeks_ago(2)
       @btn_class = "accessible-btn-success"
-    elsif DateTime.now.in_time_zone < @challengedEndDate.weeks_ago(1)
+    elsif DateTime.now.in_time_zone < @truth_challenge[:end_date].weeks_ago(1)
       @btn_class = "accessible-btn-warning"
     else
       @btn_class = "accessible-btn-danger"
