@@ -80,566 +80,10 @@
     <!-- Tab panes -->
     <div class="tab-content">
       <div role="tabpanel" class="tab-pane active" id="awards">
-        <div class="table-responsive">
-          <table class="table table-condensed table-bordered table-nowrap">
-            <thead>
-              <tr>
-                <th>Label</th>
-                <th>Submitter</th>
-                <th>Organization</th>
-                <th>Awards</th>
-                <th>Repro1</th>
-                <th>Repro2<br>Concordance</th>
-                <th>Recall</th>
-                <th>Precision</th>
-                <th>F-measure</th>
-                <th>Other</th>
-              </tr>
-            </thead>
-
-            <tr class="challenge-row-not-considered">
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a>*</td>
-              <td>Eric Banks</td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">raldana-sentieon</a></td>
-              <td>Rafael Aldana <a tabindex="0" role="button" data-trigger="Focus" data-toggle="popover" data-content="Hanying Feng, Brendan Gallagher, Jun Ye">et al.</a></td>
-              <td>Sentieon</td>
-              <td>
-                <%= medal_badge("Performance") %>
-                <br>
-                <%= medal_badge("Reproducibility") %>
-              </td>
-              <td><%= recognition_badge('deterministic') %></td>
-              <td><%= recognition_badge('highest-concordance') %></td>
-              <td><%= recognition_badge('high-recall') %></td>
-              <td><%= recognition_badge('high-precision') %></td>
-              <td><%= recognition_badge('high-f-measure') %></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/deepak.grover">dgrover-gatk</a></td>
-              <td>Deepak Grover</td>
-              <td>Sanofi-Genzyme</td>
-              <td><%= medal_badge("Accuracy") %></td>
-              <td></td>
-              <td><%= recognition_badge('high-concordance') %></td>
-              <td><%= recognition_badge('highest-recall') %></td>
-              <td><%= recognition_badge('highest-precision') %></td>
-              <td><%= recognition_badge('highest-f-measure') %></td>
-              <td><%= recognition_badge('extra-credit') %></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jeremy.edwards">jedwards-sentieon</a></td>
-              <td>Jeremy Edwards</td>
-              <td><abbr title="University of New Mexico">UNM</abbr></td>
-              <td></td>
-              <td><%= recognition_badge('deterministic') %></td>
-              <td><%= recognition_badge('high-concordance') %></td>
-              <td><%= recognition_badge('high-recall') %></td>
-              <td><%= recognition_badge('high-precision') %></td>
-              <td><%= recognition_badge('high-f-measure') %></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-gatk</a></td>
-              <td>Changhoon Kim</td>
-              <td>Macrogen</td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td><%= recognition_badge('high-precision') %></td>
-              <td></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-vqsr</a></td>
-              <td>Changhoon Kim</td>
-              <td>Macrogen</td>
-              <td></td>
-              <td><%= recognition_badge('deterministic') %></td>
-              <td></td>
-              <td></td>
-              <td><%= recognition_badge('high-precision') %></td>
-              <td></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-isaac</a></td>
-              <td>Changhoon Kim</td>
-              <td>Macrogen</td>
-              <td></td>
-              <td><%= recognition_badge('deterministic') %></td>
-              <td><%= recognition_badge('high-concordance') %></td>
-              <td></td>
-              <td><%= recognition_badge('high-precision') %></td>
-              <td></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-dragen</a></td>
-              <td>Changhoon Kim</td>
-              <td>Macrogen</td>
-              <td></td>
-              <td></td>
-              <td><%= recognition_badge('high-concordance') %></td>
-              <td><%= recognition_badge('high-recall') %></td>
-              <td><%= recognition_badge('high-precision') %></td>
-              <td><%= recognition_badge('high-f-measure') %></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-genalice</a></td>
-              <td>Changhoon Kim</td>
-              <td>Macrogen</td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/mike.lin">mlin-fermikit</a></td>
-              <td>Mike Lin</td>
-              <td>DNAnexus Science</td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td><%= recognition_badge('pfda-apps') %></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/christian.iseli">ciseli-custom</a></td>
-              <td>Christian Iseli <a tabindex="0" role="button" data-trigger="Focus" data-toggle="popover" data-content="Nicolas Guex, Maxime Jan, Thierry Schuepbach, Brian Stevenson, Ioannis Xenarios">et al.</a></td>
-              <td><abbr title="Swiss Institute of Bioinformatics">SIB</abbr></td>
-              <td></td>
-              <td><%= recognition_badge('deterministic') %></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/aaron.statham">astatham-gatk</a></td>
-              <td>Aaron Statham <a tabindex="0" role="button" data-trigger="Focus" data-toggle="popover" data-content="Mark Cowley, Joseph Copty, Mark Pinese">et al.</a></td>
-              <td><abbr title="Kinghorn Center of Clinical Genomics">KCCG</abbr></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td><%= recognition_badge('high-precision') %></td>
-              <td><%= recognition_badge('high-f-measure') %></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">anovak-vg</a></td>
-              <td>Adam Novak <a tabindex="0" role="button" data-trigger="Focus" data-toggle="popover" data-content="Erik Garrison, Eric Dawson, Glenn Hickey, Mike Lin">et al.</a></td>
-              <td>vgteam</td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td><%= recognition_badge('heroic-effort') %></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/marghoob.mohiyuddin">mmohiyuddin-mixed</a></td>
-              <td>Marghoob Mohiyuddin <a tabindex="0" role="button" data-trigger="Focus" data-toggle="popover" data-content="Jian Li">et al.</a></td>
-              <td>Roche</td>
-              <td></td>
-              <td></td>
-              <td><%= recognition_badge('high-concordance') %></td>
-              <td><%= recognition_badge('high-recall') %></td>
-              <td><%= recognition_badge('high-precision') %></td>
-              <td><%= recognition_badge('high-f-measure') %></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/charles.chapple">cchapple-mixed</a></td>
-              <td>Charles Chapple <a tabindex="0" role="button" data-trigger="Focus" data-toggle="popover" data-content="Andreas Massouras">et al.</a></td>
-              <td>Saphetor</td>
-              <td></td>
-              <td></td>
-              <td><%= recognition_badge('high-concordance') %></td>
-              <td></td>
-              <td><%= recognition_badge('high-precision') %></td>
-              <td><%= recognition_badge('high-f-measure') %></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.mark.2">amark-mixed</a></td>
-              <td>Adam Mark</td>
-              <td>Avera</td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td><%= recognition_badge('high-recall') %></td>
-              <td><%= recognition_badge('high-precision') %></td>
-              <td><%= recognition_badge('high-f-measure') %></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jason.harris">jharris-gatk</a></td>
-              <td>Jason Harris</td>
-              <td>Personalis</td>
-              <td></td>
-              <td><%= recognition_badge('deterministic') %></td>
-              <td></td>
-              <td></td>
-              <td><%= recognition_badge('high-precision') %></td>
-              <td><%= recognition_badge('high-f-measure') %></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/ayshwarya.subramanian">asubramanian-gatk</a></td>
-              <td>Ayshwarya Subramanian <a tabindex="0" role="button" data-trigger="Focus" data-toggle="popover" data-content="Yossi Farjoun, Jonathan Bloom">et al.</a></td>
-              <td>Broad Institute</td>
-              <td></td>
-              <td></td>
-              <td><%= recognition_badge('high-concordance') %></td>
-              <td></td>
-              <td><%= recognition_badge('high-precision') %></td>
-              <td><%= recognition_badge('high-f-measure') %></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/erik.garrison">egarrison-hhga</a></td>
-              <td>Erik Garrison <a tabindex="0" role="button" data-trigger="Focus" data-toggle="popover" data-content="Nikete Della Penna">et al.</a></td>
-              <td></td>
-              <td></td>
-              <td><%= recognition_badge('deterministic') %></td>
-              <td></td>
-              <td></td>
-              <td><%= recognition_badge('high-precision') %></td>
-              <td><%= recognition_badge('high-f-measure') %></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/xiang.li">xli-custom</a></td>
-              <td>Xiang Li <a tabindex="0" role="button" data-trigger="Focus" data-toggle="popover" data-content="Tao Wang">et al.</a></td>
-              <td>Pathway Genomics</td>
-              <td></td>
-              <td><%= recognition_badge('deterministic') %></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
-
-            <tr class="challenge-row-not-considered">
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a>**</td>
-              <td>Rene Lopez <a tabindex="0" role="button" data-trigger="Focus" data-toggle="popover" data-content="Adrian Sarno">et al.</a></td>
-              <td>MyBioinformatician</td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
-          </table>
-        </div>
+        <%= render "challenges/consistency/table_overview" %>
       </div>
       <div role="tabpanel" class="tab-pane" id="datasets">
-        <div class="table-responsive">
-          <table class="table table-condensed table-bordered table-nowrap">
-            <thead>
-              <tr>
-                <th>Label</th>
-                <th>VCF Files</th>
-                <th>Comparisons</th>
-              </tr>
-            </thead>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a>*</td>
-              <td><a href="/files/file-Bq8B98003fJy7x5f2GXpvFqy">G1</a>,
-                <a href="/files/file-Bq8BF8j03fJf0xG3F0Y8QGKb">G2</a>,
-                <a href="/files/file-Bq8BJJj03fJgJ5YbPvJFKQGZ">H</a></td>
-              <td><a href="/comparisons/113">R1</a>,
-                  <a href="/comparisons/114">R2</a>,
-                  <a href="/comparisons/118">A1a</a>,
-                  <a href="/comparisons/119">A1b</a>,
-                  <a href="/comparisons/120">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">raldana-sentieon</a></td>
-              <td><a href="/files/file-BvFpJ9Q0xgF4bz8zqkJfv53Y">G1</a>,
-                <a href="/files/file-BvFpJ9Q0xgF0JgV6FJ508QzJ">G2</a>,
-                <a href="/files/file-BvFpJ9Q0xgF3bXZB8Q650v4J">H</a></td>
-              <td><a href="/comparisons/471">R1</a>,
-                  <a href="/comparisons/472">R2</a>,
-                  <a href="/comparisons/479">A1a</a>,
-                  <a href="/comparisons/482">A1b</a>,
-                  <a href="/comparisons/477">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/deepak.grover">dgrover-gatk</a></td>
-              <td><a href="/files/file-BvP364809V3vz9XV5Z6PxPPK">G1</a>,
-                <a href="/files/file-BvP364809V3k6JvQBV5597vb">G2</a>,
-                <a href="/files/file-BvP364809V3k8GK0QVz2QJ8z">H</a></td>
-              <td><a href="/comparisons/989">R1</a>,
-                  <a href="/comparisons/990">R2</a>,
-                  <a href="/comparisons/788">A1a</a>,
-                  <a href="/comparisons/789">A1b</a>,
-                  <a href="/comparisons/787">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jeremy.edwards">jedwards-sentieon</a></td>
-              <td><a href="/files/file-BvGPB1j0bpvGjJyZBQ66jXJZ">G1</a>,
-                <a href="/files/file-BvGPB1j0bpvJKyJpPV516Vfb">G2</a>,
-                <a href="/files/file-BvGPB1j0bpv60XvgZ5zBv8PG">H</a></td>
-              <td><a href="/comparisons/550">R1</a>,
-                  <a href="/comparisons/551">R2</a>,
-                  <a href="/comparisons/552">A1a</a>,
-                  <a href="/comparisons/553">A1b</a>,
-                  <a href="/comparisons/554">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-gatk</a></td>
-              <td><a href="/files/file-BvGqJb008byY68x7QvJkK8ZG">G1</a>,
-                <a href="/files/file-BvGqXz008byq2zQg5k9vf781">G2</a>,
-                <a href="/files/file-BvGqbp808byQXY6K9k5GfYB8">H</a></td>
-              <td><a href="/comparisons/597">R1</a>,
-                  <a href="/comparisons/601">R2</a>,
-                  <a href="/comparisons/590">A1a</a>,
-                  <a href="/comparisons/591">A1b</a>,
-                  <a href="/comparisons/592">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-vqsr</a></td>
-              <td><a href="/files/file-BvGpxy008byQ98qyjvgykFqz">G1</a>,
-                <a href="/files/file-BvGqgV008bygk1Gq6Q69QQvb">G2</a>,
-                <a href="/files/file-BvGqkQ808byZbz8zqkJfv91Z">H</a></td>
-              <td><a href="/comparisons/598">R1</a>,
-                  <a href="/comparisons/602">R2</a>,
-                  <a href="/comparisons/583">A1a</a>,
-                  <a href="/comparisons/588">A1b</a>,
-                  <a href="/comparisons/589">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-isaac</a></td>
-              <td><a href="/files/file-BvGq4jj08byzJYQkvkJX994B">G1</a>,
-                <a href="/files/file-BvGq74008byqyfYqF4pZpQFZ">G2</a>,
-                <a href="/files/file-BvGqFk008byzv5fqxxJj7yBj">H</a></td>
-              <td><a href="/comparisons/596">R1</a>,
-                  <a href="/comparisons/600">R2</a>,
-                  <a href="/comparisons/585">A1a</a>,
-                  <a href="/comparisons/586">A1b</a>,
-                  <a href="/comparisons/587">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-dragen</a></td>
-              <td><a href="/files/file-BvGqyZ008byQGvzYg1zBPx34">G1</a>,
-                <a href="/files/file-BvGqzj808byQj68JX5z89BZ2">G2</a>,
-                <a href="/files/file-BvGv2K808bygy8YQ4v6822Kq">H</a></td>
-              <td><a href="/comparisons/599">R1</a>,
-                  <a href="/comparisons/603">R2</a>,
-                  <a href="/comparisons/593">A1a</a>,
-                  <a href="/comparisons/594">A1b</a>,
-                  <a href="/comparisons/595">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-genalice</a></td>
-              <td><a href="/files/file-BvJ6p6008bygx9gxj0gj2qjb">G1</a>,
-                <a href="/files/file-BvJ6x0Q08byxb96YY5z4K7zJ">G2</a>,
-                <a href="/files/file-BvJ6yXQ08byzv0Qv9Q6J3b2X">H</a></td>
-              <td><a href="/comparisons/635">R1</a>,
-                  <a href="/comparisons/636">R2</a>,
-                  <a href="/comparisons/631">A1a</a>,
-                  <a href="/comparisons/632">A1b</a>,
-                  <a href="/comparisons/634">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/mike.lin">mlin-fermikit</a></td>
-              <td><a href="/files/file-BvK9b880PJ941KZJ0bkqxGf8">G1</a>,
-                <a href="/files/file-BvK9kBQ08fZ67Y9Y14Zvpv6Z">G2</a>,
-                <a href="/files/file-BvK91380qYkyPQZj08Zgqq8Z">H</a></td>
-              <td><a href="/comparisons/698">R1</a>,
-                  <a href="/comparisons/699">R2</a>,
-                  <a href="/comparisons/700">A1a</a>,
-                  <a href="/comparisons/701">A1b</a>,
-                  <a href="/comparisons/702">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/christian.iseli">ciseli-custom</a></td>
-              <td><a href="/files/file-BvP0pf007Z868yVbk5JXQ5fB">G1</a>,
-                <a href="/files/file-BvP0pf007Z87x9gxj0gj3393">G2</a>,
-                <a href="/files/file-BvP0pf007Z8Pv0Qv9Q6J3qBQ">H</a></td>
-              <td><a href="/comparisons/754">R1</a>,
-                  <a href="/comparisons/753">R2</a>,
-                  <a href="/comparisons/748">A1a</a>,
-                  <a href="/comparisons/749">A1b</a>,
-                  <a href="/comparisons/750">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/aaron.statham">astatham-gatk</a></td>
-              <td><a href="/files/file-BvFzz4j0XBX6bP8Xb53k1vyX">G1</a>,
-                <a href="/files/file-BvFzyzj078B6bP8Xb53k1vy6">G2</a>,
-                <a href="/files/file-BvFzyJ803qvFPQ10Z93yJyQ4">H</a></td>
-              <td><a href="/comparisons/533">R1</a>,
-                  <a href="/comparisons/534">R2</a>,
-                  <a href="/comparisons/536">A1a</a>,
-                  <a href="/comparisons/537">A1b</a>,
-                  <a href="/comparisons/538">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">anovak-vg</a></td>
-              <td><a href="/files/file-BvP6gX00KyGVG3YK38ZQjb04">G1</a>,
-                <a href="/files/file-BvP6gb80PxgyPQZj08ZjjJFv">G2</a>,
-                <a href="/files/file-BvP6ggj0p3vkFz5PYV3j6jz6">H</a></td>
-              <td><a href="/comparisons/835">R1</a>,
-                  <a href="/comparisons/836">R2</a>,
-                  <a href="/comparisons/832">A1a</a>,
-                  <a href="/comparisons/833">A1b</a>,
-                  <a href="/comparisons/834">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/marghoob.mohiyuddin">mmohiyuddin-mixed</a></td>
-              <td><a href="/files/file-BvP5x1Q0X24Y3vjGf5z5K6FY">G1</a>,
-                <a href="/files/file-BvZ1Zb00X24xQ0V341kkb211">G2</a>,
-                <a href="/files/file-BvP5x1Q0X24z59zQybP7P1jp">H</a></td>
-              <td><a href="/comparisons/996">R1</a>,
-                  <a href="/comparisons/859">R2</a>,
-                  <a href="/comparisons/821">A1a</a>,
-                  <a href="/comparisons/997">A1b</a>,
-                  <a href="/comparisons/822">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/charles.chapple">cchapple-mixed</a></td>
-              <td><a href="/files/file-BvP8G100Kkz0XY6K9k5Gfxk0">G1</a>,
-                <a href="/files/file-BvP8GV00KkzJy28Xy197yB63">G2</a>,
-                <a href="/files/file-BvP8JP00Kkz0XY6K9k5Gfxk5">H</a></td>
-              <td><a href="/comparisons/842">R1</a>,
-                  <a href="/comparisons/845">R2</a>,
-                  <a href="/comparisons/840">A1a</a>,
-                  <a href="/comparisons/841">A1b</a>,
-                  <a href="/comparisons/843">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.mark.2">amark-mixed</a></td>
-              <td><a href="/files/file-BvPBqvQ0KbffzZ9kykJqbG5G">G1</a>,
-                <a href="/files/file-BvPF59Q0KbfxKyJpPV516yjq">G2</a>,
-                <a href="/files/file-BvPF2380Kbfvz9XV5Z6PxV6Q">H</a></td>
-              <td><a href="/comparisons/985">R1</a>,
-                  <a href="/comparisons/986">R2</a>,
-                  <a href="/comparisons/982">A1a</a>,
-                  <a href="/comparisons/984">A1b</a>,
-                  <a href="/comparisons/983">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jason.harris">jharris-gatk</a></td>
-              <td><a href="/files/file-BvP93qQ012GV1XBkv59P7Jfx">G1</a>,
-                <a href="/files/file-BvP93qQ012GbGjzbkbPGV9ZQ">G2</a>,
-                <a href="/files/file-BvP93qQ012GVZZK7b9z67zK7">H</a></td>
-              <td><a href="/comparisons/847">R1</a>,
-                  <a href="/comparisons/848">R2</a>,
-                  <a href="/comparisons/849">A1a</a>,
-                  <a href="/comparisons/850">A1b</a>,
-                  <a href="/comparisons/851">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/ayshwarya.subramanian">asubramanian-gatk</a></td>
-              <td><a href="/files/file-BvP0bk00Yf86zZ9kykJqbB1q">G1</a>,
-                <a href="/files/file-BvP0bk00Yf8Gz9XV5Z6PxP2G">G2</a>,
-                <a href="/files/file-BvP0vzj0Yf868yVbk5JXQ5gj">H</a></td>
-              <td><a href="/comparisons/751">R1</a>,
-                  <a href="/comparisons/752">R2</a>,
-                  <a href="/comparisons/755">A1a</a>,
-                  <a href="/comparisons/761">A1b</a>,
-                  <a href="/comparisons/762">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/erik.garrison">egarrison-hhga</a></td>
-              <td><a href="/files/file-BvPK1F80yG4Y7JGZg4gvvX27">G1</a>,
-                <a href="/files/file-BvPK1F80yG4y346p8k9bY6KJ">G2</a>,
-                <a href="/files/file-BvYkXzQ0f0fz7fyFq9KgB667">H</a></td>
-              <td><a href="/comparisons/868">R1</a>,
-                  <a href="/comparisons/1006">R2</a>,
-                  <a href="/comparisons/866">A1a</a>,
-                  <a href="/comparisons/1007">A1b</a>,
-                  <a href="/comparisons/981">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/xiang.li">xli-custom</a></td>
-              <td><a href="/files/file-BvGQg200Q6jF2zQg5k9vf66P">G1</a>,
-                <a href="/files/file-BvGQg200Q6j941Gv159bj065">G2</a>,
-                <a href="/files/file-BvGQg200Q6j5GjzbkbPGQzg4">H</a></td>
-              <td><a href="/comparisons/1109">R1</a>,
-                  <a href="/comparisons/1110">R2</a>,
-                  <a href="/comparisons/558">A1a</a>,
-                  <a href="/comparisons/559">A1b</a>,
-                  <a href="/comparisons/560">A2</a></td>
-            </tr>
-
-            <tr>
-              <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a>**</td>
-              <td><a href="/files/file-Bvb8Bk007b4J44Fjx82zx3Zv">G1</a>,
-                <a href="/files/file-Bvb8ZZj07b4J19BZpQ2yKPbB">G2</a>,
-                <a href="/files/file-Bvb9z8007b4GB83FX02vGqfq">H</a></td>
-              <td><a href="/comparisons/1033">R1</a>,
-                  <a href="/comparisons/1045">R2</a>,
-                  <a href="/comparisons/1030">A1a</a>,
-                  <a href="/comparisons/1032">A1b</a>,
-                  <a href="/comparisons/1043">A2</a></td>
-            </tr>
-          </table>
-        </div>
+        <%= render "challenges/consistency/table_datasets" %>
       </div>
     </div>
 
@@ -682,11 +126,11 @@
 <div class="challenge-section challenge-section-detail">
   <div class="container container-padded">
     <div class="h2">Awards and Recognitions Detail</div>
-    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    <div class="panel-group" id="detailsAccordion" role="tablist" aria-multiselectable="true">
       <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="headingOne">
           <h4 class="panel-title">
-            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            <a role="button" data-toggle="collapse" data-parent="#detailsAccordion" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
               Reproducibility across same input
             </a>
           </h4>
@@ -696,186 +140,7 @@
             <p>
               If the exact same pipeline runs twice on the exact same input, does it produce the same output? The reproducibility comparison 1 investigates exactly that, by comparing the Garvan VCF to the Garvan Rerun VCF (which are the results of running the same pipeline on the same sequencing data). In this comparison, true positives represent the common variants, whereas false positives and false negatives represent the unique variants (genotypes) in each file. The following table summarizes the performance of each entry with respect to number of common and unique variants in the reproducibility comparison 1. The entries are sorted by number of unique variants (and subsequently by submission date).
             </p>
-            <div class="table-responsive">
-              <table class="table table-condensed table-bordered">
-                <thead>
-                  <th>Label</th>
-                  <th>Repro.1</th>
-                  <th>Common (TP)</th>
-                  <th>Unique (FP+FN)</th>
-                  <th>Recognition</th>
-                </thead>
-                <tbody>
-                  <tr class="challenge-row-high">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">raldana-sentieon</a></td>
-                    <td><a href="/comparisons/471">Link</a></td>
-                    <td class='num'>4,600,753</td>
-                    <td class='num'>0</td>
-                    <td><%= recognition_badge('deterministic') %></td>
-                  </tr>
-
-                  <tr class="challenge-row-high">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jeremy.edwards">jedwards-sentieon</a></td>
-                    <td><a href="/comparisons/550">Link</a></td>
-                    <td class='num'>4,662,359</td>
-                    <td class='num'>0</td>
-                    <td><%= recognition_badge('deterministic') %></td>
-                  </tr>
-
-                  <tr class="challenge-row-high">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-vqsr</a></td>
-                    <td><a href="/comparisons/598">Link</a></td>
-                    <td class='num'>4,144,162</td>
-                    <td class='num'>0</td>
-                    <td><%= recognition_badge('deterministic') %></td>
-                  </tr>
-
-                  <tr class="challenge-row-high">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-isaac</a></td>
-                    <td><a href="/comparisons/596">Link</a></td>
-                    <td class='num'>4,132,671</td>
-                    <td class='num'>0</td>
-                    <td><%= recognition_badge('deterministic') %></td>
-                  </tr>
-
-                  <tr class="challenge-row-high">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/christian.iseli">ciseli-custom</a></td>
-                    <td><a href="/comparisons/754">Link</a></td>
-                    <td class='num'>3,251,498</td>
-                    <td class='num'>0</td>
-                    <td><%= recognition_badge('deterministic') %></td>
-                  </tr>
-
-                  <tr class="challenge-row-high">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jason.harris">jharris-gatk</a></td>
-                    <td><a href="/comparisons/847">Link</a></td>
-                    <td class='num'>4,359,277</td>
-                    <td class='num'>0</td>
-                    <td><%= recognition_badge('deterministic') %></td>
-                  </tr>
-
-                  <tr class="challenge-row-high">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/erik.garrison">egarrison-hhga</a></td>
-                    <td><a href="/comparisons/868">Link</a></td>
-                    <td class='num'>3,131,589</td>
-                    <td class='num'>0</td>
-                    <td><%= recognition_badge('deterministic') %></td>
-                  </tr>
-
-                  <tr class="challenge-row-high">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/xiang.li">xli-custom</a></td>
-                    <td><a href="/comparisons/1109">Link</a></td>
-                    <td class='num'>4,984,488</td>
-                    <td class='num'>0</td>
-                    <td><%= recognition_badge('deterministic') %></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/charles.chapple">cchapple-mixed</a></td>
-                    <td><a href="/comparisons/842">Link</a></td>
-                    <td class='num'>4,629,987</td>
-                    <td class='num'>671</td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">anovak-vg</a></td>
-                    <td><a href="/comparisons/835">Link</a></td>
-                    <td class='num'>4,988,670</td>
-                    <td class='num'>851</td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-gatk</a></td>
-                    <td><a href="/comparisons/597">Link</a></td>
-                    <td class='num'>4,689,121</td>
-                    <td class='num'>2,293</td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-dragen</a></td>
-                    <td><a href="/comparisons/599">Link</a></td>
-                    <td class='num'>4,720,819</td>
-                    <td class='num'>6,342</td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-genalice</a></td>
-                    <td><a href="/comparisons/635">Link</a></td>
-                    <td class='num'>4,611,442</td>
-                    <td class='num'>7,295</td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/deepak.grover">dgrover-gatk</a></td>
-                    <td><a href="/comparisons/989">Link</a></td>
-                    <td class='num'>4,612,455</td>
-                    <td class='num'>12,645</td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/mike.lin">mlin-fermikit</a></td>
-                    <td><a href="/comparisons/698">Link</a></td>
-                    <td class='num'>4,536,436</td>
-                    <td class='num'>13,105</td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/aaron.statham">astatham-gatk</a></td>
-                    <td><a href="/comparisons/533">Link</a></td>
-                    <td class='num'>4,532,335</td>
-                    <td class='num'>24,120</td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.mark.2">amark-mixed</a></td>
-                    <td><a href="/comparisons/985">Link</a></td>
-                    <td class='num'>3,129,181</td>
-                    <td class='num'>62,880</td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/ayshwarya.subramanian">asubramanian-gatk</a></td>
-                    <td><a href="/comparisons/751">Link</a></td>
-                    <td class='num'>4,378,027</td>
-                    <td class='num'>114,285</td>
-                    <td></td>
-                  </tr>
-
-                  <tr class="challenge-row-not-considered">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a></td>
-                    <td><a href="/comparisons/1033">Link</a></td>
-                    <td class='num'>3,139,985</td>
-                    <td class='num'>0</td>
-                    <td>[#1]</td>
-                  </tr>
-
-                  <tr class="challenge-row-not-considered">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a></td>
-                    <td><a href="/comparisons/113">Link</a></td>
-                    <td class='num'>3,151,019</td>
-                    <td class='num'>0</td>
-                    <td>[#2]</td>
-                  </tr>
-
-                  <tr class="challenge-row-not-considered">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/marghoob.mohiyuddin">mmohiyuddin-mixed</a></td>
-                    <td><a href="/comparisons/996">Link</a></td>
-                    <td class='num'>4,632,204</td>
-                    <td class='num'>0</td>
-                    <td>[#3]</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <%= render "challenges/consistency/table_repro1" %>
             <div class="text-muted small">
               <p>
                 [#1] This entry was not considered because the VCF files were not submitted within the challenge timeframe
@@ -894,7 +159,7 @@
       <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="headingTwo">
           <h4 class="panel-title">
-            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#detailsAccordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
               Reproducibility across different inputs
             </a>
           </h4>
@@ -904,208 +169,7 @@
             <p>
               Another question of interest is how reproducible is a result on the same biological sample and instrument but across different sites and library preps. The reproducibility comparison 2 quantifies the amount of similarity between results obtained using the Garvan and HLI datasets respectively. These datasets were generated from Coriell NA12878 DNA on a HiSeq X Ten instrument, but with different versions of the TruSeq Nano DNA Library Prep kit (v2.5 for Garvan; and v1 for HLI), and at different sequencing sites. Just like with reproducibility comparison 1, true positives represent the common variants, whereas false positives and false negatives represent the unique variants (genotypes). We appreciated that a single metric, concordance, defined as (common)/(common+unique) captures the essence of this comparison: it rewards not only a decrease in the number of unique variants, but also an increase in reproducible variants. The following table shows this concordance metric for the reproducibility comparison 2. The entries are sorted by decreasing concordance.
             </p>
-            <div class="table-responsive">
-              <table class="table table-condensed table-bordered">
-                <thead>
-                  <th>Label</th>
-                  <th>Repro.2</th>
-                  <th>Common (TP)</th>
-                  <th>Unique (FP+FN)</th>
-                  <th>Concordance</th>
-                  <th>Recognition</th>
-                </thead>
-                <tbody>
-                  <tr class="challenge-row-highest">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">raldana-sentieon</a></td>
-                    <td><a href="/comparisons/472">Link</a></td>
-                    <td class='num'>4,305,175</td>
-                    <td class='num'>402,872</td>
-                    <td>91.44%</td>
-                    <td><%= recognition_badge('highest-concordance') %></td>
-                  </tr>
-
-                  <tr class="challenge-row-high">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-isaac</a></td>
-                    <td><a href="/comparisons/600">Link</a></td>
-                    <td class='num'>3,865,697</td>
-                    <td class='num'>379,207</td>
-                    <td>91.07%</td>
-                    <td><%= recognition_badge('high-concordance') %></td>
-                  </tr>
-
-                  <tr class="challenge-row-high">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jeremy.edwards">jedwards-sentieon</a></td>
-                    <td><a href="/comparisons/551">Link</a></td>
-                    <td class='num'>4,346,524</td>
-                    <td class='num'>450,490</td>
-                    <td>90.61%</td>
-                    <td><%= recognition_badge('high-concordance') %></td>
-                  </tr>
-
-                  <tr class="challenge-row-high">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/charles.chapple">cchapple-mixed</a></td>
-                    <td><a href="/comparisons/845">Link</a></td>
-                    <td class='num'>4,309,008</td>
-                    <td class='num'>451,004</td>
-                    <td>90.53%</td>
-                    <td><%= recognition_badge('high-concordance') %></td>
-                  </tr>
-
-                  <tr class="challenge-row-high">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-dragen</a></td>
-                    <td><a href="/comparisons/603">Link</a></td>
-                    <td class='num'>4,408,487</td>
-                    <td class='num'>476,797</td>
-                    <td>90.24%</td>
-                    <td><%= recognition_badge('high-concordance') %></td>
-                  </tr>
-
-                  <tr class="challenge-row-high">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/deepak.grover">dgrover-gatk</a></td>
-                    <td><a href="/comparisons/990">Link</a></td>
-                    <td class='num'>4,320,164</td>
-                    <td class='num'>469,875</td>
-                    <td>90.19%</td>
-                    <td><%= recognition_badge('high-concordance') %></td>
-                  </tr>
-
-                  <tr class="challenge-row-high">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/marghoob.mohiyuddin">mmohiyuddin-mixed</a></td>
-                    <td><a href="/comparisons/859">Link</a></td>
-                    <td class='num'>4,305,204</td>
-                    <td class='num'>471,741</td>
-                    <td>90.12%</td>
-                    <td><%= recognition_badge('high-concordance') %></td>
-                  </tr>
-
-                  <tr class="challenge-row-high">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/ayshwarya.subramanian">asubramanian-gatk</a></td>
-                    <td><a href="/comparisons/752">Link</a></td>
-                    <td class='num'>4,118,928</td>
-                    <td class='num'>457,085</td>
-                    <td>90.01%</td>
-                    <td><%= recognition_badge('high-concordance') %></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/aaron.statham">astatham-gatk</a></td>
-                    <td><a href="/comparisons/534">Link</a></td>
-                    <td class='num'>4,218,797</td>
-                    <td class='num'>489,112</td>
-                    <td>89.61%</td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jason.harris">jharris-gatk</a></td>
-                    <td><a href="/comparisons/848">Link</a></td>
-                    <td class='num'>4,054,823</td>
-                    <td class='num'>477,592</td>
-                    <td>89.46%</td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/xiang.li">xli-custom</a></td>
-                    <td><a href="/comparisons/1110">Link</a></td>
-                    <td class='num'>4,586,333</td>
-                    <td class='num'>617,194</td>
-                    <td>88.14%</td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-gatk</a></td>
-                    <td><a href="/comparisons/601">Link</a></td>
-                    <td class='num'>4,194,953</td>
-                    <td class='num'>650,105</td>
-                    <td>86.58%</td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-genalice</a></td>
-                    <td><a href="/comparisons/636">Link</a></td>
-                    <td class='num'>4,181,476</td>
-                    <td class='num'>719,864</td>
-                    <td>85.31%</td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/mike.lin">mlin-fermikit</a></td>
-                    <td><a href="/comparisons/699">Link</a></td>
-                    <td class='num'>4,040,298</td>
-                    <td class='num'>735,781</td>
-                    <td>84.59%</td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-vqsr</a></td>
-                    <td><a href="/comparisons/602">Link</a></td>
-                    <td class='num'>3,657,090</td>
-                    <td class='num'>680,757</td>
-                    <td>84.31%</td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">anovak-vg</a></td>
-                    <td><a href="/comparisons/836">Link</a></td>
-                    <td class='num'>4,296,761</td>
-                    <td class='num'>1,131,758</td>
-                    <td>79.15%</td>
-                    <td></td>
-                  </tr>
-
-                  <tr class="challenge-row-not-considered">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a></td>
-                    <td><a href="/comparisons/114">Link</a></td>
-                    <td class='num'>3,151,019</td>
-                    <td class='num'>0</td>
-                    <td>100.00%</td>
-                    <td>[#4]</td>
-                  </tr>
-
-                  <tr class="challenge-row-not-considered">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a></td>
-                    <td><a href="/comparisons/1045">Link</a></td>
-                    <td class='num'>3,097,788</td>
-                    <td class='num'>57,975</td>
-                    <td>98.16%</td>
-                    <td>[#5]</td>
-                  </tr>
-
-                  <tr class="challenge-row-not-considered">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/erik.garrison">egarrison-hhga</a></td>
-                    <td><a href="/comparisons/1006">Link</a></td>
-                    <td class='num'>3,086,242</td>
-                    <td class='num'>66,955</td>
-                    <td>97.88%</td>
-                    <td>[#6]</td>
-                  </tr>
-
-                  <tr class="challenge-row-not-considered">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.mark.2">amark-mixed</a></td>
-                    <td><a href="/comparisons/986">Link</a></td>
-                    <td class='num'>3,083,646</td>
-                    <td class='num'>121,074</td>
-                    <td>96.22%</td>
-                    <td>[#6]</td>
-                  </tr>
-
-                  <tr class="challenge-row-not-considered">
-                    <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/christian.iseli">ciseli-custom</a></td>
-                    <td><a href="/comparisons/753">Link</a></td>
-                    <td class='num'>3,064,375</td>
-                    <td class='num'>259,836</td>
-                    <td>92.18%</td>
-                    <td>[#6]</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <%= render "challenges/consistency/table_repro2" %>
             <div class="text-muted small">
               <p>
               [#4] This entry was not considered because the entry submitted the NIST benchmark set as the answer
@@ -1130,7 +194,7 @@
       <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="headingThree">
           <h4 class="panel-title">
-            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#detailsAccordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
               Accuracy (Recall, Precision, and F-Measure)
             </a>
           </h4>
@@ -1145,492 +209,7 @@
               <p>The tables below summarize the results across accuracy comparisons. For each metric, the highest value between accuracy comparisons 1a and 1b is shown (column R1, P1, F1), along with the value for accuracy comparison 2 (columns R2, P2, F2). In each table, the entries are ranked based on the sum of their deltas from the top entry, i.e. for recall based on (99.54% - R1) + (98.92% - R2).
               </p>
             </div>
-
-            <div class="accuracy-tables clearfix">
-                <table class="table table-condensed table-bordered table-nowrap">
-                  <thead>
-                    <tr>
-                      <th colspan="4">Recall</th>
-                    </tr>
-                    <tr>
-                      <th>Label</th>
-                      <th>R1</th>
-                      <th>R2</th>
-                      <th>&Delta;</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr class="challenge-row-highest">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/deepak.grover">dgrover-gatk</a></td>
-                      <td>99.54%</td>
-                      <td>98.92%</td>
-                      <td>0.00%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.mark.2">amark-mixed</a></td>
-                      <td>99.46%</td>
-                      <td>98.62%</td>
-                      <td>0.38%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">raldana-sentieon</a></td>
-                      <td>99.51%</td>
-                      <td>98.54%</td>
-                      <td>0.41%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/marghoob.mohiyuddin">mmohiyuddin-mixed</a></td>
-                      <td>99.40%</td>
-                      <td>98.62%</td>
-                      <td>0.44%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jeremy.edwards">jedwards-sentieon</a></td>
-                      <td>99.44%</td>
-                      <td>98.46%</td>
-                      <td>0.56%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-dragen</a></td>
-                      <td>99.34%</td>
-                      <td>98.50%</td>
-                      <td>0.62%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/aaron.statham">astatham-gatk</a></td>
-                      <td>99.05%</td>
-                      <td>98.19%</td>
-                      <td>1.22%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/ayshwarya.subramanian">asubramanian-gatk</a></td>
-                      <td>98.91%</td>
-                      <td>98.19%</td>
-                      <td>1.36%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/erik.garrison">egarrison-hhga</a></td>
-                      <td>98.91%</td>
-                      <td>98.08%</td>
-                      <td>1.47%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/charles.chapple">cchapple-mixed</a></td>
-                      <td>98.95%</td>
-                      <td>97.96%</td>
-                      <td>1.55%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jason.harris">jharris-gatk</a></td>
-                      <td>98.82%</td>
-                      <td>97.45%</td>
-                      <td>2.19%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/xiang.li">xli-custom</a></td>
-                      <td>98.59%</td>
-                      <td>97.56%</td>
-                      <td>2.31%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-genalice</a></td>
-                      <td>97.96%</td>
-                      <td>96.75%</td>
-                      <td>3.75%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-gatk</a></td>
-                      <td>99.25%</td>
-                      <td>94.25%</td>
-                      <td>4.96%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/mike.lin">mlin-fermikit</a></td>
-                      <td>97.32%</td>
-                      <td>93.81%</td>
-                      <td>7.33%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/christian.iseli">ciseli-custom</a></td>
-                      <td>95.68%</td>
-                      <td>94.56%</td>
-                      <td>8.22%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-isaac</a></td>
-                      <td>95.26%</td>
-                      <td>93.40%</td>
-                      <td>9.80%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-vqsr</a></td>
-                      <td>95.48%</td>
-                      <td>90.60%</td>
-                      <td>12.38%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">anovak-vg</a></td>
-                      <td>93.55%</td>
-                      <td>89.99%</td>
-                      <td>14.92%</td>
-                    </tr>
-
-                    <tr class="challenge-row-not-considered">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a></td>
-                      <td>99.43%</td>
-                      <td>98.51%</td>
-                      <td>[#7]</td>
-                    </tr>
-
-                    <tr class="challenge-row-not-considered">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a></td>
-                      <td>100.00%</td>
-                      <td>100.00%</td>
-                      <td>[#8]</td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-condensed table-bordered table-nowrap">
-                  <thead>
-                    <tr>
-                      <th colspan="4">Precision</th>
-                    </tr>
-                    <tr>
-                      <th>Label</th>
-                      <th>P1</th>
-                      <th>P2</th>
-                      <th>&Delta;</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr class="challenge-row-highest">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/deepak.grover">dgrover-gatk</a></td>
-                      <td>99.71%</td>
-                      <td>99.62%</td>
-                      <td>0.00%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jason.harris">jharris-gatk</a></td>
-                      <td>99.54%</td>
-                      <td>99.61%</td>
-                      <td>0.18%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-vqsr</a></td>
-                      <td>99.48%</td>
-                      <td>99.56%</td>
-                      <td>0.29%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">raldana-sentieon</a></td>
-                      <td>99.43%</td>
-                      <td>99.60%</td>
-                      <td>0.30%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/erik.garrison">egarrison-hhga</a></td>
-                      <td>99.54%</td>
-                      <td>99.46%</td>
-                      <td>0.33%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-isaac</a></td>
-                      <td>99.41%</td>
-                      <td>99.47%</td>
-                      <td>0.45%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jeremy.edwards">jedwards-sentieon</a></td>
-                      <td>99.35%</td>
-                      <td>99.47%</td>
-                      <td>0.51%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/aaron.statham">astatham-gatk</a></td>
-                      <td>99.31%</td>
-                      <td>99.47%</td>
-                      <td>0.55%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/marghoob.mohiyuddin">mmohiyuddin-mixed</a></td>
-                      <td>99.22%</td>
-                      <td>99.43%</td>
-                      <td>0.68%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/charles.chapple">cchapple-mixed</a></td>
-                      <td>99.25%</td>
-                      <td>99.39%</td>
-                      <td>0.69%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/ayshwarya.subramanian">asubramanian-gatk</a></td>
-                      <td>99.12%</td>
-                      <td>99.39%</td>
-                      <td>0.82%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-gatk</a></td>
-                      <td>99.21%</td>
-                      <td>99.29%</td>
-                      <td>0.83%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.mark.2">amark-mixed</a></td>
-                      <td>99.13%</td>
-                      <td>99.33%</td>
-                      <td>0.87%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-dragen</a></td>
-                      <td>99.16%</td>
-                      <td>99.20%</td>
-                      <td>0.97%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/mike.lin">mlin-fermikit</a></td>
-                      <td>98.63%</td>
-                      <td>97.90%</td>
-                      <td>2.80%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-genalice</a></td>
-                      <td>98.11%</td>
-                      <td>97.76%</td>
-                      <td>3.46%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/xiang.li">xli-custom</a></td>
-                      <td>97.86%</td>
-                      <td>97.97%</td>
-                      <td>3.50%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/christian.iseli">ciseli-custom</a></td>
-                      <td>93.16%</td>
-                      <td>95.26%</td>
-                      <td>10.91%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">anovak-vg</a></td>
-                      <td>90.17%</td>
-                      <td>89.00%</td>
-                      <td>20.16%</td>
-                    </tr>
-
-                    <tr class="challenge-row-not-considered">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a></td>
-                      <td>99.78%</td>
-                      <td>99.70%</td>
-                      <td>[#7]</td>
-                    </tr>
-
-                    <tr class="challenge-row-not-considered">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a></td>
-                      <td>100.00%</td>
-                      <td>100.00%</td>
-                      <td>[#8]</td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-condensed table-bordered table-nowrap">
-                  <thead>
-                    <tr>
-                      <th colspan="4">F-measure</th>
-                    </tr>
-                    <tr>
-                      <th>Label</th>
-                      <th>F1</th>
-                      <th>F2</th>
-                      <th>&Delta;</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr class="challenge-row-highest">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/deepak.grover">dgrover-gatk</a></td>
-                      <td>99.62%</td>
-                      <td>99.27%</td>
-                      <td>0.00%</td>
-                    </tr>
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">raldana-sentieon</a></td>
-                      <td>99.47%</td>
-                      <td>99.06%</td>
-                      <td>0.36%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jeremy.edwards">jedwards-sentieon</a></td>
-                      <td>99.39%</td>
-                      <td>98.97%</td>
-                      <td>0.53%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/marghoob.mohiyuddin">mmohiyuddin-mixed</a></td>
-                      <td>99.31%</td>
-                      <td>99.02%</td>
-                      <td>0.56%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.mark.2">amark-mixed</a></td>
-                      <td>99.29%</td>
-                      <td>98.97%</td>
-                      <td>0.63%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-dragen</a></td>
-                      <td>99.25%</td>
-                      <td>98.85%</td>
-                      <td>0.79%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/aaron.statham">astatham-gatk</a></td>
-                      <td>99.18%</td>
-                      <td>98.82%</td>
-                      <td>0.89%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/erik.garrison">egarrison-hhga</a></td>
-                      <td>99.22%</td>
-                      <td>98.76%</td>
-                      <td>0.91%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/ayshwarya.subramanian">asubramanian-gatk</a></td>
-                      <td>99.00%</td>
-                      <td>98.79%</td>
-                      <td>1.10%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/charles.chapple">cchapple-mixed</a></td>
-                      <td>99.10%</td>
-                      <td>98.67%</td>
-                      <td>1.12%</td>
-                    </tr>
-
-                    <tr class="challenge-row-high">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/jason.harris">jharris-gatk</a></td>
-                      <td>99.18%</td>
-                      <td>98.52%</td>
-                      <td>1.19%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/xiang.li">xli-custom</a></td>
-                      <td>98.23%</td>
-                      <td>97.76%</td>
-                      <td>2.90%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-gatk</a></td>
-                      <td>99.23%</td>
-                      <td>96.70%</td>
-                      <td>2.96%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-genalice</a></td>
-                      <td>98.04%</td>
-                      <td>97.25%</td>
-                      <td>3.60%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/mike.lin">mlin-fermikit</a></td>
-                      <td>97.97%</td>
-                      <td>95.81%</td>
-                      <td>5.11%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-isaac</a></td>
-                      <td>97.29%</td>
-                      <td>96.34%</td>
-                      <td>5.26%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/changhoon.kim">ckim-vqsr</a></td>
-                      <td>97.44%</td>
-                      <td>94.87%</td>
-                      <td>6.58%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/christian.iseli">ciseli-custom</a></td>
-                      <td>94.40%</td>
-                      <td>94.91%</td>
-                      <td>9.58%</td>
-                    </tr>
-
-                    <tr>
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">anovak-vg</a></td>
-                      <td>91.83%</td>
-                      <td>89.49%</td>
-                      <td>17.57%</td>
-                    </tr>
-
-                    <tr class="challenge-row-not-considered">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/rene.lopez">rlopez-custom</a></td>
-                      <td>99.61%</td>
-                      <td>99.10%</td>
-                      <td>[#7]</td>
-                    </tr>
-
-                    <tr class="challenge-row-not-considered">
-                      <td><a href="/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">ebanks-nist</a></td>
-                      <td>100.00%</td>
-                      <td>100.00%</td>
-                      <td>[#8]</td>
-                    </tr>
-                  </tbody>
-                </table>
-            </div>
-
+            <%= render "challenges/consistency/tables_accuracy" %>
             <div class="text-muted small">
               <p>
               [#7] This entry was not considered because the VCF files were not submitted within the challenge timeframe<br>
@@ -1661,7 +240,7 @@
       <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="headingFour">
           <h4 class="panel-title">
-            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#detailsAccordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
               Miscellaneous Recognitions
             </a>
           </h4>
@@ -1687,71 +266,114 @@
   <div class="container container-padded">
     <div class="h2">Conclusions and lessons learned</div>
     <div>
-      <div class="h3">Comparisons</div>
-      <p>
-      This challenge used the comparison framework that was available when precisionFDA was first launched. The framework outputs detailed files with the variants of each category, so that anyone can perform downstream calculations or otherwise investigate their false positives or false negatives. This has helped participants better understand the characteristics of their pipelines – an effort that could be improved by more detailed reporting in the comparison output, since the current version of the comparison framework reports only aggregate statistics. As someone pointed out in a separate communication, “showing summary numbers for both SNPs and indels together can hide issues with indel calling behind the fact that SNPs do really well (most pipelines discover most of the easy SNPs)”. In the future, we look forward to more granular reporting, including separate statistics for SNPs versus indels and other types of variations, as well as information on zygosity mismatches. We are working with the GA4GH benchmarking group to incorporate the next generation of comparisons, and you can currently see an early glimpse of that in the <a href="https://precision.fda.gov/apps/explore">GA4GH Benchmarking app</a> on precisionFDA.
-      </p>
-
-      <div class="h3">Benchmarking material</div>
-      <p>
-      The challenge used the NIST/GiaB characterization of NA12878 as the benchmark set, as reported on GRCh37. Although NIST relied on different sequencing technologies and software algorithms to generate this dataset, members of the community expressed concerns that the dataset may be "biased towards GATK". Other community feedback mentioned known facts such as that the dataset is not comprehensive enough with respect to indels, that the confidence regions are not covering several genomic areas of clinical importance, and that this dataset does not include copy-number variants or structural variants, or incorporate phasing information. GiaB is aware of the limitations of the existing dataset and is already working to address them. In addition, precisionFDA is collaborating with NIST to engage the community to improve this dataset by incorporating a Feedback button straight into the comparison results page. The government agencies, including FDA, NIST, CDC, and other stakeholders are also collaborating towards the generation of new benchmarking materials.
-      </p>
-      <p>
-      We also received questions around the choice of GRCh37. The performance of pipelines is affected by the reference human sequence, and as one participant put it “once we obtain a perfect (no gaps, no mistakes) reference genome, the performance will be much better”. The current NIST/GiaB release is based on GRCh37, but we are looking forward to using GRCh38 in the future.
-      </p>
-
-      <div class="h3">Study design</div>
-      <p>
-      This first challenge tried to engage the community, while at the same time making use of familiar datasets (such as NIST reference material) and simple evaluations (such as the comparison framework). The main focus was looking at reproducibility, while additionally assessing accuracy, both important concepts in regulatory science.
-      </p>
-      <p>
-      On one hand, as people <a href="https://precision.fda.gov/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">said</a> “if we all approach the challenge in good faith […], this challenge sets the right methodology: (1) examine the software repeatability between runs; (2) examine the reproducibility between datasets of the same DNA sample […]; (3) examine the accuracy against a well-characterized truth set.”; on the other hand, as someone else <a href="https://precision.fda.gov/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">pointed out</a> “a winning entry for this challenge would not necessarily (and in fact is unlikely) to work well on a different sample.”
-      </p>
-      <p>
-      This challenge focused on the consistency of the results obtained from both a single as well as two different runs of the same sample. Although the sample that was used has known “truth data” attached to it for certain kinds of calls (“highly confident calls”), so that the community can at least partially assess the accuracy of the results obtained, the precisionFDA team was primarily focused on the reproducibility. Part of the reasoning behind that has been very eloquently stated by some of the challenge participants – with so few samples that have known “truth” it is very easy to over-fit the results, so “accuracy” obtained does not provide the complete picture. But we also heard, “This is the first time that software repeatability and inter-dataset reproducibility have been put at front and center of judging a genomics pipeline’s quality. Without repeatability and reproducibility, accuracy is at best a one-time stroke of luck”. We are, however, taking a second look at accuracy in the <a href="https://precision.fda.gov/challenges/truth">precisionFDA Truth Challenge</a>.
-      </p>
-
-      <p>
-      Lastly, we acknowledge that the evaluation of the results was confined within certain limits; however, the process (and its limitations) can inform future challenges. For example, we did not factor pipeline runtime or resource consumption into our evaluations.
-      </p>
-
-      <div class="h3">Epilogue</div>
-      <p>
-      We want to thank those of you who participated in our first challenge! By participating and putting your results and your thoughts out in the public, you fulfilled the first and most important goal of this challenge &ndash; to engage and get the dialogue started.
-      </p>
-      <p>
-      This challenge created a dataset that people can study further, if they so choose. We have created an archive of 60 VCF files (compressed with bgzip, and accompanied by tabix index files) that is available as a file on precisionFDA. We have also created a similar app asset, which can be included in apps that need direct access to the unarchived VCF files. We are excited to see how the community will use this in the future. Perhaps the results available from the challenge can provide some interesting ideas for precisionFDA and the scientific community to build upon.
-      </p>
-      <p>
-      In closing, we would like to leave you with several encouraging quotes from our community, which will hopefully inspire all readers to participate in one of our upcoming challenges:
-      </p>
+      <div class="media">
+        <div class="media-left">
+          <span class="fa fa-fw fa-bullseye fa-4x" aria-hidden="true"></span>
+        </div>
+        <div class="media-body">
+          <div class="h3">Comparisons</div>
+          <p>
+          This challenge used the comparison framework that was available when precisionFDA was first launched. The framework outputs detailed files with the variants of each category, so that anyone can perform downstream calculations or otherwise investigate their false positives or false negatives. This has helped participants better understand the characteristics of their pipelines – an effort that could be improved by more detailed reporting in the comparison output, since the current version of the comparison framework reports only aggregate statistics. As someone pointed out in a separate communication, “showing summary numbers for both SNPs and indels together can hide issues with indel calling behind the fact that SNPs do really well (most pipelines discover most of the easy SNPs)”. In the future, we look forward to more granular reporting, including separate statistics for SNPs versus indels and other types of variations, as well as information on zygosity mismatches. We are working with the GA4GH benchmarking group to incorporate the next generation of comparisons, and you can currently see an early glimpse of that in the <a href="https://precision.fda.gov/apps/explore">GA4GH Benchmarking app</a> on precisionFDA.
+          </p>
+        </div>
+      </div>
 
       <hr>
 
-      <blockquote>
-        “When I started working in this industry I felt that everyone claimed that their pipeline was better, but there was no objective way of measuring, so it sounded like an ad for car insurance. I think your challenges will move our industry forward immensely.”
-        <footer>Rafael Aldana, Mountain View, CA</footer>
-      </blockquote>
+      <div class="media">
+        <div class="media-left">
+          <span class="fa fa-fw fa-balance-scale fa-4x" aria-hidden="true"></span>
+        </div>
+        <div class="media-body">
+          <div class="h3">Benchmarking material</div>
+          <p>
+          The challenge used the NIST/GiaB characterization of NA12878 as the benchmark set, as reported on GRCh37. Although NIST relied on different sequencing technologies and software algorithms to generate this dataset, members of the community expressed concerns that the dataset may be "biased towards GATK". Other community feedback mentioned known facts such as that the dataset is not comprehensive enough with respect to indels, that the confidence regions are not covering several genomic areas of clinical importance, and that this dataset does not include copy-number variants or structural variants, or incorporate phasing information. GiaB is aware of the limitations of the existing dataset and is already working to address them. In addition, precisionFDA is collaborating with NIST to engage the community to improve this dataset by incorporating a Feedback button straight into the comparison results page. The government agencies, including FDA, NIST, CDC, and other stakeholders are also collaborating towards the generation of new benchmarking materials.
+          </p>
+          <p>
+          We also received questions around the choice of GRCh37. The performance of pipelines is affected by the reference human sequence, and as one participant put it “once we obtain a perfect (no gaps, no mistakes) reference genome, the performance will be much better”. The current NIST/GiaB release is based on GRCh37, but we are looking forward to using GRCh38 in the future.
+          </p>
+        </div>
+      </div>
 
-      <blockquote class="">
-        “I wish to congratulate your team for putting together a bioinformatics challenge like that, it is a nice and unique idea. It can become a significant community resource for NGS work and data in future”.
-        <footer>Deepak Grover, Boston, MA</footer>
-      </blockquote>
+      <hr>
 
-      <blockquote>
-        “The challenge made me aware of many good software methods, thanks!”
-        <footer>Huang Zhibo, Shenzhen, China</footer>
-      </blockquote>
+      <div class="media">
+        <div class="media-left">
+          <span class="fa fa-fw fa-gears fa-4x" aria-hidden="true"></span>
+        </div>
+        <div class="media-body">
+          <div class="h3">Study design</div>
+          <p>
+          This first challenge tried to engage the community, while at the same time making use of familiar datasets (such as NIST reference material) and simple evaluations (such as the comparison framework). The main focus was looking at reproducibility, while additionally assessing accuracy, both important concepts in regulatory science.
+          </p>
+          <p>
+          On one hand, as people <a href="https://precision.fda.gov/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">said</a> “if we all approach the challenge in good faith […], this challenge sets the right methodology: (1) examine the software repeatability between runs; (2) examine the reproducibility between datasets of the same DNA sample […]; (3) examine the accuracy against a well-characterized truth set.”; on the other hand, as someone else <a href="https://precision.fda.gov/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">pointed out</a> “a winning entry for this challenge would not necessarily (and in fact is unlikely) to work well on a different sample.”
+          </p>
+          <p>
+          This challenge focused on the consistency of the results obtained from both a single as well as two different runs of the same sample. Although the sample that was used has known “truth data” attached to it for certain kinds of calls (“highly confident calls”), so that the community can at least partially assess the accuracy of the results obtained, the precisionFDA team was primarily focused on the reproducibility. Part of the reasoning behind that has been very eloquently stated by some of the challenge participants – with so few samples that have known “truth” it is very easy to over-fit the results, so “accuracy” obtained does not provide the complete picture. But we also heard, “This is the first time that software repeatability and inter-dataset reproducibility have been put at front and center of judging a genomics pipeline’s quality. Without repeatability and reproducibility, accuracy is at best a one-time stroke of luck”. We are, however, taking a second look at accuracy in the <a href="https://precision.fda.gov/challenges/truth">precisionFDA Truth Challenge</a>.
+          </p>
 
-      <blockquote class="">
-        “We found this experience is very helpful for us to improve our understanding of our pipeline.”
-        <footer>Sean Li, San Diego, CA</footer>
-      </blockquote>
+          <p>
+          Lastly, we acknowledge that the evaluation of the results was confined within certain limits; however, the process (and its limitations) can inform future challenges. For example, we did not factor pipeline runtime or resource consumption into our evaluations.
+          </p>
+        </div>
+      </div>
 
-      <blockquote>
-        “We plan on contacting a fellow participant to try their pipeline.”
-        <footer>Aaron Statham, Sydney, Australia</footer>
-      </blockquote>
+      <hr>
+
+      <div class="media">
+        <div class="media-left">
+          <span class="fa fa-fw fa-flag-checkered fa-4x" aria-hidden="true"></span>
+        </div>
+        <div class="media-body">
+          <div class="h3">Epilogue</div>
+          <p>
+          We want to thank those of you who participated in our first challenge! By participating and putting your results and your thoughts out in the public, you fulfilled the first and most important goal of this challenge &ndash; to engage and get the dialogue started.
+          </p>
+          <p>
+          This challenge created a dataset that people can study further, if they so choose. We have created an archive of 60 VCF files (compressed with bgzip, and accompanied by tabix index files) that is available as a file on precisionFDA. We have also created a similar app asset, which can be included in apps that need direct access to the unarchived VCF files. We are excited to see how the community will use this in the future. Perhaps the results available from the challenge can provide some interesting ideas for precisionFDA and the scientific community to build upon.
+          </p>
+          <p>
+          In closing, we would like to leave you with several encouraging quotes from our community, which will hopefully inspire all readers to participate in one of our upcoming challenges:
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="media">
+        <div class="media-left">
+          <span class="fa fa-fw fa-quote-left fa-4x" aria-hidden="true"></span>
+        </div>
+        <div class="media-body">
+          <blockquote>
+            “When I started working in this industry I felt that everyone claimed that their pipeline was better, but there was no objective way of measuring, so it sounded like an ad for car insurance. I think your challenges will move our industry forward immensely.”
+            <footer>Rafael Aldana, Mountain View, CA</footer>
+          </blockquote>
+
+          <blockquote class="">
+            “I wish to congratulate your team for putting together a bioinformatics challenge like that, it is a nice and unique idea. It can become a significant community resource for NGS work and data in future”.
+            <footer>Deepak Grover, Boston, MA</footer>
+          </blockquote>
+
+          <blockquote>
+            “The challenge made me aware of many good software methods, thanks!”
+            <footer>Huang Zhibo, Shenzhen, China</footer>
+          </blockquote>
+
+          <blockquote class="">
+            “We found this experience is very helpful for us to improve our understanding of our pipeline.”
+            <footer>Sean Li, San Diego, CA</footer>
+          </blockquote>
+
+          <blockquote>
+            “We plan on contacting a fellow participant to try their pipeline.”
+            <footer>Aaron Statham, Sydney, Australia</footer>
+          </blockquote>
+        </div>
+      </div>
+
+
     </div>
   </div>
 </div>
