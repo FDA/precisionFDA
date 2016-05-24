@@ -42,11 +42,15 @@
     <div class="h2">Overview of Results</div>
 
     <p>We received a total of 21 entries to the challenge, summarized in the following table.</p>
-    <p>To aid in the presentation of results, we decided to give each entry a unique label, comprised of the name of the submitting user as well as a short mnemonic keyword representing the pipeline. (These keywords are merely indicative of each pipeline's main component, hence somewhat subjective; for a more faithful description of each pipeline, refer to the full text that accompanied each submission by following the label links). Each entry consists of three submitted VCF files (Garvan, Garvan-rerun, and HLI) and five comparisons (reproducibility 1 &amp; 2; accuracy 1a, 1b &amp; 2). The entries are sorted in order of date of submission.</p>
+
+    <p>
+    We would like to acknowledge and thank all of those who participated in the precisionFDA Consistency Challenge, for their engagement and contributions. We hope that everyone will feel like a winner. After considering the performance in reproducibility and accuracy comparisons, as well as other parameters, we have decided to hand out recognitions and awards, as illustrated in the table.
+    </p>
+
 
     <!-- Nav tabs -->
     <ul class="nav nav-tabs nav-tabs-contained" role="tablist">
-      <li role="presentation" class="active"><a href="#awards" aria-controls="awards" role="tab" data-toggle="tab">Awards</a></li>
+      <li role="presentation" class="active"><a href="#awards" aria-controls="awards" role="tab" data-toggle="tab">Awards and Recognitions</a></li>
       <li role="presentation"><a href="#datasets" aria-controls="datasets" role="tab" data-toggle="tab">Datasets</a></li>
     </ul>
 
@@ -625,9 +629,8 @@
     </div>
 
     <div>
-      <p>
-      We would like to acknowledge and thank all of those who participated in the precisionFDA Consistency Challenge, for their engagement and contributions. We hope that everyone will feel like a winner. After considering the performance in reproducibility and accuracy comparisons, as well as other parameters, we have decided to hand out recognitions and awards, as illustrated in the table.
-      </p>
+      <p>To aid in the presentation of results, we decided to give each entry a unique label, comprised of the name of the submitting user as well as a short mnemonic keyword representing the pipeline. (These keywords are merely indicative of each pipeline's main component, hence somewhat subjective; for a more faithful description of each pipeline, refer to the full text that accompanied each submission by following the label links). Each entry consists of three submitted VCF files (Garvan, Garvan-rerun, and HLI) and five comparisons (reproducibility 1 &amp; 2; accuracy 1a, 1b &amp; 2). The entries are sorted in order of date of submission.</p>
+
       <p>
       More specifically, we are recognizing particular entries based on the following:
       </p>
@@ -655,7 +658,7 @@
 
 <div class="challenge-section challenge-section-detail">
   <div class="container container-padded">
-    <div class="h2">Details</div>
+    <div class="h2">Awards and Recognitions Detail</div>
     <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
       <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="headingOne">
@@ -1631,39 +1634,50 @@
           </div>
         </div>
       </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingFour">
+          <h4 class="panel-title">
+            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+              Miscellaneous Recognitions
+            </a>
+          </h4>
+        </div>
+        <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+          <div class="panel-body">
+            <p>
+            We would like to extend special recognitions to the following entries:
+            </p>
+            <ul>
+              <li> The "extra-credit" recognition to the entry submitted by Deepak Grover (Sanofi-Genzyme), for answering the extra credit question.</li>
+              <li> The "pfda-apps" recognition to the entry submitted by Mike Lin (DNAnexus Science), for contributing apps to precisionFDA and using them to generate the results of the entry.</li>
+              <li> The "heroic-effort" recognition to the entry submitted by Adam Novak et. al (VGTeam), for using this challenge as an opportunity to push the boundaries of their pipeline. As they <a href="https://precision.fda.gov/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">mentioned</a> in their submission, "vg is a work in progress, and this challenge answer represents the first time it has ever been run on whole genomes. The team sprinted through the weekend preceding the deadline in order to scale up the graph read-mapping and variant-calling algorithms, which had previously been used only on limited test regions".</li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="container container-padded">
-    <div class="h2">Miscellaneous Recognitions</div>
-    <div>
-      <p>
-      We would like to extend special recognitions to the following entries:
-      </p>
-      <ul>
-        <li> The "extra-credit" recognition to the entry submitted by Deepak Grover (Sanofi-Genzyme), for answering the extra credit question.</li>
-        <li> The "pfda-apps" recognition to the entry submitted by Mike Lin (DNAnexus Science), for contributing apps to precisionFDA and using them to generate the results of the entry.</li>
-        <li> The "heroic-effort" recognition to the entry submitted by Adam Novak et. al (VGTeam), for using this challenge as an opportunity to push the boundaries of their pipeline. As they <a href="https://precision.fda.gov/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">mentioned</a> in their submission, "vg is a work in progress, and this challenge answer represents the first time it has ever been run on whole genomes. The team sprinted through the weekend preceding the deadline in order to scale up the graph read-mapping and variant-calling algorithms, which had previously been used only on limited test regions".</li>
-      </ul>
-    </div>
-  </div>
+</div>
+
+<div class="challenge-section challenge-section-conclusion">
   <div class="container container-padded">
     <div class="h2">Conclusions and lessons learned</div>
     <div>
-      <p>Comparisons</p>
+      <div class="h3">Comparisons</div>
       <p>
       This challenge used the comparison framework that was available when precisionFDA was first launched. The framework outputs detailed files with the variants of each category, so that anyone can perform downstream calculations or otherwise investigate their false positives or false negatives. This has helped participants better understand the characteristics of their pipelines – an effort that could be improved by more detailed reporting in the comparison output, since the current version of the comparison framework reports only aggregate statistics. As someone pointed out in a separate communication, “showing summary numbers for both SNPs and indels together can hide issues with indel calling behind the fact that SNPs do really well (most pipelines discover most of the easy SNPs)”. In the future, we look forward to more granular reporting, including separate statistics for SNPs versus indels and other types of variations, as well as information on zygosity mismatches. We are working with the GA4GH benchmarking group to incorporate the next generation of comparisons, and you can currently see an early glimpse of that in the <a href="https://precision.fda.gov/apps/explore">GA4GH Benchmarking app</a> on precisionFDA.
       </p>
 
-      <p>Benchmarking material</p>
+      <div class="h3">Benchmarking material</div>
       <p>
       The challenge used the NIST/GiaB characterization of NA12878 as the benchmark set, as reported on GRCh37. Although NIST relied on different sequencing technologies and software algorithms to generate this dataset, members of the community expressed concerns that the dataset may be "biased towards GATK". Other community feedback mentioned known facts such as that the dataset is not comprehensive enough with respect to indels, that the confidence regions are not covering several genomic areas of clinical importance, and that this dataset does not include copy-number variants or structural variants, or incorporate phasing information. GiaB is aware of the limitations of the existing dataset and is already working to address them. In addition, precisionFDA is collaborating with NIST to engage the community to improve this dataset by incorporating a Feedback button straight into the comparison results page. The government agencies, including FDA, NIST, CDC, and other stakeholders are also collaborating towards the generation of new benchmarking materials.
       </p>
       <p>
       We also received questions around the choice of GRCh37. The performance of pipelines is affected by the reference human sequence, and as one participant put it “once we obtain a perfect (no gaps, no mistakes) reference genome, the performance will be much better”. The current NIST/GiaB release is based on GRCh37, but we are looking forward to using GRCh38 in the future.
       </p>
-      <p>
-      Study design
-      </p>
+
+      <div class="h3">Study design</div>
       <p>
       This first challenge tried to engage the community, while at the same time making use of familiar datasets (such as NIST reference material) and simple evaluations (such as the comparison framework). The main focus was looking at reproducibility, while additionally assessing accuracy, both important concepts in regulatory science.
       </p>
@@ -1678,9 +1692,7 @@
       Lastly, we acknowledge that the evaluation of the results was confined within certain limits; however, the process (and its limitations) can inform future challenges. For example, we did not factor pipeline runtime or resource consumption into our evaluations.
       </p>
 
-      <p>
-      Epilogue
-      </p>
+      <div class="h3">Epilogue</div>
       <p>
       We want to thank those of you who participated in our first challenge! By participating and putting your results and your thoughts out in the public, you fulfilled the first and most important goal of this challenge &ndash; to engage and get the dialogue started.
       </p>
@@ -1691,25 +1703,32 @@
       In closing, we would like to leave you with several encouraging quotes from our community, which will hopefully inspire all readers to participate in one of our upcoming challenges:
       </p>
 
-      <p>
-      “When I started working in this industry I felt that everyone claimed that their pipeline was better, but there was no objective way of measuring, so it sounded like an ad for car insurance. I think your challenges will move our industry forward immensely.” – Rafael Aldana, Mountain View, CA
-      </p>
+      <hr>
 
-      <p>
-      “I wish to congratulate your team for putting together a bioinformatics challenge like that, it is a nice and unique idea. It can become a significant community resource for NGS work and data in future”. – Deepak Grover, Boston, MA
-      </p>
+      <blockquote>
+        “When I started working in this industry I felt that everyone claimed that their pipeline was better, but there was no objective way of measuring, so it sounded like an ad for car insurance. I think your challenges will move our industry forward immensely.”
+        <footer>Rafael Aldana, Mountain View, CA</footer>
+      </blockquote>
 
-      <p>
-      “The challenge made me aware of many good software methods, thanks!” – Huang Zhibo, Shenzhen, China.
-      </p>
+      <blockquote class="">
+        “I wish to congratulate your team for putting together a bioinformatics challenge like that, it is a nice and unique idea. It can become a significant community resource for NGS work and data in future”.
+        <footer>Deepak Grover, Boston, MA</footer>
+      </blockquote>
 
-      <p>
-      “We found this experience is very helpful for us to improve our understanding of our pipeline.” – Sean Li, San Diego, CA
-      </p>
+      <blockquote>
+        “The challenge made me aware of many good software methods, thanks!”
+        <footer>Huang Zhibo, Shenzhen, China</footer>
+      </blockquote>
 
-      <p>
-      “We plan on contacting a fellow participant to try their pipeline.” – Aaron Statham, Sydney, Australia
-      </p>
+      <blockquote class="">
+        “We found this experience is very helpful for us to improve our understanding of our pipeline.”
+        <footer>Sean Li, San Diego, CA</footer>
+      </blockquote>
+
+      <blockquote>
+        “We plan on contacting a fellow participant to try their pipeline.”
+        <footer>Aaron Statham, Sydney, Australia</footer>
+      </blockquote>
     </div>
   </div>
 </div>
