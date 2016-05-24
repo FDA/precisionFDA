@@ -47,13 +47,13 @@
     text-align: center
     padding: 0 25px
 
-  #accordion
+  #detailsAccordion, #accordion
     .panel-title
       text-transform: none
-      color: $link-color
+      color: $accessible-link-color
 
       &:hover
-        color: $link-hover-color
+        color: $accessible-link-hover-color
 
 
   .challenge-section
@@ -73,6 +73,8 @@
 
     &.challenge-section-conclusion
       background-color: lighten($gray-subtle, 1%)
+      .media-left .fa
+        color: $text-muted
 
   .challenge-badge
     text-transform: uppercase
@@ -92,36 +94,36 @@
         margin-right: 7px
 
     &.challenge-badge-medal
-      background-color: $label-warning-bg
+      background-color: $accessible-btn-warning-bg
       color: #fff
       .fa-inverse
-        color: $label-warning-bg
+        color: $accessible-btn-warning-bg
 
     &.challenge-badge-recognition-highest
-      background-color: $label-primary-bg
+      background-color: $accessible-btn-primary-bg
       color: #fff
 
     &.challenge-badge-recognition
       background-color: $state-info-bg
-      color: $state-info-text
+      color: $accessible-brand-blue-primary
 
   .challenge-row-highest
-    background-color: $label-primary-bg
+    background-color: $accessible-btn-primary-bg
     color: #fff
 
     a
       color: #fff
       &:hover
-        color: $link-muted-color
+        color: lighten($link-muted-color, 25%)
 
 
   .challenge-row-high
     background-color: $state-info-bg
-    color: $state-info-text
+    color: $accessible-brand-blue-primary
 
   .challenge-row-not-considered
     background-color: $gray-subtle
-    color: $text-muted
+    color: $accessible-text-muted
 
   .accuracy-tables
     table
@@ -133,7 +135,7 @@
         margin-right: 0
 
   .challenge-winning-team
-    color: $state-warning-text
+    color: $accessible-btn-warning-color
     margin-left: $padding-base-horizontal*2
     ul
       margin-top: 10px
