@@ -27,7 +27,14 @@ module ChallengesHelper
         raw """
           <div class='challenge-badge challenge-badge-recognition-highest'>
             <span class='fa fa-certificate'></span>
-            #{recognition}
+            Highest
+          </div>
+        """
+      elsif recognition.include? "high"
+        raw """
+          <div class='challenge-badge challenge-badge-recognition'>
+            <span class='fa fa-certificate'></span>
+            High
           </div>
         """
       elsif recognition.include? "not-considered"

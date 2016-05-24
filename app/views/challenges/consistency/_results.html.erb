@@ -10,7 +10,7 @@
       <div class="pfda-cards pfda-cards-justify-centered ">
         <div class="pfda-card pfda-card-warning pfda-card-rounded pfda-card-padded pfda-card-bordered">
           <div class="pfda-card-body">
-            <%= medal_badge("Overall performance", "large") %>
+            <%= medal_badge("Performance", "large") %>
             <br><br>
             <div class="lead">Sentieon team</div>
             <div>Rafael Aldana, Hanying Feng, Brendan Gallagher, Jun Ye</div>
@@ -62,7 +62,7 @@
                 <th>Organization</th>
                 <th>Awards</th>
                 <th>Repro1</th>
-                <th>Repro2</th>
+                <th>Repro2<br>Concordance</th>
                 <th>Recall</th>
                 <th>Precision</th>
                 <th>F-measure</th>
@@ -88,7 +88,7 @@
               <td>Rafael Aldana <a tabindex="0" role="button" data-trigger="Focus" data-toggle="popover" data-content="Hanying Feng, Brendan Gallagher, Jun Ye">et al.</a></td>
               <td>Sentieon</td>
               <td>
-                <%= medal_badge("Overall performance") %>
+                <%= medal_badge("Performance") %>
                 <br>
                 <%= medal_badge("Reproducibility") %>
               </td>
@@ -1120,8 +1120,7 @@
               </p>
             </div>
 
-            <div class="row">
-              <div class="col-md-8">
+            <div class="accuracy-tables clearfix">
                 <table class="table table-condensed table-bordered table-nowrap">
                   <thead>
                     <tr>
@@ -1283,8 +1282,6 @@
                     </tr>
                   </tbody>
                 </table>
-              </div>
-              <div class="col-md-8">
                 <table class="table table-condensed table-bordered table-nowrap">
                   <thead>
                     <tr>
@@ -1446,8 +1443,6 @@
                     </tr>
                   </tbody>
                 </table>
-              </div>
-              <div class="col-md-8">
                 <table class="table table-condensed table-bordered table-nowrap">
                   <thead>
                     <tr>
@@ -1608,7 +1603,6 @@
                     </tr>
                   </tbody>
                 </table>
-              </div>
             </div>
 
             <div class="text-muted small">
@@ -1691,7 +1685,7 @@
       We want to thank those of you who participated in our first challenge! By participating and putting your results and your thoughts out in the public, you fulfilled the first and most important goal of this challenge &ndash; to engage and get the dialogue started.
       </p>
       <p>
-      This challenge created a dataset that people can study further, if they so choose. We have created an archive of 60 VCF files (compressed with bgzip, and accompanied by tabix index files) that is available as a file on precisionFDA. We have also created a similar app asset, which can be included in apps that need direct access to the unarchived VCF files. We are excited to see how the community will use this in the future. Perhaps the results available from the challenge can provide some interesting ideas for precisionFDA and the scientific community to build upon. 
+      This challenge created a dataset that people can study further, if they so choose. We have created an archive of 60 VCF files (compressed with bgzip, and accompanied by tabix index files) that is available as a file on precisionFDA. We have also created a similar app asset, which can be included in apps that need direct access to the unarchived VCF files. We are excited to see how the community will use this in the future. Perhaps the results available from the challenge can provide some interesting ideas for precisionFDA and the scientific community to build upon.
       </p>
       <p>
       In closing, we would like to leave you with several encouraging quotes from our community, which will hopefully inspire all readers to participate in one of our upcoming challenges:
