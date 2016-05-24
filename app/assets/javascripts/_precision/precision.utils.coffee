@@ -20,3 +20,10 @@ window.Precision.utils =
       ++i
     regexChars.push "$"
     new RegExp(regexChars.join(""), modifiers)
+
+  scrollOnAccordionCollapse: ($accordion) ->
+    $accordion.on 'shown.bs.collapse', (e) ->
+      $selected = $(e.target)
+      $('html, body').animate({
+        scrollTop: $selected.parent().offset().top
+    }, 250)

@@ -14,4 +14,6 @@ ChallengesController = Paloma.controller('Challenges',
     $popover = $container.find('[data-toggle="popover"]')
     if $popover.length > 0
       $popover.popover()
+
+    Precision.utils.scrollOnAccordionCollapse($container.find('.accordion'))
 )
