@@ -31,6 +31,11 @@
     .lead-intro
       margin: 50px 0
 
+      & + .lead
+        margin-top: -25px
+        margin-bottom: 25px
+
+
     .pfda-card
       @include flex-grow(1)
 
@@ -81,6 +86,10 @@
       border-radius: 50px
       font-size: 20px
       padding: $padding-base-vertical $padding-base-horizontal
+      display: block
+
+      .fa-stack
+        margin-right: 7px
 
     &.challenge-badge-medal
       background-color: $label-warning-bg
@@ -122,3 +131,13 @@
 
       &:last-child
         margin-right: 0
+
+  .challenge-winning-team
+    color: $state-warning-text
+    margin-left: $padding-base-horizontal*2
+    ul
+      margin-top: 10px
+
+  .challenge-awarded-to
+    font-size: 11px
+    text-transform: uppercase

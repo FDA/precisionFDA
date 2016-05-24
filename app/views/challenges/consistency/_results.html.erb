@@ -1,35 +1,58 @@
 <div class="container container-padded">
   <div class="pfda-challenge-intro">
-    <div class="lead-intro">The precisionFDA Consistency Challenge ran from February 25, 2016 to April 25, 2016, inviting participants to process certain datasets through their NGS processing pipelines and conduct comparisons on precisionFDA. Community members from four different continents embraced the challenge, coming together under one roof, to showcase their methods, share their results, and highlight their insights. We have created this web page to summarize the challenge results and list our recognitions, as well as discuss key conclusions and other interesting findings from this first challenge.</div>
+    <div class="lead-intro">The precisionFDA Consistency Challenge ran from February 25, 2016 to April 25, 2016, inviting participants to process certain datasets through their NGS processing pipelines and conduct comparisons on precisionFDA.</div>
+    <div class="lead">
+       Community members from four different continents embraced the challenge, coming together under one roof, to showcase their methods, share their results, and highlight their insights. We have created this web page to summarize the challenge results and list our recognitions, as well as discuss key conclusions and other interesting findings from this first challenge.</div>
   </div>
 </div>
 
 <div class="challenge-section challenge-section-highlight pfda-challenge-intro">
   <div class="container container-padded">
-      <div class="h3 text-center">Community Challenge Awards</div>
+      <div class="h3 text-center text-uppercase">Community Challenge Awards</div>
       <div class="pfda-cards pfda-cards-justify-centered ">
-        <div class="pfda-card pfda-card-warning pfda-card-rounded pfda-card-padded pfda-card-bordered">
+        <div class="pfda-card pfda-card-rounded pfda-card-padded">
           <div class="pfda-card-body">
             <%= medal_badge("Performance", "large") %>
-            <br><br>
-            <div class="lead">Sentieon team</div>
-            <div>Rafael Aldana, Hanying Feng, Brendan Gallagher, Jun Ye</div>
+            <br>
+            <div class="challenge-winning-team">
+              <div class="challenge-awarded-to">Awarded to</div>
+              <div class="lead lead-bold">Sentieon team</div>
+              <ul class="list-unstyled">
+                <li>Rafael Aldana</li>
+                <li>Hanying Feng</li>
+                <li>Brendan Gallagher</li>
+                <li>Jun Ye</li>
+              </ul>
+            </div>
           </div>
         </div>
-        <div class="pfda-card pfda-card-warning pfda-card-rounded pfda-card-padded pfda-card-bordered">
+        <div class="pfda-card pfda-card-rounded pfda-card-padded">
           <div class="pfda-card-body">
             <%= medal_badge("Reproducibility", "large") %>
-            <br><br>
-            <div class="lead">Sentieon team</div>
-            <div>Rafael Aldana, Hanying Feng, Brendan Gallagher, Jun Ye</div>
+            <br>
+            <div class="challenge-winning-team">
+              <div class="challenge-awarded-to">Awarded to</div>
+              <div class="lead lead-bold">Sentieon team</div>
+              <ul class="list-unstyled">
+                <li>Rafael Aldana</li>
+                <li>Hanying Feng</li>
+                <li>Brendan Gallagher</li>
+                <li>Jun Ye</li>
+              </ul>
+            </div>
           </div>
         </div>
-        <div class="pfda-card pfda-card-warning pfda-card-rounded pfda-card-padded pfda-card-bordered">
+        <div class="pfda-card pfda-card-rounded pfda-card-padded">
           <div class="pfda-card-body">
             <%= medal_badge("Accuracy", "large") %>
-            <br><br>
-            <div class="lead">Sanofi-Genzyme</div>
-            <div>Deepak Grover</div>
+            <br>
+            <div class="challenge-winning-team">
+              <div class="challenge-awarded-to">Awarded to</div>
+              <div class="lead lead-bold">Sanofi-Genzyme</div>
+              <ul class="list-unstyled">
+                <li>Deepak Grover</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -44,7 +67,7 @@
     <p>We received a total of 21 entries to the challenge, summarized in the following table.</p>
 
     <p>
-    We would like to acknowledge and thank all of those who participated in the precisionFDA Consistency Challenge, for their engagement and contributions. We hope that everyone will feel like a winner. After considering the performance in reproducibility and accuracy comparisons, as well as other parameters, we have decided to hand out recognitions and awards, as illustrated in the table.
+    We would like to acknowledge and thank all of those who participated in the precisionFDA Consistency Challenge, for their engagement and contributions. We hope that everyone will feel like a winner. After considering the performance in reproducibility and accuracy comparisons, as well as other parameters, we have decided to hand out awards and recognitions, as illustrated in the table.
     </p>
 
 
@@ -61,7 +84,7 @@
           <table class="table table-condensed table-bordered table-nowrap">
             <thead>
               <tr>
-                <th>Nickname</th>
+                <th>Label</th>
                 <th>Submitter</th>
                 <th>Organization</th>
                 <th>Awards</th>
@@ -358,7 +381,7 @@
           <table class="table table-condensed table-bordered table-nowrap">
             <thead>
               <tr>
-                <th>Nickname</th>
+                <th>Label</th>
                 <th>VCF Files</th>
                 <th>Comparisons</th>
               </tr>
@@ -676,7 +699,7 @@
             <div class="table-responsive">
               <table class="table table-condensed table-bordered">
                 <thead>
-                  <th>Nickname</th>
+                  <th>Label</th>
                   <th>Repro.1</th>
                   <th>Common (TP)</th>
                   <th>Unique (FP+FN)</th>
@@ -884,7 +907,7 @@
             <div class="table-responsive">
               <table class="table table-condensed table-bordered">
                 <thead>
-                  <th>Nickname</th>
+                  <th>Label</th>
                   <th>Repro.2</th>
                   <th>Common (TP)</th>
                   <th>Unique (FP+FN)</th>
@@ -1130,7 +1153,7 @@
                       <th colspan="4">Recall</th>
                     </tr>
                     <tr>
-                      <th>Nickname</th>
+                      <th>Label</th>
                       <th>R1</th>
                       <th>R2</th>
                       <th>&Delta;</th>
@@ -1291,7 +1314,7 @@
                       <th colspan="4">Precision</th>
                     </tr>
                     <tr>
-                      <th>Nickname</th>
+                      <th>Label</th>
                       <th>P1</th>
                       <th>P2</th>
                       <th>&Delta;</th>
@@ -1452,7 +1475,7 @@
                       <th colspan="4">F-measure</th>
                     </tr>
                     <tr>
-                      <th>Nickname</th>
+                      <th>Label</th>
                       <th>F1</th>
                       <th>F2</th>
                       <th>&Delta;</th>
