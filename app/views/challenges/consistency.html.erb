@@ -22,32 +22,32 @@
       <!-- Nav tabs -->
       <ul class="nav nav-pills nav-tabs-contained" role="tablist">
         <li role="presentation" class="<%= !params[:tab].present? ? 'active':'' %>"><a href="<%= consistency_challenges_path %>" class="tab-label" aria-controls="info" role="tab">Challenge Info</a></li>
-        <li role="presentation" class="<%= params[:tab] == 'results' ? 'active':'' %>"><a href="<%= consistency_challenges_path('results') %>" class="tab-label" aria-controls="results" role="tab"> Challenge Results</a></li>
+        <li role="presentation" class="<%= params[:tab] == 'results' ? 'active':'' %>"><a href="<%= consistency_challenges_path('results') %>" class="tab-label" aria-controls="results" role="tab"> Challenge Results <% if @consistency_challenge[:results_announced] %><span class='label label-warning'>Announced</span><% end %></a></li>
       </ul>
     </div>
     <div class="col-sm-6">
-      <% if @challenge[:launched] %>
-        <a class="btn btn-join <%= @btn_class %> btn-lg text-uppercase" href="<%= @challenge[:active] ? join_challenge_path(@discussion[:id]) : discussion_path(@discussion[:id]) %>" role="button">
+      <% if @consistency_challenge[:launched] %>
+        <a class="btn btn-join <%= @btn_class %> btn-lg text-uppercase" href="<%= @consistency_challenge[:active] ? join_challenge_path(@discussion[:id]) : discussion_path(@discussion[:id]) %>" role="button">
           <div class="media">
             <div class="media-left">
               <span class="fa fa-trophy" aria-hidden="true"></span>
             </div>
             <div class="media-body text-left">
-              <% if !@challenge[:active] %>
+              <% if !@consistency_challenge[:active] %>
                 Challenge Closed
                 <br>
                 <small class="time-remaining">
                   View Responses
                 </small>
               <% else %>
-                <% if @challenge[:joined] %>
+                <% if @consistency_challenge[:joined] %>
                   Challenge Joined!
                 <% else %>
                   Join the Challenge
                 <% end %>
                 <br>
                 <div class="time-remaining">
-                  <%= distance_of_time_in_words_to_now(@challengedEndDate) %> remaining
+                  <%= distance_of_time_in_words_to_now(@consistency_challenge[:end_date]) %> remaining
                 </div>
               <% end %>
             </div>
@@ -65,6 +65,12 @@
 
 
 <% if params[:tab] == 'results' %>
+  <% if @consistency_challenge[:results_announced] %>
+    <%= render "challenges/consistency/results" %>
+  <% else %>
+    <%= render "challenges/consistency/preview_results" %>
+  <% end %>
+<% elsif params[:tab] == 'results-peek' && @context.user.can_administer_site? %>
   <%= render "challenges/consistency/results" %>
 <% else %>
   <%= render "challenges/consistency/info" %>
