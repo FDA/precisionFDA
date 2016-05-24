@@ -43,6 +43,10 @@
         text-align: center
         margin-bottom: $padding-large-vertical*2
 
+  .pfda-challenge-awards
+    .pfda-card
+      @include flex-grow(1)
+
   .pfda-challenge-diagram
     text-align: center
     padding: 0 25px
@@ -93,6 +97,13 @@
       .fa-stack
         margin-right: 7px
 
+      .media-body
+        line-height: 1.2
+
+      .challenge-badge-qualifier
+        text-transform: uppercase
+        font-size: 14px
+
     &.challenge-badge-medal
       background-color: $accessible-btn-warning-bg
       color: #fff
@@ -136,7 +147,7 @@
 
   .challenge-winning-team
     color: $accessible-btn-warning-color
-    margin-left: $padding-base-horizontal*2
+    margin-left: 82px // align with text in badge
     ul
       margin-top: 10px
 
