@@ -70,7 +70,7 @@
   <% else %>
     <%= render "challenges/consistency/preview_results" %>
   <% end %>
-<% elsif params[:tab] == 'results-peek' && @context.user.can_administer_site? %>
+<% elsif params[:tab] == 'results-peek' && ((@context.logged_in? && @context.user.can_administer_site?) || (ENV["DNANEXUS_BACKEND"] != "production")) %>
   <%= render "challenges/consistency/results" %>
 <% else %>
   <%= render "challenges/consistency/info" %>
