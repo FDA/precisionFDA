@@ -155,16 +155,16 @@
         <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
           <div class="panel-body">
             <p>
-              If the exact same pipeline runs twice on the exact same input, does it produce the same output? The reproducibility comparison 1 investigates exactly that, by comparing the Garvan VCF to the Garvan Rerun VCF (which are the results of running the same pipeline on the same sequencing data). In this comparison, true positives represent the common variants, whereas false positives and false negatives represent the unique variants in each file. The following table summarizes the performance of each entry with respect to number of common and unique variants in the reproducibility comparison 1. The entries are sorted by number of unique variants (and subsequently by submission date).
+              If the exact same pipeline runs twice on the exact same input, does it produce the same output? The reproducibility comparison 1 investigates exactly that, by comparing the Garvan VCF to the Garvan Rerun VCF (which are the results of running the same pipeline on the same sequencing data). In this comparison, true positives represent the common variants, whereas false positives and false negatives represent the unique variants in each file. The following table summarizes the performance of each entry with respect to number of common and unique variants in the reproducibility comparison 1. The entries are sorted by number of unique variants; since all the deterministic entries have no unique variants, those are sorted by submission date.
             </p>
             <%= render "challenges/consistency/table_repro1" %>
             <div class="text-muted small">
               <p>
-                [#1] This entry was not considered because the VCF files were not submitted within the challenge timeframe
+                [#1] This entry was not considered because the entry submitted the NIST benchmark set as the answer
                 <br>
-                [#2] This entry was not considered because the entry submitted the NIST benchmark set as the answer
+                [#2] This entry was not considered because the Garvan rerun VCF file was not submitted within the challenge timeframe
                 <br>
-                [#3] This entry was not considered because the Garvan rerun VCF file was not submitted within the challenge timeframe
+                [#3] This entry was not considered because the VCF files were not submitted within the challenge timeframe
               </p>
             </div>
             <p>
