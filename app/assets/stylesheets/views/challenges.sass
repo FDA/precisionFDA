@@ -31,6 +31,11 @@
     .lead-intro
       margin: 50px 0
 
+      & + .lead
+        margin-top: -25px
+        margin-bottom: 25px
+
+
     .pfda-card
       @include flex-grow(1)
 
@@ -38,14 +43,114 @@
         text-align: center
         margin-bottom: $padding-large-vertical*2
 
+  .pfda-challenge-awards
+    .pfda-card
+      @include flex-grow(1)
+
   .pfda-challenge-diagram
     text-align: center
     padding: 0 25px
 
-  #accordion
+  #detailsAccordion, #accordion
     .panel-title
       text-transform: none
-      color: $link-color
+      color: $accessible-link-color
 
       &:hover
-        color: $link-hover-color
+        color: $accessible-link-hover-color
+
+
+  .challenge-section
+    .h2
+      color: #344967
+      padding: $padding-base-horizontal 0
+      border-bottom: 1px solid $border-default-color
+
+    table
+      font-size: 12px
+
+    &.challenge-section-highlight
+      background-color: lighten($brand-highlight, 2%)
+
+    &.challenge-section-detail
+      background-color: $gray-lighter
+
+    &.challenge-section-conclusion
+      background-color: lighten($gray-subtle, 1%)
+      .media-left .fa
+        color: $text-muted
+
+  .challenge-badge
+    text-transform: uppercase
+    border-radius: 20px
+    padding: $padding-xs-vertical $padding-xs-horizontal
+    font-size: 10px
+    white-space: nowrap
+    display: inline-block
+
+    &.challenge-badge-lg
+      border-radius: 50px
+      font-size: 20px
+      padding: $padding-base-vertical $padding-base-horizontal
+      display: block
+
+      .fa-stack
+        margin-right: 7px
+
+      .media-body
+        line-height: 1.2
+
+      .challenge-badge-qualifier
+        text-transform: uppercase
+        font-size: 14px
+
+    &.challenge-badge-medal
+      background-color: $accessible-btn-warning-bg
+      color: #fff
+      .fa-inverse
+        color: $accessible-btn-warning-bg
+
+    &.challenge-badge-recognition-highest
+      background-color: $accessible-btn-primary-bg
+      color: #fff
+
+    &.challenge-badge-recognition
+      background-color: $state-info-bg
+      color: $accessible-brand-blue-primary
+
+  .challenge-row-highest
+    background-color: $accessible-btn-primary-bg
+    color: #fff
+
+    a
+      color: #fff
+      &:hover
+        color: lighten($link-muted-color, 25%)
+
+
+  .challenge-row-high
+    background-color: $state-info-bg
+    color: $accessible-brand-blue-primary
+
+  .challenge-row-not-considered
+    background-color: $gray-subtle
+    color: $accessible-text-muted
+
+  .accuracy-tables
+    table
+      float: left
+      width: 32%
+      margin-right: 1%
+
+      &:last-child
+        margin-right: 0
+
+  .challenge-winning-team
+    color: $accessible-btn-warning-color
+    margin-left: 82px // align with text in badge
+    ul
+      margin-top: 10px
+
+  .challenge-awarded-to
+    font-size: 11px
+    text-transform: uppercase
