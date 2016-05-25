@@ -16,7 +16,7 @@ class Challenge
       results_date: CONSISTENCY_CHALLENGE_RESULTS_DATE,
       active: DateTime.now.in_time_zone < CONSISTENCY_CHALLENGE_END_DATE,
       ended: DateTime.now.in_time_zone >= CONSISTENCY_CHALLENGE_END_DATE,
-      results_announced: false
+      results_announced: true
       # CONSISTENCY_CHALLENGE_RESULTS_DATE && DateTime.now.in_time_zone >= CONSISTENCY_CHALLENGE_RESULTS_DATE
     }
   end
