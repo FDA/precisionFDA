@@ -22,7 +22,7 @@
       <!-- Nav tabs -->
       <ul class="nav nav-pills nav-tabs-contained" role="tablist">
         <li role="presentation" class="<%= !params[:tab].present? ? 'active':'' %>"><a href="<%= consistency_challenges_path %>" class="tab-label" aria-controls="info" role="tab">Challenge Info</a></li>
-        <li role="presentation" class="<%= params[:tab] == 'results' ? 'active':'' %>"><a href="<%= consistency_challenges_path('results') %>" class="tab-label" aria-controls="results" role="tab"> Challenge Results <% if @consistency_challenge[:results_announced] %><span class='label label-warning'>Announced</span><% end %></a></li>
+        <li role="presentation" class="<%= params[:tab] == 'results' ? 'active':'' %>"><a href="<%= consistency_challenges_path('results') %>" class="tab-label" aria-controls="results" role="tab"> Challenge Results</a></li>
       </ul>
     </div>
     <div class="col-sm-6">
