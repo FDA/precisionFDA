@@ -14,28 +14,28 @@
       <br>
       <div class="row">
         <div class="col-sm-6 col-xs-24">
-          <% if @challenge[:launched] %>
-            <a class="btn btn-join <%= @btn_class %> btn-lg text-uppercase" href="<%= @challenge[:active] ? join_challenge_path(@discussion[:id]) : discussion_path(@discussion[:id]) %>" role="button">
+          <% if @truth_challenge[:launched] %>
+            <a class="btn btn-join <%= @btn_class %> btn-lg text-uppercase" href="<%= @truth_challenge[:active] ? join_challenge_path(@discussion[:id]) : discussion_path(@discussion[:id]) %>" role="button">
               <div class="media">
                 <div class="media-left">
                   <span class="fa fa-trophy" aria-hidden="true"></span>
                 </div>
                 <div class="media-body text-left">
-                  <% if !@challenge[:active] %>
+                  <% if !@truth_challenge[:active] %>
                     Challenge Closed
                     <br>
                     <small class="time-remaining">
                       View Responses
                     </small>
                   <% else %>
-                    <% if @challenge[:joined] %>
+                    <% if @truth_challenge[:joined] %>
                       Challenge Joined!
                     <% else %>
                       Join the Challenge
                     <% end %>
                     <br>
                     <div class="time-remaining">
-                      <%= distance_of_time_in_words_to_now(@challengedEndDate) %> remaining
+                      <%= distance_of_time_in_words_to_now(@truth_challenge[:end_date]) %> remaining
                     </div>
                   <% end %>
                 </div>

@@ -1,0 +1,54 @@
+<div class="container container-padded">
+  <div class="pfda-challenge-intro">
+    <center>
+      <mark class="lead">The challenge awards and recognitions will be revealed on <%= @consistency_challenge[:results_date] ? @consistency_challenge[:results_date].strftime("%d %b %Y %H:%M %Z") : 'TBD' %></mark>
+    </center>
+    <hr>
+    <div class="lead-intro">The precisionFDA Consistency Challenge ran from February 25, 2016 to April 25, 2016, inviting participants to process certain datasets through their NGS processing pipelines and conduct comparisons on precisionFDA.</div>
+    <div class="lead">
+       Community members from four different continents embraced the challenge, coming together under one virtual roof, to showcase their methods, share their results, and highlight their insights. When the results are announced, this page will summarize the challenge results and list our recognitions, as well as discuss key conclusions and other interesting findings from this first challenge.</div>
+  </div>
+</div>
+
+<div class="challenge-section challenge-section-highlight pfda-challenge-awards">
+  <div class="container container-padded">
+      <div class="h3 text-center text-uppercase">Community Challenge Awards
+      <br>
+      <small>Revealed in <%= distance_of_time_in_words_to_now(@consistency_challenge[:results_date]) %></small></div>
+      <div class="row">
+        <div class="col-md-8 col-md-offset-8">
+          <div class="pfda-cards pfda-cards-justify-centered">
+            <div class="pfda-card pfda-card-rounded">
+              <div class="pfda-card-body">
+                <%= medal_badge("Performance", "Top overall", "large") %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-8 col-md-offset-4">
+          <div class="pfda-cards pfda-cards-justify-centered">
+            <div class="pfda-card pfda-card-rounded">
+              <div class="pfda-card-body">
+                <%= medal_badge("Reproducibility", "Highest", "large") %>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-8">
+            <div class="pfda-cards pfda-cards-justify-centered">
+              <div class="pfda-card pfda-card-rounded">
+                <div class="pfda-card-body">
+                  <%= medal_badge("Accuracy", "Highest", "large") %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
