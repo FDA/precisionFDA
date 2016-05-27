@@ -32,7 +32,7 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
   .variants-circle
     position: absolute
     top: 50%
-    right: 50%
+    right: 0
     height: $withHeight
     width: $withHeight
     margin-top: -$withHeight/2
@@ -110,19 +110,21 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
       .file-label
         color: $brand-blue-dark
 
-        .fa
-          color: $brand-blue-dark
+        .file-icon
+          .fa
+            color: $brand-blue-dark
 
       &:not(.active)
         .file-info
           color: $brand-red-primary
 
     .active
-      .fa
-        color: $brand-blue-dark
+      .file-icon
+        .fa
+          color: $brand-blue-dark
 
-        &.access-icon
-          color: $brand-blue-tertiary
+          &.access-icon
+            color: $brand-blue-tertiary
 
     > li
       margin-bottom: $padding-large-vertical
@@ -267,6 +269,10 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
     font-size: $font-size-h4
 
 @media (max-width: $screen-sm-max)
+  .pfda-controller-comparisons main .variants-circle
+    top: 100%
+    right: 50%
+
   .pfda-controller-comparisons.pfda-action-new
     .affix
       position: relative !important
