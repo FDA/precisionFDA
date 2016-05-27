@@ -161,6 +161,11 @@
           <%= render "_partials/variant_file", file: @test_vcf, title: "VCF", required: true, classes: "required active"  %>
           <%= render "_partials/variant_file", file: @test_bed, title: "BED", required: false, classes: "active"  %>
         </ul>
+        <div class="variants-circle">
+            <div class="variants-circle-with">
+              with
+            </div>
+        </div>
       </div>
 
       <div class="variant-ref">
@@ -169,12 +174,6 @@
           <%= render "_partials/variant_file", file: @ref_vcf, title: "VCF", required: true, classes: "required active"  %>
           <%= render "_partials/variant_file", file: @ref_bed, title: "BED", required: false, classes: "active"  %>
         </ul>
-      </div>
-
-      <div class="variants-circle">
-          <div class="variants-circle-with">
-            with
-          </div>
       </div>
     </div>
 
