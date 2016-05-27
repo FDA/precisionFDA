@@ -48,7 +48,7 @@
                     <span class="fa fa-fw <%= challenge[:results_announced] ? 'fa-check': '' %>"></span>
                   </div>
                   <div class="media-body">
-                    <% if challenge[:ended] && !challenge[:results_announced] %>
+                    <% if challenge[:ended] && !challenge[:results_announced] && challenge[:results_date] %>
                       <mark><strong><%= distance_of_time_in_words_to_now(challenge[:results_date]) %></strong> left</mark>
                       <br>
                     <% end %>
