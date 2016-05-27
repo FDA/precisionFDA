@@ -122,12 +122,11 @@ ComparisonsController = Paloma.controller('Comparisons',
     viewModel = new ComparisonsNewView()
     ko.applyBindings(viewModel, $container[0])
 
-    viewModel.areAllInputsSet.subscribe((areAllInputsSet) ->
-      if areAllInputsSet
+    $container.on("click", ".variants-circle-compare", () ->
         testVCFModel = _.find(viewModel.testVariant.inputs(), (input) -> input.name == "test_vcf")
         refVCFModel = _.find(viewModel.refVariant.inputs(), (input) -> input.name == "ref_vcf")
 
-        if testVCFModel? && refVCFModel? && !viewModel.name()?
+        if testVCFModel? && refVCFModel?
           testName = testVCFModel.value().name.replace /\.vcf\.gz/i, ""
           refName = refVCFModel.value().name.replace /\.vcf\.gz/i, ""
 
