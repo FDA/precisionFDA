@@ -59,14 +59,9 @@ class ComparisonsNewView
       !_.isEmpty(@name())
     )
 
-    @challenges = [
-      new ChallengeViewModel({
-        id: 1
-        name: "consistency"
-        title: "Truth Challenge (HG001)"
-        actionLabel: "Compare to NA12878-NISTv2.19"
-      }, this)
-    ]
+    @challenges = []
+    for challenge in Precision.challenges.suggestions
+      @challenges.push(new ChallengeViewModel(challenge, this))
 
   validateLicenses: () ->
     licensesToAccept = []
@@ -92,18 +87,18 @@ class ComparisonsNewView
 
 class ChallengeViewModel
   constructor: (challenge, @viewModel) ->
-    @id = challenge.id
     @name = challenge.name
     @title = challenge.title
-    @actionLabel = challenge.actionLabel
+    @actionLabel = "Compare to #{@name}"
+    @vcf = challenge.benchmark.VCF
+    @bed = challenge.benchmark.BED
 
   assignChallengeFiles: () ->
     refVCFModel = _.find(@viewModel.refVariant.inputs(), (input) -> input.name == "ref_vcf")
     refBEDModel = _.find(@viewModel.refVariant.inputs(), (input) -> input.name == "ref_bed")
 
-    if @name == "consistency"
-      refVCFModel.value(Precision.challenges.consistency.benchmark.VCF)
-      refBEDModel.value(Precision.challenges.consistency.benchmark.BED)
+    refVCFModel.value(@vcf)
+    refBEDModel.value(@bed)
 
 
 class VariantViewModel

@@ -14,6 +14,18 @@
           <ul class="variant-inputs list-unstyled" data-bind="foreach: testVariant.inputs">
             <%= render "comparisons/input" %>
           </ul>
+          <div class="variants-circle">
+            <!-- ko if: areAllInputsSet -->
+              <a class="variants-circle-compare" data-toggle="modal" data-target="#comparison-modal">
+                compare
+              </a>
+            <!-- /ko -->
+            <!-- ko if: !areAllInputsSet() -->
+              <div class="variants-circle-with">
+                with
+              </div>
+            <!-- /ko -->
+          </div>
         </div>
 
         <div class="variant-ref">
@@ -24,22 +36,13 @@
           <br>
           <h4>Suggestions</h4>
           <ul class="list-unstyled" data-bind="foreach: challenges">
-            <span data-bind="text: title"></span>: <a data-bind="click: assignChallengeFiles"><span class="fa fa-files-o fa-fw"></span> <span data-bind="text: actionLabel"></span></a>
+            <li>
+              <span data-bind="text: title"></span>: <a data-bind="click: assignChallengeFiles"><span class="fa fa-files-o fa-fw"></span> <span data-bind="text: actionLabel"></span></a>
+            </li>
           </ul>
         </div>
 
-        <div class="variants-circle">
-          <!-- ko if: areAllInputsSet -->
-            <a class="variants-circle-compare" data-toggle="modal" data-target="#comparison-modal">
-              compare
-            </a>
-          <!-- /ko -->
-          <!-- ko if: !areAllInputsSet() -->
-            <div class="variants-circle-with">
-              with
-            </div>
-          <!-- /ko -->
-        </div>
+
       </div>
     </div>
   </div>
