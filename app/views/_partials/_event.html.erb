@@ -1,0 +1,41 @@
+<div class="pfda-help-block pfda-help-warning">
+  <div class="row">
+    <div class="col-sm-12 col-sm-offset-6 col-md-4 col-md-offset-0">
+      <% if event[:current] %>
+        <%= link_to event[:link], class: "pfda-event-image" do %>
+          <%= image_tag event[:image], alt: event[:image_alt_text], class: "img-responsive img-rounded" %>
+        <% end %>
+      <% else %>
+        <%= image_tag event[:image], alt: event[:image_alt_text], class: "img-responsive img-rounded" %>
+      <% end %>
+    </div>
+    <div class="col-sm-24 col-md-16 col-md-offset-1">
+      <div class="pfda-event-label">
+        <span class="label label-info lead text-uppercase">
+          <% if event[:upcoming] %>
+            Upcoming Event
+          <% elsif event[:past] %>
+            Past Event
+          <% else %>
+            Event
+          <% end %>
+        </span>
+      </div>
+      <div class="pfda-event-title lead lead-bold"><%= event[:title] %></div>
+      <br>
+      <% if event[:upcoming] %>
+        <div class="lead text-muted">Watch live in <strong><%= distance_of_time_in_words_to_now(event[:datetime])%></strong></div>
+      <% elsif event[:current] %>
+        <%= link_to event[:link], class: 'btn accessible-btn-default' do %>
+          <div class="text-left">
+            <span class="fa fa-play" aria-hidden="true"></span> <strong class="text-uppercase">Watch now</strong>
+            <br>
+            <small style="font-weight: normal"><%= event[:link] %></small>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="lead text-muted">The event has ended and a video recording will be available soon.</div>
+      <% end %>
+    </div>
+  </div>
+</div>

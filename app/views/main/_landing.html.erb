@@ -20,7 +20,13 @@
   </div>
 </div>
 
-<div class="showcase showcase-padded showcase-flex showcase-shadow container">
+<% if @event.present? %>
+  <div class="showcase showcase-padded showcase-shadow container">
+    <%= render "_partials/event", event: @event %>
+  </div>
+<% end %>
+
+<div class="showcase showcase-padded showcase-flex <%= !@event.present? ? 'showcase-shadow':'' %> container">
   <div class="showcase-item">
     <div class="showcase-icon">
       <a href="<%= about_path %>/how#notes"><span class="fa fa-sticky-note" aria-hidden="true"></span></a>
