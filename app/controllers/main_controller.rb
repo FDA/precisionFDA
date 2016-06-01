@@ -15,6 +15,18 @@ class MainController < ApplicationController
 
     @challenges = [@consistency_challenge, @truth_challenge]
 
+    @event = {
+      link: "https://collaboration.fda.gov/prefda/",
+      image: "misc/taha-announcement",
+      image_alt_text: "Dr. Taha Kass-Hout LIVE at 3:30pm EDT on June 2nd, 2016",
+      datetime: DateTime.new(2016,6,2,12,25).in_time_zone + 7.hours,
+      title: "Dr. Taha Kass-Hout, FDA CHIO, to speak LIVE on FDA Community Engagement through Challenges on June 2nd, 2016 at 3:30 p.m. EDT."
+    }
+
+    @event[:upcoming] = DateTime.now.in_time_zone < @event[:datetime]
+    @event[:past] = DateTime.now.in_time_zone >= @event[:datetime] + 2.hours
+    @event[:current] = !@event[:upcoming] && !@event[:past]
+
     if @context.logged_in?
       @notes_count = Note.real_notes.editable_by(@context).count
       @files_count = UserFile.real_files.editable_by(@context).count
