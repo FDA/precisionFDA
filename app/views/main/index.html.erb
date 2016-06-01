@@ -4,13 +4,19 @@
 <% if !@context.logged_in_or_guest? %>
   <%= render "main/landing" %>
 <% else %>
+
+
   <div class="jumbotron jumbotron-landing">
     <div class="container">
       <h1>WELCOME to precisionFDA</h1>
       <p class="lead lead-bold">A community platform for NGS assay evaluation and regulatory science exploration.</p>
     </div>
 
+
     <div class="container">
+      <% if @event.present? && !@event[:past] %>
+        <%= render "_partials/event", event: @event %>
+      <% end %>
       <div class="pfda-cards pfda-tutorial text-left">
 
         <% if @context.guest? %>
