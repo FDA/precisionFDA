@@ -1,4 +1,4 @@
-<%= grid(@notes_grid, show_filters: :when_filtered) do |g|
+<%= grid(@notes_grid, show_filters: :always) do |g|
   g.blank_slate partial:  "_partials/empty_grid"
 
   g.column name: 'Title', attribute: 'title' do |note|

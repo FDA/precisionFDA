@@ -168,7 +168,7 @@
   <% if @jobs_grid.present? %>
   <div role="tabpanel" class="tab-pane active" id="app-job">
     <div class="panel">
-      <%= grid(@jobs_grid, show_filters: :when_filtered) do |g|
+      <%= grid(@jobs_grid, show_filters: :always) do |g|
         g.blank_slate do
           content_tag :div, "No jobs found", class: 'alert alert-info'
         end
