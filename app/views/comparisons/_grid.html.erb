@@ -1,4 +1,4 @@
-<%= grid(comparisons_grid, show_filters: :when_filtered) do |g|
+<%= grid(comparisons_grid, show_filters: :always) do |g|
   g.blank_slate partial:  "_partials/empty_grid"
 
   g.after_row do |comparison, num_cols|
