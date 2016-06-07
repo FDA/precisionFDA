@@ -29,7 +29,7 @@
 </div>
 
 <% if @assets_grid.present? %>
-  <%= grid(@assets_grid, show_filters: :when_filtered) do |g|
+  <%= grid(@assets_grid, show_filters: :always) do |g|
     g.blank_slate partial:  "_partials/empty_grid"
 
     g.column name: 'Name', attribute: 'name' do |file|

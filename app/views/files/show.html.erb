@@ -207,7 +207,7 @@
     <% if @comparisons_grid.present? && @comparisons_grid.count > 0 %>
     <div role="tabpanel" class="tab-pane" id="tab-comparisons">
       <div class="panel">
-        <%= grid(@comparisons_grid, show_filters: :when_filtered) do |g|
+        <%= grid(@comparisons_grid, show_filters: :always) do |g|
           g.blank_slate partial:  "_partials/empty_grid"
 
           g.after_row do |comparison, num_cols|
