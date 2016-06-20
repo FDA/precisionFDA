@@ -812,7 +812,7 @@ emit padded_intervals "$intervals_prefix".padded.bed</pre></p>
       </div>
       <div id="notes-edit" class="h2">Editing notes</div>
       <div class="bs-docs-section">
-        <p>Notes are written using <a href="https://jonschlinkert.github.io/remarkable/demo/">Markdown syntax</a>. While editing a note, you can switch between editing the Markdown content and previewing the result. The editing mode also allows you to remove any attachments. When you are happy with your edits, click Save to store your changes.</p>
+        <p>Notes are written using <a href="https://jonschlinkert.github.io/remarkable/demo/">Markdown syntax</a>. While editing a note, you can switch between editing the Markdown content and previewing the result. The editing mode also allows you to remove any attachments. When you are happy with your edits, click "Save" to store your changes.</p>
 
         <p>To attach an item (such as a file, an app, a job, a comparison, or an asset) to a note, navigate to the page of that item and click "Attach to...". A list of all the notes authored by you will pop up. Select one or more notes and click "Attach". If you attach a private item to a public note, the system <strong>does not</strong> adjust any permissions; you need to separately publish that item so that others can access it when they read your note.</p>
 
@@ -829,6 +829,27 @@ emit padded_intervals "$intervals_prefix".padded.bed</pre></p>
         </div>
 
         <p>Tell us how you'd like this feature to evolve. Are you interested in the ability to comment on other people's notes? Would you care to "subscribe" to a note and get notifications when it changes? Should notes be collaboratively edited? <a href="mailto:precisionfda@fda.hhs.gov">Drop us a note</a> (no pun intended!) with your ideas and suggestions.</p>
+      </div>
+      <div id="discussions" class="h1">Discussions</div>
+      <div class="bs-docs-section">
+        <p>Inspired by the <a href="#notes">Notes</a> feature, Discussions build a more communal experience by allowing precisionFDA users to pose discussion topics, and members of the community to juxtapose their answers.</p>
+        <p>A discussion topic functions much like a note, in that it supports rich text formatting and attachments. Under each topic, each participants is allowed to post exactly one answer, also richly formatted and with attachments. This model of interaction encourages people to write a single answer as their thesis to the posed topic. Additional lightweight commenting is enabled on both the discussion topic and individual answers, so that the community can give quick feedback and further stimulate the discussion. Users can also upvote discussion topics or answers, to mark their interest and in some way help others prioritize what they read first.</p>
+        <p>The Discussions section of the website lists all the discussions. Click on a topic to list all the answers. Click "Read answer" to see more details about an individual answer, or click "Join" to register your participation in the topic (even if you don't submit an answer). Click "Followers" to get a detailed list of users who have joined the discussion.</p>
+      </div>
+      <div id="discussions-new" class="h2">Creating a discussion</div>
+      <div class="bs-docs-section">
+        <p>To create a new discussion, click "Start a discussion" under the Discussions section of the website. Enter a discussion title and fill in the rest of the content using <a href="https://jonschlinkert.github.io/remarkable/demo/">Markdown syntax</a>. You can save your edits even if you are not completely finished writing. Later, when you return to this topic, you can click "Edit discussion" to continue editing. To attach an item (such as a file, an app, a job, a comparison, or an asset), navigate to the page of that item and click "Attach to...", then select the discussion topic and click "Attach".</p>
+        <p>The new discussion is initially private, and accessible only by you. Once you done editing and you have attached all items, click "Publish" to make the discussion public. The publishing wizard will guide you through the publication process, asking you if you'd like to publish the attached items. For more information, consult the <a href="#publish">Publishing</a> section.</p>
+      </div>
+      <div id="discussions-answer" class="h2">Writing an answer</div>
+      <div class="bs-docs-section">
+        <p>To write an answer in a discussion, navigate to the discussion and click "Write an Answer". The process is similar to writing a note or a discussion: fill in your answer using <a href="https://jonschlinkert.github.io/remarkable/demo/">Markdown syntax</a> and click "Save" to record your changes; attach items by visiting an item and clicking "Attach to..."; and finally publish the answer by clicking "Publish".</p>
+        <p>You can always revise your answer at any point, and manipulate its attachments. If at a later point you attach a private item to a public answer, you must make sure to separately publish the item, by visiting the item and clicking "Publish".</p>
+      </div>
+      <div id="discussions-misc" class="h2">Commenting &amp; upvoting</div>
+      <div class="bs-docs-section">
+        <p>You can comment on any discussion or answer by clicking "Comment". Comments are displayed from oldest to most recent. Comments are meant to be short and thus do not support rich text formatting.</p>
+        <p>You can also upvote any discussion or answer by clicking "Upvote". This will increase a counter of votes for that item. Votes can often help other community members prioritize what discussions or answers they read.</p>
       </div>
       <div id="track" class="h1">Tracking</div>
       <div class="bs-docs-section">
@@ -971,6 +992,18 @@ emit padded_intervals "$intervals_prefix".padded.bed</pre></p>
           <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> You can always use <a href="#track">the tracking feature</a> to review the permissions of an item and its related items, both before and after publication. This will give you an idea of what is accessible to everybody (shown in green) versus only to you (shown in white).
         </div>
       </div>
+      <div id="licenses" class="h1">Licenses</div>
+      <div class="bs-docs-section">
+        <p>The licensing feature of precisionFDA allows you to protect datasets or software by requiring that users agree to a license agreement before they can access those items. You can use this feature to contribute datasets or software associated with usage restrictions, limited consent, publication embargoes, or other legal policies.</p>
+        <p>To enable this feature, select "Manage Licenses" under your profile, and click "Create a License". Enter a title for the license you are creating, and fill in the license text. The content of the license is written using <a href="https://jonschlinkert.github.io/remarkable/demo/">Markdown syntax</a>, and you can switch between editing the Markdown content and previewing the result. When you are done, click "Save and Submit". <strong>NOTE:</strong> the license text is publicly viewable, so you don't need to publish the license -- it is public already.</p>
+        <p>To associate a file with a license, navigate to a file you own and click "Attach License", then select one of your licenses. This will enable protection of the file under this license, and users will have to accept the license before they can open the file, download it, or make an authorized URL for it.</p>
+        <p>To associate software with a license, navigate to an app asset you own and click "Attach License", then select one of your licenses. This will enable protection of the particular app asset and of all apps that make use of it. Users will have to accept the license before they can download the app asset, or before they can run any app that uses it.</p>
+        <p>Since apps can use multiple assets, it is possible for an app to prompt users to accept multiple licenses when they try to run the app, if there are multiple licenses involved.</p>
+        <p>If multiple items are protected under the same license, users only need to accept the license once.</p>
+        <p>The attachment of licenses to items is independent of the publishing of items. You still need to publish files or apps if you want other precisionFDA users to be able to reach them. Licensing is only an orthogonal protection that pertains specifically to the Download and Run actions.</p>
+        <p>To see who has accepted your license, select "Manage Licenses" under your profile, and click the license. The "licensed users" tab shows a list of users who have accepted. You can revoke individual users, or even reset the whole list.</p>
+        <p>The <a href="https://precision.fda.gov/app_assets/file-BvYzqJQ03vv66X10j8XgG21x">GATK-3.5</a> app asset is an example of the licensing feature in action. After accepting the precisionFDA-specific GATK license agreement, you will be able to run apps that use it, or make and run your own GATK apps.</p>
+      </div>
     </div>
 
     <!-- SIDEBAR NAVIGATION -->
@@ -1030,10 +1063,21 @@ emit padded_intervals "$intervals_prefix".padded.bed</pre></p>
             </ul>
           </li>
           <li>
+            <a href="#discussions">Discussions</a>
+            <ul class="nav">
+              <li><a href="#discussions-new">Creating a discussion</a></li>
+              <li><a href="#discussions-answer">Writing an answer</a></li>
+              <li><a href="#discussions-misc">Commenting &amp; upvoting</a></li>
+            </ul>
+          </li>
+          <li>
             <a href="#track">Tracking</a>
           </li>
           <li>
             <a href="#publish">Publishing</a>
+          </li>
+          <li>
+            <a href="#licenses">Licenses</a>
           </li>
         </ul>
       </nav>
