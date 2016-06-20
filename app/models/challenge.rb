@@ -1,3 +1,6 @@
+require 'csv'
+require 'ostruct'
+
 class Challenge
   include ActiveModel::Model
 
@@ -39,5 +42,11 @@ class Challenge
       results_announced: false
       # TRUTH_CHALLENGE_RESULTS_DATE && DateTime.now.in_time_zone >= TRUTH_CHALLENGE_RESULTS_DATE
     }
+  end
+
+  def self.truth_results
+    results_file = "app/assets/resources/dgrover-gatk-HG002.extended.csv"
+    results = CSV.read(results_file, headers: true).map { |row| row.to_hash }
+    return results
   end
 end

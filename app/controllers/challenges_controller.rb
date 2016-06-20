@@ -35,6 +35,10 @@ class ChallengesController < ApplicationController
     else
       @btn_class = "accessible-btn-danger"
     end
+
+    if params[:tab] == "results-peek"
+      @results = Challenge.truth_results
+    end
   end
 
   def join
