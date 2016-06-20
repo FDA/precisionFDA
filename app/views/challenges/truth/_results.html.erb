@@ -1,0 +1,181 @@
+<div class="container container-padded">
+  <div class="pfda-challenge-intro">
+    <div class="lead-intro">The precisionFDA Truth Challenge ran from ....</div>
+    <div class="lead">
+       Community members from four different continents embraced the challenge...</div>
+  </div>
+</div>
+
+<div class="challenge-section challenge-section-highlight pfda-challenge-awards hide">
+  <div class="container container-padded">
+      <div class="h3 text-center text-uppercase">Community Challenge Awards</div>
+      <div class="row">
+        <div class="col-md-8 col-md-offset-8">
+          <div class="pfda-cards pfda-cards-justify-centered">
+            <div class="pfda-card pfda-card-rounded">
+              <div class="pfda-card-body">
+                <%= medal_badge("Performance", "Top overall", "large") %>
+                <br>
+                <div class="challenge-winning-team">
+                  <div class="challenge-awarded-to">Awarded to</div>
+                  <div class="lead lead-bold">Sentieon team</div>
+                  <ul class="list-inline">
+                    <li>Rafael Aldana</li>
+                    <li>Hanying Feng</li>
+                    <li>Brendan Gallagher</li>
+                    <li>Jun Ye</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-8 col-md-offset-4">
+          <div class="pfda-cards pfda-cards-justify-centered">
+            <div class="pfda-card pfda-card-rounded">
+              <div class="pfda-card-body">
+                <%= medal_badge("Reproducibility", "Highest", "large") %>
+                <br>
+                <div class="challenge-winning-team">
+                  <div class="challenge-awarded-to">Awarded to</div>
+                  <div class="lead lead-bold">Sentieon team</div>
+                  <ul class="list-inline">
+                    <li>Rafael Aldana</li>
+                    <li>Hanying Feng</li>
+                    <li>Brendan Gallagher</li>
+                    <li>Jun Ye</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-8">
+            <div class="pfda-cards pfda-cards-justify-centered">
+              <div class="pfda-card pfda-card-rounded">
+                <div class="pfda-card-body">
+                  <%= medal_badge("Accuracy", "Highest", "large") %>
+                  <br>
+                  <div class="challenge-winning-team">
+                    <div class="challenge-awarded-to">Awarded to</div>
+                    <div class="lead lead-bold">Sanofi-Genzyme</div>
+                    <ul class="list-inline">
+                      <li>Deepak Grover</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="challenge-section">
+  <div class="container container-padded">
+    <div class="h2">Overview of Results</div>
+
+    <p>We received a total of 21 entries to the challenge, summarized in the following table. <strong>The entries are sorted in order of date of submission.</strong></p>
+
+    <p>
+    We would like to acknowledge and thank all of those who participated in the precisionFDA Consistency Challenge, for their engagement and contributions. We hope that everyone will feel like a winner. After considering the performance in reproducibility and accuracy comparisons, as well as other parameters, we have decided to hand out awards and recognitions, as illustrated in the table.
+    </p>
+
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs nav-tabs-contained" role="tablist">
+      <li role="presentation" class="active"><a href="#awards" aria-controls="awards" role="tab" data-toggle="tab">Awards and Recognitions</a></li>
+      <li role="presentation"><a href="#datasets" aria-controls="datasets" role="tab" data-toggle="tab">Datasets</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane active" id="awards">
+        <%= render "challenges/truth/table_overview" %>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="datasets">
+        <%= "challenges/truth/table_datasets" %>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="challenge-section challenge-section-conclusion">
+  <div class="container container-padded">
+    <div class="h2">Conclusions and lessons learned</div>
+    <div>
+      <div class="media">
+        <div class="media-left">
+          <span class="fa fa-fw fa-bullseye fa-4x" aria-hidden="true"></span>
+        </div>
+        <div class="media-body">
+          <div class="h3">Comparisons</div>
+          <p>
+            Lorem ipsum dolar sit amet
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="media">
+        <div class="media-left">
+          <span class="fa fa-fw fa-balance-scale fa-4x" aria-hidden="true"></span>
+        </div>
+        <div class="media-body">
+          <div class="h3">Benchmarking material</div>
+          <p>
+            Lorem ipsum dolar sit amet
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="media">
+        <div class="media-left">
+          <span class="fa fa-fw fa-gears fa-4x" aria-hidden="true"></span>
+        </div>
+        <div class="media-body">
+          <div class="h3">Study design</div>
+          <p>
+            Lorem ipsum dolar sit amet
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="media">
+        <div class="media-left">
+          <span class="fa fa-fw fa-flag-checkered fa-4x" aria-hidden="true"></span>
+        </div>
+        <div class="media-body">
+          <div class="h3">Epilogue</div>
+          <p>
+          In closing, we would like to leave you with several encouraging quotes from our community, which will hopefully inspire all readers to participate in one of our upcoming challenges:
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="media">
+        <div class="media-left">
+          <span class="fa fa-fw fa-quote-left fa-4x" aria-hidden="true"></span>
+        </div>
+        <div class="media-body">
+          <blockquote>
+            “This is a quote”
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
