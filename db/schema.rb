@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160318201740) do
+ActiveRecord::Schema.define(version: 20160621205004) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id"
@@ -270,6 +270,108 @@ ActiveRecord::Schema.define(version: 20160318201740) do
 
   add_index "orgs", ["admin_id"], name: "index_orgs_on_admin_id"
   add_index "orgs", ["handle"], name: "index_orgs_on_handle", unique: true
+
+  create_table "space_memberships", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "space_id"
+    t.string   "role"
+    t.string   "side"
+    t.text     "meta"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "space_memberships", ["space_id"], name: "index_space_memberships_on_space_id"
+  add_index "space_memberships", ["user_id"], name: "index_space_memberships_on_user_id"
+
+  create_table "spaces", force: :cascade do |t|
+    t.string   "name"
+    t.text     "description"
+    t.string   "host_project"
+    t.string   "guest_project"
+    t.string   "host_dxorg"
+    t.string   "guest_dxorg"
+    t.string   "space_type"
+    t.string   "state"
+    t.text     "meta"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "spaces", ["space_type"], name: "index_spaces_on_space_type"
+  add_index "spaces", ["state"], name: "index_spaces_on_state"
+
+  create_table "truth_challenge_results", force: :cascade do |t|
+    t.string "entry"
+    t.string "type"
+    t.string "subtype"
+    t.string "subset"
+    t.string "filter"
+    t.string "genotype"
+    t.string "qq_field"
+    t.string "qq"
+    t.string "recall"
+    t.string "precision"
+    t.string "frac_na"
+    t.string "f1_score"
+    t.string "truth_total"
+    t.string "truth_tp"
+    t.string "truth_fn"
+    t.string "query_total"
+    t.string "query_tp"
+    t.string "query_fp"
+    t.string "query_unk"
+    t.string "fp_gt"
+    t.string "fp_al"
+    t.string "truth_total_titv_ratio"
+    t.string "truth_total_het_hom_ratio"
+    t.string "truth_fn_titv_ratio"
+    t.string "truth_fn_het_hom_ratio"
+    t.string "truth_tp_titv_ratio"
+    t.string "truth_tp_het_hom_ratio"
+    t.string "query_fp_titv_ratio"
+    t.string "query_fp_het_hom_ratio"
+    t.string "query_tp_titv_ratio"
+    t.string "query_total_titv_ratio"
+    t.string "query_total_het_hom_ratio"
+    t.string "query_tp_het_hom_ratio"
+    t.string "query_unk_titv_ratio"
+    t.string "query_unk_het_hom_ratio"
+    t.text   "meta"
+  end
+
+  add_index "truth_challenge_results", ["entry"], name: "index_truth_challenge_results_on_entry"
+  add_index "truth_challenge_results", ["f1_score"], name: "index_truth_challenge_results_on_f1_score"
+  add_index "truth_challenge_results", ["fp_al"], name: "index_truth_challenge_results_on_fp_al"
+  add_index "truth_challenge_results", ["fp_gt"], name: "index_truth_challenge_results_on_fp_gt"
+  add_index "truth_challenge_results", ["frac_na"], name: "index_truth_challenge_results_on_frac_na"
+  add_index "truth_challenge_results", ["genotype"], name: "index_truth_challenge_results_on_genotype"
+  add_index "truth_challenge_results", ["precision"], name: "index_truth_challenge_results_on_precision"
+  add_index "truth_challenge_results", ["query_fp"], name: "index_truth_challenge_results_on_query_fp"
+  add_index "truth_challenge_results", ["query_fp_het_hom_ratio"], name: "index_truth_challenge_results_on_query_fp_het_hom_ratio"
+  add_index "truth_challenge_results", ["query_fp_titv_ratio"], name: "index_truth_challenge_results_on_query_fp_titv_ratio"
+  add_index "truth_challenge_results", ["query_total"], name: "index_truth_challenge_results_on_query_total"
+  add_index "truth_challenge_results", ["query_total_het_hom_ratio"], name: "index_truth_challenge_results_on_query_total_het_hom_ratio"
+  add_index "truth_challenge_results", ["query_total_titv_ratio"], name: "index_truth_challenge_results_on_query_total_titv_ratio"
+  add_index "truth_challenge_results", ["query_tp"], name: "index_truth_challenge_results_on_query_tp"
+  add_index "truth_challenge_results", ["query_tp_het_hom_ratio"], name: "index_truth_challenge_results_on_query_tp_het_hom_ratio"
+  add_index "truth_challenge_results", ["query_tp_titv_ratio"], name: "index_truth_challenge_results_on_query_tp_titv_ratio"
+  add_index "truth_challenge_results", ["query_unk"], name: "index_truth_challenge_results_on_query_unk"
+  add_index "truth_challenge_results", ["query_unk_het_hom_ratio"], name: "index_truth_challenge_results_on_query_unk_het_hom_ratio"
+  add_index "truth_challenge_results", ["query_unk_titv_ratio"], name: "index_truth_challenge_results_on_query_unk_titv_ratio"
+  add_index "truth_challenge_results", ["recall"], name: "index_truth_challenge_results_on_recall"
+  add_index "truth_challenge_results", ["subset"], name: "index_truth_challenge_results_on_subset"
+  add_index "truth_challenge_results", ["subtype"], name: "index_truth_challenge_results_on_subtype"
+  add_index "truth_challenge_results", ["truth_fn"], name: "index_truth_challenge_results_on_truth_fn"
+  add_index "truth_challenge_results", ["truth_fn_het_hom_ratio"], name: "index_truth_challenge_results_on_truth_fn_het_hom_ratio"
+  add_index "truth_challenge_results", ["truth_fn_titv_ratio"], name: "index_truth_challenge_results_on_truth_fn_titv_ratio"
+  add_index "truth_challenge_results", ["truth_total"], name: "index_truth_challenge_results_on_truth_total"
+  add_index "truth_challenge_results", ["truth_total_het_hom_ratio"], name: "index_truth_challenge_results_on_truth_total_het_hom_ratio"
+  add_index "truth_challenge_results", ["truth_total_titv_ratio"], name: "index_truth_challenge_results_on_truth_total_titv_ratio"
+  add_index "truth_challenge_results", ["truth_tp"], name: "index_truth_challenge_results_on_truth_tp"
+  add_index "truth_challenge_results", ["truth_tp_het_hom_ratio"], name: "index_truth_challenge_results_on_truth_tp_het_hom_ratio"
+  add_index "truth_challenge_results", ["truth_tp_titv_ratio"], name: "index_truth_challenge_results_on_truth_tp_titv_ratio"
+  add_index "truth_challenge_results", ["type"], name: "index_truth_challenge_results_on_type"
 
   create_table "user_files", force: :cascade do |t|
     t.string   "dxid"

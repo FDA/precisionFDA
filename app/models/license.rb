@@ -8,6 +8,7 @@
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #  title      :string
+#  scope      :string
 #
 
 class License < ActiveRecord::Base
