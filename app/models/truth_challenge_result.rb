@@ -3,6 +3,7 @@
 # Table name: truth_challenge_results
 #
 #  id                        :integer          not null, primary key
+#  answer_id                 :integer
 #  entry                     :string
 #  type                      :string
 #  subtype                   :string
@@ -11,37 +12,40 @@
 #  genotype                  :string
 #  qq_field                  :string
 #  qq                        :string
-#  recall                    :string
-#  precision                 :string
-#  frac_na                   :string
-#  f1_score                  :string
-#  truth_total               :string
-#  truth_tp                  :string
-#  truth_fn                  :string
-#  query_total               :string
-#  query_tp                  :string
-#  query_fp                  :string
-#  query_unk                 :string
-#  fp_gt                     :string
-#  fp_al                     :string
-#  truth_total_titv_ratio    :string
-#  truth_total_het_hom_ratio :string
-#  truth_fn_titv_ratio       :string
-#  truth_fn_het_hom_ratio    :string
-#  truth_tp_titv_ratio       :string
-#  truth_tp_het_hom_ratio    :string
-#  query_fp_titv_ratio       :string
-#  query_fp_het_hom_ratio    :string
-#  query_tp_titv_ratio       :string
-#  query_total_titv_ratio    :string
-#  query_total_het_hom_ratio :string
-#  query_tp_het_hom_ratio    :string
-#  query_unk_titv_ratio      :string
-#  query_unk_het_hom_ratio   :string
+#  metric_recall             :decimal(7, 6)
+#  metric_precision          :decimal(7, 6)
+#  metric_frac_na            :decimal(7, 6)
+#  metric_f1_score           :decimal(7, 6)
+#  truth_total               :integer
+#  truth_tp                  :integer
+#  truth_fn                  :integer
+#  query_total               :integer
+#  query_tp                  :integer
+#  query_fp                  :integer
+#  query_unk                 :integer
+#  fp_gt                     :integer
+#  fp_al                     :integer
+#  truth_total_titv_ratio    :decimal(10, 6)
+#  truth_total_het_hom_ratio :decimal(10, 6)
+#  truth_fn_titv_ratio       :decimal(10, 6)
+#  truth_fn_het_hom_ratio    :decimal(10, 6)
+#  truth_tp_titv_ratio       :decimal(10, 6)
+#  truth_tp_het_hom_ratio    :decimal(10, 6)
+#  query_fp_titv_ratio       :decimal(10, 6)
+#  query_fp_het_hom_ratio    :decimal(10, 6)
+#  query_tp_titv_ratio       :decimal(10, 6)
+#  query_total_titv_ratio    :decimal(10, 6)
+#  query_total_het_hom_ratio :decimal(10, 6)
+#  query_tp_het_hom_ratio    :decimal(10, 6)
+#  query_unk_titv_ratio      :decimal(10, 6)
+#  query_unk_het_hom_ratio   :decimal(10, 6)
 #  meta                      :text
 #
 
-
 class TruthChallengeResult < ActiveRecord::Base
   store :meta, {coder: JSON}
+
+  # To allow 'type':
+  # http://stackoverflow.com/questions/7134559/rails-use-type-column-without-sti
+  self.inheritance_column = nil
 end

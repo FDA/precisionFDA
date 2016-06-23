@@ -76,6 +76,7 @@
   </div>
 </div>
 
+
 <div class="challenge-section">
   <div class="container container-padded">
     <div class="h2">Overview of Results</div>
@@ -105,6 +106,12 @@
   </div>
 </div>
 
+<div class="challenge-section">
+  <div class="container container-padded">
+    <div class="h2">Explore the results</div>
+  </div>
+  <%= render "challenges/truth/table_results", results_grid: @results_grid, tab: @tab %>
+</div>
 
 <div class="challenge-section challenge-section-conclusion">
   <div class="container container-padded">

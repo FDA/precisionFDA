@@ -19,6 +19,10 @@ $select-width: 28px
     a
       color: $brand-blue-tertiary
 
+    &.sorted
+      a, .fa
+        color: $text-color
+
   > tbody > tr > td, > thead > tr > th
     border-left: 0
     border-right: 0
@@ -44,14 +48,20 @@ $select-width: 28px
         color: $state-danger-text
         background-color: $state-danger-bg
 
+  > tbody > tr > td
+    &.active-filter
+      background-color: $gray-subtle
+
+  .sorted
+    font-weight: bold
+    background-color: lighten($brand-highlight, 2%)
+
+
   td.sel, th.sel
     width: $select-width
 
   .wg-filter-row
-    background-color: $gray-lighter
-
-  .sorted
-    font-weight: bold
+    background-color: #fff
 
   .pagination_status
     float: right
@@ -61,6 +71,8 @@ $select-width: 28px
     .custom-dropdown
       width: calc(100% - 30px)
       display: inline-block
+      min-width: 75px
+
     .clickable
       width: 25px
       display: inline-block
