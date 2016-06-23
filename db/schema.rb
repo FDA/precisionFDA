@@ -302,51 +302,54 @@ ActiveRecord::Schema.define(version: 20160621205004) do
   add_index "spaces", ["state"], name: "index_spaces_on_state"
 
   create_table "truth_challenge_results", force: :cascade do |t|
-    t.string "entry"
-    t.string "type"
-    t.string "subtype"
-    t.string "subset"
-    t.string "filter"
-    t.string "genotype"
-    t.string "qq_field"
-    t.string "qq"
-    t.string "recall"
-    t.string "precision"
-    t.string "frac_na"
-    t.string "f1_score"
-    t.string "truth_total"
-    t.string "truth_tp"
-    t.string "truth_fn"
-    t.string "query_total"
-    t.string "query_tp"
-    t.string "query_fp"
-    t.string "query_unk"
-    t.string "fp_gt"
-    t.string "fp_al"
-    t.string "truth_total_titv_ratio"
-    t.string "truth_total_het_hom_ratio"
-    t.string "truth_fn_titv_ratio"
-    t.string "truth_fn_het_hom_ratio"
-    t.string "truth_tp_titv_ratio"
-    t.string "truth_tp_het_hom_ratio"
-    t.string "query_fp_titv_ratio"
-    t.string "query_fp_het_hom_ratio"
-    t.string "query_tp_titv_ratio"
-    t.string "query_total_titv_ratio"
-    t.string "query_total_het_hom_ratio"
-    t.string "query_tp_het_hom_ratio"
-    t.string "query_unk_titv_ratio"
-    t.string "query_unk_het_hom_ratio"
-    t.text   "meta"
+    t.integer "answer_id"
+    t.string  "entry"
+    t.string  "type"
+    t.string  "subtype"
+    t.string  "subset"
+    t.string  "filter"
+    t.string  "genotype"
+    t.string  "qq_field"
+    t.string  "qq"
+    t.decimal "metric_recall",             precision: 7,  scale: 6
+    t.decimal "metric_precision",          precision: 7,  scale: 6
+    t.decimal "metric_frac_na",            precision: 7,  scale: 6
+    t.decimal "metric_f1_score",           precision: 7,  scale: 6
+    t.integer "truth_total"
+    t.integer "truth_tp"
+    t.integer "truth_fn"
+    t.integer "query_total"
+    t.integer "query_tp"
+    t.integer "query_fp"
+    t.integer "query_unk"
+    t.integer "fp_gt"
+    t.integer "fp_al"
+    t.decimal "truth_total_titv_ratio",    precision: 10, scale: 6
+    t.decimal "truth_total_het_hom_ratio", precision: 10, scale: 6
+    t.decimal "truth_fn_titv_ratio",       precision: 10, scale: 6
+    t.decimal "truth_fn_het_hom_ratio",    precision: 10, scale: 6
+    t.decimal "truth_tp_titv_ratio",       precision: 10, scale: 6
+    t.decimal "truth_tp_het_hom_ratio",    precision: 10, scale: 6
+    t.decimal "query_fp_titv_ratio",       precision: 10, scale: 6
+    t.decimal "query_fp_het_hom_ratio",    precision: 10, scale: 6
+    t.decimal "query_tp_titv_ratio",       precision: 10, scale: 6
+    t.decimal "query_total_titv_ratio",    precision: 10, scale: 6
+    t.decimal "query_total_het_hom_ratio", precision: 10, scale: 6
+    t.decimal "query_tp_het_hom_ratio",    precision: 10, scale: 6
+    t.decimal "query_unk_titv_ratio",      precision: 10, scale: 6
+    t.decimal "query_unk_het_hom_ratio",   precision: 10, scale: 6
+    t.text    "meta"
   end
 
+  add_index "truth_challenge_results", ["answer_id"], name: "index_truth_challenge_results_on_answer_id"
   add_index "truth_challenge_results", ["entry"], name: "index_truth_challenge_results_on_entry"
-  add_index "truth_challenge_results", ["f1_score"], name: "index_truth_challenge_results_on_f1_score"
   add_index "truth_challenge_results", ["fp_al"], name: "index_truth_challenge_results_on_fp_al"
   add_index "truth_challenge_results", ["fp_gt"], name: "index_truth_challenge_results_on_fp_gt"
-  add_index "truth_challenge_results", ["frac_na"], name: "index_truth_challenge_results_on_frac_na"
   add_index "truth_challenge_results", ["genotype"], name: "index_truth_challenge_results_on_genotype"
-  add_index "truth_challenge_results", ["precision"], name: "index_truth_challenge_results_on_precision"
+  add_index "truth_challenge_results", ["metric_f1_score"], name: "index_truth_challenge_results_on_metric_f1_score"
+  add_index "truth_challenge_results", ["metric_frac_na"], name: "index_truth_challenge_results_on_metric_frac_na"
+  add_index "truth_challenge_results", ["metric_precision"], name: "index_truth_challenge_results_on_metric_precision"
+  add_index "truth_challenge_results", ["metric_recall"], name: "index_truth_challenge_results_on_metric_recall"
   add_index "truth_challenge_results", ["query_fp"], name: "index_truth_challenge_results_on_query_fp"
   add_index "truth_challenge_results", ["query_fp_het_hom_ratio"], name: "index_truth_challenge_results_on_query_fp_het_hom_ratio"
   add_index "truth_challenge_results", ["query_fp_titv_ratio"], name: "index_truth_challenge_results_on_query_fp_titv_ratio"
@@ -359,7 +362,6 @@ ActiveRecord::Schema.define(version: 20160621205004) do
   add_index "truth_challenge_results", ["query_unk"], name: "index_truth_challenge_results_on_query_unk"
   add_index "truth_challenge_results", ["query_unk_het_hom_ratio"], name: "index_truth_challenge_results_on_query_unk_het_hom_ratio"
   add_index "truth_challenge_results", ["query_unk_titv_ratio"], name: "index_truth_challenge_results_on_query_unk_titv_ratio"
-  add_index "truth_challenge_results", ["recall"], name: "index_truth_challenge_results_on_recall"
   add_index "truth_challenge_results", ["subset"], name: "index_truth_challenge_results_on_subset"
   add_index "truth_challenge_results", ["subtype"], name: "index_truth_challenge_results_on_subtype"
   add_index "truth_challenge_results", ["truth_fn"], name: "index_truth_challenge_results_on_truth_fn"
