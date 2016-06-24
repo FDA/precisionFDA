@@ -43,4 +43,5 @@
 #= require mousetrap/mousetrap.min
 #= require mousetrap/mousetrap-global-bind.min
 #= require tablesort
+#= require tablesort/src/sorts/tablesort.number
 #= require_tree .

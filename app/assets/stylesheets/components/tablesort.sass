@@ -10,8 +10,9 @@ table.table-sort
     &.sort-header
       &:after
         content: ''
-        float: right
+        display: inline-block
         margin-top: 7px
+        margin-left: 5px
         border-width: 0 4px 4px
         border-style: solid
         border-color: #404040 transparent
@@ -29,3 +30,5 @@ table.table-sort
     &.sort-up:after
       border-bottom: none
       border-width: 4px 4px 0
+    &.sort-up, &.sort-down
+      background-color: lighten($brand-highlight, 2%)

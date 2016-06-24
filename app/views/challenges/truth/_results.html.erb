@@ -6,67 +6,93 @@
   </div>
 </div>
 
-<div class="challenge-section challenge-section-highlight pfda-challenge-awards hide">
+<div class="challenge-section challenge-section-highlight pfda-challenge-awards">
   <div class="container container-padded">
       <div class="h3 text-center text-uppercase">Community Challenge Awards</div>
-      <div class="row">
-        <div class="col-md-8 col-md-offset-8">
-          <div class="pfda-cards pfda-cards-justify-centered">
-            <div class="pfda-card pfda-card-rounded">
-              <div class="pfda-card-body">
-                <%= medal_badge("Performance", "Top overall", "large") %>
-                <br>
-                <div class="challenge-winning-team">
-                  <div class="challenge-awarded-to">Awarded to</div>
-                  <div class="lead lead-bold">Sentieon team</div>
-                  <ul class="list-inline">
-                    <li>Rafael Aldana</li>
-                    <li>Hanying Feng</li>
-                    <li>Brendan Gallagher</li>
-                    <li>Jun Ye</li>
-                  </ul>
-                </div>
+        <div class="pfda-cards pfda-cards-justify-centered">
+          <div class="pfda-card pfda-card-rounded">
+            <div class="pfda-card-body">
+              <%= medal_badge("Reproducibility", "Highest", "large") %>
+              <br>
+              <div class="challenge-winning-team">
+                <div class="challenge-awarded-to">Awarded to</div>
+                <div class="lead lead-bold">Sentieon team</div>
+                <ul class="list-inline">
+                  <li>Rafael Aldana</li>
+                  <li>Hanying Feng</li>
+                  <li>Brendan Gallagher</li>
+                  <li>Jun Ye</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="pfda-card pfda-card-rounded">
+            <div class="pfda-card-body">
+              <%= medal_badge("Accuracy", "Highest", "large") %>
+              <br>
+              <div class="challenge-winning-team">
+                <div class="challenge-awarded-to">Awarded to</div>
+                <div class="lead lead-bold">Sanofi-Genzyme</div>
+                <ul class="list-inline">
+                  <li>Deepak Grover</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="pfda-card pfda-card-rounded">
+            <div class="pfda-card-body">
+              <%= medal_badge("Accuracy", "Highest", "large") %>
+              <br>
+              <div class="challenge-winning-team">
+                <div class="challenge-awarded-to">Awarded to</div>
+                <div class="lead lead-bold">Sanofi-Genzyme</div>
+                <ul class="list-inline">
+                  <li>Deepak Grover</li>
+                </ul>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col-md-8 col-md-offset-4">
-          <div class="pfda-cards pfda-cards-justify-centered">
-            <div class="pfda-card pfda-card-rounded">
-              <div class="pfda-card-body">
-                <%= medal_badge("Reproducibility", "Highest", "large") %>
-                <br>
-                <div class="challenge-winning-team">
-                  <div class="challenge-awarded-to">Awarded to</div>
-                  <div class="lead lead-bold">Sentieon team</div>
-                  <ul class="list-inline">
-                    <li>Rafael Aldana</li>
-                    <li>Hanying Feng</li>
-                    <li>Brendan Gallagher</li>
-                    <li>Jun Ye</li>
-                  </ul>
-                </div>
+        <div class="pfda-cards pfda-cards-justify-centered">
+          <div class="pfda-card pfda-card-rounded">
+            <div class="pfda-card-body">
+              <%= medal_badge("Reproducibility", "Highest", "large") %>
+              <br>
+              <div class="challenge-winning-team">
+                <div class="challenge-awarded-to">Awarded to</div>
+                <div class="lead lead-bold">Sentieon team</div>
+                <ul class="list-inline">
+                  <li>Rafael Aldana</li>
+                  <li>Hanying Feng</li>
+                  <li>Brendan Gallagher</li>
+                  <li>Jun Ye</li>
+                </ul>
               </div>
             </div>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-8">
-            <div class="pfda-cards pfda-cards-justify-centered">
-              <div class="pfda-card pfda-card-rounded">
-                <div class="pfda-card-body">
-                  <%= medal_badge("Accuracy", "Highest", "large") %>
-                  <br>
-                  <div class="challenge-winning-team">
-                    <div class="challenge-awarded-to">Awarded to</div>
-                    <div class="lead lead-bold">Sanofi-Genzyme</div>
-                    <ul class="list-inline">
-                      <li>Deepak Grover</li>
-                    </ul>
-                  </div>
-                </div>
+          <div class="pfda-card pfda-card-rounded">
+            <div class="pfda-card-body">
+              <%= medal_badge("Accuracy", "Highest", "large") %>
+              <br>
+              <div class="challenge-winning-team">
+                <div class="challenge-awarded-to">Awarded to</div>
+                <div class="lead lead-bold">Sanofi-Genzyme</div>
+                <ul class="list-inline">
+                  <li>Deepak Grover</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="pfda-card pfda-card-rounded">
+            <div class="pfda-card-body">
+              <%= medal_badge("Accuracy", "Highest", "large") %>
+              <br>
+              <div class="challenge-winning-team">
+                <div class="challenge-awarded-to">Awarded to</div>
+                <div class="lead lead-bold">Sanofi-Genzyme</div>
+                <ul class="list-inline">
+                  <li>Deepak Grover</li>
+                </ul>
               </div>
             </div>
           </div>
@@ -97,10 +123,10 @@
     <!-- Tab panes -->
     <div class="tab-content">
       <div role="tabpanel" class="tab-pane active" id="awards">
-        <%= render "challenges/truth/table_overview" %>
+        <%= render "challenges/truth/table_overview", results: @truth_challenge[:results] %>
       </div>
       <div role="tabpanel" class="tab-pane" id="datasets">
-        <%= "challenges/truth/table_datasets" %>
+        <%= render "challenges/truth/table_datasets", results: @truth_challenge[:results] %>
       </div>
     </div>
   </div>
