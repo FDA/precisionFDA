@@ -24,34 +24,34 @@
 
     g.column name: 'Genotype', attribute: 'genotype', custom_filter: :auto, allow_multiple_selection: false
 
-    g.column name: 'Recall', attribute: 'metric_recall', filter: false do |result|
+    g.column name: 'Recall', attribute: 'metric_recall', class: "text-right", filter: false do |result|
       percentage = content_tag("div",number_with_precision(result.metric_recall * 100, precision: 4), class: "percentage")
       [percentage, {class: "text-right"}]
     end
 
-    g.column name: 'Precision', attribute: 'metric_precision', filter: false do |result|
+    g.column name: 'Precision', attribute: 'metric_precision', class: "text-right", filter: false do |result|
       percentage = content_tag("div",number_with_precision(result.metric_precision * 100, precision: 4), class: "percentage")
       [percentage, {class: "text-right"}]
     end
 
-    g.column name: 'F-score', attribute: 'metric_f1_score', filter: false do |result|
+    g.column name: 'F-score', attribute: 'metric_f1_score', class: "text-right", filter: false do |result|
       percentage = content_tag("div",number_with_precision(result.metric_f1_score * 100, precision: 4), class: "percentage")
       [percentage, {class: "text-right"}]
     end
 
-    g.column name: 'Truth TP', attribute: 'truth_tp', filter: false do |result|
+    g.column name: 'Truth TP', attribute: 'truth_tp', class: "text-right", filter: false do |result|
       [result.truth_tp, {class: "text-right"}]
     end
 
-    g.column name: 'Truth FN', attribute: 'truth_fn', filter: false do |result|
+    g.column name: 'Truth FN', attribute: 'truth_fn', class: "text-right", filter: false do |result|
       [result.truth_fn, {class: "text-right"}]
     end
 
-    g.column name: 'Query TP', attribute: 'query_tp', filter: false do |result|
+    g.column name: 'Query TP', attribute: 'query_tp', class: "text-right", filter: false do |result|
       [result.query_tp, {class: "text-right"}]
     end
 
-    g.column name: 'Query FP', attribute: 'query_fp', filter: false do |result|
+    g.column name: 'Query FP', attribute: 'query_fp', class: "text-right", filter: false do |result|
       [result.query_fp, {class: "text-right"}]
     end
   end -%>
