@@ -1,7 +1,9 @@
 window.Precision ||= {}
 window.Precision.player = null
 
-window.onYouTubePlayerAPIReady = ->
+# This function creates an <iframe> (and YouTube player)
+# after the API code downloads.
+window.onYouTubeIframeAPIReady = ->
   window.Precision.player = new YT.Player('ytplayer',
     width: '100%'
     videoId: 'e5qOVz9EIuc'
@@ -15,9 +17,13 @@ window.onYouTubePlayerAPIReady = ->
       rel: 0
       showinfo: 0
     events:
-      'onReady': (event) ->
-        event.target.setPlaybackQuality("hd720")
+      'onReady': onPlayerReady
   )
+
+# The API will call this function when the video player is ready.
+window.onPlayerReady = (event) ->
+  event.target.setPlaybackQuality("hd720")
+  event.target.playVideo()
 
 #########################################################
 #
@@ -32,17 +38,16 @@ MainController = Paloma.controller('Main',
     $container = $("body main")
 
     if $('body.pfda-guest').length > 0
-      # Load the IFrame Player API code asynchronously.
-      tag = document.createElement('script')
-
-      tag.src = 'https://www.youtube.com/player_api'
-      firstScriptTag = document.getElementsByTagName('script')[0]
-      firstScriptTag.parentNode.insertBefore tag, firstScriptTag
-      # Replace the 'ytplayer' element with an <iframe> and
-      # YouTube player after the API code downloads.
-
       $container.on("click", ".btn-player", (e) ->
-        Precision.player.playVideo()
+        # This code loads the IFrame Player API code asynchronously.
+        tag = document.createElement('script')
+
+        tag.src = 'https://www.youtube.com/iframe_api'
+        firstScriptTag = document.getElementsByTagName('script')[0]
+        firstScriptTag.parentNode.insertBefore tag, firstScriptTag
+        # Replace the 'ytplayer' element with an <iframe> and
+        # YouTube player after the API code downloads.
+
         $(e.target).closest(".btn-player-wrapper").addClass("player-playing")
       )
 
