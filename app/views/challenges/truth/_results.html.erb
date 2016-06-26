@@ -1,8 +1,7 @@
 <div class="container container-padded">
   <div class="pfda-challenge-intro">
-    <div class="lead-intro">The precisionFDA Truth Challenge ran from ....</div>
-    <div class="lead">
-       Community members from four different continents embraced the challenge...</div>
+    <div class="lead-intro">The precisionFDA Truth Challenge ran from April 26, 2016 to May 26, 2016, giving participants the unique and exciting opportunity to test their NGS pipelines on an uncharacterized sample (HG002) and publish results on precisionFDA for subsequent evaluation against newly-revealed truth data.</div>
+    <div class="lead">This web page discusses the results and lists the awards and recognitions handed out by the precisionFDA team. Due to novelties related to both the truth data and the comparison methodology, these results are only a first cut at conducting an evaluation. In the sections below, we present some lessons learned during the process of setting up the challenge, determining the truth, and using a new comparison methodology; and we finally invite the community to further explore these results and provide insight for the future.</div>
   </div>
 </div>
 
@@ -12,11 +11,26 @@
         <div class="pfda-cards pfda-cards-justify-centered">
           <div class="pfda-card pfda-card-rounded">
             <div class="pfda-card-body">
-              <%= medal_badge("Reproducibility", "Highest", "large") %>
+              <%= medal_badge("SNP Performance", "Highest", "large") %>
               <br>
               <div class="challenge-winning-team">
                 <div class="challenge-awarded-to">Awarded to</div>
-                <div class="lead lead-bold">Sentieon team</div>
+                <div class="lead lead-bold">Verily Life Sciences</div>
+                <ul class="list-inline">
+                  <li>Ryan Poplin</li>
+                  <li>Mark DePristo</li>
+                  <li>and the Verily Life Sciences Team</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="pfda-card pfda-card-rounded">
+            <div class="pfda-card-body">
+              <%= medal_badge("SNP Recall", "Highest", "large") %>
+              <br>
+              <div class="challenge-winning-team">
+                <div class="challenge-awarded-to">Awarded to</div>
+                <div class="lead lead-bold">Sentieon</div>
                 <ul class="list-inline">
                   <li>Rafael Aldana</li>
                   <li>Hanying Feng</li>
@@ -28,26 +42,16 @@
           </div>
           <div class="pfda-card pfda-card-rounded">
             <div class="pfda-card-body">
-              <%= medal_badge("Accuracy", "Highest", "large") %>
+              <%= medal_badge("SNP Precision", "Highest", "large") %>
               <br>
               <div class="challenge-winning-team">
                 <div class="challenge-awarded-to">Awarded to</div>
-                <div class="lead lead-bold">Sanofi-Genzyme</div>
+                <div class="lead lead-bold">Kinghorn Center for Clinical Genomics</div>
                 <ul class="list-inline">
-                  <li>Deepak Grover</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div class="pfda-card pfda-card-rounded">
-            <div class="pfda-card-body">
-              <%= medal_badge("Accuracy", "Highest", "large") %>
-              <br>
-              <div class="challenge-winning-team">
-                <div class="challenge-awarded-to">Awarded to</div>
-                <div class="lead lead-bold">Sanofi-Genzyme</div>
-                <ul class="list-inline">
-                  <li>Deepak Grover</li>
+                  <li>Aaron Statham</li>
+                  <li>Mark Cowley</li>
+                  <li>Joseph Copty</li>
+                  <li>Mark Pinese</li>
                 </ul>
               </div>
             </div>
@@ -56,42 +60,42 @@
         <div class="pfda-cards pfda-cards-justify-centered">
           <div class="pfda-card pfda-card-rounded">
             <div class="pfda-card-body">
-              <%= medal_badge("Reproducibility", "Highest", "large") %>
+              <%= medal_badge("INDEL Performance", "Highest", "large") %>
               <br>
               <div class="challenge-winning-team">
                 <div class="challenge-awarded-to">Awarded to</div>
-                <div class="lead lead-bold">Sentieon team</div>
+                <div class="lead lead-bold">Sanofi-Genzyme</div>
+                <ul class="list-inline">
+                  <li>Deepak Grover</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="pfda-card pfda-card-rounded">
+            <div class="pfda-card-body">
+              <%= medal_badge("INDEL Recall", "Highest", "large") %>
+              <br>
+              <div class="challenge-winning-team">
+                <div class="challenge-awarded-to">Awarded to</div>
+                <div class="lead lead-bold">Sanofi-Genzyme</div>
+                <ul class="list-inline">
+                  <li>Deepak Grover</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="pfda-card pfda-card-rounded">
+            <div class="pfda-card-body">
+              <%= medal_badge("INDEL Precision", "Highest", "large") %>
+              <br>
+              <div class="challenge-winning-team">
+                <div class="challenge-awarded-to">Awarded to</div>
+                <div class="lead lead-bold">Sentieon</div>
                 <ul class="list-inline">
                   <li>Rafael Aldana</li>
                   <li>Hanying Feng</li>
                   <li>Brendan Gallagher</li>
                   <li>Jun Ye</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div class="pfda-card pfda-card-rounded">
-            <div class="pfda-card-body">
-              <%= medal_badge("Accuracy", "Highest", "large") %>
-              <br>
-              <div class="challenge-winning-team">
-                <div class="challenge-awarded-to">Awarded to</div>
-                <div class="lead lead-bold">Sanofi-Genzyme</div>
-                <ul class="list-inline">
-                  <li>Deepak Grover</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div class="pfda-card pfda-card-rounded">
-            <div class="pfda-card-body">
-              <%= medal_badge("Accuracy", "Highest", "large") %>
-              <br>
-              <div class="challenge-winning-team">
-                <div class="challenge-awarded-to">Awarded to</div>
-                <div class="lead lead-bold">Sanofi-Genzyme</div>
-                <ul class="list-inline">
-                  <li>Deepak Grover</li>
                 </ul>
               </div>
             </div>
@@ -105,14 +109,28 @@
 
 <div class="challenge-section">
   <div class="container container-padded">
-    <div class="h2">Overview of Results</div>
+    <div class="h2">Must-read Introductory Remarks</div>
 
-    <p>We received a total of 21 entries to the challenge, summarized in the following table. <strong>The entries are sorted in order of date of submission.</strong></p>
+    <p>We are very excited to see growing numbers of challenge participants! For this challenge we received 35 entries, not only from many who participated in the previous challenge, but also from several first time participants. Some participants showcased their developing new methods, while others decided to use existing methods and see how they perform in this particular environment. We are extremely grateful to all participants for their willingness to share their results and to contribute to this effort.</p>
 
-    <p>
-    We would like to acknowledge and thank all of those who participated in the precisionFDA Consistency Challenge, for their engagement and contributions. We hope that everyone will feel like a winner. After considering the performance in reproducibility and accuracy comparisons, as well as other parameters, we have decided to hand out awards and recognitions, as illustrated in the table.
-    </p>
+    <p>This second precisionFDA challenge was conducted in collaboration with the Genome in a Bottle (GiaB) consortium, which provided the truth data, as well as with the Global Alliance for Genomics and Health (GA4GH), which provided best practices and software for conducting the comparison of participants' entries to the truth data. In fact, this effort represents the first time that this new truth data has been investigated, and the first time that this new comparison methodology has been applied at scale across the vast number of submitted entries.</p>
 
+    <p>Our evaluation against the HG002 truth data has produced several metrics (such as f-score, recall and precision) across different variant types (such as SNP and indels), subtypes (such as insertions or deletions of specific size ranges) and genomic contexts (such as whole genome, coding regions, etc.), leading to thousands of computed numbers per challenge entry. We've chosen six of them (f-score, recall and precision, across SNPs and across indels, in the whole genome) to use as the basis for handing out awards and recognitions.</p>
+
+    <p>These results are by no means the final word. Given the originality of the truth data and the comparison methodology, we expect the community to further conduct analyses and contribute to improvements in the benchmarking methodology, the correctness of the truth data, and the definition of comparison metrics.</p>
+
+    <p>We would like to acknowledge and thank all of those who participated in the precisionFDA Truth Challenge. As with the previous challenge, we hope that everyone will feel like a winner.</p>
+
+  </div>
+</div>
+
+<div class="challenge-section">
+<div class="container container-padded">
+  <div class="h2">Overview of results</div>
+
+   <p>The following table summarizes the challenge entries, and the results of the comparison against the HG002 truth data.</p>
+   <p>We've given each entry a unique label, comprised of the name of the submitting user as well as a short mnemonic keyword representing the pipeline. (As with the previous challenge, these keywords are merely indicative of each pipeline's main component, hence somewhat subjective; for a more faithful description of each pipeline, refer to the full text that accompanied each submission by following the label links). Each submitted entry consisted of two VCFs, corresponding to the variants called on the HG001/NA12878 and HG002/NA24385 datasets respectively. Links to these files can be found in the "Datasets" tab of the table.</p>
+   <p><strong>The entries are sorted alphabetically.</strong> You can click on any column header to re-sort the table according to that column.<br><br></p>
 
     <!-- Nav tabs -->
     <ul class="nav nav-tabs nav-tabs-contained" role="tablist">
@@ -129,6 +147,11 @@
         <%= render "challenges/truth/table_datasets", results: @truth_challenge[:results] %>
       </div>
     </div>
+
+    <div class="text-muted small">
+      *ccogle-snppet: This entry was not considered because the entry did not call variants across the whole genome
+    </div>
+
   </div>
 </div>
 
