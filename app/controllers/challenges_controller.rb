@@ -24,23 +24,6 @@ class ChallengesController < ApplicationController
 
   # Challenge 2 - Truth
   def truth
-    if !params.has_key?(:truth_results)
-      _params = {
-        truth_results: {
-          f: {
-            type: ["SNP"],
-            subtype: ["*"],
-            subset: ["*"],
-            genotype: ["*"]
-          }
-        }
-      }
-      if params.has_key?(:tab)
-        _params[:tab] = params[:tab]
-      end
-      redirect_to truth_challenges_path(_params)
-      return
-    end
     @discussion = Discussion.find_by(id: TRUTH_DISCUSSION_ID)
 
     @truth_challenge = Challenge.truth(@context)
@@ -55,13 +38,23 @@ class ChallengesController < ApplicationController
 
     @tab = params[:tab]
     if @tab == "results-peek"
+      if !params.has_key?(:truth_results)
+        # "?truth_results[f][type][]=SNP&truth_results[f][subtype][]=*&truth_results[f][subset][]=*&truth_results[f][genotype][]=*"
+        params[:truth_results] = {
+          f: {
+            type: ["SNP"],
+            subtype: ["*"],
+            subset: ["*"],
+            genotype: ["*"]
+          }
+        }
+      end
       @results_grid = initialize_grid(TruthChallengeResult, {
         name: 'truth_results',
         order: 'entry',
         order_direction: 'asc',
         per_page: 50
       })
-      # "?truth_results[f][type][]=SNP&truth_results[f][subtype][]=*&truth_results[f][subset][]=*&truth_results[f][genotype][]=*"
     end
   end
 

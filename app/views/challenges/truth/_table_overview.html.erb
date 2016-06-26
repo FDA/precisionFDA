@@ -2,8 +2,7 @@
   <table id="table-truth-overview" class="table table-condensed table-bordered table-nowrap table-sort">
     <thead>
       <tr>
-        <th class='sort-default' data-sort-method='number'>Entry #</th>
-        <th>Label</th>
+        <th class='sort-default' data-sort-method='string'>Label</th>
         <th>Submitter</th>
         <th>Organization</th>
         <th class="text-right">SNP-recall</th>
@@ -16,8 +15,7 @@
     </thead>
     <% results[:overview].each do |result| %>
       <tr>
-        <td><%= result[:'Order of submission'] %></td>
-        <td><a href="/discussions/2-precisionfda-truth-challenge/answers/<%= result[:'Submitter username'] %>"><%= result[:'Label'] %></a></td>
+        <td><a href="/discussions/2-precisionfda-truth-challenge/answers/<%= result[:'Submitter username'] %>"><%= result[:'Label'] %></a><%= result[:'Label'] == "ccogle-snppet" ? "*" : ""%></td>
         <td data-sort="<%= result[:'Submitter'] %>">
           <%= result[:'Submitter'] %>
           <% if result[:'Additional Users'] %>
@@ -37,7 +35,7 @@
         <% [:"SNP-recall", :"SNP-precision", :"SNP-Fscore", :"INDEL-recall", :"INDEL-precision", :"INDEL-Fscore"].each do |metric| %>
           <td data-sort="<%= result[metric] %>" class="text-right <%= 'challenge-row-medal' if results[:medals][metric] == result[:'Label'] %> <%= 'challenge-row-recognition' if results[:recognitions][metric].include?(result[:'Label']) %>">
             <%= medal_badge(results[:medals][metric] == result[:'Label']) %>
-            <%= content_tag("span", number_with_precision(result[metric] * 100, precision: 4), class: "percentage") %>
+            <%= result[metric] > 0 ? content_tag("span", number_with_precision(result[metric] * 100, precision: 4), class: "percentage") : "" %>
           </td>
         <% end %>
       </tr>
