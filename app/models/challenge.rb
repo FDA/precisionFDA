@@ -56,12 +56,12 @@ class Challenge
   }
 
   TRUTH_CHALLENGE_RECOGNITIONS = {
-    "SNP-recall": [],
-    "SNP-precision": [],
-    "SNP-Fscore": [],
-    "INDEL-recall": [],
-    "INDEL-precision": [],
-    "INDEL-Fscore": []
+    "SNP-recall": %w(eyeh-varpipe dgrover-gatk jli-custom ckim-dragen rpoplin-dv42 jlack-gatk hfeng-pmm3 hfeng-pmm2 hfeng-pmm1 raldana-dualsentieon),
+    "SNP-precision": %w(hfeng-pmm1 hfeng-pmm3 rpoplin-dv42 egarrison-hhga hfeng-pmm2 ndellapenna-hhga ckim-isaac raldana-dualsentieon ckim-vqsr dgrover-gatk),
+    "SNP-Fscore": %w(hfeng-pmm3 hfeng-pmm1 dgrover-gatk hfeng-pmm2 jli-custom bgallagher-sentieon raldana-dualsentieon),
+    "INDEL-recall": %w(astatham-gatk bgallagher-sentieon ckim-dragen ckim-gatk),
+    "INDEL-precision": %w(ltrigg-rtg1 jli-custom hfeng-pmm1 ltrigg-rtg2 hfeng-pmm2 raldana-dualsentieon dgrover-gatk ckim-vqsr astatham-gatk cchapple-custom),
+    "INDEL-Fscore": %w(jli-custom hfeng-pmm3 astatham-gatk hfeng-pmm1 hfeng-pmm2)
   }
 
   TRUTH_CHALLENGE_RESULTS_OVERVIEW = [

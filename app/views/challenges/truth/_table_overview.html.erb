@@ -5,12 +5,12 @@
         <th class='sort-default' data-sort-method='string'>Label</th>
         <th>Submitter</th>
         <th>Organization</th>
+        <th class="text-right">SNP-Fscore</th>
         <th class="text-right">SNP-recall</th>
         <th class="text-right">SNP-precision</th>
-        <th class="text-right">SNP-Fscore</th>
+        <th class="text-right">INDEL-Fscore</th>
         <th class="text-right">INDEL-recall</th>
         <th class="text-right">INDEL-precision</th>
-        <th class="text-right">INDEL-Fscore</th>
       </tr>
     </thead>
     <% results[:overview].each do |result| %>
@@ -32,7 +32,7 @@
             <%= result[:'Organization'] %>
           <% end %>
         </td>
-        <% [:"SNP-recall", :"SNP-precision", :"SNP-Fscore", :"INDEL-recall", :"INDEL-precision", :"INDEL-Fscore"].each do |metric| %>
+        <% [:"SNP-Fscore", :"SNP-recall", :"SNP-precision", :"INDEL-Fscore", :"INDEL-recall", :"INDEL-precision"].each do |metric| %>
           <td data-sort="<%= result[metric] %>" class="text-right <%= 'challenge-row-medal' if results[:medals][metric] == result[:'Label'] %> <%= 'challenge-row-recognition' if results[:recognitions][metric].include?(result[:'Label']) %>">
             <%= medal_badge(results[:medals][metric] == result[:'Label']) %>
             <%= result[metric] > 0 ? content_tag("span", number_with_precision(result[metric] * 100, precision: 4), class: "percentage") : "" %>
