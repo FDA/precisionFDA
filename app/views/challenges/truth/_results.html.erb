@@ -128,13 +128,14 @@
 <div class="container container-padded">
   <div class="h2">Overview of results</div>
 
-   <p>The following table summarizes the challenge entries, and the results of the comparison against the HG002 truth data.</p>
-   <p>We've given each entry a unique label, comprised of the name of the submitting user as well as a short mnemonic keyword representing the pipeline. (As with the previous challenge, these keywords are merely indicative of each pipeline's main component, hence somewhat subjective; for a more faithful description of each pipeline, refer to the full text that accompanied each submission by following the label links). Each submitted entry consisted of two VCFs, corresponding to the variants called on the HG001/NA12878 and HG002/NA24385 datasets respectively. Links to these files can be found in the "Datasets" tab of the table.</p>
-   <p><strong>The entries are sorted alphabetically.</strong> You can click on any column header to re-sort the table according to that column.<br><br></p>
+  <div>
+    <p>The following table summarizes the challenge entries, and the results of the comparison against the HG002 truth data.</p>
+    <p>We've given each entry a unique label, comprised of the name of the submitting user as well as a short mnemonic keyword representing the pipeline. (As with the previous challenge, these keywords are merely indicative of each pipeline's main component, hence somewhat subjective; for a more faithful description of each pipeline, refer to the full text that accompanied each submission by following the label links). Each submitted entry consisted of two VCFs, corresponding to the variants called on the HG001/NA12878 and HG002/NA24385 datasets respectively. Links to these files can be found in the "Datasets" tab of the table.</p>
+    <p><strong>The entries are sorted alphabetically.</strong> You can click on any column header to re-sort the table according to that column.<br><br></p>
 
     <!-- Nav tabs -->
     <ul class="nav nav-tabs nav-tabs-contained" role="tablist">
-      <li role="presentation" class="active"><a href="#awards" aria-controls="awards" role="tab" data-toggle="tab">Awards and Recognitions</a></li>
+      <li role="presentation" class="active"><a href="#awards" aria-controls="awards" role="tab" data-toggle="tab">Summary of HG002 results</a></li>
       <li role="presentation"><a href="#datasets" aria-controls="datasets" role="tab" data-toggle="tab">Datasets</a></li>
     </ul>
 
@@ -152,12 +153,212 @@
       *ccogle-snppet: This entry was not considered because the entry did not call variants across the whole genome
     </div>
 
+    <div>
+      <p></p>
+      <p>For more information about how these results were calculated, consult the comparison section below.</p>
+    </div>
+    <div>
+      <p>
+      We are handing out the following community challenge awards:
+      </p>
+      <ul>
+        <li><%= medal_badge('highest-snp-performance') %> to the entry submitted by Ryan Poplin et al. from Verily Life Sciences, for achieving the highest SNP F-score.</li>
+        <li><%= medal_badge('highest-snp-recall') %> to the entry submitted by Brendan Gallagher et al. from Sentieon (labeled <strong>bgallagher-sentieon</strong>), for achieving the highest SNP recall.</li>
+        <li><%= medal_badge('highest-snp-precision') %> to the entry submitted by Aaron Statham et al. from Kinghorn Center for Clinical Genomics, for achieving the highest SNP precision.</li>
+        <li><%= medal_badge('highest-indel-performance') %> to the entry submitted by Deepak Grover from Sanofi-Genzyme, for achieving the highest indel F-score.</li>
+        <li><%= medal_badge('highest-indel-recall') %> to the entry submitted by Deepak Grover from Sanofi-Genzyme, for achieving the highest indel recall.</li>
+        <li><%= medal_badge('highest-indel-precision') %> to the entry submitted by Hanying Feng et al. from Sentieon (labeled <strong>hfeng-pmm3</strong>), for achieving the highest indel precision.</li>
+      </ul>
+
+      <p>
+      We are also handing out the following recognitions:
+      </p>
+      <ul>
+        <li><%= recognition_badge('high-snp-performance', false) %> to all entries achieving a SNP F-score of 99.920% or higher.</li>
+        <li><%= recognition_badge('high-snp-recall', false) %> to all entries achieving a SNP recall of 99.910% or higher.</li>
+        <li><%= recognition_badge('high-snp-precision', false) %> to all entries achieving a SNP precision of 99.920% or higher.</li>
+        <li><%= recognition_badge('high-indel-performance', false) %> to all entries achieving an indel F-score of 99.310% or higher.</li>
+        <li><%= recognition_badge('high-indel-recall', false) %> to all entries achieving an indel recall of 99.150% or higher.</li>
+        <li><%= recognition_badge('high-indel-precision', false) %> to all entries achieving an indel precision of 99.430% or higher.</li>
+      </ul>
+
+    </div>
   </div>
 </div>
 
 <div class="challenge-section">
   <div class="container container-padded">
+    <div class="h2">Truth Data</div>
+    <p>One way of learning about the performance of software pipelines for processing human genome sequencing data is by using well-characterized datasets such as NA12878/HG001. The previous challenge made use of the GiaB/NIST NA12878 v2.19 truth data as part of the evaluation of accuracy. But considering how widely HG001 has been used to train software pipelines, this challenge focuses on a new sample, HG002, whose truth data was not yet available at the time of the challenge.</p>
+
+    <p>In particular, this challenge provided sequencing reads datasets (FASTQ) for both HG001 and HG002. During the challenge, participants had access to the aforementioned HG001 v2.19 truth data, but not to the HG002 truth data. Upon the closing of the Truth Challenge, the Genome in a Bottle (GiaB) consortium, led by the National Institute of Standards (NIST), released the HG002 truth data, as well as an updated version of the HG001 truth data. Both were intially assigned version 3.2.</p>
+
+    <p>The truth data files have been published on precisionFDA by Dr. Justin Zook (scientist at the National Institute of Standards and Technology and co-leader of the Genome in a Bottle Consortium efforts), in the precisionFDA discussion topic titled <a href="https://precision.fda.gov/discussions/10-help-improve-the-new-v3-2-giab-benchmark-calls-for-hg001-and-hg002">Help improve the new v3.2 GIAB benchmark calls for HG001 and HG002</a>.</p>
+
+    <p>Shortly after the initial publication of v3.2 of the truth data, there were two subsequent updates leading to v3.2.1 and v3.2.2. These updates introduced improvements to the truth data based on feedback from the community and from artifacts discovered in initial evaluations of the challenge entries. The final comparison results discussed on this web page are based on comparisons against the latest version of the truth data (v3.2.2).</p>
+
+    <p>It is important to note that the methodology for compiling the truth data has changed substantially since the release of v2.19 of the HG001 truth dataset, and therefore the same VCF file may rank differently in a comparison against HG001 v2.19 versus a comparison against HG001 v3.2.2. These changes are discussed in the section titled "Differences between v2.19 and v3.2 integration methods" in Dr. Zook's announcement.</p>
+
+    <p>For your convenience, we've included below a copy of the announcement. It discusses known issues of the truth data as well as other important caveats, and we encourage you to read it to understand how this new truth data may have affected the results of the challenge, or may interact with your own evaluations in the future.</p>
+
+    <div style="padding: 10px; font-size: 10pt; border: 1px solid black; background-color: #eee">
+      <p><strong>NEW RESULTS:</strong> Based on feedback received about our v3.2 calls, we have now uploaded a new version 3.2.2 set of calls that fixes a significant number of erroneously low confidence variants on chr7 and chr9, and also now excludes regions homologous to the hs37d5 decoy sequence.</p>
+      <p>Changes in v3.2.2:
+        We found a bug in one of the input call sets that was causing many of the variants on chr7 in HG001 and HG002 and on chr9 on HG002 to be reported as not high confidence.  We have corrected this issue, and all other chromosomes are the same as in v3.2.1.</p>
+        <p>Changes in v3.2.1:
+          The only change in v3.2.1 is to exclude regions from our high confidence bed file if they have homology to the decoy sequence hs37d5.  These decoy-related regions were generated by Heng Li and are available as mm-2-merged.bed at <a href="https://github.com/ga4gh/benchmarking-tools/tree/master/resources/stratification-bed-files/SegmentalDuplications">https://github.com/ga4gh/benchmarking-tools/tree/master/resources/stratification-bed-files/SegmentalDuplications</a>. Our high-confidence vcf generally does not include variants if they are homologous to decoy sequence. Although most of these likely should be excluded, some real variants may be missed, so we are excluding these regions from our high-confidence regions until they are better characterized. However, it is important to note that these regions may be enriched for false positives if the decoy is not used in mapping.</p>
+          <p>Description of v3.2:
+            We have been developing a new, reproducible integration process to create high-confidence SNP, small indel, and homozygous reference calls for benchmarking small variant calls.  We have used this new process to generate v3.2 of our high-confidence calls for HG001 (aka NA12878), as well as the first high-confidence callset for HG002 (aka Ashkenazim Jewish Son), which are attached to this discussion and under <a href="ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/release/">ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/release/</a>.  These calls were generated only from data generated from our NIST Reference Material batch of cells.  Planned future work will include (1) generating similar callsets on the GIAB/PGP AJ parents and Chinese trio, (2) incorporating additional datasets from these genomes to characterize more difficult regions, (3) incorporating pedigree information for phasing and to improve the calls, (4) developing better methods for homopolymer characterization, (5) making calls on X and Y for males, and (6) characterizing larger indels and structural variation.  We greatly appreciate the feedback many of you have given already, and we very much welcome additional feedback to help us improve future versions of these calls as comments in this discussion, and about specific challenging variants at <a href="http://goo.gl/forms/OCUnvDXMEt1NEX8m2">http://goo.gl/forms/OCUnvDXMEt1NEX8m2</a>.</p>
+            <p>We highly recommend reading the information below prior to using these calls to understand how best to use them and their limitations.  There is also a draft google doc that describes the methods used to form these calls and some preliminary comparisons to other callsets at:
+              <a href="https://docs.google.com/document/d/1NE-NGSMslFFndQpbqnvu4wfnwgmgOcQu6KIjSbCauYg/edit?usp=sharing">https://docs.google.com/document/d/1NE-NGSMslFFndQpbqnvu4wfnwgmgOcQu6KIjSbCauYg/edit?usp=sharing</a></p>
+              <h3>Best Practices for Using High-confidence Calls:</h3>
+              <p>Benchmarking variant calls is a complex process, and best practices are still being developed by the Global Alliance for Genomics and Health (GA4GH) Benchmarking Team (<a href="https://github.com/ga4gh/benchmarking-tools/">https://github.com/ga4gh/benchmarking-tools/</a>).  Several things are important to consider when benchmarking variant call accuracy:</p>
+              <ol>
+                <li>Complex variants (e.g., nearby SNPs and indels or block substitutions) can often be represented correctly in multiple ways in the vcf format.  Therefore, we recommend using sophisticated benchmarking tools like those developed by members of the GA4GH benchmarking team.  Currently, the most developed tools are rtgtools vcfeval (<a href="http://realtimegenomics.com/products/rtg-tools/">http://realtimegenomics.com/products/rtg-tools/</a>) or <a href="http://hap.py">hap.py</a> (<a href="https://github.com/Illumina/hap.py">https://github.com/Illumina/hap.py</a>).  See supplementary information in <a href="https://docs.google.com/document/d/1NE-NGSMslFFndQpbqnvu4wfnwgmgOcQu6KIjSbCauYg/edit?usp=sharing">https://docs.google.com/document/d/1NE-NGSMslFFndQpbqnvu4wfnwgmgOcQu6KIjSbCauYg/edit?usp=sharing</a> for a suggested process for doing comparisons.</li>
+                <li>By their nature, high-confidence variant calls and regions tend to include a subset of variants and regions that are easier to characterize.  Accuracy of variant calls outside the high-confidence regions is generally likely to be lower than inside the high-confidence regions, so benchmarking against high-confidence calls will usually overestimate accuracy for all variants in the genome.  Similarly, it is possible that a variant calling method has higher accuracy statistics compared to other methods when compared to the high-confidence variant calls but has lower accuracy compared to other methods for all variants in the genome.</li>
+                <li>Stratification of performance for different variant types and different genome contexts can be very useful when assessing performance, because performance often differs between variant types and genome contexts.  In addition, stratification can elucidate variant types and genome contexts that fall primarily outside high-confidence regions.  Standardized bed files for stratifying by genome context are available from GA4GH at <a href="https://github.com/ga4gh/benchmarking-tools/tree/master/resources/stratification-bed-files">https://github.com/ga4gh/benchmarking-tools/tree/master/resources/stratification-bed-files</a>.</li>
+                <li>Particularly for targeted sequencing, it is critical to calculate confidence intervals around statistics like sensitivity because there may be very few examples of variants of some types in the benchmark calls in the targeted regions.
+                  Manual curation of sequence data in a genome browser for a subset of false positives and false negatives is essential for an accurate understanding of statistics like sensitivity and precision.  Curation can often help elucidate whether the benchmark callset is wrong, the test callset is wrong, both callsets are wrong, or the true answer is unclear from current technologies.  If you find questionable or challenging sites, reporting them will help improve future callsets.  You can report information about particular sites at <a href="http://goo.gl/forms/OCUnvDXMEt1NEX8m2">http://goo.gl/forms/OCUnvDXMEt1NEX8m2</a>.</li>
+                </ol>
+                <h3>Known issues with high-confidence calls:</h3>
+                <p>There are a number of known issues in the current high-confidence callset, which we plan to address in future releases:</p>
+                <ol>
+                  <li>Compound heterozygous sites are sometimes represented as a heterozygous deletion that overlaps with a heterozygous SNP.  At these sites, the genotype “0/1” or “0|1” should not be interpreted as meaning that the “0” haplotype is reference.  Hap.py and vcfeval (with the --ref-overlap flag) interpret these sites as intended.</li>
+                  <li>The callset currently only includes local phasing information from freebayes, which does not use the PS field, so that locally phased variants should not be assumed to be phased with variants that are phased at a distant location.</li>
+                  <li>The high-confidence calls have an increased FP, FN, and genotyping error rate for single base indels in homopolymers.  Some of these sites have a low allele fraction variant in multiple technologies so that it is unclear whether the site is a systematic sequencing error or a true variant in a fraction of the cells.  Some of these sites are listed in <a href="https://docs.google.com/spreadsheets/d/1kHgRLinYcnxX3-ulvijf2HrIdrQWz5R5PtxZS-_s6ZM/edit?usp=sharing">https://docs.google.com/spreadsheets/d/1kHgRLinYcnxX3-ulvijf2HrIdrQWz5R5PtxZS-_s6ZM/edit?usp=sharing</a></li>
+                </ol>
+                <h3>Differences between v2.19 and v3.2 integration methods:</h3>
+                <p>The new v3.2 integration methods differ from the previous GIAB calls (v2.18 and v2.19) in several ways, both in the data used and the integration process and heuristics:</p>
+                <ol>
+                  <li>Only 4 datasets were used, selected because they represent 4 sequencing technologies that were generated from the NIST RM 8398 batch of DNA.  They are: 300x Illumina paired end WGS, 100x Complete Genomics WGS, 1000x Ion exome sequencing, and SOLID WGS.</li>
+                  <li>Mapping and variant calling algorithms designed specifically for each technology were used to generate sensitive variant callsets where possible: novoalign + GATK-haplotypecaller and freebayes for Illumina, the vcfBeta file from the standard Complete Genomics pipeline, tmap+TVC for Ion exome, and Lifescope+GATK-HC for SOLID.  This is intended to minimize bias towards any particular bioinformatics toolchain.</li>
+                  <li>Instead of forcing GATK to call genotypes at candidate variants in the bam files from each technology, we generate sensitive variant call sets and a bed file that describes the regions that were callable from each dataset.  For Illumina, we used GATK callable loci to find regions with at least 20 reads with MQ &gt;= 20 and with coverage less than 2x the median.  For Complete Genomics, we used the callable regions defined by the vcfBeta file and excluded +-50bp around any no-called or half-called variant.  For Ion, we intersected the exome targeted regions with callableloci (requiring at least 20 reads with MQ &gt;= 20).  Due to the shorter reads and low coverage for SOLID, it was only used to confirm variants, so no regions were considered callable.</li>
+                  <li>A new file with putative structural variants was used to exclude potential errors around SVs.  These were SVs derived from multiple PacBio callers and multiple integrated illumina callers using MetaSV.  These make up a significantly smaller fraction of the calls and genome (~4.5%) than the previous bed, which was a union of all dbVar calls for NA12878 (~10%).</li>
+                  <li>Homopolymers &gt;10bp in length, including those interrupted by one nucleotide different from the homopolymer, are now excluded from the high-confidence regions, because these were seen to have a high error rate for all technologies.  This constitutes a high fraction of the putative indel calls, so more work is needed to resolve these.</li>
+                  <li>A bug that caused nearby variants to be missed in v2.19 is fixed in the new calls.</li>
+                  <li>The new vcf contains variants outside the high-confidence bed file.  This enables more robust comparison of complex variants or nearby variants that are near the boundary of the bed file.  It also allows the user to evaluate concordance outside the high-confidence regions, but these concordance metrics should be interpreted with great care.</li>
+                  <li>We now output local phasing information when it is provided in the Illumina freebayes calls.</li>
+                </ol>
+              </div>
+
+    <p>We would like to thank the National Institute of Standards and Technology, and the Genome in a Bottle consortium, for the excellent collaboration in this precisionFDA challenge.</p>
+
+  </div>
+</div>
+
+<div class="challenge-section">
+  <div class="container container-padded">
+    <div class="h2">Comparison methodology</div>
+
+    <p>The precisionFDA system includes an initial VCF comparison framework which was used in the first precisionFDA challenge. We asked participants to use that framework to compare their HG001 VCFs against the GiaB/NIST HG001 v2.19 truth data while the challenge was still ongoing, to ensure that their files were in good shape. However, for the final evaluation of the results of this challenge, we partnered with the Benchmarking Task team of the GA4GH Data Working Group, to employ an updated comparison framework.</p>
+    <p>The GA4GH benchmarking team has been discussing the difficulties of conducting proper VCF comparisons for several months now, and has devised metrics definitions, initial specifications, early software prototypes, and other benchmarking resources for implementing VCF comparison best practices. We approached the chair of the benchmarking group, Dr. Justin Zook, to consult with him on how to best use these resources in the context of this precisionFDA challenge.</p>
+    <p>The outcome of our collaboration is the utilization of a particular methodology for comparing VCFs and counting results, which was finalized and tailored for the needs of this challenge, and which we hope will form the basis of other comparisons in the future. It is available on precisionFDA as an app, titled <a href="https://precision.fda.gov/apps/app-BxfGF8j02pBZzZxbzZxP725P">Vcfeval + Hap.py Comparison</a>. (Given the departure from the previous comparison technique, and until we have received enough feedback for this new method, the "Comparison" feature of precisionFDA has not yet been updated.)</p>
+    <div class="h3">Software used</div>
+    <p>This particular comparison framework consists of a specific version of Real Time Genomics' vcfeval, used for VCF comparison, and a specific version of Illumina's hap.py, used for quantification; together they form the prototype GA4GH benchmarking workflow, as illustrated <a href="https://github.com/ga4gh/benchmarking-tools/tree/master/doc/ref-impl">here</a>.</p>
+    <p>The vcfeval tool generates an <a href="https://github.com/ga4gh/benchmarking-tools/blob/master/doc/ref-impl/intermediate.md">intermediate VCF</a> which is further quantified by hap.py. The "quantify" tool from hap.py counts and stratifies variants. It counts SNPs and INDELs separately and provides additional counts for subtypes of each variant (indels of various lengths, het / hom, stratification regions). In order to determine if a variant specifies SNPs, insertions or deletions, "quantify" performs an alignment of the corresponding REF and ALT alleles. This improves handling of MNPs/complex variants and provides results that are comparable between different methods.</p>
+
+    <div class="h3">Metrics calculated</div>
+    <p>The quantification process calculates the following metrics, in harmony with "Comparison Method 3" as defined in this <a href="https://github.com/ga4gh/benchmarking-tools/blob/update-perf-metrics-definitions/doc/standards/GA4GHBenchmarkingPerformanceMetricsDefinitions.md">upcoming GA4GH benchmarking spec update</a>:</p>
+    <table class="table table-bordered">
+      <thead><tr><th>Metric</th><th>Definition</th></tr></thead>
+      <tr><td>TRUTH.TP</td><td>True positives, from the perspective of the truth data, i.e. the number of sites in the Truth Call Set for which there are paths through the Query Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.</td></tr>
+      <tr><td>QUERY.TP</td><td>True positives, from the perspective of the query data, i.e. the number of sites in the Query Call Set for which there are paths through the Truth Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.</td></tr>
+      <tr><td>TRUTH.FN</td><td>False negatives, i.e. the number of sites in the Truth Call Set for which there is no path through the Query Call Set that is consistent with all of the alleles at this site, or sites for which there is an inaccurate genotype call for the event. Sites with correct variant but incorrect genotype are counted here.</td></tr>
+      <tr><td>QUERY.FP</td><td>False positives, i.e. the number of sites in the Query Call Set for which there is no path through the Truth Call Set that is consistent with this site. Sites with correct variant but incorrect genotype are counted here.</td></tr>
+      <tr><td>FP.gt</td><td>The number of false positives where the non-REF alleles in the Truth and Query Call Sets match (i.e. cases where the truth is 1/1 and the query is 0/1 or similar).</td></tr>
+      <tr><td>Recall</td><td>TRUTH.TP / (TRUTH.TP + TRUTH.FN)</td></tr>
+      <tr><td>Precision</td><td>QUERY.TP / (QUERY.TP + QUERY.FP)</td></tr>
+      <tr><td>F-score</td><td>Harmonic mean of Recall and Precision</td></tr>
+    </table>
+    <p>Note that recall uses TRUTH.TP whereas precision uses QUERY.TP. For recall, TRUTH.TP counts the number of truth variants reproduced in the truth set representation, which is the same for all callers and should also be consistent with the confident regions (especially important around confident region boundaries and where variants can move between categories depending on how a variant caller decides to represent them). Using QUERY.TP for recall would have introduced problems where different methods create different representations (e.g. systematically calling MNPs as insertions + deletions can skew indel numbers in the query). For calculating precision, the tool uses QUERY.TP (i.e. the precision measures the relative number of wrong calls for all query calls).</p>
+    <div class="h3">Granular reporting and region stratification</div>
+    <p>The quantification process reports results with additional granularity, according to a few different dimensions, as outlined in the following table:</p>
+    <table class="table table-bordered">
+      <thead><tr><th>Dimension</th><th>Value</th><th>Meaning</th></tr></thead>
+      <tr><td rowspan="2">Type</td><td>SNP</td><td>SNP or MNP variants</td></tr>
+      <tr>                         <td>INDEL</td><td>Indels and complex variants</td></tr>
+      <tr><td rowspan="12">Subtype</td><td>*</td><td>Aggregate numbers of all subtypes</td></tr>
+      <tr><td><code>ti</code></td><td>SNPs that constitute transitions</td></tr>
+      <tr><td><code>tv</code></td><td>SNPs that constitute transversions</td></tr>
+      <tr><td><code>I1_5</code></td><td>Insertions of length 1-5</td></tr>
+      <tr><td><code>I6_15</code></td><td>Insertions of length 6-15</td></tr>
+      <tr><td><code>I16_PLUS</code></td><td>Insertions of length 16 or more</td></tr>
+      <tr><td><code>D1_5</code></td><td>Deletions of length 1-5</td></tr>
+      <tr><td><code>D6_15</code></td><td>Deletions of length 6-15</td></tr>
+      <tr><td><code>D16_PLUS</code></td><td>Deletions of length 16 or more</td></tr>
+      <tr><td><code>C1_5</code></td><td>Complex variants of length 1-5</td></tr>
+      <tr><td><code>C6_15</code></td><td>Complex variants of length 6-15</td></tr>
+      <tr><td><code>C16_PLUS</code></td><td>Complex variants of length 16 or more</td></tr>
+      <tr><td rowspan="4">Genotype</td><td>*</td><td>Aggregate numbers of all genotypes</td></tr>
+      <tr><td><code>het</code></td><td>Only heterozygous variant calls (0/1 or similar genotypes)</td></tr>
+      <tr><td><code>homalt</code></td><td>Only homozygous alternative variant calls (1/1 or similar genotypes)</td></tr>
+      <tr><td><code>het</code></td><td>Only heterozygous alternative variant calls (1/2 or similar genotypes)</td></tr>
+      <tr><td rowspan="52">Subset</td><td>*</td><td>Aggregate numbers not limited to any subset (but still within confident regions)</td></tr>
+      <tr><td>func_cds</td><td>Coding exons from RefSeq</td></tr>
+      <tr><td>map_l100_m2_e1</td><td>Regions in which 100bp reads map to >1 location with up to 2 mismatches and up to 1 indel</td></tr>
+      <tr><td>map_l150_m0_e0</td><td>Regions in which 150bp reads map to >1 location with up to 0 mismatches and up to 0 indels</td></tr>
+      <tr><td>map_l150_m2_e1</td><td>Regions in which 150bp reads map to >1 location with up to 2 mismatches and up to 1 indel</td></tr>
+      <tr><td>map_l150_m2_e0</td><td>Regions in which 150bp reads map to >1 location with up to 2 mismatches and up to 0 indels</td></tr>
+      <tr><td>map_l100_m1_e0</td><td>Regions in which 100bp reads map to >1 location with up to 1 mismatch and up to 0 indels</td></tr>
+      <tr><td>map_l125_m1_e0</td><td>Regions in which 125bp reads map to >1 location with up to 1 mismatch and up to 0 indels</td></tr>
+      <tr><td>map_l250_m2_e1</td><td>Regions in which 250bp reads map to >1 location with up to 2 mismatches and up to 1 indel</td></tr>
+      <tr><td>map_l250_m0_e0</td><td>Regions in which 250bp reads map to >1 location with up to 0 mismatches and up to 0 indels</td></tr>
+      <tr><td>map_l150_m1_e0</td><td>Regions in which 150bp reads map to >1 location with up to 1 mismatch and up to 0 indels</td></tr>
+      <tr><td>map_l125_m2_e0</td><td>Regions in which 125bp reads map to >1 location with up to 2 mismatches and up to 0 indels</td></tr>
+      <tr><td>map_l100_m0_e0</td><td>Regions in which 100bp reads map to >1 location with up to 0 mismatches and up to 0 indels</td></tr>
+      <tr><td>map_l250_m1_e0</td><td>Regions in which 250bp reads map to >1 location with up to 1 mismatch and up to 0 indels</td></tr>
+      <tr><td>map_l125_m2_e1</td><td>Regions in which 125bp reads map to >1 location with up to 2 mismatches and up to 1 indel</td></tr>
+      <tr><td>map_l250_m2_e0</td><td>Regions in which 250bp reads map to >1 location with up to 2 mismatches and up to 0 indels</td></tr>
+      <tr><td>map_l125_m0_e0</td><td>Regions in which 125bp reads map to >1 location with up to 0 mismatches and up to 0 indels</td></tr>
+      <tr><td>map_l100_m2_e0</td><td>Regions in which 100bp reads map to >1 location with up to 2 mismatches and up to 0 indels</td></tr>
+      <tr><td>map_siren</td><td>Regions considered difficult to map by amplab SiRen </td></tr>
+      <tr><td>tech_badpromoters</td><td>1000 promoter regions with lowest relative coverage in Illumina, relatively GC-rich</td></tr>
+      <tr><td>lowcmp_SimpleRepeat_homopolymer_gt10</td><td>Homopolymers >10bp in length</td></tr>
+      <tr><td>lowcmp_SimpleRepeat_triTR_11to50</td><td>Exact 3bp tandem repeats 11-50bp in length</td></tr>
+      <tr><td>lowcmp_Human_Full_Genome_TRDB_hg19_150331_TRgt6_lt51bp_gt95identity_merged</td><td>Tandem repeats with >6bp unit size and <51bp in length and >95% identity</td></tr>
+      <tr><td>lowcmp_Human_Full_Genome_TRDB_hg19_150331_all_merged</td><td>All tandem repeats from TRDB with adjacent repeats merged</td></tr>
+      <tr><td>lowcmp_SimpleRepeat_quadTR_11to50</td><td>Exact 4bp tandem repeats 11-50bp in length</td></tr>
+      <tr><td>lowcmp_Human_Full_Genome_TRDB_hg19_150331_TRlt7_gt200bp_gt95identity_merged</td><td>Tandem repeats with 1-6bp unit size and >200bp in length and >95% identity</td></tr>
+      <tr><td>lowcmp_Human_Full_Genome_TRDB_hg19_150331_TRlt7_lt101bp_gt95identity_merged</td><td>Tandem repeats with 1-6bp unit size and <101bp in length and >95% identity</td></tr>
+      <tr><td>lowcmp_SimpleRepeat_quadTR_gt200</td><td>Exact 4bp tandem repeats >200bp in length</td></tr>
+      <tr><td>lowcmp_Human_Full_Genome_TRDB_hg19_150331_TRgt6_lt101bp_gt95identity_merged</td><td>Tandem repeats with >6bp unit size and <101bp in length and >95% identity</td></tr>
+      <tr><td>lowcmp_AllRepeats_gt200bp_gt95identity_merged</td><td>All perfect and imperfect tandem repeats >200bp in length</td></tr>
+      <tr><td>lowcmp_Human_Full_Genome_TRDB_hg19_150331_TRgt6_51to200bp_gt95identity_merged</td><td>Tandem repeats with >6bp unit size and 51-200bp in length and >95% identity</td></tr>
+      <tr><td>lowcmp_Human_Full_Genome_TRDB_hg19_150331_all_gt95identity_merged</td><td>All tandem repeats from TRDB with >95% identity</td></tr>
+      <tr><td>lowcmp_SimpleRepeat_triTR_gt200</td><td>Exact 3bp tandem repeats >200bp in length</td></tr>
+      <tr><td>lowcmp_SimpleRepeat_triTR_51to200</td><td>Exact 3bp tandem repeats 51-200bp in length</td></tr>
+      <tr><td>lowcmp_Human_Full_Genome_TRDB_hg19_150331_TRlt7_lt51bp_gt95identity_merged</td><td>Tandem repeats with 1-6bp unit size and <51bp in length and >95% identity</td></tr>
+      <tr><td>lowcmp_Human_Full_Genome_TRDB_hg19_150331_TRlt7_51to200bp_gt95identity_merged</td><td>Tandem repeats with 1-6bp unit size and 51-200bp in length and >95% identity</td></tr>
+      <tr><td>lowcmp_AllRepeats_51to200bp_gt95identity_merged</td><td>All perfect and imperfect tandem repeats 51-200bp in length</td></tr>
+      <tr><td>lowcmp_Human_Full_Genome_TRDB_hg19_150331</td><td>All tandem repeats from TRDB</td></tr>
+      <tr><td>lowcmp_SimpleRepeat_quadTR_51to200</td><td>Exact 4bp tandem repeats 51-200bp in length</td></tr>
+      <tr><td>lowcmp_AllRepeats_lt51bp_gt95identity_merged</td><td>All perfect and imperfect tandem repeats <51bp in length</td></tr>
+      <tr><td>lowcmp_SimpleRepeat_homopolymer_6to10</td><td>All homopolymers 6-10bp in length</td></tr>
+      <tr><td>lowcmp_SimpleRepeat_diTR_gt200</td><td>Exact 2bp tandem repeats >200bp in length</td></tr>
+      <tr><td>lowcmp_SimpleRepeat_diTR_11to50</td><td>Exact 2bp tandem repeats 11-50bp in length</td></tr>
+      <tr><td>lowcmp_SimpleRepeat_diTR_51to200</td><td>Exact 2bp tandem repeats 51-200bp in length</td></tr>
+      <tr><td>lowcmp_Human_Full_Genome_TRDB_hg19_150331_TRgt6_gt200bp_gt95identity_merged</td><td>Tandem repeats with >6bp unit size and >200bp in length and >95% identity</td></tr>
+      <tr><td>segdup</td><td>Segmental duplications in GRCh37 of all sizes, not including ALTs from GRCh37</td></tr>
+      <tr><td>segdupwithalt</td><td>Segmental duplications in GRCh37 >10kb, including ALTs from GRCh37</td></tr>
+      <tr><td>decoy</td><td>Regions in GRCh37 to which decoy sequences in hs37d5 map</td></tr>
+      <tr><td>HG001compoundhet</td><td>Compound heterozygous regions in which there are 2 different variants when phased variants within 50bp are combined in HG001/NA12878</td></tr>
+      <tr><td>HG002compoundhet</td><td>Compound heterozygous regions in which there are 2 different variants when phased variants within 50bp are combined in HG002/NA24385</td></tr>
+      <tr><td>HG001complexvar</td><td>Complex variant regions in which there are 2 or more variants within 50bp in HG001/NA12878</td></tr>
+      <tr><td>HG002complexvar</td><td>Complex variant regions in which there are 2 or more variants within 50bp in HG002/NA24385</td></tr>
+
+    </table>
+    <div class="h3">Result compilation</div>
+    <p>We ran hap.py (and specifically the HAP-207 version, with the engine set to a GA4GH-specific version of vcfeval) to compare HG001 and HG002 submissions against the GiaB/NIST v3.2.2 HG001 and HG002 truth data respectively. Our executions excluded the entry labeled <strong>ccogle-snppet</strong> as it did not call variants in the whole genome. The entries labeled <strong>ghariani-varprowl</strong>, <strong>jpowers-varprowl</strong> and <strong>qzeng-custom</strong> contained few VCF lines which were deemed incompatible by this new comparison framework (which performs stricter checks). Upon closer inspection, this was due to incorrect REF columns (such as the strings "nan" or "AC-7GATAGAA") or non-diploid genotypes (such as 0/1/2, or even 0/1/2/3). These were a small fraction, so we decided to run the comparison after first removing these offending lines.</p>
+    <p>We have made available on precisionFDA complete archives of all the input files (including both the original and adjusted files, for the entries which we had to remove offending VCF lines), and the results (including the annotated VCF as output by hap.py, and extended statistics in CSV format). These are recapitulated in <a href="#">this precisionFDA discussion topic</a>.
+
+  </div>
+</div>
+
+
+<div class="challenge-section">
+  <div class="container container-padded">
     <div class="h2">Explore the results</div>
+    <p>This section includes an interactive explorer which can be used to filter all results.</p>
   </div>
   <%= render "challenges/truth/table_results", results_grid: @results_grid, tab: @tab %>
 </div>
