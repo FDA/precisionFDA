@@ -6,7 +6,7 @@
 </div>
 
 <div class="challenge-section">
-  <%= render "challenges/truth/table_results", results_grid: @results_grid, tab: @tab, show_filters: :always, grid_classes: 'table-condensed table-hover' %>
+  <%= render "challenges/truth/table_results", results_grid: @results_grid, tab: @tab, answers_to_username_map: @truth_challenge[:results][:answers_to_username_map], show_filters: :always, grid_classes: 'table-condensed table-hover' %>
 
   <div class="row">
     <div class="col-md-6">

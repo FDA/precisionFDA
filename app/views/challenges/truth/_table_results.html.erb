@@ -2,28 +2,28 @@
 <div class="pfda-toolbar pfda-toolbar-padded">
   <div class="pull-right">
     <%= link_to "Reset", truth_challenges_path({tab: tab}), class:"btn btn-link" %>
-    <button class="btn btn-primary wg-external-submit-button" data-grid-name="truth_results"><span class="fa fa-filter" aria-hidden="true"></span> Filter</button>
   </div>
 </div>
 <% end %>
+
 <%= grid(results_grid, show_filters: show_filters, hide_submit_button: true, hide_reset_button: true, html: {class: grid_classes}) do |g|
   g.blank_slate partial:  "_partials/empty_grid"
 
-  g.column name: 'Entry', attribute: 'entry', custom_filter: :auto, allow_multiple_selection: false do |result|
+  g.column name: 'Entry', attribute: 'entry', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false do |result|
     if !result.answer_id.nil?
-      link_to result.entry, discussion_answer_path(TRUTH_DISCUSSION_ID, result.answer_id)
+      link_to result.entry, discussion_answer_path(TRUTH_DISCUSSION_ID, answers_to_username_map[result.answer_id])
     else
       result.entry
     end
   end
 
-  g.column name: 'Type', attribute: 'type', custom_filter: :auto, allow_multiple_selection: false
+  g.column name: 'Type', attribute: 'type', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false
 
-  g.column name: 'Subtype', attribute: 'subtype', custom_filter: :auto, allow_multiple_selection: false
+  g.column name: 'Subtype', attribute: 'subtype', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false
 
-  g.column name: 'Subset', attribute: 'subset', custom_filter: :auto, allow_multiple_selection: false
+  g.column name: 'Subset', attribute: 'subset', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false
 
-  g.column name: 'Genotype', attribute: 'genotype', custom_filter: :auto, allow_multiple_selection: false
+  g.column name: 'Genotype', attribute: 'genotype', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false
 
   g.column name: 'Recall', attribute: 'metric_recall', class: "text-right", filter: false do |result|
     if !result.metric_recall.nil?

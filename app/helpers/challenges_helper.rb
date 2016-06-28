@@ -11,14 +11,14 @@ module ChallengesHelper
     if medal.instance_of? String
       if type == 'large'
         raw """
-            <center>
+            <div class='challenge-badge-qualifier'>#{qualifier}</div>
+            <div class='challenge-badge-medal-name'>#{medal}</div>
+            <div class='text-center'>
               <span class='fa-stack fa-3x' aria-hidden='true'>
                 <i class='fa fa-certificate fa-stack-2x'></i>
                 <i class='fa fa-trophy fa-stack-1x fa-inverse'></i>
               </span>
-            </center>
-            <div class='challenge-badge-qualifier'>#{qualifier}</div>
-            <div class='challenge-badge-medal-name'>#{medal}</div>
+            </div>
         """
       else
         raw """
