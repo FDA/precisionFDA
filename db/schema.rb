@@ -271,36 +271,6 @@ ActiveRecord::Schema.define(version: 20160621205004) do
   add_index "orgs", ["admin_id"], name: "index_orgs_on_admin_id"
   add_index "orgs", ["handle"], name: "index_orgs_on_handle", unique: true
 
-  create_table "space_memberships", force: :cascade do |t|
-    t.integer  "user_id"
-    t.integer  "space_id"
-    t.string   "role"
-    t.string   "side"
-    t.text     "meta"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  add_index "space_memberships", ["space_id"], name: "index_space_memberships_on_space_id"
-  add_index "space_memberships", ["user_id"], name: "index_space_memberships_on_user_id"
-
-  create_table "spaces", force: :cascade do |t|
-    t.string   "name"
-    t.text     "description"
-    t.string   "host_project"
-    t.string   "guest_project"
-    t.string   "host_dxorg"
-    t.string   "guest_dxorg"
-    t.string   "space_type"
-    t.string   "state"
-    t.text     "meta"
-    t.datetime "created_at",    null: false
-    t.datetime "updated_at",    null: false
-  end
-
-  add_index "spaces", ["space_type"], name: "index_spaces_on_space_type"
-  add_index "spaces", ["state"], name: "index_spaces_on_state"
-
   create_table "truth_challenge_results", force: :cascade do |t|
     t.integer "answer_id"
     t.string  "entry"
