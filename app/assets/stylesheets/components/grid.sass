@@ -27,6 +27,13 @@ $select-width: 28px
     border-left: 0
     border-right: 0
 
+  &.table-hover > tbody > tr:hover > td
+    &.sorted
+      background-color: darken($brand-highlight, 1%)
+
+    &.active-filter
+      background-color: darken($gray-subtle, 3%)
+
   &.table-striped > tbody > tr:nth-of-type(odd)
     background-color: transparent
 

@@ -23,6 +23,7 @@ class CreateTruthChallengeResults < ActiveRecord::Migration
       t.integer :query_unk
       t.integer :fp_gt
       t.integer :fp_al
+      t.decimal :pct_fp_ma, precision: 10, scale: 6
       t.decimal :truth_total_titv_ratio, precision: 10, scale: 6
       t.decimal :truth_total_het_hom_ratio, precision: 10, scale: 6
       t.decimal :truth_fn_titv_ratio, precision: 10, scale: 6

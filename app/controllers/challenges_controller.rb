@@ -37,7 +37,8 @@ class ChallengesController < ApplicationController
     end
 
     @tab = params[:tab]
-    if @tab == "results-peek"
+
+    if @tab == "results-peek" || @tab == "results-explore-peek" || (@truth_challenge[:results_announced] && (@tab == "results" || @tab == "results-explore"))
       if !params.has_key?(:truth_results)
         # "?truth_results[f][type][]=SNP&truth_results[f][subtype][]=*&truth_results[f][subset][]=*&truth_results[f][genotype][]=*"
         params[:truth_results] = {
@@ -49,6 +50,7 @@ class ChallengesController < ApplicationController
           }
         }
       end
+
       @results_grid = initialize_grid(TruthChallengeResult, {
         name: 'truth_results',
         order: 'entry',
