@@ -41,7 +41,12 @@ class Challenge
       results: {
         overview: TRUTH_CHALLENGE_RESULTS_OVERVIEW,
         medals: TRUTH_CHALLENGE_MEDALS,
-        recognitions: TRUTH_CHALLENGE_RECOGNITIONS
+        recognitions: TRUTH_CHALLENGE_RECOGNITIONS,
+        answers_to_username_map: TRUTH_CHALLENGE_RESULTS_OVERVIEW.reduce({}) do |h, v|
+          obj = {}
+          obj[v[:"Answer id"]] = v[:"Submitter username"]
+          h.merge obj
+        end
       }
     }
   end

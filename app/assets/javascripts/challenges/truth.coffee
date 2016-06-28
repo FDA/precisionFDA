@@ -15,6 +15,9 @@ ChallengesController = Paloma.controller('Challenges',
     if $popover.length > 0
       $popover.popover()
 
-    overviewTable = new Tablesort(document.getElementById('table-truth-overview'))
-    datasetTable = new Tablesort(document.getElementById('table-truth-datasets'))
+    if $container.find('table-truth-overview').length > 0
+      overviewTable = new Tablesort(document.getElementById('table-truth-overview'))
+
+    if $container.find('table-truth-datasets').length > 0
+      datasetTable = new Tablesort(document.getElementById('table-truth-datasets'))
 )

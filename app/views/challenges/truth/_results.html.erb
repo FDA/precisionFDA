@@ -12,7 +12,6 @@
           <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
             <div class="pfda-card-body">
               <%= medal_badge("SNP Performance", "Highest", "large") %>
-              <br>
               <div class="challenge-winning-team">
                 <div class="challenge-awarded-to">Awarded to</div>
                 <div class="lead lead-bold">Verily Life Sciences</div>
@@ -27,7 +26,6 @@
           <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
             <div class="pfda-card-body">
               <%= medal_badge("SNP Recall", "Highest", "large") %>
-              <br>
               <div class="challenge-winning-team">
                 <div class="challenge-awarded-to">Awarded to</div>
                 <div class="lead lead-bold">Sentieon</div>
@@ -43,7 +41,6 @@
           <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
             <div class="pfda-card-body">
               <%= medal_badge("SNP Precision", "Highest", "large") %>
-              <br>
               <div class="challenge-winning-team">
                 <div class="challenge-awarded-to">Awarded to</div>
                 <div class="lead lead-bold">Kinghorn Center for Clinical Genomics</div>
@@ -61,7 +58,6 @@
           <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
             <div class="pfda-card-body">
               <%= medal_badge("INDEL Performance", "Highest", "large") %>
-              <br>
               <div class="challenge-winning-team">
                 <div class="challenge-awarded-to">Awarded to</div>
                 <div class="lead lead-bold">Sanofi-Genzyme</div>
@@ -74,7 +70,6 @@
           <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
             <div class="pfda-card-body">
               <%= medal_badge("INDEL Recall", "Highest", "large") %>
-              <br>
               <div class="challenge-winning-team">
                 <div class="challenge-awarded-to">Awarded to</div>
                 <div class="lead lead-bold">Sanofi-Genzyme</div>
@@ -87,7 +82,6 @@
           <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
             <div class="pfda-card-body">
               <%= medal_badge("INDEL Precision", "Highest", "large") %>
-              <br>
               <div class="challenge-winning-team">
                 <div class="challenge-awarded-to">Awarded to</div>
                 <div class="lead lead-bold">Sentieon</div>
@@ -362,7 +356,7 @@
 
     <br><br>
     <div class="challenge-results-preview">
-      <%= render "challenges/truth/table_results", results_grid: @results_grid, tab: @tab, show_filters: :no, grid_classes: 'table-condensed table-nowrap table-hover' %>
+      <%= render "challenges/truth/table_results", results_grid: @results_grid, tab: @tab, answers_to_username_map: @truth_challenge[:results][:answers_to_username_map], show_filters: :no, grid_classes: 'table-condensed table-nowrap table-hover' %>
       <%= link_to "Interactively explore the results dataset", truth_challenges_path("results-explore"), class: "challenge-results-preview_link" %>
     </div>
   </div>
