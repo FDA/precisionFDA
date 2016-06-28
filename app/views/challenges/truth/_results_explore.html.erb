@@ -1,0 +1,16 @@
+<div class="container container-padded">
+  <div class="pfda-challenge-intro">
+    <div class="lead-intro">Explore the dataset</div>
+    <div class="lead">An interactive explorer which can be used to filter all results.</div>
+  </div>
+</div>
+
+<div class="challenge-section">
+  <%= render "challenges/truth/table_results", results_grid: @results_grid, tab: @tab, show_filters: :always, grid_classes: 'table-condensed table-hover' %>
+
+  <div class="row">
+    <div class="col-md-6">
+    </div>
+    <div class="col-md-18">
+    </div>
+</div>

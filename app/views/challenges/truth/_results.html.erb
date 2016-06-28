@@ -9,7 +9,7 @@
   <div class="container container-padded">
       <div class="h3 text-center text-uppercase">Community Challenge Awards</div>
         <div class="pfda-cards pfda-cards-justify-centered">
-          <div class="pfda-card pfda-card-rounded">
+          <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
             <div class="pfda-card-body">
               <%= medal_badge("SNP Performance", "Highest", "large") %>
               <br>
@@ -24,7 +24,7 @@
               </div>
             </div>
           </div>
-          <div class="pfda-card pfda-card-rounded">
+          <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
             <div class="pfda-card-body">
               <%= medal_badge("SNP Recall", "Highest", "large") %>
               <br>
@@ -40,7 +40,7 @@
               </div>
             </div>
           </div>
-          <div class="pfda-card pfda-card-rounded">
+          <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
             <div class="pfda-card-body">
               <%= medal_badge("SNP Precision", "Highest", "large") %>
               <br>
@@ -58,7 +58,7 @@
           </div>
         </div>
         <div class="pfda-cards pfda-cards-justify-centered">
-          <div class="pfda-card pfda-card-rounded">
+          <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
             <div class="pfda-card-body">
               <%= medal_badge("INDEL Performance", "Highest", "large") %>
               <br>
@@ -71,7 +71,7 @@
               </div>
             </div>
           </div>
-          <div class="pfda-card pfda-card-rounded">
+          <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
             <div class="pfda-card-body">
               <%= medal_badge("INDEL Recall", "Highest", "large") %>
               <br>
@@ -84,7 +84,7 @@
               </div>
             </div>
           </div>
-          <div class="pfda-card pfda-card-rounded">
+          <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
             <div class="pfda-card-body">
               <%= medal_badge("INDEL Precision", "Highest", "large") %>
               <br>
@@ -259,7 +259,7 @@
 
     <div class="h3">Metrics calculated</div>
     <p>The quantification process calculates the following metrics, in harmony with "Comparison Method 3" as defined in this <a href="https://github.com/ga4gh/benchmarking-tools/blob/update-perf-metrics-definitions/doc/standards/GA4GHBenchmarkingPerformanceMetricsDefinitions.md">upcoming GA4GH benchmarking spec update</a>:</p>
-    <table class="table table-bordered">
+    <table class="table table-bordered table-condensed">
       <thead><tr><th>Metric</th><th>Definition</th></tr></thead>
       <tr><td>TRUTH.TP</td><td>True positives, from the perspective of the truth data, i.e. the number of sites in the Truth Call Set for which there are paths through the Query Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.</td></tr>
       <tr><td>QUERY.TP</td><td>True positives, from the perspective of the query data, i.e. the number of sites in the Query Call Set for which there are paths through the Truth Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.</td></tr>
@@ -273,7 +273,7 @@
     <p>Note that recall uses TRUTH.TP whereas precision uses QUERY.TP. For recall, TRUTH.TP counts the number of truth variants reproduced in the truth set representation, which is the same for all callers and should also be consistent with the confident regions (especially important around confident region boundaries and where variants can move between categories depending on how a variant caller decides to represent them). Using QUERY.TP for recall would have introduced problems where different methods create different representations (e.g. systematically calling MNPs as insertions + deletions can skew indel numbers in the query). For calculating precision, the tool uses QUERY.TP (i.e. the precision measures the relative number of wrong calls for all query calls).</p>
     <div class="h3">Granular reporting and region stratification</div>
     <p>The quantification process reports results with additional granularity, according to a few different dimensions, as outlined in the following table:</p>
-    <table class="table table-bordered">
+    <table class="table table-bordered  table-condensed">
       <thead><tr><th>Dimension</th><th>Value</th><th>Meaning</th></tr></thead>
       <tr><td rowspan="2">Type</td><td>SNP</td><td>SNP or MNP variants</td></tr>
       <tr>                         <td>INDEL</td><td>Indels and complex variants</td></tr>
@@ -358,9 +358,14 @@
 <div class="challenge-section">
   <div class="container container-padded">
     <div class="h2">Explore the results</div>
-    <p>This section includes an interactive explorer which can be used to filter all results.</p>
+    <p>An interactive explorer which can be used to filter all results.</p>
+
+    <br><br>
+    <div class="challenge-results-preview">
+      <%= render "challenges/truth/table_results", results_grid: @results_grid, tab: @tab, show_filters: :no, grid_classes: 'table-condensed table-nowrap table-hover' %>
+      <%= link_to "Interactively explore the results dataset", truth_challenges_path("results-explore"), class: "challenge-results-preview_link" %>
+    </div>
   </div>
-  <%= render "challenges/truth/table_results", results_grid: @results_grid, tab: @tab %>
 </div>
 
 <div class="challenge-section challenge-section-conclusion">

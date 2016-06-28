@@ -23,6 +23,7 @@
       <ul class="nav nav-pills nav-tabs-contained" role="tablist">
         <li role="presentation" class="<%= !params[:tab].present? ? 'active':'' %>"><a href="<%= truth_challenges_path %>" class="tab-label" aria-controls="info" role="tab">Challenge Info</a></li>
         <li role="presentation" class="<%= params[:tab] == 'results' ? 'active':'' %>"><a href="<%= truth_challenges_path('results') %>" class="tab-label" aria-controls="results" role="tab"> Challenge Results</a></li>
+        <li role="presentation" class="<%= params[:tab] == 'results-explore' ? 'active':'' %>"><a href="<%= truth_challenges_path('results-explore') %>" class="tab-label" aria-controls="results" role="tab"> Explore Results</a></li>
       </ul>
     </div>
     <div class="col-sm-6">
@@ -69,8 +70,16 @@
   <% else %>
     <%= render "challenges/truth/preview_results" %>
   <% end %>
+<% elsif params[:tab] == 'results-explore' %>
+  <% if @truth_challenge[:results_announced] %>
+    <%= render "challenges/truth/results_explore" %>
+  <% else %>
+    <%= render "challenges/truth/preview_results_explore" %>
+  <% end %>
 <% elsif params[:tab] == 'results-peek' && ((@context.logged_in? && @context.user.can_administer_site?) || (ENV["DNANEXUS_BACKEND"] != "production")) %>
   <%= render "challenges/truth/results" %>
+<% elsif params[:tab] == 'results-explore-peek' && ((@context.logged_in? && @context.user.can_administer_site?) || (ENV["DNANEXUS_BACKEND"] != "production")) %>
+    <%= render "challenges/truth/results_explore" %>
 <% else %>
   <%= render "challenges/truth/info" %>
 <% end %>
