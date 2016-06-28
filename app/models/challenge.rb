@@ -36,8 +36,7 @@ class Challenge
       results_date: TRUTH_CHALLENGE_RESULTS_DATE,
       active: DateTime.now.in_time_zone < TRUTH_CHALLENGE_END_DATE,
       ended: DateTime.now.in_time_zone >= TRUTH_CHALLENGE_END_DATE,
-      results_announced: false,
-      # TRUTH_CHALLENGE_RESULTS_DATE && DateTime.now.in_time_zone >= TRUTH_CHALLENGE_RESULTS_DATE
+      results_announced: TRUTH_CHALLENGE_RESULTS_DATE && DateTime.now.in_time_zone >= TRUTH_CHALLENGE_RESULTS_DATE,
       results: {
         overview: TRUTH_CHALLENGE_RESULTS_OVERVIEW,
         medals: TRUTH_CHALLENGE_MEDALS,
@@ -516,7 +515,7 @@ class Challenge
       "Submitter username": "charles.chapple",
       "Answer id": 48,
       "Submitter": "Charles Chapple",
-      "Additional Users": "*",
+      "Additional Users": "Andreas Massouras",
       "Organization": "Saphetor",
       "Org popover": nil,
       "HG001 VCF file id": "file-Bx3Xpxj0KkzGZY3qz56KgqG2",

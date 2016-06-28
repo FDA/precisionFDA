@@ -25,6 +25,7 @@
 #  query_unk                 :integer
 #  fp_gt                     :integer
 #  fp_al                     :integer
+#  pct_fp_ma                 :decimal(10, 6)
 #  truth_total_titv_ratio    :decimal(10, 6)
 #  truth_total_het_hom_ratio :decimal(10, 6)
 #  truth_fn_titv_ratio       :decimal(10, 6)

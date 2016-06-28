@@ -94,6 +94,9 @@
   end
 
   g.column name: '% FP ma', attribute: 'pct_fp_ma', class: "text-right", filter: false do |result|
-    [result.pct_fp_ma, {class: "text-right"}]
+    if !result.pct_fp_ma.nil?
+      percentage = content_tag("div", number_with_precision(result.pct_fp_ma * 100, precision: 4), class: "percentage")
+      [percentage, {class: "text-right"}]
+    end
   end
 end -%>
