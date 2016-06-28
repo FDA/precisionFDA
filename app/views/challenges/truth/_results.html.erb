@@ -189,10 +189,6 @@
 
     <p>The truth data files have been published on precisionFDA by Dr. Justin Zook (scientist at the National Institute of Standards and Technology and co-leader of the Genome in a Bottle Consortium efforts), in the precisionFDA discussion topic titled <a href="https://precision.fda.gov/discussions/10-help-improve-the-new-v3-2-giab-benchmark-calls-for-hg001-and-hg002">Help improve the new v3.2 GIAB benchmark calls for HG001 and HG002</a>.</p>
 
-    <p>Shortly after the initial publication of v3.2 of the truth data, there were two subsequent updates leading to v3.2.1 and v3.2.2. These updates introduced improvements to the truth data based on feedback from the community and from artifacts discovered in initial evaluations of the challenge entries. The final comparison results discussed on this web page are based on comparisons against the latest version of the truth data (v3.2.2).</p>
-
-    <p>It is important to note that the methodology for compiling the truth data has changed substantially since the release of v2.19 of the HG001 truth dataset, and therefore the same VCF file may rank differently in a comparison against HG001 v2.19 versus a comparison against HG001 v3.2.2. These changes are discussed in the section titled "Differences between v2.19 and v3.2 integration methods" in Dr. Zook's announcement.</p>
-
     <p>For your convenience, we've included below a copy of the announcement. It discusses known issues of the truth data as well as other important caveats, and we encourage you to read it to understand how this new truth data may have affected the results of the challenge, or may interact with your own evaluations in the future.</p>
 
     <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
@@ -253,7 +249,11 @@
       </div>
     </div>
 
-    <p>We would like to thank the National Institute of Standards and Technology, and the Genome in a Bottle consortium, for the excellent collaboration in this precisionFDA challenge.</p>
+    <p>Shortly after the initial publication of v3.2 of the truth data, there were two subsequent updates leading to v3.2.1 and v3.2.2. These updates introduced improvements to the truth data based on feedback from the community and from artifacts discovered in initial evaluations of the challenge entries. The final comparison results discussed on this web page are based on comparisons against the latest version of the truth data (v3.2.2).</p>
+
+    <p>It is important to note that the methodology for compiling the truth data has changed substantially since the release of v2.19 of the HG001 truth dataset, and therefore the same VCF file may rank differently in a comparison against HG001 v2.19 versus a comparison against HG001 v3.2.2. These changes are discussed in the section titled "Differences between v2.19 and v3.2 integration methods" in Dr. Zook's announcement.</p>
+
+    <p>We would like to thank the National Institute of Standards and Technology, and the Genome in a Bottle consortium, for the excellent collaboration in this precisionFDA challenge. As can be attested by them, creating a truth dataset is a complicated process. The published dataset, even with its latest v3.2.2 improvements, is only an approximation of the truth. We hope you will keep that in mind when interpreting the results of this challenge and that you will exercise caution, as the determination of truth is always an ongoing process.</p>
   </div>
 </div>
 
@@ -392,7 +392,7 @@
 
     <div class="h3">Compilation of results</div>
     <p>We ran hap.py (and specifically the HAP-207 version, with the engine set to a GA4GH-specific version of vcfeval) to compare HG001 and HG002 submissions against the GiaB/NIST v3.2.2 HG001 and HG002 truth data respectively. Our executions excluded the entry labeled <strong>ccogle-snppet</strong> as it did not call variants in the whole genome. The entries labeled <strong>ghariani-varprowl</strong>, <strong>jpowers-varprowl</strong> and <strong>qzeng-custom</strong> contained few VCF lines which were deemed incompatible by this new comparison framework (which performs stricter checks). Upon closer inspection, this was due to incompatible REF columns (such as the strings "nan" or "AC-7GATAGAA") or non-diploid genotypes (such as 0/1/2, or even 0/1/2/3). These were a small fraction, so we decided to exclude these offending lines from this comparison.</p>
-    <p>We have made available on precisionFDA complete archives of all the input files (including both the original and adjusted files, for the entries which we had to remove offending VCF lines), and the results (including the annotated VCF as output by hap.py, and extended statistics in CSV format). These are recapitulated in <a href="#">this precisionFDA discussion topic</a>.
+    <p>We have made available on precisionFDA complete archives of all the input files (including both the original and adjusted files, for the entries which we had to remove offending VCF lines), and the results (including the annotated VCF as output by hap.py, and extended statistics in CSV format). These are recapitulated in a <a href="#">precisionFDA post</a>.
 
   </div>
 </div>
@@ -400,15 +400,21 @@
 <div class="challenge-section">
   <div class="container container-padded">
     <div class="h2">Results discussion</div>
-    The compiled results (as described in the previous section) are summarized in the table at the top of this web page. In addition to that, we have created an interactive explorer which can be used to query the full set of all CSV files that were output by the comparison, and to show the metrics for any combination of the "Type", "Subtype", "Genotype" and "Subset" dimensions.
+    The compiled results (as described in the previous section) are summarized in the table at the top of this web page. In addition to that, we have created an interactive explorer which can be used to query the full set of all CSV files that were output by the comparison, and to show the metrics for any combination of the "Type", "Subtype", "Genotype" and "Subset" dimensions. You can use that to answer questions such as "how does a particular entry perform across different genome subsets", or "which entry performs best in large deletions?", etc.
 
-    
+    <div class="h3">F-score, Recall and Precision</div>
+    <p>Notably, most entries did much better at SNP accuracy measures than at indel accuracy measures. The majority of entries have high SNP f-score, recall, and precision -- above 99%. The respective numbers are lower for indels, and in fact indel recall is usually lower than indel precision. Just like in the precisionFDA Consistency Challenge, it appears that pipelines are overall tuned for precision. Compared to the previous challenge, however, the input datasets had higher coverage, which contributes to high recall.</p>
+    <div class="h3">Award determination</div>
+    <p>We've determined the winners by taking the highest value in each metric (F-score, Recall, Precision) per variant type (SNPs vs indels). Please note that the award for highest f-score has been called "highest performance", to reflect the nature of the score. For each combination of metric per variant type, we are also recognizing entries with high values of that metric, based on a cutoff at the first substantial drop in the percentages. These cutoffs are ultimately subjective, and not directly applicable to other regulatory contexts (which may require well-defined thresholds ahead of time).</p>
+
 
     <br><br>
     <div class="challenge-results-preview">
       <%= render "challenges/truth/table_results", results_grid: @results_grid, tab: @tab, answers_to_username_map: @truth_challenge[:results][:answers_to_username_map], show_filters: :no, grid_classes: 'table-condensed table-nowrap table-hover' %>
       <%= link_to "Interactively explore the results dataset", truth_challenges_path("results-explore"), class: "challenge-results-preview_link" %>
     </div>
+    <br><br>
+
   </div>
 </div>
 
