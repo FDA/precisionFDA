@@ -390,23 +390,19 @@
       </div>
     </div>
 
-
-
-
-
-
-    <div class="h3">Result compilation</div>
-    <p>We ran hap.py (and specifically the HAP-207 version, with the engine set to a GA4GH-specific version of vcfeval) to compare HG001 and HG002 submissions against the GiaB/NIST v3.2.2 HG001 and HG002 truth data respectively. Our executions excluded the entry labeled <strong>ccogle-snppet</strong> as it did not call variants in the whole genome. The entries labeled <strong>ghariani-varprowl</strong>, <strong>jpowers-varprowl</strong> and <strong>qzeng-custom</strong> contained few VCF lines which were deemed incompatible by this new comparison framework (which performs stricter checks). Upon closer inspection, this was due to incorrect REF columns (such as the strings "nan" or "AC-7GATAGAA") or non-diploid genotypes (such as 0/1/2, or even 0/1/2/3). These were a small fraction, so we decided to run the comparison after first removing these offending lines.</p>
+    <div class="h3">Compilation of results</div>
+    <p>We ran hap.py (and specifically the HAP-207 version, with the engine set to a GA4GH-specific version of vcfeval) to compare HG001 and HG002 submissions against the GiaB/NIST v3.2.2 HG001 and HG002 truth data respectively. Our executions excluded the entry labeled <strong>ccogle-snppet</strong> as it did not call variants in the whole genome. The entries labeled <strong>ghariani-varprowl</strong>, <strong>jpowers-varprowl</strong> and <strong>qzeng-custom</strong> contained few VCF lines which were deemed incompatible by this new comparison framework (which performs stricter checks). Upon closer inspection, this was due to incompatible REF columns (such as the strings "nan" or "AC-7GATAGAA") or non-diploid genotypes (such as 0/1/2, or even 0/1/2/3). These were a small fraction, so we decided to exclude these offending lines from this comparison.</p>
     <p>We have made available on precisionFDA complete archives of all the input files (including both the original and adjusted files, for the entries which we had to remove offending VCF lines), and the results (including the annotated VCF as output by hap.py, and extended statistics in CSV format). These are recapitulated in <a href="#">this precisionFDA discussion topic</a>.
 
   </div>
 </div>
 
-
 <div class="challenge-section">
   <div class="container container-padded">
-    <div class="h2">Explore the results</div>
-    <p>An interactive explorer which can be used to filter all results.</p>
+    <div class="h2">Results discussion</div>
+    The compiled results (as described in the previous section) are summarized in the table at the top of this web page. In addition to that, we have created an interactive explorer which can be used to query the full set of all CSV files that were output by the comparison, and to show the metrics for any combination of the "Type", "Subtype", "Genotype" and "Subset" dimensions.
+
+    
 
     <br><br>
     <div class="challenge-results-preview">
