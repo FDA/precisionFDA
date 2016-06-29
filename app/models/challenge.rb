@@ -337,7 +337,7 @@ class Challenge
       "Submitter": "Justin Lack",
       "Additional Users": nil,
       "Organization": "NIH",
-      "Org popover": nil,
+      "Org popover": "National Institutes of Health",
       "HG001 VCF file id": "file-Bx2vk380JvF2Z1J4v568zfJ7",
       "HG002 VCF file id": "file-Bx2vk380JvF5Y8X8x5xxjKKZ",
       "SNP-recall": 0.999393,
