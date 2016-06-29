@@ -17,6 +17,13 @@
 
   g.column name: 'Genotype', attribute: 'genotype', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false
 
+  g.column name: 'F-score', attribute: 'metric_f1_score', class: "text-right", filter: false do |result|
+    if !result.metric_f1_score.nil?
+      percentage = content_tag("div", number_with_precision(result.metric_f1_score * 100, precision: 4), class: "percentage")
+      [percentage, {class: "text-right"}]
+    end
+  end
+
   g.column name: 'Recall', attribute: 'metric_recall', class: "text-right", filter: false do |result|
     if !result.metric_recall.nil?
       percentage = content_tag("div", number_with_precision(result.metric_recall * 100, precision: 4), class: "percentage")
@@ -38,16 +45,9 @@
     end
   end
 
-  g.column name: 'F-score', attribute: 'metric_f1_score', class: "text-right", filter: false do |result|
-    if !result.metric_f1_score.nil?
-      percentage = content_tag("div", number_with_precision(result.metric_f1_score * 100, precision: 4), class: "percentage")
-      [percentage, {class: "text-right"}]
-    end
-  end
-
-  g.column name: 'Truth Total', attribute: 'truth_total', class: "text-right", filter: false do |result|
-    [result.truth_total, {class: "text-right"}]
-  end
+  #g.column name: 'Truth Total', attribute: 'truth_total', class: "text-right", filter: false do |result|
+  #  [result.truth_total, {class: "text-right"}]
+  #end
 
   g.column name: 'Truth TP', attribute: 'truth_tp', class: "text-right", filter: false do |result|
     [result.truth_tp, {class: "text-right"}]
@@ -57,9 +57,9 @@
     [result.truth_fn, {class: "text-right"}]
   end
 
-  g.column name: 'Query Total', attribute: 'query_total', class: "text-right", filter: false do |result|
-    [result.query_total, {class: "text-right"}]
-  end
+  #g.column name: 'Query Total', attribute: 'query_total', class: "text-right", filter: false do |result|
+  #  [result.query_total, {class: "text-right"}]
+  #end
 
   g.column name: 'Query TP', attribute: 'query_tp', class: "text-right", filter: false do |result|
     [result.query_tp, {class: "text-right"}]
@@ -69,9 +69,9 @@
     [result.query_fp, {class: "text-right"}]
   end
 
-  g.column name: 'Query UNK', attribute: 'query_unk', class: "text-right", filter: false do |result|
-    [result.query_unk, {class: "text-right"}]
-  end
+  #g.column name: 'Query UNK', attribute: 'query_unk', class: "text-right", filter: false do |result|
+  #  [result.query_unk, {class: "text-right"}]
+  #end
 
   g.column name: 'FP gt', attribute: 'fp_gt', class: "text-right", filter: false do |result|
     [result.fp_gt, {class: "text-right"}]
