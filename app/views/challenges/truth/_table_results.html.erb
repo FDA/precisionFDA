@@ -77,13 +77,13 @@
     [result.fp_gt, {class: "text-right"}]
   end
 
-  ratios = %w(truth_total_titv_ratio truth_total_het_hom_ratio truth_fn_titv_ratio truth_fn_het_hom_ratio truth_tp_titv_ratio truth_tp_het_hom_ratio query_fp_titv_ratio query_fp_het_hom_ratio query_tp_titv_ratio query_total_titv_ratio query_total_het_hom_ratio query_tp_het_hom_ratio query_unk_titv_ratio query_unk_het_hom_ratio)
-
-  ratios.each do |ratio|
-    g.column name: ratio.gsub(/_/, ' '), attribute: ratio, class: "text-right", filter: false do |result|
-      [result[ratio], {class: "text-right"}]
-    end
-  end
+  # ratios = %w(truth_total_titv_ratio truth_total_het_hom_ratio truth_fn_titv_ratio truth_fn_het_hom_ratio truth_tp_titv_ratio truth_tp_het_hom_ratio query_fp_titv_ratio query_fp_het_hom_ratio query_tp_titv_ratio query_total_titv_ratio query_total_het_hom_ratio query_tp_het_hom_ratio query_unk_titv_ratio query_unk_het_hom_ratio)
+  #
+  # ratios.each do |ratio|
+  #   g.column name: ratio.gsub(/_/, ' '), attribute: ratio, class: "text-right", filter: false do |result|
+  #     [result[ratio], {class: "text-right"}]
+  #   end
+  # end
 
   g.column name: '% FP ma', attribute: 'pct_fp_ma', class: "text-right", filter: false do |result|
     if !result.pct_fp_ma.nil?
