@@ -51,7 +51,7 @@ CONSISTENCY_CHALLENGE_RESULTS_DATE = DateTime.new(2016,5,25,16,50).in_time_zone 
 # Challenge 2 - Truth
 TRUTH_CHALLENGE_START_DATE = DateTime.new(2016,4,26).in_time_zone.end_of_day + 4.hours
 TRUTH_CHALLENGE_END_DATE = DateTime.new(2016,5,26).in_time_zone.end_of_day + 4.hours
-TRUTH_CHALLENGE_RESULTS_DATE = false
+TRUTH_CHALLENGE_RESULTS_DATE = DateTime.new(2016,6,29,6,30).in_time_zone + 7.hours
 
 # Remove X-Runtime
 Rails.application.config.middleware.delete(Rack::Runtime)
