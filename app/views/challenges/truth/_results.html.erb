@@ -191,7 +191,7 @@
 
     <p>For your convenience, we've included below a copy of the announcement. It discusses known issues of the truth data as well as other important caveats, and we encourage you to read it to understand how this new truth data may have affected the results of the challenge, or may interact with your own evaluations in the future.</p>
 
-    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    <div class="panel-group accordion" id="accordion" role="tablist" aria-multiselectable="true">
       <div class="panel panel-info">
         <div class="panel-heading" role="tab" id="headingAnnouncement">
           <h4 class="panel-title">
@@ -434,7 +434,7 @@
       <p>We wanted to present an example of other ways in which this dataset can be analyzed, as a way to stimulate the community to conduct further experimentation with the precisionFDA Truth Challenge entries. Since the HG002 sample is male (in contrast to HG001, which is female), we decided to look at the performance of variation calling pipelines in chromosome X. It should be noted that chromosome X is not included in the confident regions of the GiaB truth data for HG002, so the comparisons have not evaluated that chromosome.</p>
       <p>In XY male individuals, locations in chromosome X outside of the pseudoautosomal regions are expected to behave as haploid, and variant calling algorithms would ideally report them as haploid calls or as diploid homozygous calls. To measure that, we used <code>bcftools stats -f .,PASS -r X:1-60001,X:2699521-154931044,X:155260561-155270560</code>, which measures the count of heterozygous and homozygous SNPs in chromosome X outside of the PAR. We subsequently calculated the fraction of SNPs that are heterozygous, and generated the following table.</p>
 
-      <div class="panel-group" id="accordion-hetero-rates" role="tablist" aria-multiselectable="true">
+      <div class="panel-group accordion" id="accordion-hetero-rates" role="tablist" aria-multiselectable="true">
         <div class="panel panel-info">
           <div class="panel-heading" role="tab" id="heading-pcthet">
             <h4 class="panel-title">
