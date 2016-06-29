@@ -65,12 +65,14 @@ Rails.application.routes.draw do
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
     end
+
     resources :comparisons do
       post 'rename', on: :member
       get 'visualize', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
     end
+
     resources :files do
       post 'download', on: :member
       post 'link', on: :member
@@ -78,21 +80,25 @@ Rails.application.routes.draw do
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
     end
+
     resources :notes do
       post 'rename', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
     end
+
     resources :assets, path: '/app_assets' do
       post 'rename', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
     end
+
     resources :challenges do
       get 'consistency(/:tab)', on: :collection, action: :consistency, as: 'consistency'
       get 'truth(/:tab)', on: :collection, action: :truth, as: 'truth'
       get 'join', on: :member
     end
+
     resources :discussions, constraints: {answer_id: /[^\/]+/ } do
       get 'followers', on: :member
       post 'rename', on: :member
@@ -110,6 +116,9 @@ Rails.application.routes.draw do
       post 'remove_items', on: :member
       post 'remove_users', on: :member
       post 'rename', on: :member
+    end
+
+    resources :queries do
     end
 
     user_constraints = { username: /[^\/]*/ }

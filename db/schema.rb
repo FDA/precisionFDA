@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160621205004) do
+ActiveRecord::Schema.define(version: 20160628062351) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id"
@@ -270,6 +270,20 @@ ActiveRecord::Schema.define(version: 20160621205004) do
 
   add_index "orgs", ["admin_id"], name: "index_orgs_on_admin_id"
   add_index "orgs", ["handle"], name: "index_orgs_on_handle", unique: true
+
+  create_table "saved_queries", force: :cascade do |t|
+    t.string   "name"
+    t.string   "grid_name"
+    t.text     "query"
+    t.text     "description"
+    t.integer  "user_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "saved_queries", ["grid_name", "id"], name: "index_saved_queries_on_grid_name_and_id"
+  add_index "saved_queries", ["grid_name"], name: "index_saved_queries_on_grid_name"
+  add_index "saved_queries", ["user_id"], name: "index_saved_queries_on_user_id"
 
   create_table "truth_challenge_results", force: :cascade do |t|
     t.integer "answer_id"

@@ -1,11 +1,3 @@
-<% if show_filters != :no %>
-<div class="pfda-toolbar pfda-toolbar-padded">
-  <div class="pull-right">
-    <%= link_to "Reset", truth_challenges_path({tab: tab}), class:"btn btn-link" %>
-  </div>
-</div>
-<% end %>
-
 <%= grid(results_grid, show_filters: show_filters, hide_submit_button: true, hide_reset_button: true, html: {class: grid_classes}) do |g|
   g.blank_slate partial:  "_partials/empty_grid"
 

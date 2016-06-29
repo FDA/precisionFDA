@@ -110,7 +110,7 @@ if defined?(Wice::Defaults)
 
   # ActiveRecord model to store queries. Read the documentation for details
   # QUERY_STORE_MODEL = 'WiceGridSerializedQuery'
-  Wice::Defaults::QUERY_STORE_MODEL = 'WiceGridSerializedQuery'
+  Wice::Defaults::QUERY_STORE_MODEL = 'SavedQuery'
 
   # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   #            Here go settings related to the date/datetime filters          #
