@@ -22,3 +22,6 @@
 
 # Ignore deployed gems
 /vendor/bundle
+
+# Ignore CSV in assets
+/app/assets/csv

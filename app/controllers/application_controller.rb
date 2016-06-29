@@ -62,6 +62,14 @@ class ApplicationController < ActionController::Base
 
   private
 
+  def current_context
+    return @context
+  end
+
+  def current_user
+    return @context.user
+  end
+
   def missing_template
     render nothing: true, status: 406
   end
