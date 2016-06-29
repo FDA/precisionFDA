@@ -1,7 +1,7 @@
 class CreateTruthChallengeResults < ActiveRecord::Migration
   def change
     create_table :truth_challenge_results do |t|
-      t.references :answer, index: true, foreign_key: true
+      t.integer :answer_id
       t.string :entry, required: true
       t.string :type
       t.string :subtype
