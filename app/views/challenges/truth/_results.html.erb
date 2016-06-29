@@ -431,7 +431,7 @@
 <div class="challenge-section">
   <div class="container container-padded">
     <div class="h2">Heterozygosity rates in chromosome X</div>
-    <p>We wanted to present an example of other ways in which this dataset can be analyzed, as a way to stimulate the community to conduct further experimentation with the precisionFDA Truth Challenge entries. Since the HG002 sample is male (in contrast to HG001, which is female), we decided to look at the performance of variation calling pipelines in chromosome X.</p>
+    <p>We wanted to present an example of other ways in which this dataset can be analyzed, as a way to stimulate the community to conduct further experimentation with the precisionFDA Truth Challenge entries. Since the HG002 sample is male (in contrast to HG001, which is female), we decided to look at the performance of variation calling pipelines in chromosome X. It should be noted that chromosome X is not included in the confident regions of the GiaB truth data for HG002, so the comparisons have not evaluated that chromosome.</p>
     <p>In XY male individuals, locations in chromosome X outside of the pseudoautosomal regions are expected to behave as haploid, and variant calling algorithms would ideally report them as haploid calls or as diploid homozygous calls. To measure that, we used <code>bcftools stats -f .,PASS -r X:1-60001,X:2699521-154931044,X:155260561-155270560</code>, which measures the count of heterozygous and homozygous SNPs in chromosome X outside of the PAR. We subsequently calculated the fraction of SNPs that are heterozygous, and generated the following table.</p>
     <table class="table table-bordered table-condensed">
     <thead><th>Label</th><th>PctHet</th></thead>
