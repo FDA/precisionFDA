@@ -35,6 +35,51 @@ class ChallengesController < ApplicationController
     else
       @btn_class = "accessible-btn-danger"
     end
+
+    @tab = params[:tab]
+
+    if @tab == "results-peek" || @tab == "results-explore-peek" || (@truth_challenge[:results_announced] && (@tab == "results" || @tab == "results-explore"))
+
+      grid_params = {
+        name: 'truth_results',
+        order: 'entry',
+        order_direction: 'asc',
+        per_page: 50
+      }
+
+      if !params.has_key?(:truth_results)
+        if params.has_key?(:query_id)
+          @saved_query = SavedQuery.find_by_id_and_grid_name(params[:query_id], 'truth_results')
+          if !@saved_query.nil?
+            params[:truth_results] = JSON.parse(@saved_query.query)["truth_results"]
+          else
+            redirect_to truth_challenges_path({tab: @tab})
+          end
+        else
+          # "?truth_results[f][type][]=SNP&truth_results[f][subtype][]=*&truth_results[f][subset][]=*&truth_results[f][genotype][]=*"
+          params[:truth_results] = {
+            f: {
+              type: ["SNP"],
+              subtype: ["*"],
+              subset: ["*"],
+              genotype: ["*"]
+            }
+          }
+        end
+      end
+
+      @results_grid = initialize_grid(TruthChallengeResult, grid_params)
+
+      if @tab == "results-explore-peek" || (@truth_challenge[:results_announced] && (@tab == "results-explore"))
+        if @context.logged_in_or_guest?
+          @new_saved_query = SavedQuery.new({
+            query: filter_and_order_state_as_hash(@results_grid).to_json,
+            grid_name: @results_grid.name
+          })
+        end
+        @query_list = SavedQuery.list(@results_grid.name, self)
+      end
+    end
   end
 
   def join
@@ -49,5 +94,16 @@ class ChallengesController < ApplicationController
       flash[:alert] = "You need to log in or request access before participating in the challenge."
       redirect_to request_access_path
     end
+  end
+
+  private
+  def filter_and_order_state_as_hash(grid)
+    {
+      grid.name => {
+        'f'               => grid.status[:f],
+        'order'           => grid.status[:order],
+        'order_direction' => grid.status[:order_direction]
+      }
+    }
   end
 end

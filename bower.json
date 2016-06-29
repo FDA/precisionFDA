@@ -30,6 +30,7 @@
     "dagre-d3": "~0.4.11",
     "knockout-sortable": "~0.11.0",
     "sortable": "~0.8.0",
-    "ace-builds": "~1.2.3"
+    "ace-builds": "~1.2.3",
+    "tablesort": "table.sort#^4.0.1"
   }
 }
