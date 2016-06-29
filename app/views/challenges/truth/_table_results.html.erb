@@ -1,0 +1,94 @@
+<%= grid(results_grid, show_filters: show_filters, hide_submit_button: true, hide_reset_button: true, html: {class: grid_classes}) do |g|
+  g.blank_slate partial:  "_partials/empty_grid"
+
+  g.column name: 'Entry', attribute: 'entry', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false do |result|
+    if !result.answer_id.nil?
+      link_to result.entry, discussion_answer_path(TRUTH_DISCUSSION_ID, answers_to_username_map[result.answer_id])
+    else
+      result.entry
+    end
+  end
+
+  g.column name: 'Type', attribute: 'type', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false
+
+  g.column name: 'Subtype', attribute: 'subtype', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false
+
+  g.column name: 'Subset', attribute: 'subset', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false
+
+  g.column name: 'Genotype', attribute: 'genotype', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false
+
+  g.column name: 'F-score', attribute: 'metric_f1_score', class: "text-right", filter: false do |result|
+    if !result.metric_f1_score.nil?
+      percentage = content_tag("div", number_with_precision(result.metric_f1_score * 100, precision: 4), class: "percentage")
+      [percentage, {class: "text-right"}]
+    end
+  end
+
+  g.column name: 'Recall', attribute: 'metric_recall', class: "text-right", filter: false do |result|
+    if !result.metric_recall.nil?
+      percentage = content_tag("div", number_with_precision(result.metric_recall * 100, precision: 4), class: "percentage")
+      [percentage, {class: "text-right"}]
+    end
+  end
+
+  g.column name: 'Precision', attribute: 'metric_precision', class: "text-right", filter: false do |result|
+    if !result.metric_precision.nil?
+      percentage = content_tag("div", number_with_precision(result.metric_precision * 100, precision: 4), class: "percentage")
+      [percentage, {class: "text-right"}]
+    end
+  end
+
+  g.column name: 'Frac_NA', attribute: 'metric_frac_na', class: "text-right", filter: false do |result|
+    if !result.metric_frac_na.nil?
+      percentage = content_tag("div", number_with_precision(result.metric_frac_na * 100, precision: 4), class: "percentage")
+      [percentage, {class: "text-right"}]
+    end
+  end
+
+  #g.column name: 'Truth Total', attribute: 'truth_total', class: "text-right", filter: false do |result|
+  #  [result.truth_total, {class: "text-right"}]
+  #end
+
+  g.column name: 'Truth TP', attribute: 'truth_tp', class: "text-right", filter: false do |result|
+    [result.truth_tp, {class: "text-right"}]
+  end
+
+  g.column name: 'Truth FN', attribute: 'truth_fn', class: "text-right", filter: false do |result|
+    [result.truth_fn, {class: "text-right"}]
+  end
+
+  #g.column name: 'Query Total', attribute: 'query_total', class: "text-right", filter: false do |result|
+  #  [result.query_total, {class: "text-right"}]
+  #end
+
+  g.column name: 'Query TP', attribute: 'query_tp', class: "text-right", filter: false do |result|
+    [result.query_tp, {class: "text-right"}]
+  end
+
+  g.column name: 'Query FP', attribute: 'query_fp', class: "text-right", filter: false do |result|
+    [result.query_fp, {class: "text-right"}]
+  end
+
+  #g.column name: 'Query UNK', attribute: 'query_unk', class: "text-right", filter: false do |result|
+  #  [result.query_unk, {class: "text-right"}]
+  #end
+
+  g.column name: 'FP gt', attribute: 'fp_gt', class: "text-right", filter: false do |result|
+    [result.fp_gt, {class: "text-right"}]
+  end
+
+  # ratios = %w(truth_total_titv_ratio truth_total_het_hom_ratio truth_fn_titv_ratio truth_fn_het_hom_ratio truth_tp_titv_ratio truth_tp_het_hom_ratio query_fp_titv_ratio query_fp_het_hom_ratio query_tp_titv_ratio query_total_titv_ratio query_total_het_hom_ratio query_tp_het_hom_ratio query_unk_titv_ratio query_unk_het_hom_ratio)
+  #
+  # ratios.each do |ratio|
+  #   g.column name: ratio.gsub(/_/, ' '), attribute: ratio, class: "text-right", filter: false do |result|
+  #     [result[ratio], {class: "text-right"}]
+  #   end
+  # end
+
+  g.column name: '% FP ma', attribute: 'pct_fp_ma', class: "text-right", filter: false do |result|
+    if !result.pct_fp_ma.nil?
+      percentage = content_tag("div", number_with_precision(result.pct_fp_ma * 100, precision: 4), class: "percentage")
+      [percentage, {class: "text-right"}]
+    end
+  end
+end -%>
