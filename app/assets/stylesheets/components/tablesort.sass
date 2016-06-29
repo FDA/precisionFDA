@@ -1,0 +1,34 @@
+@import "_common"
+
+table.table-sort
+  th.sort-header
+    &::-moz-selection, &::selection
+      background: transparent
+    cursor: pointer
+
+  th
+    &.sort-header
+      &:after
+        content: ''
+        display: inline-block
+        margin-top: 7px
+        margin-left: 5px
+        border-width: 0 4px 4px
+        border-style: solid
+        border-color: #404040 transparent
+        opacity: 0.2
+      &:hover:after
+        opacity: 0.4
+        visibility: visible
+    &.sort-up:after
+      visibility: visible
+      opacity: 0.8
+    &.sort-down
+      &:after, &:hover:after
+        visibility: visible
+        opacity: 0.8
+    &.sort-up:after
+      border-bottom: none
+      border-width: 4px 4px 0
+    &.sort-up, &.sort-down
+      background-color: lighten($brand-highlight, 2%)

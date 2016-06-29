@@ -28,7 +28,7 @@ ul, menu, dir
   -webkit-padding-start: 20px
 
 table.table-nowrap
-  td
+  th, td
     white-space: nowrap
 
 .fa-branded
@@ -94,6 +94,11 @@ table.table-nowrap
 
   &:hover
     color: $link-muted-hover-color
+
+.percentage:after
+  content: "%"
+  color: #aaa
+  margin-left: 2px
 
 // ACTIONS
 .pfda-action-show main
