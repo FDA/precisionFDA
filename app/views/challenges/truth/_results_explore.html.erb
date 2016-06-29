@@ -19,9 +19,41 @@
             <% @query_list.each do |query| %>
               <li>
                 <a href="<%= truth_challenges_path({tab: @tab}) %>?query_id=<%=query.id%>">
-                  <strong><%= query.name %></strong>
-                  <br>
-                  <%= image_tag(query.user.gravatar_url, class: 'img-circle', height: '14px') %> <small class="text-muted"><%= query.user.full_name %></small>
+                  <div class="media">
+                    <div class="media-left">
+                      <%= image_tag(query.user.gravatar_url, class: 'img-circle', height: '25px') %>
+                    </div>
+                    <div class="media-body">
+                      <strong><%= query.name %></strong>
+                      <br>
+                      <small>
+                        <%
+                          tresults = JSON.parse(query.query)["truth_results"]
+                        %>
+                        <ul class="list-inline list-inline-bullets">
+                          <% if !tresults["f"]["entry"].nil? %>
+                            <li><%= tresults["f"]["entry"].first %></li>
+                          <% end %>
+                          <% if !tresults["f"]["type"].nil? %>
+                            <li><%= tresults["f"]["type"].first %></li>
+                          <% end %>
+                          <% if !tresults["f"]["subtype"].nil? %>
+                            <li><%= tresults["f"]["subtype"].first %></li>
+                          <% end %>
+                          <% if !tresults["f"]["subset"].nil? %>
+                            <li><%= tresults["f"]["subset"].first %></li>
+                          <% end %>
+                          <% if !tresults["f"]["genome"].nil? %>
+                            <li><%= tresults["f"]["genome"].first %></li>
+                          <% end %>
+                          <% if !tresults["order"].nil?  && !tresults["order_direction"].nil? %>
+                            <li><%= tresults["order"] %> <%= tresults["order_direction"] %></li>
+                          <% end %>
+                        </ul>
+                        <small class="text-muted"><%= query.user.full_name %></small>
+                      </small>
+                    </div>
+                  </div>
                 </a>
               </li>
             <% end %>
