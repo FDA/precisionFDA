@@ -65,7 +65,7 @@
           <span class="fa fa-ban" aria-hidden="true"></span> Reset
         <% end %>
       </div>
-        <% if @context.logged_in_or_guest? && !@saved_query.nil? %>
+        <% if @context.logged_in? && !@saved_query.nil? %>
           <% if @saved_query.user_id == @context.user_id || @context.user.can_administer_site? %>
             <div class="btn-group">
               <%= link_to query_path(@saved_query), method: :delete, data: { confirm: 'Are you certain you want to delete this?' }, class: "btn btn-link-danger" do %>
