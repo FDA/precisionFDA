@@ -75,7 +75,7 @@
           <% end %>
         <% end %>
     </div>
-    <% if @context.logged_in_or_guest? %>
+    <% if @context.logged_in? %>
     <div class="pull-right">
       <%= form_for @new_saved_query, url: queries_path, method: :post, html: {class: 'form-inline'} do |f| %>
         <%= f.text_field :name, class: "form-control", placeholder: "Bookmark label...", required: "required"  %>
