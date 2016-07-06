@@ -40856,6 +40856,15 @@ openjdk-7-jre-headless
 openjdk-7-jre-lib
 openjdk-7-jre-zero
 openjdk-7-source
+openjdk-8-dbg
+openjdk-8-demo
+openjdk-8-doc
+openjdk-8-jdk
+openjdk-8-jre
+openjdk-8-jre-headless
+openjdk-8-jre-jamvm
+openjdk-8-jre-zero
+openjdk-8-source
 openjpeg-tools
 openldap-utils
 openload
