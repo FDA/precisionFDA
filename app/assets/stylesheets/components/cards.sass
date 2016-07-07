@@ -185,3 +185,14 @@
   .pfda-card-body-icon
     line-height: 100px
     min-height: 100px
+
+.container
+  .pfda-cards.pfda-cards-news
+    .pfda-card
+      width: 100%
+      @media (min-width: $screen-sm-min)
+        width: calc(50% - 20px)
+      @media (min-width: $screen-md-min)
+        width: calc(40% - 20px)
+      @media (min-width: $screen-lg-min)
+        width: calc(30% - 20px)
