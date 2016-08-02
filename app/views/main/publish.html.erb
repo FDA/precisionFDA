@@ -6,7 +6,7 @@
 <input type="hidden" data-bind="attr: {name: 'uids[' + rootID +']'}, value: 'on'" />
 <div class="container container-padded-v">
   <div class='pfda-help-block'>
-    <span class='fa fa-exclamation-triangle' aria-hidden='true'></span> Publishing items makes them publicly visible. <%= link_to("Review important information about publishing, and learn why it's a good idea to also publish related items.", "#{about_path}/how#publish", target: '_blank') %>
+    <span class='fa fa-exclamation-triangle' aria-hidden='true'></span> Publishing items makes them publicly visible. <%= link_to("Review important information about publishing, and learn why it's a good idea to also publish related items.", "#{show_docs_path('publishing')}", target: '_blank') %>
   </div>
   <div class="list-group">
     <div class="list-group-item list-group-item-header">
