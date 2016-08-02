@@ -121,6 +121,10 @@ Rails.application.routes.draw do
     resources :queries do
     end
 
+    resources :docs do
+      get ":section", on: :collection, action: :show, as: 'show'
+    end
+
     user_constraints = { username: /[^\/]*/ }
     get "/users/:username(/:tab)", to: 'users#show', constraints: user_constraints, as: 'user'
 

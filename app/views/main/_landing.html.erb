@@ -29,10 +29,10 @@
 <div class="showcase showcase-padded showcase-flex <%= !@event.present? ? 'showcase-shadow':'' %> container">
   <div class="showcase-item">
     <div class="showcase-icon">
-      <a href="<%= about_path %>/how#notes"><span class="fa fa-sticky-note" aria-hidden="true"></span></a>
+      <a href="<%= show_docs_path("notes") %>"><span class="fa fa-sticky-note" aria-hidden="true"></span></a>
     </div>
     <div class="showcase-content">
-      <div class="showcase-heading"><a href="<%= about_path %>/how#notes">Notes</a></div>
+      <div class="showcase-heading"><a href="<%= show_docs_path("notes") %>">Notes</a></div>
       <ul class="list-unstyled lead">
         <li class="media">
           <div class="media-left">
@@ -63,7 +63,7 @@
             <span class="fa fa-fw fa-book" aria-hidden="true"></span>
           </div>
           <div class="media-body">
-            <a href="<%= about_path %>/how#notes">Learn more</a>
+            <a href="<%= show_docs_path("notes") %>">Learn more</a>
           </div>
         </li>
       </ul>
@@ -71,10 +71,10 @@
   </div>
   <div class="showcase-item">
     <div class="showcase-icon">
-      <a href="<%= about_path %>/how#files"><span class="fa fa-files-o" aria-hidden="true"></span></a>
+      <a href="<%= show_docs_path("files") %>"><span class="fa fa-files-o" aria-hidden="true"></span></a>
     </div>
     <div class="showcase-content">
-      <div class="showcase-heading"><a href="<%= about_path %>/how#files">Files</a></div>
+      <div class="showcase-heading"><a href="<%= show_docs_path("files") %>">Files</a></div>
       <ul class="list-unstyled lead">
         <li class="media">
           <div class="media-left">
@@ -113,7 +113,7 @@
             <span class="fa fa-fw fa-book" aria-hidden="true"></span>
           </div>
           <div class="media-body">
-            <a href="<%= about_path %>/how#files">Learn more</a>
+            <a href="<%= show_docs_path("files") %>">Learn more</a>
           </div>
         </li>
       </ul>
@@ -122,10 +122,10 @@
 
   <div class="showcase-item">
     <div class="showcase-icon">
-      <a href="<%= about_path %>/how#comparisons"><span class="fa fa-bullseye"></span></a>
+      <a href="<%= show_docs_path("comparisons") %>"><span class="fa fa-bullseye"></span></a>
     </div>
     <div class="showcase-content">
-      <div class="showcase-heading"><a href="<%= about_path %>/how#comparisons">Comparisons</a></div>
+      <div class="showcase-heading"><a href="<%= show_docs_path("comparisons") %>">Comparisons</a></div>
       <ul class="list-unstyled lead">
         <li class="media">
           <div class="media-left">
@@ -148,7 +148,7 @@
             <span class="fa fa-fw fa-book" aria-hidden="true"></span>
           </div>
           <div class="media-body">
-            <a href="<%= about_path %>/how#comparisons">Learn more</a>
+            <a href="<%= show_docs_path("comparisons") %>">Learn more</a>
           </div>
         </li>
       </ul>
@@ -157,10 +157,10 @@
 
   <div class="showcase-item">
     <div class="showcase-icon">
-      <a href="<%= about_path %>/how#apps"><span class="fa fa-cubes"></span></a>
+      <a href="<%= show_docs_path("apps") %>"><span class="fa fa-cubes"></span></a>
     </div>
     <div class="showcase-content">
-      <div class="showcase-heading"><a href="<%= about_path %>/how#apps">Apps</a></div>
+      <div class="showcase-heading"><a href="<%= show_docs_path("apps") %>">Apps</a></div>
       <ul class="list-unstyled lead">
         <li class="media">
           <div class="media-left">
@@ -183,7 +183,7 @@
             <span class="fa fa-fw fa-book" aria-hidden="true"></span>
           </div>
           <div class="media-body">
-            <a href="<%= about_path %>/how#apps">Learn more</a>
+            <a href="<%= show_docs_path("apps") %>">Learn more</a>
           </div>
         </li>
       </ul>
