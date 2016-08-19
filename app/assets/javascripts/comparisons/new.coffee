@@ -69,7 +69,7 @@ class ComparisonsNewView
 
     if _.size(licensesToAccept) > 0
       @licenseSelector.setLicensesToAccept(licensesToAccept)
-      return @licenseSelector.areLicensesAccepted()
+      return @licenseSelector.areAllLicensesAccepted()
     else
       return true
 
@@ -119,14 +119,14 @@ ComparisonsController = Paloma.controller('Comparisons',
     ko.applyBindings(viewModel, $container[0])
 
     $container.on("click", ".variants-circle-compare", () ->
-        testVCFModel = _.find(viewModel.testVariant.inputs(), (input) -> input.name == "test_vcf")
-        refVCFModel = _.find(viewModel.refVariant.inputs(), (input) -> input.name == "ref_vcf")
+      testVCFModel = _.find(viewModel.testVariant.inputs(), (input) -> input.name == "test_vcf")
+      refVCFModel = _.find(viewModel.refVariant.inputs(), (input) -> input.name == "ref_vcf")
 
-        if testVCFModel? && refVCFModel?
-          testName = testVCFModel.value().name.replace /\.vcf\.gz/i, ""
-          refName = refVCFModel.value().name.replace /\.vcf\.gz/i, ""
+      if testVCFModel? && refVCFModel?
+        testName = testVCFModel.value().name.replace /\.vcf\.gz/i, ""
+        refName = refVCFModel.value().name.replace /\.vcf\.gz/i, ""
 
-          viewModel.name("#{testName} vs #{refName}")
+        viewModel.name("#{testName} vs #{refName}")
     )
 
     $('.license-modal').on("click", ".list-group-item", (e) =>

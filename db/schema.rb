@@ -11,13 +11,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160701174708) do
+ActiveRecord::Schema.define(version: 20160808182110) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id"
     t.integer  "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string   "state"
+    t.text     "message"
   end
 
   add_index "accepted_licenses", ["license_id"], name: "index_accepted_licenses_on_license_id"
@@ -233,10 +235,11 @@ ActiveRecord::Schema.define(version: 20160701174708) do
   create_table "licenses", force: :cascade do |t|
     t.text     "content"
     t.integer  "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",                        null: false
+    t.datetime "updated_at",                        null: false
     t.string   "title"
     t.string   "scope"
+    t.boolean  "approval_required", default: false, null: false
   end
 
   add_index "licenses", ["scope"], name: "index_licenses_on_scope"

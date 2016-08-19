@@ -259,7 +259,10 @@ class ObjectItemModel
     @loadedRelated = ko.observable(false)
 
     @license = ko.observable(object.license)
-    @license_accepted = ko.observable(object.license_accepted)
+    @user_license = ko.observable(object.user_license)
+    @user_license.accepted = ko.computed(=> @user_license()?.accepted)
+    @user_license.pending = ko.computed(=> @user_license()?.pending)
+    @user_license.unset = ko.computed(=> @user_license()?.unset)
 
     @isSelectable = ko.computed(=>
       @selectableClasses == true || (_.isArray(@selectableClasses) && _.includes(@selectableClasses, @className()))
@@ -286,17 +289,19 @@ class ObjectItemModel
     @private(object.private)
     @in_space(object.in_space)
     @license(object.license)
-    @license_accepted(object.license_accepted)
+    @user_license(object.user_license)
 
     @loaded(true)
 
   describe: () ->
-    Precision.api("/api/describe", {
+    params = _.defaults(@listModel.apiParams, {
       uid: @uid
-      include:
-        user: true
-        org: true
+      describe:
+        include:
+          user: true
+          org: true
     })
+    Precision.api("/api/describe", params)
 
   getRelatedObjects: (context) ->
     listModel = @selectorModel.getParentTypeFromContext(context, ObjectListModel)

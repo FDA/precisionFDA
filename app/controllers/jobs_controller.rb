@@ -113,11 +113,14 @@ class JobsController < ApplicationController
     licenses_to_accept = []
     @app.assets.each do |asset|
       if asset.license.present? && !asset.licensed_by?(@context)
-        licenses_to_accept << describe_for_api(asset.license)
+        licenses_to_accept << {
+          license: describe_for_api(asset.license),
+          user_license: asset.user_license(@context)
+        }
       end
     end
 
-    licenses_accepted = @context.user.accepted_licenses.map{|l| l.license_id}
+    licenses_accepted = @context.user.accepted_licenses.map{|l| {id: l.license_id, pending: l.pending?, active: l.active?, unset: !l.pending? && !l.active?}}
 
     js app: @app.slice(:dxid, :spec, :title), licenses_to_accept: licenses_to_accept.uniq { |l| l.id}, licenses_accepted: licenses_accepted
   end

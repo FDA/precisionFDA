@@ -120,12 +120,17 @@ Rails.application.routes.draw do
     end
     resources :licenses do
       post 'accept(/:redirect_to_uid)', on: :member, action: :accept, as: 'accept'
+      match 'request_approval', on: :member, action: :request_approval, as: 'request_approval', via: [:get, :post]
       post 'license_item/:item_uid', on: :member, action: :license_item, as: 'license_item'
       post 'remove_item/:item_uid(/:redirect_to_uid)', on: :member, action: :remove_item, as: 'remove_item'
       post 'remove_user/:user_uid(/:redirect_to_uid)', on: :member, action: :remove_user, as: 'remove_user'
+      post 'approve_user/:user_uid(/:redirect_to_uid)', on: :member, action: :approve_user, as: 'approve_user'
       post 'remove_items', on: :member
       post 'remove_users', on: :member
+      post 'approve_users', on: :member
       post 'rename', on: :member
+      get 'users', on: :member
+      get 'items', on: :member
     end
     resources :spaces do
       get 'members', on: :member
