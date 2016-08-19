@@ -16,7 +16,7 @@ class ApplicationController < ActionController::Base
       font_src: %w('self' https://fonts.gstatic.com https://cdnjs.cloudflare.com),
       form_action: %w('self' https://stagingdl.dnanex.us https://dl.dnanex.us),
       frame_ancestors: %w('none'),
-      frame_src: %w(https://www.youtube.com),
+      frame_src: %w('self' https://www.youtube.com),
       img_src: %w(* data:),
       media_src: %w('self'),
       object_src: %w('self'),
@@ -235,15 +235,16 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def item_from_uid(uid)
+  def item_from_uid(uid, specified_klass = nil)
     if uid =~ /^(job|app|file)-(.{24})$/
       klass = {
         "job" => Job,
         "app" => App,
         "file" => UserFile
       }[$1]
+      raise "Class '#{klass}' did not match specified class '#{specified_klass}'" if specified_klass && klass != specified_klass
       record = klass.find_by!(dxid: uid)
-      if klass == "file" && record.parent_type == "Asset"
+      if klass == UserFile && record.parent_type == "Asset"
         record = record.becomes(Asset)
       end
       return record
@@ -258,6 +259,7 @@ class ApplicationController < ActionController::Base
         "space" => Space
       }[$1]
       id = $2.to_i
+      raise "Class '#{klass}' did not match specified class '#{specified_klass}'" if specified_klass && klass != specified_klass
       return klass.find_by!(id: id)
     else
       raise "Invalid id '#{uid}' in item_from_uid"
@@ -338,8 +340,12 @@ class ApplicationController < ActionController::Base
     if accessible && opts[:include].present? && opts[:include].is_a?(Hash)
       if opts[:include][:license] && ALLOWED_CLASSES_FOR_LICENSE.include?(object.klass)
         if object.license.present?
-          describe[:license] = object.license.slice(:id, :uid)
-          describe[:license_accepted] = object.licensed_by?(@context)
+          describe[:license] = object.license.slice(:id, :uid, :approval_required)
+          describe[:user_license] = {
+            accepted: object.licensed_by?(@context),
+            pending: object.licensed_by_pending?(@context),
+            unset: !object.licensed_by_set?(@context)
+          }
         end
       end
       if opts[:include][:user]

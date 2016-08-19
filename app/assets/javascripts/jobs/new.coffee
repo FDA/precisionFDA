@@ -30,15 +30,14 @@ class JobsNewView
 
   validateLicenses: () ->
     # Reset licenses and recompute which ones to accept
-    licensesToAccept = @asset_licenses_to_accept ? []
-
+    licensesToAccept = _.clone(@asset_licenses_to_accept ? [])
     for inputModel in @inputModels.peek()
-      license = inputModel.licenseToAccept.peek()
-      licensesToAccept.push(license) if license?
+      licenseToAccept = inputModel.licenseToAccept.peek()
+      licensesToAccept.push(licenseToAccept) if licenseToAccept?
 
     if _.size(licensesToAccept) > 0
       @licenseSelector.setLicensesToAccept(licensesToAccept)
-      return @licenseSelector.areLicensesAccepted()
+      return @licenseSelector.areAllLicensesAccepted()
     else
       return true
 

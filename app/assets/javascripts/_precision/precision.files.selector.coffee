@@ -87,7 +87,7 @@ class FilesSelectorModel
     value = @selected()
     inputModel = @inputModel.peek()
     inputModel.value(value)
-    inputModel.licenseToAccept(value.license) if value.license? && !value.license_accepted
+    inputModel.licenseToAccept(value.license) if value.license? && value.user_license?.unset
     @modal.modal('hide')
 
 class FileModel
@@ -98,7 +98,9 @@ class FileModel
     @scopeIcon = if file.scope == "public" then "fa fa-fw fa-globe" else "fa fa-fw fa-lock"
     @path = file.path
     @license = file.license
-    @license_accepted = file.license_accepted
+    @license_accepted = file.user_license.accepted
+    @license_pending = file.user_license.pending
+    @license_unset = file.user_license.unset
     @user = file.user
     @org = file.org
 

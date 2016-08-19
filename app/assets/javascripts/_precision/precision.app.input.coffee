@@ -18,6 +18,7 @@ class AppInputModel
     @error = ko.observable(null)
 
     @licenseToAccept = ko.observable()
+    @userLicense = ko.observable()
 
     @value = ko.observable()
     @valueDisplay = ko.computed(
@@ -28,7 +29,7 @@ class AppInputModel
               if @defaultValue?
                 if @defaultFileValue()?
                   value = @defaultFileValue()
-                  @licenseToAccept(value.license) if value.license? && !value.license_accepted
+                  @licenseToAccept({license: value.license, user_license: value.user_license}) if value.license? && !value.user_license?.accepted
                   value.title
                 else
                   params =
@@ -38,7 +39,7 @@ class AppInputModel
                         license: true
                   Precision.api('/api/describe', params).done((value) =>
                     @defaultFileValue(value)
-                    @licenseToAccept(value.license) if value.license? && !value.license_accepted
+                    @licenseToAccept({license: value.license, user_license: value.user_license}) if value.license? && !value.user_license?.accepted
                   )
                   @defaultValue
               else
@@ -85,16 +86,19 @@ class AppInputModel
       selectionType: "radio"
       selectableClasses: ["file"]
       onSave: (selected) =>
+        @licenseToAccept(null)
         if !_.isArray(selected)
           @value({
             uid: selected.uid
             name: selected.title()
           })
-          @licenseToAccept(selected.license()) if selected.license()? && !selected.license_accepted()
+          if selected.license()? && !selected.user_license.accepted()
+            @licenseToAccept({license: selected.license(), user_license: selected.user_license()})
         else
+          licensesToAccept = []
           # FIXME: This is untested
           @value(_.map(selected, (object) =>
-            licensesToAccept = object.license() if object.license()? && !object.license_accepted()
+            licensesToAccept.push({license: object.license(), user_license: object.user_license()}) if object.license()? && !object.user_license.accepted()
             return {
               uid: object.uid
               name: object.title()
@@ -105,8 +109,6 @@ class AppInputModel
 
         deferred = $.Deferred()
         deferred.resolve(@value())
-      # onAfterSave: () ->
-      #   window.location.reload(true)
       listRelatedParams:
         # editable: true
         # scopes: ["private", "public"]

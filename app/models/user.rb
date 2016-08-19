@@ -93,6 +93,10 @@ class User < ActiveRecord::Base
     space_memberships.pluck("distinct 'space-'||space_id")
   end
 
+  def username
+    dxuser
+  end
+
   def full_name
     "#{first_name} #{last_name}"
   end

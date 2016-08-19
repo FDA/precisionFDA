@@ -69,8 +69,18 @@
       <% end %>
 
         <% if @asset.license.present? && !@asset.licensed_by?(@context) %>
-          <%= link_to accept_license_path(@asset.license.id, @asset.uid), method: :post, class: "btn btn-success" do %>
-            <span class="fa fa-check"></span> Accept License
+          <% if @asset.license.approval_required %>
+            <% if @asset.licensed_by_pending?(@context) %>
+              <span class="btn-static btn-default"><span class="fa fa-clock-o"></span> License Pending Approval</span>
+            <% else %>
+              <%= link_to request_approval_license_path(@asset.license.id), class: "btn btn-success" do %>
+                <span class="fa fa-check"></span> Request License Approval
+              <% end %>
+            <% end %>
+          <% else %>
+            <%= link_to accept_license_path(@asset.license.id, @asset.uid), method: :post, class: "btn btn-success" do %>
+              <span class="fa fa-check"></span> Accept License
+            <% end %>
           <% end %>
         <% end %>
 

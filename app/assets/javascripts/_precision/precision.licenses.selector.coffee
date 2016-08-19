@@ -6,11 +6,16 @@ class LicensesSelectorModel
     @licensesAccepted.cache = ko.observableArray()
     @previewedLicense = ko.observable()
 
-    @areAllLicensesSelected = ko.computed(=>
-      _.size(@licensesAccepted.cache()) == _.size(@licensesToAccept())
+    @selectableLicensesToAccept = ko.computed(=>
+      _.filter(@licensesToAccept(), (l) -> l.selectable)
     )
 
-    @areLicensesAccepted = ko.computed(=>
+    @areSelectableLicensesSelected = ko.computed(=>
+      selectableSize = _.size(@selectableLicensesToAccept())
+      _.size(@licensesAccepted.cache()) == selectableSize && selectableSize > 0
+    )
+
+    @areAllLicensesAccepted = ko.computed(=>
       _.every(@licensesToAccept(), (licenseToAccept) =>
         _.some(@licensesAccepted(), (licenseAccepted) =>
           licenseToAccept.id == licenseAccepted.id
@@ -25,11 +30,11 @@ class LicensesSelectorModel
     @licensesToAccept([])
     if _.size(licenses_to_set) > 0
       license_map = {}
-      for license in licenses_to_set
-        license_map[license.id] ?= license
+      for license_to_set in licenses_to_set
+        license_map[license_to_set.license.id] ?= license_to_set
 
-      _.each(license_map, (license) =>
-        @licensesToAccept.push(new LicenseModel(license))
+      _.each(license_map, (l) =>
+        @licensesToAccept.push(new LicenseModel(l.license, l.user_license))
       )
 
   previewLicense: (license) =>
@@ -48,7 +53,7 @@ class LicensesSelectorModel
         @busy(false)
         @licensesAccepted(@licensesAccepted.cache.peek())
         @toggleLicensesModal()
-        @onAcceptCallback()
+        @onAcceptCallback() if @areAllLicensesAccepted()
         return rs
       )
       .fail((error) =>
@@ -58,9 +63,14 @@ class LicensesSelectorModel
       )
 
 class LicenseModel
-  constructor: (license) ->
+  constructor: (license, userLicense) ->
     @id = license.id
     @uid = license.uid
+    @approvalRequired = license.approval_required
+
+    @licensePath = "/licenses/#{@id}"
+    @requestApprovalPath = if @approvalRequired then "#{@licensePath}/request_approval" else @licensePath
+
     @title = ko.observable(license.title ? "Loading...")
     @content = ko.observable(license.content ? "Loading...")
     @contentHTML = ko.computed(=>
@@ -70,12 +80,22 @@ class LicenseModel
         Precision.md.render(@content())
     )
 
+    @userLicense = new UserLicenseModel(userLicense)
+
+    @selectable = !@approvalRequired
+
     if !license.title? || !license.content?
       Precision.api('/api/describe', {uid: @uid})
         .done((rs) =>
           @title(rs.title)
           @content(rs.content)
         )
+
+class UserLicenseModel
+  constructor: (userLicense) ->
+    @active = userLicense?.active ? false
+    @pending = userLicense?.pending ? false
+    @unset = userLicense?.unset ? true
 
 window.Precision ||= {}
 window.Precision.models ||= {}

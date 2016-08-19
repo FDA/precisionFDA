@@ -191,6 +191,6 @@ class FilesController < ApplicationController
 
   private
     def file_params
-      params.require(:user_file).permit(:name)
+      params.require(:file).permit(:name)
     end
 end
