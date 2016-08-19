@@ -21,8 +21,8 @@ class NoteModel
       heading: 'Files'
       className: 'attachment-files'
       iconClass: 'fa fa-file-o'
-      items: _.map(attachments.files, (wrapper) ->
-        return new ItemModel(wrapper)
+      items: _.map(attachments.files, (item) ->
+        return new ItemModel(item)
       )
     })
 
@@ -30,8 +30,8 @@ class NoteModel
       heading: 'Comparisons'
       className: 'attachment-comparisons'
       iconClass: 'fa fa-area-chart'
-      items: _.map(attachments.comparisons, (wrapper) ->
-        return new ItemModel(wrapper)
+      items: _.map(attachments.comparisons, (item) ->
+        return new ItemModel(item)
       )
     })
 
@@ -39,8 +39,8 @@ class NoteModel
       heading: 'Apps'
       className: 'attachment-apps'
       iconClass: 'fa fa-cube'
-      items: _.map(attachments.apps, (wrapper) ->
-        return new ItemModel(wrapper)
+      items: _.map(attachments.apps, (item) ->
+        return new ItemModel(item)
       )
     })
 
@@ -48,8 +48,8 @@ class NoteModel
       heading: 'Jobs'
       className: 'attachment-jobs'
       iconClass: 'fa fa-tasks'
-      items: _.map(attachments.jobs, (wrapper) ->
-        return new ItemModel(wrapper)
+      items: _.map(attachments.jobs, (item) ->
+        return new ItemModel(item)
       )
     })
 
@@ -57,8 +57,8 @@ class NoteModel
       heading: 'Assets'
       className: 'attachment-assets'
       iconClass: 'fa fa-file-zip-o'
-      items: _.map(attachments.assets, (wrapper) ->
-        return new ItemModel(wrapper)
+      items: _.map(attachments.assets, (item) ->
+        return new ItemModel(item)
       )
     })
 
@@ -77,6 +77,53 @@ class NoteModel
         else
           "Saved"
     )
+
+    @objectSelector = new Precision.models.SelectorModel({
+      title: "Attach data to your note"
+      onSave: (selected) =>
+        deferred = $.Deferred()
+        _.each(selected, (item) =>
+          itemModel = new ItemModel({
+            uid: item.uid
+            klass: item.className()
+            title: item.title()
+            path: item.path()
+          }, { isNew: true })
+          this["#{itemModel.klass}s"].items.push(itemModel)
+        )
+        deferred.resolve()
+      listRelatedParams:
+        classes: ["file", "comparison", "app", "job", "asset"]
+      listModelConfigs: [
+        {
+          className: "file"
+          name: "Files"
+          apiEndpoint: "list_files"
+          apiParams:
+            states: ["closed"]
+        }
+        {
+          className: "comparison"
+          name: "Comparisons"
+          apiEndpoint: "list_comparisons"
+        }
+        {
+          className: "app"
+          name: "Apps"
+          apiEndpoint: "list_apps"
+        }
+        {
+          className: "job"
+          name: "Jobs"
+          apiEndpoint: "list_jobs"
+        }
+        {
+          className: "asset"
+          name: "Assets"
+          apiEndpoint: "list_assets"
+        }
+      ]
+    })
   bindEdit: ($container) ->
     @noteEditor = ko.aceEditors.get('note-editor')
 
@@ -119,7 +166,12 @@ class NoteModel
       attachments_to_delete: attachmentsToDelete
 
     Precision.api("/api/update_note/", params)
-      .done((res) ->
+      .done((res) =>
+        _.each(@attachments, (attachmentSection) ->
+          _.each(attachmentSection.items(), (item) ->
+            item.isNew(false)
+          )
+        )
       ).fail((error) ->
         console.error(error)
       ).always(() =>
@@ -145,22 +197,20 @@ class AttachmentsModel
     @hasChanges = ko.computed(=> _.some(@items(), (item) -> item.isChanged()))
 
 class ItemModel
-  constructor: (wrapper) ->
-    @klass = wrapper.klass
-    @uid = wrapper.uid
-    @name = wrapper.item?.title ? wrapper.uid
-    @path = if wrapper.item? then (switch wrapper.klass
-      when "app" then "/apps/#{wrapper.uid}"
-      when "asset" then "/app_assets/#{wrapper.uid}"
-      when "comparison" then "/comparisons/#{wrapper.uid.replace /^comparison-/, ''}"
-      when "file" then "/files/#{wrapper.uid}"
-      when "job" then "/jobs/#{wrapper.uid}"
-      else null) else null
+  constructor: (item, opts = {}) ->
+    opts = _.defaults(opts, {
+      isNew: false
+    })
+    @klass = item.klass
+    @uid = item.uid
+    @name = item.title
+    @path = item.path
+    @isNew = ko.observable(opts.isNew)
     @removed = ko.observable(false)
     @removed.cache = ko.observable(false)
 
     @isChanged = ko.computed(=>
-      @removed() != @removed.cache()
+      @removed() != @removed.cache() || @isNew()
     )
 
   toggleRemove: () ->

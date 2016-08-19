@@ -49,6 +49,8 @@ class User < ActiveRecord::Base
   belongs_to :org
   has_many :licenses
   has_many :accepted_licenses
+  has_many :space_memberships
+  has_many :spaces, {through: :space_memberships}
 
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 
@@ -61,6 +63,10 @@ class User < ActiveRecord::Base
 
   def uid
     "user-#{id}"
+  end
+
+  def dxid
+    "user-#{dxuser}"
   end
 
   def klass
@@ -81,6 +87,14 @@ class User < ActiveRecord::Base
 
   def billto
     org.dxorg
+  end
+
+  def space_uids
+    space_memberships.pluck("distinct 'space-'||space_id")
+  end
+
+  def username
+    dxuser
   end
 
   def full_name

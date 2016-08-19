@@ -72,6 +72,11 @@ gem 'bootstrap-kaminari-views'
 # Allows models to follow each other
 gem 'acts_as_follower'
 
+# For inline-css in emails
+gem 'inky-rb', require: 'inky'
+gem 'nokogiri'
+gem 'premailer-rails'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

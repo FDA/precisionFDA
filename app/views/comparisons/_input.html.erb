@@ -14,3 +14,5 @@
     <button class="btn btn-info" data-bind="text: valueDisplay, attr: {name: name, disable: $root.busy}, click: openFileSelector, css: { 'btn-info': !value(), 'btn-default': value}">Select file...</button>
   </div>
 </li>
+
+<%= render "_partials/selector_modal" %>

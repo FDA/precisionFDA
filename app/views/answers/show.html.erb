@@ -22,9 +22,6 @@
   <div class="pull-left">
     <% if @answer.public? %>
       <%= render "_partials/upvote_link", classes: "btn btn-default", item: @answer %>
-      <%= link_to discussion_answer_comments_path(@discussion, @answer), class: 'btn btn-link' do %>
-        <span class="fa fa-comment"></span> Comment | <%= @answer.comment_threads.size %>
-      <% end %>
     <% else %>
       <span class="btn-static"><span class="fa fa-lock"></span> This answer has not been published yet</span>
     <% end %>

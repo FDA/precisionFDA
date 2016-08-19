@@ -1,6 +1,7 @@
 <% if @app.present? %>
 <div class="metadata-section metadata-header">
   <ul class="list-group list-group-inline">
+    <%= render "_partials/metadata_access", item: @app %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">name</h5>
       <p class="list-group-item-text"><%= @app.name %></p>
@@ -27,13 +28,6 @@
       <p class="list-group-item-text"><%= @app.title %></p>
     </li>
     <% end %>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Access</h5>
-      <p class="list-group-item-text">
-        <span class="fa <%= @app.public? ? 'fa-globe' : 'fa-lock' %>"></span>
-        <%= @app.public? ? "Public" : "Private" %>
-      </p>
-    </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Created</h5>
       <p class="list-group-item-text"><%= @app.created_at.to_s(:db) %></p>
@@ -139,6 +133,11 @@
     </a>
   </li>
   <% end %>
+  <li role="presentation">
+    <a href="#tab-comments" aria-controls="tab-comments" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
+      <span class="tab-label">Comments <span class="badge"><%= @app.comment_threads.size %></span></span>
+    </a>
+  </li>
   <% if @notes.present? && @notes.total_count > 0 %>
   <li role="presentation">
     <a href="#app-notes" aria-controls="app-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
@@ -168,68 +167,11 @@
   <% if @jobs_grid.present? %>
   <div role="tabpanel" class="tab-pane active" id="app-job">
     <div class="panel">
-      <%= grid(@jobs_grid, show_filters: :always) do |g|
-        g.blank_slate do
-          content_tag :div, "No jobs found", class: 'alert alert-info'
-        end
-
-        if @app.present?
-          g.row_attributes do |job|
-            if job.app_id == @app.id
-              {class: 'job-revision-active'}
-            end
-          end
-        end
-
-        g.column name: 'State', attribute: 'state' do |job|
-          [job.state, {class: "col-state state-#{job.state}"}]
-        end
-
-        g.column name: 'Job', attribute: 'name' do |job|
-          unilinkfw(job)
-        end
-
-        if !@app.present?
-          g.column name: 'App', attribute: 'title', assoc: :app  do |job|
-            unilinkfw(job.app)
-          end
-        end
-
-        if @app.present?
-          g.column name: 'Revision', attribute: 'revision', assoc: :app do |job|
-            job.app.revision
-          end
-        end
-
-        if @app.present?
-          g.column name: 'Version', attribute: 'version', assoc: :app do |job|
-            if !job.app.version.blank?
-              job.app.version
-            end
-          end
-        end
-
-        g.column name: 'Instance type' do |job|
-          job.resolved_instance_type
-        end
-
-        g.column name: 'Duration' do |job|
-          humanizeSeconds(job.runtime)
-        end
-
-        g.column name: 'Energy Consumption' do |job|
-          content_tag(:span, " ", class: "fa fa-industry fa-fw") + " " + job.energy_string
-        end
-
-        g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |job|
-          job.created_at.to_s(:db)
-        end
-
-        g.column name: 'Access', attribute: 'scope',
-          custom_filter: {'Public' => "public", 'Private' => "private"} do |job|
-          job.public? ? "Public" : "Private"
-        end
-      end -%>
+      <% if @app.present? %>
+        <%= render "jobs/grid", jobs_grid: @jobs_grid, app: @app %>
+      <% else %>
+        <%= render "jobs/grid", jobs_grid: @jobs_grid %>
+      <% end %>
     </div>
   </div>
   <% elsif %>
@@ -285,6 +227,14 @@
       <div class="app-readme-display" data-bind="html: readmeDisplay"></div>
     </div>
     <% end %>
+
+    <div role="tabpanel" class="tab-pane" id="tab-comments">
+      <div class="row">
+        <div class="col-md-12">
+          <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @app %>
+        </div>
+      </div>
+    </div>
 
     <% if @notes.present? && @notes.total_count > 0 %>
     <div role="tabpanel" class="tab-pane tab-pane-padded" id="app-notes">
