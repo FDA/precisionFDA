@@ -17,12 +17,31 @@ class LicensesController < ApplicationController
   def show
     @license = License.find(params[:id])
 
-    @items = @license.licensed_items.includes(:licenseable)
+    @items_count = @license.licensed_items.size
     if @license.editable_by?(@context)
-      @users = @license.licensed_users
+      @users_count = @license.licensed_users.size
     end
 
     js license: @license.slice(:id, :content, :title)
+  end
+
+  def items
+    @license = License.find(params[:id])
+
+    @items = @license.licensed_items.includes(:licenseable)
+    @items_count = @license.licensed_items.size
+    if @license.editable_by?(@context)
+      @users_count = @license.licensed_users.size
+    end
+  end
+
+  def users
+    @license = License.find(params[:id])
+    redirect_to license_path(@license) unless @license.editable_by?(@context)
+
+    @items_count = @license.licensed_items.size
+    @users = @license.licensed_users
+    @users_count = @users.size
   end
 
   def edit
@@ -71,23 +90,58 @@ class LicensesController < ApplicationController
     redirect_to licenses_path
   end
 
+  def request_approval
+    @license = License.accessible_by(@context).find(params[:id])
+    if @license.nil?
+      flash[:error] = "Sorry, this license does not exist or is not accessible by you"
+      redirect_to license_path(@license)
+      return
+    end
+
+    message = !params[:accepted_license].nil? ? params[:accepted_license][:message] : nil
+
+    if request.post? && !message.nil? && message.is_a?(String)
+      accepted_license = AcceptedLicense.create!({
+        license_id: @license.id,
+        user_id: @context.user_id,
+        state: 'pending',
+        message: message
+      })
+      if accepted_license.persisted?
+        NotificationsMailer.license_request_email(@license, @context.user, message).deliver_now!
+        flash[:success] = "License approval requested"
+      end
+      redirect_to license_path(@license)
+    else
+      @acceptedLicense = AcceptedLicense.new({
+        user_id: @context.user_id,
+        license_id: @license.id,
+        state: 'pending',
+        message: message
+      })
+    end
+  end
+
   # Called from license#show, file#show, asset#show
   def accept
-    license = License.find(params[:id])
+    license = License.accessible_by(@context).find(params[:id])
     if params[:redirect_to_uid].present?
       redirect_to_item = item_from_uid(params[:redirect_to_uid])
     end
 
-    if AcceptedLicense.find_or_create_by(license_id: license.id, user_id: @context.user_id)
-      flash[:success] = "License successfully accepted"
+    if license.approval_required
+      redirect_to request_approval_path(license)
     else
-      flash[:error] = "Sorry, this license does not exist or is not accessible by you"
-    end
-
-    if redirect_to_item.nil?
-      redirect_to license_path(license)
-    else
-      redirect_to pathify(redirect_to_item)
+      if AcceptedLicense.find_or_create_by(license_id: license.id, user_id: @context.user_id)
+        flash[:success] = "License accepted"
+      else
+        flash[:error] = "Sorry, this license does not exist or is not accessible by you"
+      end
+      if redirect_to_item.nil?
+        redirect_to license_path(license)
+      else
+        redirect_to pathify(redirect_to_item)
+      end
     end
   end
 
@@ -124,7 +178,7 @@ class LicensesController < ApplicationController
       if params[:redirect_to_uid].present?
         redirect_path = pathify(item_from_uid(params[:redirect_to_uid]))
       else
-        redirect_path = pathify(item)
+        redirect_path = items_license_path(license)
       end
     end
     redirect_to redirect_path
@@ -133,11 +187,12 @@ class LicensesController < ApplicationController
   def remove_user
     license = License.find(params[:id])
     if license.editable_by?(@context)
-      user = item_from_uid(params[:user_uid])
+      user = item_from_uid(params[:user_uid], User)
       LicensedItem.transaction do
         userLicense = license.accepted_licenses.find_by(user_id: user.id)
         if !userLicense.nil?
           userLicense.destroy
+          NotificationsMailer.license_revoked_email(license, user).deliver_now!
         end
       end
     end
@@ -145,7 +200,29 @@ class LicensesController < ApplicationController
     if params[:redirect_to_uid].present?
       redirect_path = pathify(item_from_uid(params[:redirect_to_uid]))
     else
-      redirect_path = pathify(user)
+      redirect_path = users_license_path(license)
+    end
+    redirect_to redirect_path
+  end
+
+  def approve_user
+    license = License.find(params[:id])
+    if license.editable_by?(@context)
+      user = item_from_uid(params[:user_uid], User)
+      AcceptedLicense.transaction do
+        accepted_license = license.accepted_licenses.find_by(user_id: user.id)
+        if !accepted_license.nil?
+          accepted_license.update_attributes(state: 'active')
+          accepted_license.reload
+          NotificationsMailer.license_approved_email(license, user).deliver_now!
+        end
+      end
+    end
+
+    if params[:redirect_to_uid].present?
+      redirect_path = pathify(item_from_uid(params[:redirect_to_uid]))
+    else
+      redirect_path = users_license_path(license)
     end
     redirect_to redirect_path
   end
@@ -157,7 +234,7 @@ class LicensesController < ApplicationController
         license.licensed_items.destroy_all
       end
     end
-    redirect_to license_path(license)
+    redirect_to items_license_path(license)
   end
 
   def remove_users
@@ -167,7 +244,17 @@ class LicensesController < ApplicationController
         license.accepted_licenses.destroy_all
       end
     end
-    redirect_to license_path(license)
+    redirect_to users_license_path(license)
+  end
+
+  def approve_users
+    license = License.find(params[:id])
+    if license.editable_by?(@context)
+      AcceptedLicense.transaction do
+        license.accepted_licenses.update_all(state: 'active')
+      end
+    end
+    redirect_to users_license_path(license)
   end
 
   def rename
@@ -189,6 +276,6 @@ class LicensesController < ApplicationController
 
   private
     def license_params
-      params.require(:license).permit(:content, :title)
+      params.require(:license).permit(:content, :title, :approval_required)
     end
 end

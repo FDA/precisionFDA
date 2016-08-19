@@ -16,7 +16,7 @@ class ApplicationController < ActionController::Base
       font_src: %w('self' https://fonts.gstatic.com https://cdnjs.cloudflare.com),
       form_action: %w('self' https://stagingdl.dnanex.us https://dl.dnanex.us),
       frame_ancestors: %w('none'),
-      frame_src: %w(https://www.youtube.com),
+      frame_src: %w('self' https://www.youtube.com),
       img_src: %w(* data:),
       media_src: %w('self'),
       object_src: %w('self'),
@@ -56,7 +56,7 @@ class ApplicationController < ActionController::Base
   # Require login
   before_action :require_login
 
-  helper_method :pathify
+  helper_method :pathify, :pathify_comments, :item_from_uid
 
   rescue_from ActionView::MissingTemplate, with: :missing_template
 
@@ -156,7 +156,9 @@ class ApplicationController < ActionController::Base
       file_path(item.dxid)
     when "note"
       if item.note_type == "Answer"
-        discussion_answer_path(item.discussion, item.user.dxuser)
+        pathify(item.answer)
+      elsif item.note_type == "Discussion"
+        pathify(item.discussion)
       else
         note_path(item)
       end
@@ -176,6 +178,8 @@ class ApplicationController < ActionController::Base
       user_path(item.dxuser)
     when "license"
       license_path(item)
+    when "space"
+      space_path(item)
     else
       raise "Unknown class #{item.klass}"
     end
@@ -187,7 +191,9 @@ class ApplicationController < ActionController::Base
       file_comments_path(item.dxid)
     when "note"
       if item.note_type == "Answer"
-        discussion_answer_comments_path(item.discussion, item.user.dxuser)
+        pathify_comments(item.answer)
+      elsif item.note_type == "Discussion"
+        pathify_comments(item.discussion)
       else
         note_comments_path(item)
       end
@@ -203,36 +209,69 @@ class ApplicationController < ActionController::Base
       discussion_comments_path(item)
     when "answer"
       discussion_answer_comments_path(item.discussion, item.user.dxuser)
+    when "space"
+      space_comments_path(item)
     else
       raise "Unknown class #{item.klass}"
     end
   end
 
-  def item_from_uid(uid)
+  def pathify_comments_redirect(item)
+    case item.klass
+    when "discussion"
+      discussion_comments_path(item)
+    when "note"
+      if item.note_type == "Answer"
+        pathify_comments_redirect(item.answer)
+      elsif item.note_type == "Discussion"
+        pathify_comments_redirect(item.discussion)
+      else
+        pathify(item)
+      end
+    when "file", "app", "job", "asset", "comparison", "answer", "space"
+      pathify(item)
+    else
+      raise "Unknown class #{item.klass}"
+    end
+  end
+
+  def item_from_uid(uid, specified_klass = nil)
     if uid =~ /^(job|app|file)-(.{24})$/
       klass = {
         "job" => Job,
         "app" => App,
         "file" => UserFile
       }[$1]
+      raise "Class '#{klass}' did not match specified class '#{specified_klass}'" if specified_klass && klass != specified_klass
       record = klass.find_by!(dxid: uid)
-      if klass == "file" && record.parent_type == "Asset"
+      if klass == UserFile && record.parent_type == "Asset"
         record = record.becomes(Asset)
       end
       return record
-    elsif uid =~ /^(comparison|note|discussion|answer|user|license)-(\d+)$/
+    elsif uid =~ /^(comparison|note|discussion|answer|user|license|space)-(\d+)$/
       klass = {
         "comparison" => Comparison,
         "note" => Note,
         "discussion" => Discussion,
         "answer" => Answer,
         "user" => User,
-        "license" => License
+        "license" => License,
+        "space" => Space
       }[$1]
       id = $2.to_i
+      raise "Class '#{klass}' did not match specified class '#{specified_klass}'" if specified_klass && klass != specified_klass
       return klass.find_by!(id: id)
     else
       raise "Invalid id '#{uid}' in item_from_uid"
+    end
+  end
+
+  def type_from_classname(klass)
+    case klass
+    when "file"
+      "UserFile"
+    else
+      klass.capitalize
     end
   end
 
@@ -248,7 +287,75 @@ class ApplicationController < ActionController::Base
       end
     elsif params[:note_id].present?
       return [Note.find(params[:note_id])]
+    elsif params[:space_id].present?
+      return [Space.find(params[:space_id])]
+    elsif params[:comparison_id].present?
+      return [Comparison.find(params[:comparison_id])]
+    elsif params[:file_id].present?
+      return [UserFile.find_by(dxid: params[:file_id])]
+    elsif params[:asset_id].present?
+      return [Asset.find_by(dxid: params[:asset_id])]
+    elsif params[:job_id].present?
+      return [Job.find_by(dxid: params[:job_id])]
+    elsif params[:app_id].present?
+      return [App.find_by(dxid: params[:app_id])]
     end
     return
   end
+
+  def describe_for_api(object, opts = {})
+    opts = {} if opts.nil? || !opts.is_a?(Hash)
+
+    accessible = object.accessible_by?(@context)
+    item_sliced = object.context_slice(@context, *object.describe_fields)
+
+    describe = {
+      id: item_sliced[:id],
+      uid: item_sliced[:uid],
+      className: item_sliced[:klass],
+      fa_class: view_context.fa_class(object),
+      scope: item_sliced[:scope],
+      path: accessible ? pathify(object) : nil,
+      editable: object.editable_by?(@context),
+      accessible: accessible,
+      public: object.public?,
+      private: object.private?,
+      in_space: object.in_space?
+    }
+
+    if accessible && !item_sliced[:item].nil?
+      # Only return fields user has asked for
+      if opts[:fields].present? && opts[:fields].is_a?(Array) && opts[:fields].all? { |f|
+        f.is_a?(String) }
+        describe.merge!(item_sliced[:item].slice(*opts[:fields]))
+      # Use the default fields
+      else
+        describe.merge!(item_sliced[:item])
+      end
+    # Return uid as the title if not accessible
+    else
+      describe[:title] = item_sliced[:uid]
+    end
+
+    if accessible && opts[:include].present? && opts[:include].is_a?(Hash)
+      if opts[:include][:license] && ALLOWED_CLASSES_FOR_LICENSE.include?(object.klass)
+        if object.license.present?
+          describe[:license] = object.license.slice(:id, :uid, :approval_required)
+          describe[:user_license] = {
+            accepted: object.licensed_by?(@context),
+            pending: object.licensed_by_pending?(@context),
+            unset: !object.licensed_by_set?(@context)
+          }
+        end
+      end
+      if opts[:include][:user]
+        describe[:user] = object.user.slice(:dxuser, :full_name)
+      end
+      if opts[:include][:org]
+        describe[:org] = object.user.org.slice(:handle, :name)
+      end
+    end
+    return describe
+  end
+
 end

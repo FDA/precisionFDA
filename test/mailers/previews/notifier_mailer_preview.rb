@@ -1,0 +1,42 @@
+class NotifierPreview < ActionMailer::Preview
+  # Secure headers
+  SecureHeaders::Configuration.default do |config|
+    config.csp = {
+      base_uri: %w('self'),
+      default_src: %w(https: 'self' 'unsafe-inline'),
+      font_src: %w('self' https://fonts.gstatic.com https://cdnjs.cloudflare.com),
+      img_src: %w(* data:),
+      media_src: %w('self'),
+      style_src: %w('self' 'unsafe-inline' https://fonts.googleapis.com https://dnanexus.github.io https://cdnjs.cloudflare.com),
+      frame_src: %w('self'),
+      frame_ancestors: %w('self')
+    }
+  end
+
+  def guest_access_email
+    NotificationsMailer.guest_access_email(Invitation.last)
+  end
+
+  def invitation_email
+    NotificationsMailer.invitation_email(Invitation.last)
+  end
+
+  def license_request_email
+    license = License.last
+    user = User.last
+    message = "This is a test message"
+    NotificationsMailer.license_request_email(license, user, message)
+  end
+
+  def license_approved_email
+    license = License.last
+    user = User.last
+    NotificationsMailer.license_approved_email(license, user)
+  end
+
+  def license_revoked_email
+    license = License.last
+    user = User.last
+    NotificationsMailer.license_revoked_email(license, user)
+  end
+end

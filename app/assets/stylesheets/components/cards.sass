@@ -181,10 +181,8 @@
 .pfda-tutorial.pfda-cards
   .pfda-card
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15)
-
-  .pfda-card-body
-    min-height: 100px
-
+    width: 100%
+    
   .pfda-card-body-icon
     line-height: 100px
     min-height: 100px
@@ -199,3 +197,8 @@
         width: calc(40% - 20px)
       @media (min-width: $screen-lg-min)
         width: calc(30% - 20px)
+
+.panel
+  .pfda-cards-list
+    .pfda-card-list:last-child
+      border-bottom: 0

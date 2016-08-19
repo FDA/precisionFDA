@@ -95,7 +95,9 @@ class NoteAttachModel
   getNotes: (params = {}) ->
     # TODO: Mark if a note has already been attached
     # params = {item_id: @id, item_type: @type}
-
+    params = _.defaults(params, {
+      fields: ["title", "note_type"]
+    })
     @loading(true)
     Precision.api '/api/list_notes', params, (notes) =>
       @loading(false)
@@ -110,8 +112,10 @@ class NoteAttachModel
     return if !@canAttach.peek() && _.isEmpty(selectedNotes)
     params =
       note_ids: _.map(selectedNotes, (note) -> note.id)
-      item_ids: [@id]
-      item_type: @type
+      items: [{
+        id: @id
+        type: @type
+      }]
 
     Precision.api "/api/attach_to_notes", params, (res) =>
       location.reload()
@@ -124,6 +128,7 @@ class NoteAttachModel
 
 class NoteModel
   constructor: (note, @parentModel) ->
+    @uid = note.uid
     @id = note.id
     @path = note.path
     @title = note.title
@@ -132,9 +137,13 @@ class NoteModel
     @loading = ko.observable(false)
 
   getDescribe: () ->
-    if _.isEmpty(@content.peek())
+    if _.isUndefined(@content.peek())
       @loading(true)
-      Precision.api '/api/describe_note', {id: @id}, (describe) =>
+      params =
+        uid: @uid
+        describe:
+          fields: ["content"]
+      Precision.api '/api/describe', params, (describe) =>
         @loading(false)
         @content(Precision.md.render(describe.content))
         @parentModel.handleUpdate()

@@ -4,7 +4,7 @@
       <div class="note-display pfda-md-rendered" data-bind="html: content.display">
       </div>
     </div>
-    <div class="note-sidebar">
+    <div class="note-sidebar note-sidebar-padded">
       <div id="note-attachments" class="note-attachments">
         <!-- ko foreach: attachments -->
         <div class="list-group" data-bind="visible: items().length > 0, css: className">
@@ -32,5 +32,10 @@
         <!-- /ko -->
       </div>
     </div>
+    <% if !@commentable.nil? %>
+    <div class="note-sidebar">
+      <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @commentable %>
+    </div>
+    <% end %>
   </div>
 </div>

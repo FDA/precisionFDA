@@ -14,7 +14,19 @@
               <div class="media-body">
                 <div class="checkbox clearfix">
                   <label>
-                    <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.licensesAccepted.cache"> <span class="word-break-all" data-bind="text: title"></span>
+                    <!-- ko if: selectable -->
+                    <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.licensesAccepted.cache">&nbsp;
+                    <!-- /ko -->
+                    <span class="word-break-all" data-bind="text: title"></span>
+                    <!-- ko if: !selectable && !userLicense.active -->
+                      <br>
+                      <!-- ko if: userLicense.pending -->
+                        <span class="text-warning small">Pending Approval</span>
+                      <!-- /ko -->
+                      <!-- ko if: userLicense.unset -->
+                        <a class="btn btn-xs btn-default" data-bind="attr: {href: requestApprovalPath}" target="_blank">Request Approval</a>
+                      <!-- /ko -->
+                    <!-- /ko -->
                   </label>
                 </div>
               </div>
@@ -31,7 +43,7 @@
           <div role="tabpanel" class="tab-pane tab-pane-preview active" data-bind="visible: licensesToAccept().length">
             <!-- ko if: previewedLicense() -->
               <div class="h2">
-                <a href="/licenses/" data-bind="text: previewedLicense().title, attr: {href: '/licenses/' + previewedLicense().id}" target="_blank"></a>
+                <a href="/licenses/" data-bind="text: previewedLicense().title, attr: {href: previewedLicense().licensePath}" target="_blank"></a>
               </div>
               <hr>
               <!-- ko if: previewedLicense().contentHTML -->
@@ -43,7 +55,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" data-bind="click: acceptLicenses, attr: {disabled: !areAllLicensesSelected() || busy()}">Accept All Licenses</button>
+        <button type="button" class="btn btn-primary" data-bind="click: acceptLicenses, attr: {disabled: !areSelectableLicensesSelected() || busy()}">Accept Selected Licenses</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

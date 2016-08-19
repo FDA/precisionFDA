@@ -11,13 +11,7 @@
 
 <div class="metadata-section metadata-header">
   <ul class="list-group list-group-inline">
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Access</h5>
-      <p class="list-group-item-text">
-        <span class="fa <%= @note.public? ? 'fa-globe' : 'fa-lock' %>"></span>
-        <%= @note.public? ? "Public" : "Private" %>
-      </p>
-    </li>
+    <%= render "_partials/metadata_access", item: @note %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">ID</h5>
       <p class="list-group-item-text"><%= @note.uid %></p>
@@ -43,7 +37,12 @@
 
 
 <div class="pfda-toolbar clearfix">
-  <div class="btn-toolbar pull-right">
+  <div class="pull-left">
+    <% if @note.editable_by?(@context) %>
+      <button class="btn btn-default" data-bind="click: objectSelector.open"><span class="fa fa-plus" aria-hidden="true"></span> Attach to Note...</button>
+    <% end %>
+  </div>
+  <div class="pull-right">
     <%= link_to "Back", note_path(@note), class: "btn btn-link" %>
     <a class="btn btn-primary" data-bind="click: save, css: {disabled: !isFormReady()}, text: saveBtnText"></a>
   </div>
@@ -52,3 +51,7 @@
 <div class="pfda-note-container container-fluid container-padded">
   <%= render "notes/note_edit" %>
 </div>
+
+<% if @note.editable_by?(@context) %>
+  <%= render "_partials/selector_modal" %>
+<% end %>

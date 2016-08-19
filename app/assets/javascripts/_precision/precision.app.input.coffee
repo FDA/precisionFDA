@@ -1,6 +1,6 @@
 class AppInputModel
   constructor: (spec, @viewModel) ->
-    @klass = spec.class
+    @className = spec.class
     @help = spec.help
     @label = spec.label
     @name = spec.name
@@ -13,31 +13,33 @@ class AppInputModel
 
     @placeholder = @defaultValue
 
-    @isClassAnArray = @klass.indexOf('array') == 0
+    @isClassAnArray = @className.indexOf('array') == 0
 
     @error = ko.observable(null)
 
     @licenseToAccept = ko.observable()
+    @userLicense = ko.observable()
 
     @value = ko.observable()
     @valueDisplay = ko.computed(
       read: () =>
-        switch @klass
+        switch @className
           when 'file'
             if !@value()?
               if @defaultValue?
                 if @defaultFileValue()?
                   value = @defaultFileValue()
-                  @licenseToAccept(value.license) if value.license? && !value.license_accepted
-                  value.name
+                  @licenseToAccept({license: value.license, user_license: value.user_license}) if value.license? && !value.user_license?.accepted
+                  value.title
                 else
                   params =
                     uid: @defaultValue
-                    include:
-                      license: true
-                  Precision.api('/api/describe_file', params).done((value) =>
+                    describe:
+                      include:
+                        license: true
+                  Precision.api('/api/describe', params).done((value) =>
                     @defaultFileValue(value)
-                    @licenseToAccept(value.license) if value.license? && !value.license_accepted
+                    @licenseToAccept({license: value.license, user_license: value.user_license}) if value.license? && !value.user_license?.accepted
                   )
                   @defaultValue
               else
@@ -53,7 +55,7 @@ class AppInputModel
         if !value?
           @value(null)
         else
-          switch @klass
+          switch @className
             when 'boolean'
               if value == 'true'
                 @value(true)
@@ -78,6 +80,78 @@ class AppInputModel
       return @isRequired && !@isReady()
     )
 
+    @objectSelector = new Precision.models.SelectorModel({
+      title: "Select input for #{@label}"
+      help: @help
+      selectionType: "radio"
+      selectableClasses: ["file"]
+      onSave: (selected) =>
+        @licenseToAccept(null)
+        if !_.isArray(selected)
+          @value({
+            uid: selected.uid
+            name: selected.title()
+          })
+          if selected.license()? && !selected.user_license.accepted()
+            @licenseToAccept({license: selected.license(), user_license: selected.user_license()})
+        else
+          licensesToAccept = []
+          # FIXME: This is untested
+          @value(_.map(selected, (object) =>
+            licensesToAccept.push({license: object.license(), user_license: object.user_license()}) if object.license()? && !object.user_license.accepted()
+            return {
+              uid: object.uid
+              name: object.title()
+            }
+          ))
+
+          @licenseToAccept(licensesToAccept) if licensesToAccept?
+
+        deferred = $.Deferred()
+        deferred.resolve(@value())
+      listRelatedParams:
+        # editable: true
+        # scopes: ["private", "public"]
+        classes: ["file", "note", "discussion", "answer", "comparison", "app", "asset", "job"]
+      listModelConfigs: [
+        {
+          className: "file"
+          name: "Files"
+          apiEndpoint: "list_files"
+          apiParams:
+            states: ["closed"]
+            describe:
+              include:
+                user: true
+                org: true
+                license: true
+          patterns: @patterns
+        }
+        {
+          className: "note"
+          name: "Notes"
+          apiEndpoint: "list_notes"
+          apiParams:
+            note_types: ["Note"]
+            describe:
+              include:
+                user: true
+                org: true
+        }
+        {
+          className: "discussion"
+          name: "Discussions"
+          apiEndpoint: "list_notes"
+          apiParams:
+            note_types: ["Discussion"]
+            describe:
+              include:
+                user: true
+                org: true
+        }
+      ]
+    })
+
   # Boolean Functions
   toggleTrue: (e) ->
     if @value() == true
@@ -95,7 +169,7 @@ class AppInputModel
 
   # File Functions
   openFileSelector: () ->
-    @viewModel.fileSelector.open(this, @value.peek())
+    @objectSelector.open()
 
   clear: () ->
     @valueDisplay(null)
@@ -109,7 +183,7 @@ class AppInputModel
           value = _.map(value.split(','), (data) =>
             data = $.trim(data) # Remove trailing/leading whitespace
             _data = data
-            switch @klass
+            switch @className
               when 'int'
                 data = parseInt(data, 10)
                 if _.isString(_data) && _data != data.toString()
@@ -123,7 +197,7 @@ class AppInputModel
                 else
                   @error(null)
           )
-        else if @klass == "hash" && _.isString(value)
+        else if @className == "hash" && _.isString(value)
           if value.length > 0
             try
               value = JSON.parse(value)
@@ -133,7 +207,7 @@ class AppInputModel
             value = undefined
         else
           _value = value
-          switch @klass
+          switch @className
             when 'int'
               value = parseInt(value, 10)
               if _.isString(_value) && _value != value.toString()

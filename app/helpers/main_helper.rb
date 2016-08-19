@@ -1,29 +1,4 @@
 module MainHelper
-  def format_graph(node, depth)
-    item = node[0]
-    deps = node[1]
-    s = "<tr><td>"
-    s += "&nbsp;&nbsp;" * depth
-    if item.accessible_by?(@context)
-      s += h(item.try(:name) || item.try(:title)) + " (" + item.uid + ")"
-    else
-      s += item.uid
-    end
-    s += "</td><td>"
-    if item.public?
-      s += "already public"
-    elsif item.user_id == @context.user_id
-      s += "[ ]"
-    else
-      s += "not yours"
-    end
-    s += "</td></tr>"
-    deps.each do |dep|
-      s += format_graph(dep, depth+1)
-    end
-    return s
-  end
-
   def graph_nodes(graph)
     s = ""
     nodes = {}
@@ -64,7 +39,14 @@ module MainHelper
     deps = graph[1]
     uid = item.uid
     if !nodes.has_key?(uid)
-      nodes[uid] = {labelType: 'html', label: content_tag(:div, unilinkfw(item), class: 'track-box'), class: item.public? ? 'public' : (item.user_id == @context.user_id ? 'own' : 'not_yours')}
+      if item.public?
+        classname = 'public'
+      elsif item.in_space?
+        classname = 'in_space'
+      else
+        classname = item.user_id == @context.user_id ? 'own' : 'not_yours'
+      end
+      nodes[uid] = {labelType: 'html', label: content_tag(:div, unilinkfw(item), class: 'track-box'), class: classname}
     end
     deps.each do |dep|
       graph_nodes_recursive(nodes, dep)

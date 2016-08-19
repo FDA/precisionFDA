@@ -3,8 +3,8 @@ class CommentsController < ApplicationController
   before_action :require_login_or_guest, only: [:index, :show]
 
   def index
-    @itemsFromParams = get_item_array_from_params
-    @item = @itemsFromParams.last
+    @items_from_params = get_item_array_from_params
+    @item = @items_from_params.last
     if @item.accessible_by?(@context)
       @item_path = pathify(@item)
       @item_comments_path = pathify_comments(@item)
@@ -16,8 +16,8 @@ class CommentsController < ApplicationController
   end
 
   def show
-    @itemsFromParams = get_item_array_from_params
-    @item = @itemsFromParams.last
+    @items_from_params = get_item_array_from_params
+    @item = @items_from_params.last
     if @item.accessible_by?(@context)
       @item_path = pathify(@item)
       @item_comments_path = pathify_comments(@item)
@@ -29,8 +29,8 @@ class CommentsController < ApplicationController
   end
 
   def edit
-    @itemsFromParams = get_item_array_from_params
-    @item = @itemsFromParams.last
+    @items_from_params = get_item_array_from_params
+    @item = @items_from_params.last
     if @item.accessible_by?(@context)
       @item_path = pathify(@item)
       @item_comments_path = pathify_comments(@item)
@@ -43,17 +43,17 @@ class CommentsController < ApplicationController
 
   def create
     if request.post?
-      itemsFromParams = get_item_array_from_params
-      item = itemsFromParams.last
-      item_comments_path = pathify_comments(item)
-      c = comment_params
-      if item.present?
+      items_from_params = get_item_array_from_params
+      item = items_from_params.last
+      if item.present? && item.accessible_by?(@context)
+        c = comment_params
         comment = Comment.build_from(item, @context.user_id, c[:body])
         if !comment.save
           flash[:error] = "There was a problem with adding your comment"
         end
-        redirect_to item_comments_path
+        redirect_to pathify_comments_redirect(item)
       else
+        flash[:error] = "You do not have permission to add a comment to this item"
         redirect_to root_url
       end
     else
@@ -62,13 +62,12 @@ class CommentsController < ApplicationController
   end
 
   def update
-    itemsFromParams = get_item_array_from_params
-    item =  itemsFromParams.last
-    item_comments_path = pathify_comments(item)
+    items_from_params = get_item_array_from_params
+    item = items_from_params.last
     comment = Comment.find_by(id: params[:id], user_id: @context.user_id)
     if !comment.nil?
       if comment.update_attributes(comment_params)
-        redirect_to item_comments_path
+        redirect_to pathify_comments_redirect(item)
         return
       else
         render 'edit'
@@ -77,9 +76,8 @@ class CommentsController < ApplicationController
   end
 
   def destroy
-    itemsFromParams = get_item_array_from_params
-    item =  itemsFromParams.last
-    item_comments_path = pathify_comments(item)
+    items_from_params = get_item_array_from_params
+    item =  items_from_params.last
     comment = Comment.find_by(id: params[:id], user_id: @context.user_id)
     if !comment.nil?
       comment.destroy
@@ -87,7 +85,7 @@ class CommentsController < ApplicationController
       flash[:error] = "This comment could not be deleted"
     end
 
-    redirect_to item_comments_path
+    redirect_to pathify_comments_redirect(item)
   end
 
   private

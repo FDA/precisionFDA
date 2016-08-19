@@ -14,6 +14,9 @@
           <%= link_to(@discussion.title, discussion_path(@discussion)) %>
         </div>
       </div>
+      <% if @answer.scope != 'public' %>
+        <span><span class="fa fa-lock"></span> This answer has not been published yet</span>
+      <% end %>
     </div>
   </div>
 </div>
@@ -21,8 +24,8 @@
 
 <div class="pfda-toolbar clearfix">
   <div class="btn-toolbar pull-left">
-    <% if @answer.scope != 'public' %>
-      <span class="btn-static"><span class="fa fa-lock"></span> This answer has not been published yet</span>
+    <% if @answer.editable_by?(@context) %>
+      <button class="btn btn-default" data-bind="click: objectSelector.open"><span class="fa fa-plus" aria-hidden="true"></span> Attach to Answer...</button>
     <% end %>
   </div>
   <div class="btn-toolbar pull-right">
@@ -35,6 +38,10 @@
     <% end %>
   </div>
 </div>
+
+<% if @answer.editable_by?(@context) %>
+  <%= render "_partials/selector_modal" %>
+<% end %>
 
 <div class="container-fluid container-padded">
   <%= render "notes/note_edit" %>
