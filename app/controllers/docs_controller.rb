@@ -7,6 +7,7 @@ class DocsController < ApplicationController
   end
 
   def show
+    section_name = params[:section] ? params[:section] : "intro"
     @sections = [
       { name: "intro", title: "Introduction"},
       { name: "files", title: "Files"},
@@ -19,8 +20,8 @@ class DocsController < ApplicationController
       { name: "publishing", title: "Publishing"},
       { name: "licenses", title: "Licenses"}
     ]
-    @active_section = params[:section] ? params[:section] : "intro"
+    @active_section = @sections.find {|s| s[:name] == section_name }
 
-    raise "Not a valid documentation section" unless @sections.map{|s| s[:name]}.include?(@active_section)
+    raise "Not a valid documentation section" if @active_section.nil?
   end
 end

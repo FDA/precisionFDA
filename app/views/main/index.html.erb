@@ -30,7 +30,7 @@
               Get Started
             </li>
             <li><a class="btn btn-default" href="<%= guidelines_path %>"><span class="fa fa-fw fa-institution"></span> Guidelines</a></li>
-            <li><a class="btn btn-default" href="<%= about_path %>/how"><span class="fa fa-fw fa-book"></span> Docs</a></li>
+            <li><a class="btn btn-default" href="<%= docs_path %>"><span class="fa fa-fw fa-book"></span> Docs</a></li>
           </ul>
           <div class="pfda-cards pfda-cards-list pfda-tutorial text-left">
 
@@ -261,7 +261,7 @@
 
 <% if !@context.logged_in_or_guest? %>
 <div class="below-fold-actions">
-  <a class="btn accessible-btn-primary btn-lg" href="<%= about_path %>">
+  <a class="btn accessible-btn-primary btn-lg" href="<%= docs_path %>">
     <span class="fa fa-info-circle" aria-hidden="true"></span> Learn more about precisionFDA
   </a>
   <br>
