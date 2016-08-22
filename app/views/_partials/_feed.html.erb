@@ -7,9 +7,10 @@
         </div>
         <div class="media-body">
           <ul class="pfda-post-metadata list-inline">
-            <li class="pfda-post-user"><%= link_to post.user.full_name, user_path(post.user.dxuser) , class: 'link-dark'%></li>
-            <li class="pfda-post-org"><%= post.user.org.name %></li>
-            <li class="pfda-post-timestamp"><%= time_ago_in_words(post.created_at) %> ago</li>
+            <li>
+              <span class="pfda-post-user"><%= link_to post.user.full_name, user_path(post.user.dxuser) , class: 'link-dark'%></span>
+              from <span class="pfda-post-org"><%= post.user.org.name %></span> shared <span class="pfda-post-timestamp"><%= time_ago_in_words(post.created_at) %> ago</span> 
+            </li>
           </ul>
           <%= unilinkfw(post, {title_class: 'pfda-post-title'}) %>
           <ul class="pfda-post-actions list-inline list-inline-bullets">
@@ -21,6 +22,6 @@
           </ul>
         </div>
       </div>
-    </li>
+    </>
   <% end %>
 </ul>

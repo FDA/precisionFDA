@@ -6,7 +6,6 @@
   .pfda-post
     padding: $padding-large-vertical
     .pfda-post-title
-      font-weight: bold
       font-size: 18px
       .fa
         left: 15px
@@ -14,10 +13,12 @@
         margin-top: 5px
         opacity: 0.5
     .pfda-post-metadata
-      color: $text-muted
+      color: lighten($text-muted, 15%)
       line-height: 32px
       .pfda-post-user
         font-weight: bold
-        font-size: 14px
+        color: $text-muted
+      .pfda-post-org, .pfda-post-timestamp
+        color: $text-muted
     .pfda-post-actions
       color: $text-muted
