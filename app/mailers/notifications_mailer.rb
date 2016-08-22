@@ -50,4 +50,30 @@ class NotificationsMailer < ApplicationMailer
          reply_to: @license.user.email,
          subject: "Your license was revoked for \"#{@license.title}\""
   end
+
+  def space_activation_email(space, membership)
+    @space = space
+    @membership = membership
+    @user = membership.user
+    mail to: @user.email,
+         subject: "Action required to activate new space \"#{@space.title}\""
+  end
+
+  def space_activated_email(space, membership)
+    @space = space
+    @membership = membership
+    @user = membership.user
+    mail to: @user.email,
+         subject: "Your space was activated: \"#{@space.title}\""
+  end
+
+  def space_invitation_email(space, membership, admin)
+    @space = space
+    @membership = membership
+    @user = membership.user
+    @admin = admin
+    mail to: @user.email,
+         reply_to: @admin.user.email,
+         subject: "#{@admin.user.full_name} added you to the space \"#{@space.title}\""
+  end
 end

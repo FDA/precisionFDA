@@ -17,7 +17,7 @@
 #
 
 class Space < ActiveRecord::Base
-  validates :space_type, presence: true, acceptance: { accept: ['group', 'submission'] }
+  validates :space_type, presence: true, inclusion: {in: ['group', 'submission']}
 
   has_many :space_memberships
   has_many :users, {through: :space_memberships}
@@ -60,7 +60,11 @@ class Space < ActiveRecord::Base
   end
 
   def host_lead
-    space_memberships.hosts.admins.first.user
+    host_lead_member.user
+  end
+
+  def host_lead_member
+    space_memberships.hosts.admins.first
   end
 
   def host_lead?(context)
@@ -68,7 +72,11 @@ class Space < ActiveRecord::Base
   end
 
   def guest_lead
-    space_memberships.guests.admins.first.user
+    guest_lead_member.user
+  end
+
+  def guest_lead_member
+    space_memberships.guests.admins.first
   end
 
   def guest_lead?(context)
@@ -178,8 +186,8 @@ class Space < ActiveRecord::Base
       space = Space.create!(space_params)
 
       # Add leads as ADMINs
-      space.add_or_update_member(papi, host_dxorg, space_params[:host_lead_dxuser], 'ADMIN', 'HOST')
-      space.add_or_update_member(papi, guest_dxorg, space_params[:guest_lead_dxuser], 'ADMIN', 'GUEST')
+      host_lead = space.add_or_update_member(papi, host_dxorg, space_params[:host_lead_dxuser], 'ADMIN', 'HOST')
+      guest_lead = space.add_or_update_member(papi, guest_dxorg, space_params[:guest_lead_dxuser], 'ADMIN', 'GUEST')
 
       # Remove pfda admin from orgs
       papi.call(host_dxorg, "removeMember", {user: "user-precisionfda.admin"})

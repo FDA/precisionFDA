@@ -39,4 +39,23 @@ class NotifierPreview < ActionMailer::Preview
     user = User.last
     NotificationsMailer.license_revoked_email(license, user)
   end
+
+  def space_activation_email
+    space = Space.last
+    membership = space.space_memberships.last
+    NotificationsMailer.space_activation_email(space, membership)
+  end
+
+  def space_activated_email
+    space = Space.last
+    membership = space.space_memberships.last
+    NotificationsMailer.space_activation_email(space, membership)
+  end
+
+  def space_invitation_email
+    space = Space.last
+    membership = space.space_memberships.last
+    admin = space.space_memberships.hosts.admins.first
+    NotificationsMailer.space_invitation_email(space, membership, admin)
+  end
 end
