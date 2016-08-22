@@ -20,7 +20,7 @@ class NoteAttachModel
           return _.filter(notes, (note) -> _.includes(notesSearchIDs, note.dxid))
         else
           regexp = new RegExp(query, "i")
-          return _.filter(notes, (note) -> note.title.match regexp)
+          return _.filter(notes, (note) -> !_.isBlank(note.title) && note.title.match regexp)
       else
         return notes
     )
@@ -97,6 +97,7 @@ class NoteAttachModel
     # params = {item_id: @id, item_type: @type}
     params = _.defaults(params, {
       fields: ["title", "note_type"]
+      editable: true
     })
     @loading(true)
     Precision.api '/api/list_notes', params, (notes) =>
