@@ -79,7 +79,7 @@ GEM
     exception_notification (4.1.1)
       actionmailer (>= 3.0.4)
       activesupport (>= 3.0.4)
-    execjs (2.6.0)
+    execjs (2.7.0)
     foundation_emails (2.2.0.0)
     globalid (0.3.7)
       activesupport (>= 4.1.0)
@@ -97,7 +97,7 @@ GEM
       railties (>= 4.2.0)
       thor (>= 0.14, < 2.0)
     json (1.8.3)
-    kaminari (0.16.3)
+    kaminari (0.17.0)
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
     kgio (2.10.0)
@@ -213,7 +213,7 @@ GEM
       railties (>= 4.0)
       sprockets-rails (>= 2.0, < 4.0)
     websocket (1.2.2)
-    wice_grid (3.6.0.pre4)
+    wice_grid (3.6.2)
       activerecord (> 3.2)
       coffee-rails (> 3.2)
       kaminari (~> 0.16)
@@ -259,7 +259,7 @@ DEPENDENCIES
   unicorn (~> 4.9.0)
   web-console (~> 2.0)
   websocket
-  wice_grid (= 3.6.0.pre4)
+  wice_grid
 
 BUNDLED WITH
    1.10.6

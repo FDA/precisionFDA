@@ -1,4 +1,3 @@
-# encoding: utf-8
 if defined?(Wice::Defaults)
 
   # Default number of rows to show per page.
@@ -33,6 +32,9 @@ if defined?(Wice::Defaults)
 
   # Default CSV field separator
   Wice::Defaults::CSV_FIELD_SEPARATOR = ','
+
+  # Default CSV encoding (p.e. 'CP1252:UTF-8' to make Microsoft Excel(tm) happy)
+  Wice::Defaults::CSV_ENCODING = nil
 
   # The strategy when to show the filter.
   # * <tt>:when_filtered</tt> - when the table is the result of filtering
@@ -131,15 +133,15 @@ if defined?(Wice::Defaults)
 
   # Format of the date displayed.
   # If you change the format, make sure to check if +DATE_PARSER+ can still parse this string.
-  Wice::Defaults::DATE_FORMAT     =  '%Y-%m-%d'
+  Wice::Defaults::DATE_FORMAT = '%Y-%m-%d'
 
   # Format of the date displayed in jQuery's Datepicker
   # If you change the format, make sure to check if +DATE_PARSER+ can still parse this string.
-  Wice::Defaults::DATE_FORMAT_JQUERY     =  'yy-mm-dd'
+  Wice::Defaults::DATE_FORMAT_JQUERY =  'yy-mm-dd'
 
   # Format of the date displayed in Bootstrap's Datepicker
   # If you change the format, make sure to check if +DATE_PARSER+ can still parse this string.
-  Wice::Defaults::DATE_FORMAT_BOOTSTRAP     =  'yyyy-mm-dd'
+  Wice::Defaults::DATE_FORMAT_BOOTSTRAP =  'yyyy-mm-dd'
 
   # With Calendar helpers enabled the parameter sent is the string displayed. This lambda will be given a date string in the
   # format defined by +DATETIME_FORMAT+ and must generate a DateTime object.
@@ -178,6 +180,9 @@ if defined?(Wice::Defaults)
 
   # The name of the page method (should correspond to Kaminari.config.page_method_name)
   Wice::Defaults::PAGE_METHOD_NAME = :page
+
+  # The name of the theme to use for the pagination with Kaminari
+  Wice::Defaults::PAGINATION_THEME = :wice_grid
 
   # By default ActiveRecord calls are always executed inside Model.unscoped{}.
   # Setting <tt>USE_DEFAULT_SCOPE</tt> to true will use the default scope for all queries.

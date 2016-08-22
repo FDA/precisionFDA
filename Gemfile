@@ -36,7 +36,7 @@ gem 'activerecord_any_of'
 gem 'rails_param'
 
 # WiceGrid is a Rails grid plugin: https://github.com/leikind/wice_grid
-gem "wice_grid", '3.6.0.pre4'
+gem "wice_grid"
 
 # Page-specific javascript for Rails done right
 gem "paloma", "5.0.0"
