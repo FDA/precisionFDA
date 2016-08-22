@@ -1,6 +1,6 @@
 <wrapper>
   <div class="hidden-email-preview">
-    License request approved for <%= @license.title %>
+    Start by sharing data and adding members to this space
   </div>
   <spacer size="16"></spacer>
   <container class="header">
@@ -11,7 +11,7 @@
         </a>
       </columns>
       <columns>
-        <p class="header-title text-right">License Request Approved</p>
+        <p class="header-title text-right">Space Activated</p>
       </columns>
     </row>
   </container>
@@ -19,11 +19,10 @@
     <row>
       <columns>
         <p>
-          You may now <%= link_to "use or download items", items_license_url(@license) %> associated with the license <%= link_to @license.title, license_url(@license) %>.
+          The space <strong><%= link_to @space.title, space_url(@space) %></strong> has been activated and you can now move data to share with members of the space.
         </p>
-        <p>
-          <%= link_to "View licensed items", items_license_url(@license), class: 'btn btn-email-primary' %>
-        </p>
+
+        <button class="radius" href="<%= space_url(@space) %>">View Space</button>
       </columns>
     </row>
   </container>

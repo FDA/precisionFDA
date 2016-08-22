@@ -1,6 +1,6 @@
 <wrapper>
   <div class="hidden-email-preview">
-    License request approved for <%= @license.title %>
+    Space activation request for <%= @space.title %> as <%= "#{@membership.side} #{@membership.role}" %>
   </div>
   <spacer size="16"></spacer>
   <container class="header">
@@ -11,7 +11,7 @@
         </a>
       </columns>
       <columns>
-        <p class="header-title text-right">License Request Approved</p>
+        <p class="header-title text-right">Space Activation Request</p>
       </columns>
     </row>
   </container>
@@ -19,11 +19,13 @@
     <row>
       <columns>
         <p>
-          You may now <%= link_to "use or download items", items_license_url(@license) %> associated with the license <%= link_to @license.title, license_url(@license) %>.
+          The space <strong><%= link_to @space.title, space_url(@space) %></strong> was provisioned and listed you as <%= "#{@membership.side} #{@membership.role}" %>.
         </p>
+
         <p>
-          <%= link_to "View licensed items", items_license_url(@license), class: 'btn btn-email-primary' %>
+          To start adding data to this space both host and guest lead admin's must accept the invitation. Please visit the space and click on "Accept space".
         </p>
+        <button class="radius" href="<%= space_url(@space) %>">View Space Invitation</button>
       </columns>
     </row>
   </container>

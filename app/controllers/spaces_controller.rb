@@ -124,14 +124,27 @@ class SpacesController < ApplicationController
   def create
     redirect_to spaces_path unless @context.user.can_administer_site?
     if space_params[:host_lead_dxuser] == space_params[:guest_lead_dxuser]
-      flash[:error] = "Error: the host and guest lead cannot be the same user."
-    else
+      flash[:error] = "The host and guest lead cannot be the same user"
+    end
+
+    host_lead_user = User.find_by(dxuser: space_params[:host_lead_dxuser])
+    guest_lead_user = User.find_by(dxuser: space_params[:guest_lead_dxuser])
+
+    if host_lead_user.nil?
+      flash[:error] = "Host lead username #{space_params[:host_lead_dxuser]} not found"
+    elsif guest_lead_user.nil?
+      flash[:error] = "Guest lead username #{space_params[:guest_lead_dxuser]} not found"
+    end
+
+    if flash[:error].blank?
       @space = Space.provision(@context, space_params)
       if @space
+        NotificationsMailer.space_activation_email(@space, @space.host_lead_member).deliver_now!
+        NotificationsMailer.space_activation_email(@space, @space.guest_lead_member).deliver_now!
         redirect_to @space
         return
       else
-        flash[:error] = "Error: the space could not be provisioned for an unknown reason."
+        flash[:error] = "The space could not be provisioned for an unknown reason."
       end
     end
     @space = Space.new(space_params)
@@ -146,7 +159,7 @@ class SpacesController < ApplicationController
         flash[:success] = "Space updated"
         redirect_to space_path(@space)
       else
-        flash[:error] = "Error: Could not update the space. Please try again."
+        flash[:error] = "Could not update the space. Please try again."
         render :edit
       end
     end
@@ -172,6 +185,8 @@ class SpacesController < ApplicationController
         end
         if space.host_project? && space.guest_project?
           space.state = "ACTIVE"
+          NotificationsMailer.space_activated_email(space, space.host_lead_member).deliver_now!
+          NotificationsMailer.space_activated_email(space, space.guest_lead_member).deliver_now!
         end
         space.save
       end
@@ -203,6 +218,8 @@ class SpacesController < ApplicationController
           # If the username didn't return a member
           if !member
             notAdded.push(username)
+          else
+            NotificationsMailer.space_invitation_email(space, member, admin).deliver_now!
           end
         end
 
@@ -238,13 +255,17 @@ class SpacesController < ApplicationController
   private
     def space_params
       p = params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser, :space_type, :cts)
-      p.require(:name, :host_lead_dxuser, :guest_lead_dxuser, :space_type)
+      p.require(:name)
+      p.require(:host_lead_dxuser)
+      p.require(:guest_lead_dxuser)
+      p.require(:space_type)
       return p
     end
 
     def update_space_params
       p = params.require(:space).permit(:name, :description, :space_type, :cts)
-      p.require(:name, :space_type)
+      p.require(:name)
+      p.require(:space_type)
       return p
     end
 end
