@@ -132,7 +132,7 @@ class ApiController < ApplicationController
 
       scopes = params[:opts][:scopes]
       if !scopes.nil?
-        fail "Option 'scopes' can only be an Array of Strings that are one of public, private or a space-xxxx id." unless scopes.is_a?(Array) && scopes.all?{ |s| s == 'public' || s == 'private' || s =~ /^scope-(\d+)$/ }
+        fail "Option 'scopes' can only be an Array of Strings that are one of public, private or a space-xxxx id." unless scopes.is_a?(Array) && scopes.all?{ |s| s == 'public' || s == 'private' || s =~ /^space-(\d+)$/ }
       end
 
       classes = params[:opts][:classes]
@@ -239,7 +239,7 @@ class ApiController < ApplicationController
     end
 
     if params[:scopes].present?
-      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^scope-(\d+)$/ }
+      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^space-(\d+)$/ }
 
       files = files.where(scope: params[:scopes])
     end
@@ -282,7 +282,7 @@ class ApiController < ApplicationController
     end
 
     if params[:scopes].present?
-      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^scope-(\d+)$/ }
+      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^space-(\d+)$/ }
 
       notes = notes.where(scope: params[:scopes])
     end
@@ -332,7 +332,7 @@ class ApiController < ApplicationController
     end
 
     if params[:scopes].present?
-      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^scope-(\d+)$/ }
+      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^space-(\d+)$/ }
 
       comparisons = comparisons.where(scope: params[:scopes])
     end
@@ -369,7 +369,7 @@ class ApiController < ApplicationController
     end
 
     if params[:scopes].present?
-      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^scope-(\d+)$/ }
+      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^space-(\d+)$/ }
       apps = apps.where(scope: params[:scopes])
     end
 
@@ -407,7 +407,7 @@ class ApiController < ApplicationController
     end
 
     if params[:scopes].present?
-      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^scope-(\d+)$/ }
+      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^space-(\d+)$/ }
       jobs = jobs.where(scope: params[:scopes])
     end
 
@@ -451,7 +451,7 @@ class ApiController < ApplicationController
     end
 
     if params[:scopes].present?
-      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^scope-(\d+)$/ }
+      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^space-(\d+)$/ }
       assets = assets.where(scope: params[:scopes])
     end
 
