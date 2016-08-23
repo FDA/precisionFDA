@@ -99,7 +99,7 @@ class Note < ActiveRecord::Base
     update_attributes(title: new_name)
   end
 
-  def self.publish(notes, scope)
+  def self.publish(notes, context, scope)
     count = 0
     notes.uniq.each do |note|
       note.with_lock do

@@ -88,7 +88,7 @@ class Space < ActiveRecord::Base
   end
 
   def authorized_users_for_apps
-    return [space.host_dxorg, space.guest_dxorg]
+    return [host_dxorg, guest_dxorg]
   end
 
   def add_or_update_member(api, org_id, dxuser, role, side)
