@@ -131,14 +131,14 @@ class NoteModel
   constructor: (note, @parentModel) ->
     @uid = note.uid
     @id = note.id
+    @className = note.className
     @path = note.path
     @title = note.title
     @content = ko.observable()
-    @note_type = note.note_type ? 'Note'
     @loading = ko.observable(false)
 
   getDescribe: () ->
-    if _.isUndefined(@content.peek())
+    if _.isUndefined(@content.peek()) && !@loading()
       @loading(true)
       params =
         uid: @uid
