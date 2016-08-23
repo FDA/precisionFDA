@@ -1118,18 +1118,18 @@ class ApiController < ApplicationController
   # or multiple notes to an item
   # Inputs
   #
-  # note_ids (Array[integer], required): array of note ids
-  # item (Array[object], required): array of items with id, type
-  #     item.type (string): type of string from App, Comparison, Job, or UserFile
+  # note_uids (Array[String], required): array of note, discussion, answer uids
+  # item (Array[Object], required): array of items with id, type
+  #     item.type (String): type of string from App, Comparison, Job, or UserFile
   #
   # Outputs:
   #
-  # notes_added (Array[integer])
-  # items_added (Array[integer])
+  # notes_added (Array[String])
+  # items_added (Array[Integer])
   #
   def attach_to_notes
-    note_ids = params[:note_ids]
-    fail "Parameter 'note_ids' need to be an Array of Note ids" unless note_ids.is_a?(Array) && note_ids.all? { |id| id.is_a?(Numeric) }
+    note_uids = params[:note_uids]
+    fail "Parameter 'note_uids' need to be an Array of Note, Answer, or Discussion uids" unless note_uids.is_a?(Array) && note_uids.all? { |uid| uid =~ /^(note|discussion|answer)-(\d+)$/ }
 
     items = params[:items]
     fail "Items need to be an array of objects with id and type (one of App, Comparison, Job, or UserFile)" unless items.is_a?(Array) && items.all? { |item| item[:id].is_a?(Numeric) && item[:type].is_a?(String) && ["App", "Comparison", "Job", "UserFile"].include?(item[:type])}
@@ -1137,15 +1137,17 @@ class ApiController < ApplicationController
     notes_added = {}
     items_added = {}
     Note.transaction do
-      note_ids.each do |note_id|
-        note = Note.editable_by(@context).find_by!(id: note_id)
-        items.each do |item|
-          item[:type] = item[:type].present? ? item[:type] : type_from_classname(item[:className])
-          note.attachments.find_or_create_by(item_id: item[:id], item_type: item[:type])
-          items_added["#{item[:type]}-#{item[:id]}"] = true
+      note_uids.each do |note_uid|
+        note_item = item_from_uid(note_uid)
+        if !note_item.nil? && note_item.editable_by?(@context)
+          items.each do |item|
+            item[:type] = item[:type].present? ? item[:type] : type_from_classname(item[:className])
+            note_item.attachments.find_or_create_by(item_id: item[:id], item_type: item[:type])
+            items_added["#{item[:type]}-#{item[:id]}"] = true
+          end
+          notes_added[note_uid] = true
+          note_item.save
         end
-        notes_added[note_id] = true
-        note.save
       end
     end
 

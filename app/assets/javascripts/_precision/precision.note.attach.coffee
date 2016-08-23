@@ -112,7 +112,7 @@ class NoteAttachModel
     selectedNotes = @notes.selected.peek()
     return if !@canAttach.peek() && _.isEmpty(selectedNotes)
     params =
-      note_ids: _.map(selectedNotes, (note) -> note.id)
+      note_uids: _.map(selectedNotes, (note) -> note.uid)
       items: [{
         id: @id
         type: @type
