@@ -364,9 +364,12 @@ class User < ActiveRecord::Base
 
   def self.sync_job_state(result, job, user, token)
     state = result["describe"]["state"]
+
+    # Only do anything if local job state is stale
     if state != job.state
       if state == "done"
-        output = result["describe"]["output"]
+        # Use serialization to deep copy result since output will be modified
+        output = JSON.parse(result["describe"]["output"].to_json)
         output_file_ids = []
         output_file_cache = []
         output.each_key do |key|
@@ -396,19 +399,29 @@ class User < ActiveRecord::Base
             })
           end
         end
-      end
-      Job.transaction do
-        job.reload
-        if state != job.state
-          if state == "done"
+
+        # Job is done and outputs need to be created
+        Job.transaction do
+          job.reload
+          if state != job.state
             output_file_cache.each do |output_file|
               UserFile.create!(output_file)
             end
-            job.run_outputs = result["describe"]["output"]
+            job.run_outputs = output
+            job.state = state
+            job.describe = result["describe"]
+            job.save!
           end
-          job.state = state
-          job.describe = result["describe"]
-          job.save!
+        end
+      else
+        # Job state changed but not done (no outputs)
+        Job.transaction do
+          job.reload
+          if state != job.state
+            job.state = state
+            job.describe = result["describe"]
+            job.save!
+          end
         end
       end
     end
