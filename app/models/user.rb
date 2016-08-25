@@ -89,7 +89,11 @@ class User < ActiveRecord::Base
   end
 
   def space_uids
-    space_memberships.pluck("distinct 'space-'||space_id")
+    if Rails.env.development?
+      space_memberships.pluck("distinct 'space-'||space_id")
+    else
+      space_memberships.pluck("distinct concat('space-', space_id)")
+    end
   end
 
   def username
