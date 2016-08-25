@@ -81,7 +81,6 @@ class ProfileController < ApplicationController
           user[:open_files_count] = 0
           user[:closing_files_count] = 0
           user[:pending_comparisons_count] = 0
-          user[:pending_jobs_count] = 0
           user[:open_assets_count] = 0
           user[:closing_assets_count] = 0
           user[:first_name] = @first
@@ -247,7 +246,6 @@ class ProfileController < ApplicationController
           user[:open_files_count] = 0
           user[:closing_files_count] = 0
           user[:pending_comparisons_count] = 0
-          user[:pending_jobs_count] = 0
           user[:open_assets_count] = 0
           user[:closing_assets_count] = 0
           user[:first_name] = @first_name

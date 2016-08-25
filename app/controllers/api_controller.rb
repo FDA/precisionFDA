@@ -873,13 +873,10 @@ class ApiController < ApplicationController
     end
     opts[:provenance] = provenance
 
-    User.transaction do
+    Job.transaction do
       job = Job.create!(opts)
       job.input_file_ids = input_file_ids
       job.save!
-      user = User.find(@context.user_id)
-      user.pending_jobs_count = user.pending_jobs_count + 1
-      user.save!
     end
 
     render json: {id: jobid}
