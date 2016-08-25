@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160808182110) do
+ActiveRecord::Schema.define(version: 20160823155845) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id"
@@ -426,7 +426,6 @@ ActiveRecord::Schema.define(version: 20160808182110) do
     t.datetime "created_at",                              null: false
     t.datetime "updated_at",                              null: false
     t.integer  "org_id"
-    t.integer  "pending_jobs_count"
     t.integer  "open_assets_count"
     t.integer  "closing_assets_count"
     t.string   "first_name"

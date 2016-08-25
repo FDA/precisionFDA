@@ -26,7 +26,7 @@ end
 namespace :provision do
   desc "Provision a user and make them the new org admin"
   task user: :environment do
-    raise "Admin token not defined" unless ADMIN_TOKEN.present?    
+    raise "Admin token not defined" unless ADMIN_TOKEN.present?
     api = DNAnexusAPI.new(ADMIN_TOKEN)
 
     org = {}
@@ -79,7 +79,7 @@ namespace :provision do
 
     puts "Provisioning user (username: #{user[:dxuser]}, final id: #{dxuserid})"
     auth.call("user", "new", {username: user[:dxuser], email: user[:email], first: user[:first_name], last: user[:last_name], billTo: ORG_EVERYONE})
-    
+
     puts "Inviting user #{dxuserid} to org #{dxorg} as an admin"
     api.call(dxorg, "invite", {invitee: dxuserid, level: 'ADMIN', suppressEmailNotification: true})
 
@@ -99,7 +99,6 @@ namespace :provision do
       user[:open_files_count] = 0
       user[:closing_files_count] = 0
       user[:pending_comparisons_count] = 0
-      user[:pending_jobs_count] = 0
       user[:open_assets_count] = 0
       user[:closing_assets_count] = 0
       u = User.create!(user)
