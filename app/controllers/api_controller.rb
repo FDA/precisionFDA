@@ -447,7 +447,7 @@ class ApiController < ApplicationController
 
     if !ids.nil?
       fail "The 'ids' parameter needs to be an Array of String asset ids" unless ids.is_a?(Array) && ids.all? { |id| id.is_a?(String) }
-      assets.where(dxid: ids)
+      assets = assets.where(dxid: ids)
     end
 
     if params[:scopes].present?
