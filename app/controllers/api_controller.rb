@@ -855,6 +855,7 @@ class ApiController < ApplicationController
       state: "idle",
       name: name,
       describe: {},
+      scope: "private",
       user_id: @context.user_id
     }
     if run_instance_type.present?
