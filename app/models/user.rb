@@ -8,8 +8,6 @@
 #  public_files_project        :string
 #  private_comparisons_project :string
 #  public_comparisons_project  :string
-#  open_files_count            :integer          default(0)
-#  closing_files_count         :integer          default(0)
 #  pending_comparisons_count   :integer          default(0)
 #  schema_version              :integer
 #  created_at                  :datetime         not null
@@ -134,31 +132,23 @@ class User < ActiveRecord::Base
 
   def self.sync_file!(context, file_id)
     return if context.guest?
-    user_id = context.user_id
+    user = context.user
     token = context.token
-    User.transaction do
-      user = User.find(user_id)
-      file = user.uploaded_files.find(file_id) # Re-check file id
-      if file.state != "closed"
-        result = DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: [file.dxid]})["results"][0]
-        sync_file_state(result, file, user)
-      end
+    file = user.uploaded_files.find(file_id) # Re-check file id
+    if file.state != "closed"
+      result = DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: [file.dxid]})["results"][0]
+      sync_file_state(result, file, user)
     end
   end
 
   def self.sync_files!(context)
     return if context.guest?
-    user_id = context.user_id
+    user = context.user
     token = context.token
-    User.transaction do
-      user = User.find(user_id)
-      if (user.open_files_count != 0) || (user.closing_files_count != 0)
-        # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-        user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
-          DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
-            sync_file_state(result, files[i], user)
-          end
-        end
+    # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
+    user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
+      DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
+        sync_file_state(result, files[i], user)
       end
     end
   end
@@ -284,21 +274,31 @@ class User < ActiveRecord::Base
   def self.sync_file_state(result, file, user)
     if result["statusCode"] == 404
       # File was deleted by the DNAnexus stale file daemon; delete it on our end as well
-      if file.state == "open"
-        user.open_files_count = user.open_files_count - 1
-      else
-        user.closing_files_count = user.closing_files_count - 1
+      UserFile.transaction do
+        # Use find_by(file.d) since file.reload may raise ActiveRecord::RecordNotFound
+        file = UserFile.find_by(id: file.id)
+        if file.present?
+          file.destroy!
+        end
       end
-      user.save!
-      file.destroy!
     elsif result["describe"].present?
-      state = result["describe"]["state"]
-      if state != file.state
-        # NOTE the following should never fail
-        raise unless ((state == "closed") && (file.state == "closing"))
-        file.update!(state: state, file_size: result["describe"]["size"])
-        user.closing_files_count = user.closing_files_count - 1
-        user.save!
+      remote_state = result["describe"]["state"]
+      # Only begin transaction if stale file detected
+      if remote_state != file.state
+        UserFile.transaction do
+          file.reload
+          # confirm local file state is stale
+          if remote_state != file.state
+            if remote_state == "closed"
+              file.update!(state: remote_state, file_size: result["describe"]["size"])
+            elsif remote_state == "closing" && file.state == "open"
+              file.update!(state: remote_state)
+            else
+              # NOTE we should never be here
+              raise
+            end
+          end
+        end
       end
     else
       # NOTE we should never be here

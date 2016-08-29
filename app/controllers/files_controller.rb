@@ -171,15 +171,6 @@ class FilesController < ApplicationController
         redirect_to file_path(@file.dxid)
         return
       end
-      if @file.state == "open"
-        user = User.find(@context.user_id)
-        user.open_files_count = user.open_files_count - 1
-        user.save!
-      elsif @file.state == "closing"
-        user = User.find(@context.user_id)
-        user.closing_files_count = user.closing_files_count - 1
-        user.save!
-      end
       @file.destroy
     end
 
