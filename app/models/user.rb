@@ -275,7 +275,7 @@ class User < ActiveRecord::Base
     if result["statusCode"] == 404
       # File was deleted by the DNAnexus stale file daemon; delete it on our end as well
       UserFile.transaction do
-        # Use find_by(file.d) since file.reload may raise ActiveRecord::RecordNotFound
+        # Use find_by(file.id) since file.reload may raise ActiveRecord::RecordNotFound
         file = UserFile.find_by(id: file.id)
         if file.present?
           file.destroy!
