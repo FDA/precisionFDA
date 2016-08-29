@@ -8,8 +8,6 @@
 #  public_files_project        :string
 #  private_comparisons_project :string
 #  public_comparisons_project  :string
-#  open_files_count            :integer          default(0)
-#  closing_files_count         :integer          default(0)
 #  pending_comparisons_count   :integer          default(0)
 #  schema_version              :integer
 #  created_at                  :datetime         not null

@@ -536,7 +536,9 @@ class ApiController < ApplicationController
   def license_items
     license_id = params["license_id"]
     fail "License license_id needs to be an Integer" unless license_id.is_a?(Numeric) && (license_id.to_i == license_id)
-    license = License.editable_by(@context).find(license_id)
+
+    # Check if the license exists and is editable by the user. Throw 404 if otherwise.
+    License.editable_by(@context).find(license_id)
 
     items_to_license = params["items_to_license"]
     fail "License items_o_license needs to be an Array of Strings" unless items_to_license.is_a?(Array) && items_to_license.all? { |item|
@@ -573,22 +575,20 @@ class ApiController < ApplicationController
       fail "File description needs to be a String" unless description.is_a?(String)
     end
 
-    project = User.find(@context.user_id).private_files_project
+    project = @context.user.private_files_project
     dxid = DNAnexusAPI.new(@context.token).("file", "new", {"name": params[:name], "project": project})["id"]
 
-    User.transaction do
-      UserFile.create!(dxid: dxid,
-                       project: project,
-                       name: name,
-                       state: "open",
-                       description: description,
-                       user_id: @context.user_id,
-                       parent: User.find(@context.user_id),
-                       scope: 'private')
-      # Must get a fresh user inside the transaction
-      user = User.find(@context.user_id)
-      user.open_files_count = user.open_files_count + 1
-      user.save!
+    UserFile.transaction do
+      UserFile.create!(
+        dxid: dxid,
+        project: project,
+        name: name,
+        state: "open",
+        description: description,
+        user_id: @context.user_id,
+        parent: @context.user,
+        scope: 'private'
+      )
     end
 
     render json: {id: dxid}
@@ -676,7 +676,8 @@ class ApiController < ApplicationController
     id = params[:id]
     fail "Parameter 'id' needs to be a non-empty String" unless id.is_a?(String) && id != ""
 
-    file = UserFile.find_by!(dxid: id, state: "open", user_id: @context.user_id)
+    # Check that the file exists, is accessible by the user, and is in the open state. Throw 404 if otherwise.
+    UserFile.find_by!(dxid: id, state: "open", user_id: @context.user_id)
 
     result = DNAnexusAPI.new(@context.token).(id, "upload", {size: size, md5: md5, index: index})
 
@@ -696,14 +697,10 @@ class ApiController < ApplicationController
     file = UserFile.find_by!(dxid: id, user_id: @context.user_id, parent_type: "User")
     if file.state == "open"
       DNAnexusAPI.new(@context.token).(id, "close")
-      User.transaction do
+      UserFile.transaction do
         # Must recheck inside the transaction
         file.reload
         if file.state == "open"
-          user = User.find(@context.user_id)
-          user.open_files_count = user.open_files_count - 1
-          user.closing_files_count = user.closing_files_count + 1
-          user.save!
           file.state = "closing"
           file.save!
         end
