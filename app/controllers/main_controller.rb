@@ -228,7 +228,7 @@ class MainController < ApplicationController
     raise "Missing id in publish route" unless id.is_a?(String) && id.present?
 
     scope = params[:scope]
-    if scope.nil?
+    if scope.blank?
       scope = "public"
     elsif scope.is_a?(String)
       if scope != "public"
