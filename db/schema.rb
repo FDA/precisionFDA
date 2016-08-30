@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160826214939) do
+ActiveRecord::Schema.define(version: 20160827225404) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id"
@@ -53,6 +53,22 @@ ActiveRecord::Schema.define(version: 20160826214939) do
   add_index "app_series", ["latest_version_app_id"], name: "index_app_series_on_latest_version_app_id"
   add_index "app_series", ["scope"], name: "index_app_series_on_scope"
   add_index "app_series", ["user_id"], name: "index_app_series_on_user_id"
+
+  create_table "appathons", force: :cascade do |t|
+    t.string   "name"
+    t.integer  "admin_id"
+    t.integer  "meta_appathon_id"
+    t.text     "description"
+    t.string   "flag"
+    t.datetime "start_at"
+    t.datetime "end_at"
+    t.text     "meta"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
+
+  add_index "appathons", ["admin_id"], name: "index_appathons_on_admin_id"
+  add_index "appathons", ["meta_appathon_id"], name: "index_appathons_on_meta_appathon_id"
 
   create_table "apps", force: :cascade do |t|
     t.string   "dxid"
@@ -244,6 +260,20 @@ ActiveRecord::Schema.define(version: 20160826214939) do
 
   add_index "licenses", ["scope"], name: "index_licenses_on_scope"
   add_index "licenses", ["user_id"], name: "index_licenses_on_user_id"
+
+  create_table "meta_appathons", force: :cascade do |t|
+    t.string   "name"
+    t.string   "handle"
+    t.string   "template"
+    t.text     "description"
+    t.text     "meta"
+    t.datetime "start_at"
+    t.datetime "end_at"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "meta_appathons", ["handle"], name: "index_meta_appathons_on_handle", unique: true
 
   create_table "notes", force: :cascade do |t|
     t.string   "title"

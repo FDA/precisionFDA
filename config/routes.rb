@@ -118,6 +118,7 @@ Rails.application.routes.draw do
       end
       resources :comments
     end
+
     resources :licenses do
       post 'accept(/:redirect_to_uid)', on: :member, action: :accept, as: 'accept'
       match 'request_approval', on: :member, action: :request_approval, as: 'request_approval', via: [:get, :post]
@@ -132,6 +133,7 @@ Rails.application.routes.draw do
       get 'users', on: :member
       get 'items', on: :member
     end
+
     resources :spaces do
       get 'members', on: :member
       get 'data', on: :member
@@ -139,6 +141,16 @@ Rails.application.routes.draw do
       post 'rename', on: :member
       post 'invite', on: :member
       resources :comments
+    end
+
+    resources :meta_appathons, constraints: {appathon_id: /[^\/]+/ }  do
+      post 'rename', on: :member
+
+      resources :appathons, constraints: {id: /[^\/]+/} do
+        post 'rename', on: :member
+        post 'join', on: :member
+        resources :comments
+      end
     end
 
     resources :queries do

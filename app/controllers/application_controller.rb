@@ -180,6 +180,10 @@ class ApplicationController < ActionController::Base
       license_path(item)
     when "space"
       space_path(item)
+    when "meta_appathon"
+      meta_appathon_path(item)
+    when "appathon"
+      meta_appathon_appathon_path(item.meta_appathon, item)
     else
       raise "Unknown class #{item.klass}"
     end
@@ -211,6 +215,10 @@ class ApplicationController < ActionController::Base
       discussion_answer_comments_path(item.discussion, item.user.dxuser)
     when "space"
       space_comments_path(item)
+    when "meta_appathon"
+      meta_appathon_comments_path(item)
+    when "appathon"
+      meta_appathon_appathon_comments_path(item.meta_appathon, item)
     else
       raise "Unknown class #{item.klass}"
     end
@@ -228,7 +236,7 @@ class ApplicationController < ActionController::Base
       else
         pathify(item)
       end
-    when "file", "app", "job", "asset", "comparison", "answer", "space"
+    when "meta_appathon", "appathon", "file", "app", "job", "asset", "comparison", "answer", "space"
       pathify(item)
     else
       raise "Unknown class #{item.klass}"
@@ -248,8 +256,10 @@ class ApplicationController < ActionController::Base
         record = record.becomes(Asset)
       end
       return record
-    elsif uid =~ /^(comparison|note|discussion|answer|user|license|space)-(\d+)$/
+    elsif uid =~ /^(app-series|appathon|comparison|note|discussion|answer|user|license|space)-(\d+)$/
       klass = {
+        "app-series" => AppSeries,
+        "appathon" => Appathon,
         "comparison" => Comparison,
         "note" => Note,
         "discussion" => Discussion,
@@ -285,6 +295,14 @@ class ApplicationController < ActionController::Base
       else
         return [discussion]
       end
+    elsif params[:meta_appathon_id].present?
+        meta_appathon = MetaAppathon.find(params[:meta_appathon_id])
+        if params[:appathon_id].present?
+          appathon = Appathon.find_by!(meta_appathon_id: params[:meta_appathon_id], id: params[:appathon_id])
+          return [meta_appathon, appathon]
+        else
+          return [meta_appathon]
+        end
     elsif params[:note_id].present?
       return [Note.find(params[:note_id])]
     elsif params[:space_id].present?

@@ -237,7 +237,7 @@ class SpacesController < ApplicationController
 
   def rename
     @space = Space.editable_by(@context).find(params[:id])
-    name = space_params[:name]
+    name = params[:space][:title]
     if name.is_a?(String) && name != ""
       if @space.rename(name, @context)
         @space.reload
