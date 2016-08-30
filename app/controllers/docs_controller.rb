@@ -1,6 +1,5 @@
 class DocsController < ApplicationController
   skip_before_action :require_login
-  before_action :require_login_or_guest
 
   def index
     redirect_to show_docs_path("intro")
@@ -22,6 +21,6 @@ class DocsController < ApplicationController
     ]
     @active_section = @sections.find {|s| s[:name] == section_name }
 
-    raise "Not a valid documentation section" if @active_section.nil?
+    raise ActiveRecord::RecordNotFound if @active_section.nil?
   end
 end
