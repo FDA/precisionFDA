@@ -15,7 +15,7 @@ class MainController < ApplicationController
 
     @challenges = [@consistency_challenge, @truth_challenge]
 
-    if @context.logged_in?
+    if @context.logged_in_or_guest?
       notes = Note.real_notes.accessible_by_public.limit(10)
       answers = Answer.accessible_by_public.limit(10)
       discussions = Discussion.accessible_by_public.limit(10)
@@ -27,18 +27,22 @@ class MainController < ApplicationController
 
       @feed = (notes + answers + discussions + files + comparisons + apps + jobs + assets).sort_by {|a| a.created_at}.reverse
 
-      @notes_count = Note.real_notes.editable_by(@context).count
-      @files_count = UserFile.real_files.editable_by(@context).count
-      @comparisons_count = Comparison.editable_by(@context).count
-      @apps_count = App.editable_by(@context).count
-      @jobs_count = Job.editable_by(@context).count
-      @assets_count = Asset.editable_by(@context).count
-      User.transaction do
-        user = User.find(@context.user_id)
-        if !user.has_seen_guidelines
-          user.has_seen_guidelines = true
-          user.save!
-          show_guidelines = true
+      if @context.logged_in?
+        @notes_count = Note.real_notes.editable_by(@context).count
+        @files_count = UserFile.real_files.editable_by(@context).count
+        @comparisons_count = Comparison.editable_by(@context).count
+        @apps_count = App.editable_by(@context).count
+        @jobs_count = Job.editable_by(@context).count
+        @assets_count = Asset.editable_by(@context).count
+        if !@context.user.has_seen_guidelines
+          User.transaction do
+            user = User.find(@context.user_id)
+            if !user.has_seen_guidelines
+              user.has_seen_guidelines = true
+              user.save!
+              show_guidelines = true
+            end
+          end
         end
       end
     else
@@ -362,7 +366,7 @@ class MainController < ApplicationController
   end
 
   def tokify
-    context = @context.as_json
+    context = @context.as_json.slice(:user_id, :username, :token, :expiration, :org_id)
     context["expiration"] = [context["expiration"], Time.now.to_i + 1.day].min
     @key = rails_encryptor.encrypt_and_sign({context: context}.to_json)
   end
