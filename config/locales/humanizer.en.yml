@@ -5,8 +5,8 @@ en:
     questions:
       - question: Two plus two?
         answers: ["4", "four"]
-      - question: What does the A stand for in DNA?
-        answer: acid
+      - question: "What year was James Watson born in?"
+        answer: 1928
       - question: What does the F stand for in FDA?
         answer: food
       - question: What does the D stand for in FDA?
