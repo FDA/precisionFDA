@@ -20,9 +20,6 @@
         <p>The Apps page shows a collection of all the apps that you have access to. The "Relevant apps" section displays apps that you've created yourself, as well as third-party apps that you've run. The left pane displays the name of each app, and the username of its author underneath. (If the author is part of an organization, the name of the organization is prepended to the author's username). The right pane shows general information about the app, such as its input/output specifications, the app's "Readme" information, or any notes that it's attached to. If you've previously run this app, the right pane will display a list of jobs instead. You can also list jobs across all apps by clicking "All My Jobs" on the left.</p>
         <p>The "Explore" section lists all publicly contributed apps, in order of creation time. The "explorers" column counts the number of users who have run the app. The "Ran by you?" column is set to "Yes" if you've run the latest published revision of the app, or "Not this revision" if you've run an earlier revision. If you've never run the app, the column shows a button for you to try out the app.</p>
       </div>
-      <div class="bs-docs-section bs-docs-media-section">
-        <iframe width="100%" height="315" src="https://www.youtube.com/embed/oQgJ9WD7Nkg" frameborder="0" allowfullscreen></iframe>
-      </div>
       <div id="apps-run" class="h2">Running an app</div>
       <div class="bs-docs-section">
         <p>Click "Run App" to be taken to the app launch page. The page gets rendered according to the app's input/output specification. For each app input, you will be asked to provide a value. File inputs will present you with a "Select file..." button which you can use to choose a file from all the files accessible to you. String, integer, and float inputs will present you with a textbox to type a value (unless the author has pre-defined a set of choices for you to select from, in which case you will be presented with a drop-down menu). Boolean inputs will present you with True/False buttons.</p>
@@ -33,7 +30,7 @@
         <p>Once you click the "Run App" button on the upper right, the system will generate a new job that encapsulates that particular execution.</p>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <iframe width="100%" height="315" src="https://www.youtube.com/embed/P90E3jgL134" frameborder="0" allowfullscreen></iframe>
+        <%= video_iframe(@videos[:apps_run][:url]) %>
       </div>
       <div id="job-details" class="h2">Job details and logs</div>
       <div class="bs-docs-section">

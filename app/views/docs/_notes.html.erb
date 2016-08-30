@@ -10,7 +10,7 @@
         <p>Clicking on a note brings up the full note text. If the note has attachments, those are listed on the right hand side. Each attachment contains an icon to identify its type: <span class="fa fa-file-o"> </span> = File, <span class="fa fa-area-chart"> </span> = Comparison, <span class="fa fa-tasks"> </span> = Job, <span class="fa fa-cube"> </span> = App, and <span class="fa fa-file-archive-o"> </span> = Asset.</p>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <iframe width="100%" height="315" src="https://www.youtube.com/embed/c2-VlRxTZLM" frameborder="0" allowfullscreen></iframe>
+        <%= video_iframe(@videos[:notes][:url]) %>
       </div>
       <div id="notes-edit" class="h2">Editing notes</div>
       <div class="bs-docs-section">
@@ -31,9 +31,6 @@
         </div>
 
         <p>Tell us how you'd like this feature to evolve. Are you interested in the ability to comment on other people's notes? Would you care to "subscribe" to a note and get notifications when it changes? Should notes be collaboratively edited? <a href="mailto:precisionfda@fda.hhs.gov">Drop us a note</a> (no pun intended!) with your ideas and suggestions.</p>
-      </div>
-      <div class="bs-docs-section bs-docs-media-section">
-        <iframe width="100%" height="315" src="https://www.youtube.com/embed/dq32yPr0Gh4" frameborder="0" allowfullscreen></iframe>
       </div>
     </div>
     <!-- SIDEBAR NAVIGATION -->
