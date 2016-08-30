@@ -1206,6 +1206,7 @@ class ApiController < ApplicationController
   # Inputs
   #
   # uid (string, required): the uid of the item to upvote
+  # vote_scope (string, optional)
   #
   # Outputs:
   # uid (string): the uid of the item
@@ -1215,12 +1216,22 @@ class ApiController < ApplicationController
     uid = params[:uid]
     fail "Item uid needs to be a non-empty string" unless uid.is_a?(String) && uid != ""
 
+    vote_scope = params[:vote_scope]
+
     item = item_from_uid(uid)
-    if item.accessible_by?(@context) && ["discussion", "answer"].include?(item.klass)
-      item.liked_by(@context.user)
+    if item.accessible_by?(@context) && ["app-series", "discussion", "answer"].include?(item.klass)
+      if vote_scope.present?
+        appathon = item_from_uid(vote_scope, "appathon")
+        fail "#{uid} is not accessible by you in this scope" unless appathon.followed_by?(@context.user)
+        item.liked_by(@context.user, vote_scope: vote_scope)
+        upvote_count = item.get_upvotes(vote_scope: vote_scope).size
+      else
+        item.liked_by(@context.user)
+        upvote_count = item.get_upvotes.size
+      end
       render json: {
         uid: uid,
-        upvote_count: item.get_upvotes.size
+        upvote_count: upvote_count
       }
     else
       fail "#{uid} is not accessible by you"
@@ -1230,6 +1241,7 @@ class ApiController < ApplicationController
   # Inputs
   #
   # uid (string, required): the uid of the item to remove an upvote
+  # vote_scope (string, optional)
   #
   # Outputs:
   # uid (string): the uid of the item
@@ -1239,12 +1251,22 @@ class ApiController < ApplicationController
     uid = params[:uid]
     fail "Item uid needs to be a non-empty string" unless uid.is_a?(String) && uid != ""
 
+    vote_scope = params[:vote_scope]
+
     item = item_from_uid(uid)
-    if item.accessible_by?(@context) && ["discussion", "answer"].include?(item.klass)
-      item.unliked_by(@context.user)
+    if item.accessible_by?(@context) && ["app-series", "discussion", "answer"].include?(item.klass)
+      if vote_scope.present?
+        appathon = item_from_uid(vote_scope, "appathon")
+        fail "#{uid} is not accessible by you in this scope" unless appathon.followed_by?(@context.user)
+        item.unliked_by(@context.user, vote_scope: vote_scope)
+        upvote_count = item.get_upvotes(vote_scope: vote_scope).size
+      else
+        item.unliked_by(@context.user)
+        upvote_count = item.get_upvotes.size
+      end
       render json: {
         uid: uid,
-        upvote_count: item.get_upvotes.size
+        upvote_count: upvote_count
       }
     else
       fail "#{uid} is not accessible by you"

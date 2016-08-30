@@ -12,7 +12,7 @@ class Context
     @token = token
     @expiration = expiration
     @org_id = org_id
-    
+
     # Cache user, if logged in
     if logged_in?
       @user = User.find(@user_id)

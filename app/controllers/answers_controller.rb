@@ -14,7 +14,7 @@ class AnswersController < ApplicationController
 
     if @answer.nil?
       flash[:error] = "Sorry, this answer is not accessible"
-      redirect_to discussions_path()
+      redirect_to discussions_path
       return
     else
       @discussion = @answer.discussion

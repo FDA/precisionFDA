@@ -48,11 +48,12 @@ class User < ActiveRecord::Base
   has_many :accepted_licenses
   has_many :space_memberships
   has_many :spaces, {through: :space_memberships}
-
+  has_many :appathons
+  has_many :meta_appathons, {through: :appathons}
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 
   include Gravtastic
-  gravtastic :secure => true, :default => "mm"
+  gravtastic :secure => true, :default => "retro"
 
   acts_as_voter
   acts_as_followable

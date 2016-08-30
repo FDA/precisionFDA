@@ -22,8 +22,14 @@ class AppSeries < ActiveRecord::Base
   belongs_to :latest_version_app, class_name: 'App'
   belongs_to :user
 
+  acts_as_votable
+
+  def uid
+    "app-series-#{id}"
+  end
+
   def klass
-    "app"
+    "app-series"
   end
 
   def title
