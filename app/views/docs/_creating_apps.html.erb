@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <iframe width="100%" height="315" src="https://www.youtube.com/embed/f-DBLB2v1sM" frameborder="0" allowfullscreen></iframe>
+        <%= video_iframe(@videos[:apps_create][:url]) %>
       </div>
       <div id="dev-name" class="h2">App naming conventions</div>
       <div class="bs-docs-section">
@@ -503,6 +503,9 @@
       <div class="bs-docs-section">
         <p>When viewing any app, clicking the "Fork" button will bring up the app editor and initialize it with the specification of the original app. You can make any changes and then save them into a new private app owned by you. (Unlike GitHub, precisionFDA does not keep track of forks, and the operation is always private).</p>
         <p>In addition, this feature can be used to take a peek at the insides of an app &mdash; just fork it to bring up the editor, and the simply cancel the operation. This allows you to see the app's script, assets, etc.</p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section">
+        <%= video_iframe(@videos[:apps_fork][:url]) %>
       </div>
     </div>
     <!-- SIDEBAR NAVIGATION -->
