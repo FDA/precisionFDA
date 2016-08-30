@@ -2,7 +2,7 @@ class CreateAppathons < ActiveRecord::Migration
   def change
     create_table :appathons do |t|
       t.string :name, required: true
-      t.references :admin, index: true, foreign_key: true, required: true
+      t.references :admin, index: true, required: true
       t.references :meta_appathon, index: true, foreign_key: true, required: true
       t.text :description
       t.string :flag
@@ -12,5 +12,7 @@ class CreateAppathons < ActiveRecord::Migration
 
       t.timestamps null: false
     end
+
+    add_foreign_key :appathons, :users, column: 'admin_id'
   end
 end
