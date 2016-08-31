@@ -67,18 +67,29 @@
 </div>
 <% end %>
 
-<div class="appathon-container pfda-pane container-fluid">
-  <div class="pfda-pane-content">
-    <div class="pfda-appathon-participants">
-      <%= render "_partials/followers", followers: @appathon.user_followers, followable: @appathon, display_names: true %>
+<div class="appathon-container container-fluid container-padded">
+  <div class="panel panel-default">
+    <div class="pfda-pane">
+      <div class="pfda-pane-content">
+        <div class="pfda-appathon-participants">
+          <%= render "_partials/followers", followers: @appathon.user_followers, followable: @appathon, display_names: true %>
+        </div>
+
+        <% if @appathon.followed_by?(@context.user) %>
+        <div class="pfda-help-block">
+          <span class="fa fa-lightbulb-o" aria-hidden="true"></span><a href="/docs/creating_apps" target="_blank">Apps you create</a>and <a href="/docs/publishing" target="_blank">publish</a>within the app-a-thon start/end time will automatically show up here</a>
+        </div>
+        <% end %>
+
+        <%= render "appathons/app_cards", apps: @appathon.apps, vote_scope: @appathon.uid, is_appathon_followed: @appathon.followed_by?(@context.user)  %>
+      </div>
+      <% if @appathon.followed_by?(@context.user) %>
+      <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal pfda-pane-sidebar-padded-v">
+        <% if !@commentable.nil? %>
+          <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @commentable %>
+        <% end %>
+      </div>
+      <% end %>
     </div>
-    <%= render "appathons/app_cards", apps: @appathon.apps, vote_scope: @appathon.uid, is_appathon_followed: @appathon.followed_by?(@context.user)  %>
   </div>
-  <% if @appathon.followed_by?(@context.user) %>
-  <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal pfda-pane-sidebar-padded-v">
-    <% if !@commentable.nil? %>
-      <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @commentable %>
-    <% end %>
-  </div>
-  <% end %>
 </div>
