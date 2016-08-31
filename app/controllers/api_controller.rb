@@ -276,9 +276,9 @@ class ApiController < ApplicationController
   #
   def list_notes
     if params[:editable]
-      notes = Note.editable_by(@context)
+      notes = Note.editable_by(@context).where.not(title: nil)
     else
-      notes = Note.accessible_by(@context)
+      notes = Note.accessible_by(@context).where.not(title: nil)
     end
 
     if params[:scopes].present?
