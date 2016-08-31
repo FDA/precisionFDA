@@ -207,7 +207,7 @@
           <ul class="pfda-cards pfda-cards-stretch">
             <%= render "main/news" %>
             <% if @truth_challenge[:launched]  %>
-              <a class="pfda-card pfda-card-padded pfda-card-default pfda-card-rounded pfda-card-bordered" href="<%= truth_challenges_path %>">
+              <a class="pfda-card pfda-card-padded pfda-card-light pfda-card-rounded pfda-card-bordered" href="<%= truth_challenges_path %>">
                 <div class="pfda-card-header lead text-center">
                   <%= @truth_challenge[:active] ? 'Participate in the' : 'Read about the' %>
                 </div>
@@ -221,7 +221,7 @@
               <% end %>
 
               <% if @consistency_challenge[:launched]  %>
-              <a class="pfda-card pfda-card-padded pfda-card-default pfda-card-rounded pfda-card-bordered" href="<%= consistency_challenges_path %>">
+              <a class="pfda-card pfda-card-padded pfda-card-light pfda-card-rounded pfda-card-bordered" href="<%= consistency_challenges_path %>">
                 <div class="pfda-card-header lead text-center">
                   <%= @consistency_challenge[:active] ? 'Participate in the' : 'Read about the' %>
                 </div>
