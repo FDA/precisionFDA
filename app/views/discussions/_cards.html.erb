@@ -6,7 +6,7 @@
           <div class="media">
             <div class="media-left">
               <% if !discussion.private? %>
-                <%= render "_partials/upvote_badge", icon_classes: "fa-2x", item: discussion %>
+                <%= render "_partials/upvote_badge", icon_classes: "fa-2x", item: discussion, vote_scope: nil %>
               <% else %>
                 <div class="btn-upvote text-center">
                   <span class="fa fa-lock fa-2x text-danger"></span>
