@@ -1,9 +1,9 @@
-<% content_for :title do %>Create New Appathon<% end %>
+<% content_for :title do %>Host and organize an App-a-thon<% end %>
 
 <div class="page-header">
   <div class="page-title">
     <span class="fa fa-keyboard-o"></span>
-    Create a new Appathon
+    Host and organize an App-a-thon
   </div>
 </div>
 
@@ -13,13 +13,36 @@
     <div class="form-group required">
       <%= f.label :name, "Name", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_field :name, class: "form-control input-lg", placeholder: "Name this appathon...", required: "required"  %>
+        <%= f.text_field :name, class: "form-control input-lg", placeholder: "Name this app-a-thon...", required: "required"  %>
+      </div>
+    </div>
+    <div class="form-group required">
+      <%= f.label :location, "Location", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%= f.text_field :location, class: "form-control input-lg", placeholder: "Real place and/or virtual", required: "required"  %>
       </div>
     </div>
     <div class="form-group">
       <%= f.label :description, "Description", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_area :description, class: "form-control", rows: 10, placeholder: "What is this appathon about..." %>
+        <%= f.text_area :description, class: "form-control", rows: 5, placeholder: "Additional information about this app-a-thon..." %>
+      </div>
+    </div>
+    <div class="form-group required">
+      <%= f.label :flag, "Icon", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <ul class="list list-inline appathon-flags">
+          <% Appathon::ICONS.each do |icon| %>
+            <li class="pfda-padded">
+              <div class="radio">
+                <label>
+                  <%= f.radio_button :flag, icon %>
+                  <%= flag_image_tag(icon, {height: 50}) %>
+                </label>
+              </div>
+            </li>
+          <% end %>
+        </ul>
       </div>
     </div>
     <div class="form-group">

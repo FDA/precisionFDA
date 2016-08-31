@@ -5,6 +5,7 @@
 #  id          :integer          not null, primary key
 #  name        :string
 #  handle      :string
+#  template    :string
 #  description :text
 #  meta        :text
 #  start_at    :datetime
@@ -37,25 +38,24 @@ class MetaAppathon < ActiveRecord::Base
   def accessible_by?(context)
     true
   end
-  
+
   def editable_by?(context)
-    context.user.can_administer_site?
+    !context.guest? && context.user.can_administer_site?
   end
 
   def active?
-    start_at > DateTime.now && end_at < DateTime.now
+    start_at < DateTime.now && DateTime.now < end_at
   end
 
   def self.editable_by(context)
-    if context.guest?
+    if context.guest? || !context.user.can_administer_site?
       none
     else
-      raise unless context.user.can_administer_site?
       all
     end
   end
 
   def self.active
-    where("start_at > ?", DateTime.now).where("end_at < ?", DateTime.now)
+    where("start_at < ?", DateTime.now).where("? < end_at ", DateTime.now)
   end
 end

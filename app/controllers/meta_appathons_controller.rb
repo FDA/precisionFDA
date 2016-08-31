@@ -8,9 +8,8 @@ class MetaAppathonsController < ApplicationController
     @meta_appathon = MetaAppathon.find(params[:id])
     @appathons = @meta_appathon.appathons.page params[:appathons_page]
 
-    custom_templates = ["appathon_in_a_box"]
-    if custom_templates.include?(@meta_appathon.handle)
-      render template: "meta_appathons/handles/#{@meta_appathon.handle}"
+    if !@meta_appathon.template.blank?
+      render template: "meta_appathons/templates/#{@meta_appathon.template}"
     end
   end
 
@@ -25,9 +24,7 @@ class MetaAppathonsController < ApplicationController
   end
 
   def create
-    redirect_to meta_appathons_path unless @context.user.can_administer_site?
-
-    if request.post?
+    if @context.user.can_administer_site? && request.post?
       meta_appathon_params[:handle] = meta_appathon_params[:handle].parameterize
       @meta_appathon = MetaAppathon.create!(meta_appathon_params)
       if @meta_appathon.persisted?
@@ -38,7 +35,7 @@ class MetaAppathonsController < ApplicationController
         render :new
       end
     else
-      redirect_to appathons_path
+      redirect_to meta_appathons_path
     end
   end
 
@@ -58,28 +55,12 @@ class MetaAppathonsController < ApplicationController
     end
   end
 
-  def rename
-    @meta_appathon = MetaAppathon.editable_by(@context).find_by(id: params[:id])
-    name = meta_appathon_params[:name]
-    if name.is_a?(String) && name.present?
-      if @meta_appathon.rename(name, @context)
-        @meta_appathon.reload
-        flash[:success] = "Meta Appathon renamed to \"#{@meta_appathon.name}\""
-      else
-        flash[:error] = "Meta Appathon \"#{@meta_appathon.name}\" could not be renamed."
-      end
-    else
-      flash[:error] = "The new name is not a valid string"
-    end
-
-    redirect_to meta_appathon_path(@meta_appathon)
-  end
-
   private
   def meta_appathon_params
-    p = params.require(:meta_appathon).permit(:name, :description, :handle, :start_at, :end_at)
+    p = params.require(:meta_appathon).permit(:name, :description, :handle, :template, :start_at, :end_at)
     p.require(:name)
     p.require(:handle)
+    p.require(:template)
     p.require(:start_at)
     p.require(:end_at)
     return p

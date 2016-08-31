@@ -119,28 +119,10 @@ class AppathonsController < ApplicationController
     end
   end
 
-  def rename
-    @appathon = Appathon.editable_by(@context).find_by(id: params[:id], meta_appathon_id: params[:meta_appathon_id])
-    name = params[:appathon][:title]
-    if name.is_a?(String) && name != ""
-      if @appathon.rename(name, @context)
-        @appathon.reload
-        flash[:success] = "Appathon renamed to \"#{@appathon.name}\""
-      else
-        flash[:error] = "Appathon \"#{@appathon.name}\" could not be renamed."
-      end
-    else
-      flash[:error] = "The new name is not a valid string"
-    end
-
-    redirect_to meta_appathon_appathon_path(@appathon.meta_appathon, @appathon)
-  end
-
   private
   def appathon_params
-    p = params.require(:appathon).permit(:name, :description, :start_at, :end_at)
+    p = params.require(:appathon).permit(:name, :description, :location, :flag, :start_at, :end_at)
     p.require(:name)
-    # p.require(:flag)
     return p
   end
 end
