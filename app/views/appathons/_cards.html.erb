@@ -1,7 +1,7 @@
 <% if (appathons.respond_to?(:total_count) && appathons.total_count > 0) || (appathons.respond_to?(:count) && appathons.count > 0) %>
   <div class="pfda-cards pfda-cards-list">
     <% appathons.each do |appathon| %>
-      <%= link_to meta_appathon_appathon_path(meta_appathon, appathon), class: "pfda-card pfda-card-bordered pfda-card-rounded pfda-card-padded pfda-appathon-card" do %>
+      <%= link_to meta_appathon_appathon_path(meta_appathon, appathon), class: "pfda-card pfda-card-light pfda-card-bordered pfda-card-rounded pfda-card-padded pfda-appathon-card" do %>
         <div class="pfda-card-body">
           <div class="media">
             <div class="media-left">
@@ -16,7 +16,7 @@
                   <%= truncate(appathon.description, length: 250, separator: ' ') %>
                 <% end %>
               </div>
-              <ul class="list-inline list-inline-bullets">
+              <ul class="list-inline list-inline-bullets text-muted">
                 <li>
                   <%= appathon.followers_count %> participants
                 </li>
