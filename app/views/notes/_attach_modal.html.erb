@@ -26,7 +26,7 @@
           </li>
 
           <!-- ko foreach: notes.filtered -->
-          <li class="list-group-item event-note-preview" data-bind="css: {active: $parent.previewedNote() && $parent.previewedNote().id == id}">
+          <li class="list-group-item event-note-preview" data-bind="css: {active: $parent.previewedNote() && $parent.previewedNote().uid == uid}">
             <div class="media">
               <div class="media-body">
                 <div class="checkbox clearfix">
