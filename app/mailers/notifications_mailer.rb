@@ -38,8 +38,8 @@ class NotificationsMailer < ApplicationMailer
   def license_approved_email(license, user)
     @license = license
     @user = user
-    mail to: @license.user.email,
-         reply_to: @user.email,
+    mail to: @user.email,
+         reply_to: @license.user.email,
          subject: "You were approved for \"#{@license.title}\""
   end
 
