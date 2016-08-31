@@ -92,9 +92,9 @@ module ApplicationHelper
     else
       icon_span = content_tag(:span, " ", class: "fa #{icon} #{opts[:icon_class]}") + " "
     end
-    
+
     if item.accessible_by?(@context)
-      opts[:nolink] ? icon_span + item.title : link_to(icon_span + item.title, pathify(item), {class: opts[:title_class]})
+      opts[:nolink] ? icon_span + item.title.to_s : link_to(icon_span + item.title.to_s, pathify(item), {class: opts[:title_class]})
     else
       icon_span + item.uid
     end
