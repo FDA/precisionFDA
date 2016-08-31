@@ -1,0 +1,61 @@
+<% content_for :title do %><%= @meta_appathon.title %><% end %>
+
+<div class="page-header clearfix">
+  <div class="pull-left">
+    <div class="page-title">
+      <span class="fa fa-flag-checkered"></span> <%= @meta_appathon.title %>
+    </div>
+    <% if !@meta_appathon.description.blank? %>
+    <div class="description">
+      <%= @meta_appathon.description %>
+    </div>
+    <% end %>
+  </div>
+  <% if @meta_appathon.editable_by?(@context) %>
+    <div class="pull-right">
+      <div class="btn-group">
+        <div class="dropdown">
+          <button class="btn btn-link btn-lg" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="fa fa-cog"></span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
+            <li>
+              <%= link_to edit_meta_appathon_path(@meta_appathon) do %>
+                <span class="fa fa-pencil"></span> Edit
+              <% end %>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Handle</h5>
+      <p class="list-group-item-text"><%= @meta_appathon.handle %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Start</h5>
+      <p class="list-group-item-text"><%= @meta_appathon.start_at.to_s(:db) %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">End</h5>
+      <p class="list-group-item-text"><%= @meta_appathon.end_at.to_s(:db) %></p>
+    </li>
+  </ul>
+</div>
+
+<% if !@meta_appathon.followed_by?(@context.user) %>
+<div class="pfda-toolbar">
+  <div class="btn-group">
+    <%= link_to new_meta_appathon_appathon_path(@meta_appathon), class: 'btn btn-primary' do %>
+      <span class="fa fa-plus fa-fw"></span> Create an appathon
+    <% end %>
+  </div>
+</div>
+<% end %>
+
+<%= render "appathons/cards", meta_appathon: @meta_appathon, appathons: @appathons %>

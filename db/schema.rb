@@ -11,13 +11,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160628062351) do
+ActiveRecord::Schema.define(version: 20160827225404) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id"
     t.integer  "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string   "state"
+    t.text     "message"
   end
 
   add_index "accepted_licenses", ["license_id"], name: "index_accepted_licenses_on_license_id"
@@ -51,6 +53,23 @@ ActiveRecord::Schema.define(version: 20160628062351) do
   add_index "app_series", ["latest_version_app_id"], name: "index_app_series_on_latest_version_app_id"
   add_index "app_series", ["scope"], name: "index_app_series_on_scope"
   add_index "app_series", ["user_id"], name: "index_app_series_on_user_id"
+
+  create_table "appathons", force: :cascade do |t|
+    t.string   "name"
+    t.integer  "admin_id"
+    t.integer  "meta_appathon_id"
+    t.text     "description"
+    t.string   "flag"
+    t.string   "location"
+    t.datetime "start_at"
+    t.datetime "end_at"
+    t.text     "meta"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
+
+  add_index "appathons", ["admin_id"], name: "index_appathons_on_admin_id"
+  add_index "appathons", ["meta_appathon_id"], name: "index_appathons_on_meta_appathon_id"
 
   create_table "apps", force: :cascade do |t|
     t.string   "dxid"
@@ -233,14 +252,29 @@ ActiveRecord::Schema.define(version: 20160628062351) do
   create_table "licenses", force: :cascade do |t|
     t.text     "content"
     t.integer  "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",                        null: false
+    t.datetime "updated_at",                        null: false
     t.string   "title"
     t.string   "scope"
+    t.boolean  "approval_required", default: false, null: false
   end
 
   add_index "licenses", ["scope"], name: "index_licenses_on_scope"
   add_index "licenses", ["user_id"], name: "index_licenses_on_user_id"
+
+  create_table "meta_appathons", force: :cascade do |t|
+    t.string   "name"
+    t.string   "handle"
+    t.string   "template"
+    t.text     "description"
+    t.text     "meta"
+    t.datetime "start_at"
+    t.datetime "end_at"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "meta_appathons", ["handle"], name: "index_meta_appathons_on_handle", unique: true
 
   create_table "notes", force: :cascade do |t|
     t.string   "title"
@@ -284,6 +318,36 @@ ActiveRecord::Schema.define(version: 20160628062351) do
   add_index "saved_queries", ["grid_name", "id"], name: "index_saved_queries_on_grid_name_and_id"
   add_index "saved_queries", ["grid_name"], name: "index_saved_queries_on_grid_name"
   add_index "saved_queries", ["user_id"], name: "index_saved_queries_on_user_id"
+
+  create_table "space_memberships", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "space_id"
+    t.string   "role"
+    t.string   "side"
+    t.text     "meta"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "space_memberships", ["space_id"], name: "index_space_memberships_on_space_id"
+  add_index "space_memberships", ["user_id"], name: "index_space_memberships_on_user_id"
+
+  create_table "spaces", force: :cascade do |t|
+    t.string   "name"
+    t.text     "description"
+    t.string   "host_project"
+    t.string   "guest_project"
+    t.string   "host_dxorg"
+    t.string   "guest_dxorg"
+    t.string   "space_type"
+    t.string   "state"
+    t.text     "meta"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "spaces", ["space_type"], name: "index_spaces_on_space_type"
+  add_index "spaces", ["state"], name: "index_spaces_on_state"
 
   create_table "truth_challenge_results", force: :cascade do |t|
     t.integer "answer_id"
@@ -386,14 +450,11 @@ ActiveRecord::Schema.define(version: 20160628062351) do
     t.string   "public_files_project"
     t.string   "private_comparisons_project"
     t.string   "public_comparisons_project"
-    t.integer  "open_files_count",            default: 0
-    t.integer  "closing_files_count",         default: 0
     t.integer  "pending_comparisons_count",   default: 0
     t.integer  "schema_version"
     t.datetime "created_at",                              null: false
     t.datetime "updated_at",                              null: false
     t.integer  "org_id"
-    t.integer  "pending_jobs_count"
     t.integer  "open_assets_count"
     t.integer  "closing_assets_count"
     t.string   "first_name"

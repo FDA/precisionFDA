@@ -11,14 +11,17 @@
 .list-group-item-default
   color: $text-color
 
+.list-group-item-transparent-bg
+  background: transparent
+
 .list-group.list-group-inline
   margin-bottom: $padding-large-vertical
 
   li
     display: inline-block
-    // margin-right: $padding-base-horizontal
     border: 0
     border-radius: $border-radius-base
+    vertical-align: top
 
   .list-group-item-text
     font-size: 19px
@@ -117,3 +120,6 @@
 .list-group-item
   .list-inline
     margin-bottom: 0
+
+ul.list-contained, ol.list-contained
+  margin-bottom: 0

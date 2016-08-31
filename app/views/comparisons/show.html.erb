@@ -28,13 +28,7 @@
 
 <div class="metadata-section metadata-header">
   <ul class="list-group list-group-inline">
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Access</h5>
-      <p class="list-group-item-text">
-        <span class="fa <%= @comparison.public? ? 'fa-globe' : 'fa-lock' %>"></span>
-        <%= @comparison.public? ? "Public" : "Private" %>
-      </p>
-    </li>
+    <%= render "_partials/metadata_access", item: @comparison %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Org</h5>
       <p class="list-group-item-text">
@@ -129,6 +123,11 @@
       <span class="tab-label">Outputs</span>
     </a>
   </li>
+  <li role="presentation">
+    <a href="#tab-comments" aria-controls="tab-comments" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
+      <span class="tab-label">Comments <span class="badge"><%= @comparison.comment_threads.size %></span></span>
+    </a>
+  </li>
   <% if @notes.total_count > 0 %>
   <li role="presentation">
     <a href="#tab-notes" aria-controls="tab-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
@@ -220,8 +219,8 @@
         <div class="svg-container"></div>
       </li>
     </ul>
+    <% end %>
   </div>
-  <% end %>
 
   <% if @comparison.state == 'done' %>
   <div class="tab-pane" id="tab-outputs">
@@ -244,6 +243,14 @@
     </div>
   </div>
   <% end %>
+
+  <div role="tabpanel" class="tab-pane" id="tab-comments">
+    <div class="row">
+      <div class="col-md-12">
+        <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @comparison %>
+      </div>
+    </div>
+  </div>
 
   <% if @notes.total_count > 0 %>
   <div role="tabpanel" class="tab-pane" id="tab-notes">

@@ -1,0 +1,30 @@
+@import "_common"
+
+.pfda-controller-appathons
+  .pfda-appathon-participants
+    padding: $padding-base-horizontal
+    border-bottom: 1px solid $border-default-color
+
+    ul
+      margin-bottom: 0
+
+  &.pfda-action-show
+    .page-header
+      padding: 50px 25px
+      .page-context-title
+        text-align: center
+      .page-title
+        font-size: 50px
+        font-weight: 300
+        text-align: center
+      .description
+        text-align: center
+      .list-bricks
+        li
+          background-color: darken($brand-blue-subtler, 2%)
+
+  &.pfda-action-new, &.pfda-action-edit
+    .appathon-flags
+      > li
+        margin-right: 20px
+        width: 100px

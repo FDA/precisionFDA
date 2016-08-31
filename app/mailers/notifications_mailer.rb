@@ -1,4 +1,6 @@
 class NotificationsMailer < ApplicationMailer
+  default  from: 'PrecisionFDA <PrecisionFDA@fda.hhs.gov>',
+           reply_to: "PrecisionFDA@fda.hhs.gov"
 
   # Subject can be set in your I18n file at config/locales/en.yml
   # with the following lookup:
@@ -19,11 +21,59 @@ class NotificationsMailer < ApplicationMailer
 
   def guest_access_email(invitation)
     @invitation = invitation
-
     mail to: @invitation.email,
-         from: 'PrecisionFDA <PrecisionFDA@fda.hhs.gov>',
          bcc: "precisionfda-support@dnanexus.com",
-         reply_to: "PrecisionFDA@fda.hhs.gov",
          subject: "Your precisionFDA access request"
+  end
+
+  def license_request_email(license, user, message)
+    @license = license
+    @user = user
+    @message = message
+    mail to: @license.user.email,
+         reply_to: @user.email,
+         subject: "#{@user.full_name} requested approval to \"#{@license.title}\""
+  end
+
+  def license_approved_email(license, user)
+    @license = license
+    @user = user
+    mail to: @user.email,
+         reply_to: @license.user.email,
+         subject: "You were approved for \"#{@license.title}\""
+  end
+
+  def license_revoked_email(license, user)
+    @license = license
+    @user = user
+    mail to: @user.email,
+         reply_to: @license.user.email,
+         subject: "Your license was revoked for \"#{@license.title}\""
+  end
+
+  def space_activation_email(space, membership)
+    @space = space
+    @membership = membership
+    @user = membership.user
+    mail to: @user.email,
+         subject: "Action required to activate new space \"#{@space.title}\""
+  end
+
+  def space_activated_email(space, membership)
+    @space = space
+    @membership = membership
+    @user = membership.user
+    mail to: @user.email,
+         subject: "Your space was activated: \"#{@space.title}\""
+  end
+
+  def space_invitation_email(space, membership, admin)
+    @space = space
+    @membership = membership
+    @user = membership.user
+    @admin = admin
+    mail to: @user.email,
+         reply_to: @admin.user.email,
+         subject: "#{@admin.user.full_name} added you to the space \"#{@space.title}\""
   end
 end

@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 gem 'bundler', '1.10.6'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.2.6'
+gem 'rails', '4.2.7.1'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
 # Use Uglifier as compressor for JavaScript assets
@@ -36,7 +36,7 @@ gem 'activerecord_any_of'
 gem 'rails_param'
 
 # WiceGrid is a Rails grid plugin: https://github.com/leikind/wice_grid
-gem "wice_grid", '3.6.0.pre4'
+gem "wice_grid"
 
 # Page-specific javascript for Rails done right
 gem "paloma", "5.0.0"
@@ -71,6 +71,11 @@ gem 'bootstrap-kaminari-views'
 
 # Allows models to follow each other
 gem 'acts_as_follower'
+
+# For inline-css in emails
+gem 'inky-rb', require: 'inky'
+gem 'nokogiri'
+gem 'premailer-rails'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'

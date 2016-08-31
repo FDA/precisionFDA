@@ -1,0 +1,66 @@
+<%= render "licenses/header" %>
+
+<!-- Tab panes -->
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-users">
+    <% if @users_count > 0 %>
+    <div class="pfda-toolbar pfda-toolbar-transparent">
+      <div class="pull-right">
+        <div class="btn-group">
+          <% if @license.accepted_licenses_pending.count > 0 %>
+            <%= link_to approve_users_license_path(@license), method: :post, data: { confirm: 'Are you certain you want to approve all pending users for this license?' }, class: "btn btn-success" do %>
+              <span class="fa fa-check"></span> Approve all licensees <span class="badge"><%= @license.accepted_licenses_pending.count %></span>
+            <% end %>
+          <% end %>
+        </div>
+        <div class="btn-group">
+          <%= link_to remove_users_license_path(@license), method: :post, data: { confirm: 'Are you certain you want to revoke all users from this license?' }, class: "btn btn-danger" do %>
+            <span class="fa fa-ban"></span> Revoke licensees <span class="badge"><%= @license.accepted_licenses.count %></span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <br>
+    <% end %>
+    <ul class="list-group">
+      <% if @users_count > 0 %>
+        <% @license.accepted_licenses.each do |a| %>
+        <li class="list-group-item clearfix">
+          <div class="media">
+            <div class="media-left">
+              <%= link_to image_tag(a.user.gravatar_url, class: 'img-circle', height: '50px'), user_path(a.user.dxuser) %>
+            </div>
+            <div class="media-body">
+              <ul class="list-inline list-inline-bullets">
+                <li class="license-user-name"><%= link_to(a.user.full_name, user_path(a.user.dxuser)) %></li>
+                <li class="license-user-org"><%= a.user.org.name %></li>
+              </ul>
+              <% if !a.message.blank? %>
+              <div class="license-message">
+                <blockquote><%= a.message %></blockquote>
+              </div>
+              <% end %>
+            </div>
+            <% if @license.editable_by?(@context) %>
+            <div class="media-right">
+              <div class="btn-group pull-right">
+                <% if a.pending? %>
+                  <%= link_to "Approve", approve_user_license_path(@license.id, a.user.uid), method: :post, class: "btn btn-block btn-success" %>
+                <% else %>
+                  <div class="btn-static btn-default">Approved</div>
+                <% end %>
+                <%= link_to "Revoke", remove_user_license_path(@license.id, a.user.uid), method: :post, class: "btn btn-block btn-link" %>
+              </div>
+            </div>
+            <% end %>
+          </div>
+        </li>
+        <% end %>
+      <% else %>
+        <li class="list-group-item lead text-muted">
+          No one has accepted this license yet
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>

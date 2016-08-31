@@ -10,13 +10,17 @@
     border-left: 1px solid $border-default-color
 
   .pfda-pane-sidebar + .pfda-pane-content
-    border-right: 1px solid $border-default-color
+    border-left: 1px solid $border-default-color
 
   .pfda-pane-content
     @include flex(1)
     background-color: $body-bg
     &.pfda-pane-content-padded
       padding: $padding-base-horizontal
+    &.pfda-pane-content-padded-lg
+      padding: $padding-large-horizontal
+    &.pfda-pane-content-padded-xl
+      padding: $padding-large-horizontal * 2
 
   .pfda-pane-sidebar
     @include flex(0 300px)

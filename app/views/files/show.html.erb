@@ -19,13 +19,7 @@
 
 <div class="metadata-section metadata-header">
   <ul class="list-group list-group-inline">
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Access</h5>
-      <p class="list-group-item-text">
-        <span class="fa <%= @file.public? ? 'fa-globe' : 'fa-lock' %>"></span>
-        <%= @file.public? ? "Public" : "Private" %>
-      </p>
-    </li>
+    <%= render "_partials/metadata_access", item: @file %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">ID</h5>
       <p class="list-group-item-text"><%= @file.dxid %></p>
@@ -89,8 +83,18 @@
       <% end %>
 
         <% if @file.license.present? && !@file.licensed_by?(@context) %>
-          <%= link_to accept_license_path(@file.license.id, @file.uid), method: :post, class: "btn btn-success" do %>
-            <span class="fa fa-check"></span> Accept License
+          <% if @file.license.approval_required %>
+            <% if @file.licensed_by_pending?(@context) %>
+              <span class="btn-static btn-default"><span class="fa fa-clock-o"></span> License Pending Approval</span>
+            <% else %>
+              <%= link_to request_approval_license_path(@file.license.id), class: "btn btn-success" do %>
+                <span class="fa fa-check"></span> Request License Approval
+              <% end %>
+            <% end %>
+          <% else %>
+            <%= link_to accept_license_path(@file.license.id, @file.uid), method: :post, class: "btn btn-success" do %>
+              <span class="fa fa-check"></span> Accept License
+            <% end %>
           <% end %>
         <% end %>
 
@@ -147,113 +151,87 @@
   </div>
 </div>
 
-<% if @notes.total_count > 0 || @discussions.total_count > 0 || @answers.total_count > 0 || @comparisons_grid.present? && @comparisons_grid.count > 0 || @file.license.present?  %>
-  <!-- Nav tabs -->
-  <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
-    <% if @notes.total_count > 0 %>
-    <li role="presentation">
-      <a href="#tab-notes" aria-controls="tab-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
-        <span class="tab-label">Notes <span class="badge"><%= @notes.total_count %></span></span>
-      </a>
-    </li>
-    <% end %>
-    <% if @discussions.total_count > 0 %>
-    <li role="presentation">
-      <a href="#tab-discussions" aria-controls="tab-discussions" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comments-o"></span>
-        <span class="tab-label">Discussions <span class="badge"><%= @discussions.total_count %></span></span>
-      </a>
-    </li>
-    <% end %>
-    <% if @answers.total_count > 0 %>
-    <li role="presentation">
-      <a href="#tab-answers" aria-controls="tab-answers" role="tab" data-toggle="tab"><span class="fa fa-fw fa-commenting"></span>
-        <span class="tab-label">Answers <span class="badge"><%= @answers.total_count %></span></span>
-      </a>
-    </li>
-    <% end %>
-    <% if @comparisons_grid.present? && @comparisons_grid.count > 0 %>
-    <li role="presentation">
-      <a href="#tab-comparisons" aria-controls="tab-comparisons" role="tab" data-toggle="tab"><span class="fa fa-fw fa-area-chart"></span>
-        <span class="tab-label">Comparisons  <span class="badge"><%= @comparisons_grid.count %></span></span>
-      </a>
-    </li>
-    <% end %>
-    <% if @file.license.present? %>
-    <li role="presentation">
-      <a href="#tab-license" aria-controls="tab-license" role="tab" data-toggle="tab"><span class="fa fa-fw fa-legal"></span>
-        <span class="tab-label">License: <%= truncate(@file.license.title, :length => 25,  :separator => ' ') %></span>
-      </a>
-    </li>
-    <% end %>
-  </ul>
+<!-- Nav tabs -->
+<ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+  <li role="presentation">
+    <a href="#tab-comments" aria-controls="tab-comments" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
+      <span class="tab-label">Comments <span class="badge"><%= @file.comment_threads.size %></span></span>
+    </a>
+  </li>
+  <% if @notes.total_count > 0 %>
+  <li role="presentation">
+    <a href="#tab-notes" aria-controls="tab-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
+      <span class="tab-label">Notes <span class="badge"><%= @notes.total_count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @discussions.total_count > 0 %>
+  <li role="presentation">
+    <a href="#tab-discussions" aria-controls="tab-discussions" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comments-o"></span>
+      <span class="tab-label">Discussions <span class="badge"><%= @discussions.total_count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @answers.total_count > 0 %>
+  <li role="presentation">
+    <a href="#tab-answers" aria-controls="tab-answers" role="tab" data-toggle="tab"><span class="fa fa-fw fa-commenting"></span>
+      <span class="tab-label">Answers <span class="badge"><%= @answers.total_count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @comparisons_grid.present? && @comparisons_grid.count > 0 %>
+  <li role="presentation">
+    <a href="#tab-comparisons" aria-controls="tab-comparisons" role="tab" data-toggle="tab"><span class="fa fa-fw fa-area-chart"></span>
+      <span class="tab-label">Comparisons  <span class="badge"><%= @comparisons_grid.count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @file.license.present? %>
+  <li role="presentation">
+    <a href="#tab-license" aria-controls="tab-license" role="tab" data-toggle="tab"><span class="fa fa-fw fa-legal"></span>
+      <span class="tab-label">License: <%= truncate(@file.license.title, :length => 25,  :separator => ' ') %></span>
+    </a>
+  </li>
+  <% end %>
+</ul>
 
-  <!-- Tab panes -->
-  <div class="tab-content">
-    <% if @notes.real_notes.total_count > 0 %>
-    <div role="tabpanel" class="tab-pane" id="tab-notes">
-      <%= render "notes/cards", notes: @notes.real_notes %>
-    </div>
-    <% end %>
-    <% if @discussions.total_count > 0 %>
-    <div role="tabpanel" class="tab-pane" id="tab-discussions">
-      <%= render "discussions/cards", discussions: @discussions %>
-    </div>
-    <% end %>
-    <% if @answers.total_count > 0 %>
-    <div role="tabpanel" class="tab-pane" id="tab-answers">
-      <%= render "answers/cards", answers: @answers, show_discussion: true %>
-    </div>
-    <% end %>
-    <% if @comparisons_grid.present? && @comparisons_grid.count > 0 %>
-    <div role="tabpanel" class="tab-pane" id="tab-comparisons">
-      <div class="panel">
-        <%= grid(@comparisons_grid, show_filters: :always) do |g|
-          g.blank_slate partial:  "_partials/empty_grid"
-
-          g.after_row do |comparison, num_cols|
-            if !comparison.description.blank?
-              content_tag(:tr,
-                content_tag(:td, nil, {class: "col-state state-#{comparison.state}"}).concat(content_tag(:td,
-                  content_tag(:div, comparison.description, class: 'description'),
-                colspan: num_cols - 1)),
-              class: 'extra-row')
-            else
-              nil
-            end
-          end
-
-          g.column name: 'State', attribute: 'state' do |comparison|
-            [comparison.state, {class: "col-state state-#{comparison.state}"}]
-          end
-
-          g.column name: 'Name', attribute: 'name' do |comparison|
-            unilinkfw(comparison, globe: true)
-          end
-
-          g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |comparison|
-            link_to(comparison.user.dxuser, user_path(comparison.user.dxuser))
-          end
-
-          g.column name: 'Test set' do |comparison|
-            file = comparison.input("test_vcf").user_file
-            unilinkfw(file, nolink: file.id == @file.id)
-          end
-
-          g.column name: 'Benchmark set' do |comparison|
-            file = comparison.input("ref_vcf").user_file
-            unilinkfw(file, nolink: file.id == @file.id)
-          end
-        end -%>
+<!-- Tab panes -->
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane" id="tab-comments">
+    <div class="row">
+      <div class="col-md-12">
+        <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @file %>
       </div>
     </div>
-    <% end %>
-    <% if @file.license.present? %>
-    <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-license">
-      <%= render "licenses/tab_pane", license: @file.license %>
-    </div>
-    <% end %>
   </div>
-<% end %>
+  <% if @notes.real_notes.total_count > 0 %>
+  <div role="tabpanel" class="tab-pane" id="tab-notes">
+    <%= render "notes/cards", notes: @notes.real_notes %>
+  </div>
+  <% end %>
+  <% if @discussions.total_count > 0 %>
+  <div role="tabpanel" class="tab-pane" id="tab-discussions">
+    <%= render "discussions/cards", discussions: @discussions %>
+  </div>
+  <% end %>
+  <% if @answers.total_count > 0 %>
+  <div role="tabpanel" class="tab-pane" id="tab-answers">
+    <%= render "answers/cards", answers: @answers, show_discussion: true %>
+  </div>
+  <% end %>
+  <% if @comparisons_grid.present? && @comparisons_grid.count > 0 %>
+  <div role="tabpanel" class="tab-pane" id="tab-comparisons">
+    <div class="panel">
+      <%= render "comparisons/grid.html.erb", comparisons_grid: @comparisons_grid %>
+    </div>
+  </div>
+  <% end %>
+  <% if @file.license.present? %>
+  <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-license">
+    <%= render "licenses/tab_pane", license: @file.license %>
+  </div>
+  <% end %>
+</div>
 
 <% if @file.editable_by?(@context) %>
   <%= render "_partials/modal_rename", item: @file, path_to_rename: rename_file_path(@file.dxid) %>

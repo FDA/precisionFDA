@@ -76,6 +76,11 @@ class FilesController < ApplicationController
       @licenses = License.editable_by(@context)
     end
 
+    @items_from_params = [@file]
+    @item_path = pathify(@file)
+    @item_comments_path = pathify_comments(@file)
+    @comments = @file.root_comments.order(id: :desc).page params[:comments_page]
+
     @notes = @file.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @file.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
     @discussions = @file.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
@@ -166,15 +171,6 @@ class FilesController < ApplicationController
         redirect_to file_path(@file.dxid)
         return
       end
-      if @file.state == "open"
-        user = User.find(@context.user_id)
-        user.open_files_count = user.open_files_count - 1
-        user.save!
-      elsif @file.state == "closing"
-        user = User.find(@context.user_id)
-        user.closing_files_count = user.closing_files_count - 1
-        user.save!
-      end
       @file.destroy
     end
 
@@ -186,6 +182,6 @@ class FilesController < ApplicationController
 
   private
     def file_params
-      params.require(:user_file).permit(:name)
+      params.require(:file).permit(:name)
     end
 end

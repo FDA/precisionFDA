@@ -10,9 +10,13 @@ window.Precision.upvote =
     $target = $(e.currentTarget)
     uid = $target.attr("data-uid")
     count = $target.attr("data-upvote-count")
+    vote_scope = $target.attr("data-vote-scope")
 
     params =
       uid: uid
+
+    if !_.isEmpty(vote_scope)
+      params['vote_scope'] = vote_scope
 
     $target.addClass("disabled")
     if $target.is(".active")

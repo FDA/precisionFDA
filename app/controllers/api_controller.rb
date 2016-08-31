@@ -1,51 +1,256 @@
 class ApiController < ApplicationController
   skip_before_action :verify_authenticity_token
   skip_before_action :require_login
-  before_action :require_api_login,        except: [:list_assets, :describe_asset, :search_assets, :list_notes]
-  before_action :require_api_login_or_guest, only: [:list_assets, :describe_asset, :search_assets, :list_notes]
+  before_action :require_api_login,        except: [:list_apps, :list_assets, :list_comparisons, :list_files, :list_jobs, :list_notes, :list_related, :describe, :search_assets]
+  before_action :require_api_login_or_guest, only: [:list_apps, :list_assets, :list_comparisons, :list_files, :list_jobs, :list_notes, :list_related, :describe, :search_assets]
+
+  rescue_from ApiError, :with => :render_error_method
+
+  def render_error_method(e)
+    render json: {error: {type: "API Error", message: e.message}}, status: 422
+  end
+
+  # Inputs
+  #
+  # scope (string, optional): "public" or "space-123" (default is "public")
+  # uids (array of strings): one or more uids to publish to the scope
+  #
+  # Outputs
+  #
+  # published (number): the count of published objects
+  def publish
+    space = nil
+
+    scope = params[:scope]
+    if scope.nil?
+      scope = "public"
+    elsif scope.is_a?(String)
+      if scope != "public"
+        # Check that scope is a valid scope:
+        # - must be of the form space-xxxx
+        # - must exist in the Space table
+        # - must be accessible by context
+        fail "Invalid scope (only 'public' or 'space-xxxx' are accepted)" unless scope =~ /^space-(\d+)$/
+        space = Space.find_by(id: $1.to_i)
+        fail "Invalid space" unless space.present? && space.active? && space.accessible_by?(@context)
+      end
+    else
+      fail "The optional 'scope' input must be a string (either 'public' or 'space-xxxx')"
+    end
+
+    uids = params[:uids]
+    fail "The input 'uids' must be an array of object ids (strings)" unless uids.is_a?(Array) && uids.all? { |uid| uid.is_a?(String) }
+
+    items = uids.uniq.map { |uid| item_from_uid(uid) }.reject { |item| item.public? || item.scope == scope }
+    fail "Unpublishable items detected" unless items.all? { |item| item.publishable_by?(@context, scope) }
+
+    # Files to publish:
+    # - All real_files selected by the user
+    # - All assets selected by the user
+    files = items.select { |item| item.klass == "file" || item.klass == "asset" }
+
+    # Comparisons
+    comparisons = items.select { |item| item.klass == "comparison" }
+
+    # Apps
+    apps = items.select { |item| item.klass == "app" }
+
+    # Jobs
+    jobs = items.select { |item| item.klass == "job" }
+
+    # Notes
+    notes = items.select { |item| item.klass == "note" }
+
+    # Discussions
+    discussions = items.select { |item| item.klass == "discussion" }
+
+    # Answers
+    answers = items.select { |item| item.klass == "answer" }
+
+    published_count = 0
+
+    # Files
+    if files.size > 0
+      published_count += UserFile.publish(files, @context, scope)
+    end
+
+    # Comparisons
+    if comparisons.size > 0
+      published_count += Comparison.publish(comparisons, @context, scope)
+    end
+
+    # Apps
+    if apps.size > 0
+      published_count += AppSeries.publish(apps, @context, scope)
+    end
+
+    # Jobs
+    if jobs.size > 0
+      published_count += Job.publish(jobs, @context, scope)
+    end
+
+    # Notes
+    if notes.size > 0
+      published_count += Note.publish(notes, @context, scope)
+    end
+
+    # Discussions
+    if discussions.size > 0
+      published_count += Discussion.publish(discussions, @context, scope)
+    end
+
+    # Answers
+    if answers.size > 0
+      published_count += Answer.publish(answers, @context, scope)
+    end
+
+    render json: {published: published_count}
+  end
+
+  # Inputs
+  # --
+  # uid (String, required)
+  # opts:
+  #       scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
+  #       classes (Array, optional): array of valid classNames e.g. ["file", "comparison"] or leave blank for all
+  #       editable (Boolean, optional): if filtering for only editable_by the context user, otherwise accessible_by
+  #       describe (object, optional)
+  #         fields (array, optional):
+  #             Array containing field name [field_1, field_2, ...]
+  #             to indicate which object fields to include
+  #         include (object, optional)
+  #             license (boolean, optional)
+  #             user (boolean, optional)
+  #             org (boolean, optional)
+  #
+  def list_related
+    uid = params[:uid]
+    item = item_from_uid(uid)
+
+    if item.accessible_by?(@context)
+      params[:opts] = params[:opts].is_a?(Hash) ? params[:opts] : {}
+
+      scopes = params[:opts][:scopes]
+      if !scopes.nil?
+        fail "Option 'scopes' can only be an Array of Strings that are one of public, private or a space-xxxx id." unless scopes.is_a?(Array) && scopes.all?{ |s| s == 'public' || s == 'private' || s =~ /^space-(\d+)$/ }
+      end
+
+      classes = params[:opts][:classes]
+      if !classes.nil?
+        fail "Option 'classes' can be undefined or an array of strings" unless classes.is_a?(Array) && classes.all? { |k| k.is_a?(String) }
+      end
+
+      scoped_items = lambda do |scoped_item, scopes_override = false|
+        if !scopes.nil?
+          scope_query = scopes_override ? scopes_override : {scope: scopes}
+          scoped_item = scoped_item.where(scope_query)
+        end
+        if params[:opts][:editable]
+          scoped_item = scoped_item.editable_by(@context)
+        else
+          scoped_item = scoped_item.accessible_by(@context)
+        end
+
+        return scoped_item.to_a
+      end
+
+      allow_klass = lambda do |klass|
+        return classes.nil? || classes.include?(klass)
+      end
+
+      related = []
+      case item.klass
+        when "file"
+          related.push(*(scoped_items.call(item.notes.real_notes))) if allow_klass.call("note")
+          related.push(*(scoped_items.call(item.comparisons))) if allow_klass.call("comparison")
+          if item.parent_type == "Job"
+            related.push(*(scoped_items.call(Job.where(id: item.parent_id)))) if allow_klass.call("job")
+          end
+        when "note", "answer", "discussion"
+          if item.klass == "discussion"
+            scopes_override = !scopes.nil? ? {notes: {scope: scopes}} : false
+            related.push(*(scoped_items.call(item.answers.joins(:note), scopes_override))) if allow_klass.call("answer")
+          end
+          if item.klass != "note"
+            note = item.note
+          else
+            note = item
+          end
+          related.push(*(scoped_items.call(note.comparisons))) if allow_klass.call("comparison")
+          related.push(*(scoped_items.call(note.real_files))) if allow_klass.call("file")
+          related.push(*(scoped_items.call(note.apps))) if allow_klass.call("app")
+          related.push(*(scoped_items.call(note.jobs))) if allow_klass.call("job")
+          related.push(*(scoped_items.call(note.assets))) if allow_klass.call("asset")
+        when "app"
+          related.push(*(scoped_items.call(item.notes.real_notes))) if allow_klass.call("note")
+          related.push(*(scoped_items.call(item.jobs))) if allow_klass.call("job")
+          related.push(*(scoped_items.call(item.assets))) if allow_klass.call("asset")
+        when "job"
+          related.push(*(scoped_items.call(App.where(id: item.app_id)))) if allow_klass.call("app")
+          related.push(*(scoped_items.call(item.notes.real_notes))) if allow_klass.call("note")
+          related.push(*(scoped_items.call(item.input_files))) if allow_klass.call("file")
+          related.push(*(scoped_items.call(item.output_files))) if allow_klass.call("file")
+        when "asset"
+        when "comparison"
+          related.push(*(scoped_items.call(item.notes.real_notes))) if allow_klass.call("file")
+          related.push(*(scoped_items.call(item.user_files))) if allow_klass.call("file")
+        when "license"
+        when "space"
+        else
+          fail "Unknown class #{item.klass}"
+      end
+
+      related = related.map {|o| describe_for_api(o, params[:opts][:describe])}
+      render json: related
+    else
+      fail "You do not have permission to access #{id}"
+    end
+  end
 
   # Inputs:
   #
   # states (array of strings; optional): the file state/s to be returned "closed", "closing", and/or "open"
+  # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
+  # editable (Boolean, optional): if filtering for only editable_by the context user, otherwise accessible_by
+  # describe (object, optional)
+  #     fields (array, optional):
+  #         Array containing field name [field_1, field_2, ...]
+  #         to indicate which object fields to include
+  #     include (object, optional)
+  #         license (boolean, optional)
+  #         user (boolean, optional)
+  #         org (boolean, optional)
   #
   # Outputs:
   #
   # An array of hashes, each of which has these fields:
   # uid (string): the file's unique id (file-xxxxxx)
   # name (string): the filename
-  # scope (string): file scope, "public" or "private"
+  # scopes (string): file scope, "public" or "private" or "space-xxxx"
   # path (string): file_path of the file
+  #
   def list_files
-    result = []
-    files = UserFile.real_files.accessible_by(@context)
+    User.sync_files!(@context)
 
-    if params["states"].present? && (params["states"].include?("closed") || params["states"].include?("closing") || params["states"].include?("open"))
+    if params[:editable]
+      files = UserFile.real_files.editable_by(@context)
+    else
+      files = UserFile.real_files.accessible_by(@context)
+    end
+
+    if params[:scopes].present?
+      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^space-(\d+)$/ }
+
+      files = files.where(scope: params[:scopes])
+    end
+
+    if params[:states].present?
+      fail "Invalid states" unless params[:states].is_a?(Array) && params[:states].all? { |state| ["closed", "closing", "open"].include?(state) }
       files = files.where(state: params["states"])
     end
 
-    files.find_each do |file|
-      file_describe = {
-        uid: file.uid,
-        name: file.name,
-        scope: file.scope,
-        path: file_path(file.uid)
-      }
-
-      if params["include"].present?
-        if params["include"]["license"]
-          if file.license.present?
-            file_describe[:license] = file.license.slice(:id, :uid)
-            file_describe[:license_accepted] = file.licensed_by?(@context)
-          end
-        end
-        if params["include"]["user"]
-          file_describe[:user] = file.user.slice(:dxuser, :full_name)
-        end
-        if params["include"]["org"]
-          file_describe[:org] = file.user.org.slice(:handle, :name)
-        end
-      end
-      result << file_describe
+    result = files.order(id: :desc).map do |file|
+      describe_for_api(file, params[:describe])
     end
 
     render json: result
@@ -53,71 +258,243 @@ class ApiController < ApplicationController
 
   # Inputs
   #
-  # uid (string, required): the dxid of the file to describe
+  # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
+  # note_types (Array, optional): array of valid note_types e.g. ["Note", "Answer", "Discussion"]
+  # editable (Boolean, optional): if filtering for only editable_by the context user, otherwise accessible_by
+  # describe (object, optional)
+  #     fields (array, optional):
+  #         Array containing field name [field_1, field_2, ...]
+  #         to indicate which object fields to include
+  #     include (object, optional)
+  #         license (boolean, optional)
+  #         user (boolean, optional)
+  #         org (boolean, optional)
   #
   # Outputs:
   #
-  # uid (string): file uid
-  # name (string): file name
-  # state (string): private or public
-  # -- optional --
-  # license (object): license associated with file, if any
-  # license_accepted (boolean): has the user accepted this license if any
+  # An array of hashes
   #
-  def describe_file
-    # App id should be a string
-    uid = params["uid"]
-    raise unless uid.is_a?(String) && uid != ""
-
-    file = item_from_uid(uid)
-    raise unless file.klass == "file" && file.accessible_by?(@context)
-
-    file_describe = {
-      uid: file.uid,
-      name: file.name,
-      state: file.state
-    }
-
-    if params["include"].present?
-      if params["include"]["license"]
-        if file.license.present?
-          file_describe[:license] = file.license.slice(:id, :uid)
-          file_describe[:license_accepted] = file.licensed_by?(@context)
-        end
-      end
+  def list_notes
+    if params[:editable]
+      notes = Note.editable_by(@context).where.not(title: nil)
+    else
+      notes = Note.accessible_by(@context).where.not(title: nil)
     end
 
-    render json: file_describe
+    if params[:scopes].present?
+      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^space-(\d+)$/ }
 
+      notes = notes.where(scope: params[:scopes])
+    end
+
+    if params[:note_types].present?
+      fail "Param note_types can only be an Array of Strings containing 'Note', 'Answer', or 'Discussion'" unless params[:note_types].is_a?(Array) && params[:note_types].all?{ |type| ["Note", "Answer", "Discussion"].include?(type) }
+
+      note_types = params[:note_types].map {|type| type == "Note" ? nil : type}
+      notes = notes.where(note_type: note_types)
+    end
+
+    result = notes.order(id: :desc).map do |note|
+      if note.note_type == "Discussion"
+        note = note.discussion
+      elsif note.note_type == "Answer"
+        note = note.answer
+      end
+      describe_for_api(note, params[:describe])
+    end
+
+    render json: result
   end
 
   # Inputs
   #
-  # uid (string, required): the uid of the license to describe
+  # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
+  # editable (Boolean, optional): if filtering for only editable_by the context user, otherwise accessible_by
+  # describe (object, optional)
+  #     fields (array, optional):
+  #         Array containing field name [field_1, field_2, ...]
+  #         to indicate which object fields to include
+  #     include (object, optional)
+  #         license (boolean, optional)
+  #         user (boolean, optional)
+  #         org (boolean, optional)
   #
   # Outputs:
   #
+  # An array of hashes
+  #
+  def list_comparisons
+    # TODO: sync comparisons?
+    if params[:editable]
+      comparisons = Comparison.editable_by(@context)
+    else
+      comparisons = Comparison.accessible_by(@context)
+    end
+
+    if params[:scopes].present?
+      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^space-(\d+)$/ }
+
+      comparisons = comparisons.where(scope: params[:scopes])
+    end
+
+    result = comparisons.order(id: :desc).map do |comparison|
+      describe_for_api(comparison, params[:describe])
+    end
+
+    render json: result
+  end
+
+  # Inputs
+  #
+  # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
+  # editable (Boolean, optional): if filtering for only editable_by the context user, otherwise accessible_by
+  # describe (object, optional)
+  #     fields (array, optional):
+  #         Array containing field name [field_1, field_2, ...]
+  #         to indicate which object fields to include
+  #     include (object, optional)
+  #         license (boolean, optional)
+  #         user (boolean, optional)
+  #         org (boolean, optional)
+  #
+  # Outputs:
+  #
+  # An array of hashes
+  #
+  def list_apps
+    if params[:editable]
+      apps = AppSeries.editable_by(@context)
+    else
+      apps = AppSeries.accessible_by(@context)
+    end
+
+    if params[:scopes].present?
+      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^space-(\d+)$/ }
+      apps = apps.where(scope: params[:scopes])
+    end
+
+    apps = apps.order(id: :desc).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
+
+    result = apps.map do |app|
+      describe_for_api(app, params[:describe])
+    end
+
+    render json: result
+  end
+
+  # Inputs
+  #
+  # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
+  # editable (Boolean, optional): if filtering for only editable_by the context user, otherwise accessible_by
+  # describe (object, optional)
+  #     fields (array, optional):
+  #         Array containing field name [field_1, field_2, ...]
+  #         to indicate which object fields to include
+  #     include (object, optional)
+  #         license (boolean, optional)
+  #         user (boolean, optional)
+  #         org (boolean, optional)
+  #
+  # Outputs:
+  #
+  # An array of hashes
+  #
+  def list_jobs
+    if params[:editable]
+      jobs = Job.editable_by(@context)
+    else
+      jobs = Job.accessible_by(@context)
+    end
+
+    if params[:scopes].present?
+      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^space-(\d+)$/ }
+      jobs = jobs.where(scope: params[:scopes])
+    end
+
+    result = jobs.order(id: :desc).map do |job|
+      describe_for_api(job, params[:describe])
+    end
+
+    render json: result
+  end
+
+  # Inputs
+  #
+  # ids (array:string, optional): the dxids of the assets
+  # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
+  # editable (Boolean, optional): if filtering for only editable_by the context user, otherwise accessible_by
+  # describe (object, optional)
+  #     fields (array, optional):
+  #         Array containing field name [field_1, field_2, ...]
+  #         to indicate which object fields to include
+  #     include (object, optional)
+  #         license (boolean, optional)
+  #         user (boolean, optional)
+  #         org (boolean, optional)
+  #
+  # Outputs:
+  #
+  # An array of hashes
+  #
+  def list_assets
+    # TODO: sync assets?
+    ids = params[:ids]
+    if params[:editable]
+      assets = Asset.closed.editable_by(@context)
+    else
+      assets = Asset.closed.accessible_by(@context)
+    end
+
+    if !ids.nil?
+      fail "The 'ids' parameter needs to be an Array of String asset ids" unless ids.is_a?(Array) && ids.all? { |id| id.is_a?(String) }
+      assets = assets.where(dxid: ids)
+    end
+
+    if params[:scopes].present?
+      fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^space-(\d+)$/ }
+      assets = assets.where(scope: params[:scopes])
+    end
+
+    result = assets.order(:name).map do |asset|
+      describe_for_api(asset, params[:describe])
+    end
+
+    if !ids.nil?
+      # This would happen if an asset becomes inaccessible
+      # For now silently drop the asset -- allows for asset deletion
+      # raise unless ids.size == result.size
+    end
+
+    render json: result
+  end
+
+
+  # Inputs
+  #
+  # uid (string, required): the uid of the item to describe
+  # describe (object, optional)
+  #     fields (array, optional):
+  #         Array containing field name [field_1, field_2, ...]
+  #         to indicate which object fields to include
+  #     include (object, optional)
+  #         license (boolean, optional)
+  #         user (boolean, optional)
+  #         org (boolean, optional)
+  #
+  # Outputs:
+  #
+  # id (integer)
   # uid (string)
-  # title (string)
-  # content (string)
-  # accepted (boolean)
+  # describe (object)
+  #
+  def describe
+    # Item id should be a string
+    uid = params[:uid]
+    fail "The parameter 'uid' should be of type String" unless uid.is_a?(String) && uid != ""
 
-  def describe_license
-    # App id should be a string
-    uid = params["uid"]
-    raise unless uid.is_a?(String) && uid != ""
+    item = item_from_uid(uid)
 
-    license = item_from_uid(uid)
-    raise unless license.klass == "license" && license.accessible_by?(@context)
-
-    license_describe = {
-      uid: license.uid,
-      title: license.title,
-      content: license.content,
-      accepted: license.licensed_by?(@context)
-    }
-
-    render json: license_describe
+    render json: describe_for_api(item, params[:describe])
   end
 
   # Inputs:
@@ -126,12 +503,14 @@ class ApiController < ApplicationController
   #
   # Outputs:
   #
-  # (none)
+  # accepted_licenses: license_ids (same as input)
+  #
   def accept_licenses
     license_ids = params["license_ids"]
-    raise unless license_ids.is_a?(Array) && license_ids.all? { |license_id|
+    fail "License license_ids needs to be an Array of Integers" unless license_ids.is_a?(Array) && license_ids.all? { |license_id|
       license_id.is_a?(Numeric) && (license_id.to_i == license_id)} && !license_ids.empty?
-    raise unless License.where(id: license_ids).count == license_ids.count
+    license_ids.uniq!
+    fail "Some license_ids do not exist" unless License.where(id: license_ids).count == license_ids.count
 
     AcceptedLicense.transaction do
       license_ids.each do |license_id|
@@ -156,11 +535,13 @@ class ApiController < ApplicationController
   #
   def license_items
     license_id = params["license_id"]
-    raise unless license_id.is_a?(Numeric) && (license_id.to_i == license_id)
-    license = License.editable_by(@context).find(license_id)
+    fail "License license_id needs to be an Integer" unless license_id.is_a?(Numeric) && (license_id.to_i == license_id)
+
+    # Check if the license exists and is editable by the user. Throw 404 if otherwise.
+    License.editable_by(@context).find(license_id)
 
     items_to_license = params["items_to_license"]
-    raise unless items_to_license.is_a?(Array) && items_to_license.all? { |item|
+    fail "License items_o_license needs to be an Array of Strings" unless items_to_license.is_a?(Array) && items_to_license.all? { |item|
       item.is_a?(String) }
 
     items_licensed = []
@@ -186,30 +567,28 @@ class ApiController < ApplicationController
   # id (string, "file-xxxx")
   #
   def create_file
-    name = params["name"]
-    raise unless name.is_a?(String) && name != ""
+    name = params[:name]
+    fail "File name needs to be a non-empty String" unless name.is_a?(String) && name != ""
 
     description = params["description"]
     if !description.nil?
-      raise unless description.is_a?(String)
+      fail "File description needs to be a String" unless description.is_a?(String)
     end
 
-    project = User.find(@context.user_id).private_files_project
-    dxid = DNAnexusAPI.new(@context.token).("file", "new", {"name": params["name"], "project": project})["id"]
+    project = @context.user.private_files_project
+    dxid = DNAnexusAPI.new(@context.token).("file", "new", {"name": params[:name], "project": project})["id"]
 
-    User.transaction do
-      UserFile.create!(dxid: dxid,
-                       project: project,
-                       name: name,
-                       state: "open",
-                       description: description,
-                       user_id: @context.user_id,
-                       parent: User.find(@context.user_id),
-                       scope: 'private')
-      # Must get a fresh user inside the transaction
-      user = User.find(@context.user_id)
-      user.open_files_count = user.open_files_count + 1
-      user.save!
+    UserFile.transaction do
+      UserFile.create!(
+        dxid: dxid,
+        project: project,
+        name: name,
+        state: "open",
+        description: description,
+        user_id: @context.user_id,
+        parent: @context.user,
+        scope: 'private'
+      )
     end
 
     render json: {id: dxid}
@@ -226,23 +605,23 @@ class ApiController < ApplicationController
   # id (string, "file-xxxx")
   #
   def create_asset
-    name = params["name"]
-    raise unless name.is_a?(String) && name != ""
-    raise unless ((name.end_with?(".tar") && name.size > ".tar".size) || (name.end_with?(".tar.gz") && name.size > ".tar.gz".size))
+    name = params[:name]
+    fail "Asset name needs to be a non-empty String" unless name.is_a?(String) && name != ""
+    fail "Asset name should end with .tar or .tar.gz" unless ((name.end_with?(".tar") && name.size > ".tar".size) || (name.end_with?(".tar.gz") && name.size > ".tar.gz".size))
 
     description = params["description"]
     if !description.nil?
-      raise unless description.is_a?(String)
+      fail "Asset description needs to be a String" unless description.is_a?(String)
     end
 
     paths = params["paths"]
-    raise unless paths.is_a?(Array) && !paths.empty? && paths.size < 100000
+    fail "Asset paths needs to be a non-empty Array less than 100000 size" unless paths.is_a?(Array) && !paths.empty? && paths.size < 100000
     paths.each do |path|
-      raise unless path.is_a?(String) && path != "" && path.size < 4096
+      fail "Asset path should be a non-empty String of size less than 4096" unless path.is_a?(String) && path != "" && path.size < 4096
     end
 
     project = User.find(@context.user_id).private_files_project
-    dxid = DNAnexusAPI.new(@context.token).("file", "new", {"name": params["name"], "project": project})["id"]
+    dxid = DNAnexusAPI.new(@context.token).("file", "new", {"name": params[:name], "project": project})["id"]
 
     User.transaction do
       asset = Asset.create!(dxid: dxid,
@@ -285,19 +664,20 @@ class ApiController < ApplicationController
   # headers (hash of string key/values, headers must be given to HTTP PUT)
   #
   def get_upload_url
-    size = params["size"]
-    raise unless size.is_a?(Fixnum)
+    size = params[:size]
+    fail "Parameter 'size' needs to be a Fixnum" unless size.is_a?(Fixnum)
 
-    md5 = params["md5"]
-    raise unless md5.is_a?(String)
+    md5 = params[:md5]
+    fail "Parameter 'md5' needs to be a String" unless md5.is_a?(String)
 
-    index = params["index"]
-    raise unless index.is_a?(Fixnum)
+    index = params[:index]
+    fail "Parameter 'index' needs to be a Fixnum" unless index.is_a?(Fixnum)
 
-    id = params["id"]
-    raise unless id.is_a?(String) && id != ""
+    id = params[:id]
+    fail "Parameter 'id' needs to be a non-empty String" unless id.is_a?(String) && id != ""
 
-    file = UserFile.find_by!(dxid: id, state: "open", user_id: @context.user_id)
+    # Check that the file exists, is accessible by the user, and is in the open state. Throw 404 if otherwise.
+    UserFile.find_by!(dxid: id, state: "open", user_id: @context.user_id)
 
     result = DNAnexusAPI.new(@context.token).(id, "upload", {size: size, md5: md5, index: index})
 
@@ -311,20 +691,16 @@ class ApiController < ApplicationController
   # Outputs: nothing (empty hash)
   #
   def close_file
-    id = params["id"]
-    raise unless id.is_a?(String) && id != ""
+    id = params[:id]
+    fail "id needs to be a non-empty string" unless id.is_a?(String) && id != ""
 
     file = UserFile.find_by!(dxid: id, user_id: @context.user_id, parent_type: "User")
     if file.state == "open"
       DNAnexusAPI.new(@context.token).(id, "close")
-      User.transaction do
+      UserFile.transaction do
         # Must recheck inside the transaction
         file.reload
         if file.state == "open"
-          user = User.find(@context.user_id)
-          user.open_files_count = user.open_files_count - 1
-          user.closing_files_count = user.closing_files_count + 1
-          user.save!
           file.state = "closing"
           file.save!
         end
@@ -341,8 +717,8 @@ class ApiController < ApplicationController
   # Outputs: nothing (empty hash)
   #
   def close_asset
-    id = params["id"]
-    raise unless id.is_a?(String) && id != ""
+    id = params[:id]
+    fail "id needs to be a non-empty String" unless id.is_a?(String) && id != ""
 
     file = Asset.find_by!(dxid: id, user_id: @context.user_id)
     if file.state == "open"
@@ -376,138 +752,132 @@ class ApiController < ApplicationController
   # id (string): the dxid of the resulting job
   #
   def run_app
-    begin
-      # App id should be a string
-      id = params["id"]
-      fail "App ID is not a string" unless id.is_a?(String) && id != ""
+    # Parameter 'id' should be of type String
+    id = params[:id]
+    fail "App ID is not a string" unless id.is_a?(String) && id != ""
 
-      # Name should be a nonempty string
-      name = params["name"]
-      fail "Name should be a non-empty string" unless name.is_a?(String) && name != ""
+    # Name should be a nonempty string
+    name = params[:name]
+    fail "Name should be a non-empty string" unless name.is_a?(String) && name != ""
 
-      # Inputs should be a hash (more checks later)
-      inputs = params["inputs"]
-      fail "Inputs should be a hash" unless inputs.is_a?(Hash)
+    # Inputs should be a hash (more checks later)
+    inputs = params["inputs"]
+    fail "Inputs should be a hash" unless inputs.is_a?(Hash)
 
-      # App should exist and be accessible
-      @app = App.accessible_by(@context).find_by!(dxid: id)
+    # App should exist and be accessible
+    @app = App.accessible_by(@context).find_by!(dxid: id)
 
-      # Check if asset licenses have been accepeted
-      fail "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
+    # Check if asset licenses have been accepeted
+    fail "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
 
-      # Inputs should be compatible
-      # (The following also normalizes them)
-      run_inputs = {}
-      dx_run_input = {}
-      input_file_dxids = []
-      @app.input_spec.each do |input|
-        key = input["name"]
-        optional = (input["optional"] == true)
-        has_default = input.has_key?("default")
-        default = input["default"]
-        klass = input["class"]
-        choices = input["choices"]
+    # Inputs should be compatible
+    # (The following also normalizes them)
+    run_inputs = {}
+    dx_run_input = {}
+    input_file_dxids = []
+    @app.input_spec.each do |input|
+      key = input["name"]
+      optional = (input["optional"] == true)
+      has_default = input.has_key?("default")
+      default = input["default"]
+      klass = input["class"]
+      choices = input["choices"]
 
-        if inputs.has_key?(key)
-          value = inputs[key]
-        elsif has_default
-          value = default
-        elsif optional
-          # No given value and no default, but input is optional; move on
-          next
-        else
-          # Required input is missing
-          fail "#{key}: required input is missing"
-        end
-
-        # Check compatibility with choices
-        fail "#{key}: incompatiblity with choices" if choices.present? && !choices.include?(value)
-
-        if klass == "file"
-          fail "#{key}: input file value is not a string" unless value.is_a?(String)
-          file = UserFile.real_files.accessible_by(@context).find_by(dxid: value)
-          fail "#{key}: input file is not accessible or does not exist" unless !file.nil?
-          fail "#{key}: input file's license must be accepted" unless !file.license.present? || file.licensed_by?(@context)
-
-          dxvalue = {"$dnanexus_link" => value}
-          input_file_dxids << value
-        elsif klass == "int"
-          fail "#{key}: value is not an integer" unless value.is_a?(Numeric) && (value.to_i == value)
-          value = value.to_i
-        elsif klass == "float"
-          fail "#{key}: value is not a float" unless value.is_a?(Numeric)
-        elsif klass == "boolean"
-          fail "#{key}: value is not a boolean" unless value == true || value == false
-        elsif klass == "string"
-          fail "#{key}: value is not a string" unless value.is_a?(String)
-        end
-
-        run_inputs[key] = value
-        dx_run_input[key] = dxvalue || value
+      if inputs.has_key?(key)
+        value = inputs[key]
+      elsif has_default
+        value = default
+      elsif optional
+        # No given value and no default, but input is optional; move on
+        next
+      else
+        # Required input is missing
+        fail "#{key}: required input is missing"
       end
 
-      # User can override the instance type
-      if params.has_key?("instance_type")
-        fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.has_key?(params["instance_type"]) #Checks also that it's a string
-        run_instance_type = params["instance_type"]
+      # Check compatibility with choices
+      fail "#{key}: incompatiblity with choices" if choices.present? && !choices.include?(value)
+
+      if klass == "file"
+        fail "#{key}: input file value is not a string" unless value.is_a?(String)
+        file = UserFile.real_files.accessible_by(@context).find_by(dxid: value)
+        fail "#{key}: input file is not accessible or does not exist" unless !file.nil?
+        fail "#{key}: input file's license must be accepted" unless !file.license.present? || file.licensed_by?(@context)
+
+        dxvalue = {"$dnanexus_link" => value}
+        input_file_dxids << value
+      elsif klass == "int"
+        fail "#{key}: value is not an integer" unless value.is_a?(Numeric) && (value.to_i == value)
+        value = value.to_i
+      elsif klass == "float"
+        fail "#{key}: value is not a float" unless value.is_a?(Numeric)
+      elsif klass == "boolean"
+        fail "#{key}: value is not a boolean" unless value == true || value == false
+      elsif klass == "string"
+        fail "#{key}: value is not a string" unless value.is_a?(String)
       end
 
-      project = User.find(@context.user_id).private_files_project
-
-      api_input = {
-        name: name,
-        input: dx_run_input,
-        project: project,
-        timeoutPolicyByExecutable: {@app.dxid => {"*" => {"days" => 2}}}
-      }
-      if run_instance_type.present?
-        api_input[:systemRequirements] = {main: {instanceType: Job::INSTANCE_TYPES[run_instance_type]}}
-      end
-
-      # Run the app
-      jobid = DNAnexusAPI.new(@context.token).call(@app.dxid, "run", api_input)["id"]
-
-      # Create job record
-      opts = {
-        dxid: jobid,
-        app_series_id: @app.app_series_id,
-        app_id: @app.id,
-        project: project,
-        run_inputs: run_inputs,
-        state: "idle",
-        name: name,
-        describe: {},
-        user_id: @context.user_id
-      }
-      if run_instance_type.present?
-        opts[:run_instance_type] = run_instance_type
-      end
-      provenance = {jobid => {app_dxid: @app.dxid, app_id: @app.id, inputs: run_inputs}}
-      input_file_dxids.uniq!
-      input_file_ids = []
-      UserFile.accessible_by(@context).where(dxid: input_file_dxids).find_each do |file|
-        if file.parent_type == "Job"
-          parent_job = file.parent
-          provenance.merge!(parent_job.provenance)
-          provenance[file.dxid] = parent_job.dxid
-        end
-        input_file_ids << file.id
-      end
-      opts[:provenance] = provenance
-
-      User.transaction do
-        job = Job.create!(opts)
-        job.input_file_ids = input_file_ids
-        job.save!
-        user = User.find(@context.user_id)
-        user.pending_jobs_count = user.pending_jobs_count + 1
-        user.save!
-      end
-
-      render json: {id: jobid}
-    rescue ApiError => e
-      render json: {failure: e.message}
+      run_inputs[key] = value
+      dx_run_input[key] = dxvalue || value
     end
+
+    # User can override the instance type
+    if params.has_key?("instance_type")
+      fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.has_key?(params["instance_type"]) #Checks also that it's a string
+      run_instance_type = params["instance_type"]
+    end
+
+    project = User.find(@context.user_id).private_files_project
+
+    api_input = {
+      name: name,
+      input: dx_run_input,
+      project: project,
+      timeoutPolicyByExecutable: {@app.dxid => {"*" => {"days" => 2}}}
+    }
+    if run_instance_type.present?
+      api_input[:systemRequirements] = {main: {instanceType: Job::INSTANCE_TYPES[run_instance_type]}}
+    end
+
+    # Run the app
+    jobid = DNAnexusAPI.new(@context.token).call(@app.dxid, "run", api_input)["id"]
+
+    # Create job record
+    opts = {
+      dxid: jobid,
+      app_series_id: @app.app_series_id,
+      app_id: @app.id,
+      project: project,
+      run_inputs: run_inputs,
+      state: "idle",
+      name: name,
+      describe: {},
+      scope: "private",
+      user_id: @context.user_id
+    }
+    if run_instance_type.present?
+      opts[:run_instance_type] = run_instance_type
+    end
+    provenance = {jobid => {app_dxid: @app.dxid, app_id: @app.id, inputs: run_inputs}}
+    input_file_dxids.uniq!
+    input_file_ids = []
+    UserFile.accessible_by(@context).where(dxid: input_file_dxids).find_each do |file|
+      if file.parent_type == "Job"
+        parent_job = file.parent
+        provenance.merge!(parent_job.provenance)
+        provenance[file.dxid] = parent_job.dxid
+      end
+      input_file_ids << file.id
+    end
+    opts[:provenance] = provenance
+
+    Job.transaction do
+      job = Job.create!(opts)
+      job.input_file_ids = input_file_ids
+      job.save!
+    end
+
+    render json: {id: jobid}
   end
 
   # Inputs
@@ -519,267 +889,207 @@ class ApiController < ApplicationController
   # id (string, only on success): the id of the created app, if success
   # failure (string, only on failure): a message that can be shown to the user due to failure
   def create_app
-    begin
-      name = params["name"]
-      fail "The app 'name' must be a nonempty string." unless name.is_a?(String) && name != ""
-      fail "The app 'name' can only contain the characters A-Z, a-z, 0-9, '.' (period), '_' (underscore) and '-' (dash)." unless name =~ /^[a-zA-Z0-9._-]+$/
+    name = params[:name]
+    fail "The app 'name' must be a nonempty string." unless name.is_a?(String) && name != ""
+    fail "The app 'name' can only contain the characters A-Z, a-z, 0-9, '.' (period), '_' (underscore) and '-' (dash)." unless name =~ /^[a-zA-Z0-9._-]+$/
 
-      title = params["title"]
-      fail "The app 'title' must be a nonempty string." unless title.is_a?(String) && title != ""
+    title = params[:title]
+    fail "The app 'title' must be a nonempty string." unless title.is_a?(String) && title != ""
 
-      readme = params["readme"]
-      fail "The app 'Readme' must be a string." unless readme.is_a?(String)
+    readme = params[:readme]
+    fail "The app 'Readme' must be a string." unless readme.is_a?(String)
 
-      internet_access = params["internet_access"]
-      fail "The app 'Internet Access' must be a boolean, true or false." unless ((internet_access == true) || (internet_access == false))
+    internet_access = params[:internet_access]
+    fail "The app 'Internet Access' must be a boolean, true or false." unless ((internet_access == true) || (internet_access == false))
 
-      instance_type = params["instance_type"]
-      fail "The app 'instance type' must be one of: #{Job::INSTANCE_TYPES.keys.join(', ')}." unless Job::INSTANCE_TYPES.include?(instance_type)
+    instance_type = params[:instance_type]
+    fail "The app 'instance type' must be one of: #{Job::INSTANCE_TYPES.keys.join(', ')}." unless Job::INSTANCE_TYPES.include?(instance_type)
 
-      ordered_assets = params["ordered_assets"] || []
-      fail "The app 'assets' must be an array of asset ids (strings)." unless ordered_assets.is_a?(Array) && ordered_assets.all? { |a| a.is_a?(String) }
+    ordered_assets = params[:ordered_assets] || []
+    fail "The app 'assets' must be an array of asset ids (strings)." unless ordered_assets.is_a?(Array) && ordered_assets.all? { |a| a.is_a?(String) }
 
-      packages = params["packages"] || []
-      fail "The app 'packages' must be an array of package names (strings)." unless packages.is_a?(Array) && packages.all? { |a| a.is_a?(String) }
+    packages = params[:packages] || []
+    fail "The app 'packages' must be an array of package names (strings)." unless packages.is_a?(Array) && packages.all? { |a| a.is_a?(String) }
 
-      packages.sort!.uniq!
+    packages.sort!.uniq!
 
-      packages.each do |package|
-        fail "The package '#{package}' is not a valid Ubuntu package." unless App::UBUNTU_PACKAGES.bsearch { |p| package <=> p }
+    packages.each do |package|
+      fail "The package '#{package}' is not a valid Ubuntu package." unless App::UBUNTU_PACKAGES.bsearch { |p| package <=> p }
+    end
+
+    code = params[:code]
+    fail "The app 'code' must be a string." unless code.is_a?(String)
+
+    is_new = params["is_new"] == true
+
+    input_spec = params[:input_spec] || []
+    fail "The app 'input spec' must be an array of hashes." unless input_spec.is_a?(Array) && input_spec.all? { |s| s.is_a?(Hash) }
+    inputs_seen = Set.new
+    input_spec = input_spec.each_with_index.map do |spec, i|
+
+      i_name = spec["name"]
+      fail "The #{(i+1).ordinalize} input is missing a name." unless i_name.is_a?(String) && i_name != ""
+      fail "The input name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless i_name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
+      fail "Duplicate definitions for the input named '#{i_name}'." if inputs_seen.include?(i_name)
+      inputs_seen << i_name
+
+      i_class = spec["class"]
+      fail "The input named '#{i_name}' is missing a type." unless i_class.is_a?(String) && i_class != ""
+      fail "The input named '#{i_name}' contains an invalid type. Valid types are: #{App::VALID_IO_CLASSES.join(', ')}." unless App::VALID_IO_CLASSES.include?(i_class)
+
+      i_optional = spec["optional"]
+      fail "The input named '#{i_name}' is missing the 'optional' designation." unless (i_optional == true || i_optional == false)
+
+      i_label = spec["label"]
+      fail "The input named '#{i_name}' is missing a label." unless i_label.is_a?(String)
+
+      i_help = spec["help"]
+      fail "The input named '#{i_name}' is missing help text." unless i_help.is_a?(String)
+
+      i_default = spec["default"]
+      if !i_default.nil?
+        fail "The default value provided for the input named '#{i_name}' is not of the right type." unless compatible(i_default, i_class)
+        # Fix for JSON ambiguity of float/int for ints.
+        i_default = i_default.to_i if i_class == "int"
       end
 
-      code = params["code"]
-      fail "The app 'code' must be a string." unless code.is_a?(String)
-
-      is_new = params["is_new"] == true
-
-      input_spec = params["input_spec"] || []
-      fail "The app 'input spec' must be an array of hashes." unless input_spec.is_a?(Array) && input_spec.all? { |s| s.is_a?(Hash) }
-      inputs_seen = Set.new
-      input_spec = input_spec.each_with_index.map do |spec, i|
-
-        i_name = spec["name"]
-        fail "The #{(i+1).ordinalize} input is missing a name." unless i_name.is_a?(String) && i_name != ""
-        fail "The input name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless i_name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
-        fail "Duplicate definitions for the input named '#{i_name}'." if inputs_seen.include?(i_name)
-        inputs_seen << i_name
-
-        i_class = spec["class"]
-        fail "The input named '#{i_name}' is missing a type." unless i_class.is_a?(String) && i_class != ""
-        fail "The input named '#{i_name}' contains an invalid type. Valid types are: #{App::VALID_IO_CLASSES.join(', ')}." unless App::VALID_IO_CLASSES.include?(i_class)
-
-        i_optional = spec["optional"]
-        fail "The input named '#{i_name}' is missing the 'optional' designation." unless (i_optional == true || i_optional == false)
-
-        i_label = spec["label"]
-        fail "The input named '#{i_name}' is missing a label." unless i_label.is_a?(String)
-
-        i_help = spec["help"]
-        fail "The input named '#{i_name}' is missing help text." unless i_help.is_a?(String)
-
-        i_default = spec["default"]
-        if !i_default.nil?
-          fail "The default value provided for the input named '#{i_name}' is not of the right type." unless compatible(i_default, i_class)
-          # Fix for JSON ambiguity of float/int for ints.
-          i_default = i_default.to_i if i_class == "int"
-        end
-
-        i_choices = spec["choices"]
-        if !i_choices.nil?
-          fail "The 'choices' (possible values) provided for the input named '#{i_name}' were not a nonempty array." unless i_choices.is_a?(Array) && !i_choices.empty?
-          fail "The 'choices' (possible values) provided for the input named '#{i_name}' were incompatible with the input type." unless i_choices.all? { |choice| compatible(choice, i_class) }
-          fail "You cannot provide 'choices' (possible values) for the input named '#{i_name}' because it's not of type 'string' or 'int' or 'float'." unless ["string", "int", "float"].include?(i_class)
-          i_choices.uniq!
-        end
-
-        i_patterns = spec["patterns"]
-        if !i_patterns.nil?
-          fail "You cannot provide filename patterns for the non-file input named '#{i_name}'." unless i_class == "file"
-          fail "The filename patterns provided for the input named '#{i_name}' were not a nonempty array of nonempty strings." unless i_patterns.is_a?(Array) && !i_patterns.empty? && i_patterns.none?(&:empty?)
-          i_patterns.uniq!
-        end
-
-        ret = {"name": i_name, "class": i_class, "optional": i_optional, "label": i_label, "help": i_help}
-        ret["default"] = i_default unless i_default.nil?
-        ret["choices"] = i_choices unless i_choices.nil?
-        ret["patterns"] = i_patterns unless i_patterns.nil?
-        ret
+      i_choices = spec["choices"]
+      if !i_choices.nil?
+        fail "The 'choices' (possible values) provided for the input named '#{i_name}' were not a nonempty array." unless i_choices.is_a?(Array) && !i_choices.empty?
+        fail "The 'choices' (possible values) provided for the input named '#{i_name}' were incompatible with the input type." unless i_choices.all? { |choice| compatible(choice, i_class) }
+        fail "You cannot provide 'choices' (possible values) for the input named '#{i_name}' because it's not of type 'string' or 'int' or 'float'." unless ["string", "int", "float"].include?(i_class)
+        i_choices.uniq!
       end
 
-      output_spec = params["output_spec"] || []
-      fail "The app 'output spec' must be an array of hashes." unless output_spec.is_a?(Array) && output_spec.all? { |s| s.is_a?(Hash) }
-      outputs_seen = Set.new
-      output_spec = output_spec.each_with_index.map do |spec, i|
-        i_name = spec["name"]
-        fail "The #{(i+1).ordinalize} output is missing a name." unless i_name.is_a?(String) && i_name != ""
-        fail "The output name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless i_name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
-        fail "Duplicate definitions for the output named '#{i_name}'." if outputs_seen.include?(i_name)
-        outputs_seen << i_name
-
-        i_class = spec["class"]
-        fail "The output named '#{i_name}' is missing a type." unless i_class.is_a?(String) && i_class != ""
-        fail "The output named '#{i_name}' contains an invalid type. Valid types are: #{App::VALID_IO_CLASSES.join(', ')}." unless App::VALID_IO_CLASSES.include?(i_class)
-
-        i_optional = spec["optional"]
-        fail "The output named '#{i_name}' is missing the 'optional' designation." unless (i_optional == true || i_optional == false)
-
-        i_label = spec["label"]
-        fail "The output named '#{i_name}' is missing a label." unless i_label.is_a?(String)
-
-        i_help = spec["help"]
-        fail "The output named '#{i_name}' is missing help text." unless i_help.is_a?(String)
-
-        i_patterns = spec["patterns"]
-        if !i_patterns.nil?
-          fail "You cannot provide filename patterns for the non-file output named '#{i_name}'." unless i_class == "file"
-          fail "The filename patterns provided for the output named '#{i_name}' were not a nonempty array of nonempty strings." unless i_patterns.is_a?(Array) && !i_patterns.empty? && i_patterns.none?(&:empty?)
-          i_patterns.uniq!
-        end
-
-        ret = {"name": i_name, "class": i_class, "optional": i_optional, "label": i_label, "help": i_help}
-        ret["patterns"] = i_patterns unless i_patterns.nil?
-        ret
+      i_patterns = spec["patterns"]
+      if !i_patterns.nil?
+        fail "You cannot provide filename patterns for the non-file input named '#{i_name}'." unless i_class == "file"
+        fail "The filename patterns provided for the input named '#{i_name}' were not a nonempty array of nonempty strings." unless i_patterns.is_a?(Array) && !i_patterns.empty? && i_patterns.none?(&:empty?)
+        i_patterns.uniq!
       end
 
-      app = nil
-      App.transaction do
-        ordered_assets.each do |asset_dxid|
-          fail "The app asset with id '#{asset_dxid}' does not exist or is not accessible by you." unless Asset.closed.accessible_by(@context).where(dxid: asset_dxid).exists?
-        end
-        app_series_dxid = AppSeries.construct_dxid(@context.username, name)
-        app_series = AppSeries.find_by(dxid: app_series_dxid)
-        if is_new
-          fail "You already have an app by the name '#{name}'." unless app_series.nil?
-          app_series = AppSeries.create!(
-            dxid: app_series_dxid,
-            name: name,
-            latest_revision_app_id: nil,
-            latest_version_app_id: nil,
-            user_id: @context.user_id,
-            scope: "private"
-          )
-          revision = 1
-        else
-          fail "You don't have an app by the name '#{name}'." if app_series.nil?
-          revision = app_series.latest_revision_app.revision + 1
-        end
+      ret = {"name": i_name, "class": i_class, "optional": i_optional, "label": i_label, "help": i_help}
+      ret["default"] = i_default unless i_default.nil?
+      ret["choices"] = i_choices unless i_choices.nil?
+      ret["patterns"] = i_patterns unless i_patterns.nil?
+      ret
+    end
 
-        api = DNAnexusAPI.new(@context.token)
-        user = User.find(@context.user_id)
-        project = user.private_files_project
-        applet_dxid = api.call("applet", "new", {
-          project: project,
-          inputSpec: input_spec.map { |spec| spec.reject { |key,value| key == "default" || key == "choices" } },
-          outputSpec: output_spec,
-          runSpec: {
-            code: code_remap(code),
-            interpreter: "bash",
-            systemRequirements: {
-              "*" => {instanceType: Job::INSTANCE_TYPES[instance_type]}
-            },
-            distribution: "Ubuntu",
-            release: "14.04",
-            execDepends: packages.map { |p| {name: p}}
-          },
-          dxapi: "1.0.0",
-          access: internet_access ? {network: ["*"]} : {}
-        })["id"]
-        dxid = api.call("app", "new", {
-          applet: applet_dxid,
-          name: AppSeries.construct_dxname(@context.username, name),
-          title: title + " ",
-          summary: " ",
-          description: readme + " ",
-          version: "r#{revision}-#{SecureRandom.hex(3)}",
-          resources: ordered_assets,
-          details: {ordered_assets: ordered_assets},
-          openSource: false,
-          billTo: Rails.env.development? ? "user-#{@context.username}" : user.billto,
-          access: internet_access ? {network: ["*"]} : {}
-        })["id"]
-        api.call(project, "removeObjects", {objects: [applet_dxid]})
-        app = App.create!(
-          dxid: dxid,
-          version: nil,
-          revision: revision,
-          title: title,
-          readme: readme,
+    output_spec = params[:output_spec] || []
+    fail "The app 'output spec' must be an array of hashes." unless output_spec.is_a?(Array) && output_spec.all? { |s| s.is_a?(Hash) }
+    outputs_seen = Set.new
+    output_spec = output_spec.each_with_index.map do |spec, i|
+      i_name = spec["name"]
+      fail "The #{(i+1).ordinalize} output is missing a name." unless i_name.is_a?(String) && i_name != ""
+      fail "The output name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless i_name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
+      fail "Duplicate definitions for the output named '#{i_name}'." if outputs_seen.include?(i_name)
+      outputs_seen << i_name
+
+      i_class = spec["class"]
+      fail "The output named '#{i_name}' is missing a type." unless i_class.is_a?(String) && i_class != ""
+      fail "The output named '#{i_name}' contains an invalid type. Valid types are: #{App::VALID_IO_CLASSES.join(', ')}." unless App::VALID_IO_CLASSES.include?(i_class)
+
+      i_optional = spec["optional"]
+      fail "The output named '#{i_name}' is missing the 'optional' designation." unless (i_optional == true || i_optional == false)
+
+      i_label = spec["label"]
+      fail "The output named '#{i_name}' is missing a label." unless i_label.is_a?(String)
+
+      i_help = spec["help"]
+      fail "The output named '#{i_name}' is missing help text." unless i_help.is_a?(String)
+
+      i_patterns = spec["patterns"]
+      if !i_patterns.nil?
+        fail "You cannot provide filename patterns for the non-file output named '#{i_name}'." unless i_class == "file"
+        fail "The filename patterns provided for the output named '#{i_name}' were not a nonempty array of nonempty strings." unless i_patterns.is_a?(Array) && !i_patterns.empty? && i_patterns.none?(&:empty?)
+        i_patterns.uniq!
+      end
+
+      ret = {"name": i_name, "class": i_class, "optional": i_optional, "label": i_label, "help": i_help}
+      ret["patterns"] = i_patterns unless i_patterns.nil?
+      ret
+    end
+
+    app = nil
+    App.transaction do
+      ordered_assets.each do |asset_dxid|
+        fail "The app asset with id '#{asset_dxid}' does not exist or is not accessible by you." unless Asset.closed.accessible_by(@context).where(dxid: asset_dxid).exists?
+      end
+      app_series_dxid = AppSeries.construct_dxid(@context.username, name)
+      app_series = AppSeries.find_by(dxid: app_series_dxid)
+      if is_new
+        fail "You already have an app by the name '#{name}'." unless app_series.nil?
+        app_series = AppSeries.create!(
+          dxid: app_series_dxid,
+          name: name,
+          latest_revision_app_id: nil,
+          latest_version_app_id: nil,
           user_id: @context.user_id,
-          scope: "private",
-          app_series_id: app_series.id,
-          input_spec: input_spec,
-          output_spec: output_spec,
-          internet_access: internet_access,
-          instance_type: instance_type,
-          ordered_assets: ordered_assets,
-          packages: packages,
-          code: code
+          scope: "private"
         )
-        app.asset_ids = Asset.accessible_by(@context).where(dxid: ordered_assets).select(:id).map(&:id)
-        app.save!
-        app_series.update!(latest_revision_app_id: app.id)
+        revision = 1
+      else
+        fail "You don't have an app by the name '#{name}'." if app_series.nil?
+        revision = app_series.latest_revision_app.revision + 1
       end
 
-      render json: {id: app.dxid}
-
-    rescue ApiError => e
-      render json: {failure: e.message}
+      api = DNAnexusAPI.new(@context.token)
+      user = User.find(@context.user_id)
+      project = user.private_files_project
+      applet_dxid = api.call("applet", "new", {
+        project: project,
+        inputSpec: input_spec.map { |spec| spec.reject { |key,value| key == "default" || key == "choices" } },
+        outputSpec: output_spec,
+        runSpec: {
+          code: code_remap(code),
+          interpreter: "bash",
+          systemRequirements: {
+            "*" => {instanceType: Job::INSTANCE_TYPES[instance_type]}
+          },
+          distribution: "Ubuntu",
+          release: "14.04",
+          execDepends: packages.map { |p| {name: p}}
+        },
+        dxapi: "1.0.0",
+        access: internet_access ? {network: ["*"]} : {}
+      })["id"]
+      dxid = api.call("app", "new", {
+        applet: applet_dxid,
+        name: AppSeries.construct_dxname(@context.username, name),
+        title: title + " ",
+        summary: " ",
+        description: readme + " ",
+        version: "r#{revision}-#{SecureRandom.hex(3)}",
+        resources: ordered_assets,
+        details: {ordered_assets: ordered_assets},
+        openSource: false,
+        billTo: Rails.env.development? ? "user-#{@context.username}" : user.billto,
+        access: internet_access ? {network: ["*"]} : {}
+      })["id"]
+      api.call(project, "removeObjects", {objects: [applet_dxid]})
+      app = App.create!(
+        dxid: dxid,
+        version: nil,
+        revision: revision,
+        title: title,
+        readme: readme,
+        user_id: @context.user_id,
+        scope: "private",
+        app_series_id: app_series.id,
+        input_spec: input_spec,
+        output_spec: output_spec,
+        internet_access: internet_access,
+        instance_type: instance_type,
+        ordered_assets: ordered_assets,
+        packages: packages,
+        code: code
+      )
+      app.asset_ids = Asset.accessible_by(@context).where(dxid: ordered_assets).select(:id).map(&:id)
+      app.save!
+      app_series.update!(latest_revision_app_id: app.id)
     end
-  end
 
-  # Inputs
-  #
-  # ids (array:string, optional): the dxids of the assets
-  #
-  # Outputs:
-  #
-  # An array of hashes, each of which contains the following:
-  #
-  # dxid (string)
-  # name (string)
-  #
-  def list_assets
-    ids = params[:ids]
-    if !ids.nil?
-      raise unless ids.is_a?(Array) && ids.all? { |id| id.is_a?(String) }
-      assets = Asset.closed.accessible_by(@context).where(dxid: ids)
-    else
-      assets = Asset.closed.accessible_by(@context)
-    end
-
-    result = assets.order(:name).select(:dxid, :name).map do |asset|
-      {uid: asset.uid, dxid: asset.dxid, name: asset.prefix }
-    end
-
-    if !ids.nil?
-      # This would happen if an asset becomes inaccessible
-      # For now silently drop the asset -- allows for asset deletion
-      # raise unless ids.size == result.size
-    end
-
-    render json: result
-  end
-
-  # Inputs
-  #
-  # id (string, required): the dxid of the asset to describe
-  #
-  # Outputs:
-  #
-  # description (string): the markdown README of the asset
-  # archive_entries (array:string): a list of "paths" included in the archive
-  #
-  def describe_asset
-    # App id should be a string
-    id = params["id"]
-    raise unless id.is_a?(String) && id != ""
-
-    asset = Asset.accessible_by(@context).find_by!(dxid: id)
-
-    render json: {
-      description: asset.description || "",
-      archive_entries: asset.file_paths
-    }
+    render json: {id: app.dxid}
   end
 
   # Inputs
@@ -792,99 +1102,47 @@ class ApiController < ApplicationController
   #
   def search_assets
     # Prefix should be a string with at least three characters
-    prefix = params["prefix"]
-    raise unless prefix.is_a?(String) && prefix.size >= 3
+    prefix = params[:prefix]
+    fail "Prefix should be a String of at least 3 characters" unless prefix.is_a?(String) && prefix.size >= 3
 
     ids = Asset.closed.accessible_by(@context).with_search_keyword(prefix).order(:name).select(:dxid).distinct.limit(1000).map(&:dxid)
     render json: { ids: ids }
-  end
-
-
-  # Inputs
-  #
-  # -
-  #
-  # Outputs:
-  #
-  # An array of hashes, each of which contains the following:
-  #
-  # id (integer)
-  # path (string)
-  # title (string)
-  # note_type: (string)
-  #
-  def list_notes
-    notes = Note.editable_by(@context).order(note_type: :asc, title: :asc)
-
-    result = notes.map do |note|
-      title = note.title
-      path = note_path(note.to_param)
-      if !note.note_type.nil?
-        if note.note_type == 'Answer'
-          path = discussion_answer_path(note.answer.discussion, note.user.dxuser)
-        elsif note.note_type == 'Discussion'
-          path = discussion_path(note.discussion)
-        end
-      end
-      {id: note.id, path: path, title: title, note_type: note.note_type }
-    end
-
-    render json: result
-  end
-
-  # Inputs
-  #
-  # id (number, required): the id of the note to describe
-  #
-  # Outputs:
-  #
-  # content (string): the markdown README of the note
-  #
-  def describe_note
-    id = params[:id]
-    raise unless id.is_a?(Numeric) && id != ""
-
-    note = Note.accessible_by(@context).find_by!(id: id)
-
-    render json: {
-      content: note.content || ""
-    }
   end
 
   # Use this to add multiple items of the same type to a note
   # or multiple notes to an item
   # Inputs
   #
-  # note_ids (Array[integer], required): array of note ids
-  # item_ids (Array[integer], required): array of item ids
-  # item_type (string, required): type of string from App, Comparison, Job, or UserFile
+  # note_uids (Array[String], required): array of note, discussion, answer uids
+  # item (Array[Object], required): array of items with id, type
+  #     item.type (String): type of string from App, Comparison, Job, or UserFile
   #
   # Outputs:
   #
-  # notes_added (Array[integer])
-  # items_added (Array[integer])
+  # notes_added (Array[String])
+  # items_added (Array[Integer])
   #
   def attach_to_notes
-    note_ids = params[:note_ids]
-    raise unless note_ids.is_a?(Array) && note_ids.all? { |id| id.is_a?(Numeric) }
+    note_uids = params[:note_uids]
+    fail "Parameter 'note_uids' need to be an Array of Note, Answer, or Discussion uids" unless note_uids.is_a?(Array) && note_uids.all? { |uid| uid =~ /^(note|discussion|answer)-(\d+)$/ }
 
-    item_ids = params[:item_ids]
-    raise unless item_ids.is_a?(Array) && item_ids.all? { |id| id.is_a?(Numeric) }
-
-    item_type = params[:item_type]
-    raise unless item_type.is_a?(String) && ["App", "Comparison", "Job", "UserFile"].include?(item_type)
+    items = params[:items]
+    fail "Items need to be an array of objects with id and type (one of App, Comparison, Job, or UserFile)" unless items.is_a?(Array) && items.all? { |item| item[:id].is_a?(Numeric) && item[:type].is_a?(String) && ["App", "Comparison", "Job", "UserFile"].include?(item[:type])}
 
     notes_added = {}
     items_added = {}
     Note.transaction do
-      note_ids.each do |note_id|
-        note = Note.editable_by(@context).find_by!(id: note_id)
-        item_ids.each do |item_id|
-          note.attachments.find_or_create_by(item_id: item_id, item_type: item_type)
-          items_added[item_id] = true
+      note_uids.each do |note_uid|
+        note_item = item_from_uid(note_uid)
+        if !note_item.nil? && note_item.editable_by?(@context)
+          items.each do |item|
+            item[:type] = item[:type].present? ? item[:type] : type_from_classname(item[:className])
+            note_item.attachments.find_or_create_by(item_id: item[:id], item_type: item[:type])
+            items_added["#{item[:type]}-#{item[:id]}"] = true
+          end
+          notes_added[note_uid] = true
+          note_item.save
         end
-        notes_added[note_id] = true
-        note.save
       end
     end
 
@@ -908,19 +1166,19 @@ class ApiController < ApplicationController
   #
   def update_note
     id = params[:id].to_i
-    raise unless id.is_a?(Integer)
+    fail "id needs to be an Integer" unless id.is_a?(Integer)
 
     title = params[:title]
-    raise unless title.is_a?(String)
+    fail "title needs to be a String" unless title.is_a?(String)
 
     content = params[:content] || ""
-    raise unless content.is_a?(String)
+    fail "content needs to be a String" unless content.is_a?(String)
 
     attachments_to_save = params[:attachments_to_save] || []
-    raise unless attachments_to_save.is_a?(Array)
+    fail "attachments_to_save needs to be an array" unless attachments_to_save.is_a?(Array)
 
     attachments_to_delete = params[:attachments_to_delete] || []
-    raise unless attachments_to_delete.is_a?(Array)
+    fail "attachments_to_delete neeeds to be an array" unless attachments_to_delete.is_a?(Array)
 
     note = nil
     Note.transaction do
@@ -948,48 +1206,70 @@ class ApiController < ApplicationController
   # Inputs
   #
   # uid (string, required): the uid of the item to upvote
+  # vote_scope (string, optional)
   #
   # Outputs:
   # uid (string): the uid of the item
   # upvote_count (integer): latest upvote count for item
   #
   def upvote
-    uid = params["uid"]
-    raise unless uid.is_a?(String) && uid != ""
+    uid = params[:uid]
+    fail "Item uid needs to be a non-empty string" unless uid.is_a?(String) && uid != ""
+
+    vote_scope = params[:vote_scope]
 
     item = item_from_uid(uid)
-    if item.accessible_by?(@context) && ["discussion", "answer"].include?(item.klass)
-      item.liked_by(@context.user)
+    if item.accessible_by?(@context) && ["app-series", "discussion", "answer"].include?(item.klass)
+      if vote_scope.present?
+        appathon = item_from_uid(vote_scope, Appathon)
+        fail "#{uid} is not accessible by you in this scope" unless appathon.followed_by?(@context.user)
+        item.liked_by(@context.user, vote_scope: vote_scope)
+        upvote_count = item.get_upvotes(vote_scope: vote_scope).size
+      else
+        item.liked_by(@context.user)
+        upvote_count = item.get_upvotes.size
+      end
       render json: {
         uid: uid,
-        upvote_count: item.get_upvotes.size
+        upvote_count: upvote_count
       }
     else
-      raise "#{uid} is not accessible by you"
+      fail "#{uid} is not accessible by you"
     end
   end
 
   # Inputs
   #
   # uid (string, required): the uid of the item to remove an upvote
+  # vote_scope (string, optional)
   #
   # Outputs:
   # uid (string): the uid of the item
   # upvote_count (integer): latest upvote count for item
   #
   def remove_upvote
-    uid = params["uid"]
-    raise unless uid.is_a?(String) && uid != ""
+    uid = params[:uid]
+    fail "Item uid needs to be a non-empty string" unless uid.is_a?(String) && uid != ""
+
+    vote_scope = params[:vote_scope]
 
     item = item_from_uid(uid)
-    if item.accessible_by?(@context) && ["discussion", "answer"].include?(item.klass)
-      item.unliked_by(@context.user)
+    if item.accessible_by?(@context) && ["app-series", "discussion", "answer"].include?(item.klass)
+      if vote_scope.present?
+        appathon = item_from_uid(vote_scope, Appathon)
+        fail "#{uid} is not accessible by you in this scope" unless appathon.followed_by?(@context.user)
+        item.unliked_by(@context.user, vote_scope: vote_scope)
+        upvote_count = item.get_upvotes(vote_scope: vote_scope).size
+      else
+        item.unliked_by(@context.user)
+        upvote_count = item.get_upvotes.size
+      end
       render json: {
         uid: uid,
-        upvote_count: item.get_upvotes.size
+        upvote_count: upvote_count
       }
     else
-      raise "#{uid} is not accessible by you"
+      fail "#{uid} is not accessible by you"
     end
   end
 
@@ -998,13 +1278,13 @@ class ApiController < ApplicationController
   # followable_uid (string, required): the uid of the item to follow
   #
   # Outputs:
-  # followable_uid (stired): the uid of the item followed
+  # followable_uid (string): the uid of the item followed
   # follower_uid (string): the uid of the follower
   # follow_count (integer): latest count of follows on the followable item
   #
   def follow
     followable_uid = params["followable_uid"]
-    raise unless followable_uid.is_a?(String) && followable_uid != ""
+    fail "Followable uid needs to be a non-empty string" unless followable_uid.is_a?(String) && followable_uid != ""
 
     followable = item_from_uid(followable_uid)
     follower = @context.user
@@ -1016,7 +1296,7 @@ class ApiController < ApplicationController
         follow_count: followable.followers_by_type_count(follower.class.name)
       }
     else
-      raise "You do not have permission to follow this object"
+      fail "You do not have permission to follow this object"
     end
   end
 
@@ -1031,7 +1311,7 @@ class ApiController < ApplicationController
   #
   def unfollow
     followable_uid = params["followable_uid"]
-    raise unless followable_uid.is_a?(String) && followable_uid != ""
+    fail "Followable uid needs to be a non-empty string" unless followable_uid.is_a?(String) && followable_uid != ""
 
     followable = item_from_uid(followable_uid)
     follower = @context.user
@@ -1043,7 +1323,7 @@ class ApiController < ApplicationController
         follow_count: followable.followers_by_type_count(follower.class.name)
       }
     else
-      raise "You do not have permission to unfollow this object"
+      fail "You do not have permission to unfollow this object"
     end
   end
 

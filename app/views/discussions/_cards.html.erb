@@ -1,12 +1,12 @@
-<% if discussions.total_count > 0 %>
+<% if (discussions.respond_to?(:total_count) && discussions.total_count > 0) || (discussions.respond_to?(:count) && discussions.count > 0) %>
   <div class="pfda-cards pfda-cards-list">
     <% discussions.each do |discussion| %>
-      <div class="pfda-card pfda-card-list pfda-card-padded <%= !discussion.public? ? 'pfda-card-warning' : ''%>">
+      <div class="pfda-card pfda-card-list pfda-card-padded <%= discussion.private? ? 'pfda-card-warning' : ''%>">
         <div class="pfda-card-header">
           <div class="media">
             <div class="media-left">
-              <% if discussion.public? %>
-                <%= render "_partials/upvote_badge", icon_classes: "fa-2x", item: discussion %>
+              <% if !discussion.private? %>
+                <%= render "_partials/upvote_badge", icon_classes: "fa-2x", item: discussion, vote_scope: nil %>
               <% else %>
                 <div class="btn-upvote text-center">
                   <span class="fa fa-lock fa-2x text-danger"></span>
@@ -16,7 +16,7 @@
             <div class="media-body">
               <div class="text-muted">
                 <%= link_to image_tag(discussion.user.gravatar_url, class: 'img-circle', height: '25px'), user_path(discussion.user.dxuser) %>
-                <%= link_to(discussion.user.full_name, user_path(discussion.user.dxuser)) %> (<%= discussion.user.org.name %>) <%= discussion.public? ? "posted" : "unpublished discussion" %>
+                <%= link_to(discussion.user.full_name, user_path(discussion.user.dxuser)) %> (<%= discussion.user.org.name %>) <%= !discussion.private? ? "posted" : "unpublished discussion" %>
               </div>
               <div class="pfda-card-title">
                 <a href="<%= discussion_path(discussion) %>">
@@ -28,7 +28,7 @@
                 </a>
               </div>
               <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
-                <% if discussion.public? %>
+                <% if !discussion.private? %>
                   <li>
                     <%= link_to discussion_comments_path(discussion), class: "text-muted" do %>
                       <%= discussion.comment_threads.size %> <%= 'comment'.pluralize(discussion.comment_threads.size) %>
@@ -38,7 +38,7 @@
               </ul>
             </div>
             <div class="media-right">
-              <% if discussion.public? %>
+              <% if !discussion.private? %>
                 <%= link_to discussion_path(discussion), class: "btn btn-link btn-answer" do %>
                   <div class="lead lead-bold answer-count"><%= discussion.answers.accessible_by_public.size %></div>
                   <div class="lead text-muted"><small><%= 'answer'.pluralize(discussion.answers.accessible_by_public.size) %></small></div>

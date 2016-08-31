@@ -20,7 +20,7 @@
         </div>
       </div>
     </div>
-    <div class="note-sidebar">
+    <div class="note-sidebar note-sidebar-padded">
       <div id="note-attachments" class="note-attachments">
         <div class="note-section-title"><span class="fa fa-paperclip"></span> Attachments</div>
         <!-- ko foreach: attachments -->
@@ -29,12 +29,13 @@
             <div class="list-group-item-heading" data-bind="text: heading"></div>
           </div>
           <!-- ko foreach: items -->
-            <div class="list-group-item attachment" data-bind="attr: {'item-uid': uid, 'item-klass': klass}, css: {removed: removed.cache}, visible: !removed() && !(removed.cache() && !$root.editing())">
+            <div class="list-group-item attachment" data-bind="attr: {'item-uid': uid, 'item-klass': klass}, css: {removed: removed.cache, 'attachment-is-new': isNew}, visible: !removed() && !(removed.cache() && !$root.editing())">
               <div class="media">
                 <div class="media-left">
                   <span data-bind="css: $parent.iconClass"></span>
                 </div>
                 <div class="media-body word-break-all">
+                  <span data-bind="visible: isNew" class="label label-primary">Unsaved</span>
                   <!-- ko if: path -->
                     <a class="item-name" data-bind="text: name, attr: {href: path}" tabindex="-1" ></a>
                   <!-- /ko -->
