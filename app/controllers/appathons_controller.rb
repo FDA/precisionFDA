@@ -9,7 +9,7 @@ class AppathonsController < ApplicationController
   def show
     @meta_appathon = MetaAppathon.find(params[:meta_appathon_id])
 
-    @appathon = Appathon.find_by(id: params[:id], meta_appathon_id: params[:meta_appathon_id])
+    @appathon = Appathon.find_by!(id: params[:id], meta_appathon_id: params[:meta_appathon_id])
 
     @apps = @appathon.apps
 
@@ -17,8 +17,6 @@ class AppathonsController < ApplicationController
     @item_comments_path = pathify_comments(@appathon)
     @comments = @appathon.root_comments.order(id: :desc).page params[:comments_page]
     @commentable = @appathon
-
-    redirect_to meta_appathons_appathons_path(@meta_appathon) if @appathon.nil?
   end
 
   def new
