@@ -121,6 +121,10 @@ class AppathonsController < ApplicationController
   def appathon_params
     p = params.require(:appathon).permit(:name, :description, :location, :flag, :start_at, :end_at)
     p.require(:name)
+    p.require(:flag)
+    p.require(:location)
+    p.require(:start_at)
+    p.require(:end_at)
     return p
   end
 end
