@@ -73,6 +73,7 @@ module ApplicationHelper
   # scope_icon: true           # Displays scope icon instead of fa_class(item) as icon
   # title_class                # CSS class to apply to title
   # nolink: true               # Show a label, not a link
+  # noicon: false              # Show/hide the icon
   #
   def unilink(item, opts = {})
     icon = fa_class(item)
@@ -86,7 +87,12 @@ module ApplicationHelper
       end
     end
 
-    icon_span = content_tag(:span, " ", class: "fa #{icon} #{opts[:icon_class]}") + " "
+    if opts[:noicon]
+      icon_span = ""
+    else
+      icon_span = content_tag(:span, " ", class: "fa #{icon} #{opts[:icon_class]}") + " "
+    end
+    
     if item.accessible_by?(@context)
       opts[:nolink] ? icon_span + item.title : link_to(icon_span + item.title, pathify(item), {class: opts[:title_class]})
     else
