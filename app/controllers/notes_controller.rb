@@ -32,7 +32,7 @@ class NotesController < ApplicationController
     @item_comments_path = pathify_comments(@note)
     @comments = @note.root_comments.order(id: :desc).page params[:comments_page]
     @commentable = @note
-    
+
     if @note.note_type == "Answer"
       redirect_to discussion_answer_path(@note.discussion, @note.user.dxuser)
     elsif @note.note_type == "Discussion"
@@ -77,7 +77,7 @@ class NotesController < ApplicationController
     if request.post?
       Note.transaction do
         @note = Note.create!(
-          title: "Untitled Note (#{DateTime.now.strftime("%Y-%m-%d %H:%M:%S")})",
+          title: "#{@context.user.full_name}'s untitled note",
           user_id: @context.user_id,
           scope: "private"
         )
