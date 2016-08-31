@@ -193,7 +193,13 @@
 
 <hr>
 
-<%= render "main/news" %>
+<div class="h3 text-center">Latest News and Announcements</div>
+<div class="container container-padded">
+  <div class="pfda-cards pfda-cards-news pfda-cards-justify-centered">
+    <%= render "main/news" %>    
+  </div>
+</div>
+
 
 
 <% if @consistency_challenge[:launched] || @truth_challenge[:launched]  %>
