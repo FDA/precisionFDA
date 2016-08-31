@@ -12,6 +12,14 @@
   display: inline-block
   float: left
 
+  &.btn-default, &.btn-default:focus, &.btn-default:active
+    background-color: $gray-subtle
+    color: $text-muted
+    border-color: $gray-lighter
+
+    .fa
+      color: $text-muted
+
 .btn-success
   .fa
     color: $btn-success-color

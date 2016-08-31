@@ -31,13 +31,15 @@ class App < ActiveRecord::Base
   store :spec, accessors: [ :input_spec, :output_spec, :internet_access, :instance_type ], coder: JSON
   store :internal, accessors: [ :ordered_assets, :packages, :code ], coder: JSON
 
+  acts_as_commentable
+
   VALID_IO_CLASSES = ["file", "string", "boolean", "int", "float"]
 
-  def self.published
-    where(scope: 'public')
+  def uid
+    dxid
   end
 
-  def uid
+  def to_param
     dxid
   end
 
@@ -49,17 +51,18 @@ class App < ActiveRecord::Base
     "app"
   end
 
+  def describe_fields
+    ["title", "name", "version", "revision", "readme", "spec"]
+  end
+
   def versioned?
     version.present?
   end
 
-  def publishable_by?(context)
-    if context.guest?
-      false
-    else
-      user_id == context.user_id && scope != "public"
-    end
-  end
+  def publishable_by?(context, scope_to_publish_to = "public")
+    # App series must be private, otherwise must match scope
+    core_publishable_by?(context, scope_to_publish_to) && private? && (app_series.private? || (app_series.scope == scope_to_publish_to))
+  end 
 
   UBUNTU_PACKAGES = %w(
 0ad

@@ -2,7 +2,7 @@
   g.blank_slate partial:  "_partials/empty_grid"
 
   g.column name: 'Title', attribute: 'title' do |license|
-    unilinkfw(license)
+    unilinkfw(license, scope_icon: (defined?(scope_icon) ? scope_icon : false))
   end
 
   g.column name: 'Org', attribute: 'handle', assoc: [:user, :org] do |license|

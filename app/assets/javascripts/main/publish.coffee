@@ -1,8 +1,11 @@
 class PublishViewModel
-  constructor: (graph) ->
+  constructor: (graph, spaces) ->
     @treeHash = {}
     @rootID = graph[0].uid
     @treeRoot = ko.observable(@generateTree(graph[0], graph[1], true))
+
+    @spaces = spaces
+    @selectedScope = ko.observable()
 
   generateTree: (node, children, isRoot = false) ->
     if !@treeHash[node.uid]?
@@ -25,6 +28,8 @@ class NodeModel
       , 0)
     )
     @isPublished = node.public
+    @isPublic = node.public
+    @isInSpace = node.in_space
     @isOwned = node.owned
     @isPublishable = node.publishable
 
@@ -45,6 +50,8 @@ class NodeModel
                     'fa fa-fw fa-comments-o'
                   when 'answer'
                     'fa fa-fw fa-commenting'
+                  when 'space'
+                    'fa fa-fw fa-object-group'
                   else
                     'fa fa-fw fa-file-o'
 #########################################################
@@ -58,6 +65,6 @@ class NodeModel
 MainController = Paloma.controller('Main',
   publish: ->
     $container = $("body main")
-    publishViewModel = new PublishViewModel(@params.graph)
+    publishViewModel = new PublishViewModel(@params.graph, @params.spaces)
     ko.applyBindings(publishViewModel, $container[0])
 )

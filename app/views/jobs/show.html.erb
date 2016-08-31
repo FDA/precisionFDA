@@ -19,6 +19,7 @@
 
 <div class="metadata-section metadata-header">
   <ul class="list-group list-group-inline">
+    <%= render "_partials/metadata_access", item: @job %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">App</h5>
       <p class="list-group-item-text"><%= unilink(@job.app) %></p>
@@ -32,13 +33,6 @@
     <li class="list-group-item">
       <h5 class="list-group-item-heading">ID</h5>
       <p class="list-group-item-text"><%= @job.dxid %></p>
-    </li>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Access</h5>
-      <p class="list-group-item-text">
-        <span class="fa <%= @job.public? ? 'fa-globe' : 'fa-lock' %>"></span>
-        <%= @job.public? ? "Public" : "Private" %>
-      </p>
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Created</h5>
@@ -107,6 +101,11 @@
     </a>
   </li>
   <% end %>
+  <li role="presentation">
+    <a href="#tab-comments" aria-controls="tab-comments" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
+      <span class="tab-label">Comments <span class="badge"><%= @job.comment_threads.size %></span></span>
+    </a>
+  </li>
   <% if @notes.total_count > 0 %>
   <li role="presentation">
     <a href="#tab-notes" aria-controls="tab-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
@@ -173,6 +172,14 @@
     </div>
   </div>
   <% end %>
+
+  <div role="tabpanel" class="tab-pane" id="tab-comments">
+    <div class="row">
+      <div class="col-md-12">
+        <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @job %>
+      </div>
+    </div>
+  </div>
 
   <% if @notes.total_count > 0 %>
   <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-notes">

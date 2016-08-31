@@ -17,6 +17,11 @@ class AppsController < ApplicationController
         redirect_to apps_path
         return
       else
+        @items_from_params = [@app]
+        @item_path = pathify(@app)
+        @item_comments_path = pathify_comments(@app)
+        @comments = @app.root_comments.order(id: :desc).page params[:comments_page]
+
         @revisions = @app.app_series.accessible_revisions(@context).select(:title, :id, :dxid, :revision, :version)
         @notes = @app.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
         @answers = @app.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
@@ -82,6 +87,11 @@ class AppsController < ApplicationController
     @notes = @app.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @app.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
     @discussions = @app.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
+
+    @items_from_params = [@app]
+    @item_path = pathify(@app)
+    @item_comments_path = pathify_comments(@app)
+    @comments = @app.root_comments.order(id: :desc).page params[:comments_page]
 
     User.sync_jobs!(@context)
 

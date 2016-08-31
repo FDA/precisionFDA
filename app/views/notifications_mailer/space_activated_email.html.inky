@@ -1,0 +1,30 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    Start by sharing data and adding members to this space
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="https://precision.fda.gov" title="precisionFDA">
+          <img class="header-image" src="https://precision.fda.gov/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right">Space Activated</p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p>
+          The space <strong><%= link_to @space.title, space_url(@space) %></strong> has been activated and you can now move data to share with members of the space.
+        </p>
+
+        <button class="radius" href="<%= space_url(@space) %>">View Space</button>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>

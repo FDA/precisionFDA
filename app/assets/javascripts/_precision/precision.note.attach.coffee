@@ -20,7 +20,7 @@ class NoteAttachModel
           return _.filter(notes, (note) -> _.includes(notesSearchIDs, note.dxid))
         else
           regexp = new RegExp(query, "i")
-          return _.filter(notes, (note) -> note.title.match regexp)
+          return _.filter(notes, (note) -> !_.isBlank(note.title) && note.title.match regexp)
       else
         return notes
     )
@@ -95,7 +95,10 @@ class NoteAttachModel
   getNotes: (params = {}) ->
     # TODO: Mark if a note has already been attached
     # params = {item_id: @id, item_type: @type}
-
+    params = _.defaults(params, {
+      fields: ["title", "note_type"]
+      editable: true
+    })
     @loading(true)
     Precision.api '/api/list_notes', params, (notes) =>
       @loading(false)
@@ -109,9 +112,11 @@ class NoteAttachModel
     selectedNotes = @notes.selected.peek()
     return if !@canAttach.peek() && _.isEmpty(selectedNotes)
     params =
-      note_ids: _.map(selectedNotes, (note) -> note.id)
-      item_ids: [@id]
-      item_type: @type
+      note_uids: _.map(selectedNotes, (note) -> note.uid)
+      items: [{
+        id: @id
+        type: @type
+      }]
 
     Precision.api "/api/attach_to_notes", params, (res) =>
       location.reload()
@@ -124,17 +129,22 @@ class NoteAttachModel
 
 class NoteModel
   constructor: (note, @parentModel) ->
+    @uid = note.uid
     @id = note.id
+    @className = note.className
     @path = note.path
     @title = note.title
     @content = ko.observable()
-    @note_type = note.note_type ? 'Note'
     @loading = ko.observable(false)
 
   getDescribe: () ->
-    if _.isEmpty(@content.peek())
+    if _.isUndefined(@content.peek()) && !@loading()
       @loading(true)
-      Precision.api '/api/describe_note', {id: @id}, (describe) =>
+      params =
+        uid: @uid
+        describe:
+          fields: ["content"]
+      Precision.api '/api/describe', params, (describe) =>
         @loading(false)
         @content(Precision.md.render(describe.content))
         @parentModel.handleUpdate()

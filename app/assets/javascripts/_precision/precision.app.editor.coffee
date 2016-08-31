@@ -145,7 +145,7 @@ class AppEditorModel
 
   getAssetsForSave: () ->
     assets = @assets.peek()
-    return _.map(assets, 'dxid') if assets.length > 0
+    return _.map(assets, 'uid') if assets.length > 0
 
   save: () ->
     @title(_.trim(@title.peek()))

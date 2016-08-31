@@ -36,14 +36,20 @@
       <div class="nav-pill-title">Apps</div>
     <% end %>
   </li>
+  <% if !@context.guest? && (@context.user.can_administer_site? || @context.user.spaces.count > 0) %>
+  <li class="<%= 'active' if params[:controller] == 'spaces' %>" role="presentation">
+    <%= link_to spaces_path do %>
+      <div class="nav-icon fa fa-2x fa-object-group"></div>
+      <div class="nav-pill-title">Spaces</div>
+    <% end %>
+  </li>
+  <% end %>
 </ul>
 
 <ul class="nav navbar-nav navbar-right">
   <li>
     <a href="mailto:precisionfda@fda.hhs.gov"><span class="fa fa-fw fa-commenting-o"></span> Feedback</a>
   </li>
-  <li><a href="<%= guidelines_path %>"><span class="fa fa-fw fa-institution"></span> Guidelines</a></li>
-  <li><a href="<%= about_path %>/how"><span class="fa fa-fw fa-book"></span> Docs</a></li>
   <li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><%= @context.username %> <span class="caret"></span></a>
     <ul class="dropdown-menu">
@@ -52,6 +58,9 @@
         <li><%= link_to "Public Profile", user_path(@context.username) %></li>
       <% end %>
       <li><%= link_to "Manage Licenses", licenses_path %></li>
+      <li role="separator" class="divider"></li>
+      <li><a href="<%= guidelines_path %>"><span class="fa fa-fw fa-institution"></span> Guidelines</a></li>
+      <li><a href="<%= docs_path %>"><span class="fa fa-fw fa-book"></span> Docs</a></li>
       <li role="separator" class="divider"></li>
       <li><%= link_to "Log out", logout_path, method: :delete, data: {no_turbolink: true} %></li>
     </ul>

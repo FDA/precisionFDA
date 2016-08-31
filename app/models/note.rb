@@ -25,6 +25,7 @@ class Note < ActiveRecord::Base
   has_many :files, {through: :attachments, source: :item, source_type: 'UserFile'}
 
   acts_as_followable
+  acts_as_commentable
 
   def uid
     "note-#{id}"
@@ -46,6 +47,10 @@ class Note < ActiveRecord::Base
     end
   end
 
+  def describe_fields
+    ["title", "note_type", "content"]
+  end
+
   def to_param
     if title.nil?
       id.to_s
@@ -56,6 +61,10 @@ class Note < ActiveRecord::Base
 
   def real_note?
     note_type.nil?
+  end
+
+  def publishable_by?(context, scope_to_publish_to = "public")
+    core_publishable_by?(context, scope_to_publish_to) && real_note?
   end
 
   def self.real_notes
@@ -88,5 +97,19 @@ class Note < ActiveRecord::Base
 
   def rename(new_name, context)
     update_attributes(title: new_name)
+  end
+
+  def self.publish(notes, context, scope)
+    count = 0
+    notes.uniq.each do |note|
+      note.with_lock do
+        if note.publishable_by?(context, scope)
+          note.update!(scope: scope)
+          count += 1
+        end
+      end
+    end
+
+    return count
   end
 end

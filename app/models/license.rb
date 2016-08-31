@@ -2,13 +2,14 @@
 #
 # Table name: licenses
 #
-#  id         :integer          not null, primary key
-#  content    :text
-#  user_id    :integer
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
-#  title      :string
-#  scope      :string
+#  id                :integer          not null, primary key
+#  content           :text
+#  user_id           :integer
+#  created_at        :datetime         not null
+#  updated_at        :datetime         not null
+#  title             :string
+#  scope             :string
+#  approval_required :boolean          default(FALSE), not null
 #
 
 class License < ActiveRecord::Base
@@ -39,7 +40,19 @@ class License < ActiveRecord::Base
     end
   end
 
+  def publishable_by?(context, scope_to_publish_to = "public")
+    false
+  end
+
   def rename(new_name, context)
     update_attributes(title: new_name)
+  end
+
+  def describe_fields
+    ["title", "content", "approval_required"]
+  end
+
+  def accepted_licenses_pending
+    accepted_licenses.where(state: 'pending')
   end
 end

@@ -17,18 +17,24 @@
 </div>
 
 <div class="pfda-toolbar">
-  <div class="btn-group pull-right">
+  <%= form_for @license, url: license_path(@license), method: :put, html: {class: "form form-inline"} do |f| %>
+    <input type="hidden" data-bind="attr: {name: 'license[title]'}, value: title"/>
+    <input type="hidden" data-bind="attr: {name: 'license[content]'}, value: content"/>
+    <div class="btn-toolbar pull-right">
       <div class="btn-group">
-        <%= form_for @license, url: license_path(@license), method: :put, html: {class: "form form-inline"} do |f| %>
-          <input type="hidden" data-bind="attr: {name: 'license[title]'}, value: title"/>
-          <input type="hidden" data-bind="attr: {name: 'license[content]'}, value: content"/>
-
-          <button class="btn btn-primary" type="submit">
-            <span class="fa fa-save"></span> Save and Submit
-          </button>
-        <% end %>
+        <div class="btn-static checkbox">
+          <label>
+            <%= f.check_box :approval_required %> Require Manual Approval
+          </label>
+        </div>
       </div>
-  </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" type="submit">
+          <span class="fa fa-save"></span> Save and Submit
+        </button>
+      </div>
+    </div>
+  <% end %>
 </div>
 
 <div class="container-fluid">
