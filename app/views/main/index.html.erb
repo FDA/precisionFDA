@@ -14,28 +14,26 @@
       </div>
     </div>
   <% end %>
-
-    <div class="container container-padded">
+    <div class="jumbotron jumbotron-landing">
+      <div class="container">
+        <h1>WELCOME to precisionFDA</h1>
+      </div>
+    </div>
+    <div class="container-fluid container-padded">
       <% if @event.present? && !@event[:past] %>
         <%= render "_partials/event", event: @event %>
       <% end %>
       <div class="row">
-        <div class="col-md-16">
-          <div class="overview-header">Activity Feed</div>
-          <%= render "_partials/feed", feed: @feed %>
-        </div>
-        <div class="col-md-8">
+        <div class="col-md-5">
           <ul class="list-inline">
             <li class="overview-header">
               Get Started
             </li>
-            <li><a class="btn btn-default" href="<%= guidelines_path %>"><span class="fa fa-fw fa-institution"></span> Guidelines</a></li>
             <li><a class="btn btn-default" href="<%= docs_path %>"><span class="fa fa-fw fa-book"></span> Docs</a></li>
           </ul>
 
           <% if @context.guest? %>
           <div class="pfda-cards pfda-cards-list pfda-tutorial text-left">
-
             <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
               <div class="pfda-card-header">
                 <div class="pfda-card-title">
@@ -193,43 +191,58 @@
           </ul>
 
           <% end %>
-
-          <% if @truth_challenge[:launched]  %>
-          <div class="pfda-cards pfda-cards-list pfda-tutorial text-left">
-
-          <a class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-info-solid" href="<%= truth_challenges_path %>">
-            <div class="pfda-card-header lead text-center">
-              <%= @truth_challenge[:active] ? 'Participate in the' : 'Read about the' %>
-            </div>
-            <div class="pfda-card-body pfda-card-body-icon">
-              <span class="fa fa-trophy" aria-hidden="true"></span>
-            </div>
-            <div class="pfda-card-footer lead lead-bold text-center">
-              Truth Challenge
-            </div>
-          </a>
-          <% end %>
-
-          <% if @consistency_challenge[:launched]  %>
-          <a class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-info-solid" href="<%= consistency_challenges_path %>">
-            <div class="pfda-card-header lead text-center">
-              <%= @consistency_challenge[:active] ? 'Participate in the' : 'Read about the' %>
-            </div>
-            <div class="pfda-card-body pfda-card-body-icon">
-              <span class="fa fa-trophy" aria-hidden="true"></span>
-            </div>
-            <div class="pfda-card-footer lead lead-bold text-center">
-              Consistency Challenge
-            </div>
-          </a>
-          <% end %>
         </div>
+
+        <div class="col-md-12">
+          <div class="overview-header">Activity Feed</div>
+          <%= render "_partials/feed", feed: @feed %>
+        </div>
+
+        <div class="col-md-7">
+          <ul class="list-inline">
+            <li class="overview-header">
+              Latest News
+            </li>
+          </ul>
+          <ul class="pfda-cards pfda-cards-list">
+            <%= render "main/news" %>
+            <% if @truth_challenge[:launched]  %>
+            <div class="pfda-cards pfda-cards-list pfda-tutorial text-left">
+
+            <a class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-info-solid" href="<%= truth_challenges_path %>">
+              <div class="pfda-card-header lead text-center">
+                <%= @truth_challenge[:active] ? 'Participate in the' : 'Read about the' %>
+              </div>
+              <div class="pfda-card-body pfda-card-body-icon">
+                <span class="fa fa-trophy" aria-hidden="true"></span>
+              </div>
+              <div class="pfda-card-footer lead lead-bold text-center">
+                Truth Challenge
+              </div>
+            </a>
+            <% end %>
+
+            <% if @consistency_challenge[:launched]  %>
+            <a class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-info-solid" href="<%= consistency_challenges_path %>">
+              <div class="pfda-card-header lead text-center">
+                <%= @consistency_challenge[:active] ? 'Participate in the' : 'Read about the' %>
+              </div>
+              <div class="pfda-card-body pfda-card-body-icon">
+                <span class="fa fa-trophy" aria-hidden="true"></span>
+              </div>
+              <div class="pfda-card-footer lead lead-bold text-center">
+                Consistency Challenge
+              </div>
+            </a>
+            <% end %>
+          </ul>
+        </div>
+
       </div>
     </div>
 
-    <hr>
+    <hr />
 
-    <%= render "main/news" %>
 <% end %>
 
 <% if !@context.logged_in_or_guest? %>
