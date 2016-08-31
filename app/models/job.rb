@@ -61,6 +61,10 @@ class Job < ActiveRecord::Base
     dxid
   end
 
+  def to_param
+    uid
+  end
+
   def title
     name
   end

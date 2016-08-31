@@ -71,6 +71,10 @@ class UserFile < ActiveRecord::Base
     return parent_type == "User" || parent_type == "Job"
   end
 
+  def to_param
+    uid
+  end
+
   def self.not_assets
     return where.not(parent_type: 'Asset')
   end

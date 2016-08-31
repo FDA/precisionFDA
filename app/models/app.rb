@@ -39,6 +39,10 @@ class App < ActiveRecord::Base
     dxid
   end
 
+  def to_param
+    dxid
+  end
+
   def name
     app_series.name
   end
