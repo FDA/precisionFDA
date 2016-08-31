@@ -4,11 +4,6 @@
   <div class="pull-left">
     <div class="page-title">
       <span class="fa fa-flag-checkered"></span> <%= @meta_appathon.title %>
-      <% if @meta_appathon.editable_by?(@context) %>
-        <a class="pfda-rename-item" data-toggle="modal" data-target="#rename-modal">
-          <span class="fa fa-pencil"></span>
-        </a>
-      <% end %>
     </div>
     <% if !@meta_appathon.description.blank? %>
     <div class="description">
@@ -64,7 +59,3 @@
 <% end %>
 
 <%= render "appathons/cards", meta_appathon: @meta_appathon, appathons: @appathons %>
-
-<% if @meta_appathon.editable_by?(@context) %>
-  <%= render "_partials/modal_rename", item: @meta_appathon, path_to_rename: rename_meta_appathon_path(@meta_appathon.id) %>
-<% end %>

@@ -8,7 +8,8 @@
 #  meta_appathon_id :integer
 #  description      :text
 #  flag             :string
-#  start_at         :datetime         default(Thu, 25 Aug 2016 07:40:05 UTC +00:00)
+#  location         :string
+#  start_at         :datetime
 #  end_at           :datetime
 #  meta             :text
 #  created_at       :datetime         not null
@@ -21,6 +22,8 @@ class Appathon < ActiveRecord::Base
 
   acts_as_commentable
   acts_as_followable
+
+  ICONS = %w(/baseball bicycle billiards bowling cards charter chess-knight chess-stopwatch diving-mask dumbbell ghosts-pacman glove-fan golf helmet hockey mushroom-from-Mario pedestal ping-pong-racket racing-flag rugby sailing-ship shaker skates skipping-rope soccer-ball soccer-cup stopwatch tennis torch weight/)
 
   def uid
     "appathon-#{id}"
@@ -47,19 +50,11 @@ class Appathon < ActiveRecord::Base
   end
 
   def active?
-    start_at > DateTime.now && end_at < DateTime.now
+    start_at < DateTime.now && DateTime.now < end_at
   end
 
   def member_ids
     followers.map(&:id)
-  end
-
-  def flag_path
-    # FIXME: This is just temporary
-    icons = %w(baseball bicycle billiards bowling cards charter chess-knight chess-stopwatch diving-mask dumbbell ghosts-pacman glove-fan golf helmet hockey mushroom-from-Mario pedestal ping-pong-racket racing-flag rugby sailing-ship shaker skates skipping-rope soccer-ball soccer-cup stopwatch tennis torch weight)
-
-    icon_id = id % icons.length - 1
-    return "icons/SportsGamesIcons_PixelBuddha/Multi-Color Style/PNG/256x256/#{icons[icon_id]}.png"
   end
 
   def apps
@@ -79,7 +74,7 @@ class Appathon < ActiveRecord::Base
   end
 
   def self.active
-    where("start_at > ?", DateTime.now).where("end_at < ?", DateTime.now)
+    where("start_at < ?", DateTime.now).where("? < end_at", DateTime.now)
   end
 
   def rename(new_name, context)

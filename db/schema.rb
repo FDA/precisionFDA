@@ -60,6 +60,7 @@ ActiveRecord::Schema.define(version: 20160827225404) do
     t.integer  "meta_appathon_id"
     t.text     "description"
     t.string   "flag"
+    t.string   "location"
     t.datetime "start_at"
     t.datetime "end_at"
     t.text     "meta"

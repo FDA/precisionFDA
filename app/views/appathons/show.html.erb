@@ -19,7 +19,7 @@
   <% end %>
   <div class="page-context-title">
     <div class="text-center">
-      <%= image_tag(@appathon.flag_path, width: 100)  %>
+      <%= flag_image_tag(@appathon.flag, width: 100)  %>
     </div>
     <br />
     <br />
@@ -38,6 +38,14 @@
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Ends</h5>
         <p class="list-group-item-text"><%= @appathon.end_at.nil? ? @appathon.meta_appathon.end_at.to_s(:db) : @appathon.end_at.to_s(:db) %></p>
+      </li>
+    </ul>
+  </div>
+  <div class="metadata-section text-center">
+    <ul class="list-group list-group-inline list-bricks">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Location</h5>
+        <p class="list-group-item-text"><%= @appathon.location %></p>
       </li>
     </ul>
   </div>

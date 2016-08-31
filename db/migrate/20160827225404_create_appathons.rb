@@ -6,6 +6,7 @@ class CreateAppathons < ActiveRecord::Migration
       t.references :meta_appathon, index: true, foreign_key: true, required: true
       t.text :description
       t.string :flag
+      t.string :location
       t.datetime :start_at
       t.datetime :end_at
       t.text :meta
