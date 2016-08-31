@@ -310,13 +310,13 @@ class ApplicationController < ActionController::Base
     elsif params[:comparison_id].present?
       return [Comparison.find(params[:comparison_id])]
     elsif params[:file_id].present?
-      return [UserFile.find_by(dxid: params[:file_id])]
+      return [UserFile.find_by!(dxid: params[:file_id])]
     elsif params[:asset_id].present?
-      return [Asset.find_by(dxid: params[:asset_id])]
+      return [Asset.find_by!(dxid: params[:asset_id])]
     elsif params[:job_id].present?
-      return [Job.find_by(dxid: params[:job_id])]
+      return [Job.find_by!(dxid: params[:job_id])]
     elsif params[:app_id].present?
-      return [App.find_by(dxid: params[:app_id])]
+      return [App.find_by!(dxid: params[:app_id])]
     end
     return
   end
