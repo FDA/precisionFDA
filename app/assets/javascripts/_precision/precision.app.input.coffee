@@ -31,16 +31,19 @@ class AppInputModel
                   value = @defaultFileValue()
                   @licenseToAccept({license: value.license, user_license: value.user_license}) if value.license? && !value.user_license?.accepted
                   value.title
+                else if @defaultValue.match(new RegExp(/^file-(.{24})$/, "i"))
+                    params =
+                      uid: @defaultValue
+                      describe:
+                        include:
+                          license: true
+                    Precision.api('/api/describe', params).done((value) =>
+                      @defaultFileValue(value)
+                      @licenseToAccept({license: value.license, user_license: value.user_license}) if value.license? && !value.user_license?.accepted
+                    )
+                    @defaultValue
                 else
-                  params =
-                    uid: @defaultValue
-                    describe:
-                      include:
-                        license: true
-                  Precision.api('/api/describe', params).done((value) =>
-                    @defaultFileValue(value)
-                    @licenseToAccept({license: value.license, user_license: value.user_license}) if value.license? && !value.user_license?.accepted
-                  )
+                  @error("Invalid default value: #{@defaultValue}")
                   @defaultValue
               else
                 "Select file..."

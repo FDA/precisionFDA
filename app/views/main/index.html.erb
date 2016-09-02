@@ -4,8 +4,6 @@
 <% if !@context.logged_in_or_guest? %>
   <%= render "main/landing" %>
 <% else %>
-
-
   <% if @context.guest? %>
     <div class="jumbotron jumbotron-landing">
       <div class="container">
@@ -13,12 +11,14 @@
         <p class="lead lead-bold">A community platform for NGS assay evaluation and regulatory science exploration.</p>
       </div>
     </div>
-  <% end %>
+  <% else %>
     <div class="jumbotron jumbotron-landing">
       <div class="container">
         <h1>WELCOME to precisionFDA</h1>
       </div>
     </div>
+  <% end %>
+
     <div class="container-fluid container-padded">
       <% if @event.present? && !@event[:past] %>
         <%= render "_partials/event", event: @event %>
