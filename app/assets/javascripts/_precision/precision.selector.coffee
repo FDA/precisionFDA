@@ -22,7 +22,7 @@ class SelectorModel
     @calls = []
     @callsDeferred = $.Deferred()
 
-    @selectedList = new ObjectListModel(this,         {
+    @selectedList = new ObjectListModel(this, {
       className: "selected"
       name: "Selected"
     })
