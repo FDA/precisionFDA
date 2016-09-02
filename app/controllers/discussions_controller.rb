@@ -64,7 +64,8 @@ class DiscussionsController < ApplicationController
         note = Note.create!({
           user_id: @context.user_id,
           scope: "private",
-          note_type: "Discussion"
+          note_type: "Discussion",
+          title: "#{@context.user.full_name}'s untitled discussion"
         })
         Discussion.transaction do
           @discussion = Discussion.create!(
