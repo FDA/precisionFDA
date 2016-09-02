@@ -200,7 +200,7 @@ class ApiController < ApplicationController
           fail "Unknown class #{item.klass}"
       end
 
-      related = related.map {|o| describe_for_api(o, params[:opts][:describe])}
+      related = related.uniq.map {|o| describe_for_api(o, params[:opts][:describe])}
       render json: related
     else
       fail "You do not have permission to access #{id}"
