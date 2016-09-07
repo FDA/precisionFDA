@@ -167,15 +167,12 @@ class AppEditorModel
 
     Precision.api('/api/create_app', params)
       .done((data) =>
-        if data.id
-          Precision.unbind.traps()
-          window.location.replace("/apps/#{data.id}/jobs")
-        else if data.failure
-          @errorMessage(data.failure)
-          console.error(data.failure)
-          @saving(false)
+        Precision.unbind.traps()
+        window.location.replace("/apps/#{data.id}/jobs")
       )
       .fail((error) =>
+        errorObject = JSON.parse error.responseText
+        @errorMessage(errorObject.error.message)
         console.error(error)
         @saving(false)
       )
