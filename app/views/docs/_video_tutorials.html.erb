@@ -1,0 +1,49 @@
+<div id="about-docs" class="bs-docs-container docs-content">
+  <div class="row">
+    <div class="col-sm-24">
+      <div id="tutorials" class="h1">Video Tutorials</div>
+      <div class="bs-docs-section">
+        <div class="bs-docs-section bs-docs-media-section">
+          <p>Introduction</p>
+          <%= video_iframe(@videos[:intro][:url]) %>
+        </div>
+        <div class="bs-docs-section bs-docs-media-section">
+          <p>Files</p>
+          <%= video_iframe(@videos[:files][:url]) %>
+        </div>
+        <div class="bs-docs-section bs-docs-media-section">
+          <p>Comparisons</p>
+          <%= video_iframe(@videos[:comparisons][:url]) %>
+        </div>
+        <div class="bs-docs-section bs-docs-media-section">
+          <p>Running Apps</p>
+          <%= video_iframe(@videos[:apps_run][:url]) %>
+        </div>
+        <div class="bs-docs-section bs-docs-media-section">
+          <p>Creating Apps</p>
+          <%= video_iframe(@videos[:apps_create][:url]) %>
+        </div>
+        <div class="bs-docs-section bs-docs-media-section">
+          <p>Exploring and Forking Apps</p>
+          <%= video_iframe(@videos[:apps_fork][:url]) %>
+        </div>
+        <div class="bs-docs-section bs-docs-media-section">
+          <p>Notes</p>
+          <%= video_iframe(@videos[:notes][:url]) %>
+        </div>
+        <div class="bs-docs-section bs-docs-media-section">
+          <p>Discussions</p>
+          <%= video_iframe(@videos[:discussions][:url]) %>
+        </div>
+        <div class="bs-docs-section bs-docs-media-section">
+          <p>Publishing</p>
+          <%= video_iframe(@videos[:publishing][:url]) %>
+        </div>
+        <div class="bs-docs-section bs-docs-media-section">
+          <p>Licenses</p>
+          <%= video_iframe(@videos[:licenses][:url]) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
