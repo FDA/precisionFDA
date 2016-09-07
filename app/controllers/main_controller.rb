@@ -183,9 +183,10 @@ class MainController < ApplicationController
   def request_access
     @invitation = Invitation.new
     if request.post?
-      p = params.require(:invitation).permit(:first_name, :last_name, :email, :org, :duns, :address, :phone, :singular, :truth_challenge_intent, :req_reason, :req_data, :req_software, :research_intent, :clinical_intent, :humanizer_answer, :humanizer_question_id)
+      p = params.require(:invitation).permit(:first_name, :last_name, :email, :org, :duns, :address, :phone, :singular, :participate_intent, :organize_intent, :req_reason, :req_data, :req_software, :research_intent, :clinical_intent, :humanizer_answer, :humanizer_question_id)
       p[:ip] = request.remote_ip.to_s
-      p[:truth_challenge_intent] = (p[:truth_challenge_intent] == "1")
+      p[:participate_intent] = (p[:participate_intent] == "1")
+      p[:organize_intent] = (p[:organize_intent] == "1")
       p[:research_intent] = (p[:research_intent] == "1")
       p[:clinical_intent] = (p[:clinical_intent] == "1")
       p[:state] = "guest"
