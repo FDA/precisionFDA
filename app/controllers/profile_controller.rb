@@ -289,7 +289,7 @@ class ProfileController < ApplicationController
               u = User.where.any_of({first_name: inv.first_name, last_name: inv.last_name}, {normalized_email: inv.email.downcase.strip}).take
               row << (u ? "maybe #{u.dxuser}" : "")
             end
-            row += [inv.first_name, inv.last_name, inv.email, inv.org, inv.singular, inv.address, inv.phone, inv.duns, inv.consistency_challenge_intent, inv.truth_challenge_intent, inv.research_intent, inv.clinical_intent, inv.req_data, inv.req_software, inv.req_reason]
+            row += [inv.first_name, inv.last_name, inv.email, inv.org, inv.singular, inv.address, inv.phone, inv.duns, inv.participate_intent, inv.organize_intent, inv.research_intent, inv.clinical_intent, inv.req_data, inv.req_software, inv.req_reason]
             sheet.add_row row
           end
         end
