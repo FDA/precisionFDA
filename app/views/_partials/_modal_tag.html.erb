@@ -5,6 +5,8 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">
           Edit tags for <i><%= item_name %></i>
+          <br />
+          <small><span class="fa fa-globe" aria-hidden="true"></span> Tags are public to the community</small>
         </h4>
       </div>
       <%= form_for item, url: set_tags_path, method: :post do |f| %>
