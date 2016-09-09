@@ -35,6 +35,28 @@
   </ul>
 </div>
 
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <% if @app.editable_by?(@context) %>
+      <li class="list-group-item">
+        <a class="pfda-tag-item" data-toggle="modal" data-target="#tags-modal">
+          <span class="fa fa-fw fa-tags" aria-hidden="true"></span> Edit tags
+        </a>
+      </li>
+      <%= render "_partials/modal_tag", item: @app.app_series, item_name: @app.title %>
+    <% else %>
+      <span class="fa fa-fw fa-tags" aria-hidden="true"></span>
+    <% end %>
+    <li class="list-group-item">
+      <ul class="list list-inline list-inline-bullets">
+      <% @app.app_series.all_tags_list.each do |tag| %>
+        <li class="list-group-item-text"><%= tag %></li>
+      <% end %>
+      </ul>
+    </li>
+  </ul>
+</div>
+
 <div class="pfda-toolbar">
   <div class="btn-group">
     <div class="btn-group">
@@ -174,14 +196,12 @@
       <% end %>
     </div>
   </div>
-  <% elsif %>
-    <% if !@app.present? %>
+  <% elsif !@app.present? %>
     <div role="tabpanel" class="tab-pane tab-pane-padded active" id="app-job">
       <div class="alert alert-info">
         <span class="fa fa-info-circle"></span> When you run an <a href="<%= show_docs_path("apps") %>">app</a>, it will create a <a href="<%= show_docs_path("apps") %>#apps-run">job</a> that will show up here. Meanwhile, check out our <%= link_to "Featured Apps", featured_apps_path %> or <%= link_to "explore community contributions", explore_apps_path %>
       </div>
     </div>
-    <% end %>
   <% end %>
 
   <% if @app.present? %>

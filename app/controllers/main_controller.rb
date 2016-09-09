@@ -372,6 +372,34 @@ class MainController < ApplicationController
     @key = rails_encryptor.encrypt_and_sign({context: context}.to_json)
   end
 
+  # Inputs
+  #
+  # taggable_uid (string, required): the uid of the item to tag
+  # tags (string, required): comma-separated string containing tags to update to,
+  #                this will replace existing tags
+  # tag_context (string, optional): indicates the tag context to use
+  def set_tags
+    taggable_uid = params["taggable_uid"]
+    fail "Taggable uid needs to be a non-empty string" unless taggable_uid.is_a?(String) && taggable_uid != ""
+
+    tags = params["tags"]
+    fail "Tags need to be comma-separated strings" unless tags.is_a?(String)
+
+    tag_context = params["tag_context"] # Optional
+
+    taggable = item_from_uid(taggable_uid)
+
+    if taggable.accessible_by?(@context)
+      path_to_redirect = pathify(taggable)
+      @context.user.tag(taggable, with: tags, on: tag_context.blank? ? :tags : tag_context)
+      # tag_list = tag_context.blank? ? taggable.all_tags_list : taggable.all_tags_list_on(tag_context)
+      redirect_to path_to_redirect
+    else
+      flash[:error] = "This item is not accessible by you"
+      redirect_to :root
+    end
+  end
+
   private
 
   def get_graph(root)
