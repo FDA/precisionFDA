@@ -18,18 +18,9 @@
                 <%= link_to(app.title, app_path(app.dxid)) %>
               </div>
               <% if app.app_series.all_tags_list.count > 0 %>
-              <ul class="pfda-card-metadata list list-inline">
-                <li class="">
-                  <span class="fa fa-fw fa-tags"></span>
-                </li>
-                <li class="">
-                  <ul class="list-inline list-inline-bullets">
-                    <% app.app_series.all_tags_list.each do |tag| %>
-                      <li class="text-muted"><%= tag %></li>
-                    <% end %>
-                  </ul>
-                </li>
-              </ul>
+              <div class="pfda-card-metadata">
+                <%= render "_partials/tags_list", tags_list: app.app_series.all_tags_list %>
+              </div>
               <% end %>
               <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
                 <li>

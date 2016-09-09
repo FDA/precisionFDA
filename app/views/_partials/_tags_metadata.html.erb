@@ -1,0 +1,15 @@
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <% if is_editable %>
+      <li class="list-group-item">
+        <a class="pfda-tag-item" data-toggle="modal" data-target="#tags-modal">
+          <span class="fa fa-fw fa-tags" aria-hidden="true"></span> Edit tags
+        </a>
+      </li>
+      <%= render "_partials/modal_tag", item: item, item_name: item_name %>
+    <% end %>
+    <li class="list-group-item">
+      <%= render "_partials/tags_list", tags_list: tags_list %>
+    </li>
+  </ul>
+</div>
