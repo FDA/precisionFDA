@@ -164,6 +164,8 @@ class ApplicationController < ActionController::Base
       end
     when "app"
       app_path(item.dxid)
+    when "app-series"
+      pathify(item.latest_accessible(@context))
     when "job"
       job_path(item.dxid)
     when "asset"
