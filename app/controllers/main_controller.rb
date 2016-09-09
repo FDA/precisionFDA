@@ -385,6 +385,11 @@ class MainController < ApplicationController
     tags = params["tags"]
     fail "Tags need to be comma-separated strings" unless tags.is_a?(String)
 
+    suggested_tags = params["suggested_tags"]
+    if suggested_tags.is_a?(Array)
+      tags = (tags.split(',') + suggested_tags).join(',')
+    end
+
     tag_context = params["tag_context"] # Optional
 
     taggable = item_from_uid(taggable_uid)
@@ -392,7 +397,6 @@ class MainController < ApplicationController
     if taggable.accessible_by?(@context)
       path_to_redirect = pathify(taggable)
       @context.user.tag(taggable, with: tags, on: tag_context.blank? ? :tags : tag_context)
-      # tag_list = tag_context.blank? ? taggable.all_tags_list : taggable.all_tags_list_on(tag_context)
       redirect_to path_to_redirect
     else
       flash[:error] = "This item is not accessible by you"
