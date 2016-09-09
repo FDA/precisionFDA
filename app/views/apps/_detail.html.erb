@@ -35,27 +35,7 @@
   </ul>
 </div>
 
-<div class="metadata-section metadata-header">
-  <ul class="list-group list-group-inline">
-    <% if @app.editable_by?(@context) %>
-      <li class="list-group-item">
-        <a class="pfda-tag-item" data-toggle="modal" data-target="#tags-modal">
-          <span class="fa fa-fw fa-tags" aria-hidden="true"></span> Edit tags
-        </a>
-      </li>
-      <%= render "_partials/modal_tag", item: @app.app_series, item_name: @app.title %>
-    <% else %>
-      <span class="fa fa-fw fa-tags" aria-hidden="true"></span>
-    <% end %>
-    <li class="list-group-item">
-      <ul class="list list-inline list-inline-bullets">
-      <% @app.app_series.all_tags_list.each do |tag| %>
-        <li class="list-group-item-text"><%= tag %></li>
-      <% end %>
-      </ul>
-    </li>
-  </ul>
-</div>
+<%= render "_partials/tags_metadata", item: @app.app_series, item_name: @app.title, tags_list: @app.app_series.all_tags_list, is_editable: @app.editable_by?(@context) %>
 
 <div class="pfda-toolbar">
   <div class="btn-group">
