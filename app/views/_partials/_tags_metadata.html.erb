@@ -6,7 +6,7 @@
           <span class="fa fa-fw fa-tags" aria-hidden="true"></span> Edit tags
         </a>
       </li>
-      <%= render "_partials/modal_tag", item: item, item_name: item_name %>
+      <%= render "_partials/modal_tag", item: item, item_name: item_name, tags_list: tags_list, suggested_tags: defined?(suggested_tags) ? suggested_tags : nil %>
     <% end %>
     <li class="list-group-item">
       <%= render "_partials/tags_list", tags_list: tags_list %>

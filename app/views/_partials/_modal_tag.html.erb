@@ -11,10 +11,25 @@
       </div>
       <%= form_for item, url: set_tags_path, method: :post do |f| %>
       <div class="modal-body">
-        <div class="form-group required">
-          <input type="text" name="tags" class= "form-control input-lg", placeholder="Tags (comma-separated)..." value="<%= item.all_tags_list %>" />
-          <input type="hidden" name="taggable_uid" value="<%= item.uid %>" />
+        <input type="hidden" name="taggable_uid" value="<%= item.uid %>" />
+        <div class="form-group">
+          <label class="control-label">Tags (comma-separated)</label>
+          <input type="text" name="tags" class= "form-control input-lg", placeholder="e.g. foo, bar..." value="<%= tags_list %>" />
         </div>
+        <% if !suggested_tags.nil? && suggested_tags.size > 0 %>
+        <div class="form-group">
+          <label class="control-label">Suggested tags</label>
+          <% suggested_tags.each do |suggested_tag| %>
+            <% if !tags_list.include?(suggested_tag) %>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="suggested_tags[]" value="<%= suggested_tag %>"> <%= suggested_tag %>
+                </label>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+        <% end %>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Cancel</button>
