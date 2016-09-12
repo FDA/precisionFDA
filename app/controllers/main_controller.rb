@@ -394,7 +394,7 @@ class MainController < ApplicationController
 
     taggable = item_from_uid(taggable_uid)
 
-    if taggable.accessible_by?(@context)
+    if taggable.editable_by?(@context)
       path_to_redirect = pathify(taggable)
       @context.user.tag(taggable, with: tags, on: tag_context.blank? ? :tags : tag_context)
       redirect_to path_to_redirect
