@@ -23,6 +23,9 @@ class AppSeries < ActiveRecord::Base
   belongs_to :user
 
   acts_as_votable
+  acts_as_taggable
+
+  SUGGESTED_TAGS = ["Quality Control", "Reads pre-processing", "Reads alignment", "Duplicate Removals", "Variant Calling", "Simulation", "Benchmarking Tools", "Statistics/Graphics", "Resource Utilization"]
 
   def uid
     "app-series-#{id}"
