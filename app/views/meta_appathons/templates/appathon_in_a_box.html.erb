@@ -131,3 +131,17 @@
     </div>
   </div>
 </div>
+
+<div class="appathon-container container-fluid container-padded">
+  <div class="panel panel-default">
+    <div class="pfda-pane">
+      <div class="pfda-pane-content">
+        <div class="pfda-meta_appathon-participants">
+          <%= render "_partials/followers", followers: @meta_appathon.user_followers, followable: @meta_appathon, display_names: true %>
+        </div>
+
+        <%= render "meta_appathons/app_cards", apps: @apps, meta_appathon: @meta_appathon %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -48,8 +48,8 @@ class User < ActiveRecord::Base
   has_many :accepted_licenses
   has_many :space_memberships
   has_many :spaces, {through: :space_memberships}
-  has_many :appathons
-  has_many :meta_appathons, {through: :appathons}
+  has_one :appathon
+  has_many :meta_appathons
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 
   include Gravtastic
@@ -109,6 +109,12 @@ class User < ActiveRecord::Base
 
   def is_self(context)
     id == context.user_id
+  end
+
+  def appathon_from_meta(meta_appathon)
+    following_by_type('Appathon').each do |appathon|
+      return appathon if appathon.meta_appathon.uid == meta_appathon.uid
+    end
   end
 
   def can_administer_site?
