@@ -38,6 +38,8 @@ Rails.application.routes.draw do
     post '/api/describe_license', to: 'api#describe_license'
     post '/api/accept_licenses', to: 'api#accept_licenses'
     post '/api/run_app', to: 'api#run_app'
+    post '/api/get_app_spec', to: 'api#get_app_spec'
+    post '/api/get_app_script', to: 'api#get_app_script'
     post '/api/search_assets', to: 'api#search_assets'
     post '/api/create_asset', to: 'api#create_asset'
     post '/api/close_asset', to: 'api#close_asset'
