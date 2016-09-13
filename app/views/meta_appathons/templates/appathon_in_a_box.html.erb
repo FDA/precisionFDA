@@ -64,80 +64,77 @@
 
 <div class="container-fluid container-padded pfda-meta-appathon-section">
   <div class="row">
-    <div class="col-md-17">
-      <div class="row">
-        <div class="col-md-11">
-          <div class="panel">
-            <div class="panel-body">
-              <div class="h3">
-                What is an app-a-thon?
-              </div>
-
-              <p class="lead">
-                An app-a-thon is your own community event where you and your peers, collaborators or friends get together and add your favorite NGS software to the precisionFDA app library.
-              </p>
-            </div>
+    <div class="col-md-11">
+      <div class="panel">
+        <div class="panel-body">
+          <div class="h3">
+            What is an app-a-thon?
           </div>
 
-          <div class="panel">
-            <div class="panel-body">
-              <div class="h3">
-                What is a precisionFDA app?
-              </div>
-
-              <p class="lead">
-                A precisionFDA app is a wrapper around NGS software, consisting of Linux executables and a specification of how to execute them in a Linux virtual machine. Apps can encapsulate any use case such as read mapping, variation calling, benchmarking, or simulations. Users on precisionFDA can try out these apps by running them directly on the cloud.
-              </p>
-            </div>
-          </div>
+          <p class="lead">
+            An app-a-thon is your own community event where you and your peers, collaborators or friends get together and add your favorite NGS software to the precisionFDA app library.
+          </p>
         </div>
-        <div class="col-md-12 col-md-offset-1">
-          <div class="panel">
-            <div class="panel-body">
-              <div class="h3">
-                Why organize or participate in an app-a-thon?
-              </div>
+      </div>
 
-              <p class="lead">
-                By contributing to the precisionFDA app library, you help introduce your favorite NGS software to the FDA and to the community. When others do the same, you collectively help build up the precisionFDA app library, enabling the greater precisionFDA community to explore, access, and try out all these apps directly on the cloud.
-              </p>
-
-              <p class="lead">
-                You also help disseminate the software in a portable manner, because users have the option of exporting the app as a Linux container and running it in any other environment.
-              </p>
-            </div>
+      <div class="panel">
+        <div class="panel-body">
+          <div class="h3">
+            What is a precisionFDA app?
           </div>
+
+          <p class="lead">
+            A precisionFDA app is a wrapper around NGS software, consisting of Linux executables and a specification of how to execute them in a Linux virtual machine. Apps can encapsulate any use case such as read mapping, variation calling, benchmarking, or simulations. Users on precisionFDA can try out these apps by running them directly on the cloud.
+          </p>
         </div>
       </div>
     </div>
-    <div class="col-md-6 col-md-offset-1">
-      <div class="pfda-toolbar pfda-toolbar-transparent">
-        <div class="text-center">
-          <%= image_tag("icons/ColoredLineIcons/png/128/lightbulb_idea.png")  %>
-        </div>
-        <p class="text-muted">
-          Help others discover great NGS software by contributing to this effort.
-        </p>
-        <% if !@meta_appathon.followed_by?(@context.user) %>
-          <p class="text-muted">
-            Organize or participate in a precisionFDA app-a-thon today!
+    <div class="col-md-12 col-md-offset-1">
+      <div class="panel">
+        <div class="panel-body">
+          <div class="h3">
+            Why organize or participate in an app-a-thon?
+          </div>
+
+          <p class="lead">
+            By contributing to the precisionFDA app library, you help introduce your favorite NGS software to the FDA and to the community. When others do the same, you collectively help build up the precisionFDA app library, enabling the greater precisionFDA community to explore, access, and try out all these apps directly on the cloud.
           </p>
-          <%= link_to new_meta_appathon_appathon_path(@meta_appathon), class: 'btn btn-default btn-block' do %>
-            <span class="fa fa-bolt fa-fw"></span> Host an App-a-thon
-          <% end %>
-        <% end %>
+
+          <p class="lead">
+            You also help disseminate the software in a portable manner, because users have the option of exporting the app as a Linux container and running it in any other environment.
+          </p>
+        </div>
       </div>
-      <%= render "appathons/cards", meta_appathon: @meta_appathon, appathons: @appathons %>
     </div>
   </div>
+</div>
+
+<div class="appathon-container container-fluid container-padded">
+  <div class="pfda-toolbar pfda-toolbar-transparent">
+    <div class="text-center">
+      <%= image_tag("icons/ColoredLineIcons/png/128/lightbulb_idea.png")  %>
+    </div>
+    <p class="text-muted">
+      Help others discover great NGS software by contributing to this effort.
+    </p>
+    <% if !@meta_appathon.followed_by?(@context.user) %>
+      <p class="text-muted">
+        Organize or participate in a precisionFDA app-a-thon today!
+      </p>
+      <%= link_to new_meta_appathon_appathon_path(@meta_appathon), class: 'btn btn-default btn-block' do %>
+        <span class="fa fa-bolt fa-fw"></span> Host an App-a-thon
+      <% end %>
+    <% end %>
+  </div>
+  <%= render "appathons/cards", meta_appathon: @meta_appathon, appathons: @appathons %>
 </div>
 
 <div class="appathon-container container-fluid container-padded">
   <div class="panel panel-default">
     <div class="pfda-pane">
       <div class="pfda-pane-content">
-        <div class="pfda-meta_appathon-participants">
-          <%= render "_partials/followers", followers: @meta_appathon.user_followers, followable: @meta_appathon, display_names: true %>
+        <div class="h3">
+          Submissions to Appathons
         </div>
 
         <%= render "meta_appathons/app_cards", apps: @apps, meta_appathon: @meta_appathon %>

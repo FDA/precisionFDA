@@ -9,7 +9,7 @@ class MetaAppathonsController < ApplicationController
     @appathons = @meta_appathon.appathons
 
     @apps = @appathons.map {|appathon| appathon.apps}
-    @apps = @apps.flatten
+    @apps = @apps.flatten.sort_by {|app| app.updated_at }.reverse
 
     if !@meta_appathon.template.blank?
       render template: "meta_appathons/templates/#{@meta_appathon.template}"
