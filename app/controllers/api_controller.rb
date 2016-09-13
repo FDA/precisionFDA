@@ -767,7 +767,7 @@ class ApiController < ApplicationController
     # App should exist and be accessible
     @app = App.accessible_by(@context).find_by!(dxid: id)
 
-    # Check if asset licenses have been accepeted
+    # Check if asset licenses have been accepted
     fail "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
 
     # Inputs should be compatible

@@ -91,6 +91,9 @@
     <a class="btn btn-default" href="<%= fork_app_path(@app.dxid) %>">
       <span class="fa fa-code-fork"></span> Fork
     </a>
+    <%= link_to export_app_path(@app.dxid), class: 'btn btn-default', data: { confirm: 'You are about to download a Dockerfile for running your app locally.' } do %>
+      <span class="fa fa-cloud-download"></span> Export
+    <% end %>
   </div>
 
   <div class="btn-group">

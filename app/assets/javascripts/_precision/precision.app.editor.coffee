@@ -87,6 +87,8 @@ class AppEditorModel
           if saving then "Creating..." else "Create"
         when 'fork'
           if saving then "Forking..." else "Fork"
+        when 'export'
+          if saving then "Exporting..." else "Export"
         else
           if saving
             "Saving Revision #{parseInt(@revision()) + 1}..."
@@ -100,6 +102,8 @@ class AppEditorModel
           "fa fa-plus"
         when 'fork'
           "fa fa-code-fork"
+        when 'export'
+          "fa fa-cloud-download"
         else
           "fa fa-save"
     )

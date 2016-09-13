@@ -4,8 +4,8 @@ if [ "$#" -le 1 ]; then
     # TODO: document usage
     echo "invalid number of parameters"
 elif [ ! -f $2 ]; then
-    export $1=$2
+    echo -- "$2" > /output/$1
 else
-    mkdir /work/output
-    cp $2 /work/output/$1
+    mkdir -p /output
+    cp -- "$2" /output/"$1"
 fi
