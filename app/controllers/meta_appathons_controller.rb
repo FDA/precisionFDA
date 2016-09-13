@@ -6,7 +6,10 @@ class MetaAppathonsController < ApplicationController
 
   def show
     @meta_appathon = MetaAppathon.find(params[:id])
-    @appathons = @meta_appathon.appathons.page params[:appathons_page]
+    @appathons = @meta_appathon.appathons
+
+    @apps = @appathons.map {|appathon| appathon.apps}
+    @apps = @apps.flatten
 
     if !@meta_appathon.template.blank?
       render template: "meta_appathons/templates/#{@meta_appathon.template}"
