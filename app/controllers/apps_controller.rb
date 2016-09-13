@@ -50,6 +50,48 @@ class AppsController < ApplicationController
     js js_param
   end
 
+  def export
+
+    # App should exist and be accessible
+    @app = App.accessible_by(@context).find_by!(dxid: params[:id])
+
+    # Assets should be accessible and licenses accepted
+    assets = Asset.closed.accessible_by(@context);
+    fail "Assets must be editable" unless @app.assets.all? { |a| assets.include? a }
+    fail "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
+
+    # Generate download URLs and Docker commands for each asset
+    asset_cmds = ""
+    @app.assets.each do |asset|
+      url = DNAnexusAPI.new(@context.token).call(asset.dxid, "download", {filename: asset.name, project: asset.project, preauthenticated: true})["url"]
+      asset_cmds << "RUN curl " + url + " | tar xz -C / --no-same-owner --no-same-permissions\n"
+    end
+
+    # Generate Docker command for installing apt-packages
+    package_cmd = if (@app.packages.nil?) then "" else "RUN apt-get install --yes " + @app.packages.join(" ") end
+
+    # Generate new token for pfda uploader
+    context = @context.as_json.slice("user_id", "username", "token", "expiration", "org_id")
+    context["expiration"] = [context["expiration"], Time.now.to_i + 1.day].min
+    @key = rails_encryptor.encrypt_and_sign({context: context}.to_json)
+
+    # Generate Docker command for downloading latest pfda uploader
+    pfda_uploader_cmd = "RUN curl -o /usr/bin/pfda https://dl.dnanex.us/F/D/X7X4y8Bz2QyB3vfFqQ7qqJVzVz4G44JgV1j2by1J/pfda-1.0.4.tar.gz"
+
+    # Generate Dockerfile string
+    dockerfile =
+    [
+      "FROM precisionfda:ub14",
+      package_cmd,
+      asset_cmds,
+      pfda_uploader_cmd,
+      "CMD [\"/usr/bin/run\"]"
+    ].join("\n").gsub(/^$\n/, '') # Join with newlines, remove empty lines
+
+    # Download Dockerfile
+    send_data dockerfile, :filename => 'Dockerfile'
+  end
+
   def featured
     org = Org.featured
     if org
