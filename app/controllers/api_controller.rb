@@ -882,6 +882,36 @@ class ApiController < ApplicationController
 
   # Inputs
   #
+  # app_id
+  #
+  # Outputs
+  #
+  # json (string, only on success): spec, ordered_assets, and packages of the specified app
+  def get_app_spec
+    # App should exist and be accessible
+    app = App.accessible_by(@context).find_by(dxid: params[:id])
+    fail "Invalid app id" if app.nil?
+
+    render json: {spec: app.spec, assets: app.internal[:ordered_assets], packages: app.internal[:packages]}
+  end
+
+  # Inputs
+  #
+  # app_id
+  #
+  # Outputs
+  #
+  # json (string, only on success): code for the specified app
+  def get_app_script
+    # App should exist and be accessible
+    app = App.accessible_by(@context).find_by(dxid: params[:id])
+    fail "Invalid app id" if app.nil?
+
+    render json: app.internal[:code]
+  end
+
+  # Inputs
+  #
   # name, title, readme, input_spec, output_spec, internet_access, instance_type, ordered_assets, packages, code, is_new
   #
   # Outputs
