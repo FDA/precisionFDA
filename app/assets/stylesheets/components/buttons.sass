@@ -64,15 +64,19 @@
   &.active:not(.disabled)
     font-weight: bold
     .upvote-count, .fa
-      color: $brand-red-primary
+      color: $brand-red-secondary
 
     &.btn-default
       background-color: $brand-highlight
       border-color: darken($brand-highlight, 10%)
-      color: $brand-red-primary
+      color: $brand-red-secondary
 
     .upvote-label:after
       content: 'Upvoted'
+
+    &:hover
+      .upvote-count, .fa
+        color: $brand-red-primary
 
 .btn-upvote-link
   .upvote-count
