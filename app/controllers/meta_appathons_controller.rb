@@ -1,11 +1,17 @@
 class MetaAppathonsController < ApplicationController
-
   def index
     @meta_appathons = MetaAppathon.all.page params[:meta_appathons_page]
   end
 
   def show
-    @meta_appathon = MetaAppathon.find(params[:id])
+    if !params[:id].nil?
+      @meta_appathon = MetaAppathon.find(params[:id])
+      if @meta_appathon.handle == MetaAppathon::ACTIVE_META_APPATHON
+        redirect_to active_meta_appathon_path and return
+      end
+    else
+      @meta_appathon = MetaAppathon.find_by_handle(MetaAppathon::ACTIVE_META_APPATHON)
+    end
     @appathons = @meta_appathon.appathons
 
     @apps = @appathons.map {|appathon| appathon.apps}
