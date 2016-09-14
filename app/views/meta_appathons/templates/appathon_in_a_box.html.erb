@@ -110,34 +110,32 @@
 </div>
 
 <div class="appathon-container container-fluid container-padded">
-  <div class="pfda-toolbar pfda-toolbar-transparent">
-    <div class="text-center">
-      <%= image_tag("icons/ColoredLineIcons/png/128/lightbulb_idea.png")  %>
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      App-a-thons
     </div>
-    <p class="text-muted">
-      Help others discover great NGS software by contributing to this effort.
-    </p>
-    <% if !@meta_appathon.followed_by?(@context.user) %>
-      <p class="text-muted">
-        Organize or participate in a precisionFDA app-a-thon today!
-      </p>
-      <%= link_to new_meta_appathon_appathon_path(@meta_appathon), class: 'btn btn-default btn-block' do %>
-        <span class="fa fa-bolt fa-fw"></span> Host an App-a-thon
-      <% end %>
-    <% end %>
-  </div>
-  <%= render "appathons/cards", meta_appathon: @meta_appathon, appathons: @appathons %>
-</div>
-
-<div class="appathon-container container-fluid container-padded">
-  <div class="panel panel-default">
     <div class="pfda-pane">
       <div class="pfda-pane-content">
-        <div class="h3">
-          Submissions to Appathons
-        </div>
-
         <%= render "meta_appathons/app_cards", apps: @apps, meta_appathon: @meta_appathon %>
+      </div>
+      <div class="pfda-pane-sidebar">
+        <div class="pfda-toolbar">
+          <div class="text-center">
+            <%= image_tag("icons/ColoredLineIcons/png/128/lightbulb_idea.png")  %>
+          </div>
+          <p class="text-muted">
+            Help others discover great NGS software by contributing to this effort.
+          </p>
+          <% if !@meta_appathon.followed_by?(@context.user) %>
+            <p class="text-muted">
+              Organize or participate in a precisionFDA app-a-thon today!
+            </p>
+            <%= link_to new_meta_appathon_appathon_path(@meta_appathon), class: 'btn btn-default' do %>
+              <span class="fa fa-bolt fa-fw"></span> Host an App-a-thon
+            <% end %>
+          <% end %>
+        </div>
+        <%= render "appathons/cards", meta_appathon: @meta_appathon, appathons: @appathons %>
       </div>
     </div>
   </div>
