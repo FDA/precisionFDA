@@ -7,7 +7,7 @@ class Challenge
       path: Rails.application.routes.url_helpers.consistency_challenges_path,
       title: "Consistency Challenge",
       thumbnail: "challenges/pFDA-C1-Diagram-Thumbnail",
-      answers_count: consistency_discussion.answers.accessible_by_public.size,
+      responses_count: consistency_discussion.answers.accessible_by_public.size,
       followers_count: consistency_discussion.count_user_followers,
       launched: !consistency_discussion.nil? && consistency_discussion.public?,
       joined: context.logged_in? && !consistency_discussion.nil? && consistency_discussion.followed_by?(context.user),
@@ -27,7 +27,7 @@ class Challenge
       path: Rails.application.routes.url_helpers.truth_challenges_path,
       title: "Truth Challenge",
       thumbnail: "challenges/pFDA-C2-Diagram-Thumbnail",
-      answers_count: truth_discussion.answers.accessible_by_public.size,
+      responses_count: truth_discussion.answers.accessible_by_public.size,
       followers_count: truth_discussion.count_user_followers,
       launched: !truth_discussion.nil? && truth_discussion.public?,
       joined: context.logged_in? && !truth_discussion.nil? && truth_discussion.followed_by?(context.user),
@@ -47,6 +47,26 @@ class Challenge
           h.merge obj
         end
       }
+    }
+  end
+
+  def self.appathons(context)
+    meta_appathon = MetaAppathon.find_by_handle(MetaAppathon::ACTIVE_META_APPATHON)
+    now = DateTime.now.in_time_zone
+    return {
+      path: Rails.application.routes.url_helpers.active_meta_appathon_path,
+      title: meta_appathon.title,
+      thumbnail: "icons/Free Package Icon/Free Package Icon.png",
+      responses_count: meta_appathon.apps.count,
+      followers_count: meta_appathon.count_user_followers,
+      launched: meta_appathon.start_at < now,
+      joined: context.logged_in? && meta_appathon.followed_by?(context.user),
+      start_date: meta_appathon.start_at,
+      end_date: meta_appathon.end_at,
+      results_date: false,
+      active: meta_appathon.start_at < now && now < meta_appathon.end_at,
+      ended: now >= meta_appathon.end_at,
+      results_announced: false,
     }
   end
 

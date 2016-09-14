@@ -196,21 +196,16 @@
 <div class="h3 text-center">Latest News and Announcements</div>
 <div class="container container-padded">
   <div class="pfda-cards pfda-cards-news pfda-cards-justify-centered">
-    <%= render "main/news" %>    
+    <%= render "main/news" %>
   </div>
 </div>
 
-
-
-<% if @consistency_challenge[:launched] || @truth_challenge[:launched]  %>
-  <div class="jumbotron jumbotron-challenges tiltview-container">
-    <div class="container">
-      <div class="h2 text-center">precisionFDA Challenges</div>
-      <%= render "challenges/cards", challenges: @challenges %>
-    </div>
+<div class="jumbotron jumbotron-challenges tiltview-container">
+  <div class="container">
+    <div class="h2 text-center">precisionFDA Challenges</div>
+    <%= render "challenges/cards", challenges: @challenges %>
   </div>
-<% end %>
-
+</div>
 
 <div class="container">
   <%= render "_partials/quotes" %>
