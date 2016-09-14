@@ -52,7 +52,7 @@
   .fa
     font-size: 50px
 
-.btn-upvote
+.btn-upvote, .btn-upvote-link
   min-width: 60px
 
   .upvote-label:after
@@ -63,7 +63,8 @@
 
   &.active:not(.disabled)
     font-weight: bold
-    color: $brand-red-primary
+    .upvote-count, .fa
+      color: $brand-red-primary
 
     &.btn-default
       background-color: $brand-highlight
@@ -72,6 +73,11 @@
 
     .upvote-label:after
       content: 'Upvoted'
+
+.btn-upvote-link
+  .upvote-count
+    margin: 0
+    margin-right: 5px
 
 .btn-follow
   min-width: 60px
