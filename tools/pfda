@@ -213,6 +213,8 @@ parser.add_argument("--auth", action="store", dest="auth_key", help="Authorizati
 
 parser.add_argument("--app-id", action="store", dest="app_id", help="App ID for downloading specs or scripts")
 
+parser.add_argument("--output-file", action="store", dest="output_file", help="File for writing out app data")
+
 parser.add_argument("--name", action="store", dest="asset_name",
                     help="Asset name (ending with .tar or .tar.gz)")
 
@@ -323,7 +325,7 @@ def send_tostore(asset_id, data_len, data_index, data_bytes):
     storage_res.raise_for_status()
 
 # function to download an app's spec
-def download_app_info(app_id, get_app_path):
+def download_app_info(app_id, get_app_path, output_file):
     # Define URLS
     CREATE_URL = "https://localhost:3000/api/" + get_app_path
     CLOSE_URL = "https://localhost:3000/api/" + get_app_path
@@ -353,9 +355,19 @@ def download_app_info(app_id, get_app_path):
             exit(1)
         else:
             raise
-    res_received = res.json()
-    # TODO: Write to file?
-    print (res_received)
+
+    if output_file and output_file != '-':
+        f = open(output_file, 'w')
+    else:
+        f = sys.stdout
+    try:
+        if get_app_path == "get_app_spec":
+            json.dump(res.json(), f)
+        else:
+            f.write(res.text)
+    finally:
+        if f is not sys.stdout:
+            f.close()
 
 # function to upload the asset
 def upload_asset(asset_name, asset_directory, asset_readme):
@@ -559,8 +571,8 @@ if TRANSFER_TYPE == TYPE_UPLOAD_ASSET:
 elif TRANSFER_TYPE == TYPE_UPLOAD_FILE:
     upload_file(args.file_path)
 elif TRANSFER_TYPE == TYPE_DOWNLOAD_APP_SPEC:
-    download_app_info(args.app_id, "get_app_spec")
+    download_app_info(args.app_id, "get_app_spec", args.output_file)
 elif TRANSFER_TYPE == TYPE_DOWNLOAD_APP_SCRIPT:
-    download_app_info(args.app_id, "get_app_script")
+    download_app_info(args.app_id, "get_app_script", args.output_file)
 else:
     exit

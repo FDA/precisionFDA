@@ -907,7 +907,7 @@ class ApiController < ApplicationController
     app = App.accessible_by(@context).find_by(dxid: params[:id])
     fail "Invalid app id" if app.nil?
 
-    render json: {code: app.internal[:code]}
+    render plain: app.internal[:code]
   end
 
   # Inputs
