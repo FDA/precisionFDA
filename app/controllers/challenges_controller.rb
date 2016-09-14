@@ -3,8 +3,11 @@ class ChallengesController < ApplicationController
   before_action :require_login_or_guest, only: []
 
   def index
-    # TODO: Update when we have a challenge index page
-    redirect_to truth_challenges_path
+    @consistency_challenge = Challenge.consistency(@context)
+    @truth_challenge = Challenge.truth(@context)
+    @appathons_challenge = Challenge.appathons(@context)
+
+    @challenges = [@appathons_challenge, @truth_challenge, @consistency_challenge]
   end
 
   # Challenge 1 - Consistency
@@ -80,6 +83,11 @@ class ChallengesController < ApplicationController
         @query_list = SavedQuery.list(@results_grid.name, self)
       end
     end
+  end
+
+  # Challenge 3 - Appathon in a Box
+  def appathons
+    redirect_to active_meta_appathon_path
   end
 
   def join

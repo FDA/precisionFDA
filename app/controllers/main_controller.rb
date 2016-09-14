@@ -10,10 +10,10 @@ class MainController < ApplicationController
     @truth_discussion = Discussion.accessible_by_public.find_by(id: TRUTH_DISCUSSION_ID)
 
     @consistency_challenge = Challenge.consistency(@context)
-
     @truth_challenge = Challenge.truth(@context)
+    @appathons_challenge = Challenge.appathons(@context)
 
-    @challenges = [@consistency_challenge, @truth_challenge]
+    @challenges = [@appathons_challenge, @truth_challenge, @consistency_challenge]
 
     if @context.logged_in_or_guest?
       notes = Note.real_notes.accessible_by_public.order(updated_at: :desc).limit(10)
