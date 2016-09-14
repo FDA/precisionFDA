@@ -6,7 +6,7 @@
       <div class="nav-pill-title">Overview</div>
     <% end %>
   </li>
-  <li class="<%= 'active' if params[:controller] == 'discussions' || params[:controller] == 'answers' %>" role="presentation">
+  <li class="<%= 'active' if %w(discussions answers).include?(params[:controller]) %>" role="presentation">
     <%= link_to discussions_path do %>
       <div class="nav-icon fa fa-2x fa-comments-o"></div>
       <div class="nav-pill-title">Discussions</div>
@@ -30,7 +30,7 @@
       <div class="nav-pill-title">Comparisons</div>
     <% end %>
   </li>
-  <li class="<%= 'active' if params[:controller] == 'apps' || params[:controller] == 'jobs' || params[:controller] == 'assets' %>" role="presentation">
+  <li class="<%= 'active' if %w(apps jobs assets).include?(params[:controller]) %>" role="presentation">
     <%= link_to apps_path do %>
       <div class="nav-icon fa fa-2x fa-cubes"></div>
       <div class="nav-pill-title">Apps</div>
@@ -44,7 +44,7 @@
     <% end %>
   </li>
   <% end %>
-  <li class="<%= 'active' if params[:controller] == 'challenges' %>" role="presentation">
+  <li class="<%= 'active' if %w(challenges meta_appathons appathons).include?(params[:controller]) %>" role="presentation">
     <%= link_to challenges_path do %>
       <div class="nav-icon fa fa-2x fa-trophy"></div>
       <div class="nav-pill-title">Challenges</div>
