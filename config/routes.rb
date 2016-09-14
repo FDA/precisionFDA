@@ -105,6 +105,7 @@ Rails.application.routes.draw do
       resources :comments
     end
 
+    get "challenges/#{MetaAppathon::ACTIVE_META_APPATHON}" => "meta_appathons#show", as: 'active_meta_appathon'
     resources :challenges do
       get 'consistency(/:tab)', on: :collection, action: :consistency, as: 'consistency'
       get 'truth(/:tab)', on: :collection, action: :truth, as: 'truth'
