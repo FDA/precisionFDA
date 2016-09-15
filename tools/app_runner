@@ -19,8 +19,21 @@ def mkdir_p(path):
             raise
 
 # Load app spec JSON file
-with open('spec.json') as app_spec_json:
-    app_spec = json.load(app_spec_json)
+app_spec_file_path = "/spec.json"
+
+spec_exists = os.path.isfile(app_spec_file_path)
+if not spec_exists:
+    exit('No app specification file found!')
+try:
+    app_spec_fh = open(app_spec_file_path)
+    try:
+        app_spec = json.load(app_spec_fh)
+    except:
+        exit('Error loading app spec from file: {}'.format(sys.exc_info()[0]))
+    finally:
+        app_spec_fh.close()
+except (IOError, OSError) as e:
+    exit('Error opening app spec file ({}): {}'.format(e.errno, e.strerror))
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, usage=__doc__)
 
@@ -35,7 +48,6 @@ args = parser.parse_args()
 
 # Check input arguments
 for item in inputs:
-
     input_val = getattr(args, item['name'])
 
     if item['class'] == 'file':
@@ -60,7 +72,6 @@ for item in inputs:
 
 # Create environmental variables
 for item in inputs:
-
     input_val = getattr(args, item['name'])
     os.environ[item['name']] = input_val
 
@@ -69,12 +80,10 @@ for item in inputs:
         mkdir_p("{}/in/{}/{}".format(home, item['name'], input_val))
         os.environ[item['name'] + '_name'] = input_val
         os.environ[item['name'] + '_path'] = os.path.abspath(input_val)
-        # TODO: handle "." and "" case
         [head, tail] = input_val.rsplit('.', 1)
-        if tail == 'gz'
+        if tail == 'gz':
             head = head.rsplit('.', 1)[0]
         os.environ[item['name'] + '_prefix'] = head
-
 
 # Call app script
 subprocess.call('./script.sh', shell=True)
