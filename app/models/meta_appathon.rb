@@ -54,10 +54,9 @@ class MetaAppathon < ActiveRecord::Base
   end
 
   def apps
-    # FIXME: Could the sorting be made more efficient?
-    _apps = AppSeries.accessible_by_public.where(user_id: member_ids).where("created_at > ?", start_at).where("created_at < ?", end_at)
-    _apps = _apps.map { |s| s.latest_version_app }.reject(&:nil?)
-    return _apps.sort_by {|a| [-a.app_series.get_upvotes.size, a.app_series.name] }
+    _apps = []
+    appathons.each {|appathon| _apps << appathon.apps}
+    _apps.flatten
   end
 
   def self.editable_by(context)
