@@ -12,10 +12,12 @@ class MetaAppathonsController < ApplicationController
     else
       @meta_appathon = MetaAppathon.active
     end
-    @appathons = @meta_appathon.appathons
+    @appathons = @meta_appathon.appathons.order(name: :asc)
 
     @apps = @meta_appathon.apps.sort_by {|app| app.updated_at }.reverse
-
+    if @context.logged_in?
+      @user_appathon = @context.user.appathon_from_meta(@meta_appathon)
+    end
     if !@meta_appathon.template.blank?
       render template: "meta_appathons/templates/#{@meta_appathon.template}"
     end
