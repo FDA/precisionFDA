@@ -15,6 +15,13 @@ class MainController < ApplicationController
 
     @challenges = [@appathons_challenge, @truth_challenge, @consistency_challenge]
 
+    @meta_appathon = MetaAppathon.active
+    if !@meta_appathon.nil?
+      if @context.logged_in?
+        @user_appathon = @context.user.appathon_from_meta(@meta_appathon)
+      end
+    end
+
     if @context.logged_in_or_guest?
       notes = Note.real_notes.accessible_by_public.order(updated_at: :desc).limit(10)
       answers = Answer.accessible_by_public.order(updated_at: :desc).limit(10)
