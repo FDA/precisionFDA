@@ -98,7 +98,7 @@ class AppsController < ApplicationController
     dockerfile = cmds.join("\n") # Join with newlines
 
     # Download string as Dockerfile
-    send_data dockerfile, :filename => 'Dockerfile'
+    send_data dockerfile, :type => 'text; charset=utf-8', :disposition => 'attachment', :filename => 'Dockerfile'
   end
 
   def featured
