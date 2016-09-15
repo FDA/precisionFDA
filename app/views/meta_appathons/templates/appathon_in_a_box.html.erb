@@ -48,6 +48,9 @@
       <div class="col-md-11">
         <div class="panel">
           <div class="panel-body">
+            <div class="text-center">
+              <%= image_tag("icons/ColoredLineIcons/png/128/bulletin_board.png")  %>
+            </div>
             <div class="h3">
               What is an app-a-thon?
             </div>
@@ -60,6 +63,9 @@
 
         <div class="panel">
           <div class="panel-body">
+            <div class="text-center">
+              <%= image_tag("icons/ColoredLineIcons/png/128/cloud.png")  %>
+            </div>
             <div class="h3">
               What is a precisionFDA app?
             </div>
@@ -105,6 +111,9 @@
 
         <div class="panel">
           <div class="panel-body">
+            <div class="text-center">
+              <%= image_tag("icons/ColoredLineIcons/png/128/lightbulb_idea.png")  %>
+            </div>
             <div class="h3">
               Why organize or participate in an app-a-thon?
             </div>
@@ -125,19 +134,16 @@
   <div class="pfda-meta-appathon-submissions container-fluid">
     <div class="panel panel-primary">
       <div class="panel-heading">
-        App-a-thon submissions
+        <div class="text-center">
+          <%= image_tag("icons/ColoredLineIcons/png/128/laptop.png")  %>
+          <h4>App-a-thons and Submissions</h4>
+        </div>
       </div>
       <div class="pfda-pane">
-        <div class="pfda-pane-content">
-          <%= render "meta_appathons/app_cards", apps: @apps, meta_appathon: @meta_appathon %>
-        </div>
         <div class="pfda-pane-sidebar">
           <div class="pfda-toolbar">
             <div class="h4">
               Join or Organize an App-a-thon
-            </div>
-            <div class="text-center">
-              <%= image_tag("icons/ColoredLineIcons/png/128/lightbulb_idea.png")  %>
             </div>
             <p class="text-muted">
               Help others discover great NGS software by contributing to this effort.
@@ -152,6 +158,9 @@
             <% end %>
           </div>
           <%= render "appathons/cards", meta_appathon: @meta_appathon, appathons: @appathons %>
+        </div>
+        <div class="pfda-pane-content">
+          <%= render "meta_appathons/app_cards", apps: @apps, meta_appathon: @meta_appathon %>
         </div>
       </div>
     </div>
