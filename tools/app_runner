@@ -70,19 +70,18 @@ for item in inputs:
     else:
         exit('Unsupported class "{}" for argument "{}"!'.format(item['class'],item['name']))
 
-# Create environmental variables
+# Prepare app environment
 for item in inputs:
     input_val = getattr(args, item['name'])
     os.environ[item['name']] = input_val
 
     if item['class'] == 'file':
-        home = os.path.expanduser("~")
-        mkdir_p("{}/in/{}/{}".format(home, item['name'], input_val))
+        # Set environmental variables
         os.environ[item['name'] + '_name'] = input_val
         os.environ[item['name'] + '_path'] = os.path.abspath(input_val)
-        [head, tail] = input_val.rsplit('.', 1)
+        [head, tail] = os.path.splitext(os.path.basename(input_val))
         if tail == 'gz':
-            head = head.rsplit('.', 1)[0]
+            head = os.path.splitext(head)[0]
         os.environ[item['name'] + '_prefix'] = head
 
 # Call app script

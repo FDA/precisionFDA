@@ -3,9 +3,9 @@
 set -e
 
 if [ -f "$2" ]; then
-  mkdir -p /outputs/"$1"/
-  cp -- "$2" /outputs/"$1"/
+  mkdir -p /data/out/"$1"/
+  cp -- "$2" /data/out/"$1"/
 else
-  mkdir -p /outputs
-  cat > /outputs/"$1" <<< "$2"
+  mkdir -p /data/out
+  cat > /data/out/"$1" <<< "$2"
 fi
