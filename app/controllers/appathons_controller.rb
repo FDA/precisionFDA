@@ -1,48 +1,53 @@
 class AppathonsController < ApplicationController
 
   def index
-    @meta_appathon = MetaAppathon.find(params[:meta_appathon_id])
+    @meta_appathon = MetaAppathon.active
 
     @appathons = @meta_appathon.appathons.page params[:appathons_page]
   end
 
   def show
-    @meta_appathon = MetaAppathon.find(params[:meta_appathon_id])
-
-    @appathon = Appathon.find_by!(id: params[:id], meta_appathon_id: params[:meta_appathon_id])
+    @appathon = Appathon.find(params[:id])
+    @meta_appathon = @appathon.meta_appathon
 
     @apps = @appathon.apps
 
-    @items_from_params = [@meta_appathon, @appathon]
+    @items_from_params = [@appathon]
     @item_comments_path = pathify_comments(@appathon)
     @comments = @appathon.root_comments.order(id: :desc).page params[:comments_page]
     @commentable = @appathon
   end
 
   def new
-    @meta_appathon = MetaAppathon.find(params[:meta_appathon_id])
-
+    if !params[:meta_appathon_id].nil?
+      @meta_appathon = MetaAppathon.find(params[:meta_appathon_id])
+    else
+      @meta_appathon = MetaAppathon.active
+    end
     @appathon = Appathon.new({
-      meta_appathon_id: @meta_appathon_id,
+      meta_appathon_id: @meta_appathon.id,
       start_at: @meta_appathon.start_at,
       end_at: @meta_appathon.end_at
     })
   end
 
   def edit
-    @meta_appathon = MetaAppathon.find(params[:meta_appathon_id])
-
-    @appathon = Appathon.editable_by(@context).find_by(id: params[:id], meta_appathon_id: params[:meta_appathon_id])
+    @appathon = Appathon.editable_by(@context).find_by(id: params[:id])
+    @meta_appathon = @appathon.meta_appathon
     if @appathon.nil?
       flash[:error] = "You do not have permission to edit this appathon"
-      redirect_to meta_appathons_appathon_path(@meta_appathon, params[:id])
+      redirect_to appathon_path(params[:id])
     end
   end
 
   def create
-    @meta_appathon = MetaAppathon.find(params[:meta_appathon_id])
+    if !params[:meta_appathon_id].nil?
+      @meta_appathon = MetaAppathon.find(params[:meta_appathon_id])
+    else
+      @meta_appathon = MetaAppathon.active
+    end
     if @meta_appathon.followed_by?(@context.user)
-      redirect_to meta_appathons_path
+      redirect_to meta_appathon_path(@meta_appathon)
       return
     end
 
@@ -68,7 +73,7 @@ class AppathonsController < ApplicationController
     end
 
     if @appathon.persisted?
-      redirect_to meta_appathon_appathon_path(@meta_appathon, @appathon)
+      redirect_to appathon_path(@appathon)
       return
     end
 
@@ -77,14 +82,14 @@ class AppathonsController < ApplicationController
   end
 
   def update
-    @appathon = Appathon.editable_by(@context).find_by(id: params[:id], meta_appathon_id: params[:meta_appathon_id])
-    redirect_to meta_appathon_appathon_path(params[:meta_appathon_id], params[:id]) if @appathon.nil?
+    @appathon = Appathon.editable_by(@context).find_by(id: params[:id])
+    redirect_to appathon_path(params[:id]) if @appathon.nil?
 
     Appathon.transaction do
       if @appathon.update(appathon_params)
         # Handle a successful update.
         flash[:success] = "Appathon updated"
-        redirect_to meta_appathon_appathon_path(@appathon.meta_appathon, @appathon)
+        redirect_to appathon_path(@appathon)
       else
         flash[:error] = "Could not update the appathon. Please try again."
         render :edit
@@ -93,11 +98,10 @@ class AppathonsController < ApplicationController
   end
 
   def join
-    @meta_appathon = MetaAppathon.find(params[:meta_appathon_id])
-    return meta_appathons_path unless @meta_appathon
+    @appathon = Appathon.find_by(id: params[:id])
+    redirect_to meta_appathon_path(MetaAppathon.active) if @appathon.nil?
 
-    @appathon = Appathon.find_by(id: params[:id], meta_appathon_id: params[:meta_appathon_id])
-    redirect_to meta_appathons_appathons_path(@meta_appathon) if @appathon.nil?
+    @meta_appathon = @appathon.meta_appathon
 
     if @context.logged_in?
       Appathon.transaction do
@@ -110,7 +114,7 @@ class AppathonsController < ApplicationController
           flash[:error] = "You can only belong to one appathon at a time."
         end
       end
-      redirect_to meta_appathon_appathon_path(@meta_appathon, @appathon)
+      redirect_to appathon_path(@appathon)
     else
       flash[:alert] = "You need to log in or request access before participating in the appathon."
       redirect_to request_access_path

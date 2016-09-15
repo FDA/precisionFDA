@@ -9,7 +9,7 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
           <li>
-            <%= link_to edit_meta_appathon_appathon_path(@meta_appathon, @appathon) do %>
+            <%= link_to edit_appathon_path(@appathon) do %>
               <span class="fa fa-pencil"></span> Edit
             <% end %>
           </li>
@@ -61,7 +61,7 @@
 
 <% if !@meta_appathon.followed_by?(@context.user) %>
 <div class="pfda-toolbar text-center">
-  <%= link_to join_meta_appathon_appathon_path(@meta_appathon, @appathon), method: :post, data: { confirm: 'Before you join, here is what you need to know: you can only join one Appathon, you will not be able to remove yourself. Your published apps created within the start and end dates of the Appathon will be submitted automatically. Are you sure you want to continue?' }, class: "btn btn-primary btn-lg" do %>
+  <%= link_to join_appathon_path(@appathon), method: :post, data: { confirm: 'Before you join, here is what you need to know: you can only join one Appathon, you will not be able to remove yourself. Your published apps created within the start and end dates of the Appathon will be submitted automatically. Are you sure you want to continue?' }, class: "btn btn-primary btn-lg" do %>
     <span class="fa fa-user-plus"></span> Join this Appathon
   <% end %>
 </div>
@@ -71,10 +71,6 @@
   <div class="panel panel-default">
     <div class="pfda-pane">
       <div class="pfda-pane-content">
-        <div class="pfda-appathon-participants">
-          <%= render "_partials/followers", followers: @appathon.user_followers, followable: @appathon, display_names: true %>
-        </div>
-
         <% if @appathon.followed_by?(@context.user) %>
         <div class="pfda-help-block">
           <span class="fa fa-lightbulb-o" aria-hidden="true"></span><a href="/docs/creating_apps" target="_blank">Apps you create</a>and <a href="/docs/publishing" target="_blank">publish</a>within the app-a-thon start/end time will automatically show up here</a>
@@ -90,6 +86,9 @@
         <% end %>
       </div>
       <% end %>
+      <div class="pfda-pane-sidebar pfda-appathon-participants">
+        <%= render "_partials/followers", followers: @appathon.user_followers, followable: @appathon, display_names: true %>
+      </div>
     </div>
   </div>
 </div>

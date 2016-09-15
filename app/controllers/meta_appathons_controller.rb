@@ -10,7 +10,7 @@ class MetaAppathonsController < ApplicationController
         redirect_to active_meta_appathon_path and return
       end
     else
-      @meta_appathon = MetaAppathon.find_by_handle(MetaAppathon::ACTIVE_META_APPATHON)
+      @meta_appathon = MetaAppathon.active
     end
     @appathons = @meta_appathon.appathons
 
@@ -27,7 +27,7 @@ class MetaAppathonsController < ApplicationController
   end
 
   def edit
-    @meta_appathon = MetaAppathon.editable_by(@context).find(params[:id])
+    @meta_appathon = MetaAppathon.editable_by(@context).find_by(id: params[:id])
     redirect_to meta_appathon_path(params[:id]) if @meta_appathon.nil?
   end
 
@@ -48,7 +48,7 @@ class MetaAppathonsController < ApplicationController
   end
 
   def update
-    @meta_appathon = MetaAppathon.editable_by(@context).find(params[:id])
+    @meta_appathon = MetaAppathon.editable_by(@context).find_by(id: params[:id])
     redirect_to meta_appathon_path(params[:id]) if @meta_appathon.nil?
 
     MetaAppathon.transaction do
@@ -68,7 +68,6 @@ class MetaAppathonsController < ApplicationController
     p = params.require(:meta_appathon).permit(:name, :description, :handle, :template, :start_at, :end_at)
     p.require(:name)
     p.require(:handle)
-    p.require(:template)
     p.require(:start_at)
     p.require(:end_at)
     return p
