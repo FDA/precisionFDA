@@ -241,7 +241,7 @@ elif args.transfer_type == "download-app-spec":
 elif args.transfer_type == "download-app-script":
     TRANSFER_TYPE = TYPE_DOWNLOAD_APP_SCRIPT
 else:
-    exit("The transfer-type positional argument requires either 'upload-file', 'upload-asset', or 'download-app-spec'.")
+    exit("The transfer-type positional argument requires one of ['upload-file', 'upload-asset', 'download-app-spec', 'download-app-spec'].")
 
 if TRANSFER_TYPE == TYPE_UPLOAD_ASSET:
     if args.asset_name:
@@ -325,10 +325,10 @@ def send_tostore(asset_id, data_len, data_index, data_bytes):
     storage_res.raise_for_status()
 
 # function to download an app's spec
-def download_app_info(app_id, get_app_path, output_file):
+def download_app_info(app_id, app_info_path, output_file):
     # Define URLS
-    CREATE_URL = "https://localhost:3000/api/" + get_app_path
-    CLOSE_URL = "https://localhost:3000/api/" + get_app_path
+    CREATE_URL = "https://precision.fda.gov/api/" + app_info_path
+    CLOSE_URL = "https://precision.fda.gov/api/" + app_info_path
 
     # setup HTTP request retry options
     session = requests.Session()
@@ -336,7 +336,7 @@ def download_app_info(app_id, get_app_path, output_file):
     session.mount(CREATE_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=MAX_RETRY))
     session.mount(CLOSE_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=MAX_RETRY))
 
-    print("Downloading app spec...")
+    print("Downloading app data...")
     data = {"id": app_id}
     # if there is an exception show a message and exit
     try:
@@ -346,12 +346,13 @@ def download_app_info(app_id, get_app_path, output_file):
                              "persists, contact precisionFDA support.")
         logger.error(re)
         exit(1)
+
     try:
         res.raise_for_status()
     except requests.exceptions.HTTPError as he:
         if res.status_code == 401:
             logger.error(he.message)
-            logger.error("Your authorization key has expired. Please get a new authorization key and try again later.")
+            logger.error("The provided authorization key has expired. Please obtain a new authorization key and try again later.")
             exit(1)
         else:
             raise
@@ -361,7 +362,7 @@ def download_app_info(app_id, get_app_path, output_file):
     else:
         f = sys.stdout
     try:
-        if get_app_path == "get_app_spec":
+        if app_info_path == "get_app_spec":
             json.dump(res.json(), f)
         else:
             f.write(res.text)
@@ -408,7 +409,7 @@ def upload_asset(asset_name, asset_directory, asset_readme):
     except requests.exceptions.HTTPError as he:
         if res.status_code == 401:
             logger.error(he.message)
-            logger.error("Your authorization key has expired. Please get a new authorization key and try again later.")
+            logger.error("The provided authorization key has expired. Please obtain a new authorization key and try again later.")
             exit(1)
         else:
             raise
@@ -505,7 +506,7 @@ def upload_file(file_path):
     except requests.exceptions.HTTPError as he:
         if res.status_code == 401:
             logger.error(he.message)
-            logger.error("Your authorization key has expired. Please get a new authorization key and try again later.")
+            logger.error("The provided authorization key has expired. Please obtain a new authorization key and try again later.")
             exit(1)
         else:
             raise
