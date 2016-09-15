@@ -1,0 +1,75 @@
+#!/usr/bin/env python
+
+import json
+import argparse
+import os
+import errno
+import subprocess
+
+from distutils.util import strtobool
+
+# Replicate 'mkdir -p'
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
+# Load app spec JSON file
+with open('spec.json') as app_spec_json:
+    app_spec = json.load(app_spec_json)
+
+parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, usage=__doc__)
+
+# Add arguments according to input spec
+inputs = app_spec['spec']['input_spec']
+for item in inputs:
+    arg_val = '--' + item['name']
+    default_val = item['default'] if 'default' in item else ""
+    parser.add_argument(arg_val, dest=item['name'], action="store", help=item['help'], required=not item['optional'], default=default_val)
+
+args = parser.parse_args()
+
+# Check input arguments
+for item in inputs:
+
+    input_val = getattr(args, item['name'])
+
+    if item['class'] == 'file':
+        if not os.path.isfile(input_val):
+            exit('input file argument "{}" does not exist!'.format(input_val))
+    elif item['class'] == 'integer':
+        try:
+           input_val = int(input_val)
+        except ValueError:
+            exit('input integer argument "{}" is not a valid integer!'.format(input_val))
+    elif item['class'] == 'float':
+        try:
+           input_val = float(input_val)
+        except ValueError:
+            exit('input float argument "{}" is not a valid float!'.format(input_val))
+    elif item['class'] == 'boolean':
+        if input_val.lower() not in ['true','false']:
+            exit('input boolean argument "{}" is not one of [y/n, yes/no, t/f, true/false, on/off, 1/0]!'.format(input_val))
+        input_val = bool(strtobool(input_val.lower()))
+    else:
+        exit('Unsupported class "{}" for argument "{}"!'.format(item['class'],item['name']))
+
+# Create environmental variables
+for item in inputs:
+
+    input_val = getattr(args, item['name'])
+    os.environ[item['name']] = input_val
+
+    if item['class'] == 'file':
+        home = os.path.expanduser("~")
+        mkdir_p("{}/in/{}/{}".format(home, item['name'], input_val))
+        os.environ[item['name'] + '_name'] = input_val
+        os.environ[item['name'] + '_path'] = os.path.abspath(input_val)
+        os.environ[item['name'] + '_prefix'] = input_val.split('.', 1)[0]
+
+# Call app script
+subprocess.call('./script.sh', shell=True)

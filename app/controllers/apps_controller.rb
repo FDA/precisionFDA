@@ -75,10 +75,6 @@ class AppsController < ApplicationController
     context["expiration"] = [context["expiration"], Time.now.to_i + 1.day].min
     @key = rails_encryptor.encrypt_and_sign({context: context}.to_json)
 
-    # Generate Docker command for downloading latest pfda uploader
-    # TODO: Need to update pfda uploader in order for download-xxx paths to work
-    get_uploader_cmd = "RUN curl https://dl.dnanex.us/F/D/X7X4y8Bz2QyB3vfFqQ7qqJVzVz4G44JgV1j2by1J/pfda-1.0.4.tar.gz | tar xz -C /usr/bin/ --no-same-owner --no-same-permissions\n"
-
     # Generate Docker command for running pfda uploader to pull app info
     get_app_spec_cmd = "RUN pfda --auth #{@key} download-app-spec --app-id=#{@app.dxid} --output-file=\"/spec.json\""
     get_app_script_cmd = "RUN pfda --auth #{@key} download-app-script --app-id=#{@app.dxid} --output-file=\"/script.sh\""
@@ -89,11 +85,9 @@ class AppsController < ApplicationController
       "FROM precisionfda:ub14",
       package_cmd,
       asset_cmds,
-      get_uploader_cmd,
       get_app_spec_cmd,
       get_app_script_cmd,
-      # TODO: Add script generator to /usr/bin/run
-      # "CMD [\"/usr/bin/run\"]"
+      "CMD [\"/usr/bin/run\"]"
     ].join("\n").gsub(/^$\n/, '') # Join with newlines, remove empty lines
 
     # Download Dockerfile
