@@ -47,6 +47,8 @@ COPY tools/emit "/usr/bin/emit"
 COPY tools/pfda "/usr/bin/pfda"
 # copy 'app_runner' script
 COPY tools/app_runner "/usr/bin/run"
+# app container needs execution rights
+RUN chmod +x /usr/bin/run
 
 # startup
 ENTRYPOINT ["/bin/bash"]
