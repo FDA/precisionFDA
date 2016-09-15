@@ -1,11 +1,11 @@
 #!/bin/bash
 
-if [ "$#" -le 1 ]; then
-    # TODO: document usage
-    echo "invalid number of parameters"
-elif [ ! -f $2 ]; then
-    echo -- "$2" > /output/$1
+set -e
+
+if [ -f "$2" ]; then
+  mkdir -p /outputs/"$1"/
+  cp -- "$2" /outputs/"$1"/
 else
-    mkdir -p /output
-    cp -- "$2" /output/"$1"
+  mkdir -p /outputs
+  cat > /outputs/"$1" <<< "$2"
 fi

@@ -575,5 +575,5 @@ elif TRANSFER_TYPE == TYPE_DOWNLOAD_APP_SPEC:
 elif TRANSFER_TYPE == TYPE_DOWNLOAD_APP_SCRIPT:
     download_app_info(args.app_id, "get_app_script", args.output_file)
 else:
-    logger.error("Invalid TRANSFER_TYPE")
-    exit(1)
+    # Shouldn't reach here
+    exit()
