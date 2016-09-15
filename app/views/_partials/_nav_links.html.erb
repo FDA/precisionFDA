@@ -12,6 +12,13 @@
       <div class="nav-pill-title">Discussions</div>
     <% end %>
   </li>
+  <li class="<%= 'active' if %w(challenges meta_appathons appathons).include?(params[:controller]) %>" role="presentation">
+    <%= link_to challenges_path do %>
+      <div class="nav-icon fa fa-2x fa-trophy"></div>
+      <div class="nav-pill-title">Challenges</div>
+    <% end %>
+  </li>
+  <li class="nav-spacer"></li>
   <li class="<%= 'active' if params[:controller] == 'notes' %>" role="presentation">
     <%= link_to notes_path do %>
       <div class="nav-icon fa fa-2x fa-sticky-note"></div>
@@ -37,6 +44,7 @@
     <% end %>
   </li>
   <% if !@context.guest? && (@context.user.can_administer_site? || @context.user.spaces.count > 0) %>
+  <li class="nav-spacer"></li>
   <li class="<%= 'active' if params[:controller] == 'spaces' %>" role="presentation">
     <%= link_to spaces_path do %>
       <div class="nav-icon fa fa-2x fa-object-group"></div>
@@ -44,12 +52,7 @@
     <% end %>
   </li>
   <% end %>
-  <li class="<%= 'active' if %w(challenges meta_appathons appathons).include?(params[:controller]) %>" role="presentation">
-    <%= link_to challenges_path do %>
-      <div class="nav-icon fa fa-2x fa-trophy"></div>
-      <div class="nav-pill-title">Challenges</div>
-    <% end %>
-  </li>
+
 </ul>
 
 <ul class="nav navbar-nav navbar-right">
