@@ -45,7 +45,7 @@ class MetaAppathon < ActiveRecord::Base
     !context.guest? && context.user.can_administer_site?
   end
 
-  def active?
+  def is_ongoing?
     start_at < DateTime.now && DateTime.now < end_at
   end
 
@@ -68,7 +68,11 @@ class MetaAppathon < ActiveRecord::Base
     end
   end
 
-  def self.active
+  def self.ongoing
     where("start_at < ?", DateTime.now).where("? < end_at ", DateTime.now)
+  end
+
+  def self.active
+    find_by_handle(ACTIVE_META_APPATHON)
   end
 end

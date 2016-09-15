@@ -51,12 +51,12 @@ class Challenge
   end
 
   def self.appathons(context)
-    meta_appathon = MetaAppathon.find_by_handle(MetaAppathon::ACTIVE_META_APPATHON)
+    meta_appathon = MetaAppathon.active
     now = DateTime.now.in_time_zone
     return {
       path: Rails.application.routes.url_helpers.active_meta_appathon_path,
       title: meta_appathon.title,
-      thumbnail: "icons/Free Package Icon/Free Package Icon.png",
+      thumbnail: "appathons/appathon-toolbox.png",
       responses_count: meta_appathon.apps.count,
       followers_count: meta_appathon.count_user_followers,
       launched: meta_appathon.start_at < now,

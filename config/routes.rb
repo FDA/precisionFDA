@@ -147,12 +147,13 @@ Rails.application.routes.draw do
 
     resources :meta_appathons, constraints: {appathon_id: /[^\/]+/ }  do
       post 'rename', on: :member
+      resources :appathons, constraints: {id: /[^\/]+/}
+    end
 
-      resources :appathons, constraints: {id: /[^\/]+/} do
-        post 'rename', on: :member
-        post 'join', on: :member
-        resources :comments
-      end
+    resources :appathons, constraints: {id: /[^\/]+/} do
+      post 'rename', on: :member
+      post 'join', on: :member
+      resources :comments
     end
 
     resources :queries do
