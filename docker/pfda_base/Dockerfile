@@ -40,10 +40,13 @@ ENV HOME="/work"
 # set it to CWD
 WORKDIR /work
 
+# NOTE: requires tools directory to be in current context
 # copy 'emit' script
-COPY emit "/usr/bin/emit"
-# need to source emit for setting environmental variables
-RUN echo "alias \"emit=. emit\"" > ~/.bashrc
+COPY tools/emit "/usr/bin/emit"
+# copy 'pfda' script
+COPY tools/pfda "/usr/bin/pfda"
+# copy 'app_runner' script
+COPY tools/app_runner "/usr/bin/run"
 
 # startup
 ENTRYPOINT ["/bin/bash"]
