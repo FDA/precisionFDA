@@ -4,8 +4,6 @@
   .meta_appathon-title-muted
     opacity: 0.65
 
-
-
 .pfda-meta-appathon-template
   &.pfda-meta-appathon-template-appathon_in_a_box
     background-color: $brand-blue-dark
@@ -18,14 +16,18 @@
       font-weight: 300
       font-size: 30px
 
+      @media (max-width: $screen-sm-min)
+        font-size: 16px
+
     .jumbotron-meta_appathon
       background-color: #fff
       position: relative
       margin: 0
       padding: 50px 20px
       overflow: hidden
-      background-image: url("/assets/particles4.png")
-      background-repeat: no-repeat
+      /* Background pattern from subtlepatterns.com */
+      background-image: url("/assets/backgrounds/geometry2.png")
+      background-repeat: repeat
       background-position: 50% 100%
 
       h1, h2, h3, h4, h5, p, .h1, .h2, .h3, .h4, .h5
