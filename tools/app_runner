@@ -69,7 +69,12 @@ for item in inputs:
         mkdir_p("{}/in/{}/{}".format(home, item['name'], input_val))
         os.environ[item['name'] + '_name'] = input_val
         os.environ[item['name'] + '_path'] = os.path.abspath(input_val)
-        os.environ[item['name'] + '_prefix'] = input_val.split('.', 1)[0]
+        # TODO: handle "." and "" case
+        [head, tail] = input_val.rsplit('.', 1)
+        if tail == 'gz'
+            head = head.rsplit('.', 1)[0]
+        os.environ[item['name'] + '_prefix'] = head
+
 
 # Call app script
 subprocess.call('./script.sh', shell=True)

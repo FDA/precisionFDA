@@ -56,19 +56,32 @@ class AppsController < ApplicationController
     @app = App.accessible_by(@context).find_by!(dxid: params[:id])
 
     # Assets should be accessible and licenses accepted
-    assets = Asset.closed.accessible_by(@context);
-    fail "Assets must be editable" unless @app.assets.all? { |a| assets.include? a }
-    fail "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
-
-    # Generate download URLs and Docker commands for each asset
-    asset_cmds = ""
-    @app.assets.each do |asset|
-      url = DNAnexusAPI.new(@context.token).call(asset.dxid, "download", {filename: asset.name, project: asset.project, preauthenticated: true})["url"]
-      asset_cmds << "RUN curl " + url + " | tar xz -C / --no-same-owner --no-same-permissions\n"
+    if @app.assets.accessible_by(@context).count != @app.assets.count
+      flash[:error] = "This app cannot be exported because one or more assets are not accessible by the current user."
+      redirect_to app_path(@app.dxid)
+      return
+    end
+    if @app.assets.any? { |a| a.license.present? && !a.licensed_by?(@context) }
+      flash[:error] = "This app contains one or more assets which need to be licensed. Please run the app first in order to accept the licenses."
+      redirect_to app_path(@app.dxid)
+      return
     end
 
+    # Generate Dockerfile for app
+    cmds = []
+    cmds << "FROM precisionfda:ub14"
+
+    # Generate download URLs and Docker commands for each asset
+    @app.ordered_assets.each do |ordered_asset|
+      asset = @app.assets.find_by!(dxid: ordered_asset)
+      url = DNAnexusAPI.new(@context.token).call(asset.dxid, "download", {filename: asset.name, project: asset.project, preauthenticated: true})["url"]
+      tar_opts = asset.name.rpartition('.').last == 'gz' ? 'xzf' : 'xf'
+      cmds << "RUN curl #{url} | tar #{tar_opts} -C / --no-same-owner --no-same-permissions"
+    end
     # Generate Docker command for installing apt-packages
-    package_cmd = if (@app.packages.nil?) then "" else "RUN apt-get install --yes " + @app.packages.join(" ") end
+    if @app.packages.present?
+      cmds << "RUN apt-get install --yes #{@app.packages.join(" ")}"
+    end
 
     # Generate new token for pfda uploader
     context = @context.as_json.slice("user_id", "username", "token", "expiration", "org_id")
@@ -76,21 +89,15 @@ class AppsController < ApplicationController
     @key = rails_encryptor.encrypt_and_sign({context: context}.to_json)
 
     # Generate Docker command for running pfda uploader to pull app info
-    get_app_spec_cmd = "RUN pfda --auth #{@key} download-app-spec --app-id=#{@app.dxid} --output-file=\"/spec.json\""
-    get_app_script_cmd = "RUN pfda --auth #{@key} download-app-script --app-id=#{@app.dxid} --output-file=\"/script.sh\""
+    cmds << "RUN pfda --auth #{@key} download-app-spec --app-id=#{@app.dxid} --output-file=\"/spec.json\""
+    cmds << "RUN pfda --auth #{@key} download-app-script --app-id=#{@app.dxid} --output-file=\"/script.sh\""
+    # Add execution step at end of Dockerfile
+    cmds << "CMD [\"/usr/bin/run\"]"
 
-    # Generate Dockerfile string
-    dockerfile =
-    [
-      "FROM precisionfda:ub14",
-      package_cmd,
-      asset_cmds,
-      get_app_spec_cmd,
-      get_app_script_cmd,
-      "CMD [\"/usr/bin/run\"]"
-    ].join("\n").gsub(/^$\n/, '') # Join with newlines, remove empty lines
+    cmds << ""    # Add a newline at the end
+    dockerfile = cmds.join("\n") # Join with newlines
 
-    # Download Dockerfile
+    # Download string as Dockerfile
     send_data dockerfile, :filename => 'Dockerfile'
   end
 
