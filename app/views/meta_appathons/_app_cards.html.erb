@@ -27,7 +27,7 @@
                   <ul class="btn-reactions list-inline text-right">
                     <% @reactions.each do |reaction| %>
                       <li>
-                      <% if !@context.guest? %>
+                      <% if @context.logged_in? %>
                         <a class="event-upvote btn-reaction <%= @context.user.voted_up_on?(app.app_series, vote_scope: reaction[:vote_scope]) ? 'active': ''%>" data-uid="<%= app.app_series.uid %>" data-upvote-count="<%= app.app_series.get_upvotes(vote_scope: reaction[:vote_scope]).size %>" data-vote-scope="<%= reaction[:vote_scope] %>" title="<%= reaction[:title] %>" data-toggle="tooltip">
                           <span class="<%= reaction[:icon] %>"></span>
                           <div class="upvote-count"><%= app.app_series.get_upvotes(vote_scope: reaction[:vote_scope]).size %></div>

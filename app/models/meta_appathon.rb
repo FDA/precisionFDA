@@ -42,7 +42,7 @@ class MetaAppathon < ActiveRecord::Base
   end
 
   def editable_by?(context)
-    !context.guest? && context.user.can_administer_site?
+    context.logged_in? && context.user.can_administer_site?
   end
 
   def is_ongoing?

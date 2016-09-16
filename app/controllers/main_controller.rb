@@ -85,7 +85,7 @@ class MainController < ApplicationController
             title: "Browse Assets",
             path: Rails.application.routes.url_helpers.explore_assets_path,
             help_label: "Learn",
-            help_path: Rails.application.routes.url_helpers.show_docs_path('creating_apps'),
+            help_path: Rails.application.routes.url_helpers.show_docs_path('creating_apps')+"#dev-assets",
             description: "Browse the collection of software assets that are used as building blocks in apps."
           },
           {
