@@ -92,6 +92,7 @@ class AppsController < ApplicationController
     cmds << "RUN pfda --auth #{@key} download-app-spec --app-id=#{@app.dxid} --output-file=\"/spec.json\""
     cmds << "RUN pfda --auth #{@key} download-app-script --app-id=#{@app.dxid} --output-file=\"/script.sh\""
     # Add execution step at end of Dockerfile
+    cmds << "chmod +x \"/usr/bin/run\""
     cmds << "ENTRYPOINT [\"/usr/bin/run\"]"
 
     cmds << ""    # Add a newline at the end
