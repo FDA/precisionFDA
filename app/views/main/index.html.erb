@@ -134,7 +134,7 @@
                     <%= link_to "View #{@user_appathon.title}", appathon_path(@user_appathon) %>
                   </div>
                   <div>
-                    You have joined this for <a class="link-muted" href="<%= meta_appathon_path(@user_appathon.meta_appathon) %>"><%=  @user_appathon.meta_appathon.title %></a>
+                    You have joined this for <br /><a class="link-muted" href="<%= meta_appathon_path(@user_appathon.meta_appathon) %>"><%=  @user_appathon.meta_appathon.title %></a>
                   </div>
                 </li>
               <% elsif !@meta_appathon.nil? %>
