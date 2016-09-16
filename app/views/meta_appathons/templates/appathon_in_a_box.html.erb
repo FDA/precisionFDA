@@ -155,7 +155,7 @@
       </div>
       <div class="pfda-pane">
         <div class="pfda-pane-sidebar">
-          <% if @context.logged_in? %>
+          <% if @context.logged_in? && @user_appathon.nil? %>
           <div class="pfda-toolbar">
             <div class="h4">
               Join or Organize an App-a-thon
