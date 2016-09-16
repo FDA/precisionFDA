@@ -41,8 +41,11 @@ parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpForm
 inputs = app_spec['spec']['input_spec']
 for item in inputs:
     arg_val = '--' + item['name']
-    default_val = item['default'] if 'default' in item else ""
-    parser.add_argument(arg_val, dest=item['name'], action="store", help=item['help'], required=not item['optional'], default=default_val)
+    default_val = item['default'] if 'default' in item else None
+    # Special case: if has default then required doesn't matter
+    required_val = False if default_val else not item['optional']
+    # If required==True and not provided, will error regardless of default
+    parser.add_argument(arg_val, dest=item['name'], action="store", help=item['help'], required=required_val, default=default_val)
 
 args = parser.parse_args()
 
@@ -55,23 +58,27 @@ for item in inputs:
             exit('input file argument "{}" does not exist!'.format(input_val))
     elif item['class'] == 'integer':
         try:
-           input_val = int(input_val)
+            int(input_val)
         except ValueError:
             exit('input integer argument "{}" is not a valid integer!'.format(input_val))
     elif item['class'] == 'float':
         try:
-           input_val = float(input_val)
+            float(input_val)
         except ValueError:
             exit('input float argument "{}" is not a valid float!'.format(input_val))
     elif item['class'] == 'boolean':
-        if input_val.lower() not in ['true','false']:
+        try:
+            input_bool = bool(strtobool(input_val.lower()))
+        except ValueError:
             exit('input boolean argument "{}" is not one of [y/n, yes/no, t/f, true/false, on/off, 1/0]!'.format(input_val))
-        input_val = bool(strtobool(input_val.lower()))
+        # Write lowercase bool to args since bash uses lowercase
+        setattr(args, item['name'], str(input_bool).lower())
     else:
         exit('Unsupported class "{}" for argument "{}"!'.format(item['class'],item['name']))
 
 # Prepare app environment
 for item in inputs:
+    # All values in args should be strings
     input_val = getattr(args, item['name'])
     os.environ[item['name']] = input_val
 
@@ -79,10 +86,12 @@ for item in inputs:
         # Set environmental variables
         os.environ[item['name'] + '_name'] = input_val
         os.environ[item['name'] + '_path'] = os.path.abspath(input_val)
+        # "." and "" cases covered by input checks
+        # NOTE: os.path.splittext(".foo") returns ['.foo', '']
         [head, tail] = os.path.splitext(os.path.basename(input_val))
         if tail == 'gz':
             head = os.path.splitext(head)[0]
         os.environ[item['name'] + '_prefix'] = head
 
 # Call app script
-subprocess.call('./script.sh', shell=True)
+subprocess.check_call(["/bin/bash", "-e", "-x", "-o", "pipefail", "/script.sh"], stderr=subprocess.STDOUT)

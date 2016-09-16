@@ -91,7 +91,7 @@
     <a class="btn btn-default" href="<%= fork_app_path(@app.dxid) %>">
       <span class="fa fa-code-fork"></span> Fork
     </a>
-    <%= link_to export_app_path(@app.dxid), class: 'btn btn-default', data: { confirm: 'You are about to download a Dockerfile for running your app locally.' } do %>
+    <%= link_to export_app_path(@app.dxid), class: 'btn btn-default', data: { confirm: 'You are about to download a Dockerfile to run this app in a Docker container on your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
       <span class="fa fa-cloud-download"></span> Export
     <% end %>
   </div>
