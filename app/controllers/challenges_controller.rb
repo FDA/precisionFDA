@@ -1,5 +1,5 @@
 class ChallengesController < ApplicationController
-  skip_before_action :require_login, {only: [:index, :consistency, :truth, :join]}
+  skip_before_action :require_login, {only: [:index, :consistency, :truth, :appathons, :join]}
   before_action :require_login_or_guest, only: []
 
   def index

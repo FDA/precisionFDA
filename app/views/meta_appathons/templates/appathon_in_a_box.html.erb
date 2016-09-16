@@ -155,6 +155,7 @@
       </div>
       <div class="pfda-pane">
         <div class="pfda-pane-sidebar">
+          <% if @context.logged_in? %>
           <div class="pfda-toolbar">
             <div class="h4">
               Join or Organize an App-a-thon
@@ -171,6 +172,7 @@
               <% end %>
             <% end %>
           </div>
+          <% end %>
           <%= render "appathons/cards", meta_appathon: @meta_appathon, appathons: @appathons %>
         </div>
         <div class="pfda-pane-content">

@@ -8,7 +8,7 @@
     datetime: DateTime.new(2016,6,2,12,25).in_time_zone + 7.hours,
     title: "Dr. Taha Kass-Hout, FDA CHIO, to speak LIVE on FDA Community Engagement through Challenges on June 2nd, 2016 at 3:30 p.m. EDT."
   }
-  
+
   @event[:upcoming] = DateTime.now.in_time_zone < @event[:datetime]
   @event[:past] = DateTime.now.in_time_zone >= @event[:datetime] + 2.hours
   @event[:current] = !@event[:upcoming] && !@event[:past]
@@ -49,8 +49,8 @@
             <small style="font-weight: normal"><%= event[:link] %></small>
           </div>
         <% end %>
-      <% else %>
-        <div class="lead text-muted">The event has ended and a video recording will be available soon.</div>
+      <% elsif event[:ended] %>
+        <div class="lead text-muted">The event has ended</div>
       <% end %>
     </div>
   </div>
