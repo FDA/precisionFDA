@@ -51,6 +51,51 @@ class MainController < ApplicationController
             end
           end
         end
+      else
+        @tutorials = [
+          {
+            title: "Explore notes",
+            path: Rails.application.routes.url_helpers.explore_notes_path,
+            help_label: "Learn",
+            help_path: Rails.application.routes.url_helpers.show_docs_path('notes'),
+            description: "Read what others are reporting describing their thoughts and their work"
+          },
+          {
+            title: "Explore files",
+            path: Rails.application.routes.url_helpers.explore_files_path,
+            help_label: "Learn",
+            help_path: Rails.application.routes.url_helpers.show_docs_path('files'),
+            description: "Browse the datasets have been publicly shared with the precisionFDA community"
+          },
+          {
+            title: "Explore Comparisons",
+            path: Rails.application.routes.url_helpers.explore_comparisons_path,
+            help_label: "Learn",
+            help_path: Rails.application.routes.url_helpers.show_docs_path('comparisons'),
+            description: "View the differences between test sets and benchmark sets of genomic variants"
+          },
+          {
+            title: "Explore Apps",
+            path: Rails.application.routes.url_helpers.explore_apps_path,
+            help_label: "Learn",
+            help_path: Rails.application.routes.url_helpers.show_docs_path('apps'),
+            description: "Have a look at bioinformatics apps &mdash; and even study their scripts by clicking 'Fork'."
+          },
+          {
+            title: "Browse Assets",
+            path: Rails.application.routes.url_helpers.explore_assets_path,
+            help_label: "Learn",
+            help_path: Rails.application.routes.url_helpers.show_docs_path('creating_apps'),
+            description: "Browse the collection of software assets that are used as building blocks in apps."
+          },
+          {
+            title: "Try the app editor",
+            path: Rails.application.routes.url_helpers.new_app_path,
+            help_label: "Learn",
+            help_path: Rails.application.routes.url_helpers.show_docs_path('creating_apps'),
+            description: "Find out how easy it is to assemble an app (read-only; results not saved)"
+          }
+        ]
       end
     else
       @participant_orgs = [

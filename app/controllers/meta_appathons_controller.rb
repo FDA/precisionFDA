@@ -1,4 +1,7 @@
 class MetaAppathonsController < ApplicationController
+  skip_before_action :require_login, {only: [:show]}
+  before_action :require_login_or_guest, only: []
+
   def index
     @meta_appathons = MetaAppathon.all.page params[:meta_appathons_page]
   end

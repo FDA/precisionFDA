@@ -2,12 +2,12 @@
 
 <div class="page-header">
   <div class="page-title">
-    <span class="fa fa-keyboard-o"></span>
+    <span class="fa fa-laptop"></span>
     Edit <%= @appathon.title %>
   </div>
 </div>
 
-<div class="container-fluid container-padded">
+<div class="container container-padded">
   <%= form_for @appathon, url: appathon_path(@appathon), method: :put, html: {class: 'form form-horizontal'} do |f| %>
     <%= render "_partials/form_errors", object: @appathon %>
     <div class="form-group required">
