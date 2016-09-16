@@ -22,9 +22,21 @@
         margin-right: 20px
         width: 100px
 
-.pfda-appathon-participants
-  padding: $padding-base-horizontal
+.pfda-pane .pfda-appathon-sidebar.pfda-pane-sidebar
   border-left: 1px solid $border-default-color
+  .pfda-appathon-participants
+    padding: $padding-base-horizontal
 
-  ul
-    margin-bottom: 0
+    ul
+      margin-bottom: 0
+
+  .pfda-appathon-admin
+    .list-group-item
+      border: 1px solid darken(desaturate($brand-blue-subtler, 25%), 7%)
+      border-left: 0
+      border-right: 0
+      border-radius: 0
+      &:first-child
+        border-top: 1px solid $border-default-color
+      &:last-child
+        border-bottom: 0
