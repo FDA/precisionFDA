@@ -75,7 +75,7 @@ class AppsController < ApplicationController
     @app.ordered_assets.each do |ordered_asset|
       asset = @app.assets.find_by!(dxid: ordered_asset)
       url = DNAnexusAPI.new(@context.token).call(asset.dxid, "download", {filename: asset.name, project: asset.project, preauthenticated: true})["url"]
-      tar_opts = asset.name.rpartition('.').last == 'gz' ? '-xzf -' : '-xf -'
+      tar_opts = asset.is_gzipped ? '-xzf -' : '-xf -'
       cmds << "RUN curl #{url} | tar #{tar_opts} -C / --no-same-owner --no-same-permissions"
     end
     # Generate Docker command for installing apt-packages
@@ -86,17 +86,16 @@ class AppsController < ApplicationController
     # Generate new token for pfda uploader
     context = @context.as_json.slice("user_id", "username", "token", "expiration", "org_id")
     context["expiration"] = [context["expiration"], Time.now.to_i + 1.day].min
-    @key = rails_encryptor.encrypt_and_sign({context: context}.to_json)
+    key = rails_encryptor.encrypt_and_sign({context: context}.to_json)
 
     # Generate Docker command for running pfda uploader to pull app info
-    cmds << "RUN pfda --auth #{@key} download-app-spec --app-id=#{@app.dxid} --output-file=\"/spec.json\""
-    cmds << "RUN pfda --auth #{@key} download-app-script --app-id=#{@app.dxid} --output-file=\"/script.sh\""
-    # Add execution step at end of Dockerfile
-    cmds << "RUN chmod +x \"/usr/bin/run\""
-    cmds << "ENTRYPOINT [\"/usr/bin/run\"]"
+    cmds << "RUN pfda --auth #{key} download-app-spec --app-id=#{@app.dxid} --output-file=\"/spec.json\""
+    cmds << "RUN pfda --auth #{key} download-app-script --app-id=#{@app.dxid} --output-file=\"/script.sh\""
 
-    cmds << ""    # Add a newline at the end
-    dockerfile = cmds.join("\n") # Join with newlines
+    # Add entry point to container
+    cmds << "ENTRYPOINT [\"/usr/bin/run\"]"
+    cmds << ""                      # Add a newline at the end
+    dockerfile = cmds.join("\n")    # Join with newlines
 
     # Download string as Dockerfile
     send_data dockerfile, :type => 'text; charset=utf-8', :disposition => 'attachment', :filename => 'Dockerfile'
