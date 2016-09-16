@@ -15,6 +15,30 @@ class MetaAppathonsController < ApplicationController
     @appathons = @meta_appathon.appathons.order(name: :asc)
 
     @apps = @meta_appathon.apps.sort_by {|app| app.updated_at }.reverse
+
+    @reactions = [
+      {
+        vote_scope: "#{@meta_appathon.uid}-time",
+        icon: "fa fa-2x fa-bolt",
+        title: "Fast"
+      },
+      {
+        vote_scope: "#{@meta_appathon.uid}-magic",
+        icon: "fa fa-2x fa-magic",
+        title: "Magic"
+      },
+      {
+        vote_scope: "#{@meta_appathon.uid}-idea",
+        icon: "fa fa-2x fa-lightbulb-o",
+        title: "Innovative"
+      },
+      {
+        vote_scope: "#{@meta_appathon.uid}-love",
+        icon: "fa fa-2x fa-heart-o",
+        title: "Love"
+      }
+    ]
+
     if @context.logged_in?
       @user_appathon = @context.user.appathon_from_meta(@meta_appathon)
     end
