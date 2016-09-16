@@ -19,22 +19,22 @@ class MetaAppathonsController < ApplicationController
     @reactions = [
       {
         vote_scope: "#{@meta_appathon.uid}-time",
-        icon: "fa fa-2x fa-bolt",
+        icon: "fa fa-fw fa-bolt",
         title: "Fast"
       },
       {
         vote_scope: "#{@meta_appathon.uid}-magic",
-        icon: "fa fa-2x fa-magic",
+        icon: "fa fa-fw fa-magic",
         title: "Magic"
       },
       {
         vote_scope: "#{@meta_appathon.uid}-idea",
-        icon: "fa fa-2x fa-lightbulb-o",
+        icon: "fa fa-fw fa-lightbulb-o",
         title: "Innovative"
       },
       {
         vote_scope: "#{@meta_appathon.uid}-love",
-        icon: "fa fa-2x fa-heart-o",
+        icon: "fa fa-fw fa-heart-o",
         title: "Love"
       }
     ]
