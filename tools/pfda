@@ -332,7 +332,6 @@ def download_app_info(app_id, app_info_path, output_file):
 
     # setup HTTP request retry options
     session = requests.Session()
-    session.verify = False
     session.mount(CREATE_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=MAX_RETRY))
     session.mount(CLOSE_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=MAX_RETRY))
 
