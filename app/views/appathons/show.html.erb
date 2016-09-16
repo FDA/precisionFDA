@@ -86,8 +86,45 @@
         <% end %>
       </div>
       <% end %>
-      <div class="pfda-pane-sidebar pfda-appathon-participants">
-        <%= render "_partials/followers", followers: @appathon.user_followers, followable: @appathon, display_names: true %>
+      <div class="pfda-pane-sidebar pfda-appathon-sidebar">
+        <div class="pfda-appathon-participants">
+          <%= render "_partials/followers", followers: @appathon.user_followers, followable: @appathon, display_names: true %>
+        </div>
+
+        <% if @context.logged_in? && @appathon.editable_by?(@context) %>
+        <div class="pfda-appathon-admin list-group">
+          <li class="list-group-item">
+            <div class="list-group-item-heading">
+              Admin Info
+            </div>
+          </li>
+          <li class="list-group-item">
+            This app-a-thon is public and cannot be deleted
+          </li>
+          <li class="list-group-item">
+            Participants must be precisionFDA members
+          </li>
+          <li class="list-group-item">
+            Non-members must first request an account indicating they want to participate in an app-a-thon
+            <br />
+            <input type="text" class="form-control input-sm" value="<%= request_access_url %>"/>
+          </li>
+          <li class="list-group-item">
+            Members will see a <strong>Join</strong> button on the app-a-thon link
+            <br />
+            <input type="text" class="form-control input-sm" value="<%= appathon_url(@appathon) %>"/>
+          </li>
+          <li class="list-group-item">
+            Participants must create (and publish) an App within the App-a-thon start/end date for it to appear in the list
+          </li>
+          <li class="list-group-item">
+            All app's in your app-a-thon will also appear on the global list on <%= link_to meta_appathon_url(@appathon.meta_appathon), meta_appathon_path(@appathon.meta_appathon) %>
+          </li>
+          <li class="list-group-item">
+            It is up to you, the organizer, to determine a "winner" of the app-a-thon, if at all
+          </li>
+        </div>
+        <% end %>
       </div>
     </div>
   </div>

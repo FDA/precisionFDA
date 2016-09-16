@@ -46,7 +46,7 @@ class Appathon < ActiveRecord::Base
   end
 
   def editable_by?(context)
-    admin_id == context.user_id
+    context.logged_in? && admin_id == context.user_id
   end
 
   def active?
