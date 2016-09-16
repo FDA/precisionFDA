@@ -130,6 +130,7 @@
               <% if !@user_appathon.nil? %>
                 <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
                   <div class="h4">
+                    <%= link_to flag_image_tag(@user_appathon.flag, width: 40), appathon_path(@user_appathon), class: "pull-right" %>
                     <%= link_to "View #{@user_appathon.title}", appathon_path(@user_appathon) %>
                   </div>
                   <div>

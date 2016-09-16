@@ -78,6 +78,27 @@
       .upvote-count, .fa
         color: $brand-red-primary
 
+.btn-reactions
+  padding-top: 10px
+  .btn-reaction
+    margin: 0 $padding-base-horizontal
+    display: block
+
+.btn-reaction
+  color: $brand-blue-tertiary
+  text-align: center
+
+  &:hover
+    color: darken($brand-blue-tertiary, 10%)
+
+  &.active:not(.disabled)
+    font-weight: bold
+    .upvote-count, .fa
+      color: $brand-red-secondary
+    &:hover
+      .upvote-count, .fa
+        color: $brand-red-primary
+
 .btn-upvote-link
   .upvote-count
     margin: 0
