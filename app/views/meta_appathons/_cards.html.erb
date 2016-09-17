@@ -17,9 +17,11 @@
       </div>
     <% end %>
   </div>
-  <div class="paginate-container">
-    <%= paginate meta_appathons, :theme => 'twitter-bootstrap-3', :param_name => :meta_appathons_page %>
-  </div>
+  <% if (meta_appathons.respond_to?(:total_count) && meta_appathons.total_count > 0) %>
+    <div class="paginate-container">
+      <%= paginate meta_appathons, :theme => 'twitter-bootstrap-3', :param_name => :meta_appathons_page %>
+    </div>
+  <% end %>
 <% else %>
 <div class="pfda-cards">
   <div class="pfda-card pfda-card-rounded">

@@ -19,6 +19,8 @@ class MetaAppathon < ActiveRecord::Base
 
   acts_as_followable
 
+  ACTIVE_META_APPATHON = 'app-a-thon-in-a-box'
+
   def uid
     "meta-appathon-#{id}"
   end
@@ -40,11 +42,21 @@ class MetaAppathon < ActiveRecord::Base
   end
 
   def editable_by?(context)
-    !context.guest? && context.user.can_administer_site?
+    context.logged_in? && context.user.can_administer_site?
   end
 
-  def active?
+  def is_ongoing?
     start_at < DateTime.now && DateTime.now < end_at
+  end
+
+  def member_ids
+    followers.map(&:id)
+  end
+
+  def apps
+    _apps = []
+    appathons.each {|appathon| _apps << appathon.apps}
+    _apps.flatten
   end
 
   def self.editable_by(context)
@@ -55,7 +67,11 @@ class MetaAppathon < ActiveRecord::Base
     end
   end
 
-  def self.active
+  def self.ongoing
     where("start_at < ?", DateTime.now).where("? < end_at ", DateTime.now)
+  end
+
+  def self.active
+    find_by_handle(ACTIVE_META_APPATHON)
   end
 end
