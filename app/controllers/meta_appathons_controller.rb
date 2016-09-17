@@ -21,24 +21,24 @@ class MetaAppathonsController < ApplicationController
 
     @reactions = [
       {
-        vote_scope: "#{@meta_appathon.uid}-time",
-        icon: "fa fa-fw fa-bolt",
-        title: "Fast"
-      },
-      {
-        vote_scope: "#{@meta_appathon.uid}-magic",
-        icon: "fa fa-fw fa-magic",
-        title: "Magic"
+        vote_scope: "#{@meta_appathon.uid}-love",
+        icon: "fa fa-fw fa-heart-o",
+        title: "I love this app"
       },
       {
         vote_scope: "#{@meta_appathon.uid}-idea",
         icon: "fa fa-fw fa-lightbulb-o",
-        title: "Innovative"
+        title: "I think it's innovative"
       },
       {
-        vote_scope: "#{@meta_appathon.uid}-love",
-        icon: "fa fa-fw fa-heart-o",
-        title: "Love"
+        vote_scope: "#{@meta_appathon.uid}-time",
+        icon: "fa fa-fw fa-bolt",
+        title: "It's a fast/efficient algorithm"
+      },
+      {
+        vote_scope: "#{@meta_appathon.uid}-magic",
+        icon: "fa fa-fw fa-file-text-o",
+        title: "Looks well-documented"
       }
     ]
 

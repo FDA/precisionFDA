@@ -113,8 +113,8 @@ class User < ActiveRecord::Base
   end
 
   def appathon_from_meta(meta_appathon)
-    following_by_type('Appathon').each do |appathon|
-      return appathon if appathon.meta_appathon.uid == meta_appathon.uid
+    following_by_type('Appathon').find do |appathon|
+      appathon.meta_appathon.uid == meta_appathon.uid
     end
   end
 
