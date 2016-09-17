@@ -150,8 +150,8 @@
       <div class="panel-body">
         <!-- Nav tabs -->
         <ul class="nav nav-pills nav-pills-center nav-pills-padded nav-pills-lg text-uppercase" role="tablist">
-          <li role="presentation" class="active"><a href="#organizers" aria-controls="organizers" role="tab" data-toggle="tab">Organizers</a></li>
-          <li role="presentation"><a href="#participants" aria-controls="participants" role="tab" data-toggle="tab">Participants</a></li>
+          <li role="presentation" class="active"><a href="#organizers" aria-controls="organizers" role="tab" data-toggle="tab">How to organize</a></li>
+          <li role="presentation"><a href="#participants" aria-controls="participants" role="tab" data-toggle="tab">How to participate</a></li>
         </ul>
         <br/>
         <br/>
@@ -186,7 +186,7 @@
               </div>
               <div class="col-sm-14 col-sm-offset-1">
                 <p class="lead">
-                  If you are part of an organization which already has access to precisionFDA, ask your organization's precisionFDA admin to provision an account for you. Otherwise, visit the precisionFDA home page and click "Request access". Fill in the information and indicate that you are planning to organize an app-a-thon. The FDA acts as steward to providing the precisionFDA service to the community, so your request will be initially pending. In the meantime, you will receive an email with a link to access the precisionFDA website in browse (guest) mode. Later, once the FDA approves your account request, you will receive another email with your contributor account information.
+                  If you are part of an organization which already has access to precisionFDA, ask your organization's precisionFDA admin to provision an account for you. Otherwise, visit the precisionFDA home page and click <%= link_to "Request Access", request_access_path %>. Fill in the information and indicate that you are planning to organize an app-a-thon. The FDA acts as steward to providing the precisionFDA service to the community, so your request will be initially pending. In the meantime, you will receive an email with a link to access the precisionFDA website in browse (guest) mode. Later, once the FDA approves your account request, you will receive another email with your contributor account information.
                 </p>
               </div>
             </div>
@@ -223,29 +223,59 @@
               </div>
             </div>
           </div>
+
           <div role="tabpanel" class="tab-pane" id="participants">
             <div class="row">
               <div class="col-sm-2">
-                <%= image_tag("icons/ColoredLineIcons/png/64/coffee.png", class: 'img-responsive')  %>
+                <%= image_tag("icons/ColoredLineIcons/png/64/fountain_pen.png", class: 'img-responsive')  %>
               </div>
               <div class="col-sm-5">
                 <div class="h3">
-                  ...
+                  Obtain a contributor-level precisionFDA account
                 </div>
               </div>
               <div class="col-sm-14 col-sm-offset-1">
                 <p class="lead">
-                  ....
+                  If the app-a-thon's organizer is in the same organization as you, they may have already provisioned an account for you. Otherwise, <%= link_to "file an access request", request_access_path %> and indicate that you plan to participate in an app-a-thon. The FDA acts as steward to providing the precisionFDA service to the community, so your request will be initially pending. In the meantime, you will receive an email with a link to access the precisionFDA website in browse (guest) mode. Later, once the FDA approves your account request, you will receive another email with your contributor account information.
+                </p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/bulletin_board.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  Join the app-a-thon
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                  Once the organizer creates an app-a-thon structure, the app-a-thon will appear in the precisionFDA list of app-a-thons. Visit the app-a-thon's page and click "Join". Note: this action cannot be undone, and the fact that you are a member of the app-a-thon will be publicly displayed.
+                </p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/laptop.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  Learn how to make app assets and apps
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                  Familiarize yourself with the system by running some of the existing apps, to get an idea of how apps work in general, and read the <%= link_to "Apps", show_docs_path('apps') %> section of the documentation. Click "Fork" on any app to take a look at its internals, and study the <%= link_to "Creating Apps", show_docs_path('creating_apps') %> section of the documentation, which includes an introductory video on making apps. Pay particular attention to the concept of app assets; you will most likely need to package NGS software into such an app asset, as part of making your app. If you do not have access to a Linux environment, download the precisionFDA VM as mentioned in the documentation.
                 </p>
               </div>
             </div>
           </div>
         </div>
       </div>
-
     </div>
-
-
 
     <div class="panel container container-padded">
       <div class="panel-body">
