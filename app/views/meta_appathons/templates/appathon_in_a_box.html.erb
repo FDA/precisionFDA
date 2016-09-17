@@ -21,7 +21,7 @@
               <%= link_to new_meta_appathon_appathon_path(@meta_appathon), class: 'btn btn-danger btn-lg' do %>
                 <span class="fa fa-bolt fa-fw"></span> Host an App-a-thon
               <% end %>
-              <%= link_to "#meta-appathon-appathons", class: 'btn btn-default btn-lg' do %>
+              <%= link_to "#appathons-list", class: 'btn btn-default btn-lg' do %>
                 <span class="fa fa-laptop fa-fw"></span> View all App-a-thons
               <% end %>
             </p>
@@ -30,7 +30,7 @@
               <%= link_to appathon_path(@user_appathon), class: 'btn btn-default btn-lg' do %>
                 <%= flag_image_tag(@user_appathon.flag, width: 25) %> <%= @user_appathon.title %> App-a-thon
               <% end %>
-              <%= link_to "#meta-appathon-appathons", class: 'btn btn-default btn-lg' do %>
+              <%= link_to "#appathons-list", class: 'btn btn-default btn-lg' do %>
                 <span class="fa fa-laptop fa-fw"></span> View all App-a-thons
               <% end %>
             </p>
@@ -263,7 +263,7 @@
     </div>
   </div>
 
-  <div id="meta-appathon-appathons" class="pfda-meta-appathon-submissions container-fluid">
+  <div id="appathons-list" class="pfda-meta-appathon-submissions container-fluid">
     <div class="panel panel-primary">
       <div class="panel-heading">
         <div class="text-center">
