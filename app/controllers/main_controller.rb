@@ -10,22 +10,29 @@ class MainController < ApplicationController
     @truth_discussion = Discussion.accessible_by_public.find_by(id: TRUTH_DISCUSSION_ID)
 
     @consistency_challenge = Challenge.consistency(@context)
-
     @truth_challenge = Challenge.truth(@context)
+    @appathons_challenge = Challenge.appathons(@context)
 
-    @challenges = [@consistency_challenge, @truth_challenge]
+    @challenges = [@appathons_challenge, @truth_challenge, @consistency_challenge]
+
+    @meta_appathon = MetaAppathon.active
+    if !@meta_appathon.nil?
+      if @context.logged_in?
+        @user_appathon = @context.user.appathon_from_meta(@meta_appathon)
+      end
+    end
 
     if @context.logged_in_or_guest?
-      notes = Note.real_notes.accessible_by_public.order(id: :desc).limit(10)
-      answers = Answer.accessible_by_public.order(id: :desc).limit(10)
-      discussions = Discussion.accessible_by_public.order(id: :desc).limit(10)
-      files = UserFile.real_files.accessible_by_public.order(id: :desc).limit(10)
-      comparisons = Comparison.accessible_by_public.order(id: :desc).limit(10)
-      apps = App.accessible_by_public.order(id: :desc).limit(10)
-      jobs = Job.accessible_by_public.order(id: :desc).limit(10)
-      assets = Asset.accessible_by_public.order(id: :desc).limit(10)
+      notes = Note.real_notes.accessible_by_public.order(updated_at: :desc).limit(10)
+      answers = Answer.accessible_by_public.order(updated_at: :desc).limit(10)
+      discussions = Discussion.accessible_by_public.order(updated_at: :desc).limit(10)
+      files = UserFile.real_files.accessible_by_public.order(updated_at: :desc).limit(10)
+      comparisons = Comparison.accessible_by_public.order(updated_at: :desc).limit(10)
+      apps = App.accessible_by_public.order(updated_at: :desc).limit(10)
+      jobs = Job.accessible_by_public.order(updated_at: :desc).limit(10)
+      assets = Asset.accessible_by_public.order(updated_at: :desc).limit(10)
 
-      @feed = (notes + answers + discussions + files + comparisons + apps + jobs + assets).sort_by {|a| a.created_at}.reverse
+      @feed = (notes + answers + discussions + files + comparisons + apps + jobs + assets).sort_by {|a| a.updated_at}.reverse
 
       if @context.logged_in?
         @notes_count = Note.real_notes.editable_by(@context).count
@@ -44,6 +51,51 @@ class MainController < ApplicationController
             end
           end
         end
+      else
+        @tutorials = [
+          {
+            title: "Explore notes",
+            path: Rails.application.routes.url_helpers.explore_notes_path,
+            help_label: "Learn",
+            help_path: Rails.application.routes.url_helpers.show_docs_path('notes'),
+            description: "Read what others are reporting describing their thoughts and their work"
+          },
+          {
+            title: "Explore files",
+            path: Rails.application.routes.url_helpers.explore_files_path,
+            help_label: "Learn",
+            help_path: Rails.application.routes.url_helpers.show_docs_path('files'),
+            description: "Browse the datasets have been publicly shared with the precisionFDA community"
+          },
+          {
+            title: "Explore Comparisons",
+            path: Rails.application.routes.url_helpers.explore_comparisons_path,
+            help_label: "Learn",
+            help_path: Rails.application.routes.url_helpers.show_docs_path('comparisons'),
+            description: "View the differences between test sets and benchmark sets of genomic variants"
+          },
+          {
+            title: "Explore Apps",
+            path: Rails.application.routes.url_helpers.explore_apps_path,
+            help_label: "Learn",
+            help_path: Rails.application.routes.url_helpers.show_docs_path('apps'),
+            description: "Have a look at bioinformatics apps &mdash; and even study their scripts by clicking 'Fork'."
+          },
+          {
+            title: "Browse Assets",
+            path: Rails.application.routes.url_helpers.explore_assets_path,
+            help_label: "Learn",
+            help_path: Rails.application.routes.url_helpers.show_docs_path('creating_apps')+"#dev-assets",
+            description: "Browse the collection of software assets that are used as building blocks in apps."
+          },
+          {
+            title: "Try the app editor",
+            path: Rails.application.routes.url_helpers.new_app_path,
+            help_label: "Learn",
+            help_path: Rails.application.routes.url_helpers.show_docs_path('creating_apps'),
+            description: "Find out how easy it is to assemble an app (read-only; results not saved)"
+          }
+        ]
       end
     else
       @participant_orgs = [
@@ -370,6 +422,38 @@ class MainController < ApplicationController
     context = @context.as_json.slice("user_id", "username", "token", "expiration", "org_id")
     context["expiration"] = [context["expiration"], Time.now.to_i + 1.day].min
     @key = rails_encryptor.encrypt_and_sign({context: context}.to_json)
+  end
+
+  # Inputs
+  #
+  # taggable_uid (string, required): the uid of the item to tag
+  # tags (string, required): comma-separated string containing tags to update to,
+  #                this will replace existing tags
+  # tag_context (string, optional): indicates the tag context to use
+  def set_tags
+    taggable_uid = params["taggable_uid"]
+    fail "Taggable uid needs to be a non-empty string" unless taggable_uid.is_a?(String) && taggable_uid != ""
+
+    tags = params["tags"]
+    fail "Tags need to be comma-separated strings" unless tags.is_a?(String)
+
+    suggested_tags = params["suggested_tags"]
+    if suggested_tags.is_a?(Array)
+      tags = (tags.split(',') + suggested_tags).join(',')
+    end
+
+    tag_context = params["tag_context"] # Optional
+
+    taggable = item_from_uid(taggable_uid)
+
+    if taggable.editable_by?(@context)
+      path_to_redirect = pathify(taggable)
+      @context.user.tag(taggable, with: tags, on: tag_context.blank? ? :tags : tag_context)
+      redirect_to path_to_redirect
+    else
+      flash[:error] = "This item is not accessible by you"
+      redirect_to :root
+    end
   end
 
   private

@@ -25,6 +25,8 @@ class Appathon < ActiveRecord::Base
 
   ICONS = %w(baseball bicycle billiards bowling cards charter chess-knight chess-stopwatch diving-mask dumbbell ghosts-pacman glove-fan golf helmet hockey mushroom-from-Mario pedestal ping-pong-racket racing-flag rugby sailing-ship shaker skates skipping-rope soccer-ball soccer-cup stopwatch tennis torch weight)
 
+  validates :flag, inclusion: { in: ICONS }
+
   def uid
     "appathon-#{id}"
   end
@@ -46,7 +48,7 @@ class Appathon < ActiveRecord::Base
   end
 
   def editable_by?(context)
-    admin_id == context.user_id
+    context.logged_in? && admin_id == context.user_id
   end
 
   def active?

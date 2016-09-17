@@ -1221,8 +1221,11 @@ class ApiController < ApplicationController
     item = item_from_uid(uid)
     if item.accessible_by?(@context) && ["app-series", "discussion", "answer"].include?(item.klass)
       if vote_scope.present?
-        appathon = item_from_uid(vote_scope, Appathon)
-        fail "#{uid} is not accessible by you in this scope" unless appathon.followed_by?(@context.user)
+        # Special treatment for appathon vote_scope
+        if vote_scope =~ /^(appathon)-(\d+)$/
+          appathon = item_from_uid(vote_scope, Appathon)
+          fail "#{uid} is not accessible by you in this scope" unless appathon.followed_by?(@context.user)
+        end
         item.liked_by(@context.user, vote_scope: vote_scope)
         upvote_count = item.get_upvotes(vote_scope: vote_scope).size
       else
@@ -1256,8 +1259,11 @@ class ApiController < ApplicationController
     item = item_from_uid(uid)
     if item.accessible_by?(@context) && ["app-series", "discussion", "answer"].include?(item.klass)
       if vote_scope.present?
-        appathon = item_from_uid(vote_scope, Appathon)
-        fail "#{uid} is not accessible by you in this scope" unless appathon.followed_by?(@context.user)
+        # Special treatment for appathon vote_scope
+        if vote_scope =~ /^(appathon)-(\d+)$/
+          appathon = item_from_uid(vote_scope, Appathon)
+          fail "#{uid} is not accessible by you in this scope" unless appathon.followed_by?(@context.user)
+        end
         item.unliked_by(@context.user, vote_scope: vote_scope)
         upvote_count = item.get_upvotes(vote_scope: vote_scope).size
       else

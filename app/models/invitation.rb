@@ -29,7 +29,7 @@ class Invitation < ActiveRecord::Base
   require_human_on :create
   belongs_to :user
 
-  store :extras, accessors: [ :req_reason, :req_data, :req_software, :research_intent, :clinical_intent, :participate_intent, :organize_intent ], coder: JSON
+  store :extras, accessors: [ :req_reason, :req_data, :req_software, :research_intent, :clinical_intent, :consistency_challenge_intent, :truth_challenge_intent, :participate_intent, :organize_intent ], coder: JSON
 
   def valid_email
     if !User.validate_email(email)

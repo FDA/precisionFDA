@@ -19,6 +19,7 @@ Rails.application.routes.draw do
     get 'about/:section' => 'main#about'
     get 'terms' => 'main#terms'
     post 'tokify' => 'main#tokify'
+    post 'set_tags' => 'main#set_tags'
     get 'guidelines' => 'main#guidelines'
     get 'exception_test' => "main#exception_test"
 
@@ -104,6 +105,7 @@ Rails.application.routes.draw do
       resources :comments
     end
 
+    get "challenges/#{MetaAppathon::ACTIVE_META_APPATHON}" => "meta_appathons#show", as: 'active_meta_appathon'
     resources :challenges do
       get 'consistency(/:tab)', on: :collection, action: :consistency, as: 'consistency'
       get 'truth(/:tab)', on: :collection, action: :truth, as: 'truth'
@@ -145,12 +147,13 @@ Rails.application.routes.draw do
 
     resources :meta_appathons, constraints: {appathon_id: /[^\/]+/ }  do
       post 'rename', on: :member
+      resources :appathons, constraints: {id: /[^\/]+/}
+    end
 
-      resources :appathons, constraints: {id: /[^\/]+/} do
-        post 'rename', on: :member
-        post 'join', on: :member
-        resources :comments
-      end
+    resources :appathons, constraints: {id: /[^\/]+/} do
+      post 'rename', on: :member
+      post 'join', on: :member
+      resources :comments
     end
 
     resources :queries do

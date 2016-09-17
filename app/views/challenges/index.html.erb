@@ -1,0 +1,14 @@
+<% content_for :title do %>PrecisionFDA Challenges<% end %>
+
+<div class="jumbotron jumbotron-challenges">
+  <div class="container container-padded container-fluid">
+    <h1>
+      <span class="challenge-title-muted">PrecisionFDA</span>
+      <br>
+      Challenges
+    </h1>
+    <p>Participate in our challenges to engage with and contribute to the community</p>
+  </div>
+
+    <%= render "challenges/cards", challenges: @challenges %>
+</div>
