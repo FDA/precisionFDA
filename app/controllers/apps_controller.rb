@@ -69,19 +69,75 @@ class AppsController < ApplicationController
 
     # Generate Dockerfile for app
     cmds = []
-    cmds << "FROM precisionfda:ub14"
+    cmds << "# Start with Ubuntu 14.04 base image"
+    cmds << "FROM ubuntu:14.04"
+    cmds << ""
+
+    apt_packages = [
+      "aria2",
+      "byobu",
+      "cmake",
+      "cpanminus",
+      "curl",
+      "dstat",
+      "g++",
+      "git",
+      "htop",
+      "libboost-all-dev",
+      "libcurl4-openssl-dev",
+      "libncurses5-dev",
+      "make",
+      "perl",
+      "pypy",
+      "python-dev",
+      "python-pip",
+      "r-base",
+      "ruby1.9.3",
+      "wget",
+      "xz-utils"
+    ]
+    cmds << "# install apt-packages"
+    cmds << "# don't use ENV to set DEBIAN_FRONTEND"
+    cmds << "RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \\\n\t#{apt_packages.join(" \\\n\t")}"
+    cmds << ""
+
+    python_packages = [
+      "requests==2.5.0",
+      "futures==2.2.0",
+      "setuptools==10.2"
+    ]
+    cmds << "# install python packages"
+    cmds << "RUN pip install \\\n\t#{python_packages.join(" \\\n\t")}"
+    cmds << ""
+
+    cmds << "# create directory /work and set it to $HOME and CWD"
+    cmds << "RUN mkdir /work"
+    cmds << "ENV HOME=\"/work\""
+    cmds << "WORKDIR /work"
+    cmds << ""
+
+    cmds << "# Download pfda executables"
+    # TODO: Permify these links before going live!
+    cmds << "RUN curl https://dl.dnanex.us/F/D/75X9k0Q0p5vyV4PxxjyKZBqy7Y7f4GYf1bxBX349/emit-1.0.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
+    cmds << "RUN curl https://dl.dnanex.us/F/D/qqyqB2xGKF0q9B3xp1qJPvvg6gBQ3yZ86v1qg8ZY/pfda-1.0.6.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
+    cmds << "RUN curl https://dl.dnanex.us/F/D/GFZk04jxBjzJgy0z3BVFBqFg9FX6z46FFG8Z279G/run-1.0.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
+    cmds << ""
 
     # Generate download URLs and Docker commands for each asset
-    @app.ordered_assets.each do |ordered_asset|
-      asset = @app.assets.find_by!(dxid: ordered_asset)
+    cmds << "# Download app assets"
+    @app.assets.sort_by { |asset| @app.ordered_assets.find_index(asset.dxid) }.each do |asset|
       url = DNAnexusAPI.new(@context.token).call(asset.dxid, "download", {filename: asset.name, project: asset.project, preauthenticated: true})["url"]
-      tar_opts = asset.is_gzipped ? '-xzf -' : '-xf -'
+      tar_opts = asset.is_gzipped ? 'xzf -' : 'xf -'
       cmds << "RUN curl #{url} | tar #{tar_opts} -C / --no-same-owner --no-same-permissions"
     end
+    cmds << ""
+
     # Generate Docker command for installing apt-packages
+    cmds << "# Download app apt-packages"
     if @app.packages.present?
       cmds << "RUN apt-get install --yes #{@app.packages.join(" ")}"
     end
+    cmds << ""
 
     # Generate new token for pfda uploader
     context = @context.as_json.slice("user_id", "username", "token", "expiration", "org_id")
@@ -89,12 +145,16 @@ class AppsController < ApplicationController
     key = rails_encryptor.encrypt_and_sign({context: context}.to_json)
 
     # Generate Docker command for running pfda uploader to pull app info
+    cmds << "# Download app spec and code"
     cmds << "RUN pfda --auth #{key} download-app-spec --app-id=#{@app.dxid} --output-file=\"/spec.json\""
     cmds << "RUN pfda --auth #{key} download-app-script --app-id=#{@app.dxid} --output-file=\"/script.sh\""
+    cmds << ""
 
     # Add entry point to container
+    cmds << "# Set entry point to container"
     cmds << "ENTRYPOINT [\"/usr/bin/run\"]"
-    cmds << ""                      # Add a newline at the end
+    cmds << ""
+
     dockerfile = cmds.join("\n")    # Join with newlines
 
     # Download string as Dockerfile
