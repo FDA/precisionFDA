@@ -13,10 +13,10 @@
               </div>
               <ul class="list-inline list-inline-bullets text-muted">
                 <li>
-                  <%= appathon.followers_count %> participants
+                  <%= pluralize(appathon.followers_count, 'participant') %>
                 </li>
                 <li>
-                  <%= appathon.apps.count %> apps
+                  <%= pluralize(appathon.apps.count, 'app') %>
                 </li>
               </ul>
             </div>

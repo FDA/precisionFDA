@@ -25,7 +25,7 @@ class AppSeries < ActiveRecord::Base
   acts_as_votable
   acts_as_taggable
 
-  SUGGESTED_TAGS = ["Quality Control", "Reads pre-processing", "Reads alignment", "Duplicate Removals", "Variant Calling", "Simulation", "Benchmarking Tools", "Statistics/Graphics", "Resource Utilization"]
+  SUGGESTED_TAGS = ["QC/Statistics", "Benchmarking", "Simulation", "Reads Pre-processing", "Read Mapping", "Variation Calling", "CNV/SV Calling", "Annotation", "Cancer"]
 
   def uid
     "app-series-#{id}"
