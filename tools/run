@@ -49,9 +49,14 @@ for item in inputs:
 
 args = parser.parse_args()
 
-# Check input arguments
+# Check and sanitize input arguments
 for item in inputs:
     input_val = getattr(args, item['name'])
+
+    # if the value is None, store empty string
+    if input_val == None
+        setattr(args, item['name'], "")
+        continue
 
     if item['class'] == 'file':
         if not os.path.isfile(input_val):

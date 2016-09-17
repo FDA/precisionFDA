@@ -51,7 +51,6 @@ class AppsController < ApplicationController
   end
 
   def export
-
     # App should exist and be accessible
     @app = App.accessible_by(@context).find_by!(dxid: params[:id])
 
@@ -69,6 +68,7 @@ class AppsController < ApplicationController
 
     # Generate Dockerfile for app
     cmds = []
+    cmds << "# For more information on how to use this file, please refer to 'Export Apps' in the PFDA Docs section"
     cmds << "# Start with Ubuntu 14.04 base image"
     cmds << "FROM ubuntu:14.04"
     cmds << ""
