@@ -17,7 +17,12 @@
           <%= tag %>
         </a>
       <% else %>
-        <span class="upvote-count"><%= item.get_upvotes(vote_scope: tag).size %></span> | <%= tag %>
+        <% if item.get_upvotes(vote_scope: tag).size > 0 %>
+          <span class="upvote-count"><%= item.get_upvotes(vote_scope: tag).size %></span>
+        <% else %>
+          <span class="upvote-count"></span>
+        <% end %>
+        <%= tag %>
       <% end %>
     </li>
   <% end %>
