@@ -19,9 +19,10 @@
 
   li
     display: inline-block
-    border: 0
-    border-radius: $border-radius-base
-    vertical-align: top
+    &.list-group-item
+      border: 0
+      vertical-align: top
+      border-radius: $border-radius-base
 
   .list-group-item-text
     font-size: 19px
@@ -77,6 +78,10 @@
     li
       padding-top: 10px
       padding-bottom: 10px
+  &.list-inline-padding-horizontal
+    li
+      padding-left: 10px
+      padding-right: 10px
 
   &.list-inline-bullets
     vertical-align: middle

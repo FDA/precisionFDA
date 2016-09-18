@@ -18,7 +18,7 @@ class DocsController < ApplicationController
       { name: "tracking", title: "Tracking"},
       { name: "publishing", title: "Publishing"},
       { name: "licenses", title: "Licenses"},
-#      { name: "video_tutorials", title: "Video Tutorials"}
+      { name: "video_tutorials", title: "Video Tutorials"}
     ]
     @active_section = @sections.find {|s| s[:name] == section_name }
     raise ActiveRecord::RecordNotFound if @active_section.nil?

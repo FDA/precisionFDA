@@ -70,9 +70,10 @@ class JobsNewView
             console.error rs.error
         )
         .fail((error) =>
+          errorObject = JSON.parse error.responseText
           @busy(false)
           @running(false)
-          alert "#{rs.error.type}: App could not be run due to: #{rs.error.message}"
+          alert "#{errorObject.error.type}: App could not be run due to: #{errorObject.error.message}"
           console.error error
         )
 

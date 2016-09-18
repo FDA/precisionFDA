@@ -6,7 +6,7 @@
       <%= link_to(image_tag(@user.gravatar_url, class: 'img-circle', height: '48px'), "http://en.gravatar.com/emails/", title: "Edit profile image on Gravatar", target: "_blank") %>
       <br>
       <%= link_to "http://en.gravatar.com/emails/", class: "edit-gravatar-text", title: "Edit profile image on Gravatar", target: "_blank" do %>
-        Edit <span class="fa fa-external-link"></span>
+        Set <span class="fa fa-external-link"></span>
       <% end %>
     </div>
     <div class="media-body">
@@ -33,10 +33,13 @@
       </li>
     </ul>
     <div class="btn-group">
-      <%= link_to(content_tag(:span, "", class: "fa fa-fw fa-lock") + " Change password", "#{DNANEXUS_PLATFORM_URI}profile/#{@user.dxuser}/changePassword?client_id=precision_fda_gov", class: 'btn btn-primary') %>
-      <%= link_to(content_tag(:span, "", class: "fa fa-fw fa-user") + " View public profile", user_path(@user.dxuser), class: 'btn btn-default') %>
-    </div>
+
+    </div><%= link_to(content_tag(:span, "", class: "fa fa-fw fa-user") + " View public profile", user_path(@user.dxuser), class: 'btn btn-default') %>
     <div class="btn-group">
+      <%= link_to(content_tag(:span, "", class: "fa fa-fw fa-lock") + " Change password", "#{DNANEXUS_PLATFORM_URI}profile/#{@user.dxuser}/changePassword?client_id=precision_fda_gov", class: 'btn btn-default') %>
+      <%= link_to "http://en.gravatar.com/emails/", class: 'btn btn-default', target: "_blank" do %>
+        <span class="fa fa-fw fa-image"></span> Set Profile Gravatar
+      <% end %>
       <%= link_to(content_tag(:span, "", class: "fa fa-fw fa-legal") + "Manage Licenses", licenses_path, class: 'btn btn-default') %>
     </div>
   </div>

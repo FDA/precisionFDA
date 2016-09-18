@@ -1,13 +1,50 @@
 class MetaAppathonsController < ApplicationController
+  skip_before_action :require_login, {only: [:show]}
+  before_action :require_login_or_guest, only: []
 
   def index
     @meta_appathons = MetaAppathon.all.page params[:meta_appathons_page]
   end
 
   def show
-    @meta_appathon = MetaAppathon.find(params[:id])
-    @appathons = @meta_appathon.appathons.page params[:appathons_page]
+    if !params[:id].nil?
+      @meta_appathon = MetaAppathon.find(params[:id])
+      if @meta_appathon.handle == MetaAppathon::ACTIVE_META_APPATHON
+        redirect_to active_meta_appathon_path and return
+      end
+    else
+      @meta_appathon = MetaAppathon.active
+    end
+    @appathons = @meta_appathon.appathons.order(name: :asc)
 
+    @apps = @meta_appathon.apps.sort_by {|app| app.updated_at }.reverse
+
+    @reactions = [
+      {
+        vote_scope: "#{@meta_appathon.uid}-love",
+        icon: "fa fa-fw fa-heart-o",
+        title: "I love this app"
+      },
+      {
+        vote_scope: "#{@meta_appathon.uid}-idea",
+        icon: "fa fa-fw fa-lightbulb-o",
+        title: "I think it's innovative"
+      },
+      {
+        vote_scope: "#{@meta_appathon.uid}-time",
+        icon: "fa fa-fw fa-bolt",
+        title: "It's a fast/efficient algorithm"
+      },
+      {
+        vote_scope: "#{@meta_appathon.uid}-documentation",
+        icon: "fa fa-fw fa-file-text-o",
+        title: "Looks well-documented"
+      }
+    ]
+
+    if @context.logged_in?
+      @user_appathon = @context.user.appathon_from_meta(@meta_appathon)
+    end
     if !@meta_appathon.template.blank?
       render template: "meta_appathons/templates/#{@meta_appathon.template}"
     end
@@ -19,7 +56,7 @@ class MetaAppathonsController < ApplicationController
   end
 
   def edit
-    @meta_appathon = MetaAppathon.editable_by(@context).find(params[:id])
+    @meta_appathon = MetaAppathon.editable_by(@context).find_by(id: params[:id])
     redirect_to meta_appathon_path(params[:id]) if @meta_appathon.nil?
   end
 
@@ -40,7 +77,7 @@ class MetaAppathonsController < ApplicationController
   end
 
   def update
-    @meta_appathon = MetaAppathon.editable_by(@context).find(params[:id])
+    @meta_appathon = MetaAppathon.editable_by(@context).find_by(id: params[:id])
     redirect_to meta_appathon_path(params[:id]) if @meta_appathon.nil?
 
     MetaAppathon.transaction do
@@ -60,7 +97,6 @@ class MetaAppathonsController < ApplicationController
     p = params.require(:meta_appathon).permit(:name, :description, :handle, :template, :start_at, :end_at)
     p.require(:name)
     p.require(:handle)
-    p.require(:template)
     p.require(:start_at)
     p.require(:end_at)
     return p

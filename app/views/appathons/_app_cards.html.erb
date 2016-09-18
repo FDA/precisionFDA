@@ -17,6 +17,11 @@
               <div class="pfda-card-title">
                 <%= link_to(app.title, app_path(app.dxid)) %>
               </div>
+              <% if app.app_series.all_tags_list.count > 0 %>
+                <div class="pfda-card-metadata">
+                  <%= render "_partials/tags_list_votable", tags_list: app.app_series.all_tags_list, item: app.app_series %>
+                </div>
+              <% end %>
               <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
                 <li>
                   <%= link_to app_comments_path(app.dxid), class: "text-muted" do %>

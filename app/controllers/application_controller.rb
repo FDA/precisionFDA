@@ -164,6 +164,8 @@ class ApplicationController < ActionController::Base
       end
     when "app"
       app_path(item.dxid)
+    when "app-series"
+      pathify(item.latest_accessible(@context))
     when "job"
       job_path(item.dxid)
     when "asset"
@@ -183,7 +185,7 @@ class ApplicationController < ActionController::Base
     when "meta_appathon"
       meta_appathon_path(item)
     when "appathon"
-      meta_appathon_appathon_path(item.meta_appathon, item)
+      appathon_path(item)
     else
       raise "Unknown class #{item.klass}"
     end
@@ -218,7 +220,7 @@ class ApplicationController < ActionController::Base
     when "meta_appathon"
       meta_appathon_comments_path(item)
     when "appathon"
-      meta_appathon_appathon_comments_path(item.meta_appathon, item)
+      appathon_comments_path(item)
     else
       raise "Unknown class #{item.klass}"
     end
@@ -303,6 +305,8 @@ class ApplicationController < ActionController::Base
         else
           return [meta_appathon]
         end
+    elsif params[:appathon_id].present?
+      return [Appathon.find(params[:appathon_id])]
     elsif params[:note_id].present?
       return [Note.find(params[:note_id])]
     elsif params[:space_id].present?

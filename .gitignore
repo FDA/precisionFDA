@@ -25,3 +25,6 @@
 
 # Ignore CSV in assets
 /app/assets/csv
+
+# Ignore OSX hidden file
+.DS_Store
