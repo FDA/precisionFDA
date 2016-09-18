@@ -62,7 +62,7 @@ Rails.application.routes.draw do
       get 'jobs', on: :member, to: 'apps#index'
       member do
         get 'fork'
-        get 'export'
+        post 'export'
       end
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'

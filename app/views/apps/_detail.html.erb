@@ -98,8 +98,8 @@
       </button>
       <ul class="dropdown-menu">
         <li class="dropdown-header">Export To:</li>
-        <li>
-          <%= link_to export_app_path(@app.dxid), data: { confirm: 'You are about to download a Dockerfile to run this app in a Docker container on your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+        <li data-turbolinks="false">
+          <%= link_to export_app_path(@app.dxid), method: :post, data: { confirm: 'You are about to download a Dockerfile to run this app in a Docker container on your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
             Docker Container
           <% end %>
         </li>
