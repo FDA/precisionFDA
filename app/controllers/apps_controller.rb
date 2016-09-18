@@ -68,7 +68,7 @@ class AppsController < ApplicationController
 
     # Generate Dockerfile for app
     cmds = []
-    cmds << "# For more information on how to use this file, please refer to 'Export Apps' in the PFDA Docs section"
+    cmds << "# For more information on how to use this file, please refer to 'Export Apps' in the precisionFDA Docs section"
     cmds << "# Start with Ubuntu 14.04 base image"
     cmds << "FROM ubuntu:14.04"
     cmds << ""
@@ -127,7 +127,7 @@ class AppsController < ApplicationController
     cmds << "# Download app assets"
     @app.assets.sort_by { |asset| @app.ordered_assets.find_index(asset.dxid) }.each do |asset|
       url = DNAnexusAPI.new(@context.token).call(asset.dxid, "download", {filename: asset.name, project: asset.project, preauthenticated: true})["url"]
-      tar_opts = asset.is_gzipped ? 'xzf -' : 'xf -'
+      tar_opts = asset.is_gzipped? ? 'xzf -' : 'xf -'
       cmds << "RUN curl #{url} | tar #{tar_opts} -C / --no-same-owner --no-same-permissions"
     end
     cmds << ""

@@ -59,7 +59,7 @@ class Asset < UserFile
     end
   end
 
-  def is_gzipped
+  def is_gzipped?
     return name.ends_with?(".gz")
   end
 

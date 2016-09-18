@@ -41,11 +41,12 @@ parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpForm
 inputs = app_spec['spec']['input_spec']
 for item in inputs:
     arg_val = '--' + item['name']
+    choices_val = item['choices'] if 'choices' in item else None
     default_val = item['default'] if 'default' in item else None
     # Special case: if has default then required doesn't matter
     required_val = False if default_val else not item['optional']
     # If required==True and not provided, will error regardless of default
-    parser.add_argument(arg_val, dest=item['name'], action="store", help=item['help'], required=required_val, default=default_val)
+    parser.add_argument(arg_val,choices=choices_val, dest=item['name'], action="store", help=item['help'], required=required_val, default=default_val)
 
 args = parser.parse_args()
 
@@ -54,11 +55,14 @@ for item in inputs:
     input_val = getattr(args, item['name'])
 
     # if the value is None, store empty string
-    if input_val == None
+    if input_val == None:
         setattr(args, item['name'], "")
         continue
 
-    if item['class'] == 'file':
+    # strings are string
+    if item['class'] == 'string':
+        continue
+    elif item['class'] == 'file':
         if not os.path.isfile(input_val):
             exit('input file argument "{}" does not exist!'.format(input_val))
     elif item['class'] == 'integer':
@@ -85,7 +89,7 @@ for item in inputs:
 for item in inputs:
     # All values in args should be strings
     input_val = getattr(args, item['name'])
-    os.environ[item['name']] = input_val
+    os.environ[item['name']] = str(input_val)
 
     if item['class'] == 'file':
         # Set environmental variables
