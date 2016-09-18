@@ -29,10 +29,9 @@ class MainController < ApplicationController
       files = UserFile.real_files.accessible_by_public.order(updated_at: :desc).limit(10)
       comparisons = Comparison.accessible_by_public.order(updated_at: :desc).limit(10)
       apps = App.accessible_by_public.order(updated_at: :desc).limit(10)
-      jobs = Job.accessible_by_public.order(updated_at: :desc).limit(10)
       assets = Asset.accessible_by_public.order(updated_at: :desc).limit(10)
 
-      @feed = (notes + answers + discussions + files + comparisons + apps + jobs + assets).sort_by {|a| a.updated_at}.reverse
+      @feed = (notes + answers + discussions + files + comparisons + apps + assets).sort_by {|a| a.updated_at}.reverse
 
       if @context.logged_in?
         @notes_count = Note.real_notes.editable_by(@context).count
