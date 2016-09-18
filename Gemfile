@@ -56,12 +56,6 @@ gem 'axlsx'
 # Secure headers
 gem 'secure_headers'
 
-# Add comments on any model
-gem 'acts_as_commentable_with_threading'
-
-# Add voting on any model
-gem 'acts_as_votable'
-
 # Gravatar profile image helper
 gem 'gravtastic'
 
@@ -69,8 +63,12 @@ gem 'gravtastic'
 gem 'kaminari'
 gem 'bootstrap-kaminari-views'
 
-# Allows models to follow each other
+
+# Add comments on any model
+gem 'acts_as_commentable_with_threading'
+gem 'acts_as_votable'
 gem 'acts_as_follower'
+gem 'acts-as-taggable-on'
 
 # For inline-css in emails
 gem 'inky-rb', require: 'inky'

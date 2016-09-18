@@ -38,6 +38,8 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
+    acts-as-taggable-on (4.0.0)
+      activerecord (>= 4.0)
     acts_as_commentable_with_threading (2.0.1)
       activerecord (>= 4.0)
       activesupport (>= 4.0)
@@ -223,6 +225,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord_any_of
+  acts-as-taggable-on
   acts_as_commentable_with_threading
   acts_as_follower
   acts_as_votable

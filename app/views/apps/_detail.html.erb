@@ -35,6 +35,8 @@
   </ul>
 </div>
 
+<%= render "_partials/tags_metadata", item: @app.app_series, item_name: @app.title, tags_list: @app.app_series.all_tags_list, is_editable: @app.editable_by?(@context), suggested_tags: AppSeries::SUGGESTED_TAGS %>
+
 <div class="pfda-toolbar">
   <div class="btn-group">
     <div class="btn-group">
@@ -91,6 +93,20 @@
     <a class="btn btn-default" href="<%= fork_app_path(@app.dxid) %>">
       <span class="fa fa-code-fork"></span> Fork
     </a>
+    <div class="btn-group">
+      <button type="button" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="fa fa-cloud-download" aria-hidden="true"></span> Export
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+        <li class="dropdown-header">Export To:</li>
+        <li data-turbolinks="false">
+          <%= link_to export_app_path(@app.dxid), method: :post, data: { confirm: 'You are about to download a Dockerfile to run this app in a Docker container on your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+            Docker Container
+          <% end %>
+        </li>
+      </ul>
+    </div>
   </div>
 
   <div class="btn-group">
@@ -174,14 +190,12 @@
       <% end %>
     </div>
   </div>
-  <% elsif %>
-    <% if !@app.present? %>
+  <% elsif !@app.present? %>
     <div role="tabpanel" class="tab-pane tab-pane-padded active" id="app-job">
       <div class="alert alert-info">
         <span class="fa fa-info-circle"></span> When you run an <a href="<%= show_docs_path("apps") %>">app</a>, it will create a <a href="<%= show_docs_path("apps") %>#apps-run">job</a> that will show up here. Meanwhile, check out our <%= link_to "Featured Apps", featured_apps_path %> or <%= link_to "explore community contributions", explore_apps_path %>
       </div>
     </div>
-    <% end %>
   <% end %>
 
   <% if @app.present? %>

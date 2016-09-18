@@ -19,6 +19,7 @@ Rails.application.routes.draw do
     get 'about/:section' => 'main#about'
     get 'terms' => 'main#terms'
     post 'tokify' => 'main#tokify'
+    post 'set_tags' => 'main#set_tags'
     get 'guidelines' => 'main#guidelines'
     get 'exception_test' => "main#exception_test"
 
@@ -38,6 +39,8 @@ Rails.application.routes.draw do
     post '/api/describe_license', to: 'api#describe_license'
     post '/api/accept_licenses', to: 'api#accept_licenses'
     post '/api/run_app', to: 'api#run_app'
+    post '/api/get_app_spec', to: 'api#get_app_spec'
+    post '/api/get_app_script', to: 'api#get_app_script'
     post '/api/search_assets', to: 'api#search_assets'
     post '/api/create_asset', to: 'api#create_asset'
     post '/api/close_asset', to: 'api#close_asset'
@@ -60,6 +63,7 @@ Rails.application.routes.draw do
       get 'jobs', on: :member, to: 'apps#index'
       member do
         get 'fork'
+        post 'export'
       end
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
@@ -104,6 +108,7 @@ Rails.application.routes.draw do
       resources :comments
     end
 
+    get "challenges/#{MetaAppathon::ACTIVE_META_APPATHON}" => "meta_appathons#show", as: 'active_meta_appathon'
     resources :challenges do
       get 'consistency(/:tab)', on: :collection, action: :consistency, as: 'consistency'
       get 'truth(/:tab)', on: :collection, action: :truth, as: 'truth'
@@ -145,12 +150,13 @@ Rails.application.routes.draw do
 
     resources :meta_appathons, constraints: {appathon_id: /[^\/]+/ }  do
       post 'rename', on: :member
+      resources :appathons, constraints: {id: /[^\/]+/}
+    end
 
-      resources :appathons, constraints: {id: /[^\/]+/} do
-        post 'rename', on: :member
-        post 'join', on: :member
-        resources :comments
-      end
+    resources :appathons, constraints: {id: /[^\/]+/} do
+      post 'rename', on: :member
+      post 'join', on: :member
+      resources :comments
     end
 
     resources :queries do

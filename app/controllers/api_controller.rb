@@ -767,7 +767,7 @@ class ApiController < ApplicationController
     # App should exist and be accessible
     @app = App.accessible_by(@context).find_by!(dxid: id)
 
-    # Check if asset licenses have been accepeted
+    # Check if asset licenses have been accepted
     fail "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
 
     # Inputs should be compatible
@@ -878,6 +878,36 @@ class ApiController < ApplicationController
     end
 
     render json: {id: jobid}
+  end
+
+  # Inputs
+  #
+  # app_id
+  #
+  # Outputs
+  #
+  # json (string, only on success): spec, ordered_assets, and packages of the specified app
+  def get_app_spec
+    # App should exist and be accessible
+    app = App.accessible_by(@context).find_by(dxid: params[:id])
+    fail "Invalid app id" if app.nil?
+
+    render json: {spec: app.spec, assets: app.ordered_assets, packages: app.packages}
+  end
+
+  # Inputs
+  #
+  # app_id
+  #
+  # Outputs
+  #
+  # json (string, only on success): code for the specified app
+  def get_app_script
+    # App should exist and be accessible
+    app = App.accessible_by(@context).find_by(dxid: params[:id])
+    fail "Invalid app id" if app.nil?
+
+    render plain: app.code
   end
 
   # Inputs
@@ -1221,8 +1251,11 @@ class ApiController < ApplicationController
     item = item_from_uid(uid)
     if item.accessible_by?(@context) && ["app-series", "discussion", "answer"].include?(item.klass)
       if vote_scope.present?
-        appathon = item_from_uid(vote_scope, Appathon)
-        fail "#{uid} is not accessible by you in this scope" unless appathon.followed_by?(@context.user)
+        # Special treatment for appathon vote_scope
+        if vote_scope =~ /^(appathon)-(\d+)$/
+          appathon = item_from_uid(vote_scope, Appathon)
+          fail "#{uid} is not accessible by you in this scope" unless appathon.followed_by?(@context.user)
+        end
         item.liked_by(@context.user, vote_scope: vote_scope)
         upvote_count = item.get_upvotes(vote_scope: vote_scope).size
       else
@@ -1256,8 +1289,11 @@ class ApiController < ApplicationController
     item = item_from_uid(uid)
     if item.accessible_by?(@context) && ["app-series", "discussion", "answer"].include?(item.klass)
       if vote_scope.present?
-        appathon = item_from_uid(vote_scope, Appathon)
-        fail "#{uid} is not accessible by you in this scope" unless appathon.followed_by?(@context.user)
+        # Special treatment for appathon vote_scope
+        if vote_scope =~ /^(appathon)-(\d+)$/
+          appathon = item_from_uid(vote_scope, Appathon)
+          fail "#{uid} is not accessible by you in this scope" unless appathon.followed_by?(@context.user)
+        end
         item.unliked_by(@context.user, vote_scope: vote_scope)
         upvote_count = item.get_upvotes(vote_scope: vote_scope).size
       else

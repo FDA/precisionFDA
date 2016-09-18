@@ -28,6 +28,10 @@
     min-height: 500px
     background-color: darken(desaturate($brand-blue-subtler, 25%), 3%)
 
+    &:not(.pfda-pane-sidebar-minimal), &:not(.pfda-pane-sidebar-dark)
+      hr
+        border-color: darken(desaturate($brand-blue-subtler, 25%), 10%)
+
     &.pfda-pane-sidebar-padded-v
       padding-top: $padding-base-vertical
       padding-bottom: $padding-base-vertical

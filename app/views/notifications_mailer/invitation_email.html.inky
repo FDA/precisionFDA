@@ -34,7 +34,8 @@
           <tr><td>Has Software:</td><td><%= @invitation.req_software %></td></tr>
           <tr><td>Research intent?</td><td><%= !!@invitation.research_intent %></td></tr>
           <tr><td>Clinical intent?</td><td><%= !!@invitation.clinical_intent %></td></tr>
-          <tr><td>Truth Challenge intent?</td><td><%= !!@invitation.truth_challenge_intent %></td></tr>
+          <tr><td>Participate intent for appathon or challenges?</td><td><%= !!@invitation.participate_intent %></td></tr>
+          <tr><td>Organize intent for appathon or challenges?</td><td><%= !!@invitation.organize_intent %></td></tr>
         </table>
       </columns>
     </row>
