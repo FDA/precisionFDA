@@ -93,6 +93,20 @@
     <a class="btn btn-default" href="<%= fork_app_path(@app.dxid) %>">
       <span class="fa fa-code-fork"></span> Fork
     </a>
+    <div class="btn-group">
+      <button type="button" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="fa fa-cloud-download" aria-hidden="true"></span> Export
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+        <li class="dropdown-header">Export To:</li>
+        <li data-turbolinks="false">
+          <%= link_to export_app_path(@app.dxid), method: :post, data: { confirm: 'You are about to download a Dockerfile to run this app in a Docker container on your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+            Docker Container
+          <% end %>
+        </li>
+      </ul>
+    </div>
   </div>
 
   <div class="btn-group">

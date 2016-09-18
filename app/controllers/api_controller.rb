@@ -767,7 +767,7 @@ class ApiController < ApplicationController
     # App should exist and be accessible
     @app = App.accessible_by(@context).find_by!(dxid: id)
 
-    # Check if asset licenses have been accepeted
+    # Check if asset licenses have been accepted
     fail "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
 
     # Inputs should be compatible
@@ -878,6 +878,36 @@ class ApiController < ApplicationController
     end
 
     render json: {id: jobid}
+  end
+
+  # Inputs
+  #
+  # app_id
+  #
+  # Outputs
+  #
+  # json (string, only on success): spec, ordered_assets, and packages of the specified app
+  def get_app_spec
+    # App should exist and be accessible
+    app = App.accessible_by(@context).find_by(dxid: params[:id])
+    fail "Invalid app id" if app.nil?
+
+    render json: {spec: app.spec, assets: app.ordered_assets, packages: app.packages}
+  end
+
+  # Inputs
+  #
+  # app_id
+  #
+  # Outputs
+  #
+  # json (string, only on success): code for the specified app
+  def get_app_script
+    # App should exist and be accessible
+    app = App.accessible_by(@context).find_by(dxid: params[:id])
+    fail "Invalid app id" if app.nil?
+
+    render plain: app.code
   end
 
   # Inputs
