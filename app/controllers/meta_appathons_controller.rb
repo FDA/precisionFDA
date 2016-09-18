@@ -36,7 +36,7 @@ class MetaAppathonsController < ApplicationController
         title: "It's a fast/efficient algorithm"
       },
       {
-        vote_scope: "#{@meta_appathon.uid}-magic",
+        vote_scope: "#{@meta_appathon.uid}-documentation",
         icon: "fa fa-fw fa-file-text-o",
         title: "Looks well-documented"
       }
