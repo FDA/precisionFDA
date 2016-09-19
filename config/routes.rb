@@ -141,7 +141,8 @@ Rails.application.routes.draw do
 
     resources :spaces do
       get 'members', on: :member
-      get 'data', on: :member
+      get 'content', on: :member
+      get 'discuss', on: :member
       post 'accept', on: :member
       post 'rename', on: :member
       post 'invite', on: :member

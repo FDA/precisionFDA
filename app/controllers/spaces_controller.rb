@@ -10,22 +10,14 @@ class SpacesController < ApplicationController
   end
 
   def show
-    @space = Space.accessible_by(@context).find(params[:id])
-    @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
-
-    @items_from_params = [@space]
-    @item_path = pathify(@space)
-    @item_comments_path = pathify_comments(@space)
-    @comments = @space.root_comments.order(id: :desc).page params[:comments_page]
+    redirect_to content_space_path(params[:id])
   end
 
-  def data
+  def content
     @space = Space.accessible_by(@context).find(params[:id])
     @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
 
     @notes = Note.real_notes.accessible_by_space(@space)
-    # @discussions = Discussion.accessible_by_space(@space)
-    # @answers = Answer.accessible_by_space(@space)
     @files = UserFile.real_files.accessible_by_space(@space)
     @comparisons = Comparison.accessible_by_space(@space)
     @apps = AppSeries.accessible_by_space(@space)
@@ -34,8 +26,6 @@ class SpacesController < ApplicationController
 
     @counts = {
       notes: @notes.count,
-      # discussions: @discussions.count,
-      # answers: @answers.count,
       files: @files.count,
       comparisons: @comparisons.count,
       apps: @apps.count,
@@ -48,10 +38,6 @@ class SpacesController < ApplicationController
     if @counts[:notes] > 0
       @notes_list = @notes.order(title: :desc).page params[:notes_page]
     end
-    # elsif params[:tab] == 'discussions' && @counts[:discussions] > 0
-    #   @discussions = @discussion.order(id: :desc).page params[:discussions_page]
-    # elsif params[:tab] == 'answers' && @counts[:answers] > 0
-    #   @answers = @answers.order(id: :desc).page params[:answers_page]
     if @counts[:files] > 0
       @files_grid = initialize_grid(@files, {
         name: 'files',
@@ -99,6 +85,16 @@ class SpacesController < ApplicationController
     end
 
     js space_uid: @space.uid
+  end
+
+  def discuss
+    @space = Space.accessible_by(@context).find(params[:id])
+    @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
+
+    @items_from_params = [@space]
+    @item_path = pathify(@space)
+    @item_comments_path = pathify_comments(@space)
+    @comments = @space.root_comments.order(id: :desc).page params[:comments_page]
   end
 
   def members

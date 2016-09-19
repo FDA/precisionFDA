@@ -238,6 +238,8 @@ class ApplicationController < ActionController::Base
       else
         pathify(item)
       end
+    when "space"
+      discuss_space_path(item)
     when "meta_appathon", "appathon", "file", "app", "job", "asset", "comparison", "answer", "space"
       pathify(item)
     else
