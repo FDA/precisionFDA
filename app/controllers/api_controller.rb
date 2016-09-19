@@ -437,12 +437,14 @@ class ApiController < ApplicationController
   # An array of hashes
   #
   def list_assets
-    # TODO: sync assets?
+    # Refresh state of assets, if needed
+    User.sync_assets!(@context)
+
     ids = params[:ids]
     if params[:editable]
-      assets = Asset.closed.editable_by(@context)
+      assets = Asset.editable_by(@context)
     else
-      assets = Asset.closed.accessible_by(@context)
+      assets = Asset.accessible_by(@context)
     end
 
     if !ids.nil?
