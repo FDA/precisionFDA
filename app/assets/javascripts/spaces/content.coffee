@@ -1,4 +1,4 @@
-class SpacesDataView
+class SpacesContentView
   constructor: (@space_uid) ->
     @objectSelector = new Precision.models.SelectorModel({
       title: "Move data to space"
@@ -77,9 +77,9 @@ class SpacesDataView
 #########################################################
 
 SpacesController = Paloma.controller('Spaces',
-  data: ->
+  content: ->
     params = @params
     $container = $("body main")
-    viewModel = new SpacesDataView(params.space_uid)
+    viewModel = new SpacesContentView(params.space_uid)
     ko.applyBindings(viewModel, $container[0])
 )
