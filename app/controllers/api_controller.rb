@@ -28,7 +28,7 @@ class ApiController < ApplicationController
       if scope != "public"
         # Check that scope is a valid scope:
         # - must be of the form space-xxxx
-        # - must exist in the Space table
+        # - must exist in the Spa`ce table
         # - must be accessible by context
         fail "Invalid scope (only 'public' or 'space-xxxx' are accepted)" unless scope =~ /^space-(\d+)$/
         space = Space.find_by(id: $1.to_i)
@@ -442,9 +442,9 @@ class ApiController < ApplicationController
 
     ids = params[:ids]
     if params[:editable]
-      assets = Asset.editable_by(@context)
+      assets = Asset.closed.editable_by(@context)
     else
-      assets = Asset.accessible_by(@context)
+      assets = Asset.closed.accessible_by(@context)
     end
 
     if !ids.nil?
