@@ -13,8 +13,6 @@
 #  created_at                  :datetime         not null
 #  updated_at                  :datetime         not null
 #  org_id                      :integer
-#  open_assets_count           :integer
-#  closing_assets_count        :integer
 #  first_name                  :string
 #  last_name                   :string
 #  email                       :string
@@ -59,7 +57,7 @@ class User < ActiveRecord::Base
   acts_as_followable
   acts_as_follower
   acts_as_tagger
-  
+
   def uid
     "user-#{id}"
   end
@@ -163,31 +161,23 @@ class User < ActiveRecord::Base
 
   def self.sync_asset!(context, file_id)
     return if context.guest?
-    user_id = context.user_id
+    user = context.user
     token = context.token
-    User.transaction do
-      user = User.find(user_id)
-      file = user.assets.find(file_id) # Re-check file id
-      if file.state != "closed"
-        result = DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: [file.dxid]})["results"][0]
-        sync_asset_state(result, file, user)
-      end
+    file = user.assets.find(file_id) # Re-check file id
+    if file.state != "closed"
+      result = DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: [file.dxid]})["results"][0]
+      sync_file_state(result, file, user)
     end
   end
 
   def self.sync_assets!(context)
     return if context.guest?
-    user_id = context.user_id
+    user = context.user
     token = context.token
-    User.transaction do
-      user = User.find(user_id)
-      if (user.open_assets_count != 0) || (user.closing_assets_count != 0)
-        # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-        user.assets.where.not(state: "closed").all.each_slice(1000) do |files|
-          DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
-            sync_asset_state(result, files[i], user)
-          end
-        end
+    # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
+    user.assets.where.not(state: "closed").all.each_slice(1000) do |files|
+      DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
+        sync_file_state(result, files[i], user)
       end
     end
   end
@@ -307,31 +297,6 @@ class User < ActiveRecord::Base
             end
           end
         end
-      end
-    else
-      # NOTE we should never be here
-      raise
-    end
-  end
-
-  def self.sync_asset_state(result, file, user)
-    if result["statusCode"] == 404
-      # File was deleted by the DNAnexus stale file daemon; delete it on our end as well
-      if file.state == "open"
-        user.open_assets_count = user.open_assets_count - 1
-      else
-        user.closing_assets_count = user.closing_assets_count - 1
-      end
-      user.save!
-      file.destroy!
-    elsif result["describe"].present?
-      state = result["describe"]["state"]
-      if state != file.state
-        # NOTE the following should never fail
-        raise unless ((state == "closed") && (file.state == "closing"))
-        file.update!(state: state, file_size: result["describe"]["size"])
-        user.closing_assets_count = user.closing_assets_count - 1
-        user.save!
       end
     else
       # NOTE we should never be here

@@ -79,8 +79,6 @@ class ProfileController < ApplicationController
           user[:org_id] = @user.org.id
           user[:schema_version] = User::CURRENT_SCHEMA
           user[:pending_comparisons_count] = 0
-          user[:open_assets_count] = 0
-          user[:closing_assets_count] = 0
           user[:first_name] = @first
           user[:last_name] = @last
           user[:email] = @email
@@ -242,8 +240,6 @@ class ProfileController < ApplicationController
           user[:org_id] = o.id
           user[:schema_version] = User::CURRENT_SCHEMA
           user[:pending_comparisons_count] = 0
-          user[:open_assets_count] = 0
-          user[:closing_assets_count] = 0
           user[:first_name] = @first_name
           user[:last_name] = @last_name
           user[:email] = @email

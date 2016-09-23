@@ -625,7 +625,7 @@ class ApiController < ApplicationController
     project = User.find(@context.user_id).private_files_project
     dxid = DNAnexusAPI.new(@context.token).("file", "new", {"name": params[:name], "project": project})["id"]
 
-    User.transaction do
+    Asset.transaction do
       asset = Asset.create!(dxid: dxid,
                             project: project,
                             name: name,
@@ -643,10 +643,6 @@ class ApiController < ApplicationController
         end
         asset.archive_entries.create!(path: path, name: name)
       end
-      # Must get a fresh user inside the transaction
-      user = User.find(@context.user_id)
-      user.open_assets_count = user.open_assets_count + 1
-      user.save!
     end
 
     render json: {id: dxid}
@@ -725,14 +721,10 @@ class ApiController < ApplicationController
     file = Asset.find_by!(dxid: id, user_id: @context.user_id)
     if file.state == "open"
       DNAnexusAPI.new(@context.token).(id, "close")
-      User.transaction do
+      UserFile.transaction do
         # Must recheck inside the transaction
         file.reload
         if file.state == "open"
-          user = User.find(@context.user_id)
-          user.open_assets_count = user.open_assets_count - 1
-          user.closing_assets_count = user.closing_assets_count + 1
-          user.save!
           file.state = "closing"
           file.save!
         end
