@@ -101,14 +101,14 @@
 
 <!-- Nav tabs -->
 <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
-  <li role="presentation" class="<% if action_name == 'show' %>active<% end %>">
-    <a href="<%= space_path(@space) %>" aria-controls="tab-comments"><span class="fa fa-fw fa-comment"></span>
-      <span class="tab-label">Discuss</span>
+  <li role="presentation" class="<% if action_name == 'content' %>active<% end %>">
+    <a href="<%= content_space_path(@space) %>" aria-controls="tab-data"><span class="fa fa-fw fa-database"></span>
+      <span class="tab-label">Content</span>
     </a>
   </li>
-  <li role="presentation" class="<% if action_name == 'data' %>active<% end %>">
-    <a href="<%= data_space_path(@space) %>" aria-controls="tab-data"><span class="fa fa-fw fa-database"></span>
-      <span class="tab-label">Data</span>
+  <li role="presentation" class="<% if action_name == 'discuss' %>active<% end %>">
+    <a href="<%= discuss_space_path(@space) %>" aria-controls="tab-comments"><span class="fa fa-fw fa-comment"></span>
+      <span class="tab-label">Comments <span class="badge"><%= @space.comment_threads.size %></span></span>
     </a>
   </li>
   <li role="presentation" class="<% if action_name == 'members' %>active<% end %>">
