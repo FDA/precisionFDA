@@ -116,32 +116,37 @@ class AppsController < ApplicationController
     cmds << "RUN pip install \\\n\t#{python_packages.join(" \\\n\t")}"
     cmds << ""
 
-    cmds << "# Create directory /work and set it to $HOME and CWD"
-    cmds << "RUN mkdir /work"
-    cmds << "ENV HOME=\"/work\""
-    cmds << "WORKDIR /work"
+    cmds << "# Add DNAnexus repo to apt-get"
+    cmds << "RUN /bin/bash -c \"echo 'deb http://dnanexus-apt-prod.s3.amazonaws.com/ubuntu trusty/amd64/' > /etc/apt/sources.list.d/dnanexus.list\""
+    cmds << "RUN /bin/bash -c \"echo 'deb http://dnanexus-apt-prod.s3.amazonaws.com/ubuntu trusty/all/' >> /etc/apt/sources.list.d/dnanexus.list\""
+    cmds << "RUN curl https://wiki.dnanexus.com/images/files/ubuntu-signing-key.gpg | apt-key add -"
     cmds << ""
+
+    # Generate Docker command for installing apt-packages
+    if app.packages.present?
+      cmds << "# Install app-specific Ubuntu packages"
+      cmds << "RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \\\n\t#{app.packages.join(" \\\n\t")}"
+    else
+      cmds << "# Update apt-get"
+      cmds << "RUN DEBIAN_FRONTEND=noninteractive apt-get update"
+    end
+    cmds << ""
+
+    # Generate download URLs and Docker commands for each asset
+    if app.assets.present?
+      cmds << "# Download app assets"
+      app.assets.sort_by { |asset| app.ordered_assets.find_index(asset.dxid) }.each do |asset|
+        url = DNAnexusAPI.new(@context.token).call(asset.dxid, "download", {filename: asset.name, project: asset.project, preauthenticated: true})["url"]
+        tar_opts = asset.is_gzipped? ? 'xzf -' : 'xf -'
+        cmds << "RUN curl #{url} | tar #{tar_opts} -C / --no-same-owner --no-same-permissions"
+      end
+      cmds << ""
+    end
 
     cmds << "# Download pfda executables"
     cmds << "RUN curl https://dl.dnanex.us/F/D/p59772Gz0B3V9F456z26bFxk8GqqXJfF7YQ8Ypk4/emit-1.0.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
     cmds << "RUN curl https://dl.dnanex.us/F/D/J6yqF2Jy1yY377kFpkqBz8kb78k6yxVy376xxj9B/pfda-1.0.6.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
     cmds << "RUN curl https://dl.dnanex.us/F/D/1k4KQYVYP3gf6Vg1p5zp625X57yBVpFKjJY9629Q/run-1.0.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
-    cmds << ""
-
-    # Generate download URLs and Docker commands for each asset
-    cmds << "# Download app assets"
-    app.assets.sort_by { |asset| app.ordered_assets.find_index(asset.dxid) }.each do |asset|
-      url = DNAnexusAPI.new(@context.token).call(asset.dxid, "download", {filename: asset.name, project: asset.project, preauthenticated: true})["url"]
-      tar_opts = asset.is_gzipped? ? 'xzf -' : 'xf -'
-      cmds << "RUN curl #{url} | tar #{tar_opts} -C / --no-same-owner --no-same-permissions"
-    end
-    cmds << ""
-
-    # Generate Docker command for installing apt-packages
-    cmds << "# Install app-specific Ubuntu packages"
-    if app.packages.present?
-      cmds << "RUN apt-get install --yes #{app.packages.join(" ")}"
-    end
     cmds << ""
 
     # Generate new token for pfda uploader
@@ -153,6 +158,12 @@ class AppsController < ApplicationController
     cmds << "# Download app spec and code"
     cmds << "RUN pfda --auth #{key} download-app-spec --app-id=#{app.dxid} --output-file=\"/spec.json\""
     cmds << "RUN pfda --auth #{key} download-app-script --app-id=#{app.dxid} --output-file=\"/script.sh\""
+    cmds << ""
+
+    cmds << "# Create directory /work and set it to $HOME and CWD"
+    cmds << "RUN mkdir -p /work"
+    cmds << "ENV HOME=\"/work\""
+    cmds << "WORKDIR /work"
     cmds << ""
 
     # Add entry point to container

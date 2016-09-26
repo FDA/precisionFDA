@@ -127,14 +127,6 @@ class AssetsController < ApplicationController
         flash[:error] = "This asset contains a license, and has been included in one or more apps. Deleting it would render the license inaccessible to these apps, breaking reproducibility. You can either first remove the license (allowing these existing apps to run without requiring a license) or contact the precisionFDA team to discuss other options."
         redirect_to asset_path(@file.dxid)
         return
-      elsif @file.state == "open"
-        user = User.find(@context.user_id)
-        user.open_assets_count = user.open_assets_count - 1
-        user.save!
-      elsif @file.state == "closing"
-        user = User.find(@context.user_id)
-        user.closing_assets_count = user.closing_assets_count - 1
-        user.save!
       end
       @file.destroy
     end

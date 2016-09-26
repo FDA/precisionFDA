@@ -13,8 +13,6 @@
 #  created_at                  :datetime         not null
 #  updated_at                  :datetime         not null
 #  org_id                      :integer
-#  open_assets_count           :integer
-#  closing_assets_count        :integer
 #  first_name                  :string
 #  last_name                   :string
 #  email                       :string
