@@ -8,7 +8,6 @@
 #  public_files_project        :string
 #  private_comparisons_project :string
 #  public_comparisons_project  :string
-#  pending_comparisons_count   :integer          default(0)
 #  schema_version              :integer
 #  created_at                  :datetime         not null
 #  updated_at                  :datetime         not null
@@ -30,7 +29,6 @@ one:
   public_files_project: MyString
   private_comparisons_project: MyString
   public_comparisons_project: MyString
-  pending_comparisons_count: 1
 
 two:
   id: UserTwo
@@ -39,4 +37,3 @@ two:
   public_files_project: MyString
   private_comparisons_project: MyString
   public_comparisons_project: MyString
-  pending_comparisons_count: 1
