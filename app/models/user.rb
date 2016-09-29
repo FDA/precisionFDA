@@ -204,7 +204,7 @@ class User < ActiveRecord::Base
     user = context.user
     token = context.token
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-    Comparison.where(user_id: user_id).where(state: "pending").all.each_slice(1000) do |comparisons|
+    Comparison.where(user_id: user.id).where(state: "pending").all.each_slice(1000) do |comparisons|
       comparisons_hash = comparisons.map { |c| [c.dxjobid, c] }.to_h
       DNAnexusAPI.new(token).call("system", "findJobs", {
         includeSubjobs: false,
@@ -298,7 +298,7 @@ class User < ActiveRecord::Base
   def self.sync_comparison_state(result, comparison, user, token)
     state = result["describe"]["state"]
     return unless ((state == "done") || (state == "failed"))
-    # Only do anything if local comparison state is stale
+    # NOTE: comparison and jobs have different states and the following works only for "done" and "failed"
     return if state == comparison.state
     if state == "done"
       temp_meta = result["describe"]["output"]["meta"]
@@ -312,21 +312,19 @@ class User < ActiveRecord::Base
         output_keys << key
         output_ids << result["describe"]["output"][key]["$dnanexus_link"]
       end
-      output_file_ids.each_slice(1000) do |slice_of_file_ids|
-        DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: slice_of_file_ids})["results"].each_with_index do |api_result, i|
-          raise unless api_result["describe"].present? && api_result["describe"]["state"] == "closed"
-          output_file_cache.push({
-            dxid: slice_of_file_ids[i],
-            project: user.private_comparisons_project,
-            name: api_result["describe"]["name"],
-            state: 'closed',
-            description: output_keys[i],
-            user_id: user.id,
-            scope: 'private',
-            file_size: api_result["describe"]["size"],
-            parent: comparison
-          })
-        end
+      DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: output_ids})["results"].each_with_index do |api_result, i|
+        raise unless api_result["describe"].present? && api_result["describe"]["state"] == "closed"
+        output_file_cache.push({
+          dxid: output_ids[i],
+          project: user.private_comparisons_project,
+          name: api_result["describe"]["name"],
+          state: 'closed',
+          description: output_keys[i],
+          user_id: user.id,
+          scope: 'private',
+          file_size: api_result["describe"]["size"],
+          parent: comparison
+        })
       end
 
       Comparison.transaction do
@@ -335,11 +333,13 @@ class User < ActiveRecord::Base
           output_file_cache.each do |output_file|
             UserFile.create!(output_file)
           end
+          comparison.meta = temp_meta
+          comparison.state = state
           comparison.save!
         end
       end
     else
-      # Comparison state changed but not done or failed
+      # Comparison state failed
       Comparison.transaction do
         comparison.reload
         if state != comparison.state
