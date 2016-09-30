@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160922232839) do
+ActiveRecord::Schema.define(version: 20160928191202) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id"
@@ -477,10 +477,9 @@ ActiveRecord::Schema.define(version: 20160922232839) do
     t.string   "public_files_project"
     t.string   "private_comparisons_project"
     t.string   "public_comparisons_project"
-    t.integer  "pending_comparisons_count",   default: 0
     t.integer  "schema_version"
-    t.datetime "created_at",                              null: false
-    t.datetime "updated_at",                              null: false
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
     t.integer  "org_id"
     t.string   "first_name"
     t.string   "last_name"
