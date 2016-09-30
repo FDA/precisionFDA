@@ -185,7 +185,7 @@ class User < ActiveRecord::Base
     return if context.guest?
     user = context.user
     token = context.token
-    comparison = user.comparisons.find(comparison_id) # Re-check comparison id
+    comparison = user.comparisons.find(comparison_id)
     if comparison.state == "pending"
       result = DNAnexusAPI.new(token).call("system", "findJobs", {
         includeSubjobs: false,
@@ -298,7 +298,7 @@ class User < ActiveRecord::Base
   def self.sync_comparison_state(result, comparison, user, token)
     state = result["describe"]["state"]
     return unless ((state == "done") || (state == "failed"))
-    # NOTE: comparison and jobs have different states and the following works only for "done" and "failed"
+    # NOTE: comparison and job state are only comparable here because state is either "done" or "failed"
     return if state == comparison.state
     if state == "done"
       temp_meta = result["describe"]["output"]["meta"]
@@ -343,7 +343,6 @@ class User < ActiveRecord::Base
       Comparison.transaction do
         comparison.reload
         if state != comparison.state
-          comparison.meta = temp_meta
           comparison.state = state
           comparison.save!
         end
