@@ -146,7 +146,7 @@ class AppsController < ApplicationController
     cmds << "# Download pfda executables"
     cmds << "RUN curl https://dl.dnanex.us/F/D/p59772Gz0B3V9F456z26bFxk8GqqXJfF7YQ8Ypk4/emit-1.0.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
     cmds << "RUN curl https://dl.dnanex.us/F/D/J6yqF2Jy1yY377kFpkqBz8kb78k6yxVy376xxj9B/pfda-1.0.6.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
-    cmds << "RUN curl https://dl.dnanex.us/F/D/1k4KQYVYP3gf6Vg1p5zp625X57yBVpFKjJY9629Q/run-1.0.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
+    cmds << "RUN curl https://dl.dnanex.us/F/D/0kKgz424jbV1v5bvGK5738V9g5y72bJK3BGfQ3VJ/run-1.1.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
     cmds << ""
 
     # Generate new token for pfda uploader

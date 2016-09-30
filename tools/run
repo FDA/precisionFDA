@@ -58,6 +58,8 @@ for item in inputs:
     if input_val == None:
         setattr(args, item['name'], "")
         continue
+    else:
+        input_val = str(input_val)
 
     # strings are string
     if item['class'] == 'string':
@@ -65,7 +67,7 @@ for item in inputs:
     elif item['class'] == 'file':
         if not os.path.isfile(input_val):
             exit('input file argument "{}" does not exist!'.format(input_val))
-    elif item['class'] == 'integer':
+    elif item['class'] == 'int':
         try:
             int(input_val)
         except ValueError:
@@ -93,12 +95,12 @@ for item in inputs:
 
     if item['class'] == 'file':
         # Set environmental variables
-        os.environ[item['name'] + '_name'] = input_val
+        os.environ[item['name'] + '_name'] = os.path.basename(input_val)
         os.environ[item['name'] + '_path'] = os.path.abspath(input_val)
         # "." and "" cases covered by input checks
         # NOTE: os.path.splittext(".foo") returns ['.foo', '']
         [head, tail] = os.path.splitext(os.path.basename(input_val))
-        if tail == 'gz':
+        if tail == '.gz':
             head = os.path.splitext(head)[0]
         os.environ[item['name'] + '_prefix'] = head
 

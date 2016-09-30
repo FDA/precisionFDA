@@ -96,7 +96,6 @@ namespace :provision do
     User.transaction do
       user[:org_id] = o.id
       user[:schema_version] = User::CURRENT_SCHEMA
-      user[:pending_comparisons_count] = 0
       u = User.create!(user)
       o.admin_id = u.id
       o.save!

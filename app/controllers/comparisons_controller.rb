@@ -167,14 +167,11 @@ class ComparisonsController < ApplicationController
       meta: {}
     }
 
-    User.transaction do
+    Comparison.transaction do
       comparison = Comparison.create!(opts)
       files.each_key do |role|
         comparison.inputs.create!(user_file_id: files[role].id, role: role)
       end
-      user = User.find(@context.user_id)
-      user.pending_comparisons_count = user.pending_comparisons_count + 1
-      user.save!
     end
 
     redirect_to :comparisons
