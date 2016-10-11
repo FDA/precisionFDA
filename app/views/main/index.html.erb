@@ -79,15 +79,6 @@
                   Upload files to your private space to use as inputs for apps or comparisons
                 </div>
               </li>
-              <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@files_count) %>">
-                <div class="pfda-card-title">
-                  <a href="<%= new_file_path %>">Upload <%= 'first' if !tutorial_complete?(@files_count) %> file</a>
-                  <a class="link-muted pull-right" href="<%= show_docs_path('files') %>">Learn more</a>
-                </div>
-                <div class="pfda-card-body">
-                  Upload files to your private space to use as inputs for apps or comparisons
-                </div>
-              </li>
 
               <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@assets_count) %>">
                 <div class="pfda-card-title">
