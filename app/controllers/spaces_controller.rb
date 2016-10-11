@@ -1,6 +1,10 @@
 class SpacesController < ApplicationController
   def index
-    spaces = Space.accessible_by(@context)
+    if @context.user.can_administer_site?
+      spaces = Space.all
+    else
+      spaces = Space.accessible_by(@context)
+    end
     @spaces_grid = initialize_grid(spaces, {
       name: 'spaces',
       order: 'spaces.id',
@@ -137,7 +141,13 @@ class SpacesController < ApplicationController
       if @space
         NotificationsMailer.space_activation_email(@space, @space.host_lead_member).deliver_now!
         NotificationsMailer.space_activation_email(@space, @space.guest_lead_member).deliver_now!
-        redirect_to @space
+        if @space.accessible_by?(@context)
+          flash[:success] = "The space was created successfully, and will be activated once both admin's accept it."
+          redirect_to @space
+        else
+          flash[:success] = "The space was created successfully, but is not currently accessible by you."
+          redirect_to spaces_path
+        end
         return
       else
         flash[:error] = "The space could not be provisioned for an unknown reason."

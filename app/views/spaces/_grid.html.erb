@@ -18,7 +18,11 @@
   end
 
   g.column name: 'Name', attribute: 'name', auto_reload: true, allow_multiple_selection: false do |space|
-    link_to(space.name, space_path(space))
+    if space.accessible_by?(@context)
+      link_to(space.name, space_path(space))
+    else
+      space.name
+    end
   end
 
   g.column name: 'Host Lead' do |space|
