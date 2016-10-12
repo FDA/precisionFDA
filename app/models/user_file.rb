@@ -58,6 +58,8 @@ class UserFile < ActiveRecord::Base
   has_many :accepted_licenses, {through: :license}
 
   acts_as_commentable
+  acts_as_taggable
+  acts_as_votable
 
   def self.model_name
     ActiveModel::Name.new(self, nil, "File")

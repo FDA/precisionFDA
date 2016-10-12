@@ -107,6 +107,13 @@
               <!-- ko if: loaded -->
               <li data-bind="text: userName"></li>
               <li data-bind="text: orgName"></li>
+                <!-- ko if: _.size(all_tags_list()) -->
+                  <li>
+                    <ul class="pfda-tags list list-inline" data-bind="foreach: all_tags_list">
+                      <li class="pfda-tag" data-bind="text: $data"></li>
+                    </ul>
+                  </li>
+                <!-- /ko -->
               <!-- /ko -->
             </ul>
           </div>

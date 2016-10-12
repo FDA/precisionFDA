@@ -14,19 +14,18 @@
         <input type="hidden" name="taggable_uid" value="<%= item.uid %>" />
         <div class="form-group">
           <label class="control-label">Tags (comma-separated)</label>
-          <input type="text" name="tags" class= "form-control input-lg", placeholder="e.g. foo, bar..." value="<%= tags_list %>" />
+          <input type="text" name="tags" class= "form-control input-lg", placeholder="e.g. foo, bar..." value="<%= (tags_list - (suggested_tags || [])).join(', ') %>" />
         </div>
+
         <% if !suggested_tags.nil? && suggested_tags.size > 0 %>
         <div class="form-group">
           <label class="control-label">Suggested tags</label>
           <% suggested_tags.each do |suggested_tag| %>
-            <% if !tags_list.include?(suggested_tag) %>
-              <div class="checkbox">
-                <label>
-                  <input type="checkbox" name="suggested_tags[]" value="<%= suggested_tag %>"> <%= suggested_tag %>
-                </label>
-              </div>
-            <% end %>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" name="suggested_tags[]" value="<%= suggested_tag %>" <%= tags_list.include?(suggested_tag) ? 'checked': '' %>> <%= suggested_tag %>
+              </label>
+            </div>
           <% end %>
         </div>
         <% end %>

@@ -41,11 +41,12 @@ class AppsController < ApplicationController
     else
       jobs = Job.editable_by(@context)
     end
-    @jobs_grid = initialize_grid(jobs, {
+    @jobs_grid = initialize_grid(jobs.includes(:taggings), {
       name: 'jobs',
       order: 'jobs.id',
       order_direction: 'desc',
-      per_page: 100
+      per_page: 100,
+      include: [{taggings: :tag}]
     })
     js js_param
   end
@@ -180,24 +181,24 @@ class AppsController < ApplicationController
   def featured
     org = Org.featured
     if org
-      @apps_grid = initialize_grid(AppSeries.accessible_by_public.joins(:user).where(:users => { :org_id => org.id }), {
+      @apps_grid = initialize_grid(AppSeries.accessible_by_public.include(:user, :taggings).where(:users => { :org_id => org.id }), {
         name: 'apps',
         order: 'apps.created_at',
         order_direction: 'desc',
         per_page: 100,
-        include: [{user: :org}, :latest_version_app]
+        include: [{user: :org}, :latest_version_app, {taggings: :tag}]
       })
     end
     render :list
   end
 
   def explore
-    @apps_grid = initialize_grid(AppSeries.accessible_by_public.joins(:latest_version_app), {
+    @apps_grid = initialize_grid(AppSeries.accessible_by_public.includes( :latest_version_app, :taggings), {
       name: 'apps',
       order: 'apps.created_at',
       order_direction: 'desc',
       per_page: 100,
-      include: [{user: :org}, :latest_version_app]
+      include: [{user: :org}, :latest_version_app, {taggings: :tag}]
     })
     render :list
   end

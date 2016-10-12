@@ -373,6 +373,13 @@ class ApplicationController < ActionController::Base
           }
         end
       end
+      if opts[:include][:all_tags_list]
+        if object.klass == 'app'
+          describe[:all_tags_list] = object.app_series.all_tags_list
+        elsif ALLOWED_CLASSES_FOR_TAGGING.include?(object.klass)
+          describe[:all_tags_list] = object.all_tags_list
+        end
+      end
       if opts[:include][:user]
         describe[:user] = object.user.slice(:dxuser, :full_name)
       end

@@ -67,4 +67,8 @@
       end
     end
   end
+
+  g.column name: 'Tags', attribute: 'name', assoc: [:taggings, :tag] do |item|
+    render "_partials/tags_list", tags_list: item.all_tags_list
+  end
 end -%>
