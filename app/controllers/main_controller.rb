@@ -1,5 +1,5 @@
 class MainController < ApplicationController
-  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines, :browse_access, :destroy]}
+  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines, :browse_access, :destroy, :presskit]}
 
   skip_before_action :require_login,     only: [:track]
   before_action :require_login_or_guest, only: [:track]
@@ -161,6 +161,41 @@ class MainController < ApplicationController
   end
 
   def guidelines
+  end
+
+  def presskit
+    @images = [
+      {
+        title: "precisionFDA - white",
+        path: "presskit/precisionFDA.white.png",
+        css: "pfda-card-dark",
+        height: "100px"
+      },
+      {
+        title: "precisionFDA - dark",
+        path: "presskit/precisionFDA.dark.png",
+        height: "100px"
+      },
+      {
+        title: "precisionFDA - favicon - blue",
+        path: "presskit/pfda.favicon.blue.688x688.png",
+        height: "100px"
+      },
+      {
+        title: "precisionFDA - favicon - white",
+        path: "presskit/pfda.favicon.white.688x688.png",
+        height: "100px"
+      },
+      {
+        title: "Logomark - blue",
+        path: "presskit/pfda.logomark.png",
+        height: "100px"
+      },
+      {
+        title: "FDA",
+        path: "logo-fda-2016.png"
+      },
+    ]
   end
 
   def exception_test

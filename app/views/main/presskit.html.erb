@@ -1,0 +1,22 @@
+<% content_for :title do %>Presskit<% end %>
+
+<div class="page-header">
+  <div class="page-title text-center">
+    Press Kit
+  </div>
+</div>
+
+<div class="container container-padded">
+  <ul class="pfda-cards pfda-cards-list pfda-cards-stretch">
+    <% @images.each do |image| %>
+      <li class="pfda-card pfda-card-rounded pfda-card-padded <%= image[:css] %>">
+        <div class="pfda-card-title">
+          <%= image[:title] %>
+        </div>
+        <div class="pfda-card-body">
+          <%= link_to image_tag(image[:path], height: image[:height], width: image[:width]), "/assets/#{image[:path]}" %>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+</div>
