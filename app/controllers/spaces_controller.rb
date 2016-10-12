@@ -43,48 +43,48 @@ class SpacesController < ApplicationController
       @notes_list = @notes.order(title: :desc).page params[:notes_page]
     end
     if @counts[:files] > 0
-      @files_grid = initialize_grid(@files, {
+      @files_grid = initialize_grid(@files.includes(:taggings), {
         name: 'files',
         order: 'user_files.name',
         order_direction: 'desc',
         per_page: 25,
-        include: [:user, {user: :org}]
+        include: [:user, {user: :org}, {taggings: :tag}]
       })
     end
     if @counts[:comparisons] > 0
-      @comparisons_grid = initialize_grid(@comparisons, {
+      @comparisons_grid = initialize_grid(@comparisons.includes(:taggings), {
         name: 'comparisons',
         order: 'comparisons.name',
         order_direction: 'desc',
         per_page: 25,
-        include: [:user, {user: :org}]
+        include: [:user, {user: :org}, {taggings: :tag}]
       })
     end
     if @counts[:apps] > 0
-      @apps_grid = initialize_grid(@apps.joins(:latest_version_app), {
+      @apps_grid = initialize_grid(@apps.includes(:latest_version_app, :taggings), {
         name: 'apps',
         order: 'apps.title',
         order_direction: 'desc',
         per_page: 25,
-        include: [{user: :org}, :latest_version_app]
+        include: [{user: :org}, :latest_version_app, {taggings: :tag}]
       })
     end
     if @counts[:assets] > 0
-      @assets_grid = initialize_grid(Asset.unscoped.accessible_by_space(@space), {
+      @assets_grid = initialize_grid(Asset.unscoped.accessible_by_space(@space).includes(:taggings), {
         name: 'assets',
         order: 'user_files.name',
         order_direction: 'asc',
         per_page: 25,
-        include: [:user, {user: :org}]
+        include: [:user, {user: :org}, {taggings: :tag}]
       })
     end
     if @counts[:jobs] > 0
-      @jobs_grid = initialize_grid(@jobs, {
+      @jobs_grid = initialize_grid(@jobs.includes(:taggings), {
         name: 'jobs',
         order: 'jobs.created_at',
         order_direction: 'desc',
         per_page: 25,
-        include: [{user: :org}]
+        include: [{user: :org}, {taggings: :tag}]
       })
     end
 

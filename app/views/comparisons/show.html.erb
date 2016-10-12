@@ -50,8 +50,9 @@
       <p class="list-group-item-text"><%= @comparison.created_at.to_s(:db) %></p>
     </li>
   </ul>
-
 </div>
+
+<%= render "_partials/tags_metadata", item: @comparison, item_name: @comparison.name, tags_list: @comparison.all_tags_list, is_editable: @comparison.editable_by?(@context) %>
 
 <div class="pfda-toolbar">
   <div class="btn-group">

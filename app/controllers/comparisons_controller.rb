@@ -10,39 +10,39 @@ class ComparisonsController < ApplicationController
 
     User.sync_comparisons!(@context)
 
-    comparisons = Comparison.editable_by(@context)
+    comparisons = Comparison.editable_by(@context).includes(:taggings)
     @comparisons_grid = initialize_grid(comparisons, {
       name: 'comparisons',
       order: 'comparisons.id',
       order_direction: 'desc',
       per_page: 100,
-      include: [:user, {user: :org}]
+      include: [:user, {user: :org}, {taggings: :tag}]
     })
   end
 
   def featured
     org = Org.featured
     if org
-      comparisons = Comparison.accessible_by(@context).joins(:user).where(:users => { :org_id => org.id })
+      comparisons = Comparison.accessible_by(@context).includes(:user, :taggings).where(:users => { :org_id => org.id })
       @comparisons_grid = initialize_grid(comparisons, {
         name: 'comparisons',
         order: 'comparisons.id',
         order_direction: 'desc',
         per_page: 100,
-        include: [:user, {user: :org}]
+        include: [:user, {user: :org}, {taggings: :tag}]
       })
     end
     render :index
   end
 
   def explore
-    comparisons = Comparison.accessible_by_public
+    comparisons = Comparison.accessible_by_public.includes(:taggings)
     @comparisons_grid = initialize_grid(comparisons, {
       name: 'comparisons',
       order: 'comparisons.id',
       order_direction: 'desc',
       per_page: 100,
-      include: [:user, {user: :org}]
+      include: [:user, {user: :org}, {taggings: :tag}]
     })
     render :index
   end

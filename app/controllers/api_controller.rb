@@ -122,6 +122,7 @@ class ApiController < ApplicationController
   #             license (boolean, optional)
   #             user (boolean, optional)
   #             org (boolean, optional)
+  #             all_tags_list (boolean, optional)
   #
   def list_related
     uid = params[:uid]
@@ -220,6 +221,7 @@ class ApiController < ApplicationController
   #         license (boolean, optional)
   #         user (boolean, optional)
   #         org (boolean, optional)
+  #         all_tags_list (boolean, optional)
   #
   # Outputs:
   #
@@ -269,6 +271,7 @@ class ApiController < ApplicationController
   #         license (boolean, optional)
   #         user (boolean, optional)
   #         org (boolean, optional)
+  #         all_tags_list (boolean, optional)
   #
   # Outputs:
   #
@@ -318,6 +321,7 @@ class ApiController < ApplicationController
   #         license (boolean, optional)
   #         user (boolean, optional)
   #         org (boolean, optional)
+  #         all_tags_list (boolean, optional)
   #
   # Outputs:
   #
@@ -356,6 +360,7 @@ class ApiController < ApplicationController
   #         license (boolean, optional)
   #         user (boolean, optional)
   #         org (boolean, optional)
+  #         all_tags_list (boolean, optional)
   #
   # Outputs:
   #
@@ -394,6 +399,7 @@ class ApiController < ApplicationController
   #         license (boolean, optional)
   #         user (boolean, optional)
   #         org (boolean, optional)
+  #         all_tags_list (boolean, optional)
   #
   # Outputs:
   #
@@ -431,6 +437,7 @@ class ApiController < ApplicationController
   #         license (boolean, optional)
   #         user (boolean, optional)
   #         org (boolean, optional)
+  #         all_tags_list (boolean, optional)
   #
   # Outputs:
   #
@@ -482,6 +489,7 @@ class ApiController < ApplicationController
   #         license (boolean, optional)
   #         user (boolean, optional)
   #         org (boolean, optional)
+  #         all_tags_list (boolean, optional)
   #
   # Outputs:
   #
@@ -1243,7 +1251,7 @@ class ApiController < ApplicationController
     vote_scope = params[:vote_scope]
 
     item = item_from_uid(uid)
-    if item.accessible_by?(@context) && ["app-series", "discussion", "answer"].include?(item.klass)
+    if item.accessible_by?(@context) && ["app-series", "discussion", "answer", "note", "comparison", "job", "file", "asset"].include?(item.klass)
       if vote_scope.present?
         # Special treatment for appathon vote_scope
         if vote_scope =~ /^(appathon)-(\d+)$/
@@ -1281,7 +1289,7 @@ class ApiController < ApplicationController
     vote_scope = params[:vote_scope]
 
     item = item_from_uid(uid)
-    if item.accessible_by?(@context) && ["app-series", "discussion", "answer"].include?(item.klass)
+    if item.accessible_by?(@context) && ["app-series", "discussion", "answer", "note", "comparison", "job", "file", "asset"].include?(item.klass)
       if vote_scope.present?
         # Special treatment for appathon vote_scope
         if vote_scope =~ /^(appathon)-(\d+)$/

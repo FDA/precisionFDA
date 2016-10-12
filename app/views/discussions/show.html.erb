@@ -31,6 +31,8 @@
   </div>
 </div>
 
+<%= render "_partials/tags_metadata", item: @discussion, item_name: @discussion.title, tags_list: @discussion.all_tags_list, is_editable: @discussion.editable_by?(@context) %>
+
 <div class="pfda-toolbar clearfix">
   <div class="btn-toolbar pull-left">
     <% if @discussion.public? %>

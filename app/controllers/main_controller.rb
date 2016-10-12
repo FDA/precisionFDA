@@ -448,6 +448,7 @@ class MainController < ApplicationController
   # taggable_uid (string, required): the uid of the item to tag
   # tags (string, required): comma-separated string containing tags to update to,
   #                this will replace existing tags
+  # suggested_tags (array[strings], optional): array of tags
   # tag_context (string, optional): indicates the tag context to use
   def set_tags
     taggable_uid = params["taggable_uid"]
@@ -456,7 +457,7 @@ class MainController < ApplicationController
     tags = params["tags"]
     fail "Tags need to be comma-separated strings" unless tags.is_a?(String)
 
-    suggested_tags = params["suggested_tags"]
+    suggested_tags = params["suggested_tags"] # Optional
     if suggested_tags.is_a?(Array)
       tags = (tags.split(',') + suggested_tags).join(',')
     end
