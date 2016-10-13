@@ -73,7 +73,7 @@ class AppsController < ApplicationController
   def featured
     org = Org.featured
     if org
-      @apps_grid = initialize_grid(AppSeries.accessible_by_public.include(:user, :taggings).where(:users => { :org_id => org.id }), {
+      @apps_grid = initialize_grid(AppSeries.accessible_by_public.includes(:user, :taggings).where(:users => { :org_id => org.id }), {
         name: 'apps',
         order: 'apps.created_at',
         order_direction: 'desc',
