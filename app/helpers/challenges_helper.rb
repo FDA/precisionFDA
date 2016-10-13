@@ -7,12 +7,15 @@ module ChallengesHelper
     sprintf("%.2f%%", n*100.0)
   end
 
-  def medal_badge(medal, qualifier = '', type = '')
+  def medal_badge(medal, qualifier = '', type = '', context = '')
     if medal.instance_of? String
       if type == 'large'
         raw """
             <div class='challenge-badge-qualifier'>#{qualifier}</div>
             <div class='challenge-badge-medal-name'>#{medal}</div>
+            <div class='challenge-badge-context'>
+              #{context}
+            </div>
             <div class='text-center'>
               <span class='fa-stack fa-3x' aria-hidden='true'>
                 <i class='fa fa-certificate fa-stack-2x'></i>
