@@ -42,6 +42,7 @@ Rails.application.routes.draw do
     post '/api/run_app', to: 'api#run_app'
     post '/api/get_app_spec', to: 'api#get_app_spec'
     post '/api/get_app_script', to: 'api#get_app_script'
+    post '/api/export_app', to: 'api#export_app'
     post '/api/search_assets', to: 'api#search_assets'
     post '/api/create_asset', to: 'api#create_asset'
     post '/api/close_asset', to: 'api#close_asset'

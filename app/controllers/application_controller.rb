@@ -79,6 +79,13 @@ class ApplicationController < ActionController::Base
     @context = Context.new(session[:user_id], session[:username], session[:token], session[:expiration], session[:org_id])
   end
 
+  def generate_auth_key(duration = 1.day)
+    # Generate new token for pfda uploader
+    context = @context.as_json.slice("user_id", "username", "token", "expiration", "org_id")
+    context["expiration"] = [context["expiration"], Time.now.to_i + duration].min
+    return rails_encryptor.encrypt_and_sign({context: context}.to_json)
+  end
+
   def save_session(user_id, username, token, expiration, org_id)
     reset_session
     session[:user_id] = user_id
