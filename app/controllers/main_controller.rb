@@ -473,9 +473,7 @@ class MainController < ApplicationController
   end
 
   def tokify
-    context = @context.as_json.slice("user_id", "username", "token", "expiration", "org_id")
-    context["expiration"] = [context["expiration"], Time.now.to_i + 1.day].min
-    @key = rails_encryptor.encrypt_and_sign({context: context}.to_json)
+    @key = generate_auth_key
   end
 
   # Inputs

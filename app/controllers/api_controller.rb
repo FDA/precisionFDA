@@ -903,13 +903,25 @@ class ApiController < ApplicationController
   #
   # Outputs
   #
-  # json (string, only on success): code for the specified app
+  # plain text (string, only on success): code for the specified app
   def get_app_script
     # App should exist and be accessible
     app = App.accessible_by(@context).find_by(dxid: params[:id])
     fail "Invalid app id" if app.nil?
 
     render plain: app.code
+  end
+
+  def export_app
+    # App should exist and be accessible
+    app = App.accessible_by(@context).find_by(dxid: params[:id])
+    fail "Invalid app id" if app.nil?
+
+    # Assets should be accessible and licenses accepted
+    fail "One or more assets are not accessible by the current user." if app.assets.accessible_by(@context).count != app.assets.count
+    fail "One or more assets need to be licensed. Please run the app first in order to accept the licenses." if app.assets.any? { |a| a.license.present? && !a.licensed_by?(@context) }
+
+    render json: {content: app.to_docker(@context.token)}
   end
 
   # Inputs
