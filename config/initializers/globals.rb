@@ -54,6 +54,7 @@ TRUTH_CHALLENGE_END_DATE = DateTime.new(2016,5,26).in_time_zone.end_of_day + 4.h
 TRUTH_CHALLENGE_RESULTS_DATE = DateTime.new(2016,6,29,6,30).in_time_zone + 7.hours
 
 ALLOWED_CLASSES_FOR_LICENSE = ["file", "asset"]
+ALLOWED_CLASSES_FOR_TAGGING = ["app-series", "answer", "asset", "comparison", "file", "discussion", "job", "note"]
 
 # Remove X-Runtime
 Rails.application.config.middleware.delete(Rack::Runtime)

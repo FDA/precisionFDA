@@ -25,6 +25,11 @@
           <% if note.assets.count > 0 %>
             <li title="Assets"><span class="pfda-card-metadata-value"><%= note.assets.count %></span> <span class="fa fa-file-zip-o" aria-hidden="true"></span></li>
           <% end %>
+          <% if note.all_tags_list.count > 0 %>
+            <li title="Tags">
+              <%= render "_partials/tags_list", tags_list: note.all_tags_list %>
+            </li>
+          <% end %>
         </ul>
       </a>
     <% end %>

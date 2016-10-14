@@ -36,6 +36,8 @@ class Job < ActiveRecord::Base
   store :provenance, {coder: JSON}
 
   acts_as_commentable
+  acts_as_taggable
+  acts_as_votable
 
   INSTANCE_TYPES = {
     "baseline-2" => "mem1_ssd1_x2",
@@ -131,7 +133,7 @@ class Job < ActiveRecord::Base
 
   def publishable_by?(context, scope_to_publish_to = "public")
     core_publishable_by?(context, scope_to_publish_to) && terminal?
-  end 
+  end
 
   def self.publish(jobs, context, scope)
     count = 0

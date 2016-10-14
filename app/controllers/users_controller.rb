@@ -37,28 +37,28 @@ class UsersController < ApplicationController
     elsif params[:tab] == 'answers' && @counts[:answers] > 0
       @answers = @user.notes.accessible_by_public.answers.order(id: :desc).page params[:answers_page]
     elsif params[:tab] == 'files' && @counts[:files] > 0
-      @files_grid = initialize_grid(@user.real_files.accessible_by_public, {
+      @files_grid = initialize_grid(@user.real_files.accessible_by_public.includes(:taggings), {
         name: 'files',
         order: 'user_files.created_at',
         order_direction: 'desc',
         per_page: 25,
-        include: [:user, {user: :org}]
+        include: [:user, {user: :org}, {taggings: :tag}]
       })
     elsif params[:tab] == 'comparisons' && @counts[:comparisons] > 0
-      @comparisons_grid = initialize_grid(@user.comparisons.accessible_by_public, {
+      @comparisons_grid = initialize_grid(@user.comparisons.accessible_by_public.includes(:taggings), {
         name: 'comparisons',
         order: 'comparisons.id',
         order_direction: 'desc',
         per_page: 25,
-        include: [:user, {user: :org}]
+        include: [:user, {user: :org}, {taggings: :tag}]
       })
     elsif params[:tab] == 'apps' && @counts[:apps] > 0
-      @apps_grid = initialize_grid(@user.app_series.accessible_by_public.joins(:latest_version_app), {
+      @apps_grid = initialize_grid(@user.app_series.accessible_by_public.includes(:latest_version_app, :tags), {
         name: 'apps',
         order: 'apps.created_at',
         order_direction: 'desc',
         per_page: 25,
-        include: [{user: :org}, :latest_version_app]
+        include: [{user: :org}, :latest_version_app, {taggings: :tag}]
       })
     end
   end

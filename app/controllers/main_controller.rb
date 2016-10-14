@@ -1,5 +1,5 @@
 class MainController < ApplicationController
-  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines, :browse_access, :destroy]}
+  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines, :browse_access, :destroy, :presskit]}
 
   skip_before_action :require_login,     only: [:track]
   before_action :require_login_or_guest, only: [:track]
@@ -161,6 +161,41 @@ class MainController < ApplicationController
   end
 
   def guidelines
+  end
+
+  def presskit
+    @images = [
+      {
+        title: "precisionFDA - white",
+        path: "presskit/precisionFDA.white.png",
+        css: "pfda-card-dark",
+        height: "100px"
+      },
+      {
+        title: "precisionFDA - dark",
+        path: "presskit/precisionFDA.dark.png",
+        height: "100px"
+      },
+      {
+        title: "precisionFDA - favicon - blue",
+        path: "presskit/pfda.favicon.blue.688x688.png",
+        height: "100px"
+      },
+      {
+        title: "precisionFDA - favicon - white",
+        path: "presskit/pfda.favicon.white.688x688.png",
+        height: "100px"
+      },
+      {
+        title: "Logomark - blue",
+        path: "presskit/pfda.logomark.png",
+        height: "100px"
+      },
+      {
+        title: "FDA",
+        path: "logo-fda-2016.png"
+      },
+    ]
   end
 
   def exception_test
@@ -438,9 +473,7 @@ class MainController < ApplicationController
   end
 
   def tokify
-    context = @context.as_json.slice("user_id", "username", "token", "expiration", "org_id")
-    context["expiration"] = [context["expiration"], Time.now.to_i + 1.day].min
-    @key = rails_encryptor.encrypt_and_sign({context: context}.to_json)
+    @key = generate_auth_key
   end
 
   # Inputs
@@ -448,6 +481,7 @@ class MainController < ApplicationController
   # taggable_uid (string, required): the uid of the item to tag
   # tags (string, required): comma-separated string containing tags to update to,
   #                this will replace existing tags
+  # suggested_tags (array[strings], optional): array of tags
   # tag_context (string, optional): indicates the tag context to use
   def set_tags
     taggable_uid = params["taggable_uid"]
@@ -456,7 +490,7 @@ class MainController < ApplicationController
     tags = params["tags"]
     fail "Tags need to be comma-separated strings" unless tags.is_a?(String)
 
-    suggested_tags = params["suggested_tags"]
+    suggested_tags = params["suggested_tags"] # Optional
     if suggested_tags.is_a?(Array)
       tags = (tags.split(',') + suggested_tags).join(',')
     end

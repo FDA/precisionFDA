@@ -53,6 +53,8 @@
   </ul>
 </div>
 
+<%= render "_partials/tags_metadata", item: @job, item_name: @job.name, tags_list: @job.all_tags_list, is_editable: @job.editable_by?(@context) %>
+
 <div class="pfda-toolbar">
   <div class="btn-group">
     <% if @job.user_id == @context.user_id %>

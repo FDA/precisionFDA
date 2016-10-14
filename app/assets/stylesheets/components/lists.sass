@@ -75,24 +75,23 @@
 
 .list-inline
   &.list-inline-padding-vertical
-    li
+    > li
       padding-top: 10px
       padding-bottom: 10px
   &.list-inline-padding-horizontal
-    li
+    > li
       padding-left: 10px
       padding-right: 10px
 
   &.list-inline-bullets
     vertical-align: middle
-    li
+    > li
       padding-right: 0px
-    li
       &::after
         content: '\B7'
         padding-left: 5px
 
-    li:last-of-type
+    > li:last-of-type
       &::after
         content: ''
         padding-left: 0
