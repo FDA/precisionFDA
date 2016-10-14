@@ -172,6 +172,7 @@ class ObjectListModel
     params = _.defaults(@apiParams, {
       describe:
         include:
+          all_tags_list: true
           user: true
           org: true
     })
@@ -201,12 +202,14 @@ class ObjectListModel
       return _.filter(objects, (object) ->
         _.some(query, (queryToTest) ->
           regexp = Precision.utils.globToRegex(queryToTest, "i")
-          object.title.peek().match regexp
+          object.title.peek().match(regexp) || _.some(object.all_tags_list.peek(), (tag) -> tag.match(regexp))
         )
       )
     else
       regexp = new RegExp(query, "i")
-      return _.filter(objects, (object) -> object.title.peek().match regexp)
+      return _.filter(objects, (object) ->
+        object.title.peek().match(regexp) || _.some(object.all_tags_list.peek(), (tag) -> tag.match(regexp))
+      )
 
 class ObjectItemModel
   constructor: (@selectorModel, @listModel, object, opts = {}) ->
@@ -226,6 +229,7 @@ class ObjectItemModel
     @path = ko.observable(object.path)
     @userName = ko.observable(object.user?.full_name)
     @orgName = ko.observable(object.org?.name)
+    @all_tags_list = ko.observable(object.all_tags_list)
 
     @editable = ko.observable(object.editable)
     @accessible = ko.observable(object.accessible)
@@ -290,6 +294,7 @@ class ObjectItemModel
     @in_space(object.in_space)
     @license(object.license)
     @user_license(object.user_license)
+    @all_tags_list(object.all_tags_list)
 
     @loaded(true)
 
@@ -298,6 +303,7 @@ class ObjectItemModel
       uid: @uid
       describe:
         include:
+          all_tags_list: true
           user: true
           org: true
     })
@@ -315,6 +321,7 @@ class ObjectItemModel
           opts: _.extend({
             describe:
               include:
+                all_tags_list: true
                 user: true
                 org: true
           }, @selectorModel.listRelatedParams)

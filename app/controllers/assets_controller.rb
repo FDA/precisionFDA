@@ -12,12 +12,12 @@ class AssetsController < ApplicationController
 
     # Wice seems to not like the default_scope of Asset
     assets = Asset.unscoped.editable_by(@context)
-    @assets_grid = initialize_grid(assets,{
+    @assets_grid = initialize_grid(assets.includes(:taggings),{
       name: 'assets',
       order: 'user_files.name',
       order_direction: 'asc',
       per_page: 100,
-      include: [:user, {user: :org}]
+      include: [:user, {user: :org}, {taggings: :tag}]
     })
   end
 
@@ -26,12 +26,12 @@ class AssetsController < ApplicationController
     if org
       assets = Asset.unscoped.accessible_by(@context).joins(:user).where(:users => { :org_id => org.id })
 
-      @assets_grid = initialize_grid(assets,{
+      @assets_grid = initialize_grid(assets.includes(:taggings),{
         name: 'assets',
         order: 'user_files.name',
         order_direction: 'asc',
         per_page: 100,
-        include: [:user, {user: :org}]
+        include: [:user, {user: :org}, {taggings: :tag}]
       })
     end
     render :index
@@ -39,12 +39,12 @@ class AssetsController < ApplicationController
 
   def explore
     assets = Asset.unscoped.accessible_by_public
-    @assets_grid = initialize_grid(assets,{
+    @assets_grid = initialize_grid(assets.includes(:taggings),{
       name: 'assets',
       order: 'user_files.name',
       order_direction: 'asc',
       per_page: 100,
-      include: [:user, {user: :org}]
+      include: [:user, {user: :org}, {taggings: :tag}]
     })
     render :index
   end

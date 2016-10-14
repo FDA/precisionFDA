@@ -128,6 +128,7 @@ class AppInputModel
                 user: true
                 org: true
                 license: true
+                all_tags_list: true
           patterns: @patterns
         }
         {
@@ -140,6 +141,7 @@ class AppInputModel
               include:
                 user: true
                 org: true
+                all_tags_list: true
         }
         {
           className: "discussion"
@@ -151,6 +153,7 @@ class AppInputModel
               include:
                 user: true
                 org: true
+                all_tags_list: true
         }
       ]
     })

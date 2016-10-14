@@ -26,6 +26,8 @@ class Note < ActiveRecord::Base
 
   acts_as_followable
   acts_as_commentable
+  acts_as_taggable
+  acts_as_votable
 
   def uid
     "note-#{id}"

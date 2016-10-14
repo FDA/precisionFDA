@@ -276,6 +276,7 @@ class IOModel
               include:
                 user: true
                 org: true
+                all_tags_list: true
         }
         {
           className: "note"
@@ -287,6 +288,7 @@ class IOModel
               include:
                 user: true
                 org: true
+                all_tags_list: true
         }
         {
           className: "discussion"
@@ -298,6 +300,7 @@ class IOModel
               include:
                 user: true
                 org: true
+                all_tags_list: true
         }
       ]
     })

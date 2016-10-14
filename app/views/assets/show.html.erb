@@ -51,6 +51,8 @@
   </ul>
 </div>
 
+<%= render "_partials/tags_metadata", item: @asset, item_name: @asset.prefix, tags_list: @asset.all_tags_list, is_editable: @asset.editable_by?(@context) %>
+
 <div class="pfda-toolbar">
   <div class="pull-left">
     <div class="btn-group">

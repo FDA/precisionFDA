@@ -42,6 +42,8 @@ class Comparison < ActiveRecord::Base
   store :meta, {coder: JSON}
 
   acts_as_commentable
+  acts_as_taggable
+  acts_as_votable
 
   def uid
     "comparison-#{id}"

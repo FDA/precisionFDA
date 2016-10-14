@@ -22,6 +22,7 @@ Rails.application.routes.draw do
     post 'set_tags' => 'main#set_tags'
     get 'guidelines' => 'main#guidelines'
     get 'exception_test' => "main#exception_test"
+    get 'presskit' => 'main#presskit'
 
     # API
     post '/api/publish', to: 'api#publish'
@@ -41,6 +42,7 @@ Rails.application.routes.draw do
     post '/api/run_app', to: 'api#run_app'
     post '/api/get_app_spec', to: 'api#get_app_spec'
     post '/api/get_app_script', to: 'api#get_app_script'
+    post '/api/export_app', to: 'api#export_app'
     post '/api/search_assets', to: 'api#search_assets'
     post '/api/create_asset', to: 'api#create_asset'
     post '/api/close_asset', to: 'api#close_asset'
