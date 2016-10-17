@@ -193,7 +193,7 @@ class MainController < ApplicationController
       },
       {
         title: "FDA",
-        path: "logo-fda-2016.png"
+        path: "presskit/fda_ucm519147.png"
       },
     ]
   end
