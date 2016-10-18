@@ -3,7 +3,6 @@
 <div class="pfda-meta-appathon-template pfda-meta-appathon-template-<%= @meta_appathon.template %>">
   <div class="jumbotron jumbotron-meta_appathon clearfix">
     <div class="row">
-
       <div class="col-sm-18 col-sm-offset-3 text-center col-lg-12 col-lg-offset-6">
         <h1>
           <span class="meta_appathon-title-muted">PrecisionFDA</span>
@@ -39,6 +38,16 @@
       </div>
       <div class="col-sm-12 col-sm-offset-6 col-lg-8 col-lg-offset-8">
         <%= image_tag("appathons/appathon-toolbox.png", class: 'img-responsive')  %>
+      </div>
+      <div class="col-sm-18 col-sm-offset-3 col-lg-12 col-lg-offset-6 text-center alert alert-warning">
+        <div class="lead lead-bold">
+          App-a-thon End Date Extended!
+        </div>
+        <div class="lead">
+          Due to significant interest in this challenge, we have decided to extend the deadline so more of you can host and join App-a-thons!
+          <br/>
+          The new deadline is <strong>November 14th, 2016</strong>.
+        </div>
       </div>
     </div>
   </div>
@@ -112,7 +121,7 @@
                 <div class="metadata-section">
                   <ul class="list-group list-group-inline">
                     <li class="list-group-item list-group-item-transparent-bg">
-                      <h5 class="list-group-item-heading">End</h5>
+                      <h5 class="list-group-item-heading">End <span class="label label-info">Extended</span></h5>
                       <p class="list-group-item-text"><%= @meta_appathon.end_at.to_s(:db) %></p>
                     </li>
                   </ul>
@@ -203,7 +212,7 @@
               </div>
               <div class="col-sm-14 col-sm-offset-1">
                 <p class="lead">
-                Scroll up and click "Host an app-a-thon". Give your app-a-thon a name, a location, and optionally a description. Choose an icon that will represent your app-a-thon, and adjust its start date to when you want the app-a-thon to start. (We recommend keeping the end date to the default of 10/28/2016, so that your participants have the opportunity to contribute additional apps even after you conclude your app-a-thon). You can always edit this information later, so don't worry if you don't get it perfect right away.
+                Scroll up and click "Host an app-a-thon". Give your app-a-thon a name, a location, and optionally a description. Choose an icon that will represent your app-a-thon, and adjust its start date to when you want the app-a-thon to start. (We recommend keeping the end date to the default of <%= @meta_appathon.end_at.to_s(:db) %>, so that your participants have the opportunity to contribute additional apps even after you conclude your app-a-thon). You can always edit this information later, so don't worry if you don't get it perfect right away.
                 </p>
               </div>
             </div>
