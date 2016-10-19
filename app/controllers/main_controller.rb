@@ -168,7 +168,7 @@ class MainController < ApplicationController
       {
         title: "precisionFDA - white",
         path: "presskit/precisionFDA.white.png",
-        css: "pfda-card-dark",
+        css: "list-group-item-dark",
         height: "100px"
       },
       {
@@ -194,6 +194,24 @@ class MainController < ApplicationController
       {
         title: "FDA",
         path: "presskit/fda_ucm519147.png"
+      },
+    ]
+
+    @badges = [
+      {
+        title: "Member",
+        path: "presskit/badges/pfda-badge-member-large.png",
+        height: "250px"
+      },
+      {
+        title: "Challenge Participant",
+        path: "presskit/badges/pfda-badge-challenger-large.png",
+        height: "250px"
+      },
+      {
+        title: "Challenge Award (only for award recipients)",
+        path: "presskit/badges/pfda-badge-challenge-award-large.png",
+        height: "250px"
       },
     ]
   end
