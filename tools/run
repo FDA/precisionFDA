@@ -18,14 +18,27 @@ def mkdir_p(path):
         else:
             raise
 
-# Load app spec JSON file
-app_spec_file_path = "/spec.json"
+# Replicate 'ln -sf'
+def ln_sf(src, dest):
+    try:
+        os.symlink(src, dest)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST:
+            os.remove(dest)
+            os.symlink(src, dest)
+        else:
+            raise
 
-spec_exists = os.path.isfile(app_spec_file_path)
+# Load app spec JSON file
+APP_SPEC_PATH = "/spec.json"
+# input file path
+LOCAL_FILE_PATH = "/work/in/"
+
+spec_exists = os.path.isfile(APP_SPEC_PATH)
 if not spec_exists:
     exit('No app specification file found!')
 try:
-    app_spec_fh = open(app_spec_file_path)
+    app_spec_fh = open(APP_SPEC_PATH)
     try:
         app_spec = json.load(app_spec_fh)
     except:
@@ -41,12 +54,13 @@ parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpForm
 inputs = app_spec['spec']['input_spec']
 for item in inputs:
     arg_val = '--' + item['name']
-    choices_val = item['choices'] if 'choices' in item else None
-    default_val = item['default'] if 'default' in item else None
+    choices_val = map(str, item['choices']) if 'choices' in item else None
+    default_val = str(item['default']) if 'default' in item else None
     # Special case: if has default then required doesn't matter
     required_val = False if default_val else not item['optional']
     # If required==True and not provided, will error regardless of default
-    parser.add_argument(arg_val,choices=choices_val, dest=item['name'], action="store", help=item['help'], required=required_val, default=default_val)
+    # Store all args as strings, then type check later
+    parser.add_argument(arg_val, type=str, choices=choices_val, dest=item['name'], action="store", help=item['help'], required=required_val, default=default_val)
 
 args = parser.parse_args()
 
@@ -58,15 +72,20 @@ for item in inputs:
     if input_val == None:
         setattr(args, item['name'], "")
         continue
-    else:
-        input_val = str(input_val)
 
     # strings are string
     if item['class'] == 'string':
         continue
     elif item['class'] == 'file':
-        if not os.path.isfile(input_val):
-            exit('input file argument "{}" does not exist!'.format(input_val))
+        if not os.path.isabs(input_val):
+            exit('input file argument "{}" needs to be an absolute path!'.format(input_val))
+        elif not os.path.isfile(input_val):
+            exit('input file argument "{}" does not exist or is a directory!'.format(input_val))
+        link_dir = os.path.join(LOCAL_FILE_PATH, item['name'])
+        # create "LOCAL_FILE_PATH/$input_file_name"
+        mkdir_p(link_dir)
+        # symlink user file to "LOCAL_FILE_PATH/$input_file_name"
+        ln_sf(input_val, os.path.join(link_dir, os.path.basename(input_val)))
     elif item['class'] == 'int':
         try:
             int(input_val)
@@ -91,12 +110,12 @@ for item in inputs:
 for item in inputs:
     # All values in args should be strings
     input_val = getattr(args, item['name'])
-    os.environ[item['name']] = str(input_val)
+    os.environ[item['name']] = input_val
 
     if item['class'] == 'file':
         # Set environmental variables
         os.environ[item['name'] + '_name'] = os.path.basename(input_val)
-        os.environ[item['name'] + '_path'] = os.path.abspath(input_val)
+        os.environ[item['name'] + '_path'] = os.path.join(LOCAL_FILE_PATH, item['name'], os.path.basename(input_val))
         # "." and "" cases covered by input checks
         # NOTE: os.path.splittext(".foo") returns ['.foo', '']
         [head, tail] = os.path.splitext(os.path.basename(input_val))
