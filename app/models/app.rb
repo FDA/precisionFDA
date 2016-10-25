@@ -144,7 +144,7 @@ class App < ActiveRecord::Base
 
     cmds << "# Download helper executables"
     cmds << "RUN curl https://dl.dnanex.us/F/D/p59772Gz0B3V9F456z26bFxk8GqqXJfF7YQ8Ypk4/emit-1.0.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
-    cmds << "RUN curl https://dl.dnanex.us/F/D/0kKgz424jbV1v5bvGK5738V9g5y72bJK3BGfQ3VJ/run-1.1.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
+    cmds << "RUN curl https://dl.dnanex.us/F/D/2GKfQGz1vqXvPVq5z6JfBZ7fKYp2Qgx3kJ21p6jF/run-1.2.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
     cmds << ""
 
     # Generate Docker command with embedded spec and script
