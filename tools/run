@@ -54,8 +54,8 @@ parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpForm
 inputs = app_spec['spec']['input_spec']
 for item in inputs:
     arg_val = '--' + item['name']
-    choices_val = item['choices'] if 'choices' in item else None
-    default_val = item['default'] if 'default' in item else None
+    choices_val = map(str, item['choices']) if 'choices' in item else None
+    default_val = str(item['default']) if 'default' in item else None
     # Special case: if has default then required doesn't matter
     required_val = False if default_val else not item['optional']
     # If required==True and not provided, will error regardless of default
