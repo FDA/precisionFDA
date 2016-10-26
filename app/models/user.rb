@@ -275,6 +275,7 @@ class User < ActiveRecord::Base
       # Only begin transaction if stale file detected
       if remote_state != file.state
         UserFile.transaction do
+          old_file_state = file.state
           file.reload
           # confirm local file state is stale
           if remote_state != file.state
@@ -284,7 +285,7 @@ class User < ActiveRecord::Base
               file.update!(state: remote_state)
             else
               # NOTE we should never be here
-              raise
+              raise "File #{id} had local state #{file.state} (previously #{old_file_state}) and remote state #{remote_state}"
             end
           end
         end
