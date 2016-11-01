@@ -194,13 +194,18 @@ class MainController < ApplicationController
       {
         title: "FDA",
         path: "presskit/fda_ucm519147.png"
-      },
+      }
     ]
 
     @badges = [
       {
         title: "Member",
         path: "presskit/badges/pfda-badge-member-large.png",
+        height: "250px"
+      },
+      {
+        title: "App-a-thon Participant",
+        path: "presskit/badges/pfda-badge-appathon-participant-large.png",
         height: "250px"
       },
       {
@@ -212,7 +217,7 @@ class MainController < ApplicationController
         title: "Challenge Award (only for award recipients)",
         path: "presskit/badges/pfda-badge-challenge-award-large.png",
         height: "250px"
-      },
+      }
     ]
   end
 
