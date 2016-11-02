@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 # Bundler. The tool that manages all of our gems
-gem 'bundler', '1.10.6'
+gem 'bundler', '1.13.6'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.7.1'
@@ -98,6 +98,9 @@ group :development, :test do
 
   # Use thin
   gem 'thin'
+
+  # Manage environment variables
+  gem 'figaro'
 end
 
 group :production do
