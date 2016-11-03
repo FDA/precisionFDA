@@ -76,11 +76,7 @@
         <span class="fa fa-bolt"></span> Run App &nbsp;&nbsp;<span class="badge"><%= @job.app.version ? "v#{@job.app.version}" : "rev#{@job.app.revision}" %></span>
       <% end %>
     <% end %>
-    <% if @job.publishable_by?(@context) %>
-      <%= link_to publish_path + "?" + {id: @job.uid}.to_param, method: :post, class: "btn btn-success" do %>
-        <span class="fa fa-bullhorn"></span> Publish
-      <% end %>
-    <% end %>
+    <%= render "_partials/btn_publish", item: @job %>
     <% if @job.user_id == @context.user_id && !@job.terminal? %>
       <%= link_to job_path(@job.dxid), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
         <span class="fa fa-times-circle"></span> Terminate

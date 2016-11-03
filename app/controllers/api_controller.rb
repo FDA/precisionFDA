@@ -350,7 +350,7 @@ class ApiController < ApplicationController
 
   # Inputs
   #
-  # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
+  # scopes (Array, optional): array of valid scopes on the App e.g. ["private", "public", "space-1234"] or leave blank for all
   # editable (Boolean, optional): if filtering for only editable_by the context user, otherwise accessible_by
   # describe (object, optional)
   #     fields (array, optional):
@@ -368,17 +368,18 @@ class ApiController < ApplicationController
   #
   def list_apps
     if params[:editable]
-      apps = AppSeries.editable_by(@context)
+      app_series = AppSeries.editable_by(@context)
     else
-      apps = AppSeries.accessible_by(@context)
+      app_series = AppSeries.accessible_by(@context)
     end
 
+    apps = app_series.order(id: :desc).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
+
+    # The scope applies to the App and not the AppSeries
     if params[:scopes].present?
       fail "Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id." unless params[:scopes].is_a?(Array) && params[:scopes].all?{ |s| s == 'public' || s == 'private' || s =~ /^space-(\d+)$/ }
-      apps = apps.where(scope: params[:scopes])
+      apps = apps.reject {|a| !params[:scopes].include?(a.scope)}
     end
-
-    apps = apps.order(id: :desc).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
 
     result = apps.map do |app|
       describe_for_api(app, params[:describe])

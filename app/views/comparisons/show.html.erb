@@ -78,11 +78,7 @@
           <span class="fa fa-sliders"></span> Visualize
         <% end %>
       <% end %>
-      <% if @comparison.publishable_by?(@context) %>
-        <%= link_to publish_path + "?" + {id: @comparison.uid}.to_param, method: :post, class: "btn btn-success" do %>
-          <span class="fa fa-bullhorn"></span> Publish
-        <% end %>
-      <% end %>
+      <%= render "_partials/btn_publish", item: @comparison %>
     </div>
 
     <% if @comparison.editable_by?(@context) %>
