@@ -1,0 +1,32 @@
+<% if @context.user.active_spaces.count > 0 && @context.valid_publish_targets_for(item).count > 0 %>
+  <div class="btn-group">
+    <button id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn btn-success dropdown-toggle <%= defined?(classes) ? classes : '' %>">
+      Publish
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
+      <% if item.publishable_by?(@context) %>
+        <li>
+          <%= link_to publish_path + "?" + {id: item.uid, scope: 'public'}.to_param, method: :post do %>
+            <span class="fa fa-globe"></span> Public
+          <% end %>
+        </li>
+      <% end %>
+      <% if @context.user.active_spaces.count > 0 %>
+        <% @context.user.active_spaces.each do |space| %>
+          <% if item.publishable_by?(@context, space.uid) %>
+            <li>
+              <%= link_to publish_path + "?" + {id: item.uid, scope: space.uid}.to_param, method: :post do %>
+                <span class="fa fa-object-group"></span> <%= space.title %>
+              <% end %>
+            </li>
+          <% end %>
+        <% end %>
+      <% end %>
+    </ul>
+  </div>
+<% elsif item.publishable_by?(@context) %>
+  <%= link_to publish_path + "?" + {id: item.uid, scope: 'public'}.to_param, method: :post, class: "btn btn-success #{defined?(classes) ? classes : ''}" do %>
+    <span class="fa fa-bullhorn"></span> Publish
+  <% end %>
+<% end %>

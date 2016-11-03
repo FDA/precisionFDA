@@ -39,4 +39,12 @@ class Context
   def logged_in_or_guest?
     return logged_in? || guest?
   end
+
+  def valid_publish_targets_for(item)
+    targets = ["public"]
+    if logged_in?
+      targets += @user.active_spaces.map(&:uid)
+    end
+    return targets.select { |t| item.publishable_by?(self, t) }
+  end
 end

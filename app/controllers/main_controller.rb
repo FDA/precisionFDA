@@ -470,17 +470,15 @@ class MainController < ApplicationController
       redirect_to pathify(item)
       return
     end
-    if !item.publishable_by?(@context)
+
+    if !item.publishable_by?(@context, scope)
       flash[:error] = "This item cannot be published in this state."
       redirect_to pathify(item)
       return
     end
 
-    @spaces = Space.active.accessible_by(@context)
-    @canDisplaySpacesSelector = @spaces.present? && @spaces.count > 0 && !["discussion", "answer", "license"].include?(item.klass)
-
     graph = get_graph(item)
-    js graph: publisher_js_prepare(graph), spaces: @spaces.map {|s| s.slice(:uid, :title)}
+    js graph: publisher_js_prepare(graph, scope), space: space&.slice(:uid, :title), scope_to_publish_to: scope
   end
 
   def track
@@ -595,15 +593,15 @@ class MainController < ApplicationController
     end
   end
 
-  def publisher_js_prepare(node)
+  def publisher_js_prepare(node, scope = 'public')
     item = node[0].slice(:uid, :klass)
     item[:title] = node[0].accessible_by?(@context) ? node[0].title : node[0].uid
     item[:owned] = node[0].editable_by?(@context)
     item[:public] = node[0].public?
     item[:in_space] = node[0].in_space?
-    item[:publishable] = node[0].publishable_by?(@context)
+    item[:publishable] = node[0].publishable_by?(@context, scope)
 
-    children = node[1].map { |child| publisher_js_prepare(child) }
+    children = node[1].map { |child| publisher_js_prepare(child, scope) }
 
     return [item, children]
   end

@@ -118,13 +118,7 @@
       </div>
     </div>
 
-    <% if @file.publishable_by?(@context) %>
-      <div class="btn-group">
-        <%= link_to publish_path + "?" + {id: @file.uid}.to_param, method: :post, class: "btn btn-success" do %>
-          <span class="fa fa-bullhorn"></span> Publish
-        <% end %>
-      </div>
-    <% end %>
+    <%= render "_partials/btn_publish", item: @file %>
 
     <% if @file.editable_by?(@context) %>
     <div class="btn-group">
