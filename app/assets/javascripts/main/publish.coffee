@@ -1,11 +1,27 @@
 class PublishViewModel
-  constructor: (graph, spaces) ->
+  constructor: (graph, scope_to_publish_to, space) ->
     @treeHash = {}
     @rootID = graph[0].uid
     @treeRoot = ko.observable(@generateTree(graph[0], graph[1], true))
+    @selectedScope = ko.observable(scope_to_publish_to)
+    @isScopeASpace = ko.computed (=>
+      @selectedScope()?.match(new RegExp(/^space-(\d+)$/, "i"))
+    )
+    @space = ko.observable(space)
 
-    @spaces = spaces
-    @selectedScope = ko.observable()
+    @primaryButtonLabel = ko.computed(=>
+      if @isScopeASpace() && @space()?
+        "Share selected objects to \"#{@space().title}\""
+      else
+        "Publish selected objects"
+    )
+
+    @publishableItemLabel = ko.computed(=>
+      if @isScopeASpace()
+        "Share"
+      else
+        "Publish"
+    )
 
   generateTree: (node, children, isRoot = false) ->
     if !@treeHash[node.uid]?
@@ -54,6 +70,7 @@ class NodeModel
                     'fa fa-fw fa-object-group'
                   else
                     'fa fa-fw fa-file-o'
+
 #########################################################
 #
 #
@@ -65,6 +82,6 @@ class NodeModel
 MainController = Paloma.controller('Main',
   publish: ->
     $container = $("body main")
-    publishViewModel = new PublishViewModel(@params.graph, @params.spaces)
+    publishViewModel = new PublishViewModel(@params.graph, @params.scope_to_publish_to, @params.space)
     ko.applyBindings(publishViewModel, $container[0])
 )

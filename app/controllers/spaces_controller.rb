@@ -143,7 +143,7 @@ class SpacesController < ApplicationController
         NotificationsMailer.space_activation_email(@space, @space.guest_lead_member).deliver_now!
         if @space.accessible_by?(@context)
           flash[:success] = "The space was created successfully, and will be activated once both admin's accept it."
-          redirect_to @space
+          redirect_to space_path(@space)
         else
           flash[:success] = "The space was created successfully, but is not currently accessible by you."
           redirect_to spaces_path
