@@ -478,7 +478,8 @@ class MainController < ApplicationController
     end
 
     graph = get_graph(item)
-    js graph: publisher_js_prepare(graph, scope), space: space&.slice(:uid, :title), scope_to_publish_to: scope
+
+    js graph: publisher_js_prepare(graph, scope), space: !space.nil? ? space.slice(:uid, :title) : nil, scope_to_publish_to: scope
   end
 
   def track
