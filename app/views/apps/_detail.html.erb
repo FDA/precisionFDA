@@ -120,11 +120,8 @@
     <%= link_to new_app_job_path(@app.dxid), class: "btn btn-primary" do %>
       <span class="fa fa-bolt"></span> Run App&nbsp;&nbsp;<span class="badge"><%= @app.version ? "v#{@app.version}" : "rev#{@app.revision}" %></span>
     <% end %>
-    <% if @app.publishable_by?(@context) %>
-      <%= link_to publish_path + "?" + {id: @app.uid}.to_param, method: :post, class: "btn btn-success" do %>
-        <span class="fa fa-bullhorn"></span> Publish
-      <% end %>
-    <% end %>
+
+    <%= render "_partials/btn_publish", item: @app %>
   </div>
 </div>
 

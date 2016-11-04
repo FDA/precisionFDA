@@ -93,6 +93,10 @@ class User < ActiveRecord::Base
     end
   end
 
+  def active_spaces
+    spaces.active
+  end
+
   def username
     dxuser
   end

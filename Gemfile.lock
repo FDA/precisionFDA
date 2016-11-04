@@ -82,6 +82,8 @@ GEM
       actionmailer (>= 3.0.4)
       activesupport (>= 3.0.4)
     execjs (2.7.0)
+    figaro (1.1.1)
+      thor (~> 0.14)
     foundation_emails (2.2.0.0)
     globalid (0.3.7)
       activesupport (>= 4.1.0)
@@ -232,10 +234,11 @@ DEPENDENCIES
   annotate (~> 2.6.6)
   axlsx
   bootstrap-kaminari-views
-  bundler (= 1.10.6)
+  bundler (= 1.13.6)
   byebug
   coffee-rails (~> 4.1.0)
   exception_notification (= 4.1.1)
+  figaro
   gravtastic
   humanizer
   inky-rb
@@ -265,4 +268,4 @@ DEPENDENCIES
   wice_grid
 
 BUNDLED WITH
-   1.10.6
+   1.13.6
