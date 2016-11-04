@@ -4,6 +4,8 @@
 <%= form_for :main, url: publish_path do |f| %>
 <input type="hidden" data-bind="attr: {name: 'id'}, value: rootID" />
 <input type="hidden" data-bind="attr: {name: 'uids[' + rootID +']'}, value: 'on'" />
+<input type="hidden" data-bind="attr: {name: 'scope'}, value: selectedScope" />
+
 <div class="container container-padded-v">
   <!-- ko if: !isScopeASpace() -->
   <div class='pfda-help-block'>
