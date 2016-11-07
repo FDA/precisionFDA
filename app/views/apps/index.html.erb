@@ -37,17 +37,17 @@
     </div>
     <% if @my_apps.count > 0 %>
     <div class="list-group list-group-condensed-sm">
-      <li class="list-group-item list-group-item-header">
+      <div class="list-group-item list-group-item-header">
         My Apps
-      </li>
+      </div>
       <%= render "_partials/apps_list_group", apps: @my_apps, active: @app.try(:app_series_id) %>
     </div>
     <% end %>
     <% if @ran_apps.count > 0 %>
     <div class="list-group list-group-condensed-sm">
-      <li class="list-group-item list-group-item-header">
+      <div class="list-group-item list-group-item-header">
         Community Apps Ran
-      </li>
+      </div>
       <%= render "_partials/apps_list_group", apps: @ran_apps, active: @app.try(:app_series_id) %>
     </div>
     <% end %>
