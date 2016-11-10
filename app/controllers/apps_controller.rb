@@ -45,8 +45,7 @@ class AppsController < ApplicationController
       name: 'jobs',
       order: 'jobs.id',
       order_direction: 'desc',
-      per_page: 100,
-      include: [{taggings: :tag}]
+      per_page: 100
     })
     js js_param
   end
@@ -115,7 +114,7 @@ class AppsController < ApplicationController
 
     User.sync_jobs!(@context)
 
-    jobs = @app.app_series.jobs.editable_by(@context)
+    jobs = @app.app_series.jobs.editable_by(@context).includes(:taggings)
     @jobs_grid = initialize_grid(jobs, {
       name: 'jobs',
       order: 'jobs.id',
