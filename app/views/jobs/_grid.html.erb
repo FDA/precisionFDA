@@ -31,14 +31,6 @@
     end
   end
 
-  if defined?(app)
-    g.column name: 'Version', attribute: 'version', assoc: :app do |job|
-      if !job.app.version.blank?
-        job.app.version
-      end
-    end
-  end
-
   g.column name: 'Instance type' do |job|
     job.resolved_instance_type
   end
