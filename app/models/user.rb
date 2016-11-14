@@ -123,7 +123,7 @@ class User < ActiveRecord::Base
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
       dxuser == "elaine.johanson" || dxuser == "ruth.bandler"
     else
-      (org.handle == "precisionfda" || org.handle == "dnanexus") && org.admin_id == id
+      ((org.handle == "precisionfda" || org.handle == "dnanexus") && org.admin_id == id) || ["alan.zhu","george.asimenos"].include?(dxuser)
     end
   end
 
