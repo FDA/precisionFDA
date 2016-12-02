@@ -343,7 +343,9 @@ func uploadAsset(rootFolderPath string, name string, readmeFilePath string) {
   assetSize := int64(0)
   err := filepath.Walk(rootFolderPath, func(path string, f os.FileInfo, err error) error {
       if !f.IsDir() {
-        fileList = append(fileList, path)
+        relPath, err := filepath.Rel(rootFolderPath, path)
+        check(err)
+        fileList = append(fileList, relPath)
         assetSize += f.Size()
       }
       return nil
