@@ -12,6 +12,20 @@ class Context
     @token = token
     @expiration = expiration
     @org_id = org_id
+
+    # Cache user, if logged in
+    if logged_in?
+      @user = User.find(@user_id)
+    end
+  end
+
+  def user
+    raise "context.user called for guest context" if guest?
+    return @user
+  end
+
+  def gravatar_url
+    guest? ? "https://secure.gravatar.com/avatar/00000000000000000000000000000000.png?d=mm&r=PG" : @user.gravatar_url
   end
 
   def logged_in?
@@ -24,5 +38,13 @@ class Context
 
   def logged_in_or_guest?
     return logged_in? || guest?
+  end
+
+  def valid_publish_targets_for(item)
+    targets = ["public"]
+    if logged_in?
+      targets += @user.active_spaces.map(&:uid)
+    end
+    return targets.select { |t| item.publishable_by?(self, t) }
   end
 end

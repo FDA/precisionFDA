@@ -12,7 +12,7 @@
       <div class="form-group">
         <label class="col-sm-4 control-label">
           Default Instance
-          <div class="pfda-help-link"><%= link_to("See full list", "#{about_path}/how#dev-instance-types", target: "_blank") %> <span class="fa fa-external-link"></span></div>
+          <div class="pfda-help-link"><%= link_to("See full list", "#{show_docs_path('creating_apps')}#dev-instance-types", target: "_blank") %> <span class="fa fa-external-link"></span></div>
         </label>
         <div class="col-sm-10 col-sm-offset-1">
           <select name="instance_type" class="form-control" data-bind="options: availableInstances,
@@ -24,7 +24,7 @@
       <div class="form-group">
         <label class="col-sm-4 control-label">
           Assets
-          <div class="pfda-help-link"><%= link_to("Learn more", "#{about_path}/how#dev-assets", target: "_blank") %> <span class="fa fa-external-link"></span></div>
+          <div class="pfda-help-link"><%= link_to("Learn more", "#{show_docs_path('creating_apps')}#dev-assets", target: "_blank") %> <span class="fa fa-external-link"></span></div>
         </label>
         <div class="col-sm-10 col-sm-offset-1">
           <div class="list-group">
@@ -35,7 +35,7 @@
             </div>
             <!-- ko foreach: assets -->
             <div class="list-group-item list-group-item-removeable clearfix">
-              <a data-bind="attr: {href: '/app_assets/' + dxid}" target="_blank"><span class="fa fa-file-zip-o"></span> <span data-bind="text: name"></span></a>  <a class="pull-right btn btn-link btn-link-danger fa fa-times" data-bind="click: $root.removeAsset"></a>
+              <a data-bind="attr: {href: '/app_assets/' + uid}" target="_blank"><span class="fa fa-file-zip-o"></span> <span data-bind="text: name"></span></a>  <a class="pull-right btn btn-link btn-link-danger fa fa-times" data-bind="click: $root.removeAsset"></a>
             </div>
             <!-- /ko -->
          </div>

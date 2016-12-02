@@ -1,62 +1,52 @@
 class ComparisonsNewView
   constructor: () ->
-    @filterQuery = ko.observable()
-    @files = ko.observableArray()
-    @files.filtered = ko.computed(=>
-      files = _.sortBy(@files(), 'name')
-      query = @filterQuery()
-      if query?
-        regexp = new RegExp(query, "i")
-        return _.filter(files, (file) -> file.name.match regexp)
-      else
-        files
-    )
+    @busy = ko.observable(false)
 
-    @testVariant = new VariantModel("Test", {
+    @licenseSelector = new Precision.models.LicensesSelectorModel({
+      onAcceptCallback: @submitForm
+    })
+
+    @testVariant = new VariantViewModel(this, "Test", {
       inputSpec: [
         {
           name: "test_vcf"
-          title: "VCF"
-          required: true
-        }
-        {
-          name: "test_tbi"
-          title: "TBI"
-          required: true
+          label: "VCF"
+          class: "file"
+          optional: false
+          patterns: ["*.vcf.gz", "*.vcf"]
         }
         {
           name: "test_bed"
-          title: "BED"
-          required: false
+          label: "BED"
+          class: "file"
+          optional: true
+          patterns: ["*.bed"]
         }
       ]
     })
 
-    @refVariant = new VariantModel("Benchmark", {
+    @refVariant = new VariantViewModel(this, "Benchmark", {
       inputSpec: [
         {
           name: "ref_vcf"
-          title: "VCF"
-          required: true
-        }
-        {
-          name: "ref_tbi"
-          title: "TBI"
-          required: true
+          label: "VCF"
+          class: "file"
+          optional: false
+          patterns: ["*.vcf.gz", "*.vcf"]
         }
         {
           name: "ref_bed"
-          title: "BED"
-          required: false
+          label: "BED"
+          class: "file"
+          optional: true
+          patterns: ["*.bed"]
         }
       ]
     })
 
     @areAllInputsSet = ko.computed(() =>
-      inputs = @refVariant.inputs().concat(@testVariant.inputs())
-      _.all(inputs, (inputModel) ->
-        return (inputModel.required && inputModel.active()) || !inputModel.required
-      )
+      inputModels = @refVariant.inputs().concat(@testVariant.inputs())
+      _.every(inputModels, (inputModel) -> inputModel.isReady())
     )
 
     @name = ko.observable()
@@ -65,52 +55,54 @@ class ComparisonsNewView
       !_.isEmpty(@name())
     )
 
-    @getFiles()
+    @challenges = []
+    for challenge in Precision.challenges.suggestions
+      @challenges.push(new ChallengeViewModel(challenge, this))
 
-  getFiles: (params = {}) ->
-    Precision.api '/api/list_files', params, (files) =>
-      @files(_.map(files, (file) -> new FileModel(file)))
+  validateLicenses: () ->
+    licensesToAccept = []
+    # Reset licenses and recompute which ones to accept
+    inputModels = @refVariant.inputs().concat(@testVariant.inputs())
+    for inputModel in inputModels
+      license = inputModel.licenseToAccept.peek()
+      licensesToAccept.push(license) if license?
 
-  selectFile: (e) =>
-    e.preventDefault()
-    inputModel = ko.dataFor(e.currentTarget)
-    fileModel = ko.contextFor(e.currentTarget).$parent
-    inputModel.file(fileModel)
-
-  unselectFile: (e) =>
-    e.preventDefault()
-    inputModel = ko.dataFor(e.currentTarget)
-    inputModel.file(null)
-    return false
+    if _.size(licensesToAccept) > 0
+      @licenseSelector.setLicensesToAccept(licensesToAccept)
+      return @licenseSelector.areAllLicensesAccepted()
+    else
+      return true
 
   submitForm: (e) =>
-    $("#comparison-modal form").submit()
+    if !@validateLicenses()
+      @licenseSelector.previewedLicense(_.first(@licenseSelector.licensesToAccept.peek()))
+      @licenseSelector.toggleLicensesModal()
+    else
+      $("#comparison-modal form").submit()
+      @busy(true)
 
-class VariantModel
-  constructor: (@category, app) ->
+class ChallengeViewModel
+  constructor: (challenge, @viewModel) ->
+    @name = challenge.name
+    @title = challenge.title
+    @actionLabel = "Compare to #{@name}"
+    @vcf = challenge.benchmark.VCF
+    @bed = challenge.benchmark.BED
+
+  assignChallengeFiles: () ->
+    refVCFModel = _.find(@viewModel.refVariant.inputs(), (input) -> input.name == "ref_vcf")
+    refBEDModel = _.find(@viewModel.refVariant.inputs(), (input) -> input.name == "ref_bed")
+
+    refVCFModel.value(@vcf)
+    refBEDModel.value(@bed)
+
+
+class VariantViewModel
+  constructor: (viewModel, @category, app) ->
     inputs = _.map(app.inputSpec, (input) =>
-      new VariantInputModel(@category, input)
+      new Precision.models.AppInputModel(input, viewModel)
     )
     @inputs = ko.observableArray(inputs)
-
-class VariantInputModel
-  constructor: (@category, input) ->
-    @name = input.name
-    @title = input.title
-    @required = input.required ? true
-    @file = ko.observable()
-    @uid = ko.computed(=>
-      file = @file()
-      file.uid if file?
-    )
-    @active = ko.computed(=>
-      !_.isEmpty(@file())
-    )
-
-class FileModel
-  constructor: (file) ->
-    @uid = file.uid
-    @name = file.name
 
 #########################################################
 #
@@ -120,39 +112,24 @@ class FileModel
 #
 #########################################################
 
-ComparisonsController = Paloma.controller('Comparisons')
-ComparisonsController::new = ->
-  $container = $("body main")
-  viewModel = new ComparisonsNewView()
-  ko.applyBindings(viewModel, $container[0])
+ComparisonsController = Paloma.controller('Comparisons',
+  new: ->
+    $container = $("body main")
+    viewModel = new ComparisonsNewView()
+    ko.applyBindings(viewModel, $container[0])
 
-  viewModel.areAllInputsSet.subscribe((areAllInputsSet) ->
-    if areAllInputsSet
+    $container.on("click", ".variants-circle-compare", () ->
       testVCFModel = _.find(viewModel.testVariant.inputs(), (input) -> input.name == "test_vcf")
       refVCFModel = _.find(viewModel.refVariant.inputs(), (input) -> input.name == "ref_vcf")
 
-      if testVCFModel? && refVCFModel? && !viewModel.name()?
-        testName = testVCFModel.file().name.replace /\.vcf\.gz/i, ""
-        refName = refVCFModel.file().name.replace /\.vcf\.gz/i, ""
+      if testVCFModel? && refVCFModel?
+        testName = testVCFModel.value().name.replace /\.vcf\.gz/i, ""
+        refName = refVCFModel.value().name.replace /\.vcf\.gz/i, ""
 
         viewModel.name("#{testName} vs #{refName}")
-  )
+    )
 
-  $container
-    .on("click.comparisons_new", ".event-select-input", (e) -> viewModel.selectInput(e))
-    .on("click.comparisons.new", ".event-select-file", (e) -> viewModel.selectFile(e))
-    .on("click.comparisons.new", ".event-unselect-file", (e) -> viewModel.unselectFile(e))
-
-  # Affix the variants comparator and filter
-  $affixContainer = $container.find(".affix-container")
-  $affixContainer.affix({
-    offset:
-      top: $affixContainer.offset().top
-  })
-
-  $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
-
-  $(window).resize(() ->
-    $affixContainer.affix('checkPosition')
-    $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
-  )
+    $('.license-modal').on("click", ".list-group-item", (e) =>
+      viewModel.licenseSelector.previewLicense(ko.dataFor(e.currentTarget))
+    )
+)

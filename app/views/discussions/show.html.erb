@@ -1,0 +1,137 @@
+<% content_for :title do %><%= @discussion.title %><% end %>
+<div class="page-header">
+  <div class="media">
+    <div class="media-left text-muted">
+      <%= link_to image_tag(@discussion.user.gravatar_url, class: 'img-circle', height: '50px'), user_path(@discussion.user.dxuser) %>
+    </div>
+    <div class="media-body">
+      <div class="pfda-discussion-user">
+        <%= link_to("#{@discussion.user.full_name}'s", user_path(@discussion.user.dxuser)) %> (<%= @discussion.user.org.name %>) <%= @discussion.scope == 'public' ? 'discussion' : 'draft discussion' %>
+      </div>
+      <div class="pfda-discussion-title">
+        <% if @discussion.title.blank? && @discussion.editable_by?(@context) %>
+          <%= link_to edit_discussion_path(@discussion) do %>
+            <span class="fa fa-edit"></span> Edit discussion title
+          <% end %>
+        <% else %>
+          <%= @discussion.title %>
+          <% if @discussion.editable_by?(@context) %>
+            <a class="pfda-rename-item" data-toggle="modal" data-target="#rename-modal">
+              <span class="fa fa-pencil"></span>
+            </a>
+          <% end %>
+        <% end %>
+      </div>
+      <% if !@discussion.content.blank? || @discussion.attachments.count > 0 %>
+        <div class="pfda-discussion-content">
+          <%= render "notes/note" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%= render "_partials/tags_metadata", item: @discussion, item_name: @discussion.title, tags_list: @discussion.all_tags_list, is_editable: @discussion.editable_by?(@context) %>
+
+<div class="pfda-toolbar clearfix">
+  <div class="btn-toolbar pull-left">
+    <% if @discussion.public? %>
+      <%= render "_partials/upvote_link", classes: "btn btn-default", item: @discussion %>
+
+      <%= link_to discussion_comments_path(@discussion), class: 'btn btn-link' do %>
+        <span class="fa fa-comment"></span> Comment | <%= @discussion.comment_threads.size %>
+      <% end %>
+    <% else %>
+      <span class="btn-static"><span class="fa fa-lock"></span> This discussion has not been published yet</span>
+    <% end %>
+  </div>
+
+  <div class="pull-right">
+    <% if @discussion.editable_by?(@context) %>
+      <div class="btn-group">
+        <%= link_to edit_discussion_path(@discussion), class: "btn btn-primary" do %>
+          <span class="fa fa-edit"></span> Edit discussion
+        <% end %>
+
+        <% if @discussion.note.publishable_by?(@context) %>
+          <%= link_to publish_path + "?" + {id: @discussion.uid}.to_param, method: :post, class: "btn btn-success" do %>
+            <span class="fa fa-bullhorn"></span> Publish
+          <% end %>
+        <% end %>
+      </div>
+
+      <div class="btn-group">
+        <div class="dropdown">
+          <button class="btn btn-primary" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="fa fa-cog"></span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
+            <li>
+              <a data-toggle='modal' data-target='#rename-modal'>
+                <span class="fa fa-pencil"></span> Rename
+              </a>
+            </li>
+            <li role="separator" class="divider"></li>
+            <li>
+              <%= link_to discussion_path(@discussion), method: :delete, data: { confirm: 'Are you certain you want to delete this?' } do %>
+                <span class="fa fa-trash"></span> Delete
+              <% end %>
+            </li>
+          </ul>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<% if @discussion.public? %>
+<div class="discussion-container pfda-pane container-fluid">
+  <div class="pfda-pane-content">
+    <div class="pfda-discussion-answers">
+      <%= render "answers/cards", answers: @answers %>
+    </div>
+  </div>
+  <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal pfda-pane-sidebar-padded-v">
+    <div class="list-group">
+      <li class="list-group-item">
+        <% if !@discussion.has_answered?(@context.user_id) %>
+          <%= link_to discussion_answers_path(@discussion), method: :post, class: "btn btn-default btn-block" do %>
+            <span class="fa fa-edit"></span> Write an Answer
+          <% end %>
+        <% else %>
+          <%= link_to edit_discussion_answer_path(@discussion, @context.username), class: "btn btn-default btn-block" do %>
+            <span class="fa fa-edit"></span> Edit your answer
+          <% end %>
+        <% end %>
+        <%= render "_partials/follow_link", classes: "btn btn-default btn-block", item: @discussion %>
+      </li>
+      <li class="list-group-item list-group-item-header">
+        <%= link_to "Followers", followers_discussion_path(@discussion) %>
+      </li>
+      <li class="list-group-item">
+        <%= render "_partials/followers", followers: @followers, followable: @discussion %>
+      </li>
+    </div>
+    <% if @follower_orgs.size > 0 %>
+    <div class="list-group">
+      <li class="list-group-item list-group-item-header">
+        <%= link_to "Organizations", followers_discussion_path(@discussion) %>
+      </li>
+      <li class="list-group-item">
+        <ul class="list-inline list-bricks">
+          <% @follower_orgs.each do |org| %>
+          <li>
+            <%= org.name %>
+          </li>
+          <% end %>
+        </ul>
+      </li>
+    </div>
+    <% end %>
+  </div>
+</div>
+<% end %>
+
+<% if @discussion.editable_by?(@context) %>
+  <%= render "_partials/modal_rename", item: @discussion, path_to_rename: rename_discussion_path(@discussion.id) %>
+<% end %>

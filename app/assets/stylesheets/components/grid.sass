@@ -5,6 +5,9 @@ $select-width: 28px
 .wice-grid.table
   margin-bottom: 0
 
+  td
+    white-space: nowrap
+
   .fa
     color: $brand-blue-tertiary
 
@@ -16,9 +19,20 @@ $select-width: 28px
     a
       color: $brand-blue-tertiary
 
+    &.sorted
+      a, .fa
+        color: $text-color
+
   > tbody > tr > td, > thead > tr > th
     border-left: 0
     border-right: 0
+
+  &.table-hover > tbody > tr:hover > td
+    &.sorted
+      background-color: darken($brand-highlight, 1%)
+
+    &.active-filter
+      background-color: darken($gray-subtle, 3%)
 
   &.table-striped > tbody > tr:nth-of-type(odd)
     background-color: transparent
@@ -34,18 +48,29 @@ $select-width: 28px
       &.state-running
         color: #fff
         background-color: $brand-blue-primary
-      &.state-done
+      &.state-done, &.state-active
         color: $state-success-text
         background-color: $state-success-bg
       &.state-failed, &.state-error
         color: $state-danger-text
         background-color: $state-danger-bg
+      &.state-inactive
+        color: $text-muted
+        background-color: $gray-subtle
+
+  > tbody > tr > td
+    &.active-filter
+      background-color: $gray-subtle
+
+  .sorted
+    font-weight: bold
+    background-color: lighten($brand-highlight, 2%)
 
   td.sel, th.sel
     width: $select-width
 
   .wg-filter-row
-    background-color: $gray-lighter
+    background-color: #fff
 
   .pagination_status
     float: right
@@ -55,6 +80,8 @@ $select-width: 28px
     .custom-dropdown
       width: calc(100% - 30px)
       display: inline-block
+      min-width: 75px
+
     .clickable
       width: 25px
       display: inline-block

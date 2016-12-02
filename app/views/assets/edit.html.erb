@@ -10,10 +10,11 @@
 <div class="pfda-toolbar">
   <div class="btn-group pull-right">
       <div class="btn-group">
-        <%= form_for @asset, url: asset_path(@asset.dxid), method: :put do |f| %>
+        <%= form_for @asset, url: asset_path(@asset.dxid), method: :put, html: {class: "form form-inline"} do |f| %>
           <input type="hidden" data-bind="attr: {name: 'asset[description]'}, value: description"/>
+
           <button class="btn btn-primary" type="submit">
-            <span class="fa fa-save"></span> Save
+            <span class="fa fa-save"></span> Save and Submit
           </button>
         <% end %>
       </div>
@@ -24,19 +25,29 @@
   <div class="ace-editor-section">
     <!-- Nav tabs -->
     <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
-      <li role="presentation" class="active"><a href="#tab-readme-editor" aria-controls="tab-readme-editor" role="tab" data-toggle="tab">Edit Description</a></li>
-      <li role="presentation"><a href="#tab-readme-preview" aria-controls="tab-readme-preview" role="tab" data-toggle="tab">Preview</a></li>
+      <li role="presentation" class="active"><a href="#tab-readme" aria-controls="tab-readme" role="tab" data-toggle="tab">Edit Description</a></li>
     </ul>
 
     <!-- Tab panes -->
     <div class="tab-content">
-      <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-readme-editor">
-        <%= alert_help("Learn how to format Markdown for your readme", "https://jonschlinkert.github.io/remarkable/demo/") %>
+      <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-readme">
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+          <li role="presentation" class="active"><a href="#tab-readme-editor" aria-controls="tab-readme-editor" role="tab" data-toggle="tab">Edit</a></li>
+          <li role="presentation"><a href="#tab-readme-preview" aria-controls="tab-readme-preview" role="tab" data-toggle="tab">Preview</a></li>
+        </ul>
 
-        <div id="readme-editor" class="ace-rounded" data-bind="ace: description, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity, wrap: 'free'}}"></div>
-      </div>
-      <div role="tabpanel" class="tab-pane tab-pane-padded-lg" id="tab-readme-preview">
-        <div class="readme-preview pfda-md-rendered" data-bind="html: description.preview"></div>
+        <!-- Tab panes -->
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-readme-editor">
+            <%= alert_help("Learn how to format Markdown", "https://jonschlinkert.github.io/remarkable/demo/") %>
+
+            <div id="readme-editor" class="ace-rounded" data-bind="ace: description, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity, wrap: 'free'}}"></div>
+          </div>
+          <div role="tabpanel" class="tab-pane tab-pane-padded-lg" id="tab-readme-preview">
+            <div class="readme-preview pfda-md-rendered" data-bind="html: description.preview"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

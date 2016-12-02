@@ -11,14 +11,18 @@
 .list-group-item-default
   color: $text-color
 
+.list-group-item-transparent-bg
+  background: transparent
+
 .list-group.list-group-inline
   margin-bottom: $padding-large-vertical
 
   li
     display: inline-block
-    // margin-right: $padding-base-horizontal
-    border: 0
-    border-radius: $border-radius-base
+    &.list-group-item
+      border: 0
+      vertical-align: top
+      border-radius: $border-radius-base
 
   .list-group-item-text
     font-size: 19px
@@ -54,8 +58,10 @@
       .list-preview-icon .fa
         color: $brand-blue-tertiary
 
-    .list-preview-icon .fa
-      color: lighten($brand-blue-tertiary, 15%)
+    .list-preview-icon
+      cursor: pointer
+      .fa
+        color: lighten($brand-blue-tertiary, 15%)
 
 .list-group-item-removeable
   .btn-link-danger
@@ -69,22 +75,26 @@
 
 .list-inline
   &.list-inline-padding-vertical
-    li
+    > li
       padding-top: 10px
       padding-bottom: 10px
+  &.list-inline-padding-horizontal
+    > li
+      padding-left: 10px
+      padding-right: 10px
 
   &.list-inline-bullets
     vertical-align: middle
-    li
+    > li
       padding-right: 0px
-    li
       &::after
         content: '\B7'
-        padding-left: 7px
+        padding-left: 5px
 
-    li:last-of-type
+    > li:last-of-type
       &::after
         content: ''
+        padding-left: 0
 
 .list-alt-even
   li:nth-of-type(even)
@@ -106,3 +116,17 @@
   .list-group
     margin: 0
     margin-top: 10px
+
+.list-group.list-group-contained
+  margin: 0
+  margin-top: 10px
+
+.list-group-item
+  .list-inline
+    margin-bottom: 0
+
+ul.list-contained, ol.list-contained
+  margin-bottom: 0
+
+
+@include list-group-item-variant(dark, $brand-blue-dark, #ffffff)

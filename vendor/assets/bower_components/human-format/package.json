@@ -1,0 +1,34 @@
+{
+  "name": "human-format",
+  "version": "0.5.1",
+  "description": "Converts a number to/from a human readable string: `1337` ↔ `1.34kB`",
+  "keywords": [
+    "byte",
+    "bytes",
+    "file",
+    "filesize",
+    "human",
+    "humanized",
+    "pretty",
+    "readable",
+    "si",
+    "size",
+    "unit"
+  ],
+  "scripts": {
+    "lint": "standard",
+    "test": "npm run lint && mocha index.spec.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/julien-f/human-format"
+  },
+  "bugs": "https://github.com/julien-f/human-format/issues",
+  "author": "Julien Fontanet <julien.fontanet@isonoe.net> (http://julien.isonoe.net/)",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^3.0.0",
+    "mocha": "^2.2.5",
+    "standard": "^5.1.0"
+  }
+}

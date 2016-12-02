@@ -27,7 +27,7 @@
 #= require knockout-sortable
 #= require moment
 #= require wice_grid
-#= require remarkable
+#= require remarkable/remarkable
 #= require SparkMD5
 #= require sortable/js/sortable
 #= require paloma
@@ -42,4 +42,6 @@
 #= require knockout-ace/knockout-ace
 #= require mousetrap/mousetrap.min
 #= require mousetrap/mousetrap-global-bind.min
+#= require tablesort
+#= require tablesort/src/sorts/tablesort.number
 #= require_tree .

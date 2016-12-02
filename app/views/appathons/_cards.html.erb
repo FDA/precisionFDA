@@ -1,0 +1,39 @@
+<% if (appathons.respond_to?(:total_count) && appathons.total_count > 0) || (appathons.respond_to?(:count) && appathons.count > 0) %>
+  <div class="pfda-cards">
+    <% appathons.each do |appathon| %>
+      <%= link_to appathon_path(appathon), class: "pfda-card pfda-card-light pfda-card-bordered pfda-card-rounded pfda-card-padded pfda-appathon-card" do %>
+        <div class="pfda-card-body">
+          <div class="media">
+            <div class="media-left">
+              <%= flag_image_tag(appathon.flag, width: 50) %>
+            </div>
+            <div class="media-body">
+              <div class="pfda-card-title">
+                <%= appathon.name %>
+              </div>
+              <ul class="list-inline list-inline-bullets text-muted">
+                <li>
+                  <%= pluralize(appathon.followers_count, 'participant') %>
+                </li>
+                <li>
+                  <%= pluralize(appathon.apps.count, 'app') %>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+  <% if (appathons.respond_to?(:total_count) && appathons.total_count > 0) %>
+  <div class="paginate-container">
+    <%= paginate appathons, :theme => 'twitter-bootstrap-3', :param_name => :appathons_page %>
+  </div>
+  <% end %>
+<% else %>
+<div class="pfda-cards">
+  <div class="pfda-card pfda-card-rounded">
+    <div class="lead text-muted">No appathons yet</div>
+  </div>
+</div>
+<% end %>

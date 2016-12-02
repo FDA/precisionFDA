@@ -65,6 +65,7 @@ Rails.application.configure do
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
+  config.action_mailer.default_url_options = { :host => "precision.fda.gov" }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
@@ -85,10 +86,11 @@ Rails.application.configure do
   # Email us when an exception occurs
 
   Rails.application.config.middleware.use ExceptionNotification::Rack,
+    :ignore_if => ->(env, exception) { ip = env["HTTP_X_FORWARDED_FOR"]; ip == "73.158.44.186" || ip == "76.191.184.242" || IPAddr.new("64.39.96.0/20").include?(IPAddr.new(ip)) rescue false },
     :email => {
       :email_prefix => "[PrecisionFDA]",
       :sender_address => %{"notifier" <notification@dnanexus.com>},
       :exception_recipients => %w{precisionfda-dev@dnanexus.com},
       :email_format => :html
-  }
+    }
 end

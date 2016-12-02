@@ -42,8 +42,14 @@ class JobsController < ApplicationController
       end
     end
 
-    @notes = @job.notes.accessible_by(@context).order(id: :desc)
+    @items_from_params = [@job]
+    @item_path = pathify(@job)
+    @item_comments_path = pathify_comments(@job)
+    @comments = @job.root_comments.order(id: :desc).page params[:comments_page]
 
+    @notes = @job.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
+    @answers = @job.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
+    @discussions = @job.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
     js id: @job.id
   end
 
@@ -104,7 +110,19 @@ class JobsController < ApplicationController
       return
     end
 
-    js app: @app.slice(:dxid, :spec, :title)
+    licenses_to_accept = []
+    @app.assets.each do |asset|
+      if asset.license.present? && !asset.licensed_by?(@context)
+        licenses_to_accept << {
+          license: describe_for_api(asset.license),
+          user_license: asset.user_license(@context)
+        }
+      end
+    end
+
+    licenses_accepted = @context.user.accepted_licenses.map{|l| {id: l.license_id, pending: l.pending?, active: l.active?, unset: !l.pending? && !l.active?}}
+
+    js app: @app.slice(:dxid, :spec, :title), licenses_to_accept: licenses_to_accept.uniq { |l| l.id}, licenses_accepted: licenses_accepted
   end
 
   def destroy

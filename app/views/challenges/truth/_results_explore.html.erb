@@ -1,0 +1,93 @@
+<div class="container container-padded">
+  <div class="">
+    <div class="lead-intro">Explore HG002 comparison results</div>
+    <div class="lead">Use this interactive explorer to filter all results across submission entries and multiple dimensions.</div>
+  </div>
+</div>
+
+<div class="challenge-section">
+  <div class="pfda-toolbar pfda-toolbar-padded">
+    <div class="pull-left">
+      <div class="btn-group">
+        <div class="dropdown">
+          <button class="btn btn-primary" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="fa fa-bookmark" aria-hidden="true"></span>
+            <%= !@saved_query.nil? ? @saved_query[:name] : "Bookmarks" %>
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dLabel">
+            <% @query_list.each do |query| %>
+              <li>
+                <a href="<%= truth_challenges_path({tab: @tab}) %>?query_id=<%=query.id%>">
+                  <div class="media">
+                    <div class="media-left">
+                      <%= image_tag(query.user.gravatar_url, class: 'img-circle', height: '25px') %>
+                    </div>
+                    <div class="media-body">
+                      <strong><%= query.name %></strong>
+                      <br>
+                      <small>
+                        <%
+                          tresults = JSON.parse(query.query)["truth_results"]
+                        %>
+                        <ul class="list-inline list-inline-bullets">
+                          <% if !tresults["f"]["entry"].nil? %>
+                            <li><%= tresults["f"]["entry"].first %></li>
+                          <% end %>
+                          <% if !tresults["f"]["type"].nil? %>
+                            <li><%= tresults["f"]["type"].first %></li>
+                          <% end %>
+                          <% if !tresults["f"]["subtype"].nil? %>
+                            <li><%= tresults["f"]["subtype"].first %></li>
+                          <% end %>
+                          <% if !tresults["f"]["subset"].nil? %>
+                            <li><%= tresults["f"]["subset"].first %></li>
+                          <% end %>
+                          <% if !tresults["f"]["genome"].nil? %>
+                            <li><%= tresults["f"]["genome"].first %></li>
+                          <% end %>
+                          <% if !tresults["order"].nil?  && !tresults["order_direction"].nil? %>
+                            <li><%= tresults["order"] %> <%= tresults["order_direction"] %></li>
+                          <% end %>
+                        </ul>
+                        <small class="text-muted"><%= query.user.full_name %></small>
+                      </small>
+                    </div>
+                  </div>
+                </a>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+      <div class="btn-group">
+        <%= link_to truth_challenges_path({tab: @tab}), class:"btn btn-link" do %>
+          <span class="fa fa-ban" aria-hidden="true"></span> Reset
+        <% end %>
+      </div>
+        <% if @context.logged_in? && !@saved_query.nil? %>
+          <% if @saved_query.user_id == @context.user_id || @context.user.can_administer_site? %>
+            <div class="btn-group">
+              <%= link_to query_path(@saved_query), method: :delete, data: { confirm: 'Are you certain you want to delete this?' }, class: "btn btn-link-danger" do %>
+                <span class="fa fa-trash"></span> Delete
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+    </div>
+    <% if @context.logged_in? %>
+    <div class="pull-right">
+      <%= form_for @new_saved_query, url: queries_path, method: :post, html: {class: 'form-inline'} do |f| %>
+        <%= f.text_field :name, class: "form-control", placeholder: "Bookmark label...", required: "required"  %>
+        <%= f.hidden_field :query %>
+        <%= f.hidden_field :grid_name %>
+        <%= f.hidden_field :user_id %>
+        <input type="hidden" name="page_tab" value="<%= @tab %>" />
+        <button type="submit" class="btn btn-primary" data-disable-with="Saving..."><span class="fa fa-plus" aria-hidden="true"></span> Share your bookmark</button>
+      <% end %>
+    </div>
+    <% end %>
+  </div>
+
+  <%= render "challenges/truth/table_results", results_grid: @results_grid, tab: @tab, answers_to_username_map: @truth_challenge[:results][:answers_to_username_map], show_filters: :always, grid_classes: 'table-condensed table-hover' %>
+</div>

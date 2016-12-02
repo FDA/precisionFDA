@@ -1,4 +1,4 @@
-<%= grid(comparisons_grid, show_filters: :when_filtered) do |g|
+<%= grid(comparisons_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
   g.blank_slate partial:  "_partials/empty_grid"
 
   g.after_row do |comparison, num_cols|
@@ -18,7 +18,7 @@
   end
 
   g.column name: 'Name', attribute: 'name' do |comparison|
-    unilinkfw(comparison, globe: true)
+    unilinkfw(comparison, scope_icon: (defined?(scope_icon) ? scope_icon : true))
   end
 
   g.column name: 'Org', attribute: 'handle', assoc: [:user, :org] do |comparison|
@@ -43,8 +43,20 @@
     comparison.created_at.to_s(:db)
   end
 
-  g.column name: 'Access', attribute: 'scope',
-    custom_filter: {'Public' => "public", 'Private' => "private"} do |comparison|
-    comparison.public? ? "Public" : "Private"
+  if !defined?(hide_access) || !hide_access
+    g.column name: 'Access', attribute: 'scope', allow_multiple_selection: false,
+      custom_filter: {'Public' => "public", 'Private' => "private"} do |comparison|
+      if comparison.public?
+        "Public"
+      elsif comparison.private?
+        "Private"
+      else
+        unilinkfw(item_from_uid(comparison.scope))
+      end
+    end
+  end
+
+  g.column name: 'Tags', attribute: 'name', assoc: [:taggings, :tag] do |item|
+    render "_partials/tags_list", tags_list: item.all_tags_list
   end
 end -%>

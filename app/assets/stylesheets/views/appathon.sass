@@ -1,0 +1,48 @@
+@import "_common"
+
+.pfda-controller-appathons
+  &.pfda-action-show, &.pfda-action-new, &.pfda-action-edit
+    .page-header
+      padding: 50px 25px
+      .page-context-title
+        text-align: center
+      .page-title
+        font-size: 50px
+        font-weight: 300
+        text-align: center
+      .description
+        text-align: center
+      .list-bricks
+        li
+          background-color: darken($brand-blue-subtler, 2%)
+
+  &.pfda-action-new, &.pfda-action-edit
+    .appathon-flags
+      > li
+        margin-right: 20px
+        width: 100px
+
+$sidebar-border-color: darken(desaturate($brand-blue-subtler, 25%), 10%)
+.pfda-pane .pfda-appathon-sidebar.pfda-pane-sidebar
+  border-left: 1px solid $border-default-color
+  .pfda-appathon-participants
+    padding: $padding-base-horizontal
+
+    ul
+      margin-bottom: 0
+
+  .pfda-appathon-description
+    border-top: 1px solid $sidebar-border-color
+    padding: $padding-base-horizontal
+
+  .pfda-appathon-admin
+    font-size: 12px
+    .list-group-item
+      border: 1px solid lighten($sidebar-border-color, 3%)
+      border-left: 0
+      border-right: 0
+      border-radius: 0
+      &:first-child
+        border-top: 1px solid $sidebar-border-color
+      &:last-child
+        border-bottom: 0

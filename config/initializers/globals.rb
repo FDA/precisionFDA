@@ -18,15 +18,39 @@ if ENV["DNANEXUS_BACKEND"] == "production"
   DNANEXUS_AUTHSERVER_URI = "https://auth.dnanexus.com/"
   DNANEXUS_APISERVER_URI = "https://api.dnanexus.com/"
   DNANEXUS_PLATFORM_URI = "https://platform.dnanexus.com/"
+  CONSISTENCY_DISCUSSION_ID = 1
+  TRUTH_DISCUSSION_ID = 6
+  # Hard-code uid for NA12878-NISTv2.19 for feedback link
+  NIST_VCF_UID = "file-Bk50V4Q0qVb65P0v2VPbfYPZ"
 else
   DNANEXUS_AUTHSERVER_URI = "https://stagingauth.dnanexus.com/"
   DNANEXUS_APISERVER_URI = "https://stagingapi.dnanexus.com/"
   DNANEXUS_PLATFORM_URI = "https://staging.dnanexus.com/"
+  CONSISTENCY_DISCUSSION_ID = 1
+  TRUTH_DISCUSSION_ID = 4 # TODO: Update this to the discussion id of challenge
+  # Hard-code uid for NA12878-NISTv2.19 for feedback link
+  NIST_VCF_UID = "file-Bk0kjkQ0ZP01x1KJqQyqJ7yB"
 end
 
+APPKIT_TGZ = ENV["APPKIT_TGZ"]
 ORG_EVERYONE = ENV["ORG_EVERYONE"]
 ORG_DUMMY = ENV["ORG_DUMMY"]
-DEFAULT_COMPARISON_APP = ENV["DEFAULT_COMPARISON_APP"]
 ADMIN_TOKEN = ENV["ADMIN_TOKEN"]
-APPKIT_TGZ = ENV["APPKIT_TGZ"]
+DEFAULT_COMPARISON_APP = ENV["DEFAULT_COMPARISON_APP"]
 BILLING_CONFIRMATION = ENV["BILLING_CONFIRMATION"]
+
+# Challenge 1 - Consistency
+CONSISTENCY_CHALLENGE_START_DATE = DateTime.new(2016,2,25).in_time_zone.end_of_day + 4.hours
+CONSISTENCY_CHALLENGE_END_DATE = DateTime.new(2016,4,25).in_time_zone.end_of_day + 4.hours
+CONSISTENCY_CHALLENGE_RESULTS_DATE = DateTime.new(2016,5,25,16,50).in_time_zone + 8.hours
+
+# Challenge 2 - Truth
+TRUTH_CHALLENGE_START_DATE = DateTime.new(2016,4,26).in_time_zone.end_of_day + 4.hours
+TRUTH_CHALLENGE_END_DATE = DateTime.new(2016,5,26).in_time_zone.end_of_day + 4.hours
+TRUTH_CHALLENGE_RESULTS_DATE = DateTime.new(2016,6,29,6,30).in_time_zone + 7.hours
+
+ALLOWED_CLASSES_FOR_LICENSE = ["file", "asset"]
+ALLOWED_CLASSES_FOR_TAGGING = ["app-series", "answer", "asset", "comparison", "file", "discussion", "job", "note"]
+
+# Remove X-Runtime
+Rails.application.config.middleware.delete(Rack::Runtime)

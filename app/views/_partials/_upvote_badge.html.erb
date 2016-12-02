@@ -1,0 +1,11 @@
+<% if @context.logged_in? %>
+  <a class="event-upvote btn btn-default btn-upvote <%= defined?(classes) ? classes : '' %> <%= @context.user.voted_up_on?(item, vote_scope: vote_scope) ? 'active': ''%>" data-uid="<%= item.uid %>" data-upvote-count="<%= item.get_upvotes(vote_scope: vote_scope).size %>" data-vote-scope="<%= vote_scope.present? ? vote_scope : '' %>">
+    <span class="fa fa-caret-up <%= defined?(icon_classes) ? icon_classes : '' %>"></span>
+    <div class="upvote-count"><%= item.get_upvotes(vote_scope: vote_scope).size %></div>
+  </a>
+<% else %>
+  <a class="btn btn-default btn-upvote disabled <%= defined?(classes) ? classes : '' %>">
+    <span class="fa fa-caret-up <%= defined?(icon_classes) ? icon_classes : '' %>"></span>
+    <div class="upvote-count"><%= item.get_upvotes(vote_scope: vote_scope).size %></div>
+  </a>
+<% end %>

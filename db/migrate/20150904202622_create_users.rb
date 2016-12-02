@@ -8,7 +8,6 @@ class CreateUsers < ActiveRecord::Migration
       t.string :public_comparisons_project, required: true
       t.integer :open_files_count, default: 0
       t.integer :closing_files_count, default: 0
-      t.integer :pending_comparisons_count, default: 0
       t.integer :schema_version, required: true
 
       t.timestamps null: false

@@ -5,6 +5,10 @@ class AssetModel
     @description.preview = ko.computed(=>
       Precision.md.render(@description())
     )
+    @license = ko.observable(asset.license)
+    @license.preview = ko.computed(=>
+      Precision.md.render(@license())
+    )
 
 #########################################################
 #
@@ -14,9 +18,10 @@ class AssetModel
 #
 #########################################################
 
-AssetsController = Paloma.controller('Assets')
-AssetsController::edit = ->
-  $container = $("body main")
+AssetsController = Paloma.controller('Assets',
+  edit: ->
+    $container = $("body main")
 
-  assetModel = new AssetModel(@params.asset)
-  ko.applyBindings(assetModel, $container[0])
+    assetModel = new AssetModel(@params.asset)
+    ko.applyBindings(assetModel, $container[0])
+)

@@ -1,0 +1,528 @@
+<div id="about-docs" class="bs-docs-container docs-content">
+  <div class="row">
+    <div class="col-sm-18">
+      <div id="dev" class="h1">Creating Apps</div>
+      <div class="bs-docs-section">
+        <p>To create a new app, click "Create App" in the Apps page. The following section walks you through important concepts of app development.</p>
+        <div class="alert alert-info">
+          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> Want to learn by example? Simply choose any of the public apps in precisionFDA and click "Fork". This will load up the app editor, where you can take a look at the internals of the app and see what it is comprised of. You can then hit the Back button in your web browser -- unless of course you truly want to fork the app and make a private copy with which you can experiment, in which case click the new Fork button from inside the app editor to complete the operation.
+        </div>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section">
+        <%= video_iframe(@videos[:apps_create][:url]) %>
+      </div>
+      <div id="dev-name" class="h2">App naming conventions</div>
+      <div class="bs-docs-section">
+        <p>Apps have a machine-readable name that cannot contain spaces (such as "bwa-freebayes") and a human-readable title (such as "BWA-MEM and FreeBayes"). Among apps that you create, names need to be unique (you cannot author two distinct apps with the same name). This restriction is only per-user, meaning that you can still create an app with the same name as someone else's app. In fact, the system encourages you to use someone else's app as a starting point and make further tweaks and save it as your own app (a process called "<strong>forking</strong>" an app). This model was inspired from the model of GitHub repositories.</p>
+      </div>
+      <div id="dev-io" class="h2">Input and Output spec</div>
+      <div class="bs-docs-section">
+        <p>Apps require an input/output specification, which mandates what inputs they need from the user, and what outputs they are expected to generate. Note that an "input" is anything that needs to be received from the user and which can potentially vary between executions. These can be not only input files but also numerical or boolean values, and strings. In that sense, the "inputs" can be used both for receiving data to operate on as well as receiving configuration parameters. Each input field has the following properties:</p>
+        <table class="table table-bordered">
+          <thead>
+            <th>Property</th>
+            <th>Explanation</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Class</td>
+              <td>The kind of input. There are exactly five classes supported: file, string, integer, float and boolean.</td>
+            </tr>
+            <tr>
+              <td>Name</td>
+              <td>A machine-readable name for this input (no spaces allowed). The system will create a shell variable named after this, for your script to use.</td>
+            </tr>
+            <tr>
+              <td>Label</td>
+              <td>A human-readable label for this input. The system uses this to render the form that users see when launching the app.</td>
+            </tr>
+            <tr>
+              <td>Help text</td>
+              <td>Additional help text describing what this input field is about. The system shows this help text in the app details page ("spec" tab), and upon hovering on an input during app launch.</td>
+            </tr>
+            <tr>
+              <td>Default value</td>
+              <td>A default value that this field will be pre-filled with when users launch the app. (You are not required to provide defaults; do so only if you need to guide users in choosing the right values.)</td>
+            </tr>
+            <tr>
+              <td>Choices</td>
+              <td>A set of comma-separated values denoting the only permitted values for this field. If such choices are provided, the user must choose one of them using a drop-down menu and can't write in their own value.</td>
+            </tr>
+            <tr>
+              <td>Optional?</td>
+              <td>Whether this field is optional or required. When launching an app, users must fill all required fields before they can continue.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="bs-callout bs-callout-primary bs-callout-darker">
+          <h4>Input spec example</h4>
+          <p>Let's consider an app which takes a BED file with genomic intervals, and extends each interval's coordinates by adding a fixed amount of padding on both sides. Here's an example of input spec:</p>
+          <table class="table table-bordered">
+            <thead>
+              <th>Property</th>
+              <th>Value for 1st input</th>
+              <th>Value for 2nd input</th>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Class</td>
+                <td>file</td>
+                <td>integer</td>
+              </tr>
+              <tr>
+                <td>Name</td>
+                <td>intervals</td>
+                <td>padding</td>
+              </tr>
+              <tr>
+                <td>Label</td>
+                <td>BED file with intervals</td>
+                <td>Padding amount to add</td>
+              </tr>
+              <tr>
+                <td>Help text</td>
+                <td>The BED file whose genomic intervals will be extended.</td>
+                <td>The number of base pairs to extend each interval along both directions.</td>
+              </tr>
+              <tr>
+                <td>Default value</td>
+                <td></td>
+                <td>10</td>
+              </tr>
+              <tr>
+                <td>Choices</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td>Optional?</td>
+                <td>false</td>
+                <td>false</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The output specification is similar to the input specification (but with no default values). When creating an app, you specify what kind of inputs your app is expected to create, and define names and labels for them. When your script runs, it is responsible for generating the respective outputs. If an output is marked as optional, your script is not required to produce it. See the <a href="#dev-script">app shell script</a> section for more information.</p>
+        <div class="bs-callout bs-callout-primary bs-callout-darker">
+          <h4>Output spec example</h4>
+          <p>To continue our aforementioned example, here is a potential output specification for our example app:</p>
+          <table class="table table-bordered">
+            <thead>
+              <th>Property</th>
+              <th>Value for 1st output</th>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Class</td>
+                <td>file</td>
+              </tr>
+              <tr>
+                <td>Name</td>
+                <td>padded_intervals</td>
+              </tr>
+              <tr>
+                <td>Label</td>
+                <td>Padded BED result</td>
+              </tr>
+              <tr>
+                <td>Help text</td>
+                <td>The generated BED file with the padded genomic intervals.</td>
+              </tr>
+              <tr>
+                <td>Optional?</td>
+                <td>false</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div id="dev-vm-env" class="h2">VM Environment</div>
+      <div class="bs-docs-section">
+        <p>Apps run inside a virtual machine (VM); a computer on the cloud with a specific environment. When authoring an app, you have the opportunity to configure the environment according to your needs, using the "VM Environment" tab.</p>
+        <p>By default, apps do not have access to the Internet. Removing Internet access ensures that apps cannot communicate with the outside world over the Internet -- this increases user comfort and lowers the barriers for users to try out apps. If your app requires Internet access (for example, to communicate with a third-party database over the Internet, to fetch files from URLs, or to fetch and install external software at runtime), you can enable it in this tab.</p>
+        <p>The default instance type denotes the particular hardware configuration that the app will run on. Each instance type comes with a specific amount of memory, number of CPU cores, and hard disk storage. See the section on <a href="#dev-instance-types">available instance types</a> below for more information. Although you can choose a default one in the "VM Environment" tab, users can still override the default choice when launching the app. This is useful if you have a single app that can work for both small inputs (such as an exome) and large inputs (such as a whole genome).</p>
+        <div class="alert alert-info">
+          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> Make a smart choice of default instance type. Select an instance that would be suitable for typical inputs, and use the app's Readme to guide users as to how to adjust it when running your app with larger inputs. Jobs consume energy depending on the instance type used, so your pipeline may be wasteful if it does not use its default instance type efficiently.
+        </div>
+        <p>The operating system of the virtual machine is Ubuntu 14.04, with several <a href="/assets/packages.txt">preinstalled packages</a>. If your app requires additional Ubuntu packages, you can specify so in the "VM Environment" tab. For example, if your app needs Java, we recommend adding the "openjdk-7-jre-headless" package. If you are unsure as to what a certain package is called, you can use the <a href="http://packages.ubuntu.com">packages.ubuntu.com</a> website to locate packages (make sure to select the "trusty" distribution in the search form, as that is the codename for Ubuntu 14.04). Note that, specifically for Java 8, we support additional packages (such as "openjdk-8-jre-headless") which are not listed on the Ubuntu packages website.</p>
+        <p>If you need to load additional files onto the virtual machine and have them available to your app's shell script, such as executables, libraries, reference genome files or pretty much any other static files required for your execution, you can use <b>App assets</b>. Assets are tarballs that are uncompressed in the root folder of the virtual machine right before running your app script. The <a href="#dev-assets">App assets</a> section discusses in detail how to create, manage, and select assets for your app.</p>
+        <p>The shell script of an app contains the shell code that will run inside the virtual machine. The script runs as root. During the script execution, the default working directory (home directory) is <code>/work</code>. For more information about the shell variables available to your script, and the handling of app inputs and outputs from your script, consult the <a href="#dev-script">App script</a> section.</p>
+        <p>To summarize, here is what happens when your app is launched:</p>
+
+        <table class="table table-bordered">
+          <thead>
+            <th>Step</th>
+            <th>&nbsp;</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>A new virtual machine with Ubuntu 14.04 and <a href="/assets/packages.txt">these preinstalled packages</a> is initialized.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Additional Ubuntu packages are installed per your app's spec.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Your app's assets are fetched and uncompressed in the root folder.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>The job's input files are downloaded in subfolders under the <code>/work/in/</code> folder.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Shell variables are populated according to your job's inputs.</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Your app's shell script is executed.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="dev-instance-types" class="h2">Available instance types</div>
+      <div class="bs-docs-section">
+        <p>The precisionFDA system supports the following hardware configurations (instance types) for apps to run on:</p>
+
+        <table class="table table-bordered">
+          <thead>
+            <th>Instance type</th>
+            <th># of CPU cores</th>
+            <th>Memory</th>
+            <th>Hard Disk Storage</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Baseline 2</td>
+              <td>2</td>
+              <td>3.8 GB</td>
+              <td>32 GB</td>
+            </tr>
+            <tr>
+              <td>Baseline 4</td>
+              <td>4</td>
+              <td>7.5 GB</td>
+              <td>80 GB</td>
+            </tr>
+            <tr>
+              <td>Baseline 8</td>
+              <td>8</td>
+              <td>15 GB</td>
+              <td>160 GB</td>
+            </tr>
+            <tr>
+              <td>Baseline 16</td>
+              <td>16</td>
+              <td>30 GB</td>
+              <td>320 GB</td>
+            </tr>
+            <tr>
+              <td>Baseline 32</td>
+              <td>32</td>
+              <td>60 GB</td>
+              <td>640 GB</td>
+            </tr>
+            <tr>
+              <td colspan=4></td>
+            </tr>
+            <tr>
+              <td>High Mem 2</td>
+              <td>2</td>
+              <td>15 GB</td>
+              <td>32 GB</td>
+            </tr>
+            <tr>
+              <td>High Mem 4</td>
+              <td>4</td>
+              <td>30.5 GB</td>
+              <td>80 GB</td>
+            </tr>
+            <tr>
+              <td>High Mem 8</td>
+              <td>8</td>
+              <td>61 GB</td>
+              <td>160 GB</td>
+            </tr>
+            <tr>
+              <td>High Mem 16</td>
+              <td>16</td>
+              <td>122 GB</td>
+              <td>320 GB</td>
+            </tr>
+            <tr>
+              <td>High Mem 32</td>
+              <td>32</td>
+              <td>244 GB</td>
+              <td>640 GB</td>
+            </tr>
+            <tr>
+              <td colspan=4></td>
+            </tr>
+            <tr>
+              <td>High Disk 2</td>
+              <td>2</td>
+              <td>3.8 GB</td>
+              <td>160 GB</td>
+            </tr>
+            <tr>
+              <td>High Disk 4</td>
+              <td>4</td>
+              <td>7.5 GB</td>
+              <td>320 GB</td>
+            </tr>
+            <tr>
+              <td>High Disk 8</td>
+              <td>8</td>
+              <td>15 GB</td>
+              <td>640 GB</td>
+            </tr>
+            <tr>
+              <td>High Disk 16</td>
+              <td>16</td>
+              <td>30 GB</td>
+              <td>1280 GB</td>
+            </tr>
+            <tr>
+              <td>High Disk 36</td>
+              <td>36</td>
+              <td>60 GB</td>
+              <td>2880 GB</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="dev-assets" class="h2">App assets</div>
+      <div class="bs-docs-section">
+        <p>App assets are the building blocks of apps. They are tarballs (file archives), which get uncompressed in the root folder of the virtual machine before the app script starts to run. They can contain executables (such as bioinformatics tools), static data (such as reference genomes and index files) or pretty much anything else that is required for an app to run.</p>
+        <p>Just like regular files, app assets can be either private or publicly contributed to the precisionFDA community. Your app can choose among any accessible assets (whether private or public).</p>
+        <div class="alert alert-info">
+          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> You can have a public app that uses a private asset. In that case, people will be able to run the app, but will not have access to the private executables. They will also be able to fork the app but their fork won't include the private assets. This may be an option of choice if you want to allow people to try out something without giving them access to the code. For more information consult the second table in the <a href="<%= show_docs_path("publishing") %>">Publishing</a> section.
+        </div>
+        <p>To help get you started, the precisionFDA team has contributed a few popular app assets that you can include in your app's environment. The table below lists some examples of such public app assets:</p>
+
+        <table class="table table-bordered">
+          <thead>
+            <th>Asset</th>
+            <th>Contents</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>samtools-1.2</td>
+              <td>The <code>/usr/bin/samtools</code> executable.</td>
+            </tr>
+            <tr>
+              <td>htslib-1.2.1</td>
+              <td>The <code>/usr/bin/bgzip</code> and <code>/usr/bin/tabix</code> executables.</td>
+            </tr>
+            <tr>
+              <td>grch37-fasta</td>
+              <td>The GRCh37 reference genome FASTA file (<code>/work/grch37.fa</code>).</td>
+            </tr>
+            <tr>
+              <td>bwa-0.7.12</td>
+              <td>The <code>/usr/bin/bwa</code> executable.</td>
+            </tr>
+            <tr>
+              <td>bwa-grch37</td>
+              <td>The GRCh37 reference genome, indexed for BWA.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>When editing an app, in the "VM Environment" tab, you will see a list of assets that have been selected for inclusion in the app's virtual machine. You can remove assets by hovering over them and clicking the "X" button on the right hand side. You can select additional assets by clicking the "Select assets" button, which will pop up the asset selector.</p>
+        <p>The selector lists all available assets on the left hand side. Clicking on the name of an asset, or on the checkbox next to it, will select that asset for inclusion. Clicking on the whitespace surrounding the asset name, or on the right-pointing arrow next to the asset name will display information about the asset (but not toggle the selection). <u>Each asset comes with documentation</u>, which is meant to describe what is the asset and how it can be used. In addition, the system displays a list of all files that are found inside the tarball.</p>
+        <p>We understand that asset names may not always be indicative of their contents; for example, many people would recognize <code>tabix</code> as the executable that indexes VCF files, but fewer people would recognize <code>htslib</code> as the asset containing that executable. For this reason, the precisionFDA system includes a feature that allows you to search filenames across all assets. In the asset selector, type a search keyword (such as <code>tabix</code>) in the upper left corner. The asset list will be filtered to show you assets which include that file (such as <code>htslib</code>), as well as assets whose name starts with that prefix.</p>
+        <p>To upload your own assets, or to perform more detailed asset management (such as download an asset to take a look at it yourself, or delete an asset you've previously uploaded) click "Manage your assets", from either the asset selector or the "VM Environment" tab (or "Manage Assets" from the Apps listing page). You will be taken to a page listing all the precisionFDA assets (your private ones, and all public ones). Click on an asset's name to see asset details, and to perform actions such as download, delete, or edit its readme. Click "Create Assets" at the top to be presented with instructions on how to upload your own assets. The next section discusses the process in detail.</p>
+      </div>
+      <div id="dev-own-assets" class="h2">Your own assets</div>
+      <div class="bs-docs-section">
+        <p>To upload an asset, you must first prepare the files that will be included in the tarball archive. On your computer, start by creating a "fake root" folder and by assembling your files underneath it.</p>
+        <p>Since the asset will be uncompressed in the root folder on the cloud, it is important for the tarball to contain the proper subfolders inside of it. If an asset tarball does not have any subfolders, then its files will be placed directly inside the root folder (i.e. in <code>/</code>), which is not typically desired.</p>
+        <p>Therefore, create the <code>usr/bin</code> subfolder under the "fake root" and place there any binaries, and create the <code>work</code> subfolder for any working directory files. Since your app's script starts its execution inside <code>/work</code>, any files you place under that folder will be readily accessible. For example, if your asset includes a file <code>/work/GenomeAnalysisTK.jar</code>, you can use it inside your script without any other folder designation, i.e. like this: <code>java -jar GenomeAnalysisTK.jar</code>.</p>
+        <p>If you need to compile binaries for Ubuntu 14.04, or otherwise experiment with a Linux environment similar to the one that apps run on, download and install the freely available <a href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a> virtualizer. Then, from the "Create Assets" page, download the precisionFDA virtual machine image and double-click it to open it in VirtualBox. Power on the machine and log in as the <code>ubuntu</code> user. This environment contains the same Ubuntu packages as the cloud environment where apps run.</p>
+        <div class="alert alert-info">
+          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> From your host operating system (such as the OS X Terminal) you can SSH into the VM by typing <code>ssh -p 2222 ubuntu@localhost</code>. This will allow you to use your host operating system's copy/paste capabilities, or to transfer files in and out of the VM.
+        </div>
+        <p>The following table summarizes ways in which you can use the VirtualBox machine to prepare content for inclusion in your fake root:</p>
+        <table class="table table-bordered">
+          <thead>
+            <th>To include...</th>
+            <th>Do this...</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Compilable executables</td>
+              <td><code>make</code><br><code>mkdir -p fake_root/usr/bin</code><br><code>cp <em>program</em> fake_root/usr/bin</code></td>
+            </tr>
+            <tr>
+              <td>Complex compilable packages</td>
+              <td><code>./configure --prefix=/opt/<em>packagename</em></code><br><code>sudo make install</code><br><code>mkdir -p fake_root/opt/</code><br><code>cp -R /opt/<em>packagename</em> fake_root/opt/</code></td>
+            </tr>
+            <tr>
+              <td>Python packages</td>
+              <td><code>pip install --user <em>packagename</em></code><br><code>mkdir -p fake_root/work/</code><br><code>mv ~/.local fake_root/work/</code></td>
+            </tr>
+            <tr>
+              <td>R packages</td>
+              <td><code>R</code><br><code>&gt; install.packages(...)</code><br>Answer Y to the question "create a personal library"<br><code>mkdir -p fake_root/work/</code><br><code>mv ~/R fake_root/work/</code></td>
+            </tr>
+          </tbody>
+        </table>
+        <p>After assembling your fake_root, prepare a Readme file for your asset. This file needs to contain <a href="https://jonschlinkert.github.io/remarkable/demo/">Markdown syntax</a>. Below is an example of the Readme file included with the htslib-1.2.1 public asset: (note the extra two spaces after tabix-1.2.1.html -- this is how you introduce line breaks in markdown)</p>
+        <pre>
+This asset provides the `bgzip` and `tabix` executables.
+
+Include this asset if your app needs to compress and index
+a VCF file.
+
+### Example usage
+
+The following produces `file.vcf.gz` and `file.vcf.tbi`:
+
+```
+bgzip file.vcf
+tabix -p vcf file.vcf.gz
+```
+
+### Links
+
+http://www.htslib.org/doc/tabix-1.2.1.html  
+https://github.com/samtools/htslib/releases/tag/1.2.1</pre>
+        <p>Download the precisionFDA uploader by clicking the respective button in the "Create Assets" page. The downloaded archive contains a single python script, <code>pfda</code>, which you can run to upload the asset. (NOTE: It requires Python 2.7, as well as the python 'requests' and 'futures' packages, so ensure you have those available in your environment).</p>
+        <p>The tool requires an "authorization key" in order to authenticate the client against the precisionFDA system. You can get a key by clicking the respective link in the "Add Assets" page. Copy the key from that page and paste it in the command below where it says <strong>KEY</strong>. For your security, the key is valid for 24h.</p>
+        <p>Run <code>./pfda upload-asset --auth KEY --name my-asset.tar.gz --root /path/to/fake_root --readme my-asset.txt</code>. This command will archive the contents of the fake root into the named tarball, and upload it to precisionFDA along with the contents of the readme file. The tarball name must end in either <code>.tar.gz</code> or <code>.tar</code> (in which latter case it will not be compressed).</p>
+        <div class="alert alert-info">
+          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> The uploader saves your key in <code>$HOME/.config/precision-fda/config.json</code>, so after you have run it once, you don't need to specify the key in subsequent invocations.
+        </div>
+
+      </div>
+      <div id="dev-script" class="h2">App script</div>
+      <div class="bs-docs-section">
+        <p>When creating an app, the "Script" tab provides you with an editor where you can write the shell script that will be executed. The script will run as root, inside the <code>/work</code> folder (which is also set as the home directory during execution). The script is <code>source</code>'ed from inside bash, so you don't need to include any <code>#!/bin/bash</code> headers as they will be ignored. Bash by default runs with the <code>set -e -x -o pipefail</code> options.</p>
+        <p>App inputs are handled in the following way:<br>
+        <ul><li>For string, integer, float and boolean inputs, the system defines a shell variable with the same name. Its value is set to whatever value the user provided for that input (or empty, if that input is optional and no value was provided)</li>
+          <li>For files, the system downloads each file input under <code>/work/in/<em>field</em>/<em>filename</em></code>. For instance, in the <a href="#dev-io">example we gave earlier</a>, if a user provides a file called <code>trusight.bed</code> for the input field <code>intervals</code>, the system will download the file into <code>/work/in/intervals/trusight.bed</code>. In addition, the following variables are defined:
+            <table class="table table-bordered">
+              <thead>
+                <th>Variable</th>
+                <th>Content</th>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>$<em>field</em></code></td>
+                  <td>The unique system id (i.e. file-Bk0kjkQ0ZP01x1KJqQyqJ7yq) of whatever file was assigned for that field.</td>
+                </tr>
+                <tr>
+                  <td><code>$<em>field</em>_name</code></td>
+                  <td>The filename.</td>
+                </tr>
+                <tr>
+                  <td><code>$<em>field</em>_path</code></td>
+                  <td>The full file path, i.e. <code>/work/in/<em>field</em>/<em>filename</em></code>.</td>
+                </tr>
+                <tr>
+                  <td><code>$<em>field</em>_prefix</code></td>
+                  <td>The filename without its suffix (and if its suffix is ".gz", without its second suffix, i.e. without ".tar.gz", ".vcf.gz", or ".fastq.gz").</td>
+                </tr>
+              </tbody>
+            </table>
+          </li>
+        </ul>
+        <div class="bs-callout bs-callout-primary bs-callout-darker">
+          <h4>Example of system-defined variables</h4>
+          <p>For our <a href="#dev-io">example</a>, the system would define the following variables:</p>
+          <table class="table table-bordered">
+            <thead>
+              <th>Variable</th>
+              <th>Content</th>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>$intervals</code></td>
+                <td><code>file-Bk0kjkQ0ZP01x1KJqQyqJ7yq</code></td>
+              </tr>
+              <tr>
+                <td><code>$intervals_name</code></td>
+                <td><code>trusight.bed</code></td>
+              </tr>
+              <tr>
+                <td><code>$intervals_path</code></td>
+                <td><code>/work/in/intervals/trusight.bed</code></td>
+              </tr>
+              <tr>
+                <td><code>$intervals_prefix</code></td>
+                <td><code>trusight</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <p>The system defines the prefix variable because it can be often used to name results. In our example app, we can name the padded intervals <code>"$intervals_prefix".padded.bed</code>.</p>
+        </div>
+        <p>Your script needs to communicate back to the system its outputs. This is handled via a helper utility called <code>emit</code>. Use it as follows:</p>
+        <ul>
+          <li>For string, integer, float and boolean outputs, type <code>emit&nbsp;&nbsp;<em>field</em>&nbsp;&nbsp;<em>value</em></code>. For example, if you've defined an output field called <code>qc_pass</code> of boolean type, use <code>emit qc_pass true</code> to set it to true.</li>
+          <li>For file outputs, type <code>emit&nbsp;&nbsp;<em>field</em>&nbsp;&nbsp;<em>filename</em></code>. This command will upload the particular file from the local hard disk of the virtual machine onto the cloud storage, and assign it to that field.</li>
+        </ul>
+        <div class="bs-callout bs-callout-primary bs-callout-darker">
+          <h4>Example of app script</h4>
+          <p>To put it all together, here is what the script would look like for our example app:</p>
+          <pre style="white-space: nowrap">bedtools slop -i "$intervals_path" -g grch37.chrsizes -b "$padding" &gt;"$intervals_prefix".padded.bed<br>
+      emit padded_intervals "$intervals_prefix".padded.bed</pre></p>
+        </div>
+      </div>
+      <div id="dev-bash" class="h2">Bash tips</div>
+      <div class="bs-docs-section">
+        <p>Bash is the shell interpreter that runs your app's shell script. It is the most popular shell interpreter in Linux distributions, and also used to power the OS X Terminal app. In most systems you can reach the bash manual by typing <code>man bash</code>.</p>
+        <p>On precisionFDA, your app's script runs with the <code>set -e -x -o pipefail</code> options. These options have the following effects:</p>
+        <table class="table table-bordered">
+          <thead>
+            <th>Option</th>
+            <th>Effect</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>-e</code></td>
+              <td>The script will halt as soon as any command fails.</td>
+            </tr>
+            <tr>
+              <td><code>-x</code></td>
+              <td>The script will echo every command as it is executed into the output logs.</td>
+            </tr>
+            <tr>
+              <td><code>‑o&nbsp;pipefail</code></td>
+              <td>The script will halt as soon as any command fails in a pipeline of commands, i.e. <code>cmd1 | cmd2 | cmd3</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="alert alert-info">
+          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> We use <code>pipefail</code> to ensure that code such as <code>zcat file.vcf.gz | head >vcf-header.txt</code> would fail if the input file was corrupted and could not be uncompressed. Without pipefail, a failure in the first part (<code>zcat</code>) of the pipeline would not cause this command to fail, so your script would have continued running. However, this means that you must be careful to not include any commands which may return non-zero exit status in your script. For example, <code>grep chr1 some_file | wc -l &gt;chr1-counts.txt</code> would fail if there are no <code>chr1</code> entries in <code>some_file</code>, instead of outputting the number <code>0</code> to <code>chr1-counts.txt</code> (because when grep does not find something, it fails). If you are worried about this behavior, you can undo the option via <code>set +o pipefail</code>.
+        </div>
+        <p>When using bash variables that refer to a single unit (such as a filename, or a value that should not be further tokenized or otherwise interpreted on the command line), it is <strong>strongly recommended</strong> that you enclose such variables within double quotes, i.e. <code>"$file_path"</code> instead of <code>$file_path</code>. This will allow you to handle corner cases such as spaces included in the filename.</p>
+      </div>
+      <div id="dev-fork" class="h2">Forking an app</div>
+      <div class="bs-docs-section">
+        <p>When viewing any app, clicking the "Fork" button will bring up the app editor and initialize it with the specification of the original app. You can make any changes and then save them into a new private app owned by you. (Unlike GitHub, precisionFDA does not keep track of forks, and the operation is always private).</p>
+        <p>In addition, this feature can be used to take a peek at the insides of an app &mdash; just fork it to bring up the editor, and the simply cancel the operation. This allows you to see the app's script, assets, etc.</p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section">
+        <%= video_iframe(@videos[:apps_fork][:url]) %>
+      </div>
+    </div>
+    <!-- SIDEBAR NAVIGATION -->
+    <div class="col-sm-6">
+      <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
+        <ul class="nav bs-docs-sidenav">
+          <li><a href="#dev-name">App naming conventions</a></li>
+          <li><a href="#dev-io">Input and Output spec</a></li>
+          <li><a href="#dev-vm-env">VM Environment</a></li>
+          <li><a href="#dev-instance-types">Available instance types</a></li>
+          <li><a href="#dev-assets">App assets</a></li>
+          <li><a href="#dev-own-assets">Your own assets</a></li>
+          <li><a href="#dev-script">App script</a></li>
+          <li><a href="#dev-bash">Bash tips</a></li>
+          <li><a href="#dev-fork">Forking an app</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,6 @@
+app/assets/images/participants merge=ours
+app/controllers/main_controller.rb merge=ours
+bower.json merge=ours
+config/secrets.yml merge=ours
+config/initializers/globals.rb merge=ours
+go/ merge=ours

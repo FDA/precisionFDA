@@ -11,7 +11,7 @@ class AssetsModel
       if !_.isEmpty(query)
         assetsSearchIDs = @assets.searchedIDs()
         if assetsSearchIDs.length
-          return _.filter(assets, (asset) -> _.includes(assetsSearchIDs, asset.dxid))
+          return _.filter(assets, (asset) -> _.includes(assetsSearchIDs, asset.uid))
         else
           return _.filter(assets, (asset) -> asset.name.match(query))
       else
@@ -89,8 +89,8 @@ class AssetsModel
   , 500)
 
   setSelected: (selectedAssets) ->
-    ids = _.map(selectedAssets, 'dxid')
-    @assets.selected(_.filter(@assets.peek(), (asset) -> _.includes(ids, asset.dxid)))
+    ids = _.map(selectedAssets, 'uid')
+    @assets.selected(_.filter(@assets.peek(), (asset) -> _.includes(ids, asset.uid)))
 
   saveAssets: () =>
     @assets.saved(@assets.selected.peek())
@@ -107,8 +107,8 @@ class AssetsModel
 
 class AssetModel
   constructor: (asset) ->
-    @dxid = asset.dxid
-    @name = asset.name
+    @uid = asset.uid
+    @name = asset.title
     @descriptionDisplay = ko.observable()
     @archiveEntries = ko.observableArray()
     @described = ko.observable(false)
@@ -117,10 +117,10 @@ class AssetModel
   getDescribe: () ->
     if !@described.peek() && !@loading()
       @loading(true)
-      Precision.api '/api/describe_asset', {id: @dxid}, (describe) =>
+      Precision.api '/api/describe', {uid: @uid}, (describe) =>
         @loading(false)
         @descriptionDisplay(Precision.md.render(describe.description))
-        @archiveEntries(describe.archive_entries)
+        @archiveEntries(describe.file_paths)
         @described(true)
         $('.assets-modal').modal('handleUpdate')
 

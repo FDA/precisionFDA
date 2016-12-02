@@ -78,12 +78,6 @@ class ProfileController < ApplicationController
           user[:dxuser] = @suggested_username
           user[:org_id] = @user.org.id
           user[:schema_version] = User::CURRENT_SCHEMA
-          user[:open_files_count] = 0
-          user[:closing_files_count] = 0
-          user[:pending_comparisons_count] = 0
-          user[:pending_jobs_count] = 0
-          user[:open_assets_count] = 0
-          user[:closing_assets_count] = 0
           user[:first_name] = @first
           user[:last_name] = @last
           user[:email] = @email
@@ -108,7 +102,7 @@ class ProfileController < ApplicationController
     @inv = params[:inv].to_s.strip
     if @state == "" || @inv.blank? || (@inv.to_i.to_s != @inv) || (@invitation = Invitation.find(@inv.to_i)).blank?
       @state = "step1"
-      @invitations = Invitation.select(:id, :first_name, :last_name, :email, :org, :singular, :address, :phone, :duns, :user_id).order(id: :desc)
+      @invitations = Invitation.select(:id, :first_name, :last_name, :email, :org, :singular, :address, :phone, :duns, :user_id, :extras).order(id: :desc)
       return
     end
 
@@ -210,7 +204,7 @@ class ProfileController < ApplicationController
         AUDIT_LOGGER.info("The system is about to start provisioning admin '#{@suggested_username}' and org '#{@org_handle}'#{@singular ? ' (self-represented)' : ''} initiated by '#{@user.dxuser}'")
         papi.call("org", "new", {handle: dxorghandle, name: @org})
         billing_info = {
-          email: "Elaine.Johanson@fda.hhs.gov",
+          email: "billing@dnanexus.com",
           name: "Elaine Johanson",
           companyName: "FDA",
           address1: "10903 New Hampshire Ave",
@@ -244,12 +238,6 @@ class ProfileController < ApplicationController
           user[:dxuser] = @suggested_username
           user[:org_id] = o.id
           user[:schema_version] = User::CURRENT_SCHEMA
-          user[:open_files_count] = 0
-          user[:closing_files_count] = 0
-          user[:pending_comparisons_count] = 0
-          user[:pending_jobs_count] = 0
-          user[:open_assets_count] = 0
-          user[:closing_assets_count] = 0
           user[:first_name] = @first_name
           user[:last_name] = @last_name
           user[:email] = @email
@@ -285,7 +273,7 @@ class ProfileController < ApplicationController
           end
         end
         p.workbook.add_worksheet(:name => "Requests") do |sheet|
-          sheet.add_row ["time", "in_system?", "first name", "last name", "email", "organization", "self-represent?", "address", "phone", "duns", "research?", "clinical?", "has data?", "has software?", "reason" ]
+          sheet.add_row ["time", "in_system?", "first name", "last name", "email", "organization", "self-represent?", "address", "phone", "duns", "consistency challenge?", "truth challenge?", "research?", "clinical?", "has data?", "has software?", "reason" ]
           Invitation.includes(:user).find_each do |inv|
             row = []
             row << inv.created_at.strftime("%Y-%m-%d %H:%M")
@@ -295,7 +283,7 @@ class ProfileController < ApplicationController
               u = User.where.any_of({first_name: inv.first_name, last_name: inv.last_name}, {normalized_email: inv.email.downcase.strip}).take
               row << (u ? "maybe #{u.dxuser}" : "")
             end
-            row += [inv.first_name, inv.last_name, inv.email, inv.org, inv.singular, inv.address, inv.phone, inv.duns, inv.research_intent, inv.clinical_intent, inv.req_data, inv.req_software, inv.req_reason]
+            row += [inv.first_name, inv.last_name, inv.email, inv.org, inv.singular, inv.address, inv.phone, inv.duns, inv.participate_intent, inv.organize_intent, inv.research_intent, inv.clinical_intent, inv.req_data, inv.req_software, inv.req_reason]
             sheet.add_row row
           end
         end

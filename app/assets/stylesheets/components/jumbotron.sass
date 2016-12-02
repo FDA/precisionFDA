@@ -10,7 +10,8 @@
     color: $brand-blue-tertiary
 
   .container
-    text-align: center
+    h1, .lead
+      text-align: center
 
     h1, h2, h3
       font-weight: 200
@@ -40,7 +41,7 @@
 
   &:not(.jumbotron-landing-guest)
     background: lighten($brand-blue-secondary, 30%)
-    box-shadow: inset 0px 100px 200px rgba(255, 255, 255, 0.9)
+    // box-shadow: inset 0px 100px 200px rgba(255, 255, 255, 0.9)
 
   &.jumbotron-landing-guest
     background-color: #165B96 //mix($brand-blue-dark, $brand-blue-primary, 50%)
@@ -66,3 +67,52 @@
 
     .btn-link:hover
       color: white
+
+.jumbotron-overview
+  background-color: darken($navbar-inverse-bg, 5%)
+  position: relative
+  margin: 0
+  padding: 50px 20px
+  overflow: hidden
+
+  background-image: url("/assets/particles3.png")
+  background-repeat: no-repeat
+  background-position: 50% 123%
+
+  h1, h2, h3, h4, h5, p, .h1, .h2, .h3, .h4, .h5
+    color: $brand-blue-subtle
+
+  .text-muted
+    color: $brand-blue-tertiary
+
+  .container
+    h1, .lead
+      text-align: center
+
+    h1, h2, h3
+      font-weight: 200
+
+    h1
+      font-size: 72px
+
+    p
+      font-size: 24px
+
+    @media (max-width: $screen-xs-max)
+      h1
+        font-size: 48px
+      p
+        font-size: 18px
+
+.jumbotron-challenges
+  background-color: $brand-blue-dark
+  position: relative
+  margin: 0
+  padding: 50px 20px
+  overflow: hidden
+
+  h1, h2, h3, h4, h5, p, .h1, .h2, .h3, .h4, .h5
+    color: $brand-blue-subtle
+
+  .text-muted
+    color: $brand-blue-tertiary

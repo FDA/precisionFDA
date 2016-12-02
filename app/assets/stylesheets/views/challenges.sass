@@ -1,0 +1,210 @@
+@import "_common"
+
+.pfda-controller-challenges
+  a
+    font-weight: bold
+
+  h3
+    text-transform: uppercase
+    color: darken($brand-blue-tertiary, 15%)
+    margin-bottom: $padding-large-vertical*2
+
+  .challenge-title-muted
+    opacity: 0.65
+
+  .tiltview
+    opacity: 0.25
+    width: 100%
+
+  .well
+    background-color: $brand-blue-subtler
+    border-color: $brand-blue-subtle
+
+  .btn-join
+    .fa
+      font-size: 48px
+    .time-remaining
+      font-weight: 300
+      font-size: 18px
+
+  .nav-pills
+    margin-bottom: $padding-large-vertical
+
+  .pfda-challenge-intro
+    .lead-intro
+      margin: 50px 0
+
+      & + .lead
+        margin-top: -25px
+        margin-bottom: 25px
+
+    .pfda-card
+      @include flex-grow(1)
+
+      .challenge-card-icon
+        text-align: center
+        margin-bottom: $padding-large-vertical*2
+
+  .pfda-challenge-awards
+    .pfda-card
+      @include flex-grow(1)
+
+      .fa-stack
+        .fa-stack-1x
+          color: $accessible-btn-warning-bg
+
+        .fa-stack-2x
+          color: $brand-blue-dark
+
+      .challenge-badge-qualifier
+        text-transform: uppercase
+        font-size: 14px
+        text-align: center
+        color: lighten($brand-blue-dark, 20%)
+
+      .challenge-badge-medal-name
+        text-align: center
+        font-size: 20px
+        color: $brand-blue-dark
+
+      .challenge-badge-context
+        text-align: center
+        font-size: 16px
+        color: lighten($brand-blue-dark, 20%)
+
+      .challenge-winning-team
+        color: $accessible-btn-warning-color
+        text-align: center
+        ul
+          margin-top: 10px
+          opacity: 0.6
+
+      .challenge-awarded-to
+        font-size: 11px
+        text-transform: uppercase
+        opacity: 0.6
+
+    .pfda-cards + .pfda-cards
+      padding-top: 0
+
+  .pfda-challenge-diagram
+    text-align: center
+    padding: 0 25px
+
+  .accordion
+    .panel-title
+      text-transform: none
+      color: $accessible-link-color
+
+      &:hover
+        color: $accessible-link-hover-color
+
+
+  .challenge-section
+    .h2
+      color: #344967
+      padding: $padding-base-horizontal 0
+      border-bottom: 1px solid $border-default-color
+
+    table
+      font-size: 12px
+
+    &.challenge-section-highlight
+      background-color: lighten($brand-highlight, 2%)
+
+    &.challenge-section-detail
+      background-color: $gray-lighter
+
+    &.challenge-section-conclusion
+      background-color: lighten($gray-subtle, 1%)
+      .media-left .fa
+        color: $text-muted
+
+  .challenge-badge
+    text-transform: uppercase
+    border-radius: 20px
+    padding: $padding-xs-vertical $padding-xs-horizontal
+    font-size: 10px
+    white-space: nowrap
+    display: inline-block
+
+    &.challenge-badge-lg
+      border-radius: 50px
+      font-size: 20px
+      padding: $padding-base-vertical $padding-base-horizontal
+      display: block
+
+    &.challenge-badge-medal
+      background-color: $accessible-btn-warning-bg
+      color: #fff
+      .fa-stack-2x
+        color: $brand-blue-dark
+      .fa-stack-1x
+        color: $accessible-btn-warning-bg
+
+    &.challenge-badge-medal-inverse
+      color: $accessible-btn-warning-bg
+      .fa-inverse
+        color: #fff
+
+    &.challenge-badge-recognition-highest
+      background-color: $accessible-btn-primary-bg
+      color: #fff
+
+    &.challenge-badge-recognition
+      background-color: $state-info-bg
+      color: $accessible-brand-blue-primary
+
+  .challenge-row-medal
+    background-color: $accessible-btn-warning-bg
+    color: #fff
+    .percentage:after
+      color: mix(#fff, $accessible-btn-warning-bg, 50%)
+
+  .challenge-row-recognition
+    background-color: $state-info-bg
+
+  .challenge-row-highest
+    background-color: $accessible-btn-primary-bg
+    color: #fff
+
+    a
+      color: #fff
+      &:hover
+        color: lighten($link-muted-color, 25%)
+
+  .challenge-row-high
+    background-color: $state-info-bg
+    color: $accessible-brand-blue-primary
+
+  .challenge-row-not-considered
+    background-color: $gray-subtle
+    color: $accessible-text-muted
+
+  .accuracy-tables
+    table
+      float: left
+      width: 32%
+      margin-right: 1%
+
+      &:last-child
+        margin-right: 0
+
+  .challenge-results-preview
+    position: relative
+    max-height: 500px
+    overflow: hidden
+
+    .challenge-results-preview_link
+      z-index: 10
+      position: absolute
+      top: 0
+      left: 0
+      right: 0
+      bottom: 0
+      background: rgba(255, 255, 255, 0.6)
+      box-shadow: inset 0px -250px 100px rgba(255, 255, 255, 0.6)
+      text-align: center
+      line-height: 500px
+      font-size: 36px
+      text-shadow: 0px 0px 50px #aaa

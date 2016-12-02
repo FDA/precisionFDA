@@ -62,26 +62,26 @@
     <!-- Tab panes -->
     <div class="tab-content">
       <div role="tabpanel" class="tab-pane tab-pane-padded active" id="app-io-spec">
-        <%= alert_help("Learn more about app inputs and outputs", "#{about_path}/how#dev-io") %>
+        <%= alert_help("Learn more about app inputs and outputs", "#{show_docs_path('creating_apps')}#dev-io") %>
         <%= render "apps/editor.io" %>
       </div>
 
       <div role="tabpanel" class="tab-pane tab-pane-padded" id="app-environment">
-        <%= alert_help("Learn more about the virtual machine environment", "#{about_path}/how#dev-vm-env") %>
+        <%= alert_help("Learn more about the virtual machine environment", "#{show_docs_path('creating_apps')}#dev-vm-env") %>
         <%= render "apps/editor.environment" %>
       </div>
 
       <div role="tabpanel" class="tab-pane tab-pane-padded" id="app-script">
         <div class="ace-editor-section">
-          <%= alert_help("Learn more about the app script", "#{about_path}/how#dev-script") %>
-          <div id="script-editor" class="ace-rounded" data-bind="ace: code, aceOptions: { mode: 'sh', theme: 'monokai', opts: {maxLines: Infinity, wrap: 'free'} }"></div>
+          <%= alert_help("Learn more about the app script", "#{show_docs_path('creating_apps')}#dev-script") %>
+          <div id="script-editor" class="ace-rounded" data-bind="ace: code, aceOptions: { mode: 'sh', theme: 'monokai', opts: {maxLines: Infinity, wrap: 'free', newLineMode: 'unix'} }"></div>
         </div>
       </div>
 
       <div role="tabpanel" class="tab-pane" id="app-readme">
         <div class="ace-editor-section">
           <div style="padding: 6px 12px 0px 12px">
-            <%= alert_help("Learn how to format Markdown for your readme", "https://jonschlinkert.github.io/remarkable/demo/") %>
+            <%= alert_help("Learn how to format Markdown", "https://jonschlinkert.github.io/remarkable/demo/") %>
           </div>
 
           <!-- Nav tabs -->

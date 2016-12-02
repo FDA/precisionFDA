@@ -1,7 +1,18 @@
 <% content_for :title do %>Profile<% end %>
 
 <div class="page-header">
-  <div class="page-title">Profile</div>
+  <div class="media">
+    <div class="media-left text-center">
+      <%= link_to(image_tag(@user.gravatar_url, class: 'img-circle', height: '48px'), "http://en.gravatar.com/emails/", title: "Edit profile image on Gravatar", target: "_blank") %>
+      <br>
+      <%= link_to "http://en.gravatar.com/emails/", class: "edit-gravatar-text", title: "Edit profile image on Gravatar", target: "_blank" do %>
+        Set <span class="fa fa-external-link"></span>
+      <% end %>
+    </div>
+    <div class="media-body">
+      <div class="page-title">Profile</div>
+    </div>
+  </div>
 </div>
 
 <div class="infoframe-outer">
@@ -21,8 +32,16 @@
         <p class="list-group-item-text"><%= @user.email %></p>
       </li>
     </ul>
-    <%= link_to(content_tag(:span, "", class: "fa fa-lock") + " Change password", "#{DNANEXUS_PLATFORM_URI}profile/#{@user.dxuser}/changePassword?client_id=precision_fda_gov", class: 'btn btn-primary') %>
-    <%= link_to(content_tag(:span, "", class: "fa fa-user") + " View public profile", user_path(@user.dxuser), class: 'btn btn-default') %>
+    <div class="btn-group">
+
+    </div><%= link_to(content_tag(:span, "", class: "fa fa-fw fa-user") + " View public profile", user_path(@user.dxuser), class: 'btn btn-default') %>
+    <div class="btn-group">
+      <%= link_to(content_tag(:span, "", class: "fa fa-fw fa-lock") + " Change password", "#{DNANEXUS_PLATFORM_URI}profile/#{@user.dxuser}/changePassword?client_id=precision_fda_gov", class: 'btn btn-default') %>
+      <%= link_to "http://en.gravatar.com/emails/", class: 'btn btn-default', target: "_blank" do %>
+        <span class="fa fa-fw fa-image"></span> Set Profile Gravatar
+      <% end %>
+      <%= link_to(content_tag(:span, "", class: "fa fa-fw fa-legal") + "Manage Licenses", licenses_path, class: 'btn btn-default') %>
+    </div>
   </div>
 </div>
 
@@ -46,7 +65,7 @@
       </ul>
 
       <div class="infoframe-grid">
-        <%= grid(@users_grid, show_filters: :when_filtered) do |g|
+        <%= grid(@users_grid, show_filters: :always) do |g|
           g.blank_slate partial:  "_partials/empty_grid"
 
           g.column name: 'Username', attribute: 'dxuser' do |user|

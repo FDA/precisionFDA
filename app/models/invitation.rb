@@ -23,13 +23,13 @@
 class Invitation < ActiveRecord::Base
   include Humanizer
   validates :first_name, :last_name, :email, :address, :phone, :req_reason, presence: true
-  validates :singular, :research_intent, :clinical_intent, inclusion: [true, false]
+  validates :singular, :research_intent, :clinical_intent, :participate_intent, :organize_intent, inclusion: [true, false]
   validates :org, presence: {message: "can't be blank unless you represent yourself"}, unless: :singular
   validate :valid_email, on: :create
   require_human_on :create
   belongs_to :user
 
-  store :extras, accessors: [ :req_reason, :req_data, :req_software, :research_intent, :clinical_intent ], coder: JSON
+  store :extras, accessors: [ :req_reason, :req_data, :req_software, :research_intent, :clinical_intent, :consistency_challenge_intent, :truth_challenge_intent, :participate_intent, :organize_intent ], coder: JSON
 
   def valid_email
     if !User.validate_email(email)

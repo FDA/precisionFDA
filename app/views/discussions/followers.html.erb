@@ -1,0 +1,39 @@
+<% content_for :title do %>Discussion Followers: <%= @discussion.title %><% end %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-left text-muted">
+      <%= link_to image_tag(@discussion.user.gravatar_url, class: 'img-circle', height: '50px'), user_path(@discussion.user.dxuser) %>
+    </div>
+    <div class="media-body">
+      <div class="pfda-discussion-user">
+        <%= link_to("#{@discussion.user.full_name}'s", user_path(@discussion.user.dxuser)) %> (<%= @discussion.user.org.name %>) <%= @discussion.scope == 'public' ? 'discussion' : 'draft discussion' %>
+      </div>
+      <div class="pfda-discussion-title">
+        <%= pluralize(@discussion.count_user_followers, 'follower') %> for <%= link_to @discussion.title, discussion_path(@discussion) %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <ul class="pfda-followers list-unstyled">
+    <% @followers.each do |follower| %>
+    <li class="">
+      <div class="media">
+        <div class="media-left">
+          <%= link_to image_tag(follower.gravatar_url, class: 'img-circle', height: '40px'), user_path(follower.dxuser) %>
+        </div>
+        <div class="media-body">
+          <div class="pfda-user-fullname">
+            <span class="lead lead-bold"><%= link_to follower.full_name, user_path(follower.dxuser) %></span> <small class="text-muted"><%= follower.dxuser %></small>
+          </div>
+          <ul class="list-inline list-inline-bullets text-muted">
+            <li><%= follower.org.name %></li>
+          </ul>
+        </div>
+      </div>
+    </li>
+    <% end %>
+  </ul>
+</div>

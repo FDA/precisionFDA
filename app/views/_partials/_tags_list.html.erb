@@ -1,0 +1,10 @@
+<ul class="pfda-tags list list-inline">
+  <% if tags_list.count > 0 %>
+  <li class="pfda-tags-icon">
+    <span class="fa fa-fw fa-tags" aria-hidden="true"></span>
+  </li>
+  <% end %>
+  <% tags_list.each do |tag| %>
+    <li class="pfda-tag"><%= tag %></li>
+  <% end %>
+</ul>

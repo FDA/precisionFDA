@@ -1,0 +1,49 @@
+<div class="file-selector-modal selector-modal modal fade" data-bind="with: fileSelector">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">
+          Select file for <strong data-bind="text: inputModel() ? inputModel().label : ''"></strong>
+          <br>
+          <small data-bind="text: inputModel() ? inputModel().help : ''"></small>
+        </h4>
+      </div>
+      <div class="files-filter">
+        <input type="text" class="form-control input-lg input-square" placeholder="Filter..." data-bind="textInput: filterQuery" />
+      </div>
+      <div class="modal-body modal-body-padless">
+
+        <!-- ko if: !busy() -->
+          <!-- ko if: files.filtered().length > 0 -->
+          <div class="list-group" data-bind="foreach: files.filtered">
+            <div class="list-group-item" data-bind="css: $parent.type">
+              <label data-bind="attr: {title: uid}">
+                <input data-bind="checked: $parent.selected, checkedValue: $data, attr: {type: $parent.type}, click: onSelect">
+                <span data-bind="css: scopeIcon" aria-hidden="true"></span> <span class="object-name" data-bind="text: name"></span>
+                <div class="object-metadata clearfix">
+                  <ul class="list-inline list-inline-bullets pull-left">
+                    <li data-bind="text: user.full_name"></li>
+                    <li data-bind="text: org.name"></li>
+                  </ul>
+                  <a target="_blank" class="link-muted pull-right" data-bind="attr: {href: path}"><span class="fa fa-external-link"></span> Open</a>
+                </div>
+              </label>
+            </div>
+          </div>
+          <!-- /ko -->
+          <!-- ko if: files.filtered().length == 0 -->
+            <div class="alert alert-warning">No files found</div>
+          <!-- /ko -->
+        <!-- /ko -->
+        <!-- ko if: busy() -->
+          <div class="precision-loading alert text-muted">Loading...</div>
+        <!-- /ko -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-bind="click: save, css: {disabled: !canSave()}, disable: !canSave()">Select</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

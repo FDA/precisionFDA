@@ -1,4 +1,4 @@
-<%= grid(apps_grid, show_filters: :when_filtered) do |g|
+<%= grid(apps_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
   g.blank_slate partial:  "_partials/empty_grid"
 
   g.column name: 'Name', attribute: 'name' do |series|
@@ -6,7 +6,7 @@
   end
 
   g.column name: 'Title', attribute: 'title', assoc: :latest_version_app do |series|
-    unilink(series.latest_version_app)
+    unilink(series.latest_version_app, scope_icon: (defined?(scope_icon) ? scope_icon : true))
   end
 
   g.column name: 'Revision', attribute: 'revision', assoc: :latest_version_app do |series|
@@ -29,12 +29,20 @@
     series.latest_version_app.created_at.to_s(:db)
   end
 
-  g.column name: 'Access', attribute: 'scope',
-    custom_filter: {'Public' => "public", 'Private' => "private"} do |series|
-    series.public? ? "Public" : "Private"
+  if !defined?(hide_access) || !hide_access
+    g.column name: 'Access', attribute: 'scope', allow_multiple_selection: false,
+      custom_filter: {'Public' => "public", 'Private' => "private"} do |series|
+      if series.public?
+        "Public"
+      elsif series.private?
+        "Private"
+      else
+        unilinkfw(item_from_uid(series.scope))
+      end
+    end
   end
 
-  g.column name: 'Ran by you?' do |series|
+  g.column name: 'Run by you?' do |series|
     app_ids = series.jobs.where(user_id: @context.user_id).select(:app_id).distinct.map(&:app_id)
     if app_ids.include?(series.latest_version_app_id)
       "Yes"
@@ -45,4 +53,7 @@
     end
   end
 
+  g.column name: 'Tags', attribute: 'name', assoc: [:taggings, :tag] do |item|
+    render "_partials/tags_list", tags_list: item.all_tags_list
+  end
 end -%>

@@ -11,8 +11,8 @@
   </div>
 </div>
 
-<div class="container-fluid">
-  <%= alert_help("Learn more about running an app", "#{about_path}/how#apps-run") %>
+<div class="container-fluid container-padded">
+  <%= alert_help("Learn more about running an app", "#{show_docs_path('apps')}#apps-run") %>
   <form class="form form-horizontal">
     <div class="panel panel-default">
       <div class="panel-heading">
@@ -45,25 +45,26 @@
         <!-- ko foreach: inputModels -->
         <div class="form-group" data-bind="css: {required: isRequired, 'has-error': error}">
           <label class= "col-sm-4 control-label" data-bind="text: label || name, attr: {title: help}, css: {'text-danger': needsToBeSet}"></label>
-          <div class="col-sm-10 col-sm-offset-1" data-bind="css: 'field-'+klass">
+          <div class="col-sm-10 col-sm-offset-1" data-bind="css: 'field-'+className">
             <!-- ko if: choices -->
               <select class="form-control" data-bind="options: choices, optionsCaption: !defaultValue ? 'Select...' : undefined, value: valueDisplay, disable: $root.busy"></select>
             <!-- /ko -->
             <!-- ko ifnot: choices -->
-              <!-- ko if: klass == 'int' || klass == 'float' || klass == 'string' -->
+              <!-- ko if: className == 'int' || className == 'float' || className == 'string' -->
                 <input type="text" class="form-control" data-bind="textInput: valueDisplay, attr: {name: name, placeholder: placeholder, disable: $root.busy}">
               <!-- /ko -->
-              <!-- ko if: klass == 'boolean' -->
+              <!-- ko if: className == 'boolean' -->
                 <div class="btn-group">
                   <button class="btn btn-default" data-bind="css: {active: value() === true, is_default: defaultValue === true}, click: toggleTrue, disable: $root.busy">True</button>
                   <button class="btn btn-default" data-bind="css: {active: value() === false, is_default: defaultValue === false}, click: toggleFalse, disable: $root.busy">False</button>
                 </div>
               <!-- /ko -->
-              <!-- ko if: klass == 'file' -->
+              <!-- ko if: className == 'file' -->
                 <button class="btn btn-info" data-bind="text: valueDisplay, attr: {name: name, disable: $root.busy}, click: openFileSelector, css: { 'btn-info': !value(), 'btn-default': value}">Select file...</button>
                 <!-- ko if: value -->
-                  <button class="btn btn-link" data-bind="click: clear">Clear</button>
+                  <button class="btn btn-link btn-link-danger" data-bind="click: clear">Clear</button>
                 <!-- /ko -->
+                <%= render "_partials/selector_modal" %>
               <!-- /ko -->
             <!-- /ko -->
             <div class="help-block" data-bind="text: error, visible: error"></div>
@@ -75,41 +76,4 @@
   </form>
 </div>
 
-<div class="file-selector-modal modal fade" data-bind="with: fileSelector">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">
-          Select file for <strong data-bind="text: inputModel() ? inputModel().label : ''"></strong>
-          <br>
-          <small data-bind="text: inputModel() ? inputModel().help : ''"></small>
-        </h4>
-      </div>
-      <div class="modal-body">
-        <!-- ko if: !busy() -->
-          <!-- ko if: files().length > 0 -->
-          <div class="list-group" data-bind="foreach: files">
-            <div class="list-group-item" data-bind="css: $parent.type">
-              <label>
-                <input data-bind="checked: $parent.selected, checkedValue: $data, attr: {type: $parent.type}, click: onSelect">
-                <span data-bind="text: name"></span>
-              </label>
-            </div>
-          </div>
-          <!-- /ko -->
-          <!-- ko if: files().length == 0 -->
-            <div class="alert alert-warning">No files found</div>
-          <!-- /ko -->
-        <!-- /ko -->
-        <!-- ko if: busy() -->
-          <div class="precision-loading alert text-muted">Loading...</div>
-        <!-- /ko -->
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" data-bind="click: save, css: {disabled: !canSave()}, disable: !canSave()">Select</button>
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+<%= render "licenses/selector_modal" %>

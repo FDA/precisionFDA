@@ -19,6 +19,7 @@
 
 <div class="metadata-section metadata-header">
   <ul class="list-group list-group-inline">
+    <%= render "_partials/metadata_access", item: @job %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">App</h5>
       <p class="list-group-item-text"><%= unilink(@job.app) %></p>
@@ -32,13 +33,6 @@
     <li class="list-group-item">
       <h5 class="list-group-item-heading">ID</h5>
       <p class="list-group-item-text"><%= @job.dxid %></p>
-    </li>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Access</h5>
-      <p class="list-group-item-text">
-        <span class="fa <%= @job.public? ? 'fa-globe' : 'fa-lock' %>"></span>
-        <%= @job.public? ? "Public" : "Private" %>
-      </p>
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Created</h5>
@@ -59,6 +53,8 @@
   </ul>
 </div>
 
+<%= render "_partials/tags_metadata", item: @job, item_name: @job.name, tags_list: @job.all_tags_list, is_editable: @job.editable_by?(@context) %>
+
 <div class="pfda-toolbar">
   <div class="btn-group">
     <% if @job.user_id == @context.user_id %>
@@ -68,7 +64,7 @@
     <% end %>
   </div>
   <div class="btn-group">
-    <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
+    <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to...</button>
     <%= link_to track_path(id: @job.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
       <span class="fa fa-flip-vertical fa-sitemap"></span> Track
     <% end %>
@@ -80,11 +76,7 @@
         <span class="fa fa-bolt"></span> Run App &nbsp;&nbsp;<span class="badge"><%= @job.app.version ? "v#{@job.app.version}" : "rev#{@job.app.revision}" %></span>
       <% end %>
     <% end %>
-    <% if @job.publishable_by?(@context) %>
-      <%= link_to publish_path + "?" + {id: @job.uid}.to_param, method: :post, class: "btn btn-success" do %>
-        <span class="fa fa-bullhorn"></span> Publish
-      <% end %>
-    <% end %>
+    <%= render "_partials/btn_publish", item: @job %>
     <% if @job.user_id == @context.user_id && !@job.terminal? %>
       <%= link_to job_path(@job.dxid), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
         <span class="fa fa-times-circle"></span> Terminate
@@ -107,10 +99,29 @@
     </a>
   </li>
   <% end %>
-  <% if @notes.count > 0 %>
+  <li role="presentation">
+    <a href="#tab-comments" aria-controls="tab-comments" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
+      <span class="tab-label">Comments <span class="badge"><%= @job.comment_threads.size %></span></span>
+    </a>
+  </li>
+  <% if @notes.total_count > 0 %>
   <li role="presentation">
     <a href="#tab-notes" aria-controls="tab-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
-      <span class="tab-label">Notes <span class="badge"><%= @notes.count %></span></span>
+      <span class="tab-label">Notes <span class="badge"><%= @notes.total_count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @discussions.total_count > 0 %>
+  <li role="presentation">
+    <a href="#tab-discussions" aria-controls="tab-discussions" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comments-o"></span>
+      <span class="tab-label">Discussions <span class="badge"><%= @discussions.total_count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @answers.total_count > 0 %>
+  <li role="presentation">
+    <a href="#tab-answers" aria-controls="tab-answers" role="tab" data-toggle="tab"><span class="fa fa-fw fa-commenting"></span>
+      <span class="tab-label">Answers <span class="badge"><%= @answers.total_count %></span></span>
     </a>
   </li>
   <% end %>
@@ -126,7 +137,7 @@
             <div class="job-io-heading">Inputs</div>
             <table class="table table-striped table-job-io table-job-io-input">
               <tbody>
-                <%= render "_partials/job_io_rows", items: @inputs %>
+                <%= render "jobs/io_rows", items: @inputs %>
               </tbody>
             </table>
           </div>
@@ -135,7 +146,7 @@
             <div class="job-io-heading">Outputs</div>
             <table class="table table-striped table-job-io table-job-io-output">
               <tbody>
-                <%= render "_partials/job_io_rows", items: @outputs %>
+                <%= render "jobs/io_rows", items: @outputs %>
               </tbody>
             </table>
           </div>
@@ -160,9 +171,29 @@
   </div>
   <% end %>
 
-  <% if @notes.count > 0 %>
+  <div role="tabpanel" class="tab-pane" id="tab-comments">
+    <div class="row">
+      <div class="col-md-12">
+        <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @job %>
+      </div>
+    </div>
+  </div>
+
+  <% if @notes.total_count > 0 %>
   <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-notes">
     <%= render "notes/cards", notes: @notes %>
+  </div>
+  <% end %>
+
+  <% if @discussions.total_count > 0 %>
+  <div role="tabpanel" class="tab-pane" id="tab-discussions">
+    <%= render "discussions/cards", discussions: @discussions %>
+  </div>
+  <% end %>
+
+  <% if @answers.total_count > 0 %>
+  <div role="tabpanel" class="tab-pane" id="tab-answers">
+    <%= render "answers/cards", answers: @answers, show_discussion: true %>
   </div>
   <% end %>
 </div>

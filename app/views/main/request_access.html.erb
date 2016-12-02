@@ -3,7 +3,7 @@
 <div class="page-header">
   <div class="container">
     <div class="row">
-      <div class="col-sm-offset-5 col-sm-10">
+      <div class="col-sm-offset-5 col-sm-19">
         <div class="page-title">
           <div class="">Request Access to precisionFDA</div>
         </div>
@@ -11,12 +11,9 @@
         <div class="description">
           <% if @invitation.new_record? %>
             <p class="lead">
-              Thank you for your interest!
-              <br>
-              <small>
-                To request access, please leave your information below.
-              </small>
+              To request access, please leave your information below.
             </p>
+            <p class="lead">If you already have a contributor account, proceed to <strong><%= link_to "Log In", login_path %></strong>.</p>
           <% else %>
             <p class="lead text-success">
               <span class="fa fa-check"></span> Thank you! Your request has been registered. Check your email for additional instructions.
@@ -122,6 +119,23 @@
             <%= f.text_field :req_reason, class: 'form-control input-lg', required: 'required' %>
           </div>
         </div>
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            Do you intend to organize or participate in a community challenge or appathon?
+            <div class="checkbox">
+              <label class="">
+                <%= f.check_box :participate_intent %>
+                Yes, I intend to participate
+              </label>
+            </div>
+            <div class="checkbox">
+              <label class="">
+                <%= f.check_box :organize_intent %>
+                Yes, I intend to organize
+              </label>
+            </div>
+          </div>
+        </div>
         <div class="form-group form-group-lg form-group-optional">
           <div class="col-sm-offset-5 col-sm-10">
             Do you have any data to contribute? If so, list below.
@@ -185,6 +199,7 @@
         <div class="form-group form-group-lg">
             <div class="col-sm-offset-5 col-sm-10">
               <%= f.submit "Request Access to precisionFDA", class: "btn btn-lg accessible-btn-success", data: {disable_with: "Requesting..."} %>
+              &nbsp; or <strong><%= link_to "Log in", login_path %></strong>
             </div>
          </div>
       <% end %>

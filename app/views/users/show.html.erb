@@ -1,15 +1,24 @@
 <% content_for :title do %><%= @user.dxuser %><% end %>
 
 <div class="page-header">
-  <div class="page-title"><span class="fa fa-user"></span> <%= @user.full_name %> <small>(<%= @user.dxuser %>)</small></div>
+  <div class="media">
+    <div class="media-left">
+      <%= image_tag(@user.gravatar_url, class: 'img-circle', height: '48px') %>
+    </div>
+    <div class="media-body">
+      <div class="page-title">
+        <%= @user.full_name %>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="metadata-section metadata-header">
   <ul class="list-group list-group-inline">
     <li class="list-group-item">
-      <h5 class="list-group-item-heading">Joined</h5>
-      <p class="list-group-item-text"><%= @user.created_at.to_s(:db) %></p>
-      </li>
+      <h5 class="list-group-item-heading">Username</h5>
+      <p class="list-group-item-text"><%= @user.dxuser %></p>
+    </li>
 
     <% if @user.org_id.present? %>
     <li class="list-group-item">
@@ -17,7 +26,10 @@
       <p class="list-group-item-text"><%= @user.org.name %></p>
     </li>
     <% end %>
-
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Joined</h5>
+      <p class="list-group-item-text"><%= @user.created_at.to_s(:db) %></p>
+    </li>
   </ul>
 </div>
 
@@ -27,6 +39,20 @@
   <li role="presentation" class="<%= params[:tab] == 'notes' ? 'active' : '' %>">
     <a href="<%= user_path(@user.dxuser, 'notes') %>" aria-controls="tab-notes"><span class="fa fa-fw fa-sticky-note"></span>
       <span class="tab-label">Notes <span class="badge"><%= @counts[:notes] %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @counts[:discussions] > 0 %>
+  <li role="presentation" class="<%= params[:tab] == 'discussions' ? 'active' : '' %>">
+    <a href="<%= user_path(@user.dxuser, 'discussions') %>" aria-controls="tab-discussions"><span class="fa fa-fw fa-comments"></span>
+      <span class="tab-label">Discussions <span class="badge"><%= @counts[:discussions] %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @counts[:answers] > 0 %>
+  <li role="presentation" class="<%= params[:tab] == 'answers' ? 'active' : '' %>">
+    <a href="<%= user_path(@user.dxuser, 'answers') %>" aria-controls="tab-answers"><span class="fa fa-fw fa-commenting-o"></span>
+      <span class="tab-label">Answers <span class="badge"><%= @counts[:answers] %></span></span>
     </a>
   </li>
   <% end %>
@@ -59,6 +85,20 @@
     <div role="tabpanel" class="tab-pane <%= params[:tab] == 'notes' ? 'active' : '' %>" id="tab-notes">
       <div class="panel">
         <%= render "notes/cards", notes: @notes %>
+      </div>
+    </div>
+  <% end %>
+  <% if defined?(@discussions) %>
+    <div role="tabpanel" class="tab-pane <%= params[:tab] == 'discussions' ? 'active' : '' %>" id="tab-discussions">
+      <div class="panel">
+        <%= render "discussions/cards", discussions: @discussions %>
+      </div>
+    </div>
+  <% end %>
+  <% if defined?(@answers) %>
+    <div role="tabpanel" class="tab-pane <%= params[:tab] == 'answers' ? 'active' : '' %>" id="tab-answers">
+      <div class="panel">
+        <%= render "answers/cards", answers: @answers, show_discussion: true %>
       </div>
     </div>
   <% end %>

@@ -1,0 +1,67 @@
+@import "_common"
+
+.pfda-controller-meta_appathons
+  .pfda-meta-appathon-template
+    &.pfda-meta-appathon-template-appathon_in_a_box
+      background-color: $brand-blue-dark
+      .metadata-section
+        .list-group-item
+          padding-left: 0
+
+      .lead-intro
+        margin: 0 0 10px
+        font-weight: 300
+        font-size: 18px
+
+        @media (max-width: $screen-sm-min)
+          font-size: 16px
+
+      .jumbotron-meta_appathon
+        background-color: #fff
+        position: relative
+        margin: 0
+        padding: 50px 20px
+        overflow: hidden
+        /* Background pattern from subtlepatterns.com */
+        background-image: url("/assets/backgrounds/geometry2.png")
+        background-repeat: repeat
+        background-position: 50% 100%
+
+        h1, h2, h3, h4, h5, p, .h1, .h2, .h3, .h4, .h5
+          margin-top: 0
+          color: $brand-blue-primary
+
+        .text-muted
+          color: $brand-blue-tertiary
+
+        .meta_appathon-title-muted
+          opacity: 0.65
+          font-size: 75%
+
+      .pfda-meta-appathon-intro
+        padding: 50px 20px
+        width: 800px
+        margin: auto
+        color: $brand-blue-subtler
+        .thumbnail
+          margin-bottom: 0
+
+      .pfda-meta-appathon-section
+        background-color: $brand-red-primary
+        padding: 50px 20px 30px
+
+      .pfda-meta-appathon-kit
+        background-color: $brand-green-primary
+        padding: 50px 20px 30px
+        .h3
+          margin-top: 0
+
+      .pfda-meta-appathon-submissions
+        padding: 50px 20px
+
+      .pfda-meta_appathon-participants
+        padding: $padding-base-horizontal
+        border-bottom: 1px solid $border-default-color
+
+        ul
+          margin-bottom: 0

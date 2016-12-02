@@ -145,7 +145,7 @@ class AppEditorModel
 
   getAssetsForSave: () ->
     assets = @assets.peek()
-    return _.map(assets, 'dxid') if assets.length > 0
+    return _.map(assets, 'uid') if assets.length > 0
 
   save: () ->
     @title(_.trim(@title.peek()))
@@ -167,15 +167,12 @@ class AppEditorModel
 
     Precision.api('/api/create_app', params)
       .done((data) =>
-        if data.id
-          Precision.unbind.traps()
-          window.location.replace("/apps/#{data.id}/jobs")
-        else if data.failure
-          @errorMessage(data.failure)
-          console.error(data.failure)
-          @saving(false)
+        Precision.unbind.traps()
+        window.location.replace("/apps/#{data.id}/jobs")
       )
       .fail((error) =>
+        errorObject = JSON.parse error.responseText
+        @errorMessage(errorObject.error.message)
         console.error(error)
         @saving(false)
       )
@@ -195,6 +192,7 @@ class IOModel
     else
       defaultValue = spec.default
     @defaultValue = ko.observable(defaultValue)
+    @defaultFileValue = ko.observable()
     @isOptional = ko.observable(spec.optional ? false)
     # @patterns = ko.observable(spec.patterns)
     @choices = ko.observableArray(spec.choices)
@@ -226,12 +224,100 @@ class IOModel
     @isClassAnArray = ko.computed =>
       @klass().indexOf('array') == 0
 
+    # Default Value Selector
+
+    @defaultValueDisplay = ko.computed(=>
+      switch @klass()
+        when 'file'
+          defaultValue = @defaultValue()
+          defaultFileValue = @defaultFileValue()
+          if defaultValue?
+            if defaultFileValue?
+              title = defaultFileValue.title
+              if _.isFunction(title) then title() else title
+            else if defaultValue.match(new RegExp(/^file-(.{24})$/, "i"))
+                params =
+                  uid: defaultValue
+                Precision.api('/api/describe', params).done((value) =>
+                  @defaultFileValue(value)
+                )
+                defaultValue
+            else
+              @error("Invalid default value: #{defaultValue}")
+              defaultValue
+          else
+            "Select file..."
+        else
+          defaultValue
+    )
+
+    @objectSelector = new Precision.models.SelectorModel({
+      title: "Select default file for field"
+      selectionType: "radio"
+      selectableClasses: ["file"]
+      onSave: (selected) =>
+        @defaultValue(selected.uid)
+        @defaultFileValue(selected)
+
+        deferred = $.Deferred()
+        deferred.resolve(selected)
+      listRelatedParams:
+        # editable: true
+        # scopes: ["private", "public"]
+        classes: ["file", "note", "discussion", "answer", "comparison", "app", "asset", "job"]
+      listModelConfigs: [
+        {
+          className: "file"
+          name: "Files"
+          apiEndpoint: "list_files"
+          apiParams:
+            states: ["closed"]
+            describe:
+              include:
+                user: true
+                org: true
+                all_tags_list: true
+        }
+        {
+          className: "note"
+          name: "Notes"
+          apiEndpoint: "list_notes"
+          apiParams:
+            note_types: ["Note"]
+            describe:
+              include:
+                user: true
+                org: true
+                all_tags_list: true
+        }
+        {
+          className: "discussion"
+          name: "Discussions"
+          apiEndpoint: "list_notes"
+          apiParams:
+            note_types: ["Discussion"]
+            describe:
+              include:
+                user: true
+                org: true
+                all_tags_list: true
+        }
+      ]
+    })
+
   toggleChoices: () ->
     @isChoicesVisible(!@isChoicesVisible())
 
   remove: (item) ->
     io = if @ioType == "input" then @viewModel.inputs else @viewModel.outputs
     io.remove((ioItem) => ioItem.id == item.id)
+
+  openFileSelector: () ->
+    @objectSelector.open()
+
+  clear: () ->
+    @defaultValue(null)
+    @defaultFileValue(null)
 
   getDataForSave: () ->
     data =
@@ -280,7 +366,10 @@ class IOModel
             when 'float'
               value = parseFloat(value)
             when 'file'
-              value = value.dxid
+              value = value.dxid ? value
+              if !value.match(new RegExp(/^file-(.{24})$/, "i"))
+                @error("Invalid default value: #{value}")
+                value = undefined
             when 'boolean'
               if value == 'true'
                 value = true

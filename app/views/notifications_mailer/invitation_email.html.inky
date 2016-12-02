@@ -1,0 +1,60 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    Access Request for <%= @invitation.first_name %> <%= @invitation.last_name %> - <%= @invitation.org %>
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="https://precision.fda.gov" title="precisionFDA">
+          <img class="header-image" src="https://precision.fda.gov/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right">Access Request</p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <h5 class="container-title">Submitted information</h5>
+
+        <table>
+          <tr><td>First name:</td><td><%= @invitation.first_name %></td></tr>
+          <tr><td>Last name:</td><td><%= @invitation.last_name %></td></tr>
+          <tr><td>Email:</td><td><%= @invitation.email %></td></tr>
+          <tr><td>Organization:</td><td><%= @invitation.org %></td></tr>
+          <tr><td>Self-representing?</td><td><%= !!@invitation.singular %></td></tr>
+          <tr><td>Address:</td><td><%= @invitation.address %></td></tr>
+          <tr><td>Phone:</td><td><%= @invitation.phone %></td></tr>
+          <tr><td>DUNS:</td><td><%= @invitation.duns %></td></tr>
+          <tr><td>Request reason:</td><td><%= @invitation.req_reason %></td></tr>
+          <tr><td>Has Data:</td><td><%= @invitation.req_data %></td></tr>
+          <tr><td>Has Software:</td><td><%= @invitation.req_software %></td></tr>
+          <tr><td>Research intent?</td><td><%= !!@invitation.research_intent %></td></tr>
+          <tr><td>Clinical intent?</td><td><%= !!@invitation.clinical_intent %></td></tr>
+          <tr><td>Participate intent for appathon or challenges?</td><td><%= !!@invitation.participate_intent %></td></tr>
+          <tr><td>Organize intent for appathon or challenges?</td><td><%= !!@invitation.organize_intent %></td></tr>
+        </table>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+  <container class="radius">
+    <row>
+      <columns>
+        <h5 class="container-title">Additional system information</h5>
+
+        <table>
+          <tr><td>Client IP address:</td><td><%= @invitation.ip %></td></tr>
+          <tr><td>Geolocation:</td><td><%= link_to "Click to determine", "http://ip-api.com/\##{@invitation.ip}" %></td></tr>
+          <tr><td>Email acceptable?</td><td><%= !!User.validate_email(@invitation.email) %></td></tr>
+          <tr><td>Potential username:</td><td><%= User.construct_username(@invitation.first_name, @invitation.last_name) %></td></tr>
+          <tr><td>Username acceptable?</td><td><%= !!User.authserver_acceptable?(User.construct_username(@invitation.first_name, @invitation.last_name)) %></td></tr>
+        </table>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>

@@ -26,7 +26,12 @@
           </thead>
           <tbody data-bind="sortable: {data: inputs, allowDrop: false}">
             <tr class="app-io-field">
-              <td class="io-field-class" data-bind="text: klass"></td>
+              <td class="io-field-class" >
+                <span data-bind="text: klass"></span>
+                <!-- ko if: error -->
+                  <span class="fa fa-fw fa-warning"></span> <span class="text-danger" data-bind="text: error"></span>
+                <!-- /ko -->
+              </td>
               <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name" placeholder="enter_input_name"/></td>
               <td class="io-field-label"><input type="text" class="form-control" data-bind="textInput: label" placeholder="Enter Input Label"/></td>
               <td class="io-field-help"><input type="text" class="form-control" data-bind="textInput: help" placeholder="Enter help text for this field"/></td>
@@ -104,9 +109,12 @@
   </div>
 </div>
 
-
 <script type="text/html" id="io-field-file">
-  <input type="text" class="form-control" data-bind="textInput: defaultValue" placeholder="file-XXXX"/>
+  <button class="btn btn-info" data-bind="text: defaultValueDisplay, attr: {name: name, disable: $root.loading}, click: openFileSelector, css: { 'btn-info': !defaultValue(), 'btn-default': defaultValue}">Select file...</button>
+  <!-- ko if: defaultValue -->
+    <button class="btn btn-link btn-link-danger" data-bind="click: clear">Clear</button>
+  <!-- /ko -->
+  <%= render "_partials/selector_modal" %>
 </script>
 
 <script type="text/html" id="io-field-string">

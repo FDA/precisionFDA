@@ -1,0 +1,41 @@
+<div class="pfda-note">
+  <div class="note-flexbox">
+    <div class="note-pane">
+      <div class="note-display pfda-md-rendered" data-bind="html: content.display">
+      </div>
+    </div>
+    <div class="note-sidebar note-sidebar-padded">
+      <div id="note-attachments" class="note-attachments">
+        <!-- ko foreach: attachments -->
+        <div class="list-group" data-bind="visible: items().length > 0, css: className">
+          <div class="list-group-item">
+            <div class="list-group-item-heading" data-bind="text: heading"></div>
+          </div>
+          <!-- ko foreach: items -->
+            <div class="list-group-item attachment">
+              <div class="media">
+                <div class="media-left">
+                  <span data-bind="css: $parent.iconClass"></span>
+                </div>
+                <div class="media-body word-break-all">
+                  <!-- ko if: path -->
+                    <a class="item-name" data-bind="text: name, attr: {href: path}" tabindex="-1" ></a>
+                  <!-- /ko -->
+                  <!-- ko ifnot: path -->
+                    <span class="item-name" data-bind="text: uid" tabindex="-1" ></span>
+                  <!-- /ko -->
+                </div>
+              </div>
+            </div>
+          <!-- /ko -->
+        </div>
+        <!-- /ko -->
+      </div>
+    </div>
+    <% if !@commentable.nil? %>
+    <div class="note-sidebar">
+      <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @commentable %>
+    </div>
+    <% end %>
+  </div>
+</div>

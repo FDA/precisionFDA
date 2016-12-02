@@ -4,14 +4,25 @@
 <%= form_for :main, url: publish_path do |f| %>
 <input type="hidden" data-bind="attr: {name: 'id'}, value: rootID" />
 <input type="hidden" data-bind="attr: {name: 'uids[' + rootID +']'}, value: 'on'" />
+<input type="hidden" data-bind="attr: {name: 'scope'}, value: selectedScope" />
+
 <div class="container container-padded-v">
+  <!-- ko if: !isScopeASpace() -->
   <div class='pfda-help-block'>
-    <span class='fa fa-exclamation-triangle' aria-hidden='true'></span> Publishing items makes them publicly visible. <%= link_to("Review important information about publishing, and learn why it's a good idea to also publish related items.", "#{about_path}/how#publish", target: '_blank') %>
+    <span class='fa fa-exclamation-triangle' aria-hidden='true'></span> Publishing items makes them publicly visible. <%= link_to("Review important information about publishing, and learn why it's a good idea to also publish related items.", "#{show_docs_path('publishing')}", target: '_blank') %>
   </div>
+  <!-- /ko -->
+  <!-- ko if: isScopeASpace() -->
+  <div class='pfda-help-block'>
+    <span class='fa fa-exclamation-triangle' aria-hidden='true'></span>
+    Sharing items makes them visible to the members of the selected Space. <%= link_to("Review important information about publishing, and learn why it's a good idea to also publish related items.", "#{show_docs_path('publishing')}", target: '_blank') %>
+  </div>
+  <!-- /ko -->
   <div class="list-group">
     <div class="list-group-item list-group-item-header">
       <div class="btn-group">
-        <button class="btn btn-success" type="submit" name="submit">Publish Selected Objects</button>
+        <button class="btn btn-success" type="submit" name="submit" data-bind="text: primaryButtonLabel">
+        </button>
       </div>
     </div>
     <ul class="list-group list-group-nested" data-bind="template: { name: 'tree-element', foreach: treeRoot }"></ul>
@@ -27,11 +38,23 @@
         <!-- ko if: isOwned -->
           <!-- ko if: isPublishable -->
             <label class="btn btn-xs" data-bind="css: {'btn-default': !publish(), 'btn-success': publish(), 'disabled': isRoot}">
-              <input type="checkbox" data-bind="checked: publish, disable: isRoot, attr: {name: 'uids[' + uid + ']'}"/> Publish <span class="descendent-publish-indicator fa fa-circle" data-bind="visible: !publish() && childrenToPublishCount() > 0" style="display: none;"></span>
+              <input type="checkbox" data-bind="checked: publish, disable: isRoot, attr: {name: 'uids[' + uid + ']'}"/>
+              &nbsp;
+              <span data-bind="text: $root.publishableItemLabel"></span>
+              &nbsp;
+              <!-- ko if: isInSpace -->
+                <span>(from Space)</span>
+              <!-- /ko -->
+              <span class="descendent-publish-indicator fa fa-circle" data-bind="visible: !publish() && childrenToPublishCount() > 0" style="display: none;"></span>
             </label>
           <!-- /ko -->
           <!-- ko if: !isPublishable -->
-            <label class="label label-danger-text">Can't publish while pending</label>
+            <!-- ko if: isInSpace -->
+              <label class="label label-warning-text">In Space</label>
+            <!-- /ko -->
+            <!-- ko if: !isInSpace -->
+              <label class="label label-danger-text">Unpublishable</label>
+            <!-- /ko -->
           <!-- /ko -->
         <!-- /ko -->
         <!-- ko if: !isOwned -->
@@ -39,7 +62,7 @@
         <!-- /ko -->
       <!-- /ko -->
       <!-- ko if: isPublished -->
-        <label class="label label-success-text">Published</label>
+        <label class="label label-success-text">Public</label>
       <!-- /ko -->
       </div>
       <div class="media-body">

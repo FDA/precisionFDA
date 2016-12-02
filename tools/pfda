@@ -10,7 +10,7 @@ To upload a file:
 To upload an asset:
 
   pfda [--auth <KEY>] upload-asset [--threads THREADS] --name NAME --root /path/ --readme README
-  
+
 
 """
 from __future__ import print_function, unicode_literals, division
@@ -41,6 +41,7 @@ except ImportError as ie:
 from requests.adapters import HTTPAdapter
 from requests.packages import urllib3
 from requests.utils import default_user_agent
+from requests.packages.urllib3.util import Retry
 
 try:
     urllib3.disable_warnings(category=urllib3.exceptions.InsecurePlatformWarning)
@@ -51,11 +52,13 @@ logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.E
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-__version__ = "1.0.4"
+__version__ = "1.0.6"
 MAX_THREADS = 6
 THREAD_POOL_FUTURES = set()
 MAX_RETRY = 10
 CHUNK_SIZE = 64*1024*1024
+
+TYPE_UPLOAD_ASSET, TYPE_UPLOAD_FILE, TYPE_DOWNLOAD_APP_SPEC, TYPE_DOWNLOAD_APP_SCRIPT = range(4)
 
 print("\nprecisionFDA asset/file uploader -- v{}".format(__version__) + "\n")
 
@@ -204,9 +207,13 @@ IS_ASSET = False
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, usage=__doc__)
 
-parser.add_argument("upload_type", choices=['upload-file', 'upload-asset'], action="store", help="Upload type")
+parser.add_argument("transfer_type", choices=['upload-file', 'upload-asset', 'download-app-spec', 'download-app-script'], action="store", help="Upload/Download type")
 
 parser.add_argument("--auth", action="store", dest="auth_key", help="Authorization key")
+
+parser.add_argument("--app-id", action="store", dest="app_id", help="App ID for downloading specs or scripts")
+
+parser.add_argument("--output-file", action="store", dest="output_file", help="File for writing out app data")
 
 parser.add_argument("--name", action="store", dest="asset_name",
                     help="Asset name (ending with .tar or .tar.gz)")
@@ -225,14 +232,18 @@ args = parser.parse_args()
 if args.threads:
     MAX_THREADS = args.threads
 
-if args.upload_type == "upload-asset":
-    IS_ASSET = True
-elif args.upload_type == "upload-file":
-    IS_ASSET = False
+if args.transfer_type == "upload-asset":
+    TRANSFER_TYPE = TYPE_UPLOAD_ASSET
+elif args.transfer_type == "upload-file":
+    TRANSFER_TYPE = TYPE_UPLOAD_FILE
+elif args.transfer_type == "download-app-spec":
+    TRANSFER_TYPE = TYPE_DOWNLOAD_APP_SPEC
+elif args.transfer_type == "download-app-script":
+    TRANSFER_TYPE = TYPE_DOWNLOAD_APP_SCRIPT
 else:
-    exit("The upload-type positional argument requires either 'upload-file' or 'upload-asset'.")
+    exit("The transfer-type positional argument requires one of ['upload-file', 'upload-asset', 'download-app-spec', 'download-app-spec'].")
 
-if IS_ASSET:
+if TRANSFER_TYPE == TYPE_UPLOAD_ASSET:
     if args.asset_name:
         if not args.asset_name.endswith((".tar", ".tar.gz")):
             exit('The asset name "{}" should end with .tar or .tar.gz.'.format(args.asset_name))
@@ -251,7 +262,7 @@ if IS_ASSET:
             exit('The root directory "{}" does not exist.'.format(args.asset_root) + ". Provide a valid directory path.")
     else:
         exit("Root directory for the asset is required. Provide it as [--root ASSET_ROOT].")
-else:
+elif TRANSFER_TYPE == TYPE_UPLOAD_FILE:
     # check that there is another argument
     if len(args.file_path) == 0 or args.file_path == "":
         exit("File path for the file is required")
@@ -275,6 +286,8 @@ USER_AGENT = "{name}/{version} ({platform}) {requests_version}".format(name="Ass
                                                                        requests_version=default_user_agent())
 AUTH_HEADER = {"User-Agent": USER_AGENT, "Authorization": "Key %s" % (config.value)}
 
+https_retry = Retry(total=MAX_RETRY, backoff_factor=5)
+
 # define a method to get the url for the asset/file storage and then submit it
 def send_tostore(asset_id, data_len, data_index, data_bytes):
     # get md5sum of the chunk
@@ -286,8 +299,8 @@ def send_tostore(asset_id, data_len, data_index, data_bytes):
     PUT_URL = "https://s3.amazonaws.com"
 
     upload_session = requests.Session()
-    upload_session.mount(UPLOAD_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=MAX_RETRY))
-    upload_session.mount(PUT_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=MAX_RETRY))
+    upload_session.mount(UPLOAD_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=https_retry))
+    upload_session.mount(PUT_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=https_retry))
 
     # call the precisionFDA api
     # build up the data JSON to be sent to get_upload_url()
@@ -311,6 +324,51 @@ def send_tostore(asset_id, data_len, data_index, data_bytes):
         os._exit(os.EX_IOERR)
     storage_res.raise_for_status()
 
+# function to download an app's spec
+def download_app_info(app_id, app_info_path, output_file):
+    # Define URLS
+    CREATE_URL = "https://precision.fda.gov/api/" + app_info_path
+    CLOSE_URL = "https://precision.fda.gov/api/" + app_info_path
+
+    # setup HTTP request retry options
+    session = requests.Session()
+    session.mount(CREATE_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=MAX_RETRY))
+    session.mount(CLOSE_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=MAX_RETRY))
+
+    print("Downloading app data...")
+    data = {"id": app_id}
+    # if there is an exception show a message and exit
+    try:
+        res = session.post(CREATE_URL, json=data, headers=AUTH_HEADER)
+    except requests.exceptions.RequestException as re:
+        logger.error("Invalid server response during download. Please try again later; if the problem " +\
+                             "persists, contact precisionFDA support.")
+        logger.error(re)
+        exit(1)
+
+    try:
+        res.raise_for_status()
+    except requests.exceptions.HTTPError as he:
+        if res.status_code == 401:
+            logger.error(he.message)
+            logger.error("The provided authorization key has expired. Please obtain a new authorization key and try again later.")
+            exit(1)
+        else:
+            raise
+
+    if output_file and output_file != '-':
+        f = open(output_file, 'w')
+    else:
+        f = sys.stdout
+    try:
+        if app_info_path == "get_app_spec":
+            json.dump(res.json(), f)
+        else:
+            f.write(res.text)
+    finally:
+        if f is not sys.stdout:
+            f.close()
+
 # function to upload the asset
 def upload_asset(asset_name, asset_directory, asset_readme):
     with open(asset_readme) as rm:
@@ -323,6 +381,7 @@ def upload_asset(asset_name, asset_directory, asset_readme):
     # read the directory and get the entries for the files existing in all its sub-directories
     file_list = []
     cut_len = len(asset_directory)
+    no_files = True
     for dirname, dirnames, filenames in os.walk(asset_directory):
         this_dir = dirname[cut_len:]
         if this_dir != '':
@@ -330,10 +389,15 @@ def upload_asset(asset_name, asset_directory, asset_readme):
         for filename in filenames:
             ap = os.path.join(dirname, filename)[cut_len:]
             file_list.append(ap)
+            no_files = False
+
+    if no_files:
+        exit('The root directory "{}" does not contain any files.'.format(asset_directory))
+
     # setup HTTP request retry options
     asset_session = requests.Session()
-    asset_session.mount(CREATE_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=MAX_RETRY))
-    asset_session.mount(CLOSE_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=MAX_RETRY))
+    asset_session.mount(CREATE_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=https_retry))
+    asset_session.mount(CLOSE_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=https_retry))
 
     print("Creating asset...")
     data = {"name": asset_name, "description": asset_desc, "paths": file_list}
@@ -344,7 +408,7 @@ def upload_asset(asset_name, asset_directory, asset_readme):
     except requests.exceptions.HTTPError as he:
         if res.status_code == 401:
             logger.error(he.message)
-            logger.error("Your authorization key has expired. Please get a new authorization key and try again later.")
+            logger.error("The provided authorization key has expired. Please obtain a new authorization key and try again later.")
             exit(1)
         else:
             raise
@@ -421,8 +485,8 @@ def upload_file(file_path):
 
     # setup HTTP request retry options
     file_session = requests.Session()
-    file_session.mount(CREATE_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=MAX_RETRY))
-    file_session.mount(CLOSE_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=MAX_RETRY))
+    file_session.mount(CREATE_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=https_retry))
+    file_session.mount(CLOSE_URL, HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=https_retry))
 
     data = {"name": file_name, "description": description}
 
@@ -441,7 +505,7 @@ def upload_file(file_path):
     except requests.exceptions.HTTPError as he:
         if res.status_code == 401:
             logger.error(he.message)
-            logger.error("Your authorization key has expired. Please get a new authorization key and try again later.")
+            logger.error("The provided authorization key has expired. Please obtain a new authorization key and try again later.")
             exit(1)
         else:
             raise
@@ -502,7 +566,14 @@ def upload_file(file_path):
         close_res.raise_for_status()
     print("\nDone. You can access the file at https://precision.fda.gov/files/" + file_id)
 
-if IS_ASSET:
+if TRANSFER_TYPE == TYPE_UPLOAD_ASSET:
     upload_asset(args.asset_name, args.asset_root, args.asset_readme)
-else:
+elif TRANSFER_TYPE == TYPE_UPLOAD_FILE:
     upload_file(args.file_path)
+elif TRANSFER_TYPE == TYPE_DOWNLOAD_APP_SPEC:
+    download_app_info(args.app_id, "get_app_spec", args.output_file)
+elif TRANSFER_TYPE == TYPE_DOWNLOAD_APP_SCRIPT:
+    download_app_info(args.app_id, "get_app_script", args.output_file)
+else:
+    # Shouldn't reach here
+    exit()

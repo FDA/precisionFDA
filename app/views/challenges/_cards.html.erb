@@ -1,0 +1,70 @@
+<div class="pfda-cards pfda-cards-justify-centered">
+<% challenges.each do |challenge| %>
+  <% if challenge[:launched] %>
+    <a href="<%= challenge[:results_announced] ? challenge[:path] + '/results' : challenge[:path] %>" class="pfda-card pfda-card-default pfda-card-rounded pfda-card-bordered pfda-card-padded pfda-card-shadow">
+      <div class="media">
+        <div class="media-left pfda-card-title">
+          <span class="fa fa-trophy" aria-hidden="true"></span>
+        </div>
+        <div class="media-body text-left">
+          <div class="pfda-card-title">
+            <%= challenge[:title] %>
+          </div>
+          <div class="pfda-card-body">
+            <ul class="list-group list-inline list-inline-bullets">
+              <li><%= pluralize(challenge[:responses_count], 'response') %></li>
+              <li><%= pluralize(challenge[:followers_count], 'follower') %></li>
+            </ul>
+            <ul class="list-group list-group-condensed-sm list-group-contained">
+              <li class="list-group-item <%= challenge[:launched] ? '' : 'list-group-item-muted' %>">
+                <div class="media">
+                  <div class="media-left">
+                    <span class="fa fa-fw <%= challenge[:launched] ? 'fa-check': '' %>"></span>
+                  </div>
+                  <div class="media-body">
+                    Challenge started
+                    <div class="text-muted"><%= challenge[:start_date].strftime("%d %b %Y %H:%M %Z") %></div>
+                  </div>
+                </div>
+              </li>
+              <li class="list-group-item <%= challenge[:active] ? 'list-group-item-muted' : '' %>">
+                <div class="media">
+                  <div class="media-left">
+                    <span class="fa fa-fw <%= challenge[:ended] ? 'fa-check': '' %>"></span>
+                  </div>
+                  <div class="media-body">
+                    <% if challenge[:active] && !challenge[:ended] %>
+                      <mark><strong><%= distance_of_time_in_words_to_now(challenge[:end_date]) %></strong> left</mark>
+                      <br>
+                    <% end %>
+                    Submissions closed
+                    <div class="text-muted"><%= challenge[:end_date].strftime("%d %b %Y %H:%M %Z") %></div>
+                  </div>
+                </div>
+              </li>
+              <li class="list-group-item <%= challenge[:results_announced] ? '': 'list-group-item-muted' %>">
+                <div class="media">
+                  <div class="media-left">
+                    <span class="fa fa-fw <%= challenge[:results_announced] ? 'fa-check': '' %>"></span>
+                  </div>
+                  <div class="media-body">
+                    <% if challenge[:ended] && !challenge[:results_announced] && challenge[:results_date] %>
+                      <mark><strong><%= distance_of_time_in_words_to_now(challenge[:results_date]) %></strong> left</mark>
+                      <br>
+                    <% end %>
+                    Results announced
+                    <div class="text-muted"><%= challenge[:results_date] ? challenge[:results_date].strftime("%d %b %Y %H:%M %Z") : 'TBD' %></div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="pfda-card-image-banner pfda-card-image-banner-bottom">
+        <%= image_tag(challenge[:thumbnail], alt: challenge[:title], class: "img-responsive", height: "50px") %>
+      </div>
+    </a>
+  <% end %>
+<% end %>
+</div>

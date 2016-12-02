@@ -28,14 +28,12 @@
             No assets found <a class="pull-right" data-bind="click: clearQuery, visible: !_.isEmpty(query())">Clear query</a>
           </li>
           <!-- ko foreach: assets.filtered -->
-          <li class="list-group-item item-asset" data-bind="css: {active: $parent.previewedAsset() && $parent.previewedAsset().dxid == dxid}">
+          <li class="list-group-item item-asset checkbox" data-bind="css: {active: $parent.previewedAsset() && $parent.previewedAsset().uid == uid}">
             <div class="media">
               <div class="media-body">
-                <div class="checkbox clearfix">
-                  <label>
-                    <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.assets.selected"> <span class="fa fa-file-zip-o"></span> <span  class="word-break-all" data-bind="text: name"></span>
-                  </label>
-                </div>
+                <label>
+                  <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.assets.selected"> <span class="fa fa-file-zip-o"></span> <span class="item-asset-name word-break-all" data-bind="text: name"></span>
+                </label>
               </div>
               <div class="media-right">
                 <span class="list-preview-icon" data-bind="click: $parent.previewAsset"><span class="fa fa-fw fa-chevron-right"></span></span>
@@ -50,7 +48,7 @@
           <div role="tabpanel" class="tab-pane tab-pane-preview active">
             <!-- ko if: previewedAsset() -->
               <div class="h2">
-                <a href="/app_assets/" data-bind="text: previewedAsset().name, attr: {href: '/app_assets/' + previewedAsset().dxid}" target="_blank"></a>
+                <a href="/app_assets/" data-bind="text: previewedAsset().name, attr: {href: '/app_assets/' + previewedAsset().uid}" target="_blank"></a>
               </div>
               <hr>
               <!-- ko if: previewedAsset().descriptionDisplay() -->

@@ -50,6 +50,35 @@
           width: 100%
           border-radius: $btn-border-radius-large
 
+    .jumbotron-challenges
+      .tiltview
+        opacity: 0.25
+        width: 50%
+
+      .container
+        .pfda-cards:not(.pfda-cards-list)
+          .pfda-card
+            width: 100%
+            @media (min-width: $screen-sm-min)
+              width: calc(50% - 20px)
+            @media (min-width: $screen-md-min)
+              width: calc(40% - 20px)
+            @media (min-width: $screen-lg-min)
+              width: calc(30% - 20px)
+
+.pfda-controller-main.pfda-action-index
+  .overview-header
+    color: $text-muted
+    text-transform: uppercase
+    font-size: 16px
+    font-weight: 300
+    padding-left: $padding-base-horizontal
+    margin-bottom: 10px
+
+  .pfda-tutorial
+    .link-muted
+      font-weight: normal
+
 .pfda-controller-main.pfda-action-request_access main
   .error
     padding: 10px
@@ -80,11 +109,6 @@
 
   .descendent-publish-indicator
     color: $brand-green-primary
-
-.pfda-controller-main.pfda-action-index main
-  .pfda-tutorial
-    .pfda-card-body
-      min-height: 100px
 
 #about-docs
   position: relative

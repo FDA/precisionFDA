@@ -1,0 +1,467 @@
+<% content_for :title do %><%= @meta_appathon.title %><% end %>
+
+<div class="pfda-meta-appathon-template pfda-meta-appathon-template-<%= @meta_appathon.template %>">
+  <div class="jumbotron jumbotron-meta_appathon clearfix">
+    <div class="row">
+      <div class="col-sm-18 col-sm-offset-3 text-center col-lg-12 col-lg-offset-6">
+        <h1>
+          <span class="meta_appathon-title-muted">PrecisionFDA</span>
+          <br>
+          <%= @meta_appathon.title %>
+        </h1>
+
+        <p class="lead lead-intro">
+          Are you running or developing software that analyzes sequenced DNA? Help advance regulatory science, promote and discover Next-Generation Sequencing (NGS) software, and contribute to the growing precisionFDA community, by organizing a precisionFDA app-a-thon.
+        </p>
+
+        <% if @context.logged_in? %>
+          <% if !@meta_appathon.followed_by?(@context.user) && @meta_appathon.is_ongoing? %>
+            <p class="text-center">
+              <%= link_to new_meta_appathon_appathon_path(@meta_appathon), class: 'btn btn-danger btn-lg' do %>
+                <span class="fa fa-bolt fa-fw"></span> Host an App-a-thon
+              <% end %>
+              <%= link_to "#appathons-list", class: 'btn btn-default btn-lg' do %>
+                <span class="fa fa-laptop fa-fw"></span> View all App-a-thons
+              <% end %>
+            </p>
+          <% elsif !@user_appathon.nil? %>
+            <p class="text-center">
+              <%= link_to appathon_path(@user_appathon), class: 'btn btn-default btn-lg' do %>
+                <%= flag_image_tag(@user_appathon.flag, width: 25) %> <%= @user_appathon.title %> App-a-thon
+              <% end %>
+              <%= link_to "#appathons-list", class: 'btn btn-default btn-lg' do %>
+                <span class="fa fa-laptop fa-fw"></span> View all App-a-thons
+              <% end %>
+            </p>
+          <% end %>
+        <% end %>
+      </div>
+      <div class="col-sm-12 col-sm-offset-6 col-lg-8 col-lg-offset-8">
+        <%= image_tag("appathons/appathon-toolbox.png", class: 'img-responsive')  %>
+      </div>
+      <div class="col-sm-18 col-sm-offset-3 col-lg-12 col-lg-offset-6 text-center alert alert-warning">
+        <div class="lead lead-bold">
+          App-a-thon End Date Further Extended!
+        </div>
+        <div class="lead">
+          Due to significant interest in this challenge, we have decided to further extend the deadline so more of you can host and join App-a-thons!
+          <br/>
+          The new deadline is <strong>December 31st, 2016</strong>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if @meta_appathon.editable_by?(@context) %>
+  <div class="pfda-toolbar">
+    <%= link_to edit_meta_appathon_path(@meta_appathon), class: "btn btn-primary" do %>
+      <span class="fa fa-pencil"></span> Edit
+    <% end %>
+  </div>
+  <% end %>
+
+  <div class="container-fluid pfda-meta-appathon-intro">
+    <div class="thumbnail">
+      <%= video_iframe("https://www.youtube.com/embed/ir662wQJ5cI") %>
+    </div>
+  </div>
+
+  <div class="container-fluid container-padded pfda-meta-appathon-section">
+    <div class="row">
+      <div class="col-md-11">
+        <div class="panel">
+          <div class="panel-body">
+            <div class="text-center">
+              <%= image_tag("icons/ColoredLineIcons/png/128/bulletin_board.png")  %>
+            </div>
+            <div class="h3">
+              What is an app-a-thon?
+            </div>
+
+            <p class="lead">
+              An app-a-thon is your own community event where you and your peers, collaborators or friends get together and add your favorite NGS software to the precisionFDA app library.
+            </p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-body">
+            <div class="text-center">
+              <%= image_tag("icons/ColoredLineIcons/png/128/cloud.png")  %>
+            </div>
+            <div class="h3">
+              What is a precisionFDA app?
+            </div>
+
+            <p class="lead">
+              A precisionFDA app is a wrapper around NGS software, consisting of Linux executables and a specification of how to execute them in a Linux virtual machine. Apps can encapsulate any use case such as read mapping, variation calling, benchmarking, or simulations. Users on precisionFDA can try out these apps by running them directly on the cloud.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12 col-md-offset-1">
+        <div class="row">
+          <div class="col-sm-offset-1 col-sm-10">
+            <div class="panel panel-warning">
+              <div class="panel-heading">
+                <div class="metadata-section">
+                  <ul class="list-group list-group-inline">
+                    <li class="list-group-item list-group-item-transparent-bg">
+                      <h5 class="list-group-item-heading">Start</h5>
+                      <p class="list-group-item-text"><%= @meta_appathon.start_at.to_s(:db) %></p>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-offset-2 col-sm-10">
+            <div class="panel panel-warning">
+              <div class="panel-heading">
+                <div class="metadata-section">
+                  <ul class="list-group list-group-inline">
+                    <li class="list-group-item list-group-item-transparent-bg">
+                      <h5 class="list-group-item-heading">End <span class="label label-info">Further Extended</span></h5>
+                      <p class="list-group-item-text"><%= @meta_appathon.end_at.to_s(:db) %></p>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="panel">
+          <div class="panel-body">
+            <div class="text-center">
+              <%= image_tag("icons/ColoredLineIcons/png/128/lightbulb_idea.png")  %>
+            </div>
+            <div class="h3">
+              Why organize or participate in an app-a-thon?
+            </div>
+
+            <p class="lead">
+              By contributing to the precisionFDA app library, you help introduce your favorite NGS software to the FDA and to the community. When others do the same, you collectively help build up the precisionFDA app library, enabling the greater precisionFDA community to explore, access, and try out all these apps directly on the cloud.
+            </p>
+
+            <p class="lead">
+              You also help disseminate the software in a portable manner, because users have the option of exporting the app as a Linux container (Docker) and running it in any other environment.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pfda-meta-appathon-kit">
+    <div class="panel container container-padded">
+      <div class="panel-body">
+        <!-- Nav tabs -->
+        <ul class="nav nav-pills nav-pills-center nav-pills-padded nav-pills-lg text-uppercase" role="tablist">
+          <li role="presentation" class="active"><a href="#organizers" aria-controls="organizers" role="tab" data-toggle="tab">Organizer Box</a></li>
+          <li role="presentation"><a href="#participants" aria-controls="participants" role="tab" data-toggle="tab">Participant Box</a></li>
+          <li role="presentation"><a href="#everybodyelse" aria-controls="everybodyelse" role="tab" data-toggle="tab">Everybody Else</a></li>
+        </ul>
+        <br/>
+        <br/>
+        <!-- Tab panes -->
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane active" id="organizers">
+
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/coffee.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  Plan your app-a-thon
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                  Think of how you want to organize your app-a-thon. Perhaps you are teaching a class and you'd like to devote a session or two to conduct an app-a-thon with your students. Or maybe you can invite your coworkers to stay in the office late one day and put apps on precisionFDA. Or you and your friends can connect online, and fiddle with precisionFDA over the course of two weeks. You can meet physically or virtually, and run the app-a-thon over any period of time, however short or long.
+                </p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/fountain_pen.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  Get access to precisionFDA
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                File an <%= link_to "access request", request_access_path %>, indicating that you are planning to organize an app-a-thon. The FDA acts as steward to providing the precisionFDA service to the community, so your request will be initially pending. In the meantime, you will receive an email with a link to access the precisionFDA website in browse (guest) mode. Later, once the FDA approves your account request, you will receive another email with your contributor account information.
+                </p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/bulletin_board.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  Register your app-a-thon in the system
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                Scroll up and click "Host an app-a-thon". Give your app-a-thon a name, a location, and optionally a description. Choose an icon that will represent your app-a-thon, and adjust its start date to when you want the app-a-thon to start. (We recommend keeping the end date to the default of <%= @meta_appathon.end_at.to_s(:db) %>, so that your participants have the opportunity to contribute additional apps even after you conclude your app-a-thon). You can always edit this information later, so don't worry if you don't get it perfect right away.
+                </p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/pencil.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  Recruit members
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                If you are the precisionFDA admin of your organization, and the app-a-thon members are from within your organization, visit your profile page and click "Provision new user under my organization". Enter the info (first name, last name, and email) for each user and provision them. Otherwise, ask them to file an <%= link_to "access request", request_access_path %>, indicating that they plan to participate in an app-a-thon.
+                </p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/book.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  Make preparations
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                Ask your participants to prepare by using the "Participant Box". Since the app-a-thon is about adding NGS software to precisionFDA, you can also send them some software suggestions ahead of time so that they have an opportunity to decide what apps to create.
+                </p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/lightbulb_idea.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  Run the app-a-thon
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                Customize your app-a-thon to fit your style and intentions. Order coffee or food if you are staying up late. Prepare name tags if people don't know each other. And most importantly: spread the spirit of contribution, community building, and team effort.
+                </p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/thumbs_up.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  Congratulations!
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                Well done, you contributed to the precisionFDA Appathon-in-a-box challenge! If you like, you can announce an internal winner for your app-a-thon. Your app-a-thon page includes a voting feature where participants can upvote any app. You can use that to elect the winner, or you can decide any other way you prefer (or not at all -- everybody is a winner after all).
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div role="tabpanel" class="tab-pane" id="participants">
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/fountain_pen.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  Get access to precisionFDA
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                  If the app-a-thon's organizer is in the same organization as you, they may have already provisioned an account for you. Otherwise, file an <%= link_to "access request", request_access_path %>, indicating that you plan to participate in an app-a-thon. The FDA acts as steward to providing the precisionFDA service to the community, so your request will be initially pending. In the meantime, you will receive an email with a link to access the precisionFDA website in browse (guest) mode. Later, once the FDA approves your account request, you will receive another email with your contributor account information.
+                </p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/bulletin_board.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  Join the app-a-thon
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                  Once the organizer registers the app-a-thon, it will appear below, in the list of precisionFDA app-a-thons. Visit the app-a-thon's page and click "Join". Note: this action cannot be undone, and you can only join one app-a-thon, so make sure you join the right one.
+                </p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/book.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  Learn how to make app assets and apps
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                Read the <%= link_to "Apps", show_docs_path('apps') %> section of the documentation, and take a look at some of the Featured apps on precisionFDA. Click "Run" on any app to try it out, or "Fork" to take a look at its internals. Study the <%= link_to "Creating Apps", show_docs_path('creating_apps') %> section of the documentation, which includes an introductory video on making apps. Pay particular attention to the concept of app assets; you will most likely need to package NGS software into such an app asset, as part of making your app. Take a look at some of the Featured assets, and peek in the archive contents tab, to understand the subdirectories you'll need to create under the fake root when making your own assets.
+                </p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/ruler.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  Prepare and design
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                  Think ahead of time of the NGS software you'd like to add as an app. Decide what will the app do -- what inputs will it ask for, how will it run the software, and what outputs will it provide. Get prepared: If you do not have access to a Linux environment, download the precisionFDA VM as mentioned in the documentation. You can also prepare and upload app assets ahead of time.
+                </p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/laptop.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  Create your app
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                Once the app-a-thon has started, log into precisionFDA and click "Create App". (Only apps created <strong>after</strong> the app-a-thon start date can participate in an app-a-thon; if your app is older, fork it into a new one). Follow the steps to write a spec, define the VM environment (and create any assets if needed), write the shell script, and add documentation. Test your app by running it in a small input. Iterate as needed, editing and running again, until you are satisfied. You can also "Edit tags" to tag one or more categories that fit the app. When done, click "Publish" and publish the app and its assets. It will then appear in the app-a-thon's page, and in the list below.
+                </p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/thumbs_up.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  Congratulations!
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                Well done, you contributed to the precisionFDA Appathon-in-a-box challenge! Visit your app-a-thon's page to see apps created by the other members of your app-a-thon. You can also upvote any app or leave a comment on the app-a-thon.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div role="tabpanel" class="tab-pane" id="everybodyelse">
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/laptop.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  Try out some apps
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                  Take a look at the list of apps produced by the app-a-thons below. You can try out each app by running it directly on the cloud, or you can export it as a Docker container to run on your own computer.
+                </p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-2">
+                <%= image_tag("icons/ColoredLineIcons/png/64/thumbs_up.png", class: 'img-responsive')  %>
+              </div>
+              <div class="col-sm-5">
+                <div class="h3">
+                  React!
+                </div>
+              </div>
+              <div class="col-sm-14 col-sm-offset-1">
+                <p class="lead">
+                  Are you in love with a particular app? Do you think it's innovative? Is it a fast/efficient algorithm? Does it look well-documented? Tell the world by clicking on the respective reaction buttons below.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel container container-padded">
+      <div class="panel-body">
+        <div class="text-center">
+          <%= image_tag("icons/ColoredLineIcons/png/128/sunglasses.png")  %>
+        </div>
+        <div class="h3">
+          Are you new to precisionFDA?
+        </div>
+
+        <p class="lead">
+          Take a look at <a href="https://www.youtube.com/watch?v=U_vmcd93HkM" target="_blank">this 4-minute introductory video</a> to get an idea of what the system is about.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="appathons-list" class="pfda-meta-appathon-submissions container-fluid">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <div class="text-center">
+          <%= image_tag("icons/ColoredLineIcons/png/128/laptop.png")  %>
+          <h4>App-a-thons and Submitted Apps</h4>
+        </div>
+      </div>
+      <div class="pfda-pane">
+        <div class="pfda-pane-sidebar">
+          <% if @context.logged_in? && @user_appathon.nil? %>
+          <div class="pfda-toolbar">
+            <div class="h4">
+              Join or Organize an App-a-thon
+            </div>
+            <p class="text-muted">
+              Help others discover great NGS software by contributing to this effort.
+            </p>
+            <% if !@meta_appathon.followed_by?(@context.user) && @meta_appathon.is_ongoing? %>
+              <p class="text-muted">
+                Organize or participate in a precisionFDA app-a-thon today!
+              </p>
+              <%= link_to new_meta_appathon_appathon_path(@meta_appathon), class: 'btn btn-danger btn-block' do %>
+                <span class="fa fa-bolt fa-fw"></span> Host an App-a-thon
+              <% end %>
+            <% end %>
+          </div>
+          <% end %>
+          <%= render "appathons/cards", meta_appathon: @meta_appathon, appathons: @appathons %>
+        </div>
+        <div class="pfda-pane-content">
+          <%= render "meta_appathons/app_cards", apps: @apps, meta_appathon: @meta_appathon %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

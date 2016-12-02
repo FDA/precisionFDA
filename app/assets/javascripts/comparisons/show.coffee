@@ -145,37 +145,37 @@ class LineChart
 #
 #########################################################
 
-ComparisonsController = Paloma.controller('Comparisons')
-ComparisonsController::show = ->
-  $container = $("body main")
-  if @params.state == "done"
-    meta = @params.meta
-    dataset = _.map(meta["weighted_roc"]["data"], (datum) ->
-      datumObject = {}
-      for datakey, i in meta["weighted_roc"]["header"]
-        if _.includes(["f_measure", "precision", "sensitivity"], datakey)
-          datumObject[datakey] = parseFloat(datum[i])
-        else
-          datumObject[datakey] = parseInt(datum[i])
-      return datumObject
-    )
+ComparisonsController = Paloma.controller('Comparisons',
+  show: ->
+    $container = $("body main")
+    if @params.state == "done"
+      roc = @params.roc
+      dataset = _.map(roc["data"], (datum) ->
+        datumObject = {}
+        for datakey, i in roc["header"]
+          if _.includes(["f_measure", "precision", "sensitivity"], datakey)
+            datumObject[datakey] = parseFloat(datum[i])
+          else
+            datumObject[datakey] = parseInt(datum[i])
+        return datumObject
+      )
 
-    new LineChart(".chart-precision-sensitivity", dataset, {
-      yParams:
-        key: 'precision'
-        label: '% Precision'
-        format: 'p'
-        max: 1
-      xParams:
-        key: 'sensitivity'
-        label: '% Sensitivity'
-        format: 'p'
-        max: 1
-    })
+      new LineChart(".chart-precision-sensitivity", dataset, {
+        yParams:
+          key: 'precision'
+          label: '% Precision'
+          format: 'p'
+          max: 1
+        xParams:
+          key: 'sensitivity'
+          label: '% Sensitivity'
+          format: 'p'
+          max: 1
+      })
 
-  viewModel = {
-    noteAttachModel: new Precision.models.NoteAttachModel(@params.id, 'Comparison')
-  }
+    viewModel = {
+      noteAttachModel: new Precision.models.NoteAttachModel(@params.id, 'Comparison')
+    }
 
-  ko.applyBindings(viewModel, $container[0])
-
+    ko.applyBindings(viewModel, $container[0])
+)

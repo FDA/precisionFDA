@@ -1,10 +1,10 @@
 source 'https://rubygems.org'
 
 # Bundler. The tool that manages all of our gems
-gem 'bundler', '1.10.6'
+gem 'bundler', '1.13.6'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.2.3'
+gem 'rails', '4.2.7.1'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
 # Use Uglifier as compressor for JavaScript assets
@@ -36,10 +36,10 @@ gem 'activerecord_any_of'
 gem 'rails_param'
 
 # WiceGrid is a Rails grid plugin: https://github.com/leikind/wice_grid
-gem "wice_grid", '3.6.0.pre4'
+gem "wice_grid"
 
 # Page-specific javascript for Rails done right
-gem "paloma", "4.2.1"
+gem "paloma", "5.0.0"
 
 # Websocket support (for fetching logs)
 gem "websocket"
@@ -54,7 +54,26 @@ gem "humanizer"
 gem 'axlsx'
 
 # Secure headers
-gem 'secure_headers', '>= 3.0.0.pre2'
+gem 'secure_headers'
+
+# Gravatar profile image helper
+gem 'gravtastic'
+
+# Adds pagination support to models
+gem 'kaminari'
+gem 'bootstrap-kaminari-views'
+
+
+# Add comments on any model
+gem 'acts_as_commentable_with_threading'
+gem 'acts_as_votable'
+gem 'acts_as_follower'
+gem 'acts-as-taggable-on'
+
+# For inline-css in emails
+gem 'inky-rb', require: 'inky'
+gem 'nokogiri'
+gem 'premailer-rails'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
@@ -62,7 +81,7 @@ gem 'secure_headers', '>= 3.0.0.pre2'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
-group :development, :test do
+group :development do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
 
@@ -71,12 +90,17 @@ group :development, :test do
 
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
+end
 
+group :development, :test do
   # Use sqlite3 as the database for Active Record
   gem 'sqlite3'
 
   # Use thin
   gem 'thin'
+
+  # Manage environment variables
+  gem 'figaro'
 end
 
 group :production do

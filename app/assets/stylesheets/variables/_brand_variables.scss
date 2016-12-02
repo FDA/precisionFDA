@@ -21,6 +21,9 @@ $brand-failed-color: #821A1D;
 $brand-done-bg: #fff;
 $brand-done-color: darken($brand-green-primary, 5%);
 
+$link-muted-color: $brand-blue-secondary;
+$link-muted-hover-color: darken($brand-blue-secondary, 10%);
+
 $brand-font-family:  "Quicksand", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif !default;
 
 $nav-height: 74px;

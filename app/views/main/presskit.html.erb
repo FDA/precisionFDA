@@ -1,0 +1,46 @@
+<% content_for :title do %>Presskit<% end %>
+
+<div class="page-header">
+  <div class="page-title text-center">
+    Press Kit
+  </div>
+</div>
+
+<div class="container container-padded">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      Logos
+    </div>
+    <ul class="list-group">
+      <% @images.each do |image| %>
+        <li class="list-group-item <%= image[:css] %>">
+          <div class="list-group-item-heading">
+            <%= image[:title] %>
+          </div>
+          <div class="list-group-item-text">
+            <%= link_to image_tag(image[:path], height: image[:height], width: image[:width]), "/assets/#{image[:path]}" %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      Badges
+    </div>
+    <ul class="list-group">
+      <% @badges.each do |badge| %>
+        <li class="list-group-item <%= badge[:css] %>">
+          <div class="list-group-item-heading">
+            <%= badge[:title] %>
+          </div>
+          <div class="list-group-item-text">
+            <%= link_to image_tag(badge[:path], height: badge[:height], width: badge[:width]), "/assets/#{badge[:path]}" %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+</div>

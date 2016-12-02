@@ -1,0 +1,123 @@
+<% content_for :title do %><%= @space.title %><% end %>
+
+<div class="page-header clearfix">
+  <div class="pull-left">
+    <div class="page-title">
+      <span class="fa fa-object-group"></span> <%= @space.title %>
+      <% if @space.editable_by?(@context) %>
+        <a class="pfda-rename-item" data-toggle="modal" data-target="#rename-modal">
+          <span class="fa fa-pencil"></span>
+        </a>
+      <% end %>
+    </div>
+    <% if !@space.description.blank? %>
+    <div class="description">
+      <%= @space.description %>
+    </div>
+    <% end %>
+  </div>
+  <% if @space.editable_by?(@context) %>
+    <div class="pull-right">
+      <div class="btn-group">
+        <div class="dropdown">
+          <button class="btn btn-link btn-lg" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="fa fa-cog"></span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
+            <li>
+              <%= link_to edit_space_path(@space) do %>
+                <span class="fa fa-pencil"></span> Edit
+              <% end %>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">ID</h5>
+      <p class="list-group-item-text"><%= @space.uid %></p>
+    </li>
+    <% if @space.state != "ACTIVE" %>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">State</h5>
+      <p class="list-group-item-text">
+        <%= @space.state? ? @space.state : "UNACTIVATED" %>
+      </p>
+    </li>
+    <% end %>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Your Role</h5>
+      <p class="list-group-item-text"><%= @membership.role %> <small>(<%= @membership.side %>)</small></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Host Lead</h5>
+      <p class="list-group-item-text">
+        <%= link_to("#{@space.host_lead.full_name} (#{@space.host_lead.org.name})", user_path(@space.host_lead.dxuser)) %>
+      </p>
+      <% if !@space.active? && @space.host_project.blank? %>
+        <% if @space.host_lead?(@context) %>
+          <%= link_to accept_space_path(@space.id), method: :post, class: "btn btn-xs btn-success" do %>
+            <span class="fa fa-check"></span> Accept space
+          <% end %>
+        <% else %>
+          <div class="text-warning"><span class="fa fa-clock-o"></span> Waiting on acceptance</div>
+        <% end %>
+      <% end %>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Guest Lead</h5>
+      <p class="list-group-item-text">
+        <%= link_to("#{@space.guest_lead.full_name} (#{@space.guest_lead.org.name})", user_path(@space.guest_lead.dxuser)) %>
+      </p>
+      <% if !@space.active? && @space.guest_project.blank? %>
+        <% if @space.guest_lead?(@context)%>
+          <%= link_to accept_space_path(@space.id), method: :post, class: "btn btn-xs btn-success" do %>
+            <span class="fa fa-check"></span> Accept Space
+          <% end %>
+        <% else %>
+          <div class="text-warning"><span class="fa fa-clock-o"></span> Waiting on Acceptance</div>
+        <% end %>
+      <% end %>
+    </li>
+    <% if !@space.cts.blank? %>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">CTS</h5>
+      <p class="list-group-item-text">
+        <%= @space.cts  %>
+      </p>
+    </li>
+    <% end %>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Created</h5>
+      <p class="list-group-item-text"><%= @space.created_at.to_s(:db) %></p>
+    </li>
+  </ul>
+</div>
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+  <li role="presentation" class="<% if action_name == 'content' %>active<% end %>">
+    <a href="<%= content_space_path(@space) %>" aria-controls="tab-data"><span class="fa fa-fw fa-database"></span>
+      <span class="tab-label">Content</span>
+    </a>
+  </li>
+  <li role="presentation" class="<% if action_name == 'discuss' %>active<% end %>">
+    <a href="<%= discuss_space_path(@space) %>" aria-controls="tab-comments"><span class="fa fa-fw fa-comment"></span>
+      <span class="tab-label">Comments <span class="badge"><%= @space.comment_threads.size %></span></span>
+    </a>
+  </li>
+  <li role="presentation" class="<% if action_name == 'members' %>active<% end %>">
+    <a href="<%= members_space_path(@space) %>" aria-controls="tab-members"><span class="fa fa-fw fa-group"></span>
+      <span class="tab-label">Members <span class="badge"><%= @space.space_memberships.count %></span></span>
+    </a>
+  </li>
+</ul>
+
+<% if @space.editable_by?(@context) %>
+  <%= render "_partials/modal_rename", item: @space, path_to_rename: rename_space_path(@space.id) %>
+<% end %>

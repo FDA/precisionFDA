@@ -1,0 +1,45 @@
+<div class="table-responsive">
+  <table id="table-truth-overview" class="table table-condensed table-bordered table-nowrap table-sort table-hover">
+    <thead>
+      <tr>
+        <th class='sort-default' data-sort-method='string'>Label</th>
+        <th>Submitter</th>
+        <th>Organization</th>
+        <th class="text-right">SNP-Fscore</th>
+        <th class="text-right">SNP-recall</th>
+        <th class="text-right">SNP-precision</th>
+        <th class="text-right">INDEL-Fscore</th>
+        <th class="text-right">INDEL-recall</th>
+        <th class="text-right">INDEL-precision</th>
+      </tr>
+    </thead>
+    <% results[:overview].each do |result| %>
+      <tr>
+        <td><a href="/discussions/6-precisionfda-truth-challenge/answers/<%= result[:'Submitter username'] %>"><%= result[:'Label'] %></a><%= result[:'Label'] == "ccogle-snppet" ? "*" : ""%></td>
+        <td data-sort="<%= result[:'Submitter'] %>">
+          <%= result[:'Submitter'] %>
+          <% if result[:'Additional Users'] %>
+            &nbsp;
+            <a tabindex="0" role="button" data-trigger="focus" data-toggle="popover" data-content="<%= result[:'Additional Users'] %>">et al.</a>
+          <% end %>
+        </td>
+        <td data-sort="<%= result[:'Organization'] %>">
+          <% if result[:'Org popover'] %>
+            <abbr title="<%= result[:'Org popover'] %>">
+              <%= result[:'Organization'] %>
+            </abbr>
+          <% else %>
+            <%= result[:'Organization'] %>
+          <% end %>
+        </td>
+        <% [:"SNP-Fscore", :"SNP-recall", :"SNP-precision", :"INDEL-Fscore", :"INDEL-recall", :"INDEL-precision"].each do |metric| %>
+          <td data-sort="<%= result[metric] %>" class="text-right <%= 'challenge-row-medal' if results[:medals][metric] == result[:'Label'] %> <%= 'challenge-row-recognition' if results[:recognitions][metric].include?(result[:'Label']) %>">
+            <%= medal_badge(results[:medals][metric] == result[:'Label']) %>
+            <%= recognition_badge(results[:recognitions][metric].include?(result[:'Label'])) %>
+            <%= result[metric] > 0 ? content_tag("span", number_with_precision(result[metric] * 100, precision: 4), class: "percentage") : "" %>
+          </td>
+        <% end %>
+      </tr>
+    <% end %>
+  </table>
+</div>

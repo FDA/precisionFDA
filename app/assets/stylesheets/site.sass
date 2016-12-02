@@ -1,4 +1,3 @@
-// TODO: Move related classes into separate stylesheets
 @import "_common"
 
 
@@ -12,11 +11,29 @@ a, a:hover, a:focus
   &:hover
     cursor: pointer
 
+  &.disabled:not(.btn)
+    color: $text-muted
+    cursor: default
+
+  &.link-muted
+    color: $link-muted-color
+    &:hover
+      color: $link-muted-hover-color
+
+  &.link-dark
+    color: #555
+    &:hover
+      color: $link-hover-color
+
 body > main > .alert
   margin: 10px
 
 ul, menu, dir
   -webkit-padding-start: 20px
+
+table.table-nowrap
+  th, td
+    white-space: nowrap
 
 .fa-branded
   color: $brand-blue-tertiary
@@ -27,6 +44,9 @@ ul, menu, dir
   padding: $padding-base-horizontal
   border-bottom: 1px solid $border-header-color
   @include clearfix
+
+  &.pfda-toolbar-transparent
+    background-color: transparent
 
 // TABLE
 .pfda-table.table
@@ -50,16 +70,30 @@ ul, menu, dir
       border: 0
 
 // MISC
-.container-padded-v
+.container-padded-v, .pfda-padded-v
   padding-top: $padding-large-vertical
   padding-bottom: $padding-large-vertical
 
-.container-padded-h
+.container-padded-h, .pfda-padded-h
   padding-left: $padding-large-horizontal
   padding-right: $padding-large-horizontal
 
-.container-padded
+.container-padded, .pfda-padded
   padding: $padding-large-horizontal
+
+// YouTube video aspect ratio: 9/16 => 56.26%
+.embed-container
+  position: relative
+  padding-bottom: 56.25%
+  height: 0
+  overflow: hidden
+  max-width: 100%
+  iframe, object, embed
+    position: absolute
+    top: 0
+    left: 0
+    width: 100%
+    height: 100%
 
 .metadata-header
   background-color: $brand-blue-subtler
@@ -72,11 +106,52 @@ ul, menu, dir
       color: $brand-blue-tertiary
       font-size: 16px
 
+.pfda-rename-item
+  font-size: 12px
+  color: $link-muted-color
+
+  &:hover
+    color: $link-muted-hover-color
+
+.percentage:after
+  content: "%"
+  color: #aaa
+  margin-left: 2px
+
+.video-thumbnail
+  position: relative
+  display: block
+
+  img
+    box-shadow: 0px 2px 5px rgba(0,0,0,0.5)
+    width: 100%
+
+  &:hover
+    img
+      box-shadow: 0px 3px 6px rgba(0,0,0,0.6)
+    .video-thumbnail-caption
+      color: $link-hover-color
+
+  .video-thumbnail-caption
+    position: absolute
+    bottom: 0
+    left: 0
+    right: 0
+    padding: $padding-large-horizontal
+    font-size: 32px
+    line-height: 1.1
+    color: #fff
+    text-shadow: 0px 0px 5px rgba(0,0,0,0.95)
+    background: rgba(0, 0, 0, 0.5)
+    border-bottom-right-radius: $border-radius-base
+    border-bottom-left-radius: $border-radius-base
+
+    .video-datetime
+      color: $gray-lighter
+      font-size: 50%
+
 // ACTIONS
 .pfda-action-show main
-  .container-fluid
-    padding: $padding-large-vertical $padding-base-horizontal
-
   .panel
     a.list-group-item
       color: $link-color
@@ -100,6 +175,3 @@ ul, menu, dir
 .pfda-action-new main
   .page-header
     padding: $padding-large-vertical * 3 $padding-large-horizontal
-
-  .container-fluid
-    padding: $padding-large-vertical $padding-base-horizontal

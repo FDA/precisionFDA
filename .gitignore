@@ -17,6 +17,17 @@
 /tmp
 *.swp
 
-* Ignore generated assets
-public/assets
-vendor/bundle
+# Ignore generated assets
+/public/assets
+
+# Ignore deployed gems
+/vendor/bundle
+
+# Ignore CSV in assets
+/app/assets/csv
+
+# Ignore OSX hidden file
+.DS_Store
+
+# Ignore application configuration
+/config/application.yml

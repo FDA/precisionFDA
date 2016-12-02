@@ -1,0 +1,2 @@
+@@define SYSSTAT ((sa|sar)[0-9]*)
+/var/log/sysstat/@@{SYSSTAT}$ FreqRotLog

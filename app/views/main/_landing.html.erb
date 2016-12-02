@@ -20,17 +20,19 @@
   </div>
 </div>
 
-<div class="showcase showcase-shadow-jumbo container">
-  <%= render "_partials/quotes" %>
-</div>
+<% if @event.present? %>
+  <div class="showcase showcase-padded showcase-shadow container">
+    <%= render "_partials/event", event: @event %>
+  </div>
+<% end %>
 
-<div class="showcase showcase-padded showcase-flex showcase-shadow container">
+<div class="showcase showcase-padded showcase-flex <%= !@event.present? ? 'showcase-shadow':'' %> container">
   <div class="showcase-item">
     <div class="showcase-icon">
-      <a href="<%= about_path %>/how#notes"><span class="fa fa-sticky-note" aria-hidden="true"></span></a>
+      <a href="<%= show_docs_path("notes") %>"><span class="fa fa-sticky-note" aria-hidden="true"></span></a>
     </div>
     <div class="showcase-content">
-      <div class="showcase-heading"><a href="<%= about_path %>/how#notes">Notes</a></div>
+      <div class="showcase-heading"><a href="<%= show_docs_path("notes") %>">Notes</a></div>
       <ul class="list-unstyled lead">
         <li class="media">
           <div class="media-left">
@@ -61,7 +63,7 @@
             <span class="fa fa-fw fa-book" aria-hidden="true"></span>
           </div>
           <div class="media-body">
-            <a href="<%= about_path %>/how#notes">Learn more</a>
+            <a href="<%= show_docs_path("notes") %>">Learn more</a>
           </div>
         </li>
       </ul>
@@ -69,10 +71,10 @@
   </div>
   <div class="showcase-item">
     <div class="showcase-icon">
-      <a href="<%= about_path %>/how#files"><span class="fa fa-files-o" aria-hidden="true"></span></a>
+      <a href="<%= show_docs_path("files") %>"><span class="fa fa-files-o" aria-hidden="true"></span></a>
     </div>
     <div class="showcase-content">
-      <div class="showcase-heading"><a href="<%= about_path %>/how#files">Files</a></div>
+      <div class="showcase-heading"><a href="<%= show_docs_path("files") %>">Files</a></div>
       <ul class="list-unstyled lead">
         <li class="media">
           <div class="media-left">
@@ -111,7 +113,7 @@
             <span class="fa fa-fw fa-book" aria-hidden="true"></span>
           </div>
           <div class="media-body">
-            <a href="<%= about_path %>/how#files">Learn more</a>
+            <a href="<%= show_docs_path("files") %>">Learn more</a>
           </div>
         </li>
       </ul>
@@ -120,10 +122,10 @@
 
   <div class="showcase-item">
     <div class="showcase-icon">
-      <a href="<%= about_path %>/how#comparisons"><span class="fa fa-bullseye"></span></a>
+      <a href="<%= show_docs_path("comparisons") %>"><span class="fa fa-bullseye"></span></a>
     </div>
     <div class="showcase-content">
-      <div class="showcase-heading"><a href="<%= about_path %>/how#comparisons">Comparisons</a></div>
+      <div class="showcase-heading"><a href="<%= show_docs_path("comparisons") %>">Comparisons</a></div>
       <ul class="list-unstyled lead">
         <li class="media">
           <div class="media-left">
@@ -146,7 +148,7 @@
             <span class="fa fa-fw fa-book" aria-hidden="true"></span>
           </div>
           <div class="media-body">
-            <a href="<%= about_path %>/how#comparisons">Learn more</a>
+            <a href="<%= show_docs_path("comparisons") %>">Learn more</a>
           </div>
         </li>
       </ul>
@@ -155,10 +157,10 @@
 
   <div class="showcase-item">
     <div class="showcase-icon">
-      <a href="<%= about_path %>/how#apps"><span class="fa fa-cubes"></span></a>
+      <a href="<%= show_docs_path("apps") %>"><span class="fa fa-cubes"></span></a>
     </div>
     <div class="showcase-content">
-      <div class="showcase-heading"><a href="<%= about_path %>/how#apps">Apps</a></div>
+      <div class="showcase-heading"><a href="<%= show_docs_path("apps") %>">Apps</a></div>
       <ul class="list-unstyled lead">
         <li class="media">
           <div class="media-left">
@@ -181,7 +183,7 @@
             <span class="fa fa-fw fa-book" aria-hidden="true"></span>
           </div>
           <div class="media-body">
-            <a href="<%= about_path %>/how#apps">Learn more</a>
+            <a href="<%= show_docs_path("apps") %>">Learn more</a>
           </div>
         </li>
       </ul>
@@ -189,9 +191,36 @@
   </div>
 </div>
 
+<div class="jumbotron jumbotron-challenges tiltview-container">
+  <div class="container">
+    <div class="h2 text-center">precisionFDA Challenges</div>
+    <%= render "challenges/cards", challenges: @challenges %>
+  </div>
+</div>
+
+<div class="h3 text-center">Latest News and Announcements</div>
+<div class="container container-padded">
+  <div class="pfda-cards pfda-cards-news pfda-cards-justify-centered">
+    <%= render "main/news" %>
+  </div>
+</div>
+
+<hr>
+
+<div class="container">
+  <%= render "_partials/quotes" %>
+</div>
 
 <div class="container-fluid container-padded pfda-participants-section gradient-blue-sky">
-  <div class="h2 text-center text-uppercase">Community Participants</div>
+  <div class="h2 text-center">Community Participants</div>
+  <div class="pfda-participants">
+    <% @participant_orgs.each do |org| %>
+      <div class="pfda-participant" title="<%= org[:name] %>" data-toggle="tooltip">
+        <%= image_tag org[:logo], alt: org[:name], height: org[:height], class: org[:classes] %>
+      </div>
+    <% end %>
+  </div>
+  <hr>
   <div class="pfda-participants">
     <% @participants.each do |participant| %>
       <div class="pfda-participant" title="<%= participant[:name] %>" data-toggle="tooltip">

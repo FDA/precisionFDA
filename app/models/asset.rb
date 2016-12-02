@@ -32,6 +32,10 @@ class Asset < UserFile
 
   has_and_belongs_to_many :apps, {join_table: "apps_assets"}
 
+  def self.model_name
+    ActiveModel::Name.new(self, nil, "Asset")
+  end
+
   def self.with_search_keyword(prefix)
     prefix = sanitize_sql_like(prefix)
     return joins(:archive_entries).where("(archive_entries.name LIKE ? OR user_files.name LIKE ?)", "#{prefix}%", "%#{prefix}%")
@@ -46,12 +50,21 @@ class Asset < UserFile
   end
 
   def suffix
-    if name.end_in?(".tar.gz")
+    if name.ends_with?(".tar.gz")
       return ".tar.gz"
-    elsif name.end_in?(".tar")
+    elsif name.ends_with?(".tar")
       return ".tar"
     else
       raise "Found an asset that is not a .tar[.gz]"
     end
   end
+
+  def is_gzipped?
+    return name.ends_with?(".gz")
+  end
+
+  def describe_fields
+    ["title", "name", "prefix", "description", "file_paths"]
+  end
+
 end

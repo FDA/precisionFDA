@@ -8,16 +8,10 @@
 #  public_files_project        :string
 #  private_comparisons_project :string
 #  public_comparisons_project  :string
-#  open_files_count            :integer          default(0)
-#  closing_files_count         :integer          default(0)
-#  pending_comparisons_count   :integer          default(0)
 #  schema_version              :integer
 #  created_at                  :datetime         not null
 #  updated_at                  :datetime         not null
 #  org_id                      :integer
-#  pending_jobs_count          :integer
-#  open_assets_count           :integer
-#  closing_assets_count        :integer
 #  first_name                  :string
 #  last_name                   :string
 #  email                       :string
@@ -44,9 +38,32 @@ class User < ActiveRecord::Base
   has_many :apps
   has_many :app_series
   has_many :jobs
+  has_many :discussions
+  has_many :answers
   belongs_to :org
-
+  has_many :licenses
+  has_many :accepted_licenses
+  has_many :space_memberships
+  has_many :spaces, {through: :space_memberships}
+  has_one :appathon
+  has_many :meta_appathons
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
+
+  include Gravtastic
+  gravtastic :secure => true, :default => "retro"
+
+  acts_as_voter
+  acts_as_followable
+  acts_as_follower
+  acts_as_tagger
+
+  def uid
+    "user-#{id}"
+  end
+
+  def dxid
+    "user-#{dxuser}"
+  end
 
   def klass
     "user"
@@ -68,15 +85,45 @@ class User < ActiveRecord::Base
     org.dxorg
   end
 
+  def space_uids
+    if Rails.env.development?
+      space_memberships.pluck("distinct 'space-'||space_id")
+    else
+      space_memberships.pluck("distinct concat('space-', space_id)")
+    end
+  end
+
+  def active_spaces
+    spaces.active
+  end
+
+  def username
+    dxuser
+  end
+
   def full_name
     "#{first_name} #{last_name}"
+  end
+
+  def initials
+    "#{first_name[0]}#{last_name[0]}"
+  end
+
+  def is_self(context)
+    id == context.user_id
+  end
+
+  def appathon_from_meta(meta_appathon)
+    following_by_type('Appathon').find do |appathon|
+      appathon.meta_appathon.uid == meta_appathon.uid
+    end
   end
 
   def can_administer_site?
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
       dxuser == "elaine.johanson" || dxuser == "ruth.bandler"
     else
-      org.handle == "precisionfda"
+      ((org.handle == "precisionfda" || org.handle == "dnanexus") && org.admin_id == id) || ["alan.zhu"].include?(dxuser)
     end
   end
 
@@ -94,130 +141,103 @@ class User < ActiveRecord::Base
 
   def self.sync_file!(context, file_id)
     return if context.guest?
-    user_id = context.user_id
+    user = context.user
     token = context.token
-    User.transaction do
-      user = User.find(user_id)
-      file = user.uploaded_files.find(file_id) # Re-check file id
-      if file.state != "closed"
-        result = DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: [file.dxid]})["results"][0]
-        sync_file_state(result, file, user)
-      end
+    file = user.uploaded_files.find(file_id) # Re-check file id
+    if file.state != "closed"
+      result = DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: [file.dxid]})["results"][0]
+      sync_file_state(result, file, user)
     end
   end
 
   def self.sync_files!(context)
     return if context.guest?
-    user_id = context.user_id
+    user = context.user
     token = context.token
-    User.transaction do
-      user = User.find(user_id)
-      if (user.open_files_count != 0) || (user.closing_files_count != 0)
-        # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-        user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
-          DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
-            sync_file_state(result, files[i], user)
-          end
-        end
+    # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
+    user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
+      DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
+        sync_file_state(result, files[i], user)
       end
     end
   end
 
   def self.sync_asset!(context, file_id)
     return if context.guest?
-    user_id = context.user_id
+    user = context.user
     token = context.token
-    User.transaction do
-      user = User.find(user_id)
-      file = user.assets.find(file_id) # Re-check file id
-      if file.state != "closed"
-        result = DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: [file.dxid]})["results"][0]
-        sync_asset_state(result, file, user)
-      end
+    file = user.assets.find(file_id) # Re-check file id
+    if file.state != "closed"
+      result = DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: [file.dxid]})["results"][0]
+      sync_file_state(result, file, user)
     end
   end
 
   def self.sync_assets!(context)
     return if context.guest?
-    user_id = context.user_id
+    user = context.user
     token = context.token
-    User.transaction do
-      user = User.find(user_id)
-      if (user.open_assets_count != 0) || (user.closing_assets_count != 0)
-        # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-        user.assets.where.not(state: "closed").all.each_slice(1000) do |files|
-          DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
-            sync_asset_state(result, files[i], user)
-          end
-        end
+    # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
+    user.assets.where.not(state: "closed").all.each_slice(1000) do |files|
+      DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
+        sync_file_state(result, files[i], user)
       end
     end
   end
 
   def self.sync_comparison!(context, comparison_id)
     return if context.guest?
-    user_id = context.user_id
+    user = context.user
     token = context.token
-    User.transaction do
-      user = User.find(user_id)
-      comparison = user.comparisons.find(comparison_id) # Re-check comparison id
-      if comparison.state == "pending"
-        result = DNAnexusAPI.new(token).call("system", "findJobs", {
-          includeSubjobs: false,
-          id: [comparison.dxjobid],
-          project: user.private_comparisons_project,
-          parentJob: nil,
-          parentAnalysis: nil,
-          describe: true
-        })["results"][0]
-        sync_comparison_state(result, comparison, user, token)
-      end
+    comparison = user.comparisons.find(comparison_id)
+    if comparison.state == "pending"
+      result = DNAnexusAPI.new(token).call("system", "findJobs", {
+        includeSubjobs: false,
+        id: [comparison.dxjobid],
+        project: user.private_comparisons_project,
+        parentJob: nil,
+        parentAnalysis: nil,
+        describe: true
+      })["results"][0]
+      sync_comparison_state(result, comparison, user, token)
     end
   end
 
   def self.sync_comparisons!(context)
     return if context.guest?
-    user_id = context.user_id
+    user = context.user
     token = context.token
-    User.transaction do
-      user = User.find(user_id)
-      if user.pending_comparisons_count != 0
-        # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-        Comparison.where(user_id: user_id).where(state: "pending").all.each_slice(1000) do |comparisons|
-          comparisons_hash = comparisons.map { |c| [c.dxjobid, c] }.to_h
-          DNAnexusAPI.new(token).call("system", "findJobs", {
-            includeSubjobs: false,
-            id: comparisons_hash.keys,
-            project: user.private_comparisons_project,
-            parentJob: nil,
-            parentAnalysis: nil,
-            describe: true
-          })["results"].each do |result|
-            sync_comparison_state(result, comparisons_hash[result["id"]], user, token)
-          end
-        end
+    # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
+    Comparison.where(user_id: user.id).where(state: "pending").all.each_slice(1000) do |comparisons|
+      comparisons_hash = comparisons.map { |c| [c.dxjobid, c] }.to_h
+      DNAnexusAPI.new(token).call("system", "findJobs", {
+        includeSubjobs: false,
+        id: comparisons_hash.keys,
+        project: user.private_comparisons_project,
+        parentJob: nil,
+        parentAnalysis: nil,
+        describe: true
+      })["results"].each do |result|
+        sync_comparison_state(result, comparisons_hash[result["id"]], user, token)
       end
     end
   end
 
   def self.sync_job!(context, job_id)
     return if context.guest?
-    user_id = context.user_id
+    user = context.user
     token = context.token
-    User.transaction do
-      user = User.find(user_id)
-      job = user.jobs.find(job_id) # Re-check job id
-      if !job.terminal?
-        result = DNAnexusAPI.new(token).call("system", "findJobs", {
-          includeSubjobs: false,
-          id: [job.dxid],
-          project: user.private_files_project,
-          parentJob: nil,
-          parentAnalysis: nil,
-          describe: true
-        })["results"][0]
-        sync_job_state(result, job, user, token)
-      end
+    job = user.jobs.find(job_id) # Re-check job id
+    if !job.terminal?
+      result = DNAnexusAPI.new(token).call("system", "findJobs", {
+        includeSubjobs: false,
+        id: [job.dxid],
+        project: user.private_files_project,
+        parentJob: nil,
+        parentAnalysis: nil,
+        describe: true
+      })["results"][0]
+      sync_job_state(result, job, user, token)
     end
   end
 
@@ -225,23 +245,19 @@ class User < ActiveRecord::Base
     return if context.guest?
     user_id = context.user_id
     token = context.token
-    User.transaction do
-      user = User.find(user_id)
-      if user.pending_jobs_count != 0
-        # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-        Job.where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs|
-          jobs_hash = jobs.map { |j| [j.dxid, j] }.to_h
-          DNAnexusAPI.new(token).call("system", "findJobs", {
-            includeSubjobs: false,
-            id: jobs_hash.keys,
-            project: user.private_files_project,
-            parentJob: nil,
-            parentAnalysis: nil,
-            describe: true
-          })["results"].each do |result|
-            sync_job_state(result, jobs_hash[result["id"]], user, token)
-          end
-        end
+    user = User.find(user_id)
+    # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
+    Job.where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs|
+      jobs_hash = jobs.map { |j| [j.dxid, j] }.to_h
+      DNAnexusAPI.new(token).call("system", "findJobs", {
+        includeSubjobs: false,
+        id: jobs_hash.keys,
+        project: user.private_files_project,
+        parentJob: nil,
+        parentAnalysis: nil,
+        describe: true
+      })["results"].each do |result|
+        sync_job_state(result, jobs_hash[result["id"]], user, token)
       end
     end
   end
@@ -251,46 +267,32 @@ class User < ActiveRecord::Base
   def self.sync_file_state(result, file, user)
     if result["statusCode"] == 404
       # File was deleted by the DNAnexus stale file daemon; delete it on our end as well
-      if file.state == "open"
-        user.open_files_count = user.open_files_count - 1
-      else
-        user.closing_files_count = user.closing_files_count - 1
+      UserFile.transaction do
+        # Use find_by(file.id) since file.reload may raise ActiveRecord::RecordNotFound
+        file = UserFile.find_by(id: file.id)
+        if file.present?
+          file.destroy!
+        end
       end
-      user.save!
-      file.destroy!
     elsif result["describe"].present?
-      state = result["describe"]["state"]
-      if state != file.state
-        # NOTE the following should never fail
-        raise unless ((state == "closed") && (file.state == "closing"))
-        file.update!(state: state, file_size: result["describe"]["size"])
-        user.closing_files_count = user.closing_files_count - 1
-        user.save!
-      end
-    else
-      # NOTE we should never be here
-      raise
-    end
-  end
-
-  def self.sync_asset_state(result, file, user)
-    if result["statusCode"] == 404
-      # File was deleted by the DNAnexus stale file daemon; delete it on our end as well
-      if file.state == "open"
-        user.open_assets_count = user.open_assets_count - 1
-      else
-        user.closing_assets_count = user.closing_assets_count - 1
-      end
-      user.save!
-      file.destroy!
-    elsif result["describe"].present?
-      state = result["describe"]["state"]
-      if state != file.state
-        # NOTE the following should never fail
-        raise unless ((state == "closed") && (file.state == "closing"))
-        file.update!(state: state, file_size: result["describe"]["size"])
-        user.closing_assets_count = user.closing_assets_count - 1
-        user.save!
+      remote_state = result["describe"]["state"]
+      # Only begin transaction if stale file detected
+      if remote_state != file.state
+        UserFile.transaction do
+          old_file_state = file.state
+          file.reload
+          # confirm local file state is stale
+          if remote_state != file.state
+            if remote_state == "closed"
+              file.update!(state: remote_state, file_size: result["describe"]["size"])
+            elsif remote_state == "closing" && file.state == "open"
+              file.update!(state: remote_state)
+            else
+              # NOTE we should never be here
+              raise "File #{id} had local state #{file.state} (previously #{old_file_state}) and remote state #{remote_state}"
+            end
+          end
+        end
       end
     else
       # NOTE we should never be here
@@ -301,82 +303,118 @@ class User < ActiveRecord::Base
   def self.sync_comparison_state(result, comparison, user, token)
     state = result["describe"]["state"]
     return unless ((state == "done") || (state == "failed"))
-    user.pending_comparisons_count = user.pending_comparisons_count - 1
-    user.save!
-    comparison.state = state
+    # NOTE: comparison and job state are only comparable here because state is either "done" or "failed"
+    return if state == comparison.state
     if state == "done"
-      comparison.meta = result["describe"]["output"]["meta"].to_json
+      temp_meta = result["describe"]["output"]["meta"]
+      temp_meta["weighted_roc"]["data"] = temp_meta["weighted_roc"]["data"].last(100)
       output_keys = []
       output_ids = []
+      output_file_cache = []
       result["describe"]["output"].keys.each do |key|
+        # NOTE: meta is the only field of result["describe"]["output"] modified
         next if key == "meta"
         output_keys << key
         output_ids << result["describe"]["output"][key]["$dnanexus_link"]
       end
-      DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: output_ids})["results"].each_with_index do |result, i|
-        raise unless result["describe"].present? && result["describe"]["state"] == "closed"
-        UserFile.create!(
+      DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: output_ids})["results"].each_with_index do |api_result, i|
+        raise unless api_result["describe"].present? && api_result["describe"]["state"] == "closed"
+        output_file_cache.push({
           dxid: output_ids[i],
           project: user.private_comparisons_project,
-          name: result["describe"]["name"],
+          name: api_result["describe"]["name"],
           state: 'closed',
           description: output_keys[i],
           user_id: user.id,
           scope: 'private',
-          file_size: result["describe"]["size"],
+          file_size: api_result["describe"]["size"],
           parent: comparison
-        )
+        })
+      end
+
+      Comparison.transaction do
+        comparison.reload
+        if state != comparison.state
+          output_file_cache.each do |output_file|
+            UserFile.create!(output_file)
+          end
+          comparison.meta = temp_meta
+          comparison.state = state
+          comparison.save!
+        end
+      end
+    else
+      # Comparison state failed
+      Comparison.transaction do
+        comparison.reload
+        if state != comparison.state
+          comparison.state = state
+          comparison.save!
+        end
       end
     end
-    comparison.save!
   end
 
   def self.sync_job_state(result, job, user, token)
     state = result["describe"]["state"]
-    if Job::TERMINAL_STATES.include?(state)
-      user.pending_jobs_count = user.pending_jobs_count - 1
-      user.save!
-      job.state = state
-      job.describe = result["describe"]
-      if state == "done"
-        output = result["describe"]["output"]
-        output_file_ids = []
-        output.each_key do |key|
-          # TODO handle arrays later
-          raise if output[key].is_a?(Array)
-          if output[key].is_a?(Hash)
-            raise unless output[key].has_key?("$dnanexus_link")
-            output_file_id = output[key]["$dnanexus_link"]
-            output_file_ids << output_file_id
-            output[key] = output_file_id
-          end
+    # Only do anything if local job state is stale
+    return if state == job.state
+    if state == "done"
+      # Use serialization to deep copy result since output will be modified
+      output = JSON.parse(result["describe"]["output"].to_json)
+      output_file_ids = []
+      output_file_cache = []
+      output.each_key do |key|
+        # TODO handle arrays later
+        raise if output[key].is_a?(Array)
+        if output[key].is_a?(Hash)
+          raise unless output[key].has_key?("$dnanexus_link")
+          output_file_id = output[key]["$dnanexus_link"]
+          output_file_ids << output_file_id
+          output[key] = output_file_id
         end
-        output_file_ids.uniq!
-        if !output_file_ids.empty?
-          output_file_ids.each_slice(1000) do |slice_of_file_ids|
-            DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: slice_of_file_ids})["results"].each_with_index do |result, i|
-              raise unless result["describe"].present? && result["describe"]["state"] == "closed"
-              UserFile.create!(
-                dxid: slice_of_file_ids[i],
-                project: user.private_files_project,
-                name: result["describe"]["name"],
-                state: 'closed',
-                description: "",
-                user_id: user.id,
-                scope: 'private',
-                file_size: result["describe"]["size"],
-                parent: job
-              )
-            end
-          end
-        end
-        job.run_outputs = output
       end
-      job.save!
-    elsif state != job.state
-      job.state = state
-      job.describe = result["describe"]
-      job.save!
+      output_file_ids.uniq!
+      output_file_ids.each_slice(1000) do |slice_of_file_ids|
+        DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: slice_of_file_ids})["results"].each_with_index do |api_result, i|
+          # Push avoids creating a new array as opposed to +/+=
+          output_file_cache.push({
+            dxid: slice_of_file_ids[i],
+            project: user.private_files_project,
+            name: api_result["describe"]["name"],
+            state: 'closed',
+            description: "",
+            user_id: user.id,
+            scope: 'private',
+            file_size: api_result["describe"]["size"],
+            parent: job
+          })
+        end
+      end
+
+      # Job is done and outputs need to be created
+      Job.transaction do
+        job.reload
+        if state != job.state
+          output_file_cache.each do |output_file|
+            UserFile.create!(output_file)
+          end
+          job.run_outputs = output
+          job.state = state
+          job.describe = result["describe"]
+          job.save!
+        end
+      end
+    else
+      # Job state changed but not done (no outputs)
+      Job.transaction do
+        job.reload
+        if state != job.state
+          job.state = state
+          job.describe = result["describe"]
+          job.save!
+        end
+      end
     end
   end
 end

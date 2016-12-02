@@ -19,25 +19,40 @@ Rails.application.routes.draw do
     get 'about/:section' => 'main#about'
     get 'terms' => 'main#terms'
     post 'tokify' => 'main#tokify'
+    post 'set_tags' => 'main#set_tags'
     get 'guidelines' => 'main#guidelines'
     get 'exception_test' => "main#exception_test"
+    get 'presskit' => 'main#presskit'
 
     # API
+    post '/api/publish', to: 'api#publish'
     post '/api/create_file', to: 'api#create_file'
     post '/api/get_upload_url', to: 'api#get_upload_url'
+    post '/api/list_related', to: 'api#list_related'
     post '/api/close_file', to: 'api#close_file'
+    post '/api/describe', to: 'api#describe'
     post '/api/list_files', to: 'api#list_files'
-    post '/api/run_app', to: 'api#run_app'
+    post '/api/list_notes', to: 'api#list_notes'
+    post '/api/list_comparisons', to: 'api#list_comparisons'
+    post '/api/list_apps', to: 'api#list_apps'
     post '/api/list_assets', to: 'api#list_assets'
-    post '/api/describe_asset', to: 'api#describe_asset'
+    post '/api/list_jobs', to: 'api#list_jobs'
+    post '/api/describe_license', to: 'api#describe_license'
+    post '/api/accept_licenses', to: 'api#accept_licenses'
+    post '/api/run_app', to: 'api#run_app'
+    post '/api/get_app_spec', to: 'api#get_app_spec'
+    post '/api/get_app_script', to: 'api#get_app_script'
+    post '/api/export_app', to: 'api#export_app'
     post '/api/search_assets', to: 'api#search_assets'
     post '/api/create_asset', to: 'api#create_asset'
     post '/api/close_asset', to: 'api#close_asset'
     post '/api/create_app', to: 'api#create_app'
-    post '/api/list_notes', to: 'api#list_notes'
-    post '/api/describe_note', to: 'api#describe_note'
     post '/api/attach_to_notes', to: 'api#attach_to_notes'
     post '/api/update_note', to: 'api#update_note'
+    post '/api/upvote', to: 'api#upvote'
+    post '/api/remove_upvote', to: 'api#remove_upvote'
+    post '/api/follow', to: 'api#follow'
+    post '/api/unfollow', to: 'api#unfollow'
 
     # Profile
     get 'profile', to: 'profile#index'
@@ -46,35 +61,112 @@ Rails.application.routes.draw do
     post 'profile/run_report', to: 'profile#run_report', as: 'run_report'
 
     resources :apps do
-      resources :jobs, shallow: true, except: :index do
-        member do
-          get 'log'
-        end
-      end
+      resources :jobs, only: [:new, :create]
       get 'jobs', on: :member, to: 'apps#index'
       member do
         get 'fork'
+        post 'export'
       end
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
+      resources :comments
     end
+
+    resources :jobs, except: :index do
+      member do
+        get 'log'
+      end
+      resources :comments
+    end
+
     resources :comparisons do
+      post 'rename', on: :member
       get 'visualize', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
+      resources :comments
     end
+
     resources :files do
       post 'download', on: :member
+      post 'link', on: :member
+      post 'rename', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
+      resources :comments
     end
+
     resources :notes do
+      post 'rename', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
+      resources :comments
     end
+
     resources :assets, path: '/app_assets' do
+      post 'rename', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
+      resources :comments
+    end
+
+    get "challenges/#{MetaAppathon::ACTIVE_META_APPATHON}" => "meta_appathons#show", as: 'active_meta_appathon'
+    resources :challenges do
+      get 'consistency(/:tab)', on: :collection, action: :consistency, as: 'consistency'
+      get 'truth(/:tab)', on: :collection, action: :truth, as: 'truth'
+      get 'join', on: :member
+    end
+
+    resources :discussions, constraints: {answer_id: /[^\/]+/ } do
+      get 'followers', on: :member
+      post 'rename', on: :member
+      resources :answers, constraints: {id: /[^\/]+/} do
+        resources :comments
+      end
+      resources :comments
+    end
+
+    resources :licenses do
+      post 'accept(/:redirect_to_uid)', on: :member, action: :accept, as: 'accept'
+      match 'request_approval', on: :member, action: :request_approval, as: 'request_approval', via: [:get, :post]
+      post 'license_item/:item_uid', on: :member, action: :license_item, as: 'license_item'
+      post 'remove_item/:item_uid(/:redirect_to_uid)', on: :member, action: :remove_item, as: 'remove_item'
+      post 'remove_user/:user_uid(/:redirect_to_uid)', on: :member, action: :remove_user, as: 'remove_user'
+      post 'approve_user/:user_uid(/:redirect_to_uid)', on: :member, action: :approve_user, as: 'approve_user'
+      post 'remove_items', on: :member
+      post 'remove_users', on: :member
+      post 'approve_users', on: :member
+      post 'rename', on: :member
+      get 'users', on: :member
+      get 'items', on: :member
+    end
+
+    resources :spaces do
+      get 'members', on: :member
+      get 'content', on: :member
+      get 'discuss', on: :member
+      post 'accept', on: :member
+      post 'rename', on: :member
+      post 'invite', on: :member
+      resources :comments
+    end
+
+    resources :meta_appathons, constraints: {appathon_id: /[^\/]+/ }  do
+      post 'rename', on: :member
+      resources :appathons, constraints: {id: /[^\/]+/}
+    end
+
+    resources :appathons, constraints: {id: /[^\/]+/} do
+      post 'rename', on: :member
+      post 'join', on: :member
+      resources :comments
+    end
+
+    resources :queries do
+    end
+
+    resources :docs do
+      get ":section", on: :collection, action: :show, as: 'show'
     end
 
     user_constraints = { username: /[^\/]*/ }

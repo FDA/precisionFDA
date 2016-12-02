@@ -1,7 +1,14 @@
 <% content_for :title do %><%= @asset.prefix %><% end %>
 
 <div class="page-header">
-  <div class="page-title"><span class="fa fa-file-zip-o"></span> <%= @asset.prefix %></div>
+  <div class="page-title">
+    <span class="fa fa-file-zip-o"></span> <%= @asset.prefix %>
+    <% if @asset.editable_by?(@context) %>
+      <a class="pfda-rename-item" data-toggle="modal" data-target="#rename-modal">
+        <span class="fa fa-pencil"></span>
+      </a>
+    <% end %>
+  </div>
 </div>
 
 <div class="metadata-section metadata-header">
@@ -28,13 +35,7 @@
         <%= @asset.name %>
       </p>
     </li>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Access</h5>
-      <p class="list-group-item-text">
-        <span class="fa <%= @asset.public? ? 'fa-globe' : 'fa-lock' %>"></span>
-        <%= @asset.public? ? "Public" : "Private" %>
-      </p>
-    </li>
+    <%= render "_partials/metadata_access", item: @asset %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">File Size</h5>
       <p class="list-group-item-text"><%= number_to_human_size(@asset.file_size || 0) %></p>
@@ -50,19 +51,55 @@
   </ul>
 </div>
 
+<%= render "_partials/tags_metadata", item: @asset, item_name: @asset.prefix, tags_list: @asset.all_tags_list, is_editable: @asset.editable_by?(@context) %>
+
 <div class="pfda-toolbar">
   <div class="pull-left">
     <div class="btn-group">
-      <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to Note</button>
+      <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to...</button>
+      <% if @licenses.present? %>
+        <%= render "licenses/set_dropdown", licenses: @licenses, item: @asset %>
+      <% end %>
     </div>
   </div>
   <div class="pull-right">
     <div class="btn-group">
-      <% if @asset.state == "closed" %>
-        <%= link_to download_file_path(@asset.dxid), method: :post, class: "btn btn-primary" do %>
-          <span class="fa fa-download"></span> Download
-        <% end %>
+      <% if @asset.license.present? && !@asset.licensed_by?(@context) %>
+      <div class="btn-group" title="Accepting the license lets you download and use this asset" data-toggle="tooltip">
+      <% else %>
+      <div class="btn-group">
       <% end %>
+
+        <% if @asset.license.present? && !@asset.licensed_by?(@context) %>
+          <% if @asset.license.approval_required %>
+            <% if @asset.licensed_by_pending?(@context) %>
+              <span class="btn-static btn-default"><span class="fa fa-clock-o"></span> License Pending Approval</span>
+            <% else %>
+              <%= link_to request_approval_license_path(@asset.license.id), class: "btn btn-success" do %>
+                <span class="fa fa-check"></span> Request License Approval
+              <% end %>
+            <% end %>
+          <% else %>
+            <%= link_to accept_license_path(@asset.license.id, @asset.uid), method: :post, class: "btn btn-success" do %>
+              <span class="fa fa-check"></span> Accept License
+            <% end %>
+          <% end %>
+        <% end %>
+
+        <% if @asset.state == "closed" %>
+          <%= link_to download_file_path(@asset.dxid), method: :post, class: "btn btn-download btn-primary #{@asset.license.present? && !@asset.licensed_by?(@context) ? 'disabled' : ''}" do %>
+            <span class="fa fa-download"></span> Download
+          <% end %>
+        <% end %>
+        <% if @asset.state == "closed" %>
+          <%= link_to link_file_path(@asset.dxid), method: :post, class: "btn btn-primary #{@asset.license.present? && !@asset.licensed_by?(@context) ? 'disabled' : ''}" do %>
+            <span class="fa fa-link"></span> Authorized URL
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="btn-group">
       <% if @asset.user_id == @context.user_id %>
         <div class="btn-group">
           <%= link_to edit_asset_path(@asset.dxid), class: "btn btn-primary" do %>
@@ -70,18 +107,30 @@
           <% end %>
         </div>
       <% end %>
-      <% if @asset.publishable_by?(@context) %>
-        <%= link_to publish_path + "?" + {id: @asset.uid}.to_param, method: :post, class: "btn btn-success" do %>
-          <span class="fa fa-bullhorn"></span> Publish
-        <% end %>
-      <% end %>
+      <%= render "_partials/btn_publish", item: @asset %>
     </div>
-    <% if @asset.user_id == @context.user_id %>
-      <div class="btn-group">
-        <%= link_to asset_path(@asset.dxid), method: :delete, data: { confirm: 'Are you certain you want to delete this?' }, class: "btn btn-danger" do %>
-          <span class="fa fa-trash"></span> Delete
-        <% end %>
+
+    <% if @asset.editable_by?(@context) %>
+    <div class="btn-group">
+      <div class="dropdown">
+        <button class="btn btn-primary" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <span class="fa fa-cog"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
+          <li>
+            <a data-toggle='modal' data-target='#rename-modal'>
+              <span class="fa fa-pencil"></span> Rename
+            </a>
+          </li>
+          <li role="separator" class="divider"></li>
+          <li>
+            <%= link_to asset_path(@asset.dxid), method: :delete, data: { confirm: 'Are you certain you want to delete this?' } do %>
+              <span class="fa fa-trash"></span> Delete
+            <% end %>
+          </li>
+        </ul>
       </div>
+    </div>
     <% end %>
   </div>
 </div>
@@ -93,10 +142,41 @@
       <span class="tab-label">Description</span>
     </a>
   </li>
-  <% if @notes.count > 0 %>
+  <li role="presentation">
+    <a href="#tab-archive" aria-controls="tab-archive" role="tab" data-toggle="tab"><span class="fa fa-fw fa-file-zip-o"></span>
+      <span class="tab-label">Archive Contents</span>
+    </a>
+  </li>
+  <li role="presentation">
+    <a href="#tab-comments" aria-controls="tab-comments" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
+      <span class="tab-label">Comments <span class="badge"><%= @asset.comment_threads.size %></span></span>
+    </a>
+  </li>
+  <% if @notes.total_count > 0 %>
   <li role="presentation">
     <a href="#tab-notes" aria-controls="tab-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
-      <span class="tab-label">Notes <span class="badge"><%= @notes.count %></span></span>
+      <span class="tab-label">Notes <span class="badge"><%= @notes.total_count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @discussions.total_count > 0 %>
+  <li role="presentation">
+    <a href="#tab-discussions" aria-controls="tab-discussions" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comments-o"></span>
+      <span class="tab-label">Discussions <span class="badge"><%= @discussions.total_count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @answers.total_count > 0 %>
+  <li role="presentation">
+    <a href="#tab-answers" aria-controls="tab-answers" role="tab" data-toggle="tab"><span class="fa fa-fw fa-commenting"></span>
+      <span class="tab-label">Answers <span class="badge"><%= @answers.total_count %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @asset.license.present? %>
+  <li role="presentation">
+    <a href="#tab-license" aria-controls="tab-license" role="tab" data-toggle="tab"><span class="fa fa-fw fa-legal"></span>
+      <span class="tab-label">License: <%= truncate(@asset.license.title, :length => 25,  :separator => ' ') %></span>
     </a>
   </li>
   <% end %>
@@ -104,26 +184,57 @@
 
 <!-- Tab panes -->
 <div class="tab-content">
-  <div role="tabpanel" class="tab-pane active" id="tab-description">
-    <div class="pfda-pane">
-      <div class="pfda-pane-content pfda-pane-content-padded">
-        <div class="pfda-md-rendered" data-bind="html: descriptionDisplay"></div>
-      </div>
-      <div class="pfda-pane-sidebar pfda-pane-sidebar-padded">
-        <ul class="list-group list-group-condensed">
-          <li class="list-group-item">
-            <div class="list-group-item-heading">Archive Contents <small>(files only)</small></div>
-          </li>
-          <% @asset.file_paths.each do |path| %>
-            <li class="list-group-item"><%= path %></li>
-          <% end %>
-        </ul>
+  <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-description">
+    <div class="pfda-md-rendered" data-bind="html: descriptionDisplay"></div>
+  </div>
+  <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-archive">
+    <ul class="list-group">
+      <% if @asset.file_paths.count > 0 %>
+        <li class="list-group-item">
+          <div class="list-group-item-heading"><small>Files only</small></div>
+        </li>
+        <% @asset.file_paths.each do |path| %>
+          <li class="list-group-item"><%= path %></li>
+        <% end %>
+      <% else %>
+        <div class="help-block">No archive contents</div>
+      <% end %>
+    </ul>
+  </div>
+
+  <div role="tabpanel" class="tab-pane" id="tab-comments">
+    <div class="row">
+      <div class="col-md-12">
+        <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @asset %>
       </div>
     </div>
   </div>
-  <% if @notes.count > 0 %>
+
+  <% if @notes.total_count > 0 %>
   <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-notes">
     <%= render "notes/cards", notes: @notes %>
   </div>
   <% end %>
+
+  <% if @discussions.total_count > 0 %>
+  <div role="tabpanel" class="tab-pane" id="tab-discussions">
+    <%= render "discussions/cards", discussions: @discussions %>
+  </div>
+  <% end %>
+
+  <% if @answers.total_count > 0 %>
+  <div role="tabpanel" class="tab-pane" id="tab-answers">
+    <%= render "answers/cards", answers: @answers, show_discussion: true %>
+  </div>
+  <% end %>
+
+  <% if @asset.license.present? %>
+  <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-license">
+    <%= render "licenses/tab_pane", license: @asset.license %>
+  </div>
+  <% end %>
 </div>
+
+<% if @asset.editable_by?(@context) %>
+  <%= render "_partials/modal_rename", item: @asset, path_to_rename: rename_asset_path(@asset.dxid) %>
+<% end %>

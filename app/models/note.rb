@@ -9,17 +9,25 @@
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #  scope      :string
+#  note_type  :string
 #
 
 class Note < ActiveRecord::Base
   include Permissions
 
   belongs_to :user
+  has_one :answer
+  has_one :discussion
   has_many :attachments, {dependent: :destroy}
   has_many :apps, {through: :attachments, source: :item, source_type: 'App'}
   has_many :comparisons, {through: :attachments, source: :item, source_type: 'Comparison'}
   has_many :jobs, {through: :attachments, source: :item, source_type: 'Job'}
   has_many :files, {through: :attachments, source: :item, source_type: 'UserFile'}
+
+  acts_as_followable
+  acts_as_commentable
+  acts_as_taggable
+  acts_as_votable
 
   def uid
     "note-#{id}"
@@ -29,8 +37,56 @@ class Note < ActiveRecord::Base
     "note"
   end
 
+  def title
+    if self[:note_type] == "Answer"
+      if !self.answer.discussion.nil?
+        return "Answer to #{self.answer.discussion.title}"
+      else
+        return "Answer to a deleted question"
+      end
+    else
+      return self[:title]
+    end
+  end
+
+  def describe_fields
+    ["title", "note_type", "content"]
+  end
+
   def to_param
-    "#{id}-#{title.parameterize}"
+    if title.nil?
+      id.to_s
+    else
+      "#{id}-#{title.parameterize}"
+    end
+  end
+
+  def real_note?
+    note_type.nil?
+  end
+
+  def publishable_by?(context, scope_to_publish_to = "public")
+    core_publishable_by?(context, scope_to_publish_to) && real_note?
+  end
+
+  def self.real_notes
+    return where(note_type: nil)
+  end
+
+  def self.answer_notes
+    return where(note_type: 'Answer')
+  end
+
+  def self.discussion_notes
+    return where(note_type: 'Discussion')
+  end
+
+  def self.answers
+    Answer.where(note_id: answer_notes)
+  end
+
+  def self.discussions
+    Discussion.where(note_id: discussion_notes)
   end
 
   def real_files
@@ -41,11 +97,21 @@ class Note < ActiveRecord::Base
     files.where(parent_type: "Asset")
   end
 
-  def publishable_by?(context)
-    if context.guest?
-      false
-    else
-      user_id == context.user_id && scope != "public"
+  def rename(new_name, context)
+    update_attributes(title: new_name)
+  end
+
+  def self.publish(notes, context, scope)
+    count = 0
+    notes.uniq.each do |note|
+      note.with_lock do
+        if note.publishable_by?(context, scope)
+          note.update!(scope: scope)
+          count += 1
+        end
+      end
     end
+
+    return count
   end
 end

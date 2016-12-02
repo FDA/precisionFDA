@@ -1,4 +1,4 @@
-<%= grid(files_grid, show_filters: :when_filtered) do |g|
+<%= grid(files_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
   g.blank_slate partial:  "_partials/empty_grid"
 
   g.after_row do |file, num_cols|
@@ -14,7 +14,7 @@
   end
 
   g.column name: 'Name', attribute: 'name' do |file|
-    unilinkfw(file, globe: true)
+    unilinkfw(file, scope_icon: (defined?(scope_icon) ? scope_icon : true))
   end
 
   g.column name: 'Org', attribute: 'handle', assoc: [:user, :org] do |file|
@@ -41,10 +41,22 @@
     file.created_at.to_s(:db)
   end
 
-  g.column name: 'State', attribute: 'state', custom_filter: :auto
+  g.column name: 'State', attribute: 'state', allow_multiple_selection: false, custom_filter: :auto
 
-  g.column name: 'Access', attribute: 'scope',
-    custom_filter: {'Public' => "public", 'Private' => "private"} do |file|
-    file.public? ? "Public" : "Private"
+  if !defined?(hide_access) || !hide_access
+    g.column name: 'Access', attribute: 'scope', allow_multiple_selection: false,
+      custom_filter: {'Public' => "public", 'Private' => "private"} do |file|
+      if file.public?
+        "Public"
+      elsif file.private?
+        "Private"
+      else
+        unilinkfw(item_from_uid(file.scope))
+      end
+    end
+  end
+
+  g.column name: 'Tags', attribute: 'name', assoc: [:taggings, :tag] do |item|
+    render "_partials/tags_list", tags_list: item.all_tags_list
   end
 end -%>

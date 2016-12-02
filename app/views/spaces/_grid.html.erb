@@ -1,0 +1,39 @@
+<%= grid(spaces_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
+  g.blank_slate partial:  "_partials/empty_grid"
+
+  g.after_row do |space, num_cols|
+    if !space.description.blank?
+      content_tag(:tr,
+        content_tag(:td, nil, {class: "col-state state-#{space.state ? space.state.downcase : 'unactivated'}"}).concat(content_tag(:td,
+          content_tag(:div, space.description, class: 'description'),
+        colspan: num_cols - 1)),
+      class: 'extra-row')
+    else
+      nil
+    end
+  end
+
+  g.column name: 'State', attribute: 'state', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false do |space|
+    [space.state ? space.state : "UNACTIVATED", {class: "col-state state-#{space.state ? space.state.downcase : 'unactivated'}"}]
+  end
+
+  g.column name: 'Name', attribute: 'name', auto_reload: true, allow_multiple_selection: false do |space|
+    if space.accessible_by?(@context)
+      link_to(space.name, space_path(space))
+    else
+      space.name
+    end
+  end
+
+  g.column name: 'Host Lead' do |space|
+    link_to("#{space.host_lead.full_name} (#{space.host_lead.org.name})", user_path(space.host_lead.dxuser))
+  end
+
+  g.column name: 'Guest Lead' do |space|
+    link_to("#{space.guest_lead.full_name} (#{space.guest_lead.org.name})", user_path(space.guest_lead.dxuser))
+  end
+
+  g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |space|
+    space.created_at.to_s(:db)
+  end
+end -%>

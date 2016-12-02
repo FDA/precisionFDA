@@ -29,7 +29,7 @@
         </a>
       </li>
       <li role="presentation" class="<% if params[:section] == 'how' %>active<% end %>">
-        <a href="<%= about_path %>/how" aria-controls="how" role="tab">
+        <a href="<%= docs_path %>" aria-controls="how" role="tab">
           <span class="tab-label">How?</span>
           <span class="tab-help">Learn how to use the features</span>
         </a>
@@ -110,6 +110,7 @@
           <li>Omar Serang*</li>
           <li>David Shaywitz*</li>
           <li>Zivana Tezak</li>
+          <li>Alan Zhu*</li>
         </ul>
 
         <hr>
@@ -123,6 +124,7 @@
           <li>Angela Anderson*</li>
           <li>Rob Califf</li>
           <li>Mohammed (Sohail) Chaudhry</li>
+          <li>Caroline Clode*</li>
           <li>Stephanie Devaney</li>
           <li>Amber Griffin</li>
           <li>Letria Hall</li>
@@ -143,8 +145,17 @@
         </ul>
 
         <br>
-        <p class="text-muted">*Contractor to FDA’s Office of Health Informatics</p>
+        <p class="text-muted">*Contractor to FDA’s Office of Health Informatics</p>      <hr />
+        <div>
+          Media asset attributions:
+          <ul class="text-muted">
+            <li>
+              <%= link_to "MediaLoot", "http://medialoot.com/" %>
+            </li>
+          </ul>
+        </div>
       </div>
+
       <% end %>
       <% if params[:section] == 'how' %>
       <div role="tabpanel" class="tab-pane tab-pane-padded tab-pane-padded-xl active" id="how">

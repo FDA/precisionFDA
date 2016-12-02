@@ -1,0 +1,375 @@
+<div class="container container-padded">
+  <div class="pfda-challenge-intro">
+    <div class="lead-intro">The precisionFDA Consistency Challenge ran from February 25, 2016 to April 25, 2016, inviting participants to process certain datasets through their NGS processing pipelines and conduct comparisons on precisionFDA.</div>
+    <div class="lead">
+       Community members from four different continents embraced the challenge, coming together under one virtual roof, to showcase their methods, share their results, and highlight their insights. We have created this web page to summarize the challenge results and list our recognitions, as well as discuss key conclusions and other interesting findings from this first challenge.</div>
+  </div>
+</div>
+
+<div class="challenge-section challenge-section-highlight pfda-challenge-awards">
+  <div class="container container-padded">
+      <div class="h3 text-center text-uppercase">Community Challenge Awards</div>
+      <div class="row">
+        <div class="col-md-8 col-md-offset-8">
+          <div class="pfda-cards pfda-cards-justify-centered">
+            <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
+              <div class="pfda-card-body">
+                <%= medal_badge("Performance", "Top overall", "large", "in the precisionFDA Consistency Challenge") %>
+                <div class="challenge-winning-team">
+                  <div class="challenge-awarded-to">Awarded to</div>
+                  <div class="lead lead-bold">Sentieon team</div>
+                  <ul class="list-inline">
+                    <li>Rafael Aldana</li>
+                    <li>Hanying Feng</li>
+                    <li>Brendan Gallagher</li>
+                    <li>Jun Ye</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-8 col-md-offset-4">
+          <div class="pfda-cards pfda-cards-justify-centered">
+            <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
+              <div class="pfda-card-body">
+                <%= medal_badge("Reproducibility", "Highest", "large", "in the precisionFDA Consistency Challenge") %>
+                <div class="challenge-winning-team">
+                  <div class="challenge-awarded-to">Awarded to</div>
+                  <div class="lead lead-bold">Sentieon team</div>
+                  <ul class="list-inline">
+                    <li>Rafael Aldana</li>
+                    <li>Hanying Feng</li>
+                    <li>Brendan Gallagher</li>
+                    <li>Jun Ye</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-8">
+          <div class="pfda-cards pfda-cards-justify-centered">
+            <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
+              <div class="pfda-card-body">
+                <%= medal_badge("Accuracy", "Highest", "large", "in the precisionFDA Consistency Challenge") %>
+                <div class="challenge-winning-team">
+                  <div class="challenge-awarded-to">Awarded to</div>
+                  <div class="lead lead-bold">Sanofi-Genzyme</div>
+                  <ul class="list-inline">
+                    <li>Deepak Grover</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="challenge-section">
+  <div class="container container-padded">
+    <div class="h2">Overview of Results</div>
+
+    <p>We received a total of 21 entries to the challenge, summarized in the following table. <strong>The entries are sorted in order of date of submission.</strong></p>
+
+    <p>
+    We would like to acknowledge and thank all of those who participated in the precisionFDA Consistency Challenge, for their engagement and contributions. We hope that everyone will feel like a winner. After considering the performance in reproducibility and accuracy comparisons, as well as other parameters, we have decided to hand out awards and recognitions, as illustrated in the table.
+    </p>
+
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs nav-tabs-contained" role="tablist">
+      <li role="presentation" class="active"><a href="#awards" aria-controls="awards" role="tab" data-toggle="tab">Awards and Recognitions</a></li>
+      <li role="presentation"><a href="#datasets" aria-controls="datasets" role="tab" data-toggle="tab">Datasets</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane active" id="awards">
+        <%= render "challenges/consistency/table_overview" %>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="datasets">
+        <%= render "challenges/consistency/table_datasets" %>
+      </div>
+    </div>
+
+    <div class="text-muted small">
+      <p>
+        *ebanks-nist: This entry was not considered because the entry submitted the NIST benchmark set as the answer
+        <br>
+        **rlopez-custom: This entry was not considered because the VCF files were not submitted within the challenge timeframe
+      </p>
+    </div>
+
+    <div>
+      <p>To aid in the presentation of results, we decided to give each entry a unique label, comprised of the name of the submitting user as well as a short mnemonic keyword representing the pipeline. (These keywords are merely indicative of each pipeline's main component, hence somewhat subjective; for a more faithful description of each pipeline, refer to the full text that accompanied each submission by following the label links). Each entry consists of three submitted VCF files (Garvan, Garvan-rerun, and HLI) and five comparisons (reproducibility 1 &amp; 2; accuracy 1a, 1b &amp; 2), as shown in the "Datasets" tab. The entries are sorted in order of date of submission.</p>
+
+      <p>
+      We are handing out the following community challenge awards:
+      </p>
+      <ul>
+        <li><%= medal_badge('overall-performance') %> to the entry submitted by Rafael Aldana et al. from Sentieon, for their overall high performance in both reproducibility and accuracy.</li>
+        <li><%= medal_badge('reproducibility') %> to the entry submitted by Rafael Aldana et al. from Sentieon, for achieving the highest concordance and determinism.</li>
+        <li><%= medal_badge('accuracy') %> to the entry submitted by Deepak Grover from Sanofi-Genzyme, for achieving the highest accuracy.</li>
+      </ul>
+
+      <p>
+      We are also recognizing particular entries based on the following:
+      </p>
+      <ul>
+        <li>reproducibility across the same input (<%= recognition_badge('deterministic') %>)</li>
+        <li>reproducibility across different inputs (<%= recognition_badge('highest-concordance', false) %>, <%= recognition_badge('high-concordance', false) %>)</li>
+        <li>accuracy (<%= ["highest-recall", "high-recall", "highest-precision", "high-precision", "highest-f-measure", "high-f-measure"].map { |r| recognition_badge(r, false) }.join(", ").html_safe %>)</li>
+        <li>miscellaneous criteria (<%= recognition_badge('extra-credit') %>, <%= recognition_badge('pfda-apps') %>, <%= recognition_badge('heroic-effort') %>, <%= recognition_badge('promising') %>)</li>
+      </ul>
+      <p>
+      For more information about the determination of these recognitions, refer to the respective sections of this web page.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="challenge-section challenge-section-detail">
+  <div class="container container-padded">
+    <div class="h2">Performance and Recognitions Details</div>
+    <div class="panel-group accordion" id="detailsAccordion" role="tablist" aria-multiselectable="true">
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingOne">
+          <h4 class="panel-title">
+            <a role="button" data-toggle="collapse" data-parent="#detailsAccordion" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+              Reproducibility across the same input
+            </a>
+          </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+          <div class="panel-body">
+            <p>
+              If the exact same pipeline runs twice on the exact same input, does it produce the same output? The reproducibility comparison 1 investigates exactly that, by comparing the Garvan VCF to the Garvan Rerun VCF (which are the results of running the same pipeline on the same sequencing data). In this comparison, true positives represent the common variants, whereas false positives and false negatives represent the unique variants in each file. The following table summarizes the performance of each entry with respect to number of common and unique variants in the reproducibility comparison 1. The entries are sorted by number of unique variants; since all the deterministic entries have no unique variants, those are sorted by submission date.
+            </p>
+            <%= render "challenges/consistency/table_repro1" %>
+            <div class="text-muted small">
+              <p>
+                [#1] This entry was not considered because the entry submitted the NIST benchmark set as the answer
+                <br>
+                [#2] This entry was not considered because the Garvan rerun VCF file was not submitted within the challenge timeframe
+                <br>
+                [#3] This entry was not considered because the VCF files were not submitted within the challenge timeframe
+              </p>
+            </div>
+            <p>
+              We would like to recognize all entries which exhibited deterministic behavior (zero unique variants). These entries produced identical results across invocations. The remaining entries showed some degree of difference, ranging from a small amount of unique variants all the way to a hundred thousand unique variants. As suggested by some of the participants, the lack of determinism may in part be attributed to parallelization and a few other factors. One participant <a href="https://precision.fda.gov/discussions/1-precisionfda-consistency-challenge/answers/ayshwarya.subramanian">said</a>: "We think the multi-threading option used during our alignment step can lead to non-deterministic answers and hence, slight variations in results. It would be useful to note how the different entries vary in this result and which factors or differences the community decides really matter in the day-to-day running of a clinical genomics facility." Similarly, another participant <a href="https://precision.fda.gov/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">said</a>: "Our pipeline, by design, must be 100% repeatable between runs, i.e., have zero run-to-run difference. This can be achieved by rigorous software design: no random numbers, no downsampling, and rigorous parallelization hence zero dependency on the number of threads."
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingTwo">
+          <h4 class="panel-title">
+            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#detailsAccordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+              Reproducibility across different inputs
+            </a>
+          </h4>
+        </div>
+        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+          <div class="panel-body">
+            <p>
+              Another question of interest is how reproducible is a result on the same biological sample and instrument but across different sites and library preps. The reproducibility comparison 2 quantifies the amount of similarity between results obtained using the Garvan and HLI datasets respectively. These datasets were generated from Coriell NA12878 DNA on a HiSeq X Ten instrument, but with different versions of the TruSeq Nano DNA Library Prep kit (v2.5 for Garvan; and v1 for HLI), and at different sequencing sites. Just like with reproducibility comparison 1, true positives represent the common variants, whereas false positives and false negatives represent the unique variants. (In all comparisons, it should be noted that if a variant is found in both the sets being compared but with different zygosity, then it is counted as both a false positive and a false negative. This is because the comparison operates at the level of genotypes and not at the level of alleles). We appreciated that a single metric, concordance, defined as (common)/(common+unique) captures the essence of this comparison: it rewards not only a decrease in the number of unique variants, but also an increase in reproducible variants. The following table shows this concordance metric for the reproducibility comparison 2. The entries are sorted by decreasing concordance.
+            </p>
+            <%= render "challenges/consistency/table_repro2" %>
+            <div class="text-muted small">
+              <p>
+              [#4] This entry was not considered because the entry submitted the NIST benchmark set as the answer
+              <br>
+              [#5] This entry was not considered because the VCF files were not submitted within the challenge timeframe
+              <br>
+              [#6] These entries were not considered because they did not call variants across the whole genome
+              </p>
+            </div>
+            <div>
+              <p>
+              The fact that concordance is no higher than 91.44% overall is probably indicative of limitations in the sequencing portion of the experiment. Several factors can contribute to decreased concordance, including potentially different batch of starting material from Coriell, and, more importantly, different handling for library preparation. Even if the same library is used, there is also inherent variability in the way sequencing instruments process a library and produce base calls &mdash; including differences in coverage across the whole genome. Nevertheless, it is desirable for NGS pipelines to be somewhat robust to noise or other artifacts, to the extent possible. We would therefore like to recognize the entries that produced results with more than 90% concordance, assigning the <%= recognition_badge('highest-concordance', false) %> and <%= recognition_badge('high-concordance', false) %> badges.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingThree">
+          <h4 class="panel-title">
+            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#detailsAccordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+              Accuracy (Recall, Precision, and F-Measure)
+            </a>
+          </h4>
+        </div>
+        <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+          <div class="panel-body">
+            <div>
+              <p>The accuracy comparisons 1a, 1b and 2 are quantifying the similarity between participants' results and the NIST (Genome in a Bottle) v2.19 gold standard, within the confident regions provided by NIST/GiaB. Each comparison outputs several metrics, including recall, precision and f-measure.
+              </p>
+              <p>Recall, or sensitivity, reflects the percentage of variants in the NIST/GiaB benchmark set that were exactly called by the challenge participant pipeline in a submitted dataset. Precision, or positive predictive value, reflects the percentage of called variants which match exactly the NIST/GiaB benchmark set. F-measure is the harmonic mean of recall and precision, and is sometimes used as a single combined metric for evaluating overall accuracy.
+              </p>
+              <p>The tables below summarize the results across accuracy comparisons. For each metric, the highest value between accuracy comparisons 1a and 1b is shown (column R1, P1, F1), along with the value for accuracy comparison 2 (columns R2, P2, F2). In each table, the entries are ranked based on the sum of their deltas from the top entry, i.e. for recall based on (99.54% - R1) + (98.92% - R2).
+              </p>
+            </div>
+            <%= render "challenges/consistency/tables_accuracy" %>
+            <div class="text-muted small">
+              <p>
+              [#7] This entry was not considered because the VCF files were not submitted within the challenge timeframe<br>
+              [#8] This entry was not considered because the entry submitted the NIST benchmark set as the answer
+              </p>
+            </div>
+            <div>
+              <p>
+              Looking at recall, we noticed that most entries did better at Recall1 (Garvan) than Recall2 (HLI) &mdash; sometimes with striking differences (such as the entry labeled "macrogen-gatk"). This may be related to the fact that the Garvan dataset used newer, improved chemistry. We would like to recognize the top 6 entries (sum of deltas from the top less than 1%) assigning the <%= recognition_badge('highest-recall', false) %> and <%= recognition_badge('high-recall', false) %> badges.
+              </p>
+              <p>
+              A higher precision value means fewer false positives. Filtering criteria and other post-processing techniques are often used to reduce false positives, but sometimes this is at the expense of recall. Pipelines often have to deal with such tradeoffs between recall (sensitivity) and precision (positive predictive value), and different NGS pipelines may be tuned for different goals, depending on the context. Looking at the respective table for precision, the overall good performance of most entries (compared to the recall table) reveals that the majority of pipelines favor precision, especially since it does not show as big of a fluctuation between Precision1 (Garvan) and Precision2 (HLI). We would like to recognize the top 14 entries (sum of deltas from the top less than 1%) assigning the <%= recognition_badge('highest-precision', false) %> and <%= recognition_badge('high-precision', false) %> badges.
+              </p>
+              <p>
+              Given the performances in precision and recall in the first two tables, it's no surprise that the f-measure is usually slightly higher in the Garvan dataset, and that overall the entries are close (but not as close as in the precision table). We would like to recognize the top 11 entries (sum of deltas from the top less than 1.2%) assigning the <%= recognition_badge('highest-f-measure', false) %> and <%= recognition_badge('high-f-measure', false) %> badges.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingFour">
+          <h4 class="panel-title">
+            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#detailsAccordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+              Miscellaneous Recognitions
+            </a>
+          </h4>
+        </div>
+        <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+          <div class="panel-body">
+            <p>
+            We would like to extend special recognitions to the following entries:
+            </p>
+            <ul>
+              <li> The <%= recognition_badge('extra-credit') %> recognition to the entry submitted by Deepak Grover (Sanofi-Genzyme), for answering the extra credit question.</li>
+              <li> The <%= recognition_badge('pfda-apps') %> recognition to the entry submitted by Mike Lin (DNAnexus Science), for contributing apps to precisionFDA and using them to generate the results of the entry.</li>
+              <li> The <%= recognition_badge('heroic-effort') %> recognition to the entry submitted by Adam Novak et. al (VGTeam), for using this challenge as an opportunity to push the boundaries of their pipeline. As they <a href="https://precision.fda.gov/discussions/1-precisionfda-consistency-challenge/answers/adam.novak">mentioned</a> in their submission, "vg is a work in progress, and this challenge answer represents the first time it has ever been run on whole genomes. The team sprinted through the weekend preceding the deadline in order to scale up the graph read-mapping and variant-calling algorithms, which had previously been used only on limited test regions".</li>
+              <li> The <%= recognition_badge('promising') %> recognition to the entry submitted by Rene Lopez et. al (MyBioinformatician). Although the submission was not received on time, the pipeline's performance characteristics were promising, and we are looking forward to seeing this method applied to future challenges.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="challenge-section challenge-section-conclusion">
+  <div class="container container-padded">
+    <div class="h2">Conclusions and lessons learned</div>
+    <div>
+      <div class="media">
+        <div class="media-left">
+          <span class="fa fa-fw fa-bullseye fa-4x" aria-hidden="true"></span>
+        </div>
+        <div class="media-body">
+          <div class="h3">Comparisons</div>
+          <p>
+          This challenge used the comparison framework that was available when precisionFDA was first launched. The framework outputs detailed files with the variants of each category, so that anyone can perform downstream calculations or otherwise investigate their false positives or false negatives. This has helped participants better understand the characteristics of their pipelines – an effort that could be improved by more detailed reporting in the comparison output, since the current version of the comparison framework reports only aggregate statistics. As someone pointed out in a separate communication, “showing summary numbers for both SNPs and indels together can hide issues with indel calling behind the fact that SNPs do really well (most pipelines discover most of the easy SNPs)”. In the future, we look forward to more granular reporting, including separate statistics for SNPs versus indels and other types of variations, as well as information on zygosity mismatches. We are working with the GA4GH benchmarking group to incorporate the next generation of comparisons, and you can currently see an early glimpse of that in the <a href="https://precision.fda.gov/apps/explore">GA4GH Benchmarking app</a> on precisionFDA.
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="media">
+        <div class="media-left">
+          <span class="fa fa-fw fa-balance-scale fa-4x" aria-hidden="true"></span>
+        </div>
+        <div class="media-body">
+          <div class="h3">Benchmarking material</div>
+          <p>
+          The challenge used the NIST/GiaB characterization of NA12878 as the benchmark set, as reported on GRCh37. Although NIST relied on different sequencing technologies and software algorithms to generate this dataset, members of the community expressed concerns that the dataset may be "biased towards GATK". Other community feedback mentioned known facts such as that the dataset is not comprehensive enough with respect to indels, that the confident regions are not covering several genomic areas of clinical importance, and that this dataset does not include copy-number variants or structural variants, or incorporate phasing information. GiaB is aware of the limitations of the existing dataset and is already working to address them. In addition, precisionFDA is collaborating with NIST to engage the community to improve this dataset by incorporating a Feedback button straight into the comparison results page. The government agencies, including FDA, NIST, CDC, and other stakeholders are also collaborating towards the generation of new benchmarking materials.
+          </p>
+          <p>
+          We also received questions around the choice of GRCh37. The performance of pipelines is affected by the reference human sequence, and as one participant put it “once we obtain a perfect (no gaps, no mistakes) reference genome, the performance will be much better”. The current NIST/GiaB release is based on GRCh37, but we are looking forward to using GRCh38 in the future.
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="media">
+        <div class="media-left">
+          <span class="fa fa-fw fa-gears fa-4x" aria-hidden="true"></span>
+        </div>
+        <div class="media-body">
+          <div class="h3">Study design</div>
+          <p>
+          This first challenge tried to engage the community, while at the same time making use of familiar datasets (such as NIST reference material) and simple evaluations (such as the comparison framework). The main focus was looking at reproducibility, while additionally assessing accuracy, both important concepts in regulatory science.
+          </p>
+          <p>
+          On one hand, as people <a href="https://precision.fda.gov/discussions/1-precisionfda-consistency-challenge/answers/rafael.aldana">said</a> “if we all approach the challenge in good faith […], this challenge sets the right methodology: (1) examine the software repeatability between runs; (2) examine the reproducibility between datasets of the same DNA sample […]; (3) examine the accuracy against a well-characterized truth set.”; on the other hand, as someone else <a href="https://precision.fda.gov/discussions/1-precisionfda-consistency-challenge/answers/eric.banks">pointed out</a> “a winning entry for this challenge would not necessarily (and in fact is unlikely) to work well on a different sample.”
+          </p>
+          <p>
+          This challenge focused on the consistency of the results obtained from both a single as well as two different runs of the same sample. Although the sample that was used has known “truth data” attached to it for certain kinds of calls (“high confidence variant calls”), so that the community can at least partially assess the accuracy of the results obtained, the precisionFDA team was primarily focused on the reproducibility. Part of the reasoning behind that has been very eloquently stated by some of the challenge participants – with so few samples that have known “truth” it is very easy to over-fit the results, so “accuracy” obtained does not provide the complete picture. But we also heard, “This is the first time that software repeatability and inter-dataset reproducibility have been put at front and center of judging a genomics pipeline’s quality. Without repeatability and reproducibility, accuracy is at best a one-time stroke of luck”. We are, however, taking a second look at accuracy in the <a href="https://precision.fda.gov/challenges/truth">precisionFDA Truth Challenge</a>.
+          </p>
+
+          <p>
+          Lastly, we acknowledge that the evaluation of the results was confined within certain limits; however, the process (and its limitations) can inform future challenges. For example, we did not factor pipeline runtime or resource consumption into our evaluations.
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="media">
+        <div class="media-left">
+          <span class="fa fa-fw fa-flag-checkered fa-4x" aria-hidden="true"></span>
+        </div>
+        <div class="media-body">
+          <div class="h3">Epilogue</div>
+          <p>
+          We want to thank those of you who participated in our first challenge! By participating and putting your results and your thoughts out in the public, you fulfilled the first and most important goal of this challenge &ndash; to engage and get the dialogue started.
+          </p>
+          <p>
+          This challenge created a dataset that people can study further, if they so choose. We have created an archive of 60 VCF files (compressed with bgzip, and accompanied by tabix index files) that is available as a file on precisionFDA. We have also created a similar app asset, which can be included in apps that need direct access to the unarchived VCF files. We are excited to see how the community will use this in the future. Perhaps the results available from the challenge can provide some interesting ideas for precisionFDA and the scientific community to build upon.
+          </p>
+          <p>
+          In closing, we would like to leave you with several encouraging quotes from our community, which will hopefully inspire all readers to participate in one of our upcoming challenges:
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="media">
+        <div class="media-left">
+          <span class="fa fa-fw fa-quote-left fa-4x" aria-hidden="true"></span>
+        </div>
+        <div class="media-body">
+          <blockquote>
+            “When I started working in this industry I felt that everyone claimed that their pipeline was better, but there was no objective way of measuring, so it sounded like an ad for car insurance. I think your challenges will move our industry forward immensely.”
+          </blockquote>
+
+          <blockquote class="">
+            “I wish to congratulate your team for putting together a bioinformatics challenge like that, it is a nice and unique idea. It can become a significant community resource for NGS work and data in future”.
+          </blockquote>
+
+          <blockquote>
+            “The challenge made me aware of many good software methods, thanks!”
+          </blockquote>
+
+          <blockquote class="">
+            “We found this experience is very helpful for us to improve our understanding of our pipeline.”
+          </blockquote>
+
+          <blockquote>
+            “We plan on contacting a fellow participant to try their pipeline.”
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -39,6 +39,12 @@ class Comparison < ActiveRecord::Base
   has_many :notes, {through: :attachments}
   has_many :attachments, {as: :item, dependent: :destroy}
 
+  store :meta, {coder: JSON}
+
+  acts_as_commentable
+  acts_as_taggable
+  acts_as_votable
+
   def uid
     "comparison-#{id}"
   end
@@ -50,7 +56,7 @@ class Comparison < ActiveRecord::Base
   def klass
     "comparison"
   end
-  
+
   def input(role)
     inputs.where(role: role).take
   end
@@ -59,23 +65,78 @@ class Comparison < ActiveRecord::Base
     inputs.where(role: role).take!
   end
 
-  def meta_hash
-    JSON.parse(meta)
+  def stats
+    meta.slice("precision", "recall", "f-measure", "true-pos", "false-pos", "false-neg")
   end
 
-  def stats
-    meta_hash.slice("precision", "recall", "f-measure", "true-pos", "false-pos", "false-neg")
+  def describe_fields
+    ["title", "description"]
   end
 
   def deletable?
     state != "pending"
   end
 
-  def publishable_by?(context)
-    if context.guest?
-      false
+  def publishable_by?(context, scope_to_publish_to = "public")
+    core_publishable_by?(context, scope_to_publish_to) && state == "done"
+  end
+
+  def rename(new_name, context)
+    update_attributes(name: new_name)
+  end
+
+  def self.publication_project!(context, scope)
+    if scope == "public"
+      context.user.public_comparisons_project
     else
-      user_id == context.user_id && scope != "public" && state == "done"
+      Space.from_scope(scope).project_for_context!(context)
     end
+  end
+
+  def self.publish(comparisons, context, scope)
+    # Ensure API availability
+    api = DNAnexusAPI.new(context.token)
+    api.call("system", "greet")
+
+    count = 0
+
+    destination_project = Comparison.publication_project!(context, scope)
+
+    files = comparisons.uniq.select { |c| c.publishable_by?(context, scope) }.map(&:outputs).flatten
+
+    comparisons_to_publish = []
+    projects = {}
+    comparisons.uniq.each do |comparison|
+      next unless comparison.publishable_by?(context, scope)
+      comparisons_to_publish << comparison
+      comparison.outputs.flatten.each do |file|
+        raise "Consistency check failure for file #{file.id} (#{file.dxid})" unless file.passes_consistency_check?(context)
+        raise "Source and destination collision for file #{file.id} (#{file.dxid})" if destination_project == file.project
+        projects[file.project] = [] unless projects.has_key?(file.project)
+        projects[file.project].push(file)
+      end
+    end
+
+    projects.each do |project, project_files|
+      api.call(project, "clone", {objects: project_files.map(&:dxid), project: destination_project})
+    end
+
+    Comparison.transaction do
+      comparisons_to_publish.each do |comparison|
+        comparison.reload
+        raise "Race condition for comparison #{comparison.id}" unless comparison.publishable_by?(context, scope)
+        comparison.outputs.each do |file|
+          file.update!(scope: scope, project: destination_project)
+        end
+        comparison.update!(scope: scope)
+        count += 1
+      end
+    end
+
+    projects.each do |project, project_files|
+      api.call(project, "removeObjects", {objects: project_files.map(&:dxid)})
+    end
+
+    return count
   end
 end

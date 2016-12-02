@@ -9,7 +9,7 @@ module ApplicationHelper
         "alert-success"
       when "error"
         "alert-danger"
-      when "alert"
+      when "alert", "warning"
         "alert-warning"
       when "notice"
         "alert-info"
@@ -47,6 +47,10 @@ module ApplicationHelper
       "fa-file-o"
     when "note"
       "fa-sticky-note"
+    when "answer"
+      "fa-commenting"
+    when "discussion"
+      "fa-comments-o"
     when "app"
       "fa-cube"
     when "job"
@@ -55,6 +59,10 @@ module ApplicationHelper
       "fa-file-zip-o"
     when "comparison"
       "fa-area-chart"
+    when "license"
+      "fa-legal"
+    when "space"
+      "fa-object-group"
     else
       raise "Unknown class #{item.klass}"
     end
@@ -62,14 +70,31 @@ module ApplicationHelper
 
   # Valid options
   # icon_class: "fa-fw fa-2x"  # Appends to span class
-  # globe: true                # Uses globe-vs-nothing instead of fa_class(item) as icon
+  # scope_icon: true           # Displays scope icon instead of fa_class(item) as icon
+  # title_class                # CSS class to apply to title
   # nolink: true               # Show a label, not a link
+  # noicon: false              # Show/hide the icon
   #
   def unilink(item, opts = {})
-    icon = opts[:globe] ? (item.public? ? "fa-globe" : "fa-lock") : fa_class(item)
-    icon_span = content_tag(:span, " ", class: "fa #{icon} #{opts[:icon_class]}") + " "
+    icon = fa_class(item)
+    if opts[:scope_icon]
+      if item.public?
+        icon = "fa-globe"
+      elsif item.in_space?
+        icon = "fa-object-group"
+      elsif item.private?
+        icon = "fa-lock"
+      end
+    end
+
+    if opts[:noicon]
+      icon_span = ""
+    else
+      icon_span = content_tag(:span, " ", class: "fa #{icon} #{opts[:icon_class]}") + " "
+    end
+
     if item.accessible_by?(@context)
-      opts[:nolink] ? icon_span + item.title : link_to(icon_span + item.title, pathify(item))
+      opts[:nolink] ? icon_span + item.title.to_s : link_to(icon_span + item.title.to_s, pathify(item), {class: opts[:title_class]})
     else
       icon_span + item.uid
     end
