@@ -131,7 +131,7 @@ func main() {
       inputError(fmt.Sprintf("Authorization key not provided and configuration file '%s' not found. Please provide it as [--key <KEY>].", configPath))
     }
     var config jsonConfig
-	err = json.Unmarshal(f, &config)
+    err = json.Unmarshal(f, &config)
     check(err)
     globalKey = config.Key
   } else {
