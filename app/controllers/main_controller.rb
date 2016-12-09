@@ -271,13 +271,13 @@ class MainController < ApplicationController
         # Public files
         public_files_project = api.call("project", "new", {name: "precisionfda-public-files-#{username}", billTo: user.billto})["id"]
         AUDIT_LOGGER.info("User #{username} is logging in for the first time; account setup step 4 of 9 completed")
-        api.call(public_files_project, "invite", {invitee: ORG_EVERYONE, level: "VIEW", suppressEmailNotification: true})
+        api.call(public_files_project, "invite", {invitee: ORG_EVERYONE, level: "VIEW", suppressEmailNotification: true, suppressAllNotifications: true})
         AUDIT_LOGGER.info("User #{username} is logging in for the first time; account setup step 5 of 9 completed")
 
         # Public comparisons
         public_comparisons_project = api.call("project", "new", {name: "precisionfda-public-comparisons-#{username}", billTo: user.billto})["id"]
         AUDIT_LOGGER.info("User #{username} is logging in for the first time; account setup step 6 of 9 completed")
-        api.call(public_comparisons_project, "invite", {invitee: ORG_EVERYONE, level: "VIEW", suppressEmailNotification: true})
+        api.call(public_comparisons_project, "invite", {invitee: ORG_EVERYONE, level: "VIEW", suppressEmailNotification: true, suppressAllNotifications: true})
         AUDIT_LOGGER.info("User #{username} is logging in for the first time; account setup step 7 of 9 completed")
 
         # User settings
