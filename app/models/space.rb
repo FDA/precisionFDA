@@ -142,8 +142,8 @@ class Space < ActiveRecord::Base
   def create_space_project(context, contribute_org, view_org, admin)
     api = DNAnexusAPI.new(context.token)
     space_project = api.call("project", "new", {name: "precisionfda-space-#{id}-#{admin[:side]}", billTo: admin.user.billto})["id"]
-    api.call(space_project, "invite", {invitee: contribute_org, level: "CONTRIBUTE", suppressEmailNotification: true})
-    api.call(space_project, "invite", {invitee: view_org, level: "VIEW", suppressEmailNotification: true})
+    api.call(space_project, "invite", {invitee: contribute_org, level: "CONTRIBUTE", suppressEmailNotification: true, suppressAllNotifications: true})
+    api.call(space_project, "invite", {invitee: view_org, level: "VIEW", suppressEmailNotification: true, suppressAllNotifications: true})
     return space_project
   end
 
