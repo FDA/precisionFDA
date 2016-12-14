@@ -11,7 +11,7 @@
         </a>
       </columns>
       <columns>
-        <p class="header-title text-right">Space Activated</p>
+        <p class="header-title text-right"><%= @space.space_type.capitalize %> Space Activated</p>
       </columns>
     </row>
   </container>
@@ -19,7 +19,7 @@
     <row>
       <columns>
         <p>
-          The space <strong><%= link_to @space.title, space_url(@space) %></strong> has been activated and you can now move data to share with members of the space.
+          The <%= @space.space_type %> space <strong><%= link_to "\"#{@space.title_label}\"", space_url(@space) %></strong> has been activated and you can now move data to share with members of the space.
         </p>
 
         <button class="radius" href="<%= space_url(@space) %>">View Space</button>
