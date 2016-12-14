@@ -39,23 +39,31 @@
 <div class="metadata-section metadata-header">
   <ul class="list-group list-group-inline">
     <li class="list-group-item">
+      <h5 class="list-group-item-heading">State</h5>
+      <% if @space.active? %>
+        <h4><span class="label label-success"><span class="fa fa-check"></span> Active<span></h4>
+      <% elsif @space.closed? %>
+        <h4><span class="label label-primary"><span class="fa fa-lock"></span> Closed</span></h4>
+      <% else %>
+        <h4><span class="label label-default"><span class="fa fa-clock-o"></span> Unactivated</span></h4>
+      <% end %>
+    </li>
+    <li class="list-group-item">
       <h5 class="list-group-item-heading">ID</h5>
       <p class="list-group-item-text"><%= @space.uid %></p>
     </li>
-    <% if @space.state != "ACTIVE" %>
     <li class="list-group-item">
-      <h5 class="list-group-item-heading">State</h5>
+      <h5 class="list-group-item-heading">Type</h5>
       <p class="list-group-item-text">
-        <%= @space.state? ? @space.state : "UNACTIVATED" %>
+        <%= @space.space_type.capitalize %>
       </p>
     </li>
-    <% end %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Your Role</h5>
-      <p class="list-group-item-text"><%= @membership.role %> <small>(<%= @membership.side %>)</small></p>
+      <p class="list-group-item-text"><%= @membership.role %> <small>(<%= @membership.side_label %>)</small></p>
     </li>
     <li class="list-group-item">
-      <h5 class="list-group-item-heading">Host Lead</h5>
+      <h5 class="list-group-item-heading"><%= @space.host_lead_label %></h5>
       <p class="list-group-item-text">
         <%= link_to("#{@space.host_lead.full_name} (#{@space.host_lead.org.name})", user_path(@space.host_lead.dxuser)) %>
       </p>
@@ -70,7 +78,7 @@
       <% end %>
     </li>
     <li class="list-group-item">
-      <h5 class="list-group-item-heading">Guest Lead</h5>
+      <h5 class="list-group-item-heading"><%= @space.guest_lead_label %></h5>
       <p class="list-group-item-text">
         <%= link_to("#{@space.guest_lead.full_name} (#{@space.guest_lead.org.name})", user_path(@space.guest_lead.dxuser)) %>
       </p>

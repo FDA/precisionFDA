@@ -25,11 +25,11 @@
     end
   end
 
-  g.column name: 'Host Lead' do |space|
+  g.column name: @context.user.can_create_reviews? ? 'Host/Review Lead' : 'Host Lead' do |space|
     link_to("#{space.host_lead.full_name} (#{space.host_lead.org.name})", user_path(space.host_lead.dxuser))
   end
 
-  g.column name: 'Guest Lead' do |space|
+  g.column name: @context.user.can_create_reviews? ? 'Guest/Sponsor Lead' : 'Guest Lead' do |space|
     link_to("#{space.guest_lead.full_name} (#{space.guest_lead.org.name})", user_path(space.guest_lead.dxuser))
   end
 

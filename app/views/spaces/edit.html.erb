@@ -1,9 +1,9 @@
-<% content_for :title do %>Edit <%= @space.title %><% end %>
+<% content_for :title do %>Edit <%= @space.title_label %><% end %>
 
 <div class="page-header">
   <div class="page-title">
     <span class="fa fa-groups"></span>
-    Edit <%= @space.title %>
+    Edit <%= @space.title_label %>
   </div>
 </div>
 
@@ -13,28 +13,23 @@
     <div class="form-group required">
       <%= f.label :name, "Name", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_field :name, class: "form-control input-lg", placeholder: "Name this space...", required: "required"  %>
+        <%= f.text_field :name, class: "form-control input-lg", placeholder: "Name this #{@space.space_type} space...", required: "required"  %>
       </div>
     </div>
     <div class="form-group">
       <%= f.label :description, "Description", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_area :description, class: "form-control", rows: 10, placeholder: "What is this space about..." %>
+        <%= f.text_area :description, class: "form-control", rows: 10, placeholder: "What is this #{@space.space_type} space about..." %>
       </div>
     </div>
-    <div class="form-group required">
-      <%= f.label :space_type, "Type", class: 'control-label col-sm-2' %>
-      <div class="col-sm-11 col-sm-offset-1">
-        <%= f.select :space_type, options_for_select("Group" => "group", "Submission" => "submission"), {}, class: "form-control" %>
-      </div>
-    </div>
+    <% if @space.space_type == "review" %>
     <div class="form-group">
       <%= f.label :cts, "CTS #", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_field :cts, class: "form-control", placeholder: "" %>
+        <%= f.text_field :cts, class: "form-control", placeholder: "Submission #", required: "required" %>
       </div>
     </div>
-
+    <% end %>
     <div class="form-group">
       <div class="col-sm-offset-3">
         <%= f.submit "Update", class: 'btn btn-primary', data: {disable_with: "Updating..."} %>

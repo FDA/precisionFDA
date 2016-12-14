@@ -46,6 +46,14 @@ class SpaceMembership < ActiveRecord::Base
     side == "GUEST"
   end
 
+  def side_label
+    if space.is_review?
+      host? ? "REVIEWER" : "SPONSOR"
+    else
+      side
+    end
+  end
+
   def project
     if host?
       space.host_project
