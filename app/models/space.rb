@@ -93,7 +93,8 @@ class Space < ActiveRecord::Base
   end
 
   def guest_lead_member
-    space_memberships.guests.admins.first
+    # Sponsors cannot be admins in review spaces
+    is_review? ? space_memberships.guests.non_admins.first : space_memberships.guests.admins.first
   end
 
   def guest_lead?(context)
@@ -207,6 +208,8 @@ class Space < ActiveRecord::Base
       space = Space.create!(space_params)
 
       # Add leads as ADMINs
+      # Sponsors cannot be admins in review spaces
+      guest_status = is_review? ? 'MEMBER' : 'ADMIN'
       host_lead = space.add_or_update_member(papi, host_dxorg, space_params[:host_lead_dxuser], 'ADMIN', 'HOST')
       guest_lead = space.add_or_update_member(papi, guest_dxorg, space_params[:guest_lead_dxuser], 'ADMIN', 'GUEST')
 
