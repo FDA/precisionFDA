@@ -215,7 +215,7 @@ class Space < ActiveRecord::Base
       # Sponsors cannot be admins in review spaces
       guest_status = is_review? ? 'MEMBER' : 'ADMIN'
       host_lead = space.add_or_update_member(papi, host_dxorg, space_params[:host_lead_dxuser], 'ADMIN', 'HOST')
-      guest_lead = space.add_or_update_member(papi, guest_dxorg, space_params[:guest_lead_dxuser], 'ADMIN', 'GUEST')
+      guest_lead = space.add_or_update_member(papi, guest_dxorg, space_params[:guest_lead_dxuser], guest_status, 'GUEST')
 
       # Remove pfda admin from orgs
       papi.call(host_dxorg, "removeMember", {user: "user-precisionfda.admin"})
