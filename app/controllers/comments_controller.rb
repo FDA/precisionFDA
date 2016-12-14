@@ -47,10 +47,12 @@ class CommentsController < ApplicationController
       item = items_from_params.last
       if item.present? && item.accessible_by?(@context)
         c = comment_params
-        comment = Comment.build_from(item, @context.user_id, c[:body])
+        comment = Comment.build_from(item, @context.user_id, c)
         if !comment.save
           flash[:error] = "There was a problem with adding your comment"
         end
+        event = Event.build_from(comment, "create")
+        event.save
         redirect_to pathify_comments_redirect(item)
       else
         flash[:error] = "You do not have permission to add a comment to this item"
@@ -90,6 +92,6 @@ class CommentsController < ApplicationController
 
   private
     def comment_params
-      params.require(:comment).permit(:body)
+      params.require(:comment).permit(:body, :type)
     end
 end

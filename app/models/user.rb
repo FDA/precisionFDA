@@ -47,6 +47,7 @@ class User < ActiveRecord::Base
   has_many :spaces, {through: :space_memberships}
   has_one :appathon
   has_many :meta_appathons
+  has_many :events
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 
   include Gravtastic
