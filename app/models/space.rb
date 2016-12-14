@@ -213,7 +213,7 @@ class Space < ActiveRecord::Base
 
       # Add leads as ADMINs
       # Sponsors cannot be admins in review spaces
-      guest_status = is_review? ? 'MEMBER' : 'ADMIN'
+      guest_status = space.is_review? ? 'MEMBER' : 'ADMIN'
       host_lead = space.add_or_update_member(papi, host_dxorg, space_params[:host_lead_dxuser], 'ADMIN', 'HOST')
       guest_lead = space.add_or_update_member(papi, guest_dxorg, space_params[:guest_lead_dxuser], guest_status, 'GUEST')
 
