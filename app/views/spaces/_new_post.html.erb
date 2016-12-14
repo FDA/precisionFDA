@@ -1,0 +1,24 @@
+<div class="pfda-comment">
+  <div class="media">
+    <div class="media-left">
+      <%= link_to image_tag(@context.user.gravatar_url, class: 'img-circle', height: '25px'), user_path(@context.user.dxuser) %>
+    </div>
+    <div class="media-body">
+      <div class="pfda-comment-body">
+        <%= form_for :comment, url: url, html: {class: 'form form-horizontal'} do |f| %>
+          <%= render "_partials/form_errors", object: object %>
+          <div class="form-group">
+            <%= f.text_area :body, class: "form-control", rows: 3, placeholder: "Write comment or assign task..." %>
+          </div>
+          <div class="form-group">
+            <%= f.submit "Post", class: 'btn btn-default', data: {disable_with: "Post..."} %>
+            <%= f.radio_button :type, 'comment', :checked => true%>
+            <%= f.label :type, 'comment', :value => "Comment" %>
+            <%= f.radio_button :type, 'task' %>
+            <%= f.label :type, 'task', :value => "Task" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -14,7 +14,12 @@ class SpacesController < ApplicationController
   end
 
   def show
-    redirect_to content_space_path(params[:id])
+    @space = Space.accessible_by(@context).find(params[:id])
+    if @space.space_type == "review"
+      redirect_to discuss_space_path(params[:id])
+    else
+      redirect_to content_space_path(params[:id])
+    end
   end
 
   def content
@@ -99,6 +104,7 @@ class SpacesController < ApplicationController
     @item_path = pathify(@space)
     @item_comments_path = pathify_comments(@space)
     @comments = @space.root_comments.order(id: :desc).page params[:comments_page]
+    @feed = Event.events_by_scope(@space.uid).order(timestamp: :desc)
   end
 
   def members

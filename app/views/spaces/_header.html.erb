@@ -105,16 +105,29 @@
 
 <!-- Nav tabs -->
 <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
-  <li role="presentation" class="<% if action_name == 'content' %>active<% end %>">
-    <a href="<%= content_space_path(@space) %>" aria-controls="tab-data"><span class="fa fa-fw fa-database"></span>
-      <span class="tab-label">Content</span>
-    </a>
-  </li>
-  <li role="presentation" class="<% if action_name == 'discuss' %>active<% end %>">
-    <a href="<%= discuss_space_path(@space) %>" aria-controls="tab-comments"><span class="fa fa-fw fa-comment"></span>
-      <span class="tab-label">Comments <span class="badge"><%= @space.comment_threads.size %></span></span>
-    </a>
-  </li>
+  <% if @space.space_type == "review" %>
+    <li role="presentation" class="<% if action_name == 'discuss' %>active<% end %>">
+      <a href="<%= discuss_space_path(@space) %>" aria-controls="tab-comments"><span class="fa fa-fw fa-comment"></span>
+        <span class="tab-label">Activity <span class="badge"><%= @space.events.count %></span></span>
+      </a>
+    </li>
+    <li role="presentation" class="<% if action_name == 'content' %>active<% end %>">
+      <a href="<%= content_space_path(@space) %>" aria-controls="tab-data"><span class="fa fa-fw fa-database"></span>
+        <span class="tab-label">Data </span>
+      </a>
+    </li>
+  <% else %>
+    <li role="presentation" class="<% if action_name == 'content' %>active<% end %>">
+      <a href="<%= content_space_path(@space) %>" aria-controls="tab-data"><span class="fa fa-fw fa-database"></span>
+        <span class="tab-label">Content</span>
+      </a>
+    </li>
+    <li role="presentation" class="<% if action_name == 'discuss' %>active<% end %>">
+      <a href="<%= discuss_space_path(@space) %>" aria-controls="tab-comments"><span class="fa fa-fw fa-comment"></span>
+        <span class="tab-label">Comments <span class="badge"><%= @space.comment_threads.size %></span></span>
+      </a>
+    </li>
+    <% end %>
   <li role="presentation" class="<% if action_name == 'members' %>active<% end %>">
     <a href="<%= members_space_path(@space) %>" aria-controls="tab-members"><span class="fa fa-fw fa-group"></span>
       <span class="tab-label">Members <span class="badge"><%= @space.space_memberships.count %></span></span>

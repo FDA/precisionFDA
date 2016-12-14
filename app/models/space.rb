@@ -56,6 +56,10 @@ class Space < ActiveRecord::Base
     end
   end
 
+  def events
+    Event.events_by_scope(uid)
+  end
+
   def active?
     state == "ACTIVE"
   end
