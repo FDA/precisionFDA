@@ -188,6 +188,12 @@ class SpacesController < ApplicationController
   def accept
     space = Space.accessible_by(@context).find(params[:id])
     admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN')
+
+    if is_review? and !admin
+      # Check if user is sponsor
+      admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'MEMBER', side: 'GUEST')
+    end
+
     if admin
       Space.transaction do
         if admin.side == 'HOST'
