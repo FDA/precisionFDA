@@ -1,6 +1,6 @@
 <wrapper>
   <div class="hidden-email-preview">
-    Space activation request for <%= @space.title %> as <%= "#{@membership.side} #{@membership.role}" %>
+    Space activation request for <%= @space.title_label %> as <%= "#{@membership.side_label} #{@membership.role}" %>
   </div>
   <spacer size="16"></spacer>
   <container class="header">
@@ -19,11 +19,11 @@
     <row>
       <columns>
         <p>
-          The space <strong><%= link_to @space.title, space_url(@space) %></strong> was provisioned and listed you as <%= "#{@membership.side} #{@membership.role}" %>.
+          The <%= @space.space_type %> space <strong><%= link_to "\"#{@space.title_label}\"", space_url(@space) %></strong> was provisioned and listed you as <%= "#{@membership.side_label} #{@membership.role}" %>.
         </p>
 
         <p>
-          To start adding data to this space both host and guest lead admin's must accept the invitation. Please visit the space and click on "Accept space".
+          To start adding data to this space both the <%= @space.host_lead_label.downcase %> and the <%= @space.guest_lead_label.downcase %> must accept the invitation. Please visit the space and click on "Accept space".
         </p>
         <button class="radius" href="<%= space_url(@space) %>">View Space Invitation</button>
       </columns>

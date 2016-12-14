@@ -69,9 +69,7 @@
       </p>
       <% if !@space.active? && @space.host_project.blank? %>
         <% if @space.host_lead?(@context) %>
-          <%= link_to accept_space_path(@space.id), method: :post, class: "btn btn-xs btn-success" do %>
-            <span class="fa fa-check"></span> Accept space
-          <% end %>
+          <button class="btn btn-xs btn-success" data-toggle="modal" data-target="#termsModal"><span class="fa fa-check"></span> Accept space</button>
         <% else %>
           <div class="text-warning"><span class="fa fa-clock-o"></span> Waiting on acceptance</div>
         <% end %>
@@ -84,9 +82,7 @@
       </p>
       <% if !@space.active? && @space.guest_project.blank? %>
         <% if @space.guest_lead?(@context)%>
-          <%= link_to accept_space_path(@space.id), method: :post, class: "btn btn-xs btn-success" do %>
-            <span class="fa fa-check"></span> Accept Space
-          <% end %>
+          <button class="btn btn-xs btn-success" data-toggle="modal" data-target="#termsModal"><span class="fa fa-check"></span> Accept space</button>
         <% else %>
           <div class="text-warning"><span class="fa fa-clock-o"></span> Waiting on Acceptance</div>
         <% end %>
@@ -129,3 +125,26 @@
 <% if @space.editable_by?(@context) %>
   <%= render "_partials/modal_rename", item: @space, path_to_rename: rename_space_path(@space.id) %>
 <% end %>
+
+<!-- Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" role="dialog" aria-labelledby="termsModal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h3 class="modal-title"><span class="fa fa-institution" aria-hidden="true"></span> Review Space Terms</h3>
+      </div>
+      <div class="modal-body">
+        <p>Some legal text here.</p>
+      </div>
+      <div class="modal-footer">
+        <%= link_to "I Agree", accept_space_path(@space.id), method: :post, data: { dismiss: "modal" }, class: "btn btn-lg btn-success btn-done" %>
+      </div>
+      <div class="row">
+        <div class="col-sm-offset-6 col-sm-12">
+          <div class="help-block">Additional information available in our <%= link_to "Terms of Service", terms_path %>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

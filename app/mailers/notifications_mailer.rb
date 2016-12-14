@@ -56,7 +56,7 @@ class NotificationsMailer < ApplicationMailer
     @membership = membership
     @user = membership.user
     mail to: @user.email,
-         subject: "Action required to activate new space \"#{@space.title}\""
+      subject: "Action required to activate new #{@space.space_type} space \"#{@space.title_label}\""
   end
 
   def space_activated_email(space, membership)
@@ -64,7 +64,7 @@ class NotificationsMailer < ApplicationMailer
     @membership = membership
     @user = membership.user
     mail to: @user.email,
-         subject: "Your space was activated: \"#{@space.title}\""
+      subject: "Your #{@space.space_type} space was activated: \"#{@space.title_label}\""
   end
 
   def space_invitation_email(space, membership, admin)
@@ -74,6 +74,6 @@ class NotificationsMailer < ApplicationMailer
     @admin = admin
     mail to: @user.email,
          reply_to: @admin.user.email,
-         subject: "#{@admin.user.full_name} added you to the space \"#{@space.title}\""
+         subject: "#{@admin.user.full_name} added you to the #{@space.space_type} space \"#{@space.title}\""
   end
 end
