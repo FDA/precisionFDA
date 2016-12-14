@@ -1,27 +1,33 @@
 <%= grid(spaces_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
   g.blank_slate partial:  "_partials/empty_grid"
 
-  g.after_row do |space, num_cols|
-    if !space.description.blank?
-      content_tag(:tr,
-        content_tag(:td, nil, {class: "col-state state-#{space.state ? space.state.downcase : 'unactivated'}"}).concat(content_tag(:td,
-          content_tag(:div, space.description, class: 'description'),
-        colspan: num_cols - 1)),
-      class: 'extra-row')
-    else
-      nil
-    end
-  end
-
   g.column name: 'State', attribute: 'state', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false do |space|
     [space.state ? space.state : "UNACTIVATED", {class: "col-state state-#{space.state ? space.state.downcase : 'unactivated'}"}]
   end
 
+  g.column name: 'Type', attribute: 'space_type', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false do |space|
+    space.space_type
+  end
+
   g.column name: 'Name', attribute: 'name', auto_reload: true, allow_multiple_selection: false do |space|
-    if space.accessible_by?(@context)
-      link_to(space.name, space_path(space))
-    else
-      space.name
+    space.accessible_by?(@context) ? link_to(space.name, space_path(space)) : space.name
+  end
+
+  g.after_row do |space, num_cols|
+    if !space.description.blank?
+      # trim description to be 50 characters, and check for word boundaries
+      cutoff = 50
+      trim_desc = space.description[0..cutoff]
+      trim_desc = trim_desc[0..[cutoff, trim_desc.rindex(" ")].min]
+      desc_end = space.description.length < cutoff ? "" : " ... "
+      desc = "#{trim_desc}#{desc_end}"
+
+      content_tag(:tr,
+        content_tag(:td, nil, {class: "col-state state-#{space.state ? space.state.downcase : 'unactivated'}"}).concat(
+        content_tag(:td,
+          content_tag(:td, desc, class: "description")).concat(
+          content_tag(:td, nil, colspan: num_cols-3))),
+      class: 'extra-row')
     end
   end
 
@@ -31,6 +37,10 @@
 
   g.column name: @context.user.can_create_reviews? ? 'Guest/Sponsor Lead' : 'Guest Lead' do |space|
     link_to("#{space.guest_lead.full_name} (#{space.guest_lead.org.name})", user_path(space.guest_lead.dxuser))
+  end
+
+  g.column name: "CTS #" do |space|
+    space.cts
   end
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |space|
