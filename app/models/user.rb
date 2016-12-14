@@ -119,12 +119,41 @@ class User < ActiveRecord::Base
     end
   end
 
+  def is_production?
+    Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
+  end
+
+  def is_precisionfda_admin?
+    ["elaine.johanson", "ruth.bandler"].include?(dxuser)
+  end
+
+  def is_precisionfda_dev?
+    ((org.handle == "precisionfda" || org.handle == "dnanexus") && org.admin_id == id) ||
+      ["alan.zhu", "alan.fdauser"].include?(dxuser)
+  end
+
   def can_administer_site?
-    if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
-      dxuser == "elaine.johanson" || dxuser == "ruth.bandler"
+    if is_production?
+      is_precisionfda_admin?
     else
-      ((org.handle == "precisionfda" || org.handle == "dnanexus") && org.admin_id == id) || ["alan.zhu"].include?(dxuser)
+      is_precisionfda_dev?
     end
+  end
+
+  def can_create_reviews?
+    if is_production?
+      is_precisionfda_admin? || [].include?(dxuser)
+    else
+      is_precisionfda_dev?
+    end
+  end
+
+  def can_create_spaces?
+    can_administer_site? || can_create_reviews?
+  end
+
+  def can_see_spaces?
+    can_create_spaces? || spaces.count > 0
   end
 
   def self.validate_email(email)

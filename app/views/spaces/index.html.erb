@@ -1,12 +1,21 @@
 <% content_for :title do %>Spaces<% end %>
 
-<% if @context.user.can_administer_site? %>
+<% if @context.user.can_create_spaces? %>
 <div class="pfda-toolbar">
+  <% if @context.user.can_administer_site? %>
   <div class="btn-group">
-    <%= link_to new_space_path, class: 'btn btn-primary' do %>
-      <span class="fa fa-plus fa-fw"></span> Provision a Space
+    <%= link_to new_space_path(:space_type => "group"), class: 'btn btn-primary' do %>
+      <span class="fa fa-plus fa-fw"></span> Provision a Group Space
     <% end %>
   </div>
+  <% end %>
+  <% if @context.user.can_create_reviews? %>
+  <div class="btn-group">
+    <%= link_to new_space_path(:space_type => "review"), class: 'btn btn-primary' do %>
+      <span class="fa fa-plus fa-fw"></span> Provision a Review Space
+    <% end %>
+  </div>
+  <% end %>
 </div>
 <% end %>
 

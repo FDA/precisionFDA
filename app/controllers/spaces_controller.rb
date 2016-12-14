@@ -113,8 +113,13 @@ class SpacesController < ApplicationController
   end
 
   def new
-    redirect_to spaces_path unless @context.user.can_administer_site?
-    @space = Space.new
+    redirect_to spaces_path unless @context.user.can_create_spaces?
+    @space = Space.new()
+    if params[:space_type] == "review" and @context.user.can_create_reviews?
+      render :new_review
+    else
+      render :new
+    end
   end
 
   def edit
@@ -122,18 +127,23 @@ class SpacesController < ApplicationController
   end
 
   def create
-    redirect_to spaces_path unless @context.user.can_administer_site?
+    redirect_to spaces_path unless @context.user.can_create_spaces?
+
+    is_review = space_params[:space_type] == "review"
+    host_label = is_review ? "Reviewer Lead" : "Host Lead"
+    guest_label = is_review ? "Sponsor Lead" : "Guest Lead"
+
     if space_params[:host_lead_dxuser] == space_params[:guest_lead_dxuser]
-      flash[:error] = "The host and guest lead cannot be the same user"
+      flash[:error] = "The #{host_label} and #{guest_label} cannot be the same user"
     end
 
     host_lead_user = User.find_by(dxuser: space_params[:host_lead_dxuser])
     guest_lead_user = User.find_by(dxuser: space_params[:guest_lead_dxuser])
 
     if host_lead_user.nil?
-      flash[:error] = "Host lead username #{space_params[:host_lead_dxuser]} not found"
+      flash[:error] = "#{host_label} username #{space_params[:host_lead_dxuser]} not found"
     elsif guest_lead_user.nil?
-      flash[:error] = "Guest lead username #{space_params[:guest_lead_dxuser]} not found"
+      flash[:error] = "#{guest_label} username #{space_params[:guest_lead_dxuser]} not found"
     end
 
     if flash[:error].blank?
@@ -142,19 +152,19 @@ class SpacesController < ApplicationController
         NotificationsMailer.space_activation_email(@space, @space.host_lead_member).deliver_now!
         NotificationsMailer.space_activation_email(@space, @space.guest_lead_member).deliver_now!
         if @space.accessible_by?(@context)
-          flash[:success] = "The space was created successfully, and will be activated once both admin's accept it."
+          flash[:success] = "The #{@space.space_type} space was created successfully, and will be activated once both leads accept it."
           redirect_to space_path(@space)
         else
-          flash[:success] = "The space was created successfully, but is not currently accessible by you."
+          flash[:success] = "The #{@space.space_type} space was created successfully, but is not currently accessible by you."
           redirect_to spaces_path
         end
         return
       else
-        flash[:error] = "The space could not be provisioned for an unknown reason."
+        flash[:error] = "The #{@space.space_type} space could not be provisioned for an unknown reason."
       end
     end
     @space = Space.new(space_params)
-    render :new
+    render is_review ? :new_review : :new
   end
 
   def update
@@ -265,13 +275,18 @@ class SpacesController < ApplicationController
       p.require(:host_lead_dxuser)
       p.require(:guest_lead_dxuser)
       p.require(:space_type)
+      if params[:space_type] == 'review'
+        p.require(:cts)
+      end
       return p
     end
 
     def update_space_params
-      p = params.require(:space).permit(:name, :description, :space_type, :cts)
+      p = params.require(:space).permit(:name, :description, :cts)
       p.require(:name)
-      p.require(:space_type)
+      if @space.is_review?
+        p.require(:cts)
+      end
       return p
     end
 end

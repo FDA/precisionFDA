@@ -14,10 +14,11 @@
 #  meta          :text
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
+#  author        :string
 #
 
 class Space < ActiveRecord::Base
-  validates :space_type, presence: true, inclusion: {in: ['group', 'submission']}
+  validates :space_type, presence: true, inclusion: {in: ['group', 'review']}
 
   has_many :space_memberships
   has_many :users, {through: :space_memberships}
@@ -33,6 +34,10 @@ class Space < ActiveRecord::Base
 
   def title
     name
+  end
+
+  def title_label
+    is_review? ? "#{name} (CTS#: #{cts})" : title
   end
 
   def klass
@@ -55,6 +60,14 @@ class Space < ActiveRecord::Base
     state == "ACTIVE"
   end
 
+  def closed?
+    state == "CLOSED"
+  end
+
+  def is_review?
+    space_type == "review"
+  end
+
   def rename(new_name, context)
     update_attributes(name: new_name)
   end
@@ -71,6 +84,10 @@ class Space < ActiveRecord::Base
     host_lead.id == context.user_id
   end
 
+  def host_lead_label
+    is_review? ? "Reviewer Lead" : "Host Lead"
+  end
+
   def guest_lead
     guest_lead_member.user
   end
@@ -81,6 +98,10 @@ class Space < ActiveRecord::Base
 
   def guest_lead?(context)
     guest_lead.id == context.user_id
+  end
+
+  def guest_lead_label
+    is_review? ? "Sponsor Lead" : "Guest Lead"
   end
 
   def project_for_context!(context)
@@ -150,7 +171,7 @@ class Space < ActiveRecord::Base
   # space:
   #   name
   #   description
-  #   space_type ("submission")
+  #   space_type ("review")
   #   meta
   #   host_lead_dxuser
   #   guest_lead_dxuser
@@ -201,8 +222,8 @@ class Space < ActiveRecord::Base
     where(state: "ACTIVE")
   end
 
-  def self.submissions
-    where(space_type: "submission")
+  def self.reviews
+    where(space_type: "review")
   end
 
   def self.groups
