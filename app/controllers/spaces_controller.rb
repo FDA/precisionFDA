@@ -25,6 +25,7 @@ class SpacesController < ApplicationController
   def content
     @space = Space.accessible_by(@context).find(params[:id])
     @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
+    @memberships = @space.viewable_memberships
 
     @notes = Note.real_notes.accessible_by_space(@space)
     @files = UserFile.real_files.accessible_by_space(@space)
@@ -99,21 +100,19 @@ class SpacesController < ApplicationController
   def discuss
     @space = Space.accessible_by(@context).find(params[:id])
     @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
+    @memberships = @space.viewable_memberships
 
     @items_from_params = [@space]
     @item_path = pathify(@space)
     @item_comments_path = pathify_comments(@space)
     @comments = @space.root_comments.order(id: :desc).page params[:comments_page]
     @feed = Event.events_by_scope(@space.uid).order(timestamp: :desc)
-    @memberships = @space.viewable_memberships
   end
 
   def members
     @space = Space.accessible_by(@context).find(params[:id])
     @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
-
     @memberships = @space.viewable_memberships
-
     @members_grid = initialize_grid(@memberships, {
       order: 'created_at',
       order_direction: 'asc',
