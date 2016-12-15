@@ -15,10 +15,9 @@
 
   g.after_row do |space, num_cols|
     if !space.description.blank?
-      # trim description to be 50 characters, and check for word boundaries
+      # trim description to be 50 characters
       cutoff = 50
       trim_desc = space.description[0..cutoff]
-      trim_desc = trim_desc[0..[cutoff, trim_desc.rindex(" ")].min]
       desc_end = space.description.length < cutoff ? "" : " ... "
       desc = "#{trim_desc}#{desc_end}"
 
