@@ -1,5 +1,7 @@
 <div class="container-fluid container-padded">
-  <%= render "spaces/new_post", url: url, object: object %>
-  <hr>
+  <% if @space.active? %>
+    <%= render "spaces/new_post", url: url, object: object %>
+    <hr>
+  <% end %>
   <%= render "spaces/posts", feed: @feed%>
 </div>
