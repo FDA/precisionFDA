@@ -47,6 +47,14 @@ class CommentsController < ApplicationController
       item = items_from_params.last
       if item.present? && item.accessible_by?(@context)
         c = comment_params
+        if defined? item.klass and
+          item.klass == "space" and
+          c[:type] == "task" and
+          item.space_memberships(user_id: @context.user_id, role: "ADMIN").nil?
+
+          flash[:error] = "You do not have permission to add a task to this space"
+          redirect_to root_url
+        end
         comment = Comment.build_from(item, @context.user_id, c)
         if !comment.save
           flash[:error] = "There was a problem with adding your comment"

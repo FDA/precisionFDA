@@ -12,16 +12,17 @@
           </div>
           <div class="form-group">
             <%= f.submit "Post", class: 'btn btn-default', data: {disable_with: "Post..."} %>
+              <% if @context.user == @space.host_lead %>
+              <label for="comment_type_comment" class="radio-inline">
+                <input type="radio" value="comment" checked="checked" name="comment[type]" id="comment_type_comment">
+                Comment
+              </label>
 
-            <label for="comment_type_comment" class="radio-inline">
-              <input type="radio" value="comment" checked="checked" name="comment[type]" id="comment_type_comment">
-              Comment
-            </label>
-
-            <label for="comment_type_task" class="radio-inline">
-              <input type="radio" value="task" name="comment[type]" id="comment_type_task">
-              Task
-            </label>
+              <label for="comment_type_task" class="radio-inline">
+                <input type="radio" value="task" name="comment[type]" id="comment_type_task">
+                Task
+              </label>
+            <% end %>
           </div>
         <% end %>
       </div>
