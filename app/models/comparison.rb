@@ -130,6 +130,9 @@ class Comparison < ActiveRecord::Base
         end
         comparison.update!(scope: scope)
         count += 1
+
+        e = Event.build_from(comparison, "publish")
+        e.save
       end
     end
 
