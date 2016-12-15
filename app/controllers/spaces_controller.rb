@@ -105,20 +105,16 @@ class SpacesController < ApplicationController
     @item_comments_path = pathify_comments(@space)
     @comments = @space.root_comments.order(id: :desc).page params[:comments_page]
     @feed = Event.events_by_scope(@space.uid).order(timestamp: :desc)
+    @memberships = @space.viewable_memberships
   end
 
   def members
     @space = Space.accessible_by(@context).find(params[:id])
     @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
 
-    # For reviews, don't show reviewer admin as host admin
-    if @space.is_review?
-      memberships = @space.space_memberships.select { |s| !(s.user_id == @space.host_lead.id and s.side == 'GUEST') }
-    else
-      memberships = @space.space_memberships
-    end
+    @memberships = @space.viewable_memberships
 
-    @members_grid = initialize_grid(memberships, {
+    @members_grid = initialize_grid(@memberships, {
       order: 'created_at',
       order_direction: 'asc',
       per_page: 100
