@@ -12,7 +12,7 @@
         <%= event._body %>
           <% case event._state %>
           <% when "completed" %>
-            <div class="label label-default"><span class="fa fa-check"></span> Completed</div>
+            <div class="label label-success"><span class="fa fa-check"></span> Completed</div>
           <% when "revoked" %>
             <div class="label label-default"><span class="fa fa-lock"></span> Revoked</div>
           <% else %>
