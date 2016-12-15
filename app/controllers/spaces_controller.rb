@@ -198,7 +198,7 @@ class SpacesController < ApplicationController
     guest = space.space_memberships.find_by(user_id: @context.user_id, role: 'MEMBER', side: 'GUEST')
     redirect_to space if !guest
 
-    e = Event.find(params[:event_id])
+    e = Event.events_by_scope(space.uid).find(params[:event_id])
     if e._state != "revoked"
       Event.transaction do
         e.reload
@@ -216,7 +216,7 @@ class SpacesController < ApplicationController
     admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN')
     redirect_to space if !admin
 
-    e = Event.find(params[:event_id])
+    e = Event.events_by_scope(space.uid).find(params[:event_id])
     if e._state != "revoked"
       Event.transaction do
         e.reload
