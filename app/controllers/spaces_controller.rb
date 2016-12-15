@@ -132,6 +132,7 @@ class SpacesController < ApplicationController
 
   def edit
     @space = Space.editable_by(@context).find(params[:id])
+    redirect_to space_path(@space) if @space.closed?
   end
 
   def create
@@ -191,6 +192,20 @@ class SpacesController < ApplicationController
 
   def destroy
     # TODO: figure out if and how spaces should be deleted
+  end
+
+  def close
+    space = Space.accessible_by(@context).find(params[:id])
+    redirect_to_space if !space.can_modify_state?(@context)
+
+    space.state = "CLOSED"
+    if space.save
+      flash[:success] = "This space has now been closed"
+    else
+      flash[:error] = "Could not update the space. Please try again."
+    end
+
+    redirect_to space
   end
 
   def complete_task

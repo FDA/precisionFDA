@@ -4,7 +4,7 @@
   <div class="pull-left">
     <div class="page-title">
       <span class="fa fa-object-group"></span> <%= @space.title %>
-      <% if @space.editable_by?(@context) %>
+      <% if @space.editable_by?(@context) && !@space.closed?  %>
         <a class="pfda-rename-item" data-toggle="modal" data-target="#rename-modal">
           <span class="fa fa-pencil"></span>
         </a>
@@ -16,7 +16,7 @@
     </div>
     <% end %>
   </div>
-  <% if @space.editable_by?(@context) %>
+  <% if @space.editable_by?(@context) && !@space.closed? %>
     <div class="pull-right">
       <div class="btn-group">
         <div class="dropdown">
@@ -40,12 +40,32 @@
   <ul class="list-group list-group-inline">
     <li class="list-group-item">
       <h5 class="list-group-item-heading">State</h5>
-      <% if @space.active? %>
-        <h4><span class="label label-success"><span class="fa fa-check"></span> Active<span></h4>
-      <% elsif @space.closed? %>
-        <h4><span class="label label-primary"><span class="fa fa-lock"></span> Closed</span></h4>
+      <% if @space.can_modify_state?(@context) %>
+        <div class="btn-group">
+          <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="fa fa-check"></span> Active
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+              <%= link_to close_space_path(@space), method: :post, data: { confirm: 'Are you certain you want to close this space? You cannot undo this action.' } do %>
+                <span class="fa fa-lock"></span>
+                Closed
+                <small class="help-block">This will prevent any further activity in this space and is irrevocable</small>
+              <% end %>
+            </li>
+          </ul>
+        </div>
       <% else %>
-        <h4><span class="label label-default"><span class="fa fa-clock-o"></span> Unactivated</span></h4>
+        <p class="list-group-item-text">
+        <% if @space.active? %>
+          <span class="label label-success"><span class="fa fa-check"></span> Active<span>
+        <% elsif @space.closed? %>
+          <span class="label label-danger"><span class="fa fa-lock"></span> Closed</span>
+        <% else %>
+          <span class="label label-default"><span class="fa fa-clock-o"></span> Unactivated</span>
+        <% end %>
+        </p>
       <% end %>
     </li>
     <li class="list-group-item">
@@ -135,7 +155,7 @@
   </li>
 </ul>
 
-<% if @space.editable_by?(@context) %>
+<% if @space.editable_by?(@context) && !@space.closed?  %>
   <%= render "_partials/modal_rename", item: @space, path_to_rename: rename_space_path(@space.id) %>
 <% end %>
 

@@ -68,8 +68,16 @@ class Space < ActiveRecord::Base
     state == "CLOSED"
   end
 
+  def unactivated?
+    state == nil
+  end
+
   def is_review?
     space_type == "review"
+  end
+
+  def can_modify_state?(context)
+    is_review? && active? && host_lead?(context)
   end
 
   def rename(new_name, context)
