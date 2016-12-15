@@ -146,6 +146,8 @@ Rails.application.routes.draw do
       get 'content', on: :member
       get 'discuss', on: :member
       post 'accept', on: :member
+      post 'revoke_task', on: :member
+      post 'complete_task', on: :member
       post 'rename', on: :member
       post 'invite', on: :member
       resources :comments

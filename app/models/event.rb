@@ -15,7 +15,7 @@
 class Event < ActiveRecord::Base
   belongs_to :user
 
-  store :meta, :accessors => [:body], coder: JSON
+  store :meta, accessors: [:_body, :_state], coder: JSON
 
   def uid
     "event-#{id}"
@@ -38,7 +38,7 @@ class Event < ActiveRecord::Base
       :user_id => obj.user_id
     case obj.klass
     when "comment", "task"
-      e.body = obj.body
+      e._body = obj.body
       case obj.commentable.klass
       when "space"
         e.scope = obj.commentable.uid

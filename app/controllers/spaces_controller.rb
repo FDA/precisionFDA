@@ -193,6 +193,42 @@ class SpacesController < ApplicationController
     # TODO: figure out if and how spaces should be deleted
   end
 
+  def complete_task
+    space = Space.accessible_by(@context).find(params[:id])
+    guest = space.space_memberships.find_by(user_id: @context.user_id, role: 'MEMBER', side: 'GUEST')
+    redirect_to space if !guest
+
+    e = Event.find(params[:event_id])
+    if e._state != "revoked"
+      Event.transaction do
+        e.reload
+        if e._state != "revoked"
+          e._state = "completed"
+          e.save!
+        end
+      end
+    end
+    redirect_to space
+  end
+
+  def revoke_task
+    space = Space.accessible_by(@context).find(params[:id])
+    admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN')
+    redirect_to space if !admin
+
+    e = Event.find(params[:event_id])
+    if e._state != "revoked"
+      Event.transaction do
+        e.reload
+        if e._state != "revoked"
+          e._state = "revoked"
+          e.save!
+        end
+      end
+    end
+    redirect_to space
+  end
+
   def accept
     space = Space.accessible_by(@context).find(params[:id])
     admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN')
