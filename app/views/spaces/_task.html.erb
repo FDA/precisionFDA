@@ -1,4 +1,4 @@
-<div class="pfda-comment">
+<div class="pfda-comment pfda-comment-task">
   <div class="media">
     <div class="media-left">
       <%= link_to image_tag(event.user.gravatar_url, class: 'img-circle', height: '25px'), user_path(event.user.dxuser) %>
@@ -9,28 +9,33 @@
         <li><%= event.user.org.name %></li>
       </ul>
       <div class="pfda-comment-body">
-        <%= event._body %>
-          <% case event._state %>
-          <% when "completed" %>
-            <div class="label label-success"><span class="fa fa-check"></span> Completed</div>
-          <% when "revoked" %>
-            <div class="label label-default"><span class="fa fa-lock"></span> Revoked</div>
-          <% else %>
-            <% if @space.host_lead?(@context) %>
-              <%= link_to revoke_task_space_path(@space, event_id: event.id), method: :post, class: "btn btn-xs btn-warning" do %>
-                <span class="fa fa-undo"></span> Mark as Revoked
-              <% end %>
+        <div class="media">
+          <div class="media-body">
+            <%= event._body %>
+          </div>
+          <div class="media-right">
+            <% case event._state %>
+            <% when "completed" %>
+              <div class="label label-success"><span class="fa fa-check"></span> Completed</div>
+            <% when "revoked" %>
+              <div class="label label-default"><span class="fa fa-lock"></span> Revoked</div>
             <% else %>
-              <%= link_to complete_task_space_path(@space, event_id: event.id), method: :post, class: "btn btn-xs btn-warning" do %>
-                <span class="fa fa-check"></span> Mark as Completed
+              <% if @space.host_lead?(@context) %>
+                <%= link_to revoke_task_space_path(@space, event_id: event.id), method: :post, class: "btn btn-xs btn-warning" do %>
+                  <span class="fa fa-undo"></span> Mark as Revoked
+                <% end %>
+              <% else %>
+                <%= link_to complete_task_space_path(@space, event_id: event.id), method: :post, class: "btn btn-xs btn-warning" do %>
+                  <span class="fa fa-check"></span> Mark as Completed
+                <% end %>
               <% end %>
             <% end %>
-          <% end %>
+          </div>
         </div>
+      </div>
       <ul class="pfda-comment-actions list-inline list-inline-bullets text-muted">
        <li><%= event.timestamp.to_s(:db) %></li>
       </ul>
     </div>
   </div>
 </div>
-
