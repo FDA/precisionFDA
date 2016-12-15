@@ -142,6 +142,9 @@ class Job < ActiveRecord::Base
         if job.publishable_by?(context, scope)
           job.update!(scope: scope)
           count += 1
+
+          e = Event.build_from(job, "publish")
+          e.save
         end
       end
     end

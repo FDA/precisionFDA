@@ -101,6 +101,9 @@ class Discussion < ActiveRecord::Base
         if discussion.publishable_by?(context, scope)
           discussion.note.update!(scope: scope)
           count += 1
+
+          e = Event.build_from(discussion, "publish")
+          e.save
         end
       end
     end
