@@ -76,6 +76,10 @@ class Space < ActiveRecord::Base
     update_attributes(name: new_name)
   end
 
+  def viewable_memberships
+    space_memberships.where.not("user_id = ? and side = ?", host_lead.id, 'GUEST')
+  end
+
   def host_lead
     host_lead_member.user
   end
