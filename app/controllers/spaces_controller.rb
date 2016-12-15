@@ -111,7 +111,14 @@ class SpacesController < ApplicationController
     @space = Space.accessible_by(@context).find(params[:id])
     @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
 
-    @members_grid = initialize_grid(@space.space_memberships, {
+    # For reviews, don't show reviewer admin as host admin
+    if @space.is_review?
+      memberships = @space.space_memberships.select { |s| !(s.user_id == @space.host_lead.id and s.side == 'GUEST') }
+    else
+      memberships = @space.space_memberships
+    end
+
+    @members_grid = initialize_grid(memberships, {
       order: 'created_at',
       order_direction: 'asc',
       per_page: 100
