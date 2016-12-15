@@ -124,6 +124,12 @@ class Space < ActiveRecord::Base
       if member.nil?
         api.call(org_id, "invite", {invitee: user.dxid, level: role, suppressEmailNotification: true})
         member = space_memberships.create!(user_id: user.id, role: role, side: side)
+      elsif host_lead.id == member.user.id and is_review?
+        member = space_memberships.find_by(user_id: user.id, side: side)
+        if member.nil?
+          api.call(org_id, "invite", {invitee: user.dxid, level: role, suppressEmailNotification: true})
+          member = space_memberships.create!(user_id: user.id, role: role, side: side)
+        end
       elsif ![guest_lead.id, host_lead.id].include?(member.user.id)
         if member.side == side
           apiParam = {}
@@ -213,9 +219,14 @@ class Space < ActiveRecord::Base
 
       # Add leads as ADMINs
       # Sponsors cannot be admins in review spaces
-      guest_status = space.is_review? ? 'MEMBER' : 'ADMIN'
       host_lead = space.add_or_update_member(papi, host_dxorg, space_params[:host_lead_dxuser], 'ADMIN', 'HOST')
-      guest_lead = space.add_or_update_member(papi, guest_dxorg, space_params[:guest_lead_dxuser], guest_status, 'GUEST')
+      # For review spaces, host lead is both admin of host org and guest org
+      if space.is_review?
+        space.add_or_update_member(papi, guest_dxorg, space_params[:host_lead_dxuser], 'ADMIN', 'GUEST')
+        guest_lead = space.add_or_update_member(papi, guest_dxorg, space_params[:guest_lead_dxuser], 'MEMBER', 'GUEST')
+      else
+        guest_lead = space.add_or_update_member(papi, guest_dxorg, space_params[:guest_lead_dxuser], 'ADMIN', 'GUEST')
+      end
 
       # Remove pfda admin from orgs
       papi.call(host_dxorg, "removeMember", {user: "user-precisionfda.admin"})
