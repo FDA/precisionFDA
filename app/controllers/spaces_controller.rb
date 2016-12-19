@@ -136,30 +136,44 @@ class SpacesController < ApplicationController
   end
 
   def create
-    redirect_to spaces_path unless @context.user.can_create_spaces?
-
     is_review = space_params[:space_type] == "review"
+    if is_review
+      redirect_to spaces_path unless @context.user.can_create_reviews?
+    else
+      redirect_to spaces_path unless @context.user.can_create_spaces?
+    end
+
+    has_sponsor = space_params[:guest_lead_dxuser].present?
+
     host_label = is_review ? "Reviewer Lead" : "Host Lead"
     guest_label = is_review ? "Sponsor Lead" : "Guest Lead"
 
-    if space_params[:host_lead_dxuser] == space_params[:guest_lead_dxuser]
-      flash[:error] = "The #{host_label} and #{guest_label} cannot be the same user"
+    if has_sponsor
+      if space_params[:host_lead_dxuser] == space_params[:guest_lead_dxuser]
+        flash[:error] = "The #{host_label} and #{guest_label} cannot be the same user"
+      end
+      guest_lead_user = User.find_by(dxuser: space_params[:guest_lead_dxuser])
+      if guest_lead_user.nil?
+        flash[:error] = "#{guest_label} username #{space_params[:guest_lead_dxuser]} not found"
+      end
     end
 
     host_lead_user = User.find_by(dxuser: space_params[:host_lead_dxuser])
-    guest_lead_user = User.find_by(dxuser: space_params[:guest_lead_dxuser])
-
     if host_lead_user.nil?
       flash[:error] = "#{host_label} username #{space_params[:host_lead_dxuser]} not found"
-    elsif guest_lead_user.nil?
-      flash[:error] = "#{guest_label} username #{space_params[:guest_lead_dxuser]} not found"
     end
 
     if flash[:error].blank?
-      @space = Space.provision(@context, space_params)
+      if has_sponsor
+        @space = Space.provision(@context, space_params)
+      else
+        @space = Space.provision_host(@context, space_params)
+      end
       if @space
         NotificationsMailer.space_activation_email(@space, @space.host_lead_member).deliver_now!
-        NotificationsMailer.space_activation_email(@space, @space.guest_lead_member).deliver_now!
+        if has_sponsor
+          NotificationsMailer.space_activation_email(@space, @space.guest_lead_member).deliver_now!
+        end
         if @space.accessible_by?(@context)
           flash[:success] = "The #{@space.space_type} space was created successfully, and will be activated once both leads accept it."
           redirect_to space_path(@space)
@@ -257,8 +271,14 @@ class SpacesController < ApplicationController
       Space.transaction do
         if admin.side == 'HOST'
           space.host_project = space.create_space_project(@context, space.host_dxorg, space.guest_dxorg, admin) unless space.host_project?
+          if space.is_review? and !space.guest_project?
+            space.state = space.has_guest_lead? ? "Pending Sponsor Acceptance" : "Pending Sponsor Assignment"
+          end
         elsif admin.side == 'GUEST'
           space.guest_project = space.create_space_project(@context, space.guest_dxorg, space.host_dxorg, admin) unless space.guest_project?
+          if space.is_review? and !space.host_project?
+            space.state = "Pending Reviewer Acceptance"
+          end
         else
           flash[:error] = "Your admin 'side' is not correctly defined"
           redirect_to space
@@ -277,9 +297,39 @@ class SpacesController < ApplicationController
     redirect_to space
   end
 
+  def invite_sponsor_lead
+    space = Space.accessible_by(@context).find(params[:id])
+    admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN', side: 'GUEST')
+    if admin
+      invitee = params[:space][:invitees]
+      invitee_role = params[:space][:invitees_role]
+
+      if invitee.present? and invitee_role.is_a?(String) and ["MEMBER"].include?(invitee_role)
+        api = DNAnexusAPI.new(@context.token)
+        member = space.add_or_update_member(api, space.guest_dxorg, invitee, invitee_role, admin.side)
+
+        # If the username didn't return a member
+        if !member
+          flash[:error] = "The follow username could not be invited because they do not exist: #{invitee}"
+        else
+          NotificationsMailer.space_invitation_email(space, member, admin).deliver_now!
+        end
+      else
+        flash[:error] = "Sponsor Lead username and role are both required"
+      end
+
+      space.state = space.host_project? ? "Pending Sponsor Acceptance" : nil
+    else
+      flash[:error] = "You don't have permission to edit this space"
+    end
+
+    redirect_to space
+  end
+
   def invite
     space = Space.accessible_by(@context).find(params[:id])
     admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN')
+
     if admin
       invitees = params[:space][:invitees].split(',').map(&:strip)
       invitees_role = params[:space][:invitees_role]
@@ -338,10 +388,11 @@ class SpacesController < ApplicationController
       p = params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser, :space_type, :cts)
       p.require(:name)
       p.require(:host_lead_dxuser)
-      p.require(:guest_lead_dxuser)
       p.require(:space_type)
-      if params[:space_type] == 'review'
+      if p[:space_type] == 'review'
         p.require(:cts)
+      else
+        p.require(:guest_lead_dxuser)
       end
       return p
     end

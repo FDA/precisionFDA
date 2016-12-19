@@ -62,6 +62,8 @@
           <span class="label label-success"><span class="fa fa-check"></span> Active<span>
         <% elsif @space.closed? %>
           <span class="label label-danger"><span class="fa fa-lock"></span> Closed</span>
+        <% elsif @space.state.present?%>
+          <span class="label label-warning"><span class="fa fa-clock-o"></span> <%= @space.state %></span>
         <% else %>
           <span class="label label-default"><span class="fa fa-clock-o"></span> Unactivated</span>
         <% end %>
@@ -87,7 +89,7 @@
       <p class="list-group-item-text">
         <%= link_to("#{@space.host_lead.full_name} (#{@space.host_lead.org.name})", user_path(@space.host_lead.dxuser)) %>
       </p>
-      <% if !@space.active? && @space.host_project.blank? %>
+      <% if !@space.active? && @space.host_project? %>
         <% if @space.host_lead?(@context) %>
           <button class="btn btn-xs btn-success" data-toggle="modal" data-target="#termsModal"><span class="fa fa-check"></span> Accept space</button>
         <% else %>
@@ -98,10 +100,16 @@
     <li class="list-group-item">
       <h5 class="list-group-item-heading"><%= @space.guest_lead_label %></h5>
       <p class="list-group-item-text">
-        <%= link_to("#{@space.guest_lead.full_name} (#{@space.guest_lead.org.name})", user_path(@space.guest_lead.dxuser)) %>
+        <% if @space.has_guest_lead? %>
+          <%= link_to("#{@space.guest_lead.full_name} (#{@space.guest_lead.org.name})", user_path(@space.guest_lead.dxuser)) %>
+        <% else %>
+          Unassigned
+        <% end %>
       </p>
-      <% if !@space.active? && @space.guest_project.blank? %>
-        <% if @space.guest_lead?(@context)%>
+      <% if !@space.active? and @space.guest_project? %>
+        <% if @space.is_host_admin?(@context) and !@space.has_guest_lead? %>
+          <button class="btn btn-xs btn-warning" data-toggle="modal" data-target="#sponsor-lead-modal"><span class="fa fa-user-plus"></span> Add Sponsor Lead</button>
+        <% elsif @space.guest_lead?(@context) %>
           <button class="btn btn-xs btn-success" data-toggle="modal" data-target="#termsModal"><span class="fa fa-check"></span> Accept space</button>
         <% else %>
           <div class="text-warning"><span class="fa fa-clock-o"></span> Waiting on Acceptance</div>
@@ -159,11 +167,47 @@
   <%= render "_partials/modal_rename", item: @space, path_to_rename: rename_space_path(@space.id) %>
 <% end %>
 
+<div id="sponsor-lead-modal" class="members-modal modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">
+          Add Sponsor Lead
+        </h4>
+      </div>
+      <%= form_for @space, url: invite_sponsor_lead_space_path, method: :post, html: {class: 'form form-horizontal'} do |f| %>
+      <div class="modal-body">
+        <div class="form-group required">
+          <label class="col-sm-4 control-label">Username</label>
+          <div class="col-sm-19 col-sm-offset-1">
+            <%= f.text_field'invitees', class: "form-control input-lg", placeholder: "Sponsor Lead username...", required: "required", rows: 5  %>
+          </div>
+        </div>
+        <div class="form-group required">
+          <label for="space[invitees_role]" class="col-sm-4 control-label">Role</label>
+          <div class="col-sm-19 col-sm-offset-1">
+            <select name="space[invitees_role]" class="form-control input-lg">
+              <option value="MEMBER" selected="selected">Sponsor Lead</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Cancel</button>
+        <button type="submit" class="btn btn-primary" data-disable-with="Adding..."><span class="fa fa-user-plus" aria-hidden="true"></span> Add Sponsor Lead</button>
+      </div>
+      <% end %>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 <!-- Modal -->
 <div class="modal fade" id="termsModal" tabindex="-1" role="dialog" aria-labelledby="termsModal">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header text-center">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h3 class="modal-title"><span class="fa fa-institution" aria-hidden="true"></span> Review Space Terms</h3>
       </div>
       <div class="modal-body">

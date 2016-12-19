@@ -84,6 +84,6 @@
   </div>
 </div>
 
-<% if @space.active? %>
+<% if !@space.unactivated? %>
   <%= render "_partials/selector_modal" %>
 <% end %>

@@ -104,8 +104,16 @@ class Space < ActiveRecord::Base
     is_review? ? "Reviewer Lead" : "Host Lead"
   end
 
+  def is_host_admin?(context)
+    space_memberships.hosts.admins.map { |s| s.user_id }.include?(context.user_id)
+  end
+
   def guest_lead
     guest_lead_member.user
+  end
+
+  def has_guest_lead?
+    space_memberships.guests.non_admins.any?
   end
 
   def guest_lead_member
@@ -191,10 +199,52 @@ class Space < ActiveRecord::Base
     return space_project
   end
 
+  # This function is only for provisioning one-sided review spaces
+  #
+  def self.provision_host(context, space_params)
+    papi = DNAnexusAPI.new(ADMIN_TOKEN)
+    space = nil
+    Space.transaction do
+      uuid = SecureRandom.hex
+      host_dxorg = Org.construct_dxorg("space_host_#{uuid}")
+      guest_dxorg = Org.construct_dxorg("space_guest_#{uuid}")
+      host_dxorghandle = host_dxorg.sub(/^org-/, '')
+      guest_dxorghandle = guest_dxorg.sub(/^org-/, '')
+
+      # Provision Host and Guest orgs
+      Org.provision_dxorg(context, {
+        id: host_dxorg,
+        handle: host_dxorghandle,
+        name: host_dxorghandle
+      })
+
+      Org.provision_dxorg(context, {
+        id: guest_dxorg,
+        handle: guest_dxorghandle,
+        name: guest_dxorghandle
+      })
+
+      # Create the space
+      space_params[:host_dxorg] = host_dxorg
+      space_params[:guest_dxorg] = guest_dxorg
+      space = Space.create!(space_params)
+
+      host_lead = space.add_or_update_member(papi, host_dxorg, space_params[:host_lead_dxuser], 'ADMIN', 'HOST')
+      # For review spaces, host lead is both admin of host org and guest org
+      space.add_or_update_member(papi, guest_dxorg, space_params[:host_lead_dxuser], 'ADMIN', 'GUEST')
+
+      # Remove pfda admin from orgs
+      papi.call(host_dxorg, "removeMember", {user: "user-precisionfda.admin"})
+      papi.call(guest_dxorg, "removeMember", {user: "user-precisionfda.admin"})
+    end
+
+    return space
+  end
+
   # space:
   #   name
   #   description
-  #   space_type ("review")
+  #   space_type
   #   meta
   #   host_lead_dxuser
   #   guest_lead_dxuser
