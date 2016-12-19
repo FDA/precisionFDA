@@ -14,9 +14,12 @@
     <% if @space.unactivated? %>
       <div class='pfda-help-block'>
         <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
-        <p>Both host and guest leads must click "Accept space" to activate it.</p>
+        <% if @space.is_review? %>
+          <p>The reviewer lead must click "Accept space" to activate it.</p>
+        <% else %>
+          <p>Both host and guest leads must click "Accept space" to activate it.</p>
+        <% end %>
       </div>
-      <% if @total_count > 0 %><hr><% end %>
     <% end %>
 
     <% if @total_count > 0 %>
