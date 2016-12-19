@@ -150,6 +150,7 @@ Rails.application.routes.draw do
       post 'complete_task', on: :member
       post 'rename', on: :member
       post 'invite', on: :member
+      post 'invite_sponsor_lead', on: :member
       post 'close', on: :member
       resources :comments
     end

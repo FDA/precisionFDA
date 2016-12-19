@@ -35,7 +35,9 @@
   end
 
   g.column name: @context.user.can_create_reviews? ? 'Guest/Sponsor Lead' : 'Guest Lead' do |space|
-    link_to("#{space.guest_lead.full_name} (#{space.guest_lead.org.name})", user_path(space.guest_lead.dxuser))
+    if space.has_guest_lead?
+      link_to("#{space.guest_lead.full_name} (#{space.guest_lead.org.name})", user_path(space.guest_lead.dxuser))
+    end
   end
 
   g.column name: "CTS #" do |space|
