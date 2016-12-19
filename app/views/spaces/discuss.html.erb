@@ -1,9 +1,10 @@
 <%= render "spaces/header" %>
 
+<% @show_contents = @space.active? or (@space.host_project.present? and @space.is_host_admin?(@context)) %>
 <!-- Tab panes -->
 <div class="tab-content">
   <div role="tabpanel" class="tab-pane tab-pane-padded-lg active" id="tab-comments">
-    <% if @space.unactivated? %>
+    <% if !@show_contents %>
       <div class='pfda-help-block'>
         <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
         <% if @space.is_review? %>
