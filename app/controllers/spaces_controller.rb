@@ -270,13 +270,17 @@ class SpacesController < ApplicationController
     if admin
       Space.transaction do
         if admin.side == 'HOST'
-          space.host_project = space.create_space_project(@context, space.host_dxorg, space.guest_dxorg, admin) unless space.host_project?
+          if space.host_project.blank?
+            space.host_project = space.create_space_project(@context, space.host_dxorg, space.guest_dxorg, admin)
+          end
           if space.is_review? and !space.guest_project?
             space.state = space.has_guest_lead? ? "Pending Sponsor Acceptance" : "Pending Sponsor Assignment"
           end
         elsif admin.side == 'GUEST'
-          space.guest_project = space.create_space_project(@context, space.guest_dxorg, space.host_dxorg, admin) unless space.guest_project?
-          if space.is_review? and !space.host_project?
+          if space.guest_project.blank?
+            space.guest_project = space.create_space_project(@context, space.guest_dxorg, space.host_dxorg, admin)
+          end
+          if space.is_review? and space.host_project.blank?
             space.state = "Pending Reviewer Acceptance"
           end
         else
@@ -284,7 +288,7 @@ class SpacesController < ApplicationController
           redirect_to space
           return
         end
-        if space.host_project? && space.guest_project?
+        if space.host_project.present? && space.guest_project.present?
           space.state = "ACTIVE"
           NotificationsMailer.space_activated_email(space, space.host_lead_member).deliver_now!
           NotificationsMailer.space_activated_email(space, space.guest_lead_member).deliver_now!
@@ -318,7 +322,7 @@ class SpacesController < ApplicationController
         flash[:error] = "Sponsor Lead username and role are both required"
       end
 
-      space.state = space.host_project? ? "Pending Sponsor Acceptance" : nil
+      space.state = space.host_project.present? ? "Pending Sponsor Acceptance" : nil
     else
       flash[:error] = "You don't have permission to edit this space"
     end
