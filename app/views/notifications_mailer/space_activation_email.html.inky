@@ -23,7 +23,7 @@
         </p>
 
         <p>
-          To start adding data to this space both the <%= @space.host_lead_label.downcase %> and the <%= @space.guest_lead_label.downcase %> must accept the invitation. Please visit the space and click on "Accept space".
+          To activate and participate in this space both the <%= @space.host_lead_label.downcase %> and the <%= @space.guest_lead_label.downcase %> must accept the invitation. Please visit the space and click on "Accept space".
         </p>
         <button class="radius" href="<%= space_url(@space) %>">View Space Invitation</button>
       </columns>
