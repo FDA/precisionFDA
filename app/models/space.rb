@@ -83,9 +83,9 @@ class Space < ActiveRecord::Base
   def rename(new_name, context)
     update_attributes(name: new_name)
   end
-
+ #comment
   def viewable_memberships
-    space_memberships.where.not("user_id = ? and side = ?", host_lead.id, 'GUEST')
+    space_memberships.where.not("user_id = ? AND side = ?", host_lead.id, 'GUEST')
   end
 
   def host_lead
@@ -113,7 +113,7 @@ class Space < ActiveRecord::Base
   end
 
   def has_guest_lead?
-    space_memberships.guests.non_admins.any?
+    is_review? ? space_memberships.guests.non_admins.any? : space_memberships.guests.admins.any?
   end
 
   def guest_lead_member

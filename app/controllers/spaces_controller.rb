@@ -260,11 +260,15 @@ class SpacesController < ApplicationController
 
   def accept
     space = Space.accessible_by(@context).find(params[:id])
-    admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN')
 
-    if space.is_review? and !admin
-      # Check if user is sponsor
-      admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'MEMBER', side: 'GUEST')
+    if space.is_review?
+      admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN', side: 'HOST')
+      if !admin
+        # Check if user is sponsor
+        admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'MEMBER', side: 'GUEST')
+      end
+    else
+      admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN')
     end
 
     if admin
@@ -308,7 +312,7 @@ class SpacesController < ApplicationController
       invitee = params[:space][:invitees]
       invitee_role = params[:space][:invitees_role]
 
-      if invitee.present? and invitee_role.is_a?(String) and ["MEMBER"].include?(invitee_role)
+      if invitee.present? && invitee_role.is_a?(String) && ["MEMBER"].include?(invitee_role)
         api = DNAnexusAPI.new(@context.token)
         member = space.add_or_update_member(api, space.guest_dxorg, invitee, invitee_role, admin.side)
 
@@ -321,8 +325,10 @@ class SpacesController < ApplicationController
       else
         flash[:error] = "Sponsor Lead username and role are both required"
       end
-
-      space.state = space.host_project.present? ? "Pending Sponsor Acceptance" : nil
+      Space.transaction do
+        space.state = space.host_project.present? ? "Pending Sponsor Acceptance" : nil
+        space.save
+      end
     else
       flash[:error] = "You don't have permission to edit this space"
     end
