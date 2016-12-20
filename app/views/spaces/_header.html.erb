@@ -89,7 +89,7 @@
       <p class="list-group-item-text">
         <%= link_to("#{@space.host_lead.full_name} (#{@space.host_lead.org.name})", user_path(@space.host_lead.dxuser)) %>
       </p>
-      <% if !@space.active? and @space.host_project.blank? %>
+      <% if !@space.active? && @space.host_project.blank? %>
         <% if @space.host_lead?(@context) %>
           <button class="btn btn-xs btn-success" data-toggle="modal" data-target="#termsModal"><span class="fa fa-check"></span> Accept space</button>
         <% else %>
@@ -106,8 +106,8 @@
           Unassigned
         <% end %>
       </p>
-      <% if !@space.active? and @space.guest_project.blank? %>
-        <% if @space.is_host_admin?(@context) and @space.is_review? and !@space.has_guest_lead? %>
+      <% if !@space.active? && @space.guest_project.blank? %>
+        <% if @space.is_host_admin?(@context) && @space.is_review? && !@space.has_guest_lead? %>
           <button class="btn btn-xs btn-warning" data-toggle="modal" data-target="#sponsor-lead-modal"><span class="fa fa-user-plus"></span> Add Sponsor Lead</button>
         <% elsif @space.has_guest_lead? %>
           <% if @space.guest_lead?(@context) %>
@@ -122,7 +122,7 @@
     <li class="list-group-item">
       <h5 class="list-group-item-heading">CTS</h5>
       <p class="list-group-item-text">
-        <%= @space.cts  %>
+        <%= @space.cts %>
       </p>
     </li>
     <% end %>

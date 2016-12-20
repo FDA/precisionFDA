@@ -1,18 +1,25 @@
 <%= render "spaces/header" %>
 
-<% @show_contents = @space.active? or (@space.host_project.present? and @space.is_host_admin?(@context)) %>
+<% @show_contents = @space.active? || (@space.host_project.present? && @space.is_host_admin?(@context)) %>
 <!-- Tab panes -->
 <div class="tab-content">
   <div role="tabpanel" class="tab-pane tab-pane-padded-lg active" id="tab-comments">
     <% if !@show_contents %>
-      <div class='pfda-help-block'>
-        <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
-        <% if @space.is_review? %>
-          <p>The reviewer lead must click "Accept space" to activate it.</p>
-        <% else %>
-          <p>Both host and guest leads must click "Accept space" to activate it.</p>
-        <% end %>
-      </div>
+      <% if @space.unactivated? %>
+        <div class='pfda-help-block'>
+          <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
+          <% if @space.is_review? %>
+            <p>The reviewer lead must click "Accept space" to activate it.</p>
+          <% else %>
+            <p>Both host and guest leads must click "Accept space" to activate it.</p>
+          <% end %>
+        </div>
+      <% else %>
+        <div class='pfda-help-block'>
+          <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> You have not yet accepted the review space</p>
+          <p>You must click "Accept space" to view the contents of this space.</p>
+        </div>
+      <% end %>
     <% else %>
       <div class="row">
         <div class="col-md-12">
