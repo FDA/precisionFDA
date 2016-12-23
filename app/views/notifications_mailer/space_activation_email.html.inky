@@ -19,9 +19,27 @@
     <row>
       <columns>
         <p>
-          The <%= @space.space_type %> space <strong><%= link_to "\"#{@space.title_label}\"", space_url(@space) %></strong> was provisioned and listed you as <%= "#{@membership.side_label} #{@membership.role}" %>.
+          The <%= @space.space_type %> space <strong><%= link_to @space.title_label, space_url(@space) %></strong> was provisioned and listed you as <%= "#{@membership.side_label} #{@membership.role}" %>.
         </p>
 
+        <% if @space.is_review? %>
+          <p>
+            This is a PrecisionFDA review space that allows for discussion and data sharing between reviewers and sponsors as a supplement to an official FDA review submission.
+          </p>
+          <% if @membership.side == 'HOST' %>
+            <p>
+              Reviewers can assign tasks, write comments, upload data from their private space, and add members to the review space.
+            </p>
+          <% else %>
+            <p>
+              Sponsors can write comments, respond to tasks, upload data from their private space, and request additional sponsors to be invited to the space.
+            </p>
+          <% end %>
+        <% else %>
+          <p>
+            Spaces let you move data from your private area to a shared space that space members can access. You can then publish the data out of the space to the precisionFDA community.
+          </p>
+        <% end %>
         <p>
           To activate and participate in this space both the <%= @space.host_lead_label.downcase %> and the <%= @space.guest_lead_label.downcase %> must accept the invitation. Please visit the space and click on "Accept space".
         </p>

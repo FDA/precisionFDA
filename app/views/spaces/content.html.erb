@@ -12,8 +12,8 @@
 <!-- Tab panes -->
 <div class="tab-content">
   <div role="tabpanel" class="tab-pane tab-pane-padded-lg active" id="tab-data">
-    <% if !@show_contents && !space.closed? %>
-      <% if (@space.guest_project.blank? && @space.guest_lead?(@context)) ||
+    <% if !@show_contents && !@space.closed? %>
+      <% if (@space.has_guest_lead? && @space.guest_project.blank? && @space.guest_lead?(@context)) ||
             (@space.host_project.blank? && @space.host_lead?(@context)) %>
         <div class='pfda-help-block'>
           <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> You have not yet accepted the review space</p>
@@ -29,66 +29,71 @@
           <% end %>
         </div>
       <% end %>
-    <% end %>
-    <% if @total_count > 0 %>
-      <% if defined?(@notes_list) %>
-        <div class="panel">
-          <div class="panel-heading">
-            Notes &nbsp;<small class="text-muted"><%= @counts[:notes] %></small>
+    <% else %>
+      <% if @total_count > 0 %>
+        <% if defined?(@notes_list) %>
+          <div class="panel">
+            <div class="panel-heading">
+              Notes &nbsp;<small class="text-muted"><%= @counts[:notes] %></small>
+            </div>
+            <div class="panel-body">
+              <%= render "notes/cards", notes: @notes_list, scope_icon: false %>
+            </div>
           </div>
-          <div class="panel-body">
-            <%= render "notes/cards", notes: @notes_list, scope_icon: false %>
+        <% end %>
+        <% if defined?(@files_grid) %>
+          <div class="panel">
+            <div class="panel-heading">
+              Files &nbsp;<small class="text-muted"><%= @counts[:files] %></small>
+            </div>
+            <div class="panel-body">
+              <%= render "files/grid", files_grid: @files_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
+            </div>
           </div>
-        </div>
-      <% end %>
-      <% if defined?(@files_grid) %>
-        <div class="panel">
-          <div class="panel-heading">
-            Files &nbsp;<small class="text-muted"><%= @counts[:files] %></small>
+        <% end %>
+        <% if defined?(@comparisons_grid) %>
+          <div class="panel">
+            <div class="panel-heading">
+              Comparisons &nbsp;<small class="text-muted"><%= @counts[:comparisons] %></small>
+            </div>
+            <div class="panel-body">
+              <%= render "comparisons/grid", comparisons_grid: @comparisons_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
+            </div>
           </div>
-          <div class="panel-body">
-            <%= render "files/grid", files_grid: @files_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
+        <% end %>
+        <% if defined?(@apps_grid) %>
+          <div class="panel">
+            <div class="panel-heading">
+              Apps &nbsp;<small class="text-muted"><%= @counts[:apps] %></small>
+            </div>
+            <div class="panel-body">
+              <%= render "apps/grid", apps_grid: @apps_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
+            </div>
           </div>
-        </div>
-      <% end %>
-      <% if defined?(@comparisons_grid) %>
-        <div class="panel">
-          <div class="panel-heading">
-            Comparisons &nbsp;<small class="text-muted"><%= @counts[:comparisons] %></small>
+        <% end %>
+        <% if defined?(@assets_grid) %>
+          <div class="panel">
+            <div class="panel-heading">
+              Assets &nbsp;<small class="text-muted"><%= @counts[:assets] %></small>
+            </div>
+            <div class="panel-body">
+              <%= render "assets/grid", assets_grid: @assets_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
+            </div>
           </div>
-          <div class="panel-body">
-            <%= render "comparisons/grid", comparisons_grid: @comparisons_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
+        <% end %>
+        <% if defined?(@jobs_grid) %>
+          <div class="panel">
+            <div class="panel-heading">
+              Jobs &nbsp;<small class="text-muted"><%= @counts[:jobs] %></small>
+            </div>
+            <div class="panel-body">
+              <%= render "jobs/grid", jobs_grid: @jobs_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
+            </div>
           </div>
-        </div>
-      <% end %>
-      <% if defined?(@apps_grid) %>
-        <div class="panel">
-          <div class="panel-heading">
-            Apps &nbsp;<small class="text-muted"><%= @counts[:apps] %></small>
-          </div>
-          <div class="panel-body">
-            <%= render "apps/grid", apps_grid: @apps_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
-          </div>
-        </div>
-      <% end %>
-      <% if defined?(@assets_grid) %>
-        <div class="panel">
-          <div class="panel-heading">
-            Assets &nbsp;<small class="text-muted"><%= @counts[:assets] %></small>
-          </div>
-          <div class="panel-body">
-            <%= render "assets/grid", assets_grid: @assets_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
-          </div>
-        </div>
-      <% end %>
-      <% if defined?(@jobs_grid) %>
-        <div class="panel">
-          <div class="panel-heading">
-            Jobs &nbsp;<small class="text-muted"><%= @counts[:jobs] %></small>
-          </div>
-          <div class="panel-body">
-            <%= render "jobs/grid", jobs_grid: @jobs_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
-          </div>
+        <% end %>
+      <% else %>
+        <div class="container-fluid container-padded">
+          <div class="text-muted">No data has been shared to this space.</div>
         </div>
       <% end %>
     <% end %>
