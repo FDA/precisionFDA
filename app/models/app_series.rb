@@ -102,7 +102,7 @@ class AppSeries < ActiveRecord::Base
           series_updates[:latest_version_app_id] = app.id unless series.latest_version_app_id.present? && series.latest_version_app.revision > app.revision
           series.update!(series_updates) if series_updates.present?
 
-          e = Event.build_from(e, "publish")
+          e = Event.build_from(app.series, "publish")
           e.save
         end
       end
