@@ -37,7 +37,7 @@ class Space < ActiveRecord::Base
   end
 
   def title_label
-    is_review? ? "#{name} (CTS#: #{cts})" : title
+    is_review? ? "#{name} (cts:#{cts})" : title
   end
 
   def klass

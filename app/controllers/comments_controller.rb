@@ -47,11 +47,9 @@ class CommentsController < ApplicationController
       item = items_from_params.last
       if item.present? && item.accessible_by?(@context)
         c = comment_params
-        if defined? item.klass and
-          item.klass == "space" and
-          c[:type] == "task" and
-          item.space_memberships(user_id: @context.user_id, role: "ADMIN").nil?
+        item_is_space = (defined? item.klass) && item.klass == "space"
 
+        if item_is_space && c[:type] == "task" && item.space_memberships(user_id: @context.user_id, role: "ADMIN").nil?
           flash[:error] = "You do not have permission to add a task to this space"
           redirect_to root_url
         end
@@ -61,6 +59,9 @@ class CommentsController < ApplicationController
         end
         event = Event.build_from(comment, "create")
         event.save
+        if item_is_space && item.is_review?
+          NotificationsMailer.space_event_email(item, event).deliver_now!
+        end
         redirect_to pathify_comments_redirect(item)
       else
         flash[:error] = "You do not have permission to add a comment to this item"

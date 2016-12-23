@@ -4,8 +4,8 @@
 <!-- Tab panes -->
 <div class="tab-content">
   <div role="tabpanel" class="tab-pane tab-pane-padded-lg active" id="tab-comments">
-    <% if !@show_contents && !space.closed? %>
-      <% if (@space.guest_project.blank? && @space.guest_lead?(@context)) ||
+    <% if !@show_contents && !@space.closed? %>
+      <% if (@space.has_guest_lead? && @space.guest_project.blank? && @space.guest_lead?(@context)) ||
             (@space.host_project.blank? && @space.host_lead?(@context)) %>
         <div class='pfda-help-block'>
           <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> You have not yet accepted the review space</p>
