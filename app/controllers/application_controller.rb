@@ -35,9 +35,11 @@ class ApplicationController < ActionController::Base
     if ENV["DNANEXUS_BACKEND"] == "production"
       hpkp[:pins] = [
         {sha256: 'OV/2vGzq4A/PlbCUFpy5W2dHmMLPvHZ9N/FVDOPNvQw='},
+        {sha256: 'Hxbr0eK3F0xc4UkeXRvapzSvj3I0efJ+2h2Q70MpltM='},
         {sha256: 'AGLBxCqwOTXOZg/v14oxVzHbU0GVWr1QlHR7DQqnzvU='},
         {sha256: '154XxB1J9PKgQ2rcgEEsTY+0CPdx03PpIiiJPlJzAXk='}
       ]
+      hpkp[:max_age] = 7.days.to_i
     else
       hpkp[:pins] = [
         {sha256: 'gtfblKFG3oCmgxfjddilwzBgaudaW3XyH7M90LrfjOU='},
