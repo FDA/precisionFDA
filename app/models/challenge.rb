@@ -5,6 +5,7 @@ class Challenge
     consistency_discussion = Discussion.accessible_by_public.find_by(id: CONSISTENCY_DISCUSSION_ID)
     return {
       path: Rails.application.routes.url_helpers.consistency_challenges_path,
+      results_path: Rails.application.routes.url_helpers.consistency_challenges_path + "/results",
       title: "Consistency Challenge",
       thumbnail: "challenges/pFDA-C1-Diagram-Thumbnail",
       responses_count: consistency_discussion.answers.accessible_by_public.size,
@@ -25,6 +26,7 @@ class Challenge
     truth_discussion = Discussion.find_by(id: TRUTH_DISCUSSION_ID)
     return {
       path: Rails.application.routes.url_helpers.truth_challenges_path,
+      results_path: Rails.application.routes.url_helpers.truth_challenges_path + "/results",
       title: "Truth Challenge",
       thumbnail: "challenges/pFDA-C2-Diagram-Thumbnail",
       responses_count: truth_discussion.answers.accessible_by_public.size,
@@ -50,11 +52,13 @@ class Challenge
     }
   end
 
+  #TODO: May need to change this to support more appathons in future
   def self.appathons(context)
-    meta_appathon = MetaAppathon.active
+    meta_appathon = MetaAppathon.find_by_handle(APPATHON_IN_A_BOX_HANDLE)
     now = DateTime.now.in_time_zone
     return {
-      path: Rails.application.routes.url_helpers.active_meta_appathon_path,
+      path: Rails.application.routes.url_helpers.appathon_in_a_box_path,
+      results_path: Rails.application.routes.url_helpers.appathon_in_a_box_path,
       title: meta_appathon.title,
       thumbnail: "appathons/appathon-toolbox.png",
       responses_count: meta_appathon.apps.count,
@@ -63,10 +67,10 @@ class Challenge
       joined: context.logged_in? && meta_appathon.followed_by?(context.user),
       start_date: meta_appathon.start_at,
       end_date: meta_appathon.end_at,
-      results_date: false,
+      results_date: APPATHON_IN_A_BOX_RESULTS_DATE,
       active: meta_appathon.start_at < now && now < meta_appathon.end_at,
       ended: now >= meta_appathon.end_at,
-      results_announced: false,
+      results_announced: true,
     }
   end
 

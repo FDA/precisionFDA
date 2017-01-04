@@ -1,7 +1,7 @@
 <div class="pfda-cards pfda-cards-justify-centered">
 <% challenges.each do |challenge| %>
   <% if challenge[:launched] %>
-    <a href="<%= challenge[:results_announced] ? challenge[:path] + '/results' : challenge[:path] %>" class="pfda-card pfda-card-default pfda-card-rounded pfda-card-bordered pfda-card-padded pfda-card-shadow">
+    <a href="<%= challenge[:results_announced] ? challenge[:results_path] : challenge[:path] %>" class="pfda-card pfda-card-default pfda-card-rounded pfda-card-bordered pfda-card-padded pfda-card-shadow">
       <div class="media">
         <div class="media-left pfda-card-title">
           <span class="fa fa-trophy" aria-hidden="true"></span>
