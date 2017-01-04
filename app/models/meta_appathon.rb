@@ -19,8 +19,6 @@ class MetaAppathon < ActiveRecord::Base
 
   acts_as_followable
 
-  ACTIVE_META_APPATHON = 'app-a-thon-in-a-box'
-
   def uid
     "meta-appathon-#{id}"
   end
