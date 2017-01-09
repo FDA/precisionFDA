@@ -11,7 +11,7 @@ class ApplicationController < ActionController::Base
       base_uri: %w('self'),
       block_all_mixed_content: true, # see [http://www.w3.org/TR/mixed-content/](http://www.w3.org/TR/mixed-content/)
       child_src: %w('self' https://www.youtube.com blob:),
-      connect_src: %w('self' https://s3.amazonaws.com https://stagingdl.dnanex.us https://dl.dnanex.us https://api.dnanexus.com),
+      connect_src: %w('self' https://dnanexus-platform-upload-stg.s3.amazonaws.com https://s3.amazonaws.com https://stagingdl.dnanex.us https://dl.dnanex.us https://api.dnanexus.com),
       default_src: %w(https: 'self'),
       font_src: %w('self' https://fonts.gstatic.com https://cdnjs.cloudflare.com),
       form_action: %w('self' https://stagingdl.dnanex.us https://dl.dnanex.us),
