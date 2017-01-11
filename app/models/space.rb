@@ -76,6 +76,10 @@ class Space < ActiveRecord::Base
     space_type == "review"
   end
 
+  def is_publishable_to?(context)
+    (active? && accessible_by?(context)) || (is_review? && host_lead?(context))
+  end
+
   def can_modify_state?(context)
     is_review? && active? && host_lead?(context)
   end
