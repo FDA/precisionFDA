@@ -217,7 +217,6 @@ func main() {
   case "":
     // Empty command
     fmt.Println(usageString)
-    flag.Usage()
     fmt.Println("Command to execute is required. Provide it as '--cmd {'upload-file','upload-asset','api'}'")
     os.Exit(1)
 
