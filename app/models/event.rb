@@ -14,6 +14,7 @@
 
 class Event < ActiveRecord::Base
   belongs_to :user
+  belongs_to :item, polymorphic: true
 
   store :meta, accessors: [:_body, :_state], coder: JSON
 
@@ -32,7 +33,7 @@ class Event < ActiveRecord::Base
   def self.build_from(obj, event_type)
     e = new \
       :item_id => obj.id,
-      :item_type => obj.klass,
+      :item_type => obj.class.name,
       :event_type => event_type,
       :timestamp => Time.now,
       :user_id => obj.user_id

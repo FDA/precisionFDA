@@ -1,7 +1,7 @@
-<div class="pfda-comments">
+<div class="pfda-feed">
   <% if !feed.nil? && feed.size > 0 %>
     <% feed.each do |event| %>
-      <% case event.item_type %>
+      <% case event.item.klass %>
       <% when "comment" %>
         <%= render "spaces/comment", event: event %>
       <% when "task" %>
