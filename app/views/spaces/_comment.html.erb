@@ -1,18 +1,11 @@
-<div class="pfda-comment">
+<li class="pfda-post pfda-post-comment list-unstyled">
   <div class="media">
-    <div class="media-left">
-      <%= link_to image_tag(event.user.gravatar_url, class: 'img-circle', height: '25px'), user_path(event.user.dxuser) %>
+    <div class="media-left pfda-post-icon-wrapper">
+      <span class="fa fa-fw <%= fa_class(event.item) %>"></span>
     </div>
     <div class="media-body">
-      <ul class="pfda-comment-meta list-inline list-inline-bullets text-muted">
-        <li class="pfda-comment-user"><strong><%= link_to event.user.full_name, user_path(event.user.dxuser) %></strong></li>
-        <li><%= event.user.org.name %></li>
-      </ul>
+      <%= render "event_header", event: event %>
       <div class="pfda-comment-body"><%= event._body %></div>
-      <ul class="pfda-comment-actions list-inline list-inline-bullets text-muted">
-       <li><%= event.timestamp.to_s(:db) %></li>
-      </ul>
     </div>
   </div>
-</div>
-
+</li>

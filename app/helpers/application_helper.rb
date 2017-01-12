@@ -63,6 +63,10 @@ module ApplicationHelper
       "fa-legal"
     when "space"
       "fa-object-group"
+    when "task"
+      "fa-map-pin"
+    when "comment"
+      "fa-comment"
     else
       raise "Unknown class #{item.klass}"
     end
@@ -120,4 +124,7 @@ module ApplicationHelper
     'disabled="true"'.html_safe if @context.guest?
   end
 
+  def indefinitize(params_word)
+    %w(a e i o u).include?(params_word[0].downcase) ? "an #{params_word}" : "a #{params_word}"
+  end
 end
