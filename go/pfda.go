@@ -240,7 +240,7 @@ func main() {
 
     _, err = f.Write(jsonData)
     check(err)
-    fmt.Printf("Saved -auth-key in config file '%s'. A new key does not need to be provided for 24 hours from the generation time of the provided key.\n", configPath)
+    fmt.Printf("Saved authorization key in config file '%s'. A new key does not need to be provided for 24 hours from the generation time of the provided key.\n", configPath)
   }
 }
 
