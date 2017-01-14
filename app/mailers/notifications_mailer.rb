@@ -80,12 +80,9 @@ class NotificationsMailer < ApplicationMailer
   def space_event_email(space, event)
     @space = space
     @event = event
-    @space.viewable_memberships.each do |membership|
-      @user = membership.user
-      next if @user.id == @event.user_id
-      mail to: @user.email,
+    recipients = @space.viewable_memberships.select { |m| m.user.id != @event.user_id }.map { |m| m.user.email }
+      mail to: recipients,
            reply_to: "no-reply@fda.hhs.gov",
-           subject: "#{@event.user.full_name} posted a new #{@event.item_type} to the #{@space.space_type} space \"#{@space.title}\""
-      end
-    end
+           subject: "#{@event.user.full_name} posted a new #{@event.item.klass} to the #{@space.space_type} space \"#{@space.title}\""
+  end
 end
