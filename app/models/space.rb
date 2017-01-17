@@ -153,6 +153,8 @@ class Space < ActiveRecord::Base
         if member.nil?
           api.call(org_id, "invite", {invitee: user.dxid, level: role, suppressEmailNotification: true})
           member = space_memberships.create!(user_id: user.id, role: role, side: side)
+        else
+          return false
         end
       elsif host_lead.id != member.user.id && (!has_guest_lead? || guest_lead.id != member.user.id)
         if member.side == side

@@ -313,14 +313,23 @@ class SpacesController < ApplicationController
       invitee_role = params[:space][:invitees_role]
 
       if invitee.present? && invitee_role.is_a?(String) && ["MEMBER"].include?(invitee_role)
-        api = DNAnexusAPI.new(@context.token)
-        member = space.add_or_update_member(api, space.guest_dxorg, invitee, invitee_role, admin.side)
-
-        # If the username didn't return a member
-        if !member
-          flash[:error] = "The follow username could not be invited because they do not exist: #{invitee}"
+        invite_error = false
+        user = User.find_by(dxuser: invitee)
+        if user.nil? || space.space_memberships.find_by(user_id: user.id, side: 'HOST')
+          invite_error = true
         else
-          NotificationsMailer.space_invitation_email(space, member, admin).deliver_now!
+          api = DNAnexusAPI.new(@context.token)
+          member = space.add_or_update_member(api, space.guest_dxorg, invitee, invitee_role, admin.side)
+
+          # If the username didn't return a member
+          if !member
+            invite_error = true
+          else
+            NotificationsMailer.space_invitation_email(space, member, admin).deliver_now!
+          end
+        end
+        if invite_error
+          flash[:error] = "The follow username could not be invited because they do not exist or are already a member of the space: #{invitee}"
         end
       else
         flash[:error] = "Sponsor Lead username and role are both required"
