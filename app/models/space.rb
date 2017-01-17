@@ -148,13 +148,13 @@ class Space < ActiveRecord::Base
       if member.nil?
         api.call(org_id, "invite", {invitee: user.dxid, level: role, suppressEmailNotification: true})
         member = space_memberships.create!(user_id: user.id, role: role, side: side)
-      elsif host_lead.id == member.user.id and is_review?
+      elsif host_lead.id == member.user.id && is_review?
         member = space_memberships.find_by(user_id: user.id, side: side)
         if member.nil?
           api.call(org_id, "invite", {invitee: user.dxid, level: role, suppressEmailNotification: true})
           member = space_memberships.create!(user_id: user.id, role: role, side: side)
         end
-      elsif ![guest_lead.id, host_lead.id].include?(member.user.id)
+      elsif host_lead.id != member.user.id && (!has_guest_lead? || guest_lead.id != member.user.id)
         if member.side == side
           apiParam = {}
           if member.role == "ADMIN" && role != "ADMIN"
