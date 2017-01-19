@@ -35,14 +35,14 @@
               Sponsors can write comments, respond to tasks, upload data from their private space, and request additional sponsors to be invited to the space.
             </p>
           <% end %>
+          <p>
+            To participate in this space please visit the space and click on "Accept space".
+          </p>
         <% else %>
           <p>
             Spaces let you move data from your private area to a shared space that space members can access. You can then publish the data out of the space to the precisionFDA community.
           </p>
         <% end %>
-        <p>
-          To activate and participate in this space both the <%= @space.host_lead_label.downcase %> and the <%= @space.guest_lead_label.downcase %> must accept the invitation. Please visit the space and click on "Accept space".
-        </p>
         <button class="radius" href="<%= space_url(@space) %>">View Space Invitation</button>
       </columns>
     </row>
