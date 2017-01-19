@@ -38,6 +38,9 @@
               Sponsors can write comments, respond to tasks, upload data from their private space, and request additional sponsors to be invited to the space.
             </p>
           <% end %>
+          <p>
+            To participate in this space, please visit the space and click on "Accept Space."
+          </p>
         <% else %>
           <p>
             Spaces let you move data from your private area to a shared space that space members can access. You can then publish the data out of the space to the precisionFDA community.
