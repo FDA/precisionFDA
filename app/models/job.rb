@@ -145,6 +145,7 @@ class Job < ActiveRecord::Base
 
           e = Event.build_from(job, "publish")
           e.save
+          e.send_notification(scope)
         end
       end
     end

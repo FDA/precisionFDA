@@ -133,6 +133,7 @@ class Comparison < ActiveRecord::Base
 
         e = Event.build_from(comparison, "publish")
         e.save
+        e.send_notification(scope)
       end
     end
 

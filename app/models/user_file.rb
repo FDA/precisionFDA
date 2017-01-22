@@ -197,6 +197,7 @@ class UserFile < ActiveRecord::Base
 
           e = Event.build_from(file, "publish")
           e.save
+          e.send_notification(scope)
         end
       end
       api.call(project, "removeObjects", {objects: project_files.map(&:dxid)})

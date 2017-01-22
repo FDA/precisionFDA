@@ -111,6 +111,7 @@ class Note < ActiveRecord::Base
 
           e = Event.build_from(note, "publish")
           e.save
+          e.send_notification(scope)
         end
       end
     end

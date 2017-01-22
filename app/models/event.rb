@@ -26,6 +26,16 @@ class Event < ActiveRecord::Base
     "event"
   end
 
+  def send_notification(scope, opts = {})
+    if event_type == "publish" && Space.is_scope_a_space?(scope)
+      space = Space.from_scope(scope)
+      if space.is_review?
+        NotificationsMailer.space_event_email(space, self, opts).deliver_now!
+      end
+    end
+    return
+  end
+
   def self.events_by_scope(scope)
     return where(scope: scope)
   end

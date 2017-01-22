@@ -77,12 +77,14 @@ class NotificationsMailer < ApplicationMailer
          subject: "#{@admin.user.full_name} added you to the #{@space.space_type} space \"#{@space.title}\""
   end
 
-  def space_event_email(space, event)
+  def space_event_email(space, event, opts = {})
+    @context = opts[:context]
     @space = space
     @event = event
+    @action = @event.event_type == "publish" ? "published" : "posted"
     recipients = @space.viewable_memberships.select { |m| m.user.id != @event.user_id }.map { |m| m.user.email }
       mail to: recipients,
            reply_to: "no-reply@fda.hhs.gov",
-           subject: "#{@event.user.full_name} posted a new #{@event.item.klass} to the #{@space.space_type} space \"#{@space.title}\""
+           subject: "#{@event.user.full_name} #{@action} a new #{@event.item.klass} to the #{@space.space_type} space \"#{@space.title}\""
   end
 end
