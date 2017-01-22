@@ -28,6 +28,8 @@ class Space < ActiveRecord::Base
   store :meta, accessors: [:cts], coder: JSON
   attr_accessor :host_lead_dxuser, :guest_lead_dxuser, :invitees, :invitees_role
 
+  SCOPE_REGEX = "^space-(\\d+)$"
+
   def uid
     "space-#{id}"
   end
@@ -316,8 +318,12 @@ class Space < ActiveRecord::Base
     where(space_type: "group")
   end
 
+  def self.is_scope_a_space?(scope)
+    return scope =~ /#{SCOPE_REGEX}/ ? true : false
+  end
+
   def self.from_scope(scope)
-    if scope =~ /^space-(\d+)$/
+    if scope =~ /#{SCOPE_REGEX}/
       return Space.find_by!(id: $1.to_i)
     else
       raise "Invalid scope #{scope} in Space.from_scope"

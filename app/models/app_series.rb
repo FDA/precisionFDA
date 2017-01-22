@@ -104,6 +104,7 @@ class AppSeries < ActiveRecord::Base
 
           e = Event.build_from(series, "publish")
           e.save
+          e.send_notification(scope, {"context": context})
         end
       end
     end
