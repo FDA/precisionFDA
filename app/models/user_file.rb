@@ -194,10 +194,6 @@ class UserFile < ActiveRecord::Base
           raise "Race condition for file #{file.id} (#{file.dxid})" unless file.publishable_by?(context, scope)
           file.update!(scope: scope, project: destination_project)
           count += 1
-
-          e = Event.build_from(file, "publish")
-          e.save
-          e.send_notification(scope)
         end
       end
       api.call(project, "removeObjects", {objects: project_files.map(&:dxid)})

@@ -1,36 +1,19 @@
 <%= render "spaces/header" %>
 
-<% @show_contents = @space.active? || (@space.host_project.present? && @space.is_host_admin?(@context)) %>
 <!-- Tab panes -->
 <div class="tab-content">
   <div role="tabpanel" class="tab-pane tab-pane-padded-lg active" id="tab-comments">
-    <% if !@show_contents && !@space.closed? %>
-      <% if (@space.has_guest_lead? && @space.guest_project.blank? && @space.guest_lead?(@context)) ||
-            (@space.host_project.blank? && @space.host_lead?(@context)) %>
-        <div class='pfda-help-block'>
-          <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> You have not yet accepted the review space</p>
-          <p>You must click "Accept space" to view the contents of this space.</p>
-        </div>
-      <% else %>
-        <div class='pfda-help-block'>
-          <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
-          <% if @space.is_review? %>
-            <p>The reviewer lead must click "Accept space" to activate it.</p>
-          <% else %>
-            <p>Both host and guest leads must click "Accept space" to activate it.</p>
-          <% end %>
-        </div>
-      <% end %>
-    <% else %>
-      <div class="row">
-        <div class="col-md-12">
-        <% if @space.space_type == "review" %>
-          <%= render "spaces/posts_wrapper", url: @item_comments_path, feed: @feed, object: @space %>
-        <% else %>
-          <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @space %>
-        <% end %>
-        </div>
+    <% if !@space.active? %>
+      <div class='pfda-help-block'>
+        <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
+        <p>Both host and guest leads must click "Accept space" to activate it.</p>
       </div>
     <% end %>
+
+    <div class="row">
+      <div class="col-md-12">
+        <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @space %>
+      </div>
+    </div>
   </div>
 </div>

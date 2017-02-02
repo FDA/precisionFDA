@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161214163306) do
+ActiveRecord::Schema.define(version: 20160928191202) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id"
@@ -130,7 +130,6 @@ ActiveRecord::Schema.define(version: 20161214163306) do
     t.integer  "rgt"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "comment_type"
   end
 
   add_index "comments", ["commentable_id", "commentable_type"], name: "index_comments_on_commentable_id_and_commentable_type"
@@ -171,22 +170,6 @@ ActiveRecord::Schema.define(version: 20161214163306) do
 
   add_index "discussions", ["note_id"], name: "index_discussions_on_note_id"
   add_index "discussions", ["user_id"], name: "index_discussions_on_user_id"
-
-  create_table "events", force: :cascade do |t|
-    t.integer  "item_id"
-    t.string   "item_type"
-    t.string   "event_type"
-    t.datetime "timestamp"
-    t.string   "scope"
-    t.text     "meta"
-    t.integer  "user_id"
-  end
-
-  add_index "events", ["event_type"], name: "index_events_on_event_type"
-  add_index "events", ["item_id"], name: "index_events_on_item_id"
-  add_index "events", ["item_type"], name: "index_events_on_item_type"
-  add_index "events", ["scope"], name: "index_events_on_scope"
-  add_index "events", ["user_id"], name: "index_events_on_user_id"
 
   create_table "follows", force: :cascade do |t|
     t.integer  "followable_id",                   null: false

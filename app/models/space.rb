@@ -14,11 +14,10 @@
 #  meta          :text
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
-#  author        :string
 #
 
 class Space < ActiveRecord::Base
-  validates :space_type, presence: true, inclusion: {in: ['group', 'review']}
+  validates :space_type, presence: true, inclusion: {in: ['group', 'submission']}
 
   has_many :space_memberships
   has_many :users, {through: :space_memberships}
@@ -28,18 +27,12 @@ class Space < ActiveRecord::Base
   store :meta, accessors: [:cts], coder: JSON
   attr_accessor :host_lead_dxuser, :guest_lead_dxuser, :invitees, :invitees_role
 
-  SCOPE_REGEX = "^space-(\\d+)$"
-
   def uid
     "space-#{id}"
   end
 
   def title
     name
-  end
-
-  def title_label
-    is_review? ? "#{name} (cts:#{cts})" : title
   end
 
   def klass
@@ -58,40 +51,12 @@ class Space < ActiveRecord::Base
     end
   end
 
-  def events
-    Event.events_by_scope(uid)
-  end
-
   def active?
     state == "ACTIVE"
   end
 
-  def closed?
-    state == "CLOSED"
-  end
-
-  def unactivated?
-    state == nil
-  end
-
-  def is_review?
-    space_type == "review"
-  end
-
-  def is_publishable_to?(context)
-    (active? && accessible_by?(context)) || (is_review? && host_lead?(context))
-  end
-
-  def can_modify_state?(context)
-    is_review? && active? && host_lead?(context)
-  end
-
   def rename(new_name, context)
     update_attributes(name: new_name)
-  end
- #comment
-  def viewable_memberships
-    space_memberships.where.not("user_id = ? AND side = ?", host_lead.id, 'GUEST')
   end
 
   def host_lead
@@ -106,33 +71,16 @@ class Space < ActiveRecord::Base
     host_lead.id == context.user_id
   end
 
-  def host_lead_label
-    is_review? ? "Reviewer Lead" : "Host Lead"
-  end
-
-  def is_host_admin?(context)
-    space_memberships.hosts.admins.map { |s| s.user_id }.include?(context.user_id)
-  end
-
   def guest_lead
     guest_lead_member.user
   end
 
-  def has_guest_lead?
-    is_review? ? space_memberships.guests.non_admins.any? : space_memberships.guests.admins.any?
-  end
-
   def guest_lead_member
-    # Sponsors cannot be admins in review spaces
-    is_review? ? space_memberships.guests.non_admins.first : space_memberships.guests.admins.first
+    space_memberships.guests.admins.first
   end
 
   def guest_lead?(context)
     guest_lead.id == context.user_id
-  end
-
-  def guest_lead_label
-    is_review? ? "Sponsor Lead" : "Guest Lead"
   end
 
   def project_for_context!(context)
@@ -150,15 +98,7 @@ class Space < ActiveRecord::Base
       if member.nil?
         api.call(org_id, "invite", {invitee: user.dxid, level: role, suppressEmailNotification: true})
         member = space_memberships.create!(user_id: user.id, role: role, side: side)
-      elsif host_lead.id == member.user.id && is_review?
-        member = space_memberships.find_by(user_id: user.id, side: side)
-        if member.nil?
-          api.call(org_id, "invite", {invitee: user.dxid, level: role, suppressEmailNotification: true})
-          member = space_memberships.create!(user_id: user.id, role: role, side: side)
-        else
-          return false
-        end
-      elsif host_lead.id != member.user.id && (!has_guest_lead? || guest_lead.id != member.user.id)
+      elsif ![guest_lead.id, host_lead.id].include?(member.user.id)
         if member.side == side
           apiParam = {}
           if member.role == "ADMIN" && role != "ADMIN"
@@ -207,52 +147,10 @@ class Space < ActiveRecord::Base
     return space_project
   end
 
-  # This function is only for provisioning one-sided review spaces
-  #
-  def self.provision_host(context, space_params)
-    papi = DNAnexusAPI.new(ADMIN_TOKEN)
-    space = nil
-    Space.transaction do
-      uuid = SecureRandom.hex
-      host_dxorg = Org.construct_dxorg("space_host_#{uuid}")
-      guest_dxorg = Org.construct_dxorg("space_guest_#{uuid}")
-      host_dxorghandle = host_dxorg.sub(/^org-/, '')
-      guest_dxorghandle = guest_dxorg.sub(/^org-/, '')
-
-      # Provision Host and Guest orgs
-      Org.provision_dxorg(context, {
-        id: host_dxorg,
-        handle: host_dxorghandle,
-        name: host_dxorghandle
-      })
-
-      Org.provision_dxorg(context, {
-        id: guest_dxorg,
-        handle: guest_dxorghandle,
-        name: guest_dxorghandle
-      })
-
-      # Create the space
-      space_params[:host_dxorg] = host_dxorg
-      space_params[:guest_dxorg] = guest_dxorg
-      space = Space.create!(space_params)
-
-      host_lead = space.add_or_update_member(papi, host_dxorg, space_params[:host_lead_dxuser], 'ADMIN', 'HOST')
-      # For review spaces, host lead is both admin of host org and guest org
-      space.add_or_update_member(papi, guest_dxorg, space_params[:host_lead_dxuser], 'ADMIN', 'GUEST')
-
-      # Remove pfda admin from orgs
-      papi.call(host_dxorg, "removeMember", {user: "user-precisionfda.admin"})
-      papi.call(guest_dxorg, "removeMember", {user: "user-precisionfda.admin"})
-    end
-
-    return space
-  end
-
   # space:
   #   name
   #   description
-  #   space_type
+  #   space_type ("submission")
   #   meta
   #   host_lead_dxuser
   #   guest_lead_dxuser
@@ -288,15 +186,8 @@ class Space < ActiveRecord::Base
       space = Space.create!(space_params)
 
       # Add leads as ADMINs
-      # Sponsors cannot be admins in review spaces
       host_lead = space.add_or_update_member(papi, host_dxorg, space_params[:host_lead_dxuser], 'ADMIN', 'HOST')
-      # For review spaces, host lead is both admin of host org and guest org
-      if space.is_review?
-        space.add_or_update_member(papi, guest_dxorg, space_params[:host_lead_dxuser], 'ADMIN', 'GUEST')
-        guest_lead = space.add_or_update_member(papi, guest_dxorg, space_params[:guest_lead_dxuser], 'MEMBER', 'GUEST')
-      else
-        guest_lead = space.add_or_update_member(papi, guest_dxorg, space_params[:guest_lead_dxuser], 'ADMIN', 'GUEST')
-      end
+      guest_lead = space.add_or_update_member(papi, guest_dxorg, space_params[:guest_lead_dxuser], 'ADMIN', 'GUEST')
 
       # Remove pfda admin from orgs
       papi.call(host_dxorg, "removeMember", {user: "user-precisionfda.admin"})
@@ -310,20 +201,16 @@ class Space < ActiveRecord::Base
     where(state: "ACTIVE")
   end
 
-  def self.reviews
-    where(space_type: "review")
+  def self.submissions
+    where(space_type: "submission")
   end
 
   def self.groups
     where(space_type: "group")
   end
 
-  def self.is_scope_a_space?(scope)
-    return scope =~ /#{SCOPE_REGEX}/ ? true : false
-  end
-
   def self.from_scope(scope)
-    if scope =~ /#{SCOPE_REGEX}/
+    if scope =~ /^space-(\d+)$/
       return Space.find_by!(id: $1.to_i)
     else
       raise "Invalid scope #{scope} in Space.from_scope"

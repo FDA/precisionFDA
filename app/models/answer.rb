@@ -85,9 +85,6 @@ class Answer < ActiveRecord::Base
         if answer.publishable_by?(context, scope)
           answer.note.update!(scope: scope)
           count += 1
-
-          e = Event.build_from(answer, "publish")
-          e.save
         end
       end
     end

@@ -1,7 +1,0 @@
-<div class="container-fluid container-padded">
-  <% if !@space.unactivated? && !@space.closed? %>
-    <%= render "spaces/new_post", url: url, object: object %>
-    <hr>
-  <% end %>
-  <%= render "spaces/posts", feed: @feed%>
-</div>

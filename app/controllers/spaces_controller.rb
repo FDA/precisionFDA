@@ -14,18 +14,12 @@ class SpacesController < ApplicationController
   end
 
   def show
-    @space = Space.accessible_by(@context).find(params[:id])
-    if @space.space_type == "review"
-      redirect_to discuss_space_path(params[:id])
-    else
-      redirect_to content_space_path(params[:id])
-    end
+    redirect_to content_space_path(params[:id])
   end
 
   def content
     @space = Space.accessible_by(@context).find(params[:id])
     @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
-    @memberships = @space.viewable_memberships
 
     @notes = Note.real_notes.accessible_by_space(@space)
     @files = UserFile.real_files.accessible_by_space(@space)
@@ -100,20 +94,18 @@ class SpacesController < ApplicationController
   def discuss
     @space = Space.accessible_by(@context).find(params[:id])
     @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
-    @memberships = @space.viewable_memberships
 
     @items_from_params = [@space]
     @item_path = pathify(@space)
     @item_comments_path = pathify_comments(@space)
     @comments = @space.root_comments.order(id: :desc).page params[:comments_page]
-    @feed = Event.events_by_scope(@space.uid).order(timestamp: :desc)
   end
 
   def members
     @space = Space.accessible_by(@context).find(params[:id])
     @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
-    @memberships = @space.viewable_memberships
-    @members_grid = initialize_grid(@memberships, {
+
+    @members_grid = initialize_grid(@space.space_memberships, {
       order: 'created_at',
       order_direction: 'asc',
       per_page: 100
@@ -121,73 +113,48 @@ class SpacesController < ApplicationController
   end
 
   def new
-    redirect_to spaces_path unless @context.user.can_create_spaces?
-    @space = Space.new()
-    if params[:space_type] == "review" and @context.user.can_create_reviews?
-      render :new_review
-    else
-      render :new
-    end
+    redirect_to spaces_path unless @context.user.can_administer_site?
+    @space = Space.new
   end
 
   def edit
     @space = Space.editable_by(@context).find(params[:id])
-    redirect_to space_path(@space) if @space.closed?
   end
 
   def create
-    is_review = space_params[:space_type] == "review"
-    if is_review
-      redirect_to spaces_path unless @context.user.can_create_reviews?
-    else
-      redirect_to spaces_path unless @context.user.can_create_spaces?
-    end
-
-    has_sponsor = space_params[:guest_lead_dxuser].present?
-
-    host_label = is_review ? "Reviewer Lead" : "Host Lead"
-    guest_label = is_review ? "Sponsor Lead" : "Guest Lead"
-
-    if has_sponsor
-      if space_params[:host_lead_dxuser] == space_params[:guest_lead_dxuser]
-        flash[:error] = "The #{host_label} and #{guest_label} cannot be the same user"
-      end
-      guest_lead_user = User.find_by(dxuser: space_params[:guest_lead_dxuser])
-      if guest_lead_user.nil?
-        flash[:error] = "#{guest_label} username #{space_params[:guest_lead_dxuser]} not found"
-      end
+    redirect_to spaces_path unless @context.user.can_administer_site?
+    if space_params[:host_lead_dxuser] == space_params[:guest_lead_dxuser]
+      flash[:error] = "The host and guest lead cannot be the same user"
     end
 
     host_lead_user = User.find_by(dxuser: space_params[:host_lead_dxuser])
+    guest_lead_user = User.find_by(dxuser: space_params[:guest_lead_dxuser])
+
     if host_lead_user.nil?
-      flash[:error] = "#{host_label} username #{space_params[:host_lead_dxuser]} not found"
+      flash[:error] = "Host lead username #{space_params[:host_lead_dxuser]} not found"
+    elsif guest_lead_user.nil?
+      flash[:error] = "Guest lead username #{space_params[:guest_lead_dxuser]} not found"
     end
 
     if flash[:error].blank?
-      if has_sponsor
-        @space = Space.provision(@context, space_params)
-      else
-        @space = Space.provision_host(@context, space_params)
-      end
+      @space = Space.provision(@context, space_params)
       if @space
         NotificationsMailer.space_activation_email(@space, @space.host_lead_member).deliver_now!
-        if has_sponsor
-          NotificationsMailer.space_activation_email(@space, @space.guest_lead_member).deliver_now!
-        end
+        NotificationsMailer.space_activation_email(@space, @space.guest_lead_member).deliver_now!
         if @space.accessible_by?(@context)
-          flash[:success] = "The #{@space.space_type} space was created successfully, and will be activated once both leads accept it."
+          flash[:success] = "The space was created successfully, and will be activated once both admin's accept it."
           redirect_to space_path(@space)
         else
-          flash[:success] = "The #{@space.space_type} space was created successfully, but is not currently accessible by you."
+          flash[:success] = "The space was created successfully, but is not currently accessible by you."
           redirect_to spaces_path
         end
         return
       else
-        flash[:error] = "The #{@space.space_type} space could not be provisioned for an unknown reason."
+        flash[:error] = "The space could not be provisioned for an unknown reason."
       end
     end
     @space = Space.new(space_params)
-    render is_review ? :new_review : :new
+    render :new
   end
 
   def update
@@ -208,91 +175,21 @@ class SpacesController < ApplicationController
     # TODO: figure out if and how spaces should be deleted
   end
 
-  def close
-    space = Space.accessible_by(@context).find(params[:id])
-    redirect_to_space if !space.can_modify_state?(@context)
-
-    space.state = "CLOSED"
-    if space.save
-      flash[:success] = "This space has now been closed"
-    else
-      flash[:error] = "Could not update the space. Please try again."
-    end
-
-    redirect_to space
-  end
-
-  def complete_task
-    space = Space.accessible_by(@context).find(params[:id])
-    guest = space.space_memberships.find_by(user_id: @context.user_id, role: 'MEMBER', side: 'GUEST')
-    redirect_to space if !guest
-
-    e = Event.events_by_scope(space.uid).find(params[:event_id])
-    if e._state != "revoked"
-      Event.transaction do
-        e.reload
-        if e._state != "revoked"
-          e._state = "completed"
-          e.save!
-        end
-      end
-    end
-    redirect_to space
-  end
-
-  def revoke_task
-    space = Space.accessible_by(@context).find(params[:id])
-    admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN')
-    redirect_to space if !admin
-
-    e = Event.events_by_scope(space.uid).find(params[:event_id])
-    if e._state != "revoked"
-      Event.transaction do
-        e.reload
-        if e._state != "revoked"
-          e._state = "revoked"
-          e.save!
-        end
-      end
-    end
-    redirect_to space
-  end
-
   def accept
     space = Space.accessible_by(@context).find(params[:id])
-
-    if space.is_review?
-      admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN', side: 'HOST')
-      if !admin
-        # Check if user is sponsor
-        admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'MEMBER', side: 'GUEST')
-      end
-    else
-      admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN')
-    end
-
+    admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN')
     if admin
       Space.transaction do
         if admin.side == 'HOST'
-          if space.host_project.blank?
-            space.host_project = space.create_space_project(@context, space.host_dxorg, space.guest_dxorg, admin)
-          end
-          if space.is_review? and !space.guest_project?
-            space.state = space.has_guest_lead? ? "Pending Sponsor Acceptance" : "Pending Sponsor Assignment"
-          end
+          space.host_project = space.create_space_project(@context, space.host_dxorg, space.guest_dxorg, admin) unless space.host_project?
         elsif admin.side == 'GUEST'
-          if space.guest_project.blank?
-            space.guest_project = space.create_space_project(@context, space.guest_dxorg, space.host_dxorg, admin)
-          end
-          if space.is_review? and space.host_project.blank?
-            space.state = "Pending Reviewer Acceptance"
-          end
+          space.guest_project = space.create_space_project(@context, space.guest_dxorg, space.host_dxorg, admin) unless space.guest_project?
         else
           flash[:error] = "Your admin 'side' is not correctly defined"
           redirect_to space
           return
         end
-        if space.host_project.present? && space.guest_project.present?
+        if space.host_project? && space.guest_project?
           space.state = "ACTIVE"
           NotificationsMailer.space_activated_email(space, space.host_lead_member).deliver_now!
           NotificationsMailer.space_activated_email(space, space.guest_lead_member).deliver_now!
@@ -305,50 +202,9 @@ class SpacesController < ApplicationController
     redirect_to space
   end
 
-  def invite_sponsor_lead
-    space = Space.accessible_by(@context).find(params[:id])
-    admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN', side: 'GUEST')
-    if admin
-      invitee = params[:space][:invitees]
-      invitee_role = params[:space][:invitees_role]
-
-      if invitee.present? && invitee_role.is_a?(String) && ["MEMBER"].include?(invitee_role)
-        invite_error = false
-        user = User.find_by(dxuser: invitee)
-        if user.nil? || space.space_memberships.find_by(user_id: user.id, side: 'HOST')
-          invite_error = true
-        else
-          api = DNAnexusAPI.new(@context.token)
-          member = space.add_or_update_member(api, space.guest_dxorg, invitee, invitee_role, admin.side)
-
-          # If the username didn't return a member
-          if !member
-            invite_error = true
-          else
-            NotificationsMailer.space_invitation_email(space, member, admin).deliver_now!
-          end
-        end
-        if invite_error
-          flash[:error] = "The follow username could not be invited because they do not exist or are already a member of the space: #{invitee}"
-        end
-      else
-        flash[:error] = "Sponsor Lead username and role are both required"
-      end
-      Space.transaction do
-        space.state = space.host_project.present? ? "Pending Sponsor Acceptance" : nil
-        space.save
-      end
-    else
-      flash[:error] = "You don't have permission to edit this space"
-    end
-
-    redirect_to space
-  end
-
   def invite
     space = Space.accessible_by(@context).find(params[:id])
     admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN')
-
     if admin
       invitees = params[:space][:invitees].split(',').map(&:strip)
       invitees_role = params[:space][:invitees_role]
@@ -407,21 +263,15 @@ class SpacesController < ApplicationController
       p = params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser, :space_type, :cts)
       p.require(:name)
       p.require(:host_lead_dxuser)
+      p.require(:guest_lead_dxuser)
       p.require(:space_type)
-      if p[:space_type] == 'review'
-        p.require(:cts)
-      else
-        p.require(:guest_lead_dxuser)
-      end
       return p
     end
 
     def update_space_params
-      p = params.require(:space).permit(:name, :description, :cts)
+      p = params.require(:space).permit(:name, :description, :space_type, :cts)
       p.require(:name)
-      if @space.is_review?
-        p.require(:cts)
-      end
+      p.require(:space_type)
       return p
     end
 end
