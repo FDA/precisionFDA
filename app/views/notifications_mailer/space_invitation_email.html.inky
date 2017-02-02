@@ -19,33 +19,16 @@
     <row>
       <columns>
         <p>
-          You were added to the <%= @space.space_type %> space <strong><%= link_to @space.title_label, space_url(@space) %></strong> by <%= link_to @admin.user.full_name, user_url(@admin.user.username) %>.
+          You were added to the space <strong><%= link_to @space.title, space_url(@space) %></strong> by <%= link_to @admin.user.full_name, user_url(@admin.user.username) %>.
         </p>
 
         <p>Role: <strong><%= @membership.role %></strong></p>
-        <p>Side: <strong><%= @membership.side_label %></strong></p>
+        <p>Side: <strong><%= @membership.side %></strong></p>
 
-        <% if @space.is_review? %>
-          <p>
-            This is a PrecisionFDA review space that allows for discussion and data sharing between reviewers and sponsors as a supplement to an official FDA review submission.
-          </p>
-          <% if @membership.side == 'HOST' %>
-            <p>
-              Reviewers can assign tasks, write comments, upload data from their private space, and add members to the review space.
-            </p>
-          <% else %>
-            <p>
-              Sponsors can write comments, respond to tasks, upload data from their private space, and request additional sponsors to be invited to the space.
-            </p>
-          <% end %>
-          <p>
-            To participate in this space, please visit the space and click on "Accept Space."
-          </p>
-        <% else %>
-          <p>
-            Spaces let you move data from your private area to a shared space that space members can access. You can then publish the data out of the space to the precisionFDA community.
-          </p>
-        <% end %>
+        <p>
+          Space's let you move data from your private area and share to the space members to access. You can then publish the data out of the space to the precisionFDA community.
+        </p>
+
         <button class="radius" href="<%= space_url(@space) %>">View Space</button>
       </columns>
     </row>

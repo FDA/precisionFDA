@@ -108,10 +108,6 @@ class Note < ActiveRecord::Base
         if note.publishable_by?(context, scope)
           note.update!(scope: scope)
           count += 1
-
-          e = Event.build_from(note, "publish")
-          e.save
-          e.send_notification(scope)
         end
       end
     end

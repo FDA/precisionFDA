@@ -14,7 +14,6 @@
 #  rgt              :integer
 #  created_at       :datetime
 #  updated_at       :datetime
-#  comment_type     :string
 #
 
 class Comment < ActiveRecord::Base
@@ -36,19 +35,14 @@ class Comment < ActiveRecord::Base
   # NOTE: Comments belong to a user
   belongs_to :user
 
-  def klass
-    comment_type
-  end
-
   # Helper class method that allows you to build a comment
   # by passing a commentable object, a user_id, and comment text
   # example in readme
-  def self.build_from(obj, user_id, c_params)
+  def self.build_from(obj, user_id, comment)
     new \
       :commentable => obj,
-      :body        => c_params[:body],
-      :user_id     => user_id,
-      :comment_type => c_params.key?(:type) ? c_params[:type] : "comment"
+      :body        => comment,
+      :user_id     => user_id
   end
 
   #helper method to check if a comment has children

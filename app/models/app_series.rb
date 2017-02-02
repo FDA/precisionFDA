@@ -101,10 +101,6 @@ class AppSeries < ActiveRecord::Base
           series_updates[:scope] = scope if series.scope != scope
           series_updates[:latest_version_app_id] = app.id unless series.latest_version_app_id.present? && series.latest_version_app.revision > app.revision
           series.update!(series_updates) if series_updates.present?
-
-          e = Event.build_from(series, "publish")
-          e.save
-          e.send_notification(scope, {"context": context})
         end
       end
     end

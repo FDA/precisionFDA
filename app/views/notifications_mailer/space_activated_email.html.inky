@@ -19,7 +19,7 @@
     <row>
       <columns>
         <p>
-          The <%= @space.space_type %> space <strong><%= link_to @space.title_label, space_url(@space) %></strong> has been activated and you can now move data to share with members of the space.
+          The space <strong><%= link_to @space.title, space_url(@space) %></strong> has been activated and you can now move data to share with members of the space.
         </p>
 
         <button class="radius" href="<%= space_url(@space) %>">View Space</button>

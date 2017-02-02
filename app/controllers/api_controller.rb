@@ -32,7 +32,7 @@ class ApiController < ApplicationController
         # - must be accessible by context
         fail "Invalid scope (only 'public' or 'space-xxxx' are accepted)" unless scope =~ /^space-(\d+)$/
         space = Space.find_by(id: $1.to_i)
-        fail "Invalid space" unless space.present? && space.is_publishable_to?(@context)
+        fail "Invalid space" unless space.present? && space.active? && space.accessible_by?(@context)
       end
     else
       fail "The optional 'scope' input must be a string (either 'public' or 'space-xxxx')"

@@ -47,7 +47,6 @@ class User < ActiveRecord::Base
   has_many :spaces, {through: :space_memberships}
   has_one :appathon
   has_many :meta_appathons
-  has_many :events
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 
   include Gravtastic
@@ -120,41 +119,12 @@ class User < ActiveRecord::Base
     end
   end
 
-  def is_production?
-    Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
-  end
-
-  def is_precisionfda_admin?
-    ["elaine.johanson", "ruth.bandler"].include?(dxuser)
-  end
-
-  def is_precisionfda_dev?
-    ((org.handle == "precisionfda" || org.handle == "dnanexus") && org.admin_id == id) ||
-      ["alan.zhu", "alan.fdauser"].include?(dxuser)
-  end
-
   def can_administer_site?
-    if is_production?
-      is_precisionfda_admin?
+    if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
+      dxuser == "elaine.johanson" || dxuser == "ruth.bandler"
     else
-      is_precisionfda_dev?
+      ((org.handle == "precisionfda" || org.handle == "dnanexus") && org.admin_id == id) || ["alan.zhu"].include?(dxuser)
     end
-  end
-
-  def can_create_reviews?
-    if is_production?
-      is_precisionfda_admin? || [].include?(dxuser)
-    else
-      is_precisionfda_dev?
-    end
-  end
-
-  def can_create_spaces?
-    can_administer_site? || can_create_reviews?
-  end
-
-  def can_see_spaces?
-    can_create_spaces? || spaces.count > 0
   end
 
   def self.validate_email(email)
