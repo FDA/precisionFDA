@@ -3,6 +3,17 @@
 <div class="pfda-meta-appathon-template pfda-meta-appathon-template-<%= @meta_appathon.template %>">
   <div class="jumbotron jumbotron-meta_appathon clearfix">
     <div class="row">
+      <div class="col-sm-18 col-sm-offset-3 col-lg-12 col-lg-offset-6 text-center alert alert-warning">
+        <div class="lead lead-bold">
+          The App-a-thon in a Box Challenge concluded on December 31st, 2016.
+        </div>
+        <div class="lead">
+          The PrecisionFDA community would like to thank all those that participated in the App-a-thon in a Box Challenge!
+          <br/>Closing remarks for this challenge can be viewed <strong><%= link_to "here", discussion_path(APPATHON_IN_A_BOX_DISCUSSION_ID)%></strong>.
+          <br/>
+          <br/>Please stay tuned for new challenges in the 2017 calendar year!
+        </div>
+      </div>
       <div class="col-sm-18 col-sm-offset-3 text-center col-lg-12 col-lg-offset-6">
         <h1>
           <span class="meta_appathon-title-muted">PrecisionFDA</span>
@@ -39,16 +50,6 @@
       <div class="col-sm-12 col-sm-offset-6 col-lg-8 col-lg-offset-8">
         <%= image_tag("appathons/appathon-toolbox.png", class: 'img-responsive')  %>
       </div>
-      <div class="col-sm-18 col-sm-offset-3 col-lg-12 col-lg-offset-6 text-center alert alert-warning">
-        <div class="lead lead-bold">
-          App-a-thon End Date Further Extended!
-        </div>
-        <div class="lead">
-          Due to significant interest in this challenge, we have decided to further extend the deadline so more of you can host and join App-a-thons!
-          <br/>
-          The new deadline is <strong>December 31st, 2016</strong>.
-        </div>
-      </div>
     </div>
   </div>
 
@@ -60,13 +61,49 @@
   </div>
   <% end %>
 
-  <div class="container-fluid pfda-meta-appathon-intro">
-    <div class="thumbnail">
-      <%= video_iframe("https://www.youtube.com/embed/ir662wQJ5cI") %>
+  <div id="appathons-list" class="pfda-meta-appathon-submissions container-fluid">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <div class="text-center">
+          <%= image_tag("icons/ColoredLineIcons/png/128/laptop.png")  %>
+          <h4>App-a-thons and Submitted Apps</h4>
+        </div>
+      </div>
+      <div class="pfda-pane">
+        <div class="pfda-pane-sidebar">
+          <% if @context.logged_in? && @user_appathon.nil? && @meta_appathon.is_ongoing? %>
+          <div class="pfda-toolbar">
+            <div class="h4">
+              Join or Organize an App-a-thon
+            </div>
+            <p class="text-muted">
+              Help others discover great NGS software by contributing to this effort.
+            </p>
+            <% if !@meta_appathon.followed_by?(@context.user) %>
+              <p class="text-muted">
+                Organize or participate in a precisionFDA app-a-thon today!
+              </p>
+              <%= link_to new_meta_appathon_appathon_path(@meta_appathon), class: 'btn btn-danger btn-block' do %>
+                <span class="fa fa-bolt fa-fw"></span> Host an App-a-thon
+              <% end %>
+            <% end %>
+          </div>
+          <% end %>
+          <%= render "appathons/cards", meta_appathon: @meta_appathon, appathons: @appathons %>
+        </div>
+        <div class="pfda-pane-content">
+          <%= render "meta_appathons/app_cards", apps: @apps, meta_appathon: @meta_appathon %>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="container-fluid container-padded pfda-meta-appathon-section">
+    <div class="pfda-meta-appathon-video">
+      <div class="thumbnail">
+        <%= video_iframe("https://www.youtube.com/embed/ir662wQJ5cI") %>
+      </div>
+    </div>
     <div class="row">
       <div class="col-md-11">
         <div class="panel">
@@ -121,7 +158,7 @@
                 <div class="metadata-section">
                   <ul class="list-group list-group-inline">
                     <li class="list-group-item list-group-item-transparent-bg">
-                      <h5 class="list-group-item-heading">End <span class="label label-info">Further Extended</span></h5>
+                      <h5 class="list-group-item-heading">End <span class="label label-default">Closed</span></h5>
                       <p class="list-group-item-text"><%= @meta_appathon.end_at.to_s(:db) %></p>
                     </li>
                   </ul>
@@ -423,43 +460,6 @@
         <p class="lead">
           Take a look at <a href="https://www.youtube.com/watch?v=U_vmcd93HkM" target="_blank">this 4-minute introductory video</a> to get an idea of what the system is about.
         </p>
-      </div>
-    </div>
-  </div>
-
-  <div id="appathons-list" class="pfda-meta-appathon-submissions container-fluid">
-    <div class="panel panel-primary">
-      <div class="panel-heading">
-        <div class="text-center">
-          <%= image_tag("icons/ColoredLineIcons/png/128/laptop.png")  %>
-          <h4>App-a-thons and Submitted Apps</h4>
-        </div>
-      </div>
-      <div class="pfda-pane">
-        <div class="pfda-pane-sidebar">
-          <% if @context.logged_in? && @user_appathon.nil? %>
-          <div class="pfda-toolbar">
-            <div class="h4">
-              Join or Organize an App-a-thon
-            </div>
-            <p class="text-muted">
-              Help others discover great NGS software by contributing to this effort.
-            </p>
-            <% if !@meta_appathon.followed_by?(@context.user) && @meta_appathon.is_ongoing? %>
-              <p class="text-muted">
-                Organize or participate in a precisionFDA app-a-thon today!
-              </p>
-              <%= link_to new_meta_appathon_appathon_path(@meta_appathon), class: 'btn btn-danger btn-block' do %>
-                <span class="fa fa-bolt fa-fw"></span> Host an App-a-thon
-              <% end %>
-            <% end %>
-          </div>
-          <% end %>
-          <%= render "appathons/cards", meta_appathon: @meta_appathon, appathons: @appathons %>
-        </div>
-        <div class="pfda-pane-content">
-          <%= render "meta_appathons/app_cards", apps: @apps, meta_appathon: @meta_appathon %>
-        </div>
       </div>
     </div>
   </div>

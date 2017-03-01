@@ -9,7 +9,7 @@ class MetaAppathonsController < ApplicationController
   def show
     if !params[:id].nil?
       @meta_appathon = MetaAppathon.find(params[:id])
-      if @meta_appathon.handle == MetaAppathon::ACTIVE_META_APPATHON
+      if @meta_appathon.handle == ACTIVE_META_APPATHON
         redirect_to active_meta_appathon_path and return
       end
     else

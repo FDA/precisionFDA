@@ -196,13 +196,20 @@ class ProfileController < ApplicationController
         api = DNAnexusAPI.new(@context.token)
         papi = DNAnexusAPI.new(ADMIN_TOKEN)
 
-        raise "We did not expect #{dxorg} to exist on DNAnexus" if api.entity_exists?(dxorg)
         raise "We did not expect #{dxuserid} to exist on DNAnexus" if api.entity_exists?(dxuserid)
         raise "We did not expect org name '#{@org}' to exist in the database" if Org.find_by(name: @org).present?
         raise "We did not expect org handle '#{@org_handle}' to exist in the database" if Org.find_by(handle: @org_handle).present?
 
         AUDIT_LOGGER.info("The system is about to start provisioning admin '#{@suggested_username}' and org '#{@org_handle}'#{@singular ? ' (self-represented)' : ''} initiated by '#{@user.dxuser}'")
-        papi.call("org", "new", {handle: dxorghandle, name: @org})
+        if api.entity_exists?(dxorg)
+          # Check if the org exists due to earlier failure
+          org_description = papi.call(dxorg, "describe")
+          raise "We found #{dxorg} to exist already and we are not the only admin" if org_description["admins"] != ["user-precisionfda.admin"]
+          raise "We found #{dxorg} to exist already but with a different name" if org_description["name"] != @org
+        else
+          papi.call("org", "new", {handle: dxorghandle, name: @org})
+        end
+
         billing_info = {
           email: "billing@dnanexus.com",
           name: "Elaine Johanson",

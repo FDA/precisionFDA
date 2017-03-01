@@ -26,7 +26,7 @@
 </div>
 
 
-<% if !@meta_appathon.followed_by?(@context.user) %>
+<% if !@meta_appathon.followed_by?(@context.user) && @meta_appathon.is_ongoing? %>
 <div class="pfda-toolbar">
   <div class="btn-group">
     <%= link_to new_appathon_path(@meta_appathon), class: 'btn btn-primary' do %>

@@ -85,8 +85,11 @@ class ChallengesController < ApplicationController
     end
   end
 
+  # TODO: may need to change this for future appathons
   # Challenge 3 - Appathon in a Box
   def appathons
+    @discussion = Discussion.find_by(id: APPATHON_IN_A_BOX_DISCUSSION_ID)
+
     redirect_to active_meta_appathon_path
   end
 

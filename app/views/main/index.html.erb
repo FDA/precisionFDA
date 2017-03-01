@@ -49,7 +49,7 @@
             </div>
           <% else %>
             <ul class="pfda-cards pfda-cards-list pfda-tutorial text-left">
-              <% if !@user_appathon.nil? %>
+              <% if !@user_appathon.nil? && @user_appathon.meta_appathon.is_ongoing? %>
                 <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
                   <div class="pfda-card-title">
                     <%= link_to flag_image_tag(@user_appathon.flag, width: 40), appathon_path(@user_appathon), class: "pull-right" %>
@@ -59,7 +59,7 @@
                     You have joined this for <br /><a class="link-muted" href="<%= meta_appathon_path(@user_appathon.meta_appathon) %>"><%=  @user_appathon.meta_appathon.title %></a>
                   </div>
                 </li>
-              <% elsif !@meta_appathon.nil? %>
+              <% elsif !@meta_appathon.nil? && @meta_appathon.is_ongoing? %>
                 <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-warning">
                   <div class="pfda-card-title">
                     <%= link_to "View #{@meta_appathon.title}", meta_appathon_path(@meta_appathon) %>
@@ -148,6 +148,7 @@
             </li>
           </ul>
           <ul class="pfda-cards pfda-cards-stretch">
+            <%= render "main/news" %>
             <% if @appathons_challenge[:launched]  %>
             <a class="pfda-card pfda-card-padded pfda-card-light pfda-card-rounded pfda-card-bordered" href="<%= @appathons_challenge[:path] %>">
               <div class="pfda-card-header lead text-center">
@@ -157,11 +158,10 @@
                 <span class="fa fa-trophy" aria-hidden="true"></span>
               </div>
               <div class="pfda-card-title lead lead-bold text-center">
-                <%= @appathons_challenge[:title] %>
+                <%= @appathons_challenge[:title] %> Challenge
               </div>
             </a>
             <% end %>
-            <%= render "main/news" %>
             <% if @truth_challenge[:launched]  %>
             <a class="pfda-card pfda-card-padded pfda-card-light pfda-card-rounded pfda-card-bordered" href="<%= truth_challenges_path %>">
               <div class="pfda-card-header lead text-center">
@@ -175,7 +175,6 @@
               </div>
             </a>
             <% end %>
-
             <% if @consistency_challenge[:launched]  %>
             <a class="pfda-card pfda-card-padded pfda-card-light pfda-card-rounded pfda-card-bordered" href="<%= consistency_challenges_path %>">
               <div class="pfda-card-header lead text-center">

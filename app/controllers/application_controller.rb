@@ -11,7 +11,7 @@ class ApplicationController < ActionController::Base
       base_uri: %w('self'),
       block_all_mixed_content: true, # see [http://www.w3.org/TR/mixed-content/](http://www.w3.org/TR/mixed-content/)
       child_src: %w('self' https://www.youtube.com blob:),
-      connect_src: %w('self' https://s3.amazonaws.com https://stagingdl.dnanex.us https://dl.dnanex.us https://api.dnanexus.com),
+      connect_src: %w('self' https://dnanexus-platform-upload-prod.s3.amazonaws.com https://dnanexus-platform-upload-stg.s3.amazonaws.com https://s3.amazonaws.com https://stagingdl.dnanex.us https://dl.dnanex.us https://api.dnanexus.com),
       default_src: %w(https: 'self'),
       font_src: %w('self' https://fonts.gstatic.com https://cdnjs.cloudflare.com),
       form_action: %w('self' https://stagingdl.dnanex.us https://dl.dnanex.us),
@@ -35,13 +35,16 @@ class ApplicationController < ActionController::Base
     if ENV["DNANEXUS_BACKEND"] == "production"
       hpkp[:pins] = [
         {sha256: 'OV/2vGzq4A/PlbCUFpy5W2dHmMLPvHZ9N/FVDOPNvQw='},
+        {sha256: 'Hxbr0eK3F0xc4UkeXRvapzSvj3I0efJ+2h2Q70MpltM='},
         {sha256: 'AGLBxCqwOTXOZg/v14oxVzHbU0GVWr1QlHR7DQqnzvU='},
         {sha256: '154XxB1J9PKgQ2rcgEEsTY+0CPdx03PpIiiJPlJzAXk='}
       ]
+      hpkp[:max_age] = 7.days.to_i
     else
       hpkp[:pins] = [
         {sha256: 'gtfblKFG3oCmgxfjddilwzBgaudaW3XyH7M90LrfjOU='},
-        {sha256: 'x8W1sshBVav03Hgxxp+PRD5f3xs0yIBmNpph3krjGqM='}
+        {sha256: 'x8W1sshBVav03Hgxxp+PRD5f3xs0yIBmNpph3krjGqM='},
+        {sha256: 'TZqk8OpJ8n7+4M25OqUSfDZ+917bcso0RVa4ZMvdvXQ='}
       ]
     end
     config.hpkp = hpkp

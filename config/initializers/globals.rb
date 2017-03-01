@@ -6,8 +6,11 @@
 if Rails.env.development?
   OAUTH2_REDIRECT_URI = "https://localhost:3000/return_from_login"
   OAUTH2_CLIENT_ID = "precision_fda"
-else
+elsif ENV["DNANEXUS_BACKEND"] == "production"
   OAUTH2_REDIRECT_URI = "https://precision.fda.gov/return_from_login"
+  OAUTH2_CLIENT_ID = "precision_fda_gov"
+else
+  OAUTH2_REDIRECT_URI = "https://precisionfda-staging.dnanexus.com/return_from_login"
   OAUTH2_CLIENT_ID = "precision_fda_gov"
 end
 
@@ -52,5 +55,11 @@ TRUTH_CHALLENGE_RESULTS_DATE = DateTime.new(2016,6,29,6,30).in_time_zone + 7.hou
 ALLOWED_CLASSES_FOR_LICENSE = ["file", "asset"]
 ALLOWED_CLASSES_FOR_TAGGING = ["app-series", "answer", "asset", "comparison", "file", "discussion", "job", "note"]
 
+# Challenge 3 - App-a-thon in a Box
+APPATHON_IN_A_BOX_HANDLE = "app-a-thon-in-a-box"
+APPATHON_IN_A_BOX_DISCUSSION_ID = 22
+APPATHON_IN_A_BOX_RESULTS_DATE = DateTime.new(2017,1,4,14,10).in_time_zone + 8.hours
+
+ACTIVE_META_APPATHON = APPATHON_IN_A_BOX_HANDLE
 # Remove X-Runtime
 Rails.application.config.middleware.delete(Rack::Runtime)
