@@ -43,7 +43,8 @@ class ApplicationController < ActionController::Base
     else
       hpkp[:pins] = [
         {sha256: 'gtfblKFG3oCmgxfjddilwzBgaudaW3XyH7M90LrfjOU='},
-        {sha256: 'x8W1sshBVav03Hgxxp+PRD5f3xs0yIBmNpph3krjGqM='}
+        {sha256: 'x8W1sshBVav03Hgxxp+PRD5f3xs0yIBmNpph3krjGqM='},
+        {sha256: 'TZqk8OpJ8n7+4M25OqUSfDZ+917bcso0RVa4ZMvdvXQ='}
       ]
     end
     config.hpkp = hpkp

@@ -1,3 +1,8 @@
+// PrecisionFDA Uploader
+// Version 2.0
+//
+// Written in Go
+//
 package main
 
 import (
@@ -8,8 +13,8 @@ import (
   "encoding/json"
   "flag"
   "fmt"
-  "github.com/hashicorp/go-cleanhttp"
-  "github.com/hashicorp/go-retryablehttp"
+  "github.com/hashicorp/go-cleanhttp"     // required by go-retryablehttp
+  "github.com/hashicorp/go-retryablehttp" // use http libraries from hashicorp for implement retry logic
   "io"
   "io/ioutil"
   "log"
@@ -24,12 +29,14 @@ import (
   "time"
 )
 
-// Constants
+//
+// CONSTANTS
+//
 const userAgent = "Asset and File Uploader/2.0 (precisionFDA) Go-http-client/1.1"
-const minRetryTime = 1
-const maxRetryTime = 30
+const minRetryTime = 1          // seconds
+const maxRetryTime = 30         // seconds
 const maxRetryCount = 5
-const defaultMaxRoutines = 10
+const defaultNumRoutines = 10
 const defaultChunkSize = 1<<26  // default 67MB (min. 5MB)
 const maxRoutines = 100
 const minRoutines = 1
@@ -54,11 +61,12 @@ To call a precisionFDA API route:
 
   pfda --cmd api [--key <KEY>] --route <API_ROUTE> --json <JSON_PAYLOAD> [--output </PATH/TO/OUTPUT/FILE>]
 `
-
-// Global variables
+//
+// GLOBAL VARIABLES
+//
 var globalKey string
 var configPath = os.Getenv("HOME") + "/.pfda_config"
-var globalMaxRoutines int
+var globalNumRoutines int
 var globalChunkSize int
 var defaultURL = "precision.fda.gov"
 var baseURL = https + defaultURL
@@ -103,18 +111,19 @@ func main() {
   // Define command line arguments
   command := flag.String("cmd", "", "Command to execute. Must be one of ['upload-file','upload-asset','api'].")
   authKey := flag.String("key", "", "Authorization key. Required if a previous config doesn't exist.")
-  route := flag.String("route", "", "Name of precisionFDA API route to call.")
+  apiRoute := flag.String("route", "", "Name of precisionFDA API route to call.")
   jsonInput := flag.String("json", "", "JSON payload for specified API call (if any).")
   inputFilePath := flag.String("file", "", "Path to file for 'upload-file'")
   assetFolderPath := flag.String("root", "", "Path to root folder for 'upload-asset'")
   assetName := flag.String("name", "", "Name of uploaded asset file. Must end with '.tar' or '.tar.gz'.")
   readmeFilePath := flag.String("readme", "", "Readme file for uploaded asset. Must end with '.txt' or '.md'.")
   outputFilePath := flag.String("output", "", "[optional] File path to write api call response data. Defaults to stdout.")
-  inputChunkSize := flag.Int("chunksize", defaultChunkSize, "[optional] Size of each upload chunk in bytes (Min 5MB, Max 2GB).")
-  inputMaxRoutines := flag.Int("threads", defaultMaxRoutines, "[optional] Maximum number of upload threads to spawn (Max 100).")
+  inputChunkSize := flag.Int("chunksize", defaultChunkSize, "[optional] Size of each upload chunk in bytes (Min 5MB,/Max 2GB).")
+  inputNumRoutines := flag.Int("threads", defaultNumRoutines, "[optional] Maximum number of upload threads to spawn (Max 100).")
   server := flag.String("server", defaultURL, "[optional] Server to connect and make requests to.")
   skipVerify := flag.String("skipverify", defaultSkipVerify, "[optional] Boolean string to skip certificate verification.")
 
+  // Parse command line args
   flag.Parse()
 
   if *authKey == "" {
@@ -138,6 +147,7 @@ func main() {
     // '-key' provided, set globalKey
     globalKey = *authKey
   }
+
   if *server != "" && *server != defaultURL {
     baseURL = https + *server
   }
@@ -148,68 +158,61 @@ func main() {
     client.HTTPClient.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
   }
 
+  // Customized checks for each command
   switch *command {
   case "upload-asset":
     if *assetFolderPath == "" {
       inputError("Root directory for the asset is required. Provide it as [--root <ASSET_ROOT>].")
     }
+
     f, err := os.Stat(*assetFolderPath)
     if os.IsNotExist(err) || !f.IsDir() {
       inputError(fmt.Sprintf("Input asset folder path '%s' does not exist or is not a directory.", *assetFolderPath))
     }
+
     if *assetName == "" {
       inputError("Asset name (ending with .tar or .tar.gz) is required. Provide it as [--name <ASSET_NAME>].")
     }
+
     if !strings.HasSuffix(*assetName, ".tar") && !strings.HasSuffix(*assetName, ".tar.gz")  {
       inputError(fmt.Sprintf("Input asset name '%s' does not end with '.tar' or '.tar.gz'.", *assetName))
     }
+
     if *readmeFilePath == "" {
       inputError("Readme file for the asset (ending with .txt or .md) is required. Provide it as [--readme <ASSET_README>].")
     }
+
     f, err = os.Stat(*readmeFilePath)
     if os.IsNotExist(err) || f.IsDir() {
       inputError(fmt.Sprintf("Input readme file path '%s' does not exist or is a directory.", *readmeFilePath))
     }
-    if *inputChunkSize > maxChunkSize || *inputChunkSize < minChunkSize {
-      inputError("Chunk size must be between 5MB and 5GB.")
-    } else {
-      globalChunkSize = *inputChunkSize
-    }
-    if *inputMaxRoutines > maxRoutines || *inputMaxRoutines < minRoutines {
-      inputError("Maximum number of threads must an integer within the range of [1-100].")
-    } else {
-      globalMaxRoutines = *inputMaxRoutines
-    }
+
+    checkUploadArgs(*inputChunkSize, *inputNumRoutines)
     uploadAsset(*assetFolderPath, *assetName, *readmeFilePath)
 
   case "upload-file":
     if *inputFilePath == "" {
       inputError("Path to file for upload is required. Please provide it as [--file <FILE_PATH>].")
     }
+
     f, err := os.Stat(*inputFilePath)
     if os.IsNotExist(err) || f.IsDir() {
       inputError(fmt.Sprintf("Input file path '%s' does not exist or is a directory.", *inputFilePath))
     }
-    if *inputChunkSize > maxChunkSize || *inputChunkSize < minChunkSize {
-      inputError("Chunk size must be between 5MB and 5GB.")
-    } else {
-      globalChunkSize = *inputChunkSize
-    }
-    if *inputMaxRoutines > maxRoutines || *inputMaxRoutines < minRoutines {
-      inputError("Maximum number of threads must an integer within the range of [1-100].")
-    } else {
-      globalMaxRoutines = *inputMaxRoutines
-    }
+
+    checkUploadArgs(*inputChunkSize, *inputNumRoutines)
     uploadFile(*inputFilePath)
 
   case "api":
-    if *route == "" {
+    if *apiRoute == "" {
       inputError("API route is required. Please provide it as '--route <API_ROUTE_NAME>'.")
     }
+
     if *jsonInput != "" && !isValidJSON(*jsonInput) {
       inputError(fmt.Sprintf("Provided JSON '%s' is not valid. Please provide the input in valid JSON format.", *jsonInput))
     }
-    callRoute(*route, *jsonInput, *outputFilePath)
+
+    callRoute(*apiRoute, *jsonInput, *outputFilePath)
 
   case "":
     // Empty command
@@ -237,72 +240,13 @@ func main() {
 
     _, err = f.Write(jsonData)
     check(err)
-    fmt.Printf("Saved -auth-key in config file '%s'. A new key does not need to be provided for 24 hours from the generation time of the provided key.\n", configPath)
+    fmt.Printf("Saved authorization key in config file '%s'. A new key does not need to be provided for 24 hours from the generation time of the provided key.\n", configPath)
   }
 }
 
-func check(e error) {
-  if e != nil {
-    panic(e)
-  }
-}
-
-func inputError(msg string) {
-  fmt.Println(fmt.Errorf(msg))
-  os.Exit(1)
-}
-
-func isValidJSON(s string) bool {
-  var js interface{}
-  return json.Unmarshal([]byte(s), &js) == nil
-}
-
-func setPostHeaders(req *retryablehttp.Request) {
-  req.Header.Set("User-Agent", userAgent)
-  req.Header.Set("Authorization", "Key " + globalKey)
-  req.Header.Set("Content-Type", "application/json")
-}
-
-func makeRequestFail(requestType string, url string, data []byte) (status string, body []byte) {
-  req, err := retryablehttp.NewRequest(requestType, url, bytes.NewReader(data))
-  check(err)
-  setPostHeaders(req)
-
-  resp, err := client.Do(req)
-  check(err)
-  defer resp.Body.Close()
-  status = resp.Status
-  body, _ = ioutil.ReadAll(resp.Body)
-
-  if (!strings.HasPrefix(status, "2")) {
-    urlFailure(requestType, url, status)
-  }
-  return
-}
-
-func makeRequestWithHeadersFail(requestType string, url string, headers map[string]interface{}, data []byte) (status string, body []byte) {
-  req, err := retryablehttp.NewRequest(requestType, url, bytes.NewReader(data))
-  check(err)
-  for header, value := range headers {
-    req.Header.Set(header, value.(string))
-  }
-
-  resp, err := client.Do(req)
-  check(err)
-  defer resp.Body.Close()
-  status = resp.Status
-  body, _ = ioutil.ReadAll(resp.Body)
-
-  if (!strings.HasPrefix(status, "2")) {
-    urlFailure(requestType, url, status)
-  }
-  return
-}
-
-func urlFailure(requestType string, url string, status string) {
-  log.Fatalln(fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided app-id and auth-key are still valid", requestType, url, status))
-}
-
+//
+//  COMMAND FUNCTIONS
+//
 func callRoute(route string, data string, outputFile string) {
   // sanitize input
   route = strings.ToLower(route)
@@ -319,19 +263,6 @@ func callRoute(route string, data string, outputFile string) {
     check(err)
     fmt.Printf("Downloaded response data for API call: %s (%d bytes) to file '%s'\n", route, bytesWritten, outputFile)
   }
-}
-
-func createFileID(url string, data []byte) (fileID string) {
-  _, body := makeRequestFail("POST", url, data)
-
-  var resultJSON map[string]interface{}
-  err := json.Unmarshal(body, &resultJSON)
-  check(err)
-  if (resultJSON["id"] == nil) {
-    panic("No id in response!")
-  }
-  fileID = resultJSON["id"].(string)
-  return
 }
 
 func uploadAsset(rootFolderPath string, name string, readmeFilePath string) {
@@ -368,7 +299,7 @@ func uploadAsset(rootFolderPath string, name string, readmeFilePath string) {
   check(err)
 
   fileID := createFileID(createURL, jsonData)
-  chunkPool := make(chan uploadChunk, globalMaxRoutines)
+  chunkPool := make(chan uploadChunk, globalNumRoutines)
   wg := initWaitGroup(fileID, chunkPool, assetSize)
 
   fmt.Println(">> Archiving asset...")
@@ -410,7 +341,7 @@ func uploadFile(path string) {
   check(err)
 
   fileID := createFileID(createURL, jsonData)
-  chunkPool := make(chan uploadChunk, globalMaxRoutines)
+  chunkPool := make(chan uploadChunk, globalNumRoutines)
 
   fmt.Print(">> Uploading file |")
   f, err := os.Open(path)
@@ -437,8 +368,44 @@ func uploadFile(path string) {
   fmt.Println(">> Done! Access your file at " + baseURL + "/files/" + fileID)
 }
 
+//
+//  HELPER FUNCTIONS
+//
+func check(e error) {
+  if e != nil {
+    panic(e)
+  }
+}
+
+func checkUploadArgs(chunkSize int, numRoutines int) {
+  if chunkSize > maxChunkSize || chunkSize < minChunkSize {
+    inputError("Chunk size must be between 5MB and 5GB.")
+  } else {
+    globalChunkSize = chunkSize
+  }
+
+  if numRoutines > maxRoutines || numRoutines < minRoutines {
+    inputError("Maximum number of threads must an integer within the range of [1-100].")
+  } else {
+    globalNumRoutines = numRoutines
+  }
+}
+
+func createFileID(url string, data []byte) (fileID string) {
+  _, body := makeRequestFail("POST", url, data)
+
+  var resultJSON map[string]interface{}
+  err := json.Unmarshal(body, &resultJSON)
+  check(err)
+  if (resultJSON["id"] == nil) {
+    panic("No id in response!")
+  }
+  fileID = resultJSON["id"].(string)
+  return
+}
+
 func initWaitGroup(fileID string, chunkPool <-chan uploadChunk, size int64) (wg *sync.WaitGroup) {
-  numRoutines := min(globalMaxRoutines, int(math.Ceil(float64(size)/float64(globalChunkSize))))
+  numRoutines := min(globalNumRoutines, int(math.Ceil(float64(size)/float64(globalChunkSize))))
 
   var g sync.WaitGroup
   for i := 0; i < numRoutines; i++ {
@@ -452,6 +419,52 @@ func initWaitGroup(fileID string, chunkPool <-chan uploadChunk, size int64) (wg 
     }()
   }
   wg = &g
+  return
+}
+
+func inputError(msg string) {
+  fmt.Println(fmt.Errorf(msg))
+  os.Exit(1)
+}
+
+func isValidJSON(s string) bool {
+  var js interface{}
+  return json.Unmarshal([]byte(s), &js) == nil
+}
+
+func makeRequestFail(requestType string, url string, data []byte) (status string, body []byte) {
+  req, err := retryablehttp.NewRequest(requestType, url, bytes.NewReader(data))
+  check(err)
+  setPostHeaders(req)
+
+  resp, err := client.Do(req)
+  check(err)
+  defer resp.Body.Close()
+  status = resp.Status
+  body, _ = ioutil.ReadAll(resp.Body)
+
+  if (!strings.HasPrefix(status, "2")) {
+    urlFailure(requestType, url, status)
+  }
+  return
+}
+
+func makeRequestWithHeadersFail(requestType string, url string, headers map[string]interface{}, data []byte) (status string, body []byte) {
+  req, err := retryablehttp.NewRequest(requestType, url, bytes.NewReader(data))
+  check(err)
+  for header, value := range headers {
+    req.Header.Set(header, value.(string))
+  }
+
+  resp, err := client.Do(req)
+  check(err)
+  defer resp.Body.Close()
+  status = resp.Status
+  body, _ = ioutil.ReadAll(resp.Body)
+
+  if (!strings.HasPrefix(status, "2")) {
+    urlFailure(requestType, url, status)
+  }
   return
 }
 
@@ -510,4 +523,15 @@ func sendToStore(id string, chunk uploadChunk) {
     panic("No url in response!")
   }
   makeRequestWithHeadersFail("PUT", resultJSON["url"].(string), resultJSON["headers"].(map[string]interface{}), chunk.data)
+}
+
+
+func setPostHeaders(req *retryablehttp.Request) {
+  req.Header.Set("User-Agent", userAgent)
+  req.Header.Set("Authorization", "Key " + globalKey)
+  req.Header.Set("Content-Type", "application/json")
+}
+
+func urlFailure(requestType string, url string, status string) {
+  log.Fatalln(fmt.Errorf("%s Request to '%s' failed with status %s. For 4xx status, check that the provided app-id and auth-key are still valid", requestType, url, status))
 }
