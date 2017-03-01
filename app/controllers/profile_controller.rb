@@ -203,7 +203,7 @@ class ProfileController < ApplicationController
         AUDIT_LOGGER.info("The system is about to start provisioning admin '#{@suggested_username}' and org '#{@org_handle}'#{@singular ? ' (self-represented)' : ''} initiated by '#{@user.dxuser}'")
         if api.entity_exists?(dxorg)
           # Check if the org exists due to earlier failure
-          org_description = api.call(dxorg, "describe")
+          org_description = papi.call(dxorg, "describe")
           raise "We found #{dxorg} to exist already and we are not the only admin" if org_description["admins"] != ["user-precisionfda.admin"]
           raise "We found #{dxorg} to exist already but with a different name" if org_description["name"] != @org
         else
