@@ -63,6 +63,8 @@ module ApplicationHelper
       "fa-legal"
     when "space"
       "fa-object-group"
+    when "expert"
+      "fa-star-o"
     else
       raise "Unknown class #{item.klass}"
     end
