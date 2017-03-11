@@ -142,6 +142,9 @@ Rails.application.routes.draw do
       get 'items', on: :member
     end
 
+    resources :experts do
+    end
+
     resources :spaces do
       get 'members', on: :member
       get 'content', on: :member

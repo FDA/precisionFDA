@@ -1,0 +1,44 @@
+<% content_for :title do %>Create a new <strong>Expert of the Month</strong><% end %>
+
+<div class="page-header">
+  <div class="page-title">
+    <span class="fa fa-groups"></span>
+    Create a new <strong>Expert of the Month</strong>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <%= form_for @expert, url: experts_path, html: {class: 'form form-horizontal'} do |f| %>
+    <%= render "_partials/form_errors", object: @expert %>
+    <div class="form-group required">
+      <%= f.label :username, "Username", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%= f.text_field :username, class: "form-control", placeholder: "Expert username...", required: "required"  %>
+      </div>
+    </div>
+   <div class="form-group required">
+      <%= f.label :_intro, "Intro", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%= f.text_field :_intro, class: "form-control", placeholder: "Introduction...", required: "required"  %>
+      </div>
+    </div>
+    <div class="form-group required ">
+      <%= f.label :_bio, "Bio", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%= f.text_area :_bio, class: "form-control", rows: 10, placeholder: "Detailed Biography..." %>
+      </div>
+    </div>
+    <div class="form-group required">
+      <%= f.label :image, "Image URL", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%= f.text_field :image, class: "form-control", placeholder: "Image link...", required: "required"  %>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-sm-offset-3">
+        <%= f.submit "Create Expert", class: 'btn btn-primary', data: {disable_with: "Creating..."} %>
+      </div>
+    </div>
+  <% end %>
+</div>
