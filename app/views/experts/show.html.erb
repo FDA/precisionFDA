@@ -36,29 +36,37 @@
             hi
       </div>
       <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal pfda-pane-sidebar-padded-v">
-      <div class="list-group">
-        <li class="list-group-item">
-          <span class="fa fa-edit"></span> Write an Answer
-       </li>
-        <li class="list-group-item list-group-item-header">
-       <% if @context.logged_in? %>
-         <% @expert.questions_by_user_id(@context.user_id).each do |q|%>
+        <div class="list-group">
+          <li class="list-group-item text-center">
+            <a class="btn btn-primary" data-toggle="modal" data-target="#ask-question-modal">
+            <span class="fa fa-commenting-o fa-fw" aria-hidden="true"></span> Ask <%= @expert.user.first_name.capitalize %>
+        </a>
+          </li>
+          <% if @context.logged_in? %>
+            <% @user_questions = @expert.questions_by_user_id(@context.user_id) %>
+            <li class="list-group-item list-group-item-header">
+            Your Questions (<%= @user_questions.count %>)
+            <% @user_questions.each do |q|%>
+             <li class="list-group-item">
+              <%= q.body %>
+             </li>
+            <% end %>
+          <% else %>
           <li class="list-group-item">
-             <%= q.body %>
+            Please login or register for an account to see track your question history.
           </li>
-         <% end %>
-       <% else %>
-         <li class="list-group-item">
-        Please login or register for an account to see track your question history.
-          </li>
-     <% end %>
+        <% end %>
       </li>
     </div>
     <div class="list-group">
       <li class="list-group-item list-group-item-header">
-          death
+        About this month's Expert
+      </li>
+      <li class="list-group-item">
+        <%= @expert._bio %>
       </li>
     </div>
   </div>
 </div>
 
+<%= render "experts/modal_ask_question" %>

@@ -16,7 +16,7 @@ class Expert < ActiveRecord::Base
   belongs_to :user
 
   store :meta, accessors: [:_intro, :_bio], coder: JSON
-  attr_accessor :username
+  attr_accessor :username, :question
 
   def uid
     "expert-#{id}"

@@ -143,6 +143,7 @@ Rails.application.routes.draw do
     end
 
     resources :experts do
+      post 'ask_question', on: :member
     end
 
     resources :spaces do

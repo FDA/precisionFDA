@@ -34,6 +34,14 @@ class ExpertQuestion < ActiveRecord::Base
     state == "edited"
   end
 
+  def self.provision(expert, context, body)
+    q = ExpertQuestion.create!(
+      :user_id => context.logged_in? ? context.user.id : nil,
+      :expert_id => expert.id,
+      :body => body
+    )
+  end
+
   def editable_by?(context)
     if !context.guest?
       raise unless context.user_id.present?

@@ -28,6 +28,17 @@ class ExpertsController < ApplicationController
     end
   end
 
+  def ask_question
+    @expert = Expert.find(params[:id])
+    q = ExpertQuestion.provision(@expert, @context, params[:expert][:question])
+    if q
+      flash[:success] = "Your question was submitted successfully."
+    else
+      flash.now[:error] = "Your question was not submitted because of an unknown reason."
+    end
+    redirect_to expert_path(@expert)
+  end
+
   def create
     redirect_to experts_path unless @context.user.can_administer_site?
 
