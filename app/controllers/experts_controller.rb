@@ -1,13 +1,13 @@
 class ExpertsController < ApplicationController
-  skip_before_action :require_login,     only: [:index, :show]
-  before_action :require_login_or_guest, only: [:index, :show]
+  skip_before_action :require_login,     only: [:index, :show, :ask_question]
+  before_action :require_login_or_guest, only: []
 
   def index
     @experts = Expert.all
   end
 
   def new
-    redirect_to experts_path unless @context.user.can_administer_site?
+    redirect_to experts_path unless @context.logged_in? && @context.user.can_administer_site?
     @expert = Expert.new
   end
 
@@ -60,8 +60,20 @@ class ExpertsController < ApplicationController
     render :new
   end
 
+  def dashboard
+    @expert = Expert.find(params[:id])
+    redirect_to experts_path unless @expert.editable_by?(@context)
+
+    @answered_questions = @expert.answered_questions
+    @ignored_questions = @expert.ignored_questions
+    @open_questions = @expert.open_questions
+    @total_count = @answered_questions.count + @ignored_questions.count + @open_questions.count
+  end
+
   def show
     @expert = Expert.find(params[:id])
+    @answered_questions = @expert.answered_questions
+    @user_questions = @context.logged_in? ? @expert.questions_by_user_id(@context.user_id) : nil
   end
 
   def followers
