@@ -38,3 +38,7 @@ The current comparison app runs `vcfeval` from Real Time Genomics.
 You can access it at the following GitHub repo:
 
 https://github.com/RealTimeGenomics/rtg-tools
+
+## Links
+
+* [Localhost Setup](LOCAL_INSTALL.md)
