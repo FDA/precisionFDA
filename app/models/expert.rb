@@ -50,11 +50,19 @@ class Expert < ActiveRecord::Base
     state == "CLOSED"
   end
 
+  def edit_image(new_image)
+    update_attributes(image: new_image)
+  end
+
   def editable_by?(context)
     if !context.guest?
       raise unless context.user_id.present?
       user.id == context.user_id
     end
+  end
+
+  def questions_by_user_id(user_id)
+    expert_questions.select{|q| q.user.id == user_id}
   end
 
   def self.editable_by(context)

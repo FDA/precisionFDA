@@ -10,6 +10,7 @@
 #
 
 class ExpertQuestion < ActiveRecord::Base
+  belongs_to :user
   belongs_to :expert
   has_one :expert_answer, dependent: :destroy
 
