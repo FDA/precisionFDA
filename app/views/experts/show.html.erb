@@ -1,0 +1,64 @@
+<% content_for :title do %><%= @expert.name %><% end %>
+<div class="page-header">
+  <div class="media">
+    <div class="media-left text-muted">
+     <%= image_tag(@expert.image, class: 'img-square', height: '100px', width: '100px') %>
+    </div>
+    <div class="media-body">
+      <% if @expert.editable_by?(@context) %>
+        <div class="pull-right">
+          <div class="btn-group">
+            <div class="dropdown">
+              <button class="btn btn-link btn-lg" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="fa fa-cog"></span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
+                <li>
+                  <%= link_to edit_expert_path(@expert) do %>
+                    <span class="fa fa-pencil"></span> Edit
+                  <% end %>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="page-title">
+        Expert Q&A with <%= link_to("#{@expert.name}", user_path(@expert.user.dxuser)) %> (<%= @expert.user.org.name %>)
+      </div>
+      <div class="pfda-discussion-content">
+        <%= @expert._intro %>
+      </div>
+    </div>
+    <div class="pfda-pane container-padded container-fluid">
+      <div class="pfda-pane-content">
+            hi
+      </div>
+      <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal pfda-pane-sidebar-padded-v">
+      <div class="list-group">
+        <li class="list-group-item">
+          <span class="fa fa-edit"></span> Write an Answer
+       </li>
+        <li class="list-group-item list-group-item-header">
+       <% if @context.logged_in? %>
+         <% @expert.questions_by_user_id(@context.user_id).each do |q|%>
+          <li class="list-group-item">
+             <%= q.body %>
+          </li>
+         <% end %>
+       <% else %>
+         <li class="list-group-item">
+        Please login or register for an account to see track your question history.
+          </li>
+     <% end %>
+      </li>
+    </div>
+    <div class="list-group">
+      <li class="list-group-item list-group-item-header">
+          death
+      </li>
+    </div>
+  </div>
+</div>
+

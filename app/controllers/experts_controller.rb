@@ -11,6 +11,23 @@ class ExpertsController < ApplicationController
     @expert = Expert.new
   end
 
+  def edit
+    @expert = Expert.editable_by(@context).find_by!(id: params[:id])
+  end
+
+  def update
+    @expert = Expert.editable_by(@context).find(params[:id])
+    Expert.transaction do
+      if @expert.update(update_expert_params)
+        flash[:success] = "Expert information updated"
+        redirect_to expert_path(@expert)
+      else
+        flash[:error] = "Could not update expert information. Please try again."
+        render :edit
+      end
+    end
+  end
+
   def create
     redirect_to experts_path unless @context.user.can_administer_site?
 
@@ -33,25 +50,12 @@ class ExpertsController < ApplicationController
   end
 
   def show
+    @expert = Expert.find(params[:id])
   end
 
   def followers
     @discussion = Event.find(params[:id])
     #@followers = @discussion.user_followers
-  end
-
-  def edit
-    @user = User.find(@context.user_id)
-    @discussion = Discussion.editable_by(@context).find(params[:id])
-    @note = @discussion.note
-
-    if @discussion.nil?
-      flash[:error] = "Sorry, this discussion is not editable by you"
-      redirect_to discussion_path(@discussion)
-      return
-    end
-
-    js note_js(@note)
   end
 
   def rename
@@ -85,6 +89,14 @@ class ExpertsController < ApplicationController
     def expert_params
       p = params.require(:expert).permit(:username, :_intro, :_bio, :image)
       p.require(:username)
+      p.require(:_intro)
+      p.require(:_bio)
+      p.require(:image)
+      return p
+    end
+
+    def update_expert_params
+      p = params.require(:expert).permit(:_intro, :_bio, :image)
       p.require(:_intro)
       p.require(:_bio)
       p.require(:image)
