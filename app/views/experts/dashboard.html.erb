@@ -1,0 +1,104 @@
+<% content_for :title do %><%= @expert.name %><% end %>
+<div class="page-header">
+  <div class="media">
+    <div class="media-left text-muted">
+     <%= image_tag(@expert.image, class: 'img-square', height: '100px', width: '100px') %>
+    </div>
+    <div class="media-body">
+      <% if @expert.editable_by?(@context) %>
+        <div class="pull-right">
+          <div class="btn-group">
+            <div class="dropdown">
+              <button class="btn btn-link btn-lg" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="fa fa-cog"></span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
+                <li>
+                  <%= link_to edit_expert_path(@expert) do %>
+                    <span class="fa fa-pencil"></span> Edit
+                  <% end %>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="page-title">
+        Your Expert Q&A Dashboard
+      </div>
+      <div class="pfda-discussion-content">
+        <%= @expert._intro %>
+      </div>
+    </div>
+    <div class="pfda-pane container-padded container-fluid">
+      <div class="pfda-pane-content">
+        <% if @open_questions.count > 0 %>
+
+          <li class="list-group-item list-group-item-header">
+            Open Questions (<%= @open_questions.count %>)
+          </li>
+          <% @open_questions.each do |q|%>
+            <li class="list-group-item">
+              <%= q._original %>
+            </li>
+          <% end %>
+        <% end %>
+        <% if @ignored_questions.count > 0 %>
+          <li class="list-group-item list-group-item-header">
+            Ignored Questions (<%= @ignored_questions.count %>)
+          </li>
+          <% @open_questions.each do |q|%>
+            <li class="list-group-item">
+              <%= q._original %>
+            </li>
+          <% end %>
+        <% end %>
+        <% if @answered_questions.count > 0 %>
+          <li class="list-group-item list-group-item-header">
+            Answered Questions (<%= @answered_questions.count %>)
+          </li>
+          <% @answered_questions.each do |q|%>
+            <li class="list-group-item list-group-item-header">
+              <%= q.body %>
+            </li>
+            <li class="list-group-item">
+              <%= q.expert_answer.body %>
+            </li>
+          <% end %>
+        <% end %>
+        <% if @total_count == 0 %>
+          No questions have been asked yet.
+        <% end %>
+      </div>
+    </div>
+    <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal pfda-pane-sidebar-padded-v">
+      <div class="container-fluid container-padded">
+      <%= form_for @expert, url: experts_path, html: {class: 'form form-horizontal'} do |f| %>
+        <%= render "_partials/form_errors", object: @expert %>
+        <div class="form-group required">
+          <%= f.label :question, "Question", class: 'control-label col-sm-2' %>
+          <div class="col-sm-11 col-sm-offset-1">
+            <%= f.text_area :question, class: "form-control", rows: 2, placeholder: "Question...", required: "required"  %>
+          </div>
+        </div>
+        <div class="form-group required ">
+          <%= f.label :answer, "Answer", class: 'control-label col-sm-2' %>
+          <div class="col-sm-11 col-sm-offset-1">
+            <%= f.text_area :answer, class: "form-control", rows: 10, placeholder: "Answer..." %>
+          </div>
+        </div>
+        <div class="form-group">
+           <div class="col-sm-offset-3">
+            <%= f.submit "Ignore", class: 'btn btn-warning', data: {disable_with: "Ignoring Question..."} %>
+            <%= f.submit "Save Draft", class: 'btn btn-primary', data: {disable_with: "Saving Draft..."} %>
+            <%= f.submit "Submit Answer", class: 'btn btn-success', data: {disable_with: "Submitting Answer..."} %>
+          </div>
+          </div>
+          <div class="col-sm-offset-3">
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

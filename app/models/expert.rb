@@ -16,7 +16,7 @@ class Expert < ActiveRecord::Base
   belongs_to :user
 
   store :meta, accessors: [:_intro, :_bio], coder: JSON
-  attr_accessor :username, :question
+  attr_accessor :username, :question, :answer
 
   def uid
     "expert-#{id}"
@@ -50,11 +50,26 @@ class Expert < ActiveRecord::Base
     state == "CLOSED"
   end
 
+  def open_questions
+    expert_questions.select{|q| q.open?}
+  end
+
+  def ignored_questions
+    expert_questions.select{|q| q.ignored?}
+  end
+
+  def answered_questions
+    expert_questions.select{|q| q.answered?}
+  end
+
   def edit_image(new_image)
     update_attributes(image: new_image)
   end
 
   def editable_by?(context)
+    if !context.logged_in?
+        return false
+    end
     if !context.guest?
       raise unless context.user_id.present?
       user.id == context.user_id
@@ -67,6 +82,7 @@ class Expert < ActiveRecord::Base
 
   def self.editable_by(context)
     if !context.guest?
+      nd
       raise unless context.user_id.present?
       Expert.where(user_id: context.user_id).uniq
     end

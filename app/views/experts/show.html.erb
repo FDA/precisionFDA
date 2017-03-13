@@ -33,38 +33,53 @@
     </div>
     <div class="pfda-pane container-padded container-fluid">
       <div class="pfda-pane-content">
-            hi
+        <% if @answered_questions.count > 0 %>
+          <% @answered_questions.each do |q|%>
+            <li class="list-group-item list-group-item-header">
+              <%= q.body %>
+            </li>
+            <li class="list-group-item">
+              <%= q.expert_answer.body %>
+            </li>
+          <% end %>
+        <% else %>
+          No questions have been answered yet.
+        <% end %>
       </div>
       <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal pfda-pane-sidebar-padded-v">
         <div class="list-group">
           <li class="list-group-item text-center">
             <a class="btn btn-primary" data-toggle="modal" data-target="#ask-question-modal">
-            <span class="fa fa-commenting-o fa-fw" aria-hidden="true"></span> Ask <%= @expert.user.first_name.capitalize %>
-        </a>
+              <span class="fa fa-commenting-o fa-fw" aria-hidden="true"></span> Ask <%= @expert.user.first_name.capitalize %>
+            </a>
           </li>
           <% if @context.logged_in? %>
-            <% @user_questions = @expert.questions_by_user_id(@context.user_id) %>
-            <li class="list-group-item list-group-item-header">
-            Your Questions (<%= @user_questions.count %>)
-            <% @user_questions.each do |q|%>
-             <li class="list-group-item">
-              <%= q.body %>
-             </li>
+            <% if @user_questions.count > 0 %>
+              <li class="list-group-item list-group-item-header">
+                Your Questions (<%= @user_questions.count %>)
+              </li>
+              <% @user_questions.each do |q|%>
+                <li class="list-group-item">
+                  <%= q._original %>
+               </li>
+              <% end %>
             <% end %>
           <% else %>
-          <li class="list-group-item">
-            Please login or register for an account to see track your question history.
+            <li class="list-group-item">
+              Please login or register for an account to see track your question history.
+            </li>
+          <% end %>
+          <br/>
+        </div>
+        <div class="list-group">
+          <li class="list-group-item list-group-item-header">
+            About this month's Expert
           </li>
-        <% end %>
-      </li>
-    </div>
-    <div class="list-group">
-      <li class="list-group-item list-group-item-header">
-        About this month's Expert
-      </li>
-      <li class="list-group-item">
-        <%= @expert._bio %>
-      </li>
+          <li class="list-group-item">
+            <%= @expert._bio %>
+          </li>
+        </div>
+      </div>
     </div>
   </div>
 </div>

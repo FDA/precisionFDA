@@ -144,6 +144,7 @@ Rails.application.routes.draw do
 
     resources :experts do
       post 'ask_question', on: :member
+      get 'dashboard', on: :member
     end
 
     resources :spaces do

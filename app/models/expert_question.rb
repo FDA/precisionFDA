@@ -5,6 +5,7 @@
 #  id            :integer          not null, primary key
 #  state         :string
 #  body          :text
+#  meta          :text
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
 #
@@ -14,6 +15,8 @@ class ExpertQuestion < ActiveRecord::Base
   belongs_to :expert
   has_one :expert_answer, dependent: :destroy
 
+  store :meta, accessors: [:_original, :_edited], coder: JSON
+
   def uid
     "expert-question-#{id}"
   end
@@ -22,8 +25,12 @@ class ExpertQuestion < ActiveRecord::Base
     "expert-question"
   end
 
+  def open?
+    state == "open"
+  end
+
   def answered?
-    state = "answered"
+    state == "answered"
   end
 
   def ignored?
@@ -31,14 +38,16 @@ class ExpertQuestion < ActiveRecord::Base
   end
 
   def edited?
-    state == "edited"
+    _edited == true.to_s
   end
 
   def self.provision(expert, context, body)
     q = ExpertQuestion.create!(
-      :user_id => context.logged_in? ? context.user.id : nil,
+      :user_id => context.logged_in? ? context.user_id : nil,
       :expert_id => expert.id,
-      :body => body
+      :state => "open",
+      :_original => body,
+      :_edited => false.to_s
     )
   end
 
