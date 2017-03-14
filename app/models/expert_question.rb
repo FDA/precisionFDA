@@ -18,7 +18,7 @@ class ExpertQuestion < ActiveRecord::Base
   has_one :expert_answer, dependent: :destroy
 
   store :meta, accessors: [:_original, :_edited], coder: JSON
-  attr_accessor :body, :answer
+  attr_accessor :answer
 
   def uid
     "expert-question-#{id}"
