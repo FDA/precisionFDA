@@ -147,9 +147,7 @@ Rails.application.routes.draw do
       get 'dashboard', on: :member
       nested do
         scope '/dashboard' do
-          resources :expert_questions, only: [:index, :show, :create, :edit] do
-            post 'update', on: :member
-          end
+          resources :expert_questions
         end
       end
     end

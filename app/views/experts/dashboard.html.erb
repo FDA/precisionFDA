@@ -40,7 +40,7 @@
           </li>
           <% @open_questions.each do |q|%>
             <li class="list-group-item">
-              <%= q._original %>
+              <%= link_to q.body ? q.body : q._original, expert_expert_question_path(@expert.id, q.id) %>
             </li>
           <% end %>
         <% end %>
@@ -50,7 +50,7 @@
           </li>
           <% @open_questions.each do |q|%>
             <li class="list-group-item">
-              <%= q._original %>
+              <%= link_to q.body ? q.body : q._original, expert_expert_question_path(@expert.id, q.id) %>
             </li>
           <% end %>
         <% end %>
@@ -78,18 +78,18 @@
     <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal pfda-pane-sidebar-padded-v">
       <div class="container-fluid container-padded">
       <% if @selected_question.present? %>
-      <%= form_for @selected_question, url: expert_expert_question_path(@expert, @selected_question), method: :post, html: {class: 'form form-horizontal'} do |f| %>
+      <%= form_for @selected_question, url: expert_expert_question_path(@expert, @selected_question), method: :put, html: {class: 'form form-horizontal'} do |f| %>
         <%= render "_partials/form_errors", object: @expert %>
         <div class="form-group required">
           <%= f.label :body, "Question", class: 'control-label col-sm-2' %>
           <div class="col-sm-11 col-sm-offset-1">
-            <%= f.text_area :body, class: "form-control", rows: 2, placeholder: "Question...", required: "required"  %>
+            <%= f.text_area :body, class: "form-control", rows: 2, placeholder: "Question...", required: "required", value: @selected_question.body ? @selected_question.body : @selected_question._original %>
           </div>
         </div>
         <div class="form-group required ">
           <%= f.label :answer, "Answer", class: 'control-label col-sm-2' %>
           <div class="col-sm-11 col-sm-offset-1">
-            <%= f.text_area :answer, class: "form-control", rows: 10, placeholder: "Answer..." %>
+            <%= f.text_area :answer, class: "form-control", rows: 10, placeholder: "Answer...", value:  @selected_question.expert_answer ? @selected_question.expert_answer.body : "" %>
           </div>
         </div>
         <div class="form-group">
