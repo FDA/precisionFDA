@@ -9,8 +9,6 @@
 #
 
 class ExpertAnswer < ActiveRecord::Base
-  acts_as_commentable
-
   belongs_to :expert
   belongs_to :expert_question
 
@@ -20,6 +18,14 @@ class ExpertAnswer < ActiveRecord::Base
 
   def klass
     "expert-answer"
+  end
+
+  def provision(expert, question, body)
+    a = ExpertAnswer.create!(
+      :expert_id => expert.id,
+      :expert_question => question.id,
+      :body => body
+    )
   end
 
   def editable_by?(context)

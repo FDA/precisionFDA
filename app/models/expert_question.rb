@@ -11,11 +11,14 @@
 #
 
 class ExpertQuestion < ActiveRecord::Base
+  acts_as_commentable
+
   belongs_to :user
   belongs_to :expert
   has_one :expert_answer, dependent: :destroy
 
   store :meta, accessors: [:_original, :_edited], coder: JSON
+  attr_accessor :body, :answer
 
   def uid
     "expert-question-#{id}"
@@ -37,8 +40,29 @@ class ExpertQuestion < ActiveRecord::Base
     state == "ignored"
   end
 
+  def update_question(expert, params)
+    if expert_answer.nil?
+      a = ExpertAnswer.create!(
+        :expert_id => expert.id,
+        :expert_question_id => id,
+        :body => params[:expert_question][:answer])
+    else
+      expert_answer.update_attribute(:body, params[:expert_question][:answer])
+    end
+
+    update_attribute(:body, params[:expert_question][:body])
+
+    case params[:commit]
+    when "Ignore"
+      new_state = "ignore"
+    when "Submit Answer"
+      new_state = "answered"
+    else
+    end
+  end
+
   def edited?
-    _edited == true.to_s
+    body.present? ? body != _original : false
   end
 
   def self.provision(expert, context, body)

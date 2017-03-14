@@ -62,10 +62,6 @@ class Expert < ActiveRecord::Base
     expert_questions.select{|q| q.answered?}
   end
 
-  def edit_image(new_image)
-    update_attributes(image: new_image)
-  end
-
   def editable_by?(context)
     if !context.logged_in?
         return false
@@ -82,7 +78,6 @@ class Expert < ActiveRecord::Base
 
   def self.editable_by(context)
     if !context.guest?
-      nd
       raise unless context.user_id.present?
       Expert.where(user_id: context.user_id).uniq
     end
