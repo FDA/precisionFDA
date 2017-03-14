@@ -42,7 +42,7 @@ class ExpertQuestion < ActiveRecord::Base
 
   def update_question(expert, params)
     if expert_answer.nil?
-      a = ExpertAnswer.create!(
+      ExpertAnswer.create!(
         :expert_id => expert.id,
         :expert_question_id => id,
         :body => params[:expert_question][:answer])
@@ -66,7 +66,7 @@ class ExpertQuestion < ActiveRecord::Base
   end
 
   def self.provision(expert, context, q_body)
-    q = ExpertQuestion.create!(
+    ExpertQuestion.create!(
       :user_id => context.logged_in? ? context.user_id : nil,
       :expert_id => expert.id,
       :state => "open",
