@@ -53,11 +53,12 @@ class ExpertQuestion < ActiveRecord::Base
     update_attribute(:body, params[:expert_question][:body])
 
     case params[:commit]
-    when "Ignore"
-      new_state = "ignore"
+    when "Ignore Question"
+      update_attribute(:state, "ignored")
     when "Submit Answer"
-      new_state = "answered"
+      update_attribute(:state, "answered")
     else
+      update_attribute(:state, "open")
     end
   end
 

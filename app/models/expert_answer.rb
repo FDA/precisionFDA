@@ -21,7 +21,7 @@ class ExpertAnswer < ActiveRecord::Base
   end
 
   def provision(expert, question, body)
-    a = ExpertAnswer.create!(
+    ExpertAnswer.create!(
       :expert_id => expert.id,
       :expert_question => question.id,
       :body => body

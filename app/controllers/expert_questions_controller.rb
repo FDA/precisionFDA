@@ -32,7 +32,7 @@ class ExpertQuestionsController < ApplicationController
     ExpertQuestion.transaction do
       @selected_question.update_question(@expert, params)
     end
-    redirect_to dashboard_expert_path(@expert)
+    redirect_to expert_expert_question_path(@expert, @selected_question)
   end
 
   def create
