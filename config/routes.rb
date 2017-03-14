@@ -145,6 +145,13 @@ Rails.application.routes.draw do
     resources :experts do
       post 'ask_question', on: :member
       get 'dashboard', on: :member
+      nested do
+        scope '/dashboard' do
+          resources :expert_questions, only: [:index, :show, :create, :edit] do
+            post 'update', on: :member
+          end
+        end
+      end
     end
 
     resources :spaces do
