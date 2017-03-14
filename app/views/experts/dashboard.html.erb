@@ -117,6 +117,18 @@
           </div>
         </div>
       <% end %>
+    <% elsif @open_questions.count > 0 %>
+      <p class="lead">
+        Select an open question to answer it.
+      </p>
+    <% elsif @answered_questions.count > 0 %>
+        <p class="lead">
+          Select an answered question to update it. Or add a new question yourself.
+        </p>
+    <% else %>
+        <p class="lead">
+          No open questions to answer. You can add a question yourself to answer.
+        </p>
     <% end %>
     </div>
   </div>
