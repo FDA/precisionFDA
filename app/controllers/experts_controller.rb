@@ -1,6 +1,6 @@
 class ExpertsController < ApplicationController
   skip_before_action :require_login,     only: [:index, :show, :ask_question]
-  before_action :require_login_or_guest, only: []
+  before_action :require_login_or_guest, only: [:edit, :update, :create, :new]
 
   def index
     @experts = Expert.all
@@ -74,28 +74,6 @@ class ExpertsController < ApplicationController
     @expert = Expert.find(params[:id])
     @answered_questions = @expert.answered_questions
     @user_questions = @context.logged_in? ? @expert.questions_by_user_id(@context.user_id) : nil
-  end
-
-  def followers
-    @discussion = Event.find(params[:id])
-    #@followers = @discussion.user_followers
-  end
-
-  def rename
-    @discussion = Discussion.editable_by(@context).find_by!(id: params[:id])
-    title = discussion_params[:title]
-    if title.is_a?(String) && title != ""
-      if @discussion.rename(title, @context)
-        @discussion.reload
-        flash[:success] = "Discussion renamed to \"#{@discussion.title}\""
-      else
-        flash[:error] = "Discussion \"#{@discussion.title}\" could not be renamed."
-      end
-    else
-      flash[:error] = "The new name is not a valid string"
-    end
-
-    redirect_to discussion_path(@discussion)
   end
 
   def destroy
