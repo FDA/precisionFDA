@@ -17,17 +17,19 @@
             </ul>
             <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
               <li><span class="pfda-card-metadata-value"><%= e.expert_questions.count %></span> <%= "Question".pluralize(e.expert_questions.count) %></li>
-              <li><span class="pfda-card-metadata-value"><%= e.expert_answers.count %></span> <%= "Answer".pluralize(e.expert_answers.count) %></li>
+              <li><span class="pfda-card-metadata-value"><%= e.answered_questions.count %></span> <%= "Answer".pluralize(e.answered_questions.count) %></li>
             </ul>
           </div>
         </div>
       </div>
-      <div class="text-center">
+      <% if e.editable_by?(@context) %>
         <br/>
-        <%= link_to dashboard_expert_path(e), class: 'btn btn-default' do %>
-          <span class="fa fa-dashboard fa-fw"></span> View Your Expert Dashboard
-        <% end %>
-      </div>
+        <div class="text-center">
+          <%= link_to dashboard_expert_path(e), class: 'btn btn-default' do %>
+            <span class="fa fa-dashboard fa-fw"></span> View Your Expert Dashboard
+          <% end %>
+        </div>
+      <% end %>
     <% end %>
   </div>
 <% else %>
