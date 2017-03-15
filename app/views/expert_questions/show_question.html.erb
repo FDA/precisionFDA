@@ -2,7 +2,7 @@
 <div class="page-header">
   <div class="media">
     <div class="media-left text-muted">
-     <%= image_tag(@expert.image, class: 'img-square', height: '100px', width: '100px') %>
+     <%= image_tag(@expert.image, class: 'img-rounded', height: '120px', width: '120px') %>
     </div>
     <div class="media-body">
       <% if @expert.editable_by?(@context) %>
@@ -43,7 +43,17 @@
   <div class="pfda-pane-content pfda-pane-content-padded-xl">
     <div class="expert-question panel panel-default">
       <div class="panel-body">
-        <h3 class="expert-question-body"><%= @expert_question.body %></h3>
+        <h2 class="expert-question-body"><%= @expert_question.body %></h2>
+        <h6 class="expert-question-user">
+          <br/>
+          asked by
+          <% if @expert_question.user_id.nil? %>
+            anonymous
+          <% else %>
+            <%= link_to(@expert_question.user.full_name, user_path(@expert_question.user.dxuser)) %> (<%= @expert_question.user.org.name %>)
+          <% end %>
+        </h6>
+        <hr/>
         <p class="expert-question-answer-body lead">
           <%= @expert_question.expert_answer.body %>
         </p>
