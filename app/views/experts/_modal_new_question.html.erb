@@ -7,7 +7,7 @@
           Submit a new question
         </h4>
       </div>
-      <%= form_for @expert, url: expert_expert_questions_path(@expert), method: :post do |f| %>
+      <%= form_for @expert, url: expert_edit_question_index_path(@expert), method: :post do |f| %>
       <div class="modal-body">
         <div class="form-group required">
           <%= f.text_area (:question), rows: 4, class: "form-control input-lg", placeholder: "Submit a question...", required: "required"  %>

@@ -1,6 +1,6 @@
 class ExpertQuestionsController < ApplicationController
-  skip_before_action :require_login,     only: []
-  before_action :require_login_or_guest, only: [:index, :show, :edit, :create]
+  skip_before_action :require_login,     only: [:show_question]
+  before_action :require_login_or_guest, only: [:index, :show, :edit, :create, :update]
 
   def index
     @expert = Expert.find(params[:expert_id])
@@ -20,6 +20,15 @@ class ExpertQuestionsController < ApplicationController
     render 'experts/dashboard'
   end
 
+  def show_question
+    @expert = Expert.find(params[:expert_id])
+    @user_questions = @context.logged_in? ? @expert.questions_by_user_id(@context.user_id) : nil
+    @expert_question = ExpertQuestion.find(params[:id])
+    @item_comments_path = pathify_comments(@expert_question)
+    @items_from_params = [@expert_question]
+    @comments = @expert_question.root_comments.order(id: :desc).page params[:comments_page]
+  end
+
   def edit
     redirect_to edit_expert_path(params[:expert_id])
   end
@@ -32,7 +41,7 @@ class ExpertQuestionsController < ApplicationController
     ExpertQuestion.transaction do
       @selected_question.update_question(@expert, params)
     end
-    redirect_to expert_expert_question_path(@expert, @selected_question)
+    redirect_to expert_edit_question_path(@expert, @selected_question)
   end
 
   def create
