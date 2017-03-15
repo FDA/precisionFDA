@@ -3,7 +3,7 @@ class ExpertsController < ApplicationController
   before_action :require_login_or_guest, only: [:edit, :update, :create, :new]
 
   def index
-    @experts = Expert.all
+    @experts = Expert.all.order(id: :desc)
   end
 
   def new
@@ -72,8 +72,8 @@ class ExpertsController < ApplicationController
 
   def show
     @expert = Expert.find(params[:id])
-    @answered_questions = @expert.answered_questions
-    @user_questions = @context.logged_in? ? @expert.questions_by_user_id(@context.user_id) : nil
+    @answered_questions = @expert.answered_questions.sort_by{ |q| q.expert_answer.updated_at }.reverse
+    @user_questions = @context.logged_in? ? @expert.questions_by_user_id(@context.user_id).sort_by{ |q| q.expert_answer.updated_at }.reverse : nil
   end
 
   def destroy

@@ -63,6 +63,8 @@ gem 'gravtastic'
 gem 'kaminari'
 gem 'bootstrap-kaminari-views'
 
+# For getting user's local time
+gem 'local_time', '~> 1.0', '>= 1.0.3'
 
 # Add comments on any model
 gem 'acts_as_commentable_with_threading'
