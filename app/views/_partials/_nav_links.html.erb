@@ -18,7 +18,7 @@
         <div class="nav-pill-title">Challenges</div>
       <% end %>
     </li>
-    <li class="<%= 'active' if params[:controller] == 'experts' %>" role="presentation">
+    <li class="<%= 'active' if %w(experts expert_questions).include?(params[:controller]) %>" role="presentation">
       <%= link_to experts_path do %>
         <div class="nav-icon fa fa-2x fa-star-o"></div>
         <div class="nav-pill-title">Experts</div>
