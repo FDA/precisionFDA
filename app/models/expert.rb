@@ -62,6 +62,10 @@ class Expert < ActiveRecord::Base
     expert_questions.select{|q| q.answered?}
   end
 
+  def commented_questions
+    expert_questions.select{|q| q.root_comments.present?}
+  end
+
   def editable_by?(context)
     if !context.logged_in?
         return false
@@ -73,7 +77,7 @@ class Expert < ActiveRecord::Base
   end
 
   def questions_by_user_id(user_id)
-    expert_questions.select{|q| q.user.id == user_id}
+    expert_questions.select{|q| q.user.nil? ? user_id.nil? : q.user.id == user_id}
   end
 
   def self.editable_by(context)

@@ -46,6 +46,9 @@
         <h2 class="expert-question-body"><%= @expert_question.body %></h2>
         <h6 class="expert-question-footer">
           <br/>
+          <% if @expert_question.edited? %>
+              [modified]
+          <% end %>
           asked by
           <% if @expert_question.user_id.nil? %>
             anonymous

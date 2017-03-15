@@ -2,7 +2,7 @@
 <div class="page-header">
   <div class="media">
     <div class="media-left text-muted">
-     <%= image_tag(@expert.image, class: 'img-square', height: '100px', width: '100px') %>
+     <%= image_tag(@expert.image, class: 'img-rounded', height: '120px', width: '120px') %>
     </div>
     <div class="media-body">
       <% if @expert.editable_by?(@context) %>
@@ -106,6 +106,7 @@
           <div class="col-sm-11 col-sm-offset-3">
             <% if @selected_question.state == "answered" %>
               <%= f.submit "Update Answer", class: 'btn btn-success', data: {disable_with: "Updating..."} %>
+              <%= f.submit "Re-Open Question", class: 'btn btn-link pull-right' %>
             <% elsif @selected_question.state == "ignored" %>
               <%= f.submit "Submit Answer", class: 'btn btn-success' %>
               <%= f.submit "Save Draft", class: 'btn btn-link' %>
