@@ -16,8 +16,8 @@
               <li><%= local_date(e.created_at, '%B %e, %Y') %></li>
             </ul>
             <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
-              <li><span class="pfda-card-metadata-value"><%= e.expert_questions.count %></span> <%= "Question".pluralize(e.expert_questions.count) %></li>
               <li><span class="pfda-card-metadata-value"><%= e.answered_questions.count %></span> <%= "Answer".pluralize(e.answered_questions.count) %></li>
+              <li><span class="pfda-card-metadata-value"><%= e.commented_questions.count %></span> <%= "Comment".pluralize(e.commented_questions.count) %></li>
             </ul>
           </div>
         </div>

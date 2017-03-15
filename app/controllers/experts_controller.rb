@@ -73,7 +73,7 @@ class ExpertsController < ApplicationController
   def show
     @expert = Expert.find(params[:id])
     @answered_questions = @expert.answered_questions.sort_by{ |q| q.expert_answer.updated_at }.reverse
-    @user_questions = @context.logged_in? ? @expert.questions_by_user_id(@context.user_id).sort_by{ |q| q.expert_answer.updated_at }.reverse : nil
+    @user_questions = @context.logged_in? ? @expert.questions_by_user_id(@context.user_id).sort_by{ |q| q.created_at }.reverse : nil
   end
 
   def destroy
