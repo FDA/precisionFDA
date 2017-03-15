@@ -13,7 +13,7 @@
             </div>
             <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
               <li><%= e.user.org.handle %>/<%= e.user.dxuser %></li>
-              <li><%= e.updated_at.to_s(:db) %></li>
+              <li><%= local_date(e.created_at, '%B %e, %Y') %></li>
             </ul>
             <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
               <li><span class="pfda-card-metadata-value"><%= e.expert_questions.count %></span> <%= "Question".pluralize(e.expert_questions.count) %></li>
@@ -30,6 +30,7 @@
           <% end %>
         </div>
       <% end %>
+      <hr/>
     <% end %>
   </div>
 <% else %>

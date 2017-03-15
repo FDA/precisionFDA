@@ -47,6 +47,9 @@
           <%= link_to expert_show_question_path(@expert, q) do %>
             <div class="panel-body">
               <h2 class="expert-question-body"><%= q.body %></h2>
+              <h6 class="expert-question-footer">
+                updated <%= local_time_ago(q.expert_answer.updated_at) %>
+              </h6>
             </div>
           <% end %>
         </div>

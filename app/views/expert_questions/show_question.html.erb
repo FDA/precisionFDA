@@ -44,7 +44,7 @@
     <div class="expert-question panel panel-default">
       <div class="panel-body">
         <h2 class="expert-question-body"><%= @expert_question.body %></h2>
-        <h6 class="expert-question-user">
+        <h6 class="expert-question-footer">
           <br/>
           asked by
           <% if @expert_question.user_id.nil? %>
@@ -57,6 +57,9 @@
         <p class="expert-question-answer-body lead">
           <%= @expert_question.expert_answer.body %>
         </p>
+        <h6 class="expert-question-footer">
+          updated <%= local_time_ago(@expert_question.expert_answer.updated_at) %>
+        <h6/>
       </div>
     </div>
     <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @expert_question %>
