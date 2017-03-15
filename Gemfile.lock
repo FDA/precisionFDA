@@ -106,6 +106,8 @@ GEM
       activesupport (>= 3.0.0)
     kgio (2.10.0)
     libv8 (3.16.14.13)
+    local_time (1.0.3)
+      coffee-rails
     loofah (2.0.3)
       nokogiri (>= 1.5.9)
     mail (2.6.4)
@@ -245,6 +247,7 @@ DEPENDENCIES
   jbuilder (~> 2.0)
   jquery-rails
   kaminari
+  local_time (~> 1.0, >= 1.0.3)
   mysql2 (~> 0.3.18)
   nokogiri
   paloma (= 5.0.0)
