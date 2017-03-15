@@ -9,7 +9,7 @@ class ExpertQuestionsController < ApplicationController
 
   def show
     @expert = Expert.find(params[:expert_id])
-    redirect_to experts_path unless @expert.editable_by?(@context)
+    redirect_to experts_path and return unless @expert.editable_by?(@context)
 
     @answered_questions = @expert.answered_questions
     @ignored_questions = @expert.ignored_questions
@@ -35,7 +35,7 @@ class ExpertQuestionsController < ApplicationController
 
   def update
     @expert = Expert.find(params[:expert_id])
-    redirect_to experts_path unless @expert.editable_by?(@context)
+    redirect_to experts_path and return unless @expert.editable_by?(@context)
 
     @selected_question = ExpertQuestion.find(params[:id])
     ExpertQuestion.transaction do
@@ -46,7 +46,7 @@ class ExpertQuestionsController < ApplicationController
 
   def create
     @expert = Expert.find(params[:expert_id])
-    redirect_to experts_path unless @expert.editable_by?(@context)
+    redirect_to experts_path and return unless @expert.editable_by?(@context)
 
     q = ExpertQuestion.provision(@expert, @context, params[:expert][:question])
     if q
