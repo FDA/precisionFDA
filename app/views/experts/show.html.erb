@@ -2,7 +2,7 @@
 <div class="page-header">
   <div class="media">
     <div class="media-left text-muted">
-     <%= image_tag(@expert.image, class: 'img-square', height: '100px', width: '100px') %>
+     <%= image_tag(@expert.image, class: 'img-rounded', height: '120px', width: '120px') %>
     </div>
     <div class="media-body">
       <% if @expert.editable_by?(@context) %>
@@ -46,10 +46,7 @@
         <div class="expert-question panel panel-default">
           <%= link_to expert_show_question_path(@expert, q) do %>
             <div class="panel-body">
-              <h3 class="expert-question-body"><%= q.body %></h3>
-              <p class="expert-question-answer-body lead">
-                <%= q.expert_answer.body %>
-              </p>
+              <h2 class="expert-question-body"><%= q.body %></h2>
             </div>
           <% end %>
         </div>
