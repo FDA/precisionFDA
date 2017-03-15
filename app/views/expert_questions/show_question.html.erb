@@ -39,29 +39,35 @@
   </div>
 </div>
 
+<div class="pfda-toolbar">
+  <%= link_to expert_path(@expert), class: "btn btn-default" do %>
+    <span class="fa fa-chevron-left"></span> Back to questions
+  <% end %>
+</div>
+
 <div class="pfda-pane container-fluid">
   <div class="pfda-pane-content pfda-pane-content-padded-xl">
-    <div class="expert-question panel panel-default">
-      <div class="panel-body">
+    <div class="expert-question">
+      <div class="">
         <h2 class="expert-question-body"><%= @expert_question.body %></h2>
-        <h6 class="expert-question-footer">
-          <br/>
+        <small class="expert-question-footer text-muted">
           <% if @expert_question.edited? %>
-              [modified]
+            <i>Modified from a question from </i>
+          <% else %>
+            Asked by
           <% end %>
-          asked by
           <% if @expert_question.user_id.nil? %>
             anonymous
           <% else %>
             <%= link_to(@expert_question.user.full_name, user_path(@expert_question.user.dxuser)) %> (<%= @expert_question.user.org.name %>)
           <% end %>
-        </h6>
+        </small>
         <hr/>
         <p class="expert-question-answer-body lead">
           <%= @expert_question.expert_answer.body %>
         </p>
-        <h6 class="expert-question-footer">
-          updated <%= local_time_ago(@expert_question.expert_answer.updated_at) %>
+        <h6 class="expert-question-footer text-muted">
+          Updated <%= local_time_ago(@expert_question.expert_answer.updated_at) %>
         <h6/>
       </div>
     </div>
