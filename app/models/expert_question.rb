@@ -33,7 +33,7 @@ class ExpertQuestion < ActiveRecord::Base
   end
 
   def answered?
-    state == "answered"
+    state == "answered" && expert_answer.body.present?
   end
 
   def ignored?
@@ -77,10 +77,14 @@ class ExpertQuestion < ActiveRecord::Base
     )
   end
 
+  def accessible_by?(context)
+    context.logged_in?
+  end
+
   def editable_by?(context)
     if !context.guest?
       raise unless context.user_id.present?
       expert.user_id == context.user_id
     end
- end
+  end
 end

@@ -147,7 +147,13 @@ Rails.application.routes.draw do
       get 'dashboard', on: :member
       nested do
         scope '/dashboard' do
-          resources :expert_questions
+          resources :expert_questions, as: 'edit_question'
+        end
+      end
+      nested do
+        scope 'expert_questions/:id' do
+          get '', to: 'expert_questions#show_question', as: 'show_question'
+          resources :comments, as: 'question_comment'
         end
       end
     end
