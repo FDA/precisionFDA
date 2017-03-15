@@ -68,9 +68,10 @@
         </p>
         <h6 class="expert-question-footer text-muted">
           Updated <%= local_time_ago(@expert_question.expert_answer.updated_at) %>
-        <h6/>
+        </h6>
       </div>
     </div>
+    <hr/>
     <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @expert_question %>
   </div>
   <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal pfda-pane-sidebar-padded-v">
