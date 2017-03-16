@@ -7,24 +7,53 @@ class ExpertsController < ApplicationController
   end
 
   def new
-    redirect_to experts_path unless @context.logged_in? && @context.user.can_administer_site?
+    redirect_to experts_path and return unless @context.logged_in? && @context.user.can_administer_site?
     @expert = Expert.new
   end
 
   def edit
-    @expert = Expert.editable_by(@context).find_by!(id: params[:id])
+    @expert = Expert.editable_by(@context).find(params[:id])
+    redirect_to experts_path and return unless @expert.editable_by?(@context)
   end
 
   def update
     @expert = Expert.editable_by(@context).find(params[:id])
+    redirect_to experts_path and return unless @expert.editable_by?(@context)
+
     Expert.transaction do
       if @expert.update(update_expert_params)
-        flash[:success] = "Expert information updated"
+        flash[:success] = "Expert information updated."
         redirect_to expert_path(@expert)
       else
         flash[:error] = "Could not update expert information. Please try again."
         render :edit
       end
+    end
+  end
+
+  def open
+    @expert = Expert.editable_by(@context).find(params[:id])
+    redirect_to experts_path and return unless @expert.editable_by?(@context)
+
+    Expert.transaction do
+      if @expert.update_attribute(:state, "open")
+        flash[:success] = "This Expert-of-the-Month is now open."
+      else
+        flash[:error] = "Could not update Expert-of-the-Month state."
+      end
+      redirect_to dashboard_expert_path(@expert)
+    end
+  end
+
+  def close
+    @expert = Expert.editable_by(@context).find(params[:id])
+    Expert.transaction do
+      if @expert.update_attribute(:state, "closed")
+        flash[:success] = "This Expert-of-the-Month is now closed"
+      else
+        flash[:error] = "Could not update Expert-of-the-Month state"
+      end
+      redirect_to dashboard_expert_path(@expert)
     end
   end
 
@@ -88,18 +117,18 @@ class ExpertsController < ApplicationController
 
   private
     def expert_params
-      p = params.require(:expert).permit(:username, :_intro, :_bio, :image)
+      p = params.require(:expert).permit(:username, :_intro, :_about, :image)
       p.require(:username)
       p.require(:_intro)
-      p.require(:_bio)
+      p.require(:_about)
       p.require(:image)
       return p
     end
 
     def update_expert_params
-      p = params.require(:expert).permit(:_intro, :_bio, :image)
+      p = params.require(:expert).permit(:_intro, :_about, :image)
       p.require(:_intro)
-      p.require(:_bio)
+      p.require(:_about)
       p.require(:image)
       return p
     end

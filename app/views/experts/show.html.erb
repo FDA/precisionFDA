@@ -1,43 +1,6 @@
 <% content_for :title do %><%= @expert.name %><% end %>
-<div class="page-header">
-  <div class="media">
-    <div class="media-left text-muted">
-     <%= image_tag(@expert.image, class: 'img-rounded', height: '120px', width: '120px') %>
-    </div>
-    <div class="media-body">
-      <% if @expert.editable_by?(@context) %>
-        <div class="pull-right">
-          <div class="btn-group">
-            <div class="dropdown">
-              <button class="btn btn-link btn-lg" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="fa fa-cog"></span>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
-                <li>
-                  <%= link_to edit_expert_path(@expert) do %>
-                    <span class="fa fa-pencil"></span> Edit
-                  <% end %>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      <% end %>
 
-      <div class="page-title">
-        Expert Q&A with <%= link_to("#{@expert.name}", user_path(@expert.user.dxuser)) %> (<%= @expert.user.org.name %>)
-        <% if @expert.editable_by?(@context) %>
-          <%= link_to dashboard_expert_path(@expert), class: "btn btn-default" do %>
-            <span class="fa fa-fw fa-dashboard" aria-hidden="true"></span> View Your Expert Dashboard
-          <% end %>
-        <% end %>
-      </div>
-      <div class="pfda-discussion-content">
-        <%= @expert._intro %>
-      </div>
-    </div>
-  </div>
-</div>
+<%= render 'experts/header' %>
 
 <div class="pfda-pane container-fluid">
   <div class="pfda-pane-content pfda-pane-content-padded-xl">
@@ -86,7 +49,7 @@
         About this month's Expert
       </li>
       <li class="list-group-item">
-        <%= @expert._bio %>
+        <%= @expert._about%>
       </li>
     </ul>
   </div>

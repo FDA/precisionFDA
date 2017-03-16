@@ -15,7 +15,7 @@ class Expert < ActiveRecord::Base
   has_many :expert_answers, through: :expert_questions, dependent: :destroy
   belongs_to :user
 
-  store :meta, accessors: [:_intro, :_bio], coder: JSON
+  store :meta, accessors: [:_intro, :_about], coder: JSON
   attr_accessor :username, :question, :answer
 
   def uid
@@ -43,11 +43,15 @@ class Expert < ActiveRecord::Base
   end
 
   def active?
-    state == "ACTIVE"
+    state == "active"
+  end
+
+  def open?
+    ["active", "open"].include?(state)
   end
 
   def closed?
-    state == "CLOSED"
+    state == "closed"
   end
 
   def open_questions
@@ -94,6 +98,7 @@ class Expert < ActiveRecord::Base
       if u.nil?
         return e
       end
+      expert_params[:state] = "closed"
       expert_params[:user_id] = u.id
       e = Expert.create!(expert_params)
     end
