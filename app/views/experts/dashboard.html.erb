@@ -1,12 +1,6 @@
 <% content_for :title do %><%= @expert.name %><% end %>
 
-<%= render 'experts/header' %>
-
-<div class="pfda-toolbar">
-  <a class="btn btn-primary" data-toggle="modal" data-target="#new-question-modal">
-    <span class="fa fa-plus fa-fw" aria-hidden="true"></span> Add a new question
-  </a>
-</div>
+<%= render 'experts/header', { is_dashboard: true, show_toolbar: true, show_intro: false } %>
 
 <div class="pfda-pane container-padded container-fluid">
   <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal">

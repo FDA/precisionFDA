@@ -1,6 +1,6 @@
 <% content_for :title do %><%= @expert.name %><% end %>
 
-<%= render 'experts/header' %>
+<%= render 'experts/header', { is_dashboard: false, show_toolbar: true, show_intro: true } %>
 
 <div class="pfda-pane container-fluid">
   <div class="pfda-pane-content pfda-pane-content-padded-xl">
