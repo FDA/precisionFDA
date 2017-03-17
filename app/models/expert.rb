@@ -47,7 +47,7 @@ class Expert < ActiveRecord::Base
   end
 
   def open?
-    ["active", "open"].include?(state)
+    ["active", "open", nil].include?(state)
   end
 
   def closed?
