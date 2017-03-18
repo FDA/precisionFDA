@@ -59,11 +59,18 @@ class ExpertsController < ApplicationController
 
   def ask_question
     @expert = Expert.find(params[:id])
-    q = ExpertQuestion.provision(@expert, @context, params[:expert][:question])
-    if q
+    @e = ExpertQuestion.new(
+        :user_id => @context.logged_in? ? @context.user_id : nil,
+        :expert_id => @expert.id,
+        :state => "open",
+        :body => params[:expert][:question],
+        :_original => params[:expert][:question],
+        :_edited => false.to_s
+    )
+    if verify_recaptcha!(model: @e) && @e.save!
       flash[:success] = "Your question was submitted successfully."
     else
-      flash.now[:error] = "Your question was not submitted because of an unknown reason."
+      flash[:error] = "Your question was not submitted because of an unknown reason."
     end
     redirect_to expert_path(@expert)
   end
