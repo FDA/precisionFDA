@@ -44,6 +44,21 @@
     <% if @selected_question.present? %>
       <%= form_for @selected_question, url: expert_edit_question_path(@expert, @selected_question), method: :put, html: {class: 'form form-horizontal'} do |f| %>
         <%= render "_partials/form_errors", object: @expert %>
+
+        <div class="form-group text-muted">
+          <div class="control-label col-sm-2">
+            Submitted By
+          </div>
+          <div class="col-sm-11 col-sm-offset-1">
+            <div class="form-control-static">
+              <% if @selected_question.user.present? %>
+                <%= link_to(@selected_question.user.full_name.titleize, user_path(@selected_question.user.dxuser)) %> (<%= @selected_question.user.org.name %>)
+              <% else %>
+                Anonymous
+              <% end %>
+            </div>
+          </div>
+        </div>
         <div class="form-group required">
           <%= f.label :body, "Question", class: 'control-label col-sm-2' %>
           <div class="col-sm-11 col-sm-offset-1">

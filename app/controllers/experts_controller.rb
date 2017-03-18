@@ -67,7 +67,7 @@ class ExpertsController < ApplicationController
         :_original => params[:expert][:question],
         :_edited => false.to_s
     )
-    if verify_recaptcha!(model: @e) && @e.save!
+    if verify_recaptcha(model: @e) && @e.save!
       flash[:success] = "Your question was submitted successfully."
     else
       flash[:error] = "Your question was not submitted because of an unknown reason."
