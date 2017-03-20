@@ -84,6 +84,7 @@
             <% elsif @selected_question.state == "ignored" %>
               <%= f.submit "Submit Answer", class: 'btn btn-success' %>
               <%= f.submit "Save Draft", class: 'btn btn-link' %>
+              <%= f.submit "Re-Open Question", class: 'btn btn-link pull-right' %>
             <% else %>
               <%= f.submit "Submit Answer", class: 'btn btn-success' %>
               <%= f.submit "Save Draft", class: 'btn btn-link' %>

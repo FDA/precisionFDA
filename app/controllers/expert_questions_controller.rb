@@ -38,9 +38,28 @@ class ExpertQuestionsController < ApplicationController
     redirect_to experts_path and return unless @expert.editable_by?(@context)
 
     @selected_question = ExpertQuestion.find(params[:id])
+
     ExpertQuestion.transaction do
-      @selected_question.update_question(@expert, params)
+      raise unless @selected_question.update_answer(@expert, params)
+
+      new_state = @selected_question.state
+      case params[:commit]
+      when "Ignore Question"
+        new_state = "ignored"
+      when "Submit Answer", "Update Answer"
+        new_state = "answered"
+      else
+        new_state = "open"
+      end
+      raise unless @selected_question.update_attributes(
+         :state => new_state,
+         :body => params[:expert_question][:body])
     end
+    flash[:success] = "Question/answer information updated successfully."
+    redirect_to expert_edit_question_path(@expert, @selected_question)
+
+  rescue Exception => e
+    flash[:error] = "Could not update question/answer information. Please try again."
     redirect_to expert_edit_question_path(@expert, @selected_question)
   end
 
