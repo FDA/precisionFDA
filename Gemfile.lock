@@ -164,6 +164,8 @@ GEM
     rake (10.5.0)
     rdoc (4.2.1)
       json (~> 1.4)
+    recaptcha (4.1.0)
+      json
     ref (2.0.0)
     rubyzip (1.0.0)
     sass (3.4.22)
@@ -254,6 +256,7 @@ DEPENDENCIES
   premailer-rails
   rails (= 4.2.7.1)
   rails_param
+  recaptcha
   sass-rails (~> 5.0)
   sdoc (~> 0.4.0)
   secure_headers

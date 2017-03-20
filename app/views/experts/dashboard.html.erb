@@ -5,6 +5,13 @@
 <div class="pfda-pane container-padded container-fluid">
   <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal">
     <div class="list-group">
+      <% if @expert.open?  %>
+        <div class="list-group-item">
+          <a class="btn btn-primary" data-toggle="modal" data-target="#new-question-modal">
+            <span class="fa fa-plus fa-fw" aria-hidden="true"></span> Add a new question
+          </a>
+        </div>
+      <% end %>
       <% if @open_questions.count > 0 %>
         <div class="list-group-item list-group-item-header">
           Open Questions (<%= @open_questions.count %>)
