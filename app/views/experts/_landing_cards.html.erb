@@ -1,0 +1,35 @@
+<% if (experts.count > 0) %>
+  <div class="pfda-cards pfda-cards-align-centered pfda-cards-justify-centered">
+    <% experts.each do |e| %>
+      <%= link_to expert_path(e), class: "pfda-card pfda-card-default pfda-card-rounded pfda-card-bordered pfda-card-padded pfda-card-shadow" do %>
+        <div class="pfda-card-header">
+          <div class="media">
+            <div class="media-left text-muted center-block text-center">
+              <%= image_tag(e.image, class: 'img-circle', height: '150px')  %>
+            </div>
+            <div class="media-body text-center">
+              <div class="pfda-card-title">
+                <%= e.name %>
+              </div>
+              <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
+                <li><%= e.user.org.handle %>/<%= e.user.dxuser %></li>
+                <li><%= local_date(e.created_at, '%B %e, %Y') %></li>
+              </ul>
+              <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
+                <li><%= e.answered_questions.count %> <%= "Answer".pluralize(e.answered_questions.count) %></li>
+                <li><%= e.commented_questions.count %> <%= "Comment".pluralize(e.commented_questions.count) %></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="pfda-card-footer text-center">
+          <% if e.open? %>
+            <span class="label label-success"><span class="fa fa-check"></span> Open<span>
+          <% else %>
+            <span class="label label-default"><span class="fa fa-lock"></span> Closed</span>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>

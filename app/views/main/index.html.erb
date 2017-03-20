@@ -23,8 +23,9 @@
       <% if @event.present? && !@event[:past] %>
         <%= render "_partials/event", event: @event %>
       <% end %>
+
       <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-24">
           <ul class="list-inline">
             <li class="overview-header">
               Get Started
@@ -34,7 +35,7 @@
           </ul>
 
           <% if @context.guest? %>
-            <div class="pfda-cards pfda-cards-list pfda-tutorial text-left">
+            <div class="pfda-cards pfda-tutorial text-left">
               <% @tutorials.each do |tutorial| %>
               <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
                 <div class="pfda-card-title">
@@ -48,7 +49,7 @@
               <% end %>
             </div>
           <% else %>
-            <ul class="pfda-cards pfda-cards-list pfda-tutorial text-left">
+            <ul class="pfda-cards pfda-tutorial text-left">
               <% if !@user_appathon.nil? && @user_appathon.meta_appathon.is_ongoing? %>
                 <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
                   <div class="pfda-card-title">
@@ -135,13 +136,42 @@
 
           <% end %>
         </div>
+      </div>
 
+      <hr />
+
+      <div class="row">
         <div class="col-md-12">
           <div class="overview-header">Activity Feed</div>
           <%= render "_partials/feed", feed: @feed %>
         </div>
 
-        <div class="col-md-6">
+        <div class="col-md-10 col-md-offset-2">
+          <ul class="list-inline">
+            <li class="overview-header">
+              Expert Q&A Sessions
+            </li>
+            <div class="pfda-padded-h">
+              <ul class="list-inline">
+                <% @experts.each do |e| %>
+                  <li class="text-center pfda-padded">
+                    <%= link_to expert_path(e), class: 'center-block' do %>
+                      <%= image_tag(e.image, class: 'img-circle', height: '50px') %>
+                      <br/>
+                      <%= e.name %>
+                      <br />
+                      <% if e.open? %>
+                        <span class="label label-success"><span class="fa fa-check"></span> Open<span>
+                      <% else %>
+                        <span class="label label-default"><span class="fa fa-lock"></span> Closed</span>
+                      <% end %>
+                    <% end %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          </ul>
+
           <ul class="list-inline">
             <li class="overview-header">
               Latest News

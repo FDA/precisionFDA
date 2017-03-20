@@ -193,6 +193,13 @@
 
 <div class="jumbotron jumbotron-challenges tiltview-container">
   <div class="container">
+    <div class="h2 text-center">Expert Q&A Sessions</div>
+    <%= render "experts/landing_cards", experts: @experts %>
+  </div>
+</div>
+
+<div class="jumbotron jumbotron-challenges tiltview-container">
+  <div class="container">
     <div class="h2 text-center">precisionFDA Challenges</div>
     <%= render "challenges/cards", challenges: @challenges %>
   </div>
