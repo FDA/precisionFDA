@@ -5,7 +5,7 @@
       <div class="pfda-card-header">
         <div class="media">
           <div class="media-left text-muted center-block text-center">
-            <%= link_to image_tag(e.image, class: 'img-circle', height: '50px'), expert_path(e) %>
+            <%= link_to image_tag(e.image, class: 'img-circle', height: '100px'), expert_path(e) %>
           </div>
           <div class="media-body text-center">
             <div class="pfda-card-title">
@@ -22,14 +22,18 @@
           </div>
         </div>
       </div>
-      <% if e.editable_by?(@context) %>
-        <br/>
-        <div class="text-center">
-          <%= link_to dashboard_expert_path(e), class: 'btn btn-default' do %>
+      <div class="text-center">
+        <% if @context.user.can_administer_site? %>
+          <%= link_to edit_expert_path(e), class: 'btn btn-default btn-sm' do %>
+            <span class="fa fa-pencil"></span> Edit
+          <% end %>
+        <% end %>
+        <% if e.editable_by?(@context) %>
+          <%= link_to dashboard_expert_path(e), class: 'btn btn-default btn-sm' do %>
             <span class="fa fa-dashboard fa-fw"></span> View Your Expert Dashboard
           <% end %>
-        </div>
-      <% end %>
+        <% end %>
+      </div>
     </div>
     <% end %>
   </div>

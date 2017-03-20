@@ -11,50 +11,20 @@
         </div>
       <% end %>
 
-      <% if @expert.editable_by?(@context) && is_dashboard %>
-        <div class="btn-group">
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <% if @expert.open? %>
-              <span class="fa fa-check"></span> Open
-            <% else %>
-              <span class="fa fa-lock"></span> Closed
-            <% end %>
-            <span class="caret"></span>
-          </button>
-          <ul class="dropdown-menu">
-            <li>
-              <% if @expert.open? %>
-                <%= link_to close_expert_path(@expert), method: :post do %>
-                  <span class="fa fa-lock"></span>
-                  Closed
-                  <small class="help-block">This will prevent any additional questions from being submitted.</small>
-                <% end %>
-              <% else %>
-                <%= link_to open_expert_path(@expert), method: :post do %>
-                  <span class="fa fa-check"></span>
-                  Open
-                  <small class="help-block">This will allow questions to be submitted.</small>
-                <% end %>
-              <% end %>
-            </li>
-          </ul>
-        </div>
+      <p class="list-group-item-text">
+      <% if @expert.open? %>
+        <span class="label label-success"><span class="fa fa-check"></span> Open<span>
       <% else %>
-        <p class="list-group-item-text">
-        <% if @expert.open? %>
-          <span class="label label-success"><span class="fa fa-check"></span> Open<span>
-        <% else %>
-          <span class="label label-default"><span class="fa fa-lock"></span> Closed</span>
-        <% end %>
-        </p>
+        <span class="label label-default"><span class="fa fa-lock"></span> Closed</span>
       <% end %>
+      </p>
 
       <% if show_intro %>
         <hr />
         <div class="pfda-discussion-content row">
           <div class="col-md-12 col-md-offset-6">
             <div class="lead text-left">
-              <%= @expert._intro %>
+              <%= simple_format(@expert._intro) %>
             </div>
           </div>
         </div>
@@ -64,29 +34,48 @@
 </div>
 
 <% if @expert.editable_by?(@context) && show_toolbar %>
-<div class="pfda-toolbar">
+<div class="pfda-toolbar text-center">
   <div class="btn-group">
     <% if is_dashboard %>
       <%= link_to expert_path(@expert), class: "btn btn-default" do %>
         <span class="fa fa-fw fa-globe" aria-hidden="true"></span> View Public Q&A
       <% end %>
+      <%= link_to edit_expert_path(@expert), class:"btn btn-default" do %>
+        <span class="fa fa-pencil"></span> Edit Expert Info
+      <% end %>
+      <div class="btn-group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <% if @expert.open? %>
+            <span class="fa fa-check"></span> Open
+          <% else %>
+            <span class="fa fa-lock"></span> Closed
+          <% end %>
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+          <li>
+            <% if @expert.open? %>
+              <%= link_to close_expert_path(@expert), method: :post do %>
+                <span class="fa fa-lock"></span>
+                Closed
+                <small class="help-block">This will prevent any additional questions from being submitted.</small>
+              <% end %>
+            <% else %>
+              <%= link_to open_expert_path(@expert), method: :post do %>
+                <span class="fa fa-check"></span>
+                Open
+                <small class="help-block">This will allow questions to be submitted.</small>
+              <% end %>
+            <% end %>
+          </li>
+        </ul>
+      </div>
+
     <% else %>
       <%= link_to dashboard_expert_path(@expert), class: "btn btn-default" do %>
         <span class="fa fa-fw fa-dashboard" aria-hidden="true"></span> View Your Expert Dashboard
       <% end %>
     <% end %>
   </div>
-  <div class="btn-group">
-    <%= link_to edit_expert_path(@expert), class:"btn btn-default" do %>
-      <span class="fa fa-pencil"></span> Edit
-    <% end %>
-  </div>
-  <% if is_dashboard && @expert.open?  %>
-    <div class="btn-group pull-right">
-      <a class="btn btn-primary" data-toggle="modal" data-target="#new-question-modal">
-        <span class="fa fa-plus fa-fw" aria-hidden="true"></span> Add a new question
-      </a>
-    </div>
-  <% end %>
 </div>
 <% end %>
