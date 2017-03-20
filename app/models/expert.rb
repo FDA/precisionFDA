@@ -84,6 +84,14 @@ class Expert < ActiveRecord::Base
     expert_questions.select{|q| q.user.nil? ? user_id.nil? : q.user.id == user_id}
   end
 
+  def self.open
+    where.not(state: "closed")
+  end
+
+  def self.closed
+    where(state: "closed")
+  end
+
   def self.editable_by(context)
     if !context.guest?
       raise unless context.user_id.present?
