@@ -57,7 +57,7 @@ class ExpertQuestion < ActiveRecord::Base
 
   def self.provision(expert, context, q_body)
     ExpertQuestion.create!(
-      :user_id => context.logged_in? ? context.user_id : nil,
+      :user_id => context.user_id,
       :expert_id => expert.id,
       :state => "open",
       :body => q_body,
