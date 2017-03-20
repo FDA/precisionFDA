@@ -40,7 +40,7 @@ class ExpertQuestion < ActiveRecord::Base
     state == "ignored"
   end
 
-  def update_question(expert, params)
+  def update_answer(expert, params)
     if expert_answer.nil?
       ExpertAnswer.create!(
         :expert_id => expert.id,
@@ -48,17 +48,6 @@ class ExpertQuestion < ActiveRecord::Base
         :body => params[:expert_question][:answer])
     else
       expert_answer.update_attribute(:body, params[:expert_question][:answer])
-    end
-
-    update_attribute(:body, params[:expert_question][:body])
-
-    case params[:commit]
-    when "Ignore Question"
-      update_attribute(:state, "ignored")
-    when "Submit Answer", "Update Answer"
-      update_attribute(:state, "answered")
-    else
-      update_attribute(:state, "open")
     end
   end
 
