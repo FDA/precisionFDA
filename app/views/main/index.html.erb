@@ -158,7 +158,7 @@
                     <%= link_to expert_path(e), class: 'center-block' do %>
                       <%= image_tag(e.image, class: 'img-circle', height: '50px') %>
                       <br/>
-                      <%= e.name %>
+                      <%= user_title(e.user) %>
                       <br />
                       <% if e.open? %>
                         <span class="label label-success"><span class="fa fa-check"></span> Open<span>

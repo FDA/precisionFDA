@@ -13,12 +13,14 @@ class ExpertsController < ApplicationController
 
   def edit
     @expert = Expert.find(params[:id])
-    redirect_to experts_path and return unless @expert.editable_by?(@context)
+    redirect_to experts_path and return unless @expert.editable_by?(@context) || @context.user.can_administer_site?
+
+    js imageUrl: @expert.image
   end
 
   def update
     @expert = Expert.find(params[:id])
-    redirect_to experts_path and return unless @expert.editable_by?(@context)
+    redirect_to experts_path and return unless @expert.editable_by?(@context) || @context.user.can_administer_site?
 
     Expert.transaction do
       if @expert.update(update_expert_params)
@@ -126,7 +128,10 @@ class ExpertsController < ApplicationController
 
   def show
     @expert = Expert.find(params[:id])
-    redirect_to experts_path and return unless @expert.is_public?
+    if !@expert.is_public?
+      flash[:error] = "This Expert Q&A session has not been made public yet."
+      redirect_to experts_path and return
+    end
 
     @answered_questions = @expert.answered_questions.sort_by{ |q| q.expert_answer.updated_at }.reverse
     @user_questions = @context.logged_in? ? @expert.questions_by_user_id(@context.user_id).sort_by{ |q| q.created_at }.reverse : nil

@@ -31,9 +31,10 @@ class FileModel
         "#{@dataUploaded()/file.size * 100}%"
     )
 
-class FilesNewView
-  constructor: () ->
+class ExpertsEditView
+  constructor: (imageUrl) ->
     @files = ko.observableArray()
+    @imageUrl = ko.observable(imageUrl)
 
     @uploadState = ko.observable()
     @isUploadStateVisible = ko.computed(=>
@@ -82,8 +83,9 @@ class FilesNewView
     uploadCounter = 0
     files = @files.peek()
     filesLength = files.length
-    doneFn = (fileModel) =>
+    doneFn = (fileModel, url) =>
       uploadCounter++
+      @imageUrl(url)
       fileModel.state("DONE")
       @uploadState("DONE") if uploadCounter == filesLength
 
@@ -92,7 +94,21 @@ class FilesNewView
 
       do (fileModel) =>
         fileModel.state("UPLOADING")
-        Precision.uploader.uploadFile(fileModel, metadata, () -> doneFn(fileModel))
+        Precision.uploader.uploadImage(fileModel, metadata, () =>
+          @getFileLink(fileModel, doneFn)
+        )
+
+  getFileLink: (fileModel, doneFn) ->
+    Precision.api '/api/get_file_link', {'id': fileModel.id()}, (fileLinkData) =>
+      if fileLinkData.error
+        if fileLinkData.errorType == "FileNotClosed"
+          setTimeout(=>
+            @getFileLink(fileModel, doneFn)
+          , 500)
+        else
+          alert(fileLinkData.error)
+      else
+        doneFn(fileModel, fileLinkData.url)
 
 #########################################################
 #
@@ -102,15 +118,26 @@ class FilesNewView
 #
 #########################################################
 
-FilesController = Paloma.controller('Files',
-  new: ->
+ExpertsController = Paloma.controller('Experts',
+  edit: ->
     $container = $("body main")
-    viewModel = new FilesNewView()
+    viewModel = new ExpertsEditView(@params.imageUrl)
     ko.applyBindings(viewModel, $container[0])
 
     $container
       .on("change.files.new", ".event-browse-files", (e) -> viewModel.handleInputChange(e))
       .on("submit.files.new", ".form-upload-files", (e) -> viewModel.handleUpload(e))
-      .on("click.files.new", ".event-upload-files", (e) -> viewModel.handleUpload(e))
+      .on("click.files.new", ".event-upload-image", (e) -> viewModel.handleUpload(e))
+      .on("click.files.new", ".event-clear-files", (e) -> viewModel.handleClear(e))
+
+  new: ->
+    $container = $("body main")
+    viewModel = new ExpertsEditView()
+    ko.applyBindings(viewModel, $container[0])
+
+    $container
+      .on("change.files.new", ".event-browse-files", (e) -> viewModel.handleInputChange(e))
+      .on("submit.files.new", ".form-upload-files", (e) -> viewModel.handleUpload(e))
+      .on("click.files.new", ".event-upload-image", (e) -> viewModel.handleUpload(e))
       .on("click.files.new", ".event-clear-files", (e) -> viewModel.handleClear(e))
 )
