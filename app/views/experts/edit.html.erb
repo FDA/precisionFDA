@@ -13,11 +13,14 @@
     <div class="form-group required">
       <%= f.label :image, "Image", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_field :image, class: "form-control", placeholder: "Image URL...", required: "required"  %>
+        <%= render "_partials/upload_image_button" %>
+        <input type="hidden" name="expert[image]" data-bind="value: imageUrl" />
+        <br/><br/>
+        <img class="img-thumbnail" data-bind="attr: {src: imageUrl}, visible: imageUrl" />
       </div>
     </div>
     <div class="form-group required">
-      <%= f.label :_intro, "Intro", class: 'control-label col-sm-2' %>
+      <%= f.label :_intro, "Expert Intro", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
         <%= f.text_area :_intro, class: "form-control", rows: 2, placeholder: "Expert blurb...", required: "required"  %>
       </div>
@@ -42,4 +45,5 @@
       </div>
     </div>
   <% end %>
+  <%= render "_partials/upload_image_modal" %>
 </div>

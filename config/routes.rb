@@ -27,7 +27,9 @@ Rails.application.routes.draw do
     # API
     post '/api/publish', to: 'api#publish'
     post '/api/create_file', to: 'api#create_file'
+    post '/api/create_image_file', to: 'api#create_image_file'
     post '/api/get_upload_url', to: 'api#get_upload_url'
+    post '/api/get_file_link', to: 'api#get_file_link'
     post '/api/list_related', to: 'api#list_related'
     post '/api/close_file', to: 'api#close_file'
     post '/api/describe', to: 'api#describe'

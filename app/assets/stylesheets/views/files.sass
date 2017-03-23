@@ -1,51 +1,6 @@
 @import "_common"
 
 .pfda-controller-files.pfda-action-new main
-  .btn-browse-files
-    position: relative
-    overflow: hidden
-
-  .btn-browse-files input[type=file]
-    position: absolute
-    top: 0
-    right: 0
-    left: 0
-    bottom: 0
-    min-height: 100%
-    filter: alpha(opacity=0)
-    opacity: 0
-    outline: none
-    background: white
-    cursor: inherit
-    display: block
-
-  .file-description
-    &, &:focus, &:active
-      background-color: transparent
-      border-color: transparent
-      outline: 0
-      box-shadow: none
-      padding-left: 0
-
-  .list-files
-    margin-top: 0
-
-    .list-group-item
-      position: relative
-
-      .progress
-        margin: 0
-        position: absolute
-        top: 2px
-        left: 2px
-        right: 2px
-        bottom: 2px
-        opacity: 0.2
-        height: auto
-
-  .file-metadata-glue
-    color: $text-muted
-
   form
     .form-group:last-child
       margin-bottom: 0
