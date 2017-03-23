@@ -193,7 +193,7 @@ class ApplicationController < ActionController::Base
       license_path(item)
     when "space"
       space_path(item)
-    when "meta_appathon"
+    when "meta-appathon"
       meta_appathon_path(item)
     when "appathon"
       appathon_path(item)
