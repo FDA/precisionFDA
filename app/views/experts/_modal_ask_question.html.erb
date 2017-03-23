@@ -10,12 +10,7 @@
       <%= form_for @expert, url: ask_question_expert_path(@expert), method: :post do |f| %>
       <div class="modal-body">
         <div class="form-group">
-          Asking as:&nbsp;
-          <% if @context.logged_in? %>
-            <%= link_to(@context.user.full_name.titleize, user_path(@context.user.dxuser)) %> (<%= @context.user.org.name %>)
-          <% else %>
-            Anonymous
-          <% end %>
+          Asking as:&nbsp;&nbsp;<%= user_link(@context.user) %>
         </div>
         <div class="form-group required">
           <%= f.text_area (:question), rows: 4, class: "form-control input-lg", placeholder: "Ask a question...", required: "required"  %>

@@ -41,6 +41,22 @@ module ApplicationHelper
     """
   end
 
+  def user_title(user)
+    if user.nil?
+      "Anonymous"
+    else
+      user.full_name.titleize
+    end
+  end
+
+  def user_link(user)
+    if user.nil?
+      "Anonymous"
+    else
+      raw "#{link_to(user.full_name.titleize, user_url(user))} (#{user.org.name})"
+    end
+  end
+
   def fa_class(item)
     case item.klass
     when "file"

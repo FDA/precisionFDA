@@ -58,51 +58,55 @@ class ExpertsController < ApplicationController
   end
 
   def ask_question
-    @expert = Expert.find(params[:id])
+    expert = Expert.find(params[:id])
 
     if @context.logged_in?
-      q = ExpertQuestion.provision(@expert, @context, params[:expert][:question])
-      if q
+      exp_question = ExpertQuestion.provision(expert, @context, params[:expert][:question])
+      if exp_question
+        NotificationsMailer.new_expert_question_email(expert, exp_question).deliver_now!
         flash[:success] = "Your question was submitted successfully."
       else
-        flash[:error] = "Your question was not submitted because of an unknown reason."
+        flash[:error] = "Your question was not submitted because of an unknown reason, Please try again."
       end
     else
-      @q = ExpertQuestion.new(
+      @exp_question = ExpertQuestion.new(
           :user_id => nil,
-          :expert_id => @expert.id,
+          :expert_id => expert.id,
           :state => "open",
           :body => params[:expert][:question],
           :_original => params[:expert][:question],
           :_edited => false.to_s
       )
-      if verify_recaptcha(model: @q) && @q.save!
+      if verify_recaptcha(model: @exp_question) && @exp_question.save!
+        NotificationsMailer.new_expert_question_email(expert, @exp_question).deliver_now!
         flash[:success] = "Your question was submitted successfully."
       else
-        flash[:error] = "Your question was not submitted because of an unknown reason."
+        flash[:error] = "Your question was not submitted because of an unknown reason. Please try again."
       end
     end
 
-    redirect_to expert_path(@expert)
+    redirect_to expert_path(expert)
   end
 
   def create
     redirect_to experts_path unless @context.user.can_administer_site?
 
-    u = User.find_by(dxuser: expert_params[:username])
-    if u.nil?
+    user = User.find_by(dxuser: expert_params[:username])
+    if user.nil?
       flash.now[:error] = "Expert username #{expert_params[:username]} not found!"
     else
-      e = Expert.provision(@context, expert_params)
-      if e
+      expert = Expert.provision(@context, expert_params)
+      if expert
+        NotificationsMailer.new_expert_email(expert).deliver_now!
         redirect_to experts_path
-        flash[:success] = "A new Expert of the Month was successfully created for #{e.name} (#{e.user.dxuser})."
+        flash[:success] = "A new Expert of the Month was successfully created for #{user_title(expert.user)} (#{expert.user.dxuser})."
         return
       else
         flash.now[:error] = "The Expert could not be provisioned because of an unknown reason."
       end
     end
 
+    # Here only if error
     @expert = Expert.new(expert_params)
     render :new
   end
