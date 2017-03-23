@@ -3,7 +3,7 @@ class ExpertsController < ApplicationController
   before_action :require_login_or_guest, only: [:edit, :update, :create, :new]
 
   def index
-    @experts = Expert.all.order(id: :desc)
+    @experts = Expert.viewable_by(@context).order(id: :desc)
   end
 
   def new
@@ -12,12 +12,12 @@ class ExpertsController < ApplicationController
   end
 
   def edit
-    @expert = Expert.editable_by(@context).find(params[:id])
+    @expert = Expert.find(params[:id])
     redirect_to experts_path and return unless @expert.editable_by?(@context)
   end
 
   def update
-    @expert = Expert.editable_by(@context).find(params[:id])
+    @expert = Expert.find(params[:id])
     redirect_to experts_path and return unless @expert.editable_by?(@context)
 
     Expert.transaction do
@@ -32,7 +32,7 @@ class ExpertsController < ApplicationController
   end
 
   def open
-    @expert = Expert.editable_by(@context).find(params[:id])
+    @expert = Expert.find(params[:id])
     redirect_to experts_path and return unless @expert.editable_by?(@context)
 
     Expert.transaction do
@@ -46,7 +46,9 @@ class ExpertsController < ApplicationController
   end
 
   def close
-    @expert = Expert.editable_by(@context).find(params[:id])
+    @expert = Expert.find(params[:id])
+    redirect_to experts_path and return unless @expert.editable_by?(@context)
+
     Expert.transaction do
       if @expert.update_attribute(:state, "closed")
         flash[:success] = "This Expert-of-the-Month is now closed"
@@ -59,6 +61,7 @@ class ExpertsController < ApplicationController
 
   def ask_question
     expert = Expert.find(params[:id])
+    redirect_to experts_path and return unless expert.askable?
 
     if @context.logged_in?
       exp_question = ExpertQuestion.provision(expert, @context, params[:expert][:question])
@@ -99,7 +102,7 @@ class ExpertsController < ApplicationController
       if expert
         NotificationsMailer.new_expert_email(expert).deliver_now!
         redirect_to experts_path
-        flash[:success] = "A new Expert of the Month was successfully created for #{user_title(expert.user)} (#{expert.user.dxuser})."
+        flash[:success] = "A new Expert of the Month was successfully created for #{expert.user.full_name.titleize} (#{expert.user.dxuser})."
         return
       else
         flash.now[:error] = "The Expert could not be provisioned because of an unknown reason."
@@ -123,13 +126,17 @@ class ExpertsController < ApplicationController
 
   def show
     @expert = Expert.find(params[:id])
+    redirect_to experts_path and return unless @expert.is_public?
+
     @answered_questions = @expert.answered_questions.sort_by{ |q| q.expert_answer.updated_at }.reverse
     @user_questions = @context.logged_in? ? @expert.questions_by_user_id(@context.user_id).sort_by{ |q| q.created_at }.reverse : nil
   end
 
   def destroy
     expert = Event.editable_by(@context).find(params[:id])
-    name = expert.name
+    redirect_to experts_path unless @expert.editable_by?(@context)
+
+    name = user_title(expert.user)
 
     expert.destroy
 
@@ -139,19 +146,21 @@ class ExpertsController < ApplicationController
 
   private
     def expert_params
-      p = params.require(:expert).permit(:username, :_intro, :_about, :image)
+      p = params.require(:expert).permit(:username, :_intro, :_about, :image, :scope)
       p.require(:username)
       p.require(:_intro)
       p.require(:_about)
       p.require(:image)
+      p.require(:scope)
       return p
     end
 
     def update_expert_params
-      p = params.require(:expert).permit(:_intro, :_about, :image)
+      p = params.require(:expert).permit(:_intro, :_about, :image, :scope)
       p.require(:_intro)
       p.require(:_about)
       p.require(:image)
+      p.require(:scope)
       return p
     end
 end

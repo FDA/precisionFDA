@@ -53,7 +53,7 @@ module ApplicationHelper
     if user.nil?
       "Anonymous"
     else
-      raw "#{link_to(user.full_name.titleize, user_url(user))} (#{user.org.name})"
+      raw "#{link_to(user.full_name.titleize, user_url(user.username))} (#{user.org.name})"
     end
   end
 

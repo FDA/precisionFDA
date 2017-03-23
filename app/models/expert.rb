@@ -5,6 +5,7 @@
 #  id            :integer          not null, primary key
 #  state         :string
 #  image         :string
+#  scope         :string
 #  meta          :text
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
@@ -26,12 +27,20 @@ class Expert < ActiveRecord::Base
     "expert-#{id}"
   end
 
+  def is_public?
+    scope == "public"
+  end
+
   def open?
     ["open"].include?(state)
   end
 
   def closed?
     ["closed"].include?(state)
+  end
+
+  def askable?
+    is_public? && open?
   end
 
   def open_questions
@@ -67,6 +76,16 @@ class Expert < ActiveRecord::Base
 
   def self.closed
     where(state: "closed")
+  end
+
+  def self.viewable_by(context)
+    if context.user.present? && context.user.can_administer_site?
+      Expert.all
+    elsif context.logged_in? && !context.guest?
+      Expert.where("user_id = ? OR scope = ?", context.user_id, "public")
+    else
+      Expert.where(scope: "public")
+    end
   end
 
   def self.editable_by(context)
