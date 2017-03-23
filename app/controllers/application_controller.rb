@@ -193,7 +193,7 @@ class ApplicationController < ActionController::Base
       license_path(item)
     when "space"
       space_path(item)
-    when "meta_appathon"
+    when "meta-appathon"
       meta_appathon_path(item)
     when "appathon"
       appathon_path(item)
@@ -228,7 +228,7 @@ class ApplicationController < ActionController::Base
       discussion_answer_comments_path(item.discussion, item.user.dxuser)
     when "space"
       space_comments_path(item)
-    when "meta_appathon"
+    when "meta-appathon"
       meta_appathon_comments_path(item)
     when "appathon"
       appathon_comments_path(item)
@@ -251,7 +251,7 @@ class ApplicationController < ActionController::Base
       end
     when "space"
       discuss_space_path(item)
-    when "meta_appathon", "appathon", "file", "app", "job", "asset", "comparison", "answer", "space"
+    when "meta-appathon", "appathon", "file", "app", "job", "asset", "comparison", "answer", "space"
       pathify(item)
     else
       raise "Unknown class #{item.klass}"
