@@ -9,7 +9,7 @@
           </div>
           <div class="media-body text-center">
             <div class="pfda-card-title">
-              <%= link_to e.name, expert_path(e) %>
+              <%= link_to user_title(e.user), expert_path(e) %>
             </div>
             <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
               <li><%= e.user.org.handle %>/<%= e.user.dxuser %></li>

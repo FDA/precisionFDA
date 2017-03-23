@@ -7,7 +7,7 @@
         </div>
       <% else %>
         <div class="page-title">
-          Expert Q&A with <%= link_to("#{@expert.name}", user_path(@expert.user.dxuser)) %> (<%= @expert.user.org.name %>)
+          Expert Q&A with <%= user_link(@expert.user) %>
         </div>
       <% end %>
 

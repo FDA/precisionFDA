@@ -1,4 +1,4 @@
-<% content_for :title do %><%= @expert.name %><% end %>
+<% content_for :title do %><%= user_title(@expert) %><% end %>
 
 <%= render 'experts/header', { is_dashboard: true, show_toolbar: true, show_intro: false } %>
 
@@ -58,11 +58,7 @@
           </div>
           <div class="col-sm-11 col-sm-offset-1">
             <div class="form-control-static">
-              <% if @selected_question.user.present? %>
-                <%= link_to(@selected_question.user.full_name.titleize, user_path(@selected_question.user.dxuser)) %> (<%= @selected_question.user.org.name %>)
-              <% else %>
-                Anonymous
-              <% end %>
+              <%= user_link(@expert.user) %>)
             </div>
           </div>
         </div>

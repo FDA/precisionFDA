@@ -18,40 +18,20 @@ class Expert < ActiveRecord::Base
   store :meta, accessors: [:_intro, :_about], coder: JSON
   attr_accessor :username, :question, :answer
 
-  def uid
-    "expert-#{id}"
-  end
-
-  def first_name
-    user.first_name.capitalize
-  end
-
-  def last_name
-    user.last_name.capitalize
-  end
-
-  def name
-    "#{first_name} #{last_name}"
-  end
-
-  def title
-    name
-  end
-
   def klass
     "expert"
   end
 
-  def active?
-    state == "active"
+  def uid
+    "expert-#{id}"
   end
 
   def open?
-    ["active", "open", nil].include?(state)
+    ["open"].include?(state)
   end
 
   def closed?
-    state == "closed"
+    ["closed"].include?(state)
   end
 
   def open_questions
@@ -71,13 +51,10 @@ class Expert < ActiveRecord::Base
   end
 
   def editable_by?(context)
-    if !context.logged_in?
-        return false
-    end
-    if !context.guest?
-      raise unless context.user_id.present?
-      user.id == context.user_id
-    end
+    return false unless context.logged_in? && !context.guest?
+
+    raise unless context.user_id.present?
+    user.id == context.user_id
   end
 
   def questions_by_user_id(user_id)

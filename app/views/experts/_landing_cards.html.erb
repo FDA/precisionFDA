@@ -1,7 +1,7 @@
 <% if (experts.count > 0) %>
   <div class="pfda-cards pfda-cards-align-centered pfda-cards-justify-centered">
     <% experts.each do |e| %>
-      <%= link_to expert_path(e), class: "pfda-card pfda-card-default pfda-card-rounded pfda-card-bordered pfda-card-padded pfda-card-shadow" do %>
+      <div class="pfda-card pfda-card-default pfda-card-rounded pfda-card-bordered pfda-card-padded pfda-card-shadow">
         <div class="pfda-card-header">
           <div class="media">
             <div class="media-left text-muted center-block text-center">
@@ -9,7 +9,7 @@
             </div>
             <div class="media-body text-center">
               <div class="pfda-card-title">
-                <%= e.name %>
+                <%= user_link(e.user) %>
               </div>
               <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
                 <li><%= e.user.org.handle %>/<%= e.user.dxuser %></li>
@@ -30,6 +30,6 @@
           <% end %>
         </div>
       <% end %>
-    <% end %>
+    </div >
   </div>
 <% end %>

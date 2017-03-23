@@ -1,4 +1,4 @@
-<% content_for :title do %><%= @expert.name %><% end %>
+<% content_for :title do %><%= user_title(@expert.user) %><% end %>
 
 <%= render 'experts/header', { is_dashboard: false, show_toolbar: false, show_intro: false } %>
 
@@ -14,15 +14,11 @@
       <h2 class="expert-question-body"><%= @expert_question.body %></h2>
       <small class="expert-question-footer text-muted">
         <% if @expert_question.edited? %>
-          <i>Modified from a question from </i>
+          <i>Modified from a question by </i>
         <% else %>
           Asked by
         <% end %>
-        <% if @expert_question.user_id.nil? %>
-          anonymous
-        <% else %>
-          <%= link_to(@expert_question.user.full_name, user_path(@expert_question.user.dxuser)) %> (<%= @expert_question.user.org.name %>)
-        <% end %>
+        <%= user_link(@expert_question.user) %>
       </small>
       <hr/>
       <p class="expert-question-answer-body lead">

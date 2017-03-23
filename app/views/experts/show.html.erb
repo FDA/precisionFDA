@@ -1,4 +1,4 @@
-<% content_for :title do %><%= @expert.name %><% end %>
+<% content_for :title do %><%= user_title(@expert.user) %><% end %>
 
 <%= render 'experts/header', { is_dashboard: false, show_toolbar: true, show_intro: true } %>
 
