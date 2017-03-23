@@ -81,13 +81,14 @@ class NotificationsMailer < ApplicationMailer
   def new_expert_email(expert)
     @expert = expert
     mail to: @expert.user.email,
-         subject: "A new Expert Q/A Session was created for \"#{user_title(@expert.user)}\""
+         subject: "A new Expert Q/A Session was created for \"#{@expert.user.full_name.titleize}\""
   end
 
   def new_expert_question_email(expert, question)
     @expert = expert
     @question = question
+    name = @question.user.nil? ? "Anonymous" : @question.user.full_name.titleize
     mail to: @expert.user.email,
-         subject: "A new question was submitted by \"#{user_title(@question.user)}\""
+         subject: "A new question was submitted by \"#{name}\""
   end
 end

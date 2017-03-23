@@ -22,7 +22,7 @@
           An new question was asked in your Expert Q/A Session
         </p>
         <p>
-          Submitted by: <%= @question.asker_name %>
+          Submitted by: <%= user_link(@question.user) %>
         </p>
         <blockquote>
           <%= @question.body %>

@@ -1,17 +1,15 @@
-<% content_for :title do %><%= user_title(@expert) %><% end %>
+<% content_for :title do %><%= user_title(@expert.user) %><% end %>
 
 <%= render 'experts/header', { is_dashboard: true, show_toolbar: true, show_intro: false } %>
 
 <div class="pfda-pane container-padded container-fluid">
   <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal">
     <div class="list-group">
-      <% if @expert.open?  %>
-        <div class="list-group-item">
-          <a class="btn btn-primary" data-toggle="modal" data-target="#new-question-modal">
-            <span class="fa fa-plus fa-fw" aria-hidden="true"></span> Add a new question
-          </a>
-        </div>
-      <% end %>
+      <div class="list-group-item">
+        <a class="btn btn-primary" data-toggle="modal" data-target="#new-question-modal">
+          <span class="fa fa-plus fa-fw" aria-hidden="true"></span> Add a new question
+        </a>
+      </div>
       <% if @open_questions.count > 0 %>
         <div class="list-group-item list-group-item-header">
           Open Questions (<%= @open_questions.count %>)
@@ -54,11 +52,11 @@
 
         <div class="form-group text-muted">
           <div class="control-label col-sm-2">
-            Submitted By
+            Submitter
           </div>
           <div class="col-sm-11 col-sm-offset-1">
             <div class="form-control-static">
-              <%= user_link(@expert.user) %>)
+              <%= user_link(@selected_question.user) %>
             </div>
           </div>
         </div>
