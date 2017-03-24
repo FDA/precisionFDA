@@ -128,15 +128,13 @@ class ExpertsController < ApplicationController
 
   def show
     @expert = Expert.find(params[:id])
-    if !@expert.editable_by?(@context)
-      if !@expert.is_public?
-        flash[:error] = "This Expert Q&A session has not been made public yet."
-      end
+    if !@expert.editable_by?(@context) && !@expert.is_public?
+      flash[:error] = "This Expert Q&A session has not been made public yet."
       redirect_to experts_path and return
     end
 
     @answered_questions = @expert.answered_questions.sort_by{ |q| q.expert_answer.updated_at }.reverse
-    @user_questions = @context.logged_in? ? @expert.questions_by_user_id(@context.user_id).sort_by{ |q| q.created_at }.reverse : nil
+    @user_questions = @context.logged_in? && !@context.guest? ? @expert.questions_by_user_id(@context.user_id).sort_by{ |q| q.created_at }.reverse : []
   end
 
   def destroy
