@@ -11,12 +11,17 @@
         </div>
       <% end %>
 
-      <p class="list-group-item-text">
-      <% if @expert.open? %>
-        <span class="label label-success"><span class="fa fa-check"></span> Open<span>
-      <% else %>
-        <span class="label label-default"><span class="fa fa-lock"></span> Closed</span>
-      <% end %>
+      <p>
+        <% if @expert.open? %>
+          <span class="label label-success"><span class="fa fa-check"></span> Open</span>
+        <% else %>
+          <span class="label label-default"><span class="fa fa-lock"></span> Closed</span>
+        <% end %>
+        <% if @expert.is_public? %>
+          <span class="label label-success"><span class="fa fa-eye"></span> Public</span>
+        <% else %>
+          <span class="label label-default"><span class="fa fa-eye-slash"></span> Private</span>
+        <% end %>
       </p>
 
       <% if show_intro %>

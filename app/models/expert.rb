@@ -63,7 +63,7 @@ class Expert < ActiveRecord::Base
     return false unless context.logged_in? && !context.guest?
 
     raise unless context.user_id.present?
-    user.id == context.user_id
+    user.id == context.user_id || user.can_administer_site?
   end
 
   def questions_by_user_id(user_id)

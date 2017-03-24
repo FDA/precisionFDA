@@ -46,25 +46,23 @@
         <br/>
       </ul>
     <% else %>
-      <% if @context.logged_in? %>
-        <% if @user_questions.count > 0 %>
-          <ul class="list-group">
-            <li class="list-group-item list-group-item-header">
-              Your Questions (<%= @user_questions.count %>)
-            </li>
-            <% @user_questions.each do |q|%>
-              <li class="list-group-item">
-                <%= q._original %>
-               </li>
-            <% end %>
-            <br/>
-          </ul>
+      <ul class="list-group">
+        <li class="list-group-item list-group-item-header">
+          Your Questions (<%= @user_questions.count %>)
+        </li>
+        <% if @context.logged_in? %>
+          <% @user_questions.each do |q|%>
+            <li class="list-group-item">
+              <%= q._original %>
+             </li>
+          <% end %>
         <% else %>
           <li class="list-group-item">
             Please login to see your question history.
           </li>
         <% end %>
-      <% end %>
+      <br/>
+      </ul>
     <% end %>
     <ul class="list-group">
       <li class="list-group-item list-group-item-header">
