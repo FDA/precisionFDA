@@ -128,8 +128,10 @@ class ExpertsController < ApplicationController
 
   def show
     @expert = Expert.find(params[:id])
-    if !@expert.is_public?
-      flash[:error] = "This Expert Q&A session has not been made public yet."
+    if !@expert.editable_by?(@context)
+      if !@expert.is_public?
+        flash[:error] = "This Expert Q&A session has not been made public yet."
+      end
       redirect_to experts_path and return
     end
 
