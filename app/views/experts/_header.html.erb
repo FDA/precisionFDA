@@ -17,10 +17,12 @@
         <% else %>
           <span class="label label-default"><span class="fa fa-lock"></span> Closed</span>
         <% end %>
-        <% if @expert.is_public? %>
-          <span class="label label-success"><span class="fa fa-eye"></span> Public</span>
-        <% else %>
-          <span class="label label-default"><span class="fa fa-eye-slash"></span> Private</span>
+        <% if @expert.editable_by?(@context) %>
+          <% if @expert.is_public? %>
+            <span class="label label-primary"><span class="fa fa-eye"></span> Public</span>
+          <% else %>
+            <span class="label label-warning"><span class="fa fa-eye-slash"></span> Private</span>
+          <% end %>
         <% end %>
       </p>
 

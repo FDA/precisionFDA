@@ -11,6 +11,20 @@
             <div class="pfda-card-title">
               <%= link_to user_title(e.user), expert_path(e) %>
             </div>
+            <p>
+              <% if e.open? %>
+                <span class="label label-success"><span class="fa fa-check"></span> Open</span>
+              <% else %>
+                <span class="label label-default"><span class="fa fa-lock"></span> Closed</span>
+              <% end %>
+              <% if e.editable_by?(@context) %>
+                <% if e.is_public? %>
+                  <span class="label label-primary"><span class="fa fa-eye"></span> Public</span>
+                <% else %>
+                  <span class="label label-warning"><span class="fa fa-eye-slash"></span> Private</span>
+                <% end %>
+              <% end %>
+            </p>
             <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
               <li><%= e.user.org.handle %>/<%= e.user.dxuser %></li>
               <li><%= local_date(e.created_at, '%B %e, %Y') %></li>
