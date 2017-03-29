@@ -13,7 +13,7 @@ window.Precision.uploader =
   uploadImage: (fileModel, metadata, cb) ->
     chunk_size = @getChunkSize(fileModel, 5000000) # 5MB
     params = _.assign(metadata, {'name': fileModel.file.name})
-    Precision.api '/api/create_image_file', params, (uploadData) =>
+    Precision.api '/api/create_file', params, (uploadData) =>
       id = uploadData.id
       fileModel.id(id)
 

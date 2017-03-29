@@ -15,7 +15,7 @@ class ExpertsController < ApplicationController
     @expert = Expert.find(params[:id])
     redirect_to experts_path and return unless @expert.editable_by?(@context) || @context.user.can_administer_site?
 
-    js imageUrl: @expert.image
+    js imageUrl: get_preview_link(@context, @expert._image_id), fileId: @expert._image_id
   end
 
   def update
@@ -98,7 +98,7 @@ class ExpertsController < ApplicationController
 
     user = User.find_by(dxuser: expert_params[:username])
     if user.nil?
-      flash.now[:error] = "Expert username #{expert_params[:username]} not found!"
+      flash[:error] = "Expert username #{expert_params[:username]} not found!"
     else
       expert = Expert.provision(@context, expert_params)
       if expert
@@ -107,13 +107,13 @@ class ExpertsController < ApplicationController
         flash[:success] = "A new Expert of the Month was successfully created for #{expert.user.full_name.titleize} (#{expert.user.dxuser})."
         return
       else
-        flash.now[:error] = "The Expert could not be provisioned because of an unknown reason."
+        flash[:error] = "The Expert could not be provisioned because of an unknown reason."
       end
     end
 
     # Here only if error
     @expert = Expert.new(expert_params)
-    render :new
+    redirect_to new_expert_path(@expert)
   end
 
   def dashboard
@@ -151,21 +151,17 @@ class ExpertsController < ApplicationController
 
   private
     def expert_params
-      p = params.require(:expert).permit(:username, :_intro, :_about, :image, :scope)
+      p = params.require(:expert).permit(:username, :_intro, :_about, :_image_id, :scope)
       p.require(:username)
-      p.require(:_intro)
-      p.require(:_about)
-      p.require(:image)
       p.require(:scope)
+      p.require(:_image_id)
       return p
     end
 
     def update_expert_params
-      p = params.require(:expert).permit(:_intro, :_about, :image, :scope)
-      p.require(:_intro)
-      p.require(:_about)
-      p.require(:image)
+      p = params.require(:expert).permit(:_intro, :_about, :_image_id, :scope)
       p.require(:scope)
+      p.require(:_image_id)
       return p
     end
 end

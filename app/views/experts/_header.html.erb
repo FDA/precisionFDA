@@ -1,43 +1,42 @@
 <div class="page-header text-center">
-  <%= image_tag(@expert.image, class: 'img-rounded', height: '120px', width: '120px') %>
-
-      <% if is_dashboard %>
-        <div class="page-title">
-          Your Expert Q&A Dashboard
-        </div>
-      <% else %>
-        <div class="page-title">
-          Expert Q&A with <%= user_link(@expert.user) %>
-        </div>
-      <% end %>
-
-      <p>
-        <% if @expert.open? %>
-          <span class="label label-success"><span class="fa fa-check"></span> Open</span>
-        <% else %>
-          <span class="label label-default"><span class="fa fa-lock"></span> Closed</span>
-        <% end %>
-        <% if @expert.editable_by?(@context) %>
-          <% if @expert.is_public? %>
-            <span class="label label-primary"><span class="fa fa-eye"></span> Public</span>
-          <% else %>
-            <span class="label label-warning"><span class="fa fa-eye-slash"></span> Private</span>
-          <% end %>
-        <% end %>
-      </p>
-
-      <% if show_intro %>
-        <hr />
-        <div class="pfda-discussion-content row">
-          <div class="col-md-12 col-md-offset-6">
-            <div class="lead text-left">
-              <%= simple_format(@expert._intro) %>
-            </div>
-          </div>
-        </div>
-      <% end %>
+  <p>
+    <%= image_tag(@expert.image, class: 'img-rounded', height: '300px') %>
+  </p>
+  <% if is_dashboard %>
+    <div class="page-title">
+      Your Expert Q&A Dashboard
     </div>
-  </div>
+  <% else %>
+    <div class="page-title">
+      Expert Q&A with <%= user_link(@expert.user) %>
+    </div>
+  <% end %>
+
+  <p>
+    <% if @expert.open? %>
+      <span class="label label-success"><span class="fa fa-check"></span> Open</span>
+    <% else %>
+      <span class="label label-default"><span class="fa fa-lock"></span> Closed</span>
+    <% end %>
+    <% if @expert.editable_by?(@context) %>
+      <% if @expert.is_public? %>
+        <span class="label label-primary"><span class="fa fa-eye"></span> Public</span>
+      <% else %>
+        <span class="label label-warning"><span class="fa fa-eye-slash"></span> Private</span>
+      <% end %>
+    <% end %>
+  </p>
+
+  <% if show_intro %>
+    <hr/>
+    <div class="pfda-discussion-content row">
+      <div class="col-md-12 col-md-offset-6">
+        <div class="lead text-left">
+          <%= simple_format(@expert._intro) %>
+        </div>
+      </div>
+    </div>
+  <% end %>
 </div>
 
 <% if @expert.editable_by?(@context) && show_toolbar %>

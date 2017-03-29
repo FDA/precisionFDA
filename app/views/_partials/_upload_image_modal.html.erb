@@ -17,7 +17,9 @@
                 <button class="btn btn-success btn-lg event-upload-image" style="display:none;" data-bind="visible: isUploadVisible, disable: disableActions">
                   <span class="fa fa-cloud-upload fa-fw"></span> Upload
                 </button>
-                <button class="btn btn-link btn-lg event-clear-files" style="display:none;" data-bind="visible: isClearVisible, disable: disableActions">Restart</button>
+                <button class="btn btn-link btn-lg event-clear-files" style="display:none;" data-bind="visible: isClearVisible, disable: disableActions">
+                  <span class="fa fa-rotate-left"></span> Restart
+                </button>
               </div>
             </div>
           </form>
@@ -32,10 +34,10 @@
               <li class='list-group-item' data-bind="css: classes">
                 <div class='list-group-item-text clearfix'>
                   <!-- ko if: !isDone() || !path() -->
-                    <span class="file-name" data-bind="text: file.name"></span>
+                    <span class="file-name" data-bind="text: file.name.length > 50 ? file.name.substring(0,32) + '.....' + file.name.slice(-12) : file.name"></span>
                   <!-- /ko -->
                   <!-- ko if: isDone() && path() -->
-                    <a class="file-name" data-bind="text: file.name, attr: {href: path}"></a>
+                    <a class="file-name" data-bind="text: file.name.length > 50 ? file.name.substring(0,32) + '.....' + file.name.slice(-12) : file.name, attr: {href: path}"></a>
                   <!-- /ko -->
                   <span class="file-metadata-glue">&middot;</span> <small class="file-type" data-bind="text: file.type || 'File'"></small> <span class="file-metadata-glue">&middot;</span>  <small class="file-size" data-bind="text: sizeFormatted"></small>
                   <span class="pull-right" data-bind="visible: isDone">
