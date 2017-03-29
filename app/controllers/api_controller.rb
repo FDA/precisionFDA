@@ -671,7 +671,7 @@ class ApiController < ApplicationController
       # So we may have to store a reference to the file and generate
       # a shorter duration url each time it is rendered
 
-      opts = {project: file.project, preauthenticated: true, filename: file.name, duration: 86400}
+      opts = {project: file.project, preauthenticated: true, filename: file.name, duration: 300}
       url = DNAnexusAPI.new(@context.token).call(file.dxid, "download", opts)["url"]
     end
 

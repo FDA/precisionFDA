@@ -32,9 +32,11 @@ class FileModel
     )
 
 class ExpertsEditView
-  constructor: (imageUrl) ->
+  constructor: (imageUrl, fileId) ->
     @files = ko.observableArray()
+
     @imageUrl = ko.observable(imageUrl)
+    @fileId = ko.observable(fileId)
 
     @uploadState = ko.observable()
     @isUploadStateVisible = ko.computed(=>
@@ -85,6 +87,7 @@ class ExpertsEditView
     filesLength = files.length
     doneFn = (fileModel, url) =>
       uploadCounter++
+      @fileId(fileModel.id())
       @imageUrl(url)
       fileModel.state("DONE")
       @uploadState("DONE") if uploadCounter == filesLength
@@ -121,7 +124,7 @@ class ExpertsEditView
 ExpertsController = Paloma.controller('Experts',
   edit: ->
     $container = $("body main")
-    viewModel = new ExpertsEditView(@params.imageUrl)
+    viewModel = new ExpertsEditView(@params.imageUrl, @params.fileId)
     ko.applyBindings(viewModel, $container[0])
 
     $container

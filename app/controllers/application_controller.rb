@@ -161,6 +161,18 @@ class ApplicationController < ActionController::Base
     encryptor = ActiveSupport::MessageEncryptor.new(secret, sign_secret)
   end
 
+  def get_preview_link(context, id)
+    file = UserFile.find_by!(dxid: id)
+    if file.nil? || file.state != "closed"
+      return false
+    else
+      # Preview only lasts 5 minutes
+      opts = {project: file.project, preauthenticated: true, filename: file.name, duration: 300}
+      url = DNAnexusAPI.new(context.token).call(file.dxid, "download", opts)["url"]
+    end
+    return url
+  end
+
   def pathify(item)
     case item.klass
     when "file"

@@ -22,7 +22,7 @@
         <%= f.text_area :_intro, class: "form-control", rows: 2, placeholder: "Expert blurb...", required: "required"  %>
       </div>
     </div>
-    <div class="form-group required ">
+    <div class="form-group ">
       <%= f.label :_about, "About", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
         <%= f.text_area :_about, class: "form-control", rows: 10, placeholder: "More about the Expert..." %>
@@ -38,8 +38,9 @@
       <%= f.label :image, "Image", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
         <%= render "_partials/upload_image_button" %>
-        <input type="hidden" name="expert[image]" data-bind="value: imageUrl" />
-        <img data-bind="attr: {src: imageUrl}, visible: imageUrl" />
+        <input type=hidden name="expert[_image_id]" data-bind="value: fileId" required="required" />
+        <br/><br/>
+        <img class="img-thumbnail" data-bind="attr: {src: imageUrl}, visible: imageUrl" />
       </div>
     </div>
     <div class="form-group">

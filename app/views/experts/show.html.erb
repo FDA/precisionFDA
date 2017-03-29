@@ -18,6 +18,11 @@
     <% else %>
       No questions have been answered yet.
     <% end %>
+
+    <div class="text-muted">
+      <hr/>
+      The questions and answers posted under this Expert Q/A forum reflect the views of the author(s) and should not be construed to represent FDA’s views or policies.
+    </div>
   </div>
   <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal pfda-pane-sidebar-padded-v">
     <% if @expert.open? %>
@@ -74,5 +79,6 @@
     </ul>
   </div>
 </div>
-
+<div class="container container-padded">
+</div>
 <%= render "experts/modal_ask_question" %>

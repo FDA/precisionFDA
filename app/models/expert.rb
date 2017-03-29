@@ -16,7 +16,7 @@ class Expert < ActiveRecord::Base
   has_many :expert_answers, through: :expert_questions, dependent: :destroy
   belongs_to :user
 
-  store :meta, accessors: [:_intro, :_about], coder: JSON
+  store :meta, accessors: [:_intro, :_about, :_image_id], coder: JSON
   attr_accessor :username, :question, :answer
 
   def klass
@@ -102,6 +102,15 @@ class Expert < ActiveRecord::Base
       if u.nil?
         return e
       end
+
+      file = UserFile.accessible_by(context).find_by!(dxid: expert_params[:_image_id])
+      if file.nil? || file.file_size > 5000000
+        return e
+      end
+      opts = {project: file.project, preauthenticated: true, filename: file.name, duration: 9999999}
+      url = DNAnexusAPI.new(context.token).call(file.dxid, "download", opts)["url"]
+
+      expert_params[:image] = url
       expert_params[:state] = "closed"
       expert_params[:user_id] = u.id
       e = Expert.create!(expert_params)
