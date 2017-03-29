@@ -63,7 +63,7 @@ class Expert < ActiveRecord::Base
     return false unless context.logged_in? && !context.guest?
 
     raise unless context.user_id.present?
-    user.id == context.user_id || user.can_administer_site?
+    user.id == context.user_id || context.user.can_administer_site?
   end
 
   def questions_by_user_id(user_id)
@@ -95,6 +95,22 @@ class Expert < ActiveRecord::Base
     end
   end
 
+  def update_expert(context, expert_params)
+    if expert_params[:_image_id].present? && expert_params[:_image_id] != _image_id
+      expert_params[:image] = get_perm_link(context, expert_params[:_image_id])
+    end
+    update(expert_params)
+  end
+
+  def get_perm_link(context, id)
+    file = UserFile.accessible_by(context).find_by!(dxid: id)
+    if file.nil? || file.file_size > 5000000
+      return nil
+    end
+    opts = {project: file.project, preauthenticated: true, filename: file.name, duration: 9999999}
+    url = DNAnexusAPI.new(context.token).call(file.dxid, "download", opts)["url"]
+  end
+
   def self.provision(context, expert_params)
     e = nil
     Expert.transaction do
@@ -103,12 +119,7 @@ class Expert < ActiveRecord::Base
         return e
       end
 
-      file = UserFile.accessible_by(context).find_by!(dxid: expert_params[:_image_id])
-      if file.nil? || file.file_size > 5000000
-        return e
-      end
-      opts = {project: file.project, preauthenticated: true, filename: file.name, duration: 9999999}
-      url = DNAnexusAPI.new(context.token).call(file.dxid, "download", opts)["url"]
+      url = get_perm_link(context, expert_params[:_image_id])
 
       expert_params[:image] = url
       expert_params[:state] = "closed"

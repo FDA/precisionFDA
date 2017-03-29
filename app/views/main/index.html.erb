@@ -147,31 +147,32 @@
         </div>
 
         <div class="col-md-10 col-md-offset-2">
-          <ul class="list-inline">
-            <li class="overview-header">
-              Expert Q&A Sessions
-            </li>
-            <div class="pfda-padded-h">
-              <ul class="list-inline">
-                <% @experts.each do |e| %>
-                  <li class="text-center pfda-padded">
-                    <%= link_to expert_path(e), class: 'center-block' do %>
-                      <%= image_tag(e.image, class: 'img-circle', height: '50px') %>
-                      <br/>
-                      <%= user_title(e.user) %>
-                      <br />
-                      <% if e.open? %>
-                        <span class="label label-success"><span class="fa fa-check"></span> Open<span>
-                      <% else %>
-                        <span class="label label-default"><span class="fa fa-lock"></span> Closed</span>
+          <% if @experts.count > 0 %>
+            <ul class="list-inline">
+              <li class="overview-header">
+                Expert Q&A Sessions
+              </li>
+              <div class="pfda-padded-h">
+                <ul class="list-inline">
+                  <% @experts.each do |e| %>
+                    <li class="text-center pfda-padded">
+                      <%= link_to expert_path(e), class: 'center-block' do %>
+                        <%= image_tag(e.image, class: 'img-circle', height: '50px') %>
+                        <br/>
+                        <%= user_title(e.user) %>
+                        <br />
+                        <% if e.open? %>
+                          <span class="label label-success"><span class="fa fa-check"></span> Open<span>
+                        <% else %>
+                          <span class="label label-default"><span class="fa fa-lock"></span> Closed</span>
+                        <% end %>
                       <% end %>
-                    <% end %>
-                  </li>
-                <% end %>
-              </ul>
-            </div>
-          </ul>
-
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            </ul>
+          <% end %>
           <ul class="list-inline">
             <li class="overview-header">
               Latest News
