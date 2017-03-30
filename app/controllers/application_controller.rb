@@ -162,8 +162,8 @@ class ApplicationController < ActionController::Base
   end
 
   def get_preview_link(context, id)
-    file = UserFile.find_by!(dxid: id)
-    if file.nil? || file.state != "closed"
+    file = UserFile.accessible_by(context).find_by!(dxid: id)
+    if file.nil? || file.state != "closed" || file.file_size > 5000000
       return false
     else
       # Preview only lasts 5 minutes

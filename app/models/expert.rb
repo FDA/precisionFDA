@@ -97,14 +97,14 @@ class Expert < ActiveRecord::Base
 
   def update_expert(context, expert_params)
     if expert_params[:_image_id].present? && expert_params[:_image_id] != _image_id
-      expert_params[:image] = get_perm_link(context, expert_params[:_image_id])
+      expert_params[:image] = Expert.get_perm_link(context, expert_params[:_image_id])
     end
     update(expert_params)
   end
 
-  def get_perm_link(context, id)
+  def self.get_perm_link(context, id)
     file = UserFile.accessible_by(context).find_by!(dxid: id)
-    if file.nil? || file.file_size > 5000000
+    if file.nil? || file.state != "closed" || file.file_size > 5000000
       return nil
     end
     opts = {project: file.project, preauthenticated: true, filename: file.name, duration: 9999999}
@@ -118,10 +118,7 @@ class Expert < ActiveRecord::Base
       if u.nil?
         return e
       end
-
-      url = get_perm_link(context, expert_params[:_image_id])
-
-      expert_params[:image] = url
+      expert_params[:image] = Expert.get_perm_link(context, expert_params[:_image_id])
       expert_params[:state] = "closed"
       expert_params[:user_id] = u.id
       e = Expert.create!(expert_params)
