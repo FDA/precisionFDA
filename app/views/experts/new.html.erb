@@ -1,4 +1,4 @@
-<% content_for :title do %>Create a new <strong>Expert of the Month</strong><% end %>
+<% content_for :title do %>Create a new Expert of the Month<% end %>
 
 <div class="page-header">
   <div class="page-title">
@@ -13,22 +13,22 @@
     <div class="form-group required">
       <%= f.label :username, "Username", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_field :username, class: "form-control", placeholder: "Expert username...", required: "required"  %>
+        <%= f.select :username, options_for_select(@users), {}, class: "form-control", required: "required" %>
       </div>
     </div>
-   <div class="form-group required">
+   <div class="form-group">
       <%= f.label :_intro, "Intro", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_area :_intro, class: "form-control", rows: 2, placeholder: "Expert blurb...", required: "required"  %>
+        <%= f.text_area :_intro, class: "form-control", rows: 2, placeholder: "Expert blurb..." %>
       </div>
     </div>
-    <div class="form-group ">
+    <div class="form-group">
       <%= f.label :_about, "About", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
         <%= f.text_area :_about, class: "form-control", rows: 10, placeholder: "More about the Expert..." %>
       </div>
     </div>
-    <div class="form-group required">
+    <div class="form-group">
       <%= f.label :scope, "Visibility", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
         <%= f.select :scope, options_for_select("Private" => "private", "Public" => "public"), {}, class: "form-control" %>
@@ -38,14 +38,15 @@
       <%= f.label :image, "Image", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
         <%= render "_partials/upload_image_button" %>
-        <input type=hidden name="expert[_image_id]" data-bind="value: fileId" required="required" />
+        <input type="hidden" name="expert[_image_id]" data-bind="value: fileId" />
         <br/><br/>
         <img class="img-thumbnail" data-bind="attr: {src: imageUrl}, visible: imageUrl" />
       </div>
     </div>
     <div class="form-group">
       <div class="col-sm-offset-3">
-        <%= f.submit "Create Expert", class: 'btn btn-primary', data: {disable_with: "Creating..."} %>
+        <%= f.submit "Create Expert", class: 'btn btn-primary', data: {disable_with: "Creating...", bind: "enable: imageUrl"} %>
+        <div class="text-muted" data-bind="visible: !imageUrl()"><br/>Please upload an image for the expert.</div>
       </div>
     </div>
   <% end %>
