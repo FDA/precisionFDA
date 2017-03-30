@@ -24,7 +24,7 @@ class ExpertsController < ApplicationController
     redirect_to experts_path and return unless @expert.editable_by?(@context) || @context.user.can_administer_site?
 
     Expert.transaction do
-      if @expert.update_expert(context, update_expert_params)
+      if @expert.update_expert(@context, update_expert_params)
         flash[:success] = "Expert information updated."
         redirect_to expert_path(@expert)
       else
