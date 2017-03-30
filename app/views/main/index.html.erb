@@ -157,10 +157,8 @@
                   <% @experts.each do |e| %>
                     <li class="text-center pfda-padded">
                       <%= link_to expert_path(e), class: 'center-block' do %>
-                        <%= image_tag(e.image, class: 'img-circle', height: '50px') %>
-                        <br/>
-                        <%= user_title(e.user) %>
-                        <br />
+                        <%= image_tag(e.image, class: 'img-rounded', height: '300px') %>
+                        <h4><strong><%= e.user.singular? ? user_title(e.user) : "#{user_title(e.user)}, #{e.user.org.name}" %></strong></h4>
                         <% if e.open? %>
                           <span class="label label-success"><span class="fa fa-check"></span> Open<span>
                         <% else %>
