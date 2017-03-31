@@ -24,8 +24,8 @@ class ExpertQuestionsController < ApplicationController
     @expert = Expert.find(params[:expert_id])
     @user_questions = @context.logged_in? ? @expert.questions_by_user_id(@context.user_id).sort_by{ |q| q.created_at }.reverse : nil
     @expert_question = ExpertQuestion.find(params[:id])
+    @items_from_params = [@expert_question.expert, @expert_question]
     @item_comments_path = pathify_comments(@expert_question)
-    @items_from_params = [@expert_question]
     @comments = @expert_question.root_comments.order(id: :desc).page params[:comments_page]
   end
 
