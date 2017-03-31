@@ -28,6 +28,10 @@ class ExpertQuestion < ActiveRecord::Base
     "expert-question"
   end
 
+  def title
+    body
+  end
+
   def open?
     state == "open"
   end

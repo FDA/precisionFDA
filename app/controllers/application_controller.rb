@@ -209,8 +209,10 @@ class ApplicationController < ActionController::Base
       meta_appathon_path(item)
     when "appathon"
       appathon_path(item)
+    when "expert"
+      expert_path(item)
     when "expert-question"
-      expert_show_question_path(item.expert_id, item.id)
+      expert_expert_question_path(item.expert_id, item.id)
     else
       raise "Unknown class #{item.klass}"
     end
@@ -247,7 +249,7 @@ class ApplicationController < ActionController::Base
     when "appathon"
       appathon_comments_path(item)
     when "expert-question"
-      expert_question_comment_index_path(item.expert_id, item.id)
+      expert_expert_question_comments_path(item.expert_id, item.id)
     else
       raise "Unknown class #{item.klass}"
     end
@@ -267,7 +269,7 @@ class ApplicationController < ActionController::Base
       end
     when "space"
       discuss_space_path(item)
-    when "expert-question", "meta-appathon", "appathon", "file", "app", "job", "asset", "comparison", "answer", "space"
+    when "expert", "expert-question", "meta-appathon", "appathon", "file", "app", "job", "asset", "comparison", "answer", "space"
       pathify(item)
     else
       raise "Unknown class #{item.klass}"
@@ -351,7 +353,11 @@ class ApplicationController < ActionController::Base
     elsif params[:app_id].present?
       return [App.find_by!(dxid: params[:app_id])]
     elsif params[:expert_id].present?
-      return [ExpertQuestion.find(params[:id])]
+      expert = Expert.find(params[:expert_id])
+      if params[:expert_question_id].present?
+        return [expert, ExpertQuestion.find(params[:expert_question_id])]
+      end
+      return [expert]
     end
     return
   end
