@@ -9,7 +9,11 @@
             </div>
             <div class="media-body text-center">
               <div class="pfda-card-title">
-                <%= user_link(e.user) %>
+                <%= link_to(e.user.full_name.titleize, user_url(e.user.username)) %>
+                <br/>
+                <% if !e.user.singular? %>
+                  <i>from <%= e.user.org.name %></i>
+                <% end %>
               </div>
               <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
                 <li><%= e.user.org.handle %>/<%= e.user.dxuser %></li>
@@ -17,7 +21,7 @@
               </ul>
               <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
                 <li><%= e.answered_questions.count %> <%= "Answer".pluralize(e.answered_questions.count) %></li>
-                <li><%= e.commented_questions.count %> <%= "Comment".pluralize(e.commented_questions.count) %></li>
+                <li><%= e.total_comment_count %> <%= "Comment".pluralize(e.total_comment_count) %></li>
               </ul>
             </div>
           </div>

@@ -21,14 +21,13 @@
         <%= user_link(@expert_question.user) %>
       </small>
       <hr/>
-      <p class="expert-question-answer-body lead">
+      <h4 class="expert-question-answer-body lead">
         <%= simple_format(@expert_question.expert_answer.body) %>
-      </p>
+      </h4>
       <h6 class="expert-question-footer text-muted">
         Updated <%= local_time_ago(@expert_question.expert_answer.updated_at) %>
       </h6>
     </div>
-    <hr/>
     <div class="row">
       <div class="col-md-12">
         <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @expert_question %>

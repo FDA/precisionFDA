@@ -32,7 +32,7 @@
           </ul>
           <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
             <li><span class="pfda-card-metadata-value"><%= e.answered_questions.count %></span> <%= "Answer".pluralize(e.answered_questions.count) %></li>
-            <li><span class="pfda-card-metadata-value"><%= e.commented_questions.count %></span> <%= "Comment".pluralize(e.commented_questions.count) %></li>
+            <li><span class="pfda-card-metadata-value"><%= e.total_comment_count %></span> <%= "Comment".pluralize(e.total_comment_count) %></li>
           </ul>
         </div>
       </div>
@@ -50,9 +50,5 @@
       </div>
     </div>
     <% end %>
-  </div>
-<% else %>
-  <div class="alert alert-info text-center">
-    No experts have been featured yet.
   </div>
 <% end %>
