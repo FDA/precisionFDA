@@ -129,9 +129,12 @@ class ExpertsController < ApplicationController
 
   def show
     @expert = Expert.find(params[:id])
-    if !@expert.editable_by?(@context) && !@expert.is_public?
-      flash[:error] = "This Expert Q&A session has not been made public yet."
-      redirect_to experts_path and return
+    if !@expert.is_public?
+      if !@expert.editable_by?(@context)
+        redirect_to experts_path and return
+      else
+        flash.now[:warning] = "This Expert Q/A Session is currently private and not viewable by the public."
+      end
     end
 
     @answered_questions = @expert.answered_questions.sort_by{ |q| q.expert_answer.updated_at }.reverse
@@ -146,7 +149,7 @@ class ExpertsController < ApplicationController
 
     expert.destroy
 
-    flash[:success] = "Expert of the Month: \"#{name}\" has been successfully deleted"
+    flash[:success] = "Expert Q/A Session: \"#{name}\" has been successfully deleted"
     redirect_to :experts
   end
 

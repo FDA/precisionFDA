@@ -19,7 +19,7 @@
     <row>
       <columns>
         <p>
-          An new question was asked in your Expert Q/A Session
+          A new question was asked in your Expert Q/A Session
         </p>
         <p>
           Submitted by: <%= user_link(@question.user) %>

@@ -55,8 +55,8 @@ class Expert < ActiveRecord::Base
     expert_questions.select{|q| q.answered?}
   end
 
-  def commented_questions
-    expert_questions.select{|q| q.root_comments.present?}
+  def total_comment_count
+    expert_questions.select{|q| q.root_comments.present?}.map{|q| q.root_comments.count}.sum
   end
 
   def editable_by?(context)
