@@ -1,0 +1,28 @@
+<% content_for :title do %><%= user_title(@expert.user) %><% end %>
+
+<div class="pfda-toolbar">
+  <%= link_to expert_path(@expert), class: "btn btn-default" do %>
+    <span class="fa fa-chevron-left"></span> Back to questions
+  <% end %>
+</div>
+
+<div class="page-header text-center">
+  <div class="row">
+    <div class="col-md-20 col-md-offset-2">
+      <p>
+        <%= image_tag(@expert.image, class: 'img-rounded', height: '300px') %>
+      </p>
+      <div class="page-title">
+        Thoughts from
+        <%= link_to(@expert.title, user_url(@expert.user.username)) %>
+        <% if !@expert.user.singular? %>
+          of <%= @expert.user.org.name %>
+        <% end %>
+        <br/>
+      </div>
+      <h3 class="expert-question-answer-body lead text-center">
+        <%= simple_format(@expert._blog) %>
+      </h3>
+    </div>
+  </div>
+</div>

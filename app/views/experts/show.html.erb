@@ -1,9 +1,9 @@
 <% content_for :title do %><%= user_title(@expert.user) %><% end %>
 
-<%= render 'experts/header', { is_dashboard: false, show_toolbar: true, show_intro: true } %>
+<%= render 'experts/header', { is_dashboard: false } %>
 
-<div class="pfda-pane container-fluid">
-  <div class="pfda-pane-content pfda-pane-content-padded-xl">
+<div class="pfda-pane container-padded container-fluid">
+ <div class="pfda-pane-content pfda-pane-content-padded-xl">
     <% if @answered_questions.count > 0 %>
       <% @answered_questions.each do |q|%>
         <div class="expert-question">
@@ -26,14 +26,7 @@
   </div>
   <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal pfda-pane-sidebar-padded-v">
     <ul class="list-group">
-      <% if @expert.askable? %>
-        <li class="list-group-item text-center">
-          <a class="btn btn-primary btn-block btn-lg" data-toggle="modal" data-target="#ask-question-modal">
-            <span class="fa fa-commenting-o fa-fw" aria-hidden="true"></span> Ask <%= @expert.user.first_name.capitalize %>
-          </a>
-        </li>
-      <% end %>
-      <% if @context.logged_in? %>
+     <% if @context.logged_in? %>
         <% if @user_questions.count > 0 %>
           <li class="list-group-item list-group-item-header">
             Your Questions (<%= @user_questions.count %>)
@@ -54,16 +47,7 @@
       <% end %>
       <br/>
     </ul>
-    <ul class="list-group">
-      <li class="list-group-item list-group-item-header">
-        About this month's Expert
-      </li>
-      <li class="list-group-item">
-        <%= simple_format(@expert._about) %>
-      </li>
-    </ul>
   </div>
 </div>
-<div class="container container-padded">
-</div>
+
 <%= render "experts/modal_ask_question" %>

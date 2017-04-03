@@ -20,15 +20,27 @@
       </div>
     </div>
     <div class="form-group">
-      <%= f.label :_intro, "Expert Intro", class: 'control-label col-sm-2' %>
+      <%= f.label :_prefname, "Preferred Name", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_area :_intro, class: "form-control", rows: 2, placeholder: "Expert blurb..." %>
+        <%= f.text_area :_prefname, class: "form-control", rows: 1, placeholder: "Prefix (if any) to prepend to the expert's name..." %>
       </div>
     </div>
     <div class="form-group">
       <%= f.label :_about, "About", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_area :_about, class: "form-control", rows: 10, placeholder: "More about the Expert..." %>
+        <%= f.text_area :_about, class: "form-control", rows: 8, placeholder: "About the Expert..." %>
+      </div>
+    </div>
+    <div class="form-group">
+      <%= f.label :_blog, "Expert Blog", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%= f.text_area :_blog, class: "form-control", rows: 10, placeholder: "Expert blurb/blog..." %>
+      </div>
+    </div>
+    <div class="form-group">
+      <%= f.label :_challenge, "Challenge", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%= f.text_area :_challenge, class: "form-control", rows: 6, placeholder: "The expert's challenge to the community..." %>
       </div>
     </div>
     <% if @context.user.can_administer_site? %>
