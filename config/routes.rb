@@ -27,7 +27,9 @@ Rails.application.routes.draw do
     # API
     post '/api/publish', to: 'api#publish'
     post '/api/create_file', to: 'api#create_file'
+    post '/api/create_image_file', to: 'api#create_image_file'
     post '/api/get_upload_url', to: 'api#get_upload_url'
+    post '/api/get_file_link', to: 'api#get_file_link'
     post '/api/list_related', to: 'api#list_related'
     post '/api/close_file', to: 'api#close_file'
     post '/api/describe', to: 'api#describe'
@@ -140,6 +142,23 @@ Rails.application.routes.draw do
       post 'rename', on: :member
       get 'users', on: :member
       get 'items', on: :member
+    end
+
+    resources :experts do
+      post 'ask_question', on: :member
+      post 'open', on: :member
+      post 'close', on: :member
+      get 'dashboard', on: :member
+      get 'blog', on: :member
+      nested do
+        scope '/dashboard' do
+          resources :expert_questions, as: 'edit_question'
+        end
+      end
+      resources :expert_questions, only: [:create, :destroy] do
+          get '', on: :member, to: 'expert_questions#show_question', as: 'show_question'
+          resources :comments
+      end
     end
 
     resources :spaces do

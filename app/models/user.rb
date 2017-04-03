@@ -47,6 +47,7 @@ class User < ActiveRecord::Base
   has_many :spaces, {through: :space_memberships}
   has_one :appathon
   has_many :meta_appathons
+  has_one :expert
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 
   include Gravtastic
@@ -123,7 +124,7 @@ class User < ActiveRecord::Base
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
       dxuser == "elaine.johanson" || dxuser == "ruth.bandler"
     else
-      ((org.handle == "precisionfda" || org.handle == "dnanexus") && org.admin_id == id) || ["alan.zhu"].include?(dxuser)
+      ((org.handle == "precisionfda" || org.handle == "dnanexus") && org.admin_id == id) || ["alan.fdauser"].include?(dxuser)
     end
   end
 

@@ -1,0 +1,26 @@
+<div id="new-question-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">
+          Submit a new question
+        </h4>
+      </div>
+      <%= form_for @expert, url: expert_edit_question_index_path(@expert), method: :post do |f| %>
+        <div class="modal-body">
+          <div class="form-group">
+            Submitting as:&nbsp;&nbsp;<%= user_link(@expert.user) %>
+          </div>
+          <div class="form-group required">
+            <%= f.text_area (:question), rows: 4, class: "form-control input-lg", placeholder: "Submit a question...", required: "required"  %>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Cancel</button>
+          <button type="submit" class="btn btn-primary" data-disable-with="Submitting...">Submit</button>
+        </div>
+      <% end %>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

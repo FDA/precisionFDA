@@ -16,12 +16,12 @@ class ApplicationController < ActionController::Base
       font_src: %w('self' https://fonts.gstatic.com https://cdnjs.cloudflare.com),
       form_action: %w('self' https://stagingdl.dnanex.us https://dl.dnanex.us),
       frame_ancestors: %w('none'),
-      frame_src: %w('self' https://www.youtube.com),
+      frame_src: %w('self' https://www.youtube.com https://www.google.com https://www.gstatic.com),
       img_src: %w(* data:),
       media_src: %w('self'),
       object_src: %w('self'),
-      plugin_types: %w(application/x-shockwave-flash),
-      script_src: %w('self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://cdnjs.cloudflare.com https://www.youtube.com https://s.ytimg.com https://dnanexus.github.io),
+      plugin_types: %w(application/x-shockwave-flash application/pdf),
+      script_src: %w('self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.google.com https://www.google-analytics.com https://cdnjs.cloudflare.com https://www.youtube.com https://s.ytimg.com https://dnanexus.github.io),
       style_src: %w('self' 'unsafe-inline' https://fonts.googleapis.com https://dnanexus.github.io https://cdnjs.cloudflare.com),
       report_only: false,
       report_uri: %w(https://dc95b34a080e9c95bbce7c3e6aed6234.report-uri.io/r/default/csp/enforce)
@@ -161,6 +161,18 @@ class ApplicationController < ActionController::Base
     encryptor = ActiveSupport::MessageEncryptor.new(secret, sign_secret)
   end
 
+  def get_preview_link(context, id)
+    file = UserFile.accessible_by(context).find_by!(dxid: id)
+    if file.nil? || file.state != "closed" || file.file_size > 5000000
+      return false
+    else
+      # Preview only lasts 5 minutes
+      opts = {project: file.project, preauthenticated: true, filename: file.name, duration: 300}
+      url = DNAnexusAPI.new(context.token).call(file.dxid, "download", opts)["url"]
+    end
+    return url
+  end
+
   def pathify(item)
     case item.klass
     when "file"
@@ -193,10 +205,14 @@ class ApplicationController < ActionController::Base
       license_path(item)
     when "space"
       space_path(item)
-    when "meta_appathon"
+    when "meta-appathon"
       meta_appathon_path(item)
     when "appathon"
       appathon_path(item)
+    when "expert"
+      expert_path(item)
+    when "expert-question"
+      expert_expert_question_path(item.expert_id, item.id)
     else
       raise "Unknown class #{item.klass}"
     end
@@ -228,10 +244,12 @@ class ApplicationController < ActionController::Base
       discussion_answer_comments_path(item.discussion, item.user.dxuser)
     when "space"
       space_comments_path(item)
-    when "meta_appathon"
+    when "meta-appathon"
       meta_appathon_comments_path(item)
     when "appathon"
       appathon_comments_path(item)
+    when "expert-question"
+      expert_expert_question_comments_path(item.expert_id, item.id)
     else
       raise "Unknown class #{item.klass}"
     end
@@ -251,7 +269,7 @@ class ApplicationController < ActionController::Base
       end
     when "space"
       discuss_space_path(item)
-    when "meta_appathon", "appathon", "file", "app", "job", "asset", "comparison", "answer", "space"
+    when "expert", "expert-question", "meta-appathon", "appathon", "file", "app", "job", "asset", "comparison", "answer", "space"
       pathify(item)
     else
       raise "Unknown class #{item.klass}"
@@ -334,6 +352,12 @@ class ApplicationController < ActionController::Base
       return [Job.find_by!(dxid: params[:job_id])]
     elsif params[:app_id].present?
       return [App.find_by!(dxid: params[:app_id])]
+    elsif params[:expert_id].present?
+      expert = Expert.find(params[:expert_id])
+      if params[:expert_question_id].present?
+        return [expert, ExpertQuestion.find(params[:expert_question_id])]
+      end
+      return [expert]
     end
     return
   end

@@ -609,6 +609,83 @@ class ApiController < ApplicationController
   #
   # name (string, required, nonempty)
   # description (string, optional)
+  #
+  # Outputs:
+  #
+  # id (string, "file-xxxx")
+  #
+  def create_image_file
+    name = params[:name]
+    fail "File name needs to be a non-empty String" unless name.is_a?(String) && name != ""
+
+    description = params["description"]
+    if !description.nil?
+      fail "File description needs to be a String" unless description.is_a?(String)
+    end
+
+    project = @context.user.private_files_project
+    dxid = DNAnexusAPI.new(@context.token).("file", "new", {"name": params[:name], "project": project})["id"]
+
+    UserFile.transaction do
+      UserFile.create!(
+        dxid: dxid,
+        project: project,
+        name: name,
+        state: "open",
+        description: description,
+        user_id: @context.user_id,
+        parent: @context.user,
+        scope: 'private'
+      )
+    end
+
+    render json: {id: dxid}
+  end
+
+  def get_file_link
+    error = false
+
+    # Allow assets as well, thought not currently exposed in the UI
+    file = UserFile.accessible_by(@context).find_by!(dxid: params[:id])
+
+    # Refresh state of file, if needed
+    if file.state != "closed"
+      if file.parent_type == "Asset"
+        User.sync_asset!(@context, file.id)
+      else
+        User.sync_file!(@context, file.id)
+      end
+      file.reload
+    end
+
+    if file.state != "closed"
+      error = "Files can only be downloaded if they are in the 'closed' state"
+      errorType = "FileNotClosed"
+    elsif file.license.present? && !file.licensed_by?(@context)
+      error = "You must accept the license before you can get the download link"
+      errorType = "LicenseError"
+    else
+      # FIXME:
+      # The API warns against storing the url as it may contain
+      # auth information that we don't want to expose
+      # So we may have to store a reference to the file and generate
+      # a shorter duration url each time it is rendered
+
+      opts = {project: file.project, preauthenticated: true, filename: file.name, duration: 300}
+      url = DNAnexusAPI.new(@context.token).call(file.dxid, "download", opts)["url"]
+    end
+
+    if error
+      render json: {error: error, errorType: errorType}
+    else
+      render json: {id: file.dxid, url: url}
+    end
+  end
+
+  # Inputs:
+  #
+  # name (string, required, nonempty)
+  # description (string, optional)
   # paths (array:string, required)
   #
   # Outputs:
