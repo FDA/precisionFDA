@@ -1,34 +1,38 @@
 <% if (experts.count > 0) %>
-  <div class="pfda-cards pfda-cards-align-centered pfda-cards-justify-centered">
+  <ul class="pfda-cards pfda-cards-list">
     <% experts.each do |e| %>
-      <div class="pfda-card pfda-card-default pfda-card-rounded pfda-card-bordered pfda-card-padded pfda-card-shadow">
-        <div class="pfda-card-header text-center">
-          <%= link_to expert_path(e), class: 'center-block' do %>
-              <%= image_tag(e.image, class: 'img-thumbnail', height: '400px') %>
-              <div class="pfda-card-title">
-                <%= e.title %>
-                <br/>
-                <% if !e.user.singular? %>
-                  <i><%= e.user.org.name %></i>
-                <% end %>
-              </div>
-              <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
-                <li><%= local_date(e.created_at, '%B %e, %Y') %></li>
-              </ul>
-              <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
-                <li><%= e.answered_questions.count %> <%= "Answer".pluralize(e.answered_questions.count) %></li>
-                <li><%= e.total_comment_count %> <%= "Comment".pluralize(e.total_comment_count) %></li>
-              </ul>
-          <% end %>
+      <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default pfda-card-bordered">
+        <div class="media">
+          <div class="media-left media-middle">
+            <%= image_tag(e.image, class: 'img-rounded', width: '250px') %>
+            <br/>
+            <div class="pfda-card-title text-center">
+              <%= e.title %>
+              <br/>
+              <% if !e.user.singular? %>
+                <i><%= e.user.org.name %></i>
+              <% end %>
+              <br/>
+            </div>
+          </div>
+          <div class="media-body container-fluid container-padded text-center">
+            <div class="pfda-card-title lead">
+              My Challenge to the PrecisionFDA Community
+            </div>
+            <span class="text-muted"><%= local_date(e.created_at, '%B %e, %Y') %></span>
+            <hr>
+            <div class="pfda-card-body text-left">
+              <%= simple_format(e._challenge, {class: "expert-font"})%>
+            </div>
+            <div class="btn-group">
+              <%= link_to(content_tag(:span, "", class: "fa fa-star-o") + " Visit Expert Q/A", expert_path(e), class: 'btn btn-default') %>
+            </div>
+            <div class="btn-group">
+            <%= link_to(content_tag(:span, "", class: "fa fa-newspaper-o") + " Read Expert Blog Post", blog_expert_path(e), class: 'btn btn-default') %>
+            </div>
+          </div>
         </div>
-        <div class="pfda-card-footer text-center">
-          <% if e.open? %>
-            <span class="label label-success"><span class="fa fa-check"></span> Open<span>
-          <% else %>
-            <span class="label label-default"><span class="fa fa-lock"></span> Closed</span>
-          <% end %>
-        </div>
-      </div >
+      </li>
     <% end %>
-  </div>
+  </ul>
 <% end %>

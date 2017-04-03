@@ -13,12 +13,16 @@
         <%= image_tag(@expert.image, class: 'img-rounded', height: '300px') %>
       </p>
       <div class="page-title">
-        Thoughts from
-        <%= link_to(@expert.title, user_url(@expert.user.username)) %>
-        <% if !@expert.user.singular? %>
-          of <%= @expert.user.org.name %>
-        <% end %>
-        <br/>
+        <strong><%= @expert._blog_title %></strong>
+        <p>
+          <small>
+            <%= link_to(@expert.title, user_url(@expert.user.username)) %>
+            <% if !@expert.user.singular? %>
+              of <%= @expert.user.org.name %>
+            <% end %>
+          </small>
+        </p>
+       <br/>
       </div>
       <h3 class="expert-question-answer-body lead text-center">
         <%= simple_format(@expert._blog) %>
