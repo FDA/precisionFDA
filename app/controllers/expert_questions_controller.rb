@@ -22,6 +22,7 @@ class ExpertQuestionsController < ApplicationController
 
   def show_question
     @expert = Expert.find(params[:expert_id])
+    redirect_to experts_path and return unless @expert.editable_by?(@context) || @expert.is_public?
     @user_questions = @context.logged_in? ? @expert.questions_by_user_id(@context.user_id).sort_by{ |q| q.created_at }.reverse : nil
     @expert_question = ExpertQuestion.find(params[:id])
     @items_from_params = [@expert_question.expert, @expert_question]
