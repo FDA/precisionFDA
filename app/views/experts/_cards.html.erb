@@ -10,7 +10,7 @@
         </div>
         <div class="text-center">
           <div class="pfda-card-title">
-            <%= link_to user_title(e.user), expert_path(e) %>
+            <%= link_to (e.title), expert_path(e) %>
           </div>
           <p>
             <% if e.open? %>

@@ -16,11 +16,15 @@ class Expert < ActiveRecord::Base
   has_many :expert_answers, through: :expert_questions, dependent: :destroy
   belongs_to :user
 
-  store :meta, accessors: [:_intro, :_about, :_image_id], coder: JSON
+  store :meta, accessors: [:_prefname, :_about, :_blog, :_challenge, :_image_id], coder: JSON
   attr_accessor :username, :question, :answer
 
   def klass
     "expert"
+  end
+
+  def title
+    _prefname.present? ? _prefname.titleize : user.full_name.titleize
   end
 
   def uid

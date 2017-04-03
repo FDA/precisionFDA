@@ -1,9 +1,20 @@
 class ExpertsController < ApplicationController
-  skip_before_action :require_login,     only: [:index, :show, :ask_question]
+  skip_before_action :require_login,     only: [:index, :show, :ask_question, :blog]
   before_action :require_login_or_guest, only: [:edit, :update, :create, :new]
 
   def index
     @experts = Expert.viewable_by(@context).order(id: :desc)
+  end
+
+  def blog
+    @expert = Expert.find(params[:id])
+    if !@expert.is_public?
+      if !@expert.editable_by?(@context)
+        redirect_to experts_path and return
+      else
+        flash.now[:warning] = "This Expert Q/A Session is currently private and not viewable by the public."
+      end
+    end
   end
 
   def new
@@ -14,7 +25,7 @@ class ExpertsController < ApplicationController
 
   def edit
     @expert = Expert.find(params[:id])
-    redirect_to experts_path and return unless @expert.editable_by?(@context) || @context.user.can_administer_site?
+    redirect_to experts_path(@expert) and return unless @expert.editable_by?(@context) || @context.user.can_administer_site?
 
     js imageUrl: @expert.image, fileId: @expert._image_id
   end
@@ -155,7 +166,7 @@ class ExpertsController < ApplicationController
 
   private
     def expert_params
-      p = params.require(:expert).permit(:username, :_intro, :_about, :_image_id, :scope)
+      p = params.require(:expert).permit(:username, :_prefname, :_about, :_blog, :_challenge, :_image_id, :scope)
       p.require(:username)
       p.require(:scope)
       p.require(:_image_id)
@@ -163,7 +174,7 @@ class ExpertsController < ApplicationController
     end
 
     def update_expert_params
-      p = params.require(:expert).permit(:_intro, :_about, :_image_id, :scope)
+      p = params.require(:expert).permit(:_prefname, :_about, :_blog, :_challenge, :_image_id, :scope)
       p.require(:scope)
       p.require(:_image_id)
       return p

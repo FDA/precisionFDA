@@ -149,6 +149,7 @@ Rails.application.routes.draw do
       post 'open', on: :member
       post 'close', on: :member
       get 'dashboard', on: :member
+      get 'blog', on: :member
       nested do
         scope '/dashboard' do
           resources :expert_questions, as: 'edit_question'

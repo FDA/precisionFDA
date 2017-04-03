@@ -4,25 +4,24 @@
       <div class="pfda-card pfda-card-default pfda-card-rounded pfda-card-bordered pfda-card-padded pfda-card-shadow">
         <div class="pfda-card-header">
           <div class="media">
-            <div class="media-left text-muted center-block text-center">
-              <%= image_tag(e.image, class: 'img-rounded', height: '300px')  %>
-            </div>
-            <div class="media-body text-center">
-              <div class="pfda-card-title">
-                <%= link_to(e.user.full_name.titleize, user_url(e.user.username)) %>
-                <br/>
-                <% if !e.user.singular? %>
-                  <i>from <%= e.user.org.name %></i>
-                <% end %>
-              </div>
-              <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
-                <li><%= e.user.org.handle %>/<%= e.user.dxuser %></li>
-                <li><%= local_date(e.created_at, '%B %e, %Y') %></li>
-              </ul>
-              <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
-                <li><%= e.answered_questions.count %> <%= "Answer".pluralize(e.answered_questions.count) %></li>
-                <li><%= e.total_comment_count %> <%= "Comment".pluralize(e.total_comment_count) %></li>
-              </ul>
+           <div class="media-body text-center">
+              <%= link_to expert_path(e), class: 'center-block' do %>
+                <div class="pfda-card-title">
+                  <%= image_tag(e.image, class: 'img-rounded', height: '400px') %>
+                  <%= e.title %>
+                  <br/>
+                  <% if !e.user.singular? %>
+                    <i><%= e.user.org.name %></i>
+                  <% end %>
+                </div>
+                <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
+                  <li><%= local_date(e.created_at, '%B %e, %Y') %></li>
+                </ul>
+                <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
+                  <li><%= e.answered_questions.count %> <%= "Answer".pluralize(e.answered_questions.count) %></li>
+                  <li><%= e.total_comment_count %> <%= "Comment".pluralize(e.total_comment_count) %></li>
+                </ul>
+              <% end %>
             </div>
           </div>
         </div>

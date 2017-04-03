@@ -9,7 +9,7 @@ class ExpertQuestionsController < ApplicationController
 
   def show
     @expert = Expert.find(params[:expert_id])
-    redirect_to experts_path and return unless @expert.editable_by?(@context)
+    redirect_to expert_path(@expert) and return unless @expert.editable_by?(@context)
 
     @answered_questions = @expert.answered_questions
     @ignored_questions = @expert.ignored_questions
