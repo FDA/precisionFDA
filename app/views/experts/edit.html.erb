@@ -32,6 +32,12 @@
       </div>
     </div>
     <div class="form-group">
+      <%= f.label :_blog_title, "Blog Title", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%= f.text_area :_blog_title, class: "form-control", rows: 2, placeholder: "Title for expert blurb/blog..." %>
+      </div>
+    </div>
+    <div class="form-group">
       <%= f.label :_blog, "Blog", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
         <%= f.text_area :_blog, class: "form-control", rows: 10, placeholder: "Expert blurb/blog..." %>
