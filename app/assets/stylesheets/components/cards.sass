@@ -172,14 +172,14 @@
     &.pfda-card-info-solid:hover
       background-color: darken($btn-info-bg, 5%)
 
-.pfda-cards:not(.pfda-cards-list)
+.pfda-cards:not(.pfda-cards-list):not(.pfda-cards-stretch)
   .pfda-card
     width: 100%
     @media (min-width: $screen-sm-min)
       width: 300px
 
 .container
-  .pfda-cards:not(.pfda-cards-list)
+  .pfda-cards:not(.pfda-cards-list):not(.pfda-cards-stretch)
     .pfda-card
       width: 100%
       @media (min-width: $screen-sm-min)
@@ -194,7 +194,6 @@
 .pfda-tutorial.pfda-cards
   .pfda-card
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15)
-    width: 100%
 
   .pfda-card-body-icon
     line-height: 100px
