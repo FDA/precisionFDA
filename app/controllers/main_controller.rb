@@ -15,7 +15,7 @@ class MainController < ApplicationController
 
     @challenges = [@appathons_challenge, @truth_challenge, @consistency_challenge]
 
-    @experts = Expert.viewable_by(@context).order(updated_at: :desc).limit(10) # TODO: filter by published ones only
+    @experts = Expert.public.order(updated_at: :desc).limit(10) # TODO: filter by published ones only
 
     @meta_appathon = MetaAppathon.active
     if !@meta_appathon.nil?

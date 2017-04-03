@@ -82,6 +82,10 @@ class Expert < ActiveRecord::Base
     where(state: "closed")
   end
 
+  def self.public
+    where(scope: "public")
+  end
+
   def self.viewable_by(context)
     if context.user.present? && context.user.can_administer_site?
       Expert.all

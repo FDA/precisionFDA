@@ -27,10 +27,10 @@
   <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal pfda-pane-sidebar-padded-v">
     <ul class="list-group">
      <% if @context.logged_in? %>
+        <li class="list-group-item list-group-item-header">
+          Your Questions (<%= @user_questions.count %>)
+        </li>
         <% if @user_questions.count > 0 %>
-          <li class="list-group-item list-group-item-header">
-            Your Questions (<%= @user_questions.count %>)
-          </li>
           <% @user_questions.each do |q|%>
             <li class="list-group-item">
               <%= q._original %>
