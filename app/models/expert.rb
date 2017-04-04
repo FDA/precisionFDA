@@ -24,7 +24,7 @@ class Expert < ActiveRecord::Base
   end
 
   def title
-    _prefname.present? ? _prefname.titleize : user.full_name.titleize
+    _prefname.present? ? _prefname : user.full_name.titleize
   end
 
   def uid
@@ -87,10 +87,12 @@ class Expert < ActiveRecord::Base
   end
 
   def self.viewable_by(context)
-    if context.user.present? && context.user.can_administer_site?
-      Expert.all
-    elsif context.logged_in? && !context.guest?
-      Expert.where("user_id = ? OR scope = ?", context.user_id, "public")
+    if !context.guest? && context.logged_in?
+      if context.user.present? && context.user.can_administer_site?
+        Expert.all
+      else
+        Expert.where("user_id = ? OR scope = ?", context.user_id, "public")
+      end
     else
       Expert.where(scope: "public")
     end
