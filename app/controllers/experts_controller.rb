@@ -175,7 +175,6 @@ class ExpertsController < ApplicationController
 
     def update_expert_params
       p = params.require(:expert).permit(:_prefname, :_about, :_blog, :_blog_title, :_challenge, :_image_id, :scope)
-      p.require(:scope)
       p.require(:_image_id)
       return p
     end
