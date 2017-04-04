@@ -12,21 +12,18 @@
       <p>
         <%= image_tag(@expert.image, class: 'img-rounded', height: '300px') %>
       </p>
-      <div class="page-title">
-        <strong><%= @expert._blog_title %></strong>
+      <br/>
+      <div class="expert-blog-text">
+        <div data-bind="html: blogTitleDisplay"></div>
         <p>
-          <small>
-            <%= link_to(@expert.title, user_url(@expert.user.username)) %>
-            <% if !@expert.user.singular? %>
-              of <%= @expert.user.org.name %>
-            <% end %>
-          </small>
+          <%= link_to(@expert.title, user_url(@expert.user.username)) %>
+          <% if !@expert.user.singular? %>
+            <br/><%= @expert.user.org.name %>
+          <% end %>
         </p>
-       <br/>
       </div>
-      <h3 class="expert-question-answer-body lead text-center" style="text-align: left; font-size: 10pt; color: black; line-height: 1.7; font-weight: normal">
-        <%= simple_format(@expert._blog) %>
-      </h3>
+      <br/>
+      <div class="expert-blog-text text-left" data-bind="html: blogDisplay"></div>
     </div>
   </div>
 </div>

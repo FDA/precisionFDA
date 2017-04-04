@@ -15,6 +15,8 @@ class ExpertsController < ApplicationController
         flash.now[:warning] = "This Expert Q/A Session is currently private and not viewable by the public."
       end
     end
+
+    js expert: @expert.slice(:id, :_blog, :_blog_title)
   end
 
   def new
