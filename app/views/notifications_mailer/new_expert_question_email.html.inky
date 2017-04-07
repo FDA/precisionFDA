@@ -11,7 +11,7 @@
         </a>
       </columns>
       <columns>
-        <p class="header-title text-right">Expert Q/A Session Notification</p>
+        <p class="header-title text-right">Expert Q&amp;A Session Notification</p>
       </columns>
     </row>
   </container>
@@ -19,7 +19,7 @@
     <row>
       <columns>
         <p>
-          A new question was asked in your Expert Q/A Session
+          A new question was asked in your Expert Q&amp;A Session
         </p>
         <p>
           Submitted by: <%= user_link(@question.user) %>
