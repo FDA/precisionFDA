@@ -81,7 +81,7 @@ class NotificationsMailer < ApplicationMailer
   def new_expert_email(expert)
     @expert = expert
     mail to: @expert.user.email,
-         subject: "A new Expert Q/A Session was created for \"#{@expert.user.full_name.titleize}\""
+         subject: "A new Expert Q&A Session was created for \"#{@expert.user.full_name.titleize}\""
   end
 
   def new_expert_question_email(expert, question)
