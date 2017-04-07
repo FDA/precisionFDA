@@ -1,12 +1,57 @@
 <% if (experts.count > 0) %>
-  <ul class="pfda-cards pfda-cards-list">
-    <% experts.each do |e| %>
-      <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default pfda-card-bordered">
+  <div class="pfda-cards pfda-cards-list">
+    <% [experts.last].each do |e| %>
+      <div class="row">
+        <div class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default pfda-card-bordered">
+          <div class="col-md-6">
+            <div class="container-fluid expert-photo">
+              <%= image_tag(e.image, class: 'img-rounded img-responsive center-block', style: 'max-height:500px') %>
+            </div>
+          </div>
+          <div class="col-md-18">
+            <div class="container-fluid container-padded text-center">
+              <div class="pfda-card-title lead">
+                My Challenge to the PrecisionFDA Community
+              </div>
+              <span class="text-muted"><%= local_date(e.created_at, '%B %e, %Y') %></span>
+              <br/>
+              <br/>
+              <div class="expert-font strong">
+                <%= e.title %>
+                <br/>
+                <% if !e.user.singular? %>
+                  <i><%= e.user.org.name %></i>
+                <% end %>
+                <br/>
+              </div>
+              <hr>
+              <div class="pfda-card-body pfda-card-padded text-left">
+                <%= simple_format(e._challenge, {class: "expert-font"})%>
+              </div>
+              <div class="btn-group">
+                <%= link_to(content_tag(:span, "", class: "fa fa-star-o") + " Visit Expert Q/A", expert_path(e), class: 'btn btn-default') %>
+              </div>
+              <div class="btn-group">
+              <%= link_to(content_tag(:span, "", class: "fa fa-newspaper-o") + " Read Expert Blog Post", blog_expert_path(e), class: 'btn btn-default') %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+<!--
         <div class="media">
           <div class="media-left media-middle">
             <%= image_tag(e.image, class: 'img-rounded', width: '250px') %>
             <br/>
-            <div class="pfda-card-title text-center">
+          </div>
+          <div class="media-body container-fluid container-padded text-center">
+            <div class="pfda-card-title lead">
+              My Challenge to the PrecisionFDA Community
+            </div>
+            <span class="text-muted"><%= local_date(e.created_at, '%B %e, %Y') %></span>
+            <br/>
+            <br/>
+            <div class="expert-font strong">
               <%= e.title %>
               <br/>
               <% if !e.user.singular? %>
@@ -14,14 +59,8 @@
               <% end %>
               <br/>
             </div>
-          </div>
-          <div class="media-body container-fluid container-padded text-center">
-            <div class="pfda-card-title lead">
-              My Challenge to the PrecisionFDA Community
-            </div>
-            <span class="text-muted"><%= local_date(e.created_at, '%B %e, %Y') %></span>
             <hr>
-            <div class="pfda-card-body text-left">
+            <div class="pfda-card-body pfda-card-padded text-left">
               <%= simple_format(e._challenge, {class: "expert-font"})%>
             </div>
             <div class="btn-group">
@@ -32,7 +71,8 @@
             </div>
           </div>
         </div>
-      </li>
+      </div>
+    -->
     <% end %>
-  </ul>
+  </div>
 <% end %>

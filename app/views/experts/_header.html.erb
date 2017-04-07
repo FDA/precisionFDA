@@ -1,9 +1,9 @@
 <div class="page-header text-center">
-    <% if is_dashboard %>
-      <%= render 'experts/header_dashboard' %>
-    <% else %>
-      <%= render 'experts/header_public' %>
-    <% end %>
+  <% if is_dashboard %>
+    <%= render 'experts/header_dashboard' %>
+  <% else %>
+    <%= render 'experts/header_public' %>
+  <% end %>
 </div>
 
 <% if @expert.editable_by?(@context) %>
@@ -51,4 +51,3 @@
     </div>
   </div>
 <% end %>
-

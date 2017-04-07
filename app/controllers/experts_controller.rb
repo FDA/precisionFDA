@@ -12,7 +12,7 @@ class ExpertsController < ApplicationController
       if !@expert.editable_by?(@context)
         redirect_to experts_path and return
       else
-        flash.now[:warning] = "This Expert Q/A Session is currently private and not viewable by the public."
+        flash.now[:warning] = "This Expert Q&A Session is currently private and not viewable by the public."
       end
     end
 
@@ -146,7 +146,7 @@ class ExpertsController < ApplicationController
       if !@expert.editable_by?(@context)
         redirect_to experts_path and return
       else
-        flash.now[:warning] = "This Expert Q/A Session is currently private and not viewable by the public."
+        flash.now[:warning] = "This Expert Q&A Session is currently private and not viewable by the public."
       end
     end
 
@@ -162,7 +162,7 @@ class ExpertsController < ApplicationController
 
     expert.destroy
 
-    flash[:success] = "Expert Q/A Session: \"#{name}\" has been successfully deleted"
+    flash[:success] = "Expert Q&A Session: \"#{name}\" has been successfully deleted"
     redirect_to :experts
   end
 

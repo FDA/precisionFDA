@@ -1,5 +1,5 @@
 <ul class="pfda-feed">
-  <% feed.each do |post| %>
+  <% feed.first(4).each do |post| %>
     <li class="pfda-post pfda-post-<%= post.klass %> list-unstyled">
       <div class="media">
         <div class="media-left pfda-post-icon-wrapper">
