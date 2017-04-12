@@ -35,9 +35,8 @@
         <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @expert_question %>
       </div>
     </div>
-    <div class="text-muted text-left">
-      <hr/>
-      The questions, answers, and comments posted under this Expert Q&A forum reflect the views of the author(s) and should not be construed to represent views or policies held by the FDA.
+    <div class="text-left">
+      <%= render "experts/disclaimer" %>
     </div>
   </div>
 </div>
