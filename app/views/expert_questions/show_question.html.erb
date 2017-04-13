@@ -26,9 +26,10 @@
           <small><br/>Answer updated <%= local_time_ago(@expert_question.expert_answer.updated_at) %></small>
         </div>
       </div>
-      <h3 class="expert-question-answer-body lead">
+      <br/>
+      <div class="expert-blog-text">
         <%= simple_format(@expert_question.expert_answer.body) %>
-      </h3>
+      </div>
     </div>
     <div class="row">
       <div class="col-md-16">
