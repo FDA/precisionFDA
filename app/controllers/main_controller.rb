@@ -1,5 +1,5 @@
 class MainController < ApplicationController
-  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines, :browse_access, :destroy, :presskit]}
+  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines, :browse_access, :destroy, :presskit, :news]}
 
   skip_before_action :require_login,     only: [:track]
   before_action :require_login_or_guest, only: [:track]
@@ -163,6 +163,9 @@ class MainController < ApplicationController
   end
 
   def guidelines
+  end
+
+  def news
   end
 
   def presskit
