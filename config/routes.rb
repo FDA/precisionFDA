@@ -23,6 +23,7 @@ Rails.application.routes.draw do
     get 'guidelines' => 'main#guidelines'
     get 'exception_test' => "main#exception_test"
     get 'presskit' => 'main#presskit'
+    get 'news' => 'main#news'
 
     # API
     post '/api/publish', to: 'api#publish'
