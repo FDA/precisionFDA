@@ -31,17 +31,46 @@
   <%= render "experts/landing_cards", experts: @experts %>
 </div>
 
-<div class="jumbotron jumbotron-challenges tiltview-container">
+<div class="jumbotron jumbotron-challenges-landing">
   <div class="container">
-    <div class="h2 text-center">precisionFDA Challenges</div>
-    <%= render "challenges/cards", challenges: @challenges %>
+    <div class="row vertical-align">
+      <div class="col-sm-2 col-md-2 landing-btn">
+        <div class="h2">
+          <span class="fa fa-2x fa-trophy"</span>
+        </div>
+      </div>
+      <div class="col-sm-14 col-md-14 text-margin">
+        <div class="h2">
+          precisionFDA Challenges
+        </div>
+        <div class="h4">
+          Engage and improve NGS software through community challenges
+        </div>
+      </div>
+      <div class="col-sm-8 col-md-8 landing-btn">
+        <a class="btn accessible-btn-danger btn-lg btn-block" href="/challenges">Learn about Challenges</a>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="h3 text-center">About PrecisionFDA</div>
-<div class="container container-padded">
-  <div class="pfda-cards pfda-cards-news pfda-cards-justify-centered">
-    <%= render "main/news" %>
+<div class="jumbotron jumbotron-news-landing">
+  <div class="container">
+    <div class="row vertical-align">
+      <div class="col-sm-16 col-md-16">
+        <div class="h2">
+          Latest precisionFDA News
+        </div>
+        <div class="h4">
+          Learn about the latest precisionFDA events and news
+        </div>
+      </div>
+      <div class="col-sm-8 col-md-8 landing-btn">
+        <a class="btn accessible-btn-default btn-lg btn-block" href="/news">
+          <span class="fa fa-newspaper-o"></span> &nbsp;View News
+        </a>
+      </div>
+    </div>
   </div>
 </div>
 
