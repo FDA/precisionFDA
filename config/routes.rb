@@ -57,6 +57,13 @@ Rails.application.routes.draw do
     post '/api/follow', to: 'api#follow'
     post '/api/unfollow', to: 'api#unfollow'
 
+    # FHIR
+    scope '/fhir' do
+      get 'Sequence', to: 'comparisons#fhir_index'
+      get 'metadata', to: 'comparisons#fhir_cap'
+      get 'Sequence/:id', to: 'comparisons#fhir_export', id: /comparison-\d+/
+    end
+
     # Profile
     get 'profile', to: 'profile#index'
     post 'profile/provision_user', to: 'profile#provision_user', as: 'provision_user'
