@@ -1,6 +1,8 @@
 class ComparisonsController < ApplicationController
-  skip_before_action :require_login,     only: [:index, :featured, :explore, :show]
+  skip_before_action :require_login,     only: [:index, :featured, :explore, :show, :fhir_export, :fhir_index, :fhir_cap]
   before_action :require_login_or_guest, only: [:index, :featured, :explore, :show]
+
+  require 'cgi'
 
   def index
     if @context.guest?
@@ -18,6 +20,241 @@ class ComparisonsController < ApplicationController
       per_page: 100,
       include: [:user, {user: :org}, {taggings: :tag}]
     })
+  end
+
+  def fhir_cap
+    interaction = []
+    interaction << {
+      "code" => "read"
+    }
+
+    resource = []
+    resource << {
+      "type" => "Sequence",
+      "interaction" => interaction
+    }
+
+    rest = []
+    rest << {
+      "mode" => "server",
+      "resource" => resource
+    }
+
+    cap = {
+      "resourceType" => "CapabilityStatement",
+      "status" => "active",
+      "date" => Time.now.strftime("%Y-%m-%d"),
+      "kind" => "capability",
+      "publisher" => "PrecisionFDA",
+      "fhirVersion" => "v1.9.0",
+      "acceptUnknown" => "no",
+      "format" => ["json", "xml"],
+      "rest" => rest
+    }
+
+    if request.content_type =~ /xml/
+      cap.delete("resourceType")
+      render xml: cap.to_xml(:root => "CapabilityStatement")
+    else
+      render json: JSON.pretty_generate(JSON.parse(cap.to_json))
+    end
+  end
+
+  def fhir_index
+    user_params = params.except(:controller, :action)
+    page_number = 1
+    page_size = 10
+    list = nil
+    link = nil
+    format = "JSON"
+    results = []
+
+    # no unallowed params
+    if user_params == query_params
+      filtered_params = {}
+      query_params.keys.each do |key|
+        val = nil
+        case key.downcase
+        when "page"
+          if query_params[:page].to_i >= 1
+            page_number = query_params[:page].to_i
+          end
+        when "name"
+          val = query_params[:name].to_s
+        when "id"
+          val = query_params[:id].to_s
+        when "_format"
+          format = query_params[:_format].to_s
+        else
+          next
+        end
+        if val
+          filtered_params[key] = val
+        end
+      end
+      # find what range to display
+      results = Comparison.accessible_by_public.where(filtered_params)
+      list = results.page(page_number).per(page_size)
+    end
+
+    entry = []
+    if list
+      list.each do |c|
+        resource = generate_sequence(c)
+        entry << {
+          "resource" => resource
+        }
+      end
+    end
+
+    if results.count > page_number * page_size
+      link = []
+      link << {
+        "relation" => "next",
+        "url" => request.base_url + request.path + "?" + filtered_params.map{|k,v|"#{CGI::escape(k.to_s)}=#{CGI::escape(v.to_s)};"}.join + "page=#{page_number+1}"
+      }
+    end
+
+    bundle = {
+      "resourceType" => "Bundle",
+      "type" => "searchset",
+      "total" => results.count
+    }
+    if link
+      bundle["link"] = link
+    end
+    bundle["entry"] = entry
+
+    if request.content_type =~ /xml/ || format =~ /xml/
+      render xml: bundle.to_xml(:root => "Bundle")
+    else
+      render json: JSON.pretty_generate(JSON.parse(bundle.to_json))
+    end
+  end
+
+  def fhir_export
+    comparison = nil
+    if params[:id] =~ /^comparison-(\d+)$/
+      comparison = Comparison.accessible_by_public.find_by(id: $1)
+    end
+
+    if !comparison
+      raise ActionController::RoutingError, 'Not Found'
+    end
+
+    sequence = generate_sequence(comparison)
+    if request.content_type =~ /xml/
+      render xml: sequence.to_xml(:root => "Sequence")
+    else
+      render json: JSON.pretty_generate(JSON.parse(sequence.to_json))
+    end
+  end
+
+  def generate_sequence(comparison)
+    identifier = []
+    identifier << {
+      "system" => "https://precision.fda.gov/fhir/Sequence/",
+      "value" => comparison.uid
+    }
+
+    coding = []
+    ["ref_vcf", "ref_bed"].each do |role|
+      input = comparison.input(role)
+      if input
+        coding << {
+          "system" => "https://precision.fda.gov/files",
+          "code" => input.user_file.dxid,
+          "display" => input.user_file.public? ? input.user_file.name : input.user_file.dxid
+        }
+      end
+    end
+    standardSequence = {
+      "coding" => coding
+    }
+
+    app = App.find_by(dxid: COMPARATOR_V1_APP_ID)
+    coding = []
+    if app
+      coding << {
+        "system" => "https://precision.fda.gov/apps",
+        "code" => app.dxid,
+        "display" => app.title,
+        "version" => app.revision.to_s
+      }
+    end
+    method = {
+      "coding" => coding
+    }
+
+    quality_data = {
+        "type" => "unknown",
+        "standardSequence" => standardSequence,
+        "method" => method,
+        "truthTP" => comparison.meta["true-pos"].to_i,
+        "truthFN" => comparison.meta["false-neg"].to_i,
+        "queryFP" => comparison.meta["false-pos"].to_i,
+        "precision" => comparison.meta["precision"].to_f,
+        "recall" => comparison.meta["recall"].to_f,
+        "fMeasure" => comparison.meta["f-measure"].to_f
+    }
+
+    # For ROC data points, convert them to floats before exporting
+    meta_roc = comparison.meta["weighted_roc"]
+
+    headers_map = {
+      "score" => "score",
+      "true_positives" => "numTP",
+      "false_positives" => "numFP",
+      "false_negatives" => "numFN",
+      "precision" => "precision",
+      "sensitivity" => "sensitivity",
+      "f_measure" => "fMeasure"
+    }
+
+    if meta_roc["data"].present?
+      headers = {}
+      meta_roc["header"].map.each_with_index do |h,i|
+        new_key = headers_map[h]
+
+        case h
+        when "score", "true_positives", "false_positives", "false_negatives"
+          headers[new_key] = meta_roc["data"].map do |d|
+            d[i].to_i
+          end
+        else
+          headers[new_key] = meta_roc["data"].map do |d|
+            d[i].to_f
+          end
+        end
+      end
+      quality_data["roc"] = headers
+    end
+
+    quality = []
+    quality << quality_data
+
+    repository = []
+    ["test_vcf", "test_bed"].each do |role|
+      input = comparison.input(role)
+      if input
+        file = {
+          "type" => "login",
+          "url" => "https://precision.fda.gov" + pathify(input.user_file),
+          "name" => "PrecisionFDA",
+          "variantsetId" => input.user_file.dxid
+        }
+        repository << file
+      end
+    end
+
+    sequence = {
+      "resourceType" => "Sequence",
+      "type" => "dna",
+      "coordinateSystem" => 1,
+      "identifier" => identifier,
+      "quality" => quality,
+      "repository" => repository
+    }
   end
 
   def featured
@@ -228,5 +465,9 @@ class ComparisonsController < ApplicationController
   private
     def comparison_params
       params.require(:comparison).permit(:name)
+    end
+
+    def query_params
+      params.permit(:id, :name, :page, :_format)
     end
 end

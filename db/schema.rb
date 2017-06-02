@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160928191202) do
+ActiveRecord::Schema.define(version: 20170311032415) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id"
@@ -130,6 +130,7 @@ ActiveRecord::Schema.define(version: 20160928191202) do
     t.integer  "rgt"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "comment_type"
   end
 
   add_index "comments", ["commentable_id", "commentable_type"], name: "index_comments_on_commentable_id_and_commentable_type"
@@ -170,6 +171,62 @@ ActiveRecord::Schema.define(version: 20160928191202) do
 
   add_index "discussions", ["note_id"], name: "index_discussions_on_note_id"
   add_index "discussions", ["user_id"], name: "index_discussions_on_user_id"
+
+  create_table "events", force: :cascade do |t|
+    t.integer  "item_id"
+    t.string   "item_type"
+    t.string   "event_type"
+    t.datetime "timestamp"
+    t.string   "scope"
+    t.text     "meta"
+    t.integer  "user_id"
+  end
+
+  add_index "events", ["event_type"], name: "index_events_on_event_type"
+  add_index "events", ["item_id"], name: "index_events_on_item_id"
+  add_index "events", ["item_type"], name: "index_events_on_item_type"
+  add_index "events", ["scope"], name: "index_events_on_scope"
+  add_index "events", ["user_id"], name: "index_events_on_user_id"
+
+  create_table "expert_answers", force: :cascade do |t|
+    t.integer  "expert_id"
+    t.integer  "expert_question_id"
+    t.text     "body"
+    t.string   "state"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
+  end
+
+  add_index "expert_answers", ["expert_id"], name: "index_expert_answers_on_expert_id"
+  add_index "expert_answers", ["expert_question_id"], name: "index_expert_answers_on_expert_question_id"
+  add_index "expert_answers", ["state"], name: "index_expert_answers_on_state"
+
+  create_table "expert_questions", force: :cascade do |t|
+    t.integer  "expert_id"
+    t.integer  "user_id"
+    t.text     "body"
+    t.text     "meta"
+    t.string   "state"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "expert_questions", ["expert_id"], name: "index_expert_questions_on_expert_id"
+  add_index "expert_questions", ["state"], name: "index_expert_questions_on_state"
+  add_index "expert_questions", ["user_id"], name: "index_expert_questions_on_user_id"
+
+  create_table "experts", force: :cascade do |t|
+    t.integer  "user_id"
+    t.string   "image"
+    t.string   "state"
+    t.text     "meta"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "experts", ["image"], name: "index_experts_on_image"
+  add_index "experts", ["state"], name: "index_experts_on_state"
+  add_index "experts", ["user_id"], name: "index_experts_on_user_id"
 
   create_table "follows", force: :cascade do |t|
     t.integer  "followable_id",                   null: false

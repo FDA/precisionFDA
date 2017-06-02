@@ -1,5 +1,5 @@
 class MainController < ApplicationController
-  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines, :browse_access, :destroy, :presskit]}
+  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines, :browse_access, :destroy, :presskit, :news]}
 
   skip_before_action :require_login,     only: [:track]
   before_action :require_login_or_guest, only: [:track]
@@ -14,6 +14,8 @@ class MainController < ApplicationController
     @appathons_challenge = Challenge.appathons(@context)
 
     @challenges = [@appathons_challenge, @truth_challenge, @consistency_challenge]
+
+    @experts = Expert.public.order(updated_at: :desc).limit(10) # TODO: filter by published ones only
 
     @meta_appathon = MetaAppathon.active
     if !@meta_appathon.nil?
@@ -119,6 +121,9 @@ class MainController < ApplicationController
   end
 
   def guidelines
+  end
+
+  def news
   end
 
   def presskit

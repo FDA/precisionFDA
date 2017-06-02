@@ -25,6 +25,7 @@
 #= require human-format
 #= require knockout
 #= require knockout-sortable
+#= require local_time
 #= require moment
 #= require wice_grid
 #= require remarkable/remarkable

@@ -14,8 +14,9 @@ Rails.application.configure do
   config.action_controller.perform_caching = false
 
   # Don't care if the mailer can't send.
+  # TODO: Figure this out for localhost
   config.action_mailer.raise_delivery_errors = false
-  config.action_mailer.default_url_options = { :host => "52.20.174.113" }
+  config.action_mailer.default_url_options = { :host => "precisionfda-staging.dnanexus.com" }
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log

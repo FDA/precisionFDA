@@ -1,0 +1,53 @@
+<div class="page-header text-center">
+  <% if is_dashboard %>
+    <%= render 'experts/header_dashboard' %>
+  <% else %>
+    <%= render 'experts/header_public' %>
+  <% end %>
+</div>
+
+<% if @expert.editable_by?(@context) %>
+  <div class="pfda-toolbar text-center">
+    <div class="btn-group">
+      <% if is_dashboard %>
+        <%= link_to expert_path(@expert), class: "btn btn-default" do %>
+          <span class="fa fa-fw fa-globe" aria-hidden="true"></span> View Public Q&A
+        <% end %>
+        <%= link_to edit_expert_path(@expert), class:"btn btn-default" do %>
+          <span class="fa fa-pencil"></span> Edit Expert Info
+        <% end %>
+        <div class="btn-group">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <% if @expert.open? %>
+              <span class="fa fa-check"></span> Open
+            <% else %>
+              <span class="fa fa-lock"></span> Closed
+            <% end %>
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+              <% if @expert.open? %>
+                <%= link_to close_expert_path(@expert), method: :post do %>
+                  <span class="fa fa-lock"></span>
+                  Closed
+                  <small class="help-block">This will prevent any additional questions from being submitted.</small>
+                <% end %>
+              <% else %>
+                <%= link_to open_expert_path(@expert), method: :post do %>
+                  <span class="fa fa-check"></span>
+                  Open
+                  <small class="help-block">This will allow questions to be submitted.</small>
+                <% end %>
+              <% end %>
+            </li>
+          </ul>
+        </div>
+      <% else %>
+        <%= link_to dashboard_expert_path(@expert), class: "btn btn-default" do %>
+          <span class="fa fa-fw fa-dashboard" aria-hidden="true"></span> View Your Expert Dashboard
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

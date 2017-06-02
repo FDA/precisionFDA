@@ -1,0 +1,114 @@
+<% content_for :title do %><%= user_title(@expert.user) %><% end %>
+
+<%= render 'experts/header', { is_dashboard: true } %>
+
+<div class="pfda-pane container-padded container-fluid">
+  <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal">
+    <div class="list-group">
+      <div class="list-group-item">
+        <a class="btn btn-primary" data-toggle="modal" data-target="#new-question-modal">
+          <span class="fa fa-plus fa-fw" aria-hidden="true"></span> Add a new question
+        </a>
+      </div>
+      <% if @open_questions.count > 0 %>
+        <div class="list-group-item list-group-item-header">
+          Open Questions (<%= @open_questions.count %>)
+        </div>
+        <% @open_questions.each do |q|%>
+          <%= link_to q.body ? q.body : q._original, expert_edit_question_path(@expert.id, q.id), class: "list-group-item #{'active' if @selected_question && @selected_question.id == q.id }" %>
+        <% end %>
+      <% end %>
+
+      <% if @answered_questions.count > 0 %>
+        <div class="list-group-item list-group-item-header">
+          Answered Questions (<%= @answered_questions.count %>)
+        </div>
+        <% @answered_questions.each do |q|%>
+          <%= link_to q.body ? q.body : q._original, expert_edit_question_path(@expert.id, q.id), class: "list-group-item #{'active' if @selected_question && @selected_question.id == q.id }" %>
+        <% end %>
+      <% end %>
+
+      <% if @ignored_questions.count > 0 %>
+        <div class="list-group-item list-group-item-header">
+          Ignored Questions (<%= @ignored_questions.count %>)
+        </div>
+        <% @ignored_questions.each do |q|%>
+          <s><%= link_to q.body ? q.body : q._original, expert_edit_question_path(@expert.id, q.id), class: "list-group-item #{'active' if @selected_question && @selected_question.id == q.id }" %></s>
+        <% end %>
+      <% end %>
+
+      <% if @total_count == 0 %>
+        <div class="list-group-item list-group-item-header">
+          No questions have been asked yet.
+        </div>
+      <% end %>
+    </div>
+  </div>
+  <div class="pfda-pane-content">
+    <div class="container-fluid container-padded">
+    <% if @selected_question.present? %>
+      <%= form_for @selected_question, url: expert_edit_question_path(@expert, @selected_question), method: :put, html: {class: 'form form-horizontal'} do |f| %>
+        <%= render "_partials/form_errors", object: @expert %>
+
+        <div class="form-group text-muted">
+          <div class="control-label col-sm-2">
+            Submitter
+          </div>
+          <div class="col-sm-11 col-sm-offset-1">
+            <div class="form-control-static">
+              <%= user_link(@selected_question.user) %>
+            </div>
+          </div>
+        </div>
+        <div class="form-group required">
+          <%= f.label :body, "Question", class: 'control-label col-sm-2' %>
+          <div class="col-sm-11 col-sm-offset-1">
+            <%= f.text_area :body, class: "form-control", rows: 2, placeholder: "Question...", required: "required", value: @selected_question.body ? @selected_question.body : @selected_question._original %>
+            <% if  @selected_question.body != @selected_question._original %>
+            <div class="help-block">
+              Original question: <%= @selected_question._original %>
+            </div>
+            <% end %>
+          </div>
+        </div>
+        <div class="form-group required ">
+          <%= f.label :answer, "Answer", class: 'control-label col-sm-2' %>
+          <div class="col-sm-11 col-sm-offset-1">
+            <%= f.text_area :answer, class: "form-control", rows: 10, placeholder: "Answer...", value:  @selected_question.expert_answer ? @selected_question.expert_answer.body : "" %>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-11 col-sm-offset-3">
+            <% if @selected_question.state == "answered" %>
+              <%= f.submit "Update Answer", class: 'btn btn-success', data: {disable_with: "Updating..."} %>
+              <%= f.submit "Re-Open Question", class: 'btn btn-link pull-right' %>
+            <% elsif @selected_question.state == "ignored" %>
+              <%= f.submit "Submit Answer", class: 'btn btn-success' %>
+              <%= f.submit "Save Draft", class: 'btn btn-link' %>
+              <%= f.submit "Re-Open Question", class: 'btn btn-link pull-right' %>
+            <% else %>
+              <%= f.submit "Submit Answer", class: 'btn btn-success' %>
+              <%= f.submit "Save Draft", class: 'btn btn-link' %>
+              <%= f.submit "Ignore Question", class: 'btn btn-link pull-right' %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% elsif @open_questions.count > 0 %>
+      <p class="lead">
+        Select an open question to answer it.
+      </p>
+    <% elsif @answered_questions.count > 0 %>
+        <p class="lead">
+          Select an answered question to update it. Or add a new question yourself.
+        </p>
+    <% else %>
+        <p class="lead">
+          No open questions to answer. You can add a question yourself to answer.
+        </p>
+    <% end %>
+    </div>
+  </div>
+</div>
+
+<%= render "experts/modal_new_question" %>

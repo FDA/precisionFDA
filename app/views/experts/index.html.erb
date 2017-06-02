@@ -1,0 +1,27 @@
+<% content_for :title do %>Experts<% end %>
+
+<% if @context.logged_in? && @context.user.can_administer_site? %>
+<div class="pfda-toolbar text-center">
+  <div class="btn-group">
+    <%= link_to new_expert_path, class: 'btn btn-primary' do %>
+      <span class="fa fa-plus-square fa-fw"></span> Create a new expert
+    <% end %>
+  </div>
+</div>
+<% end %>
+
+<%= render "experts/cards", experts: @experts %>
+
+<div class="text-center alert alert-info">
+  <% if @experts.empty? %>
+    No experts are currently being featured.
+    <br/><br/>
+  <% end %>
+  Your community wants to hear from you!
+
+  If you would like to suggest or nominate a colleague to be featured in an Expert Q&A session, please <strong><%= mail_to "precisionfda@fda.hhs.gov", "let us know" %></strong>.
+
+  <br/>
+  Thank you for supporting and being part of the PrecisionFDA community!
+</div>
+

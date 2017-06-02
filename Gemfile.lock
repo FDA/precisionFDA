@@ -106,6 +106,8 @@ GEM
       activesupport (>= 3.0.0)
     kgio (2.10.0)
     libv8 (3.16.14.13)
+    local_time (1.0.3)
+      coffee-rails
     loofah (2.0.3)
       nokogiri (>= 1.5.9)
     mail (2.6.4)
@@ -162,6 +164,8 @@ GEM
     rake (10.5.0)
     rdoc (4.2.1)
       json (~> 1.4)
+    recaptcha (4.1.0)
+      json
     ref (2.0.0)
     rubyzip (1.0.0)
     sass (3.4.22)
@@ -245,12 +249,14 @@ DEPENDENCIES
   jbuilder (~> 2.0)
   jquery-rails
   kaminari
+  local_time (~> 1.0, >= 1.0.3)
   mysql2 (~> 0.3.18)
   nokogiri
   paloma (= 5.0.0)
   premailer-rails
   rails (= 4.2.7.1)
   rails_param
+  recaptcha
   sass-rails (~> 5.0)
   sdoc (~> 0.4.0)
   secure_headers

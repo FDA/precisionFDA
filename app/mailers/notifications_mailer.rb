@@ -1,4 +1,5 @@
 class NotificationsMailer < ApplicationMailer
+  helper :application
   default  from: 'PrecisionFDA <PrecisionFDA@fda.hhs.gov>',
            reply_to: "PrecisionFDA@fda.hhs.gov"
 
@@ -75,5 +76,19 @@ class NotificationsMailer < ApplicationMailer
     mail to: @user.email,
          reply_to: @admin.user.email,
          subject: "#{@admin.user.full_name} added you to the space \"#{@space.title}\""
+  end
+
+  def new_expert_email(expert)
+    @expert = expert
+    mail to: @expert.user.email,
+         subject: "A new Expert Q&A Session was created for \"#{@expert.user.full_name.titleize}\""
+  end
+
+  def new_expert_question_email(expert, question)
+    @expert = expert
+    @question = question
+    name = @question.user.nil? ? "Anonymous" : @question.user.full_name.titleize
+    mail to: @expert.user.email,
+         subject: "A new question was submitted by \"#{name}\""
   end
 end
