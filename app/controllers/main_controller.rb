@@ -104,6 +104,7 @@ class MainController < ApplicationController
         { logo: "participants/23andme.png", name: "23andMe"},
         { logo: "participants/aha.png", name: "American Heart Association"},
         { logo: "participants/baylor.png", name: "Baylor College of Medicine"},
+        { logo: "participants/blueprint_genetics.png", name: "Blueprint Genetics"},
         { logo: "participants/broad.png", name: "Broad Institute"},
         { logo: "participants/cdc.png", name: "Centers for Disease Control and Prevention"},
         { logo: "participants/counsyl.png", name: "Counsyl"},

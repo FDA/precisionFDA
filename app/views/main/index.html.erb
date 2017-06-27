@@ -140,7 +140,7 @@
     <hr />
 
     <div class="row">
-      <div class="col-md-17">
+      <div class="col-md-16">
         <% if @experts.count > 0 %>
           <div class="overview-header">
             Expert Spotlight
@@ -148,7 +148,7 @@
           <%= render "experts/landing_cards", experts: @experts %>
         <% end %>
       </div>
-      <div class="col-md-6 col-md-offset-1">
+      <div class="col-md-7 col-md-offset-1">
         <div class="overview-header">Latest Activity</div>
           <%= render "_partials/feed", feed: @feed %>
         <br/>
