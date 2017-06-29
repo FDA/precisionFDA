@@ -244,7 +244,7 @@ class MainController < ApplicationController
     raise unless params[:code].present? && params[:code].is_a?(String)
 
     # Exchange the code for a token
-    result = DNAnexusAuth.new(DNANEXUS_AUTHSERVER_URI).post_form("oauth2/token", {grant_type: "authorization_code", code: params[:code], redirect_uri: OAUTH2_REDIRECT_URI})
+    result = DNAnexusAuth.new(DNANEXUS_AUTHSERVER_URI).post_form("oauth2/token", {grant_type: "authorization_code", code: params[:code], redirect_uri: OAUTH2_REDIRECT_URI, client_id: OAUTH2_CLIENT_ID})
     raise unless result["access_token"].present? && result["token_type"] == "bearer"
     token = result["access_token"]
 
