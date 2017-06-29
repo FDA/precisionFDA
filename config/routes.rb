@@ -56,6 +56,7 @@ Rails.application.routes.draw do
     post '/api/remove_upvote', to: 'api#remove_upvote'
     post '/api/follow', to: 'api#follow'
     post '/api/unfollow', to: 'api#unfollow'
+    post '/api/update_submission', to: 'api#update_submission'
 
     # FHIR
     scope '/fhir' do
@@ -126,6 +127,12 @@ Rails.application.routes.draw do
       get 'consistency(/:tab)', on: :collection, action: :consistency, as: 'consistency'
       get 'truth(/:tab)', on: :collection, action: :truth, as: 'truth'
       get 'join', on: :member
+      get 'view(/:tab)', on: :member, action: :show, as: 'show'
+      resources :submissions, only: [:new, :create, :edit] do
+        post 'publish', on: :collection, action: :publish
+        get 'log', on: :member
+      end
+      post 'assign_app', on: :member
     end
 
     resources :discussions, constraints: {answer_id: /[^\/]+/ } do
