@@ -117,10 +117,10 @@
   </div>
 
   <div class="btn-group pull-right">
+    <%= render "_partials/btn_challenge_app", app: @app, challenge: Challenge.current %>
     <%= link_to new_app_job_path(@app.dxid), class: "btn btn-primary" do %>
       <span class="fa fa-bolt"></span> Run App&nbsp;&nbsp;<span class="badge"><%= @app.version ? "v#{@app.version}" : "rev#{@app.revision}" %></span>
     <% end %>
-
     <%= render "_partials/btn_publish", item: @app %>
   </div>
 </div>

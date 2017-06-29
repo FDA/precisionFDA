@@ -28,6 +28,8 @@ class App < ActiveRecord::Base
 
   has_and_belongs_to_many :assets, {join_table: 'apps_assets'}
 
+  has_many :challenges
+
   store :spec, accessors: [ :input_spec, :output_spec, :internet_access, :instance_type ], coder: JSON
   store :internal, accessors: [ :ordered_assets, :packages, :code ], coder: JSON
 

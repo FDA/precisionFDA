@@ -1,0 +1,9 @@
+<% if @context.logged_in? && app.user == @context.user && challenge && challenge.app_owner == @context.user %>
+  <% if challenge.app == app %>
+    <span class="btn btn-warning disabled"><span class="fa fa-trophy"></span> Assigned to: <%= challenge.name %></span>
+  <% else %>
+    <%= link_to assign_app_challenge_path(id: challenge.id, app_id: app.id), method: :post, class: "btn btn-warning" do %>
+      <span class="fa fa-trophy"></span> Assign to: <%= challenge.name %>
+    <% end %>
+  <% end %>
+<% end %>
