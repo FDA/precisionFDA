@@ -31,6 +31,8 @@ if ENV["DNANEXUS_BACKEND"] == "production"
   # Hard-code uid for NA12878-NISTv2.19 for feedback link
   NIST_VCF_UID = "file-Bk50V4Q0qVb65P0v2VPbfYPZ"
   COMPARATOR_V1_APP_ID = "app-BqB9XZ8006ZZ2g5KzGXP3fpq"
+  CHALLENGE_BOT_TOKEN = ENV["CHALLENGE_BOT_TOKEN"]
+  CHALLENGE_BOT_DX_USER = "user-challenge.bot"
 else
   DNANEXUS_AUTHSERVER_URI = "https://stagingauth.dnanexus.com/"
   DNANEXUS_APISERVER_URI = "https://stagingapi.dnanexus.com/"
@@ -45,6 +47,8 @@ else
   # Hard-code uid for NA12878-NISTv2.19 for feedback link
   NIST_VCF_UID = "file-Bk0kjkQ0ZP01x1KJqQyqJ7yB"
   COMPARATOR_V1_APP_ID = "app-F1qFJ7j0F5GjY9P362yQF2vX"
+  CHALLENGE_BOT_TOKEN = ENV["CHALLENGE_BOT_TOKEN"]
+  CHALLENGE_BOT_DX_USER = "challenge.bot.2"
 end
 BILLING_CONFIRMATION = ENV["BILLING_CONFIRMATION"]
 

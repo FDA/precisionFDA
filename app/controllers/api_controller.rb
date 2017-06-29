@@ -1276,6 +1276,38 @@ class ApiController < ApplicationController
 
   # Inputs
   #
+  # id (integer, required): the id of the submission to be updated
+  # title (string): the updated submission title
+  # content (string): the updated submission description
+  #
+  # Outputs:
+  # id: the submission id
+  #
+  def update_submission
+    id = params[:id].to_i
+    fail "id needs to be an Integer" unless id.is_a?(Integer)
+
+    title = params[:title]
+    fail "title needs to be a String" unless title.is_a?(String)
+
+    content = params[:content] || ""
+    fail "content needs to be a String" unless content.is_a?(String)
+
+    submission = nil
+    Submission.transaction do
+      submission = Submission.editable_by(@context).find(params[:id])
+      fail "no submission found" unless submission
+      submission.update!(desc: content)
+      submission.job.update!(name: title)
+    end
+
+    render json: {
+      id: submission.id
+    }
+  end
+
+  # Inputs
+  #
   # id (integer, required): the id of the note to be updated
   # title (string): the updated note title
   # content (string): the updated note content
@@ -1416,7 +1448,7 @@ class ApiController < ApplicationController
 
     followable = item_from_uid(followable_uid)
     follower = @context.user
-    if followable.accessible_by?(@context) && ["discussion"].include?(followable.klass)
+    if followable.accessible_by?(@context) && ["discussion","challenge"].include?(followable.klass)
       follower.follow(followable)
       render json: {
         followable_uid: followable_uid,

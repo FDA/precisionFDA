@@ -9,13 +9,10 @@
       </div>
       <%= form_for item, url: path_to_rename, method: :post do |f| %>
       <div class="modal-body">
-        <div class="form-group required">
-          <%= f.text_field (["file", "comparison", "space"].include?(item.klass) ? :name : :title), class: "form-control input-lg", placeholder: "Rename...", required: "required"  %>
-        </div>
+        <div class="note-preview pfda-md-rendered" data-bind="html: content.preview"></div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Cancel</button>
-        <button type="submit" class="btn btn-primary" data-disable-with="Renaming...">Rename</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" tabindex="-1">OK</button>
       </div>
       <% end %>
     </div><!-- /.modal-content -->
