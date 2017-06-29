@@ -3,7 +3,7 @@ class JobsController < ApplicationController
   before_action :require_login_or_guest, only: [:show]
 
   def show
-    @job = Job.accessible_by(@context).includes(:user).find_by!(dxid: params[:id])
+    @job = Job.accessible_by(@context).includes(:user).find_by(dxid: params[:id])
     if @job.nil?
       flash[:error] = "Sorry, this job does not exist or is not accessible by you"
       redirect_to apps_path

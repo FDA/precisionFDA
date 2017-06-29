@@ -1,0 +1,9 @@
+<% if @context.logged_in? %>
+  <a class="btn-follow event-follow <%= defined?(classes) ? classes : '' %> <%= @context.user.following?(item) ? 'active': ''%>" data-followable-uid="<%= item.uid %>" data-follower-uid="<%= @context.user.uid %>" data-upvote-count="<%= item.get_upvotes.size %>">
+    <span class="follow-label"></span> | <span class="follow-count"><%= item.count_user_followers %></span>
+  </a>
+<% else %>
+  <a class="btn-follow disabled <%= defined?(classes) ? classes : '' %>">
+    <span>Joined by</span> | <span class="follow-count"><%= item.count_user_followers %></span>
+  </a>
+<% end %>

@@ -1,0 +1,28 @@
+<% content_for :title do %><%= @submission.name %><% end %>
+
+<div class="page-header">
+  <div class="page-title">
+    <span class="fa fa-tasks"></span>
+    <% case @job.state
+      when "failed" %>
+      <span class="label label-danger"><%= @job.state.upcase %></span>
+    <% when "done" %>
+      <span class="label label-success"><%= @job.state.upcase %></span>
+    <% when "running" %>
+      <span class="label label-primary"><%= "verifying...".upcase %></span>
+    <% else %>
+      <span class="label label-warning"><%= "pending verification...".upcase %></span>
+    <% end %>
+    <span class="name"><%= @submission.job.name %></span>
+  </div>
+</div>
+
+<div class="pfda-toolbar">
+  <div class="btn-group pull-left">
+    <%= link_to log_challenge_submission_path(@submission.challenge, @submission), class: "btn btn-default", data: {no_turbolink: true} do %>
+      <span class="fa fa-refresh"></span> Refresh
+    <% end %>
+  </div>
+</div>
+
+<div class="container-fluid"><div class="job-log panel panel-default"><%= @log_contents.join("\n") %></div></div>

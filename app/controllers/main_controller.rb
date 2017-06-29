@@ -9,9 +9,9 @@ class MainController < ApplicationController
     @consistency_discussion = Discussion.accessible_by_public.find_by(id: CONSISTENCY_DISCUSSION_ID)
     @truth_discussion = Discussion.accessible_by_public.find_by(id: TRUTH_DISCUSSION_ID)
 
-    @consistency_challenge = Challenge.consistency(@context)
-    @truth_challenge = Challenge.truth(@context)
-    @appathons_challenge = Challenge.appathons(@context)
+    @consistency_challenge = FixedChallenge.consistency(@context)
+    @truth_challenge = FixedChallenge.truth(@context)
+    @appathons_challenge = FixedChallenge.appathons(@context)
 
     @challenges = [@appathons_challenge, @truth_challenge, @consistency_challenge]
 
