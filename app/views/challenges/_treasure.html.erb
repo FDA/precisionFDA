@@ -1,18 +1,17 @@
 <div class="container container-padded">
   <div class="pfda-challenge-intro">
-    <div class="lead-intro">The <strong>Food and Drug Administration (FDA)</strong> calls on the genomics community to further assess, compare, and improve techniques used in DNA testing by launching the second precisionFDA challenge.</div>
 
     <div class="pfda-cards pfda-cards-justify-centered ">
       <div class="pfda-card pfda-card-rounded pfda-card-padded">
         <div class="pfda-card-body">
           <div class="challenge-card-icon"><span class="fa fa-sliders fa-4x" aria-hidden="true"></span></div>
-          President Obama’s Precision Medicine Initiative envisions a day when an individual's medical care will be tailored in part based on their unique characteristics and genetic make-up.
+          The Precision Medicine Initiative envisions a day when an individual’s medical care will be tailored in part based on their unique characteristics and genetic make-up  The success of precision medicine relies upon robust and accurate genomic tests, so the Food and Drug Administration (FDA) created precisionFDA to support the community’s efforts in developing advanced genomic analysis technologies that use next-generation sequencing (NGS) -- specifically NGS bioinformatics.
         </div>
       </div>
       <div class="pfda-card pfda-card-rounded pfda-card-padded">
         <div class="pfda-card-body">
           <div class="challenge-card-icon"><span class="fa fa-flask fa-4x" aria-hidden="true"></span></div>
-          The goal of the FDA's second precisionFDA challenge, similarly to the first challenge, is to continue engaging the genomics community in advancing the quality standards in order to achieve more accurate and consistent results in the context of genetic tests (related to whole human genome sequencing), advancing the goal of better personalized care.
+          The FDA is launching the fourth precisionFDA challenge to continue its support of the genomics community in assessing, comparing, and improving techniques used for NGS. The goal of the challenge, similar to the previous challenges, is to continue engaging the genomics community in helping achieve even more accurate and consistent results in the context of NGS-based genetic tests, ultimately advancing the goal of better personalized care. The FDA intends to run this type of challenge periodically in order for the community to gauge improvements in providing a greater and greater level of precision and accuracy for NGS bioinformatics and the whole NGS test.
         </div>
       </div>
       <div class="pfda-card pfda-card-rounded pfda-card-padded">
@@ -27,7 +26,7 @@
 
     <div class="text-muted text-center">
       <p>Challenge Time Period</p>
-      <p><mark>April 26, 2016 through May 26, 2016</mark></p>
+      <p><mark>July 11, 2017 through September 1, 2017</mark></p>
     </div>
   </div>
 
@@ -40,43 +39,33 @@
 
     <div class="copy">
       <p>
-        In the context of whole human genome sequencing, software pipelines typically rely on mapping sequencing reads to a reference genome and subsequently identifying variants (differences). One way of assessing the performance of such pipelines is by using well-characterized datasets such as Genome in a Bottle’s NA12878, also known as HG001. However, we have been hearing from the community that HG001 has been widely used to train software pipelines, and that testing of pipelines would ideally be done on some other sample &mdash; perhaps one whose truth data is not provided at the time of testing.
+        In the context of whole human genome sequencing, software pipelines typically involve aligning sequencing reads to a reference genome and subsequently identifying variants (differences). One way of assessing the performance of such pipelines is by using well-characterized datasets such as Genome in a Bottle’s NA12878. However, because the existing NGS reference datasets are very limited and have been widely used to train/develop software pipelines, benchmarking of pipeline performance would ideally be done on samples with unknown variants.
       </p>
       <p>
-        The Genome in a Bottle (GiaB) consortium, lead by the National Institute of Standards (NIST), will be soon releasing a second reference sample, known as HG002, corresponding to their characterization of NA24385 (the son of an Ashkenazim trio).
-      </p>
-      <p>
-        The FDA has taken this unique opportunity, before the release of the HG002 truth data by GiaB, to set up the second precisionFDA challenge. By supplying sequencing reads datasets (FASTQ) for both HG001 and HG002, and a framework for comparing variant call format (VCF) results, this challenge provides a common frame of reference for measuring performance aspects of participants’ pipelines on both known (HG001) and not-yet-revealed (HG002) truth datasets.
+        This challenge will provide a unique opportunity for test developers to investigate the accuracy of their pipelines by testing the ability to find in-silico injected variants in FASTQ files from exome sequencing of reference cell lines. It will be part one of a continuous challenge, with part 2 to be offered later this year. This challenge will provide users with a FASTQ file of a NA12878 sequence that has been in silico modified. Users will run the FASTQ file through their pipeline, returning the VCF file to precisionFDA for comparison and determination of accuracy with respect to variant detection.
       </p>
     </div>
 
     <hr>
 
     <div class="pfda-challenge-diagram">
-      <%= link_to image_tag("challenges/pFDA-C2-Diagram", alt: "PrecisionFDA Truth Challenge", class: "img-responsive"), image_path("challenges/pFDA-C2-Diagram") %>
+      <%= link_to image_tag("challenges/pFDA-C4-Diagram", alt: "PrecisionFDA Treasure Hunt Challenge Part 1", class: "img-responsive"), image_path("challenges/pFDA-C4-Diagram") %>
     </div>
 
     <hr>
 
     <div class="copy">
       <p>
-        The challenge begins with two precisionFDA-provided input datasets, corresponding to whole-genome sequencing of the HG001 (NA12878) and HG002 (NA24385) human samples. Both samples were sequenced under similar sequencing conditions and instruments, at the same sequencing site. Your mission is to process these two FASTQ datasets through your mapping and variation calling pipeline and create VCF files. You can generate those results on your own environment, and upload them to precisionFDA, or you can reconstruct your pipeline on precisionFDA and run it there. Regardless of how you generate your VCF files, you will subsequently submit them as your entry to the challenge.
+        The challenge begins with a precisionFDA-provided input dataset (FASTQ file), corresponding to whole exome sequencing of NA12878 modified with specific variants blinded to challenge participants. This challenge will focus on detection of SNVs and InDels, not structural or copy number variants. Your mission is to process this FASTQ dataset, completely independently with no a priori comparison, through your mapping and variation calling pipeline to create a VCF file. You can generate those results in your own environment, and upload them to precisionFDA, or you can reconstruct your pipeline on precisionFDA and run it here. Regardless of how you generate your VCF file, you will subsequently submit it as your entry to the challenge. Once you submit the file you will not be able to modify your entry (but you can submit multiple entries if you wish).
       </p>
       <p>
-        For HG002, the truth data will not be known during the challenge. After submissions close on May 26, GiaB will publish their reference VCF file for HG002. The precisionFDA team will then run and publish comparisons between each contestant’s HG002 VCF file and the GiaB HG002 reference VCF. This will publicly reveal how similar is each result to the GiaB HG002 reference.
+        After submissions close, the precisionFDA team will then run and publish comparative results between each contestant’s submitted VCF files and the known reference truth set. This will challenge a pipeline’s ability to detect previously unknown genetic variants.
       </p>
       <p>
-        For HG001, the reference VCF is already available. You are therefore asked to conduct a comparison between your VCF and the GiaB HG001 (NA12878) reference VCF, and include it in your submission entry, for the following reasons:
-      </p>
-      <ol>
-        <li>to ensure that your VCF files are compatible with the comparison process (remember that we won’t be able to check on your HG002 VCF until after the end of submissions, so you are using your HG001 VCF as a check that your files can be compared without issues)</li>
-        <li>for the community to be able to contrast your performance on a previously known sample (HG001) versus a previously unknown (HG002), and to evaluate any overfitting on HG001</li>
-      </ol>
-      <p>
-      Your entry to the challenge comprises your submitted HG001 and HG002 VCFs, your submitted HG001 comparison, and the HG002 comparison conducted by precisionFDA. Each comparison outputs several metrics (such as precision<a href="#footnotes">*</a>, recall<a href="#footnotes">*</a>, f-measure, or number of common variants). Selected participants and winners<a href="#footnotes">**</a> will be recognized on the precisionFDA website. Therefore, we hope you are willing to share your experience with others to further enhance the community's effort to ensure accuracy and truth of tests.
+        Your entry to the challenge comprises your submitted NA12878MOD VCF and the comparison results conducted by precisionFDA. Selected participants and top performers will be recognized on the precisionFDA website. Therefore, we hope you are willing to share your experience with others to further enhance the community's effort to develop better technologies to detect genetic variants.
       </p>
       <p>
-        The challenge runs until May 26, 2016.
+        The challenge runs until September 1, 2017.
       </p>
     </div>
   </div>
@@ -86,7 +75,7 @@
 
 <div class="container container-padded" id="details">
   <h3>Challenge details</h3>
-  <p>Last updated: April 26th, 2016
+  <p>Last updated: July 11, 2016
 
   <div class="panel-group accordion" id="accordion" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
@@ -103,7 +92,7 @@
           If you do not yet have a contributor account on precisionFDA, <a href="/request_access">file an access request</a> with your complete information, and indicate that you are entering the challenge. The FDA acts as steward to providing the precisionFDA service to the community and ensuring proper use of the resources, so your request will be initially pending. In the meantime, you will receive an email with a link to access the precisionFDA website in browse (guest) mode. Once approved, you will receive another email with your contributor account information.
           </p>
           <p class="copy">
-          With your contributor account you can use the features required to participate in the challenge (such as transfer files or run comparisons). Everything you do on precisionFDA is initially private to you (not accessible to the FDA or the rest of the community) until you choose to publicize it. So you can immediately start working on the challenge in private, and whenever you are ready you can officially publish your results as your challenge entry.
+          With your contributor account you can use the features required to participate in the challenge (such as transfer files or run apps). Everything you do on precisionFDA is initially private to you (not accessible to the FDA or the rest of the community) until you choose to publicize it. So you can immediately start working on the challenge in private, and whenever you are ready you can officially publish your results as your challenge entry.
           </p>
         </div>
       </div>
@@ -119,63 +108,48 @@
       <div id="collapseInputFiles" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingInputFiles">
         <div class="panel-body">
           <p class="copy">
-            The starting point for this challenge consists of two datasets, corresponding to whole-genome sequencing of the HG001 (NA12878) and HG002 (NA24385) samples on an Illumina HiSeq 2500 instrument at a single site. A pair of gzipped FASTQ files is provided for each dataset. The following table summarizes key information for each dataset:
+            The starting point for this challenge consists of one dataset, corresponding to exome sequencing of the NA12878 sample on an Illumina HiSeq 2500 instrument at a single site. The FASTQ has been modified in silico (NA12878MOD) to add a number of specific SNV and InDel variants at 20% or greater variant frequency. A pair of gzipped FASTQ files is provided for the dataset. The following table summarizes key information: 
           </p>
 
           <table class="table table-bordered table-rounded">
             <thead>
               <th>Dataset</th>
-              <th>HG001</th>
-              <th>HG002</th>
+              <th>NA12878MOD</th>
             </thead>
             <tbody>
               <tr>
                 <td>Files</td>
                 <td>
-                  <a class="btn btn-link" target="_blank" href="https://precision.fda.gov/files/file-BvP0Ygj01vpFPQ10Z93QX2q6"><span class="fa fa-file-o" aria-hidden="true"></span> HG001-NA12878-50x_1.fastq.gz</a>
+                  <a class="btn btn-link" target="_blank" href="https://precision.fda.gov/files/file-F4V8k7807ggG050bF7v4q1x6"><span class="fa fa-file-o" aria-hidden="true"></span> NA12878.1.fq.gz</a>
                   <br>
-                  <a class="btn btn-link" target="_blank" href="https://precision.fda.gov/files/file-BvP0bqQ0Y286kqgkzbkPXkp5"><span class="fa fa-file-o" aria-hidden="true"></span> HG001-NA12878-50x_2.fastq.gz</a>
+                  <a class="btn btn-link" target="_blank" href="https://precision.fda.gov/files/file-F4V8k7807gg4XzZxF7VFjVv3"><span class="fa fa-file-o" aria-hidden="true"></span> NA12878.2.fq.gz</a>
                 </td>
-                <td>
-                  <a class="btn btn-link" target="_blank" href="https://precision.fda.gov/files/file-BvP0b3Q0Z8pJfQxYxbk8P2p0"><span class="fa fa-file-o" aria-hidden="true"></span> HG002-NA24385-50x_1.fastq.gz</a>
-                  <br>
-                  <a class="btn btn-link" target="_blank" href="https://precision.fda.gov/files/file-BvP0f600xKVyPQZj08ZjXPx4"><span class="fa fa-file-o" aria-hidden="true"></span> HG002-NA24385-50x_2.fastq.gz</a>
-                </td>
-              </tr>
-              <tr>
-                <td>Sequencing Site</td>
-                <td colspan="2">NIST, Gaithersburg, MD</td>
               </tr>
               <tr>
                 <td>Library Prep</td>
-                <td colspan="2">Illumina TruSeq (LT) DNA PCR-Free Sample Prep Kits (FC-121-3001), multiplexing 12-14 libraries from the same genome</td>
+                <td>Libraries were prepared from 1 microgram of genomic DNA using Kapa Biosystems’ KAPA LTP Library Preparation Kit.  Libraries were enriched for exome content using Nimblegen’s SeqCap EZ Human Exome +UTR</td>
               </tr>
               <tr>
                 <td>Read Length</td>
-                <td colspan="2">2x148bp</td>
+                <td colspan="2">2x126bp</td>
               </tr>
               <tr>
                 <td>Insert Size</td>
-                <td colspan="2">~550bp</td>
+                <td colspan="2">324bp</td>
               </tr>
               <tr>
                 <td>Instrument and Sequencing Chemistry</td>
-                <td colspan="2">HiSeq 2500 Rapid Mode v1 (2 flow cells per genome)</td>
+                <td colspan="2">Illumina HiSeq 2500 using Version 4 chemistry</td>
               </tr>
               <tr>
                 <td>Approximate Coverage</td>
-                <td>50x</td>
-                <td>50x</td>
+                <td>76x</td>
               </tr>
             </tbody>
           </table>
 
           <p class="copy">
-            We would like to thank the Genome in a Bottle consortium for contributing these files.
-          </p>
-
-          <p class="copy">
-          In the next step you will need to process these FASTQ files through your pipeline to generate VCF files. This can be done either by downloading the files and running your pipeline on your own environment, or by reconstructing your pipeline on precisionFDA and running it there. If you will be working on your own environment, download these datasets by visiting the links above and clicking the <strong>Download</strong> button (web-browser download, not recommended for large files) or the <strong>Authorized URL</strong> button.
+          You will need to process these FASTQ files through your pipeline to generate VCF files. This can be done either by downloading the files and running your pipeline on your own environment, or by reconstructing your pipeline on precisionFDA and running it there. If you will be working on your own environment, download these datasets by visiting the links above and clicking the <strong>Download</strong> button (web-browser download, not recommended for large files) or the <strong>Authorized URL</strong> button.
           </p>
         </div>
       </div>
@@ -191,7 +165,7 @@
       <div id="collapseRunPipeline" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingRunPipeline">
         <div class="panel-body">
           <p class="copy">
-            After familiarizing yourself with the input files, you will need to process them through your mapping and variation calling pipeline to generate corresponding VCF files. Your pipeline must call variants across the whole genome. Each invocation of your pipeline must take as input a pair of FASTQ files and produce a VCF file containing exactly one genotyped sample. Results must be reported on GRCh37 human coordinates (i.e. chromosomes named 1, 2, ..., X, Y, and MT). You are strongly encouraged to compress each VCF file with bgzip, to reduce the file size.
+            After familiarizing yourself with the input files, you will need to process them through your mapping and variation calling pipeline to generate corresponding VCF files. Your pipeline must call variants across the entire sequenced region. Each invocation of your pipeline must take as input a pair of FASTQ files and produce a VCF file containing exactly one genotyped sample. Results must be reported on GRCh37 human coordinates (i.e. chromosomes named 1, 2, ..., X, Y, and MT). You are strongly encouraged to compress each VCF file with bgzip, to reduce the file size.
           </p>
 
           <table class="table">
@@ -205,7 +179,7 @@
               <tr>
                 <td class="text-success">
                   <span class="fa fa-check"></span> Use GRCh37<br>
-                  <span class="fa fa-check"></span> Call variants across the whole genome<br>
+                  <span class="fa fa-check"></span> Call variants across the entire sequenced region<br>
                   <span class="fa fa-check"></span> Compress with bgzip<br>
                 </td>
                 <td class="text-danger">
@@ -217,36 +191,24 @@
             </tbody>
           </table>
 
-          <p class="copy">
-          You will need to invoke your pipeline once on the HG001 pair of FASTQ files to obtain your HG001 VCF, and once on the HG002 pair of FASTQ files to obtain your HG002 VCF.
-          </p>
-
           <table class="table table-bordered table-rounded">
             <thead>
-              <th>Invocation</th>
               <th>Input dataset (FASTQ pair)</th>
               <th>Output dataset</th>
               <th>Example output filename</th>
             </thead>
             <tbody>
               <tr>
-                <td>#1</td>
-                <td>HG001</td>
-                <td>HG001 VCF</td>
-                <td>YourName-HG001.vcf.gz</td>
-              </tr>
-              <tr>
-                <td>#2</td>
-                <td>HG002</td>
-                <td>HG002 VCF</td>
-                <td>YourName-HG002.vcf.gz</td>
+                <td>NA12878MOD</td>
+                <td>NA12878MOD VCF</td>
+                <td>YourName-NA12878MOD.vcf.gz</td>
               </tr>
             </tbody>
           </table>
 
           <div class="bs-callout bs-callout-info">
             <strong>NOTE</strong>
-            <p>The input files for this challenge correspond to 50x coverage, hence are larger than the ones used in the first precisionFDA challenge. If you previously participated in the first challenge, make sure your pipeline can handle the increased input size.</p>
+            <p>NOTE: The input files for this challenge correspond to approximately 76X coverage.</p>
           </div>
 
           <p class="copy">
@@ -276,68 +238,6 @@
       </div>
     </div>
     <div class="panel panel-default">
-      <div class="panel-heading" role="tab" id="headingComparisons">
-        <h4 class="panel-title">
-          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseComparisons" aria-expanded="false" aria-controls="collapseComparisons">
-            Conducting the HG001 comparison
-          </a>
-        </h4>
-      </div>
-      <div id="collapseComparisons" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingComparisons">
-        <div class="panel-body">
-          <p class="copy">
-            Regardless of how you generate your VCFs (whether in your own environment or directly on precisionFDA), they will be compared to the respective GiaB reference VCFs. As mentioned in the introduction, the HG001 comparison needs to be conducted by you, as a check that your files are compatible with the comparison framework, and for the community to evaluate aspects of your pipeline’s performance (and potential overfitness) on known samples. The HG002 comparison will be conducted by the precisionFDA team after the submission deadline.
-          </p>
-          <p class="copy">
-            The precisionFDA comparison framework makes use of <a href="https://github.com/RealTimeGenomics/rtg-tools">vcfeval</a> by Real Time Genomics (<a href="http://biorxiv.org/content/biorxiv/early/2015/08/03/023754.full.pdf">Cleary et al., 2015</a>) to perform a pairwise comparison between a test VCF and a benchmark VCF, optionally constrained within certain coordinates provided by BED files (a test BED and a benchmark BED). For more information consult the <a href="https://precision.fda.gov/docs/comparisons">precisionFDA docs</a>. The following table summarizes the comparisons (you will only conduct the first one yourself):
-          </p>
-
-          <table class="table table-bordered table-rounded">
-            <thead>
-              <th>Comparison</th>
-              <th>Conducted by</th>
-              <th>Test VCF</th>
-              <th>Test BED</th>
-              <th>Benchmark VCF</th>
-              <th>Benchmark BED</th>
-            </thead>
-            <tbody>
-              <tr>
-                <td>HG001</td>
-                <td>You</td>
-                <td>Your HG001 VCF</td>
-                <td>-</td>
-                <td><a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb65P0v2VPbfYPZ">NIST v2.19 VCF</a></td>
-                <td><a href="https://precision.fda.gov/files/file-Bk50V4Q0qVb4p8J8kkXpYZ4P">NIST v2.19 BED</a></td>
-              </tr>
-              <tr>
-                <td>HG002</td>
-                <td>precisionFDA</td>
-                <td>Your HG002 VCF</td>
-                <td>-</td>
-                <td>(revealed after May 26)</td>
-                <td>(revealed after May 26)</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <p class="copy">
-            The HG001 comparison is between your HG001 VCF and the NIST/GiaB v2.19 benchmark VCF file for the same sample, constrained within the coordinates of the accompanying GiaB v2.19 BED file. The precisionFDA website provides NA12878-NISTv2.19.vcf.gz (to be used as benchmark VCF) and NA12878-NISTv2.19.bed (to be used as benchmark BED). This comparison is meant to estimate the accuracy of your pipeline within the “confident” regions of the Genome in a Bottle HG001 truth dataset &mdash; therefore you must leave the test BED entry blank.
-          </p>
-
-          <p class="copy">
-            Your comparison is private, until you are ready to share it with the community (see "Submitting your entry" below).
-          </p>
-
-          <div class="bs-callout bs-callout-warning">
-            <strong>IMPORTANT</strong>
-            <p>To ensure that you are on the right track, your HG001 comparison must meet a precision* and recall* threshold of at least 90%.</p>
-          </div>
-
-        </div>
-      </div>
-    </div>
-    <div class="panel panel-default">
       <div class="panel-heading" role="tab" id="headingSubmitEntry">
         <h4 class="panel-title">
           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseSubmitEntry" aria-expanded="false" aria-controls="collapseSubmitEntry">
@@ -348,20 +248,32 @@
       <div id="collapseSubmitEntry" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSubmitEntry">
         <div class="panel-body">
           <p class="copy">
-            <%= !@discussion.nil? ? link_to("This challenge has been posted to the precisionFDA “Discussions” section", discussion_path(@discussion)) : "" %>. Discussion answers can include rich text formatting, as well as attachments such as files or comparisons. You can leverage this functionality to submit your entry by filling in your answer to the question.
+            To begin your submission, click "Submit Challenge Entry" at the top of this page. The submission screen will ask for a title, a description, and a VCF file for your entry.
           </p>
           <p class="copy">
-            In your answer’s text, please identify whether you are participating as an individual or as part of the team (and, if it is a team effort, don’t forget to identify the members of your team). Write a description of the pipeline used to obtain the results, and identify the name, version and command-line parameters of the mapper and variant caller invoked in your pipeline.
+            Start by providing a short title for your submission entry, then fill in the description. In your description, please identify whether you are participating as an individual or as part of the team (and, if it is a team effort, don’t forget to identify the members of your team). Explain the pipeline used to obtain the results, and identify the name, version and command-line parameters of the mapper and variant caller invoked in your pipeline. The description entry field supports the <a target="_blank" href="https://jonschlinkert.github.io/remarkable/demo/">Markdown syntax</a>. Don't worry if you don't get it perfect right away -- you can always go back and edit this description later.
           </p>
           <div class="bs-callout bs-callout-info">
             <strong>NOTE</strong>
-            <p>If you opted to construct your pipeline on precisionFDA, and your VCFs were generated by running one or more precisionFDA apps, the system will automatically prompt you to share the details of these executions when publishing your answer (see below). In that case, your text only needs to provide a high-level summary, because the exact software invocations will be available to the community via the system’s sharing mechanism.</p>
+            <p>If you opted to construct your pipeline on precisionFDA, and your VCF was generated by running one or more precisionFDA apps, the system will automatically prompt you to share the details of these executions when submitting your entry (see below). In that case, your description only needs to provide a high-level summary, because the exact software invocations will be available to the community via the system’s sharing mechanism.</p>
           </div>
           <p class="copy">
-            Once you save your answer, it is initially private (and only visible to you). You can go back at any point and edit it, so we encourage you to start drafting it right away, and revise it as you make progress. Once you instantiate your answer, you can attach your VCFs and your HG001 comparison to it by visiting each item and clicking Attach, and selecting your answer. Your entry must contain two VCF files (one for HG001 and one for HG002) and the HG001 comparison (as outlined in the previous section) in order to be considered valid.
+            In the submission input data section, click "Select file..." and choose the VCF file you'd like to submit. (In the popup click "Files", then tick "Only mine", then select your file).
           </p>
           <p class="copy">
-            Once you are comfortable with your answer, you can publish it so that others can see it (and don’t worry – you can still edit it or update its attachments even after publication). When publishing, the system will ask if you want to publish the comparisons, as well as the VCF files that were input to the comparisons; please choose that option to ensure that these artifacts are shared with the precisionFDA community. Entries that do not have their comparisons and VCF files published will not be considered valid. If you used apps on precisionFDA (instead of generating these VCF files externally), please choose the option to share the underlying jobs, apps, and app assets.
+            Once you have entered a title and a description, and chosen a VCF file, the "Submit" button on the upper right corner will become active. Click the button to invoke the publishing wizard, which will prompt you to publish the VCF file so that others can see it (this is a requirement for participating in the challenge). If your VCF file was generated by running apps on precisionFDA (instead of being uploaded externally), the system will ask if you also want to publish the related job, app, and app assets.
+          </p>
+          <p class="copy">
+            After completing the publishing wizard, your VCF file will become public, and your entry will be officially submitted. The system will conduct an initial verification of your entry, by running software for validating VCF files, and other VCF comparisons. During that time, your entry will appear as "pending verification" under the "my entries" tab, but will not yet show up under the public "challenge submissions" tab.
+          </p>
+          <p class="copy">
+            If your entry fails this step, it will be marked as "failed". You can click "View Log" to see some diagnostic information related to the execution of the verification software. Failed entries will not show up under the "challenge submissions" tab and will not be counted towards the challenge. (However, your VCF will have been made public -- but you are welcome to delete it).
+          </p>
+          <p class="copy">
+            If verification completes successfully, your entry will appear under "challenge submissions".
+          </p>
+          <p class="copy">
+            Successful entries cannot be revoked, but you can always submit new ones. You can also go back and edit the title and description of any entry.
           </p>
         </div>
       </div>
@@ -370,27 +282,21 @@
       <div class="panel-heading" role="tab" id="headingWinners">
         <h4 class="panel-title">
           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseWinners" aria-expanded="false" aria-controls="collapseWinners">
-            Determining the winners
+            Determining the top performers
           </a>
         </h4>
       </div>
       <div id="collapseWinners" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingWinners">
         <div class="panel-body">
           <p class="copy">
-            All valid submitted entries, after vetted by precisionFDA, and after meeting minimum criteria for performance on HG002, will receive an acknowledgement for participation in the challenge. Among these entries, the precisionFDA team will select a few winners** to be recognized on the precisionFDA website. Winning criteria may include, but are not limited to, comparison metrics on HG002 (such as precision*, recall*, f-measure). For more information about the metrics output by the comparison, consult the precisionFDA docs.
+            All valid submitted entries, after being vetted by precisionFDA, and after meeting minimum criteria for performance with NA12878MOD, will receive an acknowledgement for participation in the challenge. Among these entries, the precisionFDA team will select a few top performers to be recognized on the precisionFDA website. 
+          </p>
+          <p class="copy">
+            Top performers will primarily be determined based on the performance of identifying overall variants across NA12878MOD as well as the specific in-silico injected variants. Top performers may be broken into categories based on specific variant types and frequencies. 
           </p>
         </div>
       </div>
     </div>
 
-    <hr>
-
-    <h4 id="footnotes">Footnotes</h4>
-    <p class="copy">
-      * The terminology currently used in the precisionFDA comparison output (such as "precision" and "recall") is not necessarily harmonized with definitions used by ISO, CLSI, or FDA, but are terms commonly used by NGS software developers.
-    </p>
-    <p class="copy">
-      ** Winning a precisionFDA challenge is an acknowledgement by the precisionFDA community and does not imply FDA endorsement of any organization, tool, software, etc.
-    </p>
   </div>
 </div>
