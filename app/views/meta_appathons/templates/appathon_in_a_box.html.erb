@@ -26,7 +26,7 @@
         </p>
 
         <% if @context.logged_in? %>
-          <% if !@meta_appathon.followed_by?(@context.user) && @meta_appathon.is_ongoing? %>
+          <% if !@meta_appathon.followed_by?(@context.user) %>
             <p class="text-center">
               <%= link_to new_meta_appathon_appathon_path(@meta_appathon), class: 'btn btn-danger btn-lg' do %>
                 <span class="fa fa-bolt fa-fw"></span> Host an App-a-thon
@@ -71,7 +71,7 @@
       </div>
       <div class="pfda-pane">
         <div class="pfda-pane-sidebar">
-          <% if @context.logged_in? && @user_appathon.nil? && @meta_appathon.is_ongoing? %>
+          <% if @context.logged_in? && @user_appathon.nil? %>
           <div class="pfda-toolbar">
             <div class="h4">
               Join or Organize an App-a-thon
