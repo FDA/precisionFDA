@@ -5,13 +5,13 @@
       <div class="pfda-card pfda-card-rounded pfda-card-padded">
         <div class="pfda-card-body">
           <div class="challenge-card-icon"><span class="fa fa-sliders fa-4x" aria-hidden="true"></span></div>
-          The Precision Medicine Initiative envisions a day when an individual’s medical care will be tailored in part based on their unique characteristics and genetic make-up  The success of precision medicine relies upon robust and accurate genomic tests, so the Food and Drug Administration (FDA) created precisionFDA to support the community’s efforts in developing advanced genomic analysis technologies that use next-generation sequencing (NGS) -- specifically NGS bioinformatics.
+          The Precision Medicine Initiative envisions a day when an individual’s medical care will be tailored in part based on their unique characteristics and genetic make-up. The success of precision medicine relies upon robust and accurate genomic tests, so the Food and Drug Administration (FDA) created precisionFDA to support the community’s efforts in developing advanced genomic analysis technologies that use next-generation sequencing (NGS) -- specifically NGS bioinformatics.
         </div>
       </div>
       <div class="pfda-card pfda-card-rounded pfda-card-padded">
         <div class="pfda-card-body">
           <div class="challenge-card-icon"><span class="fa fa-flask fa-4x" aria-hidden="true"></span></div>
-          The FDA is launching the fourth precisionFDA challenge to continue its support of the genomics community in assessing, comparing, and improving techniques used for NGS. The goal of the challenge, similar to the previous challenges, is to continue engaging the genomics community in helping achieve even more accurate and consistent results in the context of NGS-based genetic tests, ultimately advancing the goal of better personalized care. The FDA intends to run this type of challenge periodically in order for the community to gauge improvements in providing a greater and greater level of precision and accuracy for NGS bioinformatics and the whole NGS test.
+          The FDA is launching a new precisionFDA challenge to continue its support of the genomics community in assessing, comparing, and improving techniques used for NGS. This challenge is designed as a warm up for the community since this will be the first time we are using in silico injected variants as part of a challenge. And yes, that means there is a harder, second part coming in the fall! 
         </div>
       </div>
       <div class="pfda-card pfda-card-rounded pfda-card-padded">
@@ -26,7 +26,7 @@
 
     <div class="text-muted text-center">
       <p>Challenge Time Period</p>
-      <p><mark>July 11, 2017 through September 1, 2017</mark></p>
+      <p><mark>July 18, 2017 through September 12, 2017</mark></p>
     </div>
   </div>
 
@@ -39,10 +39,10 @@
 
     <div class="copy">
       <p>
-        In the context of whole human genome sequencing, software pipelines typically involve aligning sequencing reads to a reference genome and subsequently identifying variants (differences). One way of assessing the performance of such pipelines is by using well-characterized datasets such as Genome in a Bottle’s NA12878. However, because the existing NGS reference datasets are very limited and have been widely used to train/develop software pipelines, benchmarking of pipeline performance would ideally be done on samples with unknown variants.
+        In the context of human genome sequencing, software pipelines typically involve aligning sequencing reads to a reference genome and subsequently identifying variants (differences). One way of assessing the performance of such pipelines is by using well-characterized datasets such as Genome in a Bottle’s NA12878. However, because the existing NGS reference datasets are very limited and have been widely used to train/develop software pipelines, benchmarking of pipeline performance would ideally be done on samples with unknown variants.
       </p>
       <p>
-        This challenge will provide a unique opportunity for test developers to investigate the accuracy of their pipelines by testing the ability to find in-silico injected variants in FASTQ files from exome sequencing of reference cell lines. It will be part one of a continuous challenge, with part 2 to be offered later this year. This challenge will provide users with a FASTQ file of a NA12878 sequence that has been in silico modified. Users will run the FASTQ file through their pipeline, returning the VCF file to precisionFDA for comparison and determination of accuracy with respect to variant detection.
+        This challenge will provide a unique opportunity for test developers to investigate the accuracy of their pipelines by testing the ability to find in silico injected variants in FASTQ files from exome sequencing of reference cell lines. It will be a warm up for the community ahead of a more difficult in silico challenge to come in the fall. This challenge will provide users with a FASTQ file of a NA12878 sequence that has been in silico modified with SNV and InDel (less than 40 bp) variants at Variant Allele Frequencies (VAF) greater than or equal to 20%. Users will run the FASTQ file through their pipeline, returning the VCF file to precisionFDA for comparison and determination of accuracy with respect to variant detection. We are also interested in understanding whether participants' pipelines can accurate detect the allele frequency of the called variants. Therefore we would also like the generated VCF files to either directly provide the detected allelic frequency in the INFO or FORMAT section of the VCF, or specify fields by which the VAF can be calculated.
       </p>
     </div>
 
@@ -56,7 +56,7 @@
 
     <div class="copy">
       <p>
-        The challenge begins with a precisionFDA-provided input dataset (FASTQ file), corresponding to whole exome sequencing of NA12878 modified with specific variants blinded to challenge participants. This challenge will focus on detection of SNVs and InDels, not structural or copy number variants. Your mission is to process this FASTQ dataset, completely independently with no a priori comparison, through your mapping and variation calling pipeline to create a VCF file. You can generate those results in your own environment, and upload them to precisionFDA, or you can reconstruct your pipeline on precisionFDA and run it here. Regardless of how you generate your VCF file, you will subsequently submit it as your entry to the challenge. Once you submit the file you will not be able to modify your entry (but you can submit multiple entries if you wish).
+        The challenge begins with a precisionFDA-provided input dataset (FASTQ file), corresponding to whole exome sequencing of NA12878 modified with specific variants blinded to challenge participants. This challenge will focus on detection of SNVs and InDels, not structural or copy number variants. Your mission is to process this FASTQ dataset, completely independently with no prior comparison, through your mapping and variation calling pipeline to create a VCF file. You can generate those results in your own environment, and upload them to precisionFDA, or you can reconstruct your pipeline on precisionFDA and run it here. Regardless of how you generate your VCF file, you will subsequently submit it as your entry to the challenge. Once you submit the file you will not be able to modify your entry (but you can submit multiple entries if you wish).
       </p>
       <p>
         After submissions close, the precisionFDA team will then run and publish comparative results between each contestant’s submitted VCF files and the known reference truth set. This will challenge a pipeline’s ability to detect previously unknown genetic variants.
@@ -65,7 +65,7 @@
         Your entry to the challenge comprises your submitted NA12878MOD VCF and the comparison results conducted by precisionFDA. Selected participants and top performers will be recognized on the precisionFDA website. Therefore, we hope you are willing to share your experience with others to further enhance the community's effort to develop better technologies to detect genetic variants.
       </p>
       <p>
-        The challenge runs until September 1, 2017.
+        The challenge runs until September 12, 2017.
       </p>
     </div>
   </div>
@@ -149,7 +149,7 @@
           </table>
 
           <p class="copy">
-          You will need to process these FASTQ files through your pipeline to generate VCF files. This can be done either by downloading the files and running your pipeline on your own environment, or by reconstructing your pipeline on precisionFDA and running it there. If you will be working on your own environment, download these datasets by visiting the links above and clicking the <strong>Download</strong> button (web-browser download, not recommended for large files) or the <strong>Authorized URL</strong> button.
+          You will need to process these FASTQ files through your pipeline to generate a VCF file. This can be done either by downloading the files and running your pipeline on your own environment, or by reconstructing your pipeline on precisionFDA and running it there. If you will be working on your own environment, download this dataset by visiting the links above and clicking the <strong>Download</strong> button (web-browser download, not recommended for large files) or the <strong>Authorized URL</strong> button.
           </p>
         </div>
       </div>
@@ -165,7 +165,7 @@
       <div id="collapseRunPipeline" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingRunPipeline">
         <div class="panel-body">
           <p class="copy">
-            After familiarizing yourself with the input files, you will need to process them through your mapping and variation calling pipeline to generate corresponding VCF files. Your pipeline must call variants across the entire sequenced region. Each invocation of your pipeline must take as input a pair of FASTQ files and produce a VCF file containing exactly one genotyped sample. Results must be reported on GRCh37 human coordinates (i.e. chromosomes named 1, 2, ..., X, Y, and MT). You are strongly encouraged to compress each VCF file with bgzip, to reduce the file size.
+            After familiarizing yourself with the input files, you will need to process them through your mapping and variation calling pipeline to generate corresponding VCF files. Your pipeline must call variants across the entire sequenced region. Each invocation of your pipeline must take as input a pair of FASTQ files and produce a VCF file containing exactly one genotyped sample. Results must be reported on GRCh37 human coordinates (i.e. chromosomes named 1, 2, ..., X, Y, and MT). You are strongly encouraged to compress the VCF file with bgzip, to reduce the file size. We are also interested in understanding whether your pipeline can accurate detect the allele frequency of the called variants. Therefore we would also prefer if your generated VCF file either directly provide the detected allelic frequency in the INFO or FORMAT section of the VCF, or contains other fields by which the VAF can be calculated.
           </p>
 
           <table class="table">
@@ -292,7 +292,7 @@
             All valid submitted entries, after being vetted by precisionFDA, and after meeting minimum criteria for performance with NA12878MOD, will receive an acknowledgement for participation in the challenge. Among these entries, the precisionFDA team will select a few top performers to be recognized on the precisionFDA website. 
           </p>
           <p class="copy">
-            Top performers will primarily be determined based on the performance of identifying overall variants across NA12878MOD as well as the specific in-silico injected variants. Top performers may be broken into categories based on specific variant types and frequencies. 
+            Top performers will primarily be determined based on the performance of identifying overall variants across NA12878MOD as well as the specific in silico injected variants. Top performers may be broken into categories based on specific variant types and frequencies. 
           </p>
         </div>
       </div>
