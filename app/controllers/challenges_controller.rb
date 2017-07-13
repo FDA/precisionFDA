@@ -31,7 +31,7 @@ class ChallengesController < ApplicationController
     if @context.logged_in? && @context.user.can_administer_site?
       @challenge = Challenge.provision(@context, challenge_params)
       if @challenge.persisted?
-        redirect_to @challenge
+        redirect_to challenge_path(@challenge)
         return
       else
         flash[:error] = "The challenge could not be provisioned for an unknown reason."
