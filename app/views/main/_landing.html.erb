@@ -48,9 +48,21 @@
         </div>
       </div>
       <div class="col-sm-8 col-md-8 landing-btn">
-        <div class="h1">
-          <a class="btn accessible-btn-danger btn-lg btn-block" href="/challenges">Learn about Challenges</a>
-        </div>
+        <% if Challenge.current.present? && Challenge.current.active? %>
+          <a class="btn accessible-btn-success btn-lg btn-block" href=<%= challenge_path(Challenge.current) %> style="white-space: normal">
+            <span class="fa fa-user-plus"></span>
+            &nbsp;Participate in the Current Challenge
+          </a>
+          <br/>
+          <a class="btn accessible-btn-primary btn-md btn-block" href="/challenges" style="white-space: normal">
+            <span class="fa fa-info-circle"></span>
+            &nbsp;Learn About Previous Challenges
+          </a>
+        <% else %>
+          <div class="h1">
+            <a class="btn accessible-btn-danger btn-lg btn-block" href="/challenges">Learn About Challenges</a>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>
