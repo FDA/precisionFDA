@@ -32,7 +32,7 @@ if ENV["DNANEXUS_BACKEND"] == "production"
   NIST_VCF_UID = "file-Bk50V4Q0qVb65P0v2VPbfYPZ"
   COMPARATOR_V1_APP_ID = "app-BqB9XZ8006ZZ2g5KzGXP3fpq"
   CHALLENGE_BOT_TOKEN = ENV["CHALLENGE_BOT_TOKEN"]
-  CHALLENGE_BOT_DX_USER = "user-challenge.bot"
+  CHALLENGE_BOT_DX_USER = "challenge.bot"
 else
   DNANEXUS_AUTHSERVER_URI = "https://stagingauth.dnanexus.com/"
   DNANEXUS_APISERVER_URI = "https://stagingapi.dnanexus.com/"
