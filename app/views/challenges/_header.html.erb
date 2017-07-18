@@ -23,11 +23,13 @@
           <h5 class="list-group-item-text"><%= challenge.end_at.to_s(:db) %></h5>
         </li>
       </ul>
-      <h3>
-        <span class="label label-warning">
-          <%= distance_of_time_in_words_to_now(challenge.end_at) %> remaining
-        </span>
-      </h3>
+      <% if challenge.active? %>
+        <h3>
+          <span class="label label-warning">
+            <%= distance_of_time_in_words_to_now(challenge.end_at) %> remaining
+          </span>
+        </h3>
+      <% end %>
       <% if challenge_index_page %>
         <a class="btn accessible-btn-danger btn-lg" href="<%= challenge_path(challenge) %>">
           View Challenge
