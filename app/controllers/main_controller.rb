@@ -13,7 +13,7 @@ class MainController < ApplicationController
     @truth_challenge = FixedChallenge.truth(@context)
     @appathons_challenge = FixedChallenge.appathons(@context)
 
-    @challenges = [@appathons_challenge, @truth_challenge, @consistency_challenge]
+    @challenges = Challenge.all.order(start_at: :desc)
 
     @experts = Expert.public.order(updated_at: :desc).limit(10) # TODO: filter by published ones only
 
