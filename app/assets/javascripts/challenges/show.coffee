@@ -13,6 +13,9 @@ MainController = Paloma.controller('Challenges',
     $popover = $container.find('[data-toggle="popover"]')
     if ($popover.length > 0)
       $.each($popover, () ->
-          $(this).popover({title: $(this).attr("name"), html: true, content: Precision.md.render($(this).attr("desc"))})
+        $(this).popover({title: $(this).attr("name"), html: true, content: Precision.md.render($(this).attr("desc"))})
       )
+
+    if $container.find('#table-results-overview').length > 0
+      overviewTable = new Tablesort(document.getElementById('table-results-overview'))
 )
