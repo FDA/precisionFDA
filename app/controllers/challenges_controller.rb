@@ -86,7 +86,7 @@ class ChallengesController < ApplicationController
     @my_entries = false
 
     case @tab
-    when "submissions"
+    when "submissions", "results"
       @submissions = Submission.accessible_by_public
     when "my_entries"
       @submissions = Submission.editable_by(@context)

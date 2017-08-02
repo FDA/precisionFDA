@@ -1,0 +1,12 @@
+<div role="tabpanel" class="tab-pane active">
+  <% if @context.logged_in? && @context.user.can_administer_site? %>
+    <% if submissions.present? %>
+      <%= render "challenges/results_overview", submissions: submissions %>
+    <% else %>
+      <div class="alert alert-info">
+        <span class="fa fa-info-circle"></span>
+        No entries have been successfully submitted for this challenge.
+      </div>
+    <% end %>
+  <% end %>
+</div>
