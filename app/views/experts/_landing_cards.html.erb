@@ -11,7 +11,7 @@
           <div class="col-md-16">
             <div class="container-fluid container-padded text-center">
               <div class="pfda-card-title lead">
-                My Challenge to the PrecisionFDA Community
+                <%= e._blog_title %>
               </div>
               <span class="text-muted"><%= local_date(e.created_at, '%B %e, %Y') %></span>
               <br/>
@@ -26,7 +26,10 @@
               </div>
               <hr>
               <div class="pfda-card-body pfda-card-padded text-left">
-                <%= simple_format(e._challenge, {class: "expert-font"})%>
+                <div class="expert-font"><%= e._challenge %>
+                  <a href="<%= blog_expert_path(e) %>"> [read more at the full blog]
+                  </a>
+                </div>
               </div>
               <br/>
               <div class="btn-group">

@@ -44,9 +44,9 @@
       </div>
     </div>
     <div class="form-group">
-      <%= f.label :_challenge, "Challenge", class: 'control-label col-sm-2' %>
+      <%= f.label :_challenge, "Blog Preview", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_area :_challenge, class: "form-control", rows: 6, placeholder: "The expert's challenge to the community..." %>
+        <%= f.text_area :_challenge, class: "form-control", rows: 6, placeholder: "Text from blog to include in front page..." %>
       </div>
     </div>
     <% if @context.user.can_administer_site? %>
