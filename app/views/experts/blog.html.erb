@@ -15,7 +15,9 @@
         </p>
         <br/>
         <div class="expert-blog-text">
-          <div data-bind="html: blogTitleDisplay"></div>
+          <div class=strong>
+            <%= @expert._blog_title %>
+          </div>
           <p>
             <%= link_to(@expert.title, user_url(@expert.user.username)) %>
             <% if !@expert.user.singular? %>
@@ -33,5 +35,3 @@
     </div>
   </div>
 </div>
-
-
