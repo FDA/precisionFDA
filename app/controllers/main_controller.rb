@@ -15,7 +15,7 @@ class MainController < ApplicationController
 
     @challenges = Challenge.all.order(start_at: :desc)
 
-    @experts = Expert.public.order(updated_at: :desc).limit(10) # TODO: filter by published ones only
+    @experts = Expert.public.order(created_at: :desc).limit(10) # TODO: filter by published ones only
 
     @meta_appathon = MetaAppathon.active
     if !@meta_appathon.nil?
