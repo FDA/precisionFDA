@@ -409,14 +409,16 @@ ActiveRecord::Schema.define(version: 20170620221240) do
   add_index "spaces", ["state"], name: "index_spaces_on_state"
 
   create_table "submissions", force: :cascade do |t|
+    t.integer  "challenge_id"
     t.integer  "user_id"
     t.integer  "job_id"
     t.text     "desc"
     t.text     "meta"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
   end
 
+  add_index "submissions", ["challenge_id"], name: "index_submissions_on_challenge_id"
   add_index "submissions", ["job_id"], name: "index_submissions_on_job_id"
   add_index "submissions", ["user_id"], name: "index_submissions_on_user_id"
 
