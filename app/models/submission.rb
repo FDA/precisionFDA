@@ -3,6 +3,7 @@
 # Table name: submissions
 #
 #  id            :integer          not null, primary key
+#  challenge_id  :integer
 #  job_id        :integer
 #  user_id       :integer
 #  desc          :text

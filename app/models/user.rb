@@ -51,8 +51,6 @@ class User < ActiveRecord::Base
   has_many :challenge_admins, {class_name: 'Challenge', foreign_key: 'admin_id'}
   has_many :challenge_app_owners, {class_name: 'Challenge', foreign_key: 'app_owner_id'}
   has_many :submissions
-  # Nice to have, TODO: add this to App side
-  # has_many :challenge_apps, {class_name: 'App', through: :challenge_app_owners}
 
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 
