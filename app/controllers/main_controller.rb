@@ -9,13 +9,13 @@ class MainController < ApplicationController
     @consistency_discussion = Discussion.accessible_by_public.find_by(id: CONSISTENCY_DISCUSSION_ID)
     @truth_discussion = Discussion.accessible_by_public.find_by(id: TRUTH_DISCUSSION_ID)
 
-    @consistency_challenge = Challenge.consistency(@context)
-    @truth_challenge = Challenge.truth(@context)
-    @appathons_challenge = Challenge.appathons(@context)
+    @consistency_challenge = FixedChallenge.consistency(@context)
+    @truth_challenge = FixedChallenge.truth(@context)
+    @appathons_challenge = FixedChallenge.appathons(@context)
 
-    @challenges = [@appathons_challenge, @truth_challenge, @consistency_challenge]
+    @challenges = Challenge.all.order(start_at: :desc)
 
-    @experts = Expert.public.order(updated_at: :desc).limit(10) # TODO: filter by published ones only
+    @experts = Expert.public.order(created_at: :desc).limit(10) # TODO: filter by published ones only
 
     @meta_appathon = MetaAppathon.active
     if !@meta_appathon.nil?
@@ -201,7 +201,7 @@ class MainController < ApplicationController
     raise unless params[:code].present? && params[:code].is_a?(String)
 
     # Exchange the code for a token
-    result = DNAnexusAuth.new(DNANEXUS_AUTHSERVER_URI).post_form("oauth2/token", {grant_type: "authorization_code", code: params[:code], redirect_uri: OAUTH2_REDIRECT_URI})
+    result = DNAnexusAuth.new(DNANEXUS_AUTHSERVER_URI).post_form("oauth2/token", {grant_type: "authorization_code", code: params[:code], redirect_uri: OAUTH2_REDIRECT_URI, client_id: OAUTH2_CLIENT_ID})
     raise unless result["access_token"].present? && result["token_type"] == "bearer"
     token = result["access_token"]
 

@@ -48,6 +48,10 @@ class User < ActiveRecord::Base
   has_one :appathon
   has_many :meta_appathons
   has_one :expert
+  has_many :challenge_admins, {class_name: 'Challenge', foreign_key: 'admin_id'}
+  has_many :challenge_app_owners, {class_name: 'Challenge', foreign_key: 'app_owner_id'}
+  has_many :submissions
+
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 
   include Gravtastic
@@ -108,6 +112,10 @@ class User < ActiveRecord::Base
 
   def initials
     "#{first_name[0]}#{last_name[0]}"
+  end
+
+  def select_text
+    "#{username} (#{full_name.titleize}, #{org.name})"
   end
 
   def is_self(context)
@@ -259,6 +267,24 @@ class User < ActiveRecord::Base
         describe: true
       })["results"].each do |result|
         sync_job_state(result, jobs_hash[result["id"]], user, token)
+      end
+    end
+  end
+
+  def self.sync_challenge_jobs!
+    user = User.find_by(dxuser: CHALLENGE_BOT_DX_USER)
+    # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
+    Job.where(user_id: user.id).where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs|
+      jobs_hash = jobs.map { |j| [j.dxid, j] }.to_h
+      DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call("system", "findJobs", {
+        includeSubjobs: false,
+        id: jobs_hash.keys,
+        project: user.private_files_project,
+        parentJob: nil,
+        parentAnalysis: nil,
+        describe: true
+      })["results"].each do |result|
+        sync_job_state(result, jobs_hash[result["id"]], user, CHALLENGE_BOT_TOKEN)
       end
     end
   end

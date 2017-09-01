@@ -10,7 +10,10 @@
     <div class="col-sm-18 col-sm-offset-1">
       <div class="page-title">
         Expert Q&A
-        <%= link_to(@expert.title, user_url(@expert.user.username)) %> (<%= @expert.user.org.name %>)
+        <%= link_to(@expert.title, user_url(@expert.user.username)) %>
+        <% if !@expert.user.singular? %>
+          (<%= @expert.user.org.name %>)
+        <% end %>
       </div>
       <p>
         <% if @expert.open? %>

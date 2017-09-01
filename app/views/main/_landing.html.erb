@@ -33,13 +33,13 @@
 
 <div class="jumbotron jumbotron-challenges-landing">
   <div class="container">
-    <div class="row vertical-align">
-      <div class="col-sm-2 col-md-2 landing-btn">
+    <div class="row">
+      <div class="col-sm-3 col-md-2 col-lg-2 landing-btn">
         <div class="h2">
           <span class="fa fa-2x fa-trophy"</span>
         </div>
       </div>
-      <div class="col-sm-14 col-md-14 text-margin">
+      <div class="col-sm-13 col-md-14 col-lg-14 text-margin">
         <div class="h2">
           precisionFDA Challenges
         </div>
@@ -48,7 +48,21 @@
         </div>
       </div>
       <div class="col-sm-8 col-md-8 landing-btn">
-        <a class="btn accessible-btn-danger btn-lg btn-block" href="/challenges">Learn about Challenges</a>
+        <% if Challenge.current.present? && Challenge.current.active? %>
+          <a class="btn accessible-btn-success btn-lg btn-block" href=<%= challenge_path(Challenge.current) %> style="white-space: normal">
+            <span class="fa fa-user-plus"></span>
+            &nbsp;Participate in the Current Challenge
+          </a>
+          <br/>
+          <a class="btn accessible-btn-primary btn-md btn-block" href="/challenges" style="white-space: normal">
+            <span class="fa fa-info-circle"></span>
+            &nbsp;Learn About Previous Challenges
+          </a>
+        <% else %>
+          <div class="h1">
+            <a class="btn accessible-btn-danger btn-lg btn-block" href="/challenges">Learn About Challenges</a>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>
@@ -56,7 +70,7 @@
 
 <div class="jumbotron jumbotron-news-landing">
   <div class="container">
-    <div class="row vertical-align">
+    <div class="row">
       <div class="col-sm-16 col-md-16">
         <div class="h2">
           Latest precisionFDA News
@@ -66,9 +80,11 @@
         </div>
       </div>
       <div class="col-sm-8 col-md-8 landing-btn">
-        <a class="btn accessible-btn-default btn-lg btn-block" href="/news">
-          <span class="fa fa-newspaper-o"></span> &nbsp;View News
-        </a>
+        <div class="h1">
+          <a class="btn accessible-btn-default btn-lg btn-block" href="/news">
+            <span class="fa fa-newspaper-o"></span> &nbsp;View News
+          </a>
+        </div>
       </div>
     </div>
   </div>

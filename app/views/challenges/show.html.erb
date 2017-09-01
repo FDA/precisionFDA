@@ -1,0 +1,51 @@
+<% content_for :title do %><%= @challenge.name %><% end %>
+
+<%= render "challenges/header", challenge: @challenge, challenge_index_page: false %>
+
+<div class="container container-padded">
+  <div class="row">
+    <div class="col-md-16">
+      <!-- Nav tabs -->
+      <ul class="nav nav-pills nav-tabs-contained" role="tablist">
+        <li role="presentation" class="<%= !["submissions", "my_entries", "results"].include?(params[:tab]) ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge) %>" class="tab-label" aria-controls="info" role="tab">Challenge Info</a></li>
+        <li role="presentation" class="<%= params[:tab] == 'submissions' ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge, 'submissions') %>" class="tab-label" aria-controls="submissions" role="tab">Challenge Submissions</a></li>
+        <li role="presentation" class="<%= params[:tab] == 'my_entries' ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge, 'my_entries') %>" class="tab-label" aria-controls="my_entries" role="tab">My Entries</a></li>
+        <% if @context.logged_in? && @context.user.can_administer_site? %>
+          <li role="presentation" class="<%= params[:tab] == 'results' ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge, 'results') %>" class="tab-label" aria-controls="results" role="tab">Results</a></li>
+        <% end %>
+      </ul>
+    </div>
+    <div class="col-md-8">
+    <% if @challenge.active? %>
+        <a class="btn btn-primary btn-block btn-lg text-uppercase" href="<%= new_challenge_submission_path(challenge_id: @challenge.id, app_dxid: @challenge.app.dxid) %>" role="button">
+          <span class="fa fa-lg fa-inbox" aria-hidden="true"></span>
+          &nbsp;Submit Challenge Entry
+        </a>
+    <% else %>
+      <% if @challenge.over? %>
+        <button type="button" class="btn btn-danger btn-block btn-lg text-uppercase" disabled>
+          <span class="fa fa-lg fa-trophy" aria-hidden="true"></span>
+          &nbsp;Challenge Closed
+        </button>
+      <% else %>
+        <button type="button" class="btn btn-primary btn-block btn-lg text-uppercase" disabled>
+          <span class="fa fa-lg fa-trophy" aria-hidden="true"></span>
+          &nbsp;Challenge Launching Soon
+        </button>
+      <% end %>
+    <% end %>
+    </div>
+  </div>
+  <br/>
+  <div class="row">
+    <% if ['my_entries','submissions'].include?(params[:tab]) %>
+      <%= render "challenges/submissions", challenge: @challenge, submissions_grid: @submissions_grid, my_entries: @my_entries %>
+    <% elsif ['results'].include?(params[:tab]) && @context.logged_in? && @context.user.can_administer_site? %>
+      <%= render "challenges/results", challenge: @challenge, submissions: @submissions %>
+    <% else %>
+      <% #TODO: This is hard coded to the treasure hunt challenge %>
+      <%= render "challenges/treasure", challenge: @challenge %>
+    <% end %>
+  </div>
+
+</div>

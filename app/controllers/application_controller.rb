@@ -289,7 +289,7 @@ class ApplicationController < ActionController::Base
         record = record.becomes(Asset)
       end
       return record
-    elsif uid =~ /^(app-series|appathon|comparison|note|discussion|answer|user|license|space)-(\d+)$/
+    elsif uid =~ /^(app-series|appathon|comparison|note|discussion|answer|user|license|space|challenge)-(\d+)$/
       klass = {
         "app-series" => AppSeries,
         "appathon" => Appathon,
@@ -299,7 +299,8 @@ class ApplicationController < ActionController::Base
         "answer" => Answer,
         "user" => User,
         "license" => License,
-        "space" => Space
+        "space" => Space,
+        "challenge" => Challenge
       }[$1]
       id = $2.to_i
       raise "Class '#{klass}' did not match specified class '#{specified_klass}'" if specified_klass && klass != specified_klass

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170311032415) do
+ActiveRecord::Schema.define(version: 20170620221240) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id"
@@ -118,6 +118,23 @@ ActiveRecord::Schema.define(version: 20170311032415) do
   add_index "attachments", ["item_type", "item_id"], name: "index_attachments_on_item_type_and_item_id"
   add_index "attachments", ["note_id"], name: "index_attachments_on_note_id"
 
+  create_table "challenges", force: :cascade do |t|
+    t.string   "name"
+    t.integer  "admin_id"
+    t.integer  "app_owner_id"
+    t.integer  "app_id"
+    t.text     "description"
+    t.text     "meta"
+    t.datetime "start_at"
+    t.datetime "end_at"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "challenges", ["admin_id"], name: "index_challenges_on_admin_id"
+  add_index "challenges", ["app_id"], name: "index_challenges_on_app_id"
+  add_index "challenges", ["app_owner_id"], name: "index_challenges_on_app_owner_id"
+
   create_table "comments", force: :cascade do |t|
     t.integer  "commentable_id"
     t.string   "commentable_type"
@@ -130,7 +147,6 @@ ActiveRecord::Schema.define(version: 20170311032415) do
     t.integer  "rgt"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "comment_type"
   end
 
   add_index "comments", ["commentable_id", "commentable_type"], name: "index_comments_on_commentable_id_and_commentable_type"
@@ -172,22 +188,6 @@ ActiveRecord::Schema.define(version: 20170311032415) do
   add_index "discussions", ["note_id"], name: "index_discussions_on_note_id"
   add_index "discussions", ["user_id"], name: "index_discussions_on_user_id"
 
-  create_table "events", force: :cascade do |t|
-    t.integer  "item_id"
-    t.string   "item_type"
-    t.string   "event_type"
-    t.datetime "timestamp"
-    t.string   "scope"
-    t.text     "meta"
-    t.integer  "user_id"
-  end
-
-  add_index "events", ["event_type"], name: "index_events_on_event_type"
-  add_index "events", ["item_id"], name: "index_events_on_item_id"
-  add_index "events", ["item_type"], name: "index_events_on_item_type"
-  add_index "events", ["scope"], name: "index_events_on_scope"
-  add_index "events", ["user_id"], name: "index_events_on_user_id"
-
   create_table "expert_answers", force: :cascade do |t|
     t.integer  "expert_id"
     t.integer  "expert_question_id"
@@ -219,12 +219,14 @@ ActiveRecord::Schema.define(version: 20170311032415) do
     t.integer  "user_id"
     t.string   "image"
     t.string   "state"
+    t.string   "scope"
     t.text     "meta"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
   add_index "experts", ["image"], name: "index_experts_on_image"
+  add_index "experts", ["scope"], name: "index_experts_on_scope"
   add_index "experts", ["state"], name: "index_experts_on_state"
   add_index "experts", ["user_id"], name: "index_experts_on_user_id"
 
@@ -405,6 +407,20 @@ ActiveRecord::Schema.define(version: 20170311032415) do
 
   add_index "spaces", ["space_type"], name: "index_spaces_on_space_type"
   add_index "spaces", ["state"], name: "index_spaces_on_state"
+
+  create_table "submissions", force: :cascade do |t|
+    t.integer  "challenge_id"
+    t.integer  "user_id"
+    t.integer  "job_id"
+    t.text     "desc"
+    t.text     "meta"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "submissions", ["challenge_id"], name: "index_submissions_on_challenge_id"
+  add_index "submissions", ["job_id"], name: "index_submissions_on_job_id"
+  add_index "submissions", ["user_id"], name: "index_submissions_on_user_id"
 
   create_table "taggings", force: :cascade do |t|
     t.integer  "tag_id"

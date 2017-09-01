@@ -1,0 +1,43 @@
+<div class="jumbotron jumbotron-challenges">
+  <div class="container container-padded container-fluid tiltview-container">
+    <div class="tiltview-description">
+      <h1>
+        <span class="challenge-title-muted">PrecisionFDA</span>
+        <br>
+        <%= challenge.name %>
+      </h1>
+      <br/>
+      <% if challenge_index_page %>
+        <p><%= challenge.description %></p>
+        <br/>
+      <% end %>
+      <ul class="list-group list-group-inline list-bricks-left">
+        <li class="list-group-item list-group-item-transparent-bg">
+          <h5 class="list-group-item-heading">Starts</h5>
+          <h5 class="list-group-item-text">
+            <%= challenge.start_at.to_s(:db) %>
+          </h5>
+        </li>
+        <li class="list-group-item list-group-item-transparent-bg">
+          <h5 class="list-group-item-heading">Ends</h5>
+          <h5 class="list-group-item-text"><%= challenge.end_at.to_s(:db) %></h5>
+        </li>
+      </ul>
+      <% if challenge.active? %>
+        <h3>
+          <span class="label label-warning">
+            <%= distance_of_time_in_words_to_now(challenge.end_at) %> remaining
+          </span>
+        </h3>
+      <% end %>
+      <% if challenge_index_page %>
+        <a class="btn accessible-btn-danger btn-lg" href="<%= challenge_path(challenge) %>">
+          View Challenge
+        </a>
+      <% end %>
+    </div>
+    <div class="tiltview col" aria-hidden="true">
+      <%= image_tag("challenges/pFDA-C4-Diagram", alt: "PrecisionFDA Truth Challenge", class: "img-responsive img-thumbnail") %>
+    </div>
+  </div>
+</div>

@@ -140,7 +140,7 @@
     <hr />
 
     <div class="row">
-      <div class="col-md-17">
+      <div class="col-md-16">
         <% if @experts.count > 0 %>
           <div class="overview-header">
             Expert Spotlight
@@ -148,7 +148,7 @@
           <%= render "experts/landing_cards", experts: @experts %>
         <% end %>
       </div>
-      <div class="col-md-6 col-md-offset-1">
+      <div class="col-md-7 col-md-offset-1">
         <div class="overview-header">Latest Activity</div>
           <%= render "_partials/feed", feed: @feed %>
         <br/>
@@ -159,6 +159,19 @@
     </div>
     <div class="row">
       <div class="pfda-cards pfda-cards-news">
+        <% @challenges.each do |challenge| %>
+          <a class="pfda-card pfda-card-padded pfda-card-light pfda-card-rounded pfda-card-bordered" href="<%= challenge_path(challenge) %>">
+            <div class="pfda-card-header lead text-center">
+              <%= challenge.active? ? 'Participate in the' : 'Read about the' %>
+            </div>
+            <div class="pfda-card-body pfda-card-body-icon">
+              <span class="fa fa-trophy" aria-hidden="true"></span>
+            </div>
+            <div class="pfda-card-title lead lead-bold text-center">
+              <%= challenge.name %> Challenge
+            </div>
+          </a>
+        <% end %>
         <% if @appathons_challenge[:launched] %>
           <a class="pfda-card pfda-card-padded pfda-card-light pfda-card-rounded pfda-card-bordered" href="<%= @appathons_challenge[:path] %>">
             <div class="pfda-card-header lead text-center">
@@ -171,8 +184,8 @@
               <%= @appathons_challenge[:title] %> Challenge
             </div>
           </a>
-          <% end %>
-          <% if @truth_challenge[:launched]  %>
+        <% end %>
+        <% if @truth_challenge[:launched]  %>
           <a class="pfda-card pfda-card-padded pfda-card-light pfda-card-rounded pfda-card-bordered" href="<%= truth_challenges_path %>">
             <div class="pfda-card-header lead text-center">
               <%= @truth_challenge[:active] ? 'Participate in the' : 'Read about the' %>
@@ -184,8 +197,8 @@
               Truth Challenge
             </div>
           </a>
-          <% end %>
-          <% if @consistency_challenge[:launched]  %>
+        <% end %>
+        <% if @consistency_challenge[:launched]  %>
           <a class="pfda-card pfda-card-padded pfda-card-light pfda-card-rounded pfda-card-bordered" href="<%= consistency_challenges_path %>">
             <div class="pfda-card-header lead text-center">
               <%= @consistency_challenge[:active] ? 'Participate in the' : 'Read about the' %>
