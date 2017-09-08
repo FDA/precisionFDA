@@ -50,11 +50,15 @@ class FilesController < ApplicationController
   end
 
   def show
-    @file = UserFile.not_assets.accessible_by(@context).includes(:user).find_by!(dxid: params[:id])
+    @file = UserFile.not_assets.accessible_by(@context).includes(:user).find_by(dxid: params[:id])
+    if @file.nil?
+      # If file wasn't found, this will throw the error page if it fails
+      @file = UserFile.not_assets.viewable_by(@context).includes(:user).find_by!(dxid: params[:id])
+    end
 
     # Refresh state of file, if needed
     if @file.state != "closed"
-      User.sync_file!(@context, @file.id)
+      @file.is_submission_output? ? User.sync_challenge_file!(@file.id) : User.sync_file!(@context, @file.id)
       @file.reload
     end
 
@@ -92,14 +96,18 @@ class FilesController < ApplicationController
 
   def download
     # Allow assets as well
-    @file = UserFile.accessible_by(@context).find_by!(dxid: params[:id])
+    @file = UserFile.accessible_by(@context).find_by(dxid: params[:id])
+    if @file.nil?
+      # If file wasn't found, this will throw the error page if it fails
+      @file = UserFile.viewable_by(@context).find_by!(dxid: params[:id])
+    end
 
     # Refresh state of file, if needed
     if @file.state != "closed"
       if @file.parent_type == "Asset"
         User.sync_asset!(@context, @file.id)
       else
-        User.sync_file!(@context, @file.id)
+        @file.is_submission_output? ? User.sync_challenge_file!(@file.id) : User.sync_file!(@context, @file.id)
       end
       @file.reload
     end
@@ -113,20 +121,24 @@ class FilesController < ApplicationController
     else
       opts = {project: @file.project, preauthenticated: true}
       opts[:filename] = @file.name
-      redirect_to DNAnexusAPI.new(@context.token).call(@file.dxid, "download", opts)["url"] + (params[:inline] == "true" ? '?inline' : '')
+      redirect_to DNAnexusAPI.new(@file.is_submission_output? ? CHALLENGE_BOT_TOKEN : @context.token).call(@file.dxid, "download", opts)["url"] + (params[:inline] == "true" ? '?inline' : '')
     end
   end
 
   def link
     # Allow assets as well, thought not currently exposed in the UI
-    @file = UserFile.accessible_by(@context).find_by!(dxid: params[:id])
+    @file = UserFile.accessible_by(@context).find_by(dxid: params[:id])
+    if @file.nil?
+      # If file wasn't found, this will throw the error page if it fails
+      @file = UserFile.viewable_by(@context).find_by!(dxid: params[:id])
+    end
 
     # Refresh state of file, if needed
     if @file.state != "closed"
       if @file.parent_type == "Asset"
         User.sync_asset!(@context, @file.id)
       else
-        User.sync_file!(@context, @file.id)
+        @file.is_submission_output? ? User.sync_challenge_file!(@file.id) : User.sync_file!(@context, @file.id)
       end
       @file.reload
     end
@@ -139,7 +151,7 @@ class FilesController < ApplicationController
       redirect_to @file.parent_type == "Asset" ? asset_path(@file.dxid) : file_path(@file.dxid)
     else
       opts = {project: @file.project, preauthenticated: true, filename: @file.name, duration: 86400}
-      @url = DNAnexusAPI.new(@context.token).call(@file.dxid, "download", opts)["url"]
+      @url = DNAnexusAPI.new(@file.is_submission_output? ? CHALLENGE_BOT_TOKEN : @context.token).call(@file.dxid, "download", opts)["url"]
     end
   end
 

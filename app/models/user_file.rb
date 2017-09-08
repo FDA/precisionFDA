@@ -73,6 +73,10 @@ class UserFile < ActiveRecord::Base
     return parent_type == "User" || parent_type == "Job"
   end
 
+  def is_submission_output?
+    return parent_type == "Job" && parent.submission.present?
+  end
+
   def to_param
     uid
   end
@@ -165,6 +169,25 @@ class UserFile < ActiveRecord::Base
       return project == context.user.public_files_project
     else
       return project == space_object.project_for_context!(context)
+    end
+  end
+
+  def viewable_by?(context)
+    if context.guest? || !context.logged_in?
+      return false
+    else
+      raise unless context.user_id.present? && context.user.present?
+      return user_id == CHALLENGE_BOT_USER_ID && context.user.is_challenge_evaluator?
+    end
+  end
+
+  def self.viewable_by(context)
+    if context.guest? || !context.logged_in? || !context.user.is_challenge_evaluator?
+      none
+    else
+      raise unless context.user_id.present? && context.user.present?
+      # get the output file ids from all submission-based jobs that successfully completed
+      where(user_id: CHALLENGE_BOT_USER_ID).where(parent_type: "Job").where(state: "closed")
     end
   end
 
