@@ -68,8 +68,10 @@
     <% if @file.parent_type != "Comparison" %>
       <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to...</button>
     <% end %>
-    <%= link_to track_path(id: @file.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
-      <span class="fa fa-flip-vertical fa-sitemap"></span> Track
+    <% if @file.accessible_by?(@context) %>
+      <%= link_to track_path(id: @file.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
+        <span class="fa fa-flip-vertical fa-sitemap"></span> Track
+      <% end %>
     <% end %>
     <% if @licenses.present? %>
       <%= render "licenses/set_dropdown", licenses: @licenses, item: @file %>
@@ -196,7 +198,13 @@
   <div role="tabpanel" class="tab-pane" id="tab-comments">
     <div class="row">
       <div class="col-md-12">
-        <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @file %>
+        <% if @file.accessible_by?(@context) %>
+          <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @file %>
+        <% else %>
+          <div class="container-fluid container-padded">
+            <%= render "comments/comments", comments: @comments, items_from_params: @items_from_params %>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>
