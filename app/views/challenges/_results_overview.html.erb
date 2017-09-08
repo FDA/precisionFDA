@@ -30,12 +30,7 @@
     <% submissions.each do |submission| %>
       <tr>
         <td data-sort="<%= submission.name %>">
-          <% if submission.desc.present? %>
-            &nbsp;
-            <a tabindex="0" role="button" data-trigger="focus" data-toggle="popover" data-content="<%= submission.desc %>"><%= submission.name %></a>
-          <% else %>
-            <%= submission.name %>
-          <% end %>
+          <%= unilink(submission.job) %>
         </td>
         <td data-sort="<%= submission.user.full_name %>">
           <%= submission.user.full_name.titleize %>

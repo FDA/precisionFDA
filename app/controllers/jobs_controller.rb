@@ -5,12 +5,16 @@ class JobsController < ApplicationController
   def show
     @job = Job.accessible_by(@context).includes(:user).find_by(dxid: params[:id])
     if @job.nil?
-      flash[:error] = "Sorry, this job does not exist or is not accessible by you"
-      redirect_to apps_path
-      return
+      @job = Job.viewable_by(@context).includes(:user).find_by(dxid: params[:id])
+      if @job.nil?
+        flash[:error] = "Sorry, this job does not exist or is not accessible by you"
+        redirect_to apps_path
+        return
+      end
     end
+
     if !@job.terminal?
-      User.sync_job!(@context, @job.id)
+      @job.from_submission? ? User.sync_challenge_job!(@job.id) : User.sync_job!(@context, @job.id)
       @job.reload
     end
 
@@ -50,18 +54,22 @@ class JobsController < ApplicationController
     @notes = @job.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @job.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
     @discussions = @job.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
-    js id: @job.id
+    js id: @job.id, desc: @job.from_submission? ? @job.submission.desc : ""
   end
 
   def log
     @job = Job.editable_by(@context).find_by(dxid: params[:id])
     if @job.nil?
-      flash[:error] = "Sorry, this job does not exist or its log is not accessible by you"
-      redirect_to apps_path
-      return
+      @job = Job.viewable_by(@context).includes(:user).find_by(dxid: params[:id])
+      if @job.nil?
+        flash[:error] = "Sorry, this job does not exist or its log is not accessible by you"
+        redirect_to apps_path
+        return
+      end
     end
+
     if !@job.terminal?
-      User.sync_job!(@context, @job.id)
+      @job.from_submission? ? User.sync_challenge_job!(@job.id) : User.sync_job!(@context, @job.id)
       @job.reload
     end
 
@@ -77,7 +85,7 @@ class JobsController < ApplicationController
       handshake << socket.readline
     end
     raise unless handshake.valid?
-    frame = WebSocket::Frame::Outgoing::Server.new(version: handshake.version, data: {access_token: @context.token, token_type: "Bearer", tail: false}.to_json, type: :text).to_s
+    frame = WebSocket::Frame::Outgoing::Server.new(version: handshake.version, data: {access_token: @job.from_submission? ? CHALLENGE_BOT_TOKEN : @context.token, token_type: "Bearer", tail: false}.to_json, type: :text).to_s
     socket.write(frame)
 
     srv = WebSocket::Frame::Incoming::Server.new(version: handshake.version)

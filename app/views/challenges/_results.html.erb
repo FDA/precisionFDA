@@ -1,5 +1,5 @@
 <div role="tabpanel" class="tab-pane active">
-  <% if @context.logged_in? && @context.user.can_administer_site? %>
+  <% if @context.logged_in? && @context.user.is_challenge_evaluator? %>
     <% if submissions.present? %>
       <%= render "challenges/results_overview", submissions: submissions %>
     <% else %>
