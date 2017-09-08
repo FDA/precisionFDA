@@ -51,8 +51,6 @@ class User < ActiveRecord::Base
   has_many :challenge_admins, {class_name: 'Challenge', foreign_key: 'admin_id'}
   has_many :challenge_app_owners, {class_name: 'Challenge', foreign_key: 'app_owner_id'}
   has_many :submissions
-  # Nice to have, TODO: add this to App side
-  # has_many :challenge_apps, {class_name: 'App', through: :challenge_app_owners}
 
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 
@@ -138,6 +136,20 @@ class User < ActiveRecord::Base
     end
   end
 
+  def is_challenge_evaluator?
+    [
+      "adam.berger",
+      "elaine.johanson",
+      "ezekiel.maier",
+      "min.yi",
+      "ruth.bandler",
+      "sharon.liang",
+      "vijay.walia.2",
+      "you.li",
+      "zivana.tezek"
+    ].include?(dxuser) || can_administer_site?
+  end
+
   def self.validate_email(email)
     /^(([^<>()\[\]\\.,;:\s@\"]+(\.[^<>()\[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/ =~ email
   end
@@ -148,6 +160,16 @@ class User < ActiveRecord::Base
 
   def self.authserver_acceptable?(username)
     username.size >= 3 && username.size <= 255 && username =~ /^[a-z][0-9a-z_\.]{2,}$/
+  end
+
+  def self.sync_challenge_file!(file_id)
+    user = User.find_by!(dxuser: CHALLENGE_BOT_DX_USER)
+    token = CHALLENGE_BOT_TOKEN
+    file = user.uploaded_files.find(file_id) # Re-check file id
+    if file.state != "closed"
+      result = DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: [file.dxid]})["results"][0]
+      sync_file_state(result, file, user)
+    end
   end
 
   def self.sync_file!(context, file_id)
@@ -231,6 +253,23 @@ class User < ActiveRecord::Base
       })["results"].each do |result|
         sync_comparison_state(result, comparisons_hash[result["id"]], user, token)
       end
+    end
+  end
+
+  def self.sync_challenge_job!(job_id)
+    user = User.find_by!(dxuser: CHALLENGE_BOT_DX_USER)
+    token = CHALLENGE_BOT_TOKEN
+    job = user.jobs.find(job_id) # Re-check job id
+    if !job.terminal?
+      result = DNAnexusAPI.new(token).call("system", "findJobs", {
+        includeSubjobs: false,
+        id: [job.dxid],
+        project: user.private_files_project,
+        parentJob: nil,
+        parentAnalysis: nil,
+        describe: true
+      })["results"][0]
+      sync_job_state(result, job, user, token)
     end
   end
 

@@ -34,7 +34,7 @@ class ChallengesController < ApplicationController
         redirect_to challenge_path(@challenge)
         return
       else
-        flash[:error] = "The challenge could not be provisioned for an unknown reason."
+        flash.now[:error] = "The challenge could not be provisioned for an unknown reason."
         render :new
       end
     else
@@ -51,6 +51,7 @@ class ChallengesController < ApplicationController
 
     if !@challenge.editable_by?(@context)
       redirect_to challenge_path(@challenge)
+      return
     end
 
     @users = User.all.map{|u| ["#{u.select_text}", u.id]}
@@ -64,7 +65,7 @@ class ChallengesController < ApplicationController
 
     if @challenge.editable_by?(@context)
       Challenge.transaction do
-        if @challenge.update!(challenge_params)
+        if @challenge.update(challenge_params)
           flash[:success] = "The challenge was edited successfully."
         else
           flash[:error] = "The challenge could not be edited for an unknown reason."
