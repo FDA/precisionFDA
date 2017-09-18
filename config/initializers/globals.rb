@@ -9,8 +9,8 @@ if Rails.env.development?
 elsif ENV["DNANEXUS_BACKEND"] == "production"
   OAUTH2_REDIRECT_URI = "https://precision.fda.gov/return_from_login"
   OAUTH2_CLIENT_ID = "precision_fda_gov"
-elsif ENV["DEV_CONTEXT"] == "true"
-  OAUTH2_REDIRECT_URI = "https://replaceme.com/return_from_login"
+elsif ENV["DEV_HOST"]
+  OAUTH2_REDIRECT_URI = "https://#{ENV["DEV_HOST"]}/return_from_login"
   OAUTH2_CLIENT_ID = "precision_fda"
 else
   OAUTH2_REDIRECT_URI = "https://precisionfda-staging.dnanexus.com/return_from_login"
