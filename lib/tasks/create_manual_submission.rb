@@ -60,7 +60,7 @@ Job.transaction do
     dx_run_input[key] = dxvalue || value
   end
 
-  challenge_bot = User.find_by(dxuser: CHALLENGE_BOT_DX_USER)
+  challenge_bot = User.find_by!(dxuser: CHALLENGE_BOT_DX_USER)
   project = challenge_bot.private_files_project
 
   api_input = {
