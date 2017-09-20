@@ -149,7 +149,7 @@ class User < ActiveRecord::Base
       "singer.ma",
       "vijay.walia.2",
       "you.li",
-      "zivana.tezek"
+      "zivana.tezak"
     ].include?(dxuser) || can_administer_site?
   end
 
