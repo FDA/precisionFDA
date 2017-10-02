@@ -18,4 +18,17 @@ MainController = Paloma.controller('Challenges',
 
     if $container.find('#table-results-overview').length > 0
       overviewTable = new Tablesort(document.getElementById('table-results-overview'))
+
+    if $container.find('#table-results-vaf').length > 0
+      overviewTable = new Tablesort(document.getElementById('table-results-vaf'))
+
+    $(document).ready ->
+      $('#table-results-overview > tbody > tr').click ->
+        $(this).toggleClass 'active'
+        return
+
+      $('#table-results-vaf > tbody > tr').click ->
+        $(this).toggleClass 'active'
+        return
+      return
 )

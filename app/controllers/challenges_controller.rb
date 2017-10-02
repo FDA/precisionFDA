@@ -83,12 +83,32 @@ class ChallengesController < ApplicationController
     end
 
     @tab = params[:tab]
-    @submissions = nil
+    @submissions = Submission.none
     @my_entries = false
+    @csv = nil
+    @csv_names = nil
+    @csv_ids = nil
+    @headers = nil
+    @keys = nil
 
     case @tab
-    when "submissions", "results"
+    when "submissions"
       @submissions = Submission.accessible_by_public
+    when "results"
+      # TODO: remove when publishing challenge
+      if @context.logged_in? && @context.user.is_challenge_evaluator?
+        @csv = CSV.open("#{Rails.root}/app/assets/csvs/treasure_hunt_warm_up_results.csv", encoding: 'bom|utf-8').read
+        @vaf_spotter_ids = [8,9,12,20,21,22,23,25,32,34,35,36,37,38,41,49,51,79,81,89,90,96,97,98,104,110,116,120,122,124,143,147,149,150,155,156,157]
+        @headers = @csv.shift(7)
+        @keys = @headers.map{|c| c.first}
+        @csv_ids, @csv_names = @csv.map{|row| row.shift.split(" ", 2)}.map{|id, name| [id.to_i, name.to_s]}.transpose
+        @submissions = Submission.accessible_by_public
+        # @vaf_submissions is no longer an ActiveRecord relation, careful if you want to use wice_grid
+        @vaf_results = @submissions.select{|s| @csv_ids.include?(s.id)}.sort_by{ |s| @csv_ids.index s.id }
+      else
+        redirect_to challenge_path(@challenge)
+        return
+      end
     when "my_entries"
       @submissions = Submission.editable_by(@context)
       @my_entries = true

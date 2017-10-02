@@ -1,5 +1,12 @@
 @import "_common"
 
+.table
+  &.table-challenge
+    tbody
+      tr
+        &.active td, &:hover
+          background-color: lighten($brand-highlight, 2%)
+
 .submission-popover
   .popover-content
     max-height: 400px
@@ -160,6 +167,14 @@
     &.challenge-badge-recognition
       background-color: $state-info-bg
       color: $accessible-brand-blue-primary
+
+    &.challenge-badge-supercaller
+      background-color: $state-info-bg
+      color: $accessible-brand-blue-primary
+
+    &.challenge-badge-superplayer
+      background-color: $accessible-btn-warning-bg
+      color: #fff
 
   .challenge-row-medal
     background-color: $accessible-btn-warning-bg
