@@ -34,6 +34,7 @@ class ApplicationController < ActionController::Base
     }
     if ENV["DNANEXUS_BACKEND"] == "production"
       hpkp[:pins] = [
+        {sha256: 'fxEEsh8jbNNYeHp09gkzFaRSpr6MYOAQRoRtGkMnw+c='},
         {sha256: 'OV/2vGzq4A/PlbCUFpy5W2dHmMLPvHZ9N/FVDOPNvQw='},
         {sha256: 'Hxbr0eK3F0xc4UkeXRvapzSvj3I0efJ+2h2Q70MpltM='},
         {sha256: 'AGLBxCqwOTXOZg/v14oxVzHbU0GVWr1QlHR7DQqnzvU='},
