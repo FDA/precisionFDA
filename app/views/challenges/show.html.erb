@@ -38,10 +38,11 @@
   </div>
   <br/>
   <div class="row">
+    <!-- TODO: case on challenge_id to ensure backwards compatibility once challenge kit is in place -->
     <% if ['my_entries','submissions'].include?(params[:tab]) %>
       <%= render "challenges/submissions", challenge: @challenge, submissions_grid: @submissions_grid, my_entries: @my_entries %>
     <% elsif ['results'].include?(params[:tab]) && @context.logged_in? && @context.user.is_challenge_evaluator? %>
-      <%= render "challenges/results", challenge: @challenge, submissions: @submissions %>
+      <%= render "challenges/results", challenge: @challenge, submissions: @submissions, vaf_results: @vaf_results, vaf_spotter_ids: @vaf_spotter_ids, csv_names: @csv_names, csv_ids: @csv_ids, csv: @csv, headers: @headers, keys: @keys %>
     <% else %>
       <% #TODO: This is hard coded to the treasure hunt challenge %>
       <%= render "challenges/treasure", challenge: @challenge %>
