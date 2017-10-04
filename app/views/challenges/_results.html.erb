@@ -15,7 +15,7 @@
         <div class="challenge-section">
           <div class="h2">Introductory Remarks</div>
           <p>
-            At the start of this challenge, users were provided with a NA12878 whole exome sequencing FASTQ file that had been <i>in silico</i> modified with single nucleotide variants (SNVs) and insertion and deletion (InDel) variants (less than 40 bp) at approximate Variant Allele Frequencies (VAFs) ≥20%. [LINK TO NOTE HERE], we provide access to the original (unmodified) FASTQ file, the list of injected variants and their expected VAF (available in Table 2 below), and the VCF evaluation app. We invite the community to try the evaluation app and give us any feedback.
+            At the start of this challenge, users were provided with a NA12878 whole exome sequencing FASTQ file that had been <i>in silico</i> modified with single nucleotide variants (SNVs) and insertion and deletion (InDel) variants (less than 40 bp) at approximate Variant Allele Frequencies (VAFs) ≥20%. <strong><%= link_to("This precisionFDA note", "https://precision.fda.gov/notes/330-precisionfda-hidden-treasures-warm-up") %></strong> summarizes certain precisionFDA artifacts related to the challenge, including a VCF with the injected variants, as well as the VCF evaluation app which was used by the system to automatically evaluate all entries. We invite the community to try the evaluation app and give us any feedback.
           </p>
           <br/>
           <div class="h2">Overview of Results</div>
@@ -32,7 +32,7 @@
                 <strong>F-score</strong> is the harmonic mean of recall and precision, and is sometimes used as a single combined metric for evaluating overall accuracy.
               </li>
             </ul>
-            The entries are <strong>sorted alphabetically</strong> by the name of the submitter, since many submitters had multiple entries.
+            The entries are <strong>sorted alphabetically</strong> by the name of the submitter, since many submitters had multiple entries. Moreover, the Entry column contains a link to the precisionFDA job that resulted from the execution of the evaluation app on that entry. All jobs, and the resulting files as output by the evaluation app, have been made public on precisionFDA and are owned by the special user 'Challenge Robot'.
           </p>
           <p>
             Participants whose submissions correctly detected and called all 50 injected variants (regardless of the whole exome precision, recall and F-score for their pipeline/submission) are being recognized as <strong><i>Warm Up in silico Variant Catchers</i></strong> and are designated with the <%= recognition_badge("variantcatcher") %> icon in the table (45 entries earned that title).
@@ -83,7 +83,7 @@
                       <%= submission.user.singular? ? "" : submission.user.org.name %>
                     </td>
                     <td data-sort="<%= submission.name %>">
-                      <%= unilink(submission.job, noicon: true) %>
+                      <%= link_to(submission.name, job_path(submission.job)) %>
                     </td>
                     <td data-sort="<%= submission.job.run_outputs["indels_01_03"] %>">
                       <%= submission.job.run_outputs["indels_01_03"] %>
@@ -167,7 +167,7 @@
                     <% job = vaf_results[i].try(:job) %>
                     <tr>
                       <td>
-                        <%= job.nil? ? csv_names[i] : unilink(job, noicon: true) %>
+                        <%= job.nil? ? csv_names[i] : link_to(job.name, job_path(job)) %>
                         <%= recognition_badge("vafspotter") if vaf_spotter_ids.include?(csv_ids[i].to_i) %>
                       </td>
                       <% row.each do |element| %>

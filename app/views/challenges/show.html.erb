@@ -10,9 +10,7 @@
         <li role="presentation" class="<%= !["submissions", "my_entries", "results"].include?(params[:tab]) ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge) %>" class="tab-label" aria-controls="info" role="tab">Challenge Info</a></li>
         <li role="presentation" class="<%= params[:tab] == 'submissions' ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge, 'submissions') %>" class="tab-label" aria-controls="submissions" role="tab">Challenge Submissions</a></li>
         <li role="presentation" class="<%= params[:tab] == 'my_entries' ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge, 'my_entries') %>" class="tab-label" aria-controls="my_entries" role="tab">My Entries</a></li>
-        <% if @context.logged_in? && @context.user.is_challenge_evaluator? %>
-          <li role="presentation" class="<%= params[:tab] == 'results' ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge, 'results') %>" class="tab-label" aria-controls="results" role="tab">Results</a></li>
-        <% end %>
+        <li role="presentation" class="<%= params[:tab] == 'results' ? 'active':'' %>"><a href="<%= show_challenge_path(@challenge, 'results') %>" class="tab-label" aria-controls="results" role="tab">Results</a></li>
       </ul>
     </div>
     <div class="col-md-8">
@@ -41,7 +39,7 @@
     <!-- TODO: case on challenge_id to ensure backwards compatibility once challenge kit is in place -->
     <% if ['my_entries','submissions'].include?(params[:tab]) %>
       <%= render "challenges/submissions", challenge: @challenge, submissions_grid: @submissions_grid, my_entries: @my_entries %>
-    <% elsif ['results'].include?(params[:tab]) && @context.logged_in? && @context.user.is_challenge_evaluator? %>
+    <% elsif ['results'].include?(params[:tab]) %>
       <%= render "challenges/results", challenge: @challenge, submissions: @submissions, vaf_results: @vaf_results, vaf_spotter_ids: @vaf_spotter_ids, csv_names: @csv_names, csv_ids: @csv_ids, csv: @csv, headers: @headers, keys: @keys %>
     <% else %>
       <% #TODO: This is hard coded to the treasure hunt challenge %>
