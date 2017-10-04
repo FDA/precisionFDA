@@ -16,12 +16,12 @@ public class LoginTest extends AbstractTest {
     @Test
     public void successfulLogin() {
         logTestHeader("Test Case: Successful Login");
+        
+        String FDAUsername = config.getString("pfda_test.username");
+        String FDAPassword = config.getString("pfda_test.password");
 
-        String FDAUsername = "AutomationTestUser";
-        String FDAPassword = "Welcome@123";
-
-        String basicAuthUser = "jnj-user";
-        String basicAuthPassword = "RockSteady";
+        String basicAuthUser = config.getString("pfda_test.dnx_stage_username");
+        String basicAuthPassword = config.getString("pfda_test.dnx_stage_password");
 
         MainPage mainPage = openMainPage();
         LoginPage loginPage = mainPage.openLoginPage(basicAuthUser, basicAuthPassword);
