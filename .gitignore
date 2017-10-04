@@ -31,3 +31,8 @@
 
 # Ignore application configuration
 /config/application.yml
+
+# Ignore autotest's temp files
+/test/functional/.idea
+/test/functional/target
+test/functional/dnanexus.staging.functional.iml
