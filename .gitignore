@@ -35,4 +35,5 @@
 # Ignore autotest's temp files
 /test/functional/.idea
 /test/functional/target
-test/functional/dnanexus.staging.functional.iml
+/test/functional/dnanexus.staging.functional.iml
+/test/functional/src/main/resources/application.conf
