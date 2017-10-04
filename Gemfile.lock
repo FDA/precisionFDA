@@ -238,7 +238,6 @@ DEPENDENCIES
   annotate (~> 2.6.6)
   axlsx
   bootstrap-kaminari-views
-  bundler (= 1.13.6)
   byebug
   coffee-rails (~> 4.1.0)
   exception_notification (= 4.1.1)
@@ -274,4 +273,4 @@ DEPENDENCIES
   wice_grid
 
 BUNDLED WITH
-   1.13.6
+   1.15.4
