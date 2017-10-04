@@ -17,11 +17,11 @@ public class LoginTest extends AbstractTest {
     public void successfulLogin() {
         logTestHeader("Test Case: Successful Login");
 
-        String FDAUsername = "AutomationTestUser";
-        String FDAPassword = "Welcome@123";
+        String FDAUsername = "xxx";
+        String FDAPassword = "xxx";
 
-        String basicAuthUser = "jnj-user";
-        String basicAuthPassword = "RockSteady";
+        String basicAuthUser = "xxx";
+        String basicAuthPassword = "xxx";
 
         MainPage mainPage = openMainPage();
         LoginPage loginPage = mainPage.openLoginPage(basicAuthUser, basicAuthPassword);
