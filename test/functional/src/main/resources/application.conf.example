@@ -1,0 +1,6 @@
+pfda_test {
+  username: ""
+  password: ""
+  dnx_stage_username: ""
+  dnx_stage_password: ""
+}
