@@ -24,7 +24,7 @@ class FilesController < ApplicationController
   def featured
     org = Org.featured
     if org
-      user_files = UserFile.real_files.accessible_by(@context).includes(:user, :taggings).where(:users => { :org_id => org.id })
+      user_files = UserFile.real_files.accessible_by(@context).includes(:user, :taggings).where(:users => { :org_id => org.id }).where.not(:users => { id: CHALLENGE_BOT_USER_ID})
 
       @files_grid = initialize_grid(user_files,{
         name: 'files',
