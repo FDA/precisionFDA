@@ -1,16 +1,21 @@
 package staging.cases;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+
+import org.openqa.selenium.firefox.FirefoxBinary;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import staging.pages.MainPage;
 import staging.pages.OpenMainPage;
+import staging.utils.SettingsProperties;
 
 import java.util.concurrent.TimeUnit;
 
@@ -18,17 +23,38 @@ public abstract class AbstractTest {
 
     protected WebDriver driver;
     private final Logger log = Logger.getLogger(this.getClass());
-    protected static final Config config = ConfigFactory.load();
 
     @BeforeMethod
     public void setUp() throws Exception {
         log.info("set browser type");
-        // String currentDirectory = System.getProperty("user.dir");
-        // System.setProperty("webdriver.chrome.driver", currentDirectory + SettingsProperties.getProperty("pathToChromeDriver"));
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--start-maximized");
-        driver = new ChromeDriver(options);
-        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+
+        String currentDirectory = System.getProperty("user.dir");
+
+
+        // Google Chrome
+
+//        System.setProperty("webdriver.chrome.driver", currentDirectory + SettingsProperties.getProperty("pathToChromeDriver"));
+//        DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+//        capabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
+//
+//        ChromeOptions options = new ChromeOptions();
+//        options.addArguments("--headless", "--disable-gpu");
+//
+//        capabilities.setCapability(ChromeOptions.CAPABILITY, options);
+//        driver = new ChromeDriver(capabilities);
+
+
+        // Firefox
+
+        FirefoxBinary firefoxBinary = new FirefoxBinary();
+        // firefoxBinary.addCommandLineOptions("--headless");
+        System.setProperty("webdriver.gecko.driver", currentDirectory + SettingsProperties.getProperty("pathToFirefoxDriver"));
+        System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
+        FirefoxOptions firefoxOptions = new FirefoxOptions();
+        firefoxOptions.setBinary(firefoxBinary);
+        driver = new FirefoxDriver(firefoxOptions);
+
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
     }
 
     @AfterMethod
@@ -56,5 +82,6 @@ public abstract class AbstractTest {
         log.info(text);
         log.info(line);
     }
+
 
 }

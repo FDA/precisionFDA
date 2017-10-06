@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.MainLocators;
+import staging.utils.Utils;
 
 public class MainPage extends AbstractPage {
 
@@ -16,7 +17,7 @@ public class MainPage extends AbstractPage {
 
     public MainPage(final WebDriver driver) {
         super(driver);
-        waitForPageToLoadAndVerifyBy(By.xpath(MainLocators.MAIN_LOGIN_LINK));
+        waitForPageToLoadAndVerifyBy(By.xpath(MainLocators.MAIN_LOGIN_LINK), 30);
     }
 
     public LoginPage openLoginPage(String basicAuthUser, String basicAuthPassword) {
@@ -24,7 +25,8 @@ public class MainPage extends AbstractPage {
 
         String url = "https://" + basicAuthUser +
                 ":" + basicAuthPassword + "" +
-                "@staging.dnanexus.com/login?scope=%7B%22full%22%3A+true%7D&redirect_uri=https%3A%2F%2F52.90.134.199%2Freturn_from_login&client_id=precision_fda";
+                "@staging.dnanexus.com/login?scope=%7B%22full%22%3A+true%7D&redirect_uri=" +
+                "https%3A%2F%2F52.90.134.199%2Freturn_from_login&client_id=precision_fda";
 
         getDriver().get(url);
 

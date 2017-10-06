@@ -1,8 +1,10 @@
 package staging.pages;
 
 import org.apache.log4j.Logger;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import staging.utils.SettingsProperties;
+import staging.utils.Utils;
 
 public class OpenMainPage extends AbstractPage {
 

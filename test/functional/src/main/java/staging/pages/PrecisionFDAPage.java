@@ -7,6 +7,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.PrecisionFDALocators;
+import staging.utils.Utils;
 
 public class PrecisionFDAPage extends AbstractPage {
 
@@ -20,7 +21,8 @@ public class PrecisionFDAPage extends AbstractPage {
 
     public PrecisionFDAPage(final WebDriver driver) {
         super(driver);
-        waitForPageToLoadAndVerifyBy(By.xpath(PrecisionFDALocators.FDANavigationPanel), 20);
+        waitForPageToLoadAndVerifyBy(By.xpath(PrecisionFDALocators.FDANavigationPanel), 30);
+        Utils.screenshot("FDA", getDriver());
     }
 
     public WebElement getNavigationPanelWE() {
