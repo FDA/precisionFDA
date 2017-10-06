@@ -16,7 +16,7 @@ public class LoginTest extends AbstractTest {
     @Test
     public void successfulLogin() {
         logTestHeader("Test Case: Successful Login");
-        
+
         String FDAUsername = config.getString("pfda_test.username");
         String FDAPassword = config.getString("pfda_test.password");
 
