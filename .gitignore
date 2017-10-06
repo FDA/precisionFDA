@@ -36,6 +36,7 @@
 /test/functional/.idea
 /test/functional/target
 /test/functional/dnanexus.staging.functional.iml
+/test/functional/dnanexus.staging.autotest.iml
 /test/functional/src/main/resources/application.conf
 
 #Ignore browser drivers
