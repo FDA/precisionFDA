@@ -37,3 +37,6 @@
 /test/functional/target
 /test/functional/dnanexus.staging.functional.iml
 /test/functional/src/main/resources/application.conf
+
+#Ignore browser drivers
+/test/functional/drivers
