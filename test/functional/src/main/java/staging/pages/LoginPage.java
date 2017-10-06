@@ -8,6 +8,7 @@ import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import staging.locators.LoginLocators;
+import staging.utils.Utils;
 
 public class LoginPage extends AbstractPage{
 
