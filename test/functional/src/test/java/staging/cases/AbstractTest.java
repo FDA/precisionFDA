@@ -1,5 +1,7 @@
 package staging.cases;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -9,9 +11,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import staging.pages.MainPage;
 import staging.pages.OpenMainPage;
-import staging.utils.SettingsProperties;
-import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.Config;
 
 import java.util.concurrent.TimeUnit;
 
