@@ -1,0 +1,4 @@
+firefox driver should be saved to the 'drivers' folder and named as 'geckodriver'
+may be downloaded from 'https://github.com/mozilla/geckodriver/releases'
+
+running from command line: mvn clean test -DsuiteXmlFile=openAllPages.xml

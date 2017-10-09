@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
+import staging.locators.CommonLocators;
 import staging.locators.PrecisionFDALocators;
 import staging.utils.Utils;
 
@@ -19,10 +20,12 @@ public class PrecisionFDAPage extends AbstractPage {
     @FindBy(xpath = PrecisionFDALocators.FDALoggedUsernameLink)
     private Link FDALoggedUsernameLink;
 
+    @FindBy(xpath = CommonLocators.APPS_PAGE_ICON)
+    private Link appsPageIcon;
+
     public PrecisionFDAPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(PrecisionFDALocators.FDANavigationPanel), 30);
-        Utils.screenshot("FDA", getDriver());
     }
 
     public WebElement getNavigationPanelWE() {
@@ -31,6 +34,12 @@ public class PrecisionFDAPage extends AbstractPage {
 
     public Link getUsernameLink() {
         return FDALoggedUsernameLink;
+    }
+
+    public AppsPage openAppsPage() {
+        log.info("opening Apps page");
+        appsPageIcon.click();
+        return new AppsPage(getDriver());
     }
 
 

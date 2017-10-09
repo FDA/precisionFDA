@@ -25,7 +25,7 @@
                 <version>2.18.1</version>
                 <configuration>
                     <suiteXmlFiles>
-                        <suiteXmlFile>testng.xml</suiteXmlFile>
+                        <suiteXmlFile>openAllPages.xml</suiteXmlFile>
                     </suiteXmlFiles>
                 </configuration>
             </plugin>
