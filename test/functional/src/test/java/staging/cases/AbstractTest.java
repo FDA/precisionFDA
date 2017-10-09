@@ -10,9 +10,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 import staging.pages.MainPage;
 import staging.pages.OpenMainPage;
 import staging.utils.SettingsProperties;
@@ -24,7 +22,7 @@ public abstract class AbstractTest {
     protected WebDriver driver;
     private final Logger log = Logger.getLogger(this.getClass());
 
-    @BeforeMethod
+    @BeforeClass
     public void setUp() throws Exception {
         log.info("set browser type");
 
@@ -47,7 +45,7 @@ public abstract class AbstractTest {
         // Firefox
 
         FirefoxBinary firefoxBinary = new FirefoxBinary();
-        // firefoxBinary.addCommandLineOptions("--headless");
+        firefoxBinary.addCommandLineOptions("--headless");
         System.setProperty("webdriver.gecko.driver", currentDirectory + SettingsProperties.getProperty("pathToFirefoxDriver"));
         System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
         FirefoxOptions firefoxOptions = new FirefoxOptions();
@@ -57,7 +55,7 @@ public abstract class AbstractTest {
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
     }
 
-    @AfterMethod
+    @AfterClass
     public void tearDown() throws Exception {
         if (driver != null) {
             driver.quit();
@@ -81,6 +79,14 @@ public abstract class AbstractTest {
         log.info(line);
         log.info(text);
         log.info(line);
+    }
+
+    public String getPageTitle() {
+        return driver.getTitle();
+    }
+
+    public WebDriver getDriver() {
+        return driver;
     }
 
 
