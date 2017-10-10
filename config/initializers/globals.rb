@@ -28,6 +28,7 @@ if ENV["DNANEXUS_BACKEND"] == "production"
   ORG_EVERYONE = "org-precisionfda"
   ORG_DUMMY = "org-precisionfda.dummy"
   ADMIN_TOKEN = ENV["ADMIN_TOKEN"]
+  ADMIN_USER = "user-precisionfda.admin"
   DEFAULT_COMPARISON_APP = "app-pfda-comparator/0.2.4"
   CONSISTENCY_DISCUSSION_ID = 1
   TRUTH_DISCUSSION_ID = 6
@@ -43,9 +44,10 @@ else
   DNANEXUS_APISERVER_URI = "https://stagingapi.dnanexus.com/"
   DNANEXUS_PLATFORM_URI = "https://staging.dnanexus.com/"
   APPKIT_TGZ = "project-Bk0YZkj0YkbBg6bk38PzQkVV:/appkit.tgz"
-  ORG_EVERYONE = "org-precisionfda"
-  ORG_DUMMY = "org-precisionfda.dummy"
+  ORG_EVERYONE = ENV["DEV_HOST"] ? "org-precisionfda_dev" : "org-precisionfda"
+  ORG_DUMMY = ENV["DEV_HOST"] ? "org-precisionfda.dummy_dev" : "org-precisionfda.dummy"
   ADMIN_TOKEN = ENV["ADMIN_TOKEN"]
+  ADMIN_USER = ENV["DEV_HOST"] ? "user-precisionfda.admin_dev" : "user-precisionfda.admin"
   DEFAULT_COMPARISON_APP = "app-pfda-comparator/0.2.4"
   CONSISTENCY_DISCUSSION_ID = 1
   TRUTH_DISCUSSION_ID = 4 # TODO: Update this to the discussion id of challenge
