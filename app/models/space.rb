@@ -190,8 +190,8 @@ class Space < ActiveRecord::Base
       guest_lead = space.add_or_update_member(papi, guest_dxorg, space_params[:guest_lead_dxuser], 'ADMIN', 'GUEST')
 
       # Remove pfda admin from orgs
-      papi.call(host_dxorg, "removeMember", {user: "user-precisionfda.admin"})
-      papi.call(guest_dxorg, "removeMember", {user: "user-precisionfda.admin"})
+      papi.call(host_dxorg, "removeMember", {user: ADMIN_USER})
+      papi.call(guest_dxorg, "removeMember", {user: ADMIN_USER})
     end
 
     return space
