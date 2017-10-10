@@ -5,7 +5,6 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.htmlelements.loader.HtmlElementLoader;
 
 import java.util.List;
@@ -39,7 +38,6 @@ public abstract class AbstractPage {
         try {
             (new WebDriverWait(driver, timeout)).ignoring(StaleElementReferenceException.class)
                     .until(new ExpectedCondition<Boolean>() {
-                        @Override
                         public Boolean apply(final WebDriver d) {
                             if (element == null) {
                                 return false;
@@ -82,7 +80,6 @@ public abstract class AbstractPage {
 
     public void waitUntilClickable(final WebElement element) {
         (new WebDriverWait(driver, DEFAULT_TIMEOUT)).until(new ExpectedCondition<Boolean>() {
-            @Override
             public Boolean apply(final WebDriver d) {
                 if (element == null) {
                     return false;
@@ -178,7 +175,7 @@ public abstract class AbstractPage {
     /**
      * Verify page content
      */
-    @Step
+
     public boolean waitForPageToLoadAndVerifyBy(final By pageIdentifier) {
         final String pageName = this.getClass().getName().replace("staging.pages.", "");
         log.info("Waiting for " + pageName + " page to load");
@@ -191,7 +188,7 @@ public abstract class AbstractPage {
         }
     }
 
-    @Step
+
     public boolean waitForPageToLoadAndVerifyBy(final By pageIdentifier, int timeout) {
         final String pageName = this.getClass().getName().replace("staging.pages.", "");
         log.info("Waiting for " + pageName + " page to load");
@@ -204,7 +201,7 @@ public abstract class AbstractPage {
         }
     }
 
-    @Step
+
     public boolean waitForPageToLoadAndVerifyWe(final WebElement pageIdentifier) {
         final String pageName = this.getClass().getName().replace("Page", "").replace("email.pages.", "");
         log.info("Waiting for " + pageName + " page to load");
@@ -235,7 +232,6 @@ public abstract class AbstractPage {
 
     private void waitForFrameAndSwitch(final WebElement frame) {
         (new WebDriverWait(driver, 20)).until(new ExpectedCondition<WebDriver>() {
-            @Override
             public WebDriver apply(final WebDriver driver) {
                 try {
                     return driver.switchTo().frame(frame);

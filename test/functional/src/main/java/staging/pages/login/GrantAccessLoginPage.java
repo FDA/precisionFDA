@@ -1,4 +1,4 @@
-package staging.pages;
+package staging.pages.login;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
@@ -6,6 +6,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Button;
 import staging.locators.GrantAccessLoginLocators;
+import staging.pages.AbstractPage;
+import staging.pages.PrecisionFDAPage;
 import staging.utils.Utils;
 
 public class GrantAccessLoginPage extends AbstractPage {

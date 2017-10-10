@@ -1,4 +1,4 @@
-package staging.pages;
+package staging.pages.login;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
@@ -8,8 +8,9 @@ import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import staging.locators.LoginLocators;
+import staging.pages.AbstractPage;
 
-public class LoginPage extends AbstractPage{
+public class LoginPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
 

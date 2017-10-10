@@ -1,4 +1,4 @@
-package staging.pages;
+package staging.pages.apps;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
@@ -7,6 +7,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.AppsLocators;
+import staging.pages.AbstractPage;
 
 public class AppsPage extends AbstractPage {
 
@@ -30,27 +31,36 @@ public class AppsPage extends AbstractPage {
     @FindBy(xpath = AppsLocators.APPS_EXPLORE_LINK)
     private Link appsExploreLink;
 
+    @FindBy(xpath = AppsLocators.APPS_MANAGE_ASSETS_LINK)
+    private Link appsManageAssetsLink;
+
     public AppsPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_RELEVANT_LINK));
     }
 
     public AppsRelevantPage openAppsRelevantPage() {
-        log.info("open Apps Relevant Page");
+        log.info("open apps.Relevant Page");
         appsRelevantLink.click();
         return new AppsRelevantPage(getDriver());
     }
 
     public AppsFeaturedPage openAppsFeaturedPage() {
-        log.info("open Apps Featured Page");
+        log.info("open apps.Featured Page");
         appsFeaturedLink.click();
         return new AppsFeaturedPage(getDriver());
     }
 
     public AppsExplorePage openAppsExplorePage() {
-        log.info("open Apps Explore Page");
+        log.info("open apps.Explore Page");
         appsExploreLink.click();
         return new AppsExplorePage(getDriver());
+    }
+
+    public AppsManageAssetsPage openAppsManageAssetsPage() {
+        log.info("open apps.ManageAssets Page");
+        appsManageAssetsLink.click();
+        return new AppsManageAssetsPage(getDriver());
     }
 
     public Link getAppsRelevantLink() {

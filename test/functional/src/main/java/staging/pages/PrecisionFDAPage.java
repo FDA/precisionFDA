@@ -8,7 +8,8 @@ import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.CommonLocators;
 import staging.locators.PrecisionFDALocators;
-import staging.utils.Utils;
+import staging.pages.apps.AppsPage;
+import staging.pages.comps.CompsPage;
 
 public class PrecisionFDAPage extends AbstractPage {
 
@@ -22,6 +23,9 @@ public class PrecisionFDAPage extends AbstractPage {
 
     @FindBy(xpath = CommonLocators.APPS_PAGE_ICON)
     private Link appsPageIcon;
+
+    @FindBy(xpath = CommonLocators.COMPS_PAGE_ICON)
+    private Link compsPageIcon;
 
     public PrecisionFDAPage(final WebDriver driver) {
         super(driver);
@@ -37,9 +41,15 @@ public class PrecisionFDAPage extends AbstractPage {
     }
 
     public AppsPage openAppsPage() {
-        log.info("opening Apps page");
+        log.info("open Apps page");
         appsPageIcon.click();
         return new AppsPage(getDriver());
+    }
+
+    public CompsPage openCompsPage() {
+        log.info("opening Comparisons page");
+        compsPageIcon.click();
+        return new CompsPage(getDriver());
     }
 
 
