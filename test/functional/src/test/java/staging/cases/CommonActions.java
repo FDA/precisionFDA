@@ -1,8 +1,8 @@
 package staging.cases;
 
 import org.apache.log4j.Logger;
-import staging.pages.GrantAccessLoginPage;
-import staging.pages.LoginPage;
+import staging.pages.login.GrantAccessLoginPage;
+import staging.pages.login.LoginPage;
 import staging.pages.MainPage;
 import staging.pages.PrecisionFDAPage;
 

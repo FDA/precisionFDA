@@ -6,7 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.MainLocators;
-import staging.utils.Utils;
+import staging.pages.login.LoginPage;
 
 public class MainPage extends AbstractPage {
 
