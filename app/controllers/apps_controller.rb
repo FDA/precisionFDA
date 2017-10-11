@@ -144,6 +144,29 @@ class AppsController < ApplicationController
   def new
   end
 
+  def batch_app
+    @app = App.accessible_by(@context).find_by(dxid: params[:id])
+    if @app.nil?
+      flash[:error] = "Sorry, this app does not exist or is not accessible by you"
+      redirect_to apps_path
+      return
+    end
+
+    licenses_to_accept = []
+    @app.assets.each do |asset|
+      if asset.license.present? && !asset.licensed_by?(@context)
+        licenses_to_accept << {
+          license: describe_for_api(asset.license),
+          user_license: asset.user_license(@context)
+        }
+      end
+    end
+
+    licenses_accepted = @context.user.accepted_licenses.map{|l| {id: l.license_id, pending: l.pending?, active: l.active?, unset: !l.pending? && !l.active?}}
+
+    js app: @app.slice(:dxid, :spec, :title), licenses_to_accept: licenses_to_accept.uniq { |l| l.id}, licenses_accepted: licenses_accepted
+  end
+
   def fork
     @app = App.accessible_by(@context).find_by(dxid: params[:id])
     if @app.nil?
