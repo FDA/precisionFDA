@@ -1,18 +1,19 @@
 package staging.cases;
 
 import org.apache.log4j.Logger;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import staging.data.PageTitles;
 import staging.pages.apps.*;
 import staging.pages.*;
 import staging.pages.comps.*;
 import staging.pages.files.*;
+import staging.pages.notes.*;
+import tools.TestResultListener;
 
-import static org.junit.Assert.fail;
 import static org.testng.Assert.assertTrue;
 
+@Listeners(TestResultListener.class)
 public class OpenAllPagesTest extends AbstractTest {
 
     private final Logger log = Logger.getLogger(this.getClass());
@@ -30,7 +31,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_APPS));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -49,7 +50,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_APPS));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -65,7 +66,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_APPS));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -81,7 +82,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_APPS));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -97,7 +98,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ASSETS));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -114,7 +115,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ASSETS));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -131,7 +132,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ASSETS));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -148,7 +149,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ASSETS));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -165,7 +166,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ADD_ASSETS));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -181,7 +182,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_COMPARISONS));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -197,7 +198,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_COMPARISONS));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -213,7 +214,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_COMPARISONS));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -229,7 +230,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_COMPARISONS));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -245,7 +246,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_COMPARATOR));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -261,7 +262,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -277,7 +278,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -293,7 +294,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -309,7 +310,7 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
 
-        log.info("--PASSED--");
+        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -325,9 +326,88 @@ public class OpenAllPagesTest extends AbstractTest {
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_UPLOAD_FILES));
 
-        log.info("--PASSED--");
+        
     }
 
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkNotesNewNotePageCanBeOpen() {
+        logTestHeader("Test Case: check that Notes.NewNote page can be open");
+
+        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        NotesNewNotePage notesNewNotePage = precisionFDAPage.openNotesPage().openNotesNewNotePage();
+
+        log.info("check Edit Tab is displayed");
+        assertTrue(notesNewNotePage.getNotesNewNoteEditTabWE().isDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_EDIT_NOTE));
+
+        
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkNotesPageCanBeOpen() {
+        logTestHeader("Test Case: check that Notes page can be open");
+
+        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        NotesPage notesPage = precisionFDAPage.openNotesPage();
+
+        log.info("check My Notes link is displayed");
+        assertTrue(notesPage.getNotesMyNotesLink().isDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
+
+        
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkNotesMyNotesPageCanBeOpen() {
+        logTestHeader("Test Case: check that Notes.MyNotes page can be open");
+
+        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        NotesMyNotesPage notesMyNotesPage = precisionFDAPage.openNotesPage().openNotesMyNotesPage();
+
+        log.info("check My Notes link is activated");
+        assertTrue(notesMyNotesPage.getNotesMyNotesActivatedLink().isDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
+
+        
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkNotesFeaturedPageCanBeOpen() {
+        logTestHeader("Test Case: check that Notes.Featured page can be open");
+
+        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        NotesFeaturedPage notesFeaturedPage = precisionFDAPage.openNotesPage().openNotesFeaturedPage();
+
+        log.info("check Featured link is activated");
+        assertTrue(notesFeaturedPage.getNotesFeaturedActivatedLink().isDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
+
+        
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkNotesExplorePageCanBeOpen() {
+        logTestHeader("Test Case: check that Notes.Explore page can be open");
+
+        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        NotesExplorePage notesExplorePage = precisionFDAPage.openNotesPage().openNotesExplorePage();
+
+        log.info("check Explore link is activated");
+        assertTrue(notesExplorePage.getNotesExploreActivatedLink().isDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
+
+        
+    }
 
 
 }

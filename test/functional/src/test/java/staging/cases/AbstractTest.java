@@ -2,27 +2,28 @@ package staging.cases;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.annotations.*;
 import staging.pages.MainPage;
 import staging.pages.OpenMainPage;
 import staging.pages.PrecisionFDAPage;
 import staging.utils.SettingsProperties;
+import staging.utils.Utils;
+import tools.CommonActions;
+import tools.TestResultListener;
 
 import java.util.concurrent.TimeUnit;
 
 import static org.testng.Assert.assertTrue;
+import static staging.utils.Utils.globalSalt;
 
+@Listeners(TestResultListener.class)
 public abstract class AbstractTest {
 
-    protected WebDriver driver;
+    protected static WebDriver driver;
     private final Logger log = Logger.getLogger(this.getClass());
 
     @BeforeClass
@@ -56,6 +57,11 @@ public abstract class AbstractTest {
         driver = new FirefoxDriver(firefoxOptions);
 
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+
+        //create debug folder
+        String folderPath = System.getProperty("user.dir") + "/target/debug-log/" + globalSalt;
+        log.info("create folder: " + folderPath);
+        Utils.createFolder(folderPath);
     }
 
     @AfterClass
@@ -90,7 +96,7 @@ public abstract class AbstractTest {
         return title;
     }
 
-    public WebDriver getDriver() {
+    public static WebDriver getDriver() {
         return driver;
     }
 
@@ -106,9 +112,6 @@ public abstract class AbstractTest {
 
         log.info("check correct username is displayed");
         assertTrue(precisionFDAPage.getUsernameLink().getText().equals("Automation Test"));
-
-        log.info("--PASSED--");
     }
-
 
 }
