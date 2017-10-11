@@ -16,5 +16,9 @@ public class PageTitles {
 
     public static final String PAGE_TITLE_UPLOAD_FILES = "Upload File(s)";
 
+    public static final String PAGE_TITLE_NOTES = "Notes";
+
+    public static final String PAGE_TITLE_EDIT_NOTE = "Edit Note";
+
 
 }

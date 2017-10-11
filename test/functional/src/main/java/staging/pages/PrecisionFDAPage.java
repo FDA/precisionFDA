@@ -12,6 +12,7 @@ import staging.pages.apps.AppsPage;
 import staging.pages.comps.CompsPage;
 import staging.pages.files.FilesAddFilesPage;
 import staging.pages.files.FilesPage;
+import staging.pages.notes.NotesPage;
 
 public class PrecisionFDAPage extends AbstractPage {
 
@@ -31,6 +32,9 @@ public class PrecisionFDAPage extends AbstractPage {
 
     @FindBy(xpath = CommonLocators.FILES_PAGE_ICON)
     private Link filesPageIcon;
+
+    @FindBy(xpath = CommonLocators.NOTES_PAGE_ICON)
+    private Link notesPageIcon;
 
     public PrecisionFDAPage(final WebDriver driver) {
         super(driver);
@@ -61,6 +65,12 @@ public class PrecisionFDAPage extends AbstractPage {
         log.info("opening Files page");
         filesPageIcon.click();
         return new FilesPage(getDriver());
+    }
+
+    public NotesPage openNotesPage() {
+        log.info("opening Notes page");
+        notesPageIcon.click();
+        return new NotesPage(getDriver());
     }
 
 

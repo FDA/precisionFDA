@@ -14,7 +14,7 @@
         </filter>
     </appender>
     <appender name="file_full" class="org.apache.log4j.DailyRollingFileAppender">
-        <param name="File" value="target/full.log" />
+        <param name="File" value="target/debug-log/full.log" />
         <param name="DatePattern" value="'.'yyyy-MM-dd'.log'" />
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern"
@@ -27,7 +27,7 @@
         </filter>
     </appender>
     <appender name="file_error" class="org.apache.log4j.DailyRollingFileAppender">
-        <param name="File" value="target/error.log" />
+        <param name="File" value="target/debug-log/error.log" />
         <param name="DatePattern" value="'.'yyyy-MM-dd'.log'" />
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern"
