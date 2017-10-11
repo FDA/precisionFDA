@@ -1,33 +1,21 @@
 package staging.cases;
 
 import org.apache.log4j.Logger;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import staging.data.PageTitles;
 import staging.pages.apps.*;
 import staging.pages.*;
 import staging.pages.comps.*;
+import staging.pages.files.*;
 
+import static org.junit.Assert.fail;
 import static org.testng.Assert.assertTrue;
 
 public class OpenAllPagesTest extends AbstractTest {
 
     private final Logger log = Logger.getLogger(this.getClass());
-
-    @Test
-    public void successfulLogin() {
-        logTestHeader("Test Case: Successful Login");
-
-        MainPage mainPage = openMainPage();
-        PrecisionFDAPage precisionFDAPage = CommonActions.loginToFDA(mainPage);
-
-        log.info("check navigation panel is displayed");
-        assertTrue(precisionFDAPage.getNavigationPanelWE().isDisplayed());
-
-        log.info("check correct username is displayed");
-        assertTrue(precisionFDAPage.getUsernameLink().getText().equals("Automation Test"));
-
-        log.info("--PASSED--");
-    }
 
     @Test(dependsOnMethods = { "successfulLogin" })
     public void checkAppsPageCanBeOpen() {
@@ -256,6 +244,86 @@ public class OpenAllPagesTest extends AbstractTest {
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_COMPARATOR));
+
+        log.info("--PASSED--");
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkFilesPageCanBeOpen() {
+        logTestHeader("Test Case: check that Files page can be open");
+
+        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        FilesPage filesPage = precisionFDAPage.openFilesPage();
+
+        log.info("check My Files link is displayed");
+        assertTrue(filesPage.getFilesMyFilesLink().isDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
+
+        log.info("--PASSED--");
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkFilesMyFilesPageCanBeOpen() {
+        logTestHeader("Test Case: check that Files.MyFiles page can be open");
+
+        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        FilesMyFilesPage filesMyFilesPage = precisionFDAPage.openFilesPage().openFilesMyFilesPage();
+
+        log.info("check My Files link is activated");
+        assertTrue(filesMyFilesPage.getFilesMyFilesActivatedLink().isDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
+
+        log.info("--PASSED--");
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkFilesFeaturedPageCanBeOpen() {
+        logTestHeader("Test Case: check that Files.Featured page can be open");
+
+        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        FilesFeaturedPage filesFeaturedPage = precisionFDAPage.openFilesPage().openFilesFeaturedPage();
+
+        log.info("check Featured link is activated");
+        assertTrue(filesFeaturedPage.getFilesFeaturedActivatedLink().isDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
+
+        log.info("--PASSED--");
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkFilesExplorePageCanBeOpen() {
+        logTestHeader("Test Case: check that Files.Explore page can be open");
+
+        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        FilesExplorePage filesExplorePage = precisionFDAPage.openFilesPage().openFilesExplorePage();
+
+        log.info("check Explore link is activated");
+        assertTrue(filesExplorePage.getFilesExploreActivatedLink().isDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
+
+        log.info("--PASSED--");
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkFilesAddFilesPageCanBeOpen() {
+        logTestHeader("Test Case: check that Files.AddFiles page can be open");
+
+        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        FilesAddFilesPage filesAddFilesPage = precisionFDAPage.openFilesPage().openFilesAddFilesPage();
+
+        log.info("check Browse Files button is displayed");
+        assertTrue(filesAddFilesPage.getFilesBrowseFilesInput().isDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_UPLOAD_FILES));
 
         log.info("--PASSED--");
     }

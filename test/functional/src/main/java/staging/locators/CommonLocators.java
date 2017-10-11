@@ -6,6 +6,8 @@ public class CommonLocators {
 
     public static final String COMPS_PAGE_ICON = "//li/a[@href='/comparisons']/div[contains(@class, 'nav-icon')]";
 
+    public static final String FILES_PAGE_ICON = "//li/a[@href='/files']/div[contains(@class, 'nav-icon')]";
+
 
 
 }

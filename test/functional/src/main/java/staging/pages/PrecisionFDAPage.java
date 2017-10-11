@@ -10,6 +10,8 @@ import staging.locators.CommonLocators;
 import staging.locators.PrecisionFDALocators;
 import staging.pages.apps.AppsPage;
 import staging.pages.comps.CompsPage;
+import staging.pages.files.FilesAddFilesPage;
+import staging.pages.files.FilesPage;
 
 public class PrecisionFDAPage extends AbstractPage {
 
@@ -26,6 +28,9 @@ public class PrecisionFDAPage extends AbstractPage {
 
     @FindBy(xpath = CommonLocators.COMPS_PAGE_ICON)
     private Link compsPageIcon;
+
+    @FindBy(xpath = CommonLocators.FILES_PAGE_ICON)
+    private Link filesPageIcon;
 
     public PrecisionFDAPage(final WebDriver driver) {
         super(driver);
@@ -50,6 +55,12 @@ public class PrecisionFDAPage extends AbstractPage {
         log.info("opening Comparisons page");
         compsPageIcon.click();
         return new CompsPage(getDriver());
+    }
+
+    public FilesPage openFilesPage() {
+        log.info("opening Files page");
+        filesPageIcon.click();
+        return new FilesPage(getDriver());
     }
 
 

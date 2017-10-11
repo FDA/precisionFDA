@@ -13,9 +13,12 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.annotations.*;
 import staging.pages.MainPage;
 import staging.pages.OpenMainPage;
+import staging.pages.PrecisionFDAPage;
 import staging.utils.SettingsProperties;
 
 import java.util.concurrent.TimeUnit;
+
+import static org.testng.Assert.assertTrue;
 
 public abstract class AbstractTest {
 
@@ -82,11 +85,29 @@ public abstract class AbstractTest {
     }
 
     public String getPageTitle() {
-        return driver.getTitle();
+        String title = driver.getTitle();
+        log.info("title is: " + title);
+        return title;
     }
 
     public WebDriver getDriver() {
         return driver;
+    }
+
+    @Test
+    public void successfulLogin() {
+        logTestHeader("Test Case: Successful Login");
+
+        MainPage mainPage = openMainPage();
+        PrecisionFDAPage precisionFDAPage = CommonActions.loginToFDA(mainPage);
+
+        log.info("check navigation panel is displayed");
+        assertTrue(precisionFDAPage.getNavigationPanelWE().isDisplayed());
+
+        log.info("check correct username is displayed");
+        assertTrue(precisionFDAPage.getUsernameLink().getText().equals("Automation Test"));
+
+        log.info("--PASSED--");
     }
 
 
