@@ -19,10 +19,13 @@ class FilesController < ApplicationController
       per_page: 100,
       include: [:user, {user: :org}, {taggings: :tag}]
     })
+
+    js files_ids_with_descriptions(user_files)
   end
 
   def featured
     org = Org.featured
+
     if org
       user_files = UserFile.real_files.accessible_by(@context).includes(:user, :taggings).where(:users => { :org_id => org.id }).where.not(:users => { id: CHALLENGE_BOT_USER_ID})
 
@@ -33,12 +36,16 @@ class FilesController < ApplicationController
         per_page: 100,
         include: [:user, {user: :org}, {taggings: :tag}]
       })
+
+      js :index, files_ids_with_descriptions(user_files)
     end
+
     render :index
   end
 
   def explore
     user_files = UserFile.real_files.accessible_by_public.includes(:taggings)
+
     @files_grid = initialize_grid(user_files,{
       name: 'files',
       order: 'user_files.created_at',
@@ -46,6 +53,8 @@ class FilesController < ApplicationController
       per_page: 100,
       include: [:user, {user: :org}, {taggings: :tag}]
     })
+
+    js :index, files_ids_with_descriptions(user_files)
     render :index
   end
 
@@ -157,16 +166,11 @@ class FilesController < ApplicationController
 
   def rename
     @file = UserFile.real_files.editable_by(@context).find_by!(dxid: params[:id])
-    name = file_params[:name]
-    if name.is_a?(String) && name != ""
-      if @file.rename(name, @context)
-        @file.reload
-        flash[:success] = "File renamed to \"#{@file.name}\""
-      else
-        flash[:error] = "File \"#{@file.name}\" could not be renamed."
-      end
+
+    if @file.rename(file_params[:name], file_params[:description], @context)
+      flash[:success] = "File info successfully updated."
     else
-      flash[:error] = "The new name is not a valid string"
+      flash[:error] = @file.errors.messages.values.flatten
     end
 
     redirect_to file_path(@file.dxid)
@@ -194,6 +198,10 @@ class FilesController < ApplicationController
 
   private
     def file_params
-      params.require(:file).permit(:name)
+      params.require(:file).permit(:name, :description)
+    end
+
+    def files_ids_with_descriptions(files)
+      { filesIdsWithDescription: files.select { |file| file.description.present? }.collect(&:id) }
     end
 end
