@@ -77,6 +77,7 @@ Rails.application.routes.draw do
       member do
         get 'fork'
         post 'export'
+        get 'batch_app'
       end
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
