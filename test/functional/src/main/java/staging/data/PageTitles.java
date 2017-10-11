@@ -12,5 +12,9 @@ public class PageTitles {
 
     public static final String PAGE_TITLE_COMPARATOR = "Comparator";
 
+    public static final String PAGE_TITLE_FILES = "Files";
+
+    public static final String PAGE_TITLE_UPLOAD_FILES = "Upload File(s)";
+
 
 }
