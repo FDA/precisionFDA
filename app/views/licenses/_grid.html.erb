@@ -14,7 +14,7 @@
   end
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |license|
-    license.created_at.to_s(:db)
+    license.created_at.to_s(:human)
   end
 
   g.column name: 'Items Attached' do |license|

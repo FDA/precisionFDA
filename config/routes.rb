@@ -57,6 +57,7 @@ Rails.application.routes.draw do
     post '/api/follow', to: 'api#follow'
     post '/api/unfollow', to: 'api#unfollow'
     post '/api/update_submission', to: 'api#update_submission'
+    post '/api/update_time_zone', to: 'api#update_time_zone'
 
     # FHIR
     scope '/fhir' do

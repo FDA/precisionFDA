@@ -138,4 +138,19 @@ module ApplicationHelper
     'disabled="true"'.html_safe if @context.guest?
   end
 
+  def time_ago(time)
+    if time.to_date == Date.today
+      "#{time_ago_in_words(time)} ago"
+    elsif time.to_date == Date.yesterday
+      time.strftime("yesterday at %l:%M%P")
+    elsif (Date.today - time.to_date).ceil < 7
+      time.strftime("%A at %l:%M%P")
+    else
+      time.strftime("on %b %d")
+    end
+  end
+
+  def time_in_default_time_zone(time, format = :human_with_tz)
+    time.in_time_zone(PrecisionFda::Application.config.time_zone).to_s(format)
+  end
 end

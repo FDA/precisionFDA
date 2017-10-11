@@ -1487,6 +1487,11 @@ class ApiController < ApplicationController
     end
   end
 
+  def update_time_zone
+    current_user.update_time_zone(params[:time_zone])
+    render json: { success: true }
+  end
+
   protected
 
   def fail(msg)

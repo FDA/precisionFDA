@@ -34,6 +34,12 @@
   end
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |space|
-    space.created_at.to_s(:db)
+    space.created_at.to_s(:human)
   end
+
+  g.column do |space|
+    time_in_default_time_zone(space.created_at)
+  end
+
+  g.column {}
 end -%>

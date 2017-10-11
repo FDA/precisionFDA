@@ -61,6 +61,9 @@ class ApplicationController < ActionController::Base
   # Require login
   before_action :require_login
 
+  # Use time zone of current user
+  around_action :user_time_zone, if: :current_user
+
   helper_method :pathify, :pathify_comments, :item_from_uid
 
   rescue_from ActionView::MissingTemplate, with: :missing_template
@@ -426,4 +429,11 @@ class ApplicationController < ActionController::Base
     return describe
   end
 
+  def user_time_zone(&block)
+    if current_user.time_zone
+      Time.use_zone(current_user.time_zone, &block)
+    else
+      yield
+    end
+  end
 end
