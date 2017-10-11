@@ -4,17 +4,15 @@
   <div class="page-title">
     <span class="fa fa-file-o"></span> <%= @file.name %>
     <% if @file.editable_by?(@context) %>
-      <a class="pfda-rename-item" data-toggle="modal" data-target="#rename-modal">
+      <a class="pfda-rename-item" data-toggle="modal" data-target="#file-comparison-edit-modal">
         <span class="fa fa-pencil"></span>
       </a>
     <% end %>
   </div>
 
-  <% if !@file.description.blank? %>
   <div class="description">
-    <%= @file.description %>
+    <%= file_description(@file) %>
   </div>
-  <% end %>
 </div>
 
 <div class="metadata-section metadata-header">
@@ -130,8 +128,8 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
           <li>
-            <a data-toggle='modal' data-target='#rename-modal'>
-              <span class="fa fa-pencil"></span> Rename
+            <a data-toggle='modal' data-target='#file-comparison-edit-modal'>
+              <span class="fa fa-pencil"></span> Edit File info
             </a>
           </li>
           <% if @file.deletable? %>
@@ -238,5 +236,5 @@
 </div>
 
 <% if @file.editable_by?(@context) %>
-  <%= render "_partials/modal_rename", item: @file, path_to_rename: rename_file_path(@file.dxid) %>
+  <%= render "_partials/modal_file_comparison_edit", item: @file, path_to_rename: rename_file_path(@file.dxid) %>
 <% end %>

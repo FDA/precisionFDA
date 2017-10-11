@@ -44,6 +44,8 @@ class UserFile < ActiveRecord::Base
   include Licenses
   require 'uri'
 
+  DESCRIPTION_MAX_LENGTH = 1000
+
   belongs_to :user
   belongs_to :parent, {polymorphic: true}
   has_many :notes, {through: :attachments}
@@ -60,6 +62,14 @@ class UserFile < ActiveRecord::Base
   acts_as_commentable
   acts_as_taggable
   acts_as_votable
+
+  validates :name, presence: { message: "Name could not be blank" }
+  validates :description,
+            allow_blank: true,
+            length: {
+              maximum: DESCRIPTION_MAX_LENGTH,
+              too_long: "Description could not be greater than #{DESCRIPTION_MAX_LENGTH} characters"
+            }
 
   def self.model_name
     ActiveModel::Name.new(self, nil, "File")
@@ -150,10 +160,16 @@ class UserFile < ActiveRecord::Base
     core_publishable_by?(context, scope_to_publish_to) && parent_type != "Comparison" && state == "closed"
   end
 
-  def rename(new_name, context)
+  def rename(new_name, description, context)
+    self.name = new_name
+    self.description = description
+
+    return false unless valid?
+
     if DNAnexusAPI.new(context.token).call(dxid, "rename", {project: project, name: new_name})
-      update_attributes(name: new_name)
+      update_attributes(name: new_name, description: description)
     else
+      errors.add(:base, "File info could not be updated.")
       false
     end
   end

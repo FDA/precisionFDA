@@ -18,6 +18,8 @@
 class Comparison < ActiveRecord::Base
   include Permissions
 
+  DESCRIPTION_MAX_LENGTH = 1000
+
   # comparison.user => returns the user who created the comparison
   belongs_to :user
 
@@ -44,6 +46,14 @@ class Comparison < ActiveRecord::Base
   acts_as_commentable
   acts_as_taggable
   acts_as_votable
+
+  validates :name, presence: { message: "Name could not be blank" }
+  validates :description,
+            allow_blank: true,
+            length: {
+              maximum: DESCRIPTION_MAX_LENGTH,
+              too_long: "Description could not be greater than #{DESCRIPTION_MAX_LENGTH} characters"
+            }
 
   def uid
     "comparison-#{id}"
@@ -81,8 +91,8 @@ class Comparison < ActiveRecord::Base
     core_publishable_by?(context, scope_to_publish_to) && state == "done"
   end
 
-  def rename(new_name, context)
-    update_attributes(name: new_name)
+  def rename(new_name, description, context)
+    update_attributes(name: new_name, description: description)
   end
 
   def self.publication_project!(context, scope)
