@@ -310,6 +310,7 @@ class MainController < ApplicationController
         end
       end
       save_session(user.id, username, token, expiration_time, user.org_id)
+      set_time_zone(user)
       AUDIT_LOGGER.info("User #{username} logged in")
       redirect_to root_url
     end
@@ -611,5 +612,12 @@ class MainController < ApplicationController
     children = node[1].map { |child| publisher_js_prepare(child, scope) }
 
     return [item, children]
+  end
+
+  def set_time_zone(user)
+    return if user.time_zone.present?
+    return if cookies[:user_time_zone].blank?
+
+    user.update_time_zone(cookies[:user_time_zone])
   end
 end

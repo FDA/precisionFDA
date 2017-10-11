@@ -94,7 +94,11 @@
     <% end %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Created</h5>
-      <p class="list-group-item-text"><%= @space.created_at.to_s(:db) %></p>
+      <p class="list-group-item-text"><%= @space.created_at.to_s(:human) %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">&nbsp;</h5>
+      <p class="list-group-item-text"><%= time_in_default_time_zone(@space.created_at) %></p>
     </li>
   </ul>
 </div>

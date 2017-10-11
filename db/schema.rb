@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170620221240) do
+ActiveRecord::Schema.define(version: 20170921133121) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id"
@@ -560,6 +560,7 @@ ActiveRecord::Schema.define(version: 20170620221240) do
     t.string   "normalized_email"
     t.datetime "last_login"
     t.text     "extras"
+    t.string   "time_zone"
   end
 
   add_index "users", ["dxuser"], name: "index_users_on_dxuser", unique: true

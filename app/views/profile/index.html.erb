@@ -17,7 +17,7 @@
 
 <div class="infoframe-outer">
   <div class="infoframe-inner">
-    <h4 class="infoframe-title">About your account</h3>
+    <h4 class="infoframe-title">About your account</h4>
     <ul class="list-group infoframe-inline">
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Username</h5>
@@ -30,6 +30,10 @@
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Email</h5>
         <p class="list-group-item-text"><%= @user.email %></p>
+      </li>
+      <li class="list-group-item time_zone_infoframe">
+        <h5 class="list-group-item-heading">Time zone</h5>
+        <%= select_tag "time_zone", options_for_select(time_zones, @user.time_zone), class: "form-control JS-TimeZone-selector", prompt: "Please select ..." %>
       </li>
     </ul>
     <div class="btn-group">
@@ -48,7 +52,7 @@
 <% if !@user.singular? %>
   <div class="infoframe-outer">
     <div class="infoframe-inner">
-      <h4 class="infoframe-title">About your organization</h3>
+      <h4 class="infoframe-title">About your organization</h4>
       <ul class="list-group infoframe-inline">
         <li class="list-group-item">
           <h5 class="list-group-item-heading">Handle</h5>
@@ -77,7 +81,7 @@
           end
 
           g.column name: 'Joined', attribute: 'created_at', auto_reload: true, filter_type: :standard do |user|
-            user.created_at.to_s(:db)
+            user.created_at.to_s(:human)
           end
         end -%>
       </div>
@@ -91,7 +95,7 @@
 <% if @user.can_administer_site? %>
   <div class="infoframe-outer">
     <div class="infoframe-inner">
-      <h4 class="infoframe-title">Site Administration</h3>
+      <h4 class="infoframe-title">Site Administration</h4>
       <ul class="list-group infoframe-inline">
         <li class="list-group-item">
           <h5 class="list-group-item-heading">Contributors</h5>

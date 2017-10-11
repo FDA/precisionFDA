@@ -1,4 +1,6 @@
 class ProfileController < ApplicationController
+  helper_method :time_zones
+
   def index
     @user = User.includes(:org).find(@context.user_id)
     if !@user.singular?
@@ -313,6 +315,10 @@ private
       i = i + 1
     end
     return candidate
+  end
+
+  def time_zones
+    ActiveSupport::TimeZone.all.map { |time_zone| [time_zone.to_s, time_zone.name] }
   end
 
 end

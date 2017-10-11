@@ -153,6 +153,11 @@ class User < ActiveRecord::Base
     ].include?(dxuser) || can_administer_site?
   end
 
+  # @param time_zone [String] new time zone
+  def update_time_zone(time_zone)
+    update(time_zone: time_zone) if Time.find_zone(time_zone)
+  end
+
   def self.validate_email(email)
     /^(([^<>()\[\]\\.,;:\s@\"]+(\.[^<>()\[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/ =~ email
   end
