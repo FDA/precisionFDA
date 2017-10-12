@@ -12,7 +12,7 @@ class ApplicationController < ActionController::Base
   # Use time zone of current user
   around_action :user_time_zone, if: lambda { !@context.guest? && current_user }
 
-  helper_method :pathify, :pathify_comments, :item_from_uid
+  helper_method :pathify, :pathify_comments, :item_from_uid, :pathify_folder
 
   rescue_from ActionView::MissingTemplate, with: :missing_template
 
@@ -169,8 +169,23 @@ class ApplicationController < ActionController::Base
       workflow_path(item.dxid)
     when "workflow-series"
       pathify(item.latest_accessible(@context))
+    when "folder"
+      pathify_folder(item)
     else
       raise "Unknown class #{item.klass}"
+    end
+  end
+
+  def pathify_folder(folder)
+    if folder.private?
+      files_path(folder_id: folder.id)
+    elsif folder.public?
+      explore_files_path(folder_id: folder.id)
+    elsif folder.in_space?
+      space = folder.space
+      content_space_path(id: space.id, folder_id: folder.id)
+    else
+      raise "Unable to build folder's path"
     end
   end
 
@@ -225,7 +240,7 @@ class ApplicationController < ActionController::Base
       end
     when "space"
       discuss_space_path(item)
-    when "expert", "expert-question", "meta-appathon", "appathon", "file", "app", "job", "asset", "comparison", "answer", "space"
+    when "expert", "expert-question", "meta-appathon", "appathon", "file", "app", "job", "asset", "comparison", "answer", "space", "folder"
       pathify(item)
     else
       raise "Unknown class #{item.klass}"
