@@ -5,19 +5,19 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
-import staging.locators.MainLocators;
+import staging.locators.StartLocators;
 import staging.pages.login.LoginPage;
 
-public class MainPage extends AbstractPage {
+public class StartPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
 
-    @FindBy(xpath = MainLocators.MAIN_LOGIN_LINK)
-    private Link mainLoginLink;
+    @FindBy(xpath = StartLocators.START_LOGIN_LINK)
+    private Link startLoginLink;
 
-    public MainPage(final WebDriver driver) {
+    public StartPage(final WebDriver driver) {
         super(driver);
-        waitForPageToLoadAndVerifyBy(By.xpath(MainLocators.MAIN_LOGIN_LINK), 30);
+        waitForPageToLoadAndVerifyBy(By.xpath(StartLocators.START_LOGIN_LINK), 30);
     }
 
     public LoginPage openLoginPage(String basicAuthUser, String basicAuthPassword) {

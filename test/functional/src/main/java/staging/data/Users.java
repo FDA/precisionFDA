@@ -3,8 +3,9 @@ package staging.data;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.apache.log4j.Logger;
+import staging.utils.SettingsProperties;
 
-public class Creds {
+public class Users {
 
     private final Logger log = Logger.getLogger(this.getClass());
     protected static final Config config = ConfigFactory.load();
@@ -23,6 +24,10 @@ public class Creds {
 
     public static String getDNXpassword() {
         return config.getString("pfda_test.dnx_stage_password");
+    }
+
+    public static String getTestUserName() {
+        return SettingsProperties.getProperty("testUserName");
     }
 
 

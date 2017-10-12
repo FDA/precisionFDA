@@ -1,9 +1,6 @@
 package staging.cases;
 
 import org.apache.log4j.Logger;
-import org.testng.annotations.Test;
-import staging.pages.MainPage;
-import staging.pages.PrecisionFDAPage;
 
 import static org.testng.Assert.assertTrue;
 

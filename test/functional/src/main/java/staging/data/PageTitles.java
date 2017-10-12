@@ -20,5 +20,15 @@ public class PageTitles {
 
     public static final String PAGE_TITLE_EDIT_NOTE = "Edit Note";
 
+    public static final String PAGE_TITLE_EXPERTS = "Experts";
+
+    public static final String PAGE_TITLE_CHALLS = "Challenges";
+
+    public static final String PAGE_TITLE_DISCS = "Discussions";
+
+    public static final String PAGE_TITLE_EDIT_DISC = "Edit Discussion";
+
+    public static final String PAGE_TITLE_OVERVIEW = "Overview";
+
 
 }

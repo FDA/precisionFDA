@@ -3,15 +3,15 @@ package staging.pages;
 import org.openqa.selenium.WebDriver;
 import staging.utils.SettingsProperties;
 
-public class OpenMainPage extends AbstractPage {
+public class OpenStartPage extends AbstractPage {
 
-    public OpenMainPage(final WebDriver driver) {
+    public OpenStartPage(final WebDriver driver) {
         super(driver);
     }
 
-    public MainPage openMainPage() {
+    public StartPage openStartPage() {
         getDriver().get(SettingsProperties.getProperty("startURL"));
-        return new MainPage(getDriver());
+        return new StartPage(getDriver());
     }
 
 }
