@@ -8,7 +8,6 @@ import ru.yandex.qatools.htmlelements.element.Button;
 import staging.locators.GrantAccessLoginLocators;
 import staging.pages.AbstractPage;
 import staging.pages.PrecisionFDAPage;
-import staging.utils.Utils;
 
 public class GrantAccessLoginPage extends AbstractPage {
 
