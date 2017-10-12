@@ -13,8 +13,9 @@ import staging.pages.CommonPage;
 import staging.pages.MainPage;
 import staging.pages.OpenMainPage;
 import staging.pages.PrecisionFDAPage;
+import staging.pages.login.GrantAccessLoginPage;
+import staging.pages.login.LoginPage;
 import staging.utils.SettingsProperties;
-import tools.Addons;
 import tools.TestResultListener;
 
 import java.io.BufferedWriter;
@@ -26,6 +27,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static org.testng.Assert.assertTrue;
+import static staging.data.Creds.*;
 
 @Listeners(TestResultListener.class)
 public abstract class AbstractTest {
@@ -106,7 +108,7 @@ public abstract class AbstractTest {
         String line = "";
         log.info("");
         for (int i = 0; i <= aim; i ++) {
-            line = line + "*";
+            line = line + "-";
         }
         log.info(line);
         log.info(text);
@@ -124,7 +126,7 @@ public abstract class AbstractTest {
         logTestHeader("Test Case: Successful Login");
 
         MainPage mainPage = openMainPage();
-        PrecisionFDAPage precisionFDAPage = Addons.loginToFDA(mainPage);
+        PrecisionFDAPage precisionFDAPage = loginToFDA(mainPage);
 
         log.info("check navigation panel is displayed");
         assertTrue(precisionFDAPage.getNavigationPanelWE().isDisplayed());
@@ -139,6 +141,13 @@ public abstract class AbstractTest {
         return precisionFDAPage;
     }
 
+    public static PrecisionFDAPage loginToFDA(MainPage mainPage) {
+        LoginPage loginPage = mainPage.openLoginPage(getDNXusername(), getDNXpassword());
+        GrantAccessLoginPage grantAccessLoginPage = loginPage.loginToPrecisionFDA(getPFDAusername(), getPFDApassword());
+        PrecisionFDAPage precisionFDAPage = grantAccessLoginPage.grantAccess();
+        return precisionFDAPage;
+    }
+
     public static void takeScreenshot(String filePath) {
         File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
         try {
@@ -150,7 +159,10 @@ public abstract class AbstractTest {
 
     public static void createFolder(String folderPath) {
         File file = new File(folderPath);
-        file.mkdir();
+        if (!file.exists()) {
+            file.mkdir();
+        }
+
     }
 
     public static void createFile(String folderPath, String content) throws IOException {
@@ -171,6 +183,33 @@ public abstract class AbstractTest {
 
     public static String getPageSource() {
         return driver.getPageSource();
+    }
+
+    public static void casePostActions(String status, String caseName, String getScreenshot, String getSource) {
+
+        final Logger log = Logger.getLogger("");
+
+        String currentSalt = getCurrentDateSalt();
+
+        String path = System.getProperty("user.dir") + "/target/debug-log/" + globalSalt + "/" +
+                status + "_" + caseName + "_" + currentSalt;
+
+        if (getScreenshot.equalsIgnoreCase("true")) {
+            //take screenshot
+            takeScreenshot(path + ".png");
+            log.info("screenshot is here: " + path + ".png");
+        }
+
+        if (getSource.equalsIgnoreCase("true")) {
+            //save page source
+            String source = getPageSource();
+            try {
+                createFile(path + ".txt", source);
+                log.info("page source is here: " + path + ".txt");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

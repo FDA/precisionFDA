@@ -18,6 +18,7 @@ public class CommonPage extends AbstractPage {
 
     public CommonPage(final WebDriver driver) {
         super(driver);
+        waitUntilJSReady();
         waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.MAIN_LOGO), 30);
     }
 

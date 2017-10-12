@@ -19,6 +19,77 @@ public class OpenAllPagesTest extends AbstractTest {
     private final Logger log = Logger.getLogger(this.getClass());
 
     @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkNotesNewNotePageCanBeOpen() {
+        logTestHeader("Test Case: check that Notes.NewNote page can be open");
+
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
+        NotesNewNotePage notesNewNotePage = precisionFDAPage.openNotesPage().openNotesNewNotePage();
+
+        log.info("check Edit Area is displayed");
+        assertTrue(notesNewNotePage.getNotesNewNoteEditorWE().isDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_EDIT_NOTE));
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkNotesPageCanBeOpen() {
+        logTestHeader("Test Case: check that Notes page can be open");
+
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
+        NotesPage notesPage = precisionFDAPage.openNotesPage();
+
+        log.info("check My Notes link is displayed");
+        assertTrue(notesPage.getNotesMyNotesLink().isDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkNotesMyNotesPageCanBeOpen() {
+        logTestHeader("Test Case: check that Notes.MyNotes page can be open");
+
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
+        NotesMyNotesPage notesMyNotesPage = precisionFDAPage.openNotesPage().openNotesMyNotesPage();
+
+        log.info("check My Notes link is activated");
+        assertTrue(notesMyNotesPage.getNotesMyNotesActivatedLink().isDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkNotesFeaturedPageCanBeOpen() {
+        logTestHeader("Test Case: check that Notes.Featured page can be open");
+
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
+        NotesFeaturedPage notesFeaturedPage = precisionFDAPage.openNotesPage().openNotesFeaturedPage();
+
+        log.info("check Featured link is activated");
+        assertTrue(notesFeaturedPage.getNotesFeaturedActivatedLink().isDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkNotesExplorePageCanBeOpen() {
+        logTestHeader("Test Case: check that Notes.Explore page can be open");
+
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
+        NotesExplorePage notesExplorePage = precisionFDAPage.openNotesPage().openNotesExplorePage();
+
+        log.info("check Explore link is activated");
+        assertTrue(notesExplorePage.getNotesExploreActivatedLink().isDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
+    }
+
+
+    @Test(dependsOnMethods = { "successfulLogin" })
     public void checkAppsPageCanBeOpen() {
         logTestHeader("Test Case: check that Apps page can be open");
 
@@ -30,8 +101,6 @@ public class OpenAllPagesTest extends AbstractTest {
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_APPS));
-
-        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -49,8 +118,6 @@ public class OpenAllPagesTest extends AbstractTest {
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_APPS));
-
-        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -65,8 +132,6 @@ public class OpenAllPagesTest extends AbstractTest {
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_APPS));
-
-        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -81,8 +146,6 @@ public class OpenAllPagesTest extends AbstractTest {
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_APPS));
-
-        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -97,8 +160,6 @@ public class OpenAllPagesTest extends AbstractTest {
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ASSETS));
-
-        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -114,8 +175,6 @@ public class OpenAllPagesTest extends AbstractTest {
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ASSETS));
-
-        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -131,8 +190,6 @@ public class OpenAllPagesTest extends AbstractTest {
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ASSETS));
-
-        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -148,8 +205,6 @@ public class OpenAllPagesTest extends AbstractTest {
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ASSETS));
-
-        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -309,8 +364,6 @@ public class OpenAllPagesTest extends AbstractTest {
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
-
-        
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -325,89 +378,6 @@ public class OpenAllPagesTest extends AbstractTest {
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_UPLOAD_FILES));
-
-        
     }
-
-    @Test(dependsOnMethods = { "successfulLogin" })
-    public void checkNotesNewNotePageCanBeOpen() {
-        logTestHeader("Test Case: check that Notes.NewNote page can be open");
-
-        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
-        NotesNewNotePage notesNewNotePage = precisionFDAPage.openNotesPage().openNotesNewNotePage();
-
-        log.info("check Edit Tab is displayed");
-        assertTrue(notesNewNotePage.getNotesNewNoteEditTabWE().isDisplayed());
-
-        log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_EDIT_NOTE));
-
-        
-    }
-
-    @Test(dependsOnMethods = { "successfulLogin" })
-    public void checkNotesPageCanBeOpen() {
-        logTestHeader("Test Case: check that Notes page can be open");
-
-        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
-        NotesPage notesPage = precisionFDAPage.openNotesPage();
-
-        log.info("check My Notes link is displayed");
-        assertTrue(notesPage.getNotesMyNotesLink().isDisplayed());
-
-        log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
-
-        
-    }
-
-    @Test(dependsOnMethods = { "successfulLogin" })
-    public void checkNotesMyNotesPageCanBeOpen() {
-        logTestHeader("Test Case: check that Notes.MyNotes page can be open");
-
-        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
-        NotesMyNotesPage notesMyNotesPage = precisionFDAPage.openNotesPage().openNotesMyNotesPage();
-
-        log.info("check My Notes link is activated");
-        assertTrue(notesMyNotesPage.getNotesMyNotesActivatedLink().isDisplayed());
-
-        log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
-
-        
-    }
-
-    @Test(dependsOnMethods = { "successfulLogin" })
-    public void checkNotesFeaturedPageCanBeOpen() {
-        logTestHeader("Test Case: check that Notes.Featured page can be open");
-
-        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
-        NotesFeaturedPage notesFeaturedPage = precisionFDAPage.openNotesPage().openNotesFeaturedPage();
-
-        log.info("check Featured link is activated");
-        assertTrue(notesFeaturedPage.getNotesFeaturedActivatedLink().isDisplayed());
-
-        log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
-
-        
-    }
-
-    @Test(dependsOnMethods = { "successfulLogin" })
-    public void checkNotesExplorePageCanBeOpen() {
-        logTestHeader("Test Case: check that Notes.Explore page can be open");
-
-        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
-        NotesExplorePage notesExplorePage = precisionFDAPage.openNotesPage().openNotesExplorePage();
-
-        log.info("check Explore link is activated");
-        assertTrue(notesExplorePage.getNotesExploreActivatedLink().isDisplayed());
-
-        log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
-
-        
-    }
-
 
 }

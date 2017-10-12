@@ -36,6 +36,7 @@ public class AppsPage extends AbstractPage {
 
     public AppsPage(final WebDriver driver) {
         super(driver);
+        waitUntilJSReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_RELEVANT_LINK));
     }
 
