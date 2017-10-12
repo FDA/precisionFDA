@@ -22,7 +22,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsPageCanBeOpen() {
         logTestHeader("Test Case: check that Apps page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         AppsPage appsPage = precisionFDAPage.openAppsPage();
 
         log.info("check Relevant apps link is displayed");
@@ -38,7 +38,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsRelevantPageCanBeOpen() {
         logTestHeader("Test Case: check that Apps.Relevant page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         AppsRelevantPage appsRelevantPage = precisionFDAPage.openAppsPage().openAppsRelevantPage();
 
         log.info("check jobs list area is displayed");
@@ -57,7 +57,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsFeaturedPageCanBeOpen() {
         logTestHeader("Test Case: check that Apps.Featured page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         AppsFeaturedPage appsFeaturedPage = precisionFDAPage.openAppsPage().openAppsFeaturedPage();
 
         log.info("check the clicked link is activated");
@@ -73,7 +73,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsExplorePageCanBeOpen() {
         logTestHeader("Test Case: check that Apps.Explore page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         AppsExplorePage appsExplorePage = precisionFDAPage.openAppsPage().openAppsExplorePage();
 
         log.info("check the clicked link is activated");
@@ -89,7 +89,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsManageAssetsPageCanBeOpen() {
         logTestHeader("Test Case: check that Apps.ManageAssets page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         AppsManageAssetsPage appsManageAssetsPage = precisionFDAPage.openAppsPage().openAppsManageAssetsPage();
 
         log.info("check 'Create Assets' button is displayed");
@@ -105,7 +105,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsManageMyAssetsPageCanBeOpen() {
         logTestHeader("Test Case: check that Apps.Manage.MyAssets page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         AppsManageAssetsPage appsManageAssetsPage = precisionFDAPage.openAppsPage().openAppsManageAssetsPage();
         AppsManageMyAssetsPage appsManageMyAssetsPage = appsManageAssetsPage.openMyAssetsPage();
 
@@ -122,7 +122,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsManageFeaturedPageCanBeOpen() {
         logTestHeader("Test Case: check that Apps.Manage.Featured page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         AppsManageAssetsPage appsManageAssetsPage = precisionFDAPage.openAppsPage().openAppsManageAssetsPage();
         AppsManageFeaturedPage appsManageFeaturedPage = appsManageAssetsPage.openFeaturedPage();
 
@@ -139,7 +139,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsManageExplorePageCanBeOpen() {
         logTestHeader("Test Case: check that Apps.Manage.Explore page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         AppsManageAssetsPage appsManageAssetsPage = precisionFDAPage.openAppsPage().openAppsManageAssetsPage();
         AppsManageExplorePage appsManageExplorePage = appsManageAssetsPage.openExplorePage();
 
@@ -156,7 +156,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsManageCreateAssetsPageCanBeOpen() {
         logTestHeader("Test Case: check that Apps.Manage.CreateAssets page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         AppsManageAssetsPage appsManageAssetsPage = precisionFDAPage.openAppsPage().openAppsManageAssetsPage();
         AppsManageCreateAssetsPage appsManageCreateAssetsPage = appsManageAssetsPage.openCreateAssetsPage();
 
@@ -172,8 +172,8 @@ public class OpenAllPagesTest extends AbstractTest {
     @Test(dependsOnMethods = { "successfulLogin" })
     public void checkComparisonsPageCanBeOpen() {
         logTestHeader("Test Case: check that Comparisons page can be open");
-
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         CompsPage compsPage = precisionFDAPage.openCompsPage();
 
         log.info("check My Comparisons link is displayed");
@@ -189,7 +189,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkCompsMyCompsPageCanBeOpen() {
         logTestHeader("Test Case: check that Comparisons.MyComparisons page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         CompsMyCompsPage compsMyCompsPage = precisionFDAPage.openCompsPage().openCompsMyCompsPage();
 
         log.info("check My Comparisons link is activated");
@@ -205,7 +205,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkCompsFeaturedPageCanBeOpen() {
         logTestHeader("Test Case: check that Comparisons.Featured page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         CompsFeaturedPage compsFeaturedPage = precisionFDAPage.openCompsPage().openCompsFeaturedPage();
 
         log.info("check Featured link is activated");
@@ -221,7 +221,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkCompsExplorePageCanBeOpen() {
         logTestHeader("Test Case: check that Comparisons.Explore page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         CompsExplorePage compsExplorePage = precisionFDAPage.openCompsPage().openCompsExplorePage();
 
         log.info("check Explore link is activated");
@@ -237,7 +237,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkCompsRunComparisonPageCanBeOpen() {
         logTestHeader("Test Case: check that Comparisons.RunComparison page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         CompsRunComparisonPage compsRunComparisonPage = precisionFDAPage.openCompsPage().openCompsRunComparisonPage();
 
         log.info("check the circle 'with' is displayed");
@@ -253,7 +253,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkFilesPageCanBeOpen() {
         logTestHeader("Test Case: check that Files page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         FilesPage filesPage = precisionFDAPage.openFilesPage();
 
         log.info("check My Files link is displayed");
@@ -269,7 +269,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkFilesMyFilesPageCanBeOpen() {
         logTestHeader("Test Case: check that Files.MyFiles page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         FilesMyFilesPage filesMyFilesPage = precisionFDAPage.openFilesPage().openFilesMyFilesPage();
 
         log.info("check My Files link is activated");
@@ -285,7 +285,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkFilesFeaturedPageCanBeOpen() {
         logTestHeader("Test Case: check that Files.Featured page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         FilesFeaturedPage filesFeaturedPage = precisionFDAPage.openFilesPage().openFilesFeaturedPage();
 
         log.info("check Featured link is activated");
@@ -301,7 +301,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkFilesExplorePageCanBeOpen() {
         logTestHeader("Test Case: check that Files.Explore page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         FilesExplorePage filesExplorePage = precisionFDAPage.openFilesPage().openFilesExplorePage();
 
         log.info("check Explore link is activated");
@@ -317,7 +317,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkFilesAddFilesPageCanBeOpen() {
         logTestHeader("Test Case: check that Files.AddFiles page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         FilesAddFilesPage filesAddFilesPage = precisionFDAPage.openFilesPage().openFilesAddFilesPage();
 
         log.info("check Browse Files button is displayed");
@@ -333,7 +333,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkNotesNewNotePageCanBeOpen() {
         logTestHeader("Test Case: check that Notes.NewNote page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         NotesNewNotePage notesNewNotePage = precisionFDAPage.openNotesPage().openNotesNewNotePage();
 
         log.info("check Edit Tab is displayed");
@@ -349,7 +349,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkNotesPageCanBeOpen() {
         logTestHeader("Test Case: check that Notes page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         NotesPage notesPage = precisionFDAPage.openNotesPage();
 
         log.info("check My Notes link is displayed");
@@ -365,7 +365,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkNotesMyNotesPageCanBeOpen() {
         logTestHeader("Test Case: check that Notes.MyNotes page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         NotesMyNotesPage notesMyNotesPage = precisionFDAPage.openNotesPage().openNotesMyNotesPage();
 
         log.info("check My Notes link is activated");
@@ -381,7 +381,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkNotesFeaturedPageCanBeOpen() {
         logTestHeader("Test Case: check that Notes.Featured page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         NotesFeaturedPage notesFeaturedPage = precisionFDAPage.openNotesPage().openNotesFeaturedPage();
 
         log.info("check Featured link is activated");
@@ -397,7 +397,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkNotesExplorePageCanBeOpen() {
         logTestHeader("Test Case: check that Notes.Explore page can be open");
 
-        PrecisionFDAPage precisionFDAPage = new PrecisionFDAPage(getDriver());
+        PrecisionFDAPage precisionFDAPage = openPrecisionFDAPage();
         NotesExplorePage notesExplorePage = precisionFDAPage.openNotesPage().openNotesExplorePage();
 
         log.info("check Explore link is activated");

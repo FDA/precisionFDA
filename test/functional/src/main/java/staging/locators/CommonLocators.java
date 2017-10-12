@@ -10,6 +10,8 @@ public class CommonLocators {
 
     public static final String NOTES_PAGE_ICON = "//li/a[@href='/notes']/div[contains(@class, 'nav-icon')]";
 
+    public static final String MAIN_LOGO = "//*[@class='navbar-header']//a/img[@alt='PrecisionFDA Home']";
+
 
 
 }
