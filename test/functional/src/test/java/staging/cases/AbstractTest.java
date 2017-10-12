@@ -1,6 +1,7 @@
 package staging.cases;
 
 import org.apache.log4j.Logger;
+import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -8,11 +9,13 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.support.FindBy;
 import org.testng.annotations.*;
+import ru.yandex.qatools.htmlelements.element.Link;
+import staging.locators.CommonLocators;
+import staging.pages.StartPage;
+import staging.pages.OpenStartPage;
 import staging.pages.CommonPage;
-import staging.pages.MainPage;
-import staging.pages.OpenMainPage;
-import staging.pages.PrecisionFDAPage;
 import staging.pages.login.GrantAccessLoginPage;
 import staging.pages.login.LoginPage;
 import staging.utils.SettingsProperties;
@@ -27,7 +30,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static org.testng.Assert.assertTrue;
-import static staging.data.Creds.*;
+import static staging.data.Users.*;
 
 @Listeners(TestResultListener.class)
 public abstract class AbstractTest {
@@ -36,6 +39,9 @@ public abstract class AbstractTest {
     private final Logger log = Logger.getLogger("");
 
     public static final String globalSalt = getCurrentDateSalt();
+
+    @FindBy(xpath = CommonLocators.MAIN_LOGO)
+    private Link mailLogoLink;
 
     @BeforeTest
     public void setUp() throws Exception {
@@ -60,7 +66,9 @@ public abstract class AbstractTest {
         // Firefox
 
         FirefoxBinary firefoxBinary = new FirefoxBinary();
-        firefoxBinary.addCommandLineOptions("--headless");
+        if (SettingsProperties.getProperty("headlessMode").equalsIgnoreCase("true")) {
+            firefoxBinary.addCommandLineOptions("--headless");
+        }
         System.setProperty("webdriver.gecko.driver", currentDirectory + SettingsProperties.getProperty("pathToFirefoxDriver"));
         System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
         FirefoxOptions firefoxOptions = new FirefoxOptions();
@@ -97,10 +105,10 @@ public abstract class AbstractTest {
     }
 
     @Test
-    public MainPage openMainPage() {
-        OpenMainPage openMainPage = new OpenMainPage(driver);
-        MainPage mainPage = openMainPage.openMainPage();
-        return mainPage;
+    public StartPage openStartPage() {
+        OpenStartPage openStartPage = new OpenStartPage(driver);
+        StartPage startPage = openStartPage.openStartPage();
+        return startPage;
     }
 
     public void logTestHeader(final String text) {
@@ -125,27 +133,26 @@ public abstract class AbstractTest {
     public void successfulLogin() {
         logTestHeader("Test Case: Successful Login");
 
-        MainPage mainPage = openMainPage();
-        PrecisionFDAPage precisionFDAPage = loginToFDA(mainPage);
+        StartPage startPage = openStartPage();
+        CommonPage commonPage = loginToFDA(startPage);
 
         log.info("check navigation panel is displayed");
-        assertTrue(precisionFDAPage.getNavigationPanelWE().isDisplayed());
+        assertTrue(commonPage.getNavigationPanelWE().isDisplayed());
 
         log.info("check correct username is displayed");
-        assertTrue(precisionFDAPage.getUsernameLink().getText().equals("Automation Test"));
+        assertTrue(commonPage.getUsernameLink().getText().equals(getTestUserName()));
     }
 
-    public PrecisionFDAPage openPrecisionFDAPage() {
-        CommonPage commonPage = new CommonPage(driver);
-        PrecisionFDAPage precisionFDAPage = commonPage.openPrecisionFDAPage();
-        return precisionFDAPage;
+    public CommonPage openCommonPage() {
+        driver.findElement(By.xpath(CommonLocators.MAIN_LOGO)).click();
+        return new CommonPage(driver);
     }
 
-    public static PrecisionFDAPage loginToFDA(MainPage mainPage) {
-        LoginPage loginPage = mainPage.openLoginPage(getDNXusername(), getDNXpassword());
+    public static CommonPage loginToFDA(StartPage startPage) {
+        LoginPage loginPage = startPage.openLoginPage(getDNXusername(), getDNXpassword());
         GrantAccessLoginPage grantAccessLoginPage = loginPage.loginToPrecisionFDA(getPFDAusername(), getPFDApassword());
-        PrecisionFDAPage precisionFDAPage = grantAccessLoginPage.grantAccess();
-        return precisionFDAPage;
+        CommonPage commonPage = grantAccessLoginPage.grantAccess();
+        return commonPage;
     }
 
     public static void takeScreenshot(String filePath) {

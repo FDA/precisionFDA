@@ -182,6 +182,7 @@ public abstract class AbstractPage {
 
 
     public boolean waitForPageToLoadAndVerifyBy(final By pageIdentifier, int timeout) {
+        waitUntilJSReady();
         final String pageName = this.getClass().getName().replace("staging.pages.", "");
         log.info("Waiting for " + pageName + " page to load");
         if (isElementPresent(pageIdentifier, timeout)) {

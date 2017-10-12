@@ -17,7 +17,6 @@ public class FilesAddFilesPage extends AbstractPage {
 
     public FilesAddFilesPage(final WebDriver driver) {
         super(driver);
-        waitUntilJSReady();
         waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_BROWSE_FILES_INPUT));
     }
 
