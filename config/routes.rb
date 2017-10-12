@@ -121,6 +121,12 @@ Rails.application.routes.draw do
       post 'rename', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
+      post 'move', on: :collection
+      post 'create_folder', on: :collection
+      post 'rename_folder', on: :member
+      post 'download_list', on: :collection
+      post 'remove', on: :collection
+      post 'publish', on: :collection
       resources :comments
     end
 
@@ -206,6 +212,12 @@ Rails.application.routes.draw do
       post 'accept', on: :member
       post 'rename', on: :member
       post 'invite', on: :member
+      post 'move', on: :member
+      post 'create_folder', on: :member
+      post 'rename_folder', on: :collection
+      post 'download_list', on: :member
+      post 'remove_folder', on: :member, as: 'remove_folder'
+      post 'publish_folder', on: :member
       resources :comments
     end
 

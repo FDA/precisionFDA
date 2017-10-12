@@ -947,6 +947,8 @@ class ApiController < ApplicationController
       fail "File description needs to be a String" unless description.is_a?(String)
     end
 
+    folder = Folder.editable_by(@context).find_by(id: params[:folder_id])
+
     project = @context.user.private_files_project
     dxid = DNAnexusAPI.new(@context.token).("file", "new", {"name": params[:name], "project": project})["id"]
 
@@ -959,7 +961,8 @@ class ApiController < ApplicationController
         description: description,
         user_id: @context.user_id,
         parent: @context.user,
-        scope: 'private'
+        scope: 'private',
+        parent_folder_id: folder.try(:id)
       )
     end
 
