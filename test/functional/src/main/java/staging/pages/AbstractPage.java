@@ -177,15 +177,7 @@ public abstract class AbstractPage {
      */
 
     public boolean waitForPageToLoadAndVerifyBy(final By pageIdentifier) {
-        final String pageName = this.getClass().getName().replace("staging.pages.", "");
-        log.info("Waiting for " + pageName + " page to load");
-        if (isElementPresent(pageIdentifier, DEFAULT_TIMEOUT)) {
-            log.info(pageName + " page is open");
-            return true;
-        } else {
-            log.error("This is not " + pageName + " page. Something is wrong");
-            return false;
-        }
+        return waitForPageToLoadAndVerifyBy(pageIdentifier, DEFAULT_TIMEOUT);
     }
 
 
@@ -201,16 +193,23 @@ public abstract class AbstractPage {
         }
     }
 
+    //Wait Until JS Ready
+    public void waitUntilJSReady() {
+        log.info("wait until JS is loaded");
+        WebDriver jsWaitDriver = driver;
+        WebDriverWait wait = new WebDriverWait(jsWaitDriver, 60);
+        JavascriptExecutor jsExec = (JavascriptExecutor) jsWaitDriver;
 
-    public boolean waitForPageToLoadAndVerifyWe(final WebElement pageIdentifier) {
-        final String pageName = this.getClass().getName().replace("Page", "").replace("email.pages.", "");
-        log.info("Waiting for " + pageName + " page to load");
-        if (isElementPresent(pageIdentifier, DEFAULT_TIMEOUT)) {
-            log.info(pageName + " page is opened.");
-            return true;
-        } else {
-            log.error("This is not " + pageName + " page. Something is wrong.");
-            return false;
+        //Wait for Javascript to load
+        ExpectedCondition<Boolean> jsLoad = driver -> ((JavascriptExecutor) jsWaitDriver)
+                .executeScript("return document.readyState").toString().equals("complete");
+
+        //Get JS is Ready
+        boolean jsReady = (Boolean) jsExec.executeScript("return document.readyState").toString().equals("complete");
+
+        //Wait Javascript until it is Ready
+        if (!jsReady) {
+            wait.until(jsLoad);
         }
     }
 

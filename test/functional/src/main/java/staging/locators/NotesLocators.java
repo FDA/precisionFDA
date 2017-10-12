@@ -20,5 +20,7 @@ public class NotesLocators {
 
     public static final String NOTES_NEW_NOTE_EDIT_TAB = "//li//a[text()='Edit Content']";
 
+    public static final String NOTES_PAGINATION_AREA = "//ul[contains(@class, 'pagination')]/li";
+
 
 }

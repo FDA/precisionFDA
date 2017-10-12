@@ -38,6 +38,7 @@ public class PrecisionFDAPage extends AbstractPage {
 
     public PrecisionFDAPage(final WebDriver driver) {
         super(driver);
+        waitUntilJSReady();
         waitForPageToLoadAndVerifyBy(By.xpath(PrecisionFDALocators.FDANavigationPanel), 30);
     }
 

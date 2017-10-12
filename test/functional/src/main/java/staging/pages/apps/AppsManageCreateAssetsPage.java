@@ -18,6 +18,7 @@ public class AppsManageCreateAssetsPage extends AbstractPage {
 
     public AppsManageCreateAssetsPage(final WebDriver driver) {
         super(driver);
+        waitUntilJSReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_MANAGE_CREATE_ASSETS_GENERATE_KEY_LINK));
     }
 
