@@ -57,7 +57,9 @@ public class FilesPage extends AbstractPage {
         return new FilesAddFilesPage(getDriver());
     }
 
-
+    public boolean isMyFilesLinkDisplayed() {
+        return isElementPresent(getFilesMyFilesLink());
+    }
 
 
 }

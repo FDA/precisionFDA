@@ -24,5 +24,7 @@ public class FilesFeaturedPage extends AbstractPage {
         return filesFeaturedActivatedLink;
     }
 
-
+    public boolean isFeaturedLinkActivated() {
+        return isElementPresent(getFilesFeaturedActivatedLink());
+    }
 }

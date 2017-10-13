@@ -53,8 +53,13 @@ public class CompsPage extends AbstractPage {
 
     public CompsRunComparisonPage openCompsRunComparisonPage() {
         log.info("open Comps.RunComparison page");
+        sleep(5000);
         compsRunComparisonLink.click();
         return new CompsRunComparisonPage(getDriver());
+    }
+
+    public boolean isMyCompsLinkDisplayed() {
+        return isElementPresent(getCompsMyCompsLink());
     }
 
 

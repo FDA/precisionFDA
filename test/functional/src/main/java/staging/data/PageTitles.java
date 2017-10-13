@@ -1,5 +1,7 @@
 package staging.data;
 
+import static staging.data.Users.getPFDAusername;
+
 public class PageTitles {
 
     public static final String PAGE_TITLE_APPS = "Apps";
@@ -29,6 +31,12 @@ public class PageTitles {
     public static final String PAGE_TITLE_EDIT_DISC = "Edit Discussion";
 
     public static final String PAGE_TITLE_OVERVIEW = "Overview";
+
+    public static final String PAGE_TITLE_PROFILE = "Profile";
+
+    public static final String PAGE_TITLE_PUBLIC_PROFILE = getPFDAusername();
+
+    public static final String PAGE_TITLE_LICENSES = "Licenses";
 
 
 }

@@ -24,5 +24,8 @@ public class CompsExplorePage extends AbstractPage {
         return compsExploreActivatedLink;
     }
 
+    public boolean isExploreLinkActivated() {
+        return isElementPresent(getCompsExploreActivatedLink());
+    }
 
 }

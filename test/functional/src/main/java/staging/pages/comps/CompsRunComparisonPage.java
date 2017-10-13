@@ -5,7 +5,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.CompsLocators;
 import staging.pages.AbstractPage;
 
@@ -18,12 +17,15 @@ public class CompsRunComparisonPage extends AbstractPage {
 
     public CompsRunComparisonPage(final WebDriver driver) {
         super(driver);
-        waitUntilJSReady();
         waitForPageToLoadAndVerifyBy(By.xpath(CompsLocators.COMPS_RUN_COMP_CIRCLE_WITH_WE));
     }
 
     public WebElement getCompsRunCompCircleWithWE() {
         return compsRunCompCirceWithWE;
+    }
+
+    public boolean isCircleWithDisplayed() {
+        return getCompsRunCompCircleWithWE().isDisplayed();
     }
 
 

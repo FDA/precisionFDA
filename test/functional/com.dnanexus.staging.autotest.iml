@@ -138,8 +138,8 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.eclipse.jetty:jetty-servlet:7.3.0.v20110203" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.eclipse.jetty:jetty-security:7.3.0.v20110203" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.google.inject.extensions:guice-servlet:3.0" level="project" />
-    <orderEntry type="library" name="Maven: ru.yandex.qatools.htmlelements:htmlelements-java:1.18" level="project" />
-    <orderEntry type="library" name="Maven: ru.yandex.qatools.htmlelements:htmlelements-matchers:1.18" level="project" />
+    <orderEntry type="library" name="Maven: ru.yandex.qatools.htmlelements:htmlelements-java:1.8" level="project" />
+    <orderEntry type="library" name="Maven: ru.yandex.qatools.htmlelements:htmlelements-matchers:1.8" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.hamcrest:hamcrest-all:1.3" level="project" />
     <orderEntry type="library" name="Maven: ru.yandex.qatools.matchers:webdriver-matchers:1.4.1" level="project" />
     <orderEntry type="library" name="Maven: ru.yandex.qatools.matchers:matcher-decorators:1.4.1" level="project" />

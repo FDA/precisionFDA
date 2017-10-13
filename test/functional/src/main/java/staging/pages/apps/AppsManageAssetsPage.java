@@ -57,5 +57,9 @@ public class AppsManageAssetsPage extends AbstractPage {
         return new AppsManageCreateAssetsPage(getDriver());
     }
 
+    public boolean isCreateAssetsDisplayed() {
+        return isElementPresent(getAppsManageCreateAssetsLink());
+    }
+
 
 }

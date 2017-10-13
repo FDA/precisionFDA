@@ -8,6 +8,7 @@ import staging.utils.SettingsProperties;
 public class Users {
 
     private final Logger log = Logger.getLogger(this.getClass());
+
     protected static final Config config = ConfigFactory.load();
 
     public static String getPFDAusername() {
@@ -26,8 +27,8 @@ public class Users {
         return config.getString("pfda_test.dnx_stage_password");
     }
 
-    public static String getTestUserName() {
-        return SettingsProperties.getProperty("testUserName");
+    public static String getTestUserFullName() {
+        return config.getString("pfda_test.userFullName");
     }
 
 

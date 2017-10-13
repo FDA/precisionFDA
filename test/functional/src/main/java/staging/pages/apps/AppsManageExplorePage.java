@@ -28,4 +28,8 @@ public class AppsManageExplorePage extends AbstractPage {
         return appsManageExploreActivatedLink;
     }
 
+    public boolean isManageExploreLinkActivated() {
+        return isElementPresent(getAppsManageExploreActivatedLink());
+    }
+
 }

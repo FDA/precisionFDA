@@ -12,8 +12,11 @@ import staging.pages.discs.DiscsNewDiscPage;
 import staging.pages.discs.DiscsPage;
 import staging.pages.experts.ExpertsPage;
 import staging.pages.files.*;
+import staging.pages.licenses.LicensesPage;
 import staging.pages.notes.*;
 import staging.pages.overview.OverviewPage;
+import staging.pages.profile.ProfilePage;
+import staging.pages.profile.PublicProfilePage;
 import tools.TestResultListener;
 
 import static org.testng.Assert.assertTrue;
@@ -23,6 +26,20 @@ public class OpenAllPagesTest extends AbstractTest {
 
     private final Logger log = Logger.getLogger("TEST");
 
+    @Test
+    public void successfulLogin() {
+        logTestHeader("Test Case: Successful Login");
+
+        StartPage startPage = openStartPage();
+        CommonPage commonPage = loginToFDA(startPage);
+
+        log.info("check navigation panel is displayed");
+        assertTrue(commonPage.isNavigationPanelDisplayed());
+
+        log.info("check correct username is displayed");
+        assertTrue(commonPage.isCorrectUserNameDisplayed());
+    }
+
     @Test(dependsOnMethods = { "successfulLogin" })
     public void checkNotesNewNotePageCanBeOpen() {
         logTestHeader("Test Case: check that Notes.NewNote page can be open");
@@ -31,7 +48,7 @@ public class OpenAllPagesTest extends AbstractTest {
         NotesNewNotePage notesNewNotePage = commonPage.openNotesPage().openNotesNewNotePage();
 
         log.info("check Edit Area is displayed");
-        assertTrue(notesNewNotePage.getNotesNewNoteEditorWE().isDisplayed());
+        assertTrue(notesNewNotePage.isEditorDisplayed());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_EDIT_NOTE));
@@ -45,7 +62,7 @@ public class OpenAllPagesTest extends AbstractTest {
         NotesPage notesPage = commonPage.openNotesPage();
 
         log.info("check My Notes link is displayed");
-        assertTrue(notesPage.getNotesMyNotesLink().isDisplayed());
+        assertTrue(notesPage.isMyNotesLinkDisplayed());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
@@ -59,7 +76,7 @@ public class OpenAllPagesTest extends AbstractTest {
         NotesMyNotesPage notesMyNotesPage = commonPage.openNotesPage().openNotesMyNotesPage();
 
         log.info("check My Notes link is activated");
-        assertTrue(notesMyNotesPage.getNotesMyNotesActivatedLink().isDisplayed());
+        assertTrue(notesMyNotesPage.isMyNotesLinkActivated());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
@@ -73,7 +90,7 @@ public class OpenAllPagesTest extends AbstractTest {
         NotesFeaturedPage notesFeaturedPage = commonPage.openNotesPage().openNotesFeaturedPage();
 
         log.info("check Featured link is activated");
-        assertTrue(notesFeaturedPage.getNotesFeaturedActivatedLink().isDisplayed());
+        assertTrue(notesFeaturedPage.isFeaturedLinkActivated());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
@@ -87,7 +104,7 @@ public class OpenAllPagesTest extends AbstractTest {
         NotesExplorePage notesExplorePage = commonPage.openNotesPage().openNotesExplorePage();
 
         log.info("check Explore link is activated");
-        assertTrue(notesExplorePage.getNotesExploreActivatedLink().isDisplayed());
+        assertTrue(notesExplorePage.isExploreLinkActivated());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
@@ -102,7 +119,7 @@ public class OpenAllPagesTest extends AbstractTest {
         AppsPage appsPage = commonPage.openAppsPage();
 
         log.info("check Relevant apps link is displayed");
-        assertTrue(appsPage.getAppsRelevantLink().isDisplayed());
+        assertTrue(appsPage.isRelevantAppsLinkDisplayed());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_APPS));
@@ -116,10 +133,10 @@ public class OpenAllPagesTest extends AbstractTest {
         AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
 
         log.info("check jobs list area is displayed");
-        assertTrue(appsRelevantPage.getAppsJobsListWE().isDisplayed());
+        assertTrue(appsRelevantPage.isJobsListDisplayed());
 
-        log.info("check the clicked link is activated");
-        assertTrue(appsRelevantPage.getAppsRelevantActivatedLink().isDisplayed());
+        log.info("check the Relevant link is activated");
+        assertTrue(appsRelevantPage.isRelevantLinkActivated());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_APPS));
@@ -132,8 +149,8 @@ public class OpenAllPagesTest extends AbstractTest {
         CommonPage commonPage = openCommonPage();
         AppsFeaturedPage appsFeaturedPage = commonPage.openAppsPage().openAppsFeaturedPage();
 
-        log.info("check the clicked link is activated");
-        assertTrue(appsFeaturedPage.getAppsFeaturedActivatedLink().isDisplayed());
+        log.info("check the Featured link is activated");
+        assertTrue(appsFeaturedPage.isFeaturedLinkActivated());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_APPS));
@@ -146,8 +163,8 @@ public class OpenAllPagesTest extends AbstractTest {
         CommonPage commonPage = openCommonPage();
         AppsExplorePage appsExplorePage = commonPage.openAppsPage().openAppsExplorePage();
 
-        log.info("check the clicked link is activated");
-        assertTrue(appsExplorePage.getAppsExploreActivatedLink().isDisplayed());
+        log.info("check the Explore link is activated");
+        assertTrue(appsExplorePage.isExploreLinkActivated());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_APPS));
@@ -161,7 +178,7 @@ public class OpenAllPagesTest extends AbstractTest {
         AppsManageAssetsPage appsManageAssetsPage = commonPage.openAppsPage().openAppsManageAssetsPage();
 
         log.info("check 'Create Assets' button is displayed");
-        assertTrue(appsManageAssetsPage.getAppsManageCreateAssetsLink().isDisplayed());
+        assertTrue(appsManageAssetsPage.isCreateAssetsDisplayed());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ASSETS));
@@ -175,8 +192,8 @@ public class OpenAllPagesTest extends AbstractTest {
         AppsManageAssetsPage appsManageAssetsPage = commonPage.openAppsPage().openAppsManageAssetsPage();
         AppsManageMyAssetsPage appsManageMyAssetsPage = appsManageAssetsPage.openMyAssetsPage();
 
-        log.info("check the clicked link is activated");
-        assertTrue(appsManageMyAssetsPage.getAppsManageMyAssetsActivatedLink().isDisplayed());
+        log.info("check the Manage My Assets link is activated");
+        assertTrue(appsManageMyAssetsPage.isManageMyAssetsAcivated());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ASSETS));
@@ -190,8 +207,8 @@ public class OpenAllPagesTest extends AbstractTest {
         AppsManageAssetsPage appsManageAssetsPage = commonPage.openAppsPage().openAppsManageAssetsPage();
         AppsManageFeaturedPage appsManageFeaturedPage = appsManageAssetsPage.openFeaturedPage();
 
-        log.info("check the clicked link is activated");
-        assertTrue(appsManageFeaturedPage.getAppsManageFeaturedActivatedLink().isDisplayed());
+        log.info("check the Manage Featured link is activated");
+        assertTrue(appsManageFeaturedPage.isFeaturedManageLinkActivated());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ASSETS));
@@ -205,8 +222,8 @@ public class OpenAllPagesTest extends AbstractTest {
         AppsManageAssetsPage appsManageAssetsPage = commonPage.openAppsPage().openAppsManageAssetsPage();
         AppsManageExplorePage appsManageExplorePage = appsManageAssetsPage.openExplorePage();
 
-        log.info("check the clicked link is activated");
-        assertTrue(appsManageExplorePage.getAppsManageExploreActivatedLink().isDisplayed());
+        log.info("check the Manage Explore link is activated");
+        assertTrue(appsManageExplorePage.isManageExploreLinkActivated());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ASSETS));
@@ -221,7 +238,7 @@ public class OpenAllPagesTest extends AbstractTest {
         AppsManageCreateAssetsPage appsManageCreateAssetsPage = appsManageAssetsPage.openCreateAssetsPage();
 
         log.info("check the Step 4 is displayed");
-        assertTrue(appsManageCreateAssetsPage.getAppsManageCreateAssetsGenerateKeyLink().isDisplayed());
+        assertTrue(appsManageCreateAssetsPage.isGenerateKeyLinkDisplayed());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ADD_ASSETS));
@@ -235,7 +252,7 @@ public class OpenAllPagesTest extends AbstractTest {
         CompsPage compsPage = commonPage.openCompsPage();
 
         log.info("check My Comparisons link is displayed");
-        assertTrue(compsPage.getCompsMyCompsLink().isDisplayed());
+        assertTrue(compsPage.isMyCompsLinkDisplayed());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_COMPARISONS));
@@ -249,7 +266,7 @@ public class OpenAllPagesTest extends AbstractTest {
         CompsMyCompsPage compsMyCompsPage = commonPage.openCompsPage().openCompsMyCompsPage();
 
         log.info("check My Comparisons link is activated");
-        assertTrue(compsMyCompsPage.getCompsMyCompsActivatedLink().isDisplayed());
+        assertTrue(compsMyCompsPage.isMyCompsLinkActivated());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_COMPARISONS));
@@ -263,7 +280,7 @@ public class OpenAllPagesTest extends AbstractTest {
         CompsFeaturedPage compsFeaturedPage = commonPage.openCompsPage().openCompsFeaturedPage();
 
         log.info("check Featured link is activated");
-        assertTrue(compsFeaturedPage.getCompsFeaturedActivatedLink().isDisplayed());
+        assertTrue(compsFeaturedPage.isFeaturedLinkActivated());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_COMPARISONS));
@@ -277,7 +294,7 @@ public class OpenAllPagesTest extends AbstractTest {
         CompsExplorePage compsExplorePage = commonPage.openCompsPage().openCompsExplorePage();
 
         log.info("check Explore link is activated");
-        assertTrue(compsExplorePage.getCompsExploreActivatedLink().isDisplayed());
+        assertTrue(compsExplorePage.isExploreLinkActivated());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_COMPARISONS));
@@ -291,7 +308,7 @@ public class OpenAllPagesTest extends AbstractTest {
         CompsRunComparisonPage compsRunComparisonPage = commonPage.openCompsPage().openCompsRunComparisonPage();
 
         log.info("check the circle 'with' is displayed");
-        assertTrue(compsRunComparisonPage.getCompsRunCompCircleWithWE().isDisplayed());
+        assertTrue(compsRunComparisonPage.isCircleWithDisplayed());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_COMPARATOR));
@@ -305,7 +322,7 @@ public class OpenAllPagesTest extends AbstractTest {
         FilesPage filesPage = commonPage.openFilesPage();
 
         log.info("check My Files link is displayed");
-        assertTrue(filesPage.getFilesMyFilesLink().isDisplayed());
+        assertTrue(filesPage.isMyFilesLinkDisplayed());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
@@ -319,7 +336,7 @@ public class OpenAllPagesTest extends AbstractTest {
         FilesMyFilesPage filesMyFilesPage = commonPage.openFilesPage().openFilesMyFilesPage();
 
         log.info("check My Files link is activated");
-        assertTrue(filesMyFilesPage.getFilesMyFilesActivatedLink().isDisplayed());
+        assertTrue(filesMyFilesPage.isMyFilesLinkActivated());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
@@ -333,7 +350,7 @@ public class OpenAllPagesTest extends AbstractTest {
         FilesFeaturedPage filesFeaturedPage = commonPage.openFilesPage().openFilesFeaturedPage();
 
         log.info("check Featured link is activated");
-        assertTrue(filesFeaturedPage.getFilesFeaturedActivatedLink().isDisplayed());
+        assertTrue(filesFeaturedPage.isFeaturedLinkActivated());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
@@ -347,7 +364,7 @@ public class OpenAllPagesTest extends AbstractTest {
         FilesExplorePage filesExplorePage = commonPage.openFilesPage().openFilesExplorePage();
 
         log.info("check Explore link is activated");
-        assertTrue(filesExplorePage.getFilesExploreActivatedLink().isDisplayed());
+        assertTrue(filesExplorePage.isExploreLinkActivated());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
@@ -361,7 +378,7 @@ public class OpenAllPagesTest extends AbstractTest {
         FilesAddFilesPage filesAddFilesPage = commonPage.openFilesPage().openFilesAddFilesPage();
 
         log.info("check Browse Files button is displayed");
-        assertTrue(filesAddFilesPage.getFilesBrowseFilesInput().isDisplayed());
+        assertTrue(filesAddFilesPage.isBrowseFilesButtonDisplayed());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_UPLOAD_FILES));
@@ -375,7 +392,7 @@ public class OpenAllPagesTest extends AbstractTest {
         ExpertsPage expertsPage = commonPage.openExpertsPage();
 
         log.info("check Experts icon is activated");
-        assertTrue(expertsPage.getExpertsActivatedLink().isDisplayed());
+        assertTrue(expertsPage.isExpertsIconDisplayed());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_EXPERTS));
@@ -389,7 +406,7 @@ public class OpenAllPagesTest extends AbstractTest {
         ChallsPage challsPage = commonPage.openChallsPage();
 
         log.info("check Challenges icon is activated");
-        assertTrue(challsPage.getChallsActivatedIconLink().isDisplayed());
+        assertTrue(challsPage.isChallengesIconDisplayed());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_CHALLS));
@@ -403,7 +420,7 @@ public class OpenAllPagesTest extends AbstractTest {
         DiscsPage discsPage = commonPage.openDiscsPage();
 
         log.info("check Start Discussion button is displayed");
-        assertTrue(discsPage.getDiscsStartDiscLink().isDisplayed());
+        assertTrue(discsPage.isStartDiscsButtonDisplayed());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_DISCS));
@@ -417,7 +434,7 @@ public class OpenAllPagesTest extends AbstractTest {
         DiscsNewDiscPage discsNewDiscPage = commonPage.openDiscsPage().openNewDiscPage();
 
         log.info("check New Discussion Editor is displayed");
-        assertTrue(discsNewDiscPage.getDiscsNewDiscEditorWE().isDisplayed());
+        assertTrue(discsNewDiscPage.isEditorDisplayed());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_EDIT_DISC));
@@ -431,10 +448,52 @@ public class OpenAllPagesTest extends AbstractTest {
         OverviewPage overviewPage = commonPage.openOverviewPage();
 
         log.info("check Welcome Text is displayed");
-        assertTrue(overviewPage.getOverviewWelcomeText().isDisplayed());
+        assertTrue(overviewPage.isWelcomeTextDisplayed());
 
         log.info("check page title");
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_OVERVIEW));
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkProfilePageCanBeOpen() {
+        logTestHeader("Test Case: check that Profile page can be open");
+
+        CommonPage commonPage = openCommonPage();
+        ProfilePage profilePage = commonPage.openProfilePage();
+
+        log.info("check About your organization Text is displayed");
+        assertTrue(profilePage.isAboutOrgTextDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_PROFILE));
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkPublicProfilePageCanBeOpen() {
+        logTestHeader("Test Case: check that Public Profile page can be open");
+
+        CommonPage commonPage = openCommonPage();
+        PublicProfilePage publicProfilePage = commonPage.openPublicProfilePage();
+
+        log.info("check 'Joined' tag is displayed");
+        assertTrue(publicProfilePage.isJoinedTagDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_PUBLIC_PROFILE));
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkLicensePageCanBeOpen() {
+        logTestHeader("Test Case: check that License page can be open");
+
+        CommonPage commonPage = openCommonPage();
+        LicensesPage licensesPage = commonPage.openLicensePage();
+
+        log.info("check Create New License button is displayed");
+        assertTrue(licensesPage.isCreateNewLicenseDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_LICENSES));
     }
 
 

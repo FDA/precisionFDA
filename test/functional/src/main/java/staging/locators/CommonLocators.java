@@ -2,9 +2,9 @@ package staging.locators;
 
 public class CommonLocators {
 
-    public static final String FDANavigationPanel = "//*[@id='pfda-navbar-collapse']";
+    public static final String COMMON_NAV_PANEL = "//*[@id='pfda-navbar-collapse']";
 
-    public static final String FDALoggedUsernameLink = "//li[@class='dropdown']/a";
+    public static final String LOGGED_USERNAME_LINK = "//li[@class='dropdown']/a";
 
     public static final String APPS_PAGE_ICON = "//li/a[@href='/apps']/div[contains(@class, 'nav-icon')]";
 

@@ -28,4 +28,8 @@ public class AppsManageFeaturedPage extends AbstractPage {
         return appsManageFeaturedActivatedLink;
     }
 
+    public boolean isFeaturedManageLinkActivated() {
+        return isElementPresent(getAppsManageFeaturedActivatedLink());
+    }
+
 }

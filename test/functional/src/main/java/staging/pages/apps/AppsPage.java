@@ -67,4 +67,8 @@ public class AppsPage extends AbstractPage {
         return appsRelevantLink;
     }
 
+    public boolean isRelevantAppsLinkDisplayed() {
+        return isElementPresent(getAppsRelevantLink());
+    }
+
 }

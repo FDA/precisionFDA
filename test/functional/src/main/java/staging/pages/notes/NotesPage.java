@@ -5,13 +5,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
-import staging.locators.FilesLocators;
 import staging.locators.NotesLocators;
 import staging.pages.AbstractPage;
-import staging.pages.files.FilesAddFilesPage;
-import staging.pages.files.FilesExplorePage;
-import staging.pages.files.FilesFeaturedPage;
-import staging.pages.files.FilesMyFilesPage;
 
 public class NotesPage extends AbstractPage {
 
@@ -59,9 +54,12 @@ public class NotesPage extends AbstractPage {
 
     public NotesNewNotePage openNotesNewNotePage() {
         log.info("open Notes.NewNote page");
-        sleep(5000);
         notesNewNoteLink.click();
         return new NotesNewNotePage(getDriver());
+    }
+
+    public boolean isMyNotesLinkDisplayed() {
+        return isElementPresent(getNotesMyNotesLink());
     }
 
 }

@@ -32,4 +32,12 @@ public class AppsRelevantPage extends AbstractPage {
         return appsRelevantActivatedLink;
     }
 
+    public boolean isJobsListDisplayed() {
+        return getAppsJobsListWE().isDisplayed();
+    }
+
+    public boolean isRelevantLinkActivated() {
+        return isElementPresent(getAppsRelevantActivatedLink());
+    }
+
 }

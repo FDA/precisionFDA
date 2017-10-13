@@ -25,5 +25,9 @@ public class NotesMyNotesPage extends AbstractPage {
         return notesMyNotesActivatedLink;
     }
 
+    public boolean isMyNotesLinkActivated() {
+        return isElementPresent(getNotesMyNotesActivatedLink());
+    }
+
 
 }
