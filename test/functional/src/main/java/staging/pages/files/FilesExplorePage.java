@@ -24,5 +24,7 @@ public class FilesExplorePage extends AbstractPage {
         return filesExploreActivatedLink;
     }
 
-
+    public boolean isExploreLinkActivated() {
+        return isElementPresent(getFilesExploreActivatedLink());
+    }
 }

@@ -23,7 +23,6 @@ public class DiscsPage extends AbstractPage {
 
     public DiscsPage(final WebDriver driver) {
         super(driver);
-        sleep(5000);
         waitForPageToLoadAndVerifyBy(By.xpath(DiscsLocators.DISCS_START_DISCS_LINK));
     }
 
@@ -35,6 +34,10 @@ public class DiscsPage extends AbstractPage {
         log.info("open Discussions.NewDiscussion page");
         discsStartDiscLink.click();
         return new DiscsNewDiscPage(getDriver());
+    }
+
+    public boolean isStartDiscsButtonDisplayed() {
+        return isElementPresent(getDiscsStartDiscLink());
     }
 
 }

@@ -24,5 +24,9 @@ public class CompsFeaturedPage extends AbstractPage {
         return compsFeaturedActivatedLink;
     }
 
+    public boolean isFeaturedLinkActivated() {
+        return isElementPresent(getCompsFeaturedActivatedLink());
+    }
+
 
 }

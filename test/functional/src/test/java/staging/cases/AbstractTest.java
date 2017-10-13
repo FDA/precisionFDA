@@ -9,9 +9,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.support.FindBy;
 import org.testng.annotations.*;
-import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.CommonLocators;
 import staging.pages.StartPage;
 import staging.pages.OpenStartPage;
@@ -36,22 +34,30 @@ import static staging.data.Users.*;
 public abstract class AbstractTest {
 
     protected static WebDriver driver;
-    private final Logger log = Logger.getLogger("");
+    private Logger log = Logger.getLogger("INFO");
 
     public static final String globalSalt = getCurrentDateSalt();
+    public static String testSuiteName;
 
-    @FindBy(xpath = CommonLocators.MAIN_LOGO)
-    private Link mailLogoLink;
+    public static String getDebugLogFolder() {
+        return System.getProperty("user.dir") + "/target/debug-log/";
+    }
+
+    public static String getDebugLogFolderPath() {
+        return getDebugLogFolder() + testSuiteName + "_" + globalSalt + "/";
+    }
 
     @BeforeTest
     public void setUp() throws Exception {
         log.info("setting browser");
 
+        //initiate global params
+        testSuiteName = this.getClass().getName().replace("staging.cases.", "");
+
         String currentDirectory = System.getProperty("user.dir");
 
 
         // Google Chrome
-
 //        System.setProperty("webdriver.chrome.driver", currentDirectory + SettingsProperties.getProperty("pathToChromeDriver"));
 //        DesiredCapabilities capabilities = DesiredCapabilities.chrome();
 //        capabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
@@ -64,7 +70,6 @@ public abstract class AbstractTest {
 
 
         // Firefox
-
         FirefoxBinary firefoxBinary = new FirefoxBinary();
         if (SettingsProperties.getProperty("headlessMode").equalsIgnoreCase("true")) {
             firefoxBinary.addCommandLineOptions("--headless");
@@ -78,11 +83,9 @@ public abstract class AbstractTest {
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
         //create debug folder
-        String folderPath = currentDirectory + "/target/debug-log";
-        createFolder(folderPath);
-        folderPath = folderPath + "/" + globalSalt;
-        createFolder(folderPath);
-        log.info("folder created: " + folderPath);
+        createFolder(getDebugLogFolder());
+        createFolder(getDebugLogFolderPath());
+        log.info("folder created: " + getDebugLogFolderPath());
     }
 
     @AfterTest
@@ -91,15 +94,14 @@ public abstract class AbstractTest {
             driver.quit();
         }
         //move log files
-        moveFile("full.log");
-        moveFile("error.log");
-
+        moveLogFile("full.log");
+        moveLogFile("error.log");
     }
 
-    public void moveFile(String fileName) {
-        String oldPath = System.getProperty("user.dir") + "/target/debug-log/" + fileName;
+    public void moveLogFile(String fileName) {
+        String oldPath = getDebugLogFolder() + fileName;
         File file = new File(oldPath);
-        String newPath = System.getProperty("user.dir") + "/target/debug-log/" + globalSalt + "/" + fileName;
+        String newPath = getDebugLogFolderPath() + fileName;
         file.renameTo(new File(newPath));
         file.delete();
     }
@@ -127,20 +129,6 @@ public abstract class AbstractTest {
         String title = driver.getTitle();
         log.info("title is: " + title);
         return title;
-    }
-
-    @Test
-    public void successfulLogin() {
-        logTestHeader("Test Case: Successful Login");
-
-        StartPage startPage = openStartPage();
-        CommonPage commonPage = loginToFDA(startPage);
-
-        log.info("check navigation panel is displayed");
-        assertTrue(commonPage.getNavigationPanelWE().isDisplayed());
-
-        log.info("check correct username is displayed");
-        assertTrue(commonPage.getUsernameLink().getText().equals(getTestUserName()));
     }
 
     public CommonPage openCommonPage() {
@@ -183,7 +171,7 @@ public abstract class AbstractTest {
 
     public static String getCurrentDateSalt() {
         Date d = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyddMM_HHmmssS");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd_MM_HHmmssS");
         String salt = dateFormat.format(d);
         return salt;
     }
@@ -194,12 +182,11 @@ public abstract class AbstractTest {
 
     public static void casePostActions(String status, String caseName, String getScreenshot, String getSource) {
 
-        final Logger log = Logger.getLogger("");
+        Logger log = Logger.getLogger("POST");
 
         String currentSalt = getCurrentDateSalt();
 
-        String path = System.getProperty("user.dir") + "/target/debug-log/" + globalSalt + "/" +
-                status + "_" + caseName + "_" + currentSalt;
+        String path = getDebugLogFolderPath() + status + "_" + caseName + "_" + currentSalt;
 
         if (getScreenshot.equalsIgnoreCase("true")) {
             //take screenshot
@@ -218,5 +205,7 @@ public abstract class AbstractTest {
             }
         }
     }
+
+
 
 }

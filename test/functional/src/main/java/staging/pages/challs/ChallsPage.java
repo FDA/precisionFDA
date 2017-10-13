@@ -37,6 +37,9 @@ public class ChallsPage extends AbstractPage {
         return challsActivatedIconLink;
     }
 
+    public boolean isChallengesIconDisplayed() {
+        return isElementPresent(getChallsActivatedIconLink());
+    }
 
 
 }

@@ -32,5 +32,9 @@ public class NotesNewNotePage extends AbstractPage {
         return notesNewNoteEditTabWE;
     }
 
+    public boolean isEditorDisplayed() {
+        return getNotesNewNoteEditorWE().isDisplayed();
+    }
+
 
 }

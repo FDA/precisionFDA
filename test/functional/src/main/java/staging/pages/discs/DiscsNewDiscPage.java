@@ -25,4 +25,8 @@ public class DiscsNewDiscPage extends AbstractPage {
         return discsNewDiscEditorWE;
     }
 
+    public boolean isEditorDisplayed() {
+        return getDiscsNewDiscEditorWE().isDisplayed();
+    }
+
 }

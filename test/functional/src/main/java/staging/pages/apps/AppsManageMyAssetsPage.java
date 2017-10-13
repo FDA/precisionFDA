@@ -28,4 +28,7 @@ public class AppsManageMyAssetsPage extends AbstractPage {
         return appsManageMyAssetsActivatedLink;
     }
 
+    public boolean isManageMyAssetsAcivated() {
+        return isElementPresent(getAppsManageMyAssetsActivatedLink());
+    }
 }

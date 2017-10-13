@@ -6,6 +6,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
+import staging.blocks.ProfileDropBlock;
+import staging.data.Users;
 import staging.locators.CommonLocators;
 import staging.pages.apps.AppsPage;
 import staging.pages.challs.ChallsPage;
@@ -13,18 +15,23 @@ import staging.pages.comps.CompsPage;
 import staging.pages.discs.DiscsPage;
 import staging.pages.experts.ExpertsPage;
 import staging.pages.files.FilesPage;
+import staging.pages.licenses.LicensesPage;
 import staging.pages.notes.NotesPage;
 import staging.pages.overview.OverviewPage;
+import staging.pages.profile.ProfilePage;
+import staging.pages.profile.PublicProfilePage;
 
 public class CommonPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
 
-    @FindBy(xpath = CommonLocators.FDANavigationPanel)
-    private WebElement FDANavigationPanel;
+    private ProfileDropBlock profileDropBlock;
 
-    @FindBy(xpath = CommonLocators.FDALoggedUsernameLink)
-    private Link FDALoggedUsernameLink;
+    @FindBy(xpath = CommonLocators.COMMON_NAV_PANEL)
+    private WebElement commonNavigationPanel;
+
+    @FindBy(xpath = CommonLocators.LOGGED_USERNAME_LINK)
+    private Link loggedUsernameLink;
 
     @FindBy(xpath = CommonLocators.APPS_PAGE_ICON)
     private Link appsPageIcon;
@@ -53,15 +60,15 @@ public class CommonPage extends AbstractPage {
 
     public CommonPage(final WebDriver driver) {
         super(driver);
-        waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.FDANavigationPanel), 30);
+        waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.COMMON_NAV_PANEL), 30);
     }
 
     public WebElement getNavigationPanelWE() {
-        return FDANavigationPanel;
+        return commonNavigationPanel;
     }
 
     public Link getUsernameLink() {
-        return FDALoggedUsernameLink;
+        return loggedUsernameLink;
     }
 
     public AppsPage openAppsPage() {
@@ -110,6 +117,41 @@ public class CommonPage extends AbstractPage {
         log.info("opening Overview page");
         overviewPageIcon.click();
         return new OverviewPage(getDriver());
+    }
+
+    public ProfilePage openProfilePage() {
+        log.info("opening Profile page");
+        openProfileDropdown();
+        profileDropBlock.openProfilePage();
+        return new ProfilePage(getDriver());
+    }
+
+    public CommonPage openProfileDropdown() {
+        loggedUsernameLink.click();
+        waitUntilDisplayed(profileDropBlock, 15);
+        return new CommonPage(getDriver());
+    }
+
+    public PublicProfilePage openPublicProfilePage() {
+        log.info("opening Public Profile page");
+        openProfileDropdown();
+        profileDropBlock.openPublicProfilePage();
+        return new PublicProfilePage(getDriver());
+    }
+
+    public LicensesPage openLicensePage() {
+        log.info("opening License page");
+        openProfileDropdown();
+        profileDropBlock.openLicensesPage();
+        return new LicensesPage(getDriver());
+    }
+
+    public boolean isNavigationPanelDisplayed() {
+        return getNavigationPanelWE().isDisplayed();
+    }
+
+    public boolean isCorrectUserNameDisplayed() {
+        return getUsernameLink().getText().equals(Users.getTestUserFullName());
     }
 
 }

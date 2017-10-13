@@ -24,5 +24,8 @@ public class NotesFeaturedPage extends AbstractPage {
         return notesFeaturedActivatedLink;
     }
 
+    public boolean isFeaturedLinkActivated() {
+        return isElementPresent(getNotesFeaturedActivatedLink());
+    }
 
 }

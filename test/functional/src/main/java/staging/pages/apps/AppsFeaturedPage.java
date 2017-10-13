@@ -24,4 +24,8 @@ public class AppsFeaturedPage extends AbstractPage {
         return appsFeaturedActivatedLink;
     }
 
+    public boolean isFeaturedLinkActivated() {
+        return isElementPresent(getAppsFeaturedActivatedLink());
+    }
+
 }

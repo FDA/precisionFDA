@@ -24,4 +24,7 @@ public class AppsExplorePage extends AbstractPage {
         return appsExploreActivatedLink;
     }
 
+    public boolean isExploreLinkActivated() {
+        return isElementPresent(getAppsExploreActivatedLink());
+    }
 }

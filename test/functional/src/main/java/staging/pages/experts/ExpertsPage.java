@@ -33,5 +33,8 @@ public class ExpertsPage extends AbstractPage {
         return expertsActivatedLink;
     }
 
+    public boolean isExpertsIconDisplayed() {
+        return isElementPresent(getExpertsActivatedLink());
+    }
 
 }

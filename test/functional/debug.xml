@@ -1,13 +1,11 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="Open all pages suite">
-    <test name="Check all pages">
+<suite name="debug">
+    <test name="debug">
         <classes>
             <class name="staging.cases.OpenAllPagesTest">
                 <methods>
                     <include name="successfulLogin" />
-                    <include name="checkNotesMyNotesPageCanBeOpen" />
-                    <include name="checkFilesAddFilesPageCanBeOpen" />
-                    <include name="checkNotesNewNotePageCanBeOpen" />
+                    <include name="checkProfilePageCanBeOpen" />
                 </methods>
             </class>
         </classes>

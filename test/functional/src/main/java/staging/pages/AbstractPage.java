@@ -5,6 +5,7 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.loader.HtmlElementLoader;
 
 import java.util.List;
@@ -128,6 +129,10 @@ public abstract class AbstractPage {
         }
     }
 
+    public boolean isElementPresent(final Link element) {
+        return element.getWrappedElement().isDisplayed();
+    }
+
     public void waitUntilNotDisplayed(final By locator) {
         new WebDriverWait(driver, DEFAULT_TIMEOUT).until(ExpectedConditions.invisibilityOfElementLocated(locator));
     }
@@ -182,7 +187,8 @@ public abstract class AbstractPage {
 
 
     public boolean waitForPageToLoadAndVerifyBy(final By pageIdentifier, int timeout) {
-        waitUntilJSReady();
+        waitUntilScriptsReady();
+        sleep(500);
         final String pageName = this.getClass().getName().replace("staging.pages.", "");
         log.info("Waiting for " + pageName + " page to load");
         if (isElementPresent(pageIdentifier, timeout)) {
@@ -194,14 +200,20 @@ public abstract class AbstractPage {
         }
     }
 
-    //Wait Until JS Ready
+
+    // ---- page scripts upload ----
+
+    //Wait Until JS, JQuery and Angular are Ready
+    public void waitUntilScriptsReady() {
+        log.info("wait until page scripts are ready");
+        waitUntilJSReady();
+        waitForJQueryLoad();
+    }
+
     public void waitUntilJSReady() {
-        log.info("wait until JS is loaded");
-        WebDriver jsWaitDriver = driver;
+        WebDriver jsWaitDriver = getDriver();
         WebDriverWait wait = new WebDriverWait(jsWaitDriver, 60);
         JavascriptExecutor jsExec = (JavascriptExecutor) jsWaitDriver;
-
-        //Wait for Javascript to load
         ExpectedCondition<Boolean> jsLoad = driver -> ((JavascriptExecutor) jsWaitDriver)
                 .executeScript("return document.readyState").toString().equals("complete");
 
@@ -211,6 +223,43 @@ public abstract class AbstractPage {
         //Wait Javascript until it is Ready
         if (!jsReady) {
             wait.until(jsLoad);
+        }
+    }
+
+    public void waitForAngularLoad() {
+        WebDriver jsWaitDriver = driver;
+        WebDriverWait wait = new WebDriverWait(jsWaitDriver, 60);
+        JavascriptExecutor jsExec = (JavascriptExecutor) jsWaitDriver;
+
+        String angularReadyScript = "return angular.element(document).injector().get('$http').pendingRequests.length === 0";
+
+        //Wait for ANGULAR to load
+        ExpectedCondition<Boolean> angularLoad = driver -> Boolean.valueOf(((JavascriptExecutor) driver)
+                .executeScript(angularReadyScript).toString());
+
+        //Get Angular is Ready
+        boolean angularReady = Boolean.valueOf(jsExec.executeScript(angularReadyScript).toString());
+
+        //Wait ANGULAR until it is Ready!
+        if(!angularReady) {
+            wait.until(angularLoad);
+        }
+    }
+
+    public void waitForJQueryLoad() {
+        WebDriver jsWaitDriver = driver;
+        JavascriptExecutor jsExec = (JavascriptExecutor) jsWaitDriver;
+        WebDriverWait jsWait = new WebDriverWait(jsWaitDriver, 60);
+
+        ExpectedCondition<Boolean> jQueryLoad = driver -> ((Long) ((JavascriptExecutor) jsWaitDriver)
+                .executeScript("return jQuery.active") == 0);
+
+        //Get JQuery is Ready
+        boolean jqueryReady = (Boolean) jsExec.executeScript("return jQuery.active==0");
+
+        //Wait JQuery until it is Ready!
+        if(!jqueryReady) {
+            jsWait.until(jQueryLoad);
         }
     }
 
