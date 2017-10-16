@@ -110,6 +110,7 @@ class MainController < ApplicationController
         { logo: "participants/counsyl.png", name: "Counsyl"},
         { logo: "participants/crystal_genetics.png", name: "Crystal Genetics"},
         { logo: "participants/dnanexus.png", name: "DNAnexus"},
+        { logo: "participants/edico.png", name: "Edico Genome"},
         { logo: "participants/emory.png", name: "Emory Genetics Lab"},
         { logo: "participants/garvan.png", name: "Garvan"},
         { logo: "participants/genedx.png", name: "GeneDx"},
