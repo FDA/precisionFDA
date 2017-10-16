@@ -18,9 +18,9 @@ public class TestResultListener extends TestListenerAdapter {
         String caseName = result.getName().replace("check", "").replace("CanBeOpen", "");
         String status = "passed";
         casePostActions(status, caseName, screenshotOnPass, htmlSourceOnPass);
-        log.info("-------------------- --");
-        log.info("--      PASSED       --");
-        log.info("-------------------- --");
+        log.info("----------------------");
+        log.info("--      PASSED      --");
+        log.info("----------------------");
     }
 
 
@@ -31,9 +31,9 @@ public class TestResultListener extends TestListenerAdapter {
         String caseName = result.getName().replace("check", "").replace("CanBeOpen", "");
         String status = "failed";
         casePostActions(status, caseName, screenshotOnFail, htmlSourceOnFail);
-        log.info("-------------------- --");
-        log.info("--      FAILED       --");
-        log.info("-------------------- --");
+        log.info("----------------------");
+        log.info("--      FAILED      --");
+        log.info("----------------------");
     }
 
 }

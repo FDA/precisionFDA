@@ -15,7 +15,6 @@ public class AppsManageCreateAssetsPage extends AbstractPage {
     @FindBy(xpath = AppsLocators.APPS_MANAGE_CREATE_ASSETS_GENERATE_KEY_LINK)
     private Link appsManageCreateAssetsGenerateKeyLink;
 
-
     public AppsManageCreateAssetsPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();

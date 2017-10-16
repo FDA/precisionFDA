@@ -5,14 +5,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import ru.yandex.qatools.htmlelements.element.Link;
-import staging.locators.NotesLocators;
 import staging.locators.ProfileLocators;
 import staging.pages.AbstractPage;
-import staging.pages.notes.NotesExplorePage;
-import staging.pages.notes.NotesFeaturedPage;
-import staging.pages.notes.NotesMyNotesPage;
-import staging.pages.notes.NotesNewNotePage;
 
 public class ProfilePage extends AbstractPage {
 
@@ -31,7 +25,7 @@ public class ProfilePage extends AbstractPage {
     }
 
     public boolean isAboutOrgTextDisplayed() {
-        return getProfileAboutOrgWE().isDisplayed();
+        return isElementPresent(getProfileAboutOrgWE());
     }
 
 }

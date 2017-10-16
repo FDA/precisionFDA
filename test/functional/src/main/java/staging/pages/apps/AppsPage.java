@@ -3,7 +3,6 @@ package staging.pages.apps;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.AppsLocators;
@@ -12,9 +11,6 @@ import staging.pages.AbstractPage;
 public class AppsPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
-
-    @FindBy(xpath = AppsLocators.APPS_JOBS_LIST)
-    private WebElement appsJobsList;
 
     @FindBy(xpath = AppsLocators.APPS_RELEVANT_LINK)
     private Link appsRelevantLink;

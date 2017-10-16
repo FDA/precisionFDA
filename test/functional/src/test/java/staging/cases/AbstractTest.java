@@ -11,24 +11,22 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.testng.annotations.*;
 import staging.locators.CommonLocators;
+import staging.model.Users;
 import staging.pages.StartPage;
-import staging.pages.OpenStartPage;
 import staging.pages.CommonPage;
 import staging.pages.login.GrantAccessLoginPage;
 import staging.pages.login.LoginPage;
 import staging.utils.SettingsProperties;
 import tools.TestResultListener;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static org.testng.Assert.assertTrue;
-import static staging.data.Users.*;
+import static staging.utils.Utils.createFile;
+import static staging.utils.Utils.createFolder;
+import static staging.utils.Utils.getCurrentDateSalt;
 
 @Listeners(TestResultListener.class)
 public abstract class AbstractTest {
@@ -37,6 +35,7 @@ public abstract class AbstractTest {
     private Logger log = Logger.getLogger("INFO");
 
     public static final String globalSalt = getCurrentDateSalt();
+
     public static String testSuiteName;
 
     public static String getDebugLogFolder() {
@@ -49,27 +48,20 @@ public abstract class AbstractTest {
 
     @BeforeTest
     public void setUp() throws Exception {
-        log.info("setting browser");
 
         //initiate global params
         testSuiteName = this.getClass().getName().replace("staging.cases.", "");
 
+        runBrowser();
+
+        //create debug folder
+        createFolder(getDebugLogFolder());
+        createFolder(getDebugLogFolderPath());
+        log.info("folder created: " + getDebugLogFolderPath());
+    }
+
+    public void runBrowser() {
         String currentDirectory = System.getProperty("user.dir");
-
-
-        // Google Chrome
-//        System.setProperty("webdriver.chrome.driver", currentDirectory + SettingsProperties.getProperty("pathToChromeDriver"));
-//        DesiredCapabilities capabilities = DesiredCapabilities.chrome();
-//        capabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
-//
-//        ChromeOptions options = new ChromeOptions();
-//        options.addArguments("--headless", "--disable-gpu");
-//
-//        capabilities.setCapability(ChromeOptions.CAPABILITY, options);
-//        driver = new ChromeDriver(capabilities);
-
-
-        // Firefox
         FirefoxBinary firefoxBinary = new FirefoxBinary();
         if (SettingsProperties.getProperty("headlessMode").equalsIgnoreCase("true")) {
             firefoxBinary.addCommandLineOptions("--headless");
@@ -79,23 +71,49 @@ public abstract class AbstractTest {
         FirefoxOptions firefoxOptions = new FirefoxOptions();
         firefoxOptions.setBinary(firefoxBinary);
         driver = new FirefoxDriver(firefoxOptions);
-
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+    }
 
-        //create debug folder
-        createFolder(getDebugLogFolder());
-        createFolder(getDebugLogFolderPath());
-        log.info("folder created: " + getDebugLogFolderPath());
+    public void reopenBrowser() {
+        log.info("reopen browser");
+        closeBrowser();
+        runBrowser();
     }
 
     @AfterTest
     public void tearDown() throws Exception {
-        if (driver != null) {
-            driver.quit();
-        }
+        closeBrowser();
         //move log files
         moveLogFile("full.log");
         moveLogFile("error.log");
+    }
+
+    public void closeBrowser() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+
+    @Test
+    public void successfulLogin() {
+        logTestHeader("Test Case: Successful Login");
+
+        Users user = Users.getTestUser();
+
+        openStartPage();
+        CommonPage commonPage = correctLoginToFDA(user);
+
+        log.info("check navigation panel is displayed");
+        assertTrue(commonPage.isNavigationPanelDisplayed());
+
+        log.info("check correct username is displayed");
+        assertTrue(commonPage.isCorrectUserNameDisplayed(user));
+    }
+
+    @Test
+    public StartPage openStartPage() {
+        driver.get(SettingsProperties.getProperty("startURL"));
+        return new StartPage(driver);
     }
 
     public void moveLogFile(String fileName) {
@@ -104,13 +122,6 @@ public abstract class AbstractTest {
         String newPath = getDebugLogFolderPath() + fileName;
         file.renameTo(new File(newPath));
         file.delete();
-    }
-
-    @Test
-    public StartPage openStartPage() {
-        OpenStartPage openStartPage = new OpenStartPage(driver);
-        StartPage startPage = openStartPage.openStartPage();
-        return startPage;
     }
 
     public void logTestHeader(final String text) {
@@ -136,13 +147,6 @@ public abstract class AbstractTest {
         return new CommonPage(driver);
     }
 
-    public static CommonPage loginToFDA(StartPage startPage) {
-        LoginPage loginPage = startPage.openLoginPage(getDNXusername(), getDNXpassword());
-        GrantAccessLoginPage grantAccessLoginPage = loginPage.loginToPrecisionFDA(getPFDAusername(), getPFDApassword());
-        CommonPage commonPage = grantAccessLoginPage.grantAccess();
-        return commonPage;
-    }
-
     public static void takeScreenshot(String filePath) {
         File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
         try {
@@ -150,30 +154,6 @@ public abstract class AbstractTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void createFolder(String folderPath) {
-        File file = new File(folderPath);
-        if (!file.exists()) {
-            file.mkdir();
-        }
-
-    }
-
-    public static void createFile(String folderPath, String content) throws IOException {
-        File file = new File(folderPath);
-        file.createNewFile();
-        FileWriter fw = new FileWriter(file.getAbsoluteFile());
-        BufferedWriter bw = new BufferedWriter(fw);
-        bw.write(content);
-        bw.close();
-    }
-
-    public static String getCurrentDateSalt() {
-        Date d = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd_MM_HHmmssS");
-        String salt = dateFormat.format(d);
-        return salt;
     }
 
     public static String getPageSource() {
@@ -206,6 +186,29 @@ public abstract class AbstractTest {
         }
     }
 
+    public LoginPage openLoginPage(String basicAuthUser, String basicAuthPassword) {
+        log.info("open Login page");
 
+        String url = "https://" + basicAuthUser +
+                ":" + basicAuthPassword + "" +
+                "@staging.dnanexus.com/login?scope=%7B%22full%22%3A+true%7D&redirect_uri=" +
+                "https%3A%2F%2F52.90.134.199%2Freturn_from_login&client_id=precision_fda";
+
+        driver.get(url);
+        return new LoginPage(driver);
+    }
+
+    public CommonPage correctLoginToFDA(Users user) {
+        LoginPage loginPage = openLoginPage(user.getBasicAuthUsername(), user.getBasicAuthPassword());
+        GrantAccessLoginPage grantAccessLoginPage = loginPage.correctLoginToPrecisionFDA(user.getApplUsername(), user.getApplPassword());
+        CommonPage commonPage = grantAccessLoginPage.grantAccess();
+        return commonPage;
+    }
+
+    public LoginPage wrongLoginToFDA(Users user) {
+        LoginPage loginPage = openLoginPage(user.getBasicAuthUsername(), user.getBasicAuthPassword());
+        loginPage = loginPage.wrongLoginToPrecisionFDA(user.getApplUsername(), user.getApplPassword());
+        return loginPage;
+    }
 
 }

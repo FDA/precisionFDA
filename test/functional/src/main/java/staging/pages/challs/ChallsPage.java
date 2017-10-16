@@ -7,12 +7,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.ChallsLocators;
-import staging.locators.NotesLocators;
 import staging.pages.AbstractPage;
-import staging.pages.notes.NotesExplorePage;
-import staging.pages.notes.NotesFeaturedPage;
-import staging.pages.notes.NotesMyNotesPage;
-import staging.pages.notes.NotesNewNotePage;
 
 public class ChallsPage extends AbstractPage {
 

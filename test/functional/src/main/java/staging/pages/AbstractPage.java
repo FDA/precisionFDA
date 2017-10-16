@@ -2,14 +2,14 @@ package staging.pages;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.*;
+
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.loader.HtmlElementLoader;
 
 import java.util.List;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.fail;
 
 public abstract class AbstractPage {
@@ -20,6 +20,8 @@ public abstract class AbstractPage {
 
     private static final int DEFAULT_TIMEOUT = 10;
 
+    public static String currentRunTime;
+
     public AbstractPage(final WebDriver driver) {
         HtmlElementLoader.populatePageObject(this, driver);
         this.driver = driver;
@@ -28,7 +30,7 @@ public abstract class AbstractPage {
     // ***** Waits and sleep ***** //
 
     public void waitUntilDisplayed(final WebElement element) {
-        waitUntilDisplayed(element, 60);
+        waitUntilDisplayed(element, 30);
     }
 
     public void waitUntilDisplayed(final WebElement element, final Integer timeout) {
@@ -36,9 +38,12 @@ public abstract class AbstractPage {
     }
 
     private void waitUntilDisplayed(final WebElement element, final Integer timeout, final boolean isLog) {
+        Wait<WebDriver> fluentWait = new FluentWait<WebDriver>(driver)
+                .withTimeout(timeout, SECONDS)
+                .pollingEvery(1, SECONDS)
+                .ignoring(NoSuchElementException.class);
         try {
-            (new WebDriverWait(driver, timeout)).ignoring(StaleElementReferenceException.class)
-                    .until(new ExpectedCondition<Boolean>() {
+                fluentWait.until(new ExpectedCondition<Boolean>() {
                         public Boolean apply(final WebDriver d) {
                             if (element == null) {
                                 return false;
@@ -46,10 +51,10 @@ public abstract class AbstractPage {
                                 return element.isDisplayed();
                             }
                         }
-                    });
+                });
         } catch (final TimeoutException e) {
             if (isLog) {
-                log.error("Element is not displayed, but expected", e);
+                log.error("Element <" + element + "> is not displayed, but expected", e);
             }
             throw e;
         }
@@ -91,6 +96,14 @@ public abstract class AbstractPage {
         });
     }
 
+    public void waitUntilNotDisplayed(final By locator) {
+        new WebDriverWait(driver, DEFAULT_TIMEOUT).until(ExpectedConditions.invisibilityOfElementLocated(locator));
+    }
+
+    public void waitUntilNotDisplayed(final By locator, final int timeout) {
+        new WebDriverWait(driver, timeout).until(ExpectedConditions.invisibilityOfElementLocated(locator));
+    }
+
     public boolean isElementPresent(final By locator, final int timeout) {
         try {
             waitUntilDisplayed(locator, timeout, false);
@@ -111,7 +124,16 @@ public abstract class AbstractPage {
 
     public boolean isElementPresent(final WebElement element) {
         try {
-            waitUntilDisplayed(element, DEFAULT_TIMEOUT, false);
+            waitUntilDisplayed(element, DEFAULT_TIMEOUT, true);
+            return true;
+        } catch (final TimeoutException e) {
+            return false;
+        }
+    }
+
+    public boolean isElementPresent(final Link element) {
+        try {
+            waitUntilDisplayed(element.getWrappedElement(), DEFAULT_TIMEOUT, true);
             return true;
         } catch (final TimeoutException e) {
             return false;
@@ -127,18 +149,6 @@ public abstract class AbstractPage {
             log.info(descr + " is NOT displayed");
             return false;
         }
-    }
-
-    public boolean isElementPresent(final Link element) {
-        return element.getWrappedElement().isDisplayed();
-    }
-
-    public void waitUntilNotDisplayed(final By locator) {
-        new WebDriverWait(driver, DEFAULT_TIMEOUT).until(ExpectedConditions.invisibilityOfElementLocated(locator));
-    }
-
-    public void waitUntilNotDisplayed(final By locator, final int timeout) {
-        new WebDriverWait(driver, timeout).until(ExpectedConditions.invisibilityOfElementLocated(locator));
     }
 
     public void sleep(final long msec) {

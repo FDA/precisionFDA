@@ -25,7 +25,7 @@ public class CompsRunComparisonPage extends AbstractPage {
     }
 
     public boolean isCircleWithDisplayed() {
-        return getCompsRunCompCircleWithWE().isDisplayed();
+        return isElementPresent(getCompsRunCompCircleWithWE());
     }
 
 

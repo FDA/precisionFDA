@@ -3,10 +3,12 @@ package staging.pages;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+
 import ru.yandex.qatools.htmlelements.element.Link;
+import staging.locators.CommonLocators;
 import staging.locators.StartLocators;
-import staging.pages.login.LoginPage;
 
 public class StartPage extends AbstractPage {
 
@@ -15,22 +17,33 @@ public class StartPage extends AbstractPage {
     @FindBy(xpath = StartLocators.START_LOGIN_LINK)
     private Link startLoginLink;
 
+    @FindBy(xpath = CommonLocators.COMMON_NAV_PANEL)
+    private WebElement commonNavigationPanel;
+
+    @FindBy(xpath = StartLocators.START_SUCCESS_MESSAGE_AREA)
+    private WebElement startSuccessMessageArea;
+
     public StartPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(StartLocators.START_LOGIN_LINK), 30);
     }
 
-    public LoginPage openLoginPage(String basicAuthUser, String basicAuthPassword) {
-        log.info("open Login page");
+    public boolean isNavigationPanelNotDisplayed() {
+        return !isElementPresent(getNavigationPanelWE(), 5);
+    }
 
-        String url = "https://" + basicAuthUser +
-                ":" + basicAuthPassword + "" +
-                "@staging.dnanexus.com/login?scope=%7B%22full%22%3A+true%7D&redirect_uri=" +
-                "https%3A%2F%2F52.90.134.199%2Freturn_from_login&client_id=precision_fda";
+    public WebElement getNavigationPanelWE() {
+        return commonNavigationPanel;
+    }
 
-        getDriver().get(url);
+    public WebElement getStartSuccessMessageArea() {
+        return startSuccessMessageArea;
+    }
 
-        return new LoginPage(getDriver());
+    public boolean isLogoutMessageDisplayed() {
+        String actualText = getStartSuccessMessageArea().getText();
+        String expectedText = StartLocators.START_YOU_LOGGED_OUT_TEXT;
+        return actualText.contains(expectedText);
     }
 
 }

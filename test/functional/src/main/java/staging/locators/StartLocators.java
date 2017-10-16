@@ -4,4 +4,8 @@ public class StartLocators {
 
     public static final String START_LOGIN_LINK = "//div/a[@href='/login']";
 
+    public static final String START_YOU_LOGGED_OUT_TEXT = "You were successfully logged out of precisionFDA";
+
+    public static final String START_SUCCESS_MESSAGE_AREA = "//div[contains(@class, 'alert-success')]";
+
 }

@@ -1,6 +1,6 @@
 package staging.data;
 
-import static staging.data.Users.getPFDAusername;
+import static staging.data.TestUser.getPFDAusername;
 
 public class PageTitles {
 
@@ -37,6 +37,10 @@ public class PageTitles {
     public static final String PAGE_TITLE_PUBLIC_PROFILE = getPFDAusername();
 
     public static final String PAGE_TITLE_LICENSES = "Licenses";
+
+    public static final String PAGE_TITLE_ABOUT = "About";
+
+    public static final String PAGE_TITLE_GUIDELINES = "Community Guidelines";
 
 
 }

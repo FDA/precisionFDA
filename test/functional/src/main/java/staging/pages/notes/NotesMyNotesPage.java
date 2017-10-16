@@ -5,7 +5,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
-import staging.locators.FilesLocators;
 import staging.locators.NotesLocators;
 import staging.pages.AbstractPage;
 

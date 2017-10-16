@@ -8,6 +8,8 @@ import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.NotesLocators;
 import staging.pages.AbstractPage;
 
+import static staging.utils.Utils.getCurrentDateTime;
+
 public class NotesPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
@@ -55,6 +57,7 @@ public class NotesPage extends AbstractPage {
     public NotesNewNotePage openNotesNewNotePage() {
         log.info("open Notes.NewNote page");
         notesNewNoteLink.click();
+        currentRunTime = getCurrentDateTime();
         return new NotesNewNotePage(getDriver());
     }
 
