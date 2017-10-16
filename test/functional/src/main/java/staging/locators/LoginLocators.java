@@ -10,6 +10,8 @@ public class LoginLocators {
 
     public static final String LOGIN_SUBMIT_BUTTON = "//button[@name='submit']";
 
+    public static final String LOGIN_WRONG_CREDS_MESSAGE = "//strong[text()='Invalid username or password']";
+
 
 
 }

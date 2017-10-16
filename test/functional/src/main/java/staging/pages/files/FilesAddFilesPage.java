@@ -25,6 +25,6 @@ public class FilesAddFilesPage extends AbstractPage {
     }
 
     public boolean isBrowseFilesButtonDisplayed() {
-        return getFilesBrowseFilesInput().isDisplayed();
+        return isElementPresent(getFilesBrowseFilesInput());
     }
 }

@@ -10,5 +10,13 @@ public class ProfileDropBlockLocators {
 
     public static final String PROFILE_DROPDOWN_MANAGE_LICENSES_ITEM = ".//a[text()='Manage Licenses']";
 
+    public static final String PROFILE_DROPDOWN_ABOUT_ITEM = ".//li/a[@href='/about']";
+
+    public static final String PROFILE_DROPDOWN_GUIDELINES_ITEM = ".//li/a[@href='/guidelines']";
+
+    public static final String PROFILE_DROPDOWN_DOCS_ITEM = ".//li/a[@href='/docs']";
+
+    public static final String PROFILE_DROPDOWN_MANAGE_LOGOUT_ITEM = ".//a[text()='Log out']";
+
 
 }

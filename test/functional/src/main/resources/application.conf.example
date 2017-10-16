@@ -3,4 +3,6 @@ pfda_test {
   password: ""
   dnx_stage_username: ""
   dnx_stage_password: ""
+  userFullName: ""
+  userOrg: ""
 }

@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.FindBy;
+
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.AppsLocators;
 import staging.pages.AbstractPage;

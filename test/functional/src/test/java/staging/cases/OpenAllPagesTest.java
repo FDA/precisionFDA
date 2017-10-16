@@ -4,6 +4,8 @@ import org.apache.log4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import staging.data.PageTitles;
+import staging.pages.Guidelines.GuidelinesPage;
+import staging.pages.about.*;
 import staging.pages.apps.*;
 import staging.pages.*;
 import staging.pages.challs.ChallsPage;
@@ -25,20 +27,6 @@ import static org.testng.Assert.assertTrue;
 public class OpenAllPagesTest extends AbstractTest {
 
     private final Logger log = Logger.getLogger("TEST");
-
-    @Test
-    public void successfulLogin() {
-        logTestHeader("Test Case: Successful Login");
-
-        StartPage startPage = openStartPage();
-        CommonPage commonPage = loginToFDA(startPage);
-
-        log.info("check navigation panel is displayed");
-        assertTrue(commonPage.isNavigationPanelDisplayed());
-
-        log.info("check correct username is displayed");
-        assertTrue(commonPage.isCorrectUserNameDisplayed());
-    }
 
     @Test(dependsOnMethods = { "successfulLogin" })
     public void checkNotesNewNotePageCanBeOpen() {
@@ -496,6 +484,96 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_LICENSES));
     }
 
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkAboutPageCanBeOpen() {
+        logTestHeader("Test Case: check that About page can be open");
 
+        CommonPage commonPage = openCommonPage();
+        AboutPage aboutPage = commonPage.openAboutPage();
+
+        log.info("check Why? tab is displayed");
+        assertTrue(aboutPage.isAboutWhyLinkDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ABOUT));
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkAboutWhyPageCanBeOpen() {
+        logTestHeader("Test Case: check that About.Why page can be open");
+
+        CommonPage commonPage = openCommonPage();
+        AboutWhyPage aboutWhyPage = commonPage.openAboutPage().openAboutWhyPage();
+
+        log.info("check Why? tab is activated");
+        assertTrue(aboutWhyPage.isAboutWhyActivatedLinkDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ABOUT));
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkAboutWhatPageCanBeOpen() {
+        logTestHeader("Test Case: check that About.What page can be open");
+
+        CommonPage commonPage = openCommonPage();
+        AboutWhatPage aboutWhatPage = commonPage.openAboutPage().openAboutWhatPage();
+
+        log.info("check What? tab is activated");
+        assertTrue(aboutWhatPage.isAboutWhatActivatedLinkDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ABOUT));
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkAboutWhoPageCanBeOpen() {
+        logTestHeader("Test Case: check that About.Who page can be open");
+
+        CommonPage commonPage = openCommonPage();
+        AboutWhoPage aboutWhoPage = commonPage.openAboutPage().openAboutWhoPage();
+
+        log.info("check Who? tab is activated");
+        assertTrue(aboutWhoPage.isAboutWhoActivatedLinkDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ABOUT));
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkAboutHowPageCanBeOpen() {
+        logTestHeader("Test Case: check that About.How page can be open");
+
+        CommonPage commonPage = openCommonPage();
+        AboutHowPage aboutHowPage = commonPage.openAboutPage().openAboutHowPage();
+
+        log.info("check 'Introduction' title is displayed");
+        assertTrue(aboutHowPage.isAboutIntroTitleDisplayed());
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkGuidelinesPageCanBeOpen() {
+        logTestHeader("Test Case: check that Guidelines page can be open");
+
+        CommonPage commonPage = openCommonPage();
+        GuidelinesPage guidelinesPage = commonPage.openGuidelinesPage();
+
+        log.info("check Guidelines Carousel is displayed");
+        assertTrue(guidelinesPage.isGuidelinesCarouselDisplayed());
+
+        log.info("check page title");
+        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_GUIDELINES));
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkDocsPageCanBeOpen() {
+        logTestHeader("Test Case: check that Docs page can be open");
+
+        CommonPage commonPage = openCommonPage();
+        AboutHowPage docsPage = commonPage.openDocsPage();
+
+        log.info("check 'Introduction' title is displayed");
+        assertTrue(docsPage.isAboutIntroTitleDisplayed());
+    }
 
 }

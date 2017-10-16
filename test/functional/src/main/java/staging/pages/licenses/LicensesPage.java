@@ -7,7 +7,6 @@ import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.LicensesLocators;
 import staging.pages.AbstractPage;
-import staging.pages.notes.NotesMyNotesPage;
 
 public class LicensesPage extends AbstractPage {
 

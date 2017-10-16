@@ -22,7 +22,7 @@ public class PublicProfilePage extends AbstractPage {
     }
 
     public boolean isJoinedTagDisplayed() {
-        return getProfileJoinedTextWE().isDisplayed();
+        return isElementPresent(getProfileJoinedTextWE());
     }
 
 }

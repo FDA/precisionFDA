@@ -22,5 +22,13 @@ public class NotesLocators {
 
     public static final String NOTES_PAGINATION_AREA = "//ul[contains(@class, 'pagination')]/li";
 
+    public static final String NOTES_EDIT_NOTE_TITLE = "//input[@name='title']";
+
+    public static final String NOTES_EDIT_NOTE_ORG = "//li/h5[text()='Org']/../p";
+
+    public static final String NOTES_EDIT_NOTE_ADDED_BY = "//li/h5[text()='Added by']/../p/a";
+
+    public static final String NOTES_EDIT_NOTE_CREATED = "//li/h5[text()='Created']/../p";
+
 
 }

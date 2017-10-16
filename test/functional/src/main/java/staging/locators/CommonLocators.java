@@ -6,6 +6,8 @@ public class CommonLocators {
 
     public static final String LOGGED_USERNAME_LINK = "//li[@class='dropdown']/a";
 
+    public static final String USER_AVATAR_IMG = "//a/img[@class='img-circle']";
+
     public static final String APPS_PAGE_ICON = "//li/a[@href='/apps']/div[contains(@class, 'nav-icon')]";
 
     public static final String COMPS_PAGE_ICON = "//li/a[@href='/comparisons']/div[contains(@class, 'nav-icon')]";

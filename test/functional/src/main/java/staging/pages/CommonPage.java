@@ -7,8 +7,13 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.blocks.ProfileDropBlock;
-import staging.data.Users;
+import staging.data.TestUser;
+
 import staging.locators.CommonLocators;
+import staging.model.Users;
+import staging.pages.Guidelines.GuidelinesPage;
+import staging.pages.about.AboutHowPage;
+import staging.pages.about.AboutPage;
 import staging.pages.apps.AppsPage;
 import staging.pages.challs.ChallsPage;
 import staging.pages.comps.CompsPage;
@@ -57,10 +62,14 @@ public class CommonPage extends AbstractPage {
     @FindBy(xpath = CommonLocators.OVERVIEW_PAGE_ICON)
     private Link overviewPageIcon;
 
+    @FindBy(xpath = CommonLocators.USER_AVATAR_IMG)
+    private Link userAvatarImgLink;
+
 
     public CommonPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.COMMON_NAV_PANEL), 30);
+        waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.USER_AVATAR_IMG), 30);
     }
 
     public WebElement getNavigationPanelWE() {
@@ -146,12 +155,40 @@ public class CommonPage extends AbstractPage {
         return new LicensesPage(getDriver());
     }
 
-    public boolean isNavigationPanelDisplayed() {
-        return getNavigationPanelWE().isDisplayed();
+    public AboutPage openAboutPage() {
+        log.info("opening About page");
+        openProfileDropdown();
+        profileDropBlock.openAboutPage();
+        return new AboutPage(getDriver());
     }
 
-    public boolean isCorrectUserNameDisplayed() {
-        return getUsernameLink().getText().equals(Users.getTestUserFullName());
+    public GuidelinesPage openGuidelinesPage() {
+        log.info("opening Guidelines page");
+        openProfileDropdown();
+        profileDropBlock.openGuidelinesPage();
+        return new GuidelinesPage(getDriver());
+    }
+
+    public AboutHowPage openDocsPage() {
+        log.info("opening Docs page");
+        openProfileDropdown();
+        profileDropBlock.openDocsPage();
+        return new AboutHowPage(getDriver());
+    }
+
+    public StartPage logout() {
+        log.info("logout");
+        openProfileDropdown();
+        profileDropBlock.logout();
+        return new StartPage(getDriver());
+    }
+
+    public boolean isNavigationPanelDisplayed() {
+        return isElementPresent(getNavigationPanelWE());
+    }
+
+    public boolean isCorrectUserNameDisplayed(Users user) {
+        return getUsernameLink().getText().equals(user.getApplUserFullName());
     }
 
 }
