@@ -1,4 +1,4 @@
-package staging.pages.Guidelines;
+package staging.pages.guidelines;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
@@ -8,16 +8,16 @@ import org.openqa.selenium.support.FindBy;
 import staging.locators.GuidelinesLocators;
 import staging.pages.AbstractPage;
 
-public class GuidelinesPage extends AbstractPage {
+public class guidelinesPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
 
     @FindBy(xpath = GuidelinesLocators.GUIDELINES_CAROUSEL)
     private WebElement guidelinesCarousel;
 
-    public GuidelinesPage(final WebDriver driver) {
+    public guidelinesPage(final WebDriver driver) {
         super(driver);
-        waitForPageToLoadAndVerifyBy(By.xpath(GuidelinesLocators.GUIDELINES_MAIN_TITLE));
+        waitForPageToLoadAndVerifyBy(By.xpath(GuidelinesLocators.GUIDELINES_CAROUSEL));
     }
 
     public WebElement getGuidelinesCarousel() {

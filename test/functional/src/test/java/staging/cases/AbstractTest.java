@@ -1,21 +1,23 @@
 package staging.cases;
 
 import org.apache.log4j.Logger;
-import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
 import org.testng.annotations.*;
 import staging.locators.CommonLocators;
 import staging.model.Users;
 import staging.pages.StartPage;
 import staging.pages.CommonPage;
+import staging.pages.apps.AppsEditAppPage;
 import staging.pages.login.GrantAccessLoginPage;
 import staging.pages.login.LoginPage;
+import staging.pages.overview.OverviewPage;
 import staging.utils.SettingsProperties;
 import tools.TestResultListener;
 
@@ -23,10 +25,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.testng.Assert.assertTrue;
 import static staging.utils.Utils.createFile;
 import static staging.utils.Utils.createFolder;
-import static staging.utils.Utils.getCurrentDateSalt;
+import static staging.utils.Utils.getFileNameUniqueValue;
 
 @Listeners(TestResultListener.class)
 public abstract class AbstractTest {
@@ -34,7 +38,7 @@ public abstract class AbstractTest {
     protected static WebDriver driver;
     private Logger log = Logger.getLogger("INFO");
 
-    public static final String globalSalt = getCurrentDateSalt();
+    public static final String fileNameUniqueValue = getFileNameUniqueValue();
 
     public static String testSuiteName;
 
@@ -43,7 +47,7 @@ public abstract class AbstractTest {
     }
 
     public static String getDebugLogFolderPath() {
-        return getDebugLogFolder() + testSuiteName + "_" + globalSalt + "/";
+        return getDebugLogFolder() + testSuiteName + "_" + fileNameUniqueValue + "/";
     }
 
     @BeforeTest
@@ -138,8 +142,19 @@ public abstract class AbstractTest {
 
     public String getPageTitle() {
         String title = driver.getTitle();
-        log.info("title is: " + title);
         return title;
+    }
+
+    public boolean isPageTitleCorrect(String expectedTitle) {
+        String actualTitle = getPageTitle();
+        log.info("actual page title is: " + actualTitle);
+        if (actualTitle.contains(expectedTitle)) {
+            return true;
+        }
+        else {
+            log.info("but it does not contain expected string: " + expectedTitle);
+            return false;
+        }
     }
 
     public CommonPage openCommonPage() {
@@ -164,7 +179,7 @@ public abstract class AbstractTest {
 
         Logger log = Logger.getLogger("POST");
 
-        String currentSalt = getCurrentDateSalt();
+        String currentSalt = getFileNameUniqueValue();
 
         String path = getDebugLogFolderPath() + status + "_" + caseName + "_" + currentSalt;
 
@@ -209,6 +224,17 @@ public abstract class AbstractTest {
         LoginPage loginPage = openLoginPage(user.getBasicAuthUsername(), user.getBasicAuthPassword());
         loginPage = loginPage.wrongLoginToPrecisionFDA(user.getApplUsername(), user.getApplPassword());
         return loginPage;
+    }
+
+    public void alertAccept(int timeOutInSeconds, int sleepInMillis) {
+        Wait<WebDriver> fluentWait = new FluentWait<WebDriver>(driver)
+                .withTimeout(timeOutInSeconds, SECONDS)
+                .pollingEvery(sleepInMillis, MILLISECONDS)
+                .ignoring(TimeoutException.class);
+        Alert alert = fluentWait.until(ExpectedConditions.alertIsPresent());
+        if (alert != null) {
+            alert.accept();
+        }
     }
 
 }

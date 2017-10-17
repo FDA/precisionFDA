@@ -5,12 +5,14 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.*;
 
 import ru.yandex.qatools.htmlelements.element.Link;
+import ru.yandex.qatools.htmlelements.element.TextInput;
 import ru.yandex.qatools.htmlelements.loader.HtmlElementLoader;
 
 import java.util.List;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.fail;
+import static staging.utils.Utils.getCurrentDateTimeValue;
 
 public abstract class AbstractPage {
 
@@ -20,7 +22,9 @@ public abstract class AbstractPage {
 
     private static final int DEFAULT_TIMEOUT = 10;
 
-    public static String currentRunTime;
+    public static String currentTestRunTime = getCurrentDateTimeValue();
+
+    public static final String testRunUniqueFinalValue = getCurrentDateTimeValue();
 
     public AbstractPage(final WebDriver driver) {
         HtmlElementLoader.populatePageObject(this, driver);
@@ -132,6 +136,15 @@ public abstract class AbstractPage {
     }
 
     public boolean isElementPresent(final Link element) {
+        try {
+            waitUntilDisplayed(element.getWrappedElement(), DEFAULT_TIMEOUT, true);
+            return true;
+        } catch (final TimeoutException e) {
+            return false;
+        }
+    }
+
+    public boolean isElementPresent(final TextInput element) {
         try {
             waitUntilDisplayed(element.getWrappedElement(), DEFAULT_TIMEOUT, true);
             return true;
@@ -311,6 +324,24 @@ public abstract class AbstractPage {
     // ***** getters & setters ***** //
     public WebDriver getDriver() {
         return driver;
+    }
+
+
+    // alerts
+    public void alertAccept(int timeOutInSeconds, int sleepInMillis) {
+        WebDriverWait wait = new WebDriverWait(driver, timeOutInSeconds, sleepInMillis);
+        Alert alert = wait.until(ExpectedConditions.alertIsPresent());
+        if (alert != null) {
+            alert.accept();
+        }
+    }
+
+    public void alertAccept() {
+        WebDriverWait wait = new WebDriverWait(driver, 5, 100);
+        Alert alert = wait.until(ExpectedConditions.alertIsPresent());
+        if (alert != null) {
+            alert.accept();
+        }
     }
 
 }

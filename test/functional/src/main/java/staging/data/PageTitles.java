@@ -42,5 +42,7 @@ public class PageTitles {
 
     public static final String PAGE_TITLE_GUIDELINES = "Community Guidelines";
 
+    public static final String PAGE_TITLE_APPS_CREATE_NEW = "Create New App";
+
 
 }

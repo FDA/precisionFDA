@@ -30,33 +30,42 @@ public class AppsPage extends AbstractPage {
     @FindBy(xpath = AppsLocators.APPS_MANAGE_ASSETS_LINK)
     private Link appsManageAssetsLink;
 
+    @FindBy(xpath = AppsLocators.APPS_CREATE_APP_BUTTON_LINK)
+    private Link appsCreateAppButtonLink;
+
     public AppsPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_RELEVANT_LINK));
     }
 
     public AppsRelevantPage openAppsRelevantPage() {
-        log.info("open apps.Relevant Page");
+        log.info("open Apps.Relevant Page");
         appsRelevantLink.click();
         return new AppsRelevantPage(getDriver());
     }
 
     public AppsFeaturedPage openAppsFeaturedPage() {
-        log.info("open apps.Featured Page");
+        log.info("open Apps.Featured Page");
         appsFeaturedLink.click();
         return new AppsFeaturedPage(getDriver());
     }
 
     public AppsExplorePage openAppsExplorePage() {
-        log.info("open apps.Explore Page");
+        log.info("open Apps.Explore Page");
         appsExploreLink.click();
         return new AppsExplorePage(getDriver());
     }
 
     public AppsManageAssetsPage openAppsManageAssetsPage() {
-        log.info("open apps.ManageAssets Page");
+        log.info("open Apps.ManageAssets Page");
         appsManageAssetsLink.click();
         return new AppsManageAssetsPage(getDriver());
+    }
+
+    public ApplCreateAppPage openCreateAppPage() {
+        log.info("open Apps.CreateApp Page");
+        appsCreateAppButtonLink.click();
+        return new ApplCreateAppPage(getDriver());
     }
 
     public Link getAppsRelevantLink() {

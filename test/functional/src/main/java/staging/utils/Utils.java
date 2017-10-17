@@ -6,19 +6,22 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class Utils {
 
-    public static String getCurrentDateTime() {
+    public static String getCurrentDateTimeValue() {
         Date d = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         String date = dateFormat.format(d);
         return date;
     }
 
-    public static String getCurrentDateSalt() {
+    public static String getFileNameUniqueValue() {
         Date d = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd_MM_HHmmssS");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         String salt = dateFormat.format(d);
         return salt;
     }
@@ -28,7 +31,6 @@ public class Utils {
         if (!file.exists()) {
             file.mkdir();
         }
-
     }
 
     public static void createFile(String folderPath, String content) throws IOException {

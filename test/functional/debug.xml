@@ -5,7 +5,8 @@
             <class name="staging.cases.OpenAllPagesTest">
                 <methods>
                     <include name="successfulLogin" />
-                    <include name="checkProfilePageCanBeOpen" />
+                    <include name="checkAppsCreateAppPageCanBeOpen" />
+                    <include name="checkFilesPageCanBeOpen" />
                 </methods>
             </class>
         </classes>

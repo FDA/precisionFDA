@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Open all pages suite">
+    <test name="Check all pages can be open">
+        <classes>
+            <class name="staging.cases.AppsManagementTest"/>
+        </classes>
+    </test>
+</suite>

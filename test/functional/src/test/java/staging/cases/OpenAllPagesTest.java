@@ -4,7 +4,7 @@ import org.apache.log4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import staging.data.PageTitles;
-import staging.pages.Guidelines.GuidelinesPage;
+import staging.pages.guidelines.guidelinesPage;
 import staging.pages.about.*;
 import staging.pages.apps.*;
 import staging.pages.*;
@@ -39,7 +39,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(notesNewNotePage.isEditorDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_EDIT_NOTE));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_EDIT_NOTE));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -53,7 +53,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(notesPage.isMyNotesLinkDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_NOTES));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -67,7 +67,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(notesMyNotesPage.isMyNotesLinkActivated());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_NOTES));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -81,7 +81,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(notesFeaturedPage.isFeaturedLinkActivated());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_NOTES));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -95,7 +95,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(notesExplorePage.isExploreLinkActivated());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_NOTES));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_NOTES));
     }
 
 
@@ -110,7 +110,22 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(appsPage.isRelevantAppsLinkDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_APPS));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_APPS));
+    }
+
+    //disabled. under testing in AppsManagementTest suite
+    @Test(dependsOnMethods = { "successfulLogin" }, enabled = false)
+    public void checkAppsCreateAppPageCanBeOpen() {
+        logTestHeader("Test Case: check that Apps.CreateApp page can be open");
+
+        CommonPage commonPage = openCommonPage();
+        ApplCreateAppPage applCreateAppPage = commonPage.openAppsPage().openCreateAppPage();
+
+        log.info("check New App Name Input is displayed");
+        assertTrue(applCreateAppPage.isNewAppNameInputDisplayed());
+
+        log.info("check page title");
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_APPS_CREATE_NEW));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -127,7 +142,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(appsRelevantPage.isRelevantLinkActivated());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_APPS));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_APPS));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -141,7 +156,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(appsFeaturedPage.isFeaturedLinkActivated());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_APPS));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_APPS));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -155,7 +170,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(appsExplorePage.isExploreLinkActivated());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_APPS));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_APPS));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -169,7 +184,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(appsManageAssetsPage.isCreateAssetsDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ASSETS));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_ASSETS));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -184,7 +199,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(appsManageMyAssetsPage.isManageMyAssetsAcivated());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ASSETS));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_ASSETS));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -199,7 +214,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(appsManageFeaturedPage.isFeaturedManageLinkActivated());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ASSETS));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_ASSETS));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -214,7 +229,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(appsManageExplorePage.isManageExploreLinkActivated());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ASSETS));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_ASSETS));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -229,7 +244,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(appsManageCreateAssetsPage.isGenerateKeyLinkDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ADD_ASSETS));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_ADD_ASSETS));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -243,7 +258,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(compsPage.isMyCompsLinkDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_COMPARISONS));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_COMPARISONS));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -257,7 +272,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(compsMyCompsPage.isMyCompsLinkActivated());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_COMPARISONS));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_COMPARISONS));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -271,7 +286,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(compsFeaturedPage.isFeaturedLinkActivated());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_COMPARISONS));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_COMPARISONS));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -285,7 +300,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(compsExplorePage.isExploreLinkActivated());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_COMPARISONS));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_COMPARISONS));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -299,7 +314,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(compsRunComparisonPage.isCircleWithDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_COMPARATOR));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_COMPARATOR));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -313,7 +328,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(filesPage.isMyFilesLinkDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_FILES));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -327,7 +342,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(filesMyFilesPage.isMyFilesLinkActivated());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_FILES));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -341,7 +356,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(filesFeaturedPage.isFeaturedLinkActivated());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_FILES));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -355,7 +370,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(filesExplorePage.isExploreLinkActivated());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_FILES));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_FILES));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -369,7 +384,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(filesAddFilesPage.isBrowseFilesButtonDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_UPLOAD_FILES));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_UPLOAD_FILES));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -383,7 +398,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(expertsPage.isExpertsIconDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_EXPERTS));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_EXPERTS));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -397,7 +412,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(challsPage.isChallengesIconDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_CHALLS));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_CHALLS));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -411,7 +426,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(discsPage.isStartDiscsButtonDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_DISCS));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_DISCS));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -425,7 +440,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(discsNewDiscPage.isEditorDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_EDIT_DISC));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_EDIT_DISC));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -439,7 +454,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(overviewPage.isWelcomeTextDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_OVERVIEW));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_OVERVIEW));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -453,7 +468,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(profilePage.isAboutOrgTextDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_PROFILE));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_PROFILE));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -467,7 +482,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(publicProfilePage.isJoinedTagDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_PUBLIC_PROFILE));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_PUBLIC_PROFILE));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -481,7 +496,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(licensesPage.isCreateNewLicenseDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_LICENSES));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_LICENSES));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -495,7 +510,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(aboutPage.isAboutWhyLinkDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ABOUT));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_ABOUT));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -509,7 +524,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(aboutWhyPage.isAboutWhyActivatedLinkDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ABOUT));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_ABOUT));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -523,7 +538,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(aboutWhatPage.isAboutWhatActivatedLinkDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ABOUT));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_ABOUT));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -537,7 +552,7 @@ public class OpenAllPagesTest extends AbstractTest {
         assertTrue(aboutWhoPage.isAboutWhoActivatedLinkDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_ABOUT));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_ABOUT));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
@@ -553,16 +568,16 @@ public class OpenAllPagesTest extends AbstractTest {
 
     @Test(dependsOnMethods = { "successfulLogin" })
     public void checkGuidelinesPageCanBeOpen() {
-        logTestHeader("Test Case: check that Guidelines page can be open");
+        logTestHeader("Test Case: check that guidelines page can be open");
 
         CommonPage commonPage = openCommonPage();
-        GuidelinesPage guidelinesPage = commonPage.openGuidelinesPage();
+        guidelinesPage guidelinesPage = commonPage.openGuidelinesPage();
 
-        log.info("check Guidelines Carousel is displayed");
+        log.info("check guidelines Carousel is displayed");
         assertTrue(guidelinesPage.isGuidelinesCarouselDisplayed());
 
         log.info("check page title");
-        assertTrue(getPageTitle().contains(PageTitles.PAGE_TITLE_GUIDELINES));
+        assertTrue(isPageTitleCorrect(PageTitles.PAGE_TITLE_GUIDELINES));
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
