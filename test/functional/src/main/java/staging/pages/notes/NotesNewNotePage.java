@@ -90,7 +90,7 @@ public class NotesNewNotePage extends AbstractPage {
 
     public boolean isCreatedDateCorrect() {
         String createdValue = notesCreated.getText();
-        String expectedValue = currentRunTime;
+        String expectedValue = currentTestRunTime;
         log.info("'Created' is displayed as: " + createdValue);
         log.info("page was opened at: " + expectedValue);
         createdValue = createdValue.substring(0, 16);
@@ -102,7 +102,6 @@ public class NotesNewNotePage extends AbstractPage {
             log.info("created [" + createdValue + "] does not equal to expected [" + expectedValue + "]");
             return false;
         }
-
     }
 
 

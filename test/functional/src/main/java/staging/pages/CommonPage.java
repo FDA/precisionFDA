@@ -7,11 +7,10 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.blocks.ProfileDropBlock;
-import staging.data.TestUser;
 
 import staging.locators.CommonLocators;
 import staging.model.Users;
-import staging.pages.Guidelines.GuidelinesPage;
+import staging.pages.guidelines.guidelinesPage;
 import staging.pages.about.AboutHowPage;
 import staging.pages.about.AboutPage;
 import staging.pages.apps.AppsPage;
@@ -162,11 +161,11 @@ public class CommonPage extends AbstractPage {
         return new AboutPage(getDriver());
     }
 
-    public GuidelinesPage openGuidelinesPage() {
-        log.info("opening Guidelines page");
+    public guidelinesPage openGuidelinesPage() {
+        log.info("opening guidelines page");
         openProfileDropdown();
         profileDropBlock.openGuidelinesPage();
-        return new GuidelinesPage(getDriver());
+        return new guidelinesPage(getDriver());
     }
 
     public AboutHowPage openDocsPage() {

@@ -29,7 +29,7 @@ public class StartPage extends AbstractPage {
     }
 
     public boolean isNavigationPanelNotDisplayed() {
-        return !isElementPresent(getNavigationPanelWE(), 5);
+        return !isElementPresent(getNavigationPanelWE(), 2);
     }
 
     public WebElement getNavigationPanelWE() {
