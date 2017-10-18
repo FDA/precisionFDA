@@ -52,56 +52,25 @@ public class NotesNewNotePage extends AbstractPage {
     public boolean isDefaultTitleCorrect(Users user) {
         String titleValue = notesTitle.getEnteredText();
         String expectedValue = user.getApplUserFullName() + "'s untitled note";
-        log.info("entered to title text is: " + titleValue);
-        if (titleValue.equals(expectedValue)) {
-            return true;
-        }
-        else {
-            log.info("but expected is: " + expectedValue);
-            return false;
-        }
+        return equals(titleValue, expectedValue);
     }
 
     public boolean isOrgCorrect(Users user) {
         String orgValue = notesOrg.getText();
         String expectedValue = user.getApplUserOrg();
-        log.info("displayed Org: " + orgValue);
-        if (orgValue.equals(expectedValue)) {
-            return true;
-        }
-        else {
-            log.info("but expected is: " + expectedValue);
-            return false;
-        }
+        return equals(orgValue, expectedValue);
     }
 
     public boolean isAddedByCorrect(Users user) {
         String addedByValue = notesAddedBy.getText();
         String expectedValue = user.getApplUsername();
-        log.info("displayed Added By is: " + addedByValue);
-        if (addedByValue.equals(expectedValue)) {
-            return true;
-        }
-        else {
-            log.info("but expected is: " + expectedValue);
-            return false;
-        }
+        return equals(addedByValue, expectedValue);
     }
 
     public boolean isCreatedDateCorrect() {
         String createdValue = notesCreated.getText();
-        String expectedValue = currentTestRunTime;
-        log.info("'Created' is displayed as: " + createdValue);
-        log.info("page was opened at: " + expectedValue);
-        createdValue = createdValue.substring(0, 16);
-        expectedValue = expectedValue.substring(0, 16);
-        if (createdValue.equals(expectedValue)) {
-            return true;
-        }
-        else {
-            log.info("created [" + createdValue + "] does not equal to expected [" + expectedValue + "]");
-            return false;
-        }
+        String expectedValue = noteCreateRunTimeUTC.substring(0, 16);
+        return contains(createdValue, expectedValue);
     }
 
 

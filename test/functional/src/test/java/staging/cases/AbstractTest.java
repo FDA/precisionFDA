@@ -14,10 +14,8 @@ import staging.locators.CommonLocators;
 import staging.model.Users;
 import staging.pages.StartPage;
 import staging.pages.CommonPage;
-import staging.pages.apps.AppsEditAppPage;
 import staging.pages.login.GrantAccessLoginPage;
 import staging.pages.login.LoginPage;
-import staging.pages.overview.OverviewPage;
 import staging.utils.SettingsProperties;
 import tools.TestResultListener;
 
@@ -51,7 +49,7 @@ public abstract class AbstractTest {
     }
 
     @BeforeTest
-    public void setUp() throws Exception {
+    public void setUp() {
 
         //initiate global params
         testSuiteName = this.getClass().getName().replace("staging.cases.", "");

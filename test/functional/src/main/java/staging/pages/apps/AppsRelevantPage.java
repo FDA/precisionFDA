@@ -6,15 +6,14 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
-import staging.data.TestConstants;
 import staging.locators.AppsLocators;
 import staging.pages.AbstractPage;
+
+import static staging.data.TestConstants.getAppTitle;
 
 public class AppsRelevantPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
-
-    final String appTitle = TestConstants.CREATE_APP_TITLE_PREFIX + testRunUniqueFinalValue;
 
     @FindBy(xpath = AppsLocators.APPS_JOBS_LIST)
     private WebElement appsJobsList;
@@ -36,7 +35,7 @@ public class AppsRelevantPage extends AbstractPage {
     }
 
     public WebElement getSavedAppLink() {
-        String xpath = AppsLocators.APPS_SAVED_APP_LINK_TEMPLATE.replace("{APP_TITLE}", appTitle);
+        String xpath = AppsLocators.APPS_SAVED_APP_LINK_TEMPLATE.replace("{APP_TITLE}", getAppTitle());
         return getDriver().findElement(By.xpath(xpath));
     }
 

@@ -11,12 +11,11 @@ import staging.locators.AppsLocators;
 import staging.model.Users;
 import staging.pages.AbstractPage;
 
+import static staging.data.TestConstants.*;
+
 public class AppsSavedAppPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
-
-    final String appName = TestConstants.CREATE_APP_NAME_PREFIX + testRunUniqueFinalValue;
-    final String appTitle = TestConstants.CREATE_APP_TITLE_PREFIX + testRunUniqueFinalValue;
 
     @FindBy(xpath = AppsLocators.APPS_JOBS_LIST)
     private WebElement appsJobsList;
@@ -91,71 +90,32 @@ public class AppsSavedAppPage extends AbstractPage {
     }
 
     public boolean isSelectedAppNameCorrect() {
-        String expected = appName.replace(":", "").replace(" ", "-");
-        log.info("expected name is: " + expected);
+        String expected = getAppName().replace(":", "").replace(" ", "-");
         String actual = getAppsRelevantSelectedAppName().getText();
-        if (expected.equals(actual)) {
-            return true;
-        }
-        else {
-            log.info("but actual is: " + actual);
-            return false;
-        }
+        return equals(actual, expected);
     }
 
     public boolean isSelectedAppOrgCorrect() {
         String expected = Users.getTestUser().getApplUserOrg();
-        log.info("expected Org is: " + expected);
         String actual = getAppsRelevantSelectedAppOrg().getText();
-        if (expected.equals(actual)) {
-            return true;
-        }
-        else {
-            log.info("but actual is: " + actual);
-            return false;
-        }
+        return equals(actual, expected);
     }
 
     public boolean isSelectedAppAddedByCorrect() {
         String expected = Users.getTestUser().getApplUsername();
-        log.info("expected Added By is: " + expected);
         String actual = getAppsRelevantSelectedAppAddedBy().getText();
-        if (expected.equals(actual)) {
-            return true;
-        }
-        else {
-            log.info("but actual is: " + actual);
-            return false;
-        }
+        return equals(actual, expected);
     }
 
     public boolean isCreatedDateCorrect() {
         String createdValue = getAppsRelevantSelectedAppCreated().getText();
-        String expectedValue = currentTestRunTime;
-        log.info("'Created' is displayed as: " + createdValue);
-        log.info("page was actually created at: " + expectedValue);
-        createdValue = createdValue.substring(0, 16);
-        expectedValue = expectedValue.substring(0, 16);
-        if (createdValue.equals(expectedValue)) {
-            return true;
-        }
-        else {
-            log.info("created [" + createdValue + "] does not equal to expected [" + expectedValue + "]");
-            return false;
-        }
+        String expectedValue = appCreateTimeUTC.substring(0, 16);
+        return contains(createdValue, expectedValue);
     }
 
     public boolean isSelectedAppTitleCorrect() {
-        String expected = appTitle;
-        log.info("expected Title is: " + expected);
         String actual = getAppsRelevantSelectedAppTitle().getText();
-        if (expected.equals(actual)) {
-            return true;
-        }
-        else {
-            log.info("but actual is: " + actual);
-            return false;
-        }
+        return equals(actual, getAppTitle());
     }
 
     public boolean isRunAppButtonDisplayed() {
@@ -170,6 +130,25 @@ public class AppsSavedAppPage extends AbstractPage {
     public AppsEditAppPage editSavedApp() {
         getAppsSavedAppEditButtonLink().click();
         return new AppsEditAppPage(getDriver());
+    }
+
+    public AppsEditAndRunAppPage runAppFromRelevantPage() {
+        getAppsSavedAppRunAppButton().click();
+        return new AppsEditAndRunAppPage(getDriver());
+    }
+
+    public boolean isRunJobDisplayed() {
+        return isElementPresent(getRunJobLink());
+    }
+
+    public WebElement getRunJobLink() {
+        String xpath = AppsLocators.APPS_SAVED_APP_JOB_LINK_TEMPLATE.replace("{JOB_NAME}", getAppJobName());
+        return getDriver().findElement(By.xpath(xpath));
+    }
+
+    public AppsJobPage openJobFromSavedAppPage() {
+        getRunJobLink().click();
+        return new AppsJobPage(getDriver());
     }
 
 

@@ -35,7 +35,7 @@ public class LoginPage extends AbstractPage {
 
     public LoginPage(final WebDriver driver) {
         super(driver);
-        waitForPageToLoadAndVerifyBy(By.xpath(LoginLocators.LOGIN_PASSWORD_INPUT), 60);
+        waitForPageToLoadAndVerifyBy(By.xpath(LoginLocators.LOGIN_PASSWORD_INPUT), 180);
     }
 
     public GrantAccessLoginPage correctLoginToPrecisionFDA(String FDAUsername, String FDAPassword) {

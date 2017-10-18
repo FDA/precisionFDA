@@ -1,5 +1,7 @@
 package staging.utils;
 
+import org.apache.log4j.Logger;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -10,7 +12,9 @@ import java.util.TimeZone;
 
 public class Utils {
 
-    public static String getCurrentDateTimeValue() {
+    private final Logger log = Logger.getLogger(this.getClass());
+
+    public static String getCurrentDateTimeUTCValue() {
         Date d = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -21,7 +25,6 @@ public class Utils {
     public static String getFileNameUniqueValue() {
         Date d = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd_MM_HHmmssS");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         String salt = dateFormat.format(d);
         return salt;
     }
