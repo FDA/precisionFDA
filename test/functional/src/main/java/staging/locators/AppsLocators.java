@@ -70,6 +70,28 @@ public class AppsLocators {
 
     public static final String APPS_SAVED_APP_SAVE_REVISION_BUTTON = "//span[contains(text(), 'Save Revision')]";
 
+    public static final String APPS_EDIT_RUN_APP_JOB_NAME_INPUT = "//label[text()='Job Name']/..//input[@name='name']";
+
+    public static final String APPS_EDIT_RUN_APP_RUN_APP_BUTTON = "//span[text()='Run App']/../../button";
+
+    public static final String APPS_SAVED_APP_JOB_LINK_TEMPLATE = "//*[contains(@class, 'job')]//a[contains(text(), '{JOB_NAME}')]";
+
+    public static final String APPS_JOB_PAGE_I_O_TAB_LINK = "//span[text()='Inputs and Outputs']/../../a[contains(@href, 'tab')]";
+
+    public static final String APPS_JOB_PAGE_JOB_NAME = "//*[@class='page-title']/span[@class='name']";
+
+    public static final String APPS_JOB_PAGE_APP_TITLE_LINK = "//*[contains(@class, 'heading')][text()='App']/..//a";
+
+    public static final String APPS_JOB_PAGE_LAUNCHED_BY_LINK = "//*[contains(@class, 'heading')][text()='Launched by']/..//a";
+
+    public static final String APPS_JOB_PAGE_CREATED = "//*[contains(@class, 'heading')][text()='Created']/../p";
+
+    public static final String APPS_JOB_PAGE_RUNNING_JOB_LABEL = "//*[contains(@class, 'title')]//span[contains(@class, 'label-')]";
+
+    public static final String APPS_JOB_PAGE_VIEW_LOG_LINK = "//*[@class='pfda-toolbar']//a[contains(@href, 'job')][contains(@href, 'log')]";
+
+    public static final String APPS_JOB_LOG_PAGE_LOG_AREA = "//*[contains(@class, 'job-log')]";
+
 
 
 }

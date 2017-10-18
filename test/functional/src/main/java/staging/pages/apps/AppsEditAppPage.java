@@ -7,7 +7,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
-import staging.data.TestConstants;
 import staging.locators.AppsLocators;
 import staging.locators.CommonLocators;
 import staging.pages.AbstractPage;
@@ -16,10 +15,6 @@ import staging.pages.overview.OverviewPage;
 public class AppsEditAppPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
-
-    final String appName = TestConstants.CREATE_APP_NAME_PREFIX + testRunUniqueFinalValue;
-    final String appTitle = TestConstants.CREATE_APP_TITLE_PREFIX + testRunUniqueFinalValue;
-    final String appScriptBody = TestConstants.CREATE_APP_SCRIPT_BODY_PREFIX + testRunUniqueFinalValue;
 
     @FindBy(xpath = AppsLocators.APPS_EDIT_APP_TITLE_INPUT)
     private TextInput appsNewAppTitleInput;

@@ -135,6 +135,7 @@ public class CommonPage extends AbstractPage {
     }
 
     public CommonPage openProfileDropdown() {
+        sleep(1000);
         loggedUsernameLink.click();
         waitUntilDisplayed(profileDropBlock, 15);
         return new CommonPage(getDriver());

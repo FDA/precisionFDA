@@ -12,7 +12,7 @@ import java.util.List;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.fail;
-import static staging.utils.Utils.getCurrentDateTimeValue;
+import static staging.utils.Utils.getCurrentDateTimeUTCValue;
 
 public abstract class AbstractPage {
 
@@ -22,9 +22,13 @@ public abstract class AbstractPage {
 
     private static final int DEFAULT_TIMEOUT = 10;
 
-    public static String currentTestRunTime = getCurrentDateTimeValue();
+    public static String jobRunTimeUTC;
 
-    public static final String testRunUniqueFinalValue = getCurrentDateTimeValue();
+    public static String appCreateTimeUTC;
+
+    public static String noteCreateRunTimeUTC;
+
+    public static final String testRunUniqueFinalValue = getCurrentDateTimeUTCValue();
 
     public AbstractPage(final WebDriver driver) {
         HtmlElementLoader.populatePageObject(this, driver);
@@ -223,66 +227,70 @@ public abstract class AbstractPage {
         }
     }
 
-
     // ---- page scripts upload ----
 
-    //Wait Until JS, JQuery and Angular are Ready
+    //Wait Until JS, JQuery are Ready
     public void waitUntilScriptsReady() {
         log.info("wait until page scripts are ready");
         waitUntilJSReady();
         waitForJQueryLoad();
+        //waitForAngularLoad();
     }
 
-    public void waitUntilJSReady() {
+    public void waitUntilJSReady() throws JavascriptException {
         WebDriver jsWaitDriver = getDriver();
         WebDriverWait wait = new WebDriverWait(jsWaitDriver, 60);
         JavascriptExecutor jsExec = (JavascriptExecutor) jsWaitDriver;
-        ExpectedCondition<Boolean> jsLoad = driver -> ((JavascriptExecutor) jsWaitDriver)
-                .executeScript("return document.readyState").toString().equals("complete");
 
-        //Get JS is Ready
-        boolean jsReady = (Boolean) jsExec.executeScript("return document.readyState").toString().equals("complete");
-
-        //Wait Javascript until it is Ready
-        if (!jsReady) {
-            wait.until(jsLoad);
+        try {
+            ExpectedCondition<Boolean> jsLoad = driver -> ((JavascriptExecutor) jsWaitDriver)
+                    .executeScript("return document.readyState").toString().equals("complete");
+            boolean jsReady = (Boolean) jsExec.executeScript("return document.readyState").toString().equals("complete");
+            if (!jsReady) {
+                wait.until(jsLoad);
+            }
         }
+        catch (Exception e) {
+
+        }
+
     }
 
-    public void waitForAngularLoad() {
+    public void waitForAngularLoad() throws JavascriptException {
         WebDriver jsWaitDriver = driver;
         WebDriverWait wait = new WebDriverWait(jsWaitDriver, 60);
         JavascriptExecutor jsExec = (JavascriptExecutor) jsWaitDriver;
 
         String angularReadyScript = "return angular.element(document).injector().get('$http').pendingRequests.length === 0";
-
-        //Wait for ANGULAR to load
-        ExpectedCondition<Boolean> angularLoad = driver -> Boolean.valueOf(((JavascriptExecutor) driver)
-                .executeScript(angularReadyScript).toString());
-
-        //Get Angular is Ready
-        boolean angularReady = Boolean.valueOf(jsExec.executeScript(angularReadyScript).toString());
-
-        //Wait ANGULAR until it is Ready!
-        if(!angularReady) {
-            wait.until(angularLoad);
+        try {
+            ExpectedCondition<Boolean> angularLoad = driver -> Boolean.valueOf(((JavascriptExecutor) driver)
+                    .executeScript(angularReadyScript).toString());
+            boolean angularReady = Boolean.valueOf(jsExec.executeScript(angularReadyScript).toString());
+            if(!angularReady) {
+                wait.until(angularLoad);
+            }
         }
+        catch (Exception e) {
+
+        }
+
     }
 
-    public void waitForJQueryLoad() {
+    public void waitForJQueryLoad() throws JavascriptException {
         WebDriver jsWaitDriver = driver;
         JavascriptExecutor jsExec = (JavascriptExecutor) jsWaitDriver;
         WebDriverWait jsWait = new WebDriverWait(jsWaitDriver, 60);
 
-        ExpectedCondition<Boolean> jQueryLoad = driver -> ((Long) ((JavascriptExecutor) jsWaitDriver)
-                .executeScript("return jQuery.active") == 0);
+        try {
+            ExpectedCondition<Boolean> jQueryLoad = driver -> ((Long) ((JavascriptExecutor) jsWaitDriver)
+                    .executeScript("return jQuery.active") == 0);
+            boolean jqueryReady = (Boolean) jsExec.executeScript("return jQuery.active==0");
+            if(!jqueryReady) {
+                jsWait.until(jQueryLoad);
+            }
+        }
+        catch (Exception e) {
 
-        //Get JQuery is Ready
-        boolean jqueryReady = (Boolean) jsExec.executeScript("return jQuery.active==0");
-
-        //Wait JQuery until it is Ready!
-        if(!jqueryReady) {
-            jsWait.until(jQueryLoad);
         }
     }
 
@@ -341,6 +349,29 @@ public abstract class AbstractPage {
         Alert alert = wait.until(ExpectedConditions.alertIsPresent());
         if (alert != null) {
             alert.accept();
+        }
+    }
+
+    // =====
+    public boolean contains(String whereString, String whatString) {
+        Logger log = Logger.getLogger("TEST");
+        if (whereString.contains(whatString)) {
+            return true;
+        }
+        else {
+            log.info("[" + whereString + "] does not contain [" + whatString + "]");
+            return false;
+        }
+    }
+
+    public boolean equals(String actualString, String expectedString) {
+        Logger log = Logger.getLogger("TEST");
+        if (actualString.equals(expectedString)) {
+            return true;
+        }
+        else {
+            log.info("expected is [" + expectedString + "] but actual is [" + actualString + "]");
+            return false;
         }
     }
 

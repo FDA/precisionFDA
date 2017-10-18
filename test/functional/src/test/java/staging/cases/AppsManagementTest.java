@@ -4,10 +4,7 @@ import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import staging.pages.CommonPage;
-import staging.pages.apps.ApplCreateAppPage;
-import staging.pages.apps.AppsEditAppPage;
-import staging.pages.apps.AppsRelevantPage;
-import staging.pages.apps.AppsSavedAppPage;
+import staging.pages.apps.*;
 
 public class AppsManagementTest extends AbstractTest {
 
@@ -102,6 +99,45 @@ public class AppsManagementTest extends AbstractTest {
 
         log.info("verify Created value has correct date, hours and minutes");
         Assert.assertTrue(appsSavedAppPage.isCreatedDateCorrect());
+    }
+
+    @Test(groups = { "runJob" }, dependsOnMethods = {"successfulLogin", "createAndSaveSimpleApp"})
+    public void runJobAndValidateResult() {
+        logTestHeader("Test Case: run created previously job and validate result");
+
+        CommonPage commonPage = openCommonPage();
+        AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl();
+        AppsEditAndRunAppPage appsEditAndRunAppPage = appsSavedAppPage.runAppFromRelevantPage();
+        appsSavedAppPage = appsEditAndRunAppPage.editAppBeforeRun().runAppFromEditPage();
+
+        log.info("verify if running job is displayed");
+        Assert.assertTrue(appsSavedAppPage.isRunJobDisplayed());
+
+        AppsJobPage appsJobPage = appsSavedAppPage.openJobFromSavedAppPage();
+
+        log.info("verify if Job Name is correct");
+        Assert.assertTrue(appsJobPage.isJobNameCorrect());
+
+        log.info("verify if App Title is correct");
+        Assert.assertTrue(appsJobPage.isAppTitleCorrect());
+
+        log.info("verify if Launched By is correct");
+        Assert.assertTrue(appsJobPage.isLaunchedByCorrect());
+
+        log.info("verify if Created date/time is correct");
+        Assert.assertTrue(appsJobPage.isCreatedCorrect());
+
+        appsJobPage = appsJobPage.waitUntilJobIsDone();
+
+        log.info("verify if Job Status is Done");
+        Assert.assertTrue(appsJobPage.isJobStatusDone());
+
+        AppsJobLogPage appsJobLogPage = appsJobPage.viewLog();
+
+        log.info("verify if Job Result is correct");
+        Assert.assertTrue(appsJobLogPage.isJobResultCorrect());
+
     }
 
 }

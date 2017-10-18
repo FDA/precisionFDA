@@ -14,15 +14,14 @@ import staging.locators.CommonLocators;
 import staging.pages.AbstractPage;
 import staging.pages.overview.OverviewPage;
 
-import static staging.utils.Utils.getCurrentDateTimeValue;
+import static staging.data.TestConstants.getAppJobScriptBody;
+import static staging.data.TestConstants.getAppName;
+import static staging.data.TestConstants.getAppTitle;
+import static staging.utils.Utils.getCurrentDateTimeUTCValue;
 
 public class ApplCreateAppPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
-
-    final String appName = TestConstants.CREATE_APP_NAME_PREFIX + testRunUniqueFinalValue;
-    final String appTitle = TestConstants.CREATE_APP_TITLE_PREFIX + testRunUniqueFinalValue;
-    final String appScriptBody = TestConstants.CREATE_APP_SCRIPT_BODY_PREFIX + testRunUniqueFinalValue;
 
     @FindBy(xpath = AppsLocators.APPS_EDIT_APP_NAME_INPUT)
     private TextInput appsNewAppNameInput;
@@ -66,18 +65,18 @@ public class ApplCreateAppPage extends AbstractPage {
 
     public ApplCreateAppPage fillCreateAppForm() {
         log.info("fill Create App form");
-        appsNewAppNameInput.sendKeys(appName);
-        appsNewAppTitleInput.sendKeys(appTitle);
+        appsNewAppNameInput.sendKeys(getAppName());
+        appsNewAppTitleInput.sendKeys(getAppTitle());
         waitUntilDisplayed(By.xpath(AppsLocators.APPS_EDIT_APP_SCRIPT_TAB_LINK));
         editAppScriptTab.click();
-        editAppScriptTextArea.sendKeys(appScriptBody);
+        editAppScriptTextArea.sendKeys(getAppJobScriptBody());
         return new ApplCreateAppPage(getDriver());
     }
 
     public AppsSavedAppPage clickCreate() {
         log.info("click Create button");
         appCreateAppButton.click();
-        currentTestRunTime = getCurrentDateTimeValue();
+        appCreateTimeUTC = getCurrentDateTimeUTCValue();
         return new AppsSavedAppPage(getDriver());
     }
 
