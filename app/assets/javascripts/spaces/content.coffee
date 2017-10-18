@@ -1,5 +1,5 @@
 class SpacesContentView
-  constructor: (@space_uid) ->
+  constructor: (@space_uid, filesIdsWithDescription) ->
     @objectSelector = new Precision.models.SelectorModel({
       title: "Move data to space"
       help: "Only private data can be moved to a Space. Data in a Space can be published, but cannot be made private again."
@@ -67,6 +67,23 @@ class SpacesContentView
         }
       ]
     })
+    @filesIdsWithDescription = filesIdsWithDescription;
+    @visibleIds = ko.observableArray([])
+
+  isVisible: (id) ->
+    return @visibleIds().indexOf(id) > -1
+
+  toggle: (id) ->
+    if @isVisible(id)
+      @visibleIds.remove(id)
+    else
+      @visibleIds.push(id)
+
+  toggleAll: ->
+    if @visibleIds().length == @filesIdsWithDescription.length
+      @visibleIds([])
+    else
+      @toggle(id) for id in @filesIdsWithDescription when !@isVisible(id)
 
 #########################################################
 #
@@ -80,6 +97,6 @@ SpacesController = Paloma.controller('Spaces',
   content: ->
     params = @params
     $container = $("body main")
-    viewModel = new SpacesContentView(params.space_uid)
+    viewModel = new SpacesContentView(params.space_uid, params.filesIdsWithDescription)
     ko.applyBindings(viewModel, $container[0])
 )
