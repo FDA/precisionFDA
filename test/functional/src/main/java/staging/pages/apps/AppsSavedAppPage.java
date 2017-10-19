@@ -10,6 +10,7 @@ import staging.data.TestConstants;
 import staging.locators.AppsLocators;
 import staging.model.Users;
 import staging.pages.AbstractPage;
+import staging.utils.Utils;
 
 import static staging.data.TestConstants.*;
 
@@ -92,30 +93,30 @@ public class AppsSavedAppPage extends AbstractPage {
     public boolean isSelectedAppNameCorrect() {
         String expected = getAppName().replace(":", "").replace(" ", "-");
         String actual = getAppsRelevantSelectedAppName().getText();
-        return equals(actual, expected);
+        return Utils.equals(actual, expected);
     }
 
     public boolean isSelectedAppOrgCorrect() {
         String expected = Users.getTestUser().getApplUserOrg();
         String actual = getAppsRelevantSelectedAppOrg().getText();
-        return equals(actual, expected);
+        return Utils.equals(actual, expected);
     }
 
     public boolean isSelectedAppAddedByCorrect() {
         String expected = Users.getTestUser().getApplUsername();
         String actual = getAppsRelevantSelectedAppAddedBy().getText();
-        return equals(actual, expected);
+        return Utils.equals(actual, expected);
     }
 
     public boolean isCreatedDateCorrect() {
         String createdValue = getAppsRelevantSelectedAppCreated().getText();
         String expectedValue = appCreateTimeUTC.substring(0, 16);
-        return contains(createdValue, expectedValue);
+        return Utils.contains(createdValue, expectedValue);
     }
 
     public boolean isSelectedAppTitleCorrect() {
         String actual = getAppsRelevantSelectedAppTitle().getText();
-        return equals(actual, getAppTitle());
+        return Utils.equals(actual, getAppTitle());
     }
 
     public boolean isRunAppButtonDisplayed() {

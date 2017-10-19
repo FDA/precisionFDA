@@ -29,6 +29,13 @@ public class Utils {
         return salt;
     }
 
+    public static String getTimeStamp() {
+        Date d = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+        String stamp = "[" + dateFormat.format(d) + "]";
+        return stamp;
+    }
+
     public static void createFolder(String folderPath) {
         File file = new File(folderPath);
         if (!file.exists()) {
@@ -43,6 +50,28 @@ public class Utils {
         BufferedWriter bw = new BufferedWriter(fw);
         bw.write(content);
         bw.close();
+    }
+
+    public static boolean contains(String whereString, String whatString) {
+        Logger log = Logger.getLogger("TEST");
+        if (whereString.contains(whatString)) {
+            return true;
+        }
+        else {
+            log.info("[" + whereString + "] does not contain [" + whatString + "]");
+            return false;
+        }
+    }
+
+    public static boolean equals(String actualString, String expectedString) {
+        Logger log = Logger.getLogger("TEST");
+        if (actualString.equals(expectedString)) {
+            return true;
+        }
+        else {
+            log.info("expected is [" + expectedString + "] but actual is [" + actualString + "]");
+            return false;
+        }
     }
 
 }

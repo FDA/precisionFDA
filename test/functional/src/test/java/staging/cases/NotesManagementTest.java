@@ -7,9 +7,27 @@ import staging.model.Users;
 import staging.pages.CommonPage;
 import staging.pages.notes.NotesNewNotePage;
 
+import static org.testng.Assert.assertTrue;
+
 public class NotesManagementTest extends AbstractTest {
 
     private final Logger log = Logger.getLogger(this.getClass());
+
+    @Test
+    public void successfulLogin() {
+        logTestHeader("Test Case: Successful Login");
+
+        Users user = Users.getTestUser();
+
+        openStartPage();
+        CommonPage commonPage = correctLoginToFDA(user);
+
+        log.info("check navigation panel is displayed");
+        assertTrue(commonPage.isNavigationPanelDisplayed());
+
+        log.info("check correct username is displayed");
+        assertTrue(commonPage.isCorrectUserNameDisplayed(user));
+    }
 
     @Test(dependsOnMethods = {"successfulLogin"})
     public void verifyDataOnNewNotePage() {

@@ -3,14 +3,33 @@ package staging.cases;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import staging.model.Users;
 import staging.pages.CommonPage;
 import staging.pages.apps.*;
+
+import static org.testng.Assert.assertTrue;
 
 public class AppsManagementTest extends AbstractTest {
 
     private final Logger log = Logger.getLogger(this.getClass());
 
-    @Test(dependsOnMethods = {"successfulLogin"}, priority = 0)
+    @Test(groups = "runJob")
+    public void successfulLogin() {
+        logTestHeader("Test Case: Successful Login");
+
+        Users user = Users.getTestUser();
+
+        openStartPage();
+        CommonPage commonPage = correctLoginToFDA(user);
+
+        log.info("check navigation panel is displayed");
+        assertTrue(commonPage.isNavigationPanelDisplayed());
+
+        log.info("check correct username is displayed");
+        assertTrue(commonPage.isCorrectUserNameDisplayed(user));
+    }
+
+    @Test(groups = { "runJob" }, dependsOnMethods = {"successfulLogin"}, priority = 0)
     public void createAndSaveSimpleApp() {
         logTestHeader("Test Case: create and save simple app with custom name, title and script text");
 

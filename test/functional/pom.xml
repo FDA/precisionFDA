@@ -20,7 +20,7 @@
                 <version>2.20.1</version>
                 <configuration>
                     <suiteXmlFiles>
-                        <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
+                        <suiteXmlFile>${suite}</suiteXmlFile>
                     </suiteXmlFiles>
                     <properties>
                         <property>

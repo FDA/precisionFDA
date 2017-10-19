@@ -352,27 +352,5 @@ public abstract class AbstractPage {
         }
     }
 
-    // =====
-    public boolean contains(String whereString, String whatString) {
-        Logger log = Logger.getLogger("TEST");
-        if (whereString.contains(whatString)) {
-            return true;
-        }
-        else {
-            log.info("[" + whereString + "] does not contain [" + whatString + "]");
-            return false;
-        }
-    }
-
-    public boolean equals(String actualString, String expectedString) {
-        Logger log = Logger.getLogger("TEST");
-        if (actualString.equals(expectedString)) {
-            return true;
-        }
-        else {
-            log.info("expected is [" + expectedString + "] but actual is [" + actualString + "]");
-            return false;
-        }
-    }
 
 }
