@@ -48,7 +48,7 @@ public abstract class AbstractTest {
         return getDebugLogFolder() + testSuiteName + "_" + fileNameUniqueValue + "/";
     }
 
-    @BeforeTest
+    @BeforeTest(alwaysRun = true)
     public void setUp() {
 
         //initiate global params
@@ -82,7 +82,7 @@ public abstract class AbstractTest {
         runBrowser();
     }
 
-    @AfterTest
+    @AfterTest(alwaysRun = true)
     public void tearDown() throws Exception {
         closeBrowser();
         //move log files
@@ -94,22 +94,6 @@ public abstract class AbstractTest {
         if (driver != null) {
             driver.quit();
         }
-    }
-
-    @Test
-    public void successfulLogin() {
-        logTestHeader("Test Case: Successful Login");
-
-        Users user = Users.getTestUser();
-
-        openStartPage();
-        CommonPage commonPage = correctLoginToFDA(user);
-
-        log.info("check navigation panel is displayed");
-        assertTrue(commonPage.isNavigationPanelDisplayed());
-
-        log.info("check correct username is displayed");
-        assertTrue(commonPage.isCorrectUserNameDisplayed(user));
     }
 
     @Test

@@ -6,10 +6,10 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
-import staging.data.TestConstants;
 import staging.locators.AppsLocators;
 import staging.model.Users;
 import staging.pages.AbstractPage;
+import staging.utils.*;
 
 import static staging.data.TestConstants.getAppJobName;
 import static staging.data.TestConstants.getAppTitle;
@@ -67,25 +67,25 @@ public class AppsJobPage extends AbstractPage {
     public boolean isJobNameCorrect() {
         String expected = getAppJobName();
         String actual = getAppsJobPageJobName().getText();
-        return equals(actual, expected);
+        return Utils.equals(actual, expected);
     }
 
     public boolean isAppTitleCorrect() {
         String expected = getAppTitle();
         String actual = getAppsJobPageAppTitleLink().getText();
-        return contains(actual, expected);
+        return Utils.contains(actual, expected);
     }
 
     public boolean isLaunchedByCorrect() {
         String expected = Users.getTestUser().getApplUsername();
         String actual = getAppsJobPageLaunchedByLink().getText();
-        return contains(actual, expected);
+        return Utils.contains(actual, expected);
     }
 
     public boolean isCreatedCorrect() {
         String expected = jobRunTimeUTC.substring(0, 16);
         String actual = getAppsJobPageCreated().getText();
-        return contains(actual, expected);
+        return Utils.contains(actual, expected);
     }
 
     public WebElement getAppsJobPageRunningJobLabel() {

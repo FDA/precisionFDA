@@ -9,6 +9,7 @@ import ru.yandex.qatools.htmlelements.element.TextInput;
 import staging.locators.NotesLocators;
 import staging.model.Users;
 import staging.pages.AbstractPage;
+import staging.utils.Utils;
 
 public class NotesNewNotePage extends AbstractPage {
 
@@ -52,25 +53,25 @@ public class NotesNewNotePage extends AbstractPage {
     public boolean isDefaultTitleCorrect(Users user) {
         String titleValue = notesTitle.getEnteredText();
         String expectedValue = user.getApplUserFullName() + "'s untitled note";
-        return equals(titleValue, expectedValue);
+        return Utils.equals(titleValue, expectedValue);
     }
 
     public boolean isOrgCorrect(Users user) {
         String orgValue = notesOrg.getText();
         String expectedValue = user.getApplUserOrg();
-        return equals(orgValue, expectedValue);
+        return Utils.equals(orgValue, expectedValue);
     }
 
     public boolean isAddedByCorrect(Users user) {
         String addedByValue = notesAddedBy.getText();
         String expectedValue = user.getApplUsername();
-        return equals(addedByValue, expectedValue);
+        return Utils.equals(addedByValue, expectedValue);
     }
 
     public boolean isCreatedDateCorrect() {
         String createdValue = notesCreated.getText();
         String expectedValue = noteCreateRunTimeUTC.substring(0, 16);
-        return contains(createdValue, expectedValue);
+        return Utils.contains(createdValue, expectedValue);
     }
 
 

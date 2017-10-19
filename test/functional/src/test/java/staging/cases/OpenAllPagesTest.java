@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import staging.data.PageTitles;
+import staging.model.Users;
 import staging.pages.guidelines.guidelinesPage;
 import staging.pages.about.*;
 import staging.pages.apps.*;
@@ -27,6 +28,22 @@ import static org.testng.Assert.assertTrue;
 public class OpenAllPagesTest extends AbstractTest {
 
     private final Logger log = Logger.getLogger("TEST");
+
+    @Test
+    public void successfulLogin() {
+        logTestHeader("Test Case: Successful Login");
+
+        Users user = Users.getTestUser();
+
+        openStartPage();
+        CommonPage commonPage = correctLoginToFDA(user);
+
+        log.info("check navigation panel is displayed");
+        assertTrue(commonPage.isNavigationPanelDisplayed());
+
+        log.info("check correct username is displayed");
+        assertTrue(commonPage.isCorrectUserNameDisplayed(user));
+    }
 
     @Test(dependsOnMethods = { "successfulLogin" })
     public void checkNotesNewNotePageCanBeOpen() {
