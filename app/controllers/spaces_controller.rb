@@ -88,7 +88,7 @@ class SpacesController < ApplicationController
       })
     end
 
-    js space_uid: @space.uid
+    js({ space_uid: @space.uid }.merge(files_ids_with_descriptions(@files)))
   end
 
   def discuss
@@ -273,5 +273,9 @@ class SpacesController < ApplicationController
       p.require(:name)
       p.require(:space_type)
       return p
+    end
+
+    def files_ids_with_descriptions(files)
+      { filesIdsWithDescription: files.select { |file| file.description.present? }.collect(&:id) }
     end
 end
