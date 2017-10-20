@@ -31,6 +31,9 @@ class DocsController < ApplicationController
       apps_fork: {
         url: "https://www.youtube.com/embed/oQgJ9WD7Nkg"
       },
+      apps_batch_run: {
+        url: "https://www.youtube.com/embed/K9rHEef2FNs"
+      },
       apps_run: {
         url: "https://www.youtube.com/embed/P90E3jgL134"
       },
