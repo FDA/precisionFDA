@@ -8,7 +8,8 @@ import org.openqa.selenium.support.FindBy;
 import staging.locators.AppsLocators;
 import staging.pages.AbstractPage;
 
-import static staging.data.TestConstants.*;
+import static staging.data.TestVariables.getAppJobScriptBody;
+import static staging.data.TestVariables.getAppJobScriptOutput;
 
 public class AppsJobLogPage extends AbstractPage {
 

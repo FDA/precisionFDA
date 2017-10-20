@@ -1,12 +1,21 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="debug">
-    <test name="debug">
+<suite name="debug" parallel="tests" thread-count="2">
+    <test name="debug1">
         <classes>
             <class name="staging.cases.OpenAllPagesTest">
                 <methods>
-                    <include name="successfulLogin" />
-                    <include name="checkAppsCreateAppPageCanBeOpen" />
-                    <include name="checkFilesPageCanBeOpen" />
+                    <include name="successfulLogin"/>
+                    <include name="checkNotesNewNotePageCanBeOpen"/>
+                    <include name="checkNotesFeaturedPageCanBeOpen"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="debug2">
+        <classes>
+            <class name="staging.cases.LoginTest">
+                <methods>
+                    <include name="loginWithWrongPassword"/>
                 </methods>
             </class>
         </classes>

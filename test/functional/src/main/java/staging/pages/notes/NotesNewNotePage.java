@@ -1,6 +1,5 @@
 package staging.pages.notes;
 
-import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -11,9 +10,9 @@ import staging.model.Users;
 import staging.pages.AbstractPage;
 import staging.utils.Utils;
 
-public class NotesNewNotePage extends AbstractPage {
+import static staging.data.TestVariables.getNoteCreateTimeUTC;
 
-    private final Logger log = Logger.getLogger(this.getClass());
+public class NotesNewNotePage extends AbstractPage {
 
     @FindBy(xpath = NotesLocators.NOTES_NEW_NOTE_EDITOR_AREA)
     private WebElement notesNewNoteEditorWE;
@@ -70,7 +69,7 @@ public class NotesNewNotePage extends AbstractPage {
 
     public boolean isCreatedDateCorrect() {
         String createdValue = notesCreated.getText();
-        String expectedValue = noteCreateRunTimeUTC.substring(0, 16);
+        String expectedValue = getNoteCreateTimeUTC().substring(0, 16);
         return Utils.contains(createdValue, expectedValue);
     }
 

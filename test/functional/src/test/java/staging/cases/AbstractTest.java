@@ -1,5 +1,6 @@
 package staging.cases;
 
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
 
@@ -10,6 +11,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.testng.annotations.*;
+import staging.data.TestConstants;
+import staging.data.TestVariables;
 import staging.locators.CommonLocators;
 import staging.model.Users;
 import staging.pages.StartPage;
@@ -17,6 +20,7 @@ import staging.pages.CommonPage;
 import staging.pages.login.GrantAccessLoginPage;
 import staging.pages.login.LoginPage;
 import staging.utils.SettingsProperties;
+import staging.utils.Utils;
 import tools.TestResultListener;
 
 import java.io.File;
@@ -25,44 +29,17 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.testng.Assert.assertTrue;
-import static staging.utils.Utils.createFile;
-import static staging.utils.Utils.createFolder;
-import static staging.utils.Utils.getFileNameUniqueValue;
+import static staging.data.TestVariables.*;
+import static staging.utils.Utils.*;
 
 @Listeners(TestResultListener.class)
 public abstract class AbstractTest {
 
-    protected static WebDriver driver;
     private Logger log = Logger.getLogger("INFO");
 
-    public static final String fileNameUniqueValue = getFileNameUniqueValue();
+    protected WebDriver driver;
 
-    public static String testSuiteName;
-
-    public static String getDebugLogFolder() {
-        return System.getProperty("user.dir") + "/target/debug-log/";
-    }
-
-    public static String getDebugLogFolderPath() {
-        return getDebugLogFolder() + testSuiteName + "_" + fileNameUniqueValue + "/";
-    }
-
-    @BeforeTest(alwaysRun = true)
-    public void setUp() {
-
-        //initiate global params
-        testSuiteName = this.getClass().getName().replace("staging.cases.", "");
-
-        runBrowser();
-
-        //create debug folder
-        createFolder(getDebugLogFolder());
-        createFolder(getDebugLogFolderPath());
-        log.info("folder created: " + getDebugLogFolderPath());
-    }
-
-    public void runBrowser() {
+    public WebDriver initiateBrowser() {
         String currentDirectory = System.getProperty("user.dir");
         FirefoxBinary firefoxBinary = new FirefoxBinary();
         if (SettingsProperties.getProperty("headlessMode").equalsIgnoreCase("true")) {
@@ -70,30 +47,104 @@ public abstract class AbstractTest {
         }
         System.setProperty("webdriver.gecko.driver", currentDirectory + SettingsProperties.getProperty("pathToFirefoxDriver"));
         System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
+
         FirefoxOptions firefoxOptions = new FirefoxOptions();
         firefoxOptions.setBinary(firefoxBinary);
-        driver = new FirefoxDriver(firefoxOptions);
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        WebDriver initDriver = new FirefoxDriver(firefoxOptions);
+        initDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        return initDriver;
+    }
+
+    @BeforeClass(alwaysRun = true)
+    public void setUp() {
+        String suiteName = this.getClass().getName().replace("staging.cases.", "");
+        setRunSuiteName(suiteName);
+        driver = new DriverFactory().getInstance().getDriver();
+        // driver = initiateBrowser();
     }
 
     public void reopenBrowser() {
         log.info("reopen browser");
         closeBrowser();
-        runBrowser();
+        driver = new DriverFactory().getInstance().getDriver();
+        // driver = initiateBrowser();
     }
 
-    @AfterTest(alwaysRun = true)
+    @AfterClass(alwaysRun = true)
     public void tearDown() throws Exception {
         closeBrowser();
-        //move log files
-        moveLogFile("full.log");
-        moveLogFile("error.log");
     }
 
     public void closeBrowser() {
         if (driver != null) {
-            driver.quit();
+            log.info("closing browser");
+            try {
+                // driver.quit();
+                DriverFactory.getInstance().removeDriver();
+            }
+            catch (WebDriverException e) {
+                //
+            }
         }
+    }
+
+    @BeforeTest
+    public void beforeTest() {
+        createFolder(getDebugLogFolder());
+        createFolder(getDebugLogFolderPath());
+        log.info("folder created: " + getDebugLogFolderPath());
+    }
+
+    @AfterTest(alwaysRun = true)
+    public void afterTest() {
+        // moveLogFile("full.log");
+        // moveLogFile("error.log");
+        // Runtime.getRuntime().exec( "pkill -f firefox" ).waitFor();
+        // Runtime.getRuntime().exec( "pkill -f geckodriver" ).waitFor();
+    }
+
+    @AfterMethod(alwaysRun = true)
+    public void afterCase() {
+        if (getFinishedCaseStatus().equals(TestConstants.CASE_STATUS_PASSED)) {
+            casePostActions(TestConstants.CASE_STATUS_PASSED, getFinishedCaseName(), isGetScreenshotOnPass(), isGetPageSourceOnPass());
+        }
+
+        if (getFinishedCaseStatus().equals(TestConstants.CASE_STATUS_FAILED)) {
+            casePostActions(TestConstants.CASE_STATUS_FAILED, getFinishedCaseName(), isGetScreenshotOnFail(), isGetPageSourceOnFail());
+        }
+    }
+
+    public void casePostActions(String caseStatus, String caseName, boolean isGetScreenshot, boolean isGetSource) {
+
+        Logger log = Logger.getLogger("INFO");
+
+        log.info("----------------------");
+        log.info("-- it was test case: " + caseName + " --");
+        log.info("----------------------");
+        log.info("--      " + caseStatus.toUpperCase() + "      --");
+        log.info("----------------------");
+
+        String filePathWithNoExt = getDebugLogFolderPath() +
+                caseStatus + "_" +
+                getRunSuiteName() + "_" +
+                caseName + "_" +
+                getRunTimeUniqueValue();
+
+        if (isGetScreenshot) {
+            takeScreenshot(filePathWithNoExt + ".png", driver);
+            log.info("screenshot is here: " + filePathWithNoExt + ".png");
+        }
+
+        if (isGetSource) {
+            String source = Utils.getPageSource(driver);
+            try {
+                createFile(filePathWithNoExt + ".txt", source);
+                log.info("page source is here: " + filePathWithNoExt + ".txt");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        log.info("----------------------");
     }
 
     @Test
@@ -144,45 +195,6 @@ public abstract class AbstractTest {
         return new CommonPage(driver);
     }
 
-    public static void takeScreenshot(String filePath) {
-        File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        try {
-            org.apache.commons.io.FileUtils.copyFile(scrFile, new File(filePath));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static String getPageSource() {
-        return driver.getPageSource();
-    }
-
-    public static void casePostActions(String status, String caseName, String getScreenshot, String getSource) {
-
-        Logger log = Logger.getLogger("POST");
-
-        String currentSalt = getFileNameUniqueValue();
-
-        String path = getDebugLogFolderPath() + status + "_" + caseName + "_" + currentSalt;
-
-        if (getScreenshot.equalsIgnoreCase("true")) {
-            //take screenshot
-            takeScreenshot(path + ".png");
-            log.info("screenshot is here: " + path + ".png");
-        }
-
-        if (getSource.equalsIgnoreCase("true")) {
-            //save page source
-            String source = getPageSource();
-            try {
-                createFile(path + ".txt", source);
-                log.info("page source is here: " + path + ".txt");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     public LoginPage openLoginPage(String basicAuthUser, String basicAuthPassword) {
         log.info("open Login page");
 
@@ -216,6 +228,52 @@ public abstract class AbstractTest {
         Alert alert = fluentWait.until(ExpectedConditions.alertIsPresent());
         if (alert != null) {
             alert.accept();
+        }
+    }
+
+    // ----- DriverFactory -----
+
+    public static class DriverFactory {
+
+        private DriverFactory() {
+            //...
+        }
+        private static DriverFactory instance = new DriverFactory();
+
+        public static DriverFactory getInstance() {
+            return instance;
+        }
+
+        ThreadLocal<WebDriver> threadDriver = new ThreadLocal<WebDriver>() {
+            @Override
+            protected WebDriver initialValue() {
+                return initiateFirefoxBrowser();
+            }
+        };
+
+        public WebDriver getDriver() {
+            return threadDriver.get();
+        }
+
+        public void removeDriver() {
+            threadDriver.get().quit();
+            threadDriver.remove();
+        }
+
+        public WebDriver initiateFirefoxBrowser() {
+            String currentDirectory = System.getProperty("user.dir");
+            FirefoxBinary firefoxBinary = new FirefoxBinary();
+            if (SettingsProperties.getProperty("headlessMode").equalsIgnoreCase("true")) {
+                firefoxBinary.addCommandLineOptions("--headless");
+            }
+            System.setProperty("webdriver.gecko.driver", currentDirectory + SettingsProperties.getProperty("pathToFirefoxDriver"));
+            System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
+
+            FirefoxOptions firefoxOptions = new FirefoxOptions();
+            firefoxOptions.setBinary(firefoxBinary);
+            WebDriver initDriver = new FirefoxDriver(firefoxOptions);
+            initDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+            return initDriver;
         }
     }
 

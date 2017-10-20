@@ -9,8 +9,8 @@ import ru.yandex.qatools.htmlelements.element.TextInput;
 import staging.locators.AppsLocators;
 import staging.pages.AbstractPage;
 
-import static staging.data.TestConstants.getAppJobName;
-import static staging.utils.Utils.getCurrentDateTimeUTCValue;
+import static staging.data.TestVariables.getAppJobName;
+import static staging.data.TestVariables.setJobRunTimeUTC;
 
 public class AppsEditAndRunAppPage extends AbstractPage {
 
@@ -35,7 +35,7 @@ public class AppsEditAndRunAppPage extends AbstractPage {
 
     public AppsSavedAppPage runAppFromEditPage() {
         appsRunAppButton.click();
-        jobRunTimeUTC = getCurrentDateTimeUTCValue();
+        setJobRunTimeUTC();
         return new AppsSavedAppPage(getDriver());
     }
 

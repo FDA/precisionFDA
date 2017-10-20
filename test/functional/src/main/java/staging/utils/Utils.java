@@ -1,6 +1,9 @@
 package staging.utils;
 
 import org.apache.log4j.Logger;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -12,8 +15,6 @@ import java.util.TimeZone;
 
 public class Utils {
 
-    private final Logger log = Logger.getLogger(this.getClass());
-
     public static String getCurrentDateTimeUTCValue() {
         Date d = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -22,9 +23,9 @@ public class Utils {
         return date;
     }
 
-    public static String getFileNameUniqueValue() {
+    public static String getRunTimeUniqueValue() {
         Date d = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd_MM_HHmmssS");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd_MM_HHmmssSSS");
         String salt = dateFormat.format(d);
         return salt;
     }
@@ -72,6 +73,19 @@ public class Utils {
             log.info("expected is [" + expectedString + "] but actual is [" + actualString + "]");
             return false;
         }
+    }
+
+    public static void takeScreenshot(String filePath, WebDriver driver) {
+        File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+        try {
+            org.apache.commons.io.FileUtils.copyFile(scrFile, new File(filePath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String getPageSource(WebDriver driver) {
+        return driver.getPageSource();
     }
 
 }

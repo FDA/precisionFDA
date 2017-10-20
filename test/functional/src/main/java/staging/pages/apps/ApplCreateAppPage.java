@@ -8,16 +8,12 @@ import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
-import staging.data.TestConstants;
 import staging.locators.AppsLocators;
 import staging.locators.CommonLocators;
 import staging.pages.AbstractPage;
 import staging.pages.overview.OverviewPage;
 
-import static staging.data.TestConstants.getAppJobScriptBody;
-import static staging.data.TestConstants.getAppName;
-import static staging.data.TestConstants.getAppTitle;
-import static staging.utils.Utils.getCurrentDateTimeUTCValue;
+import static staging.data.TestVariables.*;
 
 public class ApplCreateAppPage extends AbstractPage {
 
@@ -76,7 +72,7 @@ public class ApplCreateAppPage extends AbstractPage {
     public AppsSavedAppPage clickCreate() {
         log.info("click Create button");
         appCreateAppButton.click();
-        appCreateTimeUTC = getCurrentDateTimeUTCValue();
+        setAppCreateTimeUTC();
         return new AppsSavedAppPage(getDriver());
     }
 

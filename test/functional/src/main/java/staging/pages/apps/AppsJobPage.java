@@ -10,9 +10,9 @@ import staging.locators.AppsLocators;
 import staging.model.Users;
 import staging.pages.AbstractPage;
 import staging.utils.*;
-
-import static staging.data.TestConstants.getAppJobName;
-import static staging.data.TestConstants.getAppTitle;
+import static staging.data.TestVariables.getAppJobName;
+import static staging.data.TestVariables.getAppTitle;
+import static staging.data.TestVariables.getJobRunTimeUTC;
 
 public class AppsJobPage extends AbstractPage {
 
@@ -83,7 +83,7 @@ public class AppsJobPage extends AbstractPage {
     }
 
     public boolean isCreatedCorrect() {
-        String expected = jobRunTimeUTC.substring(0, 16);
+        String expected = getJobRunTimeUTC().substring(0, 16);
         String actual = getAppsJobPageCreated().getText();
         return Utils.contains(actual, expected);
     }
