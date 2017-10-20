@@ -32,6 +32,14 @@
       <div class="bs-docs-section bs-docs-media-section">
         <%= video_iframe(@videos[:apps_run][:url]) %>
       </div>
+      <div id="apps-batch-run" class="h2">Batch running an app</div>
+      <div class="bs-docs-section">
+        <p>For batch running, using the "Run Batch App" button, you are allowed to vary one input across a batch. Select the input you would like to vary from the dropdown menu. For file inputs when you click "Select Files", you can filter for the files you would like and select them with the checkbox on the left. Once you have selected all of your files, click "Select". For varying non file inputs (string, integer, float, boolean), enter comma-separated values.</p>
+        <p>The system will launch separate jobs for each of the varying input values.</p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section">
+        <%= video_iframe(@videos[:apps_batch_run][:url]) %>
+      </div>
       <div id="apps-export" class="h2">Exporting an app</div>
       <div class="bs-docs-section">
         <p>This feature allows you to export an app into a portable format (Docker container), so that you can run it on your own computer.</p>
@@ -100,6 +108,7 @@
           <li><a href="#apps-overview">Overview &amp; Terminology</a></li>
           <li><a href="#apps-listing">Listing apps</a></li>
           <li><a href="#apps-run">Running an app</a></li>
+          <li><a href="#apps-batch-run">Batch Running an app</a></li>
           <li><a href="#apps-export">Exporting an app</a></li>
           <li><a href="#job-details">Job details and logs</a></li>
         </ul>
