@@ -118,16 +118,24 @@ challenge_note = Note.create!(
 truth_note = Note.create!(
   user: florante,
   title: "Florante's truth note title",
+  scope: "public",
   content: "Florante's truth note content",
 )
 
 consistency_note = Note.create!(
   user: florante,
   title: "Florante's consistency note title",
+  scope: "public",
   content: "Florante's consistency note content",
 )
 
 # Create discussions
+consistency_discussion = Discussion.create!(
+  id: CONSISTENCY_DISCUSSION_ID,
+  user: florante,
+  note: consistency_note
+)
+
 challenge_discussion = Discussion.create!(
   user: florante,
   note: challenge_note
@@ -137,12 +145,6 @@ truth_discussion = Discussion.create!(
   id: TRUTH_DISCUSSION_ID,
   user: florante,
   note: truth_note
-)
-
-consistency_discussion = Discussion.create!(
-  id: CONSISTENCY_DISCUSSION_ID,
-  user: florante,
-  note: consistency_note
 )
 
 # Create appathon in a box
