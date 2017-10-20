@@ -6,13 +6,12 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
-import staging.data.TestConstants;
 import staging.locators.AppsLocators;
 import staging.model.Users;
 import staging.pages.AbstractPage;
 import staging.utils.Utils;
 
-import static staging.data.TestConstants.*;
+import static staging.data.TestVariables.*;
 
 public class AppsSavedAppPage extends AbstractPage {
 
@@ -110,7 +109,7 @@ public class AppsSavedAppPage extends AbstractPage {
 
     public boolean isCreatedDateCorrect() {
         String createdValue = getAppsRelevantSelectedAppCreated().getText();
-        String expectedValue = appCreateTimeUTC.substring(0, 16);
+        String expectedValue = getAppCreateTimeUTC().substring(0, 16);
         return Utils.contains(createdValue, expectedValue);
     }
 

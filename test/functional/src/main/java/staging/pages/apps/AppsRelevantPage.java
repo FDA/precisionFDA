@@ -9,7 +9,7 @@ import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.AppsLocators;
 import staging.pages.AbstractPage;
 
-import static staging.data.TestConstants.getAppTitle;
+import static staging.data.TestVariables.getAppTitle;
 
 public class AppsRelevantPage extends AbstractPage {
 

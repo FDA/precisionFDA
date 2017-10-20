@@ -40,4 +40,5 @@
 /test/functional/src/main/resources/application.conf
 
 #Ignore browser drivers
-/test/functional/drivers
+/test/functional/drivers/chromedriver
+/test/functional/drivers/geckodriver

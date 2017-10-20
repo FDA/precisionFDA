@@ -8,7 +8,7 @@ import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.NotesLocators;
 import staging.pages.AbstractPage;
 
-import static staging.utils.Utils.getCurrentDateTimeUTCValue;
+import static staging.data.TestVariables.setNoteCreateTimeUTC;
 
 public class NotesPage extends AbstractPage {
 
@@ -57,7 +57,7 @@ public class NotesPage extends AbstractPage {
     public NotesNewNotePage openNotesNewNotePage() {
         log.info("open Notes.NewNote page");
         notesNewNoteLink.click();
-        noteCreateRunTimeUTC = getCurrentDateTimeUTCValue();
+        setNoteCreateTimeUTC();
         return new NotesNewNotePage(getDriver());
     }
 

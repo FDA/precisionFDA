@@ -12,7 +12,6 @@ import java.util.List;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.fail;
-import static staging.utils.Utils.getCurrentDateTimeUTCValue;
 
 public abstract class AbstractPage {
 
@@ -21,14 +20,6 @@ public abstract class AbstractPage {
     private final Logger log = Logger.getLogger(this.getClass());
 
     private static final int DEFAULT_TIMEOUT = 10;
-
-    public static String jobRunTimeUTC;
-
-    public static String appCreateTimeUTC;
-
-    public static String noteCreateRunTimeUTC;
-
-    public static final String testRunUniqueFinalValue = getCurrentDateTimeUTCValue();
 
     public AbstractPage(final WebDriver driver) {
         HtmlElementLoader.populatePageObject(this, driver);
@@ -46,7 +37,7 @@ public abstract class AbstractPage {
     }
 
     private void waitUntilDisplayed(final WebElement element, final Integer timeout, final boolean isLog) {
-        Wait<WebDriver> fluentWait = new FluentWait<WebDriver>(driver)
+        Wait<WebDriver> fluentWait = new FluentWait<WebDriver>(getDriver())
                 .withTimeout(timeout, SECONDS)
                 .pollingEvery(1, SECONDS)
                 .ignoring(NoSuchElementException.class);
@@ -78,7 +69,7 @@ public abstract class AbstractPage {
 
     private void waitUntilDisplayed(final By locator, final int timeout, final boolean isLog) {
         try {
-            (new WebDriverWait(driver, timeout)).ignoring(StaleElementReferenceException.class)
+            (new WebDriverWait(getDriver(), timeout)).ignoring(StaleElementReferenceException.class)
                     .until(ExpectedConditions.visibilityOfElementLocated(locator));
         } catch (final TimeoutException e) {
             if (isLog) {
@@ -89,11 +80,11 @@ public abstract class AbstractPage {
     }
 
     public void waitUntilClickable(final By locator) {
-        (new WebDriverWait(driver, DEFAULT_TIMEOUT)).until(ExpectedConditions.elementToBeClickable(locator));
+        (new WebDriverWait(getDriver(), DEFAULT_TIMEOUT)).until(ExpectedConditions.elementToBeClickable(locator));
     }
 
     public void waitUntilClickable(final WebElement element) {
-        (new WebDriverWait(driver, DEFAULT_TIMEOUT)).until(new ExpectedCondition<Boolean>() {
+        (new WebDriverWait(getDriver(), DEFAULT_TIMEOUT)).until(new ExpectedCondition<Boolean>() {
             public Boolean apply(final WebDriver d) {
                 if (element == null) {
                     return false;
@@ -105,11 +96,11 @@ public abstract class AbstractPage {
     }
 
     public void waitUntilNotDisplayed(final By locator) {
-        new WebDriverWait(driver, DEFAULT_TIMEOUT).until(ExpectedConditions.invisibilityOfElementLocated(locator));
+        new WebDriverWait(getDriver(), DEFAULT_TIMEOUT).until(ExpectedConditions.invisibilityOfElementLocated(locator));
     }
 
     public void waitUntilNotDisplayed(final By locator, final int timeout) {
-        new WebDriverWait(driver, timeout).until(ExpectedConditions.invisibilityOfElementLocated(locator));
+        new WebDriverWait(getDriver(), timeout).until(ExpectedConditions.invisibilityOfElementLocated(locator));
     }
 
     public boolean isElementPresent(final By locator, final int timeout) {
@@ -179,7 +170,7 @@ public abstract class AbstractPage {
     // ***** Find element by ***** //
 
     public WebElement findElement(final By locator, final Integer timeout) {
-        return new WebDriverWait(driver, timeout).until(ExpectedConditions.visibilityOfElementLocated(locator));
+        return new WebDriverWait(getDriver(), timeout).until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
 
     public WebElement findElement(final By locator) {
@@ -199,14 +190,11 @@ public abstract class AbstractPage {
     }
 
     public List<WebElement> findAllByXpath(final String selector) {
-        return driver.findElements(By.xpath(selector));
+        return getDriver().findElements(By.xpath(selector));
     }
 
-    // ***** Verifying page content ***** //
 
-    /**
-     * Verify page content
-     */
+    // ---- Verifying page content ----
 
     public boolean waitForPageToLoadAndVerifyBy(final By pageIdentifier) {
         return waitForPageToLoadAndVerifyBy(pageIdentifier, DEFAULT_TIMEOUT);
@@ -226,6 +214,7 @@ public abstract class AbstractPage {
             return false;
         }
     }
+
 
     // ---- page scripts upload ----
 
@@ -257,7 +246,7 @@ public abstract class AbstractPage {
     }
 
     public void waitForAngularLoad() throws JavascriptException {
-        WebDriver jsWaitDriver = driver;
+        WebDriver jsWaitDriver = getDriver();
         WebDriverWait wait = new WebDriverWait(jsWaitDriver, 60);
         JavascriptExecutor jsExec = (JavascriptExecutor) jsWaitDriver;
 
@@ -277,7 +266,7 @@ public abstract class AbstractPage {
     }
 
     public void waitForJQueryLoad() throws JavascriptException {
-        WebDriver jsWaitDriver = driver;
+        WebDriver jsWaitDriver = getDriver();
         JavascriptExecutor jsExec = (JavascriptExecutor) jsWaitDriver;
         WebDriverWait jsWait = new WebDriverWait(jsWaitDriver, 60);
 
@@ -307,11 +296,11 @@ public abstract class AbstractPage {
     }
 
     public void waitForFrameAndSwitch(final String frameId) {
-        (new WebDriverWait(driver, 20)).until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(frameId));
+        (new WebDriverWait(getDriver(), 20)).until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(frameId));
     }
 
     private void waitForFrameAndSwitch(final WebElement frame) {
-        (new WebDriverWait(driver, 20)).until(new ExpectedCondition<WebDriver>() {
+        (new WebDriverWait(getDriver(), 20)).until(new ExpectedCondition<WebDriver>() {
             public WebDriver apply(final WebDriver driver) {
                 try {
                     return driver.switchTo().frame(frame);
@@ -331,13 +320,18 @@ public abstract class AbstractPage {
 
     // ***** getters & setters ***** //
     public WebDriver getDriver() {
-        return driver;
+        try {
+            return driver;
+        }
+        catch (WebDriverException e) {
+            return driver;
+        }
     }
 
 
     // alerts
     public void alertAccept(int timeOutInSeconds, int sleepInMillis) {
-        WebDriverWait wait = new WebDriverWait(driver, timeOutInSeconds, sleepInMillis);
+        WebDriverWait wait = new WebDriverWait(getDriver(), timeOutInSeconds, sleepInMillis);
         Alert alert = wait.until(ExpectedConditions.alertIsPresent());
         if (alert != null) {
             alert.accept();
@@ -345,7 +339,7 @@ public abstract class AbstractPage {
     }
 
     public void alertAccept() {
-        WebDriverWait wait = new WebDriverWait(driver, 5, 100);
+        WebDriverWait wait = new WebDriverWait(getDriver(), 5, 100);
         Alert alert = wait.until(ExpectedConditions.alertIsPresent());
         if (alert != null) {
             alert.accept();
