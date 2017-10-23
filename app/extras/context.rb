@@ -21,7 +21,7 @@ class Context
 
   def user
     raise "context.user called for guest context" if guest?
-    return @user
+    @user
   end
 
   def gravatar_url
