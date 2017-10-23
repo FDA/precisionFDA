@@ -62,7 +62,7 @@ class ApplicationController < ActionController::Base
   before_action :require_login
 
   # Use time zone of current user
-  around_action :user_time_zone, if: :current_user
+  around_action :user_time_zone, if: lambda { !@context.guest? && current_user }
 
   helper_method :pathify, :pathify_comments, :item_from_uid
 
@@ -75,7 +75,7 @@ class ApplicationController < ActionController::Base
   end
 
   def current_user
-    return @context.user
+    @context.user
   end
 
   def missing_template
