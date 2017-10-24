@@ -1,7 +1,7 @@
 package staging.cases;
 
-import org.apache.http.conn.HttpHostConnectException;
 import org.apache.log4j.Logger;
+import org.assertj.core.api.SoftAssertions;
 import org.openqa.selenium.*;
 
 import org.openqa.selenium.firefox.FirefoxBinary;
@@ -12,7 +12,6 @@ import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.testng.annotations.*;
 import staging.data.TestConstants;
-import staging.data.TestVariables;
 import staging.locators.CommonLocators;
 import staging.model.Users;
 import staging.pages.StartPage;
@@ -21,7 +20,7 @@ import staging.pages.login.GrantAccessLoginPage;
 import staging.pages.login.LoginPage;
 import staging.utils.SettingsProperties;
 import staging.utils.Utils;
-import tools.TestResultListener;
+import tools.CustomResultListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,42 +31,18 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static staging.data.TestVariables.*;
 import static staging.utils.Utils.*;
 
-@Listeners(TestResultListener.class)
+@Listeners(CustomResultListener.class)
 public abstract class AbstractTest {
 
     private Logger log = Logger.getLogger("INFO");
 
     protected WebDriver driver;
 
-    public WebDriver initiateBrowser() {
-        String currentDirectory = System.getProperty("user.dir");
-        FirefoxBinary firefoxBinary = new FirefoxBinary();
-        if (SettingsProperties.getProperty("headlessMode").equalsIgnoreCase("true")) {
-            firefoxBinary.addCommandLineOptions("--headless");
-        }
-        System.setProperty("webdriver.gecko.driver", currentDirectory + SettingsProperties.getProperty("pathToFirefoxDriver"));
-        System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
-
-        FirefoxOptions firefoxOptions = new FirefoxOptions();
-        firefoxOptions.setBinary(firefoxBinary);
-        WebDriver initDriver = new FirefoxDriver(firefoxOptions);
-        initDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-        return initDriver;
-    }
+    SoftAssertions SoftAssert;
 
     @BeforeClass(alwaysRun = true)
     public void setUp() {
-        String suiteName = this.getClass().getName().replace("staging.cases.", "");
-        setRunSuiteName(suiteName);
         driver = new DriverFactory().getInstance().getDriver();
-        // driver = initiateBrowser();
-    }
-
-    public void reopenBrowser() {
-        log.info("reopen browser");
-        closeBrowser();
-        driver = new DriverFactory().getInstance().getDriver();
-        // driver = initiateBrowser();
     }
 
     @AfterClass(alwaysRun = true)
@@ -79,7 +54,6 @@ public abstract class AbstractTest {
         if (driver != null) {
             log.info("closing browser");
             try {
-                // driver.quit();
                 DriverFactory.getInstance().removeDriver();
             }
             catch (WebDriverException e) {
@@ -88,45 +62,65 @@ public abstract class AbstractTest {
         }
     }
 
+    public void reopenBrowser() {
+        closeBrowser();
+        log.info("reopen browser");
+        driver = new DriverFactory().getInstance().getDriver();
+    }
+
     @BeforeTest
     public void beforeTest() {
         createFolder(getDebugLogFolder());
         createFolder(getDebugLogFolderPath());
-        log.info("folder created: " + getDebugLogFolderPath());
     }
 
     @AfterTest(alwaysRun = true)
     public void afterTest() {
-        // moveLogFile("full.log");
-        // moveLogFile("error.log");
+        // moveLogFile("full.print");
+        // moveLogFile("error.print");
         // Runtime.getRuntime().exec( "pkill -f firefox" ).waitFor();
         // Runtime.getRuntime().exec( "pkill -f geckodriver" ).waitFor();
+    }
+
+    @BeforeMethod(alwaysRun = true)
+    public void beforeCase() {
+        SoftAssert = new SoftAssertions();
     }
 
     @AfterMethod(alwaysRun = true)
     public void afterCase() {
         if (getFinishedCaseStatus().equals(TestConstants.CASE_STATUS_PASSED)) {
-            casePostActions(TestConstants.CASE_STATUS_PASSED, getFinishedCaseName(), isGetScreenshotOnPass(), isGetPageSourceOnPass());
+            casePostActions(TestConstants.CASE_STATUS_PASSED,
+                    getFinishedCaseName(),
+                    getRunSuiteName(),
+                    isGetScreenshotOnPass(),
+                    isGetPageSourceOnPass());
         }
 
         if (getFinishedCaseStatus().equals(TestConstants.CASE_STATUS_FAILED)) {
-            casePostActions(TestConstants.CASE_STATUS_FAILED, getFinishedCaseName(), isGetScreenshotOnFail(), isGetPageSourceOnFail());
+            casePostActions(TestConstants.CASE_STATUS_FAILED,
+                    getFinishedCaseName(),
+                    getRunSuiteName(),
+                    isGetScreenshotOnFail(),
+                    isGetPageSourceOnFail());
         }
     }
 
-    public void casePostActions(String caseStatus, String caseName, boolean isGetScreenshot, boolean isGetSource) {
+    public void casePostActions(String caseStatus,
+                                String caseName,
+                                String suiteName,
+                                boolean isGetScreenshot,
+                                boolean isGetSource) {
 
-        Logger log = Logger.getLogger("INFO");
-
-        log.info("----------------------");
-        log.info("-- it was test case: " + caseName + " --");
-        log.info("----------------------");
+        printLine();
+        log.info("-- it was test case [" + caseName + "] from suite [" + suiteName + "] --");
+        printLine();
         log.info("--      " + caseStatus.toUpperCase() + "      --");
-        log.info("----------------------");
+        printLine();
 
         String filePathWithNoExt = getDebugLogFolderPath() +
                 caseStatus + "_" +
-                getRunSuiteName() + "_" +
+                suiteName + "_" +
                 caseName + "_" +
                 getRunTimeUniqueValue();
 
@@ -144,7 +138,7 @@ public abstract class AbstractTest {
                 e.printStackTrace();
             }
         }
-        log.info("----------------------");
+        printLine();
     }
 
     @Test
@@ -161,16 +155,14 @@ public abstract class AbstractTest {
         file.delete();
     }
 
-    public void logTestHeader(final String text) {
-        int aim = 64;
-        String line = "";
-        log.info("");
-        for (int i = 0; i <= aim; i ++) {
-            line = line + "-";
-        }
-        log.info(line);
+    public void printTestHeader(final String text) {
+        printLine();
         log.info(text);
-        log.info(line);
+        printLine();
+    }
+
+    public void printLine() {
+        log.info("----------------------------------------------------------------");
     }
 
     public String getPageTitle() {
@@ -185,6 +177,7 @@ public abstract class AbstractTest {
             return true;
         }
         else {
+            log = Logger.getLogger("ERROR");
             log.info("but it does not contain expected string: " + expectedTitle);
             return false;
         }

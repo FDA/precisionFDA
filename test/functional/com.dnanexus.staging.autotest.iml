@@ -72,6 +72,7 @@
     <orderEntry type="library" name="Maven: org.apache.maven:maven-plugin-registry:2.2.1" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.plexus:plexus-interpolation:1.11" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.plexus:plexus-container-default:1.0-alpha-9-stable-1" level="project" />
+    <orderEntry type="library" name="Maven: junit:junit:3.8.1" level="project" />
     <orderEntry type="library" name="Maven: classworlds:classworlds:1.1-alpha-2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.maven:maven-model:2.2.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.maven:maven-plugin-api:2.2.1" level="project" />
@@ -137,15 +138,17 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.eclipse.jetty:jetty-continuation:7.3.0.v20110203" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.eclipse.jetty:jetty-servlet:7.3.0.v20110203" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.eclipse.jetty:jetty-security:7.3.0.v20110203" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: com.google.inject:guice:3.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: javax.inject:javax.inject:1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: aopalliance:aopalliance:1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.google.inject.extensions:guice-servlet:3.0" level="project" />
     <orderEntry type="library" name="Maven: ru.yandex.qatools.htmlelements:htmlelements-java:1.8" level="project" />
     <orderEntry type="library" name="Maven: ru.yandex.qatools.htmlelements:htmlelements-matchers:1.8" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.hamcrest:hamcrest-all:1.3" level="project" />
     <orderEntry type="library" name="Maven: ru.yandex.qatools.matchers:webdriver-matchers:1.4.1" level="project" />
     <orderEntry type="library" name="Maven: ru.yandex.qatools.matchers:matcher-decorators:1.4.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.assertj:assertj-core:3.8.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.testng:testng:6.11" level="project" />
-    <orderEntry type="library" name="Maven: junit:junit:4.12" level="project" />
-    <orderEntry type="library" name="Maven: org.hamcrest:hamcrest-core:1.3" level="project" />
     <orderEntry type="library" name="Maven: com.typesafe:config:1.3.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.maven.plugins:maven-compiler-plugin:3.7.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.maven:maven-artifact:3.0" level="project" />
@@ -175,8 +178,5 @@
     <orderEntry type="library" name="Maven: org.uncommons:reportng:1.1.4" level="project" />
     <orderEntry type="library" name="Maven: velocity:velocity:1.4" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: velocity:velocity-dep:1.4" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: com.google.inject:guice:3.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: javax.inject:javax.inject:1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: aopalliance:aopalliance:1.0" level="project" />
   </component>
 </module>

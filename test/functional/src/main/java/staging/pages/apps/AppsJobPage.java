@@ -9,10 +9,11 @@ import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.AppsLocators;
 import staging.model.Users;
 import staging.pages.AbstractPage;
-import staging.utils.*;
 import static staging.data.TestVariables.getAppJobName;
 import static staging.data.TestVariables.getAppTitle;
 import static staging.data.TestVariables.getJobRunTimeUTC;
+import static staging.utils.Utils.areTheyEqual;
+import static staging.utils.Utils.doesContain;
 
 public class AppsJobPage extends AbstractPage {
 
@@ -65,27 +66,51 @@ public class AppsJobPage extends AbstractPage {
     }
 
     public boolean isJobNameCorrect() {
-        String expected = getAppJobName();
-        String actual = getAppsJobPageJobName().getText();
-        return Utils.equals(actual, expected);
+        return areTheyEqual(getActJobName(), getExpJobName());
+    }
+
+    public String getExpJobName() {
+        return getAppJobName();
+    }
+
+    public String getActJobName() {
+        return getAppsJobPageJobName().getText();
     }
 
     public boolean isAppTitleCorrect() {
-        String expected = getAppTitle();
-        String actual = getAppsJobPageAppTitleLink().getText();
-        return Utils.contains(actual, expected);
+        return doesContain(getActAppTitle(), getExpAppTitle());
+    }
+
+    public String getExpAppTitle() {
+        return getAppTitle();
+    }
+
+    public String getActAppTitle() {
+        return getAppsJobPageAppTitleLink().getText();
     }
 
     public boolean isLaunchedByCorrect() {
-        String expected = Users.getTestUser().getApplUsername();
-        String actual = getAppsJobPageLaunchedByLink().getText();
-        return Utils.contains(actual, expected);
+        return doesContain(getActLaunchedBy(), getExpLaunchedBy());
+    }
+
+    public String getExpLaunchedBy() {
+        return Users.getTestUser().getApplUsername();
+    }
+
+    public String getActLaunchedBy() {
+        return getAppsJobPageLaunchedByLink().getText();
     }
 
     public boolean isCreatedCorrect() {
-        String expected = getJobRunTimeUTC().substring(0, 16);
-        String actual = getAppsJobPageCreated().getText();
-        return Utils.contains(actual, expected);
+        return doesContain(getActCreated(), getExpCreated());
+    }
+
+    public String getExpCreated() {
+        return getJobRunTimeUTC().substring(0, 16);
+    }
+
+    public String getActCreated() {
+        return getAppsJobPageCreated().getText();
     }
 
     public WebElement getAppsJobPageRunningJobLabel() {
@@ -111,6 +136,10 @@ public class AppsJobPage extends AbstractPage {
 
     public boolean isJobLabelDone() {
         return getAppsJobPageRunningJobLabel().getText().trim().equalsIgnoreCase("DONE");
+    }
+
+    public String getJobLabelValue() {
+        return getAppsJobPageRunningJobLabel().getText();
     }
 
     public boolean isJobStatusDone() {

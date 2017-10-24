@@ -2,9 +2,6 @@ package staging.data;
 
 import staging.utils.SettingsProperties;
 
-import java.util.Random;
-
-import static org.junit.Assert.fail;
 import static staging.data.TestConstants.*;
 import static staging.utils.Utils.getCurrentDateTimeUTCValue;
 import static staging.utils.Utils.getRunTimeUniqueValue;
@@ -22,6 +19,8 @@ public class TestVariables {
     public static String appCreateTimeUTC;
 
     public static String noteCreateTimeUTC;
+
+    public static boolean isAppTitleEditedFlag = false;
 
     public static final String filePathUniqueValue = generateFilePathUniqueValue();
 
@@ -44,7 +43,7 @@ public class TestVariables {
     }
 
     public static final String getAppTitle() {
-        return CREATE_APP_TITLE_PREFIX + getTestRunUniqueFinalValue();
+        return CREATE_APP_TITLE_PREFIX + getTestRunUniqueFinalValue() + getEditAddon();
     }
 
     public static String getDebugLogFolder() {
@@ -55,9 +54,10 @@ public class TestVariables {
         return getDebugLogFolder() + "run_" + getFilePathUniqueValue() + "/";
     }
 
-    public static void setFinishedCaseData(String caseStatus, String caseName) {
+    public static void setFinishedCaseData(String caseStatus, String caseName, String suiteName) {
         finishedCaseStatus = caseStatus;
         finishedCaseName = caseName;
+        setRunSuiteName(suiteName);
     }
 
     public static void setRunSuiteName(String suiteName) {
@@ -81,13 +81,6 @@ public class TestVariables {
     }
 
     public static String generateFilePathUniqueValue() {
-        Random randomGenerator = new Random();
-        try {
-            int frame = randomGenerator.nextInt(1000);
-            Thread.sleep(frame);
-        } catch (final InterruptedException e) {
-            //
-        }
         return getRunTimeUniqueValue();
     }
 
@@ -137,5 +130,38 @@ public class TestVariables {
 
     public static String getNoteCreateTimeUTC() {
         return noteCreateTimeUTC;
+    }
+
+    public static void setIsAppTitleEditedFlag(boolean flag) {
+        isAppTitleEditedFlag = flag;
+    }
+
+    public boolean getIsAppTitleEditedFlag() {
+        return isAppTitleEditedFlag;
+    }
+
+    public static String getEditAddon() {
+        if (isAppTitleEditedFlag) {
+            return "_NEW";
+        }
+        else {
+            return "";
+        }
+    }
+
+    public static String getReadMeRowText() {
+        return TestConstants.EDIT_APP_README_ROW_PREFIX + testRunUniqueFinalValue;
+    }
+
+    public static String getReadMeRichText() {
+        return TestConstants.EDIT_APP_README_RICH_PREFIX + testRunUniqueFinalValue;
+    }
+
+    public static String getAppCommentText() {
+        return TestConstants.EDIT_APP_COMMENT_PREFIX + testRunUniqueFinalValue;
+    }
+
+    public static String getAppTagText() {
+        return TestConstants.EDIT_APP_TAG_PREFIX;
     }
 }

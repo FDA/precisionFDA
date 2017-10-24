@@ -16,4 +16,12 @@ public class TestConstants {
 
     public static final String CASE_STATUS_FAILED = "failed";
 
+    public static final String EDIT_APP_README_ROW_PREFIX = "# __Auto__ *test* ";
+
+    public static final String EDIT_APP_README_RICH_PREFIX = "Auto test ";
+
+    public static final String EDIT_APP_COMMENT_PREFIX = "Auto test comment ";
+
+    public static final String EDIT_APP_TAG_PREFIX = "AutoTest";
+
 }

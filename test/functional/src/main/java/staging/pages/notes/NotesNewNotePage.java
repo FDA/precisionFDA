@@ -8,9 +8,10 @@ import ru.yandex.qatools.htmlelements.element.TextInput;
 import staging.locators.NotesLocators;
 import staging.model.Users;
 import staging.pages.AbstractPage;
-import staging.utils.Utils;
 
 import static staging.data.TestVariables.getNoteCreateTimeUTC;
+import static staging.utils.Utils.areTheyEqual;
+import static staging.utils.Utils.doesContain;
 
 public class NotesNewNotePage extends AbstractPage {
 
@@ -52,26 +53,33 @@ public class NotesNewNotePage extends AbstractPage {
     public boolean isDefaultTitleCorrect(Users user) {
         String titleValue = notesTitle.getEnteredText();
         String expectedValue = user.getApplUserFullName() + "'s untitled note";
-        return Utils.equals(titleValue, expectedValue);
+        return areTheyEqual(titleValue, expectedValue);
     }
 
     public boolean isOrgCorrect(Users user) {
         String orgValue = notesOrg.getText();
         String expectedValue = user.getApplUserOrg();
-        return Utils.equals(orgValue, expectedValue);
+        return areTheyEqual(orgValue, expectedValue);
     }
 
     public boolean isAddedByCorrect(Users user) {
         String addedByValue = notesAddedBy.getText();
         String expectedValue = user.getApplUsername();
-        return Utils.equals(addedByValue, expectedValue);
+        return areTheyEqual(addedByValue, expectedValue);
     }
 
     public boolean isCreatedDateCorrect() {
         String createdValue = notesCreated.getText();
         String expectedValue = getNoteCreateTimeUTC().substring(0, 16);
-        return Utils.contains(createdValue, expectedValue);
+        return doesContain(createdValue, expectedValue);
     }
 
+    public String getEnteredTitle() {
+        return notesTitle.getEnteredText();
+    }
+
+    public String getExpectedTitle(Users user) {
+        return user.getApplUserFullName() + "'s untitled note";
+    }
 
 }

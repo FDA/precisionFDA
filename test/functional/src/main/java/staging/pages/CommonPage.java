@@ -68,7 +68,7 @@ public class CommonPage extends AbstractPage {
     public CommonPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.COMMON_NAV_PANEL), 30);
-        waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.USER_AVATAR_IMG), 30);
+        waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.USER_AVATAR_IMG), 5);
     }
 
     public WebElement getNavigationPanelWE() {

@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="Open all pages suite">
-    <test name="Check all pages can be open">
+<suite name="Login/logout suite">
+    <test name="Login/logout test">
         <classes>
             <class name="staging.cases.OpenAllPagesTest"/>
         </classes>
