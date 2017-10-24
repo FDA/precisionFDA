@@ -1,0 +1,44 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="openAllPages" parallel="tests" thread-count="3">
+    <test name="openAllPages part 1">
+        <classes>
+            <class name="staging.cases.OpenAllPagesTest">
+                <methods>
+                    <include name="successfulLogin"/>
+                    <include name="checkNotes.*"/>
+                    <include name="checkApps.*"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="openAllPages part 2">
+        <classes>
+            <class name="staging.cases.OpenAllPagesTest">
+                <methods>
+                    <include name="successfulLogin"/>
+                    <include name="checkComps.*"/>
+                    <include name="checkFiles.*"/>
+                    <include name="checkProfile.*"/>
+                    <include name="checkPublicProfile.*"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="openAllPages part 3">
+        <classes>
+            <class name="staging.cases.OpenAllPagesTest">
+                <methods>
+                    <include name="successfulLogin"/>
+                    <include name="checkExperts.*"/>
+                    <include name="checkChallenges.*"/>
+                    <include name="checkDiscussions.*"/>
+                    <include name="checkGuidelines.*"/>
+                    <include name="checkDocs.*"/>
+                    <include name="checkOverview.*"/>
+                    <include name="checkLicense.*"/>
+                    <include name="checkAbout.*"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>

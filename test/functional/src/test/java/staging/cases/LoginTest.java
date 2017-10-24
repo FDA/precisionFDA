@@ -1,21 +1,16 @@
 package staging.cases;
 
-import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
 import staging.model.Users;
 import staging.pages.CommonPage;
 import staging.pages.StartPage;
 import staging.pages.login.LoginPage;
 
-import static org.testng.Assert.assertTrue;
-
 public class LoginTest extends AbstractTest {
-
-    private final Logger log = Logger.getLogger(this.getClass());
 
     @Test
     public void successfulLogin() {
-        logTestHeader("Test Case: Successful Login");
+        printTestHeader("Test Case: Successful Login");
 
         Users user = Users.getTestUser();
 
@@ -23,16 +18,22 @@ public class LoginTest extends AbstractTest {
         openStartPage();
         CommonPage commonPage = correctLoginToFDA(user);
 
-        log.info("check navigation panel is displayed");
-        assertTrue(commonPage.isNavigationPanelDisplayed());
+        SoftAssert.assertThat(
+                commonPage.isNavigationPanelDisplayed())
+                .as("navigation panel is displayed")
+                .isTrue();
 
-        log.info("check correct username is displayed");
-        assertTrue(commonPage.isCorrectUserNameDisplayed(user));
+        SoftAssert.assertThat(
+                commonPage.isCorrectUserNameDisplayed(user))
+                .as("logged username is displayed")
+                .isTrue();
+
+        SoftAssert.assertAll();
     }
 
     @Test
     public void checkLogoutFeature() {
-        logTestHeader("Test Case: check that logout works");
+        printTestHeader("Test Case: check that logout works");
 
         Users user = Users.getTestUser();
 
@@ -41,16 +42,22 @@ public class LoginTest extends AbstractTest {
         CommonPage commonPage = correctLoginToFDA(user);
         StartPage startPage = commonPage.logout();
 
-        log.info("check Top Navigation Panel is NOT displayed");
-        assertTrue(startPage.isNavigationPanelNotDisplayed());
+        SoftAssert.assertThat(
+                startPage.isNavigationPanelDisplayed())
+                .as("Top Navigation Panel")
+                .isFalse();
 
-        log.info("verify 'You were successfully logged out' is displayed");
-        assertTrue(startPage.isLogoutMessageDisplayed());
+        SoftAssert.assertThat(
+                startPage.isLogoutMessageDisplayed())
+                .as("'You were successfully logged out' message")
+                .isTrue();
+
+        SoftAssert.assertAll();
     }
 
     @Test
     public void loginWithWrongPassword() {
-        logTestHeader("Test Case: test login with wrong password");
+        printTestHeader("Test Case: test login with wrong password");
 
         Users user = Users.getWrongUser();
 
@@ -58,11 +65,17 @@ public class LoginTest extends AbstractTest {
         openStartPage();
         LoginPage loginPage = wrongLoginToFDA(user);
 
-        log.info("check Top Navigation Panel is NOT displayed");
-        assertTrue(loginPage.isNavigationPanelNotDisplayed());
+        SoftAssert.assertThat(
+                loginPage.isNavigationPanelDisplayed())
+                .as("Top Navigation Panel")
+                .isFalse();
 
-        log.info("check 'Invalid username or password' is displayed");
-        assertTrue(loginPage.isWrongCredsMessageDisplayed());
+        SoftAssert.assertThat(
+                loginPage.isWrongCredsMessageDisplayed())
+                .as("'Invalid username or password' message")
+                .isTrue();
+
+        SoftAssert.assertAll();
     }
 
 }

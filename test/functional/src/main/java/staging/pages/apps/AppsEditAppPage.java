@@ -1,6 +1,5 @@
 package staging.pages.apps;
 
-import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -12,9 +11,9 @@ import staging.locators.CommonLocators;
 import staging.pages.AbstractPage;
 import staging.pages.overview.OverviewPage;
 
-public class AppsEditAppPage extends AbstractPage {
+import static staging.data.TestVariables.*;
 
-    private final Logger log = Logger.getLogger(this.getClass());
+public class AppsEditAppPage extends AbstractPage {
 
     @FindBy(xpath = AppsLocators.APPS_EDIT_APP_TITLE_INPUT)
     private TextInput appsNewAppTitleInput;
@@ -30,6 +29,18 @@ public class AppsEditAppPage extends AbstractPage {
 
     @FindBy(xpath = AppsLocators.APPS_SAVED_APP_SAVE_REVISION_BUTTON)
     private WebElement editAppSaveRevisionButton;
+
+    @FindBy(xpath = AppsLocators.APPS_EDIT_APP_README_TAB_LINK)
+    private Link editAppReadmeTab;
+
+    @FindBy(xpath = AppsLocators.APPS_EDIT_APP_README_TEXTAREA)
+    private TextInput editAppReadmeTextArea;
+
+    @FindBy(xpath = AppsLocators.APPS_EDIT_APP_README_PREVIEW_TAB_LINK)
+    private Link editAppReadmePreviewTab;
+
+    @FindBy(xpath = AppsLocators.APPS_EDIT_APP_README_PREVIEW_TEXTAREA)
+    private WebElement editAppReadmePreviewArea;
 
     public AppsEditAppPage(final WebDriver driver) {
         super(driver);
@@ -51,4 +62,31 @@ public class AppsEditAppPage extends AbstractPage {
         return new AppsSavedAppPage(getDriver());
     }
 
+    public AppsEditAppPage enterNewAppTitle() {
+        appsNewAppTitleInput.clear();
+        setIsAppTitleEditedFlag(true);
+        appsNewAppTitleInput.sendKeys(getAppTitle());
+        return new AppsEditAppPage(getDriver());
+    }
+
+    public AppsEditAppPage editReadmeTab() {
+        editAppReadmeTab.click();
+        editAppReadmeTextArea.clear();
+        editAppReadmeTextArea.sendKeys(getReadMeRowText());
+        return new AppsEditAppPage(getDriver());
+    }
+
+    public AppsEditAppPage openReadmeReviewTab() {
+        editAppReadmePreviewTab.click();
+        waitUntilDisplayed(getEditAppReadmePreviewArea());
+        return new AppsEditAppPage(getDriver());
+    }
+
+    public String getReadmePreviewText() {
+        return getEditAppReadmePreviewArea().getText();
+    }
+
+    public WebElement getEditAppReadmePreviewArea() {
+        return editAppReadmePreviewArea;
+    }
 }

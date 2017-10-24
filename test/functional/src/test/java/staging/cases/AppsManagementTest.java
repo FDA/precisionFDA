@@ -1,82 +1,95 @@
 package staging.cases;
 
-import org.apache.log4j.Logger;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 import staging.model.Users;
 import staging.pages.CommonPage;
 import staging.pages.apps.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertTrue;
+import static staging.data.TestVariables.getAppCommentText;
+import static staging.data.TestVariables.getReadMeRichText;
 
 public class AppsManagementTest extends AbstractTest {
 
-    private final Logger log = Logger.getLogger(this.getClass());
-
     @Test(groups = "runJob")
     public void successfulLogin() {
-        logTestHeader("Test Case: Successful Login");
+        printTestHeader("Test Case: Successful Login");
 
         Users user = Users.getTestUser();
 
         openStartPage();
         CommonPage commonPage = correctLoginToFDA(user);
 
-        log.info("check navigation panel is displayed");
-        assertTrue(commonPage.isNavigationPanelDisplayed());
+        SoftAssert.assertThat(
+                commonPage.isNavigationPanelDisplayed())
+                .as("navigation panel is displayed")
+                .isTrue();
 
-        log.info("check correct username is displayed");
-        assertTrue(commonPage.isCorrectUserNameDisplayed(user));
+        SoftAssert.assertThat(
+                commonPage.isCorrectUserNameDisplayed(user))
+                .as("logged username is displayed")
+                .isTrue();
+
+        SoftAssert.assertAll();
     }
 
     @Test(groups = { "runJob" }, dependsOnMethods = {"successfulLogin"}, priority = 0)
     public void createAndSaveSimpleApp() {
-        logTestHeader("Test Case: create and save simple app with custom name, title and script text");
+        printTestHeader("Test Case: create and save simple app with custom name, title and script text");
 
         CommonPage commonPage = openCommonPage();
         ApplCreateAppPage applCreateAppPage = commonPage.openAppsPage().openCreateAppPage();
         AppsSavedAppPage appsSavedAppPage = applCreateAppPage.fillCreateAppForm().clickCreate();
 
-        log.info("verify if Name of created app is correct");
-        Assert.assertTrue(appsSavedAppPage.isSelectedAppNameCorrect());
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppName())
+                .as("Name of created app")
+                .isEqualTo(appsSavedAppPage.getExpSelectedAppName());
 
-        log.info("verify if Title of created app is correct");
-        Assert.assertTrue(appsSavedAppPage.isSelectedAppTitleCorrect());
+        SoftAssert.assertAll();
 
-        log.info("verify if Org of created app is correct");
-        Assert.assertTrue(appsSavedAppPage.isSelectedAppOrgCorrect());
-
-        log.info("verify if Added By of created app is correct");
-        Assert.assertTrue(appsSavedAppPage.isSelectedAppAddedByCorrect());
-
-        log.info("verify Created value has correct date, hours and minutes");
-        Assert.assertTrue(appsSavedAppPage.isCreatedDateCorrect());
     }
 
     @Test(dependsOnMethods = {"successfulLogin", "createAndSaveSimpleApp"})
-    public void checkSavedAppCanBeOpen() {
-        logTestHeader("Test Case: check Saved App can be open from My App list");
+    public void checkSavedAppHasCorrectData() {
+        printTestHeader("Test Case: check Saved App can be open from My App list and has correct data");
 
         CommonPage commonPage = openCommonPage();
         AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
         AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl();
 
-        log.info("verify if Name of created app is correct");
-        Assert.assertTrue(appsSavedAppPage.isSelectedAppNameCorrect());
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppName())
+                .as("Name of created app")
+                .isEqualTo(appsSavedAppPage.getExpSelectedAppName());
 
-        log.info("verify if Org of created app is correct");
-        Assert.assertTrue(appsSavedAppPage.isSelectedAppOrgCorrect());
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppTitle())
+                .as("Title of created app")
+                .isEqualTo(appsSavedAppPage.getExpSelectedAppTitle());
 
-        log.info("verify if Added By of created app is correct");
-        Assert.assertTrue(appsSavedAppPage.isSelectedAppAddedByCorrect());
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppOrg())
+                .as("Org of created app")
+                .isEqualTo(appsSavedAppPage.getExpSelectedAppOrg());
 
-        log.info("verify Created value has correct date, hours and minutes");
-        Assert.assertTrue(appsSavedAppPage.isCreatedDateCorrect());
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppAddedBy())
+                .as("Added By of created app")
+                .isEqualTo(appsSavedAppPage.getExpSelectedAppAddedBy());
+
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppCreated())
+                .as("Created date/time")
+                .contains(appsSavedAppPage.getExpSelectedAppCreated());
+
+        SoftAssert.assertAll();
     }
 
     @Test(dependsOnMethods = {"successfulLogin", "createAndSaveSimpleApp"})
     public void checkRevisionIncremented() {
-        logTestHeader("Test Case: check that revision version is incremented by 1");
+        printTestHeader("Test Case: check that revision version is incremented by 1");
 
         CommonPage commonPage = openCommonPage();
         AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
@@ -89,14 +102,13 @@ public class AppsManagementTest extends AbstractTest {
 
         int revisionAfter = appsSavedAppPage.getAppRevision();
 
-        log.info("verify if Revision version is incremented");
-        Assert.assertTrue(revisionBefore + 1 == revisionAfter,
+        assertTrue(revisionBefore + 1 == revisionAfter,
                 "[revision before = " + revisionBefore + " + 1] == [revision after = " + revisionAfter + "]");
     }
 
     @Test(dependsOnMethods = {"successfulLogin", "createAndSaveSimpleApp"})
     public void checkValuesNotChangedAfterIdleEdit() {
-        logTestHeader("Test Case: check App values are not changed if click Edit then Save without any changes");
+        printTestHeader("Test Case: check App values are not changed if click Edit then Save without any changes");
 
         CommonPage commonPage = openCommonPage();
         AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
@@ -104,25 +116,37 @@ public class AppsManagementTest extends AbstractTest {
         AppsEditAppPage appsEditAppPage = appsSavedAppPage.editSavedApp();
         appsSavedAppPage = appsEditAppPage.saveRevision();
 
-        log.info("verify if Name of created app is correct");
-        Assert.assertTrue(appsSavedAppPage.isSelectedAppNameCorrect());
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppName())
+                .as("Name of created app")
+                .isEqualTo(appsSavedAppPage.getExpSelectedAppName());
 
-        log.info("verify if Title of created app is correct");
-        Assert.assertTrue(appsSavedAppPage.isSelectedAppTitleCorrect());
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppTitle())
+                .as("Title of created app")
+                .isEqualTo(appsSavedAppPage.getExpSelectedAppTitle());
 
-        log.info("verify if Org of created app is correct");
-        Assert.assertTrue(appsSavedAppPage.isSelectedAppOrgCorrect());
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppOrg())
+                .as("Org of created app")
+                .isEqualTo(appsSavedAppPage.getExpSelectedAppOrg());
 
-        log.info("verify if Added By of created app is correct");
-        Assert.assertTrue(appsSavedAppPage.isSelectedAppAddedByCorrect());
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppAddedBy())
+                .as("Added By of created app")
+                .isEqualTo(appsSavedAppPage.getExpSelectedAppAddedBy());
 
-        log.info("verify Created value has correct date, hours and minutes");
-        Assert.assertTrue(appsSavedAppPage.isCreatedDateCorrect());
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppCreated())
+                .as("Created date/time")
+                .contains(appsSavedAppPage.getExpSelectedAppCreated());
+
+        SoftAssert.assertAll();
     }
 
     @Test(groups = { "runJob" }, dependsOnMethods = {"successfulLogin", "createAndSaveSimpleApp"})
     public void runJobAndValidateResult() {
-        logTestHeader("Test Case: run created previously job and validate result");
+        printTestHeader("Test Case: run created previously job and validate result");
 
         CommonPage commonPage = openCommonPage();
         AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
@@ -130,33 +154,89 @@ public class AppsManagementTest extends AbstractTest {
         AppsEditAndRunAppPage appsEditAndRunAppPage = appsSavedAppPage.runAppFromRelevantPage();
         appsSavedAppPage = appsEditAndRunAppPage.editAppBeforeRun().runAppFromEditPage();
 
-        log.info("verify if running job is displayed");
-        Assert.assertTrue(appsSavedAppPage.isRunJobDisplayed());
+        assertTrue(appsSavedAppPage.isRunJobDisplayed(), "running job is displayed");
 
         AppsJobPage appsJobPage = appsSavedAppPage.openJobFromSavedAppPage();
 
-        log.info("verify if Job Name is correct");
-        Assert.assertTrue(appsJobPage.isJobNameCorrect());
-
-        log.info("verify if App Title is correct");
-        Assert.assertTrue(appsJobPage.isAppTitleCorrect());
-
-        log.info("verify if Launched By is correct");
-        Assert.assertTrue(appsJobPage.isLaunchedByCorrect());
-
-        log.info("verify if Created date/time is correct");
-        Assert.assertTrue(appsJobPage.isCreatedCorrect());
+        assertTrue(
+                appsJobPage.getActJobName().equals(appsJobPage.getExpJobName()),
+                "Job Name");
 
         appsJobPage = appsJobPage.waitUntilJobIsDone();
 
-        log.info("verify if Job Status is Done");
-        Assert.assertTrue(appsJobPage.isJobStatusDone());
+        assertTrue(
+                appsJobPage.getJobLabelValue().equalsIgnoreCase("DONE"),
+                "Job Label Value");
 
         AppsJobLogPage appsJobLogPage = appsJobPage.viewLog();
 
-        log.info("verify if Job Result is correct");
-        Assert.assertTrue(appsJobLogPage.isJobResultCorrect());
+        assertTrue(
+                appsJobLogPage.isJobResultCorrect(),
+                "Script Job Result is correct");
+    }
 
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveSimpleApp"})
+    public void editAppTitle() {
+        printTestHeader("Test Case: check that the title of a saved app can be edited");
+
+        CommonPage commonPage = openCommonPage();
+        AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl();
+
+        AppsEditAppPage appsEditAppPage = appsSavedAppPage.editSavedApp();
+        appsEditAppPage.enterNewAppTitle();
+        appsSavedAppPage = appsEditAppPage.saveRevision();
+
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppName())
+                .as("Name of created app")
+                .isEqualTo(appsSavedAppPage.getExpSelectedAppName());
+
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppTitle())
+                .as("Edited Title of created app")
+                .isEqualTo(appsSavedAppPage.getExpSelectedAppTitle());
+
+        SoftAssert.assertAll();
+
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveSimpleApp"})
+    public void editReadMeTab() {
+        printTestHeader("Test Case: check that ReadMe tab can be edited and saved");
+
+        CommonPage commonPage = openCommonPage();
+        AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl();
+
+        AppsEditAppPage appsEditAppPage = appsSavedAppPage.editSavedApp();
+        appsEditAppPage = appsEditAppPage.editReadmeTab().openReadmeReviewTab();
+
+        assertThat(appsEditAppPage.getReadmePreviewText())
+                .as("text on Readme Preview tab during edit")
+                .isEqualTo(getReadMeRichText());
+
+        appsSavedAppPage = appsEditAppPage.saveRevision();
+        appsSavedAppPage = appsSavedAppPage.openReadmeTab();
+
+        assertThat(appsSavedAppPage.getReadMeText())
+                .as("Readme Preview text on saved page")
+                .isEqualTo(getReadMeRichText());
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveSimpleApp"})
+    public void leaveComment() {
+        printTestHeader("Test Case: check it is possible to write a comment");
+
+        CommonPage commonPage = openCommonPage();
+        AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl();
+        appsSavedAppPage = appsSavedAppPage.openCommentsTab().writeComment();
+        appsSavedAppPage = appsSavedAppPage.openCommentsTab();
+
+        assertThat(appsSavedAppPage.getLastCommentText())
+                .as("Comment text")
+                .isEqualTo(getAppCommentText());
     }
 
 }

@@ -5,18 +5,20 @@ import org.testng.TestListenerAdapter;
 import staging.data.TestConstants;
 import static staging.data.TestVariables.*;
 
-public class TestResultListener extends TestListenerAdapter {
+public class CustomResultListener extends TestListenerAdapter {
 
     @Override
     public void onTestSuccess(ITestResult result) {
+        String suiteName = result.getTestClass().getName().replace("staging.cases.", "");
         String caseName = result.getName().replace("check", "").replace("CanBeOpen", "");
-        setFinishedCaseData(TestConstants.CASE_STATUS_PASSED, caseName);
+        setFinishedCaseData(TestConstants.CASE_STATUS_PASSED, caseName, suiteName);
     }
 
     @Override
     public void onTestFailure(ITestResult result) {
+        String suiteName = result.getTestClass().getName().replace("staging.cases.", "");
         String caseName = result.getName().replace("check", "").replace("CanBeOpen", "");
-        setFinishedCaseData(TestConstants.CASE_STATUS_FAILED, caseName);
+        setFinishedCaseData(TestConstants.CASE_STATUS_FAILED, caseName, suiteName);
     }
 
 }

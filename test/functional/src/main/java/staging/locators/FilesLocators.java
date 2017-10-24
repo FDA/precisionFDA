@@ -2,7 +2,7 @@ package staging.locators;
 
 public class FilesLocators {
 
-    public static final String FILES_MY_FILES_LINK = "//a[@href='/files']//span";
+    public static final String FILES_MY_FILES_LINK = "//*[@class='pill-label'][text()='My Files']/../../a";
 
     public static final String FILES_MY_FILES_ACTIVATED_LINK = "//*[@class='active']//*[@class='pill-label'][text()='My Files']";
 

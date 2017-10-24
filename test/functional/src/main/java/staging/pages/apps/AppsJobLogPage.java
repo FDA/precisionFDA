@@ -34,7 +34,7 @@ public class AppsJobLogPage extends AbstractPage {
 
         //check if script text is displayed
         if (logText.contains(getAppJobScriptBody())) {
-            log.info("script text is displayed");
+            log.info("correct script text is displayed");
             isScriptText = true;
         }
         else {
@@ -44,7 +44,7 @@ public class AppsJobLogPage extends AbstractPage {
         //check if script result is displayed
         logText = logText.replace(getAppJobScriptBody(), "");
         if (logText.contains(getAppJobScriptOutput())) {
-            log.info("script result is displayed");
+            log.info("correct script result is displayed");
             isScriptResult = true;
         }
         else {

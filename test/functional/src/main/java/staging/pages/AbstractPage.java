@@ -11,7 +11,6 @@ import ru.yandex.qatools.htmlelements.loader.HtmlElementLoader;
 import java.util.List;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.Assert.fail;
 
 public abstract class AbstractPage {
 
@@ -163,7 +162,7 @@ public abstract class AbstractPage {
         try {
             Thread.sleep(msec);
         } catch (final InterruptedException e) {
-            fail(e.getMessage());
+            //
         }
     }
 

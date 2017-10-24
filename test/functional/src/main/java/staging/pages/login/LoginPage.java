@@ -58,6 +58,10 @@ public class LoginPage extends AbstractPage {
         return !isElementPresent(getNavigationPanelWE(), 2);
     }
 
+    public boolean isNavigationPanelDisplayed() {
+        return isElementPresent(getNavigationPanelWE(), 2);
+    }
+
     public WebElement getNavigationPanelWE() {
         return commonNavigationPanel;
     }

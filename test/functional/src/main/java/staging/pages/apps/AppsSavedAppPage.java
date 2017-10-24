@@ -5,13 +5,16 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
+import ru.yandex.qatools.htmlelements.element.TextInput;
 import staging.locators.AppsLocators;
 import staging.model.Users;
 import staging.pages.AbstractPage;
-import staging.utils.Utils;
 
 import static staging.data.TestVariables.*;
+import static staging.utils.Utils.areTheyEqual;
+import static staging.utils.Utils.doesContain;
 
 public class AppsSavedAppPage extends AbstractPage {
 
@@ -43,6 +46,39 @@ public class AppsSavedAppPage extends AbstractPage {
 
     @FindBy(xpath = AppsLocators.APPS_SAVED_APP_EDIT_BUTTON)
     private Link appsSavedAppEditButtonLink;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_README_TAB_LINK)
+    private Link appsSavedAppReadmeTabLink;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_README_PREVIEW)
+    private WebElement appsSavedAppReadmePreviewWE;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_COMMENTS_TAB_LINK)
+    private Link appsSavedAppCommentTabLink;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_COMMENT_AREA)
+    private WebElement appsSavedAppCommentArea;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_LAST_COMMENT)
+    private WebElement appsSavedAppLastComment;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_COMMENT_BUTTON)
+    private Button appsSavedAppCommentButton;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_EDIT_TAG_LINK)
+    private Link appsSavedAppEditTagLink;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_EDIT_TAG_FORM_TAGNAME_INPUT)
+    private TextInput appsEditTagsFormTagnameInput;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_EDIT_TAG_FORM_UPDATE_TAGS_BUTTON)
+    private Button appsEditTagsFormUpdateTagsButton;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_SAVED_TAG_LINK)
+    private Link appsSavedAppSavedTagLink;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_EDIT_TAG_FORM_CHECKBOXES)
+    private WebElement appsEditTagsFormCheckboxes;
 
     public AppsSavedAppPage(final WebDriver driver) {
         super(driver);
@@ -90,32 +126,63 @@ public class AppsSavedAppPage extends AbstractPage {
     }
 
     public boolean isSelectedAppNameCorrect() {
-        String expected = getAppName().replace(":", "").replace(" ", "-");
-        String actual = getAppsRelevantSelectedAppName().getText();
-        return Utils.equals(actual, expected);
+        return areTheyEqual(getActSelectedAppName(), getExpSelectedAppName());
+    }
+
+    public String getExpSelectedAppName() {
+        return getAppName().replace(":", "").replace(" ", "-");
+    }
+
+    public String getActSelectedAppName() {
+        return getAppsRelevantSelectedAppName().getText();
     }
 
     public boolean isSelectedAppOrgCorrect() {
-        String expected = Users.getTestUser().getApplUserOrg();
-        String actual = getAppsRelevantSelectedAppOrg().getText();
-        return Utils.equals(actual, expected);
+        return areTheyEqual(getActSelectedAppOrg(), getExpSelectedAppOrg());
+    }
+
+    public String getExpSelectedAppOrg() {
+        return Users.getTestUser().getApplUserOrg();
+    }
+
+    public String getActSelectedAppOrg() {
+        return getAppsRelevantSelectedAppOrg().getText();
     }
 
     public boolean isSelectedAppAddedByCorrect() {
-        String expected = Users.getTestUser().getApplUsername();
-        String actual = getAppsRelevantSelectedAppAddedBy().getText();
-        return Utils.equals(actual, expected);
+        return areTheyEqual(getActSelectedAppAddedBy(), getExpSelectedAppAddedBy());
+    }
+
+    public String getExpSelectedAppAddedBy() {
+        return Users.getTestUser().getApplUsername();
+    }
+
+    public String getActSelectedAppAddedBy() {
+        return getAppsRelevantSelectedAppAddedBy().getText();
     }
 
     public boolean isCreatedDateCorrect() {
-        String createdValue = getAppsRelevantSelectedAppCreated().getText();
-        String expectedValue = getAppCreateTimeUTC().substring(0, 16);
-        return Utils.contains(createdValue, expectedValue);
+        return doesContain(getActSelectedAppCreated(), getExpSelectedAppCreated());
+    }
+
+    public String getActSelectedAppCreated() {
+        return getAppsRelevantSelectedAppCreated().getText();
+    }
+
+    public String getExpSelectedAppCreated() {
+        return getAppCreateTimeUTC().substring(0, 16);
     }
 
     public boolean isSelectedAppTitleCorrect() {
-        String actual = getAppsRelevantSelectedAppTitle().getText();
-        return Utils.equals(actual, getAppTitle());
+        return areTheyEqual(getActSelectedAppTitle(), getExpSelectedAppTitle());
+    }
+
+    public String getExpSelectedAppTitle() {
+        return getAppTitle();
+    }
+
+    public String getActSelectedAppTitle() {
+        return getAppsRelevantSelectedAppTitle().getText();
     }
 
     public boolean isRunAppButtonDisplayed() {
@@ -151,5 +218,53 @@ public class AppsSavedAppPage extends AbstractPage {
         return new AppsJobPage(getDriver());
     }
 
+    public Link getAppsSavedAppReadmeTabLink() {
+        return appsSavedAppReadmeTabLink;
+    }
 
+    public WebElement getAppsSavedAppReadmePreviewWE() {
+        return appsSavedAppReadmePreviewWE;
+    }
+
+    public AppsSavedAppPage openReadmeTab() {
+        getAppsSavedAppReadmeTabLink().click();
+        waitUntilDisplayed(getAppsSavedAppReadmePreviewWE());
+        return new AppsSavedAppPage(getDriver());
+    }
+
+    public String getReadMeText() {
+        return getAppsSavedAppReadmePreviewWE().getText();
+    }
+
+    public AppsSavedAppPage openCommentsTab() {
+        getAppsSavedAppCommentTabLink().click();
+        waitUntilDisplayed(getAppsSavedAppCommentArea());
+        return new AppsSavedAppPage(getDriver());
+    }
+
+    public Link getAppsSavedAppCommentTabLink() {
+        return appsSavedAppCommentTabLink;
+    }
+
+    public WebElement getAppsSavedAppCommentArea() {
+        return appsSavedAppCommentArea;
+    }
+
+    public Button getAppsSavedAppCommentButton() {
+        return appsSavedAppCommentButton;
+    }
+
+    public AppsSavedAppPage writeComment() {
+        getAppsSavedAppCommentArea().sendKeys(getAppCommentText());
+        getAppsSavedAppCommentButton().click();
+        return new AppsSavedAppPage(getDriver());
+    }
+
+    public WebElement getAppsSavedAppLastComment() {
+        return appsSavedAppLastComment;
+    }
+
+    public String getLastCommentText() {
+        return getAppsSavedAppLastComment().getText();
+    }
 }

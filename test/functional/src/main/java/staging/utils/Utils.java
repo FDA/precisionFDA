@@ -38,9 +38,11 @@ public class Utils {
     }
 
     public static void createFolder(String folderPath) {
+        Logger log = Logger.getLogger("INFO");
         File file = new File(folderPath);
         if (!file.exists()) {
             file.mkdir();
+            log.info("folder created: " + folderPath);
         }
     }
 
@@ -51,28 +53,6 @@ public class Utils {
         BufferedWriter bw = new BufferedWriter(fw);
         bw.write(content);
         bw.close();
-    }
-
-    public static boolean contains(String whereString, String whatString) {
-        Logger log = Logger.getLogger("TEST");
-        if (whereString.contains(whatString)) {
-            return true;
-        }
-        else {
-            log.info("[" + whereString + "] does not contain [" + whatString + "]");
-            return false;
-        }
-    }
-
-    public static boolean equals(String actualString, String expectedString) {
-        Logger log = Logger.getLogger("TEST");
-        if (actualString.equals(expectedString)) {
-            return true;
-        }
-        else {
-            log.info("expected is [" + expectedString + "] but actual is [" + actualString + "]");
-            return false;
-        }
     }
 
     public static void takeScreenshot(String filePath, WebDriver driver) {
@@ -86,6 +66,28 @@ public class Utils {
 
     public static String getPageSource(WebDriver driver) {
         return driver.getPageSource();
+    }
+
+    public static boolean doesContain(String whereString, String whatString) {
+        if (whereString.contains(whatString)) {
+            return true;
+        }
+        else {
+            final Logger log = Logger.getLogger("TEST");
+            log.info("[" + whereString + "] does not contain [" + whatString + "]");
+            return false;
+        }
+    }
+
+    public static boolean areTheyEqual(String actualString, String expectedString) {
+        if (actualString.equals(expectedString)) {
+            return true;
+        }
+        else {
+            final Logger log = Logger.getLogger("TEST");
+            log.info("expected is [" + expectedString + "] but actual is [" + actualString + "]");
+            return false;
+        }
     }
 
 }

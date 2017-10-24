@@ -48,6 +48,14 @@ public class AppsLocators {
 
     public static final String APPS_EDIT_APP_SCRIPT_TEXTAREA = "//*[@id='script-editor']/textarea";
 
+    public static final String APPS_EDIT_APP_README_TAB_LINK = "//a/*[contains(text(), 'README')]";
+
+    public static final String APPS_EDIT_APP_README_TEXTAREA = "//*[@id='readme-editor']/textarea";
+
+    public static final String APPS_EDIT_APP_README_PREVIEW_TAB_LINK = "//li/a[text()='Preview']";
+
+    public static final String APPS_EDIT_APP_README_PREVIEW_TEXTAREA = "//*[@id='tab-readme-preview']/*[contains(@class, 'readme-preview')]";
+
     public static final String APPS_CREATE_APP_CREATE_BUTTON = "//button/*[contains(text(), 'Create')]";
 
     public static final String APPS_RELEVANT_SELECTED_APP_NAME = "//li/*[contains(text(), 'name')]/../p";
@@ -91,6 +99,28 @@ public class AppsLocators {
     public static final String APPS_JOB_PAGE_VIEW_LOG_LINK = "//*[@class='pfda-toolbar']//a[contains(@href, 'job')][contains(@href, 'log')]";
 
     public static final String APPS_JOB_LOG_PAGE_LOG_AREA = "//*[contains(@class, 'job-log')]";
+
+    public static final String APPS_SAVED_APP_README_TAB_LINK = "//a//span[text()='README']";
+
+    public static final String APPS_SAVED_APP_README_PREVIEW = "//*[@id='app-readme']";
+
+    public static final String APPS_SAVED_APP_COMMENTS_TAB_LINK = "//li/a[contains(@href, 'comments')][@aria-controls='tab-comments']";
+
+    public static final String APPS_SAVED_APP_COMMENT_AREA = "//textarea[@id='comment_body']";
+
+    public static final String APPS_SAVED_APP_COMMENT_BUTTON = "//input[@value='Comment']";
+
+    public static final String APPS_SAVED_APP_LAST_COMMENT = "//*[@class='pfda-comment'][1]//*[@class='pfda-comment-body']/p";
+
+    public static final String APPS_SAVED_APP_EDIT_TAG_LINK = "//a[@class='pfda-tag-item']";
+
+    public static final String APPS_SAVED_APP_EDIT_TAG_FORM_TAGNAME_INPUT = "//input[@name='tags']";
+
+    public static final String APPS_SAVED_APP_EDIT_TAG_FORM_UPDATE_TAGS_BUTTON = "//button[text()='Update tags']";
+
+    public static final String APPS_SAVED_APP_SAVED_TAG_LINK = "//ul[contains(@class, 'pfda-tags')]//a";
+
+    public static final String APPS_SAVED_APP_EDIT_TAG_FORM_CHECKBOXES = "//input[@name='taggable_uid']";
 
 
 
