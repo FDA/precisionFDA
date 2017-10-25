@@ -117,6 +117,18 @@ public class AppsJobPage extends AbstractPage {
         return appsJobPageRunningJobLabel;
     }
 
+    public boolean isJobLabelDone() {
+        return getAppsJobPageRunningJobLabel().getText().trim().equalsIgnoreCase("DONE");
+    }
+
+    public String getJobLabelValue() {
+        return getAppsJobPageRunningJobLabel().getText();
+    }
+
+    public boolean isJobStatusDone() {
+        return isJobLabelDone();
+    }
+
     public AppsJobPage waitUntilJobIsDone() {
         int timeoutSec = 300;
         int refreshStepSec = 15;
@@ -134,19 +146,8 @@ public class AppsJobPage extends AbstractPage {
         return new AppsJobPage(getDriver());
     }
 
-    public boolean isJobLabelDone() {
-        return getAppsJobPageRunningJobLabel().getText().trim().equalsIgnoreCase("DONE");
-    }
-
-    public String getJobLabelValue() {
-        return getAppsJobPageRunningJobLabel().getText();
-    }
-
-    public boolean isJobStatusDone() {
-        return isJobLabelDone();
-    }
-
     public AppsJobLogPage viewLog() {
+        log.info("view job log");
         getAppsJobPageViewLogLink().click();
         return new AppsJobLogPage(getDriver());
     }

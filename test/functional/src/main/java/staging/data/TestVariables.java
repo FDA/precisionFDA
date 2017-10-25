@@ -164,4 +164,20 @@ public class TestVariables {
     public static String getAppTagText() {
         return TestConstants.EDIT_APP_TAG_PREFIX;
     }
+
+    public static String getNewNoteRowText() {
+        return TestConstants.NEW_NOTE_ROW_PREFIX + testRunUniqueFinalValue;
+    }
+
+    public static String getNewNoteRichText() {
+        return TestConstants.NEW_NOTE_RICH_PREFIX + testRunUniqueFinalValue;
+    }
+
+    public static String getGeneratedNoteTitle() {
+        return TestConstants.NEW_NOTE_TITLE_PREFIX + testRunUniqueFinalValue;
+    }
+
+    public static String getGeneratedNoteToDeleteTitle() {
+        return TestConstants.NOTE_TO_DELETE_TITLE_PREFIX + testRunUniqueFinalValue;
+    }
 }

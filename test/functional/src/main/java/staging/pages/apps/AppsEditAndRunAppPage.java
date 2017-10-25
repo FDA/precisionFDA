@@ -27,13 +27,15 @@ public class AppsEditAndRunAppPage extends AbstractPage {
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_EDIT_RUN_APP_JOB_NAME_INPUT));
     }
 
-    public AppsEditAndRunAppPage editAppBeforeRun() {
+    public AppsEditAndRunAppPage editJobName() {
+        log.info("edit job name");
         appsJobNameInput.clear();
         appsJobNameInput.sendKeys(getAppJobName());
         return new AppsEditAndRunAppPage(getDriver());
     }
 
     public AppsSavedAppPage runAppFromEditPage() {
+        log.info("run app");
         appsRunAppButton.click();
         setJobRunTimeUTC();
         return new AppsSavedAppPage(getDriver());

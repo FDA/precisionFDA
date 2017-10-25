@@ -36,7 +36,7 @@ public class AppsManagementTest extends AbstractTest {
 
     @Test(groups = { "runJob" }, dependsOnMethods = {"successfulLogin"}, priority = 0)
     public void createAndSaveSimpleApp() {
-        printTestHeader("Test Case: create and save simple app with custom name, title and script text");
+        printTestHeader("Test Case: create and save simple app with custom name, title and shell script");
 
         CommonPage commonPage = openCommonPage();
         ApplCreateAppPage applCreateAppPage = commonPage.openAppsPage().openCreateAppPage();
@@ -53,7 +53,7 @@ public class AppsManagementTest extends AbstractTest {
 
     @Test(dependsOnMethods = {"successfulLogin", "createAndSaveSimpleApp"})
     public void checkSavedAppHasCorrectData() {
-        printTestHeader("Test Case: check Saved App can be open from My App list and has correct data");
+        printTestHeader("Test Case: check Saved previously App can be open from My App list and has correct data");
 
         CommonPage commonPage = openCommonPage();
         AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
@@ -89,7 +89,7 @@ public class AppsManagementTest extends AbstractTest {
 
     @Test(dependsOnMethods = {"successfulLogin", "createAndSaveSimpleApp"})
     public void checkRevisionIncremented() {
-        printTestHeader("Test Case: check that revision version is incremented by 1");
+        printTestHeader("Test Case: check that revision version is incremented by 1 after save revision");
 
         CommonPage commonPage = openCommonPage();
         AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
@@ -108,7 +108,7 @@ public class AppsManagementTest extends AbstractTest {
 
     @Test(dependsOnMethods = {"successfulLogin", "createAndSaveSimpleApp"})
     public void checkValuesNotChangedAfterIdleEdit() {
-        printTestHeader("Test Case: check App values are not changed if click Edit then Save without any changes");
+        printTestHeader("Test Case: check App data is not changed if click Edit App then Save without any changes");
 
         CommonPage commonPage = openCommonPage();
         AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
@@ -145,14 +145,14 @@ public class AppsManagementTest extends AbstractTest {
     }
 
     @Test(groups = { "runJob" }, dependsOnMethods = {"successfulLogin", "createAndSaveSimpleApp"})
-    public void runJobAndValidateResult() {
-        printTestHeader("Test Case: run created previously job and validate result");
+    public void runAppAndValidateResult() {
+        printTestHeader("Test Case: run created previously app and validate result");
 
         CommonPage commonPage = openCommonPage();
         AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
         AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl();
         AppsEditAndRunAppPage appsEditAndRunAppPage = appsSavedAppPage.runAppFromRelevantPage();
-        appsSavedAppPage = appsEditAndRunAppPage.editAppBeforeRun().runAppFromEditPage();
+        appsSavedAppPage = appsEditAndRunAppPage.editJobName().runAppFromEditPage();
 
         assertTrue(appsSavedAppPage.isRunJobDisplayed(), "running job is displayed");
 
@@ -210,7 +210,8 @@ public class AppsManagementTest extends AbstractTest {
         AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl();
 
         AppsEditAppPage appsEditAppPage = appsSavedAppPage.editSavedApp();
-        appsEditAppPage = appsEditAppPage.editReadmeTab().openReadmeReviewTab();
+        appsEditAppPage = appsEditAppPage.editReadmeTab();
+        appsEditAppPage = appsEditAppPage.openReadmeReviewTab();
 
         assertThat(appsEditAppPage.getReadmePreviewText())
                 .as("text on Readme Preview tab during edit")
@@ -238,5 +239,35 @@ public class AppsManagementTest extends AbstractTest {
                 .as("Comment text")
                 .isEqualTo(getAppCommentText());
     }
+
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveSimpleApp"})
+    public void checkDefaultInstanceIsDisplayed() {
+        printTestHeader("Test Case: check that the default instance value is displayed on edit app page and on app profile page");
+
+        CommonPage commonPage = openCommonPage();
+        AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl();
+        AppsEditAppPage appsEditAppPage = appsSavedAppPage.editSavedApp();
+        appsEditAppPage = appsEditAppPage.openVMEnvTab();
+
+        assertThat(appsEditAppPage.isInstanceDefaultValueDisplayed())
+                .as("Instance Default value is displayed on edit page")
+                .isTrue();
+
+        String instanceEditValue = appsEditAppPage.getInstanceValue();
+
+        appsSavedAppPage = appsEditAppPage.saveRevision();
+
+        assertThat(appsSavedAppPage.isInstanceValueDisplayed())
+                .as("Instance Default value is displayed on saved page")
+                .isTrue();
+
+        String instanceSavedValue = appsSavedAppPage.getInstanceValue();
+
+        assertThat(instanceEditValue.toLowerCase())
+                .as("Instance Value")
+                .isEqualTo(instanceSavedValue.replace("-", " "));
+    }
+
 
 }

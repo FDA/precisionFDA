@@ -77,12 +77,16 @@ public class AppsSavedAppPage extends AbstractPage {
     @FindBy(xpath = AppsLocators.APPS_SAVED_APP_SAVED_TAG_LINK)
     private Link appsSavedAppSavedTagLink;
 
-    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_EDIT_TAG_FORM_CHECKBOXES)
-    private WebElement appsEditTagsFormCheckboxes;
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_INSTANCE_VALUE)
+    private WebElement appsSavedAppInstanceValue;
 
     public AppsSavedAppPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_SAVED_APP_RUN_APP_BUTTON));
+    }
+
+    Users getUser() {
+        return Users.getTestUser();
     }
 
     public WebElement getAppsJobsListWE() {
@@ -125,6 +129,10 @@ public class AppsSavedAppPage extends AbstractPage {
         return appsSavedAppRevisionWE;
     }
 
+    public WebElement getAppsSavedAppInstanceValue() {
+        return appsSavedAppInstanceValue;
+    }
+
     public boolean isSelectedAppNameCorrect() {
         return areTheyEqual(getActSelectedAppName(), getExpSelectedAppName());
     }
@@ -142,7 +150,7 @@ public class AppsSavedAppPage extends AbstractPage {
     }
 
     public String getExpSelectedAppOrg() {
-        return Users.getTestUser().getApplUserOrg();
+        return getUser().getApplUserOrg();
     }
 
     public String getActSelectedAppOrg() {
@@ -154,7 +162,7 @@ public class AppsSavedAppPage extends AbstractPage {
     }
 
     public String getExpSelectedAppAddedBy() {
-        return Users.getTestUser().getApplUsername();
+        return getUser().getApplUsername();
     }
 
     public String getActSelectedAppAddedBy() {
@@ -189,57 +197,12 @@ public class AppsSavedAppPage extends AbstractPage {
         return isElementPresent(appsSavedAppRunAppButton);
     }
 
-    public int getAppRevision() {
-        String revision = getAppsSavedAppRevisionWE().getText();
-        return Integer.parseInt(revision);
+    public WebElement getAppsSavedAppLastComment() {
+        return appsSavedAppLastComment;
     }
 
-    public AppsEditAppPage editSavedApp() {
-        getAppsSavedAppEditButtonLink().click();
-        return new AppsEditAppPage(getDriver());
-    }
-
-    public AppsEditAndRunAppPage runAppFromRelevantPage() {
-        getAppsSavedAppRunAppButton().click();
-        return new AppsEditAndRunAppPage(getDriver());
-    }
-
-    public boolean isRunJobDisplayed() {
-        return isElementPresent(getRunJobLink());
-    }
-
-    public WebElement getRunJobLink() {
-        String xpath = AppsLocators.APPS_SAVED_APP_JOB_LINK_TEMPLATE.replace("{JOB_NAME}", getAppJobName());
-        return getDriver().findElement(By.xpath(xpath));
-    }
-
-    public AppsJobPage openJobFromSavedAppPage() {
-        getRunJobLink().click();
-        return new AppsJobPage(getDriver());
-    }
-
-    public Link getAppsSavedAppReadmeTabLink() {
-        return appsSavedAppReadmeTabLink;
-    }
-
-    public WebElement getAppsSavedAppReadmePreviewWE() {
-        return appsSavedAppReadmePreviewWE;
-    }
-
-    public AppsSavedAppPage openReadmeTab() {
-        getAppsSavedAppReadmeTabLink().click();
-        waitUntilDisplayed(getAppsSavedAppReadmePreviewWE());
-        return new AppsSavedAppPage(getDriver());
-    }
-
-    public String getReadMeText() {
-        return getAppsSavedAppReadmePreviewWE().getText();
-    }
-
-    public AppsSavedAppPage openCommentsTab() {
-        getAppsSavedAppCommentTabLink().click();
-        waitUntilDisplayed(getAppsSavedAppCommentArea());
-        return new AppsSavedAppPage(getDriver());
+    public String getLastCommentText() {
+        return getAppsSavedAppLastComment().getText();
     }
 
     public Link getAppsSavedAppCommentTabLink() {
@@ -254,17 +217,77 @@ public class AppsSavedAppPage extends AbstractPage {
         return appsSavedAppCommentButton;
     }
 
+    public boolean isRunJobDisplayed() {
+        return isElementPresent(getRunJobLink());
+    }
+
+    public Link getAppsSavedAppReadmeTabLink() {
+        return appsSavedAppReadmeTabLink;
+    }
+
+    public WebElement getAppsSavedAppReadmePreviewWE() {
+        return appsSavedAppReadmePreviewWE;
+    }
+
+    public String getReadMeText() {
+        return getAppsSavedAppReadmePreviewWE().getText();
+    }
+
+    public WebElement getRunJobLink() {
+        String xpath = AppsLocators.APPS_SAVED_APP_JOB_LINK_TEMPLATE.replace("{JOB_NAME}", getAppJobName());
+        return getDriver().findElement(By.xpath(xpath));
+    }
+
+    public int getAppRevision() {
+        String revision = getAppsSavedAppRevisionWE().getText();
+        return Integer.parseInt(revision);
+    }
+
+    public AppsEditAppPage editSavedApp() {
+        log.info("edit app");
+        getAppsSavedAppEditButtonLink().click();
+        return new AppsEditAppPage(getDriver());
+    }
+
+    public AppsEditAndRunAppPage runAppFromRelevantPage() {
+        log.info("run app");
+        getAppsSavedAppRunAppButton().click();
+        return new AppsEditAndRunAppPage(getDriver());
+    }
+
+    public AppsJobPage openJobFromSavedAppPage() {
+        log.info("open job");
+        getRunJobLink().click();
+        return new AppsJobPage(getDriver());
+    }
+
+    public AppsSavedAppPage openReadmeTab() {
+        log.info("open ReadMe tab");
+        getAppsSavedAppReadmeTabLink().click();
+        waitUntilDisplayed(getAppsSavedAppReadmePreviewWE());
+        return new AppsSavedAppPage(getDriver());
+    }
+
+    public AppsSavedAppPage openCommentsTab() {
+        log.info("open Comments tab");
+        getAppsSavedAppCommentTabLink().click();
+        waitUntilDisplayed(getAppsSavedAppCommentArea());
+        return new AppsSavedAppPage(getDriver());
+    }
+
     public AppsSavedAppPage writeComment() {
+        log.info("write a comment");
         getAppsSavedAppCommentArea().sendKeys(getAppCommentText());
         getAppsSavedAppCommentButton().click();
         return new AppsSavedAppPage(getDriver());
     }
 
-    public WebElement getAppsSavedAppLastComment() {
-        return appsSavedAppLastComment;
+    public String getInstanceValue() {
+        return getAppsSavedAppInstanceValue().getText();
     }
 
-    public String getLastCommentText() {
-        return getAppsSavedAppLastComment().getText();
+    public boolean isInstanceValueDisplayed() {
+        return getAppsSavedAppInstanceValue().isDisplayed();
     }
+
 }
