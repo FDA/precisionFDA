@@ -10,7 +10,7 @@ public class TestConstants {
 
     static final String CREATE_APP_SCRIPT_BODY_PREFIX_1 = "echo ";
 
-    static final String CREATE_APP_SCRIPT_BODY_PREFIX_2 = "auto__";
+    public static final String CREATE_APP_SCRIPT_BODY_PREFIX_2 = "auto__";
 
     public static final String CASE_STATUS_PASSED = "passed";
 
@@ -23,5 +23,14 @@ public class TestConstants {
     public static final String EDIT_APP_COMMENT_PREFIX = "Auto test comment ";
 
     public static final String EDIT_APP_TAG_PREFIX = "AutoTest";
+
+    public static final String NEW_NOTE_ROW_PREFIX = "# __Auto__ *test* note ";
+
+    public static final String NEW_NOTE_RICH_PREFIX = "Auto test note ";
+
+    public static final String NEW_NOTE_TITLE_PREFIX = "autotest note title ";
+
+    public static final String NOTE_TO_DELETE_TITLE_PREFIX = "note to delete title ";
+
 
 }

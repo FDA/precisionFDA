@@ -50,10 +50,10 @@ public class OpenAllPagesTest extends AbstractTest {
         printTestHeader("Test Case: check that Notes.NewNote page can be open");
 
         CommonPage commonPage = openCommonPage();
-        NotesNewNotePage notesNewNotePage = commonPage.openNotesPage().openNotesNewNotePage();
+        NotesEditNotePage notesEditNotePage = commonPage.openNotesPage().openNotesNewNotePage();
 
         SoftAssert.assertThat(
-                notesNewNotePage.isEditorDisplayed())
+                notesEditNotePage.isEditorDisplayed())
                 .as("Edit Area")
                 .isTrue();
 
@@ -155,7 +155,7 @@ public class OpenAllPagesTest extends AbstractTest {
 
         SoftAssert.assertThat(
                 appsPage.isRelevantAppsLinkDisplayed())
-                .as("Relevant apps link is activated")
+                .as("Relevant apps link is displayed")
                 .isTrue();
 
         SoftAssert.assertThat(
@@ -196,7 +196,7 @@ public class OpenAllPagesTest extends AbstractTest {
 
         SoftAssert.assertThat(
                 appsRelevantPage.isJobsListDisplayed())
-                .as("jobs list area is displayed")
+                        .as("jobs list area is displayed")
                 .isTrue();
 
         SoftAssert.assertThat(
@@ -254,7 +254,7 @@ public class OpenAllPagesTest extends AbstractTest {
 
     @Test(dependsOnMethods = { "successfulLogin" })
     public void checkAppsManageAssetsPageCanBeOpen() {
-        printTestHeader("Test Case: check that Apps.ManageAssets page can be open");
+            printTestHeader("Test Case: check that Apps.ManageAssets page can be open");
 
         CommonPage commonPage = openCommonPage();
         AppsManageAssetsPage appsManageAssetsPage = commonPage.openAppsPage().openAppsManageAssetsPage();
@@ -294,7 +294,7 @@ public class OpenAllPagesTest extends AbstractTest {
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
-    public void checkAppsManageFeaturedPageCanBeOpen() {
+        public void checkAppsManageFeaturedPageCanBeOpen() {
         printTestHeader("Test Case: check that Apps.Manage.Featured page can be open");
 
         CommonPage commonPage = openCommonPage();
@@ -345,7 +345,7 @@ public class OpenAllPagesTest extends AbstractTest {
 
         SoftAssert.assertThat(
                 appsManageCreateAssetsPage.isGenerateKeyLinkDisplayed())
-                .as("Step 4 is displayed")
+                .as("Generate Key button on Step 4 is displayed")
                 .isTrue();
 
         SoftAssert.assertThat(

@@ -122,6 +122,14 @@ public class AppsLocators {
 
     public static final String APPS_SAVED_APP_EDIT_TAG_FORM_CHECKBOXES = "//input[@name='taggable_uid']";
 
+    public static final String APPS_EDIT_APP_VMENV_TAB_LINK = "//a//span[text()='VM Environment']";
+
+    public static final String APPS_EDIT_APP_VMENV_INSTANCE_DROP = "//select[@name='instance_type']";
+
+    public static final String APPS_EDIT_APP_VMENV_INSTANCE_PACKAGE_INPUT = "//input[@placeholder='Package name']";
+
+    public static final String APPS_SAVED_APP_INSTANCE_VALUE = "//*[contains(text(), 'instance type')]/../p";
+
 
 
 }

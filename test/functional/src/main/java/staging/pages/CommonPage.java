@@ -80,7 +80,7 @@ public class CommonPage extends AbstractPage {
     }
 
     public AppsPage openAppsPage() {
-        log.info("open Apps page");
+        log.info("opening Apps page");
         appsPageIcon.click();
         return new AppsPage(getDriver());
     }

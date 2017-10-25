@@ -16,8 +16,6 @@ public class NotesLocators {
 
     public static final String NOTES_EXPLORE_ACTIVATED_LINK = "//*[@class='active']//*[@class='pill-label'][text()='Explore']";
 
-    public static final String NOTES_NEW_NOTE_EDITOR_AREA = "//*[@id='tab-note-editor']";
-
     public static final String NOTES_NEW_NOTE_EDIT_TAB = "//li//a[text()='Edit Content']";
 
     public static final String NOTES_PAGINATION_AREA = "//ul[contains(@class, 'pagination')]/li";
@@ -30,5 +28,31 @@ public class NotesLocators {
 
     public static final String NOTES_EDIT_NOTE_CREATED = "//li/h5[text()='Created']/../p";
 
+    public static final String NOTES_NEW_NOTE_EDITOR_AREA = "//*[@id='note-editor']";
 
+    public static final String NOTES_EDIT_NOTE_SAVE_BUTTON = "//a[text()='Save']";
+
+    public static final String NOTES_LIST_FIRST_NOTE_TITLE = "//*[contains(@class, 'pfda-cards-list')]/a[1]//div[contains(@class, 'title')]";
+
+    public static final String NOTES_LIST_FIRST_NOTE_USER_DATA = "//*[contains(@class, 'pfda-cards-list')]/a[1]//li[1]";
+
+    public static final String NOTES_LIST_FIRST_NOTE_CREATED = "//*[contains(@class, 'pfda-cards-list')]/a[1]//li[2]";
+
+    public static final String NOTES_SAVED_NOTE_TITLE = "//span[@class='note-title']";
+
+    public static final String NOTES_SAVED_NOTE_ORG = "//li/*[contains(text(), 'Org')]/../p";
+
+    public static final String NOTES_SAVED_NOTE_ADDED_BY = "//li/*[contains(text(), 'Added by')]/../p";
+
+    public static final String NOTES_SAVED_NOTE_CREATED = "//li/*[contains(text(), 'Created')]/../p";
+
+    public static final String NOTES_SAVED_NOTE_BODY_TEXT = "//*[contains(@class, 'note')][contains(@class, 'rendered')]";
+
+    public static final String NOTES_LIST_ANY_NOTE_LINK = "//*[contains(@class, 'pfda-cards-list')]//a";
+
+    public static final String NOTES_SAVED_NOTE_EDIT_DD = "//button[@id='dLabel']";
+
+    public static final String NOTES_SAVED_NOTE_DD_DELETE = "//*[contains(@class, 'dropdown-menu')]//a[@data-method='delete']/span/..";
+
+    public static final String NOTES_LIST_SUCCESS_MESSAGE = "//*[contains(@class, 'alert-success')]";
 }
