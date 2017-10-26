@@ -22,6 +22,10 @@ public class TestVariables {
 
     public static boolean isAppTitleEditedFlag = false;
 
+    public static boolean isNoteTitleEditedFlag = false;
+
+    public static boolean isNoteBodyEditedFlag = false;
+
     public static final String filePathUniqueValue = generateFilePathUniqueValue();
 
     public static final String testRunUniqueFinalValue = generateTestRunUniqueValue();
@@ -43,7 +47,7 @@ public class TestVariables {
     }
 
     public static final String getAppTitle() {
-        return CREATE_APP_TITLE_PREFIX + getTestRunUniqueFinalValue() + getEditAddon();
+        return CREATE_APP_TITLE_PREFIX + getTestRunUniqueFinalValue() + getCurrentAddictiveForAppTitle();
     }
 
     public static String getDebugLogFolder() {
@@ -136,13 +140,43 @@ public class TestVariables {
         isAppTitleEditedFlag = flag;
     }
 
+    public static void setIsNoteTitleEditedFlag(boolean flag) {
+        isNoteTitleEditedFlag = flag;
+    }
+
+    public static void setIsNoteBodyEditedFlag(boolean flag) {
+        isNoteBodyEditedFlag = flag;
+    }
+
     public boolean getIsAppTitleEditedFlag() {
         return isAppTitleEditedFlag;
     }
 
-    public static String getEditAddon() {
+    public static String getAdditionalEditPartString() {
+        return ADDITIONAL_PART_FOR_EDIT;
+    }
+
+    public static String getCurrentAddictiveForAppTitle() {
         if (isAppTitleEditedFlag) {
-            return "_NEW";
+            return getAdditionalEditPartString();
+        }
+        else {
+            return "";
+        }
+    }
+
+    public static String getCurrentAddictiveForNoteTitle() {
+        if (isNoteTitleEditedFlag) {
+            return getAdditionalEditPartString();
+        }
+        else {
+            return "";
+        }
+    }
+
+    public static String getCurrentAddictiveForNoteBody() {
+        if (isNoteBodyEditedFlag) {
+            return getAdditionalEditPartString();
         }
         else {
             return "";
@@ -166,18 +200,34 @@ public class TestVariables {
     }
 
     public static String getNewNoteRowText() {
-        return TestConstants.NEW_NOTE_ROW_PREFIX + testRunUniqueFinalValue;
+        return TestConstants.NEW_NOTE_ROW_PREFIX + testRunUniqueFinalValue + getCurrentAddictiveForNoteBody();
     }
 
     public static String getNewNoteRichText() {
-        return TestConstants.NEW_NOTE_RICH_PREFIX + testRunUniqueFinalValue;
+        return TestConstants.NEW_NOTE_RICH_PREFIX + testRunUniqueFinalValue + getCurrentAddictiveForNoteBody();
     }
 
     public static String getGeneratedNoteTitle() {
-        return TestConstants.NEW_NOTE_TITLE_PREFIX + testRunUniqueFinalValue;
+        return TestConstants.NEW_NOTE_TITLE_PREFIX + testRunUniqueFinalValue + getCurrentAddictiveForNoteTitle();
     }
 
     public static String getGeneratedNoteToDeleteTitle() {
         return TestConstants.NOTE_TO_DELETE_TITLE_PREFIX + testRunUniqueFinalValue;
+    }
+
+    public static String getNoteCommentText() {
+        return TestConstants.NOTE_COMMENT_PREFIX + testRunUniqueFinalValue;
+    }
+
+    public static String getGeneratedNoteToEditTitle() {
+        return TestConstants.NOTE_TO_EDIT_TITLE_PREFIX + testRunUniqueFinalValue;
+    }
+
+    public static String getGeneratedNoteToEditRowBody() {
+        return TestConstants.NOTE_TO_EDIT_ROW_BODY_PREFIX + testRunUniqueFinalValue;
+    }
+
+    public static String getGeneratedNoteToEditRichBody() {
+        return TestConstants.NOTE_TO_EDIT_RICH_BODY_PREFIX + testRunUniqueFinalValue;
     }
 }

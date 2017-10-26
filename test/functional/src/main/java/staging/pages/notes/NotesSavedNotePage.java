@@ -5,14 +5,13 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.NotesLocators;
 import staging.model.Users;
 import staging.pages.AbstractPage;
 
-import static staging.data.TestVariables.getGeneratedNoteTitle;
-import static staging.data.TestVariables.getNewNoteRichText;
-import static staging.data.TestVariables.getNoteCreateTimeUTC;
+import static staging.data.TestVariables.*;
 
 public class NotesSavedNotePage extends AbstractPage {
 
@@ -38,6 +37,18 @@ public class NotesSavedNotePage extends AbstractPage {
 
     @FindBy(xpath = NotesLocators.NOTES_SAVED_NOTE_DD_DELETE)
     private Link notesSavedNoteDeleteItem;
+
+    @FindBy(xpath = NotesLocators.NOTES_SAVED_NOTE_EDIT_BUTTON)
+    private Link notesSavedNoteEditButton;
+
+    @FindBy(xpath = NotesLocators.NOTES_SAVED_NOTE_COMMENT_AREA)
+    private WebElement notesSavedNoteCommentAreaWE;
+
+    @FindBy(xpath = NotesLocators.NOTES_SAVED_NOTE_COMMENT_SUBMIT_BUTTON)
+    private Button notesSavedNoteCommentSubmitButton;
+
+    @FindBy(xpath = NotesLocators.NOTES_SAVED_NOTE_FIRST_COMMENT)
+    private WebElement notesSavedNoteFirstCommentWE;
 
     public NotesSavedNotePage(final WebDriver driver) {
         super(driver);
@@ -128,6 +139,42 @@ public class NotesSavedNotePage extends AbstractPage {
         return notesSavedNoteDeleteItem;
     }
 
+    //----------
+
+    public Link getNotesSavedNoteEditButton() {
+        return notesSavedNoteEditButton;
+    }
+
+    //----------
+
+    public WebElement getNotesSavedNoteCommentAreaWE() {
+        return notesSavedNoteCommentAreaWE;
+    }
+
+    public Button getNotesSavedNoteCommentSubmitButton() {
+        return notesSavedNoteCommentSubmitButton;
+    }
+
+    public WebElement getNotesSavedNoteFirstCommentWE() {
+        return notesSavedNoteFirstCommentWE;
+    }
+
+    public String getNotesSavedNoteFirstCommentText() {
+        return getNotesSavedNoteFirstCommentWE().getText();
+    }
+
+    //----------
+
+    public String getExpectedNoteToEditTitle() {
+        return getGeneratedNoteToEditTitle();
+    }
+
+    public String getExpectedNoteToEditBody() {
+        return getGeneratedNoteToEditRichBody();
+    }
+
+    //----------
+
     public NotesPage deleteNote() {
         log.info("delete note");
         getNotesSavedNoteEditDD().click();
@@ -135,5 +182,22 @@ public class NotesSavedNotePage extends AbstractPage {
         getNotesSavedNoteDeleteItem().click();
         alertAccept();
         return new NotesPage(getDriver());
+    }
+
+    public NotesEditNotePage openNoteForEdit() {
+        log.info("open Note edit form");
+        getNotesSavedNoteEditButton().click();
+        return new NotesEditNotePage(getDriver());
+    }
+
+    public NotesSavedNotePage leaveComment() {
+        log.info("write and save comment");
+        getNotesSavedNoteCommentAreaWE().sendKeys(getNoteCommentText());
+        getNotesSavedNoteCommentSubmitButton().click();
+        return new NotesSavedNotePage(getDriver());
+    }
+
+    public String getExpectedCommentText() {
+        return getNoteCommentText();
     }
 }

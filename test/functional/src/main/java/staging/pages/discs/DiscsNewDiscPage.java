@@ -18,7 +18,7 @@ public class DiscsNewDiscPage extends AbstractPage {
 
     public DiscsNewDiscPage(final WebDriver driver) {
         super(driver);
-        waitForPageToLoadAndVerifyBy(By.xpath(NotesLocators.NOTES_NEW_NOTE_EDIT_TAB));
+        waitForPageToLoadAndVerifyBy(By.xpath(NotesLocators.NOTES_EDIT_NOTE_EDIT_TAB));
     }
 
     public WebElement getDiscsNewDiscEditorWE() {

@@ -18,9 +18,9 @@ public class TestConstants {
 
     public static final String EDIT_APP_README_ROW_PREFIX = "# __Auto__ *test* ";
 
-    public static final String EDIT_APP_README_RICH_PREFIX = "Auto test ";
+    public static final String EDIT_APP_README_RICH_PREFIX = "Auto app test ";
 
-    public static final String EDIT_APP_COMMENT_PREFIX = "Auto test comment ";
+    public static final String EDIT_APP_COMMENT_PREFIX = "Auto test app comment ";
 
     public static final String EDIT_APP_TAG_PREFIX = "AutoTest";
 
@@ -31,6 +31,16 @@ public class TestConstants {
     public static final String NEW_NOTE_TITLE_PREFIX = "autotest note title ";
 
     public static final String NOTE_TO_DELETE_TITLE_PREFIX = "note to delete title ";
+
+    public static final String NOTE_TO_EDIT_TITLE_PREFIX = "note to edit title ";
+
+    public static final String NOTE_TO_EDIT_ROW_BODY_PREFIX = "# __Auto__ *test* edit note ";
+
+    public static final String NOTE_TO_EDIT_RICH_BODY_PREFIX = "Auto test edit note ";
+
+    public static final String ADDITIONAL_PART_FOR_EDIT = "_NEW";
+
+    public static final String NOTE_COMMENT_PREFIX = "Auto test note comment ";
 
 
 }

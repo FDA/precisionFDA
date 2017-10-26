@@ -34,30 +34,30 @@ public class NotesManagementTest extends AbstractTest {
 
     @Test(dependsOnMethods = {"successfulLogin"})
     public void verifyDataOnNewNotePage() {
-        printTestHeader("Test Case: check that user data is displayed correctly by default on New Note page");
+        printTestHeader("Test Case: check that correct data is displayed by default on a New Note form");
 
         CommonPage commonPage = openCommonPage();
         NotesEditNotePage notesEditNotePage = commonPage.openNotesPage().openNotesNewNotePage();
 
         SoftAssert.assertThat(
-                notesEditNotePage.getEnteredTitle())
+                notesEditNotePage.getEnteredTitleText())
                 .as("entered by default Title")
                 .isEqualTo(notesEditNotePage.getExpectedDefaultTitle());
 
         SoftAssert.assertThat(
-                notesEditNotePage.getActOrg())
+                notesEditNotePage.getActOrgText())
                 .as("Org")
-                .isEqualTo(notesEditNotePage.getExpOrg());
+                .isEqualTo(notesEditNotePage.getExpOrgText());
 
         SoftAssert.assertThat(
-                notesEditNotePage.getActAddedBy())
+                notesEditNotePage.getActAddedByText())
                 .as("Added By")
-                .isEqualTo(notesEditNotePage.getExpAddedBy());
+                .isEqualTo(notesEditNotePage.getExpAddedByText());
 
         SoftAssert.assertThat(
-                notesEditNotePage.getActCreated())
+                notesEditNotePage.getActCreatedText())
                 .as("Created")
-                .contains(notesEditNotePage.getExpCreated());
+                .contains(notesEditNotePage.getExpCreatedText());
 
         SoftAssert.assertAll();
     }
@@ -69,8 +69,8 @@ public class NotesManagementTest extends AbstractTest {
         CommonPage commonPage = openCommonPage();
         NotesEditNotePage notesEditNotePage = commonPage.openNotesPage().openNotesNewNotePage();
 
-        notesEditNotePage.fillNoteTitleField();
-        notesEditNotePage.fillNoteTextArea();
+        notesEditNotePage.fillNewNoteTitleField();
+        notesEditNotePage.fillNewNoteTextArea();
         notesEditNotePage = notesEditNotePage.saveNote();
         NotesPage notesPage = notesEditNotePage.openNotesPage();
 
@@ -83,7 +83,7 @@ public class NotesManagementTest extends AbstractTest {
         assertThat(
                 notesPage.getFirstNoteTitleText())
                 .as("Created Note Title")
-                .contains(notesEditNotePage.getExpectedEditedNoteTitle());
+                .contains(notesEditNotePage.getExpectedEditedNoteTitleText());
 
 
         SoftAssert.assertThat(
@@ -99,7 +99,7 @@ public class NotesManagementTest extends AbstractTest {
         SoftAssert.assertThat(
                 notesPage.getFirstNoteCreatedText())
                 .as("Date/time created")
-                .contains(notesEditNotePage.getExpCreated());
+                .contains(notesEditNotePage.getExpCreatedText());
 
         SoftAssert.assertAll();
         */
@@ -179,6 +179,200 @@ public class NotesManagementTest extends AbstractTest {
                 savedNotePage.getSavedNoteBodyText())
                 .as("Note Body Text")
                 .contains(savedNotePage.getExpNoteBodyText());
+
+        SoftAssert.assertAll();
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveNote"})
+    public void editAndSaveCreatedNote() {
+        printTestHeader("Test Case: edit and save previously created note, verify changes");
+
+        CommonPage commonPage = openCommonPage();
+        NotesPage notesPage = commonPage.openNotesPage();
+
+        assertThat(
+                notesPage.isLinkToCreatedNoteDisplayed())
+                .as("Link to created note is displayed")
+                .isTrue();
+
+        NotesSavedNotePage savedNotePage = notesPage.openCreatedNote();
+
+        assertThat(
+                savedNotePage.getSavedNoteTitleText())
+                .as("Note Title")
+                .isEqualTo(savedNotePage.getExpectedNoteEditedTitleText());
+
+        NotesEditNotePage notesEditNotePage = savedNotePage.openNoteForEdit();
+
+        notesEditNotePage.editNoteWithNewDataAndSave();
+        notesPage = notesEditNotePage.openNotesPage();
+
+        assertThat(
+                notesPage.isLinkToCreatedNoteDisplayed())
+                .as("updated note title is displayed on list")
+                .isTrue();
+
+        savedNotePage = notesPage.openCreatedNote();
+
+        SoftAssert.assertThat(
+                savedNotePage.getSavedNoteTitleText())
+                .as("Updated Note Title")
+                .isEqualTo(savedNotePage.getExpectedNoteEditedTitleText());
+
+        SoftAssert.assertThat(
+                savedNotePage.getSavedNoteOrgText())
+                .as("Note Org")
+                .isEqualTo(savedNotePage.getExpOrgText());
+
+        SoftAssert.assertThat(
+                savedNotePage.getSavedNoteAddedByText())
+                .as("Note Added By")
+                .isEqualTo(savedNotePage.getExpAddedByText());
+
+        SoftAssert.assertThat(
+                savedNotePage.getSavedNoteCreatedText())
+                .as("Note Created")
+                .contains(savedNotePage.getExpCreatedText());
+
+        SoftAssert.assertThat(
+                savedNotePage.getSavedNoteBodyText())
+                .as("Updated Note Body Text")
+                .contains(savedNotePage.getExpNoteBodyText());
+
+        SoftAssert.assertAll();
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveNote"})
+    public void verifyEditFormHasPreviouslySavedData() {
+        printTestHeader("Test Case: check that a note edit form contains correct previously saved values");
+
+        CommonPage commonPage = openCommonPage();
+        NotesPage notesPage = commonPage.openNotesPage();
+
+        assertThat(
+                notesPage.isLinkToCreatedNoteDisplayed())
+                .as("Link to created note is displayed")
+                .isTrue();
+
+        NotesSavedNotePage savedNotePage = notesPage.openCreatedNote();
+        NotesEditNotePage notesEditNotePage = savedNotePage.openNoteForEdit();
+
+        SoftAssert.assertThat(
+                notesEditNotePage.getEnteredTitleText())
+                .as("saved note title")
+                .isEqualTo(notesEditNotePage.getExpectedEditedNoteTitleText());
+
+        SoftAssert.assertThat(
+                notesEditNotePage.getEnteredBodyText())
+                .as("saved note body")
+                .contains(notesEditNotePage.getExpectedNoteRowText());
+
+        SoftAssert.assertThat(
+                notesEditNotePage.getActOrgText())
+                .as("Org")
+                .isEqualTo(notesEditNotePage.getExpOrgText());
+
+        SoftAssert.assertThat(
+                notesEditNotePage.getActAddedByText())
+                .as("Added By")
+                .isEqualTo(notesEditNotePage.getExpAddedByText());
+
+        SoftAssert.assertThat(
+                notesEditNotePage.getActCreatedText())
+                .as("Created")
+                .contains(notesEditNotePage.getExpCreatedText());
+
+        SoftAssert.assertAll();
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveNote"})
+    public void verifyPreviewTab() {
+        printTestHeader("Test Case: verify Preview tab");
+
+        CommonPage commonPage = openCommonPage();
+        NotesPage notesPage = commonPage.openNotesPage();
+
+        assertThat(
+                notesPage.isLinkToCreatedNoteDisplayed())
+                .as("Link to created note is displayed")
+                .isTrue();
+
+        NotesSavedNotePage savedNotePage = notesPage.openCreatedNote();
+        NotesEditNotePage notesEditNotePage = savedNotePage.openNoteForEdit();
+        notesEditNotePage = notesEditNotePage.openPreviewTab();
+
+        assertThat(
+                notesEditNotePage.getNotePreviewBodyText())
+                .as("note body text on preview tab")
+                .contains(notesEditNotePage.getExpectedNoteRichText());
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveNote"})
+    public void leaveComment() {
+        printTestHeader("Test Case: write a comment for a note");
+
+        CommonPage commonPage = openCommonPage();
+        NotesPage notesPage = commonPage.openNotesPage();
+
+        assertThat(
+                notesPage.isLinkToCreatedNoteDisplayed())
+                .as("Link to created note is displayed")
+                .isTrue();
+
+        NotesSavedNotePage savedNotePage = notesPage.openCreatedNote();
+        savedNotePage = savedNotePage.leaveComment();
+
+        assertThat(
+                savedNotePage.getNotesSavedNoteFirstCommentText())
+                .as("submitted comment")
+                .isEqualTo(savedNotePage.getExpectedCommentText());
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin"})
+    public void verifyNoteIsNotChangedIfPressBack() {
+        printTestHeader("Test Case: verify that a note is not changed after edit and pressing Back");
+
+        CommonPage commonPage = openCommonPage();
+        NotesEditNotePage notesEditNotePage = commonPage.openNotesPage().openNotesNewNotePage();
+
+        notesEditNotePage = notesEditNotePage.fillAndSaveNoteToEdit();
+        NotesPage notesPage = notesEditNotePage.openNotesPage();
+
+        assertThat(
+                notesPage.isLinkToCreatedToEditNoteDisplayed())
+                .as("Link to just created note is displayed")
+                .isTrue();
+
+        NotesSavedNotePage savedNotePage = notesPage.openCreatedToEditNote();
+        notesEditNotePage = savedNotePage.openNoteForEdit();
+
+        notesEditNotePage.editNoteButNotSave();
+        savedNotePage = notesEditNotePage.clickBack();
+
+        SoftAssert.assertThat(
+                savedNotePage.getSavedNoteTitleText())
+                .as("Not changed Title")
+                .isEqualTo(savedNotePage.getExpectedNoteToEditTitle());
+
+        SoftAssert.assertThat(
+                savedNotePage.getSavedNoteOrgText())
+                .as("Note Org")
+                .isEqualTo(savedNotePage.getExpOrgText());
+
+        SoftAssert.assertThat(
+                savedNotePage.getSavedNoteAddedByText())
+                .as("Note Added By")
+                .isEqualTo(savedNotePage.getExpAddedByText());
+
+        SoftAssert.assertThat(
+                savedNotePage.getSavedNoteCreatedText())
+                .as("Note Created")
+                .contains(savedNotePage.getExpCreatedText());
+
+        SoftAssert.assertThat(
+                savedNotePage.getSavedNoteBodyText())
+                .as("Not changed Body Text")
+                .contains(savedNotePage.getExpectedNoteToEditBody());
 
         SoftAssert.assertAll();
     }
