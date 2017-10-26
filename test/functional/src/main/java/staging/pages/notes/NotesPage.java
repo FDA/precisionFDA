@@ -50,6 +50,18 @@ public class NotesPage extends AbstractPage {
         return notesMyNotesLink;
     }
 
+    public Link getNotesFeaturedLink() {
+        return notesFeaturedLink;
+    }
+
+    public Link getNotesExploreLink() {
+        return notesExploreLink;
+    }
+
+    public Link getNotesNewNoteLink() {
+        return notesNewNoteLink;
+    }
+
     public WebElement getNotesListFirstNoteTitle() {
         return notesListFirstNoteTitle;
     }
@@ -64,25 +76,26 @@ public class NotesPage extends AbstractPage {
 
     public NotesMyNotesPage openNotesMyNotesPage() {
         log.info("open Notes.MyNotes page");
-        notesMyNotesLink.click();
+        getNotesMyNotesLink().click();
         return new NotesMyNotesPage(getDriver());
     }
 
     public NotesFeaturedPage openNotesFeaturedPage() {
         log.info("open Notes.Featured page");
-        notesFeaturedLink.click();
+        getNotesFeaturedLink().click();
         return new NotesFeaturedPage(getDriver());
     }
 
     public NotesExplorePage openNotesExplorePage() {
         log.info("open Notes.Explore page");
-        notesExploreLink.click();
+        getNotesExploreLink().click();
         return new NotesExplorePage(getDriver());
     }
 
     public NotesEditNotePage openNotesNewNotePage() {
         log.info("open Notes.NewNote page");
-        notesNewNoteLink.click();
+        sleep(1000);
+        getNotesNewNoteLink().click();
         setNoteCreateTimeUTC();
         return new NotesEditNotePage(getDriver());
     }
@@ -139,8 +152,24 @@ public class NotesPage extends AbstractPage {
         return noteLink;
     }
 
+    public WebElement getCreatedToEditNoteLink() {
+        WebElement noteLink = null;
+        List<WebElement> allLinks = getDriver().findElements(By.xpath(NotesLocators.NOTES_LIST_ANY_NOTE_LINK));
+        for (WebElement we : allLinks) {
+            if (we.getText().contains(getGeneratedNoteToEditTitle())) {
+                noteLink = we;
+                break;
+            }
+        }
+        return noteLink;
+    }
+
     public boolean isLinkToCreatedNoteDisplayed() {
         return isElementPresent(getCreatedNoteLink());
+    }
+
+    public boolean isLinkToCreatedToEditNoteDisplayed() {
+        return isElementPresent(getCreatedToEditNoteLink());
     }
 
     public boolean isLinkToCreatedToDeleteNoteDisplayed() {
@@ -162,6 +191,12 @@ public class NotesPage extends AbstractPage {
     public NotesSavedNotePage openCreatedToDeleteNote() {
         log.info("open created note");
         getCreatedToDeleteNoteLink().click();
+        return new NotesSavedNotePage(getDriver());
+    }
+
+    public NotesSavedNotePage openCreatedToEditNote() {
+        log.info("open created note");
+        getCreatedToEditNoteLink().click();
         return new NotesSavedNotePage(getDriver());
     }
 
