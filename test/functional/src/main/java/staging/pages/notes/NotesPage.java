@@ -7,11 +7,10 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.NotesLocators;
+import staging.model.NoteProfile;
 import staging.pages.AbstractPage;
 
 import java.util.List;
-
-import static staging.data.TestVariables.*;
 
 public class NotesPage extends AbstractPage {
 
@@ -28,15 +27,6 @@ public class NotesPage extends AbstractPage {
 
     @FindBy(xpath = NotesLocators.NOTES_NEW_NOTE_LINK)
     private Link notesNewNoteLink;
-
-    @FindBy(xpath = NotesLocators.NOTES_LIST_FIRST_NOTE_TITLE)
-    private WebElement notesListFirstNoteTitle;
-
-    @FindBy(xpath = NotesLocators.NOTES_LIST_FIRST_NOTE_USER_DATA)
-    private WebElement notesListFirstNoteUserData;
-
-    @FindBy(xpath = NotesLocators.NOTES_LIST_FIRST_NOTE_CREATED)
-    private WebElement notesListFirstNoteCreated;
 
     @FindBy(xpath = NotesLocators.NOTES_LIST_SUCCESS_MESSAGE)
     private WebElement notesSuccessMessageWE;
@@ -62,18 +52,6 @@ public class NotesPage extends AbstractPage {
         return notesNewNoteLink;
     }
 
-    public WebElement getNotesListFirstNoteTitle() {
-        return notesListFirstNoteTitle;
-    }
-
-    public WebElement getNotesListFirstNoteUserData() {
-        return notesListFirstNoteUserData;
-    }
-
-    public WebElement getNotesListFirstNoteCreated() {
-        return notesListFirstNoteCreated;
-    }
-
     public NotesMyNotesPage openNotesMyNotesPage() {
         log.info("open Notes.MyNotes page");
         getNotesMyNotesLink().click();
@@ -96,7 +74,14 @@ public class NotesPage extends AbstractPage {
         log.info("open Notes.NewNote page");
         sleep(1000);
         getNotesNewNoteLink().click();
-        setNoteCreateTimeUTC();
+        return new NotesEditNotePage(getDriver());
+    }
+
+    public NotesEditNotePage openNotesNewNotePage(NoteProfile noteProfile) {
+        log.info("open Notes.NewNote page");
+        sleep(1000);
+        getNotesNewNoteLink().click();
+        noteProfile.setCreateNoteText();
         return new NotesEditNotePage(getDriver());
     }
 
@@ -104,35 +89,11 @@ public class NotesPage extends AbstractPage {
         return isElementPresent(getNotesMyNotesLink());
     }
 
-    public String getFirstNoteTitleText() {
-        return getNotesListFirstNoteTitle().getText();
-    }
-
-    public String getFirstNoteUserDataText() {
-        return getNotesListFirstNoteUserData().getText();
-    }
-
-    public String getFirstNoteUserName() {
-        return getFirstNoteUserDataText().split("/")[1];
-    }
-
-    public String getFirstNoteUserOrg() {
-        return getFirstNoteUserDataText().split("/")[0];
-    }
-
-    public String getFirstNoteCreatedText() {
-        return getNotesListFirstNoteCreated().getText();
-    }
-
-    public String getExpCreated() {
-        return getNoteCreateTimeUTC().substring(0, 16);
-    }
-
-    public WebElement getCreatedNoteLink() {
+    public WebElement getCreatedNoteLink(NoteProfile noteProfile) {
         WebElement noteLink = null;
         List<WebElement> allLinks = getDriver().findElements(By.xpath(NotesLocators.NOTES_LIST_ANY_NOTE_LINK));
         for (WebElement we : allLinks) {
-            if (we.getText().contains(getGeneratedNoteTitle())) {
+            if (we.getText().contains(noteProfile.getTitleText())) {
                 noteLink = we;
                 break;
             }
@@ -140,65 +101,22 @@ public class NotesPage extends AbstractPage {
         return noteLink;
     }
 
-    public WebElement getCreatedToDeleteNoteLink() {
-        WebElement noteLink = null;
-        List<WebElement> allLinks = getDriver().findElements(By.xpath(NotesLocators.NOTES_LIST_ANY_NOTE_LINK));
-        for (WebElement we : allLinks) {
-            if (we.getText().contains(getGeneratedNoteToDeleteTitle())) {
-                noteLink = we;
-                break;
-            }
-        }
-        return noteLink;
-    }
-
-    public WebElement getCreatedToEditNoteLink() {
-        WebElement noteLink = null;
-        List<WebElement> allLinks = getDriver().findElements(By.xpath(NotesLocators.NOTES_LIST_ANY_NOTE_LINK));
-        for (WebElement we : allLinks) {
-            if (we.getText().contains(getGeneratedNoteToEditTitle())) {
-                noteLink = we;
-                break;
-            }
-        }
-        return noteLink;
-    }
-
-    public boolean isLinkToCreatedNoteDisplayed() {
-        return isElementPresent(getCreatedNoteLink());
-    }
-
-    public boolean isLinkToCreatedToEditNoteDisplayed() {
-        return isElementPresent(getCreatedToEditNoteLink());
-    }
-
-    public boolean isLinkToCreatedToDeleteNoteDisplayed() {
-        WebElement link = getCreatedToDeleteNoteLink();
-        if (link != null) {
-            return isElementPresent(getCreatedToDeleteNoteLink());
-        }
-        else {
+    public boolean isLinkToCreatedNoteDisplayed(NoteProfile noteProfile) {
+        WebElement createdNoteLink = getCreatedNoteLink(noteProfile);
+        if (createdNoteLink == null) {
             return false;
         }
+        else {
+            return isElementPresent(createdNoteLink);
+        }
     }
 
-    public NotesSavedNotePage openCreatedNote() {
+    public NotesSavedNotePage openCreatedNote(NoteProfile noteProfile) {
         log.info("open created note");
-        getCreatedNoteLink().click();
+        getCreatedNoteLink(noteProfile).click();
         return new NotesSavedNotePage(getDriver());
     }
 
-    public NotesSavedNotePage openCreatedToDeleteNote() {
-        log.info("open created note");
-        getCreatedToDeleteNoteLink().click();
-        return new NotesSavedNotePage(getDriver());
-    }
-
-    public NotesSavedNotePage openCreatedToEditNote() {
-        log.info("open created note");
-        getCreatedToEditNoteLink().click();
-        return new NotesSavedNotePage(getDriver());
-    }
 
     public WebElement getNotesSuccessMessageWE() {
         return notesSuccessMessageWE;
@@ -212,7 +130,10 @@ public class NotesPage extends AbstractPage {
         return isElementPresent(getNotesSuccessMessageWE());
     }
 
-    public String getExpectedNoteToDeleteTitleText() {
-        return getGeneratedNoteToDeleteTitle();
+    public NotesEditNotePage createNewNote(NoteProfile noteProfile) {
+        NotesEditNotePage editNotePage = openNotesNewNotePage(noteProfile);
+        editNotePage.fillAndSaveNote(noteProfile);
+        return new NotesEditNotePage(getDriver());
     }
+
 }

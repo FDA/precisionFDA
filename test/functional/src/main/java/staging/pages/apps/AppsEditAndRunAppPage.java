@@ -7,10 +7,8 @@ import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import staging.locators.AppsLocators;
+import staging.model.AppProfile;
 import staging.pages.AbstractPage;
-
-import static staging.data.TestVariables.getAppJobName;
-import static staging.data.TestVariables.setJobRunTimeUTC;
 
 public class AppsEditAndRunAppPage extends AbstractPage {
 
@@ -27,17 +25,25 @@ public class AppsEditAndRunAppPage extends AbstractPage {
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_EDIT_RUN_APP_JOB_NAME_INPUT));
     }
 
-    public AppsEditAndRunAppPage editJobName() {
+    public TextInput getAppsJobNameInput() {
+        return appsJobNameInput;
+    }
+
+    public Button getAppsRunAppButton() {
+        return appsRunAppButton;
+    }
+
+    public AppsEditAndRunAppPage editJobName(AppProfile appProfile) {
         log.info("edit job name");
-        appsJobNameInput.clear();
-        appsJobNameInput.sendKeys(getAppJobName());
+        getAppsJobNameInput().clear();
+        getAppsJobNameInput().sendKeys(appProfile.getJobNameText());
         return new AppsEditAndRunAppPage(getDriver());
     }
 
-    public AppsSavedAppPage runAppFromEditPage() {
-        log.info("run app");
-        appsRunAppButton.click();
-        setJobRunTimeUTC();
+    public AppsSavedAppPage clickRunAppOnEditJobPage(AppProfile appProfile) {
+        log.info("click Run App on edit job page");
+        getAppsRunAppButton().click();
+        appProfile.setJobCreationDateTimeText();
         return new AppsSavedAppPage(getDriver());
     }
 

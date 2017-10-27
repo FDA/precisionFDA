@@ -23,7 +23,15 @@ public class Utils {
         return date;
     }
 
-    public static String getRunTimeUniqueValue() {
+    public static String getCurrentDateTimeValue(String timeZone) {
+        Date d = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone(timeZone));
+        String date = dateFormat.format(d);
+        return date;
+    }
+
+    public static String getRunTimeLocalUniqueValue() {
         Date d = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd_MM_HHmmssSSS");
         String salt = dateFormat.format(d);
@@ -88,6 +96,24 @@ public class Utils {
             log.info("expected is [" + expectedString + "] but actual is [" + actualString + "]");
             return false;
         }
+    }
+
+    public static long getDifferenceBetweenDateTime(String dateTime1, String dateTime2) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        Date d1 = null;
+        Date d2 = null;
+        long diffSec = 999;
+
+        try {
+            d1 = format.parse(dateTime1);
+            d2 = format.parse(dateTime2);
+            long diffMsec = d2.getTime() - d1.getTime();
+            diffSec = Math.abs(diffMsec * 1000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return diffSec;
     }
 
 }

@@ -9,12 +9,13 @@ import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import staging.locators.AppsLocators;
-import staging.model.Users;
+import staging.model.AppProfile;
+import staging.model.User;
 import staging.pages.AbstractPage;
+import staging.utils.Utils;
 
-import static staging.data.TestVariables.*;
-import static staging.utils.Utils.areTheyEqual;
-import static staging.utils.Utils.doesContain;
+import static staging.data.TestAppData.getAppCommentText;
+import static staging.data.TestCommonData.getTrueResult;
 
 public class AppsSavedAppPage extends AbstractPage {
 
@@ -85,16 +86,8 @@ public class AppsSavedAppPage extends AbstractPage {
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_SAVED_APP_RUN_APP_BUTTON));
     }
 
-    Users getUser() {
-        return Users.getTestUser();
-    }
-
-    public WebElement getAppsJobsListWE() {
-        return appsJobsList;
-    }
-
-    public boolean isJobsListDisplayed() {
-        return isElementPresent(getAppsJobsListWE());
+    User getUser() {
+        return User.getTestUser();
     }
 
     public WebElement getAppsRelevantSelectedAppName() {
@@ -133,20 +126,8 @@ public class AppsSavedAppPage extends AbstractPage {
         return appsSavedAppInstanceValue;
     }
 
-    public boolean isSelectedAppNameCorrect() {
-        return areTheyEqual(getActSelectedAppName(), getExpSelectedAppName());
-    }
-
-    public String getExpSelectedAppName() {
-        return getAppName().replace(":", "").replace(" ", "-");
-    }
-
     public String getActSelectedAppName() {
         return getAppsRelevantSelectedAppName().getText();
-    }
-
-    public boolean isSelectedAppOrgCorrect() {
-        return areTheyEqual(getActSelectedAppOrg(), getExpSelectedAppOrg());
     }
 
     public String getExpSelectedAppOrg() {
@@ -157,10 +138,6 @@ public class AppsSavedAppPage extends AbstractPage {
         return getAppsRelevantSelectedAppOrg().getText();
     }
 
-    public boolean isSelectedAppAddedByCorrect() {
-        return areTheyEqual(getActSelectedAppAddedBy(), getExpSelectedAppAddedBy());
-    }
-
     public String getExpSelectedAppAddedBy() {
         return getUser().getApplUsername();
     }
@@ -169,32 +146,12 @@ public class AppsSavedAppPage extends AbstractPage {
         return getAppsRelevantSelectedAppAddedBy().getText();
     }
 
-    public boolean isCreatedDateCorrect() {
-        return doesContain(getActSelectedAppCreated(), getExpSelectedAppCreated());
-    }
-
     public String getActSelectedAppCreated() {
         return getAppsRelevantSelectedAppCreated().getText();
     }
 
-    public String getExpSelectedAppCreated() {
-        return getAppCreateTimeUTC().substring(0, 16);
-    }
-
-    public boolean isSelectedAppTitleCorrect() {
-        return areTheyEqual(getActSelectedAppTitle(), getExpSelectedAppTitle());
-    }
-
-    public String getExpSelectedAppTitle() {
-        return getAppTitle();
-    }
-
     public String getActSelectedAppTitle() {
         return getAppsRelevantSelectedAppTitle().getText();
-    }
-
-    public boolean isRunAppButtonDisplayed() {
-        return isElementPresent(appsSavedAppRunAppButton);
     }
 
     public WebElement getAppsSavedAppLastComment() {
@@ -217,8 +174,8 @@ public class AppsSavedAppPage extends AbstractPage {
         return appsSavedAppCommentButton;
     }
 
-    public boolean isRunJobDisplayed() {
-        return isElementPresent(getRunJobLink());
+    public boolean isRunJobDisplayed(AppProfile appProfile) {
+        return isElementPresent(getRunJobLink(appProfile));
     }
 
     public Link getAppsSavedAppReadmeTabLink() {
@@ -233,8 +190,8 @@ public class AppsSavedAppPage extends AbstractPage {
         return getAppsSavedAppReadmePreviewWE().getText();
     }
 
-    public WebElement getRunJobLink() {
-        String xpath = AppsLocators.APPS_SAVED_APP_JOB_LINK_TEMPLATE.replace("{JOB_NAME}", getAppJobName());
+    public WebElement getRunJobLink(AppProfile appProfile) {
+        String xpath = AppsLocators.APPS_SAVED_APP_JOB_LINK_TEMPLATE.replace("{JOB_NAME}", appProfile.getJobNameText());
         return getDriver().findElement(By.xpath(xpath));
     }
 
@@ -243,21 +200,21 @@ public class AppsSavedAppPage extends AbstractPage {
         return Integer.parseInt(revision);
     }
 
-    public AppsEditAppPage editSavedApp() {
-        log.info("edit app");
+    public AppsEditAppPage clickEdit() {
+        log.info("click edit");
         getAppsSavedAppEditButtonLink().click();
         return new AppsEditAppPage(getDriver());
     }
 
-    public AppsEditAndRunAppPage runAppFromRelevantPage() {
-        log.info("run app");
+    public AppsEditAndRunAppPage clickRunAppOnRelevantPage() {
+        log.info("click Run App on relevant page");
         getAppsSavedAppRunAppButton().click();
         return new AppsEditAndRunAppPage(getDriver());
     }
 
-    public AppsJobPage openJobFromSavedAppPage() {
+    public AppsJobPage openJobFromSavedAppPage(AppProfile appProfile) {
         log.info("open job");
-        getRunJobLink().click();
+        getRunJobLink(appProfile).click();
         return new AppsJobPage(getDriver());
     }
 
@@ -282,12 +239,41 @@ public class AppsSavedAppPage extends AbstractPage {
         return new AppsSavedAppPage(getDriver());
     }
 
+    public String getExpectedCommentText() {
+        return getAppCommentText();
+    }
+
     public String getInstanceValue() {
         return getAppsSavedAppInstanceValue().getText();
     }
 
     public boolean isInstanceValueDisplayed() {
         return getAppsSavedAppInstanceValue().isDisplayed();
+    }
+
+    public AppsSavedAppPage runJob(AppProfile appProfile) {
+        AppsEditAndRunAppPage appsEditAndRunAppPage = clickRunAppOnRelevantPage();
+        appsEditAndRunAppPage.editJobName(appProfile).clickRunAppOnEditJobPage(appProfile);
+        return new AppsSavedAppPage(getDriver());
+    }
+
+    public String getIsAppCreationDateTimeCorrect(AppProfile appProfile) {
+        long possibleDelta = 10;
+        String textResult = "";
+        String actTime = getActSelectedAppCreated();
+        String expTime = appProfile.getAppCreationDateTimeText();
+        if (Utils.getDifferenceBetweenDateTime(actTime, expTime) <= possibleDelta) {
+            textResult = getTrueResult();
+        }
+        else {
+            textResult = "Too big difference between displayed [" + actTime + "] and expected [" + expTime + "]";
+            log.info(textResult);
+        }
+        return textResult;
+    }
+
+    public String getDateTimeCorrectTrueResult() {
+        return getTrueResult();
     }
 
 }

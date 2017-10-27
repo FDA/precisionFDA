@@ -3,7 +3,7 @@ package staging.data;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
-public class TestUser {
+public class TestUserData {
 
     protected static final Config config = ConfigFactory.load();
 

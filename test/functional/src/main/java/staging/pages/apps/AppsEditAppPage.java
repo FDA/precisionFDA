@@ -10,10 +10,10 @@ import ru.yandex.qatools.htmlelements.element.Select;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import staging.locators.AppsLocators;
 import staging.locators.CommonLocators;
+import staging.model.AppProfile;
 import staging.pages.AbstractPage;
-import staging.pages.overview.OverviewPage;
 
-import static staging.data.TestVariables.*;
+import static staging.data.TestAppData.setIsAppTitleEditedFlag;
 
 public class AppsEditAppPage extends AbstractPage {
 
@@ -64,10 +64,6 @@ public class AppsEditAppPage extends AbstractPage {
         return editAppSaveRevisionButton;
     }
 
-    public Link getOverviewPageIcon() {
-        return overviewPageIcon;
-    }
-
     public TextInput getAppsNewAppTitleInput() {
         return appsNewAppTitleInput;
     }
@@ -112,31 +108,25 @@ public class AppsEditAppPage extends AbstractPage {
         return getEditVMEnvInstanceDrop().getFirstSelectedOption().isDisplayed();
     }
 
-    public OverviewPage openOverviewPage() {
-        getOverviewPageIcon().click();
-        alertAccept(2, 200);
-        return new OverviewPage(getDriver());
-    }
-
     public AppsSavedAppPage saveRevision() {
         log.info("click save revision");
         getEditAppSaveRevisionButton().click();
         return new AppsSavedAppPage(getDriver());
     }
 
-    public AppsEditAppPage enterNewAppTitle() {
+    public AppsEditAppPage enterNewAppTitle(AppProfile appProfile) {
         log.info("edit New App title");
         getAppsNewAppTitleInput().clear();
         setIsAppTitleEditedFlag(true);
-        getAppsNewAppTitleInput().sendKeys(getAppTitle());
+        getAppsNewAppTitleInput().sendKeys(appProfile.getAppTitleText());
         return new AppsEditAppPage(getDriver());
     }
 
-    public AppsEditAppPage editReadmeTab() {
+    public AppsEditAppPage editReadmeTab(AppProfile appProfile) {
         log.info("open and edit ReadMe tab");
         getEditAppReadmeTab().click();
         getEditAppReadmeTextArea().clear();
-        getEditAppReadmeTextArea().sendKeys(getReadMeRowText());
+        getEditAppReadmeTextArea().sendKeys(appProfile.getReadMeRowText());
         return new AppsEditAppPage(getDriver());
     }
 

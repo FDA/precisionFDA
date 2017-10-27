@@ -9,10 +9,12 @@ import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import staging.locators.CommonLocators;
 import staging.locators.NotesLocators;
-import staging.model.Users;
+import staging.model.NoteProfile;
+import staging.model.User;
 import staging.pages.AbstractPage;
 
-import static staging.data.TestVariables.*;
+import static staging.data.TestNotesData.setIsNoteBodyEditedFlag;
+import static staging.data.TestNotesData.setIsNoteTitleEditedFlag;
 
 public class NotesEditNotePage extends AbstractPage {
 
@@ -59,8 +61,8 @@ public class NotesEditNotePage extends AbstractPage {
         waitForPageToLoadAndVerifyBy(By.xpath(NotesLocators.NOTES_EDIT_NOTE_EDITOR_VISIBLE_DIV), 10);
     }
 
-    public Users getUser() {
-        return Users.getTestUser();
+    public User getUser() {
+        return User.getTestUser();
     }
 
     public WebElement getNotesEditNoteEditorWE() {
@@ -79,24 +81,8 @@ public class NotesEditNotePage extends AbstractPage {
         return notesAddedBy;
     }
 
-    public WebElement getNotesCreatedEl() {
-        return notesCreated;
-    }
-
     public Link getNotesSaveButton() {
         return notesSaveButton;
-    }
-
-    public Link getNotesBackButton() {
-        return notesBackButton;
-    }
-
-    public Link getNotesPageIcon() {
-        return notesPageIcon;
-    }
-
-    public WebElement getNotesEditNoteEditTabWE() {
-        return notesEditNoteEditTabWE;
     }
 
     public Link getNotesEditNotePreviewTabLink() {
@@ -143,97 +129,45 @@ public class NotesEditNotePage extends AbstractPage {
         return getUser().getApplUsername();
     }
 
-    public String getActCreatedText() {
-        return getNotesCreatedEl().getText();
-    }
-
-    public String getExpCreatedText() {
-        return getNoteCreateTimeUTC().substring(0, 16);
-    }
-
-    public String getExpectedEditedNoteTitleText() {
-        return getGeneratedNoteTitle();
-    }
-
-    public String getExpectedNoteRichText() {
-        return getNewNoteRichText();
-    }
-
-    public String getExpectedNoteRowText() {
-        return getNewNoteRowText();
-    }
-
-    public void fillNewNoteTextArea() {
-        getNotesEditNoteEditorWE().sendKeys(getNewNoteRowText());
-    }
-
-    public void fillNewNoteTitleField() {
-        getNotesTitleEl().clear();
-        getNotesTitleEl().sendKeys(getGeneratedNoteTitle());
-    }
-
-    public NotesEditNotePage saveNote() {
-        log.info("save note");
-        getNotesSaveButton().click();
-        return new NotesEditNotePage(getDriver());
-    }
-
     public NotesPage openNotesPage() {
         log.info("opening Notes page");
         notesPageIcon.click();
         return new NotesPage(getDriver());
     }
 
-    public String getExpectedUsername() {
-        return getUser().getApplUsername();
-    }
-
-    public String getCurrentOrg() {
-        return getUser().getApplUserOrg();
-    }
-
-    public NotesEditNotePage fillAndSaveNoteToDelete() {
-        log.info("fill and save a note form");
+    public NotesEditNotePage fillAndSaveNote(NoteProfile noteProfile) {
+        log.info("fill and save a note");
         getNotesTitleEl().clear();
-        getNotesTitleEl().sendKeys(getGeneratedNoteToDeleteTitle());
-        getNotesEditNoteEditorWE().sendKeys(getNewNoteRowText());
+        getNotesTitleEl().sendKeys(noteProfile.getTitleText());
+        getNotesEditNoteEditorWE().sendKeys(noteProfile.getRowBodyText());
         getNotesSaveButton().click();
         return new NotesEditNotePage(getDriver());
     }
 
-    public NotesEditNotePage fillAndSaveNoteToEdit() {
-        log.info("fill and save a note form");
-        getNotesTitleEl().clear();
-        getNotesTitleEl().sendKeys(getGeneratedNoteToEditTitle());
-        getNotesEditNoteEditorWE().sendKeys(getGeneratedNoteToEditRowBody());
-        getNotesSaveButton().click();
-        return new NotesEditNotePage(getDriver());
-    }
-
-    public NotesEditNotePage editNoteWithNewDataAndSave() {
+    public NotesEditNotePage editNoteWithNewDataAndSave(NoteProfile noteProfile) {
         log.info("edit and save the note");
 
         setIsNoteTitleEditedFlag(true);
         setIsNoteBodyEditedFlag(true);
 
         getNotesTitleEl().clear();
-        getNotesTitleEl().sendKeys(getGeneratedNoteTitle());
+        getNotesTitleEl().sendKeys(noteProfile.getTitleText());
 
         getNotesEditNoteEditorWE().clear();
-        getNotesEditNoteEditorWE().sendKeys(getNewNoteRowText());
+        getNotesEditNoteEditorWE().sendKeys(noteProfile.getRowBodyText());
 
         getNotesSaveButton().click();
         return new NotesEditNotePage(getDriver());
     }
 
-    public void editNoteButNotSave() {
+    public void editNoteButNotSave(NoteProfile noteProfile) {
         log.info("edit note");
 
         getNotesTitleEl().clear();
-        getNotesTitleEl().sendKeys(getAdditionalEditPartString() + getGeneratedNoteToEditTitle());
+        getNotesTitleEl().sendKeys(noteProfile.getTitleText());
 
         getNotesEditNoteEditorWE().clear();
-        getNotesEditNoteEditorWE().sendKeys(getAdditionalEditPartString() + getGeneratedNoteToEditRowBody());
+        getNotesEditNoteEditorWE().sendKeys(noteProfile.getRowBodyText());
     }
 
     public NotesEditNotePage openPreviewTab() {

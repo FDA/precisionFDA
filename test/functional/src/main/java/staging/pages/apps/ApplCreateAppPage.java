@@ -10,10 +10,8 @@ import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import staging.locators.AppsLocators;
 import staging.locators.CommonLocators;
+import staging.model.AppProfile;
 import staging.pages.AbstractPage;
-import staging.pages.overview.OverviewPage;
-
-import static staging.data.TestVariables.*;
 
 public class ApplCreateAppPage extends AbstractPage {
 
@@ -49,31 +47,40 @@ public class ApplCreateAppPage extends AbstractPage {
         return appsNewAppNameInput;
     }
 
+    public Link getEditAppScriptTab() {
+        return editAppScriptTab;
+    }
+
+    public TextInput getAppsNewAppTitleInput() {
+        return appsNewAppTitleInput;
+    }
+
+    public TextInput getEditAppScriptTextArea() {
+        return editAppScriptTextArea;
+    }
+
+    public Button getAppCreateAppButton() {
+        return appCreateAppButton;
+    }
+
     public boolean isNewAppNameInputDisplayed() {
         return isElementPresent(getAppsNewAppNameInput());
     }
 
-    public OverviewPage openOverviewPage() {
-        overviewPageIcon.click();
-        alertAccept(2, 200);
-        return new OverviewPage(getDriver());
-    }
-
-    public ApplCreateAppPage fillCreateAppForm() {
+    public ApplCreateAppPage fillCreateAppForm(AppProfile appProfile) {
         log.info("fill Create App form");
-        appsNewAppNameInput.sendKeys(getAppName());
-        appsNewAppTitleInput.sendKeys(getAppTitle());
+        getAppsNewAppNameInput().sendKeys(appProfile.getAppNameText());
+        getAppsNewAppTitleInput().sendKeys(appProfile.getAppTitleText());
         waitUntilDisplayed(By.xpath(AppsLocators.APPS_EDIT_APP_SCRIPT_TAB_LINK));
-        editAppScriptTab.click();
-        editAppScriptTextArea.sendKeys(getAppJobScriptBody());
+        getEditAppScriptTab().click();
+        getEditAppScriptTextArea().sendKeys(appProfile.getAppScriptCodeText());
         return new ApplCreateAppPage(getDriver());
     }
 
-    public AppsSavedAppPage clickCreate() {
+    public AppsSavedAppPage clickCreate(AppProfile appProfile) {
         log.info("click Create button");
-        appCreateAppButton.click();
-        setAppCreateTimeUTC();
+        getAppCreateAppButton().click();
+        appProfile.setAppCreationDateTimeText();
         return new AppsSavedAppPage(getDriver());
     }
-
 }

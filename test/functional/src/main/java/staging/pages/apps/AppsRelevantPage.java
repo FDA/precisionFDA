@@ -7,9 +7,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.AppsLocators;
+import staging.model.AppProfile;
 import staging.pages.AbstractPage;
-
-import static staging.data.TestVariables.getAppTitle;
 
 public class AppsRelevantPage extends AbstractPage {
 
@@ -34,8 +33,8 @@ public class AppsRelevantPage extends AbstractPage {
         return appsRelevantActivatedLink;
     }
 
-    public WebElement getSavedAppLink() {
-        String xpath = AppsLocators.APPS_SAVED_APP_LINK_TEMPLATE.replace("{APP_TITLE}", getAppTitle());
+    public WebElement getSavedAppLink(AppProfile appProfile) {
+        String xpath = AppsLocators.APPS_SAVED_APP_LINK_TEMPLATE.replace("{APP_TITLE}", appProfile.getAppTitleText());
         return getDriver().findElement(By.xpath(xpath));
     }
 
@@ -47,9 +46,9 @@ public class AppsRelevantPage extends AbstractPage {
         return isElementPresent(getAppsRelevantActivatedLink());
     }
 
-    public AppsSavedAppPage openSavedAppl() {
+    public AppsSavedAppPage openSavedAppl(AppProfile appProfile) {
         log.info("open saved application");
-        getSavedAppLink().click();
+        getSavedAppLink(appProfile).click();
         return new AppsSavedAppPage(getDriver());
     }
 }

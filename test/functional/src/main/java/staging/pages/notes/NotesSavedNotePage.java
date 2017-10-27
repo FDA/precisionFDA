@@ -8,10 +8,10 @@ import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.NotesLocators;
-import staging.model.Users;
+import staging.model.User;
 import staging.pages.AbstractPage;
 
-import static staging.data.TestVariables.*;
+import static staging.data.TestNotesData.getNoteCommentText;
 
 public class NotesSavedNotePage extends AbstractPage {
 
@@ -55,8 +55,8 @@ public class NotesSavedNotePage extends AbstractPage {
         waitForPageToLoadAndVerifyBy(By.xpath(NotesLocators.NOTES_SAVED_NOTE_BODY_TEXT));
     }
 
-    public Users getUser() {
-        return Users.getTestUser();
+    public User getUser() {
+        return User.getTestUser();
     }
 
     //----------
@@ -67,10 +67,6 @@ public class NotesSavedNotePage extends AbstractPage {
 
     public String getSavedNoteTitleText() {
         return getSavedNoteTitleWE().getText();
-    }
-
-    public String getExpectedNoteEditedTitleText() {
-        return getGeneratedNoteTitle();
     }
 
     //----------
@@ -91,10 +87,6 @@ public class NotesSavedNotePage extends AbstractPage {
 
     public WebElement getSavedNoteCreatedWE() {
         return notesSavedNoteCreated;
-    }
-
-    public String getExpCreatedText() {
-        return getNoteCreateTimeUTC().substring(0, 16);
     }
 
     public String getSavedNoteCreatedText() {
@@ -123,10 +115,6 @@ public class NotesSavedNotePage extends AbstractPage {
 
     public String getSavedNoteBodyText() {
         return getNotesSavedNoteBodyWE().getText();
-    }
-
-    public String getExpNoteBodyText() {
-        return getNewNoteRichText();
     }
 
     //----------
@@ -161,16 +149,6 @@ public class NotesSavedNotePage extends AbstractPage {
 
     public String getNotesSavedNoteFirstCommentText() {
         return getNotesSavedNoteFirstCommentWE().getText();
-    }
-
-    //----------
-
-    public String getExpectedNoteToEditTitle() {
-        return getGeneratedNoteToEditTitle();
-    }
-
-    public String getExpectedNoteToEditBody() {
-        return getGeneratedNoteToEditRichBody();
     }
 
     //----------

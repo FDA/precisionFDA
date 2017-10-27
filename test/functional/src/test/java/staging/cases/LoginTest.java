@@ -1,7 +1,7 @@
 package staging.cases;
 
 import org.testng.annotations.Test;
-import staging.model.Users;
+import staging.model.User;
 import staging.pages.CommonPage;
 import staging.pages.StartPage;
 import staging.pages.login.LoginPage;
@@ -12,7 +12,7 @@ public class LoginTest extends AbstractTest {
     public void successfulLogin() {
         printTestHeader("Test Case: Successful Login");
 
-        Users user = Users.getTestUser();
+        User user = User.getTestUser();
 
         reopenBrowser();
         openStartPage();
@@ -35,7 +35,7 @@ public class LoginTest extends AbstractTest {
     public void checkLogoutFeature() {
         printTestHeader("Test Case: check that logout works");
 
-        Users user = Users.getTestUser();
+        User user = User.getTestUser();
 
         reopenBrowser();
         openStartPage();
@@ -44,12 +44,12 @@ public class LoginTest extends AbstractTest {
 
         SoftAssert.assertThat(
                 startPage.isNavigationPanelDisplayed())
-                .as("Top Navigation Panel")
+                .as("Top Navigation Panel is displayed")
                 .isFalse();
 
         SoftAssert.assertThat(
                 startPage.isLogoutMessageDisplayed())
-                .as("'You were successfully logged out' message")
+                .as("'You were successfully logged out' message is displayed")
                 .isTrue();
 
         SoftAssert.assertAll();
@@ -59,7 +59,7 @@ public class LoginTest extends AbstractTest {
     public void loginWithWrongPassword() {
         printTestHeader("Test Case: test login with wrong password");
 
-        Users user = Users.getWrongUser();
+        User user = User.getWrongUser();
 
         reopenBrowser();
         openStartPage();
@@ -67,12 +67,12 @@ public class LoginTest extends AbstractTest {
 
         SoftAssert.assertThat(
                 loginPage.isNavigationPanelDisplayed())
-                .as("Top Navigation Panel")
+                .as("Top Navigation Panel is displayed")
                 .isFalse();
 
         SoftAssert.assertThat(
                 loginPage.isWrongCredsMessageDisplayed())
-                .as("'Invalid username or password' message")
+                .as("'Invalid username or password' message is displayed")
                 .isTrue();
 
         SoftAssert.assertAll();

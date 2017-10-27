@@ -6,10 +6,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import staging.locators.AppsLocators;
+import staging.model.AppProfile;
 import staging.pages.AbstractPage;
-
-import static staging.data.TestVariables.getAppJobScriptBody;
-import static staging.data.TestVariables.getAppJobScriptOutput;
 
 public class AppsJobLogPage extends AbstractPage {
 
@@ -27,30 +25,13 @@ public class AppsJobLogPage extends AbstractPage {
         return appsJobLogPageLogArea;
     }
 
-    public boolean isJobResultCorrect() {
-        String logText = getAppsJobLogPageLogArea().getText();
-        boolean isScriptText = false;
-        boolean isScriptResult = false;
+    public String getFullJobLogText() {
+        return getAppsJobLogPageLogArea().getText();
+    }
 
-        //check if script text is displayed
-        if (logText.contains(getAppJobScriptBody())) {
-            log.info("correct script text is displayed");
-            isScriptText = true;
-        }
-        else {
-            log.info("[WARNING] script text is NOT displayed. Expected: " + getAppJobScriptBody());
-        }
-
-        //check if script result is displayed
-        logText = logText.replace(getAppJobScriptBody(), "");
-        if (logText.contains(getAppJobScriptOutput())) {
-            log.info("correct script result is displayed");
-            isScriptResult = true;
-        }
-        else {
-            log.info("[WARNING] script result is NOT displayed. Expected: " + getAppJobScriptOutput());
-        }
-
-        return isScriptText && isScriptResult;
+    public String getScriptResultFromLog(AppProfile appProfile) {
+        String scriptLog = getAppsJobLogPageLogArea().getText();
+        scriptLog = scriptLog.replace(appProfile.getAppScriptCodeText(), "");
+        return scriptLog;
     }
 }

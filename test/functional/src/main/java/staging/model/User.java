@@ -1,8 +1,8 @@
 package staging.model;
 
-import staging.data.TestUser;
+import staging.data.TestUserData;
 
-public class Users {
+public class User {
 
     private final String basicAuthUsername;
 
@@ -16,10 +16,9 @@ public class Users {
 
     private final String applUserOrg;
 
-
-    public Users(final String basicAuthUsername, final String basicAuthPassword,
-                 final String applUsername, final String applPassword,
-                 final String applUserFullName, final String applUserOrg) {
+    public User(final String basicAuthUsername, final String basicAuthPassword,
+                final String applUsername, final String applPassword,
+                final String applUserFullName, final String applUserOrg) {
         this.basicAuthUsername = basicAuthUsername;
         this.basicAuthPassword = basicAuthPassword;
         this.applUsername = applUsername;
@@ -52,16 +51,16 @@ public class Users {
         return applUserOrg;
     }
 
-    public static Users getTestUser() {
-        return new Users(TestUser.basicAuthUsername(), TestUser.basicAuthPassword(),
-                TestUser.applUsername(), TestUser.applPassword(),
-                TestUser.applUserFullName(), TestUser.applUserOrg());
+    public static User getTestUser() {
+        return new User(TestUserData.basicAuthUsername(), TestUserData.basicAuthPassword(),
+                TestUserData.applUsername(), TestUserData.applPassword(),
+                TestUserData.applUserFullName(), TestUserData.applUserOrg());
     }
 
-    public static Users getWrongUser() {
-        return new Users(TestUser.basicAuthUsername(), TestUser.basicAuthPassword(),
-                TestUser.applUsername(), "wrongPassword",
-                TestUser.applUserFullName(), TestUser.applUserOrg());
+    public static User getWrongUser() {
+        return new User(TestUserData.basicAuthUsername(), TestUserData.basicAuthPassword(),
+                TestUserData.applUsername(), "wrongPassword",
+                TestUserData.applUserFullName(), TestUserData.applUserOrg());
     }
     
 }
