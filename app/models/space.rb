@@ -43,6 +43,10 @@ class Space < ActiveRecord::Base
     ["title", "description", "state"]
   end
 
+  def created_at_in_ny
+    created_at.in_time_zone("America/New_York")
+  end
+
   def to_param
     if name.nil?
       id.to_s

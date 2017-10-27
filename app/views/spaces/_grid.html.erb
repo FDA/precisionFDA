@@ -38,7 +38,7 @@
   end
 
   g.column do |space|
-    time_in_default_time_zone(space.created_at)
+    space.created_at_in_ny.to_s(:human_with_tz)
   end
 
   g.column {}
