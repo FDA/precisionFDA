@@ -28,4 +28,12 @@ public class ProfilePage extends AbstractPage {
         return isElementPresent(getProfileAboutOrgWE());
     }
 
+    public void setTimeZone(String zone) {
+
+    }
+
+    public void setUTCTimeZone() {
+        setTimeZone("UTC");
+    }
+
 }

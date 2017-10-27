@@ -122,7 +122,7 @@ public abstract class AbstractPage {
 
     public boolean isElementPresent(final WebElement element) {
         try {
-            waitUntilDisplayed(element, DEFAULT_TIMEOUT, true);
+            waitUntilDisplayed(element, DEFAULT_TIMEOUT, false);
             return true;
         } catch (final TimeoutException e) {
             return false;
@@ -131,7 +131,7 @@ public abstract class AbstractPage {
 
     public boolean isElementPresent(final Link element) {
         try {
-            waitUntilDisplayed(element.getWrappedElement(), DEFAULT_TIMEOUT, true);
+            waitUntilDisplayed(element.getWrappedElement(), DEFAULT_TIMEOUT, false);
             return true;
         } catch (final TimeoutException e) {
             return false;

@@ -9,7 +9,7 @@ import ru.yandex.qatools.htmlelements.element.Link;
 import staging.blocks.ProfileDropBlock;
 
 import staging.locators.CommonLocators;
-import staging.model.Users;
+import staging.model.User;
 import staging.pages.guidelines.guidelinesPage;
 import staging.pages.about.AboutHowPage;
 import staging.pages.about.AboutPage;
@@ -71,6 +71,10 @@ public class CommonPage extends AbstractPage {
         waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.USER_AVATAR_IMG), 5);
     }
 
+    ProfileDropBlock getProfileDropBlock() {
+        return profileDropBlock;
+    }
+
     public WebElement getNavigationPanelWE() {
         return commonNavigationPanel;
     }
@@ -79,107 +83,139 @@ public class CommonPage extends AbstractPage {
         return loggedUsernameLink;
     }
 
+    public Link getNotesPageIcon() {
+        return notesPageIcon;
+    }
+
+    public Link getAppsPageIcon() {
+        return appsPageIcon;
+    }
+
+    public Link getOverviewPageIcon() {
+        return overviewPageIcon;
+    }
+
+    public Link getCompsPageIcon() {
+        return compsPageIcon;
+    }
+
+    public Link getChallsPageIcon() {
+        return challsPageIcon;
+    }
+
+    public Link getDiscsPageIcon() {
+        return discsPageIcon;
+    }
+
+    public Link getExpertsPageIcon() {
+        return expertsPageIcon;
+    }
+
+    public Link getFilesPageIcon() {
+        return filesPageIcon;
+    }
+
     public AppsPage openAppsPage() {
         log.info("opening Apps page");
-        appsPageIcon.click();
+        getAppsPageIcon().click();
         return new AppsPage(getDriver());
     }
 
     public CompsPage openCompsPage() {
         log.info("opening Comparisons page");
-        compsPageIcon.click();
+        getCompsPageIcon().click();
         return new CompsPage(getDriver());
     }
 
     public FilesPage openFilesPage() {
         log.info("opening Files page");
-        filesPageIcon.click();
+        getFilesPageIcon().click();
         return new FilesPage(getDriver());
     }
 
     public NotesPage openNotesPage() {
         log.info("opening Notes page");
-        notesPageIcon.click();
+        getNotesPageIcon().click();
         return new NotesPage(getDriver());
     }
 
     public ExpertsPage openExpertsPage() {
         log.info("opening Experts page");
-        expertsPageIcon.click();
+        getExpertsPageIcon().click();
         return new ExpertsPage(getDriver());
     }
 
     public ChallsPage openChallsPage() {
         log.info("opening Challenges page");
-        challsPageIcon.click();
+        getChallsPageIcon().click();
         return new ChallsPage(getDriver());
     }
 
     public DiscsPage openDiscsPage() {
         log.info("opening Discussions page");
-        discsPageIcon.click();
+        getDiscsPageIcon().click();
         return new DiscsPage(getDriver());
     }
 
     public OverviewPage openOverviewPage() {
         log.info("opening Overview page");
-        overviewPageIcon.click();
+        getOverviewPageIcon().click();
         return new OverviewPage(getDriver());
     }
 
     public ProfilePage openProfilePage() {
         log.info("opening Profile page");
         openProfileDropdown();
-        profileDropBlock.openProfilePage();
+        getProfileDropBlock().openProfilePage();
         return new ProfilePage(getDriver());
     }
 
     public CommonPage openProfileDropdown() {
         sleep(1000);
-        loggedUsernameLink.click();
-        waitUntilDisplayed(profileDropBlock, 15);
+        getUsernameLink().click();
+        waitUntilDisplayed(getProfileDropBlock(), 15);
         return new CommonPage(getDriver());
     }
 
     public PublicProfilePage openPublicProfilePage() {
         log.info("opening Public Profile page");
         openProfileDropdown();
-        profileDropBlock.openPublicProfilePage();
+        getProfileDropBlock().openPublicProfilePage();
         return new PublicProfilePage(getDriver());
     }
 
     public LicensesPage openLicensePage() {
         log.info("opening License page");
         openProfileDropdown();
-        profileDropBlock.openLicensesPage();
+        getProfileDropBlock().openLicensesPage();
         return new LicensesPage(getDriver());
     }
 
     public AboutPage openAboutPage() {
         log.info("opening About page");
         openProfileDropdown();
-        profileDropBlock.openAboutPage();
+        getProfileDropBlock().openAboutPage();
         return new AboutPage(getDriver());
     }
 
     public guidelinesPage openGuidelinesPage() {
         log.info("opening guidelines page");
         openProfileDropdown();
-        profileDropBlock.openGuidelinesPage();
+        getProfileDropBlock().openGuidelinesPage();
         return new guidelinesPage(getDriver());
     }
 
     public AboutHowPage openDocsPage() {
         log.info("opening Docs page");
         openProfileDropdown();
-        profileDropBlock.openDocsPage();
+        getProfileDropBlock().openDocsPage();
         return new AboutHowPage(getDriver());
     }
 
     public StartPage logout() {
         log.info("logout");
         openProfileDropdown();
-        profileDropBlock.logout();
+        getProfileDropBlock().logout();
         return new StartPage(getDriver());
     }
 
@@ -187,7 +223,7 @@ public class CommonPage extends AbstractPage {
         return isElementPresent(getNavigationPanelWE());
     }
 
-    public boolean isCorrectUserNameDisplayed(Users user) {
+    public boolean isCorrectUserNameDisplayed(User user) {
         return getUsernameLink().getText().equals(user.getApplUserFullName());
     }
 

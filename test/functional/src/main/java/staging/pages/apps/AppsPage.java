@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.AppsLocators;
+import staging.model.AppProfile;
 import staging.pages.AbstractPage;
 
 public class AppsPage extends AbstractPage {
@@ -38,42 +39,65 @@ public class AppsPage extends AbstractPage {
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_RELEVANT_LINK));
     }
 
-    public AppsRelevantPage openAppsRelevantPage() {
-        log.info("open Apps.Relevant Page");
-        appsRelevantLink.click();
-        return new AppsRelevantPage(getDriver());
+    public Link getAppsCreateAppButtonLink() {
+        return appsCreateAppButtonLink;
     }
 
-    public AppsFeaturedPage openAppsFeaturedPage() {
-        log.info("open Apps.Featured Page");
-        appsFeaturedLink.click();
-        return new AppsFeaturedPage(getDriver());
+    public Link getAppsExploreLink() {
+        return appsExploreLink;
     }
 
-    public AppsExplorePage openAppsExplorePage() {
-        log.info("open Apps.Explore Page");
-        appsExploreLink.click();
-        return new AppsExplorePage(getDriver());
+    public Link getAppsFeaturedLink() {
+        return appsFeaturedLink;
     }
 
-    public AppsManageAssetsPage openAppsManageAssetsPage() {
-        log.info("open Apps.ManageAssets Page");
-        appsManageAssetsLink.click();
-        return new AppsManageAssetsPage(getDriver());
-    }
-
-    public ApplCreateAppPage openCreateAppPage() {
-        log.info("open Apps.CreateApp Page");
-        appsCreateAppButtonLink.click();
-        return new ApplCreateAppPage(getDriver());
+    public Link getAppsManageAssetsLink() {
+        return appsManageAssetsLink;
     }
 
     public Link getAppsRelevantLink() {
         return appsRelevantLink;
     }
 
+    public AppsRelevantPage openAppsRelevantPage() {
+        log.info("open Apps.Relevant Page");
+        getAppsRelevantLink().click();
+        return new AppsRelevantPage(getDriver());
+    }
+
+    public AppsFeaturedPage openAppsFeaturedPage() {
+        log.info("open Apps.Featured Page");
+        getAppsFeaturedLink().click();
+        return new AppsFeaturedPage(getDriver());
+    }
+
+    public AppsExplorePage openAppsExplorePage() {
+        log.info("open Apps.Explore Page");
+        getAppsExploreLink().click();
+        return new AppsExplorePage(getDriver());
+    }
+
+    public AppsManageAssetsPage openAppsManageAssetsPage() {
+        log.info("open Apps.ManageAssets Page");
+        getAppsManageAssetsLink().click();
+        return new AppsManageAssetsPage(getDriver());
+    }
+
+    public ApplCreateAppPage openCreateAppPage() {
+        log.info("open Apps.CreateApp Page");
+        getAppsCreateAppButtonLink().click();
+        return new ApplCreateAppPage(getDriver());
+    }
+
     public boolean isRelevantAppsLinkDisplayed() {
         return isElementPresent(getAppsRelevantLink());
+    }
+
+    public AppsSavedAppPage createNewApp(AppProfile appProfile) {
+        ApplCreateAppPage applCreateAppPage = openCreateAppPage();
+        applCreateAppPage.fillCreateAppForm(appProfile);
+        applCreateAppPage.clickCreate(appProfile);
+        return new AppsSavedAppPage(getDriver());
     }
 
 }

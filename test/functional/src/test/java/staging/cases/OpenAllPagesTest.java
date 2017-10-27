@@ -3,7 +3,7 @@ package staging.cases;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import staging.data.PageTitles;
-import staging.model.Users;
+import staging.model.User;
 import staging.pages.guidelines.guidelinesPage;
 import staging.pages.about.*;
 import staging.pages.apps.*;
@@ -28,7 +28,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void successfulLogin() {
         printTestHeader("Test Case: Successful Login");
 
-        Users user = Users.getTestUser();
+        User user = User.getTestUser();
         openStartPage();
         CommonPage commonPage = correctLoginToFDA(user);
 

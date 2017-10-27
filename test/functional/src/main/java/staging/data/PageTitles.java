@@ -1,6 +1,6 @@
 package staging.data;
 
-import static staging.data.TestUser.getPFDAusername;
+import static staging.data.TestUserData.getPFDAusername;
 
 public class PageTitles {
 

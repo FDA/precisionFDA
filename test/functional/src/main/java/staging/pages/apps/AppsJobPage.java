@@ -7,13 +7,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.AppsLocators;
-import staging.model.Users;
 import staging.pages.AbstractPage;
-import static staging.data.TestVariables.getAppJobName;
-import static staging.data.TestVariables.getAppTitle;
-import static staging.data.TestVariables.getJobRunTimeUTC;
-import static staging.utils.Utils.areTheyEqual;
-import static staging.utils.Utils.doesContain;
 
 public class AppsJobPage extends AbstractPage {
 
@@ -49,68 +43,12 @@ public class AppsJobPage extends AbstractPage {
         return appsJobPageJobName;
     }
 
-    public Link getAppsJobPageAppTitleLink() {
-        return appsJobPageAppTitleLink;
-    }
-
-    public Link getAppsJobPageLaunchedByLink() {
-        return appsJobPageLaunchedByLink;
-    }
-
-    public WebElement getAppsJobPageCreated() {
-        return appsJobPageCreated;
-    }
-
     public Link getAppsJobPageViewLogLink() {
         return appsJobPageViewLogLink;
     }
 
-    public boolean isJobNameCorrect() {
-        return areTheyEqual(getActJobName(), getExpJobName());
-    }
-
-    public String getExpJobName() {
-        return getAppJobName();
-    }
-
     public String getActJobName() {
         return getAppsJobPageJobName().getText();
-    }
-
-    public boolean isAppTitleCorrect() {
-        return doesContain(getActAppTitle(), getExpAppTitle());
-    }
-
-    public String getExpAppTitle() {
-        return getAppTitle();
-    }
-
-    public String getActAppTitle() {
-        return getAppsJobPageAppTitleLink().getText();
-    }
-
-    public boolean isLaunchedByCorrect() {
-        return doesContain(getActLaunchedBy(), getExpLaunchedBy());
-    }
-
-    public String getExpLaunchedBy() {
-        return Users.getTestUser().getApplUsername();
-    }
-
-    public String getActLaunchedBy() {
-        return getAppsJobPageLaunchedByLink().getText();
-    }
-
-    public boolean isCreatedCorrect() {
-        return doesContain(getActCreated(), getExpCreated());
-    }
-
-    public String getExpCreated() {
-        return getJobRunTimeUTC().substring(0, 16);
-    }
-
-    public String getActCreated() {
-        return getAppsJobPageCreated().getText();
     }
 
     public WebElement getAppsJobPageRunningJobLabel() {
@@ -151,9 +89,5 @@ public class AppsJobPage extends AbstractPage {
         getAppsJobPageViewLogLink().click();
         return new AppsJobLogPage(getDriver());
     }
-
-
-
-
 
 }

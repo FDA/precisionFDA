@@ -11,9 +11,9 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.testng.annotations.*;
-import staging.data.TestConstants;
 import staging.locators.CommonLocators;
-import staging.model.Users;
+import staging.model.AppProfile;
+import staging.model.User;
 import staging.pages.StartPage;
 import staging.pages.CommonPage;
 import staging.pages.login.GrantAccessLoginPage;
@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static staging.data.TestVariables.*;
+import static staging.data.TestCommonData.*;
 import static staging.utils.Utils.*;
 
 @Listeners(CustomResultListener.class)
@@ -89,16 +89,16 @@ public abstract class AbstractTest {
 
     @AfterMethod(alwaysRun = true)
     public void afterCase() {
-        if (getFinishedCaseStatus().equals(TestConstants.CASE_STATUS_PASSED)) {
-            casePostActions(TestConstants.CASE_STATUS_PASSED,
+        if (getFinishedCaseStatus().equals(CASE_STATUS_PASSED)) {
+            casePostActions(CASE_STATUS_PASSED,
                     getFinishedCaseName(),
                     getRunSuiteName(),
                     isGetScreenshotOnPass(),
                     isGetPageSourceOnPass());
         }
 
-        if (getFinishedCaseStatus().equals(TestConstants.CASE_STATUS_FAILED)) {
-            casePostActions(TestConstants.CASE_STATUS_FAILED,
+        if (getFinishedCaseStatus().equals(CASE_STATUS_FAILED)) {
+            casePostActions(CASE_STATUS_FAILED,
                     getFinishedCaseName(),
                     getRunSuiteName(),
                     isGetScreenshotOnFail(),
@@ -122,7 +122,7 @@ public abstract class AbstractTest {
                 caseStatus + "_" +
                 suiteName + "_" +
                 caseName + "_" +
-                getRunTimeUniqueValue();
+                getRunTimeLocalUniqueValue();
 
         if (isGetScreenshot) {
             takeScreenshot(filePathWithNoExt + ".png", driver);
@@ -200,14 +200,14 @@ public abstract class AbstractTest {
         return new LoginPage(driver);
     }
 
-    public CommonPage correctLoginToFDA(Users user) {
+    public CommonPage correctLoginToFDA(User user) {
         LoginPage loginPage = openLoginPage(user.getBasicAuthUsername(), user.getBasicAuthPassword());
         GrantAccessLoginPage grantAccessLoginPage = loginPage.correctLoginToPrecisionFDA(user.getApplUsername(), user.getApplPassword());
         CommonPage commonPage = grantAccessLoginPage.grantAccess();
         return commonPage;
     }
 
-    public LoginPage wrongLoginToFDA(Users user) {
+    public LoginPage wrongLoginToFDA(User user) {
         LoginPage loginPage = openLoginPage(user.getBasicAuthUsername(), user.getBasicAuthPassword());
         loginPage = loginPage.wrongLoginToPrecisionFDA(user.getApplUsername(), user.getApplPassword());
         return loginPage;
