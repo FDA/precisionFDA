@@ -301,6 +301,7 @@ class MainController < ApplicationController
           end
           user.last_login = Time.now
           user.save!
+          set_time_zone(user)
         end
       else
         User.transaction do
@@ -310,7 +311,6 @@ class MainController < ApplicationController
         end
       end
       save_session(user.id, username, token, expiration_time, user.org_id)
-      set_time_zone(user)
       AUDIT_LOGGER.info("User #{username} logged in")
       redirect_to root_url
     end
