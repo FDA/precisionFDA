@@ -34,7 +34,7 @@ public class AppsRelevantPage extends AbstractPage {
     }
 
     public WebElement getSavedAppLink(AppProfile appProfile) {
-        String xpath = AppsLocators.APPS_SAVED_APP_LINK_TEMPLATE.replace("{APP_TITLE}", appProfile.getAppTitleText());
+        String xpath = AppsLocators.APPS_SAVED_APP_LINK_TEMPLATE.replace("{APP_TITLE}", appProfile.getAppCurRevTitleText());
         return getDriver().findElement(By.xpath(xpath));
     }
 
@@ -50,5 +50,9 @@ public class AppsRelevantPage extends AbstractPage {
         log.info("open saved application");
         getSavedAppLink(appProfile).click();
         return new AppsSavedAppPage(getDriver());
+    }
+
+    public boolean isLinkToSavedAppDisplayed(AppProfile appProfile) {
+        return isElementPresent(getSavedAppLink(appProfile));
     }
 }

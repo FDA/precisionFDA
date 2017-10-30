@@ -13,8 +13,8 @@ import staging.model.NoteProfile;
 import staging.model.User;
 import staging.pages.AbstractPage;
 
-import static staging.data.TestNotesData.setIsNoteBodyEditedFlag;
-import static staging.data.TestNotesData.setIsNoteTitleEditedFlag;
+import static staging.data.TestNotesData.getAddon;
+import static staging.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class NotesEditNotePage extends AbstractPage {
 
@@ -138,8 +138,8 @@ public class NotesEditNotePage extends AbstractPage {
     public NotesEditNotePage fillAndSaveNote(NoteProfile noteProfile) {
         log.info("fill and save a note");
         getNotesTitleEl().clear();
-        getNotesTitleEl().sendKeys(noteProfile.getTitleText());
-        getNotesEditNoteEditorWE().sendKeys(noteProfile.getRowBodyText());
+        getNotesTitleEl().sendKeys(noteProfile.getTitleNoteText());
+        getNotesEditNoteEditorWE().sendKeys(noteProfile.getRowBodyNoteText());
         getNotesSaveButton().click();
         return new NotesEditNotePage(getDriver());
     }
@@ -147,27 +147,32 @@ public class NotesEditNotePage extends AbstractPage {
     public NotesEditNotePage editNoteWithNewDataAndSave(NoteProfile noteProfile) {
         log.info("edit and save the note");
 
-        setIsNoteTitleEditedFlag(true);
-        setIsNoteBodyEditedFlag(true);
+        String newTitle = noteProfile.getTitleNoteText() + " upd " + getRunTimeLocalUniqueValue();
+        String newRowBody = noteProfile.getRowBodyNoteText() + " upd " + getRunTimeLocalUniqueValue();
+        String newRichBody = noteProfile.getRichBodyNoteText() + " upd " + getRunTimeLocalUniqueValue();
+
+        noteProfile.setMainTitleNoteText(newTitle);
+        noteProfile.setMainRowBodyNoteText(newRowBody);
+        noteProfile.setMainRichBodyNoteText(newRichBody);
 
         getNotesTitleEl().clear();
-        getNotesTitleEl().sendKeys(noteProfile.getTitleText());
+        getNotesTitleEl().sendKeys(newTitle);
 
         getNotesEditNoteEditorWE().clear();
-        getNotesEditNoteEditorWE().sendKeys(noteProfile.getRowBodyText());
+        getNotesEditNoteEditorWE().sendKeys(newRowBody);
 
         getNotesSaveButton().click();
         return new NotesEditNotePage(getDriver());
     }
 
     public void editNoteButNotSave(NoteProfile noteProfile) {
-        log.info("edit note");
+        log.info("edit note but not save");
 
         getNotesTitleEl().clear();
-        getNotesTitleEl().sendKeys(noteProfile.getTitleText());
+        getNotesTitleEl().sendKeys(noteProfile.getTitleNoteText() + " upd " + getRunTimeLocalUniqueValue());
 
         getNotesEditNoteEditorWE().clear();
-        getNotesEditNoteEditorWE().sendKeys(noteProfile.getRowBodyText());
+        getNotesEditNoteEditorWE().sendKeys(noteProfile.getRowBodyNoteText() + " upd " + getRunTimeLocalUniqueValue());
     }
 
     public NotesEditNotePage openPreviewTab() {

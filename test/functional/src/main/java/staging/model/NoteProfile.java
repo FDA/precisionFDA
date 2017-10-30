@@ -5,64 +5,48 @@ import static staging.utils.Utils.getCurrentDateTimeValue;
 
 public class NoteProfile {
 
-    private final String titleText;
+    private String createdNoteText;
 
-    private final String rowBodyText;
+    private String titleNoteText;
 
-    private final String richBodyText;
+    private String rowBodyNoteText;
 
-    private static String createNoteText;
+    private String richBodyNoteText;
 
-    public NoteProfile(final String titleText, final String rowBodyText,
-                final String richBodyText, final String createNoteText) {
-        this.titleText = titleText;
-        this.rowBodyText = rowBodyText;
-        this.richBodyText = richBodyText;
-        this.createNoteText = createNoteText;
+    public NoteProfile(final String titleNoteText, final String rowBodyNoteText,
+                       final String richBodyNoteText, final String createdNoteText) {
+        this.titleNoteText = titleNoteText;
+        this.rowBodyNoteText = rowBodyNoteText;
+        this.richBodyNoteText = richBodyNoteText;
+        this.createdNoteText = createdNoteText;
     }
 
-    public String getTitleText() {
-        return titleText;
+    public String getTitleNoteText() {
+        return titleNoteText;
     }
 
-    public String getRowBodyText() {
-        return rowBodyText;
+    public String getRowBodyNoteText() {
+        return rowBodyNoteText;
     }
 
-    public String getRichBodyText() {
-        return richBodyText;
+    public String getRichBodyNoteText() {
+        return richBodyNoteText;
     }
 
-    public static NoteProfile getMainNote() {
-        return new NoteProfile(getMainTitleText(), getMainRowBodyText(), getMainRichBodyText(), createNoteText);
+    public void setCreatedNoteText() {
+        this.createdNoteText = getCurrentDateTimeValue(TIME_ZONE);
     }
 
-    public static NoteProfile getNoteToDelete() {
-        return new NoteProfile(getTitleToDeleteText(), getRowBodyToDeleteText(), getRichBodyToDeleteText(), createNoteText);
+    public void setMainTitleNoteText(String title) {
+        this.titleNoteText = title;
     }
 
-    public static NoteProfile getUpdatedNote() {
-        return new NoteProfile(getUpdatedTitleText(), getUpdatedRowBodyText(), getUpdatedRichBodyText(), createNoteText);
+    public void setMainRowBodyNoteText(String rowBody) {
+        this.rowBodyNoteText = rowBody;
     }
 
-    public static NoteProfile getEditNotSavedNote() {
-        return new NoteProfile(
-                getTitleToEditText() + "update1",
-                getRowBodyToEditText() + "update1",
-                getRichBodyToEditText() + "update1",
-                createNoteText);
-    }
-
-    public static NoteProfile getNoteToEdit() {
-        return new NoteProfile(getTitleToEditText(), getRowBodyToEditText(), getRichBodyToEditText(), createNoteText);
-    }
-
-    public void setCreateNoteText() {
-        this.createNoteText = getCurrentDateTimeValue(TIME_ZONE);
-    }
-
-    public String getCreateNoteText() {
-        return createNoteText.substring(0, 16);
+    public void setMainRichBodyNoteText(String richBody) {
+        this.richBodyNoteText = richBody;
     }
 
 }

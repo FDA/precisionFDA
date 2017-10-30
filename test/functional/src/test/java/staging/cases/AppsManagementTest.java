@@ -1,14 +1,17 @@
 package staging.cases;
 
 import org.testng.annotations.Test;
+import ru.yandex.qatools.htmlelements.annotations.Name;
 import staging.model.AppProfile;
 import staging.model.User;
-import staging.pages.CommonPage;
 import staging.pages.apps.*;
+import staging.pages.overview.OverviewPage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertTrue;
+import static staging.data.TestAppData.*;
 
+@Name("Applications management test suite")
 public class AppsManagementTest extends AbstractTest {
 
     @Test(groups = "runJob")
@@ -21,57 +24,62 @@ public class AppsManagementTest extends AbstractTest {
 
         User user = User.getTestUser();
 
-        openStartPage();
-        CommonPage commonPage = correctLoginToFDA(user);
+        OverviewPage overviewPage = correctLoginToFDA(user);
 
         SoftAssert.assertThat(
-                commonPage.isNavigationPanelDisplayed())
+                overviewPage.isNavigationPanelDisplayed())
                 .as("navigation panel is displayed")
                 .isTrue();
 
         SoftAssert.assertThat(
-                commonPage.isCorrectUserNameDisplayed(user))
-                .as("logged username is displayed")
-                .isTrue();
+                overviewPage.getUsernameLinkText())
+                .as("logged username")
+                .isEqualTo(user.getApplUserFullName());
 
         SoftAssert.assertAll();
     }
 
-    @Test(groups = { "runJob" }, dependsOnMethods = {"precondition"}, priority = 0)
-    public void createAndSaveSimpleApp() {
-        printTestHeader("Test Case: create and save simple app with custom name, title and shell script");
+    @Test(dependsOnMethods = {"precondition"}, priority = 0)
+    public void createAndSaveApp() {
+        printTestHeader("Test Case: create and save an app with custom name, title and shell script");
 
-        AppProfile appProfile = AppProfile.getMainApp();
+        AppProfile appProfile = getMainProfile();
 
-        CommonPage commonPage = openCommonPage();
-        AppsPage appsPage = commonPage.openAppsPage();
+        OverviewPage overviewPage = openOverviewPage();
+        AppsPage appsPage = overviewPage.openAppsPage();
         AppsSavedAppPage appsSavedAppPage = appsPage.createNewApp(appProfile);
 
         assertThat(
                 appsSavedAppPage.getActSelectedAppName())
                 .as("Name of created app")
-                .isEqualTo(appProfile.getAppNameText());
+                .isEqualTo(appProfile.getAppInitNameText());
     }
 
-    @Test(dependsOnMethods = {"precondition", "createAndSaveSimpleApp"})
+    @Test(dependsOnMethods = {"precondition", "createAndSaveApp"})
     public void checkSavedAppHasCorrectData() {
         printTestHeader("Test Case: check Saved previously App can be open from My App list and has correct data");
 
-        AppProfile appProfile = AppProfile.getMainApp();
+        AppProfile appProfile = getMainProfile();
 
-        CommonPage commonPage = openCommonPage();
-        AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
+        OverviewPage overviewPage = openOverviewPage();
+        AppsRelevantPage appsRelevantPage = overviewPage.openAppsPage().openAppsRelevantPage();
+
+        assertThat(
+                appsRelevantPage.isLinkToSavedAppDisplayed(appProfile))
+                .as("Link to saved app is displayed")
+                .isTrue();
+
         AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppName())
                 .as("Name of created app")
-                .isEqualTo(appProfile.getAppNameText());
+                .isEqualTo(appProfile.getAppCurRevNameText());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppTitle())
                 .as("Title of created app")
-                .isEqualTo(appProfile.getAppTitleText());
+                .isEqualTo(appProfile.getAppCurRevTitleText());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppOrg())
@@ -87,7 +95,7 @@ public class AppsManagementTest extends AbstractTest {
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppCreated())
                 .as("Created date/time")
-                .contains(appProfile.getAppCreationDateTimeText());
+                .contains(appProfile.getAppInitCreationDateTimeText());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getIsAppCreationDateTimeCorrect(appProfile))
@@ -98,20 +106,26 @@ public class AppsManagementTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"precondition", "createAndSaveSimpleApp"})
-    public void checkRevisionIncremented() {
+    @Test(dependsOnMethods = {"precondition", "createAndSaveApp"})
+    public void checkRevisionIsIncremented() {
         printTestHeader("Test Case: check that revision version is incremented by 1 after save revision");
 
-        AppProfile appProfile = AppProfile.getMainApp();
+        AppProfile appProfile = getMainProfile();
 
-        CommonPage commonPage = openCommonPage();
-        AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
+        OverviewPage overviewPage = openOverviewPage();
+        AppsRelevantPage appsRelevantPage = overviewPage.openAppsPage().openAppsRelevantPage();
+
+        assertThat(
+                appsRelevantPage.isLinkToSavedAppDisplayed(appProfile))
+                .as("Link to saved app is displayed")
+                .isTrue();
+
         AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
 
         int revisionBefore = appsSavedAppPage.getAppRevision();
 
         AppsEditAppPage appsEditAppPage = appsSavedAppPage.clickEdit();
-        appsSavedAppPage = appsEditAppPage.saveRevision();
+        appsSavedAppPage = appsEditAppPage.saveRevision(appProfile);
 
         int revisionAfter = appsSavedAppPage.getAppRevision();
 
@@ -119,27 +133,33 @@ public class AppsManagementTest extends AbstractTest {
                 "[revision before = " + revisionBefore + " + 1] == [revision after = " + revisionAfter + "]");
     }
 
-    @Test(dependsOnMethods = {"precondition", "createAndSaveSimpleApp"})
+    @Test(dependsOnMethods = {"precondition", "createAndSaveApp"})
     public void checkValuesNotChangedAfterIdleEdit() {
         printTestHeader("Test Case: check App data is not changed if click Edit App then Save without any changes");
 
-        AppProfile appProfile = AppProfile.getMainApp();
+        AppProfile appProfile = getMainProfile();
 
-        CommonPage commonPage = openCommonPage();
-        AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
+        OverviewPage overviewPage = openOverviewPage();
+        AppsRelevantPage appsRelevantPage = overviewPage.openAppsPage().openAppsRelevantPage();
+
+        assertThat(
+                appsRelevantPage.isLinkToSavedAppDisplayed(appProfile))
+                .as("Link to saved app is displayed")
+                .isTrue();
+
         AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
         AppsEditAppPage appsEditAppPage = appsSavedAppPage.clickEdit();
-        appsSavedAppPage = appsEditAppPage.saveRevision();
+        appsSavedAppPage = appsEditAppPage.saveRevision(appProfile);
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppName())
                 .as("Name of created app")
-                .isEqualTo(appProfile.getAppNameText());
+                .isEqualTo(appProfile.getAppCurRevNameText());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppTitle())
                 .as("Title of created app")
-                .isEqualTo(appProfile.getAppTitleText());
+                .isEqualTo(appProfile.getAppCurRevTitleText());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppOrg())
@@ -154,15 +174,20 @@ public class AppsManagementTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(groups = { "runJob" }, dependsOnMethods = {"precondition", "createAndSaveSimpleApp"})
+    @Test(groups = { "runJob" }, dependsOnMethods = {"precondition"})
     public void runAppAndValidateResult() {
-        printTestHeader("Test Case: run created previously app and validate result");
+        printTestHeader("Test Case: run app and validate result");
 
-        AppProfile appProfile = AppProfile.getMainApp();
+        AppProfile appProfile = getRunJobProfile();
 
-        CommonPage commonPage = openCommonPage();
-        AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
-        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
+        OverviewPage overviewPage = openOverviewPage();
+        AppsPage appsPage = overviewPage.openAppsPage();
+        AppsSavedAppPage appsSavedAppPage = appsPage.createNewApp(appProfile);
+
+        assertThat(
+                appsSavedAppPage.getActSelectedAppName())
+                .as("Name of created app")
+                .isEqualTo(appProfile.getAppInitNameText());
 
         appsSavedAppPage = appsSavedAppPage.runJob(appProfile);
 
@@ -173,7 +198,7 @@ public class AppsManagementTest extends AbstractTest {
         AppsJobPage appsJobPage = appsSavedAppPage.openJobFromSavedAppPage(appProfile);
 
         assertThat(appsJobPage.getActJobName())
-                .as("job name on a job page")
+                .as("job name value on the job page")
                 .isEqualTo(appProfile.getJobNameText());
 
         appsJobPage = appsJobPage.waitUntilJobIsDone();
@@ -186,7 +211,7 @@ public class AppsManagementTest extends AbstractTest {
 
         SoftAssert.assertThat(appsJobLogPage.getFullJobLogText())
                 .as("full job log")
-                .contains(appProfile.getAppScriptCodeText());
+                .contains(appProfile.getAppInitScriptCodeText());
 
         SoftAssert.assertThat(appsJobLogPage.getScriptResultFromLog(appProfile))
                 .as("script result output")
@@ -195,68 +220,85 @@ public class AppsManagementTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"precondition", "createAndSaveSimpleApp"})
+    @Test(dependsOnMethods = {"precondition", "createAndSaveApp"})
     public void editAppTitle() {
         printTestHeader("Test Case: check that the title of a saved app can be edited");
 
-        AppProfile initProfile = AppProfile.getMainApp();
-        AppProfile updProfile = AppProfile.getUpdatedApp();
+        AppProfile appProfile = getMainProfile();
 
-        CommonPage commonPage = openCommonPage();
-        AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
-        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(initProfile);
+        OverviewPage overviewPage = openOverviewPage();
+        AppsRelevantPage appsRelevantPage = overviewPage.openAppsPage().openAppsRelevantPage();
 
-        AppsEditAppPage appsEditAppPage = appsSavedAppPage.clickEdit();
-        appsEditAppPage.enterNewAppTitle(updProfile);
-        appsSavedAppPage = appsEditAppPage.saveRevision();
+        assertThat(
+                appsRelevantPage.isLinkToSavedAppDisplayed(appProfile))
+                .as("Link to saved app is displayed")
+                .isTrue();
+
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
+
+        appsSavedAppPage = appsSavedAppPage.editAndSaveAppTitle(appProfile);
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppName())
                 .as("Name of created app")
-                .isEqualTo(initProfile.getAppNameText());
+                .isEqualTo(appProfile.getAppInitNameText());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppTitle())
                 .as("Edited Title of created app")
-                .isEqualTo(updProfile.getAppTitleText());
+                .isEqualTo(appProfile.getAppCurRevTitleText());
+
+        System.out.println("TITLE is: " + appProfile.getAppCurRevTitleText());
 
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"precondition", "createAndSaveSimpleApp"})
-    public void editReadMeTab() {
+    @Test(dependsOnMethods = {"precondition", "createAndSaveApp"})
+    public void editReadmeAndVerify() {
         printTestHeader("Test Case: check that ReadMe tab can be edited and saved");
 
-        AppProfile appProfile = AppProfile.getMainApp();
+        AppProfile appProfile = getMainProfile();
 
-        CommonPage commonPage = openCommonPage();
-        AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
+        OverviewPage overviewPage = openOverviewPage();
+        AppsRelevantPage appsRelevantPage = overviewPage.openAppsPage().openAppsRelevantPage();
+
+        assertThat(
+                appsRelevantPage.isLinkToSavedAppDisplayed(appProfile))
+                .as("Link to saved app is displayed")
+                .isTrue();
+
         AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
-
-        AppsEditAppPage appsEditAppPage = appsSavedAppPage.clickEdit();
-        appsEditAppPage = appsEditAppPage.editReadmeTab(appProfile);
+        AppsEditAppPage appsEditAppPage = appsSavedAppPage.editReadmeButNotSave(appProfile);
         appsEditAppPage = appsEditAppPage.openReadmeReviewTab();
 
-        assertThat(appsEditAppPage.getReadmePreviewText())
+        SoftAssert.assertThat(appsEditAppPage.getReadmePreviewText())
                 .as("text on Readme Preview tab during edit")
-                .isEqualTo(appProfile.getReadMeRichText());
+                .isEqualTo(appProfile.getTempReadMeRichText());
 
-        appsSavedAppPage = appsEditAppPage.saveRevision();
+        appsSavedAppPage = appsEditAppPage.saveRevisionAfterReadmeEdit(appProfile);
         appsSavedAppPage = appsSavedAppPage.openReadmeTab();
 
-        assertThat(appsSavedAppPage.getReadMeText())
+        SoftAssert.assertThat(appsSavedAppPage.getReadMeText())
                 .as("Readme Preview text on saved page")
-                .isEqualTo(appProfile.getReadMeRichText());
+                .isEqualTo(appProfile.getCurRevReadMeRichText());
+
+        SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"precondition", "createAndSaveSimpleApp"})
-    public void leaveComment() {
-        printTestHeader("Test Case: check it is possible to write a comment");
+    @Test(dependsOnMethods = {"precondition", "createAndSaveApp"})
+    public void leaveAppComment() {
+        printTestHeader("Test Case: check it is possible to write a comment for an app");
 
-        AppProfile appProfile = AppProfile.getMainApp();
+        AppProfile appProfile = getMainProfile();
 
-        CommonPage commonPage = openCommonPage();
-        AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
+        OverviewPage overviewPage = openOverviewPage();
+        AppsRelevantPage appsRelevantPage = overviewPage.openAppsPage().openAppsRelevantPage();
+
+        assertThat(
+                appsRelevantPage.isLinkToSavedAppDisplayed(appProfile))
+                .as("Link to saved app is displayed")
+                .isTrue();
+
         AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
         appsSavedAppPage = appsSavedAppPage.openCommentsTab().writeComment();
         appsSavedAppPage = appsSavedAppPage.openCommentsTab();
@@ -266,14 +308,20 @@ public class AppsManagementTest extends AbstractTest {
                 .isEqualTo(appsSavedAppPage.getExpectedCommentText());
     }
 
-    @Test(dependsOnMethods = {"precondition", "createAndSaveSimpleApp"})
+    @Test(dependsOnMethods = {"precondition", "createAndSaveApp"})
     public void checkDefaultInstanceIsDisplayed() {
         printTestHeader("Test Case: check that the default instance value is displayed on edit app page and on app profile page");
 
-        AppProfile appProfile = AppProfile.getMainApp();
+        AppProfile appProfile = getMainProfile();
 
-        CommonPage commonPage = openCommonPage();
-        AppsRelevantPage appsRelevantPage = commonPage.openAppsPage().openAppsRelevantPage();
+        OverviewPage overviewPage = openOverviewPage();
+        AppsRelevantPage appsRelevantPage = overviewPage.openAppsPage().openAppsRelevantPage();
+
+        assertThat(
+                appsRelevantPage.isLinkToSavedAppDisplayed(appProfile))
+                .as("Link to saved app is displayed")
+                .isTrue();
+
         AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
         AppsEditAppPage appsEditAppPage = appsSavedAppPage.clickEdit();
         appsEditAppPage = appsEditAppPage.openVMEnvTab();
@@ -284,7 +332,7 @@ public class AppsManagementTest extends AbstractTest {
 
         String instanceEditValue = appsEditAppPage.getInstanceValue();
 
-        appsSavedAppPage = appsEditAppPage.saveRevision();
+        appsSavedAppPage = appsEditAppPage.saveRevision(appProfile);
 
         assertThat(appsSavedAppPage.isInstanceValueDisplayed())
                 .as("Instance Default value is displayed on saved page")
@@ -295,6 +343,59 @@ public class AppsManagementTest extends AbstractTest {
         assertThat(instanceEditValue.toLowerCase())
                 .as("Instance Value")
                 .isEqualTo(instanceSavedValue.replace("-", " "));
+    }
+
+    @Test(dependsOnMethods = {"precondition"})
+    public void verifyPreviousRevisionHasCorrectData() {
+        printTestHeader("Test Case: check that a previous app revision has correct data");
+
+        AppProfile appProfile = getCheckRevProfile();
+
+        OverviewPage overviewPage = openOverviewPage();
+        AppsPage appsPage = overviewPage.openAppsPage();
+        AppsSavedAppPage appsSavedAppPage = appsPage.createNewApp(appProfile);
+
+        assertThat(
+                appsSavedAppPage.getActSelectedAppName())
+                .as("Name of the created app")
+                .isEqualTo(appProfile.getAppInitNameText());
+
+        appsSavedAppPage = appsSavedAppPage.editAndSaveApp(appProfile);
+
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppName())
+                .as("Name of the updated app")
+                .isEqualTo(appProfile.getAppInitNameText());
+
+        appsSavedAppPage = appsSavedAppPage.openFirstRevision();
+
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppName())
+                .as("Name of the first revision")
+                .isEqualTo(appProfile.getAppInitNameText());
+
+        SoftAssert.assertThat(
+                appsSavedAppPage.getAppsSavedRevisionPageTitleText())
+                .as("Title of the first revision")
+                .isEqualTo(appProfile.getAppInitTitleText());
+
+        appsSavedAppPage = appsSavedAppPage.openReadmeTab();
+
+        SoftAssert.assertThat(appsSavedAppPage.getReadMeText())
+                .as("Readme Preview text of the first revision")
+                .isEqualTo(appProfile.getInitReadMeRichText());
+
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppOrg())
+                .as("Org of the app")
+                .isEqualTo(appsSavedAppPage.getExpSelectedAppOrg());
+
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppAddedBy())
+                .as("Added By of the app")
+                .isEqualTo(appsSavedAppPage.getExpSelectedAppAddedBy());
+
+        SoftAssert.assertAll();
     }
 
 }

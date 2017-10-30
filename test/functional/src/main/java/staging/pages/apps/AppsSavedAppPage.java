@@ -16,6 +16,7 @@ import staging.utils.Utils;
 
 import static staging.data.TestAppData.getAppCommentText;
 import static staging.data.TestCommonData.getTrueResult;
+import static staging.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class AppsSavedAppPage extends AbstractPage {
 
@@ -81,6 +82,15 @@ public class AppsSavedAppPage extends AbstractPage {
     @FindBy(xpath = AppsLocators.APPS_SAVED_APP_INSTANCE_VALUE)
     private WebElement appsSavedAppInstanceValue;
 
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_REVISIONS_BUTTON)
+    private WebElement appsRevisionsButton;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_FIRST_REVISION)
+    private WebElement appsSavedFirstRevision;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_REVISION_PAGE_TITLE)
+    private WebElement appsSavedRevisionPageTitle;
+
     public AppsSavedAppPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_SAVED_APP_RUN_APP_BUTTON));
@@ -92,6 +102,10 @@ public class AppsSavedAppPage extends AbstractPage {
 
     public WebElement getAppsRelevantSelectedAppName() {
         return appsRelevantSelectedAppName;
+    }
+
+    public WebElement getAppsSavedRevisionPageTitle() {
+        return appsSavedRevisionPageTitle;
     }
 
     public WebElement getAppsRelevantSelectedAppOrg() {
@@ -186,6 +200,18 @@ public class AppsSavedAppPage extends AbstractPage {
         return appsSavedAppReadmePreviewWE;
     }
 
+    public WebElement getAppsRevisionsButton() {
+        return appsRevisionsButton;
+    }
+
+    public WebElement getAppsSavedFirstRevision() {
+        return appsSavedFirstRevision;
+    }
+
+    public String getAppsSavedRevisionPageTitleText() {
+        return getAppsSavedRevisionPageTitle().getText();
+    }
+
     public String getReadMeText() {
         return getAppsSavedAppReadmePreviewWE().getText();
     }
@@ -253,15 +279,16 @@ public class AppsSavedAppPage extends AbstractPage {
 
     public AppsSavedAppPage runJob(AppProfile appProfile) {
         AppsEditAndRunAppPage appsEditAndRunAppPage = clickRunAppOnRelevantPage();
-        appsEditAndRunAppPage.editJobName(appProfile).clickRunAppOnEditJobPage(appProfile);
-        return new AppsSavedAppPage(getDriver());
+        appsEditAndRunAppPage.editJobName(appProfile.getJobNameText());
+        AppsSavedAppPage appsSavedAppPage = appsEditAndRunAppPage.clickRunAppOnEditJobPage(appProfile);
+        return appsSavedAppPage;
     }
 
     public String getIsAppCreationDateTimeCorrect(AppProfile appProfile) {
         long possibleDelta = 10;
         String textResult = "";
         String actTime = getActSelectedAppCreated();
-        String expTime = appProfile.getAppCreationDateTimeText();
+        String expTime = appProfile.getAppCurRevCreationDateTimeText();
         if (Utils.getDifferenceBetweenDateTime(actTime, expTime) <= possibleDelta) {
             textResult = getTrueResult();
         }
@@ -275,5 +302,61 @@ public class AppsSavedAppPage extends AbstractPage {
     public String getDateTimeCorrectTrueResult() {
         return getTrueResult();
     }
+
+    public AppsSavedAppPage editAndSaveAppTitle(AppProfile appProfile) {
+        log.info("edit and save app title");
+        String newTitle = appProfile.getAppCurRevTitleText() + " upd " + getRunTimeLocalUniqueValue();
+        AppsEditAppPage appsEditAppPage = clickEdit();
+        appsEditAppPage.fillTitleInput(newTitle);
+        appProfile.setAppCurRevTitleText(newTitle);
+        AppsSavedAppPage appsSavedAppPage = appsEditAppPage.saveRevision(appProfile);
+        return appsSavedAppPage;
+    }
+
+    public AppsEditAppPage editReadmeButNotSave(AppProfile appProfile) {
+        log.info("edit readme");
+        String add = getRunTimeLocalUniqueValue();
+        String tempReadmeRow = appProfile.getCurRevReadMeRowText() + " upd " + add;
+        String tempReadmeRich = appProfile.getCurRevReadMeRichText() + " upd " + add;
+        AppsEditAppPage appsEditAppPage = clickEdit();
+        appsEditAppPage.fillReadmeTab(tempReadmeRow);
+        appProfile.setAppTempReadMeRowText(tempReadmeRow);
+        appProfile.setAppTempReadMeRichText(tempReadmeRich);
+        return new AppsEditAppPage(getDriver());
+    }
+
+    public AppsSavedAppPage editAndSaveApp(AppProfile appProfile) {
+        log.info("edit and save app");
+
+        AppsEditAppPage editAppPage = clickEdit();
+        String add = getRunTimeLocalUniqueValue();
+
+        String newTitle = appProfile.getAppCurRevTitleText() + add;
+        String newReadMeRow = appProfile.getCurRevReadMeRowText() + add;
+        String newReadMeRich = appProfile.getCurRevReadMeRichText() + add;
+        String newScript = appProfile.getAppCurRevScriptCodeText() + add;
+
+        editAppPage.fillTitleInput(newTitle);
+        appProfile.setAppCurRevTitleText(newTitle);
+
+        editAppPage.fillScriptArea(newScript);
+        appProfile.setAppCurRevScriptCodeText(newScript);
+
+        editAppPage.fillReadmeTab(newReadMeRow);
+        appProfile.setAppCurRevReadMeRowText(newReadMeRow);
+        appProfile.setAppCurRevReadMeRichText(newReadMeRich);
+
+        AppsSavedAppPage appsSavedAppPage = editAppPage.saveRevision(appProfile);
+        return appsSavedAppPage;
+    }
+
+    public AppsSavedAppPage openFirstRevision() {
+        getAppsRevisionsButton().click();
+        waitUntilDisplayed(getAppsSavedFirstRevision());
+        getAppsSavedFirstRevision().click();
+        return new AppsSavedAppPage(getDriver());
+    }
+
+
 
 }

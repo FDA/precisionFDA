@@ -28,10 +28,6 @@ public class StartPage extends AbstractPage {
         waitForPageToLoadAndVerifyBy(By.xpath(StartLocators.START_LOGIN_LINK), 30);
     }
 
-    public boolean isNavigationPanelNotDisplayed() {
-        return !isElementPresent(getNavigationPanelWE(), 2);
-    }
-
     public boolean isNavigationPanelDisplayed() {
         return isElementPresent(getNavigationPanelWE(), 2);
     }
@@ -44,10 +40,8 @@ public class StartPage extends AbstractPage {
         return startSuccessMessageArea;
     }
 
-    public boolean isLogoutMessageDisplayed() {
-        String actualText = getStartSuccessMessageArea().getText();
-        String expectedText = StartLocators.START_YOU_LOGGED_OUT_TEXT;
-        return actualText.contains(expectedText);
+    public String getMessageAreaText() {
+        return getStartSuccessMessageArea().getText();
     }
 
 }

@@ -1,5 +1,7 @@
 package staging.data;
 
+import staging.model.NoteProfile;
+
 import static staging.data.TestCommonData.getTestRunUniqueFinalValue;
 
 public class TestNotesData {
@@ -18,52 +20,40 @@ public class TestNotesData {
 
     public static final String NOTE_TO_EDIT_RICH_BODY_PREFIX = "Auto test edit note ";
 
-    public static final String ADDITIONAL_PART_FOR_EDIT = "_NEW";
+    public static final String ADDITIONAL_PART_FOR_EDIT = "_UPDATE";
 
     public static final String NOTE_COMMENT_PREFIX = "Auto test note comment ";
 
     public static final String TIME_ZONE = "GMT";
 
-    public static boolean isNoteTitleEditedFlag;
+    public static NoteProfile mainNote = new NoteProfile(getNewMainTitleText(), getNewMainRowBodyText(), getNewMainRichBodyText(), "");
 
-    public static boolean isNoteBodyEditedFlag;
+    public static NoteProfile noteToDelete = new NoteProfile(getTitleToDeleteText(), getRowBodyToDeleteText(), getRichBodyToDeleteText(), "");
 
-    public static String getAddonForNoteTitle() {
-        if (isNoteTitleEditedFlag) {
-            return ADDITIONAL_PART_FOR_EDIT;
-        }
-        else {
-            return "";
-        }
+    public static NoteProfile noteToEdit = new NoteProfile(getTitleToEditText(), getRowBodyToEditText(), getRichBodyToEditText(), "");
+
+    public static NoteProfile getMainNote() {
+        return mainNote;
     }
 
-    public static String getAddonForNoteBody() {
-        if (isNoteBodyEditedFlag) {
-            return ADDITIONAL_PART_FOR_EDIT;
-        }
-        else {
-            return "";
-        }
+    public static NoteProfile getNoteToEdit() {
+        return noteToEdit;
     }
 
-    public static void setIsNoteTitleEditedFlag(boolean flag) {
-        isNoteTitleEditedFlag = flag;
+    public static NoteProfile getNoteToDelete() {
+        return noteToDelete;
     }
 
-    public static void setIsNoteBodyEditedFlag(boolean flag) {
-        isNoteBodyEditedFlag = flag;
+    public static String getNewMainTitleText() {
+        return NEW_NOTE_TITLE_PREFIX + getTestRunUniqueFinalValue();
     }
 
-    public static String getMainTitleText() {
-        return NEW_NOTE_TITLE_PREFIX + getTestRunUniqueFinalValue() + getAddonForNoteTitle();
+    public static String getNewMainRowBodyText() {
+        return NEW_NOTE_ROW_BODY_PREFIX + getTestRunUniqueFinalValue();
     }
 
-    public static String getMainRowBodyText() {
-        return NEW_NOTE_ROW_BODY_PREFIX + getTestRunUniqueFinalValue() + getAddonForNoteBody();
-    }
-
-    public static String getMainRichBodyText() {
-        return NEW_NOTE_RICH_BODY_PREFIX + getTestRunUniqueFinalValue() + getAddonForNoteBody();
+    public static String getNewMainRichBodyText() {
+        return NEW_NOTE_RICH_BODY_PREFIX + getTestRunUniqueFinalValue();
     }
 
     public static String getTitleToDeleteText() {
@@ -78,17 +68,6 @@ public class TestNotesData {
         return NEW_NOTE_RICH_BODY_PREFIX + getTestRunUniqueFinalValue();
     }
 
-    public static String getUpdatedTitleText() {
-        return NEW_NOTE_TITLE_PREFIX + getTestRunUniqueFinalValue() + ADDITIONAL_PART_FOR_EDIT;
-    }
-
-    public static String getUpdatedRowBodyText() {
-        return NEW_NOTE_ROW_BODY_PREFIX + getTestRunUniqueFinalValue() + ADDITIONAL_PART_FOR_EDIT;
-    }
-
-    public static String getUpdatedRichBodyText() {
-        return NEW_NOTE_RICH_BODY_PREFIX + getTestRunUniqueFinalValue() + ADDITIONAL_PART_FOR_EDIT;
-    }
     public static String getNoteCommentText() {
         return NOTE_COMMENT_PREFIX + getTestRunUniqueFinalValue();
     }
@@ -103,6 +82,10 @@ public class TestNotesData {
 
     public static String getRichBodyToEditText() {
         return NOTE_TO_EDIT_RICH_BODY_PREFIX + getTestRunUniqueFinalValue();
+    }
+
+    public static String getAddon() {
+        return ADDITIONAL_PART_FOR_EDIT;
     }
 
 

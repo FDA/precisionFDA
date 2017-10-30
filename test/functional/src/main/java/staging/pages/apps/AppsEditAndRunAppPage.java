@@ -33,11 +33,10 @@ public class AppsEditAndRunAppPage extends AbstractPage {
         return appsRunAppButton;
     }
 
-    public AppsEditAndRunAppPage editJobName(AppProfile appProfile) {
+    public void editJobName(String jobName) {
         log.info("edit job name");
         getAppsJobNameInput().clear();
-        getAppsJobNameInput().sendKeys(appProfile.getJobNameText());
-        return new AppsEditAndRunAppPage(getDriver());
+        getAppsJobNameInput().sendKeys(jobName);
     }
 
     public AppsSavedAppPage clickRunAppOnEditJobPage(AppProfile appProfile) {

@@ -94,9 +94,25 @@ public class AppsPage extends AbstractPage {
     }
 
     public AppsSavedAppPage createNewApp(AppProfile appProfile) {
+        log.info("create and save new app");
         ApplCreateAppPage applCreateAppPage = openCreateAppPage();
-        applCreateAppPage.fillCreateAppForm(appProfile);
+
+        String name = appProfile.getAppInitNameText();
+        String title = appProfile.getAppInitTitleText();
+        String script = appProfile.getAppInitScriptCodeText();
+        String readmeRow = appProfile.getInitReadMeRowText();
+        String readmeRich = appProfile.getInitReadMeRichText();
+
+        applCreateAppPage.fillCreateAppForm(name, title, script, readmeRow);
+
         applCreateAppPage.clickCreate(appProfile);
+
+        appProfile.setAppCurRevNameText(name);
+        appProfile.setAppCurRevTitleText(title);
+        appProfile.setAppCurRevScriptCodeText(script);
+        appProfile.setAppCurRevReadMeRowText(readmeRow);
+        appProfile.setAppCurRevReadMeRichText(readmeRich);
+
         return new AppsSavedAppPage(getDriver());
     }
 
