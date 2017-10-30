@@ -2,9 +2,9 @@ package staging.cases;
 
 import org.testng.annotations.Test;
 import staging.model.User;
-import staging.pages.CommonPage;
 import staging.pages.StartPage;
 import staging.pages.login.LoginPage;
+import staging.pages.overview.OverviewPage;
 
 public class LoginTest extends AbstractTest {
 
@@ -14,21 +14,21 @@ public class LoginTest extends AbstractTest {
 
         User user = User.getTestUser();
 
-        reopenBrowser();
-        openStartPage();
-        CommonPage commonPage = correctLoginToFDA(user);
+        openBrowser();
+        OverviewPage overviewPage = correctLoginToFDA(user);
 
         SoftAssert.assertThat(
-                commonPage.isNavigationPanelDisplayed())
+                overviewPage.isNavigationPanelDisplayed())
                 .as("navigation panel is displayed")
                 .isTrue();
 
         SoftAssert.assertThat(
-                commonPage.isCorrectUserNameDisplayed(user))
-                .as("logged username is displayed")
-                .isTrue();
+                overviewPage.getUsernameLinkText())
+                .as("logged username")
+                .isEqualTo(user.getApplUserFullName());
 
         SoftAssert.assertAll();
+        closeBrowser();
     }
 
     @Test
@@ -37,10 +37,9 @@ public class LoginTest extends AbstractTest {
 
         User user = User.getTestUser();
 
-        reopenBrowser();
-        openStartPage();
-        CommonPage commonPage = correctLoginToFDA(user);
-        StartPage startPage = commonPage.logout();
+        openBrowser();
+        OverviewPage overviewPage = correctLoginToFDA(user);
+        StartPage startPage = overviewPage.logout();
 
         SoftAssert.assertThat(
                 startPage.isNavigationPanelDisplayed())
@@ -48,11 +47,12 @@ public class LoginTest extends AbstractTest {
                 .isFalse();
 
         SoftAssert.assertThat(
-                startPage.isLogoutMessageDisplayed())
-                .as("'You were successfully logged out' message is displayed")
-                .isTrue();
+                startPage.getMessageAreaText())
+                .as("success message")
+                .contains("You were successfully logged out");
 
         SoftAssert.assertAll();
+        closeBrowser();
     }
 
     @Test
@@ -61,8 +61,7 @@ public class LoginTest extends AbstractTest {
 
         User user = User.getWrongUser();
 
-        reopenBrowser();
-        openStartPage();
+        openBrowser();
         LoginPage loginPage = wrongLoginToFDA(user);
 
         SoftAssert.assertThat(
@@ -71,11 +70,12 @@ public class LoginTest extends AbstractTest {
                 .isFalse();
 
         SoftAssert.assertThat(
-                loginPage.isWrongCredsMessageDisplayed())
-                .as("'Invalid username or password' message is displayed")
-                .isTrue();
+                loginPage.getLoginWrongCredsMessageText())
+                .as("error message")
+                .contains("Invalid username or password");
 
         SoftAssert.assertAll();
+        closeBrowser();
     }
 
 }

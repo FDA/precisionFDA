@@ -81,7 +81,7 @@ public class NotesPage extends AbstractPage {
         log.info("open Notes.NewNote page");
         sleep(1000);
         getNotesNewNoteLink().click();
-        noteProfile.setCreateNoteText();
+        noteProfile.setCreatedNoteText();
         return new NotesEditNotePage(getDriver());
     }
 
@@ -93,7 +93,7 @@ public class NotesPage extends AbstractPage {
         WebElement noteLink = null;
         List<WebElement> allLinks = getDriver().findElements(By.xpath(NotesLocators.NOTES_LIST_ANY_NOTE_LINK));
         for (WebElement we : allLinks) {
-            if (we.getText().contains(noteProfile.getTitleText())) {
+            if (we.getText().contains(noteProfile.getTitleNoteText())) {
                 noteLink = we;
                 break;
             }

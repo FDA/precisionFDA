@@ -5,62 +5,122 @@ import static staging.utils.Utils.getCurrentDateTimeValue;
 
 public class AppProfile {
 
-    private final String appNameText;
+    private String appInitNameText;
 
-    private final String appTitleText;
+    private String appInitTitleText;
 
-    private final String appScriptCodeText;
+    private String appInitScriptCodeText;
 
-    private static String appCreationDateTimeText;
+    private String appInitCreationDateTimeText;
 
-    private static String appReadMeRowText;
+    private String appInitReadMeRowText;
 
-    private static String appReadMeRichText;
+    private String appInitReadMeRichText;
 
-    private static String jobNameText;
+    private String appCurRevNameText;
 
-    private static String jobCreationDateTimeText;
+    private String appCurRevTitleText;
 
-    private static String expectedJobOutputText;
+    private String appCurRevScriptCodeText;
 
-    public AppProfile(final String appNameText, final String appTitleText,
-                      final String appScriptCodeText, final String appCreationDateTimeText,
-                      final String appReadMeRowText, final String appReadMeRichText,
+    private String appCurRevCreationDateTimeText;
+
+    private String appCurRevReadMeRowText;
+
+    private String appCurRevReadMeRichText;
+
+    private String appTempReadMeRowText;
+
+    private String appTempReadMeRichText;
+
+    private String jobNameText;
+
+    private String jobCreationDateTimeText;
+
+    private String expectedJobOutputText;
+
+    public AppProfile(final String appInitNameText, final String appInitTitleText,
+                      final String appInitScriptCodeText, final String appInitCreationDateTimeText,
+                      final String appInitReadMeRowText, final String appInitReadMeRichText,
+                      final String appCurRevNameText, final String appCurRevTitleText,
+                      final String appCurRevScriptCodeText, final String appCurRevCreationDateTimeText,
+                      final String appCurRevReadMeRowText, final String appCurRevReadMeRichText,
+                      final String appTempReadMeRowText, final String appTempReadMeRichText,
                       final String jobNameText, final String jobCreationDateTimeText,
                       final String expectedJobOutputText) {
-        this.appNameText = appNameText;
-        this.appTitleText = appTitleText;
-        this.appScriptCodeText = appScriptCodeText;
-        this.appCreationDateTimeText = appCreationDateTimeText;
-        this.appReadMeRowText = appReadMeRowText;
-        this.appReadMeRichText = appReadMeRichText;
+        this.appInitNameText = appInitNameText;
+        this.appInitTitleText = appInitTitleText;
+        this.appInitScriptCodeText = appInitScriptCodeText;
+        this.appInitCreationDateTimeText = appInitCreationDateTimeText;
+        this.appInitReadMeRowText = appInitReadMeRowText;
+        this.appInitReadMeRichText = appInitReadMeRichText;
+        this.appCurRevNameText = appCurRevNameText;
+        this.appCurRevTitleText = appCurRevTitleText;
+        this.appCurRevScriptCodeText = appCurRevScriptCodeText;
+        this.appCurRevCreationDateTimeText = appCurRevCreationDateTimeText;
+        this.appCurRevReadMeRowText = appCurRevReadMeRowText;
+        this.appCurRevReadMeRichText = appCurRevReadMeRichText;
+        this.appTempReadMeRowText = appTempReadMeRowText;
+        this.appTempReadMeRichText = appTempReadMeRichText;
         this.jobNameText = jobNameText;
         this.jobCreationDateTimeText = jobCreationDateTimeText;
         this.expectedJobOutputText = expectedJobOutputText;
     }
 
-    public String getAppNameText() {
-        return appNameText;
+    public String getAppInitNameText() {
+        return this.appInitNameText.replace(" ", "-");
     }
 
-    public String getAppTitleText() {
-        return appTitleText;
+    public String getAppInitTitleText() {
+        return this.appInitTitleText;
     }
 
-    public String getAppScriptCodeText() {
-        return appScriptCodeText;
+    public String getAppInitScriptCodeText() {
+        return this.appInitScriptCodeText;
     }
 
-    public String getAppCreationDateTimeText() {
-        return appCreationDateTimeText;
+    public String getAppInitCreationDateTimeText() {
+        return this.appInitCreationDateTimeText;
     }
 
-    public String getReadMeRowText() {
-        return appReadMeRowText;
+    public String getInitReadMeRowText() {
+        return this.appInitReadMeRowText;
     }
 
-    public String getReadMeRichText() {
-        return appReadMeRichText;
+    public String getInitReadMeRichText() {
+        return this.appInitReadMeRichText;
+    }
+
+    public String getAppCurRevNameText() {
+        return this.appCurRevNameText;
+    }
+
+    public String getAppCurRevTitleText() {
+        return this.appCurRevTitleText;
+    }
+
+    public String getAppCurRevScriptCodeText() {
+        return this.appCurRevScriptCodeText;
+    }
+
+    public String getAppCurRevCreationDateTimeText() {
+        return this.appCurRevCreationDateTimeText;
+    }
+
+    public String getCurRevReadMeRowText() {
+        return this.appCurRevReadMeRowText;
+    }
+
+    public String getCurRevReadMeRichText() {
+        return this.appCurRevReadMeRichText;
+    }
+
+    public String getTempReadMeRowText() {
+        return this.appTempReadMeRowText;
+    }
+
+    public String getTempReadMeRichText() {
+        return this.appTempReadMeRichText;
     }
 
     public String getJobNameText() {
@@ -68,34 +128,51 @@ public class AppProfile {
     }
 
     public String getJobCreationDateTimeText() {
-        return jobCreationDateTimeText;
+        return this.jobCreationDateTimeText;
     }
 
     public String getExpectedJobOutputText() {
-        return expectedJobOutputText;
+        return this.expectedJobOutputText;
     }
 
-    public void setAppCreationDateTimeText() {
-        this.appCreationDateTimeText = getCurrentDateTimeValue(TIME_ZONE);
+    public void setAppInitCreationDateTimeText() {
+        this.appInitCreationDateTimeText = getCurrentDateTimeValue(TIME_ZONE);
     }
 
     public void setJobCreationDateTimeText() {
         this.jobCreationDateTimeText = getCurrentDateTimeValue(TIME_ZONE);
     }
 
-    public static AppProfile getMainApp() {
-        return new AppProfile(getMainAppName(), getMainAppTitle(),
-                getMainAppJobScriptBody(), appCreationDateTimeText,
-                getMainAppReadMeRowText(), getMainAppReadMeRichText(),
-                getMainAppJobName(), jobCreationDateTimeText,
-                getMainAppExpJobOutput());
+    public void setAppCurRevNameText(String name) {
+        this.appCurRevNameText = name;
     }
 
-    public static AppProfile getUpdatedApp() {
-        return new AppProfile(getMainAppName(), getUpdatedAppTitle(),
-                getMainAppJobScriptBody(), appCreationDateTimeText,
-                getMainAppReadMeRowText(), getMainAppReadMeRichText(),
-                getMainAppJobName(), jobCreationDateTimeText,
-                getMainAppExpJobOutput());
+    public void setAppCurRevTitleText(String title) {
+        this.appCurRevTitleText = title;
     }
+
+    public void setAppCurRevScriptCodeText(String code) {
+        this.appCurRevScriptCodeText = code;
+    }
+
+    public void setAppCurRevCreationDateTimeText() {
+        this.appCurRevCreationDateTimeText =  getCurrentDateTimeValue(TIME_ZONE);
+    }
+
+    public void setAppCurRevReadMeRowText(String row) {
+        this.appCurRevReadMeRowText = row;
+    }
+
+    public void setAppCurRevReadMeRichText(String rich) {
+        this.appCurRevReadMeRichText = rich;
+    }
+
+    public void setAppTempReadMeRowText(String row) {
+        this.appTempReadMeRowText = row;
+    }
+
+    public void setAppTempReadMeRichText(String rich) {
+        this.appTempReadMeRichText = rich;
+    }
+
 }

@@ -1,0 +1,11 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Login/logout suite">
+    <test name="Login/logout test">
+        <classes>
+            <class name="staging.cases.LoginTest"/>
+            <class name="staging.cases.OpenAllPagesTest"/>
+            <class name="staging.cases.AppsManagementTest"/>
+            <class name="staging.cases.NotesManagementTest"/>
+        </classes>
+    </test>
+</suite>

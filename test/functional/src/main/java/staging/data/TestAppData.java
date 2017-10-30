@@ -1,10 +1,58 @@
 package staging.data;
 
+import staging.model.AppProfile;
+
 import static staging.data.TestCommonData.getTestRunUniqueFinalValue;
 
 public class TestAppData {
 
-    public static boolean isAppTitleEditedFlag = false;
+    public static AppProfile mainProfile = new AppProfile(
+            getMainAppName(), getMainAppTitle(),
+            getMainAppJobScriptBody(), "",
+            getMainAppReadMeRowText(), getMainAppReadMeRichText(),
+            getMainAppName(), getMainAppTitle(),
+            getMainAppJobScriptBody(), "",
+            "", "",
+            "", "",
+            getMainAppJobName(), "",
+            getMainAppExpJobOutput()
+    );
+
+    public static AppProfile runJobProfile = new AppProfile(
+            getAppForJobName(), getAppForJobTitle(),
+            getMainAppJobScriptBody(), "",
+            "", "",
+            getAppForJobName(), getAppForJobTitle(),
+            getMainAppJobScriptBody(), "",
+            "", "",
+            "", "",
+            getMainAppJobName(), "",
+            getMainAppExpJobOutput()
+    );
+
+    public static AppProfile checkRevisionProfile = new AppProfile(
+            getCheckRevAppName(), getCheckRevAppTitle(),
+            getCheckRevAppJobScriptBody(), "",
+            getCheckRevAppReadMeRowText(), getCheckRevAppReadMeRichText(),
+            getCheckRevAppName(), getCheckRevAppTitle(),
+            getCheckRevAppJobScriptBody(), "",
+            "", "",
+            "", "",
+            getCheckRevAppJobName(), "",
+            getCheckRevAppExpJobOutput()
+    );
+
+    public static AppProfile getMainProfile() {
+        return mainProfile;
+    }
+
+    public static AppProfile getRunJobProfile() {
+        return runJobProfile;
+    }
+
+    public static AppProfile getCheckRevProfile() {
+        return checkRevisionProfile;
+    }
 
     public static final String TIME_ZONE = "GMT";
 
@@ -12,39 +60,62 @@ public class TestAppData {
 
     static final String CREATE_APP_TITLE_PREFIX = "autotest_app_title_";
 
+    static final String CREATE_APP_NAME_FOR_JOB_PREFIX = "job_run_app_name_";
+
+    static final String CREATE_APP_TITLE_FOR_JOB_PREFIX = "job_run_app_title_";
+
     static final String CREATE_APP_JOB_NAME_PREFIX = "autotest_app_job_";
 
     static final String CREATE_APP_SCRIPT_BODY_PREFIX_1 = "echo ";
 
+    static final String CREATE_APP_PREFIX_CHECK_REV = "check rev ";
+
     public static final String CREATE_APP_SCRIPT_BODY_PREFIX_2 = "auto__";
 
-    public static final String EDIT_APP_README_ROW_PREFIX = "# __Auto__ *test* app ";
+    public static final String EDIT_APP_README_ROW_PREFIX = "# __Auto__ *readme* app ";
 
-    public static final String EDIT_APP_README_RICH_PREFIX = "Auto test app ";
+    public static final String EDIT_APP_README_RICH_PREFIX = "Auto readme app ";
 
     public static final String EDIT_APP_COMMENT_PREFIX = "Auto test app comment ";
 
-    public static final String ADDITIONAL_PART_FOR_EDIT = "_NEW";
+    //--------------------------
+
+    public static final String getCheckRevAppName() {
+        return CREATE_APP_PREFIX_CHECK_REV + CREATE_APP_NAME_PREFIX + getTestRunUniqueFinalValue();
+    }
+
+    public static final String getCheckRevAppTitle() {
+        return CREATE_APP_PREFIX_CHECK_REV + CREATE_APP_TITLE_PREFIX + getTestRunUniqueFinalValue();
+    }
+
+    public static final String getCheckRevAppJobScriptBody() {
+        return CREATE_APP_SCRIPT_BODY_PREFIX_1 + getAppJobCheckRevScriptOutput();
+    }
+
+    public static final String getAppJobCheckRevScriptOutput() {
+        return CREATE_APP_SCRIPT_BODY_PREFIX_2 + getTestRunUniqueFinalValue() + "check_rev";
+    }
+
+    public static final String getCheckRevAppReadMeRowText() {
+        return EDIT_APP_README_ROW_PREFIX + getTestRunUniqueFinalValue() + "check_rev";
+    }
+
+    public static final String getCheckRevAppReadMeRichText() {
+        return EDIT_APP_README_RICH_PREFIX + getTestRunUniqueFinalValue() + "check_rev";
+    }
+
+    public static final String getCheckRevAppJobName() {
+        return CREATE_APP_PREFIX_CHECK_REV + CREATE_APP_JOB_NAME_PREFIX + getTestRunUniqueFinalValue();
+    }
+
+    public static final String getCheckRevAppExpJobOutput() {
+        return getAppJobCheckRevScriptOutput();
+    }
+
+    //--------------------------
 
     public static final String getAppJobScriptOutput() {
         return CREATE_APP_SCRIPT_BODY_PREFIX_2 + getTestRunUniqueFinalValue();
-    }
-
-    public static void setIsAppTitleEditedFlag(boolean flag) {
-        isAppTitleEditedFlag = flag;
-    }
-
-    public static String getAdditionalEditPartString() {
-        return ADDITIONAL_PART_FOR_EDIT;
-    }
-
-    public static String getAddonForAppTitle() {
-        if (isAppTitleEditedFlag) {
-            return getAdditionalEditPartString();
-        }
-        else {
-            return "";
-        }
     }
 
     public static final String getMainAppJobScriptBody() {
@@ -60,7 +131,7 @@ public class TestAppData {
     }
 
     public static final String getMainAppTitle() {
-        return CREATE_APP_TITLE_PREFIX + getTestRunUniqueFinalValue() + getAddonForAppTitle();
+        return CREATE_APP_TITLE_PREFIX + getTestRunUniqueFinalValue();
     }
 
     public static String getMainAppReadMeRowText() {
@@ -79,8 +150,12 @@ public class TestAppData {
         return EDIT_APP_COMMENT_PREFIX + getTestRunUniqueFinalValue();
     }
 
-    public static String getUpdatedAppTitle() {
-        return CREATE_APP_TITLE_PREFIX + getTestRunUniqueFinalValue() + getAdditionalEditPartString();
+    public static final String getAppForJobName() {
+        return CREATE_APP_NAME_FOR_JOB_PREFIX + getTestRunUniqueFinalValue();
+    }
+
+    public static final String getAppForJobTitle() {
+        return CREATE_APP_TITLE_FOR_JOB_PREFIX + getTestRunUniqueFinalValue();
     }
 
 }

@@ -7,17 +7,14 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.testng.annotations.*;
 import staging.locators.CommonLocators;
-import staging.model.AppProfile;
 import staging.model.User;
-import staging.pages.StartPage;
-import staging.pages.CommonPage;
 import staging.pages.login.GrantAccessLoginPage;
 import staging.pages.login.LoginPage;
+import staging.pages.overview.OverviewPage;
 import staging.utils.SettingsProperties;
 import staging.utils.Utils;
 import tools.CustomResultListener;
@@ -28,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
 import static staging.data.TestCommonData.*;
 import static staging.utils.Utils.*;
 
@@ -47,6 +45,13 @@ public abstract class AbstractTest {
 
     @AfterClass(alwaysRun = true)
     public void tearDown() throws Exception {
+        try {
+            driver.switchTo().alert();
+            alertAccept(1, 100);
+        }
+        catch (NoAlertPresentException Ex)
+        { //
+        }
         closeBrowser();
     }
 
@@ -62,9 +67,7 @@ public abstract class AbstractTest {
         }
     }
 
-    public void reopenBrowser() {
-        closeBrowser();
-        log.info("reopen browser");
+    public void openBrowser() {
         driver = new DriverFactory().getInstance().getDriver();
     }
 
@@ -89,6 +92,7 @@ public abstract class AbstractTest {
 
     @AfterMethod(alwaysRun = true)
     public void afterCase() {
+
         if (getFinishedCaseStatus().equals(CASE_STATUS_PASSED)) {
             casePostActions(CASE_STATUS_PASSED,
                     getFinishedCaseName(),
@@ -141,12 +145,6 @@ public abstract class AbstractTest {
         printLine();
     }
 
-    @Test
-    public StartPage openStartPage() {
-        driver.get(SettingsProperties.getProperty("startURL"));
-        return new StartPage(driver);
-    }
-
     public void moveLogFile(String fileName) {
         String oldPath = getDebugLogFolder() + fileName;
         File file = new File(oldPath);
@@ -170,41 +168,27 @@ public abstract class AbstractTest {
         return title;
     }
 
-    public boolean isPageTitleCorrect(String expectedTitle) {
-        String actualTitle = getPageTitle();
-        log.info("actual page title is: " + actualTitle);
-        if (actualTitle.contains(expectedTitle)) {
-            return true;
-        }
-        else {
-            log = Logger.getLogger("ERROR");
-            log.info("but it does not contain expected string: " + expectedTitle);
-            return false;
-        }
-    }
-
-    public CommonPage openCommonPage() {
+    public OverviewPage openOverviewPage() {
         driver.findElement(By.xpath(CommonLocators.MAIN_LOGO)).click();
-        return new CommonPage(driver);
+        return new OverviewPage(driver);
     }
 
     public LoginPage openLoginPage(String basicAuthUser, String basicAuthPassword) {
         log.info("open Login page");
 
-        String url = "https://" + basicAuthUser +
-                ":" + basicAuthPassword + "" +
-                "@staging.dnanexus.com/login?scope=%7B%22full%22%3A+true%7D&redirect_uri=" +
-                "https%3A%2F%2F52.90.134.199%2Freturn_from_login&client_id=precision_fda";
+        String loginPageURL = SettingsProperties.getProperty("loginPageURL");
 
-        driver.get(url);
+        loginPageURL = loginPageURL.replace("{basicAuthUser}", basicAuthUser).replace("{basicAuthPassword}", basicAuthPassword);
+
+        driver.get(loginPageURL);
         return new LoginPage(driver);
     }
 
-    public CommonPage correctLoginToFDA(User user) {
+    public OverviewPage correctLoginToFDA(User user) {
         LoginPage loginPage = openLoginPage(user.getBasicAuthUsername(), user.getBasicAuthPassword());
         GrantAccessLoginPage grantAccessLoginPage = loginPage.correctLoginToPrecisionFDA(user.getApplUsername(), user.getApplPassword());
-        CommonPage commonPage = grantAccessLoginPage.grantAccess();
-        return commonPage;
+        OverviewPage overviewPage = grantAccessLoginPage.grantAccess();
+        return overviewPage;
     }
 
     public LoginPage wrongLoginToFDA(User user) {
@@ -218,7 +202,7 @@ public abstract class AbstractTest {
                 .withTimeout(timeOutInSeconds, SECONDS)
                 .pollingEvery(sleepInMillis, MILLISECONDS)
                 .ignoring(TimeoutException.class);
-        Alert alert = fluentWait.until(ExpectedConditions.alertIsPresent());
+        Alert alert = fluentWait.until(alertIsPresent());
         if (alert != null) {
             alert.accept();
         }

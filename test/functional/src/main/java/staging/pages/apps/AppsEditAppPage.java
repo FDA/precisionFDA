@@ -13,8 +13,6 @@ import staging.locators.CommonLocators;
 import staging.model.AppProfile;
 import staging.pages.AbstractPage;
 
-import static staging.data.TestAppData.setIsAppTitleEditedFlag;
-
 public class AppsEditAppPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
@@ -108,26 +106,22 @@ public class AppsEditAppPage extends AbstractPage {
         return getEditVMEnvInstanceDrop().getFirstSelectedOption().isDisplayed();
     }
 
-    public AppsSavedAppPage saveRevision() {
+    public AppsSavedAppPage saveRevision(AppProfile appProfile) {
         log.info("click save revision");
         getEditAppSaveRevisionButton().click();
+        appProfile.setAppCurRevCreationDateTimeText();
         return new AppsSavedAppPage(getDriver());
     }
 
-    public AppsEditAppPage enterNewAppTitle(AppProfile appProfile) {
-        log.info("edit New App title");
+    public void fillTitleInput(String title) {
         getAppsNewAppTitleInput().clear();
-        setIsAppTitleEditedFlag(true);
-        getAppsNewAppTitleInput().sendKeys(appProfile.getAppTitleText());
-        return new AppsEditAppPage(getDriver());
+        getAppsNewAppTitleInput().sendKeys(title);
     }
 
-    public AppsEditAppPage editReadmeTab(AppProfile appProfile) {
-        log.info("open and edit ReadMe tab");
+    public void fillReadmeTab(String readMeRowText) {
         getEditAppReadmeTab().click();
         getEditAppReadmeTextArea().clear();
-        getEditAppReadmeTextArea().sendKeys(appProfile.getReadMeRowText());
-        return new AppsEditAppPage(getDriver());
+        getEditAppReadmeTextArea().sendKeys(readMeRowText);
     }
 
     public AppsEditAppPage openReadmeReviewTab() {
@@ -143,4 +137,30 @@ public class AppsEditAppPage extends AbstractPage {
         waitUntilDisplayed(getEditVMEnvInstancePackageInput());
         return new AppsEditAppPage(getDriver());
     }
+
+    public AppsSavedAppPage saveRevisionAfterReadmeEdit(AppProfile appProfile) {
+        appProfile.setAppCurRevReadMeRowText(appProfile.getTempReadMeRowText());
+        appProfile.setAppCurRevReadMeRichText(appProfile.getTempReadMeRichText());
+        AppsSavedAppPage appsSavedAppPage = saveRevision(appProfile);
+        return  appsSavedAppPage;
+    }
+
+    public void openScriptTab() {
+        getEditAppScriptTab().click();
+    }
+
+    public Link getEditAppScriptTab() {
+        return editAppScriptTab;
+    }
+
+    public TextInput getEditAppScriptTextArea() {
+        return editAppScriptTextArea;
+    }
+
+    public void fillScriptArea(String script) {
+        openScriptTab();
+        getEditAppScriptTextArea().clear();
+        getEditAppScriptTextArea().sendKeys(script);
+    }
+
 }

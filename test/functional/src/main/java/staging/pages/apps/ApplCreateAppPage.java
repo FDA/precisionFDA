@@ -38,6 +38,12 @@ public class ApplCreateAppPage extends AbstractPage {
     @FindBy(xpath = AppsLocators.APPS_SAVED_APP_SAVE_REVISION_BUTTON)
     private WebElement editAppSaveRevisionButton;
 
+    @FindBy(xpath = AppsLocators.APPS_EDIT_APP_README_TAB_LINK)
+    private Link editAppReadmeTab;
+
+    @FindBy(xpath = AppsLocators.APPS_EDIT_APP_README_TEXTAREA)
+    private TextInput editAppReadmeTextArea;
+
     public ApplCreateAppPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_EDIT_APP_NAME_INPUT));
@@ -49,6 +55,10 @@ public class ApplCreateAppPage extends AbstractPage {
 
     public Link getEditAppScriptTab() {
         return editAppScriptTab;
+    }
+
+    public TextInput getEditAppReadmeTextArea() {
+        return editAppReadmeTextArea;
     }
 
     public TextInput getAppsNewAppTitleInput() {
@@ -63,24 +73,32 @@ public class ApplCreateAppPage extends AbstractPage {
         return appCreateAppButton;
     }
 
+    public Link getEditAppReadmeTab() {
+        return editAppReadmeTab;
+    }
+
+
+
     public boolean isNewAppNameInputDisplayed() {
         return isElementPresent(getAppsNewAppNameInput());
     }
 
-    public ApplCreateAppPage fillCreateAppForm(AppProfile appProfile) {
+    public ApplCreateAppPage fillCreateAppForm(String name, String title, String script, String readmeRow) {
         log.info("fill Create App form");
-        getAppsNewAppNameInput().sendKeys(appProfile.getAppNameText());
-        getAppsNewAppTitleInput().sendKeys(appProfile.getAppTitleText());
+        getAppsNewAppNameInput().sendKeys(name);
+        getAppsNewAppTitleInput().sendKeys(title);
         waitUntilDisplayed(By.xpath(AppsLocators.APPS_EDIT_APP_SCRIPT_TAB_LINK));
         getEditAppScriptTab().click();
-        getEditAppScriptTextArea().sendKeys(appProfile.getAppScriptCodeText());
+        getEditAppScriptTextArea().sendKeys(script);
+        getEditAppReadmeTab().click();
+        getEditAppReadmeTextArea().sendKeys(readmeRow);
         return new ApplCreateAppPage(getDriver());
     }
 
     public AppsSavedAppPage clickCreate(AppProfile appProfile) {
         log.info("click Create button");
         getAppCreateAppButton().click();
-        appProfile.setAppCreationDateTimeText();
+        appProfile.setAppInitCreationDateTimeText();
         return new AppsSavedAppPage(getDriver());
     }
 }

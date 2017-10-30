@@ -7,7 +7,7 @@ import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Button;
 import staging.locators.GrantAccessLoginLocators;
 import staging.pages.AbstractPage;
-import staging.pages.CommonPage;
+import staging.pages.overview.OverviewPage;
 
 public class GrantAccessLoginPage extends AbstractPage {
 
@@ -21,10 +21,10 @@ public class GrantAccessLoginPage extends AbstractPage {
         waitForPageToLoadAndVerifyBy(By.xpath(GrantAccessLoginLocators.GrantAccessButton));
     }
 
-    public CommonPage grantAccess() {
+    public OverviewPage grantAccess() {
         log.info("grant access");
         grantAccessButton.click();
-        return new CommonPage(getDriver());
+        return new OverviewPage(getDriver());
     }
 
 

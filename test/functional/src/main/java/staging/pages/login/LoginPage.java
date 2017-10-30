@@ -54,10 +54,6 @@ public class LoginPage extends AbstractPage {
         return new LoginPage(getDriver());
     }
 
-    public boolean isNavigationPanelNotDisplayed() {
-        return !isElementPresent(getNavigationPanelWE(), 2);
-    }
-
     public boolean isNavigationPanelDisplayed() {
         return isElementPresent(getNavigationPanelWE(), 2);
     }
@@ -72,6 +68,10 @@ public class LoginPage extends AbstractPage {
 
     public boolean isWrongCredsMessageDisplayed() {
         return isElementPresent(getLoginWrongCredsMessage());
+    }
+
+    public String getLoginWrongCredsMessageText() {
+        return getLoginWrongCredsMessage().getText();
     }
 
 }
