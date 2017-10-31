@@ -9,6 +9,7 @@ import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import staging.locators.CommonLocators;
 import staging.locators.LoginLocators;
+import staging.model.User;
 import staging.pages.AbstractPage;
 
 public class LoginPage extends AbstractPage {
@@ -38,22 +39,6 @@ public class LoginPage extends AbstractPage {
         waitForPageToLoadAndVerifyBy(By.xpath(LoginLocators.LOGIN_PASSWORD_INPUT), 180);
     }
 
-    public GrantAccessLoginPage correctLoginToPrecisionFDA(String FDAUsername, String FDAPassword) {
-        log.info("login to PrecisionFDA page");
-        loginUsernameInput.sendKeys(FDAUsername);
-        loginPasswordInput.sendKeys(FDAPassword);
-        loginSubmitButton.click();
-        return new GrantAccessLoginPage(getDriver());
-    }
-
-    public LoginPage wrongLoginToPrecisionFDA(String FDAUsername, String FDAPassword) {
-        log.info("login to PrecisionFDA page");
-        loginUsernameInput.sendKeys(FDAUsername);
-        loginPasswordInput.sendKeys(FDAPassword);
-        loginSubmitButton.click();
-        return new LoginPage(getDriver());
-    }
-
     public boolean isNavigationPanelDisplayed() {
         return isElementPresent(getNavigationPanelWE(), 2);
     }
@@ -66,12 +51,24 @@ public class LoginPage extends AbstractPage {
         return loginWrongCredsMessage;
     }
 
-    public boolean isWrongCredsMessageDisplayed() {
-        return isElementPresent(getLoginWrongCredsMessage());
-    }
-
     public String getLoginWrongCredsMessageText() {
         return getLoginWrongCredsMessage().getText();
+    }
+
+    public GrantAccessLoginPage correctLogin(User user) {
+        log.info("correct login to PrecisionFDA page");
+        loginUsernameInput.sendKeys(user.getApplUsername());
+        loginPasswordInput.sendKeys(user.getApplPassword());
+        loginSubmitButton.click();
+        return new GrantAccessLoginPage(getDriver());
+    }
+
+    public LoginPage wrongLogin(User user) {
+        log.info("wrong login to PrecisionFDA page");
+        loginUsernameInput.sendKeys(user.getApplUsername());
+        loginPasswordInput.sendKeys(user.getApplPassword());
+        loginSubmitButton.click();
+        return new LoginPage(getDriver());
     }
 
 }

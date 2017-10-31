@@ -31,32 +31,60 @@ public class ProfileDropBlock extends AbstractBlock {
     @FindBy(xpath = ProfileDropBlockLocators.PROFILE_DROPDOWN_MANAGE_LOGOUT_ITEM)
     private Link logoutLink;
 
+    public Link getProfileLink() {
+        return profileLink;
+    }
+
+    public Link getAboutLink() {
+        return aboutLink;
+    }
+
+    public Link getManageLicensesLink() {
+        return manageLicensesLink;
+    }
+
+    public Link getDocsLink() {
+        return docsLink;
+    }
+
+    public Link getPublicProfileLink() {
+        return publicProfileLink;
+    }
+
+    public Link getGuidelinesLink() {
+        return guidelinesLink;
+    }
+
+    public Link getLogoutLink() {
+        return logoutLink;
+    }
+
     public void openProfilePage() {
-        profileLink.click();
+        getProfileLink().click();
     }
 
     public void openPublicProfilePage() {
-        publicProfileLink.click();
+        getPublicProfileLink().click();
     }
 
     public void openLicensesPage() {
-        manageLicensesLink.click();
+        getManageLicensesLink().click();
     }
 
     public void openAboutPage() {
-        aboutLink.click();
+        getAboutLink().click();
     }
 
     public void openGuidelinesPage() {
-        guidelinesLink.click();
+        getGuidelinesLink().click();
     }
 
     public void openDocsPage() {
-        docsLink.click();
+        getDocsLink().click();
     }
 
     public void logout() {
-        logoutLink.click();
+        getLogoutLink().click();
     }
 
 }

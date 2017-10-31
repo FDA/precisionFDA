@@ -39,32 +39,59 @@ public class AppProfile {
 
     private String expectedJobOutputText;
 
-    public AppProfile(final String appInitNameText, final String appInitTitleText,
-                      final String appInitScriptCodeText, final String appInitCreationDateTimeText,
-                      final String appInitReadMeRowText, final String appInitReadMeRichText,
-                      final String appCurRevNameText, final String appCurRevTitleText,
-                      final String appCurRevScriptCodeText, final String appCurRevCreationDateTimeText,
-                      final String appCurRevReadMeRowText, final String appCurRevReadMeRichText,
-                      final String appTempReadMeRowText, final String appTempReadMeRichText,
-                      final String jobNameText, final String jobCreationDateTimeText,
-                      final String expectedJobOutputText) {
+    private String appCommentCreatedText;
+
+    public AppProfile(final String appInitNameText,
+                      final String appCurRevNameText,
+
+                      final String appInitTitleText,
+                      final String appCurRevTitleText,
+
+                      final String appInitScriptCodeText,
+                      final String appCurRevScriptCodeText,
+
+                      final String appInitReadMeRowText,
+                      final String appTempReadMeRowText,
+                      final String appCurRevReadMeRowText,
+
+                      final String appInitReadMeRichText,
+                      final String appTempReadMeRichText,
+                      final String appCurRevReadMeRichText,
+
+                      final String appInitCreationDateTimeText,
+                      final String appCurRevCreationDateTimeText,
+
+                      final String jobNameText,
+                      final String jobCreationDateTimeText,
+                      final String expectedJobOutputText,
+
+                      final String appCommentCreatedText) {
+
         this.appInitNameText = appInitNameText;
-        this.appInitTitleText = appInitTitleText;
-        this.appInitScriptCodeText = appInitScriptCodeText;
-        this.appInitCreationDateTimeText = appInitCreationDateTimeText;
-        this.appInitReadMeRowText = appInitReadMeRowText;
-        this.appInitReadMeRichText = appInitReadMeRichText;
         this.appCurRevNameText = appCurRevNameText;
+
+        this.appInitTitleText = appInitTitleText;
         this.appCurRevTitleText = appCurRevTitleText;
+
+        this.appInitScriptCodeText = appInitScriptCodeText;
         this.appCurRevScriptCodeText = appCurRevScriptCodeText;
-        this.appCurRevCreationDateTimeText = appCurRevCreationDateTimeText;
-        this.appCurRevReadMeRowText = appCurRevReadMeRowText;
-        this.appCurRevReadMeRichText = appCurRevReadMeRichText;
+
+        this.appInitReadMeRowText = appInitReadMeRowText;
         this.appTempReadMeRowText = appTempReadMeRowText;
+        this.appCurRevReadMeRowText = appCurRevReadMeRowText;
+
+        this.appInitReadMeRichText = appInitReadMeRichText;
         this.appTempReadMeRichText = appTempReadMeRichText;
+        this.appCurRevReadMeRichText = appCurRevReadMeRichText;
+
+        this.appInitCreationDateTimeText = appInitCreationDateTimeText;
+        this.appCurRevCreationDateTimeText = appCurRevCreationDateTimeText;
+
         this.jobNameText = jobNameText;
         this.jobCreationDateTimeText = jobCreationDateTimeText;
         this.expectedJobOutputText = expectedJobOutputText;
+
+        this.appCommentCreatedText = appCommentCreatedText;
     }
 
     public String getAppInitNameText() {
@@ -127,6 +154,10 @@ public class AppProfile {
         return jobNameText;
     }
 
+    public String getAppCommentCreatedText() {
+        return appCommentCreatedText;
+    }
+
     public String getJobCreationDateTimeText() {
         return this.jobCreationDateTimeText;
     }
@@ -136,11 +167,19 @@ public class AppProfile {
     }
 
     public void setAppInitCreationDateTimeText() {
-        this.appInitCreationDateTimeText = getCurrentDateTimeValue(TIME_ZONE);
+        this.appInitCreationDateTimeText = getCurrentDateTimeValue(DEFAULT_TIME_ZONE);
+    }
+
+    public void setAppInitCreationDateTimeText(String timezone) {
+        this.appInitCreationDateTimeText = getCurrentDateTimeValue(timezone);
     }
 
     public void setJobCreationDateTimeText() {
-        this.jobCreationDateTimeText = getCurrentDateTimeValue(TIME_ZONE);
+        this.jobCreationDateTimeText = getCurrentDateTimeValue(DEFAULT_TIME_ZONE);
+    }
+
+    public void setJobCreationDateTimeText(String timezone) {
+        this.jobCreationDateTimeText = getCurrentDateTimeValue(timezone);
     }
 
     public void setAppCurRevNameText(String name) {
@@ -156,7 +195,11 @@ public class AppProfile {
     }
 
     public void setAppCurRevCreationDateTimeText() {
-        this.appCurRevCreationDateTimeText =  getCurrentDateTimeValue(TIME_ZONE);
+        this.appCurRevCreationDateTimeText = getCurrentDateTimeValue(DEFAULT_TIME_ZONE);
+    }
+
+    public void setAppCurRevCreationDateTimeText(String timezone) {
+        this.appCurRevCreationDateTimeText =  getCurrentDateTimeValue(timezone);
     }
 
     public void setAppCurRevReadMeRowText(String row) {
@@ -173,6 +216,22 @@ public class AppProfile {
 
     public void setAppTempReadMeRichText(String rich) {
         this.appTempReadMeRichText = rich;
+    }
+
+    public void setAppInitNameText(String name) {
+        this.appInitNameText = name;
+    }
+
+    public void setAppInitTitleText(String title) {
+        this.appInitTitleText = title;
+    }
+
+    public void setAppCommentCreatedText() {
+        this.appCommentCreatedText = getCurrentDateTimeValue(DEFAULT_TIME_ZONE);
+    }
+
+    public void setAppCommentCreatedText(String timezone) {
+        this.appCommentCreatedText = getCurrentDateTimeValue(timezone);
     }
 
 }

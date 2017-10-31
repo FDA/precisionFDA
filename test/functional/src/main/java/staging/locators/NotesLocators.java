@@ -71,4 +71,6 @@ public class NotesLocators {
     public static final String NOTES_SAVED_NOTE_FIRST_COMMENT = "//*[@class='pfda-comments']/*[@class='pfda-comment'][1]//p";
 
     public static final String NOTES_EDIT_NOTE_BACK_BUTTON = "//a[text()='Back']";
+
+    public static final String NOTES_SUBMITTED_COMMENT_TIME = "//*[contains(@class, 'comment-actions')]/li[3]";
 }

@@ -8,14 +8,14 @@ import org.openqa.selenium.support.FindBy;
 import staging.locators.GuidelinesLocators;
 import staging.pages.AbstractPage;
 
-public class guidelinesPage extends AbstractPage {
+public class GuidelinesPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
 
     @FindBy(xpath = GuidelinesLocators.GUIDELINES_CAROUSEL)
     private WebElement guidelinesCarousel;
 
-    public guidelinesPage(final WebDriver driver) {
+    public GuidelinesPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(GuidelinesLocators.GUIDELINES_CAROUSEL));
     }

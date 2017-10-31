@@ -1,11 +1,13 @@
 package staging.cases;
 
 import org.testng.annotations.Test;
+import ru.yandex.qatools.htmlelements.annotations.Name;
 import staging.model.User;
 import staging.pages.StartPage;
 import staging.pages.login.LoginPage;
 import staging.pages.overview.OverviewPage;
 
+@Name("Login test suite")
 public class LoginTest extends AbstractTest {
 
     @Test
@@ -15,7 +17,7 @@ public class LoginTest extends AbstractTest {
         User user = User.getTestUser();
 
         openBrowser();
-        OverviewPage overviewPage = correctLoginToFDA(user);
+        OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(
                 overviewPage.isNavigationPanelDisplayed())
@@ -38,7 +40,7 @@ public class LoginTest extends AbstractTest {
         User user = User.getTestUser();
 
         openBrowser();
-        OverviewPage overviewPage = correctLoginToFDA(user);
+        OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
         StartPage startPage = overviewPage.logout();
 
         SoftAssert.assertThat(
@@ -62,7 +64,7 @@ public class LoginTest extends AbstractTest {
         User user = User.getWrongUser();
 
         openBrowser();
-        LoginPage loginPage = wrongLoginToFDA(user);
+        LoginPage loginPage = openLoginPage(user).wrongLogin(user);
 
         SoftAssert.assertThat(
                 loginPage.isNavigationPanelDisplayed())

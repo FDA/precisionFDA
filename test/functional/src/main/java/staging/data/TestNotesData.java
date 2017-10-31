@@ -3,6 +3,7 @@ package staging.data;
 import staging.model.NoteProfile;
 
 import static staging.data.TestCommonData.getTestRunUniqueFinalValue;
+import static staging.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class TestNotesData {
 
@@ -20,28 +21,26 @@ public class TestNotesData {
 
     public static final String NOTE_TO_EDIT_RICH_BODY_PREFIX = "Auto test edit note ";
 
-    public static final String ADDITIONAL_PART_FOR_EDIT = "_UPDATE";
-
     public static final String NOTE_COMMENT_PREFIX = "Auto test note comment ";
 
-    public static final String TIME_ZONE = "GMT";
+    public static final String DEFAULT_TIME_ZONE = "GMT";
 
-    public static NoteProfile mainNote = new NoteProfile(getNewMainTitleText(), getNewMainRowBodyText(), getNewMainRichBodyText(), "");
+    public static NoteProfile mainNote = new NoteProfile(getNewMainTitleText(), getNewMainRowBodyText(), getNewMainRichBodyText(), "", "");
 
-    public static NoteProfile noteToDelete = new NoteProfile(getTitleToDeleteText(), getRowBodyToDeleteText(), getRichBodyToDeleteText(), "");
-
-    public static NoteProfile noteToEdit = new NoteProfile(getTitleToEditText(), getRowBodyToEditText(), getRichBodyToEditText(), "");
-
-    public static NoteProfile getMainNote() {
-        return mainNote;
+    public static NoteProfile getNoteToDelete() {
+        return new NoteProfile(getTitleToDeleteText(), getRowBodyToDeleteText(), getRichBodyToDeleteText(), "", "");
     }
 
     public static NoteProfile getNoteToEdit() {
-        return noteToEdit;
+        return new NoteProfile(getTitleToEditText(), getRowBodyToEditText(), getRichBodyToEditText(), "", "");
     }
 
-    public static NoteProfile getNoteToDelete() {
-        return noteToDelete;
+    public static NoteProfile getNoteTimeZone() {
+        return new NoteProfile(getTimeZoneTitleText(), getNewMainRowBodyText(), getNewMainRichBodyText(), "", "");
+    }
+
+    public static NoteProfile getMainNote() {
+        return mainNote;
     }
 
     public static String getNewMainTitleText() {
@@ -84,8 +83,8 @@ public class TestNotesData {
         return NOTE_TO_EDIT_RICH_BODY_PREFIX + getTestRunUniqueFinalValue();
     }
 
-    public static String getAddon() {
-        return ADDITIONAL_PART_FOR_EDIT;
+    public static String getTimeZoneTitleText() {
+        return NEW_NOTE_TITLE_PREFIX + getRunTimeLocalUniqueValue() + " " + TestCommonData.getCurrentTimezone();
     }
 
 

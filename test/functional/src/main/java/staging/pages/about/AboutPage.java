@@ -51,25 +51,25 @@ public class AboutPage extends AbstractPage {
 
     public AboutWhyPage openAboutWhyPage() {
         log.info("open About.Why Page");
-        aboutWhyTabLink.click();
+        getAboutWhyLink().click();
         return new AboutWhyPage(getDriver());
     }
 
     public AboutWhatPage openAboutWhatPage() {
         log.info("open About.What Page");
-        aboutWhatTabLink.click();
+        getAboutWhatLink().click();
         return new AboutWhatPage(getDriver());
     }
 
     public AboutWhoPage openAboutWhoPage() {
         log.info("open About.Who Page");
-        aboutWhoTabLink.click();
+        getAboutWhoLink().click();
         return new AboutWhoPage(getDriver());
     }
 
     public AboutHowPage openAboutHowPage() {
         log.info("open About.How Page");
-        aboutHowTabLink.click();
+        getAboutHowLink().click();
         return new AboutHowPage(getDriver());
     }
 

@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
+import staging.data.TestCommonData;
 import staging.locators.NotesLocators;
 import staging.model.NoteProfile;
 import staging.pages.AbstractPage;
@@ -31,6 +32,9 @@ public class NotesPage extends AbstractPage {
     @FindBy(xpath = NotesLocators.NOTES_LIST_SUCCESS_MESSAGE)
     private WebElement notesSuccessMessageWE;
 
+    @FindBy(xpath = NotesLocators.NOTES_LIST_FIRST_NOTE_CREATED)
+    private WebElement firstNoteCreatedWE;
+
     public NotesPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(NotesLocators.NOTES_PAGINATION_AREA));
@@ -52,6 +56,14 @@ public class NotesPage extends AbstractPage {
         return notesNewNoteLink;
     }
 
+    public WebElement getFirstNoteCreatedWE() {
+        return firstNoteCreatedWE;
+    }
+
+    public String getFirstNoteCreatedText() {
+        return getFirstNoteCreatedWE().getText();
+    }
+
     public NotesMyNotesPage openNotesMyNotesPage() {
         log.info("open Notes.MyNotes page");
         getNotesMyNotesLink().click();
@@ -70,18 +82,18 @@ public class NotesPage extends AbstractPage {
         return new NotesExplorePage(getDriver());
     }
 
-    public NotesEditNotePage openNotesNewNotePage() {
+    public NotesEditNotePage openNewNotePage() {
         log.info("open Notes.NewNote page");
         sleep(1000);
         getNotesNewNoteLink().click();
         return new NotesEditNotePage(getDriver());
     }
 
-    public NotesEditNotePage openNotesNewNotePage(NoteProfile noteProfile) {
+    public NotesEditNotePage openNewNotePage(NoteProfile noteProfile) {
         log.info("open Notes.NewNote page");
         sleep(1000);
         getNotesNewNoteLink().click();
-        noteProfile.setCreatedNoteText();
+        noteProfile.setNoteCreatedText(TestCommonData.getCurrentTimezone());
         return new NotesEditNotePage(getDriver());
     }
 
@@ -117,7 +129,6 @@ public class NotesPage extends AbstractPage {
         return new NotesSavedNotePage(getDriver());
     }
 
-
     public WebElement getNotesSuccessMessageWE() {
         return notesSuccessMessageWE;
     }
@@ -130,10 +141,6 @@ public class NotesPage extends AbstractPage {
         return isElementPresent(getNotesSuccessMessageWE());
     }
 
-    public NotesEditNotePage createNewNote(NoteProfile noteProfile) {
-        NotesEditNotePage editNotePage = openNotesNewNotePage(noteProfile);
-        editNotePage.fillAndSaveNote(noteProfile);
-        return new NotesEditNotePage(getDriver());
-    }
+
 
 }
