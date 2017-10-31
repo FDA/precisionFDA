@@ -26,7 +26,7 @@ public class NotesManagementTest extends AbstractTest {
         printTestHeader(" -- Login -- ");
 
         User user = User.getTestUser();
-        OverviewPage overviewPage = correctLoginToFDA(user);
+        OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(
                 overviewPage.isNavigationPanelDisplayed())
@@ -45,8 +45,7 @@ public class NotesManagementTest extends AbstractTest {
     public void verifyDataOnNewNotePage() {
         printTestHeader("Test Case: check that correct data is displayed by default on a New Note form");
 
-        OverviewPage overviewPage = openOverviewPage();
-        NotesEditNotePage notesEditNotePage = overviewPage.openNotesPage().openNotesNewNotePage();
+        NotesEditNotePage notesEditNotePage = getCommonPage().openNotesPage().openNewNotePage();
 
         SoftAssert.assertThat(
                 notesEditNotePage.getEnteredTitleText())
@@ -78,10 +77,10 @@ public class NotesManagementTest extends AbstractTest {
 
         NoteProfile noteProfile = getMainNote();
 
-        OverviewPage overviewPage = openOverviewPage();
-        NotesPage notesPage = overviewPage.openNotesPage();
+        NotesPage notesPage = getCommonPage().openNotesPage();
 
-        NotesEditNotePage notesEditNotePage = notesPage.createNewNote(noteProfile);
+        NotesEditNotePage notesEditNotePage = notesPage.openNewNotePage();
+        notesEditNotePage.fillAndSaveNote(noteProfile);
         notesPage = notesEditNotePage.openNotesPage();
 
         assertThat(
@@ -106,11 +105,6 @@ public class NotesManagementTest extends AbstractTest {
                 .as("Created Note Org")
                 .isEqualTo(notesEditNotePage.getCurrentOrg());
 
-        SoftAssert.assertThat(
-                notesPage.getFirstNoteCreatedText())
-                .as("Date/time created")
-                .contains(notesEditNotePage.getExpCreatedText());
-
         SoftAssert.assertAll();
         */
     }
@@ -121,10 +115,10 @@ public class NotesManagementTest extends AbstractTest {
 
         NoteProfile noteProfile = getNoteToDelete();
 
-        OverviewPage overviewPage = openOverviewPage();
-        NotesPage notesPage = overviewPage.openNotesPage();
+        NotesPage notesPage = getCommonPage().openNotesPage();
 
-        NotesEditNotePage notesEditNotePage = notesPage.createNewNote(noteProfile);
+        NotesEditNotePage notesEditNotePage = notesPage.openNewNotePage();
+        notesEditNotePage.fillAndSaveNote(noteProfile);
         notesPage = notesEditNotePage.openNotesPage();
 
         assertThat(
@@ -159,8 +153,7 @@ public class NotesManagementTest extends AbstractTest {
 
         NoteProfile noteProfile = getMainNote();
 
-        OverviewPage overviewPage = openOverviewPage();
-        NotesPage notesPage = overviewPage.openNotesPage();
+        NotesPage notesPage = getCommonPage().openNotesPage();
 
         assertThat(
                 notesPage.isLinkToCreatedNoteDisplayed(noteProfile))
@@ -184,13 +177,6 @@ public class NotesManagementTest extends AbstractTest {
                 .as("Note Added By")
                 .isEqualTo(savedNotePage.getExpAddedByText());
 
-        /*
-        SoftAssert.assertThat(
-                savedNotePage.getSavedNoteCreatedText())
-                .as("Note Created")
-                .contains(noteProfile.getAppInitCreationDateTimeText());
-        */
-
         SoftAssert.assertThat(
                 savedNotePage.getSavedNoteBodyText())
                 .as("Note Body Text")
@@ -205,8 +191,7 @@ public class NotesManagementTest extends AbstractTest {
 
         NoteProfile noteProfile = getMainNote();
 
-        OverviewPage overviewPage = openOverviewPage();
-        NotesPage notesPage = overviewPage.openNotesPage();
+        NotesPage notesPage = getCommonPage().openNotesPage();
 
         assertThat(
                 notesPage.isLinkToCreatedNoteDisplayed(noteProfile))
@@ -268,8 +253,7 @@ public class NotesManagementTest extends AbstractTest {
 
         NoteProfile noteProfile = getMainNote();
 
-        OverviewPage overviewPage = openOverviewPage();
-        NotesPage notesPage = overviewPage.openNotesPage();
+        NotesPage notesPage = getCommonPage().openNotesPage();
 
         assertThat(
                 notesPage.isLinkToCreatedNoteDisplayed(noteProfile))
@@ -299,13 +283,6 @@ public class NotesManagementTest extends AbstractTest {
                 .as("Added By")
                 .isEqualTo(notesEditNotePage.getExpAddedByText());
 
-        /*
-        SoftAssert.assertThat(
-                notesEditNotePage.getActCreatedText())
-                .as("Created")
-                .contains(notesEditNotePage.getExpCreatedText());
-        */
-
         SoftAssert.assertAll();
     }
 
@@ -315,8 +292,7 @@ public class NotesManagementTest extends AbstractTest {
 
         NoteProfile noteProfile = getMainNote();
 
-        OverviewPage overviewPage = openOverviewPage();
-        NotesPage notesPage = overviewPage.openNotesPage();
+        NotesPage notesPage = getCommonPage().openNotesPage();
 
         assertThat(
                 notesPage.isLinkToCreatedNoteDisplayed(noteProfile))
@@ -339,8 +315,7 @@ public class NotesManagementTest extends AbstractTest {
 
         NoteProfile noteProfile = getMainNote();
 
-        OverviewPage overviewPage = openOverviewPage();
-        NotesPage notesPage = overviewPage.openNotesPage();
+        NotesPage notesPage = getCommonPage().openNotesPage();
 
         assertThat(
                 notesPage.isLinkToCreatedNoteDisplayed(noteProfile))
@@ -362,10 +337,10 @@ public class NotesManagementTest extends AbstractTest {
 
         NoteProfile initProfile = getNoteToEdit();
 
-        OverviewPage overviewPage = openOverviewPage();
-        NotesPage notesPage = overviewPage.openNotesPage();
+        NotesPage notesPage = getCommonPage().openNotesPage();
 
-        NotesEditNotePage notesEditNotePage = notesPage.createNewNote(initProfile);
+        NotesEditNotePage notesEditNotePage = notesPage.openNewNotePage();
+        notesEditNotePage.fillAndSaveNote(initProfile);
         notesPage = notesEditNotePage.openNotesPage();
 
         assertThat(
@@ -376,7 +351,8 @@ public class NotesManagementTest extends AbstractTest {
         NotesSavedNotePage savedNotePage = notesPage.openCreatedNote(initProfile);
         notesEditNotePage = savedNotePage.openNoteForEdit();
 
-        notesEditNotePage.editNoteButNotSave(initProfile);
+        notesEditNotePage.editNoteTitleWithNewValue(initProfile);
+        notesEditNotePage.editNoteTextWithNewValue(initProfile);
         savedNotePage = notesEditNotePage.clickBack();
 
         SoftAssert.assertThat(

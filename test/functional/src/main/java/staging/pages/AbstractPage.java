@@ -2,33 +2,17 @@ package staging.pages;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
-import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.*;
 
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import ru.yandex.qatools.htmlelements.loader.HtmlElementLoader;
-import staging.blocks.ProfileDropBlock;
-import staging.locators.CommonLocators;
-import staging.model.User;
-import staging.pages.about.AboutHowPage;
-import staging.pages.about.AboutPage;
-import staging.pages.apps.AppsPage;
-import staging.pages.challs.ChallsPage;
-import staging.pages.comps.CompsPage;
-import staging.pages.discs.DiscsPage;
-import staging.pages.experts.ExpertsPage;
-import staging.pages.files.FilesPage;
-import staging.pages.guidelines.guidelinesPage;
-import staging.pages.licenses.LicensesPage;
-import staging.pages.notes.NotesPage;
-import staging.pages.overview.OverviewPage;
-import staging.pages.profile.ProfilePage;
-import staging.pages.profile.PublicProfilePage;
 
 import java.util.List;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
 
 public abstract class AbstractPage {
 
@@ -184,7 +168,7 @@ public abstract class AbstractPage {
         }
     }
 
-    // ***** Find element by ***** //
+    // -------- Find element by -----------
 
     public WebElement findElement(final By locator, final Integer timeout) {
         return new WebDriverWait(getDriver(), timeout).until(ExpectedConditions.visibilityOfElementLocated(locator));
@@ -259,7 +243,6 @@ public abstract class AbstractPage {
         catch (Exception e) {
 
         }
-
     }
 
     public void waitForAngularLoad() throws JavascriptException {
@@ -279,7 +262,6 @@ public abstract class AbstractPage {
         catch (Exception e) {
 
         }
-
     }
 
     public void waitForJQueryLoad() throws JavascriptException {
@@ -300,7 +282,8 @@ public abstract class AbstractPage {
         }
     }
 
-    // ***** Switch to frame ***** //
+    // ------ frames -------
+
     public void switchToFrame(final WebElement frame) {
         waitUntilDisplayed(frame); // just in case
         waitForFrameAndSwitch(frame);
@@ -335,7 +318,8 @@ public abstract class AbstractPage {
 
     }
 
-    // ***** getters & setters ***** //
+    // -------- getters and setters ---------
+
     public WebDriver getDriver() {
         try {
             return driver;
@@ -345,220 +329,17 @@ public abstract class AbstractPage {
         }
     }
 
+    // ------- alerts ------
 
-    // alerts
     public void alertAccept(int timeOutInSeconds, int sleepInMillis) {
-        WebDriverWait wait = new WebDriverWait(getDriver(), timeOutInSeconds, sleepInMillis);
-        Alert alert = wait.until(ExpectedConditions.alertIsPresent());
+        Wait<WebDriver> fluentWait = new FluentWait<WebDriver>(driver)
+                .withTimeout(timeOutInSeconds, SECONDS)
+                .pollingEvery(sleepInMillis, MILLISECONDS)
+                .ignoring(TimeoutException.class);
+        Alert alert = fluentWait.until(alertIsPresent());
         if (alert != null) {
             alert.accept();
         }
     }
-
-    public void alertAccept() {
-        WebDriverWait wait = new WebDriverWait(getDriver(), 5, 100);
-        Alert alert = wait.until(ExpectedConditions.alertIsPresent());
-        if (alert != null) {
-            alert.accept();
-        }
-    }
-
-    // common elements description
-
-    private ProfileDropBlock profileDropBlock;
-
-    @FindBy(xpath = CommonLocators.COMMON_NAV_PANEL)
-    private WebElement commonNavigationPanel;
-
-    @FindBy(xpath = CommonLocators.LOGGED_USERNAME_LINK)
-    private Link loggedUsernameLink;
-
-    @FindBy(xpath = CommonLocators.APPS_PAGE_ICON)
-    private Link appsPageIcon;
-
-    @FindBy(xpath = CommonLocators.COMPS_PAGE_ICON)
-    private Link compsPageIcon;
-
-    @FindBy(xpath = CommonLocators.FILES_PAGE_ICON)
-    private Link filesPageIcon;
-
-    @FindBy(xpath = CommonLocators.NOTES_PAGE_ICON)
-    private Link notesPageIcon;
-
-    @FindBy(xpath = CommonLocators.EXPERTS_PAGE_ICON)
-    private Link expertsPageIcon;
-
-    @FindBy(xpath = CommonLocators.CHALLS_PAGE_ICON)
-    private Link challsPageIcon;
-
-    @FindBy(xpath = CommonLocators.DISCS_PAGE_ICON)
-    private Link discsPageIcon;
-
-    @FindBy(xpath = CommonLocators.OVERVIEW_PAGE_ICON)
-    private Link overviewPageIcon;
-
-    @FindBy(xpath = CommonLocators.USER_AVATAR_IMG)
-    private Link userAvatarImgLink;
-
-    ProfileDropBlock getProfileDropBlock() {
-        return profileDropBlock;
-    }
-
-    public WebElement getNavigationPanelWE() {
-        return commonNavigationPanel;
-    }
-
-    public Link getUsernameLink() {
-        return loggedUsernameLink;
-    }
-
-    public Link getNotesPageIcon() {
-        return notesPageIcon;
-    }
-
-    public Link getAppsPageIcon() {
-        return appsPageIcon;
-    }
-
-    public Link getOverviewPageIcon() {
-        return overviewPageIcon;
-    }
-
-    public Link getCompsPageIcon() {
-        return compsPageIcon;
-    }
-
-    public Link getChallsPageIcon() {
-        return challsPageIcon;
-    }
-
-    public Link getDiscsPageIcon() {
-        return discsPageIcon;
-    }
-
-    public Link getExpertsPageIcon() {
-        return expertsPageIcon;
-    }
-
-    public Link getFilesPageIcon() {
-        return filesPageIcon;
-    }
-
-    public AppsPage openAppsPage() {
-        log.info("opening Apps page");
-        getAppsPageIcon().click();
-        return new AppsPage(getDriver());
-    }
-
-    public CompsPage openCompsPage() {
-        log.info("opening Comparisons page");
-        getCompsPageIcon().click();
-        return new CompsPage(getDriver());
-    }
-
-    public FilesPage openFilesPage() {
-        log.info("opening Files page");
-        getFilesPageIcon().click();
-        return new FilesPage(getDriver());
-    }
-
-    public NotesPage openNotesPage() {
-        log.info("opening Notes page");
-        getNotesPageIcon().click();
-        return new NotesPage(getDriver());
-    }
-
-    public ExpertsPage openExpertsPage() {
-        log.info("opening Experts page");
-        getExpertsPageIcon().click();
-        return new ExpertsPage(getDriver());
-    }
-
-    public ChallsPage openChallsPage() {
-        log.info("opening Challenges page");
-        getChallsPageIcon().click();
-        return new ChallsPage(getDriver());
-    }
-
-    public DiscsPage openDiscsPage() {
-        log.info("opening Discussions page");
-        getDiscsPageIcon().click();
-        return new DiscsPage(getDriver());
-    }
-
-    public OverviewPage openOverviewPage() {
-        log.info("opening Overview page");
-        getOverviewPageIcon().click();
-        return new OverviewPage(getDriver());
-    }
-
-    public ProfilePage openProfilePage() {
-        log.info("opening Profile page");
-        openProfileDropdown();
-        getProfileDropBlock().openProfilePage();
-        return new ProfilePage(getDriver());
-    }
-
-    public void openProfileDropdown() {
-        sleep(1000);
-        getUsernameLink().click();
-        waitUntilDisplayed(getProfileDropBlock(), 15);
-    }
-
-    public PublicProfilePage openPublicProfilePage() {
-        log.info("opening Public Profile page");
-        openProfileDropdown();
-        getProfileDropBlock().openPublicProfilePage();
-        return new PublicProfilePage(getDriver());
-    }
-
-    public LicensesPage openLicensePage() {
-        log.info("opening License page");
-        openProfileDropdown();
-        getProfileDropBlock().openLicensesPage();
-        return new LicensesPage(getDriver());
-    }
-
-    public AboutPage openAboutPage() {
-        log.info("opening About page");
-        openProfileDropdown();
-        getProfileDropBlock().openAboutPage();
-        return new AboutPage(getDriver());
-    }
-
-    public guidelinesPage openGuidelinesPage() {
-        log.info("opening guidelines page");
-        openProfileDropdown();
-        getProfileDropBlock().openGuidelinesPage();
-        return new guidelinesPage(getDriver());
-    }
-
-    public AboutHowPage openDocsPage() {
-        log.info("opening Docs page");
-        openProfileDropdown();
-        getProfileDropBlock().openDocsPage();
-        return new AboutHowPage(getDriver());
-    }
-
-    public StartPage logout() {
-        log.info("logout");
-        openProfileDropdown();
-        getProfileDropBlock().logout();
-        return new StartPage(getDriver());
-    }
-
-
-    public boolean isNavigationPanelDisplayed() {
-        return isElementPresent(getNavigationPanelWE());
-    }
-
-    public boolean isCorrectUserNameDisplayed(User user) {
-        return getUsernameLink().getText().equals(user.getApplUserFullName());
-    }
-
-    public String getUsernameLinkText() {
-        return getUsernameLink().getText();
-    }
-
 
 }

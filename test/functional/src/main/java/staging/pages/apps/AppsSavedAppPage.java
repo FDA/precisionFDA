@@ -8,15 +8,13 @@ import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
+import staging.data.TestCommonData;
 import staging.locators.AppsLocators;
 import staging.model.AppProfile;
 import staging.model.User;
 import staging.pages.AbstractPage;
-import staging.utils.Utils;
 
 import static staging.data.TestAppData.getAppCommentText;
-import static staging.data.TestCommonData.getTrueResult;
-import static staging.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class AppsSavedAppPage extends AbstractPage {
 
@@ -91,6 +89,12 @@ public class AppsSavedAppPage extends AbstractPage {
     @FindBy(xpath = AppsLocators.APPS_SAVED_APP_REVISION_PAGE_TITLE)
     private WebElement appsSavedRevisionPageTitle;
 
+    @FindBy(xpath = AppsLocators.APPS_SUBMITTED_COMMENT_TIME)
+    private WebElement appsSubmittedCommentTimeWE;
+
+    @FindBy(xpath = AppsLocators.APPS_REVISION_TITLE_LABEL)
+    private WebElement appsRevisionTitleLabeWE;
+
     public AppsSavedAppPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_SAVED_APP_RUN_APP_BUTTON));
@@ -98,6 +102,14 @@ public class AppsSavedAppPage extends AbstractPage {
 
     User getUser() {
         return User.getTestUser();
+    }
+
+    public WebElement getAppsRevisionTitleLabeWE() {
+        return appsRevisionTitleLabeWE;
+    }
+
+    public WebElement getAppsSubmittedCommentTimeWE() {
+        return appsSubmittedCommentTimeWE;
     }
 
     public WebElement getAppsRelevantSelectedAppName() {
@@ -216,6 +228,10 @@ public class AppsSavedAppPage extends AbstractPage {
         return getAppsSavedAppReadmePreviewWE().getText();
     }
 
+    public String getAppsSubmittedCommentTimeText() {
+        return getAppsSubmittedCommentTimeWE().getText();
+    }
+
     public WebElement getRunJobLink(AppProfile appProfile) {
         String xpath = AppsLocators.APPS_SAVED_APP_JOB_LINK_TEMPLATE.replace("{JOB_NAME}", appProfile.getJobNameText());
         return getDriver().findElement(By.xpath(xpath));
@@ -232,10 +248,10 @@ public class AppsSavedAppPage extends AbstractPage {
         return new AppsEditAppPage(getDriver());
     }
 
-    public AppsEditAndRunAppPage clickRunAppOnRelevantPage() {
-        log.info("click Run App on relevant page");
+    public AppsEditAndRunJobPage clickRunAppOnAppPage() {
+        log.info("click Run App on the app page");
         getAppsSavedAppRunAppButton().click();
-        return new AppsEditAndRunAppPage(getDriver());
+        return new AppsEditAndRunJobPage(getDriver());
     }
 
     public AppsJobPage openJobFromSavedAppPage(AppProfile appProfile) {
@@ -265,6 +281,14 @@ public class AppsSavedAppPage extends AbstractPage {
         return new AppsSavedAppPage(getDriver());
     }
 
+    public AppsSavedAppPage writeComment(AppProfile appProfile) {
+        log.info("write a comment");
+        getAppsSavedAppCommentArea().sendKeys(getAppCommentText());
+        getAppsSavedAppCommentButton().click();
+        appProfile.setAppCommentCreatedText(TestCommonData.getCurrentTimezone());
+        return new AppsSavedAppPage(getDriver());
+    }
+
     public String getExpectedCommentText() {
         return getAppCommentText();
     }
@@ -277,86 +301,12 @@ public class AppsSavedAppPage extends AbstractPage {
         return getAppsSavedAppInstanceValue().isDisplayed();
     }
 
-    public AppsSavedAppPage runJob(AppProfile appProfile) {
-        AppsEditAndRunAppPage appsEditAndRunAppPage = clickRunAppOnRelevantPage();
-        appsEditAndRunAppPage.editJobName(appProfile.getJobNameText());
-        AppsSavedAppPage appsSavedAppPage = appsEditAndRunAppPage.clickRunAppOnEditJobPage(appProfile);
-        return appsSavedAppPage;
-    }
-
-    public String getIsAppCreationDateTimeCorrect(AppProfile appProfile) {
-        long possibleDelta = 10;
-        String textResult = "";
-        String actTime = getActSelectedAppCreated();
-        String expTime = appProfile.getAppCurRevCreationDateTimeText();
-        if (Utils.getDifferenceBetweenDateTime(actTime, expTime) <= possibleDelta) {
-            textResult = getTrueResult();
-        }
-        else {
-            textResult = "Too big difference between displayed [" + actTime + "] and expected [" + expTime + "]";
-            log.info(textResult);
-        }
-        return textResult;
-    }
-
-    public String getDateTimeCorrectTrueResult() {
-        return getTrueResult();
-    }
-
-    public AppsSavedAppPage editAndSaveAppTitle(AppProfile appProfile) {
-        log.info("edit and save app title");
-        String newTitle = appProfile.getAppCurRevTitleText() + " upd " + getRunTimeLocalUniqueValue();
-        AppsEditAppPage appsEditAppPage = clickEdit();
-        appsEditAppPage.fillTitleInput(newTitle);
-        appProfile.setAppCurRevTitleText(newTitle);
-        AppsSavedAppPage appsSavedAppPage = appsEditAppPage.saveRevision(appProfile);
-        return appsSavedAppPage;
-    }
-
-    public AppsEditAppPage editReadmeButNotSave(AppProfile appProfile) {
-        log.info("edit readme");
-        String add = getRunTimeLocalUniqueValue();
-        String tempReadmeRow = appProfile.getCurRevReadMeRowText() + " upd " + add;
-        String tempReadmeRich = appProfile.getCurRevReadMeRichText() + " upd " + add;
-        AppsEditAppPage appsEditAppPage = clickEdit();
-        appsEditAppPage.fillReadmeTab(tempReadmeRow);
-        appProfile.setAppTempReadMeRowText(tempReadmeRow);
-        appProfile.setAppTempReadMeRichText(tempReadmeRich);
-        return new AppsEditAppPage(getDriver());
-    }
-
-    public AppsSavedAppPage editAndSaveApp(AppProfile appProfile) {
-        log.info("edit and save app");
-
-        AppsEditAppPage editAppPage = clickEdit();
-        String add = getRunTimeLocalUniqueValue();
-
-        String newTitle = appProfile.getAppCurRevTitleText() + add;
-        String newReadMeRow = appProfile.getCurRevReadMeRowText() + add;
-        String newReadMeRich = appProfile.getCurRevReadMeRichText() + add;
-        String newScript = appProfile.getAppCurRevScriptCodeText() + add;
-
-        editAppPage.fillTitleInput(newTitle);
-        appProfile.setAppCurRevTitleText(newTitle);
-
-        editAppPage.fillScriptArea(newScript);
-        appProfile.setAppCurRevScriptCodeText(newScript);
-
-        editAppPage.fillReadmeTab(newReadMeRow);
-        appProfile.setAppCurRevReadMeRowText(newReadMeRow);
-        appProfile.setAppCurRevReadMeRichText(newReadMeRich);
-
-        AppsSavedAppPage appsSavedAppPage = editAppPage.saveRevision(appProfile);
-        return appsSavedAppPage;
-    }
-
     public AppsSavedAppPage openFirstRevision() {
         getAppsRevisionsButton().click();
         waitUntilDisplayed(getAppsSavedFirstRevision());
         getAppsSavedFirstRevision().click();
+        waitUntilDisplayed(getAppsRevisionTitleLabeWE());
         return new AppsSavedAppPage(getDriver());
     }
-
-
 
 }

@@ -6,7 +6,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.AppsLocators;
-import staging.model.AppProfile;
 import staging.pages.AbstractPage;
 
 public class AppsPage extends AbstractPage {
@@ -83,37 +82,14 @@ public class AppsPage extends AbstractPage {
         return new AppsManageAssetsPage(getDriver());
     }
 
-    public ApplCreateAppPage openCreateAppPage() {
+    public AppsEditAppPage openCreateAppPage() {
         log.info("open Apps.CreateApp Page");
         getAppsCreateAppButtonLink().click();
-        return new ApplCreateAppPage(getDriver());
+        return new AppsEditAppPage(getDriver());
     }
 
     public boolean isRelevantAppsLinkDisplayed() {
         return isElementPresent(getAppsRelevantLink());
-    }
-
-    public AppsSavedAppPage createNewApp(AppProfile appProfile) {
-        log.info("create and save new app");
-        ApplCreateAppPage applCreateAppPage = openCreateAppPage();
-
-        String name = appProfile.getAppInitNameText();
-        String title = appProfile.getAppInitTitleText();
-        String script = appProfile.getAppInitScriptCodeText();
-        String readmeRow = appProfile.getInitReadMeRowText();
-        String readmeRich = appProfile.getInitReadMeRichText();
-
-        applCreateAppPage.fillCreateAppForm(name, title, script, readmeRow);
-
-        applCreateAppPage.clickCreate(appProfile);
-
-        appProfile.setAppCurRevNameText(name);
-        appProfile.setAppCurRevTitleText(title);
-        appProfile.setAppCurRevScriptCodeText(script);
-        appProfile.setAppCurRevReadMeRowText(readmeRow);
-        appProfile.setAppCurRevReadMeRichText(readmeRich);
-
-        return new AppsSavedAppPage(getDriver());
     }
 
 }

@@ -3,58 +3,133 @@ package staging.data;
 import staging.model.AppProfile;
 
 import static staging.data.TestCommonData.getTestRunUniqueFinalValue;
+import static staging.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class TestAppData {
 
     public static AppProfile mainProfile = new AppProfile(
-            getMainAppName(), getMainAppTitle(),
-            getMainAppJobScriptBody(), "",
-            getMainAppReadMeRowText(), getMainAppReadMeRichText(),
-            getMainAppName(), getMainAppTitle(),
-            getMainAppJobScriptBody(), "",
-            "", "",
-            "", "",
-            getMainAppJobName(), "",
-            getMainAppExpJobOutput()
+            getMainAppName(),
+            "",
+
+            getMainAppTitle(),
+            "",
+
+            getMainAppJobScriptBody(),
+            "",
+
+            getMainAppReadMeRowText(),
+            "",
+            "",
+
+            getMainAppReadMeRichText(),
+            "",
+            "",
+
+            "",
+            "",
+
+            getMainAppJobName(),
+            "",
+            getMainAppExpJobOutput(),
+
+            ""
     );
 
-    public static AppProfile runJobProfile = new AppProfile(
-            getAppForJobName(), getAppForJobTitle(),
-            getMainAppJobScriptBody(), "",
-            "", "",
-            getAppForJobName(), getAppForJobTitle(),
-            getMainAppJobScriptBody(), "",
-            "", "",
-            "", "",
-            getMainAppJobName(), "",
-            getMainAppExpJobOutput()
-    );
+    public static AppProfile getRunJobProfile() {
+        return new AppProfile(
+                getAppForJobName(),
+                "",
 
-    public static AppProfile checkRevisionProfile = new AppProfile(
-            getCheckRevAppName(), getCheckRevAppTitle(),
-            getCheckRevAppJobScriptBody(), "",
-            getCheckRevAppReadMeRowText(), getCheckRevAppReadMeRichText(),
-            getCheckRevAppName(), getCheckRevAppTitle(),
-            getCheckRevAppJobScriptBody(), "",
-            "", "",
-            "", "",
-            getCheckRevAppJobName(), "",
-            getCheckRevAppExpJobOutput()
-    );
+                getAppForJobTitle(),
+                "",
+
+                getMainAppJobScriptBody(),
+                "",
+
+                getMainAppReadMeRowText(),
+                "",
+                "",
+
+                getMainAppReadMeRichText(),
+                "",
+                "",
+
+                "",
+                "",
+
+                getAppForJobName(),
+                "",
+                getMainAppExpJobOutput(),
+
+                ""
+        );
+    }
+
+    public static AppProfile getCheckRevisionProfile() {
+        return new AppProfile(
+                getCheckRevAppName(),
+                "",
+
+                getCheckRevAppTitle(),
+                "",
+
+                getCheckRevAppJobScriptBody(),
+                "",
+
+                getCheckRevAppReadMeRowText(),
+                "",
+                "",
+
+                getCheckRevAppReadMeRichText(),
+                "",
+                "",
+
+                "",
+                "",
+
+                getCheckRevAppJobName(),
+                "",
+                getAppJobCheckRevScriptOutput(),
+
+                ""
+        );
+    }
+
+    public static AppProfile getCheckTimeZoneProfile() {
+        return new AppProfile(
+                getTimeZoneAppName(),
+                "",
+
+                getTimeZoneAppTitle(),
+                "",
+
+                "",
+                "",
+
+                "",
+                "",
+                "",
+
+                "",
+                "",
+                "",
+
+                "",
+                "",
+
+                getCheckRevAppJobName(),
+                "",
+                "",
+
+                ""
+        );
+    }
 
     public static AppProfile getMainProfile() {
         return mainProfile;
     }
 
-    public static AppProfile getRunJobProfile() {
-        return runJobProfile;
-    }
-
-    public static AppProfile getCheckRevProfile() {
-        return checkRevisionProfile;
-    }
-
-    public static final String TIME_ZONE = "GMT";
+    public static final String DEFAULT_TIME_ZONE = "GMT";
 
     static final String CREATE_APP_NAME_PREFIX = "autotest_app_name_";
 
@@ -158,4 +233,13 @@ public class TestAppData {
         return CREATE_APP_TITLE_FOR_JOB_PREFIX + getTestRunUniqueFinalValue();
     }
 
+    // ---------------------
+
+    public static final String getTimeZoneAppName() {
+        return CREATE_APP_NAME_PREFIX + " " + getRunTimeLocalUniqueValue() + " " + TestCommonData.getCurrentTimezone();
+    }
+
+    public static final String getTimeZoneAppTitle() {
+        return CREATE_APP_TITLE_PREFIX + " " + getRunTimeLocalUniqueValue() + " " + TestCommonData.getCurrentTimezone();
+    }
 }

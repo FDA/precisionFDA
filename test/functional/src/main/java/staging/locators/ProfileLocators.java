@@ -6,4 +6,6 @@ public class ProfileLocators {
 
     public static final String PROFILE_PUBLIC_JOINED_TAG = "//li/h5[text()='Joined']";
 
+    public static final String PROFILE_TIMEZONE_SELECT = "//select[@id='time_zone']";
+
 }

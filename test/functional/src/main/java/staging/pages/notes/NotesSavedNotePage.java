@@ -7,7 +7,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
+import staging.data.TestCommonData;
 import staging.locators.NotesLocators;
+import staging.model.NoteProfile;
 import staging.model.User;
 import staging.pages.AbstractPage;
 
@@ -49,6 +51,9 @@ public class NotesSavedNotePage extends AbstractPage {
 
     @FindBy(xpath = NotesLocators.NOTES_SAVED_NOTE_FIRST_COMMENT)
     private WebElement notesSavedNoteFirstCommentWE;
+
+    @FindBy(xpath = NotesLocators.NOTES_SUBMITTED_COMMENT_TIME)
+    private WebElement notesSubmittedCommentTimeWE;
 
     public NotesSavedNotePage(final WebDriver driver) {
         super(driver);
@@ -151,6 +156,14 @@ public class NotesSavedNotePage extends AbstractPage {
         return getNotesSavedNoteFirstCommentWE().getText();
     }
 
+    public WebElement getNotesSubmittedCommentTimeWE() {
+        return notesSubmittedCommentTimeWE;
+    }
+
+    public String getSubmittedCommentTimeText() {
+        return getNotesSubmittedCommentTimeWE().getText();
+    }
+
     //----------
 
     public NotesPage deleteNote() {
@@ -158,12 +171,12 @@ public class NotesSavedNotePage extends AbstractPage {
         getNotesSavedNoteEditDD().click();
         waitUntilDisplayed(By.xpath(NotesLocators.NOTES_SAVED_NOTE_DD_DELETE));
         getNotesSavedNoteDeleteItem().click();
-        alertAccept();
+        alertAccept(1, 100);
         return new NotesPage(getDriver());
     }
 
     public NotesEditNotePage openNoteForEdit() {
-        log.info("open Note edit form");
+        log.info("open Note to edit");
         getNotesSavedNoteEditButton().click();
         return new NotesEditNotePage(getDriver());
     }
@@ -175,7 +188,16 @@ public class NotesSavedNotePage extends AbstractPage {
         return new NotesSavedNotePage(getDriver());
     }
 
+    public NotesSavedNotePage leaveComment(NoteProfile noteProfile) {
+        log.info("write and save comment");
+        getNotesSavedNoteCommentAreaWE().sendKeys(getNoteCommentText());
+        getNotesSavedNoteCommentSubmitButton().click();
+        noteProfile.setCommentCreatedText(TestCommonData.getCurrentTimezone());
+        return new NotesSavedNotePage(getDriver());
+    }
+
     public String getExpectedCommentText() {
         return getNoteCommentText();
     }
+
 }

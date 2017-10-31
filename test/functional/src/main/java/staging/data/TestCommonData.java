@@ -18,11 +18,19 @@ public class TestCommonData {
 
     public static String runSuiteName;
 
+    public static String currentTimezone = "GMT";
 
     public static final String filePathUniqueValue = generateFilePathUniqueValue();
 
     public static final String testRunUniqueFinalValue = generateTestRunUniqueValue();
 
+    public static String getCurrentTimezone() {
+        return currentTimezone;
+    }
+
+    public static void setCurrentTimezone(String timezone) {
+        currentTimezone = timezone;
+    }
 
     public static String getDebugLogFolder() {
         return System.getProperty("user.dir") + "/target/debug-log/";

@@ -10,7 +10,7 @@ import staging.locators.AppsLocators;
 import staging.model.AppProfile;
 import staging.pages.AbstractPage;
 
-public class AppsEditAndRunAppPage extends AbstractPage {
+public class AppsEditAndRunJobPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
 
@@ -20,7 +20,7 @@ public class AppsEditAndRunAppPage extends AbstractPage {
     @FindBy(xpath = AppsLocators.APPS_EDIT_RUN_APP_RUN_APP_BUTTON)
     private Button appsRunAppButton;
 
-    public AppsEditAndRunAppPage(final WebDriver driver) {
+    public AppsEditAndRunJobPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_EDIT_RUN_APP_JOB_NAME_INPUT));
     }
@@ -33,10 +33,14 @@ public class AppsEditAndRunAppPage extends AbstractPage {
         return appsRunAppButton;
     }
 
-    public void editJobName(String jobName) {
-        log.info("edit job name");
+    public void fillJobName(String jobName) {
+        log.info("fill job name");
         getAppsJobNameInput().clear();
         getAppsJobNameInput().sendKeys(jobName);
+    }
+
+    public void editJob(AppProfile appProfile) {
+        fillJobName(appProfile.getJobNameText());
     }
 
     public AppsSavedAppPage clickRunAppOnEditJobPage(AppProfile appProfile) {

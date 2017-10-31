@@ -10,11 +10,9 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.testng.annotations.*;
-import staging.locators.CommonLocators;
 import staging.model.User;
-import staging.pages.login.GrantAccessLoginPage;
+import staging.pages.CommonPage;
 import staging.pages.login.LoginPage;
-import staging.pages.overview.OverviewPage;
 import staging.utils.SettingsProperties;
 import staging.utils.Utils;
 import tools.CustomResultListener;
@@ -168,33 +166,20 @@ public abstract class AbstractTest {
         return title;
     }
 
-    public OverviewPage openOverviewPage() {
-        driver.findElement(By.xpath(CommonLocators.MAIN_LOGO)).click();
-        return new OverviewPage(driver);
-    }
-
-    public LoginPage openLoginPage(String basicAuthUser, String basicAuthPassword) {
+    public LoginPage openLoginPage(User user) {
         log.info("open Login page");
 
         String loginPageURL = SettingsProperties.getProperty("loginPageURL");
 
-        loginPageURL = loginPageURL.replace("{basicAuthUser}", basicAuthUser).replace("{basicAuthPassword}", basicAuthPassword);
+        loginPageURL = loginPageURL.replace("{basicAuthUser}", user.getBasicAuthUsername())
+                .replace("{basicAuthPassword}", user.getBasicAuthPassword());
 
         driver.get(loginPageURL);
         return new LoginPage(driver);
     }
 
-    public OverviewPage correctLoginToFDA(User user) {
-        LoginPage loginPage = openLoginPage(user.getBasicAuthUsername(), user.getBasicAuthPassword());
-        GrantAccessLoginPage grantAccessLoginPage = loginPage.correctLoginToPrecisionFDA(user.getApplUsername(), user.getApplPassword());
-        OverviewPage overviewPage = grantAccessLoginPage.grantAccess();
-        return overviewPage;
-    }
-
-    public LoginPage wrongLoginToFDA(User user) {
-        LoginPage loginPage = openLoginPage(user.getBasicAuthUsername(), user.getBasicAuthPassword());
-        loginPage = loginPage.wrongLoginToPrecisionFDA(user.getApplUsername(), user.getApplPassword());
-        return loginPage;
+    public CommonPage getCommonPage() {
+        return new CommonPage(driver);
     }
 
     public void alertAccept(int timeOutInSeconds, int sleepInMillis) {

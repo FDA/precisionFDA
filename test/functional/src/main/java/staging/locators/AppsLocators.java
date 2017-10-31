@@ -135,4 +135,8 @@ public class AppsLocators {
     public static final String APPS_SAVED_APP_FIRST_REVISION = "//*[@class='btn-group open']/*[@class='dropdown-menu']//span[text()='1']";
 
     public static final String APPS_SAVED_APP_REVISION_PAGE_TITLE = "//li/*[contains(text(), 'evision')][contains(text(), 'itle')]/../p";
+
+    public static final String APPS_SUBMITTED_COMMENT_TIME = "//*[contains(@class, 'comment-actions')]/li[3]";
+
+    public static final String APPS_REVISION_TITLE_LABEL = "//li/*[text()='Revision Title']";
 }

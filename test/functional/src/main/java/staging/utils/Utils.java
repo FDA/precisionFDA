@@ -13,6 +13,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import static staging.data.TestCommonData.getTrueResult;
+
 public class Utils {
 
     public static String getCurrentDateTimeUTCValue() {
@@ -109,11 +111,25 @@ public class Utils {
             d1 = format.parse(dateTime1);
             d2 = format.parse(dateTime2);
             long diffMsec = d2.getTime() - d1.getTime();
-            diffSec = Math.abs(diffMsec * 1000);
+            diffSec = Math.abs(diffMsec/1000);
         } catch (Exception e) {
             e.printStackTrace();
+            diffSec = 1000;
         }
         return diffSec;
+    }
+
+    public static String isDateTimeCorrect(String actTime, String expTime) {
+        long possibleDelta = 3;
+        String textResult = "";
+        Long delta = Utils.getDifferenceBetweenDateTime(actTime, expTime);
+        if (delta <= possibleDelta) {
+            textResult = getTrueResult();
+        }
+        else {
+            textResult = "Too big difference between displayed [" + actTime + "] and expected [" + expTime + "] | delta is: " + delta + " seconds";
+        }
+        return textResult;
     }
 
 }
