@@ -318,7 +318,9 @@ private
   end
 
   def time_zones
-    ActiveSupport::TimeZone.all.map { |time_zone| [time_zone.to_s, time_zone.name] }
+    ActiveSupport::TimeZone.all.map do |time_zone|
+      ["(GMT#{time_zone.now.formatted_offset}) #{time_zone.name}", time_zone.name]
+    end
   end
 
 end
