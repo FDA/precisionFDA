@@ -83,8 +83,8 @@ class Space < ActiveRecord::Base
     guest_lead.id == context.user_id
   end
 
-  def project_for_context!(context)
-    space_memberships.find_by!(user_id: context.user_id).project
+  def project_for_user!(user)
+    space_memberships.find_by!(user_id: user.id).project
   end
 
   def authorized_users_for_apps

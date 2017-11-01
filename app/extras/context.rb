@@ -36,6 +36,14 @@ class Context
     return (@user_id == -1 && @username.start_with?("Guest-") && @token == "INVALID" && @expiration.present? && ((@expiration - Time.now.to_i) > 5.minutes) && @org_id == -1)
   end
 
+  def challenge_admin?
+    logged_in? && user.is_challenge_admin?
+  end
+
+  def challenge_evaluator?
+    logged_in? && user.is_challenge_evaluator?
+  end
+
   def logged_in_or_guest?
     return logged_in? || guest?
   end
