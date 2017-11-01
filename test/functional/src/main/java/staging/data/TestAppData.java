@@ -2,7 +2,7 @@ package staging.data;
 
 import staging.model.AppProfile;
 
-import static staging.data.TestCommonData.getTestRunUniqueFinalValue;
+import static staging.data.TestRunData.getTestRunUniqueFinalValue;
 import static staging.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class TestAppData {
@@ -17,7 +17,7 @@ public class TestAppData {
             getMainAppJobScriptBody(),
             "",
 
-            getMainAppReadMeRowText(),
+            getMainAppReadMeRawText(),
             "",
             "",
 
@@ -46,7 +46,7 @@ public class TestAppData {
                 getMainAppJobScriptBody(),
                 "",
 
-                getMainAppReadMeRowText(),
+                getMainAppReadMeRawText(),
                 "",
                 "",
 
@@ -76,7 +76,7 @@ public class TestAppData {
                 getCheckRevAppJobScriptBody(),
                 "",
 
-                getCheckRevAppReadMeRowText(),
+                getCheckRevAppReadMeRawText(),
                 "",
                 "",
 
@@ -147,7 +147,7 @@ public class TestAppData {
 
     public static final String CREATE_APP_SCRIPT_BODY_PREFIX_2 = "auto__";
 
-    public static final String EDIT_APP_README_ROW_PREFIX = "# __Auto__ *readme* app ";
+    public static final String EDIT_APP_README_RAW_PREFIX = "# __Auto__ *readme* app ";
 
     public static final String EDIT_APP_README_RICH_PREFIX = "Auto readme app ";
 
@@ -171,8 +171,8 @@ public class TestAppData {
         return CREATE_APP_SCRIPT_BODY_PREFIX_2 + getTestRunUniqueFinalValue() + "check_rev";
     }
 
-    public static final String getCheckRevAppReadMeRowText() {
-        return EDIT_APP_README_ROW_PREFIX + getTestRunUniqueFinalValue() + "check_rev";
+    public static final String getCheckRevAppReadMeRawText() {
+        return EDIT_APP_README_RAW_PREFIX + getTestRunUniqueFinalValue() + "check_rev";
     }
 
     public static final String getCheckRevAppReadMeRichText() {
@@ -209,8 +209,8 @@ public class TestAppData {
         return CREATE_APP_TITLE_PREFIX + getTestRunUniqueFinalValue();
     }
 
-    public static String getMainAppReadMeRowText() {
-        return EDIT_APP_README_ROW_PREFIX + getTestRunUniqueFinalValue();
+    public static String getMainAppReadMeRawText() {
+        return EDIT_APP_README_RAW_PREFIX + getTestRunUniqueFinalValue();
     }
 
     public static String getMainAppReadMeRichText() {
@@ -236,10 +236,10 @@ public class TestAppData {
     // ---------------------
 
     public static final String getTimeZoneAppName() {
-        return CREATE_APP_NAME_PREFIX + " " + getRunTimeLocalUniqueValue() + " " + TestCommonData.getCurrentTimezone();
+        return CREATE_APP_NAME_PREFIX + " " + getRunTimeLocalUniqueValue() + " " + TestRunData.getCurrentTimezone();
     }
 
     public static final String getTimeZoneAppTitle() {
-        return CREATE_APP_TITLE_PREFIX + " " + getRunTimeLocalUniqueValue() + " " + TestCommonData.getCurrentTimezone();
+        return CREATE_APP_TITLE_PREFIX + " " + getRunTimeLocalUniqueValue() + " " + TestRunData.getCurrentTimezone();
     }
 }

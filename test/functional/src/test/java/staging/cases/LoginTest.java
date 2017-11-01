@@ -1,7 +1,10 @@
 package staging.cases;
 
+import org.assertj.core.api.Assert;
+import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 import ru.yandex.qatools.htmlelements.annotations.Name;
+import static org.assertj.core.api.Assertions.assertThat;
 import staging.model.User;
 import staging.pages.StartPage;
 import staging.pages.login.LoginPage;
@@ -11,36 +14,23 @@ import staging.pages.overview.OverviewPage;
 public class LoginTest extends AbstractTest {
 
     @Test
-    public void successfulLogin() {
-        printTestHeader("Test Case: Successful Login");
+    public void successfulLoginLogout() {
+        printTestHeader("Test Case: Successful Login and logout");
 
         User user = User.getTestUser();
 
-        openBrowser();
         OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
 
-        SoftAssert.assertThat(
+        assertThat(
                 overviewPage.isNavigationPanelDisplayed())
                 .as("navigation panel is displayed")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 overviewPage.getUsernameLinkText())
                 .as("logged username")
                 .isEqualTo(user.getApplUserFullName());
 
-        SoftAssert.assertAll();
-        closeBrowser();
-    }
-
-    @Test
-    public void checkLogoutFeature() {
-        printTestHeader("Test Case: check that logout works");
-
-        User user = User.getTestUser();
-
-        openBrowser();
-        OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
         StartPage startPage = overviewPage.logout();
 
         SoftAssert.assertThat(
@@ -54,7 +44,6 @@ public class LoginTest extends AbstractTest {
                 .contains("You were successfully logged out");
 
         SoftAssert.assertAll();
-        closeBrowser();
     }
 
     @Test
@@ -63,7 +52,6 @@ public class LoginTest extends AbstractTest {
 
         User user = User.getWrongUser();
 
-        openBrowser();
         LoginPage loginPage = openLoginPage(user).wrongLogin(user);
 
         SoftAssert.assertThat(
@@ -77,7 +65,6 @@ public class LoginTest extends AbstractTest {
                 .contains("Invalid username or password");
 
         SoftAssert.assertAll();
-        closeBrowser();
     }
 
 }

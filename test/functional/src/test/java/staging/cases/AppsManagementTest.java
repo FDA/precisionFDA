@@ -47,12 +47,12 @@ public class AppsManagementTest extends AbstractTest {
 
         AppsPage appsPage = getCommonPage().openAppsPage();
         AppsEditAppPage appsEditAppPage = appsPage.openCreateAppPage();
-        AppsSavedAppPage appsSavedAppPage = appsEditAppPage.fillAndSaveNewAppForm(appProfile);
+        AppsSavedAppPage appsSavedAppPage = appsEditAppPage.fillAndSaveNewApp(appProfile);
 
         assertThat(
                 appsSavedAppPage.getActSelectedAppName())
                 .as("Name of created app")
-                .isEqualTo(appProfile.getAppInitNameText());
+                .isEqualTo(appProfile.getInitNameText());
     }
 
     @Test(dependsOnMethods = {"precondition", "createAndSaveApp"})
@@ -73,12 +73,12 @@ public class AppsManagementTest extends AbstractTest {
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppName())
                 .as("Name of created app")
-                .isEqualTo(appProfile.getAppCurRevNameText());
+                .isEqualTo(appProfile.getCurRevNameText());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppTitle())
                 .as("Title of created app")
-                .isEqualTo(appProfile.getAppCurRevTitleText());
+                .isEqualTo(appProfile.getCurRevTitleText());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppOrg())
@@ -139,12 +139,12 @@ public class AppsManagementTest extends AbstractTest {
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppName())
                 .as("Name of created app")
-                .isEqualTo(appProfile.getAppCurRevNameText());
+                .isEqualTo(appProfile.getCurRevNameText());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppTitle())
                 .as("Title of created app")
-                .isEqualTo(appProfile.getAppCurRevTitleText());
+                .isEqualTo(appProfile.getCurRevTitleText());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppOrg())
@@ -167,12 +167,12 @@ public class AppsManagementTest extends AbstractTest {
 
         AppsPage appsPage = getCommonPage().openAppsPage();
         AppsEditAppPage appsEditAppPage = appsPage.openCreateAppPage();
-        AppsSavedAppPage appsSavedAppPage = appsEditAppPage.fillAndSaveNewAppForm(appProfile);
+        AppsSavedAppPage appsSavedAppPage = appsEditAppPage.fillAndSaveNewApp(appProfile);
 
         assertThat(
                 appsSavedAppPage.getActSelectedAppName())
                 .as("Name of created app")
-                .isEqualTo(appProfile.getAppInitNameText());
+                .isEqualTo(appProfile.getInitNameText());
 
         AppsEditAndRunJobPage appsEditAndRunJobPage = appsSavedAppPage.clickRunAppOnAppPage();
         appsEditAndRunJobPage.editJob(appProfile);
@@ -198,7 +198,7 @@ public class AppsManagementTest extends AbstractTest {
 
         SoftAssert.assertThat(appsJobLogPage.getFullJobLogText())
                 .as("full job log")
-                .contains(appProfile.getAppInitScriptCodeText());
+                .contains(appProfile.getInitScriptText());
 
         SoftAssert.assertThat(appsJobLogPage.getScriptResultFromLog(appProfile))
                 .as("script result output")
@@ -227,14 +227,14 @@ public class AppsManagementTest extends AbstractTest {
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppName())
                 .as("Name of created app")
-                .isEqualTo(appProfile.getAppInitNameText());
+                .isEqualTo(appProfile.getInitNameText());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppTitle())
                 .as("Edited Title of created app")
-                .isEqualTo(appProfile.getAppCurRevTitleText());
+                .isEqualTo(appProfile.getCurRevTitleText());
 
-        System.out.println("TITLE is: " + appProfile.getAppCurRevTitleText());
+        System.out.println("TITLE is: " + appProfile.getCurRevTitleText());
 
         SoftAssert.assertAll();
     }
@@ -257,6 +257,7 @@ public class AppsManagementTest extends AbstractTest {
         appsEditAppPage.openReadmeEditTab();
 
         appsEditAppPage.editReadmeWithNewValue(appProfile);
+
         appsEditAppPage = appsEditAppPage.openReadmePreviewTab();
 
         SoftAssert.assertThat(appsEditAppPage.getReadmePreviewText())
@@ -287,7 +288,7 @@ public class AppsManagementTest extends AbstractTest {
                 .isTrue();
 
         AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
-        appsSavedAppPage = appsSavedAppPage.openCommentsTab().writeComment();
+        appsSavedAppPage = appsSavedAppPage.openCommentsTab().leaveComment();
         appsSavedAppPage = appsSavedAppPage.openCommentsTab();
 
         assertThat(appsSavedAppPage.getLastCommentText())
@@ -339,12 +340,12 @@ public class AppsManagementTest extends AbstractTest {
 
         AppsPage appsPage = getCommonPage().openAppsPage();
         AppsEditAppPage appsEditAppPage = appsPage.openCreateAppPage();
-        AppsSavedAppPage appsSavedAppPage = appsEditAppPage.fillAndSaveNewAppForm(appProfile);
+        AppsSavedAppPage appsSavedAppPage = appsEditAppPage.fillAndSaveNewApp(appProfile);
 
         assertThat(
                 appsSavedAppPage.getActSelectedAppName())
                 .as("Name of the created app")
-                .isEqualTo(appProfile.getAppInitNameText());
+                .isEqualTo(appProfile.getInitNameText());
 
         appsEditAppPage = appsSavedAppPage.clickEdit();
         appsSavedAppPage = appsEditAppPage.editAndSaveAppWithNewValues(appProfile);
@@ -352,19 +353,19 @@ public class AppsManagementTest extends AbstractTest {
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppName())
                 .as("Name of the updated app")
-                .isEqualTo(appProfile.getAppInitNameText());
+                .isEqualTo(appProfile.getInitNameText());
 
         appsSavedAppPage = appsSavedAppPage.openFirstRevision();
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppName())
                 .as("Name of the first revision")
-                .isEqualTo(appProfile.getAppInitNameText());
+                .isEqualTo(appProfile.getInitNameText());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getAppsSavedRevisionPageTitleText())
                 .as("Title of the first revision")
-                .isEqualTo(appProfile.getAppInitTitleText());
+                .isEqualTo(appProfile.getInitTitleText());
 
         appsSavedAppPage = appsSavedAppPage.openReadmeTab();
 

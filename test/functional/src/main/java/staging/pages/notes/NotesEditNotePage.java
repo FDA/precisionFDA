@@ -143,8 +143,8 @@ public class NotesEditNotePage extends AbstractPage {
     }
 
     public NotesEditNotePage fillAndSaveNote(NoteProfile noteProfile) {
-        fillTitle(noteProfile.getTitleNoteText());
-        fillNoteText(noteProfile.getRowBodyNoteText());
+        fillTitle(noteProfile.getNoteTitleText());
+        fillNoteText(noteProfile.getNoteRawText());
         clickSave();
         return new NotesEditNotePage(getDriver());
     }
@@ -170,13 +170,13 @@ public class NotesEditNotePage extends AbstractPage {
     public NotesEditNotePage editNoteWithNewDataAndSave(NoteProfile noteProfile) {
         log.info("edit and save the note");
 
-        String newTitle = noteProfile.getTitleNoteText() + " upd " + getRunTimeLocalUniqueValue();
-        String newRowBody = noteProfile.getRowBodyNoteText() + " upd " + getRunTimeLocalUniqueValue();
-        String newRichBody = noteProfile.getRichBodyNoteText() + " upd " + getRunTimeLocalUniqueValue();
+        String newTitle = noteProfile.getNoteTitleText() + " upd " + getRunTimeLocalUniqueValue();
+        String newRowBody = noteProfile.getNoteRawText() + " upd " + getRunTimeLocalUniqueValue();
+        String newRichBody = noteProfile.getNoteRichText() + " upd " + getRunTimeLocalUniqueValue();
 
-        noteProfile.setTitleNoteText(newTitle);
-        noteProfile.setRowBodyNoteText(newRowBody);
-        noteProfile.setRichBodyNoteText(newRichBody);
+        noteProfile.setNoteTitleText(newTitle);
+        noteProfile.setNoteRawText(newRowBody);
+        noteProfile.setNoteRichText(newRichBody);
 
         getNotesTitleEl().clear();
         getNotesTitleEl().sendKeys(newTitle);
@@ -191,13 +191,13 @@ public class NotesEditNotePage extends AbstractPage {
     public void editNoteTitleWithNewValue(NoteProfile noteProfile) {
         log.info("edit note title with new data");
         getNotesTitleEl().clear();
-        getNotesTitleEl().sendKeys(noteProfile.getTitleNoteText() + " upd " + getRunTimeLocalUniqueValue());
+        getNotesTitleEl().sendKeys(noteProfile.getNoteTitleText() + " upd " + getRunTimeLocalUniqueValue());
     }
 
     public void editNoteTextWithNewValue(NoteProfile noteProfile) {
         log.info("edit note text with new data");
         getNotesEditNoteEditorWE().clear();
-        getNotesEditNoteEditorWE().sendKeys(noteProfile.getRowBodyNoteText() + " upd " + getRunTimeLocalUniqueValue());
+        getNotesEditNoteEditorWE().sendKeys(noteProfile.getNoteRawText() + " upd " + getRunTimeLocalUniqueValue());
     }
 
     public NotesEditNotePage openPreviewTab() {

@@ -7,34 +7,34 @@ public class NoteProfile {
 
     private String noteCreatedText;
 
-    private String titleNoteText;
+    private String noteTitleText;
 
-    private String rowBodyNoteText;
+    private String noteRawText;
 
-    private String richBodyNoteText;
+    private String noteRichText;
 
     private String commentCreatedText;
 
-    public NoteProfile(final String titleNoteText, final String rowBodyNoteText,
-                       final String richBodyNoteText, final String noteCreatedText,
+    public NoteProfile(final String noteTitleText, final String noteRawText,
+                       final String noteRichText, final String noteCreatedText,
                        final String commentCreatedText) {
-        this.titleNoteText = titleNoteText;
-        this.rowBodyNoteText = rowBodyNoteText;
-        this.richBodyNoteText = richBodyNoteText;
+        this.noteTitleText = noteTitleText;
+        this.noteRawText = noteRawText;
+        this.noteRichText = noteRichText;
         this.noteCreatedText = noteCreatedText;
         this.commentCreatedText = commentCreatedText;
     }
 
-    public String getTitleNoteText() {
-        return titleNoteText;
+    public String getNoteTitleText() {
+        return noteTitleText;
     }
 
-    public String getRowBodyNoteText() {
-        return rowBodyNoteText;
+    public String getNoteRawText() {
+        return noteRawText;
     }
 
-    public String getRichBodyNoteText() {
-        return richBodyNoteText;
+    public String getNoteRichText() {
+        return noteRichText;
     }
 
     public String getNoteCreatedText() {
@@ -45,7 +45,7 @@ public class NoteProfile {
         return commentCreatedText;
     }
 
-    public void setCreatedNoteText() {
+    public void setNoteCreatedText() {
         this.noteCreatedText = getCurrentDateTimeValue(DEFAULT_TIME_ZONE);
     }
 
@@ -61,16 +61,16 @@ public class NoteProfile {
         this.commentCreatedText = getCurrentDateTimeValue(timezone);
     }
 
-    public void setTitleNoteText(String title) {
-        this.titleNoteText = title;
+    public void setNoteTitleText(String title) {
+        this.noteTitleText = title;
     }
 
-    public void setRowBodyNoteText(String rowBody) {
-        this.rowBodyNoteText = rowBody;
+    public void setNoteRawText(String rowBody) {
+        this.noteRawText = rowBody;
     }
 
-    public void setRichBodyNoteText(String richBody) {
-        this.richBodyNoteText = richBody;
+    public void setNoteRichText(String richBody) {
+        this.noteRichText = richBody;
     }
 
 }

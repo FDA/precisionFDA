@@ -34,7 +34,7 @@ public class AppsRelevantPage extends AbstractPage {
     }
 
     public WebElement getSavedAppLink(AppProfile appProfile) {
-        String xpath = AppsLocators.APPS_SAVED_APP_LINK_TEMPLATE.replace("{APP_TITLE}", appProfile.getAppCurRevTitleText());
+        String xpath = AppsLocators.APPS_SAVED_APP_LINK_TEMPLATE.replace("{APP_TITLE}", appProfile.getCurRevTitleText());
         return getDriver().findElement(By.xpath(xpath));
     }
 

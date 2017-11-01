@@ -105,6 +105,7 @@ public class CommonPage extends AbstractPage {
 
     public AppsPage openAppsPage() {
         log.info("opening Apps page");
+        isElementPresent(getAppsPageIcon(), 30);
         getAppsPageIcon().click();
         return new AppsPage(getDriver());
     }
@@ -123,6 +124,7 @@ public class CommonPage extends AbstractPage {
 
     public NotesPage openNotesPage() {
         log.info("opening Notes page");
+        isElementPresent(getNotesPageIcon());
         getNotesPageIcon().click();
         return new NotesPage(getDriver());
     }
@@ -161,7 +163,7 @@ public class CommonPage extends AbstractPage {
     public void openProfileDropdown() {
         sleep(1000);
         getUsernameLink().click();
-        waitUntilDisplayed(getProfileDropBlock(), 15);
+        waitUntilDisplayed(getProfileDropBlock(), 30);
     }
 
     public PublicProfilePage openPublicProfilePage() {

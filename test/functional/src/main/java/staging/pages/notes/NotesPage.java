@@ -6,7 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
-import staging.data.TestCommonData;
+import staging.data.TestRunData;
 import staging.locators.NotesLocators;
 import staging.model.NoteProfile;
 import staging.pages.AbstractPage;
@@ -38,6 +38,7 @@ public class NotesPage extends AbstractPage {
     public NotesPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(NotesLocators.NOTES_PAGINATION_AREA));
+        waitForPageToLoadAndVerifyBy(By.xpath(NotesLocators.NOTES_NEW_NOTE_LINK), 30);
     }
 
     public Link getNotesMyNotesLink() {
@@ -82,18 +83,18 @@ public class NotesPage extends AbstractPage {
         return new NotesExplorePage(getDriver());
     }
 
-    public NotesEditNotePage openNewNotePage() {
+    public NotesEditNotePage openNewNote() {
         log.info("open Notes.NewNote page");
         sleep(1000);
         getNotesNewNoteLink().click();
         return new NotesEditNotePage(getDriver());
     }
 
-    public NotesEditNotePage openNewNotePage(NoteProfile noteProfile) {
+    public NotesEditNotePage openNewNoteSaveTime(NoteProfile noteProfile) {
         log.info("open Notes.NewNote page");
         sleep(1000);
         getNotesNewNoteLink().click();
-        noteProfile.setNoteCreatedText(TestCommonData.getCurrentTimezone());
+        noteProfile.setNoteCreatedText(TestRunData.getCurrentTimezone());
         return new NotesEditNotePage(getDriver());
     }
 
@@ -105,7 +106,7 @@ public class NotesPage extends AbstractPage {
         WebElement noteLink = null;
         List<WebElement> allLinks = getDriver().findElements(By.xpath(NotesLocators.NOTES_LIST_ANY_NOTE_LINK));
         for (WebElement we : allLinks) {
-            if (we.getText().contains(noteProfile.getTitleNoteText())) {
+            if (we.getText().contains(noteProfile.getNoteTitleText())) {
                 noteLink = we;
                 break;
             }

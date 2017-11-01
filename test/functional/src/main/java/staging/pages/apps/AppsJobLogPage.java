@@ -31,7 +31,7 @@ public class AppsJobLogPage extends AbstractPage {
 
     public String getScriptResultFromLog(AppProfile appProfile) {
         String scriptLog = getAppsJobLogPageLogArea().getText();
-        scriptLog = scriptLog.replace(appProfile.getAppInitScriptCodeText(), "");
+        scriptLog = scriptLog.replace(appProfile.getInitScriptText(), "");
         return scriptLog;
     }
 }
