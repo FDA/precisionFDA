@@ -3,7 +3,7 @@ package tools;
 import org.testng.ITestResult;
 import org.testng.TestListenerAdapter;
 
-import static staging.data.TestCommonData.*;
+import static staging.data.TestRunData.*;
 
 public class CustomResultListener extends TestListenerAdapter {
 

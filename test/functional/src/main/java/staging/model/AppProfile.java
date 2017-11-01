@@ -5,149 +5,149 @@ import static staging.utils.Utils.getCurrentDateTimeValue;
 
 public class AppProfile {
 
-    private String appInitNameText;
+    private String initNameText;
 
-    private String appInitTitleText;
+    private String initTitleText;
 
-    private String appInitScriptCodeText;
+    private String initScriptText;
 
-    private String appInitCreationDateTimeText;
+    private String initAppCreatedText;
 
-    private String appInitReadMeRowText;
+    private String initReadMeRawText;
 
-    private String appInitReadMeRichText;
+    private String initReadMeRichText;
 
-    private String appCurRevNameText;
+    private String curRevNameText;
 
-    private String appCurRevTitleText;
+    private String curRevTitleText;
 
-    private String appCurRevScriptCodeText;
+    private String curRevScriptText;
 
-    private String appCurRevCreationDateTimeText;
+    private String curRevAppCreatedText;
 
-    private String appCurRevReadMeRowText;
+    private String curRevReadMeRawText;
 
-    private String appCurRevReadMeRichText;
+    private String curRevReadMeRichText;
 
-    private String appTempReadMeRowText;
+    private String tempReadMeRawText;
 
-    private String appTempReadMeRichText;
+    private String tempReadMeRichText;
 
     private String jobNameText;
 
-    private String jobCreationDateTimeText;
+    private String jobCreatedText;
 
     private String expectedJobOutputText;
 
     private String appCommentCreatedText;
 
-    public AppProfile(final String appInitNameText,
-                      final String appCurRevNameText,
+    public AppProfile(final String initNameText,
+                      final String curRevNameText,
 
-                      final String appInitTitleText,
-                      final String appCurRevTitleText,
+                      final String initTitleText,
+                      final String curRevTitleText,
 
-                      final String appInitScriptCodeText,
-                      final String appCurRevScriptCodeText,
+                      final String initScriptText,
+                      final String curRevScriptText,
 
-                      final String appInitReadMeRowText,
-                      final String appTempReadMeRowText,
-                      final String appCurRevReadMeRowText,
+                      final String initReadMeRawText,
+                      final String tempReadMeRawText,
+                      final String curRevReadMeRawText,
 
-                      final String appInitReadMeRichText,
-                      final String appTempReadMeRichText,
-                      final String appCurRevReadMeRichText,
+                      final String initReadMeRichText,
+                      final String tempReadMeRichText,
+                      final String curRevReadMeRichText,
 
-                      final String appInitCreationDateTimeText,
-                      final String appCurRevCreationDateTimeText,
+                      final String initAppCreatedText,
+                      final String curRevAppCreatedText,
 
                       final String jobNameText,
-                      final String jobCreationDateTimeText,
+                      final String jobCreatedText,
                       final String expectedJobOutputText,
 
                       final String appCommentCreatedText) {
 
-        this.appInitNameText = appInitNameText;
-        this.appCurRevNameText = appCurRevNameText;
+        this.initNameText = initNameText;
+        this.curRevNameText = curRevNameText;
 
-        this.appInitTitleText = appInitTitleText;
-        this.appCurRevTitleText = appCurRevTitleText;
+        this.initTitleText = initTitleText;
+        this.curRevTitleText = curRevTitleText;
 
-        this.appInitScriptCodeText = appInitScriptCodeText;
-        this.appCurRevScriptCodeText = appCurRevScriptCodeText;
+        this.initScriptText = initScriptText;
+        this.curRevScriptText = curRevScriptText;
 
-        this.appInitReadMeRowText = appInitReadMeRowText;
-        this.appTempReadMeRowText = appTempReadMeRowText;
-        this.appCurRevReadMeRowText = appCurRevReadMeRowText;
+        this.initReadMeRawText = initReadMeRawText;
+        this.tempReadMeRawText = tempReadMeRawText;
+        this.curRevReadMeRawText = curRevReadMeRawText;
 
-        this.appInitReadMeRichText = appInitReadMeRichText;
-        this.appTempReadMeRichText = appTempReadMeRichText;
-        this.appCurRevReadMeRichText = appCurRevReadMeRichText;
+        this.initReadMeRichText = initReadMeRichText;
+        this.tempReadMeRichText = tempReadMeRichText;
+        this.curRevReadMeRichText = curRevReadMeRichText;
 
-        this.appInitCreationDateTimeText = appInitCreationDateTimeText;
-        this.appCurRevCreationDateTimeText = appCurRevCreationDateTimeText;
+        this.initAppCreatedText = initAppCreatedText;
+        this.curRevAppCreatedText = curRevAppCreatedText;
 
         this.jobNameText = jobNameText;
-        this.jobCreationDateTimeText = jobCreationDateTimeText;
+        this.jobCreatedText = jobCreatedText;
         this.expectedJobOutputText = expectedJobOutputText;
 
         this.appCommentCreatedText = appCommentCreatedText;
     }
 
-    public String getAppInitNameText() {
-        return this.appInitNameText.replace(" ", "-");
+    public String getInitNameText() {
+        return this.initNameText.replace(" ", "-");
     }
 
-    public String getAppInitTitleText() {
-        return this.appInitTitleText;
+    public String getInitTitleText() {
+        return this.initTitleText;
     }
 
-    public String getAppInitScriptCodeText() {
-        return this.appInitScriptCodeText;
+    public String getInitScriptText() {
+        return this.initScriptText;
     }
 
-    public String getAppInitCreationDateTimeText() {
-        return this.appInitCreationDateTimeText;
+    public String getInitAppCreatedText() {
+        return this.initAppCreatedText;
     }
 
-    public String getInitReadMeRowText() {
-        return this.appInitReadMeRowText;
+    public String getInitReadMeRawText() {
+        return this.initReadMeRawText;
     }
 
     public String getInitReadMeRichText() {
-        return this.appInitReadMeRichText;
+        return this.initReadMeRichText;
     }
 
-    public String getAppCurRevNameText() {
-        return this.appCurRevNameText;
+    public String getCurRevNameText() {
+        return this.curRevNameText;
     }
 
-    public String getAppCurRevTitleText() {
-        return this.appCurRevTitleText;
+    public String getCurRevTitleText() {
+        return this.curRevTitleText;
     }
 
-    public String getAppCurRevScriptCodeText() {
-        return this.appCurRevScriptCodeText;
+    public String getCurRevScriptText() {
+        return this.curRevScriptText;
     }
 
-    public String getAppCurRevCreationDateTimeText() {
-        return this.appCurRevCreationDateTimeText;
+    public String getCurRevAppCreatedText() {
+        return this.curRevAppCreatedText;
     }
 
     public String getCurRevReadMeRowText() {
-        return this.appCurRevReadMeRowText;
+        return this.curRevReadMeRawText;
     }
 
     public String getCurRevReadMeRichText() {
-        return this.appCurRevReadMeRichText;
+        return this.curRevReadMeRichText;
     }
 
     public String getTempReadMeRowText() {
-        return this.appTempReadMeRowText;
+        return this.tempReadMeRawText;
     }
 
     public String getTempReadMeRichText() {
-        return this.appTempReadMeRichText;
+        return this.tempReadMeRichText;
     }
 
     public String getJobNameText() {
@@ -158,8 +158,8 @@ public class AppProfile {
         return appCommentCreatedText;
     }
 
-    public String getJobCreationDateTimeText() {
-        return this.jobCreationDateTimeText;
+    public String getJobCreatedText() {
+        return this.jobCreatedText;
     }
 
     public String getExpectedJobOutputText() {
@@ -167,63 +167,63 @@ public class AppProfile {
     }
 
     public void setAppInitCreationDateTimeText() {
-        this.appInitCreationDateTimeText = getCurrentDateTimeValue(DEFAULT_TIME_ZONE);
+        this.initAppCreatedText = getCurrentDateTimeValue(DEFAULT_TIME_ZONE);
     }
 
-    public void setAppInitCreationDateTimeText(String timezone) {
-        this.appInitCreationDateTimeText = getCurrentDateTimeValue(timezone);
+    public void setInitAppCreatedText(String timezone) {
+        this.initAppCreatedText = getCurrentDateTimeValue(timezone);
     }
 
     public void setJobCreationDateTimeText() {
-        this.jobCreationDateTimeText = getCurrentDateTimeValue(DEFAULT_TIME_ZONE);
+        this.jobCreatedText = getCurrentDateTimeValue(DEFAULT_TIME_ZONE);
     }
 
-    public void setJobCreationDateTimeText(String timezone) {
-        this.jobCreationDateTimeText = getCurrentDateTimeValue(timezone);
+    public void setJobCreatedText(String timezone) {
+        this.jobCreatedText = getCurrentDateTimeValue(timezone);
     }
 
-    public void setAppCurRevNameText(String name) {
-        this.appCurRevNameText = name;
+    public void setCurRevNameText(String name) {
+        this.curRevNameText = name;
     }
 
-    public void setAppCurRevTitleText(String title) {
-        this.appCurRevTitleText = title;
+    public void setCurRevTitleText(String title) {
+        this.curRevTitleText = title;
     }
 
-    public void setAppCurRevScriptCodeText(String code) {
-        this.appCurRevScriptCodeText = code;
+    public void setCurRevScriptText(String code) {
+        this.curRevScriptText = code;
     }
 
-    public void setAppCurRevCreationDateTimeText() {
-        this.appCurRevCreationDateTimeText = getCurrentDateTimeValue(DEFAULT_TIME_ZONE);
+    public void setCurRevAppCreatedText() {
+        this.curRevAppCreatedText = getCurrentDateTimeValue(DEFAULT_TIME_ZONE);
     }
 
-    public void setAppCurRevCreationDateTimeText(String timezone) {
-        this.appCurRevCreationDateTimeText =  getCurrentDateTimeValue(timezone);
+    public void setCurRevAppCreatedText(String timezone) {
+        this.curRevAppCreatedText =  getCurrentDateTimeValue(timezone);
     }
 
-    public void setAppCurRevReadMeRowText(String row) {
-        this.appCurRevReadMeRowText = row;
+    public void setCurRevReadMeRawText(String raw) {
+        this.curRevReadMeRawText = raw;
     }
 
-    public void setAppCurRevReadMeRichText(String rich) {
-        this.appCurRevReadMeRichText = rich;
+    public void setCurRevReadMeRichText(String rich) {
+        this.curRevReadMeRichText = rich;
     }
 
-    public void setAppTempReadMeRowText(String row) {
-        this.appTempReadMeRowText = row;
+    public void setTempReadMeRawText(String raw) {
+        this.tempReadMeRawText = raw;
     }
 
-    public void setAppTempReadMeRichText(String rich) {
-        this.appTempReadMeRichText = rich;
+    public void setTempReadMeRichText(String rich) {
+        this.tempReadMeRichText = rich;
     }
 
-    public void setAppInitNameText(String name) {
-        this.appInitNameText = name;
+    public void setInitNameText(String name) {
+        this.initNameText = name;
     }
 
-    public void setAppInitTitleText(String title) {
-        this.appInitTitleText = title;
+    public void setInitTitleText(String title) {
+        this.initTitleText = title;
     }
 
     public void setAppCommentCreatedText() {

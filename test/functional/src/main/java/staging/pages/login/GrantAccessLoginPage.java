@@ -13,17 +13,21 @@ public class GrantAccessLoginPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
 
-    @FindBy(xpath = GrantAccessLoginLocators.GrantAccessButton)
+    @FindBy(xpath = GrantAccessLoginLocators.GRANT_ACCESS_BUTTON)
     private Button grantAccessButton;
+
+    public Button getGrantAccessButton() {
+        return grantAccessButton;
+    }
 
     public GrantAccessLoginPage(final WebDriver driver) {
         super(driver);
-        waitForPageToLoadAndVerifyBy(By.xpath(GrantAccessLoginLocators.GrantAccessButton));
+        waitForPageToLoadAndVerifyBy(By.xpath(GrantAccessLoginLocators.GRANT_ACCESS_BUTTON));
     }
 
     public OverviewPage grantAccess() {
         log.info("grant access");
-        grantAccessButton.click();
+        getGrantAccessButton().click();
         return new OverviewPage(getDriver());
     }
 

@@ -7,7 +7,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
-import staging.data.TestCommonData;
+import staging.data.TestRunData;
 import staging.locators.NotesLocators;
 import staging.model.NoteProfile;
 import staging.model.User;
@@ -188,11 +188,11 @@ public class NotesSavedNotePage extends AbstractPage {
         return new NotesSavedNotePage(getDriver());
     }
 
-    public NotesSavedNotePage leaveComment(NoteProfile noteProfile) {
+    public NotesSavedNotePage leaveCommentSaveTime(NoteProfile noteProfile) {
         log.info("write and save comment");
         getNotesSavedNoteCommentAreaWE().sendKeys(getNoteCommentText());
         getNotesSavedNoteCommentSubmitButton().click();
-        noteProfile.setCommentCreatedText(TestCommonData.getCurrentTimezone());
+        noteProfile.setCommentCreatedText(TestRunData.getCurrentTimezone());
         return new NotesSavedNotePage(getDriver());
     }
 

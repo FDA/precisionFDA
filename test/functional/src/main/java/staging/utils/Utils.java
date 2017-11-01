@@ -9,11 +9,13 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-import static staging.data.TestCommonData.getTrueResult;
+import static staging.data.TestRunData.getTrueResult;
 
 public class Utils {
 
@@ -38,6 +40,27 @@ public class Utils {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd_MM_HHmmssSSS");
         String salt = dateFormat.format(d);
         return salt;
+    }
+
+    public static String applyTimezoneToDate(String dateString, String timezoneOfTheDate, String desiredTimezone) {
+        Logger log = Logger.getLogger("INFO");
+
+        SimpleDateFormat dateFormatOld = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormatOld.setTimeZone(TimeZone.getTimeZone(timezoneOfTheDate));
+
+        SimpleDateFormat dateFormatNew = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormatNew.setTimeZone(TimeZone.getTimeZone(desiredTimezone));
+
+        Date oldDate;
+        String newDateString = "";
+        try {
+            oldDate = dateFormatOld.parse(dateString);
+            newDateString = dateFormatNew.format(oldDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        log.info("date was converted from [" + dateString + "] to [" + newDateString + "]");
+        return newDateString;
     }
 
     public static String getTimeStamp() {
@@ -120,7 +143,8 @@ public class Utils {
     }
 
     public static String isDateTimeCorrect(String actTime, String expTime) {
-        long possibleDelta = 3;
+        final Logger log = Logger.getLogger("");
+        long possibleDelta = 10;
         String textResult = "";
         Long delta = Utils.getDifferenceBetweenDateTime(actTime, expTime);
         if (delta <= possibleDelta) {
@@ -128,6 +152,7 @@ public class Utils {
         }
         else {
             textResult = "Too big difference between displayed [" + actTime + "] and expected [" + expTime + "] | delta is: " + delta + " seconds";
+            log.error(textResult);
         }
         return textResult;
     }

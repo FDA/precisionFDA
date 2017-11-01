@@ -2,12 +2,12 @@ package staging.data;
 
 import staging.model.NoteProfile;
 
-import static staging.data.TestCommonData.getTestRunUniqueFinalValue;
+import static staging.data.TestRunData.getTestRunUniqueFinalValue;
 import static staging.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class TestNotesData {
 
-    public static final String NEW_NOTE_ROW_BODY_PREFIX = "# __Auto__ *test* note ";
+    public static final String NEW_NOTE_RAW_BODY_PREFIX = "# __Auto__ *test* note ";
 
     public static final String NEW_NOTE_RICH_BODY_PREFIX = "Auto test note ";
 
@@ -17,7 +17,7 @@ public class TestNotesData {
 
     public static final String NOTE_TO_EDIT_TITLE_PREFIX = "note to edit title ";
 
-    public static final String NOTE_TO_EDIT_ROW_BODY_PREFIX = "# __Auto__ *test* edit note ";
+    public static final String NOTE_TO_EDIT_RAW_BODY_PREFIX = "# __Auto__ *test* edit note ";
 
     public static final String NOTE_TO_EDIT_RICH_BODY_PREFIX = "Auto test edit note ";
 
@@ -25,7 +25,7 @@ public class TestNotesData {
 
     public static final String DEFAULT_TIME_ZONE = "GMT";
 
-    public static NoteProfile mainNote = new NoteProfile(getNewMainTitleText(), getNewMainRowBodyText(), getNewMainRichBodyText(), "", "");
+    public static NoteProfile mainNote = new NoteProfile(getNewMainTitleText(), getNewMainRawBodyText(), getNewMainRichBodyText(), "", "");
 
     public static NoteProfile getNoteToDelete() {
         return new NoteProfile(getTitleToDeleteText(), getRowBodyToDeleteText(), getRichBodyToDeleteText(), "", "");
@@ -36,7 +36,7 @@ public class TestNotesData {
     }
 
     public static NoteProfile getNoteTimeZone() {
-        return new NoteProfile(getTimeZoneTitleText(), getNewMainRowBodyText(), getNewMainRichBodyText(), "", "");
+        return new NoteProfile(getTimeZoneTitleText(), getNewMainRawBodyText(), getNewMainRichBodyText(), "", "");
     }
 
     public static NoteProfile getMainNote() {
@@ -47,8 +47,8 @@ public class TestNotesData {
         return NEW_NOTE_TITLE_PREFIX + getTestRunUniqueFinalValue();
     }
 
-    public static String getNewMainRowBodyText() {
-        return NEW_NOTE_ROW_BODY_PREFIX + getTestRunUniqueFinalValue();
+    public static String getNewMainRawBodyText() {
+        return NEW_NOTE_RAW_BODY_PREFIX + getTestRunUniqueFinalValue();
     }
 
     public static String getNewMainRichBodyText() {
@@ -60,7 +60,7 @@ public class TestNotesData {
     }
 
     public static String getRowBodyToDeleteText() {
-        return NEW_NOTE_ROW_BODY_PREFIX + getTestRunUniqueFinalValue();
+        return NEW_NOTE_RAW_BODY_PREFIX + getTestRunUniqueFinalValue();
     }
 
     public static String getRichBodyToDeleteText() {
@@ -76,7 +76,7 @@ public class TestNotesData {
     }
 
     public static String getRowBodyToEditText() {
-        return NOTE_TO_EDIT_ROW_BODY_PREFIX + getTestRunUniqueFinalValue();
+        return NOTE_TO_EDIT_RAW_BODY_PREFIX + getTestRunUniqueFinalValue();
     }
 
     public static String getRichBodyToEditText() {
@@ -84,8 +84,7 @@ public class TestNotesData {
     }
 
     public static String getTimeZoneTitleText() {
-        return NEW_NOTE_TITLE_PREFIX + getRunTimeLocalUniqueValue() + " " + TestCommonData.getCurrentTimezone();
+        return NEW_NOTE_TITLE_PREFIX + getRunTimeLocalUniqueValue() + " " + TestRunData.getCurrentTimezone();
     }
-
 
 }

@@ -47,7 +47,7 @@ public class OpenAllPagesTest extends AbstractTest {
         printTestHeader("Test Case: check that Notes.NewNote page can be open");
 
         NotesPage notesPage = getCommonPage().openNotesPage();
-        NotesEditNotePage notesEditNotePage = notesPage.openNewNotePage();
+        NotesEditNotePage notesEditNotePage = notesPage.openNewNote();
 
         SoftAssert.assertThat(
                 notesEditNotePage.isEditorDisplayed())

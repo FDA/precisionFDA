@@ -5,6 +5,7 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.*;
 
 import ru.yandex.qatools.htmlelements.element.Link;
+import ru.yandex.qatools.htmlelements.element.Select;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import ru.yandex.qatools.htmlelements.loader.HtmlElementLoader;
 
@@ -20,7 +21,7 @@ public abstract class AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
 
-    private static final int DEFAULT_TIMEOUT = 10;
+    private static final int DEFAULT_TIMEOUT = 20;
 
     public AbstractPage(final WebDriver driver) {
         HtmlElementLoader.populatePageObject(this, driver);
@@ -132,6 +133,24 @@ public abstract class AbstractPage {
     }
 
     public boolean isElementPresent(final Link element) {
+        try {
+            waitUntilDisplayed(element.getWrappedElement(), DEFAULT_TIMEOUT, false);
+            return true;
+        } catch (final TimeoutException e) {
+            return false;
+        }
+    }
+
+    public boolean isElementPresent(final Link element, final int timeout) {
+        try {
+            waitUntilDisplayed(element.getWrappedElement(), timeout, false);
+            return true;
+        } catch (final TimeoutException e) {
+            return false;
+        }
+    }
+
+    public boolean isElementPresent(final Select element) {
         try {
             waitUntilDisplayed(element.getWrappedElement(), DEFAULT_TIMEOUT, false);
             return true;

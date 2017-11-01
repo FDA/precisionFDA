@@ -5,8 +5,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import ru.yandex.qatools.htmlelements.element.Select;
-import staging.data.TestCommonData;
+import staging.data.TestRunData;
 import staging.locators.ProfileLocators;
 import staging.pages.AbstractPage;
 
@@ -39,8 +40,10 @@ public class ProfilePage extends AbstractPage {
 
     public ProfilePage setTimeZone(String[] timeZone) {
         log.info("select timezone: " + timeZone[1]);
+        isElementPresent(getProfileTimeZoneSelect());
+        sleep(500);
         getProfileTimeZoneSelect().selectByVisibleText(timeZone[1]);
-        TestCommonData.setCurrentTimezone(timeZone[0]);
+        TestRunData.setCurrentTimezone(timeZone[0]);
         return new ProfilePage(getDriver());
     }
 

@@ -4,7 +4,7 @@ import staging.utils.SettingsProperties;
 
 import static staging.utils.Utils.getRunTimeLocalUniqueValue;
 
-public class TestCommonData {
+public class TestRunData {
 
     public static final String CASE_STATUS_PASSED = "passed";
 

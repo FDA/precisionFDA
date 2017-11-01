@@ -8,7 +8,7 @@ import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
-import staging.data.TestCommonData;
+import staging.data.TestRunData;
 import staging.locators.AppsLocators;
 import staging.model.AppProfile;
 import staging.model.User;
@@ -274,18 +274,18 @@ public class AppsSavedAppPage extends AbstractPage {
         return new AppsSavedAppPage(getDriver());
     }
 
-    public AppsSavedAppPage writeComment() {
-        log.info("write a comment");
+    public AppsSavedAppPage leaveComment() {
+        log.info("leave a comment");
         getAppsSavedAppCommentArea().sendKeys(getAppCommentText());
         getAppsSavedAppCommentButton().click();
         return new AppsSavedAppPage(getDriver());
     }
 
-    public AppsSavedAppPage writeComment(AppProfile appProfile) {
-        log.info("write a comment");
+    public AppsSavedAppPage leaveCommentSaveTime(AppProfile appProfile) {
+        log.info("leave a comment");
         getAppsSavedAppCommentArea().sendKeys(getAppCommentText());
         getAppsSavedAppCommentButton().click();
-        appProfile.setAppCommentCreatedText(TestCommonData.getCurrentTimezone());
+        appProfile.setAppCommentCreatedText(TestRunData.getCurrentTimezone());
         return new AppsSavedAppPage(getDriver());
     }
 

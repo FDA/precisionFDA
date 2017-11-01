@@ -2,6 +2,7 @@ package staging.pages.apps;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -9,7 +10,7 @@ import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.Select;
 import ru.yandex.qatools.htmlelements.element.TextInput;
-import staging.data.TestCommonData;
+import staging.data.TestRunData;
 import staging.locators.AppsLocators;
 import staging.locators.CommonLocators;
 import staging.model.AppProfile;
@@ -123,7 +124,7 @@ public class AppsEditAppPage extends AbstractPage {
     public AppsSavedAppPage saveRevision(AppProfile appProfile) {
         log.info("save revision");
         getEditAppSaveRevisionButton().click();
-        appProfile.setAppCurRevCreationDateTimeText(TestCommonData.getCurrentTimezone());
+        appProfile.setCurRevAppCreatedText(TestRunData.getCurrentTimezone());
         return new AppsSavedAppPage(getDriver());
     }
 
@@ -142,6 +143,9 @@ public class AppsEditAppPage extends AbstractPage {
     public void fillReadme(String readMeRowText) {
         log.info("fill readme");
         getEditAppReadmeTextArea().clear();
+        sleep(1000);
+        getEditAppReadmeTextArea().sendKeys(Keys.BACK_SPACE);
+        sleep(500);
         getEditAppReadmeTextArea().sendKeys(readMeRowText);
     }
 
@@ -173,8 +177,8 @@ public class AppsEditAppPage extends AbstractPage {
     }
 
     public AppsSavedAppPage saveRevisionAfterReadmeEdit(AppProfile appProfile) {
-        appProfile.setAppCurRevReadMeRowText(appProfile.getTempReadMeRowText());
-        appProfile.setAppCurRevReadMeRichText(appProfile.getTempReadMeRichText());
+        appProfile.setCurRevReadMeRawText(appProfile.getTempReadMeRowText());
+        appProfile.setCurRevReadMeRichText(appProfile.getTempReadMeRichText());
         AppsSavedAppPage appsSavedAppPage = saveRevision(appProfile);
         return appsSavedAppPage;
     }
@@ -200,30 +204,32 @@ public class AppsEditAppPage extends AbstractPage {
     public AppsSavedAppPage clickCreate(AppProfile appProfile) {
         log.info("click Create button");
         getAppCreateAppButton().click();
-        appProfile.setAppInitCreationDateTimeText(TestCommonData.getCurrentTimezone());
+        appProfile.setInitAppCreatedText(TestRunData.getCurrentTimezone());
         return new AppsSavedAppPage(getDriver());
     }
 
-    public AppsSavedAppPage fillAndSaveNewAppForm(AppProfile appProfile) {
+    public AppsSavedAppPage fillAndSaveNewApp(AppProfile appProfile) {
         log.info("fill and save new app");
 
-        fillAppName(appProfile.getAppInitNameText());
-        fillAppTitle(appProfile.getAppInitTitleText());
+        fillAppName(appProfile.getInitNameText());
+        fillAppTitle(appProfile.getInitTitleText());
 
-        appProfile.setAppCurRevNameText(appProfile.getAppInitNameText());
-        appProfile.setAppCurRevTitleText(appProfile.getAppInitTitleText());
+        appProfile.setCurRevNameText(appProfile.getInitNameText());
+        appProfile.setCurRevTitleText(appProfile.getInitTitleText());
 
-        if (appProfile.getAppInitScriptCodeText().length() > 0) {
+        if (appProfile.getInitScriptText().length() > 0) {
             openScriptTab();
-            fillScriptArea(appProfile.getAppInitScriptCodeText());
-            appProfile.setAppCurRevScriptCodeText(appProfile.getAppInitScriptCodeText());
+            fillScriptArea(appProfile.getInitScriptText());
+            appProfile.setCurRevScriptText(appProfile.getInitScriptText());
         }
 
-        if (appProfile.getInitReadMeRowText().length() > 0) {
+        if (appProfile.getInitReadMeRawText().length() > 0) {
             openReadmeEditTab();
-            fillReadme(appProfile.getInitReadMeRowText());
-            appProfile.setAppCurRevReadMeRowText(appProfile.getInitReadMeRowText());
-            appProfile.setAppCurRevReadMeRichText(appProfile.getInitReadMeRichText());
+            fillReadme(appProfile.getInitReadMeRawText());
+            appProfile.setCurRevReadMeRawText(appProfile.getInitReadMeRawText());
+            appProfile.setCurRevReadMeRichText(appProfile.getInitReadMeRichText());
+            appProfile.setTempReadMeRawText(appProfile.getInitReadMeRawText());
+            appProfile.setTempReadMeRichText(appProfile.getInitReadMeRichText());
         }
 
         AppsSavedAppPage appsSavedAppPage = clickCreate(appProfile);
@@ -233,9 +239,9 @@ public class AppsEditAppPage extends AbstractPage {
 
     public AppsSavedAppPage editAndSaveAppTitleWithNewValue(AppProfile appProfile) {
         log.info("edit app title with new data");
-        String newTitle = appProfile.getAppCurRevTitleText() + " upd " + getRunTimeLocalUniqueValue();
+        String newTitle = appProfile.getCurRevTitleText() + " upd " + getRunTimeLocalUniqueValue();
         fillAppTitle(newTitle);
-        appProfile.setAppCurRevTitleText(newTitle);
+        appProfile.setCurRevTitleText(newTitle);
         AppsSavedAppPage appsSavedAppPage = saveRevision(appProfile);
         return appsSavedAppPage;
     }
@@ -243,33 +249,33 @@ public class AppsEditAppPage extends AbstractPage {
     public void editReadmeWithNewValue(AppProfile appProfile) {
         log.info("edit readme with new data");
         String add = getRunTimeLocalUniqueValue();
-        String tempReadmeRow = appProfile.getInitReadMeRowText() + " upd " + add;
+        String tempReadmeRow = appProfile.getInitReadMeRawText() + " upd " + add;
         String tempReadmeRich = appProfile.getInitReadMeRichText() + " upd " + add;
         fillReadme(tempReadmeRow);
-        appProfile.setAppTempReadMeRowText(tempReadmeRow);
-        appProfile.setAppTempReadMeRichText(tempReadmeRich);
+        appProfile.setTempReadMeRawText(tempReadmeRow);
+        appProfile.setTempReadMeRichText(tempReadmeRich);
     }
 
     public AppsSavedAppPage editAndSaveAppWithNewValues(AppProfile appProfile) {
         log.info("edit and save app with new data");
 
         String add = getRunTimeLocalUniqueValue();
-        String newTitle = appProfile.getAppCurRevTitleText() + add;
+        String newTitle = appProfile.getCurRevTitleText() + add;
         String newReadMeRow = appProfile.getCurRevReadMeRowText() + add;
         String newReadMeRich = appProfile.getCurRevReadMeRichText() + add;
-        String newScript = appProfile.getAppCurRevScriptCodeText() + add;
+        String newScript = appProfile.getCurRevScriptText() + add;
 
         fillAppTitle(newTitle);
-        appProfile.setAppCurRevTitleText(newTitle);
+        appProfile.setCurRevTitleText(newTitle);
 
         openScriptTab();
         fillScriptArea(newScript);
-        appProfile.setAppCurRevScriptCodeText(newScript);
+        appProfile.setCurRevScriptText(newScript);
 
         openReadmeEditTab();
         fillReadme(newReadMeRow);
-        appProfile.setAppCurRevReadMeRowText(newReadMeRow);
-        appProfile.setAppCurRevReadMeRichText(newReadMeRich);
+        appProfile.setCurRevReadMeRawText(newReadMeRow);
+        appProfile.setCurRevReadMeRichText(newReadMeRich);
 
         AppsSavedAppPage appsSavedAppPage = saveRevision(appProfile);
         return appsSavedAppPage;

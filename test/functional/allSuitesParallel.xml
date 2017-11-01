@@ -1,0 +1,23 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="all suites" parallel="tests" thread-count="3">
+    <test name="AppsManagementTest">
+        <classes>
+            <class name="staging.cases.AppsManagementTest" />
+        </classes>
+    </test>
+    <test name="NotesManagementTest">
+        <classes>
+            <class name="staging.cases.NotesManagementTest" />
+        </classes>
+    </test>
+    <test name="TimeZoneTest">
+        <classes>
+            <class name="staging.cases.TimeZoneTest" />
+        </classes>
+    </test>
+    <test name="OpenAllPagesTest">
+        <classes>
+            <class name="staging.cases.OpenAllPagesTest" />
+        </classes>
+    </test>
+</suite>

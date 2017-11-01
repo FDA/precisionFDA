@@ -45,7 +45,7 @@ public class NotesManagementTest extends AbstractTest {
     public void verifyDataOnNewNotePage() {
         printTestHeader("Test Case: check that correct data is displayed by default on a New Note form");
 
-        NotesEditNotePage notesEditNotePage = getCommonPage().openNotesPage().openNewNotePage();
+        NotesEditNotePage notesEditNotePage = getCommonPage().openNotesPage().openNewNote();
 
         SoftAssert.assertThat(
                 notesEditNotePage.getEnteredTitleText())
@@ -79,7 +79,7 @@ public class NotesManagementTest extends AbstractTest {
 
         NotesPage notesPage = getCommonPage().openNotesPage();
 
-        NotesEditNotePage notesEditNotePage = notesPage.openNewNotePage();
+        NotesEditNotePage notesEditNotePage = notesPage.openNewNote();
         notesEditNotePage.fillAndSaveNote(noteProfile);
         notesPage = notesEditNotePage.openNotesPage();
 
@@ -117,7 +117,7 @@ public class NotesManagementTest extends AbstractTest {
 
         NotesPage notesPage = getCommonPage().openNotesPage();
 
-        NotesEditNotePage notesEditNotePage = notesPage.openNewNotePage();
+        NotesEditNotePage notesEditNotePage = notesPage.openNewNote();
         notesEditNotePage.fillAndSaveNote(noteProfile);
         notesPage = notesEditNotePage.openNotesPage();
 
@@ -137,7 +137,7 @@ public class NotesManagementTest extends AbstractTest {
         SoftAssert.assertThat(
                 notesPage.getNotesSuccessMessageText())
                 .as("success alert message")
-                .contains(noteProfile.getTitleNoteText());
+                .contains(noteProfile.getNoteTitleText());
 
         SoftAssert.assertThat(
                 notesPage.isLinkToCreatedNoteDisplayed(noteProfile))
@@ -165,7 +165,7 @@ public class NotesManagementTest extends AbstractTest {
         SoftAssert.assertThat(
                 savedNotePage.getSavedNoteTitleText())
                 .as("Note Title")
-                .isEqualTo(noteProfile.getTitleNoteText());
+                .isEqualTo(noteProfile.getNoteTitleText());
 
         SoftAssert.assertThat(
                 savedNotePage.getSavedNoteOrgText())
@@ -180,7 +180,7 @@ public class NotesManagementTest extends AbstractTest {
         SoftAssert.assertThat(
                 savedNotePage.getSavedNoteBodyText())
                 .as("Note Body Text")
-                .contains(noteProfile.getRichBodyNoteText());
+                .contains(noteProfile.getNoteRichText());
 
         SoftAssert.assertAll();
     }
@@ -203,7 +203,7 @@ public class NotesManagementTest extends AbstractTest {
         assertThat(
                 savedNotePage.getSavedNoteTitleText())
                 .as("Note Title")
-                .isEqualTo(noteProfile.getTitleNoteText());
+                .isEqualTo(noteProfile.getNoteTitleText());
 
         NotesEditNotePage notesEditNotePage = savedNotePage.openNoteForEdit();
 
@@ -220,7 +220,7 @@ public class NotesManagementTest extends AbstractTest {
         SoftAssert.assertThat(
                 savedNotePage.getSavedNoteTitleText())
                 .as("Updated Note Title")
-                .isEqualTo(noteProfile.getTitleNoteText());
+                .isEqualTo(noteProfile.getNoteTitleText());
 
         SoftAssert.assertThat(
                 savedNotePage.getSavedNoteOrgText())
@@ -242,7 +242,7 @@ public class NotesManagementTest extends AbstractTest {
         SoftAssert.assertThat(
                 savedNotePage.getSavedNoteBodyText())
                 .as("Updated Note Body Text")
-                .contains(noteProfile.getRichBodyNoteText());
+                .contains(noteProfile.getNoteRichText());
 
         SoftAssert.assertAll();
     }
@@ -266,12 +266,12 @@ public class NotesManagementTest extends AbstractTest {
         SoftAssert.assertThat(
                 notesEditNotePage.getEnteredTitleText())
                 .as("saved note title")
-                .isEqualTo(noteProfile.getTitleNoteText());
+                .isEqualTo(noteProfile.getNoteTitleText());
 
         SoftAssert.assertThat(
                 notesEditNotePage.getEnteredBodyText())
                 .as("saved note body")
-                .contains(noteProfile.getRowBodyNoteText());
+                .contains(noteProfile.getNoteRawText());
 
         SoftAssert.assertThat(
                 notesEditNotePage.getActOrgText())
@@ -306,7 +306,7 @@ public class NotesManagementTest extends AbstractTest {
         assertThat(
                 notesEditNotePage.getNotePreviewBodyText())
                 .as("note body text on preview tab")
-                .contains(noteProfile.getRichBodyNoteText());
+                .contains(noteProfile.getNoteRichText());
     }
 
     @Test(dependsOnMethods = {"precondition", "createAndSaveNote"})
@@ -339,7 +339,7 @@ public class NotesManagementTest extends AbstractTest {
 
         NotesPage notesPage = getCommonPage().openNotesPage();
 
-        NotesEditNotePage notesEditNotePage = notesPage.openNewNotePage();
+        NotesEditNotePage notesEditNotePage = notesPage.openNewNote();
         notesEditNotePage.fillAndSaveNote(initProfile);
         notesPage = notesEditNotePage.openNotesPage();
 
@@ -358,7 +358,7 @@ public class NotesManagementTest extends AbstractTest {
         SoftAssert.assertThat(
                 savedNotePage.getSavedNoteTitleText())
                 .as("Not changed Title")
-                .isEqualTo(initProfile.getTitleNoteText());
+                .isEqualTo(initProfile.getNoteTitleText());
 
         SoftAssert.assertThat(
                 savedNotePage.getSavedNoteOrgText())
@@ -380,7 +380,7 @@ public class NotesManagementTest extends AbstractTest {
         SoftAssert.assertThat(
                 savedNotePage.getSavedNoteBodyText())
                 .as("Not changed Body Text")
-                .contains(initProfile.getRichBodyNoteText());
+                .contains(initProfile.getNoteRichText());
 
         SoftAssert.assertAll();
     }
