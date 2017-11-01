@@ -4,6 +4,7 @@ class JobsController < ApplicationController
 
   def show
     @job = Job.accessible_by(@context).includes(:user).find_by(dxid: params[:id])
+
     if @job.nil?
       @job = Job.viewable_by(@context).includes(:user).find_by(dxid: params[:id])
       if @job.nil?
@@ -18,34 +19,6 @@ class JobsController < ApplicationController
       @job.reload
     end
 
-    @inputs = []
-    @outputs = []
-    @job.input_spec.each do |spec|
-      @job.run_inputs.each do |name, value|
-        if spec[:name] == name
-          item = {spec: spec, value: value}
-          if spec[:class] == 'file'
-            item[:file] = UserFile.find_by(dxid: item[:value])
-          end
-          @inputs.push(item)
-        end
-      end
-    end
-
-    if @job.done?
-      @job.output_spec.each do |spec|
-        @job.run_outputs.each do |name, value|
-          if spec[:name] == name
-            item = {spec: spec, value: value}
-            if spec[:class] == 'file'
-              item[:file] = UserFile.find_by(dxid: item[:value])
-            end
-            @outputs.push(item)
-          end
-        end
-      end
-    end
-
     @items_from_params = [@job]
     @item_path = pathify(@job)
     @item_comments_path = pathify_comments(@job)
@@ -58,7 +31,7 @@ class JobsController < ApplicationController
   end
 
   def log
-    @job = Job.editable_by(@context).find_by(dxid: params[:id])
+    @job = Job.accessible_by(@context).find_by(dxid: params[:id])
     if @job.nil?
       @job = Job.viewable_by(@context).includes(:user).find_by(dxid: params[:id])
       if @job.nil?

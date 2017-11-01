@@ -1,0 +1,54 @@
+
+<input type="hidden" data-bind="attr: {name: 'id'}, value: rootID" />
+<!-- ko foreach: publishingObjectsUids()-->
+  <input type="hidden" data-bind="attr: {name: 'uids[' + $data + ']'}, value: 'on'" />
+<!-- /ko -->
+<input type="hidden" data-bind="attr: {name: 'scope'}, value: selectedScope" />
+
+<script id="tree-element" type="text/html">
+  <li class="list-group-item" data-bind="css: {'list-group-item-muted': !publish(), 'list-group-item-default': publish()}">
+    <div class="media">
+      <div class="media-left">
+      <!-- ko if: !isPublished -->
+        <!-- ko if: isOwned -->
+          <!-- ko if: isPublishable -->
+            <label class="btn btn-xs" data-bind="css: {'btn-default': !publish(), 'btn-success': publish(), 'disabled': isRoot}">
+              <input type="checkbox" data-bind="checked: publish, disable: isRoot, attr: {name: 'uids[' + uid + ']'}"/>
+              &nbsp;
+              <span data-bind="text: $root.publishableItemLabel"></span>
+              &nbsp;
+              <!-- ko if: isInSpace -->
+                <span>(from Space)</span>
+              <!-- /ko -->
+              <span class="descendent-publish-indicator fa fa-circle" data-bind="visible: !publish() && childrenToPublishCount() > 0" style="display: none;"></span>
+            </label>
+          <!-- /ko -->
+          <!-- ko if: !isPublishable -->
+            <!-- ko if: isInSpace -->
+              <label class="label label-warning-text">In Space</label>
+            <!-- /ko -->
+            <!-- ko if: !isInSpace -->
+              <label class="label label-danger-text">Unpublishable</label>
+            <!-- /ko -->
+          <!-- /ko -->
+        <!-- /ko -->
+        <!-- ko if: !isOwned -->
+          <label class="label label-danger-text">Not Permitted</label>
+        <!-- /ko -->
+      <!-- /ko -->
+      <!-- ko if: isPublished -->
+        <label class="label label-success-text">Public</label>
+      <!-- /ko -->
+      </div>
+      <div class="media-body">
+        <span data-bind="css: iconClass"></span> <span class="object-title" data-bind="text: title"></span>
+        <ul class="list-group" data-bind="visible: publish() && !_.isEmpty(children())">
+          <li class="list-group-item">
+            <small class="text-uppercase">Related objects</small> <small class="text-muted"><strong>(Publishing is recommended)</strong></small>
+          </li>
+          <!-- ko template: { name: 'tree-element', foreach: children } --><!-- /ko -->
+        </ul>
+      </div>
+    </div>
+  </li>
+</script>

@@ -614,7 +614,12 @@ class ApiController < ApplicationController
   #
   # id (string, "file-xxxx")
   #
-  def create_image_file
+  def create_challenge_resource
+    challenge = Challenge.find_by!(id: params[:challenge_id])
+    if !challenge.editable_by?(@context)
+      fail "Challenge cannot be modified by current user."
+    end
+
     name = params[:name]
     fail "File name needs to be a non-empty String" unless name.is_a?(String) && name != ""
 
@@ -623,23 +628,69 @@ class ApiController < ApplicationController
       fail "File description needs to be a String" unless description.is_a?(String)
     end
 
-    project = @context.user.private_files_project
-    dxid = DNAnexusAPI.new(@context.token).("file", "new", {"name": params[:name], "project": project})["id"]
+    project = CHALLENGE_BOT_PRIVATE_FILES_PROJECT
+    dxid = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).("file", "new", {"name": params[:name], "project": CHALLENGE_BOT_PRIVATE_FILES_PROJECT})["id"]
+    challenge_bot = User.find_by!(dxuser: CHALLENGE_BOT_DX_USER)
 
     UserFile.transaction do
-      UserFile.create!(
+      file = UserFile.create!(
         dxid: dxid,
         project: project,
         name: name,
         state: "open",
         description: description,
-        user_id: @context.user_id,
-        parent: @context.user,
+        user_id: User.challenge_bot.id,
+        parent: challenge_bot,
         scope: 'private'
+      )
+
+      ChallengeResource.create!(
+        challenge_id: challenge.id,
+        user_file_id: file.id,
+        user_id: @context.user_id
       )
     end
 
     render json: {id: dxid}
+  end
+
+  def create_resource_link
+    error = false
+
+    file = UserFile.find_by!(dxid: params[:id], user_id: User.challenge_bot.id)
+    resource = ChallengeResource.find_by!(user_id: @context.user_id, challenge_id: params[:challenge_id], user_file_id: file.id)
+
+    if !resource.editable_by?(@context)
+      fail "Challenge resource cannot be modified by current user."
+    end
+
+    # Refresh state of file, if needed
+    if file.state != "closed"
+      User.sync_challenge_bot_files!(@context)
+      file.reload
+    end
+
+    if file.state != "closed"
+      error = "Files can only be downloaded if they are in the 'closed' state"
+      errorType = "FileNotClosed"
+    else
+      # FIXME:
+      # The API warns against storing the url as it may contain
+      # auth information that we don't want to expose
+      # So we may have to store a reference to the file and generate
+      # a shorter duration url each time it is rendered
+
+      opts = {project: file.project, preauthenticated: true, filename: file.name, duration: 9999999999}
+      url = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call(file.dxid, "download", opts)["url"]
+    end
+
+    resource.update_attributes({url: url})
+
+    if error
+      render json: {error: error, errorType: errorType}
+    else
+      render json: {id: file.dxid, url: url}
+    end
   end
 
   def get_file_link
@@ -761,9 +812,17 @@ class ApiController < ApplicationController
     fail "Parameter 'id' needs to be a non-empty String" unless id.is_a?(String) && id != ""
 
     # Check that the file exists, is accessible by the user, and is in the open state. Throw 404 if otherwise.
-    UserFile.find_by!(dxid: id, state: "open", user_id: @context.user_id)
+    file = UserFile.find_by!(dxid: id, state: "open")
+    token = @context.token
+    if file.user_id != @context.user_id
+      if !file.challenge_resources.empty? && @context.user.can_administer_site?
+        token = CHALLENGE_BOT_TOKEN
+      else
+        fail "The current user does not have access to the file."
+      end
+    end
 
-    result = DNAnexusAPI.new(@context.token).(id, "upload", {size: size, md5: md5, index: index})
+    result = DNAnexusAPI.new(token).(id, "upload", {size: size, md5: md5, index: index})
 
     render json: result
   end
@@ -778,9 +837,18 @@ class ApiController < ApplicationController
     id = params[:id]
     fail "id needs to be a non-empty string" unless id.is_a?(String) && id != ""
 
-    file = UserFile.find_by!(dxid: id, user_id: @context.user_id, parent_type: "User")
+    file = UserFile.find_by!(dxid: id, parent_type: "User")
+    token = @context.token
+    if file.user_id != @context.user_id
+      if !file.challenge_resources.empty? && @context.user.can_administer_site?
+        token = CHALLENGE_BOT_TOKEN
+      else
+        fail "The current user does not have access to the file."
+      end
+    end
+
     if file.state == "open"
-      DNAnexusAPI.new(@context.token).(id, "close")
+      DNAnexusAPI.new(token).(id, "close")
       UserFile.transaction do
         # Must recheck inside the transaction
         file.reload
@@ -852,112 +920,25 @@ class ApiController < ApplicationController
 
     # Inputs should be compatible
     # (The following also normalizes them)
-    run_inputs = {}
-    dx_run_input = {}
-    input_file_dxids = []
-    @app.input_spec.each do |input|
-      key = input["name"]
-      optional = (input["optional"] == true)
-      has_default = input.has_key?("default")
-      default = input["default"]
-      klass = input["class"]
-      choices = input["choices"]
+    input_info = input_spec_preparer.run(@app, inputs)
 
-      if inputs.has_key?(key)
-        value = inputs[key]
-      elsif has_default
-        value = default
-      elsif optional
-        # No given value and no default, but input is optional; move on
-        next
-      else
-        # Required input is missing
-        fail "#{key}: required input is missing"
-      end
+    fail input_spec_preparer.first_error unless input_spec_preparer.valid?
 
-      # Check compatibility with choices
-      fail "#{key}: incompatiblity with choices" if choices.present? && !choices.include?(value)
-
-      if klass == "file"
-        fail "#{key}: input file value is not a string" unless value.is_a?(String)
-        file = UserFile.real_files.accessible_by(@context).find_by(dxid: value)
-        fail "#{key}: input file is not accessible or does not exist" unless !file.nil?
-        fail "#{key}: input file's license must be accepted" unless !file.license.present? || file.licensed_by?(@context)
-
-        dxvalue = {"$dnanexus_link" => value}
-        input_file_dxids << value
-      elsif klass == "int"
-        fail "#{key}: value is not an integer" unless value.is_a?(Numeric) && (value.to_i == value)
-        value = value.to_i
-      elsif klass == "float"
-        fail "#{key}: value is not a float" unless value.is_a?(Numeric)
-      elsif klass == "boolean"
-        fail "#{key}: value is not a boolean" unless value == true || value == false
-      elsif klass == "string"
-        fail "#{key}: value is not a string" unless value.is_a?(String)
-      end
-
-      run_inputs[key] = value
-      dx_run_input[key] = dxvalue || value
-    end
+    run_instance_type = params[:instance_type]
 
     # User can override the instance type
-    if params.has_key?("instance_type")
+    if run_instance_type
       fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.has_key?(params["instance_type"]) #Checks also that it's a string
-      run_instance_type = params["instance_type"]
     end
 
-    project = User.find(@context.user_id).private_files_project
-
-    api_input = {
+    job = job_creator.create(
+      app: @app,
       name: name,
-      input: dx_run_input,
-      project: project,
-      timeoutPolicyByExecutable: {@app.dxid => {"*" => {"days" => 2}}}
-    }
-    if run_instance_type.present?
-      api_input[:systemRequirements] = {main: {instanceType: Job::INSTANCE_TYPES[run_instance_type]}}
-    end
+      input_info: input_info,
+      run_instance_type: run_instance_type
+    )
 
-    # Run the app
-    jobid = DNAnexusAPI.new(@context.token).call(@app.dxid, "run", api_input)["id"]
-
-    # Create job record
-    opts = {
-      dxid: jobid,
-      app_series_id: @app.app_series_id,
-      app_id: @app.id,
-      project: project,
-      run_inputs: run_inputs,
-      state: "idle",
-      name: name,
-      describe: {},
-      scope: "private",
-      user_id: @context.user_id
-    }
-    if run_instance_type.present?
-      opts[:run_instance_type] = run_instance_type
-    end
-    provenance = {jobid => {app_dxid: @app.dxid, app_id: @app.id, inputs: run_inputs}}
-    input_file_dxids.uniq!
-    input_file_ids = []
-    UserFile.accessible_by(@context).where(dxid: input_file_dxids).find_each do |file|
-      if file.parent_type == "Job"
-        parent_job = file.parent
-        provenance.merge!(parent_job.provenance)
-        provenance[file.dxid] = parent_job.dxid
-      end
-      input_file_ids << file.id
-    end
-    opts[:provenance] = provenance
-
-    Job.transaction do
-      job = Job.create!(opts)
-      job.input_file_ids = input_file_ids
-      job.save!
-    end
-
-    render json: {id: jobid}
+    render json: { id: job.dxid }
   end
 
   # Inputs
@@ -1493,6 +1474,19 @@ class ApiController < ApplicationController
   end
 
   protected
+
+  def input_spec_preparer
+    @input_spec_preparer ||= InputSpecPreparer.new(@context)
+  end
+
+  def job_creator
+    @job_creator ||= JobCreator.new(
+      api: DNAnexusAPI.new(@context.token),
+      context: @context,
+      user: @context.user,
+      project: @context.user.private_files_project
+    )
+  end
 
   def fail(msg)
     raise ApiError, msg
