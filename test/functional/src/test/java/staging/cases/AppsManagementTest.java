@@ -2,6 +2,7 @@ package staging.cases;
 
 import org.testng.annotations.Test;
 import ru.yandex.qatools.htmlelements.annotations.Name;
+import staging.data.TestDict;
 import staging.model.AppProfile;
 import staging.model.User;
 import staging.pages.apps.*;
@@ -89,6 +90,31 @@ public class AppsManagementTest extends AbstractTest {
                 appsSavedAppPage.getActSelectedAppAddedBy())
                 .as("Added By of created app")
                 .isEqualTo(appsSavedAppPage.getExpSelectedAppAddedBy());
+
+        SoftAssert.assertThat(
+                appsSavedAppPage.getAppSavedInputLabelText())
+                .as("Input label text")
+                .isEqualTo(TestDict.getInputLabelFieldName());
+
+        SoftAssert.assertThat(
+                appsSavedAppPage.getAppSavedInputHelpText())
+                .as("Input help text")
+                .isEqualTo(TestDict.getInputHelpFieldName());
+
+        SoftAssert.assertThat(
+                appsSavedAppPage.getAppSavedInputDefaultText())
+                .as("Input default text")
+                .isEqualTo("Default: " + TestDict.getInputDefaultFieldName());
+
+        SoftAssert.assertThat(
+                appsSavedAppPage.getAppSavedOutputLabelText())
+                .as("Output label text")
+                .isEqualTo(TestDict.getOutputLabelFieldName());
+
+        SoftAssert.assertThat(
+                appsSavedAppPage.getAppSavedOutputHelpText())
+                .as("Output help text")
+                .isEqualTo(TestDict.getOutputHelpFieldName());
 
         SoftAssert.assertAll();
     }
@@ -194,15 +220,15 @@ public class AppsManagementTest extends AbstractTest {
                 .as("Job Label Value")
                 .isEqualToIgnoringCase("DONE");
 
+        SoftAssert.assertThat(appsJobPage.getAppsJobRunOutputResultText())
+                .as("job result output")
+                .isEqualTo(appProfile.getExpectedJobOutputText());
+
         AppsJobLogPage appsJobLogPage = appsJobPage.viewLog();
 
         SoftAssert.assertThat(appsJobLogPage.getFullJobLogText())
                 .as("full job log")
                 .contains(appProfile.getInitScriptText());
-
-        SoftAssert.assertThat(appsJobLogPage.getScriptResultFromLog(appProfile))
-                .as("script result output")
-                .contains(appProfile.getExpectedJobOutputText());
 
         SoftAssert.assertAll();
     }

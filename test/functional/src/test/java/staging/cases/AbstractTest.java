@@ -10,6 +10,7 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.testng.annotations.*;
+import staging.data.TestDict;
 import staging.model.User;
 import staging.pages.CommonPage;
 import staging.pages.login.LoginPage;
@@ -24,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
+import static staging.data.TestDict.getCaseStatusFailed;
+import static staging.data.TestDict.getCaseStatusPassed;
 import static staging.data.TestRunData.*;
 import static staging.utils.Utils.*;
 
@@ -91,16 +94,16 @@ public abstract class AbstractTest {
     @AfterMethod(alwaysRun = true)
     public void afterCase() {
 
-        if (getFinishedCaseStatus().equals(CASE_STATUS_PASSED)) {
-            casePostActions(CASE_STATUS_PASSED,
+        if (getFinishedCaseStatus().equals(getCaseStatusPassed())) {
+            casePostActions(getCaseStatusPassed(),
                     getFinishedCaseName(),
                     getRunSuiteName(),
                     isGetScreenshotOnPass(),
                     isGetPageSourceOnPass());
         }
 
-        if (getFinishedCaseStatus().equals(CASE_STATUS_FAILED)) {
-            casePostActions(CASE_STATUS_FAILED,
+        if (getFinishedCaseStatus().equals(getCaseStatusFailed())) {
+            casePostActions(getCaseStatusFailed(),
                     getFinishedCaseName(),
                     getRunSuiteName(),
                     isGetScreenshotOnFail(),

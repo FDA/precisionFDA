@@ -6,12 +6,6 @@ import static staging.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class TestRunData {
 
-    public static final String CASE_STATUS_PASSED = "passed";
-
-    public static final String CASE_STATUS_FAILED = "failed";
-
-    public static final String TRUE_RESULT = "true";
-
     public static String finishedCaseStatus;
 
     public static String finishedCaseName;
@@ -20,9 +14,13 @@ public class TestRunData {
 
     public static String currentTimezone = "GMT";
 
+    public static final String INPUT_OUTPUT_FIELDS_ADDON = "_at";
+
     public static final String filePathUniqueValue = generateFilePathUniqueValue();
 
     public static final String testRunUniqueFinalValue = generateTestRunUniqueValue();
+
+    public static final String TEST_TEXT_FILE_NAME = "textFile.txt";
 
     public static String getCurrentTimezone() {
         return currentTimezone;
@@ -78,6 +76,10 @@ public class TestRunData {
         return testRunUniqueFinalValue;
     }
 
+    public static String getTestTextTemplateFileName() {
+        return TEST_TEXT_FILE_NAME;
+    }
+
     public static boolean isGetScreenshotOnPass() {
         return SettingsProperties.getProperty("screenshotOnPass").equalsIgnoreCase("true");
     }
@@ -94,7 +96,8 @@ public class TestRunData {
         return SettingsProperties.getProperty("htmlSourceOnFail").equalsIgnoreCase("true");
     }
 
-    public static String getTrueResult() {
-        return TRUE_RESULT;
+    public static String getInputOutputFieldsAddon() {
+        return INPUT_OUTPUT_FIELDS_ADDON;
     }
+
 }
