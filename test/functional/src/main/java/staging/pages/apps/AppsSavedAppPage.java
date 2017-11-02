@@ -95,6 +95,61 @@ public class AppsSavedAppPage extends AbstractPage {
     @FindBy(xpath = AppsLocators.APPS_REVISION_TITLE_LABEL)
     private WebElement appsRevisionTitleLabeWE;
 
+    @FindBy(xpath = AppsLocators.APPS_SAVED_INPUT_LABEL_VALUE)
+    private WebElement appSavedInputLabelWE;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_INPUT_HELP_VALUE)
+    private WebElement appSavedInputHelpWE;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_INPUT_DEFAULT_VALUE)
+    private WebElement appSavedInputDefaultWE;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_OUTPUT_LABEL_VALUE)
+    private WebElement appSavedOutputLabelWE;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_OUTPUT_HELP_VALUE)
+    private WebElement appSavedOutputHelpWE;
+
+    public WebElement getAppSavedInputLabelWE() {
+        return appSavedInputLabelWE;
+    }
+
+    public WebElement getAppSavedInputHelpWE() {
+        return appSavedInputHelpWE;
+    }
+
+    public WebElement getAppSavedInputDefaultWE() {
+        return appSavedInputDefaultWE;
+    }
+
+    public WebElement getAppSavedOutputLabelWE() {
+        return appSavedOutputLabelWE;
+    }
+
+    public WebElement getAppSavedOutputHelpWE() {
+        return appSavedOutputHelpWE;
+    }
+
+    public String getAppSavedInputLabelText() {
+        return getAppSavedInputLabelWE().getText();
+    }
+
+    public String getAppSavedInputHelpText() {
+        return getAppSavedInputHelpWE().getText();
+    }
+
+    public String getAppSavedInputDefaultText() {
+        return getAppSavedInputDefaultWE().getText();
+    }
+
+    public String getAppSavedOutputLabelText() {
+        return getAppSavedOutputLabelWE().getText();
+    }
+
+    public String getAppSavedOutputHelpText() {
+        return getAppSavedOutputHelpWE().getText();
+    }
+
     public AppsSavedAppPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_SAVED_APP_RUN_APP_BUTTON));

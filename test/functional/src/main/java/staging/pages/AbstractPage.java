@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.*;
 
+import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.Select;
 import ru.yandex.qatools.htmlelements.element.TextInput;
@@ -59,6 +60,18 @@ public abstract class AbstractPage {
             }
             throw e;
         }
+    }
+
+    public void waitUntilDisplayed(final Link link) {
+        waitUntilDisplayed(link.getWrappedElement());
+    }
+
+    public void waitUntilDisplayed(final Button button) {
+        waitUntilDisplayed(button.getWrappedElement());
+    }
+
+    public void waitUntilDisplayed(final TextInput input) {
+        waitUntilDisplayed(input.getWrappedElement());
     }
 
     public void waitUntilDisplayed(final By locator) {

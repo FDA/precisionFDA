@@ -5,17 +5,14 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.DateFormat;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-import static staging.data.TestRunData.getTrueResult;
+import static staging.data.TestDict.getTrueResult;
+import static staging.data.TestRunData.getTestTextTemplateFileName;
 
 public class Utils {
 
@@ -155,6 +152,62 @@ public class Utils {
             log.error(textResult);
         }
         return textResult;
+    }
+
+    public static String getTestTextFileName() {
+        return getTestFileName("txt");
+    }
+
+    public static String getTestFileName(String type) {
+        final Logger log = Logger.getLogger("");
+        String commonPart = getRunTimeLocalUniqueValue();
+        String testFilesPath = System.getProperty("user.dir") + SettingsProperties.getProperty("pathToTestFiles");
+        String tempFilesPath = System.getProperty("user.dir") + SettingsProperties.getProperty("pathToTempFiles");
+        String newFileName = commonPart;
+        String templateFileName = "";
+
+        if (type.equals("txt")) {
+            newFileName = "textFile_" + commonPart + ".txt";
+            templateFileName = getTestTextTemplateFileName();
+        }
+
+        InputStream oInStream = null;
+        OutputStream oOutStream = null;
+
+        try {
+            oInStream = new FileInputStream(testFilesPath + templateFileName);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            oOutStream = new FileOutputStream(tempFilesPath + newFileName);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        byte[] oBytes = new byte[1024];
+        int nLength;
+        BufferedInputStream oBuffInputStream = new BufferedInputStream( oInStream );
+        try {
+            while ((nLength = oBuffInputStream.read(oBytes)) > 0)
+            {
+                oOutStream.write(oBytes, 0, nLength);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            oInStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            oOutStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        log.info("created file: " + newFileName);
+        return newFileName;
     }
 
 }

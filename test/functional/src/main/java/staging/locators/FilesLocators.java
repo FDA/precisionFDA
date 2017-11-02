@@ -16,6 +16,16 @@ public class FilesLocators {
 
     public static final String FILES_ADD_FILES_LINK = "//*[@class='btn-group']//a[@href='/files/new']/span";
 
-    public static final String FILES_BROWSE_FILES_INPUT = "//form[@class='form form-upload-files']//span[contains(@class, 'browse-files')]";
+    public static final String FILES_BROWSE_FILES_INPUT = "//input[@class='event-browse-files']";
+
+    public static final String FILES_BROWSE_FILES_VISIBLE_FORM = "//*[contains(@class, 'form-upload-files')]";
+
+    public static final String FILES_UPLOAD_ALL_BUTTON = "//button[contains(@class, 'upload-files')]";
+
+    public static final String FILES_UPLOAD_PREVIEW_FILE_NAME = "//*[@class='file-name']";
+
+    public static final String FILES_UPLOADS_COMPLETE_MESSAGE = "//span[text()='Upload(s) complete']";
+
+    public static final String FILES_COMMON_LINK_TO_UPLOADED_FILE = "//*[@id='files']//a[contains(@href, 'file-')]";
 
 }

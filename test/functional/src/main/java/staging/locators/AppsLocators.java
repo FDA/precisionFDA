@@ -139,4 +139,39 @@ public class AppsLocators {
     public static final String APPS_SUBMITTED_COMMENT_TIME = "//*[contains(@class, 'comment-actions')]/li[3]";
 
     public static final String APPS_REVISION_TITLE_LABEL = "//li/*[text()='Revision Title']";
+
+    public static final String APPS_ADD_INPUT_FIELD_BUTTON = "//*[@class='section-io-input']//*[text()='Inputs']/..//button";
+
+    public static final String APPS_ADD_OUTPUT_FIELD_BUTTON = "//*[@class='section-io-input']//*[text()='Outputs']/..//button";
+
+    public static final String APPS_ADD_INPUT_STRING_ITEM = "//*[@class='section-io-input']//*[text()='Inputs']/..//li/a[text()='String']";
+
+    public static final String APPS_ADD_OUTPUT_STRING_ITEM = "//*[@class='section-io-input']//*[text()='Outputs']/..//li/a[text()='String']";
+
+    public static final String APPS_INPUT_NAME_FIELD = "//input[contains(@placeholder, 'nter')][contains(@placeholder, 'ame')][contains(@placeholder, 'nput')]";
+
+    public static final String APPS_INPUT_LABEL_FIELD = "//input[contains(@placeholder, 'nter')][contains(@placeholder, 'abel')][contains(@placeholder, 'nput')]";
+
+    public static final String APPS_INPUT_HELP_FIELD = "//input[contains(@placeholder, 'nter')][contains(@placeholder, 'elp')][contains(@placeholder, 'ext')]";
+
+    public static final String APPS_INPUT_DEFAULT_FIELD = "//input[contains(@placeholder, 'ptional')][contains(@placeholder, 'efault')]";
+
+    public static final String APPS_OUTPUT_NAME_FIELD = "//input[contains(@placeholder, 'nter')][contains(@placeholder, 'ame')][contains(@placeholder, 'utput')]";
+
+    public static final String APPS_OUTPUT_LABEL_FIELD = "//input[contains(@placeholder, 'nter')][contains(@placeholder, 'abel')][contains(@placeholder, 'utput')]";
+
+    public static final String APPS_OUTPUT_HELP_FIELD = "//input[contains(@placeholder, 'nter')][contains(@placeholder, 'elp')][contains(@placeholder, 'utput')]";
+
+    public static final String APPS_SAVED_INPUT_LABEL_VALUE = "//*[text()='Inputs']/..//p[contains(@class, 'label')]";
+
+    public static final String APPS_SAVED_INPUT_HELP_VALUE = "//*[text()='Inputs']/..//p[contains(@class, 'help')]";
+
+    public static final String APPS_SAVED_INPUT_DEFAULT_VALUE = "//*[text()='Inputs']/..//p[contains(@class, 'default')]";
+
+    public static final String APPS_SAVED_OUTPUT_LABEL_VALUE = "//*[text()='Outputs']/..//p[contains(@class, 'label')]";
+
+    public static final String APPS_SAVED_OUTPUT_HELP_VALUE = "//*[text()='Outputs']/..//p[contains(@class, 'help')]";
+
+    public static final String APPS_JOB_RUN_OUTPUT_RESULT = "//table[contains(@class, 'output')]//td[contains(@class, 'job-io-value')]";
+
 }

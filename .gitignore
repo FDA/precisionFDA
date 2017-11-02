@@ -42,3 +42,6 @@
 #Ignore browser drivers
 /test/functional/drivers/chromedriver
 /test/functional/drivers/geckodriver
+
+#Ignore temp files
+/test/functional/src/main/resources/tempFiles/*.txt

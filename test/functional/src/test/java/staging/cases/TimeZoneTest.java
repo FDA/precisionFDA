@@ -18,7 +18,7 @@ import staging.pages.profile.ProfilePage;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static staging.data.TestAppData.*;
-import static staging.data.TestRunData.getTrueResult;
+import static staging.data.TestDict.getTrueResult;
 import static staging.data.TestNotesData.getNoteTimeZone;
 import static staging.utils.Utils.applyTimezoneToDate;
 import static staging.utils.Utils.isDateTimeCorrect;
@@ -33,14 +33,14 @@ public class TimeZoneTest extends AbstractTest {
                 {"GMT+12:45",   "(GMT+12:45) Chatham Is."},
                 {"GMT+9:30",    "(GMT+09:30) Darwin"},
                 {"GMT+13",      "(GMT+13:00) Tokelau Is."},
-                {"GMT-11",      "(GMT-11:00) American Samoa"},
                 {"GMT+10",      "(GMT+10:00) Hobart"},
                 {"GMT-8",       "(GMT-08:00) America/Los_Angeles"}
         };
     }
 
     public String[] getTestTimeZone() {
-        return new String[]{"GMT+2", "(GMT+02:00) Athens"};
+        return new String[]
+                {"GMT+2",       "(GMT+02:00) Athens"};
     }
 
     @Test
@@ -85,11 +85,11 @@ public class TimeZoneTest extends AbstractTest {
 
         //set timezone
         ProfilePage profilePage = getCommonPage().openProfilePage();
-        profilePage.setTimeZone(timeZone);
+        profilePage = profilePage.setTimeZone(timeZone);
 
         //validation
         NoteProfile noteProfile = getNoteTimeZone();
-        NotesEditNotePage notesEditNotePage = getCommonPage().openNotesPage().openNewNoteSaveTime(noteProfile);
+        NotesEditNotePage notesEditNotePage = profilePage.openNotesPage().openNewNoteSaveTime(noteProfile);
 
         String expNoteCreated = noteProfile.getNoteCreatedText();
 
@@ -128,13 +128,15 @@ public class TimeZoneTest extends AbstractTest {
                 .isEqualTo(getTrueResult());
 
         profilePage = getCommonPage().openProfilePage();
-        profilePage.setTimeZone(getTestTimeZone());
+        profilePage = profilePage.setTimeZone(getTestTimeZone());
 
-        notesPage = notesEditNotePage.openNotesPage();
+        notesPage = profilePage.openNotesPage();
         savedNotePage = notesPage.openCreatedNote(noteProfile);
 
+        String actCreated = savedNotePage.getSavedNoteCreatedText();
+        String expCreated = applyTimezoneToDate(expNoteCreated, timeZone[0], getTestTimeZone()[0]);
         SoftAssert.assertThat(
-                isDateTimeCorrect(savedNotePage.getSavedNoteCreatedText(), applyTimezoneToDate(expNoteCreated, timeZone[0], getTestTimeZone()[0])))
+                isDateTimeCorrect(actCreated, expCreated))
                 .as("Created date/time is correct one on saved Note form after TimeZone change from " + timeZone[1] + " to " + getTestTimeZone()[1])
                 .isEqualTo(getTrueResult());
 
@@ -149,11 +151,11 @@ public class TimeZoneTest extends AbstractTest {
 
         //set timezone
         ProfilePage profilePage = getCommonPage().openProfilePage();
-        profilePage.setTimeZone(timeZone);
+        profilePage = profilePage.setTimeZone(timeZone);
 
         //validation
         AppProfile appProfile = getCheckTimeZoneProfile();
-        AppsPage appsPage = getCommonPage().openAppsPage();
+        AppsPage appsPage = profilePage.openAppsPage();
         AppsEditAppPage appsEditAppPage = appsPage.openCreateAppPage();
         AppsSavedAppPage appsSavedAppPage = appsEditAppPage.fillAndSaveNewApp(appProfile);
 
@@ -186,14 +188,15 @@ public class TimeZoneTest extends AbstractTest {
                 .isEqualTo(getTrueResult());
 
         profilePage = getCommonPage().openProfilePage();
-        profilePage.setTimeZone(getTestTimeZone());
+        profilePage = profilePage.setTimeZone(getTestTimeZone());
 
-        AppsRelevantPage appsRelevantPage = getCommonPage().openAppsPage().openAppsRelevantPage();
+        AppsRelevantPage appsRelevantPage = profilePage.openAppsPage().openAppsRelevantPage();
         appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
 
+        String actCreated = appsSavedAppPage.getActSelectedAppCreated();
+        String expCreated = applyTimezoneToDate(appProfile.getCurRevAppCreatedText(), timeZone[0], getTestTimeZone()[0]);
         SoftAssert.assertThat(
-                isDateTimeCorrect(appsSavedAppPage.getActSelectedAppCreated(),
-                        applyTimezoneToDate(appProfile.getCurRevAppCreatedText(), timeZone[0], getTestTimeZone()[0])))
+                isDateTimeCorrect(actCreated, expCreated))
                 .as("Created date/time is correct one App form after TimeZone change from " + timeZone[1] + " to " + getTestTimeZone()[1])
                 .isEqualTo(getTrueResult());
 

@@ -5,11 +5,14 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.ui.ExpectedConditions;
+import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.Select;
 import staging.data.TestRunData;
+import staging.locators.CommonLocators;
 import staging.locators.ProfileLocators;
 import staging.pages.AbstractPage;
+import staging.pages.apps.AppsPage;
+import staging.pages.notes.NotesPage;
 
 public class ProfilePage extends AbstractPage {
 
@@ -21,6 +24,12 @@ public class ProfilePage extends AbstractPage {
     @FindBy(xpath = ProfileLocators.PROFILE_TIMEZONE_SELECT)
     private Select profileTimeZoneSelect;
 
+    @FindBy(xpath = CommonLocators.APPS_PAGE_ICON)
+    private Link appsPageIcon;
+
+    @FindBy(xpath = CommonLocators.NOTES_PAGE_ICON)
+    private Link notesPageIcon;
+
     public ProfilePage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(ProfileLocators.PROFILE_ABOUT_YOUR_ORG_TEXT));
@@ -28,6 +37,14 @@ public class ProfilePage extends AbstractPage {
 
     public WebElement getProfileAboutOrgWE() {
         return profileAboutOrgWE;
+    }
+
+    public Link getAppsPageIcon() {
+        return appsPageIcon;
+    }
+
+    public Link getNotesPageIcon() {
+        return notesPageIcon;
     }
 
     public Select getProfileTimeZoneSelect() {
@@ -49,6 +66,18 @@ public class ProfilePage extends AbstractPage {
 
     public String getSelectedTimeZone() {
         return getProfileTimeZoneSelect().getFirstSelectedOption().getText();
+    }
+
+    public AppsPage openAppsPage() {
+        log.info("open Apps page");
+        getAppsPageIcon().click();
+        return new AppsPage(getDriver());
+    }
+
+    public NotesPage openNotesPage() {
+        log.info("open Notes page");
+        getNotesPageIcon().click();
+        return new NotesPage(getDriver());
     }
 
 }

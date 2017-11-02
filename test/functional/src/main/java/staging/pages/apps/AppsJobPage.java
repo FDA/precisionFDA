@@ -34,6 +34,9 @@ public class AppsJobPage extends AbstractPage {
     @FindBy(xpath = AppsLocators.APPS_JOB_PAGE_VIEW_LOG_LINK)
     private Link appsJobPageViewLogLink;
 
+    @FindBy(xpath = AppsLocators.APPS_JOB_RUN_OUTPUT_RESULT)
+    private WebElement appsJobRunOutputResult;
+
     public AppsJobPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_JOB_PAGE_I_O_TAB_LINK));
@@ -53,6 +56,16 @@ public class AppsJobPage extends AbstractPage {
 
     public WebElement getAppsJobPageRunningJobLabel() {
         return appsJobPageRunningJobLabel;
+    }
+
+    public WebElement getAppsJobRunOutputResultWe() {
+        return appsJobRunOutputResult;
+    }
+
+    public String getAppsJobRunOutputResultText() {
+        String output = getAppsJobRunOutputResultWe().getText();
+        log.info("Output result is: " + output);
+        return output.trim();
     }
 
     public boolean isJobLabelDone() {

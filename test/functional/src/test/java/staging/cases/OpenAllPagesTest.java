@@ -43,26 +43,6 @@ public class OpenAllPagesTest extends AbstractTest {
     }
 
     @Test(dependsOnMethods = { "successfulLogin" })
-    public void checkNotesNewNotePageCanBeOpen() {
-        printTestHeader("Test Case: check that Notes.NewNote page can be open");
-
-        NotesPage notesPage = getCommonPage().openNotesPage();
-        NotesEditNotePage notesEditNotePage = notesPage.openNewNote();
-
-        SoftAssert.assertThat(
-                notesEditNotePage.isEditorDisplayed())
-                .as("Edit Area")
-                .isTrue();
-
-        SoftAssert.assertThat(
-                getPageTitle())
-                .as("Page Title")
-                .contains(PageTitles.PAGE_TITLE_EDIT_NOTE);
-
-        SoftAssert.assertAll();
-    }
-
-    @Test(dependsOnMethods = { "successfulLogin" })
     public void checkNotesPageCanBeOpen() {
         printTestHeader("Test Case: check that Notes page can be open");
 

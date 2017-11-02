@@ -143,6 +143,8 @@ public class TestAppData {
 
     static final String CREATE_APP_SCRIPT_BODY_PREFIX_1 = "echo ";
 
+    static final String CREATE_APP_SCRIPT_BODY_PART1 = "emit ";
+
     static final String CREATE_APP_PREFIX_CHECK_REV = "check rev ";
 
     public static final String CREATE_APP_SCRIPT_BODY_PREFIX_2 = "auto__";
@@ -189,12 +191,12 @@ public class TestAppData {
 
     //--------------------------
 
-    public static final String getAppJobScriptOutput() {
-        return CREATE_APP_SCRIPT_BODY_PREFIX_2 + getTestRunUniqueFinalValue();
+    public static final String getAppJobScriptExpectedOutput() {
+        return getTestRunUniqueFinalValue();
     }
 
     public static final String getMainAppJobScriptBody() {
-        return CREATE_APP_SCRIPT_BODY_PREFIX_1 + getAppJobScriptOutput();
+        return CREATE_APP_SCRIPT_BODY_PART1 + TestDict.getOutputNameFieldName() + " " + getAppJobScriptExpectedOutput();
     }
 
     public static final String getMainAppJobName() {
@@ -218,7 +220,7 @@ public class TestAppData {
     }
 
     public static String getMainAppExpJobOutput() {
-        return getAppJobScriptOutput();
+        return getAppJobScriptExpectedOutput();
     }
 
     public static String getAppCommentText() {
