@@ -11,9 +11,10 @@ import staging.pages.overview.OverviewPage;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertTrue;
 import static staging.data.TestAppData.*;
+import static staging.data.TestRunData.*;
 
 @Name("Applications management test suite")
-public class AppsManagementTest extends AbstractTest {
+public class AppsTest extends AbstractTest {
 
     @Test(groups = "runJob")
     void precondition() {
@@ -94,27 +95,27 @@ public class AppsManagementTest extends AbstractTest {
         SoftAssert.assertThat(
                 appsSavedAppPage.getAppSavedInputLabelText())
                 .as("Input label text")
-                .isEqualTo(TestDict.getInputLabelFieldName());
+                .isEqualTo(getInputLabelFieldName());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getAppSavedInputHelpText())
                 .as("Input help text")
-                .isEqualTo(TestDict.getInputHelpFieldName());
+                .isEqualTo(getInputHelpFieldName());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getAppSavedInputDefaultText())
                 .as("Input default text")
-                .isEqualTo("Default: " + TestDict.getInputDefaultFieldName());
+                .isEqualTo("Default: " + getInputDefaultFieldName());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getAppSavedOutputLabelText())
                 .as("Output label text")
-                .isEqualTo(TestDict.getOutputLabelFieldName());
+                .isEqualTo(getOutputLabelFieldName());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getAppSavedOutputHelpText())
                 .as("Output help text")
-                .isEqualTo(TestDict.getOutputHelpFieldName());
+                .isEqualTo(getOutputHelpFieldName());
 
         SoftAssert.assertAll();
     }

@@ -28,4 +28,22 @@ public class FilesLocators {
 
     public static final String FILES_COMMON_LINK_TO_UPLOADED_FILE = "//*[@id='files']//a[contains(@href, 'file-')]";
 
+    public static final String FILES_DOWNLOAD_FILE_LINK = "//a[contains(@class, 'btn')]/span[contains(@class, 'download')]/..";
+
+    public static final String FILES_UPLOADED_FILE_PAGE_TITLE = "//*[@class='page-title']";
+
+    public static final String FILES_UPLOADED_FILE_ADDED_BY = "//*[text()='Added by']/..//a";
+
+    public static final String FILES_UPLOADED_FILE_ACCESS_VALUE = "//*[text()='Access']/..//p";
+
+    public static final String FILES_CREATE_FOLDER_BUTTON = "//*[contains(@data-target, 'create-folder')]";
+
+    public static final String FILES_CREATE_FOLDER_FORM_CREATE_BUTTON = "//form//button[text()='Create']";
+
+    public static final String FILES_CREATE_FOLDER_FORM_NAME_INPUT = "//form//input[@id='name']";
+
+    public static final String FILES_COMMON_LINK_TO_CREATED_FOLDER = "//td/a[contains(@href, 'folder')]";
+
+    public static final String FILES_SUCCESS_ALERT = "//*[contains(@class, 'alert-success')]";
+
 }

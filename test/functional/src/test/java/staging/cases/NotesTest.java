@@ -15,7 +15,7 @@ import static staging.data.TestNotesData.getNoteToDelete;
 import static staging.data.TestNotesData.getNoteToEdit;
 
 @Name("Notes Management Test Suite")
-public class NotesManagementTest extends AbstractTest {
+public class NotesTest extends AbstractTest {
 
     @Test
     void precondition() {

@@ -7,12 +7,12 @@
     </test>
     <test name="AppsManagementTest">
         <classes>
-            <class name="staging.cases.AppsManagementTest"/>
+            <class name="staging.cases.AppsTest"/>
         </classes>
     </test>
     <test name="NotesManagementTest">
         <classes>
-            <class name="staging.cases.NotesManagementTest"/>
+            <class name="staging.cases.NotesTest"/>
         </classes>
     </test>
     <test name="TimeZoneTest">

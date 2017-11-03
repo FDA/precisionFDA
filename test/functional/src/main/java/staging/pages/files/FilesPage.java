@@ -6,9 +6,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
+import ru.yandex.qatools.htmlelements.element.TextInput;
 import staging.locators.FilesLocators;
-import staging.locators.NotesLocators;
-import staging.model.NoteProfile;
 import staging.pages.AbstractPage;
 
 import java.util.List;
@@ -29,6 +28,18 @@ public class FilesPage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_ADD_FILES_LINK)
     private Link filesAddFilesLink;
 
+    @FindBy(xpath = FilesLocators.FILES_CREATE_FOLDER_BUTTON)
+    private WebElement filesCreateFolderButton;
+
+    @FindBy(xpath = FilesLocators.FILES_CREATE_FOLDER_FORM_CREATE_BUTTON)
+    private WebElement createFolderFormCreateButton;
+
+    @FindBy(xpath = FilesLocators.FILES_CREATE_FOLDER_FORM_NAME_INPUT)
+    private TextInput createFolderFormNameInput;
+
+    @FindBy(xpath = FilesLocators.FILES_SUCCESS_ALERT)
+    private WebElement successAlertWE;
+
     public FilesPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_MY_FILES_LINK));
@@ -48,6 +59,22 @@ public class FilesPage extends AbstractPage {
 
     public Link getFilesFeaturedLink() {
         return filesFeaturedLink;
+    }
+
+    public WebElement getSuccessAlertWE() {
+        return successAlertWE;
+    }
+
+    public TextInput getCreateFolderFormNameInput() {
+        return createFolderFormNameInput;
+    }
+
+    public WebElement getCreateFolderFormCreateButton() {
+        return createFolderFormCreateButton;
+    }
+
+    public WebElement getFilesCreateFolderButton() {
+        return filesCreateFolderButton;
     }
 
     public FilesMyFilesPage openFilesMyFilesPage() {
@@ -90,6 +117,18 @@ public class FilesPage extends AbstractPage {
         return fileLink;
     }
 
+    public WebElement getCreatedFolderLink(String folderName) {
+        WebElement folderLink = null;
+        List<WebElement> allLinks = getDriver().findElements(By.xpath(FilesLocators.FILES_COMMON_LINK_TO_CREATED_FOLDER));
+        for (WebElement we : allLinks) {
+            if (we.getText().contains(folderName)) {
+                folderLink = we;
+                break;
+            }
+        }
+        return folderLink;
+    }
+
     public boolean isLinkToUploadedFileDisplayed(String fileName) {
         WebElement fileLink = getUploadedFileLink(fileName);
         if (fileLink == null) {
@@ -98,6 +137,46 @@ public class FilesPage extends AbstractPage {
         else {
             return isElementPresent(fileLink);
         }
+    }
+
+    public UploadedFilePage openUploadedFile(String fileName) {
+        log.info("open uploaded file page");
+        getUploadedFileLink(fileName).click();
+        return new UploadedFilePage(getDriver());
+    }
+
+    public FilesPage createFolder(String folderName) {
+        log.info("create new folder");
+        getFilesCreateFolderButton().click();
+        waitUntilDisplayed(getCreateFolderFormCreateButton());
+        getCreateFolderFormNameInput().sendKeys(folderName);
+        getCreateFolderFormCreateButton().click();
+        log.info("created folder: " + folderName);
+        return new FilesPage(getDriver());
+    }
+
+    public boolean isLinkToCreatedFolderDisplayed(String folderName) {
+        WebElement folderLink = getCreatedFolderLink(folderName);
+        if (folderLink == null) {
+            return false;
+        }
+        else {
+            return isElementPresent(folderLink);
+        }
+    }
+
+    public FilesPage openFolder(String folderName) {
+        log.info("open folder");
+        getCreatedFolderLink(folderName).click();
+        return new FilesPage(getDriver());
+    }
+
+    public boolean isSuccessMessageDisplayed() {
+        return isElementPresent(getSuccessAlertWE());
+    }
+
+    public String getSuccessMessageText() {
+        return getSuccessAlertWE().getText();
     }
 
 }

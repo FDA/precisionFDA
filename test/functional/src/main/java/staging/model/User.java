@@ -52,15 +52,21 @@ public class User {
     }
 
     public static User getTestUser() {
-        return new User(TestUserData.basicAuthUsername(), TestUserData.basicAuthPassword(),
-                TestUserData.applUsername(), TestUserData.applPassword(),
-                TestUserData.applUserFullName(), TestUserData.applUserOrg());
+        return new User(TestUserData.basicPreTestAuthUsername(), TestUserData.basicPreTestAuthPassword(),
+                TestUserData.preTestUsername(), TestUserData.preTestPassword(),
+                TestUserData.preTestFullName(), TestUserData.preTestOrg());
     }
 
     public static User getWrongUser() {
-        return new User(TestUserData.basicAuthUsername(), TestUserData.basicAuthPassword(),
-                TestUserData.applUsername(), "wrongPassword",
-                TestUserData.applUserFullName(), TestUserData.applUserOrg());
+        return new User(TestUserData.basicPreTestAuthUsername(), TestUserData.basicPreTestAuthPassword(),
+                TestUserData.preTestUsername(), "wrongPassword",
+                TestUserData.preTestFullName(), TestUserData.preTestOrg());
+    }
+
+    public static User getAdminUser() {
+        return new User(TestUserData.basicPreAdminAuthUsername(), TestUserData.basicPreAdminAuthPassword(),
+                TestUserData.preAdminUsername(), TestUserData.preAdminPassword(),
+                TestUserData.preAdminFullName(), TestUserData.preAdminOrg());
     }
     
 }

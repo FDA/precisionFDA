@@ -11,8 +11,6 @@ import staging.locators.FilesLocators;
 import staging.pages.AbstractPage;
 import staging.utils.SettingsProperties;
 
-import static staging.utils.Utils.getTestTextFileName;
-
 public class FilesAddFilesPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
@@ -37,6 +35,10 @@ public class FilesAddFilesPage extends AbstractPage {
         waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_BROWSE_FILES_VISIBLE_FORM));
     }
 
+    public WebElement getFilesBrowseFilesVisibleForm() {
+        return filesBrowseFilesVisibleForm;
+    }
+
     public TextInput getFilesBrowseFilesInput() {
         return filesBrowseFilesInput;
     }
@@ -54,7 +56,7 @@ public class FilesAddFilesPage extends AbstractPage {
     }
 
     public boolean isBrowseFilesButtonDisplayed() {
-        return isElementPresent(getFilesBrowseFilesInput());
+        return isElementPresent(getFilesBrowseFilesVisibleForm());
     }
 
     public FilesAddFilesPage browseFileToUpload(String fileName) {

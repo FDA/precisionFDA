@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import static staging.data.TestDict.getTrueResult;
+import static staging.data.TestRunData.getTestPngTemplateFileName;
 import static staging.data.TestRunData.getTestTextTemplateFileName;
 
 public class Utils {
@@ -154,11 +155,7 @@ public class Utils {
         return textResult;
     }
 
-    public static String getTestTextFileName() {
-        return getTestFileName("txt");
-    }
-
-    public static String getTestFileName(String type) {
+    public static String getGeneratedTestFileName(String type) {
         final Logger log = Logger.getLogger("");
         String commonPart = getRunTimeLocalUniqueValue();
         String testFilesPath = System.getProperty("user.dir") + SettingsProperties.getProperty("pathToTestFiles");
@@ -169,6 +166,11 @@ public class Utils {
         if (type.equals("txt")) {
             newFileName = "textFile_" + commonPart + ".txt";
             templateFileName = getTestTextTemplateFileName();
+        }
+
+        if (type.equals("png")) {
+            newFileName = "pngFile_" + commonPart + ".png";
+            templateFileName = getTestPngTemplateFileName();
         }
 
         InputStream oInStream = null;
@@ -208,6 +210,45 @@ public class Utils {
         }
         log.info("created file: " + newFileName);
         return newFileName;
+    }
+
+    public static void deleteTempFiles() {
+        deleteFilesByExt(".txt");
+        deleteFilesByExt(".png");
+    }
+
+    public static void deleteFilesByExt(String ext) {
+        GenericExtFilter filter = new GenericExtFilter(ext);
+        String stringFileDir = System.getProperty("user.dir") + SettingsProperties.getProperty("pathToTempFiles");
+        File fileDir = new File(stringFileDir);
+
+        //list out all the file name with .txt extension
+        String[] list = fileDir.list(filter);
+
+        if (list.length == 0) return;
+
+        File fileDelete;
+
+        for (String file : list){
+            String temp = new StringBuffer(stringFileDir)
+                    .append(File.separator)
+                    .append(file).toString();
+            fileDelete = new File(temp);
+            fileDelete.delete();
+        }
+    }
+
+    public static class GenericExtFilter implements FilenameFilter {
+
+        private String ext;
+
+        public GenericExtFilter(String ext) {
+            this.ext = ext;
+        }
+
+        public boolean accept(File dir, String name) {
+            return (name.endsWith(ext));
+        }
     }
 
 }
