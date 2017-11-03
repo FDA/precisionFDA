@@ -6,3 +6,12 @@ pfda_test {
   userFullName: ""
   userOrg: ""
 }
+
+pfda_admin {
+    username: ""
+    password: ""
+    dnx_stage_username: ""
+    dnx_stage_password: ""
+    userFullName: ""
+    userOrg: ""
+}

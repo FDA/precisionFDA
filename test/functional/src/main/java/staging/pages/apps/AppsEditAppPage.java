@@ -18,6 +18,7 @@ import staging.model.AppProfile;
 import staging.pages.AbstractPage;
 
 import static staging.data.TestDict.getDictString;
+import static staging.data.TestRunData.*;
 import static staging.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class AppsEditAppPage extends AbstractPage {
@@ -331,10 +332,10 @@ public class AppsEditAppPage extends AbstractPage {
             waitUntilDisplayed(getAppAddInputStringItem());
             getAppAddInputStringItem().click();
             waitUntilDisplayed(getAppInputDefaultField());
-            getAppInputNameField().sendKeys(TestDict.getInputNameFieldName());
-            getAppInputLabelField().sendKeys(TestDict.getInputLabelFieldName());
-            getAppInputHelpField().sendKeys(TestDict.getInputHelpFieldName());
-            getAppInputDefaultField().sendKeys(TestDict.getInputDefaultFieldName());
+            getAppInputNameField().sendKeys(getInputNameFieldName());
+            getAppInputLabelField().sendKeys(getInputLabelFieldName());
+            getAppInputHelpField().sendKeys(getInputHelpFieldName());
+            getAppInputDefaultField().sendKeys(getInputDefaultFieldName());
         }
     }
 
@@ -346,9 +347,9 @@ public class AppsEditAppPage extends AbstractPage {
             waitUntilDisplayed(getAppAddOutputStringItem());
             getAppAddOutputStringItem().click();
             waitUntilDisplayed(getAppOutputHelpField());
-            getAppOutputNameField().sendKeys(TestDict.getOutputNameFieldName());
-            getAppOutputLabelField().sendKeys(TestDict.getOutputLabelFieldName());
-            getAppOutputHelpField().sendKeys(TestDict.getOutputHelpFieldName());
+            getAppOutputNameField().sendKeys(getOutputNameFieldName());
+            getAppOutputLabelField().sendKeys(getOutputLabelFieldName());
+            getAppOutputHelpField().sendKeys(getOutputHelpFieldName());
         }
     }
 

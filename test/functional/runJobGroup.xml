@@ -8,7 +8,7 @@
             </run>
         </groups>
         <classes>
-            <class name="staging.cases.AppsManagementTest" />
+            <class name="staging.cases.AppsTest" />
         </classes>
     </test>
 </suite>

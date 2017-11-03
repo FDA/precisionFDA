@@ -2,6 +2,7 @@ package staging.data;
 
 import staging.model.AppProfile;
 
+import static staging.data.TestRunData.getOutputNameFieldName;
 import static staging.data.TestRunData.getTestRunUniqueFinalValue;
 import static staging.utils.Utils.getRunTimeLocalUniqueValue;
 
@@ -196,7 +197,7 @@ public class TestAppData {
     }
 
     public static final String getMainAppJobScriptBody() {
-        return CREATE_APP_SCRIPT_BODY_PART1 + TestDict.getOutputNameFieldName() + " " + getAppJobScriptExpectedOutput();
+        return CREATE_APP_SCRIPT_BODY_PART1 + getOutputNameFieldName() + " " + getAppJobScriptExpectedOutput();
     }
 
     public static final String getMainAppJobName() {

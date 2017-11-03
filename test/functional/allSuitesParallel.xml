@@ -1,13 +1,13 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 <suite name="all suites" parallel="tests" thread-count="3">
-    <test name="AppsManagementTest">
+    <test name="AppsTest">
         <classes>
-            <class name="staging.cases.AppsManagementTest" />
+            <class name="staging.cases.AppsTest" />
         </classes>
     </test>
-    <test name="NotesManagementTest">
+    <test name="NotesTest">
         <classes>
-            <class name="staging.cases.NotesManagementTest" />
+            <class name="staging.cases.NotesTest" />
         </classes>
     </test>
     <test name="TimeZoneTest">
@@ -18,6 +18,16 @@
     <test name="OpenAllPagesTest">
         <classes>
             <class name="staging.cases.OpenAllPagesTest" />
+        </classes>
+    </test>
+    <test name="ExpertsTest">
+        <classes>
+            <class name="staging.cases.ExpertsTest" />
+        </classes>
+    </test>
+    <test name="FilesTest">
+        <classes>
+            <class name="staging.cases.FilesTest" />
         </classes>
     </test>
 </suite>

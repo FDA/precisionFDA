@@ -10,7 +10,6 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.testng.annotations.*;
-import staging.data.TestDict;
 import staging.model.User;
 import staging.pages.CommonPage;
 import staging.pages.login.LoginPage;
@@ -80,6 +79,7 @@ public abstract class AbstractTest {
 
     @AfterTest(alwaysRun = true)
     public void afterTest() {
+        deleteTempFiles();
         // moveLogFile("full.print");
         // moveLogFile("error.print");
         // Runtime.getRuntime().exec( "pkill -f firefox" ).waitFor();
