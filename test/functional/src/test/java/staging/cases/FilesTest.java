@@ -2,6 +2,7 @@ package staging.cases;
 
 import org.testng.annotations.Test;
 import ru.yandex.qatools.htmlelements.annotations.Name;
+import staging.data.TestUserData;
 import staging.model.User;
 import staging.pages.files.FilesAddFilesPage;
 import staging.pages.files.FilesPage;
@@ -19,7 +20,7 @@ public class FilesTest extends AbstractTest {
     public void successfulLogin() {
         printTestHeader(" -- Successful Login -- ");
 
-        User user = User.getTestUser();
+        User user = TestUserData.getTestUser();
 
         OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
 

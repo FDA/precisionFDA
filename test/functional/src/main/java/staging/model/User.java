@@ -1,7 +1,5 @@
 package staging.model;
 
-import staging.data.TestUserData;
-
 public class User {
 
     private final String basicAuthUsername;
@@ -49,24 +47,6 @@ public class User {
 
     public String getApplUserOrg() {
         return applUserOrg;
-    }
-
-    public static User getTestUser() {
-        return new User(TestUserData.basicPreTestAuthUsername(), TestUserData.basicPreTestAuthPassword(),
-                TestUserData.preTestUsername(), TestUserData.preTestPassword(),
-                TestUserData.preTestFullName(), TestUserData.preTestOrg());
-    }
-
-    public static User getWrongUser() {
-        return new User(TestUserData.basicPreTestAuthUsername(), TestUserData.basicPreTestAuthPassword(),
-                TestUserData.preTestUsername(), "wrongPassword",
-                TestUserData.preTestFullName(), TestUserData.preTestOrg());
-    }
-
-    public static User getAdminUser() {
-        return new User(TestUserData.basicPreAdminAuthUsername(), TestUserData.basicPreAdminAuthPassword(),
-                TestUserData.preAdminUsername(), TestUserData.preAdminPassword(),
-                TestUserData.preAdminFullName(), TestUserData.preAdminOrg());
     }
     
 }

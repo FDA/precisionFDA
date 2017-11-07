@@ -9,6 +9,9 @@ import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.locators.CommonLocators;
 import staging.locators.StartLocators;
+import staging.model.ExpertProfile;
+
+import java.util.List;
 
 public class StartPage extends AbstractPage {
 
@@ -43,5 +46,28 @@ public class StartPage extends AbstractPage {
     public String getMessageAreaText() {
         return getStartSuccessMessageArea().getText();
     }
+
+    public boolean isCreatedExpertPrefNameDisplayed(ExpertProfile expertProfile) {
+        if (getCreatedExpertWE(expertProfile) == null) {
+            return false;
+        }
+        else {
+            return isElementPresent(getCreatedExpertWE(expertProfile), 2);
+        }
+    }
+
+    public WebElement getCreatedExpertWE(ExpertProfile expertProfile) {
+        WebElement prefName = null;
+        List<WebElement> allNames = getDriver().findElements(By.xpath(StartLocators.START_COMMON_EXPERT_PREF_NAMES));
+        for (WebElement we : allNames) {
+            if (we.getText().contains(expertProfile.getExpertPreferredName())) {
+                prefName = we;
+                break;
+            }
+        }
+        return prefName;
+    }
+
+
 
 }

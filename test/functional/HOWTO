@@ -1,31 +1,47 @@
------------
-Before run
------------
+--------------------
+Preparation and run:
+--------------------
 
-Firefox driver should be located to the 'drivers' folder and named as 'geckodriver'.
-It may be downloaded from 'https://github.com/mozilla/geckodriver/releases'.
+1.
+Download the automated test framework from GIT, “automationTesting” branch:
+https://github.com/dnanexus/precision-fda
+The framework is located at: https://github.com/dnanexus/precision-fda/tree/automationTesting/test/functional
+It is a Maven project.
+
+2.
+Make sure Maven is installed on your machine.
+
+3.
+Make sure Java (JRE and JDK) is installed on the machine where you are planning to run the automated suite.
+Works fine with “openjdk” ver. 1.8.*
+
+4.
+Make sure Firefox is installed on the machine. Works fine with the last version 56.0
+
+Download the “geckodriver” file, save unpacked file to “.../precision-fda/test/functional/drivers” folder.
+The file should be downloaded here: https://github.com/mozilla/geckodriver/releases
+
+5.
+Edit the file “precision-fda/test/functional/src/main/resources/settings.properties” if needed.
+
+6.
+Edit the file “precision-fda/test/functional/src/main/resources/application.conf.example”: the file is a container for test users data.
+Rename the file “application.conf.example” to “application.conf”.
+
+7.
+Make sure VPN is active if needed.
+
+8.
+Via command line: go to ""/precision-fda/test/functional/” folder.
+Execute “mvn clean test -Dsuite=allSuitesParallel.xml”, where “allSuitesParallel.xml” -
+the file with description what test cases should be run and how they should be run.
+In our case: all existing test cases in parallel using 3 threads.
 
 
-----------------------------
-How to run from command line
-----------------------------
+----------------------
+How to review results:
+----------------------
 
-1. go to "/test/functional/" folder (where the POM file is located)
-2. mvn clean test -Dsuite={suiteName}
+a. “precision-fda/test/functional/target/surefire-reports/html/index.html” - is an html report of the run
 
-where {suiteName} is a testNG xml profile file (existing profile files are located at "/test/functional/" folder).
-
-E.g. "appsManagementSuite.xml" profile contains all test cases from "AppsManagementTest" suite.
-"runJobGroup.xml" profile will run test cases with group = "runJob".
-So in this case you should use the command "mvn clean test -Dsuite=runJobGroup.xml"
-You may create other testNG profiles depending your requirements.
-
-
-----------------------------
-How to see reports/logs
-----------------------------
-
-The folder with full logs, screenshots and page sources: /target/debug-log/
-(it can be configured in resources/settings.properties)
-
-ReportNG report is created here: /target/surefire-reports/ (you should open "/html/index.html" file)
+b. The folder “precision-fda/test/functional/target/debug-log/” will have full log files and screenshots (if it is enabled in the “properties” file).

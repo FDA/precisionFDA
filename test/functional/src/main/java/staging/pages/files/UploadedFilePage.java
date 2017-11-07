@@ -6,10 +6,10 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
+import staging.data.TestUserData;
 import staging.locators.FilesLocators;
 import staging.model.User;
 import staging.pages.AbstractPage;
-import staging.pages.apps.AppsJobPage;
 
 import static staging.data.TestDict.getDictPrivate;
 
@@ -32,7 +32,7 @@ public class UploadedFilePage extends AbstractPage {
 
 
     User getTestUser() {
-        return User.getTestUser();
+        return TestUserData.getTestUser();
     }
 
     public UploadedFilePage(final WebDriver driver) {

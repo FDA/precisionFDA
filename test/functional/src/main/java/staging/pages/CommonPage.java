@@ -201,4 +201,12 @@ public class CommonPage extends AbstractPage {
         return new AboutHowPage(getDriver());
     }
 
+    public StartPage logout() {
+        log.info("logout");
+        openProfileDropdown();
+        getProfileDropBlock().logout();
+        getDriver().manage().deleteAllCookies();
+        return new StartPage(getDriver());
+    }
+
 }

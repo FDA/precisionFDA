@@ -3,6 +3,7 @@ package staging.cases;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import ru.yandex.qatools.htmlelements.annotations.Name;
+import staging.data.TestUserData;
 import staging.model.AppProfile;
 import staging.model.NoteProfile;
 import staging.model.User;
@@ -44,7 +45,7 @@ public class TimeZoneTest extends AbstractTest {
     public void successfulLogin() {
         printTestHeader("Test Case: Successful Login");
 
-        User user = User.getTestUser();
+        User user = TestUserData.getTestUser();
         OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(

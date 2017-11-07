@@ -2,7 +2,7 @@ package staging.cases;
 
 import org.testng.annotations.Test;
 import ru.yandex.qatools.htmlelements.annotations.Name;
-import staging.data.TestDict;
+import staging.data.TestUserData;
 import staging.model.AppProfile;
 import staging.model.User;
 import staging.pages.apps.*;
@@ -24,7 +24,7 @@ public class AppsTest extends AbstractTest {
     public void successfulLogin() {
         printTestHeader(" -- Successful Login -- ");
 
-        User user = User.getTestUser();
+        User user = TestUserData.getTestUser();
 
         OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
 

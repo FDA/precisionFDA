@@ -3,6 +3,7 @@ package staging.cases;
 import org.testng.annotations.Test;
 import ru.yandex.qatools.htmlelements.annotations.Name;
 import staging.data.PageTitles;
+import staging.data.TestUserData;
 import staging.model.User;
 import staging.pages.guidelines.GuidelinesPage;
 import staging.pages.about.*;
@@ -26,7 +27,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void successfulLogin() {
         printTestHeader("Test Case: Successful Login");
 
-        User user = User.getTestUser();
+        User user = TestUserData.getTestUser();
         OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(

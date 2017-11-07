@@ -2,6 +2,7 @@ package staging.data;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import staging.model.User;
 
 public class TestUserData {
 
@@ -105,6 +106,82 @@ public class TestUserData {
 
     public static String preAdminOrg() {
         return getPreAdminUserOrg();
+    }
+
+    // another test user
+
+    public static String getPreAnotherUsername() {
+        return config.getString("pfda_othertest.username");
+    }
+
+    public static String getPreAnotherPassword() {
+        return config.getString("pfda_othertest.password");
+    }
+
+    public static String getPreAnotherDNXusername() {
+        return config.getString("pfda_othertest.dnx_stage_username");
+    }
+
+    public static String getPreAnotherDNXpassword() {
+        return config.getString("pfda_othertest.dnx_stage_password");
+    }
+
+    public static String getPreAnotherUserFullName() {
+        return config.getString("pfda_othertest.userFullName");
+    }
+
+    public static String getPreAnotherUserOrg() {
+        return config.getString("pfda_othertest.userOrg");
+    }
+
+    public static String basicPreAnotherAuthUsername() {
+        return getPreAnotherDNXusername();
+    }
+
+    public static String basicPreAnotherAuthPassword() {
+        return getPreAnotherDNXpassword();
+    }
+
+    public static String preAnotherUsername() {
+        return getPreAnotherUsername();
+    }
+
+    public static String preAnotherPassword() {
+        return getPreAnotherPassword();
+    }
+
+    public static String preAnotherFullName() {
+        return getPreAnotherUserFullName();
+    }
+
+    public static String preAnotherOrg() {
+        return getPreAnotherUserOrg();
+    }
+
+    //====================
+
+    public static User getTestUser() {
+        return new User(TestUserData.basicPreTestAuthUsername(), TestUserData.basicPreTestAuthPassword(),
+                TestUserData.preTestUsername(), TestUserData.preTestPassword(),
+                TestUserData.preTestFullName(), TestUserData.preTestOrg());
+    }
+
+    public static User getAnotherTestUser() {
+        return new User(TestUserData.basicPreAnotherAuthUsername(), TestUserData.basicPreAnotherAuthPassword(),
+                TestUserData.preAnotherUsername(), TestUserData.preAnotherPassword(),
+                TestUserData.preAnotherFullName(), TestUserData.preAnotherOrg());
+    }
+
+    public static User getWrongUser() {
+        return new User(TestUserData.basicPreTestAuthUsername(), TestUserData.basicPreTestAuthPassword(),
+                TestUserData.preTestUsername(), "wrongPassword",
+                TestUserData.preTestFullName(), TestUserData.preTestOrg());
+    }
+
+    public static User getAdminUser() {
+        return new User(TestUserData.basicPreAdminAuthUsername(), TestUserData.basicPreAdminAuthPassword(),
+                TestUserData.preAdminUsername(), TestUserData.preAdminPassword(),
+                TestUserData.preAdminFullName(), TestUserData.preAdminOrg());
     }
 
 }

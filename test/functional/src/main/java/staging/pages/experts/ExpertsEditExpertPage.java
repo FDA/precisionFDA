@@ -13,7 +13,7 @@ import staging.model.ExpertProfile;
 import staging.pages.AbstractPage;
 import staging.utils.SettingsProperties;
 
-public class ExpertsCreateExpertPage extends AbstractPage {
+public class ExpertsEditExpertPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
 
@@ -59,10 +59,12 @@ public class ExpertsCreateExpertPage extends AbstractPage {
     @FindBy(xpath = ExpertsLocators.CREATE_EXPERT_IMAGE_UPLOAD_COMPLETE_OK_BUTTON)
     private Button imageUploadCompleteOkButton;
 
+    @FindBy(xpath = ExpertsLocators.EDIT_EXPERT_UPDATE_BUTTON)
+    private WebElement updateButton;
 
-    public ExpertsCreateExpertPage(final WebDriver driver) {
+    public ExpertsEditExpertPage(final WebDriver driver) {
         super(driver);
-        waitForPageToLoadAndVerifyBy(By.xpath(ExpertsLocators.CREATE_EXPERT_BUTTON_ON_NEW_EXPERT_FORM));
+        waitForPageToLoadAndVerifyBy(By.xpath(ExpertsLocators.CREATE_EXPERT_FORM_UPLOAD_IMAGE_BUTTON));
     }
 
     public Button getImageUploadCompleteOkButton() {
@@ -121,7 +123,11 @@ public class ExpertsCreateExpertPage extends AbstractPage {
         return blogTitleInput;
     }
 
-    public ExpertsCreateExpertPage fillNewExpertForm(ExpertProfile expertProfile) {
+    public WebElement getUpdateButtonWE() {
+        return updateButton;
+    }
+
+    public ExpertsEditExpertPage fillNewExpertForm(ExpertProfile expertProfile) {
         log.info("fill new expert form");
 
         getUsernameSelect().selectByValue(expertProfile.getExpertName());
@@ -145,7 +151,7 @@ public class ExpertsCreateExpertPage extends AbstractPage {
 
         getImageUploadCompleteOkButton().click();
 
-        return new ExpertsCreateExpertPage(getDriver());
+        return new ExpertsEditExpertPage(getDriver());
     }
 
     public ExpertsPage clickCreateExpert() {
@@ -154,6 +160,20 @@ public class ExpertsCreateExpertPage extends AbstractPage {
         return new ExpertsPage(getDriver());
     }
 
+    public boolean isVisibilitySelectorDisplayed() {
+        return isElementPresent(getVisibilitySelect(), 2);
+    }
+
+    public void setPublicVisibility() {
+        log.info("set Public");
+        getVisibilitySelect().selectByVisibleText("Public");
+    }
+
+    public ExpertsCreatedExpertPage clickUpdate() {
+        log.info("click update");
+        getUpdateButtonWE().click();
+        return new ExpertsCreatedExpertPage(getDriver());
+    }
 
 
 

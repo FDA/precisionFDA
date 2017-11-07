@@ -7,6 +7,15 @@ pfda_test {
   userOrg: ""
 }
 
+pfda_othertest {
+    username: ""
+    password: ""
+    dnx_stage_username: ""
+    dnx_stage_password: ""
+    userFullName: ""
+    userOrg: ""
+}
+
 pfda_admin {
     username: ""
     password: ""

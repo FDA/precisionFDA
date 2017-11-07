@@ -22,7 +22,7 @@ public class ExpertsLocators {
 
     public static final String CREATE_EXPERT_FORM_PREVIEW_INPUT = "//textarea[@id='expert__challenge']";
 
-    public static final String CREATE_EXPERT_FORM_VISIBILITY_SELECT = "//textarea[@id='expert_scope']";
+    public static final String CREATE_EXPERT_FORM_VISIBILITY_SELECT = "//select[@id='expert_scope']";
 
     public static final String CREATE_EXPERT_FORM_UPLOAD_IMAGE_BUTTON = "//button[text()='Upload image']";
 
@@ -38,9 +38,23 @@ public class ExpertsLocators {
 
     public static final String CREATE_EXPERT_ALERT_SUCCESS = "//*[contains(@class, 'alert-success')]";
 
-    public static final String CREATED_EXPERT_COMMON_LINK = "//*[@class='pfda-card-title']/a[text()='{EXPERT_PREF_NAME}']";
+    public static final String CREATED_EXPERT_COMMON_LINK = "//*[@class='pfda-card-title']/a";
 
     public static final String CREATED_EXPERT_COMMON_IMAGE = "//img[contains(@src, '{EXPERT_IMAGE_FILE_NAME}')]";
+
+    public static final String CREATED_EXPERT_PAGE_VIEW_DASHBOARD = "//a/span[contains(@class, 'dashboard')]";
+
+    public static final String CREATED_EXPERT_PAGE_PUBLICPRIVATE_LABEL = "//*[contains(@class, 'label')]/*[contains(@class, 'eye')]/..";
+
+    public static final String CREATED_EXPERT_PAGE_OPENCLOSED_LABEL = "//*[contains(@class, 'label')]/*[contains(@class, 'check')]/..|//*[contains(@class, 'label')]/*[contains(@class, 'lock')]/..";
+
+    public static final String CREATED_EXPERT_PAGE_ABOUT = "//*[contains(@class, 'expert-intro')]";
+
+    public static final String CREATED_EXPERT_DASHBOARD_EDIT_LINK = "//a[contains(@href, 'edit')]/*[contains(@class, 'pencil')]/..";
+
+    public static final String EDIT_EXPERT_UPDATE_BUTTON = "//input[@value='Update']";
+
+    public static final String EXPERT_PAGE_ASK_QUESTION_BUTTON = "//a[contains(@data-target, 'ask-question')]";
 
 
 }
