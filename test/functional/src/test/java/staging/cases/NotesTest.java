@@ -2,6 +2,7 @@ package staging.cases;
 
 import org.testng.annotations.Test;
 import ru.yandex.qatools.htmlelements.annotations.Name;
+import staging.data.TestUserData;
 import staging.model.NoteProfile;
 import staging.model.User;
 import staging.pages.notes.NotesEditNotePage;
@@ -25,7 +26,7 @@ public class NotesTest extends AbstractTest {
     public void successfulLogin() {
         printTestHeader(" -- Login -- ");
 
-        User user = User.getTestUser();
+        User user = TestUserData.getTestUser();
         OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(

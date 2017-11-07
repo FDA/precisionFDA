@@ -10,6 +10,8 @@ import staging.locators.ExpertsLocators;
 import staging.model.ExpertProfile;
 import staging.pages.AbstractPage;
 
+import java.util.List;
+
 public class ExpertsPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
@@ -66,19 +68,10 @@ public class ExpertsPage extends AbstractPage {
         return isElementPresent(getExpertCreatedSuccessAlertWE());
     }
 
-    public ExpertsCreateExpertPage clickCreateExpertButton() {
+    public ExpertsEditExpertPage clickCreateExpertButton() {
         log.info("open new expert form");
         getCreateExpertButtonLink().click();
-        return new ExpertsCreateExpertPage(getDriver());
-    }
-
-    public WebElement getLinkToCreatedExpert(String expertPreferredName) {
-        String xpath = ExpertsLocators.CREATED_EXPERT_COMMON_LINK.replace("{EXPERT_PREF_NAME}", expertPreferredName);
-        return getDriver().findElement(By.xpath(xpath));
-    }
-
-    public boolean isCreatedExpertPrefNameDisplayed(ExpertProfile expertProfile) {
-        return isElementPresent(getLinkToCreatedExpert(expertProfile.getExpertPreferredName()));
+        return new ExpertsEditExpertPage(getDriver());
     }
 
     public WebElement getCreatedExpertImage(String imageFileName) {
@@ -86,7 +79,34 @@ public class ExpertsPage extends AbstractPage {
         return getDriver().findElement(By.xpath(xpath));
     }
 
+    public boolean isCreatedExpertPrefNameDisplayed(ExpertProfile expertProfile) {
+        if (getCreatedExpertLink(expertProfile) == null) {
+            return false;
+        }
+        else {
+            return isElementPresent(getCreatedExpertLink(expertProfile), 2);
+        }
+    }
+
+    public WebElement getCreatedExpertLink(ExpertProfile expertProfile) {
+        WebElement prefName = null;
+        List<WebElement> allNames = getDriver().findElements(By.xpath(ExpertsLocators.CREATED_EXPERT_COMMON_LINK));
+        for (WebElement we : allNames) {
+            if (we.getText().contains(expertProfile.getExpertPreferredName())) {
+                prefName = we;
+                break;
+            }
+        }
+        return prefName;
+    }
+
     public boolean isCreatedExpertImageDisplayed(ExpertProfile expertProfile) {
         return isElementPresent(getCreatedExpertImage(expertProfile.getExpertImage()));
+    }
+
+    public ExpertsCreatedExpertPage openExpertPage(ExpertProfile expertProfile) {
+        log.info("open expert page");
+        getCreatedExpertLink(expertProfile).click();
+        return new ExpertsCreatedExpertPage(getDriver());
     }
 }

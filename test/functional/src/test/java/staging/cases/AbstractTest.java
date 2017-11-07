@@ -19,6 +19,7 @@ import tools.CustomResultListener;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -45,13 +46,6 @@ public abstract class AbstractTest {
 
     @AfterClass(alwaysRun = true)
     public void tearDown() throws Exception {
-        try {
-            driver.switchTo().alert();
-            alertAccept(1, 100);
-        }
-        catch (NoAlertPresentException Ex)
-        { //
-        }
         closeBrowser();
     }
 
@@ -59,16 +53,19 @@ public abstract class AbstractTest {
         if (driver != null) {
             log.info("closing browser");
             try {
+                try {
+                    driver.switchTo().alert();
+                    alertAccept(1, 100);
+                }
+                catch (NoAlertPresentException Ex)
+                { //
+                }
                 DriverFactory.getInstance().removeDriver();
             }
             catch (WebDriverException e) {
                 //
             }
         }
-    }
-
-    public void openBrowser() {
-        driver = new DriverFactory().getInstance().getDriver();
     }
 
     @BeforeTest
@@ -173,10 +170,16 @@ public abstract class AbstractTest {
         log.info("open Login page");
 
         String loginPageURL = SettingsProperties.getProperty("loginPageURL");
+        driver.manage().deleteAllCookies();
+        sleep(1000);
+        Set<Cookie> allCookies = driver.manage().getCookies();
+        for (Cookie cookie : allCookies) {
+            driver.manage().deleteCookieNamed(cookie.getName());
+        }
+        sleep(1000);
 
         loginPageURL = loginPageURL.replace("{basicAuthUser}", user.getBasicAuthUsername())
                 .replace("{basicAuthPassword}", user.getBasicAuthPassword());
-
         driver.get(loginPageURL);
         return new LoginPage(driver);
     }
@@ -193,6 +196,14 @@ public abstract class AbstractTest {
         Alert alert = fluentWait.until(alertIsPresent());
         if (alert != null) {
             alert.accept();
+        }
+    }
+
+    public void sleep(final long msec) {
+        try {
+            Thread.sleep(msec);
+        } catch (final InterruptedException e) {
+            //
         }
     }
 

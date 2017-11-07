@@ -8,6 +8,7 @@ import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.data.TestRunData;
+import staging.data.TestUserData;
 import staging.locators.NotesLocators;
 import staging.model.NoteProfile;
 import staging.model.User;
@@ -61,7 +62,7 @@ public class NotesSavedNotePage extends AbstractPage {
     }
 
     public User getUser() {
-        return User.getTestUser();
+        return TestUserData.getTestUser();
     }
 
     //----------

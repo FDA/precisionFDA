@@ -9,6 +9,7 @@ import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import staging.data.TestRunData;
+import staging.data.TestUserData;
 import staging.locators.AppsLocators;
 import staging.model.AppProfile;
 import staging.model.User;
@@ -156,7 +157,7 @@ public class AppsSavedAppPage extends AbstractPage {
     }
 
     User getUser() {
-        return User.getTestUser();
+        return TestUserData.getTestUser();
     }
 
     public WebElement getAppsRevisionTitleLabeWE() {

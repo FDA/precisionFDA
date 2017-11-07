@@ -8,4 +8,6 @@ public class StartLocators {
 
     public static final String START_SUCCESS_MESSAGE_AREA = "//div[contains(@class, 'alert-success')]";
 
+    public static final String START_COMMON_EXPERT_PREF_NAMES = "//*[contains(@class, 'pfda-card-title')]";
+
 }

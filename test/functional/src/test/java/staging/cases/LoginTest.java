@@ -1,10 +1,10 @@
 package staging.cases;
 
-import org.assertj.core.api.Assert;
-import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 import ru.yandex.qatools.htmlelements.annotations.Name;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import staging.data.TestUserData;
 import staging.model.User;
 import staging.pages.StartPage;
 import staging.pages.login.LoginPage;
@@ -17,7 +17,7 @@ public class LoginTest extends AbstractTest {
     public void successfulLoginLogout() {
         printTestHeader("Test Case: Successful Login and logout");
 
-        User user = User.getTestUser();
+        User user = TestUserData.getTestUser();
 
         OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
 
@@ -50,7 +50,7 @@ public class LoginTest extends AbstractTest {
     public void loginWithWrongPassword() {
         printTestHeader("Test Case: test login with wrong password");
 
-        User user = User.getWrongUser();
+        User user = TestUserData.getWrongUser();
 
         LoginPage loginPage = openLoginPage(user).wrongLogin(user);
 

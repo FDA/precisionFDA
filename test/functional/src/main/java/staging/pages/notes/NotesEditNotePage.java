@@ -7,6 +7,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
+import staging.data.TestUserData;
 import staging.locators.CommonLocators;
 import staging.locators.NotesLocators;
 import staging.model.NoteProfile;
@@ -61,7 +62,7 @@ public class NotesEditNotePage extends AbstractPage {
     }
 
     public User getUser() {
-        return User.getTestUser();
+        return TestUserData.getTestUser();
     }
 
     public WebElement getNotesEditNoteEditorWE() {
