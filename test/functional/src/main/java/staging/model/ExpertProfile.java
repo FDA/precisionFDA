@@ -49,12 +49,12 @@ public class ExpertProfile {
         return expertBlog;
     }
 
-    public String getExpertBlogPreview() {
-        return expertBlogPreview;
-    }
-
     public String getExpertImage() {
         return expertImage;
+    }
+
+    public String getExpertBlogPreview() {
+        return expertBlogPreview;
     }
 }
 

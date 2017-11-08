@@ -85,14 +85,21 @@ public abstract class AbstractTest {
 
     @BeforeMethod(alwaysRun = true)
     public void beforeCase() {
-        SoftAssert = new SoftAssertions();
+        callBeforeCase();
     }
 
     @AfterMethod(alwaysRun = true)
     public void afterCase() {
+        callAfterCase();
+    }
 
+    public void callBeforeCase() {
+        SoftAssert = new SoftAssertions();
+    }
+
+    public void callAfterCase() {
         if (getFinishedCaseStatus().equals(getCaseStatusPassed())) {
-            casePostActions(getCaseStatusPassed(),
+            logAfterCaseData(getCaseStatusPassed(),
                     getFinishedCaseName(),
                     getRunSuiteName(),
                     isGetScreenshotOnPass(),
@@ -100,7 +107,7 @@ public abstract class AbstractTest {
         }
 
         if (getFinishedCaseStatus().equals(getCaseStatusFailed())) {
-            casePostActions(getCaseStatusFailed(),
+            logAfterCaseData(getCaseStatusFailed(),
                     getFinishedCaseName(),
                     getRunSuiteName(),
                     isGetScreenshotOnFail(),
@@ -108,11 +115,11 @@ public abstract class AbstractTest {
         }
     }
 
-    public void casePostActions(String caseStatus,
-                                String caseName,
-                                String suiteName,
-                                boolean isGetScreenshot,
-                                boolean isGetSource) {
+    public void logAfterCaseData(String caseStatus,
+                                 String caseName,
+                                 String suiteName,
+                                 boolean isGetScreenshot,
+                                 boolean isGetSource) {
 
         printLine();
         log.info("-- it was test case [" + caseName + "] from suite [" + suiteName + "] --");

@@ -84,7 +84,7 @@ public class ExpertsPage extends AbstractPage {
             return false;
         }
         else {
-            return isElementPresent(getCreatedExpertLink(expertProfile), 2);
+            return isElementPresent(getCreatedExpertLink(expertProfile), 3);
         }
     }
 
