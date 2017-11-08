@@ -124,6 +124,7 @@ class MainController < ApplicationController
         { logo: "participants/ostp.png", name: "White House Office of Science and Technology Policy"},
         { logo: "participants/personalis.png", name: "Personalis"},
         { logo: "participants/pharmgkb.png", name: "PharmGKB"},
+        { logo: "participants/qiagen.png", name: "Qiagen"},
         { logo: "participants/roche.png", name: "Roche"},
         { logo: "participants/sequenom.png", name: "Sequenom"},
         { logo: "participants/seracare.png", name: "Seracare"},
