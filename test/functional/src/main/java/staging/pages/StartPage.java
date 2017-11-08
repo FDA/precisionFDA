@@ -47,25 +47,25 @@ public class StartPage extends AbstractPage {
         return getStartSuccessMessageArea().getText();
     }
 
-    public boolean isCreatedExpertPrefNameDisplayed(ExpertProfile expertProfile) {
-        if (getCreatedExpertWE(expertProfile) == null) {
+    public boolean isCreatedExpertBlogTitleDisplayed(ExpertProfile expertProfile) {
+        if (getCreatedExpertBlogTitleWE(expertProfile) == null) {
             return false;
         }
         else {
-            return isElementPresent(getCreatedExpertWE(expertProfile), 2);
+            return isElementPresent(getCreatedExpertBlogTitleWE(expertProfile), 2);
         }
     }
 
-    public WebElement getCreatedExpertWE(ExpertProfile expertProfile) {
-        WebElement prefName = null;
-        List<WebElement> allNames = getDriver().findElements(By.xpath(StartLocators.START_COMMON_EXPERT_PREF_NAMES));
-        for (WebElement we : allNames) {
-            if (we.getText().contains(expertProfile.getExpertPreferredName())) {
-                prefName = we;
+    public WebElement getCreatedExpertBlogTitleWE(ExpertProfile expertProfile) {
+        WebElement blogTitle = null;
+        List<WebElement> allTitles = getDriver().findElements(By.xpath(StartLocators.START_COMMON_EXPERT_BLOG_TITLE));
+        for (WebElement we : allTitles) {
+            if (we.getText().contains(expertProfile.getExpertBlogTitle())) {
+                blogTitle = we;
                 break;
             }
         }
-        return prefName;
+        return blogTitle;
     }
 
 

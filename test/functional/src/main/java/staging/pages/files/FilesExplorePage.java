@@ -17,7 +17,7 @@ public class FilesExplorePage extends AbstractPage {
 
     public FilesExplorePage(final WebDriver driver) {
         super(driver);
-        waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_ADD_FILES_LINK));
+        waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_EXPLORE_ACTIVATED_LINK));
     }
 
     public Link getFilesExploreActivatedLink() {

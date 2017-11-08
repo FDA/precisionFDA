@@ -22,7 +22,7 @@ public abstract class AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
 
-    private static final int DEFAULT_TIMEOUT = 20;
+    private static final int DEFAULT_TIMEOUT = 10;
 
     public AbstractPage(final WebDriver driver) {
         HtmlElementLoader.populatePageObject(this, driver);
@@ -66,12 +66,20 @@ public abstract class AbstractPage {
         waitUntilDisplayed(link.getWrappedElement());
     }
 
+    public void waitUntilDisplayed(final Link link, int timeout) {
+        waitUntilDisplayed(link.getWrappedElement(), timeout);
+    }
+
     public void waitUntilDisplayed(final Button button) {
         waitUntilDisplayed(button.getWrappedElement());
     }
 
     public void waitUntilDisplayed(final TextInput input) {
         waitUntilDisplayed(input.getWrappedElement());
+    }
+
+    public void waitUntilDisplayed(final TextInput input, int timeout) {
+        waitUntilDisplayed(input.getWrappedElement(), timeout);
     }
 
     public void waitUntilDisplayed(final By locator) {

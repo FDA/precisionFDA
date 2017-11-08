@@ -56,5 +56,41 @@ public class ExpertsLocators {
 
     public static final String EXPERT_PAGE_ASK_QUESTION_BUTTON = "//a[contains(@data-target, 'ask-question')]";
 
+    public static final String EXPERT_PAGE_OPENCLOSED_BUTTON = "//button[contains(@class, 'dropdown')]/span[@class='caret']/..";
+
+    public static final String EXPERT_PAGE_OPEN_EXPERT_ITEM = "//*[@class='dropdown-menu']/li/a[contains(@href, 'open')]";
+
+    public static final String EXPERT_PAGE_CLOSE_EXPERT_ITEM = "//*[@class='dropdown-menu']/li/a[contains(@href, 'close')]";
+
+    public static final String EXPERT_QUESTION_POPUP_TEXTAREA = "//textarea[@id='expert_question']";
+
+    public static final String EXPERT_QUESTION_POPUP_SUBMIT_BUTTON = "//button[text()='Submit']";
+
+    public static final String EXPERT_YOUR_QUESTIONS_COMMON = "//ul[@class='list-group']/li[@class='list-group-item']";
+
+    public static final String EXPERT_OPEN_QUESTION_LINK_COMMON_WHEN_NO_ANSWERED = "//*[contains(text(), 'Open Question')]/following-sibling::a";
+
+    public static final String EXPERT_OPEN_QUESTION_LINK_COMMON_WHEN_ANSWERED = "//*[preceding::*[contains(text(), 'Open Quest')]][following::*[contains(text(), 'Answered Quest')]]";
+
+    public static final String EXPERT_ANSWERED_QUESTION_LINK_COMMON = "//*[contains(text(), 'Answered Question')]/following-sibling::a";
+
+    public static final String EXPERT_COMMON_QUESTION_LINK_DASHBOARD = "//a[contains(@class, 'item')][text()='{QUESTION}']";
+
+    public static final String EXPERT_QA_FORM_ANSWER_TEXTAREA = "//textarea[@id='expert_question_answer']";
+
+    public static final String EXPERT_QA_FORM_QUESTION_TEXTAREA = "//textarea[@id='expert_question_body']";
+
+    public static final String EXPERT_ANSWER_QUESTION_SUBMIT_ANSWER_BUTTON = "//input[@value='Submit Answer']";
+
+    public static final String EXPERT_QUESTION_POPUP_UPDATE_BUTTON = "//input[@value='Update Answer']";
+
+    public static final String EXPERT_ANSWERED_QUESTIONS_LINKS_FOR_SUBMITTER_COMMON = "//*[contains(@class, 'expert-question')][contains(text(), 'nswered')]/../*[@class='expert-question-body']";
+
+    public static final String EXPERT_ANSWERED_QUESTIONS_PAGE_ANSWER = "//*[@class='expert-question']/*[@class='expert-blog-text']/p";
+
+    public static final String EXPERT_OPEN_QUESTIONS_LIST_TITLE = "//*[contains(text(), 'Open Questions')]";
+
+    public static final String EXPERT_ANSWERED_QUESTIONS_LIST_TITLE = "//*[contains(text(), 'Answered Questions')]";
+
 
 }

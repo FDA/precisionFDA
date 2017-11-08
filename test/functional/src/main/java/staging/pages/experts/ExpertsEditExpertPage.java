@@ -169,6 +169,11 @@ public class ExpertsEditExpertPage extends AbstractPage {
         getVisibilitySelect().selectByVisibleText("Public");
     }
 
+    public void setPrivateVisibility() {
+        log.info("set Private");
+        getVisibilitySelect().selectByVisibleText("Private");
+    }
+
     public ExpertsCreatedExpertPage clickUpdate() {
         log.info("click update");
         getUpdateButtonWE().click();

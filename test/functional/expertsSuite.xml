@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Experts test suite">
+    <test name="Experts test suite">
+        <classes>
+            <class name="staging.cases.ExpertsTest"/>
+        </classes>
+    </test>
+</suite>
