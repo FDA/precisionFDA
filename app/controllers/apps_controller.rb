@@ -1,7 +1,7 @@
 class AppsController < ApplicationController
   skip_before_action :require_login,     only: [:index, :featured, :explore, :show, :fork, :new]
   before_action :require_login_or_guest, only: [:index, :featured, :explore, :show, :fork, :new]
-  before_action :validate_app_before_export, only: [:export, :cwl_export]
+  before_action :validate_app_before_export, only: [:export, :cwl_export, :wdl_export]
 
   def index
     if @context.guest?
@@ -59,6 +59,12 @@ class AppsController < ApplicationController
     docker_file = @app.to_docker(@context.token)
     filename = @app.name.strip.underscore.gsub(" ", "_")
     send_data cwl_exporter.export(@app, docker_file, filename), :filename => "#{filename}.tar.gz"
+  end
+
+  def wdl_export
+    docker_file = @app.to_docker(@context.token)
+    filename = @app.name.strip.underscore.gsub(" ", "_")
+    send_data wdl_exporter.export(@app, docker_file, filename), :filename => "#{filename}.tar.gz"
   end
 
   def featured
@@ -174,6 +180,10 @@ class AppsController < ApplicationController
 
   def cwl_exporter
     @cwl_exporter ||= CwlToolExporter.new
+  end
+
+  def wdl_exporter
+    @wdl_exporter ||= WdlExporter.new
   end
 
   def validate_app_before_export
