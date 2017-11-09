@@ -79,6 +79,7 @@ Rails.application.routes.draw do
         get 'fork'
         post 'export'
         post 'cwl_export'
+        post 'wdl_export'
         get 'batch_app'
       end
       get 'featured', on: :collection, as: 'featured'
