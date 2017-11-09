@@ -21,6 +21,7 @@ public class ChallsPage extends AbstractPage {
 
     public ChallsPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(ChallsLocators.CHALLS_PREV_CHALLS_TEXT));
     }
 

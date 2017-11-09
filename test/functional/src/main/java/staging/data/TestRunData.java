@@ -3,7 +3,6 @@ package staging.data;
 import staging.utils.SettingsProperties;
 
 import static staging.utils.Utils.getRunTimeLocalUniqueValue;
-import static staging.utils.Utils.getGeneratedTestFileName;
 
 public class TestRunData {
 
@@ -15,17 +14,9 @@ public class TestRunData {
 
     public static String currentTimezone = "GMT";
 
-    public static final String INPUT_OUTPUT_FIELDS_ADDON = "_at";
-
     public static final String filePathUniqueValue = generateFilePathUniqueValue();
 
     public static final String testRunUniqueFinalValue = generateTestRunUniqueValue();
-
-    public static final String TEST_TEXT_FILE_NAME = "textFile.txt";
-
-    public static final String TEST_PNG_FILE_NAME = "pngFile.png";
-
-    public static final String TEST_FOLDER_NAME_PREFIX = "at_folder_";
 
     public static final String INPUT_NAME_FIELD_NAME = "input_name_";
 
@@ -95,18 +86,6 @@ public class TestRunData {
         return testRunUniqueFinalValue;
     }
 
-    public static String getTestTextTemplateFileName() {
-        return TEST_TEXT_FILE_NAME;
-    }
-
-    public static String getTestPngTemplateFileName() {
-        return TEST_PNG_FILE_NAME;
-    }
-
-    public static String getTestFolderNamePrefix() {
-        return TEST_FOLDER_NAME_PREFIX;
-    }
-
     public static boolean isGetScreenshotOnPass() {
         return SettingsProperties.getProperty("screenshotOnPass").equalsIgnoreCase("true");
     }
@@ -121,22 +100,6 @@ public class TestRunData {
 
     public static boolean isGetPageSourceOnFail() {
         return SettingsProperties.getProperty("htmlSourceOnFail").equalsIgnoreCase("true");
-    }
-
-    public static String getInputOutputFieldsAddon() {
-        return INPUT_OUTPUT_FIELDS_ADDON;
-    }
-
-    public static String generateTestTextFileName() {
-        return getGeneratedTestFileName("txt");
-    }
-
-    public static String generateTestPngFileName() {
-        return getGeneratedTestFileName("png");
-    }
-
-    public static String generateTestFolderName() {
-        return getTestFolderNamePrefix() + getRunTimeLocalUniqueValue();
     }
 
     public static String getInputNameFieldName() {

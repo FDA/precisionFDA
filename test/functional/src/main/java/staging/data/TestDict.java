@@ -12,6 +12,8 @@ public class TestDict {
 
     public static final String DICT_PRIVATE = "Private";
 
+    public static final String DICT_MY_FILES = "My files";
+
     public static String getDictString() {
         return DICT_STRING;
     }
@@ -29,5 +31,9 @@ public class TestDict {
     }
 
     public static String getDictPrivate() { return DICT_PRIVATE; }
+
+    public static String getDictMyFiles() {
+        return DICT_MY_FILES;
+    }
 
 }

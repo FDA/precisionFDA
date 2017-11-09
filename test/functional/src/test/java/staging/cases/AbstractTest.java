@@ -178,13 +178,10 @@ public abstract class AbstractTest {
 
         String loginPageURL = SettingsProperties.getProperty("loginPageURL");
         driver.manage().deleteAllCookies();
-        sleep(1000);
         Set<Cookie> allCookies = driver.manage().getCookies();
         for (Cookie cookie : allCookies) {
             driver.manage().deleteCookieNamed(cookie.getName());
         }
-        sleep(1000);
-
         loginPageURL = loginPageURL.replace("{basicAuthUser}", user.getBasicAuthUsername())
                 .replace("{basicAuthPassword}", user.getBasicAuthPassword());
         driver.get(loginPageURL);
@@ -255,7 +252,7 @@ public abstract class AbstractTest {
             FirefoxOptions firefoxOptions = new FirefoxOptions();
             firefoxOptions.setBinary(firefoxBinary);
             WebDriver initDriver = new FirefoxDriver(firefoxOptions);
-            initDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+            initDriver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
             return initDriver;
         }
     }

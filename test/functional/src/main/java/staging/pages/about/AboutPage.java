@@ -30,6 +30,7 @@ public class AboutPage extends AbstractPage {
 
     public AboutPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AboutLocators.ABOUT_MAIN_TITLE));
     }
 

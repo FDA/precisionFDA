@@ -58,6 +58,7 @@ public class NotesEditNotePage extends AbstractPage {
 
     public NotesEditNotePage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(NotesLocators.NOTES_EDIT_NOTE_EDITOR_VISIBLE_DIV), 10);
     }
 

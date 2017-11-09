@@ -105,51 +105,65 @@ public class CommonPage extends AbstractPage {
 
     public AppsPage openAppsPage() {
         log.info("opening Apps page");
-        isElementPresent(getAppsPageIcon(), 30);
-        getAppsPageIcon().click();
+        Link link = getAppsPageIcon();
+        waitUntilClickable(link);
+        link.click();
         return new AppsPage(getDriver());
     }
 
     public CompsPage openCompsPage() {
         log.info("opening Comparisons page");
-        getCompsPageIcon().click();
+        Link link = getCompsPageIcon();
+        waitUntilClickable(link);
+        link.click();
         return new CompsPage(getDriver());
     }
 
     public FilesPage openFilesPage() {
         log.info("opening Files page");
-        getFilesPageIcon().click();
+        Link link = getFilesPageIcon();
+        waitUntilClickable(link);
+        link.click();
         return new FilesPage(getDriver());
     }
 
     public NotesPage openNotesPage() {
         log.info("opening Notes page");
-        isElementPresent(getNotesPageIcon());
-        getNotesPageIcon().click();
+        Link link = getNotesPageIcon();
+        waitUntilClickable(link);
+        link.click();
         return new NotesPage(getDriver());
     }
 
     public ExpertsPage openExpertsPage() {
         log.info("opening Experts page");
-        getExpertsPageIcon().click();
+        Link link = getExpertsPageIcon();
+        waitUntilClickable(link);
+        link.click();
         return new ExpertsPage(getDriver());
     }
 
     public ChallsPage openChallsPage() {
         log.info("opening Challenges page");
-        getChallsPageIcon().click();
+        Link link = getChallsPageIcon();
+        waitUntilClickable(link);
+        link.click();
         return new ChallsPage(getDriver());
     }
 
     public DiscsPage openDiscsPage() {
         log.info("opening Discussions page");
-        getDiscsPageIcon().click();
+        Link link = getDiscsPageIcon();
+        waitUntilClickable(link);
+        link.click();
         return new DiscsPage(getDriver());
     }
 
     public OverviewPage openOverviewPage() {
         log.info("opening Overview page");
-        getOverviewPageIcon().click();
+        Link link = getOverviewPageIcon();
+        waitUntilClickable(link);
+        link.click();
         return new OverviewPage(getDriver());
     }
 
@@ -162,7 +176,9 @@ public class CommonPage extends AbstractPage {
 
     public void openProfileDropdown() {
         sleep(1000);
-        getUsernameLink().click();
+        Link link = getUsernameLink();
+        waitUntilClickable(link);
+        link.click();
         waitUntilDisplayed(getProfileDropBlock(), 30);
     }
 

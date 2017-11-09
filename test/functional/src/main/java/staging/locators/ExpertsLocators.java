@@ -76,6 +76,8 @@ public class ExpertsLocators {
 
     public static final String EXPERT_COMMON_QUESTION_LINK_DASHBOARD = "//a[contains(@class, 'item')][text()='{QUESTION}']";
 
+    public static final String EXPERT_COMMON_QUESTION_ACTIVE_LINK_DASHBOARD = "//a[contains(@class, 'item')][contains(@class, 'active')][text()='{QUESTION}']";
+
     public static final String EXPERT_QA_FORM_ANSWER_TEXTAREA = "//textarea[@id='expert_question_answer']";
 
     public static final String EXPERT_QA_FORM_QUESTION_TEXTAREA = "//textarea[@id='expert_question_body']";

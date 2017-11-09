@@ -36,6 +36,7 @@ public class LoginPage extends AbstractPage {
 
     public LoginPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(LoginLocators.LOGIN_PASSWORD_INPUT), 180);
     }
 

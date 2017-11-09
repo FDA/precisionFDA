@@ -17,6 +17,7 @@ public class ExpertsQAPage extends AbstractPage {
 
     public ExpertsQAPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(ExpertsLocators.EXPERT_ANSWERED_QUESTIONS_PAGE_ANSWER));
     }
 

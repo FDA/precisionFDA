@@ -17,6 +17,7 @@ public class AppsManageMyAssetsPage extends AbstractPage {
 
     public AppsManageMyAssetsPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_MANAGE_MAIN_TOOLBAR));
     }
 

@@ -64,6 +64,7 @@ public class ExpertsEditExpertPage extends AbstractPage {
 
     public ExpertsEditExpertPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(ExpertsLocators.CREATE_EXPERT_FORM_UPLOAD_IMAGE_BUTTON));
     }
 
@@ -156,6 +157,7 @@ public class ExpertsEditExpertPage extends AbstractPage {
 
     public ExpertsPage clickCreateExpert() {
         log.info("click Create Expert");
+        waitUntilClickable(getCreateExpertButton());
         getCreateExpertButton().click();
         return new ExpertsPage(getDriver());
     }

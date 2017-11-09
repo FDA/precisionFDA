@@ -17,6 +17,7 @@ public class AboutHowPage extends AbstractPage {
 
     public AboutHowPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AboutLocators.ABOUT_INTRODUCTION_TITLE));
     }
 

@@ -14,6 +14,7 @@ public class PublicProfilePage extends AbstractPage {
 
     public PublicProfilePage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(ProfileLocators.PROFILE_PUBLIC_JOINED_TAG));
     }
 

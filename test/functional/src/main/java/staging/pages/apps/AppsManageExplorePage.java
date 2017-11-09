@@ -17,6 +17,7 @@ public class AppsManageExplorePage extends AbstractPage {
 
     public AppsManageExplorePage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_MANAGE_MAIN_TOOLBAR));
     }
 
