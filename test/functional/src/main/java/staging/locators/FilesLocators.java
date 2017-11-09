@@ -4,17 +4,17 @@ public class FilesLocators {
 
     public static final String FILES_MY_FILES_LINK = "//*[@class='pill-label'][text()='My Files']/../../a";
 
-    public static final String FILES_MY_FILES_ACTIVATED_LINK = "//*[@class='active']//*[@class='pill-label'][text()='My Files']";
+    public static final String FILES_MY_FILES_ACTIVATED_LINK = "//*[@class='active']//*[@class='pill-label'][text()='My Files']/..";
 
-    public static final String FILES_FEATURED_LINK = "//*[@class='pill-label'][text()='Featured']";
+    public static final String FILES_FEATURED_LINK = "//*[@class='pill-label'][text()='Featured']/..";
 
-    public static final String FILES_FEATURED_ACTIVATED_LINK = "//*[@class='active']//*[@class='pill-label'][text()='Featured']";
+    public static final String FILES_FEATURED_ACTIVATED_LINK = "//*[@class='active']//*[@class='pill-label'][text()='Featured']/..";
 
-    public static final String FILES_EXPLORE_LINK = "//*[@class='pill-label'][text()='Explore']";
+    public static final String FILES_EXPLORE_LINK = "//*[@class='pill-label'][text()='Explore']/..";
 
-    public static final String FILES_EXPLORE_ACTIVATED_LINK = "//*[@class='active']//*[@class='pill-label'][text()='Explore']";
+    public static final String FILES_EXPLORE_ACTIVATED_LINK = "//*[@class='active']//*[@class='pill-label'][text()='Explore']/..";
 
-    public static final String FILES_ADD_FILES_LINK = "//*[@class='btn-group']//a[@href='/files/new']/span";
+    public static final String FILES_ADD_FILES_BUTTON_LINK = "//*[@class='btn-group']//a[@href='/files/new']/span";
 
     public static final String FILES_BROWSE_FILES_INPUT = "//input[@class='event-browse-files']";
 
@@ -45,5 +45,9 @@ public class FilesLocators {
     public static final String FILES_COMMON_LINK_TO_CREATED_FOLDER = "//td/a[contains(@href, 'folder')]";
 
     public static final String FILES_SUCCESS_ALERT = "//*[contains(@class, 'alert-success')]";
+
+    public static final String FILES_BREADCRUMBS = "//ol[@class='breadcrumb']";
+
+    public static final String FILES_BREADCRUMB_CHAIN = "//ol[@class='breadcrumb']/li";
 
 }

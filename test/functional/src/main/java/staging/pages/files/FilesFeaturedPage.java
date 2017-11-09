@@ -18,6 +18,7 @@ public class FilesFeaturedPage extends AbstractPage {
 
     public FilesFeaturedPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_FEATURED_ACTIVATED_LINK));
     }
 

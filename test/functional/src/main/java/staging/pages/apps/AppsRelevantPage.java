@@ -22,6 +22,7 @@ public class AppsRelevantPage extends AbstractPage {
 
     public AppsRelevantPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_JOBS_LIST));
     }
 

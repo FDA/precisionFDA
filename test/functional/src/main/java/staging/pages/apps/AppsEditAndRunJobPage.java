@@ -22,6 +22,7 @@ public class AppsEditAndRunJobPage extends AbstractPage {
 
     public AppsEditAndRunJobPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_EDIT_RUN_APP_JOB_NAME_INPUT));
     }
 

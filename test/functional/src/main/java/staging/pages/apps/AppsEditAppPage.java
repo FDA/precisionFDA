@@ -102,6 +102,7 @@ public class AppsEditAppPage extends AbstractPage {
 
     public AppsEditAppPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_EDIT_APP_TITLE_INPUT));
     }
 

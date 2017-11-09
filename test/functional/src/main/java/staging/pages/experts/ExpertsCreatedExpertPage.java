@@ -9,7 +9,6 @@ import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import staging.locators.ExpertsLocators;
-import staging.model.ExpertProfile;
 import staging.pages.AbstractPage;
 
 import java.util.List;
@@ -86,16 +85,18 @@ public class ExpertsCreatedExpertPage extends AbstractPage {
 
     public ExpertsExpertDashboardPage openDashboard() {
         log.info("open dashboard");
+        waitUntilClickable(getViewDashboardLink());
         getViewDashboardLink().click();
         return new ExpertsExpertDashboardPage(getDriver());
     }
 
     public boolean isAskQuestionButtonDisplayed() {
-        return isElementPresent(getAskQuestionButton(), 2);
+        return isElementPresent(getAskQuestionButton(), 5);
     }
 
     public ExpertsCreatedExpertPage submitQuestion(String question) {
         log.info("submit question");
+        waitUntilClickable(getAskQuestionButton());
         getAskQuestionButton().click();
         waitUntilDisplayed(getQuestionPopupTextarea(), 5);
         getQuestionPopupTextarea().sendKeys(question);
@@ -147,7 +148,9 @@ public class ExpertsCreatedExpertPage extends AbstractPage {
 
     public ExpertsQAPage openQAPage(String question) {
         log.info("open answered question");
-        getAnsweredQuestionForSubmitter(question).click();
+        WebElement link = getAnsweredQuestionForSubmitter(question);
+        waitUntilClickable(link);
+        link.click();
         return new ExpertsQAPage(getDriver());
     }
 

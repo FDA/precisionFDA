@@ -22,6 +22,7 @@ public class GrantAccessLoginPage extends AbstractPage {
 
     public GrantAccessLoginPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(GrantAccessLoginLocators.GRANT_ACCESS_BUTTON));
     }
 

@@ -17,6 +17,7 @@ public class CompsExplorePage extends AbstractPage {
 
     public CompsExplorePage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(CompsLocators.COMPS_RUN_COMPARISON_LINK));
     }
 

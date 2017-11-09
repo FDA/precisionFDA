@@ -153,6 +153,7 @@ public class AppsSavedAppPage extends AbstractPage {
 
     public AppsSavedAppPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_SAVED_APP_RUN_APP_BUTTON));
     }
 

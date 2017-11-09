@@ -2,6 +2,7 @@ package staging.pages.experts;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -94,22 +95,25 @@ public class ExpertsExpertDashboardPage extends AbstractPage {
 
     public ExpertsEditExpertPage clickEdit() {
         log.info("click edit");
+        waitUntilClickable(getEditExpert());
         getEditExpert().click();
         return new ExpertsEditExpertPage(getDriver());
     }
 
     public ExpertsExpertDashboardPage setStatusOpen() {
         log.info("set Open");
+        waitUntilClickable(getOpenClosedButton());
         getOpenClosedButton().click();
-        waitUntilDisplayed(getOpenExpertItem(), 3);
+        waitUntilDisplayed(getOpenExpertItem(), 5);
         getOpenExpertItem().click();
         return new ExpertsExpertDashboardPage(getDriver());
     }
 
     public ExpertsExpertDashboardPage setStatusClosed() {
         log.info("set Closed");
+        waitUntilClickable(getOpenClosedButton());
         getOpenClosedButton().click();
-        waitUntilDisplayed(getCloseExpertItem(), 3);
+        waitUntilDisplayed(getCloseExpertItem(), 5);
         getCloseExpertItem().click();
         return new ExpertsExpertDashboardPage(getDriver());
     }
@@ -183,6 +187,7 @@ public class ExpertsExpertDashboardPage extends AbstractPage {
     public ExpertsExpertDashboardPage answerQuestion(String answer) {
         log.info("answer the question");
         getQaFormAnswerTextarea().sendKeys(answer);
+        waitUntilClickable(getAnswerQuestionSubmitButton());
         getAnswerQuestionSubmitButton().click();
         waitUntilDisplayed(getAnswerQuestionUpdateButton(), 10);
         return new ExpertsExpertDashboardPage(getDriver());
@@ -206,12 +211,20 @@ public class ExpertsExpertDashboardPage extends AbstractPage {
 
     public ExpertsExpertDashboardPage openQuestion(String question) {
         log.info("open question");
-        getCommonQuestionLink(question).click();
+        WebElement link = getCommonQuestionLink(question);
+        link.click();
+        waitUntilDisplayed(getCommonQuestionActiveLink(question), 10);
+        sleep(500);
         return new ExpertsExpertDashboardPage(getDriver());
     }
 
     public WebElement getCommonQuestionLink(String question) {
         String xpath = ExpertsLocators.EXPERT_COMMON_QUESTION_LINK_DASHBOARD.replace("{QUESTION}", question);
+        return findByXpath(xpath);
+    }
+
+    public WebElement getCommonQuestionActiveLink(String question) {
+        String xpath = ExpertsLocators.EXPERT_COMMON_QUESTION_ACTIVE_LINK_DASHBOARD.replace("{QUESTION}", question);
         return findByXpath(xpath);
     }
 }

@@ -17,6 +17,7 @@ public class AboutWhyPage extends AbstractPage {
 
     public AboutWhyPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AboutLocators.ABOUT_WHY_ACTIVATED_TAB_LINK));
     }
 

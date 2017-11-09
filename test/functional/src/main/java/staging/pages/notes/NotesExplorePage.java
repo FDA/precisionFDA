@@ -18,6 +18,7 @@ public class NotesExplorePage extends AbstractPage {
 
     public NotesExplorePage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(NotesLocators.NOTES_NEW_NOTE_LINK));
     }
 

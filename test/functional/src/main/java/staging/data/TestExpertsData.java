@@ -1,10 +1,8 @@
 package staging.data;
 
 import staging.model.ExpertProfile;
-import staging.model.User;
 
-import static staging.data.TestRunData.generateTestPngFileName;
-import static staging.data.TestRunData.getTestPngTemplateFileName;
+import static staging.utils.Utils.generateTestPngFileName;
 import static staging.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class TestExpertsData {

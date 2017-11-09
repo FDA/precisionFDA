@@ -18,6 +18,7 @@ public class AppsJobLogPage extends AbstractPage {
 
     public AppsJobLogPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_JOB_LOG_PAGE_LOG_AREA));
     }
 

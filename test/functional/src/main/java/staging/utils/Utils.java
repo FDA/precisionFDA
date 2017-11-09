@@ -11,9 +11,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import static staging.data.TestDict.getDictMyFiles;
 import static staging.data.TestDict.getTrueResult;
-import static staging.data.TestRunData.getTestPngTemplateFileName;
-import static staging.data.TestRunData.getTestTextTemplateFileName;
+import static staging.data.TestFilesData.getTestPngTemplateFileName;
+import static staging.data.TestFilesData.getTestTextTemplateFileName;
 
 public class Utils {
 
@@ -249,6 +250,27 @@ public class Utils {
         public boolean accept(File dir, String name) {
             return (name.endsWith(ext));
         }
+    }
+
+    public static String generateExpectedBreadcrumbs(String rootFolderName, String firstLevelFolderName, String secondLevelFolderName) {
+        String br = getDictMyFiles();
+        if (rootFolderName.length() > 0) {
+            br = br + " / " + rootFolderName;
+        }
+        if (firstLevelFolderName.length() > 0) {
+            br = br + " / " + firstLevelFolderName;
+        }
+        if (secondLevelFolderName.length() > 0) {
+            br = br + " / " + secondLevelFolderName;
+        }
+        return br;
+    }
+    public static String generateTestTextFileName() {
+        return getGeneratedTestFileName("txt");
+    }
+
+    public static String generateTestPngFileName() {
+        return getGeneratedTestFileName("png");
     }
 
 }

@@ -17,6 +17,7 @@ public class AppsFeaturedPage extends AbstractPage {
 
     public AppsFeaturedPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_MAIN_DIV));
     }
 

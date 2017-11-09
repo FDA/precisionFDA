@@ -32,6 +32,7 @@ public class ProfilePage extends AbstractPage {
 
     public ProfilePage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(ProfileLocators.PROFILE_ABOUT_YOUR_ORG_TEXT));
     }
 
@@ -59,7 +60,7 @@ public class ProfilePage extends AbstractPage {
         log.info("select timezone: " + timeZone[1]);
         isElementPresent(getProfileTimeZoneSelect());
         sleep(500);
-        getProfileTimeZoneSelect().selectByVisibleText(timeZone[1]);
+        getProfileTimeZoneSelect().selectByValue(timeZone[1]);
         TestRunData.setCurrentTimezone(timeZone[0]);
         return new ProfilePage(getDriver());
     }
@@ -70,13 +71,17 @@ public class ProfilePage extends AbstractPage {
 
     public AppsPage openAppsPage() {
         log.info("open Apps page");
-        getAppsPageIcon().click();
+        Link link = getAppsPageIcon();
+        waitUntilClickable(link);
+        link.click();
         return new AppsPage(getDriver());
     }
 
     public NotesPage openNotesPage() {
         log.info("open Notes page");
-        getNotesPageIcon().click();
+        Link link = getNotesPageIcon();
+        waitUntilClickable(link);
+        link.click();
         return new NotesPage(getDriver());
     }
 

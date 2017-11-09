@@ -35,6 +35,7 @@ public class AppsPage extends AbstractPage {
 
     public AppsPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_JOBS_LIST));
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_CREATE_APP_BUTTON_LINK), 30);
     }
@@ -61,32 +62,41 @@ public class AppsPage extends AbstractPage {
 
     public AppsRelevantPage openAppsRelevantPage() {
         log.info("open Apps.Relevant Page");
-        getAppsRelevantLink().click();
+        Link link = getAppsRelevantLink();
+        waitUntilDisplayed(link);
+        link.click();
         return new AppsRelevantPage(getDriver());
     }
 
     public AppsFeaturedPage openAppsFeaturedPage() {
         log.info("open Apps.Featured Page");
-        getAppsFeaturedLink().click();
+        Link link = getAppsFeaturedLink();
+        waitUntilDisplayed(link);
+        link.click();
         return new AppsFeaturedPage(getDriver());
     }
 
     public AppsExplorePage openAppsExplorePage() {
         log.info("open Apps.Explore Page");
-        getAppsExploreLink().click();
+        Link link = getAppsExploreLink();
+        waitUntilDisplayed(link);
+        link.click();
         return new AppsExplorePage(getDriver());
     }
 
     public AppsManageAssetsPage openAppsManageAssetsPage() {
         log.info("open Apps.ManageAssets Page");
-        getAppsManageAssetsLink().click();
+        Link link = getAppsManageAssetsLink();
+        waitUntilDisplayed(link);
+        link.click();
         return new AppsManageAssetsPage(getDriver());
     }
 
     public AppsEditAppPage openCreateAppPage() {
         log.info("open Apps.CreateApp Page");
-        isElementPresent(getAppsCreateAppButtonLink(), 30);
-        getAppsCreateAppButtonLink().click();
+        Link link = getAppsCreateAppButtonLink();
+        waitUntilDisplayed(link);
+        link.click();
         return new AppsEditAppPage(getDriver());
     }
 

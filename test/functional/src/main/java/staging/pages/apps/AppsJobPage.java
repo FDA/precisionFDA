@@ -39,6 +39,7 @@ public class AppsJobPage extends AbstractPage {
 
     public AppsJobPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_JOB_PAGE_I_O_TAB_LINK));
     }
 

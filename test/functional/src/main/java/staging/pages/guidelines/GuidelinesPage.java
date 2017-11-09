@@ -17,6 +17,7 @@ public class GuidelinesPage extends AbstractPage {
 
     public GuidelinesPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(GuidelinesLocators.GUIDELINES_CAROUSEL));
     }
 

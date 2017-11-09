@@ -17,6 +17,7 @@ public class CompsRunComparisonPage extends AbstractPage {
 
     public CompsRunComparisonPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(CompsLocators.COMPS_RUN_COMP_CIRCLE_WITH_WE));
     }
 

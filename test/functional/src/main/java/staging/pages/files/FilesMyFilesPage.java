@@ -14,7 +14,8 @@ public class FilesMyFilesPage extends AbstractPage {
 
     public FilesMyFilesPage(final WebDriver driver) {
         super(driver);
-        waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_ADD_FILES_LINK));
+        waitUntilScriptsReady();
+        waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_ADD_FILES_BUTTON_LINK));
     }
 
     public Link getFilesMyFilesActivatedLink() {

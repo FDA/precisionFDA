@@ -30,7 +30,7 @@ public class OverviewPage extends AbstractPage {
     public OverviewPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.COMMON_NAV_PANEL), 30);
-        waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.USER_AVATAR_IMG), 5);
+        // waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.USER_AVATAR_IMG), 5);
     }
 
     protected ProfileDropBlock getProfileDropBlock() {

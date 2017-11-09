@@ -29,8 +29,6 @@ public class UploadedFilePage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_ACCESS_VALUE)
     private WebElement uploadedFileAccessValue;
 
-
-
     User getTestUser() {
         return TestUserData.getTestUser();
     }

@@ -17,6 +17,7 @@ public class LicensesPage extends AbstractPage {
 
     public LicensesPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(LicensesLocators.LICENSE_CREATE_NEW_LINK));
     }
 

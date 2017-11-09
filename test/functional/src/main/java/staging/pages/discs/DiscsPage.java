@@ -18,6 +18,7 @@ public class DiscsPage extends AbstractPage {
 
     public DiscsPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(DiscsLocators.DISCS_START_DISCS_LINK));
     }
 

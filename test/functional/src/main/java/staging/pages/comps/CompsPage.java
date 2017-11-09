@@ -26,6 +26,7 @@ public class CompsPage extends AbstractPage {
 
     public CompsPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(CompsLocators.COMPS_MY_COMPS_LINK));
     }
 
@@ -33,28 +34,47 @@ public class CompsPage extends AbstractPage {
         return compsMyCompsLink;
     }
 
+    public Link getCompsExploreLink() {
+        return compsExploreLink;
+    }
+
+    public Link getCompsFeaturedLink() {
+        return compsFeaturedLink;
+    }
+
+    public Link getCompsRunComparisonLink() {
+        return compsRunComparisonLink;
+    }
+
     public CompsMyCompsPage openCompsMyCompsPage() {
         log.info("open Comps.MyComps page");
-        compsMyCompsLink.click();
+        Link link = getCompsMyCompsLink();
+        waitUntilDisplayed(link);
+        link.click();
         return new CompsMyCompsPage(getDriver());
     }
 
     public CompsFeaturedPage openCompsFeaturedPage() {
         log.info("open Comps.Featured page");
-        compsFeaturedLink.click();
+        Link link = getCompsFeaturedLink();
+        waitUntilDisplayed(link);
+        link.click();
         return new CompsFeaturedPage(getDriver());
     }
 
     public CompsExplorePage openCompsExplorePage() {
         log.info("open Comps.Explore page");
-        compsExploreLink.click();
+        Link link = getCompsExploreLink();
+        waitUntilDisplayed(link);
+        link.click();
         return new CompsExplorePage(getDriver());
     }
 
     public CompsRunComparisonPage openCompsRunComparisonPage() {
         log.info("open Comps.RunComparison page");
-        sleep(5000);
-        compsRunComparisonLink.click();
+        Link link = getCompsRunComparisonLink();
+        waitUntilDisplayed(link);
+        link.click();
         return new CompsRunComparisonPage(getDriver());
     }
 

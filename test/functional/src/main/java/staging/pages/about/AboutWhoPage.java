@@ -17,6 +17,7 @@ public class AboutWhoPage extends AbstractPage {
 
     public AboutWhoPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AboutLocators.ABOUT_WHO_ACTIVATED_TAB_LINK));
     }
 

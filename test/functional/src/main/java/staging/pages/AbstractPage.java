@@ -32,7 +32,7 @@ public abstract class AbstractPage {
     // ***** Waits and sleep ***** //
 
     public void waitUntilDisplayed(final WebElement element) {
-        waitUntilDisplayed(element, 30);
+        waitUntilDisplayed(element, DEFAULT_TIMEOUT);
     }
 
     public void waitUntilDisplayed(final WebElement element, final Integer timeout) {
@@ -42,7 +42,7 @@ public abstract class AbstractPage {
     private void waitUntilDisplayed(final WebElement element, final Integer timeout, final boolean isLog) {
         Wait<WebDriver> fluentWait = new FluentWait<WebDriver>(getDriver())
                 .withTimeout(timeout, SECONDS)
-                .pollingEvery(1, SECONDS)
+                .pollingEvery(500, MILLISECONDS)
                 .ignoring(NoSuchElementException.class);
         try {
                 fluentWait.until(new ExpectedCondition<Boolean>() {
@@ -118,6 +118,30 @@ public abstract class AbstractPage {
         });
     }
 
+    public void waitUntilClickable(final Link element) {
+        (new WebDriverWait(getDriver(), DEFAULT_TIMEOUT)).until(new ExpectedCondition<Boolean>() {
+            public Boolean apply(final WebDriver d) {
+                if (element == null) {
+                    return false;
+                } else {
+                    return element.getWrappedElement().isDisplayed() && element.getWrappedElement().isEnabled();
+                }
+            }
+        });
+    }
+
+    public void waitUntilClickable(final Button element) {
+        (new WebDriverWait(getDriver(), DEFAULT_TIMEOUT)).until(new ExpectedCondition<Boolean>() {
+            public Boolean apply(final WebDriver d) {
+                if (element == null) {
+                    return false;
+                } else {
+                    return element.getWrappedElement().isDisplayed() && element.getWrappedElement().isEnabled();
+                }
+            }
+        });
+    }
+
     public void waitUntilNotDisplayed(final By locator) {
         new WebDriverWait(getDriver(), DEFAULT_TIMEOUT).until(ExpectedConditions.invisibilityOfElementLocated(locator));
     }
@@ -138,6 +162,15 @@ public abstract class AbstractPage {
     public boolean isElementPresent(final WebElement element, final int timeout) {
         try {
             waitUntilDisplayed(element, timeout, false);
+            return true;
+        } catch (final TimeoutException e) {
+            return false;
+        }
+    }
+
+    public boolean isElementPresent(final WebElement element, final int timeout, boolean isLog) {
+        try {
+            waitUntilDisplayed(element, timeout, isLog);
             return true;
         } catch (final TimeoutException e) {
             return false;
@@ -252,8 +285,6 @@ public abstract class AbstractPage {
 
 
     public boolean waitForPageToLoadAndVerifyBy(final By pageIdentifier, int timeout) {
-        waitUntilScriptsReady();
-        sleep(500);
         final String pageName = this.getClass().getName().replace("staging.pages.", "");
         log.info("Waiting for " + pageName + " page to load");
         if (isElementPresent(pageIdentifier, timeout)) {

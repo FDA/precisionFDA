@@ -28,6 +28,7 @@ public class StartPage extends AbstractPage {
 
     public StartPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(StartLocators.START_LOGIN_LINK), 30);
     }
 

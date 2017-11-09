@@ -58,6 +58,7 @@ public class NotesSavedNotePage extends AbstractPage {
 
     public NotesSavedNotePage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(NotesLocators.NOTES_SAVED_NOTE_BODY_TEXT));
     }
 

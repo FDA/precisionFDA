@@ -69,7 +69,8 @@ public class FilesAddFilesPage extends AbstractPage {
     }
 
     public void browseFile(String filePath) {
-        getFilesBrowseFilesInput().sendKeys(filePath);
+        TextInput input = getFilesBrowseFilesInput();
+        input.sendKeys(filePath);
         waitUntilDisplayed(getFilesUploadAllButton());
     }
 

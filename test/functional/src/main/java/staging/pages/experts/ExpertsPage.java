@@ -101,12 +101,14 @@ public class ExpertsPage extends AbstractPage {
     }
 
     public boolean isCreatedExpertImageDisplayed(ExpertProfile expertProfile) {
-        return isElementPresent(getCreatedExpertImage(expertProfile.getExpertImage()));
+        return isElementPresent(getCreatedExpertImage(expertProfile.getExpertImage()), 10);
     }
 
     public ExpertsCreatedExpertPage openExpertPage(ExpertProfile expertProfile) {
         log.info("open expert page");
-        getCreatedExpertLink(expertProfile).click();
+        WebElement expert = getCreatedExpertLink(expertProfile);
+        waitUntilClickable(expert);
+        expert.click();
         return new ExpertsCreatedExpertPage(getDriver());
     }
 }
