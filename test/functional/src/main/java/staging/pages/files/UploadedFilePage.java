@@ -5,11 +5,15 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import staging.data.TestUserData;
 import staging.locators.FilesLocators;
+import staging.locators.NotesLocators;
+import staging.model.FilesProfile;
 import staging.model.User;
 import staging.pages.AbstractPage;
+import staging.pages.notes.NotesPage;
 
 import static staging.data.TestDict.getDictPrivate;
 
@@ -28,6 +32,12 @@ public class UploadedFilePage extends AbstractPage {
 
     @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_ACCESS_VALUE)
     private WebElement uploadedFileAccessValue;
+
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_DD)
+    private Button uploadedFileEditDD;
+
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_DELETE_ITEM)
+    private Link uploadedFileEditDeleteItem;
 
     User getTestUser() {
         return TestUserData.getTestUser();
@@ -60,6 +70,14 @@ public class UploadedFilePage extends AbstractPage {
 
     public String getUploadedFileAccessValueText() {
         return getUploadedFileAccessValueWE().getText();
+    }
+
+    public Button getUploadedFileEditDD() {
+        return uploadedFileEditDD;
+    }
+
+    public Link getUploadedFileEditDeleteItem() {
+        return uploadedFileEditDeleteItem;
     }
 
     public boolean isPageTitleCorrect(String fileName) {
@@ -110,6 +128,22 @@ public class UploadedFilePage extends AbstractPage {
             spentTimeSec = spentTimeSec + refreshStepSec;
             getDriver().navigate().refresh();
         }
+        return new UploadedFilePage(getDriver());
+    }
+
+    public FilesPage deleteFile() {
+        log.info("delete file");
+        getUploadedFileEditDD().click();
+        waitUntilDisplayed(By.xpath(FilesLocators.FILES_UPLOADED_FILE_EDIT_DELETE_ITEM));
+        getUploadedFileEditDeleteItem().click();
+        alertAccept(1, 100);
+        return new FilesPage(getDriver());
+    }
+
+    public UploadedFilePage updateDescription(String descr) {
+        log.info("update description");
+
+
         return new UploadedFilePage(getDriver());
     }
 

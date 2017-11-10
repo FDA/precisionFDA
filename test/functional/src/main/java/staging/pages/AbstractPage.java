@@ -224,7 +224,16 @@ public abstract class AbstractPage {
 
     public boolean isElementPresent(final TextInput element) {
         try {
-            waitUntilDisplayed(element.getWrappedElement(), DEFAULT_TIMEOUT, true);
+            waitUntilDisplayed(element.getWrappedElement(), DEFAULT_TIMEOUT, false);
+            return true;
+        } catch (final TimeoutException e) {
+            return false;
+        }
+    }
+
+    public boolean isElementPresent(final TextInput element, int timeout) {
+        try {
+            waitUntilDisplayed(element.getWrappedElement(), timeout, false);
             return true;
         } catch (final TimeoutException e) {
             return false;

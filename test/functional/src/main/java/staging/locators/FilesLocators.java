@@ -50,4 +50,14 @@ public class FilesLocators {
 
     public static final String FILES_BREADCRUMB_CHAIN = "//ol[@class='breadcrumb']/li";
 
+    public static final String FILES_UPLOADED_FILE_EDIT_DD = "//button[@id='dLabel']";
+
+    public static final String FILES_UPLOADED_FILE_EDIT_DELETE_ITEM = "//*[contains(@class, 'toolbar')]//a[@data-method='delete']";
+
+    public static final String FILES_FILTER_NAME_INPUT = "//input[@id='files_f_name']";
+
+    public static final String FILES_FILTER_ICON = "//*[@id='files_submit_grid_icon']";
+
+    public static final String FILES_COMMON_LINK = "//td/a[contains(@href, 'files')]";
+
 }

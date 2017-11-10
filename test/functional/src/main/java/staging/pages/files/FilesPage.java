@@ -44,12 +44,18 @@ public class FilesPage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_BREADCRUMBS)
     private WebElement breadcrumbs;
 
+    @FindBy(xpath = FilesLocators.FILES_FILTER_NAME_INPUT)
+    private TextInput filterNameInput;
+
+    @FindBy(xpath = FilesLocators.FILES_FILTER_ICON)
+    private WebElement filterIcon;
+
     public FilesPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_ADD_FILES_BUTTON_LINK));
         waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_CREATE_FOLDER_BUTTON));
-        sleep(5000);
+        sleep(1000);
     }
 
     public Link getFilesMyFilesLink() {
@@ -84,19 +90,36 @@ public class FilesPage extends AbstractPage {
         return createFolderFormCreateButton;
     }
 
+    public TextInput getFilterNameInput() {
+        return filterNameInput;
+    }
+
+    public WebElement getFilterIcon() {
+        return filterIcon;
+    }
+
     public WebElement getFilesCreateFolderButton() {
         return getDriver().findElement(By.xpath(FilesLocators.FILES_CREATE_FOLDER_BUTTON));
+    }
+
+    public boolean isBreadcrumbDisplayed() {
+        return isElementPresent(getBreadcrumbs(), 2);
     }
 
     public String getDisplayedBreadcrumbsText() {
         isElementPresent(getBreadcrumbs());
         List<WebElement> chains = getDriver().findElements(By.xpath(FilesLocators.FILES_BREADCRUMB_CHAIN));
         String br = "";
-        for (int i = 0; i <= chains.size() - 1; i ++) {
-            br = br + chains.get(i).getText();
-            if (i < chains.size() - 1) {
-                br = br + " / ";
+        if (!chains.isEmpty()) {
+            for (int i = 0; i <= chains.size() - 1; i ++) {
+                br = br + chains.get(i).getText();
+                if (i < chains.size() - 1) {
+                    br = br + " / ";
+                }
             }
+        }
+        else {
+            br = "breadcrumbs are not displayed";
         }
         return br;
     }
@@ -216,6 +239,53 @@ public class FilesPage extends AbstractPage {
 
     public String getSuccessMessageText() {
         return getSuccessAlertWE().getText();
+    }
+
+    public FilesPage filterByName(String name) {
+        log.info("filter by name");
+        getFilterNameInput().clear();
+        getFilterNameInput().sendKeys(name);
+        getFilterIcon().click();
+        waitUntilScriptsReady();
+        return new FilesPage(getDriver());
+    }
+
+    public boolean isCorrectSelectionByNameDisplayed(String name) {
+        boolean res = true;
+        List<WebElement> allLinks = getDriver().findElements(By.xpath(FilesLocators.FILES_COMMON_LINK));
+        if (!allLinks.isEmpty()) {
+            for (WebElement we : allLinks) {
+                if (!we.getText().toLowerCase().contains(name.toLowerCase())) {
+                    res = false;
+                    log.error("[" + we.getText() + "] does not contain [" + name + "]");
+                    break;
+                }
+            }
+        }
+        else {
+            res = false;
+            log.error("selection is empty");
+        }
+        return res;
+    }
+
+    public int getNumberOfDisplayedItems() {
+        List<WebElement> allLinks = getDriver().findElements(By.xpath(FilesLocators.FILES_COMMON_LINK));
+        return allLinks.size();
+    }
+
+    public FilesPage clickBreadcrumbMyFiles() {
+        log.info("click My Files in breadcrumbs");
+        List<WebElement> chains = getDriver().findElements(By.xpath(FilesLocators.FILES_BREADCRUMB_CHAIN));
+        chains.get(0).click();
+        return new FilesPage(getDriver());
+    }
+
+    public FilesPage clickBreadcrumbFirstLevel() {
+        log.info("click first level folder in breadcrumbs");
+        List<WebElement> chains = getDriver().findElements(By.xpath(FilesLocators.FILES_BREADCRUMB_CHAIN));
+        chains.get(1).click();
+        return new FilesPage(getDriver());
     }
 
 }

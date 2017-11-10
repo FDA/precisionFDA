@@ -14,6 +14,12 @@ public class TestDict {
 
     public static final String DICT_MY_FILES = "My files";
 
+    public static final String DICT_COMMON_FILTER_PHRASE = "filter";
+
+    public static final String DICT_1ST_FILTER_PHRASE = DICT_COMMON_FILTER_PHRASE + "#1";
+
+    public static final String DICT_2ND_FILTER_PHRASE = DICT_COMMON_FILTER_PHRASE + "#2";
+
     public static String getDictString() {
         return DICT_STRING;
     }
@@ -34,6 +40,18 @@ public class TestDict {
 
     public static String getDictMyFiles() {
         return DICT_MY_FILES;
+    }
+
+    public static String getDictFirstFilterPhrase() {
+        return DICT_1ST_FILTER_PHRASE;
+    }
+
+    public static String getDictSecondFilterPhrase() {
+        return DICT_2ND_FILTER_PHRASE;
+    }
+
+    public static String getDictCommonFilterPhrase() {
+        return DICT_COMMON_FILTER_PHRASE;
     }
 
 }

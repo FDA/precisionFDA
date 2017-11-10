@@ -4,6 +4,8 @@ public class FilesProfile {
 
     private String fileInRoot;
 
+    private String fileInRootDescription;
+
     private String fileInFirstLevelFolder;
 
     private String fileInSecondLevelFolder;
@@ -12,9 +14,10 @@ public class FilesProfile {
 
     private String secondLevelFolder;
 
-    public FilesProfile(final String fileInRootFolder, final String fileInFirstLevelFolder, final String fileInSecondLevelFolder,
-                        final String firstLevelFolder, final String secondLevelFolder) {
+    public FilesProfile(final String fileInRootFolder, final String fileInRootDescription, final String fileInFirstLevelFolder,
+                        final String fileInSecondLevelFolder, final String firstLevelFolder, final String secondLevelFolder) {
         this.fileInRoot = fileInRootFolder;
+        this.fileInRootDescription = fileInRootDescription;
         this.fileInFirstLevelFolder = fileInFirstLevelFolder;
         this.fileInSecondLevelFolder = fileInSecondLevelFolder;
         this.firstLevelFolder = firstLevelFolder;
@@ -23,6 +26,10 @@ public class FilesProfile {
 
     public String getFileInRoot() {
         return fileInRoot;
+    }
+
+    public String getFileInRootDescription() {
+        return fileInRootDescription;
     }
 
     public String getFileInFirstLevelFolder() {
@@ -39,6 +46,10 @@ public class FilesProfile {
 
     public String getSecondLevelFolder() {
         return secondLevelFolder;
+    }
+
+    public void setFileInRoot(String newName) {
+        this.fileInRoot = newName;
     }
 }
 

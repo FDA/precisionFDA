@@ -206,6 +206,10 @@ public class AppsEditAppPage extends AbstractPage {
         return getEditVMEnvInstanceDrop().getFirstSelectedOption().isDisplayed();
     }
 
+    public boolean isNewAppTitleInputDisplayed() {
+        return isElementPresent(getAppsNewAppTitleInput(), 2);
+    }
+
     public AppsSavedAppPage saveRevision(AppProfile appProfile) {
         log.info("save revision");
         getEditAppSaveRevisionButton().click();
