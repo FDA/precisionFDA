@@ -53,13 +53,6 @@ public abstract class AbstractTest {
         if (driver != null) {
             log.info("closing browser");
             try {
-                try {
-                    driver.switchTo().alert();
-                    alertAccept(1, 100);
-                }
-                catch (NoAlertPresentException Ex)
-                { //
-                }
                 DriverFactory.getInstance().removeDriver();
             }
             catch (WebDriverException e) {
@@ -70,13 +63,13 @@ public abstract class AbstractTest {
 
     @BeforeTest
     public void beforeTest() {
+        deleteTempFiles();
         createFolder(getDebugLogFolder());
         createFolder(getDebugLogFolderPath());
     }
 
     @AfterTest(alwaysRun = true)
     public void afterTest() {
-        deleteTempFiles();
         // moveLogFile("full.print");
         // moveLogFile("error.print");
         // Runtime.getRuntime().exec( "pkill -f firefox" ).waitFor();

@@ -122,6 +122,25 @@ public class OpenAllPagesTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
+    @Test(dependsOnMethods = { "successfulLogin" })
+    public void checkNotesNewNotePageCanBeOpen() {
+        printTestHeader("Test Case: check that New Note page can be open");
+
+        NotesPage notesPage = getCommonPage().openNotesPage();
+        NotesEditNotePage editNotePage = notesPage.openNewNote();
+
+        SoftAssert.assertThat(
+                editNotePage.isEditorDisplayed())
+                .as("New Note editor is displayed")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                getPageTitle())
+                .as("Page Title")
+                .contains(PageTitles.PAGE_TITLE_EDIT_NOTE);
+
+        SoftAssert.assertAll();
+    }
 
     @Test(dependsOnMethods = { "successfulLogin" })
     public void checkAppsPageCanBeOpen() {
@@ -307,6 +326,27 @@ public class OpenAllPagesTest extends AbstractTest {
                 getPageTitle())
                 .as("Page Title")
                 .contains(PageTitles.PAGE_TITLE_ADD_ASSETS);
+
+        SoftAssert.assertAll();
+    }
+
+    // disabled because of confirmation popup; checked via AppsTests suite
+    @Test(dependsOnMethods = { "successfulLogin" }, enabled = false)
+    public void checkAppsCreateAppPageCanBeOpen() {
+        printTestHeader("Test Case: check that Create App page can be open");
+
+        AppsPage appsPage = getCommonPage().openAppsPage();
+        AppsEditAppPage editAppPage = appsPage.openCreateAppPage();
+
+        SoftAssert.assertThat(
+                editAppPage.isNewAppTitleInputDisplayed())
+                .as("Title input is displayed")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                getPageTitle())
+                .as("Page Title")
+                .contains(PageTitles.PAGE_TITLE_APPS_CREATE_NEW);
 
         SoftAssert.assertAll();
     }

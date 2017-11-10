@@ -11,8 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-import static staging.data.TestDict.getDictMyFiles;
-import static staging.data.TestDict.getTrueResult;
+import static staging.data.TestDict.*;
 import static staging.data.TestFilesData.getTestPngTemplateFileName;
 import static staging.data.TestFilesData.getTestTextTemplateFileName;
 
@@ -158,20 +157,30 @@ public class Utils {
 
     public static String getGeneratedTestFileName(String type) {
         final Logger log = Logger.getLogger("");
-        String commonPart = getRunTimeLocalUniqueValue();
+        String runTime = getRunTimeLocalUniqueValue();
         String testFilesPath = System.getProperty("user.dir") + SettingsProperties.getProperty("pathToTestFiles");
         String tempFilesPath = System.getProperty("user.dir") + SettingsProperties.getProperty("pathToTempFiles");
-        String newFileName = commonPart;
+        String newFileName = runTime;
         String templateFileName = "";
 
         if (type.equals("txt")) {
-            newFileName = "textFile_" + commonPart + ".txt";
+            newFileName = "text_file_" + runTime + ".txt";
             templateFileName = getTestTextTemplateFileName();
         }
 
         if (type.equals("png")) {
-            newFileName = "pngFile_" + commonPart + ".png";
+            newFileName = "png_file_" + runTime + ".png";
             templateFileName = getTestPngTemplateFileName();
+        }
+
+        if (type.equals("filterPhrase#1")) {
+            newFileName = "png_" + getDictFirstFilterPhrase() + "_" + runTime + ".png";
+            templateFileName = getTestPngTemplateFileName();
+        }
+
+        if (type.equals("filterPhrase#2")) {
+            newFileName = "txt_" + getDictSecondFilterPhrase() + "_" + runTime + ".txt";
+            templateFileName = getTestTextTemplateFileName();
         }
 
         InputStream oInStream = null;
@@ -272,5 +281,14 @@ public class Utils {
     public static String generateTestPngFileName() {
         return getGeneratedTestFileName("png");
     }
+
+    public static String generateFirstFilterFileName() {
+        return getGeneratedTestFileName("filterPhrase#1");
+    }
+
+    public static String generateSecondFilterFileName() {
+        return getGeneratedTestFileName("filterPhrase#2");
+    }
+
 
 }
