@@ -75,7 +75,7 @@ class EditSubmissionModel
 #
 #########################################################
 
-NotesController = Paloma.controller('Submissions',
+ChallengeController = Paloma.controller('Submissions',
   edit: ->
     $container = $("body main")
 

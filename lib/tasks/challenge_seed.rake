@@ -3,6 +3,15 @@ require 'csv'
 # rake challenge:seed_truth[...path_to_output_csv.../challenge2-full-output.csv]
 desc "Starting seed for Truth Challenge Results"
 namespace :challenge do
+
+  task :create_bot_user, [:path] => :environment do
+    User.create(
+      dxuser: CHALLENGE_BOT_DX_USER,
+      private_files_project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
+      public_files_project: CHALLENGE_BOT_PUBLIC_FILES_PROJECT
+    )
+  end
+
   task :seed_truth, [:path] => :environment do |task, args|
     TruthChallengeResult.transaction do
       TruthChallengeResult.delete_all

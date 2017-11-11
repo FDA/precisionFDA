@@ -10,6 +10,7 @@
 # Read Sprockets README (https:#github.com/rails/sprockets#sprockets-directives) for details
 # about supported directives.
 #
+#= require content-tools.min
 #= require polyfills
 #= require vendor
 #= require cookies-js

@@ -1,0 +1,46 @@
+/* Alignment styles for images, videos and iframes in editable regions
+@import "_common"
+
+.author
+  font-style: italic
+  font-weight: bold
+
+.ct-ignition
+  left: 100px
+
+.ct-ignition__button--edit
+  position: relative
+  top: 150px
+
+/* TODO: Fix ME 
+.ct-ignition__button--confirm,
+.ct-ignition__button--cancel,
+.ct-ignition__button--busy
+  position: relative
+  top: 150px
+
+[data-editable], .content_tools
+  iframe, image, [data-ce-tag=img], img, video
+    clear: both
+    display: block
+    margin-left: auto
+    margin-right: auto
+    max-width: 100%
+  .align-left
+    clear: initial
+    float: left
+    margin-right: 0.5em
+  .align-right
+    clear: initial
+    float: right
+    margin-left: 0.5em
+  .bold
+    font-weight: bold
+  .italic
+    font-style: italic
+  .text-center
+    text-align: center
+  .text-left
+    text-align: left
+  .text-right
+    text-align: right
