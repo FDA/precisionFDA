@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170921133121) do
+ActiveRecord::Schema.define(version: 20171006115436) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id"
@@ -118,6 +118,20 @@ ActiveRecord::Schema.define(version: 20170921133121) do
   add_index "attachments", ["item_type", "item_id"], name: "index_attachments_on_item_type_and_item_id"
   add_index "attachments", ["note_id"], name: "index_attachments_on_note_id"
 
+  create_table "challenge_resources", force: :cascade do |t|
+    t.integer  "challenge_id"
+    t.integer  "user_file_id"
+    t.integer  "user_id"
+    t.text     "url"
+    t.text     "meta"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "challenge_resources", ["challenge_id"], name: "index_challenge_resources_on_challenge_id"
+  add_index "challenge_resources", ["user_file_id"], name: "index_challenge_resources_on_user_file_id"
+  add_index "challenge_resources", ["user_id"], name: "index_challenge_resources_on_user_id"
+
   create_table "challenges", force: :cascade do |t|
     t.string   "name"
     t.integer  "admin_id"
@@ -127,13 +141,16 @@ ActiveRecord::Schema.define(version: 20170921133121) do
     t.text     "meta"
     t.datetime "start_at"
     t.datetime "end_at"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
+    t.string   "status"
+    t.string   "card_image_url"
   end
 
   add_index "challenges", ["admin_id"], name: "index_challenges_on_admin_id"
   add_index "challenges", ["app_id"], name: "index_challenges_on_app_id"
   add_index "challenges", ["app_owner_id"], name: "index_challenges_on_app_owner_id"
+  add_index "challenges", ["status"], name: "index_challenges_on_status"
 
   create_table "comments", force: :cascade do |t|
     t.integer  "commentable_id"
@@ -490,7 +507,6 @@ ActiveRecord::Schema.define(version: 20170921133121) do
     t.text    "meta"
   end
 
-  add_index "truth_challenge_results", ["answer_id"], name: "index_truth_challenge_results_on_answer_id"
   add_index "truth_challenge_results", ["entry"], name: "index_truth_challenge_results_on_entry"
   add_index "truth_challenge_results", ["fp_al"], name: "index_truth_challenge_results_on_fp_al"
   add_index "truth_challenge_results", ["fp_gt"], name: "index_truth_challenge_results_on_fp_gt"

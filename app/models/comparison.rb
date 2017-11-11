@@ -95,11 +95,11 @@ class Comparison < ActiveRecord::Base
     update_attributes(name: new_name, description: description)
   end
 
-  def self.publication_project!(context, scope)
+  def self.publication_project!(user, scope)
     if scope == "public"
-      context.user.public_comparisons_project
+      user.public_comparisons_project
     else
-      Space.from_scope(scope).project_for_context!(context)
+      Space.from_scope(scope).project_for_user!(user)
     end
   end
 

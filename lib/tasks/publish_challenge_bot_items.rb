@@ -8,7 +8,8 @@ Job.transaction do
   raise unless App.find_by!(dxid: "app-F5PBGj80846j3gBg0pz6VVG3").app_series.scope == "public"
   raise unless App.find_by!(dxid: "app-F5PBGj80846j3gBg0pz6VVG3").scope == "public"
 
-  jobs = Job.where(user: CHALLENGE_BOT_USER_ID, state: "done").where.not(scope: "public")
+  challenge_bot = User.challenge_bot
+  jobs = challenge_bot.jobs.where(state: "done").where.not(scope: "public")
   jobs_ids = jobs.ids
   jobs_count = jobs.count
   # Jobs
@@ -22,10 +23,10 @@ Job.transaction do
     end
   end
   raise unless jobs_published == jobs_count
-  raise unless Job.where(user: CHALLENGE_BOT_USER_ID, state: "done").where.not(scope: "public").count == 0
+  raise unless challenge_bot.jobs.where(state: "done").where.not(scope: "public").count == 0
 
   # Files
-  files = UserFile.where(user: CHALLENGE_BOT_USER_ID, parent_type: "Job", parent_id: jobs_ids).where.not(scope: "public")
+  files = challenge_bot.user_files.where(parent_type: "Job", parent_id: jobs_ids).where.not(scope: "public")
   files_published = 0
   files_count = files.count
 
@@ -58,5 +59,5 @@ Job.transaction do
 
   raise unless files_published == files_count
   # check public files owned by challenge bot match count of public files output by challenge bot jobs
-  raise unless UserFile.where(user: CHALLENGE_BOT_USER_ID, scope: "public").count == Job.where(user: CHALLENGE_BOT_USER_ID, scope: "public").map{|j| j.output_files.count}.sum
+  raise unless challenge_bot.user_files.where(scope: "public").count == challenge_bot.jobs.where(scope: "public").map{|j| j.output_files.count}.sum
 end

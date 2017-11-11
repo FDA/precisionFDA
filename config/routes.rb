@@ -58,6 +58,8 @@ Rails.application.routes.draw do
     post '/api/unfollow', to: 'api#unfollow'
     post '/api/update_submission', to: 'api#update_submission'
     post '/api/update_time_zone', to: 'api#update_time_zone'
+    post '/api/create_challenge_resource', to: 'api#create_challenge_resource'
+    post '/api/create_resource_link', to: 'api#create_resource_link'
 
     # FHIR
     scope '/fhir' do
@@ -130,11 +132,17 @@ Rails.application.routes.draw do
       get 'truth(/:tab)', on: :collection, action: :truth, as: 'truth'
       get 'join', on: :member
       get 'view(/:tab)', on: :member, action: :show, as: 'show'
+      get 'editor(/:tab)', on: :member, action: :edit_page, as: 'edit_page'
+      post 'editor/save_page', on: :member, action: :save_page, as: 'save_page'
+      resources :challenge_resources, only: [:new, :create, :destroy] do
+        post 'rename', on: :member
+      end
       resources :submissions, only: [:new, :create, :edit] do
         post 'publish', on: :collection, action: :publish
         get 'log', on: :member
       end
       post 'assign_app', on: :member
+      post 'announce_result', on: :member
     end
 
     resources :discussions, constraints: {answer_id: /[^\/]+/ } do

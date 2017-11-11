@@ -59,6 +59,8 @@ class UserFile < ActiveRecord::Base
   has_one :license, {through: :licensed_item}
   has_many :accepted_licenses, {through: :license}
 
+  has_many :challenge_resources
+
   acts_as_commentable
   acts_as_taggable
   acts_as_votable
@@ -111,13 +113,13 @@ class UserFile < ActiveRecord::Base
     return where(state: 'closed')
   end
 
-  def self.publication_project!(context, scope)
+  def self.publication_project!(user, scope)
     # This is a class method for independent files.
     # For comparison files, use Comparison.publication_project!
     if scope == "public"
-      context.user.public_files_project
+      user.public_files_project
     else
-      Space.from_scope(scope).project_for_context!(context)
+      Space.from_scope(scope).project_for_user!(user)
     end
   end
 
@@ -174,17 +176,17 @@ class UserFile < ActiveRecord::Base
     end
   end
 
-  def passes_consistency_check?(context)
+  def passes_consistency_check?(user)
     if private?
       if independent?
-        return project == context.user.private_files_project
+        return project == user.private_files_project
       else
-        return project == context.user.private_comparisons_project
+        return project == user.private_comparisons_project
       end
     elsif public?
-      return project == context.user.public_files_project
+      return project == user.public_files_project
     else
-      return project == space_object.project_for_context!(context)
+      return project == space_object.project_for_user!(user)
     end
   end
 
@@ -193,7 +195,7 @@ class UserFile < ActiveRecord::Base
       return false
     else
       raise unless context.user_id.present? && context.user.present?
-      return user_id == CHALLENGE_BOT_USER_ID && context.user.is_challenge_evaluator?
+      return user_id == User.challenge_bot.id && context.user.is_challenge_evaluator?
     end
   end
 
@@ -203,41 +205,13 @@ class UserFile < ActiveRecord::Base
     else
       raise unless context.user_id.present? && context.user.present?
       # get the output file ids from all submission-based jobs that successfully completed
-      where(user_id: CHALLENGE_BOT_USER_ID).where(parent_type: "Job").where(state: "closed")
+      where(user_id: User.challenge_bot.id).where(parent_type: "Job").where(state: "closed")
     end
   end
 
   def self.publish(files, context, scope)
-    # Ensure API availability
-    api = DNAnexusAPI.new(context.token)
-    api.call("system", "greet")
-
-    count = 0
-
-    destination_project = UserFile.publication_project!(context, scope)
-
-    projects = {}
-    files.uniq.each do |file|
-      next unless file.publishable_by?(context, scope)
-      raise "Consistency check failure for file #{file.id} (#{file.dxid})" unless file.passes_consistency_check?(context)
-      raise "Source and destination collision for file #{file.id} (#{file.dxid})" if destination_project == file.project
-      projects[file.project] = [] unless projects.has_key?(file.project)
-      projects[file.project].push(file)
-    end
-
-    projects.each do |project, project_files|
-      api.call(project, "clone", {objects: project_files.map(&:dxid), project: destination_project})
-      UserFile.transaction do
-        project_files.each do |file|
-          file.reload
-          raise "Race condition for file #{file.id} (#{file.dxid})" unless file.publishable_by?(context, scope)
-          file.update!(scope: scope, project: destination_project)
-          count += 1
-        end
-      end
-      api.call(project, "removeObjects", {objects: project_files.map(&:dxid)})
-    end
-
-    return count
+    file_publisher = FilePublisher.by_context(context)
+    file_publisher.publish(files, scope)
   end
+
 end
