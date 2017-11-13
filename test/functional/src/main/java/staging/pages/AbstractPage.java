@@ -10,6 +10,7 @@ import ru.yandex.qatools.htmlelements.element.Select;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import ru.yandex.qatools.htmlelements.loader.HtmlElementLoader;
 
+import java.io.File;
 import java.util.List;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -371,6 +372,24 @@ public abstract class AbstractPage {
         }
     }
 
+    public void waitUntilFileIsDownloaded(String filePath) {
+        int timeoutSec = 15;
+        int refreshStepSec = 1;
+        int spentTimeSec = 0;
+
+        File file = new File(filePath);
+
+        log.info("waiting for " + timeoutSec + " sec until file is downloaded");
+        while ( !file.exists() && (spentTimeSec < timeoutSec) ) {
+            sleep(refreshStepSec*1000);
+            spentTimeSec = spentTimeSec + refreshStepSec;
+            log.info("it's been " + spentTimeSec + " seconds");
+        }
+        if (!file.exists()) {
+            log.info("[WARNING] the file was not downloaded after " + timeoutSec + " seconds");
+        }
+    }
+
     // ------ frames -------
 
     public void switchToFrame(final WebElement frame) {
@@ -429,6 +448,12 @@ public abstract class AbstractPage {
         if (alert != null) {
             alert.accept();
         }
+    }
+
+    //-------- common actions ---------
+
+    public CommonPage getCommonPage() {
+        return new CommonPage(getDriver());
     }
 
 }

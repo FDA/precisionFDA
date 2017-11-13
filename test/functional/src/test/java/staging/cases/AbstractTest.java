@@ -12,14 +12,16 @@ import org.openqa.selenium.support.ui.Wait;
 import org.testng.annotations.*;
 import staging.model.User;
 import staging.pages.CommonPage;
-import staging.pages.login.LoginPage;
+import staging.pages.login.LoginPrecisionPage;
+import staging.pages.overview.OverviewPage;
+import staging.pages.staging.LoginStagingPage;
+import staging.pages.staging.MainStagingPage;
 import staging.utils.SettingsProperties;
 import staging.utils.Utils;
 import tools.CustomResultListener;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -166,19 +168,36 @@ public abstract class AbstractTest {
         return title;
     }
 
-    public LoginPage openLoginPage(User user) {
-        log.info("open Login page");
+    public OverviewPage openOverviewPage() {
+        log.info("open Overview page");
+        String url = SettingsProperties.getProperty("precisionFdaURL");
+        driver.get(url);
+        return new OverviewPage(driver);
+    }
 
-        String loginPageURL = SettingsProperties.getProperty("loginPageURL");
+    public LoginPrecisionPage openLoginPrecisionPage(User user) {
+        log.info("open Precision FDA Login page");
+
+        String loginPageURL = SettingsProperties.getProperty("loginPrecisionPageURL");
         driver.manage().deleteAllCookies();
-        Set<Cookie> allCookies = driver.manage().getCookies();
-        for (Cookie cookie : allCookies) {
-            driver.manage().deleteCookieNamed(cookie.getName());
-        }
         loginPageURL = loginPageURL.replace("{basicAuthUser}", user.getBasicAuthUsername())
                 .replace("{basicAuthPassword}", user.getBasicAuthPassword());
         driver.get(loginPageURL);
-        return new LoginPage(driver);
+        return new LoginPrecisionPage(driver);
+    }
+
+    public LoginStagingPage logoutFromAll() {
+        log.info("total logout from Staging");
+        MainStagingPage mainStagingPage = openStaging();
+        LoginStagingPage loginStagingPage = mainStagingPage.logout();
+        return loginStagingPage;
+    }
+
+    public MainStagingPage openStaging() {
+        log.info("open Staging");
+        String stagingURL = SettingsProperties.getProperty("stagingURL");
+        driver.get(stagingURL);
+        return new MainStagingPage(driver);
     }
 
     public CommonPage getCommonPage() {
@@ -202,6 +221,17 @@ public abstract class AbstractTest {
         } catch (final InterruptedException e) {
             //
         }
+    }
+
+    public boolean isDockerFileDownloaded() {
+        boolean isDownloaded = false;
+        String downloadsPath = getPathToDownloadsFolder();
+        String fileName = getDockerFileName();
+        File file = new File(downloadsPath + fileName);
+        if (file.exists()) {
+            isDownloaded = true;
+        }
+        return isDownloaded;
     }
 
     // ----- DriverFactory -----
@@ -243,7 +273,17 @@ public abstract class AbstractTest {
             System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
 
             FirefoxOptions firefoxOptions = new FirefoxOptions();
+
             firefoxOptions.setBinary(firefoxBinary);
+            firefoxOptions.addPreference("browser.download.folderList", 2);
+            firefoxOptions.addPreference("browser.download.manager.showWhenStarting", false);
+            firefoxOptions.addPreference("browser.download.dir", getPathToDownloadsFolder());
+            firefoxOptions.addPreference("browser.helperApps.neverAsk.saveToDisk", "text/plain");
+            firefoxOptions.addPreference("browser.download.manager.focusWhenStarting", false);
+            firefoxOptions.addPreference("browser.download.manager.useWindow", false);
+            firefoxOptions.addPreference("browser.download.manager.showAlertOnComplete", false);
+            firefoxOptions.addPreference("browser.download.manager.closeWhenDone", false);
+
             WebDriver initDriver = new FirefoxDriver(firefoxOptions);
             initDriver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
             return initDriver;

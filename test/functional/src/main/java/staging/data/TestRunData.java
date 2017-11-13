@@ -2,35 +2,39 @@ package staging.data;
 
 import staging.utils.SettingsProperties;
 
+import java.io.File;
+
 import static staging.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class TestRunData {
 
-    public static String finishedCaseStatus;
+    static String finishedCaseStatus;
 
-    public static String finishedCaseName;
+    static String finishedCaseName;
 
-    public static String runSuiteName;
+    static String runSuiteName;
 
-    public static String currentTimezone = "GMT";
+    static String currentTimezone = "GMT";
 
-    public static final String filePathUniqueValue = generateFilePathUniqueValue();
+    static final String filePathUniqueValue = generateFilePathUniqueValue();
 
-    public static final String testRunUniqueFinalValue = generateTestRunUniqueValue();
+    static final String testRunUniqueFinalValue = generateTestRunUniqueValue();
 
-    public static final String INPUT_NAME_FIELD_NAME = "input_name_";
+    static final String INPUT_NAME_FIELD_NAME = "input_name_";
 
-    public static final String INPUT_LABEL_FIELD_NAME = "input_label_";
+    static final String INPUT_LABEL_FIELD_NAME = "input_label_";
 
-    public static final String INPUT_HELP_FIELD_NAME = "input_help_";
+    static final String INPUT_HELP_FIELD_NAME = "input_help_";
 
-    public static final String INPUT_DEFAULT_FIELD_NAME = "input_default_";
+    static final String INPUT_DEFAULT_FIELD_NAME = "input_default_";
 
-    public static final String OUTPUT_NAME_FIELD_NAME = "output_name_";
+    static final String OUTPUT_NAME_FIELD_NAME = "output_name_";
 
-    public static final String OUTPUT_LABEL_FIELD_NAME = "output_label_";
+    static final String OUTPUT_LABEL_FIELD_NAME = "output_label_";
 
-    public static final String OUTPUT_HELP_FIELD_NAME = "output_help_";
+    static final String OUTPUT_HELP_FIELD_NAME = "output_help_";
+
+    static final String DOCKER_FILE_NAME = "Dockerfile";
 
     public static String getCurrentTimezone() {
         return currentTimezone;
@@ -130,4 +134,12 @@ public class TestRunData {
         return OUTPUT_HELP_FIELD_NAME;
     }
 
+    public static String getDockerFileName() {
+        return DOCKER_FILE_NAME;
+    }
+
+    public static String getPathToDownloadsFolder() {
+        String downloadsPath = System.getProperty("user.home") + "/Downloads/";
+        return downloadsPath;
+    }
 }

@@ -2,7 +2,7 @@
 <suite name="Files suite">
     <test name="Files suite">
         <classes>
-            <class name="staging.cases.FilesTest"/>
+            <class asdfsdfasdfname="staging.cases.FilesTest"/>
         </classes>
     </test>
 </suite>

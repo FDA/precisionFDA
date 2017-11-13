@@ -11,6 +11,19 @@ import staging.locators.CommonLocators;
 import staging.locators.OverviewLocators;
 import staging.pages.AbstractPage;
 import staging.pages.StartPage;
+import staging.pages.about.AboutHowPage;
+import staging.pages.about.AboutPage;
+import staging.pages.apps.AppsPage;
+import staging.pages.challs.ChallsPage;
+import staging.pages.comps.CompsPage;
+import staging.pages.discs.DiscsPage;
+import staging.pages.experts.ExpertsPage;
+import staging.pages.files.FilesPage;
+import staging.pages.guidelines.GuidelinesPage;
+import staging.pages.licenses.LicensesPage;
+import staging.pages.notes.NotesPage;
+import staging.pages.profile.ProfilePage;
+import staging.pages.profile.PublicProfilePage;
 
 public class OverviewPage extends AbstractPage {
 
@@ -72,6 +85,58 @@ public class OverviewPage extends AbstractPage {
         openProfileDropdown();
         getProfileDropBlock().logout();
         return new StartPage(getDriver());
+    }
+
+    public NotesPage openNotesPage() {
+        return getCommonPage().openNotesPage();
+    }
+
+    public AppsPage openAppsPage() {
+        return getCommonPage().openAppsPage();
+    }
+
+    public CompsPage openCompsPage() {
+        return getCommonPage().openCompsPage();
+    }
+
+    public FilesPage openFilesPage() {
+        return getCommonPage().openFilesPage();
+    }
+
+    public ExpertsPage openExpertsPage() {
+        return getCommonPage().openExpertsPage();
+    }
+
+    public ChallsPage openChallsPage() {
+        return getCommonPage().openChallsPage();
+    }
+
+    public DiscsPage openDiscsPage() {
+        return getCommonPage().openDiscsPage();
+    }
+
+    public ProfilePage openProfilePage() {
+        return getCommonPage().openProfilePage();
+    }
+
+    public PublicProfilePage openPublicProfilePage() {
+        return getCommonPage().openPublicProfilePage();
+    }
+
+    public LicensesPage openLicensePage() {
+        return getCommonPage().openLicensePage();
+    }
+
+    public AboutPage openAboutPage() {
+        return getCommonPage().openAboutPage();
+    }
+
+    public GuidelinesPage openGuidelinesPage() {
+        return getCommonPage().openGuidelinesPage();
+    }
+
+    public AboutHowPage openDocsPage() {
+        return getCommonPage().openDocsPage();
     }
 
 }

@@ -7,19 +7,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import staging.data.TestUserData;
 import staging.model.User;
 import staging.pages.StartPage;
-import staging.pages.login.LoginPage;
+import staging.pages.login.LoginPrecisionPage;
 import staging.pages.overview.OverviewPage;
 
 @Name("Login test suite")
 public class LoginTest extends AbstractTest {
 
     @Test
-    public void successfulLoginLogout() {
-        printTestHeader("Test Case: Successful Login and logout");
+    public void successfulLoginLogoutPrecisionFDA() {
+        printTestHeader("Test Case: Successful Login to Precision FDA and logout");
 
         User user = TestUserData.getTestUser();
 
-        OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
+        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
         assertThat(
                 overviewPage.isNavigationPanelDisplayed())
@@ -52,15 +52,15 @@ public class LoginTest extends AbstractTest {
 
         User user = TestUserData.getWrongUser();
 
-        LoginPage loginPage = openLoginPage(user).wrongLogin(user);
+        LoginPrecisionPage loginPrecisionPage = openLoginPrecisionPage(user).wrongLogin(user);
 
         SoftAssert.assertThat(
-                loginPage.isNavigationPanelDisplayed())
+                loginPrecisionPage.isNavigationPanelDisplayed())
                 .as("Top Navigation Panel is displayed")
                 .isFalse();
 
         SoftAssert.assertThat(
-                loginPage.getLoginWrongCredsMessageText())
+                loginPrecisionPage.getLoginWrongCredsMessageText())
                 .as("error message")
                 .contains("Invalid username or password");
 

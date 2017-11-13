@@ -1,6 +1,6 @@
 package staging.locators;
 
-public class LoginLocators {
+public class LoginPrecisionLocators {
 
     public static final String LOGIN_LOGIN_FORM = "//div[contains(@class, 'login')]//form[contains(@class, 'login')]";
 

@@ -27,7 +27,7 @@ public class NotesTest extends AbstractTest {
         printTestHeader(" -- Login -- ");
 
         User user = TestUserData.getTestUser();
-        OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
+        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(
                 overviewPage.isNavigationPanelDisplayed())

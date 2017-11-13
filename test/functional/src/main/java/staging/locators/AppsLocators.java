@@ -174,4 +174,8 @@ public class AppsLocators {
 
     public static final String APPS_JOB_RUN_OUTPUT_RESULT = "//table[contains(@class, 'output')]//td[contains(@class, 'job-io-value')]";
 
+    public static final String APPS_SAVED_EXPORT_BUTTON = "//button/span[contains(@class, 'cloud-download')]/..";
+
+    public static final String APPS_SAVED_EXPORT_DOCKER_LINK = "//a[contains(text(), 'Docker Container')]";
+
 }
