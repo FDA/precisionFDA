@@ -26,7 +26,7 @@ public class FilesTest extends AbstractTest {
 
         User user = TestUserData.getTestUser();
 
-        OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
+        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(
                 overviewPage.isNavigationPanelDisplayed())
@@ -413,13 +413,7 @@ public class FilesTest extends AbstractTest {
                 .isTrue();
 
         UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(filesProfile.getFileInRoot());
-        uploadedFilePage = uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
-        // filesPage = uploadedFilePage.updateDescription(filesProfile.getFileInRootDescription());
-
-        assertThat(
-                filesPage.isLinkToUploadedFileDisplayed(filesProfile.getFileInRoot()))
-                .as("Link to uploaded file is NOT displayed inside root directory")
-                .isFalse();
+        // TBD
     }
 
 }

@@ -28,7 +28,7 @@ public class OpenAllPagesTest extends AbstractTest {
         printTestHeader("Test Case: Successful Login");
 
         User user = TestUserData.getTestUser();
-        OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
+        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(
                 overviewPage.isNavigationPanelDisplayed())
@@ -46,8 +46,8 @@ public class OpenAllPagesTest extends AbstractTest {
     @Test(dependsOnMethods = { "successfulLogin" })
     public void checkNotesPageCanBeOpen() {
         printTestHeader("Test Case: check that Notes page can be open");
-
-        NotesPage notesPage = getCommonPage().openNotesPage();
+        
+        NotesPage notesPage = openOverviewPage().openNotesPage();
 
         SoftAssert.assertThat(
                 notesPage.isMyNotesLinkDisplayed())
@@ -66,7 +66,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkNotesMyNotesPageCanBeOpen() {
         printTestHeader("Test Case: check that Notes.MyNotes page can be open");
 
-        NotesPage notesPage = getCommonPage().openNotesPage();
+        NotesPage notesPage = openOverviewPage().openNotesPage();
         NotesMyNotesPage notesMyNotesPage = notesPage.openNotesMyNotesPage();
 
         SoftAssert.assertThat(
@@ -86,7 +86,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkNotesFeaturedPageCanBeOpen() {
         printTestHeader("Test Case: check that Notes.Featured page can be open");
 
-        NotesPage notesPage = getCommonPage().openNotesPage();
+        NotesPage notesPage = openOverviewPage().openNotesPage();
         NotesFeaturedPage notesFeaturedPage = notesPage.openNotesFeaturedPage();
 
         SoftAssert.assertThat(
@@ -106,7 +106,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkNotesExplorePageCanBeOpen() {
         printTestHeader("Test Case: check that Notes.Explore page can be open");
 
-        NotesPage notesPage = getCommonPage().openNotesPage();
+        NotesPage notesPage = openOverviewPage().openNotesPage();
         NotesExplorePage notesExplorePage = notesPage.openNotesExplorePage();
 
         SoftAssert.assertThat(
@@ -126,7 +126,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkNotesNewNotePageCanBeOpen() {
         printTestHeader("Test Case: check that New Note page can be open");
 
-        NotesPage notesPage = getCommonPage().openNotesPage();
+        NotesPage notesPage = openOverviewPage().openNotesPage();
         NotesEditNotePage editNotePage = notesPage.openNewNote();
 
         SoftAssert.assertThat(
@@ -146,7 +146,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsPageCanBeOpen() {
         printTestHeader("Test Case: check that Apps page can be open");
 
-        AppsPage appsPage = getCommonPage().openAppsPage();
+        AppsPage appsPage = openOverviewPage().openAppsPage();
 
         SoftAssert.assertThat(
                 appsPage.isRelevantAppsLinkDisplayed())
@@ -165,7 +165,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsRelevantPageCanBeOpen() {
         printTestHeader("Test Case: check that Apps.Relevant page can be open");
 
-        AppsPage appsPage = getCommonPage().openAppsPage();
+        AppsPage appsPage = openOverviewPage().openAppsPage();
         AppsRelevantPage appsRelevantPage = appsPage.openAppsRelevantPage();
 
         SoftAssert.assertThat(
@@ -190,7 +190,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsFeaturedPageCanBeOpen() {
         printTestHeader("Test Case: check that Apps.Featured page can be open");
 
-        AppsPage appsPage = getCommonPage().openAppsPage();
+        AppsPage appsPage = openOverviewPage().openAppsPage();
         AppsFeaturedPage appsFeaturedPage = appsPage.openAppsFeaturedPage();
 
         SoftAssert.assertThat(
@@ -210,7 +210,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsExplorePageCanBeOpen() {
         printTestHeader("Test Case: check that Apps.Explore page can be open");
 
-        AppsPage appsPage = getCommonPage().openAppsPage();
+        AppsPage appsPage = openOverviewPage().openAppsPage();
         AppsExplorePage appsExplorePage = appsPage.openAppsExplorePage();
 
         SoftAssert.assertThat(
@@ -230,7 +230,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsManageAssetsPageCanBeOpen() {
             printTestHeader("Test Case: check that Apps.ManageAssets page can be open");
 
-        AppsPage appsPage = getCommonPage().openAppsPage();
+        AppsPage appsPage = openOverviewPage().openAppsPage();
         AppsManageAssetsPage appsManageAssetsPage = appsPage.openAppsManageAssetsPage();
 
         SoftAssert.assertThat(
@@ -250,7 +250,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsManageMyAssetsPageCanBeOpen() {
         printTestHeader("Test Case: check that Apps.Manage.MyAssets page can be open");
 
-        AppsPage appsPage = getCommonPage().openAppsPage();
+        AppsPage appsPage = openOverviewPage().openAppsPage();
         AppsManageAssetsPage appsManageAssetsPage = appsPage.openAppsManageAssetsPage();
         AppsManageMyAssetsPage appsManageMyAssetsPage = appsManageAssetsPage.openMyAssetsPage();
 
@@ -271,7 +271,7 @@ public class OpenAllPagesTest extends AbstractTest {
         public void checkAppsManageFeaturedPageCanBeOpen() {
         printTestHeader("Test Case: check that Apps.Manage.Featured page can be open");
 
-        AppsPage appsPage = getCommonPage().openAppsPage();
+        AppsPage appsPage = openOverviewPage().openAppsPage();
         AppsManageAssetsPage appsManageAssetsPage = appsPage.openAppsManageAssetsPage();
         AppsManageFeaturedPage appsManageFeaturedPage = appsManageAssetsPage.openFeaturedPage();
 
@@ -292,7 +292,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsManageExplorePageCanBeOpen() {
         printTestHeader("Test Case: check that Apps.Manage.Explore page can be open");
 
-        AppsPage appsPage = getCommonPage().openAppsPage();
+        AppsPage appsPage = openOverviewPage().openAppsPage();
         AppsManageAssetsPage appsManageAssetsPage = appsPage.openAppsManageAssetsPage();
         AppsManageExplorePage appsManageExplorePage = appsManageAssetsPage.openExplorePage();
 
@@ -313,7 +313,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsManageCreateAssetsPageCanBeOpen() {
         printTestHeader("Test Case: check that Apps.Manage.CreateAssets page can be open");
 
-        AppsPage appsPage = getCommonPage().openAppsPage();
+        AppsPage appsPage = openOverviewPage().openAppsPage();
         AppsManageAssetsPage appsManageAssetsPage = appsPage.openAppsManageAssetsPage();
         AppsManageCreateAssetsPage appsManageCreateAssetsPage = appsManageAssetsPage.openCreateAssetsPage();
 
@@ -335,7 +335,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAppsCreateAppPageCanBeOpen() {
         printTestHeader("Test Case: check that Create App page can be open");
 
-        AppsPage appsPage = getCommonPage().openAppsPage();
+        AppsPage appsPage = openOverviewPage().openAppsPage();
         AppsEditAppPage editAppPage = appsPage.openCreateAppPage();
 
         SoftAssert.assertThat(
@@ -355,7 +355,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkCompsPageCanBeOpen() {
         printTestHeader("Test Case: check that Comparisons page can be open");
 
-        CompsPage compsPage = getCommonPage().openCompsPage();
+        CompsPage compsPage = openOverviewPage().openCompsPage();
 
         SoftAssert.assertThat(
                 compsPage.isMyCompsLinkDisplayed())
@@ -374,7 +374,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkCompsMyCompsPageCanBeOpen() {
         printTestHeader("Test Case: check that Comparisons.MyComparisons page can be open");
 
-        CompsPage compsPage = getCommonPage().openCompsPage();
+        CompsPage compsPage = openOverviewPage().openCompsPage();
         CompsMyCompsPage compsMyCompsPage = compsPage.openCompsMyCompsPage();
 
         SoftAssert.assertThat(
@@ -394,7 +394,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkCompsFeaturedPageCanBeOpen() {
         printTestHeader("Test Case: check that Comparisons.Featured page can be open");
 
-        CompsPage compsPage = getCommonPage().openCompsPage();
+        CompsPage compsPage = openOverviewPage().openCompsPage();
         CompsFeaturedPage compsFeaturedPage = compsPage.openCompsFeaturedPage();
 
         SoftAssert.assertThat(
@@ -414,7 +414,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkCompsExplorePageCanBeOpen() {
         printTestHeader("Test Case: check that Comparisons.Explore page can be open");
 
-        CompsPage compsPage = getCommonPage().openCompsPage();
+        CompsPage compsPage = openOverviewPage().openCompsPage();
         CompsExplorePage compsExplorePage = compsPage.openCompsExplorePage();
 
         SoftAssert.assertThat(
@@ -434,7 +434,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkCompsRunComparisonPageCanBeOpen() {
         printTestHeader("Test Case: check that Comparisons.RunComparison page can be open");
 
-        CompsPage compsPage = getCommonPage().openCompsPage();
+        CompsPage compsPage = openOverviewPage().openCompsPage();
         CompsRunComparisonPage compsRunComparisonPage = compsPage.openCompsRunComparisonPage();
 
         SoftAssert.assertThat(
@@ -454,7 +454,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkFilesPageCanBeOpen() {
         printTestHeader("Test Case: check that Files page can be open");
 
-        FilesPage filesPage = getCommonPage().openFilesPage();
+        FilesPage filesPage = openOverviewPage().openFilesPage();
 
         SoftAssert.assertThat(
                 filesPage.isMyFilesLinkDisplayed())
@@ -473,7 +473,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkFilesMyFilesPageCanBeOpen() {
         printTestHeader("Test Case: check that Files.MyFiles page can be open");
 
-        FilesPage filesPage = getCommonPage().openFilesPage();
+        FilesPage filesPage = openOverviewPage().openFilesPage();
         FilesMyFilesPage filesMyFilesPage = filesPage.openFilesMyFilesPage();
 
         SoftAssert.assertThat(
@@ -493,7 +493,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkFilesFeaturedPageCanBeOpen() {
         printTestHeader("Test Case: check that Files.Featured page can be open");
 
-        FilesPage filesPage = getCommonPage().openFilesPage();
+        FilesPage filesPage = openOverviewPage().openFilesPage();
         FilesFeaturedPage filesFeaturedPage = filesPage.openFilesFeaturedPage();
 
         SoftAssert.assertThat(
@@ -513,7 +513,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkFilesExplorePageCanBeOpen() {
         printTestHeader("Test Case: check that Files.Explore page can be open");
 
-        FilesPage filesPage = getCommonPage().openFilesPage();
+        FilesPage filesPage = openOverviewPage().openFilesPage();
         FilesExplorePage filesExplorePage = filesPage.openFilesExplorePage();
 
         SoftAssert.assertThat(
@@ -533,7 +533,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkFilesAddFilesPageCanBeOpen() {
         printTestHeader("Test Case: check that Files.AddFiles page can be open");
 
-        FilesPage filesPage = getCommonPage().openFilesPage();
+        FilesPage filesPage = openOverviewPage().openFilesPage();
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
 
         SoftAssert.assertThat(
@@ -553,7 +553,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkExpertsPageCanBeOpen() {
         printTestHeader("Test Case: check that Experts page can be open");
 
-        ExpertsPage expertsPage = getCommonPage().openExpertsPage();
+        ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
 
         SoftAssert.assertThat(
                 expertsPage.isExpertsIconDisplayed())
@@ -572,7 +572,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkChallengesPageCanBeOpen() {
         printTestHeader("Test Case: check that Challenges page can be open");
 
-        ChallsPage challsPage = getCommonPage().openChallsPage();
+        ChallsPage challsPage = openOverviewPage().openChallsPage();
 
         SoftAssert.assertThat(
                 challsPage.isChallengesIconDisplayed())
@@ -591,7 +591,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkDiscussionsPageCanBeOpen() {
         printTestHeader("Test Case: check that Discussions page can be open");
 
-        DiscsPage discsPage = getCommonPage().openDiscsPage();
+        DiscsPage discsPage = openOverviewPage().openDiscsPage();
 
         SoftAssert.assertThat(
                 discsPage.isStartDiscsButtonDisplayed())
@@ -610,7 +610,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkDiscussionsNewDiscPageCanBeOpen() {
         printTestHeader("Test Case: check that Discussions.NewDiscussion page can be open");
 
-        DiscsPage discsPage = getCommonPage().openDiscsPage();
+        DiscsPage discsPage = openOverviewPage().openDiscsPage();
         DiscsNewDiscPage discsNewDiscPage = discsPage.openNewDiscPage();
 
         SoftAssert.assertThat(
@@ -630,7 +630,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkOverviewPageCanBeOpen() {
         printTestHeader("Test Case: check that Overview page can be open");
 
-        OverviewPage overviewPage = getCommonPage().openOverviewPage();
+        OverviewPage overviewPage = openOverviewPage();
 
         SoftAssert.assertThat(
                 overviewPage.isWelcomeTextDisplayed())
@@ -649,7 +649,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkProfilePageCanBeOpen() {
         printTestHeader("Test Case: check that Profile page can be open");
 
-        ProfilePage profilePage = getCommonPage().openProfilePage();
+        ProfilePage profilePage = openOverviewPage().openProfilePage();
 
         SoftAssert.assertThat(
                 profilePage.isAboutOrgTextDisplayed())
@@ -668,7 +668,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkPublicProfilePageCanBeOpen() {
         printTestHeader("Test Case: check that Public Profile page can be open");
 
-        PublicProfilePage publicProfilePage = getCommonPage().openPublicProfilePage();
+        PublicProfilePage publicProfilePage = openOverviewPage().openPublicProfilePage();
 
         SoftAssert.assertThat(
                 publicProfilePage.isJoinedTagDisplayed())
@@ -687,7 +687,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkLicensePageCanBeOpen() {
         printTestHeader("Test Case: check that License page can be open");
 
-        LicensesPage licensesPage = getCommonPage().openLicensePage();
+        LicensesPage licensesPage = openOverviewPage().openLicensePage();
 
         SoftAssert.assertThat(
                 licensesPage.isCreateNewLicenseDisplayed())
@@ -706,7 +706,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAboutPageCanBeOpen() {
         printTestHeader("Test Case: check that About page can be open");
 
-        AboutPage aboutPage = getCommonPage().openAboutPage();
+        AboutPage aboutPage = openOverviewPage().openAboutPage();
 
         SoftAssert.assertThat(
                  aboutPage.isAboutWhyLinkDisplayed())
@@ -725,7 +725,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAboutWhyPageCanBeOpen() {
         printTestHeader("Test Case: check that About.Why page can be open");
 
-        AboutPage aboutPage = getCommonPage().openAboutPage();
+        AboutPage aboutPage = openOverviewPage().openAboutPage();
         AboutWhyPage aboutWhyPage = aboutPage.openAboutWhyPage();
 
         SoftAssert.assertThat(
@@ -745,7 +745,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAboutWhatPageCanBeOpen() {
         printTestHeader("Test Case: check that About.What page can be open");
 
-        AboutPage aboutPage = getCommonPage().openAboutPage();
+        AboutPage aboutPage = openOverviewPage().openAboutPage();
         AboutWhatPage aboutWhatPage = aboutPage.openAboutWhatPage();
 
         SoftAssert.assertThat(
@@ -765,7 +765,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAboutWhoPageCanBeOpen() {
         printTestHeader("Test Case: check that About.Who page can be open");
 
-        AboutPage aboutPage = getCommonPage().openAboutPage();
+        AboutPage aboutPage = openOverviewPage().openAboutPage();
         AboutWhoPage aboutWhoPage = aboutPage.openAboutWhoPage();
 
         SoftAssert.assertThat(
@@ -785,7 +785,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkAboutHowPageCanBeOpen() {
         printTestHeader("Test Case: check that About.How page can be open");
 
-        AboutPage aboutPage = getCommonPage().openAboutPage();
+        AboutPage aboutPage = openOverviewPage().openAboutPage();
         AboutHowPage aboutHowPage = aboutPage.openAboutHowPage();
 
         SoftAssert.assertThat(
@@ -800,7 +800,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkGuidelinesPageCanBeOpen() {
         printTestHeader("Test Case: check that guidelines page can be open");
 
-        GuidelinesPage guidelinesPage = getCommonPage().openGuidelinesPage();
+        GuidelinesPage guidelinesPage = openOverviewPage().openGuidelinesPage();
 
         SoftAssert.assertThat(
                 guidelinesPage.isGuidelinesCarouselDisplayed())
@@ -819,7 +819,7 @@ public class OpenAllPagesTest extends AbstractTest {
     public void checkDocsPageCanBeOpen() {
         printTestHeader("Test Case: check that Docs page can be open");
 
-        AboutHowPage docsPage = getCommonPage().openDocsPage();
+        AboutHowPage docsPage = openOverviewPage().openDocsPage();
 
         SoftAssert.assertThat(
                 docsPage.isAboutIntroTitleDisplayed())

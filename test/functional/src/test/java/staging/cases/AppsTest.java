@@ -7,26 +7,24 @@ import staging.model.AppProfile;
 import staging.model.User;
 import staging.pages.apps.*;
 import staging.pages.overview.OverviewPage;
+import staging.utils.Utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertTrue;
 import static staging.data.TestAppData.*;
 import static staging.data.TestRunData.*;
+import static staging.utils.Utils.clearDownloadsFolder;
 
 @Name("Applications management test suite")
 public class AppsTest extends AbstractTest {
 
     @Test(groups = "runJob")
-    void precondition() {
-        successfulLogin();
-    }
-
     public void successfulLogin() {
         printTestHeader(" -- Successful Login -- ");
 
         User user = TestUserData.getTestUser();
 
-        OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
+        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(
                 overviewPage.isNavigationPanelDisplayed())
@@ -41,7 +39,7 @@ public class AppsTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"precondition"}, priority = 0)
+    @Test(dependsOnMethods = {"successfulLogin"}, priority = 0)
     public void createAndSaveApp() {
         printTestHeader("Test Case: create and save an app with custom name, title and shell script");
 
@@ -57,7 +55,7 @@ public class AppsTest extends AbstractTest {
                 .isEqualTo(appProfile.getInitNameText());
     }
 
-    @Test(dependsOnMethods = {"precondition", "createAndSaveApp"})
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveApp"})
     public void checkSavedAppHasCorrectData() {
         printTestHeader("Test Case: check Saved previously App can be open from My App list and has correct data");
 
@@ -120,7 +118,7 @@ public class AppsTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"precondition", "createAndSaveApp"})
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveApp"})
     public void checkRevisionIsIncremented() {
         printTestHeader("Test Case: check that revision version is incremented by 1 after save revision");
 
@@ -146,7 +144,7 @@ public class AppsTest extends AbstractTest {
                 "[revision before = " + revisionBefore + " + 1] == [revision after = " + revisionAfter + "]");
     }
 
-    @Test(dependsOnMethods = {"precondition", "createAndSaveApp"})
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveApp"})
     public void checkValuesNotChangedAfterIdleEdit() {
         printTestHeader("Test Case: check App data is not changed if click Edit App then Save without any changes");
 
@@ -186,7 +184,7 @@ public class AppsTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(groups = { "runJob" }, dependsOnMethods = {"precondition"})
+    @Test(groups = { "runJob" }, dependsOnMethods = {"successfulLogin"})
     public void runAppAndValidateResult() {
         printTestHeader("Test Case: run app and validate result");
 
@@ -234,7 +232,7 @@ public class AppsTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"precondition", "createAndSaveApp"})
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveApp"})
     public void editAppTitle() {
         printTestHeader("Test Case: check that the title of a saved app can be edited");
 
@@ -266,7 +264,7 @@ public class AppsTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"precondition", "createAndSaveApp"})
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveApp"})
     public void editReadmeAndVerify() {
         printTestHeader("Test Case: check that ReadMe tab can be edited and saved");
 
@@ -301,7 +299,7 @@ public class AppsTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"precondition", "createAndSaveApp"})
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveApp"})
     public void leaveAppComment() {
         printTestHeader("Test Case: check it is possible to write a comment for an app");
 
@@ -323,7 +321,7 @@ public class AppsTest extends AbstractTest {
                 .isEqualTo(appsSavedAppPage.getExpectedCommentText());
     }
 
-    @Test(dependsOnMethods = {"precondition", "createAndSaveApp"})
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveApp"})
     public void checkDefaultInstanceIsDisplayed() {
         printTestHeader("Test Case: check that the default instance value is displayed on edit app page and on app profile page");
 
@@ -359,7 +357,7 @@ public class AppsTest extends AbstractTest {
                 .isEqualTo(instanceSavedValue.replace("-", " "));
     }
 
-    @Test(dependsOnMethods = {"precondition"})
+    @Test(dependsOnMethods = {"successfulLogin"})
     public void verifyPreviousRevisionHasCorrectData() {
         printTestHeader("Test Case: check that a previous app revision has correct data");
 
@@ -409,6 +407,36 @@ public class AppsTest extends AbstractTest {
                 appsSavedAppPage.getActSelectedAppAddedBy())
                 .as("Added By of the app")
                 .isEqualTo(appsSavedAppPage.getExpSelectedAppAddedBy());
+
+        SoftAssert.assertAll();
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveApp"})
+    public void exportDockerFile() {
+        printTestHeader("Test Case: check it is possible to export an app as a docker file");
+
+        AppProfile appProfile = getMainProfile();
+
+        AppsRelevantPage appsRelevantPage = getCommonPage().openAppsPage().openAppsRelevantPage();
+
+        assertThat(
+                appsRelevantPage.isLinkToSavedAppDisplayed(appProfile))
+                .as("Link to saved app is displayed")
+                .isTrue();
+
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
+        clearDownloadsFolder();
+        appsSavedAppPage = appsSavedAppPage.exportDockerContainer();
+
+        SoftAssert.assertThat(
+                appsSavedAppPage.getActSelectedAppName())
+                .as("Name of the app")
+                .isEqualTo(appProfile.getCurRevNameText());
+
+        SoftAssert.assertThat(
+                isDockerFileDownloaded())
+                .as("Docker file is downloaded")
+                .isTrue();
 
         SoftAssert.assertAll();
     }

@@ -19,4 +19,12 @@ public abstract class AbstractBlock extends HtmlElement {
         return null;
     }
 
+    public void sleep(final long msec) {
+        try {
+            Thread.sleep(msec);
+        } catch (final InterruptedException e) {
+            //
+        }
+    }
+
 }

@@ -46,7 +46,7 @@ public class TimeZoneTest extends AbstractTest {
         printTestHeader("Test Case: Successful Login");
 
         User user = TestUserData.getTestUser();
-        OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
+        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(
                 overviewPage.isNavigationPanelDisplayed())

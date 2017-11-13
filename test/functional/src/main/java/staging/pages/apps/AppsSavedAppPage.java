@@ -15,7 +15,11 @@ import staging.model.AppProfile;
 import staging.model.User;
 import staging.pages.AbstractPage;
 
+import java.io.File;
+
 import static staging.data.TestAppData.getAppCommentText;
+import static staging.data.TestRunData.getDockerFileName;
+import static staging.data.TestRunData.getPathToDownloadsFolder;
 
 public class AppsSavedAppPage extends AbstractPage {
 
@@ -111,6 +115,12 @@ public class AppsSavedAppPage extends AbstractPage {
     @FindBy(xpath = AppsLocators.APPS_SAVED_OUTPUT_HELP_VALUE)
     private WebElement appSavedOutputHelpWE;
 
+    @FindBy(xpath = AppsLocators.APPS_SAVED_EXPORT_BUTTON)
+    private Button appSavedExportButton;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_EXPORT_DOCKER_LINK)
+    private Link appSavedExportDockerLink;
+
     public WebElement getAppSavedInputLabelWE() {
         return appSavedInputLabelWE;
     }
@@ -129,6 +139,14 @@ public class AppsSavedAppPage extends AbstractPage {
 
     public WebElement getAppSavedOutputHelpWE() {
         return appSavedOutputHelpWE;
+    }
+
+    public Button getAppSavedExportButton() {
+        return appSavedExportButton;
+    }
+
+    public Link getAppSavedExportDockerLink() {
+        return appSavedExportDockerLink;
     }
 
     public String getAppSavedInputLabelText() {
@@ -364,6 +382,21 @@ public class AppsSavedAppPage extends AbstractPage {
         getAppsSavedFirstRevision().click();
         waitUntilDisplayed(getAppsRevisionTitleLabeWE());
         return new AppsSavedAppPage(getDriver());
+    }
+
+    public AppsSavedAppPage exportDockerContainer() {
+        log.info("export docker file");
+        waitUntilClickable(getAppSavedExportButton());
+        getAppSavedExportButton().click();
+        waitUntilClickable(getAppSavedExportDockerLink());
+        getAppSavedExportDockerLink().click();
+        alertAccept(10, 500);
+        waitUntilDockerFileIsDownloaded();
+        return new AppsSavedAppPage(getDriver());
+    }
+
+    public void waitUntilDockerFileIsDownloaded() {
+        waitUntilFileIsDownloaded(getPathToDownloadsFolder() + getDockerFileName());
     }
 
 }

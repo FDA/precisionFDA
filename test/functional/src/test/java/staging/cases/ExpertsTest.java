@@ -1,7 +1,6 @@
 package staging.cases;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.Reporter;
 import org.testng.annotations.Test;
 import ru.yandex.qatools.htmlelements.annotations.Name;
 import staging.data.TestUserData;
@@ -10,7 +9,6 @@ import staging.model.QuestionProfile;
 import staging.model.User;
 import staging.pages.StartPage;
 import staging.pages.experts.*;
-import staging.pages.overview.OverviewPage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static staging.data.TestExpertsData.getMainProfile;
@@ -19,39 +17,14 @@ import static staging.data.TestQuestionsData.getMainQAProfile;
 @Name("Experts test suite")
 public class ExpertsTest extends AbstractTest {
 
-    @BeforeMethod
-    @Override
-    public void beforeCase() {
-        callBeforeCase();
-        setUp();
-    }
-
-    @AfterMethod
-    @Override
-    public void afterCase() {
-        callAfterCase();
-        closeBrowser();
-    }
-
     @Test(priority = 1)
     public void createExpert() {
         printTestHeader("Test Case: check it is possible to create an expert as an admin user");
 
         User user = TestUserData.getAdminUser();
-
-        OverviewPage overviewPage = openLoginPage(user).correctLogin(user).grantAccess();
-
-        SoftAssert.assertThat(
-                overviewPage.isNavigationPanelDisplayed())
-                .as("navigation panel is displayed")
-                .isTrue();
-
-        SoftAssert.assertThat(
-                overviewPage.getUsernameLinkText())
-                .as("logged username")
-                .isEqualTo(user.getApplUserFullName());
-
         ExpertProfile expertProfile = getMainProfile();
+
+        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
 
@@ -68,6 +41,8 @@ public class ExpertsTest extends AbstractTest {
                 expertsPage.isExpertCreatedSuccessAlertDisplayed())
                 .as("success alert is displayed")
                 .isTrue();
+
+        Reporter.log("");
 
         SoftAssert.assertThat(
                 expertsPage.getExpertCreatedSuccessAlertText())
@@ -108,17 +83,19 @@ public class ExpertsTest extends AbstractTest {
                 .as("expert's blog title is displayed on start page")
                 .isFalse();
 
+        logoutFromAll();
+
         SoftAssert.assertAll();
     }
 
-    @Test(priority = 2)
+    @Test(priority = 2, dependsOnMethods = "createExpert")
     public void checkPrivateClosedAsTheExpertFirst() {
         printTestHeader("Test Case: check behavior of the just created expert block as the expert user");
 
         User user = TestUserData.getTestUser();
         ExpertProfile expertProfile = getMainProfile();
 
-        openLoginPage(user).correctLogin(user).grantAccess();
+        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
 
         SoftAssert.assertThat(
@@ -151,17 +128,19 @@ public class ExpertsTest extends AbstractTest {
                 .as("Select Visibility element")
                 .isFalse();
 
+        logoutFromAll();
+
         SoftAssert.assertAll();
     }
 
-    @Test(priority = 3)
+    @Test(priority = 3, dependsOnMethods = "createExpert")
     public void checkPrivateClosedAsAnotherUserFirst() {
         printTestHeader("Test Case: check behavior of the created expert block as another user");
 
         User user = TestUserData.getAnotherTestUser();
         ExpertProfile expertProfile = getMainProfile();
 
-        openLoginPage(user).correctLogin(user).grantAccess();
+        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
 
         assertThat(
@@ -170,14 +149,14 @@ public class ExpertsTest extends AbstractTest {
                 .isFalse();
     }
 
-    @Test(priority = 4)
+    @Test(priority = 4, dependsOnMethods = "createExpert")
     public void setPublicVisibility() {
         printTestHeader("Test Case: set visibility as Public");
 
         User user = TestUserData.getAdminUser();
         ExpertProfile expertProfile = getMainProfile();
 
-        openLoginPage(user).correctLogin(user).grantAccess();
+        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
         ExpertsExpertDashboardPage expertDashboardPage = createdExpertPage.openDashboard();
@@ -195,17 +174,19 @@ public class ExpertsTest extends AbstractTest {
                 .as("public/private label")
                 .contains("Public");
 
+        logoutFromAll();
+
         SoftAssert.assertAll();
     }
 
-    @Test(priority = 5)
+    @Test(priority = 5, dependsOnMethods = "createExpert")
     public void checkPublicClosedAsAnotherUserFirst() {
         printTestHeader("Test Case: check behavior of the public closed expert as another user");
 
         User user = TestUserData.getAnotherTestUser();
         ExpertProfile expertProfile = getMainProfile();
 
-        openLoginPage(user).correctLogin(user).grantAccess();
+        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
 
         SoftAssert.assertThat(
@@ -230,17 +211,19 @@ public class ExpertsTest extends AbstractTest {
                 .as("Ask Question button is displayed")
                 .isFalse();
 
+        logoutFromAll();
+
         SoftAssert.assertAll();
     }
 
-    @Test(priority = 6)
+    @Test(priority = 6, dependsOnMethods = "createExpert")
     public void setStatusOpen() {
         printTestHeader("Test Case: set status as Open");
 
         User user = TestUserData.getTestUser();
         ExpertProfile expertProfile = getMainProfile();
 
-        openLoginPage(user).correctLogin(user).grantAccess();
+        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
 
@@ -267,17 +250,19 @@ public class ExpertsTest extends AbstractTest {
                 .as("public/private label")
                 .contains("Public");
 
+        logoutFromAll();
+
         SoftAssert.assertAll();
     }
 
-    @Test(priority = 7)
+    @Test(priority = 7, dependsOnMethods = "createExpert")
     public void checkPublicOpenAsAnotherUser() {
         printTestHeader("Test Case: check behavior of the public open expert as another user");
 
         User user = TestUserData.getAnotherTestUser();
         ExpertProfile expertProfile = getMainProfile();
 
-        openLoginPage(user).correctLogin(user).grantAccess();
+        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
 
         SoftAssert.assertThat(
@@ -297,10 +282,12 @@ public class ExpertsTest extends AbstractTest {
                 .as("Ask Question button is displayed")
                 .isTrue();
 
+        logoutFromAll();
+
         SoftAssert.assertAll();
     }
 
-    @Test(priority = 8)
+    @Test(priority = 8, dependsOnMethods = "createExpert")
     public void askQuestionAsAnotherUser() {
         printTestHeader("Test Case: submit a question to expert");
 
@@ -308,7 +295,7 @@ public class ExpertsTest extends AbstractTest {
         ExpertProfile expertProfile = getMainProfile();
         QuestionProfile questionProfile = getMainQAProfile();
 
-        openLoginPage(user).correctLogin(user).grantAccess();
+        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
         createdExpertPage = createdExpertPage.submitQuestion(questionProfile.getExpertQuestion1());
@@ -324,10 +311,12 @@ public class ExpertsTest extends AbstractTest {
                 .as("question #2 is displayed in Your Questions list")
                 .isTrue();
 
+        logoutFromAll();
+
         SoftAssert.assertAll();
     }
 
-    @Test(priority = 9)
+    @Test(priority = 9, dependsOnMethods = "createExpert")
     public void answerQuestionAsExpert() {
         printTestHeader("Test Case: answer the question as the expert");
 
@@ -335,7 +324,7 @@ public class ExpertsTest extends AbstractTest {
         ExpertProfile expertProfile = getMainProfile();
         QuestionProfile questionProfile = getMainQAProfile();
 
-        openLoginPage(user).correctLogin(user).grantAccess();
+        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
         ExpertsExpertDashboardPage expertDashboardPage = createdExpertPage.openDashboard();
@@ -373,10 +362,12 @@ public class ExpertsTest extends AbstractTest {
                 .as("question #2 is displayed in Open Questions list")
                 .isTrue();
 
+        logoutFromAll();
+
         SoftAssert.assertAll();
     }
 
-    @Test(priority = 10)
+    @Test(priority = 10, dependsOnMethods = "createExpert")
     public void checkAnswerAsAnotherUser() {
         printTestHeader("Test Case: check the answer as the question author");
 
@@ -384,7 +375,7 @@ public class ExpertsTest extends AbstractTest {
         ExpertProfile expertProfile = getMainProfile();
         QuestionProfile questionProfile = getMainQAProfile();
 
-        openLoginPage(user).correctLogin(user).grantAccess();
+        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
 
@@ -399,16 +390,18 @@ public class ExpertsTest extends AbstractTest {
                 expertsQAPage.getAnswerText())
                 .as("answer #1 is displayed correctly")
                 .isEqualTo(questionProfile.getExpertAnswer1());
+
+        logoutFromAll();
     }
 
-    @Test(priority = 11)
+    @Test(priority = 11, dependsOnMethods = "createExpert")
     public void setStatusClosed() {
         printTestHeader("Test Case: set status as Closed");
 
         User user = TestUserData.getTestUser();
         ExpertProfile expertProfile = getMainProfile();
 
-        openLoginPage(user).correctLogin(user).grantAccess();
+        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
         ExpertsExpertDashboardPage expertDashboardPage = createdExpertPage.openDashboard();
@@ -424,10 +417,12 @@ public class ExpertsTest extends AbstractTest {
                 .as("public/private label")
                 .contains("Public");
 
+        logoutFromAll();
+
         SoftAssert.assertAll();
     }
 
-    @Test(priority = 12)
+    @Test(priority = 12, dependsOnMethods = "createExpert")
     public void checkPublicClosedAsAnotherUserSecond() {
         printTestHeader("Test Case: check behavior of the public closed expert as another user second time");
 
@@ -435,7 +430,7 @@ public class ExpertsTest extends AbstractTest {
         ExpertProfile expertProfile = getMainProfile();
         QuestionProfile questionProfile = getMainQAProfile();
 
-        openLoginPage(user).correctLogin(user).grantAccess();
+        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
 
         SoftAssert.assertThat(
@@ -482,17 +477,19 @@ public class ExpertsTest extends AbstractTest {
                 .as("answer #1 is displayed correctly")
                 .isEqualTo(questionProfile.getExpertAnswer1());
 
+        logoutFromAll();
+
         SoftAssert.assertAll();
     }
 
-    @Test(priority = 13)
+    @Test(priority = 13, dependsOnMethods = "createExpert")
     public void setPrivateVisibility() {
         printTestHeader("Test Case: set visibility as Private");
 
         User user = TestUserData.getAdminUser();
         ExpertProfile expertProfile = getMainProfile();
 
-        openLoginPage(user).correctLogin(user).grantAccess();
+        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
         ExpertsExpertDashboardPage expertDashboardPage = createdExpertPage.openDashboard();
@@ -510,33 +507,37 @@ public class ExpertsTest extends AbstractTest {
                 .as("public/private label")
                 .contains("Private");
 
+        logoutFromAll();
+
         SoftAssert.assertAll();
     }
 
-    @Test(priority = 14)
+    @Test(priority = 14, dependsOnMethods = "createExpert")
     public void checkPrivateClosedAsAnotherUserSecond() {
         printTestHeader("Test Case: check behavior of the created expert block as another user second time");
 
         User user = TestUserData.getAnotherTestUser();
         ExpertProfile expertProfile = getMainProfile();
 
-        openLoginPage(user).correctLogin(user).grantAccess();
+        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
 
         assertThat(
                 expertsPage.isCreatedExpertPrefNameDisplayed(expertProfile))
                 .as("link to the created expert is NOT displayed")
                 .isFalse();
+
+        logoutFromAll();
     }
 
-    @Test(priority = 15)
+    @Test(priority = 15, dependsOnMethods = "createExpert")
     public void checkPrivateClosedAsTheExpertSecond() {
         printTestHeader("Test Case: check behavior of created expert block as the expert user second time");
 
         User user = TestUserData.getTestUser();
         ExpertProfile expertProfile = getMainProfile();
 
-        openLoginPage(user).correctLogin(user).grantAccess();
+        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
         QuestionProfile questionProfile = getMainQAProfile();
 
@@ -587,6 +588,8 @@ public class ExpertsTest extends AbstractTest {
                 expertDashboardPage.getEnteredQuestionFromForm())
                 .as("entered question #2")
                 .isEqualTo(questionProfile.getExpertQuestion2());
+
+        logoutFromAll();
 
         SoftAssert.assertAll();
     }

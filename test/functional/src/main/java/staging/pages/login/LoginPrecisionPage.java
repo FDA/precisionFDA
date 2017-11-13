@@ -8,36 +8,36 @@ import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import staging.locators.CommonLocators;
-import staging.locators.LoginLocators;
+import staging.locators.LoginPrecisionLocators;
 import staging.model.User;
 import staging.pages.AbstractPage;
 
-public class LoginPage extends AbstractPage {
+public class LoginPrecisionPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
 
-    @FindBy(xpath = LoginLocators.LOGIN_LOGIN_FORM)
+    @FindBy(xpath = LoginPrecisionLocators.LOGIN_LOGIN_FORM)
     private WebElement loginLoginForm;
 
-    @FindBy(xpath = LoginLocators.LOGIN_USERNAME_INPUT)
+    @FindBy(xpath = LoginPrecisionLocators.LOGIN_USERNAME_INPUT)
     private TextInput loginUsernameInput;
 
-    @FindBy(xpath = LoginLocators.LOGIN_PASSWORD_INPUT)
+    @FindBy(xpath = LoginPrecisionLocators.LOGIN_PASSWORD_INPUT)
     private TextInput loginPasswordInput;
 
-    @FindBy(xpath = LoginLocators.LOGIN_SUBMIT_BUTTON)
+    @FindBy(xpath = LoginPrecisionLocators.LOGIN_SUBMIT_BUTTON)
     private Button loginSubmitButton;
 
     @FindBy(xpath = CommonLocators.COMMON_NAV_PANEL)
     private WebElement commonNavigationPanel;
 
-    @FindBy(xpath = LoginLocators.LOGIN_WRONG_CREDS_MESSAGE)
+    @FindBy(xpath = LoginPrecisionLocators.LOGIN_WRONG_CREDS_MESSAGE)
     private WebElement loginWrongCredsMessage;
 
-    public LoginPage(final WebDriver driver) {
+    public LoginPrecisionPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
-        waitForPageToLoadAndVerifyBy(By.xpath(LoginLocators.LOGIN_PASSWORD_INPUT), 180);
+        waitForPageToLoadAndVerifyBy(By.xpath(LoginPrecisionLocators.LOGIN_PASSWORD_INPUT), 180);
     }
 
     public boolean isNavigationPanelDisplayed() {
@@ -64,12 +64,12 @@ public class LoginPage extends AbstractPage {
         return new GrantAccessLoginPage(getDriver());
     }
 
-    public LoginPage wrongLogin(User user) {
+    public LoginPrecisionPage wrongLogin(User user) {
         log.info("wrong login to PrecisionFDA page");
         loginUsernameInput.sendKeys(user.getApplUsername());
         loginPasswordInput.sendKeys(user.getApplPassword());
         loginSubmitButton.click();
-        return new LoginPage(getDriver());
+        return new LoginPrecisionPage(getDriver());
     }
 
 }

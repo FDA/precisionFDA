@@ -14,6 +14,7 @@ import java.util.TimeZone;
 import static staging.data.TestDict.*;
 import static staging.data.TestFilesData.getTestPngTemplateFileName;
 import static staging.data.TestFilesData.getTestTextTemplateFileName;
+import static staging.data.TestRunData.*;
 
 public class Utils {
 
@@ -288,6 +289,20 @@ public class Utils {
 
     public static String generateSecondFilterFileName() {
         return getGeneratedTestFileName("filterPhrase#2");
+    }
+
+    public static void clearDownloadsFolder() {
+        String downloadsPath = getPathToDownloadsFolder();
+        String oldFileName = getDockerFileName();
+        String newFileName = downloadsPath + oldFileName + "_old_" + getRunTimeLocalUniqueValue();
+        renameFile(downloadsPath, oldFileName, newFileName);
+    }
+
+    public static void renameFile(String pathToFile, String oldFileName, String newFileName) {
+        Logger log = Logger.getLogger("INFO");
+        File file = new File(pathToFile + oldFileName);
+        file.renameTo(new File(newFileName));
+        log.info("file [" + oldFileName + "] is renamed to [" + newFileName + "]");
     }
 
 
