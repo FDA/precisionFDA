@@ -2,7 +2,7 @@
 <suite name="Login/logout suite">
     <test name="Login/logout test">
         <classes>
-            <class name="staging.cases.OpenAllPagesTest"/>
+            <class name="precisionFDA.cases.OpenAllPagesTest"/>
         </classes>
     </test>
 </suite>

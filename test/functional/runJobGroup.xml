@@ -8,7 +8,7 @@
             </run>
         </groups>
         <classes>
-            <class name="staging.cases.AppsTest" />
+            <class name="precisionFDA.cases.AppsTest" />
         </classes>
     </test>
 </suite>

@@ -2,27 +2,37 @@
 <suite name="all suites">
     <test name="OpenAllPagesTest">
         <classes>
-            <class name="staging.cases.OpenAllPagesTest"/>
+            <class name="precisionFDA.cases.OpenAllPagesTest"/>
         </classes>
     </test>
-    <test name="AppsManagementTest">
+    <test name="AppsTest">
         <classes>
-            <class name="staging.cases.AppsTest"/>
+            <class name="precisionFDA.cases.AppsTest"/>
         </classes>
     </test>
-    <test name="NotesManagementTest">
+    <test name="NotesTest">
         <classes>
-            <class name="staging.cases.NotesTest"/>
+            <class name="precisionFDA.cases.NotesTest"/>
         </classes>
     </test>
     <test name="TimeZoneTest">
         <classes>
-            <class name="staging.cases.TimeZoneTest"/>
+            <class name="precisionFDA.cases.TimeZoneTest"/>
         </classes>
     </test>
     <test name="LoginTest">
         <classes>
-            <class name="staging.cases.LoginTest"/>
+            <class name="precisionFDA.cases.LoginTest"/>
+        </classes>
+    </test>
+    <test name="ExpertsTest">
+        <classes>
+            <class name="precisionFDA.cases.ExpertsTest"/>
+        </classes>
+    </test>
+    <test name="SpacesTest">
+        <classes>
+            <class name="precisionFDA.cases.SpacesTest"/>
         </classes>
     </test>
 </suite>

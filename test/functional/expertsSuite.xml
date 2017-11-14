@@ -2,7 +2,7 @@
 <suite name="Experts test suite">
     <test name="Experts test suite">
         <classes>
-            <class name="staging.cases.ExpertsTest"/>
+            <class name="precisionFDA.cases.ExpertsTest"/>
         </classes>
     </test>
 </suite>

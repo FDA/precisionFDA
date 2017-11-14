@@ -2,7 +2,7 @@
 <suite name="Timezone validation suite">
     <test name="Timezone validation test">
         <classes>
-            <class name="staging.cases.TimeZoneTest"/>
+            <class name="precisionFDA.cases.TimeZoneTest"/>
         </classes>
     </test>
 </suite>
