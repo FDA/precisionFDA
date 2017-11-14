@@ -2,7 +2,7 @@
 <suite name="Login/logout suite">
     <test name="Login/logout test">
         <classes>
-            <class name="staging.cases.LoginTest"/>
+            <class name="precisionFDA.cases.LoginTest"/>
         </classes>
     </test>
 </suite>

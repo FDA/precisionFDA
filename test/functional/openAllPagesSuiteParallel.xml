@@ -2,7 +2,7 @@
 <suite name="openAllPages" parallel="tests" thread-count="3">
     <test name="openAllPages part 1">
         <classes>
-            <class name="staging.cases.OpenAllPagesTest">
+            <class name="precisionFDA.cases.OpenAllPagesTest">
                 <methods>
                     <include name="successfulLogin"/>
                     <include name="checkNotes.*"/>
@@ -13,7 +13,7 @@
     </test>
     <test name="openAllPages part 2">
         <classes>
-            <class name="staging.cases.OpenAllPagesTest">
+            <class name="precisionFDA.cases.OpenAllPagesTest">
                 <methods>
                     <include name="successfulLogin"/>
                     <include name="checkComps.*"/>
@@ -26,7 +26,7 @@
     </test>
     <test name="openAllPages part 3">
         <classes>
-            <class name="staging.cases.OpenAllPagesTest">
+            <class name="precisionFDA.cases.OpenAllPagesTest">
                 <methods>
                     <include name="successfulLogin"/>
                     <include name="checkExperts.*"/>
