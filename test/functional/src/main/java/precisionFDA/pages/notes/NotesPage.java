@@ -13,6 +13,8 @@ import precisionFDA.pages.AbstractPage;
 
 import java.util.List;
 
+import static precisionFDA.utils.Utils.sleep;
+
 public class NotesPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());

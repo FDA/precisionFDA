@@ -5,9 +5,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import precisionFDA.utils.Utils;
 import ru.yandex.qatools.htmlelements.element.Link;
 import precisionFDA.locators.AppsLocators;
 import precisionFDA.pages.AbstractPage;
+
+import static precisionFDA.utils.Utils.sleep;
 
 public class AppsJobPage extends AbstractPage {
 

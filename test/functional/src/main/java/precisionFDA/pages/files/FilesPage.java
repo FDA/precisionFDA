@@ -5,6 +5,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import precisionFDA.utils.Utils;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
@@ -12,6 +13,8 @@ import precisionFDA.locators.FilesLocators;
 import precisionFDA.pages.AbstractPage;
 
 import java.util.List;
+
+import static precisionFDA.utils.Utils.sleep;
 
 public class FilesPage extends AbstractPage {
 

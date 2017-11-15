@@ -222,6 +222,8 @@ public class Utils {
     }
 
     public static void deleteTempFiles() {
+        final Logger log = Logger.getLogger("");
+        log.info("deleting temp files");
         deleteTempFilesByExt(".txt");
         deleteTempFilesByExt(".png");
         deleteFileByPartialName(getDockerFileName(), getPathToTempFilesFolder());
@@ -317,6 +319,49 @@ public class Utils {
 
     public static String generateUpdatedName(String oldFileName) {
         return "upd_" + getRunTimeLocalUniqueValue() + oldFileName;
+    }
+
+    public static void waitUntilFileIsDownloaded(String filePath) {
+        final Logger log = Logger.getLogger("");
+        int timeoutSec = 15;
+        int refreshStepSec = 1;
+        int spentTimeSec = 0;
+
+        File file = new File(filePath);
+
+        log.info("waiting up to " + timeoutSec + " sec until file [" + filePath + "] is downloaded");
+        while ( !file.exists() && (spentTimeSec < timeoutSec) ) {
+            sleep(refreshStepSec*1000);
+            spentTimeSec = spentTimeSec + refreshStepSec;
+            log.info("it's been " + spentTimeSec + " seconds");
+        }
+        if (!file.exists()) {
+            log.info("[WARNING] the file was not downloaded after " + timeoutSec + " seconds");
+        }
+    }
+
+    public static void sleep(final long msec) {
+        try {
+            Thread.sleep(msec);
+        } catch (final InterruptedException e) {
+            //
+        }
+    }
+
+    public static void wgetFile(String url) {
+        final Logger log = Logger.getLogger("");
+        String[] array = url.split("/");
+        String fileName = array[array.length - 1];
+        log.info("trying to download file [" + fileName + "] from [" + url + "]");
+        String command = "wget -O " + getPathToDownloadsFolder() + fileName + " " + url;
+        try {
+            Runtime.getRuntime().exec( command ).waitFor();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        waitUntilFileIsDownloaded(getPathToDownloadsFolder() + fileName);
     }
 
 

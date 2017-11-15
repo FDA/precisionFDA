@@ -252,14 +252,6 @@ public abstract class AbstractPage {
         }
     }
 
-    public void sleep(final long msec) {
-        try {
-            Thread.sleep(msec);
-        } catch (final InterruptedException e) {
-            //
-        }
-    }
-
     // -------- Find element by -----------
 
     public WebElement findElement(final By locator, final Integer timeout) {
@@ -369,24 +361,6 @@ public abstract class AbstractPage {
         }
         catch (Exception e) {
 
-        }
-    }
-
-    public void waitUntilFileIsDownloaded(String filePath) {
-        int timeoutSec = 15;
-        int refreshStepSec = 1;
-        int spentTimeSec = 0;
-
-        File file = new File(filePath);
-
-        log.info("waiting for " + timeoutSec + " sec until file is downloaded");
-        while ( !file.exists() && (spentTimeSec < timeoutSec) ) {
-            sleep(refreshStepSec*1000);
-            spentTimeSec = spentTimeSec + refreshStepSec;
-            log.info("it's been " + spentTimeSec + " seconds");
-        }
-        if (!file.exists()) {
-            log.info("[WARNING] the file was not downloaded after " + timeoutSec + " seconds");
         }
     }
 

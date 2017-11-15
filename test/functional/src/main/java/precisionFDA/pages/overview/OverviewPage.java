@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import precisionFDA.pages.spaces.SpacesPage;
+import precisionFDA.utils.Utils;
 import ru.yandex.qatools.htmlelements.element.Link;
 import precisionFDA.blocks.ProfileDropBlock;
 import precisionFDA.locators.CommonLocators;
@@ -25,6 +26,8 @@ import precisionFDA.pages.licenses.LicensesPage;
 import precisionFDA.pages.notes.NotesPage;
 import precisionFDA.pages.profile.ProfilePage;
 import precisionFDA.pages.profile.PublicProfilePage;
+
+import static precisionFDA.utils.Utils.sleep;
 
 public class OverviewPage extends AbstractPage {
 

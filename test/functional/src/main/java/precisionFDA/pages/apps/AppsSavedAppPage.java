@@ -18,6 +18,7 @@ import precisionFDA.pages.AbstractPage;
 import static precisionFDA.data.TestAppData.getAppCommentText;
 import static precisionFDA.data.TestRunData.getDockerFileName;
 import static precisionFDA.data.TestRunData.getPathToDownloadsFolder;
+import static precisionFDA.utils.Utils.waitUntilFileIsDownloaded;
 
 public class AppsSavedAppPage extends AbstractPage {
 

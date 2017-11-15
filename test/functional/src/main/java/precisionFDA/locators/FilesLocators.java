@@ -76,4 +76,10 @@ public class FilesLocators {
 
     public static final String FILES_UPLOADED_FILE_SAVED_COMMENT_TEXT = "//*[@class='pfda-comment-body']/p";
 
+    public static final String FILES_UPLOADED_AUTHURL_PAGE_TITLE = "//p[contains(text(), 'Authorized URL for')]";
+
+    public static final String FILES_UPLOADED_AUTHURL_PAGE_URL = "//div[contains(text(), 'http')][contains(@class, 'alert')]";
+
+    public static final String FILES_UPLOADED_FILE_PAGE_AUTHORIZED_URL_BUTTON_LINK = "//a/span[contains(@class, 'fa-link')]/..";
+
 }
