@@ -6,6 +6,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import precisionFDA.utils.Utils;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.Select;
@@ -20,6 +21,7 @@ import precisionFDA.pages.AbstractPage;
 import static precisionFDA.data.TestDict.getDictString;
 import static precisionFDA.data.TestRunData.*;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
+import static precisionFDA.utils.Utils.sleep;
 
 public class AppsEditAppPage extends AbstractPage {
 

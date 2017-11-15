@@ -1,5 +1,6 @@
 package precisionFDA.cases;
 
+import com.epam.reportportal.message.ReportPortalMessage;
 import org.apache.log4j.Logger;
 import org.assertj.core.api.SoftAssertions;
 import org.openqa.selenium.*;
@@ -32,7 +33,7 @@ import static precisionFDA.data.TestDict.getCaseStatusPassed;
 import static precisionFDA.data.TestRunData.*;
 import static precisionFDA.utils.Utils.*;
 
-@Listeners(CustomResultListener.class)
+@Listeners( { CustomResultListener.class } )
 public abstract class AbstractTest {
 
     private Logger log = Logger.getLogger("INFO");
@@ -63,19 +64,31 @@ public abstract class AbstractTest {
         }
     }
 
-    @BeforeTest
-    public void beforeTest() {
+    @BeforeSuite(alwaysRun = true)
+    public void beforeSuite() {
         deleteTempFiles();
         createFolder(getDebugLogFolder());
         createFolder(getDebugLogFolderPath());
     }
 
-    @AfterTest(alwaysRun = true)
-    public void afterTest() {
-        // moveLogFile("full.print");
-        // moveLogFile("error.print");
-        // Runtime.getRuntime().exec( "pkill -f firefox" ).waitFor();
-        // Runtime.getRuntime().exec( "pkill -f geckodriver" ).waitFor();
+    @AfterSuite(alwaysRun = true)
+    public void afterSuite() {
+        // moveLogFileToCurrentLogFolder("full.print");
+        // moveLogFileToCurrentLogFolder("error.print");
+        try {
+            Runtime.getRuntime().exec( "pkill -f firefox" ).waitFor();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            Runtime.getRuntime().exec( "pkill -f geckodriver" ).waitFor();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @BeforeMethod(alwaysRun = true)
@@ -131,6 +144,13 @@ public abstract class AbstractTest {
         if (isGetScreenshot) {
             takeScreenshot(filePathWithNoExt + ".png", driver);
             log.info("screenshot is here: " + filePathWithNoExt + ".png");
+
+            try {
+                ReportPortalMessage message = new ReportPortalMessage(new File(filePathWithNoExt + ".png"), "snapshot");
+                log.info(message);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         if (isGetSource) {
@@ -145,7 +165,7 @@ public abstract class AbstractTest {
         printLine();
     }
 
-    public void moveLogFile(String fileName) {
+    public void moveLogFileToCurrentLogFolder(String fileName) {
         String oldPath = getDebugLogFolder() + fileName;
         File file = new File(oldPath);
         String newPath = getDebugLogFolderPath() + fileName;
@@ -212,14 +232,6 @@ public abstract class AbstractTest {
         Alert alert = fluentWait.until(alertIsPresent());
         if (alert != null) {
             alert.accept();
-        }
-    }
-
-    public void sleep(final long msec) {
-        try {
-            Thread.sleep(msec);
-        } catch (final InterruptedException e) {
-            //
         }
     }
 

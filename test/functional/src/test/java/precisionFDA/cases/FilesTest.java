@@ -1,6 +1,7 @@
 package precisionFDA.cases;
 
 import org.testng.annotations.Test;
+import precisionFDA.pages.files.FilesAuthURLPage;
 import ru.yandex.qatools.htmlelements.annotations.Name;
 import precisionFDA.data.TestUserData;
 import precisionFDA.model.FilesProfile;
@@ -17,6 +18,7 @@ import static precisionFDA.data.TestDict.getDictSecondFilterPhrase;
 import static precisionFDA.data.TestFilesData.*;
 import static precisionFDA.utils.Utils.generateExpectedBreadcrumbs;
 import static precisionFDA.utils.Utils.removeSameFileFromDownloads;
+import static precisionFDA.utils.Utils.wgetFile;
 
 @Name("Files test suite")
 public class FilesTest extends AbstractTest {
@@ -26,7 +28,6 @@ public class FilesTest extends AbstractTest {
         printTestHeader(" -- Successful Login -- ");
 
         UserProfile user = TestUserData.getTestUser();
-
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(
@@ -510,6 +511,39 @@ public class FilesTest extends AbstractTest {
                 uploadedFilePage.getUploadedFileSavedCommentText())
                 .as("Submitted comment text")
                 .isEqualTo(filesProfile.getFileInRootComment());
+
+        SoftAssert.assertAll();
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin", "uploadFileToRootDirectory"})
+    public void validateAuthorizedURL() {
+        printTestHeader("Test Case: check it is possible to use an authorized URL");
+
+        FilesProfile filesProfile = getMainFilesProfile();
+
+        FilesPage filesPage = openOverviewPage().openFilesPage();
+
+        assertThat(
+                filesPage.isLinkToUploadedFileDisplayed(filesProfile.getFileInRoot()))
+                .as("Link to uploaded file is displayed inside root directory")
+                .isTrue();
+
+        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(filesProfile.getFileInRoot());
+        FilesAuthURLPage authorizedURLPage = uploadedFilePage.clickAuthorizedURL();
+
+        assertThat(
+                authorizedURLPage.isAuthorizedUrlDisplayed())
+                .as("Authorized generated URL is displayed")
+                .isTrue();
+
+        String authUrl = authorizedURLPage.getAuthUrlText();
+        removeSameFileFromDownloads(filesProfile.getFileInRoot());
+        wgetFile(authUrl);
+
+        SoftAssert.assertThat(
+                isFileDownloaded(filesProfile.getFileInRoot()))
+                .as("The file [" + filesProfile.getFileInRoot() + "] is downloaded by url [" + authUrl + "]")
+                .isTrue();
 
         SoftAssert.assertAll();
     }

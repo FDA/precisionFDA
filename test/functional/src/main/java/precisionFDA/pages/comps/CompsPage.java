@@ -4,9 +4,12 @@ import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.FindBy;
+import precisionFDA.utils.Utils;
 import ru.yandex.qatools.htmlelements.element.Link;
 import precisionFDA.locators.CompsLocators;
 import precisionFDA.pages.AbstractPage;
+
+import static precisionFDA.utils.Utils.sleep;
 
 public class CompsPage extends AbstractPage {
 
@@ -72,8 +75,9 @@ public class CompsPage extends AbstractPage {
 
     public CompsRunComparisonPage openCompsRunComparisonPage() {
         log.info("open Comps.RunComparison page");
+        sleep(500);
         Link link = getCompsRunComparisonLink();
-        waitUntilDisplayed(link);
+        waitUntilClickable(link);
         link.click();
         return new CompsRunComparisonPage(getDriver());
     }

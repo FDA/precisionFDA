@@ -5,6 +5,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import precisionFDA.utils.Utils;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.Select;
 import precisionFDA.data.TestRunData;
@@ -13,6 +14,8 @@ import precisionFDA.locators.ProfileLocators;
 import precisionFDA.pages.AbstractPage;
 import precisionFDA.pages.apps.AppsPage;
 import precisionFDA.pages.notes.NotesPage;
+
+import static precisionFDA.utils.Utils.sleep;
 
 public class ProfilePage extends AbstractPage {
 
@@ -61,6 +64,7 @@ public class ProfilePage extends AbstractPage {
         isElementPresent(getProfileTimeZoneSelect());
         sleep(500);
         getProfileTimeZoneSelect().selectByValue(timeZone[1]);
+        sleep(500);
         TestRunData.setCurrentTimezone(timeZone[0]);
         return new ProfilePage(getDriver());
     }

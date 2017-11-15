@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import precisionFDA.model.FilesProfile;
+import precisionFDA.utils.Utils;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import precisionFDA.data.TestUserData;
@@ -18,6 +19,8 @@ import static precisionFDA.data.TestDict.getDictPrivate;
 import static precisionFDA.data.TestRunData.getDockerFileName;
 import static precisionFDA.data.TestRunData.getPathToDownloadsFolder;
 import static precisionFDA.utils.Utils.generateUpdatedName;
+import static precisionFDA.utils.Utils.sleep;
+import static precisionFDA.utils.Utils.waitUntilFileIsDownloaded;
 
 public class UploadedFilePage extends AbstractPage {
 
@@ -65,6 +68,9 @@ public class UploadedFilePage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_SAVED_COMMENT_TEXT)
     private WebElement uploadedFileSavedCommentWE;
 
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_PAGE_AUTHORIZED_URL_BUTTON_LINK)
+    private Link uploadedFileAuthorizedUrlButtonLink;
+
     UserProfile getTestUser() {
         return TestUserData.getTestUser();
     }
@@ -72,6 +78,10 @@ public class UploadedFilePage extends AbstractPage {
     public UploadedFilePage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_UPLOADED_FILE_ACCESS_VALUE));
+    }
+
+    public Link getUploadedFileAuthorizedUrlButtonLink() {
+        return uploadedFileAuthorizedUrlButtonLink;
     }
 
     public Link getDownloadFileLink() {
@@ -273,6 +283,13 @@ public class UploadedFilePage extends AbstractPage {
         waitUntilClickable(getUploadedFileCommentSubmitButton());
         getUploadedFileCommentSubmitButton().click();
         return new UploadedFilePage(getDriver());
+    }
+
+    public FilesAuthURLPage clickAuthorizedURL() {
+        log.info("click Authorized URL");
+        waitUntilClickable(getUploadedFileAuthorizedUrlButtonLink());
+        getUploadedFileAuthorizedUrlButtonLink().click();
+        return new FilesAuthURLPage(getDriver());
     }
 
 
