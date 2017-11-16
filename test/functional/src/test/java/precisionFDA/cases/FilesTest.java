@@ -50,6 +50,12 @@ public class FilesTest extends AbstractTest {
         FilesProfile filesProfile = getMainFilesProfile();
 
         FilesPage filesPage = openOverviewPage().openFilesPage();
+
+        assertThat(
+                filesPage.isAddFilesButtonDisplayed())
+                .as("Add Files button is displayed")
+                .isTrue();
+
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(filesProfile.getFileInRoot());
 
@@ -105,6 +111,12 @@ public class FilesTest extends AbstractTest {
         FilesProfile filesProfile = getMainFilesProfile();
 
         FilesPage filesPage = openOverviewPage().openFilesPage();
+
+        assertThat(
+                filesPage.isCreateFolderButtonDisplayed())
+                .as("Create Folder button is displayed")
+                .isTrue();
+
         filesPage = filesPage.createFolder(filesProfile.getFirstLevelFolder());
 
         assertThat(

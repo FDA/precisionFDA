@@ -3,23 +3,24 @@ package precisionFDA.pages;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.*;
-
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.Select;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import ru.yandex.qatools.htmlelements.loader.HtmlElementLoader;
 
-import java.io.File;
 import java.util.List;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
+import static precisionFDA.data.TestDict.getDictError;
+import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
+import static precisionFDA.utils.Utils.reportScreenshot;
 
 public abstract class AbstractPage {
 
-    private final WebDriver driver;
+    private static WebDriver driver;
 
     private final Logger log = Logger.getLogger(this.getClass());
 
@@ -293,11 +294,12 @@ public abstract class AbstractPage {
             log.info(pageName + " page is open");
             return true;
         } else {
-            log.error("This is not " + pageName + " page. Something is wrong");
+            reportScreenshot("It looks like a wrong page is open. Should be " + pageName + " | Please see screenshot ==>",
+                    "wrongPage_" + pageName + getRunTimeLocalUniqueValue() + ".png",
+                    getDictError());
             return false;
         }
     }
-
 
     // ---- page scripts upload ----
 
@@ -402,7 +404,7 @@ public abstract class AbstractPage {
 
     // -------- getters and setters ---------
 
-    public WebDriver getDriver() {
+    public static WebDriver getDriver() {
         try {
             return driver;
         }

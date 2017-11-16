@@ -172,9 +172,10 @@ public class NotesEditNotePage extends AbstractPage {
     public NotesEditNotePage editNoteWithNewDataAndSave(NoteProfile noteProfile) {
         log.info("edit and save the note");
 
-        String newTitle = noteProfile.getNoteTitleText() + " upd " + getRunTimeLocalUniqueValue();
-        String newRowBody = noteProfile.getNoteRawText() + " upd " + getRunTimeLocalUniqueValue();
-        String newRichBody = noteProfile.getNoteRichText() + " upd " + getRunTimeLocalUniqueValue();
+        String salt = getRunTimeLocalUniqueValue();
+        String newTitle = noteProfile.getNoteTitleText() + " upd " + salt;
+        String newRowBody = noteProfile.getNoteRawText() + " upd " + salt;
+        String newRichBody = noteProfile.getNoteRichText() + " upd " + salt;
 
         noteProfile.setNoteTitleText(newTitle);
         noteProfile.setNoteRawText(newRowBody);

@@ -1,6 +1,5 @@
 package precisionFDA.cases;
 
-import org.testng.Reporter;
 import org.testng.annotations.Test;
 import ru.yandex.qatools.htmlelements.annotations.Name;
 import precisionFDA.data.TestUserData;
@@ -41,8 +40,6 @@ public class ExpertsTest extends AbstractTest {
                 expertsPage.isExpertCreatedSuccessAlertDisplayed())
                 .as("success alert is displayed")
                 .isTrue();
-
-        Reporter.log("");
 
         SoftAssert.assertThat(
                 expertsPage.getExpertCreatedSuccessAlertText())

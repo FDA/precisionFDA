@@ -32,7 +32,7 @@ public class CommonPage extends AbstractPage {
 
     public CommonPage(final WebDriver driver) {
         super(driver);
-        waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.COMMON_NAV_PANEL));
+        // waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.COMMON_NAV_PANEL));
     }
 
     private ProfileDropBlock profileDropBlock;
@@ -116,9 +116,9 @@ public class CommonPage extends AbstractPage {
 
     public AppsPage openAppsPage() {
         log.info("opening Apps page");
-        Link link = getAppsPageIcon();
         sleep(1000);
-        // waitUntilClickable(link);
+        Link link = getAppsPageIcon();
+        waitUntilClickable(link);
         link.click();
         return new AppsPage(getDriver());
     }

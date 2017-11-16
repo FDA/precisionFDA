@@ -89,19 +89,23 @@ public class TestRunData {
     }
 
     public static boolean isGetScreenshotOnPass() {
-        return SettingsProperties.getProperty("screenshotOnPass").equalsIgnoreCase("true");
+        return SettingsProperties.getProperty("screenshotOnTestSuccess").equalsIgnoreCase("true");
     }
 
     public static boolean isGetScreenshotOnFail() {
-        return SettingsProperties.getProperty("screenshotOnFail").equalsIgnoreCase("true");
+        return SettingsProperties.getProperty("screenshotOnTestFailure").equalsIgnoreCase("true");
     }
 
     public static boolean isGetPageSourceOnPass() {
-        return SettingsProperties.getProperty("htmlSourceOnPass").equalsIgnoreCase("true");
+        return SettingsProperties.getProperty("htmlSourceOnTestSuccess").equalsIgnoreCase("true");
     }
 
     public static boolean isGetPageSourceOnFail() {
-        return SettingsProperties.getProperty("htmlSourceOnFail").equalsIgnoreCase("true");
+        return SettingsProperties.getProperty("htmlSourceOnTestFailure").equalsIgnoreCase("true");
+    }
+
+    public static boolean isScreenshotFeatureOn() {
+        return SettingsProperties.getProperty("screenshotFeatureOn").equalsIgnoreCase("true");
     }
 
     public static String getInputNameFieldName() {

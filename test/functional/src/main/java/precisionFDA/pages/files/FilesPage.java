@@ -5,7 +5,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import precisionFDA.utils.Utils;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
@@ -102,7 +101,7 @@ public class FilesPage extends AbstractPage {
     }
 
     public WebElement getFilesCreateFolderButton() {
-        return getDriver().findElement(By.xpath(FilesLocators.FILES_CREATE_FOLDER_BUTTON));
+        return filesCreateFolderButton;
     }
 
     public boolean isBreadcrumbDisplayed() {
@@ -217,6 +216,15 @@ public class FilesPage extends AbstractPage {
         we2.click();
         log.info("created folder: " + folderName);
         return new FilesPage(getDriver());
+    }
+
+    public boolean isCreateFolderButtonDisplayed() {
+        sleep(1000);
+        return isElementPresent(getFilesCreateFolderButton(), 1);
+    }
+
+    public boolean isAddFilesButtonDisplayed() {
+        return isElementPresent(getFilesAddFilesButtonLink(), 2);
     }
 
     public boolean isLinkToCreatedFolderDisplayed(String folderName) {
