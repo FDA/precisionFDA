@@ -1,9 +1,11 @@
 package precisionFDA.utils;
 
+import com.epam.reportportal.message.ReportPortalMessage;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import precisionFDA.pages.AbstractPage;
 
 import java.io.*;
 import java.text.ParseException;
@@ -15,15 +17,12 @@ import static precisionFDA.data.TestDict.*;
 import static precisionFDA.data.TestFilesData.getTestPngTemplateFileName;
 import static precisionFDA.data.TestFilesData.getTestTextTemplateFileName;
 import static precisionFDA.data.TestRunData.*;
+import static precisionFDA.data.TestRunData.getDebugLogFolderPath;
 
-public class Utils {
+public class Utils extends AbstractPage {
 
-    public static String getCurrentDateTimeUTCValue() {
-        Date d = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        String date = dateFormat.format(d);
-        return date;
+    public Utils(WebDriver driver) {
+        super(driver);
     }
 
     public static String getCurrentDateTimeValue(String timeZone) {
@@ -87,39 +86,35 @@ public class Utils {
         bw.close();
     }
 
-    public static void takeScreenshot(String filePath, WebDriver driver) {
-        File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        try {
-            org.apache.commons.io.FileUtils.copyFile(scrFile, new File(filePath));
-        } catch (IOException e) {
-            e.printStackTrace();
+    public static void reportScreenshot(String message, String fileName, String loggerLevel) {
+        if (isScreenshotFeatureOn()) {
+            final Logger log = Logger.getLogger(loggerLevel.toUpperCase());
+            String filePath = getDebugLogFolderPath() + fileName;
+            takeScreenshot(filePath);
+            try {
+                ReportPortalMessage rpMessage = new ReportPortalMessage(new File(filePath), message);
+                log.info(rpMessage);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void takeScreenshot(String filePath) {
+        if (isScreenshotFeatureOn()) {
+            final Logger log = Logger.getLogger("INFO");
+            File scrFile = ((TakesScreenshot) getDriver()).getScreenshotAs(OutputType.FILE);
+            try {
+                org.apache.commons.io.FileUtils.copyFile(scrFile, new File(filePath));
+                log.info("screenshot is here: " + filePath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public static String getPageSource(WebDriver driver) {
         return driver.getPageSource();
-    }
-
-    public static boolean doesContain(String whereString, String whatString) {
-        if (whereString.contains(whatString)) {
-            return true;
-        }
-        else {
-            final Logger log = Logger.getLogger("TEST");
-            log.info("[" + whereString + "] does not contain [" + whatString + "]");
-            return false;
-        }
-    }
-
-    public static boolean areTheyEqual(String actualString, String expectedString) {
-        if (actualString.equals(expectedString)) {
-            return true;
-        }
-        else {
-            final Logger log = Logger.getLogger("TEST");
-            log.info("expected is [" + expectedString + "] but actual is [" + actualString + "]");
-            return false;
-        }
     }
 
     public static long getDifferenceBetweenDateTime(String dateTime1, String dateTime2) {
@@ -147,7 +142,7 @@ public class Utils {
         String textResult = "";
         Long delta = Utils.getDifferenceBetweenDateTime(actTime, expTime);
         if (delta <= possibleDelta) {
-            textResult = getTrueResult();
+            textResult = getDictTrue();
         }
         else {
             textResult = "Too big difference between displayed [" + actTime + "] and expected [" + expTime + "] | delta is: " + delta + " seconds";

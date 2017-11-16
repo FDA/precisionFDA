@@ -2,44 +2,56 @@ package precisionFDA.data;
 
 public class TestDict {
 
-    public static final String DICT_STRING = "STRING";
+    static final String DICT_STRING = "STRING";
 
-    public static final String TRUE_RESULT = "true";
+    static final String DICT_TRUE = "true";
 
-    public static final String CASE_STATUS_PASSED = "passed";
+    static final String DICT_PASSED = "passed";
 
-    public static final String CASE_STATUS_FAILED = "failed";
+    static final String DICT_FAILED = "failed";
 
-    public static final String DICT_PRIVATE = "Private";
+    static final String DICT_PRIVATE = "Private";
 
-    public static final String DICT_MY_FILES = "My files";
+    static final String DICT_INFO = "info";
 
-    public static final String DICT_COMMON_FILTER_PHRASE = "filter";
+    static final String DICT_ERROR = "error";
 
-    public static final String DICT_1ST_FILTER_PHRASE = DICT_COMMON_FILTER_PHRASE + "#1";
+    static final String DICT_MY_FILES = "My files";
 
-    public static final String DICT_2ND_FILTER_PHRASE = DICT_COMMON_FILTER_PHRASE + "#2";
+    static final String DICT_COMMON_FILTER_PHRASE = "filter";
+
+    static final String DICT_1ST_FILTER_PHRASE = DICT_COMMON_FILTER_PHRASE + "#1";
+
+    static final String DICT_2ND_FILTER_PHRASE = DICT_COMMON_FILTER_PHRASE + "#2";
 
     public static String getDictString() {
         return DICT_STRING;
     }
 
-    public static String getTrueResult() {
-        return TRUE_RESULT;
+    public static String getDictTrue() {
+        return DICT_TRUE;
     }
 
-    public static String getCaseStatusPassed() {
-        return CASE_STATUS_PASSED;
+    public static String getDictPassed() {
+        return DICT_PASSED;
     }
 
-    public static String getCaseStatusFailed() {
-        return CASE_STATUS_FAILED;
+    public static String getDictFailed() {
+        return DICT_FAILED;
     }
 
     public static String getDictPrivate() { return DICT_PRIVATE; }
 
     public static String getDictMyFiles() {
         return DICT_MY_FILES;
+    }
+
+    public static String getDictInfo() {
+        return DICT_INFO;
+    }
+
+    public static String getDictError() {
+        return DICT_ERROR;
     }
 
     public static String getDictFirstFilterPhrase() {

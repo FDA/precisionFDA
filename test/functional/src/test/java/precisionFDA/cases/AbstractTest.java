@@ -1,6 +1,5 @@
 package precisionFDA.cases;
 
-import com.epam.reportportal.message.ReportPortalMessage;
 import org.apache.log4j.Logger;
 import org.assertj.core.api.SoftAssertions;
 import org.openqa.selenium.*;
@@ -8,6 +7,9 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.logging.LogType;
+import org.openqa.selenium.logging.LoggingPreferences;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.testng.annotations.*;
@@ -24,12 +26,12 @@ import tools.CustomResultListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
-import static precisionFDA.data.TestDict.getCaseStatusFailed;
-import static precisionFDA.data.TestDict.getCaseStatusPassed;
+import static precisionFDA.data.TestDict.*;
 import static precisionFDA.data.TestRunData.*;
 import static precisionFDA.utils.Utils.*;
 
@@ -41,6 +43,10 @@ public abstract class AbstractTest {
     protected WebDriver driver;
 
     SoftAssertions SoftAssert;
+
+    public WebDriver getDriver() {
+        return driver;
+    }
 
     @BeforeClass(alwaysRun = true)
     public void setUp() {
@@ -92,35 +98,12 @@ public abstract class AbstractTest {
     }
 
     @BeforeMethod(alwaysRun = true)
-    public void beforeCase() {
+    public void beforeTestCase() {
         callBeforeCase();
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void afterCase() {
-        callAfterCase();
     }
 
     public void callBeforeCase() {
         SoftAssert = new SoftAssertions();
-    }
-
-    public void callAfterCase() {
-        if (getFinishedCaseStatus().equals(getCaseStatusPassed())) {
-            logAfterCaseData(getCaseStatusPassed(),
-                    getFinishedCaseName(),
-                    getRunSuiteName(),
-                    isGetScreenshotOnPass(),
-                    isGetPageSourceOnPass());
-        }
-
-        if (getFinishedCaseStatus().equals(getCaseStatusFailed())) {
-            logAfterCaseData(getCaseStatusFailed(),
-                    getFinishedCaseName(),
-                    getRunSuiteName(),
-                    isGetScreenshotOnFail(),
-                    isGetPageSourceOnFail());
-        }
     }
 
     public void logAfterCaseData(String caseStatus,
@@ -135,22 +118,22 @@ public abstract class AbstractTest {
         log.info("--      " + caseStatus.toUpperCase() + "      --");
         printLine();
 
-        String filePathWithNoExt = getDebugLogFolderPath() +
-                caseStatus + "_" +
+        String fileNameWithNoExt = caseStatus + "_" +
                 suiteName + "_" +
                 caseName + "_" +
                 getRunTimeLocalUniqueValue();
 
-        if (isGetScreenshot) {
-            takeScreenshot(filePathWithNoExt + ".png", driver);
-            log.info("screenshot is here: " + filePathWithNoExt + ".png");
+        String filePathWithNoExt = getDebugLogFolderPath() + fileNameWithNoExt;
 
-            try {
-                ReportPortalMessage message = new ReportPortalMessage(new File(filePathWithNoExt + ".png"), "snapshot");
-                log.info(message);
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (isGetScreenshot) {
+            String loggerLevel = "";
+            if (caseStatus.equalsIgnoreCase(getDictPassed())) {
+                loggerLevel = getDictInfo();
             }
+            else {
+                loggerLevel = getDictError();
+            }
+            reportScreenshot(loggerLevel.toUpperCase() + ": screenshot when " + caseName + " test case is finished", fileNameWithNoExt + ".png", loggerLevel);
         }
 
         if (isGetSource) {
@@ -280,6 +263,10 @@ public abstract class AbstractTest {
 
         public WebDriver initiateFirefoxBrowser() {
             String currentDirectory = System.getProperty("user.dir");
+
+            LoggingPreferences logs = new LoggingPreferences();
+            logs.enable(LogType.BROWSER, Level.SEVERE);
+
             FirefoxBinary firefoxBinary = new FirefoxBinary();
             if (SettingsProperties.getProperty("headlessMode").equalsIgnoreCase("true")) {
                 firefoxBinary.addCommandLineOptions("--headless");
@@ -298,6 +285,7 @@ public abstract class AbstractTest {
             firefoxOptions.addPreference("browser.download.manager.useWindow", false);
             firefoxOptions.addPreference("browser.download.manager.showAlertOnComplete", false);
             firefoxOptions.addPreference("browser.download.manager.closeWhenDone", false);
+            firefoxOptions.setCapability(CapabilityType.LOGGING_PREFS, logs);
 
             WebDriver initDriver = new FirefoxDriver(firefoxOptions);
             initDriver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);

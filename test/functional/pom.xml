@@ -40,7 +40,7 @@
                         </property>
                         <property>
                             <name>listener</name>
-                            <value>com.epam.reportportal.testng.ReportPortalTestNGListener, org.uncommons.reportng.HTMLReporter, org.uncommons.reportng.JUnitXMLReporter</value>
+                            <value>com.epam.reportportal.testng.ReportPortalTestNGListener,org.uncommons.reportng.HTMLReporter, org.uncommons.reportng.JUnitXMLReporter</value>
                         </property>
                     </properties>
                 </configuration>

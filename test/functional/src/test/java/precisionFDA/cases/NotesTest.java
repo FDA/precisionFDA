@@ -233,13 +233,6 @@ public class NotesTest extends AbstractTest {
                 .as("Note Added By")
                 .isEqualTo(savedNotePage.getExpAddedByText());
 
-        /*
-        SoftAssert.assertThat(
-                savedNotePage.getSavedNoteCreatedText())
-                .as("Note Created")
-                .contains(savedNotePage.getExpCreatedText());
-        */
-
         SoftAssert.assertThat(
                 savedNotePage.getSavedNoteBodyText())
                 .as("Updated Note Body Text")
