@@ -11,7 +11,6 @@ class AppsController < ApplicationController
 
     js_param = {}
     @app = nil
-    @challenges = Challenge.app_owned_by(@context)
 
     if params[:id].present?
       @app = App.accessible_by(@context).find_by(dxid: params[:id])
@@ -30,8 +29,8 @@ class AppsController < ApplicationController
         @answers = @app.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
         @discussions = @app.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
 
-        @assigned_challenges = @challenges.where(app_id: @app.id)
-        @assignable_challenges = @challenges.select{ |c| c.can_assign_specific_app?(@app) }
+        @assigned_challenges = Challenge.where(app_id: @app.id)
+        @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@app) }
       end
       js_param[:app] = @app.slice(:id, :dxid, :readme)
     end
@@ -113,8 +112,6 @@ class AppsController < ApplicationController
     @item_path = pathify(@app)
     @item_comments_path = pathify_comments(@app)
     @comments = @app.root_comments.order(id: :desc).page params[:comments_page]
-
-    @challenges = Challenge.app_owned_by(@context)
 
     User.sync_jobs!(@context)
 
