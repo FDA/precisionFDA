@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertTrue;
 import static precisionFDA.data.TestAppData.*;
 import static precisionFDA.data.TestRunData.*;
+import static precisionFDA.utils.Utils.printTestHeader;
 import static precisionFDA.utils.Utils.removeDockerFileFromDownloads;
 
 @Name("Applications management test suite")

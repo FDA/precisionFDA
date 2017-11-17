@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static precisionFDA.data.TestNotesData.getMainNoteProfile;
 import static precisionFDA.data.TestNotesData.getNoteToDelete;
 import static precisionFDA.data.TestNotesData.getNoteToEdit;
+import static precisionFDA.utils.Utils.printTestHeader;
 
 @Name("Notes Management Test Suite")
 public class NotesTest extends AbstractTest {

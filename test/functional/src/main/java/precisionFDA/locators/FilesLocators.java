@@ -82,4 +82,10 @@ public class FilesLocators {
 
     public static final String FILES_UPLOADED_FILE_PAGE_AUTHORIZED_URL_BUTTON_LINK = "//a/span[contains(@class, 'fa-link')]/..";
 
+    public static final String FILES_PUBLISH_PAGE_PUBLISH_OBJ_BUTTON = "//button[text()='Publish selected objects']";
+
+    public static final String FILES_UPLOADED_FILE_PUBLISH_BUTTON_LINK = "//a[contains(@href, 'publish')]/span/..";
+
+    public static final String FILES_PUBLISH_PAGE_FILE_NAME = "//span[@class='object-title']";
+
 }

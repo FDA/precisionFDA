@@ -3,6 +3,7 @@ package precisionFDA.cases;
 import org.testng.annotations.Test;
 import ru.yandex.qatools.htmlelements.annotations.Name;
 import static org.assertj.core.api.Assertions.assertThat;
+import static precisionFDA.utils.Utils.printTestHeader;
 
 import precisionFDA.data.TestUserData;
 import precisionFDA.model.UserProfile;

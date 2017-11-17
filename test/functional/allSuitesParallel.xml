@@ -25,6 +25,11 @@
             <class name="precisionFDA.cases.ExpertsTest" />
         </classes>
     </test>
+    <test name="FilesPublishTest">
+        <classes>
+            <class name="precisionFDA.cases.FilesPublishTest" />
+        </classes>
+    </test>
     <test name="FilesTest">
         <classes>
             <class name="precisionFDA.cases.FilesTest" />

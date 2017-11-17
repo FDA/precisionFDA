@@ -137,6 +137,12 @@ public class TestFilesData {
 
     //=================
 
+    public static String getPublishFileInRoot() {
+        return generateTestPngFileName();
+    }
+
+    //=================
+
     public static FilesProfile mainFilesProfile = new FilesProfile(
         getMainFileInRoot(),
         getMainFileInRootDescr(),
@@ -177,6 +183,16 @@ public class TestFilesData {
             ""
     );
 
+    public static FilesProfile publishFilesProfile = new FilesProfile(
+            getPublishFileInRoot(),
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+    );
+
     //=================
 
     public static FilesProfile getMainFilesProfile() {
@@ -194,6 +210,8 @@ public class TestFilesData {
     public static FilesProfile getSecondFilterProfile() {
         return filesSecondFilterProfile;
     }
+
+    public static FilesProfile getPublishFilesProfile() { return publishFilesProfile; }
 
 
 }

@@ -23,6 +23,7 @@ import static precisionFDA.data.TestDict.getDictTrue;
 import static precisionFDA.data.TestNotesData.getNoteTimeZone;
 import static precisionFDA.utils.Utils.applyTimezoneToDate;
 import static precisionFDA.utils.Utils.isDateTimeCorrect;
+import static precisionFDA.utils.Utils.printTestHeader;
 
 @Name("Time Zone test suite")
 public class TimeZoneTest extends AbstractTest {
@@ -32,7 +33,7 @@ public class TimeZoneTest extends AbstractTest {
         return new Object[][] {
                 {"GMT",         "UTC",                          "(GMT+00:00) UTC"},
                 {"GMT-8",       "Pacific Time (US & Canada)",   "(GMT-08:00) Pacific Time (US & Canada)"},
-                {"GMT+12:45",   "Chatham Is.",                  "(GMT+12:45) Chatham Is."}
+                {"GMT+13:45",   "Chatham Is.",                  "(GMT+13:45) Chatham Is."}
         };
     }
 

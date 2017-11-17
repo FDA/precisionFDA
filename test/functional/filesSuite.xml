@@ -3,6 +3,7 @@
     <test name="Files suite">
         <classes>
             <class name="precisionFDA.cases.FilesTest"/>
+            <class name="precisionFDA.cases.FilesPublishTest"/>
         </classes>
     </test>
 </suite>

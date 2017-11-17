@@ -20,6 +20,8 @@ import precisionFDA.pages.overview.OverviewPage;
 import precisionFDA.pages.profile.ProfilePage;
 import precisionFDA.pages.profile.PublicProfilePage;
 
+import static precisionFDA.utils.Utils.printTestHeader;
+
 @Name("Open all pages test suite")
 public class OpenAllPagesTest extends AbstractTest {
 
@@ -514,10 +516,10 @@ public class OpenAllPagesTest extends AbstractTest {
         printTestHeader("Test Case: check that Files.Explore page can be open");
 
         FilesPage filesPage = openOverviewPage().openFilesPage();
-        FilesExplorePage filesExplorePage = filesPage.openFilesExplorePage();
+        filesPage = filesPage.openFilesExplorePage();
 
         SoftAssert.assertThat(
-                filesExplorePage.isExploreLinkActivated())
+                filesPage.isExploreLinkActivated())
                 .as("Explore link is activated")
                 .isTrue();
 

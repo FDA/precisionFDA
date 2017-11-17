@@ -52,12 +52,19 @@ public class FilesPage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_FILTER_ICON)
     private WebElement filterIcon;
 
+    @FindBy(xpath = FilesLocators.FILES_EXPLORE_ACTIVATED_LINK)
+    private Link filesExploreActivatedLink;
+
     public FilesPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_ADD_FILES_BUTTON_LINK));
         //waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_CREATE_FOLDER_BUTTON));
         sleep(1000);
+    }
+
+    public Link getFilesExploreActivatedLink() {
+        return filesExploreActivatedLink;
     }
 
     public Link getFilesMyFilesLink() {
@@ -108,6 +115,10 @@ public class FilesPage extends AbstractPage {
         return isElementPresent(getBreadcrumbs(), 2);
     }
 
+    public boolean isExploreLinkActivated() {
+        return isElementPresent(getFilesExploreActivatedLink());
+    }
+
     public String getDisplayedBreadcrumbsText() {
         isElementPresent(getBreadcrumbs());
         List<WebElement> chains = getDriver().findElements(By.xpath(FilesLocators.FILES_BREADCRUMB_CHAIN));
@@ -142,12 +153,13 @@ public class FilesPage extends AbstractPage {
         return new FilesFeaturedPage(getDriver());
     }
 
-    public FilesExplorePage openFilesExplorePage() {
+    public FilesPage openFilesExplorePage() {
         log.info("open Files.Explore page");
         Link link = getFilesExploreLink();
         waitUntilClickable(link);
         link.click();
-        return new FilesExplorePage(getDriver());
+        waitUntilDisplayed(getFilesExploreActivatedLink());
+        return new FilesPage(getDriver());
     }
 
     public FilesAddFilesPage openFilesAddFilesPage() {

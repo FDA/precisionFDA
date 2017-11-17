@@ -9,8 +9,9 @@ public class LoginStagingPage extends AbstractPage {
 
     public LoginStagingPage(final WebDriver driver) {
         super(driver);
-        waitUntilScriptsReady();
-        waitForPageToLoadAndVerifyBy(By.xpath(LoginStagingLocators.LOGIN_PASSWORD_INPUT), 180);
+        waitForPageToLoadAndVerifyBy(By.xpath(LoginStagingLocators.LOGIN_USERNAME_INPUT), 10);
+        waitForPageToLoadAndVerifyBy(By.xpath(LoginStagingLocators.LOGIN_PASSWORD_INPUT), 10);
+        waitForPageToLoadAndVerifyBy(By.xpath(LoginStagingLocators.LOGIN_SUBMIT_BUTTON), 10);
     }
 
 }

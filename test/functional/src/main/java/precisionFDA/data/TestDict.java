@@ -12,9 +12,13 @@ public class TestDict {
 
     static final String DICT_PRIVATE = "Private";
 
+    static final String DICT_PUBLIC = "Public";
+
     static final String DICT_INFO = "info";
 
     static final String DICT_ERROR = "error";
+
+    static final String DICT_WARNING = "warning";
 
     static final String DICT_MY_FILES = "My files";
 
@@ -42,8 +46,16 @@ public class TestDict {
 
     public static String getDictPrivate() { return DICT_PRIVATE; }
 
+    public static String getDictPublic() {
+        return DICT_PUBLIC;
+    }
+
     public static String getDictMyFiles() {
         return DICT_MY_FILES;
+    }
+
+    public static String getDictWarning() {
+        return DICT_WARNING;
     }
 
     public static String getDictInfo() {

@@ -1,5 +1,6 @@
 package precisionFDA.pages;
 
+import com.epam.reportportal.message.ReportPortalMessage;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.*;
@@ -9,18 +10,21 @@ import ru.yandex.qatools.htmlelements.element.Select;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import ru.yandex.qatools.htmlelements.loader.HtmlElementLoader;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
-import static precisionFDA.data.TestDict.getDictError;
+import static precisionFDA.data.TestDict.getDictWarning;
+import static precisionFDA.data.TestRunData.*;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
-import static precisionFDA.utils.Utils.reportScreenshot;
+import static precisionFDA.utils.Utils.takeScreenshot;
 
 public abstract class AbstractPage {
 
-    private static WebDriver driver;
+    protected WebDriver driver;
 
     private final Logger log = Logger.getLogger(this.getClass());
 
@@ -294,9 +298,26 @@ public abstract class AbstractPage {
             log.info(pageName + " page is open");
             return true;
         } else {
-            reportScreenshot("It looks like a wrong page is open. Should be " + pageName + " | Please see screenshot ==>",
-                    "wrongPage_" + pageName + getRunTimeLocalUniqueValue() + ".png",
-                    getDictError());
+
+            String message = "It looks like a wrong page is open. Should be " + pageName;
+            log.warn(message);
+
+            String fileName =
+                    getDictWarning() + "_" +
+                    getRunTimeLocalUniqueValue()
+                    + ".png";
+
+            if (isScreenshotFeatureOn()) {
+                String filePath = getDebugLogFolderPath() + fileName;
+                takeScreenshot(filePath, driver);
+                try {
+                    ReportPortalMessage rpMessage = new ReportPortalMessage(new File(filePath), message + " | Please see screenshot ==>");
+                    log.warn(rpMessage);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
             return false;
         }
     }
@@ -404,7 +425,7 @@ public abstract class AbstractPage {
 
     // -------- getters and setters ---------
 
-    public static WebDriver getDriver() {
+    public WebDriver getDriver() {
         try {
             return driver;
         }

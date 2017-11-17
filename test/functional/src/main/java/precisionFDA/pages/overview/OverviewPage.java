@@ -6,7 +6,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import precisionFDA.pages.spaces.SpacesPage;
-import precisionFDA.utils.Utils;
 import ru.yandex.qatools.htmlelements.element.Link;
 import precisionFDA.blocks.ProfileDropBlock;
 import precisionFDA.locators.CommonLocators;
@@ -46,8 +45,9 @@ public class OverviewPage extends AbstractPage {
 
     public OverviewPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.COMMON_NAV_PANEL), 30);
-        // waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.USER_AVATAR_IMG), 5);
+        waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.APPS_PAGE_ICON), 5);
     }
 
     protected ProfileDropBlock getProfileDropBlock() {

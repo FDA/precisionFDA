@@ -12,6 +12,7 @@ import precisionFDA.pages.experts.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static precisionFDA.data.TestExpertsData.getMainExpertProfile;
 import static precisionFDA.data.TestQuestionsData.getMainQAProfile;
+import static precisionFDA.utils.Utils.printTestHeader;
 
 @Name("Experts test suite")
 public class ExpertsTest extends AbstractTest {
@@ -144,6 +145,8 @@ public class ExpertsTest extends AbstractTest {
                 expertsPage.isCreatedExpertPrefNameDisplayed(expertProfile))
                 .as("link to the created expert is NOT displayed")
                 .isFalse();
+
+        logoutFromAll();
     }
 
     @Test(priority = 4, dependsOnMethods = "createExpert")

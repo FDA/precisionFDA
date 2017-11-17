@@ -37,7 +37,7 @@ public class AppsPage extends AbstractPage {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_JOBS_LIST));
-        waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_CREATE_APP_BUTTON_LINK), 30);
+        waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_CREATE_APP_BUTTON_LINK), 60);
     }
 
     public Link getAppsCreateAppButtonLink() {

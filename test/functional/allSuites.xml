@@ -35,4 +35,14 @@
             <class name="precisionFDA.cases.SpacesTest"/>
         </classes>
     </test>
+    <test name="FilesTest">
+        <classes>
+            <class name="precisionFDA.cases.FilesTest" />
+        </classes>
+    </test>
+    <test name="FilesPublishTest">
+        <classes>
+            <class name="precisionFDA.cases.FilesPublishTest" />
+        </classes>
+    </test>
 </suite>
