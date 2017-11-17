@@ -196,7 +196,7 @@ class Challenge < ActiveRecord::Base
     return false if app_id == checked_app.id
     return true if submissions.empty?
 
-    app.input_spec == checked_app.app
+    app.input_spec == checked_app.input_spec
   end
 
   def is_viewable?(context)
