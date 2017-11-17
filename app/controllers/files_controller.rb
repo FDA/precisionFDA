@@ -59,11 +59,7 @@ class FilesController < ApplicationController
   end
 
   def show
-    @file = UserFile.not_assets.accessible_by(@context).includes(:user).find_by(dxid: params[:id])
-    if @file.nil?
-      # If file wasn't found, this will throw the error page if it fails
-      @file = UserFile.not_assets.viewable_by(@context).includes(:user).find_by!(dxid: params[:id])
-    end
+    @file = UserFile.not_assets.accessible_by(@context).includes(:user).find_by!(dxid: params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
@@ -105,11 +101,7 @@ class FilesController < ApplicationController
 
   def download
     # Allow assets as well
-    @file = UserFile.accessible_by(@context).find_by(dxid: params[:id])
-    if @file.nil?
-      # If file wasn't found, this will throw the error page if it fails
-      @file = UserFile.viewable_by(@context).find_by!(dxid: params[:id])
-    end
+    @file = UserFile.accessible_by(@context).find_by!(dxid: params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
@@ -136,11 +128,7 @@ class FilesController < ApplicationController
 
   def link
     # Allow assets as well, thought not currently exposed in the UI
-    @file = UserFile.accessible_by(@context).find_by(dxid: params[:id])
-    if @file.nil?
-      # If file wasn't found, this will throw the error page if it fails
-      @file = UserFile.viewable_by(@context).find_by!(dxid: params[:id])
-    end
+    @file = UserFile.accessible_by(@context).find_by!(dxid: params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"

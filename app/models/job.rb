@@ -154,34 +154,12 @@ class Job < ActiveRecord::Base
     super && terminal?
   end
 
-  def from_submission?
-    submission.present?
-  end
-
   def publish_by_user(user, scope = "public")
     update!(scope: scope) if publishable_by_user?(user, scope)
   end
 
   def from_submission?
     submission.present?
-  end
-
-  def viewable_by?(context)
-    if context.guest? || !context.logged_in?
-      return false
-    else
-      raise unless context.user_id.present? && context.user.present?
-      return from_submission? && context.user.is_challenge_evaluator?
-    end
-  end
-
-  def self.viewable_by(context)
-    if context.guest? || !context.logged_in? || !context.user.is_challenge_evaluator?
-      none
-    else
-      raise unless context.user_id.present? && context.user.present?
-      joins(:submission)
-    end
   end
 
   def self.publish(jobs, context, scope)
@@ -203,7 +181,6 @@ class Job < ActiveRecord::Base
   end
 
   def input_data
-    # IoCollection.build(self)
     IOCollection.build(input_spec, run_inputs)
   end
 end

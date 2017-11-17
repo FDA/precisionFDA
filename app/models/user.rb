@@ -62,10 +62,14 @@ class User < ActiveRecord::Base
   acts_as_follower
   acts_as_tagger
 
-  scope :without_challenge_bot, -> { where.not(dxuser: CHALLENGE_BOT_DX_USER) }
+  scope :not_challenge_bot, -> { where.not(dxuser: CHALLENGE_BOT_DX_USER) }
 
   def self.challenge_bot
     find_by!(dxuser: CHALLENGE_BOT_DX_USER)
+  end
+
+  def challenge_bot?
+    dxuser == CHALLENGE_BOT_DX_USER
   end
 
   def uid
@@ -78,6 +82,10 @@ class User < ActiveRecord::Base
 
   def klass
     "user"
+  end
+
+  def org
+    challenge_bot? ? Org.new : super
   end
 
   def real_files

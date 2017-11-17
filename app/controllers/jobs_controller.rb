@@ -6,12 +6,9 @@ class JobsController < ApplicationController
     @job = Job.accessible_by(@context).includes(:user).find_by(dxid: params[:id])
 
     if @job.nil?
-      @job = Job.viewable_by(@context).includes(:user).find_by(dxid: params[:id])
-      if @job.nil?
-        flash[:error] = "Sorry, this job does not exist or is not accessible by you"
-        redirect_to apps_path
-        return
-      end
+      flash[:error] = "Sorry, this job does not exist or is not accessible by you"
+      redirect_to apps_path
+      return
     end
 
     if !@job.terminal?
@@ -32,13 +29,11 @@ class JobsController < ApplicationController
 
   def log
     @job = Job.accessible_by(@context).find_by(dxid: params[:id])
+
     if @job.nil?
-      @job = Job.viewable_by(@context).includes(:user).find_by(dxid: params[:id])
-      if @job.nil?
-        flash[:error] = "Sorry, this job does not exist or its log is not accessible by you"
-        redirect_to apps_path
-        return
-      end
+      flash[:error] = "Sorry, this job does not exist or its log is not accessible by you"
+      redirect_to apps_path
+      return
     end
 
     if !@job.terminal?

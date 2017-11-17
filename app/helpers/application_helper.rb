@@ -150,7 +150,4 @@ module ApplicationHelper
     end
   end
 
-  def time_in_default_time_zone(time, format = :human_with_tz)
-    time.in_time_zone(PrecisionFda::Application.config.time_zone).to_s(format)
-  end
 end
