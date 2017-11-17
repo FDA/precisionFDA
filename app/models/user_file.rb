@@ -190,25 +190,6 @@ class UserFile < ActiveRecord::Base
     end
   end
 
-  def viewable_by?(context)
-    if context.guest? || !context.logged_in?
-      return false
-    else
-      raise unless context.user_id.present? && context.user.present?
-      return user_id == User.challenge_bot.id && context.user.is_challenge_evaluator?
-    end
-  end
-
-  def self.viewable_by(context)
-    if context.guest? || !context.logged_in? || !context.user.is_challenge_evaluator?
-      none
-    else
-      raise unless context.user_id.present? && context.user.present?
-      # get the output file ids from all submission-based jobs that successfully completed
-      where(user_id: User.challenge_bot.id).where(parent_type: "Job").where(state: "closed")
-    end
-  end
-
   def self.publish(files, context, scope)
     file_publisher = FilePublisher.by_context(context)
     file_publisher.publish(files, scope)

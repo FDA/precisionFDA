@@ -264,7 +264,7 @@ class ChallengesController < ApplicationController
   end
 
   def app_owners_for_select
-    @app_owners_candidates = User.without_challenge_bot.map{ |u| [u.select_text, u.id] }
+    @app_owners_candidates = User.not_challenge_bot.map{ |u| [u.select_text, u.id] }
   end
 
   def find_editable_challenge
