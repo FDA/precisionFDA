@@ -20,7 +20,7 @@ public class MainStagingPage extends AbstractPage {
 
     public MainStagingPage(final WebDriver driver) {
         super(driver);
-        waitForPageToLoadAndVerifyBy(By.xpath(MainStagingLocators.PROJECTS_LINK), 30);
+        waitForPageToLoadAndVerifyBy(By.xpath(MainStagingLocators.PROJECTS_LINK), 60);
     }
 
     public Link getUserDD() {

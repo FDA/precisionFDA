@@ -1,11 +1,9 @@
 package precisionFDA.pages;
 
 import org.apache.log4j.Logger;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.FindBy;
 import precisionFDA.pages.spaces.SpacesPage;
-import precisionFDA.utils.Utils;
 import ru.yandex.qatools.htmlelements.element.Link;
 import precisionFDA.blocks.ProfileDropBlock;
 import precisionFDA.locators.CommonLocators;
@@ -32,6 +30,7 @@ public class CommonPage extends AbstractPage {
 
     public CommonPage(final WebDriver driver) {
         super(driver);
+        waitUntilScriptsReady();
         // waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.COMMON_NAV_PANEL));
     }
 
@@ -117,9 +116,17 @@ public class CommonPage extends AbstractPage {
     public AppsPage openAppsPage() {
         log.info("opening Apps page");
         sleep(1000);
-        Link link = getAppsPageIcon();
-        waitUntilClickable(link);
-        link.click();
+        waitUntilClickable(getAppsPageIcon());
+        sleep(1000);
+        clickAppIcon();
+        sleep(1000);
+        clickAppIcon();
+        return new AppsPage(getDriver());
+    }
+
+    public AppsPage clickAppIcon() {
+        waitUntilClickable(getAppsPageIcon());
+        getAppsPageIcon().click();
         return new AppsPage(getDriver());
     }
 
@@ -141,6 +148,7 @@ public class CommonPage extends AbstractPage {
 
     public NotesPage openNotesPage() {
         log.info("opening Notes page");
+        sleep(1000);
         Link link = getNotesPageIcon();
         waitUntilClickable(link);
         link.click();

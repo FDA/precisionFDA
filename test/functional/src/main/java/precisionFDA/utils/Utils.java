@@ -1,11 +1,9 @@
 package precisionFDA.utils;
 
-import com.epam.reportportal.message.ReportPortalMessage;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-import precisionFDA.pages.AbstractPage;
 
 import java.io.*;
 import java.text.ParseException;
@@ -17,13 +15,8 @@ import static precisionFDA.data.TestDict.*;
 import static precisionFDA.data.TestFilesData.getTestPngTemplateFileName;
 import static precisionFDA.data.TestFilesData.getTestTextTemplateFileName;
 import static precisionFDA.data.TestRunData.*;
-import static precisionFDA.data.TestRunData.getDebugLogFolderPath;
 
-public class Utils extends AbstractPage {
-
-    public Utils(WebDriver driver) {
-        super(driver);
-    }
+public class Utils {
 
     public static String getCurrentDateTimeValue(String timeZone) {
         Date d = new Date();
@@ -84,33 +77,6 @@ public class Utils extends AbstractPage {
         BufferedWriter bw = new BufferedWriter(fw);
         bw.write(content);
         bw.close();
-    }
-
-    public static void reportScreenshot(String message, String fileName, String loggerLevel) {
-        if (isScreenshotFeatureOn()) {
-            final Logger log = Logger.getLogger(loggerLevel.toUpperCase());
-            String filePath = getDebugLogFolderPath() + fileName;
-            takeScreenshot(filePath);
-            try {
-                ReportPortalMessage rpMessage = new ReportPortalMessage(new File(filePath), message);
-                log.info(rpMessage);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public static void takeScreenshot(String filePath) {
-        if (isScreenshotFeatureOn()) {
-            final Logger log = Logger.getLogger("INFO");
-            File scrFile = ((TakesScreenshot) getDriver()).getScreenshotAs(OutputType.FILE);
-            try {
-                org.apache.commons.io.FileUtils.copyFile(scrFile, new File(filePath));
-                log.info("screenshot is here: " + filePath);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     public static String getPageSource(WebDriver driver) {
@@ -358,6 +324,40 @@ public class Utils extends AbstractPage {
         }
         waitUntilFileIsDownloaded(getPathToDownloadsFolder() + fileName);
     }
+
+    public static void printCaseStatus(String caseStatus, String caseName, String suiteName) {
+        final Logger log = Logger.getLogger("");
+        printLine();
+        log.info("-- it was test case [" + caseName + "] from suite [" + suiteName + "] --");
+        printLine();
+        log.info("--      " + caseStatus.toUpperCase() + "      --");
+        printLine();
+    }
+    public static void printTestHeader(final String text) {
+        final Logger log = Logger.getLogger("");
+        printLine();
+        log.info(text);
+        printLine();
+    }
+
+    public static void printLine() {
+        final Logger log = Logger.getLogger("");
+        log.info("----------------------------------------------------------------");
+    }
+
+    public static void takeScreenshot(String filePath, WebDriver driver) {
+        if (isScreenshotFeatureOn()) {
+            final Logger log = Logger.getLogger(getDictInfo().toUpperCase());
+            File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+            try {
+                org.apache.commons.io.FileUtils.copyFile(scrFile, new File(filePath));
+                log.info("screenshot is here: " + filePath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
 
 }

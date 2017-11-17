@@ -1,14 +1,11 @@
 package precisionFDA.cases;
 
 import org.testng.annotations.Test;
-import precisionFDA.pages.files.FilesAuthURLPage;
+import precisionFDA.pages.files.*;
 import ru.yandex.qatools.htmlelements.annotations.Name;
 import precisionFDA.data.TestUserData;
 import precisionFDA.model.FilesProfile;
 import precisionFDA.model.UserProfile;
-import precisionFDA.pages.files.FilesAddFilesPage;
-import precisionFDA.pages.files.FilesPage;
-import precisionFDA.pages.files.UploadedFilePage;
 import precisionFDA.pages.overview.OverviewPage;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,16 +13,14 @@ import static precisionFDA.data.TestDict.getDictCommonFilterPhrase;
 import static precisionFDA.data.TestDict.getDictFirstFilterPhrase;
 import static precisionFDA.data.TestDict.getDictSecondFilterPhrase;
 import static precisionFDA.data.TestFilesData.*;
-import static precisionFDA.utils.Utils.generateExpectedBreadcrumbs;
-import static precisionFDA.utils.Utils.removeSameFileFromDownloads;
-import static precisionFDA.utils.Utils.wgetFile;
+import static precisionFDA.utils.Utils.*;
 
 @Name("Files test suite")
 public class FilesTest extends AbstractTest {
 
     @Test
     public void successfulLogin() {
-        printTestHeader(" -- Successful Login -- ");
+        printTestHeader("Precondition: Successful Login");
 
         UserProfile user = TestUserData.getTestUser();
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -94,11 +89,6 @@ public class FilesTest extends AbstractTest {
         SoftAssert.assertThat(
                 uploadedFilePage.isAddedByCorrect())
                 .as("Added by is correct")
-                .isTrue();
-
-        SoftAssert.assertThat(
-                uploadedFilePage.isAccessPrivate())
-                .as("Access is private")
                 .isTrue();
 
         SoftAssert.assertAll();
@@ -559,6 +549,5 @@ public class FilesTest extends AbstractTest {
 
         SoftAssert.assertAll();
     }
-
 
 }

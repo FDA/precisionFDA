@@ -7,6 +7,7 @@ import precisionFDA.cases.AbstractTest;
 
 import static precisionFDA.data.TestDict.*;
 import static precisionFDA.data.TestRunData.*;
+import static precisionFDA.utils.Utils.printCaseStatus;
 
 public class CustomResultListener extends AbstractTest implements ITestListener {
 
@@ -16,12 +17,7 @@ public class CustomResultListener extends AbstractTest implements ITestListener 
         String caseName = result.getName();
         setFinishedCaseData(getDictPassed(), caseName, suiteName);
 
-        logAfterCaseData(
-                getDictPassed(),
-                caseName,
-                suiteName,
-                isGetScreenshotOnPass(),
-                isGetPageSourceOnPass());
+        printCaseStatus(getDictPassed(), caseName, suiteName);
     }
 
     @Override
@@ -30,12 +26,7 @@ public class CustomResultListener extends AbstractTest implements ITestListener 
         String caseName = result.getName();
         setFinishedCaseData(getDictFailed(), caseName, suiteName);
 
-        logAfterCaseData(
-                getDictFailed(),
-                caseName,
-                suiteName,
-                isGetScreenshotOnFail(),
-                isGetPageSourceOnFail());
+        printCaseStatus(getDictFailed(), caseName, suiteName);
     }
 
     @Override

@@ -16,7 +16,7 @@ import precisionFDA.pages.AbstractPage;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 
 import static precisionFDA.data.TestDict.getDictPrivate;
-import static precisionFDA.data.TestRunData.getDockerFileName;
+import static precisionFDA.data.TestDict.getDictPublic;
 import static precisionFDA.data.TestRunData.getPathToDownloadsFolder;
 import static precisionFDA.utils.Utils.generateUpdatedName;
 import static precisionFDA.utils.Utils.sleep;
@@ -71,6 +71,9 @@ public class UploadedFilePage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_PAGE_AUTHORIZED_URL_BUTTON_LINK)
     private Link uploadedFileAuthorizedUrlButtonLink;
 
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_PUBLISH_BUTTON_LINK)
+    private Link uploadedFilePublishButtonLink;
+
     UserProfile getTestUser() {
         return TestUserData.getTestUser();
     }
@@ -78,6 +81,10 @@ public class UploadedFilePage extends AbstractPage {
     public UploadedFilePage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_UPLOADED_FILE_ACCESS_VALUE));
+    }
+
+    public Link getUploadedFilePublishButtonLink() {
+        return uploadedFilePublishButtonLink;
     }
 
     public Link getUploadedFileAuthorizedUrlButtonLink() {
@@ -194,6 +201,17 @@ public class UploadedFilePage extends AbstractPage {
         }
     }
 
+    public boolean isAccessPublic() {
+        String actValue = getUploadedFileAccessValueText();
+        if (actValue.equalsIgnoreCase(getDictPublic())) {
+            return true;
+        }
+        else {
+            log.info("displayed access is [" + actValue + "] but expected [" + getDictPrivate());
+            return false;
+        }
+    }
+
     public boolean isDownloadFileLinkDisplayed() {
         UploadedFilePage uploadedFilePage = waitUntilDownloadFileLinkIsDisplayed();
         return isElementPresent(getDownloadFileLink());
@@ -292,5 +310,11 @@ public class UploadedFilePage extends AbstractPage {
         return new FilesAuthURLPage(getDriver());
     }
 
+    public FilesPublishPage clickPublish() {
+        log.info("click Publish");
+        waitUntilClickable(getUploadedFilePublishButtonLink());
+        getUploadedFilePublishButtonLink().click();
+        return new FilesPublishPage(getDriver());
+    }
 
 }

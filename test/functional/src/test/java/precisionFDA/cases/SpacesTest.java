@@ -10,6 +10,7 @@ import precisionFDA.pages.spaces.SpacesPage;
 import ru.yandex.qatools.htmlelements.annotations.Name;
 
 import static precisionFDA.data.TestSpacesData.getMainSpaceProfile;
+import static precisionFDA.utils.Utils.printTestHeader;
 
 @Name("Spaces management test suite")
 public class SpacesTest extends AbstractTest {

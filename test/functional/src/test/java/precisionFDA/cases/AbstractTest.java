@@ -1,5 +1,6 @@
 package precisionFDA.cases;
 
+import com.epam.reportportal.message.ReportPortalMessage;
 import org.apache.log4j.Logger;
 import org.assertj.core.api.SoftAssertions;
 import org.openqa.selenium.*;
@@ -9,7 +10,6 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
-import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.testng.annotations.*;
@@ -20,7 +20,6 @@ import precisionFDA.pages.overview.OverviewPage;
 import precisionFDA.pages.staging.LoginStagingPage;
 import precisionFDA.pages.staging.MainStagingPage;
 import precisionFDA.utils.SettingsProperties;
-import precisionFDA.utils.Utils;
 import tools.CustomResultListener;
 
 import java.io.File;
@@ -33,20 +32,18 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
 import static precisionFDA.data.TestDict.*;
 import static precisionFDA.data.TestRunData.*;
+import static precisionFDA.data.TestRunData.getFinishedCaseName;
+import static precisionFDA.data.TestRunData.getFinishedCaseStatus;
 import static precisionFDA.utils.Utils.*;
 
 @Listeners( { CustomResultListener.class } )
 public abstract class AbstractTest {
 
-    private Logger log = Logger.getLogger("INFO");
+    private Logger log = Logger.getLogger(getDictInfo().toUpperCase());
 
     protected WebDriver driver;
 
     SoftAssertions SoftAssert;
-
-    public WebDriver getDriver() {
-        return driver;
-    }
 
     @BeforeClass(alwaysRun = true)
     public void setUp() {
@@ -56,6 +53,7 @@ public abstract class AbstractTest {
     @AfterClass(alwaysRun = true)
     public void tearDown() throws Exception {
         closeBrowser();
+        sleep(5000);
     }
 
     public void closeBrowser() {
@@ -81,63 +79,54 @@ public abstract class AbstractTest {
     public void afterSuite() {
         // moveLogFileToCurrentLogFolder("full.print");
         // moveLogFileToCurrentLogFolder("error.print");
-        try {
-            Runtime.getRuntime().exec( "pkill -f firefox" ).waitFor();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            Runtime.getRuntime().exec( "pkill -f geckodriver" ).waitFor();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // try {
+        //     Runtime.getRuntime().exec( "pkill -f firefox" ).waitFor();
+        // } catch (InterruptedException e) {
+        //    e.printStackTrace();
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
+        // try {
+        //     Runtime.getRuntime().exec( "pkill -f geckodriver" ).waitFor();
+        // } catch (InterruptedException e) {
+        //     e.printStackTrace();
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
     }
 
     @BeforeMethod(alwaysRun = true)
     public void beforeTestCase() {
-        callBeforeCase();
-    }
-
-    public void callBeforeCase() {
         SoftAssert = new SoftAssertions();
     }
 
-    public void logAfterCaseData(String caseStatus,
-                                 String caseName,
-                                 String suiteName,
-                                 boolean isGetScreenshot,
-                                 boolean isGetSource) {
-
-        printLine();
-        log.info("-- it was test case [" + caseName + "] from suite [" + suiteName + "] --");
-        printLine();
-        log.info("--      " + caseStatus.toUpperCase() + "      --");
-        printLine();
-
-        String fileNameWithNoExt = caseStatus + "_" +
-                suiteName + "_" +
-                caseName + "_" +
-                getRunTimeLocalUniqueValue();
-
-        String filePathWithNoExt = getDebugLogFolderPath() + fileNameWithNoExt;
-
-        if (isGetScreenshot) {
-            String loggerLevel = "";
-            if (caseStatus.equalsIgnoreCase(getDictPassed())) {
-                loggerLevel = getDictInfo();
-            }
-            else {
-                loggerLevel = getDictError();
-            }
-            reportScreenshot(loggerLevel.toUpperCase() + ": screenshot when " + caseName + " test case is finished", fileNameWithNoExt + ".png", loggerLevel);
+    @AfterMethod(alwaysRun = true)
+    public void afterTestCase() {
+        boolean isGetScreenshot = false;
+        boolean isGetSource = false;
+        if (getFinishedCaseStatus().equalsIgnoreCase(getDictPassed())) {
+            isGetScreenshot = isGetScreenshotOnPass();
+            isGetSource = isGetPageSourceOnPass();
+        }
+        else if (getFinishedCaseStatus().equalsIgnoreCase(getDictFailed())) {
+            isGetScreenshot = isGetScreenshotOnFail();
+            isGetSource = isGetPageSourceOnFail();
         }
 
+        //-------------
+
+        String fileNameWithNoExt = getFinishedCaseStatus() + "_" +
+                getRunSuiteName() + "_" +
+                getFinishedCaseName() + "_" +
+                getRunTimeLocalUniqueValue();
+
+        //-------------
+
         if (isGetSource) {
-            String source = Utils.getPageSource(driver);
+
+            String filePathWithNoExt = getDebugLogFolderPath() + fileNameWithNoExt;
+
+            String source = getPageSource(driver);
             try {
                 createFile(filePathWithNoExt + ".txt", source);
                 log.info("page source is here: " + filePathWithNoExt + ".txt");
@@ -145,6 +134,40 @@ public abstract class AbstractTest {
                 e.printStackTrace();
             }
         }
+
+        //---------------
+
+        if (isGetScreenshot && isScreenshotFeatureOn()) {
+
+            String loggerLevel;
+            if (getFinishedCaseStatus().equalsIgnoreCase(getDictPassed())) {
+                loggerLevel = getDictInfo();
+            }
+            else {
+                loggerLevel = getDictError();
+            }
+
+            final Logger log = Logger.getLogger(loggerLevel.toUpperCase());
+
+            String filePath = getDebugLogFolderPath() + fileNameWithNoExt + ".png";
+            String message = loggerLevel.toUpperCase() + ": screenshot when " + getFinishedCaseName() + " test case is finished | Please see screenshot ==>";
+            takeScreenshot(filePath, driver);
+            try {
+                ReportPortalMessage rpMessage = new ReportPortalMessage(new File(filePath), message);
+                if (loggerLevel.equalsIgnoreCase(getDictError())) {
+                    log.error(rpMessage);
+                }
+                else {
+                    log.info(rpMessage);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        //---------------
+
         printLine();
     }
 
@@ -156,18 +179,9 @@ public abstract class AbstractTest {
         file.delete();
     }
 
-    public void printTestHeader(final String text) {
-        printLine();
-        log.info(text);
-        printLine();
-    }
-
-    public void printLine() {
-        log.info("----------------------------------------------------------------");
-    }
-
     public String getPageTitle() {
         String title = driver.getTitle();
+        log.info("actual page title is: " + title);
         return title;
     }
 
@@ -192,8 +206,8 @@ public abstract class AbstractTest {
     public LoginStagingPage logoutFromAll() {
         log.info("total logout from Staging");
         MainStagingPage mainStagingPage = openStaging();
-        LoginStagingPage loginStagingPage = mainStagingPage.logout();
-        return loginStagingPage;
+        mainStagingPage.logout();
+        return new LoginStagingPage(driver);
     }
 
     public MainStagingPage openStaging() {
@@ -285,7 +299,6 @@ public abstract class AbstractTest {
             firefoxOptions.addPreference("browser.download.manager.useWindow", false);
             firefoxOptions.addPreference("browser.download.manager.showAlertOnComplete", false);
             firefoxOptions.addPreference("browser.download.manager.closeWhenDone", false);
-            firefoxOptions.setCapability(CapabilityType.LOGGING_PREFS, logs);
 
             WebDriver initDriver = new FirefoxDriver(firefoxOptions);
             initDriver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
