@@ -26,7 +26,7 @@ public class CommonLocators {
 
     public static final String SPACES_PAGE_ICON = "//*[text()='Spaces']/../../a";
 
-    public static final String MAIN_LOGO = "//*[@class='navbar-header']//a/img[contains(@alt, 'Home')]";
+    public static final String MAIN_LOGO = "//a[@class='navbar-brand']/img";
 
 
 }

@@ -17,6 +17,7 @@ import java.util.List;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
+import static precisionFDA.data.TestDict.getDictError;
 import static precisionFDA.data.TestDict.getDictWarning;
 import static precisionFDA.data.TestRunData.*;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
@@ -283,13 +284,26 @@ public abstract class AbstractPage {
         return getDriver().findElements(By.xpath(selector));
     }
 
+    public String getOptionTextByPartialText(String partialText, String selectorByXpath) {
+        List<WebElement> options = getDriver().findElements(By.xpath(selectorByXpath));
+        String optionText = "";
+        if (options.size() > 0) {
+            for (WebElement we : options) {
+                if (we.getText().contains(partialText)) {
+                    optionText = we.getText();
+                    break;
+                }
+            }
+        }
+        return optionText;
+    }
+
 
     // ---- Verifying page content ----
 
     public boolean waitForPageToLoadAndVerifyBy(final By pageIdentifier) {
         return waitForPageToLoadAndVerifyBy(pageIdentifier, DEFAULT_TIMEOUT);
     }
-
 
     public boolean waitForPageToLoadAndVerifyBy(final By pageIdentifier, int timeout) {
         final String pageName = this.getClass().getName().replace("precisionFDA.pages.", "");
@@ -298,28 +312,35 @@ public abstract class AbstractPage {
             log.info(pageName + " page is open");
             return true;
         } else {
-
             String message = "It looks like a wrong page is open. Should be " + pageName;
             log.warn(message);
-
             String fileName =
                     getDictWarning() + "_" +
                     getRunTimeLocalUniqueValue()
                     + ".png";
-
-            if (isScreenshotFeatureOn()) {
-                String filePath = getDebugLogFolderPath() + fileName;
-                takeScreenshot(filePath, driver);
-                try {
-                    ReportPortalMessage rpMessage = new ReportPortalMessage(new File(filePath), message + " | Please see screenshot ==>");
-                    log.warn(rpMessage);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
+            reportScreenshot(message + " | Please see screenshot ==>", fileName, getDictWarning());
             return false;
         }
+    }
+
+    public String reportScreenshot(String message, String fileName, String loggerLevel) {
+        String filePath = getDebugLogFolderPath() + fileName;
+        takeScreenshot(filePath, driver);
+        try {
+            ReportPortalMessage rpMessage = new ReportPortalMessage(new File(filePath), message);
+            if (loggerLevel.equalsIgnoreCase(getDictError())) {
+                log.error(rpMessage);
+            }
+            else if (loggerLevel.equalsIgnoreCase(getDictWarning())) {
+                log.warn(rpMessage);
+            }
+            else {
+                log.info(rpMessage);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return filePath;
     }
 
     // ---- page scripts upload ----

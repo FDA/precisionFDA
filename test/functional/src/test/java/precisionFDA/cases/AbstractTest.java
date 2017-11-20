@@ -138,7 +138,6 @@ public abstract class AbstractTest {
         //---------------
 
         if (isGetScreenshot && isScreenshotFeatureOn()) {
-
             String loggerLevel;
             if (getFinishedCaseStatus().equalsIgnoreCase(getDictPassed())) {
                 loggerLevel = getDictInfo();
@@ -146,29 +145,33 @@ public abstract class AbstractTest {
             else {
                 loggerLevel = getDictError();
             }
-
-            final Logger log = Logger.getLogger(loggerLevel.toUpperCase());
-
-            String filePath = getDebugLogFolderPath() + fileNameWithNoExt + ".png";
             String message = loggerLevel.toUpperCase() + ": screenshot when " + getFinishedCaseName() + " test case is finished | Please see screenshot ==>";
-            takeScreenshot(filePath, driver);
-            try {
-                ReportPortalMessage rpMessage = new ReportPortalMessage(new File(filePath), message);
-                if (loggerLevel.equalsIgnoreCase(getDictError())) {
-                    log.error(rpMessage);
-                }
-                else {
-                    log.info(rpMessage);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
+            reportScreenshot(message, fileNameWithNoExt + ".png", loggerLevel);
         }
 
         //---------------
 
         printLine();
+    }
+
+    public String reportScreenshot(String message, String fileName, String loggerLevel) {
+        String filePath = getDebugLogFolderPath() + fileName;
+        takeScreenshot(filePath, driver);
+        try {
+            ReportPortalMessage rpMessage = new ReportPortalMessage(new File(filePath), message);
+            if (loggerLevel.equalsIgnoreCase(getDictError())) {
+                log.error(rpMessage);
+            }
+            else if (loggerLevel.equalsIgnoreCase(getDictWarning())) {
+                log.warn(rpMessage);
+            }
+            else {
+                log.info(rpMessage);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return filePath;
     }
 
     public void moveLogFileToCurrentLogFolder(String fileName) {
@@ -187,14 +190,13 @@ public abstract class AbstractTest {
 
     public OverviewPage openOverviewPage() {
         log.info("open Overview page");
-        String url = SettingsProperties.getProperty("precisionFdaURL");
+        String url = SettingsProperties.getProperty("precisionFdaOverviewURL");
         driver.get(url);
         return new OverviewPage(driver);
     }
 
     public LoginPrecisionPage openLoginPrecisionPage(UserProfile user) {
         log.info("open Precision FDA Login page");
-
         String loginPageURL = SettingsProperties.getProperty("loginPrecisionPageURL");
         driver.manage().deleteAllCookies();
         loginPageURL = loginPageURL.replace("{basicAuthUser}", user.getBasicAuthUsername())

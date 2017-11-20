@@ -36,8 +36,8 @@ public class AppsPage extends AbstractPage {
     public AppsPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
-        waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_JOBS_LIST));
-        waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_CREATE_APP_BUTTON_LINK), 60);
+        waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_JOBS_LIST), 30);
+        waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_CREATE_APP_BUTTON_LINK), 5);
     }
 
     public Link getAppsCreateAppButtonLink() {
@@ -95,7 +95,7 @@ public class AppsPage extends AbstractPage {
     public AppsEditAppPage openCreateAppPage() {
         log.info("open Apps.CreateApp Page");
         Link link = getAppsCreateAppButtonLink();
-        waitUntilDisplayed(link);
+        waitUntilClickable(link);
         link.click();
         return new AppsEditAppPage(getDriver());
     }

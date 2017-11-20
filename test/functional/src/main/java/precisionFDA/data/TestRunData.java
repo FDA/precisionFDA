@@ -151,4 +151,9 @@ public class TestRunData {
     public static String getPathToTempFilesFolder() {
         return System.getProperty("user.dir") + SettingsProperties.getProperty("pathToTempFiles");
     }
+
+    public static String getTestImageHttpsUrl() {
+        return SettingsProperties.getProperty("testImageHttpsUrl");
+    }
+
 }

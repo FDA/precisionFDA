@@ -20,6 +20,8 @@ public class TestDict {
 
     static final String DICT_WARNING = "warning";
 
+    static final String DICT_SETUP = "setup";
+
     static final String DICT_MY_FILES = "My files";
 
     static final String DICT_COMMON_FILTER_PHRASE = "filter";
@@ -48,6 +50,10 @@ public class TestDict {
 
     public static String getDictPublic() {
         return DICT_PUBLIC;
+    }
+
+    public static String getDictSetup() {
+        return DICT_SETUP;
     }
 
     public static String getDictMyFiles() {

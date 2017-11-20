@@ -49,7 +49,9 @@ public class AppsRelevantPage extends AbstractPage {
 
     public AppsSavedAppPage openSavedAppl(AppProfile appProfile) {
         log.info("open saved application");
-        getSavedAppLink(appProfile).click();
+        WebElement link = getSavedAppLink(appProfile);
+        waitUntilClickable(link);
+        link.click();
         return new AppsSavedAppPage(getDriver());
     }
 
