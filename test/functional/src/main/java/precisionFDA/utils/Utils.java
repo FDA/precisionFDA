@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 import java.io.*;
 import java.text.ParseException;
@@ -357,6 +358,7 @@ public class Utils {
             }
         }
     }
+
 
 
 

@@ -2,6 +2,7 @@ package precisionFDA.pages;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import precisionFDA.pages.spaces.SpacesPage;
 import ru.yandex.qatools.htmlelements.element.Link;
@@ -69,6 +70,9 @@ public class CommonPage extends AbstractPage {
     @FindBy(xpath = CommonLocators.SPACES_PAGE_ICON)
     private Link spacesPageIcon;
 
+    @FindBy(xpath = CommonLocators.MAIN_LOGO)
+    private WebElement mainLogo;
+
     protected ProfileDropBlock getProfileDropBlock() {
         return profileDropBlock;
     }
@@ -113,14 +117,19 @@ public class CommonPage extends AbstractPage {
         return spacesPageIcon;
     }
 
+    public WebElement getMainLogo() {
+        return mainLogo;
+    }
+
+    public String getMainLogoUrl() {
+        return getMainLogo().getAttribute("src");
+    }
+
     public AppsPage openAppsPage() {
         log.info("opening Apps page");
-        sleep(1000);
         waitUntilClickable(getAppsPageIcon());
-        sleep(1000);
         clickAppIcon();
-        sleep(1000);
-        clickAppIcon();
+        sleep(5000);
         return new AppsPage(getDriver());
     }
 
