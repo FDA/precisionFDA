@@ -31,7 +31,6 @@ public class TimeZoneTest extends AbstractTest {
     @DataProvider(name="getTimeZoneValue")
     public Object[][] getTimeZoneValue() {
         return new Object[][] {
-                {"GMT",         "UTC",                          "(GMT+00:00) UTC"},
                 {"GMT-8",       "Pacific Time (US & Canada)",   "(GMT-08:00) Pacific Time (US & Canada)"},
                 {"GMT+13:45",   "Chatham Is.",                  "(GMT+13:45) Chatham Is."}
         };
@@ -39,7 +38,7 @@ public class TimeZoneTest extends AbstractTest {
 
     public String[] getTestTimeZone() {
         return new String[]
-                {"GMT+2",       "Athens",               "(GMT+02:00) Athens"};
+                {"GMT",         "UTC",                          "(GMT+00:00) UTC"};
     }
 
     @Test
@@ -192,7 +191,7 @@ public class TimeZoneTest extends AbstractTest {
         profilePage = profilePage.setTimeZone(getTestTimeZone());
 
         AppsRelevantPage appsRelevantPage = profilePage.openAppsPage().openAppsRelevantPage();
-        appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
+        appsSavedAppPage = appsRelevantPage.openAppFromMyAppsList(appProfile);
 
         String actCreated = appsSavedAppPage.getActSelectedAppCreated();
         String expCreated = applyTimezoneToDate(appProfile.getCurRevAppCreatedText(), timeZone[0], getTestTimeZone()[0]);

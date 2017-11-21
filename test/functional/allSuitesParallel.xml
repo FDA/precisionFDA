@@ -1,5 +1,10 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 <suite name="all suites" parallel="tests" thread-count="2">
+    <test name="TimeZoneTest">
+        <classes>
+            <class name="precisionFDA.cases.TimeZoneTest" />
+        </classes>
+    </test>
     <test name="AppsTest">
         <classes>
             <class name="precisionFDA.cases.AppsTest" />
@@ -8,11 +13,6 @@
     <test name="NotesTest">
         <classes>
             <class name="precisionFDA.cases.NotesTest" />
-        </classes>
-    </test>
-    <test name="TimeZoneTest">
-        <classes>
-            <class name="precisionFDA.cases.TimeZoneTest" />
         </classes>
     </test>
     <test name="OpenAllPagesTest">
@@ -38,6 +38,11 @@
     <test name="SpacesTest">
         <classes>
             <class name="precisionFDA.cases.SpacesTest" />
+        </classes>
+    </test>
+    <test name="ChallsTest">
+        <classes>
+            <class name="precisionFDA.cases.ChallsTest" />
         </classes>
     </test>
 </suite>

@@ -1,15 +1,21 @@
 package precisionFDA.cases;
 
 import org.testng.annotations.Test;
-import precisionFDA.data.TestChallsData;
+import precisionFDA.data.TestAppData;
 import precisionFDA.data.TestUserData;
+import precisionFDA.model.AppProfile;
 import precisionFDA.model.ChallProfile;
 import precisionFDA.model.UserProfile;
+import precisionFDA.pages.apps.AppsEditAppPage;
+import precisionFDA.pages.apps.AppsPage;
+import precisionFDA.pages.apps.AppsRelevantPage;
+import precisionFDA.pages.apps.AppsSavedAppPage;
 import precisionFDA.pages.challs.ChallsCreatedChallPage;
 import precisionFDA.pages.challs.ChallsEditChallPage;
 import precisionFDA.pages.challs.ChallsEditChallengeInfo;
 import precisionFDA.pages.challs.ChallsPage;
 import precisionFDA.pages.overview.OverviewPage;
+import precisionFDA.pages.profile.ProfilePage;
 import ru.yandex.qatools.htmlelements.annotations.Name;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,15 +26,52 @@ import static precisionFDA.utils.Utils.printTestHeader;
 @Name("Challenges test suite")
 public class ChallsTest extends AbstractTest {
 
+    public String[] getTestTimeZone() {
+        return new String[]
+                {"GMT+3",       "Moscow",               "(GMT+03:00) Moscow"};
+    }
+
     @Test(priority = 0)
+    public void createApp() {
+        printTestHeader("Test Case: create app as a test user");
+
+        UserProfile user = TestUserData.getTestUser();
+        AppProfile appProfile = TestAppData.getChallAppProfile();
+
+        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+
+        ProfilePage profilePage = overviewPage.openProfilePage();
+        profilePage.setTimeZone(getTestTimeZone());
+
+        AppsPage appsPage = openOverviewPage().openAppsPage();
+        AppsEditAppPage appsEditAppPage = appsPage.openCreateAppPage();
+        AppsSavedAppPage appsSavedAppPage = appsEditAppPage.fillAndSaveAppForChallenge(appProfile);
+
+        assertThat(
+                appsSavedAppPage.getActSelectedAppName())
+                .as("Name of created app")
+                .isEqualTo(appProfile.getInitNameText());
+
+        assertThat(
+                appsSavedAppPage.isAssignToChallengeDisplayed())
+                .as("Assign to Challenge button is NOT displayed")
+                .isFalse();
+    }
+
+    @Test(priority = 1)
     public void createChallenge() {
         printTestHeader("Test Case: create a challenge as admin and verify");
 
         UserProfile user = TestUserData.getAdminUser();
         ChallProfile challProfile = getMainChallProfile();
 
+        logoutFromAll();
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
-        ChallsPage challsPage = overviewPage.openChallsPage();
+
+        ProfilePage profilePage = openOverviewPage().openProfilePage();
+        profilePage.setTimeZone(getTestTimeZone());
+
+        ChallsPage challsPage = openOverviewPage().openChallsPage();
 
         assertThat(
                 challsPage.isCreateNewChallLinkDisplayed())
@@ -85,7 +128,7 @@ public class ChallsTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(priority = 1)
+    @Test(priority = 2, dependsOnMethods = { "createChallenge" })
     public void editChallengePage() {
         printTestHeader("Test Case: edit the created challenge page");
 
@@ -144,6 +187,34 @@ public class ChallsTest extends AbstractTest {
                 .as("Introduction text")
                 .isEqualTo(challProfile.getChallInfo());
     }
+
+    @Test(priority = 3, dependsOnMethods = { "createChallenge", "createApp" })
+    public void assignToChallenge() {
+        printTestHeader("Test Case: assign the created app to the created challenge");
+
+        UserProfile user = TestUserData.getTestUser();
+        AppProfile appProfile = TestAppData.getChallAppProfile();
+        ChallProfile challProfile = getMainChallProfile();
+
+        logoutFromAll();
+        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        AppsRelevantPage appsRelevantPage = overviewPage.openAppsPage().openAppsRelevantPage();
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openAppFromMyAppsList(appProfile);
+
+        assertThat(
+                appsSavedAppPage.isAssignToChallengeDisplayed())
+                .as("Assign to Challenge button is displayed")
+                .isTrue();
+
+        appsSavedAppPage = appsSavedAppPage.assignToChallenge(challProfile.getChallName());
+
+        assertThat(
+                appsSavedAppPage.isChallengeTagDisplayed(challProfile.getChallName()))
+                .as("Challenge tag is displayed")
+                .isTrue();
+    }
+
+
 
 
 }

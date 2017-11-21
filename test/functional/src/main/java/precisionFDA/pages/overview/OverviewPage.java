@@ -45,7 +45,7 @@ public class OverviewPage extends AbstractPage {
 
     public OverviewPage(final WebDriver driver) {
         super(driver);
-        waitUntilScriptsReady();
+        // waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.COMMON_NAV_PANEL), 30);
         waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.APPS_PAGE_ICON), 5);
     }

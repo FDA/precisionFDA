@@ -54,6 +54,10 @@ public class AppsJobPage extends AbstractPage {
         return appsJobPageViewLogLink;
     }
 
+    public Link getAppsJobPageIOTabLink() {
+        return appsJobPageIOTabLink;
+    }
+
     public String getActJobName() {
         return getAppsJobPageJobName().getText();
     }
@@ -105,6 +109,10 @@ public class AppsJobPage extends AbstractPage {
         log.info("view job log");
         getAppsJobPageViewLogLink().click();
         return new AppsJobLogPage(getDriver());
+    }
+
+    public boolean isAppsJobPageIOTabLinkDisplayed() {
+        return isElementPresent(getAppsJobPageIOTabLink(), 5);
     }
 
 }

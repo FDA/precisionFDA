@@ -4,6 +4,8 @@ public class TestDict {
 
     static final String DICT_STRING = "STRING";
 
+    static final String DICT_FILE = "FILE";
+
     static final String DICT_TRUE = "true";
 
     static final String DICT_PASSED = "passed";
@@ -54,6 +56,10 @@ public class TestDict {
 
     public static String getDictSetup() {
         return DICT_SETUP;
+    }
+
+    public static String getDictFile() {
+        return DICT_FILE;
     }
 
     public static String getDictMyFiles() {
