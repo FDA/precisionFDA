@@ -125,6 +125,18 @@ public abstract class AbstractPage {
         });
     }
 
+    public void waitUntilClickable(final WebElement element, int timeout) {
+        (new WebDriverWait(getDriver(), timeout)).until(new ExpectedCondition<Boolean>() {
+            public Boolean apply(final WebDriver d) {
+                if (element == null) {
+                    return false;
+                } else {
+                    return element.isDisplayed() && element.isEnabled();
+                }
+            }
+        });
+    }
+
     public void waitUntilClickable(final Link element) {
         (new WebDriverWait(getDriver(), DEFAULT_TIMEOUT)).until(new ExpectedCondition<Boolean>() {
             public Boolean apply(final WebDriver d) {
@@ -196,6 +208,24 @@ public abstract class AbstractPage {
     public boolean isElementPresent(final Link element) {
         try {
             waitUntilDisplayed(element.getWrappedElement(), DEFAULT_TIMEOUT, false);
+            return true;
+        } catch (final TimeoutException e) {
+            return false;
+        }
+    }
+
+    public boolean isElementPresent(final Button element) {
+        try {
+            waitUntilDisplayed(element.getWrappedElement(), DEFAULT_TIMEOUT, false);
+            return true;
+        } catch (final TimeoutException e) {
+            return false;
+        }
+    }
+
+    public boolean isElementPresent(final Button element, final int timeout) {
+        try {
+            waitUntilDisplayed(element.getWrappedElement(), timeout, false);
             return true;
         } catch (final TimeoutException e) {
             return false;

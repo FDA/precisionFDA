@@ -34,7 +34,7 @@ public class AppsRelevantPage extends AbstractPage {
         return appsRelevantActivatedLink;
     }
 
-    public WebElement getSavedAppLink(AppProfile appProfile) {
+    public WebElement getMyAppsAppLink(AppProfile appProfile) {
         String xpath = AppsLocators.APPS_SAVED_APP_LINK_TEMPLATE.replace("{APP_TITLE}", appProfile.getCurRevTitleText());
         return getDriver().findElement(By.xpath(xpath));
     }
@@ -47,15 +47,49 @@ public class AppsRelevantPage extends AbstractPage {
         return isElementPresent(getAppsRelevantActivatedLink());
     }
 
-    public AppsSavedAppPage openSavedAppl(AppProfile appProfile) {
-        log.info("open saved application");
-        WebElement link = getSavedAppLink(appProfile);
+    public AppsSavedAppPage openAppFromMyAppsList(AppProfile appProfile) {
+        log.info("open saved application from My Apps list");
+        WebElement link = getMyAppsAppLink(appProfile);
         waitUntilClickable(link);
         link.click();
         return new AppsSavedAppPage(getDriver());
     }
 
-    public boolean isLinkToSavedAppDisplayed(AppProfile appProfile) {
-        return isElementPresent(getSavedAppLink(appProfile));
+    public AppsSavedAppPage openAppFromJobsList(AppProfile appProfile) {
+        log.info("open saved application from jobs list");
+        WebElement link = getJobsListAppLink(appProfile);
+        waitUntilClickable(link);
+        link.click();
+        return new AppsSavedAppPage(getDriver());
+    }
+
+    public AppsJobPage openJobFromJobsList(AppProfile appProfile) {
+        log.info("open job from jobs list");
+        WebElement link = getJobsListJobLink(appProfile);
+        waitUntilClickable(link);
+        link.click();
+        return new AppsJobPage(getDriver());
+    }
+
+    public WebElement getJobsListAppLink(AppProfile appProfile) {
+        String xpath = AppsLocators.APPS_JOBS_LIST_APP_LINK_TEMPLATE.replace("{APP_TITLE}", appProfile.getCurRevTitleText());
+        return getDriver().findElement(By.xpath(xpath));
+    }
+
+    public WebElement getJobsListJobLink(AppProfile appProfile) {
+        String xpath = AppsLocators.APPS_JOBS_LIST_JOB_LINK_TEMPLATE.replace("{JOB_NAME}", appProfile.getJobNameText());
+        return getDriver().findElement(By.xpath(xpath));
+    }
+
+    public boolean isLinkToMyAppsAppDisplayed(AppProfile appProfile) {
+        return isElementPresent(getMyAppsAppLink(appProfile), 5);
+    }
+
+    public boolean isLinkToJobsListAppDisplayed(AppProfile appProfile) {
+        return isElementPresent(getJobsListAppLink(appProfile), 5);
+    }
+
+    public boolean isLinkToJobsListJobDisplayed(AppProfile appProfile) {
+        return isElementPresent(getJobsListJobLink(appProfile), 5);
     }
 }

@@ -129,7 +129,7 @@ public class CommonPage extends AbstractPage {
         log.info("opening Apps page");
         waitUntilClickable(getAppsPageIcon());
         clickAppIcon();
-        sleep(5000);
+        sleep(3000);
         return new AppsPage(getDriver());
     }
 

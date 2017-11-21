@@ -8,6 +8,10 @@ public class ChallProfile {
 
     private String challScoringAppUser;
 
+    private int challStartsAtFromNowSec;
+
+    private int durationSec;
+
     private String challStartsAt;
 
     private String challEndsAt;
@@ -22,13 +26,16 @@ public class ChallProfile {
 
     public ChallProfile(final String challName,
                         final String challDescr, final String challScoringAppUser,
+                        final int challStartsAtFromNowSec, final int durationSec,
                         final String challStartsAt, final String challEndsAt,
                         final String challCardImage, final String challStatus,
                         final String challInfo, final String challResults) {
         this.challName = challName;
         this.challDescr = challDescr;
         this.challScoringAppUser = challScoringAppUser;
-        this.challStartsAt = challStartsAt;
+        this.challStartsAtFromNowSec = challStartsAtFromNowSec;
+        this.durationSec = durationSec;
+        this.challStartsAt= challStartsAt;
         this.challEndsAt = challEndsAt;
         this.challCardImage = challCardImage;
         this.challStatus = challStatus;
@@ -46,6 +53,14 @@ public class ChallProfile {
 
     public String getChallScoringAppUser() {
         return challScoringAppUser;
+    }
+
+    public int getChallStartsAtFromNowSec() {
+        return challStartsAtFromNowSec;
+    }
+
+    public int getDurationSec() {
+        return durationSec;
     }
 
     public String getChallStartsAt() {
@@ -70,6 +85,16 @@ public class ChallProfile {
 
     public String getChallResults() {
         return challResults;
+    }
+
+    //==============
+
+    public void setChallStartsAt(String startsAt) {
+        this.challStartsAt = startsAt;
+    }
+
+    public void setChallEndsAt(String endsAt) {
+        this.challEndsAt = endsAt;
     }
 }
 

@@ -2,7 +2,6 @@ package precisionFDA.pages.challs;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -12,7 +11,7 @@ import precisionFDA.pages.AbstractPage;
 import ru.yandex.qatools.htmlelements.element.Select;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 
-import static precisionFDA.utils.Utils.sleep;
+import static precisionFDA.data.TestChallsData.getChallAtDateTime;
 
 public class ChallsEditChallPage extends AbstractPage {
 
@@ -91,9 +90,14 @@ public class ChallsEditChallPage extends AbstractPage {
         String optionFullText = getOptionTextByPartialText(challProfile.getChallScoringAppUser(), ChallsLocators.CHALLS_EDIT_CHALL_FORM_USER_OPTIONS_COMMON);
         getEditChallUserSelect().selectByVisibleText(optionFullText);
 
-        getEditChallStartsInput().sendKeys(challProfile.getChallStartsAt());
+        // generate date/time and save
+        String startsAt = getChallAtDateTime(challProfile.getChallStartsAtFromNowSec());
+        String endsAt = getChallAtDateTime(challProfile.getChallStartsAtFromNowSec() + challProfile.getDurationSec());
+        challProfile.setChallStartsAt(startsAt);
+        challProfile.setChallEndsAt(endsAt);
 
-        getEditChallEndsInput().sendKeys(challProfile.getChallEndsAt());
+        getEditChallStartsInput().sendKeys(startsAt);
+        getEditChallEndsInput().sendKeys(endsAt);
 
         getEditChallCardImageInput().sendKeys(challProfile.getChallCardImage());
     }

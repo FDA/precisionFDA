@@ -64,11 +64,11 @@ public class AppsTest extends AbstractTest {
         AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
-                appsRelevantPage.isLinkToSavedAppDisplayed(appProfile))
+                appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
                 .as("Link to saved app is displayed")
                 .isTrue();
 
-        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openAppFromMyAppsList(appProfile);
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppName())
@@ -127,11 +127,11 @@ public class AppsTest extends AbstractTest {
         AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
-                appsRelevantPage.isLinkToSavedAppDisplayed(appProfile))
+                appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
                 .as("Link to saved app is displayed")
                 .isTrue();
 
-        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openAppFromMyAppsList(appProfile);
 
         int revisionBefore = appsSavedAppPage.getAppRevision();
 
@@ -153,11 +153,11 @@ public class AppsTest extends AbstractTest {
         AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
-                appsRelevantPage.isLinkToSavedAppDisplayed(appProfile))
+                appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
                 .as("Link to saved app is displayed")
                 .isTrue();
 
-        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openAppFromMyAppsList(appProfile);
         AppsEditAppPage appsEditAppPage = appsSavedAppPage.clickEdit();
         appsSavedAppPage = appsEditAppPage.saveRevision(appProfile);
 
@@ -232,6 +232,41 @@ public class AppsTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
+    @Test(groups = { "runJob" }, dependsOnMethods = {"successfulLogin", "runAppAndValidateResult"})
+    public void openItemsFromJobsList() {
+        printTestHeader("Test Case: check it is possible to open the app and job from jobs list");
+
+        AppProfile appProfile = getRunJobAppProfile();
+
+        AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
+
+        assertThat(appsRelevantPage.isLinkToJobsListAppDisplayed(appProfile))
+                .as("Link to the application in the jobs list is displayed")
+                .isTrue();
+
+        assertThat(appsRelevantPage.isLinkToJobsListJobDisplayed(appProfile))
+                .as("Link to the job in the jobs list is displayed")
+                .isTrue();
+
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openAppFromJobsList(appProfile);
+
+        SoftAssert.assertThat(
+                appsSavedAppPage.isInstanceValueDisplayed())
+                .as("Instance value is displayed")
+                .isTrue();
+
+        appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
+
+        AppsJobPage appsJobPage = appsRelevantPage.openJobFromJobsList(appProfile);
+
+        SoftAssert.assertThat(
+                appsJobPage.isAppsJobPageIOTabLinkDisplayed())
+                .as("Input/Output tab is displayed")
+                .isTrue();
+
+        SoftAssert.assertAll();
+    }
+
     @Test(dependsOnMethods = {"successfulLogin", "createAndSaveApp"})
     public void editAppTitle() {
         printTestHeader("Test Case: check that the title of a saved app can be edited");
@@ -241,11 +276,11 @@ public class AppsTest extends AbstractTest {
         AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
-                appsRelevantPage.isLinkToSavedAppDisplayed(appProfile))
+                appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
                 .as("Link to saved app is displayed")
                 .isTrue();
 
-        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openAppFromMyAppsList(appProfile);
         AppsEditAppPage appsEditAppPage = appsSavedAppPage.clickEdit();
         appsEditAppPage.editAndSaveAppTitleWithNewValue(appProfile);
 
@@ -273,11 +308,11 @@ public class AppsTest extends AbstractTest {
         AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
-                appsRelevantPage.isLinkToSavedAppDisplayed(appProfile))
+                appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
                 .as("Link to saved app is displayed")
                 .isTrue();
 
-        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openAppFromMyAppsList(appProfile);
         AppsEditAppPage appsEditAppPage = appsSavedAppPage.clickEdit();
         appsEditAppPage.openReadmeEditTab();
 
@@ -308,11 +343,11 @@ public class AppsTest extends AbstractTest {
         AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
-                appsRelevantPage.isLinkToSavedAppDisplayed(appProfile))
+                appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
                 .as("Link to saved app is displayed")
                 .isTrue();
 
-        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openAppFromMyAppsList(appProfile);
         appsSavedAppPage = appsSavedAppPage.openCommentsTab().leaveComment();
         appsSavedAppPage = appsSavedAppPage.openCommentsTab();
 
@@ -330,11 +365,11 @@ public class AppsTest extends AbstractTest {
         AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
-                appsRelevantPage.isLinkToSavedAppDisplayed(appProfile))
+                appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
                 .as("Link to saved app is displayed")
                 .isTrue();
 
-        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openAppFromMyAppsList(appProfile);
         AppsEditAppPage appsEditAppPage = appsSavedAppPage.clickEdit();
         appsEditAppPage = appsEditAppPage.openVMEnvTab();
 
@@ -420,11 +455,11 @@ public class AppsTest extends AbstractTest {
         AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
-                appsRelevantPage.isLinkToSavedAppDisplayed(appProfile))
+                appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
                 .as("Link to saved app is displayed")
                 .isTrue();
 
-        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openSavedAppl(appProfile);
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openAppFromMyAppsList(appProfile);
         removeDockerFileFromDownloads();
         appsSavedAppPage = appsSavedAppPage.exportDockerContainer();
 

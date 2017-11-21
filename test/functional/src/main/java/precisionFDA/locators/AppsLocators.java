@@ -146,7 +146,11 @@ public class AppsLocators {
 
     public static final String APPS_ADD_INPUT_STRING_ITEM = "//*[@class='section-io-input']//*[text()='Inputs']/..//li/a[text()='String']";
 
+    public static final String APPS_ADD_INPUT_FILE_ITEM = "//*[@class='section-io-input']//*[text()='Inputs']/..//li/a[text()='File']";
+
     public static final String APPS_ADD_OUTPUT_STRING_ITEM = "//*[@class='section-io-input']//*[text()='Outputs']/..//li/a[text()='String']";
+
+    public static final String APPS_ADD_OUTPUT_FILE_ITEM = "//*[@class='section-io-input']//*[text()='Outputs']/..//li/a[text()='File']";
 
     public static final String APPS_INPUT_NAME_FIELD = "//input[contains(@placeholder, 'nter')][contains(@placeholder, 'ame')][contains(@placeholder, 'nput')]";
 
@@ -177,5 +181,15 @@ public class AppsLocators {
     public static final String APPS_SAVED_EXPORT_BUTTON = "//button/span[contains(@class, 'cloud-download')]/..";
 
     public static final String APPS_SAVED_EXPORT_DOCKER_LINK = "//a[contains(text(), 'Docker Container')]";
+
+    public static final String APPS_JOBS_LIST_APP_LINK_TEMPLATE = "//*[@id='jobs']//a[contains(text(), '{APP_TITLE}')]";
+
+    public static final String APPS_JOBS_LIST_JOB_LINK_TEMPLATE = "//*[@id='jobs']//a[contains(text(), '{JOB_NAME}')]";
+
+    public static final String APPS_SAVED_APP_ASSIGN_TO_CHALLENGE_BUTTON ="//button[contains(@class, 'dropdown-toggle')]/span[contains(@class, 'trophy')]/..";
+
+    public static final String APPS_SAVED_APP_ASSIGN_TO_CHALLENGE_ITEM_TEMPLATE = "//*[@class='dropdown-menu']//a[contains(text(), '{CHALLENGE_NAME}')]";
+
+    public static final String APPS_SAVED_APP_CHALLENGE_TAG_TEMPLATE = "//*[@class='details-challenges']//span[text()='{CHALLENGE_NAME}']";
 
 }

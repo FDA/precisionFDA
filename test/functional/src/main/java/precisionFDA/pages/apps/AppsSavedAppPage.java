@@ -120,6 +120,13 @@ public class AppsSavedAppPage extends AbstractPage {
     @FindBy(xpath = AppsLocators.APPS_SAVED_EXPORT_DOCKER_LINK)
     private Link appSavedExportDockerLink;
 
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_ASSIGN_TO_CHALLENGE_BUTTON)
+    private Button appSavedAssignToChallengeButton;
+
+    public Button getAppSavedAssignToChallengeButton() {
+        return appSavedAssignToChallengeButton;
+    }
+
     public WebElement getAppSavedInputLabelWE() {
         return appSavedInputLabelWE;
     }
@@ -372,7 +379,7 @@ public class AppsSavedAppPage extends AbstractPage {
     }
 
     public boolean isInstanceValueDisplayed() {
-        return getAppsSavedAppInstanceValue().isDisplayed();
+        return isElementPresent(getAppsSavedAppInstanceValue(), 5);
     }
 
     public AppsSavedAppPage openFirstRevision() {
@@ -398,4 +405,33 @@ public class AppsSavedAppPage extends AbstractPage {
         waitUntilFileIsDownloaded(getPathToDownloadsFolder() + getDockerFileName());
     }
 
+    public boolean isAssignToChallengeDisplayed() {
+        return isElementPresent(getAppSavedAssignToChallengeButton(), 3);
+    }
+
+    public AppsSavedAppPage assignToChallenge(String challengeName) {
+        log.info("assign to challenge");
+        waitUntilClickable(getAppSavedAssignToChallengeButton());
+        getAppSavedAssignToChallengeButton().click();
+        WebElement item = getChallengeItem(challengeName);
+        waitUntilClickable(item, 5);
+        item.click();
+        return new AppsSavedAppPage(getDriver());
+    }
+
+    public WebElement getChallengeItem(String challengeName) {
+        String xpath = AppsLocators.APPS_SAVED_APP_ASSIGN_TO_CHALLENGE_ITEM_TEMPLATE.replace("{CHALLENGE_NAME}", challengeName);
+        WebElement el = getDriver().findElement(By.xpath(xpath));
+        return el;
+    }
+
+    public WebElement getChallengeTagWe(String challengeName) {
+        String xpath = AppsLocators.APPS_SAVED_APP_CHALLENGE_TAG_TEMPLATE.replace("{CHALLENGE_NAME}", challengeName);
+        WebElement el = getDriver().findElement(By.xpath(xpath));
+        return el;
+    }
+
+    public boolean isChallengeTagDisplayed(String challengeName) {
+        return isElementPresent(getChallengeTagWe(challengeName), 3);
+    }
 }

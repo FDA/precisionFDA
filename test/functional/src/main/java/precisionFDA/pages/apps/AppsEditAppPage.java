@@ -6,7 +6,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import precisionFDA.utils.Utils;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.Select;
@@ -18,6 +17,11 @@ import precisionFDA.locators.CommonLocators;
 import precisionFDA.model.AppProfile;
 import precisionFDA.pages.AbstractPage;
 
+import java.util.List;
+
+import static precisionFDA.data.TestChallsData.*;
+import static precisionFDA.data.TestChallsData.getTestChallAppInputFileFieldName1;
+import static precisionFDA.data.TestDict.getDictFile;
 import static precisionFDA.data.TestDict.getDictString;
 import static precisionFDA.data.TestRunData.*;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
@@ -78,8 +82,14 @@ public class AppsEditAppPage extends AbstractPage {
     @FindBy(xpath = AppsLocators.APPS_ADD_INPUT_STRING_ITEM)
     private Link appAddInputStringItem;
 
+    @FindBy(xpath = AppsLocators.APPS_ADD_INPUT_FILE_ITEM)
+    private Link appAddInputFileItem;
+
     @FindBy(xpath = AppsLocators.APPS_ADD_OUTPUT_STRING_ITEM)
     private Link appAddOutputStringItem;
+
+    @FindBy(xpath = AppsLocators.APPS_ADD_OUTPUT_FILE_ITEM)
+    private Link appAddOutputFileItem;
 
     @FindBy(xpath = AppsLocators.APPS_INPUT_NAME_FIELD)
     private TextInput appInputNameField;
@@ -164,40 +174,55 @@ public class AppsEditAppPage extends AbstractPage {
         return appAddInputStringItem;
     }
 
+    public Link getAppAddInputFileItem() {
+        return appAddInputFileItem;
+    }
+
     public Link getAppAddOutputStringItem() {
         return appAddOutputStringItem;
+    }
+
+    public Link getAppAddOutputFileItem() {
+        return appAddOutputFileItem;
     }
 
     public Link getOverviewPageIcon() {
         return overviewPageIcon;
     }
 
-    public TextInput getAppInputNameField() {
-        return appInputNameField;
+    public WebElement getAppInputNameField() {
+        List<WebElement> fields = getDriver().findElements(By.xpath(AppsLocators.APPS_INPUT_NAME_FIELD));
+        return fields.get(fields.size() - 1);
     }
 
-    public TextInput getAppInputLabelField() {
-        return appInputLabelField;
+    public WebElement getAppInputLabelField() {
+        List<WebElement> fields = getDriver().findElements(By.xpath(AppsLocators.APPS_INPUT_LABEL_FIELD));
+        return fields.get(fields.size() - 1);
     }
 
-    public TextInput getAppInputHelpField() {
-        return appInputHelpField;
+    public WebElement getAppInputHelpField() {
+        List<WebElement> fields = getDriver().findElements(By.xpath(AppsLocators.APPS_INPUT_HELP_FIELD));
+        return fields.get(fields.size() - 1);
     }
 
-    public TextInput getAppInputDefaultField() {
-        return appInputDefaultField;
+    public WebElement getAppInputDefaultField() {
+        List<WebElement> fields = getDriver().findElements(By.xpath(AppsLocators.APPS_INPUT_DEFAULT_FIELD));
+        return fields.get(fields.size() - 1);
     }
 
-    public TextInput getAppOutputNameField() {
-        return appOutputNameField;
+    public WebElement getAppOutputNameField() {
+        List<WebElement> fields = getDriver().findElements(By.xpath(AppsLocators.APPS_OUTPUT_NAME_FIELD));
+        return fields.get(fields.size() - 1);
     }
 
-    public TextInput getAppOutputLabelField() {
-        return appOutputLabelField;
+    public WebElement getAppOutputLabelField() {
+        List<WebElement> fields = getDriver().findElements(By.xpath(AppsLocators.APPS_OUTPUT_LABEL_FIELD));
+        return fields.get(fields.size() - 1);
     }
 
-    public TextInput getAppOutputHelpField() {
-        return appOutputHelpField;
+    public WebElement getAppOutputHelpField() {
+        List<WebElement> fields = getDriver().findElements(By.xpath(AppsLocators.APPS_OUTPUT_HELP_FIELD));
+        return fields.get(fields.size() - 1);
     }
 
     public String getInstanceValue() {
@@ -331,7 +356,32 @@ public class AppsEditAppPage extends AbstractPage {
         return appsSavedAppPage;
     }
 
-    public void addInputField(String type) {
+    public AppsSavedAppPage fillAndSaveAppForChallenge(AppProfile appProfile) {
+        log.info("fill and save app for challenge");
+
+        fillAppName(appProfile.getInitNameText());
+        fillAppTitle(appProfile.getInitTitleText());
+
+        appProfile.setCurRevNameText(appProfile.getInitNameText());
+        appProfile.setCurRevTitleText(appProfile.getInitTitleText());
+
+        addInputField(getDictFile(), getTestChallAppInputFileFieldName1());
+        addInputField(getDictFile(), getTestChallAppInputFileFieldName2());
+
+        addOutputField(getDictFile(), getTestChallAppOutputFileFieldName1());
+        addOutputField(getDictFile(), getTestChallAppOutputFileFieldName2());
+        addOutputField(getDictString(), getTestChallAppOutputStrFieldName1());
+
+        openScriptTab();
+        fillScriptArea(appProfile.getInitScriptText());
+        appProfile.setCurRevScriptText(appProfile.getInitScriptText());
+
+        AppsSavedAppPage appsSavedAppPage = clickCreate(appProfile);
+
+        return appsSavedAppPage;
+    }
+
+    public void addInputField(String type, String name) {
         log.info("add input field");
         getAppAddInputFieldButton().click();
 
@@ -339,14 +389,27 @@ public class AppsEditAppPage extends AbstractPage {
             waitUntilDisplayed(getAppAddInputStringItem());
             getAppAddInputStringItem().click();
             waitUntilDisplayed(getAppInputDefaultField());
-            getAppInputNameField().sendKeys(getInputNameFieldName());
+            getAppInputNameField().sendKeys(name);
             getAppInputLabelField().sendKeys(getInputLabelFieldName());
             getAppInputHelpField().sendKeys(getInputHelpFieldName());
             getAppInputDefaultField().sendKeys(getInputDefaultFieldName());
         }
+
+        if (type == TestDict.getDictFile()) {
+            waitUntilDisplayed(getAppAddInputStringItem());
+            getAppAddInputFileItem().click();
+            waitUntilDisplayed(getAppInputHelpField());
+            getAppInputNameField().sendKeys(name);
+            getAppInputLabelField().sendKeys(getInputLabelFieldName());
+            getAppInputHelpField().sendKeys(getInputHelpFieldName());
+        }
     }
 
-    public void addOutputField(String type) {
+    public void addInputField(String type) {
+        addInputField(type, getInputNameFieldName());
+    }
+
+    public void addOutputField(String type, String name) {
         log.info("add output field");
         getAppAddOutputFieldButton().click();
 
@@ -354,10 +417,23 @@ public class AppsEditAppPage extends AbstractPage {
             waitUntilDisplayed(getAppAddOutputStringItem());
             getAppAddOutputStringItem().click();
             waitUntilDisplayed(getAppOutputHelpField());
-            getAppOutputNameField().sendKeys(getOutputNameFieldName());
+            getAppOutputNameField().sendKeys(name);
             getAppOutputLabelField().sendKeys(getOutputLabelFieldName());
             getAppOutputHelpField().sendKeys(getOutputHelpFieldName());
         }
+
+        if (type == TestDict.getDictFile()) {
+            waitUntilDisplayed(getAppAddOutputStringItem());
+            getAppAddOutputFileItem().click();
+            waitUntilDisplayed(getAppOutputHelpField());
+            getAppOutputNameField().sendKeys(name);
+            getAppOutputLabelField().sendKeys(getOutputLabelFieldName());
+            getAppOutputHelpField().sendKeys(getOutputHelpFieldName());
+        }
+    }
+
+    public void addOutputField(String type) {
+        addOutputField(type, getOutputNameFieldName());
     }
 
     public AppsSavedAppPage editAndSaveAppTitleWithNewValue(AppProfile appProfile) {
