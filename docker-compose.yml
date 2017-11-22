@@ -22,6 +22,6 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=password
     ports:
-      - 3000
+      - 3306
 volumes:
   pfda-mysql-volume:

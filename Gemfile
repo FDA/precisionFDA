@@ -108,6 +108,7 @@ group :development, :test do
 
   # Manage environment variables
   gem 'figaro'
+  gem 'highline'
 end
 
 group :production do
