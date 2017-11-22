@@ -14,7 +14,7 @@ public class FilesLocators {
 
     public static final String FILES_EXPLORE_ACTIVATED_LINK = "//*[@class='active']//*[@class='pill-label'][text()='Explore']/..";
 
-    public static final String FILES_ADD_FILES_BUTTON_LINK = "//*[@class='btn-group']//a[@href='/files/new']/span";
+    public static final String FILES_ADD_FILES_BUTTON_LINK = "//*[contains(@class, 'btn')]//a[contains(@href, '/files/new')]";
 
     public static final String FILES_BROWSE_FILES_INPUT = "//input[@class='event-browse-files']";
 
@@ -52,7 +52,11 @@ public class FilesLocators {
 
     public static final String FILES_UPLOADED_FILE_EDIT_DD = "//button[@id='dLabel']";
 
-    public static final String FILES_UPLOADED_FILE_EDIT_DELETE_ITEM = "//*[contains(@class, 'toolbar')]//a[@data-method='delete']";
+    public static final String FILES_UPLOADED_FILE_EDIT_DELETE_ITEM = "//a/*[contains(@class, 'trash')]/..";
+
+    public static final String FILES_UPLOADED_FILE_EDIT_DOWNLOAD_ITEM = "//a/*[contains(@class, 'download')]/..";
+
+    public static final String FILES_UPLOADED_FILE_EDIT_RENAME_ITEM = "//a/*[contains(@class, 'pencil')]/..";
 
     public static final String FILES_FILTER_NAME_INPUT = "//input[@id='files_f_name']";
 
@@ -87,5 +91,25 @@ public class FilesLocators {
     public static final String FILES_UPLOADED_FILE_PUBLISH_BUTTON_LINK = "//a[contains(@href, 'publish')]/span/..";
 
     public static final String FILES_PUBLISH_PAGE_FILE_NAME = "//span[@class='object-title']";
+
+    public static final String FILES_LIST_CHECKBOX_TEMPLATE = "//a[contains(text(), '{ITEM_NAME}')]/../..//input[@type='checkbox']";
+
+    public static final String FILES_DELETE_DIALOG_ITEMS_TABLE = "//*[@id='delete-files-modal']//table";
+
+    public static final String FILES_DOWNLOAD_DIALOG_ITEMS_TABLE = "//*[@id='download-files-modal']//table";
+
+    public static final String FILES_DELETE_DIALOG_ITEM_TEMPLATE = "//*[@id='delete-files-modal']//a/span[text()='{ITEM_NAME}']";
+
+    public static final String FILES_DELETE_DIALOG_ITEM_COMMON = "//*[@id='delete-files-modal']//a/span";
+
+    public static final String FILES_DOWNLOAD_DIALOG_ITEM_COMMON = "//*[@id='download-files-modal']//a/span";
+
+    public static final String FILES_DOWNLOAD_DIALOG_ITEM_TEMPLATE = "//*[@id='download-files-modal']//a/span[text()='{ITEM_NAME}']";
+
+    public static final String FILES_DELETE_DIALOG_DELETE_BUTTON = "//*[@id='delete-files-modal']//button[text()='Delete']";
+
+    public static final String FILES_RENAME_DIALOG_INPUT = "//form[@id='rename_form']//input[@name='file[name]']";
+
+    public static final String FILES_RENAME_DIALOG_RENAME_BUTTON = "//form[@id='rename_form']//button[text()='Rename']";
 
 }

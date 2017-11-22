@@ -26,11 +26,13 @@ public class TestDict {
 
     static final String DICT_MY_FILES = "My files";
 
-    static final String DICT_COMMON_FILTER_PHRASE = "filter";
+    static final String DICT_DELIMITER_VALUE = "&&";
 
-    static final String DICT_1ST_FILTER_PHRASE = DICT_COMMON_FILTER_PHRASE + "#1";
+    static final String DICT_FILTER = "filter";
 
-    static final String DICT_2ND_FILTER_PHRASE = DICT_COMMON_FILTER_PHRASE + "#2";
+    static final String DICT_TXT = "txt";
+
+    static final String DICT_PNG = "png";
 
     public static String getDictString() {
         return DICT_STRING;
@@ -78,16 +80,19 @@ public class TestDict {
         return DICT_ERROR;
     }
 
-    public static String getDictFirstFilterPhrase() {
-        return DICT_1ST_FILTER_PHRASE;
+    public static String getDictDelimiterValue() {
+        return DICT_DELIMITER_VALUE;
     }
 
-    public static String getDictSecondFilterPhrase() {
-        return DICT_2ND_FILTER_PHRASE;
+    public static String getDictFilter() {
+        return DICT_FILTER;
     }
 
-    public static String getDictCommonFilterPhrase() {
-        return DICT_COMMON_FILTER_PHRASE;
+    public static String getDictTxt() {
+        return DICT_TXT;
     }
 
+    public static String getDictPng() {
+        return DICT_PNG;
+    }
 }

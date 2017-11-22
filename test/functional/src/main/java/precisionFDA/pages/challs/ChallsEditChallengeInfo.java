@@ -10,6 +10,7 @@ import precisionFDA.pages.AbstractPage;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.Select;
 
+import static precisionFDA.data.TestDict.getDictDelimiterValue;
 import static precisionFDA.utils.Utils.sleep;
 
 public class ChallsEditChallengeInfo extends AbstractPage {
@@ -151,7 +152,7 @@ public class ChallsEditChallengeInfo extends AbstractPage {
     }
 
     public void writeChallengeResults(String results) {
-        String[] res = results.split("&&");
+        String[] res = results.split(getDictDelimiterValue());
         getEditResultTitleEditor().click();
         sleep(500);
         getEditResultTitleEditor().sendKeys(res[0]);
