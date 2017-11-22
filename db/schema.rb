@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171006115436) do
+ActiveRecord::Schema.define(version: 20171113163745) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id"
@@ -141,9 +141,10 @@ ActiveRecord::Schema.define(version: 20171006115436) do
     t.text     "meta"
     t.datetime "start_at"
     t.datetime "end_at"
-    t.datetime "created_at",     null: false
-    t.datetime "updated_at",     null: false
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
     t.string   "status"
+    t.boolean  "automated",      default: true
     t.string   "card_image_url"
   end
 
