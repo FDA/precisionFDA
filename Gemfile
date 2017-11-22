@@ -109,6 +109,7 @@ group :development, :test do
   # Manage environment variables
   gem 'figaro'
   gem 'highline'
+  gem 'quiet_assets'
 end
 
 group :production do
