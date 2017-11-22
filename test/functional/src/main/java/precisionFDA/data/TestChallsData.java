@@ -5,6 +5,7 @@ import precisionFDA.model.ChallProfile;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static precisionFDA.data.TestDict.getDictDelimiterValue;
 import static precisionFDA.data.TestDict.getDictSetup;
 import static precisionFDA.data.TestRunData.getTestImageHttpsUrl;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
@@ -82,7 +83,8 @@ public class TestChallsData {
     }
 
     public static String getMainChallResults() {
-        return getTestNewChallResultsPrefix() + getRunTimeLocalUniqueValue() + "1 &&" + getTestNewChallResultsPrefix() + getRunTimeLocalUniqueValue() + "2";
+        return getTestNewChallResultsPrefix() + getRunTimeLocalUniqueValue() + "1 " + getDictDelimiterValue() +
+                getTestNewChallResultsPrefix() + getRunTimeLocalUniqueValue() + "2";
     }
 
     public static String getChallAtDateTime(int delaySec) {

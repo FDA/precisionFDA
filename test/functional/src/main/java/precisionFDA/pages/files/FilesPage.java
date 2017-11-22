@@ -5,6 +5,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import precisionFDA.model.FolderProfile;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
@@ -13,6 +14,7 @@ import precisionFDA.pages.AbstractPage;
 
 import java.util.List;
 
+import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 import static precisionFDA.utils.Utils.sleep;
 
 public class FilesPage extends AbstractPage {
@@ -55,12 +57,58 @@ public class FilesPage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_EXPLORE_ACTIVATED_LINK)
     private Link filesExploreActivatedLink;
 
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_DD)
+    private Button uploadedFileEditDD;
+
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_DELETE_ITEM)
+    private Link uploadedFileEditDeleteItem;
+
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_DOWNLOAD_ITEM)
+    private Link uploadedFileEditDownloadItem;
+
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_RENAME_ITEM)
+    private Link uploadedFileEditRenameItem;
+
+    @FindBy(xpath = FilesLocators.FILES_DELETE_DIALOG_ITEMS_TABLE)
+    private WebElement deleteDialogItemsTable;
+
+    @FindBy(xpath = FilesLocators.FILES_DOWNLOAD_DIALOG_ITEMS_TABLE)
+    private WebElement downloadDialogItemsTable;
+
+    @FindBy(xpath = FilesLocators.FILES_DELETE_DIALOG_DELETE_BUTTON)
+    private Button deleteDialogDeleteButton;
+
+    @FindBy(xpath = FilesLocators.FILES_RENAME_DIALOG_INPUT)
+    private TextInput renameDialogInput;
+
+    @FindBy(xpath = FilesLocators.FILES_RENAME_DIALOG_RENAME_BUTTON)
+    private Button renameDialogRenameButton;
+
     public FilesPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
-        waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_ADD_FILES_BUTTON_LINK));
-        //waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_CREATE_FOLDER_BUTTON));
+        waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_MY_FILES_LINK));
         sleep(1000);
+    }
+
+    public Button getRenameDialogRenameButton() {
+        return renameDialogRenameButton;
+    }
+
+    public TextInput getRenameDialogInput() {
+        return renameDialogInput;
+    }
+
+    public WebElement getDeleteDialogItemsTable() {
+        return deleteDialogItemsTable;
+    }
+
+    public WebElement getDownloadDialogItemsTable() {
+        return downloadDialogItemsTable;
+    }
+
+    public Button getDeleteDialogDeleteButton() {
+        return deleteDialogDeleteButton;
     }
 
     public Link getFilesExploreActivatedLink() {
@@ -309,6 +357,98 @@ public class FilesPage extends AbstractPage {
         List<WebElement> chains = getDriver().findElements(By.xpath(FilesLocators.FILES_BREADCRUMB_CHAIN));
         chains.get(1).click();
         return new FilesPage(getDriver());
+    }
+
+    public void selectItem(String name) {
+        String xpath = FilesLocators.FILES_LIST_CHECKBOX_TEMPLATE.replace("{ITEM_NAME}", name);
+        WebElement chb = findElement(By.xpath(xpath));
+        chb.click();
+        sleep(200);
+    }
+
+    public void clickDeleteSelected() {
+        log.info("click delete item(s)");
+        getFilesEditDD().click();
+        Link link = getFilesEditDeleteItem();
+        waitUntilClickable(link);
+        link.click();
+        waitUntilDisplayed(getDeleteDialogItemsTable(), 5);
+        waitUntilClickable(getDeleteDialogDeleteButton());
+    }
+
+    public void clickDownloadSelected() {
+        log.info("click download item(s)");
+        getFilesEditDD().click();
+        Link link = getFilesEditDownloadItem();
+        waitUntilClickable(link);
+        link.click();
+        waitUntilDisplayed(getDownloadDialogItemsTable(), 5);
+    }
+
+    public Button getFilesEditDD() {
+        return uploadedFileEditDD;
+    }
+
+    public Link getFilesEditDeleteItem() {
+        return uploadedFileEditDeleteItem;
+    }
+
+    public Link getFilesEditDownloadItem() {
+        return uploadedFileEditDownloadItem;
+    }
+
+    public Link getFilesEditRenameItem() {
+        return uploadedFileEditRenameItem;
+    }
+
+    public boolean isItemInDeleteDialogDisplayed(String name) {
+        String xpath = FilesLocators.FILES_DELETE_DIALOG_ITEM_TEMPLATE.replace("{ITEM_NAME}", name);
+        WebElement link = findElement(By.xpath(xpath));
+        return isElementPresent(link, 2);
+    }
+
+    public int getNumberOfItemsToDelete() {
+        int num = getDriver().findElements(By.xpath(FilesLocators.FILES_DELETE_DIALOG_ITEM_COMMON)).size();
+        log.info("number of items to delete: " + num);
+        return num;
+    }
+
+    public int getNumberOfItemsToDownload() {
+        int num = getDriver().findElements(By.xpath(FilesLocators.FILES_DOWNLOAD_DIALOG_ITEM_COMMON)).size();
+        log.info("number of items to download: " + num);
+        return num;
+    }
+
+    public FilesPage clickDeleteOnDialog() {
+        log.info("click Delete");
+        getDeleteDialogDeleteButton().click();
+        return new FilesPage(getDriver());
+    }
+
+    public void clickRenameSelected() {
+        log.info("click rename item");
+        getFilesEditDD().click();
+        Link link = getFilesEditRenameItem();
+        waitUntilClickable(link);
+        link.click();
+        waitUntilDisplayed(getRenameDialogInput(), 5);
+        waitUntilClickable(getRenameDialogRenameButton());
+    }
+
+    public FilesPage renameAndSaveFolder(FolderProfile folderProfile) {
+        log.info("rename and save folder");
+        getRenameDialogInput().clear();
+        String newName = "upd_" + getRunTimeLocalUniqueValue() + folderProfile.getFolderName();
+        getRenameDialogInput().sendKeys(newName);
+        getRenameDialogRenameButton().click();
+        folderProfile.setFolderName(newName);
+        return new FilesPage(getDriver());
+    }
+
+    public boolean isItemInDownloadDialogDisplayed(String name) {
+        String xpath = FilesLocators.FILES_DOWNLOAD_DIALOG_ITEM_TEMPLATE.replace("{ITEM_NAME}", name);
+        WebElement link = findElement(By.xpath(xpath));
+        return isElementPresent(link, 3);
     }
 
 }

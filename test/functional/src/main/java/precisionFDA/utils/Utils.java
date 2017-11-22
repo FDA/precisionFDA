@@ -4,20 +4,31 @@ import org.apache.log4j.Logger;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Random;
 import java.util.TimeZone;
 
 import static precisionFDA.data.TestDict.*;
-import static precisionFDA.data.TestFilesData.getTestPngTemplateFileName;
-import static precisionFDA.data.TestFilesData.getTestTextTemplateFileName;
+import static precisionFDA.data.TestFilesData.*;
 import static precisionFDA.data.TestRunData.*;
 
 public class Utils {
+
+    static final String TEST_TEXT_FILE_NAME = "textFile.txt";
+
+    static final String TEST_PNG_FILE_NAME = "pngFile.png";
+
+    public static String getTestTextTemplateFileName() {
+        return TEST_TEXT_FILE_NAME;
+    }
+
+    public static String getTestPngTemplateFileName() {
+        return TEST_PNG_FILE_NAME;
+    }
 
     public static String getCurrentDateTimeValue(String timeZone) {
         Date d = new Date();
@@ -124,23 +135,28 @@ public class Utils {
         String newFileName = runTime;
         String templateFileName = "";
 
-        if (type.equals("txt")) {
-            newFileName = "text_file_" + runTime + ".txt";
+        if (type.equals(getDictTxt())) {
+            newFileName = "text_file_" + runTime + getRandom() + ".txt";
             templateFileName = getTestTextTemplateFileName();
         }
 
-        if (type.equals("png")) {
-            newFileName = "png_file_" + runTime + ".png";
+        if (type.equals(getDictPng())) {
+            newFileName = "png_file_" + runTime + getRandom() + ".png";
             templateFileName = getTestPngTemplateFileName();
         }
 
-        if (type.equals("filterPhrase#1")) {
-            newFileName = "png_" + getDictFirstFilterPhrase() + "_" + runTime + ".png";
+        if (type.equals(getDictFilter() + "#1")) {
+            newFileName = "png_" + getFirstFilterPhrase() + "_" + runTime + getRandom() + ".png";
             templateFileName = getTestPngTemplateFileName();
         }
 
-        if (type.equals("filterPhrase#2")) {
-            newFileName = "txt_" + getDictSecondFilterPhrase() + "_" + runTime + ".txt";
+        if (type.equals(getDictFilter() + "#2")) {
+            newFileName = "txt_" + getSecondFilterPhrase() + "_" + runTime + getRandom() + ".txt";
+            templateFileName = getTestTextTemplateFileName();
+        }
+
+        if (type.equals(getDictFilter())) {
+            newFileName = "txt_" + getCommonFilterPhrase() + "_" + runTime + getRandom() + ".txt";
             templateFileName = getTestTextTemplateFileName();
         }
 
@@ -243,14 +259,6 @@ public class Utils {
 
     public static String generateTestPngFileName() {
         return getGeneratedTestFileName("png");
-    }
-
-    public static String generateFirstFilterFileName() {
-        return getGeneratedTestFileName("filterPhrase#1");
-    }
-
-    public static String generateSecondFilterFileName() {
-        return getGeneratedTestFileName("filterPhrase#2");
     }
 
     public static void removeDockerFileFromDownloads() {
@@ -359,7 +367,10 @@ public class Utils {
         }
     }
 
-
+    public static String getRandom() {
+        Random rand = new Random();
+        return "" + rand.nextInt(1000);
+    }
 
 
 }

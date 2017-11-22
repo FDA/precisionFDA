@@ -1,17 +1,15 @@
 package precisionFDA.cases;
 
 import org.testng.annotations.Test;
+import precisionFDA.model.FileProfile;
+import precisionFDA.model.FolderProfile;
 import precisionFDA.pages.files.*;
 import ru.yandex.qatools.htmlelements.annotations.Name;
 import precisionFDA.data.TestUserData;
-import precisionFDA.model.FilesProfile;
 import precisionFDA.model.UserProfile;
 import precisionFDA.pages.overview.OverviewPage;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static precisionFDA.data.TestDict.getDictCommonFilterPhrase;
-import static precisionFDA.data.TestDict.getDictFirstFilterPhrase;
-import static precisionFDA.data.TestDict.getDictSecondFilterPhrase;
 import static precisionFDA.data.TestFilesData.*;
 import static precisionFDA.utils.Utils.*;
 
@@ -42,7 +40,7 @@ public class FilesTest extends AbstractTest {
     public void uploadFileToRootDirectory() {
         printTestHeader("Test Case: check it is possible to upload text file to the root directory");
 
-        FilesProfile filesProfile = getMainFilesProfile();
+        FileProfile fileProfile = getMainFileProfile();
 
         FilesPage filesPage = openOverviewPage().openFilesPage();
 
@@ -52,12 +50,12 @@ public class FilesTest extends AbstractTest {
                 .isTrue();
 
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
-        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(filesProfile.getFileInRoot());
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(fileProfile.getFileName());
 
         SoftAssert.assertThat(
                 filesAddFilesPage.getFileToUploadPreviewNameText())
                 .as("text file name")
-                .isEqualTo(filesProfile.getFileInRoot());
+                .isEqualTo(fileProfile.getFileName());
 
         filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
 
@@ -69,20 +67,20 @@ public class FilesTest extends AbstractTest {
         SoftAssert.assertThat(
                 filesAddFilesPage.getFileToUploadPreviewNameText())
                 .as("text file name")
-                .isEqualTo(filesProfile.getFileInRoot());
+                .isEqualTo(fileProfile.getFileName());
 
         filesPage = openOverviewPage().openFilesPage();
 
         assertThat(
-                filesPage.isLinkToUploadedFileDisplayed(filesProfile.getFileInRoot()))
+                filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
                 .as("Link to uploaded file is displayed inside root directory")
                 .isTrue();
 
-        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(filesProfile.getFileInRoot());
+        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
         uploadedFilePage = uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
 
         SoftAssert.assertThat(
-                uploadedFilePage.isPageTitleCorrect(filesProfile.getFileInRoot()))
+                uploadedFilePage.isPageTitleCorrect(fileProfile.getFileName()))
                 .as("Page title is correct")
                 .isTrue();
 
@@ -95,10 +93,10 @@ public class FilesTest extends AbstractTest {
     }
 
     @Test(dependsOnMethods = "successfulLogin")
-    public void createFirstLevelFolder() {
+    public void createFolderInRoot() {
         printTestHeader("Test Case: check it is possible to create a folder in the root directory");
 
-        FilesProfile filesProfile = getMainFilesProfile();
+        FolderProfile folderProfile = getMainFolderProfile();
 
         FilesPage filesPage = openOverviewPage().openFilesPage();
 
@@ -107,10 +105,10 @@ public class FilesTest extends AbstractTest {
                 .as("Create Folder button is displayed")
                 .isTrue();
 
-        filesPage = filesPage.createFolder(filesProfile.getFirstLevelFolder());
+        filesPage = filesPage.createFolder(folderProfile.getFolderName());
 
         assertThat(
-                filesPage.isLinkToCreatedFolderDisplayed(filesProfile.getFirstLevelFolder()))
+                filesPage.isLinkToCreatedFolderDisplayed(folderProfile.getFolderName()))
                 .as("Link to created folder is displayed")
                 .isTrue();
 
@@ -122,34 +120,35 @@ public class FilesTest extends AbstractTest {
         SoftAssert.assertThat(
                 filesPage.getSuccessMessageText())
                 .as("success alert message")
-                .contains(filesProfile.getFirstLevelFolder());
+                .contains(folderProfile.getFolderName());
 
-        filesPage = filesPage.openFolder(filesProfile.getFirstLevelFolder());
+        filesPage = filesPage.openFolder(folderProfile.getFolderName());
 
         SoftAssert.assertThat(
                 filesPage.getDisplayedBreadcrumbsText())
                 .as("Breadcrumbs")
-                .isEqualTo(generateExpectedBreadcrumbs(filesProfile.getFirstLevelFolder(), "", ""));
+                .isEqualTo(generateExpectedBreadcrumbs(folderProfile.getFolderName(), "", ""));
 
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = "createFirstLevelFolder")
-    public void uploadFileToFirstLevelFolder() {
-        printTestHeader("Test Case: check it is possible to upload png file to the first level folder");
+    @Test(dependsOnMethods = { "createFolderInRoot", "successfulLogin" })
+    public void uploadFileToCreatedFolder() {
+        printTestHeader("Test Case: check it is possible to upload png file to the created folder");
 
-        FilesProfile filesProfile = getMainFilesProfile();
+        FolderProfile folderProfile = getMainFolderProfile();
+        FileProfile fileProfile = getFileInMainFolderProfile();
 
         FilesPage filesPage = openOverviewPage().openFilesPage();
-        filesPage = filesPage.openFolder(filesProfile.getFirstLevelFolder());
+        filesPage = filesPage.openFolder(folderProfile.getFolderName());
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
 
-        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(filesProfile.getFileInFirstLevelFolder());
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(fileProfile.getFileName());
 
         SoftAssert.assertThat(
                 filesAddFilesPage.getFileToUploadPreviewNameText())
                 .as("png file name")
-                .isEqualTo(filesProfile.getFileInFirstLevelFolder());
+                .isEqualTo(fileProfile.getFileName());
 
         filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
 
@@ -161,20 +160,20 @@ public class FilesTest extends AbstractTest {
         SoftAssert.assertThat(
                 filesAddFilesPage.getFileToUploadPreviewNameText())
                 .as("png file name")
-                .isEqualTo(filesProfile.getFileInFirstLevelFolder());
+                .isEqualTo(fileProfile.getFileName());
 
-        filesPage = openOverviewPage().openFilesPage().openFolder(filesProfile.getFirstLevelFolder());
+        filesPage = openOverviewPage().openFilesPage().openFolder(folderProfile.getFolderName());
 
         assertThat(
-                filesPage.isLinkToUploadedFileDisplayed(filesProfile.getFileInFirstLevelFolder()))
-                .as("Link to uploaded file is displayed inside the first level folder")
+                filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
+                .as("Link to uploaded file is displayed inside the created folder")
                 .isTrue();
 
-        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(filesProfile.getFileInFirstLevelFolder());
+        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
         uploadedFilePage = uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
 
         SoftAssert.assertThat(
-                uploadedFilePage.isPageTitleCorrect(filesProfile.getFileInFirstLevelFolder()))
+                uploadedFilePage.isPageTitleCorrect(fileProfile.getFileName()))
                 .as("Page title is correct")
                 .isTrue();
 
@@ -191,18 +190,19 @@ public class FilesTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = "createFirstLevelFolder")
+    @Test(dependsOnMethods = { "createFolderInRoot", "successfulLogin" } )
     public void createSecondLevelFolder() {
         printTestHeader("Test Case: check it is possible to create a folder in the first level folder");
 
-        FilesProfile filesProfile = getMainFilesProfile();
+        FolderProfile mainFolderProfile = getMainFolderProfile();
+        FolderProfile nextFolderProfile = getNextFolderProfile();
 
         FilesPage filesPage = openOverviewPage().openFilesPage();
-        filesPage = filesPage.openFolder(filesProfile.getFirstLevelFolder());
-        filesPage = filesPage.createFolder(filesProfile.getSecondLevelFolder());
+        filesPage = filesPage.openFolder(mainFolderProfile.getFolderName());
+        filesPage = filesPage.createFolder(nextFolderProfile.getFolderName());
 
         assertThat(
-                filesPage.isLinkToCreatedFolderDisplayed(filesProfile.getSecondLevelFolder()))
+                filesPage.isLinkToCreatedFolderDisplayed(nextFolderProfile.getFolderName()))
                 .as("Link to created folder is displayed")
                 .isTrue();
 
@@ -214,148 +214,180 @@ public class FilesTest extends AbstractTest {
         SoftAssert.assertThat(
                 filesPage.getSuccessMessageText())
                 .as("success alert message")
-                .contains(filesProfile.getSecondLevelFolder());
-
-        filesPage = filesPage.openFolder(filesProfile.getSecondLevelFolder());
-
-        SoftAssert.assertThat(
-                filesPage.getDisplayedBreadcrumbsText())
-                .as("Breadcrumbs")
-                .isEqualTo(generateExpectedBreadcrumbs(filesProfile.getFirstLevelFolder(), filesProfile.getSecondLevelFolder(), ""));
+                .contains(nextFolderProfile.getFolderName());
 
         SoftAssert.assertAll();
     }
 
     @Test(dependsOnMethods = "successfulLogin")
-    public void deleteFileInRoot() {
-        printTestHeader("Test Case: check it is possible to delete an uploaded to root file");
+    public void deleteFileInRootFromProfile() {
+        printTestHeader("Test Case: check it is possible to delete an uploaded to root file from its profile");
 
-        FilesProfile filesProfile = getFileToDeleteProfile();
+        FileProfile fileProfile = getFileToDeleteProfile();
 
         FilesPage filesPage = openOverviewPage().openFilesPage();
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
 
-        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(filesProfile.getFileInRoot());
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(fileProfile.getFileName());
         filesAddFilesPage.uploadAllFiles();
         filesPage = openOverviewPage().openFilesPage();
 
         assertThat(
-                filesPage.isLinkToUploadedFileDisplayed(filesProfile.getFileInRoot()))
+                filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
                 .as("Link to uploaded file is displayed inside root directory")
                 .isTrue();
 
-        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(filesProfile.getFileInRoot());
+        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
         uploadedFilePage = uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
         filesPage = uploadedFilePage.deleteFile();
 
         assertThat(
-                filesPage.isLinkToUploadedFileDisplayed(filesProfile.getFileInRoot()))
+                filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
                 .as("Link to uploaded file is NOT displayed inside root directory")
                 .isFalse();
     }
 
-    @Test(dependsOnMethods = {"successfulLogin", "createFirstLevelFolder"})
+    @Test(dependsOnMethods = {"successfulLogin"})
     public void filterByName() {
         printTestHeader("Test Case: check it is possible to filter folders and files by name");
 
-        FilesProfile firstFilterProfile = getFirstFilterProfile();
-        FilesProfile secondFilterProfile = getSecondFilterProfile();
+        FileProfile filterOneFile = getFilterOneFile();
+        FileProfile filterTwoFile = getFilterTwoFile();
+        FileProfile filterCommonFile = getFilterCommonFile();
 
-        //upload files what should be in a filter result
+        FolderProfile filterMainFolder = getFilterMainFolder();
+        FolderProfile filterOneFolder = getFilterOneFolder();
+        FolderProfile filterTwoFolder = getFilterTwoFolder();
+        FolderProfile filterCommonFolder = getFilterCommonFolder();
+
+        // create a folder in root directory and open it
         FilesPage filesPage = openOverviewPage().openFilesPage();
+        filesPage = filesPage.createFolder(filterMainFolder.getFolderName());
+        filesPage = filesPage.openFolder(filterMainFolder.getFolderName());
+
+        // upload test files
+
+        // with phrase 'filter#1'
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
-        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(firstFilterProfile.getFileInRoot());
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(filterOneFile.getFileName());
         filesAddFilesPage.uploadAllFiles();
         filesPage = openOverviewPage().openFilesPage();
+        filesPage = filesPage.openFolder(filterMainFolder.getFolderName());
 
         SoftAssert.assertThat(
-                filesPage.isLinkToUploadedFileDisplayed(firstFilterProfile.getFileInRoot()))
-                .as("Link to uploaded file #1 is displayed inside root directory")
+                filesPage.isLinkToUploadedFileDisplayed(filterOneFile.getFileName()))
+                .as("Link to uploaded file #1 is displayed inside the folder")
                 .isTrue();
 
-        filesPage = openOverviewPage().openFilesPage();
+        // with phrase 'filter#2'
         filesAddFilesPage = filesPage.openFilesAddFilesPage();
-        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(secondFilterProfile.getFileInRoot());
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(filterTwoFile.getFileName());
         filesAddFilesPage.uploadAllFiles();
         filesPage = openOverviewPage().openFilesPage();
+        filesPage = filesPage.openFolder(filterMainFolder.getFolderName());
 
         SoftAssert.assertThat(
-                filesPage.isLinkToUploadedFileDisplayed(secondFilterProfile.getFileInRoot()))
-                .as("Link to uploaded file #2 is displayed inside root directory")
+                filesPage.isLinkToUploadedFileDisplayed(filterTwoFile.getFileName()))
+                .as("Link to uploaded file #2 is displayed inside the folder")
                 .isTrue();
 
-        //create folders what should be in a filter result
-        filesPage = filesPage.createFolder(firstFilterProfile.getFirstLevelFolder());
+        // with phrase 'filter'
+        filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(filterCommonFile.getFileName());
+        filesAddFilesPage.uploadAllFiles();
+        filesPage = openOverviewPage().openFilesPage();
+        filesPage = filesPage.openFolder(filterMainFolder.getFolderName());
 
         SoftAssert.assertThat(
-                filesPage.isLinkToCreatedFolderDisplayed(firstFilterProfile.getFirstLevelFolder()))
-                .as("Link to created folder #1 is displayed inside root directory")
+                filesPage.isLinkToUploadedFileDisplayed(filterCommonFile.getFileName()))
+                .as("Link to uploaded common filter file is displayed inside the folder")
                 .isTrue();
 
-        filesPage = filesPage.createFolder(secondFilterProfile.getFirstLevelFolder());
+        // create test folders
+
+        // with phrase 'filter#1'
+        filesPage = filesPage.createFolder(filterOneFolder.getFolderName());
 
         SoftAssert.assertThat(
-                filesPage.isLinkToCreatedFolderDisplayed(secondFilterProfile.getFirstLevelFolder()))
-                .as("Link to created folder #2 is displayed inside root directory")
+                filesPage.isLinkToCreatedFolderDisplayed(filterOneFolder.getFolderName()))
+                .as("Link to created folder #1 is displayed inside the folder")
                 .isTrue();
 
-        //filter phrase #1
-        filesPage = filesPage.filterByName(getDictFirstFilterPhrase());
+        // with phrase 'filter#2'
+        filesPage = filesPage.createFolder(filterTwoFolder.getFolderName());
 
         SoftAssert.assertThat(
-                filesPage.isCorrectSelectionByNameDisplayed(getDictFirstFilterPhrase()))
-                .as("Correct selection is displayed: " + getDictFirstFilterPhrase())
+                filesPage.isLinkToCreatedFolderDisplayed(filterTwoFolder.getFolderName()))
+                .as("Link to created folder #2 is displayed inside the folder")
                 .isTrue();
 
+        // with phrase 'filter'
+        filesPage = filesPage.createFolder(filterCommonFolder.getFolderName());
+
         SoftAssert.assertThat(
-                (filesPage.getNumberOfDisplayedItems() >= 2))
-                .as("Number of displayed files and folders equals or more than 2")
+                filesPage.isLinkToCreatedFolderDisplayed(filterCommonFolder.getFolderName()))
+                .as("Link to created common filter folder is displayed inside the folder")
                 .isTrue();
 
-        //filter phrase #2
-        filesPage = filesPage.filterByName(getDictSecondFilterPhrase());
+
+        // filter by 'filter#1'
+        filesPage = filesPage.filterByName(getFirstFilterPhrase());
 
         SoftAssert.assertThat(
-                filesPage.isCorrectSelectionByNameDisplayed(getDictSecondFilterPhrase()))
-                .as("Correct selection is displayed: " + getDictSecondFilterPhrase())
-                .isTrue();
-
-        SoftAssert.assertThat(
-                (filesPage.getNumberOfDisplayedItems() >= 2))
-                .as("Number of displayed files and folders equals or more than 2")
-                .isTrue();
-
-        //filter common phrase
-        filesPage = filesPage.filterByName(getDictCommonFilterPhrase());
-
-        SoftAssert.assertThat(
-                filesPage.isCorrectSelectionByNameDisplayed(getDictCommonFilterPhrase()))
-                .as("Correct selection is displayed: " + getDictCommonFilterPhrase())
+                filesPage.isCorrectSelectionByNameDisplayed(getFirstFilterPhrase()))
+                .as("Correct selection is displayed: " + getFirstFilterPhrase())
                 .isTrue();
 
         SoftAssert.assertThat(
-                (filesPage.getNumberOfDisplayedItems() >= 4))
-                .as("Number of displayed files and folders equals or more than 4")
+                (filesPage.getNumberOfDisplayedItems() == 2))
+                .as("Number of displayed files and folders == 2")
+                .isTrue();
+
+        // filter by 'filter#2'
+        filesPage = filesPage.filterByName(getSecondFilterPhrase());
+
+        SoftAssert.assertThat(
+                filesPage.isCorrectSelectionByNameDisplayed(getSecondFilterPhrase()))
+                .as("Correct selection is displayed: " + getSecondFilterPhrase())
+                .isTrue();
+
+        SoftAssert.assertThat(
+                (filesPage.getNumberOfDisplayedItems() == 2))
+                .as("Number of displayed files and folders == 2")
+                .isTrue();
+
+        // filter by 'filter'
+        filesPage = filesPage.filterByName(getCommonFilterPhrase());
+
+        SoftAssert.assertThat(
+                filesPage.isCorrectSelectionByNameDisplayed(getCommonFilterPhrase()))
+                .as("Correct selection is displayed: " + getCommonFilterPhrase())
+                .isTrue();
+
+        SoftAssert.assertThat(
+                (filesPage.getNumberOfDisplayedItems() == 6))
+                .as("Number of displayed files and folders == 6")
                 .isTrue();
 
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"successfulLogin", "createSecondLevelFolder", "createFirstLevelFolder"})
+    @Test(dependsOnMethods = {"successfulLogin", "createSecondLevelFolder", "createFolderInRoot"})
     public void breadcrumbsNavigation() {
         printTestHeader("Test Case: validate navigation via breadcrumbs");
 
-        FilesProfile filesProfile = getMainFilesProfile();
+        FolderProfile mainFolderProfile = getMainFolderProfile();
+        FolderProfile nextFolderProfile = getNextFolderProfile();
 
         // open second level folder
         FilesPage filesPage = openOverviewPage().openFilesPage();
-        filesPage = filesPage.openFolder(filesProfile.getFirstLevelFolder());
-        filesPage = filesPage.openFolder(filesProfile.getSecondLevelFolder());
+        filesPage = filesPage.openFolder(mainFolderProfile.getFolderName());
+        filesPage = filesPage.openFolder(nextFolderProfile.getFolderName());
 
         assertThat(
                 filesPage.getDisplayedBreadcrumbsText())
                 .as("Breadcrumbs")
-                .isEqualTo(generateExpectedBreadcrumbs(filesProfile.getFirstLevelFolder(), filesProfile.getSecondLevelFolder(), ""));
+                .isEqualTo(generateExpectedBreadcrumbs(mainFolderProfile.getFolderName(), nextFolderProfile.getFolderName(), ""));
 
         // go to root directory
         filesPage = filesPage.clickBreadcrumbMyFiles();
@@ -366,13 +398,13 @@ public class FilesTest extends AbstractTest {
                 .isFalse();
 
         SoftAssert.assertThat(
-                filesPage.isLinkToCreatedFolderDisplayed(filesProfile.getFirstLevelFolder()))
+                filesPage.isLinkToCreatedFolderDisplayed(mainFolderProfile.getFolderName()))
                 .as("Link to first level folder is displayed")
                 .isTrue();
 
         // open second level folder again
-        filesPage = filesPage.openFolder(filesProfile.getFirstLevelFolder());
-        filesPage = filesPage.openFolder(filesProfile.getSecondLevelFolder());
+        filesPage = filesPage.openFolder(mainFolderProfile.getFolderName());
+        filesPage = filesPage.openFolder(nextFolderProfile.getFolderName());
 
         // go to first level folder
         filesPage = filesPage.clickBreadcrumbFirstLevel();
@@ -380,10 +412,10 @@ public class FilesTest extends AbstractTest {
         SoftAssert.assertThat(
                 filesPage.getDisplayedBreadcrumbsText())
                 .as("Breadcrumbs")
-                .isEqualTo(generateExpectedBreadcrumbs(filesProfile.getFirstLevelFolder(), "", ""));
+                .isEqualTo(generateExpectedBreadcrumbs(mainFolderProfile.getFolderName(), "", ""));
 
         SoftAssert.assertThat(
-                filesPage.isLinkToCreatedFolderDisplayed(filesProfile.getSecondLevelFolder()))
+                filesPage.isLinkToCreatedFolderDisplayed(nextFolderProfile.getFolderName()))
                 .as("Link to second level folder is displayed")
                 .isTrue();
 
@@ -396,7 +428,7 @@ public class FilesTest extends AbstractTest {
                 .isFalse();
 
         SoftAssert.assertThat(
-                filesPage.isLinkToCreatedFolderDisplayed(filesProfile.getFirstLevelFolder()))
+                filesPage.isLinkToCreatedFolderDisplayed(mainFolderProfile.getFolderName()))
                 .as("Link to first level folder is displayed")
                 .isTrue();
 
@@ -407,26 +439,26 @@ public class FilesTest extends AbstractTest {
     public void downloadFile() {
         printTestHeader("Test Case: check it is possible to download a file");
 
-        FilesProfile filesProfile = getMainFilesProfile();
+        FileProfile fileProfile = getMainFileProfile();
 
         FilesPage filesPage = openOverviewPage().openFilesPage();
 
         assertThat(
-                filesPage.isLinkToUploadedFileDisplayed(filesProfile.getFileInRoot()))
+                filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
                 .as("Link to uploaded file is displayed inside root directory")
                 .isTrue();
 
-        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(filesProfile.getFileInRoot());
-        removeSameFileFromDownloads(filesProfile.getFileInRoot());
+        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
+        removeSameFileFromDownloads(fileProfile.getFileName());
         uploadedFilePage = uploadedFilePage.downloadFile();
 
         SoftAssert.assertThat(
                 uploadedFilePage.getFilePageTitleText())
                 .as("Title of the page")
-                .isEqualTo(filesProfile.getFileInRoot());
+                .isEqualTo(fileProfile.getFileName());
 
         SoftAssert.assertThat(
-                isFileDownloaded(filesProfile.getFileInRoot()))
+                isFileDownloaded(fileProfile.getFileName()))
                 .as("The file is downloaded")
                 .isTrue();
 
@@ -434,30 +466,30 @@ public class FilesTest extends AbstractTest {
     }
 
     @Test(dependsOnMethods = {"successfulLogin", "uploadFileToRootDirectory"})
-    public void renameFile() {
-        printTestHeader("Test Case: check it is possible to rename a file");
+    public void renameFileFromProfile() {
+        printTestHeader("Test Case: check it is possible to rename a file from its profile");
 
-        FilesProfile filesProfile = getMainFilesProfile();
+        FileProfile fileProfile = getMainFileProfile();
 
         FilesPage filesPage = openOverviewPage().openFilesPage();
 
         assertThat(
-                filesPage.isLinkToUploadedFileDisplayed(filesProfile.getFileInRoot()))
+                filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
                 .as("Link to uploaded file is displayed inside root directory")
                 .isTrue();
 
-        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(filesProfile.getFileInRoot());
-        uploadedFilePage = uploadedFilePage.renameFileOnFilePage(filesProfile);
+        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
+        uploadedFilePage = uploadedFilePage.renameFileOnFilePage(fileProfile);
 
         SoftAssert.assertThat(
                 uploadedFilePage.getFilePageTitleText())
                 .as("New Title of the page")
-                .isEqualTo(filesProfile.getFileInRoot());
+                .isEqualTo(fileProfile.getFileName());
 
         filesPage = openOverviewPage().openFilesPage();
 
         SoftAssert.assertThat(
-                filesPage.isLinkToUploadedFileDisplayed(filesProfile.getFileInRoot()))
+                filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
                 .as("Link to renamed file is displayed inside root directory")
                 .isTrue();
 
@@ -468,22 +500,22 @@ public class FilesTest extends AbstractTest {
     public void addFileDescription() {
         printTestHeader("Test Case: check it is possible to add a file description");
 
-        FilesProfile filesProfile = getMainFilesProfile();
+        FileProfile fileProfile = getMainFileProfile();
 
         FilesPage filesPage = openOverviewPage().openFilesPage();
 
         assertThat(
-                filesPage.isLinkToUploadedFileDisplayed(filesProfile.getFileInRoot()))
+                filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
                 .as("Link to uploaded file is displayed inside root directory")
                 .isTrue();
 
-        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(filesProfile.getFileInRoot());
-        uploadedFilePage = uploadedFilePage.addFileDescription(filesProfile);
+        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
+        uploadedFilePage = uploadedFilePage.addFileDescription(fileProfile);
 
         SoftAssert.assertThat(
                 uploadedFilePage.getUploadedFileDescriptionText())
                 .as("New Description of the file")
-                .isEqualTo(filesProfile.getFileInRootDescription());
+                .isEqualTo(fileProfile.getFileDescription());
 
         SoftAssert.assertAll();
     }
@@ -492,27 +524,27 @@ public class FilesTest extends AbstractTest {
     public void leaveComment() {
         printTestHeader("Test Case: check it is possible to write a comment");
 
-        FilesProfile filesProfile = getMainFilesProfile();
+        FileProfile fileProfile = getMainFileProfile();
 
         FilesPage filesPage = openOverviewPage().openFilesPage();
 
         assertThat(
-                filesPage.isLinkToUploadedFileDisplayed(filesProfile.getFileInRoot()))
+                filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
                 .as("Link to uploaded file is displayed inside root directory")
                 .isTrue();
 
-        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(filesProfile.getFileInRoot());
-        uploadedFilePage = uploadedFilePage.leaveComment(filesProfile.getFileInRootComment());
+        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
+        uploadedFilePage = uploadedFilePage.leaveComment(fileProfile.getFileComment());
 
         SoftAssert.assertThat(
                 uploadedFilePage.getFilePageTitleText())
                 .as("Title of the page")
-                .isEqualTo(filesProfile.getFileInRoot());
+                .isEqualTo(fileProfile.getFileName());
 
         SoftAssert.assertThat(
                 uploadedFilePage.getUploadedFileSavedCommentText())
                 .as("Submitted comment text")
-                .isEqualTo(filesProfile.getFileInRootComment());
+                .isEqualTo(fileProfile.getFileComment());
 
         SoftAssert.assertAll();
     }
@@ -521,16 +553,16 @@ public class FilesTest extends AbstractTest {
     public void validateAuthorizedURL() {
         printTestHeader("Test Case: check it is possible to use an authorized URL");
 
-        FilesProfile filesProfile = getMainFilesProfile();
+        FileProfile fileProfile = getMainFileProfile();
 
         FilesPage filesPage = openOverviewPage().openFilesPage();
 
         assertThat(
-                filesPage.isLinkToUploadedFileDisplayed(filesProfile.getFileInRoot()))
+                filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
                 .as("Link to uploaded file is displayed inside root directory")
                 .isTrue();
 
-        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(filesProfile.getFileInRoot());
+        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
         FilesAuthURLPage authorizedURLPage = uploadedFilePage.clickAuthorizedURL();
 
         assertThat(
@@ -539,15 +571,264 @@ public class FilesTest extends AbstractTest {
                 .isTrue();
 
         String authUrl = authorizedURLPage.getAuthUrlText();
-        removeSameFileFromDownloads(filesProfile.getFileInRoot());
+        removeSameFileFromDownloads(fileProfile.getFileName());
         wgetFile(authUrl);
 
         SoftAssert.assertThat(
-                isFileDownloaded(filesProfile.getFileInRoot()))
-                .as("The file [" + filesProfile.getFileInRoot() + "] is downloaded by url [" + authUrl + "]")
+                isFileDownloaded(fileProfile.getFileName()))
+                .as("The file [" + fileProfile.getFileName() + "] is downloaded by url [" + authUrl + "]")
                 .isTrue();
 
         SoftAssert.assertAll();
     }
 
+    @Test(dependsOnMethods = {"successfulLogin"})
+    public void deleteSeveralItemsInFolder() {
+        printTestHeader("Test Case: check it is possible to delete several files and folders in a folder");
+
+        FileProfile firstFile = getScopeDeleteFirstFile();
+        FileProfile secondFile = getScopeDeleteSecondFile();
+        FileProfile thirdFile = getScopeDeleteThirdFile();
+        FileProfile insideFile = getScopeDeleteFourthFile();
+
+        FolderProfile mainFolder = getScopeDeleteMainFolder();
+        FolderProfile firstFolder = getScopeDeleteFirstFolderToDelete();
+        FolderProfile secondFolder = getScopeDeleteSecondFolderToLeave();
+        FolderProfile thirdFolder = getScopeDeleteThirdFolderToDelete();
+
+        // create a folder in root directory and open it
+        FilesPage filesPage = openOverviewPage().openFilesPage();
+        filesPage = filesPage.createFolder(mainFolder.getFolderName());
+        filesPage = filesPage.openFolder(mainFolder.getFolderName());
+
+        // upload test files
+
+        // #1
+        FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(firstFile.getFileName());
+        filesAddFilesPage.uploadAllFiles();
+        filesPage = openOverviewPage().openFilesPage();
+        filesPage = filesPage.openFolder(mainFolder.getFolderName());
+
+        assertThat(
+                filesPage.isLinkToUploadedFileDisplayed(firstFile.getFileName()))
+                .as("Link to uploaded file #1 is displayed inside the folder")
+                .isTrue();
+
+        // #2
+        filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(secondFile.getFileName());
+        filesAddFilesPage.uploadAllFiles();
+        filesPage = openOverviewPage().openFilesPage();
+        filesPage = filesPage.openFolder(mainFolder.getFolderName());
+
+        assertThat(
+                filesPage.isLinkToUploadedFileDisplayed(secondFile.getFileName()))
+                .as("Link to uploaded file #2 is displayed inside the folder")
+                .isTrue();
+
+        // #3
+        filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(thirdFile.getFileName());
+        filesAddFilesPage.uploadAllFiles();
+        filesPage = openOverviewPage().openFilesPage();
+        filesPage = filesPage.openFolder(mainFolder.getFolderName());
+
+        assertThat(
+                filesPage.isLinkToUploadedFileDisplayed(thirdFile.getFileName()))
+                .as("Link to uploaded file #3 is displayed inside the folder")
+                .isTrue();
+
+        // create test folders
+
+        // #1
+        filesPage = filesPage.createFolder(firstFolder.getFolderName());
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(firstFolder.getFolderName()))
+                .as("Link to created folder #1 is displayed inside the folder")
+                .isTrue();
+
+        // upload file to the folder #1
+        filesPage = filesPage.openFolder(firstFolder.getFolderName());
+        filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(insideFile.getFileName());
+        filesAddFilesPage.uploadAllFiles();
+        filesPage = openOverviewPage().openFilesPage();
+        filesPage = filesPage.openFolder(mainFolder.getFolderName()).openFolder(firstFolder.getFolderName());
+
+        assertThat(
+                filesPage.isLinkToUploadedFileDisplayed(insideFile.getFileName()))
+                .as("Link to uploaded file #4 is displayed inside the folder")
+                .isTrue();
+
+        filesPage = openOverviewPage().openFilesPage();
+        filesPage = filesPage.openFolder(mainFolder.getFolderName());
+
+        // #2
+        filesPage = filesPage.createFolder(secondFolder.getFolderName());
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(secondFolder.getFolderName()))
+                .as("Link to created folder #2 is displayed inside the folder")
+                .isTrue();
+
+        // #3
+        filesPage = filesPage.createFolder(thirdFolder.getFolderName());
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(thirdFolder.getFolderName()))
+                .as("Link to created folder #3 is displayed inside the folder")
+                .isTrue();
+
+        // select items to delete
+        filesPage.selectItem(firstFile.getFileName());
+        filesPage.selectItem(secondFile.getFileName());
+        filesPage.selectItem(firstFolder.getFolderName());
+        filesPage.selectItem(secondFolder.getFolderName());
+
+        filesPage.clickDeleteSelected();
+
+        assertThat(
+                filesPage.isItemInDeleteDialogDisplayed(firstFile.getFileName()))
+                .as("Selected to delete item is displayed in the confirmation dialog: " + firstFile.getFileName())
+                .isTrue();
+
+        assertThat(
+                filesPage.isItemInDeleteDialogDisplayed(secondFile.getFileName()))
+                .as("Selected to delete item is displayed in the confirmation dialog: " + secondFile.getFileName())
+                .isTrue();
+
+        assertThat(
+                filesPage.isItemInDeleteDialogDisplayed(firstFolder.getFolderName()))
+                .as("Selected to delete item is displayed in the confirmation dialog: " + firstFolder.getFolderName())
+                .isTrue();
+
+        assertThat(
+                filesPage.isItemInDeleteDialogDisplayed(secondFolder.getFolderName()))
+                .as("Selected to delete item is displayed in the confirmation dialog: " + secondFolder.getFolderName())
+                .isTrue();
+
+        assertThat(
+                filesPage.isItemInDeleteDialogDisplayed(insideFile.getFileName()))
+                .as("Selected to delete item is displayed in the confirmation dialog: " + insideFile.getFileName())
+                .isTrue();
+
+        assertThat(
+                filesPage.getNumberOfItemsToDelete() == 5)
+                .as("number of displayed items at the confirmation dialog == 5")
+                .isTrue();
+
+        filesPage = filesPage.clickDeleteOnDialog();
+        filesPage = filesPage.openFolder(firstFolder.getFolderName());
+
+        assertThat(
+                filesPage.isLinkToUploadedFileDisplayed(thirdFile.getFileName()))
+                .as("File is still displayed: " + thirdFile.getFileName())
+                .isTrue();
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(thirdFolder.getFolderName()))
+                .as("Folder is still displayed: " + thirdFolder.getFolderName())
+                .isTrue();
+
+        assertThat(
+                 filesPage.getNumberOfDisplayedItems() == 2)
+                .as("Number of displayed files and folders == 2")
+                .isTrue();
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin", "createFolderInRoot" } )
+    public void renameFolder() {
+        printTestHeader("Test Case: check it is possible to rename a folder");
+
+        FolderProfile folderProfile = getMainFolderProfile();
+
+        FilesPage filesPage = openOverviewPage().openFilesPage();
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(folderProfile.getFolderName()))
+                .as("Link to created folder is displayed inside root directory")
+                .isTrue();
+
+        filesPage.selectItem(folderProfile.getFolderName());
+        filesPage.clickRenameSelected();
+        filesPage = filesPage.renameAndSaveFolder(folderProfile);
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(folderProfile.getFolderName()))
+                .as("Link to folder with new name is displayed inside root directory")
+                .isTrue();
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin", "uploadFileToRootDirectory" } )
+    public void downloadItemsFromFilesList() {
+        printTestHeader("Test Case: check it is possible to download select items from files list");
+
+        FileProfile mainFile = getMainFileProfile();
+
+        FileProfile firstFile = getDownloadFirstFile();
+        FileProfile secondFile = getDownloadSecondFile();
+        FileProfile insideFile = getDownloadInsideFile();
+
+        FolderProfile mainFolder = getDownloadMainFolder();
+        FolderProfile firstFolder = getDownloadFirstFolder();
+
+        // create main folder
+        FilesPage filesPage = openOverviewPage().openFilesPage();
+        filesPage = filesPage.createFolder(mainFolder.getFolderName());
+        filesPage = filesPage.openFolder(mainFolder.getFolderName());
+
+        // upload file #1
+        FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(firstFile.getFileName());
+        filesAddFilesPage.uploadAllFiles();
+
+        // upload file #2
+        openOverviewPage().openFilesPage().openFolder(mainFolder.getFolderName());
+        filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(secondFile.getFileName());
+        filesAddFilesPage.uploadAllFiles();
+
+        // create folder #1
+        filesPage = openOverviewPage().openFilesPage().openFolder(mainFolder.getFolderName());
+        filesPage = filesPage.createFolder(firstFolder.getFolderName());
+        filesPage.openFolder(firstFolder.getFolderName());
+
+        // upload file inside
+        filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(insideFile.getFileName());
+        filesAddFilesPage.uploadAllFiles();
+
+        filesPage = openOverviewPage().openFilesPage();
+        filesPage.selectItem(mainFolder.getFolderName());
+        filesPage.selectItem(mainFile.getFileName());
+        filesPage.clickDownloadSelected();
+
+        assertThat(
+                filesPage.isItemInDownloadDialogDisplayed(mainFile.getFileName()))
+                .as("Selected to download item is displayed in the confirmation dialog: " + mainFile.getFileName())
+                .isTrue();
+
+        assertThat(
+                filesPage.isItemInDownloadDialogDisplayed(firstFile.getFileName()))
+                .as("Selected to download item is displayed in the confirmation dialog: " + firstFile.getFileName())
+                .isTrue();
+
+        assertThat(
+                filesPage.isItemInDownloadDialogDisplayed(secondFile.getFileName()))
+                .as("Selected to download item is displayed in the confirmation dialog: " + secondFile.getFileName())
+                .isTrue();
+
+        assertThat(
+                filesPage.getNumberOfItemsToDownload() == 4)
+                .as("number of displayed items at the confirmation dialog == 4")
+                .isTrue();
+
+        removeSameFileFromDownloads(mainFile.getFileName());
+        removeSameFileFromDownloads(firstFile.getFileName());
+        removeSameFileFromDownloads(secondFile.getFileName());
+        removeSameFileFromDownloads(insideFile.getFileName());
+
+    }
 }

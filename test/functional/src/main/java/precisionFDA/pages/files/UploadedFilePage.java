@@ -5,8 +5,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import precisionFDA.model.FilesProfile;
-import precisionFDA.utils.Utils;
+import precisionFDA.model.FileProfile;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import precisionFDA.data.TestUserData;
@@ -238,13 +237,6 @@ public class UploadedFilePage extends AbstractPage {
         return new FilesPage(getDriver());
     }
 
-    public UploadedFilePage updateDescription(String descr) {
-        log.info("update description");
-
-
-        return new UploadedFilePage(getDriver());
-    }
-
     public UploadedFilePage downloadFile() {
         log.info("download file");
         String fileName = getFilePageTitleText();
@@ -257,7 +249,7 @@ public class UploadedFilePage extends AbstractPage {
         waitUntilFileIsDownloaded(getPathToDownloadsFolder() + fileName);
     }
 
-    public UploadedFilePage renameFileOnFilePage(FilesProfile filesProfile) {
+    public UploadedFilePage renameFileOnFilePage(FileProfile fileProfile) {
         log.info("rename the file");
 
         getUploadedFileEditDD().click();
@@ -267,18 +259,18 @@ public class UploadedFilePage extends AbstractPage {
 
         waitUntilDisplayed(getEditFileFormNameInput(), 30);
         getEditFileFormNameInput().clear();
-        String fileName = filesProfile.getFileInRoot();
+        String fileName = fileProfile.getFileName();
         String newName = generateUpdatedName(fileName);
         getEditFileFormNameInput().sendKeys(newName);
         waitUntilClickable(getEditFileFormSaveButton());
         getEditFileFormSaveButton().click();
 
-        filesProfile.setFileInRoot(newName);
+        fileProfile.setFileName(newName);
 
         return new UploadedFilePage(getDriver());
     }
 
-    public UploadedFilePage addFileDescription(FilesProfile filesProfile) {
+    public UploadedFilePage addFileDescription(FileProfile fileProfile) {
         log.info("add file description");
 
         getUploadedFileEditDD().click();
@@ -288,7 +280,7 @@ public class UploadedFilePage extends AbstractPage {
 
         waitUntilDisplayed(getEditFileFormDescrTextarea(), 30);
         getEditFileFormDescrTextarea().clear();
-        getEditFileFormDescrTextarea().sendKeys(filesProfile.getFileInRootDescription());
+        getEditFileFormDescrTextarea().sendKeys(fileProfile.getFileDescription());
         waitUntilClickable(getEditFileFormSaveButton());
         getEditFileFormSaveButton().click();
 
