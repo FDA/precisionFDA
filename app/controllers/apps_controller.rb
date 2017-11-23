@@ -41,7 +41,7 @@ class AppsController < ApplicationController
     else
       jobs = Job.editable_by(@context)
     end
-    @jobs_grid = initialize_grid(jobs.includes(:taggings), {
+    @jobs_grid = initialize_grid(jobs.includes(:taggings, analysis: :workflow), {
       name: 'jobs',
       order: 'jobs.id',
       order_direction: 'desc',

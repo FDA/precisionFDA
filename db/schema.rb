@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170921133121) do
+ActiveRecord::Schema.define(version: 20170926003138) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id"
@@ -24,6 +24,17 @@ ActiveRecord::Schema.define(version: 20170921133121) do
 
   add_index "accepted_licenses", ["license_id"], name: "index_accepted_licenses_on_license_id"
   add_index "accepted_licenses", ["user_id"], name: "index_accepted_licenses_on_user_id"
+
+  create_table "analyses", force: :cascade do |t|
+    t.string   "name"
+    t.string   "dxid"
+    t.integer  "user_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+    t.integer  "workflow_id"
+  end
+
+  add_index "analyses", ["user_id"], name: "index_analyses_on_user_id"
 
   create_table "answers", force: :cascade do |t|
     t.integer  "user_id"
@@ -288,6 +299,7 @@ ActiveRecord::Schema.define(version: 20170921133121) do
     t.datetime "updated_at",    null: false
     t.integer  "app_series_id"
     t.string   "scope"
+    t.integer  "analysis_id"
   end
 
   add_index "jobs", ["app_id"], name: "index_jobs_on_app_id"
@@ -581,5 +593,37 @@ ActiveRecord::Schema.define(version: 20170921133121) do
 
   add_index "votes", ["votable_id", "votable_type", "vote_scope"], name: "index_votes_on_votable_id_and_votable_type_and_vote_scope"
   add_index "votes", ["voter_id", "voter_type", "vote_scope"], name: "index_votes_on_voter_id_and_voter_type_and_vote_scope"
+
+  create_table "workflow_series", force: :cascade do |t|
+    t.string   "dxid"
+    t.string   "name"
+    t.integer  "latest_revision_workflow_id"
+    t.integer  "user_id"
+    t.string   "scope"
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
+  end
+
+  add_index "workflow_series", ["latest_revision_workflow_id"], name: "index_workflow_series_on_latest_revision_workflow_id"
+  add_index "workflow_series", ["user_id"], name: "index_workflow_series_on_user_id"
+
+  create_table "workflows", force: :cascade do |t|
+    t.string   "title"
+    t.string   "name"
+    t.string   "dxid"
+    t.integer  "user_id"
+    t.text     "readme"
+    t.string   "edit_version"
+    t.text     "spec"
+    t.string   "default_instance"
+    t.string   "scope"
+    t.integer  "revision"
+    t.integer  "workflow_series_id"
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
+  end
+
+  add_index "workflows", ["user_id"], name: "index_workflows_on_user_id"
+  add_index "workflows", ["workflow_series_id"], name: "index_workflows_on_workflow_series_id"
 
 end
