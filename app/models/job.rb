@@ -16,6 +16,7 @@
 #  updated_at    :datetime         not null
 #  app_series_id :integer
 #  scope         :string
+#  analysis_id   :integer
 #
 
 class Job < ActiveRecord::Base
@@ -24,6 +25,7 @@ class Job < ActiveRecord::Base
   belongs_to :app
   belongs_to :user
   belongs_to :app_series
+  belongs_to :analysis
 
   has_and_belongs_to_many :input_files, {join_table: "job_inputs", class_name: "UserFile"}
   has_many :output_files, as: :parent, class_name: "UserFile"

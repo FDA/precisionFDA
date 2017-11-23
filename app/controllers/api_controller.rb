@@ -107,6 +107,367 @@ class ApiController < ApplicationController
     render json: {published: published_count}
   end
 
+  # Inputs:
+  #
+  # id (Integer; required): app series id
+  #
+  # Outputs:
+  #
+  # An array of hashes
+  #
+  def list_app_revisions
+    app_series_id = params["id"]
+    fail "id needs to be an Integer" unless app_series_id.is_a?(Numeric) && (app_series_id.to_i == app_series_id)
+    app_series = AppSeries.accessible_by(@context).find_by(id: params["id"])
+    fail "AppSeries not found" if app_series.nil?
+    render json: app_series.accessible_revisions(@context).select(:title, :id, :dxid, :revision, :version)
+  end
+
+  # Inputs
+  #
+  # workflow_name, workflow_title, readme, is_new, slots
+  #
+  # Outputs
+  #
+  # id (string, only on success): the id of the created workflow, if success
+  # failure (string, only on failure): a message that can be shown to the user due to failure
+  def create_workflow
+    workflow_name = params[:workflow_name]
+    fail "The workflow 'workflow_name' must be a nonempty string." unless workflow_name.is_a?(String) && workflow_name != ""
+    fail "The workflow 'workflow_name' can only contain the characters A-Z, a-z, 0-9, '.' (period), '_' (underscore) and '-' (dash)." unless workflow_name =~ /^[a-zA-Z0-9._-]+$/
+
+    title = params[:workflow_title]
+    fail "The workflow 'title' must be a nonempty string." unless title.is_a?(String) && title != ""
+
+    readme = params[:readme]
+    fail "The workflow 'Readme' must be a string." unless readme.is_a?(String)
+
+    is_new = params[:is_new]
+    fail "The workflow 'is_new' must be a boolean, true or false." unless ((is_new == true) || (is_new == false))
+
+    slots = params[:slots] || []
+    fail "The workflow 'slots' must be an array of hashes." unless slots.is_a?(Array) && slots.all? { |slot| slot.is_a?(Hash) }
+
+    spec = {input_spec: {stages: []}, output_spec: {stages: []}}
+    stages = []
+    slot_details_by_slot_id = {}
+    slot_idx_to_slot_id = {}
+    output_classes = {}
+    slots.each_with_index do |slot, slot_i|
+      name = slot["name"]
+      fail "#{(slot_i+1).ordinalize} slot: Each 'name' must be a nonempty string." unless name.is_a?(String) && name != ""
+
+      dxid = slot["dxid"]
+      fail "Slot '#{name}': Each slot 'dxid' must be a nonempty string." unless dxid.is_a?(String) && dxid != ""
+      fail "Slot '#{name}': App 'dxid' for slot '#{name}' does not exist or is not accessible by you." if App.accessible_by(@context).find_by(dxid: dxid).nil?
+
+      instance_type = slot["instanceType"]
+      fail "Slot '#{name}': Each slot 'instanceType' must be a nonempty string." unless instance_type.is_a?(String) && instance_type != ""
+      fail "Slot '#{name}': Each slot 'instanceType' must be a valid instance type selected" unless Job::INSTANCE_TYPES.has_key?(instance_type)
+
+      slot_id = slot["slotId"]
+      fail "Slot '#{name}': Each slot 'slotId' must be a nonempty string." unless slot_id.is_a?(String) && slot_id != ""
+      fail "Slot '#{name}': Each slot 'slotId' must be unique." if slot_details_by_slot_id.has_key?(slot_id)
+      slot_details_by_slot_id[slot_id] = { prev_slot: nil, next_slot: nil, idx: slot_i }
+      slot_idx_to_slot_id[slot_i] = slot_id
+
+      inputs = slot["inputs"] || []
+      fail "Slot '#{name}': Each slot 'inputs' must be an array of hashes." unless inputs.is_a?(Array) && inputs.all? { |slot| slot.is_a?(Hash) }
+      prev_slot_expected = inputs.any? { |input| input["values"]["id"] }
+
+      outputs = slot["outputs"] || []
+      fail "Slot '#{name}': Each slot 'outputs' must be an array of hashes." unless outputs.is_a?(Array) && outputs.all? { |slot| slot.is_a?(Hash) }
+      outputs.each do |output|
+        output_classes[slot_id] ||= {}
+        output_classes[slot_id][output["name"]] = output["class"]
+      end
+      next_slot_expected = outputs.any? { |output| output["values"]["id"] }
+
+      if slot_i != 0
+        defined_prev_slot_id = slot_idx_to_slot_id[slot_i - 1]
+        fail "Slot '#{name}': Each slot 'slotId' must be the value of the previous slot's 'nextSlot'." if slot_details_by_slot_id[defined_prev_slot_id][:next_slot_expected] && slot_details_by_slot_id[defined_prev_slot_id][:next_slot] != slot_id
+
+        prev_slot = slot["prevSlot"]
+        if prev_slot_expected
+          fail "Slot '#{name}': Each slot 'prevSlot' must be a non empty string." unless prev_slot.is_a?(String) && prev_slot != ""
+          fail "Slot '#{name}': Each slot 'prevSlot' must be the value of the previous slot's 'slotId'." if prev_slot != defined_prev_slot_id
+        end
+      else
+        prev_slot = nil
+      end
+
+      if slot_i != slots.size - 1
+        next_slot = slot["nextSlot"]
+        if next_slot_expected
+          fail "Slot '#{name}': Each slot 'nextSlot' must be a non empty string if any element of 'outputs' refers to another stage's input." unless next_slot.is_a?(String) && next_slot != ""
+        end
+      else
+        next_slot = nil
+      end
+
+      slot_details_by_slot_id[slot_id] = { prev_slot: prev_slot, next_slot: next_slot, idx: slot_i, next_slot_expected: next_slot_expected }
+
+      spec[:input_spec][:stages] << {
+        "name": name,
+        "prev_slot": prev_slot,
+        "next_slot": next_slot,
+        "slotId": slot_id,
+        "app_dxid": dxid,
+        "inputs": inputs,
+        "outputs": outputs,
+        "instanceType": instance_type
+      }
+
+      stage_inputs = {}
+      stage_inputs_seen = Set.new
+      inputs.each_with_index do |input, input_i|
+        i_name = input["name"]
+        fail "Slot '#{name}': The #{(input_i+1).ordinalize} input is missing a name." unless i_name.is_a?(String) && i_name != ""
+        fail "Slot '#{name}': The input name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless i_name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
+        fail "Slot '#{name}': Duplicate definitions for the input named '#{i_name}'." if stage_inputs_seen.include?(i_name)
+        stage_inputs_seen << i_name
+
+        i_class = input["class"]
+        fail "Slot '#{name}': The input named '#{i_name}' is missing a type." unless i_class.is_a?(String) && i_class != ""
+        fail "Slot '#{name}': The input named '#{i_name}' contains an invalid type. Valid types are: #{App::VALID_IO_CLASSES.join(', ')}." unless App::VALID_IO_CLASSES.include?(i_class)
+
+        i_optional = input["optional"]
+        fail "Slot '#{name}': The input named '#{i_name}' is missing the 'optional' designation." unless (i_optional == true || i_optional == false)
+
+        i_label = input["label"]
+        fail "Slot '#{name}': The input named '#{i_name}' is missing a label." unless i_label.is_a?(String)
+
+        i_required_run_input = input["requiredRunInput"]
+        fail "Slot '#{name}': The input named '#{i_name}' is missing the 'required_run_input' designation." unless (i_required_run_input == true || i_required_run_input == false)
+
+        i_parent_slot = input["parent_slot"]
+        fail "Slot '#{name}': The input named '#{i_name}' has the 'parent_slot' value of '#{i_parent_slot}' but is expected to be '#{slot_id}'." unless i_parent_slot == slot_id
+
+        i_stage_name = input["stageName"]
+        fail "Slot '#{name}': The input named '#{i_name}' has the 'stageName' value of '#{i_stage_name}' but is expected to be '#{name}'." unless i_stage_name == name
+
+        i_values = input["values"]
+        fail "Slot '#{name}': The input named '#{i_name}' is expected to have a 'values' hash with keys 'id' and 'name'." unless i_values.is_a?(Hash) && i_values.has_key?("id") && i_values.has_key?("name")
+
+        if slot_i == 0
+          fail "Slot '#{name}': The input named '#{i_name}' must be desginated as a required input or be linked to a compatible stage output." if !i_optional && !i_required_run_input
+        else
+          if !i_optional
+            i_values_id = i_values["id"]
+            i_values_name = i_values["name"]
+            linked_to_a_stage = i_values_id.present? && i_values_name.present?
+            fail "Slot '#{name}': The input named '#{i_name}' must be desginated as a required input or be linked to another stage's output." if !i_required_run_input && !linked_to_a_stage
+            if linked_to_a_stage
+              slot_id_mismatch = defined_prev_slot_id != i_values_id
+              linked_to_previous_stage = output_classes.has_key?(defined_prev_slot_id) && output_classes[defined_prev_slot_id].has_key?(i_values_name)
+              fail "Slot '#{name}': The input named '#{i_name}' is linked to an output that does not belong to the previous stage." if !i_required_run_input && (slot_id_mismatch || !linked_to_previous_stage)
+
+              output_class = output_classes[defined_prev_slot_id][i_values_name]
+              fail "Slot '#{name}': The input named '#{i_name}' is linked to an output with the wrong class. Input type is '#{i_class}', but output type is '#{output_class}'." if i_class != output_class
+            end
+          end
+        end
+
+        unless i_values_id.nil?
+          stage_inputs.merge!({i_name => {"$dnanexus_link": {"outputField": i_values_name, "stage": i_values_id}}})
+        end
+      end
+      each_stage = {
+        "executable":  dxid,
+        "id": slot_id,
+        "systemRequirements": {"main" => {"instanceType": Job::INSTANCE_TYPES[instance_type]}}
+      }
+      each_stage.merge!({"input": stage_inputs}) unless stage_inputs.blank?
+      stages << each_stage
+    end
+
+    workflow_params = {
+      project: current_user.private_files_project,
+      name: workflow_name,
+      title: title,
+      stages: stages
+    }
+
+    Workflow.transaction do
+      workflow_series_dxid = WorkflowSeries.construct_dxid(@context.username, workflow_name)
+      workflow_series = WorkflowSeries.find_by(dxid: workflow_series_dxid)
+      if is_new
+        fail "You already have a workflow by the name '#{workflow_name}'." unless workflow_series.nil?
+        workflow_series = WorkflowSeries.create!(
+          dxid: workflow_series_dxid,
+          name: workflow_name,
+          latest_revision_workflow_id: nil,
+          user_id: @context.user_id,
+          scope: "private"
+        )
+
+        revision = 1
+      else
+        fail "You don't have a workflow by the name '#{workflow_name}'." if workflow_series.nil?
+        revision = workflow_series.latest_revision_workflow.revision + 1
+      end
+      api = DNAnexusAPI.new(@context.token)
+      response = api.create_workflow(workflow_params)
+      workflow = Workflow.create!(
+        name: workflow_name,
+        title: title,
+        dxid: response["id"],
+        edit_version: response["editVersion"],
+        user_id: current_user.id,
+        spec: spec,
+        readme: readme,
+        revision: revision,
+        scope: "private",
+        workflow_series_id: workflow_series.id,
+      )
+      workflow.save!
+      workflow_series.update!(latest_revision_workflow_id: workflow.id)
+      render json: {id: workflow.dxid}
+    end
+  end
+
+  # Inputs
+  #
+  # workflow_id (string, required): the dxid of the workflow to run
+  # inputs (hash, required): the inputs
+  # name (string, required): the name of the analysis
+  #
+  # Outputs
+  #
+  # id (string, only on success): the id of the created analysis, if success
+  # failure (string, only on failure): a message that can be shown to the user due to failure
+  def run_workflow
+    analysis_name = params["name"]
+    fail "The workflow 'analysis_name' must be a nonempty string." unless analysis_name.is_a?(String) && analysis_name != ""
+
+    workflow_id = params["workflow_id"]
+    fail "The workflow 'workflow_id' must be a nonempty string." unless workflow_id.is_a?(String) && workflow_id != ""
+    workflow = Workflow.accessible_by(@context).find_by(dxid: workflow_id)
+    fail "Workflow with id #{workflow_id} does not exist or is not accessible by you" if workflow.nil?
+
+    inputs = params["inputs"]
+    fail "The workflow 'inputs' must be an array of hashes." unless inputs.is_a?(Array) && inputs.all? { |s| s.is_a?(Hash) }
+
+    workflow_input_spec = workflow.input_spec_hash
+    unseen_workflow_inputs = workflow.input_spec_hash
+    dx_run_workflow_inputs = {}
+    stage_inputs = Hash.new { |h,k| h[k] = {} }
+
+    inputs.each do |api_input|
+      input_name = api_input["input_name"]
+      stage_input_name_match = /^(stage-\w{14}).(\w+)$/.match(input_name)
+      fail "Invalid value for input_name" if stage_input_name_match.captures.size != 2
+      stage = stage_input_name_match[1]
+      matched_input_name = stage_input_name_match[2]
+
+      input_klass = api_input["class"]
+      fail "The input named '#{input_name}' has invalid type '#{input_klass}'. Valid types are: #{App::VALID_IO_CLASSES.join(', ')}." unless App::VALID_IO_CLASSES.include?(input_klass)
+
+      input_value = api_input["input_value"]
+      optional = workflow_input_spec[stage][matched_input_name]["optional"]
+      unseen_workflow_inputs[stage].delete(matched_input_name)
+      next if optional && !input_value.present?
+      case input_klass
+      when "file"
+        fail "#{input_name}: input file value is not a string" unless input_value.is_a?(String)
+        file = UserFile.real_files.accessible_by(@context).find_by(dxid: input_value)
+        fail "#{input_name}: input file is not accessible or does not exist" unless !file.nil?
+        fail "#{input_name}: input file's license must be accepted" unless !file.license.present? || file.licensed_by?(@context)
+
+        input_value = {"$dnanexus_link" => input_value}
+      when "int"
+        fail "#{input_name}: value is not an integer" unless input_value.to_i.to_s == input_value
+        input_value = input_value.to_i
+      when "float"
+        fail "#{input_name}: value is not a float" unless input_value.starts_with?(input_value.to_f.to_s)
+        input_value = input_value.to_f
+      when "boolean"
+        fail "#{input_name}: value is not a boolean" unless input_value == true || input_value == false
+      when "string"
+        fail "#{input_name}: value is not a string" unless input_value.is_a?(String)
+      end
+      dx_run_workflow_inputs.merge!(input_name => input_value)
+
+      stage_inputs[stage][matched_input_name] = input_value
+    end
+
+    unseen_workflow_inputs.each do |stage, inputs|
+      inputs.each do |name, input|
+        fail "The required input '#{stage}.#{name}' is missing" if !input["optional"]
+      end
+    end
+
+    project = @context.user.private_files_project
+    workflow_params = {
+      name: analysis_name,
+      input: dx_run_workflow_inputs,
+      project: project
+    }
+
+    api = DNAnexusAPI.new(@context.token)
+    response = api.run_workflow(workflow_id, workflow_params)
+    analysis_dxid = response["id"]
+    analysis = Analysis.create!(name: analysis_name, workflow_id: workflow.id, dxid: analysis_dxid, user_id: current_user.id)
+
+    response["stages"].each_with_index do |job_id, idx|
+      # Create job record
+      app = workflow.apps[idx]
+      stage = workflow.input_spec["stages"][idx]
+      run_inputs = {}
+      input_file_dxids = []
+      stage_inputs[stage["slotId"]].each do |input_name, input_value|
+        if input_value.is_a?(Hash)
+          if input_value["$dnanexus_link"].is_a?(String) && /^file-/.match(input_value["$dnanexus_link"])
+            input_file_dxids << input_value["$dnanexus_link"]
+            run_inputs[input_name] = input_value["$dnanexus_link"]
+          end
+        else
+          run_inputs[input_name] = input_value
+        end
+      end
+      opts = {
+        dxid: job_id,
+        app_series_id: app.app_series_id,
+        analysis_id: analysis.id,
+        app_id: app.id,
+        project: project,
+        run_inputs: run_inputs,
+        state: "idle",
+        name: app.title,
+        describe: {},
+        scope: "private",
+        user_id: @context.user_id,
+        run_instance_type: stage["instanceType"]
+      }
+      provenance = {job_id => {workflow_dxid: workflow.dxid, workflow_id: workflow.id, inputs: run_inputs}}
+      input_file_dxids.uniq!
+      input_file_ids = []
+      UserFile.accessible_by(@context).where(dxid: input_file_dxids).find_each do |file|
+        if file.parent_type == "Job"
+          if file.parent
+            parent_job = file.parent
+            provenance.merge!(parent_job.provenance)
+            provenance[file.dxid] = parent_job.dxid
+          end
+        end
+        input_file_ids << file.id
+      end
+      opts[:provenance] = provenance
+      Job.transaction do
+        job = Job.create!(opts)
+        job.input_file_ids = input_file_ids
+        job.save!
+      end
+    end
+    render json: {id: analysis_dxid}
+  end
+
+  def to_bool (input)
+    return true   if input == 'true'
+    return false  if input == 'false'
+    raise ArgumentError.new("invalid value for Boolean: \"#{self}\"")
+  end
+
   # Inputs
   # --
   # uid (String, required)

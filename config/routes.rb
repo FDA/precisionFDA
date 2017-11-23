@@ -43,6 +43,9 @@ Rails.application.routes.draw do
     post '/api/describe_license', to: 'api#describe_license'
     post '/api/accept_licenses', to: 'api#accept_licenses'
     post '/api/run_app', to: 'api#run_app'
+    post '/api/list_app_revisions', to: 'api#list_app_revisions'
+    post '/api/create_workflow', to: 'api#create_workflow'
+    post '/api/run_workflow', to: 'api#run_workflow'
     post '/api/get_app_spec', to: 'api#get_app_spec'
     post '/api/get_app_script', to: 'api#get_app_script'
     post '/api/export_app', to: 'api#export_app'
@@ -83,6 +86,14 @@ Rails.application.routes.draw do
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
       resources :comments
+    end
+
+    resources :workflows, except: [:create, :update, :destroy] do
+      resources :analyses, only: [:new, :create]
+      member do
+        get 'analyses', to: 'workflows#index'
+        get 'fork'
+      end
     end
 
     resources :jobs, except: :index do
