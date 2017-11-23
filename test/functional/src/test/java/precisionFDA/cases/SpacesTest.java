@@ -52,8 +52,17 @@ public class SpacesTest extends AbstractTest {
                 .as("Provision Space button is displayed")
                 .isTrue();
 
-        SoftAssert.assertAll();
+        SoftAssert.assertThat(
+                spacesPage.isCreatedSpaceNameDisplayed(spaceProfile.getSpaceName()))
+                .as("Created space name is displayed")
+                .isTrue();
 
+        SoftAssert.assertThat(
+                spacesPage.isCreatedSpaceDescrDisplayed(spaceProfile.getSpaceDescription()))
+                .as("Created space description is displayed")
+                .isTrue();
+
+        SoftAssert.assertAll();
     }
 
 

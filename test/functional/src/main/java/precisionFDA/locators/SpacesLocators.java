@@ -18,4 +18,8 @@ public class SpacesLocators {
 
     public static final String EDIT_SPACE_CREATE_BUTTON = "//input[@value='Create']";
 
+    public static final String SPACES_NAME_TEMPLATE = "//*[@id='spaces']//td[text()='{SPACE_NAME}']";
+
+    public static final String SPACES_DESCR_TEMPLATE = "//*[@id='spaces']//*[@class='description'][text()='{SPACE_DESCR}']";
+
 }

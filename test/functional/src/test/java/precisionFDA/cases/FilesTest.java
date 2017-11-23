@@ -259,6 +259,8 @@ public class FilesTest extends AbstractTest {
         FolderProfile filterOneFolder = getFilterOneFolder();
         FolderProfile filterTwoFolder = getFilterTwoFolder();
         FolderProfile filterCommonFolder = getFilterCommonFolder();
+        FolderProfile nonFilterFolder = getNonFilterFolder();
+
 
         // create a folder in root directory and open it
         FilesPage filesPage = openOverviewPage().openFilesPage();
@@ -315,6 +317,9 @@ public class FilesTest extends AbstractTest {
 
         // with phrase 'filter#2'
         filesPage = filesPage.createFolder(filterTwoFolder.getFolderName());
+
+        // without phrase 'filter'
+        filesPage = filesPage.createFolder(nonFilterFolder.getFolderName());
 
         SoftAssert.assertThat(
                 filesPage.isLinkToCreatedFolderDisplayed(filterTwoFolder.getFolderName()))
@@ -719,8 +724,9 @@ public class FilesTest extends AbstractTest {
                 .as("number of displayed items at the confirmation dialog == 5")
                 .isTrue();
 
-        filesPage = filesPage.clickDeleteOnDialog();
-        filesPage = filesPage.openFolder(firstFolder.getFolderName());
+        filesPage.clickDeleteOnDialog();
+        filesPage = openOverviewPage().openFilesPage();
+        filesPage = filesPage.openFolder(mainFolder.getFolderName());
 
         assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(thirdFile.getFileName()))
@@ -830,5 +836,38 @@ public class FilesTest extends AbstractTest {
         removeSameFileFromDownloads(secondFile.getFileName());
         removeSameFileFromDownloads(insideFile.getFileName());
 
+        filesPage.scrollRight();
+
+        filesPage.downloadItemFromDownloadDialog(mainFile.getFileName());
+
+        SoftAssert.assertThat(
+                isFileDownloaded(mainFile.getFileName()))
+                .as("The file is downloaded: " + mainFile.getFileName())
+                .isTrue();
+
+        filesPage.downloadItemFromDownloadDialog(firstFile.getFileName());
+
+        SoftAssert.assertThat(
+                isFileDownloaded(firstFile.getFileName()))
+                .as("The file is downloaded: " + firstFile.getFileName())
+                .isTrue();
+
+        filesPage.downloadItemFromDownloadDialog(secondFile.getFileName());
+
+        SoftAssert.assertThat(
+                isFileDownloaded(secondFile.getFileName()))
+                .as("The file is downloaded: " + secondFile.getFileName())
+                .isTrue();
+
+        filesPage.downloadItemFromDownloadDialog(insideFile.getFileName());
+
+        SoftAssert.assertThat(
+                isFileDownloaded(insideFile.getFileName()))
+                .as("The file is downloaded: " + insideFile.getFileName())
+                .isTrue();
+
+        openOverviewPage();
+
+        SoftAssert.assertAll();
     }
 }
