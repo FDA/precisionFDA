@@ -1,0 +1,125 @@
+<% content_for :title do %>Run <%= @workflow.title %><% end %>
+
+<div class="affix-spacer">
+  <div class="affix-container">
+    <div class="page-header clearfix">
+      <div class="page-title pull-left"><span class="fa fa-cube"></span> Run <%= link_to @workflow.title, workflow_path(@workflow.uid), target: "_blank" %></div>
+      <div class="btn-group pull-right">
+        <button class="btn btn-primary btn-lg " data-bind="text: isRunning()? 'Running...' : 'Run Workflow', disable: !canRunWorkflow() || isRunning(), click: function () { run_workflow(); }"><span class="fa fa-bolt"></span> <span ></span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <div class="error-section" data-bind="visible: errorMessage" style="display: none">
+    <div class="alert alert-danger">
+      <strong>Please fix the issue and retry:</strong> <span data-bind="text: errorMessage"></span>
+    </div>
+  </div>
+  <!-- <%= alert_help("Learn more about running a workflow", "#{show_docs_path('workflows')}#workflow-run") %> -->
+  <form class="form form-horizontal">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>Configure</h4>
+      </div>
+      <div class="panel-body">
+        <div class="form-group required">
+          <label class= "col-sm-4 control-label" for="name">Analysis Name</label>
+          <div class="col-sm-10 col-sm-offset-1">
+            <input type="text" name="name" class="form-control" data-bind="textInput: title">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>Inputs</h4>
+      </div>
+      <div class="panel-body">
+        <ul data-bind="template: {name: 'required-inputs', foreach: inputs()}"></ul>
+      </div>
+    </div>
+  </form>
+</div>
+<script type="text/html" id="required-inputs">
+
+  <div>
+    <div class="workflow-input-header">
+      <div class="workflows-input pfda-padded center-block">
+        <i style="padding-right: 12px;"class="fa fa-gear fa-branded center-block" aria-hidden="true"></i><span class="bold " data-bind="text: name" ></span>
+      </div>
+    </div>
+    <!-- ko foreach: $root.data_inputs($data) -->
+    <div class="pfda-padded row form-group required">
+      <label class="col-md-offset-3 col-md-3 control-label"data-bind="css: $data.optional? '' : 'data-required', text: stageName"></label>
+      <div class="col-md-6 io-field-default" data-bind="template: { name: 'io-field-'+$data.class}"></div>
+    </div>
+    <!-- /ko -->
+  </div>
+</script>
+
+<script type="text/html" id="io-field-file">
+  <button class="btn btn-info" data-bind="text: selectorModel.fileValueDisplay(), attr: {name: name, disable: $root.loading}, click: function () { selectorModel.openSelector();}">Select file...</button>
+  <!-- ko if: selectorModel.defaultValues -->
+  <button class="btn btn-link btn-link-danger" data-bind="click: function () { selectorModel.clear();}">Clear</button>
+  <!-- /ko -->
+  <%= render "workflows/selector_modal" %>
+</script>
+<script type="text/html" id="io-field-array:file">
+  <button class="btn btn-info" data-bind="text: selectorModel.fileValueDisplay(), attr: {name: name, disable: $root.loading}, click: function () { selectorModel.openSelector();}">Select file...</button>
+  <!-- ko if: selectorModel.defaultValues -->
+  <button class="btn btn-link btn-link-danger" data-bind="click: function () { selectorModel.clear();}">Clear</button>
+  <!-- /ko -->
+  <%= render "workflows/selector_modal" %>
+</script>
+
+<!--<script type="text/html" id="io-field-run">-->
+<!--<button class="btn btn-info" data-bind="text: defaultValueDisplay, attr: {name: name, disable: $root.loading}, click: openRunSelector, css: { 'btn-info': !defaultValues(), 'btn-default': defaultValues}">Select run...</button>-->
+<!--&lt;!&ndash; ko if: defaultValues &ndash;&gt;-->
+<!--<button class="btn btn-link btn-link-danger" data-bind="click: clear">Clear</button>-->
+<!--&lt;!&ndash; /ko &ndash;&gt;-->
+<!--&lt;!&ndash;%= render "_partials/run_selector_modal" %>-->
+<!--</script>-->
+
+
+<script type="text/html" id="io-field-string">
+  <!--<!--button data-bind="click: function () { console.log($context); }"> Context Log </button>-->
+
+  <input type="text" class="form-control"  data-bind="textInput: defaultValues"/>
+</script>
+
+<script type="text/html" id="io-field-array:string">
+  <input type="text" class="form-control" data-bind="textInput: defaultValues"/>
+</script>
+
+<script type="text/html" id="io-field-int">
+  <input type="text" class="form-control" data-bind="textInput: defaultValues"/>
+</script>
+
+<script type="text/html" id="io-field-array:int">
+  <input type="text" class="form-control"  data-bind="textInput: defaultValues"/>
+</script>
+
+<script type="text/html" id="io-field-float">
+  <input type="text" class="form-control" data-bind="textInput: defaultValues"/>
+</script>
+
+<script type="text/html" id="io-field-array:float">
+  <input type="text" class="form-control" data-bind="textInput: defaultValues"/>
+</script>
+
+<!--<script type="text/html" id="io-field-study">-->
+<!--<button class="btn btn-info" data-bind="text: defaultValueDisplay, attr: {name: name, disable: $root.loading}, click: openRunSelector, css: { 'btn-info': !defaultValues(), 'btn-default': defaultValues}">Select run...</button>-->
+<!--&lt;!&ndash; ko if: defaultValues &ndash;&gt;-->
+<!--<button class="btn btn-link btn-link-danger" data-bind="click: clear">Clear</button>-->
+<!--&lt;!&ndash; /ko &ndash;&gt;-->
+<!--<!--%= render "_partials/run_selector_modal" %>-->
+<!--</script>-->
+
+<script type="text/html" id="io-field-boolean">
+  <div class="btn-group">
+    <button class="btn btn-default" data-bind="css: {active: isTrueActive, is_default: defaultValues()[0] === 'true'}, click: toggleTrue, disable: $root.busy">True</button>
+    <button class="btn btn-default" data-bind="css: {active: isFalseActive, is_default: defaultValues()[0] === 'false'}, click: toggleFalse, disable: $root.busy">False</button>
+  </div>
+</script>

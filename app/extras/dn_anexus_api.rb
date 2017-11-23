@@ -38,6 +38,14 @@ class DNAnexusAPI
     return true
   end
 
+  def run_workflow(workflow_id, params)
+    call(workflow_id, "run", params)
+  end
+
+  def create_workflow(params)
+    call("workflow", "new", params)
+  end
+
   def self.email_exists?(email)
     api = self.new(ADMIN_TOKEN)
     begin

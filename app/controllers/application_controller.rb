@@ -165,6 +165,10 @@ class ApplicationController < ActionController::Base
       expert_path(item)
     when "expert-question"
       expert_expert_question_path(item.expert_id, item.id)
+    when "workflow"
+      workflow_path(item.dxid)
+    when "workflow-series"
+      pathify(item.latest_accessible(@context))
     else
       raise "Unknown class #{item.klass}"
     end
@@ -229,10 +233,11 @@ class ApplicationController < ActionController::Base
   end
 
   def item_from_uid(uid, specified_klass = nil)
-    if uid =~ /^(job|app|file)-(.{24})$/
+    if uid =~ /^(job|app|file|workflow)-(.{24})$/
       klass = {
         "job" => Job,
         "app" => App,
+        "workflow" => Workflow,
         "file" => UserFile
       }[$1]
       raise "Class '#{klass}' did not match specified class '#{specified_klass}'" if specified_klass && klass != specified_klass
@@ -241,9 +246,10 @@ class ApplicationController < ActionController::Base
         record = record.becomes(Asset)
       end
       return record
-    elsif uid =~ /^(app-series|appathon|comparison|note|discussion|answer|user|license|space|challenge)-(\d+)$/
+    elsif uid =~ /^(app-series|workflow-series|appathon|comparison|note|discussion|answer|user|license|space|challenge)-(\d+)$/
       klass = {
         "app-series" => AppSeries,
+        "workflow-series" => WorkflowSeries,
         "appathon" => Appathon,
         "comparison" => Comparison,
         "note" => Note,
