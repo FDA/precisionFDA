@@ -1,6 +1,7 @@
 package precisionFDA.utils;
 
 import org.apache.log4j.Logger;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -291,22 +292,22 @@ public class Utils {
         return "upd_" + getRunTimeLocalUniqueValue() + oldFileName;
     }
 
-    public static void waitUntilFileIsDownloaded(String filePath) {
+    public static void waitUntilFileIsDownloaded(String fileName) {
         final Logger log = Logger.getLogger("");
-        int timeoutSec = 15;
+        int timeoutSec = 30;
         int refreshStepSec = 1;
         int spentTimeSec = 0;
 
-        File file = new File(filePath);
+        File file = new File(getPathToDownloadsFolder() + fileName);
 
-        log.info("waiting up to " + timeoutSec + " sec until file [" + filePath + "] is downloaded");
+        log.info("waiting up to " + timeoutSec + " sec until file [" + fileName + "] is downloaded");
         while ( !file.exists() && (spentTimeSec < timeoutSec) ) {
             sleep(refreshStepSec*1000);
             spentTimeSec = spentTimeSec + refreshStepSec;
             log.info("it's been " + spentTimeSec + " seconds");
         }
         if (!file.exists()) {
-            log.info("[WARNING] the file was not downloaded after " + timeoutSec + " seconds");
+            log.warn("[WARNING] the file was not downloaded after " + timeoutSec + " seconds: " + fileName);
         }
     }
 
@@ -331,7 +332,7 @@ public class Utils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        waitUntilFileIsDownloaded(getPathToDownloadsFolder() + fileName);
+        waitUntilFileIsDownloaded(fileName);
     }
 
     public static void printCaseStatus(String caseStatus, String caseName, String suiteName) {

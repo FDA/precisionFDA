@@ -181,6 +181,10 @@ public class TestFilesData {
         return FILTER_FOLDER_PREFIX + getCommonFilterPhrase() + " " + getRunTimeLocalUniqueValue();
     }
 
+    public static String getNonFilterFolderName() {
+        return FILTER_FOLDER_PREFIX + " ilter " + getRunTimeLocalUniqueValue();
+    }
+
     //---------------
 
     public static FileProfile filterOneFile = new FileProfile(
@@ -217,6 +221,10 @@ public class TestFilesData {
             getFilterCommonFolderName()
     );
 
+    public static FolderProfile nonFilterFolder = new FolderProfile(
+            getNonFilterFolderName()
+    );
+
     //---------------
 
     public static FileProfile getFilterOneFile() {
@@ -245,6 +253,10 @@ public class TestFilesData {
 
     public static FolderProfile getFilterCommonFolder() {
         return filterCommonFolder;
+    }
+
+    public static FolderProfile getNonFilterFolder() {
+        return nonFilterFolder;
     }
 
     //=== main file profile ===

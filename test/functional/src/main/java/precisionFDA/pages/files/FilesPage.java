@@ -1,9 +1,7 @@
 package precisionFDA.pages.files;
 
 import org.apache.log4j.Logger;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
 import precisionFDA.model.FolderProfile;
 import ru.yandex.qatools.htmlelements.element.Button;
@@ -16,6 +14,7 @@ import java.util.List;
 
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 import static precisionFDA.utils.Utils.sleep;
+import static precisionFDA.utils.Utils.waitUntilFileIsDownloaded;
 
 public class FilesPage extends AbstractPage {
 
@@ -84,11 +83,25 @@ public class FilesPage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_RENAME_DIALOG_RENAME_BUTTON)
     private Button renameDialogRenameButton;
 
+    @FindBy(xpath = FilesLocators.FILES_DOWNLOAD_DIALOG_CLOSE_BUTTON)
+    private Button downloadDialogCloseButton;
+
+    @FindBy(xpath = FilesLocators.FILES_DOWNLOAD_DIALOG_PLACE_TO_FOCUS)
+    private WebElement downloadDialogPlaceToFocus;
+
     public FilesPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_MY_FILES_LINK));
-        sleep(1000);
+        sleep(2000);
+    }
+
+    private Button getDownloadDialogCloseButton() {
+        return downloadDialogCloseButton;
+    }
+
+    public WebElement getDownloadDialogPlaceToFocus() {
+        return downloadDialogPlaceToFocus;
     }
 
     public Button getRenameDialogRenameButton() {
@@ -212,6 +225,7 @@ public class FilesPage extends AbstractPage {
 
     public FilesAddFilesPage openFilesAddFilesPage() {
         log.info("opening Files.AddFiles page");
+        waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_ADD_FILES_BUTTON_LINK));
         Link link = getFilesAddFilesButtonLink();
         waitUntilClickable(link);
         link.click();
@@ -267,6 +281,7 @@ public class FilesPage extends AbstractPage {
 
     public FilesPage createFolder(String folderName) {
         log.info("create new folder");
+        waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_CREATE_FOLDER_BUTTON));
         WebElement we1 = getFilesCreateFolderButton();
         waitUntilDisplayed(we1);
         we1.click();
@@ -449,6 +464,36 @@ public class FilesPage extends AbstractPage {
         String xpath = FilesLocators.FILES_DOWNLOAD_DIALOG_ITEM_TEMPLATE.replace("{ITEM_NAME}", name);
         WebElement link = findElement(By.xpath(xpath));
         return isElementPresent(link, 3);
+    }
+
+    public void downloadItemFromDownloadDialog(String name) {
+        log.info("download from dialog: " + name);
+        String xpath = FilesLocators.FILES_DOWNLOAD_DIALOG_DOWNLOAD_ITEM_LINK_TEMPLATE.replace("{ITEM_NAME}", name);
+        WebElement link = getDriver().findElement(By.xpath(xpath));
+        waitUntilDisplayed(link, 5);
+        link.click();
+        waitUntilFileIsDownloaded(name);
+    }
+
+    public FilesPage closeDownloadDialog() {
+        log.info("Close download dialog");
+        Button button = getDownloadDialogCloseButton();
+        waitUntilClickable(button);
+        button.click();
+        return new FilesPage(getDriver());
+    }
+
+    public boolean isDownloadCloseButtonDisplayed() {
+        return isElementPresent(getDownloadDialogCloseButton());
+    }
+
+    public void scrollRight() {
+        log.info("scroll download dialog list to right");
+        getDownloadDialogPlaceToFocus().click();
+        for (int i = 0; i <= 15; i ++) {
+            getDownloadDialogPlaceToFocus().sendKeys(Keys.ARROW_RIGHT);
+            sleep(200);
+        }
     }
 
 }

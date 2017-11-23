@@ -112,4 +112,10 @@ public class FilesLocators {
 
     public static final String FILES_RENAME_DIALOG_RENAME_BUTTON = "//form[@id='rename_form']//button[text()='Rename']";
 
+    public static final String FILES_DOWNLOAD_DIALOG_DOWNLOAD_ITEM_LINK_TEMPLATE = "//*[@id='download-files-modal']//a/span[text()='{ITEM_NAME}']/../../..//a/*[contains(@class, 'download')]/..";
+
+    public static final String FILES_DOWNLOAD_DIALOG_CLOSE_BUTTON = "//*[@id='download-files-modal']//button[text()='Close']";
+
+    public static final String FILES_DOWNLOAD_DIALOG_PLACE_TO_FOCUS = "//*[@id='download-files-modal']//tr[1]/td/span[contains(@class, 'help')]";
+
 }

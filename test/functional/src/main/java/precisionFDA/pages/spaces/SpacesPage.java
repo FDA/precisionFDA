@@ -3,6 +3,7 @@ package precisionFDA.pages.spaces;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import precisionFDA.locators.SpacesLocators;
 import precisionFDA.pages.AbstractPage;
@@ -14,7 +15,6 @@ public class SpacesPage extends AbstractPage {
 
     @FindBy(xpath = SpacesLocators.PROVISION_SPACE_BUTTON_LINK)
     private Link provisionSpaceButtonLink;
-
 
     public SpacesPage(final WebDriver driver) {
         super(driver);
@@ -35,6 +35,18 @@ public class SpacesPage extends AbstractPage {
 
     public boolean isProvisionButtonDisplayed() {
         return isElementPresent(getProvisionSpaceButtonLink(), 2);
+    }
+
+    public boolean isCreatedSpaceNameDisplayed(String name) {
+        String xpath = SpacesLocators.SPACES_NAME_TEMPLATE.replace("{SPACE_NAME}", name);
+        WebElement we = getDriver().findElement(By.xpath(xpath));
+        return isElementPresent(we, 2);
+    }
+
+    public boolean isCreatedSpaceDescrDisplayed(String descr) {
+        String xpath = SpacesLocators.SPACES_DESCR_TEMPLATE.replace("{SPACE_DESCR}", descr);
+        WebElement we = getDriver().findElement(By.xpath(xpath));
+        return isElementPresent(we, 2);
     }
 
 

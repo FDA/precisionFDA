@@ -211,11 +211,6 @@ public class UploadedFilePage extends AbstractPage {
         }
     }
 
-    public boolean isDownloadFileLinkDisplayed() {
-        UploadedFilePage uploadedFilePage = waitUntilDownloadFileLinkIsDisplayed();
-        return isElementPresent(getDownloadFileLink());
-    }
-
     public UploadedFilePage waitUntilDownloadFileLinkIsDisplayed() {
         int timeoutSec = 60;
         int refreshStepSec = 5;
@@ -241,12 +236,8 @@ public class UploadedFilePage extends AbstractPage {
         log.info("download file");
         String fileName = getFilePageTitleText();
         getDownloadFileLink().click();
-        waitUntilUploadedFileIsDownloaded(fileName);
+        waitUntilFileIsDownloaded(fileName);
         return new UploadedFilePage(getDriver());
-    }
-
-    public void waitUntilUploadedFileIsDownloaded(String fileName) {
-        waitUntilFileIsDownloaded(getPathToDownloadsFolder() + fileName);
     }
 
     public UploadedFilePage renameFileOnFilePage(FileProfile fileProfile) {
