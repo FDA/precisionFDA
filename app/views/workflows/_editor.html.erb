@@ -1,0 +1,73 @@
+<div class="app-editor">
+  <div class="pfda-toolbar">
+    <form class="form-inline">
+      <div class="form-group">
+        <label>Workflow Name</label>
+        <p class="form-control-static" style="display: none" data-bind="text: name"></p>
+        <input type="text" class="form-control" style="" placeholder="Enter Workflow name (e.g. workflow_name) - this is permanent" data-bind="textInput: name.cache, visible: true" />
+      </div>
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" class="form-control" placeholder="Enter workflow title - you can change this later" data-bind="textInput: title"/>
+      </div>
+      <div class="pull-right">
+        <div class="btn-group">
+          <div class="form-group">
+            <button class="btn btn-primary" data-bind="text: saveButtonText, attr: {disabled: !canCreateWorkflow()}, disable: !canCreateWorkflow(), click: saveWorkflow"></button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="error-section workflows-alert-danger" data-bind="visible: errorMessage" style="display: none">
+    <div class="alert alert-danger">
+      <strong>Please fix the issue and retry:</strong> <span data-bind="text: errorMessage"></span>
+    </div>
+  </div>
+  <div class="editor-content" data-bind="visible: true" style="">
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+      <li role="presentation" class="active">
+        <a href="#workflow-io-spec" aria-controls="workflow-io-spec" role="tab" data-toggle="tab"><span class="fa fa-fw fa-puzzle-piece"></span>
+          <span class="tab-label">Stages</span>
+        </a>
+      </li>
+      <li role="presentation">
+        <a href="#workflow-readme" aria-controls="workflow-readme" role="tab" data-toggle="tab"><span class="fa fa-fw fa-info-circle"></span>
+          <span class="tab-label">README</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane tab-pane-padded active" id="workflow-io-spec">
+        <%= render "editor.io" %>
+      </div>
+
+      <div role="tabpanel" class="tab-pane" id="workflow-readme">
+        <div class="ace-editor-section">
+          <div style="padding: 6px 12px 0px 12px">
+            <%= alert_help("Learn how to format Markdown", "https://jonschlinkert.github.io/remarkable/demo/") %>
+          </div>
+
+          <!-- Nav tabs -->
+          <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+            <li role="presentation" class="active"><a href="#tab-readme-editor" aria-controls="tab-readme-editor" role="tab" data-toggle="tab">Edit Readme</a></li>
+            <li role="presentation"><a href="#tab-readme-preview" aria-controls="tab-readme-preview" role="tab" data-toggle="tab">Preview</a></li>
+          </ul>
+
+          <!-- Tab panes -->
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-readme-editor">
+              <div id="readme-editor" class="ace-rounded" data-bind="ace: readme, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity, wrap: 'free'}}"></div>
+            </div>
+            <div role="tabpanel" class="tab-pane tab-pane-padded-lg" id="tab-readme-preview">
+              <div class="readme-preview pfda-md-rendered" data-bind="html: readme.preview"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

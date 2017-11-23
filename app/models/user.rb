@@ -51,6 +51,7 @@ class User < ActiveRecord::Base
   has_many :challenge_app_owners, {class_name: 'Challenge', foreign_key: 'app_owner_id'}
   has_many :submissions
   has_many :challenge_resources
+  has_many :analyses
 
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 
@@ -322,7 +323,7 @@ class User < ActiveRecord::Base
         id: [job.dxid],
         project: user.private_files_project,
         parentJob: nil,
-        parentAnalysis: nil,
+        parentAnalysis: job.try(:analysis).try(:dxid),
         describe: true
       })["results"][0]
       sync_job_state(result, job, user, token)
@@ -335,14 +336,13 @@ class User < ActiveRecord::Base
     token = context.token
     user = User.find(user_id)
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-    Job.where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs|
+    Job.includes(:analysis).where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs|
       jobs_hash = jobs.map { |j| [j.dxid, j] }.to_h
       DNAnexusAPI.new(token).call("system", "findJobs", {
         includeSubjobs: false,
         id: jobs_hash.keys,
         project: user.private_files_project,
         parentJob: nil,
-        parentAnalysis: nil,
         describe: true
       })["results"].each do |result|
         sync_job_state(result, jobs_hash[result["id"]], user, token)

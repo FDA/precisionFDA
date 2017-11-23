@@ -69,6 +69,8 @@ module ApplicationHelper
       "fa-comments-o"
     when "app"
       "fa-cube"
+    when "workflow"
+      "fa-flash"
     when "job"
       "fa-tasks"
     when "asset"
