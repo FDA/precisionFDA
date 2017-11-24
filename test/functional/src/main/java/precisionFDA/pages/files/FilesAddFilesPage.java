@@ -89,4 +89,8 @@ public class FilesAddFilesPage extends AbstractPage {
         return isElementPresent(getFilesUploadsCompleteMessageWE());
     }
 
+    public FilesPage openRootFilesPage() {
+        return getCommonPage().openFilesPage();
+    }
+
 }

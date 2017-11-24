@@ -27,8 +27,19 @@ public final class SettingsProperties {
         final java.util.Properties properties = new java.util.Properties();
         InputStream input = null;
 
+        String settingsFile = "devSettings.properties";
+
+        String env = System.getProperty("env");
+        if (("" + env).equalsIgnoreCase("null")) {
+            env = "dev";
+        }
+
+        if (env.equalsIgnoreCase("loc")) {
+            settingsFile = "locSettings.properties";
+        }
+
         try {
-            input = SettingsProperties.class.getClassLoader().getResourceAsStream("settings.properties");
+            input = SettingsProperties.class.getClassLoader().getResourceAsStream(settingsFile);
             properties.load(input);
             input.close();
         } catch (final Exception e) {}

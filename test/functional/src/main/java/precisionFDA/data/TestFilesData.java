@@ -448,4 +448,134 @@ public class TestFilesData {
         return downloadFirstFolder;
     }
 
+    //=== moving test ===
+
+    public static String getMoveInRootFolderFileName() {
+        return getGeneratedTestFileName(getDictPng());
+    }
+
+    public static String getMoveFirstFileName() {
+        return getGeneratedTestFileName(getDictTxt());
+    }
+
+    public static String getMoveSecondFileName() {
+        return getGeneratedTestFileName(getDictPng());
+    }
+
+    public static String getMoveThirdFileName() {
+        return getGeneratedTestFileName(getDictTxt());
+    }
+
+    public static String getMoveFourthFileName() {
+        return getGeneratedTestFileName(getDictPng());
+    }
+
+    //---------------
+
+    public static FileProfile moveInRootFolderFile = new FileProfile(
+            getMoveInRootFolderFileName(),
+            "",
+            ""
+    );
+
+    public static FileProfile moveFirstFile = new FileProfile(
+            getMoveFirstFileName(),
+            "",
+            ""
+    );
+
+    public static FileProfile moveSecondFile = new FileProfile(
+            getMoveSecondFileName(),
+            "",
+            ""
+    );
+
+    public static FileProfile moveThirdFile = new FileProfile(
+            getMoveThirdFileName(),
+            "",
+            ""
+    );
+
+    public static FileProfile moveFourthFile = new FileProfile(
+            getMoveFourthFileName(),
+            "",
+            ""
+    );
+
+    //---------------
+
+    public static FileProfile getMoveInRootFolderFile() {
+        return moveInRootFolderFile;
+    }
+
+    public static FileProfile getMoveFirstFile() {
+        return moveFirstFile;
+    }
+
+    public static FileProfile getMoveSecondFile() {
+        return moveSecondFile;
+    }
+
+    public static FileProfile getMoveThirdFile() {
+        return moveThirdFile;
+    }
+
+    public static FileProfile getMoveFourthFile() {
+        return moveFourthFile;
+    }
+
+    //---------------
+
+    public static FolderProfile moveRootFolder = new FolderProfile(
+            "at Move test In Root " + getRunTimeLocalUniqueValue()
+    );
+
+    public static FolderProfile moveFirstFolder = new FolderProfile(
+            "at Move test First " + getRunTimeLocalUniqueValue()
+    );
+
+    public static FolderProfile moveSecondFolder = new FolderProfile(
+            "at Move test Second " + getRunTimeLocalUniqueValue()
+    );
+
+    public static FolderProfile moveThirdFolder = new FolderProfile(
+            "at Move test Third " + getRunTimeLocalUniqueValue()
+    );
+
+    public static FolderProfile moveFourthFolder = new FolderProfile(
+            "at Move test Fourth " + getRunTimeLocalUniqueValue()
+    );
+
+    public static FolderProfile moveFifthFolder = new FolderProfile(
+            "at Move test Fifth " + getRunTimeLocalUniqueValue()
+    );
+
+    //---------------
+
+    public static FolderProfile getMoveRootFolder() {
+        return moveRootFolder;
+    }
+
+    public static FolderProfile getMoveFirstFolder() {
+        return moveFirstFolder;
+    }
+
+    public static FolderProfile getMoveSecondFolder() {
+        return moveSecondFolder;
+    }
+
+    public static FolderProfile getMoveThirdFolder() {
+        return moveThirdFolder;
+    }
+
+    public static FolderProfile getMoveFourthFolder() {
+        return moveFourthFolder;
+    }
+
+    public static FolderProfile getMoveFifthFolder() {
+        return moveFifthFolder;
+    }
+
+    //---------------
+
 }

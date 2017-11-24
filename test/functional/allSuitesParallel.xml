@@ -1,5 +1,5 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="all suites" parallel="tests" thread-count="2">
+<suite name="all suites" parallel="tests" thread-count="3">
     <test name="TimeZoneTest">
         <classes>
             <class name="precisionFDA.cases.TimeZoneTest" />
