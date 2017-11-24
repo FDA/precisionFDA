@@ -27,16 +27,20 @@ class Workflow < ActiveRecord::Base
 
   store :spec, accessors: [ :input_spec, :output_spec, :internet_access, :instance_type ], coder: JSON
 
+  def stages
+    input_spec["stages"]
+  end
+
   def all_input_spec
-    input_spec["stages"].reduce([]) { |inputs, stage| inputs + stage["inputs"] }
+    stages.reduce([]) { |inputs, stage| inputs + stage["inputs"] }
   end
 
   def all_output_spec
-    input_spec["stages"].reduce([]) { |outputs, stage| outputs + stage["outputs"] }
+    stages.reduce([]) { |outputs, stage| outputs + stage["outputs"] }
   end
 
   def apps
-    @apps ||= App.where(dxid: input_spec["stages"].map { |stage| stage["app_dxid"] })
+    @apps ||= App.where(dxid: stages.map { |stage| stage["app_dxid"] })
   end
 
   def uid
@@ -55,4 +59,21 @@ class Workflow < ActiveRecord::Base
     end
     hash
   end
+
+  def unused_input_spec
+    stages.each_with_object([]) do |stage, unused_inputs|
+      stage["inputs"].each do |input|
+        unused_inputs << input unless input["values"]["id"]
+      end
+    end
+  end
+
+  def unused_output_spec
+    stages.each_with_object([]) do |stage, unused_outputs|
+      stage["outputs"].each do |output|
+        unused_outputs << output unless output["values"]["id"]
+      end
+    end
+  end
+
 end

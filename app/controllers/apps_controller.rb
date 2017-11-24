@@ -59,15 +59,11 @@ class AppsController < ApplicationController
   end
 
   def cwl_export
-    docker_file = @app.to_docker(@context.token)
-    filename = @app.name.strip.underscore.gsub(" ", "_")
-    send_data cwl_exporter.export(@app, docker_file, filename), :filename => "#{filename}.tar.gz"
+    send_data cwl_exporter.app_export(@app), :filename => "#{@app.name}.tar.gz"
   end
 
   def wdl_export
-    docker_file = @app.to_docker(@context.token)
-    filename = @app.name.strip.underscore.gsub(" ", "_")
-    send_data wdl_exporter.export(@app, docker_file, filename), :filename => "#{filename}.tar.gz"
+    send_data wdl_exporter.app_export(@app), :filename => "#{@app.name}.tar.gz"
   end
 
   def featured
@@ -182,11 +178,11 @@ class AppsController < ApplicationController
   private
 
   def cwl_exporter
-    @cwl_exporter ||= CwlToolExporter.new
+    @cwl_exporter ||= CwlExporter.new(@context.token)
   end
 
   def wdl_exporter
-    @wdl_exporter ||= WdlExporter.new
+    @wdl_exporter ||= WdlExporter.new(@context.token)
   end
 
   def validate_app_before_export

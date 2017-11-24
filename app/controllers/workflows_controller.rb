@@ -1,5 +1,7 @@
 class WorkflowsController < ApplicationController
 
+  before_action :validate_workflow_before_export, only: %i(cwl_export wdl_export)
+
   def new
     app_series = AppSeries.accessible_by(@context).joins(:apps).merge(App.accessible_by(@context)).distinct
     private_app_series = app_series.where(scope: "private")
@@ -89,4 +91,39 @@ class WorkflowsController < ApplicationController
     public_app_series = app_series.where(scope: "public")
     js apps: {private_apps: private_app_series.map { |app_series| app_series.slice(:id, :name) }, public_apps: public_app_series.map { |app_series| app_series.slice(:id, :name) }}, workflow: @workflow
   end
+
+  def cwl_export
+    send_data cwl_exporter.workflow_export(@workflow), :filename => "#{@workflow.name}.tar.gz"
+  end
+
+  def wdl_export
+    send_data wdl_exporter.workflow_export(@workflow), :filename => "#{@workflow.name}.tar.gz"
+  end
+
+  private
+
+  def cwl_exporter
+    @cwl_exporter ||= CwlExporter.new(@context.token)
+  end
+
+  def wdl_exporter
+    @wdl_exporter ||= WdlExporter.new(@context.token)
+  end
+
+  def validate_workflow_before_export
+    # App should exist and be accessible
+    @workflow = Workflow.accessible_by(@context).find_by!(dxid: params[:id])
+
+    # Assets should be accessible and licenses accepted
+    @workflow.apps.each do |app|
+      if app.assets.accessible_by(@context).count != app.assets.count
+        flash[:error] = "This app cannot be exported because one or more assets are not accessible by the current user."
+        redirect_to app_path(app.dxid)
+      elsif app.assets.any? { |a| a.license.present? && !a.licensed_by?(@context) }
+        flash[:error] = "This app contains one or more assets which need to be licensed. Please run the app first in order to accept the licenses."
+        redirect_to app_path(app.dxid)
+      end
+    end
+  end
+
 end
