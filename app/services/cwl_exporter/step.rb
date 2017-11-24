@@ -1,47 +1,12 @@
-class CwlToolExporter
+class CwlExporter::Step
 
-  class Expression
-    def initialize(value)
-      @value = value
-    end
+  include ::CwlExporter::Adapter
 
-    def encode_with(coder)
-      coder.tag = nil
-      coder.scalar = @value
-      coder.style = Psych::Nodes::Scalar::SINGLE_QUOTED
-    end
+  def initialize(app)
+    @app = app
   end
 
-  def export(app, dockerfile, name)
-    TarballBuilder.build do |tar|
-      add_file(tar, "README.md", readme(name))
-      add_file(tar, "#{name}.cwl", pfda_app_to_cwl(app, name).to_yaml)
-      add_file(tar, "Dockerfile", dockerfile)
-    end
-  end
-
-  def add_file(tar, filename, content, mode = 777)
-    tar.add_file filename, mode do |tf|
-      tf.write content
-    end
-  end
-
-  def readme(name)
-    <<-EOH
-##{name}
-
-To execute this app locally, please ensure you have Docker (get.docker.com) and cwltool ('pip install cwtool') and run:
-
-```
-docker build . -t #{name}
-sudo cwltool --no-match-user --no-read-only #{name}.cwl inputs.json
-```
-
-where inputs.json is a standard CWL input file definition (see 'A Gentle Guide to CWL' for examples).
-    EOH
-  end
-
-  def pfda_app_to_cwl(app, docker_pull)
+  def to_s
     {
       "class" => "CommandLineTool",
       "id" => app.dxid,
@@ -51,7 +16,7 @@ where inputs.json is a standard CWL input file definition (see 'A Gentle Guide t
       "requirements" => [
         {
           "class" => "DockerRequirement",
-          "dockerPull" => docker_pull,
+          "dockerPull" => app.name,
           "dockerOutputDirectory" => "/data/out"
         },
         {
@@ -61,8 +26,12 @@ where inputs.json is a standard CWL input file definition (see 'A Gentle Guide t
       ],
       "inputs" => inputs(app),
       "outputs" => outputs(app)
-    }
+    }.to_yaml
   end
+
+  private
+
+  attr_reader :app
 
   def inputs(app)
     position = 1
@@ -112,29 +81,6 @@ where inputs.json is a standard CWL input file definition (see 'A Gentle Guide t
         end
 
       result[app_output["name"]] = cwl_outp
-    end
-  end
-
-  def output_eval(klass)
-    case klass
-    when "string"  then Expression.new "$(file_string())"
-    when "int"     then Expression.new "$(parseInt(file_string()))"
-    when "boolean" then Expression.new "$(file_string() == 'true')"
-    when "float"   then Expression.new "$(parseFloat(file_string()))"
-    else
-      raise "Unsupported output type for output_binding: #{klass}"
-    end
-  end
-
-  def cwl_type(type)
-    case type
-    when "string"  then "string"
-    when "int"     then "long"
-    when "file"    then "File"
-    when "boolean" then "boolean"
-    when "float"   then "double"
-    else
-      raise "Unsupported type: #{type}"
     end
   end
 

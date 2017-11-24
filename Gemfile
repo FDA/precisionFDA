@@ -85,6 +85,9 @@ gem 'mysql2', '~> 0.3.18'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
+# View outgoing HTTP requests
+gem 'httplog'
+
 group :development do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
@@ -94,9 +97,6 @@ group :development do
 
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
-
-  # View outgoing HTTP requests
-  gem 'httplog'
 
   # Project-wide environment variables
   gem 'dotenv-rails'
@@ -110,6 +110,11 @@ group :development, :test do
   gem 'figaro'
   gem 'highline'
   gem 'quiet_assets'
+end
+
+group :test do
+  gem 'rspec-rails', '~> 3.7', '>= 3.7.1'
+  gem 'factory_bot_rails', '~> 4.8', '>= 4.8.2'
 end
 
 group :production do
