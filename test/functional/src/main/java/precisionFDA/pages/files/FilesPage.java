@@ -59,20 +59,32 @@ public class FilesPage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_DD)
     private Button uploadedFileEditDD;
 
-    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_DELETE_ITEM)
-    private Link uploadedFileEditDeleteItem;
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_DELETE_ENABLED_ITEM)
+    private Link uploadedFileEditDeleteEnabledItem;
 
-    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_DOWNLOAD_ITEM)
-    private Link uploadedFileEditDownloadItem;
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_DOWNLOAD_ENABLED_ITEM)
+    private Link uploadedFileEditDownloadEnabledItem;
 
-    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_RENAME_ITEM)
-    private Link uploadedFileEditRenameItem;
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_DOWNLOAD_ANY_ITEM)
+    private Link uploadedFileEditDownloadAnyItem;
+
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_MOVE_ENABLED_ITEM)
+    private Link uploadedFileEditMoveEnabledItem;
+
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_RENAME_ENABLED_ITEM)
+    private Link uploadedFileEditRenameEnabledItem;
+
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_PUBLISH_ENABLED_ITEM)
+    private Link uploadedFileEditPublishEnabledItem;
 
     @FindBy(xpath = FilesLocators.FILES_DELETE_DIALOG_ITEMS_TABLE)
     private WebElement deleteDialogItemsTable;
 
     @FindBy(xpath = FilesLocators.FILES_DOWNLOAD_DIALOG_ITEMS_TABLE)
     private WebElement downloadDialogItemsTable;
+
+    @FindBy(xpath = FilesLocators.FILES_MOVE_DIALOG_TREE_MY_FILES_LINK)
+    private Link moveDialogTreeMyFilesLink;
 
     @FindBy(xpath = FilesLocators.FILES_DELETE_DIALOG_DELETE_BUTTON)
     private Button deleteDialogDeleteButton;
@@ -89,6 +101,9 @@ public class FilesPage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_DOWNLOAD_DIALOG_PLACE_TO_FOCUS)
     private WebElement downloadDialogPlaceToFocus;
 
+    @FindBy(xpath = FilesLocators.FILES_MOVE_DIALOG_MOVE_HERE_BUTTON)
+    private Button moveDialogMoveHereButton;
+
     public FilesPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
@@ -96,7 +111,11 @@ public class FilesPage extends AbstractPage {
         sleep(2000);
     }
 
-    private Button getDownloadDialogCloseButton() {
+    public Button getMoveDialogMoveHereButton() {
+        return moveDialogMoveHereButton;
+    }
+
+    public Button getDownloadDialogCloseButton() {
         return downloadDialogCloseButton;
     }
 
@@ -118,6 +137,10 @@ public class FilesPage extends AbstractPage {
 
     public WebElement getDownloadDialogItemsTable() {
         return downloadDialogItemsTable;
+    }
+
+    public Link getMoveDialogTreeMyFilesLink() {
+        return moveDialogTreeMyFilesLink;
     }
 
     public Button getDeleteDialogDeleteButton() {
@@ -383,8 +406,8 @@ public class FilesPage extends AbstractPage {
 
     public void clickDeleteSelected() {
         log.info("click delete item(s)");
-        getFilesEditDD().click();
-        Link link = getFilesEditDeleteItem();
+        openActionsDropDown();
+        Link link = getFilesEditDeleteEnabledItem();
         waitUntilClickable(link);
         link.click();
         waitUntilDisplayed(getDeleteDialogItemsTable(), 5);
@@ -393,27 +416,73 @@ public class FilesPage extends AbstractPage {
 
     public void clickDownloadSelected() {
         log.info("click download item(s)");
-        getFilesEditDD().click();
-        Link link = getFilesEditDownloadItem();
+        openActionsDropDown();
+        Link link = getFilesEditDownloadEnabledItem();
         waitUntilClickable(link);
         link.click();
         waitUntilDisplayed(getDownloadDialogItemsTable(), 5);
+    }
+
+    public void clickMoveSelected() {
+        log.info("click move item(s)");
+        openActionsDropDown();
+        Link link = getFilesEditMoveEnabledItem();
+        waitUntilClickable(link);
+        link.click();
+        waitUntilDisplayed(getMoveDialogTreeMyFilesLink(), 30);
+    }
+
+    public void openActionsDropDown() {
+        getFilesEditDD().click();
+        Link link = getFilesEditDownloadAnyItem();
+        waitUntilDisplayed(link, 5);
+    }
+
+    public void clickTreeItemOnMoveDialog(String itemName) {
+        log.info("click on the tree item: " + itemName);
+        String xpath = FilesLocators.FILES_MOVE_DIALOG_TREE_TEMPLATE_LINK.replace("{ITEM_NAME}", itemName);
+        WebElement link = getDriver().findElement(By.xpath(xpath));
+        waitUntilClickable(link, 5);
+        link.click();
+        String clickedXpath = FilesLocators.FILES_MOVE_DIALOG_TREE_TEMPLATE_CLICKED_LINK.replace("{ITEM_NAME}", itemName);
+        WebElement clickedLink = getDriver().findElement(By.xpath(clickedXpath));
+        waitUntilDisplayed(clickedLink, 5);
+    }
+
+    public FilesPage clickMoveHere() {
+        log.info("click Move Here");
+        Button button = getMoveDialogMoveHereButton();
+        waitUntilClickable(button);
+        button.click();
+        return new FilesPage(getDriver());
     }
 
     public Button getFilesEditDD() {
         return uploadedFileEditDD;
     }
 
-    public Link getFilesEditDeleteItem() {
-        return uploadedFileEditDeleteItem;
+    public Link getFilesEditDeleteEnabledItem() {
+        return uploadedFileEditDeleteEnabledItem;
     }
 
-    public Link getFilesEditDownloadItem() {
-        return uploadedFileEditDownloadItem;
+    public Link getFilesEditDownloadEnabledItem() {
+        return uploadedFileEditDownloadEnabledItem;
     }
 
-    public Link getFilesEditRenameItem() {
-        return uploadedFileEditRenameItem;
+    public Link getFilesEditDownloadAnyItem() {
+        return uploadedFileEditDownloadAnyItem;
+    }
+
+    public Link getFilesEditMoveEnabledItem() {
+        return uploadedFileEditMoveEnabledItem;
+    }
+
+    public Link getFilesEditRenameEnabledItem() {
+        return uploadedFileEditRenameEnabledItem;
+    }
+
+    public Link getFilesEditPublishEnabledItem() {
+        return uploadedFileEditPublishEnabledItem;
     }
 
     public boolean isItemInDeleteDialogDisplayed(String name) {
@@ -442,8 +511,8 @@ public class FilesPage extends AbstractPage {
 
     public void clickRenameSelected() {
         log.info("click rename item");
-        getFilesEditDD().click();
-        Link link = getFilesEditRenameItem();
+        openActionsDropDown();
+        Link link = getFilesEditRenameEnabledItem();
         waitUntilClickable(link);
         link.click();
         waitUntilDisplayed(getRenameDialogInput(), 5);
@@ -494,6 +563,30 @@ public class FilesPage extends AbstractPage {
             getDownloadDialogPlaceToFocus().sendKeys(Keys.ARROW_RIGHT);
             sleep(200);
         }
+    }
+
+    public FilesPage openRootFilesPage() {
+        return getCommonPage().openFilesPage();
+    }
+
+    public boolean isDropDownDeleteItemClickable() {
+        return isElementPresent(getFilesEditDeleteEnabledItem(), 1);
+    }
+
+    public boolean isDropDownMoveItemClickable() {
+        return isElementPresent(getFilesEditMoveEnabledItem(), 1);
+    }
+
+    public boolean isDropDownDownloadItemClickable() {
+        return isElementPresent(getFilesEditDownloadEnabledItem(), 1);
+    }
+
+    public boolean isDropDownRenameItemClickable() {
+        return isElementPresent(getFilesEditRenameEnabledItem(), 1);
+    }
+
+    public boolean isDropDownPublishItemClickable() {
+        return isElementPresent(getFilesEditPublishEnabledItem(), 1);
     }
 
 }

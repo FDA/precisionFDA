@@ -1,6 +1,7 @@
 package precisionFDA.data;
 
 import precisionFDA.model.ChallProfile;
+import precisionFDA.model.TimeZoneProfile;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -94,8 +95,8 @@ public class TestChallsData {
         return string;
     }
 
-    public static String getExpectedChallDateTimeValue(String initDateTime) {
-        return initDateTime.replace("T", " ");
+    public static String getExpectedChallDateTimeValue(String initDateTime, TimeZoneProfile timeZone) {
+        return initDateTime.replace("T", " ") + " " + timeZone.getCodeOfLocation();
     }
 
     public static ChallProfile mainChallProfile = new ChallProfile(

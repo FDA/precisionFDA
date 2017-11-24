@@ -52,11 +52,17 @@ public class FilesLocators {
 
     public static final String FILES_UPLOADED_FILE_EDIT_DD = "//button[@id='dLabel']";
 
-    public static final String FILES_UPLOADED_FILE_EDIT_DELETE_ITEM = "//a/*[contains(@class, 'trash')]/..";
+    public static final String FILES_UPLOADED_FILE_EDIT_DELETE_ENABLED_ITEM = "//li[not(contains(@class, 'disabled'))]/a/*[contains(@class, 'trash')]/..";
 
-    public static final String FILES_UPLOADED_FILE_EDIT_DOWNLOAD_ITEM = "//a/*[contains(@class, 'download')]/..";
+    public static final String FILES_UPLOADED_FILE_EDIT_DOWNLOAD_ENABLED_ITEM = "//li[not(contains(@class, 'disabled'))]/a/*[contains(@class, 'download')]/..";
 
-    public static final String FILES_UPLOADED_FILE_EDIT_RENAME_ITEM = "//a/*[contains(@class, 'pencil')]/..";
+    public static final String FILES_UPLOADED_FILE_EDIT_DOWNLOAD_ANY_ITEM = "//a/*[contains(@class, 'download')]/..";
+
+    public static final String FILES_UPLOADED_FILE_EDIT_MOVE_ENABLED_ITEM = "//li[not(contains(@class, 'disabled'))]/a/*[contains(@class, 'share')]/..";
+
+    public static final String FILES_UPLOADED_FILE_EDIT_RENAME_ENABLED_ITEM = "//li[not(contains(@class, 'disabled'))]/a/*[contains(@class, 'pencil')]/..";
+
+    public static final String FILES_UPLOADED_FILE_EDIT_PUBLISH_ENABLED_ITEM = "//li[not(contains(@class, 'disabled'))]/a/*[contains(@class, 'bullhorn')]/..";
 
     public static final String FILES_FILTER_NAME_INPUT = "//input[@id='files_f_name']";
 
@@ -98,6 +104,12 @@ public class FilesLocators {
 
     public static final String FILES_DOWNLOAD_DIALOG_ITEMS_TABLE = "//*[@id='download-files-modal']//table";
 
+    public static final String FILES_MOVE_DIALOG_TREE_MY_FILES_LINK = "//*[@id='move_files_tree']//a[contains(text(), 'My files')]";
+
+    public static final String FILES_MOVE_DIALOG_TREE_TEMPLATE_LINK = "//*[@id='move_files_tree']//a[contains(text(), '{ITEM_NAME}')]";
+
+    public static final String FILES_MOVE_DIALOG_TREE_TEMPLATE_CLICKED_LINK = "//*[@id='move_files_tree']//a[contains(text(), '{ITEM_NAME}')][contains(@class, 'clicked')]";
+
     public static final String FILES_DELETE_DIALOG_ITEM_TEMPLATE = "//*[@id='delete-files-modal']//a/span[text()='{ITEM_NAME}']";
 
     public static final String FILES_DELETE_DIALOG_ITEM_COMMON = "//*[@id='delete-files-modal']//a/span";
@@ -117,5 +129,7 @@ public class FilesLocators {
     public static final String FILES_DOWNLOAD_DIALOG_CLOSE_BUTTON = "//*[@id='download-files-modal']//button[text()='Close']";
 
     public static final String FILES_DOWNLOAD_DIALOG_PLACE_TO_FOCUS = "//*[@id='download-files-modal']//tr[1]/td/span[contains(@class, 'help')]";
+
+    public static final String FILES_MOVE_DIALOG_MOVE_HERE_BUTTON = "//*[@id='move_form']//button[text()='Move here']";
 
 }

@@ -5,6 +5,7 @@ import precisionFDA.data.TestAppData;
 import precisionFDA.data.TestUserData;
 import precisionFDA.model.AppProfile;
 import precisionFDA.model.ChallProfile;
+import precisionFDA.model.TimeZoneProfile;
 import precisionFDA.model.UserProfile;
 import precisionFDA.pages.apps.AppsEditAppPage;
 import precisionFDA.pages.apps.AppsPage;
@@ -21,15 +22,11 @@ import ru.yandex.qatools.htmlelements.annotations.Name;
 import static org.assertj.core.api.Assertions.assertThat;
 import static precisionFDA.data.TestChallsData.getExpectedChallDateTimeValue;
 import static precisionFDA.data.TestChallsData.getMainChallProfile;
+import static precisionFDA.data.TimeZonesData.getMoscowTimeZone;
 import static precisionFDA.utils.Utils.printTestHeader;
 
 @Name("Challenges test suite")
 public class ChallsTest extends AbstractTest {
-
-    public String[] getTestTimeZone() {
-        return new String[]
-                {"GMT+3",       "Moscow",               "(GMT+03:00) Moscow"};
-    }
 
     @Test(priority = 0)
     public void createApp() {
@@ -37,11 +34,12 @@ public class ChallsTest extends AbstractTest {
 
         UserProfile user = TestUserData.getTestUser();
         AppProfile appProfile = TestAppData.getChallAppProfile();
+        TimeZoneProfile timeZone = getMoscowTimeZone();
 
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
         ProfilePage profilePage = overviewPage.openProfilePage();
-        profilePage.setTimeZone(getTestTimeZone());
+        profilePage.setTimeZone(timeZone);
 
         AppsPage appsPage = openOverviewPage().openAppsPage();
         AppsEditAppPage appsEditAppPage = appsPage.openCreateAppPage();
@@ -64,12 +62,13 @@ public class ChallsTest extends AbstractTest {
 
         UserProfile user = TestUserData.getAdminUser();
         ChallProfile challProfile = getMainChallProfile();
+        TimeZoneProfile timeZone = getMoscowTimeZone();
 
         logoutFromAll();
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
         ProfilePage profilePage = openOverviewPage().openProfilePage();
-        profilePage.setTimeZone(getTestTimeZone());
+        profilePage.setTimeZone(timeZone);
 
         ChallsPage challsPage = openOverviewPage().openChallsPage();
 
@@ -96,12 +95,12 @@ public class ChallsTest extends AbstractTest {
         SoftAssert.assertThat(
                 createdChallPage.getStartsText())
                 .as("Starts value")
-                .isEqualTo(getExpectedChallDateTimeValue(challProfile.getChallStartsAt()));
+                .isEqualTo(getExpectedChallDateTimeValue(challProfile.getChallStartsAt(), timeZone));
 
         SoftAssert.assertThat(
                 createdChallPage.getEndsText())
                 .as("Ends value")
-                .isEqualTo(getExpectedChallDateTimeValue(challProfile.getChallEndsAt()));
+                .isEqualTo(getExpectedChallDateTimeValue(challProfile.getChallEndsAt(), timeZone));
 
         challsPage = overviewPage.openChallsPage();
 
@@ -118,12 +117,12 @@ public class ChallsTest extends AbstractTest {
         SoftAssert.assertThat(
                 challsPage.getCreatedChallStartsValue(challProfile))
                 .as("Starts value on the Challenges page")
-                .isEqualTo(getExpectedChallDateTimeValue(challProfile.getChallStartsAt()));
+                .isEqualTo(getExpectedChallDateTimeValue(challProfile.getChallStartsAt(), timeZone));
 
         SoftAssert.assertThat(
                 challsPage.getCreatedChallEndsValue(challProfile))
                 .as("Ends value on the Challenges page")
-                .isEqualTo(getExpectedChallDateTimeValue(challProfile.getChallEndsAt()));
+                .isEqualTo(getExpectedChallDateTimeValue(challProfile.getChallEndsAt(), timeZone));
 
         SoftAssert.assertAll();
     }
@@ -213,8 +212,5 @@ public class ChallsTest extends AbstractTest {
                 .as("Challenge tag is displayed")
                 .isTrue();
     }
-
-
-
 
 }

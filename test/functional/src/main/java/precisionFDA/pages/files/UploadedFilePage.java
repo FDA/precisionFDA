@@ -16,7 +16,6 @@ import ru.yandex.qatools.htmlelements.element.TextInput;
 
 import static precisionFDA.data.TestDict.getDictPrivate;
 import static precisionFDA.data.TestDict.getDictPublic;
-import static precisionFDA.data.TestRunData.getPathToDownloadsFolder;
 import static precisionFDA.utils.Utils.generateUpdatedName;
 import static precisionFDA.utils.Utils.sleep;
 import static precisionFDA.utils.Utils.waitUntilFileIsDownloaded;
@@ -40,7 +39,7 @@ public class UploadedFilePage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_DD)
     private Button uploadedFileEditDD;
 
-    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_DELETE_ITEM)
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_DELETE_ENABLED_ITEM)
     private Link uploadedFileEditDeleteItem;
 
     @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_EDIT_ITEM)
@@ -226,7 +225,7 @@ public class UploadedFilePage extends AbstractPage {
     public FilesPage deleteFile() {
         log.info("delete file");
         getUploadedFileEditDD().click();
-        waitUntilDisplayed(By.xpath(FilesLocators.FILES_UPLOADED_FILE_EDIT_DELETE_ITEM));
+        waitUntilDisplayed(By.xpath(FilesLocators.FILES_UPLOADED_FILE_EDIT_DELETE_ENABLED_ITEM));
         getUploadedFileEditDeleteItem().click();
         alertAccept(1, 100);
         return new FilesPage(getDriver());

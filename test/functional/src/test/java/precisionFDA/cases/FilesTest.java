@@ -261,7 +261,6 @@ public class FilesTest extends AbstractTest {
         FolderProfile filterCommonFolder = getFilterCommonFolder();
         FolderProfile nonFilterFolder = getNonFilterFolder();
 
-
         // create a folder in root directory and open it
         FilesPage filesPage = openOverviewPage().openFilesPage();
         filesPage = filesPage.createFolder(filterMainFolder.getFolderName());
@@ -272,8 +271,8 @@ public class FilesTest extends AbstractTest {
         // with phrase 'filter#1'
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(filterOneFile.getFileName());
-        filesAddFilesPage.uploadAllFiles();
-        filesPage = openOverviewPage().openFilesPage();
+        filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
         filesPage = filesPage.openFolder(filterMainFolder.getFolderName());
 
         SoftAssert.assertThat(
@@ -284,8 +283,8 @@ public class FilesTest extends AbstractTest {
         // with phrase 'filter#2'
         filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(filterTwoFile.getFileName());
-        filesAddFilesPage.uploadAllFiles();
-        filesPage = openOverviewPage().openFilesPage();
+        filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
         filesPage = filesPage.openFolder(filterMainFolder.getFolderName());
 
         SoftAssert.assertThat(
@@ -296,8 +295,8 @@ public class FilesTest extends AbstractTest {
         // with phrase 'filter'
         filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(filterCommonFile.getFileName());
-        filesAddFilesPage.uploadAllFiles();
-        filesPage = openOverviewPage().openFilesPage();
+        filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
         filesPage = filesPage.openFolder(filterMainFolder.getFolderName());
 
         SoftAssert.assertThat(
@@ -611,8 +610,8 @@ public class FilesTest extends AbstractTest {
         // #1
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(firstFile.getFileName());
-        filesAddFilesPage.uploadAllFiles();
-        filesPage = openOverviewPage().openFilesPage();
+        filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
         filesPage = filesPage.openFolder(mainFolder.getFolderName());
 
         assertThat(
@@ -623,8 +622,8 @@ public class FilesTest extends AbstractTest {
         // #2
         filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(secondFile.getFileName());
-        filesAddFilesPage.uploadAllFiles();
-        filesPage = openOverviewPage().openFilesPage();
+        filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
         filesPage = filesPage.openFolder(mainFolder.getFolderName());
 
         assertThat(
@@ -635,8 +634,8 @@ public class FilesTest extends AbstractTest {
         // #3
         filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(thirdFile.getFileName());
-        filesAddFilesPage.uploadAllFiles();
-        filesPage = openOverviewPage().openFilesPage();
+        filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
         filesPage = filesPage.openFolder(mainFolder.getFolderName());
 
         assertThat(
@@ -658,8 +657,8 @@ public class FilesTest extends AbstractTest {
         filesPage = filesPage.openFolder(firstFolder.getFolderName());
         filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(insideFile.getFileName());
-        filesAddFilesPage.uploadAllFiles();
-        filesPage = openOverviewPage().openFilesPage();
+        FilesAddFilesPage addFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = addFilesPage.openRootFilesPage();
         filesPage = filesPage.openFolder(mainFolder.getFolderName()).openFolder(firstFolder.getFolderName());
 
         assertThat(
@@ -667,7 +666,7 @@ public class FilesTest extends AbstractTest {
                 .as("Link to uploaded file #4 is displayed inside the folder")
                 .isTrue();
 
-        filesPage = openOverviewPage().openFilesPage();
+        filesPage = filesPage.openRootFilesPage();
         filesPage = filesPage.openFolder(mainFolder.getFolderName());
 
         // #2
@@ -725,7 +724,12 @@ public class FilesTest extends AbstractTest {
                 .isTrue();
 
         filesPage.clickDeleteOnDialog();
-        filesPage = openOverviewPage().openFilesPage();
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(mainFolder.getFolderName()))
+                .as("Root is open; Link to main folder is displayed in root directory")
+                .isTrue();
+
         filesPage = filesPage.openFolder(mainFolder.getFolderName());
 
         assertThat(
@@ -788,25 +792,28 @@ public class FilesTest extends AbstractTest {
         // upload file #1
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(firstFile.getFileName());
-        filesAddFilesPage.uploadAllFiles();
+        filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
 
         // upload file #2
-        openOverviewPage().openFilesPage().openFolder(mainFolder.getFolderName());
+        filesPage = filesPage.openFolder(mainFolder.getFolderName());
         filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(secondFile.getFileName());
-        filesAddFilesPage.uploadAllFiles();
+        filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
 
         // create folder #1
-        filesPage = openOverviewPage().openFilesPage().openFolder(mainFolder.getFolderName());
+        filesPage = filesPage.openFolder(mainFolder.getFolderName());
         filesPage = filesPage.createFolder(firstFolder.getFolderName());
         filesPage.openFolder(firstFolder.getFolderName());
 
         // upload file inside
         filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(insideFile.getFileName());
-        filesAddFilesPage.uploadAllFiles();
+        filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
 
-        filesPage = openOverviewPage().openFilesPage();
+        filesPage = filesPage.openRootFilesPage();
         filesPage.selectItem(mainFolder.getFolderName());
         filesPage.selectItem(mainFile.getFileName());
         filesPage.clickDownloadSelected();
@@ -870,4 +877,283 @@ public class FilesTest extends AbstractTest {
 
         SoftAssert.assertAll();
     }
+
+    @Test(dependsOnMethods = { "successfulLogin" }, enabled = false )
+    public void moveItems() {
+        printTestHeader("Test Case: check it is possible to move folder and file to another folder");
+
+
+//        == initially ==
+//        Root Directory
+//            ---- In Root Folder -
+//                ---- in Root File -
+//                ---- First Folder -
+//                    ---- Third Folder -
+//                        ---- third File -
+//                    ---- Fifth Folder -
+//                    ---- first File -
+//                    ---- second File -
+//                ---- Second Folder -
+//                    ---- Fourth Folder
+//                    ---- fourth File
+
+        FolderProfile rootFolder = getMoveRootFolder();
+        FolderProfile firstFolder = getMoveFirstFolder();
+        FolderProfile secondFolder = getMoveSecondFolder();
+        FolderProfile thirdFolder = getMoveThirdFolder();
+        FolderProfile fourthFolder = getMoveFourthFolder();
+        FolderProfile fifthFolder = getMoveFifthFolder();
+
+        FileProfile inRootFolderFile = getMoveInRootFolderFile();
+        FileProfile firstFile = getMoveFirstFile();
+        FileProfile secondFile = getMoveSecondFile();
+        FileProfile thirdFile = getMoveThirdFile();
+        FileProfile fourthFile = getMoveFourthFile();
+
+        // create in Root folder
+        FilesPage filesPage = openOverviewPage().openFilesPage();
+        filesPage = filesPage.createFolder(rootFolder.getFolderName());
+        filesPage = filesPage.openFolder(rootFolder.getFolderName());
+
+        // upload in root folder file
+        FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(inRootFolderFile.getFileName());
+        filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage().openFolder(rootFolder.getFolderName());
+
+        // create folder #1
+        filesPage = filesPage.createFolder(firstFolder.getFolderName());
+
+        // create folder #2
+        filesPage = filesPage.createFolder(secondFolder.getFolderName());
+
+        // create folder #3
+        filesPage = filesPage.openFolder(firstFolder.getFolderName());
+        filesPage = filesPage.createFolder(thirdFolder.getFolderName());
+
+        // create folder #5
+        filesPage = filesPage.createFolder(fifthFolder.getFolderName());
+
+        // upload file #1
+        filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(firstFile.getFileName());
+        filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
+
+        // upload file #2
+        filesPage = filesPage.openFolder(rootFolder.getFolderName()).openFolder(firstFolder.getFolderName());
+        filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(secondFile.getFileName());
+        filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
+
+        // upload file #3
+        filesPage = filesPage.openFolder(rootFolder.getFolderName()).
+                openFolder(firstFolder.getFolderName()).
+                openFolder(thirdFolder.getFolderName());
+        filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(thirdFile.getFileName());
+        filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
+
+        // create folder #4
+        filesPage = filesPage.openFolder(rootFolder.getFolderName()).openFolder(secondFolder.getFolderName());
+        filesPage = filesPage.createFolder(fourthFolder.getFolderName());
+
+        // upload file #4
+        filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(fourthFile.getFileName());
+        filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
+
+        filesPage = filesPage.openFolder(rootFolder.getFolderName());
+        filesPage.selectItem(firstFolder.getFolderName());
+        filesPage.selectItem(inRootFolderFile.getFileName());
+        filesPage.clickMoveSelected();
+
+        filesPage.clickTreeItemOnMoveDialog(rootFolder.getFolderName());
+        filesPage.clickTreeItemOnMoveDialog(secondFolder.getFolderName());
+        filesPage = filesPage.clickMoveHere();
+
+//        == should be ==
+//        Root Directory
+//            ---- In Root Folder -
+//                ---- Second Folder -
+//                    ---- Fourth Folder
+//                    ---- fourth File
+//                    ---- in Root File -
+//                    ---- First Folder -
+//                        ---- Third Folder -
+//                            ---- third File -
+//                        ---- Fifth Folder -
+//                        ---- first File -
+//                        ---- second File -
+
+        //---------------
+
+        filesPage = filesPage.openRootFilesPage().openFolder(rootFolder.getFolderName());
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(secondFolder.getFolderName()))
+                .as("Second folder is displayed")
+                .isTrue();
+
+        assertThat(
+                filesPage.getNumberOfDisplayedItems() == 1)
+                .as("Number of displayed files and folders == 1")
+                .isTrue();
+
+        //---------------
+
+        filesPage = filesPage.openFolder(secondFolder.getFolderName());
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(firstFolder.getFolderName()))
+                .as("First folder is displayed")
+                .isTrue();
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(fourthFolder.getFolderName()))
+                .as("Fourth folder is displayed")
+                .isTrue();
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(inRootFolderFile.getFileName()))
+                .as("In Root file is displayed")
+                .isTrue();
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(fourthFile.getFileName()))
+                .as("Fourth file is displayed")
+                .isTrue();
+
+        assertThat(
+                filesPage.getNumberOfDisplayedItems() == 4)
+                .as("Number of displayed files and folders == 4")
+                .isTrue();
+
+        //---------------
+
+        filesPage = filesPage.openFolder(firstFolder.getFolderName());
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(thirdFolder.getFolderName()))
+                .as("Third folder is displayed")
+                .isTrue();
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(fifthFolder.getFolderName()))
+                .as("Fifth folder is displayed")
+                .isTrue();
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(firstFile.getFileName()))
+                .as("First file is displayed")
+                .isTrue();
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(secondFile.getFileName()))
+                .as("Second file is displayed")
+                .isTrue();
+
+        assertThat(
+                filesPage.getNumberOfDisplayedItems() == 4)
+                .as("Number of displayed files and folders == 4")
+                .isTrue();
+
+        //---------------
+
+        filesPage = filesPage.openFolder(thirdFolder.getFolderName());
+
+        assertThat(
+                filesPage.isLinkToCreatedFolderDisplayed(thirdFile.getFileName()))
+                .as("Third file is displayed")
+                .isTrue();
+
+        assertThat(
+                filesPage.getNumberOfDisplayedItems() == 1)
+                .as("Number of displayed files and folders == 1")
+                .isTrue();
+    }
+
+    @Test(dependsOnMethods = { "successfulLogin" }, enabled = false)
+    public void test() {
+        printTestHeader("Test Case: check it is possible to move folder and file to another folder");
+
+//        Root Directory
+//            ---- In Root Folder -
+//                ---- in Root File -
+//                ---- First Folder -
+//                    ---- Third Folder -
+//                        ---- third File -
+//                    ---- Fifth Folder -
+//                    ---- first File -
+//                    ---- second File -
+//                ---- Second Folder -
+//                    ---- Fourth Folder
+//                    ---- fourth File
+
+        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FolderProfile firstFolder = getMoveFirstFolder();
+        FolderProfile secondFolder = getMoveSecondFolder();
+
+        filesPage = filesPage.createFolder(firstFolder.getFolderName());
+        filesPage = filesPage.createFolder(secondFolder.getFolderName());
+
+        filesPage.selectItem(firstFolder.getFolderName());
+        filesPage.clickMoveSelected();
+
+        filesPage.clickTreeItemOnMoveDialog(secondFolder.getFolderName());
+        filesPage = filesPage.clickMoveHere();
+
+        SoftAssert.assertAll();
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin", "uploadFileToRootDirectory", "createFolderInRoot"} )
+    public void checkDropDownItemsAreDisabled() {
+        printTestHeader("Test Case: check that drop-down items for bulk actions are disabled when there are not selected files/folders");
+
+        FilesPage filesPage = openOverviewPage().openFilesPage();
+        filesPage.openActionsDropDown();
+
+        SoftAssert.assertThat(
+                filesPage.isDropDownDeleteItemClickable())
+                .as("Delete item is clickable")
+                .isFalse();
+
+        SoftAssert.assertThat(
+                filesPage.isDropDownDownloadItemClickable())
+                .as("Download item is clickable")
+                .isFalse();
+
+        SoftAssert.assertThat(
+                filesPage.isDropDownRenameItemClickable())
+                .as("Rename item is clickable")
+                .isFalse();
+
+        SoftAssert.assertThat(
+                filesPage.isDropDownMoveItemClickable())
+                .as("Move item is clickable")
+                .isFalse();
+
+        SoftAssert.assertThat(
+                filesPage.isDropDownPublishItemClickable())
+                .as("Publish item is clickable")
+                .isFalse();
+
+        FileProfile mainFile = getMainFileProfile();
+        FolderProfile mainFolder = getMainFolderProfile();
+
+        filesPage.selectItem(mainFile.getFileName());
+        filesPage.selectItem(mainFolder.getFolderName());
+        filesPage.openActionsDropDown();
+
+        SoftAssert.assertThat(
+                filesPage.isDropDownRenameItemClickable())
+                .as("Rename item is clickable")
+                .isFalse();
+
+        SoftAssert.assertAll();
+    }
+
 }
