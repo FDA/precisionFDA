@@ -83,7 +83,7 @@
 <% end %>
 
 <% if @files_grid.present? %>
-  <%= render "files/grid", files_grid: @files_grid, scope_icon: false %>
+  <%= render "files/grid", files_grid: @files_grid, scope_icon: false, show_checkboxes: defined?(@edit_access_present) && @edit_access_present %>
 <% else %>
   <div class="alert alert-info">
     <% if action_name == 'index' %>

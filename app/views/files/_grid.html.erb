@@ -13,7 +13,9 @@
     end
   end
 
-  g.action_column html_check_box: true
+  if defined?(show_checkboxes) && show_checkboxes
+    g.action_column html_check_box: true
+  end
 
   g.column name: 'Name', attribute: 'name' do |file|
     unilinkfw(file, scope_icon: (defined?(scope_icon) ? scope_icon : true))
