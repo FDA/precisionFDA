@@ -104,11 +104,18 @@ public class FilesPage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_MOVE_DIALOG_MOVE_HERE_BUTTON)
     private Button moveDialogMoveHereButton;
 
+    @FindBy(xpath = FilesLocators.FILES_MOVE_DANGER_NOTIFICATION)
+    private WebElement dangerNotification;
+
     public FilesPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_MY_FILES_LINK));
         sleep(2000);
+    }
+
+    public WebElement getDangerNotification() {
+        return dangerNotification;
     }
 
     public Button getMoveDialogMoveHereButton() {
@@ -201,6 +208,10 @@ public class FilesPage extends AbstractPage {
 
     public boolean isExploreLinkActivated() {
         return isElementPresent(getFilesExploreActivatedLink());
+    }
+
+    public boolean isDangerNotificationDisplayed() {
+        return isElementPresent(getDangerNotification(), 1);
     }
 
     public String getDisplayedBreadcrumbsText() {
@@ -587,6 +598,11 @@ public class FilesPage extends AbstractPage {
 
     public boolean isDropDownPublishItemClickable() {
         return isElementPresent(getFilesEditPublishEnabledItem(), 1);
+    }
+
+    public boolean isItemCheckboxDisplayed(String itemName) {
+        String xpath = FilesLocators.FILES_LIST_CHECKBOX_TEMPLATE.replace("{ITEM_NAME}", itemName);
+        return isElementPresent(By.xpath(xpath), 1);
     }
 
 }

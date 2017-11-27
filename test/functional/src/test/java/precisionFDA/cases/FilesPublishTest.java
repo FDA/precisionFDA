@@ -101,7 +101,7 @@ public class FilesPublishTest extends AbstractTest {
         FilesPage filesPage = openOverviewPage().openFilesPage();
         UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
 
-        FilesPublishPage publishPage = uploadedFilePage.clickPublish();
+        FilesPublishPage publishPage = uploadedFilePage.clickPublishToPublic();
 
         assertThat(
                 publishPage.getFileToPublishNameText())
@@ -153,6 +153,11 @@ public class FilesPublishTest extends AbstractTest {
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
                 .as("Link to published file is now displayed on Explore page")
                 .isTrue();
+
+        SoftAssert.assertThat(
+                filesPage.isItemCheckboxDisplayed(fileProfile.getFileName()))
+                .as("Checkbox is displayed for the file")
+                .isFalse();
 
         UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
 

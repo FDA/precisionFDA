@@ -402,7 +402,7 @@ public class AppsSavedAppPage extends AbstractPage {
     }
 
     public void waitUntilDockerFileIsDownloaded() {
-        waitUntilFileIsDownloaded(getPathToDownloadsFolder() + getDockerFileName());
+        waitUntilFileIsDownloaded(getDockerFileName());
     }
 
     public boolean isAssignToChallengeDisplayed() {
