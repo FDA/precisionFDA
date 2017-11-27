@@ -13,12 +13,6 @@ class EditorModel
 
   constructor: (challenge_id) ->
 
-    FIXTURE_TOOLS = undefined
-    IMAGE_FIXTURE_TOOLS = undefined
-    LINK_FIXTURE_TOOLS = undefined
-    editor = undefined
-    req = undefined
-
     ContentTools.StylePalette.add [
       new (ContentTools.Style)('By-line', 'article__by-line', [ 'p' ])
       new (ContentTools.Style)('Caption', 'article__caption', [ 'p' ])
@@ -27,8 +21,8 @@ class EditorModel
       new (ContentTools.Style)('Example + Bad', 'example--bad', [ 'pre' ])
     ]
 
-    editor = ContentTools.EditorApp.get()
-    editor.init '[data-editable], [data-fixture]', 'data-name'
+    @editor = ContentTools.EditorApp.get()
+    @editor.init '[data-editable], [data-fixture]', 'data-name'
     FIXTURE_TOOLS = [ [
       'undo'
       'redo'
@@ -44,7 +38,7 @@ class EditorModel
       'redo'
       'link'
     ] ]
-    ContentEdit.Root.get().bind 'focus', (element) ->
+    ContentEdit.Root.get().bind 'focus', (element) =>
       tools = undefined
       if element.isFixed()
         if element.type() == 'ImageFixture'
@@ -55,11 +49,11 @@ class EditorModel
           tools = FIXTURE_TOOLS
       else
         tools = ContentTools.DEFAULT_TOOLS
-      if editor.toolbox().tools() != tools
-        return editor.toolbox().tools(tools)
+      if @editor.toolbox().tools() != tools
+        return @editor.toolbox().tools(tools)
       return
 
-    editor.addEventListener 'saved', (ev) ->
+    @editor.addEventListener 'saved', (ev) ->
       name = undefined
       onStateChange = undefined
       passive = undefined
@@ -94,7 +88,7 @@ class EditorModel
           console.error(error)
         )
         .always(=>
-          editor.busy false
+          @editor.busy false
         )
 
 #########################################################
@@ -113,7 +107,7 @@ EditorController = Paloma.controller('Challenges',
     ko.applyBindings(viewModel, $container[0])
 
     $(document).on 'page:before-change', ->
-      console.log viewModel.editor._state
-      confirm 'page:before-change'
+      if viewModel.editor._state == 'editing'
+        confirm 'Changes you made may not be saved.'
 
 )
