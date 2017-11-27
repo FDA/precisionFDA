@@ -108,7 +108,7 @@ class SpacesController < ApplicationController
       })
     end
 
-
+    @show_checkboxes = @space.accessible_by?(@context)
 
     js({ space_uid: @space.uid, space_id: @space.id }.merge(files_ids_with_descriptions(nodes, @space)))
   end
