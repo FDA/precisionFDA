@@ -51,8 +51,8 @@ class FolderService
     nodes.each do |node|
       return Rats.failure(message: "Unexpected scope") unless node.scope == computed_scope
 
-      if node.is_a?(Folder) && target_folder.present? && node.has_in_children?(target_folder)
-        return Rats.failure(message: "Unable to move folder into its child folder")
+      if node.is_a?(Folder) && target_folder.present? && (node == target_folder || node.has_in_children?(target_folder))
+        return Rats.failure(message: "Unable to move folder into itself or its child folder")
       end
 
       node[scope_column_name] = target_folder_id
