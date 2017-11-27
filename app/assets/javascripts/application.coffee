@@ -48,4 +48,5 @@
 #= require mousetrap/mousetrap-global-bind.min
 #= require tablesort
 #= require tablesort/src/sorts/tablesort.number
+#= require eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min
 #= require_tree .
