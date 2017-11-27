@@ -1,0 +1,39 @@
+<%= grid(analyses_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
+  g.blank_slate do
+    content_tag :div, "No analyses found", class: 'alert alert-info'
+  end
+
+  g.column do
+    content_tag(:span, " ", class: "indicator fa fa-caret-down fa-fw")
+  end
+
+  g.row_attributes do |analysis|
+    { id: "analysis-#{analysis.id}" }
+  end
+
+  g.column name: 'State' do |analysis|
+    [analysis.all_state, {class: "col-state state-#{analysis.all_state}"}]
+  end
+
+  g.column name: 'Execution name', attribute: 'name' do |analysis|
+    analysis.name
+  end
+
+  if !defined?(workflow)
+    g.column name: 'Workflow', attribute: 'title', assoc: :workflow do |analysis|
+      unilinkfw(analysis.workflow)
+    end
+  end
+
+  g.column name: 'App' do |analysis|
+    'N/A'
+  end
+
+  g.column name: 'Duration' do |analysis|
+    humanizeSeconds(analysis.duration)
+  end
+
+  g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |analysis|
+    analysis.created_at.to_s(:db)
+  end
+end -%>
