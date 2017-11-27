@@ -30,7 +30,7 @@ class AppsController < ApplicationController
         @discussions = @app.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
 
         @assigned_challenges = Challenge.where(app_id: @app.id)
-        @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@app) }
+        @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@context.user, @app) }
       end
       js_param[:app] = @app.slice(:id, :dxid, :readme)
     end

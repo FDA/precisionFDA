@@ -49,21 +49,20 @@ class ChallengesController < ApplicationController
   end
 
   def assign_app
-    challenge = Challenge.find_by!(id: params[:id])
+    return unless @context.logged_in?
 
-    unless challenge.can_assign_app?
-      flash[:error] = "This app cannot be assigned because the current challenge is currently open."
+    challenge = Challenge.find_by!(id: params[:id])
+    app = App.editable_by(@context).find_by(id: params[:app_id])
+
+    unless challenge.can_assign_specific_app?(@context.user, app)
+      flash[:error] = "This app cannot be assigned to the current challenge."
       redirect_to apps_path
       return
     end
 
-    return if !@context.logged_in? && challenge.app_owner != @context.user
-
-    app = App.editable_by(@context).find_by(id: params[:app_id])
-
     if app
-      if challenge.can_assign_specific_app?(app) && Challenge.add_app_dev(@context, challenge.id, app.id)
-        flash[:success] = "Your app '#{app.title}' was succssfully assigned to: #{challenge.name}"
+      if Challenge.add_app_dev(@context, challenge.id, app.id)
+        flash[:success] = "Your app '#{app.title}' was successfully assigned to: #{challenge.name}"
       else
         flash.now[:error] = "The specified app could not be assigned to the current challenge: #{challenge.name} due to an internal error."
       end
@@ -72,7 +71,6 @@ class ChallengesController < ApplicationController
       flash[:error] = "The specified app was not found and could not be assigned to the current challenge: #{challenge.name}."
       redirect_to apps_path
     end
-
   end
 
   def join
@@ -109,10 +107,14 @@ class ChallengesController < ApplicationController
   end
 
   def save_page
-    if params[:regions].present?
-      new_regions = @challenge.regions.merge(params[:regions])
-      @challenge.update!(regions: new_regions)
+    return if params[:regions].blank?
+
+    @challenge.regions = @challenge.regions.merge(params[:regions])
+
+    if @challenge.save
       render json: { msg: "saved" }
+    else
+      render json: { errors: @challenge.errors.full_messages.join(", ") }
     end
   end
 
