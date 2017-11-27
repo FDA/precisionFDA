@@ -38,10 +38,15 @@ class Challenge < ActiveRecord::Base
   delegate :setup?, :active?, :coming_soon?, :paused?, :closed?, :archived?, :result_announced?, to: :state
 
   validates :start_at, :end_at, presence: true
-  validates :status, inclusion: { :in => ->(challenge) {challenge.available_statuses } }
+  validates :title, length: { maximum: 150 }
+  validates :description, length: { maximum: 50000 }
+  validates_format_of :card_image_url, :with => URI::regexp(%w(https))
+
+  validates :status, inclusion: { :in => ->(challenge) { challenge.available_statuses } }
+  validates :meta, meta: true
   validates :app_id,
             presence: true,
-            if: ->(challenge) { !challenge.status_setup? && !challenge.status_archived? }
+            if: ->(challenge) { !challenge.status_setup? }
   validate :validate_end_at
   validate :validate_start_at
 
@@ -178,20 +183,17 @@ class Challenge < ActiveRecord::Base
     !over?
   end
 
-  def can_assign_app?
-    return false if over?
-
-    [STATUS_PAUSED, STATUS_SETUP].include?(status) || app_id.blank?
-  end
-
   def can_announce_result?
     return false if result_announced?
     closed?
   end
 
-  def can_assign_specific_app?(checked_app)
-    return false unless can_assign_app?
+  def can_assign_specific_app?(checked_user, checked_app)
+    return false if over?
 
+    return unless [STATUS_PAUSED, STATUS_SETUP].include?(status)
+
+    return false unless app_owner == checked_user
     return true if app_id.blank?
     return false if app_id == checked_app.id
     return true if submissions.empty?
@@ -208,6 +210,8 @@ class Challenge < ActiveRecord::Base
   end
 
   def output_names
+    return [] unless app
+
     app.output_spec.map { |output| output["name"] }
   end
 
