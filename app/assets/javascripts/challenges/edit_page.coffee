@@ -111,4 +111,9 @@ EditorController = Paloma.controller('Challenges',
     params = @params
     viewModel = new EditorModel(params.challenge.id)
     ko.applyBindings(viewModel, $container[0])
+
+    $(document).on 'page:before-change', ->
+      console.log viewModel.editor._state
+      confirm 'page:before-change'
+
 )
