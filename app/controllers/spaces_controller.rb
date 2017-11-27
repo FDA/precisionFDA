@@ -23,6 +23,7 @@ class SpacesController < ApplicationController
   def content
     @space = Space.accessible_by(@context).find(params[:id])
     @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
+    folder_id = params[:folder_id]
 
     if request.xhr?
       render_folders(folders(params[:folder_id]))
@@ -35,6 +36,7 @@ class SpacesController < ApplicationController
     @apps = AppSeries.accessible_by_space(@space)
     @assets = Asset.accessible_by_space(@space)
     @jobs = Job.accessible_by_space(@space)
+    @folders = folders(folder_id)
 
     @counts = {
       notes: @notes.count,
@@ -42,7 +44,8 @@ class SpacesController < ApplicationController
       comparisons: @comparisons.count,
       apps: @apps.count,
       assets: @assets.count,
-      jobs: @jobs.count
+      jobs: @jobs.count,
+      folders: @folders.count
     }
 
     @total_count = @counts.values.sum
@@ -51,12 +54,11 @@ class SpacesController < ApplicationController
       @notes_list = @notes.order(title: :desc).page params[:notes_page]
     end
 
-    folder_id = params[:folder_id]
     @folder = Folder.accessible_by_space(@space).find_by(id: folder_id)
 
     nodes = Node.where.any_of(
       UserFile.real_files.accessible_by_space(@space).where(scoped_parent_folder_id: folder_id),
-      folders(folder_id)
+      @folders
     )
 
     @files_grid = initialize_grid(nodes.includes(:taggings), {
@@ -105,6 +107,8 @@ class SpacesController < ApplicationController
         include: [{user: :org}, {taggings: :tag}]
       })
     end
+
+
 
     js({ space_uid: @space.uid, space_id: @space.id }.merge(files_ids_with_descriptions(nodes, @space)))
   end
