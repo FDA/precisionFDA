@@ -18,8 +18,8 @@ public class SpacesPage extends AbstractPage {
 
     public SpacesPage(final WebDriver driver) {
         super(driver);
-        waitUntilScriptsReady();
-        waitForPageToLoadAndVerifyBy(By.xpath(SpacesLocators.PROVISION_SPACE_BUTTON_LINK));
+        // waitUntilScriptsReady();
+        waitForPageToLoadAndVerifyBy(By.xpath(SpacesLocators.SPACES_MAIN_DIV));
     }
 
     public Link getProvisionSpaceButtonLink() {
@@ -37,9 +37,14 @@ public class SpacesPage extends AbstractPage {
         return isElementPresent(getProvisionSpaceButtonLink(), 2);
     }
 
-    public boolean isCreatedSpaceNameDisplayed(String name) {
-        String xpath = SpacesLocators.SPACES_NAME_TEMPLATE.replace("{SPACE_NAME}", name);
+    public WebElement getSpaceNameLink(String spaceName) {
+        String xpath = SpacesLocators.SPACES_NAME_TEMPLATE.replace("{SPACE_NAME}", spaceName);
         WebElement we = getDriver().findElement(By.xpath(xpath));
+        return we;
+    }
+
+    public boolean isCreatedSpaceNameDisplayed(String name) {
+        WebElement we = getSpaceNameLink(name);
         return isElementPresent(we, 2);
     }
 
@@ -49,6 +54,19 @@ public class SpacesPage extends AbstractPage {
         return isElementPresent(we, 2);
     }
 
+    public SpaceDetailsPage openSpace(String spaceName) {
+        log.info("Open space");
+        WebElement link = getSpaceNameLink(spaceName);
+        waitUntilClickable(link, 2);
+        link.click();
+        return new SpaceDetailsPage(getDriver());
+    }
+
+    public String getSpaceStatusOnGrid(String spaceName) {
+        String xpath = SpacesLocators.SPACES_SPASE_STATUS_ON_GRID_TEMPLATE.replace("{SPACE_NAME}", spaceName);
+        WebElement we = findElement(By.xpath(xpath));
+        return we.getText().trim();
+    }
 
 
 }

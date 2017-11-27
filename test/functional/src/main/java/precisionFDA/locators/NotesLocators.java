@@ -52,7 +52,7 @@ public class NotesLocators {
 
     public static final String NOTES_LIST_ANY_NOTE_LINK = "//*[contains(@class, 'pfda-cards-list')]//a";
 
-    public static final String NOTES_SAVED_NOTE_EDIT_DD = "//button[@id='dLabel']";
+    public static final String NOTES_SAVED_NOTE_EDIT_DD = "//button/span[contains(@class, 'cog')]/..";
 
     public static final String NOTES_SAVED_NOTE_DD_DELETE = "//*[contains(@class, 'dropdown-menu')]//a[@data-method='delete']/span/..";
 

@@ -69,8 +69,11 @@ public class UploadedFilePage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_PAGE_AUTHORIZED_URL_BUTTON_LINK)
     private Link uploadedFileAuthorizedUrlButtonLink;
 
-    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_PUBLISH_BUTTON_LINK)
-    private Link uploadedFilePublishButtonLink;
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_PUBLISH_BUTTON)
+    private WebElement uploadedFilePublishButton;
+
+    @FindBy(xpath = FilesLocators.FILES_UPLOADED_FILE_PUBLISH_TO_PUBLIC_ITEM_LINK)
+    private Link publishToPublicLink;
 
     UserProfile getTestUser() {
         return TestUserData.getTestUser();
@@ -81,8 +84,12 @@ public class UploadedFilePage extends AbstractPage {
         waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_UPLOADED_FILE_ACCESS_VALUE));
     }
 
-    public Link getUploadedFilePublishButtonLink() {
-        return uploadedFilePublishButtonLink;
+    public WebElement getUploadedFilePublishButton() {
+        return uploadedFilePublishButton;
+    }
+
+    public Link getPublishToPublicLink() {
+        return publishToPublicLink;
     }
 
     public Link getUploadedFileAuthorizedUrlButtonLink() {
@@ -292,10 +299,15 @@ public class UploadedFilePage extends AbstractPage {
         return new FilesAuthURLPage(getDriver());
     }
 
-    public FilesPublishPage clickPublish() {
-        log.info("click Publish");
-        waitUntilClickable(getUploadedFilePublishButtonLink());
-        getUploadedFilePublishButtonLink().click();
+    public FilesPublishPage clickPublishToPublic() {
+        log.info("click Publish to Public");
+        WebElement button = getUploadedFilePublishButton();
+        waitUntilClickable(button);
+        button.click();
+        Link link = getPublishToPublicLink();
+        if ( isElementPresent(link, 2) ) {
+            link.click();
+        }
         return new FilesPublishPage(getDriver());
     }
 

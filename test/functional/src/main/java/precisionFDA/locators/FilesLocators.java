@@ -50,7 +50,7 @@ public class FilesLocators {
 
     public static final String FILES_BREADCRUMB_CHAIN = "//ol[@class='breadcrumb']/li";
 
-    public static final String FILES_UPLOADED_FILE_EDIT_DD = "//button[@id='dLabel']";
+    public static final String FILES_UPLOADED_FILE_EDIT_DD = "//button/span[contains(@class, 'cog')]/..";
 
     public static final String FILES_UPLOADED_FILE_EDIT_DELETE_ENABLED_ITEM = "//li[not(contains(@class, 'disabled'))]/a/*[contains(@class, 'trash')]/..";
 
@@ -94,7 +94,9 @@ public class FilesLocators {
 
     public static final String FILES_PUBLISH_PAGE_PUBLISH_OBJ_BUTTON = "//button[text()='Publish selected objects']";
 
-    public static final String FILES_UPLOADED_FILE_PUBLISH_BUTTON_LINK = "//a[contains(@href, 'publish')]/span/..";
+    public static final String FILES_UPLOADED_FILE_PUBLISH_BUTTON = "//*[contains(@class, 'btn')]/*[contains(text(), 'Publish')]";
+
+    public static final String FILES_UPLOADED_FILE_PUBLISH_TO_PUBLIC_ITEM_LINK = "//*[contains(@class, 'drop')]//a[contains(@href, '=public')]";
 
     public static final String FILES_PUBLISH_PAGE_FILE_NAME = "//span[@class='object-title']";
 
@@ -131,5 +133,7 @@ public class FilesLocators {
     public static final String FILES_DOWNLOAD_DIALOG_PLACE_TO_FOCUS = "//*[@id='download-files-modal']//tr[1]/td/span[contains(@class, 'help')]";
 
     public static final String FILES_MOVE_DIALOG_MOVE_HERE_BUTTON = "//*[@id='move_form']//button[text()='Move here']";
+
+    public static final String FILES_MOVE_DANGER_NOTIFICATION = "//*[contains(@class, 'danger')]";
 
 }

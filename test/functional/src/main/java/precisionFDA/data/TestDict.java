@@ -34,6 +34,18 @@ public class TestDict {
 
     static final String DICT_PNG = "png";
 
+    static final String DICT_UNACTIVATED = "UNACTIVATED";
+
+    static final String DICT_ACTIVE = "ACTIVE";
+
+    public static String getDictUnactivated() {
+        return DICT_UNACTIVATED;
+    }
+
+    public static String getDictActive() {
+        return DICT_ACTIVE;
+    }
+
     public static String getDictString() {
         return DICT_STRING;
     }

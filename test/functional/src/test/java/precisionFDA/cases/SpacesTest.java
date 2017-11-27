@@ -6,9 +6,12 @@ import precisionFDA.model.SpaceProfile;
 import precisionFDA.model.UserProfile;
 import precisionFDA.pages.overview.OverviewPage;
 import precisionFDA.pages.spaces.EditSpacePage;
+import precisionFDA.pages.spaces.SpaceDetailsPage;
 import precisionFDA.pages.spaces.SpacesPage;
 import ru.yandex.qatools.htmlelements.annotations.Name;
 
+import static precisionFDA.data.TestDict.getDictActive;
+import static precisionFDA.data.TestDict.getDictUnactivated;
 import static precisionFDA.data.TestSpacesData.getMainSpaceProfile;
 import static precisionFDA.utils.Utils.printTestHeader;
 
@@ -36,7 +39,7 @@ public class SpacesTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"loginAsAdminUser"})
+    @Test(dependsOnMethods = {"loginAsAdminUser"}, priority = 0)
     public void createAndSaveSpace() {
         printTestHeader("Test Case: create and save a space");
 
@@ -62,8 +65,133 @@ public class SpacesTest extends AbstractTest {
                 .as("Created space description is displayed")
                 .isTrue();
 
+        logoutFromAll();
+
         SoftAssert.assertAll();
     }
+
+    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 1)
+    public void activateSpaceByHostLead() {
+        printTestHeader("Test Case: activate space by host lead");
+
+        SpaceProfile spaceProfile = getMainSpaceProfile();
+        UserProfile user = TestUserData.getTestUser();
+
+        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        SpacesPage spacesPage = overviewPage.openSpacesPage();
+
+        SoftAssert.assertThat(
+                spacesPage.getSpaceStatusOnGrid(spaceProfile.getSpaceName()))
+                .as("Status is Unactivated")
+                .isEqualToIgnoringCase(getDictUnactivated());
+
+        SpaceDetailsPage spaceDetailsPage = spacesPage.openSpace(spaceProfile.getSpaceName());
+
+        SoftAssert.assertThat(
+                spaceDetailsPage.isAcceptByHostLeadDisplayed())
+                .as("'Accept' link for Host Lead is displayed")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                spaceDetailsPage.isAcceptByGuestLeadDisplayed())
+                .as("'Accept' link for Guest Lead is displayed")
+                .isFalse();
+
+        spaceDetailsPage = spaceDetailsPage.acceptByHostLead();
+
+        SoftAssert.assertThat(
+                spaceDetailsPage.isAcceptByHostLeadDisplayed())
+                .as("'Accept' link for Host Lead is displayed")
+                .isFalse();
+
+        SoftAssert.assertThat(
+                spaceDetailsPage.isAcceptByGuestLeadDisplayed())
+                .as("'Accept' link for Guest Lead is displayed")
+                .isFalse();
+
+        logoutFromAll();
+
+        SoftAssert.assertAll();
+    }
+
+    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 2)
+    public void activateSpaceByGuestLead() {
+        printTestHeader("Test Case: activate space by guest lead");
+
+        SpaceProfile spaceProfile = getMainSpaceProfile();
+        UserProfile user = TestUserData.getAnotherTestUser();
+
+        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        SpacesPage spacesPage = overviewPage.openSpacesPage();
+
+        SoftAssert.assertThat(
+                spacesPage.getSpaceStatusOnGrid(spaceProfile.getSpaceName()))
+                .as("Status is Unactivated")
+                .isEqualToIgnoringCase(getDictUnactivated());
+
+        SpaceDetailsPage spaceDetailsPage = spacesPage.openSpace(spaceProfile.getSpaceName());
+
+        SoftAssert.assertThat(
+                spaceDetailsPage.isAcceptByGuestLeadDisplayed())
+                .as("'Accept' link for Guest Lead is displayed")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                spaceDetailsPage.isAcceptByHostLeadDisplayed())
+                .as("'Accept' link for Host Lead is displayed")
+                .isFalse();
+
+        spaceDetailsPage = spaceDetailsPage.acceptByGuestLead();
+
+        SoftAssert.assertThat(
+                spaceDetailsPage.isAcceptByHostLeadDisplayed())
+                .as("'Accept' link for Host Lead is displayed")
+                .isFalse();
+
+        SoftAssert.assertThat(
+                spaceDetailsPage.isAcceptByGuestLeadDisplayed())
+                .as("'Accept' link for Guest Lead is displayed")
+                .isFalse();
+
+        logoutFromAll();
+
+        SoftAssert.assertAll();
+    }
+
+    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 3)
+    public void createFolderByHostLead() {
+        printTestHeader("Test Case: create a folder by host lead");
+
+        SpaceProfile spaceProfile = getMainSpaceProfile();
+        UserProfile user = TestUserData.getTestUser();
+
+        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        SpacesPage spacesPage = overviewPage.openSpacesPage();
+
+        SoftAssert.assertThat(
+                spacesPage.getSpaceStatusOnGrid(spaceProfile.getSpaceName()))
+                .as("Status is Active")
+                .isEqualToIgnoringCase(getDictActive());
+
+        SpaceDetailsPage spaceDetailsPage = spacesPage.openSpace(spaceProfile.getSpaceName());
+
+        SoftAssert.assertThat(
+                spaceDetailsPage.isAcceptByHostLeadDisplayed())
+                .as("'Accept' link for Host Lead is displayed")
+                .isFalse();
+
+        SoftAssert.assertThat(
+                spaceDetailsPage.isAcceptByGuestLeadDisplayed())
+                .as("'Accept' link for Guest Lead is displayed")
+                .isFalse();
+
+        logoutFromAll();
+
+        SoftAssert.assertAll();
+
+    }
+
+
 
 
 }

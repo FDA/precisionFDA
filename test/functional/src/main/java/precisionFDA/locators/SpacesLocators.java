@@ -18,8 +18,17 @@ public class SpacesLocators {
 
     public static final String EDIT_SPACE_CREATE_BUTTON = "//input[@value='Create']";
 
-    public static final String SPACES_NAME_TEMPLATE = "//*[@id='spaces']//td[text()='{SPACE_NAME}']";
+    public static final String SPACES_NAME_TEMPLATE = "//*[@id='spaces']//*[text()='{SPACE_NAME}']";
 
     public static final String SPACES_DESCR_TEMPLATE = "//*[@id='spaces']//*[@class='description'][text()='{SPACE_DESCR}']";
 
+    public static final String SPACE_DETAILS_MEMBERS_TAB_LINK = "//a[contains(@href, 'members')][contains(@aria-controls, 'members')]";
+
+    public static final String SPACE_DETAILS_ACCEPT_BY_GUEST_LEAD_LINK = "//*[text()='Guest Lead']/../a[contains(@href, 'accept')]";
+
+    public static final String SPACE_DETAILS_ACCEPT_BY_HOST_LEAD_LINK = "//*[text()='Host Lead']/../a[contains(@href, 'accept')]";
+
+    public static final String SPACES_SPASE_STATUS_ON_GRID_TEMPLATE = "//a[text()='{SPACE_NAME}']/../../*[contains(@class, 'state')]";
+
+    public static final String SPACES_MAIN_DIV = "//*[@id='spaces']";
 }

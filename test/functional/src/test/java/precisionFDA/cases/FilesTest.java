@@ -726,6 +726,11 @@ public class FilesTest extends AbstractTest {
         filesPage.clickDeleteOnDialog();
 
         assertThat(
+                filesPage.isDangerNotificationDisplayed())
+                .as("Danger notification is displayed")
+                .isFalse();
+
+        assertThat(
                 filesPage.isLinkToCreatedFolderDisplayed(mainFolder.getFolderName()))
                 .as("Root is open; Link to main folder is displayed in root directory")
                 .isTrue();
@@ -769,11 +774,16 @@ public class FilesTest extends AbstractTest {
                 filesPage.isLinkToCreatedFolderDisplayed(folderProfile.getFolderName()))
                 .as("Link to folder with new name is displayed inside root directory")
                 .isTrue();
+
+        assertThat(
+                filesPage.isDangerNotificationDisplayed())
+                .as("Danger notification is displayed")
+                .isFalse();
     }
 
     @Test(dependsOnMethods = { "successfulLogin", "uploadFileToRootDirectory" } )
     public void downloadItemsFromFilesList() {
-        printTestHeader("Test Case: check it is possible to download select items from files list");
+        printTestHeader("Test Case: check it is possible to download selected items from files list");
 
         FileProfile mainFile = getMainFileProfile();
 
@@ -878,7 +888,7 @@ public class FilesTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = { "successfulLogin" }, enabled = false )
+    @Test(dependsOnMethods = { "successfulLogin" } )
     public void moveItems() {
         printTestHeader("Test Case: check it is possible to move folder and file to another folder");
 
@@ -974,6 +984,11 @@ public class FilesTest extends AbstractTest {
         filesPage.clickTreeItemOnMoveDialog(rootFolder.getFolderName());
         filesPage.clickTreeItemOnMoveDialog(secondFolder.getFolderName());
         filesPage = filesPage.clickMoveHere();
+
+        assertThat(
+                filesPage.isDangerNotificationDisplayed())
+                .as("Danger notification is displayed")
+                .isFalse();
 
 //        == should be ==
 //        Root Directory
@@ -1074,39 +1089,6 @@ public class FilesTest extends AbstractTest {
                 filesPage.getNumberOfDisplayedItems() == 1)
                 .as("Number of displayed files and folders == 1")
                 .isTrue();
-    }
-
-    @Test(dependsOnMethods = { "successfulLogin" }, enabled = false)
-    public void test() {
-        printTestHeader("Test Case: check it is possible to move folder and file to another folder");
-
-//        Root Directory
-//            ---- In Root Folder -
-//                ---- in Root File -
-//                ---- First Folder -
-//                    ---- Third Folder -
-//                        ---- third File -
-//                    ---- Fifth Folder -
-//                    ---- first File -
-//                    ---- second File -
-//                ---- Second Folder -
-//                    ---- Fourth Folder
-//                    ---- fourth File
-
-        FilesPage filesPage = openOverviewPage().openFilesPage();
-        FolderProfile firstFolder = getMoveFirstFolder();
-        FolderProfile secondFolder = getMoveSecondFolder();
-
-        filesPage = filesPage.createFolder(firstFolder.getFolderName());
-        filesPage = filesPage.createFolder(secondFolder.getFolderName());
-
-        filesPage.selectItem(firstFolder.getFolderName());
-        filesPage.clickMoveSelected();
-
-        filesPage.clickTreeItemOnMoveDialog(secondFolder.getFolderName());
-        filesPage = filesPage.clickMoveHere();
-
-        SoftAssert.assertAll();
     }
 
     @Test(dependsOnMethods = {"successfulLogin", "uploadFileToRootDirectory", "createFolderInRoot"} )
