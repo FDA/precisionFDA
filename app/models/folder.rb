@@ -26,7 +26,7 @@ class Folder < Node
   end
 
   def editable_by?(context)
-    public? ? context.user.fda? : super
+    public? ? context.user.can_administer_site? : super
   end
 
   def has_in_children?(node)
