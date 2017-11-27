@@ -97,10 +97,6 @@ class User < ActiveRecord::Base
     org_id.blank? || org.singular
   end
 
-  def fda?
-    dxuser == ADMIN_USER || org.handle == "precisionfda"
-  end
-
   def can_provision_accounts?
     !singular? && org.admin_id == id
   end

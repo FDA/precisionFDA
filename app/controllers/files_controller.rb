@@ -72,7 +72,7 @@ class FilesController < ApplicationController
     @files_grid = files_grid(user_files)
     @new_folder_is_public = true
     @scope = "public"
-    @edit_access_present = @context.user.fda?
+    @edit_access_present = @context.user.can_administer_site?
 
     js :index, files_ids_with_descriptions(
       user_files,
@@ -225,7 +225,7 @@ class FilesController < ApplicationController
     is_public_folder = params[:public] == "true"
 
     if is_public_folder
-      if @context.user.fda?
+      if @context.user.can_administer_site?
         parent_folder = Folder.accessible_by_public.find_by(id: params[:parent_folder_id])
         scope = "public"
       else
