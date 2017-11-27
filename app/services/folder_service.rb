@@ -49,10 +49,14 @@ class FolderService
     errors = []
 
     nodes.each do |node|
-      return Rats.failure(message: "Unexpected scope") unless node.scope == computed_scope
+      if node.is_a?(Folder)
+        if node.scope != computed_scope && !node.private?
+          return Rats.failure(message: "Unexpected scope")
+        end
 
-      if node.is_a?(Folder) && target_folder.present? && (node == target_folder || node.has_in_children?(target_folder))
-        return Rats.failure(message: "Unable to move folder into itself or its child folder")
+        if target_folder.present? && (node == target_folder || node.has_in_children?(target_folder))
+          return Rats.failure(message: "Unable to move folder into itself or its child folder")
+        end
       end
 
       node[scope_column_name] = target_folder_id
