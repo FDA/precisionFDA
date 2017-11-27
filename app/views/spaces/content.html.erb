@@ -85,7 +85,13 @@
             Files &nbsp;<small class="text-muted"><%= @counts[:files] %></small>
           </div>
           <div class="panel-body">
-            <%= render "files/grid", files_grid: @files_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
+            <%= render "files/grid",
+                       files_grid: @files_grid,
+                       scope_icon: false,
+                       hide_access: true,
+                       show_filters: :when_filtered,
+                       show_checkboxes: @show_checkboxes
+            %>
           </div>
         </div>
       <% end %>
