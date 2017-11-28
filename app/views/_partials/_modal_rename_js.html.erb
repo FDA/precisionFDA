@@ -11,6 +11,7 @@
         <input type="hidden" name="source" value="list">
         <input type="hidden" name="file[id]">
         <input type="hidden" name="space_id" value="<%= defined?(space_id) ? space_id : nil %>">
+          <input type="hidden" name="scope" data-bind="value: scope">
         <div class="modal-body">
           <div class="form-group required">
             <input type="text" name="file[name]" class="form-control input-lg" placeholder="Rename..." required="required" />

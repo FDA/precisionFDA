@@ -178,24 +178,43 @@ class FilesController < ApplicationController
   end
 
   def rename
-    @file = UserFile.real_files.editable_by(@context).find_by!(dxid: params[:id])
+    @file = UserFile.real_files.find_by(dxid: params[:id])
 
-    if @file.rename(file_params[:name], file_params[:description], @context)
-      flash[:success] = "File info successfully updated."
-    else
-      flash[:error] = @file.errors.messages.values.flatten
+    unless @file.present?
+      flash[:error] = "File not found"
+      redirect_to files_path
+      return
     end
 
-    parent_folder = @file.parent_folder
+    description = file_params.key?(:description) ? file_params[:description] : @file.description
+    parent_folder = @file.parent_folder(params[:scope])
 
     redirect_target = if params[:source] == "list"
                         if parent_folder.present?
                           pathify_folder(parent_folder)
                         else
-                          @file.public? ? explore_files_path : files_path
+                          if @file.in_space?
+                            content_space_path(Space.from_scope(@file.scope))
+                          elsif params[:scope] == "public"
+                            explore_files_path
+                          else
+                            files_path
+                          end
                         end
+                      else
+                        file_path(@file.dxid)
+                      end
+
+    unless @file.editable_by?(@context)
+      flash[:error] = "You have no permissions to edit this file."
+      redirect_to redirect_target
+      return
+    end
+
+    if @file.rename(file_params[:name], description, @context)
+      flash[:success] = "File info successfully updated."
     else
-      file_path(@file.dxid)
+      flash[:error] = @file.errors.messages.values.flatten
     end
 
     redirect_to redirect_target
