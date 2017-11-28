@@ -1,8 +1,6 @@
 <%= render "spaces/header" %>
 
 <% if @space.active? %>
-    <% breadcrumb :folder, @folder %>
-    <%= breadcrumbs style: :bootstrap, class: "breadcrumb transparent" %>
   <div class="pfda-toolbar pfda-toolbar-transparent">
     <div class="pull-left">
       <div class="btn-group">
@@ -85,6 +83,8 @@
             Files &nbsp;<small class="text-muted"><%= @counts[:files] %></small>
           </div>
           <div class="panel-body">
+            <% breadcrumb :folder, @folder %>
+            <%= breadcrumbs style: :bootstrap, class: "breadcrumb transparent" %>
             <%= render "files/grid",
                        files_grid: @files_grid,
                        scope_icon: false,
