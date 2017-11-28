@@ -11,7 +11,45 @@
 
 class EditorModel
 
+  initEditor: ->
+    @editor = ContentTools.EditorApp.get()
+    @editor.init '[data-editable], [data-fixture]', 'data-name'
+
+    @editor.addEventListener 'saved', (ev) =>
+      # Check if this was a passive save
+      passive = ev.detail().passive
+      # Check to see if there are any changes to save
+      regions = ev.detail().regions
+      if Object.keys(regions).length == 0
+        return
+      # Set the editors state to busy while we save our changes
+      @editor.busy true
+
+      # Collect the contents of each region into a FormData instance
+      payload = {}
+      payload.regions = regions
+      payload.id = @challenge_id
+
+      route = "/challenges/#{@challenge_id}/editor/save_page"
+      Precision.api(route, payload)
+        .done((data) =>
+          if !passive
+            new (ContentTools.FlashUI)('ok')
+        )
+        .fail((error) =>
+          # Save failed, notify the user with a flash
+          new (ContentTools.FlashUI)('no')
+          errorObject = JSON.parse error.responseText
+          @errorMessage(errorObject.error.message)
+          console.error(error)
+        )
+        .always(=>
+          @editor.busy false
+        )
+
   constructor: (challenge_id) ->
+
+    @challenge_id = challenge_id
 
     ContentTools.StylePalette.add [
       new (ContentTools.Style)('By-line', 'article__by-line', [ 'p' ])
@@ -21,8 +59,8 @@ class EditorModel
       new (ContentTools.Style)('Example + Bad', 'example--bad', [ 'pre' ])
     ]
 
-    @editor = ContentTools.EditorApp.get()
-    @editor.init '[data-editable], [data-fixture]', 'data-name'
+    @initEditor()
+
     FIXTURE_TOOLS = [ [
       'undo'
       'redo'
@@ -39,7 +77,6 @@ class EditorModel
       'link'
     ] ]
     ContentEdit.Root.get().bind 'focus', (element) =>
-      tools = undefined
       if element.isFixed()
         if element.type() == 'ImageFixture'
           tools = IMAGE_FIXTURE_TOOLS
@@ -52,44 +89,6 @@ class EditorModel
       if @editor.toolbox().tools() != tools
         return @editor.toolbox().tools(tools)
       return
-
-    @editor.addEventListener 'saved', (ev) ->
-      name = undefined
-      onStateChange = undefined
-      passive = undefined
-      payload = undefined
-      regions = undefined
-      xhr = undefined
-      # Check if this was a passive save
-      passive = ev.detail().passive
-      # Check to see if there are any changes to save
-      regions = ev.detail().regions
-      if Object.keys(regions).length == 0
-        return
-      # Set the editors state to busy while we save our changes
-      @busy true
-
-      # Collect the contents of each region into a FormData instance
-      payload = {}
-      payload.regions = regions
-      payload.id = challenge_id
-
-      route = "/challenges/#{challenge_id}/editor/save_page"
-      Precision.api(route, payload)
-        .done((data) =>
-          if !passive
-            new (ContentTools.FlashUI)('ok')
-        )
-        .fail((error) =>
-          # Save failed, notify the user with a flash
-          new (ContentTools.FlashUI)('no')
-          errorObject = JSON.parse error.responseText
-          @errorMessage(errorObject.error.message)
-          console.error(error)
-        )
-        .always(=>
-          @editor.busy false
-        )
 
 #########################################################
 #
@@ -107,7 +106,16 @@ EditorController = Paloma.controller('Challenges',
     ko.applyBindings(viewModel, $container[0])
 
     $(document).on 'page:before-change', ->
-      if viewModel.editor._state == 'editing'
-        confirm 'Changes you made may not be saved.'
+      if viewModel.editor.getState() == 'editing'
+        if confirm 'Changes you made may not be saved.'
+          viewModel.editor.unmount()
+          viewModel.initEditor()
+
+          $(document).on 'page:update', ->
+            window.location.reload()
+
+          return true
+        else
+          return false
 
 )
