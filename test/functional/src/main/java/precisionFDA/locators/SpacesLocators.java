@@ -31,4 +31,17 @@ public class SpacesLocators {
     public static final String SPACES_SPASE_STATUS_ON_GRID_TEMPLATE = "//a[text()='{SPACE_NAME}']/../../*[contains(@class, 'state')]";
 
     public static final String SPACES_MAIN_DIV = "//*[@id='spaces']";
+
+    public static final String SPACES_CREATE_FOLDER_BUTTON = "//*[contains(@data-target, 'folder')][contains(@data-target, 'create')]";
+
+    public static final String SPACES_CREATE_FOLDER_FORM_CREATE_BUTTON = "//*[@id='create-folder-modal']//button[text()='Create']";
+
+    public static final String SPACES_CREATE_FOLDER_FORM_NAME_INPUT = "//*[@id='create-folder-modal']//input[@id='name']";
+
+    public static final String SPACES_CREATED_FOLDER_TEMPLATE = "//*[@id='files']//a[contains(text(), '{FOLDER_NAME}')]";
+
+    public static final String SPACES_FILES_BREADCRUMBS = "//ol[contains(@class, 'breadcrumb')]";
+
+    public static final String FILES_BREADCRUMB_CHAIN = "//ol[contains(@class, 'breadcrumb')]/li";
+
 }

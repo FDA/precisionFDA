@@ -53,7 +53,7 @@ public abstract class AbstractTest {
     @AfterClass(alwaysRun = true)
     public void tearDown() throws Exception {
         closeBrowser();
-        sleep(5000);
+        sleep(3000);
     }
 
     public void closeBrowser() {

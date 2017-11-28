@@ -2,6 +2,8 @@ package precisionFDA.cases;
 
 import org.testng.annotations.Test;
 import precisionFDA.data.TestUserData;
+import precisionFDA.model.FileProfile;
+import precisionFDA.model.FolderProfile;
 import precisionFDA.model.SpaceProfile;
 import precisionFDA.model.UserProfile;
 import precisionFDA.pages.overview.OverviewPage;
@@ -12,7 +14,11 @@ import ru.yandex.qatools.htmlelements.annotations.Name;
 
 import static precisionFDA.data.TestDict.getDictActive;
 import static precisionFDA.data.TestDict.getDictUnactivated;
+import static precisionFDA.data.TestFilesData.getMainSpaceFile;
+import static precisionFDA.data.TestFilesData.getMainSpaceFolder;
 import static precisionFDA.data.TestSpacesData.getMainSpaceProfile;
+import static precisionFDA.utils.Utils.generateExpectedBreadcrumbsFiles;
+import static precisionFDA.utils.Utils.generateExpectedBreadcrumbsSpaces;
 import static precisionFDA.utils.Utils.printTestHeader;
 
 @Name("Spaces management test suite")
@@ -164,6 +170,7 @@ public class SpacesTest extends AbstractTest {
 
         SpaceProfile spaceProfile = getMainSpaceProfile();
         UserProfile user = TestUserData.getTestUser();
+        FolderProfile spaceFolder = getMainSpaceFolder();
 
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         SpacesPage spacesPage = overviewPage.openSpacesPage();
@@ -185,10 +192,43 @@ public class SpacesTest extends AbstractTest {
                 .as("'Accept' link for Guest Lead is displayed")
                 .isFalse();
 
-        logoutFromAll();
+        spaceDetailsPage = spaceDetailsPage.createFolder(spaceFolder.getFolderName());
+
+        SoftAssert.assertThat(
+                spaceDetailsPage.isLinkToCreatedFolderDisplayed(spaceFolder.getFolderName()))
+                .as("Created folder is displayed")
+                .isTrue();
+
+        spaceDetailsPage = spaceDetailsPage.openFolder(spaceFolder.getFolderName());
+
+        SoftAssert.assertThat(
+                spaceDetailsPage.getDisplayedBreadcrumbsText())
+                .as("Breadcrumbs")
+                .isEqualTo(generateExpectedBreadcrumbsSpaces(spaceFolder.getFolderName(), "", ""));
+
+        spaceDetailsPage = spaceDetailsPage.clickBreadcrumbSpaceFiles();
+
+        SoftAssert.assertThat(
+                spaceDetailsPage.isLinkToCreatedFolderDisplayed(spaceFolder.getFolderName()))
+                .as("Created folder is displayed")
+                .isTrue();
 
         SoftAssert.assertAll();
+    }
 
+    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 4, enabled = false)
+    public void addFileByHostLead() {
+        printTestHeader("Test Case: add a file by host lead");
+
+        SpaceProfile spaceProfile = getMainSpaceProfile();
+        UserProfile user = TestUserData.getTestUser();
+        FolderProfile spaceFolder = getMainSpaceFolder();
+        FileProfile spaceFile = getMainSpaceFile();
+
+        SpacesPage spacesPage = openOverviewPage().openSpacesPage();
+        SpaceDetailsPage spaceDetailsPage = spacesPage.openSpace(spaceProfile.getSpaceName());
+
+        SoftAssert.assertAll();
     }
 
 

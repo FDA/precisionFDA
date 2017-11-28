@@ -8,6 +8,8 @@ import ru.yandex.qatools.htmlelements.element.Link;
 import precisionFDA.locators.AboutLocators;
 import precisionFDA.pages.AbstractPage;
 
+import static precisionFDA.utils.Utils.sleep;
+
 public class AboutWhyPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
@@ -26,6 +28,7 @@ public class AboutWhyPage extends AbstractPage {
     }
 
     public boolean isAboutWhyActivatedLinkDisplayed() {
+        sleep(1);
         return isElementPresent(getAboutWhyActivatedLink());
     }
 

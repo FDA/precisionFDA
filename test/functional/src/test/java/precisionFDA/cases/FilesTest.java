@@ -127,7 +127,7 @@ public class FilesTest extends AbstractTest {
         SoftAssert.assertThat(
                 filesPage.getDisplayedBreadcrumbsText())
                 .as("Breadcrumbs")
-                .isEqualTo(generateExpectedBreadcrumbs(folderProfile.getFolderName(), "", ""));
+                .isEqualTo(generateExpectedBreadcrumbsFiles(folderProfile.getFolderName(), "", ""));
 
         SoftAssert.assertAll();
     }
@@ -391,7 +391,7 @@ public class FilesTest extends AbstractTest {
         assertThat(
                 filesPage.getDisplayedBreadcrumbsText())
                 .as("Breadcrumbs")
-                .isEqualTo(generateExpectedBreadcrumbs(mainFolderProfile.getFolderName(), nextFolderProfile.getFolderName(), ""));
+                .isEqualTo(generateExpectedBreadcrumbsFiles(mainFolderProfile.getFolderName(), nextFolderProfile.getFolderName(), ""));
 
         // go to root directory
         filesPage = filesPage.clickBreadcrumbMyFiles();
@@ -416,7 +416,7 @@ public class FilesTest extends AbstractTest {
         SoftAssert.assertThat(
                 filesPage.getDisplayedBreadcrumbsText())
                 .as("Breadcrumbs")
-                .isEqualTo(generateExpectedBreadcrumbs(mainFolderProfile.getFolderName(), "", ""));
+                .isEqualTo(generateExpectedBreadcrumbsFiles(mainFolderProfile.getFolderName(), "", ""));
 
         SoftAssert.assertThat(
                 filesPage.isLinkToCreatedFolderDisplayed(nextFolderProfile.getFolderName()))
