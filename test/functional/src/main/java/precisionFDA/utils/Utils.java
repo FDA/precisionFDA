@@ -241,7 +241,7 @@ public class Utils {
         }
     }
 
-    public static String generateExpectedBreadcrumbs(String rootFolderName, String firstLevelFolderName, String secondLevelFolderName) {
+    public static String generateExpectedBreadcrumbsFiles(String rootFolderName, String firstLevelFolderName, String secondLevelFolderName) {
         String br = getDictMyFiles();
         if (rootFolderName.length() > 0) {
             br = br + " / " + rootFolderName;
@@ -254,6 +254,21 @@ public class Utils {
         }
         return br;
     }
+
+    public static String generateExpectedBreadcrumbsSpaces(String rootFolderName, String firstLevelFolderName, String secondLevelFolderName) {
+        String br = getDictSpaceFiles();
+        if (rootFolderName.length() > 0) {
+            br = br + " / " + rootFolderName;
+        }
+        if (firstLevelFolderName.length() > 0) {
+            br = br + " / " + firstLevelFolderName;
+        }
+        if (secondLevelFolderName.length() > 0) {
+            br = br + " / " + secondLevelFolderName;
+        }
+        return br;
+    }
+
     public static String generateTestTextFileName() {
         return getGeneratedTestFileName("txt");
     }

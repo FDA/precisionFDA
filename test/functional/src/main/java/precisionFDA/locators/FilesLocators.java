@@ -104,6 +104,8 @@ public class FilesLocators {
 
     public static final String FILES_DELETE_DIALOG_ITEMS_TABLE = "//*[@id='delete-files-modal']//table";
 
+    public static final String FILES_PUBLISH_DIALOG_ITEMS_TABLE = "//*[@id='publish-files-modal']//table";
+
     public static final String FILES_DOWNLOAD_DIALOG_ITEMS_TABLE = "//*[@id='download-files-modal']//table";
 
     public static final String FILES_MOVE_DIALOG_TREE_MY_FILES_LINK = "//*[@id='move_files_tree']//a[contains(text(), 'My files')]";
@@ -114,6 +116,8 @@ public class FilesLocators {
 
     public static final String FILES_DELETE_DIALOG_ITEM_TEMPLATE = "//*[@id='delete-files-modal']//a/span[text()='{ITEM_NAME}']";
 
+    public static final String FILES_PUBLISH_DIALOG_ITEM_TEMPLATE = "//*[@id='publish-files-modal']//a/span[text()='{ITEM_NAME}']";
+
     public static final String FILES_DELETE_DIALOG_ITEM_COMMON = "//*[@id='delete-files-modal']//a/span";
 
     public static final String FILES_DOWNLOAD_DIALOG_ITEM_COMMON = "//*[@id='download-files-modal']//a/span";
@@ -121,6 +125,8 @@ public class FilesLocators {
     public static final String FILES_DOWNLOAD_DIALOG_ITEM_TEMPLATE = "//*[@id='download-files-modal']//a/span[text()='{ITEM_NAME}']";
 
     public static final String FILES_DELETE_DIALOG_DELETE_BUTTON = "//*[@id='delete-files-modal']//button[text()='Delete']";
+
+    public static final String FILES_PUBLISH_DIALOG_PUBLISH_BUTTON = "//*[@id='publish-files-modal']//button[text()='Publish']";
 
     public static final String FILES_RENAME_DIALOG_INPUT = "//form[@id='rename_form']//input[@name='file[name]']";
 

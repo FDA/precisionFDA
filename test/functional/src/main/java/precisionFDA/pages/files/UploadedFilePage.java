@@ -311,4 +311,8 @@ public class UploadedFilePage extends AbstractPage {
         return new FilesPublishPage(getDriver());
     }
 
+    public FilesPage openRootFilesPage() {
+        return getCommonPage().openFilesPage();
+    }
+
 }

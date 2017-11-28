@@ -187,41 +187,41 @@ public class TestFilesData {
 
     //---------------
 
-    public static FileProfile filterOneFile = new FileProfile(
+    static FileProfile filterOneFile = new FileProfile(
             getFilterOneFileName(),
             "",
             ""
     );
 
-    public static FileProfile filterTwoFile = new FileProfile(
+    static FileProfile filterTwoFile = new FileProfile(
             getFilterTwoFileName(),
             "",
             ""
     );
 
-    public static FileProfile filterCommonFile = new FileProfile(
+    static FileProfile filterCommonFile = new FileProfile(
             getFilterCommonFileName(),
             "",
             ""
     );
 
-    public static FolderProfile filterMainFolder = new FolderProfile(
+    static FolderProfile filterMainFolder = new FolderProfile(
             getFilterMainFolderName()
     );
 
-    public static FolderProfile filterOneFolder = new FolderProfile(
+    static FolderProfile filterOneFolder = new FolderProfile(
             getFilterOneFolderName()
     );
 
-    public static FolderProfile filterTwoFolder = new FolderProfile(
+    static FolderProfile filterTwoFolder = new FolderProfile(
             getFilterTwoFolderName()
     );
 
-    public static FolderProfile filterCommonFolder = new FolderProfile(
+    static FolderProfile filterCommonFolder = new FolderProfile(
             getFilterCommonFolderName()
     );
 
-    public static FolderProfile nonFilterFolder = new FolderProfile(
+    static FolderProfile nonFilterFolder = new FolderProfile(
             getNonFilterFolderName()
     );
 
@@ -281,7 +281,7 @@ public class TestFilesData {
 
     //-----------------
 
-    public static FileProfile mainFileProfile = new FileProfile(
+    static FileProfile mainFileProfile = new FileProfile(
             getMainFileInRoot(),
             getMainFileInRootDescr(),
             getMainFileInRootComment()
@@ -323,7 +323,7 @@ public class TestFilesData {
 
     //-----------------
 
-    public static FolderProfile mainFolderProfile = new FolderProfile(
+    static FolderProfile mainFolderProfile = new FolderProfile(
             getMainFolderName()
     );
 
@@ -336,7 +336,7 @@ public class TestFilesData {
     //===== file uploaded to the main folder ====
 
 
-    public static FileProfile fileInMainFolderProfile = new FileProfile(
+    static FileProfile fileInMainFolderProfile = new FileProfile(
             getGeneratedTestFileName(getDictPng()),
             "",
             ""
@@ -348,7 +348,7 @@ public class TestFilesData {
 
     //====== file to delete ========
 
-    public static FileProfile fileToDeleteProfile = new FileProfile(
+    static FileProfile fileToDeleteProfile = new FileProfile(
             getGeneratedTestFileName(getDictPng()),
             "",
             ""
@@ -360,7 +360,7 @@ public class TestFilesData {
 
     //====== file to publish ========
 
-    public static FileProfile fileToPublishProfile = new FileProfile(
+    static FileProfile fileToPublishProfile = new FileProfile(
             getGeneratedTestFileName(getDictTxt()),
             "",
             ""
@@ -400,29 +400,29 @@ public class TestFilesData {
 
     //---------------
 
-    public static FileProfile downloadFirstFile = new FileProfile(
+    static FileProfile downloadFirstFile = new FileProfile(
             getDownloadFirstFileName(),
             "",
             ""
     );
 
-    public static FileProfile downloadSecondFile = new FileProfile(
+    static FileProfile downloadSecondFile = new FileProfile(
             getDownloadSecondFileName(),
             "",
             ""
     );
 
-    public static FileProfile downloadInsideFile = new FileProfile(
+    static FileProfile downloadInsideFile = new FileProfile(
             getDownloadInsideFileName(),
             "",
             ""
     );
 
-    public static FolderProfile downloadMainFolder = new FolderProfile(
+    static FolderProfile downloadMainFolder = new FolderProfile(
             getDownloadMainFolderName()
     );
 
-    public static FolderProfile downloadFirstFolder = new FolderProfile(
+    static FolderProfile downloadFirstFolder = new FolderProfile(
             getDownloadFirstFolderName()
     );
 
@@ -472,31 +472,31 @@ public class TestFilesData {
 
     //---------------
 
-    public static FileProfile moveInRootFolderFile = new FileProfile(
+    static FileProfile moveInRootFolderFile = new FileProfile(
             getMoveInRootFolderFileName(),
             "",
             ""
     );
 
-    public static FileProfile moveFirstFile = new FileProfile(
+    static FileProfile moveFirstFile = new FileProfile(
             getMoveFirstFileName(),
             "",
             ""
     );
 
-    public static FileProfile moveSecondFile = new FileProfile(
+    static FileProfile moveSecondFile = new FileProfile(
             getMoveSecondFileName(),
             "",
             ""
     );
 
-    public static FileProfile moveThirdFile = new FileProfile(
+    static FileProfile moveThirdFile = new FileProfile(
             getMoveThirdFileName(),
             "",
             ""
     );
 
-    public static FileProfile moveFourthFile = new FileProfile(
+    static FileProfile moveFourthFile = new FileProfile(
             getMoveFourthFileName(),
             "",
             ""
@@ -526,27 +526,27 @@ public class TestFilesData {
 
     //---------------
 
-    public static FolderProfile moveRootFolder = new FolderProfile(
+    static FolderProfile moveRootFolder = new FolderProfile(
             "at Move test In Root " + getRunTimeLocalUniqueValue()
     );
 
-    public static FolderProfile moveFirstFolder = new FolderProfile(
+    static FolderProfile moveFirstFolder = new FolderProfile(
             "at Move test First " + getRunTimeLocalUniqueValue()
     );
 
-    public static FolderProfile moveSecondFolder = new FolderProfile(
+    static FolderProfile moveSecondFolder = new FolderProfile(
             "at Move test Second " + getRunTimeLocalUniqueValue()
     );
 
-    public static FolderProfile moveThirdFolder = new FolderProfile(
+    static FolderProfile moveThirdFolder = new FolderProfile(
             "at Move test Third " + getRunTimeLocalUniqueValue()
     );
 
-    public static FolderProfile moveFourthFolder = new FolderProfile(
+    static FolderProfile moveFourthFolder = new FolderProfile(
             "at Move test Fourth " + getRunTimeLocalUniqueValue()
     );
 
-    public static FolderProfile moveFifthFolder = new FolderProfile(
+    static FolderProfile moveFifthFolder = new FolderProfile(
             "at Move test Fifth " + getRunTimeLocalUniqueValue()
     );
 
@@ -576,6 +576,104 @@ public class TestFilesData {
         return moveFifthFolder;
     }
 
-    //---------------
+    //=== publish on grid test ===
+
+    public static String getPublishGridFileInRootOneName() {
+        return getGeneratedTestFileName(getDictPng());
+    }
+
+    public static String getPublishGridFileInRootTwoName() {
+        return getGeneratedTestFileName(getDictTxt());
+    }
+
+    public static String getPublishGridFirstFileName() {
+        return getGeneratedTestFileName(getDictTxt());
+    }
+
+    public static String getPublishGridSecondFileName() {
+        return getGeneratedTestFileName(getDictPng());
+    }
+
+    public static String getPublishGridThirdFileName() {
+        return getGeneratedTestFileName(getDictTxt());
+    }
+
+    static FileProfile publishGridFileInRootOne = new FileProfile(
+            getPublishGridFileInRootOneName(),
+            "",
+            ""
+    );
+
+    static FileProfile publishGridFileInRootTwo = new FileProfile(
+            getPublishGridFileInRootTwoName(),
+            "",
+            ""
+    );
+
+    static FileProfile publishGridFirstFileName = new FileProfile(
+            getPublishGridFirstFileName(),
+            "",
+            ""
+    );
+
+    static FileProfile publishGridSecondFileName = new FileProfile(
+            getPublishGridSecondFileName(),
+            "",
+            ""
+    );
+
+    static FileProfile publishGridThirdFileName = new FileProfile(
+            getPublishGridThirdFileName(),
+            "",
+            ""
+    );
+
+    public static FileProfile getPublishGridFileInRootOne() {
+        return publishGridFileInRootOne;
+    }
+
+    public static FileProfile getPublishGridFileInRootTwo() {
+        return publishGridFileInRootTwo;
+    }
+
+    public static FileProfile getPublishGridFirstFile() {
+        return publishGridFirstFileName;
+    }
+
+    public static FileProfile getPublishGridSecondFile() {
+        return publishGridSecondFileName;
+    }
+
+    public static FileProfile getPublishGridThirdFile() {
+        return publishGridThirdFileName;
+    }
+
+    static FolderProfile publishGridFolder = new FolderProfile(
+            "at Publish in grid " + getRunTimeLocalUniqueValue()
+    );
+
+    public static FolderProfile getPublishGridFolder() {
+        return publishGridFolder;
+    }
+
+    //=== space test ===
+
+    static FolderProfile mainSpaceFolder = new FolderProfile(
+            "at space folder " + getRunTimeLocalUniqueValue()
+    );
+
+    public static FolderProfile getMainSpaceFolder() {
+        return mainSpaceFolder;
+    }
+
+    static FileProfile mainSpaceFile = new FileProfile(
+            getGeneratedTestFileName(getDictTxt()),
+            "",
+            ""
+    );
+
+    public static FileProfile getMainSpaceFile() {
+        return mainSpaceFile;
+    }
 
 }

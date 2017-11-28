@@ -80,6 +80,9 @@ public class FilesPage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_DELETE_DIALOG_ITEMS_TABLE)
     private WebElement deleteDialogItemsTable;
 
+    @FindBy(xpath = FilesLocators.FILES_PUBLISH_DIALOG_ITEMS_TABLE)
+    private WebElement publishDialogItemsTable;
+
     @FindBy(xpath = FilesLocators.FILES_DOWNLOAD_DIALOG_ITEMS_TABLE)
     private WebElement downloadDialogItemsTable;
 
@@ -91,6 +94,9 @@ public class FilesPage extends AbstractPage {
 
     @FindBy(xpath = FilesLocators.FILES_RENAME_DIALOG_INPUT)
     private TextInput renameDialogInput;
+
+    @FindBy(xpath = FilesLocators.FILES_PUBLISH_DIALOG_PUBLISH_BUTTON)
+    private Button publishDialogPublishButton;
 
     @FindBy(xpath = FilesLocators.FILES_RENAME_DIALOG_RENAME_BUTTON)
     private Button renameDialogRenameButton;
@@ -142,6 +148,10 @@ public class FilesPage extends AbstractPage {
         return deleteDialogItemsTable;
     }
 
+    public WebElement getPublishDialogItemsTable() {
+        return publishDialogItemsTable;
+    }
+
     public WebElement getDownloadDialogItemsTable() {
         return downloadDialogItemsTable;
     }
@@ -152,6 +162,10 @@ public class FilesPage extends AbstractPage {
 
     public Button getDeleteDialogDeleteButton() {
         return deleteDialogDeleteButton;
+    }
+
+    public Button getPublishDialogPublishButton() {
+        return publishDialogPublishButton;
     }
 
     public Link getFilesExploreActivatedLink() {
@@ -425,6 +439,16 @@ public class FilesPage extends AbstractPage {
         waitUntilClickable(getDeleteDialogDeleteButton());
     }
 
+    public void clickPublishSelected() {
+        log.info("click Publish item(s)");
+        openActionsDropDown();
+        Link link = getFilesEditPublishEnabledItem();
+        waitUntilClickable(link);
+        link.click();
+        waitUntilDisplayed(getPublishDialogItemsTable(), 5);
+        waitUntilClickable(getPublishDialogPublishButton());
+    }
+
     public void clickDownloadSelected() {
         log.info("click download item(s)");
         openActionsDropDown();
@@ -498,8 +522,12 @@ public class FilesPage extends AbstractPage {
 
     public boolean isItemInDeleteDialogDisplayed(String name) {
         String xpath = FilesLocators.FILES_DELETE_DIALOG_ITEM_TEMPLATE.replace("{ITEM_NAME}", name);
-        WebElement link = findElement(By.xpath(xpath));
-        return isElementPresent(link, 2);
+        return isElementPresent(By.xpath(xpath), 1);
+    }
+
+    public boolean isItemInPublishDialogDisplayed(String name) {
+        String xpath = FilesLocators.FILES_PUBLISH_DIALOG_ITEM_TEMPLATE.replace("{ITEM_NAME}", name);
+        return isElementPresent(By.xpath(xpath), 1);
     }
 
     public int getNumberOfItemsToDelete() {
@@ -517,6 +545,12 @@ public class FilesPage extends AbstractPage {
     public FilesPage clickDeleteOnDialog() {
         log.info("click Delete");
         getDeleteDialogDeleteButton().click();
+        return new FilesPage(getDriver());
+    }
+
+    public FilesPage clickPublishOnDialog() {
+        log.info("click Publish");
+        getPublishDialogPublishButton().click();
         return new FilesPage(getDriver());
     }
 
