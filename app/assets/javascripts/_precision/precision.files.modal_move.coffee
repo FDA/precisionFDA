@@ -45,7 +45,8 @@ class MoveFilesModal
       core: {
         check_callback: true,
         animation: 0,
-        data: @TREE
+        data: @TREE,
+        worker: false
       }
     })
     @treeContainer.on 'open_node.jstree', (e, data) ->
