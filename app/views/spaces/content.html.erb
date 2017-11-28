@@ -142,7 +142,7 @@
 <% if @space.active? %>
   <%= render "_partials/selector_modal" %>
   <%= render "_partials/modal_create_folder", parent_folder_id: @parent_folder_id, create_path: create_folder_space_path %>
-  <%= render "_partials/modal_rename_js", space_id: @space.id %>
+  <%= render "_partials/modal_rename_js", space_id: @space.id, source: "list" %>
   <%= render "_partials/modal_move_files", move_path: move_space_path(@space), scope: @space.uid %>
   <%= render "_partials/modal_download_files" %>
   <%= render "_partials/modal_delete_files", remove_path: remove_folder_space_path(@space) %>
