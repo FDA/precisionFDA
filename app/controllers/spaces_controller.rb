@@ -321,7 +321,7 @@ class SpacesController < ApplicationController
   def move
     space = Space.accessible_by(@context).find(params[:id])
     target_folder_id = params[:target_id] == 'root' ? nil : params[:target_id]
-    target_folder = target_folder_id ? Folder.editable_by(@context).find(target_folder_id) : nil
+    target_folder = target_folder_id ? Folder.accessible_by_space(space).find_by(id: target_folder_id) : nil
     service = FolderService.new(@context)
 
     result = service.move(
