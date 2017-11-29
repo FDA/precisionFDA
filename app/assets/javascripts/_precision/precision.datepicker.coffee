@@ -2,6 +2,8 @@ class Datepicker
 
   constructor: (@input, @params) ->
 
+    formatDate = (moment_date) -> moment_date.format('MM/DD/YYYY hh:mm A')
+
     bodyClickHandler = (e) =>
       if e.target != @label
         $(@input).data("DateTimePicker").hide()
@@ -13,17 +15,28 @@ class Datepicker
     createDOM = =>
       label = document.createElement('span')
       label.classList.add 'form-control'
+      if @input.readOnly
+        label.setAttribute 'readonly', @input.readOnly
+      if @input.disabled
+        label.setAttribute 'disabled', @input.disabled
       @input.setAttribute 'type', 'hidden'
       $(@input).after(label)
       return label
 
     @label = createDOM()
-
-    @datetimepicker = $(@input).datetimepicker()
+    
+    value = @input.value
+    @datetimepicker = $(@input).datetimepicker({
+      date: new Date(value)
+    })
+    
+    @input.value = value
+    if @input.value
+      @label.innerText = formatDate moment(new Date(@input.value))
     
     $(@input).on 'dp.change', (e) =>
-      @input.value = e.date
-      @label.innerText = e.date.format('MM/DD/YYYY hh:mm A')
+      @input.value = e.date.toISOString()
+      @label.innerText = formatDate e.date
 
     $(@label).on 'click', =>
       $(@input).data("DateTimePicker").show()
