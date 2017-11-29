@@ -45,7 +45,7 @@ class SpacesController < ApplicationController
       apps: @apps.count,
       assets: @assets.count,
       jobs: @jobs.count,
-      folders: @folders.count
+      folders: folders.limit(1).count
     }
 
     @total_count = @counts.values.sum
