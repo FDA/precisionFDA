@@ -23,7 +23,6 @@
       <% if @total_count > 0 %><hr><% end %>
     <% end %>
 
-    <% if @total_count > 0 %>
       <% if defined?(@notes_list) %>
         <div class="panel">
           <div class="panel-heading">
@@ -42,8 +41,14 @@
           <div class="panel-body">
             <div class="pfda-toolbar">
               <div class="pull-left">
-                <% breadcrumb :folder, @folder %>
-                <%= breadcrumbs style: :bootstrap, class: "breadcrumb no-border" %>
+                <% if @counts[:files] + @counts[:folders] > 0 %>
+                  <% breadcrumb :folder, @folder %>
+                  <%= breadcrumbs style: :bootstrap, class: "breadcrumb no-border" %>
+                <% else %>
+                  <div class="empty-grid-head text-info">
+                    No records found
+                  </div>
+                <% end %>
               </div>
               <div class="pull-right">
                 <span class="btn btn-primary" data-toggle="modal" data-target="#create-folder-modal">
@@ -95,7 +100,8 @@
                        scope_icon: false,
                        hide_access: true,
                        show_filters: :when_filtered,
-                       show_checkboxes: @show_checkboxes
+                       show_checkboxes: @show_checkboxes,
+                       clear_blank_state: !@folder && true
             %>
           </div>
         </div>
@@ -140,7 +146,6 @@
           </div>
         </div>
       <% end %>
-    <% end %>
   </div>
 </div>
 
