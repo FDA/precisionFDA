@@ -172,8 +172,8 @@ public class FilesPublishTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test
-    public void publicItemsOnFilesList() {
+    @Test(priority = 5)
+    public void publicItemsFromFilesGrid() {
         printTestHeader("Test Case: check it is possible to public folder and files on Files grid");
 
         FileProfile fileInRootOne = getPublishGridFileInRootOne();

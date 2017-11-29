@@ -141,4 +141,8 @@ public class SpaceDetailsPage extends AbstractPage {
         chains.get(0).click();
         return new SpaceDetailsPage(getDriver());
     }
+
+    public boolean isBreadcrumbDisplayed() {
+        return isElementPresent(getBreadcrumbs(), 2);
+    }
 }

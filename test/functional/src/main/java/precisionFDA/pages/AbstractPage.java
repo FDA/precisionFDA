@@ -98,6 +98,7 @@ public abstract class AbstractPage {
     }
 
     private void waitUntilDisplayed(final By locator, final int timeout, final boolean isLog) {
+        log.info("wait until displayed: " + locator);
         try {
             (new WebDriverWait(getDriver(), timeout)).ignoring(StaleElementReferenceException.class)
                     .until(ExpectedConditions.visibilityOfElementLocated(locator));
@@ -114,18 +115,11 @@ public abstract class AbstractPage {
     }
 
     public void waitUntilClickable(final WebElement element) {
-        (new WebDriverWait(getDriver(), DEFAULT_TIMEOUT)).until(new ExpectedCondition<Boolean>() {
-            public Boolean apply(final WebDriver d) {
-                if (element == null) {
-                    return false;
-                } else {
-                    return element.isDisplayed() && element.isEnabled();
-                }
-            }
-        });
+        waitUntilClickable(element, DEFAULT_TIMEOUT);
     }
 
     public void waitUntilClickable(final WebElement element, int timeout) {
+        log.info("wait until clickable: " + element);
         (new WebDriverWait(getDriver(), timeout)).until(new ExpectedCondition<Boolean>() {
             public Boolean apply(final WebDriver d) {
                 if (element == null) {
@@ -138,6 +132,7 @@ public abstract class AbstractPage {
     }
 
     public void waitUntilClickable(final Link element) {
+        log.info("wait until clickable: " + element);
         (new WebDriverWait(getDriver(), DEFAULT_TIMEOUT)).until(new ExpectedCondition<Boolean>() {
             public Boolean apply(final WebDriver d) {
                 if (element == null) {
@@ -150,6 +145,7 @@ public abstract class AbstractPage {
     }
 
     public void waitUntilClickable(final Button element) {
+        log.info("wait until clickable: " + element);
         (new WebDriverWait(getDriver(), DEFAULT_TIMEOUT)).until(new ExpectedCondition<Boolean>() {
             public Boolean apply(final WebDriver d) {
                 if (element == null) {
