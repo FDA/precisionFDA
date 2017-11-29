@@ -15,6 +15,10 @@
     background-color: transparent;
   }
 
+  &.no-border {
+    border: none;
+  }
+
   > li {
     display: inline-block;
 
