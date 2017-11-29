@@ -55,7 +55,7 @@
           <!-- /ko -->
           <input type="hidden" name="scope" data-bind="value: scope">
           <button type="button" class="btn btn-default" data-bind="enable: !deleteFilesModal.loading()" data-dismiss="modal" tabindex="-1">Cancel</button>
-          <button type="submit" class="btn btn-danger" data-bind="enable: !deleteFilesModal.loading()" data-disable-with="Deleting...">Delete</button>
+          <button type="submit" class="btn btn-danger" data-bind="enable: !deleteFilesModal.loading() && deleteFilesModal.sendingItemsCnt() > 0" data-disable-with="Deleting...">Delete</button>
         <% end %>
       </div>
     </div>

@@ -67,6 +67,8 @@ class FolderService
   end
 
   def remove(nodes)
+    return Rats.failure(message: "No objects selected") if nodes.blank?
+
     res = nil
 
     nodes.each do |node|
