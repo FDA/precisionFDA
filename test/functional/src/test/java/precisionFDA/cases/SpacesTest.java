@@ -12,6 +12,7 @@ import precisionFDA.pages.spaces.SpaceDetailsPage;
 import precisionFDA.pages.spaces.SpacesPage;
 import ru.yandex.qatools.htmlelements.annotations.Name;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static precisionFDA.data.TestDict.getDictActive;
 import static precisionFDA.data.TestDict.getDictUnactivated;
 import static precisionFDA.data.TestFilesData.getMainSpaceFile;
@@ -200,6 +201,11 @@ public class SpacesTest extends AbstractTest {
                 .isTrue();
 
         spaceDetailsPage = spaceDetailsPage.openFolder(spaceFolder.getFolderName());
+
+        assertThat(
+                spaceDetailsPage.isBreadcrumbDisplayed())
+                .as("Breadcrumbs are displayed")
+                .isTrue();
 
         SoftAssert.assertThat(
                 spaceDetailsPage.getDisplayedBreadcrumbsText())

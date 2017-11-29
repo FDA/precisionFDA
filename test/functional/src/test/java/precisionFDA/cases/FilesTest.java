@@ -990,6 +990,11 @@ public class FilesTest extends AbstractTest {
                 .as("Danger notification is displayed")
                 .isFalse();
 
+        SoftAssert.assertThat(
+                filesPage.getDisplayedBreadcrumbsText())
+                .as("Breadcrumbs")
+                .isEqualTo(generateExpectedBreadcrumbsFiles(rootFolder.getFolderName(), secondFolder.getFolderName(), ""));
+
 //        == should be ==
 //        Root Directory
 //            ---- In Root Folder -
@@ -1033,12 +1038,12 @@ public class FilesTest extends AbstractTest {
                 .isTrue();
 
         assertThat(
-                filesPage.isLinkToCreatedFolderDisplayed(inRootFolderFile.getFileName()))
+                filesPage.isLinkToUploadedFileDisplayed(inRootFolderFile.getFileName()))
                 .as("In Root file is displayed")
                 .isTrue();
 
         assertThat(
-                filesPage.isLinkToCreatedFolderDisplayed(fourthFile.getFileName()))
+                filesPage.isLinkToUploadedFileDisplayed(fourthFile.getFileName()))
                 .as("Fourth file is displayed")
                 .isTrue();
 
@@ -1062,12 +1067,12 @@ public class FilesTest extends AbstractTest {
                 .isTrue();
 
         assertThat(
-                filesPage.isLinkToCreatedFolderDisplayed(firstFile.getFileName()))
+                filesPage.isLinkToUploadedFileDisplayed(firstFile.getFileName()))
                 .as("First file is displayed")
                 .isTrue();
 
         assertThat(
-                filesPage.isLinkToCreatedFolderDisplayed(secondFile.getFileName()))
+                filesPage.isLinkToUploadedFileDisplayed(secondFile.getFileName()))
                 .as("Second file is displayed")
                 .isTrue();
 
@@ -1081,7 +1086,7 @@ public class FilesTest extends AbstractTest {
         filesPage = filesPage.openFolder(thirdFolder.getFolderName());
 
         assertThat(
-                filesPage.isLinkToCreatedFolderDisplayed(thirdFile.getFileName()))
+                filesPage.isLinkToUploadedFileDisplayed(thirdFile.getFileName()))
                 .as("Third file is displayed")
                 .isTrue();
 
@@ -1089,6 +1094,8 @@ public class FilesTest extends AbstractTest {
                 filesPage.getNumberOfDisplayedItems() == 1)
                 .as("Number of displayed files and folders == 1")
                 .isTrue();
+
+        SoftAssert.assertAll();
     }
 
     @Test(dependsOnMethods = {"successfulLogin", "uploadFileToRootDirectory", "createFolderInRoot"} )
@@ -1134,6 +1141,73 @@ public class FilesTest extends AbstractTest {
                 filesPage.isDropDownRenameItemClickable())
                 .as("Rename item is clickable")
                 .isFalse();
+
+        SoftAssert.assertAll();
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin"} )
+    public void movePublicFiles() {
+        printTestHeader("Test Case: check it is possible to move public file");
+
+        FilesPage filesPage = openOverviewPage().openFilesPage();
+
+        FolderProfile folder = getMovePublicFolder();
+        FileProfile privateFile = getMovePublicFile();
+        FileProfile publicFile = getMovePrivateFile();
+
+        FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(privateFile.getFileName());
+        filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
+
+        filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(publicFile.getFileName());
+        filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
+
+        filesPage = filesPage.createFolder(folder.getFolderName());
+        filesPage = filesPage.openRootFilesPage();
+
+        filesPage.selectItem(publicFile.getFileName());
+        filesPage.clickPublishSelected();
+        filesPage.clickPublishOnDialog();
+
+        filesPage.selectItem(privateFile.getFileName());
+        filesPage.selectItem(publicFile.getFileName());
+        filesPage.clickMoveSelected();
+
+        filesPage.clickTreeItemOnMoveDialog(folder.getFolderName());
+        filesPage = filesPage.clickMoveHere();
+
+        assertThat(
+                filesPage.isDangerNotificationDisplayed())
+                .as("Danger notification is displayed")
+                .isFalse();
+
+        assertThat(
+                filesPage.isBreadcrumbDisplayed())
+                .as("Breadcrumbs are displayed")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                filesPage.getDisplayedBreadcrumbsText())
+                .as("Breadcrumbs")
+                .isEqualTo(generateExpectedBreadcrumbsFiles(folder.getFolderName(), "", ""));
+
+        SoftAssert.assertThat(
+                filesPage.isLinkToUploadedFileDisplayed(privateFile.getFileName()))
+                .as("Private file is displayed inside the folder")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                filesPage.isLinkToUploadedFileDisplayed(publicFile.getFileName()))
+                .as("Public file is displayed inside the folder")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                filesPage.getNumberOfDisplayedItems() == 2)
+                .as("Number of files inside the folder == 2")
+                .isTrue();
 
         SoftAssert.assertAll();
     }

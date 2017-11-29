@@ -676,4 +676,34 @@ public class TestFilesData {
         return mainSpaceFile;
     }
 
+    //=== move public test ===
+
+    static FolderProfile movePublicFolder = new FolderProfile(
+            "at move public folder " + getRunTimeLocalUniqueValue()
+    );
+
+    public static FolderProfile getMovePublicFolder() {
+        return movePublicFolder;
+    }
+
+    static FileProfile movePublicFile = new FileProfile(
+            getGeneratedTestFileName(getDictTxt()),
+            "",
+            ""
+    );
+
+    static FileProfile movePrivateFile = new FileProfile(
+            getGeneratedTestFileName(getDictTxt()),
+            "",
+            ""
+    );
+
+    public static FileProfile getMovePublicFile() {
+        return movePublicFile;
+    }
+
+    public static FileProfile getMovePrivateFile() {
+        return movePrivateFile;
+    }
+
 }
