@@ -6,7 +6,9 @@ class FolderService
 
   def add_folder(name, parent_folder = nil, scope = "private")
     if parent_folder
-      return Rats.failure(message: "Incorrect user") unless parent_folder.editable_by?(context)
+      unless parent_folder.editable_by?(context)
+        return Rats.failure(message: "You have no permissions to add objects to #{parent_folder.name}")
+      end
       computed_scope = parent_folder.scope
       parent_folder_id = parent_folder.id
     else
@@ -28,7 +30,9 @@ class FolderService
   end
 
   def rename(folder, new_name)
-    return Rats.failure(message: "Incorrect user") unless folder.editable_by?(context)
+    unless folder.editable_by?(context)
+      return Rats.failure(message: "You have no permissions to rename '#{folder.name}'")
+    end
     folder.name = new_name
     folder.save ? Rats.success(folder) : Rats.failure(folder.errors.messages)
   end
@@ -37,7 +41,9 @@ class FolderService
     return Rats.failure(message: "No files selected") unless nodes.present?
 
     if target_folder
-      return Rats.failure(message: "Incorrect user") unless target_folder.editable_by?(context)
+      unless target_folder.editable_by?(context)
+        return Rats.failure(message: "You have no permissions to add objects to '#{target_folder.name}'")
+      end
       computed_scope = target_folder.scope
       target_folder_id = target_folder.id
     else
@@ -72,7 +78,7 @@ class FolderService
     res = nil
 
     nodes.each do |node|
-      return Rats.failure(message: "Incorrect user") unless node.editable_by?(context)
+      return Rats.failure(message: "You have no permissions to remove '#{node.name}'") unless node.editable_by?(context)
       res = node.is_a?(Folder) ? remove_folder(node) : remove_file(node)
       break unless res.success?
     end
