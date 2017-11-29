@@ -8,49 +8,6 @@
           <span class="fa fa-plus" aria-hidden="true"></span> Move data to space...
         </button>
       </div>
-      <span class="btn btn-primary" data-toggle="modal" data-target="#create-folder-modal" style="margin-left: 10px;">
-        <span class="fa fa-plus-square fa-fw"></span> Add folder
-      </span>
-    </div>
-    <div class="pull-right">
-      <div class="btn-group">
-        <div class="dropdown">
-          <button class="btn btn-primary" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <span class="fa fa-cog"></span>
-          </button>
-          <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
-            <li data-bind="css: { disabled: !isRenamingAllowed() }">
-              <a data-toggle='modal' data-bind="click: showRenamingModal">
-                <span class="fa fa-pencil"></span> Rename
-              </a>
-            </li>
-            <li role="separator" class="divider"></li>
-            <li data-bind="css: { disabled: !isMovingAllowed() }">
-              <a data-toggle='modal' data-bind="click: showMoveModal">
-                <span class="fa fa-share"></span> Move
-              </a>
-            </li>
-            <li role="separator" class="divider"></li>
-            <li data-bind="css: { disabled: !isPublishingAllowed() }">
-              <a data-toggle='modal' data-bind="click: showPublishModal">
-                <i class="fa fa-fw fa-bullhorn"></i> Publish
-              </a>
-            </li>
-            <li role="separator" class="divider"></li>
-            <li data-bind="css: { disabled: !isDeletingAllowed() }">
-              <a data-toggle='modal' data-bind="click: showDeleteModal">
-                <i class="fa fa-fw fa-trash"></i> Delete
-              </a>
-            </li>
-            <li role="separator" class="divider"></li>
-            <li data-bind="css: { disabled: !isDownloadingAllowed() }">
-              <a data-toggle='modal' data-bind="click: showDownloadModal">
-                <i class="fa fa-fw fa-download"></i> Download
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
     </div>
   </div>
 <% end %>
@@ -83,8 +40,56 @@
             Files &nbsp;<small class="text-muted"><%= @counts[:files] %></small>
           </div>
           <div class="panel-body">
-            <% breadcrumb :folder, @folder %>
-            <%= breadcrumbs style: :bootstrap, class: "breadcrumb transparent" %>
+            <div class="pfda-toolbar">
+              <div class="pull-left">
+                <% breadcrumb :folder, @folder %>
+                <%= breadcrumbs style: :bootstrap, class: "breadcrumb no-border" %>
+              </div>
+              <div class="pull-right">
+                <span class="btn btn-primary" data-toggle="modal" data-target="#create-folder-modal">
+                  <span class="fa fa-plus-square fa-fw"></span> Add folder
+                </span>
+                <div class="btn-group">
+                  <div class="dropdown">
+                    <button class="btn btn-primary" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <span class="fa fa-cog"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
+                      <li data-bind="css: { disabled: !isRenamingAllowed() }">
+                        <a data-toggle='modal' data-bind="click: showRenamingModal">
+                          <span class="fa fa-pencil"></span> Rename
+                        </a>
+                      </li>
+                      <li role="separator" class="divider"></li>
+                      <li data-bind="css: { disabled: !isMovingAllowed() }">
+                        <a data-toggle='modal' data-bind="click: showMoveModal">
+                          <span class="fa fa-share"></span> Move
+                        </a>
+                      </li>
+                      <li role="separator" class="divider"></li>
+                      <li data-bind="css: { disabled: !isPublishingAllowed() }">
+                        <a data-toggle='modal' data-bind="click: showPublishModal">
+                          <i class="fa fa-fw fa-bullhorn"></i> Publish
+                        </a>
+                      </li>
+                      <li role="separator" class="divider"></li>
+                      <li data-bind="css: { disabled: !isDeletingAllowed() }">
+                        <a data-toggle='modal' data-bind="click: showDeleteModal">
+                          <i class="fa fa-fw fa-trash"></i> Delete
+                        </a>
+                      </li>
+                      <li role="separator" class="divider"></li>
+                      <li data-bind="css: { disabled: !isDownloadingAllowed() }">
+                        <a data-toggle='modal' data-bind="click: showDownloadModal">
+                          <i class="fa fa-fw fa-download"></i> Download
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <%= render "files/grid",
                        files_grid: @files_grid,
                        scope_icon: false,
