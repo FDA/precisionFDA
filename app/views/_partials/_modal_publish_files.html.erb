@@ -49,7 +49,7 @@
           <!-- /ko -->
           <input type="hidden" name="scope" data-bind="value: scope">
           <button type="button" class="btn btn-default" data-bind="enable: !publishFilesModal.loading()" data-dismiss="modal" tabindex="-1">Cancel</button>
-          <button type="submit" class="btn btn-success" data-bind="enable: !publishFilesModal.loading() && publishModal.sendingItemsCnt > 0" data-disable-with="Publishing...">Publish</button>
+          <button type="submit" class="btn btn-success" data-bind="enable: !publishFilesModal.loading() && publishFilesModal.sendingItemsCnt() > 0" data-disable-with="Publishing...">Publish</button>
         <% end %>
       </div>
     </div>
