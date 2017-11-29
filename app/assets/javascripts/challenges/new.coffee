@@ -14,6 +14,8 @@ init_datetimepickers = () ->
 MainController = Paloma.controller('Challenges',
   create: ->
     do init_datetimepickers
+  update: ->
+    do init_datetimepickers
   new: ->
     do init_datetimepickers
   edit: ->
