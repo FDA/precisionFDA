@@ -7,13 +7,15 @@
 #########################################################
 
 init_datetimepickers = () ->
-  $('.add-datetimepicker').datetimepicker({
-      format: 'MM/DD/YYYY hh:mm A'
-  })
+  inputs = $('.add-datetimepicker')
+  for input in inputs
+    new Precision.Datepicker(input)
 
 MainController = Paloma.controller('Challenges',
   create: ->
     do init_datetimepickers
   new: ->
+    do init_datetimepickers
+  edit: ->
     do init_datetimepickers
 )
