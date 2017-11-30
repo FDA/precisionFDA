@@ -39,9 +39,15 @@ class EditorModel
         .fail((error) =>
           # Save failed, notify the user with a flash
           new (ContentTools.FlashUI)('no')
-          errorObject = JSON.parse error.responseText
-          @errorMessage(errorObject.error.message)
-          console.error(error)
+
+          try
+            errorObject = JSON.parse error.responseText
+            message = errorObject.error.message
+          catch
+            message = 'Something went wrong!'
+
+          Precision.alert.show(message)
+          window.location.reload()
         )
         .always(=>
           @editor.busy false
