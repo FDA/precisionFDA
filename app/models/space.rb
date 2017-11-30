@@ -151,6 +151,10 @@ class Space < ActiveRecord::Base
     return space_project
   end
 
+  def state_hash
+    state.blank? ? { "UNACTIVATED" => "NULL" } : { state => state }
+  end
+
   # space:
   #   name
   #   description
