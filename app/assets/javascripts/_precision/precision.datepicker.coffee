@@ -5,7 +5,7 @@ class Datepicker
   getValue: -> @input.value
   
   setValue: (moment_date) ->
-    @input.value = moment_date.toISOString()
+    @input.value = moment_date.format('YYYY-MM-DD hh:mm:ss Z')
     @label.innerText = formatDate moment_date
 
   constructor: (@input, @params) ->
@@ -38,7 +38,9 @@ class Datepicker
     
     @input.value = value
     if @input.value
-      @label.innerText = formatDate moment(new Date(@input.value))
+      # .replace(/-/g,'/') is for firefox. Don't work with standart iso date string.
+      _value = @input.value.replace(/-/g, '/') || undefined #this is for firefox
+      @label.innerText = formatDate moment(new Date(_value))
     
     $(@input).on 'dp.change', (e) =>
       @setValue(e.date)
