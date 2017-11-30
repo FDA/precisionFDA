@@ -55,6 +55,11 @@ class FolderService
     errors = []
 
     nodes.each do |node|
+      unless node.editable_by?(context)
+        errors << "You have no permissions to move '#{node.name}'"
+        break
+      end
+
       if node.is_a?(Folder)
         if node.scope != computed_scope && !node.private?
           return Rats.failure(message: "Unexpected scope")
@@ -69,7 +74,7 @@ class FolderService
       errors << node.errors.messages.values unless node.save
     end
 
-    errors.empty? ? Rats.success(count: nodes.size, scope: scope) : Rats.failure(errors.uniq)
+    errors.empty? ? Rats.success(count: nodes.size, scope: scope) : Rats.failure(messages: errors.uniq)
   end
 
   def remove(nodes)
