@@ -331,13 +331,20 @@ class SpacesController < ApplicationController
     )
 
     if result.success?
-      target_folder_name = target_folder.present? ? target_folder.name : "root directory"
+      if target_folder.present?
+        target_folder_name = target_folder.name
+        redirect_path = pathify_folder(target_folder)
+      else
+        target_folder_name = "root directory"
+        redirect_path = content_space_path(space)
+      end
+
       flash[:success] = "Successfully moved #{result.value[:count]} item(s) to #{target_folder_name}"
     else
+      current_folder = Folder.accessible_by_space(space).find_by(id: params[:current_folder])
+      redirect_path = current_folder.present? ? pathify_folder(current_folder) : content_space_path(space)
       flash[:error] = result.value.values
     end
-
-    redirect_path = target_folder.present? ? pathify_folder(target_folder) : content_space_path(space)
 
     redirect_to redirect_path
   end
