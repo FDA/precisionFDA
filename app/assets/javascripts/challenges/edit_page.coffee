@@ -11,6 +11,11 @@
 
 class EditorModel
 
+  showError: (message) ->
+    Precision.alert.show(message)
+    new (ContentTools.FlashUI)('no')
+    window.location.reload()
+
   initEditor: ->
     @editor = ContentTools.EditorApp.get()
     @editor.init '[data-editable], [data-fixture]', 'data-name'
@@ -33,12 +38,13 @@ class EditorModel
       route = "/challenges/#{@challenge_id}/editor/save_page"
       Precision.api(route, payload)
         .done((data) =>
-          if !passive
+
+          if data?.errors
+            @showError(data.errors)
+          else if !passive
             new (ContentTools.FlashUI)('ok')
         )
         .fail((error) =>
-          # Save failed, notify the user with a flash
-          new (ContentTools.FlashUI)('no')
 
           try
             errorObject = JSON.parse error.responseText
@@ -46,10 +52,9 @@ class EditorModel
           catch
             message = 'Something went wrong!'
 
-          Precision.alert.show(message)
-          window.location.reload()
+          @showError(message)
         )
-        .always(=>
+        .always( =>
           @editor.busy false
         )
 

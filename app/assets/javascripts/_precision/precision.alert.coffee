@@ -27,7 +27,7 @@ class AlertModel
   createNode = (text, style) ->
     style = default_style if !style
     $container = $(document.createElement('div'))
-    $container.addClass('alert flash-alert fade in')
+    $container.addClass('text-center alert flash-alert fade in')
     $container.addClass(style)
     $container.attr('role', 'alert')
     $container.append(text)
