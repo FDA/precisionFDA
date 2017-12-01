@@ -7,10 +7,9 @@ class AddStatusToChallenges < ActiveRecord::Migration
     reversible do |change|
       change.up do
         Challenge.find_each do |challenge|
-          challenge.update_attributes(
-            status: challenge.end_at.past? ? Challenge::STATUS_ARCHIVED : Challenge::STATUS_OPEN,
-            automated: false
-          )
+          challenge.status = challenge.end_at.past? ? Challenge::STATUS_ARCHIVED : Challenge::STATUS_OPEN
+          challenge.automated = false
+          challenge.save(validate: false)
         end
       end
     end
