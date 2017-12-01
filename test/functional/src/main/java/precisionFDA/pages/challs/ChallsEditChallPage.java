@@ -8,10 +8,12 @@ import org.openqa.selenium.support.FindBy;
 import precisionFDA.locators.ChallsLocators;
 import precisionFDA.model.ChallProfile;
 import precisionFDA.pages.AbstractPage;
+import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.Select;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 
 import static precisionFDA.data.TestChallsData.getChallAtDateTime;
+import static precisionFDA.utils.Utils.sleep;
 
 public class ChallsEditChallPage extends AbstractPage {
 
@@ -32,6 +34,12 @@ public class ChallsEditChallPage extends AbstractPage {
     @FindBy(xpath = ChallsLocators.CHALLS_EDIT_CHALL_FORM_STARTS_INPUT)
     private TextInput editChallStartsInput;
 
+    @FindBy(xpath = ChallsLocators.CHALLS_EDIT_CHALL_FORM_STARTS_VISIBLE_ELEMENT)
+    private WebElement editChallStartsVisibleElement;
+
+    @FindBy(xpath = ChallsLocators.CHALLS_EDIT_CHALL_FORM_ENDS_VISIBLE_ELEMENT)
+    private WebElement editChallEndsVisibleElement;
+
     @FindBy(xpath = ChallsLocators.CHALLS_EDIT_CHALL_FORM_ENDS_INPUT)
     private TextInput editChallEndsInput;
 
@@ -44,10 +52,46 @@ public class ChallsEditChallPage extends AbstractPage {
     @FindBy(xpath = ChallsLocators.CHALLS_EDIT_CHALL_FORM_CREATE_BUTTON)
     private WebElement editChallCreateButton;
 
+    @FindBy(xpath = ChallsLocators.CHALLS_BOOTSTRAP_CALENDAR_POPUP)
+    private WebElement bootstrapCalendarPopup;
+
+    @FindBy(xpath = ChallsLocators.CHALLS_BOOTSTRAP_CALENDAR_POPUP_INCR_MIN_ARROW)
+    private Link bootstrapCalendarPopupIncrMinArrow;
+
+    @FindBy(xpath = ChallsLocators.CHALLS_PAGE_TITLE)
+    private WebElement pageTitle;
+
+    @FindBy(xpath = ChallsLocators.CHALLS_BOOTSTRAP_CALENDAR_POPUP_TIME_ICON)
+    private Link bootstrapCalendarPopupTimeIcon;
+
     public ChallsEditChallPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(ChallsLocators.CHALLS_EDIT_CHALL_FORM_STATUS_SELECT));
+    }
+
+    public TextInput getEditChallStartsInput() {
+        return editChallStartsInput;
+    }
+
+    public TextInput getEditChallEndsInput() {
+        return editChallEndsInput;
+    }
+
+    public Link getBootstrapCalendarPopupTimeIcon() {
+        return bootstrapCalendarPopupTimeIcon;
+    }
+
+    public WebElement getPageTitle() {
+        return pageTitle;
+    }
+
+    public Link getBootstrapCalendarPopupIncrMinArrow() {
+        return bootstrapCalendarPopupIncrMinArrow;
+    }
+
+    public WebElement getBootstrapCalendarPopup() {
+        return bootstrapCalendarPopup;
     }
 
     public TextInput getEditChallNameInput() {
@@ -62,12 +106,12 @@ public class ChallsEditChallPage extends AbstractPage {
         return editChallUserSelect;
     }
 
-    public TextInput getEditChallStartsInput() {
-        return editChallStartsInput;
+    public WebElement getEditChallStartsVisibleElement() {
+        return editChallStartsVisibleElement;
     }
 
-    public TextInput getEditChallEndsInput() {
-        return editChallEndsInput;
+    public WebElement getEditChallEndsVisibleElement() {
+        return editChallEndsVisibleElement;
     }
 
     public TextInput getEditChallCardImageInput() {
@@ -85,21 +129,65 @@ public class ChallsEditChallPage extends AbstractPage {
     public void fillChallForm(ChallProfile challProfile) {
         log.info("fill challenge form");
         getEditChallNameInput().sendKeys(challProfile.getChallName());
-        getEditChallDescrInput().sendKeys((challProfile.getChallDescr()));
 
         String optionFullText = getOptionTextByPartialText(challProfile.getChallScoringAppUser(), ChallsLocators.CHALLS_EDIT_CHALL_FORM_USER_OPTIONS_COMMON);
         getEditChallUserSelect().selectByVisibleText(optionFullText);
 
         // generate date/time and save
-        String startsAt = getChallAtDateTime(challProfile.getChallStartsAtFromNowSec());
-        String endsAt = getChallAtDateTime(challProfile.getChallStartsAtFromNowSec() + challProfile.getDurationSec());
-        challProfile.setChallStartsAt(startsAt);
-        challProfile.setChallEndsAt(endsAt);
+//        String startsAt = getChallAtDateTime(challProfile.getChallStartsAtFromNowMin());
+//        String endsAt = getChallAtDateTime(challProfile.getChallStartsAtFromNowMin() + challProfile.getDurationMin());
 
-        getEditChallStartsInput().sendKeys(startsAt);
-        getEditChallEndsInput().sendKeys(endsAt);
+        fillStartsAtInput(challProfile);
+        fillEndsAtInput(challProfile);
+
+        getPageTitle().click();
+
+        getEditChallDescrInput().sendKeys((challProfile.getChallDescr()));
 
         getEditChallCardImageInput().sendKeys(challProfile.getChallCardImage());
+
+        challProfile.setChallStartsAt(getEnteredStartsValue());
+        challProfile.setChallEndsAt(getEnteredEndsValue());
+    }
+
+    public void fillStartsAtInput(ChallProfile challProfile) {
+        getEditChallStartsVisibleElement().click();
+        WebElement calendar = getBootstrapCalendarPopup();
+        waitUntilDisplayed(calendar, 2);
+
+        getBootstrapCalendarPopupTimeIcon().click();
+        sleep(200);
+
+        Link arrow = getBootstrapCalendarPopupIncrMinArrow();
+
+        for (int i = 0; i <= challProfile.getChallStartsAtFromNowMin(); i ++) {
+            arrow.click();
+            sleep(100);
+        }
+    }
+
+    public void fillEndsAtInput(ChallProfile challProfile) {
+        getEditChallEndsVisibleElement().click();
+        WebElement calendar = getBootstrapCalendarPopup();
+        waitUntilDisplayed(calendar, 2);
+
+        getBootstrapCalendarPopupTimeIcon().click();
+        sleep(200);
+
+        Link arrow = getBootstrapCalendarPopupIncrMinArrow();
+
+        for (int i = 0; i <= challProfile.getChallStartsAtFromNowMin() + challProfile.getDurationMin(); i ++) {
+            arrow.click();
+            sleep(100);
+        }
+    }
+
+    public String getEnteredStartsValue() {
+        return getEditChallStartsInput().getWrappedElement().getAttribute("value");
+    }
+
+    public String getEnteredEndsValue() {
+        return getEditChallEndsInput().getWrappedElement().getAttribute("value");
     }
 
     public ChallsCreatedChallPage clickCreate() {

@@ -9,6 +9,7 @@ import java.util.Date;
 import static precisionFDA.data.TestDict.getDictDelimiterValue;
 import static precisionFDA.data.TestDict.getDictSetup;
 import static precisionFDA.data.TestRunData.getTestImageHttpsUrl;
+import static precisionFDA.data.TestRunData.getText1000Symbols;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class TestChallsData {
@@ -68,7 +69,7 @@ public class TestChallsData {
     }
 
     public static String getMainChallDescr() {
-        return getTestNewChallDescrPrefix() + getRunTimeLocalUniqueValue();
+        return getRunTimeLocalUniqueValue() + getText1000Symbols();
     }
 
     public static String getMainChallScoringUser() {
@@ -80,7 +81,7 @@ public class TestChallsData {
     }
 
     public static String getMainChallInfo() {
-        return getTestNewChallInfoPrefix() + getRunTimeLocalUniqueValue();
+        return getRunTimeLocalUniqueValue() + getText1000Symbols();
     }
 
     public static String getMainChallResults() {
@@ -88,23 +89,25 @@ public class TestChallsData {
                 getTestNewChallResultsPrefix() + getRunTimeLocalUniqueValue() + "2";
     }
 
-    public static String getChallAtDateTime(int delaySec) {
-        Date d = new Date(System.currentTimeMillis() + delaySec * 1000);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    public static String getChallAtDateTime(int delayMin) {
+        Date d = new Date(System.currentTimeMillis() + delayMin * 60 * 1000);
+        // SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
         String string = dateFormat.format(d);
         return string;
     }
 
     public static String getExpectedChallDateTimeValue(String initDateTime, TimeZoneProfile timeZone) {
-        return initDateTime.replace("T", " ") + " " + timeZone.getCodeOfLocation();
+        String[] init = initDateTime.split(" ");
+        return init[0] + " " + init[1] + " " + timeZone.getCodeOfLocation();
     }
 
     public static ChallProfile mainChallProfile = new ChallProfile(
             getMainChallName(),
             getMainChallDescr(),
             getMainChallScoringUser(),
-            30,
-            180,
+            1,
+            3,
             "",
             "",
             getChallCardImage(),

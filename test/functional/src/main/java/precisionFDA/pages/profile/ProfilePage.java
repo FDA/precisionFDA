@@ -6,7 +6,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import precisionFDA.model.TimeZoneProfile;
-import precisionFDA.utils.Utils;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.Select;
 import precisionFDA.data.TestRunData;
@@ -71,12 +70,12 @@ public class ProfilePage extends AbstractPage {
     }
 
     public ProfilePage setTimeZone(TimeZoneProfile timeZone) {
-        log.info("select timezone: " + timeZone.getCodeAndLocation());
+        log.info("select timezone: " + timeZone.getTimeAndLocation());
         isElementPresent(getProfileTimeZoneSelect());
         sleep(500);
         getProfileTimeZoneSelect().selectByValue(timeZone.getLocation());
         sleep(500);
-        TestRunData.setCurrentTimezone(timeZone.getZoneCode());
+        TestRunData.setCurrentTimezone(timeZone.getZoneTime());
         return new ProfilePage(getDriver());
     }
 

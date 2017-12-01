@@ -3,6 +3,7 @@ package precisionFDA.data;
 import precisionFDA.model.NoteProfile;
 
 import static precisionFDA.data.TestRunData.getTestRunUniqueFinalValue;
+import static precisionFDA.data.TestRunData.getText1000Symbols;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class TestNotesData {
@@ -48,11 +49,11 @@ public class TestNotesData {
     }
 
     public static String getNewMainRawBodyText() {
-        return NEW_NOTE_RAW_BODY_PREFIX + getTestRunUniqueFinalValue();
+        return NEW_NOTE_RAW_BODY_PREFIX + getTestRunUniqueFinalValue() + getText1000Symbols();
     }
 
     public static String getNewMainRichBodyText() {
-        return NEW_NOTE_RICH_BODY_PREFIX + getTestRunUniqueFinalValue();
+        return NEW_NOTE_RICH_BODY_PREFIX + getTestRunUniqueFinalValue() + getText1000Symbols();
     }
 
     public static String getTitleToDeleteText() {

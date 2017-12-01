@@ -50,6 +50,9 @@ public class NotesEditNotePage extends AbstractPage {
     @FindBy(xpath = NotesLocators.NOTES_EDIT_NOTE_EDITOR_VISIBLE_DIV)
     private WebElement notesEditNoteVisibleEditor;
 
+    @FindBy(xpath = NotesLocators.NOTES_EDIT_NOTE_EDITOR_ENTERED_TEXT)
+    private WebElement notesEditNoteEnteredText;
+
     @FindBy(xpath = NotesLocators.NOTES_EDIT_NOTE_PREVIEW_TAB_LINK)
     private Link notesEditNotePreviewTabLink;
 
@@ -64,6 +67,10 @@ public class NotesEditNotePage extends AbstractPage {
 
     public UserProfile getUser() {
         return TestUserData.getTestUser();
+    }
+
+    public WebElement getNotesEditNoteEnteredTextWe() {
+        return notesEditNoteEnteredText;
     }
 
     public WebElement getNotesEditNoteEditorWE() {
@@ -115,7 +122,7 @@ public class NotesEditNotePage extends AbstractPage {
     }
 
     public String getEnteredBodyText() {
-        return getNotesEditNoteVisibleEditorEl().getText();
+        return getNotesEditNoteEnteredTextWe().getText().replace("\n", "").replace("\r", "");
     }
 
     public String getExpectedDefaultTitle() {

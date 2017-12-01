@@ -20,7 +20,11 @@ public class ChallsLocators {
 
     public static final String CHALLS_EDIT_CHALL_FORM_STARTS_INPUT = "//input[@id='challenge_start_at']";
 
+    public static final String CHALLS_EDIT_CHALL_FORM_STARTS_VISIBLE_ELEMENT = "//input[@id='challenge_start_at']/../span";
+
     public static final String CHALLS_EDIT_CHALL_FORM_ENDS_INPUT = "//input[@id='challenge_end_at']";
+
+    public static final String CHALLS_EDIT_CHALL_FORM_ENDS_VISIBLE_ELEMENT = "//input[@id='challenge_end_at']/../span";
 
     public static final String CHALLS_EDIT_CHALL_FORM_CARD_IMAGE_INPUT = "//input[@id='challenge_card_image_url']";
 
@@ -71,6 +75,14 @@ public class ChallsLocators {
     public static final String CHALLS_EDIT_INFO_EDIT_CHALLENGE_RETURN_BUTTON = "//a[contains(text(), 'Return')]";
 
     public static final String CHALLS_CREATED_CHALL_INTRO_TEXT = "//div[@class='row']/p";
+
+    public static final String CHALLS_BOOTSTRAP_CALENDAR_POPUP = "//*[contains(@class, 'bootstrap-datetimepicker-widget')]";
+
+    public static final String CHALLS_BOOTSTRAP_CALENDAR_POPUP_INCR_MIN_ARROW = "//*[contains(@class, 'bootstrap-datetimepicker-widget')]//a[@data-action='incrementMinutes']";
+
+    public static final String CHALLS_PAGE_TITLE = "//*[@class='page-title']";
+
+    public static final String CHALLS_BOOTSTRAP_CALENDAR_POPUP_TIME_ICON = "//*[contains(@class, 'bootstrap-datetimepicker')]//a[contains(@title, 'Time')]";
 
 
 

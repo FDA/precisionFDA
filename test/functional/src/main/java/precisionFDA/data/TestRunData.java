@@ -2,6 +2,11 @@ package precisionFDA.data;
 
 import precisionFDA.utils.SettingsProperties;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class TestRunData {
@@ -154,6 +159,29 @@ public class TestRunData {
 
     public static String getTestImageHttpsUrl() {
         return SettingsProperties.getProperty("testImageHttpsUrl");
+    }
+
+    public static String getText1000Symbols() {
+        String sFilePath = getPathToTestFilesFolder() + "text_1000_symbols.txt";
+        BufferedReader br  = null;
+        String text = "";
+        try {
+            String sCurrentLine;
+            br = new BufferedReader(new FileReader(sFilePath));
+            while ((sCurrentLine = br.readLine()) != null) {
+                text = text + sCurrentLine;
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (br != null)br.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return text;
     }
 
 }
