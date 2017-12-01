@@ -40,8 +40,18 @@ public class SpacesLocators {
 
     public static final String SPACES_CREATED_FOLDER_TEMPLATE = "//*[@id='files']//a[contains(text(), '{FOLDER_NAME}')]";
 
+    public static final String SPACES_ADDED_FILE_TEMPLATE = "//*[@id='files']//a[contains(text(), '{FILE_NAME}')]";
+
     public static final String SPACES_FILES_BREADCRUMBS = "//ol[contains(@class, 'breadcrumb')]";
 
     public static final String FILES_BREADCRUMB_CHAIN = "//ol[contains(@class, 'breadcrumb')]/li";
+
+    public static final String SPACES_MOVE_DATA_TO_SPACE_BUTTON = "//button[contains(@data-bind, 'objectSelector')]";
+
+    public static final String SPACES_MOVE_DATA_TO_SPACE_FILES_ITEM = "//*[contains(@class, 'modal-dialog')]//li/a/span[text()='Files']";
+
+    public static final String SPACES_MOVE_DATA_TO_SPACE_FILE_CHECKBOX_TEMPLATE = "//*[contains(@class, 'modal-dialog')]//*[@class='object-name'][text()='{FILE_NAME}']/../input";
+
+    public static final String SPACES_MOVE_DATA_TO_SPACE_DIALOG_SELECT_BUTTON = "//*[contains(@class, 'modal-dialog')]//button/*[text()='Select']";
 
 }

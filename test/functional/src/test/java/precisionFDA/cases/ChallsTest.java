@@ -28,18 +28,24 @@ import static precisionFDA.utils.Utils.printTestHeader;
 @Name("Challenges test suite")
 public class ChallsTest extends AbstractTest {
 
-    @Test(priority = 0)
-    public void createApp() {
-        printTestHeader("Test Case: create app as a test user");
+    @Test
+    public void precondition() {
+        printTestHeader("Precondition: login and set timezone");
 
         UserProfile user = TestUserData.getTestUser();
-        AppProfile appProfile = TestAppData.getChallAppProfile();
         TimeZoneProfile timeZone = getMoscowTimeZone();
 
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
         ProfilePage profilePage = overviewPage.openProfilePage();
         profilePage.setTimeZone(timeZone);
+    }
+
+    @Test(priority = 0, dependsOnMethods = "precondition")
+    public void createApp() {
+        printTestHeader("Test Case: create app as a test user");
+
+        AppProfile appProfile = TestAppData.getChallAppProfile();
 
         AppsPage appsPage = openOverviewPage().openAppsPage();
         AppsEditAppPage appsEditAppPage = appsPage.openCreateAppPage();
@@ -49,14 +55,9 @@ public class ChallsTest extends AbstractTest {
                 appsSavedAppPage.getActSelectedAppName())
                 .as("Name of created app")
                 .isEqualTo(appProfile.getInitNameText());
-
-        assertThat(
-                appsSavedAppPage.isAssignToChallengeDisplayed())
-                .as("Assign to Challenge button is NOT displayed")
-                .isFalse();
     }
 
-    @Test(priority = 1)
+    @Test(priority = 1, dependsOnMethods = "precondition")
     public void createChallenge() {
         printTestHeader("Test Case: create a challenge as admin and verify");
 

@@ -5,7 +5,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import precisionFDA.locators.FilesLocators;
 import precisionFDA.locators.SpacesLocators;
 import precisionFDA.pages.AbstractPage;
 import ru.yandex.qatools.htmlelements.element.Button;
@@ -39,10 +38,31 @@ public class SpaceDetailsPage extends AbstractPage {
     @FindBy(xpath = SpacesLocators.SPACES_FILES_BREADCRUMBS)
     private WebElement breadcrumbs;
 
+    @FindBy(xpath = SpacesLocators.SPACES_MOVE_DATA_TO_SPACE_BUTTON)
+    private Button moveDataToSpaceButton;
+
+    @FindBy(xpath = SpacesLocators.SPACES_MOVE_DATA_TO_SPACE_FILES_ITEM)
+    private Link moveDataToSpaceFilesItem;
+
+    @FindBy(xpath = SpacesLocators.SPACES_MOVE_DATA_TO_SPACE_DIALOG_SELECT_BUTTON)
+    private Button moveDataToSpaceDialogSelectButton;
+
     public SpaceDetailsPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(SpacesLocators.SPACE_DETAILS_MEMBERS_TAB_LINK));
+    }
+
+    public Button getMoveDataToSpaceDialogSelectButton() {
+        return moveDataToSpaceDialogSelectButton;
+    }
+
+    public Link getMoveDataToSpaceFilesItem() {
+        return moveDataToSpaceFilesItem;
+    }
+
+    public Button getMoveDataToSpaceButton() {
+        return moveDataToSpaceButton;
     }
 
     public TextInput getCreateFolderFormNameInput() {
@@ -105,6 +125,11 @@ public class SpaceDetailsPage extends AbstractPage {
         return isElementPresent(By.xpath(xpath), 1);
     }
 
+    public boolean isLinkToAddedFileDisplayed(String fileName) {
+        String xpath = SpacesLocators.SPACES_ADDED_FILE_TEMPLATE.replace("{FILE_NAME}", fileName);
+        return isElementPresent(By.xpath(xpath), 1);
+    }
+
     public SpaceDetailsPage openFolder(String folderName) {
         log.info("open folder");
         String xpath = SpacesLocators.SPACES_CREATED_FOLDER_TEMPLATE.replace("{FOLDER_NAME}", folderName);
@@ -145,4 +170,30 @@ public class SpaceDetailsPage extends AbstractPage {
     public boolean isBreadcrumbDisplayed() {
         return isElementPresent(getBreadcrumbs(), 2);
     }
+
+    public void clickMoveDataToSpace() {
+        log.info("click Move Data to Space");
+        Button button = getMoveDataToSpaceButton();
+        waitUntilDisplayed(button);
+        button.click();
+    }
+
+    public SpaceDetailsPage selectFileOnMoveToSpaceDialog(String fileName) {
+        log.info("select file");
+        Link files = getMoveDataToSpaceFilesItem();
+        waitUntilDisplayed(files);
+        files.click();
+        String xpath = SpacesLocators.SPACES_MOVE_DATA_TO_SPACE_FILE_CHECKBOX_TEMPLATE.replace("{FILE_NAME}", fileName);
+        By elBy = By.xpath(xpath);
+        waitUntilDisplayed(elBy, 20);
+        getDriver().findElement(elBy).click();
+        Button button = getMoveDataToSpaceDialogSelectButton();
+        waitUntilDisplayed(button);
+        button.click();
+        String file = SpacesLocators.SPACES_ADDED_FILE_TEMPLATE.replace("{FILE_NAME}", fileName);
+        By fileBy = By.xpath(file);
+        waitUntilDisplayed(fileBy, 30);
+        return new SpaceDetailsPage(getDriver());
+    }
+
 }

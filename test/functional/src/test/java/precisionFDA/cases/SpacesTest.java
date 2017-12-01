@@ -6,6 +6,9 @@ import precisionFDA.model.FileProfile;
 import precisionFDA.model.FolderProfile;
 import precisionFDA.model.SpaceProfile;
 import precisionFDA.model.UserProfile;
+import precisionFDA.pages.files.FilesAddFilesPage;
+import precisionFDA.pages.files.FilesPage;
+import precisionFDA.pages.files.UploadedFilePage;
 import precisionFDA.pages.overview.OverviewPage;
 import precisionFDA.pages.spaces.EditSpacePage;
 import precisionFDA.pages.spaces.SpaceDetailsPage;
@@ -18,7 +21,6 @@ import static precisionFDA.data.TestDict.getDictUnactivated;
 import static precisionFDA.data.TestFilesData.getMainSpaceFile;
 import static precisionFDA.data.TestFilesData.getMainSpaceFolder;
 import static precisionFDA.data.TestSpacesData.getMainSpaceProfile;
-import static precisionFDA.utils.Utils.generateExpectedBreadcrumbsFiles;
 import static precisionFDA.utils.Utils.generateExpectedBreadcrumbsSpaces;
 import static precisionFDA.utils.Utils.printTestHeader;
 
@@ -222,22 +224,29 @@ public class SpacesTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 4, enabled = false)
+    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 4)
     public void addFileByHostLead() {
         printTestHeader("Test Case: add a file by host lead");
 
         SpaceProfile spaceProfile = getMainSpaceProfile();
-        UserProfile user = TestUserData.getTestUser();
-        FolderProfile spaceFolder = getMainSpaceFolder();
         FileProfile spaceFile = getMainSpaceFile();
 
-        SpacesPage spacesPage = openOverviewPage().openSpacesPage();
-        SpaceDetailsPage spaceDetailsPage = spacesPage.openSpace(spaceProfile.getSpaceName());
+        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(spaceFile.getFileName());
+        filesPage = filesAddFilesPage.uploadAllFiles().openRootFilesPage();
+        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(spaceFile.getFileName());
+        uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
 
-        SoftAssert.assertAll();
+        SpaceDetailsPage spaceDetailsPage = openOverviewPage().openSpacesPage().openSpace(spaceProfile.getSpaceName());
+        spaceDetailsPage.clickMoveDataToSpace();
+        spaceDetailsPage = spaceDetailsPage.selectFileOnMoveToSpaceDialog(spaceFile.getFileName());
+
+        assertThat(
+                spaceDetailsPage.isLinkToAddedFileDisplayed(spaceFile.getFileName()))
+                .as("Added file is displayed")
+                .isTrue();
     }
-
-
 
 
 }

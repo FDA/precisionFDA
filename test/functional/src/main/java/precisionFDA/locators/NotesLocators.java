@@ -32,6 +32,8 @@ public class NotesLocators {
 
     public static final String NOTES_EDIT_NOTE_EDITOR_VISIBLE_DIV = "//*[@class='pfda-note note-editing']";
 
+    public static final String NOTES_EDIT_NOTE_EDITOR_ENTERED_TEXT = "//*[@class='pfda-note note-editing']//*[@class='ace_layer ace_text-layer']";
+
     public static final String NOTES_EDIT_NOTE_SAVE_BUTTON = "//a[text()='Save']";
 
     public static final String NOTES_LIST_FIRST_NOTE_TITLE = "//*[contains(@class, 'pfda-cards-list')]/a[1]//div[contains(@class, 'title')]";

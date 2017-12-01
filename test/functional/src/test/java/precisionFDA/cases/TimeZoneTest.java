@@ -2,6 +2,7 @@ package precisionFDA.cases;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import precisionFDA.model.TimeZoneProfile;
 import ru.yandex.qatools.htmlelements.annotations.Name;
 import precisionFDA.data.TestUserData;
 import precisionFDA.model.AppProfile;
@@ -21,6 +22,9 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static precisionFDA.data.TestAppData.*;
 import static precisionFDA.data.TestDict.getDictTrue;
 import static precisionFDA.data.TestNotesData.getNoteTimeZone;
+import static precisionFDA.data.TimeZonesData.getChathamTimeZone;
+import static precisionFDA.data.TimeZonesData.getPacificTimeZone;
+import static precisionFDA.data.TimeZonesData.getUtcTimeZone;
 import static precisionFDA.utils.Utils.applyTimezoneToDate;
 import static precisionFDA.utils.Utils.isDateTimeCorrect;
 import static precisionFDA.utils.Utils.printTestHeader;
@@ -31,14 +35,13 @@ public class TimeZoneTest extends AbstractTest {
     @DataProvider(name="getTimeZoneValue")
     public Object[][] getTimeZoneValue() {
         return new Object[][] {
-                {"GMT-8",       "Pacific Time (US & Canada)",   "(GMT-08:00) Pacific Time (US & Canada)"},
-                {"GMT+13:45",   "Chatham Is.",                  "(GMT+13:45) Chatham Is."}
+                { getPacificTimeZone() },
+                { getChathamTimeZone() }
         };
     }
 
-    public String[] getTestTimeZone() {
-        return new String[]
-                {"GMT",         "UTC",                          "(GMT+00:00) UTC"};
+    public TimeZoneProfile getTestTimeZone() {
+        return getUtcTimeZone();
     }
 
     @Test
@@ -64,8 +67,8 @@ public class TimeZoneTest extends AbstractTest {
     @Test(dataProvider = "getTimeZoneValue", dataProviderClass = TimeZoneTest.class,
             dependsOnMethods = { "successfulLogin" },
             enabled = false)
-    public void setTimeZone(String[] timeZone) {
-        String descr = " | " + timeZone[0] + " | " + timeZone[1];
+    public void setTimeZone(TimeZoneProfile timeZone) {
+        String descr = " | " + timeZone.getZoneTime() + " | " + timeZone.getLocation();
         printTestHeader("Test Case: check TimeZone can be set" + descr);
         ProfilePage profilePage = openOverviewPage().openProfilePage();
         profilePage.setTimeZone(timeZone);
@@ -73,13 +76,13 @@ public class TimeZoneTest extends AbstractTest {
         assertThat(
                 profilePage.getSelectedTimeZone())
                 .as("selected timezone")
-                .isEqualTo(timeZone[1]);
+                .isEqualTo(timeZone.getTimeAndLocation());
     }
 
     @Test(dataProvider = "getTimeZoneValue", dataProviderClass = TimeZoneTest.class,
             dependsOnMethods = { "successfulLogin"})
-    public void checkTimeStamps(String[] timeZone) {
-        String descr = " | " + timeZone[0] + " | " + timeZone[1];
+    public void checkTimeStamps(TimeZoneProfile timeZone) {
+        String descr = " | " + timeZone.getZoneTime() + " | " + timeZone.getLocation();
 
         //set timezone
         ProfilePage profilePage = openOverviewPage().openProfilePage();
@@ -134,10 +137,11 @@ public class TimeZoneTest extends AbstractTest {
         savedNotePage = notesPage.openCreatedNote(noteProfile);
 
         String actNoteCreated = savedNotePage.getSavedNoteCreatedText();
-        String expNoteCreatedTimeZoneApplied = applyTimezoneToDate(expNoteCreated, timeZone[0], getTestTimeZone()[0]);
+        String expNoteCreatedTimeZoneApplied = applyTimezoneToDate(expNoteCreated, timeZone.getZoneTime(), getTestTimeZone().getZoneTime());
         SoftAssert.assertThat(
                 isDateTimeCorrect(actNoteCreated, expNoteCreatedTimeZoneApplied))
-                .as("Created date/time is correct one on saved Note form after TimeZone change from " + timeZone[1] + " to " + getTestTimeZone()[1])
+                .as("Created date/time is correct one on saved Note form after TimeZone change from " + timeZone.getTimeAndLocation() +
+                        " to " + getTestTimeZone().getTimeAndLocation())
                 .isEqualTo(getDictTrue());
 
         SoftAssert.assertAll();
@@ -145,8 +149,8 @@ public class TimeZoneTest extends AbstractTest {
 
     @Test(dataProvider = "getTimeZoneValue", dataProviderClass = TimeZoneTest.class,
             dependsOnMethods = { "successfulLogin"})
-    public void checkAppsTimeStamps(String[] timeZone) {
-        String descr = " | " + timeZone[0] + " | " + timeZone[1];
+    public void checkAppsTimeStamps(TimeZoneProfile timeZone) {
+        String descr = " | " + timeZone.getZoneTime() + " | " + timeZone.getLocation();
         printTestHeader("Test Case: check that timestamps are correct through working with apps" + descr);
 
         //set timezone
@@ -194,10 +198,10 @@ public class TimeZoneTest extends AbstractTest {
         appsSavedAppPage = appsRelevantPage.openAppFromMyAppsList(appProfile);
 
         String actCreated = appsSavedAppPage.getActSelectedAppCreated();
-        String expCreated = applyTimezoneToDate(appProfile.getCurRevAppCreatedText(), timeZone[0], getTestTimeZone()[0]);
+        String expCreated = applyTimezoneToDate(appProfile.getCurRevAppCreatedText(), timeZone.getZoneTime(), getTestTimeZone().getZoneTime());
         SoftAssert.assertThat(
                 isDateTimeCorrect(actCreated, expCreated))
-                .as("Created date/time is correct one App form after TimeZone change from " + timeZone[1] + " to " + getTestTimeZone()[1])
+                .as("Created date/time is correct one App form after TimeZone change from " + timeZone.getTimeAndLocation() + " to " + getTestTimeZone().getTimeAndLocation())
                 .isEqualTo(getDictTrue());
 
         SoftAssert.assertAll();

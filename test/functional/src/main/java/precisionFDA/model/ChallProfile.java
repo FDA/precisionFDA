@@ -8,9 +8,9 @@ public class ChallProfile {
 
     private String challScoringAppUser;
 
-    private int challStartsAtFromNowSec;
+    private int challStartsAtFromNowMin;
 
-    private int durationSec;
+    private int durationMin;
 
     private String challStartsAt;
 
@@ -26,15 +26,15 @@ public class ChallProfile {
 
     public ChallProfile(final String challName,
                         final String challDescr, final String challScoringAppUser,
-                        final int challStartsAtFromNowSec, final int durationSec,
+                        final int challStartsAtFromNowMin, final int durationMin,
                         final String challStartsAt, final String challEndsAt,
                         final String challCardImage, final String challStatus,
                         final String challInfo, final String challResults) {
         this.challName = challName;
         this.challDescr = challDescr;
         this.challScoringAppUser = challScoringAppUser;
-        this.challStartsAtFromNowSec = challStartsAtFromNowSec;
-        this.durationSec = durationSec;
+        this.challStartsAtFromNowMin = challStartsAtFromNowMin;
+        this.durationMin = durationMin;
         this.challStartsAt= challStartsAt;
         this.challEndsAt = challEndsAt;
         this.challCardImage = challCardImage;
@@ -55,12 +55,12 @@ public class ChallProfile {
         return challScoringAppUser;
     }
 
-    public int getChallStartsAtFromNowSec() {
-        return challStartsAtFromNowSec;
+    public int getChallStartsAtFromNowMin() {
+        return challStartsAtFromNowMin;
     }
 
-    public int getDurationSec() {
-        return durationSec;
+    public int getDurationMin() {
+        return durationMin;
     }
 
     public String getChallStartsAt() {
