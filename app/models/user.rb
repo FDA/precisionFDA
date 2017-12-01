@@ -48,9 +48,9 @@ class User < ActiveRecord::Base
   has_one :appathon
   has_many :meta_appathons
   has_one :expert
-  has_many :challenge_admins, {class_name: 'Challenge', foreign_key: 'admin_id'}
   has_many :challenge_app_owners, {class_name: 'Challenge', foreign_key: 'app_owner_id'}
   has_many :submissions
+  has_many :challenge_resources
   has_many :analyses
 
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
@@ -63,6 +63,16 @@ class User < ActiveRecord::Base
   acts_as_follower
   acts_as_tagger
 
+  scope :not_challenge_bot, -> { where.not(dxuser: CHALLENGE_BOT_DX_USER) }
+
+  def self.challenge_bot
+    find_by!(dxuser: CHALLENGE_BOT_DX_USER)
+  end
+
+  def challenge_bot?
+    dxuser == CHALLENGE_BOT_DX_USER
+  end
+
   def uid
     "user-#{id}"
   end
@@ -73,6 +83,10 @@ class User < ActiveRecord::Base
 
   def klass
     "user"
+  end
+
+  def org
+    challenge_bot? ? Org.new : super
   end
 
   def real_files
@@ -92,11 +106,7 @@ class User < ActiveRecord::Base
   end
 
   def space_uids
-    if Rails.env.development?
-      space_memberships.pluck("distinct 'space-'||space_id")
-    else
-      space_memberships.pluck("distinct concat('space-', space_id)")
-    end
+    space_memberships.pluck("distinct concat('space-', space_id)")
   end
 
   def active_spaces
@@ -133,7 +143,7 @@ class User < ActiveRecord::Base
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
       dxuser == "elaine.johanson" || dxuser == "ruth.bandler"
     else
-      ((["precisionfda", "precisionfda_dev", "dnanexus"].include?(org.handle)) && org.admin_id == id) || ["alan.fdauser"].include?(dxuser)
+      ((["precisionfda", "precisionfda_dev", "dnanexus"].include?(org.handle)) && org.admin_id == id) || ["alan.fdauser", "singeradmin.pfdadev"].include?(dxuser)
     end
   end
 
@@ -157,6 +167,14 @@ class User < ActiveRecord::Base
   # @param time_zone [String] new time zone
   def update_time_zone(time_zone)
     update(time_zone: time_zone) if Time.find_zone(time_zone)
+  end
+
+  def root_folder
+    folders.find_by(scope: "private", parent_folder_id: nil)
+  end
+
+  def is_challenge_admin?
+    return can_administer_site?
   end
 
   def self.validate_email(email)
@@ -196,6 +214,18 @@ class User < ActiveRecord::Base
     return if context.guest?
     user = context.user
     token = context.token
+    # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
+    user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
+      DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
+        sync_file_state(result, files[i], user)
+      end
+    end
+  end
+
+  def self.sync_challenge_bot_files!(context)
+    return if context.guest?
+    user = User.find_by(dxuser: CHALLENGE_BOT_DX_USER)
+    token = CHALLENGE_BOT_TOKEN
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
     user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
       DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
@@ -328,7 +358,7 @@ class User < ActiveRecord::Base
       DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call("system", "findJobs", {
         includeSubjobs: false,
         id: jobs_hash.keys,
-        project: user.private_files_project,
+        project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
         parentJob: nil,
         parentAnalysis: nil,
         describe: true

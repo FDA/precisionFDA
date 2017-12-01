@@ -135,30 +135,33 @@ class Job < ActiveRecord::Base
     app.output_spec
   end
 
+  def update_provenance!
+    new_value = { dxid => { app_dxid: app.dxid, app_id: app.id, inputs: run_inputs }}
+
+    # TODO: USE SCOPE OF USER_FILE MODEL!
+    input_files.where(parent_type: "Job").find_each do |file|
+      parent_job = file.parent
+      new_value.merge!(parent_job.provenance)
+      new_value[file.dxid] = parent_job.dxid
+    end
+
+    update_attribute(:provenance, new_value)
+  end
+
   def publishable_by?(context, scope_to_publish_to = "public")
-    core_publishable_by?(context, scope_to_publish_to) && terminal?
+    super && terminal?
+  end
+
+  def publishable_by_user?(user, scope_to_publish_to = "public")
+    super && terminal?
+  end
+
+  def publish_by_user(user, scope = "public")
+    update!(scope: scope) if publishable_by_user?(user, scope)
   end
 
   def from_submission?
     submission.present?
-  end
-
-  def viewable_by?(context)
-    if context.guest? || !context.logged_in?
-      return false
-    else
-      raise unless context.user_id.present? && context.user.present?
-      return from_submission? && context.user.is_challenge_evaluator?
-    end
-  end
-
-  def self.viewable_by(context)
-    if context.guest? || !context.logged_in? || !context.user.is_challenge_evaluator?
-      none
-    else
-      raise unless context.user_id.present? && context.user.present?
-      joins(:submission)
-    end
   end
 
   def self.publish(jobs, context, scope)
@@ -173,5 +176,13 @@ class Job < ActiveRecord::Base
     end
 
     return count
+  end
+
+  def output_data
+    IOCollection.build(output_spec, run_outputs)
+  end
+
+  def input_data
+    IOCollection.build(input_spec, run_inputs)
   end
 end

@@ -61,6 +61,8 @@ Rails.application.routes.draw do
     post '/api/unfollow', to: 'api#unfollow'
     post '/api/update_submission', to: 'api#update_submission'
     post '/api/update_time_zone', to: 'api#update_time_zone'
+    post '/api/create_challenge_resource', to: 'api#create_challenge_resource'
+    post '/api/create_resource_link', to: 'api#create_resource_link'
 
     # FHIR
     scope '/fhir' do
@@ -81,6 +83,8 @@ Rails.application.routes.draw do
       member do
         get 'fork'
         post 'export'
+        post 'cwl_export'
+        post 'wdl_export'
         get 'batch_app'
       end
       get 'featured', on: :collection, as: 'featured'
@@ -117,6 +121,12 @@ Rails.application.routes.draw do
       post 'rename', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
+      post 'move', on: :collection
+      post 'create_folder', on: :collection
+      post 'rename_folder', on: :member
+      post 'download_list', on: :collection
+      post 'remove', on: :collection
+      post 'publish', on: :collection
       resources :comments
     end
 
@@ -141,11 +151,17 @@ Rails.application.routes.draw do
       get 'truth(/:tab)', on: :collection, action: :truth, as: 'truth'
       get 'join', on: :member
       get 'view(/:tab)', on: :member, action: :show, as: 'show'
+      get 'editor(/:tab)', on: :member, action: :edit_page, as: 'edit_page'
+      post 'editor/save_page', on: :member, action: :save_page, as: 'save_page'
+      resources :challenge_resources, only: [:new, :create, :destroy] do
+        post 'rename', on: :member
+      end
       resources :submissions, only: [:new, :create, :edit] do
         post 'publish', on: :collection, action: :publish
         get 'log', on: :member
       end
       post 'assign_app', on: :member
+      post 'announce_result', on: :member
     end
 
     resources :discussions, constraints: {answer_id: /[^\/]+/ } do
@@ -196,6 +212,12 @@ Rails.application.routes.draw do
       post 'accept', on: :member
       post 'rename', on: :member
       post 'invite', on: :member
+      post 'move', on: :member
+      post 'create_folder', on: :member
+      post 'rename_folder', on: :collection
+      post 'download_list', on: :member
+      post 'remove_folder', on: :member, as: 'remove_folder'
+      post 'publish_folder', on: :member
       resources :comments
     end
 

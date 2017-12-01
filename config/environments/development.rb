@@ -42,5 +42,13 @@ Rails.application.configure do
   # config.action_view.raise_on_missing_translations = true
 
   # SSL
-  config.force_ssl = true
+  config.force_ssl = true 
+
+  # STDOUT logging
+  if ENV['RAILS_LOG_TO_STDOUT']
+    STDOUT.sync = true
+    logger           = ActiveSupport::Logger.new(STDOUT)
+    logger.formatter = config.log_formatter
+    config.logger = ActiveSupport::TaggedLogging.new(logger)
+  end
 end

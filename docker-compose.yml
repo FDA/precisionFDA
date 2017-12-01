@@ -1,0 +1,28 @@
+version: "3.2"
+services:
+  web:
+    image: ruby:2.2.3
+    volumes:
+      - type: bind
+        source: .
+        target: /precision-fda
+    environment:
+      - BUNDLE_PATH=/precision-fda/.gems
+      - DATABASE_URL=mysql2://root:password@db/precision-fda
+      - RAILS_LOG_TO_STDOUT=1
+    working_dir: /precision-fda
+    command: 'bundle exec thin --ssl start'
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+  db:
+    image: mysql:latest
+    volumes:
+      - 'pfda-mysql-volume:/var/lib/mysql'
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    ports:
+      - 3306
+volumes:
+  pfda-mysql-volume:

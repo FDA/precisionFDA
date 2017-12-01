@@ -302,6 +302,7 @@ class MainController < ApplicationController
           end
           user.last_login = Time.now
           user.save!
+          set_time_zone(user)
         end
       else
         User.transaction do
@@ -311,7 +312,6 @@ class MainController < ApplicationController
         end
       end
       save_session(user.id, username, token, expiration_time, user.org_id)
-      set_time_zone(user)
       AUDIT_LOGGER.info("User #{username} logged in")
       redirect_to root_url
     end
@@ -485,9 +485,9 @@ class MainController < ApplicationController
       return
     end
 
-    graph = get_graph(item)
-
-    js graph: publisher_js_prepare(graph, scope), space: !space.nil? ? space.slice(:uid, :title) : nil, scope_to_publish_to: scope
+    js graph: graph_decorator.decorate(item, scope),
+       space: space.nil? ? nil : space.slice(:uid, :title),
+       scope_to_publish_to: scope
   end
 
   def track
@@ -541,33 +541,8 @@ class MainController < ApplicationController
 
   private
 
-  def get_graph(root)
-    klass = root.klass
-    if klass == "asset"
-      klass = "file"
-    elsif klass == "answer"
-      klass = "note"
-    elsif klass == "discussion"
-      klass = "note"
-    end
-
-    self.send("get_subgraph_of_#{klass}", root)
-  end
-
-  def get_subgraph_of_job(job)
-    if job.accessible_by?(@context)
-      return [job, [get_subgraph_of_app(job.app)] + job.input_files.map { |file| get_subgraph_of_file(file) }]
-    else
-      return [job, []]
-    end
-  end
-
-  def get_subgraph_of_app(app)
-    if app.accessible_by?(@context)
-      return [app, app.assets.map { |asset| get_subgraph_of_file(asset) }]
-    else
-      return [app, []]
-    end
+  def graph_decorator
+    @graph_decorator ||= GraphDecorator.new(@context)
   end
 
   def get_subgraph_of_file(file)
