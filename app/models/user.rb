@@ -106,11 +106,7 @@ class User < ActiveRecord::Base
   end
 
   def space_uids
-    if Rails.env.development?
-      space_memberships.pluck("distinct 'space-'||space_id")
-    else
-      space_memberships.pluck("distinct concat('space-', space_id)")
-    end
+    space_memberships.pluck("distinct concat('space-', space_id)")
   end
 
   def active_spaces
@@ -171,6 +167,10 @@ class User < ActiveRecord::Base
   # @param time_zone [String] new time zone
   def update_time_zone(time_zone)
     update(time_zone: time_zone) if Time.find_zone(time_zone)
+  end
+
+  def root_folder
+    folders.find_by(scope: "private", parent_folder_id: nil)
   end
 
   def is_challenge_admin?

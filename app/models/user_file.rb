@@ -39,8 +39,8 @@
 # not_assets: U || J || C
 # independent: U || J || A
 #
-class UserFile < ActiveRecord::Base
-  include Permissions
+class UserFile < Node
+
   include Licenses
   require 'uri'
 
@@ -62,7 +62,6 @@ class UserFile < ActiveRecord::Base
   has_many :challenge_resources
 
   acts_as_commentable
-  acts_as_taggable
   acts_as_votable
 
   validates :name, presence: { message: "Name could not be blank" }
@@ -91,6 +90,11 @@ class UserFile < ActiveRecord::Base
 
   def to_param
     uid
+  end
+
+  def parent_folder(scope = "private")
+    column_name = Node.scope_column_name(scope)
+    Folder.find_by(id: self[column_name])
   end
 
   def self.not_assets
@@ -125,10 +129,6 @@ class UserFile < ActiveRecord::Base
 
   def uid
     dxid
-  end
-
-  def title
-    parent_type == "Asset" ? self.becomes(Asset).prefix : name
   end
 
   def klass
@@ -194,5 +194,4 @@ class UserFile < ActiveRecord::Base
     file_publisher = FilePublisher.by_context(context)
     file_publisher.publish(files, scope)
   end
-
 end

@@ -78,7 +78,7 @@ gem 'nokogiri'
 gem 'premailer-rails'
 
 gem 'mysql2', '~> 0.3.18'
-
+gem 'gretel'
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

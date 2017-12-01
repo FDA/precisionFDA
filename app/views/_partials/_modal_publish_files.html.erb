@@ -1,0 +1,57 @@
+<div id="publish-files-modal" class="publish-files-modal modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">
+          Publish
+          <span data-bind="text: publishFilesModal.sendingItemsCnt"></span>
+          Item(s)
+        </h4>
+      </div>
+      <div class="modal-body">
+        <!-- ko if: publishFilesModal.showError -->
+        <div class="alert alert-danger"
+              role="alert"
+              data-bind="text: publishFilesModal.errorText">
+        </div>
+        <!-- /ko -->
+        <!-- ko if: publishFilesModal.loading -->
+        <h4 class="text-center">Loading...</h4>
+        <!-- /ko -->
+        <!-- ko if: !publishFilesModal.loading() -->
+        <table class="table wice-grid file-download-list">
+          <tbody>
+            <!-- ko foreach: publishFilesModal.displayingItems -->
+              <tr>
+                <td>
+                  <a target="_blank" data-bind="attr: { href: $data.viewURL }">
+                    <i class="fa fa-fw fa-file-o"></i>
+                    <span data-bind="text: $data.name"></span>
+                  </a>
+                </td>
+                <td>
+                  <span class="file-download-path help-block" data-bind="text: $data.fsPath"></span>
+                </td>
+              </tr>
+            <!-- /ko -->
+          </tbody>
+        </table>
+        <!-- /ko -->
+        <!-- ko if: publishFilesModal.showNoData -->
+        <h4 class="text-center">Selected items are either already published or not owned by you</h4>
+        <!-- /ko -->
+      </div>
+      <div class="modal-footer">
+        <%= form_tag publish_path, method: :post do %>
+          <!-- ko foreach: publishFilesModal.sendingItems -->
+            <input type="hidden" name="ids[]" data-bind="value: $data">
+          <!-- /ko -->
+          <input type="hidden" name="scope" data-bind="value: scope">
+          <button type="button" class="btn btn-default" data-bind="enable: !publishFilesModal.loading()" data-dismiss="modal" tabindex="-1">Cancel</button>
+          <button type="submit" class="btn btn-success" data-bind="enable: !publishFilesModal.loading() && publishFilesModal.sendingItemsCnt() > 0" data-disable-with="Publishing...">Publish</button>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
