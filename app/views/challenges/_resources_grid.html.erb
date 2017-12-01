@@ -1,0 +1,22 @@
+<%= grid(resources_grid , show_filters: defined?(show_filters) ? show_filters : :always) do |g|
+  g.blank_slate partial:  "_partials/empty_grid"
+
+  g.column name: '' do |resource|
+    image_tag(resource.url, style: 'max-width:150px;max-height:150px;', alt: "Preview N/A", class: "text-muted")
+  end
+
+  g.column name: 'URL', attribute: 'url' do |resource|
+    link_to(resource.url, resource.url, class: "table-text-wrap", target: "_blank") +
+    link_to("", challenge_challenge_resource_path(resource.challenge.id, resource.id), method: :delete, data: { confirm: 'Are you certain you want to delete this?' }, class: "fa fa-lg fa-trash pull-right") +
+    content_tag(:div, resource.name, class: 'text-muted table-text-wrap')
+  end
+
+  g.column name: 'Added by', attribute: 'dxuser', assoc: [:user] do |resource|
+    link_to(resource.user.dxuser, user_path(resource.user.dxuser))
+  end
+
+  g.column name: 'Uploaded', attribute: 'created_at', auto_reload: true, filter_type: :standard do |resource|
+    resource.user_file.created_at.to_s(:db)
+  end
+
+end -%>

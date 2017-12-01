@@ -1,8 +1,5 @@
 source 'https://rubygems.org'
 
-# Bundler. The tool that manages all of our gems
-gem 'bundler', '1.13.6'
-
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.7.1'
 # Use SCSS for stylesheets
@@ -80,6 +77,8 @@ gem 'inky-rb', require: 'inky'
 gem 'nokogiri'
 gem 'premailer-rails'
 
+gem 'mysql2', '~> 0.3.18'
+gem 'gretel'
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
@@ -95,21 +94,26 @@ group :development do
 
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
+
+  # View outgoing HTTP requests
+  gem 'httplog'
+
+  # Project-wide environment variables
+  gem 'dotenv-rails'
 end
 
 group :development, :test do
-  # Use sqlite3 as the database for Active Record
-  gem 'sqlite3'
-
   # Use thin
   gem 'thin'
 
   # Manage environment variables
   gem 'figaro'
+  gem 'highline'
+  gem 'quiet_assets'
 end
 
 group :production do
-  gem 'mysql2', '~> 0.3.18'
+
   # Use Unicorn as the app server
   gem 'unicorn', '~> 4.9.0'
   gem 'exception_notification', '4.1.1'

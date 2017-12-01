@@ -42,6 +42,9 @@ table.table-nowrap
   display: flex
   align-items: center
 
+.table-text-wrap
+  white-space: pre-line
+
 // TOOLBAR
 .pfda-toolbar
   background-color: $brand-blue-subtler
@@ -51,6 +54,10 @@ table.table-nowrap
 
   &.pfda-toolbar-transparent
     background-color: transparent
+
+  .action-buttons
+    .btn + .btn
+      margin-left: 10px
 
 // TABLE
 .pfda-table.table
@@ -182,3 +189,8 @@ table.table-nowrap
 .pfda-action-new main
   .page-header
     padding: $padding-large-vertical * 3 $padding-large-horizontal
+
+.bootstrap-datetimepicker-widget
+  &.dropdown-menu
+    max-height: initial
+    overflow: initial

@@ -10,6 +10,7 @@
 # Read Sprockets README (https:#github.com/rails/sprockets#sprockets-directives) for details
 # about supported directives.
 #
+#= require content-tools.min
 #= require polyfills
 #= require vendor
 #= require cookies-js
@@ -47,4 +48,6 @@
 #= require mousetrap/mousetrap-global-bind.min
 #= require tablesort
 #= require tablesort/src/sorts/tablesort.number
+#= require eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min
+#= require jstree
 #= require_tree .

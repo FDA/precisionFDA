@@ -31,3 +31,7 @@
 
 # Ignore application configuration
 /config/application.yml
+.gems/
+
+# Ignore local environment
+.env

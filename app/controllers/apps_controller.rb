@@ -1,6 +1,7 @@
 class AppsController < ApplicationController
   skip_before_action :require_login,     only: [:index, :featured, :explore, :show, :fork, :new]
   before_action :require_login_or_guest, only: [:index, :featured, :explore, :show, :fork, :new]
+  before_action :validate_app_before_export, only: [:export, :cwl_export, :wdl_export]
 
   def index
     if @context.guest?
@@ -10,6 +11,7 @@ class AppsController < ApplicationController
 
     js_param = {}
     @app = nil
+
     if params[:id].present?
       @app = App.accessible_by(@context).find_by(dxid: params[:id])
       if @app.nil?
@@ -26,6 +28,9 @@ class AppsController < ApplicationController
         @notes = @app.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
         @answers = @app.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
         @discussions = @app.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
+
+        @assigned_challenges = Challenge.where(app_id: @app.id)
+        @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@context.user, @app) }
       end
       js_param[:app] = @app.slice(:id, :dxid, :readme)
     end
@@ -33,7 +38,6 @@ class AppsController < ApplicationController
     @my_apps = AppSeries.editable_by(@context).order(name: :asc).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
 
     @ran_apps = AppSeries.accessible_by(@context).order(name: :asc).where.not(user_id: @context.user_id).joins(:jobs).distinct.where(:jobs => { :user_id => @context.user_id }).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
-
 
     User.sync_jobs!(@context)
     if @app.present?
@@ -51,22 +55,19 @@ class AppsController < ApplicationController
   end
 
   def export
-    # App should exist and be accessible
-    app = App.accessible_by(@context).find_by!(dxid: params[:id])
+    send_data @app.to_docker(@context.token), :type => 'text; charset=utf-8', :disposition => 'attachment', :filename => 'Dockerfile'
+  end
 
-    # Assets should be accessible and licenses accepted
-    if app.assets.accessible_by(@context).count != app.assets.count
-      flash[:error] = "This app cannot be exported because one or more assets are not accessible by the current user."
-      redirect_to app_path(app.dxid)
-      return
-    end
-    if app.assets.any? { |a| a.license.present? && !a.licensed_by?(@context) }
-      flash[:error] = "This app contains one or more assets which need to be licensed. Please run the app first in order to accept the licenses."
-      redirect_to app_path(app.dxid)
-      return
-    end
+  def cwl_export
+    docker_file = @app.to_docker(@context.token)
+    filename = @app.name.strip.underscore.gsub(" ", "_")
+    send_data cwl_exporter.export(@app, docker_file, filename), :filename => "#{filename}.tar.gz"
+  end
 
-    send_data app.to_docker(@context.token), :type => 'text; charset=utf-8', :disposition => 'attachment', :filename => 'Dockerfile'
+  def wdl_export
+    docker_file = @app.to_docker(@context.token)
+    filename = @app.name.strip.underscore.gsub(" ", "_")
+    send_data wdl_exporter.export(@app, docker_file, filename), :filename => "#{filename}.tar.gz"
   end
 
   def featured
@@ -175,6 +176,33 @@ class AppsController < ApplicationController
       return
     else
       js app: @app.slice(:dxid, :name, :title, :version, :revision, :readme, :spec, :internal)
+    end
+  end
+
+  private
+
+  def cwl_exporter
+    @cwl_exporter ||= CwlToolExporter.new
+  end
+
+  def wdl_exporter
+    @wdl_exporter ||= WdlExporter.new
+  end
+
+  def validate_app_before_export
+    # App should exist and be accessible
+    @app = App.accessible_by(@context).find_by!(dxid: params[:id])
+
+    # Assets should be accessible and licenses accepted
+    if @app.assets.accessible_by(@context).count != @app.assets.count
+      flash[:error] = "This app cannot be exported because one or more assets are not accessible by the current user."
+      redirect_to app_path(@app.dxid)
+      return
+    end
+    if @app.assets.any? { |a| a.license.present? && !a.licensed_by?(@context) }
+      flash[:error] = "This app contains one or more assets which need to be licensed. Please run the app first in order to accept the licenses."
+      redirect_to app_path(@app.dxid)
+      return
     end
   end
 end
