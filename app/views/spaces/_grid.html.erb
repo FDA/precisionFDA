@@ -13,7 +13,7 @@
     end
   end
 
-  g.column name: 'State', attribute: 'state', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false do |space|
+  g.column name: 'State', attribute: 'state', custom_filter: :state_hash, auto_reload: true, allow_multiple_selection: false do |space|
     [space.state ? space.state : "UNACTIVATED", {class: "col-state state-#{space.state ? space.state.downcase : 'unactivated'}"}]
   end
 

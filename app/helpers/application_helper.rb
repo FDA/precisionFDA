@@ -83,6 +83,8 @@ module ApplicationHelper
       "fa-object-group"
     when "expert"
       "fa-star-o"
+    when "folder"
+      "fa-folder"
     else
       raise "Unknown class #{item.klass}"
     end
