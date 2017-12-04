@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
 import precisionFDA.model.FolderProfile;
+import precisionFDA.pages.spaces.SpaceDetailsPage;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
@@ -637,6 +638,21 @@ public class FilesPage extends AbstractPage {
     public boolean isItemCheckboxDisplayed(String itemName) {
         String xpath = FilesLocators.FILES_LIST_CHECKBOX_TEMPLATE.replace("{ITEM_NAME}", itemName);
         return isElementPresent(By.xpath(xpath), 1);
+    }
+
+    public WebElement getLinkToSpace(String fileName) {
+        String xpath = FilesLocators.FILES_SPACE_LINK.replace("{FILE_NAME}", fileName);
+        return getDriver().findElement(By.xpath(xpath));
+    }
+
+    public String getLinkToSpaceText(String fileName) {
+        return getLinkToSpace(fileName).getText().trim();
+    }
+
+    public SpaceDetailsPage clickOnSpaceLink(String fileName) {
+        log.info("click on space link for the file");
+        getLinkToSpace(fileName).click();
+        return new SpaceDetailsPage(getDriver());
     }
 
 }

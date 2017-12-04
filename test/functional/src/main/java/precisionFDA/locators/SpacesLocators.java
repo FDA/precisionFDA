@@ -54,4 +54,48 @@ public class SpacesLocators {
 
     public static final String SPACES_MOVE_DATA_TO_SPACE_DIALOG_SELECT_BUTTON = "//*[contains(@class, 'modal-dialog')]//button/*[text()='Select']";
 
+    public static final String SPACES_CHECKBOX_TEMPLATE = "//a[contains(text(), '{ITEM_NAME}')]/../..//input[@type='checkbox']";
+
+    public static final String SPACES_DD_COG_BUTTON = "//*[@id='tab-data']//*[@class='dropdown']//button/*[contains(@class, 'cog')]/..";
+
+    public static final String SPACES_DD_COG_ITEMS = "//*[contains(@class, 'dropdown')][contains(@class, 'open')]/ul";
+
+    public static final String SPACES_DD_RENAME_ITEM = "//*[contains(@class, 'dropdown')][contains(@class, 'open')]/ul//a/*[contains(@class, 'pencil')]/..";
+
+    public static final String SPACES_DD_DELETE_ITEM = "//*[contains(@class, 'dropdown')][contains(@class, 'open')]/ul//a/*[contains(@class, 'trash')]/..";
+
+    public static final String SPACES_DD_PUBLISH_ITEM = "//*[contains(@class, 'dropdown')][contains(@class, 'open')]/ul//a/*[contains(@class, 'bullhorn')]/..";
+
+    public static final String SPACES_DD_MOVE_ITEM = "//*[contains(@class, 'dropdown')][contains(@class, 'open')]/ul//a/*[contains(@class, 'share')]/..";
+
+    public static final String SPACES_MODAL_RENAME_NAME_INPUT = "//*[@id='rename_form']//input[@name='file[name]']";
+
+    public static final String SPACES_MODAL_RENAME_SUBMIT_BUTTON = "//*[@id='rename_form']//button[text()='Rename']";
+
+    public static final String SPACES_MODAL_DELETE_TABLE = "//*[@id='delete-files-modal']//table[contains(@class, 'wice-grid')]";
+
+    public static final String SPACES_MODAL_PUBLISH_TABLE = "//*[@id='publish-files-modal']//table[contains(@class, 'wice-grid')]";
+
+    public static final String SPACES_MODAL_DELETE_BUTTON= "//*[@id='delete-files-modal']//button[text()='Delete']";
+
+    public static final String DANGER_NOTIFICATION = "//*[contains(@class, 'danger')]";
+
+    public static final String MOVE_DIALOG_TREE = "//*[@id='move-modal']//*[@id='move_files_tree']";
+
+    public static final String MOVE_DIALOG_TREE_TEMPLATE_LINK = "//*[@id='move_files_tree']//a[contains(text(), '{ITEM_NAME}')]";
+
+    public static final String MOVE_DIALOG_TREE_TEMPLATE_CLICKED_LINK = "//*[@id='move_files_tree']//a[contains(text(), '{ITEM_NAME}')][contains(@class, 'clicked')]";
+
+    public static final String MOVE_DIALOG_MOVE_HERE_BUTTON = "//*[@id='move_form']//button[text()='Move here']";
+
+    public static final String SPACE_FILES_FIRST_CHECKBOX = "//*[contains(@class, 'table-bordered')]//tr[1]/td/input";
+
+    public static final String FILES_DELETE_DIALOG_ITEM_TEMPLATE = "//*[@id='delete-files-modal']//a/span[text()='{ITEM_NAME}']";
+
+    public static final String FILES_DELETE_DIALOG_ITEM_COMMON = "//*[@id='delete-files-modal']//a/span";
+
+    public static final String FILES_PUBLISH_DIALOG_ITEM_TEMPLATE = "//*[@id='publish-files-modal']//a/span[text()='{ITEM_NAME}']";
+
+    public static final String FILES_PUBLISH_DIALOG_PUBLISH_BUTTON = "//*[@id='publish-files-modal']//button[text()='Publish']";
+
 }
