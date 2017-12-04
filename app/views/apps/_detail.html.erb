@@ -106,12 +106,12 @@
           <% end %>
         </li>
         <li data-turbolinks="false">
-          <%= link_to cwl_export_app_path(@app.dxid), method: :post, data: { confirm: 'You are about to download a CWL Tool package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+          <%= link_to cwl_export_app_path(@app.dxid), data: { confirm: 'You are about to download a CWL Tool package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
             CWL Tool
           <% end %>
         </li>
         <li data-turbolinks="false">
-          <%= link_to wdl_export_app_path(@app.dxid), method: :post, data: { confirm: 'You are about to download a WDL Task package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+          <%= link_to wdl_export_app_path(@app.dxid), data: { confirm: 'You are about to download a WDL Task package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
             WDL Task
           <% end %>
         </li>
