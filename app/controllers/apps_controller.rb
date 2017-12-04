@@ -107,6 +107,8 @@ class AppsController < ApplicationController
     @notes = @app.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @app.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
     @discussions = @app.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
+    @assigned_challenges = Challenge.where(app_id: @app.id)
+    @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@context.user, @app) }
 
     @items_from_params = [@app]
     @item_path = pathify(@app)
