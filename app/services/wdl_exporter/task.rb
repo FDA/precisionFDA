@@ -1,5 +1,7 @@
 class WdlExporter::Task
 
+  include ::WdlExporter::Adapter
+
   def initialize(app)
     @app = app
   end
@@ -25,6 +27,10 @@ task #{app.name} {
   TEXT
   end
 
+  private
+
+  attr_reader :app
+
   def inputs
     app.input_spec.map do |input|
       wdl_type = wdl_type(input["class"])
@@ -35,7 +41,7 @@ task #{app.name} {
 
   def command
     params = app.input_spec.map do |input|
-      "--#{input["name"]} ${#{input["name"]}}"
+      "--#{input["name"]} \"${#{input["name"]}}\""
     end.join(" ")
 
     "/usr/bin/run #{params} && mv /data/out/* ."
@@ -48,36 +54,6 @@ task #{app.name} {
       wdl_expression = wdl_expression(output["class"], name)
 
       "    #{wdl_type} #{name} = #{wdl_expression}"
-    end
-  end
-
-  private
-
-  attr_reader :app
-
-  def wdl_type(klass)
-    case klass
-    when "string"  then "String"
-    when "file"    then "File"
-
-    when "int"     then "Int"
-    when "boolean" then "Boolean"
-    when "float"   then "Float"
-    else
-      raise "Unsupported type: #{type}"
-    end
-  end
-
-  def wdl_expression(klass, name)
-    case klass
-    when "string"  then "read_string(\"#{name}\")"
-    when "file"    then "\"#{name}\""
-
-    when "int"     then "read_int(\"#{name}\")"
-    when "boolean" then "read_boolean(\"#{name}\")"
-    when "float"   then "read_float(\"#{name}\")"
-    else
-      raise "Unsupported type: #{type}"
     end
   end
 
