@@ -142,4 +142,6 @@ public class FilesLocators {
 
     public static final String FILES_MOVE_DANGER_NOTIFICATION = "//*[contains(@class, 'danger')]";
 
+    public static final String FILES_SPACE_LINK = "//a[contains(text(), '{FILE_NAME}')]/../..//a[contains(@href, 'spaces')]";
+
 }

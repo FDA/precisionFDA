@@ -656,7 +656,7 @@ public class TestFilesData {
         return publishGridFolder;
     }
 
-    //=== space test ===
+    //=== main space test ===
 
     static FolderProfile mainSpaceFolder = new FolderProfile(
             "at space folder " + getRunTimeLocalUniqueValue()
@@ -704,6 +704,106 @@ public class TestFilesData {
 
     public static FileProfile getMovePrivateFile() {
         return movePrivateFile;
+    }
+
+    //=== to edit space test ===
+
+    static FolderProfile toEditSpaceFolder = new FolderProfile(
+            "at space folder to edit " + getRunTimeLocalUniqueValue()
+    );
+
+    public static FolderProfile getToEditSpaceFolder() {
+        return toEditSpaceFolder;
+    }
+
+    static FileProfile toEditSpaceFile = new FileProfile(
+            getGeneratedTestFileName(getDictPng()),
+            "",
+            ""
+    );
+
+    public static FileProfile getToEditSpaceFile() {
+        return toEditSpaceFile;
+    }
+
+    //=== to delete space test ===
+
+    static FolderProfile toDeleteSpaceFolder = new FolderProfile(
+            "at space folder to delete " + getRunTimeLocalUniqueValue()
+    );
+
+    public static FolderProfile getToDeleteSpaceFolder() {
+        return toDeleteSpaceFolder;
+    }
+
+    static FileProfile toDeleteSpaceFile = new FileProfile(
+            getGeneratedTestFileName(getDictPng()),
+            "",
+            ""
+    );
+
+    static FileProfile toDeleteSpaceFileSecond = new FileProfile(
+            getGeneratedTestFileName(getDictPng()),
+            "",
+            ""
+    );
+
+    public static FileProfile getToDeleteSpaceFile() {
+        return toDeleteSpaceFile;
+    }
+
+    public static FileProfile getToDeleteSpaceFileSecond() {
+        return toDeleteSpaceFileSecond;
+    }
+
+    //=== to move space test ===
+
+    static FolderProfile toMoveSpaceFolder = new FolderProfile(
+            "at space folder move test " + getRunTimeLocalUniqueValue()
+    );
+
+    public static FolderProfile getToMoveSpaceFolder() {
+        return toMoveSpaceFolder;
+    }
+
+    static FileProfile toMoveSpaceFile = new FileProfile(
+            getGeneratedTestFileName(getDictTxt()),
+            "",
+            ""
+    );
+
+    public static FileProfile getToMoveSpaceFile() {
+        return toMoveSpaceFile;
+    }
+
+    //=== to publish space test ===
+
+    static FolderProfile toPublishSpaceFolder = new FolderProfile(
+            "at space folder to publish " + getRunTimeLocalUniqueValue()
+    );
+
+    public static FolderProfile getToPublishSpaceFolder() {
+        return toPublishSpaceFolder;
+    }
+
+    static FileProfile toPublishSpaceFile = new FileProfile(
+            getGeneratedTestFileName(getDictPng()),
+            "",
+            ""
+    );
+
+    static FileProfile toPublishSpaceFileSecond = new FileProfile(
+            getGeneratedTestFileName(getDictPng()),
+            "",
+            ""
+    );
+
+    public static FileProfile getToPublishSpaceFile() {
+        return toPublishSpaceFile;
+    }
+
+    public static FileProfile getToPublishSpaceFileSecond() {
+        return toPublishSpaceFileSecond;
     }
 
 }
