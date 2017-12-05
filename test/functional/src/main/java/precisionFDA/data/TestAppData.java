@@ -5,9 +5,7 @@ import precisionFDA.model.AppProfile;
 import static precisionFDA.data.TestChallsData.getTestChallAppOutputFileFieldName1;
 import static precisionFDA.data.TestChallsData.getTestChallAppOutputFileFieldName2;
 import static precisionFDA.data.TestChallsData.getTestChallAppOutputStrFieldName1;
-import static precisionFDA.data.TestRunData.getDebugLogFolder;
-import static precisionFDA.data.TestRunData.getOutputNameFieldName;
-import static precisionFDA.data.TestRunData.getTestRunUniqueFinalValue;
+import static precisionFDA.data.TestRunData.*;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class TestAppData {
@@ -43,6 +41,18 @@ public class TestAppData {
     static final String CREATE_APP_CHALL_TITLE_PREFIX = "at_challenge_test_title_";
 
     static final String CREATE_APP_JOB_CHALL_NAME_PREFIX = "at_job_challenge_test_";
+
+    static final String DOCKER_FILE_NAME = "Dockerfile";
+
+    static final String DOCKER_VALIDATION_TEXT = "RUN DEBIAN_FRONTEND";
+
+    public static String getDockerValidationText() {
+        return DOCKER_VALIDATION_TEXT;
+    }
+
+    public static String getDockerFileName() {
+        return DOCKER_FILE_NAME;
+    }
 
     static String CREATE_CHALL_APP_SCRIPT_BODY =
             "emit " + getTestChallAppOutputStrFieldName1() + " 'foo bar str 1'\n" +

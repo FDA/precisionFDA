@@ -12,8 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertTrue;
 import static precisionFDA.data.TestAppData.*;
 import static precisionFDA.data.TestRunData.*;
-import static precisionFDA.utils.Utils.printTestHeader;
-import static precisionFDA.utils.Utils.removeDockerFileFromDownloads;
+import static precisionFDA.utils.Utils.*;
 
 @Name("Applications management test suite")
 public class AppsTest extends AbstractTest {
@@ -251,8 +250,8 @@ public class AppsTest extends AbstractTest {
         AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openAppFromJobsList(appProfile);
 
         SoftAssert.assertThat(
-                appsSavedAppPage.isInstanceValueDisplayed())
-                .as("Instance value is displayed")
+                appsSavedAppPage.isRunJobDisplayed(appProfile))
+                .as("Job name is displayed: " + appProfile.getJobNameText())
                 .isTrue();
 
         appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
@@ -463,17 +462,86 @@ public class AppsTest extends AbstractTest {
         removeDockerFileFromDownloads();
         appsSavedAppPage = appsSavedAppPage.exportDockerContainer();
 
-        SoftAssert.assertThat(
+        assertThat(
                 appsSavedAppPage.getActSelectedAppName())
                 .as("Name of the app")
                 .isEqualTo(appProfile.getCurRevNameText());
 
-        SoftAssert.assertThat(
+        assertThat(
                 isDockerFileDownloaded())
                 .as("Docker file is downloaded")
                 .isTrue();
 
-        SoftAssert.assertAll();
+        assertThat(
+                isDockerFileNotEmpty())
+                .as("Docker file is not empty")
+                .isTrue();
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveApp"})
+    public void exportCWLToolFile() {
+        printTestHeader("Test Case: check it is possible to export an app as a CWL Tool file");
+
+        AppProfile appProfile = getMainAppProfile();
+
+        AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
+
+        assertThat(
+                appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
+                .as("Link to saved app is displayed")
+                .isTrue();
+
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openAppFromMyAppsList(appProfile);
+        removeCWLToolFileFromDownloads(appProfile);
+        appsSavedAppPage = appsSavedAppPage.exportCWLTool(appProfile);
+
+        assertThat(
+                appsSavedAppPage.getActSelectedAppName())
+                .as("Name of the app")
+                .isEqualTo(appProfile.getCurRevNameText());
+
+        assertThat(
+                isCWLToolFileDownloaded(appProfile))
+                .as("CWL Tool file is downloaded")
+                .isTrue();
+
+        assertThat(
+                isCWLToolFileNotEmpty(appProfile))
+                .as("CWL Tool file is not empty")
+                .isTrue();
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveApp"})
+    public void exportWDLTaskFile() {
+        printTestHeader("Test Case: check it is possible to export an app as a WDL Task file");
+
+        AppProfile appProfile = getMainAppProfile();
+
+        AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
+
+        assertThat(
+                appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
+                .as("Link to saved app is displayed")
+                .isTrue();
+
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openAppFromMyAppsList(appProfile);
+        removeWDLTaskFileFromDownloads(appProfile);
+        appsSavedAppPage = appsSavedAppPage.exportWDLTask(appProfile);
+
+        assertThat(
+                appsSavedAppPage.getActSelectedAppName())
+                .as("Name of the app")
+                .isEqualTo(appProfile.getCurRevNameText());
+
+        assertThat(
+                isWDLTaskFileDownloaded(appProfile))
+                .as("WDL Task file is downloaded")
+                .isTrue();
+
+        assertThat(
+                isWDLTaskFileNotEmpty(appProfile))
+                .as("WDL Task file is not empty")
+                .isTrue();
     }
 
 }

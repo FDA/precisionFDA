@@ -99,7 +99,16 @@ public class TestChallsData {
 
     public static String getExpectedChallDateTimeValue(String initDateTime, TimeZoneProfile timeZone) {
         String[] init = initDateTime.split(" ");
-        return init[0] + " " + init[1] + " " + timeZone.getCodeOfLocation();
+        String time = init[1];
+
+        if (init[2].toUpperCase().equalsIgnoreCase("PM")) {
+            String[] timeArray = time.split(":");
+            String hours = timeArray[0];
+            hours = "" + (Integer.parseInt(hours) + 12);
+            time = hours + ":" + timeArray[1] + ":" + timeArray[2];
+        }
+
+        return init[0] + " " + time + " " + timeZone.getCodeOfLocation();
     }
 
     public static ChallProfile mainChallProfile = new ChallProfile(

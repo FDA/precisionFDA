@@ -73,8 +73,6 @@ public class SpacesTest extends AbstractTest {
                 .as("Created space description is displayed")
                 .isTrue();
 
-        logoutFromAll();
-
         SoftAssert.assertAll();
     }
 
@@ -85,6 +83,7 @@ public class SpacesTest extends AbstractTest {
         SpaceProfile spaceProfile = getMainSpaceProfile();
         UserProfile user = TestUserData.getTestUser();
 
+        logoutFromAll();
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         SpacesPage spacesPage = overviewPage.openSpacesPage();
 
@@ -117,8 +116,6 @@ public class SpacesTest extends AbstractTest {
                 .as("'Accept' link for Guest Lead is displayed")
                 .isFalse();
 
-        logoutFromAll();
-
         SoftAssert.assertAll();
     }
 
@@ -129,6 +126,7 @@ public class SpacesTest extends AbstractTest {
         SpaceProfile spaceProfile = getMainSpaceProfile();
         UserProfile user = TestUserData.getAnotherTestUser();
 
+        logoutFromAll();
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         SpacesPage spacesPage = overviewPage.openSpacesPage();
 
@@ -161,8 +159,6 @@ public class SpacesTest extends AbstractTest {
                 .as("'Accept' link for Guest Lead is displayed")
                 .isFalse();
 
-        logoutFromAll();
-
         SoftAssert.assertAll();
     }
 
@@ -174,6 +170,7 @@ public class SpacesTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUser();
         FolderProfile spaceFolder = getMainSpaceFolder();
 
+        logoutFromAll();
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         SpacesPage spacesPage = overviewPage.openSpacesPage();
 
@@ -263,11 +260,47 @@ public class SpacesTest extends AbstractTest {
     }
 
     @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 5)
+    public void checkVisibilityByGuest() {
+        printTestHeader("Test Case: verify Guest User can view create by Host User file and folder");
+
+        SpaceProfile spaceProfile = getMainSpaceProfile();
+        FileProfile spaceFile = getMainSpaceFile();
+        FolderProfile spaceFolder = getMainSpaceFolder();
+        UserProfile user = TestUserData.getAnotherTestUser();
+
+        logoutFromAll();
+        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        SpacesPage spacesPage = overviewPage.openSpacesPage();
+        SpaceDetailsPage spaceDetailsPage = spacesPage.openSpace(spaceProfile.getSpaceName());
+
+        assertThat(
+                spaceDetailsPage.isLinkToAddedFileDisplayed(spaceFile.getFileName()))
+                .as("Added by Host file is displayed")
+                .isTrue();
+
+        assertThat(
+                spaceDetailsPage.isLinkToCreatedFolderDisplayed(spaceFolder.getFolderName()))
+                .as("Created by Host folder is displayed")
+                .isTrue();
+
+        UploadedFilePage uploadedFilePage = spaceDetailsPage.openFile(spaceFile.getFileName());
+
+        assertThat(
+                uploadedFilePage.isPageTitleCorrect(spaceFile.getFileName()))
+                .as("Page title is correct one")
+                .isTrue();
+    }
+
+    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 6)
     public void renameFile() {
         printTestHeader("Test Case: rename a file");
 
         SpaceProfile spaceProfile = getMainSpaceProfile();
         FileProfile spaceFile = getToEditSpaceFile();
+        UserProfile user = TestUserData.getTestUser();
+
+        logoutFromAll();
+        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
         FilesPage filesPage = openOverviewPage().openFilesPage();
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
@@ -308,7 +341,7 @@ public class SpacesTest extends AbstractTest {
                 .isTrue();
     }
 
-    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 6)
+    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 7)
     public void renameFolder() {
         printTestHeader("Test Case: rename a folder");
 
@@ -338,7 +371,7 @@ public class SpacesTest extends AbstractTest {
                 .isTrue();
     }
 
-    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 7)
+    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 8)
     public void moveFile() {
         printTestHeader("Test Case: move a file to a folder");
 
@@ -408,7 +441,7 @@ public class SpacesTest extends AbstractTest {
                 .isFalse();
     }
 
-    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 8)
+    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 9)
     public void deleteFolderAndFiles() {
         printTestHeader("Test Case: delete folder and files");
 
@@ -530,7 +563,7 @@ public class SpacesTest extends AbstractTest {
                 .isFalse();
     }
 
-    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 9)
+    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 10)
     public void publishFiles() {
         printTestHeader("Test Case: publish files");
 
@@ -633,14 +666,14 @@ public class SpacesTest extends AbstractTest {
 
         assertThat(
                 spaceDetailsPage.isLinkToAddedFileDisplayed(spaceFile1.getFileName()))
-                .as("file1 is displayed in Explored tab")
+                .as("file1 is displayed in Explore tab")
                 .isTrue();
 
         filesPage.filterByName(spaceFile2.getFileName());
 
         assertThat(
                 spaceDetailsPage.isLinkToAddedFileDisplayed(spaceFile2.getFileName()))
-                .as("file2 is displayed in Explored tab")
+                .as("file2 is displayed in Explore tab")
                 .isTrue();
     }
 
