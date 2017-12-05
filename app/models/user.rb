@@ -143,7 +143,7 @@ class User < ActiveRecord::Base
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
       dxuser == "elaine.johanson" || dxuser == "ruth.bandler"
     else
-      ((["precisionfda", "precisionfda_dev", "dnanexus"].include?(org.handle)) && org.admin_id == id) || ["alan.fdauser", "singeradmin.pfdadev"].include?(dxuser)
+      ((["precisionfda", "precisionfda_dev", "dnanexus"].include?(org.handle)) && org.admin_id == id) || ["alan.fdauser", "singeradmin.pfdadev", "singer.ma"].include?(dxuser)
     end
   end
 
