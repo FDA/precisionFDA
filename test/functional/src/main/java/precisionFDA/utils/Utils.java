@@ -1,10 +1,10 @@
 package precisionFDA.utils;
 
 import org.apache.log4j.Logger;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import precisionFDA.model.AppProfile;
 
 import java.io.*;
 import java.text.ParseException;
@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.Random;
 import java.util.TimeZone;
 
+import static precisionFDA.data.TestAppData.getDockerFileName;
 import static precisionFDA.data.TestDict.*;
 import static precisionFDA.data.TestFilesData.*;
 import static precisionFDA.data.TestRunData.*;
@@ -205,6 +206,8 @@ public class Utils {
         log.info("deleting temp files");
         deleteTempFilesByExt(".txt");
         deleteTempFilesByExt(".png");
+        deleteTempFilesByExt(".gz");
+        deleteTempFilesByExt(".tar");
         deleteFileByPartialName(getDockerFileName(), getPathToTempFilesFolder());
     }
 
@@ -281,6 +284,22 @@ public class Utils {
         removeSameFileFromDownloads(getDockerFileName());
     }
 
+    public static void removeCWLToolFileFromDownloads(AppProfile appProfile) {
+        removeSameFileFromDownloads(getCWLToolFileName(appProfile));
+    }
+
+    public static void removeWDLTaskFileFromDownloads(AppProfile appProfile) {
+        removeSameFileFromDownloads(getWDLTaskFileName(appProfile));
+    }
+
+    public static String getCWLToolFileName(AppProfile appProfile) {
+        return appProfile.getCurRevNameText() + ".tar.gz";
+    }
+
+    public static String getWDLTaskFileName(AppProfile appProfile) {
+        return appProfile.getCurRevNameText() + ".tar.gz";
+    }
+
     public static void removeSameFileFromDownloads(String fileName) {
         String downloadsPath = getPathToDownloadsFolder();
         String newFileName = downloadsPath + "old_" + getRunTimeLocalUniqueValue() + fileName;
@@ -301,6 +320,11 @@ public class Utils {
                 f.delete();
             }
         }
+    }
+
+    public static double getFileSize(String filePath) {
+        File file = new File(filePath);
+        return file.length();
     }
 
     public static String generateUpdatedName(String oldFileName) {
@@ -386,6 +410,27 @@ public class Utils {
     public static String getRandom() {
         Random rand = new Random();
         return "" + rand.nextInt(1000);
+    }
+
+    public static String getTextFromFile(String filePath) {
+        String text = "";
+        BufferedReader br  = null;
+        try {
+            String sCurrentLine;
+            br = new BufferedReader(new FileReader(filePath));
+            while ((sCurrentLine = br.readLine()) != null) {
+                text = text + sCurrentLine;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (br != null)br.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return text;
     }
 
 

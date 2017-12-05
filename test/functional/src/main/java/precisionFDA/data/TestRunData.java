@@ -2,12 +2,8 @@ package precisionFDA.data;
 
 import precisionFDA.utils.SettingsProperties;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
+import static precisionFDA.utils.Utils.getTextFromFile;
 
 public class TestRunData {
 
@@ -36,8 +32,6 @@ public class TestRunData {
     static final String OUTPUT_LABEL_FIELD_NAME = "output_label_";
 
     static final String OUTPUT_HELP_FIELD_NAME = "output_help_";
-
-    static final String DOCKER_FILE_NAME = "Dockerfile";
 
     public static String getCurrentTimezone() {
         return currentTimezone;
@@ -141,10 +135,6 @@ public class TestRunData {
         return OUTPUT_HELP_FIELD_NAME;
     }
 
-    public static String getDockerFileName() {
-        return DOCKER_FILE_NAME;
-    }
-
     public static String getPathToDownloadsFolder() {
         return getPathToTempFilesFolder();
     }
@@ -163,25 +153,7 @@ public class TestRunData {
 
     public static String getText1000Symbols() {
         String sFilePath = getPathToTestFilesFolder() + "text_1000_symbols.txt";
-        BufferedReader br  = null;
-        String text = "";
-        try {
-            String sCurrentLine;
-            br = new BufferedReader(new FileReader(sFilePath));
-            while ((sCurrentLine = br.readLine()) != null) {
-                text = text + sCurrentLine;
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (br != null)br.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-        return text;
+        return getTextFromFile(sFilePath);
     }
 
 }

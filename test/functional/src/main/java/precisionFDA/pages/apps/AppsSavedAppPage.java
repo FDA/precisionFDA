@@ -16,8 +16,9 @@ import precisionFDA.model.UserProfile;
 import precisionFDA.pages.AbstractPage;
 
 import static precisionFDA.data.TestAppData.getAppCommentText;
-import static precisionFDA.data.TestRunData.getDockerFileName;
-import static precisionFDA.data.TestRunData.getPathToDownloadsFolder;
+import static precisionFDA.data.TestAppData.getDockerFileName;
+import static precisionFDA.utils.Utils.getCWLToolFileName;
+import static precisionFDA.utils.Utils.getWDLTaskFileName;
 import static precisionFDA.utils.Utils.waitUntilFileIsDownloaded;
 
 public class AppsSavedAppPage extends AbstractPage {
@@ -120,6 +121,12 @@ public class AppsSavedAppPage extends AbstractPage {
     @FindBy(xpath = AppsLocators.APPS_SAVED_EXPORT_DOCKER_LINK)
     private Link appSavedExportDockerLink;
 
+    @FindBy(xpath = AppsLocators.APPS_SAVED_EXPORT_CWLTOOL_LINK)
+    private Link appSavedExportCWLToolLink;
+
+    @FindBy(xpath = AppsLocators.APPS_SAVED_EXPORT_WDLTASK_LINK)
+    private Link appSavedExportWDLTaskLink;
+
     @FindBy(xpath = AppsLocators.APPS_SAVED_APP_ASSIGN_TO_CHALLENGE_BUTTON)
     private Button appSavedAssignToChallengeButton;
 
@@ -153,6 +160,14 @@ public class AppsSavedAppPage extends AbstractPage {
 
     public Link getAppSavedExportDockerLink() {
         return appSavedExportDockerLink;
+    }
+
+    public Link getAppSavedExportCWLToolLink() {
+        return appSavedExportCWLToolLink;
+    }
+
+    public Link getAppSavedExportWDLTaskLink() {
+        return appSavedExportWDLTaskLink;
     }
 
     public String getAppSavedInputLabelText() {
@@ -282,7 +297,7 @@ public class AppsSavedAppPage extends AbstractPage {
     }
 
     public boolean isRunJobDisplayed(AppProfile appProfile) {
-        return isElementPresent(getRunJobLink(appProfile));
+        return isElementPresent(getRunJobLink(appProfile), 2);
     }
 
     public Link getAppsSavedAppReadmeTabLink() {
@@ -401,8 +416,38 @@ public class AppsSavedAppPage extends AbstractPage {
         return new AppsSavedAppPage(getDriver());
     }
 
+    public AppsSavedAppPage exportCWLTool(AppProfile appProfile) {
+        log.info("export CWL Tool file");
+        waitUntilClickable(getAppSavedExportButton());
+        getAppSavedExportButton().click();
+        waitUntilClickable(getAppSavedExportCWLToolLink());
+        getAppSavedExportCWLToolLink().click();
+        alertAccept(10, 500);
+        waitUntilCWLToolFileIsDownloaded(appProfile);
+        return new AppsSavedAppPage(getDriver());
+    }
+
+    public AppsSavedAppPage exportWDLTask(AppProfile appProfile) {
+        log.info("export WDL Task file");
+        waitUntilClickable(getAppSavedExportButton());
+        getAppSavedExportButton().click();
+        waitUntilClickable(getAppSavedExportWDLTaskLink());
+        getAppSavedExportWDLTaskLink().click();
+        alertAccept(10, 500);
+        waitUntilWDLTaskFileIsDownloaded(appProfile);
+        return new AppsSavedAppPage(getDriver());
+    }
+
     public void waitUntilDockerFileIsDownloaded() {
         waitUntilFileIsDownloaded(getDockerFileName());
+    }
+
+    public void waitUntilCWLToolFileIsDownloaded(AppProfile appProfile) {
+        waitUntilFileIsDownloaded(getCWLToolFileName(appProfile));
+    }
+
+    public void waitUntilWDLTaskFileIsDownloaded(AppProfile appProfile) {
+        waitUntilFileIsDownloaded(getWDLTaskFileName(appProfile));
     }
 
     public boolean isAssignToChallengeDisplayed() {

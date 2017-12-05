@@ -11,6 +11,7 @@ import precisionFDA.model.FileProfile;
 import precisionFDA.model.FolderProfile;
 import precisionFDA.pages.AbstractPage;
 import precisionFDA.pages.files.FilesPage;
+import precisionFDA.pages.files.UploadedFilePage;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
@@ -250,6 +251,14 @@ public class SpaceDetailsPage extends AbstractPage {
         WebElement we = getDriver().findElement(By.xpath(xpath));
         we.click();
         return new SpaceDetailsPage(getDriver());
+    }
+
+    public UploadedFilePage openFile(String fileName) {
+        log.info("open file");
+        String xpath = SpacesLocators.SPACES_ADDED_FILE_TEMPLATE.replace("{FILE_NAME}", fileName);
+        WebElement we = getDriver().findElement(By.xpath(xpath));
+        we.click();
+        return new UploadedFilePage(getDriver());
     }
 
     public String getDisplayedBreadcrumbsText() {

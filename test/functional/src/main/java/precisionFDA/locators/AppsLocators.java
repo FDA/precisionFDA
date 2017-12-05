@@ -82,7 +82,7 @@ public class AppsLocators {
 
     public static final String APPS_EDIT_RUN_APP_RUN_APP_BUTTON = "//span[text()='Run App']/../../button";
 
-    public static final String APPS_SAVED_APP_JOB_LINK_TEMPLATE = "//*[contains(@class, 'job')]//a[contains(text(), '{JOB_NAME}')]";
+    public static final String APPS_SAVED_APP_JOB_LINK_TEMPLATE = "//*[@id='app-job']//a[contains(text(), '{JOB_NAME}')]";
 
     public static final String APPS_JOB_PAGE_I_O_TAB_LINK = "//span[text()='Inputs and Outputs']/../../a[contains(@href, 'tab')]";
 
@@ -181,6 +181,10 @@ public class AppsLocators {
     public static final String APPS_SAVED_EXPORT_BUTTON = "//button/span[contains(@class, 'cloud-download')]/..";
 
     public static final String APPS_SAVED_EXPORT_DOCKER_LINK = "//a[contains(text(), 'Docker Container')]";
+
+    public static final String APPS_SAVED_EXPORT_CWLTOOL_LINK = "//a[contains(text(), 'CWL Tool')]";
+
+    public static final String APPS_SAVED_EXPORT_WDLTASK_LINK = "//a[contains(text(), 'WDL Task')]";
 
     public static final String APPS_JOBS_LIST_APP_LINK_TEMPLATE = "//*[@id='jobs']//a[contains(text(), '{APP_TITLE}')]";
 

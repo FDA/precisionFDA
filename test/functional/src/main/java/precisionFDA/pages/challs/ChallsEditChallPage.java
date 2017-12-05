@@ -127,7 +127,7 @@ public class ChallsEditChallPage extends AbstractPage {
     }
 
     public void fillChallForm(ChallProfile challProfile) {
-        log.info("fill challenge form");
+        log.info("fill challenge form. Name is: " + challProfile.getChallName());
         getEditChallNameInput().sendKeys(challProfile.getChallName());
 
         String optionFullText = getOptionTextByPartialText(challProfile.getChallScoringAppUser(), ChallsLocators.CHALLS_EDIT_CHALL_FORM_USER_OPTIONS_COMMON);
