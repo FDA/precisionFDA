@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171115161356) do
+ActiveRecord::Schema.define(version: 20171113163745) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -260,12 +260,6 @@ ActiveRecord::Schema.define(version: 20171115161356) do
   add_index "experts", ["state"], name: "index_experts_on_state", using: :btree
   add_index "experts", ["user_id"], name: "index_experts_on_user_id", using: :btree
 
-  create_table "filesystem", force: :cascade do |t|
-    t.integer "node_id", limit: 4
-    t.text    "scope",   limit: 65535, null: false
-    t.text    "path",    limit: 65535
-  end
-
   create_table "follows", force: :cascade do |t|
     t.integer  "followable_id",   limit: 4,                   null: false
     t.string   "followable_type", limit: 255,                 null: false
@@ -381,15 +375,14 @@ ActiveRecord::Schema.define(version: 20171115161356) do
     t.text     "description",             limit: 65535
     t.integer  "user_id",                 limit: 4
     t.integer  "file_size",               limit: 8
-    t.datetime "created_at",                                            null: false
-    t.datetime "updated_at",                                            null: false
+    t.datetime "created_at",                            null: false
+    t.datetime "updated_at",                            null: false
     t.integer  "parent_id",               limit: 4
     t.string   "parent_type",             limit: 255
     t.string   "scope",                   limit: 255
     t.integer  "parent_folder_id",        limit: 4
     t.string   "sti_type",                limit: 255
     t.integer  "scoped_parent_folder_id", limit: 4
-    t.boolean  "is_root",                               default: false
   end
 
   add_index "nodes", ["parent_type", "parent_id"], name: "index_nodes_on_parent_type_and_parent_id", using: :btree
@@ -552,6 +545,7 @@ ActiveRecord::Schema.define(version: 20171115161356) do
     t.text    "meta",                      limit: 65535
   end
 
+  add_index "truth_challenge_results", ["answer_id"], name: "index_truth_challenge_results_on_answer_id", using: :btree
   add_index "truth_challenge_results", ["entry"], name: "index_truth_challenge_results_on_entry", using: :btree
   add_index "truth_challenge_results", ["fp_al"], name: "index_truth_challenge_results_on_fp_al", using: :btree
   add_index "truth_challenge_results", ["fp_gt"], name: "index_truth_challenge_results_on_fp_gt", using: :btree
@@ -672,6 +666,8 @@ ActiveRecord::Schema.define(version: 20171115161356) do
   add_foreign_key "apps_assets", "nodes", column: "asset_id"
   add_foreign_key "archive_entries", "nodes", column: "asset_id"
   add_foreign_key "challenge_resources", "challenges"
+  add_foreign_key "challenge_resources", "nodes", column: "user_file_id"
+  add_foreign_key "challenge_resources", "users"
   add_foreign_key "challenges", "apps"
   add_foreign_key "challenges", "users", column: "admin_id"
   add_foreign_key "challenges", "users", column: "app_owner_id"
