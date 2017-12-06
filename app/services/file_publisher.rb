@@ -43,7 +43,7 @@ class FilePublisher
         project_files.each do |file|
           file.reload
           raise "Race condition for file #{file.id} (#{file.dxid})" unless file.publishable_by_user?(user, scope)
-          file.update!(scope: scope, project: destination_project)
+          file.update!(scope: scope, project: destination_project, scoped_parent_folder_id: nil)
           count += 1
         end
       end
