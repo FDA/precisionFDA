@@ -154,4 +154,7 @@ module ApplicationHelper
     end
   end
 
+  def git_revision
+    "#{GIT_BRANCH}:#{GIT_REVISION}"
+  end
 end
