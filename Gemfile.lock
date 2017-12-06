@@ -101,7 +101,6 @@ GEM
     gravtastic (3.2.6)
     gretel (3.0.9)
       rails (>= 3.1.0)
-    highline (1.7.8)
     htmlentities (4.3.4)
     httplog (0.99.7)
       colorize
@@ -281,7 +280,6 @@ DEPENDENCIES
   figaro
   gravtastic
   gretel
-  highline
   httplog
   humanizer
   inky-rb

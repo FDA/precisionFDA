@@ -1,12 +1,8 @@
-require 'highline'
-
-cli = HighLine.new
-
-first_name = cli.ask('First name') { |q| q.validate = /\w+/ }
-last_name = cli.ask('Last name') { |q| q.validate = /\w+/ }
-email = cli.ask('Email') { |q| q.validate = /.+/ }
-dxuser = cli.ask('User ID') { |q| q.validate = /.+/ }
-org_handle = cli.ask('Org handle (without prefix)'){ |q| q.validate = /.+/ }
+first_name = ENV.fetch('PFDA_USER_FIRST_NAME', 'Alice')
+last_name = ENV.fetch('PFDA_USER_LAST_NAME', 'Black')
+email = ENV.fetch('PFDA_USER_EMAIL', 'alice.black@alice.black.com')
+dxuser = ENV.fetch('PFDA_USER_DXUSER', 'automationtestuser')
+org_handle = ENV.fetch('PFDA_USER_ORG_HANDLE', 'automationtestinggmbh')
 
 ActiveRecord::Base.transaction do
   user = User.create!(
