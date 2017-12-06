@@ -8,6 +8,7 @@ import precisionFDA.model.SpaceProfile;
 import precisionFDA.model.UserProfile;
 import precisionFDA.pages.files.FilesAddFilesPage;
 import precisionFDA.pages.files.FilesPage;
+import precisionFDA.pages.files.FilesPublishPage;
 import precisionFDA.pages.files.UploadedFilePage;
 import precisionFDA.pages.overview.OverviewPage;
 import precisionFDA.pages.spaces.EditSpacePage;
@@ -76,7 +77,7 @@ public class SpacesTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 1)
+    @Test(dependsOnMethods = {"createAndSaveSpace"}, priority = 1)
     public void activateSpaceByHostLead() {
         printTestHeader("Test Case: activate space by host lead");
 
@@ -119,7 +120,7 @@ public class SpacesTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 2)
+    @Test(dependsOnMethods = {"createAndSaveSpace"}, priority = 2)
     public void activateSpaceByGuestLead() {
         printTestHeader("Test Case: activate space by guest lead");
 
@@ -162,7 +163,7 @@ public class SpacesTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 3)
+    @Test(dependsOnMethods = {"createAndSaveSpace"}, priority = 3)
     public void createFolderByHostLead() {
         printTestHeader("Test Case: create a folder by host lead");
 
@@ -220,7 +221,7 @@ public class SpacesTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 4)
+    @Test(dependsOnMethods = {"createAndSaveSpace"}, priority = 4)
     public void addFileByHostLead() {
         printTestHeader("Test Case: add a file by host lead");
 
@@ -259,7 +260,7 @@ public class SpacesTest extends AbstractTest {
                 .isTrue();
     }
 
-    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 5)
+    @Test(dependsOnMethods = {"createAndSaveSpace"}, priority = 5)
     public void checkVisibilityByGuest() {
         printTestHeader("Test Case: verify Guest User can view create by Host User file and folder");
 
@@ -291,7 +292,7 @@ public class SpacesTest extends AbstractTest {
                 .isTrue();
     }
 
-    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 6)
+    @Test(dependsOnMethods = {"createAndSaveSpace"}, priority = 6)
     public void renameFile() {
         printTestHeader("Test Case: rename a file");
 
@@ -341,7 +342,7 @@ public class SpacesTest extends AbstractTest {
                 .isTrue();
     }
 
-    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 7)
+    @Test(dependsOnMethods = {"createAndSaveSpace"}, priority = 7)
     public void renameFolder() {
         printTestHeader("Test Case: rename a folder");
 
@@ -371,7 +372,7 @@ public class SpacesTest extends AbstractTest {
                 .isTrue();
     }
 
-    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 8)
+    @Test(dependsOnMethods = {"createAndSaveSpace"}, priority = 8)
     public void moveFile() {
         printTestHeader("Test Case: move a file to a folder");
 
@@ -441,7 +442,7 @@ public class SpacesTest extends AbstractTest {
                 .isFalse();
     }
 
-    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 9)
+    @Test(dependsOnMethods = {"createAndSaveSpace"}, priority = 9)
     public void deleteFolderAndFiles() {
         printTestHeader("Test Case: delete folder and files");
 
@@ -563,7 +564,7 @@ public class SpacesTest extends AbstractTest {
                 .isFalse();
     }
 
-    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 10)
+    @Test(dependsOnMethods = {"createAndSaveSpace"}, priority = 10)
     public void publishFiles() {
         printTestHeader("Test Case: publish files");
 
@@ -677,5 +678,35 @@ public class SpacesTest extends AbstractTest {
                 .isTrue();
     }
 
+    @Test(dependsOnMethods = {"createAndSaveSpace"}, priority = 11)
+    public void publishFileToSpaceFromFilesPage() {
+        printTestHeader("Test Case: publish a file to a space from Files page");
+
+        SpaceProfile spaceProfile = getMainSpaceProfile();
+        FileProfile fileProfile = getPublishToSpaceFile();
+
+        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(fileProfile.getFileName());
+        filesPage = filesAddFilesPage.uploadAllFiles().openRootFilesPage();
+
+        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
+        uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
+
+        FilesPublishPage filesPublishPage = uploadedFilePage.clickPublishToSpace(spaceProfile.getSpaceName());
+        uploadedFilePage = filesPublishPage.clickPublishObjects();
+
+        assertThat(
+                uploadedFilePage.isAccessSpace(spaceProfile.getSpaceName()))
+                .as("Access is space " + spaceProfile.getSpaceName())
+                .isTrue();
+
+        SpaceDetailsPage spaceDetailsPage = openOverviewPage().openSpacesPage().openSpace(spaceProfile.getSpaceName());
+
+        assertThat(
+                spaceDetailsPage.isLinkToAddedFileDisplayed(fileProfile.getFileName()))
+                .as("Published to space file is displayed")
+                .isTrue();
+    }
 
 }

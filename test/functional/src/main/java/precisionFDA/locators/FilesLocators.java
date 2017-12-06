@@ -92,11 +92,13 @@ public class FilesLocators {
 
     public static final String FILES_UPLOADED_FILE_PAGE_AUTHORIZED_URL_BUTTON_LINK = "//a/span[contains(@class, 'fa-link')]/..";
 
-    public static final String FILES_PUBLISH_PAGE_PUBLISH_OBJ_BUTTON = "//button[text()='Publish selected objects']";
+    public static final String FILES_PUBLISH_PAGE_PUBLISH_OBJ_BUTTON = "//form[contains(@action, 'publish')]//button[contains(text(), 'objects')]";
 
     public static final String FILES_UPLOADED_FILE_PUBLISH_BUTTON = "//*[contains(@class, 'btn')]/*[contains(text(), 'Publish')]";
 
     public static final String FILES_UPLOADED_FILE_PUBLISH_TO_PUBLIC_ITEM_LINK = "//*[contains(@class, 'drop')]//a[contains(@href, '=public')]";
+
+    public static final String FILES_UPLOADED_FILE_PUBLISH_TO_SPACE_ITEM_LINK_COMMON = "//*[contains(@class, 'pull')]//ul[contains(@class, 'dropdown')]//li/a";
 
     public static final String FILES_PUBLISH_PAGE_FILE_NAME = "//span[@class='object-title']";
 

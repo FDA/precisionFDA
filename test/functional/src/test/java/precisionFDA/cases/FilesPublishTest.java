@@ -5,10 +5,7 @@ import precisionFDA.data.TestUserData;
 import precisionFDA.model.FileProfile;
 import precisionFDA.model.FolderProfile;
 import precisionFDA.model.UserProfile;
-import precisionFDA.pages.files.FilesAddFilesPage;
-import precisionFDA.pages.files.FilesPage;
-import precisionFDA.pages.files.FilesPublishPage;
-import precisionFDA.pages.files.UploadedFilePage;
+import precisionFDA.pages.files.*;
 import ru.yandex.qatools.htmlelements.annotations.Name;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,8 +56,6 @@ public class FilesPublishTest extends AbstractTest {
                 .as("Access is private")
                 .isTrue();
 
-        logoutFromAll();
-
         SoftAssert.assertAll();
     }
 
@@ -71,6 +66,7 @@ public class FilesPublishTest extends AbstractTest {
         FileProfile fileProfile = getPublishFileProfile();
         UserProfile user = TestUserData.getAnotherTestUser();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         FilesPage filesPage = openOverviewPage().openFilesPage();
 
@@ -86,8 +82,6 @@ public class FilesPublishTest extends AbstractTest {
                 .as("Link to the uploaded private file is NOT displayed in Explore Tab for another user")
                 .isFalse();
 
-        logoutFromAll();
-
         SoftAssert.assertAll();
     }
 
@@ -98,6 +92,7 @@ public class FilesPublishTest extends AbstractTest {
         FileProfile fileProfile = getPublishFileProfile();
         UserProfile user = TestUserData.getTestUser();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         FilesPage filesPage = openOverviewPage().openFilesPage();
         UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
@@ -129,8 +124,6 @@ public class FilesPublishTest extends AbstractTest {
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
                 .as("Link to uploaded file is displayed in Explore list for the author")
                 .isTrue();
-
-        logoutFromAll();
     }
 
     @Test(priority = 4)
@@ -140,6 +133,7 @@ public class FilesPublishTest extends AbstractTest {
         FileProfile fileProfile = getPublishFileProfile();
         UserProfile user = TestUserData.getAnotherTestUser();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         FilesPage filesPage = openOverviewPage().openFilesPage();
 
@@ -157,7 +151,7 @@ public class FilesPublishTest extends AbstractTest {
 
         SoftAssert.assertThat(
                 filesPage.isItemCheckboxDisplayed(fileProfile.getFileName()))
-                .as("Checkbox is displayed for the file")
+                .as("Input checkbox is displayed for the file")
                 .isFalse();
 
         UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
@@ -167,9 +161,14 @@ public class FilesPublishTest extends AbstractTest {
                 .as("Access is public")
                 .isTrue();
 
-        logoutFromAll();
-
         SoftAssert.assertAll();
+
+        FilesAuthURLPage authURLPage = uploadedFilePage.clickAuthorizedURL();
+
+        assertThat(
+                authURLPage.isAuthorizedUrlDisplayed())
+                .as("Authorized url is displayed")
+                .isTrue();
     }
 
     @Test(priority = 5)
@@ -185,6 +184,7 @@ public class FilesPublishTest extends AbstractTest {
 
         UserProfile user = TestUserData.getTestUser();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         FilesPage filesPage = openOverviewPage().openFilesPage();
 

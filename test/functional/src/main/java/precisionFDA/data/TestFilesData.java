@@ -806,4 +806,16 @@ public class TestFilesData {
         return toPublishSpaceFileSecond;
     }
 
+    //=== publish a file to a space from Files page ===
+
+    public static FileProfile getPublishToSpaceFile() {
+        return publishToSpaceFile;
+    }
+
+    static FileProfile publishToSpaceFile = new FileProfile(
+            getGeneratedTestFileName(getDictPng()),
+            "",
+            ""
+    );
+
 }
