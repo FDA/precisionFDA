@@ -3,6 +3,7 @@
 <head>
   <%= render "_partials/head" %>
 </head>
+  <!-- revision: <%= git_revision %> /-->
   <body class="pfda-controller-<%= controller_name %> pfda-action-<%= action_name %> <% if !@context.logged_in_or_guest? %>pfda-guest<% else %>pfda-user<% end %>" <%= yield(:body_attributes) %> <% if !@context.logged_in_or_guest? %>data-no-turbolink<% end %> >
   <header>
     <%= render "_partials/navbar" %>
