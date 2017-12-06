@@ -47,3 +47,4 @@
 /test/functional/src/main/resources/tempFiles/*.txt
 /test/functional/src/main/resources/tempFiles/*.png
 /test/functional/src/main/resources/tempFiles/Docker*
+/test/functional/src/main/resources/tempFiles/*.gz

@@ -14,6 +14,8 @@ import precisionFDA.model.UserProfile;
 import precisionFDA.pages.AbstractPage;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 
+import java.util.List;
+
 import static precisionFDA.data.TestDict.getDictPrivate;
 import static precisionFDA.data.TestDict.getDictPublic;
 import static precisionFDA.utils.Utils.generateUpdatedName;
@@ -117,7 +119,7 @@ public class UploadedFilePage extends AbstractPage {
     }
 
     public String getUploadedFileAccessValueText() {
-        return getUploadedFileAccessValueWE().getText();
+        return getUploadedFileAccessValueWE().getText().trim();
     }
 
     public Button getUploadedFileEditDD() {
@@ -201,7 +203,7 @@ public class UploadedFilePage extends AbstractPage {
             return true;
         }
         else {
-            log.info("displayed access is [" + actValue + "] but expected [" + getDictPrivate());
+            log.info("displayed access is [" + actValue + "] but expected [" + getDictPrivate() + "]");
             return false;
         }
     }
@@ -212,7 +214,18 @@ public class UploadedFilePage extends AbstractPage {
             return true;
         }
         else {
-            log.info("displayed access is [" + actValue + "] but expected [" + getDictPrivate());
+            log.info("displayed access is [" + actValue + "] but expected [" + getDictPrivate() + "]");
+            return false;
+        }
+    }
+
+    public boolean isAccessSpace(String spaceName) {
+        String actValue = getUploadedFileAccessValueText();
+        if (actValue.equalsIgnoreCase(spaceName)) {
+            return true;
+        }
+        else {
+            log.info("displayed access is [" + actValue + "] but expected [" + spaceName + "]");
             return false;
         }
     }
@@ -309,6 +322,36 @@ public class UploadedFilePage extends AbstractPage {
             link.click();
         }
         return new FilesPublishPage(getDriver());
+    }
+
+    public FilesPublishPage clickPublishToSpace(String spaceName) {
+        log.info("click Publish to Space: " + spaceName);
+        WebElement button = getUploadedFilePublishButton();
+        waitUntilClickable(button);
+        button.click();
+        WebElement link = getPublishToSpaceLink(spaceName);
+        if ( link != null ) {
+            link.click();
+        }
+        else {
+            log.warn("the item is not displayed in the Publish drop down list: " + spaceName);
+        }
+        return new FilesPublishPage(getDriver());
+    }
+
+    public WebElement getPublishToSpaceLink(String spaceName) {
+        String xpath = FilesLocators.FILES_UPLOADED_FILE_PUBLISH_TO_SPACE_ITEM_LINK_COMMON;
+        WebElement spaceItemLink = null;
+        List<WebElement> allLinks = getDriver().findElements(By.xpath(xpath));
+        if (allLinks.size() > 0) {
+            for (WebElement we : allLinks) {
+                if (we.getText().contains(spaceName)) {
+                    spaceItemLink = we;
+                    break;
+                }
+            }
+        }
+        return spaceItemLink;
     }
 
     public FilesPage openRootFilesPage() {
