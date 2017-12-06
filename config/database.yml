@@ -2,17 +2,18 @@ default: &default
   adapter: mysql2
   pool: 5
   timeout: 5000
+  host: db
+  username: root
+  password: password
 
 development:
-  url: <%= ENV['DATABASE_URL'] %>
+  <<: *default
+  database: precisionfda-development
 
 test:
   <<: *default
   database: precisionfda-test
-  host: localhost
-  username: root
-  password: root
 
 production:
   <<: *default
-  database: db/production.sqlite3
+  database: precisionfda-production
