@@ -64,10 +64,17 @@ public class ChallsEditChallPage extends AbstractPage {
     @FindBy(xpath = ChallsLocators.CHALLS_BOOTSTRAP_CALENDAR_POPUP_TIME_ICON)
     private Link bootstrapCalendarPopupTimeIcon;
 
+    @FindBy(xpath = ChallsLocators.CHALLS_CREATED_CHALL_UPDATE_BUTTON)
+    private WebElement updateButton;
+
     public ChallsEditChallPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(ChallsLocators.CHALLS_EDIT_CHALL_FORM_STATUS_SELECT));
+    }
+
+    public WebElement getUpdateButton() {
+        return updateButton;
     }
 
     public TextInput getEditChallStartsInput() {
@@ -194,6 +201,15 @@ public class ChallsEditChallPage extends AbstractPage {
         log.info("click Create");
         waitUntilDisplayed(getEditChallCreateButton());
         getEditChallCreateButton().click();
+        return new ChallsCreatedChallPage(getDriver());
+    }
+
+    public void setOpenStatus() {
+        getEditChallStatusSelect().selectByVisibleText("open");
+    }
+
+    public ChallsCreatedChallPage clickUpdate() {
+        getUpdateButton().click();
         return new ChallsCreatedChallPage(getDriver());
     }
 

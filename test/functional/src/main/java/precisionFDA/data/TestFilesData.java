@@ -818,4 +818,16 @@ public class TestFilesData {
             ""
     );
 
+    //=== main new challenge entry file  ===
+
+    public static FileProfile getMainNewChallEntryFile() {
+        return mainNewChallEntryFile;
+    }
+
+    static FileProfile mainNewChallEntryFile = new FileProfile(
+            getGeneratedTestFileName(getDictTxt()),
+            "",
+            ""
+    );
+
 }

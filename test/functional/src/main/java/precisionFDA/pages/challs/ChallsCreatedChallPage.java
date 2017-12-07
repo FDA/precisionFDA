@@ -9,6 +9,8 @@ import precisionFDA.locators.ChallsLocators;
 import precisionFDA.pages.AbstractPage;
 import ru.yandex.qatools.htmlelements.element.Link;
 
+import static precisionFDA.utils.Utils.sleep;
+
 public class ChallsCreatedChallPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
@@ -31,10 +33,31 @@ public class ChallsCreatedChallPage extends AbstractPage {
     @FindBy(xpath = ChallsLocators.CHALLS_CREATED_CHALL_INTRO_TEXT)
     private WebElement introWE;
 
+    @FindBy(xpath = ChallsLocators.CHALLS_JOIN_CHALLENGE_BUTTON)
+    private Link joinChallengeButtonLink;
+
+    @FindBy(xpath = ChallsLocators.SUBMIT_CHALLENGE_ENTRY_BUTTON)
+    private Link submitEntryChallengeButtonLink;
+
+    @FindBy(xpath = ChallsLocators.CHALLS_CREATED_CHALL_SETTINGS_BUTTON)
+    private Link settingsButtonLink;
+
     public ChallsCreatedChallPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(ChallsLocators.CHALLS_CREATED_CHALL_INTRO_LINK));
+    }
+
+    public Link getSettingsButtonLink() {
+        return settingsButtonLink;
+    }
+
+    public Link getJoinChallengeButtonLink() {
+        return joinChallengeButtonLink;
+    }
+
+    public Link getSubmitEntryChallengeButtonLink() {
+        return submitEntryChallengeButtonLink;
     }
 
     public WebElement getIntroWE() {
@@ -86,6 +109,53 @@ public class ChallsCreatedChallPage extends AbstractPage {
         waitUntilClickable(getEditPageButtonLink());
         getEditPageButtonLink().click();
         return new ChallsEditChallengeInfo(getDriver());
+    }
+
+    public boolean isJoinChallengeButtonDisplayed() {
+        return isElementPresent(getJoinChallengeButtonLink(), 2);
+    }
+
+    public ChallsCreatedChallPage clickJoinChallenge() {
+        waitUntilClickable(getJoinChallengeButtonLink());
+        getJoinChallengeButtonLink().click();
+        return new ChallsCreatedChallPage(getDriver());
+    }
+
+    public boolean isSubmitEntryChallengeButtonDisplayed() {
+        return isElementPresent(getSubmitEntryChallengeButtonLink());
+    }
+
+    public ChallsNewSubmissionPage clickSubmitEntry() {
+        waitUntilClickable(getSubmitEntryChallengeButtonLink());
+        getSubmitEntryChallengeButtonLink().click();
+        return new ChallsNewSubmissionPage(getDriver());
+    }
+
+    public ChallsEditChallPage clickSettings() {
+        waitUntilDisplayed(getSettingsButtonLink(), 2);
+        getSettingsButtonLink().click();
+        return new ChallsEditChallPage(getDriver());
+    }
+
+    public void waitUntilChallengeActive() {
+        int timeoutSec = 120;
+        int refreshStepSec = 15;
+        int spentTimeSec = 0;
+        log.info("waiting for " + timeoutSec + " sec until the challenge is active");
+        while ( !isElementPresent(getJoinChallengeButtonLink(), 1) && (spentTimeSec < timeoutSec) ) {
+            sleep(refreshStepSec*1000);
+            spentTimeSec = spentTimeSec + refreshStepSec;
+            log.info("it's been " + spentTimeSec + " seconds");
+            getDriver().navigate().refresh();
+        }
+        if (!isElementPresent(getJoinChallengeButtonLink(), 1)) {
+            log.info("[WARNING] the challenge is not active after " + timeoutSec + " seconds");
+        }
+    }
+
+    public boolean isSubmittedInputFileLinkDisplayed(String fileName) {
+        String xpath = ChallsLocators.SUBMITTED_INPUT_FILE_LINK.replace("{FILE_NAME}", fileName);
+        return isElementPresent(By.xpath(xpath), 3);
     }
 
 }

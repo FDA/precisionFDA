@@ -7,6 +7,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import precisionFDA.locators.FilesLocators;
 import precisionFDA.pages.AbstractPage;
+import precisionFDA.pages.challs.ChallsCreatedChallPage;
 import ru.yandex.qatools.htmlelements.element.Button;
 
 public class FilesPublishPage extends AbstractPage {
@@ -42,5 +43,12 @@ public class FilesPublishPage extends AbstractPage {
         waitUntilClickable(getPublishObjectsButton());
         getPublishObjectsButton().click();
         return new UploadedFilePage(getDriver());
+    }
+
+    public ChallsCreatedChallPage clickPublishObjectsViaEntrySubmit() {
+        log.info("click Publish Objects");
+        waitUntilClickable(getPublishObjectsButton());
+        getPublishObjectsButton().click();
+        return new ChallsCreatedChallPage(getDriver());
     }
 }
