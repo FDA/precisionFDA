@@ -4,14 +4,19 @@ class GraphDecorator
     @context = context
   end
 
-  def decorate(roots, scope = "public")
+  def for_publisher(roots, scope = "public")
     @scope = scope
     Array.wrap(roots).map { |root| subgraph_of(root) }
   end
 
+  def for_track(root)
+    @track_format = true
+    subgraph_of(root)
+  end
+
   private
 
-  attr_reader :context, :scope
+  attr_reader :context, :scope, :track_format
 
   def subgraph_of(record)
     decorate_node(record, self.send("subgraph_of_#{record.klass}", record))
@@ -48,7 +53,6 @@ class GraphDecorator
     children = job.input_files.map do |file|
       decorate_node(file, subgraph_of_file(file))
     end
-
     children.push(
       decorate_node(job.app, subgraph_of_app(job.app))
     )
@@ -56,8 +60,8 @@ class GraphDecorator
 
   def subgraph_of_file(file)
     return unless file.accessible_by?(context)
-    return decorate_node(file.parent, subgraph_of_job(file.parent)) if file.parent_type == "Job"
-    return decorate_node(file.parent, subgraph_of_comparison(file.parent)) if file.parent_type == "Comparison"
+    return [decorate_node(file.parent, subgraph_of_job(file.parent))] if file.parent_type == "Job"
+    return [decorate_node(file.parent, subgraph_of_comparison(file.parent))] if file.parent_type == "Comparison"
     []
   end
 
@@ -66,6 +70,8 @@ class GraphDecorator
   alias_method :subgraph_of_discussion, :subgraph_of_note
 
   def decorate_node(record, children)
+    return [record, Array.wrap(children)] if track_format
+
     item = record.slice(:uid, :klass)
     item[:title] = record.accessible_by?(context) ? record.title : record.uid
     item[:owned] = record.editable_by?(context)
