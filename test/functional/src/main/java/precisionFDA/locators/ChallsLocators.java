@@ -84,6 +84,30 @@ public class ChallsLocators {
 
     public static final String CHALLS_BOOTSTRAP_CALENDAR_POPUP_TIME_ICON = "//*[contains(@class, 'bootstrap-datetimepicker')]//a[contains(@title, 'Time')]";
 
+    public static final String CHALLS_JOIN_CHALLENGE_BUTTON = "//a[contains(@class, 'btn')][contains(@href, 'join')]/span/..";
 
+    public static final String SUBMIT_CHALLENGE_ENTRY_BUTTON = "//a[contains(@class, 'btn')][contains(@href, 'submission')]/span/..";
+
+    public static final String SUBMIT_NEW_ENTRY_NAME_INPUT = "//input[@id='submission_name']";
+
+    public static final String SUBMIT_NEW_ENTRY_DESCR_INPUT = "//textarea[@id='submission_desc']";
+
+    public static final String SUBMIT_NEW_ENTRY_MODAL_FILES_TAB = "//*[contains(@class, 'modal')][contains(@style, 'block')]//li/a/span[text()='Files']";
+
+    public static final String SUBMIT_NEW_ENTRY_MODAL_FILE_RB_TEMPLATE = "//*[contains(@class, 'modal')]//*[text()='{FILE_NAME}']/../input[@type='radio']";
+
+    public static final String SUBMIT_NEW_ENTRY_MODAL_FILE_NAME_TEMPLATE = "//*[contains(@class, 'modal')]//*[text()='{FILE_NAME}']";
+
+    public static final String SUBMIT_NEW_ENTRY_MODAL_SUBMIT_BUTTON = "//*[contains(@class, 'modal')][contains(@style, 'block')]//button/span[text()='Select']/..";
+
+    public static final String CHALLS_CREATED_CHALL_SETTINGS_BUTTON = "//a[contains(text(), 'Settings')]";
+
+    public static final String CHALLS_CREATED_CHALL_UPDATE_BUTTON = "//input[@value='Update']";
+
+    public static final String SUBMIT_NEW_ENTRY_ATTACHED_FILE_TEMPLATE = "//*[contains(@class, 'required')]//button[text()='{FILE_NAME}']";
+
+    public static final String SUBMIT_NEW_ENTRY_SUBMIT_BUTTON = "//button/span[text()='Submit']";
+
+    public static final String SUBMITTED_INPUT_FILE_LINK = "//table//a[contains(text(), '{FILE_NAME}')]";
 
 }

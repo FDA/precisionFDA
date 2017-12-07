@@ -366,11 +366,11 @@ public class AppsEditAppPage extends AbstractPage {
         appProfile.setCurRevTitleText(appProfile.getInitTitleText());
 
         addInputField(getDictFile(), getTestChallAppInputFileFieldName1());
-        addInputField(getDictFile(), getTestChallAppInputFileFieldName2());
+        // addInputField(getDictFile(), getTestChallAppInputFileFieldName2());
 
         addOutputField(getDictFile(), getTestChallAppOutputFileFieldName1());
-        addOutputField(getDictFile(), getTestChallAppOutputFileFieldName2());
-        addOutputField(getDictString(), getTestChallAppOutputStrFieldName1());
+        // addOutputField(getDictFile(), getTestChallAppOutputFileFieldName2());
+        // addOutputField(getDictString(), getTestChallAppOutputStrFieldName1());
 
         openScriptTab();
         fillScriptArea(appProfile.getInitScriptText());

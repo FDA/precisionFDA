@@ -1,29 +1,32 @@
 package precisionFDA.cases;
 
+import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import precisionFDA.data.TestAppData;
 import precisionFDA.data.TestUserData;
-import precisionFDA.model.AppProfile;
-import precisionFDA.model.ChallProfile;
-import precisionFDA.model.TimeZoneProfile;
-import precisionFDA.model.UserProfile;
+import precisionFDA.model.*;
 import precisionFDA.pages.apps.AppsEditAppPage;
 import precisionFDA.pages.apps.AppsPage;
 import precisionFDA.pages.apps.AppsRelevantPage;
 import precisionFDA.pages.apps.AppsSavedAppPage;
-import precisionFDA.pages.challs.ChallsCreatedChallPage;
-import precisionFDA.pages.challs.ChallsEditChallPage;
-import precisionFDA.pages.challs.ChallsEditChallengeInfo;
-import precisionFDA.pages.challs.ChallsPage;
+import precisionFDA.pages.challs.*;
+import precisionFDA.pages.files.FilesAddFilesPage;
+import precisionFDA.pages.files.FilesPage;
+import precisionFDA.pages.files.FilesPublishPage;
+import precisionFDA.pages.files.UploadedFilePage;
 import precisionFDA.pages.overview.OverviewPage;
 import precisionFDA.pages.profile.ProfilePage;
 import ru.yandex.qatools.htmlelements.annotations.Name;
+import ru.yandex.qatools.htmlelements.element.Link;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static precisionFDA.data.TestChallsData.getExpectedChallDateTimeValue;
 import static precisionFDA.data.TestChallsData.getMainChallProfile;
+import static precisionFDA.data.TestFilesData.getMainNewChallEntryFile;
+import static precisionFDA.data.TestNewChallEntryData.getMainNewChallEntryProfile;
 import static precisionFDA.data.TimeZonesData.getMoscowTimeZone;
 import static precisionFDA.utils.Utils.printTestHeader;
+import static precisionFDA.utils.Utils.sleep;
 
 @Name("Challenges test suite")
 public class ChallsTest extends AbstractTest {
@@ -211,6 +214,151 @@ public class ChallsTest extends AbstractTest {
         assertThat(
                 appsSavedAppPage.isChallengeTagDisplayed(challProfile.getChallName()))
                 .as("Challenge tag is displayed")
+                .isTrue();
+    }
+
+    @Test(priority = 4, dependsOnMethods = { "createChallenge", "createApp" })
+    public void setChallengeStatusToOpen() {
+        printTestHeader("Test Case: set challenge status to open");
+
+        UserProfile user = TestUserData.getAdminUser();
+        AppProfile appProfile = TestAppData.getChallAppProfile();
+        ChallProfile challProfile = getMainChallProfile();
+
+        logoutFromAll();
+        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        ChallsPage challsPage = overviewPage.openChallsPage();
+
+        assertThat(
+                challsPage.isCreatedChallNameDisplayed(challProfile.getChallName()))
+                .as("The created challenge is displayed")
+                .isTrue();
+
+        ChallsCreatedChallPage createdChallPage = challsPage.viewChallenge(challProfile);
+        ChallsEditChallPage editChallPage = createdChallPage.clickSettings();
+
+        // ------ remove it later ! -----
+        editChallPage.getEditChallEndsVisibleElement().click();
+        sleep(2000);
+        editChallPage.getBootstrapCalendarPopupTimeIcon().click();
+        sleep(200);
+        Link arrow = editChallPage.getBootstrapCalendarPopupIncrMinArrow();
+        for (int i = 0; i <= 1; i ++) {
+            arrow.click();
+            sleep(100);
+        }
+        editChallPage.getPageTitle().click();
+        // -----------------------------
+
+        editChallPage.setOpenStatus();
+        createdChallPage = editChallPage.clickUpdate();
+
+        createdChallPage.waitUntilChallengeActive();
+
+        assertThat(
+                createdChallPage.isJoinChallengeButtonDisplayed())
+                .as("Join Challenge button is displayed")
+                .isTrue();
+    }
+
+    @Test(priority = 5, dependsOnMethods = { "createChallenge", "createApp" })
+    public void joinChallenge() {
+        printTestHeader("Test Case: join challenge");
+
+        UserProfile user = TestUserData.getAnotherTestUser();
+        ChallProfile challProfile = getMainChallProfile();
+
+        logoutFromAll();
+        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        ChallsPage challsPage = overviewPage.openChallsPage();
+
+        assertThat(
+                challsPage.isCreatedChallNameDisplayed(challProfile.getChallName()))
+                .as("The created challenge is displayed")
+                .isTrue();
+
+        ChallsCreatedChallPage createdChallPage = challsPage.viewChallenge(challProfile);
+
+        assertThat(
+                createdChallPage.getIntroText())
+                .as("Introduction text")
+                .isEqualTo(challProfile.getChallInfo());
+
+        assertThat(
+                createdChallPage.isJoinChallengeButtonDisplayed())
+                .as("Join Challenge button is displayed")
+                .isTrue();
+
+        createdChallPage = createdChallPage.clickJoinChallenge();
+
+        assertThat(
+                createdChallPage.isSubmitEntryChallengeButtonDisplayed())
+                .as("Submit Entry button is displayed")
+                .isTrue();
+
+    }
+
+    @Test(priority = 6, dependsOnMethods = { "createChallenge", "createApp" })
+    public void submitChallengeEntry() {
+        printTestHeader("Test Case: submit challenge entry");
+
+        ChallProfile challProfile = getMainChallProfile();
+        NewChallEntryProfile newChallEntryProfile = getMainNewChallEntryProfile();
+        FileProfile inputFileProfile = getMainNewChallEntryFile();
+
+        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(inputFileProfile.getFileName());
+        filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
+
+        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(inputFileProfile.getFileName());
+        uploadedFilePage = uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
+        filesPage = uploadedFilePage.openRootFilesPage();
+
+        assertThat(
+                filesPage.isLinkToUploadedFileDisplayed(inputFileProfile.getFileName()))
+                .as("File is uploaded: " + inputFileProfile.getFileName())
+                .isTrue();
+
+        ChallsPage challsPage = openOverviewPage().openChallsPage();
+        ChallsCreatedChallPage createdChallPage = challsPage.viewChallenge(challProfile);
+
+        assertThat(
+                createdChallPage.isSubmitEntryChallengeButtonDisplayed())
+                .as("Submit Entry button is displayed")
+                .isTrue();
+
+        ChallsNewSubmissionPage newSubmissionPage = createdChallPage.clickSubmitEntry();
+        newSubmissionPage.fillNewChallSubmissionPage(newChallEntryProfile);
+        newSubmissionPage.clickSelectFile1();
+
+        assertThat(
+                newSubmissionPage.isSelectInputPopupDisplayed())
+                .as("Select input modal dialog is displayed")
+                .isTrue();
+
+        newSubmissionPage.clickFilesOnModal();
+
+        assertThat(
+                newSubmissionPage.isFileOnModalDisplayed(inputFileProfile.getFileName()))
+                .as("Required file is displayed om the modal dialog")
+                .isTrue();
+
+        newSubmissionPage.selectFileInModal(inputFileProfile.getFileName());
+        newSubmissionPage = newSubmissionPage.clickSelectOnModal();
+
+        assertThat(
+                newSubmissionPage.isFileAttached(inputFileProfile.getFileName()))
+                .as("File is attached")
+                .isTrue();
+
+        FilesPublishPage publishPage = newSubmissionPage.clickSubmit();
+        createdChallPage = publishPage.clickPublishObjectsViaEntrySubmit();
+
+        assertThat(
+                createdChallPage.isSubmittedInputFileLinkDisplayed(inputFileProfile.getFileName()))
+                .as("Submitted input file link is displayed")
                 .isTrue();
     }
 

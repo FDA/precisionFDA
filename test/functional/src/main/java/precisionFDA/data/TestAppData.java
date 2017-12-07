@@ -2,9 +2,7 @@ package precisionFDA.data;
 
 import precisionFDA.model.AppProfile;
 
-import static precisionFDA.data.TestChallsData.getTestChallAppOutputFileFieldName1;
-import static precisionFDA.data.TestChallsData.getTestChallAppOutputFileFieldName2;
-import static precisionFDA.data.TestChallsData.getTestChallAppOutputStrFieldName1;
+import static precisionFDA.data.TestChallsData.*;
 import static precisionFDA.data.TestRunData.*;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 
@@ -54,12 +52,16 @@ public class TestAppData {
         return DOCKER_FILE_NAME;
     }
 
-    static String CREATE_CHALL_APP_SCRIPT_BODY =
+    static String CREATE_CHALL_APP_SCRIPT_BODY_OLD =
             "emit " + getTestChallAppOutputStrFieldName1() + " 'foo bar str 1'\n" +
             "echo 'some test text 1' > output_file1.txt\n" +
             "echo 'some test text 2' > output_file2.txt\n" +
             "emit " + getTestChallAppOutputFileFieldName1() + " output_file1.txt\n" +
             "emit " + getTestChallAppOutputFileFieldName2() + " output_file2.txt";
+
+    static String CREATE_CHALL_APP_SCRIPT_BODY =
+            "echo $" + getTestChallAppInputFileFieldName1() + " > file_link.txt\n" +
+                    "emit out_file_1 file_link.txt";
 
     //--------------------------
 
