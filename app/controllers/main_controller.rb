@@ -485,7 +485,7 @@ class MainController < ApplicationController
       return
     end
 
-    js graph: graph_decorator.decorate(item, scope),
+    js graph: graph_decorator.for_publisher(item, scope),
        space: space.nil? ? nil : space.slice(:uid, :title),
        scope_to_publish_to: scope
   end
@@ -499,7 +499,7 @@ class MainController < ApplicationController
       redirect_to :root
       return
     end
-    @graph = get_graph(@item)
+    @graph = graph_decorator.for_track(@item)
   end
 
   def tokify
@@ -543,51 +543,6 @@ class MainController < ApplicationController
 
   def graph_decorator
     @graph_decorator ||= GraphDecorator.new(@context)
-  end
-
-  def get_subgraph_of_file(file)
-    if file.accessible_by?(@context)
-      if file.parent_type == "Job"
-        return [file, [get_subgraph_of_job(file.parent)]]
-      elsif file.parent_type == "Comparison"
-        return [file, [get_subgraph_of_comparison(file.parent)]]
-      else #Asset or user-uploaded file
-        return [file, []]
-      end
-    else
-      return [file, []]
-    end
-  end
-
-  def get_subgraph_of_comparison(comparison)
-    if comparison.accessible_by?(@context)
-      return [comparison, comparison.user_files.map { |file| get_subgraph_of_file(file) }]
-    else
-      return [comparison, []]
-    end
-  end
-
-  def get_subgraph_of_note(note)
-    if note.accessible_by?(@context)
-      return [note, note.attachments.map { |attachment|
-        self.send("get_subgraph_of_#{attachment.item_type.downcase.sub(/^user/, '')}", attachment.item)
-      }]
-    else
-      return [note, []]
-    end
-  end
-
-  def publisher_js_prepare(node, scope = 'public')
-    item = node[0].slice(:uid, :klass)
-    item[:title] = node[0].accessible_by?(@context) ? node[0].title : node[0].uid
-    item[:owned] = node[0].editable_by?(@context)
-    item[:public] = node[0].public?
-    item[:in_space] = node[0].in_space?
-    item[:publishable] = node[0].publishable_by?(@context, scope)
-
-    children = node[1].map { |child| publisher_js_prepare(child, scope) }
-
-    return [item, children]
   end
 
   def set_time_zone(user)

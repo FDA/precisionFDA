@@ -93,7 +93,7 @@ class SubmissionsController < ApplicationController
       return
     end
 
-    js graph: graph_decorator.decorate(not_public_items, scope),
+    js graph: graph_decorator.for_publisher(not_public_items, scope),
        space: nil,
        scope_to_publish_to: scope,
        params: params
