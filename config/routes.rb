@@ -28,6 +28,7 @@ Rails.application.routes.draw do
         end
       end
 
+      get "active_users", to: "users#active"
     end
 
     # Main controller
