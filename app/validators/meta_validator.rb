@@ -5,7 +5,7 @@ class MetaValidator < ActiveModel::EachValidator
   def validate_each(entity, attribute, value)
 
     if value.to_json.length > MAX_LENGTH
-      entity.errors.add(attribute)
+      entity.errors.add(attribute, :too_long, { count: MAX_LENGTH })
     end
 
   end

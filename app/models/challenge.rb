@@ -157,30 +157,17 @@ class Challenge < ActiveRecord::Base
   end
 
   def started?
-    DateTime.now >= start_at
+    return false if new_record?
+    DateTime.now >= start_at_was
   end
 
   def over?
-    DateTime.now >= end_at
+    return false if new_record?
+    DateTime.now >= end_at_was
   end
 
   def accepting_submissions?
     active? && app_id.present?
-  end
-
-  def can_change_app_owner?
-    return true if new_record?
-    !started?
-  end
-
-  def can_change_start_at?
-    return true if new_record?
-    !started?
-  end
-
-  def can_change_end_at?
-    return true if new_record?
-    !over?
   end
 
   def can_announce_result?
@@ -229,6 +216,7 @@ class Challenge < ActiveRecord::Base
 
   def validate_end_at
     return unless end_at_changed?
+    return if end_at.blank?
 
     if start_at && end_at <= start_at
       errors.add(:end_at, "can't be before the challenge start time")
@@ -241,12 +229,13 @@ class Challenge < ActiveRecord::Base
 
   def validate_start_at
     return unless start_at_changed?
+    return if start_at.blank?
 
     if start_at <= DateTime.now
       errors.add(:start_at, "can't be before the current time")
     end
 
-    if end_at <= start_at
+    if end_at && end_at <= start_at
       errors.add(:start_at, "can't be after the challenge end time")
     end
   end

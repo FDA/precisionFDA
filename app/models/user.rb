@@ -317,17 +317,19 @@ class User < ActiveRecord::Base
     user = context.user
     token = context.token
     job = user.jobs.find(job_id) # Re-check job id
-    if !job.terminal?
-      result = DNAnexusAPI.new(token).call("system", "findJobs", {
-        includeSubjobs: false,
-        id: [job.dxid],
-        project: user.private_files_project,
-        parentJob: nil,
-        parentAnalysis: job.try(:analysis).try(:dxid),
-        describe: true
-      })["results"][0]
-      sync_job_state(result, job, user, token)
-    end
+
+    return if job.terminal?
+
+    result = DNAnexusAPI.new(token).call("system", "findJobs", {
+      includeSubjobs: false,
+      id: [job.dxid],
+      project: user.private_files_project,
+      parentJob: nil,
+      parentAnalysis: job.try(:analysis).try(:dxid),
+      describe: true
+    })["results"][0]
+
+    sync_job_state(result, job, user, token)
   end
 
   def self.sync_jobs!(context)
@@ -377,6 +379,7 @@ class User < ActiveRecord::Base
         # Use find_by(file.id) since file.reload may raise ActiveRecord::RecordNotFound
         file = UserFile.find_by(id: file.id)
         if file.present?
+          Event::FileDeleted.create(file, user)
           file.destroy!
         end
       end
@@ -391,6 +394,7 @@ class User < ActiveRecord::Base
           if remote_state != file.state
             if remote_state == "closed"
               file.update!(state: remote_state, file_size: result["describe"]["size"])
+              Event::FileCreated.create(file, user)
             elsif remote_state == "closing" && file.state == "open"
               file.update!(state: remote_state)
             else
@@ -442,7 +446,8 @@ class User < ActiveRecord::Base
         comparison.reload
         if state != comparison.state
           output_file_cache.each do |output_file|
-            UserFile.create!(output_file)
+            file = UserFile.create!(output_file)
+            Event::FileCreated.create(file, user)
           end
           comparison.meta = temp_meta
           comparison.state = state
@@ -503,12 +508,14 @@ class User < ActiveRecord::Base
         job.reload
         if state != job.state
           output_file_cache.each do |output_file|
-            UserFile.create!(output_file)
+            user_file = UserFile.create!(output_file)
+            Event::FileCreated.create(user_file, user)
           end
           job.run_outputs = output
           job.state = state
           job.describe = result["describe"]
           job.save!
+          Event::JobCoreUsed.create(job, user) unless job.runtime.nil?
         end
       end
     else
@@ -519,8 +526,10 @@ class User < ActiveRecord::Base
           job.state = state
           job.describe = result["describe"]
           job.save!
+          Event::JobFailed.create(job, user) if job.failed?
         end
       end
     end
   end
+
 end
