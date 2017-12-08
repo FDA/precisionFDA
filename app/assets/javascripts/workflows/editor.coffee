@@ -276,27 +276,31 @@ class WorkflowEditorModel
     availapps
 
   addStages: (data) =>
-    Precision.api('/api/describe', {uid: data.selectedAppDxid()})
-      .done((app) =>
-        inputs = app.spec.input_spec.map((input) => $.extend({}, input, {values: {id: null, name: null}}))
-        outputs = app.spec.output_spec.map((output) => $.extend({}, output, {values: {id: null, name: null}}))
-        spec =
-          name: app.name
-          dxid: app.dxid
-          instanceType: app.spec.instance_type
-          revision: app.revision
-          inputs: inputs
-          outputs: outputs
-        new_slot = new slotModel(spec, this)
-        @slots.push(new_slot)
-        if spec.outputs.length > 0
-          @eligibleSlots.push(new_slot)
+    uid = data.selectedAppDxid()
+    if uid
+      Precision.api('/api/describe', {uid: uid})
+        .done((app) =>
+          inputs = app.spec.input_spec.map((input) => $.extend({}, input, {values: {id: null, name: null}}))
+          outputs = app.spec.output_spec.map((output) => $.extend({}, output, {values: {id: null, name: null}}))
+          spec =
+            name: app.name
+            dxid: app.dxid
+            instanceType: app.spec.instance_type
+            revision: app.revision
+            inputs: inputs
+            outputs: outputs
+          new_slot = new slotModel(spec, this)
+          @slots.push(new_slot)
+          if spec.outputs.length > 0
+            @eligibleSlots.push(new_slot)
+        )
+        .fail((error) =>
+          errorObject = JSON.parse error.responseText
+          @errorMessage(errorObject.error.message)
+          console.error(error)
       )
-      .fail((error) =>
-        errorObject = JSON.parse error.responseText
-        @errorMessage(errorObject.error.message)
-        console.error(error)
-    )
+    else
+      alert("Please wait a few seconds for this app to load.")
 
   configureSlot: (slot) =>
     @slotBeingEdited(slot)

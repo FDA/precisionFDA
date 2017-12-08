@@ -76,4 +76,13 @@ class Workflow < ActiveRecord::Base
     end
   end
 
+  def unused_input_spec_hash
+    hash = {}
+    unused_input_spec.each do |input_spec|
+      hash[input_spec["parent_slot"]] ||= {}
+      hash[input_spec["parent_slot"]][input_spec["name"]] = input_spec
+    end
+    hash
+  end
+
 end
