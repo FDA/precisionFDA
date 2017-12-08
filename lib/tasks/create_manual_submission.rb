@@ -73,6 +73,7 @@ Job.transaction do
   # Run the app
   jobid = DNAnexusAPI.new(CHALLENGE_TOKEN).call(@app.dxid, "run", api_input)["id"]
 
+  # TODO: Candidate for refactoring. See JobCreator
   # Create job record
   opts = {
     dxid: jobid,
@@ -105,6 +106,7 @@ Job.transaction do
     job = Job.create!(opts)
     job.input_file_ids = input_file_ids
     job.save!
+    Event::JobRun.create(job, challenge_bot)
   end
 
   # create submission record

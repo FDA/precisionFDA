@@ -117,7 +117,11 @@ class FolderService
   def remove_file(file)
     DNAnexusAPI.new(context.token).call(file.project, "removeObjects", objects: [file.dxid])
     UserFile.transaction { file.destroy }
-    file.destroyed? ? Rats.success(file) : Rats.failure(message: "#{file.name}: file removal error.")
+
+    return Rats.failure(message: "#{file.name}: file removal error.") unless file.destroyed?
+
+    Event::FileDeleted.create(file, context.user)
+    Rats.success(file)
   end
 
 end
