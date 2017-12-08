@@ -71,4 +71,10 @@ ActiveRecord::Base.transaction do
     start_at: 2.weeks.ago,
     end_at: 2.weeks.from_now
   )
+
+  User.create!(
+    dxuser: CHALLENGE_BOT_DX_USER,
+    private_files_project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
+    public_files_project: CHALLENGE_BOT_PUBLIC_FILES_PROJECT
+  )
 end
