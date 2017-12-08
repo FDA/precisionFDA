@@ -196,4 +196,10 @@ public class AppsLocators {
 
     public static final String APPS_SAVED_APP_CHALLENGE_TAG_TEMPLATE = "//*[@class='details-challenges']//span[text()='{CHALLENGE_NAME}']";
 
+    public static final String APPS_TRACK_PAGE_MAIN_DIV = "//div[contains(@class, 'track-canvas')]";
+
+    public static final String APPS_SAVED_APP_TRACK_BUTTON_LINK = "//a[contains(@href, 'track')]";
+
+    public static final String APPS_TRACK_PAGE_APP_BLOCK = "//*[name()='svg']//a[contains(text(), '{APP_TITLE}')]";
+
 }

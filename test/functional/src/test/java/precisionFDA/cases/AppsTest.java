@@ -544,4 +544,26 @@ public class AppsTest extends AbstractTest {
                 .isTrue();
     }
 
+    @Test(dependsOnMethods = {"successfulLogin", "createAndSaveApp"})
+    public void trackApp() {
+        printTestHeader("Test Case: check it is possible to track an app");
+
+        AppProfile appProfile = getMainAppProfile();
+
+        AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
+
+        assertThat(
+                appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
+                .as("Link to saved app is displayed")
+                .isTrue();
+
+        AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openAppFromMyAppsList(appProfile);
+        AppsTrackAppPage trackAppPage = appsSavedAppPage.clickTrack();
+
+        assertThat(
+                trackAppPage.isAppBlockDisplayed(appProfile))
+                .as("App block is displayed on the schema")
+                .isTrue();
+    }
+
 }
