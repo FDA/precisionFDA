@@ -130,6 +130,17 @@ public class AppsSavedAppPage extends AbstractPage {
     @FindBy(xpath = AppsLocators.APPS_SAVED_APP_ASSIGN_TO_CHALLENGE_BUTTON)
     private Button appSavedAssignToChallengeButton;
 
+    @FindBy(xpath = AppsLocators.APPS_SAVED_APP_TRACK_BUTTON_LINK)
+    private Link appSavedTrackButtonLink;
+
+    public Link getAppsSavedAppEditTagLink() {
+        return appsSavedAppEditTagLink;
+    }
+
+    public Link getAppSavedTrackButtonLink() {
+        return appSavedTrackButtonLink;
+    }
+
     public Button getAppSavedAssignToChallengeButton() {
         return appSavedAssignToChallengeButton;
     }
@@ -479,4 +490,12 @@ public class AppsSavedAppPage extends AbstractPage {
     public boolean isChallengeTagDisplayed(String challengeName) {
         return isElementPresent(getChallengeTagWe(challengeName), 3);
     }
+
+    public AppsTrackAppPage clickTrack() {
+        log.info("click Track");
+        waitUntilDisplayed(getAppSavedTrackButtonLink(), 2);
+        getAppSavedTrackButtonLink().click();
+        return new AppsTrackAppPage(getDriver());
+    }
+
 }
