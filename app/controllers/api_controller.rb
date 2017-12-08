@@ -345,11 +345,11 @@ class ApiController < ApplicationController
     workflow = Workflow.accessible_by(@context).find_by(dxid: workflow_id)
     fail "Workflow with id #{workflow_id} does not exist or is not accessible by you" if workflow.nil?
 
-    inputs = params["inputs"]
-    fail "The workflow 'inputs' must be an array of hashes." unless inputs.is_a?(Array) && inputs.all? { |s| s.is_a?(Hash) }
+    inputs = params["inputs"] || []
+    fail "If provided, the workflow 'inputs' must be an array of hashes." unless inputs.is_a?(Array) && inputs.all? { |s| s.is_a?(Hash) }
 
     workflow_input_spec = workflow.input_spec_hash
-    unseen_workflow_inputs = workflow.input_spec_hash
+    unseen_workflow_inputs = workflow.unused_input_spec_hash
     dx_run_workflow_inputs = {}
     stage_inputs = Hash.new { |h,k| h[k] = {} }
 
