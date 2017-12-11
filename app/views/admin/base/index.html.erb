@@ -16,10 +16,10 @@
     <h4 class="infoframe-title">Site Activity</h4>
     <div>
       <a class="btn btn-default" rel="nofollow" href="<%= admin_activity_reports_path %>">
-        <i class="fa fa-line-chart" aria-hidden="true"></i> Site Activity reporting</a>
+        <i class="fa fa-line-chart" aria-hidden="true"></i> Site Activity reporting
       </a>
-      <a class="btn btn-default" rel="nofollow" href="<%= admin_active_users_path %>">
-        <i class="fa fa-file-text-o" aria-hidden="true"></i> Active Users</a>
+      <a class="btn btn-default" data-confirm="You are about to download CSV file" data-turbolinks="false" href="<%= admin_active_users_path %>" rel="nofollow">
+        <i class="fa fa-file-text-o" aria-hidden="true"></i> Active Users
       </a>
     </div>
   </div>
