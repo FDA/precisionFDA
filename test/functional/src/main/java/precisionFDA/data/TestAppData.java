@@ -318,6 +318,64 @@ public class TestAppData {
         );
     }
 
+    // ---------------------
+
+    static final String CREATE_APP_WF_NAME_PREFIX = "autotest_app_wf_name_";
+
+    static final String CREATE_APP_WF_TITLE_PREFIX = "autotest_app_wf_title_";
+
+    static final String CREATE_APP_JOB_WF_NAME_PREFIX = "autotest_app_wf_job_";
+
+    public static final String getAppWFName() {
+        return CREATE_APP_WF_NAME_PREFIX + getTestRunUniqueFinalValue();
+    }
+
+    public static final String getAppWFTitle() {
+        return CREATE_APP_WF_TITLE_PREFIX + getTestRunUniqueFinalValue();
+    }
+
+    public static final String getAppJobWFName() {
+        return CREATE_APP_JOB_WF_NAME_PREFIX + getTestRunUniqueFinalValue();
+    }
+
+    static String CREATE_WF_APP_SCRIPT_BODY =
+            "echo $" + getTestWFAppInputFileFieldName1() + " > file_link.txt\n" +
+                    "emit out_file_1 file_link.txt";
+
+    public static final String getMainAppWFScriptBody() {
+        return CREATE_WF_APP_SCRIPT_BODY;
+    }
+
+    public static AppProfile mainWorkflowAppProfile = new AppProfile(
+            getAppWFName(),
+            "",
+
+            getAppWFTitle(),
+            "",
+
+            getMainAppWFScriptBody(),
+            "",
+
+            "",
+            "",
+            "",
+
+            "",
+            "",
+            "",
+
+            "",
+            "",
+
+            getAppJobWFName(),
+            "",
+            "",
+
+            ""
+    );
+
+    // ---------------------
+
     public static AppProfile getMainAppProfile() {
         return mainAppProfile;
     }
@@ -328,6 +386,10 @@ public class TestAppData {
 
     public static AppProfile getChallAppProfile() {
         return challAppProfile;
+    }
+
+    public static AppProfile getMainWorkflowAppProfile() {
+        return mainWorkflowAppProfile;
     }
 
 

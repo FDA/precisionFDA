@@ -5,6 +5,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import precisionFDA.pages.spaces.SpacesPage;
+import precisionFDA.pages.wf.WorkflowsPage;
 import ru.yandex.qatools.htmlelements.element.Link;
 import precisionFDA.blocks.ProfileDropBlock;
 import precisionFDA.locators.CommonLocators;
@@ -70,6 +71,9 @@ public class CommonPage extends AbstractPage {
     @FindBy(xpath = CommonLocators.SPACES_PAGE_ICON)
     private Link spacesPageIcon;
 
+    @FindBy(xpath = CommonLocators.WORKFLOWS_PAGE_ICON)
+    private Link workflowsPageIcon;
+
     @FindBy(xpath = CommonLocators.MAIN_LOGO)
     private WebElement mainLogo;
 
@@ -99,6 +103,10 @@ public class CommonPage extends AbstractPage {
 
     public Link getDiscsPageIcon() {
         return discsPageIcon;
+    }
+
+    public Link getWorkflowsPageIcon() {
+        return workflowsPageIcon;
     }
 
     public Link getExpertsPageIcon() {
@@ -260,6 +268,14 @@ public class CommonPage extends AbstractPage {
         waitUntilClickable(link);
         link.click();
         return new SpacesPage(getDriver());
+    }
+
+    public WorkflowsPage openWorkflowsPage() {
+        log.info("opening Workflows page");
+        Link link = getWorkflowsPageIcon();
+        waitUntilClickable(link);
+        link.click();
+        return new WorkflowsPage(getDriver());
     }
 
 }

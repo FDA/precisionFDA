@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import precisionFDA.pages.spaces.SpacesPage;
+import precisionFDA.pages.wf.WorkflowsPage;
 import ru.yandex.qatools.htmlelements.element.Link;
 import precisionFDA.blocks.ProfileDropBlock;
 import precisionFDA.locators.CommonLocators;
@@ -145,6 +146,10 @@ public class OverviewPage extends AbstractPage {
 
     public SpacesPage openSpacesPage() {
         return getCommonPage().openSpacesPage();
+    }
+
+    public WorkflowsPage openWorkflowsPage() {
+        return getCommonPage().openWorkflowsPage();
     }
 
 }
