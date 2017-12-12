@@ -32,8 +32,14 @@ public class TestChallsData {
 
     public static final String TEST_CHALL_APP_OUTPUT_STR_FIELD_NAME_1 = "out_str_1";
 
+    public static final String TEST_WF_APP_INPUT_FILE_FIELD_NAME_1 = "in_file_1";
+
     public static String getTestChallAppInputFileFieldName1() {
         return TEST_CHALL_APP_INPUT_FILE_FIELD_NAME_1;
+    }
+
+    public static String getTestWFAppInputFileFieldName1() {
+        return TEST_WF_APP_INPUT_FILE_FIELD_NAME_1;
     }
 
     public static String getTestChallAppInputFileFieldName2() {

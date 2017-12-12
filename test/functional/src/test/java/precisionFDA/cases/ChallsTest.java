@@ -237,19 +237,6 @@ public class ChallsTest extends AbstractTest {
         ChallsCreatedChallPage createdChallPage = challsPage.viewChallenge(challProfile);
         ChallsEditChallPage editChallPage = createdChallPage.clickSettings();
 
-        // ------ remove it later ! -----
-        editChallPage.getEditChallEndsVisibleElement().click();
-        sleep(2000);
-        editChallPage.getBootstrapCalendarPopupTimeIcon().click();
-        sleep(200);
-        Link arrow = editChallPage.getBootstrapCalendarPopupIncrMinArrow();
-        for (int i = 0; i <= 1; i ++) {
-            arrow.click();
-            sleep(100);
-        }
-        editChallPage.getPageTitle().click();
-        // -----------------------------
-
         editChallPage.setOpenStatus();
         createdChallPage = editChallPage.clickUpdate();
 

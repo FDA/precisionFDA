@@ -381,6 +381,31 @@ public class AppsEditAppPage extends AbstractPage {
         return appsSavedAppPage;
     }
 
+    public AppsSavedAppPage fillAndSaveAppForWorkflow(AppProfile appProfile) {
+        log.info("fill and save app for workflow");
+
+        fillAppName(appProfile.getInitNameText());
+        fillAppTitle(appProfile.getInitTitleText());
+
+        appProfile.setCurRevNameText(appProfile.getInitNameText());
+        appProfile.setCurRevTitleText(appProfile.getInitTitleText());
+
+        addInputField(getDictFile(), getTestChallAppInputFileFieldName1());
+        // addInputField(getDictFile(), getTestChallAppInputFileFieldName2());
+
+        addOutputField(getDictFile(), getTestChallAppOutputFileFieldName1());
+        // addOutputField(getDictFile(), getTestChallAppOutputFileFieldName2());
+        // addOutputField(getDictString(), getTestChallAppOutputStrFieldName1());
+
+        openScriptTab();
+        fillScriptArea(appProfile.getInitScriptText());
+        appProfile.setCurRevScriptText(appProfile.getInitScriptText());
+
+        AppsSavedAppPage appsSavedAppPage = clickCreate(appProfile);
+
+        return appsSavedAppPage;
+    }
+
     public void addInputField(String type, String name) {
         log.info("add input field");
         getAppAddInputFieldButton().click();
