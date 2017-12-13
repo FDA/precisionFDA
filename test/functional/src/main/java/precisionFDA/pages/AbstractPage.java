@@ -77,6 +77,10 @@ public abstract class AbstractPage {
         waitUntilDisplayed(link.getWrappedElement(), timeout);
     }
 
+    public void waitUntilDisplayed(final Select select, int timeout) {
+        waitUntilDisplayed(select.getWrappedElement(), timeout);
+    }
+
     public void waitUntilDisplayed(final Button button) {
         waitUntilDisplayed(button.getWrappedElement());
     }
