@@ -66,7 +66,7 @@ class AssetsController < ApplicationController
     @item_comments_path = pathify_comments(@asset)
     @comments = @asset.root_comments.order(id: :desc).page params[:comments_page]
 
-    @notes = @asset.notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
+    @notes = @asset.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @asset.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
     @discussions = @asset.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
 
