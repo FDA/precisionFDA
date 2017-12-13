@@ -830,4 +830,16 @@ public class TestFilesData {
             ""
     );
 
+    //=== main WF input file  ===
+
+    public static FileProfile getMainWFInputFile() {
+        return mainWFInputFile;
+    }
+
+    static FileProfile mainWFInputFile = new FileProfile(
+            getGeneratedTestFileName(getDictTxt()),
+            "",
+            ""
+    );
+
 }
