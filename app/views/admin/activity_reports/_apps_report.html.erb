@@ -16,7 +16,9 @@
             <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
             <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
           </a>
-          <strong class="pull-right">12</strong>
+          <strong class="pull-right">
+            <span data-bind="text: appsCreatedTotal"></span>
+          </strong>
         </div>
         <div id="apps_created_chart"
              class="chart-container"
@@ -34,7 +36,9 @@
             <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
             <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
           </a>
-          <strong class="pull-right">3</strong>
+          <strong class="pull-right">
+            <span data-bind="text: appsPublishedTotal"></span>
+          </strong>
         </div>
         <div id="apps_published_chart"
              class="chart-container"
@@ -52,7 +56,9 @@
             <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
             <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
           </a>
-          <span class="pull-right">45</span>
+          <span class="pull-right">
+            <span data-bind="text: appsRunTotal"></span>
+          </span>
         </div>
         <div id="apps_run_chart"
              class="chart-container"
@@ -85,19 +91,25 @@
 
     <div class="total-row">
       <div class="total">
-        <div class="total-value">25</div>
+        <div class="total-value">
+          <span data-bind="text: totalAppsTotal"></span>
+        </div>
         <div class="total-label">
           <a href="#">total apps</a>
         </div>
       </div>
       <div class="total">
-        <div class="total-value">3</div>
+        <div class="total-value">
+          <span data-bind="text: publicAppsTotal"></span>
+        </div>
         <div class="total-label">
           <a href="#">public apps</a>
         </div>
       </div>
       <div class="total">
-        <div class="total-value">1,082 hrs</div>
+        <div class="total-value">
+          <span data-bind="text: runtimeTotal"></span>
+        </div>
         <div class="total-label">
           <a href="#">total runtime</a>
         </div>
