@@ -1,17 +1,25 @@
 class Datepicker
 
   DEFAULT_FORMAT = 'MM/DD/YYYY hh:mm A Z'
+  
+  RETURN_FORMAT = 'YYYY-MM-DD hh:mm:ss A Z'
 
   dateFromDateString = (date_string) -> (new Date(date_string)).toISOString()
 
   formatDate = (moment_date, format = DEFAULT_FORMAT) -> moment_date.format(format)
 
-  getValue: -> @input.value
+  getValue: -> @input.getAttribute 'value'
+  
+  getMomentValue: -> @momentValue
+  
+  getReturnFormat: -> RETURN_FORMAT
   
   setValue: (moment_date = moment(), default_label) ->
-    $(@input).data("DateTimePicker").date(moment_date)
-    @input.value = moment_date.format('YYYY-MM-DD hh:mm:ss A Z')
-    @input.setAttribute 'value', @input.value
+    # $(@input).data("DateTimePicker").date(moment_date)
+    @momentValue = moment_date
+    value = moment_date.format(RETURN_FORMAT)
+    @input.value = value
+    @input.setAttribute 'value', value
 
     if typeof default_label == 'string'
       label = default_label
@@ -74,10 +82,10 @@ class Datepicker
 
     @nodes = createDOM()
     
-    value = @input.value || formatDate moment(@params.defaultValue)
+    # value = @input.value || formatDate moment(@params.defaultValue)
+    value = $(@input).attr('value') || formatDate moment(@params.defaultValue)
     @datetimepicker = $(@input).datetimepicker({
-      # date: moment(dateFromDateString(value || null)),
-      format: @params.format || DEFAULT_FORMAT,
+      format: RETURN_FORMAT,
       defaultDate: @params.defaultValue || false
     })
     if $(@input).attr('value')
@@ -90,6 +98,8 @@ class Datepicker
     
     $(@input).on 'dp.change', (e) =>
       @setValue(e.date)
+      if typeof @params.onChange == 'function'
+        @params.onChange(e)
 
     $(@nodes.label).on 'click', =>
       $(@input).data("DateTimePicker").show()

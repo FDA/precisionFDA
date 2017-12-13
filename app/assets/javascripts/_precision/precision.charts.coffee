@@ -11,7 +11,7 @@ class Chart
       when value > KB then return (bytes / KB).toFixed(1) + " KB"
       else return (bytes) + " B"
 
-  loadData: (url, params, callback) ->
+  loadData: (url, params, callback, custom_handler) ->
     @error(false)
     @loading(true)
     $.ajax({
@@ -19,11 +19,14 @@ class Chart
       url: url,
       data: params,
       success: (response) =>
-        @chart.series[0]?.remove()
-        @chart.addSeries({
-          name: 'values',
-          data: response.data
-        })
+        if typeof custom_handler == 'function'
+          custom_handler(@chart, response)
+        else
+          @chart.series[0]?.remove()
+          @chart.addSeries({
+            name: 'values',
+            data: response.data
+          })
         @loading(false)
         if typeof callback == 'function'
           callback(response)

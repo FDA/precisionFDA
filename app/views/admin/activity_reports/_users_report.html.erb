@@ -16,7 +16,9 @@
             <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
             <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
           </a>
-          <strong class="pull-right">1008</strong>
+          <strong class="pull-right">
+            <span data-bind="text: userViewsTotal"></span>
+          </strong>
         </div>
         <div id="users_views_chart"
              class="chart-container"
@@ -34,9 +36,11 @@
             <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
             <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
           </a>
-          <strong class="pull-right">205</strong>
+          <strong class="pull-right">
+            <span data-bind="text: userAccessTotal"></span>
+          </strong>
         </div>
-        <div id="users_access_request"
+        <div id="users_access_request_chart"
              class="chart-container"
              data-bind="css: {
                 'loading': users_access_request_chart.loading,
@@ -52,9 +56,11 @@
             <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
             <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
           </a>
-          <span class="pull-right">80</span>
+          <strong class="pull-right">
+            <span data-bind="text: userLoginsTotal"></span>
+          </strong>
         </div>
-        <div id="users_logins"
+        <div id="users_logins_chart"
              class="chart-container"
              data-bind="css: {
                 'loading': users_logins_chart.loading,
