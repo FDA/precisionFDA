@@ -10,6 +10,9 @@ import precisionFDA.model.WorkflowProfile;
 import precisionFDA.pages.AbstractPage;
 import ru.yandex.qatools.htmlelements.element.Link;
 
+import static precisionFDA.data.TestDict.getDictDone;
+import static precisionFDA.utils.Utils.sleep;
+
 public class CreatedWorkflowPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
@@ -26,16 +29,13 @@ public class CreatedWorkflowPage extends AbstractPage {
         waitForPageToLoadAndVerifyBy(By.xpath(WorkflowLocators.CREATED_WF_DIAGRAM_LINK));
     }
 
+    public By getAnalysisStateBy(String analysisName) {
+        String xpath = WorkflowLocators.RUN_WF_CONFIG_ANALYSIS_STATUS.replace("{ANALYSIS_NAME}", analysisName);
+        return By.xpath(xpath);
+    }
+
     public Link getRunWorkflowButton() {
         return runWorkflowButton;
-    }
-
-    public Link getWfDiagramTabLink() {
-        return wfDiagramTabLink;
-    }
-
-    public boolean isWorkflowDiagramLinkDisplayed() {
-        return isElementPresent(getWfDiagramTabLink(), 2);
     }
 
     public By getAppInputBy(AppProfile appProfile) {
@@ -58,9 +58,38 @@ public class CreatedWorkflowPage extends AbstractPage {
         return new RunWorkflowConfigPage(getDriver());
     }
 
-    public boolean isWorkflowTitleDisplayedOnAnalyses(WorkflowProfile workflowProfile) {
-        String xpath = WorkflowLocators.CREATED_WF_ANALYSES_WF_TITLE.replace("{WF_TITLE}", workflowProfile.getWfTitle());
+    public boolean isAnalysisNameDisplayed(WorkflowProfile workflowProfile) {
+        String xpath = WorkflowLocators.CREATED_WF_ANALYSES_WF_TITLE.replace("{WF_TITLE}", workflowProfile.getWfFirstAnalysisName());
         return isElementPresent(By.xpath(xpath), 5);
+    }
+
+    public String getAnalysisStateText(String analysisName) {
+        return getDriver().findElement(getAnalysisStateBy(analysisName)).getText();
+    }
+
+    public boolean isAnalysisStatusDone(String analysisName) {
+        boolean isDone = false;
+        if (getAnalysisStateText(analysisName).equalsIgnoreCase(getDictDone())) {
+            isDone = true;
+        }
+        return isDone;
+    }
+
+    public CreatedWorkflowPage waitUntilAnalysisDone(String analysisName) {
+        int timeoutSec = 300;
+        int refreshStepSec = 15;
+        int spentTimeSec = 0;
+        log.info("waiting for " + timeoutSec + " sec until analysis status is Done for " + analysisName);
+        while ( !isAnalysisStatusDone(analysisName) && (spentTimeSec < timeoutSec) ) {
+            sleep(refreshStepSec*1000);
+            spentTimeSec = spentTimeSec + refreshStepSec;
+            log.info("it's been " + spentTimeSec + " seconds");
+            getDriver().navigate().refresh();
+        }
+        if (!isAnalysisStatusDone(analysisName)) {
+            log.info("[WARNING] the analysis status is not DONE after " + timeoutSec + " seconds: " + analysisName);
+        }
+        return new CreatedWorkflowPage(getDriver());
     }
 
 }

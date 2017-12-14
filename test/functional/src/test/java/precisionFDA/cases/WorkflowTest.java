@@ -127,6 +127,7 @@ public class WorkflowTest extends AbstractTest {
                 .as("Input App is displayed")
                 .isTrue();
 
+        runWorkflowConfigPage.enterAnalysisName(workflowProfile.getWfFirstAnalysisName());
         runWorkflowConfigPage = runWorkflowConfigPage.clickSelectFile();
         runWorkflowConfigPage.clickFilesOnModal();
         runWorkflowConfigPage.selectFileInModal(inputFileProfile.getFileName());
@@ -140,8 +141,15 @@ public class WorkflowTest extends AbstractTest {
         createdWorkflowPage = runWorkflowConfigPage.clickRunWorkflow();
 
         assertThat(
-                createdWorkflowPage.isWorkflowTitleDisplayedOnAnalyses(workflowProfile))
-                .as("Workflow title is displayed on Analyses tab")
+                createdWorkflowPage.isAnalysisNameDisplayed(workflowProfile))
+                .as("Analysis name is displayed on Analyses tab")
+                .isTrue();
+
+        createdWorkflowPage = createdWorkflowPage.waitUntilAnalysisDone(workflowProfile.getWfFirstAnalysisName());
+
+        assertThat(
+                createdWorkflowPage.isAnalysisStatusDone(workflowProfile.getWfFirstAnalysisName()))
+                .as("analysis status is Done")
                 .isTrue();
     }
 

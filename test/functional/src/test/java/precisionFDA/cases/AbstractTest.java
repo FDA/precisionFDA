@@ -35,6 +35,7 @@ import static precisionFDA.data.TestAppData.getDockerFileName;
 import static precisionFDA.data.TestAppData.getDockerValidationText;
 import static precisionFDA.data.TestDict.*;
 import static precisionFDA.data.TestRunData.*;
+import static precisionFDA.utils.SettingsProperties.getEnv;
 import static precisionFDA.utils.Utils.*;
 
 @Listeners( { CustomResultListener.class } )
@@ -49,6 +50,7 @@ public abstract class AbstractTest {
     @BeforeClass(alwaysRun = true)
     public void setUp() {
         driver = new DriverFactory().getInstance().getDriver();
+        log.info("=== Environment is: " + getEnv().toUpperCase() + " ===");
     }
 
     @AfterClass(alwaysRun = true)

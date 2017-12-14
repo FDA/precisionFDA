@@ -54,5 +54,8 @@ public class WorkflowLocators {
 
     public static final String CREATED_WF_ANALYSES_WF_TITLE = "//*[contains(@id, 'analysis')]/td[text()='{WF_TITLE}']";
 
+    public static final String RUN_WF_CONFIG_ANALYSIS_NAME_INPUT = "//*[contains(@class, 'form')]//label[text()='Analysis Name']/..//input";
+
+    public static final String RUN_WF_CONFIG_ANALYSIS_STATUS = "//td[text()='{ANALYSIS_NAME}']/../td[contains(@class, 'state')]";
 
 }
