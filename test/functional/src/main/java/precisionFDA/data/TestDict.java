@@ -40,8 +40,14 @@ public class TestDict {
 
     static final String DICT_ACTIVE = "ACTIVE";
 
+    static final String DICT_DONE = "done";
+
     public static String getDictUnactivated() {
         return DICT_UNACTIVATED;
+    }
+
+    public static String getDictDone() {
+        return DICT_DONE;
     }
 
     public static String getDictActive() {

@@ -29,10 +29,7 @@ public final class SettingsProperties {
 
         String settingsFile = "devSettings.properties";
 
-        String env = System.getProperty("env");
-        if (("" + env).equalsIgnoreCase("null")) {
-            env = "dev";
-        }
+        String env = getEnv();
 
         if (env.equalsIgnoreCase("loc")) {
             settingsFile = "locSettings.properties";
@@ -45,6 +42,14 @@ public final class SettingsProperties {
         } catch (final Exception e) {}
 
         return properties;
+    }
+
+    public static String getEnv() {
+        String env = System.getProperty("env");
+        if (("" + env).equalsIgnoreCase("null")) {
+            env = "dev";
+        }
+        return env;
     }
 
 }

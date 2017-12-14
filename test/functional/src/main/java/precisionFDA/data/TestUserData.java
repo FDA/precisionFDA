@@ -4,11 +4,13 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import precisionFDA.model.UserProfile;
 
+import static precisionFDA.utils.SettingsProperties.getEnv;
+
 public class TestUserData {
 
     // test user
 
-    protected static final Config config = ConfigFactory.load();
+    protected static final Config config = ConfigFactory.load(getConfFile());
 
     public static String getPreTestUsername() {
             return config.getString("pfda_test.username");
@@ -182,6 +184,18 @@ public class TestUserData {
         return new UserProfile(TestUserData.basicPreAdminAuthUsername(), TestUserData.basicPreAdminAuthPassword(),
                 TestUserData.preAdminUsername(), TestUserData.preAdminPassword(),
                 TestUserData.preAdminFullName(), TestUserData.preAdminOrg());
+    }
+
+    private static String getConfFile() {
+        String env = getEnv();
+        String confFile ="";
+        if (env.equalsIgnoreCase("dev")) {
+            confFile = "dev_user_creds";
+        }
+        if (env.equalsIgnoreCase("loc")) {
+            confFile = "loc_user_creds";
+        }
+        return confFile;
     }
 
 }

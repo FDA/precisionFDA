@@ -45,4 +45,14 @@
             <class name="precisionFDA.cases.FilesPublishTest" />
         </classes>
     </test>
+    <test name="ChallsTest">
+        <classes>
+            <class name="precisionFDA.cases.ChallsTest" />
+        </classes>
+    </test>
+    <test name="WorkflowTest">
+        <classes>
+            <class name="precisionFDA.cases.WorkflowTest" />
+        </classes>
+    </test>
 </suite>
