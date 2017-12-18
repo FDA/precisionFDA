@@ -239,13 +239,15 @@ class SubmissionsController < ApplicationController
       input_info: input_info
     )
 
-    Submission.create!(
+    submission = Submission.create!(
       job_id: job.id,
       desc: desc,
       user_id: @context.user_id,
       challenge_id: challenge.id,
       _inputs: input_info.file_dxids
     )
+
+    Event::SubmissionCreated.create(submission, @context.user)
 
     flash[:success] = "Your entry was submitted successfully."
   end

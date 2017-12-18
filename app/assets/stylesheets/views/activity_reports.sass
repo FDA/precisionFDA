@@ -1,0 +1,136 @@
+@import "_common"
+
+@mixin shadowed-border()
+  border: 1px solid $border-default-color
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .075)
+  border-radius: 3px
+
+$chart-size: 400px
+$chart-zoomed-size: 70%
+$chart-header-size: 41px
+
+.pfda-controller-activity_reports.pfda-action-index
+
+  .panel
+    margin-bottom: 0px
+    border-radius: 0px
+    border-bottom: none
+
+  .pfda-toolbar
+    .btn-group
+      padding: 0px 2.5px
+    .pfda-datetimepicker,
+    .add-datetimepicker
+      float: left
+      width: 150px      
+      margin-right: 3px
+      text-align: center
+    .pfda-datetimepicker
+      height: 100%
+    
+
+  .total-row
+    margin: 20px 0px
+    display: flex
+    justify-content: center
+    flex-wrap: wrap
+    .total
+      width: 300px
+      padding: 30px
+      margin: 10px
+      text-transform: uppercase
+      text-align: center
+      @include shadowed-border()
+      &-value
+        font-size: 30px        
+      &-label
+        margin-top: 10px
+        a
+          pointer-events: none
+
+  &.chart-zoomed
+    overflow: hidden
+  
+  .chart-zoomed-modal
+    position: fixed
+    top: 0
+    left: 0
+    width: 100%
+    height: 100%
+    background-color: rgba(0, 0, 0, .6)
+    z-index: 1900
+
+  .chart-row
+    display: flex
+    justify-content: center
+    flex-wrap: wrap
+
+    .chart
+      width: $chart-size
+      height: $chart-size
+      @include shadowed-border()
+      margin: 10px
+      &.full-width
+        width: 100%
+      &.zoomed
+        width: 80%
+        height: $chart-zoomed-size
+        top: 15%
+        position: fixed
+        background-color: #FFF
+        z-index: 2000
+        margin: auto
+        display: flex
+        flex-direction: column
+        .chart-container
+          height: 100%
+          display: flex
+          flex-basis: 100%
+          flex-grow: 1
+          flex-shrink: 1
+        .fa-search-minus
+          display: inline
+        .fa-search-plus
+          display: none
+
+      .fa-search-minus
+        display: none
+      .fa-search-plus
+        display: inline
+
+      &-header
+        padding: 10px
+        font-weight: bold
+        text-transform: uppercase
+        border-bottom: 1px solid $border-default-color
+        height: $chart-header-size
+
+      &-container
+        height: $chart-size - $chart-header-size - 10px
+        &.loading,
+        &.error
+          position: relative
+          &:before
+            content: 'Loading...'
+            position: absolute
+            width: 100%
+            height: 100%
+            background-color: #FFF
+            z-index: 10
+            text-align: center
+            padding-top: 40%
+            font-size: 26px
+            color: rgba(0, 0, 0, .3)
+        &.error
+          &:before
+            content: 'Something went wrong'
+            color: $alert-danger-text
+            background-color: $alert-danger-bg
+      
+      &-error
+        position: absolute
+        top: $chart-header-size
+        left: 0
+        width: 100%
+        text-align: center
+        padding-top: 40%
