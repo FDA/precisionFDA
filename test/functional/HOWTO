@@ -16,26 +16,30 @@ Make sure Java (JRE and JDK) is installed on the machine where you are planning 
 Works fine with “openjdk” ver. 1.8.*
 
 4.
-Make sure Firefox is installed on the machine. Works fine with the last version 56.0
+Make sure Firefox is installed on the machine. Works fine with the last version 57.0
 
+5.
 Download the “geckodriver” file, save unpacked file to “.../precision-fda/test/functional/drivers” folder.
 The file should be downloaded here: https://github.com/mozilla/geckodriver/releases
 
-5.
-Edit the file “precision-fda/test/functional/src/main/resources/settings.properties” if needed.
-
 6.
-Edit the file “precision-fda/test/functional/src/main/resources/application.conf.example”: the file is a container for test users data.
-Rename the file “application.conf.example” to “application.conf”.
+Edit the file "devSettings.properties" (or "locSettings.properties") in the folder
+"precision-fda/test/functional/src/main/resources/" if needed.
 
 7.
-Make sure VPN is active if needed.
+Edit the file "dev_user_creds.conf.example" (or "loc_user_creds.conf.example") in the folder
+"precision-fda/test/functional/src/main/resources/".
+the file is a container for test users data.
+Rename the file “dev_user_creds.conf.example” to “dev_user_creds.conf”.
 
 8.
-Via command line: go to ""/precision-fda/test/functional/” folder.
-Execute “mvn clean test -Dsuite=allSuitesParallel.xml”, where “allSuitesParallel.xml” -
-the file with description what test cases should be run and how they should be run.
-In our case: all existing test cases in parallel using 3 threads.
+Via command line: go to "/precision-fda/test/functional/” folder.
+Execute “mvn clean test -Dsuite=allSuitesParallel.xml -Denv=dev”,
+where “allSuitesParallel.xml” - the "suite" file, the file with description what test cases should be run and how they should be run.
+"-Denv=dev" sets an environment parameter value.
+If "dev" is selected - the files "dev_user_creds.conf" and "devSettings.properties" will be used.
+If "loc" is selected - the files "loc_user_creds.conf" and "locSettings.properties" will be used.
+In our case: all existing test cases will be run on dev environment in parallel using 3 threads.
 
 
 ----------------------
@@ -44,4 +48,5 @@ How to review results:
 
 a. “precision-fda/test/functional/target/surefire-reports/html/index.html” - is an html report of the run
 
-b. The folder “precision-fda/test/functional/target/debug-log/” will have full log files and screenshots (if it is enabled in the “properties” file).
+b. The folder “precision-fda/test/functional/target/debug-log/” will have full log files and screenshots
+(if it is enabled in the “properties” file).

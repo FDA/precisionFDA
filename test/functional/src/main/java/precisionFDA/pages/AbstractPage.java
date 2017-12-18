@@ -346,6 +346,7 @@ public abstract class AbstractPage {
             log.warn(message);
             String fileName =
                     getDictWarning() + "_" +
+                    pageName + "_" +
                     getRunTimeLocalUniqueValue()
                     + ".png";
             reportScreenshot(message + " | Please see screenshot ==>", fileName, getDictWarning());
