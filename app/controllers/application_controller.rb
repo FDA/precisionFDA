@@ -9,6 +9,8 @@ class ApplicationController < ActionController::Base
   # Require login
   before_action :require_login
 
+  before_action :create_user_viewed_event
+
   # Use time zone of current user
   around_action :user_time_zone, if: lambda { !@context.guest? && current_user }
 
@@ -404,5 +406,12 @@ class ApplicationController < ActionController::Base
     else
       yield
     end
+  end
+
+  def create_user_viewed_event
+    return if request.xhr?
+    return unless request.get?
+
+    Event::UserViewed.create(@context)
   end
 end

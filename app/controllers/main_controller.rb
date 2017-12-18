@@ -313,6 +313,7 @@ class MainController < ApplicationController
       end
       save_session(user.id, username, token, expiration_time, user.org_id)
       AUDIT_LOGGER.info("User #{username} logged in")
+      Event::UserLoggedIn.create(user)
       redirect_to root_url
     end
   end
@@ -335,6 +336,7 @@ class MainController < ApplicationController
           AUDIT_LOGGER.info("Access requested: #{p.to_json}")
           NotificationsMailer.invitation_email(@invitation).deliver_now!
           NotificationsMailer.guest_access_email(@invitation).deliver_now!
+          Event::UserAccessRequested.create(@invitation)
         end
       end
     end

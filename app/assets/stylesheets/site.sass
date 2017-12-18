@@ -191,6 +191,28 @@ table.table-nowrap
     padding: $padding-large-vertical * 3 $padding-large-horizontal
 
 .bootstrap-datetimepicker-widget
+  &.top
+    bottom: 30px !important
   &.dropdown-menu
     max-height: initial
     overflow: initial
+
+.pfda-datetimepicker
+  &.with-icon
+    position: relative
+
+.pfda-datetimepicker-label
+  overflow: hidden
+  white-space: nowrap
+  text-overflow: ellipsis
+.pfda-datetimepicker-value
+  height: 0px
+  padding: 0px
+  box-sizing: border-box
+  box-shadow: none
+  border: none
+  width: 0px
+.pfda-datetimepicker-icon
+  position: absolute
+  top: 10px
+  right: 10px
