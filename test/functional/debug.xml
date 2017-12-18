@@ -1,0 +1,10 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="debug test suite">
+    <test name="debug test suite">
+        <classes>
+            <class name="precisionFDA.cases.WorkflowTest"/>
+            <class name="precisionFDA.cases.AppsTest"/>
+            <class name="precisionFDA.cases.ChallsTest"/>
+        </classes>
+    </test>
+</suite>
