@@ -42,8 +42,26 @@ public class TestDict {
 
     static final String DICT_DONE = "done";
 
+    static final String DICT_CHALLENGE_CLOSED = "Challenge Closed";
+
+    static final String DICT_OPEN = "open";
+
+    static final String DICT_ARCHIVED = "archived";
+
+    public static String getDictOpen() {
+        return DICT_OPEN;
+    }
+
+    public static String getDictArchived() {
+        return DICT_ARCHIVED;
+    }
+
     public static String getDictUnactivated() {
         return DICT_UNACTIVATED;
+    }
+
+    public static String getDictChallengeClosed() {
+        return DICT_CHALLENGE_CLOSED;
     }
 
     public static String getDictDone() {

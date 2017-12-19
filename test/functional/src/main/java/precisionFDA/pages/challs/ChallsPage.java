@@ -113,5 +113,23 @@ public class ChallsPage extends AbstractPage {
         return new ChallsCreatedChallPage(getDriver());
     }
 
+    public boolean isAnnouncedResultDisplayed(ChallProfile challProfile) {
+        return isElementPresent(getChallengeCardBy(challProfile), 5);
+    }
+
+    public By getChallengeCardBy(ChallProfile challProfile) {
+        String xpath = ChallsLocators.CHALLS_PAGE_CHALLENGE_CARD_LINK_TEMPLATE.replace("{CHALL_NAME}", challProfile.getChallName());
+        return By.xpath(xpath);
+    }
+
+    public ChallsCreatedChallPage clickOnChallengeCard(ChallProfile challProfile) {
+        log.info("click on Challenge card");
+        isElementPresent(getChallengeCardBy(challProfile), 1);
+        getDriver().findElement(getChallengeCardBy(challProfile)).click();
+        return new ChallsCreatedChallPage(getDriver());
+    }
+
+
+
 
 }

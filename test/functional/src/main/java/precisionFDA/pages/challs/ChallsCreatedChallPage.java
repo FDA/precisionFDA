@@ -7,8 +7,11 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import precisionFDA.locators.ChallsLocators;
 import precisionFDA.pages.AbstractPage;
+import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 
+import static precisionFDA.data.TestDict.getDictChallengeClosed;
+import static precisionFDA.data.TestDict.getDictDone;
 import static precisionFDA.utils.Utils.sleep;
 
 public class ChallsCreatedChallPage extends AbstractPage {
@@ -16,10 +19,10 @@ public class ChallsCreatedChallPage extends AbstractPage {
     private final Logger log = Logger.getLogger(this.getClass());
 
     @FindBy(xpath = ChallsLocators.CHALLS_CREATED_CHALL_PAGE_NAME)
-    private WebElement createdName;
+    private WebElement createdChallengeName;
 
     @FindBy(xpath = ChallsLocators.CHALLS_CREATED_CHALL_PAGE_DESCR)
-    private WebElement createdDescr;
+    private WebElement createdChallengeDescr;
 
     @FindBy(xpath = ChallsLocators.CHALLS_CREATED_CHALL_PAGE_STARTS_VALUE)
     private WebElement startsWE;
@@ -42,10 +45,31 @@ public class ChallsCreatedChallPage extends AbstractPage {
     @FindBy(xpath = ChallsLocators.CHALLS_CREATED_CHALL_SETTINGS_BUTTON)
     private Link settingsButtonLink;
 
+    @FindBy(xpath = ChallsLocators.MY_ENTRIES_LINK)
+    private Link myEntriesLink;
+
+    @FindBy(xpath = ChallsLocators.MY_ENTRIES_INPUT_FILE_COLUMN_NAME)
+    private WebElement myEntriesInputFileColumnName;
+
+    @FindBy(xpath = ChallsLocators.CHALLS_CREATED_CHALLENGE_CLOSED_BUTTON)
+    private Button challengeClosedButton;
+
     public ChallsCreatedChallPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(ChallsLocators.CHALLS_CREATED_CHALL_INTRO_LINK));
+    }
+
+    public Button getChallengeClosedButton() {
+        return challengeClosedButton;
+    }
+
+    public WebElement getMyEntriesInputFileColumnName() {
+        return myEntriesInputFileColumnName;
+    }
+
+    public Link getMyEntriesLink() {
+        return myEntriesLink;
     }
 
     public Link getSettingsButtonLink() {
@@ -76,24 +100,24 @@ public class ChallsCreatedChallPage extends AbstractPage {
         return endsWE;
     }
 
-    public WebElement getCreatedName() {
-        return createdName;
+    public WebElement getCreatedChallengeName() {
+        return createdChallengeName;
     }
 
-    public WebElement getCreatedDescr() {
-        return createdDescr;
+    public WebElement getCreatedChallengeDescr() {
+        return createdChallengeDescr;
     }
 
     public String getIntroText() {
         return getIntroWE().getText().trim();
     }
 
-    public String getCreatedNameText() {
-        return getCreatedName().getText().trim();
+    public String getCreatedChallengeNameText() {
+        return getCreatedChallengeName().getText().trim();
     }
 
-    public String getCreatedDescrText() {
-        return getCreatedDescr().getText().trim();
+    public String getCreatedChallengeDescrText() {
+        return getCreatedChallengeDescr().getText().trim();
     }
 
     public String getStartsText() {
@@ -153,9 +177,74 @@ public class ChallsCreatedChallPage extends AbstractPage {
         }
     }
 
+    public void waitUntilChallengeClosed() {
+        int timeoutSec = 120;
+        int refreshStepSec = 15;
+        int spentTimeSec = 0;
+        log.info("waiting for " + timeoutSec + " sec until the challenge is closed");
+        while ( !isChallengeClosedButtonDisplayed() && (spentTimeSec < timeoutSec) ) {
+            sleep(refreshStepSec*1000);
+            spentTimeSec = spentTimeSec + refreshStepSec;
+            log.info("it's been " + spentTimeSec + " seconds");
+            getDriver().navigate().refresh();
+        }
+        if (!isElementPresent(getJoinChallengeButtonLink(), 1)) {
+            log.info("[WARNING] the challenge is not closed after " + timeoutSec + " seconds");
+        }
+    }
+
     public boolean isSubmittedInputFileLinkDisplayed(String fileName) {
         String xpath = ChallsLocators.SUBMITTED_INPUT_FILE_LINK.replace("{FILE_NAME}", fileName);
         return isElementPresent(By.xpath(xpath), 3);
+    }
+
+    public ChallsCreatedChallPage clickMyEntries() {
+        log.info("click My Entries");
+        getMyEntriesLink().click();
+        waitUntilDisplayed(getMyEntriesInputFileColumnName(), 10);
+        return new ChallsCreatedChallPage(getDriver());
+    }
+
+    public boolean isSubmittedEntryNameDisplayed(String entryName) {
+        String xpath = ChallsLocators.MY_ENTRIES_ENTRY_NAME_LINK_TEMPLATE.replace("{ENTRY_NAME}", entryName);
+        By name = By.xpath(xpath);
+        return isElementPresent(name, 1);
+    }
+
+    public boolean isSubmittedEntryInputFileNameDisplayed(String fileName, String entryName) {
+        String xpath = ChallsLocators.MY_ENTRIES_INPUT_FILE_NAME_LINK_TEMPLATE
+                .replace("{ENTRY_NAME}", entryName)
+                .replace("{FILE_NAME}", fileName);
+        By el = By.xpath(xpath);
+        return isElementPresent(el, 1);
+    }
+
+    public boolean isEntryStateDone(String entryName) {
+        boolean res = false;
+        String actual = getEntryStateText(entryName);
+        String expected = getDictDone();
+        if (!actual.equalsIgnoreCase(expected)) {
+            log.warn("expected state is [" + expected + "] but actual is [" + actual + "] for entry " + entryName);
+        }
+        else {
+            res = true;
+        }
+        return res;
+    }
+
+    public String getEntryStateText(String entryName) {
+        String xpath = ChallsLocators.MY_ENTRIES_ENTRY_STATE_TEMPLATE.replace("{ENTRY_NAME}", entryName);
+        By el = By.xpath(xpath);
+        isElementPresent(el, 1);
+        return getDriver().findElement(el).getText().trim();
+    }
+
+    public boolean isChallengeClosedButtonDisplayed() {
+        boolean isButton = isElementPresent(getChallengeClosedButton(), 1);
+        String source = getDriver().getPageSource();
+        boolean isSource = source.contains(getDictChallengeClosed());
+        log.info("is button = " + isButton + "; isSource = " + isSource);
+        return isButton && isSource;
     }
 
 }
