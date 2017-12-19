@@ -110,4 +110,20 @@ public class ChallsLocators {
 
     public static final String SUBMITTED_INPUT_FILE_LINK = "//table//a[contains(text(), '{FILE_NAME}')]";
 
+    public static final String MY_ENTRIES_LINK = "//a[text()='My Entries']";
+
+    public static final String MY_ENTRIES_INPUT_FILE_COLUMN_NAME = "//th[text()='Input File']";
+
+    public static final String MY_ENTRIES_ENTRY_NAME_LINK_TEMPLATE = "//table//a[text()='{ENTRY_NAME}']";
+
+    public static final String MY_ENTRIES_INPUT_FILE_NAME_LINK_TEMPLATE = "//table//a[text()='{ENTRY_NAME}']/../../td//a[contains(@href, 'files')][contains(text(), '{FILE_NAME}')]";
+
+    public static final String MY_ENTRIES_ENTRY_STATE_TEMPLATE = "//table//a[text()='{ENTRY_NAME}']/../../td[contains(@class, 'state')]";
+
+    public static final String CHALLS_CREATED_CHALLENGE_CLOSED_BUTTON = "//button[contains(@class, 'danger')]";
+
+    public static final String CHALLS_EDIT_CHALLENGE_ANNOUNCE_RESULT_BUTTON_LINK = "//a[text()='Announce result']";
+
+    public static final String CHALLS_PAGE_CHALLENGE_CARD_LINK_TEMPLATE = "//*[contains(@class, 'pfda-card-title')][contains(text(), '{CHALL_NAME}')]";
+
 }

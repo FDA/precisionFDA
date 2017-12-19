@@ -830,6 +830,18 @@ public class TestFilesData {
             ""
     );
 
+    //=== main second challenge entry file  ===
+
+    public static FileProfile getSecondNewChallEntryFile() {
+        return secondChallEntryFile;
+    }
+
+    static FileProfile secondChallEntryFile = new FileProfile(
+            getGeneratedTestFileName(getDictTxt()),
+            "",
+            ""
+    );
+
     //=== main WF input file  ===
 
     public static FileProfile getMainWFInputFile() {

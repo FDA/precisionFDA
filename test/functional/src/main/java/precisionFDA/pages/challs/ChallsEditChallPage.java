@@ -12,7 +12,8 @@ import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.Select;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 
-import static precisionFDA.data.TestChallsData.getChallAtDateTime;
+import static precisionFDA.data.TestDict.getDictArchived;
+import static precisionFDA.data.TestDict.getDictOpen;
 import static precisionFDA.utils.Utils.sleep;
 
 public class ChallsEditChallPage extends AbstractPage {
@@ -67,10 +68,17 @@ public class ChallsEditChallPage extends AbstractPage {
     @FindBy(xpath = ChallsLocators.CHALLS_CREATED_CHALL_UPDATE_BUTTON)
     private WebElement updateButton;
 
+    @FindBy(xpath = ChallsLocators.CHALLS_EDIT_CHALLENGE_ANNOUNCE_RESULT_BUTTON_LINK)
+    private Link announceResultButtonLink;
+
     public ChallsEditChallPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(ChallsLocators.CHALLS_EDIT_CHALL_FORM_STATUS_SELECT));
+    }
+
+    public Link getAnnounceResultButtonLink() {
+        return announceResultButtonLink;
     }
 
     public WebElement getUpdateButton() {
@@ -205,14 +213,28 @@ public class ChallsEditChallPage extends AbstractPage {
     }
 
     public void setOpenStatus() {
-        getEditChallStatusSelect().selectByVisibleText("open");
+        getEditChallStatusSelect().selectByVisibleText(getDictOpen());
+    }
+
+    public void setArchivedStatus() {
+        getEditChallStatusSelect().selectByVisibleText(getDictArchived());
     }
 
     public ChallsCreatedChallPage clickUpdate() {
+        log.info("click Update");
         getUpdateButton().click();
         return new ChallsCreatedChallPage(getDriver());
     }
 
+    public boolean isAnnounceResultButtonDisplayed() {
+        return isElementPresent(getAnnounceResultButtonLink(), 5);
+    }
+
+    public ChallsCreatedChallPage clickAnnounceResult() {
+        log.info("click Announce Result");
+        getAnnounceResultButtonLink().click();
+        return new ChallsCreatedChallPage(getDriver());
+    }
 
 
 }
