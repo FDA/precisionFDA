@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171211122715) do
+ActiveRecord::Schema.define(version: 20171220124605) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -226,6 +226,7 @@ ActiveRecord::Schema.define(version: 20171211122715) do
     t.string   "param2",     limit: 255
     t.string   "param3",     limit: 255
     t.datetime "created_at",             null: false
+    t.string   "param4",     limit: 255
   end
 
   create_table "expert_answers", force: :cascade do |t|
