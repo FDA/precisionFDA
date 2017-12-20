@@ -27,7 +27,7 @@ module Admin
       private
 
       def collection
-        Event::JobFailed.date_range(start_date, end_date)
+        Event::JobClosed.failed.date_range(start_date, end_date)
       end
 
     end

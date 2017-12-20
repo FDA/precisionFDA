@@ -67,6 +67,7 @@ class Job < ActiveRecord::Base
   acts_as_votable
 
   scope :done, -> { where(state: STATE_DONE) }
+  scope :terminal, -> { where(state: [TERMINAL_STATES]) }
 
   def uid
     dxid
