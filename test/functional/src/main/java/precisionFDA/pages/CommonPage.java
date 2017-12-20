@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import precisionFDA.pages.dashboard.AdminDashboardPage;
 import precisionFDA.pages.spaces.SpacesPage;
 import precisionFDA.pages.wf.WorkflowsPage;
 import ru.yandex.qatools.htmlelements.element.Link;
@@ -245,6 +246,13 @@ public class CommonPage extends AbstractPage {
         openProfileDropdown();
         getProfileDropBlock().openGuidelinesPage();
         return new GuidelinesPage(getDriver());
+    }
+
+    public AdminDashboardPage openAdminDashboardPage() {
+        log.info("opening admin dashboard page");
+        openProfileDropdown();
+        getProfileDropBlock().openAdminDashboardPage();
+        return new AdminDashboardPage(getDriver());
     }
 
     public AboutHowPage openDocsPage() {

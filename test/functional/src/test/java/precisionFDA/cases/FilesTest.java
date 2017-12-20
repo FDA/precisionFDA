@@ -333,7 +333,6 @@ public class FilesTest extends AbstractTest {
                 .as("Link to created common filter folder is displayed inside the folder")
                 .isTrue();
 
-
         // filter by 'filter#1'
         filesPage = filesPage.filterByName(getFirstFilterPhrase());
 

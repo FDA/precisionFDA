@@ -13,7 +13,6 @@ import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.testng.annotations.*;
-import precisionFDA.model.AppProfile;
 import precisionFDA.model.UserProfile;
 import precisionFDA.pages.CommonPage;
 import precisionFDA.pages.login.LoginPrecisionPage;
@@ -31,8 +30,6 @@ import java.util.logging.Level;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
-import static precisionFDA.data.TestAppData.getDockerFileName;
-import static precisionFDA.data.TestAppData.getDockerValidationText;
 import static precisionFDA.data.TestDict.*;
 import static precisionFDA.data.TestRunData.*;
 import static precisionFDA.utils.SettingsProperties.getEnv;
@@ -237,68 +234,6 @@ public abstract class AbstractTest {
         }
     }
 
-    public boolean isFileDownloaded(String fileName) {
-        boolean isDownloaded = false;
-        String downloadsPath = getPathToDownloadsFolder();
-        File file = new File(downloadsPath + fileName);
-        if (file.exists()) {
-            isDownloaded = true;
-        }
-        return isDownloaded;
-    }
-
-    public boolean isDockerFileDownloaded() {
-        return isFileDownloaded(getDockerFileName());
-    }
-
-    public boolean isCWLToolFileDownloaded(AppProfile appProfile) {
-        return isFileDownloaded(getCWLToolFileName(appProfile));
-    }
-
-    public boolean isWDLTaskFileDownloaded(AppProfile appProfile) {
-        return isFileDownloaded(getWDLTaskFileName(appProfile));
-    }
-
-    public boolean isDockerFileNotEmpty() {
-        boolean notEmpty = isFileContainsText(getPathToDownloadsFolder() + getDockerFileName(), getDockerValidationText());
-        if (!notEmpty) {
-            log.warn("the docker file does not contain text: " + getDockerValidationText());
-        }
-        return notEmpty;
-    }
-
-    public boolean isCWLToolFileNotEmpty(AppProfile appProfile) {
-        double num = 500;
-        boolean notEmpty = false;
-        double size = getFileSize(getPathToDownloadsFolder() + getCWLToolFileName(appProfile));
-        if (size < num) {
-            log.warn("the downloaded CWL Tool file looks like a wrong one - size of the file is less then " + num);
-        }
-        else {
-            notEmpty = true;
-        }
-        return notEmpty;
-    }
-
-    public boolean isWDLTaskFileNotEmpty(AppProfile appProfile) {
-        double num = 500;
-        boolean notEmpty = false;
-        double size = getFileSize(getPathToDownloadsFolder() + getWDLTaskFileName(appProfile));
-        log.info("file size is: " + size);
-        if (size < num) {
-            log.warn("the downloaded WDL Task file looks like a wrong one - size of the file is less then " + num);
-        }
-        else {
-            notEmpty = true;
-        }
-        return notEmpty;
-    }
-
-    public boolean isFileContainsText(String filePath, String text) {
-        String fileText = getTextFromFile(filePath);
-        return fileText.contains(text);
-    }
-
     // ----- DriverFactory -----
 
     public static class DriverFactory {
@@ -335,7 +270,19 @@ public abstract class AbstractTest {
             logs.enable(LogType.BROWSER, Level.SEVERE);
 
             FirefoxBinary firefoxBinary = new FirefoxBinary();
-            if (SettingsProperties.getProperty("headlessMode").equalsIgnoreCase("true")) {
+
+            String headlessModeCmd = "" + System.getProperty("headlessMode");
+            String headlessModeCfg = "" + SettingsProperties.getProperty("headlessMode");
+            String headlessMode;
+
+            if (headlessModeCmd.equalsIgnoreCase(getDictTrue()) || headlessModeCmd.equalsIgnoreCase(getDictFalse())) {
+                headlessMode = headlessModeCmd;
+            }
+            else {
+                headlessMode = headlessModeCfg;
+            }
+
+            if (headlessMode.equalsIgnoreCase("true")) {
                 firefoxBinary.addCommandLineOptions("--headless");
             }
             System.setProperty("webdriver.gecko.driver", currentDirectory + SettingsProperties.getProperty("pathToFirefoxDriver"));
@@ -348,7 +295,7 @@ public abstract class AbstractTest {
             firefoxOptions.addPreference("browser.download.manager.showWhenStarting", false);
             firefoxOptions.addPreference("browser.download.dir", getPathToDownloadsFolder());
             firefoxOptions.addPreference("browser.helperApps.neverAsk.saveToDisk",
-                    "text/plain, image/png, application/zlib, application/x-gzip, application/x-compressed, " +
+                    "text/plain, image/png, application/zlib, application/x-gzip, application/x-compressed, text/csv, " +
                             "application/x-gtar, multipart/x-gzip, application/tgz, " +
                             "application/gnutar, application/x-tar, application/gzip, application/tar+gzip, application/octet-stream");
             firefoxOptions.addPreference("browser.download.manager.focusWhenStarting", false);

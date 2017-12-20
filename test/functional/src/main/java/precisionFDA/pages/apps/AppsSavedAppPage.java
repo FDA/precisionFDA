@@ -5,6 +5,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import precisionFDA.utils.Utils;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
@@ -16,10 +17,11 @@ import precisionFDA.model.UserProfile;
 import precisionFDA.pages.AbstractPage;
 
 import static precisionFDA.data.TestAppData.getAppCommentText;
-import static precisionFDA.data.TestAppData.getDockerFileName;
-import static precisionFDA.utils.Utils.getCWLToolFileName;
-import static precisionFDA.utils.Utils.getWDLTaskFileName;
-import static precisionFDA.utils.Utils.waitUntilFileIsDownloaded;
+import static precisionFDA.data.TestRunData.getDockerFileName;
+import static precisionFDA.data.TestRunData.getDockerValidationText;
+import static precisionFDA.data.TestRunData.getPathToDownloadsFolder;
+import static precisionFDA.utils.Utils.*;
+import static precisionFDA.utils.Utils.getFileSize;
 
 public class AppsSavedAppPage extends AbstractPage {
 
@@ -496,6 +498,53 @@ public class AppsSavedAppPage extends AbstractPage {
         waitUntilDisplayed(getAppSavedTrackButtonLink(), 2);
         getAppSavedTrackButtonLink().click();
         return new AppsTrackAppPage(getDriver());
+    }
+
+    public boolean isDockerFileDownloaded() {
+        return isFileDownloaded(getDockerFileName());
+    }
+
+    public boolean isCWLToolFileDownloaded(AppProfile appProfile) {
+        return isFileDownloaded(getCWLToolFileName(appProfile));
+    }
+
+    public boolean isWDLTaskFileDownloaded(AppProfile appProfile) {
+        return isFileDownloaded(getWDLTaskFileName(appProfile));
+    }
+
+    public boolean isDockerFileNotEmpty() {
+        boolean notEmpty = Utils.isFileContainsText(getPathToDownloadsFolder() + getDockerFileName(), getDockerValidationText());
+        if (!notEmpty) {
+            log.warn("the docker file does not contain text: " + getDockerValidationText());
+        }
+        return notEmpty;
+    }
+
+    public boolean isCWLToolFileNotEmpty(AppProfile appProfile) {
+        double num = 500;
+        boolean notEmpty = false;
+        double size = getFileSize(getPathToDownloadsFolder() + getCWLToolFileName(appProfile));
+        if (size < num) {
+            log.warn("the downloaded CWL Tool file looks like a wrong one - size of the file is less then " + num);
+        }
+        else {
+            notEmpty = true;
+        }
+        return notEmpty;
+    }
+
+    public boolean isWDLTaskFileNotEmpty(AppProfile appProfile) {
+        double num = 500;
+        boolean notEmpty = false;
+        double size = getFileSize(getPathToDownloadsFolder() + getWDLTaskFileName(appProfile));
+        log.info("file size is: " + size);
+        if (size < num) {
+            log.warn("the downloaded WDL Task file looks like a wrong one - size of the file is less then " + num);
+        }
+        else {
+            notEmpty = true;
+        }
+        return notEmpty;
     }
 
 }

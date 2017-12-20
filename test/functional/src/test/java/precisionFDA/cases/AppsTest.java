@@ -468,12 +468,12 @@ public class AppsTest extends AbstractTest {
                 .isEqualTo(appProfile.getCurRevNameText());
 
         assertThat(
-                isDockerFileDownloaded())
+                appsSavedAppPage.isDockerFileDownloaded())
                 .as("Docker file is downloaded")
                 .isTrue();
 
         assertThat(
-                isDockerFileNotEmpty())
+                appsSavedAppPage.isDockerFileNotEmpty())
                 .as("Docker file is not empty")
                 .isTrue();
     }
@@ -501,12 +501,12 @@ public class AppsTest extends AbstractTest {
                 .isEqualTo(appProfile.getCurRevNameText());
 
         assertThat(
-                isCWLToolFileDownloaded(appProfile))
+                appsSavedAppPage.isCWLToolFileDownloaded(appProfile))
                 .as("CWL Tool file is downloaded")
                 .isTrue();
 
         assertThat(
-                isCWLToolFileNotEmpty(appProfile))
+                appsSavedAppPage.isCWLToolFileNotEmpty(appProfile))
                 .as("CWL Tool file is not empty")
                 .isTrue();
     }
@@ -534,12 +534,12 @@ public class AppsTest extends AbstractTest {
                 .isEqualTo(appProfile.getCurRevNameText());
 
         assertThat(
-                isWDLTaskFileDownloaded(appProfile))
+                appsSavedAppPage.isWDLTaskFileDownloaded(appProfile))
                 .as("WDL Task file is downloaded")
                 .isTrue();
 
         assertThat(
-                isWDLTaskFileNotEmpty(appProfile))
+                appsSavedAppPage.isWDLTaskFileNotEmpty(appProfile))
                 .as("WDL Task file is not empty")
                 .isTrue();
     }

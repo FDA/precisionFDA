@@ -25,6 +25,9 @@ public class ProfileDropBlock extends AbstractBlock {
     @FindBy(xpath = ProfileDropBlockLocators.PROFILE_DROPDOWN_GUIDELINES_ITEM)
     private Link guidelinesLink;
 
+    @FindBy(xpath = ProfileDropBlockLocators.PROFILE_DROPDOWN_ADMINDASHBOARD_ITEM)
+    private Link adminDashboardLink;
+
     @FindBy(xpath = ProfileDropBlockLocators.PROFILE_DROPDOWN_DOCS_ITEM)
     private Link docsLink;
 
@@ -55,6 +58,10 @@ public class ProfileDropBlock extends AbstractBlock {
         return guidelinesLink;
     }
 
+    public Link getAdminDashboardLink() {
+        return adminDashboardLink;
+    }
+
     public Link getLogoutLink() {
         return logoutLink;
     }
@@ -77,6 +84,10 @@ public class ProfileDropBlock extends AbstractBlock {
 
     public void openGuidelinesPage() {
         getGuidelinesLink().click();
+    }
+
+    public void openAdminDashboardPage() {
+        getAdminDashboardLink().click();
     }
 
     public void openDocsPage() {

@@ -49,3 +49,4 @@
 /test/functional/src/main/resources/tempFiles/*.png
 /test/functional/src/main/resources/tempFiles/Docker*
 /test/functional/src/main/resources/tempFiles/*.gz
+/test/functional/src/main/resources/tempFiles/*.csv

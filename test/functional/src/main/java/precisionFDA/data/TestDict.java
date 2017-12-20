@@ -8,6 +8,8 @@ public class TestDict {
 
     static final String DICT_TRUE = "true";
 
+    static final String DICT_FALSE = "false";
+
     static final String DICT_PASSED = "passed";
 
     static final String DICT_FAILED = "failed";
@@ -47,6 +49,10 @@ public class TestDict {
     static final String DICT_OPEN = "open";
 
     static final String DICT_ARCHIVED = "archived";
+
+    public static String getDictFalse() {
+        return DICT_FALSE;
+    }
 
     public static String getDictOpen() {
         return DICT_OPEN;

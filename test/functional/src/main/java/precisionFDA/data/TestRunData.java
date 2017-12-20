@@ -3,6 +3,7 @@ package precisionFDA.data;
 import precisionFDA.utils.SettingsProperties;
 
 import static precisionFDA.utils.SettingsProperties.getEnv;
+import static precisionFDA.utils.Utils.getCurrentDate_YYYY_MM_dd;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 import static precisionFDA.utils.Utils.getTextFromFile;
 
@@ -33,6 +34,24 @@ public class TestRunData {
     static final String OUTPUT_LABEL_FIELD_NAME = "output_label_";
 
     static final String OUTPUT_HELP_FIELD_NAME = "output_help_";
+
+    static final String DOCKER_FILE_NAME = "Dockerfile";
+
+    static final String ACTIVE_USERS_FILE_NAME_PREFIX = "active_users_";
+
+    static final String DOCKER_VALIDATION_TEXT = "RUN DEBIAN_FRONTEND";
+
+    public static String getDockerValidationText() {
+        return DOCKER_VALIDATION_TEXT;
+    }
+
+    public static String getDockerFileName() {
+        return DOCKER_FILE_NAME;
+    }
+
+    public static String getActiveUsersFileName() {
+        return ACTIVE_USERS_FILE_NAME_PREFIX + getCurrentDate_YYYY_MM_dd() + ".csv";
+    }
 
     public static String getCurrentTimezone() {
         return currentTimezone;
