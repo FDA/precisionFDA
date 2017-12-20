@@ -15,6 +15,7 @@ class ActivityReportsView
     result = (hours + 'HRS ' + minutes + 'MINS')
     result = minutes + 'MINS' if hours == '00'
     result = seconds + 'SECS' if hours == '00' and minutes == '00'
+    result = '0' if seconds == '00' and hours == '00' and minutes == '00'
 
     return result
 
