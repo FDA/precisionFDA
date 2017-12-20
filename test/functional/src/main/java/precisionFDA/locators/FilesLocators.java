@@ -146,4 +146,6 @@ public class FilesLocators {
 
     public static final String FILES_SPACE_LINK = "//a[contains(text(), '{FILE_NAME}')]/../..//a[contains(@href, 'spaces')]";
 
+    public static final String FILES_UPLOAD_RESTART_BUTTON = "//button[text()='Restart']";
+
 }

@@ -30,9 +30,16 @@ public class FilesAddFilesPage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_UPLOADS_COMPLETE_MESSAGE)
     private WebElement filesUploadsCompleteMessageWE;
 
+    @FindBy(xpath = FilesLocators.FILES_UPLOAD_RESTART_BUTTON)
+    private Button filesUploadRestartButton;
+
     public FilesAddFilesPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_BROWSE_FILES_VISIBLE_FORM));
+    }
+
+    public Button getFilesUploadRestartButton() {
+        return filesUploadRestartButton;
     }
 
     public WebElement getFilesBrowseFilesVisibleForm() {
@@ -91,6 +98,13 @@ public class FilesAddFilesPage extends AbstractPage {
 
     public FilesPage openRootFilesPage() {
         return getCommonPage().openFilesPage();
+    }
+
+    public FilesAddFilesPage clickRestart() {
+        log.info("click Restart");
+        isElementPresent(getFilesUploadRestartButton(), 5);
+        getFilesUploadRestartButton().click();
+        return new FilesAddFilesPage(getDriver());
     }
 
 }

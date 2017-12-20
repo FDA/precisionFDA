@@ -13,7 +13,6 @@ import java.util.Date;
 import java.util.Random;
 import java.util.TimeZone;
 
-import static precisionFDA.data.TestAppData.getDockerFileName;
 import static precisionFDA.data.TestDict.*;
 import static precisionFDA.data.TestFilesData.*;
 import static precisionFDA.data.TestRunData.*;
@@ -43,6 +42,13 @@ public class Utils {
     public static String getRunTimeLocalUniqueValue() {
         Date d = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd_MM_HHmmssSSS");
+        String salt = dateFormat.format(d);
+        return salt;
+    }
+
+    public static String getCurrentDate_YYYY_MM_dd() {
+        Date d = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd");
         String salt = dateFormat.format(d);
         return salt;
     }
@@ -208,6 +214,7 @@ public class Utils {
         deleteTempFilesByExt(".png");
         deleteTempFilesByExt(".gz");
         deleteTempFilesByExt(".tar");
+        deleteTempFilesByExt(".csv");
         deleteFileByPartialName(getDockerFileName(), getPathToTempFilesFolder());
     }
 
@@ -282,6 +289,10 @@ public class Utils {
 
     public static void removeDockerFileFromDownloads() {
         removeSameFileFromDownloads(getDockerFileName());
+    }
+
+    public static void removeActiveUsersFileFromDownloads() {
+        removeSameFileFromDownloads(getActiveUsersFileName());
     }
 
     public static void removeCWLToolFileFromDownloads(AppProfile appProfile) {
@@ -431,6 +442,21 @@ public class Utils {
             }
         }
         return text;
+    }
+
+    public static boolean isFileContainsText(String filePath, String text) {
+        String fileText = getTextFromFile(filePath);
+        return fileText.contains(text);
+    }
+
+    public static boolean isFileDownloaded(String fileName) {
+        boolean isDownloaded = false;
+        String downloadsPath = getPathToDownloadsFolder();
+        File file = new File(downloadsPath + fileName);
+        if (file.exists()) {
+            isDownloaded = true;
+        }
+        return isDownloaded;
     }
 
 

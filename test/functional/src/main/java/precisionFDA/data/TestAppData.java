@@ -40,18 +40,6 @@ public class TestAppData {
 
     static final String CREATE_APP_JOB_CHALL_NAME_PREFIX = "at_job_challenge_test_";
 
-    static final String DOCKER_FILE_NAME = "Dockerfile";
-
-    static final String DOCKER_VALIDATION_TEXT = "RUN DEBIAN_FRONTEND";
-
-    public static String getDockerValidationText() {
-        return DOCKER_VALIDATION_TEXT;
-    }
-
-    public static String getDockerFileName() {
-        return DOCKER_FILE_NAME;
-    }
-
     static String CREATE_CHALL_APP_SCRIPT_BODY_OLD =
             "emit " + getTestChallAppOutputStrFieldName1() + " 'foo bar str 1'\n" +
             "echo 'some test text 1' > output_file1.txt\n" +

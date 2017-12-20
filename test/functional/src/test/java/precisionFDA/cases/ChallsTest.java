@@ -504,7 +504,6 @@ public class ChallsTest extends AbstractTest {
     public void archiveChallenge() {
         printTestHeader("Test Case: archive challenge");
 
-        UserProfile user = TestUserData.getAdminUser();
         ChallProfile challProfile = getMainChallProfile();
 
         ChallsPage challsPage = openOverviewPage().openChallsPage();

@@ -5,6 +5,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import precisionFDA.pages.dashboard.AdminDashboardPage;
 import precisionFDA.pages.spaces.SpacesPage;
 import precisionFDA.pages.wf.WorkflowsPage;
 import ru.yandex.qatools.htmlelements.element.Link;
@@ -138,6 +139,10 @@ public class OverviewPage extends AbstractPage {
 
     public GuidelinesPage openGuidelinesPage() {
         return getCommonPage().openGuidelinesPage();
+    }
+
+    public AdminDashboardPage openAdminDashboardPage() {
+        return getCommonPage().openAdminDashboardPage();
     }
 
     public AboutHowPage openDocsPage() {
