@@ -9,7 +9,10 @@
 init_datetimepickers = () ->
   inputs = $('.add-datetimepicker')
   for input in inputs
-    new Precision.Datepicker(input)
+    new Precision.Datepicker(input, {
+      noDefaultValue: true,
+      icon: true
+    })
 
 MainController = Paloma.controller('Challenges',
   create: ->
