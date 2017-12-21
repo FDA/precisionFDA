@@ -3,13 +3,6 @@ class CollectEvents < ActiveRecord::Migration
     reversible do |dir|
       dir.up do
 
-        Job.find_each do |job|
-          return if job.runtime.nil?
-
-          event = Event::JobCoreUsed.create(job, job.user)
-          event.update(created_at: job.created_at)
-        end
-
         execute <<-SQL
           INSERT INTO events (type, org_handle, dxuser, param1, param2, param3, created_at)
             SELECT 'Event::FileCreated' AS type, orgs.handle, users.dxuser, nodes.file_size, nodes.dxid, nodes.parent_type, nodes.created_at
@@ -45,15 +38,6 @@ class CollectEvents < ActiveRecord::Migration
         SQL
 
         execute <<-SQL
-          INSERT INTO events (type, org_handle, dxuser, param1, created_at)
-            SELECT 'Event::JobFailed' AS type, orgs.handle, users.dxuser, jobs.dxid, jobs.updated_at
-            FROM jobs
-            JOIN users ON users.id = jobs.user_id
-            JOIN orgs ON orgs.id = users.org_id
-            WHERE jobs.state = 'failed';
-        SQL
-
-        execute <<-SQL
           INSERT INTO events (type, param1, created_at)
             SELECT 'Event::UserAccessRequested' AS type, invitations.id, invitations.created_at
             FROM invitations
@@ -67,9 +51,7 @@ class CollectEvents < ActiveRecord::Migration
                 type = 'Event::FileCreated' OR
                 type = 'Event::AppPublished' OR
                 type = 'Event::JobRun' OR
-                type = 'Event::UserAccessRequested' OR
-                type = 'Event::JobCoreUsed' OR
-                type = 'Event::JobFailed'
+                type = 'Event::UserAccessRequested'
         SQL
       end
     end
