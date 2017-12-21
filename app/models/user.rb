@@ -515,7 +515,7 @@ class User < ActiveRecord::Base
           job.state = state
           job.describe = result["describe"]
           job.save!
-          Event::JobCoreUsed.create(job, user) unless job.runtime.nil?
+          Event::JobClosed.create(job, user)
         end
       end
     else
@@ -526,7 +526,7 @@ class User < ActiveRecord::Base
           job.state = state
           job.describe = result["describe"]
           job.save!
-          Event::JobFailed.create(job, user) if job.failed?
+          Event::JobClosed.create(job, user)
         end
       end
     end
