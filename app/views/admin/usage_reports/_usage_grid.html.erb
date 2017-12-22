@@ -2,7 +2,7 @@
   g.blank_slate partial: "_partials/empty_grid"
 
   g.column name: "User", attribute: "dxuser", assoc: :user do |metric|
-    metric.user.dxuser
+    link_to metric.user.dxuser, user_path(metric.user.dxuser)
   end
 
   g.column name: "Current storage usage", attribute: "storage_usage", filter_type: :range do |metric|
