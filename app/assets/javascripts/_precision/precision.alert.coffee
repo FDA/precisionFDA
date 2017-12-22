@@ -21,7 +21,10 @@ class AlertModel
 
   #private
   appendToPage = (container) ->
-    $('noscript')?.first?().after(container)
+    if $('noscript').length > 0
+      $('noscript').first?().after(container)
+    else
+      $('main').first?().prepend(container)
 
   #private
   createNode = (text, style) ->
