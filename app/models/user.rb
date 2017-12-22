@@ -52,6 +52,7 @@ class User < ActiveRecord::Base
   has_many :submissions
   has_many :challenge_resources
   has_many :analyses
+  has_one :usage_metric
 
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 
