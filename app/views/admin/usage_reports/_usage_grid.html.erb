@@ -1,8 +1,12 @@
 <%= grid(@usage_grid, show_filters: true, hide_csv_button: true) do |g|
   g.blank_slate partial: "_partials/empty_grid"
 
-  g.column name: "User", attribute: "dxuser", assoc: :user do |metric|
+  g.column name: "User", attribute: "dxuser", assoc: :user, in_csv: false do |metric|
     link_to metric.user.dxuser, user_path(metric.user.dxuser)
+  end
+
+  g.column name: "User", attribute: "dxuser", assoc: :user, in_html: false do |metric|
+    metric.user.dxuser
   end
 
   g.column name: "Current storage usage", attribute: "storage_usage", filter_type: :range do |metric|
