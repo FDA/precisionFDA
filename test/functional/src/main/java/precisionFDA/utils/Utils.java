@@ -9,6 +9,7 @@ import precisionFDA.model.AppProfile;
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 import java.util.TimeZone;
@@ -51,6 +52,24 @@ public class Utils {
         SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd");
         String salt = dateFormat.format(d);
         return salt;
+    }
+
+    public static String getCurrentDate_YYYY_MM_dd_Slashes() {
+        Date d = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/YYYY");
+        String date = dateFormat.format(d);
+        return date;
+    }
+
+    public static String getTomorrowDate_YYYY_MM_dd_Slashes() {
+        Date d = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime(d);
+        c.add(Calendar.DATE, 1);
+        d = c.getTime();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/YYYY");
+        String date = dateFormat.format(d);
+        return date;
     }
 
     public static String applyTimezoneToDate(String dateString, String timezoneOfTheDate, String desiredTimezone) {

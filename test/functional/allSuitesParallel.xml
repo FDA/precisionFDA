@@ -50,4 +50,9 @@
             <class name="precisionFDA.cases.WorkflowTest" />
         </classes>
     </test>
+    <test name="AdminDashboardTest">
+        <classes>
+            <class name="precisionFDA.cases.AdminDashboardTest" />
+        </classes>
+    </test>
 </suite>

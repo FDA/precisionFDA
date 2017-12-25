@@ -19,10 +19,17 @@ public class AdminDashboardPage extends AbstractPage {
     @FindBy(xpath = DashboardLocators.ACTIVE_USERS_LINK)
     private Link activeUsersLink;
 
+    @FindBy(xpath = DashboardLocators.ACTIVITY_REPORTS_LINK)
+    private Link activityReportsLink;
+
     public AdminDashboardPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(DashboardLocators.SITE_ACTIVITY_TITLE));
+    }
+
+    public Link getActivityReportsLink() {
+        return activityReportsLink;
     }
 
     public Link getActiveUsersLink() {
@@ -38,6 +45,10 @@ public class AdminDashboardPage extends AbstractPage {
 
     public boolean isActiveUsersLinkDisplayed() {
         return isElementPresent(getActiveUsersLink(), 5);
+    }
+
+    public boolean isActivityReportsLinkDisplayed() {
+        return isElementPresent(getActivityReportsLink(), 5);
     }
 
     public void waitUntilActiveUsersFileIsDownloaded() {
@@ -64,6 +75,13 @@ public class AdminDashboardPage extends AbstractPage {
 
     public boolean isActiveUsersFileDownloaded() {
         return isFileDownloaded(getActiveUsersFileName());
+    }
+
+    public ActivityReportsPage clickActivityReports() {
+        log.info("click Activity Reports");
+        isElementPresent(getActivityReportsLink(), 5);
+        getActivityReportsLink().click();
+        return new ActivityReportsPage(getDriver());
     }
 
 }
