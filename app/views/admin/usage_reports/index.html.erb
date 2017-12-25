@@ -1,0 +1,21 @@
+<% content_for :title, "User and usage" %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-body">
+      <div class="page-title">
+        <i class="fa fa-users" aria-hidden="true"></i>
+        Users and Usage
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pfda-toolbar">
+  <div class="btn btn-default wg-external-csv-export-button" data-grid-name="usage">
+    <i class="fa fa-file-excel-o"></i> Export to CSV
+  </div>
+</div>
+
+
+<%= render partial: 'admin/usage_reports/usage_grid' %>

@@ -28,6 +28,8 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :usage_reports, only: [:index]
+
       get "active_users", to: "users#active"
     end
 

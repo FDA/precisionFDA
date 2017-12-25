@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171220124605) do
+ActiveRecord::Schema.define(version: 20171225120802) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -364,14 +364,6 @@ ActiveRecord::Schema.define(version: 20171220124605) do
   add_index "licenses", ["scope"], name: "index_licenses_on_scope", using: :btree
   add_index "licenses", ["user_id"], name: "index_licenses_on_user_id", using: :btree
 
-  create_table "main_apps", id: false, force: :cascade do |t|
-    t.text "C1", limit: 65535
-  end
-
-  create_table "main_jobs", id: false, force: :cascade do |t|
-    t.text "C1", limit: 65535
-  end
-
   create_table "meta_appathons", force: :cascade do |t|
     t.string   "name",        limit: 255
     t.string   "handle",      limit: 255
@@ -399,9 +391,9 @@ ActiveRecord::Schema.define(version: 20171220124605) do
     t.integer  "parent_id",               limit: 4
     t.string   "parent_type",             limit: 255
     t.string   "scope",                   limit: 255
-    t.integer  "scoped_parent_folder_id", limit: 4
     t.integer  "parent_folder_id",        limit: 4
     t.string   "sti_type",                limit: 255
+    t.integer  "scoped_parent_folder_id", limit: 4
   end
 
   add_index "nodes", ["parent_type", "parent_id"], name: "index_nodes_on_parent_type_and_parent_id", using: :btree
@@ -597,6 +589,16 @@ ActiveRecord::Schema.define(version: 20171220124605) do
   add_index "truth_challenge_results", ["truth_tp_titv_ratio"], name: "index_truth_challenge_results_on_truth_tp_titv_ratio", using: :btree
   add_index "truth_challenge_results", ["type"], name: "index_truth_challenge_results_on_type", using: :btree
 
+  create_table "usage_metrics", force: :cascade do |t|
+    t.integer  "user_id",               limit: 4,                           null: false
+    t.integer  "storage_usage",         limit: 8
+    t.decimal  "daily_compute_price",             precision: 30, scale: 20
+    t.decimal  "weekly_compute_price",            precision: 30, scale: 20
+    t.decimal  "monthly_compute_price",           precision: 30, scale: 20
+    t.decimal  "yearly_compute_price",            precision: 30, scale: 20
+    t.datetime "created_at"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string   "dxuser",                      limit: 255
     t.string   "private_files_project",       limit: 255
@@ -667,9 +669,49 @@ ActiveRecord::Schema.define(version: 20171220124605) do
   add_index "workflows", ["user_id"], name: "index_workflows_on_user_id", using: :btree
   add_index "workflows", ["workflow_series_id"], name: "index_workflows_on_workflow_series_id", using: :btree
 
+  add_foreign_key "accepted_licenses", "licenses"
+  add_foreign_key "accepted_licenses", "users"
   add_foreign_key "analyses", "workflows"
+  add_foreign_key "answers", "discussions"
+  add_foreign_key "answers", "notes"
+  add_foreign_key "answers", "users"
+  add_foreign_key "app_series", "apps", column: "latest_revision_app_id"
+  add_foreign_key "app_series", "apps", column: "latest_version_app_id"
+  add_foreign_key "app_series", "users"
+  add_foreign_key "appathons", "meta_appathons"
+  add_foreign_key "appathons", "users", column: "admin_id"
+  add_foreign_key "apps", "app_series"
+  add_foreign_key "apps", "users"
+  add_foreign_key "apps_assets", "apps"
+  add_foreign_key "apps_assets", "nodes", column: "asset_id"
+  add_foreign_key "archive_entries", "nodes", column: "asset_id"
+  add_foreign_key "challenge_resources", "challenges"
+  add_foreign_key "challenges", "apps"
+  add_foreign_key "challenges", "users", column: "admin_id"
+  add_foreign_key "challenges", "users", column: "app_owner_id"
+  add_foreign_key "comparisons", "users"
+  add_foreign_key "discussions", "notes"
+  add_foreign_key "discussions", "users"
+  add_foreign_key "expert_answers", "expert_questions"
+  add_foreign_key "expert_answers", "experts"
+  add_foreign_key "expert_questions", "experts"
+  add_foreign_key "expert_questions", "users"
+  add_foreign_key "experts", "users"
+  add_foreign_key "invitations", "users"
   add_foreign_key "jobs", "analyses"
+  add_foreign_key "jobs", "app_series"
+  add_foreign_key "jobs", "apps"
+  add_foreign_key "jobs", "users"
+  add_foreign_key "licensed_items", "licenses"
+  add_foreign_key "licenses", "users"
+  add_foreign_key "nodes", "users"
+  add_foreign_key "notes", "users"
+  add_foreign_key "orgs", "users", column: "admin_id"
+  add_foreign_key "saved_queries", "users"
+  add_foreign_key "space_memberships", "spaces"
+  add_foreign_key "space_memberships", "users"
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"
   add_foreign_key "submissions", "users"
+  add_foreign_key "users", "orgs"
 end
