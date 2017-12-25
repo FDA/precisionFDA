@@ -55,7 +55,7 @@ class FolderService
     errors = []
 
     nodes.each do |node|
-      unless node.editable_by?(context)
+      unless (node.public? && context.user.can_administer_site?) || node.editable_by?(context)
         errors << "You have no permissions to move '#{node.name}'"
         break
       end
