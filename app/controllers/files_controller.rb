@@ -225,23 +225,19 @@ class FilesController < ApplicationController
 
   def destroy
     @file = UserFile.real_files.where(user_id: @context.user_id).find_by!(dxid: params[:id])
+    service = FolderService.new(@context)
 
-    UserFile.transaction do
-      @file.reload
+    res = service.remove([@file])
 
-      if @file.comparisons.count > 0
-        flash[:error] = "This file cannot be deleted because it participates in one or more comparisons. Please delete all the comparisons first."
-        redirect_to file_path(@file.dxid)
-        return
-      end
-      Event::FileDeleted.create(@file, @context.user)
-      @file.destroy
+    if res.success?
+      flash[:success] = "File \"#{@file.name}\" has been successfully deleted"
+      redirect_path = files_path
+    else
+      flash[:error] = res.value.values.first
+      redirect_path = file_path(@file.dxid)
     end
 
-    DNAnexusAPI.new(@context.token).call(@file.project, "removeObjects", objects: [@file.dxid])
-
-    flash[:success] = "File \"#{@file.name}\" has been successfully deleted"
-    redirect_to files_path
+    redirect_to redirect_path
   end
 
   def create_folder
