@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171220124605) do
+ActiveRecord::Schema.define(version: 20171225120802) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -591,7 +591,7 @@ ActiveRecord::Schema.define(version: 20171220124605) do
 
   create_table "usage_metrics", force: :cascade do |t|
     t.integer  "user_id",               limit: 4,                           null: false
-    t.integer  "storage_usage",         limit: 4
+    t.integer  "storage_usage",         limit: 8
     t.decimal  "daily_compute_price",             precision: 30, scale: 20
     t.decimal  "weekly_compute_price",            precision: 30, scale: 20
     t.decimal  "monthly_compute_price",           precision: 30, scale: 20
