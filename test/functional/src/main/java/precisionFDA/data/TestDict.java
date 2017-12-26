@@ -30,6 +30,8 @@ public class TestDict {
 
     static final String DICT_SPACE_FILES = "Space files";
 
+    static final String DICT_EXPLORE_FILES = "Explore";
+
     static final String DICT_DELIMITER_VALUE = "&&";
 
     static final String DICT_FILTER = "filter";
@@ -114,6 +116,10 @@ public class TestDict {
 
     public static String getDictSpaceFiles() {
         return DICT_SPACE_FILES;
+    }
+
+    public static String getDictExploreFiles() {
+        return DICT_EXPLORE_FILES;
     }
 
     public static String getDictWarning() {

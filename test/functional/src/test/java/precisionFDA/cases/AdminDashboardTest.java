@@ -106,4 +106,88 @@ public class AdminDashboardTest extends AbstractTest {
                 .isTrue();
     }
 
+    @Test(dependsOnMethods = {"successfulLogin"})
+    public void checkDateRangeButtons() {
+        printTestHeader("Test Case: verify Date Range buttons are working correctly");
+
+        AdminDashboardPage dashboardPage = openOverviewPage().openAdminDashboardPage();
+        ActivityReportsPage reportsPage = dashboardPage.clickActivityReports();
+
+        assertThat(
+                reportsPage.isDayDateRangeButtonDisplayed())
+                .as("Day Date Range button is displayed")
+                .isTrue();
+
+        assertThat(
+                reportsPage.isWeekDateRangeButtonDisplayed())
+                .as("Week Date Range button is displayed")
+                .isTrue();
+
+        assertThat(
+                reportsPage.isMonthDateRangeButtonDisplayed())
+                .as("Month Date Range button is displayed")
+                .isTrue();
+
+        assertThat(
+                reportsPage.isYearDateRangeButtonDisplayed())
+                .as("Year Date Range button is displayed")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                reportsPage.toDateEqualsToday())
+                .as("To Date input has Today date")
+                .isTrue();
+
+        reportsPage.clickDayRangeButton();
+
+        SoftAssert.assertThat(
+                reportsPage.toDateEqualsToday())
+                .as("To Date input has Today date")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                reportsPage.fromDateEqualsYesterday())
+                .as("From Date input has Yesterday date")
+                .isTrue();
+
+        reportsPage.clickWeekRangeButton();
+
+        SoftAssert.assertThat(
+                reportsPage.toDateEqualsToday())
+                .as("To Date input has Today date")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                reportsPage.fromDateEqualsLastSunday())
+                .as("From Date input has last Sunday date")
+                .isTrue();
+
+        reportsPage.clickMonthRangeButton();
+
+        SoftAssert.assertThat(
+                reportsPage.toDateEqualsToday())
+                .as("To Date input has Today date")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                reportsPage.fromDateEqualsFirstDayOfCurrentMonth())
+                .as("From Date input has the first day of the current month")
+                .isTrue();
+
+        reportsPage.clickYearRangeButton();
+
+        SoftAssert.assertThat(
+                reportsPage.toDateEqualsToday())
+                .as("To Date input has Today date")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                reportsPage.fromDateEqualsFirstDayOfCurrentYear())
+                .as("From Date input has the first day of the current year")
+                .isTrue();
+
+        SoftAssert.assertAll();
+
+    }
+
 }

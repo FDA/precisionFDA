@@ -10,9 +10,7 @@ import precisionFDA.pages.AbstractPage;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 
-import static precisionFDA.utils.Utils.getCurrentDate_YYYY_MM_dd_Slashes;
-import static precisionFDA.utils.Utils.getTomorrowDate_YYYY_MM_dd_Slashes;
-import static precisionFDA.utils.Utils.sleep;
+import static precisionFDA.utils.Utils.*;
 
 public class ActivityReportsPage extends AbstractPage {
 
@@ -96,10 +94,52 @@ public class ActivityReportsPage extends AbstractPage {
     @FindBy(xpath = DashboardLocators.ACTIVITY_REPORTS_BOOTSTRAP_CALENDAR_POPUP_FIRST_DAY)
     private WebElement popupCalendarFirstDay;
 
+    @FindBy(xpath = DashboardLocators.ACTIVITY_REPORTS_DATE_RANGE_DAY_BUTTON)
+    private Button dayDateRangeButton;
+
+    @FindBy(xpath = DashboardLocators.ACTIVITY_REPORTS_DATE_RANGE_WEEK_BUTTON)
+    private Button weekDateRangeButton;
+
+    @FindBy(xpath = DashboardLocators.ACTIVITY_REPORTS_DATE_RANGE_MONTH_BUTTON)
+    private Button monthDateRangeButton;
+
+    @FindBy(xpath = DashboardLocators.ACTIVITY_REPORTS_DATE_RANGE_YEAR_BUTTON)
+    private Button yearDateRangeButton;
+
+    @FindBy(xpath = DashboardLocators.ACTIVITY_REPORTS_TO_DATE_WITH_VALUE)
+    private WebElement toDateWithValue;
+
+    @FindBy(xpath = DashboardLocators.ACTIVITY_REPORTS_FROM_DATE_WITH_VALUE)
+    private WebElement fromDateWithValue;
+
     public ActivityReportsPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(DashboardLocators.ACTIVITY_REPORTS_SELECT_PERIOD_BUTTONS));
+    }
+
+    public WebElement getFromDateWithValue() {
+        return fromDateWithValue;
+    }
+
+    public WebElement getToDateWithValue() {
+        return toDateWithValue;
+    }
+
+    public Button getDayDateRangeButton() {
+        return dayDateRangeButton;
+    }
+
+    public Button getMonthDateRangeButton() {
+        return monthDateRangeButton;
+    }
+
+    public Button getWeekDateRangeButton() {
+        return weekDateRangeButton;
+    }
+
+    public Button getYearDateRangeButton() {
+        return yearDateRangeButton;
     }
 
     public WebElement getPopupCalendarFirstDay() {
@@ -266,5 +306,128 @@ public class ActivityReportsPage extends AbstractPage {
 
     public boolean isWrongPeriodErrorDisplayed() {
         return isElementPresent(getWrongPeriodError(), 5);
+    }
+
+    public boolean isDayDateRangeButtonDisplayed() {
+        return isElementPresent(getDayDateRangeButton(), 5);
+    }
+
+    public boolean isWeekDateRangeButtonDisplayed() {
+        return isElementPresent(getWeekDateRangeButton(), 5);
+    }
+
+    public boolean isMonthDateRangeButtonDisplayed() {
+        return isElementPresent(getMonthDateRangeButton(), 5);
+    }
+
+    public boolean isYearDateRangeButtonDisplayed() {
+        return isElementPresent(getYearDateRangeButton(), 5);
+    }
+
+    public boolean toDateEqualsToday() {
+        String current = getCurrentDate_MM_dd_YYYY_Slashes();
+        String displayed = getValueToDate();
+        boolean equals = false;
+        if (current.equals(displayed)) {
+            equals = true;
+            log.info("To Date field displays correct value: " + displayed);
+        }
+        else {
+            equals = false;
+            log.warn("Today is [" + current + "] but the To Date field displays [" + displayed + "]");
+        }
+        return equals;
+    }
+
+    public boolean fromDateEqualsYesterday() {
+        String yesterday = getYesterdayDate_MM_dd_YYYY_Slashes();
+        String displayed = getValueFromDate();
+        boolean equals = false;
+        if (yesterday.equals(displayed)) {
+            equals = true;
+            log.info("From Date field displays correct value: " + displayed);
+        }
+        else {
+            equals = false;
+            log.warn("Yesterday is [" + yesterday + "] but the From Date field displays [" + displayed + "]");
+        }
+        return equals;
+    }
+
+    public boolean fromDateEqualsLastSunday() {
+        String lastSunday = getLastSundayDate_MM_dd_YYYY_Slashes();
+        String displayed = getValueFromDate();
+        boolean equals = false;
+        if (lastSunday.equals(displayed)) {
+            equals = true;
+            log.info("From Date field displays correct value: " + displayed);
+        }
+        else {
+            equals = false;
+            log.warn("Last sunday is [" + lastSunday + "] but the From Date field displays [" + displayed + "]");
+        }
+        return equals;
+    }
+
+    public boolean fromDateEqualsFirstDayOfCurrentMonth() {
+        String firstMonthDay = getFirstDayOfCurrentMonth_MM_dd_YYYY_Slashes();
+        String displayed = getValueFromDate();
+        boolean equals = false;
+        if (firstMonthDay.equals(displayed)) {
+            equals = true;
+            log.info("From Date field displays correct value: " + displayed);
+        }
+        else {
+            equals = false;
+            log.warn("First day of current month is [" + firstMonthDay + "] but the From Date field displays [" + displayed + "]");
+        }
+        return equals;
+    }
+
+    public boolean fromDateEqualsFirstDayOfCurrentYear() {
+        String firstYearDay = getFirstDayOfCurrentYear_MM_dd_YYYY_Slashes();
+        String displayed = getValueFromDate();
+        boolean equals = false;
+        if (firstYearDay.equals(displayed)) {
+            equals = true;
+            log.info("From Date field displays correct value: " + displayed);
+        }
+        else {
+            equals = false;
+            log.warn("First day of current year is [" + firstYearDay + "] but the From Date field displays [" + displayed + "]");
+        }
+        return equals;
+    }
+
+    public String getValueFromDate() {
+        return getFromDateWithValue().getText().trim();
+    }
+
+    public String getValueToDate() {
+        return getToDateWithValue().getText().trim();
+    }
+
+    public void clickDayRangeButton() {
+        log.info("click Day");
+        getDayDateRangeButton().click();
+        sleep(200);
+    }
+
+    public void clickWeekRangeButton() {
+        log.info("click Week");
+        getWeekDateRangeButton().click();
+        sleep(200);
+    }
+
+    public void clickMonthRangeButton() {
+        log.info("click Month");
+        getMonthDateRangeButton().click();
+        sleep(200);
+    }
+
+    public void clickYearRangeButton() {
+        log.info("click Year");
+        getYearDateRangeButton().click();
+        sleep(200);
     }
 }

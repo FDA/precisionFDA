@@ -62,6 +62,16 @@ public class DashboardLocators {
 
     public static final String ACTIVITY_REPORTS_BOOTSTRAP_CALENDAR_POPUP_FIRST_DAY = "//*[@class='datepicker-days']//td[@data-action='selectDay'][text()='1']";
 
+    public static final String ACTIVITY_REPORTS_DATE_RANGE_DAY_BUTTON = "//*[@id='select_date_range']/button[text()='Day']";
 
+    public static final String ACTIVITY_REPORTS_DATE_RANGE_WEEK_BUTTON = "//*[@id='select_date_range']/button[text()='Week']";
+
+    public static final String ACTIVITY_REPORTS_DATE_RANGE_MONTH_BUTTON = "//*[@id='select_date_range']/button[text()='Month']";
+
+    public static final String ACTIVITY_REPORTS_DATE_RANGE_YEAR_BUTTON = "//*[@id='select_date_range']/button[text()='Year']";
+
+    public static final String ACTIVITY_REPORTS_TO_DATE_WITH_VALUE = "//*[contains(@class, 'datetimepicker')]/input[@name='date_to']/../span";
+
+    public static final String ACTIVITY_REPORTS_FROM_DATE_WITH_VALUE = "//*[contains(@class, 'datetimepicker')]/input[@name='date_at']/../span";
 
 }

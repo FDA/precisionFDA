@@ -90,6 +90,9 @@ public class FilesPage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_MOVE_DIALOG_TREE_MY_FILES_LINK)
     private Link moveDialogTreeMyFilesLink;
 
+    @FindBy(xpath = FilesLocators.FILES_MOVE_DIALOG_TREE_ROOT_ITEM_LINK)
+    private Link moveDialogTreeRootItemLink;
+
     @FindBy(xpath = FilesLocators.FILES_DELETE_DIALOG_DELETE_BUTTON)
     private Button deleteDialogDeleteButton;
 
@@ -159,6 +162,10 @@ public class FilesPage extends AbstractPage {
 
     public Link getMoveDialogTreeMyFilesLink() {
         return moveDialogTreeMyFilesLink;
+    }
+
+    public Link getMoveDialogTreeRootItemLink() {
+        return moveDialogTreeRootItemLink;
     }
 
     public Button getDeleteDialogDeleteButton() {
@@ -465,7 +472,7 @@ public class FilesPage extends AbstractPage {
         Link link = getFilesEditMoveEnabledItem();
         waitUntilClickable(link);
         link.click();
-        waitUntilDisplayed(getMoveDialogTreeMyFilesLink(), 30);
+        waitUntilDisplayed(getMoveDialogTreeRootItemLink(), 30);
     }
 
     public void openActionsDropDown() {

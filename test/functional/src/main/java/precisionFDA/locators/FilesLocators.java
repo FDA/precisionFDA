@@ -112,6 +112,8 @@ public class FilesLocators {
 
     public static final String FILES_MOVE_DIALOG_TREE_MY_FILES_LINK = "//*[@id='move_files_tree']//a[contains(text(), 'My files')]";
 
+    public static final String FILES_MOVE_DIALOG_TREE_ROOT_ITEM_LINK = "//*[@id='move_files_tree']//a[@id='root_anchor']";
+
     public static final String FILES_MOVE_DIALOG_TREE_TEMPLATE_LINK = "//*[@id='move_files_tree']//a[contains(text(), '{ITEM_NAME}')]";
 
     public static final String FILES_MOVE_DIALOG_TREE_TEMPLATE_CLICKED_LINK = "//*[@id='move_files_tree']//a[contains(text(), '{ITEM_NAME}')][contains(@class, 'clicked')]";
