@@ -854,4 +854,24 @@ public class TestFilesData {
             ""
     );
 
+    //=== move file in public space by admin"  ===
+
+    public static FileProfile getMoveInPublicSpaceFileProfile() {
+        return moveInPublicSpaceFileProfile;
+    }
+
+    static FileProfile moveInPublicSpaceFileProfile = new FileProfile(
+            getGeneratedTestFileName(getDictPng()),
+            "",
+            ""
+    );
+
+    static FolderProfile moveInPublicSpaceFolder = new FolderProfile(
+            "at move in publish space " + getRunTimeLocalUniqueValue()
+    );
+
+    public static FolderProfile getMoveInPublicSpaceFolder() {
+        return moveInPublicSpaceFolder;
+    }
+
 }

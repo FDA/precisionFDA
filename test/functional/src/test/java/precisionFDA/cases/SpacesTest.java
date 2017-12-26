@@ -21,7 +21,7 @@ import static precisionFDA.data.TestDict.getDictActive;
 import static precisionFDA.data.TestDict.getDictUnactivated;
 import static precisionFDA.data.TestFilesData.*;
 import static precisionFDA.data.TestSpacesData.getMainSpaceProfile;
-import static precisionFDA.utils.Utils.generateExpectedBreadcrumbsSpaces;
+import static precisionFDA.utils.Utils.generateBreadcrumbsSpaces;
 import static precisionFDA.utils.Utils.printTestHeader;
 
 @Name("Spaces management test suite")
@@ -209,7 +209,7 @@ public class SpacesTest extends AbstractTest {
         SoftAssert.assertThat(
                 spaceDetailsPage.getDisplayedBreadcrumbsText())
                 .as("Breadcrumbs")
-                .isEqualTo(generateExpectedBreadcrumbsSpaces(spaceFolder.getFolderName(), "", ""));
+                .isEqualTo(generateBreadcrumbsSpaces(spaceFolder.getFolderName(), "", ""));
 
         spaceDetailsPage = spaceDetailsPage.clickBreadcrumbSpaceFiles();
 
@@ -417,7 +417,7 @@ public class SpacesTest extends AbstractTest {
         assertThat(
                 spaceDetailsPage.getDisplayedBreadcrumbsText())
                 .as("Breadcrumbs")
-                .isEqualTo(generateExpectedBreadcrumbsSpaces(spaceFolder.getFolderName(), "", ""));
+                .isEqualTo(generateBreadcrumbsSpaces(spaceFolder.getFolderName(), "", ""));
 
         assertThat(
                 spaceDetailsPage.isLinkToAddedFileDisplayed(spaceFile.getFileName()))

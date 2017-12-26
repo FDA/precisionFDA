@@ -54,18 +54,51 @@ public class Utils {
         return salt;
     }
 
-    public static String getCurrentDate_YYYY_MM_dd_Slashes() {
+    public static String getCurrentDate_MM_dd_YYYY_Slashes() {
         Date d = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/YYYY");
         String date = dateFormat.format(d);
         return date;
     }
 
-    public static String getTomorrowDate_YYYY_MM_dd_Slashes() {
+    public static String getYesterdayDate_MM_dd_YYYY_Slashes() {
         Date d = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(d);
-        c.add(Calendar.DATE, 1);
+        c.add(Calendar.DATE, -1);
+        d = c.getTime();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/YYYY");
+        String date = dateFormat.format(d);
+        return date;
+    }
+
+    public static String getLastSundayDate_MM_dd_YYYY_Slashes() {
+        Date d = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime(d);
+        c.add( Calendar.DAY_OF_WEEK, -(c.get(Calendar.DAY_OF_WEEK)-1));
+        d = c.getTime();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/YYYY");
+        String date = dateFormat.format(d);
+        return date;
+    }
+
+    public static String getFirstDayOfCurrentMonth_MM_dd_YYYY_Slashes() {
+        Date d = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime(d);
+        c.set(Calendar.DAY_OF_MONTH, 1);
+        d = c.getTime();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/YYYY");
+        String date = dateFormat.format(d);
+        return date;
+    }
+
+    public static String getFirstDayOfCurrentYear_MM_dd_YYYY_Slashes() {
+        Date d = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime(d);
+        c.set(Calendar.DAY_OF_YEAR, 1);
         d = c.getTime();
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/YYYY");
         String date = dateFormat.format(d);
@@ -270,22 +303,20 @@ public class Utils {
         }
     }
 
-    public static String generateExpectedBreadcrumbsFiles(String rootFolderName, String firstLevelFolderName, String secondLevelFolderName) {
-        String br = getDictMyFiles();
-        if (rootFolderName.length() > 0) {
-            br = br + " / " + rootFolderName;
-        }
-        if (firstLevelFolderName.length() > 0) {
-            br = br + " / " + firstLevelFolderName;
-        }
-        if (secondLevelFolderName.length() > 0) {
-            br = br + " / " + secondLevelFolderName;
-        }
-        return br;
+    public static String generateBreadcrumbsMyFiles(String rootFolderName, String firstLevelFolderName, String secondLevelFolderName) {
+        return generateBreadcrumbs(getDictMyFiles(), rootFolderName, firstLevelFolderName, secondLevelFolderName);
     }
 
-    public static String generateExpectedBreadcrumbsSpaces(String rootFolderName, String firstLevelFolderName, String secondLevelFolderName) {
-        String br = getDictSpaceFiles();
+    public static String generateBreadcrumbsSpaces(String rootFolderName, String firstLevelFolderName, String secondLevelFolderName) {
+        return generateBreadcrumbs(getDictSpaceFiles(), rootFolderName, firstLevelFolderName, secondLevelFolderName);
+    }
+
+    public static String generateBreadcrumbsExploreFiles(String rootFolderName, String firstLevelFolderName, String secondLevelFolderName) {
+        return generateBreadcrumbs(getDictExploreFiles(), rootFolderName, firstLevelFolderName, secondLevelFolderName);
+    }
+
+    static String generateBreadcrumbs(String rootItem, String rootFolderName, String firstLevelFolderName, String secondLevelFolderName) {
+        String br = rootItem;
         if (rootFolderName.length() > 0) {
             br = br + " / " + rootFolderName;
         }

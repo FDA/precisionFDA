@@ -10,6 +10,8 @@ import ru.yandex.qatools.htmlelements.annotations.Name;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static precisionFDA.data.TestFilesData.*;
+import static precisionFDA.utils.Utils.generateBreadcrumbsExploreFiles;
+import static precisionFDA.utils.Utils.generateBreadcrumbsMyFiles;
 import static precisionFDA.utils.Utils.printTestHeader;
 
 @Name("Files publish test suite")
@@ -85,7 +87,7 @@ public class FilesPublishTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(priority = 3)
+    @Test(priority = 2)
     public void publishFileByAuthor() {
         printTestHeader("Test Case: verify the just uploaded file can be published by author");
 
@@ -126,7 +128,7 @@ public class FilesPublishTest extends AbstractTest {
                 .isTrue();
     }
 
-    @Test(priority = 4)
+    @Test(priority = 3)
     public void checkPublicFileAccessByAnotherUser() {
         printTestHeader("Test Case: verify the published file access by another user");
 
@@ -171,7 +173,7 @@ public class FilesPublishTest extends AbstractTest {
                 .isTrue();
     }
 
-    @Test(priority = 5)
+    @Test(priority = 4)
     public void publicItemsFromFilesGrid() {
         printTestHeader("Test Case: check it is possible to public folder and files on Files grid");
 
@@ -298,5 +300,68 @@ public class FilesPublishTest extends AbstractTest {
         logoutFromAll();
 
         SoftAssert.assertAll();
+    }
+
+    @Test(priority = 5)
+    public void movePublicFileByAdmin() {
+        printTestHeader("Test Case: move file in public space by admin");
+
+        FileProfile moveFileProfile = getMoveInPublicSpaceFileProfile();
+        FolderProfile moveFolder = getMoveInPublicSpaceFolder();
+        UserProfile anotherTestUser = TestUserData.getAnotherTestUser();
+        UserProfile adminUser = TestUserData.getAdminUser();
+
+        // login as another user
+        openLoginPrecisionPage(anotherTestUser).correctLogin(anotherTestUser).grantAccess();
+        FilesPage filesPage = openOverviewPage().openFilesPage();
+
+        // upload a file by another user
+        FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
+        filesAddFilesPage = filesAddFilesPage.browseFileToUpload(moveFileProfile.getFileName());
+        filesAddFilesPage.uploadAllFiles();
+        filesPage = filesAddFilesPage.openRootFilesPage();
+
+        // publish the file
+        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(moveFileProfile.getFileName());
+        uploadedFilePage = uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
+        FilesPublishPage publishPage = uploadedFilePage.clickPublishToPublic();
+        publishPage.clickPublishObjects();
+
+        // login as admin
+        logoutFromAll();
+        openLoginPrecisionPage(adminUser).correctLogin(adminUser).grantAccess();
+        filesPage = openOverviewPage().openFilesPage();
+        filesPage = filesPage.openFilesExplorePage();
+
+        assertThat(
+                filesPage.isLinkToUploadedFileDisplayed(moveFileProfile.getFileName()))
+                .as("Link to created by another user and published file is displayed in root")
+                .isTrue();
+
+        // create folder
+        filesPage = filesPage.createFolder(moveFolder.getFolderName());
+
+        // move the file to the folder
+        filesPage.selectItem(moveFileProfile.getFileName());
+        filesPage.clickMoveSelected();
+        filesPage.clickTreeItemOnMoveDialog(moveFolder.getFolderName());
+        filesPage = filesPage.clickMoveHere();
+
+        assertThat(
+                filesPage.isDangerNotificationDisplayed())
+                .as("Danger notification is displayed")
+                .isFalse();
+
+        assertThat(
+                filesPage.isLinkToUploadedFileDisplayed(moveFileProfile.getFileName()))
+                .as("Link to created by another user and published file is displayed in the folder")
+                .isTrue();
+
+        assertThat(
+                filesPage.getDisplayedBreadcrumbsText())
+                .as("Breadcrumbs")
+                .isEqualTo(generateBreadcrumbsExploreFiles(moveFolder.getFolderName(), "", ""));
+
+        logoutFromAll();
     }
 }
