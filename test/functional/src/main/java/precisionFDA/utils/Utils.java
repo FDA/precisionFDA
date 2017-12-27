@@ -345,6 +345,10 @@ public class Utils {
         removeSameFileFromDownloads(getActiveUsersFileName());
     }
 
+    public static void removeUsersAndUsageFileFromDownloads() {
+        removeSameFileFromDownloads(getUsersAndUsageFileName());
+    }
+
     public static void removeCWLToolFileFromDownloads(AppProfile appProfile) {
         removeSameFileFromDownloads(getCWLToolFileName(appProfile));
     }

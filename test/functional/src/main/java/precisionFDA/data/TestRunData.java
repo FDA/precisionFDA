@@ -39,6 +39,8 @@ public class TestRunData {
 
     static final String ACTIVE_USERS_FILE_NAME_PREFIX = "active_users_";
 
+    static final String USERS_AND_USAGE_FILE_NAME_PREFIX = "users_usage_";
+
     static final String DOCKER_VALIDATION_TEXT = "RUN DEBIAN_FRONTEND";
 
     public static String getDockerValidationText() {
@@ -51,6 +53,10 @@ public class TestRunData {
 
     public static String getActiveUsersFileName() {
         return ACTIVE_USERS_FILE_NAME_PREFIX + getCurrentDate_YYYY_MM_dd() + ".csv";
+    }
+
+    public static String getUsersAndUsageFileName() {
+        return USERS_AND_USAGE_FILE_NAME_PREFIX + getCurrentDate_YYYY_MM_dd() + ".csv";
     }
 
     public static String getCurrentTimezone() {

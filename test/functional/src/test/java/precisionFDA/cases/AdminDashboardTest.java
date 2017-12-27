@@ -5,6 +5,7 @@ import precisionFDA.data.TestUserData;
 import precisionFDA.model.UserProfile;
 import precisionFDA.pages.dashboard.ActivityReportsPage;
 import precisionFDA.pages.dashboard.AdminDashboardPage;
+import precisionFDA.pages.dashboard.UsersAndUsagePage;
 import precisionFDA.pages.overview.OverviewPage;
 import ru.yandex.qatools.htmlelements.annotations.Name;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,8 +36,8 @@ public class AdminDashboardTest extends AbstractTest {
     }
 
     @Test(dependsOnMethods = {"successfulLogin"})
-    public void downloadActiveUsers() {
-        printTestHeader("Test Case: download active users and verify");
+    public void exportActiveUsers() {
+        printTestHeader("Test Case: export active users and verify");
 
         AdminDashboardPage dashboardPage = openOverviewPage().openAdminDashboardPage();
 
@@ -187,7 +188,39 @@ public class AdminDashboardTest extends AbstractTest {
                 .isTrue();
 
         SoftAssert.assertAll();
+    }
 
+    @Test(dependsOnMethods = {"successfulLogin"})
+    public void exportUsersAndUsage() {
+        printTestHeader("Test Case: export Users&Usage and verify");
+
+        AdminDashboardPage dashboardPage = openOverviewPage().openAdminDashboardPage();
+
+        assertThat(
+                dashboardPage.isUsersAndUsageLinkDisplayed())
+                .as("Users&Usage button is displayed")
+                .isTrue();
+
+        UsersAndUsagePage usersAndUsagePage = dashboardPage.clickUsersAndUsageLink();
+
+        assertThat(
+                usersAndUsagePage.isUsersAndUsageExportCSVDisplayed())
+                .as("Users&Usage export to CSV is displayed")
+                .isTrue();
+
+        removeUsersAndUsageFileFromDownloads();
+        usersAndUsagePage.exportToCSV();
+        usersAndUsagePage.waitUntilUsersAndUsageFileIsDownloaded();
+
+        assertThat(
+                usersAndUsagePage.isUsersAndUsageFileDownloaded())
+                .as("Users&Usage file is downloaded")
+                .isTrue();
+
+        assertThat(
+                usersAndUsagePage.isUsersAndUsageFileCorrect())
+                .as("Users&Usage file is correct one")
+                .isTrue();
     }
 
 }
