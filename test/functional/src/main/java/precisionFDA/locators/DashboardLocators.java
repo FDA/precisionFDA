@@ -74,4 +74,10 @@ public class DashboardLocators {
 
     public static final String ACTIVITY_REPORTS_FROM_DATE_WITH_VALUE = "//*[contains(@class, 'datetimepicker')]/input[@name='date_at']/../span";
 
+    public static final String USERS_AND_USAGE_LINK = "//a[contains(@href, 'usage_reports')]/i/..";
+
+    public static final String USERS_AND_USAGE_CURRENT_STORAGE_COLUMN_LINK = "//a[text()='Current storage usage']";
+
+    public static final String USERS_AND_USAGE_EXPORT_TO_CSV_BUTTON = "//*[contains(@class, 'csv-export-button')]";
+
 }
