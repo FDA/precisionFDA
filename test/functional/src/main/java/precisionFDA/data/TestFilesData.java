@@ -854,7 +854,7 @@ public class TestFilesData {
             ""
     );
 
-    //=== move file in public space by admin"  ===
+    //=== move file in public space by admin  ===
 
     public static FileProfile getMoveInPublicSpaceFileProfile() {
         return moveInPublicSpaceFileProfile;
@@ -872,6 +872,18 @@ public class TestFilesData {
 
     public static FolderProfile getMoveInPublicSpaceFolder() {
         return moveInPublicSpaceFolder;
+    }
+
+    //=== attach to discussion file  ===
+
+    static FileProfile discAttachFile = new FileProfile(
+            getGeneratedTestFileName(getDictTxt()),
+            "",
+            ""
+    );
+
+    public static FileProfile getDiscAttachFile() {
+        return discAttachFile;
     }
 
 }

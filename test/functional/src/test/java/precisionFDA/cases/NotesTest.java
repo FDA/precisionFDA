@@ -63,12 +63,6 @@ public class NotesTest extends AbstractTest {
                 notesEditNotePage.getActAddedByText())
                 .as("Added By")
                 .isEqualTo(notesEditNotePage.getExpAddedByText());
-        /*
-        SoftAssert.assertThat(
-                notesEditNotePage.getActCreatedText())
-                .as("Created")
-                .contains(notesEditNotePage.getExpCreatedText());
-        */
 
         SoftAssert.assertAll();
     }

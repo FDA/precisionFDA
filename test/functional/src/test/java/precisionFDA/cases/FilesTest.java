@@ -69,7 +69,7 @@ public class FilesTest extends AbstractTest {
                 .as("text file name")
                 .isEqualTo(fileProfile.getFileName());
 
-        filesPage = openOverviewPage().openFilesPage();
+        filesPage = openFilesPage();
 
         assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
@@ -98,7 +98,7 @@ public class FilesTest extends AbstractTest {
 
         FolderProfile folderProfile = getMainFolderProfile();
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
 
         assertThat(
                 filesPage.isCreateFolderButtonDisplayed())
@@ -139,7 +139,7 @@ public class FilesTest extends AbstractTest {
         FolderProfile folderProfile = getMainFolderProfile();
         FileProfile fileProfile = getFileInMainFolderProfile();
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
         filesPage = filesPage.openFolder(folderProfile.getFolderName());
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
 
@@ -162,7 +162,7 @@ public class FilesTest extends AbstractTest {
                 .as("png file name")
                 .isEqualTo(fileProfile.getFileName());
 
-        filesPage = openOverviewPage().openFilesPage().openFolder(folderProfile.getFolderName());
+        filesPage = openFilesPage().openFolder(folderProfile.getFolderName());
 
         assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
@@ -197,7 +197,7 @@ public class FilesTest extends AbstractTest {
         FolderProfile mainFolderProfile = getMainFolderProfile();
         FolderProfile nextFolderProfile = getNextFolderProfile();
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
         filesPage = filesPage.openFolder(mainFolderProfile.getFolderName());
         filesPage = filesPage.createFolder(nextFolderProfile.getFolderName());
 
@@ -225,12 +225,12 @@ public class FilesTest extends AbstractTest {
 
         FileProfile fileProfile = getFileToDeleteProfile();
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
 
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(fileProfile.getFileName());
         filesAddFilesPage.uploadAllFiles();
-        filesPage = openOverviewPage().openFilesPage();
+        filesPage = openFilesPage();
 
         assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
@@ -262,7 +262,7 @@ public class FilesTest extends AbstractTest {
         FolderProfile nonFilterFolder = getNonFilterFolder();
 
         // create a folder in root directory and open it
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
         filesPage = filesPage.createFolder(filterMainFolder.getFolderName());
         filesPage = filesPage.openFolder(filterMainFolder.getFolderName());
 
@@ -383,7 +383,7 @@ public class FilesTest extends AbstractTest {
         FolderProfile nextFolderProfile = getNextFolderProfile();
 
         // open second level folder
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
         filesPage = filesPage.openFolder(mainFolderProfile.getFolderName());
         filesPage = filesPage.openFolder(nextFolderProfile.getFolderName());
 
@@ -444,7 +444,7 @@ public class FilesTest extends AbstractTest {
 
         FileProfile fileProfile = getMainFileProfile();
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
 
         assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
@@ -474,7 +474,7 @@ public class FilesTest extends AbstractTest {
 
         FileProfile fileProfile = getMainFileProfile();
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
 
         assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
@@ -489,7 +489,7 @@ public class FilesTest extends AbstractTest {
                 .as("New Title of the page")
                 .isEqualTo(fileProfile.getFileName());
 
-        filesPage = openOverviewPage().openFilesPage();
+        filesPage = openFilesPage();
 
         SoftAssert.assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
@@ -505,7 +505,7 @@ public class FilesTest extends AbstractTest {
 
         FileProfile fileProfile = getMainFileProfile();
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
 
         assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
@@ -529,7 +529,7 @@ public class FilesTest extends AbstractTest {
 
         FileProfile fileProfile = getMainFileProfile();
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
 
         assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
@@ -558,7 +558,7 @@ public class FilesTest extends AbstractTest {
 
         FileProfile fileProfile = getMainFileProfile();
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
 
         assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
@@ -600,7 +600,7 @@ public class FilesTest extends AbstractTest {
         FolderProfile thirdFolder = getScopeDeleteThirdFolderToDelete();
 
         // create a folder in root directory and open it
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
         filesPage = filesPage.createFolder(mainFolder.getFolderName());
         filesPage = filesPage.openFolder(mainFolder.getFolderName());
 
@@ -758,7 +758,7 @@ public class FilesTest extends AbstractTest {
 
         FolderProfile folderProfile = getMainFolderProfile();
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
 
         assertThat(
                 filesPage.isLinkToCreatedFolderDisplayed(folderProfile.getFolderName()))
@@ -794,7 +794,7 @@ public class FilesTest extends AbstractTest {
         FolderProfile firstFolder = getDownloadFirstFolder();
 
         // create main folder
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
         filesPage = filesPage.createFolder(mainFolder.getFolderName());
         filesPage = filesPage.openFolder(mainFolder.getFolderName());
 
@@ -920,7 +920,7 @@ public class FilesTest extends AbstractTest {
         FileProfile fourthFile = getMoveFourthFile();
 
         // create in Root folder
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
         filesPage = filesPage.createFolder(rootFolder.getFolderName());
         filesPage = filesPage.openFolder(rootFolder.getFolderName());
 
@@ -1101,7 +1101,7 @@ public class FilesTest extends AbstractTest {
     public void checkDropDownItemsAreDisabled() {
         printTestHeader("Test Case: check that drop-down items for bulk actions are disabled when there are not selected files/folders");
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
         filesPage.openActionsDropDown();
 
         SoftAssert.assertThat(
@@ -1148,7 +1148,7 @@ public class FilesTest extends AbstractTest {
     public void movePublicFiles() {
         printTestHeader("Test Case: check it is possible to move public file");
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
 
         FolderProfile folder = getMovePublicFolder();
         FileProfile privateFile = getMovePublicFile();
@@ -1164,7 +1164,10 @@ public class FilesTest extends AbstractTest {
         filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
         filesPage = filesAddFilesPage.openRootFilesPage();
 
-        filesPage = filesPage.createFolder(folder.getFolderName());
+        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(publicFile.getFileName());
+        uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
+
+        filesPage = openFilesPage().createFolder(folder.getFolderName());
         filesPage = filesPage.openRootFilesPage();
 
         filesPage.selectItem(publicFile.getFileName());
