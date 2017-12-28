@@ -38,11 +38,11 @@ class UsageCollector
         created_at
       ) SELECT
         t0.id AS user_id,
-        (t1.storage - t2.storage) AS storage_usage,
-        t3.day_price AS daily_compute_price,
-        t4.week_price AS weekly_compute_price,
-        t5.month_price AS monthly_compute_price,
-        t6.year_price AS yearly_compute_price,
+        IFNULL((t1.storage - t2.storage), 0) AS storage_usage,
+        IFNULL(t3.day_price, 0) AS daily_compute_price,
+        IFNULL(t4.week_price, 0) AS weekly_compute_price,
+        IFNULL(t5.month_price, 0) AS monthly_compute_price,
+        IFNULL(t6.year_price, 0) AS yearly_compute_price,
         NOW() as created_at
       FROM users AS t0
       LEFT JOIN (
