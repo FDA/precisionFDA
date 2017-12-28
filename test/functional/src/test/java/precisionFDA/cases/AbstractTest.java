@@ -15,6 +15,7 @@ import org.openqa.selenium.support.ui.Wait;
 import org.testng.annotations.*;
 import precisionFDA.model.UserProfile;
 import precisionFDA.pages.CommonPage;
+import precisionFDA.pages.files.FilesPage;
 import precisionFDA.pages.login.LoginPrecisionPage;
 import precisionFDA.pages.overview.OverviewPage;
 import precisionFDA.pages.staging.LoginStagingPage;
@@ -193,6 +194,13 @@ public abstract class AbstractTest {
         String url = SettingsProperties.getProperty("precisionFdaOverviewURL");
         driver.get(url);
         return new OverviewPage(driver);
+    }
+
+    public FilesPage openFilesPage() {
+        log.info("open Files page");
+        String url = SettingsProperties.getProperty("precisionFdaFilesURL");
+        driver.get(url);
+        return new FilesPage(driver);
     }
 
     public LoginPrecisionPage openLoginPrecisionPage(UserProfile user) {

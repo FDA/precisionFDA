@@ -25,7 +25,7 @@ public class FilesPublishTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUser();
 
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
 
         assertThat(
                 filesPage.isAddFilesButtonDisplayed())
@@ -49,7 +49,7 @@ public class FilesPublishTest extends AbstractTest {
                 .as("Link to uploaded file is NOT displayed in Explore Tab")
                 .isFalse();
 
-        filesPage = openOverviewPage().openFilesPage();
+        filesPage = openFilesPage();
 
         UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
 
@@ -70,7 +70,7 @@ public class FilesPublishTest extends AbstractTest {
 
         logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
 
         SoftAssert.assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
@@ -96,7 +96,7 @@ public class FilesPublishTest extends AbstractTest {
 
         logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
         UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
 
         FilesPublishPage publishPage = uploadedFilePage.clickPublishToPublic();
@@ -137,7 +137,7 @@ public class FilesPublishTest extends AbstractTest {
 
         logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
 
         SoftAssert.assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
@@ -188,7 +188,7 @@ public class FilesPublishTest extends AbstractTest {
 
         logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
 
         // upload a file in root one
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
@@ -313,7 +313,7 @@ public class FilesPublishTest extends AbstractTest {
 
         // login as another user
         openLoginPrecisionPage(anotherTestUser).correctLogin(anotherTestUser).grantAccess();
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
 
         // upload a file by another user
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
@@ -330,7 +330,7 @@ public class FilesPublishTest extends AbstractTest {
         // login as admin
         logoutFromAll();
         openLoginPrecisionPage(adminUser).correctLogin(adminUser).grantAccess();
-        filesPage = openOverviewPage().openFilesPage();
+        filesPage = openFilesPage();
         filesPage = filesPage.openFilesExplorePage();
 
         assertThat(

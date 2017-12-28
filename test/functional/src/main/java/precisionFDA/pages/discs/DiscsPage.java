@@ -26,14 +26,29 @@ public class DiscsPage extends AbstractPage {
         return discsStartDiscLink;
     }
 
-    public DiscsNewDiscPage openNewDiscPage() {
+    public DiscsEditDiscPage openNewDiscPage() {
         log.info("open Discussions.NewDiscussion page");
         discsStartDiscLink.click();
-        return new DiscsNewDiscPage(getDriver());
+        return new DiscsEditDiscPage(getDriver());
     }
 
     public boolean isStartDiscsButtonDisplayed() {
         return isElementPresent(getDiscsStartDiscLink());
+    }
+
+    public boolean isLinkToDiscussionDisplayed(String discName) {
+        return isElementPresent(getCreatedDiscLinkBy(discName), 5);
+    }
+
+    public By getCreatedDiscLinkBy(String discName) {
+        String xpath = DiscsLocators.SAVED_DISC_LINK_TEMPLATE.replace("{DISC_NAME}", discName);
+        return By.xpath(xpath);
+    }
+
+    public CreatedDiscPage openCreatedDisc(String discName) {
+        log.info("open discussion: " + discName);
+        getDriver().findElement(getCreatedDiscLinkBy(discName)).click();
+        return new CreatedDiscPage(getDriver());
     }
 
 }

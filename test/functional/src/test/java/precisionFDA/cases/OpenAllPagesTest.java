@@ -10,7 +10,7 @@ import precisionFDA.pages.about.*;
 import precisionFDA.pages.apps.*;
 import precisionFDA.pages.challs.ChallsPage;
 import precisionFDA.pages.comps.*;
-import precisionFDA.pages.discs.DiscsNewDiscPage;
+import precisionFDA.pages.discs.DiscsEditDiscPage;
 import precisionFDA.pages.discs.DiscsPage;
 import precisionFDA.pages.experts.ExpertsPage;
 import precisionFDA.pages.files.*;
@@ -608,15 +608,15 @@ public class OpenAllPagesTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
-    @Test(dependsOnMethods = { "successfulLogin" })
+    @Test(dependsOnMethods = { "successfulLogin" }, enabled = false)
     public void checkDiscussionsNewDiscPageCanBeOpen() {
         printTestHeader("Test Case: check that Discussions.NewDiscussion page can be open");
 
         DiscsPage discsPage = openOverviewPage().openDiscsPage();
-        DiscsNewDiscPage discsNewDiscPage = discsPage.openNewDiscPage();
+        DiscsEditDiscPage discsEditDiscPage = discsPage.openNewDiscPage();
 
         SoftAssert.assertThat(
-                discsNewDiscPage.isEditorDisplayed())
+                discsEditDiscPage.isEditorDisplayed())
                 .as("New Discussion Editor is displayed")
                 .isTrue();
 
