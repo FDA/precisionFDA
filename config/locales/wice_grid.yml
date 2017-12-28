@@ -45,6 +45,16 @@ en:
     deselect_all: Remove selection
     expand: Expand
     collapse: Collapse
+    file_size_filter:
+      asis: Bytes
+      kilo: Kilobytes
+      mega: Megabytes
+      giga: Gigabytes
+      tera: Terabytes
+      peta: Petabytes
+      exa: Exabytes
+      zetta: Zettabytes
+      yotta: Yottabytes
 
 es:
   date:
