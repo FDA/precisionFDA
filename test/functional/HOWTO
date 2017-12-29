@@ -39,7 +39,7 @@ where “allSuitesParallel.xml” - the "suite" file, the file with description 
 "-Denv=dev" sets an environment parameter value.
 If "dev" is selected - the files "dev_user_creds.conf" and "devSettings.properties" will be used.
 If "loc" is selected - the files "loc_user_creds.conf" and "locSettings.properties" will be used.
-In our case: all existing test cases will be run on dev environment in parallel using 3 threads.
+In our case: all existing test cases will be run on dev environment in parallel using 4 threads.
 
 
 ----------------------

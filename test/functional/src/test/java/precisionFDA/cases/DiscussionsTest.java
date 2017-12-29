@@ -77,7 +77,7 @@ public class DiscussionsTest extends AbstractTest {
 
     @Test(priority = 2, dependsOnMethods = {"successfulLogin", "createDiscussion"})
     public void verifyCreatedDiscussion() {
-        printTestHeader("Test Case: create new discussion");
+        printTestHeader("Test Case: verify created discussion");
 
         DiscProfile mainDiscProfile = getMainDiscProfile();
 
@@ -90,15 +90,17 @@ public class DiscussionsTest extends AbstractTest {
 
         CreatedDiscPage createdDiscPage = discsPage.openCreatedDisc(mainDiscProfile.getDiscName());
 
-        assertThat(
+        SoftAssert.assertThat(
                 createdDiscPage.isSavedTitleCorrect(mainDiscProfile))
                 .as("Title of created discussion is correct one")
                 .isTrue();
 
-        assertThat(
+        SoftAssert.assertThat(
                 createdDiscPage.isSavedContentCorrect(mainDiscProfile))
                 .as("Content of created discussion is correct one")
                 .isTrue();
+
+        SoftAssert.assertAll();
     }
 
     @Test(priority = 3, dependsOnMethods = {"successfulLogin", "createDiscussion"})
@@ -107,6 +109,7 @@ public class DiscussionsTest extends AbstractTest {
 
         DiscProfile mainDiscProfile = getMainDiscProfile();
         DiscProfile editDiscProfile = getEditDiscProfile();
+        FileProfile discFile = getDiscAttachFile();
 
         DiscsPage discsPage = openOverviewPage().openDiscsPage();
 
@@ -130,15 +133,22 @@ public class DiscussionsTest extends AbstractTest {
 
         createdDiscPage = discsPage.openCreatedDisc(editDiscProfile.getDiscName());
 
-        assertThat(
+        SoftAssert.assertThat(
                 createdDiscPage.isSavedTitleCorrect(editDiscProfile))
                 .as("Title of edited discussion is correct one")
                 .isTrue();
 
-        assertThat(
+        SoftAssert.assertThat(
                 createdDiscPage.isSavedContentCorrect(editDiscProfile))
                 .as("Content of edited discussion is correct one")
                 .isTrue();
+
+        SoftAssert.assertThat(
+                editDiscPage.isAttachedFileDisplayed(discFile.getFileName()))
+                .as("Link to attached file is displayed through edit")
+                .isTrue();
+
+        SoftAssert.assertAll();
     }
 
 }
