@@ -146,16 +146,16 @@ class SpacesController < ApplicationController
   def create
     redirect_to spaces_path unless @context.user.can_administer_site?
     if space_params[:host_lead_dxuser] == space_params[:guest_lead_dxuser]
-      flash[:error] = "The host and guest lead cannot be the same user"
+      flash.now[:error] = "The host and guest lead cannot be the same user"
     end
 
     host_lead_user = User.find_by(dxuser: space_params[:host_lead_dxuser])
     guest_lead_user = User.find_by(dxuser: space_params[:guest_lead_dxuser])
 
     if host_lead_user.nil?
-      flash[:error] = "Host lead username #{space_params[:host_lead_dxuser]} not found"
+      flash.now[:error] = "Host lead username #{space_params[:host_lead_dxuser]} not found"
     elsif guest_lead_user.nil?
-      flash[:error] = "Guest lead username #{space_params[:guest_lead_dxuser]} not found"
+      flash.now[:error] = "Guest lead username #{space_params[:guest_lead_dxuser]} not found"
     end
 
     if flash[:error].blank?
@@ -172,7 +172,7 @@ class SpacesController < ApplicationController
         end
         return
       else
-        flash[:error] = "The space could not be provisioned for an unknown reason."
+        flash.now[:error] = "The space could not be provisioned for an unknown reason."
       end
     end
     @space = Space.new(space_params)
