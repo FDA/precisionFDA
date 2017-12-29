@@ -97,9 +97,6 @@ group :development do
 
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
-
-  # Project-wide environment variables
-  gem 'dotenv-rails'
 end
 
 group :development, :test do
@@ -109,11 +106,16 @@ group :development, :test do
   # Manage environment variables
   gem 'figaro'
   gem 'quiet_assets'
+
+  # Project-wide environment variables
+  gem 'dotenv-rails'
 end
 
 group :test do
   gem 'rspec-rails', '~> 3.7', '>= 3.7.1'
   gem 'factory_bot_rails', '~> 4.8', '>= 4.8.2'
+  gem 'database_cleaner', '~> 1.5', '>= 1.5.3'
+  gem 'webmock', '~> 3.1', '>= 3.1.1'
 end
 
 group :production do
