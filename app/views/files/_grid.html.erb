@@ -51,7 +51,7 @@
     link_to(file.user.dxuser, user_path(file.user.dxuser))
   end
 
-  g.column name: 'Size', attribute: 'file_size' do |file|
+  g.column name: 'Size', attribute: 'file_size', filter_type: :file_size do |file|
     number_to_human_size(file.file_size)
   end
 

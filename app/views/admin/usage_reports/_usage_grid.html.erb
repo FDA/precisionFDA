@@ -9,7 +9,7 @@
     metric.user.dxuser
   end
 
-  g.column name: "Current storage usage", attribute: "storage_usage", filter_type: :range do |metric|
+  g.column name: "Current storage usage", attribute: "storage_usage", filter_type: :file_size do |metric|
     number_to_human_size(metric.storage_usage || 0)
   end
 
