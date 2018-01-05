@@ -6,13 +6,13 @@ window.Precision.player = null
 window.onYouTubeIframeAPIReady = ->
   window.Precision.player = new YT.Player('ytplayer',
     width: '100%'
-    videoId: 'e5qOVz9EIuc'
+    videoId: 'Zs9dW4ZEjn8'
     playerVars:
       autoplay: 0
       controls: 2
       enablejsapi: 1
       loop: 0
-      playlist: 'e5qOVz9EIuc'
+      playlist: 'Zs9dW4ZEjn8'
       modestbranding: 1
       rel: 0
       showinfo: 0
