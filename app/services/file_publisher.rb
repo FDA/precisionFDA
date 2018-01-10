@@ -20,15 +20,13 @@ class FilePublisher
   end
 
   def publish(files, scope = "public")
-    # Ensure API availability
-    api.call("system", "greet")
     count = 0
-
     destination_project = UserFile.publication_project!(user, scope)
 
     projects = {}
     files.uniq.each do |file|
       next unless file.publishable_by_user?(user, scope)
+      raise "Unable to publish #{file.name} - file is not closed" unless file.state == UserFile::STATE_CLOSED
       raise "Consistency check failure for file #{file.id} (#{file.dxid})" unless file.passes_consistency_check?(user)
       raise "Source and destination collision for file #{file.id} (#{file.dxid})" if destination_project == file.project
       projects[file.project] = [] unless projects.has_key?(file.project)
@@ -36,8 +34,7 @@ class FilePublisher
     end
 
     projects.each do |project, project_files|
-
-      api.call(project, "clone", {objects: project_files.map(&:dxid), project: destination_project})
+      api.call(project, "clone", objects: project_files.map(&:dxid), project: destination_project)
 
       UserFile.transaction do
         project_files.each do |file|
@@ -48,8 +45,7 @@ class FilePublisher
         end
       end
 
-      api.call(project, "removeObjects", {objects: project_files.map(&:dxid)})
-
+      api.call(project, "removeObjects", objects: project_files.map(&:dxid))
     end
 
     count
