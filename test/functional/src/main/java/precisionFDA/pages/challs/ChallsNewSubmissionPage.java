@@ -96,7 +96,7 @@ public class ChallsNewSubmissionPage extends AbstractPage {
     public boolean isFileOnModalDisplayed(String fileName) {
         String xpath = ChallsLocators.SUBMIT_NEW_ENTRY_MODAL_FILE_NAME_TEMPLATE.replace("{FILE_NAME}", fileName);
         By we = By.xpath(xpath);
-        return isElementPresent(we, 5);
+        return isElementPresent(we, 30);
     }
 
     public ChallsNewSubmissionPage clickSelectOnModal() {

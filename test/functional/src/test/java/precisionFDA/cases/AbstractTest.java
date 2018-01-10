@@ -15,6 +15,7 @@ import org.openqa.selenium.support.ui.Wait;
 import org.testng.annotations.*;
 import precisionFDA.model.UserProfile;
 import precisionFDA.pages.CommonPage;
+import precisionFDA.pages.docs.DocsPage;
 import precisionFDA.pages.files.FilesPage;
 import precisionFDA.pages.login.LoginPrecisionPage;
 import precisionFDA.pages.overview.OverviewPage;
@@ -229,6 +230,10 @@ public abstract class AbstractTest {
 
     public CommonPage getCommonPage() {
         return new CommonPage(driver);
+    }
+
+    public DocsPage getDocsPage() {
+        return new DocsPage(driver);
     }
 
     public void alertAccept(int timeOutInSeconds, int sleepInMillis) {

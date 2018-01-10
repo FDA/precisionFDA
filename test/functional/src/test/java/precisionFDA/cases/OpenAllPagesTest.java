@@ -1,6 +1,7 @@
 package precisionFDA.cases;
 
 import org.testng.annotations.Test;
+import precisionFDA.pages.docs.DocsPage;
 import ru.yandex.qatools.htmlelements.annotations.Name;
 import precisionFDA.data.PageTitles;
 import precisionFDA.data.TestUserData;
@@ -788,10 +789,10 @@ public class OpenAllPagesTest extends AbstractTest {
         printTestHeader("Test Case: check that About.How page can be open");
 
         AboutPage aboutPage = openOverviewPage().openAboutPage();
-        AboutHowPage aboutHowPage = aboutPage.openAboutHowPage();
+        DocsPage docsPage = aboutPage.openAboutHowPage();
 
         SoftAssert.assertThat(
-                aboutHowPage.isAboutIntroTitleDisplayed())
+                docsPage.isIntroTitleDisplayed())
                 .as("'Introduction' title is displayed")
                 .isTrue();
 
@@ -813,20 +814,6 @@ public class OpenAllPagesTest extends AbstractTest {
                 getPageTitle())
                 .as("Page Title")
                 .contains(PageTitles.PAGE_TITLE_GUIDELINES);
-
-        SoftAssert.assertAll();
-    }
-
-    @Test(dependsOnMethods = { "successfulLogin" })
-    public void checkDocsPageCanBeOpen() {
-        printTestHeader("Test Case: check that Docs page can be open");
-
-        AboutHowPage docsPage = openOverviewPage().openDocsPage();
-
-        SoftAssert.assertThat(
-                docsPage.isAboutIntroTitleDisplayed())
-                .as("'Introduction' title is displayed")
-                .isTrue();
 
         SoftAssert.assertAll();
     }

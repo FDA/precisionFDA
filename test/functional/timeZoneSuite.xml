@@ -1,8 +1,0 @@
-<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="Timezone validation suite">
-    <test name="Timezone validation test">
-        <classes>
-            <class name="precisionFDA.cases.TimeZoneTest"/>
-        </classes>
-    </test>
-</suite>

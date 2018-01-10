@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import precisionFDA.pages.dashboard.AdminDashboardPage;
+import precisionFDA.pages.docs.DocsPage;
 import precisionFDA.pages.spaces.SpacesPage;
 import precisionFDA.pages.wf.WorkflowsPage;
 import ru.yandex.qatools.htmlelements.element.Link;
@@ -14,7 +15,6 @@ import precisionFDA.locators.CommonLocators;
 import precisionFDA.locators.OverviewLocators;
 import precisionFDA.pages.AbstractPage;
 import precisionFDA.pages.StartPage;
-import precisionFDA.pages.about.AboutHowPage;
 import precisionFDA.pages.about.AboutPage;
 import precisionFDA.pages.apps.AppsPage;
 import precisionFDA.pages.challs.ChallsPage;
@@ -145,7 +145,7 @@ public class OverviewPage extends AbstractPage {
         return getCommonPage().openAdminDashboardPage();
     }
 
-    public AboutHowPage openDocsPage() {
+    public DocsPage openDocsPage() {
         return getCommonPage().openDocsPage();
     }
 

@@ -1,8 +1,0 @@
-<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="Files Publish suite">
-    <test name="Files Publish suite">
-        <classes>
-            <class name="precisionFDA.cases.FilesPublishTest"/>
-        </classes>
-    </test>
-</suite>

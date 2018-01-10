@@ -27,10 +27,9 @@ public class WorkflowTest extends AbstractTest {
     @Test
     public void precondition() {
         printTestHeader("Precondition: login");
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getAnotherTestUser();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
     }
-
 
     @Test(priority = 0, dependsOnMethods = "precondition")
     public void createApp() {
@@ -89,7 +88,7 @@ public class WorkflowTest extends AbstractTest {
                 .isTrue();
     }
 
-    @Test(priority = 2, dependsOnMethods = "precondition")
+    @Test(priority = 2, dependsOnMethods = { "precondition", "createWorkflow" })
     public void runWorkflow() {
         printTestHeader("Test Case: run workflow");
 
