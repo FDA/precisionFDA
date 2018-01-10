@@ -60,4 +60,9 @@
             <class name="precisionFDA.cases.DiscussionsTest" />
         </classes>
     </test>
+    <test name="DocsTest">
+        <classes>
+            <class name="precisionFDA.cases.DocsTest" />
+        </classes>
+    </test>
 </suite>

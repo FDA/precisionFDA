@@ -18,6 +18,4 @@ public class AboutLocators {
 
     public static final String ABOUT_HOW_TAB_LINK = "//a/span[text()='How?']";
 
-    public static final String ABOUT_INTRODUCTION_TITLE = "//div[@id='introduction']";
-
 }

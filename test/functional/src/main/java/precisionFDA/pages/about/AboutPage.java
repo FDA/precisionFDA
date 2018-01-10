@@ -5,6 +5,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import precisionFDA.pages.docs.DocsPage;
 import ru.yandex.qatools.htmlelements.element.Link;
 import precisionFDA.locators.AboutLocators;
 import precisionFDA.pages.AbstractPage;
@@ -68,10 +69,10 @@ public class AboutPage extends AbstractPage {
         return new AboutWhoPage(getDriver());
     }
 
-    public AboutHowPage openAboutHowPage() {
+    public DocsPage openAboutHowPage() {
         log.info("open About.How Page");
         getAboutHowLink().click();
-        return new AboutHowPage(getDriver());
+        return new DocsPage(getDriver());
     }
 
     public boolean isAboutWhyLinkDisplayed() {
