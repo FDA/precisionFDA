@@ -50,8 +50,8 @@ public class UsersAndUsagePage extends AbstractPage {
 
     public boolean isUsersAndUsageFileCorrect() {
         String[] expectedArray = {
-                TestUserData.getAnotherTestUser().getApplUsername(),
-                TestUserData.getTestUser().getApplUsername(),
+                TestUserData.getTestUserTwo().getApplUsername(),
+                TestUserData.getTestUserOne().getApplUsername(),
                 TestUserData.getAdminUser().getApplUsername(),
                 "User,Current storage usage,Compute in past day,Compute in past week,Compute in past month,Compute in past year"};
 

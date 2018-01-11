@@ -78,7 +78,7 @@ public class UploadedFilePage extends AbstractPage {
     private Link publishToPublicLink;
 
     UserProfile getTestUser() {
-        return TestUserData.getTestUser();
+        return TestUserData.getTestUserOne();
     }
 
     public UploadedFilePage(final WebDriver driver) {

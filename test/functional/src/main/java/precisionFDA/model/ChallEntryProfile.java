@@ -1,13 +1,13 @@
 package precisionFDA.model;
 
-public class NewChallEntryProfile {
+public class ChallEntryProfile {
 
     private String entryName;
 
     private String entryDescr;
 
-    public NewChallEntryProfile(final String entryName,
-                                final String entryDescr) {
+    public ChallEntryProfile(final String entryName,
+                             final String entryDescr) {
         this.entryName = entryName;
         this.entryDescr = entryDescr;
     }
@@ -20,5 +20,3 @@ public class NewChallEntryProfile {
         return entryDescr;
     }
 }
-
-

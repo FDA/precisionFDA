@@ -14,6 +14,12 @@ import java.util.Date;
 import java.util.Random;
 import java.util.TimeZone;
 
+import ru.yandex.qatools.ashot.AShot;
+import ru.yandex.qatools.ashot.Screenshot;
+import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
+
+import javax.imageio.ImageIO;
+
 import static precisionFDA.data.TestDict.*;
 import static precisionFDA.data.TestFilesData.*;
 import static precisionFDA.data.TestRunData.*;
@@ -462,13 +468,22 @@ public class Utils {
     public static void takeScreenshot(String filePath, WebDriver driver) {
         if (isScreenshotFeatureOn()) {
             final Logger log = Logger.getLogger(getDictInfo().toUpperCase());
-            File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+            // File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+
+            Screenshot screenshot = new AShot().shootingStrategy(ShootingStrategies.viewportPasting(1000)).takeScreenshot(driver);
             try {
-                org.apache.commons.io.FileUtils.copyFile(scrFile, new File(filePath));
+                ImageIO.write(screenshot.getImage(),"PNG",new File(filePath));
                 log.info("screenshot is here: " + filePath);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+//            try {
+//                org.apache.commons.io.FileUtils.copyFile(scrFile, new File(filePath));
+//                log.info("screenshot is here: " + filePath);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 

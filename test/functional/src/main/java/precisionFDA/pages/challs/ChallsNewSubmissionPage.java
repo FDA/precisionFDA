@@ -6,7 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import precisionFDA.locators.ChallsLocators;
-import precisionFDA.model.NewChallEntryProfile;
+import precisionFDA.model.ChallEntryProfile;
 import precisionFDA.pages.AbstractPage;
 import precisionFDA.pages.files.FilesPublishPage;
 import precisionFDA.utils.Utils;
@@ -60,7 +60,7 @@ public class ChallsNewSubmissionPage extends AbstractPage {
         waitForPageToLoadAndVerifyBy(By.xpath(ChallsLocators.SUBMIT_NEW_ENTRY_NAME_INPUT));
     }
 
-    public void fillNewChallSubmissionPage(NewChallEntryProfile entryProfile) {
+    public void fillNewChallSubmissionPage(ChallEntryProfile entryProfile) {
         log.info("fill New Challenge Submission page");
         getNewEntryNameInput().sendKeys(entryProfile.getEntryName());
         getNewEntryDescrInput().sendKeys(entryProfile.getEntryDescr());

@@ -34,8 +34,8 @@ public class TestSpacesData {
     public static SpaceProfile mainSpaceProfile = new SpaceProfile(
             getMainSpaceName(),
             getMainSpaceDescr(),
-            TestUserData.getTestUser().getApplUsername(),
-            TestUserData.getAnotherTestUser().getApplUsername(),
+            TestUserData.getTestUserOne().getApplUsername(),
+            TestUserData.getTestUserTwo().getApplUsername(),
             "",
             ""
     );

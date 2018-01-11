@@ -90,7 +90,7 @@ public class ExpertsTest extends AbstractTest {
     public void checkPrivateClosedAsTheExpertFirst() {
         printTestHeader("Test Case: check behavior of the just created expert block as the expert user");
 
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getTestUserOne();
         ExpertProfile expertProfile = getMainExpertProfile();
 
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -135,7 +135,7 @@ public class ExpertsTest extends AbstractTest {
     public void checkPrivateClosedAsAnotherUserFirst() {
         printTestHeader("Test Case: check behavior of the created expert block as another user");
 
-        UserProfile user = TestUserData.getAnotherTestUser();
+        UserProfile user = TestUserData.getTestUserTwo();
         ExpertProfile expertProfile = getMainExpertProfile();
 
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -183,7 +183,7 @@ public class ExpertsTest extends AbstractTest {
     public void checkPublicClosedAsAnotherUserFirst() {
         printTestHeader("Test Case: check behavior of the public closed expert as another user");
 
-        UserProfile user = TestUserData.getAnotherTestUser();
+        UserProfile user = TestUserData.getTestUserTwo();
         ExpertProfile expertProfile = getMainExpertProfile();
 
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -220,7 +220,7 @@ public class ExpertsTest extends AbstractTest {
     public void setStatusOpen() {
         printTestHeader("Test Case: set status as Open");
 
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getTestUserOne();
         ExpertProfile expertProfile = getMainExpertProfile();
 
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -259,7 +259,7 @@ public class ExpertsTest extends AbstractTest {
     public void checkPublicOpenAsAnotherUser() {
         printTestHeader("Test Case: check behavior of the public open expert as another user");
 
-        UserProfile user = TestUserData.getAnotherTestUser();
+        UserProfile user = TestUserData.getTestUserTwo();
         ExpertProfile expertProfile = getMainExpertProfile();
 
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -291,7 +291,7 @@ public class ExpertsTest extends AbstractTest {
     public void askQuestionAsAnotherUser() {
         printTestHeader("Test Case: submit a question to expert");
 
-        UserProfile user = TestUserData.getAnotherTestUser();
+        UserProfile user = TestUserData.getTestUserTwo();
         ExpertProfile expertProfile = getMainExpertProfile();
         QuestionProfile questionProfile = getMainQAProfile();
 
@@ -320,7 +320,7 @@ public class ExpertsTest extends AbstractTest {
     public void answerQuestionAsExpert() {
         printTestHeader("Test Case: answer the question as the expert");
 
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getTestUserOne();
         ExpertProfile expertProfile = getMainExpertProfile();
         QuestionProfile questionProfile = getMainQAProfile();
 
@@ -371,7 +371,7 @@ public class ExpertsTest extends AbstractTest {
     public void checkAnswerAsAnotherUser() {
         printTestHeader("Test Case: check the answer as the question author");
 
-        UserProfile user = TestUserData.getAnotherTestUser();
+        UserProfile user = TestUserData.getTestUserTwo();
         ExpertProfile expertProfile = getMainExpertProfile();
         QuestionProfile questionProfile = getMainQAProfile();
 
@@ -398,7 +398,7 @@ public class ExpertsTest extends AbstractTest {
     public void setStatusClosed() {
         printTestHeader("Test Case: set status as Closed");
 
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getTestUserOne();
         ExpertProfile expertProfile = getMainExpertProfile();
 
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -426,7 +426,7 @@ public class ExpertsTest extends AbstractTest {
     public void checkPublicClosedAsAnotherUserSecond() {
         printTestHeader("Test Case: check behavior of the public closed expert as another user second time");
 
-        UserProfile user = TestUserData.getAnotherTestUser();
+        UserProfile user = TestUserData.getTestUserTwo();
         ExpertProfile expertProfile = getMainExpertProfile();
         QuestionProfile questionProfile = getMainQAProfile();
 
@@ -516,7 +516,7 @@ public class ExpertsTest extends AbstractTest {
     public void checkPrivateClosedAsAnotherUserSecond() {
         printTestHeader("Test Case: check behavior of the created expert block as another user second time");
 
-        UserProfile user = TestUserData.getAnotherTestUser();
+        UserProfile user = TestUserData.getTestUserTwo();
         ExpertProfile expertProfile = getMainExpertProfile();
 
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -534,7 +534,7 @@ public class ExpertsTest extends AbstractTest {
     public void checkPrivateClosedAsTheExpertSecond() {
         printTestHeader("Test Case: check behavior of created expert block as the expert user second time");
 
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getTestUserOne();
         ExpertProfile expertProfile = getMainExpertProfile();
 
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();

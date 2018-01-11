@@ -17,7 +17,7 @@ public class DocsTest extends AbstractTest {
     public void successfulLogin() {
         printTestHeader(" -- Successful Login -- ");
 
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getTestUserOne();
 
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 

@@ -23,7 +23,7 @@ public class AppsRelevantPage extends AbstractPage {
     public AppsRelevantPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
-        waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_JOBS_LIST));
+        waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_CREATE_APP_BUTTON_LINK));
     }
 
     public WebElement getAppsJobsListWE() {

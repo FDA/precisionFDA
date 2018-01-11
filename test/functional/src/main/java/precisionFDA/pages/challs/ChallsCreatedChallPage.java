@@ -5,13 +5,19 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import precisionFDA.data.TestUserData;
 import precisionFDA.locators.ChallsLocators;
+import precisionFDA.model.ChallEntryProfile;
+import precisionFDA.model.UserProfile;
 import precisionFDA.pages.AbstractPage;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 
 import static precisionFDA.data.TestDict.getDictChallengeClosed;
 import static precisionFDA.data.TestDict.getDictDone;
+import static precisionFDA.data.TestDict.getDictPending;
+import static precisionFDA.data.TestNewChallEntryData.getMainChallEntryProfile;
+import static precisionFDA.data.TestNewChallEntryData.getSecondChallEntryProfile;
 import static precisionFDA.utils.Utils.sleep;
 
 public class ChallsCreatedChallPage extends AbstractPage {
@@ -178,7 +184,7 @@ public class ChallsCreatedChallPage extends AbstractPage {
     }
 
     public void waitUntilChallengeClosed() {
-        int timeoutSec = 120;
+        int timeoutSec = 180;
         int refreshStepSec = 15;
         int spentTimeSec = 0;
         log.info("waiting for " + timeoutSec + " sec until the challenge is closed");
@@ -221,14 +227,29 @@ public class ChallsCreatedChallPage extends AbstractPage {
 
     public boolean isEntryStateDone(String entryName) {
         boolean res = false;
-        String actual = getEntryStateText(entryName);
-        String expected = getDictDone();
-        if (!actual.equalsIgnoreCase(expected)) {
-            log.warn("expected state is [" + expected + "] but actual is [" + actual + "] for entry " + entryName);
+        String doneStatus = getDictDone().toUpperCase();
+        String pendingStatus = getDictPending().toUpperCase();
+
+        int timeoutSec = 180;
+        int refreshStepSec = 30;
+        int spentTimeSec = 0;
+
+        log.info("waiting for " + timeoutSec + " sec until the entry is done");
+        while ( getEntryStateText(entryName).toUpperCase().contains(pendingStatus) && (spentTimeSec < timeoutSec) ) {
+            sleep(refreshStepSec*1000);
+            spentTimeSec = spentTimeSec + refreshStepSec;
+            log.info("it's been " + spentTimeSec + " seconds");
+            getDriver().navigate().refresh();
+        }
+
+        String currentStatus = getEntryStateText(entryName).toUpperCase();
+        if (!currentStatus.equalsIgnoreCase(doneStatus)) {
+            log.error("expected state is [" + doneStatus + "] but actual is [" + currentStatus + "] for entry " + entryName);
         }
         else {
             res = true;
         }
+
         return res;
     }
 
@@ -245,6 +266,32 @@ public class ChallsCreatedChallPage extends AbstractPage {
         boolean isSource = source.contains(getDictChallengeClosed());
         log.info("is button = " + isButton + "; isSource = " + isSource);
         return isButton && isSource;
+    }
+
+    public boolean isResultUserOneFullNameDisplayed() {
+        return isResultUserFullNameDisplayed(TestUserData.getTestUserOne());
+    }
+
+    public boolean isResultUserTwoFullNameDisplayed() {
+        return isResultUserFullNameDisplayed(TestUserData.getTestUserTwo());
+    }
+
+    public boolean isResultUserFullNameDisplayed(UserProfile user) {
+        String xpath = ChallsLocators.RESULT_PAGE_FULL_NAME_TEMPLATE.replace("{FULL_NAME}", user.getApplUserFullName());
+        return isElementPresent(By.xpath(xpath), 1);
+    }
+
+    public boolean isResultFirstEntryNameDisplayed() {
+        return isResultEntryNameDisplayed(getMainChallEntryProfile());
+    }
+
+    public boolean isResultSecondEntryNameDisplayed() {
+        return isResultEntryNameDisplayed(getSecondChallEntryProfile());
+    }
+
+    public boolean isResultEntryNameDisplayed(ChallEntryProfile entry) {
+        String xpath = ChallsLocators.RESULT_PAGE_ENTRY_NAME_TEMPLATE.replace("{ENTRY_NAME}", entry.getEntryName());
+        return isElementPresent(By.xpath(xpath), 1);
     }
 
 }

@@ -18,7 +18,7 @@ public class LoginTest extends AbstractTest {
     public void successfulLoginLogoutPrecisionFDA() {
         printTestHeader("Test Case: Successful Login to Precision FDA and logout");
 
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getTestUserOne();
 
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 

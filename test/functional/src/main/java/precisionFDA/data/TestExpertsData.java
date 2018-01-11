@@ -62,7 +62,7 @@ public class TestExpertsData {
     }
 
     public static String getMainExpertUser() {
-        return TestUserData.getTestUser().getApplUsername();
+        return TestUserData.getTestUserOne().getApplUsername();
     }
 
     public static ExpertProfile mainExpertProfile = new ExpertProfile(
