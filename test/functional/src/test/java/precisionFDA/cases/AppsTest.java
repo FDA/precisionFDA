@@ -21,7 +21,7 @@ public class AppsTest extends AbstractTest {
     public void successfulLogin() {
         printTestHeader(" -- Successful Login -- ");
 
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getTestUserOne();
 
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
@@ -59,6 +59,7 @@ public class AppsTest extends AbstractTest {
         printTestHeader("Test Case: check Saved previously App can be open from My App list and has correct data");
 
         AppProfile appProfile = getMainAppProfile();
+        UserProfile user = TestUserData.getTestUserOne();
 
         AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
@@ -82,7 +83,7 @@ public class AppsTest extends AbstractTest {
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppOrg())
                 .as("Org of created app")
-                .isEqualTo(appsSavedAppPage.getExpSelectedAppOrg());
+                .isEqualTo(user.getApplUserOrg());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppAddedBy())
@@ -148,6 +149,7 @@ public class AppsTest extends AbstractTest {
         printTestHeader("Test Case: check App data is not changed if click Edit App then Save without any changes");
 
         AppProfile appProfile = getMainAppProfile();
+        UserProfile user = TestUserData.getTestUserOne();
 
         AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
@@ -173,7 +175,7 @@ public class AppsTest extends AbstractTest {
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppOrg())
                 .as("Org of created app")
-                .isEqualTo(appsSavedAppPage.getExpSelectedAppOrg());
+                .isEqualTo(user.getApplUserOrg());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppAddedBy())
@@ -396,6 +398,7 @@ public class AppsTest extends AbstractTest {
         printTestHeader("Test Case: check that a previous app revision has correct data");
 
         AppProfile appProfile = getCheckRevisionAppProfile();
+        UserProfile user = TestUserData.getTestUserOne();
 
         AppsPage appsPage = openOverviewPage().openAppsPage();
         AppsEditAppPage appsEditAppPage = appsPage.openCreateAppPage();
@@ -435,7 +438,7 @@ public class AppsTest extends AbstractTest {
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppOrg())
                 .as("Org of the app")
-                .isEqualTo(appsSavedAppPage.getExpSelectedAppOrg());
+                .isEqualTo(user.getApplUserOrg());
 
         SoftAssert.assertThat(
                 appsSavedAppPage.getActSelectedAppAddedBy())

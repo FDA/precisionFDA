@@ -210,7 +210,7 @@ public class AppsSavedAppPage extends AbstractPage {
     }
 
     UserProfile getUser() {
-        return TestUserData.getTestUser();
+        return TestUserData.getTestUserOne();
     }
 
     public WebElement getAppsRevisionTitleLabeWE() {

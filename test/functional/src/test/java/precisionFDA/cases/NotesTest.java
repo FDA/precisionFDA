@@ -27,7 +27,7 @@ public class NotesTest extends AbstractTest {
     public void successfulLogin() {
         printTestHeader(" -- Login -- ");
 
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getTestUserOne();
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(

@@ -20,7 +20,7 @@ public class FilesTest extends AbstractTest {
     public void successfulLogin() {
         printTestHeader("Precondition: Successful Login");
 
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getTestUserOne();
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(

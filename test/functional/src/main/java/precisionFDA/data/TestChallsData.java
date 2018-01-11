@@ -79,7 +79,7 @@ public class TestChallsData {
     }
 
     public static String getMainChallScoringUser() {
-        return TestUserData.getTestUser().getApplUsername();
+        return TestUserData.getTestUserOne().getApplUsername();
     }
 
     public static String getChallCardImage() {
@@ -122,7 +122,7 @@ public class TestChallsData {
             getMainChallDescr(),
             getMainChallScoringUser(),
             1,
-            3,
+            4,
             "",
             "",
             getChallCardImage(),

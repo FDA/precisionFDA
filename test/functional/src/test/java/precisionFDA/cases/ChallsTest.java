@@ -22,8 +22,8 @@ import static precisionFDA.data.TestChallsData.getExpectedChallDateTimeValue;
 import static precisionFDA.data.TestChallsData.getMainChallProfile;
 import static precisionFDA.data.TestFilesData.getMainNewChallEntryFile;
 import static precisionFDA.data.TestFilesData.getSecondNewChallEntryFile;
-import static precisionFDA.data.TestNewChallEntryData.getMainNewChallEntryProfile;
-import static precisionFDA.data.TestNewChallEntryData.getSecondNewChallEntryProfile;
+import static precisionFDA.data.TestNewChallEntryData.getMainChallEntryProfile;
+import static precisionFDA.data.TestNewChallEntryData.getSecondChallEntryProfile;
 import static precisionFDA.data.TimeZonesData.getMoscowTimeZone;
 import static precisionFDA.utils.Utils.printTestHeader;
 
@@ -34,7 +34,7 @@ public class ChallsTest extends AbstractTest {
     public void precondition() {
         printTestHeader("Precondition: login and set timezone");
 
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getTestUserOne();
         TimeZoneProfile timeZone = getMoscowTimeZone();
 
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -45,7 +45,7 @@ public class ChallsTest extends AbstractTest {
 
     @Test(priority = 0, dependsOnMethods = "precondition")
     public void createApp() {
-        printTestHeader("Test Case: create app as a test user");
+        printTestHeader("Test Case: create app as a test user one");
 
         AppProfile appProfile = TestAppData.getChallAppProfile();
 
@@ -194,7 +194,7 @@ public class ChallsTest extends AbstractTest {
     public void assignToChallenge() {
         printTestHeader("Test Case: assign the created app to the created challenge");
 
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getTestUserOne();
         AppProfile appProfile = TestAppData.getChallAppProfile();
         ChallProfile challProfile = getMainChallProfile();
 
@@ -221,7 +221,6 @@ public class ChallsTest extends AbstractTest {
         printTestHeader("Test Case: set challenge status to open");
 
         UserProfile user = TestUserData.getAdminUser();
-        AppProfile appProfile = TestAppData.getChallAppProfile();
         ChallProfile challProfile = getMainChallProfile();
 
         logoutFromAll();
@@ -251,7 +250,7 @@ public class ChallsTest extends AbstractTest {
     public void joinChallenge() {
         printTestHeader("Test Case: join challenge");
 
-        UserProfile user = TestUserData.getAnotherTestUser();
+        UserProfile user = TestUserData.getTestUserTwo();
         ChallProfile challProfile = getMainChallProfile();
 
         logoutFromAll();
@@ -260,7 +259,7 @@ public class ChallsTest extends AbstractTest {
 
         assertThat(
                 challsPage.isCreatedChallNameDisplayed(challProfile.getChallName()))
-                .as("The created challenge is displayed for another user")
+                .as("The created challenge is displayed for test user two")
                 .isTrue();
 
         ChallsCreatedChallPage createdChallPage = challsPage.viewChallenge(challProfile);
@@ -279,17 +278,17 @@ public class ChallsTest extends AbstractTest {
 
         assertThat(
                 createdChallPage.isSubmitEntryChallengeButtonDisplayed())
-                .as("Submit Entry button is displayed for another user")
+                .as("Submit Entry button is displayed for test user two")
                 .isTrue();
 
     }
 
     @Test(priority = 6, dependsOnMethods = { "createChallenge", "createApp" })
     public void submitChallengeEntryByAnotherUser() {
-        printTestHeader("Test Case: submit challenge entry by another user");
+        printTestHeader("Test Case: submit challenge entry by test user two");
 
         ChallProfile challProfile = getMainChallProfile();
-        NewChallEntryProfile newChallEntryProfile = getMainNewChallEntryProfile();
+        ChallEntryProfile challEntryProfile = getMainChallEntryProfile();
         FileProfile inputFileProfile = getMainNewChallEntryFile();
 
         FilesPage filesPage = openOverviewPage().openFilesPage();
@@ -316,7 +315,7 @@ public class ChallsTest extends AbstractTest {
                 .isTrue();
 
         ChallsNewSubmissionPage newSubmissionPage = createdChallPage.clickSubmitEntry();
-        newSubmissionPage.fillNewChallSubmissionPage(newChallEntryProfile);
+        newSubmissionPage.fillNewChallSubmissionPage(challEntryProfile);
         newSubmissionPage.clickSelectFile1();
 
         assertThat(
@@ -350,12 +349,12 @@ public class ChallsTest extends AbstractTest {
 
     @Test(priority = 7, dependsOnMethods = { "createChallenge", "createApp" })
     public void submitChallengeEntryByAppAuthor() {
-        printTestHeader("Test Case: submit challenge entry by the app author");
+        printTestHeader("Test Case: submit challenge entry by the app author [test user one]");
 
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getTestUserOne();
         ChallProfile challProfile = getMainChallProfile();
         FileProfile inputFileProfile = getSecondNewChallEntryFile();
-        NewChallEntryProfile newChallEntryProfile = getSecondNewChallEntryProfile();
+        ChallEntryProfile challEntryProfile = getSecondChallEntryProfile();
 
         logoutFromAll();
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -378,7 +377,7 @@ public class ChallsTest extends AbstractTest {
 
         assertThat(
                 challsPage.isCreatedChallNameDisplayed(challProfile.getChallName()))
-                .as("The created challenge is displayed for the app author")
+                .as("The created challenge is displayed for the test user one")
                 .isTrue();
 
         ChallsCreatedChallPage createdChallPage = challsPage.viewChallenge(challProfile);
@@ -401,7 +400,7 @@ public class ChallsTest extends AbstractTest {
                 .isTrue();
 
         ChallsNewSubmissionPage newSubmissionPage = createdChallPage.clickSubmitEntry();
-        newSubmissionPage.fillNewChallSubmissionPage(newChallEntryProfile);
+        newSubmissionPage.fillNewChallSubmissionPage(challEntryProfile);
         newSubmissionPage.clickSelectFile1();
 
         assertThat(
@@ -435,11 +434,11 @@ public class ChallsTest extends AbstractTest {
 
     @Test(priority = 8, dependsOnMethods = { "createChallenge", "createApp" })
     public void verifyEntryStatusByAnotherUser() {
-        printTestHeader("Test Case: verify entry status by another user");
+        printTestHeader("Test Case: verify entry status by test user two");
 
-        UserProfile user = TestUserData.getAnotherTestUser();
+        UserProfile user = TestUserData.getTestUserTwo();
         ChallProfile challProfile = getMainChallProfile();
-        NewChallEntryProfile newChallEntryProfile = getMainNewChallEntryProfile();
+        ChallEntryProfile challEntryProfile = getMainChallEntryProfile();
         FileProfile inputFileProfile = getMainNewChallEntryFile();
 
         logoutFromAll();
@@ -448,24 +447,24 @@ public class ChallsTest extends AbstractTest {
 
         assertThat(
                 challsPage.isCreatedChallNameDisplayed(challProfile.getChallName()))
-                .as("The created challenge is displayed for another user")
+                .as("The created challenge is displayed for test user two")
                 .isTrue();
 
         ChallsCreatedChallPage createdChallPage = challsPage.viewChallenge(challProfile);
         createdChallPage = createdChallPage.clickMyEntries();
 
         SoftAssert.assertThat(
-                createdChallPage.isSubmittedEntryNameDisplayed(newChallEntryProfile.getEntryName()))
+                createdChallPage.isSubmittedEntryNameDisplayed(challEntryProfile.getEntryName()))
                 .as("submitted entry name is displayed on My Entries")
                 .isTrue();
 
         SoftAssert.assertThat(
-                createdChallPage.isSubmittedEntryInputFileNameDisplayed(inputFileProfile.getFileName(), newChallEntryProfile.getEntryName()))
+                createdChallPage.isSubmittedEntryInputFileNameDisplayed(inputFileProfile.getFileName(), challEntryProfile.getEntryName()))
                 .as("submitted entry input file name displayed on My Entries")
                 .isTrue();
 
         SoftAssert.assertThat(
-                createdChallPage.isEntryStateDone(newChallEntryProfile.getEntryName()))
+                createdChallPage.isEntryStateDone(challEntryProfile.getEntryName()))
                 .as("submitted entry state is Done")
                 .isTrue();
 
@@ -497,7 +496,7 @@ public class ChallsTest extends AbstractTest {
                 .as("Announce Result button is displayed")
                 .isTrue();
 
-        createdChallPage = editChallPage.clickAnnounceResult();
+        editChallPage.clickAnnounceResult();
     }
 
     @Test(priority = 10, dependsOnMethods = { "createChallenge", "createApp" })
@@ -526,6 +525,54 @@ public class ChallsTest extends AbstractTest {
                 createdChallPage.getCreatedChallengeNameText())
                 .as("Challenge name")
                 .contains(challProfile.getChallName());
+    }
+
+    @Test(priority = 11, dependsOnMethods = { "createChallenge", "createApp" })
+    public void checkChallengeResults() {
+        printTestHeader("Test Case: check challenge results");
+
+        ChallProfile challProfile = getMainChallProfile();
+        ChallsPage challsPage = openOverviewPage().openChallsPage();
+
+        assertThat(
+                challsPage.isAnnouncedResultDisplayed(challProfile))
+                .as("Challenge card is displayed on Challenges page")
+                .isTrue();
+
+        ChallsCreatedChallPage createdChallPage = challsPage.clickOnChallengeCard(challProfile);
+
+        assertThat(
+                createdChallPage.getCreatedChallengeNameText())
+                .as("Challenge name")
+                .contains(challProfile.getChallName());
+
+        assertThat(
+                createdChallPage.isChallengeClosedButtonDisplayed())
+                .as("'Closed' button is displayed")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                createdChallPage.isResultUserOneFullNameDisplayed())
+                .as("Full name of the user one is displayed")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                createdChallPage.isResultUserTwoFullNameDisplayed())
+                .as("Full name of the user two is displayed")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                createdChallPage.isResultFirstEntryNameDisplayed())
+                .as("First entry name is displayed")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                createdChallPage.isResultSecondEntryNameDisplayed())
+                .as("Second entry name is displayed")
+                .isTrue();
+
+        SoftAssert.assertAll();
+
     }
 
 }

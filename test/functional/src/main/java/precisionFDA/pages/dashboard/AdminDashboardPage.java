@@ -67,8 +67,8 @@ public class AdminDashboardPage extends AbstractPage {
     }
 
     public boolean isActiveUsersFileCorrect() {
-        String[] expectedArray = {TestUserData.getAnotherTestUser().getApplUsername(),
-                TestUserData.getTestUser().getApplUsername(),
+        String[] expectedArray = {TestUserData.getTestUserTwo().getApplUsername(),
+                TestUserData.getTestUserOne().getApplUsername(),
                 "id", "first_name", "last_name", "email", "created_at", "last_login"};
 
         boolean contains;

@@ -1,6 +1,6 @@
 package precisionFDA.data;
 
-import precisionFDA.model.NewChallEntryProfile;
+import precisionFDA.model.ChallEntryProfile;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class TestNewChallEntryData {
@@ -29,22 +29,22 @@ public class TestNewChallEntryData {
         return SECOND_ENTRY_DESCR_PREFIX + getRunTimeLocalUniqueValue();
     }
 
-    public static NewChallEntryProfile mainNewChallEntryProfile = new NewChallEntryProfile(
+    public static ChallEntryProfile mainChallEntryProfile = new ChallEntryProfile(
             getMainEntryName(),
             getMainEntryDescr()
     );
 
-    public static NewChallEntryProfile getMainNewChallEntryProfile() {
-        return mainNewChallEntryProfile;
+    public static ChallEntryProfile getMainChallEntryProfile() {
+        return mainChallEntryProfile;
     }
 
-    public static NewChallEntryProfile secondNewChallEntryProfile = new NewChallEntryProfile(
+    public static ChallEntryProfile secondChallEntryProfile = new ChallEntryProfile(
             getSecondEntryName(),
             getSecondEntryDescr()
     );
 
-    public static NewChallEntryProfile getSecondNewChallEntryProfile() {
-        return secondNewChallEntryProfile;
+    public static ChallEntryProfile getSecondChallEntryProfile() {
+        return secondChallEntryProfile;
     }
 
 }

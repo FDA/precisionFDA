@@ -82,7 +82,7 @@ public class SpacesTest extends AbstractTest {
         printTestHeader("Test Case: activate space by host lead");
 
         SpaceProfile spaceProfile = getMainSpaceProfile();
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getTestUserOne();
 
         logoutFromAll();
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -125,7 +125,7 @@ public class SpacesTest extends AbstractTest {
         printTestHeader("Test Case: activate space by guest lead");
 
         SpaceProfile spaceProfile = getMainSpaceProfile();
-        UserProfile user = TestUserData.getAnotherTestUser();
+        UserProfile user = TestUserData.getTestUserTwo();
 
         logoutFromAll();
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -168,7 +168,7 @@ public class SpacesTest extends AbstractTest {
         printTestHeader("Test Case: create a folder by host lead");
 
         SpaceProfile spaceProfile = getMainSpaceProfile();
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getTestUserOne();
         FolderProfile spaceFolder = getMainSpaceFolder();
 
         logoutFromAll();
@@ -267,7 +267,7 @@ public class SpacesTest extends AbstractTest {
         SpaceProfile spaceProfile = getMainSpaceProfile();
         FileProfile spaceFile = getMainSpaceFile();
         FolderProfile spaceFolder = getMainSpaceFolder();
-        UserProfile user = TestUserData.getAnotherTestUser();
+        UserProfile user = TestUserData.getTestUserTwo();
 
         logoutFromAll();
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -298,7 +298,7 @@ public class SpacesTest extends AbstractTest {
 
         SpaceProfile spaceProfile = getMainSpaceProfile();
         FileProfile spaceFile = getToEditSpaceFile();
-        UserProfile user = TestUserData.getTestUser();
+        UserProfile user = TestUserData.getTestUserOne();
 
         logoutFromAll();
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();

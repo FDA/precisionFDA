@@ -120,10 +120,14 @@ public class ChallsLocators {
 
     public static final String MY_ENTRIES_ENTRY_STATE_TEMPLATE = "//table//a[text()='{ENTRY_NAME}']/../../td[contains(@class, 'state')]";
 
-    public static final String CHALLS_CREATED_CHALLENGE_CLOSED_BUTTON = "//button[contains(@class, 'danger')]";
+    public static final String CHALLS_CREATED_CHALLENGE_CLOSED_BUTTON = "//*[@class='row']//button/span[contains(@class, 'trophy')]/..";
 
     public static final String CHALLS_EDIT_CHALLENGE_ANNOUNCE_RESULT_BUTTON_LINK = "//a[text()='Announce result']";
 
     public static final String CHALLS_PAGE_CHALLENGE_CARD_LINK_TEMPLATE = "//*[contains(@class, 'pfda-card-title')][contains(text(), '{CHALL_NAME}')]";
+
+    public static final String RESULT_PAGE_FULL_NAME_TEMPLATE = "//table[@id='table-results-overview']//td[contains(text(), '{FULL_NAME}')]";
+
+    public static final String RESULT_PAGE_ENTRY_NAME_TEMPLATE = "//table[@id='table-results-overview']//td/a[contains(text(), '{ENTRY_NAME}')]";
 
 }

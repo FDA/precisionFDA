@@ -63,7 +63,7 @@ public class NotesSavedNotePage extends AbstractPage {
     }
 
     public UserProfile getUser() {
-        return TestUserData.getTestUser();
+        return TestUserData.getTestUserOne();
     }
 
     //----------

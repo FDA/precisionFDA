@@ -162,13 +162,13 @@ public class TestUserData {
 
     //====================
 
-    public static UserProfile getTestUser() {
+    public static UserProfile getTestUserOne() {
         return new UserProfile(TestUserData.basicPreTestAuthUsername(), TestUserData.basicPreTestAuthPassword(),
                 TestUserData.preTestUsername(), TestUserData.preTestPassword(),
                 TestUserData.preTestFullName(), TestUserData.preTestOrg());
     }
 
-    public static UserProfile getAnotherTestUser() {
+    public static UserProfile getTestUserTwo() {
         return new UserProfile(TestUserData.basicPreAnotherAuthUsername(), TestUserData.basicPreAnotherAuthPassword(),
                 TestUserData.preAnotherUsername(), TestUserData.preAnotherPassword(),
                 TestUserData.preAnotherFullName(), TestUserData.preAnotherOrg());

@@ -66,7 +66,7 @@ public class NotesEditNotePage extends AbstractPage {
     }
 
     public UserProfile getUser() {
-        return TestUserData.getTestUser();
+        return TestUserData.getTestUserOne();
     }
 
     public WebElement getNotesEditNoteEnteredTextWe() {

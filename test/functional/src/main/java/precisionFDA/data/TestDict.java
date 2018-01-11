@@ -46,6 +46,8 @@ public class TestDict {
 
     static final String DICT_DONE = "done";
 
+    static final String DICT_PENDING = "pending";
+
     static final String DICT_CHALLENGE_CLOSED = "Challenge Closed";
 
     static final String DICT_OPEN = "open";
@@ -74,6 +76,10 @@ public class TestDict {
 
     public static String getDictDone() {
         return DICT_DONE;
+    }
+
+    public static String getDictPending() {
+        return DICT_PENDING;
     }
 
     public static String getDictActive() {
