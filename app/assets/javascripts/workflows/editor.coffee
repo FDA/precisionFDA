@@ -1,5 +1,41 @@
 class WorkflowEditorModel
-  constructor: (apps, workflow, @mode='edit') ->
+  setSlots: (workflow) ->
+    if workflow? && !@slots().length > 0
+      for stage in workflow.spec.input_spec["stages"]
+        Precision.api('/api/describe', { uid: stage.app_dxid }, null, null, false)
+          .done((app) =>
+            inputs = app.spec.input_spec.map (input) ->
+              $.extend({}, input, {
+                values: { id: null, name: null }
+              })
+            outputs = app.spec.output_spec.map (output) ->
+              $.extend({}, output, {
+                values: { id: null, name: null }
+              })
+            spec = {
+              name: app.name,
+              dxid: app.dxid,
+              instanceType: app.spec.instance_type,
+              revision: app.revision,
+              inputs: inputs,
+              outputs: outputs
+            }
+            new_slot = new slotModel(spec, this, stage, true)
+            @slots.push(new_slot)
+            if spec.outputs.length > 0
+              @eligibleSlots.push(new_slot)
+        )
+      for stage in workflow.spec.input_spec["stages"]
+        prev_slot = ko.utils.arrayFilter @slots(), (slot) ->
+          slot.slotId() == stage.prev_slot
+        next_slot = ko.utils.arrayFilter @slots(), (slot) ->
+          slot.slotId() == stage.next_slot
+        current_slot = ko.utils.arrayFilter @slots(), (slot) ->
+          slot.slotId() == stage.slotId
+        current_slot[0].prevSlot(prev_slot[0])
+        current_slot[0].nextSlot(next_slot[0])
+
+  constructor: (apps, workflow, @mode = 'edit') ->
     @workflow = workflow
     @all_apps = ko.observableArray(apps.private_apps.concat(apps.public_apps).sort((a, b) -> a.id - b.id) )
     @private_apps = ko.observableArray(apps.private_apps)
@@ -48,36 +84,7 @@ class WorkflowEditorModel
     @canCreateWorkflow = ko.computed(=>
       return @numberStagesUnConfigured().length == 0 && !_.isEmpty(@title()) && !_.isEmpty(@name())
     )
-    @setSlots = ko.computed(=>
-      if workflow? && !@slots().length > 0
-        for stage in workflow.spec.input_spec["stages"]
-          Precision.api('/api/describe', {uid: stage.app_dxid}, null, null, false)
-            .done((app) =>
-              inputs = app.spec.input_spec.map((input) => $.extend({}, input, {values: {id: null, name: null}}))
-              outputs = app.spec.output_spec.map((output) => $.extend({}, output, {values: {id: null, name: null}}))
-              spec =
-                name: app.name
-                dxid: app.dxid
-                instanceType: app.spec.instance_type
-                revision: app.revision
-                inputs: inputs
-                outputs: outputs
-              new_slot = new slotModel(spec, this, stage, true)
-              @slots.push(new_slot)
-              if spec.outputs.length > 0
-                @eligibleSlots.push(new_slot)
-          )
-        for stage in workflow.spec.input_spec["stages"]
-          prev_slot = ko.utils.arrayFilter(@slots(), (slot) =>
-            slot.slotId() == stage.prev_slot)
-          next_slot = ko.utils.arrayFilter(@slots(), (slot) =>
-            slot.slotId() == stage.next_slot)
-          current_slot = ko.utils.arrayFilter(@slots(), (slot) =>
-            slot.slotId() == stage.slotId)
-          current_slot[0].prevSlot(prev_slot[0])
-          current_slot[0].nextSlot(next_slot[0])
-
-    )
+    @setSlots(workflow)
     @saveButtonText = ko.computed(=>
       saving = @saving()
       switch @mode
