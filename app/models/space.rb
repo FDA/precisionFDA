@@ -43,6 +43,10 @@ class Space < ActiveRecord::Base
     ["title", "description", "state"]
   end
 
+  def created_at_in_ny
+    created_at.in_time_zone("America/New_York")
+  end
+
   def to_param
     if name.nil?
       id.to_s
@@ -83,8 +87,8 @@ class Space < ActiveRecord::Base
     guest_lead.id == context.user_id
   end
 
-  def project_for_context!(context)
-    space_memberships.find_by!(user_id: context.user_id).project
+  def project_for_user!(user)
+    space_memberships.find_by!(user_id: user.id).project
   end
 
   def authorized_users_for_apps
@@ -147,6 +151,10 @@ class Space < ActiveRecord::Base
     return space_project
   end
 
+  def state_hash
+    state.blank? ? { "UNACTIVATED" => "NULL" } : { state => state }
+  end
+
   # space:
   #   name
   #   description
@@ -190,8 +198,8 @@ class Space < ActiveRecord::Base
       guest_lead = space.add_or_update_member(papi, guest_dxorg, space_params[:guest_lead_dxuser], 'ADMIN', 'GUEST')
 
       # Remove pfda admin from orgs
-      papi.call(host_dxorg, "removeMember", {user: "user-precisionfda.admin"})
-      papi.call(guest_dxorg, "removeMember", {user: "user-precisionfda.admin"})
+      papi.call(host_dxorg, "removeMember", {user: ADMIN_USER})
+      papi.call(guest_dxorg, "removeMember", {user: ADMIN_USER})
     end
 
     return space

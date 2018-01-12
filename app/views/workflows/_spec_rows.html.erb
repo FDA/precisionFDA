@@ -1,0 +1,33 @@
+<% if spec.count > 0 %>
+  <% spec.each do |item| %>
+    <tr>
+      <td>
+        <p class="spec-class"><%= item[:class] %></p>
+      </td>
+      <td class="spec-info">
+        <p class="spec-label"><%= !item[:label].blank? ? item[:label] : item[:name] %></p>
+        <p class="spec-help"><%= item[:help] %></p>
+        <% if !item[:patterns].blank? %>
+          <p class="spec-patterns">Patterns: <%= item[:patterns].map(&:inspect).join(', ') %></p>
+        <% end %>
+        <% if !item[:default].blank? %>
+          <p class="spec-default">Default: <%= item[:default] %></p>
+        <% end %>
+        <% if !item[:choices].blank? %>
+          <p class="spec-choices">Choices: <%= item[:choices].to_s %></p>
+        <% end %>
+      </td>
+      <td>
+        <% if !item[:optional] %> <label class="spec-required label label-info">Required</label><% end %>
+      </td>
+      <td>
+        <i style="padding-right: 12px;"class="fa fa-gear fa-branded center-block" aria-hidden="true">
+        <%= item[:stageName] %>
+      </td>
+    </tr>
+  <% end %>
+<% else %>
+  <tr>
+    <td class="text-muted">No fields specified</td>
+  </tr>
+<% end %>

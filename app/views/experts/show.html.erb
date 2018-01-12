@@ -10,7 +10,7 @@
           <%= link_to expert_expert_question_path(@expert, q) do %>
             <h3 class="expert-question-body"><%= q.body %></h3>
             <h6 class="expert-question-footer text-muted">
-              Answered <%= local_time_ago(q.expert_answer.updated_at) %>
+              Answered <%= time_ago(q.expert_answer.updated_at) %>
             </h6>
           <% end %>
         </div>

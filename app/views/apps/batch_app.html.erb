@@ -1,0 +1,184 @@
+<% content_for :title do %>Run <%= @app.title %><% end %>
+
+<div class="affix-spacer">
+  <div class="affix-container">
+    <div class="page-header clearfix">
+      <div class="page-title pull-left"><span class="fa fa-cube"></span> Run <%= link_to @app.title, app_path(@app.uid), target: "_blank" %></div>
+      <div class="btn-group pull-right">
+        <button type="button" class="btn btn-lg" data-bind="css: {disabled: !isRunnable(), 'btn-danger': !isRunnable(), 'btn-danger': isRunnable()}, attr: {disabled: !isRunnable()}, disable: !isRunnable(), click: run"><span data-bind="text: runBtnText()"></span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <%= alert_help("Learn more about running an app", "#{show_docs_path('apps')}#apps-run") %>
+  <form class="form form-horizontal">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>Configure Batch</h4>
+      </div>
+      <div class="panel-body">
+        <div class="form-group required">
+          <label class= "col-sm-4 control-label" for="name">Batch Job Name </label>
+          <div class="col-sm-10 col-sm-offset-1">
+            <input type="text" name="name" class="form-control" placeholder="Enter a name for this job" data-bind="textInput: name">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class= "col-sm-4 control-label" for="instance_type">Instance Type</label>
+          <div class="col-sm-10 col-sm-offset-1">
+            <select name="instance_type" class="form-control" data-bind="options: availableInstances,
+               optionsText: 'label',
+               optionsValue: 'value',
+               value: instanceType,
+               optionsCaption: 'Choose...'"></select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>Batch Input</h4>
+      </div>
+      <div class="panel-body">
+        <div class="row">
+          <p>1. Select Batch Input</p>
+          <p class="text-muted">You can only select one batch input to vary between executions.</p>
+          <div class="form-group col-sm-5 col-sm-offset-3" >
+            <select name="batch_input_name" class="form-control" id="batch-input-name" data-bind="event: {change: selectBatchInput}, options: availableInputs(),
+               optionsText: 'name',
+               optionsValue: 'name',
+               value: batchInputName,
+               optionsCaption: 'Choose...'"></select>
+          </div>
+        </div>
+        <!-- ko if: batchInputSpec().length > 0 -->
+        <!-- ko foreach: batchInputSpec() -->
+        <div class="pfda-padded-v">
+          <p>2. Enter batch values</p>
+          <p class="text-muted">
+            <!-- ko if: className == 'file' -->
+            Please select multiple files.
+            <!-- /ko -->
+            <!-- ko if: className == 'int' || className == 'float' || className == 'string' -->
+            Please enter multiple values separated with commas.
+            <!-- /ko -->
+          </p>
+        </div>
+        <div class="form-group" data-bind="css: {required: isRequired, 'has-error': error}">
+          <label class= "col-md-1 " data-bind="text: className"></label>
+          <label class= "col-md-3" data-bind="text: label||name, attr: {title: help}, css: {'text-danger': needsToBeSet}"></label>
+          <div class="col-md-6" data-bind="css: 'field-'+className">
+            <!-- ko ifnot: choices -->
+            <!-- ko if: className == 'file' -->
+            <button class="btn btn-info batch-app" data-bind="text: 'Select Files', attr: {name: name, disable: $root.busy}, click: openFileSelector, css: { 'btn-info': !value(), 'btn-default': value()}">Select files...</button>
+            <%= render "_partials/selector_modal" %>
+            <!-- /ko -->
+            <!-- ko if: className == 'int' || className == 'float' || className == 'string' -->
+            <textarea type="text" class="form-control" data-bind="textInput: valueDisplay, attr: {name: name, placeholder: placeholder, disable: $root.busy}"></textarea>
+            <!-- /ko -->
+            <!-- ko if: className == 'boolean' -->
+            <div class="btn-group">
+              <button class="btn btn-default" data-bind="css: {active: value() === true, is_default: defaultValue === true}, click: toggleTrue, disable: $root.busy">True</button>
+              <button class="btn btn-default" data-bind="css: {active: value() === false, is_default: defaultValue === false}, click: toggleFalse, disable: $root.busy">False</button>
+            </div>
+            <!-- /ko -->
+            <!-- /ko -->
+
+            <div class="help-block" data-bind="text: error, visible: error"></div>
+          </div>
+        </div>
+        <!-- ko if: className == 'file' -->
+        <!-- ko ifnot: value() -->
+        <!-- ko if: defaultFileValue() -->
+        <table class="table batch">
+          <thead>
+          <th>File Name</th>
+          <th></th>
+          </thead>
+          <tbody class="table-hover">
+          <tr>
+            <td ><span data-bind="text: $data.defaultFileValue().title"/></td>
+            <td class="io-field-remove text-right"><a class="btn btn-link btn-link-danger fa fa-times" data-bind="click: $root.removeItem"></a></td>
+          </tr>
+          </tbody>
+        </table>
+        <!-- /ko -->
+        <!-- /ko -->
+        <!-- ko if: value() -->
+        <table class="table batch">
+          <thead>
+            <th>File Name</th>
+            <th></th>
+          </thead>
+          <tbody class="table-hover">
+          <!-- ko if: !_.isArray(value()) -->
+          <tr>
+            <td ><span data-bind="text: $data.value().name"/></td>
+            <td class="io-field-remove text-right"><a class="btn btn-link btn-link-danger fa fa-times" data-bind="click: $root.removeItem"></a></td>
+          </tr>
+          <!-- /ko -->
+          <!-- ko if: _.isArray(value()) && value().length > 0 -->
+          <!-- ko foreach: value -->
+          <tr>
+            <td ><span data-bind="text: name"/></td>
+            <td class="io-field-remove text-right"><a class="btn btn-link btn-link-danger fa fa-times" data-bind="click: $root.removeItem"></a></td>
+          </tr>
+          <!-- /ko -->
+          <!-- /ko -->
+          </tbody>
+        </table>
+        <!-- /ko -->
+        <!-- /ko -->
+        <!-- /ko -->
+        <!-- /ko -->
+
+      </div>
+    </div>
+    <!-- ko if: otherInputSpec().length > 0 -->
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>Other Inputs</h4>
+        </div>
+        <div class="panel-body">
+          <h5>The values set for all inputs below will apply to all batch executions.</h5>
+          <!-- ko foreach: otherInputSpec() -->
+          <div class="form-group" data-bind="css: {required: isRequired, 'has-error': error}">
+            <label class= "col-md-1 " data-bind="text: className"></label>
+            <label class= "col-md-3 " data-bind="text: label || name, attr: {title: help}, css: {'text-danger': needsToBeSet}"></label>
+            <div class="col-md-6" data-bind="css: 'field-'+className">
+              <!-- ko if: choices -->
+              <select class="form-control" data-bind="options: choices, optionsCaption: !defaultValue ? 'Select...' : undefined, value: valueDisplay, disable: $root.busy"></select>
+              <!-- /ko -->
+              <!-- ko ifnot: choices -->
+              <!-- ko if: className == 'int' || className == 'float' || className == 'string' -->
+              <textarea type="text" class="form-control" data-bind="textInput: valueDisplay, attr: {name: name, placeholder: placeholder, disable: $root.busy}"></textarea>
+              <!-- /ko -->
+              <!-- ko if: className == 'boolean' -->
+              <div class="btn-group">
+                <button class="btn btn-default" data-bind="css: {active: value() === true, is_default: defaultValue === true}, click: toggleTrue, disable: $root.busy">True</button>
+                <button class="btn btn-default" data-bind="css: {active: value() === false, is_default: defaultValue === false}, click: toggleFalse, disable: $root.busy">False</button>
+              </div>
+              <!-- /ko -->
+              <!-- ko if: className == 'file' -->
+              <button class="btn btn-info" data-bind="text: valueDisplay, attr: {name: name, disable: $root.busy}, click: openFileSelector, css: { 'btn-info': !value(), 'btn-default': value}">Select file...</button>
+                <!-- ko if: value -->
+                <button class="btn btn-link btn-link-danger" data-bind="click: clear">Clear</button>
+                <!-- /ko -->
+                <%= render "_partials/selector_modal" %>
+              <!-- /ko -->
+              <!-- /ko -->
+              <!-- /ko -->
+              <div class="help-block" data-bind="text: error, visible: error"></div>
+            </div>
+          </div>
+          <!-- /ko -->
+        </div>
+      </div>
+    <!-- /ko -->
+  </form>
+</div>
+
+<%= render "licenses/selector_modal" %>

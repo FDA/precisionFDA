@@ -20,16 +20,70 @@
   </ul>
 </div>
 
-<div class="pfda-toolbar">
-  <div class="btn-group">
-    <a class="btn btn-primary" href="<%= new_file_path %>">
-      <span class="fa fa-plus-square fa-fw"></span> Add files
-    </a>
+<% breadcrumb :folder, @current_folder %>
+<%= breadcrumbs style: :bootstrap %>
+
+<% if @edit_access_present %>
+  <div class="pfda-toolbar">
+    <div class="pull-left">
+      <div class="btn-group action-buttons">
+        <% if @scope == "private" %>
+          <a class="btn btn-primary" href="<%= new_file_path(folder_id: @current_folder.try(:id)) %>">
+            <span class="fa fa-plus-square fa-fw"></span> Add files
+          </a>
+        <% end %>
+        <span class="btn btn-primary" data-toggle="modal" data-target="#create-folder-modal">
+          <span class="fa fa-plus-square fa-fw"></span> Add folder
+        </span>
+      </div>
+    </div>
+    <div class="pull-right">
+      <div class="btn-group">
+        <div class="dropdown">
+          <button class="btn btn-primary" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="fa fa-cog"></span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
+            <li data-bind="css: { disabled: !isRenamingAllowed() }">
+              <a data-toggle='modal' data-bind="click: showRenamingModal">
+                <i class="fa fa-fw fa-pencil"></i> Rename
+              </a>
+            </li>
+            <li role="separator" class="divider"></li>
+            <li data-bind="css: { disabled: !isMovingAllowed() }">
+              <a data-toggle='modal' data-bind="click: showMoveModal">
+                <i class="fa fa-fw fa-share"></i> Move
+              </a>
+            </li>
+            <% if @scope == "private" %>
+              <li role="separator" class="divider"></li>
+              <li data-bind="css: { disabled: !isPublishingAllowed() }">
+                <a data-toggle='modal' data-bind="click: showPublishModal">
+                  <i class="fa fa-fw fa-bullhorn"></i> Publish
+                </a>
+              </li>
+            <% end %>
+            <li role="separator" class="divider"></li>
+            <li data-bind="css: { disabled: !isDeletingAllowed() }">
+              <a data-toggle='modal' data-bind="click: showDeleteModal">
+                <i class="fa fa-fw fa-trash"></i> Delete
+              </a>
+            </li>
+            <li role="separator" class="divider"></li>
+            <li data-bind="css: { disabled: !isDownloadingAllowed() }">
+              <a data-toggle='modal' data-bind="click: showDownloadModal">
+                <i class="fa fa-fw fa-download"></i> Download
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+<% end %>
 
 <% if @files_grid.present? %>
-  <%= render "files/grid", files_grid: @files_grid %>
+  <%= render "files/grid", files_grid: @files_grid, scope_icon: false, show_checkboxes: defined?(@edit_access_present) && @edit_access_present %>
 <% else %>
   <div class="alert alert-info">
     <% if action_name == 'index' %>
@@ -39,3 +93,16 @@
     <% end %>
   </div>
 <% end %>
+
+<%=
+  render "_partials/modal_create_folder",
+         parent_folder_id: @parent_folder_id,
+         create_path: create_folder_files_path,
+         is_public: @new_folder_is_public
+%>
+
+<%= render "_partials/modal_rename_js" %>
+<%= render "_partials/modal_move_files", move_path: move_files_path, scope: defined?(@scope) ? @scope : nil %>
+<%= render "_partials/modal_download_files" %>
+<%= render "_partials/modal_delete_files", remove_path: remove_files_path %>
+<%= render "_partials/modal_publish_files", publish_path: publish_files_path %>

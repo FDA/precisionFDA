@@ -1,0 +1,28 @@
+<% content_for :title do %>Workflows<% end %>
+
+<div class="pfda-toolbar">
+  <div class="btn-group">
+    <a class="btn btn-primary" href="<%= new_workflow_path %>"><span class="fa fa-plus-square fa-fw"></span> Create Workflow</a>
+  </div>
+</div>
+
+<div class="pfda-pane container-fluid">
+  <div class="pfda-pane-sidebar pfda-pane-sidebar-dark pfda-pane-sidebar-padded-v">
+    <div class="list-group">
+      <a href="<%= workflows_path() %>" class="list-group-item <%= @workflow.nil? ? 'active' : '' %>">
+        <span class="fa fa-tasks"></span> All My Analyses
+      </a>
+    </div>
+    <% if @my_workflows.count > 0 %>
+    <div class="list-group list-group-condensed-sm">
+      <div class="list-group-item list-group-item-header">
+        My Workflows
+      </div>
+      <%= render "_partials/workflows_list_group", workflows: @my_workflows, active: @workflow.try(:workflow_series_id) %>
+    </div>
+    <% end %>
+  </div>
+  <div class="pfda-pane-content">
+    <%= render "/workflows/detail", workflow: @workflow, analyses_grid: @analyses_grid %>
+  </div>
+</div>

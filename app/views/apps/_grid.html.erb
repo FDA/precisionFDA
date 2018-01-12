@@ -26,7 +26,7 @@
   end
 
   g.column name: 'Created', attribute: 'created_at', assoc: :latest_version_app, auto_reload: true, filter_type: :standard do |series|
-    series.latest_version_app.created_at.to_s(:db)
+    series.latest_version_app.created_at.to_s(:human)
   end
 
   if !defined?(hide_access) || !hide_access

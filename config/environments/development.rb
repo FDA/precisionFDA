@@ -14,8 +14,7 @@ Rails.application.configure do
   config.action_controller.perform_caching = false
 
   # Don't care if the mailer can't send.
-  # TODO: Figure this out for localhost
-  config.action_mailer.raise_delivery_errors = false
+  config.action_mailer.delivery_method = :file
   config.action_mailer.default_url_options = { :host => "precisionfda-staging.dnanexus.com" }
 
   # Print deprecation notices to the Rails logger.
@@ -42,5 +41,13 @@ Rails.application.configure do
   # config.action_view.raise_on_missing_translations = true
 
   # SSL
-  config.force_ssl = true
+  config.force_ssl = true 
+
+  # STDOUT logging
+  if ENV['RAILS_LOG_TO_STDOUT']
+    STDOUT.sync = true
+    logger           = ActiveSupport::Logger.new(STDOUT)
+    logger.formatter = config.log_formatter
+    config.logger = ActiveSupport::TaggedLogging.new(logger)
+  end
 end

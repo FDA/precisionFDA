@@ -1,4 +1,6 @@
 class ProfileController < ApplicationController
+  helper_method :time_zones
+
   def index
     @user = User.includes(:org).find(@context.user_id)
     if !@user.singular?
@@ -204,7 +206,7 @@ class ProfileController < ApplicationController
         if api.entity_exists?(dxorg)
           # Check if the org exists due to earlier failure
           org_description = papi.call(dxorg, "describe")
-          raise "We found #{dxorg} to exist already and we are not the only admin" if org_description["admins"] != ["user-precisionfda.admin"]
+          raise "We found #{dxorg} to exist already and we are not the only admin" if org_description["admins"] != [ADMIN_USER]
           raise "We found #{dxorg} to exist already but with a different name" if org_description["name"] != @org
         else
           papi.call("org", "new", {handle: dxorghandle, name: @org})
@@ -225,7 +227,7 @@ class ProfileController < ApplicationController
         auth.call(dxorg, "updateBillingInformation", {billingInformation: billing_info, autoConfirm: BILLING_CONFIRMATION})
         auth.call("user", "new", {username: @suggested_username, email: @email, first: @first_name, last: @last_name, billTo: ORG_EVERYONE})
         papi.call(dxorg, "invite", {invitee: dxuserid, level: 'ADMIN', suppressEmailNotification: true})
-        papi.call(dxorg, "removeMember", {user: "user-precisionfda.admin"})
+        papi.call(dxorg, "removeMember", {user: ADMIN_USER})
         papi.call(ORG_EVERYONE, "invite", {invitee: dxuserid, level: 'MEMBER', allowBillableActivities: false, appAccess: true, projectAccess: 'VIEW', suppressEmailNotification: true})
 
         o = nil
@@ -313,6 +315,12 @@ private
       i = i + 1
     end
     return candidate
+  end
+
+  def time_zones
+    ActiveSupport::TimeZone.all.map do |time_zone|
+      ["(GMT#{time_zone.now.formatted_offset}) #{time_zone.name}", time_zone.name]
+    end
   end
 
 end

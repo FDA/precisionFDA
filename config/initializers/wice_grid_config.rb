@@ -88,6 +88,10 @@ if defined?(Wice::Defaults)
   # the value is a 2-element array with 2 strings, the first should be a name of view processor class inherited from
   # Wice::Columns::ViewColumn, the second should be a name of conditions generator class inherited from
   # Wice::Columns::ConditionsGeneratorColumn .
+  #
+  Wice::Defaults::ADDITIONAL_COLUMN_PROCESSORS = {
+    file_size:  ['Wice::Columns::ViewColumnFileSize', 'Wice::Columns::ConditionsGeneratorColumnFileSize']
+  }
 
   # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   #                              Showing All Records                          #

@@ -33,11 +33,11 @@
     <ul class="list-group list-group-inline list-bricks">
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Starts</h5>
-        <p class="list-group-item-text"><%= @appathon.start_at.nil? ? @appathon.meta_appathon.start_at.to_s(:db) : @appathon.start_at.to_s(:db) %></p>
+        <p class="list-group-item-text"><%= @appathon.start_at.nil? ? @appathon.meta_appathon.start_at.to_s(:human) : @appathon.start_at.to_s(:human) %></p>
       </li>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Ends</h5>
-        <p class="list-group-item-text"><%= @appathon.end_at.nil? ? @appathon.meta_appathon.end_at.to_s(:db) : @appathon.end_at.to_s(:db) %></p>
+        <p class="list-group-item-text"><%= @appathon.end_at.nil? ? @appathon.meta_appathon.end_at.to_s(:human) : @appathon.end_at.to_s(:human) %></p>
       </li>
     </ul>
   </div>

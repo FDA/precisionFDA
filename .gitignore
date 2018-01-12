@@ -50,3 +50,9 @@
 /test/functional/src/main/resources/tempFiles/Docker*
 /test/functional/src/main/resources/tempFiles/*.gz
 /test/functional/src/main/resources/tempFiles/*.csv
+
+.gems/
+
+# Ignore local environment
+.env
+.env.*

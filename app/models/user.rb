@@ -48,9 +48,11 @@ class User < ActiveRecord::Base
   has_one :appathon
   has_many :meta_appathons
   has_one :expert
-  has_many :challenge_admins, {class_name: 'Challenge', foreign_key: 'admin_id'}
   has_many :challenge_app_owners, {class_name: 'Challenge', foreign_key: 'app_owner_id'}
   has_many :submissions
+  has_many :challenge_resources
+  has_many :analyses
+  has_one :usage_metric
 
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 
@@ -62,6 +64,16 @@ class User < ActiveRecord::Base
   acts_as_follower
   acts_as_tagger
 
+  scope :not_challenge_bot, -> { where.not(dxuser: CHALLENGE_BOT_DX_USER) }
+
+  def self.challenge_bot
+    find_by!(dxuser: CHALLENGE_BOT_DX_USER)
+  end
+
+  def challenge_bot?
+    dxuser == CHALLENGE_BOT_DX_USER
+  end
+
   def uid
     "user-#{id}"
   end
@@ -72,6 +84,10 @@ class User < ActiveRecord::Base
 
   def klass
     "user"
+  end
+
+  def org
+    challenge_bot? ? Org.new : super
   end
 
   def real_files
@@ -91,11 +107,7 @@ class User < ActiveRecord::Base
   end
 
   def space_uids
-    if Rails.env.development?
-      space_memberships.pluck("distinct 'space-'||space_id")
-    else
-      space_memberships.pluck("distinct concat('space-', space_id)")
-    end
+    space_memberships.pluck("distinct concat('space-', space_id)")
   end
 
   def active_spaces
@@ -132,7 +144,7 @@ class User < ActiveRecord::Base
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
       dxuser == "elaine.johanson" || dxuser == "ruth.bandler"
     else
-      ((org.handle == "precisionfda" || org.handle == "dnanexus") && org.admin_id == id) || ["alan.fdauser"].include?(dxuser)
+      ((["precisionfda", "precisionfda_dev", "dnanexus"].include?(org.handle)) && org.admin_id == id) || ["alan.fdauser", "singeradmin.pfdadev", "singer.ma", "pamella.tater.2", "ezekiel.maier", "vijay.kandali"].include?(dxuser)
     end
   end
 
@@ -151,6 +163,19 @@ class User < ActiveRecord::Base
       "you.li",
       "zivana.tezak"
     ].include?(dxuser) || can_administer_site?
+  end
+
+  # @param time_zone [String] new time zone
+  def update_time_zone(time_zone)
+    update(time_zone: time_zone) if Time.find_zone(time_zone)
+  end
+
+  def root_folder
+    folders.find_by(scope: "private", parent_folder_id: nil)
+  end
+
+  def is_challenge_admin?
+    return can_administer_site?
   end
 
   def self.validate_email(email)
@@ -190,6 +215,18 @@ class User < ActiveRecord::Base
     return if context.guest?
     user = context.user
     token = context.token
+    # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
+    user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
+      DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
+        sync_file_state(result, files[i], user)
+      end
+    end
+  end
+
+  def self.sync_challenge_bot_files!(context)
+    return if context.guest?
+    user = User.find_by(dxuser: CHALLENGE_BOT_DX_USER)
+    token = CHALLENGE_BOT_TOKEN
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
     user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
       DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
@@ -281,17 +318,19 @@ class User < ActiveRecord::Base
     user = context.user
     token = context.token
     job = user.jobs.find(job_id) # Re-check job id
-    if !job.terminal?
-      result = DNAnexusAPI.new(token).call("system", "findJobs", {
-        includeSubjobs: false,
-        id: [job.dxid],
-        project: user.private_files_project,
-        parentJob: nil,
-        parentAnalysis: nil,
-        describe: true
-      })["results"][0]
-      sync_job_state(result, job, user, token)
-    end
+
+    return if job.terminal?
+
+    result = DNAnexusAPI.new(token).call("system", "findJobs", {
+      includeSubjobs: false,
+      id: [job.dxid],
+      project: user.private_files_project,
+      parentJob: nil,
+      parentAnalysis: job.try(:analysis).try(:dxid),
+      describe: true
+    })["results"][0]
+
+    sync_job_state(result, job, user, token)
   end
 
   def self.sync_jobs!(context)
@@ -300,14 +339,13 @@ class User < ActiveRecord::Base
     token = context.token
     user = User.find(user_id)
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-    Job.where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs|
+    Job.includes(:analysis).where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs|
       jobs_hash = jobs.map { |j| [j.dxid, j] }.to_h
       DNAnexusAPI.new(token).call("system", "findJobs", {
         includeSubjobs: false,
         id: jobs_hash.keys,
         project: user.private_files_project,
         parentJob: nil,
-        parentAnalysis: nil,
         describe: true
       })["results"].each do |result|
         sync_job_state(result, jobs_hash[result["id"]], user, token)
@@ -323,7 +361,7 @@ class User < ActiveRecord::Base
       DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call("system", "findJobs", {
         includeSubjobs: false,
         id: jobs_hash.keys,
-        project: user.private_files_project,
+        project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
         parentJob: nil,
         parentAnalysis: nil,
         describe: true
@@ -342,6 +380,7 @@ class User < ActiveRecord::Base
         # Use find_by(file.id) since file.reload may raise ActiveRecord::RecordNotFound
         file = UserFile.find_by(id: file.id)
         if file.present?
+          Event::FileDeleted.create(file, user)
           file.destroy!
         end
       end
@@ -356,6 +395,7 @@ class User < ActiveRecord::Base
           if remote_state != file.state
             if remote_state == "closed"
               file.update!(state: remote_state, file_size: result["describe"]["size"])
+              Event::FileCreated.create(file, user)
             elsif remote_state == "closing" && file.state == "open"
               file.update!(state: remote_state)
             else
@@ -407,7 +447,8 @@ class User < ActiveRecord::Base
         comparison.reload
         if state != comparison.state
           output_file_cache.each do |output_file|
-            UserFile.create!(output_file)
+            file = UserFile.create!(output_file)
+            Event::FileCreated.create(file, user)
           end
           comparison.meta = temp_meta
           comparison.state = state
@@ -468,12 +509,14 @@ class User < ActiveRecord::Base
         job.reload
         if state != job.state
           output_file_cache.each do |output_file|
-            UserFile.create!(output_file)
+            user_file = UserFile.create!(output_file)
+            Event::FileCreated.create(user_file, user)
           end
           job.run_outputs = output
           job.state = state
           job.describe = result["describe"]
           job.save!
+          Event::JobClosed.create(job, user)
         end
       end
     else
@@ -484,8 +527,10 @@ class User < ActiveRecord::Base
           job.state = state
           job.describe = result["describe"]
           job.save!
+          Event::JobClosed.create(job, user)
         end
       end
     end
   end
+
 end

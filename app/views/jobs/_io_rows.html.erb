@@ -1,17 +1,17 @@
 <% items.each do |item| %>
   <tr>
-    <td class="job-io-label" title="<%= item[:spec][:help] %>">
-      <%= !item[:spec][:label].blank? ? item[:spec][:label] : item[:spec][:name] %>
+    <td class="job-io-label" title="<%= item.help %>">
+      <%= item.label %>
     </td>
-    <td class="job-io-value job-io-class-<%= item[:spec][:class] %>">
-      <% if item[:spec][:class] == 'file' %>
-        <% if item[:file].present? %>
-          <%= unilink(item[:file]) %>
+    <td class="job-io-value job-io-class-<%= item.klass %>">
+      <% if item.file? %>
+        <% if item.file.present? %>
+          <%= unilink(item.file) %>
         <% else %>
-          <%= item[:value] %>
+          <%= item.value %>
         <% end %>
       <% else %>
-        <%= item[:value] %>
+        <%= item.value %>
       <% end %>
     </td>
   </tr>
