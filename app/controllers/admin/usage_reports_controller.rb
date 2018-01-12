@@ -14,6 +14,9 @@ module Admin
         name: "usage"
       })
 
+      @storage_date = UsageMetric.order(created_at: :asc).limit(1).pluck(:created_at).first
+      @compute_date = (@storage_date - 1.day).end_of_day if @storage_date
+
       export_grid_if_requested("usage" => "usage_grid")
     end
 
