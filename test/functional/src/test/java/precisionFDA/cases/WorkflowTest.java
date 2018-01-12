@@ -27,7 +27,7 @@ public class WorkflowTest extends AbstractTest {
     @Test
     public void precondition() {
         printTestHeader("Precondition: login");
-        UserProfile user = TestUserData.getTestUserTwo();
+        UserProfile user = TestUserData.getTestUserOne();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
     }
 
