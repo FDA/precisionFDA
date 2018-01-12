@@ -99,8 +99,7 @@ group :development do
   gem 'spring'
 end
 
-group :development, :test do
-  # Use thin
+group :development, :test, :ui_test do
   gem 'thin'
 
   # Manage environment variables
