@@ -41,6 +41,7 @@ class CreateTruthChallengeResults < ActiveRecord::Migration
       t.text :meta
     end
 
+    add_index :truth_challenge_results, :answer_id
     add_index :truth_challenge_results, :entry
     add_index :truth_challenge_results, :type
     add_index :truth_challenge_results, :subtype

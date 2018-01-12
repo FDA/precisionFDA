@@ -4,46 +4,16 @@ class JobsController < ApplicationController
 
   def show
     @job = Job.accessible_by(@context).includes(:user).find_by(dxid: params[:id])
+
     if @job.nil?
-      @job = Job.viewable_by(@context).includes(:user).find_by(dxid: params[:id])
-      if @job.nil?
-        flash[:error] = "Sorry, this job does not exist or is not accessible by you"
-        redirect_to apps_path
-        return
-      end
+      flash[:error] = "Sorry, this job does not exist or is not accessible by you"
+      redirect_to apps_path
+      return
     end
 
     if !@job.terminal?
       @job.from_submission? ? User.sync_challenge_job!(@job.id) : User.sync_job!(@context, @job.id)
       @job.reload
-    end
-
-    @inputs = []
-    @outputs = []
-    @job.input_spec.each do |spec|
-      @job.run_inputs.each do |name, value|
-        if spec[:name] == name
-          item = {spec: spec, value: value}
-          if spec[:class] == 'file'
-            item[:file] = UserFile.find_by(dxid: item[:value])
-          end
-          @inputs.push(item)
-        end
-      end
-    end
-
-    if @job.done?
-      @job.output_spec.each do |spec|
-        @job.run_outputs.each do |name, value|
-          if spec[:name] == name
-            item = {spec: spec, value: value}
-            if spec[:class] == 'file'
-              item[:file] = UserFile.find_by(dxid: item[:value])
-            end
-            @outputs.push(item)
-          end
-        end
-      end
     end
 
     @items_from_params = [@job]
@@ -58,14 +28,12 @@ class JobsController < ApplicationController
   end
 
   def log
-    @job = Job.editable_by(@context).find_by(dxid: params[:id])
+    @job = Job.accessible_by(@context).find_by(dxid: params[:id])
+
     if @job.nil?
-      @job = Job.viewable_by(@context).includes(:user).find_by(dxid: params[:id])
-      if @job.nil?
-        flash[:error] = "Sorry, this job does not exist or its log is not accessible by you"
-        redirect_to apps_path
-        return
-      end
+      flash[:error] = "Sorry, this job does not exist or its log is not accessible by you"
+      redirect_to apps_path
+      return
     end
 
     if !@job.terminal?

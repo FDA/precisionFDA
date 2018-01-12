@@ -1,0 +1,9 @@
+<% content_for :title do %><%= @workflow.title %><% end %>
+
+<div class="page-header clearfix">
+  <div class="page-title"><span class="fa fa-cube"></span> <%= @workflow.title %></div>
+</div>
+
+<div class="pfda-pane-content">
+  <%= render "/workflows/detail", workflow: @workflow, analyses_grid: @analyses_grid %>
+</div>

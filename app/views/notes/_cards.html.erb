@@ -9,7 +9,7 @@
         </div>
         <ul class="pfda-card-metadata pfda-card-metadata-glued pfda-card-metadata-fw-indent list-inline list-inline-bullets">
           <li><%= note.user.org.handle %>/<%= note.user.dxuser %></li>
-          <li><%= note.created_at.to_s(:db) %></li>
+          <li><%= note.created_at.to_s(:human) %></li>
           <% if note.real_files.count > 0 %>
             <li title="Files"><span class="pfda-card-metadata-value"><%= note.real_files.count %></span> <span class="fa fa-files-o" aria-hidden="true"></span></li>
           <% end %>

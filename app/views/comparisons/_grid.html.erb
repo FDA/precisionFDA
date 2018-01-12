@@ -1,3 +1,5 @@
+<% toggle_all_descriptions = content_tag(:a, nil, href: '#', class: 'fa fa-info-circle', 'data-bind' => 'click: toggleAll') %>
+
 <%= grid(comparisons_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
   g.blank_slate partial:  "_partials/empty_grid"
 
@@ -6,8 +8,8 @@
       content_tag(:tr,
         content_tag(:td, nil, {class: "col-state state-#{comparison.state}"}).concat(content_tag(:td,
           content_tag(:div, comparison.description, class: 'description'),
-        colspan: num_cols - 1)),
-      class: 'extra-row')
+        colspan: num_cols - 1, class: 'wrap-normal')),
+      class: 'extra-row hidden', 'data-bind' => "css: { hidden: !isVisible(#{comparison.id}) }")
     else
       nil
     end
@@ -19,6 +21,14 @@
 
   g.column name: 'Name', attribute: 'name' do |comparison|
     unilinkfw(comparison, scope_icon: (defined?(scope_icon) ? scope_icon : true))
+  end
+
+  g.column name: toggle_all_descriptions do |comparison|
+    if comparison.description.present?
+      content_tag(:a, nil, href: '#', class: 'fa fa-info-circle', 'data-bind' => "click: function() { toggle(#{comparison.id}) }")
+    else
+      nil
+    end
   end
 
   g.column name: 'Org', attribute: 'handle', assoc: [:user, :org] do |comparison|
@@ -40,7 +50,7 @@
   end
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |comparison|
-    comparison.created_at.to_s(:db)
+    comparison.created_at.to_s(:human)
   end
 
   if !defined?(hide_access) || !hide_access

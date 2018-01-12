@@ -54,7 +54,7 @@ class App < ActiveRecord::Base
   end
 
   def describe_fields
-    ["title", "name", "version", "revision", "readme", "spec"]
+    ["title", "name", "version", "revision", "readme", "spec", "dxid"]
   end
 
   def versioned?

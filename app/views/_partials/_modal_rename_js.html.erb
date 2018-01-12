@@ -1,0 +1,27 @@
+<div id="rename-modal-js" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">
+          Rename
+        </h4>
+      </div>
+      <%= form_tag nil, id: :rename_form, method: :post do %>
+        <input type="hidden" name="source" value="list">
+        <input type="hidden" name="file[id]">
+        <input type="hidden" name="space_id" value="<%= defined?(space_id) ? space_id : nil %>">
+          <input type="hidden" name="scope" data-bind="value: scope">
+        <div class="modal-body">
+          <div class="form-group required">
+            <input type="text" name="file[name]" class="form-control input-lg" placeholder="Rename..." required="required" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Cancel</button>
+          <button type="submit" class="btn btn-primary" data-disable-with="Renaming...">Rename</button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

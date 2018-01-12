@@ -1,9 +1,27 @@
-<% if @context.logged_in? && app.user == @context.user && challenge && challenge.app_owner == @context.user %>
-  <% if challenge.app == app %>
-    <span class="btn btn-warning disabled"><span class="fa fa-trophy"></span> Assigned to: <%= challenge.name %></span>
-  <% else %>
-    <%= link_to assign_app_challenge_path(id: challenge.id, app_id: app.id), method: :post, class: "btn btn-warning" do %>
-      <span class="fa fa-trophy"></span> Assign to: <%= challenge.name %>
-    <% end %>
-  <% end %>
+<% if @context.logged_in? && app.user == @context.user && @assignable_challenges.any? %>
+  <div class="btn-group">
+
+    <button type="button" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn btn-warning dropdown-toggle">
+      <span class="fa fa-trophy"></span> Assign to Challenge
+      <span class="caret"></span>
+    </button>
+
+    <ul class="dropdown-menu">
+      <li class="dropdown-header">Challenges</li>
+
+      <% @assignable_challenges.each do |challenge| %>
+        <li class="clearfix">
+          <% if challenge.app %>
+            <a href="#" data-bind="click: function() { showConfirmationModal(<%= challenge.id %>) }"><%= challenge[:name] %></a>
+          <% else %>
+            <%= link_to assign_app_challenge_path(id: challenge[:id], app_id: app.id), method: :post do %><%= challenge[:name] %>
+          <% end %>
+        <% end %>
+        </li>
+      <% end %>
+    </ul>
+
+  </div>
+
+  <%= render partial: "_partials/modal_replace_challenge_app" %>
 <% end %>

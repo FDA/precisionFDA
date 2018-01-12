@@ -18,7 +18,7 @@
   end
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |file|
-    file.created_at.to_s(:db)
+    file.created_at.to_s(:human)
   end
 
   g.column name: 'State', attribute: 'state', custom_filter: :auto

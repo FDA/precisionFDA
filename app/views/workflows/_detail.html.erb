@@ -1,0 +1,198 @@
+<% if @workflow.present? %>
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <%= render "_partials/metadata_access", item: @workflow %>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">name</h5>
+      <p class="list-group-item-text"><%= @workflow.name %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Org</h5>
+      <p class="list-group-item-text">
+        <%= @workflow.user.org.handle %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Added by</h5>
+      <p class="list-group-item-text">
+        <%= link_to(@workflow.user.dxuser, user_path(@workflow.user.dxuser)) %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">ID</h5>
+      <p class="list-group-item-text"><%= @workflow.dxid %></p>
+    </li>
+    <% if @workflow.title != @revisions.first.title %>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Revision Title</h5>
+      <p class="list-group-item-text"><%= @workflow.title %></p>
+    </li>
+    <% end %>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Created</h5>
+      <p class="list-group-item-text"><%= @workflow.created_at.to_s(:db) %></p>
+    </li>
+  </ul>
+</div>
+
+<%= render "_partials/tags_metadata", item: @workflow.workflow_series, item_name: @workflow.title, tags_list: @workflow.workflow_series.all_tags_list, is_editable: @workflow.editable_by?(@context), suggested_tags: AppSeries::SUGGESTED_TAGS %>
+
+<div class="pfda-toolbar">
+  <div class="btn-group">
+    <div class="btn-group">
+      <button type="button" class="btn btn-default btn-default-version dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="fa fa-history" aria-hidden="true"></span>
+        <span class="text-muted">Revision:</span>
+        <span class="app-revision"><%= @workflow.revision %></span>
+        <% if @workflow.id == @revisions.first.id %>
+          <span class="app-label-latest label label-info">Latest</span>
+        <% end %>
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+        <% if @revisions.size == 0 # Should be impossible %>
+          <li class="dropdown-header">
+            None available
+          </li>
+        <% else %>
+          <li class="dropdown-header">Revisions</li>
+          <% @revisions.each do |workflow| %>
+            <li class="<% if workflow.dxid == params[:id] %>active<% end %>">
+              <a href="<%= action_name == 'index' ? workflow_analyses_path(workflow.dxid) : workflow_path(workflow.dxid) %>" class="clearfix">
+                <span class="workflow-revision"><%= workflow.revision %></span>
+                <% if @revisions.first.id == workflow.id %>
+                  <span class="workflow-label-latest label label-info pull-right">Latest</span>
+                <% end %>
+              </a>
+            </li>
+          <% end %>
+        <% end %>
+      </ul>
+    </div>
+    <% if @workflow.editable_by?(@context) %>
+    <div class="btn-group" <% if @revisions.first.dxid != @workflow.dxid %>data-toggle="tooltip" data-placement="top" title="Only latest revision is editable"<% end %>>
+      <a class="btn btn-default <% if @revisions.first.dxid != @workflow.dxid %>disabled<% end %>" href="<%= edit_workflow_path(@workflow.dxid) %>">
+        <span class="fa fa-edit"></span> Edit
+      </a>
+    </div>
+    <% end %>
+    <a class="btn btn-default" href="<%= fork_workflow_path(@workflow.dxid) %>">
+      <span class="fa fa-code-fork"></span> Fork
+    </a>
+    <div class="btn-group">
+      <button type="button" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="fa fa-cloud-download" aria-hidden="true"></span> Export
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+        <li class="dropdown-header">Export To:</li>
+        <li data-turbolinks="false">
+          <%= link_to cwl_export_workflow_path(@workflow.dxid), data: { confirm: 'You are about to download a CWL Workflow package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+            CWL Workflow
+          <% end %>
+        </li>
+        <li data-turbolinks="false">
+          <%= link_to wdl_export_workflow_path(@workflow.dxid), data: { confirm: 'You are about to download a WDL Workflow package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+            WDL Workflow
+          <% end %>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="btn-group pull-right">
+    <%= link_to new_workflow_analysis_path(@workflow.dxid), class: "btn btn-primary" do %>
+      Run Workflow&nbsp;&nbsp;<span class="badge rev-badge"><%= "rev#{@workflow.revision}" %></span>
+    <% end %>
+  </div>
+</div>
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+  <% if @analyses_grid.present? %>
+  <li role="presentation" class="active">
+    <a href="#workflow-analysis" aria-controls="workflow-analysis" role="tab" data-toggle="tab"><span class="fa fa-fw fa-tasks"></span>
+      <span class="tab-label">Analyses</span>
+    </a>
+  </li>
+  <% end %>
+  <li role="presentation" class="<% if !@analyses_grid.present? %>active<% end %>">
+    <a href="#workflow-spec" aria-controls="workflow-spec" role="tab" data-toggle="tab"><span class="fa fa-fw fa-puzzle-piece"></span>
+      <span class="tab-label">Spec</span>
+    </a>
+  </li>
+  <li role="presentation">
+    <a href="#workflow-diagram" aria-controls="workflow-diagram" role="tab" data-toggle="tab"><span class="fa fa-fw fa-info"></span>
+      <span class="tab-label">Workflow Diagram</span>
+    </a>
+  </li>
+  <% if !@workflow.readme.blank? %>
+  <li role="presentation">
+    <a href="#workflow-readme" aria-controls="workflow-readme" role="tab" data-toggle="tab"><span class="fa fa-fw fa-info"></span>
+      <span class="tab-label">README</span>
+    </a>
+  </li>
+  <% end %>
+</ul>
+<% end %>
+
+<!-- Tab panes -->
+<div class="tab-content">
+  <% if @analyses_grid.present? %>
+  <div role="tabpanel" class="tab-pane active" id="workflow-analysis">
+    <div class="panel">
+      <% if @workflow.present? %>
+        <%= render "analyses/grid", analyses_grid: @analyses_grid, workflow: @workflow %>
+      <% else %>
+        <%= render "analyses/grid", analyses_grid: @analyses_grid %>
+      <% end %>
+    </div>
+  </div>
+  <% elsif !@workflow.present? %>
+    <div role="tabpanel" class="tab-pane tab-pane-padded active" id="workflow-analysis">
+      <div class="alert alert-info">
+        <span class="fa fa-info-circle"></span> When you run a <a href="<%= show_docs_path("workflows") %>">workflow</a>, it will create a <a href="<%= show_docs_path("workflows") %>#workflows-run">analysis</a> that will show up here.
+      </div>
+    </div>
+  <% end %>
+
+  <% if @workflow.present? %>
+    <div role="tabpanel" class="tab-pane tab-pane-padded <% if !@analyses_grid.present? %>active<% end %>" id="workflow-spec">
+      <div class="list-group">
+        <div class="list-group-item app-spec-group">
+          <div class="app-spec">
+            <div class="row">
+              <div class="app-spec-column col-md-12">
+                <div class="spec-heading">Inputs</div>
+                <table class="table table-striped table-spec table-spec-input">
+                  <tbody>
+                    <%= render "workflows/spec_rows", spec: @workflow.all_input_spec %>
+                  </tbody>
+                </table>
+              </div>
+              <div class="app-spec-column col-md-12">
+                <div class="spec-heading">Outputs</div>
+                <table class="table table-striped table-spec table-spec-output">
+                  <tbody>
+                    <%= render "workflows/spec_rows", spec: @workflow.all_output_spec %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div role="tabpanel" class="tab-pane tab-pane-padded" id="workflow-diagram">
+      <form class="form form-horizontal">
+        <%= render 'workflows/diagram' %>
+      </form>
+    </div>
+
+    <% if !@workflow.readme.blank? %>
+    <div role="tabpanel" class="tab-pane tab-pane-padded" id="workflow-readme">
+      <div class="app-readme-display" data-bind="html: readmeDisplay"></div>
+    </div>
+    <% end %>
+  <% end %>
+</div>

@@ -1,0 +1,74 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <h4>
+      <a href="#">
+        <i class="fa fa-user" aria-hidden="true"></i>
+        USERS
+      </a>
+    </h4>
+
+    <div class="chart-row">
+
+      <div class="chart" data-name="users_views_chart">
+        <div class="chart-header">
+          <a href="#" class="chart-zoom">
+            Views
+            <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
+            <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
+          </a>
+          <strong class="pull-right">
+            <span data-bind="text: userViewsTotal"></span>
+          </strong>
+        </div>
+        <div id="users_views_chart"
+             class="chart-container"
+             data-bind="css: {
+                'loading': users_views_chart.loading,
+                'error': users_views_chart.error
+              }">
+        </div>
+      </div>
+      
+      <div class="chart" data-name="users_access_request_chart">
+        <div class="chart-header">
+          <a href="#" class="chart-zoom">
+            Access request
+            <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
+            <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
+          </a>
+          <strong class="pull-right">
+            <span data-bind="text: userAccessTotal"></span>
+          </strong>
+        </div>
+        <div id="users_access_request_chart"
+             class="chart-container"
+             data-bind="css: {
+                'loading': users_access_request_chart.loading,
+                'error': users_access_request_chart.error
+              }">
+        </div>
+      </div>
+      
+      <div class="chart" data-name="users_logins_chart">
+        <div class="chart-header">
+          <a href="#" class="chart-zoom">
+            User logins
+            <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
+            <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
+          </a>
+          <strong class="pull-right">
+            <span data-bind="text: userLoginsTotal"></span>
+          </strong>
+        </div>
+        <div id="users_logins_chart"
+             class="chart-container"
+             data-bind="css: {
+                'loading': users_logins_chart.loading,
+                'error': users_logins_chart.error
+              }">
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

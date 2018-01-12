@@ -6,9 +6,16 @@ $brand-blue-subtler: #F4F8FD;
 $brand-blue-dark: #343E4D;
 
 $brand-green-primary: #56d699; //#6BDBA5; //#31c97f;
+$brand-green-secondary: lighten($brand-green-primary, 20%);
 
 $brand-red-primary: #EB776F;
 $brand-red-secondary: #821A1D;
+$brand-red-tertiary: #FF0000;
+
+$brand-purple-primary: #702F8A;
+$brand-purple-subtle: lighten($brand-purple-primary, 40%);
+
+$brand-bg-gray: #F4F2F2;
 
 $brand-highlight: #FFF6E4;
 

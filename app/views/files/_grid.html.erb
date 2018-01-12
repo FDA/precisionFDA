@@ -1,20 +1,46 @@
+<% toggle_all_descriptions = content_tag(:a, nil, href: '#', class: 'fa fa-info-circle', 'data-bind' => 'click: toggleAll') %>
+
 <%= grid(files_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
-  g.blank_slate partial:  "_partials/empty_grid"
+  if defined?(clear_blank_state) && clear_blank_state
+    g.blank_slate { '' }
+  else
+    g.blank_slate partial: "_partials/empty_grid"
+  end
+
 
   g.after_row do |file, num_cols|
-    if !file.description.blank?
+    if file.description.present?
       content_tag(:tr,
         content_tag(:td,
           content_tag(:div, file.description, class: 'description'),
-        colspan: num_cols),
-      class: 'extra-row')
-    else
-      nil
+        colspan: num_cols, class: 'wrap-normal'),
+      class: 'extra-row hidden', 'data-bind' => "css: { hidden: !isVisible(#{file.id}) }")
     end
+  end
+
+  if defined?(show_checkboxes) && show_checkboxes
+    g.action_column html_check_box: true
   end
 
   g.column name: 'Name', attribute: 'name' do |file|
     unilinkfw(file, scope_icon: (defined?(scope_icon) ? scope_icon : true))
+  end
+
+  g.column name: toggle_all_descriptions do |file|
+    if file.description.present?
+      content_tag(:a, nil, href: '#', class: 'fa fa-info-circle', 'data-bind' => "click: function() { toggle(#{file.id}) }")
+    end
+  end
+
+  g.column name: 'Type', attribute: 'sti_type' do |file|
+    case file.klass
+      when "file"
+        "File"
+      when "folder"
+        "Folder"
+      else
+        "Unknown"
+    end
   end
 
   g.column name: 'Org', attribute: 'handle', assoc: [:user, :org] do |file|
@@ -25,12 +51,14 @@
     link_to(file.user.dxuser, user_path(file.user.dxuser))
   end
 
-  g.column name: 'Size', attribute: 'file_size' do |file|
+  g.column name: 'Size', attribute: 'file_size', filter_type: :file_size do |file|
     number_to_human_size(file.file_size)
   end
 
   g.column name: 'Origin' do |file|
-    if file.parent_type != "User"
+    if file.klass == "folder"
+      nil
+    elsif file.parent_type != "User"
       unilinkfw(file.parent)
     else
       "Uploaded"
@@ -38,7 +66,7 @@
   end
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |file|
-    file.created_at.to_s(:db)
+    file.created_at.to_s(:human)
   end
 
   g.column name: 'State', attribute: 'state', allow_multiple_selection: false, custom_filter: :auto
