@@ -400,7 +400,7 @@ public class AppsEditAppPage extends AbstractPage {
         openScriptTab();
         fillScriptArea(appProfile.getInitScriptText());
         appProfile.setCurRevScriptText(appProfile.getInitScriptText());
-
+        sleep(1000);
         AppsSavedAppPage appsSavedAppPage = clickCreate(appProfile);
 
         return appsSavedAppPage;

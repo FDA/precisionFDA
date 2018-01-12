@@ -116,13 +116,6 @@ public class TimeZoneTest extends AbstractTest {
                 .as("Created date/time is correct one on saved Note form" + descr)
                 .isEqualTo(getDictTrue());
 
-        savedNotePage = savedNotePage.leaveCommentSaveTime(noteProfile);
-
-        SoftAssert.assertThat(
-                isDateTimeCorrect(savedNotePage.getSubmittedCommentTimeText(), expNoteCreated))
-                .as("Comment submitted time is correct one" + descr)
-                .isEqualTo(getDictTrue());
-
         notesEditNotePage = savedNotePage.openNoteForEdit();
 
         SoftAssert.assertThat(
@@ -206,6 +199,5 @@ public class TimeZoneTest extends AbstractTest {
 
         SoftAssert.assertAll();
     }
-
-
+    
 }

@@ -40,7 +40,6 @@ public class NotesPage extends AbstractPage {
     public NotesPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
-        waitForPageToLoadAndVerifyBy(By.xpath(NotesLocators.NOTES_PAGINATION_AREA));
         waitForPageToLoadAndVerifyBy(By.xpath(NotesLocators.NOTES_NEW_NOTE_LINK), 30);
     }
 
