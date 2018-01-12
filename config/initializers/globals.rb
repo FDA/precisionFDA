@@ -3,7 +3,7 @@
 # by using: if Rails.env.development? { .... }
 #
 
-if Rails.env.development?
+if Rails.env.development? || Rails.env.ui_test?
   OAUTH2_REDIRECT_URI = "https://localhost:3000/return_from_login"
   OAUTH2_CLIENT_ID = "precision_fda"
 elsif ENV["DNANEXUS_BACKEND"] == "production"
