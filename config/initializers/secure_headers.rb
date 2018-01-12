@@ -21,12 +21,10 @@ SecureHeaders::Configuration.default do |config|
     plugin_types: %w(application/x-shockwave-flash application/pdf),
     script_src: %w('self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.google.com https://www.google-analytics.com https://cdnjs.cloudflare.com https://www.youtube.com https://s.ytimg.com https://dnanexus.github.io),
     style_src: %w('self' 'unsafe-inline' https://fonts.googleapis.com https://dnanexus.github.io https://cdnjs.cloudflare.com),
-    report_only: false,
-    report_uri: %w(https://dc95b34a080e9c95bbce7c3e6aed6234.report-uri.io/r/default/csp/enforce)
+    report_only: false
   }
   hpkp = {
     report_only: false,
-    report_uri: 'https://dc95b34a080e9c95bbce7c3e6aed6234.report-uri.io/r/default/hpkp/enforce',
     max_age: 5.minutes.to_i,
     include_subdomains: false
   }
