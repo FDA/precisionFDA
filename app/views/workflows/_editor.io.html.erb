@@ -1,0 +1,271 @@
+<div class="section-io">
+  <div class="section-io-input">
+    <div class="panel">
+      <div class="panel-heading clearfix">
+        <div class="btn-group pull-left">
+          <button class="btn btn-sm btn-primary" aria-haspopup="true" aria-expanded="false" data-toggle="modal" data-target="#build-workflow-modal">
+            Add Stage
+          </button>
+          <span class="small pfda-padded-h" data-bind="text: stagesText, css: numberStagesUnConfigured().length > 0 ? 'workflow-warning' : 'workflow-info'"></span>
+        </div>
+      </div>
+      <div class="workflows standard container">
+        <!-- ko if: slots().length == 0 -->
+          <div class="workflow centered-div">
+            <p class="workflow centered-text"> No Stages Added. Add Stage by clicking on "Add Stage" above. </p>
+          </div>
+        <!-- /ko -->
+        <div class="workflows container jumbotron">
+          <ul class="stage-inputs-container" data-bind="template: {name: 'stage-inputs', foreach: slots}">
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal selector-modal fade" id="build-workflow-modal" tabindex="-1" role="dialog" aria-labelledby="build-workflow-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="workspace-sharing-modal-label">Add Stages</h4>
+      </div>
+      <%= form_tag(new_workflow_path, method: 'post', class: "form form-vertical") do %>
+          <div class="modal-body">
+            <div class="pfda-toolbar">
+              <ul class="nav nav-pills nav-pills-center" role="tablist">
+                <li role="presentation" class="active">
+                  <a href="#all-apps" aria-controls="table-view" role="tab" data-toggle="tab">
+                    All Apps
+                  </a>
+                </li>
+                <li role="presentation">
+                  <a href="#private-apps" aria-controls="table-view" role="tab" data-toggle="tab">
+                    Private Apps
+                  </a>
+                </li>
+                <li role="presentation">
+                  <a href="#public-apps" aria-controls="graph-view" role="tab" data-toggle="tab">
+                    Public Apps
+                  </a>
+                </li>
+
+              </ul>
+            </div>
+            <div class="tab-content">
+              <div role="tabpanel" class="tab-pane" id="private-apps">
+                <div class="container-fluid container-padded">
+                  <div class="workflow-pre-scrollable">
+                    <input type="text" class="form-control input-md input-square" placeholder="Filter..." data-bind="textInput: filterQuery" />
+                    <form class="form form-horizontal">
+                      <div class="pfda-padded-v" data-bind='template: {name: "add-stages", foreach: privateApps()}'></div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <div role="tabpanel" class="tab-pane" id="public-apps">
+                <div class="container-fluid container-padded">
+                  <div class="workflow-pre-scrollable">
+                    <input type="text" class="form-control input-md input-square" placeholder="Filter..." data-bind="textInput: filterQuery" />
+                    <form class="form form-horizontal">
+                      <div class="pfda-padded-v" data-bind='template: {name: "add-stages", foreach: publicApps()}'></div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <div role="tabpanel" class="tab-pane active" id="all-apps">
+                <div class="container-fluid container-padded">
+                  <div class="workflow-pre-scrollable">
+                    <input type="text" class="form-control input-md input-square" placeholder="Filter..." data-bind="textInput: filterQuery" />
+                    <form class="form form-horizontal">
+                      <div class="pfda-padded-v" data-bind='template: {name: "add-stages", foreach: allApps()}'></div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default btn-link modal-btn" data-dismiss="modal" tabindex="-1">Close</button>
+          </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+<script id='stage-inputs'  type='text/html'>
+  <div class="pfda-padded-b">
+  <div class="workflows center-block" data-bind='foreach: inputs'>
+    <span data-bind="attr: {'id': name}, css: configured()? 'workflow-info': 'workflow-warning'", class="glyphicon glyphicon-filter " ></span>
+  </div>
+  <div class="" data-bind="css: configured()? 'configured' : 'unconfigured'">
+    <span class='fa fa-times-circle-o customize-input-output pull-right' data-bind="click: $parent.removeSlot, css: configured()? 'workflow-info': 'workflow-warning'"></span>
+    <a  href="#" data-bind="click: function(){$root.configureSlot($data);}" data-toggle="modal" data-target="#configure-stage-modal">
+      <div class="workflows stage-item">
+        <div class="fa fa-gear" data-bind="text: name"></div>
+      </div>
+    </a>
+  </div>
+  <div class="workflows center-block" data-bind='foreach: outputs'>
+    <span data-bind="attr: {'id': name}, css: configured()? 'workflow-info': 'workflow-warning'", class="glyphicon glyphicon-filter gly-flip-vertical"  ></span>
+  </div>
+  </div>
+</script>
+<script id='add-stages' type='text/html'>
+  <table class="table pfda-table table-striped">
+    <tbody>
+      <tr class="row">
+        <td class="col-sm-5"><span data-bind="text: $data.app.name" ></span></td>
+        <td class="col-sm-12">
+          <!-- ko if: inputsForApp().length > 0 -->
+            <span class="text-warning">Inputs </span>
+            <!-- ko foreach: inputsForApp() -->
+              <span data-bind="text: $data.name + ':' + $data.class " ></span>
+            <!-- /ko -->
+            <br>
+          <!--/ko -->
+          <!-- ko if: outputsForApp().length > 0 -->
+            <span class="text-warning">Outputs </span>
+            <!-- ko foreach: outputsForApp() -->
+              <span data-bind="text: $data.name + ':' + $data.class " ></span>
+            <!-- /ko -->
+          <!-- /ko -->
+        </td>
+        <td class="col-sm-5">
+          <label>Revision</label>
+          <div class="imbed-checkbox">
+            <select name="instance_type" class="form-control" data-bind=" options: $data.revisions(),
+                   optionsText: 'revision',
+                   optionsValue: 'id',
+                   value: selectedApp">
+            </select>
+          </div>
+        </td>
+        <td class="col-sm-2">
+           <a href="#"  data-bind="click: function(){$root.addStages($data);}">Add </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</script>
+<div data-bind="modal: slotBeingEdited" class="modal fade" id="configure-stage-modal" tabindex="-1" role="dialog" aria-labelledby="configure-stage-modal-label">
+    <div class="modal-dialog" role="document">
+      <!-- ko if: slotBeingEdited()-->
+      <div class="modal-content">
+        <div class="modal-header workflows workflow-modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h1 class="modal-title" id="workspace-sharing-modal-label" data-bind="text: slotBeingEdited().name"></h1>
+          <h5 data-bind="text: 'Revision : ' + slotBeingEdited().revision"></h5>
+        </div>
+        <div class="modal-body">
+          <div class="error-section workflows-alert-danger" data-bind="visible: errorMessage" style="display: none">
+            <div class="alert alert-danger">
+              <strong>Please fix the issue and retry:</strong> <span data-bind="text: errorMessage"></span>
+            </div>
+          </div>
+          <!-- ko if: slotBeingEdited().inputs().length > 0 -->
+            <h5 class="strong text-uppercase"> Inputs</h5>
+            <!-- ko foreach: slotBeingEdited().inputs() -->
+              <div class="pfda-padded-b" >
+                <div class="imbed-checkbox" data-bind="text: $data.label || $data.name"></div><span data-bind="text: $data.optional? '' : ' - Required', css: optional? '': 'workflow-warning'" ></span><span class="col-sm-offset-1" data-bind="text: 'Type:'+ $data.class"></span>
+                <div data-bind="template: { name: 'io-field'}"></div>
+                <div class="imbed-checkbox" data-bind="click: isSelected">
+                  <input type="checkbox" data-bind="attr: {disabled: !isSelected() && configured}, disable: !isSelected() && configured, checked: isSelected, click: workflowRequired, clickBubble: false"></div>
+                <label>Set as required workflow input</label>
+              </div>
+            <!-- /ko -->
+          <!-- /ko -->
+          <!-- ko if: slotBeingEdited().outputs().length > 0 -->
+            <h5 class="strong text-uppercase"> Outputs</h5>
+            <!-- ko foreach: slotBeingEdited().outputs() -->
+              <div class="pfda-padded-b">
+                <div class="workflows io-field-default">
+                  <div class="imbed-checkbox col-sm-8" data-bind="text: $data.label || $data.name"></div><span class="col-sm-offset-2 " data-bind="text: 'Type:'+ $data.class"></span>
+                </div>
+              </div>
+            <!-- /ko -->
+          <!-- /ko -->
+          <h5 class="strong text-uppercase"> Config</h5>
+          <div class="pfda-padded-b">
+            <div>Instance Type </div>
+            <select name="instance_type" class="form-control" data-bind="options: slotBeingEdited().instanceTypes,
+               optionsText: 'label',
+               optionsValue: 'value',
+               value: slotBeingEdited().instanceType">
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default btn-link modal-btn" data-dismiss="modal" tabindex="-1">Close</button>
+        </div>
+      </div>
+      <!-- /ko -->
+    </div>
+</div>
+
+<div data-bind="" class="workflows modal right fade in" id="mapper-modal" tabindex="-1" role="dialog" aria-labelledby="mapper-modal-label">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header workflows workflow-modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h1 class="modal-title" id="mapper-modal-label">Select Outputs </h1>
+      </div>
+      <div class="modal-body">
+        <!-- ko ifnot: eligibleSlots().length > 0 -->
+          <div class="alert-danger">
+            <span> No configurable Apps Available </span>
+          </div>
+        <!-- /ko -->
+        <!-- ko if: eligibleSlots().length > 0 -->
+          <!-- ko foreach: eligibleSlots -->
+            <div >
+              <a data-toggle="collapse" data-bind="attr: {'href': '#collapse_' + name}">
+                <i style="padding-right: 12px;"class="indicator fa fa-caret-down pfda-padded-h" aria-hidden="true"></i><i class="fa fa-gear"></i><strong class="bold pfda-padded-b pfda-padded-v" data-bind="text: $data.name"></strong>
+              </a>
+              <div data-bind="attr: {'id': 'collapse_' + name}" class="panel-collapse collapse" >
+                <!-- ko foreach: $data.outputs() -->
+                  <!-- ko if: $data.class== $root.inputBeingEdited().class -->
+                    <div class="pfda-padded-h pfda-padded">
+                      <div class="workflows io-field-default">
+                        <div class="row">
+                          <div class="workflows io-field-default col-md-3" data-bind="text: $data.class"></div>
+                          <div class="workflows io-field-default col-md-6" data-bind="text: name"></div>
+                          <div class="workflows io-field-default pull-right col-md-3"><a data-bind="click: function(){$root.setMapping($data, $parent);}" data-dismiss="modal" tabindex="-1" class="io-field-default">Select</a></div>
+                      </div>
+                      </div>
+                    </div>
+                <!--/ko -->
+                <!--/ko -->
+              </div>
+            </div>
+          <!-- /ko -->
+        <!-- /ko -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default btn-link modal-btn modal fade in" data-dismiss="modal" tabindex="-1">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/html" id="output-mapper">
+  <div class="input-group">
+    <a class="btn " href="#"  data-bind="textInput: $data.name"></a>
+  </div>
+</script>
+<script type="text/html" id="io-field">
+  <div class="input-group">
+    <input type="text" data-bind="textInput: $data.outputBinding()" class="form-control" />
+    <span class="input-group-btn">
+      <!-- ko if: $data.configured() == true -->
+        <button class="btn btn-primary" data-bind="click: function(){$root.unsetMapping($data);}, attr: {disabled: isSelected()}, disable: isSelected(), text: $data.setInputText($data)" type="button"></button>      <!-- /ko -->
+      <!-- ko if: $data.configured() == false -->
+        <button class="btn btn-primary" data-bind="click: function(){$root.configInput($data);}, attr: {disabled: isSelected()}, disable: isSelected(), text: $data.setInputText($data)" aria-haspopup="true" aria-expanded="false" data-toggle="modal" data-target="#mapper-modal" type="button"></button>      <!-- /ko-->
+   </span>
+  </div>
+</script>

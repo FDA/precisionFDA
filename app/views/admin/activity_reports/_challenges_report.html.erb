@@ -1,0 +1,54 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <h4>
+      <a href="#">
+        <i class="fa fa-user" aria-hidden="true"></i>
+        CHALLENGES
+      </a>
+    </h4>
+
+    <div class="chart-row">
+
+      <div class="chart" data-name="challenges_signup_chart">
+        <div class="chart-header">
+          <a href="#" class="chart-zoom">
+            Challenges signup
+            <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
+            <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
+          </a>
+          <strong class="pull-right">
+            <span data-bind="text: challengesSignupTotal"></span>
+          </strong>
+        </div>
+        <div id="challenges_signup_chart"
+             class="chart-container"
+             data-bind="css: {
+                'loading': challenges_signup_chart.loading,
+                'error': challenges_signup_chart.error
+              }">
+        </div>
+      </div>
+      
+      <div class="chart" data-name="challenges_submissions_chart">
+        <div class="chart-header">
+          <a href="#" class="chart-zoom">
+            Submissions
+            <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
+            <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
+          </a>
+          <strong class="pull-right">
+            <span data-bind="text: challengesSubmissionsTotal"></span>
+          </strong>
+        </div>
+        <div id="challenges_submissions_chart"
+             class="chart-container"
+             data-bind="css: {
+                'loading': challenges_submissions_chart.loading,
+                'error': challenges_submissions_chart.error
+              }">
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

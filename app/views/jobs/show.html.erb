@@ -36,7 +36,7 @@
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Created</h5>
-      <p class="list-group-item-text"><%= @job.created_at.to_s(:db) %></p>
+      <p class="list-group-item-text"><%= @job.created_at.to_s(:human) %></p>
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Instance type</h5>
@@ -57,7 +57,7 @@
 
 <div class="pfda-toolbar">
   <div class="btn-group">
-    <% if @job.accessible_by?(@context) || @job.viewable_by?(@context) %>
+    <% if @job.accessible_by?(@context) %>
       <%= link_to log_job_path(@job.dxid), class: "btn btn-default" do %>
         <span class="fa fa-file-code-o"></span> View Log
       <% end %>
@@ -148,7 +148,7 @@
             <div class="job-io-heading">Inputs</div>
             <table class="table table-striped table-job-io table-job-io-input">
               <tbody>
-                <%= render "jobs/io_rows", items: @inputs %>
+                <%= render "jobs/io_rows", items: @job.input_data %>
               </tbody>
             </table>
           </div>
@@ -157,7 +157,7 @@
             <div class="job-io-heading">Outputs</div>
             <table class="table table-striped table-job-io table-job-io-output">
               <tbody>
-                <%= render "jobs/io_rows", items: @outputs %>
+                <%= render "jobs/io_rows", items: @job.output_data %>
               </tbody>
             </table>
           </div>

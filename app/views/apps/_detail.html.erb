@@ -30,7 +30,7 @@
     <% end %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Created</h5>
-      <p class="list-group-item-text"><%= @app.created_at.to_s(:db) %></p>
+      <p class="list-group-item-text"><%= @app.created_at.to_s(:human) %></p>
     </li>
   </ul>
 </div>
@@ -105,6 +105,16 @@
             Docker Container
           <% end %>
         </li>
+        <li data-turbolinks="false">
+          <%= link_to cwl_export_app_path(@app.dxid), data: { confirm: 'You are about to download a CWL Tool package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+            CWL Tool
+          <% end %>
+        </li>
+        <li data-turbolinks="false">
+          <%= link_to wdl_export_app_path(@app.dxid), data: { confirm: 'You are about to download a WDL Task package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+            WDL Task
+          <% end %>
+        </li>
       </ul>
     </div>
   </div>
@@ -117,12 +127,27 @@
   </div>
 
   <div class="btn-group pull-right">
-    <%= render "_partials/btn_challenge_app", app: @app, challenge: Challenge.current %>
+    <%= render "_partials/btn_challenge_app", app: @app %>
+
     <%= link_to new_app_job_path(@app.dxid), class: "btn btn-primary" do %>
       <span class="fa fa-bolt"></span> Run App&nbsp;&nbsp;<span class="badge"><%= @app.version ? "v#{@app.version}" : "rev#{@app.revision}" %></span>
     <% end %>
+    <%= link_to batch_app_app_path(@app.dxid), class: "btn btn-primary" do %>
+        <span class="fa fa-bolt"></span> Run Batch App&nbsp;&nbsp;<span class="badge"><%= @app.version ? "v#{@app.version}" : "rev#{@app.revision}" %></span>
+    <% end %>
     <%= render "_partials/btn_publish", item: @app %>
   </div>
+
+  <% if @context.logged_in? && app.user == @context.user %>
+    <% if @assigned_challenges.any? %>
+      <h4 class="details-challenges">
+        <% @assigned_challenges.each do |challenge| %>
+          <span class="label label-warning disabled"><i class="fa fa-trophy"></i><%= challenge.name.squish %></span>
+        <% end %>
+      </h4>
+    <% end %>
+  <% end %>
+
 </div>
 
 <!-- Nav tabs -->

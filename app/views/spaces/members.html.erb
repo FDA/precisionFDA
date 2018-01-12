@@ -35,7 +35,7 @@
         end
 
         g.column name: 'Joined', attribute: 'created_at', auto_reload: true, filter_type: :standard do |member|
-          member.created_at.to_s(:db)
+          member.created_at.to_s(:human)
         end
       end -%>
     </div>

@@ -29,7 +29,7 @@ class Org < ActiveRecord::Base
   end
 
   def self.featured
-    Org.find_by(handle: 'precisionfda')
+    Org.find_by(handle: ORG_EVERYONE_HANDLE)
   end
 
   def self.real_orgs

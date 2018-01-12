@@ -31,6 +31,14 @@
     end
   end
 
+  g.column name: 'Workflow' do |job|
+    if job.try(:analysis).try(:workflow)
+      unilinkfw(job.analysis.workflow)
+    else
+      "N/A"
+    end
+  end
+
   g.column name: 'Instance type' do |job|
     job.resolved_instance_type
   end
@@ -44,7 +52,7 @@
   end
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |job|
-    job.created_at.to_s(:db)
+    job.created_at.to_s(:human)
   end
 
   if !defined?(hide_access) || !hide_access

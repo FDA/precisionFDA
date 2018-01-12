@@ -1,0 +1,29 @@
+<% content_for :title do %>Admin Dashboard<% end %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-body">
+      <div class="page-title">
+        <i class="fa fa-bar-chart" aria-hidden="true"></i>
+        Admin Dashboard
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="infoframe-outer">
+  <div class="infoframe-inner">
+    <h4 class="infoframe-title">Site Activity</h4>
+    <div>
+      <a class="btn btn-default" rel="nofollow" href="<%= admin_activity_reports_path %>">
+        <i class="fa fa-line-chart" aria-hidden="true"></i> Site Activity reporting
+      </a>
+      <a class="btn btn-default" data-confirm="You are about to download CSV file" data-turbolinks="false" href="<%= admin_active_users_path %>" rel="nofollow">
+        <i class="fa fa-file-text-o" aria-hidden="true"></i> Active Users
+      </a>
+      <a class="btn btn-default" rel="nofollow" href="<%= admin_usage_reports_path %>">
+        <i class="fa fa-users" aria-hidden="true"></i> Users & Usage
+      </a>
+    </div>
+  </div>
+</div>

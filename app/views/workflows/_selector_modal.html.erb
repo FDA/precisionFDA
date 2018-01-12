@@ -1,0 +1,154 @@
+<div class="object-selector-modal selector-modal modal fade" data-bind="with: selectorModel.objectSelector, attr: {id: selectorModel.objectSelector.id}">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" data-bind="text: title"></h4>
+
+        <!-- ko if: hasError -->
+        <div class="alert alert-danger alert-single">
+          <strong><span class="fa fa-warning"></span> <span data-bind="text: error().type"></span></strong>
+          <div data-bind="text: error().message"></div>
+        </div>
+        <!-- /ko -->
+      </div>
+      <div class="modal-body modal-body-padless">
+        <!-- Nav tabs -->
+        <ul class="nav nav-pills nav-pills-center nav-tabs-padded" role="tablist">
+          <!-- ko foreach: objectLists -->
+          <li role="presentation" data-bind="attr: {'data-classname': className}">
+            <a role="tab" data-toggle="tab" data-bind="attr: {href: '#tab-' + $parent.id + '-' + className}">
+              <span data-bind="text: name"></span>
+              <span class="badge" data-bind="visible: numFilteredObjects, text: numFilteredObjects"></span>
+            </a>
+          </li>
+          <!-- /ko -->
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+          <!-- ko foreach: objectLists -->
+          <div role="tabpanel" class="tab-pane" data-bind="attr: {id: 'tab-' + $parent.id + '-' + className}">
+            <div data-bind="visible: isRelatedVisible()">
+              <div class="pfda-toolbar">
+                <a class="btn btn-default" data-bind="click: clearActiveRelated"><span class="fa fa-fw fa-chevron-left"></span> Back to <span data-bind="text: name"></span></a>
+              </div>
+              <div class="list-group" data-bind="template: {name: 'object-item-template', foreach: activeRelatedObjects}"></div>
+            </div>
+
+            <div data-bind="visible: !isRelatedVisible()">
+              <div class="objects-filter pfda-toolbar" data-bind="visible: !(className == 'selected' && ($parent.selectionType == 'radio' || $parent.selectionType == 'checkbox'))">
+                <!-- ko if: className == 'selected' -->
+                <input type="text" class="form-control input-lg input-square" placeholder="Filter..." data-bind="textInput: filterQuery" />
+                <!-- /ko -->
+                <!-- ko if: className != 'selected' -->
+                <div class="input-group">
+                  <input type="text" class="form-control input-lg input-square" placeholder="Filter..." data-bind="textInput: filterQuery" />
+                  <span class="input-group-btn">
+                    <div class="btn-group">
+                      <label class="btn btn-default btn-filter" data-bind="css: {active: selectorModel.filterByEditable}">
+                        <input type="checkbox" autocomplete="off" data-bind="checked: selectorModel.filterByEditable"> Only mine
+                      </label>
+                    </div>
+                  </span>
+                </div>
+                <!-- /ko -->
+              </div>
+              <!-- ko if: !busy() -->
+              <!-- ko if: numFilteredObjects() > 0 -->
+              <div class="list-group" data-bind="template: {name: 'object-item-template', foreach: objects.filtered}"></div>
+              <!-- /ko -->
+              <!-- ko if: numFilteredObjects() == 0 -->
+              <div class="alert alert-warning alert-single">No <span data-bind="text: className"></span> objects found</div>
+              <!-- /ko -->
+              <!-- /ko -->
+              <!-- ko if: busy() -->
+              <div class="precision-loading alert text-muted">Loading...</div>
+              <!-- /ko -->
+            </div>
+            <!-- /ko -->
+          </div>
+          <!-- /ko -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default btn-link" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-bind="click: save, css: {disabled: !canSave()}, disable: !canSave()">
+          <span data-bind="text: saving() ? 'Selecting...':'Select'"></span>
+          <span class="badge" data-bind="visible: numSelected, text: numSelected"></span>
+        </button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script type="text/html" id="object-item-template">
+  <div class="list-group-item" data-bind="css: {selectable: isSelectable, 'not-selectable': !isSelectable(), radio: selectionType == 'radio', checkbox: selectionType == 'checkbox'}">
+    <div class="media">
+      <div class="media-body">
+        <label data-bind="attr: {title: uid}">
+          <!-- ko if: isSelectable -->
+          <!-- ko if: selectionType == "radio" -->
+          <input type="radio" data-bind="checked: selected, checkedValue: $data, attr: {name: $parent.className == 'selected' ? 'selected-object' : 'list-selected-object'}">
+          <!-- /ko -->
+          <!-- ko if: selectionType == "checkbox" -->
+          <input type="checkbox" data-bind="checked: selected, checkedValue: $data">
+          <!-- /ko -->
+          <!-- /ko -->
+          <span data-bind="css: classIcon" aria-hidden="true"></span> <span class="object-name" data-bind="text: title"></span>
+          <div class="object-metadata clearfix">
+            <ul class="list-inline list-inline-bullets pull-left">
+              <li>
+                <span data-bind="css: scopeIcon"></span>
+                <span data-bind="text: scopeFormatted" class="text-capitalize"></span>
+              </li>
+              <!-- ko if: loaded -->
+              <li data-bind="text: userName"></li>
+              <!-- ko if: _.size(all_tags_list()) -->
+              <li>
+                <ul class="pfda-tags list list-inline" data-bind="foreach: all_tags_list">
+                  <li class="pfda-tag" data-bind="text: $data"></li>
+                </ul>
+              </li>
+              <!-- /ko -->
+              <!-- /ko -->
+            </ul>
+          </div>
+        </label>
+      </div>
+      <!-- ko template: {name: 'object-item-actions-template', data: $data} --><!-- /ko -->
+    </div>
+  </div>
+</script>
+
+<script type="text/html" id="object-item-actions-template">
+  <!-- ko if: loaded -->
+  <div class="media-right">
+    <a target="_blank" class="link-muted object-open-link" data-bind="attr: {href: path}" title="Open in new tab"><span class="fa fa-fw fa-external-link"></span></a>
+  </div>
+  <!-- /ko -->
+
+
+  <!-- ko if: loadedRelated() -->
+  <div class="media-right">
+    <!-- ko if: numRelatedObjects() == 0 -->
+    <span class="link-muted object-related-link">
+        <span class="badge badge-muted">No related objects</span>
+      </span>
+    <!-- /ko -->
+    <!-- ko if: numRelatedObjects() > 0 -->
+    <a class="link-muted object-related-link" title="View related objects">
+      <span class="badge badge-link" data-bind="text: numRelatedObjects()"></span>
+    </a>
+    <!-- /ko -->
+  </div>
+  <!-- /ko -->
+
+  <!-- ko if: !loadedRelated() || numRelatedObjects() > 0 -->
+  <div class="media-right">
+    <a class="link-muted object-related-link" title="View related objects">
+      <span class="fa fa-fw" data-bind="css: {'fa-chevron-right': !loadingRelated(), 'fa-spinner fa-spin': loadingRelated()}"></span>
+    </a>
+  </div>
+  <!-- /ko -->
+</script>

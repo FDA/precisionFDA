@@ -13,7 +13,7 @@
     end
   end
 
-  g.column name: 'State', attribute: 'state', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false do |space|
+  g.column name: 'State', attribute: 'state', custom_filter: :state_hash, auto_reload: true, allow_multiple_selection: false do |space|
     [space.state ? space.state : "UNACTIVATED", {class: "col-state state-#{space.state ? space.state.downcase : 'unactivated'}"}]
   end
 
@@ -34,6 +34,12 @@
   end
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |space|
-    space.created_at.to_s(:db)
+    space.created_at.to_s(:human)
   end
+
+  g.column do |space|
+    space.created_at_in_ny.to_s(:human)
+  end
+
+  g.column {}
 end -%>

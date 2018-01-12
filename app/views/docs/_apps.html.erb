@@ -32,6 +32,14 @@
       <div class="bs-docs-section bs-docs-media-section">
         <%= video_iframe(@videos[:apps_run][:url]) %>
       </div>
+      <div id="apps-batch-run" class="h2">Batch running an app</div>
+      <div class="bs-docs-section">
+        <p>For batch running, using the "Run Batch App" button, you are allowed to vary one input across a batch. Select the input you would like to vary from the dropdown menu. For file inputs when you click "Select Files", you can filter for the files you would like and select them with the checkbox on the left. Once you have selected all of your files, click "Select". For varying non file inputs (string, integer, float, boolean), enter comma-separated values.</p>
+        <p>The system will launch separate jobs for each of the varying input values.</p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section">
+        <%= video_iframe(@videos[:apps_batch_run][:url]) %>
+      </div>
       <div id="apps-export" class="h2">Exporting an app</div>
       <div class="bs-docs-section">
         <p>This feature allows you to export an app into a portable format (Docker container), so that you can run it on your own computer.</p>
@@ -44,6 +52,79 @@
         <p>Apps on precisionFDA have one or more outputs. On the cloud, those are shown in the job details page, once the job is done. In the case of the Docker container, the execution writes its outputs inside the container, in the hardcoded <code>/data/out</code> directory. We chose that convention so that if you use <code>-v</code> to map a folder of your hard drive to <code>/data</code> (as we did in the example above), you will get the outputs conveniently added inside that directory underneath an <code>out</code> subdirectory.</p>
         <p>This feature is currently in beta. Please keep in mind that due to the nature of Linux container technology, the environment inside the container is not identical to the cloud environment. Moreover, certain configuration aspects of the app such as "Internet Access" or "Instance Type" are not reflected in the exported container. As always, we welcome your feedback and ideas on how to evolve this feature.</p>
       </div>
+      <div id="cwl-export" class="h2">CWL export</div>
+      <div class="bs-docs-section">
+        <p> The Common Workflow Language (CWL) is an open standard for describing scientific pipelines. The precisionFDA system, in support of open standards, can export tools and workflows into metadata compatible with CWL. You will then be able to run the resulting CWL descriptions with implementations of CWL. A common starting point will be the reference implementation. <a href="https://github.com/common-workflow-language/cwltool">https://github.com/common-workflow-language/cwltool</a></p>
+
+        <p>Individual apps can also be exported to be a single CWL Tool. A tarball will be generated, containing the Dockerfile for the tool, a cwl definition of the tool, and a brief README.md file with instructions on how to build and use the tool. For example, taking a look at the results of exporting url_fetcher as a CWL tool will generate <code>url_fetcher.tar.gz</code>.</p>
+
+        <pre style="white-space: pre-line;">
+$ mkdir url_fetcher
+
+$ tar -xvzf url_fetcher.tar.gz -C url_fetcher
+
+x README.md
+
+x url_fetcher.cwl
+
+x Dockerfile
+
+$ cd url_fetcher
+
+$ cat README.md
+
+#url_fetcher
+
+To execute this app locally, please ensure you have Docker (get.docker.com) and cwltool ('pip install cwtool') and run:
+
+
+```
+
+docker build . -t url_fetcher
+
+sudo cwltool --no-match-user --no-read-only url_fetcher.cwl inputs.json
+
+```
+
+where inputs.json is a standard CWL input file definition (see 'A Gentle Guide to CWL' for examples).
+
+        </pre>
+
+        <p>The first command will build the docker image from the Dockerfile. The second command runs the cwl tool defined in the tool definition (the .cwl file) using the inputs specified (in the .json file). The inputs can also be specified on the command line rather than in the json file.</p>
+
+        <p>Workflows can also be exported in a CWL format. A tarball will be generated containing multiple Dockerfiles, multiple cwl definitions, and a brief README.md with instructions. In this case, use make with the Makefile to build all of the tools. </p>
+      </div>
+      <div id="wdl-export" class="h2">WDL export</div>
+      <div class="bs-docs-section">
+<p>The Workflow Definition Language (WDL) is a workflow language  supported by the Broad Institute. Broad uses WDL for their internal work and has specifically designed it to be human readable and writable. To support this open standard, the precisionFDA system can generate WDL definitions, which can be run with systems which are compliant with WDL. More information about WDL can be found on the Broad Institute's website https://software.broadinstitute.org/wdl/</p>
+
+<p>Individual apps can be exported as a WDL task. A tarball will be generated containing the Dockerfile for the tool, a WDL definition of the task, and a brief README.md file with instructions on how to use the tool. For example, taking a look at the results of exporting the url_fetcher app as a WDL task will generate <code>url_fetcher.tar.gz</code>.</p>
+
+<pre style="white-space: pre-line;">
+$ mkdir url_fetcher
+$ tar -xvzf url_fetcher.tar.gz -C url_fetcher
+x README.md
+x url_fetcher.wdl
+x Dockerfile
+$ cd url_fetcher
+$ cat README.md 
+#url_fetcher
+
+To execute this app locally, please ensure you have Docker (get.docker.com) and Cromwell (https://github.com/broadinstitute/cromwell) and run:
+
+```
+java -jar /path/to/cromwell.jar url_fetcher.wdl -i inputs.json
+```
+
+where inputs.json is a standard WDL input file definition (see https://software.broadinstitute.org/wdl/ for examples).
+</pre>
+
+<p>The example here utilizes cromwell, an open source workflow runner developed by the Broad Institute. Cromwell will take care of building the app based on the definition, and then running it based on the inputs provided.</p>
+
+<p>Workflows can also be exported as WDL workflows. A tarball will be generated with multiple Dockerfiles, multiple WDL tasks for each individual tool, and a WDL task for the overall workflow. A README.md is provided with brief instructions on use.</p>
+
+      </div>
+
       <div id="job-details" class="h2">Job details and logs</div>
       <div class="bs-docs-section">
         <p>Clicking on a job will take you to the job details page. The bottom section of the page shows the inputs that were chosen when the job was launched. If the job has finished successfully, it also shows the generated outputs. If the job has failed, it shows information related to the error.</p>
@@ -100,7 +181,10 @@
           <li><a href="#apps-overview">Overview &amp; Terminology</a></li>
           <li><a href="#apps-listing">Listing apps</a></li>
           <li><a href="#apps-run">Running an app</a></li>
+          <li><a href="#apps-batch-run">Batch Running an app</a></li>
           <li><a href="#apps-export">Exporting an app</a></li>
+          <li><a href="#cwl-export">CWL export</a></li>
+          <li><a href="#wdl-export">WDL export</a></li>
           <li><a href="#job-details">Job details and logs</a></li>
         </ul>
       </nav>

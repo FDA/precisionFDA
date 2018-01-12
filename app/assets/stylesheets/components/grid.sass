@@ -7,6 +7,8 @@ $select-width: 28px
 
   td
     white-space: nowrap
+    &.wrap-normal
+      white-space: normal
 
   .fa
     color: $brand-blue-tertiary
@@ -39,6 +41,7 @@ $select-width: 28px
 
   > tbody > tr, &.table-striped > tbody > tr:nth-of-type(odd)
     .col-state
+      width: 120px
       text-transform: uppercase
       font-weight: bold
       font-size: 10px
@@ -104,3 +107,6 @@ $select-width: 28px
   padding: $padding-large-vertical $padding-large-horizontal
   .alert
     margin-bottom: 0
+
+.empty-grid-head
+  margin: 8px 0

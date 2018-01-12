@@ -29,6 +29,8 @@ class Invitation < ActiveRecord::Base
   require_human_on :create
   belongs_to :user
 
+  scope :guest, lambda { where(state: "guest") }
+
   store :extras, accessors: [ :req_reason, :req_data, :req_software, :research_intent, :clinical_intent, :consistency_challenge_intent, :truth_challenge_intent, :participate_intent, :organize_intent ], coder: JSON
 
   def valid_email
