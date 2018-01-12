@@ -343,7 +343,7 @@ public abstract class AbstractPage {
             return true;
         } else {
             String message = "It looks like a wrong page is open. Should be " + pageName;
-            log.warn(message);
+            log.error(message);
             String fileName =
                     getDictWarning() + "_" +
                     pageName + "_" +

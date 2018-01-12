@@ -199,5 +199,5 @@ public class TimeZoneTest extends AbstractTest {
 
         SoftAssert.assertAll();
     }
-    
+
 }
