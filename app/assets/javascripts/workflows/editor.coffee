@@ -49,25 +49,25 @@ class WorkflowEditorModel
     @saving = ko.observable(false)
     @sortedList = ko.observableArray()
     @name = ko.observable(workflow?.name)
-    @name.cache = ko.computed(
+    @name.cache = ko.computed({
       read: () =>
         @name()
       write: (name) =>
         name = _.trim(name.toLowerCase())
                    .replace(/\s+/g, "-")
-                   .replace(/[^a-zA-Z0-9\-\_]+/g,"")
+                   .replace(/[^a-zA-Z0-9\-\_]+/g, "")
 
         @name(name)
-    )
+    })
 
     @title = ko.observable(workflow?.title)
     @slotBeingEdited = ko.observable()
     @updatingWorkflow = ko.observableArray(false)
     @inputBeingEdited = ko.observableArray()
-    @eligibleSlots= ko.observableArray()
+    @eligibleSlots = ko.observableArray()
     @availableInstances = Precision.INSTANCES
     @numberStagesUnConfigured = ko.computed(=>
-      ko.utils.arrayFilter(@slots(), (slot) =>
+      ko.utils.arrayFilter(@slots(), (slot) ->
         if slot.inputs().length > 0
           !slot.configured())
     )
@@ -393,7 +393,7 @@ class IOModel
     @optional = io.optional
     @requiredRunInput = false
     @label = io.label
-    @defaultValues = (if io.default!=undefined then io.default else io.defaultValues)
+    @defaultValues = (if io.default != undefined then io.default else io.defaultValues)
   workflowRequired: (data, e) ->
     e.cancelBubble = true
     if (e.stopPropagation)
@@ -401,7 +401,7 @@ class IOModel
     data.configured(!data.configured())
     data.requiredRunInput = true
     config = true
-    ko.utils.arrayForEach(@viewModel().slotBeingEdited().inputs(), (input) =>
+    ko.utils.arrayForEach(@viewModel().slotBeingEdited().inputs(), (input) ->
       if input.optional == false && config == true
         config = input.configured()
     )
@@ -417,11 +417,12 @@ class IOModel
 class slotModel
   constructor: (spec, viewModel, stage = null, configured = false) ->
     @id = spec.dxid
-    @slotId = ko.computed(=>
+    @slotId = ko.computed( () ->
       if stage?
         stage["slotId"]
       else
-        'stage-'+ Math.round((Math.pow(36, 14 + 1) - Math.random() * Math.pow(36, 14))).toString(36).slice(1)
+        _slotId = Math.round((Math.pow(36, 14 + 1) - Math.random() * Math.pow(36, 14)))
+        'stage-' + _slotId.toString(36).slice(1)
     )
     @name = spec.name
     @revision = spec.revision
@@ -429,12 +430,17 @@ class slotModel
     @instanceType = ko.observable(stage?.instanceType || spec?.instanceType)
     @inputs = ko.observableArray()
     @addInputs = ko.computed(=>
+      configured = true
       if stage?
         ko.utils.arrayForEach(stage["inputs"], (input) =>
+          if !input.optional
+            configured = false
           @inputs.push(new IOModel(input, @slotId(), @name, true, viewModel))
         )
       else
         ko.utils.arrayForEach(spec.inputs, (input) =>
+          if !input.optional
+            configured = false
           @inputs.push(new IOModel(input, @slotId(), @name, false, viewModel))
         )
     )
