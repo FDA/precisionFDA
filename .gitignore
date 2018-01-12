@@ -35,8 +35,7 @@
 # Ignore autotest's config files
 /test/functional/.idea
 /test/functional/target
-/test/functional/dnanexus.staging.functional.iml
-/test/functional/dnanexus.staging.autotest.iml
+/test/functional/com.dnanexus.staging.autotest.iml
 /test/functional/src/main/resources/dev_user_creds.conf
 /test/functional/src/main/resources/loc_user_creds.conf
 
