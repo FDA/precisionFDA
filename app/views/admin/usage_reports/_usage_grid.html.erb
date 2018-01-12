@@ -1,0 +1,32 @@
+<%= grid(@usage_grid, show_filters: true, hide_csv_button: true) do |g|
+  g.blank_slate partial: "_partials/empty_grid"
+
+  g.column name: "User", attribute: "dxuser", assoc: :user, in_csv: false do |metric|
+    link_to metric.user.dxuser, user_path(metric.user.dxuser)
+  end
+
+  g.column name: "User", attribute: "dxuser", assoc: :user, in_html: false do |metric|
+    metric.user.dxuser
+  end
+
+  g.column name: "Current storage usage", attribute: "storage_usage", filter_type: :file_size do |metric|
+    number_to_human_size(metric.storage_usage || 0)
+  end
+
+  g.column name: "Compute in past day", attribute: "daily_compute_price", filter_type: :range  do |metric|
+    number_to_currency(metric.daily_compute_price || 0)
+  end
+
+  g.column name: "Compute in past week", attribute: "weekly_compute_price", filter_type: :range  do |metric|
+    number_to_currency(metric.weekly_compute_price || 0)
+  end
+
+  g.column name: "Compute in past month", attribute: "monthly_compute_price", filter_type: :range  do |metric|
+    number_to_currency(metric.monthly_compute_price || 0)
+  end
+
+  g.column name: "Compute in past year", attribute: "yearly_compute_price", filter_type: :range  do |metric|
+    number_to_currency(metric.yearly_compute_price || 0)
+  end
+
+end %>

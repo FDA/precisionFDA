@@ -64,6 +64,20 @@ module ChallengesHelper
         """
       elsif recognition.include? "not-considered"
         return "Not Considered"
+      elsif recognition.include? "variant"
+        raw """
+          <span class='challenge-badge challenge-badge-supercaller'>
+            <span class='fa fa-star' aria-hidden='true'></span>
+            #{trim ? 'Variant Catcher' : recognition}
+          </span>
+        """
+      elsif recognition.include? "vaf"
+        raw """
+          <span class='challenge-badge challenge-badge-superplayer'>
+            <span class='fa fa-star' aria-hidden='true'></span>
+            #{trim ? 'VAF Spotter' : recognition}
+          </span>
+        """
       else
         raw """
           <span class='challenge-badge challenge-badge-recognition'>

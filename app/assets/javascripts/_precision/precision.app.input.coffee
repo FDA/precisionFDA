@@ -1,5 +1,6 @@
 class AppInputModel
   constructor: (spec, @viewModel) ->
+    @batchInput = ko.observable(false)
     @className = spec.class
     @help = spec.help
     @label = spec.label
@@ -10,7 +11,12 @@ class AppInputModel
     @isRequired = !@isOptional
     @patterns = spec.patterns
     @choices = spec.choices
-
+    @buttonType = ko.computed(=>
+      if @batchInput() == true
+        'checkbox'
+      else
+        'radio'
+    )
     @placeholder = @defaultValue
 
     @isClassAnArray = @className.indexOf('array') == 0
@@ -74,7 +80,11 @@ class AppInputModel
       @value()
       hasDefault = @defaultValue?
       isRequired = @isRequired
-      hasData = @getDataForRun()? && @getDataForRun() != ''
+      hasData = false
+      if @getDataForRun()? && _.isArray(@getDataForRun())
+        hasData = (@getDataForRun()? && @getDataForRun().length > 0 && @validArray(@getDataForRun()) && @getDataForRun() != '')
+      else
+        hasData = (@getDataForRun()? && @getDataForRun() != '')
       hasError = @error() != null
       return !hasError && (!isRequired || (isRequired && (hasData || hasDefault)))
     )
@@ -83,80 +93,90 @@ class AppInputModel
       return @isRequired && !@isReady()
     )
 
-    @objectSelector = new Precision.models.SelectorModel({
-      title: "Select input for #{@label}"
-      help: @help
-      selectionType: "radio"
-      selectableClasses: ["file"]
-      onSave: (selected) =>
-        @licenseToAccept(null)
-        if !_.isArray(selected)
-          @value({
-            uid: selected.uid
-            name: selected.title()
-          })
-          if selected.license()? && !selected.user_license.accepted()
-            @licenseToAccept({license: selected.license(), user_license: selected.user_license()})
-        else
-          licensesToAccept = []
-          # FIXME: This is untested
-          @value(_.map(selected, (object) =>
-            licensesToAccept.push({license: object.license(), user_license: object.user_license()}) if object.license()? && !object.user_license.accepted()
-            return {
-              uid: object.uid
-              name: object.title()
-            }
-          ))
+    @fileSelector = ko.computed(=>
+      @objectSelector = new Precision.models.SelectorModel({
+        title: "Select input for #{@label}"
+        help: @help
+        selectionType: @buttonType()
+        selectableClasses: ["file"]
+        onSave: (selected) =>
+          @licenseToAccept(null)
+          if !_.isArray(selected)
+            @value({
+              uid: selected.uid
+              name: selected.title()
+            })
+            if selected.license()? && !selected.user_license.accepted()
+              @licenseToAccept({license: selected.license(), user_license: selected.user_license()})
+          else
+            licensesToAccept = []
+            # FIXME: This is untested
+            @value(_.map(selected, (object) =>
+              licensesToAccept.push({license: object.license(), user_license: object.user_license()}) if object.license()? && !object.user_license.accepted()
+              return {
+                uid: object.uid
+                name: object.title()
+              }
+            ))
 
-          @licenseToAccept(licensesToAccept) if licensesToAccept?
+            @licenseToAccept(licensesToAccept) if licensesToAccept?
 
-        deferred = $.Deferred()
-        deferred.resolve(@value())
-      listRelatedParams:
-        # editable: true
-        # scopes: ["private", "public"]
-        classes: ["file", "note", "discussion", "answer", "comparison", "app", "asset", "job"]
-      listModelConfigs: [
-        {
-          className: "file"
-          name: "Files"
-          apiEndpoint: "list_files"
-          apiParams:
-            states: ["closed"]
-            describe:
-              include:
-                user: true
-                org: true
-                license: true
-                all_tags_list: true
-          patterns: @patterns
-        }
-        {
-          className: "note"
-          name: "Notes"
-          apiEndpoint: "list_notes"
-          apiParams:
-            note_types: ["Note"]
-            describe:
-              include:
-                user: true
-                org: true
-                all_tags_list: true
-        }
-        {
-          className: "discussion"
-          name: "Discussions"
-          apiEndpoint: "list_notes"
-          apiParams:
-            note_types: ["Discussion"]
-            describe:
-              include:
-                user: true
-                org: true
-                all_tags_list: true
-        }
-      ]
-    })
+          deferred = $.Deferred()
+          deferred.resolve(@value())
+        listRelatedParams:
+          # editable: true
+          # scopes: ["private", "public"]
+          classes: ["file", "note", "discussion", "answer", "comparison", "app", "asset", "job"]
+        listModelConfigs: [
+          {
+            className: "file"
+            name: "Files"
+            apiEndpoint: "list_files"
+            apiParams:
+              states: ["closed"]
+              describe:
+                include:
+                  user: true
+                  org: true
+                  license: true
+                  all_tags_list: true
+            patterns: @patterns
+          }
+          {
+            className: "note"
+            name: "Notes"
+            apiEndpoint: "list_notes"
+            apiParams:
+              note_types: ["Note"]
+              describe:
+                include:
+                  user: true
+                  org: true
+                  all_tags_list: true
+          }
+          {
+            className: "discussion"
+            name: "Discussions"
+            apiEndpoint: "list_notes"
+            apiParams:
+              note_types: ["Discussion"]
+              describe:
+                include:
+                  user: true
+                  org: true
+                  all_tags_list: true
+          }
+        ]
+      })
+    )
+
+  validArray: (array) =>
+    value = true
+    _.map(array, (object) =>
+      if !object?
+        value = false
+      )
+    return value
 
   # Boolean Functions
   toggleTrue: (e) ->
@@ -175,18 +195,30 @@ class AppInputModel
 
   # File Functions
   openFileSelector: () ->
-    @objectSelector.open()
+    @fileSelector().open()
 
   clear: () ->
     @valueDisplay(null)
 
   getDataForRun: () ->
-    value = @value()
-    if value? && value != ''
+    if @className=='boolean'
+      if @value()? && _.isArray(@value())? && @value().length > 0
+        selectedData = @value()
+      else if _.isBoolean(@value())
+        selectedData = @value()
+      else if @defaultvalue?
+        selectedData = @defaultvalue
+
+    else if @value()?
+      selectedData = @value()
+    else if @defaultvalue?
+      selectedData = @defaultvalue
+
+    if selectedData? && selectedData != ''
       try
-        if @isClassAnArray && _.isString(value)
-          value = value.replace(/(^\s*,)|(,\s*$)/g, '') # Remove any trailing/leading commas
-          value = _.map(value.split(','), (data) =>
+        if @isClassAnArray && _.isString(selectedData)
+          selectedData = selectedData.replace(/(^\s*,)|(,\s*$)/g, '') # Remove any trailing/leading commas
+          selectedData = _.map(selectedData.split(','), (data) =>
             data = $.trim(data) # Remove trailing/leading whitespace
             _data = data
             switch @className
@@ -203,37 +235,115 @@ class AppInputModel
                 else
                   @error(null)
           )
-        else if @className == "hash" && _.isString(value)
-          if value.length > 0
+        else if @className == "hash" && _.isString(selectedData)
+          if selectedData.length > 0
             try
-              value = JSON.parse(value)
+              value = JSON.parse(selectedData)
             catch error
               @error(error.message)
           else
             value = undefined
         else
-          _value = value
           switch @className
-            when 'int'
-              value = parseInt(value, 10)
-              if _.isString(_value) && _value != value.toString()
-                @error("#{_value} is not a valid integer")
-              else
-                @error(null)
-            when 'float'
-              value = parseFloat(value)
-              if _.isString(_value) && _value != value.toString()
-                @error("#{_value} is not a valid float")
-              else
-                @error(null)
+            when 'int', 'string', 'float'
+              value = @parseStringData(@className, selectedData)
             when 'file'
-              value = value.uid
+              if _.isString(selectedData)
+                value = selectedData
+              else if _.isArray(selectedData) && _.isObject(selectedData[0])
+                value = selectedData[0].uid
+              else if _.isObject(selectedData)
+                value = selectedData.uid
+              else
+                value = selectedData
+            when 'boolean'
+              value = selectedData
             else
-              value
+              value = selectedData
       catch error
         value = undefined
     else
       value = undefined
+    return value
+
+  parseStringData: (type, selectedData) =>
+    return if !selectedData?
+    switch type
+      when 'int'
+        parseDatum = (rawDatum) => parseInt(rawDatum, 10)
+        dataType = 'integer'
+      when 'string'
+        parseDatum = (rawDatum) => rawDatum
+        dataType = 'string'
+      when 'float'
+        parseDatum = (rawDatum) => parseFloat(rawDatum, 10)
+        dataType = 'float'
+      else
+        return
+
+    if @batchInput() == true
+      [values, errors, missingInput, data_arr]  = [[], [], false, selectedData.split(',')]
+      for rawDatum in data_arr
+        parsedDatum = parseDatum(rawDatum)
+        if rawDatum == "" && @isRequired
+          missingInput = true
+        else if _.isString(rawDatum) && rawDatum != parsedDatum.toString()
+          errors.push("#{rawDatum} is not a valid #{dataType}")
+        else
+          values.push(parsedDatum)
+      errors.push("All batch inputs must be defined for this input") if missingInput
+
+      if errors.length > 0
+        @error(errors.join(". "))
+        return null
+      else
+        @error(null)
+        return values
+    else
+      parsedDatum = parseDatum(selectedData)
+      if _.isString(selectedData) && selectedData != parsedDatum.toString()
+        @error("#{selectedData} is not a valid #{dataType}")
+        return null
+      else
+        @error(null)
+        return parsedDatum
+
+  getDataForBatchRun: () =>
+    if @value()
+      value = @value()
+    else if @defaultValue
+      value = @defaultValue
+
+    try
+      switch @className
+        when 'int'
+          if _.isNumber(value)
+            value = parseInt(value, 10)
+          else
+            value = _.map(value.split(','), (data) =>
+              data = $.trim(data)
+              parseInt(data, 10)
+            )
+        when 'string'
+          value = _.map(value.split(','), (data) =>
+            data = $.trim(data)
+            data.toString()
+          )
+        when 'float'
+          value = _.map(value, (data) =>
+            data = $.trim(data)
+            parseFloat(data, 10)
+          )
+        when 'file'
+          if _.isArray(value)
+            value = _.map(value, (data) =>
+              data.uid
+            )
+          else
+            value
+    catch error
+      value = undefined
+
     return value
 
 window.Precision ||= {}

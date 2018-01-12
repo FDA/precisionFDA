@@ -3,7 +3,7 @@ class FileModel
     @id = ko.observable()
     @file = file
     @state = ko.observable()
-    @sizeFormatted = humanFormat(file.size, {unit: 'B'})
+    @sizeFormatted = humanFormat(file.size, { unit: 'B' })
 
     @path = ko.computed(=>
       "/files/#{@id()}" if @id()?
@@ -28,11 +28,13 @@ class FileModel
       if file.size == 0
         if @dataUploaded() == file.size then "100%" else 0
       else
-        "#{@dataUploaded()/file.size * 100}%"
+        "#{@dataUploaded() / file.size * 100}%"
     )
 
 class FilesNewView
-  constructor: () ->
+  constructor: (data) ->
+    
+    @folder_id = data.folder_id
     @files = ko.observableArray()
 
     @uploadState = ko.observable()
@@ -88,9 +90,11 @@ class FilesNewView
       @uploadState("DONE") if uploadCounter == filesLength
 
     for fileModel, i in files
-      metadata = {}
+      metadata = {
+        folder_id: @folder_id
+      }
 
-      do (fileModel) =>
+      do (fileModel) ->
         fileModel.state("UPLOADING")
         Precision.uploader.uploadFile(fileModel, metadata, () -> doneFn(fileModel))
 
@@ -105,7 +109,7 @@ class FilesNewView
 FilesController = Paloma.controller('Files',
   new: ->
     $container = $("body main")
-    viewModel = new FilesNewView()
+    viewModel = new FilesNewView(@params)
     ko.applyBindings(viewModel, $container[0])
 
     $container

@@ -54,7 +54,7 @@ class App < ActiveRecord::Base
   end
 
   def describe_fields
-    ["title", "name", "version", "revision", "readme", "spec"]
+    ["title", "name", "version", "revision", "readme", "spec", "dxid"]
   end
 
   def versioned?
@@ -145,8 +145,8 @@ class App < ActiveRecord::Base
     end
 
     cmds << "# Download helper executables"
-    cmds << "RUN curl https://dl.dnanex.us/F/D/p59772Gz0B3V9F456z26bFxk8GqqXJfF7YQ8Ypk4/emit-1.0.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
-    cmds << "RUN curl https://dl.dnanex.us/F/D/2GKfQGz1vqXvPVq5z6JfBZ7fKYp2Qgx3kJ21p6jF/run-1.2.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
+    cmds << "RUN curl https://dl.dnanex.us/F/D/0K8P4zZvjq9vQ6qV0b6QqY1z2zvfZ0QKQP4gjBXp/emit-1.0.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
+    cmds << "RUN curl https://dl.dnanex.us/F/D/bByKQvv1F7BFP3xXPgYXZPZjkXj9V684VPz8gb7p/run-1.2.tar.gz | tar xzf - -C /usr/bin/ --no-same-owner --no-same-permissions"
     cmds << ""
 
     # Generate Docker command with embedded spec and script

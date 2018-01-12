@@ -1,0 +1,120 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <h4>
+      <a href="#">
+        <i class="fa fa-user" aria-hidden="true"></i>
+        APPS
+      </a>
+    </h4>
+
+    <div class="chart-row">
+
+      <div class="chart" data-name="apps_created_chart">
+        <div class="chart-header">
+          <a href="#" class="chart-zoom">
+            apps created
+            <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
+            <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
+          </a>
+          <strong class="pull-right">
+            <span data-bind="text: appsCreatedTotal"></span>
+          </strong>
+        </div>
+        <div id="apps_created_chart"
+             class="chart-container"
+             data-bind="css: {
+                'loading': apps_created_chart.loading,
+                'error': apps_created_chart.error
+              }">
+        </div>
+      </div>
+      
+      <div class="chart" data-name="apps_published_chart">
+        <div class="chart-header">
+          <a href="#" class="chart-zoom">
+            apps published
+            <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
+            <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
+          </a>
+          <strong class="pull-right">
+            <span data-bind="text: appsPublishedTotal"></span>
+          </strong>
+        </div>
+        <div id="apps_published_chart"
+             class="chart-container"
+             data-bind="css: {
+                'loading': apps_published_chart.loading,
+                'error': apps_published_chart.error
+              }">
+        </div>
+      </div>
+      
+      <div class="chart" data-name="apps_run_chart">
+        <div class="chart-header">
+          <a href="#" class="chart-zoom">
+            apps run
+            <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
+            <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
+          </a>
+          <span class="pull-right">
+            <span data-bind="text: appsRunTotal"></span>
+          </span>
+        </div>
+        <div id="apps_run_chart"
+             class="chart-container"
+             data-bind="css: {
+                'loading': apps_run_chart.loading,
+                'error': apps_run_chart.error
+              }">
+        </div>
+      </div>
+      
+      <div class="chart full-width" data-name="apps_jobs_run_chart">
+        <div class="chart-header">
+          <a href="#" class="chart-zoom">
+            Jobs run
+            <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
+            <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
+          </a>
+          <span class="pull-right"></span>
+        </div>
+        <div id="apps_jobs_run_chart"
+             class="chart-container"
+             data-bind="css: {
+                'loading': apps_jobs_run_chart.loading,
+                'error': apps_jobs_run_chart.error
+              }">
+        </div>
+      </div>
+
+    </div>
+
+    <div class="total-row">
+      <div class="total">
+        <div class="total-value">
+          <span data-bind="text: totalAppsTotal"></span>
+        </div>
+        <div class="total-label">
+          <a href="#">total apps</a>
+        </div>
+      </div>
+      <div class="total">
+        <div class="total-value">
+          <span data-bind="text: publicAppsTotal"></span>
+        </div>
+        <div class="total-label">
+          <a href="#">public apps</a>
+        </div>
+      </div>
+      <div class="total">
+        <div class="total-value">
+          <span data-bind="text: runtimeTotal"></span>
+        </div>
+        <div class="total-label">
+          <a href="#">total runtime</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

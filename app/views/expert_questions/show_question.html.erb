@@ -23,7 +23,7 @@
       <div class="text-center">
         <%= image_tag(@expert.image, class: 'img-rounded', height: '300px') %>
         <div class="expert-question-footer text-muted">
-          <small><br/>Answer updated <%= local_time_ago(@expert_question.expert_answer.updated_at) %></small>
+          <small><br/>Answer updated <%= time_ago(@expert_question.expert_answer.updated_at) %></small>
         </div>
       </div>
       <br/>
