@@ -70,6 +70,10 @@ public class DocsLocators {
 
     public static final String DOCS_CREATING_APPS_TITLE = "//div[@id='dev'][text()='Creating Apps']";
 
+    public static final String DOCS_NOTES_TITLE = "//div[@id='notes'][text()='Notes']";
+
+    public static final String DOCS_DISCUSSIONS_TITLE = "//div[@id='discussions'][text()='Discussions']";
+
     public static final String DOCS_CR_APPS_CONVENTION_LINK = "//*[contains(@class, 'sidenav')]//a[text()='App naming conventions']";
 
     public static final String DOCS_CR_APPS_IO_SPEC_LINK = "//*[contains(@class, 'sidenav')]//a[text()='Input and Output spec']";
@@ -87,5 +91,15 @@ public class DocsLocators {
     public static final String DOCS_CR_APPS_BASH_LINK = "//*[contains(@class, 'sidenav')]//a[text()='Bash tips']";
 
     public static final String DOCS_CR_APPS_FORKING_LINK = "//*[contains(@class, 'sidenav')]//a[text()='Forking an app']";
+
+    public static final String DOCS_NOTES_EDITING_LINK = "//*[contains(@class, 'sidenav')]//a[text()='Editing notes']";
+
+    public static final String DOCS_NOTES_IDEAS_LINK = "//*[contains(@class, 'sidenav')]//a[text()='Ideas for using notes']";
+
+    public static final String DOCS_DISCS_CREATING_LINK = "//*[contains(@class, 'sidenav')]//a[text()='Creating a discussion']";
+
+    public static final String DOCS_DISCS_ANSWER_LINK = "//*[contains(@class, 'sidenav')]//a[text()='Writing an answer']";
+
+    public static final String DOCS_DISCS_COMMENTING_LINK = "//*[contains(@class, 'sidenav')]//a[text()='Commenting & upvoting']";
 
 }

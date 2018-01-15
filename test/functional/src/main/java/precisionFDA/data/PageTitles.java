@@ -1,6 +1,6 @@
 package precisionFDA.data;
 
-import static precisionFDA.data.TestUserData.getPreTestUsername;
+import static precisionFDA.data.TestUserData.getPfdaUser1Username;
 
 public class PageTitles {
 
@@ -34,7 +34,7 @@ public class PageTitles {
 
     public static final String PAGE_TITLE_PROFILE = "Profile";
 
-    public static final String PAGE_TITLE_PUBLIC_PROFILE = getPreTestUsername();
+    public static final String PAGE_TITLE_PUBLIC_PROFILE = getPfdaUser1Username();
 
     public static final String PAGE_TITLE_LICENSES = "Licenses";
 

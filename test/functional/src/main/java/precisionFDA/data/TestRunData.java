@@ -2,7 +2,7 @@ package precisionFDA.data;
 
 import precisionFDA.utils.SettingsProperties;
 
-import static precisionFDA.utils.SettingsProperties.getEnv;
+import static precisionFDA.utils.SettingsProperties.getTestRunEnv;
 import static precisionFDA.utils.Utils.getCurrentDate_YYYY_MM_dd;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 import static precisionFDA.utils.Utils.getTextFromFile;
@@ -72,7 +72,7 @@ public class TestRunData {
     }
 
     public static String getDebugLogFolderPath() {
-        return getDebugLogFolder() + "run_" + getEnv().toLowerCase() + "_" + getFilePathUniqueValue() + "/";
+        return getDebugLogFolder() + "run_" + getTestRunEnv().toLowerCase() + "_" + getFilePathUniqueValue() + "/";
     }
 
     public static void setFinishedCaseData(String caseStatus, String caseName, String suiteName) {

@@ -80,7 +80,7 @@ public class DocsTest extends AbstractTest {
 
         SoftAssert.assertThat(
                 docsPage.isFilesTitleDisplayed())
-                .as("Files page title is displayed")
+                .as("Docs Files page title is displayed")
                 .isTrue();
 
         SoftAssert.assertThat(
@@ -121,7 +121,7 @@ public class DocsTest extends AbstractTest {
 
         SoftAssert.assertThat(
                 docsPage.isDocsCompsTitleDisplayed())
-                .as("Comparisons page title is displayed")
+                .as("Docs Comparisons page title is displayed")
                 .isTrue();
 
         SoftAssert.assertThat(
@@ -167,7 +167,7 @@ public class DocsTest extends AbstractTest {
 
         SoftAssert.assertThat(
                 docsPage.isDocsAppsTitleDisplayed())
-                .as("Apps page title is displayed")
+                .as("Docs Apps page title is displayed")
                 .isTrue();
 
         SoftAssert.assertThat(
@@ -228,7 +228,7 @@ public class DocsTest extends AbstractTest {
 
         SoftAssert.assertThat(
                 docsPage.isDocsCreatingAppsTitleDisplayed())
-                .as("Creating Apps page title is displayed")
+                .as("Docs Creating Apps page title is displayed")
                 .isTrue();
 
         SoftAssert.assertThat(
@@ -274,6 +274,73 @@ public class DocsTest extends AbstractTest {
         SoftAssert.assertThat(
                 docsPage.isCrAppsForkingLinkDisplayed())
                 .as("Forking an app link is displayed")
+                .isTrue();
+
+        SoftAssert.assertAll();
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin", "openDocsPage"})
+    public void checkDocsNotesPage() {
+        printTestHeader("Test Case: check Docs Notes page");
+
+        DocsPage docsPage = getDocsPage();
+
+        assertThat(
+                docsPage.isNotesLinkDisplayed())
+                .as("Link to Docs Notes page is displayed")
+                .isTrue();
+
+        docsPage.clickNotesLink();
+
+        SoftAssert.assertThat(
+                docsPage.isDocsNotesTitleDisplayed())
+                .as("Docs Notes page title is displayed")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                docsPage.isNotesEditingLinkDisplayed())
+                .as("Editing notes link is displayed")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                docsPage.isNotesIdeasLinkDisplayed())
+                .as("Ideas for using notes link is displayed")
+                .isTrue();
+
+        SoftAssert.assertAll();
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin", "openDocsPage"})
+    public void checkDocsDiscussionsPage() {
+        printTestHeader("Test Case: check Docs Discussions page");
+
+        DocsPage docsPage = getDocsPage();
+
+        assertThat(
+                docsPage.isDiscsLinkDisplayed())
+                .as("Link to Docs Discussions page is displayed")
+                .isTrue();
+
+        docsPage.clickDiscussionsLink();
+
+        SoftAssert.assertThat(
+                docsPage.isDocsDiscussionsTitleDisplayed())
+                .as("Docs Discussions page title is displayed")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                docsPage.isDiscsCreatingLinkDisplayed())
+                .as("Creating a discussion link is displayed")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                docsPage.isDiscsAnswerLinkDisplayed())
+                .as("Writing an answer link is displayed")
+                .isTrue();
+
+        SoftAssert.assertThat(
+                docsPage.isDiscsCommentingLinkDisplayed())
+                .as("Commenting & upvoting link is displayed")
                 .isTrue();
 
         SoftAssert.assertAll();
