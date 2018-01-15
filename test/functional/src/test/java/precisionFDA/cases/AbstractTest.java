@@ -33,7 +33,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
 import static precisionFDA.data.TestDict.*;
 import static precisionFDA.data.TestRunData.*;
-import static precisionFDA.utils.SettingsProperties.getEnv;
+import static precisionFDA.utils.SettingsProperties.getTestRunEnv;
 import static precisionFDA.utils.Utils.*;
 
 @Listeners( { CustomResultListener.class } )
@@ -48,7 +48,7 @@ public abstract class AbstractTest {
     @BeforeClass(alwaysRun = true)
     public void setUp() {
         driver = new DriverFactory().getInstance().getDriver();
-        log.info("=== Environment is: " + getEnv().toUpperCase() + " ===");
+        log.info("=== Environment is: " + getTestRunEnv().toUpperCase() + " ===");
     }
 
     @AfterClass(alwaysRun = true)

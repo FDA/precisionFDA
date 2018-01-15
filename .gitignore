@@ -35,9 +35,7 @@
 # Ignore autotest's config files
 /test/functional/.idea
 /test/functional/target
-/test/functional/com.dnanexus.staging.autotest.iml
-/test/functional/src/main/resources/dev_user_creds.conf
-/test/functional/src/main/resources/loc_user_creds.conf
+/test/functional/com.dnanexus.pfda.autotest.iml
 
 #Ignore browser drivers
 /test/functional/drivers/chromedriver

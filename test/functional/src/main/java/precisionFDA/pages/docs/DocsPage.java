@@ -31,6 +31,18 @@ public class DocsPage extends AbstractPage {
     @FindBy(xpath = DocsLocators.DOCS_CREATING_APPS_TITLE)
     private WebElement docsCreatingAppsTitle;
 
+    @FindBy(xpath = DocsLocators.DOCS_NOTES_TITLE)
+    private WebElement docsNotesTitle;
+
+    @FindBy(xpath = DocsLocators.DOCS_DISCUSSIONS_TITLE)
+    private WebElement docsDiscussionsTitle;
+
+    @FindBy(xpath = DocsLocators.DOCS_NOTES_EDITING_LINK)
+    private Link notesEditingLink;
+
+    @FindBy(xpath = DocsLocators.DOCS_NOTES_IDEAS_LINK)
+    private Link notesIdeasLink;
+
     @FindBy(xpath = DocsLocators.DOCS_INTRODUCTION_LINK)
     private Link introLink;
 
@@ -142,10 +154,39 @@ public class DocsPage extends AbstractPage {
     @FindBy(xpath = DocsLocators.DOCS_CR_APPS_VM_ENV_LINK)
     private Link crAppsVMEnvLink;
 
+    @FindBy(xpath = DocsLocators.DOCS_DISCS_ANSWER_LINK)
+    private Link discsAnswerLink;
+
+    @FindBy(xpath = DocsLocators.DOCS_DISCS_COMMENTING_LINK)
+    private Link discsCommentingLink;
+
+    @FindBy(xpath = DocsLocators.DOCS_DISCS_CREATING_LINK)
+    private Link discsCreatingLink;
+
     public DocsPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(DocsLocators.DOCS_LIST_TITLE));
+    }
+
+    public Link getDiscsAnswerLink() {
+        return discsAnswerLink;
+    }
+
+    public Link getDiscsCommentingLink() {
+        return discsCommentingLink;
+    }
+
+    public Link getDiscsCreatingLink() {
+        return discsCreatingLink;
+    }
+
+    public Link getNotesEditingLink() {
+        return notesEditingLink;
+    }
+
+    public Link getNotesIdeasLink() {
+        return notesIdeasLink;
     }
 
     public WebElement getDocsCreatingAppsTitle() {
@@ -154,6 +195,10 @@ public class DocsPage extends AbstractPage {
 
     public WebElement getDocsAppsTitle() {
         return docsAppsTitle;
+    }
+
+    public WebElement getDocsNotesTitle() {
+        return docsNotesTitle;
     }
 
     public Link getCrAppsAssetsLink() {
@@ -248,6 +293,10 @@ public class DocsPage extends AbstractPage {
         return docsFilesTitle;
     }
 
+    public WebElement getDocsDiscussionsTitle() {
+        return docsDiscussionsTitle;
+    }
+
     public Link getAppsLink() {
         return appsLink;
     }
@@ -321,15 +370,19 @@ public class DocsPage extends AbstractPage {
     }
 
     public boolean isIntroTitleDisplayed() {
-        return isElementPresent(getDocsIntroTitle(), 2);
+        return isElementPresent(getDocsIntroTitle(), 1);
     }
 
     public boolean isFilesTitleDisplayed() {
-        return isElementPresent(getDocsFilesTitle(), 2);
+        return isElementPresent(getDocsFilesTitle(), 1);
     }
 
     public boolean isDocsListTitleDisplayed() {
         return isElementPresent(getDocsListTitle());
+    }
+
+    public boolean isDocsDiscussionsTitleDisplayed() {
+        return isElementPresent(getDocsDiscussionsTitle(), 1);
     }
 
     public boolean isAppsLinkDisplayed() {
@@ -456,6 +509,10 @@ public class DocsPage extends AbstractPage {
         return isElementPresent(getDocsCreatingAppsTitle(), 1);
     }
 
+    public boolean isDocsNotesTitleDisplayed() {
+        return isElementPresent(getDocsNotesTitle(), 1);
+    }
+
     public boolean isCrAppsAssetsLinkDisplayed() {
         return isElementPresent(getCrAppsAssetsLink(), 1);
     }
@@ -486,6 +543,26 @@ public class DocsPage extends AbstractPage {
 
     public boolean isCrAppsScriptLinkDisplayed() {
         return isElementPresent(getCrAppsScriptLink(), 1);
+    }
+
+    public boolean isNotesEditingLinkDisplayed() {
+        return isElementPresent(getNotesEditingLink(), 1);
+    }
+
+    public boolean isNotesIdeasLinkDisplayed() {
+        return isElementPresent(getNotesIdeasLink(), 1);
+    }
+
+    public boolean isDiscsAnswerLinkDisplayed() {
+        return isElementPresent(getDiscsAnswerLink(), 1);
+    }
+
+    public boolean isDiscsCommentingLinkDisplayed() {
+        return isElementPresent(getDiscsCommentingLink(), 1);
+    }
+
+    public boolean isDiscsCreatingLinkDisplayed() {
+        return isElementPresent(getDiscsCreatingLink(), 1);
     }
 
     public boolean isCrAppsVMEnvLinkDisplayed() {
@@ -519,6 +596,18 @@ public class DocsPage extends AbstractPage {
     public DocsPage clickCreatingAppsLink() {
         log.info("click Creating Apps");
         getCreatingAppsLink().click();
+        return new DocsPage(getDriver());
+    }
+
+    public DocsPage clickNotesLink() {
+        log.info("click Notes Apps");
+        getNotesLink().click();
+        return new DocsPage(getDriver());
+    }
+
+    public DocsPage clickDiscussionsLink() {
+        log.info("click Discussions Apps");
+        getDiscsLink().click();
         return new DocsPage(getDriver());
     }
 }
