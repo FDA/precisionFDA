@@ -11,9 +11,15 @@
         <div style="padding: 16px;">
         <p>
           Challenge
+          <!-- ko if: selectedChallenge().link -->
           <a data-bind="attr: { href: selectedChallenge().link }">
             <span data-bind="text: selectedChallenge().name"></span>
-          </a> already has assigned app
+          </a>
+          <!-- /ko -->
+          <!-- ko ifnot: selectedChallenge().link -->
+          "<span data-bind="text: selectedChallenge().name"></span>"
+          <!-- /ko -->
+          already has assigned app
           <a data-bind="attr: { href: selectedChallenge().app.link }">
             <span data-bind="text: selectedChallenge().app.title"></span> (rev. <span data-bind="text: selectedChallenge().app.revision"></span>)
           </a>
