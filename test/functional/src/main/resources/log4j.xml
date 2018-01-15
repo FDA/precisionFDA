@@ -39,19 +39,10 @@
             <param name="AcceptOnMatch" value="true" />
         </filter>
     </appender>
-    <appender name="ReportPortalAppender" class="com.epam.ta.reportportal.log4j.appender.ReportPortalAppender">
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="[%d{HH:mm:ss}] %-5p (%F:%L) - %m%n"/>
-        </layout>
-    </appender>
-    <logger name="com.epam.ta.apache">
-        <level value="OFF"/>
-    </logger>
     <root>
         <priority value="INFO"/>
         <appender-ref ref="console"/>
         <appender-ref ref="file_full"/>
         <appender-ref ref="file_error"/>
-        <appender-ref ref="ReportPortalAppender" />
     </root>
 </log4j:configuration>

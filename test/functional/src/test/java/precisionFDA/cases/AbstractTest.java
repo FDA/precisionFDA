@@ -1,6 +1,5 @@
 package precisionFDA.cases;
 
-import com.epam.reportportal.message.ReportPortalMessage;
 import org.apache.log4j.Logger;
 import org.assertj.core.api.SoftAssertions;
 import org.openqa.selenium.*;
@@ -147,8 +146,9 @@ public abstract class AbstractTest {
             else {
                 loggerLevel = getDictError();
             }
-            String message = loggerLevel.toUpperCase() + ": screenshot when " + getFinishedCaseName() + " test case is finished | Please see screenshot ==>";
-            reportScreenshot(message, fileNameWithNoExt + ".png", loggerLevel);
+            String fileName = fileNameWithNoExt + ".png";
+            String message = loggerLevel.toUpperCase() + ": screenshot when " + getFinishedCaseName() + " case is finished";
+            reportScreenshot(message, fileName, loggerLevel);
         }
 
         //---------------
@@ -158,21 +158,16 @@ public abstract class AbstractTest {
 
     public String reportScreenshot(String message, String fileName, String loggerLevel) {
         String filePath = getDebugLogFolderPath() + fileName;
-        takeScreenshot(filePath, driver);
-        try {
-            ReportPortalMessage rpMessage = new ReportPortalMessage(new File(filePath), message);
-            if (loggerLevel.equalsIgnoreCase(getDictError())) {
-                log.error(rpMessage);
-            }
-            else if (loggerLevel.equalsIgnoreCase(getDictWarning())) {
-                log.warn(rpMessage);
-            }
-            else {
-                log.info(rpMessage);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (loggerLevel.equalsIgnoreCase(getDictError())) {
+            log.error(message);
         }
+        else if (loggerLevel.equalsIgnoreCase(getDictWarning())) {
+            log.warn(message);
+        }
+        else {
+            log.info(message);
+        }
+        takeScreenshot(filePath, driver);
         return filePath;
     }
 
@@ -321,5 +316,4 @@ public abstract class AbstractTest {
             return initDriver;
         }
     }
-
 }

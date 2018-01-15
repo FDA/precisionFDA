@@ -1,6 +1,5 @@
 package precisionFDA.pages;
 
-import com.epam.reportportal.message.ReportPortalMessage;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.*;
@@ -10,8 +9,6 @@ import ru.yandex.qatools.htmlelements.element.Select;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import ru.yandex.qatools.htmlelements.loader.HtmlElementLoader;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -349,28 +346,23 @@ public abstract class AbstractPage {
                     pageName + "_" +
                     getRunTimeLocalUniqueValue()
                     + ".png";
-            reportScreenshot(message + " | Please see screenshot ==>", fileName, getDictWarning());
+            reportScreenshot(message, fileName, getDictWarning());
             return false;
         }
     }
 
     public String reportScreenshot(String message, String fileName, String loggerLevel) {
         String filePath = getDebugLogFolderPath() + fileName;
-        takeScreenshot(filePath, driver);
-        try {
-            ReportPortalMessage rpMessage = new ReportPortalMessage(new File(filePath), message);
-            if (loggerLevel.equalsIgnoreCase(getDictError())) {
-                log.error(rpMessage);
-            }
-            else if (loggerLevel.equalsIgnoreCase(getDictWarning())) {
-                log.warn(rpMessage);
-            }
-            else {
-                log.info(rpMessage);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (loggerLevel.equalsIgnoreCase(getDictError())) {
+            log.error(message);
         }
+        else if (loggerLevel.equalsIgnoreCase(getDictWarning())) {
+            log.warn(message);
+        }
+        else {
+            log.info(message);
+        }
+        takeScreenshot(filePath, driver);
         return filePath;
     }
 
