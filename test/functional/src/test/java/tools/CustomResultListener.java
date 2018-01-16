@@ -6,7 +6,7 @@ import org.testng.ITestResult;
 import precisionFDA.cases.AbstractTest;
 
 import static precisionFDA.data.TestDict.*;
-import static precisionFDA.data.TestRunData.*;
+import static precisionFDA.data.TestCommonData.*;
 import static precisionFDA.utils.Utils.printCaseStatus;
 
 public class CustomResultListener extends AbstractTest implements ITestListener {

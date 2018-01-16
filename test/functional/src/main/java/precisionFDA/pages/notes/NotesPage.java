@@ -6,7 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Link;
-import precisionFDA.data.TestRunData;
+import precisionFDA.data.TestCommonData;
 import precisionFDA.locators.NotesLocators;
 import precisionFDA.model.NoteProfile;
 import precisionFDA.pages.AbstractPage;
@@ -96,7 +96,7 @@ public class NotesPage extends AbstractPage {
         log.info("open Notes.NewNote page");
         sleep(1000);
         getNotesNewNoteLink().click();
-        noteProfile.setNoteCreatedText(TestRunData.getCurrentTimezone());
+        noteProfile.setNoteCreatedText(TestCommonData.getCurrentTimezone());
         return new NotesEditNotePage(getDriver());
     }
 

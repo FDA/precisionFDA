@@ -2,8 +2,8 @@ package precisionFDA.data;
 
 import precisionFDA.model.NoteProfile;
 
-import static precisionFDA.data.TestRunData.getTestRunUniqueFinalValue;
-import static precisionFDA.data.TestRunData.getText1000Symbols;
+import static precisionFDA.data.TestCommonData.getTestRunUniqueFinalValue;
+import static precisionFDA.data.TestCommonData.getText1000Symbols;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class TestNotesData {
@@ -85,7 +85,7 @@ public class TestNotesData {
     }
 
     public static String getTimeZoneTitleText() {
-        return NEW_NOTE_TITLE_PREFIX + getRunTimeLocalUniqueValue() + " " + TestRunData.getCurrentTimezone();
+        return NEW_NOTE_TITLE_PREFIX + getRunTimeLocalUniqueValue() + " " + TestCommonData.getCurrentTimezone();
     }
 
 }

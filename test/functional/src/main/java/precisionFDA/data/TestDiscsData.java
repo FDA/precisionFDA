@@ -2,8 +2,8 @@ package precisionFDA.data;
 
 import precisionFDA.model.DiscProfile;
 
-import static precisionFDA.data.TestRunData.getTestRunUniqueFinalValue;
-import static precisionFDA.data.TestRunData.getText1000Symbols;
+import static precisionFDA.data.TestCommonData.getTestRunUniqueFinalValue;
+import static precisionFDA.data.TestCommonData.getText1000Symbols;
 
 public class TestDiscsData {
 

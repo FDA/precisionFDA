@@ -9,7 +9,7 @@ import precisionFDA.locators.DashboardLocators;
 import precisionFDA.pages.AbstractPage;
 import ru.yandex.qatools.htmlelements.element.Link;
 
-import static precisionFDA.data.TestRunData.*;
+import static precisionFDA.data.TestCommonData.*;
 import static precisionFDA.utils.Utils.*;
 
 public class AdminDashboardPage extends AbstractPage {

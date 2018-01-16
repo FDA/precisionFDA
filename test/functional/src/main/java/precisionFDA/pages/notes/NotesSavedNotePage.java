@@ -7,7 +7,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
-import precisionFDA.data.TestRunData;
+import precisionFDA.data.TestCommonData;
 import precisionFDA.data.TestUserData;
 import precisionFDA.locators.NotesLocators;
 import precisionFDA.model.NoteProfile;
@@ -194,7 +194,7 @@ public class NotesSavedNotePage extends AbstractPage {
         log.info("write and save comment");
         getNotesSavedNoteCommentAreaWE().sendKeys(getNoteCommentText());
         getNotesSavedNoteCommentSubmitButton().click();
-        noteProfile.setCommentCreatedText(TestRunData.getCurrentTimezone());
+        noteProfile.setCommentCreatedText(TestCommonData.getCurrentTimezone());
         return new NotesSavedNotePage(getDriver());
     }
 

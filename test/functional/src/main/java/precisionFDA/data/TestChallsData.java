@@ -8,8 +8,8 @@ import java.util.Date;
 
 import static precisionFDA.data.TestDict.getDictDelimiterValue;
 import static precisionFDA.data.TestDict.getDictSetup;
-import static precisionFDA.data.TestRunData.getTestImageHttpsUrl;
-import static precisionFDA.data.TestRunData.getText1000Symbols;
+import static precisionFDA.utils.TestRunConfig.getTestImageHttpsUrl;
+import static precisionFDA.data.TestCommonData.getText1000Symbols;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class TestChallsData {
@@ -79,7 +79,7 @@ public class TestChallsData {
     }
 
     public static String getMainChallScoringUser() {
-        return TestUserData.getTestUserOne().getApplUsername();
+        return TestUserData.getTestUserTwo().getApplUsername();
     }
 
     public static String getChallCardImage() {

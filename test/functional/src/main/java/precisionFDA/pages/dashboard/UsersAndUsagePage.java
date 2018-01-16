@@ -9,8 +9,8 @@ import precisionFDA.data.TestUserData;
 import precisionFDA.locators.DashboardLocators;
 import precisionFDA.pages.AbstractPage;
 
-import static precisionFDA.data.TestRunData.getPathToDownloadsFolder;
-import static precisionFDA.data.TestRunData.getUsersAndUsageFileName;
+import static precisionFDA.data.TestCommonData.getPathToDownloadsFolder;
+import static precisionFDA.data.TestCommonData.getUsersAndUsageFileName;
 import static precisionFDA.utils.Utils.isFileContainsText;
 import static precisionFDA.utils.Utils.isFileDownloaded;
 import static precisionFDA.utils.Utils.waitUntilFileIsDownloaded;
