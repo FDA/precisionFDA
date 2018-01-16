@@ -54,7 +54,7 @@ class ChallengesController < ApplicationController
     challenge = Challenge.find_by!(id: params[:id])
     app = App.editable_by(@context).find_by(id: params[:app_id])
 
-    unless challenge.can_assign_specific_app?(@context.user, app)
+    unless challenge.can_assign_specific_app?(@context, app)
       flash[:error] = "This app cannot be assigned to the current challenge."
       redirect_to apps_path
       return
