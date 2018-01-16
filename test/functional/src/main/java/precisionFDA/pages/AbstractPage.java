@@ -340,13 +340,12 @@ public abstract class AbstractPage {
             return true;
         } else {
             String message = "It looks like a wrong page is open. Should be " + pageName;
-            log.error(message);
             String fileName =
-                    getDictWarning() + "_" +
+                    getDictError() + "_" +
                     pageName + "_" +
                     getRunTimeLocalUniqueValue()
                     + ".png";
-            reportScreenshot(message, fileName, getDictWarning());
+            reportScreenshot(message, fileName, getDictError());
             return false;
         }
     }

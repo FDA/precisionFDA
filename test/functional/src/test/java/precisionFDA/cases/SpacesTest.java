@@ -117,6 +117,11 @@ public class SpacesTest extends AbstractTest {
                 .as("'Accept' link for Guest Lead is displayed")
                 .isFalse();
 
+        SoftAssert.assertThat(
+                spaceDetailsPage.isMembersTabLinkDisplayed())
+                .as("Members Tab is displayed")
+                .isTrue();
+
         SoftAssert.assertAll();
     }
 
@@ -159,6 +164,11 @@ public class SpacesTest extends AbstractTest {
                 spaceDetailsPage.isAcceptByGuestLeadDisplayed())
                 .as("'Accept' link for Guest Lead is displayed")
                 .isFalse();
+
+        SoftAssert.assertThat(
+                spaceDetailsPage.isMembersTabLinkDisplayed())
+                .as("Members Tab is displayed")
+                .isTrue();
 
         SoftAssert.assertAll();
     }
