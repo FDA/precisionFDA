@@ -9,7 +9,7 @@ import precisionFDA.utils.Utils;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.TextInput;
-import precisionFDA.data.TestRunData;
+import precisionFDA.data.TestCommonData;
 import precisionFDA.data.TestUserData;
 import precisionFDA.locators.AppsLocators;
 import precisionFDA.model.AppProfile;
@@ -17,9 +17,9 @@ import precisionFDA.model.UserProfile;
 import precisionFDA.pages.AbstractPage;
 
 import static precisionFDA.data.TestAppData.getAppCommentText;
-import static precisionFDA.data.TestRunData.getDockerFileName;
-import static precisionFDA.data.TestRunData.getDockerValidationText;
-import static precisionFDA.data.TestRunData.getPathToDownloadsFolder;
+import static precisionFDA.data.TestCommonData.getDockerFileName;
+import static precisionFDA.data.TestCommonData.getDockerValidationText;
+import static precisionFDA.data.TestCommonData.getPathToDownloadsFolder;
 import static precisionFDA.utils.Utils.*;
 import static precisionFDA.utils.Utils.getFileSize;
 
@@ -394,7 +394,7 @@ public class AppsSavedAppPage extends AbstractPage {
         log.info("leave a comment");
         getAppsSavedAppCommentArea().sendKeys(getAppCommentText());
         getAppsSavedAppCommentButton().click();
-        appProfile.setAppCommentCreatedText(TestRunData.getCurrentTimezone());
+        appProfile.setAppCommentCreatedText(TestCommonData.getCurrentTimezone());
         return new AppsSavedAppPage(getDriver());
     }
 

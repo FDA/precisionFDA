@@ -16,7 +16,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
 import static precisionFDA.data.TestDict.getDictError;
 import static precisionFDA.data.TestDict.getDictWarning;
-import static precisionFDA.data.TestRunData.*;
+import static precisionFDA.data.TestCommonData.*;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 import static precisionFDA.utils.Utils.takeScreenshot;
 

@@ -19,7 +19,7 @@ public class SpacesPage extends AbstractPage {
     public SpacesPage(final WebDriver driver) {
         super(driver);
         // waitUntilScriptsReady();
-        waitForPageToLoadAndVerifyBy(By.xpath(SpacesLocators.SPACES_MAIN_DIV));
+        waitForPageToLoadAndVerifyBy(By.xpath(SpacesLocators.SPACES_HOST_LEAD_COLUMN));
     }
 
     public Link getProvisionSpaceButtonLink() {

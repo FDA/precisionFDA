@@ -11,7 +11,7 @@ import precisionFDA.pages.overview.OverviewPage;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertTrue;
 import static precisionFDA.data.TestAppData.*;
-import static precisionFDA.data.TestRunData.*;
+import static precisionFDA.data.TestCommonData.*;
 import static precisionFDA.utils.Utils.*;
 
 @Name("Applications management test suite")

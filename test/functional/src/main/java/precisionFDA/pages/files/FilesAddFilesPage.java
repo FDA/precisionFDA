@@ -10,7 +10,7 @@ import ru.yandex.qatools.htmlelements.element.TextInput;
 import precisionFDA.locators.FilesLocators;
 import precisionFDA.pages.AbstractPage;
 
-import static precisionFDA.data.TestRunData.getPathToTempFilesFolder;
+import static precisionFDA.utils.TestRunConfig.getPathToTempFilesFolder;
 
 public class FilesAddFilesPage extends AbstractPage {
 
@@ -70,7 +70,7 @@ public class FilesAddFilesPage extends AbstractPage {
     public FilesAddFilesPage browseFileToUpload(String fileName) {
         log.info("select file to upload");
 
-        String textFilePath = System.getProperty("user.dir") + getPathToTempFilesFolder() + fileName;
+        String textFilePath = getPathToTempFilesFolder() + fileName;
 
         browseFile(textFilePath);
         return new FilesAddFilesPage(getDriver());

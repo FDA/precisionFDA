@@ -32,6 +32,10 @@ public class SpacesLocators {
 
     public static final String SPACES_MAIN_DIV = "//*[@id='spaces']";
 
+    public static final String SPACES_TITLE_WE = "//*[@id='spaces_title']";
+
+    public static final String SPACES_HOST_LEAD_COLUMN= "//*[@id='spaces']//*[text()='Host Lead']";
+
     public static final String SPACES_CREATE_FOLDER_BUTTON = "//*[contains(@data-target, 'folder')][contains(@data-target, 'create')]";
 
     public static final String SPACES_CREATE_FOLDER_FORM_CREATE_BUTTON = "//*[@id='create-folder-modal']//button[text()='Create']";

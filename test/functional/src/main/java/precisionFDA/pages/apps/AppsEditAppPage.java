@@ -11,7 +11,7 @@ import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.Select;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 import precisionFDA.data.TestDict;
-import precisionFDA.data.TestRunData;
+import precisionFDA.data.TestCommonData;
 import precisionFDA.locators.AppsLocators;
 import precisionFDA.locators.CommonLocators;
 import precisionFDA.model.AppProfile;
@@ -23,7 +23,7 @@ import static precisionFDA.data.TestChallsData.*;
 import static precisionFDA.data.TestChallsData.getTestChallAppInputFileFieldName1;
 import static precisionFDA.data.TestDict.getDictFile;
 import static precisionFDA.data.TestDict.getDictString;
-import static precisionFDA.data.TestRunData.*;
+import static precisionFDA.data.TestCommonData.*;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 import static precisionFDA.utils.Utils.sleep;
 
@@ -240,7 +240,7 @@ public class AppsEditAppPage extends AbstractPage {
     public AppsSavedAppPage saveRevision(AppProfile appProfile) {
         log.info("save revision");
         getEditAppSaveRevisionButton().click();
-        appProfile.setCurRevAppCreatedText(TestRunData.getCurrentTimezone());
+        appProfile.setCurRevAppCreatedText(TestCommonData.getCurrentTimezone());
         return new AppsSavedAppPage(getDriver());
     }
 
@@ -320,7 +320,7 @@ public class AppsEditAppPage extends AbstractPage {
     public AppsSavedAppPage clickCreate(AppProfile appProfile) {
         log.info("click Create button");
         getAppCreateAppButton().click();
-        appProfile.setInitAppCreatedText(TestRunData.getCurrentTimezone());
+        appProfile.setInitAppCreatedText(TestCommonData.getCurrentTimezone());
         return new AppsSavedAppPage(getDriver());
     }
 

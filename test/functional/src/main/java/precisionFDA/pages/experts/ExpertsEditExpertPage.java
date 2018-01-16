@@ -12,7 +12,7 @@ import precisionFDA.locators.ExpertsLocators;
 import precisionFDA.model.ExpertProfile;
 import precisionFDA.pages.AbstractPage;
 
-import static precisionFDA.data.TestRunData.getPathToTempFilesFolder;
+import static precisionFDA.utils.TestRunConfig.getPathToTempFilesFolder;
 
 public class ExpertsEditExpertPage extends AbstractPage {
 

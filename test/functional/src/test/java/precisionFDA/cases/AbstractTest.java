@@ -31,7 +31,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
 import static precisionFDA.data.TestDict.*;
-import static precisionFDA.data.TestRunData.*;
+import static precisionFDA.utils.TestRunConfig.*;
+import static precisionFDA.data.TestCommonData.*;
 import static precisionFDA.utils.Utils.*;
 
 @Listeners( { CustomResultListener.class } )
@@ -202,9 +203,9 @@ public abstract class AbstractTest {
         String loginPageURL = getLoginPfdaPageURL();
         driver.manage().deleteAllCookies();
         loginPageURL = loginPageURL
-                .replace("{basicAuthUser}", user.getBasicAuthUsername())
-                .replace("{basicAuthPassword}", user.getBasicAuthPassword())
-                .replace("{pfdaStartUrl}", getPfdaOverviewURL());
+                .replace("_basicAuthUser_", user.getBasicAuthUsername())
+                .replace("_basicAuthPassword_", user.getBasicAuthPassword())
+                .replace("_pfdaStartUrl_", getPfdaOverviewURL());
         driver.get(loginPageURL);
         return new LoginPrecisionPage(driver);
     }

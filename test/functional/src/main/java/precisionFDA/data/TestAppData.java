@@ -3,7 +3,7 @@ package precisionFDA.data;
 import precisionFDA.model.AppProfile;
 
 import static precisionFDA.data.TestChallsData.*;
-import static precisionFDA.data.TestRunData.*;
+import static precisionFDA.data.TestCommonData.*;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 
 public class TestAppData {
@@ -134,11 +134,11 @@ public class TestAppData {
     // ---------------------
 
     public static final String getTimeZoneAppName() {
-        return CREATE_APP_NAME_PREFIX + " " + getRunTimeLocalUniqueValue() + " " + TestRunData.getCurrentTimezone();
+        return CREATE_APP_NAME_PREFIX + " " + getRunTimeLocalUniqueValue() + " " + TestCommonData.getCurrentTimezone();
     }
 
     public static final String getTimeZoneAppTitle() {
-        return CREATE_APP_TITLE_PREFIX + " " + getRunTimeLocalUniqueValue() + " " + TestRunData.getCurrentTimezone();
+        return CREATE_APP_TITLE_PREFIX + " " + getRunTimeLocalUniqueValue() + " " + TestCommonData.getCurrentTimezone();
     }
 
     // ---------------------

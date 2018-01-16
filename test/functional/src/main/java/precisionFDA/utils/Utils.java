@@ -20,7 +20,10 @@ import javax.imageio.ImageIO;
 
 import static precisionFDA.data.TestDict.*;
 import static precisionFDA.data.TestFilesData.*;
-import static precisionFDA.data.TestRunData.*;
+import static precisionFDA.utils.TestRunConfig.getPathToTempFilesFolder;
+import static precisionFDA.utils.TestRunConfig.getPathToTestFilesFolder;
+import static precisionFDA.utils.TestRunConfig.isScreenshotFeatureOn;
+import static precisionFDA.data.TestCommonData.*;
 
 public class Utils {
 

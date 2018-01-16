@@ -34,7 +34,7 @@ public class ChallsTest extends AbstractTest {
     public void precondition() {
         printTestHeader("Precondition: login and set timezone");
 
-        UserProfile user = TestUserData.getTestUserOne();
+        UserProfile user = TestUserData.getTestUserTwo();
         TimeZoneProfile timeZone = getMoscowTimeZone();
 
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -194,7 +194,7 @@ public class ChallsTest extends AbstractTest {
     public void assignToChallenge() {
         printTestHeader("Test Case: assign the created app to the created challenge");
 
-        UserProfile user = TestUserData.getTestUserOne();
+        UserProfile user = TestUserData.getTestUserTwo();
         AppProfile appProfile = TestAppData.getChallAppProfile();
         ChallProfile challProfile = getMainChallProfile();
 
@@ -250,7 +250,7 @@ public class ChallsTest extends AbstractTest {
     public void joinChallenge() {
         printTestHeader("Test Case: join challenge");
 
-        UserProfile user = TestUserData.getTestUserTwo();
+        UserProfile user = TestUserData.getTestUserOne();
         ChallProfile challProfile = getMainChallProfile();
 
         logoutFromAll();
@@ -351,7 +351,7 @@ public class ChallsTest extends AbstractTest {
     public void submitChallengeEntryByAppAuthor() {
         printTestHeader("Test Case: submit challenge entry by the app author [test user one]");
 
-        UserProfile user = TestUserData.getTestUserOne();
+        UserProfile user = TestUserData.getTestUserTwo();
         ChallProfile challProfile = getMainChallProfile();
         FileProfile inputFileProfile = getSecondNewChallEntryFile();
         ChallEntryProfile challEntryProfile = getSecondChallEntryProfile();
@@ -436,7 +436,7 @@ public class ChallsTest extends AbstractTest {
     public void verifyEntryStatusByAnotherUser() {
         printTestHeader("Test Case: verify entry status by test user two");
 
-        UserProfile user = TestUserData.getTestUserTwo();
+        UserProfile user = TestUserData.getTestUserOne();
         ChallProfile challProfile = getMainChallProfile();
         ChallEntryProfile challEntryProfile = getMainChallEntryProfile();
         FileProfile inputFileProfile = getMainNewChallEntryFile();

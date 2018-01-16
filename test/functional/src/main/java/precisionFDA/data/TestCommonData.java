@@ -1,12 +1,12 @@
 package precisionFDA.data;
 
+import static precisionFDA.utils.TestRunConfig.getPathToTempFilesFolder;
+import static precisionFDA.utils.TestRunConfig.getPathToTestFilesFolder;
 import static precisionFDA.utils.Utils.getCurrentDate_YYYY_MM_dd;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 import static precisionFDA.utils.Utils.getTextFromFile;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 
-public class TestRunData {
+public class TestCommonData {
 
     static String finishedCaseStatus;
 
@@ -41,10 +41,6 @@ public class TestRunData {
     static final String USERS_AND_USAGE_FILE_NAME_PREFIX = "users_usage_";
 
     static final String DOCKER_VALIDATION_TEXT = "RUN DEBIAN_FRONTEND";
-
-    protected static final Config config = ConfigFactory.load("settings");
-
-    final static String profile = "test_settings_profile_1";
 
     public static String getDockerValidationText() {
         return DOCKER_VALIDATION_TEXT;
@@ -116,26 +112,6 @@ public class TestRunData {
         return testRunUniqueFinalValue;
     }
 
-    public static boolean isGetScreenshotOnPass() {
-        return getScreenshotOnTestSuccess().equalsIgnoreCase("true");
-    }
-
-    public static boolean isGetScreenshotOnFail() {
-        return getScreenshotOnTestFailure().equalsIgnoreCase("true");
-    }
-
-    public static boolean isGetPageSourceOnPass() {
-        return getHtmlSourceOnTestSuccess().equalsIgnoreCase("true");
-    }
-
-    public static boolean isGetPageSourceOnFail() {
-        return getHtmlSourceOnTestFailure().equalsIgnoreCase("true");
-    }
-
-    public static boolean isScreenshotFeatureOn() {
-        return getScreenshotFeatureOn().equalsIgnoreCase("true");
-    }
-
     public static String getInputNameFieldName() {
         return INPUT_NAME_FIELD_NAME;
     }
@@ -168,65 +144,8 @@ public class TestRunData {
         return getPathToTempFilesFolder();
     }
 
-    public static String getPathToTestFilesFolder() {
-        return System.getProperty("user.dir") + config.getString(profile + ".pathToTestFiles");
-    }
-
-    public static String getPathToTempFilesFolder() {
-        return System.getProperty("user.dir") + config.getString(profile + ".pathToTempFiles");
-    }
-
-    public static String getTestImageHttpsUrl() {
-        return config.getString(profile + ".testImageHttpsUrl");
-    }
-
     public static String getText1000Symbols() {
         String sFilePath = getPathToTestFilesFolder() + "text_1000_symbols.txt";
         return getTextFromFile(sFilePath);
     }
-
-    public static String getPfdaOverviewURL() {
-        return config.getString(profile + ".precisionFdaOverviewURL");
-    }
-
-    public static String getPfdaFilesURL() {
-        return config.getString(profile + ".precisionFdaFilesURL");
-    }
-
-    public static String getLoginPfdaPageURL() {
-        return config.getString(profile + ".loginPrecisionPageURL");
-    }
-
-    public static String getStagingURL() {
-        return config.getString(profile + ".stagingURL");
-    }
-
-    public static String getScreenshotFeatureOn() {
-        return config.getString(profile + ".screenshotFeatureOn");
-    }
-
-    public static String getScreenshotOnTestSuccess() {
-        return config.getString(profile + ".screenshotOnTestSuccess");
-    }
-
-    public static String getScreenshotOnTestFailure() {
-        return config.getString(profile + ".screenshotOnTestFailure");
-    }
-
-    public static String getHtmlSourceOnTestSuccess() {
-        return config.getString(profile + ".htmlSourceOnTestSuccess");
-    }
-
-    public static String getHtmlSourceOnTestFailure() {
-        return config.getString(profile + ".htmlSourceOnTestFailure");
-    }
-
-    public static String getHeadlessMode() {
-        return config.getString(profile + ".headlessMode");
-    }
-
-    public static String getPathToFirefoxDriver() {
-        return config.getString(profile + ".pathToFirefoxDriver");
-    }
-
 }
