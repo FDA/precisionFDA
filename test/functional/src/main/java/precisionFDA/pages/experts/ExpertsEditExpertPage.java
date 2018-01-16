@@ -11,7 +11,8 @@ import ru.yandex.qatools.htmlelements.element.TextInput;
 import precisionFDA.locators.ExpertsLocators;
 import precisionFDA.model.ExpertProfile;
 import precisionFDA.pages.AbstractPage;
-import precisionFDA.utils.SettingsProperties;
+
+import static precisionFDA.data.TestRunData.getPathToTempFilesFolder;
 
 public class ExpertsEditExpertPage extends AbstractPage {
 
@@ -142,7 +143,7 @@ public class ExpertsEditExpertPage extends AbstractPage {
         waitUntilDisplayed(getImageUploadBrowseButton());
 
         getImageUploadBrowseInput().sendKeys(System.getProperty("user.dir")
-                + SettingsProperties.getProperty("pathToTempFiles")
+                + getPathToTempFilesFolder()
                 + expertProfile.getExpertImage());
 
         waitUntilDisplayed(getImageUploadButton());

@@ -1,11 +1,10 @@
 package precisionFDA.data;
 
-import precisionFDA.utils.SettingsProperties;
-
-import static precisionFDA.utils.SettingsProperties.getTestRunEnv;
 import static precisionFDA.utils.Utils.getCurrentDate_YYYY_MM_dd;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 import static precisionFDA.utils.Utils.getTextFromFile;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 public class TestRunData {
 
@@ -43,6 +42,10 @@ public class TestRunData {
 
     static final String DOCKER_VALIDATION_TEXT = "RUN DEBIAN_FRONTEND";
 
+    protected static final Config config = ConfigFactory.load("settings");
+
+    final static String profile = "test_settings_profile_1";
+
     public static String getDockerValidationText() {
         return DOCKER_VALIDATION_TEXT;
     }
@@ -72,7 +75,7 @@ public class TestRunData {
     }
 
     public static String getDebugLogFolderPath() {
-        return getDebugLogFolder() + "run_" + getTestRunEnv().toLowerCase() + "_" + getFilePathUniqueValue() + "/";
+        return getDebugLogFolder() + "run_" + getFilePathUniqueValue() + "/";
     }
 
     public static void setFinishedCaseData(String caseStatus, String caseName, String suiteName) {
@@ -114,23 +117,23 @@ public class TestRunData {
     }
 
     public static boolean isGetScreenshotOnPass() {
-        return SettingsProperties.getProperty("screenshotOnTestSuccess").equalsIgnoreCase("true");
+        return getScreenshotOnTestSuccess().equalsIgnoreCase("true");
     }
 
     public static boolean isGetScreenshotOnFail() {
-        return SettingsProperties.getProperty("screenshotOnTestFailure").equalsIgnoreCase("true");
+        return getScreenshotOnTestFailure().equalsIgnoreCase("true");
     }
 
     public static boolean isGetPageSourceOnPass() {
-        return SettingsProperties.getProperty("htmlSourceOnTestSuccess").equalsIgnoreCase("true");
+        return getHtmlSourceOnTestSuccess().equalsIgnoreCase("true");
     }
 
     public static boolean isGetPageSourceOnFail() {
-        return SettingsProperties.getProperty("htmlSourceOnTestFailure").equalsIgnoreCase("true");
+        return getHtmlSourceOnTestFailure().equalsIgnoreCase("true");
     }
 
     public static boolean isScreenshotFeatureOn() {
-        return SettingsProperties.getProperty("screenshotFeatureOn").equalsIgnoreCase("true");
+        return getScreenshotFeatureOn().equalsIgnoreCase("true");
     }
 
     public static String getInputNameFieldName() {
@@ -166,20 +169,64 @@ public class TestRunData {
     }
 
     public static String getPathToTestFilesFolder() {
-        return System.getProperty("user.dir") + SettingsProperties.getProperty("pathToTestFiles");
+        return System.getProperty("user.dir") + config.getString(profile + ".pathToTestFiles");
     }
 
     public static String getPathToTempFilesFolder() {
-        return System.getProperty("user.dir") + SettingsProperties.getProperty("pathToTempFiles");
+        return System.getProperty("user.dir") + config.getString(profile + ".pathToTempFiles");
     }
 
     public static String getTestImageHttpsUrl() {
-        return SettingsProperties.getProperty("testImageHttpsUrl");
+        return config.getString(profile + ".testImageHttpsUrl");
     }
 
     public static String getText1000Symbols() {
         String sFilePath = getPathToTestFilesFolder() + "text_1000_symbols.txt";
         return getTextFromFile(sFilePath);
+    }
+
+    public static String getPfdaOverviewURL() {
+        return config.getString(profile + ".precisionFdaOverviewURL");
+    }
+
+    public static String getPfdaFilesURL() {
+        return config.getString(profile + ".precisionFdaFilesURL");
+    }
+
+    public static String getLoginPfdaPageURL() {
+        return config.getString(profile + ".loginPrecisionPageURL");
+    }
+
+    public static String getStagingURL() {
+        return config.getString(profile + ".stagingURL");
+    }
+
+    public static String getScreenshotFeatureOn() {
+        return config.getString(profile + ".screenshotFeatureOn");
+    }
+
+    public static String getScreenshotOnTestSuccess() {
+        return config.getString(profile + ".screenshotOnTestSuccess");
+    }
+
+    public static String getScreenshotOnTestFailure() {
+        return config.getString(profile + ".screenshotOnTestFailure");
+    }
+
+    public static String getHtmlSourceOnTestSuccess() {
+        return config.getString(profile + ".htmlSourceOnTestSuccess");
+    }
+
+    public static String getHtmlSourceOnTestFailure() {
+        return config.getString(profile + ".htmlSourceOnTestFailure");
+    }
+
+    public static String getHeadlessMode() {
+        return config.getString(profile + ".headlessMode");
+    }
+
+    public static String getPathToFirefoxDriver() {
+        return config.getString(profile + ".pathToFirefoxDriver");
     }
 
 }

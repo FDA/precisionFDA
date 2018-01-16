@@ -4,13 +4,11 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import precisionFDA.model.UserProfile;
 
-import static precisionFDA.utils.SettingsProperties.getTestRunEnv;
-
 public class TestUserData {
 
     // test user 1
 
-    protected static final Config config = ConfigFactory.load(getConfFile());
+    protected static final Config config = ConfigFactory.load("credentials");
 
     public static String atUser1 = "pfda_at_user_1";
 
@@ -42,30 +40,6 @@ public class TestUserData {
             return config.getString(atUser1 + ".userOrg");
         }
 
-    public static String basicAuthUser1Username() {
-        return getPfdaUser1DNXusername();
-    }
-
-    public static String basicAuthUser1Password() {
-        return getPfdaUser1DNXpassword();
-    }
-
-    public static String pfdaUser1Username() {
-        return getPfdaUser1Username();
-    }
-
-    public static String pfdaUser1Password() {
-        return getPfdaUser1Password();
-    }
-
-    public static String pfdaUser1FullName() {
-        return getPfdaUser1FullName();
-    }
-
-    public static String pfdaUser1Org() {
-        return getPfdaUser1Org();
-    }
-
     // admin user
 
     public static String getPfdaUserAdminUsername() {
@@ -90,30 +64,6 @@ public class TestUserData {
 
     public static String getPfdaUserAdminOrg() {
         return config.getString(atUserAdmin + ".userOrg");
-    }
-
-    public static String basicAuthUserAdminUsername() {
-        return getPfdaUserAdminDNXusername();
-    }
-
-    public static String basicAuthUserAdminPassword() {
-        return getPfdaUserAdminDNXpassword();
-    }
-
-    public static String pfdaUserAdminUsername() {
-        return getPfdaUserAdminUsername();
-    }
-
-    public static String pfdaUserAdminPassword() {
-        return getPfdaUserAdminPassword();
-    }
-
-    public static String pfdaUserAdminFullName() {
-        return getPfdaUserAdminFullName();
-    }
-
-    public static String pfdaUserAdminOrg() {
-        return getPfdaUserAdminOrg();
     }
 
     // test user 2
@@ -142,66 +92,46 @@ public class TestUserData {
         return config.getString(atUser2 + ".userOrg");
     }
 
-    public static String basicAuthUser2Username() {
-        return getPfdaUser2DNXusername();
-    }
-
-    public static String basicAuthUser2Password() {
-        return getPfdaUser2DNXpassword();
-    }
-
-    public static String pfdaUser2Username() {
-        return getPfdaUser2Username();
-    }
-
-    public static String pfdaUser2Password() {
-        return getPfdaUser2Password();
-    }
-
-    public static String pfdaUser2FullName() {
-        return getPfdaUser2FullName();
-    }
-
-    public static String pfdaUser2Org() {
-        return getPfdaUser2Org();
-    }
-
     //====================
 
     public static UserProfile getTestUserOne() {
-        return new UserProfile(TestUserData.basicAuthUser1Username(), TestUserData.basicAuthUser1Password(),
-                TestUserData.pfdaUser1Username(), TestUserData.pfdaUser1Password(),
-                TestUserData.pfdaUser1FullName(), TestUserData.pfdaUser1Org());
+        return new UserProfile(
+                TestUserData.getPfdaUser1DNXusername(),
+                TestUserData.getPfdaUser1DNXpassword(),
+                TestUserData.getPfdaUser1Username(),
+                TestUserData.getPfdaUser1Password(),
+                TestUserData.getPfdaUser1FullName(),
+                TestUserData.getPfdaUser1Org());
     }
 
     public static UserProfile getTestUserTwo() {
-        return new UserProfile(TestUserData.basicAuthUser2Username(), TestUserData.basicAuthUser2Password(),
-                TestUserData.pfdaUser2Username(), TestUserData.pfdaUser2Password(),
-                TestUserData.pfdaUser2FullName(), TestUserData.pfdaUser2Org());
+        return new UserProfile(
+                TestUserData.getPfdaUser2DNXusername(),
+                TestUserData.getPfdaUser2DNXpassword(),
+                TestUserData.getPfdaUser2Username(),
+                TestUserData.getPfdaUser2Password(),
+                TestUserData.getPfdaUser2FullName(),
+                TestUserData.getPfdaUser2Org());
     }
 
     public static UserProfile getWrongUser() {
-        return new UserProfile(TestUserData.basicAuthUser1Username(), TestUserData.basicAuthUser1Password(),
-                TestUserData.pfdaUser1Username(), "wrongPassword",
-                TestUserData.pfdaUser1FullName(), TestUserData.pfdaUser1Org());
+        return new UserProfile(
+                TestUserData.getPfdaUser1DNXusername(),
+                TestUserData.getPfdaUser1DNXpassword(),
+                TestUserData.getPfdaUser1Username(),
+                TestUserData.getPfdaUser1Password() + "wrong",
+                TestUserData.getPfdaUser1FullName(),
+                TestUserData.getPfdaUser1Org());
     }
 
     public static UserProfile getAdminUser() {
-        return new UserProfile(TestUserData.basicAuthUserAdminUsername(), TestUserData.basicAuthUserAdminPassword(),
-                TestUserData.pfdaUserAdminUsername(), TestUserData.pfdaUserAdminPassword(),
-                TestUserData.pfdaUserAdminFullName(), TestUserData.pfdaUserAdminOrg());
-    }
-
-    private static String getConfFile() {
-        String env = getTestRunEnv();
-        String confFile ="";
-        if (env.equalsIgnoreCase("dev")) {
-            confFile = "dev_user_creds";
-        }
-        if (env.equalsIgnoreCase("loc")) {
-            confFile = "loc_user_creds";
-        }
-        return confFile;
+        return new UserProfile(
+                TestUserData.getPfdaUserAdminDNXusername(),
+                TestUserData.getPfdaUserAdminDNXpassword(),
+                TestUserData.getPfdaUserAdminUsername(),
+                TestUserData.getPfdaUserAdminPassword(),
+                TestUserData.getPfdaUserAdminFullName(),
+                TestUserData.getPfdaUserAdminOrg());
     }
 
 }

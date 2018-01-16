@@ -20,7 +20,6 @@ import precisionFDA.pages.login.LoginPrecisionPage;
 import precisionFDA.pages.overview.OverviewPage;
 import precisionFDA.pages.staging.LoginStagingPage;
 import precisionFDA.pages.staging.MainStagingPage;
-import precisionFDA.utils.SettingsProperties;
 import tools.CustomResultListener;
 
 import java.io.File;
@@ -33,7 +32,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
 import static precisionFDA.data.TestDict.*;
 import static precisionFDA.data.TestRunData.*;
-import static precisionFDA.utils.SettingsProperties.getTestRunEnv;
 import static precisionFDA.utils.Utils.*;
 
 @Listeners( { CustomResultListener.class } )
@@ -48,7 +46,7 @@ public abstract class AbstractTest {
     @BeforeClass(alwaysRun = true)
     public void setUp() {
         driver = new DriverFactory().getInstance().getDriver();
-        log.info("=== Environment is: " + getTestRunEnv().toUpperCase() + " ===");
+        log.info("=== Environment is: " + getPfdaOverviewURL() + " ===");
     }
 
     @AfterClass(alwaysRun = true)
@@ -187,24 +185,26 @@ public abstract class AbstractTest {
 
     public OverviewPage openOverviewPage() {
         log.info("open Overview page");
-        String url = SettingsProperties.getProperty("precisionFdaOverviewURL");
+        String url = getPfdaOverviewURL();
         driver.get(url);
         return new OverviewPage(driver);
     }
 
     public FilesPage openFilesPage() {
         log.info("open Files page");
-        String url = SettingsProperties.getProperty("precisionFdaFilesURL");
+        String url = getPfdaFilesURL();
         driver.get(url);
         return new FilesPage(driver);
     }
 
     public LoginPrecisionPage openLoginPrecisionPage(UserProfile user) {
         log.info("open Precision FDA Login page");
-        String loginPageURL = SettingsProperties.getProperty("loginPrecisionPageURL");
+        String loginPageURL = getLoginPfdaPageURL();
         driver.manage().deleteAllCookies();
-        loginPageURL = loginPageURL.replace("{basicAuthUser}", user.getBasicAuthUsername())
-                .replace("{basicAuthPassword}", user.getBasicAuthPassword());
+        loginPageURL = loginPageURL
+                .replace("{basicAuthUser}", user.getBasicAuthUsername())
+                .replace("{basicAuthPassword}", user.getBasicAuthPassword())
+                .replace("{pfdaStartUrl}", getPfdaOverviewURL());
         driver.get(loginPageURL);
         return new LoginPrecisionPage(driver);
     }
@@ -218,7 +218,7 @@ public abstract class AbstractTest {
 
     public MainStagingPage openStaging() {
         log.info("open Staging");
-        String stagingURL = SettingsProperties.getProperty("stagingURL");
+        String stagingURL = getStagingURL();
         driver.get(stagingURL);
         return new MainStagingPage(driver);
     }
@@ -280,7 +280,7 @@ public abstract class AbstractTest {
             FirefoxBinary firefoxBinary = new FirefoxBinary();
 
             String headlessModeCmd = "" + System.getProperty("headlessMode");
-            String headlessModeCfg = "" + SettingsProperties.getProperty("headlessMode");
+            String headlessModeCfg = getHeadlessMode();
             String headlessMode;
 
             if (headlessModeCmd.equalsIgnoreCase(getDictTrue()) || headlessModeCmd.equalsIgnoreCase(getDictFalse())) {
@@ -293,7 +293,7 @@ public abstract class AbstractTest {
             if (headlessMode.equalsIgnoreCase("true")) {
                 firefoxBinary.addCommandLineOptions("--headless");
             }
-            System.setProperty("webdriver.gecko.driver", currentDirectory + SettingsProperties.getProperty("pathToFirefoxDriver"));
+            System.setProperty("webdriver.gecko.driver", currentDirectory + getPathToFirefoxDriver());
             System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
 
             FirefoxOptions firefoxOptions = new FirefoxOptions();

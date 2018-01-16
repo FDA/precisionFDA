@@ -102,10 +102,17 @@ public class SpaceDetailsPage extends AbstractPage {
     @FindBy(xpath = SpacesLocators.FILES_PUBLISH_DIALOG_PUBLISH_BUTTON)
     private Button publishDialogPublishButton;
 
+    @FindBy(xpath = SpacesLocators.SPACE_DETAILS_MEMBERS_TAB_LINK)
+    private Link membersTabLink;
+
     public SpaceDetailsPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(SpacesLocators.SPACE_DETAILS_MEMBERS_TAB_LINK));
+    }
+
+    public Link getMembersTabLink() {
+        return membersTabLink;
     }
 
     public WebElement getSpaceFilesFirstCheckbox() {
@@ -375,6 +382,10 @@ public class SpaceDetailsPage extends AbstractPage {
 
     public boolean isDangerNotificationDisplayed() {
         return isElementPresent(getDangerNotification(), 1);
+    }
+
+    public boolean isMembersTabLinkDisplayed() {
+        return isElementPresent(getMembersTabLink(), 1);
     }
 
     public void clickMoveSelected() {

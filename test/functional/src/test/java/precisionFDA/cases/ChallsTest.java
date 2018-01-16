@@ -572,7 +572,6 @@ public class ChallsTest extends AbstractTest {
                 .isTrue();
 
         SoftAssert.assertAll();
-
     }
 
 }
