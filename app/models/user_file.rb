@@ -46,6 +46,10 @@ class UserFile < Node
 
   DESCRIPTION_MAX_LENGTH = 1000
 
+  STATE_CLOSING = "closing"
+  STATE_CLOSED = "closed"
+  STATE_OPEN = "open"
+
   belongs_to :user
   belongs_to :parent, {polymorphic: true}
   has_many :notes, {through: :attachments}
