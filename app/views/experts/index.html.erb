@@ -1,6 +1,6 @@
 <% content_for :title do %>Experts<% end %>
 
-<% if @context.logged_in? && @context.user.can_administer_site? %>
+<% if @context.can_administer_site? %>
 <div class="pfda-toolbar text-center">
   <div class="btn-group">
     <%= link_to new_expert_path, class: 'btn btn-primary' do %>

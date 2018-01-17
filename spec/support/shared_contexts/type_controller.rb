@@ -13,4 +13,12 @@ RSpec.shared_context "type_controller", type: :controller do
     @request.session[:org_id] = user.org_id
   end
 
+  def authenticate_as_guest!
+    @request.session[:user_id] = -1
+    @request.session[:username] = "Guest-1"
+    @request.session[:token] = "INVALID"
+    @request.session[:expiration] = 30.day.since.to_i
+    @request.session[:org_id] = -1
+  end
+
 end
