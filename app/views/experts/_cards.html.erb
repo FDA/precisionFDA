@@ -36,7 +36,7 @@
         </div>
       </div>
       <div class="text-center">
-        <% if @context.logged_in? && @context.user.can_administer_site? %>
+        <% if @context.can_administer_site? %>
           <%= link_to edit_expert_path(e), class: 'btn btn-default btn-sm' do %>
             <span class="fa fa-pencil"></span> Edit
           <% end %>

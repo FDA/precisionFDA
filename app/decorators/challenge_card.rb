@@ -1,6 +1,13 @@
 class ChallengeCard
   delegate :title, to: :challenge
 
+  def self.by_context(challenge, context)
+    new(
+      challenge,
+      context.logged_in? ? context.user : User.new
+    )
+  end
+
   def initialize(challenge, user)
     @challenge = challenge
     @user = user
