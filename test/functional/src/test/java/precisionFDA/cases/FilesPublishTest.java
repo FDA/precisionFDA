@@ -21,7 +21,7 @@ public class FilesPublishTest extends AbstractTest {
         printTestHeader("Test Case: upload new file and verify access");
 
         FileProfile fileProfile = getPublishFileProfile();
-        UserProfile user = TestUserData.getTestUserOne();
+        UserProfile user = TestUserData.getTestUserTwo();
 
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         FilesPage filesPage = openFilesPage();
@@ -65,7 +65,7 @@ public class FilesPublishTest extends AbstractTest {
         printTestHeader("Test Case: verify the just uploaded file access by another user");
 
         FileProfile fileProfile = getPublishFileProfile();
-        UserProfile user = TestUserData.getTestUserTwo();
+        UserProfile user = TestUserData.getTestUserOne();
 
         logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -91,7 +91,7 @@ public class FilesPublishTest extends AbstractTest {
         printTestHeader("Test Case: verify the just uploaded file can be published by author");
 
         FileProfile fileProfile = getPublishFileProfile();
-        UserProfile user = TestUserData.getTestUserOne();
+        UserProfile user = TestUserData.getTestUserTwo();
 
         logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -132,7 +132,7 @@ public class FilesPublishTest extends AbstractTest {
         printTestHeader("Test Case: verify the published file access by another user");
 
         FileProfile fileProfile = getPublishFileProfile();
-        UserProfile user = TestUserData.getTestUserTwo();
+        UserProfile user = TestUserData.getTestUserOne();
 
         logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -183,7 +183,7 @@ public class FilesPublishTest extends AbstractTest {
         FileProfile thirdFile = getPublishGridThirdFile();
         FolderProfile folder = getPublishGridFolder();
 
-        UserProfile user = TestUserData.getTestUserOne();
+        UserProfile user = TestUserData.getTestUserTwo();
 
         logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
@@ -307,7 +307,7 @@ public class FilesPublishTest extends AbstractTest {
 
         FileProfile moveFileProfile = getMoveInPublicSpaceFileProfile();
         FolderProfile moveFolder = getMoveInPublicSpaceFolder();
-        UserProfile anotherTestUser = TestUserData.getTestUserTwo();
+        UserProfile anotherTestUser = TestUserData.getTestUserOne();
         UserProfile adminUser = TestUserData.getAdminUser();
 
         // login as another user

@@ -19,11 +19,23 @@ public class DocsPage extends AbstractPage {
     @FindBy(xpath = DocsLocators.DOCS_COMPS_TITLE)
     private WebElement docsCompsTitle;
 
+    @FindBy(xpath = DocsLocators.DOCS_TRACKING_TITLE)
+    private WebElement docsTrackingTitle;
+
+    @FindBy(xpath = DocsLocators.DOCS_PUBLISHING_TITLE)
+    private WebElement docsPublishingTitle;
+
     @FindBy(xpath = DocsLocators.DOCS_FILES_TITLE)
     private WebElement docsFilesTitle;
 
     @FindBy(xpath = DocsLocators.DOCS_APPS_TITLE)
     private WebElement docsAppsTitle;
+
+    @FindBy(xpath = DocsLocators.DOCS_LICENSES_TITLE)
+    private WebElement docsLicensesTitle;
+
+    @FindBy(xpath = DocsLocators.DOCS_VIDEO_TUTORIALS_TITLE)
+    private WebElement docsVideoTutorialsTitle;
 
     @FindBy(xpath = DocsLocators.DOCS_LIST_TITLE)
     private WebElement docsListTitle;
@@ -201,6 +213,22 @@ public class DocsPage extends AbstractPage {
         return docsNotesTitle;
     }
 
+    public WebElement getDocsVideoTutorialsTitle() {
+        return docsVideoTutorialsTitle;
+    }
+
+    public WebElement getDocsLicensesTitle() {
+        return docsLicensesTitle;
+    }
+
+    public WebElement getDocsPublishingTitle() {
+        return docsPublishingTitle;
+    }
+
+    public WebElement getDocsTrackingTitle() {
+        return docsTrackingTitle;
+    }
+
     public Link getCrAppsAssetsLink() {
         return crAppsAssetsLink;
     }
@@ -375,6 +403,10 @@ public class DocsPage extends AbstractPage {
 
     public boolean isFilesTitleDisplayed() {
         return isElementPresent(getDocsFilesTitle(), 1);
+    }
+
+    public boolean isDocsTrackingTitleDisplayed() {
+        return isElementPresent(getDocsTrackingTitle(), 1);
     }
 
     public boolean isDocsListTitleDisplayed() {
@@ -569,6 +601,18 @@ public class DocsPage extends AbstractPage {
         return isElementPresent(getCrAppsVMEnvLink(), 1);
     }
 
+    public boolean isDocsPublishingTitleDisplayed() {
+        return isElementPresent(getDocsPublishingTitle(), 1);
+    }
+
+    public boolean isDocsLicensesTitleDisplayed() {
+        return isElementPresent(getDocsLicensesTitle(), 1);
+    }
+
+    public boolean isDocsVideoTutorialsTitleDisplayed() {
+        return isElementPresent(getDocsVideoTutorialsTitle(), 1);
+    }
+
     public DocsPage clickIntroLink() {
         log.info("click Introduction");
         getIntroLink().click();
@@ -600,14 +644,39 @@ public class DocsPage extends AbstractPage {
     }
 
     public DocsPage clickNotesLink() {
-        log.info("click Notes Apps");
+        log.info("click Notes");
         getNotesLink().click();
         return new DocsPage(getDriver());
     }
 
     public DocsPage clickDiscussionsLink() {
-        log.info("click Discussions Apps");
+        log.info("click Discussions");
         getDiscsLink().click();
         return new DocsPage(getDriver());
     }
+
+    public DocsPage clickTrackingLink() {
+        log.info("click Tracking");
+        getTrackingLink().click();
+        return new DocsPage(getDriver());
+    }
+
+    public DocsPage clickPublishingLink() {
+        log.info("click Publishing");
+        getPublishingLink().click();
+        return new DocsPage(getDriver());
+    }
+
+    public DocsPage clickLicensesLink() {
+        log.info("click Licenses");
+        getLicensesLink().click();
+        return new DocsPage(getDriver());
+    }
+
+    public DocsPage clickVideoTutorialsLink() {
+        log.info("click VideoTutorials");
+        getVideoTutorialsLink().click();
+        return new DocsPage(getDriver());
+    }
+
 }

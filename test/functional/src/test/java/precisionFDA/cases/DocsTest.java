@@ -346,4 +346,80 @@ public class DocsTest extends AbstractTest {
         SoftAssert.assertAll();
     }
 
+    @Test(dependsOnMethods = {"successfulLogin", "openDocsPage"})
+    public void checkDocsTrackingPage() {
+        printTestHeader("Test Case: check Docs Tracking page");
+
+        DocsPage docsPage = getDocsPage();
+
+        assertThat(
+                docsPage.isTrackingLinkDisplayed())
+                .as("Link to Docs Tracking page is displayed")
+                .isTrue();
+
+        docsPage.clickTrackingLink();
+
+        assertThat(
+                docsPage.isDocsTrackingTitleDisplayed())
+                .as("Docs Tracking page title is displayed")
+                .isTrue();
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin", "openDocsPage"})
+    public void checkDocsPublishingPage() {
+        printTestHeader("Test Case: check Docs Publishing page");
+
+        DocsPage docsPage = getDocsPage();
+
+        assertThat(
+                docsPage.isPublishingLinkDisplayed())
+                .as("Link to Docs Publishing page is displayed")
+                .isTrue();
+
+        docsPage.clickPublishingLink();
+
+        assertThat(
+                docsPage.isDocsPublishingTitleDisplayed())
+                .as("Docs Publishing page title is displayed")
+                .isTrue();
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin", "openDocsPage"})
+    public void checkDocsLicensesPage() {
+        printTestHeader("Test Case: check Docs Licenses page");
+
+        DocsPage docsPage = getDocsPage();
+
+        assertThat(
+                docsPage.isLicensesLinkDisplayed())
+                .as("Link to Docs Licenses page is displayed")
+                .isTrue();
+
+        docsPage.clickLicensesLink();
+
+        assertThat(
+                docsPage.isDocsLicensesTitleDisplayed())
+                .as("Docs Licenses page title is displayed")
+                .isTrue();
+    }
+
+    @Test(dependsOnMethods = {"successfulLogin", "openDocsPage"})
+    public void checkDocsVideoTutorialsPage() {
+        printTestHeader("Test Case: check Docs VideoTutorials page");
+
+        DocsPage docsPage = getDocsPage();
+
+        assertThat(
+                docsPage.isVideoTutorialsLinkDisplayed())
+                .as("Link to Docs VideoTutorials page is displayed")
+                .isTrue();
+
+        docsPage.clickVideoTutorialsLink();
+
+        assertThat(
+                docsPage.isDocsVideoTutorialsTitleDisplayed())
+                .as("Docs VideoTutorials page title is displayed")
+                .isTrue();
+    }
+
 }

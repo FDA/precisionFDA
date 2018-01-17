@@ -469,10 +469,10 @@ public class AppsSavedAppPage extends AbstractPage {
 
     public AppsSavedAppPage assignToChallenge(String challengeName) {
         log.info("assign to challenge");
-        waitUntilClickable(getAppSavedAssignToChallengeButton());
+        waitUntilClickable(getAppSavedAssignToChallengeButton(), 60);
         getAppSavedAssignToChallengeButton().click();
         WebElement item = getChallengeItem(challengeName);
-        waitUntilClickable(item, 5);
+        waitUntilClickable(item, 30);
         item.click();
         return new AppsSavedAppPage(getDriver());
     }
