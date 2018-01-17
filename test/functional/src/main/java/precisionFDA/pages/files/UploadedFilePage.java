@@ -327,14 +327,15 @@ public class UploadedFilePage extends AbstractPage {
     public FilesPublishPage clickPublishToSpace(String spaceName) {
         log.info("click Publish to Space: " + spaceName);
         WebElement button = getUploadedFilePublishButton();
-        waitUntilClickable(button);
+        waitUntilClickable(button, 30);
         button.click();
+        sleep(1000);
         WebElement link = getPublishToSpaceLink(spaceName);
         if ( link != null ) {
             link.click();
         }
         else {
-            log.warn("the item is not displayed in the Publish drop down list: " + spaceName);
+            log.error("the item is not displayed in the Publish drop down list: " + spaceName);
         }
         return new FilesPublishPage(getDriver());
     }

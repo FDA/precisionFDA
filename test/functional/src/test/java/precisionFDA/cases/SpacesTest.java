@@ -688,7 +688,7 @@ public class SpacesTest extends AbstractTest {
                 .isTrue();
     }
 
-    @Test(dependsOnMethods = {"createAndSaveSpace"}, priority = 11)
+    @Test(dependsOnMethods = {"loginAsAdminUser", "createAndSaveSpace"}, priority = 11)
     public void publishFileToSpaceFromFilesPage() {
         printTestHeader("Test Case: publish a file to a space from Files page");
 
