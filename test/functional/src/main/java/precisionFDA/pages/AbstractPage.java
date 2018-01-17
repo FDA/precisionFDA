@@ -133,8 +133,12 @@ public abstract class AbstractPage {
     }
 
     public void waitUntilClickable(final Link element) {
+        waitUntilClickable(element, DEFAULT_TIMEOUT);
+    }
+
+    public void waitUntilClickable(final Link element, int timeout) {
         log.info("wait until clickable: " + element);
-        (new WebDriverWait(getDriver(), DEFAULT_TIMEOUT)).until(new ExpectedCondition<Boolean>() {
+        (new WebDriverWait(getDriver(), timeout)).until(new ExpectedCondition<Boolean>() {
             public Boolean apply(final WebDriver d) {
                 if (element == null) {
                     return false;
@@ -146,8 +150,12 @@ public abstract class AbstractPage {
     }
 
     public void waitUntilClickable(final Button element) {
+        waitUntilClickable(element, DEFAULT_TIMEOUT);
+    }
+
+    public void waitUntilClickable(final Button element, int timeout) {
         log.info("wait until clickable: " + element);
-        (new WebDriverWait(getDriver(), DEFAULT_TIMEOUT)).until(new ExpectedCondition<Boolean>() {
+        (new WebDriverWait(getDriver(), timeout)).until(new ExpectedCondition<Boolean>() {
             public Boolean apply(final WebDriver d) {
                 if (element == null) {
                     return false;

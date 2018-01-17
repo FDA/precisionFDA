@@ -72,6 +72,14 @@ public class DocsLocators {
 
     public static final String DOCS_NOTES_TITLE = "//div[@id='notes'][text()='Notes']";
 
+    public static final String DOCS_TRACKING_TITLE = "//div[@id='track'][text()='Tracking']";
+
+    public static final String DOCS_PUBLISHING_TITLE = "//div[@id='publish'][text()='Publishing']";
+
+    public static final String DOCS_LICENSES_TITLE = "//div[@id='licenses'][text()='Licenses']";
+
+    public static final String DOCS_VIDEO_TUTORIALS_TITLE = "//div[@id='tutorials'][text()='Video Tutorials']";
+
     public static final String DOCS_DISCUSSIONS_TITLE = "//div[@id='discussions'][text()='Discussions']";
 
     public static final String DOCS_CR_APPS_CONVENTION_LINK = "//*[contains(@class, 'sidenav')]//a[text()='App naming conventions']";

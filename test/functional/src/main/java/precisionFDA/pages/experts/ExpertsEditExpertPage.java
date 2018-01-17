@@ -142,8 +142,7 @@ public class ExpertsEditExpertPage extends AbstractPage {
         getUploadImageButton().click();
         waitUntilDisplayed(getImageUploadBrowseButton());
 
-        getImageUploadBrowseInput().sendKeys(System.getProperty("user.dir")
-                + getPathToTempFilesFolder()
+        getImageUploadBrowseInput().sendKeys(getPathToTempFilesFolder()
                 + expertProfile.getExpertImage());
 
         waitUntilDisplayed(getImageUploadButton());
