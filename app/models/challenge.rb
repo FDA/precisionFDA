@@ -175,12 +175,13 @@ class Challenge < ActiveRecord::Base
     closed?
   end
 
-  def can_assign_specific_app?(checked_user, checked_app)
+  def can_assign_specific_app?(context, checked_app)
+    return false unless context.logged_in?
     return false if over?
 
     return unless [STATUS_PAUSED, STATUS_SETUP].include?(status)
 
-    return false unless app_owner == checked_user
+    return false unless app_owner == context.user
     return true if app_id.blank?
     return false if app_id == checked_app.id
     return true if submissions.empty?

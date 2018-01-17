@@ -30,7 +30,7 @@ class AppsController < ApplicationController
         @discussions = @app.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
 
         @assigned_challenges = Challenge.where(app_id: @app.id)
-        @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@context.user, @app) }
+        @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@context, @app) }
       end
     end
 
@@ -104,7 +104,7 @@ class AppsController < ApplicationController
     @answers = @app.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
     @discussions = @app.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
     @assigned_challenges = Challenge.where(app_id: @app.id)
-    @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@context.user, @app) }
+    @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@context, @app) }
 
     @items_from_params = [@app]
     @item_path = pathify(@app)
@@ -132,7 +132,7 @@ class AppsController < ApplicationController
         {
           id: challenge.id,
           name: challenge.name,
-          link: challenge_path(challenge.id),
+          link: (challenge.is_viewable?(@context) ? challenge_path(challenge.id) : nil),
           assign_link: assign_app_challenge_path(id: challenge.id, app_id: app.id),
           app: {
             id: (challenge.app.dxid rescue nil),
