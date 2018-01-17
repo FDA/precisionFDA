@@ -310,7 +310,7 @@ class ChallengesController < ApplicationController
 
   def challenge_cards
     Challenge.archived.all.map do |challenge|
-      ChallengeCard.new(challenge, @context.user)
+      ChallengeCard.by_context(challenge, @context)
     end
   end
 

@@ -33,7 +33,7 @@
             View Challenge
           </a>
         <% end %>
-        <% if @context.logged_in? && @context.user.can_administer_site? %>
+        <% if @context.can_administer_site? %>
           <div class="btn-group pull-right">
             <a class="btn btn-default btn-lg" href="<%= edit_challenge_path(challenge) %>"><span class="fa fa-cog fa-fw"></span> Settings</a>
             <!-- Disable turbolinks since we need to load the JS for ContentTools editor -->
