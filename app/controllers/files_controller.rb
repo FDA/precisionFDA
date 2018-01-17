@@ -72,7 +72,7 @@ class FilesController < ApplicationController
     @files_grid = files_grid(user_files)
     @new_folder_is_public = true
     @scope = "public"
-    @edit_access_present = @context.user.can_administer_site?
+    @edit_access_present = @context.can_administer_site?
 
     js :index, files_ids_with_descriptions(
       user_files,
