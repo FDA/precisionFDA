@@ -2,8 +2,7 @@ package precisionFDA.utils;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-
-import static java.lang.Boolean.getBoolean;
+import static java.lang.Boolean.valueOf;
 
 public class TestRunConfig {
 
@@ -12,23 +11,23 @@ public class TestRunConfig {
     final static String profile = "test_settings_profile_1";
 
     public static boolean isGetScreenshotOnPass() {
-        return getBoolean(config.getString(profile + ".screenshotOnTestSuccess"));
+        return valueOf(config.getString(profile + ".screenshotOnTestSuccess"));
     }
 
     public static boolean isGetScreenshotOnFail() {
-        return getBoolean(config.getString(profile + ".screenshotOnTestFailure"));
+        return valueOf(config.getString(profile + ".screenshotOnTestFailure"));
     }
 
     public static boolean isGetPageSourceOnPass() {
-        return getBoolean(config.getString(profile + ".htmlSourceOnTestSuccess"));
+        return valueOf(config.getString(profile + ".htmlSourceOnTestSuccess"));
     }
 
     public static boolean isGetPageSourceOnFail() {
-        return getBoolean(config.getString(profile + ".htmlSourceOnTestFailure"));
+        return valueOf(config.getString(profile + ".htmlSourceOnTestFailure"));
     }
 
     public static boolean isScreenshotFeatureOn() {
-        return getBoolean(config.getString(profile + ".screenshotFeatureOn"));
+        return valueOf(config.getString(profile + ".screenshotFeatureOn"));
     }
 
     public static String getPathToTestFilesFolder() {

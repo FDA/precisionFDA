@@ -3,8 +3,6 @@ Preparation and run:
 --------------------
 
 1.
-Download the automated test framework from GIT, “automationTesting” branch:
-https://github.com/dnanexus/precision-fda
 The framework is located at: https://github.com/dnanexus/precision-fda/tree/automationTesting/test/functional
 It is a Maven project.
 
@@ -23,24 +21,18 @@ Download the “geckodriver” file, save unpacked file to “.../precision-fda/
 The file should be downloaded here: https://github.com/mozilla/geckodriver/releases
 
 6.
-Edit the file "devSettings.properties" (or "locSettings.properties") in the folder
-"precision-fda/test/functional/src/main/resources/" if needed.
+Edit the file "settings.conf" in the folder "precision-fda/test/functional/src/main/resources/" if needed.
 
 7.
-Edit the file "dev_user_creds.conf.example" (or "loc_user_creds.conf.example") in the folder
-"precision-fda/test/functional/src/main/resources/".
-the file is a container for test users data.
-Rename the file “dev_user_creds.conf.example” to “dev_user_creds.conf”.
+Edit the file "credentials.conf" in the folder "precision-fda/test/functional/src/main/resources/".
+The file is a container of test users data.
+All passwords and start URL are saved in environment variables.
 
 8.
 Via command line: go to "/precision-fda/test/functional/” folder.
-Execute “mvn clean test -Dsuite=allSuitesParallel.xml -Denv=dev”,
+Execute “mvn clean test -Dsuite=allSuitesParallel.xml”,
 where “allSuitesParallel.xml” - the "suite" file, the file with description what test cases should be run and how they should be run.
-"-Denv=dev" sets an environment parameter value.
-If "dev" is selected - the files "dev_user_creds.conf" and "devSettings.properties" will be used.
-If "loc" is selected - the files "loc_user_creds.conf" and "locSettings.properties" will be used.
 In our case: all existing test cases will be run on dev environment in parallel using 4 threads.
-
 
 ----------------------
 How to review results:
@@ -49,4 +41,4 @@ How to review results:
 a. “precision-fda/test/functional/target/surefire-reports/html/index.html” - is an html report of the run
 
 b. The folder “precision-fda/test/functional/target/debug-log/” will have full log files and screenshots
-(if it is enabled in the “properties” file).
+(if it is enabled in the “settings.conf” file).

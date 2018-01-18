@@ -1,6 +1,9 @@
 package precisionFDA.utils;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import precisionFDA.model.AppProfile;
 
@@ -11,12 +14,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 import java.util.TimeZone;
-
-import ru.yandex.qatools.ashot.AShot;
-import ru.yandex.qatools.ashot.Screenshot;
-import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
-
-import javax.imageio.ImageIO;
 
 import static precisionFDA.data.TestDict.*;
 import static precisionFDA.data.TestFilesData.*;
@@ -418,7 +415,7 @@ public class Utils {
             log.info("it's been " + spentTimeSec + " seconds");
         }
         if (!file.exists()) {
-            log.warn("[WARNING] the file was not downloaded after " + timeoutSec + " seconds: " + fileName);
+            log.error("the file was not downloaded after " + timeoutSec + " seconds: " + fileName);
         }
     }
 
@@ -469,9 +466,9 @@ public class Utils {
     public static void takeScreenshot(String filePath, WebDriver driver) {
         if (isScreenshotFeatureOn()) {
             final Logger log = Logger.getLogger(getDictInfo().toUpperCase());
-            Screenshot screenshot = new AShot().shootingStrategy(ShootingStrategies.viewportPasting(1000)).takeScreenshot(driver);
+            File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
             try {
-                ImageIO.write(screenshot.getImage(), "PNG", new File(filePath));
+                FileUtils.copyFile(scrFile, new File(filePath));
                 log.info("screenshot is here: " + filePath);
             } catch (IOException e) {
                 e.printStackTrace();

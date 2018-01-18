@@ -36,8 +36,8 @@ public class TestUserData {
             return config.getString(atUser1 + ".userFullName");
         }
 
-    public static String getPfdaUser1Org() {
-            return config.getString(atUser1 + ".userOrg");
+    public static String getPfdaUser1OrgHandle() {
+            return config.getString(atUser1 + ".userOrgHandle");
         }
 
     // admin user
@@ -62,8 +62,8 @@ public class TestUserData {
         return config.getString(atUserAdmin + ".userFullName");
     }
 
-    public static String getPfdaUserAdminOrg() {
-        return config.getString(atUserAdmin + ".userOrg");
+    public static String getPfdaUserAdminOrgHandle() {
+        return config.getString(atUserAdmin + ".userOrgHandle");
     }
 
     // test user 2
@@ -88,8 +88,8 @@ public class TestUserData {
         return config.getString(atUser2 + ".userFullName");
     }
 
-    public static String getPfdaUser2Org() {
-        return config.getString(atUser2 + ".userOrg");
+    public static String getPfdaUser2OrgHandle() {
+        return config.getString(atUser2 + ".userOrgHandle");
     }
 
     //====================
@@ -101,7 +101,7 @@ public class TestUserData {
                 TestUserData.getPfdaUser1Username(),
                 TestUserData.getPfdaUser1Password(),
                 TestUserData.getPfdaUser1FullName(),
-                TestUserData.getPfdaUser1Org());
+                TestUserData.getPfdaUser1OrgHandle());
     }
 
     public static UserProfile getTestUserTwo() {
@@ -111,7 +111,7 @@ public class TestUserData {
                 TestUserData.getPfdaUser2Username(),
                 TestUserData.getPfdaUser2Password(),
                 TestUserData.getPfdaUser2FullName(),
-                TestUserData.getPfdaUser2Org());
+                TestUserData.getPfdaUser2OrgHandle());
     }
 
     public static UserProfile getWrongUser() {
@@ -121,7 +121,7 @@ public class TestUserData {
                 TestUserData.getPfdaUser1Username(),
                 TestUserData.getPfdaUser1Password() + "wrong",
                 TestUserData.getPfdaUser1FullName(),
-                TestUserData.getPfdaUser1Org());
+                TestUserData.getPfdaUser1OrgHandle());
     }
 
     public static UserProfile getAdminUser() {
@@ -131,7 +131,7 @@ public class TestUserData {
                 TestUserData.getPfdaUserAdminUsername(),
                 TestUserData.getPfdaUserAdminPassword(),
                 TestUserData.getPfdaUserAdminFullName(),
-                TestUserData.getPfdaUserAdminOrg());
+                TestUserData.getPfdaUserAdminOrgHandle());
     }
 
 }
