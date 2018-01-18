@@ -1,9 +1,7 @@
 package precisionFDA.pages.files;
 
 import org.apache.log4j.Logger;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
 import precisionFDA.model.FileProfile;
 import ru.yandex.qatools.htmlelements.element.Button;
@@ -13,7 +11,6 @@ import precisionFDA.locators.FilesLocators;
 import precisionFDA.model.UserProfile;
 import precisionFDA.pages.AbstractPage;
 import ru.yandex.qatools.htmlelements.element.TextInput;
-
 import java.util.List;
 
 import static precisionFDA.data.TestDict.getDictPrivate;
@@ -332,6 +329,9 @@ public class UploadedFilePage extends AbstractPage {
         sleep(1000);
         WebElement link = getPublishToSpaceLink(spaceName);
         if ( link != null ) {
+            JavascriptExecutor je = (JavascriptExecutor) driver;
+            je.executeScript("arguments[0].scrollIntoView(true);", link);
+            sleep(500);
             link.click();
         }
         else {

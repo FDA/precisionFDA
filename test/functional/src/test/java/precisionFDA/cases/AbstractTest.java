@@ -11,6 +11,7 @@ import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
+import org.testng.Reporter;
 import org.testng.annotations.*;
 import precisionFDA.model.UserProfile;
 import precisionFDA.pages.CommonPage;
@@ -33,6 +34,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
 import static precisionFDA.data.TestDict.*;
 import static precisionFDA.utils.TestRunConfig.*;
 import static precisionFDA.data.TestCommonData.*;
+import static precisionFDA.utils.TestRunConfig.isScreenshotFeatureOn;
 import static precisionFDA.utils.Utils.*;
 
 @Listeners( { CustomResultListener.class } )
@@ -46,7 +48,9 @@ public abstract class AbstractTest {
 
     @BeforeClass(alwaysRun = true)
     public void setUp() {
+        System.setProperty("org.uncommons.reportng.escape-output", "false");
         driver = new DriverFactory().getInstance().getDriver();
+        driver.manage().window().setSize(new Dimension(1920, 1080));
         log.info("=== Environment is: " + getPfdaOverviewURL() + " ===");
     }
 
@@ -167,6 +171,7 @@ public abstract class AbstractTest {
             log.info(message);
         }
         takeScreenshot(filePath, driver);
+        Reporter.log(message + ": <a target='blank' href='" + filePath + "'>" + fileName + "</a><br>");
         return filePath;
     }
 

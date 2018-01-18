@@ -313,7 +313,7 @@ public class SpacesTest extends AbstractTest {
         logoutFromAll();
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = overviewPage.openFilesPage();
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(spaceFile.getFileName());
         filesPage = filesAddFilesPage.uploadAllFiles().openRootFilesPage();

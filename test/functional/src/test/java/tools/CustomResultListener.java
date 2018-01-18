@@ -25,7 +25,6 @@ public class CustomResultListener extends AbstractTest implements ITestListener 
         String suiteName = result.getTestClass().getName().replace("precisionFDA.cases.", "");
         String caseName = result.getName();
         setFinishedCaseData(getDictFailed(), caseName, suiteName);
-
         printCaseStatus(getDictFailed(), caseName, suiteName);
     }
 

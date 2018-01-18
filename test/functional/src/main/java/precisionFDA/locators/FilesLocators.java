@@ -98,7 +98,7 @@ public class FilesLocators {
 
     public static final String FILES_UPLOADED_FILE_PUBLISH_TO_PUBLIC_ITEM_LINK = "//*[contains(@class, 'drop')]//a[contains(@href, '=public')]";
 
-    public static final String FILES_UPLOADED_FILE_PUBLISH_TO_SPACE_ITEM_LINK_COMMON = "//*[contains(@class, 'pull')]//ul[contains(@class, 'dropdown')]//li/a";
+    public static final String FILES_UPLOADED_FILE_PUBLISH_TO_SPACE_ITEM_LINK_COMMON = "//ul//a[contains(@href, 'publish')]";
 
     public static final String FILES_PUBLISH_PAGE_FILE_NAME = "//span[@class='object-title']";
 
