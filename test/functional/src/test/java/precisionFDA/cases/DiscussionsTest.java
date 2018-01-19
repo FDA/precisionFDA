@@ -145,7 +145,7 @@ public class DiscussionsTest extends AbstractTest {
 
         SoftAssert.assertThat(
                 editDiscPage.isAttachedFileDisplayed(discFile.getFileName()))
-                .as("Link to attached file is displayed through edit")
+                .as("Link to attached file is displayed after edit")
                 .isTrue();
 
         SoftAssert.assertAll();

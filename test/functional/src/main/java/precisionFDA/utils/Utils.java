@@ -1,12 +1,14 @@
 package precisionFDA.utils;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import precisionFDA.model.AppProfile;
+import ru.yandex.qatools.ashot.AShot;
+import ru.yandex.qatools.ashot.Screenshot;
+import ru.yandex.qatools.ashot.screentaker.ViewportPastingStrategy;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -466,14 +468,40 @@ public class Utils {
     public static void takeScreenshot(String filePath, WebDriver driver) {
         if (isScreenshotFeatureOn()) {
             final Logger log = Logger.getLogger(getDictInfo().toUpperCase());
-            File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+
+            final Screenshot screenshot = new AShot().shootingStrategy(new ViewportPastingStrategy(1000)).takeScreenshot(driver);
+            final BufferedImage image = screenshot.getImage();
             try {
-                FileUtils.copyFile(scrFile, new File(filePath));
+                ImageIO.write(image, "PNG", new File(filePath));
                 log.info("screenshot is here: " + filePath);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+//            File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+//            try {
+//                FileUtils.copyFile(scrFile, new File(filePath));
+//                log.info("screenshot is here: " + filePath);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
+    }
+
+    public static String reportScreenshot(String message, String fileName, String loggerLevel, WebDriver driver) {
+        final Logger log = Logger.getLogger("");
+        String filePath = getCurrentRunLogFolderPath() + fileName;
+        if (loggerLevel.equalsIgnoreCase(getDictError())) {
+            log.error(message);
+        }
+        else if (loggerLevel.equalsIgnoreCase(getDictWarning())) {
+            log.warn(message);
+        }
+        else {
+            log.info(message);
+        }
+        takeScreenshot(filePath, driver);
+        return filePath;
     }
 
     public static String getRandom() {
