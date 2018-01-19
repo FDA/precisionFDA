@@ -3,6 +3,7 @@ package precisionFDA.pages;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.*;
+import precisionFDA.utils.Utils;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 import ru.yandex.qatools.htmlelements.element.Select;
@@ -15,10 +16,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
 import static precisionFDA.data.TestDict.getDictError;
-import static precisionFDA.data.TestDict.getDictWarning;
-import static precisionFDA.data.TestCommonData.*;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
-import static precisionFDA.utils.Utils.takeScreenshot;
 
 public abstract class AbstractPage {
 
@@ -349,28 +347,13 @@ public abstract class AbstractPage {
         } else {
             String message = "It looks like a wrong page is open. Should be " + pageName;
             String fileName =
-                    getDictError() + "_" +
+                    getDictError() + "_expected_" +
                     pageName + "_" +
                     getRunTimeLocalUniqueValue()
                     + ".png";
-            reportScreenshot(message, fileName, getDictError());
+            Utils.reportScreenshot(message, fileName, getDictError(), getDriver());
             return false;
         }
-    }
-
-    public String reportScreenshot(String message, String fileName, String loggerLevel) {
-        String filePath = getDebugLogFolderPath() + fileName;
-        if (loggerLevel.equalsIgnoreCase(getDictError())) {
-            log.error(message);
-        }
-        else if (loggerLevel.equalsIgnoreCase(getDictWarning())) {
-            log.warn(message);
-        }
-        else {
-            log.info(message);
-        }
-        takeScreenshot(filePath, driver);
-        return filePath;
     }
 
     // ---- page scripts upload ----

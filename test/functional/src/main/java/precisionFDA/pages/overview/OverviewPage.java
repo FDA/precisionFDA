@@ -5,6 +5,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import precisionFDA.locators.FilesLocators;
 import precisionFDA.pages.dashboard.AdminDashboardPage;
 import precisionFDA.pages.docs.DocsPage;
 import precisionFDA.pages.spaces.SpacesPage;

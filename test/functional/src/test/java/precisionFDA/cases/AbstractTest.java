@@ -21,6 +21,7 @@ import precisionFDA.pages.login.LoginPrecisionPage;
 import precisionFDA.pages.overview.OverviewPage;
 import precisionFDA.pages.staging.LoginStagingPage;
 import precisionFDA.pages.staging.MainStagingPage;
+import precisionFDA.utils.Utils;
 import tools.CustomResultListener;
 
 import java.io.File;
@@ -57,7 +58,7 @@ public abstract class AbstractTest {
     @AfterClass(alwaysRun = true)
     public void tearDown() throws Exception {
         closeBrowser();
-        sleep(3000);
+        sleep(2000);
     }
 
     public void closeBrowser() {
@@ -75,8 +76,10 @@ public abstract class AbstractTest {
     @BeforeSuite(alwaysRun = true)
     public void beforeSuite() {
         deleteTempFiles();
-        createFolder(getDebugLogFolder());
-        createFolder(getDebugLogFolderPath());
+        createFolder(getDebugLogCommonFolderPath());
+        createFolder(getCurrentRunLogFolderPath());
+        String relativeFilePath = "../../" + getDebugLogCommonFolderName() + "full.log";
+        Reporter.log("<a target='_blank' href='" + relativeFilePath + "'>full log</a><br><br>");
     }
 
     @AfterSuite(alwaysRun = true)
@@ -128,7 +131,7 @@ public abstract class AbstractTest {
 
         if (isGetSource) {
 
-            String filePathWithNoExt = getDebugLogFolderPath() + fileNameWithNoExt;
+            String filePathWithNoExt = getCurrentRunLogFolderPath() + fileNameWithNoExt;
 
             String source = getPageSource(driver);
             try {
@@ -150,8 +153,10 @@ public abstract class AbstractTest {
                 loggerLevel = getDictError();
             }
             String fileName = fileNameWithNoExt + ".png";
-            String message = loggerLevel.toUpperCase() + ": screenshot when " + getFinishedCaseName() + " case is finished";
-            reportScreenshot(message, fileName, loggerLevel);
+            String message = "screenshot when " + getFinishedCaseName() + " case is finished";
+            Utils.reportScreenshot(message, fileName, loggerLevel, driver);
+            String relativeFilePath = "../../" + getDebugLogCommonFolderName() + getCurrentRunLogFolderName() + fileName;
+            Reporter.log(getRunSuiteName() + "." + getFinishedCaseName() + ": <a target='_blank' href='" + relativeFilePath + "'>" + fileName + "</a><br>");
         }
 
         //---------------
@@ -159,26 +164,10 @@ public abstract class AbstractTest {
         printLine();
     }
 
-    public String reportScreenshot(String message, String fileName, String loggerLevel) {
-        String filePath = getDebugLogFolderPath() + fileName;
-        if (loggerLevel.equalsIgnoreCase(getDictError())) {
-            log.error(message);
-        }
-        else if (loggerLevel.equalsIgnoreCase(getDictWarning())) {
-            log.warn(message);
-        }
-        else {
-            log.info(message);
-        }
-        takeScreenshot(filePath, driver);
-        Reporter.log(message + ": <a target='blank' href='" + filePath + "'>" + fileName + "</a><br>");
-        return filePath;
-    }
-
     public void moveLogFileToCurrentLogFolder(String fileName) {
-        String oldPath = getDebugLogFolder() + fileName;
+        String oldPath = getDebugLogCommonFolderPath() + fileName;
         File file = new File(oldPath);
-        String newPath = getDebugLogFolderPath() + fileName;
+        String newPath = getCurrentRunLogFolderPath() + fileName;
         file.renameTo(new File(newPath));
         file.delete();
     }
@@ -285,20 +274,20 @@ public abstract class AbstractTest {
 
             FirefoxBinary firefoxBinary = new FirefoxBinary();
 
-            String headlessModeCmd = "" + System.getProperty("headlessMode");
-            String headlessModeCfg = getHeadlessMode();
-            String headlessMode;
+            Boolean headlessMode;
+            String headlessModeCmdStr = "" + System.getProperty("headlessMode");
 
-            if (headlessModeCmd.equalsIgnoreCase(getDictTrue()) || headlessModeCmd.equalsIgnoreCase(getDictFalse())) {
-                headlessMode = headlessModeCmd;
+            if (!headlessModeCmdStr.equalsIgnoreCase("null")) {
+                headlessMode = Boolean.valueOf(headlessModeCmdStr);
             }
             else {
-                headlessMode = headlessModeCfg;
+                headlessMode = getHeadlessModeConfig();
             }
 
-            if (headlessMode.equalsIgnoreCase("true")) {
+            if (Boolean.valueOf(headlessMode)) {
                 firefoxBinary.addCommandLineOptions("--headless");
             }
+
             System.setProperty("webdriver.gecko.driver", currentDirectory + getPathToFirefoxDriver());
             System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
 

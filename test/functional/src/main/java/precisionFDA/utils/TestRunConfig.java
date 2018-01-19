@@ -2,7 +2,6 @@ package precisionFDA.utils;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import static java.lang.Boolean.valueOf;
 
 public class TestRunConfig {
 
@@ -11,23 +10,23 @@ public class TestRunConfig {
     final static String profile = "test_settings_profile_1";
 
     public static boolean isGetScreenshotOnPass() {
-        return valueOf(config.getString(profile + ".screenshotOnTestSuccess"));
+        return Boolean.valueOf(config.getString(profile + ".screenshotOnTestSuccess"));
     }
 
     public static boolean isGetScreenshotOnFail() {
-        return valueOf(config.getString(profile + ".screenshotOnTestFailure"));
+        return Boolean.valueOf(config.getString(profile + ".screenshotOnTestFailure"));
     }
 
     public static boolean isGetPageSourceOnPass() {
-        return valueOf(config.getString(profile + ".htmlSourceOnTestSuccess"));
+        return Boolean.valueOf(config.getString(profile + ".htmlSourceOnTestSuccess"));
     }
 
     public static boolean isGetPageSourceOnFail() {
-        return valueOf(config.getString(profile + ".htmlSourceOnTestFailure"));
+        return Boolean.valueOf(config.getString(profile + ".htmlSourceOnTestFailure"));
     }
 
     public static boolean isScreenshotFeatureOn() {
-        return valueOf(config.getString(profile + ".screenshotFeatureOn"));
+        return Boolean.valueOf(config.getString(profile + ".screenshotFeatureOn"));
     }
 
     public static String getPathToTestFilesFolder() {
@@ -58,8 +57,8 @@ public class TestRunConfig {
         return config.getString(profile + ".stagingURL");
     }
 
-    public static String getHeadlessMode() {
-        return config.getString(profile + ".headlessMode");
+    public static Boolean getHeadlessModeConfig() {
+        return Boolean.valueOf(config.getString(profile + ".headlessMode"));
     }
 
     public static String getPathToFirefoxDriver() {

@@ -42,6 +42,10 @@ public class TestCommonData {
 
     static final String DOCKER_VALIDATION_TEXT = "RUN DEBIAN_FRONTEND";
 
+    public static final String getDebugLogCommonFolderName() {
+        return "debug-log/";
+    }
+
     public static String getDockerValidationText() {
         return DOCKER_VALIDATION_TEXT;
     }
@@ -66,12 +70,16 @@ public class TestCommonData {
         currentTimezone = timezone;
     }
 
-    public static String getDebugLogFolder() {
-        return System.getProperty("user.dir") + "/target/debug-log/";
+    public static String getDebugLogCommonFolderPath() {
+        return System.getProperty("user.dir") + "/target/" + getDebugLogCommonFolderName();
     }
 
-    public static String getDebugLogFolderPath() {
-        return getDebugLogFolder() + "run_" + getFilePathUniqueValue() + "/";
+    public static final String getCurrentRunLogFolderPath() {
+        return getDebugLogCommonFolderPath() + getCurrentRunLogFolderName();
+    }
+
+    public static final String getCurrentRunLogFolderName() {
+        return "run_" + getFilePathUniqueValue() + "/";
     }
 
     public static void setFinishedCaseData(String caseStatus, String caseName, String suiteName) {
