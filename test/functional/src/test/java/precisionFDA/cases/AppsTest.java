@@ -216,21 +216,19 @@ public class AppsTest extends AbstractTest {
 
         appsJobPage = appsJobPage.waitUntilJobIsDone();
 
-        SoftAssert.assertThat(appsJobPage.getJobLabelValue())
+        assertThat(appsJobPage.getJobLabelValue())
                 .as("Job Label Value")
                 .isEqualToIgnoringCase("DONE");
 
-        SoftAssert.assertThat(appsJobPage.getAppsJobRunOutputResultText())
+        assertThat(appsJobPage.getAppsJobRunOutputResultText())
                 .as("job result output")
                 .isEqualTo(appProfile.getExpectedJobOutputText());
 
         AppsJobLogPage appsJobLogPage = appsJobPage.viewLog();
 
-        SoftAssert.assertThat(appsJobLogPage.getFullJobLogText())
+        assertThat(appsJobLogPage.getFullJobLogText())
                 .as("full job log")
                 .contains(appProfile.getInitScriptText());
-
-        SoftAssert.assertAll();
     }
 
     @Test(groups = { "runJob" }, dependsOnMethods = {"successfulLogin", "runAppAndValidateResult"})
@@ -251,7 +249,7 @@ public class AppsTest extends AbstractTest {
 
         AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openAppFromJobsList(appProfile);
 
-        SoftAssert.assertThat(
+        assertThat(
                 appsSavedAppPage.isRunJobDisplayed(appProfile))
                 .as("Job name is displayed: " + appProfile.getJobNameText())
                 .isTrue();
@@ -260,12 +258,10 @@ public class AppsTest extends AbstractTest {
 
         AppsJobPage appsJobPage = appsRelevantPage.openJobFromJobsList(appProfile);
 
-        SoftAssert.assertThat(
+        assertThat(
                 appsJobPage.isAppsJobPageIOTabLinkDisplayed())
                 .as("Input/Output tab is displayed")
                 .isTrue();
-
-        SoftAssert.assertAll();
     }
 
     @Test(dependsOnMethods = {"successfulLogin", "createAndSaveApp"})
@@ -295,8 +291,6 @@ public class AppsTest extends AbstractTest {
                 .as("Edited Title of created app")
                 .isEqualTo(appProfile.getCurRevTitleText());
 
-        System.out.println("TITLE is: " + appProfile.getCurRevTitleText());
-
         SoftAssert.assertAll();
     }
 
@@ -321,18 +315,16 @@ public class AppsTest extends AbstractTest {
 
         appsEditAppPage = appsEditAppPage.openReadmePreviewTab();
 
-        SoftAssert.assertThat(appsEditAppPage.getReadmePreviewText())
+        assertThat(appsEditAppPage.getReadmePreviewText())
                 .as("text on Readme Preview tab during edit")
                 .isEqualTo(appProfile.getTempReadMeRichText());
 
         appsSavedAppPage = appsEditAppPage.saveRevisionAfterReadmeEdit(appProfile);
         appsSavedAppPage = appsSavedAppPage.openReadmeTab();
 
-        SoftAssert.assertThat(appsSavedAppPage.getReadMeText())
+        assertThat(appsSavedAppPage.getReadMeText())
                 .as("Readme Preview text on saved page")
                 .isEqualTo(appProfile.getCurRevReadMeRichText());
-
-        SoftAssert.assertAll();
     }
 
     @Test(dependsOnMethods = {"successfulLogin", "createAndSaveApp"})
@@ -412,19 +404,19 @@ public class AppsTest extends AbstractTest {
         appsEditAppPage = appsSavedAppPage.clickEdit();
         appsSavedAppPage = appsEditAppPage.editAndSaveAppWithNewValues(appProfile);
 
-        SoftAssert.assertThat(
+        assertThat(
                 appsSavedAppPage.getActSelectedAppName())
                 .as("Name of the updated app")
                 .isEqualTo(appProfile.getInitNameText());
 
         appsSavedAppPage = appsSavedAppPage.openFirstRevision();
 
-        SoftAssert.assertThat(
+        assertThat(
                 appsSavedAppPage.getActSelectedAppName())
                 .as("Name of the first revision")
                 .isEqualTo(appProfile.getInitNameText());
 
-        SoftAssert.assertThat(
+        assertThat(
                 appsSavedAppPage.getAppsSavedRevisionPageTitleText())
                 .as("Title of the first revision")
                 .isEqualTo(appProfile.getInitTitleText());

@@ -90,17 +90,17 @@ public class ChallsTest extends AbstractTest {
                 .as("Name of the created challenge")
                 .contains(challProfile.getChallName());
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdChallPage.getCreatedChallengeDescrText())
                 .as("Description of the created challenge")
                 .isEqualTo(challProfile.getChallDescr());
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdChallPage.getStartsText())
                 .as("Starts value")
                 .isEqualTo(getExpectedChallDateTimeValue(challProfile.getChallStartsAt(), timeZone));
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdChallPage.getEndsText())
                 .as("Ends value")
                 .isEqualTo(getExpectedChallDateTimeValue(challProfile.getChallEndsAt(), timeZone));

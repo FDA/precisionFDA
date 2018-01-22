@@ -88,19 +88,19 @@ public class SpacesTest extends AbstractTest {
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         SpacesPage spacesPage = overviewPage.openSpacesPage();
 
-        SoftAssert.assertThat(
+        assertThat(
                 spacesPage.getSpaceStatusOnGrid(spaceProfile.getSpaceName()))
                 .as("Status is Unactivated")
                 .isEqualToIgnoringCase(getDictUnactivated());
 
         SpaceDetailsPage spaceDetailsPage = spacesPage.openSpace(spaceProfile.getSpaceName());
 
-        SoftAssert.assertThat(
+        assertThat(
                 spaceDetailsPage.isAcceptByHostLeadDisplayed())
                 .as("'Accept' link for Host Lead is displayed")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 spaceDetailsPage.isAcceptByGuestLeadDisplayed())
                 .as("'Accept' link for Guest Lead is displayed")
                 .isFalse();
@@ -136,19 +136,19 @@ public class SpacesTest extends AbstractTest {
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         SpacesPage spacesPage = overviewPage.openSpacesPage();
 
-        SoftAssert.assertThat(
+        assertThat(
                 spacesPage.getSpaceStatusOnGrid(spaceProfile.getSpaceName()))
                 .as("Status is Unactivated")
                 .isEqualToIgnoringCase(getDictUnactivated());
 
         SpaceDetailsPage spaceDetailsPage = spacesPage.openSpace(spaceProfile.getSpaceName());
 
-        SoftAssert.assertThat(
+        assertThat(
                 spaceDetailsPage.isAcceptByGuestLeadDisplayed())
                 .as("'Accept' link for Guest Lead is displayed")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 spaceDetailsPage.isAcceptByHostLeadDisplayed())
                 .as("'Accept' link for Host Lead is displayed")
                 .isFalse();
@@ -185,26 +185,26 @@ public class SpacesTest extends AbstractTest {
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         SpacesPage spacesPage = overviewPage.openSpacesPage();
 
-        SoftAssert.assertThat(
+        assertThat(
                 spacesPage.getSpaceStatusOnGrid(spaceProfile.getSpaceName()))
                 .as("Status is Active")
                 .isEqualToIgnoringCase(getDictActive());
 
         SpaceDetailsPage spaceDetailsPage = spacesPage.openSpace(spaceProfile.getSpaceName());
 
-        SoftAssert.assertThat(
+        assertThat(
                 spaceDetailsPage.isAcceptByHostLeadDisplayed())
                 .as("'Accept' link for Host Lead is displayed")
                 .isFalse();
 
-        SoftAssert.assertThat(
+        assertThat(
                 spaceDetailsPage.isAcceptByGuestLeadDisplayed())
                 .as("'Accept' link for Guest Lead is displayed")
                 .isFalse();
 
         spaceDetailsPage = spaceDetailsPage.createFolder(spaceFolder.getFolderName());
 
-        SoftAssert.assertThat(
+        assertThat(
                 spaceDetailsPage.isLinkToCreatedFolderDisplayed(spaceFolder.getFolderName()))
                 .as("Created folder is displayed")
                 .isTrue();
@@ -216,19 +216,17 @@ public class SpacesTest extends AbstractTest {
                 .as("Breadcrumbs are displayed")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 spaceDetailsPage.getDisplayedBreadcrumbsText())
                 .as("Breadcrumbs")
                 .isEqualTo(generateBreadcrumbsSpaces(spaceFolder.getFolderName(), "", ""));
 
         spaceDetailsPage = spaceDetailsPage.clickBreadcrumbSpaceFiles();
 
-        SoftAssert.assertThat(
+        assertThat(
                 spaceDetailsPage.isLinkToCreatedFolderDisplayed(spaceFolder.getFolderName()))
                 .as("Created folder is displayed")
                 .isTrue();
-
-        SoftAssert.assertAll();
     }
 
     @Test(dependsOnMethods = {"createAndSaveSpace"}, priority = 4)
@@ -241,8 +239,8 @@ public class SpacesTest extends AbstractTest {
         FilesPage filesPage = openOverviewPage().openFilesPage();
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(spaceFile.getFileName());
-        filesPage = filesAddFilesPage.uploadAllFiles().openRootFilesPage();
-        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(spaceFile.getFileName());
+        FilesAddFilesPage addFilesPage = filesAddFilesPage.uploadAllFiles();
+        UploadedFilePage uploadedFilePage = addFilesPage.openUploadedFile(spaceFile.getFileName());
         uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
 
         SpaceDetailsPage spaceDetailsPage = openOverviewPage().openSpacesPage().openSpace(spaceProfile.getSpaceName());
@@ -254,7 +252,7 @@ public class SpacesTest extends AbstractTest {
                 .as("Added file is displayed")
                 .isTrue();
 
-        filesPage = openOverviewPage().openFilesPage();
+        filesPage = openFilesPage();
         filesPage = filesPage.filterByName(spaceFile.getFileName());
 
         assertThat(
@@ -316,8 +314,8 @@ public class SpacesTest extends AbstractTest {
         FilesPage filesPage = overviewPage.openFilesPage();
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(spaceFile.getFileName());
-        filesPage = filesAddFilesPage.uploadAllFiles().openRootFilesPage();
-        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(spaceFile.getFileName());
+        FilesAddFilesPage addFilesPage = filesAddFilesPage.uploadAllFiles();
+        UploadedFilePage uploadedFilePage = addFilesPage.openUploadedFile(spaceFile.getFileName());
         uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
 
         SpaceDetailsPage spaceDetailsPage = openOverviewPage().openSpacesPage().openSpace(spaceProfile.getSpaceName());
@@ -338,7 +336,7 @@ public class SpacesTest extends AbstractTest {
                 .as("The file with updated name is displayed")
                 .isTrue();
 
-        filesPage = openOverviewPage().openFilesPage();
+        filesPage = openFilesPage();
         filesPage = filesPage.filterByName(spaceFile.getFileName());
 
         assertThat(
@@ -393,8 +391,8 @@ public class SpacesTest extends AbstractTest {
         FilesPage filesPage = openOverviewPage().openFilesPage();
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(spaceFile.getFileName());
-        filesPage = filesAddFilesPage.uploadAllFiles().openRootFilesPage();
-        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(spaceFile.getFileName());
+        FilesAddFilesPage addFilesPage = filesAddFilesPage.uploadAllFiles();
+        UploadedFilePage uploadedFilePage = addFilesPage.openUploadedFile(spaceFile.getFileName());
         uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
 
         SpaceDetailsPage spaceDetailsPage = openOverviewPage().openSpacesPage().openSpace(spaceProfile.getSpaceName());
@@ -471,9 +469,8 @@ public class SpacesTest extends AbstractTest {
         // upload test file 2
         filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(spaceFile2.getFileName());
-        filesPage = filesAddFilesPage.uploadAllFiles().openRootFilesPage();
-
-        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(spaceFile2.getFileName());
+        FilesAddFilesPage addFilesPage = filesAddFilesPage.uploadAllFiles();
+        UploadedFilePage uploadedFilePage = addFilesPage.openUploadedFile(spaceFile2.getFileName());
         uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
 
         // add file to space
@@ -557,7 +554,7 @@ public class SpacesTest extends AbstractTest {
                 .as("Deleted folder is displayed")
                 .isFalse();
 
-        filesPage = openOverviewPage().openFilesPage();
+        filesPage = openFilesPage();
 
         filesPage.filterByName(spaceFile1.getFileName());
 
@@ -593,9 +590,8 @@ public class SpacesTest extends AbstractTest {
         // upload test file 2
         filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(spaceFile2.getFileName());
-        filesPage = filesAddFilesPage.uploadAllFiles().openRootFilesPage();
-
-        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(spaceFile2.getFileName());
+        FilesAddFilesPage addFilesPage = filesAddFilesPage.uploadAllFiles();
+        UploadedFilePage uploadedFilePage = addFilesPage.openUploadedFile(spaceFile2.getFileName());
         uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
 
         // add file to space
@@ -671,7 +667,7 @@ public class SpacesTest extends AbstractTest {
                 .as("Added file2 is displayed")
                 .isFalse();
 
-        filesPage = openOverviewPage().openFilesPage().openFilesExplorePage();
+        filesPage = openFilesPage().openFilesExplorePage();
 
         filesPage.filterByName(spaceFile1.getFileName());
 
@@ -698,9 +694,8 @@ public class SpacesTest extends AbstractTest {
         FilesPage filesPage = openOverviewPage().openFilesPage();
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(fileProfile.getFileName());
-        filesPage = filesAddFilesPage.uploadAllFiles().openRootFilesPage();
-
-        UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
+        FilesAddFilesPage addFilesPage = filesAddFilesPage.uploadAllFiles();
+        UploadedFilePage uploadedFilePage = addFilesPage.openUploadedFile(fileProfile.getFileName());
         uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
 
         FilesPublishPage filesPublishPage = uploadedFilePage.clickPublishToSpace(spaceProfile.getSpaceName());

@@ -134,43 +134,43 @@ public class AdminDashboardTest extends AbstractTest {
                 .as("Year Date Range button is displayed")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 reportsPage.toDateEqualsToday())
                 .as("To Date input has Today date")
                 .isTrue();
 
         reportsPage.clickDayRangeButton();
 
-        SoftAssert.assertThat(
+        assertThat(
                 reportsPage.toDateEqualsToday())
                 .as("To Date input has Today date")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 reportsPage.fromDateEqualsYesterday())
                 .as("From Date input has Yesterday date")
                 .isTrue();
 
         reportsPage.clickWeekRangeButton();
 
-        SoftAssert.assertThat(
+        assertThat(
                 reportsPage.toDateEqualsToday())
                 .as("To Date input has Today date")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 reportsPage.fromDateEqualsLastSunday())
                 .as("From Date input has last Sunday date")
                 .isTrue();
 
         reportsPage.clickMonthRangeButton();
 
-        SoftAssert.assertThat(
+        assertThat(
                 reportsPage.toDateEqualsToday())
                 .as("To Date input has Today date")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 reportsPage.fromDateEqualsFirstDayOfCurrentMonth())
                 .as("From Date input has the first day of the current month")
                 .isTrue();

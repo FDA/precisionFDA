@@ -22,7 +22,9 @@ public class FilesLocators {
 
     public static final String FILES_UPLOAD_ALL_BUTTON = "//button[contains(@class, 'upload-files')]";
 
-    public static final String FILES_UPLOAD_PREVIEW_FILE_NAME = "//*[@class='file-name']";
+    public static final String FILES_UPLOAD_PREVIEW_FILE_NAME_COMMON = "//*[@class='file-name']";
+
+    public static final String FILES_UPLOAD_PREVIEW_FILE_NAME_TEMPLATE = "//*[@class='file-name'][text()='{FILE_NAME}']";
 
     public static final String FILES_UPLOADS_COMPLETE_MESSAGE = "//span[text()='Upload(s) complete']";
 
