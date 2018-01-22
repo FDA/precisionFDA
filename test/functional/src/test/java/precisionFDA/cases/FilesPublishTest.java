@@ -43,7 +43,7 @@ public class FilesPublishTest extends AbstractTest {
 
         filesPage = filesPage.openFilesExplorePage();
 
-        SoftAssert.assertThat(
+        assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
                 .as("Link to uploaded file is NOT displayed in Explore Tab")
                 .isFalse();
@@ -52,12 +52,10 @@ public class FilesPublishTest extends AbstractTest {
 
         UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
 
-        SoftAssert.assertThat(
+        assertThat(
                 uploadedFilePage.isAccessPrivate())
                 .as("Access is private")
                 .isTrue();
-
-        SoftAssert.assertAll();
     }
 
     @Test(priority = 1)
@@ -71,19 +69,17 @@ public class FilesPublishTest extends AbstractTest {
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         FilesPage filesPage = openFilesPage();
 
-        SoftAssert.assertThat(
+        assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
                 .as("Link to the uploaded private file is NOT displayed on My Files page for another user")
                 .isFalse();
 
         filesPage = filesPage.openFilesExplorePage();
 
-        SoftAssert.assertThat(
+        assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
                 .as("Link to the uploaded private file is NOT displayed in Explore Tab for another user")
                 .isFalse();
-
-        SoftAssert.assertAll();
     }
 
     @Test(priority = 2)
@@ -138,7 +134,7 @@ public class FilesPublishTest extends AbstractTest {
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         FilesPage filesPage = openFilesPage();
 
-        SoftAssert.assertThat(
+        assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileProfile.getFileName()))
                 .as("Link to published file is NOT displayed on My Files page")
                 .isFalse();
@@ -150,19 +146,17 @@ public class FilesPublishTest extends AbstractTest {
                 .as("Link to published file is now displayed on Explore page")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 filesPage.isItemCheckboxDisplayed(fileProfile.getFileName()))
                 .as("Input checkbox is displayed for the file")
                 .isFalse();
 
         UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
 
-        SoftAssert.assertThat(
+        assertThat(
                 uploadedFilePage.isAccessPublic())
                 .as("Access is public")
                 .isTrue();
-
-        SoftAssert.assertAll();
 
         FilesAuthURLPage authURLPage = uploadedFilePage.clickAuthorizedURL();
 
@@ -242,27 +236,27 @@ public class FilesPublishTest extends AbstractTest {
 
         filesPage.clickPublishSelected();
 
-        SoftAssert.assertThat(
+        assertThat(
                 filesPage.isItemInPublishDialogDisplayed(secondFile.getFileName()))
                 .as("Second file is displayed on the Publish dialog")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 filesPage.isItemInPublishDialogDisplayed(secondFile.getFileName()))
                 .as("Third file is displayed on the Publish dialog")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 filesPage.isItemInPublishDialogDisplayed(fileInRootTwo.getFileName()))
                 .as("File in root two is displayed on the Publish dialog")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 filesPage.isItemInPublishDialogDisplayed(fileInRootOne.getFileName()))
                 .as("File in root one is NOT displayed on the Publish dialog")
                 .isFalse();
 
-        SoftAssert.assertThat(
+        assertThat(
                 filesPage.isItemInPublishDialogDisplayed(firstFile.getFileName()))
                 .as("First file is NOT displayed on the Publish dialog")
                 .isFalse();
@@ -296,8 +290,6 @@ public class FilesPublishTest extends AbstractTest {
                 .as("Link to third is displayed on Explore page")
                 .isTrue();
 
-        logoutFromAll();
-
         SoftAssert.assertAll();
     }
 
@@ -311,6 +303,7 @@ public class FilesPublishTest extends AbstractTest {
         UserProfile adminUser = TestUserData.getAdminUser();
 
         // login as another user
+        logoutFromAll();
         openLoginPrecisionPage(anotherTestUser).correctLogin(anotherTestUser).grantAccess();
         FilesPage filesPage = openFilesPage();
 
@@ -346,21 +339,21 @@ public class FilesPublishTest extends AbstractTest {
         filesPage.clickTreeItemOnMoveDialog(moveFolder.getFolderName());
         filesPage = filesPage.clickMoveHere();
 
-        assertThat(
+        SoftAssert.assertThat(
                 filesPage.isDangerNotificationDisplayed())
                 .as("Danger notification is displayed")
                 .isFalse();
 
-        assertThat(
+        SoftAssert.assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(moveFileProfile.getFileName()))
                 .as("Link to created by another user and published file is displayed in the folder")
                 .isTrue();
 
-        assertThat(
+        SoftAssert.assertThat(
                 filesPage.getDisplayedBreadcrumbsText())
                 .as("Breadcrumbs")
                 .isEqualTo(generateBreadcrumbsExploreFiles(moveFolder.getFolderName(), "", ""));
 
-        logoutFromAll();
+        SoftAssert.assertAll();
     }
 }

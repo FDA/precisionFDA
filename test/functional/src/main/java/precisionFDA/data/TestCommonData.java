@@ -8,12 +8,6 @@ import static precisionFDA.utils.Utils.getTextFromFile;
 
 public class TestCommonData {
 
-    static String finishedCaseStatus;
-
-    static String finishedCaseName;
-
-    static String runSuiteName;
-
     static String currentTimezone = "GMT";
 
     static final String filePathUniqueValue = generateFilePathUniqueValue();
@@ -80,28 +74,6 @@ public class TestCommonData {
 
     public static final String getCurrentRunLogFolderName() {
         return "run_" + getFilePathUniqueValue() + "/";
-    }
-
-    public static void setFinishedCaseData(String caseStatus, String caseName, String suiteName) {
-        finishedCaseStatus = caseStatus;
-        finishedCaseName = caseName;
-        setRunSuiteName(suiteName);
-    }
-
-    public static void setRunSuiteName(String suiteName) {
-        runSuiteName = suiteName;
-    }
-
-    public static String getRunSuiteName() {
-        return runSuiteName;
-    }
-
-    public static String getFinishedCaseStatus() {
-        return finishedCaseStatus;
-    }
-
-    public static String getFinishedCaseName() {
-        return finishedCaseName;
     }
 
     public static String getFilePathUniqueValue() {

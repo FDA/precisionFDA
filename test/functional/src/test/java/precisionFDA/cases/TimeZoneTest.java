@@ -104,21 +104,21 @@ public class TimeZoneTest extends AbstractTest {
         notesEditNotePage.fillAndSaveNote(noteProfile);
         NotesPage notesPage = notesEditNotePage.openNotesPage();
 
-        SoftAssert.assertThat(
+        assertThat(
                 isDateTimeCorrect(notesPage.getFirstNoteCreatedText(), expNoteCreated))
                 .as("Created date/time is correct one on Notes list" + descr)
                 .isEqualTo(getDictTrue());
 
         NotesSavedNotePage savedNotePage = notesPage.openCreatedNote(noteProfile);
 
-        SoftAssert.assertThat(
+        assertThat(
                 isDateTimeCorrect(savedNotePage.getSavedNoteCreatedText(), expNoteCreated))
                 .as("Created date/time is correct one on saved Note form" + descr)
                 .isEqualTo(getDictTrue());
 
         notesEditNotePage = savedNotePage.openNoteForEdit();
 
-        SoftAssert.assertThat(
+        assertThat(
                 isDateTimeCorrect(notesEditNotePage.getCreatedText(), expNoteCreated))
                 .as("Created date/time is correct one on edit note form page" + descr)
                 .isEqualTo(getDictTrue());
@@ -131,13 +131,12 @@ public class TimeZoneTest extends AbstractTest {
 
         String actNoteCreated = savedNotePage.getSavedNoteCreatedText();
         String expNoteCreatedTimeZoneApplied = applyTimezoneToDate(expNoteCreated, timeZone.getZoneTime(), getTestTimeZone().getZoneTime());
-        SoftAssert.assertThat(
+
+        assertThat(
                 isDateTimeCorrect(actNoteCreated, expNoteCreatedTimeZoneApplied))
                 .as("Created date/time is correct one on saved Note form after TimeZone change from " + timeZone.getTimeAndLocation() +
                         " to " + getTestTimeZone().getTimeAndLocation())
                 .isEqualTo(getDictTrue());
-
-        SoftAssert.assertAll();
     }
 
     @Test(dataProvider = "getTimeZoneValue", dataProviderClass = TimeZoneTest.class,
@@ -164,7 +163,7 @@ public class TimeZoneTest extends AbstractTest {
         appsSavedAppPage = appsSavedAppPage.openCommentsTab().leaveCommentSaveTime(appProfile);
         appsSavedAppPage = appsSavedAppPage.openCommentsTab();
 
-        SoftAssert.assertThat(
+        assertThat(
                 isDateTimeCorrect(appsSavedAppPage.getAppsSubmittedCommentTimeText(), appProfile.getAppCommentCreatedText()))
                 .as("Comment submitted time is correct one" + descr)
                 .isEqualTo(getDictTrue());
@@ -172,14 +171,14 @@ public class TimeZoneTest extends AbstractTest {
         appsEditAppPage = appsSavedAppPage.clickEdit();
         appsEditAppPage.editAndSaveAppTitleWithNewValue(appProfile);
 
-        SoftAssert.assertThat(
+        assertThat(
                 isDateTimeCorrect(appsSavedAppPage.getActSelectedAppCreated(), appProfile.getCurRevAppCreatedText()))
                 .as("Created date/time is correct one for the new revision" + descr)
                 .isEqualTo(getDictTrue());
 
         appsSavedAppPage = appsSavedAppPage.openFirstRevision();
 
-        SoftAssert.assertThat(
+        assertThat(
                 isDateTimeCorrect(appsSavedAppPage.getActSelectedAppCreated(), appProfile.getInitAppCreatedText()))
                 .as("Created date/time is correct one for the first revision" + descr)
                 .isEqualTo(getDictTrue());
@@ -192,12 +191,13 @@ public class TimeZoneTest extends AbstractTest {
 
         String actCreated = appsSavedAppPage.getActSelectedAppCreated();
         String expCreated = applyTimezoneToDate(appProfile.getCurRevAppCreatedText(), timeZone.getZoneTime(), getTestTimeZone().getZoneTime());
-        SoftAssert.assertThat(
-                isDateTimeCorrect(actCreated, expCreated))
-                .as("Created date/time is correct one App form after TimeZone change from " + timeZone.getTimeAndLocation() + " to " + getTestTimeZone().getTimeAndLocation())
-                .isEqualTo(getDictTrue());
 
-        SoftAssert.assertAll();
+        assertThat(
+                isDateTimeCorrect(actCreated, expCreated))
+                .as("Created date/time is correct one App form after TimeZone change from "
+                        + timeZone.getTimeAndLocation() + " to "
+                        + getTestTimeZone().getTimeAndLocation())
+                .isEqualTo(getDictTrue());
     }
 
 }

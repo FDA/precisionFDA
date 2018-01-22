@@ -5,7 +5,7 @@ import org.openqa.selenium.WebDriver;
 import precisionFDA.model.AppProfile;
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.Screenshot;
-import ru.yandex.qatools.ashot.screentaker.ViewportPastingStrategy;
+import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -140,7 +140,7 @@ public class Utils {
     }
 
     public static void createFolder(String folderPath) {
-        Logger log = Logger.getLogger("INFO");
+        Logger log = Logger.getLogger("");
         File file = new File(folderPath);
         if (!file.exists()) {
             file.mkdir();
@@ -445,14 +445,6 @@ public class Utils {
         waitUntilFileIsDownloaded(fileName);
     }
 
-    public static void printCaseStatus(String caseStatus, String caseName, String suiteName) {
-        final Logger log = Logger.getLogger("");
-        printLine();
-        log.info("-- it was test case [" + caseName + "] from suite [" + suiteName + "] --");
-        printLine();
-        log.info("--      " + caseStatus.toUpperCase() + "      --");
-        printLine();
-    }
     public static void printTestHeader(final String text) {
         final Logger log = Logger.getLogger("");
         printLine();
@@ -467,9 +459,11 @@ public class Utils {
 
     public static void takeScreenshot(String filePath, WebDriver driver) {
         if (isScreenshotFeatureOn()) {
-            final Logger log = Logger.getLogger(getDictInfo().toUpperCase());
+            final Logger log = Logger.getLogger("");
 
-            final Screenshot screenshot = new AShot().shootingStrategy(new ViewportPastingStrategy(1000)).takeScreenshot(driver);
+            final Screenshot screenshot = new AShot()
+                    .shootingStrategy(ShootingStrategies.viewportPasting(100))
+                    .takeScreenshot(driver);
             final BufferedImage image = screenshot.getImage();
             try {
                 ImageIO.write(image, "PNG", new File(filePath));

@@ -25,7 +25,7 @@ public class FilesAddFilesPage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_UPLOAD_ALL_BUTTON)
     private Button filesUploadAllButton;
 
-    @FindBy(xpath = FilesLocators.FILES_UPLOAD_PREVIEW_FILE_NAME)
+    @FindBy(xpath = FilesLocators.FILES_UPLOAD_PREVIEW_FILE_NAME_COMMON)
     private WebElement fileToUploadPreviewName;
 
     @FindBy(xpath = FilesLocators.FILES_UPLOADS_COMPLETE_MESSAGE)
@@ -106,6 +106,19 @@ public class FilesAddFilesPage extends AbstractPage {
         isElementPresent(getFilesUploadRestartButton(), 5);
         getFilesUploadRestartButton().click();
         return new FilesAddFilesPage(getDriver());
+    }
+
+    public UploadedFilePage openUploadedFile(String fileName) {
+        log.info("open uploaded file page");
+        By fileBy = getUploadedFileLinkBy(fileName);
+        WebElement fileWE = getDriver().findElement(fileBy);
+        fileWE.click();
+        return new UploadedFilePage(getDriver());
+    }
+
+    public By getUploadedFileLinkBy(String fileName) {
+        String xpath = FilesLocators.FILES_UPLOAD_PREVIEW_FILE_NAME_TEMPLATE.replace("{FILE_NAME}", fileName);
+        return By.xpath(xpath);
     }
 
 }

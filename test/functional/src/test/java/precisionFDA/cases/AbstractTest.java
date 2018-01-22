@@ -11,6 +11,7 @@ import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
+import org.testng.ITestResult;
 import org.testng.Reporter;
 import org.testng.annotations.*;
 import precisionFDA.model.UserProfile;
@@ -22,7 +23,6 @@ import precisionFDA.pages.overview.OverviewPage;
 import precisionFDA.pages.staging.LoginStagingPage;
 import precisionFDA.pages.staging.MainStagingPage;
 import precisionFDA.utils.Utils;
-import tools.CustomResultListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,10 +38,9 @@ import static precisionFDA.data.TestCommonData.*;
 import static precisionFDA.utils.TestRunConfig.isScreenshotFeatureOn;
 import static precisionFDA.utils.Utils.*;
 
-@Listeners( { CustomResultListener.class } )
 public abstract class AbstractTest {
 
-    private Logger log = Logger.getLogger(getDictInfo().toUpperCase());
+    private Logger log = Logger.getLogger("");
 
     protected WebDriver driver;
 
@@ -56,7 +55,7 @@ public abstract class AbstractTest {
     }
 
     @AfterClass(alwaysRun = true)
-    public void tearDown() throws Exception {
+    public void tearDown() {
         closeBrowser();
         sleep(2000);
     }
@@ -78,8 +77,8 @@ public abstract class AbstractTest {
         deleteTempFiles();
         createFolder(getDebugLogCommonFolderPath());
         createFolder(getCurrentRunLogFolderPath());
-        String relativeFilePath = "../../" + getDebugLogCommonFolderName() + "full.log";
-        Reporter.log("<a target='_blank' href='" + relativeFilePath + "'>full log</a><br><br>");
+        String relativeFullLogFilePath = "../../" + getDebugLogCommonFolderName() + "full.log";
+        Reporter.log("<a target='_blank' href='" + relativeFullLogFilePath + "'>full log</a><br><br>");
     }
 
     @AfterSuite(alwaysRun = true)
@@ -108,23 +107,38 @@ public abstract class AbstractTest {
     }
 
     @AfterMethod(alwaysRun = true)
-    public void afterTestCase() {
-        boolean isGetScreenshot = false;
-        boolean isGetSource = false;
-        if (getFinishedCaseStatus().equalsIgnoreCase(getDictPassed())) {
+    public void afterTestCase(ITestResult result) {
+        boolean isGetScreenshot;
+        boolean isGetSource;
+        String caseStatus;
+
+        String finishedCaseName = result.getMethod().getMethodName();
+        String runTimeSuiteName = result.getTestClass().getName().replace("precisionFDA.cases.", "");
+        boolean isCaseSuccess = result.isSuccess();
+
+        if (isCaseSuccess) {
             isGetScreenshot = isGetScreenshotOnPass();
             isGetSource = isGetPageSourceOnPass();
+            caseStatus = getDictPassed();
         }
-        else if (getFinishedCaseStatus().equalsIgnoreCase(getDictFailed())) {
+        else {
             isGetScreenshot = isGetScreenshotOnFail();
             isGetSource = isGetPageSourceOnFail();
+            caseStatus = getDictFailed();
         }
+
+        printLine();
+        log.info("-- it was test case [" + finishedCaseName + "] from suite [" + runTimeSuiteName + "] --");
+        printLine();
+        log.info("--      " + caseStatus.toUpperCase() + "      --");
+        printLine();
 
         //-------------
 
-        String fileNameWithNoExt = getFinishedCaseStatus() + "_" +
-                getRunSuiteName() + "_" +
-                getFinishedCaseName() + "_" +
+        String fileNameWithNoExt =
+                caseStatus + "_" +
+                runTimeSuiteName + "_" +
+                finishedCaseName + "_" +
                 getRunTimeLocalUniqueValue();
 
         //-------------
@@ -146,17 +160,18 @@ public abstract class AbstractTest {
 
         if (isGetScreenshot && isScreenshotFeatureOn()) {
             String loggerLevel;
-            if (getFinishedCaseStatus().equalsIgnoreCase(getDictPassed())) {
+            if (isCaseSuccess) {
                 loggerLevel = getDictInfo();
             }
             else {
                 loggerLevel = getDictError();
             }
             String fileName = fileNameWithNoExt + ".png";
-            String message = "screenshot when " + getFinishedCaseName() + " case is finished";
+            String message = "taking screenshot when " + finishedCaseName + " case is finished";
             Utils.reportScreenshot(message, fileName, loggerLevel, driver);
             String relativeFilePath = "../../" + getDebugLogCommonFolderName() + getCurrentRunLogFolderName() + fileName;
-            Reporter.log(getRunSuiteName() + "." + getFinishedCaseName() + ": <a target='_blank' href='" + relativeFilePath + "'>" + fileName + "</a><br>");
+            Reporter.log(runTimeSuiteName + "." + finishedCaseName + ": <a target='_blank' href='"
+                    + relativeFilePath + "'>" + fileName + "</a><br>");
         }
 
         //---------------

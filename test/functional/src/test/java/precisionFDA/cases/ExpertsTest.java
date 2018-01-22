@@ -37,53 +37,49 @@ public class ExpertsTest extends AbstractTest {
         expertsEditExpertPage = expertsEditExpertPage.fillNewExpertForm(expertProfile);
         expertsPage = expertsEditExpertPage.clickCreateExpert();
 
-        SoftAssert.assertThat(
+        assertThat(
                 expertsPage.isExpertCreatedSuccessAlertDisplayed())
                 .as("success alert is displayed")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 expertsPage.getExpertCreatedSuccessAlertText())
                 .as("success alert")
                 .contains(expertProfile.getExpertName());
 
-        SoftAssert.assertThat(
+        assertThat(
                 expertsPage.isCreatedExpertPrefNameDisplayed(expertProfile))
                 .as("link to just created expert is displayed")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 expertsPage.isCreatedExpertImageDisplayed(expertProfile))
                 .as("uploaded expert image is displayed")
                 .isTrue();
 
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdExpertPage.getAboutDisplayedText())
                 .as("About text")
                 .isEqualTo(expertProfile.getExpertAbout());
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdExpertPage.getOpenClosedLabelText())
                 .as("open/closed label")
                 .contains("Closed");
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdExpertPage.getPublicPrivateLabelText())
                 .as("public/private label")
                 .contains("Private");
 
         StartPage startPage = openOverviewPage().logout();
 
-        SoftAssert.assertThat(
+        assertThat(
                 startPage.isCreatedExpertBlogTitleDisplayed(expertProfile))
                 .as("expert's blog title is displayed on start page")
                 .isFalse();
-
-        logoutFromAll();
-
-        SoftAssert.assertAll();
     }
 
     @Test(priority = 2, dependsOnMethods = "createExpert")
@@ -93,27 +89,28 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserOne();
         ExpertProfile expertProfile = getMainExpertProfile();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
 
-        SoftAssert.assertThat(
+        assertThat(
                 expertsPage.isCreatedExpertPrefNameDisplayed(expertProfile))
                 .as("link to the created expert is displayed")
                 .isTrue();
 
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdExpertPage.getOpenClosedLabelText())
                 .as("open/closed label")
                 .contains("Closed");
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdExpertPage.getPublicPrivateLabelText())
                 .as("public/private label")
                 .contains("Private");
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdExpertPage.getAboutDisplayedText())
                 .as("About text")
                 .isEqualTo(expertProfile.getExpertAbout());
@@ -121,14 +118,10 @@ public class ExpertsTest extends AbstractTest {
         ExpertsExpertDashboardPage expertDashboardPage = createdExpertPage.openDashboard();
         ExpertsEditExpertPage editExpertPage = expertDashboardPage.clickEdit();
 
-        SoftAssert.assertThat(
+        assertThat(
                 editExpertPage.isVisibilitySelectorDisplayed())
                 .as("Select Visibility element")
                 .isFalse();
-
-        logoutFromAll();
-
-        SoftAssert.assertAll();
     }
 
     @Test(priority = 3, dependsOnMethods = "createExpert")
@@ -138,6 +131,7 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserTwo();
         ExpertProfile expertProfile = getMainExpertProfile();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
 
@@ -145,8 +139,6 @@ public class ExpertsTest extends AbstractTest {
                 expertsPage.isCreatedExpertPrefNameDisplayed(expertProfile))
                 .as("link to the created expert is NOT displayed")
                 .isFalse();
-
-        logoutFromAll();
     }
 
     @Test(priority = 4, dependsOnMethods = "createExpert")
@@ -156,6 +148,7 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getAdminUser();
         ExpertProfile expertProfile = getMainExpertProfile();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
@@ -174,8 +167,6 @@ public class ExpertsTest extends AbstractTest {
                 .as("public/private label")
                 .contains("Public");
 
-        logoutFromAll();
-
         SoftAssert.assertAll();
     }
 
@@ -186,10 +177,11 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserTwo();
         ExpertProfile expertProfile = getMainExpertProfile();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
 
-        SoftAssert.assertThat(
+        assertThat(
                 expertsPage.isCreatedExpertPrefNameDisplayed(expertProfile))
                 .as("link to the created expert is displayed")
                 .isTrue();
@@ -211,8 +203,6 @@ public class ExpertsTest extends AbstractTest {
                 .as("Ask Question button is displayed")
                 .isFalse();
 
-        logoutFromAll();
-
         SoftAssert.assertAll();
     }
 
@@ -223,16 +213,17 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserOne();
         ExpertProfile expertProfile = getMainExpertProfile();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdExpertPage.getOpenClosedLabelText())
                 .as("open/closed label")
                 .contains("Closed");
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdExpertPage.getPublicPrivateLabelText())
                 .as("public/private label")
                 .contains("Public");
@@ -250,8 +241,6 @@ public class ExpertsTest extends AbstractTest {
                 .as("public/private label")
                 .contains("Public");
 
-        logoutFromAll();
-
         SoftAssert.assertAll();
     }
 
@@ -262,10 +251,11 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserTwo();
         ExpertProfile expertProfile = getMainExpertProfile();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
 
-        SoftAssert.assertThat(
+        assertThat(
                 expertsPage.isCreatedExpertPrefNameDisplayed(expertProfile))
                 .as("link to the created expert is displayed")
                 .isTrue();
@@ -282,8 +272,6 @@ public class ExpertsTest extends AbstractTest {
                 .as("Ask Question button is displayed")
                 .isTrue();
 
-        logoutFromAll();
-
         SoftAssert.assertAll();
     }
 
@@ -295,6 +283,7 @@ public class ExpertsTest extends AbstractTest {
         ExpertProfile expertProfile = getMainExpertProfile();
         QuestionProfile questionProfile = getMainQAProfile();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
@@ -311,8 +300,6 @@ public class ExpertsTest extends AbstractTest {
                 .as("question #2 is displayed in Your Questions list")
                 .isTrue();
 
-        logoutFromAll();
-
         SoftAssert.assertAll();
     }
 
@@ -324,6 +311,7 @@ public class ExpertsTest extends AbstractTest {
         ExpertProfile expertProfile = getMainExpertProfile();
         QuestionProfile questionProfile = getMainQAProfile();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
@@ -339,7 +327,7 @@ public class ExpertsTest extends AbstractTest {
                 .as("question #1 is displayed in Open Questions list")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 expertDashboardPage.isOpenQuestionLinkDisplayed(questionProfile.getExpertQuestion2()))
                 .as("question #2 is displayed in Open Questions list")
                 .isTrue();
@@ -362,8 +350,6 @@ public class ExpertsTest extends AbstractTest {
                 .as("question #2 is displayed in Open Questions list")
                 .isTrue();
 
-        logoutFromAll();
-
         SoftAssert.assertAll();
     }
 
@@ -375,6 +361,7 @@ public class ExpertsTest extends AbstractTest {
         ExpertProfile expertProfile = getMainExpertProfile();
         QuestionProfile questionProfile = getMainQAProfile();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
@@ -390,8 +377,6 @@ public class ExpertsTest extends AbstractTest {
                 expertsQAPage.getAnswerText())
                 .as("answer #1 is displayed correctly")
                 .isEqualTo(questionProfile.getExpertAnswer1());
-
-        logoutFromAll();
     }
 
     @Test(priority = 11, dependsOnMethods = "createExpert")
@@ -401,6 +386,7 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserOne();
         ExpertProfile expertProfile = getMainExpertProfile();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
@@ -417,8 +403,6 @@ public class ExpertsTest extends AbstractTest {
                 .as("public/private label")
                 .contains("Public");
 
-        logoutFromAll();
-
         SoftAssert.assertAll();
     }
 
@@ -430,27 +414,28 @@ public class ExpertsTest extends AbstractTest {
         ExpertProfile expertProfile = getMainExpertProfile();
         QuestionProfile questionProfile = getMainQAProfile();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
 
-        SoftAssert.assertThat(
+        assertThat(
                 expertsPage.isCreatedExpertPrefNameDisplayed(expertProfile))
                 .as("link to the created expert is displayed")
                 .isTrue();
 
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdExpertPage.getOpenClosedLabelText())
                 .as("open/closed label")
                 .contains("Closed");
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdExpertPage.getAboutDisplayedText())
                 .as("About text")
                 .isEqualTo(expertProfile.getExpertAbout());
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdExpertPage.isAskQuestionButtonDisplayed())
                 .as("Ask Question button is displayed")
                 .isFalse();
@@ -460,12 +445,12 @@ public class ExpertsTest extends AbstractTest {
                 .as("question #1 is displayed as answered")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdExpertPage.isYourQuestionDisplayed(questionProfile.getExpertQuestion1()))
                 .as("question #1 is displayed in Your questions list")
                 .isTrue();
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdExpertPage.isYourQuestionDisplayed(questionProfile.getExpertQuestion2()))
                 .as("question #2 is displayed in Your questions list")
                 .isTrue();
@@ -476,10 +461,6 @@ public class ExpertsTest extends AbstractTest {
                 expertsQAPage.getAnswerText())
                 .as("answer #1 is displayed correctly")
                 .isEqualTo(questionProfile.getExpertAnswer1());
-
-        logoutFromAll();
-
-        SoftAssert.assertAll();
     }
 
     @Test(priority = 13, dependsOnMethods = "createExpert")
@@ -489,6 +470,7 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getAdminUser();
         ExpertProfile expertProfile = getMainExpertProfile();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
@@ -507,8 +489,6 @@ public class ExpertsTest extends AbstractTest {
                 .as("public/private label")
                 .contains("Private");
 
-        logoutFromAll();
-
         SoftAssert.assertAll();
     }
 
@@ -519,6 +499,7 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserTwo();
         ExpertProfile expertProfile = getMainExpertProfile();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
 
@@ -526,8 +507,6 @@ public class ExpertsTest extends AbstractTest {
                 expertsPage.isCreatedExpertPrefNameDisplayed(expertProfile))
                 .as("link to the created expert is NOT displayed")
                 .isFalse();
-
-        logoutFromAll();
     }
 
     @Test(priority = 15, dependsOnMethods = "createExpert")
@@ -537,23 +516,24 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserOne();
         ExpertProfile expertProfile = getMainExpertProfile();
 
+        logoutFromAll();
         openLoginPrecisionPage(user).correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
         QuestionProfile questionProfile = getMainQAProfile();
 
-        SoftAssert.assertThat(
+        assertThat(
                 expertsPage.isCreatedExpertPrefNameDisplayed(expertProfile))
                 .as("link to the created expert is displayed")
                 .isTrue();
 
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdExpertPage.getOpenClosedLabelText())
                 .as("open/closed label")
                 .contains("Closed");
 
-        SoftAssert.assertThat(
+        assertThat(
                 createdExpertPage.getPublicPrivateLabelText())
                 .as("public/private label")
                 .contains("Private");
@@ -572,26 +552,24 @@ public class ExpertsTest extends AbstractTest {
 
         expertDashboardPage = expertDashboardPage.openQuestion(questionProfile.getExpertQuestion1());
 
-        SoftAssert.assertThat(
+        assertThat(
                 expertDashboardPage.getEnteredQuestionFromForm())
                 .as("entered question #1")
                 .isEqualTo(questionProfile.getExpertQuestion1());
 
-        SoftAssert.assertThat(
+        assertThat(
                 expertDashboardPage.getEnteredAnswerFromForm())
                 .as("entered answer #1")
                 .isEqualTo(questionProfile.getExpertAnswer1());
 
         expertDashboardPage = expertDashboardPage.openQuestion(questionProfile.getExpertQuestion2());
 
-        SoftAssert.assertThat(
+        assertThat(
                 expertDashboardPage.getEnteredQuestionFromForm())
                 .as("entered question #2")
                 .isEqualTo(questionProfile.getExpertQuestion2());
 
         logoutFromAll();
-
-        SoftAssert.assertAll();
     }
 
 }

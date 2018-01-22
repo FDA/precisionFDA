@@ -83,26 +83,6 @@ public class NotesTest extends AbstractTest {
                 notesPage.isLinkToCreatedNoteDisplayed(noteProfile))
                 .as("Link to created note is displayed")
                 .isTrue();
-
-        /*
-        assertThat(
-                notesPage.getFirstNoteTitleText())
-                .as("Created Note Title")
-                .contains(notesEditNotePage.getExpectedEditedNoteTitleText());
-
-
-        SoftAssert.assertThat(
-                notesPage.getFirstNoteUserName())
-                .as("Created Note Username")
-                .isEqualTo(notesEditNotePage.getExpectedUsername());
-
-        SoftAssert.assertThat(
-                notesPage.getFirstNoteUserOrg())
-                .as("Created Note Org")
-                .isEqualTo(notesEditNotePage.getCurrentOrg());
-
-        SoftAssert.assertAll();
-        */
     }
 
     @Test(dependsOnMethods = {"precondition"})
@@ -358,13 +338,6 @@ public class NotesTest extends AbstractTest {
                 savedNotePage.getSavedNoteAddedByText())
                 .as("Note Added By")
                 .isEqualTo(savedNotePage.getExpAddedByText());
-
-        /*
-        SoftAssert.assertThat(
-                savedNotePage.getSavedNoteCreatedText())
-                .as("Note Created")
-                .contains(savedNotePage.getExpCreatedText());
-        */
 
         SoftAssert.assertThat(
                 savedNotePage.getSavedNoteBodyText())
