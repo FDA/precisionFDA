@@ -11,7 +11,7 @@ import precisionFDA.pages.AbstractPage;
 
 import static precisionFDA.data.TestCommonData.getPathToDownloadsFolder;
 import static precisionFDA.data.TestCommonData.getUsersAndUsageFileName;
-import static precisionFDA.utils.Utils.isFileContainsText;
+import static precisionFDA.utils.Utils.doesFileContainText;
 import static precisionFDA.utils.Utils.isFileDownloaded;
 import static precisionFDA.utils.Utils.waitUntilFileIsDownloaded;
 
@@ -59,7 +59,7 @@ public class UsersAndUsagePage extends AbstractPage {
         boolean flag = true;
 
         for (int i = 0; i <= expectedArray.length - 1; i ++) {
-            contains = isFileContainsText(getPathToDownloadsFolder() + getUsersAndUsageFileName(), expectedArray[i]);
+            contains = doesFileContainText(getPathToDownloadsFolder() + getUsersAndUsageFileName(), expectedArray[i]);
             if (!contains) {
                 log.warn("the Users&Usage file does not contain expected string: " + expectedArray[i]);
                 flag = false;

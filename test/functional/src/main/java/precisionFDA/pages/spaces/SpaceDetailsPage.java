@@ -316,7 +316,7 @@ public class SpaceDetailsPage extends AbstractPage {
         files.click();
         String xpath = SpacesLocators.SPACES_MOVE_DATA_TO_SPACE_FILE_CHECKBOX_TEMPLATE.replace("{FILE_NAME}", fileName);
         By elBy = By.xpath(xpath);
-        waitUntilDisplayed(elBy, 20);
+        waitUntilDisplayed(elBy, 30);
         getDriver().findElement(elBy).click();
         Button button = getMoveDataToSpaceDialogSelectButton();
         waitUntilDisplayed(button);

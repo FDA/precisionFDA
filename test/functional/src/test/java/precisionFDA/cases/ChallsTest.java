@@ -49,7 +49,7 @@ public class ChallsTest extends AbstractTest {
 
         AppProfile appProfile = TestAppData.getChallAppProfile();
 
-        AppsPage appsPage = openOverviewPage().openAppsPage();
+        AppsPage appsPage = openAppsPage();
         AppsEditAppPage appsEditAppPage = appsPage.openCreateAppPage();
         AppsSavedAppPage appsSavedAppPage = appsEditAppPage.fillAndSaveAppForChallenge(appProfile);
 
@@ -70,10 +70,10 @@ public class ChallsTest extends AbstractTest {
         logoutFromAll();
         OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
 
-        ProfilePage profilePage = openOverviewPage().openProfilePage();
+        ProfilePage profilePage = overviewPage.openProfilePage();
         profilePage.setTimeZone(timeZone);
 
-        ChallsPage challsPage = openOverviewPage().openChallsPage();
+        ChallsPage challsPage = openChallsPage();
 
         assertThat(
                 challsPage.isCreateNewChallLinkDisplayed())
@@ -136,7 +136,7 @@ public class ChallsTest extends AbstractTest {
 
         ChallProfile challProfile = getMainChallProfile();
 
-        ChallsPage challsPage = openOverviewPage().openChallsPage();
+        ChallsPage challsPage = openChallsPage();
         ChallsCreatedChallPage createdChallPage = challsPage.viewChallenge(challProfile);
         ChallsEditChallengeInfo editChallengeInfo = createdChallPage.clickEditPage();
         editChallengeInfo = editChallengeInfo.clickChallengeInfo();
@@ -306,7 +306,7 @@ public class ChallsTest extends AbstractTest {
                 .as("File is uploaded: " + inputFileProfile.getFileName())
                 .isTrue();
 
-        ChallsPage challsPage = openOverviewPage().openChallsPage();
+        ChallsPage challsPage = openChallsPage();
         ChallsCreatedChallPage createdChallPage = challsPage.viewChallenge(challProfile);
 
         assertThat(
@@ -373,7 +373,7 @@ public class ChallsTest extends AbstractTest {
                 .as("File is uploaded: " + inputFileProfile.getFileName())
                 .isTrue();
 
-        ChallsPage challsPage = openOverviewPage().openChallsPage();
+        ChallsPage challsPage = openChallsPage();
 
         assertThat(
                 challsPage.isCreatedChallNameDisplayed(challProfile.getChallName()))
@@ -505,14 +505,14 @@ public class ChallsTest extends AbstractTest {
 
         ChallProfile challProfile = getMainChallProfile();
 
-        ChallsPage challsPage = openOverviewPage().openChallsPage();
+        ChallsPage challsPage = openChallsPage();
 
         ChallsCreatedChallPage createdChallPage = challsPage.viewChallenge(challProfile);
         ChallsEditChallPage editChallPage = createdChallPage.clickSettings();
         editChallPage.setArchivedStatus();
         editChallPage.clickUpdate();
 
-        challsPage = openOverviewPage().openChallsPage();
+        challsPage = openChallsPage();
 
         assertThat(
                 challsPage.isAnnouncedResultDisplayed(challProfile))
@@ -532,7 +532,7 @@ public class ChallsTest extends AbstractTest {
         printTestHeader("Test Case: check challenge results");
 
         ChallProfile challProfile = getMainChallProfile();
-        ChallsPage challsPage = openOverviewPage().openChallsPage();
+        ChallsPage challsPage = openChallsPage();
 
         assertThat(
                 challsPage.isAnnouncedResultDisplayed(challProfile))

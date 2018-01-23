@@ -75,7 +75,7 @@ public class AdminDashboardPage extends AbstractPage {
         boolean flag = true;
 
         for (int i = 0; i <= expectedArray.length - 1; i ++) {
-            contains = isFileContainsText(getPathToDownloadsFolder() + getActiveUsersFileName(), expectedArray[i]);
+            contains = doesFileContainText(getPathToDownloadsFolder() + getActiveUsersFileName(), expectedArray[i]);
             if (!contains) {
                 log.warn("the Active Users file does not contain expected string: " + expectedArray[i]);
                 flag = false;

@@ -54,7 +54,7 @@ public class SpacesTest extends AbstractTest {
 
         SpaceProfile spaceProfile = getMainSpaceProfile();
 
-        SpacesPage spacesPage = openOverviewPage().openSpacesPage();
+        SpacesPage spacesPage = openSpacesPage();
         EditSpacePage editSpacePage = spacesPage.clickProvisionSpace();
         editSpacePage.fillSpaceForm(spaceProfile);
         spacesPage = editSpacePage.clickCreate();
@@ -236,14 +236,14 @@ public class SpacesTest extends AbstractTest {
         SpaceProfile spaceProfile = getMainSpaceProfile();
         FileProfile spaceFile = getMainSpaceFile();
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(spaceFile.getFileName());
         FilesAddFilesPage addFilesPage = filesAddFilesPage.uploadAllFiles();
         UploadedFilePage uploadedFilePage = addFilesPage.openUploadedFile(spaceFile.getFileName());
         uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
 
-        SpaceDetailsPage spaceDetailsPage = openOverviewPage().openSpacesPage().openSpace(spaceProfile.getSpaceName());
+        SpaceDetailsPage spaceDetailsPage = openSpacesPage().openSpace(spaceProfile.getSpaceName());
         spaceDetailsPage.clickMoveDataToSpace();
         spaceDetailsPage = spaceDetailsPage.selectFileOnMoveToSpaceDialog(spaceFile.getFileName());
 
@@ -318,7 +318,7 @@ public class SpacesTest extends AbstractTest {
         UploadedFilePage uploadedFilePage = addFilesPage.openUploadedFile(spaceFile.getFileName());
         uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
 
-        SpaceDetailsPage spaceDetailsPage = openOverviewPage().openSpacesPage().openSpace(spaceProfile.getSpaceName());
+        SpaceDetailsPage spaceDetailsPage = openSpacesPage().openSpace(spaceProfile.getSpaceName());
         spaceDetailsPage.clickMoveDataToSpace();
         spaceDetailsPage = spaceDetailsPage.selectFileOnMoveToSpaceDialog(spaceFile.getFileName());
 
@@ -357,7 +357,7 @@ public class SpacesTest extends AbstractTest {
         SpaceProfile spaceProfile = getMainSpaceProfile();
         FolderProfile spaceFolder = getToEditSpaceFolder();
 
-        SpaceDetailsPage spaceDetailsPage = openOverviewPage().openSpacesPage().openSpace(spaceProfile.getSpaceName());
+        SpaceDetailsPage spaceDetailsPage = openSpacesPage().openSpace(spaceProfile.getSpaceName());
         spaceDetailsPage = spaceDetailsPage.createFolder(spaceFolder.getFolderName());
 
         assertThat(
@@ -388,14 +388,14 @@ public class SpacesTest extends AbstractTest {
         FolderProfile spaceFolder = getToMoveSpaceFolder();
         FileProfile spaceFile = getToMoveSpaceFile();
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(spaceFile.getFileName());
         FilesAddFilesPage addFilesPage = filesAddFilesPage.uploadAllFiles();
         UploadedFilePage uploadedFilePage = addFilesPage.openUploadedFile(spaceFile.getFileName());
         uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
 
-        SpaceDetailsPage spaceDetailsPage = openOverviewPage().openSpacesPage().openSpace(spaceProfile.getSpaceName());
+        SpaceDetailsPage spaceDetailsPage = openSpacesPage().openSpace(spaceProfile.getSpaceName());
         spaceDetailsPage.clickMoveDataToSpace();
         spaceDetailsPage = spaceDetailsPage.selectFileOnMoveToSpaceDialog(spaceFile.getFileName());
 
@@ -459,7 +459,7 @@ public class SpacesTest extends AbstractTest {
         FileProfile spaceFile1 = getToDeleteSpaceFile();
         FileProfile spaceFile2 = getToDeleteSpaceFileSecond();
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
 
         // upload test file 1
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
@@ -474,7 +474,7 @@ public class SpacesTest extends AbstractTest {
         uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
 
         // add file to space
-        SpaceDetailsPage spaceDetailsPage = openOverviewPage().openSpacesPage().openSpace(spaceProfile.getSpaceName());
+        SpaceDetailsPage spaceDetailsPage = openSpacesPage().openSpace(spaceProfile.getSpaceName());
         spaceDetailsPage.clickMoveDataToSpace();
         spaceDetailsPage = spaceDetailsPage.selectFileOnMoveToSpaceDialog(spaceFile1.getFileName());
         spaceDetailsPage.clickMoveDataToSpace();
@@ -580,7 +580,7 @@ public class SpacesTest extends AbstractTest {
         FileProfile spaceFile1 = getToPublishSpaceFile();
         FileProfile spaceFile2 = getToPublishSpaceFileSecond();
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
 
         // upload test file 1
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
@@ -595,7 +595,7 @@ public class SpacesTest extends AbstractTest {
         uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
 
         // add file to space
-        SpaceDetailsPage spaceDetailsPage = openOverviewPage().openSpacesPage().openSpace(spaceProfile.getSpaceName());
+        SpaceDetailsPage spaceDetailsPage = openSpacesPage().openSpace(spaceProfile.getSpaceName());
         spaceDetailsPage.clickMoveDataToSpace();
         spaceDetailsPage = spaceDetailsPage.selectFileOnMoveToSpaceDialog(spaceFile1.getFileName());
         spaceDetailsPage.clickMoveDataToSpace();
@@ -691,7 +691,7 @@ public class SpacesTest extends AbstractTest {
         SpaceProfile spaceProfile = getMainSpaceProfile();
         FileProfile fileProfile = getPublishToSpaceFile();
 
-        FilesPage filesPage = openOverviewPage().openFilesPage();
+        FilesPage filesPage = openFilesPage();
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(fileProfile.getFileName());
         FilesAddFilesPage addFilesPage = filesAddFilesPage.uploadAllFiles();
@@ -706,7 +706,7 @@ public class SpacesTest extends AbstractTest {
                 .as("Access is space " + spaceProfile.getSpaceName())
                 .isTrue();
 
-        SpaceDetailsPage spaceDetailsPage = openOverviewPage().openSpacesPage().openSpace(spaceProfile.getSpaceName());
+        SpaceDetailsPage spaceDetailsPage = openSpacesPage().openSpace(spaceProfile.getSpaceName());
 
         assertThat(
                 spaceDetailsPage.isLinkToAddedFileDisplayed(fileProfile.getFileName()))

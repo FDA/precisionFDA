@@ -513,7 +513,7 @@ public class AppsSavedAppPage extends AbstractPage {
     }
 
     public boolean isDockerFileNotEmpty() {
-        boolean notEmpty = Utils.isFileContainsText(getPathToDownloadsFolder() + getDockerFileName(), getDockerValidationText());
+        boolean notEmpty = Utils.doesFileContainText(getPathToDownloadsFolder() + getDockerFileName(), getDockerValidationText());
         if (!notEmpty) {
             log.warn("the docker file does not contain text: " + getDockerValidationText());
         }
