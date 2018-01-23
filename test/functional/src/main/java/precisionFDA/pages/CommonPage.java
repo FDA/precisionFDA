@@ -138,7 +138,7 @@ public class CommonPage extends AbstractPage {
         log.info("opening Apps page");
         waitUntilClickable(getAppsPageIcon());
         clickAppIcon();
-        sleep(3000);
+        sleep(2000);
         return new AppsPage(getDriver());
     }
 

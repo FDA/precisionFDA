@@ -524,7 +524,7 @@ public class Utils {
         return text;
     }
 
-    public static boolean isFileContainsText(String filePath, String text) {
+    public static boolean doesFileContainText(String filePath, String text) {
         String fileText = getTextFromFile(filePath);
         return fileText.contains(text);
     }

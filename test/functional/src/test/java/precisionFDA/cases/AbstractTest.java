@@ -16,10 +16,13 @@ import org.testng.Reporter;
 import org.testng.annotations.*;
 import precisionFDA.model.UserProfile;
 import precisionFDA.pages.CommonPage;
+import precisionFDA.pages.apps.AppsPage;
+import precisionFDA.pages.challs.ChallsPage;
 import precisionFDA.pages.docs.DocsPage;
 import precisionFDA.pages.files.FilesPage;
 import precisionFDA.pages.login.LoginPrecisionPage;
 import precisionFDA.pages.overview.OverviewPage;
+import precisionFDA.pages.spaces.SpacesPage;
 import precisionFDA.pages.staging.LoginStagingPage;
 import precisionFDA.pages.staging.MainStagingPage;
 import precisionFDA.utils.Utils;
@@ -51,7 +54,12 @@ public abstract class AbstractTest {
         System.setProperty("org.uncommons.reportng.escape-output", "false");
         driver = new DriverFactory().getInstance().getDriver();
         driver.manage().window().setSize(new Dimension(1920, 1080));
-        log.info("=== Environment is: " + getPfdaOverviewURL() + " ===");
+        String env = getPfdaOverviewURL();
+        env = env.replace("https://", "").replace("http://", "");
+        log.info("=== Environment is: "
+                + env.substring(0, 7)
+                + "..."
+                + " ===");
     }
 
     @AfterClass(alwaysRun = true)
@@ -205,6 +213,24 @@ public abstract class AbstractTest {
         String url = getPfdaFilesURL();
         driver.get(url);
         return new FilesPage(driver);
+    }
+
+    public AppsPage openAppsPage() {
+        log.info("open Apps page");
+        getCommonPage().openAppsPage();
+        return new AppsPage(driver);
+    }
+
+    public SpacesPage openSpacesPage() {
+        log.info("open Spaces page");
+        getCommonPage().openSpacesPage();
+        return new SpacesPage(driver);
+    }
+
+    public ChallsPage openChallsPage() {
+        log.info("open Challenges page");
+        getCommonPage().openChallsPage();
+        return new ChallsPage(driver);
     }
 
     public LoginPrecisionPage openLoginPrecisionPage(UserProfile user) {

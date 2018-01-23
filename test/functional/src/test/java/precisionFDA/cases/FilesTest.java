@@ -812,9 +812,10 @@ public class FilesTest extends AbstractTest {
         filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(insideFile.getFileName());
         filesAddFilesPage = filesAddFilesPage.uploadAllFiles();
-        filesPage = filesAddFilesPage.openRootFilesPage();
+        UploadedFilePage uploadedFilePage = filesAddFilesPage.openUploadedFile(insideFile.getFileName());
+        uploadedFilePage.waitUntilDownloadFileLinkIsDisplayed();
 
-        filesPage = filesPage.openRootFilesPage();
+        filesPage = openFilesPage();
         filesPage.selectItem(mainFolder.getFolderName());
         filesPage.selectItem(mainFile.getFileName());
         filesPage.clickDownloadSelected();
