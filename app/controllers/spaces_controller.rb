@@ -92,7 +92,7 @@ class SpacesController < ApplicationController
     if @counts[:assets] > 0
       @assets_grid = initialize_grid(Asset.unscoped.accessible_by_space(@space).includes(:taggings), {
         name: 'assets',
-        order: 'user_files.name',
+        order: 'nodes.name',
         order_direction: 'asc',
         per_page: 25,
         include: [:user, {user: :org}, {taggings: :tag}]
