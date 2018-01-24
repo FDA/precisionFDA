@@ -31,7 +31,12 @@
 <div class="form-group required">
   <%= f.label :card_image_url, "Card image", class: 'control-label col-sm-2' %>
   <div class="col-sm-11 col-sm-offset-1">
-    <%= f.text_field :card_image_url, class: "form-control input-lg", placeholder: "https://...", required: "required"  %>
+    <%= render "_partials/upload_image_button" %>
+    <input type="hidden" name="challenge[card_image_id]" data-bind="value: fileId" required="required" />
+    <input type="hidden" name="challenge[card_image_url]" data-bind="value: imageUrl" required="required" />
+    <br/>
+    <br/>
+    <img class="img-thumbnail" data-bind="attr: {src: imageUrl}, visible: imageUrl" />    
   </div>
 </div>
 <div class="form-group required">
