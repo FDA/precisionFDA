@@ -11,7 +11,7 @@
             <div class="form-group text-centered">
               <div class="control-group">
                 <span class="btn btn-primary btn-lg btn-browse-files" data-bind="visible: isBrowseVisible, disable: disableActions">
-                  <span class="fa fa-file-image-o"></span> Browse image to upload... <input class="event-browse-files" type='file' accept="image/*" required>
+                  <span class="fa fa-file-image-o"></span> Browse image to upload... <input class="event-browse-files" type='file' accept="image/*" required />
                 </span>
 
                 <button class="btn btn-success btn-lg event-upload-image" style="display:none;" data-bind="visible: isUploadVisible, disable: disableActions">
@@ -37,7 +37,11 @@
                     <span class="file-name" data-bind="text: file.name.length > 50 ? file.name.substring(0,32) + '.....' + file.name.slice(-12) : file.name"></span>
                   <!-- /ko -->
                   <!-- ko if: isDone() && path() -->
-                    <a class="file-name" data-bind="text: file.name.length > 50 ? file.name.substring(0,32) + '.....' + file.name.slice(-12) : file.name, attr: {href: path}"></a>
+                    <% if display_url %>
+                      <a class="file-name" data-bind="text: file.name.length > 50 ? file.name.substring(0,32) + '.....' + file.name.slice(-12) : file.name, attr: {href: path}"></a>
+                    <% else %>
+                      <span class="file-name" data-bind="text: file.name.length > 50 ? file.name.substring(0,32) + '.....' + file.name.slice(-12) : file.name"></span>
+                    <% end %>
                   <!-- /ko -->
                   <span class="file-metadata-glue">&middot;</span> <small class="file-type" data-bind="text: file.type || 'File'"></small> <span class="file-metadata-glue">&middot;</span>  <small class="file-size" data-bind="text: sizeFormatted"></small>
                   <span class="pull-right" data-bind="visible: isDone">
