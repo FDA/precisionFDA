@@ -4,6 +4,8 @@ class InputSpecPreparer
 
   include ActiveModel::Validations
 
+  attr_reader :errors
+
   def initialize(context)
     @context = context
     @errors = []
@@ -29,10 +31,11 @@ class InputSpecPreparer
         value = default
       elsif optional
         # No given value and no default, but input is optional; move on
-        return
+        next
       else
         # Required input is missing
         add_error "#{key}: required input is missing"
+        next
       end
 
       # Check compatibility with choices
@@ -40,11 +43,16 @@ class InputSpecPreparer
 
       case klass
       when "file"
-        add_error "#{key}: input file value is not a string" unless value.is_a?(String)
+        unless value.is_a?(String)
+          add_error "#{key}: input file value is not a string"
+          next
+        end
         file = UserFile.real_files.accessible_by(@context).find_by(dxid: value)
-        add_error "#{key}: input file is not accessible or does not exist" unless file
+        unless file
+          add_error "#{key}: input file is not accessible or does not exist"
+          next
+        end
         add_error "#{key}: input file's license must be accepted" unless !file.license.present? || file.licensed_by?(@context)
-
         dxvalue = {"$dnanexus_link" => value}
         input_info.push_file(file)
       when "int"
@@ -65,17 +73,19 @@ class InputSpecPreparer
   end
 
   def first_error
-    @errors.first
+    errors.first
   end
 
   def valid?
-    @errors.empty?
+    errors.empty?
   end
 
   private
 
+  attr_writer :errors
+
   def add_error(message)
-    @errors.push(message)
+    errors.push(message)
   end
 
 end
