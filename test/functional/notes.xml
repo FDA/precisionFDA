@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="notes suite">
+    <test name="NotesTest">
+        <classes>
+            <class name="precisionFDA.cases.NotesTest" />
+        </classes>
+    </test>
+</suite>
