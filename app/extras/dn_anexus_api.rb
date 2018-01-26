@@ -1,8 +1,18 @@
 class DNAnexusAPI
+
+  def self.for_challenge_bot
+    new(CHALLENGE_BOT_TOKEN)
+  end
+
   def initialize(bearer_token, apiserver_url = DNANEXUS_APISERVER_URI)
     raise "Bearer is nil" if bearer_token.nil?
     @bearer_token = bearer_token
     @apiserver_url = apiserver_url
+  end
+
+  def generate_permanent_link(file)
+    opts = { project: file.project, preauthenticated: true, filename: file.name, duration: 9999999999 }
+    call(file.dxid, "download", opts)["url"]
   end
 
   def call(subject, method, input = {})

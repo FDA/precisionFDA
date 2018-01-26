@@ -202,9 +202,16 @@ class User < ActiveRecord::Base
 
   def self.sync_file!(context, file_id)
     return if context.guest?
+
     user = context.user
-    token = context.token
     file = user.uploaded_files.find(file_id) # Re-check file id
+
+    if file.created_by_challenge_bot? && user.can_administer_site?
+      token = CHALLENGE_BOT_TOKEN
+    else
+      token = context.token
+    end
+
     if file.state != "closed"
       result = DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: [file.dxid]})["results"][0]
       sync_file_state(result, file, user)

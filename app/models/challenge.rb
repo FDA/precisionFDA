@@ -40,7 +40,6 @@ class Challenge < ActiveRecord::Base
   validates :start_at, :end_at, presence: true
   validates :title, length: { maximum: 150 }
   validates :description, length: { maximum: 50000 }
-  validates_format_of :card_image_url, :with => URI::regexp(%w(https))
 
   validates :status, inclusion: { :in => ->(challenge) { challenge.available_statuses } }
   validates :meta, meta: true
@@ -211,6 +210,16 @@ class Challenge < ActiveRecord::Base
     return true if context.challenge_evaluator?
 
     status_result_announced? || status_archived?
+  end
+
+  def update_card_image_url!
+    return unless previous_changes.key?(:card_image_id)
+    return unless card_image_id.present?
+
+    card_image = UserFile.find_by!(dxid: card_image_id)
+    update_attributes(
+      card_image_url: DNAnexusAPI.for_challenge_bot.generate_permanent_link(card_image)
+    )
   end
 
   private
