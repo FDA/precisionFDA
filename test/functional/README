@@ -1,0 +1,55 @@
+# Overview
+
+The framework allows to run UI automated test cases on PFDA.
+Description of the automated test cases (steps) are located here:
+https://docs.google.com/spreadsheets/d/1hskd1tUgyA7e3LSlwvxvqTeLr4RJ7E3CnbAP-oaM88I/edit?usp=sharing
+
+
+# Environment preparation
+
+1. It is a Maven project.
+Make sure Maven is installed on your machine.
+
+2. Make sure Java (JRE and JDK) is installed on the machine where you are planning to run the automated suites.
+Works fine with "openjdk" ver. 1.8.*
+
+3. Make sure Firefox is installed on the machine. Works fine with the version 58.0
+
+4. Download the "geckodriver" file from here: "https://github.com/mozilla/geckodriver/releases"
+Unpack the file to ".../precision-fda/test/functional/drivers" folder.
+
+5. Edit the file "settings.conf" in the folder ".../precision-fda/test/functional/src/main/resources/" if needed.
+
+6. Edit the file "credentials.conf" in the folder ".../precision-fda/test/functional/src/main/resources/" if needed.
+The file is a container of test users data - credentials and user info.
+Please pay attention: all passwords and start URL must be saved in environment variables.
+
+For example for linux
+the file is: /etc/environment
+contains:
+PFDA_AT_USER_1_PASSWORD="some_password_here1"
+PFDA_AT_USER_2_PASSWORD="some_password_here2"
+PFDA_AT_USER_ADMIN_PASSWORD="some_password_here3"
+PFDA_BASIC_AUTH_DNX_PASSWORD="some_password_here4"
+PFDA_START_URL="https://11.11.11.11"
+
+
+# Running
+
+Using terminal: go to ".../precision-fda/test/functional/" folder.
+Execute "mvn clean test -Dsuite=allSuitesParallel.xml -DheadlessMode=true",
+where "allSuitesParallel.xml" - the "suite" file, the file with description what exactly test cases should be run
+and how they should be run.
+In our case: the suite "allSuitesParallel.xml" is created to run all existing test cases in parallel using 4 threads.
+"DheadlessMode=true" means that the browser(s) will be run in the hidden mode (without GUI).
+
+If you would like to run some specific suite only (e.g. "Spaces" testing only) you have to define appropriate test suite
+("spaces.xml" for this example)
+So the command will be: "mvn clean test -Dsuite=spaces.xml -DheadlessMode=true"
+
+
+# Test reports
+
+a. ".../precision-fda/test/functional/target/surefire-reports/html/index.html" - is an html report of the last run.
+
+b. The folder ".../precision-fda/test/functional/target/debug-log/" contains full log files and screenshots taken through testing.
