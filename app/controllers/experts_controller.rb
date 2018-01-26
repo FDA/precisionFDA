@@ -20,7 +20,7 @@ class ExpertsController < ApplicationController
   end
 
   def new
-    redirect_to experts_path and return unless @context.logged_in? && @context.user.can_administer_site?
+    redirect_to experts_path and return unless @context.can_administer_site?
     @users = User.all.order(:first_name).map{|u| ["#{u.username} (#{u.full_name.titleize}, #{u.org.name})", u.username]}
     @expert = Expert.new
   end

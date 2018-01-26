@@ -76,9 +76,9 @@
   <% else %>
     <%= render "challenges/truth/preview_results_explore" %>
   <% end %>
-<% elsif params[:tab] == 'results-peek' && ((@context.logged_in? && @context.user.can_administer_site?) || (ENV["DNANEXUS_BACKEND"] != "production")) %>
+<% elsif params[:tab] == 'results-peek' && (@context.can_administer_site? || (ENV["DNANEXUS_BACKEND"] != "production")) %>
   <%= render "challenges/truth/results" %>
-<% elsif params[:tab] == 'results-explore-peek' && ((@context.logged_in? && @context.user.can_administer_site?) || (ENV["DNANEXUS_BACKEND"] != "production")) %>
+<% elsif params[:tab] == 'results-explore-peek' && (@context.can_administer_site? || (ENV["DNANEXUS_BACKEND"] != "production")) %>
     <%= render "challenges/truth/results_explore" %>
 <% else %>
   <%= render "challenges/truth/info" %>
