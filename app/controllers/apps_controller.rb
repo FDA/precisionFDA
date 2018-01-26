@@ -9,8 +9,8 @@ class AppsController < ApplicationController
       return
     end
 
-    js_param = {}
     @app = nil
+    @assignable_challenges = []
 
     if params[:id].present?
       @app = App.accessible_by(@context).find_by(dxid: params[:id])
@@ -30,9 +30,8 @@ class AppsController < ApplicationController
         @discussions = @app.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
 
         @assigned_challenges = Challenge.where(app_id: @app.id)
-        @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@context.user, @app) }
+        @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@context, @app) }
       end
-      js_param[:app] = @app.slice(:id, :dxid, :readme)
     end
 
     @my_apps = AppSeries.editable_by(@context).order(name: :asc).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
@@ -51,7 +50,8 @@ class AppsController < ApplicationController
       order_direction: 'desc',
       per_page: 100
     })
-    js js_param
+
+    js js_info(@app, @assignable_challenges)
   end
 
   def export
@@ -104,7 +104,7 @@ class AppsController < ApplicationController
     @answers = @app.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
     @discussions = @app.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
     @assigned_challenges = Challenge.where(app_id: @app.id)
-    @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@context.user, @app) }
+    @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@context, @app) }
 
     @items_from_params = [@app]
     @item_path = pathify(@app)
@@ -121,7 +121,28 @@ class AppsController < ApplicationController
       per_page: 100
     })
 
-    js app: @app.slice(:id, :dxid, :readme)
+    js js_info(@app, @assignable_challenges)
+  end
+
+
+  def js_info(app, challenges)
+    {
+      app: (app.slice(:id, :dxid, :title, :readme, :revision).merge(link: app_path(app.dxid)) rescue nil),
+      challenges: challenges.collect do |challenge|
+        {
+          id: challenge.id,
+          name: challenge.name,
+          link: (challenge.is_viewable?(@context) ? challenge_path(challenge.id) : nil),
+          assign_link: assign_app_challenge_path(id: challenge.id, app_id: app.id),
+          app: {
+            id: (challenge.app.dxid rescue nil),
+            title: (challenge.app.title rescue nil),
+            revision: (challenge.app.revision rescue nil),
+            link: (app_path(challenge.app.dxid) rescue nil)
+          }
+        }
+      end
+    }
   end
 
   def edit

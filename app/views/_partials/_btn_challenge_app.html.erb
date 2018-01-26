@@ -11,12 +11,17 @@
 
       <% @assignable_challenges.each do |challenge| %>
         <li class="clearfix">
-        <%= link_to assign_app_challenge_path(id: challenge[:id], app_id: app.id), method: :post do %>
-          <%= challenge[:name] %>
+          <% if challenge.app %>
+            <a href="#" data-bind="click: function() { showConfirmationModal(<%= challenge.id %>) }"><%= challenge[:name] %></a>
+          <% else %>
+            <%= link_to assign_app_challenge_path(id: challenge[:id], app_id: app.id), method: :post do %><%= challenge[:name] %>
+          <% end %>
         <% end %>
         </li>
       <% end %>
     </ul>
 
   </div>
+
+  <%= render partial: "_partials/modal_replace_challenge_app" %>
 <% end %>

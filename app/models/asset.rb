@@ -38,7 +38,7 @@ class Asset < UserFile
 
   def self.with_search_keyword(prefix)
     prefix = sanitize_sql_like(prefix)
-    return joins(:archive_entries).where("(archive_entries.name LIKE ? OR user_files.name LIKE ?)", "#{prefix}%", "%#{prefix}%")
+    return joins(:archive_entries).where("(archive_entries.name LIKE ? OR nodes.name LIKE ?)", "#{prefix}%", "%#{prefix}%")
   end
 
   def file_paths

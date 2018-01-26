@@ -1,18 +1,17 @@
 version: "3.2"
 services:
   web:
-    image: ruby:2.2.3
+    build:
+      context: ../
+      dockerfile: docker/isolation.Dockerfile
     volumes:
       - type: bind
-        source: .
+        source: ../
         target: /precision-fda
     environment:
-      - BUNDLE_PATH=/precision-fda/.gems
-      - DATABASE_URL=mysql2://root:password@db/precision-fda
       - RAILS_LOG_TO_STDOUT=1
-      - DEV_HOST=localhost
+      - RAILS_ENV=ui_test
     working_dir: /precision-fda
-    command: 'bundle exec thin --ssl start'
     ports:
       - '3000:3000'
     depends_on:

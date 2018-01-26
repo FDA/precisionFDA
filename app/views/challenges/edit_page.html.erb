@@ -1,6 +1,6 @@
 <% content_for :title do %><%= @challenge.name %><% end %>
 
-<% if @context.logged_in? && @context.user.can_administer_site? %>
+<% if @context.can_administer_site? %>
   <div class="pfda-toolbar">
       <!-- Nav tabs -->
       <ul class="nav nav-pills nav-pills-md" role="tablist">
