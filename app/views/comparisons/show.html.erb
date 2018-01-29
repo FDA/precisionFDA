@@ -217,7 +217,6 @@
     <% end %>
   </div>
 
-  <% if @comparison.state == 'done' %>
   <div class="tab-pane" id="tab-outputs">
     <div class="comparison-outputs panel">
       <%= grid(@outputs_grid) do |g|
@@ -237,7 +236,6 @@
       end -%>
     </div>
   </div>
-  <% end %>
 
   <div role="tabpanel" class="tab-pane" id="tab-comments">
     <div class="row">
