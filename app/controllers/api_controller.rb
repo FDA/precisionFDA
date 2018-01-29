@@ -972,6 +972,34 @@ class ApiController < ApplicationController
     render json: {id: dxid}
   end
 
+  def create_challenge_card_image
+    return unless @context.can_administer_site?
+
+    name = params[:name]
+    fail "File name needs to be a non-empty String" unless name.is_a?(String) && name != ""
+
+    description = params["description"]
+    if !description.nil?
+      fail "File description needs to be a String" unless description.is_a?(String)
+    end
+
+    project = CHALLENGE_BOT_PRIVATE_FILES_PROJECT
+    dxid = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).("file", "new", {"name": params[:name], "project": CHALLENGE_BOT_PRIVATE_FILES_PROJECT})["id"]
+
+    UserFile.create!(
+      dxid: dxid,
+      project: project,
+      name: name,
+      state: "open",
+      description: description,
+      user_id: User.challenge_bot.id,
+      parent: @context.user,
+      scope: 'private'
+    )
+
+    render json: { id: dxid }
+  end
+
   # Inputs:
   #
   # name (string, required, nonempty)
@@ -982,6 +1010,8 @@ class ApiController < ApplicationController
   # id (string, "file-xxxx")
   #
   def create_challenge_resource
+    return unless @context.can_administer_site?
+
     challenge = Challenge.find_by!(id: params[:challenge_id])
     if !challenge.editable_by?(@context)
       fail "Challenge cannot be modified by current user."
@@ -1007,7 +1037,7 @@ class ApiController < ApplicationController
         state: "open",
         description: description,
         user_id: User.challenge_bot.id,
-        parent: challenge_bot,
+        parent: @context.user,
         scope: 'private'
       )
 
@@ -1022,8 +1052,6 @@ class ApiController < ApplicationController
   end
 
   def create_resource_link
-    error = false
-
     file = UserFile.find_by!(dxid: params[:id], user_id: User.challenge_bot.id)
     resource = ChallengeResource.find_by!(user_id: @context.user_id, challenge_id: params[:challenge_id], user_file_id: file.id)
 
@@ -1038,26 +1066,24 @@ class ApiController < ApplicationController
     end
 
     if file.state != "closed"
-      error = "Files can only be downloaded if they are in the 'closed' state"
-      errorType = "FileNotClosed"
-    else
-      # FIXME:
-      # The API warns against storing the url as it may contain
-      # auth information that we don't want to expose
-      # So we may have to store a reference to the file and generate
-      # a shorter duration url each time it is rendered
-
-      opts = {project: file.project, preauthenticated: true, filename: file.name, duration: 9999999999}
-      url = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call(file.dxid, "download", opts)["url"]
+      render json: {
+        error: "Files can only be downloaded if they are in the 'closed' state",
+        errorType: "FileNotClosed"
+      }
+      return
     end
 
-    resource.update_attributes({url: url})
+    # FIXME:
+    # The API warns against storing the url as it may contain
+    # auth information that we don't want to expose
+    # So we may have to store a reference to the file and generate
+    # a shorter duration url each time it is rendered
 
-    if error
-      render json: {error: error, errorType: errorType}
-    else
-      render json: {id: file.dxid, url: url}
-    end
+    url = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).generate_permanent_link(file)
+
+    resource.update_attributes({ url: url })
+
+    render json: { id: file.dxid, url: url }
   end
 
   def get_file_link
@@ -1089,8 +1115,14 @@ class ApiController < ApplicationController
       # So we may have to store a reference to the file and generate
       # a shorter duration url each time it is rendered
 
+      if file.created_by_challenge_bot? && @context.can_administer_site?
+        token = CHALLENGE_BOT_TOKEN
+      else
+        token = @context.token
+      end
+
       opts = {project: file.project, preauthenticated: true, filename: file.name, duration: 300}
-      url = DNAnexusAPI.new(@context.token).call(file.dxid, "download", opts)["url"]
+      url = DNAnexusAPI.new(token).call(file.dxid, "download", opts)["url"]
     end
 
     if error
@@ -1182,7 +1214,7 @@ class ApiController < ApplicationController
     file = UserFile.find_by!(dxid: id, state: "open")
     token = @context.token
     if file.user_id != @context.user_id
-      if !file.challenge_resources.empty? && @context.user.can_administer_site?
+      if file.created_by_challenge_bot? && @context.user.can_administer_site?
         token = CHALLENGE_BOT_TOKEN
       else
         fail "The current user does not have access to the file."
@@ -1207,7 +1239,7 @@ class ApiController < ApplicationController
     file = UserFile.find_by!(dxid: id, parent_type: "User")
     token = @context.token
     if file.user_id != @context.user_id
-      if !file.challenge_resources.empty? && @context.user.can_administer_site?
+      if file.created_by_challenge_bot? && @context.user.can_administer_site?
         token = CHALLENGE_BOT_TOKEN
       else
         fail "The current user does not have access to the file."

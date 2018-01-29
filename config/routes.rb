@@ -56,6 +56,7 @@ Rails.application.routes.draw do
     # API
     post '/api/publish', to: 'api#publish'
     post '/api/create_file', to: 'api#create_file'
+    post '/api/create_challenge_card_image', to: 'api#create_challenge_card_image'
     post '/api/create_image_file', to: 'api#create_image_file'
     post '/api/get_upload_url', to: 'api#get_upload_url'
     post '/api/get_file_link', to: 'api#get_file_link'

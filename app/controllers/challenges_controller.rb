@@ -19,21 +19,33 @@ class ChallengesController < ApplicationController
   end
 
   def create
-    @challenge = Challenge.new(challenge_params)
+    ActiveRecord::Base.transaction do
+      @challenge = Challenge.new(challenge_params)
 
-    if @challenge.save
-      redirect_to challenge_path(@challenge)
-    else
-      render action: :new
+      if @challenge.save
+        @challenge.update_card_image_url!
+        redirect_to challenge_path(@challenge)
+      else
+        render action: :new
+        js challenge_params
+      end
     end
   end
 
+  def edit
+    js card_image_url: @challenge.card_image_url, card_image_id: @challenge.card_image_id
+  end
+
   def update
-    if @challenge.update(update_challenge_params)
-      flash[:success] = "The challenge was updated successfully."
-      redirect_to challenge_path(@challenge)
-    else
-      render action: :edit
+    ActiveRecord::Base.transaction do
+      if @challenge.update(update_challenge_params)
+        @challenge.update_card_image_url!
+        flash[:success] = "The challenge was updated successfully."
+        redirect_to challenge_path(@challenge)
+      else
+        render action: :edit
+        js update_challenge_params
+      end
     end
   end
 
@@ -283,7 +295,7 @@ class ChallengesController < ApplicationController
   end
 
   def challenge_params
-    p = params.require(:challenge).permit(:name, :description, :app_owner_id, :start_at, :end_at, :status, :regions, :card_image_url)
+    p = params.require(:challenge).permit(:name, :description, :app_owner_id, :start_at, :end_at, :status, :regions, :card_image_id)
     p.require(:name)
     p.require(:start_at)
     p.require(:end_at)
@@ -291,7 +303,7 @@ class ChallengesController < ApplicationController
   end
 
   def update_challenge_params
-    p = params.require(:challenge).permit(:name, :description, :app_owner_id, :start_at, :end_at, :status, :card_image_url)
+    p = params.require(:challenge).permit(:name, :description, :app_owner_id, :start_at, :end_at, :status, :card_image_id)
     p.require(:name)
     p.require(:start_at)
     p.require(:end_at)
