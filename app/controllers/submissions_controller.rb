@@ -67,7 +67,13 @@ class SubmissionsController < ApplicationController
     raise "Challenge ID not found in submission#create params." unless challenge
 
     input_info = input_spec_preparer.run(challenge.app, submission_inputs)
-    raise input_spec_preparer.first_error unless input_spec_preparer.valid?
+
+    unless input_spec_preparer.valid?
+      input_spec_preparer.errors.each do |error_message|
+        flash[:error] = error_message
+      end
+      return
+    end
 
     scope = "public"
     items = input_info.uniq_files
