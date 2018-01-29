@@ -31,6 +31,10 @@ class PlatformRack
     [200, {}, [{}.to_json]]
   end
 
+  def post_run(_params)
+    [200, {}, [{}.to_json]]
+  end
+
   def parse_method_name(env)
     request_type = env["REQUEST_METHOD"].downcase
 
@@ -42,6 +46,8 @@ class PlatformRack
         "invite"
       when /.*\/removeMember/
         "remove_member"
+      when /.*\/run/
+        "run"
       when "/org/new"
         "org_new"
       else
