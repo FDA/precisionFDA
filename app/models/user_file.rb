@@ -84,6 +84,33 @@ class UserFile < Node
     return where(parent_type: ['User', 'Job'])
   end
 
+  def self.not_assets
+    return where.not(parent_type: 'Asset')
+  end
+
+  def self.independent
+    return where.not(parent_type: 'Comparison')
+  end
+
+  def self.closed
+    return where(state: 'closed')
+  end
+
+  def self.publication_project!(user, scope)
+    # This is a class method for independent files.
+    # For comparison files, use Comparison.publication_project!
+    if scope == "public"
+      user.public_files_project
+    else
+      Space.from_scope(scope).project_for_user!(user)
+    end
+  end
+
+  def self.publish(files, context, scope)
+    file_publisher = FilePublisher.by_context(context)
+    file_publisher.publish(files, scope)
+  end
+
   def real_file?
     return parent_type == "User" || parent_type == "Job"
   end
@@ -101,34 +128,12 @@ class UserFile < Node
     Folder.find_by(id: self[column_name])
   end
 
-  def self.not_assets
-    return where.not(parent_type: 'Asset')
-  end
-
   def not_asset?
     return parent_type != "Asset"
   end
 
-  def self.independent
-    return where.not(parent_type: 'Comparison')
-  end
-
   def independent?
     return parent_type != "Comparison"
-  end
-
-  def self.closed
-    return where(state: 'closed')
-  end
-
-  def self.publication_project!(user, scope)
-    # This is a class method for independent files.
-    # For comparison files, use Comparison.publication_project!
-    if scope == "public"
-      user.public_files_project
-    else
-      Space.from_scope(scope).project_for_user!(user)
-    end
   end
 
   def uid
@@ -194,8 +199,9 @@ class UserFile < Node
     end
   end
 
-  def self.publish(files, context, scope)
-    file_publisher = FilePublisher.by_context(context)
-    file_publisher.publish(files, scope)
+  def created_by_challenge_bot?
+    return true if challenge_resources.any?
+    User.challenge_bot == user
   end
+
 end
