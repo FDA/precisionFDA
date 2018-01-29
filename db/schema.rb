@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180123144134) do
+ActiveRecord::Schema.define(version: 20180125085602) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -158,6 +158,7 @@ ActiveRecord::Schema.define(version: 20180123144134) do
     t.string   "status",         limit: 255
     t.boolean  "automated",                    default: true
     t.string   "card_image_url", limit: 255
+    t.string   "card_image_id",  limit: 255
   end
 
   add_index "challenges", ["admin_id"], name: "index_challenges_on_admin_id", using: :btree
