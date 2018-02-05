@@ -15,7 +15,7 @@ gem 'therubyracer', platforms: :ruby
 gem 'turnout', '~> 2.2.0'
 
 # Use jquery as the JavaScript library
-gem 'jquery-rails'
+gem 'jquery-rails', '~> 4.3', '>= 4.3.1'
 # Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
 gem 'turbolinks'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
@@ -48,7 +48,7 @@ gem "semverly"
 gem "humanizer"
 
 # Excel spreadsheet generation
-gem 'axlsx'
+gem "axlsx", git: "https://github.com/randym/axlsx.git", branch: "release-3.0.0"
 
 # Secure headers
 gem 'secure_headers'
@@ -74,7 +74,7 @@ gem 'acts-as-taggable-on'
 
 # For inline-css in emails
 gem 'inky-rb', require: 'inky'
-gem 'nokogiri'
+gem 'nokogiri', '~> 1.8', '>= 1.8.2'
 gem 'premailer-rails'
 
 gem 'mysql2', '~> 0.3.18'
