@@ -9,6 +9,10 @@
 ### Aim - change upload image dialog ###
 #= require ./content_tools/image_dialog.coffee
 
+### ContentTools PropertiesDialog Monkeypatch ###
+### Aim - prohibit to insert DOM nodes ###
+#= require ./content_tools/properties_dialog.coffee
+
 class EditorModel
 
   showError: (message) ->
