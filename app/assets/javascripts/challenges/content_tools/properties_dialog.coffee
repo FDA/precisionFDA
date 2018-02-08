@@ -1,5 +1,9 @@
 ### Hide "Code" button in properties dialog ###
 
+_bind = (fn, me) ->
+  ->
+    fn.apply me, arguments
+
 _hasProp = {}.hasOwnProperty
 _extends = (child, parent) ->
   ctor = ->
@@ -20,7 +24,7 @@ StyleUI = ((_super) ->
     @_applied = applied
     return
   _extends StyleUI, _super
-  StyleUI::applied = (applied) ->
+  StyleUI.prototype.applied = (applied) ->
     if applied == undefined
       return @_applied
     if @_applied == applied
@@ -31,7 +35,7 @@ StyleUI = ((_super) ->
     else
       ContentEdit.removeCSSClass @_domElement, 'ct-section--applied'
 
-  StyleUI::mount = (domParent, before) ->
+  StyleUI.prototype.mount = (domParent, before) ->
     label = undefined
     if before == null
       before = null
@@ -44,7 +48,7 @@ StyleUI = ((_super) ->
     @_domElement.appendChild @constructor.createDiv([ 'ct-section__switch' ])
     StyleUI.__super__.mount.call this, domParent, before
 
-  StyleUI::_addDOMEventListeners = ->
+  StyleUI.prototype._addDOMEventListeners = ->
     toggleSection = undefined
     toggleSection = ((_this) ->
       (ev) ->
@@ -58,6 +62,64 @@ StyleUI = ((_super) ->
 
   StyleUI
 )(ContentTools.AnchoredComponentUI)
+
+ContentTools.PropertiesDialog.prototype.changedAttributes = ->
+  
+  attributes = {}
+  changedAttributes = {}
+  attributeUIs = this._attributeUIs
+  
+  for attributeUI in attributeUIs
+    name = attributeUI.name()
+    value = attributeUI.value()
+    continue if name == ''
+    attributes[name.toLowerCase()] = true
+    if this.element.attr(name) != value
+      changedAttributes[name] = value
+
+  restricted = ContentTools.getRestrictedAtributes(this.element.tagName())
+  elementAttributes = this.element.attributes()
+
+  for name of elementAttributes
+    value = elementAttributes[name]
+    continue if restricted and restricted.indexOf(name.toLowerCase()) != -1
+    if !attributes[name]
+      changedAttributes[name] = null
+
+  return changedAttributes
+
+checkAttributes = (attrs, el) ->
+  attrs_ok = true
+  for name of attrs
+    value = attrs[name]
+    _el = document.createElement(el._domElement.tagName)
+    try
+      _el.setAttribute(name, value)
+    catch
+      Precision.alert.showAboveAll("Wrong argument name: #{name} or value: #{value}")
+      attrs_ok = false
+    finally
+      _el = null
+  return attrs_ok
+
+
+ContentTools.PropertiesDialog.prototype.save = ->
+  innerHTML = null
+  
+  if this._supportsCoding
+    innerHTML = this._domInnerHTML.value
+
+  changedAttributes = this.changedAttributes()
+  if !checkAttributes(changedAttributes, this.element)
+    return false
+  
+  detail = {
+    changedAttributes: changedAttributes,
+    changedStyles: this.changedStyles(),
+    innerHTML: innerHTML
+  }
+  
+  return this.dispatchEvent(this.createEvent('save', detail))
 
 
 ContentTools.PropertiesDialog.prototype.mount = ->
@@ -158,3 +220,93 @@ ContentTools.PropertiesDialog.prototype.mount = ->
     ContentEdit.addCSSClass(this._domStylesTab, 'ct-control--active')
 
   return this._addDOMEventListeners()
+
+ContentEdit.Element.prototype.removeAttr = (name) ->
+  name = name.toLowerCase()
+  return if typeof this._attributes[name] != 'string' and !this._attributes[name]
+  delete this._attributes[name]
+  if this.isMounted() and name.toLowerCase() != 'class'
+    this._domElement.removeAttribute(name)
+  return this.taint()
+
+ContentTools.TagUI.prototype._onMouseDown = (ev) ->
+  ev.preventDefault()
+  if @element.storeState
+    @element.storeState()
+  app = ContentTools.EditorApp.get()
+  modal = new (ContentTools.ModalUI)
+  dialog = new (ContentTools.PropertiesDialog)(@element)
+  dialog.addEventListener 'cancel', ((_this) ->
+    ->
+      modal.hide()
+      dialog.hide()
+      if _this.element.restoreState
+        return _this.element.restoreState()
+      return
+  )(this)
+  dialog.addEventListener 'save', ((_this) ->
+    (ev) ->
+      detail = ev.detail()
+      attributes = detail.changedAttributes
+      styles = detail.changedStyles
+      innerHTML = detail.innerHTML
+      for name of attributes
+        value = attributes[name]
+        if name == 'class'
+          if value == null
+            value = ''
+          classNames = {}
+          _ref = value.split(' ')
+          _i = 0
+          _len = _ref.length
+          while _i < _len
+            className = _ref[_i]
+            className = className.trim()
+            if !className
+              _i++
+              continue
+            classNames[className] = true
+            if !_this.element.hasCSSClass(className)
+              _this.element.addCSSClass className
+            _i++
+          _ref1 = _this.element.attr('class').split(' ')
+          _j = 0
+          _len1 = _ref1.length
+          while _j < _len1
+            className = _ref1[_j]
+            className = className.trim()
+            if classNames[className] == undefined
+              _this.element.removeCSSClass className
+            _j++
+        else
+          if value == null
+            _this.element.removeAttr name
+            _this.element._domElement.removeAttribute name
+          else
+            _this.element.attr name, value
+      for cssClass of styles
+        applied = styles[cssClass]
+        if applied
+          _this.element.addCSSClass cssClass
+        else
+          _this.element.removeCSSClass cssClass
+      if innerHTML != null
+        if innerHTML != dialog.getElementInnerHTML()
+          element = _this.element
+          if !element.content
+            element = element.children[0]
+          element.content = new (HTMLString.String)(innerHTML, element.content.preserveWhitespace())
+          element.updateInnerHTML()
+          element.taint()
+          element.selection new (ContentSelect.Range)(0, 0)
+          element.storeState()
+      modal.hide()
+      dialog.hide()
+      if _this.element.restoreState
+        return _this.element.restoreState()
+      return
+  )(this)
+  app.attach modal
+  app.attach dialog
+  modal.show()
+  dialog.show()
