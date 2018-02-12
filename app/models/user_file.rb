@@ -50,6 +50,8 @@ class UserFile < Node
   STATE_CLOSED = "closed"
   STATE_OPEN = "open"
 
+  PARENT_TYPE_COMPARISON = "Comparison"
+
   belongs_to :user
   belongs_to :parent, {polymorphic: true}
   has_many :notes, {through: :attachments}
@@ -89,7 +91,7 @@ class UserFile < Node
   end
 
   def self.independent
-    return where.not(parent_type: 'Comparison')
+    return where.not(parent_type: PARENT_TYPE_COMPARISON)
   end
 
   def self.closed
@@ -133,7 +135,11 @@ class UserFile < Node
   end
 
   def independent?
-    return parent_type != "Comparison"
+    !parent_comparison?
+  end
+
+  def parent_comparison?
+    parent_type == PARENT_TYPE_COMPARISON
   end
 
   def uid
@@ -168,7 +174,7 @@ class UserFile < Node
   end
 
   def publishable_by?(context, scope_to_publish_to = "public")
-    core_publishable_by?(context, scope_to_publish_to) && parent_type != "Comparison" && state == "closed"
+    core_publishable_by?(context, scope_to_publish_to) && !parent_comparison? && state == "closed"
   end
 
   def rename(new_name, description, context)
