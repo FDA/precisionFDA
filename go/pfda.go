@@ -29,6 +29,8 @@ import (
   "time"
 )
 
+import _ "crypto/tls/fipsonly"
+
 //
 // CONSTANTS
 //
@@ -155,7 +157,7 @@ func main() {
   b, err := strconv.ParseBool(*skipVerify)
   check(err)
   if b {
-    client.HTTPClient.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+    client.HTTPClient.Transport.(*http.Transport).TLSClientConfig = &tls.Config{MinVersion: tls.VersionTLS12}
   }
 
   // Customized checks for each command
