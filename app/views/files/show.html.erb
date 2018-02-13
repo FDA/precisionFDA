@@ -120,18 +120,20 @@
 
     <%= render "_partials/btn_publish", item: @file %>
 
-    <% if @file.editable_by?(@context) %>
+    <% if @file.editable_by?(@context) && (!@file.parent_comparison? || @file.deletable?) %>
     <div class="btn-group">
       <div class="dropdown">
         <button class="btn btn-primary" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <span class="fa fa-cog"></span>
         </button>
         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
-          <li>
-            <a data-toggle='modal' data-target='#file-comparison-edit-modal'>
-              <span class="fa fa-pencil"></span> Edit File info
-            </a>
-          </li>
+          <% unless @file.parent_comparison? %>
+            <li>
+              <a data-toggle='modal' data-target='#file-comparison-edit-modal'>
+                <span class="fa fa-pencil"></span> Edit File info
+              </a>
+            </li>
+          <% end %>
           <% if @file.deletable? %>
             <li role="separator" class="divider"></li>
             <li>
