@@ -993,7 +993,7 @@ class ApiController < ApplicationController
       state: "open",
       description: description,
       user_id: User.challenge_bot.id,
-      parent: @context.user,
+      parent: User.challenge_bot,
       scope: 'private'
     )
 
@@ -1037,7 +1037,7 @@ class ApiController < ApplicationController
         state: "open",
         description: description,
         user_id: User.challenge_bot.id,
-        parent: @context.user,
+        parent: challenge_bot,
         scope: 'private'
       )
 
@@ -1097,7 +1097,11 @@ class ApiController < ApplicationController
       if file.parent_type == "Asset"
         User.sync_asset!(@context, file.id)
       else
-        User.sync_file!(@context, file.id)
+        if file.created_by_challenge_bot? && @context.can_administer_site?
+          User.sync_challenge_file!(file.id)
+        else
+          User.sync_file!(@context, file.id)
+        end
       end
       file.reload
     end
