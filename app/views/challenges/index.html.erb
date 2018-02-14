@@ -1,6 +1,7 @@
 <% content_for :title do %>PrecisionFDA Challenges<% end %>
-
-<%= render "challenges/cfsan_challenge_pre_card" %>
+<% if Time.now.utc < '2018-02-15 14:00:00 UTC' %>
+  <%= render "challenges/cfsan_challenge_pre_card" %>
+<% end %>
 <% @featured_challenges.each do |challenge| %>
   <%= render "challenges/header", challenge: challenge, challenge_index_page: true %>
 <% end %>
