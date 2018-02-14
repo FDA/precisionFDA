@@ -205,12 +205,7 @@ class User < ActiveRecord::Base
 
     user = context.user
     file = user.uploaded_files.find(file_id) # Re-check file id
-
-    if file.created_by_challenge_bot? && user.can_administer_site?
-      token = CHALLENGE_BOT_TOKEN
-    else
-      token = context.token
-    end
+    token = context.token
 
     if file.state != "closed"
       result = DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: [file.dxid]})["results"][0]
