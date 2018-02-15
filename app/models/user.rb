@@ -159,7 +159,6 @@ class User < ActiveRecord::Base
       "ruth.bandler",
       "sharon.liang",
       "singer.ma",
-      "vijay.walia.2",
       "you.li",
       "zivana.tezak"
     ].include?(dxuser) || can_administer_site?
@@ -175,7 +174,7 @@ class User < ActiveRecord::Base
   end
 
   def is_challenge_admin?
-    return can_administer_site?
+    return (can_administer_site? || dxuser == "singer.ma" || dxuser == "ezekiel.maier" )
   end
 
   def self.validate_email(email)
