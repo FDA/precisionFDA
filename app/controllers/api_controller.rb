@@ -973,7 +973,7 @@ class ApiController < ApplicationController
   end
 
   def create_challenge_card_image
-    return unless @context.can_administer_site?
+    return unless @context.challenge_admin?
 
     name = params[:name]
     fail "File name needs to be a non-empty String" unless name.is_a?(String) && name != ""
