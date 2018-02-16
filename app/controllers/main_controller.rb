@@ -390,7 +390,7 @@ class MainController < ApplicationController
 
     if params[:uids]
       uids = params[:uids]
-      raise "The object 'uids' must be a hash of object ids (strings) with value 'on'." unless uids.is_a?(Hash) && uids.all? { |uid, checked| uid.is_a?(String) && checked == "on" }
+      raise "The object 'uids' must be a hash of object ids (strings) with value 'on'." if !uids.is_a?(Hash) || !uids.all? { |uid, checked| uid.is_a?(String) && checked == "on" }
 
       items = ([id] + uids.keys).uniq.map { |uid| item_from_uid(uid) }.reject { |item| item.public? || item.scope == scope }
       raise "Unpublishable items detected" unless items.all? { |item| item.publishable_by?(@context, scope) }

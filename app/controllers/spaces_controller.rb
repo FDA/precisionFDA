@@ -144,7 +144,11 @@ class SpacesController < ApplicationController
   end
 
   def create
-    redirect_to spaces_path unless @context.user.can_administer_site?
+    unless @context.user.can_administer_site?
+      redirect_to spaces_path
+      return
+    end
+
     if space_params[:host_lead_dxuser] == space_params[:guest_lead_dxuser]
       flash.now[:error] = "The host and guest lead cannot be the same user"
     end
