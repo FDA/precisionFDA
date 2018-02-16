@@ -255,14 +255,10 @@ class ApplicationController < ActionController::Base
         "job" => Job,
         "app" => App,
         "workflow" => Workflow,
-        "file" => UserFile
+        "file" => Node,
       }[$1]
       raise "Class '#{klass}' did not match specified class '#{specified_klass}'" if specified_klass && klass != specified_klass
-      record = klass.find_by!(dxid: uid)
-      if klass == UserFile && record.parent_type == "Asset"
-        record = record.becomes(Asset)
-      end
-      return record
+      klass.find_by!(dxid: uid)
     elsif uid =~ /^(app-series|workflow-series|appathon|comparison|note|discussion|answer|user|license|space|challenge)-(\d+)$/
       klass = {
         "app-series" => AppSeries,
@@ -279,7 +275,7 @@ class ApplicationController < ActionController::Base
       }[$1]
       id = $2.to_i
       raise "Class '#{klass}' did not match specified class '#{specified_klass}'" if specified_klass && klass != specified_klass
-      return klass.find_by!(id: id)
+      klass.find_by!(id: id)
     else
       raise "Invalid id '#{uid}' in item_from_uid"
     end
