@@ -312,6 +312,7 @@ class MainController < ApplicationController
         end
       end
       save_session(user.id, username, token, expiration_time, user.org_id)
+      decode_context
       AUDIT_LOGGER.info("User #{username} logged in")
       Event::UserLoggedIn.create(user)
       redirect_to root_url
