@@ -66,38 +66,38 @@ class ActivityReportsView
     }
 
     ### Users Charts ###
-    @users_views_chart.loadData '/admin/activity_reports/user_viewed', params, (data) =>
+    @users_views_chart.loadData '/api/activity_reports/user_viewed', params, (data) =>
       @userViewsTotal data.total
 
-    @users_access_request_chart.loadData '/admin/activity_reports/user_access_requested', params, (data) =>
+    @users_access_request_chart.loadData '/api/activity_reports/user_access_requested', params, (data) =>
       @userAccessTotal data.total
 
-    @users_logins_chart.loadData '/admin/activity_reports/user_logged_in', params, (data) =>
+    @users_logins_chart.loadData '/api/activity_reports/user_logged_in', params, (data) =>
       @userLoginsTotal data.total
     ### Users Charts END ###
 
     ### Data Charts ###
-    @data_upload_chart.loadData '/admin/activity_reports/data_upload', params, (data) =>
+    @data_upload_chart.loadData '/api/activity_reports/data_upload', params, (data) =>
       @dataUploadTotal totalDataScale(data.total)
 
-    @data_generated_chart.loadData '/admin/activity_reports/data_generated', params, (data) =>
+    @data_generated_chart.loadData '/api/activity_reports/data_generated', params, (data) =>
       @dataGeneratedTotal totalDataScale(data.total)
       
-    @data_download_chart.loadData '/admin/activity_reports/data_download', params, (data) =>
+    @data_download_chart.loadData '/api/activity_reports/data_download', params, (data) =>
       @dataDownloadTotal totalDataScale(data.total)
     ### Data Charts END ###
     
     ### Apps Charts ###
-    @apps_created_chart.loadData '/admin/activity_reports/app_created', params, (data) =>
+    @apps_created_chart.loadData '/api/activity_reports/app_created', params, (data) =>
       @appsCreatedTotal data.total
 
-    @apps_published_chart.loadData '/admin/activity_reports/app_published', params, (data) =>
+    @apps_published_chart.loadData '/api/activity_reports/app_published', params, (data) =>
       @appsPublishedTotal data.total
       
-    @apps_run_chart.loadData '/admin/activity_reports/app_run', params, (data) =>
+    @apps_run_chart.loadData '/api/activity_reports/app_run', params, (data) =>
       @appsRunTotal data.total
       
-    @apps_jobs_run_chart.loadData '/admin/activity_reports/job_run', params, null, (chart, response) ->
+    @apps_jobs_run_chart.loadData '/api/activity_reports/job_run', params, null, (chart, response) ->
       series = chart.series[0]
       data = {
         name: 'Job run',
@@ -117,7 +117,7 @@ class ActivityReportsView
         }
       })
     
-    @apps_jobs_run_chart.loadData '/admin/activity_reports/job_failed', params, null, (chart, response) ->
+    @apps_jobs_run_chart.loadData '/api/activity_reports/job_failed', params, null, (chart, response) ->
       series = chart.series[1]
       data = {
         name: 'Job failed',
@@ -140,10 +140,10 @@ class ActivityReportsView
     ### Apps Charts END ###
     
     ### Challenges Charts ###
-    @challenges_signup_chart.loadData '/admin/activity_reports/users_signed_up_for_challenge', params, (data) =>
+    @challenges_signup_chart.loadData '/api/activity_reports/users_signed_up_for_challenge', params, (data) =>
       @challengesSignupTotal data.total
 
-    @challenges_submissions_chart.loadData '/admin/activity_reports/submissions_created', params, (data) =>
+    @challenges_submissions_chart.loadData '/api/activity_reports/submissions_created', params, (data) =>
       @challengesSubmissionsTotal data.total
     ### Challenges Charts END ###
 

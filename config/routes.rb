@@ -73,6 +73,29 @@ Rails.application.routes.draw do
     get '/news_items' => 'news_items#index'
 
     # API
+    namespace "api" do
+      get "update_active", to: "base#update_active"
+      namespace "activity_reports" do
+        get "total"
+        get "data_upload"
+        get "data_download"
+        get "data_generated"
+        get "app_created"
+        get "app_published"
+        get "app_run"
+        get "job_run"
+        get "job_failed"
+        get "user_access_requested"
+        get "user_logged_in"
+        get "user_viewed"
+        get "users_signed_up_for_challenge"
+        get "submissions_created"
+      end
+      resources :challenges, only: [] do
+        post 'save_editor_page', on: :member
+      end
+    end
+
     post '/api/publish', to: 'api#publish'
     post '/api/create_file', to: 'api#create_file'
     post '/api/create_challenge_card_image', to: 'api#create_challenge_card_image'
