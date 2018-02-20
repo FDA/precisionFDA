@@ -1,6 +1,6 @@
-module Admin
+module Api
   class ActivityReportsController
-    class FilesUploaded < AbstractData
+    class FilesDownloaded < AbstractData
 
       def total
         collection.sum_by(:file_size).to_i
@@ -27,7 +27,7 @@ module Admin
       private
 
       def collection
-        Event::FileCreated.with_parent_type_user.date_range(start_date, end_date)
+        Event::FileDownloaded.date_range(start_date, end_date)
       end
 
     end
