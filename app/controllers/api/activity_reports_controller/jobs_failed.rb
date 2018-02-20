@@ -1,6 +1,6 @@
-module Admin
+module Api
   class ActivityReportsController
-    class SubmissionsCreated < AbstractData
+    class JobsFailed < AbstractData
 
       def total
         collection.count
@@ -27,7 +27,7 @@ module Admin
       private
 
       def collection
-        Event::SubmissionCreated.date_range(start_date, end_date)
+        Event::JobClosed.failed.date_range(start_date, end_date)
       end
 
     end
