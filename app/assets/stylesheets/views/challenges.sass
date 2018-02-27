@@ -1,5 +1,9 @@
 @import "_common"
 
+.pfda-controller-challenges.pfda-action-edit_page
+  [data-editable].container
+    margin-left: 150px
+
 .table
   &.table-challenge
     tbody
@@ -9,7 +13,11 @@
 .ct-widget
   .ct-dialog__error
     margin-top: 10px
-    color: #e74c3c
+    color: #e74c3c  
+  &.ct-toolbox.ct-widget--active
+    left: 10px
+    top: 230px
+
 .ct-widget.ct-image-dialog--pfda-challenges
   &.ct-dialog
     height: 220px
@@ -33,7 +41,23 @@
   .ct-image-dialog__view
     display: none
   .ct-dialog__controls
-    margin-top: 40px
+    margin-top: 40px  
+
+
+th.ce-element--type-table-cell
+  .ce-element--type-table-cell-text
+    &.ce-element--empty:after
+      content: 'header'
+.ce-element--type-table-cell
+  .ce-element--type-table-cell-text
+    padding-right: 10px
+    &.ce-element--empty:after
+      content: 'empty cell'
+  &:last-child .ce-element--type-table-cell-text
+    padding-right: 0px
+
+.ce-element--empty:after
+  content: 'Start typing here'
 
 .ce-element--type-image
   max-width: 100%

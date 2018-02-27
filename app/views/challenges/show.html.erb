@@ -56,7 +56,11 @@
         <%= render "challenges/results", challenge: @challenge, submissions: @submissions, vaf_results: @vaf_results, vaf_spotter_ids: @vaf_spotter_ids, csv_names: @csv_names, csv_ids: @csv_ids, csv: @csv, headers: @headers, keys: @keys %>
       <% end %>
     <% else %>
-      <%= raw(@challenge.regions["intro"]) %>
+      <% if @challenge.name == 'Hidden Treasures - Warm Up'%>
+        <%= render 'challenges/treasure' %>
+      <% else %>
+        <%= raw(@challenge.regions["intro"]) %>
+      <% end %>
     <% end %>
   </div>
 </div>

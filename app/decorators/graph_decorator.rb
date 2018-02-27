@@ -42,7 +42,7 @@ class GraphDecorator
     return unless note.accessible_by?(context)
 
     note.attachments.map do |attachment|
-      children = self.send("subgraph_of_#{attachment.item_type.downcase.sub(/^user/, '')}", attachment.item)
+      children = subgraph_of(attachment.item)
       decorate_node(attachment.item, children)
     end
   end
