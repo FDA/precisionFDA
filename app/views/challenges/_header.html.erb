@@ -7,20 +7,18 @@
         <%= challenge.name %>
       </h1>
       <br/>
-      <% if challenge_index_page %>
-        <p><%= challenge.description %></p>
-        <br/>
-      <% end %>
+      <p class="challenge-description"><%= challenge.description %></p>
+      <br/>
       <ul class="list-group list-group-inline list-bricks-left">
         <li class="list-group-item list-group-item-transparent-bg">
           <h5 class="list-group-item-heading">Starts</h5>
           <h5 class="list-group-item-text">
-            <%= challenge.start_at.to_s(:db) %>
+            <%= challenge.start_at.to_s(:human) %>
           </h5>
         </li>
         <li class="list-group-item list-group-item-transparent-bg">
           <h5 class="list-group-item-heading">Ends</h5>
-          <h5 class="list-group-item-text"><%= challenge.end_at.to_s(:db) %></h5>
+          <h5 class="list-group-item-text"><%= challenge.end_at.to_s(:human) %></h5>
         </li>
       </ul>
       <% if challenge.active? %>
@@ -30,14 +28,21 @@
           </span>
         </h3>
       <% end %>
-      <% if challenge_index_page %>
-        <a class="btn accessible-btn-danger btn-lg" href="<%= challenge_path(challenge) %>">
-          View Challenge
-        </a>
-      <% end %>
+        <% if challenge_index_page %>
+          <a class="btn accessible-btn-danger btn-lg" href="<%= challenge_path(challenge) %>">
+            View Challenge
+          </a>
+        <% end %>
+        <% if @context.challenge_admin? %>
+          <div class="btn-group pull-right">
+            <a class="btn btn-default btn-lg" href="<%= edit_challenge_path(challenge) %>"><span class="fa fa-cog fa-fw"></span> Settings</a>
+            <!-- Disable turbolinks since we need to load the JS for ContentTools editor -->
+            <a class="btn btn-default btn-lg" href="<%= edit_page_challenge_path(challenge) %>" data-no-turbolink="true"><span class="fa fa-file-code-o fa-fw"></span> Edit Page</a>
+          </div>
+        <% end %>
     </div>
     <div class="tiltview col" aria-hidden="true">
-      <%= image_tag("challenges/pFDA-C4-Diagram", alt: "PrecisionFDA Truth Challenge", class: "img-responsive img-thumbnail") %>
+      <%= image_tag(challenge.card_image_url, alt: challenge.name, class: "img-responsive img-thumbnail") %>
     </div>
   </div>
 </div>

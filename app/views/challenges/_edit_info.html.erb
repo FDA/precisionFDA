@@ -1,0 +1,5 @@
+<% if @context.can_administer_site? || @context.challenge_admin?%>
+  <div data-editable data-name="intro" class="container container-padded" id="intro">
+    <%= raw(challenge.regions["intro"]) %>
+  </div>
+<% end %>

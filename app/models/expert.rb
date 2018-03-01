@@ -117,8 +117,7 @@ class Expert < ActiveRecord::Base
     if file.nil? || file.state != "closed" || file.file_size > 5000000
       return nil
     end
-    opts = {project: file.project, preauthenticated: true, filename: file.name, duration: 9999999}
-    url = DNAnexusAPI.new(context.token).call(file.dxid, "download", opts)["url"]
+    DNAnexusAPI.new(context.token).generate_permanent_link(file)
   end
 
   def self.provision(context, expert_params)

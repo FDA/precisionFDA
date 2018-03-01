@@ -4,3 +4,36 @@
   form
     .form-group:last-child
       margin-bottom: 0
+
+.pfda-controller-files.pfda-action-index
+  .move-files-tree
+    overflow: auto
+  .folders-path-text
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+    color: $brand-info !important
+    .fa
+      font-size: 10px
+    .tree-path-onclick
+      cursor: pointer
+      &:hover
+        text-decoration: underline
+  
+  
+.download-files-modal,
+.delete-files-modal,
+.publish-files-modal
+  .file-download-list,
+  .file-delete-list,
+  .file-publish-list
+    .help-block
+      display: inline
+    tbody
+      tr:first-child
+        td
+          border-top: none
+  .modal-body
+    padding: 0px
+    overflow: auto
+    max-height: 400px

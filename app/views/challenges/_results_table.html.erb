@@ -1,0 +1,42 @@
+<div class="table-responsive">
+  <table id="table-results-overview" class="table table-condensed table-bordered table-nowrap table-sort table-hover">
+    <thead>
+      <tr>
+        <th class='sort-default' data-sort-method='string'>Submitter</th>
+        <th>Organization</th>
+        <th>Entry</th>
+        <% outputs.each do |output| %>
+          <th><%= output %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <% submissions.each do |submission| %>
+      <tr>
+        <td data-sort="<%= submission.user.full_name %>">
+          <%= submission.user.full_name.titleize %>
+        </td>
+        <td data-sort="<%= submission.user.singular? ? "" : submission.user.org.name %>">
+          <%= submission.user.singular? ? "" : submission.user.org.name %>
+        </td>
+        <td data-sort="<%= submission.name %>">
+          <%= unilink(submission.job) %>
+        </td>
+
+        <% submission.job.output_data.each do |item| %>
+          <td data-sort="<%= item.name %>">
+            <% if item.file? %>
+              <% if item.file.present? %>
+                <%= unilink(item.file) %>
+              <% else %>
+                <%= item.value %>
+              <% end %>
+            <% else %>
+              <%= item.value %>
+            <% end %>
+          </td>
+        <% end %>
+
+      </tr>
+    <% end %>
+  </table>
+</div>

@@ -1,0 +1,35 @@
+<% content_for :title, "Users and usage" %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-body">
+      <div class="page-title">
+        <i class="fa fa-users" aria-hidden="true"></i>
+        Users and usage
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if @storage_date %>
+  <div class="metadata-section metadata-header">
+    <ul class="list-group list-group-inline">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Storage usage info is actual as of</h5>
+        <p class="list-group-item-text"><%= @storage_date.to_s(:human) %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Computation info is actual as of</h5>
+        <p class="list-group-item-text"><%= @compute_date.to_s(:human) %></p>
+      </li>
+    </ul>
+  </div>
+ 
+  <div class="pfda-toolbar">
+    <div class="btn btn-default wg-external-csv-export-button" data-grid-name="usage">
+      <i class="fa fa-file-excel-o"></i> Export to CSV
+    </div>
+  </div>
+<% end %>
+
+<%= render partial: 'admin/usage_reports/usage_grid' %>

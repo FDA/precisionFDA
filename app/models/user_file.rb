@@ -39,10 +39,18 @@
 # not_assets: U || J || C
 # independent: U || J || A
 #
-class UserFile < ActiveRecord::Base
-  include Permissions
+class UserFile < Node
+
   include Licenses
   require 'uri'
+
+  DESCRIPTION_MAX_LENGTH = 1000
+
+  STATE_CLOSING = "closing"
+  STATE_CLOSED = "closed"
+  STATE_OPEN = "open"
+
+  PARENT_TYPE_COMPARISON = "Comparison"
 
   belongs_to :user
   belongs_to :parent, {polymorphic: true}
@@ -57,9 +65,18 @@ class UserFile < ActiveRecord::Base
   has_one :license, {through: :licensed_item}
   has_many :accepted_licenses, {through: :license}
 
+  has_many :challenge_resources
+
   acts_as_commentable
-  acts_as_taggable
   acts_as_votable
+
+  validates :name, presence: { message: "Name could not be blank" }
+  validates :description,
+            allow_blank: true,
+            length: {
+              maximum: DESCRIPTION_MAX_LENGTH,
+              too_long: "Description could not be greater than #{DESCRIPTION_MAX_LENGTH} characters"
+            }
 
   def self.model_name
     ActiveModel::Name.new(self, nil, "File")
@@ -69,50 +86,64 @@ class UserFile < ActiveRecord::Base
     return where(parent_type: ['User', 'Job'])
   end
 
-  def real_file?
-    return parent_type == "User" || parent_type == "Job"
-  end
-
-  def to_param
-    uid
-  end
-
   def self.not_assets
     return where.not(parent_type: 'Asset')
   end
 
-  def not_asset?
-    return parent_type != "Asset"
-  end
-
   def self.independent
-    return where.not(parent_type: 'Comparison')
-  end
-
-  def independent?
-    return parent_type != "Comparison"
+    return where.not(parent_type: PARENT_TYPE_COMPARISON)
   end
 
   def self.closed
     return where(state: 'closed')
   end
 
-  def self.publication_project!(context, scope)
+  def self.publication_project!(user, scope)
     # This is a class method for independent files.
     # For comparison files, use Comparison.publication_project!
     if scope == "public"
-      context.user.public_files_project
+      user.public_files_project
     else
-      Space.from_scope(scope).project_for_context!(context)
+      Space.from_scope(scope).project_for_user!(user)
     end
+  end
+
+  def self.publish(files, context, scope)
+    file_publisher = FilePublisher.by_context(context)
+    file_publisher.publish(files, scope)
+  end
+
+  def real_file?
+    return parent_type == "User" || parent_type == "Job"
+  end
+
+  def is_submission_output?
+    return parent_type == "Job" && parent.submission.present?
+  end
+
+  def to_param
+    uid
+  end
+
+  def parent_folder(scope = "private")
+    column_name = Node.scope_column_name(scope)
+    Folder.find_by(id: self[column_name])
+  end
+
+  def not_asset?
+    return parent_type != "Asset"
+  end
+
+  def independent?
+    !parent_comparison?
+  end
+
+  def parent_comparison?
+    parent_type == PARENT_TYPE_COMPARISON
   end
 
   def uid
     dxid
-  end
-
-  def title
-    parent_type == "Asset" ? self.becomes(Asset).prefix : name
   end
 
   def klass
@@ -143,62 +174,40 @@ class UserFile < ActiveRecord::Base
   end
 
   def publishable_by?(context, scope_to_publish_to = "public")
-    core_publishable_by?(context, scope_to_publish_to) && parent_type != "Comparison" && state == "closed"
+    core_publishable_by?(context, scope_to_publish_to) && !parent_comparison? && state == "closed"
   end
 
-  def rename(new_name, context)
+  def rename(new_name, description, context)
+    self.name = new_name
+    self.description = description
+
+    return false unless valid?
+
     if DNAnexusAPI.new(context.token).call(dxid, "rename", {project: project, name: new_name})
-      update_attributes(name: new_name)
+      update_attributes(name: new_name, description: description)
     else
+      errors.add(:base, "File info could not be updated.")
       false
     end
   end
 
-  def passes_consistency_check?(context)
+  def passes_consistency_check?(user)
     if private?
       if independent?
-        return project == context.user.private_files_project
+        return project == user.private_files_project
       else
-        return project == context.user.private_comparisons_project
+        return project == user.private_comparisons_project
       end
     elsif public?
-      return project == context.user.public_files_project
+      return project == user.public_files_project
     else
-      return project == space_object.project_for_context!(context)
+      return project == space_object.project_for_user!(user)
     end
   end
 
-  def self.publish(files, context, scope)
-    # Ensure API availability
-    api = DNAnexusAPI.new(context.token)
-    api.call("system", "greet")
-
-    count = 0
-
-    destination_project = UserFile.publication_project!(context, scope)
-
-    projects = {}
-    files.uniq.each do |file|
-      next unless file.publishable_by?(context, scope)
-      raise "Consistency check failure for file #{file.id} (#{file.dxid})" unless file.passes_consistency_check?(context)
-      raise "Source and destination collision for file #{file.id} (#{file.dxid})" if destination_project == file.project
-      projects[file.project] = [] unless projects.has_key?(file.project)
-      projects[file.project].push(file)
-    end
-
-    projects.each do |project, project_files|
-      api.call(project, "clone", {objects: project_files.map(&:dxid), project: destination_project})
-      UserFile.transaction do
-        project_files.each do |file|
-          file.reload
-          raise "Race condition for file #{file.id} (#{file.dxid})" unless file.publishable_by?(context, scope)
-          file.update!(scope: scope, project: destination_project)
-          count += 1
-        end
-      end
-      api.call(project, "removeObjects", {objects: project_files.map(&:dxid)})
-    end
-
-    return count
+  def created_by_challenge_bot?
+    return true if challenge_resources.any?
+    User.challenge_bot == user
   end
+
 end

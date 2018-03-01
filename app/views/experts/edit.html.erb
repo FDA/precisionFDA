@@ -49,7 +49,7 @@
         <%= f.text_area :_challenge, class: "form-control", rows: 6, placeholder: "Text from blog to include in front page..." %>
       </div>
     </div>
-    <% if @context.user.can_administer_site? %>
+    <% if @context.can_administer_site? %>
       <div class="form-group required">
         <%= f.label :scope, "Visibility", class: 'control-label col-sm-2' %>
         <div class="col-sm-11 col-sm-offset-1">
@@ -63,5 +63,5 @@
       </div>
     </div>
   <% end %>
-  <%= render "_partials/upload_image_modal" %>
+  <%= render "_partials/upload_image_modal", display_url: true %>
 </div>

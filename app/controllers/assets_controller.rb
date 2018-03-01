@@ -12,40 +12,21 @@ class AssetsController < ApplicationController
 
     # Wice seems to not like the default_scope of Asset
     assets = Asset.unscoped.editable_by(@context)
-    @assets_grid = initialize_grid(assets.includes(:taggings),{
-      name: 'assets',
-      order: 'user_files.name',
-      order_direction: 'asc',
-      per_page: 100,
-      include: [:user, {user: :org}, {taggings: :tag}]
-    })
+    @assets_grid = assets_grid_for(assets)
   end
 
   def featured
     org = Org.featured
     if org
       assets = Asset.unscoped.accessible_by(@context).joins(:user).where(:users => { :org_id => org.id })
-
-      @assets_grid = initialize_grid(assets.includes(:taggings),{
-        name: 'assets',
-        order: 'user_files.name',
-        order_direction: 'asc',
-        per_page: 100,
-        include: [:user, {user: :org}, {taggings: :tag}]
-      })
+      @assets_grid = assets_grid_for(assets)
     end
     render :index
   end
 
   def explore
     assets = Asset.unscoped.accessible_by_public
-    @assets_grid = initialize_grid(assets.includes(:taggings),{
-      name: 'assets',
-      order: 'user_files.name',
-      order_direction: 'asc',
-      per_page: 100,
-      include: [:user, {user: :org}, {taggings: :tag}]
-    })
+    @assets_grid = assets_grid_for(assets)
     render :index
   end
 
@@ -66,7 +47,7 @@ class AssetsController < ApplicationController
     @item_comments_path = pathify_comments(@asset)
     @comments = @asset.root_comments.order(id: :desc).page params[:comments_page]
 
-    @notes = @asset.notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
+    @notes = @asset.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @asset.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
     @discussions = @asset.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
 
@@ -141,5 +122,15 @@ class AssetsController < ApplicationController
 
   def asset_params
     params.require(:asset).permit(:description, :title)
+  end
+
+  def assets_grid_for(assets)
+    initialize_grid(assets.includes(:taggings),{
+      name: "assets",
+      order: "name",
+      order_direction: "asc",
+      per_page: 100,
+      include: [:user, { user: :org }, { taggings: :tag }]
+    })
   end
 end

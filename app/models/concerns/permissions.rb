@@ -7,7 +7,15 @@ module Permissions
         accessible_by_public
       else
         raise unless context.user_id.present? && context.user.present?
-        where.any_of({user_id: context.user_id}, {scope: "public"}, {scope: context.user.space_uids})
+
+        queries = [].tap do |queries|
+          queries.push({ user_id: context.user_id })
+          queries.push({ scope: "public" })
+          queries.push({ scope: context.user.space_uids })
+          queries.push({ user_id: User.challenge_bot.id }) if context.challenge_evaluator?
+        end
+
+        where.any_of(*queries)
       end
     end
 
@@ -37,7 +45,11 @@ module Permissions
     if context.guest?
       public?
     else
-      user_id == context.user_id || public? || context.user.space_uids.include?(scope)
+      return true if public?
+      return true if user_id == context.user_id
+      return true if context.user.space_uids.include?(scope)
+
+      context.challenge_evaluator? && user.dxuser == CHALLENGE_BOT_DX_USER
     end
   end
 
@@ -60,8 +72,19 @@ module Permissions
     end
   end
 
+  def core_publishable_by_user?(user, scope_to_publish_to)
+    return false unless user
+    # Publishable if owned by user, and not already public,
+    # and not in another space (if publishing to space)
+    user_id == user.id && !public? && (scope_to_publish_to == "public" || private?)
+  end
+
   def publishable_by?(context, scope_to_publish_to = "public")
     core_publishable_by?(context, scope_to_publish_to)
+  end
+
+  def publishable_by_user?(user, scope_to_publish_to = "public")
+    core_publishable_by_user?(user, scope_to_publish_to)
   end
 
   def public?

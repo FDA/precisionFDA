@@ -10,7 +10,7 @@
   end
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |note|
-    note.created_at.to_s(:db)
+    note.created_at.to_s(:human)
   end
 
   if defined?(hide_access) && !hide_access

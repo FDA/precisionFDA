@@ -5,6 +5,34 @@ Rails.application.routes.draw do
   #
   scope(format: false) do
 
+    namespace(:admin) do
+
+      root "dashboard#index"
+
+      resources :activity_reports, only: [:index] do
+        collection do
+          get "total"
+          get "data_upload"
+          get "data_download"
+          get "data_generated"
+          get "app_created"
+          get "app_published"
+          get "app_run"
+          get "job_run"
+          get "job_failed"
+          get "user_access_requested"
+          get "user_logged_in"
+          get "user_viewed"
+          get "users_signed_up_for_challenge"
+          get "submissions_created"
+        end
+      end
+
+      resources :usage_reports, only: [:index]
+
+      get "active_users", to: "users#active"
+    end
+
     # Main controller
     get 'login' => 'main#login'
     delete 'logout' => 'main#destroy'
@@ -28,6 +56,7 @@ Rails.application.routes.draw do
     # API
     post '/api/publish', to: 'api#publish'
     post '/api/create_file', to: 'api#create_file'
+    post '/api/create_challenge_card_image', to: 'api#create_challenge_card_image'
     post '/api/create_image_file', to: 'api#create_image_file'
     post '/api/get_upload_url', to: 'api#get_upload_url'
     post '/api/get_file_link', to: 'api#get_file_link'
@@ -43,6 +72,9 @@ Rails.application.routes.draw do
     post '/api/describe_license', to: 'api#describe_license'
     post '/api/accept_licenses', to: 'api#accept_licenses'
     post '/api/run_app', to: 'api#run_app'
+    post '/api/list_app_revisions', to: 'api#list_app_revisions'
+    post '/api/create_workflow', to: 'api#create_workflow'
+    post '/api/run_workflow', to: 'api#run_workflow'
     post '/api/get_app_spec', to: 'api#get_app_spec'
     post '/api/get_app_script', to: 'api#get_app_script'
     post '/api/export_app', to: 'api#export_app'
@@ -57,6 +89,9 @@ Rails.application.routes.draw do
     post '/api/follow', to: 'api#follow'
     post '/api/unfollow', to: 'api#unfollow'
     post '/api/update_submission', to: 'api#update_submission'
+    post '/api/update_time_zone', to: 'api#update_time_zone'
+    post '/api/create_challenge_resource', to: 'api#create_challenge_resource'
+    post '/api/create_resource_link', to: 'api#create_resource_link'
 
     # FHIR
     scope '/fhir' do
@@ -77,10 +112,23 @@ Rails.application.routes.draw do
       member do
         get 'fork'
         post 'export'
+        get 'cwl_export'
+        get 'wdl_export'
+        get 'batch_app'
       end
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
       resources :comments
+    end
+
+    resources :workflows, except: [:create, :update, :destroy] do
+      resources :analyses, only: [:new, :create]
+      member do
+        get 'analyses', to: 'workflows#index'
+        get 'fork'
+        get 'cwl_export'
+        get 'wdl_export'
+      end
     end
 
     resources :jobs, except: :index do
@@ -104,6 +152,12 @@ Rails.application.routes.draw do
       post 'rename', on: :member
       get 'featured', on: :collection, as: 'featured'
       get 'explore', on: :collection, as: 'explore'
+      post 'move', on: :collection
+      post 'create_folder', on: :collection
+      post 'rename_folder', on: :member
+      post 'download_list', on: :collection
+      post 'remove', on: :collection
+      post 'publish', on: :collection
       resources :comments
     end
 
@@ -128,11 +182,17 @@ Rails.application.routes.draw do
       get 'truth(/:tab)', on: :collection, action: :truth, as: 'truth'
       get 'join', on: :member
       get 'view(/:tab)', on: :member, action: :show, as: 'show'
+      get 'editor(/:tab)', on: :member, action: :edit_page, as: 'edit_page'
+      post 'editor/save_page', on: :member, action: :save_page, as: 'save_page'
+      resources :challenge_resources, only: [:new, :create, :destroy] do
+        post 'rename', on: :member
+      end
       resources :submissions, only: [:new, :create, :edit] do
         post 'publish', on: :collection, action: :publish
         get 'log', on: :member
       end
       post 'assign_app', on: :member
+      post 'announce_result', on: :member
     end
 
     resources :discussions, constraints: {answer_id: /[^\/]+/ } do
@@ -183,6 +243,12 @@ Rails.application.routes.draw do
       post 'accept', on: :member
       post 'rename', on: :member
       post 'invite', on: :member
+      post 'move', on: :member
+      post 'create_folder', on: :member
+      post 'rename_folder', on: :collection
+      post 'download_list', on: :member
+      post 'remove_folder', on: :member, as: 'remove_folder'
+      post 'publish_folder', on: :member
       resources :comments
     end
 
@@ -210,53 +276,4 @@ Rails.application.routes.draw do
     # You can have the root of your site routed with "root"
     root 'main#index'
   end
-
-  # Example of regular route:
-  #   get 'products/:id' => 'catalog#view'
-
-  # Example of named route that can be invoked with purchase_url(id: product.id)
-  #   get 'products/:id/purchase' => 'catalog#purchase', as: :purchase
-
-  # Example resource route (maps HTTP verbs to controller actions automatically):
-  #   resources :products
-
-  # Example resource route with options:
-  #   resources :products do
-  #     member do
-  #       get 'short'
-  #       post 'toggle'
-  #     end
-  #
-  #     collection do
-  #       get 'sold'
-  #     end
-  #   end
-
-  # Example resource route with sub-resources:
-  #   resources :products do
-  #     resources :comments, :sales
-  #     resource :seller
-  #   end
-
-  # Example resource route with more complex sub-resources:
-  #   resources :products do
-  #     resources :comments
-  #     resources :sales do
-  #       get 'recent', on: :collection
-  #     end
-  #   end
-
-  # Example resource route with concerns:
-  #   concern :toggleable do
-  #     post 'toggle'
-  #   end
-  #   resources :posts, concerns: :toggleable
-  #   resources :photos, concerns: :toggleable
-
-  # Example resource route within a namespace:
-  #   namespace :admin do
-  #     # Directs /admin/products/* to Admin::ProductsController
-  #     # (app/controllers/admin/products_controller.rb)
-  #     resources :products
-  #   end
 end

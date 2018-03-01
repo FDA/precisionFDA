@@ -1,55 +1,4 @@
 class ApplicationController < ActionController::Base
-  # Secure headers
-  SecureHeaders::Configuration.default do |config|
-    config.hsts = "max-age=#{20.years.to_i}; includeSubDomains; preload"
-    config.x_frame_options = "DENY"
-    config.x_content_type_options = "nosniff"
-    config.x_xss_protection = "1; mode=block"
-    config.x_download_options = "noopen"
-    config.x_permitted_cross_domain_policies = "none"
-    config.csp = {
-      base_uri: %w('self'),
-      block_all_mixed_content: true, # see [http://www.w3.org/TR/mixed-content/](http://www.w3.org/TR/mixed-content/)
-      child_src: %w('self' https://www.youtube.com blob:),
-      connect_src: %w('self' https://dnanexus-platform-upload-prod.s3.amazonaws.com https://dnanexus-platform-upload-stg.s3.amazonaws.com https://s3.amazonaws.com https://stagingdl.dnanex.us https://dl.dnanex.us https://api.dnanexus.com),
-      default_src: %w(https: 'self'),
-      font_src: %w('self' https://fonts.gstatic.com https://cdnjs.cloudflare.com),
-      form_action: %w('self' https://stagingdl.dnanex.us https://dl.dnanex.us),
-      frame_ancestors: %w('none'),
-      frame_src: %w('self' https://www.youtube.com https://www.google.com https://www.gstatic.com),
-      img_src: %w(* data:),
-      media_src: %w('self'),
-      object_src: %w('self'),
-      plugin_types: %w(application/x-shockwave-flash application/pdf),
-      script_src: %w('self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.google.com https://www.google-analytics.com https://cdnjs.cloudflare.com https://www.youtube.com https://s.ytimg.com https://dnanexus.github.io),
-      style_src: %w('self' 'unsafe-inline' https://fonts.googleapis.com https://dnanexus.github.io https://cdnjs.cloudflare.com),
-      report_only: false,
-      report_uri: %w(https://dc95b34a080e9c95bbce7c3e6aed6234.report-uri.io/r/default/csp/enforce)
-    }
-    hpkp = {
-      report_only: false,
-      report_uri: 'https://dc95b34a080e9c95bbce7c3e6aed6234.report-uri.io/r/default/hpkp/enforce',
-      max_age: 5.minutes.to_i,
-      include_subdomains: false
-    }
-    if ENV["DNANEXUS_BACKEND"] == "production"
-      hpkp[:pins] = [
-        {sha256: 'OV/2vGzq4A/PlbCUFpy5W2dHmMLPvHZ9N/FVDOPNvQw='},
-        {sha256: 'Hxbr0eK3F0xc4UkeXRvapzSvj3I0efJ+2h2Q70MpltM='},
-        {sha256: 'AGLBxCqwOTXOZg/v14oxVzHbU0GVWr1QlHR7DQqnzvU='},
-        {sha256: '154XxB1J9PKgQ2rcgEEsTY+0CPdx03PpIiiJPlJzAXk='}
-      ]
-      hpkp[:max_age] = 7.days.to_i
-    else
-      hpkp[:pins] = [
-        {sha256: 'gtfblKFG3oCmgxfjddilwzBgaudaW3XyH7M90LrfjOU='},
-        {sha256: 'x8W1sshBVav03Hgxxp+PRD5f3xs0yIBmNpph3krjGqM='},
-        {sha256: 'TZqk8OpJ8n7+4M25OqUSfDZ+917bcso0RVa4ZMvdvXQ='}
-      ]
-    end
-    config.hpkp = hpkp
-  end
-
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
@@ -60,7 +9,12 @@ class ApplicationController < ActionController::Base
   # Require login
   before_action :require_login
 
-  helper_method :pathify, :pathify_comments, :item_from_uid
+  before_action :create_user_viewed_event
+
+  # Use time zone of current user
+  around_action :user_time_zone, if: lambda { !@context.guest? && current_user }
+
+  helper_method :pathify, :pathify_comments, :item_from_uid, :pathify_folder
 
   rescue_from ActionView::MissingTemplate, with: :missing_template
 
@@ -71,7 +25,7 @@ class ApplicationController < ActionController::Base
   end
 
   def current_user
-    return @context.user
+    @context.user
   end
 
   def missing_template
@@ -213,8 +167,27 @@ class ApplicationController < ActionController::Base
       expert_path(item)
     when "expert-question"
       expert_expert_question_path(item.expert_id, item.id)
+    when "workflow"
+      workflow_path(item.dxid)
+    when "workflow-series"
+      pathify(item.latest_accessible(@context))
+    when "folder"
+      pathify_folder(item)
     else
       raise "Unknown class #{item.klass}"
+    end
+  end
+
+  def pathify_folder(folder)
+    if folder.private?
+      files_path(folder_id: folder.id)
+    elsif folder.public?
+      explore_files_path(folder_id: folder.id)
+    elsif folder.in_space?
+      space = folder.space
+      content_space_path(id: space.id, folder_id: folder.id)
+    else
+      raise "Unable to build folder's path"
     end
   end
 
@@ -269,7 +242,7 @@ class ApplicationController < ActionController::Base
       end
     when "space"
       discuss_space_path(item)
-    when "expert", "expert-question", "meta-appathon", "appathon", "file", "app", "job", "asset", "comparison", "answer", "space"
+    when "expert", "expert-question", "meta-appathon", "appathon", "file", "app", "job", "asset", "comparison", "answer", "space", "folder"
       pathify(item)
     else
       raise "Unknown class #{item.klass}"
@@ -277,21 +250,19 @@ class ApplicationController < ActionController::Base
   end
 
   def item_from_uid(uid, specified_klass = nil)
-    if uid =~ /^(job|app|file)-(.{24})$/
+    if uid =~ /^(job|app|file|workflow)-(.{24})$/
       klass = {
         "job" => Job,
         "app" => App,
-        "file" => UserFile
+        "workflow" => Workflow,
+        "file" => Node,
       }[$1]
       raise "Class '#{klass}' did not match specified class '#{specified_klass}'" if specified_klass && klass != specified_klass
-      record = klass.find_by!(dxid: uid)
-      if klass == UserFile && record.parent_type == "Asset"
-        record = record.becomes(Asset)
-      end
-      return record
-    elsif uid =~ /^(app-series|appathon|comparison|note|discussion|answer|user|license|space|challenge)-(\d+)$/
+      klass.find_by!(dxid: uid)
+    elsif uid =~ /^(app-series|workflow-series|appathon|comparison|note|discussion|answer|user|license|space|challenge)-(\d+)$/
       klass = {
         "app-series" => AppSeries,
+        "workflow-series" => WorkflowSeries,
         "appathon" => Appathon,
         "comparison" => Comparison,
         "note" => Note,
@@ -304,7 +275,7 @@ class ApplicationController < ActionController::Base
       }[$1]
       id = $2.to_i
       raise "Class '#{klass}' did not match specified class '#{specified_klass}'" if specified_klass && klass != specified_klass
-      return klass.find_by!(id: id)
+      klass.find_by!(id: id)
     else
       raise "Invalid id '#{uid}' in item_from_uid"
     end
@@ -425,4 +396,18 @@ class ApplicationController < ActionController::Base
     return describe
   end
 
+  def user_time_zone(&block)
+    if current_user.time_zone
+      Time.use_zone(current_user.time_zone, &block)
+    else
+      yield
+    end
+  end
+
+  def create_user_viewed_event
+    return if request.xhr?
+    return unless request.get?
+
+    Event::UserViewed.create(@context)
+  end
 end

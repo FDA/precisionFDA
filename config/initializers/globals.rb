@@ -3,12 +3,15 @@
 # by using: if Rails.env.development? { .... }
 #
 
-if Rails.env.development?
+if Rails.env.development? || Rails.env.ui_test?
   OAUTH2_REDIRECT_URI = "https://localhost:3000/return_from_login"
   OAUTH2_CLIENT_ID = "precision_fda"
 elsif ENV["DNANEXUS_BACKEND"] == "production"
   OAUTH2_REDIRECT_URI = "https://precision.fda.gov/return_from_login"
   OAUTH2_CLIENT_ID = "precision_fda_gov"
+elsif ENV["DEV_HOST"]
+  OAUTH2_REDIRECT_URI = "https://#{ENV["DEV_HOST"]}/return_from_login"
+  OAUTH2_CLIENT_ID = "precision_fda"
 else
   OAUTH2_REDIRECT_URI = "https://precisionfda-staging.dnanexus.com/return_from_login"
   OAUTH2_CLIENT_ID = "precision_fda_gov"
@@ -45,6 +48,12 @@ DEFAULT_COMPARISON_APP = ENV["DEFAULT_COMPARISON_APP"]
 BILLING_CONFIRMATION = ENV["BILLING_CONFIRMATION"]
 CHALLENGE_BOT_TOKEN = ENV["CHALLENGE_BOT_TOKEN"]
 CHALLENGE_BOT_DX_USER = ENV["CHALLENGE_BOT_DX_USER"]
+CHALLENGE_BOT_PUBLIC_FILES_PROJECT = ENV['CHALLENGE_BOT_PUBLIC_FILES_PROJECT']
+CHALLENGE_BOT_PRIVATE_FILES_PROJECT = ENV['CHALLENGE_BOT_PRIVATE_FILES_PROJECT']
+ADMIN_USER = ENV['ADMIN_USER']
+DEFAULT_COMPARISON_APP = ENV['DEFAULT_COMPARISON_APP']
+
+
 
 # Challenge 1 - Consistency
 CONSISTENCY_CHALLENGE_START_DATE = DateTime.new(2016,2,25).in_time_zone.end_of_day + 4.hours
@@ -63,7 +72,7 @@ ALLOWED_CLASSES_FOR_TAGGING = ["app-series", "answer", "asset", "comparison", "f
 APPATHON_IN_A_BOX_HANDLE = "app-a-thon-in-a-box"
 APPATHON_IN_A_BOX_DISCUSSION_ID = 22
 APPATHON_IN_A_BOX_RESULTS_DATE = DateTime.new(2017,1,4,14,10).in_time_zone + 8.hours
-
 ACTIVE_META_APPATHON = APPATHON_IN_A_BOX_HANDLE
+
 # Remove X-Runtime
 Rails.application.config.middleware.delete(Rack::Runtime)

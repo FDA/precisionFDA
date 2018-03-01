@@ -22,16 +22,21 @@
   end
 
   g.column name: 'Input File' do |submission|
-    file = submission.job.input_files.first
-    if file.present?
-      unilinkfw(submission.job.input_files.first)
-    else
-      content_tag(:span, " ", class: "fa fa-file-o fa-fw") + " " + submission._inputs.first
+    content_tag(:ul, "", class: "submission-ul") do
+      submission.job.input_files.enum_for(:each_with_index).collect do |file, index|
+        if file.present?
+          content_tag(:li, unilinkfw(file))
+        else
+          content_tag(:li,
+            content_tag(:span, " ", class: "fa fa-file-o fa-fw") + " " + submission._inputs[index]
+          )
+        end
+      end.join.html_safe
     end
   end
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |submission|
-    submission.created_at.to_s(:db)
+    submission.created_at.to_s(:human)
   end
 
 end %>

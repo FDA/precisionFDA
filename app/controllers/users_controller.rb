@@ -39,7 +39,7 @@ class UsersController < ApplicationController
     elsif params[:tab] == 'files' && @counts[:files] > 0
       @files_grid = initialize_grid(@user.real_files.accessible_by_public.includes(:taggings), {
         name: 'files',
-        order: 'user_files.created_at',
+        order: 'created_at',
         order_direction: 'desc',
         per_page: 25,
         include: [:user, {user: :org}, {taggings: :tag}]

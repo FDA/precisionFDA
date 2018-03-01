@@ -4,17 +4,15 @@
   <div class="page-title">
     <span class="fa fa-file-o"></span> <%= @file.name %>
     <% if @file.editable_by?(@context) %>
-      <a class="pfda-rename-item" data-toggle="modal" data-target="#rename-modal">
+      <a class="pfda-rename-item" data-toggle="modal" data-target="#file-comparison-edit-modal">
         <span class="fa fa-pencil"></span>
       </a>
     <% end %>
   </div>
 
-  <% if !@file.description.blank? %>
   <div class="description">
-    <%= @file.description %>
+    <%= file_description(@file) %>
   </div>
-  <% end %>
 </div>
 
 <div class="metadata-section metadata-header">
@@ -56,7 +54,7 @@
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Created</h5>
-      <p class="list-group-item-text"><%= @file.created_at.to_s(:db) %></p>
+      <p class="list-group-item-text"><%= @file.created_at.to_s(:human) %></p>
     </li>
   </ul>
 </div>
@@ -68,8 +66,10 @@
     <% if @file.parent_type != "Comparison" %>
       <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to...</button>
     <% end %>
-    <%= link_to track_path(id: @file.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
-      <span class="fa fa-flip-vertical fa-sitemap"></span> Track
+    <% if @file.accessible_by?(@context) %>
+      <%= link_to track_path(id: @file.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
+        <span class="fa fa-flip-vertical fa-sitemap"></span> Track
+      <% end %>
     <% end %>
     <% if @licenses.present? %>
       <%= render "licenses/set_dropdown", licenses: @licenses, item: @file %>
@@ -120,18 +120,20 @@
 
     <%= render "_partials/btn_publish", item: @file %>
 
-    <% if @file.editable_by?(@context) %>
+    <% if @file.editable_by?(@context) && (!@file.parent_comparison? || @file.deletable?) %>
     <div class="btn-group">
       <div class="dropdown">
         <button class="btn btn-primary" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <span class="fa fa-cog"></span>
         </button>
         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
-          <li>
-            <a data-toggle='modal' data-target='#rename-modal'>
-              <span class="fa fa-pencil"></span> Rename
-            </a>
-          </li>
+          <% unless @file.parent_comparison? %>
+            <li>
+              <a data-toggle='modal' data-target='#file-comparison-edit-modal'>
+                <span class="fa fa-pencil"></span> Edit File info
+              </a>
+            </li>
+          <% end %>
           <% if @file.deletable? %>
             <li role="separator" class="divider"></li>
             <li>
@@ -196,7 +198,13 @@
   <div role="tabpanel" class="tab-pane" id="tab-comments">
     <div class="row">
       <div class="col-md-12">
-        <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @file %>
+        <% if @file.accessible_by?(@context) %>
+          <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @file %>
+        <% else %>
+          <div class="container-fluid container-padded">
+            <%= render "comments/comments", comments: @comments, items_from_params: @items_from_params %>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>
@@ -230,5 +238,5 @@
 </div>
 
 <% if @file.editable_by?(@context) %>
-  <%= render "_partials/modal_rename", item: @file, path_to_rename: rename_file_path(@file.dxid) %>
+  <%= render "_partials/modal_file_comparison_edit", item: @file, path_to_rename: rename_file_path(@file.dxid) %>
 <% end %>

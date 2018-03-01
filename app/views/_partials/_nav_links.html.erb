@@ -49,6 +49,12 @@
         <div class="nav-pill-title">Apps</div>
       <% end %>
     </li>
+    <li class="<%= 'active' if params[:controller] == 'workflows' %>" role="presentation">
+      <%= link_to workflows_path do %>
+        <div class="nav-icon fa fa-2x fa-flash"></div>
+        <div class="nav-pill-title">Workflows</div>
+      <% end %>
+    </li>
     <% if @context.logged_in? && (@context.user.can_administer_site? || @context.user.spaces.count > 0) %>
       <li class="nav-spacer"></li>
       <li class="<%= 'active' if params[:controller] == 'spaces' %>" role="presentation">
@@ -76,6 +82,10 @@
         <li><a href="<%= guidelines_path %>"><span class="fa fa-fw fa-institution"></span> Guidelines</a></li>
         <li><a href="<%= docs_path %>"><span class="fa fa-fw fa-book"></span> Docs</a></li>
         <li role="separator" class="divider"></li>
+        <% if @context.can_administer_site? %>
+          <li><%= link_to "Admin Dashboard", admin_root_path %></li>
+          <li role="separator" class="divider"></li>
+        <% end %>
         <li><%= link_to "Log out", logout_path, method: :delete, data: {no_turbolink: true} %></li>
       </ul>
     </li>

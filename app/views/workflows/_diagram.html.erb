@@ -1,0 +1,81 @@
+<div class="workflows standard container">
+  <div class="workflows container jumbotron">
+      <ul class="stage-inputs-container" data-bind="sortable: {template: 'stage-inputs', data: slots}">
+      </ul>
+  </div>
+</div>
+<script id='stage-inputs'  type='text/html'>
+  <div>
+    <div class="" data-bind='foreach: $root.firstStage().inputs'>
+      <div class="shifted-io" >
+        <div data-bind="text: name"></div>
+        <span data-bind="attr: {'id': name}, css: 'workflow-digaram-gly'", class="glyphicon glyphicon-filter"></span>
+      </div>
+    </div>
+    <div class="" data-bind="css: 'input-configured'">
+      <a href="#" data-toggle="modal" data-target="#configure-stage-modal">
+        <div class="workflows input-item">
+          <div class="fa fa-gear" data-bind="text: $root.firstStage().name"></div>
+        </div>
+      </a>
+    </div>
+    <div class="workflows center-block" data-bind='foreach: $root.firstStage().outputs'>
+      <!-- ko ifnot: values.id -->
+        <span data-bind="attr: {'id': name}, css: 'workflow-fa'", class="workflows center-block fa fa-arrow-down"></span>
+      <!-- /ko -->
+      <!-- ko if: values.id -->
+        <span data-bind="attr: {'id': name}, css: 'workflow-fa'", class="workflows center-block fa"></span>
+      <!-- /ko -->
+    </div>
+
+
+    <div  data-bind="foreach: $root.slotsWithoutFirstAndLast()">
+      <div class="workflows center-block workflow position-center" data-bind='foreach: inputs'>
+        <!-- ko ifnot: values.id -->
+          <img src="/assets/workflows/input_arrow.png" class="workflows input-img" width="200px;" height="50px;"><span data-bind="text: name"> </span>
+        <!-- /ko -->
+        <!-- ko if: values.id -->
+          <span data-bind="attr: {'id': name},  css: 'workflow-digaram-gly'", class="fa fa-long-arrow-down fa-2x"></span>
+        <!-- /ko -->
+      </div>
+      <div data-bind="css: 'workflow input-configured'">
+        <a  href="#"  data-toggle="modal" data-target="#configure-stage-modal">
+          <div class="workflows input-item">
+            <div class="fa fa-gear" data-bind="text: name"></div>
+          </div>
+        </a>
+      </div>
+      <div class="workflows center-block" data-bind='foreach: outputs'>
+        <!-- ko ifnot: $data.values.id -->
+          <span data-bind="attr: {'id': name}, css: 'workflow-fa'", class="workflows center-block fa fa-arrow-down"></span>
+        <!-- /ko -->
+        <!-- ko if: values.id -->
+          <span data-bind="attr: {'id': name}, css: 'workflow-fa'", class="fa"></span>
+        <!-- /ko -->
+      </div>
+    </div>
+    <div>
+      <div class="workflows center-block workflow position-center" data-bind='foreach: $root.lastStage().inputs'>
+        <!-- ko ifnot: values.id-->
+          <img src="/assets/workflows/input_arrow.png" class="workflows input-img" data-bind="text: name" width="200px;" height="50px;"><span data-bind="text: name"> </span>
+        <!-- /ko -->
+        <!-- ko if: values.id-->
+          <span data-bind="attr: {'id': name},  css: 'workflow-digaram-gly'", class="fa fa-long-arrow-down  fa-2x"></span>
+        <!-- /ko -->
+      </div>
+      <div class="" data-bind="css: 'input-configured'">
+        <a  href="#"  data-toggle="modal" data-target="#configure-stage-modal">
+          <div class="workflows input-item">
+            <div class="fa fa-gear" data-bind="text: $root.lastStage().name"></div>
+          </div>
+        </a>
+      </div>
+      <div data-bind="foreach: $root.lastStage().outputs">
+        <div class="shifted-io" >
+          <span data-bind="attr: {'idf': name},  css: 'workflow-digaram-gly'", class="fa fa-arrow-down"></span>
+          <div data-bind="text: name"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</script>

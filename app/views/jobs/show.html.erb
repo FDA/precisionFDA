@@ -36,7 +36,7 @@
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Created</h5>
-      <p class="list-group-item-text"><%= @job.created_at.to_s(:db) %></p>
+      <p class="list-group-item-text"><%= @job.created_at.to_s(:human) %></p>
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Instance type</h5>
@@ -57,7 +57,7 @@
 
 <div class="pfda-toolbar">
   <div class="btn-group">
-    <% if @job.user_id == @context.user_id %>
+    <% if @job.accessible_by?(@context) %>
       <%= link_to log_job_path(@job.dxid), class: "btn btn-default" do %>
         <span class="fa fa-file-code-o"></span> View Log
       <% end %>
@@ -65,8 +65,10 @@
   </div>
   <div class="btn-group">
     <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to...</button>
-    <%= link_to track_path(id: @job.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
-      <span class="fa fa-flip-vertical fa-sitemap"></span> Track
+    <% if @job.accessible_by?(@context) %>
+      <%= link_to track_path(id: @job.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
+        <span class="fa fa-flip-vertical fa-sitemap"></span> Track
+      <% end %>
     <% end %>
   </div>
 
@@ -99,11 +101,20 @@
     </a>
   </li>
   <% end %>
-  <li role="presentation">
-    <a href="#tab-comments" aria-controls="tab-comments" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
-      <span class="tab-label">Comments <span class="badge"><%= @job.comment_threads.size %></span></span>
-    </a>
-  </li>
+  <% if @job.from_submission? %>
+    <li role="presentation">
+      <a href="#tab-description" aria-controls="tab-description" role="tab" data-toggle="tab"><span class="fa fa-fw fa-info"></span>
+        <span class="tab-label">Submission Description</span>
+      </a>
+    </li>
+  <% end %>
+  <% if @job.accessible_by?(@context) %>
+    <li role="presentation">
+      <a href="#tab-comments" aria-controls="tab-comments" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
+        <span class="tab-label">Comments <span class="badge"><%= @job.comment_threads.size %></span></span>
+      </a>
+    </li>
+  <% end %>
   <% if @notes.total_count > 0 %>
   <li role="presentation">
     <a href="#tab-notes" aria-controls="tab-notes" role="tab" data-toggle="tab"><span class="fa fa-fw fa-sticky-note"></span>
@@ -137,7 +148,7 @@
             <div class="job-io-heading">Inputs</div>
             <table class="table table-striped table-job-io table-job-io-input">
               <tbody>
-                <%= render "jobs/io_rows", items: @inputs %>
+                <%= render "jobs/io_rows", items: @job.input_data %>
               </tbody>
             </table>
           </div>
@@ -146,7 +157,7 @@
             <div class="job-io-heading">Outputs</div>
             <table class="table table-striped table-job-io table-job-io-output">
               <tbody>
-                <%= render "jobs/io_rows", items: @outputs %>
+                <%= render "jobs/io_rows", items: @job.output_data %>
               </tbody>
             </table>
           </div>
@@ -157,24 +168,34 @@
   </div>
 
   <% if @job.failed? %>
-  <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-error">
-    <div class="row">
-      <div class="panel panel-danger panel-job-failed col-md-12 col-md-offset-6">
-        <div class="panel-heading">
-          The execution failed with the following error message
-        </div>
-        <div class="panel-body">
-          <div class="text-monospace"><%= @job.failure_message %></div>
+    <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-error">
+      <div class="row">
+        <div class="panel panel-danger panel-job-failed col-md-12 col-md-offset-6">
+          <div class="panel-heading">
+            The execution failed with the following error message
+          </div>
+          <div class="panel-body">
+            <div class="text-monospace"><%= @job.failure_message %></div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
   <% end %>
+
+  <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-description">
+    <div class="pfda-md-rendered" data-bind="html: jobViewModel.descriptionDisplay"></div>
+  </div>
 
   <div role="tabpanel" class="tab-pane" id="tab-comments">
     <div class="row">
       <div class="col-md-12">
-        <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @job %>
+        <% if @job.accessible_by?(@context) %>
+          <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @job %>
+        <% else %>
+          <div class="container-fluid container-padded">
+            <%= render "comments/comments", comments: @comments, items_from_params: @items_from_params %>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>

@@ -96,24 +96,31 @@ class DiscussionsController < ApplicationController
   end
 
   private
-    def discussion_params
-      params.require(:discussion).permit(:title)
-    end
 
-    def note_js(note)
-      comparisons = note.comparisons
-      files = note.real_files
-      apps = note.apps
-      jobs = note.jobs
-      assets = note.assets
+  def discussion_params
+    params.require(:discussion).permit(:title)
+  end
 
-      attachments = {
-        comparisons: (comparisons.map { |o| describe_for_api(o)}),
-        files: (files.map { |o| describe_for_api(o)}),
-        apps: (apps.map { |o| describe_for_api(o)}),
-        jobs: (jobs.map { |o| describe_for_api(o)}),
-        assets: (assets.map { |o| describe_for_api(o)}),
-      }
-      return {note: note.slice(:id, :content, :title), attachments: attachments, edit: params[:edit], editable: note.editable_by?(@context)}
-    end
+  def note_js(note)
+    comparisons = note.comparisons
+    files = note.real_files
+    apps = note.apps
+    jobs = note.jobs
+    assets = note.assets
+
+    attachments = {
+      comparisons: (comparisons.map { |o| describe_for_api(o)}),
+      files: (files.map { |o| describe_for_api(o)}),
+      apps: (apps.map { |o| describe_for_api(o)}),
+      jobs: (jobs.map { |o| describe_for_api(o)}),
+      assets: (assets.map { |o| describe_for_api(o)}),
+    }
+
+    {
+      note: note.slice(:id, :content, :title),
+      attachments: attachments,
+      edit: params[:edit],
+      editable: note.editable_by?(@context)
+    }
+  end
 end

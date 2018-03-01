@@ -28,7 +28,7 @@
     <% end %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Joined</h5>
-      <p class="list-group-item-text"><%= @user.created_at.to_s(:db) %></p>
+      <p class="list-group-item-text"><%= @user.created_at.to_s(:human) %></p>
     </li>
   </ul>
 </div>

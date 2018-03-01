@@ -2,8 +2,12 @@
 
 <% if @space.active? %>
   <div class="pfda-toolbar pfda-toolbar-transparent">
-    <div class="btn-group">
-      <button class="btn btn-default" data-bind="click: objectSelector.open"><span class="fa fa-plus" aria-hidden="true"></span> Move data to space...</button>
+    <div class="pull-left">
+      <div class="btn-group">
+        <button class="btn btn-default" data-bind="click: objectSelector.open">
+          <span class="fa fa-plus" aria-hidden="true"></span> Move data to space...
+        </button>
+      </div>
     </div>
   </div>
 <% end %>
@@ -11,7 +15,7 @@
 <!-- Tab panes -->
 <div class="tab-content">
   <div role="tabpanel" class="tab-pane tab-pane-padded-lg active" id="tab-data">
-    <% if !@space.active? %>
+    <% unless @space.active? %>
       <div class='pfda-help-block'>
         <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
         <p>Both host and guest leads must click "Accept space" to activate it.</p>
@@ -19,7 +23,6 @@
       <% if @total_count > 0 %><hr><% end %>
     <% end %>
 
-    <% if @total_count > 0 %>
       <% if defined?(@notes_list) %>
         <div class="panel">
           <div class="panel-heading">
@@ -36,7 +39,70 @@
             Files &nbsp;<small class="text-muted"><%= @counts[:files] %></small>
           </div>
           <div class="panel-body">
-            <%= render "files/grid", files_grid: @files_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
+            <div class="pfda-toolbar">
+              <div class="pull-left">
+                <% if @counts[:files] + @counts[:folders] > 0 %>
+                  <% breadcrumb :folder, @folder %>
+                  <%= breadcrumbs style: :bootstrap, class: "breadcrumb no-border" %>
+                <% else %>
+                  <div class="empty-grid-head text-info">
+                    No records found
+                  </div>
+                <% end %>
+              </div>
+              <div class="pull-right">
+                <span class="btn btn-primary" data-toggle="modal" data-target="#create-folder-modal">
+                  <span class="fa fa-plus-square fa-fw"></span> Add folder
+                </span>
+                <div class="btn-group">
+                  <div class="dropdown">
+                    <button class="btn btn-primary" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <span class="fa fa-cog"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
+                      <li data-bind="css: { disabled: !isRenamingAllowed() }">
+                        <a data-toggle='modal' data-bind="click: showRenamingModal">
+                          <span class="fa fa-pencil"></span> Rename
+                        </a>
+                      </li>
+                      <li role="separator" class="divider"></li>
+                      <li data-bind="css: { disabled: !isMovingAllowed() }">
+                        <a data-toggle='modal' data-bind="click: showMoveModal">
+                          <span class="fa fa-share"></span> Move
+                        </a>
+                      </li>
+                      <li role="separator" class="divider"></li>
+                      <li data-bind="css: { disabled: !isPublishingAllowed() }">
+                        <a data-toggle='modal' data-bind="click: showPublishModal">
+                          <i class="fa fa-fw fa-bullhorn"></i> Publish
+                        </a>
+                      </li>
+                      <li role="separator" class="divider"></li>
+                      <li data-bind="css: { disabled: !isDeletingAllowed() }">
+                        <a data-toggle='modal' data-bind="click: showDeleteModal">
+                          <i class="fa fa-fw fa-trash"></i> Delete
+                        </a>
+                      </li>
+                      <li role="separator" class="divider"></li>
+                      <li data-bind="css: { disabled: !isDownloadingAllowed() }">
+                        <a data-toggle='modal' data-bind="click: showDownloadModal">
+                          <i class="fa fa-fw fa-download"></i> Download
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <%= render "files/grid",
+                       files_grid: @files_grid,
+                       scope_icon: false,
+                       hide_access: true,
+                       show_filters: :when_filtered,
+                       show_checkboxes: @show_checkboxes,
+                       clear_blank_state: !@folder && true
+            %>
           </div>
         </div>
       <% end %>
@@ -80,10 +146,15 @@
           </div>
         </div>
       <% end %>
-    <% end %>
   </div>
 </div>
 
 <% if @space.active? %>
   <%= render "_partials/selector_modal" %>
+  <%= render "_partials/modal_create_folder", parent_folder_id: @parent_folder_id, create_path: create_folder_space_path %>
+  <%= render "_partials/modal_rename_js", space_id: @space.id, source: "list" %>
+  <%= render "_partials/modal_move_files", current_folder: @folder.try(:id), move_path: move_space_path(@space), scope: @space.uid %>
+  <%= render "_partials/modal_download_files" %>
+  <%= render "_partials/modal_delete_files", remove_path: remove_folder_space_path(@space) %>
+  <%= render "_partials/modal_publish_files", publish_path: publish_folder_space_path(@space) %>
 <% end %>

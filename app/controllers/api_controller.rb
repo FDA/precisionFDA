@@ -107,6 +107,370 @@ class ApiController < ApplicationController
     render json: {published: published_count}
   end
 
+  # Inputs:
+  #
+  # id (Integer; required): app series id
+  #
+  # Outputs:
+  #
+  # An array of hashes
+  #
+  def list_app_revisions
+    app_series_id = params["id"]
+    fail "id needs to be an Integer" unless app_series_id.is_a?(Numeric) && (app_series_id.to_i == app_series_id)
+    app_series = AppSeries.accessible_by(@context).find_by(id: params["id"])
+    fail "AppSeries not found" if app_series.nil?
+    render json: app_series.accessible_revisions(@context).select(:title, :id, :dxid, :revision, :version)
+  end
+
+  # Inputs
+  #
+  # workflow_name, workflow_title, readme, is_new, slots
+  #
+  # Outputs
+  #
+  # id (string, only on success): the id of the created workflow, if success
+  # failure (string, only on failure): a message that can be shown to the user due to failure
+  def create_workflow
+    workflow_name = params[:workflow_name]
+    fail "The workflow 'workflow_name' must be a nonempty string." unless workflow_name.is_a?(String) && workflow_name != ""
+    fail "The workflow 'workflow_name' can only contain the characters A-Z, a-z, 0-9, '.' (period), '_' (underscore) and '-' (dash)." unless workflow_name =~ /^[a-zA-Z0-9._-]+$/
+
+    title = params[:workflow_title]
+    fail "The workflow 'title' must be a nonempty string." unless title.is_a?(String) && title != ""
+
+    readme = params[:readme]
+    fail "The workflow 'Readme' must be a string." unless readme.is_a?(String)
+
+    is_new = params[:is_new]
+    fail "The workflow 'is_new' must be a boolean, true or false." unless ((is_new == true) || (is_new == false))
+
+    slots = params[:slots] || []
+    fail "The workflow 'slots' must be an array of hashes." unless slots.is_a?(Array) && slots.all? { |slot| slot.is_a?(Hash) }
+
+    spec = {input_spec: {stages: []}, output_spec: {stages: []}}
+    stages = []
+    slot_details_by_slot_id = {}
+    slot_idx_to_slot_id = {}
+    output_classes = {}
+    slots.each_with_index do |slot, slot_i|
+      name = slot["name"]
+      fail "#{(slot_i+1).ordinalize} slot: Each 'name' must be a nonempty string." unless name.is_a?(String) && name != ""
+
+      dxid = slot["dxid"]
+      fail "Slot '#{name}': Each slot 'dxid' must be a nonempty string." unless dxid.is_a?(String) && dxid != ""
+      fail "Slot '#{name}': App 'dxid' for slot '#{name}' does not exist or is not accessible by you." if App.accessible_by(@context).find_by(dxid: dxid).nil?
+
+      instance_type = slot["instanceType"]
+      fail "Slot '#{name}': Each slot 'instanceType' must be a nonempty string." unless instance_type.is_a?(String) && instance_type != ""
+      fail "Slot '#{name}': Each slot 'instanceType' must be a valid instance type selected" unless Job::INSTANCE_TYPES.has_key?(instance_type)
+
+      slot_id = slot["slotId"]
+      fail "Slot '#{name}': Each slot 'slotId' must be a nonempty string." unless slot_id.is_a?(String) && slot_id != ""
+      fail "Slot '#{name}': Each slot 'slotId' must be unique." if slot_details_by_slot_id.has_key?(slot_id)
+      slot_details_by_slot_id[slot_id] = { prev_slot: nil, next_slot: nil, idx: slot_i }
+      slot_idx_to_slot_id[slot_i] = slot_id
+
+      inputs = slot["inputs"] || []
+      fail "Slot '#{name}': Each slot 'inputs' must be an array of hashes." unless inputs.is_a?(Array) && inputs.all? { |slot| slot.is_a?(Hash) }
+      prev_slot_expected = inputs.any? { |input| input["values"]["id"] }
+
+      outputs = slot["outputs"] || []
+      fail "Slot '#{name}': Each slot 'outputs' must be an array of hashes." unless outputs.is_a?(Array) && outputs.all? { |slot| slot.is_a?(Hash) }
+      outputs.each do |output|
+        output_classes[slot_id] ||= {}
+        output_classes[slot_id][output["name"]] = output["class"]
+      end
+      next_slot_expected = outputs.any? { |output| output["values"]["id"] }
+
+      if slot_i != 0
+        defined_prev_slot_id = slot_idx_to_slot_id[slot_i - 1]
+        fail "Slot '#{name}': Each slot 'slotId' must be the value of the previous slot's 'nextSlot'." if slot_details_by_slot_id[defined_prev_slot_id][:next_slot_expected] && slot_details_by_slot_id[defined_prev_slot_id][:next_slot] != slot_id
+
+        prev_slot = slot["prevSlot"]
+        if prev_slot_expected
+          fail "Slot '#{name}': Each slot 'prevSlot' must be a non empty string." unless prev_slot.is_a?(String) && prev_slot != ""
+          fail "Slot '#{name}': Each slot 'prevSlot' must be the value of the previous slot's 'slotId'." if prev_slot != defined_prev_slot_id
+        end
+      else
+        prev_slot = nil
+      end
+
+      if slot_i != slots.size - 1
+        next_slot = slot["nextSlot"]
+        if next_slot_expected
+          fail "Slot '#{name}': Each slot 'nextSlot' must be a non empty string if any element of 'outputs' refers to another stage's input." unless next_slot.is_a?(String) && next_slot != ""
+        end
+      else
+        next_slot = nil
+      end
+
+      slot_details_by_slot_id[slot_id] = { prev_slot: prev_slot, next_slot: next_slot, idx: slot_i, next_slot_expected: next_slot_expected }
+
+      spec[:input_spec][:stages] << {
+        "name": name,
+        "prev_slot": prev_slot,
+        "next_slot": next_slot,
+        "slotId": slot_id,
+        "app_dxid": dxid,
+        "inputs": inputs,
+        "outputs": outputs,
+        "instanceType": instance_type
+      }
+
+      stage_inputs = {}
+      stage_inputs_seen = Set.new
+      inputs.each_with_index do |input, input_i|
+        i_name = input["name"]
+        fail "Slot '#{name}': The #{(input_i+1).ordinalize} input is missing a name." unless i_name.is_a?(String) && i_name != ""
+        fail "Slot '#{name}': The input name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless i_name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
+        fail "Slot '#{name}': Duplicate definitions for the input named '#{i_name}'." if stage_inputs_seen.include?(i_name)
+        stage_inputs_seen << i_name
+
+        i_class = input["class"]
+        fail "Slot '#{name}': The input named '#{i_name}' is missing a type." unless i_class.is_a?(String) && i_class != ""
+        fail "Slot '#{name}': The input named '#{i_name}' contains an invalid type. Valid types are: #{App::VALID_IO_CLASSES.join(', ')}." unless App::VALID_IO_CLASSES.include?(i_class)
+
+        i_optional = input["optional"]
+        fail "Slot '#{name}': The input named '#{i_name}' is missing the 'optional' designation." unless (i_optional == true || i_optional == false)
+
+        i_label = input["label"]
+        fail "Slot '#{name}': The input named '#{i_name}' is missing a label." unless i_label.is_a?(String)
+
+        i_required_run_input = input["requiredRunInput"]
+        fail "Slot '#{name}': The input named '#{i_name}' is missing the 'required_run_input' designation." unless (i_required_run_input == true || i_required_run_input == false)
+
+        i_parent_slot = input["parent_slot"]
+        fail "Slot '#{name}': The input named '#{i_name}' has the 'parent_slot' value of '#{i_parent_slot}' but is expected to be '#{slot_id}'." unless i_parent_slot == slot_id
+
+        i_stage_name = input["stageName"]
+        fail "Slot '#{name}': The input named '#{i_name}' has the 'stageName' value of '#{i_stage_name}' but is expected to be '#{name}'." unless i_stage_name == name
+
+        i_values = input["values"]
+        fail "Slot '#{name}': The input named '#{i_name}' is expected to have a 'values' hash with keys 'id' and 'name'." unless i_values.is_a?(Hash) && i_values.has_key?("id") && i_values.has_key?("name")
+
+        if slot_i == 0
+          fail "Slot '#{name}': The input named '#{i_name}' must be desginated as a required input or be linked to a compatible stage output." if !i_optional && !i_required_run_input
+        else
+          if !i_optional
+            i_values_id = i_values["id"]
+            i_values_name = i_values["name"]
+            linked_to_a_stage = i_values_id.present? && i_values_name.present?
+            fail "Slot '#{name}': The input named '#{i_name}' must be desginated as a required input or be linked to another stage's output." if !i_required_run_input && !linked_to_a_stage
+            if linked_to_a_stage
+              slot_id_mismatch = defined_prev_slot_id != i_values_id
+              linked_to_previous_stage = output_classes.has_key?(defined_prev_slot_id) && output_classes[defined_prev_slot_id].has_key?(i_values_name)
+              fail "Slot '#{name}': The input named '#{i_name}' is linked to an output that does not belong to the previous stage." if !i_required_run_input && (slot_id_mismatch || !linked_to_previous_stage)
+
+              output_class = output_classes[defined_prev_slot_id][i_values_name]
+              fail "Slot '#{name}': The input named '#{i_name}' is linked to an output with the wrong class. Input type is '#{i_class}', but output type is '#{output_class}'." if i_class != output_class
+            end
+          end
+        end
+
+        unless i_values_id.nil?
+          stage_inputs.merge!({i_name => {"$dnanexus_link": {"outputField": i_values_name, "stage": i_values_id}}})
+        end
+      end
+      each_stage = {
+        "executable":  dxid,
+        "id": slot_id,
+        "systemRequirements": {"main" => {"instanceType": Job::INSTANCE_TYPES[instance_type]}}
+      }
+      each_stage.merge!({"input": stage_inputs}) unless stage_inputs.blank?
+      stages << each_stage
+    end
+
+    workflow_params = {
+      project: current_user.private_files_project,
+      name: workflow_name,
+      title: title,
+      stages: stages
+    }
+
+    Workflow.transaction do
+      workflow_series_dxid = WorkflowSeries.construct_dxid(@context.username, workflow_name)
+      workflow_series = WorkflowSeries.find_by(dxid: workflow_series_dxid)
+      if is_new
+        fail "You already have a workflow by the name '#{workflow_name}'." unless workflow_series.nil?
+        workflow_series = WorkflowSeries.create!(
+          dxid: workflow_series_dxid,
+          name: workflow_name,
+          latest_revision_workflow_id: nil,
+          user_id: @context.user_id,
+          scope: "private"
+        )
+
+        revision = 1
+      else
+        fail "You don't have a workflow by the name '#{workflow_name}'." if workflow_series.nil?
+        revision = workflow_series.latest_revision_workflow.revision + 1
+      end
+      api = DNAnexusAPI.new(@context.token)
+      response = api.create_workflow(workflow_params)
+      workflow = Workflow.create!(
+        name: workflow_name,
+        title: title,
+        dxid: response["id"],
+        edit_version: response["editVersion"],
+        user_id: current_user.id,
+        spec: spec,
+        readme: readme,
+        revision: revision,
+        scope: "private",
+        workflow_series_id: workflow_series.id,
+      )
+      workflow.save!
+      workflow_series.update!(latest_revision_workflow_id: workflow.id)
+      render json: {id: workflow.dxid}
+    end
+  end
+
+  # Inputs
+  #
+  # workflow_id (string, required): the dxid of the workflow to run
+  # inputs (hash, required): the inputs
+  # name (string, required): the name of the analysis
+  #
+  # Outputs
+  #
+  # id (string, only on success): the id of the created analysis, if success
+  # failure (string, only on failure): a message that can be shown to the user due to failure
+  def run_workflow
+    analysis_name = params["name"]
+    fail "The workflow 'analysis_name' must be a nonempty string." unless analysis_name.is_a?(String) && analysis_name != ""
+
+    workflow_id = params["workflow_id"]
+    fail "The workflow 'workflow_id' must be a nonempty string." unless workflow_id.is_a?(String) && workflow_id != ""
+    workflow = Workflow.accessible_by(@context).find_by(dxid: workflow_id)
+    fail "Workflow with id #{workflow_id} does not exist or is not accessible by you" if workflow.nil?
+
+    inputs = params["inputs"] || []
+    fail "If provided, the workflow 'inputs' must be an array of hashes." unless inputs.is_a?(Array) && inputs.all? { |s| s.is_a?(Hash) }
+
+    workflow_input_spec = workflow.input_spec_hash
+    unseen_workflow_inputs = workflow.unused_input_spec_hash
+    dx_run_workflow_inputs = {}
+    stage_inputs = Hash.new { |h,k| h[k] = {} }
+
+    inputs.each do |api_input|
+      input_name = api_input["input_name"]
+      stage_input_name_match = /^(stage-\w{14}).(\w+)$/.match(input_name)
+      fail "Invalid value for input_name" if stage_input_name_match.captures.size != 2
+      stage = stage_input_name_match[1]
+      matched_input_name = stage_input_name_match[2]
+
+      input_klass = api_input["class"]
+      fail "The input named '#{input_name}' has invalid type '#{input_klass}'. Valid types are: #{App::VALID_IO_CLASSES.join(', ')}." unless App::VALID_IO_CLASSES.include?(input_klass)
+
+      input_value = api_input["input_value"]
+      optional = workflow_input_spec[stage][matched_input_name]["optional"]
+      unseen_workflow_inputs[stage].delete(matched_input_name)
+      next if optional && !input_value.present?
+      case input_klass
+      when "file"
+        fail "#{input_name}: input file value is not a string" unless input_value.is_a?(String)
+        file = UserFile.real_files.accessible_by(@context).find_by(dxid: input_value)
+        fail "#{input_name}: input file is not accessible or does not exist" unless !file.nil?
+        fail "#{input_name}: input file's license must be accepted" unless !file.license.present? || file.licensed_by?(@context)
+
+        input_value = {"$dnanexus_link" => input_value}
+      when "int"
+        fail "#{input_name}: value is not an integer" unless input_value.to_i.to_s == input_value
+        input_value = input_value.to_i
+      when "float"
+        fail "#{input_name}: value is not a float" unless input_value.starts_with?(input_value.to_f.to_s)
+        input_value = input_value.to_f
+      when "boolean"
+        fail "#{input_name}: value is not a boolean" unless input_value == true || input_value == false
+      when "string"
+        fail "#{input_name}: value is not a string" unless input_value.is_a?(String)
+      end
+      dx_run_workflow_inputs.merge!(input_name => input_value)
+
+      stage_inputs[stage][matched_input_name] = input_value
+    end
+
+    unseen_workflow_inputs.each do |stage, inputs|
+      inputs.each do |name, input|
+        fail "The required input '#{stage}.#{name}' is missing" if !input["optional"]
+      end
+    end
+
+    project = @context.user.private_files_project
+    workflow_params = {
+      name: analysis_name,
+      input: dx_run_workflow_inputs,
+      project: project
+    }
+
+    api = DNAnexusAPI.new(@context.token)
+    response = api.run_workflow(workflow_id, workflow_params)
+    analysis_dxid = response["id"]
+    analysis = Analysis.create!(name: analysis_name, workflow_id: workflow.id, dxid: analysis_dxid, user_id: current_user.id)
+
+    response["stages"].each_with_index do |job_id, idx|
+      # Create job record
+      app = workflow.apps[idx]
+      stage = workflow.input_spec["stages"][idx]
+      run_inputs = {}
+      input_file_dxids = []
+      stage_inputs[stage["slotId"]].each do |input_name, input_value|
+        if input_value.is_a?(Hash)
+          if input_value["$dnanexus_link"].is_a?(String) && /^file-/.match(input_value["$dnanexus_link"])
+            input_file_dxids << input_value["$dnanexus_link"]
+            run_inputs[input_name] = input_value["$dnanexus_link"]
+          end
+        else
+          run_inputs[input_name] = input_value
+        end
+      end
+
+      # TODO: Candidate for refactoring. See JobCreator
+      opts = {
+        dxid: job_id,
+        app_series_id: app.app_series_id,
+        analysis_id: analysis.id,
+        app_id: app.id,
+        project: project,
+        run_inputs: run_inputs,
+        state: "idle",
+        name: app.title,
+        describe: {},
+        scope: "private",
+        user_id: @context.user_id,
+        run_instance_type: stage["instanceType"]
+      }
+      provenance = {job_id => {workflow_dxid: workflow.dxid, workflow_id: workflow.id, inputs: run_inputs}}
+      input_file_dxids.uniq!
+      input_file_ids = []
+      UserFile.accessible_by(@context).where(dxid: input_file_dxids).find_each do |file|
+        if file.parent_type == "Job"
+          if file.parent
+            parent_job = file.parent
+            provenance.merge!(parent_job.provenance)
+            provenance[file.dxid] = parent_job.dxid
+          end
+        end
+        input_file_ids << file.id
+      end
+      opts[:provenance] = provenance
+      Job.transaction do
+        job = Job.create!(opts)
+        job.input_file_ids = input_file_ids
+        job.save!
+        Event::JobRun.create(job, @context.user)
+      end
+    end
+    render json: {id: analysis_dxid}
+  end
+
+  def to_bool (input)
+    return true   if input == 'true'
+    return false  if input == 'false'
+    raise ArgumentError.new("invalid value for Boolean: \"#{self}\"")
+  end
+
   # Inputs
   # --
   # uid (String, required)
@@ -586,6 +950,8 @@ class ApiController < ApplicationController
       fail "File description needs to be a String" unless description.is_a?(String)
     end
 
+    folder = Folder.editable_by(@context).find_by(id: params[:folder_id])
+
     project = @context.user.private_files_project
     dxid = DNAnexusAPI.new(@context.token).("file", "new", {"name": params[:name], "project": project})["id"]
 
@@ -598,11 +964,40 @@ class ApiController < ApplicationController
         description: description,
         user_id: @context.user_id,
         parent: @context.user,
-        scope: 'private'
+        scope: 'private',
+        parent_folder_id: folder.try(:id)
       )
     end
 
     render json: {id: dxid}
+  end
+
+  def create_challenge_card_image
+    return unless (@context.can_administer_site? || @context.challenge_admin?)
+
+    name = params[:name]
+    fail "File name needs to be a non-empty String" unless name.is_a?(String) && name != ""
+
+    description = params["description"]
+    if !description.nil?
+      fail "File description needs to be a String" unless description.is_a?(String)
+    end
+
+    project = CHALLENGE_BOT_PRIVATE_FILES_PROJECT
+    dxid = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).("file", "new", {"name": params[:name], "project": CHALLENGE_BOT_PRIVATE_FILES_PROJECT})["id"]
+
+    UserFile.create!(
+      dxid: dxid,
+      project: project,
+      name: name,
+      state: "open",
+      description: description,
+      user_id: User.challenge_bot.id,
+      parent: User.challenge_bot,
+      scope: 'private'
+    )
+
+    render json: { id: dxid }
   end
 
   # Inputs:
@@ -614,7 +1009,14 @@ class ApiController < ApplicationController
   #
   # id (string, "file-xxxx")
   #
-  def create_image_file
+  def create_challenge_resource
+    return unless @context.challenge_admin?
+
+    challenge = Challenge.find_by!(id: params[:challenge_id])
+    if !challenge.editable_by?(@context)
+      fail "Challenge cannot be modified by current user."
+    end
+
     name = params[:name]
     fail "File name needs to be a non-empty String" unless name.is_a?(String) && name != ""
 
@@ -623,23 +1025,65 @@ class ApiController < ApplicationController
       fail "File description needs to be a String" unless description.is_a?(String)
     end
 
-    project = @context.user.private_files_project
-    dxid = DNAnexusAPI.new(@context.token).("file", "new", {"name": params[:name], "project": project})["id"]
+    project = CHALLENGE_BOT_PRIVATE_FILES_PROJECT
+    dxid = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).("file", "new", {"name": params[:name], "project": CHALLENGE_BOT_PRIVATE_FILES_PROJECT})["id"]
+    challenge_bot = User.find_by!(dxuser: CHALLENGE_BOT_DX_USER)
 
     UserFile.transaction do
-      UserFile.create!(
+      file = UserFile.create!(
         dxid: dxid,
         project: project,
         name: name,
         state: "open",
         description: description,
-        user_id: @context.user_id,
-        parent: @context.user,
+        user_id: User.challenge_bot.id,
+        parent: challenge_bot,
         scope: 'private'
+      )
+
+      ChallengeResource.create!(
+        challenge_id: challenge.id,
+        user_file_id: file.id,
+        user_id: @context.user_id
       )
     end
 
     render json: {id: dxid}
+  end
+
+  def create_resource_link
+    file = UserFile.find_by!(dxid: params[:id], user_id: User.challenge_bot.id)
+    resource = ChallengeResource.find_by!(user_id: @context.user_id, challenge_id: params[:challenge_id], user_file_id: file.id)
+
+    if !resource.editable_by?(@context)
+      fail "Challenge resource cannot be modified by current user."
+    end
+
+    # Refresh state of file, if needed
+    if file.state != "closed"
+      User.sync_challenge_bot_files!(@context)
+      file.reload
+    end
+
+    if file.state != "closed"
+      render json: {
+        error: "Files can only be downloaded if they are in the 'closed' state",
+        errorType: "FileNotClosed"
+      }
+      return
+    end
+
+    # FIXME:
+    # The API warns against storing the url as it may contain
+    # auth information that we don't want to expose
+    # So we may have to store a reference to the file and generate
+    # a shorter duration url each time it is rendered
+
+    url = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).generate_permanent_link(file)
+
+    resource.update_attributes({ url: url })
+
+    render json: { id: file.dxid, url: url }
   end
 
   def get_file_link
@@ -653,7 +1097,11 @@ class ApiController < ApplicationController
       if file.parent_type == "Asset"
         User.sync_asset!(@context, file.id)
       else
-        User.sync_file!(@context, file.id)
+        if file.created_by_challenge_bot? && (@context.can_administer_site? || @context.challenge_admin?)
+          User.sync_challenge_file!(file.id)
+        else
+          User.sync_file!(@context, file.id)
+        end
       end
       file.reload
     end
@@ -671,8 +1119,14 @@ class ApiController < ApplicationController
       # So we may have to store a reference to the file and generate
       # a shorter duration url each time it is rendered
 
+      if file.created_by_challenge_bot? && (@context.can_administer_site? || @context.challenge_admin?)
+        token = CHALLENGE_BOT_TOKEN
+      else
+        token = @context.token
+      end
+
       opts = {project: file.project, preauthenticated: true, filename: file.name, duration: 300}
-      url = DNAnexusAPI.new(@context.token).call(file.dxid, "download", opts)["url"]
+      url = DNAnexusAPI.new(token).call(file.dxid, "download", opts)["url"]
     end
 
     if error
@@ -761,9 +1215,17 @@ class ApiController < ApplicationController
     fail "Parameter 'id' needs to be a non-empty String" unless id.is_a?(String) && id != ""
 
     # Check that the file exists, is accessible by the user, and is in the open state. Throw 404 if otherwise.
-    UserFile.find_by!(dxid: id, state: "open", user_id: @context.user_id)
+    file = UserFile.find_by!(dxid: id, state: "open")
+    token = @context.token
+    if file.user_id != @context.user_id
+      if file.created_by_challenge_bot? && (@context.user.can_administer_site? || @context.user.is_challenge_admin?)
+        token = CHALLENGE_BOT_TOKEN
+      else
+        fail "The current user does not have access to the file."
+      end
+    end
 
-    result = DNAnexusAPI.new(@context.token).(id, "upload", {size: size, md5: md5, index: index})
+    result = DNAnexusAPI.new(token).(id, "upload", {size: size, md5: md5, index: index})
 
     render json: result
   end
@@ -778,9 +1240,18 @@ class ApiController < ApplicationController
     id = params[:id]
     fail "id needs to be a non-empty string" unless id.is_a?(String) && id != ""
 
-    file = UserFile.find_by!(dxid: id, user_id: @context.user_id, parent_type: "User")
+    file = UserFile.find_by!(dxid: id, parent_type: "User")
+    token = @context.token
+    if file.user_id != @context.user_id
+      if file.created_by_challenge_bot? && (@context.user.can_administer_site? || @context.user.is_challenge_admin?)
+        token = CHALLENGE_BOT_TOKEN
+      else
+        fail "The current user does not have access to the file."
+      end
+    end
+
     if file.state == "open"
-      DNAnexusAPI.new(@context.token).(id, "close")
+      DNAnexusAPI.new(token).(id, "close")
       UserFile.transaction do
         # Must recheck inside the transaction
         file.reload
@@ -852,112 +1323,25 @@ class ApiController < ApplicationController
 
     # Inputs should be compatible
     # (The following also normalizes them)
-    run_inputs = {}
-    dx_run_input = {}
-    input_file_dxids = []
-    @app.input_spec.each do |input|
-      key = input["name"]
-      optional = (input["optional"] == true)
-      has_default = input.has_key?("default")
-      default = input["default"]
-      klass = input["class"]
-      choices = input["choices"]
+    input_info = input_spec_preparer.run(@app, inputs)
 
-      if inputs.has_key?(key)
-        value = inputs[key]
-      elsif has_default
-        value = default
-      elsif optional
-        # No given value and no default, but input is optional; move on
-        next
-      else
-        # Required input is missing
-        fail "#{key}: required input is missing"
-      end
+    fail input_spec_preparer.first_error unless input_spec_preparer.valid?
 
-      # Check compatibility with choices
-      fail "#{key}: incompatiblity with choices" if choices.present? && !choices.include?(value)
-
-      if klass == "file"
-        fail "#{key}: input file value is not a string" unless value.is_a?(String)
-        file = UserFile.real_files.accessible_by(@context).find_by(dxid: value)
-        fail "#{key}: input file is not accessible or does not exist" unless !file.nil?
-        fail "#{key}: input file's license must be accepted" unless !file.license.present? || file.licensed_by?(@context)
-
-        dxvalue = {"$dnanexus_link" => value}
-        input_file_dxids << value
-      elsif klass == "int"
-        fail "#{key}: value is not an integer" unless value.is_a?(Numeric) && (value.to_i == value)
-        value = value.to_i
-      elsif klass == "float"
-        fail "#{key}: value is not a float" unless value.is_a?(Numeric)
-      elsif klass == "boolean"
-        fail "#{key}: value is not a boolean" unless value == true || value == false
-      elsif klass == "string"
-        fail "#{key}: value is not a string" unless value.is_a?(String)
-      end
-
-      run_inputs[key] = value
-      dx_run_input[key] = dxvalue || value
-    end
+    run_instance_type = params[:instance_type]
 
     # User can override the instance type
-    if params.has_key?("instance_type")
+    if run_instance_type
       fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.has_key?(params["instance_type"]) #Checks also that it's a string
-      run_instance_type = params["instance_type"]
     end
 
-    project = User.find(@context.user_id).private_files_project
-
-    api_input = {
+    job = job_creator.create(
+      app: @app,
       name: name,
-      input: dx_run_input,
-      project: project,
-      timeoutPolicyByExecutable: {@app.dxid => {"*" => {"days" => 2}}}
-    }
-    if run_instance_type.present?
-      api_input[:systemRequirements] = {main: {instanceType: Job::INSTANCE_TYPES[run_instance_type]}}
-    end
+      input_info: input_info,
+      run_instance_type: run_instance_type
+    )
 
-    # Run the app
-    jobid = DNAnexusAPI.new(@context.token).call(@app.dxid, "run", api_input)["id"]
-
-    # Create job record
-    opts = {
-      dxid: jobid,
-      app_series_id: @app.app_series_id,
-      app_id: @app.id,
-      project: project,
-      run_inputs: run_inputs,
-      state: "idle",
-      name: name,
-      describe: {},
-      scope: "private",
-      user_id: @context.user_id
-    }
-    if run_instance_type.present?
-      opts[:run_instance_type] = run_instance_type
-    end
-    provenance = {jobid => {app_dxid: @app.dxid, app_id: @app.id, inputs: run_inputs}}
-    input_file_dxids.uniq!
-    input_file_ids = []
-    UserFile.accessible_by(@context).where(dxid: input_file_dxids).find_each do |file|
-      if file.parent_type == "Job"
-        parent_job = file.parent
-        provenance.merge!(parent_job.provenance)
-        provenance[file.dxid] = parent_job.dxid
-      end
-      input_file_ids << file.id
-    end
-    opts[:provenance] = provenance
-
-    Job.transaction do
-      job = Job.create!(opts)
-      job.input_file_ids = input_file_ids
-      job.save!
-    end
-
-    render json: {id: jobid}
+    render json: { id: job.dxid }
   end
 
   # Inputs
@@ -1209,6 +1593,7 @@ class ApiController < ApplicationController
       app.asset_ids = Asset.accessible_by(@context).where(dxid: ordered_assets).select(:id).map(&:id)
       app.save!
       app_series.update!(latest_revision_app_id: app.id)
+      Event::AppCreated.create(app, @context.user)
     end
 
     render json: {id: app.dxid}
@@ -1487,7 +1872,25 @@ class ApiController < ApplicationController
     end
   end
 
+  def update_time_zone
+    current_user.update_time_zone(params[:time_zone])
+    render json: { success: true }
+  end
+
   protected
+
+  def input_spec_preparer
+    @input_spec_preparer ||= InputSpecPreparer.new(@context)
+  end
+
+  def job_creator
+    @job_creator ||= JobCreator.new(
+      api: DNAnexusAPI.new(@context.token),
+      context: @context,
+      user: @context.user,
+      project: @context.user.private_files_project
+    )
+  end
 
   def fail(msg)
     raise ApiError, msg

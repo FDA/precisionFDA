@@ -5,10 +5,19 @@
 
 .breadcrumb {
   padding: $breadcrumb-padding-vertical $breadcrumb-padding-horizontal;
-  margin-bottom: $line-height-computed;
+  margin-bottom: 0;
   list-style: none;
-  background-color: $breadcrumb-bg;
+  background-color: $brand-blue-subtler;
   border-radius: $border-radius-base;
+  border-bottom: solid 1px $border-header-color;
+
+  &.transparent {
+    background-color: transparent;
+  }
+
+  &.no-border {
+    border: none;
+  }
 
   > li {
     display: inline-block;

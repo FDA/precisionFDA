@@ -1,0 +1,24 @@
+<div role="tabpanel" class="tab-pane active">
+  <% if @challenge.can_show_results?(@context) %>
+
+    <div class="content_tools">
+      <%= raw(challenge.regions["results"]) %>
+    </div>
+
+    <% if submissions.present? %>
+      <%= render "challenges/results_table", outputs: @result_columns, submissions: @results %>
+    <% else %>
+      <div class="alert alert-info">
+        <span class="fa fa-info-circle"></span>
+        No entries have been successfully submitted for this challenge.
+      </div>
+    <% end %>
+
+    <br>
+
+    <div class="content_tools">
+      <%= raw(challenge.regions["results-details"]) %>
+    </div>
+
+  <% end %>
+</div>

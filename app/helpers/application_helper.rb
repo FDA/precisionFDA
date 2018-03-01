@@ -69,6 +69,8 @@ module ApplicationHelper
       "fa-comments-o"
     when "app"
       "fa-cube"
+    when "workflow"
+      "fa-flash"
     when "job"
       "fa-tasks"
     when "asset"
@@ -81,6 +83,8 @@ module ApplicationHelper
       "fa-object-group"
     when "expert"
       "fa-star-o"
+    when "folder"
+      "fa-folder"
     else
       raise "Unknown class #{item.klass}"
     end
@@ -111,7 +115,7 @@ module ApplicationHelper
       icon_span = content_tag(:span, " ", class: "fa #{icon} #{opts[:icon_class]}") + " "
     end
 
-    if item.accessible_by?(@context)
+    if item.accessible_by?(@context) || (item.try(:user).try(:dxuser) == CHALLENGE_BOT_DX_USER && @context.logged_in? && @context.user.is_challenge_evaluator?)
       opts[:nolink] ? icon_span + item.title.to_s : link_to(icon_span + item.title.to_s, pathify(item), {class: opts[:title_class]})
     else
       icon_span + item.uid
@@ -138,4 +142,19 @@ module ApplicationHelper
     'disabled="true"'.html_safe if @context.guest?
   end
 
+  def time_ago(time)
+    if time.to_date == Date.today
+      "#{time_ago_in_words(time)} ago"
+    elsif time.to_date == Date.yesterday
+      time.strftime("yesterday at %l:%M%P")
+    elsif (Date.today - time.to_date).ceil < 7
+      time.strftime("%A at %l:%M%P")
+    else
+      time.strftime("on %b %d")
+    end
+  end
+
+  def git_revision
+    "#{GIT_BRANCH}:#{GIT_REVISION}"
+  end
 end

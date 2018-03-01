@@ -1,0 +1,13 @@
+<a class="btn btn-primary" href="<%= new_challenge_challenge_resource_path(challenge) %>">
+  <span class="fa fa-plus-square fa-fw"></span> Add Resource Files
+</a>
+<br/>
+<br/>
+
+<% if resources_grid.present? %>
+  <%= render "challenges/resources_grid", resources_grid: resources_grid %>
+<% else %>
+  <div class="alert alert-info">
+    No challenge resources uploaded yet.
+  </div>
+<% end %>

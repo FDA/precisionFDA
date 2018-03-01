@@ -10,46 +10,17 @@
 <div class="container-fluid container-padded">
   <%= form_for @challenge, url: challenge_path(@challenge), html: {class: 'form form-horizontal'} do |f| %>
     <%= render "_partials/form_errors", object: @challenge %>
-    <div class="form-group required">
-      <%= f.label :name, "Name", class: 'control-label col-sm-2' %>
-      <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_field :name, class: "form-control input-lg", placeholder: "Name this challenge...", required: "required"  %>
-      </div>
-    </div>
-    <div class="form-group">
-      <%= f.label :description, "Description", class: 'control-label col-sm-2' %>
-      <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_area :description, class: "form-control", rows: 10, placeholder: "What is this challenge is about..." %>
-      </div>
-    </div>
-    <div class="form-group required">
-      <%= f.label :admin_id, "Challenge Admin", class: 'control-label col-sm-2' %>
-      <div class="col-sm-11 col-sm-offset-1">
-        <%= f.select :admin_id, options_for_select(@users, @challenge.admin_id), {}, class: "form-control", required: "required" %>
-      </div>
-    </div>
-    <div class="form-group required">
-      <%= f.label :app_owner_id, "Scoring App User", class: 'control-label col-sm-2' %>
-      <div class="col-sm-11 col-sm-offset-1">
-        <%= f.select :app_owner_id, options_for_select(@users, @challenge.app_owner_id), {}, class: "form-control", required: "required" %>
-      </div>
-    </div>
-    <div class="form-group required">
-      <%= f.label :start_at, "Starts at", class: 'control-label col-sm-2' %>
-      <div class="col-sm-11 col-sm-offset-1">
-        <%= f.datetime_local_field :start_at, class: "form-control", required: "required" %>
-      </div>
-    </div>
-    <div class="form-group required">
-      <%= f.label :end_at, "Ends at", class: 'control-label col-sm-2' %>
-      <div class="col-sm-11 col-sm-offset-1">
-        <%= f.datetime_local_field :end_at, class: "form-control", required: "required" %>
-      </div>
-    </div>
+    <%= render "common_inputs", f: f %>
+
     <div class="form-group">
       <div class="col-sm-offset-3">
         <%= f.submit "Update", class: 'btn btn-primary', data: {disable_with: "Updating..."} %>
+        <%- if @challenge.can_announce_result? %>
+          <%= link_to "Announce result", announce_result_challenge_path(@challenge), method: :post, class: "btn btn-warning" %>
+        <%- end %>
       </div>
     </div>
   <% end %>
 </div>
+
+<%= render "_partials/upload_image_modal", display_url: false %>

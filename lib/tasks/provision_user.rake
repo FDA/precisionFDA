@@ -69,7 +69,7 @@ namespace :provision do
     dxorg = Org.construct_dxorg(org[:handle])
     dxorghandle = dxorg.sub(/^org-/, '')
 
-    raise "user-precisionfda.admin is not an admin of '#{dxorg}'" unless api.call(dxorg, 'describe')["level"] == "ADMIN"
+    raise "#{ADMIN_USER} is not an admin of '#{dxorg}'" unless api.call(dxorg, 'describe')["level"] == "ADMIN"
 
     puts "Checking if #{dxuserid} already exists..."
     want_404 { api.call(dxuserid, 'describe') }

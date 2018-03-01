@@ -42,6 +42,9 @@ table.table-nowrap
   display: flex
   align-items: center
 
+.table-text-wrap
+  white-space: pre-line
+
 // TOOLBAR
 .pfda-toolbar
   background-color: $brand-blue-subtler
@@ -51,6 +54,10 @@ table.table-nowrap
 
   &.pfda-toolbar-transparent
     background-color: transparent
+
+  .action-buttons
+    .btn + .btn
+      margin-left: 10px
 
 // TABLE
 .pfda-table.table
@@ -76,6 +83,9 @@ table.table-nowrap
 // MISC
 .container-padded-v, .pfda-padded-v
   padding-top: $padding-large-vertical
+  padding-bottom: $padding-large-vertical
+
+.container-padded-b, .pfda-padded-b
   padding-bottom: $padding-large-vertical
 
 .container-padded-h, .pfda-padded-h
@@ -179,3 +189,30 @@ table.table-nowrap
 .pfda-action-new main
   .page-header
     padding: $padding-large-vertical * 3 $padding-large-horizontal
+
+.bootstrap-datetimepicker-widget
+  &.top
+    bottom: 30px !important
+  &.dropdown-menu
+    max-height: initial
+    overflow: initial
+
+.pfda-datetimepicker
+  &.with-icon
+    position: relative
+
+.pfda-datetimepicker-label
+  overflow: hidden
+  white-space: nowrap
+  text-overflow: ellipsis
+.pfda-datetimepicker-value
+  height: 0px
+  padding: 0px
+  box-sizing: border-box
+  box-shadow: none
+  border: none
+  width: 0px
+.pfda-datetimepicker-icon
+  position: absolute
+  top: 10px
+  right: 10px

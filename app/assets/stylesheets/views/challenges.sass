@@ -1,10 +1,83 @@
 @import "_common"
 
+.pfda-controller-challenges.pfda-action-edit_page
+  [data-editable].container
+    margin-left: 150px
+
+.table
+  &.table-challenge
+    tbody
+      tr
+        &.active td, &:hover
+          background-color: lighten($brand-highlight, 2%)
+.ct-widget
+  .ct-dialog__error
+    margin-top: 10px
+    color: #e74c3c  
+  &.ct-toolbox.ct-widget--active
+    left: 10px
+    top: 230px
+
+.ct-widget.ct-image-dialog--pfda-challenges
+  &.ct-dialog
+    height: 220px
+    margin-top: -110px  
+  .ct-image-dialog__input
+    border: none
+    border-bottom: 1px solid #eee
+    height: 32px
+    line-height: 32px
+    outline: none
+    padding: 0 4px
+    font-family: arial, sans-serif
+    font-size: 14px
+    line-height: 18px
+    -webkit-font-smoothing: antialiased
+    -moz-osx-font-smoothing: grayscale
+    vertical-align: top
+    width: 456px
+    &:focus
+      border-bottom: 1px solid #e1e1e1
+  .ct-image-dialog__view
+    display: none
+  .ct-dialog__controls
+    margin-top: 40px  
+
+
+th.ce-element--type-table-cell
+  .ce-element--type-table-cell-text
+    &.ce-element--empty:after
+      content: 'header'
+.ce-element--type-table-cell
+  .ce-element--type-table-cell-text
+    padding-right: 10px
+    &.ce-element--empty:after
+      content: 'empty cell'
+  &:last-child .ce-element--type-table-cell-text
+    padding-right: 0px
+
+.ce-element--empty:after
+  content: 'Start typing here'
+
+.ce-element--type-image
+  max-width: 100%
+.ce-element--type-image,
+.ce-element--type-video,
+[data-editable] iframe,
+[data-editable] img
+  margin-left: 0px
+  margin-right: 0px
+
+.submission-ul
+  margin-bottom: 0px
+  list-style: none
+  padding-left: 0px
+
 .submission-popover
   .popover-content
     max-height: 400px
     max-width: 800px
-    overflow: scroll
+    overflow: auto
   .popover-title
     text-transform: none
     font-weight: bold
@@ -161,6 +234,14 @@
       background-color: $state-info-bg
       color: $accessible-brand-blue-primary
 
+    &.challenge-badge-supercaller
+      background-color: $state-info-bg
+      color: $accessible-brand-blue-primary
+
+    &.challenge-badge-superplayer
+      background-color: $accessible-btn-warning-bg
+      color: #fff
+
   .challenge-row-medal
     background-color: $accessible-btn-warning-bg
     color: #fff
@@ -214,3 +295,6 @@
       line-height: 500px
       font-size: 36px
       text-shadow: 0px 0px 50px #aaa
+
+  .challenge-description
+    font-weight: 300

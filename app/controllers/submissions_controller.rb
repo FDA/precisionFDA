@@ -3,11 +3,28 @@ class SubmissionsController < ApplicationController
   before_action :require_login_or_guest, only: []
 
   def new
-    @submission = Submission.new
     @challenge = Challenge.find_by_id!(params[:challenge_id])
+    if @context.logged_in?
+      unless @challenge.followed_by?(@context.user)
+        flash[:warning] = "Please join the challenge to enter submissions."
+        redirect_to challenge_path(@challenge)
+        return
+      end
+    else
+      redirect_to challenge_path(@challenge)
+      return
+    end
+
+    @submission = Submission.new
     @app = @challenge.app
 
-    if @app.nil?
+    unless @challenge.accepting_submissions?
+      flash[:error] = "Sorry, this challenge is currently not accepting submissions."
+      redirect_to challenge_path(@challenge)
+      return
+    end
+
+    unless @app
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
       redirect_to apps_path
       return
@@ -40,7 +57,6 @@ class SubmissionsController < ApplicationController
   end
 
   def create
-    submission_inputs = nil
     if params[:submission] && params[:submission][:inputs]
       submission_inputs = JSON.parse(params[:submission][:inputs])
     else
@@ -48,39 +64,45 @@ class SubmissionsController < ApplicationController
     end
 
     challenge = Challenge.find(params[:challenge_id])
-    if challenge.nil?
-      raise "Challenge ID not found in submission#create params."
+    raise "Challenge ID not found in submission#create params." unless challenge
+
+    input_info = input_spec_preparer.run(challenge.app, submission_inputs)
+
+    unless input_spec_preparer.valid?
+      input_spec_preparer.errors.each do |error_message|
+        flash[:error] = error_message
+      end
+      return
     end
 
-    # Publishing wizard only takes a single top-level element to publish, so grab the first file
-    first_file = challenge.app.input_spec.select{|input| input["class"]=="file"}.first
-    if !submission_inputs.has_key?(first_file[:name])
-      raise "Submission inputs do not match Challenge App Spec."
-    end
-
-    id = submission_inputs["#{first_file[:name]}"]
     scope = "public"
-    item = item_from_uid(id)
-    if !item.editable_by?(@context)
-      flash[:error] = "This item is not owned by you."
+    items = input_info.uniq_files
+
+    unless items.all? { |item| item.editable_by?(@context) }
+      flash[:error] = "Item is not owned by you."
       redirect_to :back
       return
     end
-    if item.public?
-      flash[:warning] = "All input files are already public."
+
+    if items.all?(&:public?)
+      flash[:warning] = "All input files are already public." unless items.empty?
       run_job_create_submission(params)
-      redirect_to show_challenge_path(params[:challenge_id], 'my_entries')
+      redirect_to show_challenge_path(params[:challenge_id], "my_entries")
       return
     end
-    if !item.publishable_by?(@context, scope)
-      flash[:error] = "This item cannot be published in this state."
+
+    not_public_items = items.reject(&:public?)
+
+    unless not_public_items.all? { |item| item.publishable_by?(@context, scope) }
+      flash[:error] = "Item cannot be published in this state."
       redirect_to pathify(item)
       return
     end
 
-    graph = get_graph(item)
-
-    js graph: publisher_js_prepare(graph, scope), space: nil, scope_to_publish_to: scope, params: params
+    js graph: graph_decorator.for_publisher(not_public_items, scope),
+       space: nil,
+       scope_to_publish_to: scope,
+       params: params
   end
 
   def publish
@@ -210,131 +232,30 @@ class SubmissionsController < ApplicationController
     raise "Inputs should be a hash" unless inputs.is_a?(Hash)
 
     # TODO: Does challengebot need to worry about licenses?
-    #
     # Check if asset licenses have been accepted
     # raise "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
 
-    # Inputs should be compatible
-    # (The following also normalizes them)
-    run_inputs = {}
-    dx_run_input = {}
-    input_file_dxids = []
     @app = App.find(challenge.app_id)
-    @app.input_spec.each do |input|
-      key = input["name"]
-      optional = (input["optional"] == true)
-      has_default = input.has_key?("default")
-      default = input["default"]
-      klass = input["class"]
-      choices = input["choices"]
 
-      if inputs.has_key?(key)
-        value = inputs[key]
-      elsif has_default
-        value = default
-      elsif optional
-        # No given value and no default, but input is optional; move on
-        next
-      else
-        # Required input is missing
-        raise "#{key}: required input is missing"
-      end
+    input_info = input_spec_preparer.run(@app, inputs)
 
-      # Check compatibility with choices
-      raise "#{key}: incompatiblity with choices" if choices.present? && !choices.include?(value)
-
-      if klass == "file"
-        raise "#{key}: input file value is not a string" unless value.is_a?(String)
-        file = UserFile.real_files.accessible_by(@context).find_by(dxid: value)
-        raise "#{key}: input file is not accessible or does not exist" unless !file.nil?
-        raise "#{key}: input file's license must be accepted" unless !file.license.present? || file.licensed_by?(@context)
-
-        dxvalue = {"$dnanexus_link" => value}
-        input_file_dxids << value
-      elsif klass == "int"
-        raise "#{key}: value is not an integer" unless value.is_a?(Numeric) && (value.to_i == value)
-        value = value.to_i
-      elsif klass == "float"
-        raise "#{key}: value is not a float" unless value.is_a?(Numeric)
-      elsif klass == "boolean"
-        raise "#{key}: value is not a boolean" unless value == true || value == false
-      elsif klass == "string"
-        raise "#{key}: value is not a string" unless value.is_a?(String)
-      end
-
-      run_inputs[key] = value
-      dx_run_input[key] = dxvalue || value
-    end
-
-    challenge_bot = User.find_by(dxuser: CHALLENGE_BOT_DX_USER)
-    project = challenge_bot.private_files_project
-
-    api_input = {
+    job = job_creator.create(
+      app: @app,
       name: name,
-      input: dx_run_input,
-      project: project,
-      timeoutPolicyByExecutable: {@app.dxid => {"*" => {"days" => 2}}}
-    }
+      input_info: input_info
+    )
 
-    # Run the app
-    jobid = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call(@app.dxid, "run", api_input)["id"]
+    submission = Submission.create!(
+      job_id: job.id,
+      desc: desc,
+      user_id: @context.user_id,
+      challenge_id: challenge.id,
+      _inputs: input_info.file_dxids
+    )
 
-    # Create job record
-    opts = {
-      dxid: jobid,
-      app_series_id: @app.app_series_id,
-      app_id: @app.id,
-      project: project,
-      run_inputs: run_inputs,
-      state: "idle",
-      name: name,
-      describe: {},
-      scope: "private",
-      user_id: challenge_bot.id
-    }
+    Event::SubmissionCreated.create(submission, @context.user)
 
-    provenance = {jobid => {app_dxid: @app.dxid, app_id: @app.id, inputs: run_inputs}}
-    input_file_dxids.uniq!
-    input_file_ids = []
-    UserFile.accessible_by(@context).where(dxid: input_file_dxids).find_each do |file|
-      if file.parent_type == "Job"
-        parent_job = file.parent
-        provenance.merge!(parent_job.provenance)
-        provenance[file.dxid] = parent_job.dxid
-      end
-      input_file_ids << file.id
-    end
-    opts[:provenance] = provenance
-
-    job = nil
-    Job.transaction do
-      job = Job.create!(opts)
-      job.input_file_ids = input_file_ids
-      job.save!
-    end
-
-    # create submission record
-    published_count = 0
-    if job
-      opts = {
-        job_id: job.id,
-        desc: desc,
-        user_id: @context.user_id,
-        challenge_id: challenge.id,
-        _inputs: input_file_dxids
-      }
-      Submission.transaction do
-        submission = Submission.create!(opts)
-      end
-    end
-
-    msg = "Your entry was submitted successfully."
-    if published_count == 1
-      msg += " #{published_count} item has been published."
-    elsif published_count > 1
-      msg += " #{published_count} items have been published."
-    end
-    flash[:success] = msg
+    flash[:success] = "Your entry was submitted successfully."
   end
 
   def log
@@ -390,77 +311,25 @@ class SubmissionsController < ApplicationController
 
   private
 
-  def get_graph(root)
-    klass = root.klass
-    if klass == "asset"
-      klass = "file"
-    elsif klass == "answer"
-      klass = "note"
-    elsif klass == "discussion"
-      klass = "note"
-    end
-
-    self.send("get_subgraph_of_#{klass}", root)
+  def input_spec_preparer
+    @input_spec_preparer ||= InputSpecPreparer.new(@context)
   end
 
-  def get_subgraph_of_job(job)
-    if job.accessible_by?(@context)
-      return [job, [get_subgraph_of_app(job.app)] + job.input_files.map { |file| get_subgraph_of_file(file) }]
-    else
-      return [job, []]
-    end
+  def graph_decorator
+    @graph_decorator ||= GraphDecorator.new(@context)
   end
 
-  def get_subgraph_of_app(app)
-    if app.accessible_by?(@context)
-      return [app, app.assets.map { |asset| get_subgraph_of_file(asset) }]
-    else
-      return [app, []]
-    end
+  def job_creator
+    @job_creator ||= JobCreator.new(
+      api: DNAnexusAPI.new(CHALLENGE_BOT_TOKEN),
+      context: @context,
+      user: challenge_bot,
+      project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT
+    )
   end
 
-  def get_subgraph_of_file(file)
-    if file.accessible_by?(@context)
-      if file.parent_type == "Job"
-        return [file, [get_subgraph_of_job(file.parent)]]
-      elsif file.parent_type == "Comparison"
-        return [file, [get_subgraph_of_comparison(file.parent)]]
-      else #Asset or user-uploaded file
-        return [file, []]
-      end
-    else
-      return [file, []]
-    end
+  def challenge_bot
+    @challenge_bot ||= User.find_by(dxuser: CHALLENGE_BOT_DX_USER)
   end
 
-  def get_subgraph_of_comparison(comparison)
-    if comparison.accessible_by?(@context)
-      return [comparison, comparison.user_files.map { |file| get_subgraph_of_file(file) }]
-    else
-      return [comparison, []]
-    end
-  end
-
-  def get_subgraph_of_note(note)
-    if note.accessible_by?(@context)
-      return [note, note.attachments.map { |attachment|
-        self.send("get_subgraph_of_#{attachment.item_type.downcase.sub(/^user/, '')}", attachment.item)
-      }]
-    else
-      return [note, []]
-    end
-  end
-
-  def publisher_js_prepare(node, scope = 'public')
-    item = node[0].slice(:uid, :klass)
-    item[:title] = node[0].accessible_by?(@context) ? node[0].title : node[0].uid
-    item[:owned] = node[0].editable_by?(@context)
-    item[:public] = node[0].public?
-    item[:in_space] = node[0].in_space?
-    item[:publishable] = node[0].publishable_by?(@context, scope)
-
-    children = node[1].map { |child| publisher_js_prepare(child, scope) }
-
-    return [item, children]
-  end
 end

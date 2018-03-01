@@ -145,7 +145,7 @@
                   <ul class="list-group list-group-inline">
                     <li class="list-group-item list-group-item-transparent-bg">
                       <h5 class="list-group-item-heading">Start</h5>
-                      <p class="list-group-item-text"><%= @meta_appathon.start_at.to_s(:db) %></p>
+                      <p class="list-group-item-text"><%= @meta_appathon.start_at.to_s(:human) %></p>
                     </li>
                   </ul>
                 </div>
@@ -159,7 +159,7 @@
                   <ul class="list-group list-group-inline">
                     <li class="list-group-item list-group-item-transparent-bg">
                       <h5 class="list-group-item-heading">End <span class="label label-default">Closed</span></h5>
-                      <p class="list-group-item-text"><%= @meta_appathon.end_at.to_s(:db) %></p>
+                      <p class="list-group-item-text"><%= @meta_appathon.end_at.to_s(:human) %></p>
                     </li>
                   </ul>
                 </div>
@@ -249,7 +249,7 @@
               </div>
               <div class="col-sm-14 col-sm-offset-1">
                 <p class="lead">
-                Scroll up and click "Host an app-a-thon". Give your app-a-thon a name, a location, and optionally a description. Choose an icon that will represent your app-a-thon, and adjust its start date to when you want the app-a-thon to start. (We recommend keeping the end date to the default of <%= @meta_appathon.end_at.to_s(:db) %>, so that your participants have the opportunity to contribute additional apps even after you conclude your app-a-thon). You can always edit this information later, so don't worry if you don't get it perfect right away.
+                Scroll up and click "Host an app-a-thon". Give your app-a-thon a name, a location, and optionally a description. Choose an icon that will represent your app-a-thon, and adjust its start date to when you want the app-a-thon to start. (We recommend keeping the end date to the default of <%= @meta_appathon.end_at.to_s(:human) %>, so that your participants have the opportunity to contribute additional apps even after you conclude your app-a-thon). You can always edit this information later, so don't worry if you don't get it perfect right away.
                 </p>
               </div>
             </div>

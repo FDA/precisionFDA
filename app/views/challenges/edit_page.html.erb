@@ -1,0 +1,36 @@
+<% content_for :title do %><%= @challenge.name %><% end %>
+
+<% if @context.can_administer_site? || @context.challenge_admin?%>
+  <div class="pfda-toolbar">
+      <!-- Nav tabs -->
+      <ul class="nav nav-pills nav-pills-md" role="tablist">
+        <div class="btn-group pull-right">
+          <a class="btn btn-default btn-md" href="<%= show_challenge_path(@challenge, params[:tab]) %>"><span class="fa fa-reply fa-fw"></span> Return to Challenge Page</a>
+        </div>
+        <li role="presentation" class="<%= !["challenge_results", "resources"].include?(params[:tab]) ? 'active':'' %>"><a href="<%= edit_page_challenge_path(@challenge) %>" data-no-turbolink="true" class="tab-label" aria-controls="info" role="tab">Challenge Info</a></li>
+        <li role="presentation" class="<%= ["challenge_results"].include?(params[:tab]) ? 'active':'' %>"><a href="<%= edit_page_challenge_path(@challenge, 'challenge_results') %>" data-no-turbolink="true" class="tab-label" aria-controls="challenge_results" role="tab">Challenge Results</a></li>
+        <li role="presentation" class="<%= ["resources"].include?(params[:tab]) ? 'active':'' %>"><a href="<%= edit_page_challenge_path(@challenge, 'resources') %>" class="tab-label" aria-controls="challenge_results" role="tab">Resources</a></li>
+      </ul>
+    </div>
+    <% if ['challenge_results'].include?(params[:tab]) %>
+      <%= render "challenges/edit_results", challenge: @challenge, submissions_grid: @submissions_grid %>
+    <% elsif ['resources'].include?(params[:tab]) %>
+      <div class="pfda-toolbar">
+        <div class="btn-group">
+          <%= link_to new_challenge_challenge_resource_path(@challenge), class: 'btn btn-primary btn-md' do %>
+            <span class="fa fa-plus fa-fw"></span> Add Resource Files
+          <% end %>
+        </div>
+      </div>
+      <% if @resources_grid.present? %>
+        <%= render "challenges/resources_grid", resources_grid: @resources_grid %>
+      <% else %>
+        <div class="alert alert-info">
+          No challenge resources uploaded yet.
+        </div>
+      <% end %>
+    <% else %>
+      <%= render "challenges/edit_info", challenge: @challenge %>
+    <% end %>
+  </div>
+<% end %>
