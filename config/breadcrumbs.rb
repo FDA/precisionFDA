@@ -8,7 +8,7 @@ crumb :folder do |folder|
     elsif controller_name == 'files' && action_name == 'explore'
       link "Explore", explore_files_path
     elsif controller_name == 'spaces' && action_name == 'content'
-      # TODO(Viktor Polotebnov): Temporary solution for getting space. Should be changed.
+      # TODO Temporary solution for getting space. Should be changed.
       space = Space.find(params[:id])
       link "Space files", content_space_path(space)
     end
