@@ -18,9 +18,14 @@ public class LoginTest extends AbstractTest {
     public void successfulLoginLogoutPrecisionFDA() {
         printTestHeader("Test Case: Successful Login to Precision FDA and logout");
 
+        logoutFromPlatform();
+
         UserProfile user = TestUserData.getTestUserOne();
 
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        StartPage startPage = openStartPage();
+        LoginPrecisionPage loginPrecisionPage = startPage.clickLogin();
+
+        OverviewPage overviewPage = loginPrecisionPage.correctLogin(user).grantAccess();
 
         assertThat(
                 overviewPage.isNavigationPanelDisplayed())
@@ -32,7 +37,7 @@ public class LoginTest extends AbstractTest {
                 .as("logged username")
                 .isEqualTo(user.getApplUserFullName());
 
-        StartPage startPage = overviewPage.logout();
+        startPage = overviewPage.logout();
 
         SoftAssert.assertThat(
                 startPage.isNavigationPanelDisplayed())
@@ -44,6 +49,11 @@ public class LoginTest extends AbstractTest {
                 .as("success message")
                 .contains("You were successfully logged out");
 
+        SoftAssert.assertThat(
+                startPage.isLoginLinkDisplayed())
+                .as("Login button is displayed")
+                .isTrue();
+
         SoftAssert.assertAll();
     }
 
@@ -51,9 +61,11 @@ public class LoginTest extends AbstractTest {
     public void loginWithWrongPassword() {
         printTestHeader("Test Case: test login with wrong password");
 
+        logoutFromPlatform();
+
         UserProfile user = TestUserData.getWrongUser();
 
-        LoginPrecisionPage loginPrecisionPage = openLoginPrecisionPage(user).wrongLogin(user);
+        LoginPrecisionPage loginPrecisionPage = openLoginPrecisionPage().wrongLogin(user);
 
         SoftAssert.assertThat(
                 loginPrecisionPage.isNavigationPanelDisplayed())

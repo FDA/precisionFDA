@@ -117,11 +117,18 @@ public class FilesPage extends AbstractPage {
     @FindBy(xpath = FilesLocators.FILES_MOVE_DANGER_NOTIFICATION)
     private WebElement dangerNotification;
 
+    @FindBy(xpath = FilesLocators.FILES_DOWNLOAD_DIALOG_FIRST_DOWNLOAD_LINK)
+    private WebElement firstDownloadLink;
+
     public FilesPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(FilesLocators.FILES_MY_FILES_LINK));
-        sleep(2000);
+        sleep(getPageSleep());
+    }
+
+    public WebElement getFirstDownloadLink() {
+        return firstDownloadLink;
     }
 
     public WebElement getDangerNotification() {
@@ -292,45 +299,25 @@ public class FilesPage extends AbstractPage {
         return isElementPresent(getFilesMyFilesLink());
     }
 
-    public WebElement getUploadedFileLink(String fileName) {
-        WebElement fileLink = null;
-        List<WebElement> allLinks = getDriver().findElements(By.xpath(FilesLocators.FILES_COMMON_LINK_TO_UPLOADED_FILE));
-        if (allLinks.size() > 0) {
-            for (WebElement we : allLinks) {
-                if (we.getText().contains(fileName)) {
-                    fileLink = we;
-                    break;
-                }
-            }
-        }
-        return fileLink;
+    public By getUploadedFileLinkBy(String fileName) {
+        String xpath = FilesLocators.FILES_LINK_TO_UPLOADED_FILE_TEMPLATE.replace("{FILE_NAME}", fileName);
+        By fileLinkBy = By.xpath(xpath);
+        return fileLinkBy;
     }
 
-    public WebElement getCreatedFolderLink(String folderName) {
-        WebElement folderLink = null;
-        List<WebElement> allLinks = getDriver().findElements(By.xpath(FilesLocators.FILES_COMMON_LINK_TO_CREATED_FOLDER));
-        for (WebElement we : allLinks) {
-            if (we.getText().contains(folderName)) {
-                folderLink = we;
-                break;
-            }
-        }
-        return folderLink;
+    public By getCreatedFolderLinkBy(String folderName) {
+        String xpath = FilesLocators.FILES_LINK_TO_CREATED_FOLDER_TEMPLATE.replace("{FOLDER_NAME}", folderName);
+        By folderLinkBy = By.xpath(xpath);
+        return folderLinkBy;
     }
 
     public boolean isLinkToUploadedFileDisplayed(String fileName) {
-        WebElement fileLink = getUploadedFileLink(fileName);
-        if (fileLink == null) {
-            return false;
-        }
-        else {
-            return isElementPresent(fileLink, 1);
-        }
+        return isElementPresent(getUploadedFileLinkBy(fileName), 2);
     }
 
     public UploadedFilePage openUploadedFile(String fileName) {
         log.info("open uploaded file page");
-        WebElement file = getUploadedFileLink(fileName);
+        WebElement file = getDriver().findElement(getUploadedFileLinkBy(fileName));
         file.click();
         return new UploadedFilePage(getDriver());
     }
@@ -359,19 +346,22 @@ public class FilesPage extends AbstractPage {
     }
 
     public boolean isLinkToCreatedFolderDisplayed(String folderName) {
-        WebElement folderLink = getCreatedFolderLink(folderName);
-        if (folderLink == null) {
-            return false;
-        }
-        else {
-            return isElementPresent(folderLink, 1);
-        }
+        return isElementPresent(getCreatedFolderLinkBy(folderName), 2);
     }
 
     public FilesPage openFolder(String folderName) {
         log.info("open folder");
-        WebElement folder = getCreatedFolderLink(folderName);
+        WebElement folder = getDriver().findElement(getCreatedFolderLinkBy(folderName));
         folder.click();
+        waitUntilDisplayed(getBreadcrumbs(), 30);
+        for (int i = 0; i < 6; i ++) {
+            if (getDisplayedBreadcrumbsText().toLowerCase().contains(folderName.toLowerCase())) {
+                break;
+            }
+            else {
+                sleep(5000);
+            }
+        }
         return new FilesPage(getDriver());
     }
 
@@ -420,6 +410,7 @@ public class FilesPage extends AbstractPage {
         log.info("click My Files in breadcrumbs");
         List<WebElement> chains = getDriver().findElements(By.xpath(FilesLocators.FILES_BREADCRUMB_CHAIN));
         chains.get(0).click();
+        sleep(2000);
         return new FilesPage(getDriver());
     }
 
@@ -434,7 +425,7 @@ public class FilesPage extends AbstractPage {
         String xpath = FilesLocators.FILES_LIST_CHECKBOX_TEMPLATE.replace("{ITEM_NAME}", name);
         WebElement chb = findElement(By.xpath(xpath));
         chb.click();
-        sleep(200);
+        sleep(500);
     }
 
     public void clickDeleteSelected() {
@@ -612,9 +603,12 @@ public class FilesPage extends AbstractPage {
     public void scrollRight() {
         log.info("scroll download dialog list to right");
         getDownloadDialogPlaceToFocus().click();
-        for (int i = 0; i <= 15; i ++) {
-            getDownloadDialogPlaceToFocus().sendKeys(Keys.ARROW_RIGHT);
-            sleep(200);
+        sleep(500);
+        WebElement link = getFirstDownloadLink();
+        if ( link != null ) {
+            JavascriptExecutor je = (JavascriptExecutor) driver;
+            je.executeScript("arguments[0].scrollIntoView(true);", link);
+            sleep(500);
         }
     }
 

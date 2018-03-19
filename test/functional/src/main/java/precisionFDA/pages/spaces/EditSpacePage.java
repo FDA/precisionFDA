@@ -11,6 +11,8 @@ import precisionFDA.pages.AbstractPage;
 import ru.yandex.qatools.htmlelements.element.Select;
 import ru.yandex.qatools.htmlelements.element.TextInput;
 
+import static precisionFDA.utils.Utils.sleep;
+
 public class EditSpacePage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
@@ -40,6 +42,7 @@ public class EditSpacePage extends AbstractPage {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(SpacesLocators.EDIT_SPACE_HOST_LEAD_INPUT));
+        sleep(getPageSleep());
     }
 
     public TextInput getEditSpaceHostLeadInput() {
@@ -83,6 +86,7 @@ public class EditSpacePage extends AbstractPage {
         log.info("click Create");
         waitUntilClickable(getEditSpaceCreateButton());
         getEditSpaceCreateButton().click();
+
         return new SpacesPage(getDriver());
     }
 

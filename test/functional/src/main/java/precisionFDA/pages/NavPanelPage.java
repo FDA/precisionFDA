@@ -1,9 +1,11 @@
 package precisionFDA.pages;
 
 import org.apache.log4j.Logger;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import precisionFDA.locators.AppsLocators;
 import precisionFDA.pages.dashboard.AdminDashboardPage;
 import precisionFDA.pages.docs.DocsPage;
 import precisionFDA.pages.spaces.SpacesPage;
@@ -27,11 +29,11 @@ import precisionFDA.pages.profile.PublicProfilePage;
 
 import static precisionFDA.utils.Utils.sleep;
 
-public class CommonPage extends AbstractPage {
+public class NavPanelPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
 
-    public CommonPage(final WebDriver driver) {
+    public NavPanelPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
         // waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.COMMON_NAV_PANEL));
@@ -130,21 +132,25 @@ public class CommonPage extends AbstractPage {
         return mainLogo;
     }
 
+    public Boolean isUsernameLinkDisplayed() {
+        return isElementPresent(getUsernameLink(), 1);
+    }
+
     public String getMainLogoUrl() {
         return getMainLogo().getAttribute("src");
     }
 
     public AppsPage openAppsPage() {
         log.info("opening Apps page");
-        waitUntilClickable(getAppsPageIcon());
+        waitUntilClickable(getAppsPageIcon(), 5);
         clickAppIcon();
-        sleep(2000);
         return new AppsPage(getDriver());
     }
 
     public AppsPage clickAppIcon() {
         waitUntilClickable(getAppsPageIcon());
         getAppsPageIcon().click();
+        waitUntilDisplayed(By.xpath(AppsLocators.APPS_CREATE_APP_BUTTON_LINK));
         return new AppsPage(getDriver());
     }
 
