@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="OpenAllPages suite">
+    <test name="OpenAllPagesTest">
+        <classes>
+            <class name="precisionFDA.cases.OpenAllPagesTest" />
+            <class name="precisionFDA.cases.OpenDashboardPagesTest" />
+        </classes>
+    </test>
+</suite>

@@ -21,7 +21,7 @@ public class FilesTest extends AbstractTest {
         printTestHeader("Precondition: Successful Login");
 
         UserProfile user = TestUserData.getTestUserOne();
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(
                 overviewPage.isNavigationPanelDisplayed())
@@ -381,7 +381,7 @@ public class FilesTest extends AbstractTest {
         FolderProfile nextFolderProfile = getNextFolderProfile();
 
         // open second level folder
-        FilesPage filesPage = openFilesPage();
+        FilesPage filesPage = openOverviewPage().openFilesPage();
         filesPage = filesPage.openFolder(mainFolderProfile.getFolderName());
         filesPage = filesPage.openFolder(nextFolderProfile.getFolderName());
 
@@ -607,7 +607,7 @@ public class FilesTest extends AbstractTest {
 
         assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(firstFile.getFileName()))
-                .as("Link to uploaded file #1 is displayed inside the folder")
+                .as("Link to uploaded file #1 is displayed inside the folder: " + firstFile.getFileName())
                 .isTrue();
 
         // #2
@@ -619,7 +619,7 @@ public class FilesTest extends AbstractTest {
 
         assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(secondFile.getFileName()))
-                .as("Link to uploaded file #2 is displayed inside the folder")
+                .as("Link to uploaded file #2 is displayed inside the folder: " + secondFile.getFileName())
                 .isTrue();
 
         // #3
@@ -631,7 +631,7 @@ public class FilesTest extends AbstractTest {
 
         assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(thirdFile.getFileName()))
-                .as("Link to uploaded file #3 is displayed inside the folder")
+                .as("Link to uploaded file #3 is displayed inside the folder: " + thirdFile.getFileName())
                 .isTrue();
 
         // create test folders
@@ -641,7 +641,7 @@ public class FilesTest extends AbstractTest {
 
         assertThat(
                 filesPage.isLinkToCreatedFolderDisplayed(firstFolder.getFolderName()))
-                .as("Link to created folder #1 is displayed inside the folder")
+                .as("Link to created folder #1 is displayed inside the folder: " + firstFolder.getFolderName())
                 .isTrue();
 
         // upload file to the folder #1
@@ -680,7 +680,7 @@ public class FilesTest extends AbstractTest {
         filesPage.selectItem(firstFile.getFileName());
         filesPage.selectItem(secondFile.getFileName());
         filesPage.selectItem(firstFolder.getFolderName());
-        filesPage.selectItem(secondFolder.getFolderName());
+        filesPage.selectItem(thirdFolder.getFolderName());
 
         filesPage.clickDeleteSelected();
 
@@ -700,8 +700,8 @@ public class FilesTest extends AbstractTest {
                 .isTrue();
 
         assertThat(
-                filesPage.isItemInDeleteDialogDisplayed(secondFolder.getFolderName()))
-                .as("Selected to delete item is displayed in the confirmation dialog: " + secondFolder.getFolderName())
+                filesPage.isItemInDeleteDialogDisplayed(thirdFolder.getFolderName()))
+                .as("Selected to delete item is displayed in the confirmation dialog: " + thirdFolder.getFolderName())
                 .isTrue();
 
         assertThat(
@@ -734,8 +734,8 @@ public class FilesTest extends AbstractTest {
                 .isTrue();
 
         assertThat(
-                filesPage.isLinkToCreatedFolderDisplayed(thirdFolder.getFolderName()))
-                .as("Folder is still displayed: " + thirdFolder.getFolderName())
+                filesPage.isLinkToCreatedFolderDisplayed(secondFolder.getFolderName()))
+                .as("Folder is still displayed: " + secondFolder.getFolderName())
                 .isTrue();
 
         assertThat(

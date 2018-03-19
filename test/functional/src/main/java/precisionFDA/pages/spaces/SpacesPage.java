@@ -9,6 +9,8 @@ import precisionFDA.locators.SpacesLocators;
 import precisionFDA.pages.AbstractPage;
 import ru.yandex.qatools.htmlelements.element.Link;
 
+import static precisionFDA.utils.Utils.sleep;
+
 public class SpacesPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
@@ -18,8 +20,9 @@ public class SpacesPage extends AbstractPage {
 
     public SpacesPage(final WebDriver driver) {
         super(driver);
-        // waitUntilScriptsReady();
-        waitForPageToLoadAndVerifyBy(By.xpath(SpacesLocators.SPACES_HOST_LEAD_COLUMN));
+        waitUntilScriptsReady();
+        waitForPageToLoadAndVerifyBy(By.xpath(SpacesLocators.LEAD_OR_PROVISION));
+        sleep(getPageSleep());
     }
 
     public Link getProvisionSpaceButtonLink() {
@@ -67,6 +70,5 @@ public class SpacesPage extends AbstractPage {
         WebElement we = findElement(By.xpath(xpath));
         return we.getText().trim();
     }
-
 
 }

@@ -130,4 +130,14 @@ public class ChallsLocators {
 
     public static final String RESULT_PAGE_ENTRY_NAME_TEMPLATE = "//table[@id='table-results-overview']//td/a[contains(text(), '{ENTRY_NAME}')]";
 
+    public static final String EDIT_CHALL_BROWSE_IMAGE_BUTTON = "//button[contains(text(), 'pload')]";
+
+    public static final String EDIT_CHALL_MODAL_BROWSE_IMAGE_INPUT = "//*[@id='image-upload-modal']//input[@type='file']";
+
+    public static final String EDIT_CHALL_MODAL_UPLOAD_IMAGE_BUTTON = "//*[@id='image-upload-modal']//button[contains(@class, 'upload')]";
+
+    public static final String EDIT_CHALL_MODAL_UPLOAD_IMAGE_OK_BUTTON = "//*[@id='image-upload-modal']//button[text()='OK']";
+
+    public static final String EDIT_CHALL_MODAL_BROWSE_IMAGE_VISIBLE = "//*[@id='image-upload-modal']//span[contains(@class, 'file-image')]";
+
 }

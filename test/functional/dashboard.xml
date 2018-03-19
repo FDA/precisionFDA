@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="AdminDashboardTest suite">
+    <test name="AdminDashboardTest">
+        <classes>
+            <class name="precisionFDA.cases.AdminDashboardTest" />
+        </classes>
+    </test>
+</suite>

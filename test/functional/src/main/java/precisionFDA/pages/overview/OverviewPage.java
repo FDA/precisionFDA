@@ -5,7 +5,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import precisionFDA.locators.FilesLocators;
 import precisionFDA.pages.dashboard.AdminDashboardPage;
 import precisionFDA.pages.docs.DocsPage;
 import precisionFDA.pages.spaces.SpacesPage;
@@ -51,6 +50,7 @@ public class OverviewPage extends AbstractPage {
         // waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.COMMON_NAV_PANEL), 30);
         waitForPageToLoadAndVerifyBy(By.xpath(CommonLocators.APPS_PAGE_ICON), 5);
+        sleep(2000);
     }
 
     protected ProfileDropBlock getProfileDropBlock() {

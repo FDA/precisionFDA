@@ -1,0 +1,23 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="test suite" parallel="tests" thread-count="2">
+    <test name="AdminDashboardTest">
+        <classes>
+            <class name="precisionFDA.cases.AdminDashboardTest" />
+        </classes>
+    </test>
+    <test name="LoginTest">
+        <classes>
+            <class name="precisionFDA.cases.LoginTest" />
+        </classes>
+    </test>
+    <test name="DiscussionsTest">
+        <classes>
+            <class name="precisionFDA.cases.DiscussionsTest" />
+        </classes>
+    </test>
+    <test name="NotesTest">
+        <classes>
+            <class name="precisionFDA.cases.NotesTest" />
+        </classes>
+    </test>
+</suite>

@@ -14,17 +14,27 @@ import org.openqa.selenium.support.ui.Wait;
 import org.testng.ITestResult;
 import org.testng.Reporter;
 import org.testng.annotations.*;
-import precisionFDA.model.UserProfile;
-import precisionFDA.pages.CommonPage;
+import precisionFDA.pages.AnyPage;
+import precisionFDA.pages.NavPanelPage;
+import precisionFDA.pages.StartPage;
+import precisionFDA.pages.about.AboutPage;
 import precisionFDA.pages.apps.AppsPage;
 import precisionFDA.pages.challs.ChallsPage;
+import precisionFDA.pages.comps.CompsPage;
+import precisionFDA.pages.discs.DiscsPage;
 import precisionFDA.pages.docs.DocsPage;
+import precisionFDA.pages.experts.ExpertsPage;
 import precisionFDA.pages.files.FilesPage;
+import precisionFDA.pages.guidelines.GuidelinesPage;
+import precisionFDA.pages.licenses.LicensesPage;
 import precisionFDA.pages.login.LoginPrecisionPage;
+import precisionFDA.pages.notes.NotesPage;
 import precisionFDA.pages.overview.OverviewPage;
+import precisionFDA.pages.platform.PlatformPage;
+import precisionFDA.pages.profile.ProfilePage;
+import precisionFDA.pages.profile.PublicProfilePage;
 import precisionFDA.pages.spaces.SpacesPage;
-import precisionFDA.pages.staging.LoginStagingPage;
-import precisionFDA.pages.staging.MainStagingPage;
+import precisionFDA.pages.platform.MainPlatformPage;
 import precisionFDA.utils.Utils;
 
 import java.io.File;
@@ -45,31 +55,32 @@ public abstract class AbstractTest {
 
     private Logger log = Logger.getLogger("");
 
-    protected WebDriver driver;
-
     SoftAssertions SoftAssert;
 
     @BeforeClass(alwaysRun = true)
-    public void setUp() {
-        System.setProperty("org.uncommons.reportng.escape-output", "false");
-        driver = new DriverFactory().getInstance().getDriver();
-        driver.manage().window().setSize(new Dimension(1920, 1080));
-        String env = getPfdaOverviewURL();
-        env = env.replace("https://", "").replace("http://", "");
-        log.info("=== Environment is: "
-                + env.substring(0, 7)
-                + "..."
-                + " ===");
+    public void beforeClass() {
+        // driver = DriverFactory.getInstance().getDriver();
+        new DriverFactory().getInstance().getDriver();
+        sleep(5000);
+        if (("" + getDriver()).toLowerCase().contains("null")) {
+            sleep(10000);
+        }
+        log.info("DRIVER = " + getDriver());
+        getDriver().manage().window().setSize(new Dimension(1920, 1080));
+    }
+
+    public WebDriver getDriver() {
+        return DriverFactory.getInstance().getDriver();
     }
 
     @AfterClass(alwaysRun = true)
-    public void tearDown() {
+    public void afterClass() {
         closeBrowser();
-        sleep(2000);
+        sleep(5000);
     }
 
     public void closeBrowser() {
-        if (driver != null) {
+        if (getDriver() != null) {
             log.info("closing browser");
             try {
                 DriverFactory.getInstance().removeDriver();
@@ -82,31 +93,24 @@ public abstract class AbstractTest {
 
     @BeforeSuite(alwaysRun = true)
     public void beforeSuite() {
+        System.setProperty("org.uncommons.reportng.escape-output", "false");
         deleteTempFiles();
         createFolder(getDebugLogCommonFolderPath());
         createFolder(getCurrentRunLogFolderPath());
         String relativeFullLogFilePath = "../../" + getDebugLogCommonFolderName() + "full.log";
         Reporter.log("<a target='_blank' href='" + relativeFullLogFilePath + "'>full log</a><br><br>");
+        setEnv();
+        String displayedURL = getPfdaStartUrl();
+        displayedURL = displayedURL.replace("https://", "").replace("http://", "");
+        log.info("=== Environment is: "
+                + displayedURL.substring(0, 7)
+                + "..."
+                + " ===");
     }
 
     @AfterSuite(alwaysRun = true)
     public void afterSuite() {
-        // moveLogFileToCurrentLogFolder("full.print");
-        // moveLogFileToCurrentLogFolder("error.print");
-        // try {
-        //     Runtime.getRuntime().exec( "pkill -f firefox" ).waitFor();
-        // } catch (InterruptedException e) {
-        //    e.printStackTrace();
-        // } catch (IOException e) {
-        //     e.printStackTrace();
-        // }
-        // try {
-        //     Runtime.getRuntime().exec( "pkill -f geckodriver" ).waitFor();
-        // } catch (InterruptedException e) {
-        //     e.printStackTrace();
-        // } catch (IOException e) {
-        //     e.printStackTrace();
-        // }
+        //
     }
 
     @BeforeMethod(alwaysRun = true)
@@ -155,7 +159,7 @@ public abstract class AbstractTest {
 
             String filePathWithNoExt = getCurrentRunLogFolderPath() + fileNameWithNoExt;
 
-            String source = getPageSource(driver);
+            String source = getPageSource(getDriver());
             try {
                 createFile(filePathWithNoExt + ".txt", source);
                 log.info("page source is here: " + filePathWithNoExt + ".txt");
@@ -172,11 +176,11 @@ public abstract class AbstractTest {
                 loggerLevel = getDictInfo();
             }
             else {
-                loggerLevel = getDictError();
+                loggerLevel = getDictInfo();
             }
             String fileName = fileNameWithNoExt + ".png";
             String message = "taking screenshot when " + finishedCaseName + " case is finished";
-            Utils.reportScreenshot(message, fileName, loggerLevel, driver);
+            Utils.reportScreenshot(message, fileName, loggerLevel, getDriver());
             String relativeFilePath = "../../" + getDebugLogCommonFolderName() + getCurrentRunLogFolderName() + fileName;
             Reporter.log(runTimeSuiteName + "." + finishedCaseName + ": <a target='_blank' href='"
                     + relativeFilePath + "'>" + fileName + "</a><br>");
@@ -196,79 +200,159 @@ public abstract class AbstractTest {
     }
 
     public String getPageTitle() {
-        String title = driver.getTitle();
+        String title = getDriver().getTitle();
         log.info("actual page title is: " + title);
         return title;
     }
 
     public OverviewPage openOverviewPage() {
         log.info("open Overview page");
-        String url = getPfdaOverviewURL();
-        driver.get(url);
-        return new OverviewPage(driver);
+        String url = getPfdaStartUrl();
+        getDriver().get(url);
+        return new OverviewPage(getDriver());
+    }
+
+    public StartPage openStartPage() {
+        log.info("open Start page");
+        String url = getPfdaStartUrl();
+        getDriver().get(url);
+        return new StartPage(getDriver());
     }
 
     public FilesPage openFilesPage() {
         log.info("open Files page");
-        String url = getPfdaFilesURL();
-        driver.get(url);
-        return new FilesPage(driver);
+        getCommonPage().openFilesPage();
+        return new FilesPage(getDriver());
     }
 
     public AppsPage openAppsPage() {
         log.info("open Apps page");
         getCommonPage().openAppsPage();
-        return new AppsPage(driver);
+        return new AppsPage(getDriver());
     }
 
     public SpacesPage openSpacesPage() {
         log.info("open Spaces page");
         getCommonPage().openSpacesPage();
-        return new SpacesPage(driver);
+        return new SpacesPage(getDriver());
     }
 
     public ChallsPage openChallsPage() {
         log.info("open Challenges page");
         getCommonPage().openChallsPage();
-        return new ChallsPage(driver);
+        return new ChallsPage(getDriver());
     }
 
-    public LoginPrecisionPage openLoginPrecisionPage(UserProfile user) {
+    public NotesPage openNotesPage() {
+        log.info("open Notes page");
+        getCommonPage().openNotesPage();
+        return new NotesPage(getDriver());
+    }
+
+    public CompsPage openCompsPage() {
+        log.info("open Comparisons page");
+        getCommonPage().openCompsPage();
+        return new CompsPage(getDriver());
+    }
+
+    public ExpertsPage openExpertsPage() {
+        log.info("open Experts page");
+        getCommonPage().openExpertsPage();
+        return new ExpertsPage(getDriver());
+    }
+
+    public DiscsPage openDiscsPage() {
+        log.info("open Discussions page");
+        getCommonPage().openDiscsPage();
+        return new DiscsPage(getDriver());
+    }
+
+    public ProfilePage openProfilePage() {
+        log.info("open Profile page");
+        getCommonPage().openProfilePage();
+        return new ProfilePage(getDriver());
+    }
+
+    public PublicProfilePage openPublicProfilePage() {
+        log.info("open Public Profile page");
+        getCommonPage().openPublicProfilePage();
+        return new PublicProfilePage(getDriver());
+    }
+
+    public LicensesPage openLicensePage() {
+        log.info("open License page");
+        getCommonPage().openLicensePage();
+        return new LicensesPage(getDriver());
+    }
+
+    public AboutPage openAboutPage() {
+        log.info("open About page");
+        getCommonPage().openAboutPage();
+        return new AboutPage(getDriver());
+    }
+
+    public GuidelinesPage openGuidelinesPage() {
+        log.info("open Guidelines page");
+        getCommonPage().openGuidelinesPage();
+        return new GuidelinesPage(getDriver());
+    }
+
+    public DocsPage openDocsPage() {
+        log.info("open Docs page");
+        getCommonPage().openDocsPage();
+        return new DocsPage(getDriver());
+    }
+
+    public LoginPrecisionPage openLoginPrecisionPage() {
         log.info("open Precision FDA Login page");
-        String loginPageURL = getLoginPfdaPageURL();
-        driver.manage().deleteAllCookies();
-        loginPageURL = loginPageURL
-                .replace("_basicAuthUser_", user.getBasicAuthUsername())
-                .replace("_basicAuthPassword_", user.getBasicAuthPassword())
-                .replace("_pfdaStartUrl_", getPfdaOverviewURL());
-        driver.get(loginPageURL);
-        return new LoginPrecisionPage(driver);
+        String loginPageURL = getPfdaLoginPageUrl();
+        // log.info("PFDA login page: " + loginPageURL);
+        getDriver().manage().deleteAllCookies();
+        getDriver().get(loginPageURL);
+        return new LoginPrecisionPage(getDriver());
     }
 
-    public LoginStagingPage logoutFromAll() {
-        log.info("total logout from Staging");
-        MainStagingPage mainStagingPage = openStaging();
-        mainStagingPage.logout();
-        return new LoginStagingPage(driver);
+    public void logoutFromPlatform() {
+        log.info("logout from platform");
+        PlatformPage platformPage = openPlatform();
+        if (platformPage.isLoginPasswordInputDisplayed()) {
+            log.info("already logged out");
+        }
+        else if (platformPage.isProjectsLinkDisplayed()) {
+            log.info("logged in now; will log out");
+            getMainPlatformPage().logout();
+        }
+        else {
+            log.error("unknown page: should be platform page");
+        }
     }
 
-    public MainStagingPage openStaging() {
-        log.info("open Staging");
-        String stagingURL = getStagingURL();
-        driver.get(stagingURL);
-        return new MainStagingPage(driver);
+    public PlatformPage openPlatform() {
+        log.info("open Platform");
+        String platformLoginPage = getPlatformLoginPageUrl();
+        // log.info("platform login page: " + platformLoginPage);
+        getDriver().get(platformLoginPage);
+        return new PlatformPage(getDriver());
     }
 
-    public CommonPage getCommonPage() {
-        return new CommonPage(driver);
+    public NavPanelPage getCommonPage() {
+        return new NavPanelPage(getDriver());
+    }
+
+    public AnyPage getAnyPage() {
+        return new AnyPage(getDriver());
+    }
+
+    public MainPlatformPage getMainPlatformPage() {
+        return new MainPlatformPage(getDriver());
     }
 
     public DocsPage getDocsPage() {
-        return new DocsPage(driver);
+        return new DocsPage(getDriver());
     }
 
     public void alertAccept(int timeOutInSeconds, int sleepInMillis) {
-        Wait<WebDriver> fluentWait = new FluentWait<WebDriver>(driver)
+        Wait<WebDriver> fluentWait = new FluentWait<WebDriver>(getDriver())
                 .withTimeout(timeOutInSeconds, SECONDS)
                 .pollingEvery(sleepInMillis, MILLISECONDS)
                 .ignoring(TimeoutException.class);
@@ -316,7 +400,7 @@ public abstract class AbstractTest {
             FirefoxBinary firefoxBinary = new FirefoxBinary();
 
             Boolean headlessMode;
-            String headlessModeCmdStr = "" + System.getProperty("headlessMode");
+            String headlessModeCmdStr = "" + System.getProperty("headless");
 
             if (!headlessModeCmdStr.equalsIgnoreCase("null")) {
                 headlessMode = Boolean.valueOf(headlessModeCmdStr);
