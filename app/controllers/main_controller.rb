@@ -487,7 +487,7 @@ class MainController < ApplicationController
       return
     end
 
-    js graph: graph_decorator.for_publisher(item, scope),
+    js graph: GraphDecorator.for_publisher(@context, item, scope),
        space: space.nil? ? nil : space.slice(:uid, :title),
        scope_to_publish_to: scope
   end
@@ -496,12 +496,12 @@ class MainController < ApplicationController
     id = params[:id]
     raise "Missing id in track route" unless id.is_a?(String) && id.present?
     @item = item_from_uid(id)
-    if !@item.accessible_by?(@context)
+    unless @item.accessible_by?(@context)
       flash[:error] = "This item is not accessible by you"
       redirect_to :root
       return
     end
-    @graph = graph_decorator.for_track(@item)
+    @graph = GraphDecorator.build(@context, @item)
   end
 
   def tokify
@@ -542,10 +542,6 @@ class MainController < ApplicationController
   end
 
   private
-
-  def graph_decorator
-    @graph_decorator ||= GraphDecorator.new(@context)
-  end
 
   def set_time_zone(user)
     return if user.time_zone.present?
