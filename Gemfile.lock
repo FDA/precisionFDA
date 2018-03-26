@@ -137,7 +137,7 @@ GEM
     libv8 (3.16.14.13)
     local_time (1.0.3)
       coffee-rails
-    loofah (2.1.1)
+    loofah (2.2.2)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     mail (2.6.4)
