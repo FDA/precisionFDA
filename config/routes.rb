@@ -28,7 +28,9 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :usage_reports, only: [:index]
+      resources :usage_reports, only: [:index] do
+        post :update_custom_range, on: :collection
+      end
 
       get "active_users", to: "users#active"
     end
