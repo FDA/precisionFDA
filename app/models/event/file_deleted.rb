@@ -5,6 +5,7 @@ class Event::FileDeleted < Event
   event_attribute :scope, db_column: :param3
   event_attribute :dxuser
   event_attribute :org_handle
+  event_attribute :created_at
 
   def self.create(file, user)
     super(

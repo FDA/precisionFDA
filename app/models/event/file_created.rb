@@ -5,6 +5,7 @@ class Event::FileCreated < Event
   event_attribute :parent_type, db_column: :param3
   event_attribute :dxuser
   event_attribute :org_handle
+  event_attribute :created_at
 
   scope :with_parent_type_user, -> { where(param3: "User") }
   scope :with_parent_type_job, -> { where(param3: "Job") }
