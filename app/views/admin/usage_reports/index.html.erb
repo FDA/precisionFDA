@@ -11,6 +11,21 @@
   </div>
 </div>
 
+<div class="pfda-toolbar">
+  <div class="row">
+    <div class="col-md-10">
+      <div class="pull-left">
+        <h5 class="list-group-item-heading">Custom range</h5>
+        <%= form_for :custom_range, url: update_custom_range_admin_usage_reports_path do |f| %>
+          <%= f.text_field :date_from, value: @custom_range_begin, class: "form-control add-datetimepicker" %>
+          <%= f.text_field :date_to, value: @custom_range_end, class: "form-control add-datetimepicker" %>
+          <%= f.submit "Submit", class: "btn btn-primary" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
 <% if @storage_date %>
   <div class="metadata-section metadata-header">
     <ul class="list-group list-group-inline">
@@ -24,7 +39,7 @@
       </li>
     </ul>
   </div>
- 
+
   <div class="pfda-toolbar">
     <div class="btn btn-default wg-external-csv-export-button" data-grid-name="usage">
       <i class="fa fa-file-excel-o"></i> Export to CSV
