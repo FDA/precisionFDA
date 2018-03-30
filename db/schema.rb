@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180129150436) do
+ActiveRecord::Schema.define(version: 20180329111551) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -445,6 +445,11 @@ ActiveRecord::Schema.define(version: 20180129150436) do
   add_index "saved_queries", ["grid_name"], name: "index_saved_queries_on_grid_name", using: :btree
   add_index "saved_queries", ["user_id"], name: "index_saved_queries_on_user_id", using: :btree
 
+  create_table "settings", force: :cascade do |t|
+    t.string "key",   limit: 255, null: false
+    t.string "value", limit: 255, null: false
+  end
+
   create_table "space_memberships", force: :cascade do |t|
     t.integer  "user_id",    limit: 4
     t.integer  "space_id",   limit: 4
@@ -592,13 +597,19 @@ ActiveRecord::Schema.define(version: 20180129150436) do
   add_index "truth_challenge_results", ["type"], name: "index_truth_challenge_results_on_type", using: :btree
 
   create_table "usage_metrics", force: :cascade do |t|
-    t.integer  "user_id",               limit: 4,                           null: false
-    t.integer  "storage_usage",         limit: 8
-    t.decimal  "daily_compute_price",             precision: 30, scale: 20
-    t.decimal  "weekly_compute_price",            precision: 30, scale: 20
-    t.decimal  "monthly_compute_price",           precision: 30, scale: 20
-    t.decimal  "yearly_compute_price",            precision: 30, scale: 20
+    t.integer  "user_id",                    limit: 4,                           null: false
+    t.integer  "storage_usage",              limit: 8
+    t.decimal  "daily_compute_price",                  precision: 30, scale: 20
+    t.decimal  "weekly_compute_price",                 precision: 30, scale: 20
+    t.decimal  "monthly_compute_price",                precision: 30, scale: 20
+    t.decimal  "yearly_compute_price",                 precision: 30, scale: 20
     t.datetime "created_at"
+    t.integer  "daily_byte_hours",           limit: 8
+    t.integer  "weekly_byte_hours",          limit: 8
+    t.integer  "monthly_byte_hours",         limit: 8
+    t.integer  "yearly_byte_hours",          limit: 8
+    t.integer  "custom_range_byte_hours",    limit: 8
+    t.decimal  "custom_range_compute_price",           precision: 30, scale: 20
   end
 
   create_table "users", force: :cascade do |t|
