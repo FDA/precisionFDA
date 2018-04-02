@@ -98,7 +98,7 @@ group :development do
   gem 'rubocop', '~> 0.54.0', require: false
 
   gem 'pronto', '~> 0.9.5'
-  gem 'pronto-rubocop', '~> 0.9.0'
+  gem 'pronto-rubocop', '~> 0.9.0', require: false
 end
 
 group :development, :test, :ui_test do
