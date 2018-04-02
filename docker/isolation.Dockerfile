@@ -1,5 +1,6 @@
-FROM ruby:2.2.8
+FROM ruby:2.2.3
 RUN apt-get update
+RUN apt-get install cmake -y
 ENV APP_DIR=/precision-fda
 WORKDIR $APP_DIR
 RUN mkdir -p $APP_DIR
