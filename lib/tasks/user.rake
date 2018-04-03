@@ -1,6 +1,6 @@
 namespace :user do
   desc "Generate a user"
-  task :generate, [:dxuser, :first_name, :last_name, :email, :org_handle] => :environment do |_, args|
+  task :generate, [:dxuser, :first_name, :last_name, :email, :org_handle, :private_files_project, :public_files_project, :private_comparisons_project, :public_comparisons_project] => :environment do |_, args|
     ActiveRecord::Base.transaction do
       user = User.create!(
         dxuser: args.dxuser,
@@ -8,7 +8,11 @@ namespace :user do
         first_name: args.first_name,
         last_name: args.last_name,
         email: args.email,
-        normalized_email: args.email
+        normalized_email: args.email,
+        private_files_project: args.private_files_project,
+        public_files_project: args.public_files_project,
+        private_comparisons_project: args.private_comparisons_project,
+        public_comparisons_project: args.public_comparisons_project,
       )
       org = Org.find_or_initialize_by(handle: args.org_handle)
       org.attributes = {
@@ -49,7 +53,11 @@ namespace :user do
       "PrecisionFDA",
       "Admin - Dev",
       "fdelacruz+precisionfda.admin_dev@dnanexus.com",
-      "precisionfda_dev"
+      "precisionfda",
+      "project-F76jJ080xYKypQ786PVqpbqY",
+      "project-F76jJp80F794xX5bGVyjpjKP",
+      "project-F76jJVQ0bfK2qJ5GGXJ5fF5j",
+      "public_comparisons_project",
     )
   end
 end

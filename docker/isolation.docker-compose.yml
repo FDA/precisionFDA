@@ -5,6 +5,7 @@ services:
       context: ../
       dockerfile: docker/isolation.Dockerfile
     volumes:
+      - 'pfda-mysql-volume:/mysql-volume'
       - type: bind
         source: ../
         target: /precision-fda
