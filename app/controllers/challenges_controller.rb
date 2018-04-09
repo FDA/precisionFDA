@@ -26,8 +26,8 @@ class ChallengesController < ApplicationController
         @challenge.update_card_image_url!
         redirect_to challenge_path(@challenge)
       else
-        render action: :new
         js challenge_params
+        render action: :new
       end
     end
   end
@@ -43,8 +43,8 @@ class ChallengesController < ApplicationController
         flash[:success] = "The challenge was updated successfully."
         redirect_to challenge_path(@challenge)
       else
-        render action: :edit
         js update_challenge_params
+        render action: :edit
       end
     end
   end
@@ -284,19 +284,20 @@ class ChallengesController < ApplicationController
   end
 
   def challenge_params
-    p = params.require(:challenge).permit(:name, :description, :app_owner_id, :start_at, :end_at, :status, :regions, :card_image_id)
-    p.require(:name)
-    p.require(:start_at)
-    p.require(:end_at)
-    return p
+    params.require(:challenge)
+      .permit(
+        :name, :description, :app_owner_id, :start_at, :end_at, :status,
+        :regions, :card_image_id, :card_image_url
+      )
+
   end
 
   def update_challenge_params
-    p = params.require(:challenge).permit(:name, :description, :app_owner_id, :start_at, :end_at, :status, :card_image_id)
-    p.require(:name)
-    p.require(:start_at)
-    p.require(:end_at)
-    return p
+    params.require(:challenge)
+      .permit(
+        :name, :description, :app_owner_id, :start_at, :end_at, :status,
+        :card_image_id, :card_image_url
+      )
   end
 
   def filter_and_order_state_as_hash(grid)
