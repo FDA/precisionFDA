@@ -1,4 +1,4 @@
-module Admin
+module Api
   class ActivityReportsController
     # @abstract implement #total, #hourly_data, #daily_data, #monthly_data in a child.
     class AbstractData

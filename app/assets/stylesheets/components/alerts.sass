@@ -8,9 +8,30 @@
   margin-bottom: 0
 
 .alert.above-all
-  position: absolute
+  position: fixed
   z-index: 10109
   width: calc(100% - 20px)
   top: 10px
   left: 0px
   margin: 0px 10px
+
+.alert-modal-backdrop
+  z-index: 10000
+.modal.alert-modal
+  z-index: 10001
+  .alert
+    margin-bottom: 0
+  .modal-dialog
+    top: 35%
+    margin: auto
+  .modal-body
+    text-align: center
+    font-size: 16px
+  .alert-modal-button
+    margin-top: 5px
+    button
+      font-size: 16px
+      &:nth-child(even)
+        margin-left: 5px
+
+      
