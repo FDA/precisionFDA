@@ -64,7 +64,7 @@ class User < ActiveRecord::Base
   acts_as_follower
   acts_as_tagger
 
-  scope :not_challenge_bot, -> { where.not(dxuser: CHALLENGE_BOT_DX_USER) }
+  scope :real, -> { where.not(dxuser: CHALLENGE_BOT_DX_USER) }
 
   def self.challenge_bot
     find_by!(dxuser: CHALLENGE_BOT_DX_USER)
@@ -191,7 +191,7 @@ class User < ActiveRecord::Base
   end
 
   def self.sync_challenge_file!(file_id)
-    user = User.find_by!(dxuser: CHALLENGE_BOT_DX_USER)
+    user = User.challenge_bot
     token = CHALLENGE_BOT_TOKEN
     file = user.uploaded_files.find(file_id) # Re-check file id
     if file.state != "closed"
@@ -227,7 +227,7 @@ class User < ActiveRecord::Base
 
   def self.sync_challenge_bot_files!(context)
     return if context.guest?
-    user = User.find_by(dxuser: CHALLENGE_BOT_DX_USER)
+    user = User.challenge_bot
     token = CHALLENGE_BOT_TOKEN
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
     user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
@@ -299,7 +299,7 @@ class User < ActiveRecord::Base
   end
 
   def self.sync_challenge_job!(job_id)
-    user = User.find_by!(dxuser: CHALLENGE_BOT_DX_USER)
+    user = User.challenge_bot
     token = CHALLENGE_BOT_TOKEN
     job = user.jobs.find(job_id) # Re-check job id
     if !job.terminal?
@@ -356,7 +356,7 @@ class User < ActiveRecord::Base
   end
 
   def self.sync_challenge_jobs!
-    user = User.find_by(dxuser: CHALLENGE_BOT_DX_USER)
+    user = User.challenge_bot
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
     Job.where(user_id: user.id).where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs|
       jobs_hash = jobs.map { |j| [j.dxid, j] }.to_h

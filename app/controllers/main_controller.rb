@@ -25,15 +25,7 @@ class MainController < ApplicationController
     end
 
     if @context.logged_in_or_guest?
-      notes = Note.real_notes.accessible_by_public.order(updated_at: :desc).limit(10)
-      answers = Answer.accessible_by_public.order(updated_at: :desc).limit(10)
-      discussions = Discussion.accessible_by_public.order(updated_at: :desc).limit(10)
-      files = UserFile.real_files.accessible_by_public.order(updated_at: :desc).limit(10)
-      comparisons = Comparison.accessible_by_public.order(updated_at: :desc).limit(10)
-      apps = App.accessible_by_public.order(updated_at: :desc).limit(10)
-      assets = Asset.accessible_by_public.order(updated_at: :desc).limit(10)
-
-      @feed = (notes + answers + discussions + files + comparisons + apps + assets).sort_by {|a| a.updated_at}.reverse
+      @feed = collect_feed
 
       if @context.logged_in?
         @notes_count = Note.real_notes.editable_by(@context).count
@@ -543,6 +535,12 @@ class MainController < ApplicationController
   end
 
   private
+
+  def collect_feed
+    [Note, Answer, Discussion, UserFile, Comparison, App, Asset].map do |klass|
+      klass.where(user: User.real).accessible_by_public.order(updated_at: :desc).limit(4)
+    end.sum.sort_by(&:updated_at).reverse
+  end
 
   def set_time_zone(user)
     return if user.time_zone.present?

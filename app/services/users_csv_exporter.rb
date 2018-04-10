@@ -7,8 +7,7 @@ class UsersCsvExporter
     offset = 0
 
     loop do
-      users = User
-                .not_challenge_bot
+      users = User.real
                 .where.not(id: Invitation.guest.select(:id))
                 .order(created_at: :desc)
                 .limit(limit)

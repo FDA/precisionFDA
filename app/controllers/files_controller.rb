@@ -38,12 +38,11 @@ class FilesController < ApplicationController
     org = Org.featured
 
     if org
-      user_files = UserFile
-                     .real_files
-                     .accessible_by(@context)
-                     .includes(:user, :taggings)
-                     .where(users: { org_id: org.id })
-                     .where.not(:users => { id: User.challenge_bot.id})
+      user_files =
+        UserFile.real_files
+          .accessible_by(@context)
+          .includes(:user, :taggings)
+          .where(user: User.real.where(org: org))
 
       @files_grid = files_grid(user_files)
       @new_folder_is_public = false
