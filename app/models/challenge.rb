@@ -59,7 +59,7 @@ class Challenge < ActiveRecord::Base
 
     Challenge.transaction do
       app = App.find_by(id: app_id)
-      user = User.find_by!(dxuser: CHALLENGE_BOT_DX_USER)
+      user = User.challenge_bot
       api.call(app.dxid, "addDevelopers", {developers: [user.dxid]})
       challenge = Challenge.find_by!(id: challenge_id)
       challenge.update!(app_id: app_id)
