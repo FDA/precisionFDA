@@ -1,7 +1,8 @@
 version: "3.2"
 services:
   web:
-    image: ruby:2.2.3
+    build:
+      context: .
     volumes:
       - type: bind
         source: .
