@@ -48,7 +48,7 @@ gem 'semverly'
 gem 'humanizer'
 
 # Excel spreadsheet generation
-gem 'axlsx', git: 'https://github.com/randym/axlsx.git', branch: 'release-3.0.0'
+gem 'axlsx', '3.0.0.pre'
 
 # Secure headers
 gem 'secure_headers'
