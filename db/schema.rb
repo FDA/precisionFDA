@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180329111551) do
+ActiveRecord::Schema.define(version: 20180417083411) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -229,6 +229,8 @@ ActiveRecord::Schema.define(version: 20180329111551) do
     t.datetime "created_at",             null: false
     t.string   "param4",     limit: 255
   end
+
+  add_index "events", ["type", "created_at"], name: "index_events_on_type_and_created_at", using: :btree
 
   create_table "expert_answers", force: :cascade do |t|
     t.integer  "expert_id",          limit: 4

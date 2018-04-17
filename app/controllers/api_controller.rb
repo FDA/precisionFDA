@@ -459,7 +459,7 @@ class ApiController < ApplicationController
         job = Job.create!(opts)
         job.input_file_ids = input_file_ids
         job.save!
-        Event::JobRun.create(job, @context.user)
+        Event::JobRun.create_for(job, @context.user)
       end
     end
     render json: {id: analysis_dxid}
@@ -1593,7 +1593,7 @@ class ApiController < ApplicationController
       app.asset_ids = Asset.accessible_by(@context).where(dxid: ordered_assets).select(:id).map(&:id)
       app.save!
       app_series.update!(latest_revision_app_id: app.id)
-      Event::AppCreated.create(app, @context.user)
+      Event::AppCreated.create_for(app, @context.user)
     end
 
     render json: {id: app.dxid}

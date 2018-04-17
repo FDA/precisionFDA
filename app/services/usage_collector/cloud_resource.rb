@@ -46,7 +46,7 @@ class UsageCollector
 
       def storage_at(date, user)
         Event::FileCreated.where('created_at < ?', date).where(dxuser: user.dxuser)
-          .sum_by(:file_size).to_i
+          .sum(:file_size).to_i
       end
 
     end
