@@ -24,6 +24,7 @@ class WorkflowEditorModel
             @slots.push(new_slot)
             if spec.outputs.length > 0
               @eligibleSlots.push(new_slot)
+            @checkConfiguredSlots()
         )
       for stage in workflow.spec.input_spec["stages"]
         prev_slot = ko.utils.arrayFilter @slots(), (slot) ->
@@ -34,6 +35,7 @@ class WorkflowEditorModel
           slot.slotId() == stage.slotId
         current_slot[0].prevSlot(prev_slot[0])
         current_slot[0].nextSlot(next_slot[0])
+      @checkConfiguredSlots()
 
   constructor: (apps, workflow, @mode = 'edit') ->
     @workflow = workflow
@@ -84,7 +86,21 @@ class WorkflowEditorModel
     @canCreateWorkflow = ko.computed(=>
       return @numberStagesUnConfigured().length == 0 && !_.isEmpty(@title()) && !_.isEmpty(@name())
     )
+
+    @checkConfiguredSlot = (slot) ->
+      config = true
+      ko.utils.arrayForEach(slot.inputs(), (input) ->
+        if input.optional == false && config == true
+          config = input.configured()
+      )
+      slot.configured(config)
+      return true
+
+    @checkConfiguredSlots = () ->
+      ko.utils.arrayForEach(@slots(), (slot) => @checkConfiguredSlot(slot))
+
     @setSlots(workflow)
+
     @saveButtonText = ko.computed(=>
       saving = @saving()
       switch @mode
@@ -400,12 +416,15 @@ class IOModel
       e.stopPropagation()
     data.configured(!data.configured())
     data.requiredRunInput = true
-    config = true
-    ko.utils.arrayForEach(@viewModel().slotBeingEdited().inputs(), (input) ->
-      if input.optional == false && config == true
-        config = input.configured()
-    )
-    @viewModel().slotBeingEdited().configured(config)
+    @viewModel().checkConfiguredSlot(@viewModel().slotBeingEdited())
+    # data.configured(!data.configured())
+    # data.requiredRunInput = true
+    # config = true
+    # ko.utils.arrayForEach(@viewModel().slotBeingEdited().inputs(), (input) ->
+    #   if input.optional == false && config == true
+    #     config = input.configured()
+    # )
+    # @viewModel().slotBeingEdited().configured(config)
     return true
 
   setInputText: (data) ->
