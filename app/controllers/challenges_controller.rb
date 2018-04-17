@@ -96,7 +96,7 @@ class ChallengesController < ApplicationController
 
     if !challenge.followed_by?(@context.user)
       @context.user.follow(challenge)
-      Event::SignedUpForChallenge.create(challenge, @context.user)
+      Event::SignedUpForChallenge.create_for(challenge, @context.user)
       flash[:success] = "You are now following the challenge! If you would like to participate please submit an entry by the deadline."
     else
       flash[:success] = "You are already following the challenge! Remember to submit your entries by the challenge deadline!"

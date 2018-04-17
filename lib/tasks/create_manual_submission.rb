@@ -106,7 +106,7 @@ Job.transaction do
     job = Job.create!(opts)
     job.input_file_ids = input_file_ids
     job.save!
-    Event::JobRun.create(job, challenge_bot)
+    Event::JobRun.create_for(job, challenge_bot)
   end
 
   # create submission record
