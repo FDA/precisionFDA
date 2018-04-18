@@ -124,7 +124,7 @@ class FolderService
 
     return Rats.failure(message: "#{file.name}: file removal error.") unless file.destroyed?
 
-    Event::FileDeleted.create(file, context.user)
+    Event::FileDeleted.create_for(file, context.user)
     Rats.success(file)
   end
 
