@@ -99,7 +99,7 @@ class UsageCollector
       Event::JobClosed
         .date_range(custom_range_start, custom_range_end)
         .where(dxuser: user.dxuser)
-        .sum_by(:price)
+        .sum(:price)
     end
 
     def sql_date(date)

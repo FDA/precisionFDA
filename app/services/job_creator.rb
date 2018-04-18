@@ -30,7 +30,7 @@ class JobCreator
       job.input_file_ids = input_info.file_ids
       job.save!
       job.update_provenance!
-      Event::JobRun.create(job, context.user)
+      Event::JobRun.create_for(job, context.user)
       job
     end
   end

@@ -415,7 +415,7 @@ class ApplicationController < ActionController::Base
     return if request.xhr?
     return unless request.get?
 
-    Event::UserViewed.create(@context)
+    Event::UserViewed.create_for(@context, request.path)
   end
 
   def handle_last_active
