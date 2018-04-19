@@ -24,7 +24,7 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getAdminUser();
         ExpertProfile expertProfile = getMainExpertProfile();
 
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
 
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
 
@@ -89,8 +89,8 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserOne();
         ExpertProfile expertProfile = getMainExpertProfile();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
 
         assertThat(
@@ -131,8 +131,8 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserTwo();
         ExpertProfile expertProfile = getMainExpertProfile();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
 
         assertThat(
@@ -148,8 +148,8 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getAdminUser();
         ExpertProfile expertProfile = getMainExpertProfile();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         ExpertsPage expertsPage = getCommonPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
         ExpertsExpertDashboardPage expertDashboardPage = createdExpertPage.openDashboard();
@@ -177,8 +177,8 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserTwo();
         ExpertProfile expertProfile = getMainExpertProfile();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
 
         assertThat(
@@ -213,8 +213,8 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserOne();
         ExpertProfile expertProfile = getMainExpertProfile();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
 
@@ -251,8 +251,8 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserTwo();
         ExpertProfile expertProfile = getMainExpertProfile();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
 
         assertThat(
@@ -283,8 +283,8 @@ public class ExpertsTest extends AbstractTest {
         ExpertProfile expertProfile = getMainExpertProfile();
         QuestionProfile questionProfile = getMainQAProfile();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
         createdExpertPage = createdExpertPage.submitQuestion(questionProfile.getExpertQuestion1());
@@ -311,8 +311,8 @@ public class ExpertsTest extends AbstractTest {
         ExpertProfile expertProfile = getMainExpertProfile();
         QuestionProfile questionProfile = getMainQAProfile();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
         ExpertsExpertDashboardPage expertDashboardPage = createdExpertPage.openDashboard();
@@ -361,8 +361,8 @@ public class ExpertsTest extends AbstractTest {
         ExpertProfile expertProfile = getMainExpertProfile();
         QuestionProfile questionProfile = getMainQAProfile();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
 
@@ -386,8 +386,8 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserOne();
         ExpertProfile expertProfile = getMainExpertProfile();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
         ExpertsExpertDashboardPage expertDashboardPage = createdExpertPage.openDashboard();
@@ -414,8 +414,8 @@ public class ExpertsTest extends AbstractTest {
         ExpertProfile expertProfile = getMainExpertProfile();
         QuestionProfile questionProfile = getMainQAProfile();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
 
         assertThat(
@@ -470,8 +470,8 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getAdminUser();
         ExpertProfile expertProfile = getMainExpertProfile();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
         ExpertsCreatedExpertPage createdExpertPage = expertsPage.openExpertPage(expertProfile);
         ExpertsExpertDashboardPage expertDashboardPage = createdExpertPage.openDashboard();
@@ -499,8 +499,8 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserTwo();
         ExpertProfile expertProfile = getMainExpertProfile();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
 
         assertThat(
@@ -516,8 +516,8 @@ public class ExpertsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserOne();
         ExpertProfile expertProfile = getMainExpertProfile();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         ExpertsPage expertsPage = openOverviewPage().openExpertsPage();
         QuestionProfile questionProfile = getMainQAProfile();
 
@@ -569,7 +569,7 @@ public class ExpertsTest extends AbstractTest {
                 .as("entered question #2")
                 .isEqualTo(questionProfile.getExpertQuestion2());
 
-        logoutFromAll();
+        logoutFromPlatform();
     }
 
 }

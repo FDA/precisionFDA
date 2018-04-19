@@ -1,0 +1,68 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="all suites" parallel="tests" thread-count="2">
+    <test name="TimeZoneTest">
+        <classes>
+            <class name="precisionFDA.cases.TimeZoneTest" />
+        </classes>
+    </test>
+    <test name="AppsTest">
+        <classes>
+            <class name="precisionFDA.cases.AppsTest" />
+        </classes>
+    </test>
+    <test name="NotesTest">
+        <classes>
+            <class name="precisionFDA.cases.NotesTest" />
+        </classes>
+    </test>
+    <test name="OpenAllPagesTest">
+        <classes>
+            <class name="precisionFDA.cases.OpenAllPagesTest" />
+        </classes>
+    </test>
+    <test name="ExpertsTest">
+        <classes>
+            <class name="precisionFDA.cases.ExpertsTest" />
+        </classes>
+    </test>
+    <test name="FilesPublishTest">
+        <classes>
+            <class name="precisionFDA.cases.FilesPublishTest" />
+        </classes>
+    </test>
+    <test name="FilesTest">
+        <classes>
+            <class name="precisionFDA.cases.FilesTest" />
+        </classes>
+    </test>
+    <test name="SpacesTest">
+        <classes>
+            <class name="precisionFDA.cases.SpacesTest" />
+        </classes>
+    </test>
+    <test name="ChallsTest">
+        <classes>
+            <class name="precisionFDA.cases.ChallsTest" />
+        </classes>
+    </test>
+    <test name="WorkflowTest">
+        <classes>
+            <class name="precisionFDA.cases.WorkflowTest" />
+        </classes>
+    </test>
+    <test name="AdminDashboardTest">
+        <classes>
+            <class name="precisionFDA.cases.AdminDashboardTest" />
+        </classes>
+    </test>
+    <test name="DiscussionsTest">
+        <classes>
+            <class name="precisionFDA.cases.DiscussionsTest" />
+        </classes>
+    </test>
+    <test name="LoginTest">
+        <classes>
+            <class name="precisionFDA.cases.LoginTest" />
+        </classes>
+    </test>
+</suite>

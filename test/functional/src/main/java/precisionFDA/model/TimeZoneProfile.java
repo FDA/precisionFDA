@@ -2,38 +2,33 @@ package precisionFDA.model;
 
 public class TimeZoneProfile {
 
-    private String zoneTime;
-
     private String location;
-
-    private String timeAndLocation;
 
     private String codeOfLocation;
 
-    public TimeZoneProfile(final String zoneTime,
-                           final String location,
-                           final String timeAndLocation,
-                           final String codeOfLocation) {
-        this.zoneTime = zoneTime;
+    private String value;
+
+    public TimeZoneProfile(final String location,
+                           final String codeOfLocation,
+                           final String value) {
         this.location = location;
-        this.timeAndLocation = timeAndLocation;
         this.codeOfLocation = codeOfLocation;
+        this.value = value;
     }
-
-    public String getZoneTime() {
-        return zoneTime;
-    }
-
     public String getLocation() {
         return location;
     }
 
-    public String getTimeAndLocation() {
-        return timeAndLocation;
-    }
-
     public String getCodeOfLocation() {
         return codeOfLocation;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }
 

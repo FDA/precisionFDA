@@ -79,8 +79,8 @@ module Admin
       {
         apps: Event::AppCreated.count,
         public_apps: Event::AppPublished.count,
-        runtime: Event::JobClosed.sum_by(:runtime).to_i,
-        data_storage: Event::FileCreated.sum_by(:file_size).to_i - Event::FileDeleted.sum_by(:file_size).to_i,
+        runtime: Event::JobClosed.sum(:runtime).to_i,
+        data_storage: Event::FileCreated.sum(:file_size).to_i - Event::FileDeleted.sum(:file_size).to_i,
         number_of_files: Event::FileCreated.count - Event::FileDeleted.count
       }
     end

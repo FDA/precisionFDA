@@ -33,22 +33,22 @@ gem 'activerecord_any_of'
 gem 'rails_param'
 
 # WiceGrid is a Rails grid plugin: https://github.com/leikind/wice_grid
-gem "wice_grid"
+gem 'wice_grid'
 
 # Page-specific javascript for Rails done right
-gem "paloma", "5.0.0"
+gem 'paloma', '5.0.0'
 
 # Websocket support (for fetching logs)
-gem "websocket"
+gem 'websocket'
 
 # Semantic versioning parsing
-gem "semverly"
+gem 'semverly'
 
 # Captcha
-gem "humanizer"
+gem 'humanizer'
 
 # Excel spreadsheet generation
-gem "axlsx", git: "https://github.com/randym/axlsx.git", branch: "release-3.0.0"
+gem 'axlsx', '3.0.0.pre'
 
 # Secure headers
 gem 'secure_headers'
@@ -57,20 +57,20 @@ gem 'secure_headers'
 gem 'gravtastic'
 
 # Adds pagination support to models
-gem 'kaminari'
 gem 'bootstrap-kaminari-views'
+gem 'kaminari'
 
 # For getting user's local time
 gem 'local_time', '~> 1.0', '>= 1.0.3'
 
 # For reCaptcha
-gem "recaptcha", require: "recaptcha/rails"
+gem 'recaptcha', require: 'recaptcha/rails'
 
 # Add comments on any model
-gem 'acts_as_commentable_with_threading'
-gem 'acts_as_votable'
-gem 'acts_as_follower'
 gem 'acts-as-taggable-on'
+gem 'acts_as_commentable_with_threading'
+gem 'acts_as_follower'
+gem 'acts_as_votable'
 
 # For inline-css in emails
 gem 'inky-rb', require: 'inky'
@@ -78,48 +78,47 @@ gem 'nokogiri', '~> 1.8', '>= 1.8.2'
 gem 'premailer-rails'
 
 gem 'mysql2', '~> 0.3.18'
-gem 'gretel'
-# Use ActiveModel has_secure_password
-# gem 'bcrypt', '~> 3.1.7'
 
-# Use Capistrano for deployment
-# gem 'capistrano-rails', group: :development
+gem 'gretel'
 
 # View outgoing HTTP requests
 gem 'httplog'
 
 group :development do
-  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
 
   # Access an IRB console on exception pages or by using <%= console %> in views
   gem 'web-console', '~> 2.0'
 
-  # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
+  # Spring speeds up development by keeping your application running
+  # in the background. Read more: https://github.com/rails/spring
   gem 'spring'
+
+  # Automatic Ruby code checking tool
+  gem 'rubocop', '~> 0.54.0', require: false
+
+  gem 'pronto', '~> 0.9.5'
+  gem 'pronto-rubocop', '~> 0.9.0', require: false
 end
 
 group :development, :test, :ui_test do
-  gem 'thin'
-
+  # Project-wide environment variables
+  gem 'dotenv-rails'
   # Manage environment variables
   gem 'figaro'
   gem 'quiet_assets'
-
-  # Project-wide environment variables
-  gem 'dotenv-rails'
+  gem 'thin'
 end
 
 group :test do
-  gem 'rspec-rails', '~> 3.7', '>= 3.7.1'
-  gem 'factory_bot_rails', '~> 4.8', '>= 4.8.2'
   gem 'database_cleaner', '~> 1.5', '>= 1.5.3'
+  gem 'factory_bot_rails', '~> 4.8', '>= 4.8.2'
+  gem 'rspec-rails', '~> 3.7', '>= 3.7.1'
   gem 'webmock', '~> 3.1', '>= 3.1.1'
 end
 
 group :production do
-
+  gem 'exception_notification', '4.1.1'
   # Use Unicorn as the app server
   gem 'unicorn', '~> 4.9.0'
-  gem 'exception_notification', '4.1.1'
 end

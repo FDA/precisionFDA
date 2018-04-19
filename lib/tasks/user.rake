@@ -1,36 +1,22 @@
 namespace :user do
   desc "Generate a user"
-
-  task :generate, [:env_prefix] => :environment do |_, args|
-    env_prefix = args[:env_prefix].upcase
-
-    first_name = ENV["#{env_prefix}_FIRST_NAME"]
-    last_name = ENV["#{env_prefix}_LAST_NAME"]
-    email = ENV["#{env_prefix}_EMAIL"]
-    dxuser = ENV["#{env_prefix}_DX_USER"]
-    org_handle = ENV["#{env_prefix}_ORG_HANDLE"]
-    private_files_project = ENV["#{env_prefix}_PRIVATE_FILES_PROJECT"]
-    public_files_project = ENV["#{env_prefix}_PUBLIC_FILES_PROJECT"]
-    private_comparisons_project = ENV["#{env_prefix}_PRIVATE_COMPARISONS_PROJECT"]
-    public_comparisons_project = ENV["#{env_prefix}_PUBLIC_COMPARISONS_PROJECT"]
-
+  task :generate, [:dxuser, :first_name, :last_name, :email, :org_handle, :private_files_project, :public_files_project, :private_comparisons_project, :public_comparisons_project] => :environment do |_, args|
     ActiveRecord::Base.transaction do
       user = User.create!(
-        dxuser: dxuser,
+        dxuser: args.dxuser,
         schema_version: 1,
-        first_name: first_name,
-        last_name: last_name,
-        email: email,
-        normalized_email: email,
-        private_files_project: private_files_project,
-        public_files_project: public_files_project,
-        private_comparisons_project: private_comparisons_project,
-        public_comparisons_project: public_comparisons_project,
+        first_name: args.first_name,
+        last_name: args.last_name,
+        email: args.email,
+        normalized_email: args.email,
+        private_files_project: args.private_files_project,
+        public_files_project: args.public_files_project,
+        private_comparisons_project: args.private_comparisons_project,
+        public_comparisons_project: args.public_comparisons_project,
       )
-
-      org = Org.find_or_initialize_by(handle: org_handle)
+      org = Org.find_or_initialize_by(handle: args.org_handle)
       org.attributes = {
-        name: "#{last_name}'s org",
+        name: "#{args.last_name}'s org",
         admin_id: user.id,
         address: "703 Market",
         duns: "",
@@ -39,9 +25,39 @@ namespace :user do
         singular: false
       }
       org.save
-
+      user.has_seen_guidelines = true
       user.update!(org_id: org.id)
     end
+  end
 
+  desc "Generate test users"
+  task :generate_test_users do
+    Rake::Task["user:generate"].invoke(
+      "pfda_autotest1",
+      "John",
+      "Johnlastname",
+      "aabramenko-c+pfda_autotest1@dnanexus.com",
+      "autotestorg1"
+    )
+    Rake::Task["user:generate"].reenable
+    Rake::Task["user:generate"].invoke(
+      "pfda_autotest2",
+      "Bill",
+      "Billlastname",
+      "aabramenko-c+pfda_autotest2@dnanexus.com",
+      "autotestorg2"
+    )
+    Rake::Task["user:generate"].reenable
+    Rake::Task["user:generate"].invoke(
+      "precisionfda.admin_dev",
+      "PrecisionFDA",
+      "Admin - Dev",
+      "fdelacruz+precisionfda.admin_dev@dnanexus.com",
+      "precisionfda",
+      "project-F76jJ080xYKypQ786PVqpbqY",
+      "project-F76jJp80F794xX5bGVyjpjKP",
+      "project-F76jJVQ0bfK2qJ5GGXJ5fF5j",
+      "public_comparisons_project",
+    )
   end
 end

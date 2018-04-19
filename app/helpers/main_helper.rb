@@ -11,34 +11,31 @@ module MainHelper
 
   def graph_edges(graph)
     s = ""
-    item = graph[0]
-    deps = graph[1]
+    item = graph.record
+    deps = graph.children
     deps.each do |dep|
       s += graph_edges(dep)
-      s += "g.setEdge(#{dep[0].uid.inspect}, #{item.uid.inspect}, {label: ''});\n"
+      s += "g.setEdge(#{dep.uid.inspect}, #{item.uid.inspect}, {label: ''});\n"
     end
     s
   end
 
   def tutorial_complete?(count)
-    return count.nil? || count > 0
+    count.nil? || count > 0
   end
 
   def tutorial_state(count)
-    if count.nil? || count > 0
-      return "default"
-    else
-      return "warning"
-    end
+    tutorial_complete?(count) ? "default" : "warning"
   end
 
   private
 
   def graph_nodes_recursive(nodes, graph)
-    item = graph[0]
-    deps = graph[1]
+    item = graph.record
+    deps = graph.children
+    # item is nil ...
     uid = item.uid
-    if !nodes.has_key?(uid)
+    unless nodes.has_key?(uid)
       if item.public?
         classname = 'public'
       elsif item.in_space?

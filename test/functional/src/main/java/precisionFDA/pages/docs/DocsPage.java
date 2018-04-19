@@ -9,6 +9,8 @@ import precisionFDA.locators.DocsLocators;
 import precisionFDA.pages.AbstractPage;
 import ru.yandex.qatools.htmlelements.element.Link;
 
+import static precisionFDA.utils.Utils.sleep;
+
 public class DocsPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
@@ -179,6 +181,7 @@ public class DocsPage extends AbstractPage {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(DocsLocators.DOCS_LIST_TITLE));
+        sleep(getPageSleep());
     }
 
     public Link getDiscsAnswerLink() {
@@ -398,23 +401,23 @@ public class DocsPage extends AbstractPage {
     }
 
     public boolean isIntroTitleDisplayed() {
-        return isElementPresent(getDocsIntroTitle(), 1);
+        return isElementPresent(getDocsIntroTitle(), 5);
     }
 
     public boolean isFilesTitleDisplayed() {
-        return isElementPresent(getDocsFilesTitle(), 1);
+        return isElementPresent(getDocsFilesTitle(), 5);
     }
 
     public boolean isDocsTrackingTitleDisplayed() {
-        return isElementPresent(getDocsTrackingTitle(), 1);
+        return isElementPresent(getDocsTrackingTitle(), 5);
     }
 
     public boolean isDocsListTitleDisplayed() {
-        return isElementPresent(getDocsListTitle());
+        return isElementPresent(getDocsListTitle(), 5);
     }
 
     public boolean isDocsDiscussionsTitleDisplayed() {
-        return isElementPresent(getDocsDiscussionsTitle(), 1);
+        return isElementPresent(getDocsDiscussionsTitle(), 5);
     }
 
     public boolean isAppsLinkDisplayed() {
@@ -498,11 +501,11 @@ public class DocsPage extends AbstractPage {
     }
 
     public boolean isDocsCompsTitleDisplayed() {
-        return isElementPresent(getDocsCompsTitle(), 1);
+        return isElementPresent(getDocsCompsTitle(), 5);
     }
 
     public boolean isDocsAppsTitleDisplayed() {
-        return isElementPresent(getDocsAppsTitle(), 1);
+        return isElementPresent(getDocsAppsTitle(), 5);
     }
 
     public boolean isAppsListingLinkDisplayed() {
@@ -538,11 +541,11 @@ public class DocsPage extends AbstractPage {
     }
 
     public boolean isDocsCreatingAppsTitleDisplayed() {
-        return isElementPresent(getDocsCreatingAppsTitle(), 1);
+        return isElementPresent(getDocsCreatingAppsTitle(), 5);
     }
 
     public boolean isDocsNotesTitleDisplayed() {
-        return isElementPresent(getDocsNotesTitle(), 1);
+        return isElementPresent(getDocsNotesTitle(), 5);
     }
 
     public boolean isCrAppsAssetsLinkDisplayed() {
@@ -602,15 +605,15 @@ public class DocsPage extends AbstractPage {
     }
 
     public boolean isDocsPublishingTitleDisplayed() {
-        return isElementPresent(getDocsPublishingTitle(), 1);
+        return isElementPresent(getDocsPublishingTitle(), 5);
     }
 
     public boolean isDocsLicensesTitleDisplayed() {
-        return isElementPresent(getDocsLicensesTitle(), 1);
+        return isElementPresent(getDocsLicensesTitle(), 5);
     }
 
     public boolean isDocsVideoTutorialsTitleDisplayed() {
-        return isElementPresent(getDocsVideoTutorialsTitle(), 1);
+        return isElementPresent(getDocsVideoTutorialsTitle(), 5);
     }
 
     public DocsPage clickIntroLink() {

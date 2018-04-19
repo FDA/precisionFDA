@@ -26,12 +26,18 @@ public abstract class AbstractPage {
 
     private static final int DEFAULT_TIMEOUT = 10;
 
+    public static final int DEFAULT_PAGE_SLEEP = 2;
+
     public AbstractPage(final WebDriver driver) {
         HtmlElementLoader.populatePageObject(this, driver);
         this.driver = driver;
     }
 
     // ***** Waits and sleep ***** //
+
+    public static int getPageSleep() {
+        return DEFAULT_PAGE_SLEEP * 1000;
+    }
 
     public void waitUntilDisplayed(final WebElement element) {
         waitUntilDisplayed(element, DEFAULT_TIMEOUT);
@@ -483,8 +489,8 @@ public abstract class AbstractPage {
 
     //-------- common actions ---------
 
-    public CommonPage getCommonPage() {
-        return new CommonPage(getDriver());
+    public NavPanelPage getCommonPage() {
+        return new NavPanelPage(getDriver());
     }
 
 }

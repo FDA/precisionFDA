@@ -1,18 +1,15 @@
 class Event::JobClosed < Event
+  alias_attribute :dxid, :param1
+  alias_attribute :runtime, :param2
+  alias_attribute :price, :param3
+  alias_attribute :state, :param4
 
-  event_attribute :dxid, db_column: :param1
-  event_attribute :runtime, db_column: :param2
-  event_attribute :price, db_column: :param3
-  event_attribute :state, db_column: :param4
-  event_attribute :dxuser
-  event_attribute :org_handle
+  scope :failed, -> { where(state: Job::STATE_FAILED) }
 
-  scope :failed, -> { where(param4: Job::STATE_FAILED) }
-
-  def self.create(job, user)
+  def self.create_for(job, user)
     return unless job.terminal?
 
-    super(
+    create(
       dxid: job.dxid,
       runtime: job.runtime,
       price: job.describe["totalPrice"],
@@ -21,5 +18,4 @@ class Event::JobClosed < Event
       org_handle: user.org.handle
     )
   end
-
 end

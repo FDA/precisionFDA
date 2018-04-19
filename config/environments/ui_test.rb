@@ -39,11 +39,16 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
+  config.active_record.migration_error = :page_load
+
   # SSL
   config.force_ssl = true
 
-  STDOUT.sync = true
-  logger           = ActiveSupport::Logger.new(STDOUT)
-  logger.formatter = config.log_formatter
-  config.logger = ActiveSupport::TaggedLogging.new(logger)
+  if ENV['RAILS_LOG_TO_STDOUT']
+    STDOUT.sync = true
+    logger           = ActiveSupport::Logger.new(STDOUT)
+    logger.formatter = config.log_formatter
+    config.logger = ActiveSupport::TaggedLogging.new(logger)
+  end
+
 end

@@ -30,5 +30,7 @@ public class CommonLocators {
 
     public static final String MAIN_LOGO = "//a[@class='navbar-brand']/img";
 
+    public static final String SPACES_ICON_ACTIVE = "//*[@id='pfda-navbar-collapse']//li[@class='active']/a[contains(@href, 'spaces')]";
+
 
 }

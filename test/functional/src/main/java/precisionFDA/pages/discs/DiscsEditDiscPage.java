@@ -52,6 +52,10 @@ public class DiscsEditDiscPage extends AbstractPage {
         return attachModalFilesTab;
     }
 
+    public By getAttachModalFilesTabBy() {
+        return By.xpath(DiscsLocators.EDIT_DISC_ATTACH_MODAL_FILES_TAB);
+    }
+
     public Button getAttachButton() {
         return attachButton;
     }
@@ -86,7 +90,7 @@ public class DiscsEditDiscPage extends AbstractPage {
 
     public DiscsEditDiscPage clickSave() {
         log.info("click Save");
-        isElementPresent(getSaveButtonLink(), 5);
+        waitUntilDisplayed(getSaveButtonLink(), 10);
         getSaveButtonLink().click();
         return new DiscsEditDiscPage(getDriver());
     }
@@ -115,6 +119,7 @@ public class DiscsEditDiscPage extends AbstractPage {
         getFileCheckboxOnModal(fileName).click();
         isElementPresent(getAttachModalSelectButton(), 5);
         getAttachModalSelectButton().click();
+        waitUntilNotDisplayed(getAttachModalFilesTabBy(), 10);
         return new DiscsEditDiscPage(getDriver());
     }
 

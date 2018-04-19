@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180125085602) do
+ActiveRecord::Schema.define(version: 20180417083411) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -230,6 +230,8 @@ ActiveRecord::Schema.define(version: 20180125085602) do
     t.string   "param4",     limit: 255
   end
 
+  add_index "events", ["type", "created_at"], name: "index_events_on_type_and_created_at", using: :btree
+
   create_table "expert_answers", force: :cascade do |t|
     t.integer  "expert_id",          limit: 4
     t.integer  "expert_question_id", limit: 4
@@ -445,6 +447,11 @@ ActiveRecord::Schema.define(version: 20180125085602) do
   add_index "saved_queries", ["grid_name"], name: "index_saved_queries_on_grid_name", using: :btree
   add_index "saved_queries", ["user_id"], name: "index_saved_queries_on_user_id", using: :btree
 
+  create_table "settings", force: :cascade do |t|
+    t.string "key",   limit: 255, null: false
+    t.string "value", limit: 255, null: false
+  end
+
   create_table "space_memberships", force: :cascade do |t|
     t.integer  "user_id",    limit: 4
     t.integer  "space_id",   limit: 4
@@ -557,6 +564,7 @@ ActiveRecord::Schema.define(version: 20180125085602) do
     t.text    "meta",                      limit: 65535
   end
 
+  add_index "truth_challenge_results", ["answer_id"], name: "index_truth_challenge_results_on_answer_id", using: :btree
   add_index "truth_challenge_results", ["entry"], name: "index_truth_challenge_results_on_entry", using: :btree
   add_index "truth_challenge_results", ["fp_al"], name: "index_truth_challenge_results_on_fp_al", using: :btree
   add_index "truth_challenge_results", ["fp_gt"], name: "index_truth_challenge_results_on_fp_gt", using: :btree
@@ -591,13 +599,19 @@ ActiveRecord::Schema.define(version: 20180125085602) do
   add_index "truth_challenge_results", ["type"], name: "index_truth_challenge_results_on_type", using: :btree
 
   create_table "usage_metrics", force: :cascade do |t|
-    t.integer  "user_id",               limit: 4,                           null: false
-    t.integer  "storage_usage",         limit: 8
-    t.decimal  "daily_compute_price",             precision: 30, scale: 20
-    t.decimal  "weekly_compute_price",            precision: 30, scale: 20
-    t.decimal  "monthly_compute_price",           precision: 30, scale: 20
-    t.decimal  "yearly_compute_price",            precision: 30, scale: 20
+    t.integer  "user_id",                    limit: 4,                           null: false
+    t.integer  "storage_usage",              limit: 8
+    t.decimal  "daily_compute_price",                  precision: 30, scale: 20
+    t.decimal  "weekly_compute_price",                 precision: 30, scale: 20
+    t.decimal  "monthly_compute_price",                precision: 30, scale: 20
+    t.decimal  "yearly_compute_price",                 precision: 30, scale: 20
     t.datetime "created_at"
+    t.integer  "daily_byte_hours",           limit: 8
+    t.integer  "weekly_byte_hours",          limit: 8
+    t.integer  "monthly_byte_hours",         limit: 8
+    t.integer  "yearly_byte_hours",          limit: 8
+    t.integer  "custom_range_byte_hours",    limit: 8
+    t.decimal  "custom_range_compute_price",           precision: 30, scale: 20
   end
 
   create_table "users", force: :cascade do |t|
@@ -622,6 +636,17 @@ ActiveRecord::Schema.define(version: 20180125085602) do
   add_index "users", ["dxuser"], name: "index_users_on_dxuser", unique: true, using: :btree
   add_index "users", ["normalized_email"], name: "index_users_on_normalized_email", using: :btree
   add_index "users", ["org_id"], name: "index_users_on_org_id", using: :btree
+
+  create_table "versions", force: :cascade do |t|
+    t.string   "item_type",  limit: 191,        null: false
+    t.integer  "item_id",    limit: 4,          null: false
+    t.string   "event",      limit: 255,        null: false
+    t.string   "whodunnit",  limit: 255
+    t.text     "object",     limit: 4294967295
+    t.datetime "created_at"
+  end
+
+  add_index "versions", ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id", using: :btree
 
   create_table "votes", force: :cascade do |t|
     t.integer  "votable_id",   limit: 4
@@ -687,6 +712,8 @@ ActiveRecord::Schema.define(version: 20180125085602) do
   add_foreign_key "apps_assets", "nodes", column: "asset_id"
   add_foreign_key "archive_entries", "nodes", column: "asset_id"
   add_foreign_key "challenge_resources", "challenges"
+  add_foreign_key "challenge_resources", "nodes", column: "user_file_id"
+  add_foreign_key "challenge_resources", "users"
   add_foreign_key "challenges", "apps"
   add_foreign_key "challenges", "users", column: "admin_id"
   add_foreign_key "challenges", "users", column: "app_owner_id"
