@@ -20,7 +20,7 @@ public class AdminDashboardTest extends AbstractTest {
 
         UserProfile user = TestUserData.getAdminUser();
 
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(
                 overviewPage.isNavigationPanelDisplayed())
@@ -76,6 +76,11 @@ public class AdminDashboardTest extends AbstractTest {
         ActivityReportsPage reportsPage = dashboardPage.clickActivityReports();
 
         assertThat(
+                reportsPage.isAlertDangerDisplayed())
+                .as("Alert danger is displayed")
+                .isFalse();
+
+        assertThat(
                 reportsPage.areChartsDisplayed())
                 .as("All charts are displayed")
                 .isTrue();
@@ -115,6 +120,11 @@ public class AdminDashboardTest extends AbstractTest {
         ActivityReportsPage reportsPage = dashboardPage.clickActivityReports();
 
         assertThat(
+                reportsPage.isAlertDangerDisplayed())
+                .as("Alert danger is displayed")
+                .isFalse();
+
+        assertThat(
                 reportsPage.isDayDateRangeButtonDisplayed())
                 .as("Day Date Range button is displayed")
                 .isTrue();
@@ -142,6 +152,11 @@ public class AdminDashboardTest extends AbstractTest {
         reportsPage.clickDayRangeButton();
 
         assertThat(
+                reportsPage.isAlertDangerDisplayed())
+                .as("Alert danger is displayed")
+                .isFalse();
+
+        assertThat(
                 reportsPage.toDateEqualsToday())
                 .as("To Date input has Today date")
                 .isTrue();
@@ -152,6 +167,11 @@ public class AdminDashboardTest extends AbstractTest {
                 .isTrue();
 
         reportsPage.clickWeekRangeButton();
+
+        assertThat(
+                reportsPage.isAlertDangerDisplayed())
+                .as("Alert danger is displayed")
+                .isFalse();
 
         assertThat(
                 reportsPage.toDateEqualsToday())
@@ -166,6 +186,11 @@ public class AdminDashboardTest extends AbstractTest {
         reportsPage.clickMonthRangeButton();
 
         assertThat(
+                reportsPage.isAlertDangerDisplayed())
+                .as("Alert danger is displayed")
+                .isFalse();
+
+        assertThat(
                 reportsPage.toDateEqualsToday())
                 .as("To Date input has Today date")
                 .isTrue();
@@ -176,6 +201,11 @@ public class AdminDashboardTest extends AbstractTest {
                 .isTrue();
 
         reportsPage.clickYearRangeButton();
+
+        assertThat(
+                reportsPage.isAlertDangerDisplayed())
+                .as("Alert danger is displayed")
+                .isFalse();
 
         SoftAssert.assertThat(
                 reportsPage.toDateEqualsToday())
@@ -203,24 +233,32 @@ public class AdminDashboardTest extends AbstractTest {
 
         UsersAndUsagePage usersAndUsagePage = dashboardPage.clickUsersAndUsageLink();
 
-        assertThat(
-                usersAndUsagePage.isUsersAndUsageExportCSVDisplayed())
-                .as("Users&Usage export to CSV is displayed")
-                .isTrue();
+        if (!usersAndUsagePage.isNoRecordsFoundDisplayed()) {
+            assertThat(
+                    usersAndUsagePage.isUsersAndUsageExportCSVDisplayed())
+                    .as("Users&Usage export to CSV is displayed")
+                    .isTrue();
 
-        removeUsersAndUsageFileFromDownloads();
-        usersAndUsagePage.exportToCSV();
-        usersAndUsagePage.waitUntilUsersAndUsageFileIsDownloaded();
+            removeUsersAndUsageFileFromDownloads();
+            usersAndUsagePage.exportToCSV();
+            usersAndUsagePage.waitUntilUsersAndUsageFileIsDownloaded();
 
-        assertThat(
-                usersAndUsagePage.isUsersAndUsageFileDownloaded())
-                .as("Users&Usage file is downloaded")
-                .isTrue();
+            assertThat(
+                    usersAndUsagePage.isUsersAndUsageFileDownloaded())
+                    .as("Users&Usage file is downloaded")
+                    .isTrue();
 
-        assertThat(
-                usersAndUsagePage.isUsersAndUsageFileCorrect())
-                .as("Users&Usage file is correct one")
-                .isTrue();
+            assertThat(
+                    usersAndUsagePage.isUsersAndUsageFileCorrect())
+                    .as("Users&Usage file is correct one")
+                    .isTrue();
+        }
+        else {
+            assertThat(
+                    usersAndUsagePage.isUsersAndUsageExportCSVDisplayed())
+                    .as("Users&Usage export to CSV is NOT displayed because No Records Found")
+                    .isFalse();
+        }
     }
 
 }

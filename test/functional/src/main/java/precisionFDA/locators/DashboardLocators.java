@@ -56,6 +56,8 @@ public class DashboardLocators {
 
     public static final String ACTIVITY_REPORTS_WRONG_PERIOD_ERROR = "//*[contains(@class, 'alert-danger')][contains(text(), 'greater')]";
 
+    public static final String ACTIVITY_REPORTS_ALERT_DANGER = "//*[contains(@class, 'alert-danger')]";
+
     public static final String ACTIVITY_REPORTS_BOOTSTRAP_CALENDAR_POPUP = "//*[contains(@class, 'bootstrap-datetimepicker-widget')]";
 
     public static final String ACTIVITY_REPORTS_BOOTSTRAP_CALENDAR_POPUP_NEXT_MONTH_ARROW = "//*[@class='datepicker-days']//th[@data-action='next']";
@@ -79,5 +81,9 @@ public class DashboardLocators {
     public static final String USERS_AND_USAGE_CURRENT_STORAGE_COLUMN_LINK = "//a[text()='Current storage usage']";
 
     public static final String USERS_AND_USAGE_EXPORT_TO_CSV_BUTTON = "//*[contains(@class, 'csv-export-button')]";
+
+    public static final String USERS_AND_USAGE_NO_RECORDS_FOUND = "//*[@class='empty-grid']//*[contains(text(), 'o records found')]";
+
+    public static final String USERS_AND_USAGE_TITLE_ICON = "//*[@class='page-title']//i[contains(@class, 'fa-users')]";
 
 }

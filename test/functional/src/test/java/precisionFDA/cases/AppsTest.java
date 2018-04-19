@@ -23,7 +23,7 @@ public class AppsTest extends AbstractTest {
 
         UserProfile user = TestUserData.getTestUserOne();
 
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(
                 overviewPage.isNavigationPanelDisplayed())
@@ -61,7 +61,7 @@ public class AppsTest extends AbstractTest {
         AppProfile appProfile = getMainAppProfile();
         UserProfile user = TestUserData.getTestUserOne();
 
-        AppsRelevantPage appsRelevantPage = openAppsPage().openAppsRelevantPage();
+        AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
                 appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
@@ -124,7 +124,7 @@ public class AppsTest extends AbstractTest {
 
         AppProfile appProfile = getMainAppProfile();
 
-        AppsRelevantPage appsRelevantPage = openAppsPage().openAppsRelevantPage();
+        AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
                 appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
@@ -151,7 +151,7 @@ public class AppsTest extends AbstractTest {
         AppProfile appProfile = getMainAppProfile();
         UserProfile user = TestUserData.getTestUserOne();
 
-        AppsRelevantPage appsRelevantPage = openAppsPage().openAppsRelevantPage();
+        AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
                 appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
@@ -191,7 +191,7 @@ public class AppsTest extends AbstractTest {
 
         AppProfile appProfile = getRunJobAppProfile();
 
-        AppsPage appsPage = openAppsPage();
+        AppsPage appsPage = openOverviewPage().openAppsPage();
         AppsEditAppPage appsEditAppPage = appsPage.openCreateAppPage();
         AppsSavedAppPage appsSavedAppPage = appsEditAppPage.fillAndSaveNewApp(appProfile);
 
@@ -214,7 +214,7 @@ public class AppsTest extends AbstractTest {
                 .as("job name value on the job page")
                 .isEqualTo(appProfile.getJobNameText());
 
-        appsJobPage = appsJobPage.waitUntilJobIsDone();
+        appsJobPage = appsJobPage.waitUntilJobFinished();
 
         assertThat(appsJobPage.getJobLabelValue())
                 .as("Job Label Value")
@@ -237,7 +237,7 @@ public class AppsTest extends AbstractTest {
 
         AppProfile appProfile = getRunJobAppProfile();
 
-        AppsRelevantPage appsRelevantPage = openAppsPage().openAppsRelevantPage();
+        AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(appsRelevantPage.isLinkToJobsListAppDisplayed(appProfile))
                 .as("Link to the application in the jobs list is displayed")
@@ -254,7 +254,7 @@ public class AppsTest extends AbstractTest {
                 .as("Job name is displayed: " + appProfile.getJobNameText())
                 .isTrue();
 
-        appsRelevantPage = openAppsPage().openAppsRelevantPage();
+        appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         AppsJobPage appsJobPage = appsRelevantPage.openJobFromJobsList(appProfile);
 
@@ -270,7 +270,7 @@ public class AppsTest extends AbstractTest {
 
         AppProfile appProfile = getMainAppProfile();
 
-        AppsRelevantPage appsRelevantPage = openAppsPage().openAppsRelevantPage();
+        AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
                 appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
@@ -300,7 +300,7 @@ public class AppsTest extends AbstractTest {
 
         AppProfile appProfile = getMainAppProfile();
 
-        AppsRelevantPage appsRelevantPage = openAppsPage().openAppsRelevantPage();
+        AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
                 appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
@@ -333,7 +333,7 @@ public class AppsTest extends AbstractTest {
 
         AppProfile appProfile = getMainAppProfile();
 
-        AppsRelevantPage appsRelevantPage = openAppsPage().openAppsRelevantPage();
+        AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
                 appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
@@ -355,7 +355,7 @@ public class AppsTest extends AbstractTest {
 
         AppProfile appProfile = getMainAppProfile();
 
-        AppsRelevantPage appsRelevantPage = openAppsPage().openAppsRelevantPage();
+        AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
                 appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
@@ -392,7 +392,7 @@ public class AppsTest extends AbstractTest {
         AppProfile appProfile = getCheckRevisionAppProfile();
         UserProfile user = TestUserData.getTestUserOne();
 
-        AppsPage appsPage = openAppsPage();
+        AppsPage appsPage = openOverviewPage().openAppsPage();
         AppsEditAppPage appsEditAppPage = appsPage.openCreateAppPage();
         AppsSavedAppPage appsSavedAppPage = appsEditAppPage.fillAndSaveNewApp(appProfile);
 
@@ -446,7 +446,7 @@ public class AppsTest extends AbstractTest {
 
         AppProfile appProfile = getMainAppProfile();
 
-        AppsRelevantPage appsRelevantPage = openAppsPage().openAppsRelevantPage();
+        AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
                 appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
@@ -479,7 +479,7 @@ public class AppsTest extends AbstractTest {
 
         AppProfile appProfile = getMainAppProfile();
 
-        AppsRelevantPage appsRelevantPage = openAppsPage().openAppsRelevantPage();
+        AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
                 appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
@@ -512,7 +512,7 @@ public class AppsTest extends AbstractTest {
 
         AppProfile appProfile = getMainAppProfile();
 
-        AppsRelevantPage appsRelevantPage = openAppsPage().openAppsRelevantPage();
+        AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
                 appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))
@@ -545,7 +545,7 @@ public class AppsTest extends AbstractTest {
 
         AppProfile appProfile = getMainAppProfile();
 
-        AppsRelevantPage appsRelevantPage = openAppsPage().openAppsRelevantPage();
+        AppsRelevantPage appsRelevantPage = openOverviewPage().openAppsPage().openAppsRelevantPage();
 
         assertThat(
                 appsRelevantPage.isLinkToMyAppsAppDisplayed(appProfile))

@@ -14,7 +14,8 @@
 # Ignore all logfiles and tempfiles.
 /log/*
 !/log/.keep
-/tmp
+/tmp/*
+!/tmp/.keep
 *.swp
 
 # Ignore generated assets
@@ -37,11 +38,11 @@
 /test/functional/target
 /test/functional/*.iml
 
-#Ignore browser drivers
+#Ignore test browser drivers
 /test/functional/drivers/chromedriver
 /test/functional/drivers/geckodriver
 
-#Ignore temp files
+#Ignore test temp files
 /test/functional/src/main/resources/tempFiles/*.txt
 /test/functional/src/main/resources/tempFiles/*.png
 /test/functional/src/main/resources/tempFiles/Docker*
@@ -53,3 +54,7 @@
 # Ignore local environment
 .env
 .env.*
+
+# Ignore local scripts
+run-ui-test.sh
+

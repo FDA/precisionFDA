@@ -99,7 +99,7 @@ class SubmissionsController < ApplicationController
       return
     end
 
-    js graph: graph_decorator.for_publisher(not_public_items, scope),
+    js graph: GraphDecorator.for_publisher(@context, not_public_items, scope),
        space: nil,
        scope_to_publish_to: scope,
        params: params
@@ -253,7 +253,7 @@ class SubmissionsController < ApplicationController
       _inputs: input_info.file_dxids
     )
 
-    Event::SubmissionCreated.create(submission, @context.user)
+    Event::SubmissionCreated.create_for(submission, @context.user)
 
     flash[:success] = "Your entry was submitted successfully."
   end
@@ -313,10 +313,6 @@ class SubmissionsController < ApplicationController
 
   def input_spec_preparer
     @input_spec_preparer ||= InputSpecPreparer.new(@context)
-  end
-
-  def graph_decorator
-    @graph_decorator ||= GraphDecorator.new(@context)
   end
 
   def job_creator

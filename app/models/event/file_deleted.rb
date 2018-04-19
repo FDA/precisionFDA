@@ -1,13 +1,10 @@
 class Event::FileDeleted < Event
+  alias_attribute :file_size, :param1
+  alias_attribute :dxid, :param2
+  alias_attribute :scope, :param3
 
-  event_attribute :file_size, db_column: :param1
-  event_attribute :dxid, db_column: :param2
-  event_attribute :scope, db_column: :param3
-  event_attribute :dxuser
-  event_attribute :org_handle
-
-  def self.create(file, user)
-    super(
+  def self.create_for(file, user)
+    create(
       dxid: file.dxid,
       file_size: file.file_size,
       scope: file.scope,
@@ -15,5 +12,4 @@ class Event::FileDeleted < Event
       org_handle: user.org.handle
     )
   end
-
 end

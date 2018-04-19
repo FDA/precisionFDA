@@ -22,10 +22,17 @@ public class UsersAndUsagePage extends AbstractPage {
     @FindBy(xpath = DashboardLocators.USERS_AND_USAGE_EXPORT_TO_CSV_BUTTON)
     private WebElement exportToCSVButton;
 
+    @FindBy(xpath = DashboardLocators.USERS_AND_USAGE_NO_RECORDS_FOUND)
+    private WebElement noRecordsFound;
+
     public UsersAndUsagePage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
-        waitForPageToLoadAndVerifyBy(By.xpath(DashboardLocators.USERS_AND_USAGE_CURRENT_STORAGE_COLUMN_LINK));
+        waitForPageToLoadAndVerifyBy(By.xpath(DashboardLocators.USERS_AND_USAGE_TITLE_ICON));
+    }
+
+    public WebElement getNoRecordsFound() {
+        return noRecordsFound;
     }
 
     public WebElement getExportToCSVButton() {
@@ -66,6 +73,10 @@ public class UsersAndUsagePage extends AbstractPage {
             }
         }
         return flag;
+    }
+
+    public boolean isNoRecordsFoundDisplayed() {
+        return isElementPresent(getNoRecordsFound(), 1);
     }
 
 }

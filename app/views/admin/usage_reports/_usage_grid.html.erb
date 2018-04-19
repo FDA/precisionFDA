@@ -29,4 +29,27 @@
     number_to_currency(metric.yearly_compute_price || 0)
   end
 
+  g.column name: "Compute in custom range", attribute: "custom_range_compute_price", filter_type: :range  do |metric|
+    number_to_currency(metric.custom_range_compute_price || 0)
+  end
+
+  g.column name: "Consumption in past day", attribute: "daily_byte_hours", filter_type: :range  do |metric|
+    number_to_human_size(metric.daily_byte_hours || 0) + "-Hours"
+  end
+
+  g.column name: "Consumption in past week", attribute: "weekly_byte_hours", filter_type: :range  do |metric|
+    number_to_human_size(metric.weekly_byte_hours || 0) + "-Hours"
+  end
+
+  g.column name: "Consumption in past month", attribute: "monthly_byte_hours", filter_type: :range  do |metric|
+    number_to_human_size(metric.monthly_byte_hours || 0) + "-Hours"
+  end
+
+  g.column name: "Consumption in past year", attribute: "yearly_byte_hours", filter_type: :range  do |metric|
+    number_to_human_size(metric.yearly_byte_hours || 0) + "-Hours"
+  end
+
+  g.column name: "Consumption in custom range", attribute: "custom_range_byte_hours", filter_type: :range  do |metric|
+    number_to_human_size(metric.custom_range_byte_hours || 0) + "-Hours"
+  end
 end %>
