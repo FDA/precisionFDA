@@ -82,7 +82,5 @@ APPATHON_IN_A_BOX_DISCUSSION_ID = 22
 APPATHON_IN_A_BOX_RESULTS_DATE = DateTime.new(2017,1,4,14,10).in_time_zone + 8.hours
 ACTIVE_META_APPATHON = APPATHON_IN_A_BOX_HANDLE
 
-MAX_MINUTES_INACTIVITY = ENV.fetch("MAX_TIME_INACTIVITY", 15).to_i
-
 # Remove X-Runtime
 Rails.application.config.middleware.delete(Rack::Runtime)

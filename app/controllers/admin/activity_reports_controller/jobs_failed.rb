@@ -1,6 +1,6 @@
-module Api
+module Admin
   class ActivityReportsController
-    class UsersSignedUpForChallenge < AbstractData
+    class JobsFailed < AbstractData
 
       def total
         collection.count
@@ -27,7 +27,7 @@ module Api
       private
 
       def collection
-        Event::SignedUpForChallenge.date_range(start_date, end_date)
+        Event::JobClosed.failed.date_range(start_date, end_date)
       end
 
     end
