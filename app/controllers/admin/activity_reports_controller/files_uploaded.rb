@@ -1,4 +1,4 @@
-module Api
+module Admin
   class ActivityReportsController
     class FilesUploaded < AbstractData
 

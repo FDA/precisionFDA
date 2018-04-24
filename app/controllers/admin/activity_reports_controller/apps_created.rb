@@ -1,6 +1,6 @@
-module Api
+module Admin
   class ActivityReportsController
-    class UsersAccessRequested < AbstractData
+    class AppsCreated < AbstractData
 
       def total
         collection.count
@@ -27,7 +27,7 @@ module Api
       private
 
       def collection
-        Event::UserAccessRequested.date_range(start_date, end_date)
+        Event::AppCreated.date_range(start_date, end_date)
       end
 
     end
