@@ -2,7 +2,7 @@ class ChallengesController < ApplicationController
   skip_before_action :require_login, {only: [:index, :consistency, :truth, :appathons, :join, :show]}
   before_action :require_login_or_guest, only: []
   before_action :check_on_challenge_admin, only: %i(new create)
-  before_action :find_editable_challenge, only: %i(edit update edit_page announce_result)
+  before_action :find_editable_challenge, only: %i(edit update edit_page save_page announce_result)
 
   helper_method :app_owners_for_select
 
@@ -119,6 +119,17 @@ class ChallengesController < ApplicationController
     js challenge: @challenge.slice(:id)
   end
 
+  def save_page
+    return if params[:regions].blank?
+
+    @challenge.regions = @challenge.regions.merge(params[:regions])
+
+    if @challenge.save
+      render json: { msg: "saved" }
+    else
+      render json: { errors: @challenge.errors.full_messages.join(", ") }
+    end
+  end
 
   def show
     @challenge = Challenge.find_by(id: params[:id])
