@@ -1,6 +1,6 @@
-module Api
+module Admin
   class ActivityReportsController
-    class JobsRun < AbstractData
+    class AppsPublished < AbstractData
 
       def total
         collection.count
@@ -27,7 +27,7 @@ module Api
       private
 
       def collection
-        Event::JobRun.date_range(start_date, end_date)
+        Event::AppPublished.date_range(start_date, end_date)
       end
 
     end
