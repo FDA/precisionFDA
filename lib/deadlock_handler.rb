@@ -1,10 +1,7 @@
 module DeadlockHandler
-  def self.included(base)
-    base.extend(ClassMethods)
-    base.class_eval do
-      class << self
-        alias_method_chain :transaction, :deadlock_handling
-      end
+  def self.prepended(base)
+    class << base
+      prepend ClassMethods
     end
   end
 
@@ -15,8 +12,8 @@ module DeadlockHandler
       "deadlock detected",
     ]
 
-    def transaction_with_deadlock_handling(*objects, &block)
-      transaction_without_deadlock_handling(*objects, &block)
+    def transaction(_options = {}, &block)
+      super
     rescue ActiveRecord::StatementInvalid => error
       raise unless DEADLOCK_ERROR_MESSAGES.any? { |msg| error.message =~ /#{Regexp.escape(msg)}/ }
 

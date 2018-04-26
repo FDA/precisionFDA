@@ -1,1 +1,1 @@
-ActiveRecord::Base.send(:include, DeadlockHandler) if defined?(ActiveRecord)
+ActiveRecord::Base.prepend(DeadlockHandler) if defined?(ActiveRecord)
