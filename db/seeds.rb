@@ -1,8 +1,11 @@
+require_relative('migrate/20180516114442_seed_news_items')
+
 first_name = ENV.fetch('PFDA_USER_FIRST_NAME', 'Alice')
 last_name = ENV.fetch('PFDA_USER_LAST_NAME', 'Black')
 email = ENV.fetch('PFDA_USER_EMAIL', 'alice.black@alice.black.com')
 dxuser = ENV.fetch('PFDA_USER_DXUSER', 'automationtestuser')
 org_handle = ENV.fetch('PFDA_USER_ORG_HANDLE', 'automationtestinggmbh')
+
 
 ActiveRecord::Base.transaction do
   user = User.create!(
@@ -77,4 +80,7 @@ ActiveRecord::Base.transaction do
     private_files_project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
     public_files_project: CHALLENGE_BOT_PUBLIC_FILES_PROJECT
   )
+
+  # load articles generated from stuff.
+  SeedNewsItems.new.up
 end

@@ -87,8 +87,11 @@ gem 'gretel'
 # View outgoing HTTP requests
 gem 'httplog'
 
+gem 'simple_form'
+
 group :development do
   gem 'byebug'
+  gem 'pry-rails'
 
   # Access an IRB console on exception pages or by using <%= console %> in views
   gem 'web-console', '~> 2.0'

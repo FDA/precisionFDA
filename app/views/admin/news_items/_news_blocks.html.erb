@@ -1,0 +1,36 @@
+<%= javascript_tag "window._token = '#{form_authenticity_token}'" %>
+
+<div class="pfda-cards pfda-cards-news" data-bind="sortable: {template: 'news_item', data: news_items, beforeMove: movedItem}"></div>
+<script type="text/html" id="news_item">
+    <div target="blank" class="pfda-card pfda-card-padded pfda-card-light pfda-card-rounded pfda-card-bordered">
+      <div data-bind="ifnot: video">
+        <div class="pfda-card-title">
+          <span data-bind="ifnot: published" >
+            <span title="This item is not published" class="fa fa-lock">
+            </span>
+          </span>
+          <a target='blank' data-bind="attr: {href: link, title: title}, text: title"></a>
+        </div>
+        <hr/>
+        <div class="pfda-card-body" data-bind="text: content">
+        </div>
+      </div>
+
+      <div data-bind="if: video">
+        <div class="embed-responsive embed-responsive-16by9">
+          <iframe class="embed-responsive-item" data-bind="if: video, attr: {src: video}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+        <div class="pfda-card-title">
+          <span data-bind="ifnot: published">
+            <span title="This item is not published" class="fa fa-lock">
+            </span>
+          </span>
+          <hr/>
+          <a data-bind="attr: {href: link, title: title}, text: title"></a>
+        </div>
+      </div>
+
+      <a class="fa fa-trash fa-fw" data-bind="attr: {href: urlFor}" data-method="delete" rel="nofollow" data-confirm="Are you sure?" ></a>
+      <a class="fa fa-edit fa-fw" data-bind="attr: {href: editUrl}"></a>
+    </div>
+</script>
