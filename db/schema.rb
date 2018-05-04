@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180417083411) do
+ActiveRecord::Schema.define(version: 20180511133729) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -380,6 +380,21 @@ ActiveRecord::Schema.define(version: 20180417083411) do
   end
 
   add_index "meta_appathons", ["handle"], name: "index_meta_appathons_on_handle", unique: true, using: :btree
+
+  create_table "news_items", force: :cascade do |t|
+    t.string   "title",      limit: 255
+    t.string   "link",       limit: 255
+    t.date     "when"
+    t.text     "content",    limit: 65535
+    t.integer  "user_id",    limit: 4
+    t.string   "video",      limit: 255
+    t.integer  "position",   limit: 4,     default: 0, null: false
+    t.boolean  "published"
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+  end
+
+  add_index "news_items", ["position"], name: "position_news_items_idx", using: :btree
 
   create_table "nodes", force: :cascade do |t|
     t.string   "dxid",                    limit: 255

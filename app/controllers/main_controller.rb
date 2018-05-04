@@ -17,6 +17,8 @@ class MainController < ApplicationController
 
     @experts = Expert.public.order(created_at: :desc).limit(10) # TODO: filter by published ones only
 
+    @news_items = NewsItem.published.positioned
+
     @meta_appathon = MetaAppathon.active
     if !@meta_appathon.nil?
       if @context.logged_in?
@@ -161,6 +163,7 @@ class MainController < ApplicationController
   end
 
   def news
+    @news_items = NewsItem.positioned.published
   end
 
   def presskit

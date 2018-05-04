@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+
   #
   # Remove the ability to switch formats (i.e. /foo vs /foo.json or /foo.xml)
   # by wrapping everything into a scope
@@ -9,6 +10,9 @@ Rails.application.routes.draw do
 
       root "dashboard#index"
 
+      resources :news_items, path: 'news'
+      post 'news/positions' => 'news_items#positions'
+      
       resources :activity_reports, only: [:index] do
         collection do
           get "total"
@@ -54,6 +58,9 @@ Rails.application.routes.draw do
     get 'exception_test' => "main#exception_test"
     get 'presskit' => 'main#presskit'
     get 'news' => 'main#news'
+
+    # News Items, public
+    get '/news_items' => 'news_items#index'
 
     # API
     post '/api/publish', to: 'api#publish'

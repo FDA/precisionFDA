@@ -1,0 +1,26 @@
+<% @news_items.each do |n|%>
+  <div target="blank" class="pfda-card pfda-card-padded pfda-card-light pfda-card-rounded pfda-card-bordered">
+  
+    <% if n.video.blank? %>
+      <div class="pfda-card-title">
+        <%= link_to n.link, { title: n.title, target: 'blank'} do %>
+          <%= n.title %>
+        <% end %>
+      </div>
+      <hr/>
+      <div class="pfda-card-body">
+        <%= n.content %>
+      </div>
+    <% else %>
+      <div class="embed-responsive embed-responsive-16by9">
+        <iframe class="embed-responsive-item" src="<%= n.video %>"frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      </div>
+      <hr/>
+      <div class="pfda-card-title">
+        <%= link_to n.link, { title: n.title, target: 'blank' } do %>
+          <%= n.title %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>
