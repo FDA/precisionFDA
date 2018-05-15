@@ -17,7 +17,8 @@ module DeadlockHandler
     rescue ActiveRecord::StatementInvalid => error
       raise unless DEADLOCK_ERROR_MESSAGES.any? { |msg| error.message =~ /#{Regexp.escape(msg)}/ }
 
-      raise error, error.message + "\n" + innodb_deadlocks, error.backtrace
+      logger.error error.message + "\n" + innodb_deadlocks
+      logger.error error.backtrace.join("\n")
     end
 
     private
