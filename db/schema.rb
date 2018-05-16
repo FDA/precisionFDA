@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180511133729) do
+ActiveRecord::Schema.define(version: 20180516114442) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -286,6 +286,18 @@ ActiveRecord::Schema.define(version: 20180511133729) do
 
   add_index "follows", ["followable_id", "followable_type"], name: "fk_followables", using: :btree
   add_index "follows", ["follower_id", "follower_type"], name: "fk_follows", using: :btree
+
+  create_table "get_started_boxes", force: :cascade do |t|
+    t.string   "title",             limit: 255
+    t.string   "feature_url",       limit: 255
+    t.string   "documentation_url", limit: 255
+    t.text     "description",       limit: 65535
+    t.boolean  "public"
+    t.integer  "kind",              limit: 4,     default: 0
+    t.integer  "position",          limit: 4,     default: 0
+    t.datetime "created_at",                                  null: false
+    t.datetime "updated_at",                                  null: false
+  end
 
   create_table "invitations", force: :cascade do |t|
     t.string   "first_name", limit: 255
