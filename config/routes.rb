@@ -37,6 +37,9 @@ Rails.application.routes.draw do
       end
 
       get "active_users", to: "users#active"
+      resources :get_started_boxes, except: [:show] do
+        post :update_positions, on: :collection
+      end
     end
 
     # Main controller

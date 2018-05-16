@@ -1,4 +1,5 @@
 require_relative('migrate/20180516114442_seed_news_items')
+require_relative 'migrate/20180510104759_create_get_started_boxes'
 
 first_name = ENV.fetch('PFDA_USER_FIRST_NAME', 'Alice')
 last_name = ENV.fetch('PFDA_USER_LAST_NAME', 'Black')
@@ -83,4 +84,5 @@ ActiveRecord::Base.transaction do
 
   # load articles generated from stuff.
   SeedNewsItems.new.up
+  CreateGetStartedBoxes.new.up
 end

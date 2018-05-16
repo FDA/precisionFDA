@@ -20,7 +20,7 @@ class MainController < ApplicationController
     @news_items = NewsItem.published.positioned
 
     @meta_appathon = MetaAppathon.active
-    if !@meta_appathon.nil?
+    if @meta_appathon.present?
       if @context.logged_in?
         @user_appathon = @context.user.appathon_from_meta(@meta_appathon)
       end
@@ -143,6 +143,8 @@ class MainController < ApplicationController
       @participant_orgs = @participant_orgs.shuffle
       @participants = @participants.shuffle
     end
+
+    @get_started_boxes = GetStartedBox.visible.positioned
 
     js show_guidelines: show_guidelines
   end
