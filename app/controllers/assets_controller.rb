@@ -69,7 +69,8 @@ class AssetsController < ApplicationController
     title = asset_params[:title]
     if title.is_a?(String) && title != ""
       name = title + @asset.suffix
-      if @asset.rename(name, @context)
+      description = asset_params[:description] || @asset.description
+      if @asset.rename(name, description, @context)
         @asset.reload
         flash[:success] = "Asset renamed to \"#{@asset.name}\""
       else
