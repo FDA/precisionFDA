@@ -12,6 +12,8 @@ import precisionFDA.pages.AbstractPage;
 
 import java.util.List;
 
+import static precisionFDA.utils.Utils.sleep;
+
 public class ChallsPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
@@ -35,6 +37,7 @@ public class ChallsPage extends AbstractPage {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(ChallsLocators.CHALLS_PREV_CHALLS_TEXT));
+        sleep(getPageSleep());
     }
 
     public Link getChallsActivatedIconLink() {
@@ -128,8 +131,5 @@ public class ChallsPage extends AbstractPage {
         getDriver().findElement(getChallengeCardBy(challProfile)).click();
         return new ChallsCreatedChallPage(getDriver());
     }
-
-
-
 
 }

@@ -23,7 +23,7 @@ public class FilesPublishTest extends AbstractTest {
         FileProfile fileProfile = getPublishFileProfile();
         UserProfile user = TestUserData.getTestUserTwo();
 
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         FilesPage filesPage = openFilesPage();
 
         assertThat(
@@ -65,8 +65,8 @@ public class FilesPublishTest extends AbstractTest {
         FileProfile fileProfile = getPublishFileProfile();
         UserProfile user = TestUserData.getTestUserOne();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         FilesPage filesPage = openFilesPage();
 
         assertThat(
@@ -89,8 +89,8 @@ public class FilesPublishTest extends AbstractTest {
         FileProfile fileProfile = getPublishFileProfile();
         UserProfile user = TestUserData.getTestUserTwo();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         FilesPage filesPage = openFilesPage();
         UploadedFilePage uploadedFilePage = filesPage.openUploadedFile(fileProfile.getFileName());
 
@@ -130,8 +130,8 @@ public class FilesPublishTest extends AbstractTest {
         FileProfile fileProfile = getPublishFileProfile();
         UserProfile user = TestUserData.getTestUserOne();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         FilesPage filesPage = openFilesPage();
 
         assertThat(
@@ -179,8 +179,8 @@ public class FilesPublishTest extends AbstractTest {
 
         UserProfile user = TestUserData.getTestUserTwo();
 
-        logoutFromAll();
-        openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(user).grantAccess();
         FilesPage filesPage = openFilesPage();
 
         // upload a file in root one
@@ -238,27 +238,27 @@ public class FilesPublishTest extends AbstractTest {
 
         assertThat(
                 filesPage.isItemInPublishDialogDisplayed(secondFile.getFileName()))
-                .as("Second file is displayed on the Publish dialog")
+                .as("Second file is displayed on the Publish dialog: " + secondFile.getFileName())
                 .isTrue();
 
         assertThat(
-                filesPage.isItemInPublishDialogDisplayed(secondFile.getFileName()))
-                .as("Third file is displayed on the Publish dialog")
+                filesPage.isItemInPublishDialogDisplayed(thirdFile.getFileName()))
+                .as("Third file is displayed on the Publish dialog: " + thirdFile.getFileName())
                 .isTrue();
 
         assertThat(
                 filesPage.isItemInPublishDialogDisplayed(fileInRootTwo.getFileName()))
-                .as("File in root two is displayed on the Publish dialog")
+                .as("File in root two is displayed on the Publish dialog: " + fileInRootTwo.getFileName())
                 .isTrue();
 
         assertThat(
                 filesPage.isItemInPublishDialogDisplayed(fileInRootOne.getFileName()))
-                .as("File in root one is NOT displayed on the Publish dialog")
+                .as("File in root one is NOT displayed on the Publish dialog: " + fileInRootOne.getFileName())
                 .isFalse();
 
         assertThat(
                 filesPage.isItemInPublishDialogDisplayed(firstFile.getFileName()))
-                .as("First file is NOT displayed on the Publish dialog")
+                .as("First file is NOT displayed on the Publish dialog: " + firstFile.getFileName())
                 .isFalse();
 
         filesPage.clickPublishOnDialog();
@@ -267,27 +267,27 @@ public class FilesPublishTest extends AbstractTest {
 
         SoftAssert.assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileInRootOne.getFileName()))
-                .as("Link to file in root one is displayed on Explore page")
+                .as("Link to file in root one is displayed on Explore page: " + fileInRootOne.getFileName())
                 .isTrue();
 
         SoftAssert.assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(fileInRootTwo.getFileName()))
-                .as("Link to file in root teo is displayed on Explore page")
+                .as("Link to file in root two is displayed on Explore page: " + fileInRootTwo.getFileName())
                 .isTrue();
 
         SoftAssert.assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(firstFile.getFileName()))
-                .as("Link to first is displayed on Explore page")
+                .as("Link to first file is displayed on Explore page: " + firstFile.getFileName())
                 .isTrue();
 
         SoftAssert.assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(secondFile.getFileName()))
-                .as("Link to second is displayed on Explore page")
+                .as("Link to second file is displayed on Explore page: " + secondFile.getFileName())
                 .isTrue();
 
         SoftAssert.assertThat(
                 filesPage.isLinkToUploadedFileDisplayed(thirdFile.getFileName()))
-                .as("Link to third is displayed on Explore page")
+                .as("Link to third file is displayed on Explore page: " + thirdFile.getFileName())
                 .isTrue();
 
         SoftAssert.assertAll();
@@ -295,7 +295,7 @@ public class FilesPublishTest extends AbstractTest {
 
     @Test(priority = 5)
     public void movePublicFileByAdmin() {
-        printTestHeader("Test Case: move file in public space by admin");
+        printTestHeader("Test Case: move file to public space by admin");
 
         FileProfile moveFileProfile = getMoveInPublicSpaceFileProfile();
         FolderProfile moveFolder = getMoveInPublicSpaceFolder();
@@ -303,8 +303,8 @@ public class FilesPublishTest extends AbstractTest {
         UserProfile adminUser = TestUserData.getAdminUser();
 
         // login as another user
-        logoutFromAll();
-        openLoginPrecisionPage(anotherTestUser).correctLogin(anotherTestUser).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(anotherTestUser).grantAccess();
         FilesPage filesPage = openFilesPage();
 
         // upload a file by another user
@@ -320,8 +320,8 @@ public class FilesPublishTest extends AbstractTest {
         publishPage.clickPublishObjects();
 
         // login as admin
-        logoutFromAll();
-        openLoginPrecisionPage(adminUser).correctLogin(adminUser).grantAccess();
+        logoutFromPlatform();
+        openLoginPrecisionPage().correctLogin(adminUser).grantAccess();
         filesPage = openFilesPage();
         filesPage = filesPage.openFilesExplorePage();
 

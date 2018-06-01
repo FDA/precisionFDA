@@ -14,6 +14,8 @@ public class TestDict {
 
     static final String DICT_FAILED = "failed";
 
+    static final String DICT_FAIL = "fail";
+
     static final String DICT_PRIVATE = "Private";
 
     static final String DICT_PUBLIC = "Public";
@@ -102,6 +104,10 @@ public class TestDict {
         return DICT_FAILED;
     }
 
+    public static String getDictFail() {
+        return DICT_FAIL;
+    }
+
     public static String getDictPrivate() { return DICT_PRIVATE; }
 
     public static String getDictPublic() {
@@ -154,5 +160,21 @@ public class TestDict {
 
     public static String getDictPng() {
         return DICT_PNG;
+    }
+
+    public static String getDictLoc() {
+        return "loc";
+    }
+
+    public static final String getDictDev() {
+        return "dev";
+    }
+
+    public static String getDictProd() {
+        return "prod";
+    }
+
+    public static String getDictStaging() {
+        return "staging";
     }
 }

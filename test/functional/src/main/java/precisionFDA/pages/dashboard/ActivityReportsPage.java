@@ -19,6 +19,9 @@ public class ActivityReportsPage extends AbstractPage {
     @FindBy(xpath = DashboardLocators.ACTIVITY_REPORTS_USERS_VIEW_CHART)
     private WebElement usersViewChart;
 
+    @FindBy(xpath = DashboardLocators.ACTIVITY_REPORTS_ALERT_DANGER)
+    private WebElement alertDanger;
+
     @FindBy(xpath = DashboardLocators.ACTIVITY_REPORTS_USERS_ACCESS_REQUEST_CHART)
     private WebElement usersAccessRequestChart;
 
@@ -116,6 +119,10 @@ public class ActivityReportsPage extends AbstractPage {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(DashboardLocators.ACTIVITY_REPORTS_SELECT_PERIOD_BUTTONS));
+    }
+
+    public WebElement getAlertDanger() {
+        return alertDanger;
     }
 
     public WebElement getFromDateWithValue() {
@@ -246,6 +253,10 @@ public class ActivityReportsPage extends AbstractPage {
         return usersViewChart;
     }
 
+    public Boolean isAlertDangerDisplayed() {
+        return isElementPresent(getAlertDanger(), 1);
+    }
+
     public boolean areChartsDisplayed() {
         WebElement[] array = { getUsersViewChart(), getUsersUploadChart(), getUsersLoginsChart(),
                 getUsersGeneratedChart(), getUsersDownloadChart(), getUsersAccessRequestChart(),
@@ -288,6 +299,8 @@ public class ActivityReportsPage extends AbstractPage {
 
     public void setFromDateAsFirstDayNextMonth() {
         log.info("set From Date as the first day of next month");
+        getMonthDateRangeButton().click();
+        sleep(500);
         getFromDateInputVisible().click();
         waitUntilDisplayed(getPopupCalendar(), 5);
         sleep(500);
@@ -296,6 +309,7 @@ public class ActivityReportsPage extends AbstractPage {
         sleep(500);
         waitUntilDisplayed(getPopupCalendarFirstDay(), 10);
         getPopupCalendarFirstDay().click();
+        sleep(500);
     }
 
     public void clickSubmitDatePeriod() {

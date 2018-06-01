@@ -30,6 +30,8 @@ public class FilesLocators {
 
     public static final String FILES_COMMON_LINK_TO_UPLOADED_FILE = "//*[@id='files']//a[contains(@href, 'file-')]";
 
+    public static final String FILES_LINK_TO_UPLOADED_FILE_TEMPLATE = "//*[@id='files']//a[contains(@href, 'file-')][contains(text(), '{FILE_NAME}')]";
+
     public static final String FILES_DOWNLOAD_FILE_LINK = "//a[contains(@class, 'btn')]/span[contains(@class, 'download')]/..";
 
     public static final String FILES_UPLOADED_FILE_PAGE_TITLE = "//*[@class='page-title']";
@@ -45,6 +47,8 @@ public class FilesLocators {
     public static final String FILES_CREATE_FOLDER_FORM_NAME_INPUT = "//form//input[@id='name']";
 
     public static final String FILES_COMMON_LINK_TO_CREATED_FOLDER = "//td/a[contains(@href, 'folder')]";
+
+    public static final String FILES_LINK_TO_CREATED_FOLDER_TEMPLATE = "//td/a[contains(@href, 'folder')][contains(text(), '{FOLDER_NAME}')]";
 
     public static final String FILES_SUCCESS_ALERT = "//*[contains(@class, 'alert-success')]";
 
@@ -142,7 +146,7 @@ public class FilesLocators {
 
     public static final String FILES_DOWNLOAD_DIALOG_CLOSE_BUTTON = "//*[@id='download-files-modal']//button[text()='Close']";
 
-    public static final String FILES_DOWNLOAD_DIALOG_PLACE_TO_FOCUS = "//*[@id='download-files-modal']//tr[1]/td/span[contains(@class, 'help')]";
+    public static final String FILES_DOWNLOAD_DIALOG_PLACE_TO_FOCUS = "//*[@id='download-files-modal']//*[text()='My files']";
 
     public static final String FILES_MOVE_DIALOG_MOVE_HERE_BUTTON = "//*[@id='move_form']//button[text()='Move here']";
 
@@ -151,5 +155,7 @@ public class FilesLocators {
     public static final String FILES_SPACE_LINK = "//a[contains(text(), '{FILE_NAME}')]/../..//a[contains(@href, 'spaces')]";
 
     public static final String FILES_UPLOAD_RESTART_BUTTON = "//button[text()='Restart']";
+
+    public static final String FILES_DOWNLOAD_DIALOG_FIRST_DOWNLOAD_LINK = "//*[@id='download-files-modal']//tr[1]//a[contains(@href, 'download')]";
 
 }

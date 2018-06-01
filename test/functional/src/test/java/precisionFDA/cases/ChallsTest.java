@@ -20,8 +20,7 @@ import ru.yandex.qatools.htmlelements.annotations.Name;
 import static org.assertj.core.api.Assertions.assertThat;
 import static precisionFDA.data.TestChallsData.getExpectedChallDateTimeValue;
 import static precisionFDA.data.TestChallsData.getMainChallProfile;
-import static precisionFDA.data.TestFilesData.getMainNewChallEntryFile;
-import static precisionFDA.data.TestFilesData.getSecondNewChallEntryFile;
+import static precisionFDA.data.TestFilesData.*;
 import static precisionFDA.data.TestNewChallEntryData.getMainChallEntryProfile;
 import static precisionFDA.data.TestNewChallEntryData.getSecondChallEntryProfile;
 import static precisionFDA.data.TimeZonesData.getMoscowTimeZone;
@@ -37,7 +36,7 @@ public class ChallsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserTwo();
         TimeZoneProfile timeZone = getMoscowTimeZone();
 
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
 
         ProfilePage profilePage = overviewPage.openProfilePage();
         profilePage.setTimeZone(timeZone);
@@ -67,8 +66,8 @@ public class ChallsTest extends AbstractTest {
         ChallProfile challProfile = getMainChallProfile();
         TimeZoneProfile timeZone = getMoscowTimeZone();
 
-        logoutFromAll();
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
 
         ProfilePage profilePage = overviewPage.openProfilePage();
         profilePage.setTimeZone(timeZone);
@@ -81,9 +80,7 @@ public class ChallsTest extends AbstractTest {
                 .isTrue();
 
         ChallsEditChallPage editChallPage = challsPage.clickCreateNewChall();
-        editChallPage.fillChallForm(challProfile);
-
-        ChallsCreatedChallPage createdChallPage = editChallPage.clickCreate();
+        ChallsCreatedChallPage createdChallPage = editChallPage.fillAndSaveChallForm(challProfile);
 
         assertThat(
                 createdChallPage.getCreatedChallengeNameText())
@@ -198,8 +195,8 @@ public class ChallsTest extends AbstractTest {
         AppProfile appProfile = TestAppData.getChallAppProfile();
         ChallProfile challProfile = getMainChallProfile();
 
-        logoutFromAll();
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
         AppsRelevantPage appsRelevantPage = overviewPage.openAppsPage().openAppsRelevantPage();
         AppsSavedAppPage appsSavedAppPage = appsRelevantPage.openAppFromMyAppsList(appProfile);
 
@@ -223,8 +220,8 @@ public class ChallsTest extends AbstractTest {
         UserProfile user = TestUserData.getAdminUser();
         ChallProfile challProfile = getMainChallProfile();
 
-        logoutFromAll();
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
         ChallsPage challsPage = overviewPage.openChallsPage();
 
         assertThat(
@@ -253,8 +250,8 @@ public class ChallsTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserOne();
         ChallProfile challProfile = getMainChallProfile();
 
-        logoutFromAll();
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
         ChallsPage challsPage = overviewPage.openChallsPage();
 
         assertThat(
@@ -356,8 +353,8 @@ public class ChallsTest extends AbstractTest {
         FileProfile inputFileProfile = getSecondNewChallEntryFile();
         ChallEntryProfile challEntryProfile = getSecondChallEntryProfile();
 
-        logoutFromAll();
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
         FilesPage filesPage = overviewPage.openFilesPage();
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();
         filesAddFilesPage = filesAddFilesPage.browseFileToUpload(inputFileProfile.getFileName());
@@ -441,8 +438,8 @@ public class ChallsTest extends AbstractTest {
         ChallEntryProfile challEntryProfile = getMainChallEntryProfile();
         FileProfile inputFileProfile = getMainNewChallEntryFile();
 
-        logoutFromAll();
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
         ChallsPage challsPage = overviewPage.openChallsPage();
 
         assertThat(
@@ -452,6 +449,7 @@ public class ChallsTest extends AbstractTest {
 
         ChallsCreatedChallPage createdChallPage = challsPage.viewChallenge(challProfile);
         createdChallPage = createdChallPage.clickMyEntries();
+        createdChallPage.waitUntilEntrySubmissionFinished(challEntryProfile.getEntryName());
 
         SoftAssert.assertThat(
                 createdChallPage.isSubmittedEntryNameDisplayed(challEntryProfile.getEntryName()))
@@ -478,8 +476,8 @@ public class ChallsTest extends AbstractTest {
         UserProfile user = TestUserData.getAdminUser();
         ChallProfile challProfile = getMainChallProfile();
 
-        logoutFromAll();
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
         ChallsPage challsPage = overviewPage.openChallsPage();
 
         assertThat(

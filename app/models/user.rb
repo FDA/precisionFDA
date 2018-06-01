@@ -371,7 +371,7 @@ class User < ActiveRecord::Base
         # Use find_by(file.id) since file.reload may raise ActiveRecord::RecordNotFound
         file = UserFile.find_by(id: file.id)
         if file.present?
-          Event::FileDeleted.create(file, user)
+          Event::FileDeleted.create_for(file, user)
           file.destroy!
         end
       end
@@ -386,7 +386,7 @@ class User < ActiveRecord::Base
           if remote_state != file.state
             if remote_state == "closed"
               file.update!(state: remote_state, file_size: result["describe"]["size"])
-              Event::FileCreated.create(file, user)
+              Event::FileCreated.create_for(file, user)
             elsif remote_state == "closing" && file.state == "open"
               file.update!(state: remote_state)
             else
@@ -439,7 +439,7 @@ class User < ActiveRecord::Base
         if state != comparison.state
           output_file_cache.each do |output_file|
             file = UserFile.create!(output_file)
-            Event::FileCreated.create(file, user)
+            Event::FileCreated.create_for(file, user)
           end
           comparison.meta = temp_meta
           comparison.state = state
@@ -501,13 +501,13 @@ class User < ActiveRecord::Base
         if state != job.state
           output_file_cache.each do |output_file|
             user_file = UserFile.create!(output_file)
-            Event::FileCreated.create(user_file, user)
+            Event::FileCreated.create_for(user_file, user)
           end
           job.run_outputs = output
           job.state = state
           job.describe = result["describe"]
           job.save!
-          Event::JobClosed.create(job, user)
+          Event::JobClosed.create_for(job, user)
         end
       end
     else
@@ -518,7 +518,7 @@ class User < ActiveRecord::Base
           job.state = state
           job.describe = result["describe"]
           job.save!
-          Event::JobClosed.create(job, user)
+          Event::JobClosed.create_for(job, user)
         end
       end
     end

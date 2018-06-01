@@ -1,26 +1,27 @@
-package precisionFDA.pages.staging;
+package precisionFDA.pages.platform;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.FindBy;
+import precisionFDA.locators.PlatformLocators;
 import ru.yandex.qatools.htmlelements.element.Link;
-import precisionFDA.locators.MainStagingLocators;
 import precisionFDA.pages.AbstractPage;
 
-public class MainStagingPage extends AbstractPage {
+public class MainPlatformPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
 
-    @FindBy(xpath = MainStagingLocators.USER_DD_LINK)
+    @FindBy(xpath = PlatformLocators.USER_DD_LINK)
     private Link userDD;
 
-    @FindBy(xpath = MainStagingLocators.LOGOUT_DD_ITEM_LINK)
+    @FindBy(xpath = PlatformLocators.LOGOUT_DD_ITEM_LINK)
     private Link logoutItem;
 
-    public MainStagingPage(final WebDriver driver) {
+    public MainPlatformPage(final WebDriver driver) {
         super(driver);
-        waitForPageToLoadAndVerifyBy(By.xpath(MainStagingLocators.PROJECTS_LINK), 60);
+        waitForPageToLoadAndVerifyBy(By.xpath(PlatformLocators.PROJECTS_LINK), 30);
+        waitForPageToLoadAndVerifyBy(By.xpath(PlatformLocators.USER_DD_LINK), 2);
     }
 
     public Link getUserDD() {
@@ -31,12 +32,12 @@ public class MainStagingPage extends AbstractPage {
         return logoutItem;
     }
 
-    public LoginStagingPage logout() {
-        log.info("logout from Staging");
+    public LoginPlatformPage logout() {
+        log.info("logout from Platform");
         getUserDD().click();
         waitUntilClickable(getLogoutItem());
         getLogoutItem().click();
-        return new LoginStagingPage(getDriver());
+        return new LoginPlatformPage(getDriver());
     }
 
 }

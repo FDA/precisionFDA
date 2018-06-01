@@ -27,7 +27,7 @@ module Admin
       private
 
       def collection
-        Event::UserViewed.date_range(start_date, end_date).select_count_uniq_by(:identifier)
+        Event::UserViewed.date_range(start_date, end_date).select_count_uniq_by(:dxuser)
       end
 
     end

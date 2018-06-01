@@ -886,4 +886,16 @@ public class TestFilesData {
         return discAttachFile;
     }
 
+    //=== attach to discussion file  ===
+
+    static FileProfile challCardFile = new FileProfile(
+            getGeneratedTestFileName(getDictPng()),
+            "",
+            ""
+    );
+
+    public static FileProfile getChallCardFile() {
+        return challCardFile;
+    }
+
 }

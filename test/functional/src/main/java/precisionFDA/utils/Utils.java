@@ -60,6 +60,14 @@ public class Utils {
         return salt;
     }
 
+    public static String getCurrentDate_YYYY_MM_dd_UTC() {
+        Date d = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String salt = dateFormat.format(d);
+        return salt;
+    }
+
     public static String getCurrentDate_MM_dd_YYYY_Slashes() {
         Date d = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/YYYY");

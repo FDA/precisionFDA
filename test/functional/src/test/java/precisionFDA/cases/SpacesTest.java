@@ -33,7 +33,7 @@ public class SpacesTest extends AbstractTest {
 
         UserProfile user = TestUserData.getAdminUser();
 
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
 
         SoftAssert.assertThat(
                 overviewPage.isNavigationPanelDisplayed())
@@ -84,8 +84,8 @@ public class SpacesTest extends AbstractTest {
         SpaceProfile spaceProfile = getMainSpaceProfile();
         UserProfile user = TestUserData.getTestUserOne();
 
-        logoutFromAll();
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
         SpacesPage spacesPage = overviewPage.openSpacesPage();
 
         assertThat(
@@ -132,8 +132,8 @@ public class SpacesTest extends AbstractTest {
         SpaceProfile spaceProfile = getMainSpaceProfile();
         UserProfile user = TestUserData.getTestUserTwo();
 
-        logoutFromAll();
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
         SpacesPage spacesPage = overviewPage.openSpacesPage();
 
         assertThat(
@@ -181,8 +181,8 @@ public class SpacesTest extends AbstractTest {
         UserProfile user = TestUserData.getTestUserOne();
         FolderProfile spaceFolder = getMainSpaceFolder();
 
-        logoutFromAll();
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
         SpacesPage spacesPage = overviewPage.openSpacesPage();
 
         assertThat(
@@ -277,8 +277,8 @@ public class SpacesTest extends AbstractTest {
         FolderProfile spaceFolder = getMainSpaceFolder();
         UserProfile user = TestUserData.getTestUserTwo();
 
-        logoutFromAll();
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
         SpacesPage spacesPage = overviewPage.openSpacesPage();
         SpaceDetailsPage spaceDetailsPage = spacesPage.openSpace(spaceProfile.getSpaceName());
 
@@ -308,8 +308,8 @@ public class SpacesTest extends AbstractTest {
         FileProfile spaceFile = getToEditSpaceFile();
         UserProfile user = TestUserData.getTestUserOne();
 
-        logoutFromAll();
-        OverviewPage overviewPage = openLoginPrecisionPage(user).correctLogin(user).grantAccess();
+        logoutFromPlatform();
+        OverviewPage overviewPage = openLoginPrecisionPage().correctLogin(user).grantAccess();
 
         FilesPage filesPage = overviewPage.openFilesPage();
         FilesAddFilesPage filesAddFilesPage = filesPage.openFilesAddFilesPage();

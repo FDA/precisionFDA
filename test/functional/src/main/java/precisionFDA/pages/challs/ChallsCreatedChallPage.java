@@ -13,9 +13,7 @@ import precisionFDA.pages.AbstractPage;
 import ru.yandex.qatools.htmlelements.element.Button;
 import ru.yandex.qatools.htmlelements.element.Link;
 
-import static precisionFDA.data.TestDict.getDictChallengeClosed;
-import static precisionFDA.data.TestDict.getDictDone;
-import static precisionFDA.data.TestDict.getDictPending;
+import static precisionFDA.data.TestDict.*;
 import static precisionFDA.data.TestNewChallEntryData.getMainChallEntryProfile;
 import static precisionFDA.data.TestNewChallEntryData.getSecondChallEntryProfile;
 import static precisionFDA.utils.Utils.sleep;
@@ -194,7 +192,7 @@ public class ChallsCreatedChallPage extends AbstractPage {
             log.info("it's been " + spentTimeSec + " seconds");
             getDriver().navigate().refresh();
         }
-        if (!isElementPresent(getJoinChallengeButtonLink(), 1)) {
+        if (!isChallengeClosedButtonDisplayed()) {
             log.info("[WARNING] the challenge is not closed after " + timeoutSec + " seconds");
         }
     }
@@ -228,19 +226,6 @@ public class ChallsCreatedChallPage extends AbstractPage {
     public boolean isEntryStateDone(String entryName) {
         boolean res = false;
         String doneStatus = getDictDone().toUpperCase();
-        String pendingStatus = getDictPending().toUpperCase();
-
-        int timeoutSec = 180;
-        int refreshStepSec = 30;
-        int spentTimeSec = 0;
-
-        log.info("waiting for " + timeoutSec + " sec until the entry is done");
-        while ( getEntryStateText(entryName).toUpperCase().contains(pendingStatus) && (spentTimeSec < timeoutSec) ) {
-            sleep(refreshStepSec*1000);
-            spentTimeSec = spentTimeSec + refreshStepSec;
-            log.info("it's been " + spentTimeSec + " seconds");
-            getDriver().navigate().refresh();
-        }
 
         String currentStatus = getEntryStateText(entryName).toUpperCase();
         if (!currentStatus.equalsIgnoreCase(doneStatus)) {
@@ -251,6 +236,29 @@ public class ChallsCreatedChallPage extends AbstractPage {
         }
 
         return res;
+    }
+
+    public void waitUntilEntrySubmissionFinished(String entryName) {
+        String doneStatus = getDictDone().toUpperCase();
+        String failedStatus = getDictFail().toUpperCase();
+        String currentStatus;
+
+        int timeoutSec = 180;
+        int refreshStepSec = 30;
+        log.info("waiting for " + timeoutSec + " sec until the entry is finished");
+
+        for (int spentTimeSec = 0; spentTimeSec <= timeoutSec; spentTimeSec += refreshStepSec) {
+            currentStatus = getEntryStateText(entryName).toUpperCase();
+            log.info("current entry submission status: " + currentStatus);
+            if (currentStatus.contains(doneStatus) || currentStatus.contains(failedStatus)) {
+                break;
+            }
+            else {
+                sleep(refreshStepSec*1000);
+                log.info("it's been " + ( spentTimeSec + refreshStepSec ) + " seconds");
+                getDriver().navigate().refresh();
+            }
+        }
     }
 
     public String getEntryStateText(String entryName) {
@@ -264,7 +272,6 @@ public class ChallsCreatedChallPage extends AbstractPage {
         boolean isButton = isElementPresent(getChallengeClosedButton(), 1);
         String source = getDriver().getPageSource();
         boolean isSource = source.contains(getDictChallengeClosed());
-        log.info("is button = " + isButton + "; isSource = " + isSource);
         return isButton && isSource;
     }
 

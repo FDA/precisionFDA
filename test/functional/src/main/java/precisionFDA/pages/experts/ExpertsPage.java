@@ -12,6 +12,8 @@ import precisionFDA.pages.AbstractPage;
 
 import java.util.List;
 
+import static precisionFDA.utils.Utils.sleep;
+
 public class ExpertsPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
@@ -34,6 +36,7 @@ public class ExpertsPage extends AbstractPage {
     public ExpertsPage(final WebDriver driver) {
         super(driver);
         waitForPageToLoadAndVerifyBy(By.xpath(ExpertsLocators.EXPERTS_MAIN_DIV));
+        sleep(getPageSleep());
     }
 
     public WebElement getCreatedExpertImage() {

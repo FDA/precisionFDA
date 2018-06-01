@@ -10,6 +10,8 @@ import precisionFDA.locators.AppsLocators;
 import precisionFDA.model.AppProfile;
 import precisionFDA.pages.AbstractPage;
 
+import static precisionFDA.utils.Utils.sleep;
+
 public class AppsRelevantPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
@@ -24,6 +26,7 @@ public class AppsRelevantPage extends AbstractPage {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_CREATE_APP_BUTTON_LINK));
+        sleep(getPageSleep());
     }
 
     public WebElement getAppsJobsListWE() {
@@ -34,9 +37,9 @@ public class AppsRelevantPage extends AbstractPage {
         return appsRelevantActivatedLink;
     }
 
-    public WebElement getMyAppsAppLink(AppProfile appProfile) {
+    public By getMyAppsAppLinkBy(AppProfile appProfile) {
         String xpath = AppsLocators.APPS_SAVED_APP_LINK_TEMPLATE.replace("{APP_TITLE}", appProfile.getCurRevTitleText());
-        return getDriver().findElement(By.xpath(xpath));
+        return By.xpath(xpath);
     }
 
     public boolean isJobsListDisplayed() {
@@ -49,9 +52,8 @@ public class AppsRelevantPage extends AbstractPage {
 
     public AppsSavedAppPage openAppFromMyAppsList(AppProfile appProfile) {
         log.info("open saved application from My Apps list");
-        WebElement link = getMyAppsAppLink(appProfile);
-        waitUntilClickable(link);
-        link.click();
+        By linkBy = getMyAppsAppLinkBy(appProfile);
+        getDriver().findElement(linkBy).click();
         return new AppsSavedAppPage(getDriver());
     }
 
@@ -82,7 +84,7 @@ public class AppsRelevantPage extends AbstractPage {
     }
 
     public boolean isLinkToMyAppsAppDisplayed(AppProfile appProfile) {
-        return isElementPresent(getMyAppsAppLink(appProfile), 5);
+        return isElementPresent(getMyAppsAppLinkBy(appProfile), 5);
     }
 
     public boolean isLinkToJobsListAppDisplayed(AppProfile appProfile) {

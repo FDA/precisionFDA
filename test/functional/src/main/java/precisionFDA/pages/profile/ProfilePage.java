@@ -15,6 +15,9 @@ import precisionFDA.pages.AbstractPage;
 import precisionFDA.pages.apps.AppsPage;
 import precisionFDA.pages.notes.NotesPage;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static precisionFDA.utils.Utils.sleep;
 
 public class ProfilePage extends AbstractPage {
@@ -59,23 +62,26 @@ public class ProfilePage extends AbstractPage {
         return isElementPresent(getProfileAboutOrgWE());
     }
 
-    public ProfilePage setTimeZone(String[] timeZone) {
-        log.info("select timezone: " + timeZone[1]);
-        isElementPresent(getProfileTimeZoneSelect());
-        sleep(500);
-        getProfileTimeZoneSelect().selectByValue(timeZone[1]);
-        sleep(500);
-        TestCommonData.setCurrentTimezone(timeZone[0]);
-        return new ProfilePage(getDriver());
-    }
-
     public ProfilePage setTimeZone(TimeZoneProfile timeZone) {
-        log.info("select timezone: " + timeZone.getTimeAndLocation());
+        log.info("select timezone: " + timeZone.getLocation());
         isElementPresent(getProfileTimeZoneSelect());
         sleep(500);
         getProfileTimeZoneSelect().selectByValue(timeZone.getLocation());
         sleep(500);
-        TestCommonData.setCurrentTimezone(timeZone.getZoneTime());
+
+        String selected = getProfileTimeZoneSelect().getFirstSelectedOption().getText().trim();
+        log.info("selected timezone string is: " + selected);
+        String mask = "\\((.*?:.*?)\\)";
+        String value = "";
+        Pattern regex = Pattern.compile(mask);
+        Matcher regexMatcher = regex.matcher(selected);
+        while (regexMatcher.find()) {
+            value = regexMatcher.group(1);
+        }
+        value = value.replace("(", "").replace(")", "");
+        log.info("time zone is " + value);
+        timeZone.setValue(value);
+        TestCommonData.setCurrentTimezone(value);
         return new ProfilePage(getDriver());
     }
 

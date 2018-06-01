@@ -3,7 +3,7 @@ module Admin
     class FilesGenerated < AbstractData
 
       def total
-        collection.sum_by(:file_size).to_i
+        collection.sum(:file_size).to_i
       end
 
       def hourly_data

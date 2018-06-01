@@ -16,8 +16,6 @@ public class ChallProfile {
 
     private String challEndsAt;
 
-    private String challCardImage;
-
     private String challStatus;
 
     private String challInfo;
@@ -28,7 +26,7 @@ public class ChallProfile {
                         final String challDescr, final String challScoringAppUser,
                         final int challStartsAtFromNowMin, final int durationMin,
                         final String challStartsAt, final String challEndsAt,
-                        final String challCardImage, final String challStatus,
+                        final String challStatus,
                         final String challInfo, final String challResults) {
         this.challName = challName;
         this.challDescr = challDescr;
@@ -37,7 +35,6 @@ public class ChallProfile {
         this.durationMin = durationMin;
         this.challStartsAt= challStartsAt;
         this.challEndsAt = challEndsAt;
-        this.challCardImage = challCardImage;
         this.challStatus = challStatus;
         this.challInfo = challInfo;
         this.challResults = challResults;
@@ -69,10 +66,6 @@ public class ChallProfile {
 
     public String getChallEndsAt() {
         return challEndsAt;
-    }
-
-    public String getChallCardImage() {
-        return challCardImage;
     }
 
     public String getChallStatus() {

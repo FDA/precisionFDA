@@ -10,7 +10,7 @@ class AddJobClosedToEvents < ActiveRecord::Migration
         SQL
 
         Job.terminal.find_each do |job|
-          event = Event::JobClosed.create(job, job.user)
+          event = Event::JobClosed.create_for(job, job.user)
           event.update(created_at: job.created_at)
         end
       end

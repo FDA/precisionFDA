@@ -8,6 +8,8 @@ import ru.yandex.qatools.htmlelements.element.Link;
 import precisionFDA.locators.AppsLocators;
 import precisionFDA.pages.AbstractPage;
 
+import static precisionFDA.utils.Utils.sleep;
+
 public class AppsPage extends AbstractPage {
 
     private final Logger log = Logger.getLogger(this.getClass());
@@ -36,7 +38,8 @@ public class AppsPage extends AbstractPage {
     public AppsPage(final WebDriver driver) {
         super(driver);
         waitUntilScriptsReady();
-        waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_CREATE_APP_BUTTON_LINK), 30);
+        waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_CREATE_APP_BUTTON_LINK), 120);
+        sleep(getPageSleep());
     }
 
     public Link getAppsCreateAppButtonLink() {

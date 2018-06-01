@@ -109,6 +109,7 @@ public class SpaceDetailsPage extends AbstractPage {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(SpacesLocators.SPACE_DETAILS_MEMBERS_TAB_LINK));
+        sleep(getPageSleep());
     }
 
     public Link getMembersTabLink() {
@@ -294,6 +295,7 @@ public class SpaceDetailsPage extends AbstractPage {
     public SpaceDetailsPage clickBreadcrumbSpaceFiles() {
         List<WebElement> chains = getDriver().findElements(By.xpath(SpacesLocators.FILES_BREADCRUMB_CHAIN));
         chains.get(0).click();
+        sleep(2000);
         waitUntilDisplayed(getSpaceFilesFirstCheckbox(), 30);
         return new SpaceDetailsPage(getDriver());
     }

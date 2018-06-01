@@ -148,7 +148,7 @@ class FilesController < ApplicationController
       opts = {project: @file.project, preauthenticated: true}
       opts[:filename] = @file.name
       file_url = DNAnexusAPI.new(@file.is_submission_output? ? CHALLENGE_BOT_TOKEN : @context.token).call(@file.dxid, "download", opts)["url"] + (params[:inline] == "true" ? '?inline' : '')
-      Event::FileDownloaded.create(@file, @context.user)
+      Event::FileDownloaded.create_for(@file, @context.user)
       redirect_to file_url
     end
   end
@@ -176,7 +176,7 @@ class FilesController < ApplicationController
     else
       opts = {project: @file.project, preauthenticated: true, filename: @file.name, duration: 86400}
       @url = DNAnexusAPI.new(@file.is_submission_output? ? CHALLENGE_BOT_TOKEN : @context.token).call(@file.dxid, "download", opts)["url"]
-      Event::FileDownloaded.create(@file, @context.user)
+      Event::FileDownloaded.create_for(@file, @context.user)
     end
   end
 

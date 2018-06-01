@@ -10,6 +10,8 @@ This requires manually "bootstrapping" the situation in steps described in
 
 ## Install
 
+### Setup for localhost development on MacOS
+
 * Install XCode
     * Search and install XCode from the App Store.
 * Install Apple Command Line Tools
@@ -37,12 +39,21 @@ This requires manually "bootstrapping" the situation in steps described in
     * `git config --global user.name “FirstName LastName”`
     * `git config --global push.default simple`
 
+### Docker setup
+
+* Install Docker and Docker-Compose. See [instructions](https://docs.docker.com/compose/install/)
+* Install gems
+  * `docker-compose run web bundle install`
+* Prepare db
+  * `docker-compose run web bundle exec rake db:create`
+  * `docker-compose run web bundle exec rake db:schema:load`
+
 ## pFDA setup
 
 * Clone Repo
     * `git clone git@github.com:dnanexus/precision-fda.git`
-* `bundle`
-* `bundle exec rake db:migrate`
+* `bundle install`
+* `bundle exec rake db:schema:load`
 
 ### Issues
 
@@ -72,87 +83,17 @@ with your account, access your profile on the upper right.
 - Check your email for a new email message asking you to confirm by clicking the link
 - Click the link to confirm.
 
-Create a User and Org entry through your rails console. The _dxuser_ of the user
-record must match your DNAnexus username, and the _handle_ of the org record must
+Create a User and Org, and other required records by running
+```
+bundle exec rake db:seed \
+  PFDA_USER_FIRST_NAME=Florante \
+  PFDA_USER_LAST_NAME=DelaCruz \
+  PFDA_USER_EMAIL=fdelacruz+pfdalocal@dnanexus.com \
+  PFDA_USER_ORG_HANDLE=floranteorg
+```
+
+The _dxuser_ of the user record must match your DNAnexus username, and the _handle_ of the org record must
 match the DNAnexus org handle without the pfda.. prefix, i.e. floranteorg.
-```ruby
-
-florante = User.create!(
-  dxuser: "fdelacruz_dev",
-  schema_version: 1,
-  first_name: "Florante",
-  last_name: "DelaCruz",
-  email: "fdelacruz+pfdalocal@dnanexus.com",
-  normalized_email: "fdelacruz+pfdalocal@dnanexus.com"
-)
-
-org = Org.create!(
-  handle: "floranteorg",
-  name: "Florante's org",
-  admin_id: florante.id,
-  address: "703 Market",
-  duns: "",
-  phone: "",
-  state: "complete",
-  singular: false
-)
-
-florante.update!(org_id: org.id)
-```
-
-## pFDA localhost seeds
-
-pFDA expects certain table entries to be present. Add these using the code below.
-Make sure to use your own credentials for the User/Org.
-
-```ruby
-
-# Create notes
-challenge_note = Note.create!(
-  user: florante,
-  title: "Florante's challenge note title",
-  scope: "public",
-  content: "Florante's challenge note content",
-)
-
-truth_note = Note.create!(
-  user: florante,
-  title: "Florante's truth note title",
-  content: "Florante's truth note content",
-)
-
-consistency_note = Note.create!(
-  user: florante,
-  title: "Florante's consistency note title",
-  content: "Florante's consistency note content",
-)
-
-# Create discussions
-challenge_discussion = Discussion.create!(
-  user: florante,
-  note: challenge_note
-)
-
-truth_discussion = Discussion.create!(
-  id: TRUTH_DISCUSSION_ID,
-  user: florante,
-  note: truth_note
-)
-
-consistency_discussion = Discussion.create!(
-  id: CONSISTENCY_DISCUSSION_ID,
-  user: florante,
-  note: consistency_note
-)
-
-# Create appathon in a box
-meta_appathon_in_a_box = MetaAppathon.create(
-  handle: "app-a-thon-in-a-box",
-  name: "meta appathon title placeholder",
-  start_at: 2.weeks.ago,
-  end_at: 2.weeks.from_now
-)
-```
 
 ## pFDA running
 

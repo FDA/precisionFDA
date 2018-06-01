@@ -1,5 +1,7 @@
 <% content_for :title do %>PrecisionFDA Challenges<% end %>
 
+<%= render "challenges/cfsan_challenge_pre_card" %>
+
 <% @featured_challenges.each do |challenge| %>
   <%= render "challenges/header", challenge: challenge, challenge_index_page: true %>
 <% end %>

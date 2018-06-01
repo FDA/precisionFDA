@@ -116,6 +116,7 @@ public class AppsEditAppPage extends AbstractPage {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_EDIT_APP_TITLE_INPUT));
+        sleep(getPageSleep());
     }
 
     public WebElement getEditAppSaveRevisionButton() {

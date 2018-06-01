@@ -1,8 +1,8 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="docs suite">
-    <test name="DocsTest">
+<suite name="notes suite">
+    <test name="NotesTest">
         <classes>
-            <class name="precisionFDA.cases.DocsTest" />
+            <class name="precisionFDA.cases.NotesTest" />
         </classes>
     </test>
 </suite>

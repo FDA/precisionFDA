@@ -5,11 +5,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import precisionFDA.utils.Utils;
 import ru.yandex.qatools.htmlelements.element.Link;
 import precisionFDA.locators.AppsLocators;
 import precisionFDA.pages.AbstractPage;
 
+import static precisionFDA.data.TestDict.getDictDone;
+import static precisionFDA.data.TestDict.getDictFail;
 import static precisionFDA.utils.Utils.sleep;
 
 public class AppsJobPage extends AbstractPage {
@@ -44,6 +45,7 @@ public class AppsJobPage extends AbstractPage {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(AppsLocators.APPS_JOB_PAGE_I_O_TAB_LINK));
+        sleep(getPageSleep());
     }
 
     public WebElement getAppsJobPageJobName() {
@@ -77,7 +79,7 @@ public class AppsJobPage extends AbstractPage {
     }
 
     public boolean isJobLabelDone() {
-        return getAppsJobPageRunningJobLabel().getText().trim().equalsIgnoreCase("DONE");
+        return getAppsJobPageRunningJobLabel().getText().trim().equalsIgnoreCase(getDictDone());
     }
 
     public String getJobLabelValue() {
@@ -88,20 +90,31 @@ public class AppsJobPage extends AbstractPage {
         return isJobLabelDone();
     }
 
-    public AppsJobPage waitUntilJobIsDone() {
+    public AppsJobPage waitUntilJobFinished() {
         int timeoutSec = 300;
         int refreshStepSec = 15;
-        int spentTimeSec = 0;
-        log.info("waiting for " + timeoutSec + " sec until job status is Done");
-        while ( !isJobStatusDone() && (spentTimeSec < timeoutSec) ) {
-            sleep(refreshStepSec*1000);
-            spentTimeSec = spentTimeSec + refreshStepSec;
-            log.info("it's been " + spentTimeSec + " seconds");
-            getDriver().navigate().refresh();
+        String doneStatus = getDictDone().toUpperCase();
+        String failedStatus = getDictFail().toUpperCase();
+
+        log.info("waiting for " + timeoutSec + " sec until job status is finished");
+
+        String currentStatus;
+        for (int spentTimeSec = 0; spentTimeSec <= timeoutSec; spentTimeSec += refreshStepSec) {
+            currentStatus = getJobLabelValue().toUpperCase();
+            log.info("current job status: " + currentStatus);
+            if (currentStatus.contains(doneStatus) || currentStatus.contains(failedStatus)) {
+                break;
+            }
+            else {
+                sleep(refreshStepSec*1000);
+                log.info("it's been " + ( spentTimeSec + refreshStepSec ) + " seconds");
+                getDriver().navigate().refresh();
+            }
         }
         if (!isJobStatusDone()) {
-            log.info("[WARNING] the running job is not DONE after " + timeoutSec + " seconds");
+            log.warn("the running job is not DONE after " + timeoutSec + " seconds");
         }
+
         return new AppsJobPage(getDriver());
     }
 

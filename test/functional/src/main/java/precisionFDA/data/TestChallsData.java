@@ -8,7 +8,6 @@ import java.util.Date;
 
 import static precisionFDA.data.TestDict.getDictDelimiterValue;
 import static precisionFDA.data.TestDict.getDictSetup;
-import static precisionFDA.utils.TestRunConfig.getTestImageHttpsUrl;
 import static precisionFDA.data.TestCommonData.getText1000Symbols;
 import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
 
@@ -82,10 +81,6 @@ public class TestChallsData {
         return TestUserData.getTestUserTwo().getApplUsername();
     }
 
-    public static String getChallCardImage() {
-        return getTestImageHttpsUrl();
-    }
-
     public static String getMainChallInfo() {
         return getRunTimeLocalUniqueValue() + getText1000Symbols();
     }
@@ -110,8 +105,18 @@ public class TestChallsData {
         if (init[2].toUpperCase().equalsIgnoreCase("PM")) {
             String[] timeArray = time.split(":");
             String hours = timeArray[0];
-            hours = "" + (Integer.parseInt(hours) + 12);
+            if (Integer.parseInt(hours) != 12) {
+                hours = "" + (Integer.parseInt(hours) + 12);
+            }
             time = hours + ":" + timeArray[1] + ":" + timeArray[2];
+        }
+
+        if (init[2].toUpperCase().equalsIgnoreCase("AM")) {
+            String[] timeArray = time.split(":");
+            String hours = timeArray[0];
+            if (Integer.parseInt(hours) == 12) {
+                time = "00:" + timeArray[1] + ":" + timeArray[2];
+            }
         }
 
         return init[0] + " " + time + " " + timeZone.getCodeOfLocation();
@@ -122,10 +127,9 @@ public class TestChallsData {
             getMainChallDescr(),
             getMainChallScoringUser(),
             1,
-            4,
+            3,
             "",
             "",
-            getChallCardImage(),
             getDictSetup(),
             getMainChallInfo(),
             getMainChallResults()

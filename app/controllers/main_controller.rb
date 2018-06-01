@@ -192,7 +192,7 @@ class MainController < ApplicationController
     if @context.guest?
       render "_partials/_error", status: 403, locals: {message: "You are currently browsing precisionFDA as a guest. To log in and complete this action, you need a user account. Contact precisionfda@fda.hhs.gov if you need to upgrade to a user account with contributor-level access."}
     else
-      redirect_to "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=#{OAUTH2_CLIENT_ID}&redirect_uri=#{URI.encode(OAUTH2_REDIRECT_URI)}"
+      redirect_to "#{DNANEXUS_AUTHSERVER_URI}oauth2/authorize?response_type=code&client_id=#{OAUTH2_CLIENT_ID}&redirect_uri=#{URI.encode_www_form_component(OAUTH2_REDIRECT_URI)}"
     end
   end
 
@@ -269,7 +269,7 @@ class MainController < ApplicationController
       end
       save_session(user.id, username, token, expiration_time, user.org_id)
       AUDIT_LOGGER.info("User #{username} logged in")
-      Event::UserLoggedIn.create(user)
+      Event::UserLoggedIn.create_for(user)
       redirect_to root_url
     end
   end
@@ -292,7 +292,7 @@ class MainController < ApplicationController
           AUDIT_LOGGER.info("Access requested: #{p.to_json}")
           NotificationsMailer.invitation_email(@invitation).deliver_now!
           NotificationsMailer.guest_access_email(@invitation).deliver_now!
-          Event::UserAccessRequested.create(@invitation)
+          Event::UserAccessRequested.create_for(@invitation)
         end
       end
     end
@@ -443,7 +443,7 @@ class MainController < ApplicationController
       return
     end
 
-    js graph: graph_decorator.for_publisher(item, scope),
+    js graph: GraphDecorator.for_publisher(@context, item, scope),
        space: space.nil? ? nil : space.slice(:uid, :title),
        scope_to_publish_to: scope
   end
@@ -452,12 +452,12 @@ class MainController < ApplicationController
     id = params[:id]
     raise "Missing id in track route" unless id.is_a?(String) && id.present?
     @item = item_from_uid(id)
-    if !@item.accessible_by?(@context)
+    unless @item.accessible_by?(@context)
       flash[:error] = "This item is not accessible by you"
       redirect_to :root
       return
     end
-    @graph = graph_decorator.for_track(@item)
+    @graph = GraphDecorator.build(@context, @item)
   end
 
   def tokify
@@ -498,10 +498,6 @@ class MainController < ApplicationController
   end
 
   private
-
-  def graph_decorator
-    @graph_decorator ||= GraphDecorator.new(@context)
-  end
 
   def set_time_zone(user)
     return if user.time_zone.present?

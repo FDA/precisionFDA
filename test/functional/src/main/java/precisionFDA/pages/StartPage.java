@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
+import precisionFDA.pages.login.LoginPrecisionPage;
 import ru.yandex.qatools.htmlelements.element.Link;
 import precisionFDA.locators.CommonLocators;
 import precisionFDA.locators.StartLocators;
@@ -30,6 +31,20 @@ public class StartPage extends AbstractPage {
         super(driver);
         waitUntilScriptsReady();
         waitForPageToLoadAndVerifyBy(By.xpath(StartLocators.START_LOGIN_LINK), 30);
+    }
+
+    public LoginPrecisionPage clickLogin() {
+        log.info("click Login");
+        getStartLoginLink().click();
+        return new LoginPrecisionPage(getDriver());
+    }
+
+    public Link getStartLoginLink() {
+        return startLoginLink;
+    }
+
+    public Boolean isLoginLinkDisplayed() {
+        return isElementPresent(getStartLoginLink(), 2);
     }
 
     public boolean isNavigationPanelDisplayed() {

@@ -140,6 +140,7 @@ public class ChallsEditChallengeInfo extends AbstractPage {
         waitUntilDisplayed(getConfirmIcon());
         getConfirmIcon().click();
         waitUntilDisplayed(getPencilIcon());
+        sleep(2000);
         return new ChallsEditChallengeInfo(getDriver());
     }
 

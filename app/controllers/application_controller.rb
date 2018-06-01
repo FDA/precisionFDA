@@ -3,6 +3,9 @@ class ApplicationController < ActionController::Base
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
 
+  # if we have some invalid forms redirect to root page.
+  rescue_from ActionController::InvalidAuthenticityToken, with: :invalid_token
+
   # Decode context
   before_action :decode_context
 
@@ -19,6 +22,10 @@ class ApplicationController < ActionController::Base
   rescue_from ActionView::MissingTemplate, with: :missing_template
 
   private
+
+  def invalid_token
+    redirect_to root_path, status: 303, alert: "Invalid session"
+  end
 
   def current_context
     return @context
@@ -408,6 +415,6 @@ class ApplicationController < ActionController::Base
     return if request.xhr?
     return unless request.get?
 
-    Event::UserViewed.create(@context)
+    Event::UserViewed.create_for(@context, request.path)
   end
 end

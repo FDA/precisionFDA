@@ -2,7 +2,7 @@ package precisionFDA.locators;
 
 public class SpacesLocators {
 
-    public static final String PROVISION_SPACE_BUTTON_LINK = "//*[contains(@class, 'btn-group')]/a[contains(@href, 'spaces/')]";
+    public static final String PROVISION_SPACE_BUTTON_LINK = "//*[contains(@class, 'btn-group')]/a[contains(@href, 'spaces/new')]";
 
     public static final String EDIT_SPACE_HOST_LEAD_INPUT = "//input[@id='space_host_lead_dxuser']";
 
@@ -30,11 +30,9 @@ public class SpacesLocators {
 
     public static final String SPACES_SPASE_STATUS_ON_GRID_TEMPLATE = "//a[text()='{SPACE_NAME}']/../../*[contains(@class, 'state')]";
 
-    public static final String SPACES_MAIN_DIV = "//*[@id='spaces']";
-
     public static final String SPACES_TITLE_WE = "//*[@id='spaces_title']";
 
-    public static final String SPACES_HOST_LEAD_COLUMN= "//*[@id='spaces']//*[text()='Host Lead']";
+    public static final String SPACES_HOST_LEAD_COLUMN = "//*[@id='spaces']//*[text()='Host Lead']";
 
     public static final String SPACES_CREATE_FOLDER_BUTTON = "//*[contains(@data-target, 'folder')][contains(@data-target, 'create')]";
 
@@ -101,5 +99,9 @@ public class SpacesLocators {
     public static final String FILES_PUBLISH_DIALOG_ITEM_TEMPLATE = "//*[@id='publish-files-modal']//a/span[text()='{ITEM_NAME}']";
 
     public static final String FILES_PUBLISH_DIALOG_PUBLISH_BUTTON = "//*[@id='publish-files-modal']//button[text()='Publish']";
+
+    public static final String MAIN_DIV = "//*[contains(@class, 'pfda-controller-spaces')]";
+
+    public static final String LEAD_OR_PROVISION = "//*[@id='spaces']//*[text()='Host Lead']|//*[contains(@class, 'btn-group')]/a[contains(@href, 'spaces/new')]";
 
 }

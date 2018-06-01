@@ -2,9 +2,7 @@ package precisionFDA.data;
 
 import static precisionFDA.utils.TestRunConfig.getPathToTempFilesFolder;
 import static precisionFDA.utils.TestRunConfig.getPathToTestFilesFolder;
-import static precisionFDA.utils.Utils.getCurrentDate_YYYY_MM_dd;
-import static precisionFDA.utils.Utils.getRunTimeLocalUniqueValue;
-import static precisionFDA.utils.Utils.getTextFromFile;
+import static precisionFDA.utils.Utils.*;
 
 public class TestCommonData {
 
@@ -49,11 +47,11 @@ public class TestCommonData {
     }
 
     public static String getActiveUsersFileName() {
-        return ACTIVE_USERS_FILE_NAME_PREFIX + getCurrentDate_YYYY_MM_dd() + ".csv";
+        return ACTIVE_USERS_FILE_NAME_PREFIX + getCurrentDate_YYYY_MM_dd_UTC() + ".csv";
     }
 
     public static String getUsersAndUsageFileName() {
-        return USERS_AND_USAGE_FILE_NAME_PREFIX + getCurrentDate_YYYY_MM_dd() + ".csv";
+        return USERS_AND_USAGE_FILE_NAME_PREFIX + getCurrentDate_YYYY_MM_dd_UTC() + ".csv";
     }
 
     public static String getCurrentTimezone() {
