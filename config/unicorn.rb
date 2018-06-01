@@ -11,6 +11,8 @@ end
 
 after_fork do |server, worker|
   if defined?(ActiveRecord::Base)
-    ActiveRecord::Base.establish_connection(Rails.application.config.database_configuration[Rails.env])
+    ActiveRecord::Base.establish_connection(
+      ENV.fetch('DATABASE_URL', Rails.application.config.database_configuration[Rails.env])
+    )
   end
 end
