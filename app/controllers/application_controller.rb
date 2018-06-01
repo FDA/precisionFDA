@@ -24,7 +24,7 @@ class ApplicationController < ActionController::Base
   private
 
   def invalid_token
-    redirect_to root_path, status: 303, alert: "Invalid session"
+    redirect_to root_path, status: :see_other, alert: "Invalid session"
   end
 
   def current_context
