@@ -1,5 +1,3 @@
-# Recipe: postfix
-
 bash 'install_postfix' do
   user "root"
   code <<-EOH

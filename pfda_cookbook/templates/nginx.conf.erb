@@ -1,0 +1,61 @@
+user www-data;
+worker_processes 1;
+pid /var/run/nginx.pid;
+error_log  <%= node[:nginx][:log_dir] %>/nginx_error.log debug;
+
+events {
+  worker_connections 1024;
+  use epoll;
+  multi_accept on;
+}
+
+http {
+  server_tokens off;
+  client_max_body_size 50M;
+  keepalive_timeout 65;
+  keepalive_requests 100000;
+  sendfile on;
+  tcp_nopush on;
+  tcp_nodelay on;
+
+  server {
+   listen 80 default_server;
+   listen [::]:80 default_server;
+
+   server_name _;
+
+   return 301 https://$host$request_uri;
+  }
+
+  server {
+    server_name <%= @app_domain %>;
+    access_log <%= node[:nginx][:log_dir] %>/<%= @app_domain %>-ssl.access.log;
+
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    <%= render 'ssl_settings.conf.erb' %>
+
+    root /srv/pfda/public;
+
+    try_files $uri/index.html $uri @pfda;
+
+    location @pfda {
+      proxy_pass http://pfda;
+      <%= render 'proxy_settings.conf.erb' %>
+    }
+
+     error_page 500 502 503 504 /500.html;
+     client_max_body_size 4G;
+     keepalive_timeout 10;
+
+    # HSTS (ngx_http_headers_module is required) (15768000 seconds = 6 months)
+    add_header Strict-Transport-Security max-age=15768000;
+    add_header X-Request-ID $request_id;
+  }
+
+  upstream pfda {
+    server localhost:3000 fail_timeout=0;
+  }
+}
+

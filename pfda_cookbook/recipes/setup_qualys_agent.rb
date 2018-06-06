@@ -47,14 +47,15 @@
 #
 
 
-aws_access_key_id = node[:qualys][:aws_access_key_id]
-aws_secret_access_key = node[:qualys][:aws_secret_access_key]
-environment = node[:qualys][:environment]
+if node[:qualys]
+  aws_access_key_id = node[:qualys][:aws_access_key_id]
+  aws_secret_access_key = node[:qualys][:aws_secret_access_key]
+  environment = node[:qualys][:environment]
 
 
-bash "install qualys-cloud-agent" do
-  user "root"
-  code <<-EOH
+  bash "install qualys-cloud-agent" do
+    user "root"
+    code <<-EOH
     export AWS_ACCESS_KEY_ID=#{aws_access_key_id}
     export AWS_SECRET_ACCESS_KEY=#{aws_secret_access_key}
     export AWS_DEFAULT_REGION="us-east-1"
@@ -65,13 +66,12 @@ bash "install qualys-cloud-agent" do
     aws s3 cp ${BUCKET}/qualys/1.6.1/qualys-cloud-agent.x86_64.deb /tmp
 
     dpkg --install /tmp/qualys-cloud-agent.x86_64.deb
-  EOH
-end
+    EOH
+  end
 
-
-bash "activate qualys-cloud-agent" do
-  user "root"
-  code <<-EOH
+  bash "activate qualys-cloud-agent" do
+    user "root"
+    code <<-EOH
 
     environment=#{environment}
 
@@ -87,5 +87,6 @@ bash "activate qualys-cloud-agent" do
       CustomerId=$customerID \
       ActivationId=$activationID
 
-  EOH
+    EOH
+  end
 end
