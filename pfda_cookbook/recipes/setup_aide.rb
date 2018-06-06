@@ -37,10 +37,10 @@ template "/etc/default/aide" do
   group "root"
   source "aide-default.erb"
   variables(
-    :mail_to           => node['aide']['mail_to'],
-    :copy_new_db       => node['aide']['copy_new_db'],
-    :quiet_reports     => node['aide']['quiet_reports'],
-    :fqdn	       => node['aide']['fqdn'],
+    :mail_to       => node['aide']['mail_to'],
+    :copy_new_db   => node['aide']['copy_new_db'],
+    :quiet_reports => node['aide']['quiet_reports'],
+    :fqdn	         => node['aide']['fqdn'],
   )
 end
 
@@ -49,7 +49,7 @@ template "/etc/aide/aide.conf.d/99_aide_custom" do
   group "root"
   source "99_aide_custom.erb"
   variables(
-    :custom_rules       => node['aide']['custom_rules'],
+    :custom_rules => node['aide']['custom_rules'],
   )
   notifies :run, "execute[update-aide-config]", :immediately
 end

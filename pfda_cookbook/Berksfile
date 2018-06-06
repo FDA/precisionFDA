@@ -1,0 +1,10 @@
+# frozen_string_literal: true
+source 'https://supermarket.chef.io'
+
+metadata
+
+cookbook 'application', '~> 5.2.0'
+cookbook 'application_git', '~> 1.2.0'
+cookbook 'application_ruby', '~> 4.1.0'
+cookbook 'apt', '~> 7.0.0'
+cookbook 'nginx', '~> 8.1.2'
