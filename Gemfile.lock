@@ -265,7 +265,8 @@ GEM
     secure_headers (3.1.2)
       useragent
     semverly (1.0.0)
-    spring (1.6.2)
+    spring (2.0.2)
+      activesupport (>= 4.2)
     sprockets (3.7.0)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
@@ -372,4 +373,4 @@ DEPENDENCIES
   wice_grid
 
 BUNDLED WITH
-   1.16.1
+   1.16.2
