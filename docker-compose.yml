@@ -9,7 +9,6 @@ services:
         target: /precision-fda
     environment:
       - BUNDLE_PATH=/precision-fda/.gems
-      - DATABASE_URL=mysql2://root:password@db/precision-fda
       - RAILS_LOG_TO_STDOUT=1
       - DEV_HOST=localhost
     working_dir: /precision-fda

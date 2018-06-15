@@ -8,7 +8,7 @@ default: &default
 
 development:
   <<: *default
-  database: precisionfda-development
+  database: precision-fda
 
 test:
   <<: *default
