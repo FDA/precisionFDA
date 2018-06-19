@@ -14,7 +14,7 @@ RSpec.describe ApiController, type: :controller do
         expect(response).to have_http_status(200)
       end
 
-      context "after 20 minutes inactivity" do
+      context "after 15 minutes inactivity" do
         before { expire_session! }
 
         it "returns a response with unauthorized http status" do
@@ -22,7 +22,6 @@ RSpec.describe ApiController, type: :controller do
           expect(response).to have_http_status(401)
         end
       end
-
     end
 
     context "api" do
@@ -34,7 +33,7 @@ RSpec.describe ApiController, type: :controller do
         expect(response).to have_http_status(200)
       end
 
-      context "after 20 minutes inactivity" do
+      context "after 15 minutes inactivity" do
         before { expire_session! }
 
         it "returns a list of files" do

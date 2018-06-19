@@ -7,7 +7,7 @@ class ApplicationController < ActionController::Base
   rescue_from ActionController::InvalidAuthenticityToken, with: :invalid_token
 
   # Decode context
-  before_action :decode_context, :handle_last_active, :update_last_active
+  before_action :handle_session, :decode_context
 
   # Require login
   before_action :require_login
@@ -57,6 +57,7 @@ class ApplicationController < ActionController::Base
     session[:token] = token
     session[:expiration] = expiration
     session[:org_id] = org_id
+    Session.create(user_id: user_id, key: session.id)
   end
 
   def require_login
@@ -418,26 +419,23 @@ class ApplicationController < ActionController::Base
     Event::UserViewed.create_for(@context, request.path)
   end
 
-  def handle_last_active
-    return unless @context.logged_in?
+  def handle_session
+    return unless session[:user_id]
 
-    if inactivity_time_expired?
+    ar_session = Session.find_by(key: session.id)
+
+    unless ar_session
       reset_session
-      decode_context
+      return
     end
-  end
 
-  def inactivity_time_expired?
-    return false unless session[:expired_at]
-
-    Time.parse(session[:expired_at]).past?
-  end
-
-  def update_last_active
-    return unless @context.logged_in?
-
-    session[:expired_at] = MAX_MINUTES_INACTIVITY.minutes.since.iso8601
-    cookies[:sessionExpiredAt] = MAX_MINUTES_INACTIVITY.minutes.since.to_i
+    if ar_session.expired?
+      ar_session.destroy!
+      reset_session
+    else
+      ar_session.touch
+      cookies[:sessionExpiredAt] = MAX_MINUTES_INACTIVITY.minutes.since.to_i
+    end
   end
 
 end

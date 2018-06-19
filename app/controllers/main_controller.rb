@@ -106,6 +106,8 @@ class MainController < ApplicationController
     if @context.logged_in?
       AUDIT_LOGGER.info("User #{session[:username]} logged out")
     end
+
+    Session.where(key: session.id).delete_all
     reset_session
     flash[:success] = "You were successfully logged out of precisionFDA"
     redirect_to root_url
@@ -262,10 +264,19 @@ class MainController < ApplicationController
           user.save!
         end
       end
-      save_session(user.id, username, token, expiration_time, user.org_id)
-      decode_context
-      AUDIT_LOGGER.info("User #{username} logged in")
-      Event::UserLoggedIn.create_for(user)
+
+      Session.delete_expired
+
+      if Session.limit_reached?(user)
+        flash[:error] = "You have reached a limit for login. You can use only #{Session::SESSIONS_LIMIT} active sessions."
+      else
+        Session.where(key: session.id).delete_all
+        reset_session
+        save_session(user.id, username, token, expiration_time, user.org_id)
+        AUDIT_LOGGER.info("User #{username} logged in")
+        Event::UserLoggedIn.create_for(user)
+      end
+
       redirect_to root_url
     end
   end
