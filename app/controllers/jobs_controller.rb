@@ -53,10 +53,10 @@ class JobsController < ApplicationController
       handshake << socket.readline
     end
     raise unless handshake.valid?
-    frame = WebSocket::Frame::Outgoing::Server.new(version: handshake.version, data: {access_token: @job.from_submission? ? CHALLENGE_BOT_TOKEN : @context.token, token_type: "Bearer", tail: false}.to_json, type: :text).to_s
+    frame = WebSocket::Frame::Outgoing::Client.new(version: handshake.version, data: {access_token: @job.from_submission? ? CHALLENGE_BOT_TOKEN : @context.token, token_type: "Bearer", tail: false}.to_json, type: :text).to_s
     socket.write(frame)
 
-    srv = WebSocket::Frame::Incoming::Server.new(version: handshake.version)
+    client = WebSocket::Frame::Incoming::Client.new(version: handshake.version)
 
     @log_times = []
     @log_levels = []
@@ -64,8 +64,8 @@ class JobsController < ApplicationController
     while true do
       data = socket.getc
       break if data.nil? || data.empty?
-      srv << data
-      while (msg = srv.next) do
+      client << data
+      while (msg = client.next) do
         msg = JSON.parse(msg.to_s)
         # source, msg, timestamp, level, job, line|
         # source=SYSTEM, msg=END_LOG
