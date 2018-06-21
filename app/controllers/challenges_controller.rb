@@ -153,6 +153,11 @@ class ChallengesController < ApplicationController
     when "submissions"
       @submissions = @challenge.submissions.accessible_by_public
     when "results"
+      unless @challenge.can_show_results?(@context)
+        redirect_to challenges_path
+        return
+      end
+
       @submissions = @challenge.submissions.accessible_by_public
       if @challenge.automated?
         @results = @challenge.completed_submissions
