@@ -54,7 +54,7 @@ gem 'humanizer'
 gem 'axlsx', '3.0.0.pre'
 
 # Secure headers
-gem 'secure_headers'
+gem 'secure_headers', '~> 6.0'
 
 # Gravatar profile image helper
 gem 'gravtastic'

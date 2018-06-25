@@ -394,7 +394,7 @@ DEPENDENCIES
   rubyzip (= 1.2.2)
   sass-rails (~> 5.0)
   sdoc (~> 0.4.0)
-  secure_headers
+  secure_headers (~> 6.0)
   semverly
   simple_form
   soapforce
