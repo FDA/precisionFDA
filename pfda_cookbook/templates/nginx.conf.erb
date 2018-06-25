@@ -49,8 +49,6 @@ http {
      client_max_body_size 4G;
      keepalive_timeout 10;
 
-    # HSTS (ngx_http_headers_module is required) (15768000 seconds = 6 months)
-    add_header Strict-Transport-Security max-age=15768000;
     add_header X-Request-ID $request_id;
   }
 
