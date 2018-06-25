@@ -41,6 +41,9 @@ gem 'paloma', '5.0.0'
 # Websocket support (for fetching logs)
 gem 'websocket'
 
+# Affix sprocket version as per vuln derscribed in PFDA-495
+gem 'sprockets', '> 3.7.1'
+
 # Semantic versioning parsing
 gem 'semverly'
 
