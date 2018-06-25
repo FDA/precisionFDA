@@ -74,7 +74,7 @@ GEM
       execjs
     coffee-script-source (1.10.0)
     colorize (0.8.1)
-    concurrent-ruby (1.0.2)
+    concurrent-ruby (1.0.5)
     crack (0.4.3)
       safe_yaml (~> 1.0.0)
     crass (1.0.4)
@@ -182,7 +182,7 @@ GEM
       rubocop (~> 0.38, >= 0.35.0)
     quiet_assets (1.1.0)
       railties (>= 3.1, < 5.0)
-    rack (1.6.8)
+    rack (1.6.10)
     rack-accept (0.4.5)
       rack (>= 0.4)
     rack-test (0.6.3)
@@ -267,7 +267,7 @@ GEM
     semverly (1.0.0)
     spring (2.0.2)
       activesupport (>= 4.2)
-    sprockets (3.7.0)
+    sprockets (3.7.2)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
     sprockets-rails (3.1.1)
@@ -361,6 +361,7 @@ DEPENDENCIES
   secure_headers
   semverly
   spring
+  sprockets (> 3.7.1)
   therubyracer
   thin
   turbolinks
