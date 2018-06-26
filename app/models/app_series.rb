@@ -14,6 +14,7 @@
 #
 
 class AppSeries < ActiveRecord::Base
+  include Auditor
   include Permissions
 
   has_many :apps

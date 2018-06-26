@@ -20,6 +20,7 @@
 #
 
 class Job < ActiveRecord::Base
+  include Auditor
   include Permissions
 
   INSTANCE_TYPES = {
@@ -142,16 +143,18 @@ class Job < ActiveRecord::Base
   end
 
   def update_provenance!
-    new_value = { dxid => { app_dxid: app.dxid, app_id: app.id, inputs: run_inputs }}
+    Auditor.suppress do
+      new_value = { dxid => { app_dxid: app.dxid, app_id: app.id, inputs: run_inputs }}
 
-    # TODO: USE SCOPE OF USER_FILE MODEL!
-    input_files.where(parent_type: "Job").find_each do |file|
-      parent_job = file.parent
-      new_value.merge!(parent_job.provenance)
-      new_value[file.dxid] = parent_job.dxid
+      # TODO: USE SCOPE OF USER_FILE MODEL!
+      input_files.where(parent_type: "Job").find_each do |file|
+        parent_job = file.parent
+        new_value.merge!(parent_job.provenance)
+        new_value[file.dxid] = parent_job.dxid
+      end
+
+      update_attribute(:provenance, new_value)
     end
-
-    update_attribute(:provenance, new_value)
   end
 
   def publishable_by?(context, scope_to_publish_to = "public")

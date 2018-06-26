@@ -12,6 +12,7 @@
 #
 
 class Analysis < ActiveRecord::Base
+  include Auditor
   include Permissions
   extend ApplicationHelper
 

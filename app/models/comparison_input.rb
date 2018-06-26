@@ -9,6 +9,8 @@
 #
 
 class ComparisonInput < ActiveRecord::Base
+  include Auditor
+
   belongs_to :comparison
   belongs_to :user_file
 end

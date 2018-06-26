@@ -17,6 +17,8 @@
 #
 
 class Appathon < ActiveRecord::Base
+  include Auditor
+
   belongs_to :meta_appathon
   belongs_to :admin, {class_name: 'User'}
 

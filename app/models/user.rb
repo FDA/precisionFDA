@@ -21,6 +21,7 @@
 #
 
 class User < ActiveRecord::Base
+  include Auditor
 
   # The "schema_version" field is used to denote the schema
   # associated with this user on the platform. Changing the
@@ -213,13 +214,15 @@ class User < ActiveRecord::Base
   end
 
   def self.sync_files!(context)
-    return if context.guest?
-    user = context.user
-    token = context.token
-    # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-    user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
-      DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
-        sync_file_state(result, files[i], user)
+    Auditor.suppress do
+      return if context.guest?
+      user = context.user
+      token = context.token
+      # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
+      user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
+        DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
+          sync_file_state(result, files[i], user)
+        end
       end
     end
   end

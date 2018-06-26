@@ -1,4 +1,5 @@
 class Session < ActiveRecord::Base
+  include Auditor
 
   SESSIONS_LIMIT = 2
 

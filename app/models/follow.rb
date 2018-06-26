@@ -13,6 +13,7 @@
 #
 
 class Follow < ActiveRecord::Base
+  include Auditor
 
   extend ActsAsFollower::FollowerLib
   extend ActsAsFollower::FollowScopes
