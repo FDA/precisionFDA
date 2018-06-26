@@ -16,6 +16,7 @@
 #
 
 class Comparison < ActiveRecord::Base
+  include Auditor
   include Permissions
 
   DESCRIPTION_MAX_LENGTH = 1000

@@ -9,6 +9,9 @@ class ApplicationController < ActionController::Base
   # Decode context
   before_action :handle_session, :decode_context
 
+  # Audit log
+  before_action :save_current_user_for_audit
+
   # Require login
   before_action :require_login
 
@@ -41,6 +44,10 @@ class ApplicationController < ActionController::Base
 
   def decode_context
     @context = Context.new(session[:user_id], session[:username], session[:token], session[:expiration], session[:org_id])
+  end
+
+  def save_current_user_for_audit
+    Auditor.current_user = AuditLogUser.new(@context.username, request.remote_ip)
   end
 
   def generate_auth_key(duration = 1.day)

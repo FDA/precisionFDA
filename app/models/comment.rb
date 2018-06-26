@@ -17,6 +17,7 @@
 #
 
 class Comment < ActiveRecord::Base
+  include Auditor
   include Permissions
 
   acts_as_nested_set :scope => [:commentable_id, :commentable_type]

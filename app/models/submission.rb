@@ -13,6 +13,7 @@
 #
 
 class Submission < ActiveRecord::Base
+  include Auditor
 
   belongs_to :user
   belongs_to :job

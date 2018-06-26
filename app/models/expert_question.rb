@@ -11,6 +11,8 @@
 #
 
 class ExpertQuestion < ActiveRecord::Base
+  include Auditor
+
   acts_as_commentable
 
   belongs_to :user

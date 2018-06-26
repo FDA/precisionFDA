@@ -104,7 +104,7 @@ class MainController < ApplicationController
 
   def destroy
     if @context.logged_in?
-      AUDIT_LOGGER.info("User #{session[:username]} logged out")
+      Auditor.perform_audit({ action: "destroy", record_type: "Session", record: { message: "User #{session[:username]} logged out" } })
     end
 
     Session.where(key: session.id).delete_all
@@ -207,42 +207,50 @@ class MainController < ApplicationController
     raise unless full_username.start_with?("user-")
     username = full_username[/^user-(.+)$/, 1]
 
+    # Prepare data for Audit log
+    Auditor.current_user = AuditLogUser.new(username, request.remote_ip)
+
     # Extract expiration date
     expiration_duration = result["expires_in"].to_i
     expiration_time = Time.now.to_i + expiration_duration
 
     user = User.find_by(dxuser: username)
     if user.nil?
-      AUDIT_LOGGER.info("User #{username} attempted to log in from an existing DNAnexus account")
-      render "_partials/_error", status: 403, locals: {message: "ERROR: You cannot use an existing DNAnexus account (#{username}) to log into precisionFDA. You need to apply for and obtain a separate precisionFDA account."}
+      log_session("User #{username} attempted to log in from an existing DNAnexus account")
+
+      render "_partials/_error", status: 403, locals: { message: "ERROR: You cannot use an existing DNAnexus account (#{username}) to log into precisionFDA. You need to apply for and obtain a separate precisionFDA account." }
     else
       if user.last_login.nil? && user.private_files_project.nil?
         api = DNAnexusAPI.new(token)
-        AUDIT_LOGGER.info("User #{username} is logging in for the first time; account setup step 1 of 9 completed")
+
+        log_session("User #{username} is logging in for the first time; account setup step 1 of 9 completed")
 
         # Private files
         private_files_project = api.call("project", "new", {name: "precisionfda-personal-files-#{username}", billTo: user.billto})["id"]
-        AUDIT_LOGGER.info("User #{username} is logging in for the first time; account setup step 2 of 9 completed")
+
+        log_session("User #{username} is logging in for the first time; account setup step 2 of 9 completed")
 
         # Private comparisons
         private_comparisons_project = api.call("project", "new", {name: "precisionfda-personal-comparisons-#{username}", billTo: user.billto})["id"]
-        AUDIT_LOGGER.info("User #{username} is logging in for the first time; account setup step 3 of 9 completed")
+
+        log_session("User #{username} is logging in for the first time; account setup step 3 of 9 completed")
 
         # Public files
         public_files_project = api.call("project", "new", {name: "precisionfda-public-files-#{username}", billTo: user.billto})["id"]
-        AUDIT_LOGGER.info("User #{username} is logging in for the first time; account setup step 4 of 9 completed")
+        log_session("User #{username} is logging in for the first time; account setup step 4 of 9 completed")
         api.call(public_files_project, "invite", {invitee: ORG_EVERYONE, level: "VIEW", suppressEmailNotification: true, suppressAllNotifications: true})
-        AUDIT_LOGGER.info("User #{username} is logging in for the first time; account setup step 5 of 9 completed")
+        log_session("User #{username} is logging in for the first time; account setup step 5 of 9 completed")
 
         # Public comparisons
         public_comparisons_project = api.call("project", "new", {name: "precisionfda-public-comparisons-#{username}", billTo: user.billto})["id"]
-        AUDIT_LOGGER.info("User #{username} is logging in for the first time; account setup step 6 of 9 completed")
+        log_session("User #{username} is logging in for the first time; account setup step 6 of 9 completed")
+
         api.call(public_comparisons_project, "invite", {invitee: ORG_EVERYONE, level: "VIEW", suppressEmailNotification: true, suppressAllNotifications: true})
-        AUDIT_LOGGER.info("User #{username} is logging in for the first time; account setup step 7 of 9 completed")
+        log_session("User #{username} is logging in for the first time; account setup step 7 of 9 completed")
 
         # User settings
         api.call(full_username, "update", {policies: {emailWhenJobComplete: "never"}})
-        AUDIT_LOGGER.info("User #{username} is logging in for the first time; account setup step 8 of 9 completed")
+        log_session("User #{username} is logging in for the first time; account setup step 8 of 9 completed")
 
         User.transaction do
           user.reload
@@ -251,7 +259,7 @@ class MainController < ApplicationController
             user.private_comparisons_project = private_comparisons_project
             user.public_files_project = public_files_project
             user.public_comparisons_project = public_comparisons_project
-            AUDIT_LOGGER.info("User #{username} is logging in for the first time; account setup step 9 of 9 completed")
+            log_session("User #{username} is logging in for the first time; account setup step 9 of 9 completed")
           end
           user.last_login = Time.now
           user.save!
@@ -273,7 +281,7 @@ class MainController < ApplicationController
         Session.where(key: session.id).delete_all
         reset_session
         save_session(user.id, username, token, expiration_time, user.org_id)
-        AUDIT_LOGGER.info("User #{username} logged in")
+        log_session("User #{username} logged in")
         Event::UserLoggedIn.create_for(user)
       end
 
@@ -296,7 +304,14 @@ class MainController < ApplicationController
       Invitation.transaction do
         @invitation = Invitation.create(p)
         if @invitation.persisted?
-          AUDIT_LOGGER.info("Access requested: #{p.to_json}")
+          auditor_data = {
+            action: "create",
+            record_type: "Access Request",
+            record: {
+              message: "Access requested: #{p.to_json}"
+            }
+          }
+          Auditor.perform_audit(auditor_data)
           NotificationsMailer.invitation_email(@invitation).deliver_now!
           NotificationsMailer.guest_access_email(@invitation).deliver_now!
           Event::UserAccessRequested.create_for(@invitation)
@@ -325,7 +340,14 @@ class MainController < ApplicationController
 
     if request.post?
       save_session(-1, "Guest-#{@invitation.id}", "INVALID", @invitation.expires_at.to_i, -1)
-      AUDIT_LOGGER.info("Browse access granted for #{@invitation.email} (id #{@invitation.id})")
+      auditor_data = {
+        action: "create",
+        record_type: "Access Request",
+        record: {
+          message: "Browse access granted for #{@invitation.email} (id #{@invitation.id})"
+        }
+      }
+      Auditor.perform_audit(auditor_data)
       redirect_to root_url
     end
   end
@@ -521,5 +543,16 @@ class MainController < ApplicationController
     return if cookies[:user_time_zone].blank?
 
     user.update_time_zone(cookies[:user_time_zone])
+  end
+
+  def log_session(message)
+    data = {
+      action: "create",
+      record_type: "Session",
+      record: {
+        message: message
+      }
+    }
+    Auditor.perform_audit(data)
   end
 end
