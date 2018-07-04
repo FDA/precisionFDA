@@ -1,0 +1,25 @@
+<div class="row">
+  <div class="col-md-24">
+    <div class="container-fluid container-padded pfda-participants-section gradient-blue-sky">
+      <div class="h2 text-center">Community Participants</div>
+      <div class="pfda-participants" data-bind="sortable: { template: 'participant-company', data: orgParticipants, afterMove: myDropCallback }"></div>
+      <hr>
+      <div class="pfda-participants" data-bind="sortable: { template: 'participant', data: personParticipants, afterMove: myDropCallback }"></div>
+      <hr>
+      <div class="h2 text-center">Invisible Participants</div>
+      <div class="pfda-participants" data-bind="sortable: { template: 'participant-company', data: invisibleParticipants, afterMove: myDropCallback }"></div>
+    </div>
+  </div>
+</div>
+
+<script id="participant-company" type="text/html">
+  <a class="pfda-participant" title="" data-toggle="tooltip" data-bind="attr: { title: title, href: href }">
+    <img data-bind="attr: { alt: title, src: imageUrl }">
+  </a>
+</script>
+
+<script id="participant" type="text/html">
+  <a class="pfda-participant" title="" data-toggle="tooltip" data-bind="attr: { title: title, href: href }">
+    <img class="img-circle" data-bind="attr: { alt: title, src: imageUrl }">
+  </a>
+</script>

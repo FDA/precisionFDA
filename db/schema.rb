@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180516114442) do
+ActiveRecord::Schema.define(version: 20180629093507) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -460,6 +460,19 @@ ActiveRecord::Schema.define(version: 20180516114442) do
   add_index "orgs", ["admin_id"], name: "index_orgs_on_admin_id", using: :btree
   add_index "orgs", ["handle"], name: "index_orgs_on_handle", unique: true, using: :btree
 
+  create_table "participants", force: :cascade do |t|
+    t.string   "title",      limit: 255
+    t.string   "image_url",  limit: 255
+    t.integer  "node_id",    limit: 4
+    t.boolean  "public"
+    t.integer  "kind",       limit: 4,   default: 0
+    t.integer  "position",   limit: 4,   default: 0
+    t.datetime "created_at",                         null: false
+    t.datetime "updated_at",                         null: false
+  end
+
+  add_index "participants", ["node_id"], name: "fk_rails_12f54662db", using: :btree
+
   create_table "saved_queries", force: :cascade do |t|
     t.string   "name",        limit: 255
     t.string   "grid_name",   limit: 255
@@ -762,6 +775,7 @@ ActiveRecord::Schema.define(version: 20180516114442) do
   add_foreign_key "nodes", "users"
   add_foreign_key "notes", "users"
   add_foreign_key "orgs", "users", column: "admin_id"
+  add_foreign_key "participants", "nodes"
   add_foreign_key "saved_queries", "users"
   add_foreign_key "space_memberships", "spaces"
   add_foreign_key "space_memberships", "users"
