@@ -119,6 +119,10 @@ class FolderService
       return Rats.failure(message: "File #{file.name} cannot be deleted because it participates in one or more comparisons. Please delete all the comparisons first.")
     end
 
+    if Participant.by_file(file).any?
+      return Rats.failure(message: "File #{file.name} cannot be deleted because it participates in one or more participants. Please delete all participants first.")
+    end
+
     DNAnexusAPI.new(context.token).call(file.project, "removeObjects", objects: [file.dxid])
     UserFile.transaction { file.destroy }
 

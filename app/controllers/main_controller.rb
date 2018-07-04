@@ -93,55 +93,8 @@ class MainController < ApplicationController
         ]
       end
     else
-      @participant_orgs = [
-        # orgs
-        { logo: "participants/23andme.png", name: "23andMe"},
-        { logo: "participants/aha.png", name: "American Heart Association"},
-        { logo: "participants/baylor.png", name: "Baylor College of Medicine"},
-        { logo: "participants/blueprint_genetics.png", name: "Blueprint Genetics"},
-        { logo: "participants/broad.png", name: "Broad Institute"},
-        { logo: "participants/cdc.png", name: "Centers for Disease Control and Prevention"},
-        { logo: "participants/counsyl.png", name: "Counsyl"},
-        { logo: "participants/crystal_genetics.png", name: "Crystal Genetics"},
-        { logo: "participants/dnanexus.png", name: "DNAnexus"},
-        { logo: "participants/edico.png", name: "Edico Genome"},
-        { logo: "participants/emory.png", name: "Emory Genetics Lab"},
-        { logo: "participants/garvan.png", name: "Garvan"},
-        { logo: "participants/genedx.png", name: "GeneDx"},
-        { logo: "participants/humanlongevity.png", name: "Human Longevity Inc."},
-        { logo: "participants/illumina.png", name: "Illumina"},
-        { logo: "participants/intel.png", name: "Intel"},
-        { logo: "participants/macrogen.png", name: "Macrogen"},
-        { logo: "participants/natera.png", name: "Natera"},
-        { logo: "participants/nist.png", name: "NIST"},
-        { logo: "participants/nih.png", name: "NIH"},
-        { logo: "participants/ostp.png", name: "White House Office of Science and Technology Policy"},
-        { logo: "participants/personalis.png", name: "Personalis"},
-        { logo: "participants/pharmgkb.png", name: "PharmGKB"},
-        { logo: "participants/qiagen.png", name: "Qiagen"},
-        { logo: "participants/roche.png", name: "Roche"},
-        { logo: "participants/sequenom.png", name: "Sequenom"},
-        { logo: "participants/seracare.png", name: "Seracare"},
-        { logo: "participants/us-house-of-representatives.png", name: "US House of Representatives"}
-      ]
-
-      @participants =  [
-        # individuals
-        { logo: "participants/russ_altman.jpg", name: "Dr. Russ Altman", classes: "img-circle"},
-        { logo: "participants/euan_ashley.jpg", name: "Dr. Euan Ashley", classes: "img-circle"},
-        { logo: "participants/lester_carter.jpg", name: "Dr. Lester Carter", classes: "img-circle"},
-        { logo: "participants/rachel_goldfeder.png", name: "Rachel Goldfeder", classes: "img-circle"},
-        { logo: "participants/teri_klein.jpg", name: "Dr. Teri Klein", classes: "img-circle"},
-        { logo: "participants/hans_nelsen.jpg", name: "Hans Nelsen", classes: "img-circle"},
-        { logo: "participants/snehit_prabhu.jpg", name: "Dr. Snehit Prabhu", classes: "img-circle"},
-        { logo: "participants/dennis_wall.jpg", name: "Dr. Dennis P. Wall", classes: "img-circle"},
-        { logo: "participants/mark_woon.jpg", name: "Mark Woon", classes: "img-circle"},
-        { logo: "participants/mark_wright.jpg", name: "Dr. Mark Wright", classes: "img-circle"},
-        { logo: "participants/peter_tonellato.jpg", name: "Dr. Peter Tonellato", classes: "img-circle"}
-      ]
-
-      @participant_orgs = @participant_orgs.shuffle
-      @participants = @participants.shuffle
+      @participant_orgs = Participant.org.positioned
+      @participants = Participant.person.positioned
     end
 
     @get_started_boxes = GetStartedBox.visible.positioned

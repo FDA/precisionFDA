@@ -1,0 +1,56 @@
+<%= render "_partials/form_errors", object: @expert %>
+<% unless @expert.persisted? %>
+  <div class="form-group required">
+    <%= f.label :username, "Username", class: 'control-label col-sm-2' %>
+    <div class="col-sm-11 col-sm-offset-1">
+      <%= f.select :username, options_for_select_experts(@users), {}, class: "form-control", required: "required" %>
+    </div>
+  </div>
+<% end %>
+<div class="form-group required">
+  <%= f.label :image, "Image", class: 'control-label col-sm-2' %>
+  <div class="col-sm-11 col-sm-offset-1">
+    <%= render "_partials/upload_image_button" %>
+    <input type="hidden" name="expert[_image_id]" data-bind="value: modalUploader.fileId" required="required" />
+    <br/><br/>
+    <img class="img-thumbnail" data-bind="attr: {src: modalUploader.imageUrl}, visible: modalUploader.imageUrl" />
+  </div>
+</div>
+<div class="form-group">
+  <%= f.label :_prefname, "Preferred Name", class: 'control-label col-sm-2' %>
+  <div class="col-sm-11 col-sm-offset-1">
+    <%= f.text_area :_prefname, class: "form-control", rows: 1, placeholder: "Preferred title to display other than 'First name Last name'" %>
+  </div>
+</div>
+<div class="form-group">
+  <%= f.label :_about, "About", class: 'control-label col-sm-2' %>
+  <div class="col-sm-11 col-sm-offset-1">
+    <%= f.text_area :_about, class: "form-control", rows: 6, placeholder: "About the Expert..." %>
+  </div>
+</div>
+<div class="form-group">
+  <%= f.label :_blog_title, "Blog Title", class: 'control-label col-sm-2' %>
+  <div class="col-sm-11 col-sm-offset-1">
+    <%= f.text_area :_blog_title, class: "form-control", rows: 2, placeholder: "Title for expert's blurb/blog..." %>
+  </div>
+</div>
+<div class="form-group">
+  <%= f.label :_blog, "Blog", class: 'control-label col-sm-2' %>
+  <div class="col-sm-11 col-sm-offset-1">
+    <%= f.text_area :_blog, class: "form-control", rows: 10, placeholder: "Expert blurb/blog..." %>
+  </div>
+</div>
+<div class="form-group">
+  <%= f.label :_challenge, "Blog Preview", class: 'control-label col-sm-2' %>
+  <div class="col-sm-11 col-sm-offset-1">
+    <%= f.text_area :_challenge, class: "form-control", rows: 6, placeholder: "Text from blog to include in front page..." %>
+  </div>
+</div>
+<% if @context.can_administer_site? %>
+  <div class="form-group">
+    <%= f.label :scope, "Visibility", class: 'control-label col-sm-2' %>
+    <div class="col-sm-11 col-sm-offset-1">
+      <%= f.select :scope, options_for_select({ "Private" => "private", "Public" => "public" }, "Private"), {}, class: "form-control" %>
+    </div>
+  </div>
+<% end %>

@@ -1,4 +1,4 @@
-class ExpertsEditView
+class editView
   constructor: (params) ->
     @modalUploader = new window.Precision.ModalImageUploader(params.imageUrl, params.fileId)
 
@@ -10,14 +10,14 @@ class ExpertsEditView
 #
 #########################################################
 
-ExpertsController = Paloma.controller('Experts',
-  edit: ->
-    $container = $("body main")
-    viewModel = new ExpertsEditView(@params)
-    ko.applyBindings(viewModel, $container[0])
-
+ParticipantsController = Paloma.controller('Admin/Participants',
   new: ->
     $container = $("body main")
-    viewModel = new ExpertsEditView(@params)
+    viewModel = new editView(@params)
+    ko.applyBindings(viewModel, $container[0])
+
+  edit: ->
+    $container = $("body main")
+    viewModel = new editView(@params)
     ko.applyBindings(viewModel, $container[0])
 )

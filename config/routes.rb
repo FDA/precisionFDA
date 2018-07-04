@@ -40,6 +40,9 @@ Rails.application.routes.draw do
       resources :get_started_boxes, except: [:show] do
         post :update_positions, on: :collection
       end
+      resources :participants, except: [:show] do
+        post :update_positions, on: :collection
+      end
     end
 
     # Main controller
