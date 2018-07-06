@@ -22,7 +22,7 @@
     <div class="form-actions col-sm-offset-3">
       <%= link_to 'Back', admin_participants_url, class: 'btn btn-warning'  %>
       <%= link_to 'Delete', admin_participant_path(@participant), class: 'btn btn-danger', method: :delete, data: { confirm: 'Are you certain you want to delete this?' } if @participant.persisted?  %>
-      <%= f.button :submit %>
+      <%= f.button :submit, data: { disable_with: "Creating...", bind: "enable: modalUploader.fileId" } %>
     </div>
   <% end %>
 
