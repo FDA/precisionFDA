@@ -6,7 +6,7 @@ class PlatformRack
   end
 
   def path
-    "https://stagingapi.dnanexus.com"
+    DNANEXUS_APISERVER_URI
   end
 
   def call(env)
@@ -35,6 +35,10 @@ class PlatformRack
     [200, {}, [{}.to_json]]
   end
 
+  def post_project_new(params)
+    [200, {}, [{ id: "project-#{params["name"]}"}.to_json]]
+  end
+
   def parse_method_name(env)
     request_type = env["REQUEST_METHOD"].downcase
 
@@ -50,6 +54,8 @@ class PlatformRack
         "run"
       when "/org/new"
         "org_new"
+      when "/project/new"
+        "project_new"
       else
         raise "Method for '#{env["PATH_INFO"]}' isn't implemented yet"
       end
@@ -60,11 +66,11 @@ class PlatformRack
   def parse_params(env)
     params = CGI.parse(env["QUERY_STRING"])
 
-    if env["CONTENT_TYPE"] =~ %r{^multipart/form\-data; boundary=}
-      params.merge!(Rack::Multipart.parse_multipart(env))
-    else
-      params.merge!(CGI.parse(env["rack.input"].string))
+    if env["CONTENT_TYPE"] == "application/json"
+      params.merge!(JSON.parse(env["rack.input"].string))
     end
+
+    params
   end
 
 end
