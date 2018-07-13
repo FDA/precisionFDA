@@ -51,6 +51,7 @@ Rails.application.routes.draw do
     get 'return_from_login' => 'main#return_from_login'
     post 'publish' => 'main#publish'
     get 'track' => 'main#track'
+    get 'mislabeling' => 'main#mislabeling'
     get 'request_access' => 'main#request_access'
     post 'request_access' => 'main#request_access'
     get 'browse_access' => 'main#browse_access'

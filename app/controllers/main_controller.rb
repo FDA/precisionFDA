@@ -1,7 +1,7 @@
 class MainController < ApplicationController
-  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines, :browse_access, :destroy, :presskit, :news]}
+  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines, :browse_access, :destroy, :presskit, :news, :mislabeling]}
 
-  skip_before_action :require_login,     only: [:track]
+  skip_before_action :require_login,     only: [:track, :mislabeling]
   before_action :require_login_or_guest, only: [:track]
 
   def index
@@ -453,6 +453,10 @@ class MainController < ApplicationController
       return
     end
     @graph = GraphDecorator.build(@context, @item)
+  end
+
+  def mislabeling
+
   end
 
   def tokify
