@@ -44,12 +44,14 @@ module Permissions
   def accessible_by?(context)
     if context.guest?
       public?
-    else
+    elsif context.logged_in?
       return true if public?
       return true if user_id == context.user_id
       return true if context.user.space_uids.include?(scope)
 
       context.challenge_evaluator? && user.dxuser == CHALLENGE_BOT_DX_USER
+    else
+      false
     end
   end
 

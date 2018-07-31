@@ -1,0 +1,21 @@
+<div class="container-fluid container-padded">
+
+  <%= simple_form_for [:admin, @admin_get_started_box], html: { class: 'form-horizontal', novalidate: true }, wrapper: :horizontal_form do |f| %>
+
+    <%= f.error_notification %>
+
+    <div class="form-inputs">
+      <%= f.input :title, disabled: !@admin_get_started_box.default? %>
+      <%= f.input :description, as: :text, input_html: { rows: 5}  %>
+      <%= f.input :feature_url %>
+      <%= f.input :documentation_url %>
+      <%= f.input :public %>
+    </div>
+
+    <div class="form-actions col-sm-offset-3">
+      <%= link_to 'Back', admin_get_started_boxes_url, class: 'btn btn-warning'  %>
+      <%= f.button :submit %>
+    </div>
+  <% end %>
+
+</div>

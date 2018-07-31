@@ -13,7 +13,7 @@ class UsageCollector
     end
 
     def collect_for_custom_range
-      User.not_challenge_bot.find_each do |user|
+      User.real.find_each do |user|
         metric = user.usage_metric ? user.usage_metric : user.build_usage_metric
         metric.update(
           custom_range_byte_hours: CloudResource.consumption(custom_range_start, custom_range_end, user),
@@ -83,7 +83,7 @@ class UsageCollector
 
     # Update cloud resource consumption for all periods
     def collect_consumption
-      User.not_challenge_bot.find_each do |user|
+      User.real.find_each do |user|
         metric = user.usage_metric ? user.usage_metric : user.build_usage_metric
         metric.update(
           custom_range_byte_hours: CloudResource.consumption(custom_range_start, custom_range_end, user),

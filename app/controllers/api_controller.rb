@@ -1027,7 +1027,7 @@ class ApiController < ApplicationController
 
     project = CHALLENGE_BOT_PRIVATE_FILES_PROJECT
     dxid = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).("file", "new", {"name": params[:name], "project": CHALLENGE_BOT_PRIVATE_FILES_PROJECT})["id"]
-    challenge_bot = User.find_by!(dxuser: CHALLENGE_BOT_DX_USER)
+    challenge_bot = User.challenge_bot
 
     UserFile.transaction do
       file = UserFile.create!(
@@ -1036,7 +1036,7 @@ class ApiController < ApplicationController
         name: name,
         state: "open",
         description: description,
-        user_id: User.challenge_bot.id,
+        user_id: challenge_bot.id,
         parent: challenge_bot,
         scope: 'private'
       )

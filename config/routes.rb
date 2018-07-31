@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+
   #
   # Remove the ability to switch formats (i.e. /foo vs /foo.json or /foo.xml)
   # by wrapping everything into a scope
@@ -9,6 +10,9 @@ Rails.application.routes.draw do
 
       root "dashboard#index"
 
+      resources :news_items, path: 'news'
+      post 'news/positions' => 'news_items#positions'
+      
       resources :activity_reports, only: [:index] do
         collection do
           get "total"
@@ -33,6 +37,12 @@ Rails.application.routes.draw do
       end
 
       get "active_users", to: "users#active"
+      resources :get_started_boxes, except: [:show] do
+        post :update_positions, on: :collection
+      end
+      resources :participants, except: [:show] do
+        post :update_positions, on: :collection
+      end
     end
 
     # Main controller
@@ -41,6 +51,7 @@ Rails.application.routes.draw do
     get 'return_from_login' => 'main#return_from_login'
     post 'publish' => 'main#publish'
     get 'track' => 'main#track'
+    get 'mislabeling' => 'main#mislabeling'
     get 'request_access' => 'main#request_access'
     post 'request_access' => 'main#request_access'
     get 'browse_access' => 'main#browse_access'
@@ -54,6 +65,9 @@ Rails.application.routes.draw do
     get 'exception_test' => "main#exception_test"
     get 'presskit' => 'main#presskit'
     get 'news' => 'main#news'
+
+    # News Items, public
+    get '/news_items' => 'news_items#index'
 
     # API
     post '/api/publish', to: 'api#publish'

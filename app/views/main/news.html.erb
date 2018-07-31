@@ -11,61 +11,25 @@
 <div class="container container-padded">
   <div class="row">
     <div class="col-md-20 col-md-offset-2">
-      <div class="news-item">
-        <a target="blank" class="lead-intro" href="https://medtech.pharmamedtechbi.com/MT105058/QampA-FDA-Dx-Reviewers-Tips-For-NextGen-Sequencing-Sponsors">
-          Q&A: FDA Dx Reviewer's Tips For Next-Gen Sequencing Sponsors
-          <br/>
-          <h4 class="text-muted">June 26th, 2017</h4>
-          <hr>
-          <div class="lead">
-            A top reviewer in US FDA's in vitro diagnostics office offers tips to next-generation sequencing test sponsors to avoid common submission shortcomings in this interview with Medtech Insight. According to FDA's Hisani Madison, sponsors frequently fall short in providing a refined intended-use statement.
-          </div>
-        </a>
-      </div>
-      <div class="news-item">
-        <a target="blank" class="lead-intro" href="https://www.fda.gov/NewsEvents/Newsroom/PressAnnouncements/ucm560167.htm">
-          FDA approves first cancer treatment for any solid tumor with a specific genetic feature
-          <br/>
-          <h4 class="text-muted">May 24th, 2017</h4>
-          <hr>
-          <div class="lead">
-            The U.S. Food and Drug Administration today granted accelerated approval to a treatment for patients whose cancers have a specific genetic feature (biomarker). This is the first time the agency has approved a cancer treatment based on a common biomarker rather than the location in the body where the tumor originated.
-          </div>
-        </a>
-      </div>
-      <div class="news-item">
-        <a target="blank" class="lead-intro" href="https://hive.biochemistry.gwu.edu/rvdb">
-          Reference Viral DataBase v10.2
-          <br/>
-          <h4 class="text-muted">May 23rd, 2017</h4>
-          <hr>
-          <div class="lead">
-            New in May 2017, the NGS Reference Virus Database version 10.2 (unclustered and clustered)
-          </div>
-        </a>
-      </div>
-      <div class="news-item">
-        <a target="blank" class="lead-intro" href="http://www.fda.gov/ScienceResearch/SpecialTopics/PrecisionMedicine/default.htm">
-          Optimizing regulatory oversight for Next Generation Sequencing tests
-          <br/>
-          <h4 class="text-muted">July 6th, 2016</h4>
-          <hr>
-          <div class="lead">
-            In support of the White House’s Precision Medicine Initiative, the FDA issued two draft guidances that offer a streamlined approach to the oversight of ‘Next Generation Sequencing’ tests that detect medically important differences in a person’s genomic makeup.
-          </div>
-        </a>
-      </div>
-      <div class="news-item">
-        <a target="blank" class="lead-intro" href="https://www.youtube.com/watch?v=JCcpyJz49jE">
-          Interview with the former FDA Chief Health Informatics Officer about precisionFDA
-          <br/>
-          <h4 class="text-muted">July 5th, 2016</h4>
-          <hr>
-          <div class="lead">
-            <%= image_tag "misc/taha-interview-narrow.png", alt: "Interview with Dr Taha Kass-Hout", class: "img-responsive img-rounded" %>
-          </div>
-        </a>
-      </div>
+
+      <% @news_items.each do |i|  %>
+        <div class="news-item">
+          <%= link_to i.href, class: "lead-intro" do %>
+            <%= i.title %>
+            <br/>
+            <h4 class="text-muted"><%= i.created_at.strftime("%B #{i.created_at.day.ordinalize}, %Y")%></h4>
+            <hr>
+            <div class="lead">
+              <%= i.content %>
+            </div>
+            <% unless i.video.blank? %>
+              <div class="embed-responsive embed-responsive-16by9">
+                <iframe src="<%= i.video %>" class="embed-responsive-item" style="display: block" rameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
     </div>
   </div>
 </div>

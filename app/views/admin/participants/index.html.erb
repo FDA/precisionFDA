@@ -1,0 +1,26 @@
+<% content_for :title do %>Participants<% end %>
+
+<%= render partial: "admin/_partials/workbench_toolbar" %>
+
+<div class="pfda-toolbar">
+  <div class="btn-group">
+    <%= link_to new_admin_participant_path, class: 'btn btn-primary' do %>
+      <span class="fa fa-plus fa-fw"></span> New participant
+    <% end %>
+  </div>
+  <div class="btn-group" style="display: none;" data-bind="visible: displaySave">
+    <button class="btn btn-success" data-bind="click: saveSortBoxes">
+      <span class="fa fa-save fa-fw"></span> Save
+    </button>
+  </div>
+</div>
+
+<% if @org_participants.any? || @person_participants.any? || @invisible_participants.any?  %>
+  <%= render partial: "admin/participants/items" %>
+<% else %>
+  <div class="container-fluid container-padded">
+    <div class="alert alert-info">
+      We couldn't find any participants here
+    </div>
+  </div>
+<% end %>

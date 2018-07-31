@@ -21,8 +21,31 @@ class ExpertsController < ApplicationController
 
   def new
     redirect_to experts_path and return unless @context.can_administer_site?
-    @users = User.all.order(:first_name).map{|u| ["#{u.username} (#{u.full_name.titleize}, #{u.org.name})", u.username]}
+    @users = User.real.includes(:org).order(:first_name)
     @expert = Expert.new
+  end
+
+  def create
+    redirect_to experts_path unless @context.user.can_administer_site?
+
+    user = User.real.find_by(dxuser: expert_params[:username])
+    if user.nil?
+      flash[:error] = "Expert username #{expert_params[:username]} not found!"
+    else
+      expert = Expert.provision(@context, expert_params)
+      if expert
+        NotificationsMailer.new_expert_email(expert).deliver_now!
+        redirect_to experts_path
+        flash[:success] = "A new Expert of the Month was successfully created for #{expert.user.full_name.titleize} (#{expert.user.dxuser})."
+        return
+      else
+        flash[:error] = "The Expert could not be provisioned because of an unknown reason."
+      end
+    end
+
+    # Here only if error
+    @expert = Expert.new(expert_params)
+    redirect_to new_expert_path(@expert)
   end
 
   def edit
@@ -105,29 +128,6 @@ class ExpertsController < ApplicationController
     end
 
     redirect_to expert_path(expert)
-  end
-
-  def create
-    redirect_to experts_path unless @context.user.can_administer_site?
-
-    user = User.find_by(dxuser: expert_params[:username])
-    if user.nil?
-      flash[:error] = "Expert username #{expert_params[:username]} not found!"
-    else
-      expert = Expert.provision(@context, expert_params)
-      if expert
-        NotificationsMailer.new_expert_email(expert).deliver_now!
-        redirect_to experts_path
-        flash[:success] = "A new Expert of the Month was successfully created for #{expert.user.full_name.titleize} (#{expert.user.dxuser})."
-        return
-      else
-        flash[:error] = "The Expert could not be provisioned because of an unknown reason."
-      end
-    end
-
-    # Here only if error
-    @expert = Expert.new(expert_params)
-    redirect_to new_expert_path(@expert)
   end
 
   def dashboard

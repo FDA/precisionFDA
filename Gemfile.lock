@@ -66,6 +66,7 @@ GEM
       rails (>= 3.1)
     builder (3.2.3)
     byebug (8.2.1)
+    coderay (1.1.2)
     coffee-rails (4.1.1)
       coffee-script (>= 2.2.0)
       railties (>= 4.0.0, < 5.1.x)
@@ -74,7 +75,7 @@ GEM
       execjs
     coffee-script-source (1.10.0)
     colorize (0.8.1)
-    concurrent-ruby (1.0.2)
+    concurrent-ruby (1.0.5)
     crack (0.4.3)
       safe_yaml (~> 1.0.0)
     crass (1.0.4)
@@ -145,6 +146,7 @@ GEM
       nokogiri (>= 1.5.9)
     mail (2.6.4)
       mime-types (>= 1.16, < 4)
+    method_source (0.9.0)
     mime-types (3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2016.0521)
@@ -180,9 +182,14 @@ GEM
     pronto-rubocop (0.9.0)
       pronto (~> 0.9.0)
       rubocop (~> 0.38, >= 0.35.0)
+    pry (0.11.3)
+      coderay (~> 1.1.0)
+      method_source (~> 0.9.0)
+    pry-rails (0.3.6)
+      pry (>= 0.10.4)
     quiet_assets (1.1.0)
       railties (>= 3.1, < 5.0)
-    rack (1.6.8)
+    rack (1.6.10)
     rack-accept (0.4.5)
       rack (>= 0.4)
     rack-test (0.6.3)
@@ -265,8 +272,12 @@ GEM
     secure_headers (3.1.2)
       useragent
     semverly (1.0.0)
-    spring (1.6.2)
-    sprockets (3.7.0)
+    simple_form (4.0.0)
+      actionpack (> 4)
+      activemodel (> 4)
+    spring (2.0.2)
+      activesupport (>= 4.2)
+    sprockets (3.7.2)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
     sprockets-rails (3.1.1)
@@ -349,6 +360,7 @@ DEPENDENCIES
   premailer-rails
   pronto (~> 0.9.5)
   pronto-rubocop (~> 0.9.0)
+  pry-rails
   quiet_assets
   rails (= 4.2.7.1)
   rails_param
@@ -359,7 +371,9 @@ DEPENDENCIES
   sdoc (~> 0.4.0)
   secure_headers
   semverly
+  simple_form
   spring
+  sprockets (> 3.7.1)
   therubyracer
   thin
   turbolinks
@@ -372,4 +386,4 @@ DEPENDENCIES
   wice_grid
 
 BUNDLED WITH
-   1.16.1
+   1.16.2

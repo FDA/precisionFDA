@@ -9,59 +9,14 @@
 
 <div class="container-fluid container-padded">
   <%= form_for @expert, url: expert_path(@expert), method: :put, html: {class: 'form form-horizontal'} do |f| %>
-    <%= render "_partials/form_errors", object: @expert %>
-    <div class="form-group required">
-      <%= f.label :image, "Image", class: 'control-label col-sm-2' %>
-      <div class="col-sm-11 col-sm-offset-1">
-        <%= render "_partials/upload_image_button" %>
-        <input type="hidden" name="expert[_image_id]" data-bind="value: fileId" />
-        <br/><br/>
-        <img class="img-thumbnail" data-bind="attr: {src: imageUrl}, visible: imageUrl" />
-      </div>
-    </div>
-    <div class="form-group">
-      <%= f.label :_prefname, "Preferred Name", class: 'control-label col-sm-2' %>
-      <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_area :_prefname, class: "form-control", rows: 1, placeholder: "Prefix (if any) to prepend to the expert's name..." %>
-      </div>
-    </div>
-    <div class="form-group">
-      <%= f.label :_about, "About", class: 'control-label col-sm-2' %>
-      <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_area :_about, class: "form-control", rows: 6, placeholder: "About the Expert..." %>
-      </div>
-    </div>
-    <div class="form-group">
-      <%= f.label :_blog_title, "Blog Title", class: 'control-label col-sm-2' %>
-      <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_area :_blog_title, class: "form-control", rows: 2, placeholder: "Title for expert blurb/blog..." %>
-      </div>
-    </div>
-    <div class="form-group">
-      <%= f.label :_blog, "Blog", class: 'control-label col-sm-2' %>
-      <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_area :_blog, class: "form-control", rows: 10, placeholder: "Expert blurb/blog..." %>
-      </div>
-    </div>
-    <div class="form-group">
-      <%= f.label :_challenge, "Blog Preview", class: 'control-label col-sm-2' %>
-      <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_area :_challenge, class: "form-control", rows: 6, placeholder: "Text from blog to include in front page..." %>
-      </div>
-    </div>
-    <% if @context.can_administer_site? %>
-      <div class="form-group required">
-        <%= f.label :scope, "Visibility", class: 'control-label col-sm-2' %>
-        <div class="col-sm-11 col-sm-offset-1">
-          <%= f.select :scope, options_for_select({"Private" => "private", "Public" => "public"}, @expert.scope), {}, class: "form-control" %>
-        </div>
-      </div>
-    <% end %>
+
+    <%= render "experts/form_fields", f: f %>
+
     <div class="form-group">
       <div class="col-sm-offset-3">
         <%= f.submit "Update", class: 'btn btn-primary', data: {disable_with: "Updating..."} %>
       </div>
     </div>
   <% end %>
-  <%= render "_partials/upload_image_modal", display_url: true %>
+  <%= render "_partials/admin/modal_image_uploader" %>
 </div>
