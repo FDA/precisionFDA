@@ -1,0 +1,15 @@
+<% @news_items.each do |it| %>
+
+  <div>
+    <%= it.title %>
+  </div>
+  <div>
+    <%= it.content %>
+  </div>
+
+  <div>
+    <% unless it.video.blank? %>
+      <iframe width="600" height="300" src="<%= it.video %>" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <% end %>
+  </div>
+<% end %>

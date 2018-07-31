@@ -50,88 +50,7 @@
           </div>
         <% else %>
           <ul class="pfda-cards pfda-tutorial text-left">
-            <% if !@user_appathon.nil? && @user_appathon.meta_appathon.is_ongoing? %>
-              <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
-                <div class="pfda-card-title">
-                  <%= link_to flag_image_tag(@user_appathon.flag, width: 40), appathon_path(@user_appathon), class: "pull-right" %>
-                  <%= link_to "View #{@user_appathon.title}", appathon_path(@user_appathon) %>
-                </div>
-                <div class="pfda-card-body">
-                  You have joined this for <br /><a class="link-muted" href="<%= meta_appathon_path(@user_appathon.meta_appathon) %>"><%=  @user_appathon.meta_appathon.title %></a>
-                </div>
-              </li>
-            <% elsif !@meta_appathon.nil? && @meta_appathon.is_ongoing? %>
-              <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-warning">
-                <div class="pfda-card-title">
-                  <%= link_to "View #{@meta_appathon.title}", meta_appathon_path(@meta_appathon) %>
-                </div>
-                <div class="pfda-card-body">
-                  Participate or organize
-                </div>
-              </li>
-            <% end %>
-
-            <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@files_count) %>">
-              <div class="pfda-card-title">
-                <a href="<%= new_file_path %>">Upload <%= 'first' if !tutorial_complete?(@files_count) %> file</a>
-                <a class="link-muted pull-right" href="<%= show_docs_path('files') %>">Learn more</a>
-              </div>
-              <div class="pfda-card-body">
-                Upload files to your private space to use as inputs for apps or comparisons
-              </div>
-            </li>
-
-            <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@assets_count) %>">
-              <div class="pfda-card-title">
-                <a href="<%= new_asset_path %>">Add <%= 'first' if !tutorial_complete?(@assets_count) %> asset</a>
-                <a class="link-muted pull-right" href="<%= show_docs_path('creating_apps') %>#dev-assets">Learn more</a>
-              </div>
-              <div class="pfda-card-body">
-                Contribute a tarball with software that can be used by apps
-              </div>
-            </li>
-
-            <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@apps_count) %>">
-              <div class="pfda-card-title">
-                <a href="<%= new_app_path %>">Create <%= 'first' if !tutorial_complete?(@apps_count) %> app</a>
-                <a class="link-muted pull-right" href="<%= show_docs_path('creating_apps') %>">Learn more</a>
-              </div>
-              <div class="pfda-card-body">
-                Combine assets with a shell script, and achieve just about anything
-              </div>
-            </li>
-
-            <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@jobs_count) %>">
-              <div class="pfda-card-title">
-                <a href="<%= apps_path %>">Launch <%= 'first' if !tutorial_complete?(@jobs_count) %> app</a>
-                <a class="link-muted pull-right" href="<%= show_docs_path('apps') %>#apps-listing">Learn more</a>
-              </div>
-              <div class="pfda-card-body">
-                Run bioinformatics or other Linux-based software on the cloud
-              </div>
-            </li>
-
-            <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@comparisons_count) %>">
-              <div class="pfda-card-title">
-                <a href="<%= new_comparison_path %>">Run <%= 'first' if !tutorial_complete?(@comparisons_count) %> comparison</a>
-                <a class="link-muted pull-right" href="<%= show_docs_path('comparisons') %>">Learn more</a>
-              </div>
-              <div class="pfda-card-body">
-                Look at the differences between a test set and a benchmark set of genomic variants
-              </div>
-            </li>
-
-            <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= tutorial_state(@notes_count) %>">
-              <div class="pfda-card-title">
-                <%= link_to notes_path(), method: :post, data: {disable_with: "Creating Note..."} do %>
-                  Create <%= 'first' if !tutorial_complete?(@notes_count) %> note
-                <% end %>
-                <a class="link-muted pull-right" href="<%= show_docs_path('notes') %>">Learn more</a>
-              </div>
-              <div class="pfda-card-body">
-                Write and publish rich notes describing your thoughts and your work
-              </div>
-            </li>
+            <%= render partial: "main/get_started_box", collection: @get_started_boxes %>
           </ul>
         <% end %>
       </div>
@@ -215,7 +134,7 @@
     </div>
     <div class="row">
       <div class="pfda-cards pfda-cards-news">
-        <%= render "main/news" %>
+        <%= render partial: "_partials/news_blocks", locals: { isAdmin: false } %>
       </div>
     </div>
     <br/>

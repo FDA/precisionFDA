@@ -36,7 +36,7 @@ window.onPlayerReady = (event) ->
 MainController = Paloma.controller('Main',
   index: ->
     $container = $("body main")
-
+    
     if $('body.pfda-guest').length > 0
       $container.on("click", ".btn-player", (e) ->
         # This code loads the IFrame Player API code asynchronously.

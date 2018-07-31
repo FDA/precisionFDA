@@ -13,4 +13,5 @@ window.Precision.api = (route, input, successCallback, errorCallback, async=true
     success: (data, status, xhr) ->
       successCallback?(data)
     error: (xhr, status, err) ->
-      if errorCallback? then errorCallback(status, err) else console.error(status, err)
+      Precision.errors.unconditional_handle(xhr)
+      if errorCallback? then errorCallback(status, err) else Precision.errors.handle(xhr)

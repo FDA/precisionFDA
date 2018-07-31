@@ -44,7 +44,7 @@ class UserFile < Node
   include Licenses
   require 'uri'
 
-  DESCRIPTION_MAX_LENGTH = 1000
+  DESCRIPTION_MAX_LENGTH = 65535
 
   STATE_CLOSING = "closing"
   STATE_CLOSED = "closed"

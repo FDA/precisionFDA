@@ -1,0 +1,15 @@
+<%= render partial: "admin/_partials/workbench_toolbar" %>
+
+<div class="page-header">
+  <div class="page-title">
+    <div class="fa fa-newspaper-o"></div>
+    Create a new
+    <strong>News Item</strong>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <div class="container-fluid container-padded">
+    <%= render partial: 'form', locals: { item: @news_item } %>
+  </div>
+</div>

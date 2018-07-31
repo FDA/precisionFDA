@@ -325,7 +325,7 @@ class SubmissionsController < ApplicationController
   end
 
   def challenge_bot
-    @challenge_bot ||= User.find_by(dxuser: CHALLENGE_BOT_DX_USER)
+    @challenge_bot ||= User.challenge_bot
   end
 
 end

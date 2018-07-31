@@ -153,6 +153,11 @@ class ChallengesController < ApplicationController
     when "submissions"
       @submissions = @challenge.submissions.accessible_by_public
     when "results"
+      unless @challenge.can_show_results?(@context)
+        redirect_to challenges_path
+        return
+      end
+
       @submissions = @challenge.submissions.accessible_by_public
       if @challenge.automated?
         @results = @challenge.completed_submissions
@@ -279,7 +284,7 @@ class ChallengesController < ApplicationController
   end
 
   def app_owners_for_select
-    @app_owners_candidates = User.not_challenge_bot.map{ |u| [u.select_text, u.id] }
+    @app_owners_candidates = User.real.map { |u| [u.select_text, u.id] }
   end
 
   def find_editable_challenge

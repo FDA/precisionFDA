@@ -155,6 +155,14 @@ class Space < ActiveRecord::Base
     state.blank? ? { "UNACTIVATED" => "NULL" } : { state => state }
   end
 
+  def host_dxorghandle
+    host_dxorg.sub(/^org-/, '')
+  end
+
+  def guest_dxorghandle
+    guest_dxorg.sub(/^org-/, '')
+  end
+
   # space:
   #   name
   #   description

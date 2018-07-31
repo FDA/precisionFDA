@@ -1,0 +1,31 @@
+<div class="container-fluid container-padded">
+
+  <%= simple_form_for [:admin, @participant], html: { class: 'form-horizontal', novalidate: true }, wrapper: :horizontal_form do |f| %>
+
+    <%= f.error_notification %>
+
+    <div class="form-inputs">
+      <%= f.input :title %>
+    </div>
+
+    <div class="form-group required">
+      <%= f.label :image, "Image", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%= render "_partials/upload_image_button" %>
+        <input type="hidden" name="participant[node_dxid]" data-bind="value: modalUploader.fileId" required="required" />
+        <input type="hidden" name="participant[image_url]" data-bind="value: modalUploader.imageUrl" required="required" />
+        <br/><br/>
+        <img class="img-thumbnail" data-bind="attr: {src: modalUploader.imageUrl}, visible: modalUploader.imageUrl" />
+      </div>
+    </div>
+
+    <div class="form-actions col-sm-offset-3">
+      <%= link_to 'Back', admin_participants_url, class: 'btn btn-warning'  %>
+      <%= link_to 'Delete', admin_participant_path(@participant), class: 'btn btn-danger', method: :delete, data: { confirm: 'Are you certain you want to delete this?' } if @participant.persisted?  %>
+      <%= f.button :submit, data: { disable_with: "Creating...", bind: "enable: modalUploader.fileId" } %>
+    </div>
+  <% end %>
+
+</div>
+
+<%= render "_partials/admin/modal_image_uploader" %>

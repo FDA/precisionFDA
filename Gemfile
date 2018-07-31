@@ -41,6 +41,9 @@ gem 'paloma', '5.0.0'
 # Websocket support (for fetching logs)
 gem 'websocket'
 
+# Affix sprocket version as per vuln derscribed in PFDA-495
+gem 'sprockets', '> 3.7.1'
+
 # Semantic versioning parsing
 gem 'semverly'
 
@@ -84,8 +87,11 @@ gem 'gretel'
 # View outgoing HTTP requests
 gem 'httplog'
 
+gem 'simple_form'
+
 group :development do
   gem 'byebug'
+  gem 'pry-rails'
 
   # Access an IRB console on exception pages or by using <%= console %> in views
   gem 'web-console', '~> 2.0'
