@@ -24,21 +24,21 @@ class Job < ActiveRecord::Base
   include Permissions
 
   INSTANCE_TYPES = {
-    "baseline-2" => "mem1_ssd1_x2",
-    "baseline-4" => "mem1_ssd1_x4",
-    "baseline-8" => "mem1_ssd1_x8",
-    "baseline-16" => "mem1_ssd1_x16",
-    "baseline-32" => "mem1_ssd1_x32",
-    "himem-2" => "mem3_ssd1_x2",
-    "himem-4" => "mem3_ssd1_x4",
-    "himem-8" => "mem3_ssd1_x8",
-    "himem-16" => "mem3_ssd1_x16",
-    "himem-32" => "mem3_ssd1_x32",
-    "hidisk-2" => "mem1_ssd2_x2",
-    "hidisk-4" => "mem1_ssd2_x4",
-    "hidisk-8" => "mem1_ssd2_x8",
-    "hidisk-16" => "mem1_ssd2_x16",
-    "hidisk-36" => "mem1_ssd2_x36"
+    "baseline-2" => "mem1_ssd1_x2_fedramp",
+    "baseline-4" => "mem1_ssd1_x4_fedramp",
+    "baseline-8" => "mem1_ssd1_x8_fedramp",
+    "baseline-16" => "mem1_ssd1_x16_fedramp",
+    "baseline-36" => "mem1_ssd1_x36_fedramp",
+    "himem-2" => "mem3_ssd1_x2_fedramp",
+    "himem-4" => "mem3_ssd1_x4_fedramp",
+    "himem-8" => "mem3_ssd1_x8_fedramp",
+    "himem-16" => "mem3_ssd1_x16_fedramp",
+    "himem-32" => "mem3_ssd1_x32_fedramp",
+    "hidisk-2" => "mem1_ssd2_x2_fedramp",
+    "hidisk-4" => "mem1_ssd2_x4_fedramp",
+    "hidisk-8" => "mem1_ssd2_x8_fedramp",
+    "hidisk-16" => "mem1_ssd2_x16_fedramp",
+    "hidisk-36" => "mem1_ssd2_x36_fedramp"
   }
 
   STATE_DONE = "done"
