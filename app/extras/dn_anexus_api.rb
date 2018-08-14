@@ -17,7 +17,7 @@ class DNAnexusAPI
 
   def call(subject, method, input = {})
     uri = URI("#{@apiserver_url}#{subject}/#{method}")
-    Net::HTTP.start(uri.host, uri.port, {read_timeout: 90, use_ssl: true}) do |http|
+    Net::HTTP.start(uri.host, uri.port, {read_timeout: 180, use_ssl: true}) do |http|
       response = http.post(uri.path, input.to_json, {"Content-Type" => "application/json", "Authorization" => "Bearer #{@bearer_token}"})
       response.value
       return JSON.parse(response.body)
