@@ -20,6 +20,7 @@ class WorkflowSeries < ActiveRecord::Base
   belongs_to :user
 
   acts_as_taggable
+  acts_as_votable
 
   def uid
     "workflow-series-#{id}"
