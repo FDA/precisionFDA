@@ -22,6 +22,7 @@
 class Job < ActiveRecord::Base
   include Auditor
   include Permissions
+  include InternalUid
 
   INSTANCE_TYPES = {
     "baseline-2" => "mem1_ssd1_x2_fedramp",
@@ -69,10 +70,6 @@ class Job < ActiveRecord::Base
 
   scope :done, -> { where(state: STATE_DONE) }
   scope :terminal, -> { where(state: [TERMINAL_STATES]) }
-
-  def uid
-    dxid
-  end
 
   def to_param
     uid

@@ -68,17 +68,14 @@ module Permissions
     if context.guest?
       false
     else
-      # Publishable if owned by user, and not already public,
-      # and not in another space (if publishing to space)
-      user_id == context.user_id && !public? && (scope_to_publish_to == "public" || private?)
+      return false unless user_id == context.user_id
+      core_publishable_by_user?(context.user, scope_to_publish_to)
     end
   end
 
   def core_publishable_by_user?(user, scope_to_publish_to)
     return false unless user
-    # Publishable if owned by user, and not already public,
-    # and not in another space (if publishing to space)
-    user_id == user.id && !public? && (scope_to_publish_to == "public" || private?)
+    user_id == user.id && private?
   end
 
   def publishable_by?(context, scope_to_publish_to = "public")
@@ -99,6 +96,10 @@ module Permissions
 
   def in_space?
     !public? && !private?
+  end
+
+  def in_confidential_space?
+    in_space? && space_object.confidential?
   end
 
   def space_object

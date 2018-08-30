@@ -288,6 +288,11 @@ Rails.application.routes.draw do
       get 'content', on: :member
       get 'discuss', on: :member
       post 'accept', on: :member
+      post 'request_lock', on: :member, to: 'space_requests#request_lock'
+      post 'confirm_lock', on: :member, to: 'space_requests#confirm_lock'
+      post 'request_unlock', on: :member, to: 'space_requests#request_unlock'
+      post 'confirm_unlock', on: :member, to: 'space_requests#confirm_unlock'
+      post 'reject_unlock', on: :member, to: 'space_requests#reject_unlock'
       post 'rename', on: :member
       post 'invite', on: :member
       post 'move', on: :member
@@ -296,7 +301,24 @@ Rails.application.routes.draw do
       post 'download_list', on: :member
       post 'remove_folder', on: :member, as: 'remove_folder'
       post 'publish_folder', on: :member
+      post 'copy_folder_to_cooperative', on: :member
+      post 'copy_file_to_cooperative', on: :member
+      post 'copy_to_cooperative', on: :member
       resources :comments
+    end
+
+    resources :space_membership, only: [] do
+      member do
+        post :to_lead
+        post :to_admin
+        post :to_viewer
+        post :to_member
+        post :to_inactive
+      end
+    end
+
+    resources :notification_preferences, only: [:index] do
+      get 'update', on: :collection
     end
 
     resources :meta_appathons, constraints: {appathon_id: /[^\/]+/ }  do

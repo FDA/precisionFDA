@@ -85,5 +85,14 @@ ACTIVE_META_APPATHON = APPATHON_IN_A_BOX_HANDLE
 MAX_MINUTES_INACTIVITY = ENV.fetch("MAX_TIME_INACTIVITY", 30).to_i
 SESSIONS_LIMIT = ENV.fetch("SESSIONS_LIMIT", 2).to_i
 
+REVIEW_SPACE_ADMINS =
+  if ENV["REVIEW_SPACE_ADMINS"]
+    ENV["REVIEW_SPACE_ADMINS"].split(" ")
+  elsif ENV["DNANEXUS_BACKEND"] == "production"
+    %w()
+  else
+    %w()
+  end
+
 # Remove X-Runtime
 Rails.application.config.middleware.delete(Rack::Runtime)

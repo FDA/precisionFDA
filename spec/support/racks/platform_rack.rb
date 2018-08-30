@@ -12,6 +12,10 @@ class PlatformRack < BaseRack
 
   private
 
+  def post_greet(_params)
+    [200, {}, [{}.to_json]]
+  end
+
   def post_describe(_params)
     [404, {}, [{}.to_json]]
   end
@@ -29,11 +33,35 @@ class PlatformRack < BaseRack
   end
 
   def post_run(_params)
-    [200, {}, [{}.to_json]]
+    [200, {}, [{ id: "job-FKpFJPQ0yYxY0gqGKpFxGfqZ" }.to_json]]
   end
 
   def post_project_new(params)
     [200, {}, [{ id: "project-#{params["name"]}"}.to_json]]
+  end
+
+  def post_set_member_access(params)
+    [200, {}, [{}.to_json]]
+  end
+
+  def post_applet_new(params)
+    [200, {}, [{}.to_json]]
+  end
+
+  def post_app_new(params)
+    [200, {}, [{}.to_json]]
+  end
+
+  def post_remove_objects(params)
+    [200, {}, [{}.to_json]]
+  end
+
+  def post_add_authorized_users(_params)
+    [200, {}, [{}.to_json]]
+  end
+
+  def post_publish(_params)
+    [200, {}, [{}.to_json]]
   end
 
   def parse_method_name(env)
@@ -41,8 +69,14 @@ class PlatformRack < BaseRack
 
     method_name =
       case env["PATH_INFO"]
+      when "/system/greet"
+        "greet"
+      when /.*\/addAuthorizedUsers/
+        "add_authorized_users"
       when /.*\/describe/
         "describe"
+      when /.*\/publish/
+        "publish"
       when /.*\/invite/
         "invite"
       when /.*\/removeMember/
@@ -53,6 +87,14 @@ class PlatformRack < BaseRack
         "org_new"
       when "/project/new"
         "project_new"
+      when /.*\/setMemberAccess/
+        "set_member_access"
+      when "/applet/new"
+        "applet_new"
+      when "/app/new"
+        "app_new"
+      when /.*\/removeObjects/
+        "remove_objects"
       else
         raise "Method for '#{env["PATH_INFO"]}' isn't implemented yet"
       end

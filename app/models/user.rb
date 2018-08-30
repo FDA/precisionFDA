@@ -96,7 +96,7 @@ class User < ActiveRecord::Base
   has_many :licenses
   has_many :accepted_licenses
   has_many :space_memberships
-  has_many :spaces, {through: :space_memberships}
+  has_many :spaces, { through: :space_memberships }
   has_one :appathon
   has_many :meta_appathons
   has_one :expert
@@ -117,6 +117,10 @@ class User < ActiveRecord::Base
   acts_as_tagger
 
   scope :real, -> { where.not(dxuser: CHALLENGE_BOT_DX_USER) }
+
+  # Have the ability to create new review spaces and have full access to all the contents
+  # and activities available within reviewer and cooperative areas.
+  scope :review_space_admins, -> { where(dxuser: REVIEW_SPACE_ADMINS) }
 
   def self.challenge_bot
     find_by!(dxuser: CHALLENGE_BOT_DX_USER)
@@ -159,7 +163,7 @@ class User < ActiveRecord::Base
   end
 
   def space_uids
-    space_memberships.pluck("distinct concat('space-', space_id)")
+    spaces.pluck("distinct concat('space-', spaces.id)")
   end
 
   def active_spaces
@@ -204,6 +208,10 @@ class User < ActiveRecord::Base
 
   def is_challenge_evaluator?
     CHALLENGE_EVALUATORS.include?(dxuser) || can_administer_site?
+  end
+
+  def review_space_admin?
+    REVIEW_SPACE_ADMINS.include?(dxuser)
   end
 
   # @param time_zone [String] new time zone

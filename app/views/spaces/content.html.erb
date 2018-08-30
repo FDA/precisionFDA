@@ -10,19 +10,10 @@
       </div>
     </div>
   </div>
-<% end %>
 
-<!-- Tab panes -->
-<div class="tab-content">
-  <div role="tabpanel" class="tab-pane tab-pane-padded-lg active" id="tab-data">
-    <% unless @space.active? %>
-      <div class='pfda-help-block'>
-        <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
-        <p>Both host and guest leads must click "Accept space" to activate it.</p>
-      </div>
-      <% if @total_count > 0 %><hr><% end %>
-    <% end %>
-
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane tab-pane-padded-lg active" id="tab-data">
       <% if defined?(@notes_list) %>
         <div class="panel">
           <div class="panel-heading">
@@ -89,6 +80,14 @@
                           <i class="fa fa-fw fa-download"></i> Download
                         </a>
                       </li>
+                      <% if @space.confidential? %>
+                        <li role="separator" class="divider"></li>
+                        <li data-bind="css: { disabled: !isCopyingAllowed() }">
+                          <a data-toggle='modal' data-bind="click: showCopyToCooperativeModal">
+                            <i class="fa fa-fw fa-download"></i> Copy to cooperative
+                          </a>
+                        </li>
+                      <% end %>
                     </ul>
                   </div>
                 </div>
@@ -146,10 +145,9 @@
           </div>
         </div>
       <% end %>
+    </div>
   </div>
-</div>
 
-<% if @space.active? %>
   <%= render "_partials/selector_modal" %>
   <%= render "_partials/modal_create_folder", parent_folder_id: @parent_folder_id, create_path: create_folder_space_path %>
   <%= render "_partials/modal_rename_js", space_id: @space.id, source: "list" %>
@@ -157,4 +155,5 @@
   <%= render "_partials/modal_download_files" %>
   <%= render "_partials/modal_delete_files", remove_path: remove_folder_space_path(@space) %>
   <%= render "_partials/modal_publish_files", publish_path: publish_folder_space_path(@space) %>
+  <%= render "_partials/modal_copy_files_to_cooperative", path: copy_folder_to_cooperative_space_path(@space) %>
 <% end %>

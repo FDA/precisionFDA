@@ -69,4 +69,11 @@
   g.column name: 'Tags', attribute: 'name', assoc: [:taggings, :tag] do |item|
     render "_partials/tags_list", tags_list: item.all_tags_list
   end
+
+  g.column do |comparison|
+    if comparison.in_confidential_space?
+      link_to "Copy to cooperative", copy_to_cooperative_space_path(comparison.space_object, object_id: comparison.uid), method: :post, class: 'btn btn-primary btn-xs'
+    end
+  end
+
 end -%>

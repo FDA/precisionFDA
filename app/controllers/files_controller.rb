@@ -82,7 +82,7 @@ class FilesController < ApplicationController
   end
 
   def show
-    @file = UserFile.not_assets.accessible_by(@context).includes(:user).find_by!(dxid: params[:id])
+    @file = UserFile.not_assets.accessible_by(@context).includes(:user).find_by_uid!(params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
@@ -125,7 +125,7 @@ class FilesController < ApplicationController
 
   def download
     # Allow assets as well
-    @file = UserFile.accessible_by(@context).find_by!(dxid: params[:id])
+    @file = UserFile.accessible_by(@context).find_by_uid!(params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
@@ -154,7 +154,7 @@ class FilesController < ApplicationController
 
   def link
     # Allow assets as well, thought not currently exposed in the UI
-    @file = UserFile.accessible_by(@context).find_by!(dxid: params[:id])
+    @file = UserFile.accessible_by(@context).find_by_uid!(params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
@@ -180,7 +180,7 @@ class FilesController < ApplicationController
   end
 
   def rename
-    @file = UserFile.real_files.find_by(dxid: params[:id])
+    @file = UserFile.real_files.find_by_uid(params[:id])
 
     unless @file.present?
       flash[:error] = "File not found"
@@ -223,7 +223,7 @@ class FilesController < ApplicationController
   end
 
   def destroy
-    @file = UserFile.real_files.where(user_id: @context.user_id).find_by!(dxid: params[:id])
+    @file = UserFile.real_files.where(user_id: @context.user_id).find_by_uid!(params[:id])
     service = FolderService.new(@context)
 
     res = service.remove([@file])

@@ -101,17 +101,17 @@
         <% end %>
 
         <% if @file.state == "closed" %>
-          <%= link_to download_file_path(@file.dxid, inline: true), method: :post, class: "btn btn-primary #{@file.license.present? && !@file.licensed_by?(@context) ? 'disabled' : ''}" do %>
+          <%= link_to download_file_path(@file, inline: true), method: :post, class: "btn btn-primary #{@file.license.present? && !@file.licensed_by?(@context) ? 'disabled' : ''}" do %>
             <span class="fa fa-external-link"></span> Open
           <% end %>
         <% end %>
         <% if @file.state == "closed" %>
-          <%= link_to download_file_path(@file.dxid), method: :post, class: "btn btn-primary #{@file.license.present? && !@file.licensed_by?(@context) ? 'disabled' : ''}" do %>
+          <%= link_to download_file_path(@file), method: :post, class: "btn btn-primary #{@file.license.present? && !@file.licensed_by?(@context) ? 'disabled' : ''}" do %>
             <span class="fa fa-download"></span> Download
           <% end %>
         <% end %>
         <% if @file.state == "closed" %>
-          <%= link_to link_file_path(@file.dxid), method: :post, class: "btn btn-primary #{@file.license.present? && !@file.licensed_by?(@context) ? 'disabled' : ''}" do %>
+          <%= link_to link_file_path(@file), method: :post, class: "btn btn-primary #{@file.license.present? && !@file.licensed_by?(@context) ? 'disabled' : ''}" do %>
             <span class="fa fa-link"></span> Authorized URL
           <% end %>
         <% end %>

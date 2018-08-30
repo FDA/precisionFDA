@@ -118,10 +118,10 @@ class WorkflowsController < ApplicationController
     @workflow.apps.each do |app|
       if app.assets.accessible_by(@context).count != app.assets.count
         flash[:error] = "This app cannot be exported because one or more assets are not accessible by the current user."
-        redirect_to app_path(app.dxid)
+        redirect_to app_path(app)
       elsif app.assets.any? { |a| a.license.present? && !a.licensed_by?(@context) }
         flash[:error] = "This app contains one or more assets which need to be licensed. Please run the app first in order to accept the licenses."
-        redirect_to app_path(app.dxid)
+        redirect_to app_path(app)
       end
     end
   end

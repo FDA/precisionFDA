@@ -125,7 +125,7 @@ class AppInputModel
           deferred.resolve(@value())
         listRelatedParams:
           # editable: true
-          # scopes: ["private", "public"]
+          scopes: @viewModel.scopes
           classes: ["file", "note", "discussion", "answer", "comparison", "app", "asset", "job"]
         listModelConfigs: [
           {
@@ -133,6 +133,7 @@ class AppInputModel
             name: "Files"
             apiEndpoint: "list_files"
             apiParams:
+              scopes: @viewModel.scopes
               states: ["closed"]
               describe:
                 include:

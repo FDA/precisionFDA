@@ -1,6 +1,8 @@
 class JobsNewView
-  constructor: (app, @asset_licenses_to_accept) ->
-    @dxid = app.dxid
+  constructor: (app, @asset_licenses_to_accept, space_id, available_spaces) ->
+    @uid = app.uid
+    @scopes = app.space_scopes
+
     @inputSpec = app.spec.input_spec
     @outputSpec = app.spec.output_spec
 
@@ -11,11 +13,13 @@ class JobsNewView
     @busy = ko.observable(false)
     @running = ko.observable(false)
     @name = ko.observable(app.title)
+    @spaceId = ko.observable(space_id)
     @inputModels = ko.observableArray(_.map(@inputSpec, (spec) =>
       new Precision.models.AppInputModel(spec, this)
     ))
 
     @isRunnable = ko.computed(() =>
+      @spaceId()
       isConfigReady = !_.isEmpty(@name())
       areInputsReady = _.every(@inputModels(), (inputModel) ->
         inputModel.isReady()
@@ -25,6 +29,7 @@ class JobsNewView
     )
 
     @availableInstances = Precision.INSTANCES
+    @availableSpaces = available_spaces
     @defaultInstanceType = app.spec.instance_type
     @instanceType = ko.observable(app.spec.instance_type)
 
@@ -47,11 +52,12 @@ class JobsNewView
       @licenseSelector.toggleLicensesModal()
     else
       params =
-        id: @dxid
+        id: @uid
         name: @name.peek()
         inputs: {}
 
       params.instance_type = @instanceType.peek() if @instanceType.peek()?
+      params.space_id = @spaceId.peek() if @spaceId.peek()?
 
       for inputModel in @inputModels()
         data = inputModel.getDataForRun()
@@ -62,7 +68,7 @@ class JobsNewView
       Precision.api('/api/run_app', params)
         .done((rs) =>
           if !rs.error?
-            window.location = "/apps/#{@dxid}/jobs"
+            window.location = "/apps/#{@uid}/jobs"
           else
             @busy(false)
             @running(false)
@@ -88,7 +94,7 @@ class JobsNewView
 JobsController = Paloma.controller('Jobs',
   new: ->
     $container = $("body main")
-    viewModel = new JobsNewView(@params.app, @params.licenses_to_accept)
+    viewModel = new JobsNewView(@params.app, @params.licenses_to_accept, @params.space_id, @params.available_spaces)
     ko.applyBindings(viewModel, $container[0])
 
     $affixContainer = $container.find(".affix-container")

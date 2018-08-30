@@ -1,5 +1,5 @@
 class SpacesContentView
-  constructor: (@space_uid, filesIdsWithDescription, rootName, nodes, topNodes, selectedListURL, scope) ->
+  constructor: (@space_uid, filesIdsWithDescription, rootName, nodes, topNodes, selectedListURL, scope, scopes) ->
     @objectSelector = new Precision.models.SelectorModel({
       title: "Move data to space"
       help: "Only private data can be moved to a Space. Data in a Space can be published, but cannot be made private again."
@@ -12,7 +12,7 @@ class SpacesContentView
         window.location.reload(true)
       listRelatedParams:
         editable: true
-        scopes: ["private"]
+        scopes: scopes
         classes: ["file", "note", "comparison", "app", "asset", "job"]
       listModelConfigs: [
         {
@@ -21,7 +21,7 @@ class SpacesContentView
           apiEndpoint: "list_files"
           apiParams:
             editable: true
-            scopes: ["private"]
+            scopes: scopes
             states: ["closed"]
         }
         {
@@ -30,7 +30,7 @@ class SpacesContentView
           apiEndpoint: "list_notes"
           apiParams:
             editable: true
-            scopes: ["private"]
+            scopes: scopes
             note_types: ["Note"]
         }
         {
@@ -39,7 +39,7 @@ class SpacesContentView
           apiEndpoint: "list_comparisons"
           apiParams:
             editable: true
-            scopes: ["private"]
+            scopes: scopes
         }
         {
           className: "app"
@@ -47,7 +47,7 @@ class SpacesContentView
           apiEndpoint: "list_apps"
           apiParams:
             editable: true
-            scopes: ["private"]
+            scopes: scopes
         }
         {
           className: "asset"
@@ -55,7 +55,7 @@ class SpacesContentView
           apiEndpoint: "list_assets"
           apiParams:
             editable: true
-            scopes: ["private"]
+            scopes: scopes
         }
         {
           className: "job"
@@ -63,7 +63,7 @@ class SpacesContentView
           apiEndpoint: "list_jobs"
           apiParams:
             editable: true
-            scopes: ["private"]
+            scopes: scopes
         }
       ]
     })
@@ -76,6 +76,7 @@ class SpacesContentView
     @deleteModal = $('#delete-files-modal')
     @downloadModal = $('#download-files-modal')
     @publishModal = $('#publish-files-modal')
+    @copyToCooperativeModal = $('#copy-files-to-cooperative-modal')
     @nodes = nodes
     @scope = scope
 
@@ -104,6 +105,13 @@ class SpacesContentView
       selectedListURL: @selectedListURL,
       scope: scope,
       task: 'publish'
+    })
+
+    @copyFilesToCooperativeModal = new Precision.models.ActionsWithFilesModal({
+      selectedItems: @selectedItems,
+      selectedListURL: @selectedListURL,
+      scope: scope,
+      task: 'copy_to_cooperative'
     })
 
   isVisible: (id) ->
@@ -178,6 +186,13 @@ class SpacesContentView
       @publishFilesModal.getItems()
       @publishModal.modal('show')
 
+  isCopyingAllowed: ->
+    @selectedItems().length > 0
+
+  showCopyToCooperativeModal: ->
+    @copyFilesToCooperativeModal.getItems()
+    @copyToCooperativeModal.modal('show')
+
 #########################################################
 #
 #
@@ -197,7 +212,8 @@ SpacesController = Paloma.controller('Spaces',
       @params.nodes,
       @params.topNodes,
       @params.selectedListURL,
-      @params.scope
+      @params.scope,
+      @params.scopes
     )
     ko.applyBindings(viewModel, $container[0])
     $container.on('change', '[name="files[selected][]"]', (e) ->

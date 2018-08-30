@@ -1,0 +1,45 @@
+<li class="list-group-item">
+
+  <h5 class="list-group-item-heading"><%= member_side(@space, lead) %> Lead</h5>
+
+  <p class="list-group-item-text">
+    <%= link_to("#{lead.user.full_name} (#{lead.user.org.name})", user_path(lead.user.dxuser)) %>
+  </p>
+
+  <% if !@space.active? && !@space.accepted_by?(lead) %>
+
+    <% if lead.user_id == @context.user_id %>
+      <%= link_to accept_space_path(@space.id), method: :post, class: "btn btn-xs btn-success" do %>
+        <span class="fa fa-check"></span> Accept space
+      <% end %>
+    <% else %>
+      <div class="text-warning"><span class="fa fa-clock-o"></span> Waiting on acceptance</div>
+    <% end %>
+
+  <% end %>
+
+
+  <% if lead.user_id == @context.user_id %>
+
+    <% if SpaceMembershipPolicy.can_request_lock?(@space, lead) %>
+      <%= link_to request_lock_space_path(@space.id), method: :post, class: "btn btn-xs btn-danger" do %>
+        <span class="fa fa-archive"></span> Request lock
+      <% end %>
+    <% end %>
+
+    <% if SpaceMembershipPolicy.can_request_unlock?(@space, lead) %>
+      <%= link_to request_unlock_space_path(@space.id), method: :post, class: "btn btn-xs btn-primary" do %>
+        <span class="fa fa-archive"></span> Request unlock
+      <% end %>
+    <% end %>
+
+    <% if @space.requests.unlock.pending.any? %>
+      <div class="text-warning"><span class="fa fa-clock-o"></span> Waiting for unlock</div>
+    <% end %>
+
+    <% if @space.requests.lock.pending.any? %>
+      <div class="text-warning"><span class="fa fa-clock-o"></span> Waiting for lock</div>
+    <% end %>
+  <% end %>
+
+</li>
