@@ -13,7 +13,7 @@ class AppsController < ApplicationController
     @assignable_challenges = []
 
     if params[:id].present?
-      @app = App.accessible_by(@context).find_by(dxid: params[:id])
+      @app = App.accessible_by(@context).find_by_uid(params[:id])
       if @app.nil?
         flash[:error] = "Sorry, this app does not exist or is not accessible by you"
         redirect_to apps_path
@@ -24,7 +24,7 @@ class AppsController < ApplicationController
         @item_comments_path = pathify_comments(@app)
         @comments = @app.root_comments.order(id: :desc).page params[:comments_page]
 
-        @revisions = @app.app_series.accessible_revisions(@context).select(:title, :id, :dxid, :revision, :version)
+        @revisions = @app.app_series.accessible_revisions(@context).select(:title, :id, :uid, :revision, :version)
         @notes = @app.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
         @answers = @app.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
         @discussions = @app.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
@@ -40,9 +40,9 @@ class AppsController < ApplicationController
 
     User.sync_jobs!(@context)
     if @app.present?
-      jobs = @app.app_series.jobs.editable_by(@context)
+      jobs = @app.app_series.jobs.origin.editable_by(@context)
     else
-      jobs = Job.editable_by(@context)
+      jobs = Job.origin.editable_by(@context)
     end
     @jobs_grid = initialize_grid(jobs.includes(:taggings, analysis: :workflow), {
       name: 'jobs',
@@ -92,14 +92,14 @@ class AppsController < ApplicationController
   end
 
   def show
-    @app = App.accessible_by(@context).find_by(dxid: params[:id])
+    @app = App.accessible_by(@context).find_by_uid(params[:id])
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
       redirect_to apps_path
       return
     end
 
-    @revisions = @app.app_series.accessible_revisions(@context).select(:title, :id, :dxid, :revision, :version)
+    @revisions = @app.app_series.accessible_revisions(@context).select(:title, :id, :uid, :revision, :version)
     @notes = @app.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @app.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
     @discussions = @app.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
@@ -127,7 +127,7 @@ class AppsController < ApplicationController
 
   def js_info(app, challenges)
     {
-      app: (app.slice(:id, :dxid, :title, :readme, :revision).merge(link: app_path(app.dxid)) rescue nil),
+      app: (app.slice(:id, :dxid, :title, :readme, :revision).merge(link: app_path(app)) rescue nil),
       challenges: challenges.collect do |challenge|
         {
           id: challenge.id,
@@ -138,7 +138,7 @@ class AppsController < ApplicationController
             id: (challenge.app.dxid rescue nil),
             title: (challenge.app.title rescue nil),
             revision: (challenge.app.revision rescue nil),
-            link: (app_path(challenge.app.dxid) rescue nil)
+            link: (app_path(challenge.app) rescue nil)
           }
         }
       end
@@ -146,14 +146,14 @@ class AppsController < ApplicationController
   end
 
   def edit
-    @app = App.editable_by(@context).find_by(dxid: params[:id])
+    @app = App.editable_by(@context).find_by_uid(params[:id])
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
       redirect_to apps_path
       return
     else
       if @app.id != @app.app_series.latest_revision_app_id
-        redirect_to edit_app_path(@app.app_series.latest_revision_app.dxid)
+        redirect_to edit_app_path(@app.app_series.latest_revision_app)
         return
       else
         js app: @app.slice(:dxid, :name, :title, :version, :revision, :readme, :spec, :internal)
@@ -165,7 +165,7 @@ class AppsController < ApplicationController
   end
 
   def batch_app
-    @app = App.accessible_by(@context).find_by(dxid: params[:id])
+    @app = App.accessible_by(@context).find_by_uid(params[:id])
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
       redirect_to apps_path
@@ -188,7 +188,7 @@ class AppsController < ApplicationController
   end
 
   def fork
-    @app = App.accessible_by(@context).find_by(dxid: params[:id])
+    @app = App.accessible_by(@context).find_by_uid(params[:id])
     if @app.nil?
       flash[:error] = "Sorry, you do not have permissions to fork this app"
       redirect_to apps_path
@@ -210,17 +210,17 @@ class AppsController < ApplicationController
 
   def validate_app_before_export
     # App should exist and be accessible
-    @app = App.accessible_by(@context).find_by!(dxid: params[:id])
+    @app = App.accessible_by(@context).find_by_uid!(params[:id])
 
     # Assets should be accessible and licenses accepted
     if @app.assets.accessible_by(@context).count != @app.assets.count
       flash[:error] = "This app cannot be exported because one or more assets are not accessible by the current user."
-      redirect_to app_path(@app.dxid)
+      redirect_to app_path(@app)
       return
     end
     if @app.assets.any? { |a| a.license.present? && !a.licensed_by?(@context) }
       flash[:error] = "This app contains one or more assets which need to be licensed. Please run the app first in order to accept the licenses."
-      redirect_to app_path(@app.dxid)
+      redirect_to app_path(@app)
       return
     end
   end

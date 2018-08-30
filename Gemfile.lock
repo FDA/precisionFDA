@@ -146,6 +146,10 @@ GEM
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
     kgio (2.10.0)
+    launchy (2.4.3)
+      addressable (~> 2.3)
+    letter_opener (1.6.0)
+      launchy (~> 2.2)
     libv8 (3.16.14.13)
     local_time (1.0.3)
       coffee-rails
@@ -377,6 +381,7 @@ DEPENDENCIES
   jbuilder (~> 2.0)
   jquery-rails (~> 4.3, >= 4.3.1)
   kaminari
+  letter_opener
   local_time (~> 1.0, >= 1.0.3)
   mysql2 (~> 0.3.18)
   nokogiri (~> 1.8, >= 1.8.5)

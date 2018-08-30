@@ -370,7 +370,7 @@ class ApiController < ApplicationController
       case input_klass
       when "file"
         fail "#{input_name}: input file value is not a string" unless input_value.is_a?(String)
-        file = UserFile.real_files.accessible_by(@context).find_by(dxid: input_value)
+        file = UserFile.real_files.accessible_by(@context).find_by_uid(input_value)
         fail "#{input_name}: input file is not accessible or does not exist" unless !file.nil?
         fail "#{input_name}: input file's license must be accepted" unless !file.license.present? || file.licensed_by?(@context)
 
@@ -1090,7 +1090,7 @@ class ApiController < ApplicationController
     error = false
 
     # Allow assets as well, thought not currently exposed in the UI
-    file = UserFile.accessible_by(@context).find_by!(dxid: params[:id])
+    file = UserFile.accessible_by(@context).find_by_uid!(params[:id])
 
     # Refresh state of file, if needed
     if file.state != "closed"
@@ -1215,7 +1215,7 @@ class ApiController < ApplicationController
     fail "Parameter 'id' needs to be a non-empty String" unless id.is_a?(String) && id != ""
 
     # Check that the file exists, is accessible by the user, and is in the open state. Throw 404 if otherwise.
-    file = UserFile.find_by!(dxid: id, state: "open")
+    file = UserFile.open.find_by_uid!(id)
     token = @context.token
     if file.user_id != @context.user_id
       if file.created_by_challenge_bot? && (@context.user.can_administer_site? || @context.user.is_challenge_admin?)
@@ -1316,7 +1316,7 @@ class ApiController < ApplicationController
     fail "Inputs should be a hash" unless inputs.is_a?(Hash)
 
     # App should exist and be accessible
-    @app = App.accessible_by(@context).find_by!(dxid: id)
+    @app = App.accessible_by(@context).find_by_uid!(id)
 
     # Check if asset licenses have been accepted
     fail "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
@@ -1334,14 +1334,20 @@ class ApiController < ApplicationController
       fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.has_key?(params["instance_type"]) #Checks also that it's a string
     end
 
+    space_id = params[:space_id]
+    if space_id
+      fail "Invalid space_id" unless @app.can_run_in_space?(@context.user, space_id)
+    end
+
     job = job_creator.create(
       app: @app,
       name: name,
       input_info: input_info,
-      run_instance_type: run_instance_type
+      run_instance_type: run_instance_type,
+      scope: space_id ? Space.find(space_id).uid : nil,
     )
 
-    render json: { id: job.dxid }
+    render json: { id: job.uid }
   end
 
   # Inputs
@@ -1596,7 +1602,7 @@ class ApiController < ApplicationController
       Event::AppCreated.create_for(app, @context.user)
     end
 
-    render json: {id: app.dxid}
+    render json: { id: app.uid }
   end
 
   # Inputs

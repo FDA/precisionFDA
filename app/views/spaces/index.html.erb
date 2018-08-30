@@ -1,6 +1,6 @@
 <% content_for :title do %>Spaces<% end %>
 
-<% if @context.can_administer_site? %>
+<% if @context.review_space_admin? %>
 <div class="pfda-toolbar">
   <div class="btn-group">
     <%= link_to new_space_path, class: 'btn btn-primary' do %>

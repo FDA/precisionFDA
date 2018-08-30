@@ -42,6 +42,7 @@
 class UserFile < Node
 
   include Licenses
+  include InternalUid
   require 'uri'
 
   DESCRIPTION_MAX_LENGTH = 65535
@@ -78,12 +79,14 @@ class UserFile < Node
               too_long: "Description could not be greater than #{DESCRIPTION_MAX_LENGTH} characters"
             }
 
+  scope :open, -> { where(state: STATE_OPEN) }
+
   def self.model_name
     ActiveModel::Name.new(self, nil, "File")
   end
 
   def self.real_files
-    return where(parent_type: ['User', 'Job'])
+    where(parent_type: ['User', 'Job', 'Node'])
   end
 
   def self.not_assets
@@ -142,10 +145,6 @@ class UserFile < Node
     parent_type == PARENT_TYPE_COMPARISON
   end
 
-  def uid
-    dxid
-  end
-
   def klass
     parent_type == "Asset" ? "asset" : "file"
   end
@@ -155,7 +154,7 @@ class UserFile < Node
   end
 
   def feedback(context)
-    if uid == NIST_VCF_UID && context
+    if dxid == NIST_VCF_UID && context
       if context.guest?
         return "https://docs.google.com/forms/d/1cF0XoeGbLJUSRC3pvEz36DMdlpWA9nFwUXJA_o-oxrU/viewform?entry.556919704=NISTv2.19"
       else

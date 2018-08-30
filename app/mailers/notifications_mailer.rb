@@ -78,6 +78,30 @@ class NotificationsMailer < ApplicationMailer
          subject: "#{@admin.user.full_name} added you to the space \"#{@space.title}\""
   end
 
+  def space_request_lock_email(space, membership)
+    @space = space
+    @membership = membership
+    @user = membership.user
+    mail to: User.review_space_admins.pluck(:email),
+         subject: "#{@user.full_name} requested to lock the space \"#{@space.title}\""
+  end
+
+  def space_request_unlock_email(space, membership)
+    @space = space
+    @membership = membership
+    @user = membership.user
+    mail to: User.review_space_admins.pluck(:email),
+         subject: "#{@user.full_name} requested to unlock the space \"#{@space.title}\""
+  end
+
+  # @param space [Space] Shared space
+  def sponsor_unlock_email(space, user)
+    @space = space
+    @user = user
+    mail to: space.space_memberships.guest.active.lead.first.user.email,
+         subject: "#{@user.full_name} unlocked the space \"#{@space.title}\""
+  end
+
   def new_expert_email(expert)
     @expert = expert
     mail to: @expert.user.email,

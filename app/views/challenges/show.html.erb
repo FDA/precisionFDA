@@ -23,7 +23,7 @@
             &nbsp;Join Challenge
           </a>
         <% elsif @challenge.accepting_submissions? %>
-          <a class="btn btn-primary btn-block btn-lg text-uppercase" href="<%= new_challenge_submission_path(challenge_id: @challenge.id, app_dxid: @challenge.app.dxid) %>" role="button">
+          <a class="btn btn-primary btn-block btn-lg text-uppercase" href="<%= new_challenge_submission_path(challenge_id: @challenge.id, app_dxid: @challenge.app) %>" role="button">
             <span class="fa fa-lg fa-inbox" aria-hidden="true"></span>
             &nbsp;Submit Challenge Entry
           </a>

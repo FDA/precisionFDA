@@ -140,9 +140,7 @@ class ComparisonsController < ApplicationController
       comparison = Comparison.accessible_by_public.find_by(id: $1)
     end
 
-    if !comparison
-      raise ActionController::RoutingError, 'Not Found'
-    end
+    not_found! unless comparison
 
     sequence = generate_sequence(comparison)
     if request.content_type =~ /xml/
@@ -375,12 +373,12 @@ class ComparisonsController < ApplicationController
     files = {}
     # Required files
     ["test_vcf", "ref_vcf"].each do |role|
-      files[role] = UserFile.real_files.accessible_by(@context).find_by!(dxid: comp_params["#{role}_uid"])
+      files[role] = UserFile.real_files.accessible_by(@context).find_by_uid!(comp_params["#{role}_uid"])
     end
     # Optional files
     ["test_bed", "ref_bed"].each do |role|
       if comp_params["#{role}_uid"].present?
-        files[role] = UserFile.real_files.accessible_by(@context).find_by!(dxid: comp_params["#{role}_uid"])
+        files[role] = UserFile.real_files.accessible_by(@context).find_by_uid!(comp_params["#{role}_uid"])
       end
     end
 
@@ -398,7 +396,7 @@ class ComparisonsController < ApplicationController
     run_input = {
       name: comp_params[:name],
       project: project,
-      input: Hash[files.map {|k,v| [k, {"$dnanexus_link": {project: v.project, id: v.uid}}]}]
+      input: Hash[files.map {|k,v| [k, {"$dnanexus_link": {project: v.project, id: v.dxid}}]}]
     }
     jobid = DNAnexusAPI.new(@context.token).call(DEFAULT_COMPARISON_APP, "run", run_input)["id"]
 

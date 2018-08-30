@@ -6,6 +6,8 @@
 class Context
   attr_accessor :user_id, :username, :token, :expiration, :org_id
 
+  delegate :review_space_admin?, to: :user
+
   def initialize(user_id, username, token, expiration, org_id)
     @user_id = user_id
     @username = username
@@ -58,5 +60,9 @@ class Context
       targets += @user.active_spaces.map(&:uid)
     end
     return targets.select { |t| item.publishable_by?(self, t) }
+  end
+
+  def api
+    @api ||= DNAnexusAPI.new(token)
   end
 end

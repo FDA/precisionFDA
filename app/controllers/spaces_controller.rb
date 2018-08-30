@@ -3,8 +3,10 @@ class SpacesController < ApplicationController
   before_action :init_parent_folder, only: [:content]
 
   def index
-    if @context.user.can_administer_site?
-      spaces = Space.all
+    if @context.can_administer_site?
+      spaces = Space
+    elsif @context.review_space_admin?
+      spaces = Space.review
     else
       spaces = Space.accessible_by(@context)
     end
@@ -21,8 +23,14 @@ class SpacesController < ApplicationController
   end
 
   def content
-    @space = Space.accessible_by(@context).find(params[:id])
-    @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
+    @space = Space.accessible_by(@context).find_by_id(params[:id])
+
+    unless @space
+      redirect_to root_url
+      return
+    end
+
+    @membership = fetch_membership
     folder_id = params[:folder_id]
 
     # TODO move to api
@@ -111,13 +119,12 @@ class SpacesController < ApplicationController
 
     @show_checkboxes = @space.accessible_by?(@context)
 
-    js({ space_uid: @space.uid, space_id: @space.id }.merge(files_ids_with_descriptions(nodes, @space)))
+    js({ space_uid: @space.uid, space_id: @space.id, scopes: @space.accessible_scopes_for_move }.merge(files_ids_with_descriptions(nodes, @space)))
   end
 
   def discuss
     @space = Space.accessible_by(@context).find(params[:id])
-    @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
-
+    @membership = fetch_membership
     @items_from_params = [@space]
     @item_path = pathify(@space)
     @item_comments_path = pathify_comments(@space)
@@ -126,8 +133,7 @@ class SpacesController < ApplicationController
 
   def members
     @space = Space.accessible_by(@context).find(params[:id])
-    @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
-
+    @membership = fetch_membership
     @members_grid = initialize_grid(@space.space_memberships, {
       order: 'created_at',
       order_direction: 'asc',
@@ -136,56 +142,39 @@ class SpacesController < ApplicationController
   end
 
   def new
-    redirect_to spaces_path unless @context.user.can_administer_site?
-    @space = Space.new
+    redirect_to spaces_path unless @context.user.review_space_admin?
+    @space = SpaceForm.new
   end
 
   def edit
-    @space = Space.editable_by(@context).find(params[:id])
+    @space = editable_space
   end
 
   def create
-    unless @context.user.can_administer_site?
+    unless @context.user.review_space_admin?
       redirect_to spaces_path
       return
     end
 
-    if space_params[:host_lead_dxuser] == space_params[:guest_lead_dxuser]
-      flash.now[:error] = "The host and guest lead cannot be the same user"
-    end
+    if space_form.valid?
+      space = space_form.persist!(@context.api)
 
-    host_lead_user = User.find_by(dxuser: space_params[:host_lead_dxuser])
-    guest_lead_user = User.find_by(dxuser: space_params[:guest_lead_dxuser])
-
-    if host_lead_user.nil?
-      flash.now[:error] = "Host lead username #{space_params[:host_lead_dxuser]} not found"
-    elsif guest_lead_user.nil?
-      flash.now[:error] = "Guest lead username #{space_params[:guest_lead_dxuser]} not found"
-    end
-
-    if flash[:error].blank?
-      @space = Space.provision(@context, space_params)
-      if @space
-        NotificationsMailer.space_activation_email(@space, @space.host_lead_member).deliver_now!
-        NotificationsMailer.space_activation_email(@space, @space.guest_lead_member).deliver_now!
-        if @space.accessible_by?(@context)
-          flash[:success] = "The space was created successfully, and will be activated once both admin's accept it."
-          redirect_to space_path(@space)
-        else
-          flash[:success] = "The space was created successfully, but is not currently accessible by you."
-          redirect_to spaces_path
-        end
-        return
+      if space.accessible_by?(@context)
+        flash[:success] = "The space was created successfully, and will be activated once both admin's accept it."
+        redirect_to space_path(space)
       else
-        flash.now[:error] = "The space could not be provisioned for an unknown reason."
+        flash[:success] = "The space was created successfully, but is not currently accessible by you."
+        redirect_to spaces_path
       end
+    else
+      @space = space_form
+      js space_params
+      render :new
     end
-    @space = Space.new(space_params)
-    render :new
   end
 
   def update
-    @space = Space.editable_by(@context).find(params[:id])
+    @space = editable_space
     Space.transaction do
       if @space.update(update_space_params)
         # Handle a successful update.
@@ -204,72 +193,44 @@ class SpacesController < ApplicationController
 
   def accept
     space = Space.accessible_by(@context).find(params[:id])
-    admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN')
+    admin = space.space_memberships.lead_or_admin.find_by(user_id: @context.user_id)
+
     if admin
-      Space.transaction do
-        if admin.side == 'HOST'
-          space.host_project = space.create_space_project(@context, space.host_dxorg, space.guest_dxorg, admin) unless space.host_project?
-        elsif admin.side == 'GUEST'
-          space.guest_project = space.create_space_project(@context, space.guest_dxorg, space.host_dxorg, admin) unless space.guest_project?
-        else
-          flash[:error] = "Your admin 'side' is not correctly defined"
-          redirect_to space
-          return
-        end
-        if space.host_project? && space.guest_project?
-          space.state = "ACTIVE"
-          NotificationsMailer.space_activated_email(space, space.host_lead_member).deliver_now!
-          NotificationsMailer.space_activated_email(space, space.guest_lead_member).deliver_now!
-        end
-        space.save
-      end
+      SpaceService::Accept.call(@context.api, space, admin) unless space.accepted_by?(admin)
     else
       flash[:error] = "You don't have permission to edit this space"
     end
+
     redirect_to space
   end
 
+
   def invite
     space = Space.accessible_by(@context).find(params[:id])
-    admin = space.space_memberships.find_by(user_id: @context.user_id, role: 'ADMIN')
-    if admin
-      invitees = params[:space][:invitees].split(',').map(&:strip)
-      invitees_role = params[:space][:invitees_role]
-
-      if invitees.count > 0 && params[:space][:invitees] != "" && invitees_role.is_a?(String) && ["ADMIN", "MEMBER"].include?(invitees_role)
-        api = DNAnexusAPI.new(@context.token)
-        notAdded = []
-        invitees.each do |username|
-          if admin.side == 'HOST'
-            member = space.add_or_update_member(api, space.host_dxorg, username, invitees_role, admin.side)
-          elsif admin.side == 'GUEST'
-            member = space.add_or_update_member(api, space.guest_dxorg, username, invitees_role, admin.side)
-          else
-            raise "The admin 'side' is not correctly defined"
-          end
-
-          # If the username didn't return a member
-          if !member
-            notAdded.push(username)
-          else
-            NotificationsMailer.space_invitation_email(space, member, admin).deliver_now!
-          end
-        end
-
-        if notAdded.count > 0
-          flash[:error] = "The follow username's could not be invited because they do not exist: #{notAdded.to_sentence}"
-        end
+    admin =
+      if @context.review_space_admin?
+        SpaceMembership.new_by_admin(@context.user)
       else
-        flash[:error] = "Invitees and role are both required"
+        space.space_memberships.lead_or_admin.find_by(user_id: @context.user_id)
+      end
+
+    if admin
+      space_invite_form = SpaceInviteForm.new(params[:space])
+
+      if space_invite_form.valid?
+        space_invite_form.invite(@context, space, admin)
+      else
+        flash[:error] = space_invite_form.errors.messages.values.join(", ")
       end
     else
       flash[:error] = "You don't have permission to edit this space"
     end
+
     redirect_to members_space_path(space)
   end
 
   def rename
-    @space = Space.editable_by(@context).find(params[:id])
+    @space = editable_space
     name = params[:space][:name]
     if name.is_a?(String) && name != ""
       if @space.rename(name, @context)
@@ -374,6 +335,9 @@ class SpacesController < ApplicationController
         nodes = Node.accessible_by_space(space).editable_by(@context).where(id: params[:ids]).to_a
         files += nodes
         nodes.each { |node| files += node.all_children if node.is_a?(Folder) }
+      when "copy_to_cooperative"
+        nodes = Node.accessible_by_space(space).editable_by(@context).where(id: params[:ids], scope: space.uid)
+        nodes.each { |node| files += node.is_a?(Folder) ? node.all_files(Node.where(scope: space.uid)) : [node] }
     end
 
     res = files.map do |file|
@@ -433,22 +397,63 @@ class SpacesController < ApplicationController
     redirect_to content_space_path(space)
   end
 
+  def copy_folder_to_cooperative
+    space = Space.accessible_by(@context).find(params[:id])
+    files = UserFile
+              .accessible_by_space(space)
+              .editable_by(@context)
+              .where(id: params[:ids])
+
+    shared_space = space.shared_space
+    if shared_space
+      new_files = files_copy_service.copy(files, shared_space.uid)
+    end
+
+    flash[:success] = "#{new_files.count} file(s) successfully copied"
+    redirect_to content_space_path(space)
+  end
+
+  def copy_to_cooperative
+    space = Space.accessible_by(@context).find(params[:id])
+    object = item_from_uid(params[:object_id])
+
+    if space && object && space.shared_space
+      ActiveRecord::Base.transaction do
+        copy_service.copy(object, space.shared_space.uid)
+      end
+      flash[:success] = "#{object.class} successfully copied"
+    end
+
+    redirect_to content_space_path(space)
+  end
+
+  def copy_service
+    @copy_service ||= CopyService.new(api: @context.api, user: @context.user)
+  end
+
+  def job
+    render 'jobs/show'
+  end
+
   private
 
+  def fetch_membership
+    if @context.review_space_admin?
+      SpaceMembership.new_by_admin(@context.user)
+    else
+      @space.space_memberships.find_by!(user_id: @context.user_id)
+    end
+  end
+
   def space_params
-    p = params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser, :space_type, :cts)
+    p = params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser, :space_type, :cts, :sponsor_org_handle)
     p.require(:name)
-    p.require(:host_lead_dxuser)
-    p.require(:guest_lead_dxuser)
     p.require(:space_type)
     return p
   end
 
   def update_space_params
-    p = params.require(:space).permit(:name, :description, :space_type, :cts)
-    p.require(:name)
-    p.require(:space_type)
-    return p
+    params.require(:space).permit(:name, :description, :cts)
   end
 
   def folders(parent_folder_id = nil)
@@ -489,5 +494,19 @@ class SpacesController < ApplicationController
 
   def init_parent_folder
     @parent_folder_id = params[:folder_id]
+  end
+
+  def editable_space
+    space = Space.find(params[:id])
+    not_found! unless space.editable_by?(@context)
+    space
+  end
+
+  def space_form
+    @space_form ||= SpaceForm.new(space_params)
+  end
+
+  def files_copy_service
+    CopyService::FileCopier.new(api: @context.api, user: @context.user)
   end
 end
