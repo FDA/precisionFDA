@@ -191,6 +191,7 @@ Rails.application.routes.draw do
       resources :comments
     end
 
+    get "challenges/mislabeling" => redirect("/mislabeling")
     get "challenges/#{ACTIVE_META_APPATHON}" => "meta_appathons#show", as: 'active_meta_appathon'
     get "challenges/#{APPATHON_IN_A_BOX_HANDLE}", as: 'appathon_in_a_box'
     resources :challenges do
