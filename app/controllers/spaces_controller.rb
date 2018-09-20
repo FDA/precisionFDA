@@ -347,11 +347,6 @@ class SpacesController < ApplicationController
     render 'jobs/show'
   end
 
-  def feed
-    @total_count = @counts.values.sum
-    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
-  end
-
   def tasks
     case params[:filter]
     when "created_by_me"
@@ -481,6 +476,21 @@ class SpacesController < ApplicationController
       per_page: 25,
       include: [:user, {user: :org}, {taggings: :tag}]
     })
+  end
+
+  def feed
+    @object_type_counters = SpaceEvent.object_type_counters
+    @start_date = Date.yesterday
+    @end_date = Time.now
+    @duration = 2
+    @roles = SpaceEvent.roles.map { |k, v| {name: k, value: v} }
+    @sides = SpaceEvent.sides.map { |k, v| {name: k, value: v} }
+    users = @space.users
+    @overall_users = users.count
+    @users = users.map { |u| { name: u.full_name, value: u.id } }
+    @chart = SpaceFeedController::SpaceEvents.new(@start_date, @end_date, {})
+    feed = SpaceEvent.collection(@start_date, @end_date)
+    @feed = SpaceEvent.describe_events(feed)
     js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
   end
 

@@ -177,6 +177,9 @@ class Job < ActiveRecord::Base
         if job.publishable_by?(context, scope)
           job.update!(scope: scope)
           count += 1
+          if scope =~ /^space-(\d+)$/
+            SpaceEventService.call($1.to_i, context.user_id, nil, job, :job_added)
+          end
         end
       end
     end

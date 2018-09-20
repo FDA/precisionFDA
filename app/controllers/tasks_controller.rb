@@ -57,6 +57,8 @@ class TasksController < ApplicationController
       js task_params
       render space_tasks_path()
     else
+      SpaceEventService.call(@task.space_id, @context.user_id, nil, @task, :task_created)
+
       NotificationsMailer.new_task_email(@task).deliver_now!
       flash[:success] = "Task '#{result.value.name}' successfully created."
       redirect_to tasks_space_path(@task.space_id)
@@ -79,6 +81,9 @@ class TasksController < ApplicationController
 
     if TaskPolicy.can_delete?(task, @membership) && (task.editable_by?(@context) || task.source_user?(@context))
       task.destroy
+
+      SpaceEventService.call(space_id, @context.user_id, @membership, task, :task_deleted)
+
       flash[:success] = "Task has been successfully deleted"
     end
     redirect_to :back, status: :see_other rescue redirect_to tasks_space_path(space_id)
@@ -99,6 +104,7 @@ class TasksController < ApplicationController
       if TaskPolicy.can_decline?(task, @membership)
         task.declined!
         NotificationsMailer.task_updated_email(task, "declined").deliver_later!
+        SpaceEventService.call(task.space_id, @context.user_id, @membership, task, :task_declined)
         if params.dig(:comment, :body).presence
           comment = Comment.build_from(task, @context.user_id, params[:comment][:body])
           comment.save
@@ -113,6 +119,7 @@ class TasksController < ApplicationController
       if TaskPolicy.can_complete?(task, @membership)
         task.completed!
         NotificationsMailer.task_updated_email(task, "completed").deliver_later!
+        SpaceEventService.call(task.space_id, @context.user_id, @membership, task, :task_completed)
       end
     end
     render json: {status: "success"}
@@ -142,6 +149,7 @@ class TasksController < ApplicationController
     assignee = User.find(params[:task][:assignee_id])
     @task.update(assignee_id: assignee.id, status: 0) if assignee
     NotificationsMailer.new_task_email(@task).deliver_later!
+    SpaceEventService.call(@task.space_id, @context.user_id, nil, @task, :task_reassigned)
 
     redirect_to tasks_space_path(@task.space_id)
   end

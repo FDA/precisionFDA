@@ -11,6 +11,7 @@ class Space < ActiveRecord::Base
   has_many :requests, class_name: 'SpaceRequest'
   belongs_to :space
   has_many :tasks, dependent: :destroy
+  has_many :space_events
 
   acts_as_commentable
 
