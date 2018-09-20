@@ -1,8 +1,6 @@
 @import "_common"
 
 .pfda-autocomplete
-  &--wrapper
-    position: relative
   input.form-control
     padding-left: 28px
     padding-right: 28px
@@ -16,7 +14,9 @@
     background-color: #FFF
     border: 1px solid #CCC
     border-radius: 3px
-    width: 100%
+    min-width: 200px
+    max-height: 125px
+    overflow: auto
     z-index: 100
   &--option
     padding: 5px 15px

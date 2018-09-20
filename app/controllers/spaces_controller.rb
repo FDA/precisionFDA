@@ -479,19 +479,24 @@ class SpacesController < ApplicationController
   end
 
   def feed
-    @object_type_counters = SpaceEvent.object_type_counters
-    @start_date = Date.yesterday
-    @end_date = Time.now
-    @duration = 2
+    if @space.space_events.any?
+      start_date = @space.space_events.order(created_at: :asc).first.created_at
+      end_date = @space.space_events.order(created_at: :asc).last.created_at
+      @duration = ((end_date - start_date) / 1.days).ceil
+      @start_date = start_date.strftime("%m/%d/%Y")
+      @end_date = end_date.strftime("%m/%d/%Y")
+    else
+      @start_date = nil
+      @end_date = nil
+      @duration = 0
+    end
     @roles = SpaceEvent.roles.map { |k, v| {name: k, value: v} }
     @sides = SpaceEvent.sides.map { |k, v| {name: k, value: v} }
     users = @space.users
     @overall_users = users.count
     @users = users.map { |u| { name: u.full_name, value: u.id } }
-    @chart = SpaceFeedController::SpaceEvents.new(@start_date, @end_date, {})
-    feed = SpaceEvent.collection(@start_date, @end_date)
-    @feed = SpaceEvent.describe_events(feed)
-    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
+    object_types = SpaceEvent.object_type_counters(Date.today.beginning_of_week.to_time, Time.now, {space_id: @space.id})
+    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move, object_types: object_types })
   end
 
   private

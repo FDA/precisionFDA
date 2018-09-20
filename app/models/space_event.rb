@@ -97,9 +97,9 @@ class SpaceEvent < ActiveRecord::Base
     end
   end
 
-  def self.describe_events(collection)
+  def self.describe_events(collection, page = 1)
     events = collection.includes(:user, :entity)
-    events
+    events.page(page).per(10)
       .reject { |e| e.entity.nil? }
       .map do |event|
         {
@@ -115,19 +115,33 @@ class SpaceEvent < ActiveRecord::Base
       end
   end
 
-  def self.collection(start_date, end_date, filters = {}, sort = "asc")
+  def self.collection(start_date, end_date, filters = {})
+    sort = filters[:sort] ? filters[:sort] : "asc"
+    filters.delete(:sort)
+    filters.reject! { |k, v| v.empty? || v.nil? || (v == "null") }
+    if filters[:object_type] = "[]"
+      filters[:object_type] = []
+    end
+
+    space =
+      if filters[:space_id] =~ /^space-(\d+)$/
+        Space.find_by!(id: $1.to_i)
+      else
+        Space.find(filters[:space_id])
+      end
+    filters[:space_id] = space.id
     SpaceEvent.date_range(start_date, end_date).where(filters).order(created_at: sort)
   end
 
-  def self.object_type_counters(start_date = nil, end_date = nil)
-    events = SpaceEvent.date_range(start_date, end_date).group(:object_type).count
+  def self.object_type_counters(start_date = nil, end_date = nil, filters = {})
+    events = SpaceEvent.date_range(start_date, end_date).where(filters).group(:object_type).count
 
     OBJECT_TYPES.each_with_index do |type, i|
       events[i] = 0 unless events[i]
       events[type] = events.delete(i)
     end
 
-    events
+    events.map { |k, v| { name: k, value: v, type_id: SpaceEvent.object_types[k] } }
   end
 
   def self.group_by_hour
@@ -151,4 +165,5 @@ class SpaceEvent < ActiveRecord::Base
   def sort_object_type
     self.object_type = activity_type.split("_").first
   end
+
 end
