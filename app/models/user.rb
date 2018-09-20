@@ -575,6 +575,9 @@ class User < ActiveRecord::Base
           Event::JobClosed.create_for(job, user)
         end
       end
+      if job.scope =~ /^space-(\d+)$/
+        SpaceEventService.call($1.to_i, user.id, nil, job, :job_completed)
+      end
     else
       # Job state changed but not done (no outputs)
       Job.transaction do

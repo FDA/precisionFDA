@@ -1,33 +1,52 @@
-<div class="tab-content">
-  <div role="tabpanel" class="tab-pane tab-pane-padded-lg active" id="tab-data">
-    <% unless @space.active? %>
-      <div class='pfda-help-block'>
-        <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
-        <p>Both host and guest leads must click "Accept space" to activate it.</p>
+
+<div class="tab-content" id="ko_spaces_feed_container">
+  <div role="tabpanel" class="tab-pane active" id="tab-feed">
+    <div class="panel spaces-feed-panel">
+      <div class="panel-body">
+        <h3>
+          <i class="fa fa-chevron-down" data-toggle="collapse" aria-expanded="true" data-target="#feed_filters_form"></i>
+          Activity Summary
+        </h3>
+
+        <% unless @space.active? %>
+          <div class="pfda-help-block">
+            <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
+            <p>Both host and guest leads must click "Accept space" to activate it.</p>
+          </div>
+          <% if @total_count > 0 %><hr><% end %>
+        <% end %>
+
       </div>
-      <% if @total_count > 0 %><hr><% end %>
+    </div>
+
+    <% if !@start_date.blank? %>
+      <div class="panel spaces-feed-panel">
+        <div class="metadata-section metadata-header">
+          <ul class="list-group list-group-inline">
+            <li class="list-group-item">
+              <h4 class="list-group-item-heading">FIRST ACTIVITY</h4>
+              <p class="list-group-item-text"><%= @start_date %></p>
+            </li>
+            <li class="list-group-item">
+              <h4 class="list-group-item-heading">LAST ACTIVITY</h4>
+              <p class="list-group-item-text"><%= @end_date %></p>
+            </li>
+            <li class="list-group-item">
+              <h4 class="list-group-item-heading">DURATION</h4>
+              <p class="list-group-item-text"><%= @duration %> day(s)</p>
+            </li>
+            <li class="list-group-item">
+              <h4 class="list-group-item-heading">OVERALL USERS</h4>
+              <p class="list-group-item-text"><%= @overall_users %></p>
+            </li>
+          </ul>
+        </div>
+      </div>
     <% end %>
 
-    <% if defined?(@comparisons_grid) %>
-      <div class="panel">
-        <div class="panel-heading">
-          Comparisons &nbsp;<small class="text-muted"><%= @counts[:comparisons] %></small>
-        </div>
-        <div class="panel-body">
-          <%= render "comparisons/grid", comparisons_grid: @comparisons_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
-        </div>
-      </div>
-    <% end %>
-    <% if defined?(@assets_grid) %>
-      <div class="panel">
-        <div class="panel-heading">
-          Assets &nbsp;<small class="text-muted"><%= @counts[:assets] %></small>
-        </div>
-        <div class="panel-body">
-          <%= render "assets/grid", assets_grid: @assets_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
-        </div>
-      </div>
-    <% end %>
+    <%= render "spaces/feed/filters" %>
+    <%= render "spaces/feed/chart" %>
+    <%= render "spaces/feed/feed" %>
 
   </div>
 </div>

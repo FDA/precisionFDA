@@ -175,7 +175,7 @@ class ApplicationController < ActionController::Base
     when "space"
       space_path(item)
     when "task"
-      tasks_space_path(item.space_id)
+      space_task_path(item.space_id, item)
     when "meta-appathon"
       meta_appathon_path(item)
     when "appathon"

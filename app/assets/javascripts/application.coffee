@@ -53,4 +53,5 @@
 #= require jstree
 #= require atwho-js/js/jquery.atwho.min
 #= require jquery.caret.min.js
+#= require bootstrap-select/bootstrap-select.min.js
 #= require_tree .

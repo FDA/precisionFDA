@@ -52,10 +52,12 @@ class AutocompleteModel
 
     return renderedOptions
 
-  renderOptionsContainer = () ->
+  renderOptionsContainer = (inputNode) ->
+    width = inputNode.offsetWidth
     optionsContainer = document.createElement('ul')
     optionsContainer.classList.add("#{PREFIX}--options")
     optionsContainer.classList.add('hidden')
+    optionsContainer.style.width = "#{width}px"
     return optionsContainer
 
   renderInputGroup = () ->
@@ -174,7 +176,6 @@ class AutocompleteModel
     @nodes.rootNode = renderRootNode()
     @nodes.inputNode = renderInputNode(@params.inputNode)
     @nodes.hiddenInput = renderHiddenInput(@params.inputNode)
-    @nodes.optionsContainer = renderOptionsContainer()
     @nodes.inputGroup = renderInputGroup()
     @nodes.searchIcon = renderIcon('search')
     @nodes.clearIcon = renderIcon('times', 'right', true)
@@ -182,12 +183,14 @@ class AutocompleteModel
 
     $(@nodes.hiddenInput).after(@nodes.rootNode)
     $(@nodes.rootNode).append(@nodes.inputGroup)
-    $(@nodes.rootNode).append(@nodes.optionsContainer)
     $(@nodes.inputGroup).append(@nodes.searchIcon)
     $(@nodes.inputGroup).append(@nodes.hiddenInput)
     $(@nodes.inputGroup).append(@nodes.inputNode)
     $(@nodes.inputGroup).append(@nodes.clearIcon)
     $(@nodes.inputGroup).append(@nodes.spinnerIcon)
+
+    @nodes.optionsContainer = renderOptionsContainer(@nodes.inputNode)
+    $(@nodes.rootNode).append(@nodes.optionsContainer)
 
     if @params.options
       options = renderOptionsArray(@params.options)
