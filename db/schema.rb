@@ -518,6 +518,22 @@ ActiveRecord::Schema.define(version: 20181126083825) do
     t.string "value", limit: 255, null: false
   end
 
+  create_table "space_events", force: :cascade do |t|
+    t.integer  "user_id",       limit: 4,   null: false
+    t.integer  "space_id",      limit: 4,   null: false
+    t.integer  "entity_id",     limit: 4,   null: false
+    t.string   "entity_type",   limit: 255, null: false
+    t.integer  "activity_type", limit: 4,   null: false
+    t.integer  "side",          limit: 4,   null: false
+    t.datetime "created_at",                null: false
+    t.integer  "object_type",   limit: 4,   null: false
+    t.integer  "role",          limit: 4,   null: false
+  end
+
+  add_index "space_events", ["entity_type", "entity_id"], name: "index_space_events_on_entity_type_and_entity_id", using: :btree
+  add_index "space_events", ["space_id"], name: "index_space_events_on_space_id", using: :btree
+  add_index "space_events", ["user_id"], name: "index_space_events_on_user_id", using: :btree
+
   create_table "space_memberships", force: :cascade do |t|
     t.integer  "user_id",    limit: 4
     t.text     "meta",       limit: 65535
@@ -826,6 +842,8 @@ ActiveRecord::Schema.define(version: 20181126083825) do
   add_foreign_key "orgs", "users", column: "admin_id"
   add_foreign_key "participants", "nodes"
   add_foreign_key "saved_queries", "users"
+  add_foreign_key "space_events", "spaces"
+  add_foreign_key "space_events", "users"
   add_foreign_key "space_memberships", "users"
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"

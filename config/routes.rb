@@ -322,6 +322,13 @@ Rails.application.routes.draw do
         get 'task', on: :member
         resources :comments
       end
+
+      resources :space_feed, only: [:index] do
+        collection do
+          get 'object_types'
+          get 'chart'
+        end
+      end
     end
 
     resources :space_membership, only: [] do

@@ -103,6 +103,9 @@ class AppSeries < ActiveRecord::Base
           series_updates[:latest_version_app_id] = app.id unless series.latest_version_app_id.present? && series.latest_version_app.revision > app.revision
           series.update!(series_updates) if series_updates.present?
           Event::AppPublished.create_for(app, scope, context.user)
+          if scope =~ /^space-(\d+)$/
+            SpaceEventService.call($1.to_i, context.user_id, nil, app, :app_added)
+          end
         end
       end
     end

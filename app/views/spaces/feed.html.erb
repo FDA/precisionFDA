@@ -8,25 +8,26 @@
       <% if @total_count > 0 %><hr><% end %>
     <% end %>
 
-      <% if defined?(@comparisons_grid) %>
-        <div class="panel">
-          <div class="panel-heading">
-            Comparisons &nbsp;<small class="text-muted"><%= @counts[:comparisons] %></small>
-          </div>
-          <div class="panel-body">
-            <%= render "comparisons/grid", comparisons_grid: @comparisons_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
-          </div>
+    <% if defined?(@comparisons_grid) %>
+      <div class="panel">
+        <div class="panel-heading">
+          Comparisons &nbsp;<small class="text-muted"><%= @counts[:comparisons] %></small>
         </div>
-      <% end %>
-      <% if defined?(@assets_grid) %>
-        <div class="panel">
-          <div class="panel-heading">
-            Assets &nbsp;<small class="text-muted"><%= @counts[:assets] %></small>
-          </div>
-          <div class="panel-body">
-            <%= render "assets/grid", assets_grid: @assets_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
-          </div>
+        <div class="panel-body">
+          <%= render "comparisons/grid", comparisons_grid: @comparisons_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
         </div>
-      <% end %>
+      </div>
+    <% end %>
+    <% if defined?(@assets_grid) %>
+      <div class="panel">
+        <div class="panel-heading">
+          Assets &nbsp;<small class="text-muted"><%= @counts[:assets] %></small>
+        </div>
+        <div class="panel-body">
+          <%= render "assets/grid", assets_grid: @assets_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
+        </div>
+      </div>
+    <% end %>
+
   </div>
 </div>

@@ -56,6 +56,8 @@ class CommentsController < ApplicationController
       comment = attach_content(comment, params)
       if comment.save
         move_to_child(comment)
+
+        log_space_event(comment, params[:space_id], "comment_added") if params[:space_id]
       else
         flash[:error] = "There was a problem with adding your comment"
       end
@@ -72,6 +74,7 @@ class CommentsController < ApplicationController
     comment = Comment.find_by(id: params[:id], user_id: @context.user_id)
     if !comment.nil?
       if comment.update_attributes(comment_params)
+        log_space_event(comment, params[:space_id], "comment_edited") if params[:space_id]
         redirect_to pathify_comments_redirect(item)
         return
       else
@@ -86,6 +89,7 @@ class CommentsController < ApplicationController
     comment = Comment.find_by(id: params[:id], user_id: @context.user_id)
     if !comment.nil? && comment_inside_space?(item)
       comment.deleted!
+      log_space_event(comment, params[:space_id], "comment_deleted") if params[:space_id]
     elsif !comment.nil?
       comment.destroy
     else
@@ -132,5 +136,9 @@ class CommentsController < ApplicationController
           comment.update(content_object: parent.content_object)
         end
       end
+    end
+
+    def log_space_event(comment, space_id, event)
+      SpaceEventService.call(space_id, @context.user_id, nil, comment, event.to_sym)
     end
 end
