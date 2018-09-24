@@ -45,6 +45,9 @@ Rails.application.routes.draw do
       end
     end
 
+    # hotfix for PFDA-557
+    get "/mislabeling" => redirect("/challenges/4")
+
     # Main controller
     get 'login' => 'main#login'
     delete 'logout' => 'main#destroy'
