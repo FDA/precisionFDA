@@ -150,18 +150,17 @@ class User < ActiveRecord::Base
 
   def is_challenge_evaluator?
     [
-      "adam.berger",
-      "alan.zhu",
       "elaine.johanson",
       "ezekiel.maier",
       "george.asimenos",
+      "heike.sichtig",
       "min.yi",
       "ruth.bandler",
       "sharon.liang",
       "singer.ma",
+      "yi.yan",
       "you.li",
       "zivana.tezak",
-      "errol.strain"
     ].include?(dxuser) || can_administer_site?
   end
 
