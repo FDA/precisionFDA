@@ -69,7 +69,10 @@ class JobsController < ApplicationController
         msg = JSON.parse(msg.to_s)
         # source, msg, timestamp, level, job, line|
         # source=SYSTEM, msg=END_LOG
-        raise if msg["code"]
+        if msg["code"]
+          flash[:error] = "Sorry, something went wrong. Please, try later"
+          return
+        end
         return if msg["source"] == "SYSTEM" && msg["msg"] == "END_LOG"
         @log_times << msg["timestamp"]
         @log_levels << msg["level"]
