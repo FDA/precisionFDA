@@ -253,7 +253,7 @@ GEM
       ruby-progressbar (~> 1.7)
       unicode-display_width (~> 1.0, >= 1.0.1)
     ruby-progressbar (1.9.0)
-    rubyzip (1.2.1)
+    rubyzip (1.2.2)
     rugged (0.27.0)
     safe_yaml (1.0.4)
     sass (3.4.22)
@@ -367,6 +367,7 @@ DEPENDENCIES
   recaptcha
   rspec-rails (~> 3.7, >= 3.7.1)
   rubocop (~> 0.54.0)
+  rubyzip (= 1.2.2)
   sass-rails (~> 5.0)
   sdoc (~> 0.4.0)
   secure_headers
@@ -386,4 +387,4 @@ DEPENDENCIES
   wice_grid
 
 BUNDLED WITH
-   1.16.2
+   1.16.5
