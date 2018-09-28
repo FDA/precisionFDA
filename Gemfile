@@ -128,3 +128,6 @@ group :production do
   # Use Unicorn as the app server
   gem 'unicorn', '~> 4.9.0'
 end
+
+gem 'rubyzip', '=1.2.2'
+
