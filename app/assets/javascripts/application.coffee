@@ -14,7 +14,7 @@
 #= require polyfills
 #= require vendor
 #= require cookies-js
-#= require jquery
+#= require jquery3
 #= require jquery-ui
 #= require jquery_ujs
 #= require turbolinks
