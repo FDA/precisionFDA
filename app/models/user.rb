@@ -105,6 +105,7 @@ class User < ActiveRecord::Base
   has_many :challenge_resources
   has_many :analyses
   has_one :usage_metric
+  has_many :tasks
 
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 

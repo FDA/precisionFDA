@@ -1,5 +1,9 @@
 <%= grid(apps_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
-  g.blank_slate partial:  "_partials/empty_grid"
+  if defined?(div_if_empty)
+    g.blank_slate content_tag :div, "No apps found", class: 'alert alert-info'
+  else
+    g.blank_slate partial:  "_partials/empty_grid"
+  end
 
   g.column name: 'Name', attribute: 'name' do |series|
     series.name

@@ -1,125 +1,150 @@
 <% content_for :title do %><%= @space.title %><% end %>
 
-<div class="page-header clearfix">
-  <div class="pull-left">
+<div id="ko_spaces_header_container">
 
+  <div class="page-header clearfix">
+    <div class="pull-left">
 
-    <% if @space.review? && @space.active? %>
-      <% if @space.confidential? %>
-        <%= link_to "TO SHARED", content_space_path(@space.space) %>
-      <% else %>
-        <%= link_to "TO PRIVATE", content_space_path(@space.confidential_space(@membership)) %>
-      <% end %>
-    <% end %>
-
-
-    <div class="page-title">
-      <span class="fa fa-object-group"></span>
-      <%= @space.title %>
-      <% if @space.review? %>
-        <%= "(#{space_type(@space)})" %>
+      <% if @space.review? && @space.active? %>
+        <% if @space.confidential? %>
+          <%= link_to "TO SHARED", feed_space_path(@space.space) %>
+        <% else %>
+          <%= link_to "TO PRIVATE", feed_space_path(@space.confidential_space(@membership)) %>
+        <% end %>
       <% end %>
 
+      <div class="page-title">
+        <span class="fa fa-object-group"></span>
+        <%= @space.title %>
+        <% if @space.review? %>
+          <%= "(#{space_type(@space)})" %>
+        <% end %>
+      </div>
       <% if @space.editable_by?(@context) %>
-        <a class="pfda-rename-item" data-toggle="modal" data-target="#rename-modal">
-          <span class="fa fa-pencil"></span>
-        </a>
+        <div>
+          <a class="pfda-rename-item" data-toggle="modal" data-target="#rename-modal">
+            <i class="fa fa-pencil"></i>&nbsp;Rename
+          </a>
+          <a class="pfda-rename-item" href="<%= edit_space_path(@space) %>">
+            <span class="fa fa-external-link" aria-hidden="true"></span>&nbsp;Edit
+          </a>
+        </div>
+      <% end %>
+      <% if !@space.description.blank? %>
+        <div class="description">
+          <%= @space.description %>
+        </div>
+      <% end %>
+
+      <% if @context.review_space_admin? %>
+
+        <% if @space.requests.lock_up.pending.any? %>
+          <%= link_to confirm_lock_space_path(@space.id), method: :post, class: "btn btn-xs btn-danger" do %>
+            <span class="fa fa-archive"></span> Confirm lock
+          <% end %>
+        <% end %>
+
+        <% if @space.requests.unlock.pending.any? %>
+          <%= link_to confirm_unlock_space_path(@space.id), method: :post, class: "btn btn-xs btn-primary" do %>
+            <span class="fa fa-archive"></span> Confirm unlock
+          <% end %>
+
+          <%= form_for :request, url: confirm_unlock_space_path, html: {class: "form form-horizontal"} do |f| %>
+            <label class="">
+              <%= f.check_box :sponsor_notification %>
+              Notify the sponsor
+            </label>
+            <%= f.submit "Confirm unlock", class: 'btn btn-xs btn-primary', data: { disable_with: "Confirmation..." } %>
+          <% end %>
+
+          <%= link_to reject_unlock_space_path(@space.id), method: :post, class: "btn btn-xs btn-danger" do %>
+            <span class="fa fa-archive"></span> Reject unlock
+          <% end %>
+        <% end %>
+
       <% end %>
     </div>
-    <% if !@space.description.blank? %>
-    <div class="description">
-      <%= @space.description %>
-    </div>
-    <% end %>
 
-    <% if @context.review_space_admin? %>
-
-      <% if @space.requests.lock_up.pending.any? %>
-        <%= link_to confirm_lock_space_path(@space.id), method: :post, class: "btn btn-xs btn-danger" do %>
-          <span class="fa fa-archive"></span> Confirm lock
-        <% end %>
-      <% end %>
-
-      <% if @space.requests.unlock.pending.any? %>
-        <%= link_to confirm_unlock_space_path(@space.id), method: :post, class: "btn btn-xs btn-primary" do %>
-          <span class="fa fa-archive"></span> Confirm unlock
-        <% end %>
-
-        <%= form_for :request, url: confirm_unlock_space_path, html: {class: "form form-horizontal"} do |f| %>
-          <label class="">
-            <%= f.check_box :sponsor_notification %>
-            Notify the sponsor
-          </label>
-          <%= f.submit "Confirm unlock", class: 'btn btn-xs btn-primary', data: { disable_with: "Confirmation..." } %>
-        <% end %>
-
-        <%= link_to reject_unlock_space_path(@space.id), method: :post, class: "btn btn-xs btn-danger" do %>
-          <span class="fa fa-archive"></span> Reject unlock
-        <% end %>
-      <% end %>
-
-    <% end %>
-  </div>
-  <% if @space.editable_by?(@context) %>
-    <div class="pull-right">
-      <div class="btn-group">
-        <div class="dropdown">
-          <button class="btn btn-link btn-lg" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <span class="fa fa-cog"></span>
+    <% if @space.active? && @space.editable_by?(@context) %>
+      <div class="pull-right">
+        <div class="btn-group">
+          <button class="btn btn-default" data-bind="click: objectSelector.open">
+            <span class="fa fa-plus" aria-hidden="true"></span> Move data to space...
           </button>
-          <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
-            <li>
-              <%= link_to edit_space_path(@space) do %>
-                <span class="fa fa-pencil"></span> Edit
-              <% end %>
-            </li>
-          </ul>
         </div>
       </div>
-    </div>
+    <% end %>
+  </div>
+
+  <div class="metadata-section metadata-header">
+    <ul class="list-group list-group-inline">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">ID</h5>
+        <p class="list-group-item-text"><%= @space.uid %></p>
+      </li>
+      <% if @space.state != "ACTIVE" %>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">State</h5>
+        <p class="list-group-item-text">
+          <%= @space.state? ? @space.state : "UNACTIVATED" %>
+        </p>
+      </li>
+      <% end %>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Your Role</h5>
+        <p class="list-group-item-text"><%= @membership.role %> <small>(<%= @membership.side %>)</small></p>
+      </li>
+
+      <% @space.leads.each do |lead| %>
+        <%= render "spaces/header_lead", lead: lead %>
+      <% end %>
+
+      <% if @space.cts.present? %>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">CTS</h5>
+          <p class="list-group-item-text">
+            <%= @space.cts  %>
+          </p>
+        </li>
+      <% end %>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Created</h5>
+        <p class="list-group-item-text"><%= @space.created_at.to_s(:human) %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">&nbsp;</h5>
+        <p class="list-group-item-text"><%= @space.created_at_in_ny.to_s(:human) %></p>
+      </li>
+    </ul>
+  </div>
+
+  <% if @space.active? %>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs nav-tabs-padded nav-tabs-centered" role="tablist">
+      <% content_actions = ['tasks', 'feed', 'notes', 'files', 'apps', 'jobs'] %>
+      <li role="presentation" class="<% if content_actions.include?(action_name) %>active<% end %>">
+        <a href="<%= feed_space_path(@space) %>" aria-controls="tab-data"><span class="fa fa-fw fa-database"></span>
+          <span class="tab-label">Content</span>
+        </a>
+      </li>
+      <li role="presentation" class="<% if action_name == 'discuss' %>active<% end %>">
+        <a href="<%= discuss_space_path(@space) %>" aria-controls="tab-comments"><span class="fa fa-fw fa-comment"></span>
+          <span class="tab-label">Comments <span class="badge"><%= @space.comment_threads.size %></span></span>
+        </a>
+      </li>
+      <li role="presentation" class="<% if action_name == 'members' %>active<% end %>">
+        <a href="<%= members_space_path(@space) %>" aria-controls="tab-members"><span class="fa fa-fw fa-group"></span>
+          <span class="tab-label">Members <span class="badge"><%= @space.space_memberships.count %></span></span>
+        </a>
+      </li>
+    </ul>
+
+    <% if @space.editable_by?(@context) %>
+      <%= render "_partials/modal_rename", item: @space, path_to_rename: rename_space_path(@space.id) %>
+    <% end %>
+
+    <%= render "_partials/selector_modal" %>
   <% end %>
-</div>
-
-<div class="metadata-section metadata-header">
-  <ul class="list-group list-group-inline">
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">ID</h5>
-      <p class="list-group-item-text"><%= @space.uid %></p>
-    </li>
-    <% if @space.state != "ACTIVE" %>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">State</h5>
-      <p class="list-group-item-text">
-        <%= @space.state? ? @space.state : "UNACTIVATED" %>
-      </p>
-    </li>
-    <% end %>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Your Role</h5>
-      <p class="list-group-item-text"><%= @membership.role %> <small>(<%= @membership.side %>)</small></p>
-    </li>
-
-    <% @space.leads.each do |lead| %>
-      <%= render "spaces/header_lead", lead: lead %>
-    <% end %>
-
-    <% if @space.cts.present? %>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">CTS</h5>
-      <p class="list-group-item-text">
-        <%= @space.cts  %>
-      </p>
-    </li>
-    <% end %>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Created</h5>
-      <p class="list-group-item-text"><%= @space.created_at.to_s(:human) %></p>
-    </li>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">&nbsp;</h5>
-      <p class="list-group-item-text"><%= @space.created_at_in_ny.to_s(:human) %></p>
-    </li>
-  </ul>
 </div>
 
 <% if @space.unactivated? %>
@@ -139,30 +164,5 @@
     <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has been locked</p>
     <p>Both host and guest leads must click "Accept space" to activate it.</p>
   </div>
-
-<% elsif @space.active? %>
-
-  <!-- Nav tabs -->
-  <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
-    <li role="presentation" class="<% if action_name == 'content' %>active<% end %>">
-      <a href="<%= content_space_path(@space) %>" aria-controls="tab-data"><span class="fa fa-fw fa-database"></span>
-        <span class="tab-label">Content</span>
-      </a>
-    </li>
-    <li role="presentation" class="<% if action_name == 'discuss' %>active<% end %>">
-      <a href="<%= discuss_space_path(@space) %>" aria-controls="tab-comments"><span class="fa fa-fw fa-comment"></span>
-        <span class="tab-label">Comments <span class="badge"><%= @space.comment_threads.size %></span></span>
-      </a>
-    </li>
-    <li role="presentation" class="<% if action_name == 'members' %>active<% end %>">
-      <a href="<%= members_space_path(@space) %>" aria-controls="tab-members"><span class="fa fa-fw fa-group"></span>
-        <span class="tab-label">Members <span class="badge"><%= @space.space_memberships.count %></span></span>
-      </a>
-    </li>
-  </ul>
-
-  <% if @space.editable_by?(@context) %>
-    <%= render "_partials/modal_rename", item: @space, path_to_rename: rename_space_path(@space.id) %>
-  <% end %>
 
 <% end %>

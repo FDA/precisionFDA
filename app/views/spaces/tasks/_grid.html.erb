@@ -1,0 +1,38 @@
+<%= grid(tasks_grid, show_filters: :when_filtered) do |g|
+  g.blank_slate do
+    content_tag :div, defined?(empty_text) ? empty_text : "No taks found", class: 'alert alert-info'
+  end
+
+  g.column name: content_tag(:input, '', type: 'checkbox', class: 'select-all-tasks') do |task|
+    content_tag(:input, '', type: 'checkbox', class: 'select-task', value: task.id, 'data-actions': allowed_task_actions(task, @membership, params[:filter]))
+  end
+
+  g.column name: 'TASK' do |task|
+    content_tag(:a, task.name, href: "/spaces/#{@space.id}/tasks/#{task.id}", target: "_blank")
+  end
+
+  g.column name: 'ASSIGNER' do |task|
+    content_tag(:a, task.assigner.username, href: "/users/#{task.assigner.username}", target: "_blank")
+  end
+
+  g.column name: 'ASSIGNEE' do |task|
+    content_tag(:a, task.assignee.username, href: "/users/#{task.assignee.username}", target: "_blank")
+  end
+
+  g.column name: 'RESPONDED ON' do |task|
+    date = task.response_deadline.try(:strftime, "%m/%d/%Y")
+    failed_css = task.status == 'failed_response_deadline' ? 'failed' : ''
+    content_tag(:span, date, class: "#{failed_css}")
+  end
+
+  g.column name: 'COMPLETE BY' do |task|
+    date = task.completion_deadline.try(:strftime, "%m/%d/%Y")
+    failed_css = task.status == 'failed_completion_deadline' ? 'failed' : ''
+    content_tag(:span, date, class: "#{failed_css}", title: "Failed Deadline")
+  end
+
+  g.column name: 'COMMENTS' do |task|
+    content_tag(:a, task.root_comments.size, href: "/spaces/#{@space.id}/tasks/#{task.id}", target: "_blank")
+  end
+
+end -%>

@@ -111,7 +111,12 @@ class FilesController < ApplicationController
     @items_from_params = [@file]
     @item_path = pathify(@file)
     @item_comments_path = pathify_comments(@file)
-    @comments = @file.root_comments.order(id: :desc).page params[:comments_page]
+    if @file.in_space?
+      space = item_from_uid(@file.scope)
+      @comments = Comment.where(commentable: space, content_object: @file).order(id: :desc).page params[:comments_page]
+    else
+      @comments = @file.root_comments.order(id: :desc).page params[:comments_page]
+    end
 
     @notes = @file.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @file.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
@@ -196,7 +201,7 @@ class FilesController < ApplicationController
                           pathify_folder(parent_folder)
                         else
                           if @file.in_space?
-                            content_space_path(Space.from_scope(@file.scope))
+                            feed_space_path(Space.from_scope(@file.scope))
                           elsif params[:scope] == "public"
                             explore_files_path
                           else

@@ -16,7 +16,12 @@ class JobsController < ApplicationController
     @items_from_params = [@job]
     @item_path = pathify(@job)
     @item_comments_path = pathify_comments(@job)
-    @comments = @job.root_comments.order(id: :desc).page params[:comments_page]
+    if @job.in_space?
+      space = item_from_uid(@job.scope)
+      @comments = Comment.where(commentable: space, content_object: @job).order(id: :desc).page params[:comments_page]
+    else
+      @comments = @job.root_comments.order(id: :desc).page params[:comments_page]
+    end
 
     @notes = @job.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @job.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]

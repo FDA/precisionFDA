@@ -1,0 +1,22 @@
+<div class="btn-group">
+  <%= render_button('accept', 'success', 'thumbs-up', true) %>
+  <%= render_button('complete', 'success', 'check', true) %>
+  <%= render_button('reopen', 'success', 'repeat', true, 'reopen_task_modal') %>
+  <%= render_button('make_active', 'success', 'arrow-up', true, 'make_active_task_modal') %>
+  <%= render_button('comment', 'primary', 'comments', false, 'comment_task_modal') %>
+  <%= render_button('reassign', 'primary', 'share', false, 'reassign_task_modal') %>
+  <%= render_button('edit', 'primary', 'pencil', false, 'edit_task_modal') %>
+  <%= render_button('clone', 'primary', 'clone', false, 'clone_task_modal') %>
+  <%= render_button('decline', 'warning', 'thumbs-down', true, 'decline_task_modal') %>
+  <%= render_button('delete', 'danger', 'trash', false, 'delete_task_modal') %>
+</div>
+<div>
+  <%= render 'spaces/tasks/modal_make_active_task' %>
+  <%= render 'spaces/tasks/modal_reopen_task' %>
+  <%= render 'spaces/tasks/modal_comment_task' %>
+  <%= render 'spaces/tasks/modal_decline_task' %>
+  <%= render 'spaces/tasks/modal_edit_task' %>
+  <%= render 'spaces/tasks/modal_clone_task' %>
+  <%= render 'spaces/tasks/modal_reassign_task' %>
+  <%= render 'spaces/tasks/modal_delete_task' %>
+</div>

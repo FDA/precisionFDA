@@ -22,7 +22,12 @@ class AppsController < ApplicationController
         @items_from_params = [@app]
         @item_path = pathify(@app)
         @item_comments_path = pathify_comments(@app)
-        @comments = @app.root_comments.order(id: :desc).page params[:comments_page]
+        if @app.in_space?
+          space = item_from_uid(@app.scope)
+          @comments = Comment.where(commentable: space, content_object: @app).order(id: :desc).page params[:comments_page]
+        else
+          @comments = @app.root_comments.order(id: :desc).page params[:comments_page]
+        end
 
         @revisions = @app.app_series.accessible_revisions(@context).select(:title, :id, :uid, :revision, :version)
         @notes = @app.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
@@ -109,7 +114,12 @@ class AppsController < ApplicationController
     @items_from_params = [@app]
     @item_path = pathify(@app)
     @item_comments_path = pathify_comments(@app)
-    @comments = @app.root_comments.order(id: :desc).page params[:comments_page]
+    if @app.in_space?
+      space = item_from_uid(@app.scope)
+      @comments = Comment.where(commentable: space, content_object: @app).order(id: :desc).page params[:comments_page]
+    else
+      @comments = @app.root_comments.order(id: :desc).page params[:comments_page]
+    end
 
     User.sync_jobs!(@context)
 

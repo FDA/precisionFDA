@@ -1,0 +1,20 @@
+<% if @context.logged_in? %>
+<div class="pfda-comment pfda-comment--with-mentions">
+  <div class="media">
+    <div class="media-left">
+      <%= link_to image_tag(@context.user.gravatar_url, class: 'img-circle', height: '25px'), user_path(@context.user.dxuser) %>
+    </div>
+    <div class="media-body">
+      <div class="pfda-comment-body">
+        <%- comment = comment || Comment.new %>
+        <%=
+          render "comments/nested_form",
+          comment: comment,
+          url: url,
+          hide_assoc_with: defined?(hide_assoc_with) ? true : false
+        %>
+      </div>
+    </div>
+  </div>
+</div>
+<% end %>

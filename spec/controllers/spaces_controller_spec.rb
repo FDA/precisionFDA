@@ -1,7 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe SpacesController, type: :controller do
-
   let(:admin) { create(:user, :admin) }
   let(:review_space_admin) { create(:user, :review_admin) }
   let(:host_lead) { create(:user, dxuser: "user_1") }
@@ -289,6 +288,19 @@ RSpec.describe SpacesController, type: :controller do
         })
 
         expect(review_space.confidential_reviewer_space.space_memberships.count ).to eq(2)
+      end
+    end
+  end
+
+  describe "tasks" do
+    let(:space) { create(:space, :group, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id) }
+
+    context "by host_admin" do
+      before { authenticate!(host_lead) }
+      it "lists tasks" do
+        get :tasks, id: space
+
+        expect(response).to be_successful
       end
     end
   end

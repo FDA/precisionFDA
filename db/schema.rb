@@ -169,20 +169,24 @@ ActiveRecord::Schema.define(version: 20181106134112) do
   add_index "challenges", ["status"], name: "index_challenges_on_status", using: :btree
 
   create_table "comments", force: :cascade do |t|
-    t.integer  "commentable_id",   limit: 4
-    t.string   "commentable_type", limit: 255
-    t.string   "title",            limit: 255
-    t.text     "body",             limit: 65535
-    t.string   "subject",          limit: 255
-    t.integer  "user_id",          limit: 4,     null: false
-    t.integer  "parent_id",        limit: 4
-    t.integer  "lft",              limit: 4
-    t.integer  "rgt",              limit: 4
+    t.integer  "commentable_id",      limit: 4
+    t.string   "commentable_type",    limit: 255
+    t.string   "title",               limit: 255
+    t.text     "body",                limit: 65535
+    t.string   "subject",             limit: 255
+    t.integer  "user_id",             limit: 4,                 null: false
+    t.integer  "parent_id",           limit: 4
+    t.integer  "lft",                 limit: 4
+    t.integer  "rgt",                 limit: 4
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "content_object_id",   limit: 4
+    t.string   "content_object_type", limit: 255
+    t.integer  "state",               limit: 4,     default: 0
   end
 
   add_index "comments", ["commentable_id", "commentable_type"], name: "index_comments_on_commentable_id_and_commentable_type", using: :btree
+  add_index "comments", ["content_object_type", "content_object_id"], name: "index_comments_on_content_object_type_and_content_object_id", using: :btree
   add_index "comments", ["user_id"], name: "index_comments_on_user_id", using: :btree
 
   create_table "comparison_inputs", force: :cascade do |t|
@@ -428,11 +432,13 @@ ActiveRecord::Schema.define(version: 20181106134112) do
     t.integer  "parent_folder_id",        limit: 4
     t.string   "sti_type",                limit: 255
     t.integer  "scoped_parent_folder_id", limit: 4
+    t.string   "uid",                     limit: 255
   end
 
   add_index "nodes", ["parent_type", "parent_id"], name: "index_nodes_on_parent_type_and_parent_id", using: :btree
   add_index "nodes", ["scope"], name: "index_nodes_on_scope", using: :btree
   add_index "nodes", ["state"], name: "index_nodes_on_state", using: :btree
+  add_index "nodes", ["uid"], name: "index_nodes_on_uid", unique: true, using: :btree
   add_index "nodes", ["user_id"], name: "index_nodes_on_user_id", using: :btree
 
   create_table "notes", force: :cascade do |t|
@@ -600,6 +606,22 @@ ActiveRecord::Schema.define(version: 20181106134112) do
   end
 
   add_index "tags", ["name"], name: "index_tags_on_name", unique: true, using: :btree
+
+  create_table "tasks", force: :cascade do |t|
+    t.integer  "user_id",             limit: 4
+    t.integer  "space_id",            limit: 4
+    t.integer  "assignee_id",         limit: 4,                 null: false
+    t.integer  "status",              limit: 4,     default: 0, null: false
+    t.string   "name",                limit: 255
+    t.text     "description",         limit: 65535
+    t.datetime "response_deadline"
+    t.datetime "completion_deadline"
+    t.datetime "created_at",                                    null: false
+    t.datetime "updated_at",                                    null: false
+  end
+
+  add_index "tasks", ["space_id"], name: "index_tasks_on_space_id", using: :btree
+  add_index "tasks", ["user_id"], name: "index_tasks_on_user_id", using: :btree
 
   create_table "truth_challenge_results", force: :cascade do |t|
     t.integer "answer_id",                 limit: 4
@@ -822,5 +844,7 @@ ActiveRecord::Schema.define(version: 20181106134112) do
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"
   add_foreign_key "submissions", "users"
+  add_foreign_key "tasks", "spaces"
+  add_foreign_key "tasks", "users"
   add_foreign_key "users", "orgs"
 end

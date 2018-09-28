@@ -320,7 +320,12 @@ class ComparisonsController < ApplicationController
     @items_from_params = [@comparison]
     @item_path = pathify(@comparison)
     @item_comments_path = pathify_comments(@comparison)
-    @comments = @comparison.root_comments.order(id: :desc).page params[:comments_page]
+    if @comparison.in_space?
+      space = item_from_uid(@comparison.scope)
+      @comments = Comment.where(commentable: space, content_object: @comparison).order(id: :desc).page params[:comments_page]
+    else
+      @comments = @comparison.root_comments.order(id: :desc).page params[:comments_page]
+    end
 
     @notes = @comparison.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @comparison.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]

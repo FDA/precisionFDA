@@ -121,7 +121,13 @@
   </li>
   <li role="presentation">
     <a href="#tab-comments" aria-controls="tab-comments" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
-      <span class="tab-label">Comments <span class="badge"><%= @comparison.comment_threads.size %></span></span>
+      <span class="tab-label">Comments <span class="badge">
+        <% if @comparison.in_space? %>
+          <%= @comments.active.size %>
+        <% else %>
+          <%= @comparison.comment_threads.size %>
+        <% end %>
+      </span></span>
     </a>
   </li>
   <% if @notes.total_count > 0 %>

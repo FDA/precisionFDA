@@ -112,7 +112,14 @@
   <% if @job.accessible_by?(@context) %>
     <li role="presentation">
       <a href="#tab-comments" aria-controls="tab-comments" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
-        <span class="tab-label">Comments <span class="badge"><%= @job.comment_threads.size %></span></span>
+        <span class="tab-label">Comments <span class="badge">
+          <% if @job.in_space? %>
+            <%= @comments.active.size %>
+          <% else %>
+            <%= @job.comment_threads.size %>
+          <% end %>
+          </span>
+        </span>
       </a>
     </li>
   <% end %>
