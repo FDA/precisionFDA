@@ -115,4 +115,29 @@ class NotificationsMailer < ApplicationMailer
     mail to: @expert.user.email,
          subject: "A new question was submitted by \"#{name}\""
   end
+
+  def new_task_email(task)
+    @task = task
+    mail to: @task.assignee.email,
+         subject: "Task \"#{@task.name}\" was assigned to you"
+  end
+
+  def task_updated_email(task, action)
+    @task = task
+    @action = action
+    mail to: @task.user.email,
+         subject: "Task \"#{@task.name}\" was \"#{@action}\""
+  end
+
+  def user_failed_to_acknowledge_task_email(task)
+    @task = task
+    mail to: @task.user.email,
+         subject: "User failed to ackowledge task \"#{@task.name}\""
+  end
+
+  def user_failed_to_complete_task_email(task)
+    @task = task
+    mail to: @task.user.email,
+         subject: "User failed to complete task \"#{@task.name}\" in time"
+  end
 end

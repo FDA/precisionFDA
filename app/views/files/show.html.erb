@@ -119,7 +119,10 @@
     </div>
 
     <%= render "_partials/btn_publish", item: @file %>
-    <%= render "_partials/btn_copy_to_cooperative", item: @file %>
+
+    <div class="btn-group">
+      <%= render "_partials/btn_copy_to_cooperative", item: @file %>
+    </div>
 
     <% if @file.editable_by?(@context) && (!@file.parent_comparison? || @file.deletable?) %>
     <div class="btn-group">
@@ -154,7 +157,13 @@
 <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
   <li role="presentation">
     <a href="#tab-comments" aria-controls="tab-comments" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
-      <span class="tab-label">Comments <span class="badge"><%= @file.comment_threads.size %></span></span>
+      <span class="tab-label">Comments <span class="badge">
+        <% if @file.in_space? %>
+          <%= @comments.active.size %>
+        <% else %>
+          <%= @file.comment_threads.size %>
+        <% end %>
+      </span></span>
     </a>
   </li>
   <% if @notes.total_count > 0 %>

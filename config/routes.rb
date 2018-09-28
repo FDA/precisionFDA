@@ -12,7 +12,7 @@ Rails.application.routes.draw do
 
       resources :news_items, path: 'news'
       post 'news/positions' => 'news_items#positions'
-      
+
       resources :activity_reports, only: [:index] do
         collection do
           get "total"
@@ -287,6 +287,12 @@ Rails.application.routes.draw do
       get 'members', on: :member
       get 'content', on: :member
       get 'discuss', on: :member
+      get 'tasks',   on: :member
+      get 'feed',   on: :member
+      get 'notes',   on: :member
+      get 'files',   on: :member
+      get 'apps',   on: :member
+      get 'jobs',   on: :member
       post 'accept', on: :member
       post 'request_lock', on: :member, to: 'space_requests#request_lock'
       post 'confirm_lock', on: :member, to: 'space_requests#confirm_lock'
@@ -304,7 +310,20 @@ Rails.application.routes.draw do
       post 'copy_folder_to_cooperative', on: :member
       post 'copy_file_to_cooperative', on: :member
       post 'copy_to_cooperative', on: :member
+      post 'search_content', on: :member
       resources :comments
+
+      resources :tasks, only: [:create, :destroy, :update, :show] do
+        post 'accept', on: :collection
+        post 'complete', on: :collection
+        post 'decline', on: :collection
+        post 'make_active', on: :collection
+        post 'reopen', on: :collection
+        post 'reassign', on: :member
+        post 'copy', on: :member
+        get 'task', on: :member
+        resources :comments
+      end
     end
 
     resources :space_membership, only: [] do

@@ -1,3 +1,94 @@
-// Place all the styles related to the Spaces controller here.
-// They will automatically be included in application.css.
-// You can use Sass here: http://sass-lang.com/
+@import "_common"
+$side-bar-width: 250px
+
+.pfda-controller-spaces
+  &.pfda-action-discuss
+    .spaces-comments-container
+      max-width: 1024px
+      margin: auto
+
+  .pfda-pane-spaces
+    background-color: #FFF
+    .tab-content
+      width: 100%
+      max-width: 100%
+      overflow: auto
+
+  .pfda-pane-sidebar
+    flex: 0 $side-bar-width
+    width: $side-bar-width
+    min-width: $side-bar-width
+    min-height: 650px
+    &.pfda-pane-sidebar-dark
+      .list-group-spaces
+        padding: 0px
+        a
+          .fa-chevron-down
+            transition: transform 300ms ease-out
+        a.collapsed .fa-chevron-down
+          transform: rotate(-90deg)
+        a.list-item-spaces
+          color: #FFF
+          font-size: 17px
+          &.list-child-item-spaces
+            font-size: 14px
+            padding: 5px 15px
+            padding-left: 30px
+          &.active
+            color: $brand-blue-secondary
+            background-color: lighten($brand-blue-secondary, 25%)
+          .fa
+            margin-right: 5px
+          .list-group-item-cnt
+            float: right
+
+  .spaces-files-buttons,
+  .spaces-tasks-buttons
+    text-align: right
+    margin-bottom: 10px
+
+  .spaces-tasks-buttons
+    margin-bottom: 50px
+
+  .spaces-tasks-actions
+    float: left
+    margin-bottom: 10px
+    clear: both
+    width: 100%
+    .pull-right button
+      border-radius: 3px !important
+      margin-left: 5px !important
+
+  .spaces-tasks-grid
+    clear: both
+    .failed
+      color: $brand-red-tertiary
+
+  .tasks-actions-modal
+    .control-label
+      text-align: left
+    textarea
+      resize: vertical
+    .loader-container
+      display: none
+    &.loading
+      .modal-footer
+        position: relative
+      .loader-container
+        position: absolute
+        display: flex
+        height: 100%
+        width: 100%
+        top: 0
+        .loader
+          margin: auto
+          font-size: 30px
+      .modal-body,
+      .modal-footer
+        visibility: hidden
+    .add-atwho
+      min-height: 150px
+      overflow: auto
+      &:empty:before
+        content: attr(data-placeholder)
+        color: #999

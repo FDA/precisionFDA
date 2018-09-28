@@ -10,7 +10,7 @@ crumb :folder do |folder|
     elsif controller_name == 'spaces' && action_name == 'content'
       # TODO Temporary solution for getting space. Should be changed.
       space = Space.find(params[:id])
-      link "Space files", content_space_path(space)
+      link "Space files", feed_space_path(space)
     end
   end
 end

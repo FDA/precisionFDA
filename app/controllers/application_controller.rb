@@ -174,6 +174,8 @@ class ApplicationController < ActionController::Base
       license_path(item)
     when "space"
       space_path(item)
+    when "task"
+      tasks_space_path(item.space_id)
     when "meta-appathon"
       meta_appathon_path(item)
     when "appathon"
@@ -200,7 +202,7 @@ class ApplicationController < ActionController::Base
       explore_files_path(folder_id: folder.id)
     elsif folder.in_space?
       space = folder.space
-      content_space_path(id: space.id, folder_id: folder.id)
+      files_space_path(id: space.id, folder_id: folder.id)
     else
       raise "Unable to build folder's path"
     end
@@ -232,6 +234,8 @@ class ApplicationController < ActionController::Base
       discussion_answer_comments_path(item.discussion, item.user.dxuser)
     when "space"
       space_comments_path(item)
+    when "task"
+      space_task_comments_path(item.space_id, item)
     when "meta-appathon"
       meta_appathon_comments_path(item)
     when "appathon"
@@ -257,6 +261,8 @@ class ApplicationController < ActionController::Base
       end
     when "space"
       discuss_space_path(item)
+    when "task"
+      tasks_space_path(item.space_id)
     when "expert", "expert-question", "meta-appathon", "appathon", "file", "app", "job", "asset", "comparison", "answer", "space", "folder"
       pathify(item)
     else
@@ -333,6 +339,9 @@ class ApplicationController < ActionController::Base
       return [Appathon.find(params[:appathon_id])]
     elsif params[:note_id].present?
       return [Note.find(params[:note_id])]
+    elsif params[:task_id].present?
+      task = Task.find(params[:task_id])
+      return [task.space, task]
     elsif params[:space_id].present?
       return [Space.find(params[:space_id])]
     elsif params[:comparison_id].present?

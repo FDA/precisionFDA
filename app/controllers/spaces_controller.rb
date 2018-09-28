@@ -1,6 +1,8 @@
 class SpacesController < ApplicationController
 
-  before_action :init_parent_folder, only: [:content]
+  before_action :init_parent_folder, only: [:files]
+  before_action :find_space_and_membership, only: [:discuss, :members, :feed, :tasks, :files, :apps, :notes, :jobs]
+  before_action :content_counters, only: [:feed, :tasks, :files, :apps, :notes, :jobs]
 
   def index
     if @context.can_administer_site?
@@ -19,121 +21,28 @@ class SpacesController < ApplicationController
   end
 
   def show
-    redirect_to content_space_path(params[:id])
-  end
-
-  def content
-    @space = Space.accessible_by(@context).find_by_id(params[:id])
-
-    unless @space
-      redirect_to root_url
-      return
-    end
-
-    @membership = fetch_membership
-    folder_id = params[:folder_id]
-
-    # TODO move to api
-    if request.xhr?
-      render_folders(folders(params[:folder_id]))
-      return
-    end
-
-    @notes = Note.real_notes.accessible_by_space(@space)
-    @files = UserFile.real_files.accessible_by_space(@space)
-    @comparisons = Comparison.accessible_by_space(@space)
-    @apps = AppSeries.accessible_by_space(@space)
-    @assets = Asset.accessible_by_space(@space)
-    @jobs = Job.accessible_by_space(@space)
-    @folders = folders(folder_id)
-
-    @counts = {
-      notes: @notes.count,
-      files: @files.count,
-      comparisons: @comparisons.count,
-      apps: @apps.count,
-      assets: @assets.count,
-      jobs: @jobs.count,
-      folders: folders.limit(1).count
-    }
-
-    @total_count = @counts.values.sum
-
-    if @counts[:notes] > 0
-      @notes_list = @notes.order(title: :desc).page params[:notes_page]
-    end
-
-    @folder = Folder.accessible_by_space(@space).find_by(id: folder_id)
-
-    nodes = Node.where.any_of(
-      UserFile.real_files.accessible_by_space(@space).where(scoped_parent_folder_id: folder_id),
-      @folders
-    )
-
-    @files_grid = initialize_grid(nodes.includes(:taggings), {
-      name: 'files',
-      order: 'name',
-      order_direction: 'desc',
-      per_page: 25,
-      include: [:user, {user: :org}, {taggings: :tag}],
-      custom_order: { "nodes.sti_type" => "nodes.sti_type, nodes.name" }
-    })
-    @scope = @space.uid
-
-    if @counts[:comparisons] > 0
-      @comparisons_grid = initialize_grid(@comparisons.includes(:taggings), {
-        name: 'comparisons',
-        order: 'comparisons.name',
-        order_direction: 'desc',
-        per_page: 25,
-        include: [:user, {user: :org}, {taggings: :tag}]
-      })
-    end
-    if @counts[:apps] > 0
-      @apps_grid = initialize_grid(@apps.includes(:latest_version_app, :taggings), {
-        name: 'apps',
-        order: 'apps.title',
-        order_direction: 'desc',
-        per_page: 25,
-        include: [{user: :org}, :latest_version_app, {taggings: :tag}]
-      })
-    end
-    if @counts[:assets] > 0
-      @assets_grid = initialize_grid(Asset.unscoped.accessible_by_space(@space).includes(:taggings), {
-        name: 'assets',
-        order: 'nodes.name',
-        order_direction: 'asc',
-        per_page: 25,
-        include: [:user, {user: :org}, {taggings: :tag}]
-      })
-    end
-    if @counts[:jobs] > 0
-      @jobs_grid = initialize_grid(@jobs.includes(:taggings), {
-        name: 'jobs',
-        order: 'jobs.created_at',
-        order_direction: 'desc',
-        per_page: 25,
-        include: [{user: :org}, {taggings: :tag}]
-      })
-    end
-
-    @show_checkboxes = @space.accessible_by?(@context)
-
-    js({ space_uid: @space.uid, space_id: @space.id, scopes: @space.accessible_scopes_for_move }.merge(files_ids_with_descriptions(nodes, @space)))
+    redirect_to feed_space_path(params[:id])
   end
 
   def discuss
-    @space = Space.accessible_by(@context).find(params[:id])
-    @membership = fetch_membership
+    @associate_with_options = ['Note', 'File', 'App', 'Job']
     @items_from_params = [@space]
     @item_path = pathify(@space)
     @item_comments_path = pathify_comments(@space)
     @comments = @space.root_comments.order(id: :desc).page params[:comments_page]
+    user_ids = @space.space_memberships.active.map(&:user_id)
+    users = User.find(user_ids).map {|u| {name: u.dxuser} }
+    space_id = @space.to_param
+    js users: users, space_id: space_id
+  end
+
+  def search_content
+    space = Space.find(params[:id])
+    results = space.search_content(params[:content_type], params[:query])
+    render json: results
   end
 
   def members
-    @space = Space.accessible_by(@context).find(params[:id])
-    @membership = fetch_membership
     @members_grid = initialize_grid(@space.space_memberships, {
       order: 'created_at',
       order_direction: 'asc',
@@ -262,7 +171,7 @@ class SpacesController < ApplicationController
     redirect_target = if parent_folder.present?
                         pathify_folder(parent_folder)
                       else
-                        content_space_path(space)
+                        files_space_path(space)
                       end
 
     redirect_to redirect_target
@@ -280,7 +189,7 @@ class SpacesController < ApplicationController
       flash[:success] = "Folder '#{result.value.name}' successfully created."
     end
 
-    redirect_path = parent_folder.present? ? pathify_folder(parent_folder) : content_space_path(space)
+    redirect_path = parent_folder.present? ? pathify_folder(parent_folder) : files_space_path(space)
     redirect_to redirect_path
   end
 
@@ -302,13 +211,13 @@ class SpacesController < ApplicationController
         redirect_path = pathify_folder(target_folder)
       else
         target_folder_name = "root directory"
-        redirect_path = content_space_path(space)
+        redirect_path = files_space_path(space)
       end
 
       flash[:success] = "Successfully moved #{result.value[:count]} item(s) to #{target_folder_name}"
     else
       current_folder = Folder.accessible_by_space(space).find_by(id: params[:current_folder])
-      redirect_path = current_folder.present? ? pathify_folder(current_folder) : content_space_path(space)
+      redirect_path = current_folder.present? ? pathify_folder(current_folder) : files_space_path(space)
       flash[:error] = result.value.values
     end
 
@@ -369,7 +278,7 @@ class SpacesController < ApplicationController
       flash[:error] = res.value.values
     end
 
-    redirect_to content_space_path(space)
+    redirect_to files_space_path(space)
   end
 
   def publish_folder
@@ -381,7 +290,7 @@ class SpacesController < ApplicationController
 
     if files.size == 0
       flash[:error] = "No nodes selected"
-      redirect_to content_space_path(space)
+      redirect_to files_space_path(space)
       return
     end
 
@@ -389,12 +298,12 @@ class SpacesController < ApplicationController
       count = UserFile.publish(files, @context, "public")
     rescue RuntimeError => e
       flash[:error] = e.message
-      redirect_to content_space_path(space)
+      redirect_to files_space_path(space)
       return
     end
 
     flash[:success] = "#{count} file(s) successfully published"
-    redirect_to content_space_path(space)
+    redirect_to files_space_path(space)
   end
 
   def copy_folder_to_cooperative
@@ -410,7 +319,7 @@ class SpacesController < ApplicationController
     end
 
     flash[:success] = "#{new_files.count} file(s) successfully copied"
-    redirect_to content_space_path(space)
+    redirect_to :back
   end
 
   def copy_to_cooperative
@@ -424,7 +333,7 @@ class SpacesController < ApplicationController
       flash[:success] = "#{object.class} successfully copied"
     end
 
-    redirect_to content_space_path(space)
+    redirect_to :back
   end
 
   def copy_service
@@ -433,6 +342,122 @@ class SpacesController < ApplicationController
 
   def job
     render 'jobs/show'
+  end
+
+  def feed
+    @total_count = @counts.values.sum
+    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
+  end
+
+  def tasks
+    TasksChecker.check_tasks_for_failed_response_deadline
+    TasksChecker.check_tasks_for_failed_completion_deadline
+
+    case params[:filter]
+    when "created_by_me"
+      filter = {user_id: @context.user_id}
+    when "my"
+      filter = {assignee_id: @context.user_id}
+    else
+      filter = {}
+    end
+
+    case params[:status]
+    when "awaiting_response"
+      @tasks = @space.tasks.where(filter).awaiting_response
+      @page_title = 'Awaiting Response Tasks'
+    when "completed"
+      @tasks = @space.tasks.where(filter).completed
+      @page_title = 'Completed Tasks'
+    when "declined"
+      @tasks = @space.tasks.where(filter).declined
+      @page_title = 'Declined Tasks'
+    when "accepted"
+      @tasks = @space.tasks.where(filter).accepted_and_failed_deadline
+      @page_title = 'Active Tasks'
+    else
+      @tasks = @space.tasks.where(filter)
+      @page_title = 'Other Tasks'
+    end
+
+    @tasks_grid = initialize_grid(@tasks, {
+      name: 'tasks',
+      order: 'tasks.created_at',
+      order_direction: 'desc',
+      per_page: 25,
+      include: [{user: :org}]
+    })
+
+    users = @space.users.map {|u| {label: u.dxuser, value: u.id} }
+
+    if @context.user.can_administer_site?
+      user_ids = @space.space_memberships.where(side: @membership.side).pluck(:user_id)
+      @group_tasks = @space.tasks.where(user_id: user_ids)
+    end
+
+    js({ space_uid: @space.uid, space_id: @space.id, scopes: @space.accessible_scopes_for_move, users: users })
+  end
+
+  def notes
+    @notes = Note.real_notes.accessible_by_space(@space)
+    @notes_list = @notes.order(title: :desc).page params[:notes_page]
+    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
+  end
+
+  def files
+    @folder_id = params[:folder_id]
+    @folder = Folder.accessible_by_space(@space).find_by(id: @folder_id)
+    @folders = folders(@folder_id)
+
+    if request.xhr?
+      render_folders(@folders)
+      return
+    end
+
+    nodes = Node.where.any_of(
+      UserFile.real_files.accessible_by_space(@space).where(scoped_parent_folder_id: @folder_id),
+      @folders
+    )
+
+    @counts.merge!({folders: folders.limit(1).count})
+
+    @files_grid = initialize_grid(nodes.includes(:taggings), {
+      name: 'files',
+      order: 'name',
+      order_direction: 'desc',
+      per_page: 25,
+      include: [:user, {user: :org}, {taggings: :tag}],
+      custom_order: { "nodes.sti_type" => "nodes.sti_type, nodes.name" }
+    })
+    @scope = @space.uid
+
+    @show_checkboxes = @space.accessible_by?(@context)
+
+    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move, space_id: @space.id }.merge(files_ids_with_descriptions(nodes, @space)))
+  end
+
+  def apps
+    @apps = AppSeries.accessible_by_space(@space)
+    @apps_grid = initialize_grid(@apps.includes(:latest_version_app, :taggings), {
+      name: 'apps',
+      order: 'apps.title',
+      order_direction: 'desc',
+      per_page: 25,
+      include: [{user: :org}, :latest_version_app, {taggings: :tag}]
+    })
+    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
+  end
+
+  def jobs
+    @jobs = Job.accessible_by_space(@space)
+    @jobs_grid = initialize_grid(@jobs.includes(:taggings), {
+      name: 'jobs',
+      order: 'jobs.created_at',
+      order_direction: 'desc',
+      per_page: 25,
+      include: [{user: :org}, {taggings: :tag}]
+    })
+    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
   end
 
   private
@@ -508,5 +533,18 @@ class SpacesController < ApplicationController
 
   def files_copy_service
     CopyService::FileCopier.new(api: @context.api, user: @context.user)
+  end
+
+  def find_space_and_membership
+    @space = Space.accessible_by(@context).find_by_id(params[:id])
+    unless @space
+      redirect_to root_url
+      return
+    end
+    @membership = fetch_membership
+  end
+
+  def content_counters
+    @counts ||= @space.content_counters(@context.user_id)
   end
 end
