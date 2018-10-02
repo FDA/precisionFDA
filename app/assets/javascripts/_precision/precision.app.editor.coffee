@@ -45,12 +45,11 @@ class AppEditorModel
 
     @inputSpec = app?.spec.input_spec
     @outputSpec = app?.spec.output_spec
-    @inputs = ko.observableArray(_.map(@inputSpec, (spec) =>
-      new IOModel(spec, "input", this)
-    ))
-    @outputs = ko.observableArray(_.map(@outputSpec, (spec) =>
-      new IOModel(spec, "output", this)
-    ))
+
+    @inputs = ko.observableArray()
+    @createInputs(@inputSpec)
+    @outputs = ko.observableArray()
+    @createOutputs(@outputSpec)
 
     @internetAccess = ko.observable(app?.spec.internet_access ? false)
 
@@ -113,6 +112,16 @@ class AppEditorModel
 
     Precision.bind.save(this, @save)
     Precision.bind.traps()
+
+  createInputs: (inputSpec) =>
+    @inputs.removeAll()
+    _.each(inputSpec, (spec) =>
+      @inputs.push(new IOModel(spec, "input", this)))
+
+  createOutputs: (inputSpec) =>
+    @outputs.removeAll()
+    _.each(inputSpec, (spec) =>
+      @outputs.push(new IOModel(spec, "output", this)))
 
   onOpenAssetsModal: ->
     # Set up a subscription for when the assets will be loaded,
@@ -384,5 +393,5 @@ class IOModel
     return value
 
 window.Precision ||= {}
-window.Precision.models || = {}
+window.Precision.models ||= {}
 window.Precision.models.AppEditorModel = AppEditorModel
