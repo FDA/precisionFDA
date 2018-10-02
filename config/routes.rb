@@ -94,6 +94,10 @@ Rails.application.routes.draw do
       resources :challenges, only: [] do
         post 'save_editor_page', on: :member
       end
+
+      resources :apps, only: [] do
+        post 'attributes_by_cwl', on: :collection
+      end
     end
 
     post '/api/publish', to: 'api#publish'
