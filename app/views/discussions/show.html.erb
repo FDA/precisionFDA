@@ -95,7 +95,7 @@
     <div class="list-group">
       <li class="list-group-item">
         <% if !@discussion.has_answered?(@context.user_id) %>
-          <%= link_to discussion_answers_path(@discussion), method: :post, class: "btn btn-default btn-block" do %>
+          <%= button_to discussion_answers_path(@discussion), method: :post, form_class: "btn-block", class: "btn btn-default btn-block", data: { disable_with: 'Creating...' } do %>
             <span class="fa fa-edit"></span> Write an Answer
           <% end %>
         <% else %>
