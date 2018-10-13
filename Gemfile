@@ -127,6 +127,7 @@ group :production do
   gem 'exception_notification', '4.1.1'
   # Use Unicorn as the app server
   gem 'unicorn', '~> 4.9.0'
+  gem 'soapforce'
 end
 
 gem 'rubyzip', '=1.2.2'
