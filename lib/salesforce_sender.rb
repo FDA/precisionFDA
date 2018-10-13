@@ -1,10 +1,4 @@
 class SalesforceSender
-
-  FROM_EMAILS = {
-    %r{notification@dnanexus.com}i => ENV.fetch('SALESFORCE_NOTIFIER_EMAIL_ID'),
-    %r{precisionfda@fda.hhs.gov}i  => ENV.fetch('SALESFORCE_FDA_EMAIL_ID'),
-  }
-
   attr_accessor :settings
 
   def initialize(values)
@@ -33,8 +27,15 @@ class SalesforceSender
 
   private
 
+  def from_emails
+    {
+      %r{notification@dnanexus.com}i => ENV.fetch('SALESFORCE_NOTIFIER_EMAIL_ID'),
+      %r{precisionfda@fda.hhs.gov}i  => ENV.fetch('SALESFORCE_FDA_EMAIL_ID'),
+    }
+  end
+
   def org_wide_email_address_id(email)
-    FROM_EMAILS.find do |regex, id|
+    from_emails.find do |regex, id|
       return id if regex.match(email)
     end
     raise "org_wide_email_address_id for '#{email}' not found!"
