@@ -12,13 +12,11 @@ class SalesforceSender
     response = client.client.call(:send_email, {
       :message => {
         :messages => {
-          :'@xsi:type'  => 'tns:SingleEmailMessage',
-          :toAddresses  => mail.to,
-          :bccAddresses => mail.bcc,
-          :ccAddresses  => mail.cc,
-          :replyTo      => mail_from,
-          :subject      => mail.subject,
-          :htmlBody     => mail.html_part.body,
+          :'@xsi:type' => 'tns:SingleEmailMessage',
+          :toAddresses => mail.to,
+          :replyTo     => mail_from,
+          :subject     => mail.subject,
+          :htmlBody    => mail.html_part.body,
           :orgWideEmailAddressId => org_wide_email_address_id(mail_from),
         }
       }
