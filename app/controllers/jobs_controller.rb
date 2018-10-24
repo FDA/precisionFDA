@@ -28,7 +28,10 @@ class JobsController < ApplicationController
   end
 
   def log
-    @job = Job.accessible_by(@context).find_by(dxid: params[:id])
+    @job = Job.accessible_by(@context).find_by(
+      dxid: params[:id],
+      user_id: @context.user_id
+    )
 
     if @job.nil?
       flash[:error] = "Sorry, this job does not exist or its log is not accessible by you"
