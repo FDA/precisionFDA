@@ -198,13 +198,19 @@
         </div>
         <div class="form-group form-group-lg">
             <div class="col-sm-offset-5 col-sm-10">
-              <%= f.submit "Request Access to precisionFDA", class: "btn btn-lg accessible-btn-success", data: {disable_with: "Requesting..."} %>
+              <button class="btn btn-lg accessible-btn-success">
+                Request Access to precisionFDA
+              </button>
+
               &nbsp; or <strong><%= link_to "Log in", login_path %></strong>
             </div>
-         </div>
+        </div>
+
+        <%= render "_partials/modal_access_request_confirm" %>
       <% end %>
     </div>
   </div>
 <% end %>
 
 <%= render "_partials/fda_footer" %>
+
