@@ -36,6 +36,12 @@ module PrecisionFda
 
     config.autoload_paths += Dir[Rails.root.join("app", "validators", "**")]
 
+    config.middleware.insert 0,
+        Rack::UTF8Sanitizer,
+        sanitizable_content_types: ['application/x-www-form-urlencoded'],
+        only: ['rack.input', 'QUERY_STRING', 'PATH_INFO'],
+        strategy: :replace
+
     # Minimum Sass number precision required by bootstrap-sass
     ::Sass::Script::Value::Number.precision = [8, ::Sass::Script::Value::Number.precision].max
   end
