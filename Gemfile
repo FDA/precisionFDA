@@ -84,6 +84,8 @@ gem 'mysql2', '~> 0.3.18'
 
 gem 'gretel'
 
+gem 'rack-utf8_sanitizer', '~> 1.6'
+
 # View outgoing HTTP requests
 gem 'httplog'
 
