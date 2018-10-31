@@ -195,11 +195,20 @@ class MainController < ApplicationController
 
   def return_from_login
     # Ensure we were sent here from DNAnexus
-    raise unless params[:code].present? && params[:code].is_a?(String)
+    if params[:code].blank? || !params[:code].is_a?(String)
+      redirect_to(root_url) and return
+    end
 
     # Exchange the code for a token
-    result = DNAnexusAuth.new(DNANEXUS_AUTHSERVER_URI).post_form("oauth2/token", {grant_type: "authorization_code", code: params[:code], redirect_uri: OAUTH2_REDIRECT_URI, client_id: OAUTH2_CLIENT_ID})
-    raise unless result["access_token"].present? && result["token_type"] == "bearer"
+    result = DNAnexusAuth.new(DNANEXUS_AUTHSERVER_URI).
+               fetch_token(params[:code])
+
+    if result["access_token"].blank? ||
+       result["token_type"] != "bearer"
+
+      redirect_to(root_url) and return
+    end
+
     token = result["access_token"]
 
     # Extract username
