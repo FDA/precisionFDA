@@ -40,6 +40,7 @@
               <span class="fa fa-download"></span> Windows
             </a>
           </p>
+          <p>Note: On Linux and Mac OS, after unzipping the downloaded file, you may need to run the following command to make the binary executable: <code>chmod +x pfda</code>.</p>
           <p>Version 2.0.0 (6/21/2018): TLS 1.2 and FIPS 140-2 support.</p>
           <p>Version 1.0.4 (1/5/2016): Reduced memory usage of each thread.</p>
           <p>Version 1.0.3 (12/14/2015): The uploader can now be used for both assets and files.</p>
@@ -59,7 +60,7 @@
           <p class="help-block">
             This command will archive the contents of the fake root into the named tarball, and upload it to precisionFDA along with the contents of the readme file (replace <strong>KEY</strong> below with the actual content of your authorization key copied from the page in step 4, and pasted directly in the command line):
           </p>
-          <p><code>./pfda_{os}_{arch} --cmd upload-asset --key KEY --name my-asset.tar.gz --root /path/to/fake_root --readme my-asset.txt</code></p>
+          <p><code>./pfda --cmd upload-asset --key KEY --name my-asset.tar.gz --root /path/to/fake_root --readme my-asset.txt</code></p>
           <p>TIP: The uploader saves your key in <code>$HOME/.config/precision-fda/config.json</code>, so after you have run it once, you don't need to specify the key in subsequent invocations.</p>
         </li>
       </ul>
