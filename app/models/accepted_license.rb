@@ -12,6 +12,7 @@
 #
 
 class AcceptedLicense < ActiveRecord::Base
+  include Auditor
   belongs_to :license
   belongs_to :user
   has_many :licensed_items, through: :license

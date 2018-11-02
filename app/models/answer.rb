@@ -11,6 +11,7 @@
 #
 
 class Answer < ActiveRecord::Base
+  include Auditor
   # This includes permissions but many methods must be redefined
   # given that the real permissions are mandated by the note
   include Permissions

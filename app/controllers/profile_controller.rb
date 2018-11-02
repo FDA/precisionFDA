@@ -66,7 +66,7 @@ class ProfileController < ApplicationController
           dxuserid = "user-#{@suggested_username}"
           dxorg = @user.org.dxorg
 
-          AUDIT_LOGGER.info("The system is about to start provisioning user '#{@suggested_username}' under org '#{@user.org.handle}', initiated by '#{@user.dxuser}'")
+          Auditor.perform_audit({ action: "create", record_type: "Provision User", record: { message: "The system is about to start provisioning user '#{@suggested_username}' under org '#{@user.org.handle}', initiated by '#{@user.dxuser}'" } })
           auth = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
           auth.call("user", "new", {username: @suggested_username, email: @email, first: @first, last: @last, billTo: ORG_EVERYONE})
 
@@ -85,7 +85,15 @@ class ProfileController < ApplicationController
           user[:email] = @email
           user[:normalized_email] = @normalized_email
           u = User.create!(user)
-          AUDIT_LOGGER.info("A new user has been created under the '#{@user.org.handle}' organization: user=#{u.as_json} by '#{@user.dxuser}'")
+
+          auditor_data = {
+            action: "create",
+            record_type: "Provision User",
+            record: {
+              message: "A new user has been created under the '#{@user.org.handle}' organization: user=#{u.as_json} by '#{@user.dxuser}'"
+            }
+          }
+          Auditor.perform_audit(auditor_data)
           @state = "step3"
         end
       end
@@ -202,7 +210,7 @@ class ProfileController < ApplicationController
         raise "We did not expect org name '#{@org}' to exist in the database" if Org.find_by(name: @org).present?
         raise "We did not expect org handle '#{@org_handle}' to exist in the database" if Org.find_by(handle: @org_handle).present?
 
-        AUDIT_LOGGER.info("The system is about to start provisioning admin '#{@suggested_username}' and org '#{@org_handle}'#{@singular ? ' (self-represented)' : ''} initiated by '#{@user.dxuser}'")
+        Auditor.perform_audit({ action: "create", record_type: "Provision Org", record: { message: "The system is about to start provisioning admin '#{@suggested_username}' and org '#{@org_handle}'#{@singular ? ' (self-represented)' : ''} initiated by '#{@user.dxuser}'" } })
         if api.entity_exists?(dxorg)
           # Check if the org exists due to earlier failure
           org_description = papi.call(dxorg, "describe")
@@ -255,7 +263,7 @@ class ProfileController < ApplicationController
           o.update!(admin_id: u.id)
         end
         Invitation.find(@inv.to_i).update(user_id: u.id)
-        AUDIT_LOGGER.info("A new admin and organization have been created: user=#{u.as_json}, org=#{o.as_json} by '#{@user.dxuser}'")
+        Auditor.perform_audit({ action: "create", record_type: "Provision Org", record: { message: "A new admin and organization have been created: user=#{u.as_json}, org=#{o.as_json} by '#{@user.dxuser}'" } })
       end
     end
   end
