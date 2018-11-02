@@ -1,4 +1,5 @@
 class Node < ActiveRecord::Base
+  include Auditor
 
   self.inheritance_column = :sti_type
 

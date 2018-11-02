@@ -11,6 +11,8 @@
 #
 
 class LicensedItem < ActiveRecord::Base
+  include Auditor
+
   belongs_to :license
   belongs_to :licenseable, polymorphic: true
 end

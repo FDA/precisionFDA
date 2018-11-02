@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # == Schema Information
 #
 # Table name: users
@@ -21,6 +22,7 @@
 #
 
 class User < ActiveRecord::Base
+  include Auditor
 
   # The "schema_version" field is used to denote the schema
   # associated with this user on the platform. Changing the
@@ -29,6 +31,54 @@ class User < ActiveRecord::Base
   # so that users who log in and whose schema_version is
   # lower will get migrated.
   CURRENT_SCHEMA = 1
+
+  PRODUCTION_ADMINS = %w(
+    elaine.johanson
+    ruth.bandler
+    singer.ma
+    john.didion
+    ezekiel.maier
+    holly.stephens
+  ).freeze
+
+  NON_PRODUCTION_ADMINS = %w(
+    alan.fdauser
+    Adam.Berger@fda.hhs.gov
+    martin.bednar
+    zeke.maier
+    Zivana.Tezak@fda.hhs.gov
+    singeradmin.pfdadev
+    singer.admin
+    pamella.tater.2
+    ezekiel.maier
+    vijay.kandali
+    min.yi
+    nicholas.hill
+    john.didion
+    singer.ma
+    naina.thangaraj
+    holly.stephens
+  ).freeze
+
+  NON_PRODUCTION_ADMIN_ORGS = %w(
+    precisionfda
+    precisionfda_dev
+    dnanexus
+  ).freeze
+
+  CHALLENGE_EVALUATORS = %w(
+    elaine.johanson
+    ezekiel.maier
+    george.asimenos
+    heike.sichtig
+    min.yi
+    ruth.bandler
+    sharon.liang
+    singer.ma
+    yi.yan
+    you.li
+    zivana.tezak
+  ).freeze
 
   has_many :uploaded_files, {class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'}
   has_many :user_files
@@ -142,26 +192,16 @@ class User < ActiveRecord::Base
 
   def can_administer_site?
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
-      ["elaine.johanson", "ruth.bandler", "singer.ma", "john.didion", "ezekiel.maier"].include?(dxuser)
+      PRODUCTION_ADMINS.include?(dxuser)
     else
-      ((["precisionfda", "precisionfda_dev", "dnanexus"].include?(org.handle)) && org.admin_id == id) || ["alan.fdauser", "Adam.Berger@fda.hhs.gov", "martin.bednar", "zeke.maier", "Zivana.Tezak@fda.hhs.gov", "singeradmin.pfdadev",'singer.admin', "pamella.tater.2", "ezekiel.maier", "vijay.kandali", 'min.yi',"nicholas.hill", "john.didion", "singer.ma"].include?(dxuser)
+      NON_PRODUCTION_ADMIN_ORGS.include?(org.handle) &&
+      org.admin_id == id ||
+      NON_PRODUCTION_ADMINS.include?(dxuser)
     end
   end
 
   def is_challenge_evaluator?
-    [
-      "elaine.johanson",
-      "ezekiel.maier",
-      "george.asimenos",
-      "heike.sichtig",
-      "min.yi",
-      "ruth.bandler",
-      "sharon.liang",
-      "singer.ma",
-      "yi.yan",
-      "you.li",
-      "zivana.tezak",
-    ].include?(dxuser) || can_administer_site?
+    CHALLENGE_EVALUATORS.include?(dxuser) || can_administer_site?
   end
 
   # @param time_zone [String] new time zone
@@ -213,13 +253,15 @@ class User < ActiveRecord::Base
   end
 
   def self.sync_files!(context)
-    return if context.guest?
-    user = context.user
-    token = context.token
-    # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-    user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
-      DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
-        sync_file_state(result, files[i], user)
+    Auditor.suppress do
+      return if context.guest?
+      user = context.user
+      token = context.token
+      # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
+      user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
+        DNAnexusAPI.new(token).call("system", "describeDataObjects", {objects: files.map(&:dxid)})["results"].each_with_index do |result, i|
+          sync_file_state(result, files[i], user)
+        end
       end
     end
   end

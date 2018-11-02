@@ -9,6 +9,8 @@
 #
 
 class ExpertAnswer < ActiveRecord::Base
+  include Auditor
+
   belongs_to :expert
   belongs_to :expert_question
 

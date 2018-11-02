@@ -13,6 +13,7 @@
 #
 
 class Challenge < ActiveRecord::Base
+  include Auditor
 
   STATUS_SETUP =    "setup"
   STATUS_OPEN =     "open"

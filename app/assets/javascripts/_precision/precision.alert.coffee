@@ -13,13 +13,13 @@ class AlertModel
 
   #public
   show: (text, style) ->
-    $container = createNode(text, style)
+    $container = createContainer(text, style)
     appendToPage($container)
     @on($container)
 
   #public
   showAboveAll: (text, style) ->
-    $container = createNode(text, style)
+    $container = createContainer(text, style)
     $container.addClass('above-all')
     appendToPage($container)
     @on($container, 10000)
@@ -42,14 +42,20 @@ class AlertModel
       $('main').first?().prepend(container)
 
   #private
-  createNode = (text, style) ->
+  createContainer = (text, style) ->
     style = default_style if !style
-    $container = $(document.createElement('div'))
-    $container.addClass('text-center alert flash-alert fade in')
+    $container = createNode('text-center alert flash-alert fade in')
     $container.addClass(style)
     $container.attr('role', 'alert')
     $container.append(text)
     return $container
+
+  #private
+  createNode = (css = '', node = 'div', child = null) ->
+    $node = $(document.createElement(node))
+    $node.addClass(css)
+    $node.append(child) if child
+    return $node
 
   constructor: () ->
     default_style = 'alert-danger'

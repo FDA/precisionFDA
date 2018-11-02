@@ -1,9 +1,6 @@
+require_relative 'base_rack'
 # Rack for testing platform requests
-class PlatformRack
-
-  def initialize
-    @path_parts = []
-  end
+class PlatformRack < BaseRack
 
   def path
     DNANEXUS_APISERVER_URI
@@ -61,16 +58,6 @@ class PlatformRack
       end
 
     "#{request_type}_#{method_name}"
-  end
-
-  def parse_params(env)
-    params = CGI.parse(env["QUERY_STRING"])
-
-    if env["CONTENT_TYPE"] == "application/json"
-      params.merge!(JSON.parse(env["rack.input"].string))
-    end
-
-    params
   end
 
 end

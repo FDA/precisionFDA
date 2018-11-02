@@ -15,6 +15,8 @@
 #
 
 class MetaAppathon < ActiveRecord::Base
+  include Auditor
+
   has_many :appathons
 
   acts_as_followable

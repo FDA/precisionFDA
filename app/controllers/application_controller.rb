@@ -7,7 +7,10 @@ class ApplicationController < ActionController::Base
   rescue_from ActionController::InvalidAuthenticityToken, with: :invalid_token
 
   # Decode context
-  before_action :decode_context
+  before_action :handle_session, :decode_context
+
+  # Audit log
+  before_action :save_current_user_for_audit
 
   # Require login
   before_action :require_login
@@ -43,6 +46,10 @@ class ApplicationController < ActionController::Base
     @context = Context.new(session[:user_id], session[:username], session[:token], session[:expiration], session[:org_id])
   end
 
+  def save_current_user_for_audit
+    Auditor.current_user = AuditLogUser.new(@context.username, request.remote_ip)
+  end
+
   def generate_auth_key(duration = 1.day)
     # Generate new token for pfda uploader
     context = @context.as_json.slice("user_id", "username", "token", "expiration", "org_id")
@@ -57,6 +64,7 @@ class ApplicationController < ActionController::Base
     session[:token] = token
     session[:expiration] = expiration
     session[:org_id] = org_id
+    Session.create(user_id: user_id, key: session.id)
   end
 
   def require_login
@@ -417,4 +425,24 @@ class ApplicationController < ActionController::Base
 
     Event::UserViewed.create_for(@context, request.path)
   end
+
+  def handle_session
+    return unless session[:user_id]
+
+    ar_session = Session.find_by(key: session.id)
+
+    unless ar_session
+      reset_session
+      return
+    end
+
+    if ar_session.expired?
+      ar_session.destroy!
+      reset_session
+    else
+      ar_session.touch
+      cookies[:sessionExpiredAt] = MAX_MINUTES_INACTIVITY.minutes.since.to_i
+    end
+  end
+
 end

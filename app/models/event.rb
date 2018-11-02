@@ -1,4 +1,6 @@
 class Event < ActiveRecord::Base
+  include Auditor
+
   scope :date_range, ->(begin_at, end_at) { where(created_at: begin_at..end_at) }
 
   def self.select_sum(attribute)

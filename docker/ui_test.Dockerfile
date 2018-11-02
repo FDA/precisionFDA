@@ -61,6 +61,7 @@ ENV DATABASE_URL=mysql2://root:password@localhost/precision-fda-uitest
 ENV RAILS_ENV=ui_test
 ENV PFDA_USER_ORG_HANDLE=alice_org
 ENV PFDA_USER_DXUSER=alice
+ENV NO_FIPS=1
 
 ENV PFDA_AT_USER_1_PASSWORD_DEV="password"
 ENV PFDA_AT_USER_2_PASSWORD_DEV="password"

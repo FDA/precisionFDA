@@ -19,6 +19,7 @@
 #
 
 class Workflow < ActiveRecord::Base
+  include Auditor
   include Permissions
 
   belongs_to :user

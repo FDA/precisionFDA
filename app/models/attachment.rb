@@ -9,6 +9,8 @@
 #
 
 class Attachment < ActiveRecord::Base
+  include Auditor
+
   belongs_to :note
   belongs_to :item, polymorphic: true
 end
