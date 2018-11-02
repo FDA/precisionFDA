@@ -13,6 +13,8 @@
 #
 
 class SavedQuery < ActiveRecord::Base  #:nodoc:
+  include Auditor
+
   belongs_to :user
   serialize :query
 

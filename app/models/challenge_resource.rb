@@ -12,6 +12,7 @@
 #  updated_at    :datetime         not null
 
 class ChallengeResource < ActiveRecord::Base
+  include Auditor
 
   belongs_to :challenge
   belongs_to :user_file, dependent: :destroy

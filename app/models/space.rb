@@ -17,6 +17,8 @@
 #
 
 class Space < ActiveRecord::Base
+  include Auditor
+
   validates :space_type, presence: true, inclusion: {in: ['group', 'submission']}
 
   has_many :space_memberships

@@ -322,6 +322,9 @@ class FilesController < ApplicationController
     redirect_to redirect_target
   end
 
+  # TODO move to api
+  skip_before_action :require_login, only: :download_list
+  before_action :require_api_login, only: :download_list
   def download_list
     task = params[:task]
     files = []

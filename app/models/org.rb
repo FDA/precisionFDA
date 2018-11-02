@@ -16,6 +16,8 @@
 #
 
 class Org < ActiveRecord::Base
+  include Auditor
+
   has_many :users
   belongs_to :admin, {class_name: 'User'}
 
@@ -48,7 +50,14 @@ class Org < ActiveRecord::Base
 
     org = papi.call("org", "new", {handle: org[:handle], name: org[:name]})
 
-    AUDIT_LOGGER.info("The system is about to start provisioning a new dxorg '#{org[:id]}'")
+    auditor_data = {
+      action: "create",
+      record_type: "Org Provision",
+      record: {
+        message: "The system is about to start provisioning a new dxorg '#{org[:id]}'"
+      }
+    }
+    Auditor.perform_audit(auditor_data)
 
     if billable
       auth = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)

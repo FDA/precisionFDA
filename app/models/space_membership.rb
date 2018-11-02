@@ -13,6 +13,8 @@
 #
 
 class SpaceMembership < ActiveRecord::Base
+  include Auditor
+
   belongs_to :user
   belongs_to :space, dependent: :destroy
 

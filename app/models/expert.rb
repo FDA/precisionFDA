@@ -12,6 +12,8 @@
 #
 
 class Expert < ActiveRecord::Base
+  include Auditor
+
   has_many :expert_questions, dependent: :destroy
   has_many :expert_answers, through: :expert_questions, dependent: :destroy
   belongs_to :user
