@@ -25,6 +25,7 @@ class SpacesController < ApplicationController
     @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
     folder_id = params[:folder_id]
 
+    # TODO move to api
     if request.xhr?
       render_folders(folders(params[:folder_id]))
       return
@@ -353,6 +354,9 @@ class SpacesController < ApplicationController
     redirect_to redirect_path
   end
 
+  # TODO move to api
+  skip_before_action :require_login, only: :download_list
+  before_action :require_api_login, only: :download_list
   def download_list
     task = params[:task]
     space = Space.accessible_by(@context).find(params[:id])

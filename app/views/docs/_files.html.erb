@@ -32,9 +32,9 @@
         <p>For large files that are on your computer, we suggest using the <strong>precisionFDA uploader</strong>, a command-line tool capable of uploading with multiple threads and more resilient to transient errors.
         The precisionFDA uploader can be used for both files and app assets, and it's available through the <a href="<%= new_asset_path %>">Create Assets</a> page.</p>
 
-        <p>Visit that page and download the precisionFDA uploader by clicking the respective button under "Step 3". (NOTE: The uploader requires Python 2.7, as well as the python 'requests' and 'futures' packages, so ensure you have those available in your environment).</p>
+        <p>Visit that page and download the precisionFDA uploader for your operating system (os) and architecture (arch) by clicking the respective button under "Step 3".</p>
         <p>The tool requires an "authorization key" in order to authenticate the client against the precisionFDA system. You can get a key by clicking the respective button under "Step 4" in the "Add Assets" page. Copy the key from that page and paste it in the command below where it says <strong>KEY</strong>. For your security, the key is valid for 24h.</p>
-        <p>Run <code>./pfda upload-file --auth KEY /path/to/file</code>. This command will upload the file to precisionFDA.</p>
+        <p>Run <code>./pfda_{os}_{arch} --cmd upload-file --key KEY --file /path/to/file</code>. This command will upload the file to precisionFDA.</p>
         <div class="alert alert-info">
           <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> The uploader saves your key in <code>$HOME/.config/precision-fda/config.json</code>, so after you have run it once, you don't need to specify the key in subsequent invocations.
         </div>

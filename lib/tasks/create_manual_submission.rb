@@ -1,17 +1,25 @@
 Job.transaction do
   challenge_id = ARGV[0]            # runner provides challenge_id
   CHALLENGE_TOKEN = ARGV[1]         # runner provides token
-  file_id = ARGV[2]                 # runner provides file_id (dxid)
-
-  file = UserFile.find_by!(dxid: file_id)
-  user_id = file.user_id
-  name = "TBD"
-  desc = "TBD"
-  inputs = {"entry_vcf" => file_id}       # Please verify
+  name = ARGV[2]                    # runner provide submission name
+  desc = ARGV[3]                    # runner provides submission description
+  file_inputs = ARGV[4..-1]         # runner provides one or more input_name=file pairs
+  
+  inputs = {}
+  user_id = nil
   run_inputs = {}
   input_file_dxids = []
   dx_run_input = {}
-
+  
+  file_inputs.each do |file_input|
+    if user_id.nil?
+      file = UserFile.find_by!(dxid: file_id)
+      user_id = file.user_id
+    end
+    key, value = file_input.split("=")
+    inputs[key] = value
+  end
+  
   challenge = Challenge.find_by!(id: challenge_id)
   @app = App.find(challenge.app_id)
   @app.input_spec.each do |input|

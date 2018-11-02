@@ -13,6 +13,7 @@
 #
 
 class WorkflowSeries < ActiveRecord::Base
+  include Auditor
   include Permissions
 
   has_many :workflows

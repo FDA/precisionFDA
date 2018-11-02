@@ -44,6 +44,7 @@
 #
 
 class TruthChallengeResult < ActiveRecord::Base
+  include Auditor
   store :meta, {coder: JSON}
 
   # To allow 'type':
