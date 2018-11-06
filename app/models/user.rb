@@ -58,6 +58,7 @@ class User < ActiveRecord::Base
     singer.ma
     naina.thangaraj
     holly.stephens
+    aabramenko.adminstage
   ).freeze
 
   NON_PRODUCTION_ADMIN_ORGS = %w(
