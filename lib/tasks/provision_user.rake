@@ -100,7 +100,12 @@ namespace :provision do
       o.admin_id = u.id
       o.save!
     end
-    AUDIT_LOGGER.info("A new admin has been created under the '#{o.handle}' organization: user=#{u.as_json}, the previous admin is now a member")
+
+    Auditor.current_user = AuditLogUser.new(nil, nil)
+    Auditor.perform_audit(
+      action: "create", record_type: "Provision User",
+      record: { message: "A new admin has been created under the '#{o.handle}' organization: user=#{u.as_json}, the previous admin is now a member" }
+    )
 
     # The following is required, otherwise rake continues
     # parsing the command line options and tries to run tasks
