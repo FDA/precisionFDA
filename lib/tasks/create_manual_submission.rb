@@ -12,12 +12,12 @@ Job.transaction do
   dx_run_input = {}
   
   file_inputs.each do |file_input|
+    key, file_id = file_input.split("=")
+    inputs[key] = file_id
     if user_id.nil?
       file = UserFile.find_by!(dxid: file_id)
       user_id = file.user_id
     end
-    key, value = file_input.split("=")
-    inputs[key] = value
   end
   
   challenge = Challenge.find_by!(id: challenge_id)
