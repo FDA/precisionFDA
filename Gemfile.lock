@@ -149,7 +149,7 @@ GEM
     libv8 (3.16.14.13)
     local_time (1.0.3)
       coffee-rails
-    loofah (2.2.2)
+    loofah (2.2.3)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     mail (2.6.4)
@@ -165,7 +165,7 @@ GEM
     multi_xml (0.6.0)
     multipart-post (2.0.0)
     mysql2 (0.3.20)
-    nokogiri (1.8.2)
+    nokogiri (1.8.5)
       mini_portile2 (~> 2.3.0)
     nori (2.6.0)
     octokit (4.8.0)
