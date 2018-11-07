@@ -23,19 +23,14 @@
         </td>
 
         <% submission.job.output_data.each do |item| %>
-          <td data-sort="<%= item.name %>">
-            <% if item.file? %>
-              <% if item.file.present? %>
-                <%= unilink(item.file) %>
-              <% else %>
-                <%= item.value %>
-              <% end %>
+          <td data-sort="<%= item.file.present? ? item.file.name : item.value %>">
+            <% if item.file.present? %>
+              <%= unilink(item.file) %>
             <% else %>
               <%= item.value %>
             <% end %>
           </td>
         <% end %>
-
       </tr>
     <% end %>
   </table>
