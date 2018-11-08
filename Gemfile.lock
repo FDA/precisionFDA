@@ -378,7 +378,7 @@ DEPENDENCIES
   kaminari
   local_time (~> 1.0, >= 1.0.3)
   mysql2 (~> 0.3.18)
-  nokogiri (~> 1.8, >= 1.8.2)
+  nokogiri (~> 1.8, >= 1.8.5)
   paloma (= 5.0.0)
   premailer-rails
   pronto (~> 0.9.5)
