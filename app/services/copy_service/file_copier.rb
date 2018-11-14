@@ -8,30 +8,37 @@ class CopyService
 
     def copy(files, scope)
       files = Array.wrap(files)
-      new_files = []
+      copies = Copies.new
 
       destination_project = UserFile.publication_project!(user, scope)
 
-      files_grouped_by_project(new_files, files, destination_project).each do |project, project_files|
+        files_grouped_by_project(copies, files, destination_project).each do |project, project_files|
         api.call(project, "clone", objects: project_files.map(&:dxid), project: destination_project)
 
         project_files.each do |file|
-          new_files << copy_record(file, scope, destination_project)
+          copies.push(
+            file: copy_record(file, scope, destination_project),
+            source: file
+          )
         end
       end
 
-      new_files
+      copies
     end
 
     private
 
     attr_reader :api, :user
 
-    def files_grouped_by_project(new_files, files, destination_project)
+    def files_grouped_by_project(copies, files, destination_project)
       files.uniq.each_with_object({}) do |file, projects|
         existed_file = UserFile.find_by(dxid: file.dxid, project: destination_project)
         if existed_file.present?
-          new_files << existed_file
+          copies.push(
+            file: existed_file,
+            source: file,
+            copied: false
+          )
           next
         end
 

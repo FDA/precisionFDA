@@ -185,10 +185,10 @@ class Job < ActiveRecord::Base
   end
 
   def output_data
-    IOCollection.build(output_spec, run_outputs)
+    IOCollection.build_outputs(self)
   end
 
   def input_data
-    IOCollection.build(input_spec, run_inputs)
+    IOCollection.build_inputs(self)
   end
 end
