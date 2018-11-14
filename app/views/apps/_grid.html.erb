@@ -56,12 +56,4 @@
   g.column name: 'Tags', attribute: 'name', assoc: [:taggings, :tag] do |item|
     render "_partials/tags_list", tags_list: item.all_tags_list
   end
-
-  g.column do |series|
-    if series.latest_version_app.in_space? && series.latest_version_app.space_object.confidential?
-      link_to "Copy to cooperative", copy_to_cooperative_space_path(series.latest_version_app.space_object, object_id: series.latest_version_app.uid), method: :post, class: 'btn btn-primary btn-xs'
-    end
-  end
-
-
 end -%>

@@ -1,17 +1,12 @@
 <% if (notes.respond_to?(:total_count) && notes.total_count > 0) || (notes.respond_to?(:count) && notes.count > 0) %>
   <div class="pfda-cards pfda-cards-list">
     <% notes.each do |note| %>
-      <div class="pfda-card pfda-card-list pfda-card-padded">
-        <a href="<%= note_path(note.to_param) %>">
-          <div class="pfda-card-header">
-            <div class="pfda-card-title">
-              <%= unilinkfw(note, {scope_icon: (defined?(scope_icon) ? scope_icon : true), nolink: true}) %>
-            </div>
+      <a class="pfda-card pfda-card-list pfda-card-padded" href="<%= note_path(note.to_param) %>">
+        <div class="pfda-card-header">
+          <div class="pfda-card-title">
+            <%= unilinkfw(note, {scope_icon: (defined?(scope_icon) ? scope_icon : true), nolink: true}) %>
           </div>
-        </a>
-        <% if note.in_confidential_space? %>
-          <%= button_to "Copy to cooperative", copy_to_cooperative_space_path(note.space_object, object_id: note.uid), method: :post, class: 'btn btn-primary btn-xs', data: { confirm: 'Are you sure you want to copy this note?' } %>
-        <% end %>
+        </div>
         <ul class="pfda-card-metadata pfda-card-metadata-glued pfda-card-metadata-fw-indent list-inline list-inline-bullets">
           <li><%= note.user.org.handle %>/<%= note.user.dxuser %></li>
           <li><%= note.created_at.to_s(:human) %></li>
@@ -36,7 +31,7 @@
             </li>
           <% end %>
         </ul>
-      </div>
+      </a>
     <% end %>
   </div>
   <div class="paginate-container">

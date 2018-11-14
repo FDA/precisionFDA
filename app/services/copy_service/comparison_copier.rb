@@ -28,7 +28,7 @@ class CopyService
         new_comparison.inputs << new_input
       end
 
-      new_comparison.outputs = file_copier.copy(comparison.outputs, scope)
+      new_comparison.outputs = file_copier.copy(comparison.outputs, scope).all
       new_comparison.save!
     end
 

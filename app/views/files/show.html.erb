@@ -119,6 +119,7 @@
     </div>
 
     <%= render "_partials/btn_publish", item: @file %>
+    <%= render "_partials/btn_copy_to_cooperative", item: @file %>
 
     <% if @file.editable_by?(@context) && (!@file.parent_comparison? || @file.deletable?) %>
     <div class="btn-group">

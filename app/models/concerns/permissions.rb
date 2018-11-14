@@ -86,6 +86,15 @@ module Permissions
     core_publishable_by_user?(user, scope_to_publish_to)
   end
 
+  def copyable_to_cooperative_by?(context)
+    copyable_to_cooperative? if accessible_by?(context)
+  end
+
+  def copyable_to_cooperative?
+    return false unless in_confidential_space?
+    self.class.where(dxid: dxid, scope: space_object.shared_space.uid).empty?
+  end
+
   def public?
     scope == "public"
   end

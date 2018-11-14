@@ -1,10 +1,11 @@
-class Job::IOCollection::Record
+class Job::IOCollection::Input
 
   attr_reader :value
 
-  def initialize(spec, value)
+  def initialize(spec, value, options)
     @spec = spec
     @value = value
+    @options = options
   end
 
   def help
@@ -28,11 +29,13 @@ class Job::IOCollection::Record
   end
 
   def file
-    UserFile.find_by(dxid: value) if file?
+    return nil unless file?
+
+    UserFile.find_by_uid(value)
   end
 
   private
 
-  attr_reader :spec
+  attr_reader :spec, :options
 
 end

@@ -87,10 +87,4 @@
   g.column name: 'Tags', attribute: 'name', assoc: [:taggings, :tag] do |item|
     render "_partials/tags_list", tags_list: item.all_tags_list
   end
-
-  g.column do |file|
-    if file.in_confidential_space?
-      link_to "Copy to cooperative", copy_folder_to_cooperative_space_path(file.space_object, ids: file.uid), method: :post, class: 'btn btn-primary btn-xs'
-    end
-  end
 end -%>
