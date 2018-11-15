@@ -1,8 +1,6 @@
 class Session < ActiveRecord::Base
   include Auditor
 
-  SESSIONS_LIMIT = 2
-
   validates :key, :user_id, presence: true
 
   def self.delete_expired
