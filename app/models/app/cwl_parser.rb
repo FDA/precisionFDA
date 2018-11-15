@@ -41,7 +41,7 @@ class App::CwlParser
 
     def code(cwl)
       <<-CODE
-pip install --upgrade setuptools==3.3
+pip install --upgrade setuptools==12.4
 pip install cwltool
 
 cat <<EOF > description.cwl
