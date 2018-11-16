@@ -155,6 +155,16 @@ module SpacesHelper
         active: is_active(action, 'jobs'),
         count: counts[:jobs]
       },
+      comparisons: {
+        url: comparisons_space_path(space),
+        active: is_active(action, 'comparisons'),
+        count: counts[:comparisons]
+      },
+      assets: {
+        url: assets_space_path(space),
+        active: is_active(action, 'assets'),
+        count: counts[:assets]
+      },
     }
   end
 

@@ -74,7 +74,8 @@ class Space < ActiveRecord::Base
   end
 
   def title
-    name
+    return name unless review?
+    confidential? ? "#{name}(Confidential)" : "#{name}(Cooperative)"
   end
 
   def klass
@@ -247,8 +248,8 @@ class Space < ActiveRecord::Base
     files = UserFile.real_files.accessible_by_space(self).count
     apps = App.accessible_by_space(self).count
     jobs = Job.accessible_by_space(self).count
-    # comparisons = Comparison.accessible_by_space(self).count
-    # assets = Asset.accessible_by_space(self).count
+    comparisons = Comparison.accessible_by_space(self).count
+    assets = Asset.accessible_by_space(self).count
 
     tasks = self.tasks.where("user_id = :user_id or assignee_id = :user_id", user_id: user_id)
     open_tasks = tasks.open.count
@@ -263,8 +264,8 @@ class Space < ActiveRecord::Base
       files: files,
       apps: apps,
       jobs: jobs,
-      # comparisons: comparisons,
-      # assets: assets,
+      comparisons: comparisons,
+      assets: assets,
       open_tasks: open_tasks,
       accepted_tasks: accepted_tasks,
       declined_tasks: declined_tasks,

@@ -1,8 +1,8 @@
 class SpacesController < ApplicationController
 
   before_action :init_parent_folder, only: [:files]
-  before_action :find_space_and_membership, only: [:discuss, :members, :feed, :tasks, :files, :apps, :notes, :jobs]
-  before_action :content_counters, only: [:feed, :tasks, :files, :apps, :notes, :jobs]
+  before_action :find_space_and_membership, only: [:discuss, :members, :feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons]
+  before_action :content_counters, only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons]
 
   def index
     if @context.can_administer_site?
@@ -456,6 +456,30 @@ class SpacesController < ApplicationController
       order_direction: 'desc',
       per_page: 25,
       include: [{user: :org}, {taggings: :tag}]
+    })
+    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
+  end
+
+  def assets
+    @assets = Asset.accessible_by_space(@space)
+    @assets_grid = initialize_grid(Asset.unscoped.accessible_by_space(@space).includes(:taggings), {
+      name: 'assets',
+      order: 'nodes.name',
+      order_direction: 'asc',
+      per_page: 25,
+      include: [:user, {user: :org}, {taggings: :tag}]
+    })
+    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
+  end
+
+  def comparisons
+    @comparisons = Comparison.accessible_by_space(@space)
+    @comparisons_grid = initialize_grid(@comparisons.includes(:taggings), {
+      name: 'comparisons',
+      order: 'comparisons.name',
+      order_direction: 'desc',
+      per_page: 25,
+      include: [:user, {user: :org}, {taggings: :tag}]
     })
     js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
   end

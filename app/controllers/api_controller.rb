@@ -120,7 +120,7 @@ class ApiController < ApplicationController
     fail "id needs to be an Integer" unless app_series_id.is_a?(Numeric) && (app_series_id.to_i == app_series_id)
     app_series = AppSeries.accessible_by(@context).find_by(id: params["id"])
     fail "AppSeries not found" if app_series.nil?
-    render json: app_series.accessible_revisions(@context).select(:title, :id, :dxid, :revision, :version)
+    render json: app_series.accessible_revisions(@context).select(:title, :id, :uid, :revision, :version)
   end
 
   # Inputs
@@ -821,7 +821,7 @@ class ApiController < ApplicationController
 
     if !ids.nil?
       fail "The 'ids' parameter needs to be an Array of String asset ids" unless ids.is_a?(Array) && ids.all? { |id| id.is_a?(String) }
-      assets = assets.where(dxid: ids)
+      assets = assets.where(uid: ids)
     end
 
     if params[:scopes].present?
@@ -955,21 +955,22 @@ class ApiController < ApplicationController
     project = @context.user.private_files_project
     dxid = DNAnexusAPI.new(@context.token).("file", "new", {"name": params[:name], "project": project})["id"]
 
-    UserFile.transaction do
-      UserFile.create!(
-        dxid: dxid,
-        project: project,
-        name: name,
-        state: "open",
-        description: description,
-        user_id: @context.user_id,
-        parent: @context.user,
-        scope: 'private',
-        parent_folder_id: folder.try(:id)
-      )
-    end
 
-    render json: {id: dxid}
+    file = UserFile.transaction do
+        UserFile.create!(
+          dxid: dxid,
+          project: project,
+          name: name,
+          state: "open",
+          description: description,
+          user_id: @context.user_id,
+          parent: @context.user,
+          scope: 'private',
+          parent_folder_id: folder.try(:id)
+        )
+      end
+
+    render json: { id: file.uid }
   end
 
   def create_challenge_card_image
@@ -986,7 +987,7 @@ class ApiController < ApplicationController
     project = CHALLENGE_BOT_PRIVATE_FILES_PROJECT
     dxid = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).("file", "new", {"name": params[:name], "project": CHALLENGE_BOT_PRIVATE_FILES_PROJECT})["id"]
 
-    UserFile.create!(
+    file = UserFile.create!(
       dxid: dxid,
       project: project,
       name: name,
@@ -997,7 +998,7 @@ class ApiController < ApplicationController
       scope: 'private'
     )
 
-    render json: { id: dxid }
+    render json: { id: file.uid }
   end
 
   # Inputs:
@@ -1046,9 +1047,9 @@ class ApiController < ApplicationController
         user_file_id: file.id,
         user_id: @context.user_id
       )
-    end
 
-    render json: {id: dxid}
+      render json: { id: file.uid }
+    end
   end
 
   def create_resource_link
@@ -1083,7 +1084,7 @@ class ApiController < ApplicationController
 
     resource.update_attributes({ url: url })
 
-    render json: { id: file.dxid, url: url }
+    render json: { id: file.uid, url: url }
   end
 
   def get_file_link
@@ -1132,7 +1133,7 @@ class ApiController < ApplicationController
     if error
       render json: {error: error, errorType: errorType}
     else
-      render json: {id: file.dxid, url: url}
+      render json: {id: file.uid, url: url}
     end
   end
 
@@ -1183,9 +1184,8 @@ class ApiController < ApplicationController
         end
         asset.archive_entries.create!(path: path, name: name)
       end
+      render json: { id: asset.uid }
     end
-
-    render json: {id: dxid}
   end
 
   # Inputs:
@@ -1225,7 +1225,7 @@ class ApiController < ApplicationController
       end
     end
 
-    result = DNAnexusAPI.new(token).(id, "upload", {size: size, md5: md5, index: index})
+    result = DNAnexusAPI.new(token).(file.dxid, "upload", {size: size, md5: md5, index: index})
 
     render json: result
   end
@@ -1240,7 +1240,7 @@ class ApiController < ApplicationController
     id = params[:id]
     fail "id needs to be a non-empty string" unless id.is_a?(String) && id != ""
 
-    file = UserFile.find_by!(dxid: id, parent_type: "User")
+    file = UserFile.where(parent_type: "User").find_by_uid!(id)
     token = @context.token
     if file.user_id != @context.user_id
       if file.created_by_challenge_bot? && (@context.user.can_administer_site? || @context.user.is_challenge_admin?)
@@ -1251,7 +1251,7 @@ class ApiController < ApplicationController
     end
 
     if file.state == "open"
-      DNAnexusAPI.new(token).(id, "close")
+      DNAnexusAPI.new(token).(file.dxid, "close")
       UserFile.transaction do
         # Must recheck inside the transaction
         file.reload
@@ -1275,9 +1275,9 @@ class ApiController < ApplicationController
     id = params[:id]
     fail "id needs to be a non-empty String" unless id.is_a?(String) && id != ""
 
-    file = Asset.find_by!(dxid: id, user_id: @context.user_id)
+    file = Asset.where(user_id: @context.user_id).find_by_uid!(id)
     if file.state == "open"
-      DNAnexusAPI.new(@context.token).(id, "close")
+      DNAnexusAPI.new(@context.token).(file.dxid, "close")
       UserFile.transaction do
         # Must recheck inside the transaction
         file.reload
@@ -1524,9 +1524,10 @@ class ApiController < ApplicationController
 
     app = nil
     App.transaction do
-      ordered_assets.each do |asset_dxid|
-        fail "The app asset with id '#{asset_dxid}' does not exist or is not accessible by you." unless Asset.closed.accessible_by(@context).where(dxid: asset_dxid).exists?
+      ordered_assets.each do |asset_uid|
+        fail "The app asset with id '#{asset_uid}' does not exist or is not accessible by you." unless Asset.closed.accessible_by(@context).where(uid: asset_uid).exists?
       end
+      assets = Asset.closed.accessible_by(@context).where(uid: ordered_assets)
       app_series_dxid = AppSeries.construct_dxid(@context.username, name)
       app_series = AppSeries.find_by(dxid: app_series_dxid)
       if is_new
@@ -1572,8 +1573,8 @@ class ApiController < ApplicationController
         summary: " ",
         description: readme + " ",
         version: "r#{revision}-#{SecureRandom.hex(3)}",
-        resources: ordered_assets,
-        details: {ordered_assets: ordered_assets},
+        resources: assets.map(&:dxid),
+        details: {ordered_assets: assets.map(&:dxid)},
         openSource: false,
         billTo: Rails.env.development? ? "user-#{@context.username}" : user.billto,
         access: internet_access ? {network: ["*"]} : {}
@@ -1592,11 +1593,11 @@ class ApiController < ApplicationController
         output_spec: output_spec,
         internet_access: internet_access,
         instance_type: instance_type,
-        ordered_assets: ordered_assets,
+        ordered_assets: assets.map(&:uid),
         packages: packages,
         code: code
       )
-      app.asset_ids = Asset.accessible_by(@context).where(dxid: ordered_assets).select(:id).map(&:id)
+      app.asset_ids = assets.map(&:id)
       app.save!
       app_series.update!(latest_revision_app_id: app.id)
       Event::AppCreated.create_for(app, @context.user)

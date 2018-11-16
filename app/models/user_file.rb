@@ -137,6 +137,10 @@ class UserFile < Node
     return parent_type != "Asset"
   end
 
+  def asset?
+    sti_type == "Asset"
+  end
+
   def independent?
     !parent_comparison?
   end

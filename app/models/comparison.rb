@@ -150,4 +150,9 @@ class Comparison < ActiveRecord::Base
 
     return count
   end
+
+  def copyable_to_cooperative?
+    in_confidential_space?
+  end
+
 end
