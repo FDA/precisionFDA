@@ -17,6 +17,12 @@ class CopyService
       end
     end
 
+    def find
+      copies.find do |copy|
+        yield copy.file, copy.source, copy.copied
+      end
+    end
+
     def all
       copies.map(&:file)
     end

@@ -161,7 +161,7 @@ class ApplicationController < ActionController::Base
     when "job"
       job_path(item)
     when "asset"
-      asset_path(item.dxid)
+      asset_path(item)
     when "comparison"
       comparison_path(item)
     when "discussion"

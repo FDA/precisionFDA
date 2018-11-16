@@ -285,7 +285,6 @@ Rails.application.routes.draw do
 
     resources :spaces do
       get 'members', on: :member
-      get 'content', on: :member
       get 'discuss', on: :member
       get 'tasks',   on: :member
       get 'feed',   on: :member
@@ -293,6 +292,8 @@ Rails.application.routes.draw do
       get 'files',   on: :member
       get 'apps',   on: :member
       get 'jobs',   on: :member
+      get 'comparisons',   on: :member
+      get 'assets',   on: :member
       post 'accept', on: :member
       post 'request_lock', on: :member, to: 'space_requests#request_lock'
       post 'confirm_lock', on: :member, to: 'space_requests#confirm_lock'

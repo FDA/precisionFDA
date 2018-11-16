@@ -16,9 +16,6 @@
       <div class="page-title">
         <span class="fa fa-object-group"></span>
         <%= @space.title %>
-        <% if @space.review? %>
-          <%= "(#{space_type(@space)})" %>
-        <% end %>
       </div>
       <% if @space.editable_by?(@context) %>
         <div>

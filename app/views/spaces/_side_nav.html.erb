@@ -25,7 +25,9 @@
     </div>
     <%= sidenav_link(nav.dig(:notes, :url), nav.dig(:notes, :active), 'fa-sticky-note', nav.dig(:notes, :count), 'Notes') %>
     <%= sidenav_link(nav.dig(:files, :url), nav.dig(:files, :active), 'fa-files-o', nav.dig(:files, :count), 'Files') %>
+    <%= sidenav_link(nav.dig(:assets, :url), nav.dig(:assets, :active), 'fa-files-o', nav.dig(:assets, :count), 'Assets') %>
     <%= sidenav_link(nav.dig(:apps, :url), nav.dig(:apps, :active), 'fa-cubes', nav.dig(:apps, :count), 'Apps') %>
     <%= sidenav_link(nav.dig(:jobs, :url), nav.dig(:jobs, :active), 'fa-list-ol', nav.dig(:jobs, :count), 'Jobs') %>
+    <%= sidenav_link(nav.dig(:comparisons, :url), nav.dig(:comparisons, :active), 'fa-list-ol', nav.dig(:comparisons, :count), 'Comparison') %>
   </div>
 </div>

@@ -56,7 +56,8 @@ class CopyService
       new_file.scope = scope
       new_file.project = destination_project
       new_file.scoped_parent_folder_id = nil
-      new_file.parent = file
+      new_file.parent = file.asset? ? new_file : file
+      new_file.parent_type = "Asset" if file.asset?
       new_file.save!
       new_file
     end

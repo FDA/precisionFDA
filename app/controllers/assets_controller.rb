@@ -34,7 +34,7 @@ class AssetsController < ApplicationController
   end
 
   def show
-    @asset = Asset.accessible_by(@context).includes(:archive_entries).find_by!(dxid: params[:id])
+    @asset = Asset.accessible_by(@context).includes(:archive_entries).find_by_uid!(params[:id])
 
     # Refresh state of asset, if needed
     if @asset.state != "closed"
@@ -59,13 +59,13 @@ class AssetsController < ApplicationController
   end
 
   def edit
-    @asset = Asset.editable_by(@context).includes(:archive_entries).find_by!(dxid: params[:id])
+    @asset = Asset.editable_by(@context).includes(:archive_entries).find_by_uid!(params[:id])
 
     js asset: @asset.slice(:id, :description)
   end
 
   def rename
-    @asset = Asset.editable_by(@context).find_by!(dxid: params[:id])
+    @asset = Asset.editable_by(@context).find_by_uid!(params[:id])
     title = asset_params[:title]
     if title.is_a?(String) && title != ""
       name = title + @asset.suffix
@@ -80,18 +80,18 @@ class AssetsController < ApplicationController
       flash[:error] = "The new name is not a valid string"
     end
 
-    redirect_to asset_path(@asset.dxid)
+    redirect_to asset_path(@asset)
   end
 
   def update
-    @asset = Asset.editable_by(@context).includes(:archive_entries).find_by!(dxid: params[:id])
+    @asset = Asset.editable_by(@context).includes(:archive_entries).find_by_uid!(params[:id])
 
     Asset.transaction do
       @asset.reload
       if @asset.update(asset_params)
         # Handle a successful update.
         flash[:success] = "Asset updated"
-        redirect_to asset_path(@asset.dxid)
+        redirect_to asset_path(@asset)
       else
         flash[:error] = "Error: Could not update the asset. Please try again."
         render 'edit'
@@ -100,14 +100,14 @@ class AssetsController < ApplicationController
   end
 
   def destroy
-    @file = Asset.editable_by(@context).find_by!(dxid: params[:id])
+    @file = Asset.editable_by(@context).find_by_uid!(params[:id])
 
     UserFile.transaction do
       @file.reload
 
       if @file.license.present? && !@file.apps.empty?
         flash[:error] = "This asset contains a license, and has been included in one or more apps. Deleting it would render the license inaccessible to these apps, breaking reproducibility. You can either first remove the license (allowing these existing apps to run without requiring a license) or contact the precisionFDA team to discuss other options."
-        redirect_to asset_path(@file.dxid)
+        redirect_to asset_path(@file)
         return
       end
       @file.destroy
