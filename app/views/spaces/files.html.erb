@@ -8,7 +8,6 @@
         </div>
         <div class="panel-body">
 
-          <% if SpaceMembershipPolicy.can_move_content?(@space, @membership) %>
             <div class="spaces-files-buttons">
               <span class="btn btn-primary" data-toggle="modal" data-target="#create-folder-modal">
                 <span class="fa fa-plus-square fa-fw"></span> Add folder
@@ -31,6 +30,11 @@
                       </a>
                     </li>
                     <li role="separator" class="divider"></li>
+                    <li data-bind="css: { disabled: !isPublishingAllowed() }">
+                      <a data-toggle='modal' data-bind="click: showPublishModal">
+                        <i class="fa fa-fw fa-bullhorn"></i> Publish
+                      </a>
+                    </li>
                     <li role="separator" class="divider"></li>
                     <li data-bind="css: { disabled: !isDeletingAllowed() }">
                       <a data-toggle='modal' data-bind="click: showDeleteModal">
@@ -47,7 +51,6 @@
                 </div>
               </div>
             </div>
-          <% end %>
 
             <div class="spaces-files-table">
               <% if @counts[:files] + @counts[:folders] > 0 %>
@@ -65,7 +68,7 @@
                      scope_icon: false,
                      hide_access: true,
                      show_filters: :when_filtered,
-                     show_checkboxes: SpaceMembershipPolicy.can_move_content?(@space, @membership) && @show_checkboxes,
+                     show_checkboxes: @show_checkboxes,
                      clear_blank_state: !@folder && true
           %>
         </div>
