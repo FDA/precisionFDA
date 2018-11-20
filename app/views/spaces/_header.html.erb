@@ -19,9 +19,11 @@
       </div>
       <% if @space.editable_by?(@context) %>
         <div>
-          <a class="pfda-rename-item" data-toggle="modal" data-target="#rename-modal">
-            <i class="fa fa-pencil"></i>&nbsp;Rename
-          </a>
+          <% if @space.active? %>
+            <a class="pfda-rename-item" data-toggle="modal" data-target="#rename-modal">
+              <i class="fa fa-pencil"></i>&nbsp;Rename
+            </a>
+          <% end %>
           <a class="pfda-rename-item" href="<%= edit_space_path(@space) %>">
             <span class="fa fa-external-link" aria-hidden="true"></span>&nbsp;Edit
           </a>
@@ -62,7 +64,7 @@
       <% end %>
     </div>
 
-    <% if @space.active? && @space.editable_by?(@context) %>
+    <% if SpaceMembershipPolicy.can_move_content?(@space, @membership) %>
       <div class="pull-right">
         <div class="btn-group">
           <button class="btn btn-default" data-bind="click: objectSelector.open">
@@ -89,7 +91,7 @@
       <% end %>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Your Role</h5>
-        <p class="list-group-item-text"><%= @membership.role %> <small>(<%= @membership.side %>)</small></p>
+        <p class="list-group-item-text"><%= @membership.role %> <small>(<%= member_side(@space, @membership) %>)</small></p>
       </li>
 
       <% @space.leads.each do |lead| %>
@@ -116,6 +118,14 @@
   </div>
 
   <% if @space.active? %>
+
+    <% if @space.review? && @membership.new_record? %>
+      <div class='pfda-help-block'>
+        <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span>You have no full access to this space.</p>
+        <p>You have to be a member of space for access to all content.</p>
+      </div>
+    <% end %>
+
     <!-- Nav tabs -->
     <ul class="nav nav-tabs nav-tabs-padded nav-tabs-centered" role="tablist">
       <% content_actions = ['tasks', 'feed', 'notes', 'files', 'apps', 'jobs'] %>
@@ -149,7 +159,11 @@
   <div class='pfda-help-block'>
     <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
     <% if @space.review? %>
-      <p>Both reviewer and sponsor leads must click "Accept space" to activate it.</p>
+      <% if @space.confidential? %>
+        <p>Both reviewer and sponsor leads must click "Accept space" to activate the <%= link_to 'cooperative space', space_path(@space.shared_space) %>.</p>
+      <% else %>
+        <p>Both reviewer and sponsor leads must click "Accept space" to activate it.</p>
+      <% end %>
     <% else %>
       <p>Both host and guest leads must click "Accept space" to activate it.</p>
     <% end %>
@@ -159,7 +173,6 @@
 
   <div class='pfda-help-block'>
     <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has been locked</p>
-    <p>Both host and guest leads must click "Accept space" to activate it.</p>
   </div>
 
 <% end %>

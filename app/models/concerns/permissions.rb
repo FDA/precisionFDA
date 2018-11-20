@@ -2,6 +2,11 @@ module Permissions
   extend ActiveSupport::Concern
 
   module ClassMethods
+
+    def can_be_in_space?
+      true
+    end
+
     def accessible_by(context)
       if context.guest?
         accessible_by_public
@@ -9,7 +14,7 @@ module Permissions
         raise unless context.user_id.present? && context.user.present?
 
         queries = [].tap do |queries|
-          queries.push({ user_id: context.user_id })
+          queries.push({ user_id: context.user_id, scope: "private" })
           queries.push({ scope: "public" })
           queries.push({ scope: context.user.space_uids })
           queries.push({ user_id: User.challenge_bot.id }) if context.challenge_evaluator?
@@ -24,7 +29,9 @@ module Permissions
         none
       else
         raise unless context.user_id.present?
-        where(user_id: context.user_id)
+        records = where(user_id: context.user_id)
+        return records unless can_be_in_space?
+        records.where(scope: ["public", "private"] + context.user.space_uids)
       end
     end
 
@@ -46,7 +53,7 @@ module Permissions
       public?
     elsif context.logged_in?
       return true if public?
-      return true if user_id == context.user_id
+      return true if !in_space? && user_id == context.user_id
       return true if context.user.space_uids.include?(scope)
 
       context.challenge_evaluator? && user.dxuser == CHALLENGE_BOT_DX_USER
@@ -56,11 +63,11 @@ module Permissions
   end
 
   def editable_by?(context)
-    if context.guest?
-      false
-    else
-      user_id == context.user_id
-    end
+    return false if context.guest?
+    return user_id == context.user_id unless in_space?
+
+    return false unless context.user.space_uids.include?(scope)
+    SpaceMembershipPolicy.can_modify_content?(space_object, context.user)
   end
 
   # Helper method, not to be called from outside the model
@@ -87,6 +94,8 @@ module Permissions
   end
 
   def copyable_to_cooperative_by?(context)
+    return false unless in_space?
+    return false unless SpaceMembershipPolicy.can_modify_content?(space_object, context.user)
     copyable_to_cooperative? if accessible_by?(context)
   end
 

@@ -11,7 +11,7 @@ class InputSpecPreparer
     @errors = []
   end
 
-  def run(app, inputs)
+  def run(app, inputs, accessible_scopes = nil)
     @errors = []
     input_info = InputInfo.new
 
@@ -53,7 +53,7 @@ class InputSpecPreparer
           next
         end
 
-        if app.in_space? && !app.space_scopes.include?(file.scope)
+        if accessible_scopes && !accessible_scopes.include?(file.scope)
           add_error "#{key}: input file is not accessible to this space"
           next
         end

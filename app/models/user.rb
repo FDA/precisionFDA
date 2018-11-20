@@ -96,7 +96,7 @@ class User < ActiveRecord::Base
   has_many :licenses
   has_many :accepted_licenses
   has_many :space_memberships
-  has_many :spaces, { through: :space_memberships }
+  has_many :spaces, -> { where("space_memberships.active = ?", true) }, { through: :space_memberships }
   has_one :appathon
   has_many :meta_appathons
   has_one :expert
@@ -212,6 +212,7 @@ class User < ActiveRecord::Base
   end
 
   def review_space_admin?
+    return true if can_administer_site?
     REVIEW_SPACE_ADMINS.include?(dxuser)
   end
 

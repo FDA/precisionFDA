@@ -37,7 +37,9 @@
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Origin</h5>
       <p class="list-group-item-text">
-        <% if @file.parent_type != "User" %>
+        <% if @file.parent_type == "Node" && @file.parent.blank? %>
+          "Copied"
+        <% elsif @file.parent_type != "User" %>
           <%= unilink(@file.parent) %>
         <% else %>
           Uploaded

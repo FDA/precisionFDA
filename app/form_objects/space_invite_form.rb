@@ -3,7 +3,8 @@ class SpaceInviteForm
 
   attr_accessor(
     :invitees,
-    :invitees_role
+    :invitees_role,
+    :space,
   )
 
   validates :invitees, :invitees_role, presence: true
@@ -15,7 +16,7 @@ class SpaceInviteForm
   end
 
   # @param [SpaceMembership, #side, #user] admin
-  def invite(context, space, admin)
+  def invite(context, admin)
     return if invalid?
 
     api = context.review_space_admin? ? DNAnexusAPI.for_admin : context.api
@@ -40,6 +41,15 @@ class SpaceInviteForm
 
     if invalid_invitees.any?
       errors.add(:invitees, "The follow username's could not be invited because they do not exist: #{invalid_invitees.to_sentence}")
+    end
+
+    existed_users = SpaceMembership.joins(:user, :spaces)
+      .merge(User.where(dxuser: invitees))
+      .merge(Space.where(id: space.id))
+      .pluck('users.dxuser')
+
+    if existed_users.present?
+      errors.add(:invitees, "The follow username's could not be invited because they are participants already: #{existed_users.to_sentence}")
     end
   end
 

@@ -1,4 +1,5 @@
 class NotificationsMailer < ApplicationMailer
+  add_template_helper(SpacesHelper)
   helper :application
   default  from: 'PrecisionFDA <PrecisionFDA@fda.hhs.gov>',
            reply_to: "PrecisionFDA@fda.hhs.gov"
@@ -76,22 +77,6 @@ class NotificationsMailer < ApplicationMailer
     mail to: @user.email,
          reply_to: @admin.user.email,
          subject: "#{@admin.user.full_name} added you to the space \"#{@space.title}\""
-  end
-
-  def space_request_lock_email(space, membership)
-    @space = space
-    @membership = membership
-    @user = membership.user
-    mail to: User.review_space_admins.pluck(:email),
-         subject: "#{@user.full_name} requested to lock the space \"#{@space.title}\""
-  end
-
-  def space_request_unlock_email(space, membership)
-    @space = space
-    @membership = membership
-    @user = membership.user
-    mail to: User.review_space_admins.pluck(:email),
-         subject: "#{@user.full_name} requested to unlock the space \"#{@space.title}\""
   end
 
   # @param space [Space] Shared space

@@ -1,25 +1,18 @@
-<%= render "spaces/header" %>
-
-<div class="pfda-pane pfda-pane-spaces container-fluid">
-  <%= render "spaces/side_nav" %>
-
-  <div class="tab-content">
-    <div role="tabpanel" class="tab-pane active" id="tab-apps">
-      <div class="panel">
-        <div class="panel-heading">
-          <h4>Comparisons</h4>
-        </div>
-        <div class="panel-body">
-          <%=
-            render "comparisons/grid",
-                   comparisons_grid: @comparisons_grid,
-                   scope_icon: false,
-                   hide_access: true,
-                   show_filters: :when_filtered
-          %>
-        </div>
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane active" id="tab-apps">
+    <div class="panel">
+      <div class="panel-heading">
+        <h4>Comparisons</h4>
+      </div>
+      <div class="panel-body">
+        <%=
+          render "comparisons/grid",
+                 comparisons_grid: @comparisons_grid,
+                 scope_icon: false,
+                 hide_access: true,
+                 show_filters: :when_filtered
+        %>
       </div>
     </div>
   </div>
-
 </div>

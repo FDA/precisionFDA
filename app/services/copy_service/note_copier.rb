@@ -23,7 +23,13 @@ class CopyService
       note.attachments.find_each do |attachment|
         new_items = Array.wrap(copy_service.copy(attachment.item, scope))
         new_items.each do |new_item|
-          new_note.attachments.create(item: new_item)
+          if new_item.is_a?(Copies)
+            new_item.each do |new_file|
+              new_note.attachments.create(item: new_file)
+            end
+          else
+            new_note.attachments.create(item: new_item)
+          end
         end
       end
     end

@@ -1,6 +1,6 @@
 <wrapper>
   <div class="hidden-email-preview">
-    Space activation request for <%= @space.title %> %>
+    Space unlock for <%= @space.title %> %>
   </div>
   <spacer size="16"></spacer>
   <container class="header">
@@ -11,7 +11,7 @@
         </a>
       </columns>
       <columns>
-        <p class="header-title text-right">Space is unlocked</p>
+        <p class="header-title text-right">Space is active</p>
       </columns>
     </row>
   </container>
@@ -19,12 +19,9 @@
     <row>
       <columns>
         <p>
-          The space <strong><%= link_to @space.title, space_url(@space) %></strong> was provisioned.
+          The space <strong><%= link_to @space.title, space_url(@space) %></strong> was unlocked.
         </p>
 
-        <p>
-          To start adding data to this space both host and guest lead admin's must accept the invitation. Please visit the space and click on "Accept space".
-        </p>
         <button class="radius" href="<%= space_url(@space) %>">View Space Invitation</button>
       </columns>
     </row>

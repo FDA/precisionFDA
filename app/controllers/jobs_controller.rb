@@ -100,11 +100,12 @@ class JobsController < ApplicationController
     end
 
     licenses_accepted = @context.user.accepted_licenses.map{|l| {id: l.license_id, pending: l.pending?, active: l.active?, unset: !l.pending? && !l.active?}}
+    available_spaces = @app.available_job_spaces(@context.user)
 
     js app: @app.slice(:uid, :spec, :title, :space_scopes),
        licenses_to_accept: licenses_to_accept.uniq { |l| l.id}, licenses_accepted: licenses_accepted,
-       space_id: params[:space_id],
-       available_spaces: @app.available_job_spaces(@context.user).map { |space| { value: space.id, label: space.title } }
+       available_spaces: available_spaces.map { |space| { value: space.id, label: space.title } },
+       content_scopes: available_spaces.each_with_object({}) {  |space, memo| memo[space.id] = space.accessible_scopes }
   end
 
   def destroy

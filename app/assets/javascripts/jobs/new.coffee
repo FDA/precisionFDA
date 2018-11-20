@@ -1,8 +1,7 @@
 class JobsNewView
-  constructor: (app, @asset_licenses_to_accept, space_id, available_spaces) ->
+  constructor: (app, @asset_licenses_to_accept, available_spaces, available_content_scopes) ->
     @uid = app.uid
-    @scopes = app.space_scopes
-
+    @available_content_scopes = available_content_scopes
     @inputSpec = app.spec.input_spec
     @outputSpec = app.spec.output_spec
 
@@ -13,13 +12,17 @@ class JobsNewView
     @busy = ko.observable(false)
     @running = ko.observable(false)
     @name = ko.observable(app.title)
-    @spaceId = ko.observable(space_id)
-    @inputModels = ko.observableArray(_.map(@inputSpec, (spec) =>
-      new Precision.models.AppInputModel(spec, this)
-    ))
+    @spaceId = ko.observable()
+    @inSpace = available_spaces.length > 0
+    @contentScopes = ko.computed( => available_content_scopes[@spaceId()] )
+    @inputModels = ko.computed(=>
+      return if @inSpace && !@spaceId()
+      _.map(@inputSpec, (spec) =>
+        new Precision.models.AppInputModel(spec, this)
+      )
+    )
 
     @isRunnable = ko.computed(() =>
-      @spaceId()
       isConfigReady = !_.isEmpty(@name())
       areInputsReady = _.every(@inputModels(), (inputModel) ->
         inputModel.isReady()
@@ -94,7 +97,7 @@ class JobsNewView
 JobsController = Paloma.controller('Jobs',
   new: ->
     $container = $("body main")
-    viewModel = new JobsNewView(@params.app, @params.licenses_to_accept, @params.space_id, @params.available_spaces)
+    viewModel = new JobsNewView(@params.app, @params.licenses_to_accept, @params.available_spaces, @params.content_scopes)
     ko.applyBindings(viewModel, $container[0])
 
     $affixContainer = $container.find(".affix-container")

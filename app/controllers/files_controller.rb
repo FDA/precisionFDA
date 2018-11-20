@@ -144,10 +144,10 @@ class FilesController < ApplicationController
 
     if @file.state != "closed"
       flash[:error] = "Files can only be downloaded if they are in the 'closed' state"
-      redirect_to file_path(@file.dxid)
+      redirect_to file_path(@file)
     elsif @file.license.present? && !@file.licensed_by?(@context)
       flash[:error] = "You must accept the license before you can download this"
-      redirect_to @file.parent_type == "Asset" ? asset_path(@file.dxid) : file_path(@file.dxid)
+      redirect_to @file.parent_type == "Asset" ? asset_path(@file) : file_path(@file)
     else
       opts = {project: @file.project, preauthenticated: true}
       opts[:filename] = @file.name
@@ -173,10 +173,10 @@ class FilesController < ApplicationController
 
     if @file.state != "closed"
       flash[:error] = "Files can only be downloaded if they are in the 'closed' state"
-      redirect_to file_path(@file.dxid)
+      redirect_to file_path(@file)
     elsif @file.license.present? && !@file.licensed_by?(@context)
       flash[:error] = "You must accept the license before you can get the download link"
-      redirect_to @file.parent_type == "Asset" ? asset_path(@file.dxid) : file_path(@file.dxid)
+      redirect_to @file.parent_type == "Asset" ? asset_path(@file) : file_path(@file)
     else
       opts = {project: @file.project, preauthenticated: true, filename: @file.name, duration: 86400}
       @url = DNAnexusAPI.new(@file.is_submission_output? ? CHALLENGE_BOT_TOKEN : @context.token).call(@file.dxid, "download", opts)["url"]
@@ -209,7 +209,7 @@ class FilesController < ApplicationController
                           end
                         end
                       else
-                        file_path(@file.dxid)
+                        file_path(@file)
                       end
 
     unless @file.editable_by?(@context)
@@ -238,7 +238,7 @@ class FilesController < ApplicationController
       redirect_path = files_path
     else
       flash[:error] = res.value.values.first
-      redirect_path = file_path(@file.dxid)
+      redirect_path = file_path(@file)
     end
 
     redirect_to redirect_path
@@ -355,10 +355,10 @@ class FilesController < ApplicationController
         name: file.name,
         type: file.klass,
         fsPath: ([root_name] + file.ancestors(params[:scope]).map(&:name).reverse).compact.join(" / "),
-        viewURL: file.is_a?(UserFile) ? file_path(file.dxid) : pathify_folder(file)
+        viewURL: file.is_a?(UserFile) ? file_path(file) : pathify_folder(file)
       }
 
-      info.merge!(downloadURL: download_file_path(file.dxid)) if task == "download" && file.is_a?(UserFile)
+      info.merge!(downloadURL: download_file_path(file)) if task == "download" && file.is_a?(UserFile)
 
       info
     end

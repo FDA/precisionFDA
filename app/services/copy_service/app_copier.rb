@@ -13,6 +13,7 @@ class CopyService
       new_app.revision = 1
 
       copy_dependencies(new_app, app, scope)
+      publish(new_app, scope)
 
       new_app.save!
       new_app
@@ -42,6 +43,12 @@ class CopyService
       new_app.ordered_assets = app.ordered_assets.map do |ordered_uid|
         copies.find { |_, source| source.uid == ordered_uid }.file.uid
       end
+    end
+
+    def publish(app, scope)
+      api.call(app.dxid, 'addAuthorizedUsers', {
+        "authorizedUsers": AppSeries.authorized_users_for_scope!(scope)
+      })
     end
 
   end

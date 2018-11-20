@@ -295,11 +295,8 @@ Rails.application.routes.draw do
       get 'comparisons',   on: :member
       get 'assets',   on: :member
       post 'accept', on: :member
-      post 'request_lock', on: :member, to: 'space_requests#request_lock'
-      post 'confirm_lock', on: :member, to: 'space_requests#confirm_lock'
-      post 'request_unlock', on: :member, to: 'space_requests#request_unlock'
-      post 'confirm_unlock', on: :member, to: 'space_requests#confirm_unlock'
-      post 'reject_unlock', on: :member, to: 'space_requests#reject_unlock'
+      post 'lock', on: :member, to: 'space_requests#lock'
+      post 'unlock', on: :member, to: 'space_requests#unlock'
       post 'rename', on: :member
       post 'invite', on: :member
       post 'move', on: :member
@@ -338,7 +335,7 @@ Rails.application.routes.draw do
     end
 
     resources :notification_preferences, only: [:index] do
-      get 'update', on: :collection
+      post 'change', on: :collection
     end
 
     resources :meta_appathons, constraints: {appathon_id: /[^\/]+/ }  do

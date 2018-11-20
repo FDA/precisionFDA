@@ -374,7 +374,7 @@ class ApiController < ApplicationController
         fail "#{input_name}: input file is not accessible or does not exist" unless !file.nil?
         fail "#{input_name}: input file's license must be accepted" unless !file.license.present? || file.licensed_by?(@context)
 
-        input_value = {"$dnanexus_link" => input_value}
+        input_value = {"$dnanexus_link" => file.dxid}
       when "int"
         fail "#{input_name}: value is not an integer" unless input_value.to_i.to_s == input_value
         input_value = input_value.to_i
@@ -1053,7 +1053,7 @@ class ApiController < ApplicationController
   end
 
   def create_resource_link
-    file = UserFile.find_by!(dxid: params[:id], user_id: User.challenge_bot.id)
+    file = UserFile.where(user_id: User.challenge_bot.id).find_by_uid!(params[:id])
     resource = ChallengeResource.find_by!(user_id: @context.user_id, challenge_id: params[:challenge_id], user_file_id: file.id)
 
     if !resource.editable_by?(@context)
@@ -1321,9 +1321,14 @@ class ApiController < ApplicationController
     # Check if asset licenses have been accepted
     fail "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
 
+    space_id = params[:space_id]
+    if space_id
+      fail "Invalid space_id" unless @app.can_run_in_space?(@context.user, space_id)
+    end
+    space = Space.find_by_id(space_id)
     # Inputs should be compatible
     # (The following also normalizes them)
-    input_info = input_spec_preparer.run(@app, inputs)
+    input_info = input_spec_preparer.run(@app, inputs, space.try(:accessible_scopes))
 
     fail input_spec_preparer.first_error unless input_spec_preparer.valid?
 
@@ -1334,17 +1339,12 @@ class ApiController < ApplicationController
       fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.has_key?(params["instance_type"]) #Checks also that it's a string
     end
 
-    space_id = params[:space_id]
-    if space_id
-      fail "Invalid space_id" unless @app.can_run_in_space?(@context.user, space_id)
-    end
-
     job = job_creator.create(
       app: @app,
       name: name,
       input_info: input_info,
       run_instance_type: run_instance_type,
-      scope: space_id ? Space.find(space_id).uid : nil,
+      scope: space.try(:uid),
     )
 
     render json: { id: job.uid }
@@ -1359,7 +1359,7 @@ class ApiController < ApplicationController
   # json (string, only on success): spec, ordered_assets, and packages of the specified app
   def get_app_spec
     # App should exist and be accessible
-    app = App.accessible_by(@context).find_by(dxid: params[:id])
+    app = App.accessible_by(@context).find_by_uid(params[:id])
     fail "Invalid app id" if app.nil?
 
     render json: {spec: app.spec, assets: app.ordered_assets, packages: app.packages}
@@ -1374,7 +1374,7 @@ class ApiController < ApplicationController
   # plain text (string, only on success): code for the specified app
   def get_app_script
     # App should exist and be accessible
-    app = App.accessible_by(@context).find_by(dxid: params[:id])
+    app = App.accessible_by(@context).find_by_uid(params[:id])
     fail "Invalid app id" if app.nil?
 
     render plain: app.code
@@ -1382,7 +1382,7 @@ class ApiController < ApplicationController
 
   def export_app
     # App should exist and be accessible
-    app = App.accessible_by(@context).find_by(dxid: params[:id])
+    app = App.accessible_by(@context).find_by_uid(params[:id])
     fail "Invalid app id" if app.nil?
 
     # Assets should be accessible and licenses accepted
