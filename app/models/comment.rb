@@ -81,4 +81,8 @@ class Comment < ActiveRecord::Base
     method = ["Note", "App", "Workflow"].include?(content_object_type) ? :title : :name
     content_object.send(method)
   end
+
+  def in_space?
+    false
+  end
 end

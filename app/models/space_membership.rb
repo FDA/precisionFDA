@@ -32,6 +32,10 @@ class SpaceMembership < ActiveRecord::Base
     lead? || admin?
   end
 
+  def lead_or_admin_or_member?
+    lead_or_admin? || member?
+  end
+
   def custom_role
     { role => self[:role] }
   end

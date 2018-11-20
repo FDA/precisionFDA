@@ -217,7 +217,7 @@ class Challenge < ActiveRecord::Base
     return unless previous_changes.key?(:card_image_id)
     return unless card_image_id.present?
 
-    card_image = UserFile.find_by!(dxid: card_image_id)
+    card_image = UserFile.find_by_uid!(card_image_id)
     update_attributes(
       card_image_url: DNAnexusAPI.for_challenge_bot.generate_permanent_link(card_image)
     )

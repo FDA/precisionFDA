@@ -4,6 +4,8 @@ class SpacesController < ApplicationController
   before_action :find_space_and_membership, only: [:discuss, :members, :feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons]
   before_action :content_counters, only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons]
 
+  layout "space_content", only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons]
+
   def index
     if @context.can_administer_site?
       spaces = Space
@@ -33,7 +35,7 @@ class SpacesController < ApplicationController
     user_ids = @space.space_memberships.active.map(&:user_id)
     users = User.find(user_ids).map {|u| {name: u.dxuser} }
     space_id = @space.to_param
-    js users: users, space_id: space_id
+    js users: users, space_id: space_id, space_uid: @space.uid, scopes: @space.accessible_scopes_for_move
   end
 
   def search_content
@@ -48,6 +50,7 @@ class SpacesController < ApplicationController
       order_direction: 'asc',
       per_page: 100
     })
+    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
   end
 
   def new
@@ -124,10 +127,10 @@ class SpacesController < ApplicationController
       end
 
     if admin
-      space_invite_form = SpaceInviteForm.new(params[:space])
+      space_invite_form = SpaceInviteForm.new(params[:space].merge(space: space))
 
       if space_invite_form.valid?
-        space_invite_form.invite(@context, space, admin)
+        space_invite_form.invite(@context, admin)
       else
         flash[:error] = space_invite_form.errors.messages.values.join(", ")
       end
@@ -255,10 +258,10 @@ class SpacesController < ApplicationController
         name: file.name,
         type: file.klass,
         fsPath: ([root_name] + file.ancestors(params[:scope]).map(&:name).reverse).compact.join(" / "),
-        viewURL: file.is_a?(UserFile) ? file_path(file.dxid) : pathify_folder(file)
+        viewURL: file.is_a?(UserFile) ? file_path(file) : pathify_folder(file)
       }
 
-      info.merge!(downloadURL: download_file_path(file.dxid)) if task == "download" && file.is_a?(UserFile)
+      info.merge!(downloadURL: download_file_path(file)) if task == "download" && file.is_a?(UserFile)
 
       info
     end
@@ -488,9 +491,10 @@ class SpacesController < ApplicationController
 
   def fetch_membership
     if @context.review_space_admin?
-      SpaceMembership.new_by_admin(@context.user)
+      membership = @space.space_memberships.active.find_by(user_id: @context.user_id)
+      membership || SpaceMembership.new_by_admin(@context.user)
     else
-      @space.space_memberships.find_by!(user_id: @context.user_id)
+      @space.space_memberships.active.find_by!(user_id: @context.user_id)
     end
   end
 

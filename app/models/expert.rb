@@ -115,7 +115,7 @@ class Expert < ActiveRecord::Base
   end
 
   def self.get_perm_link(context, id)
-    file = UserFile.accessible_by(context).find_by!(dxid: id)
+    file = UserFile.accessible_by(context).find_by_uid!(id)
     if file.nil? || file.state != "closed" || file.file_size > 5000000
       return nil
     end

@@ -6,7 +6,7 @@
     <% if @space.editable_by?(@context) %>
       <div class="pfda-toolbar pfda-toolbar-transparent">
         <a class="btn btn-default" data-toggle="modal" data-target="#members-modal">
-          <span class="fa fa-user-plus" aria-hidden="true"></span> Add or update members
+          <span class="fa fa-user-plus" aria-hidden="true"></span> Add members
         </a>
       </div>
     <% end %>
@@ -14,8 +14,14 @@
       <%= grid(@members_grid, show_filters: :always) do |g|
         g.blank_slate partial:  "_partials/empty_grid"
 
+          g.row_attributes do |member|
+            if member.inactive?
+              { class: 'inactive_member' }
+            end
+          end
+
         g.column name: 'Role', attribute: 'role', custom_filter: :custom_role, auto_reload: true, allow_multiple_selection: false do |member|
-          member.role
+          member.inactive? ? "#{member.role} (disabled)" : member.role
         end
 
         g.column name: 'Side', attribute: 'side', custom_filter: space_sides(@space), auto_reload: true, allow_multiple_selection: false do |member|
@@ -89,7 +95,7 @@
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">
-          Add or Update Member/s
+          Add Member/s
         </h4>
       </div>
       <%= form_for @space, url: invite_space_path, method: :post, html: {class: 'form form-horizontal'} do |f| %>
@@ -109,7 +115,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Cancel</button>
-        <button type="submit" class="btn btn-primary" data-disable-with="Adding..."><span class="fa fa-user-plus" aria-hidden="true"></span> Add or Update Member/s</button>
+        <button type="submit" class="btn btn-primary" data-disable-with="Adding..."><span class="fa fa-user-plus" aria-hidden="true"></span> Add Member/s</button>
       </div>
       <% end %>
     </div><!-- /.modal-content -->

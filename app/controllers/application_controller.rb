@@ -211,7 +211,7 @@ class ApplicationController < ActionController::Base
   def pathify_comments(item)
     case item.klass
     when "file"
-      file_comments_path(item.dxid)
+      file_comments_path(item)
     when "note"
       if item.note_type == "Answer"
         pathify_comments(item.answer)
@@ -225,7 +225,7 @@ class ApplicationController < ActionController::Base
     when "job"
       job_comments_path(item)
     when "asset"
-      asset_comments_path(item.dxid)
+      asset_comments_path(item)
     when "comparison"
       comparison_comments_path(item)
     when "discussion"
@@ -347,14 +347,13 @@ class ApplicationController < ActionController::Base
     elsif params[:comparison_id].present?
       return [Comparison.find(params[:comparison_id])]
     elsif params[:file_id].present?
-      return [UserFile.find_by!(dxid: params[:file_id])]
+      return [UserFile.find_by_uid!(params[:file_id])]
     elsif params[:asset_id].present?
-      return [Asset.find_by!(dxid: params[:asset_id])]
+      return [Asset.find_by_uid!(params[:asset_id])]
     elsif params[:job_id].present?
-      # @context.in_space?
-      return [Job.find_by!(dxid: params[:job_id])]
+      return [Job.find_by_uid!(params[:job_id])]
     elsif params[:app_id].present?
-      return [App.find_by!(dxid: params[:app_id])]
+      return [App.find_by_uid!(params[:app_id])]
     elsif params[:expert_id].present?
       expert = Expert.find(params[:expert_id])
       if params[:expert_question_id].present?

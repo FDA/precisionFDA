@@ -2,6 +2,25 @@ class SpaceMembershipPolicy
 
   class << self
 
+    def can_modify_content?(space, user)
+      can_move_content_by_user?(space, user)
+    end
+
+    def can_move_content_by_user?(space, user)
+      can_move_content?(
+        space,
+        space.space_memberships.find_by(user_id: user.id)
+      )
+    end
+
+    def can_move_content?(space, member)
+      return false unless space.active?
+      return false if member.new_record?
+      return false if member.inactive?
+
+      member.lead_or_admin_or_member?
+    end
+
     def can_disable?(space, admin, member)
       suitable_admin_and_member?(space, admin, member)
     end
@@ -26,20 +45,6 @@ class SpaceMembershipPolicy
       return false unless suitable_admin_and_member?(space, admin, member)
       return false if member.viewer?
       true
-    end
-
-    def can_request_lock?(space, admin)
-      return unless space.shared?
-      return unless admin.host?
-      return unless space.active?
-      space.requests.lock_up.pending.empty?
-    end
-
-    def can_request_unlock?(space, admin)
-      return unless space.shared?
-      return unless admin.host?
-      return unless space.locked?
-      space.requests.unlock.pending.empty?
     end
 
     private
