@@ -12,7 +12,6 @@ window.onYouTubeIframeAPIReady = ->
       controls: 2
       enablejsapi: 1
       loop: 0
-      playlist: 'Zs9dW4ZEjn8'
       modestbranding: 1
       rel: 0
       showinfo: 0
@@ -36,7 +35,7 @@ window.onPlayerReady = (event) ->
 MainController = Paloma.controller('Main',
   index: ->
     $container = $("body main")
-    
+
     if $('body.pfda-guest').length > 0
       $container.on("click", ".btn-player", (e) ->
         # This code loads the IFrame Player API code asynchronously.
