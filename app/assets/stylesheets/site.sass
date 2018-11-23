@@ -248,6 +248,25 @@ table.table-nowrap
 .btn-fa-dark
   color: #575757 !important
 
+.modal-with-loader
+  .loader-container
+    display: none
+  &.loading
+    .modal-footer
+      position: relative
+    .loader-container
+      position: absolute
+      display: flex
+      height: 100%
+      width: 100%
+      top: 0
+      .loader
+        margin: auto
+        font-size: 30px
+    .modal-body,
+    .modal-footer
+      visibility: hidden
+
 .turbolinks-progress-bar
   height: 10px
   background-color: #0ff

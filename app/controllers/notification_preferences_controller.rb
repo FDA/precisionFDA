@@ -3,10 +3,10 @@ class NotificationPreferencesController < ApplicationController
   before_action :check_user
 
   def index
-    js preference: preference
+    render json: { preference: preference }
   end
 
-  def update
+  def change
     preference.attributes = permitted_params
     render json: { success: preference.save }
   end
