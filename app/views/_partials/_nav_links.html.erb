@@ -77,6 +77,7 @@
           <li><%= link_to "Public Profile", user_path(@context.username) %></li>
         <% end %>
         <li><%= link_to "Manage Licenses", licenses_path %></li>
+        <li><a href="#" data-toggle="modal" data-target="#notification_settings_modal">Notification Settings</a></li>
         <li role="separator" class="divider"></li>
         <li><a href="<%= about_path %>"><span class="fa fa-fw fa-info-circle"></span> About</a></li>
         <li><a href="<%= guidelines_path %>"><span class="fa fa-fw fa-institution"></span> Guidelines</a></li>
