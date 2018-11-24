@@ -10,6 +10,7 @@ class SpaceMembership < ActiveRecord::Base
   ROLE_VIEWER = 'viewer'
 
   belongs_to :user
+  has_one :notification_preference, through: :user
   has_and_belongs_to_many :spaces, dependent: :destroy
 
   store :meta, { coder: JSON }
@@ -22,6 +23,15 @@ class SpaceMembership < ActiveRecord::Base
 
   def self.new_by_admin(user)
     new(side: SIDE_HOST, role: ROLE_ADMIN, user: user)
+  end
+
+  def self.subscribed_to(subscription)
+    includes(:notification_preference)
+      .select { |member| member.notification_preference.send(subscription) }
+  end
+
+  def notification_preference
+    super || NotificationPreference.new
   end
 
   def inactive?

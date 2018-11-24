@@ -5,6 +5,11 @@ class SpaceRequestsController < ApplicationController
       Space.transaction do
         space.locked!
         space.confidential_spaces.each(&:locked!)
+
+        space.space_memberships.subscribed_to(:space_lock_unlock_delete).each do |member|
+          ReviewSpaceMailer.unlock_email(space, @context.user, member).deliver_now!
+        end
+
       end
     end
 
