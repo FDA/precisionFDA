@@ -106,6 +106,7 @@ class User < ActiveRecord::Base
   has_many :analyses
   has_one :usage_metric
   has_many :tasks
+  has_one :notification_preference
 
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 
