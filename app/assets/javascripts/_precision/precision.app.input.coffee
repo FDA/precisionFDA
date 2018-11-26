@@ -37,7 +37,7 @@ class AppInputModel
                   value = @defaultFileValue()
                   @licenseToAccept({license: value.license, user_license: value.user_license}) if value.license? && !value.user_license?.accepted
                   value.title
-                else if @defaultValue.match(new RegExp(/^file-(.{24})$/, "i"))
+                else if @defaultValue.match(new RegExp(/^file-(.{24,})$/, "i"))
                     params =
                       uid: @defaultValue
                       describe:
