@@ -1,7 +1,7 @@
 class TasksController < ApplicationController
   before_action :find_task, only: [:show, :reassign, :copy, :task]
   before_action :find_tasks, only: [:accept, :complete, :decline, :make_active, :reopen]
-  before_action :find_membership, only: [:accept, :complete, :decline, :destroy, :make_active, :reopen]
+  before_action :find_space_and_membership, only: [:show, :create, :accept, :complete, :decline, :destroy, :make_active, :reopen]
 
   def task
     task = @task.attributes.merge(
@@ -13,9 +13,6 @@ class TasksController < ApplicationController
   end
 
   def show
-    @space = Space.accessible_by(@context).find(params[:space_id])
-    @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
-
     case @task.status
     when "open"
       @status = 'Awaiting Response'
@@ -51,9 +48,6 @@ class TasksController < ApplicationController
   end
 
   def create
-    @space = Space.accessible_by(@context).find(params[:space_id])
-    @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
-
     service = TaskService.new(@context)
     @task = service.add_task(params)
 
@@ -65,7 +59,7 @@ class TasksController < ApplicationController
     else
       NotificationsMailer.new_task_email(@task).deliver_now!
       flash[:success] = "Task '#{result.value.name}' successfully created."
-      redirect_to tasks_space_path(@space)
+      redirect_to tasks_space_path(@task.space_id)
     end
   end
 
@@ -179,8 +173,17 @@ class TasksController < ApplicationController
     @tasks = Task.find(params[:task_ids] || [])
   end
 
-  def find_membership
-    space = Space.accessible_by(@context).find(params[:space_id])
-    @membership = space.space_memberships.find_by!(user_id: @context.user_id)
+  def fetch_membership
+    if @context.review_space_admin?
+      membership = @space.space_memberships.active.find_by(user_id: @context.user_id)
+      membership || SpaceMembership.new_by_admin(@context.user)
+    else
+      @space.space_memberships.active.find_by!(user_id: @context.user_id)
+    end
+  end
+
+  def find_space_and_membership
+    @space = Space.accessible_by(@context).find(params[:space_id])
+    @membership = fetch_membership
   end
 end
