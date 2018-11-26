@@ -27,7 +27,7 @@ class SpacesController < ApplicationController
   end
 
   def discuss
-    @associate_with_options = ['Note', 'File', 'App', 'Job']
+    @associate_with_options = ['Note', 'File', 'App', 'Job', 'Asset', 'Comparison']
     @items_from_params = [@space]
     @item_path = pathify(@space)
     @item_comments_path = pathify_comments(@space)

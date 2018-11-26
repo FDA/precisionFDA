@@ -224,8 +224,11 @@ class Space < ActiveRecord::Base
       Note.real_notes.accessible_by_space(self).where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
         .map { |note| [note.id, note.title]}
     when "File"
-      UserFile.real_files.accessible_by_space(self).where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
+      UserFile.accessible_by_space(self).where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
         .map { |file| [file.id, file.name]}
+    when "Asset"
+      Asset.accessible_by_space(self).where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
+        .map { |asset| [asset.id, asset.name]}
     when "Comparison"
       Comparison.accessible_by_space(self).where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
         .map { |comparison| [comparison.id, comparison.name]}
