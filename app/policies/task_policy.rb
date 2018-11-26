@@ -56,8 +56,7 @@ class TaskPolicy
 
   # source user or space admin can delete task
   def self.can_delete?(task, member)
-    statuses = ['completed']
-    statuses.include?(task.status) && (task.user_id == member.user_id || (task.space.space_memberships.ids.include?(member.id) && member.role == "admin"))
+    task.user_id == member.user_id || (task.space.space_memberships.ids.include?(member.id) && member.role == "admin")
   end
 
 end

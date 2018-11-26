@@ -353,9 +353,6 @@ class SpacesController < ApplicationController
   end
 
   def tasks
-    TasksChecker.check_tasks_for_failed_response_deadline
-    TasksChecker.check_tasks_for_failed_completion_deadline
-
     case params[:filter]
     when "created_by_me"
       filter = {user_id: @context.user_id}
