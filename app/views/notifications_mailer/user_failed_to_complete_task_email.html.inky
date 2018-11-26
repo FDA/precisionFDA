@@ -19,10 +19,10 @@
     <row>
       <columns>
         <p>
-          Completion deadline is over for <strong><%= link_to @task.name, space_url(@task.space, @task) %></strong> task.
+          Completion deadline is over for <strong><%= @task.name %></strong> task.
         </p>
 
-        <button class="radius" href="<%= tasks_space_url(@task.space) %>">View Tasks</button>
+        <button class="radius" href="<%= space_task_url(@task.space, @task) %>">View Task</button>
       </columns>
     </row>
   </container>

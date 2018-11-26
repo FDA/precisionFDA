@@ -42,7 +42,7 @@
           <% end %>
         </p>
 
-        <button class="radius" href="<%= tasks_space_url(@task.space) %>">View Tasks</button>
+        <button class="radius" href="<%= space_task_url(@task.space, @task) %>">Open task</button>
       </columns>
     </row>
   </container>
