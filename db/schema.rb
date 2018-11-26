@@ -538,18 +538,6 @@ ActiveRecord::Schema.define(version: 20181126083825) do
   add_index "space_memberships_spaces", ["space_id"], name: "index_space_memberships_spaces_on_space_id", using: :btree
   add_index "space_memberships_spaces", ["space_membership_id"], name: "index_space_memberships_spaces_on_space_membership_id", using: :btree
 
-  create_table "space_requests", force: :cascade do |t|
-    t.integer  "status",     limit: 4, default: 0
-    t.integer  "kind",       limit: 4, default: 0
-    t.integer  "space_id",   limit: 4
-    t.integer  "user_id",    limit: 4
-    t.datetime "created_at",                       null: false
-    t.datetime "updated_at",                       null: false
-  end
-
-  add_index "space_requests", ["space_id"], name: "index_space_requests_on_space_id", using: :btree
-  add_index "space_requests", ["user_id"], name: "fk_rails_ceb7f2ca83", using: :btree
-
   create_table "spaces", force: :cascade do |t|
     t.string   "name",           limit: 255
     t.text     "description",    limit: 65535
@@ -839,8 +827,6 @@ ActiveRecord::Schema.define(version: 20181126083825) do
   add_foreign_key "participants", "nodes"
   add_foreign_key "saved_queries", "users"
   add_foreign_key "space_memberships", "users"
-  add_foreign_key "space_requests", "spaces"
-  add_foreign_key "space_requests", "users"
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"
   add_foreign_key "submissions", "users"
