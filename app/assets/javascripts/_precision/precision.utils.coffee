@@ -34,3 +34,8 @@ window.Precision.utils =
         resolve()
         clearTimeout(T)
       , time)
+
+  capitalize: (str) -> (str || '').replace(/\b\w/g, (l) -> l.toUpperCase())
+
+  splitAndCapitalize: (str = '') ->
+    return str.split('_').map((item) => @capitalize(item)).join(' ')
