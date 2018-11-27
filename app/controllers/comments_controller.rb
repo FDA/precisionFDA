@@ -31,11 +31,11 @@ class CommentsController < ApplicationController
   def edit
     @items_from_params = get_item_array_from_params
     @item = @items_from_params.last
-    if @item.accessible_by?(@context) && @item.active?
+    @comment = Comment.find_by!(id: params[:id], user_id: @context.user_id)
+    if @item.accessible_by?(@context) && @comment.active?
       @item_path = pathify(@item)
       @item_comments_path = pathify_comments(@item)
-      @comment = Comment.find_by!(id: params[:id], user_id: @context.user_id)
-    elsif @item.accessible_by?(@context) && @item.deleted?
+    elsif @item.accessible_by?(@context) && @comment.deleted?
       redirect_to root_url
     else
       flash[:error] = "You do not have permissions to edit this comment"
