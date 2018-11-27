@@ -44,7 +44,8 @@ class DocsController < ApplicationController
         url: "https://www.youtube.com/embed/KHgUe-a1v_k"
       },
       files: {
-        url: "https://www.youtube.com/embed/o5PmgUsWQGo"
+        how_to_upload_url: "https://www.youtube.com/embed/o5PmgUsWQGo",
+        how_to_navigate_url: "https://www.youtube.com/embed/w2lbAYYf7J8"
       },
       intro: {
         url: "https://www.youtube.com/embed/U_vmcd93HkM"
