@@ -1,14 +1,9 @@
 .pfda-controller-tasks.pfda-action-show
   .task-status
     font-size: 20px
-  .tasks-actions-modal
-    .control-label
-      text-align: left
-    textarea
-      resize: vertical
-    .add-atwho
-      min-height: 150px
-      overflow: auto
-      &:empty:before
-        content: attr(data-placeholder)
-        color: #999
+  .task-description
+    max-width: 1024px
+    padding: 10px
+    p
+      text-overflow: ellipsis
+      overflow: hidden
