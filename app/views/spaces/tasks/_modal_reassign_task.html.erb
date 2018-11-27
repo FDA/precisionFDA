@@ -18,7 +18,7 @@
           <%= modal_form_row('Reassign To (required):', 'task[assignee_id]', true) %>
           <%= modal_form_row('Response deadline:', 'task[response_deadline]', false, 'readonly', '', '', 'text: reassignTaskModal.task.response_deadline') %>
           <%= modal_form_row('Completion deadline:', 'task[completion_deadline]', false, 'readonly', '', '', 'text: reassignTaskModal.task.completion_deadline') %>
-          <%= modal_form_row('Description:', 'task[description]', false, 'readonly', '', '', 'text: reassignTaskModal.task.description') %>
+          <%= modal_form_row('Description:', 'task[description]', false, 'readonly', '', 'text-area', 'text: reassignTaskModal.task.description') %>
           <%= modal_form_row(
             'Please provide an explanation for reassigning this task (optional):',
             'comment[body]',
