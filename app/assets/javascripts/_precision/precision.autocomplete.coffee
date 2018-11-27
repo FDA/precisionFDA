@@ -84,11 +84,11 @@ class AutocompleteModel
     return inputNode
 
   updateOptions: (options = [], filter) ->
+    $(@nodes.optionsContainer).empty()
     width = @nodes.inputNode.offsetWidth
     @nodes.optionsContainer.style.width = "#{width}px"
     options = renderOptionsArray(options, filter)
     if options.length
-      $(@nodes.optionsContainer).empty()
       $(@nodes.optionsContainer).append(options)
       @nodes.optionsContainer.classList.remove('hidden')
 
