@@ -84,6 +84,8 @@ class AutocompleteModel
     return inputNode
 
   updateOptions: (options = [], filter) ->
+    width = @nodes.inputNode.offsetWidth
+    @nodes.optionsContainer.style.width = "#{width}px"
     options = renderOptionsArray(options, filter)
     if options.length
       $(@nodes.optionsContainer).empty()
