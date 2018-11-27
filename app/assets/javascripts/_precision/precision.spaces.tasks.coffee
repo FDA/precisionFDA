@@ -9,8 +9,7 @@ class PageModel
       method: method,
       data: data,
       success: (data, status, jqXHR) =>
-        @showAlert(successMsg, 'alert-success')
-        @refreshPage()
+        @refreshPage(successMsg)
       error: (response) =>
         try
           data = JSON.parse(response.responseText)
@@ -22,9 +21,12 @@ class PageModel
           @actionsDisabled(false)
           @isLoading(false)
     })
-  refreshPage: () ->
+  refreshPage: (successMsg) ->
     @actionsDisabled(true)
-    $('.modal').modal('hide')
+    showAlert = () =>
+      @showAlert(successMsg, 'alert-success')
+      document.removeEventListener 'turbolinks:render', showAlert
+    document.addEventListener 'turbolinks:render', showAlert
     Turbolinks.visit(window.location.toString(), { action: 'replace' })
   constructor: ->
     @actionsDisabled = ko.observable(false)
