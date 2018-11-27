@@ -24,9 +24,11 @@ class PageModel
   refreshPage: (successMsg) ->
     @actionsDisabled(true)
     showAlert = () =>
+      $('.modal').modal('hide')
       @showAlert(successMsg, 'alert-success')
-      document.removeEventListener 'turbolinks:render', showAlert
-    document.addEventListener 'turbolinks:render', showAlert
+      document.removeEventListener 'turbolinks:load', showAlert
+    document.addEventListener 'turbolinks:load', showAlert
+    Turbolinks.clearCache()
     Turbolinks.visit(window.location.toString(), { action: 'replace' })
   constructor: ->
     @actionsDisabled = ko.observable(false)
