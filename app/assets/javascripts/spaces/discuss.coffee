@@ -76,7 +76,7 @@ class SpacesDiscussView
 #
 #########################################################
 
-MainController = Paloma.controller('Spaces', {
+SpacesController = Paloma.controller('Spaces', {
   discuss: ->
     $container = $("#ko_spaces_discuss_container")
     viewModel = new SpacesDiscussView($('.pfda-comment--with-mentions form'), @params.space_id)

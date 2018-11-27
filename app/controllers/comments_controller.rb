@@ -41,6 +41,8 @@ class CommentsController < ApplicationController
       flash[:error] = "You do not have permissions to edit this comment"
       redirect_to root_url
     end
+
+    js klass: @item.klass, users: ["pfda_autotest1"]
   end
 
   def create
