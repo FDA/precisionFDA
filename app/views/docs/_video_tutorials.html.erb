@@ -51,6 +51,12 @@
           <p>Licenses</p>
           <%= video_iframe(@videos[:licenses][:url]) %>
         </div>
+        <% if @context.can_administer_site? %>
+          <div class="bs-docs-section bs-docs-media-section">
+            <p>Site Activity Reporting</p>
+            <%= video_iframe(@videos[:site_activity_reporting][:url]) %>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>
