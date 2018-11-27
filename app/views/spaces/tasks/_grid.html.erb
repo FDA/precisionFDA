@@ -7,8 +7,8 @@
     content_tag(:input, '', type: 'checkbox', class: 'select-task', value: task.id, 'data-actions': allowed_task_actions(task, @membership, params[:filter]))
   end
 
-  g.column name: 'TASK' do |task|
-    content_tag(:a, task.name, href: "/spaces/#{@space.id}/tasks/#{task.id}", target: "_blank")
+  g.column name: 'TASK', html: { class: 'task-name-column' } do |task|
+    content_tag(:a, task.name, href: "/spaces/#{@space.id}/tasks/#{task.id}", target: "_blank", title: task.name)
   end
 
   g.column name: 'ASSIGNER' do |task|
