@@ -167,6 +167,8 @@ class TasksController < ApplicationController
 
   def find_task
     @task = Task.find(params[:id])
+  rescue
+    redirect_to tasks_space_path(params[:space_id])
   end
 
   def find_tasks
