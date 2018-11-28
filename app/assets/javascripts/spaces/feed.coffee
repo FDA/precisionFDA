@@ -113,7 +113,10 @@ class SpacesFeedView
         @saveCheckboxState(input)
     )
 
-  resetDateFilters: () -> @setDateRange()
+  resetDateFilters: () ->
+    $('#select_date_range button').removeClass('active')
+    $('#select_date_range button[data-type="week"]').addClass('active')
+    @setDateRange()
 
   resetUserFilters: () ->
     @filtersForm[0].querySelectorAll('select').forEach(
