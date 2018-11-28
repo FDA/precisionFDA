@@ -54,7 +54,7 @@ class TasksController < ApplicationController
     result = @task.save ? Rats.success(@task) : Rats.failure(@task.errors.messages)
 
     if result.failure?
-      js task_params
+      js params: task_params, errors: result.value
       render space_tasks_path()
     else
       SpaceEventService.call(@task.space_id, @context.user_id, nil, @task, :task_created)
