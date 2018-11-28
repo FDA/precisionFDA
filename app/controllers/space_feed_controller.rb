@@ -27,11 +27,11 @@ class SpaceFeedController < ApplicationController
   end
 
   def feed_filter_params
-    params.permit(:sort, :space_id, :side, role: [], user_id: [], object_type: [])
+    params.permit(:sort, :space_id, :side, :object_type, role: [], user_id: [], object_type: [])
   end
 
   def filter_params
-    params.permit(:space_id, :side, role: [], user_id: [], object_type: [])
+    params.permit(:space_id, :side, :object_type, role: [], user_id: [], object_type: [])
   end
 
   def page

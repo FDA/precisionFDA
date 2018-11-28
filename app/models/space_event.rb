@@ -119,7 +119,7 @@ class SpaceEvent < ActiveRecord::Base
     sort = filters[:sort] ? filters[:sort] : "asc"
     filters.delete(:sort)
     filters.reject! { |k, v| v.empty? || v.nil? || (v == "null") }
-    if filters[:object_type] = "[]"
+    if filters[:object_type] == "[]"
       filters[:object_type] = []
     end
 

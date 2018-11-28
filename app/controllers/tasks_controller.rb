@@ -151,9 +151,6 @@ class TasksController < ApplicationController
     NotificationsMailer.new_task_email(@task).deliver_later!
     SpaceEventService.call(@task.space_id, @context.user_id, nil, @task, :task_reassigned)
 
-    membership = @task.space.space_memberships.find_by!(user_id: @context.user_id)
-    SpaceEventService.call(@task.space_id, @context.user_id, membership[:side], @task, :task_reassigned)
-
     redirect_to tasks_space_path(@task.space_id)
   end
 
