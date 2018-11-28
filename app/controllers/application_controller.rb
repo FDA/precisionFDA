@@ -262,7 +262,7 @@ class ApplicationController < ActionController::Base
     when "space"
       discuss_space_path(item)
     when "task"
-      tasks_space_path(item.space_id)
+      space_task_path(item.space_id, item)
     when "expert", "expert-question", "meta-appathon", "appathon", "file", "app", "job", "asset", "comparison", "answer", "space", "folder"
       pathify(item)
     else
