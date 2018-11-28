@@ -174,11 +174,11 @@ class SpacesFeedView
     @feedItems = ko.observableArray()
     @feedLoading = ko.observable(false)
     @moreFeedLoading = ko.observable(false)
-    @sortDirection = ko.observable('asc')
+    @sortDirection = ko.observable('desc')
     @feedPage = ko.observable(1)
     @checkedTypes = {}
     @sortLabel = ko.computed(() =>
-      if @sortDirection() == 'asc'
+      if @sortDirection() == 'desc'
         return 'Newest to Oldest'
       else
         return 'Oldest to Newest'
