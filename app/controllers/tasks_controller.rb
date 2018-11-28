@@ -54,13 +54,12 @@ class TasksController < ApplicationController
     result = @task.save ? Rats.success(@task) : Rats.failure(@task.errors.messages)
 
     if result.failure?
-      js params: task_params, errors: result.value
-      render space_tasks_path()
+      render json: { params: task_params, errors: result.value }
     else
       SpaceEventService.call(@task.space_id, @context.user_id, nil, @task, :task_created)
-
       NotificationsMailer.new_task_email(@task).deliver_now!
-      redirect_to tasks_space_path(@task.space_id)
+
+      render json: {status: "success"}
     end
   end
 
@@ -159,7 +158,7 @@ class TasksController < ApplicationController
   private
 
   def task_params
-    params.permit(:name, :description, :response_deadline, :completion_deadline, :assignee_id)
+    params.require(:task).permit(:name, :description, :response_deadline, :completion_deadline, :assignee_id)
   end
 
   def editable_params
