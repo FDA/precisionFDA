@@ -35,6 +35,12 @@ class CommentsController < ApplicationController
     if @item.accessible_by?(@context) && @comment.active?
       @item_path = pathify(@item)
       @item_comments_path = pathify_comments(@item)
+      if @item.klass == "space"
+        user_ids = @item.space_memberships.active.map(&:user_id)
+        users = User.find(user_ids).map {|u| {name: u.dxuser} }
+      else
+        users = nil
+      end
     elsif @item.accessible_by?(@context) && @comment.deleted?
       redirect_to root_url
     else
@@ -42,7 +48,7 @@ class CommentsController < ApplicationController
       redirect_to root_url
     end
 
-    js klass: @item.klass, users: ["pfda_autotest1"]
+    js klass: @item.klass, users: users
   end
 
   def create
