@@ -123,6 +123,10 @@ class TasksController < ApplicationController
       if TaskPolicy.can_make_active?(task, @membership)
         task.accepted!
         NotificationsMailer.task_updated_email(task, "made active").deliver_later!
+        if params.dig(:comment, :body).presence
+          comment = Comment.build_from(task, @context.user_id, params[:comment][:body])
+          comment.save
+        end
       end
     end
     render json: {status: "success"}
@@ -133,6 +137,10 @@ class TasksController < ApplicationController
       if TaskPolicy.can_reopen?(task, @membership)
         task.open!
         NotificationsMailer.task_updated_email(task, "reopened").deliver_later!
+        if params.dig(:comment, :body).presence
+          comment = Comment.build_from(task, @context.user_id, params[:comment][:body])
+          comment.save
+        end
       end
     end
     render json: {status: "success"}
