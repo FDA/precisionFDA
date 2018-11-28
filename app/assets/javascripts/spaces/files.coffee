@@ -134,5 +134,8 @@ SpacesController = Paloma.controller('Spaces', {
     $container.on('change', '[name="files[selected][]"]', (e) ->
       viewModel.updateSelectedNodes(e)
     )
+    $container.on('show.bs.modal', '#rename-modal-js', (e) ->
+      viewModel.fillModal()
+    )
 
 })
