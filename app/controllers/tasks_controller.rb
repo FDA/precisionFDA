@@ -54,7 +54,8 @@ class TasksController < ApplicationController
     result = @task.save ? Rats.success(@task) : Rats.failure(@task.errors.messages)
 
     if result.failure?
-      render json: { errors: result.value.values.flatten }.to_json, status: 500
+      errors = result.value.map { |k, v| "#{k} #{v[0]}" }
+      render json: { errors: errors }.to_json, status: 500
     else
       SpaceEventService.call(@task.space_id, @context.user_id, nil, @task, :task_created)
       NotificationsMailer.new_task_email(@task).deliver_now!
