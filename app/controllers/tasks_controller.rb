@@ -60,18 +60,13 @@ class TasksController < ApplicationController
       SpaceEventService.call(@task.space_id, @context.user_id, nil, @task, :task_created)
 
       NotificationsMailer.new_task_email(@task).deliver_now!
-      flash[:success] = "Task '#{result.value.name}' successfully created."
       redirect_to tasks_space_path(@task.space_id)
     end
   end
 
   def update
     task = Task.find(params[:id])
-    if task.update_task(editable_params)
-      flash[:success] = "Task updated"
-    else
-      flash[:error] = "Could not update the task. Please try again."
-    end
+    task.update_task(editable_params)
     redirect_to :back, status: :see_other rescue redirect_to tasks_space_path(task.space_id)
   end
 
@@ -83,8 +78,6 @@ class TasksController < ApplicationController
       task.destroy
 
       SpaceEventService.call(space_id, @context.user_id, @membership, task, :task_deleted)
-
-      flash[:success] = "Task has been successfully deleted"
     end
     redirect_to :back, status: :see_other rescue redirect_to tasks_space_path(space_id)
   end
@@ -176,7 +169,7 @@ class TasksController < ApplicationController
   def find_task
     @task = Task.find(params[:id])
   rescue
-    redirect_to tasks_space_path(params[:space_id])
+    redirect_to tasks_space_path(params[:space_id], filter: :my, status: :awaiting_response)
   end
 
   def find_tasks
