@@ -93,6 +93,7 @@ class SpacesFeedView
     @loadFeed(data)
 
   submitFilters: () ->
+    @feedPage(1)
     data = @getFormData()
     @loadChart(data)
     @loadFeed(data)
