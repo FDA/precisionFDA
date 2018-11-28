@@ -13,7 +13,8 @@ class PageModel
       error: (response) =>
         try
           data = JSON.parse(response.responseText)
-          text = data.error?.message
+          if data.errors and Array.isArray(data.errors) and data.errors.length > 0
+            text = data.errors[0]
         catch
           text = null
         finally
