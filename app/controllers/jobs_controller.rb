@@ -104,7 +104,7 @@ class JobsController < ApplicationController
 
     js app: @app.slice(:uid, :spec, :title, :space_scopes),
        licenses_to_accept: licenses_to_accept.uniq { |l| l.id}, licenses_accepted: licenses_accepted,
-       available_spaces: available_spaces.map { |space| { value: space.id, label: space.title } },
+       selectable_spaces: available_spaces.map { |space| { value: space.id, label: space.title } },
        content_scopes: available_spaces.each_with_object({}) {  |space, memo| memo[space.id] = space.accessible_scopes }
   end
 
