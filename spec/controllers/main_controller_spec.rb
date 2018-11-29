@@ -31,7 +31,7 @@ RSpec.describe MainController, type: :controller do
 
     context "reached the limit of sessions " do
       before do
-        Session::SESSIONS_LIMIT.times do
+        SESSIONS_LIMIT.times do
           authenticate!(user)
           reset_session
         end

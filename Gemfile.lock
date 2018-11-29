@@ -78,7 +78,7 @@ GEM
       execjs
     coffee-script-source (1.10.0)
     colorize (0.8.1)
-    concurrent-ruby (1.0.5)
+    concurrent-ruby (1.1.3)
     crack (0.4.3)
       safe_yaml (~> 1.0.0)
     crass (1.0.4)
@@ -129,7 +129,7 @@ GEM
       colorize (~> 0.8)
       rack (>= 1.0)
     humanizer (2.6.4)
-    i18n (0.9.3)
+    i18n (0.9.5)
       concurrent-ruby (~> 1.0)
     inky-rb (1.3.7.2)
       foundation_emails (~> 2)
@@ -198,7 +198,7 @@ GEM
       pry (>= 0.10.4)
     quiet_assets (1.1.0)
       railties (>= 3.1, < 5.0)
-    rack (1.6.10)
+    rack (1.6.11)
     rack-accept (0.4.5)
       rack (>= 0.4)
     rack-test (0.6.3)
@@ -317,12 +317,13 @@ GEM
     thor (0.19.4)
     thread_safe (0.3.6)
     tilt (2.0.5)
-    turbolinks (2.5.3)
-      coffee-rails
+    turbolinks (5.0.0)
+      turbolinks-source (~> 5)
+    turbolinks-source (5.2.0)
     turnout (2.2.1)
       rack (~> 1.3)
       rack-accept (~> 0.4)
-    tzinfo (1.2.4)
+    tzinfo (1.2.5)
       thread_safe (~> 0.1)
     uglifier (3.0.3)
       execjs (>= 0.3.0, < 3)
@@ -378,7 +379,7 @@ DEPENDENCIES
   kaminari
   local_time (~> 1.0, >= 1.0.3)
   mysql2 (~> 0.3.18)
-  nokogiri (~> 1.8, >= 1.8.2)
+  nokogiri (~> 1.8, >= 1.8.5)
   paloma (= 5.0.0)
   premailer-rails
   pronto (~> 0.9.5)
@@ -402,7 +403,7 @@ DEPENDENCIES
   sprockets (> 3.7.1)
   therubyracer
   thin
-  turbolinks
+  turbolinks (= 5.0.0)
   turnout (~> 2.2.0)
   uglifier (>= 1.3.0)
   unicorn (~> 4.9.0)

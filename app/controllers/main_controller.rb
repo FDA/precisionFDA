@@ -285,7 +285,7 @@ class MainController < ApplicationController
       Session.delete_expired
 
       if Session.limit_reached?(user)
-        flash[:error] = "You have reached a limit for login. You can use only #{Session::SESSIONS_LIMIT} active sessions."
+        flash[:error] = "You have reached a limit for login. You can use only #{SESSIONS_LIMIT} active sessions."
       else
         Session.where(key: session.id).delete_all
         reset_session

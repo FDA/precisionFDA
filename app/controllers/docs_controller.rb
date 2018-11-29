@@ -7,19 +7,30 @@ class DocsController < ApplicationController
 
   def show
     section_name = params[:section] ? params[:section] : "intro"
+
     @sections = [
-      { name: "intro", title: "Introduction"},
-      { name: "files", title: "Files"},
-      { name: "comparisons", title: "Comparisons"},
-      { name: "apps", title: "Apps"},
-      { name: "creating_apps", title: "Creating Apps"},
-      { name: "notes", title: "Notes"},
-      { name: "discussions", title: "Discussions"},
-      { name: "tracking", title: "Tracking"},
-      { name: "publishing", title: "Publishing"},
-      { name: "licenses", title: "Licenses"},
-      { name: "video_tutorials", title: "Video Tutorials"}
+      { name: "intro", title: "Introduction" },
+      { name: "files", title: "Files" },
+      { name: "comparisons", title: "Comparisons" },
+      { name: "apps", title: "Apps" },
+      { name: "creating_apps", title: "Creating Apps" },
+      { name: "notes", title: "Notes" },
+      { name: "discussions", title: "Discussions" },
+      { name: "tracking", title: "Tracking" },
+      { name: "publishing", title: "Publishing" },
+      { name: "licenses", title: "Licenses" }
     ]
+
+    if @context.can_administer_site?
+      @sections.concat([
+        { name: "challenge_workbench", title: "The Challenge Workbench" },
+        { name: "site_customization", title: "Site Customization" },
+        { name: "site_activity_reporting", title: "Site Activity Reporting" }
+      ])
+    end
+
+    @sections << { name: "video_tutorials", title: "Video Tutorials" }
+
     @active_section = @sections.find {|s| s[:name] == section_name }
     raise ActiveRecord::RecordNotFound if @active_section.nil?
 
@@ -44,7 +55,8 @@ class DocsController < ApplicationController
         url: "https://www.youtube.com/embed/KHgUe-a1v_k"
       },
       files: {
-        url: "https://www.youtube.com/embed/o5PmgUsWQGo"
+        how_to_upload_url: "https://www.youtube.com/embed/o5PmgUsWQGo",
+        how_to_navigate_url: "https://www.youtube.com/embed/w2lbAYYf7J8"
       },
       intro: {
         url: "https://www.youtube.com/embed/U_vmcd93HkM"
@@ -57,8 +69,10 @@ class DocsController < ApplicationController
       },
       publishing: {
         url: "https://www.youtube.com/embed/dsOCn1zTBOo"
+      },
+      site_activity_reporting: {
+        url: "https://www.youtube.com/embed/O1iTuI9Fvcc"
       }
     }
-
   end
 end

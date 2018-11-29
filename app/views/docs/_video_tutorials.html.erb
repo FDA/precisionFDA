@@ -8,8 +8,12 @@
           <%= video_iframe(@videos[:intro][:url]) %>
         </div>
         <div class="bs-docs-section bs-docs-media-section">
-          <p>Files</p>
-          <%= video_iframe(@videos[:files][:url]) %>
+          <p>How to Upload Files</p>
+          <%= video_iframe(@videos[:files][:how_to_upload_url]) %>
+        </div>
+        <div class="bs-docs-section bs-docs-media-section">
+          <p>File & Folder Navigation</p>
+          <%= video_iframe(@videos[:files][:how_to_navigate_url]) %>
         </div>
         <div class="bs-docs-section bs-docs-media-section">
           <p>Comparisons</p>
@@ -47,6 +51,12 @@
           <p>Licenses</p>
           <%= video_iframe(@videos[:licenses][:url]) %>
         </div>
+        <% if @context.can_administer_site? %>
+          <div class="bs-docs-section bs-docs-media-section">
+            <p>Site Activity Reporting</p>
+            <%= video_iframe(@videos[:site_activity_reporting][:url]) %>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>
