@@ -43,13 +43,18 @@ class App < ActiveRecord::Base
     uid
   end
 
+  # Scopes of files that can be used to run an app. This makes sense only for review spaces
   def space_scopes
-    return unless in_space?
+    return [] unless in_space?
+    return [] unless space_object.review?
+
     space_object.accessible_scopes
   end
 
+  # Scopes that can be used to run an app. This makes sense only for review spaces
   def available_job_spaces(user)
     return [] unless in_space?
+    return [] unless space_object.review?
 
     Space.joins(:space_memberships)
       .merge(SpaceMembership.where(user_id: user.id))

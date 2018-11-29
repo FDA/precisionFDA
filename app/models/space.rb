@@ -190,6 +190,7 @@ class Space < ActiveRecord::Base
     [uid, shared_space.try(:uid)].compact
   end
 
+  # Scopes of content that can be moved to an space.
   def accessible_scopes_for_move
     ["private"]
   end
