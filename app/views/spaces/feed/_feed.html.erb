@@ -40,7 +40,7 @@
               </div>
               <div class="activity-feed-body bg-info">
                 <!-- ko if: $data.entity_url.length -->
-                <a target="_blank" data-bind="text: Precision.utils.capitalize($data.entity_name), attr: { href: $data.entity_url }"></a>
+                <a target="_blank" data-bind="text: $data.entity_name, attr: { href: $data.entity_url }"></a>
                 <!-- /ko -->
                 <!-- ko ifnot: $data.entity_url.length -->
                 <span data-bind="text: $data.entity_name"></span>
