@@ -263,7 +263,10 @@ class Space < ActiveRecord::Base
     completed_tasks = tasks.completed.count
     tasks = open_tasks + accepted_tasks + declined_tasks + completed_tasks
 
+    feed = self.space_events.count
+
     {
+      feed: feed,
       tasks: tasks,
       notes: notes,
       files: files,
