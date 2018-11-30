@@ -111,7 +111,7 @@
       <%= render "_partials/btn_copy_to_cooperative", item: @asset %>
     </div>
 
-    <% if @asset.editable_by?(@context) %>
+    <% if @asset.editable_by?(@context) && !in_verified_space?(@asset) %>
     <div class="btn-group">
       <div class="dropdown">
         <button class="btn btn-primary" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

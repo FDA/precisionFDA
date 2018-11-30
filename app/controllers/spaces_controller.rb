@@ -10,7 +10,7 @@ class SpacesController < ApplicationController
     if @context.can_administer_site?
       spaces = Space
     elsif @context.review_space_admin?
-      spaces = Space.review
+      spaces = Space.where(space_type: [Space.space_types[:review],Space.space_types[:verification]])
     else
       spaces = Space.accessible_by(@context)
     end
@@ -51,6 +51,23 @@ class SpacesController < ApplicationController
       per_page: 100
     })
     js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
+  end
+
+  def verify
+    @space = Space.accessible_by(@context).find(params[:id])
+    if @space.space_type == 'verification'
+      @space.verified = true
+      @space.save!
+      flash[:success] = "Space verified and locked!"
+    end
+    # make all apps verified
+    apps = App.accessible_by_space(@space)
+    app_series = AppSeries.accessible_by_space(@space)
+    App.where(id: apps.map(&:id)).update_all(verified: true)
+    AppSeries.where(id: app_series.map(&:id)).update_all(verified: true)
+
+    session[:verified] =  @space.id
+    redirect_to @space
   end
 
   def new
@@ -112,7 +129,6 @@ class SpacesController < ApplicationController
     else
       flash[:error] = "You don't have permission to edit this space"
     end
-
     redirect_to space
   end
 

@@ -1,4 +1,6 @@
-<% content_for :title do %><%= @space.title %><% end %>
+<% content_for :title do %><%= @space.title %>
+<% end %>
+
 
 <div id="ko_spaces_header_container">
 
@@ -12,12 +14,27 @@
           <%= link_to "TO PRIVATE", feed_space_path(@space.confidential_space(@membership)) %>
         <% end %>
       <% end %>
-
+      
       <div class="page-title">
         <span class="fa fa-object-group"></span>
         <%= @space.title %>
+        <% if @space.verification? %>
+          - Verification Space
+          <% if @space.editable_by?(@context) && !@space.verified? && @space.can_verify_space(@context)  %>
+            <a class="btn btn-primary verify-button" data-toggle="modal" data-target="#verification-modal">
+              <span class="fa fa-check" aria-hidden="true"></span> Verify this space
+            </a>
+          <% end %>
+          <% if @space.verified? %>
+            <div class="fa fa-check-circle" style="color: #1F70B5;padding-left: 20px; font-size: 42px">
+            </div>
+          <% end %>
+        <% end %>
+
+
       </div>
-      <% if @space.editable_by?(@context) %>
+
+      <% if @space.editable_by?(@context) && !@space.verified? %>
         <div>
           <% if @space.active? %>
             <a class="pfda-rename-item" data-toggle="modal" data-target="#rename-modal">
@@ -29,6 +46,7 @@
           </a>
         </div>
       <% end %>
+
       <% if !@space.description.blank? %>
         <div class="description">
           <%= @space.description %>
@@ -36,7 +54,7 @@
       <% end %>
     </div>
 
-    <% if SpaceMembershipPolicy.can_move_content?(@space, @membership) %>
+    <% if SpaceMembershipPolicy.can_move_content?(@space, @membership) && !@space.verified? %>
       <div class="pull-right">
         <div class="btn-group">
           <button class="btn btn-default" data-bind="click: objectSelector.open">
@@ -54,12 +72,12 @@
         <p class="list-group-item-text"><%= @space.uid %></p>
       </li>
       <% if @space.state != "ACTIVE" %>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">State</h5>
-        <p class="list-group-item-text">
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">State</h5>
+          <p class="list-group-item-text">
           <%= @space.state? ? @space.state : "UNACTIVATED" %>
-        </p>
-      </li>
+          </p>
+        </li>
       <% end %>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Your Role</h5>
@@ -74,7 +92,7 @@
         <li class="list-group-item">
           <h5 class="list-group-item-heading">CTS</h5>
           <p class="list-group-item-text">
-            <%= @space.cts  %>
+          <%= @space.cts  %>
           </p>
         </li>
       <% end %>
@@ -118,7 +136,7 @@
       </li>
     </ul>
 
-    <% if @space.editable_by?(@context) %>
+    <% if @space.editable_by?(@context) && !@space.verified? %>
       <%= render "_partials/modal_rename", item: @space, path_to_rename: rename_space_path(@space.id) %>
     <% end %>
 
@@ -128,23 +146,49 @@
 
 <% if @space.unactivated? %>
 
-  <div class='pfda-help-block'>
-    <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
-    <% if @space.review? %>
-      <% if @space.confidential? %>
-        <p>Both reviewer and sponsor leads must click "Accept space" to activate the <%= link_to 'cooperative space', space_path(@space.shared_space) %>.</p>
+    <div class='pfda-help-block'>
+      <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
+      <% if @space.review? %>
+        <% if @space.confidential? %>
+          <p>Both reviewer and sponsor leads must click "Accept space" to activate the <%= link_to 'cooperative space', space_path(@space.shared_space) %>.</p>
+        <% else %>
+          <p>Both reviewer and sponsor leads must click "Accept space" to activate it.</p>
+        <% end %>
       <% else %>
-        <p>Both reviewer and sponsor leads must click "Accept space" to activate it.</p>
+        <p>Both host and guest leads must click "Accept space" to activate it.</p>
       <% end %>
-    <% else %>
-      <p>Both host and guest leads must click "Accept space" to activate it.</p>
-    <% end %>
+    </div>
+
+  <% elsif(@space.locked? || @space.verified?) %>
+
+    <div class='pfda-help-block'>
+      <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has been locked</p>
+    </div>
+
+  <% end %>
+
+<div class="modal fade" id="verification-modal">
+  <div class="modal-dialog" role="document" style="width: 660px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        <h3 class="modal-title">Verify Space</h3>
+      </div>
+      <%= form_for @space, url: verify_space_url, method: :post, html: {class: 'form form-horizontal'} do |f|%>
+        <%= f.hidden_field :verified, value: true %>
+        <div class="modal-body">
+          <h4>
+            Verifying a space will lock the space and now will be visible to all reviewers<br>
+            Would you like to lock the space?
+
+          </h4>
+        </div>
+        <div class="modal-footer">
+          <div class="col-lg-14"></div>
+          <button type="submit" class="btn btn-primary col-lg-4">Yes</button>
+          <button type="button" class="btn btn-default col-lg-4" data-dismiss="modal" tabindex="-1">Cancel</button>
+        </div>
+      <% end %>
+    </div>
   </div>
-
-<% elsif @space.locked? %>
-
-  <div class='pfda-help-block'>
-    <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has been locked</p>
-  </div>
-
-<% end %>
+</div>

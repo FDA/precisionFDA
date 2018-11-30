@@ -12,11 +12,12 @@ class SpacesNewView
     @spaceTypes = ko.observableArray([
       new SpaceTypes('groups', 'groups'),
       new SpaceTypes('review', 'review'),
+      new SpaceTypes('verification', 'verification'),
     ]);
     @chosenSpaceType = ko.observable(params.space_type)
 #    @hostLeadLabel = ko.observable('123')
     @hostLeadLabel = ko.computed(() =>
-      if @chosenSpaceType() == 'groups'
+      if @chosenSpaceType() == 'groups' || @chosenSpaceType() == 'verification'
         'Host Lead'
       else
         'Reviewer Lead'

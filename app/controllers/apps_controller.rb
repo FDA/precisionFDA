@@ -155,6 +155,16 @@ class AppsController < ApplicationController
     }
   end
 
+  def update
+    @app = App.editable_by(@context).find_by!(id: params[:id])
+    @app.verified = params[:app][:verified]
+    @app.save!
+
+    respond_to do |format|
+      format.json { render json: {ok: 1}}
+    end
+  end
+
   def edit
     @app = App.editable_by(@context).find_by_uid(params[:id])
     if @app.nil?

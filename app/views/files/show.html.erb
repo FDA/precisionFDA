@@ -3,7 +3,7 @@
 <div class="page-header">
   <div class="page-title">
     <span class="fa fa-file-o"></span> <%= @file.name %>
-    <% if @file.editable_by?(@context) %>
+    <% if @file.editable_by?(@context) && !in_verified_space?(@file) %>
       <a class="pfda-rename-item" data-toggle="modal" data-target="#file-comparison-edit-modal">
         <span class="fa fa-pencil"></span>
       </a>
@@ -125,8 +125,7 @@
     <div class="btn-group">
       <%= render "_partials/btn_copy_to_cooperative", item: @file %>
     </div>
-
-    <% if @file.editable_by?(@context) && (!@file.parent_comparison? || @file.deletable?) %>
+    <% if @file.editable_by?(@context) && (!@file.parent_comparison? || @file.deletable?) && !in_verified_space?(@file) %>
     <div class="btn-group">
       <div class="dropdown">
         <button class="btn btn-primary" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

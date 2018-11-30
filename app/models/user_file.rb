@@ -173,7 +173,7 @@ class UserFile < Node
   end
 
   def deletable?
-    return ((parent_type == "User") || (parent_type == "Job"))
+    return ((parent_type == "User") || (parent_type == "Job")) && ( (scope == "private" || scope == "public") || !(in_space? && space_object.verified?))
   end
 
   def publishable_by?(context, scope_to_publish_to = "public")

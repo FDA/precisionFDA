@@ -20,6 +20,28 @@ FactoryBot.define do
       end
     end
 
+    trait :verification do
+      space_type :verification
+
+      transient do
+        host_lead_id nil
+        guest_lead_id nil
+      end
+
+      after(:create) do |space, evaluator|
+        space.space_memberships.admin.host.create!(user_id: evaluator.host_lead_id)
+        space.space_memberships.admin.guest.create!(user_id: evaluator.guest_lead_id)
+      end
+    end
+
+    trait :verified do
+      verified 1
+    end
+
+    trait :non_verified do
+      verified 0
+    end
+
     trait :review do
       space_type :review
 

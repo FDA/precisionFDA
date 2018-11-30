@@ -4,7 +4,7 @@
       <div class="panel-body">
         <h3><%= @page_title %></h3>
 
-        <% if @space.active? %>
+        <% if @space.active? && !@space.verified? %>
           <div class="spaces-tasks-buttons">
             <span class="btn btn-primary" data-toggle="modal" data-target="#create_task_modal">
               <i class="fa fa-plus"></i>&nbsp;New Task
