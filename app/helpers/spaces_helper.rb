@@ -186,4 +186,84 @@ module SpacesHelper
     """
   end
 
+  def date_value_by_status(task)
+    case task.status
+      when "open"
+        return {
+          respond: task.response_deadline,
+          complete: task.completion_deadline
+        }
+      when "failed_response_deadline"
+        return {
+          respond: task.response_deadline,
+          complete: task.completion_deadline
+        }
+      when "active"
+        return {
+          respond: task.response_time,
+          complete: task.completion_deadline
+        }
+      when "failed_completion_deadline"
+        return {
+          respond: task.response_time,
+          complete: task.completion_deadline
+        }
+      when "completed"
+        return {
+          respond: task.response_time,
+          complete: task.completion_time
+        }
+      when "declined"
+        return {
+          respond: task.response_deadline,
+          complete: task.response_time
+        }
+      else
+        return {
+          respond: '',
+          complete: ''
+        }
+    end
+  end
+
+  def title_by_status(task)
+    case task.status
+      when "open"
+        return {
+          respond: { title: 'RESPOND BY', value: task.response_deadline },
+          complete: { title: 'COMPLETE BY', value: task.completion_deadline }
+        }
+      when "failed_response_deadline"
+        return {
+          respond: { title: 'RESPOND BY', value: task.response_deadline },
+          complete: { title: 'COMPLETE BY', value: task.completion_deadline }
+        }
+      when "active"
+        return {
+          respond: { title: 'RESPONDED BY', value: task.response_time },
+          complete: { title: 'COMPLETE BY', value: task.completion_deadline }
+        }
+      when "failed_completion_deadline"
+        return {
+          respond: { title: 'RESPONDED ON', value: task.response_time },
+          complete: { title: 'COMPLETE BY', value: task.completion_deadline }
+        }
+      when "completed"
+        return {
+          respond: { title: 'RESPONDED ON', value: task.response_time },
+          complete: { title: 'COMPLETED ON', value: task.completion_time }
+        }
+      when "declined"
+        return {
+          respond: { title: 'RESPOND BY', value: task.response_deadline },
+          complete: { title: 'DECLINED ON', value: task.response_time }
+        }
+      else
+        return {
+          title: '',
+          value: ''
+        }
+    end
+  end
+
 end
