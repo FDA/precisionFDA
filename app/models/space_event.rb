@@ -130,6 +130,8 @@ class SpaceEvent < ActiveRecord::Base
         Space.find(filters[:space_id])
       end
     filters[:space_id] = space.id
+    filters[:user_id] = filters.delete(:users) if filters[:users]
+    filters[:role] = filters.delete(:roles) if filters[:roles]
     SpaceEvent.date_range(start_date, end_date).where(filters).order(created_at: sort)
   end
 
