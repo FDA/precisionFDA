@@ -89,6 +89,7 @@ class TasksController < ApplicationController
     @tasks.each do |task|
       if TaskPolicy.can_accept?(task, @membership)
         task.accepted!
+        task.update(response_time: Time.now)
       end
     end
     render json: { status: 200 }
@@ -98,6 +99,7 @@ class TasksController < ApplicationController
     @tasks.each do |task|
       if TaskPolicy.can_decline?(task, @membership)
         task.declined!
+        task.update(response_time: Time.now)
         SpaceEventService.call(task.space_id, @context.user_id, @membership, task, :task_declined)
         if params.dig(:comment, :body).presence
           comment = Comment.build_from(task, @context.user_id, params[:comment][:body])
@@ -112,6 +114,7 @@ class TasksController < ApplicationController
     @tasks.each do |task|
       if TaskPolicy.can_complete?(task, @membership)
         task.completed!
+        task.update(complete_time: Time.now)
         SpaceEventService.call(task.space_id, @context.user_id, @membership, task, :task_completed)
       end
     end
@@ -122,6 +125,7 @@ class TasksController < ApplicationController
     @tasks.each do |task|
       if TaskPolicy.can_make_active?(task, @membership)
         task.accepted!
+        task.update(complete_time: nil)
         if params.dig(:comment, :body).presence
           comment = Comment.build_from(task, @context.user_id, params[:comment][:body])
           comment.save
@@ -135,6 +139,7 @@ class TasksController < ApplicationController
     @tasks.each do |task|
       if TaskPolicy.can_reopen?(task, @membership)
         task.open!
+        task.update(complete_time: nil, response_time: nil)
         if params.dig(:comment, :body).presence
           comment = Comment.build_from(task, @context.user_id, params[:comment][:body])
           comment.save
@@ -157,6 +162,8 @@ class TasksController < ApplicationController
     @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
 
     attributes = @task.attributes.merge(assignee_id: @task.assignee.dxuser)
+    attributes.delete(:response_time)
+    attributes.delete(:complete_time)
     @task = Task.new(attributes)
     render "new"
   end
