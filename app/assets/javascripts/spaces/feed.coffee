@@ -251,6 +251,5 @@ SpacesController = Paloma.controller('Spaces', {
 
     $(window).on 'scroll', loadMoreFeed
     $(document).on 'turbolinks:before-visit', () -> $(window).off 'scroll', loadMoreFeed
-    )
 
 })
