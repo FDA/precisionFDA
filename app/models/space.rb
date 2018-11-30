@@ -1,7 +1,8 @@
+# TODO Items can be moved from private submitter/reviewer workspaces to a shared space.
 class Space < ActiveRecord::Base
   include Auditor
 
-  TYPES = %i(groups review)
+  TYPES = %i(groups review verification)
   STATES = %i(unactivated active locked deleted)
 
   belongs_to :sponsor_org, { class_name: 'Org' }
@@ -16,9 +17,11 @@ class Space < ActiveRecord::Base
 
   store :meta, accessors: [:cts], coder: JSON
 
+  alias_method :shared_space, :space
+
   attr_accessor :invitees, :invitees_role
 
-  alias_method :shared_space, :space
+  attr_accessor :host_lead_dxuser, :guest_lead_dxuser, :invitees, :invitees_role
 
   enum space_type: TYPES
   enum state: STATES
@@ -28,6 +31,8 @@ class Space < ActiveRecord::Base
   scope :confidential, -> { review.where.not(space_id: nil) }
   scope :reviewer, -> { review.where.not(host_dxorg: nil) }
   scope :sponsor, -> { review.where.not(guest_dxorg: nil) }
+
+  scope :all_verified, -> { where(verified: true) }
 
   def confidential_space(member)
     if member.host?
@@ -51,6 +56,11 @@ class Space < ActiveRecord::Base
 
   def shared?
     review? && !confidential?
+  end
+
+  def verified?
+    return false if space_type != 'verification'
+    verified ? true : false
   end
 
   def accepted?
@@ -176,7 +186,7 @@ class Space < ActiveRecord::Base
 
   def editable_by?(context)
     return if context.guest?
-
+    return if verified?
     raise unless context.user_id.present?
 
     return true if context.review_space_admin? && reviewer?
@@ -201,6 +211,8 @@ class Space < ActiveRecord::Base
 
     return true if context.review_space_admin? && reviewer?
 
+    return true if verified? && context.user.review_space_admin?
+
     space_memberships.active.exists?(user_id: context.user_id)
   end
 
@@ -213,6 +225,7 @@ class Space < ActiveRecord::Base
       joins(:space_memberships).where.any_of(
         { space_memberships: { active: true, user_id: context.user_id } },
         { id: self.reviewer },
+        { id: self.all_verified }
       ).uniq
     else
       joins(:space_memberships).where(space_memberships: { active: true, user_id: context.user_id }).uniq
@@ -245,6 +258,9 @@ class Space < ActiveRecord::Base
     else
       []
     end.map { |i, j| { id: i, name: j } }
+  end
+  def can_verify_space(context)
+    (space_memberships.host.lead[0].user.dxuser == context.user.dxuser) && active?
   end
 
   def content_counters(user_id)

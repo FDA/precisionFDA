@@ -13,7 +13,7 @@ class SpaceForm
 
   validates :name, :description, :space_type, presence: true
   validate :validate_host_lead_dxuser
-  validate :validate_guest_lead_dxuser, if: -> { space_type == 'groups' }
+  validate :validate_guest_lead_dxuser, if: -> { space_type == 'groups' || space_type == 'verification' }
   validate :validate_sponsor_org, if: -> { space_type == 'review' }
 
   def self.model_name

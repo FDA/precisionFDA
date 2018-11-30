@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-
   #
   # Remove the ability to switch formats (i.e. /foo vs /foo.json or /foo.xml)
   # by wrapping everything into a scope
@@ -68,9 +67,6 @@ Rails.application.routes.draw do
     get 'exception_test' => "main#exception_test"
     get 'presskit' => 'main#presskit'
     get 'news' => 'main#news'
-
-    # News Items, public
-    get '/news_items' => 'news_items#index'
 
     # API
     namespace "api" do
@@ -283,6 +279,7 @@ Rails.application.routes.draw do
       end
     end
 
+
     resources :spaces do
       get 'members', on: :member
       get 'discuss', on: :member
@@ -294,6 +291,7 @@ Rails.application.routes.draw do
       get 'jobs',   on: :member
       get 'comparisons',   on: :member
       get 'assets',   on: :member
+      post 'verify', on: :member
       post 'accept', on: :member
       post 'lock', on: :member, to: 'space_requests#lock'
       post 'unlock', on: :member, to: 'space_requests#unlock'
@@ -344,6 +342,7 @@ Rails.application.routes.draw do
     resources :notification_preferences, only: [:index] do
       post 'change', on: :collection
     end
+
 
     resources :meta_appathons, constraints: {appathon_id: /[^\/]+/ }  do
       post 'rename', on: :member

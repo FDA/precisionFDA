@@ -1,7 +1,7 @@
 module SpacesHelper
 
   def member_side(space, member)
-    if space.groups?
+    if space.groups? || space.verification?
       member.host? ? "host" : "guest"
     elsif space.review?
       member.host? ? "reviewer" : "sponsor"
@@ -28,6 +28,7 @@ module SpacesHelper
   end
 
   def space_type(space)
+    return 'Verification' if space.verification?
     return 'Group' if space.groups?
 
     space.confidential? ? 'Confidential' : 'Cooperative'

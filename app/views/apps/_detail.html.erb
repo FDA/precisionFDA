@@ -125,6 +125,12 @@
       <span class="fa fa-flip-vertical fa-sitemap"></span> Track
     <% end %>
   </div>
+  <% if @app.verified? %>
+    <span>
+      <span class="fa fa-check-circle" style="padding-left: 30px; color: #1F70B5"></span>
+      Verified
+    </span>
+  <% end %>
 
   <div class="btn-group pull-right">
     <%= render "_partials/btn_challenge_app", app: @app %>

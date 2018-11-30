@@ -4,6 +4,8 @@ class FilesController < ApplicationController
   before_action :redirect_guest,         only: [:index]
   before_action :init_parent_folder,     only: [:index, :featured, :explore]
 
+  include VerifiedSpaceHelper
+
   def index
     if request.xhr?
       render_folders(private_folders(@parent_folder_id))
@@ -435,7 +437,8 @@ class FilesController < ApplicationController
       foldersPath: node.is_a?(Folder) ? pathify_folder(node) : nil,
       name: node.name,
       rename_path: node.is_a?(Folder) ? rename_folder_file_path(node) : rename_file_path(node),
-      type: node.klass
+      type: node.klass,
+      in_verified_space: in_verified_space?(node)
     }
   end
 
@@ -478,4 +481,5 @@ class FilesController < ApplicationController
   def init_parent_folder
     @parent_folder_id = params[:folder_id]
   end
+
 end

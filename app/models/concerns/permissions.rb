@@ -64,6 +64,9 @@ module Permissions
 
   def editable_by?(context)
     return false if context.guest?
+
+    return false if in_locked_verificaiton_space?
+
     return user_id == context.user_id unless in_space?
 
     return false unless context.user.space_uids.include?(scope)
@@ -110,6 +113,10 @@ module Permissions
 
   def private?
     scope == "private" || scope.nil?
+  end
+
+  def in_locked_verificaiton_space?
+    in_space? && space_object.verified?
   end
 
   def in_space?

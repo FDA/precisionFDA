@@ -39,4 +39,5 @@ AppsController = Paloma.controller('Apps',
     $container.find('[data-toggle="tooltip"]').tooltip({
       container: 'body'
     })
+
 )

@@ -56,8 +56,9 @@ ActiveRecord::Schema.define(version: 20181130164656) do
     t.integer  "latest_version_app_id",  limit: 4
     t.integer  "user_id",                limit: 4
     t.string   "scope",                  limit: 255
-    t.datetime "created_at",                         null: false
-    t.datetime "updated_at",                         null: false
+    t.datetime "created_at",                                         null: false
+    t.datetime "updated_at",                                         null: false
+    t.boolean  "verified",                           default: false, null: false
   end
 
   add_index "app_series", ["dxid"], name: "index_app_series_on_dxid", using: :btree
@@ -93,10 +94,11 @@ ActiveRecord::Schema.define(version: 20181130164656) do
     t.string   "scope",         limit: 255
     t.text     "spec",          limit: 65535
     t.text     "internal",      limit: 65535
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
+    t.datetime "created_at",                                  null: false
+    t.datetime "updated_at",                                  null: false
     t.integer  "app_series_id", limit: 4
     t.string   "uid",           limit: 255
+    t.boolean  "verified",                    default: false, null: false
   end
 
   add_index "apps", ["app_series_id"], name: "index_apps_on_app_series_id", using: :btree
@@ -574,12 +576,13 @@ ActiveRecord::Schema.define(version: 20181130164656) do
     t.string   "host_dxorg",     limit: 255
     t.string   "guest_dxorg",    limit: 255
     t.text     "meta",           limit: 65535
-    t.datetime "created_at",                               null: false
-    t.datetime "updated_at",                               null: false
+    t.datetime "created_at",                                   null: false
+    t.datetime "updated_at",                                   null: false
     t.integer  "space_id",       limit: 4
-    t.integer  "state",          limit: 4,     default: 0, null: false
-    t.integer  "space_type",     limit: 4,     default: 0, null: false
+    t.integer  "state",          limit: 4,     default: 0,     null: false
+    t.integer  "space_type",     limit: 4,     default: 0,     null: false
     t.integer  "sponsor_org_id", limit: 4
+    t.boolean  "verified",                     default: false, null: false
   end
 
   create_table "submissions", force: :cascade do |t|

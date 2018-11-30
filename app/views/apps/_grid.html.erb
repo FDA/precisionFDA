@@ -25,6 +25,10 @@
     series.user.org.handle
   end
 
+  g.column name: 'Verified', attribute: 'verified' do |series|
+    content_tag(:span, "", class: series.verified? ? "fa fa-check" : "fa fa-times")
+  end
+
   g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |series|
     link_to(series.user.dxuser, user_path(series.user.dxuser))
   end

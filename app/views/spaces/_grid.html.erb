@@ -14,7 +14,7 @@
   end
 
   g.column name: 'State', attribute: 'state', custom_filter: Space.states.to_a, auto_reload: true, allow_multiple_selection: false do |space|
-    [space.state, { class: "col-state state-#{space.state}" }]
+    [(space.verified == true ? content_tag(:span, nil, {class:'fa fa-lock'}):'')+ " " + space.state, { class: "col-state state-#{space.state}" }]
   end
 
   g.column name: 'Name', attribute: 'name', auto_reload: true, allow_multiple_selection: false do |space|
