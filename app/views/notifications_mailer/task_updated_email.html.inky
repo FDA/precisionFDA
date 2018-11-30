@@ -1,6 +1,6 @@
 <wrapper>
   <div class="hidden-email-preview">
-    Task <%= @task.name %> was <%= @action %>
+    Task was <%= @action %>
   </div>
   <spacer size="16"></spacer>
   <container class="header">
@@ -11,7 +11,7 @@
         </a>
       </columns>
       <columns>
-        <p class="header-title text-right">Task <%= @task.name %> was <%= @action %></p>
+        <p class="header-title text-right">Task was <%= @action %></p>
       </columns>
     </row>
   </container>
@@ -19,7 +19,15 @@
     <row>
       <columns>
         <p>
-          A task <strong><%= link_to @task.name, space_task_url(@task.space, @task) %></strong> created by you in <%= link_to @task.space.title, space_url(@task.space) %> space was <%= @action %>.
+          <% if @action == 'created' %>
+            A task <strong><%= link_to @task.name, space_task_url(@task.space, @task) %></strong> in <%= link_to @task.space.title, space_url(@task.space) %> space was created by <%= @task_creator %> and assigned to <%= @task_assignee %>.
+          <% elsif @action == 'deleted' %>
+            A task <strong><%= @task.name %></strong> in <%= link_to @task.space.title, space_url(@task.space) %> space was deleted.
+          <% elsif @action == 'reassigned' %>
+            A task <strong><%= link_to @task.name, space_task_url(@task.space, @task) %></strong> in <%= link_to @task.space.title, space_url(@task.space) %> space was <%= @action %> to <%= @task_assignee %>.
+          <% else %>
+            A task <strong><%= link_to @task.name, space_task_url(@task.space, @task) %></strong> created by <%= @task_creator %> in <%= link_to @task.space.title, space_url(@task.space) %> space was <%= @action %>.
+          <% end %>
         </p>
 
         <button class="radius" href="<%= tasks_space_url(@task.space) %>">View Tasks</button>

@@ -14,5 +14,6 @@ module SpaceMembershipService
         SpaceMembershipService::Update.call(api, space, membership) unless membership.lead?
       end
     end
+
   end
 end

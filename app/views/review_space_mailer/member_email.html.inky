@@ -11,7 +11,7 @@
         </a>
       </columns>
       <columns>
-        <p class="header-title text-right">Space is active</p>
+        <p class="header-title text-right">New user</p>
       </columns>
     </row>
   </container>
@@ -19,7 +19,7 @@
     <row>
       <columns>
         <p>
-          The space <strong><%= link_to @space.title, space_url(@space) %></strong> was unlocked.
+          #{@new_member.user.full_name} was added to the space "#{@space.title}" as #{member_side(@space, @new_member)} #{@new_member.role}.
         </p>
 
         <button class="radius" href="<%= space_url(@space) %>">View Space</button>

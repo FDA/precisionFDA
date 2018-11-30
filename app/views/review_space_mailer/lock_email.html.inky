@@ -1,6 +1,6 @@
 <wrapper>
   <div class="hidden-email-preview">
-    Space unlock for <%= @space.title %>
+    Space lock for <%= @space.title %>
   </div>
   <spacer size="16"></spacer>
   <container class="header">
@@ -11,7 +11,7 @@
         </a>
       </columns>
       <columns>
-        <p class="header-title text-right">Space is active</p>
+        <p class="header-title text-right">Space is locked</p>
       </columns>
     </row>
   </container>
@@ -19,10 +19,8 @@
     <row>
       <columns>
         <p>
-          The space <strong><%= link_to @space.title, space_url(@space) %></strong> was unlocked.
+          The space <strong><%= link_to @space.title, space_url(@space) %></strong> was locked.
         </p>
-
-        <button class="radius" href="<%= space_url(@space) %>">View Space</button>
       </columns>
     </row>
   </container>

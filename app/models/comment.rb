@@ -54,6 +54,10 @@ class Comment < ActiveRecord::Base
       :user_id     => user_id
   end
 
+  def klass
+    'comment'
+  end
+
   #helper method to check if a comment has children
   def has_children?
     self.children.any?
@@ -85,4 +89,11 @@ class Comment < ActiveRecord::Base
   def in_space?
     false
   end
+
+  def mentioned_users
+    User.where(
+      dxuser: body.scan(/\@([^[:space:]]*)/)
+    )
+  end
+
 end

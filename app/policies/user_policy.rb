@@ -9,5 +9,9 @@ class UserPolicy
       context.user.space_memberships.active.count > 0
     end
 
+    def access_notification_preference?(user)
+      user.spaces.review.any?
+    end
+
   end
 end

@@ -79,14 +79,6 @@ class NotificationsMailer < ApplicationMailer
          subject: "#{@admin.user.full_name} added you to the space \"#{@space.title}\""
   end
 
-  # @param space [Space] Shared space
-  def sponsor_unlock_email(space, user)
-    @space = space
-    @user = user
-    mail to: space.space_memberships.guest.active.lead.first.user.email,
-         subject: "#{@user.full_name} unlocked the space \"#{@space.title}\""
-  end
-
   def new_expert_email(expert)
     @expert = expert
     mail to: @expert.user.email,
@@ -107,11 +99,14 @@ class NotificationsMailer < ApplicationMailer
          subject: "Task \"#{@task.name}\" was assigned to you"
   end
 
-  def task_updated_email(task, action)
+  def task_updated_email(task, receiver, action)
     @task = task
     @action = action
-    mail to: @task.user.email,
-         subject: "Task \"#{@task.name}\" was \"#{@action}\""
+    @receiver = receiver
+    @task_creator = @task.user.id == @receiver.id ? 'you' : @task.user.full_name
+    @task_assignee = @task.assignee.id == @receiver.id ? 'you' : @task.assignee.full_name
+    mail to: @receiver.email,
+         subject: "Task \"#{@task.name}\" was #{@action}"
   end
 
   def user_failed_to_acknowledge_task_email(task)

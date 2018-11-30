@@ -64,11 +64,6 @@ class NotifierPreview < ActionMailer::Preview
     NotificationsMailer.new_task_email(task)
   end
 
-  def task_updated_email
-    task = Task.last
-    NotificationsMailer.task_updated_email(task, "accepted")
-  end
-
   def user_failed_to_acknowledge_task_email
     task = Task.last
     NotificationsMailer.user_failed_to_acknowledge_task_email(task)

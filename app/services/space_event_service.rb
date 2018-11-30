@@ -15,6 +15,7 @@ module SpaceEventService
         when "note" then :note_added
         end
     end
-    SpaceEvent.create(space_id: space_id, user_id: user_id, side: membership[:side], role: membership[:role], entity: entity, activity_type: activity_type)
+    space_event = SpaceEvent.create(space_id: space_id, user_id: user_id, side: membership[:side], role: membership[:role], entity: entity, activity_type: activity_type)
+    NotificationSender.call(space_event)
   end
 end
