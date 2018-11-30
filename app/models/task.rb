@@ -63,6 +63,7 @@ class Task < ActiveRecord::Base
   end
 
   def accessible_by?(context)
+    return true if context.review_space_admin?
     if !context.guest?
       raise unless context.user_id.present?
       space.space_memberships.exists?(user_id: context.user_id)
