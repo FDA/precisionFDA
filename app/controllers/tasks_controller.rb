@@ -1,7 +1,7 @@
 class TasksController < ApplicationController
   before_action :find_task, only: [:show, :reassign, :copy, :task]
   before_action :find_tasks, only: [:accept, :complete, :decline, :make_active, :reopen]
-  before_action :find_space_and_membership, only: [:show, :create, :accept, :complete, :decline, :destroy, :make_active, :reopen]
+  before_action :find_space_and_membership, only: [:show, :create, :update, :accept, :complete, :decline, :destroy, :make_active, :reopen]
 
   def task
     task = @task.attributes.merge(
@@ -13,6 +13,8 @@ class TasksController < ApplicationController
   end
 
   def show
+    redirect_to root_url unless TaskPolicy.can_see?(@task, @membership)
+
     case @task.status
     when "open"
       @status = 'Awaiting Response'
@@ -66,7 +68,9 @@ class TasksController < ApplicationController
 
   def update
     task = Task.find(params[:id])
-    task.update_task(editable_params)
+    if TaskPolicy.can_edit?(task, @membership)
+      task.update_task(editable_params)
+    end
     redirect_to :back, status: :see_other rescue redirect_to tasks_space_path(task.space_id)
   end
 
@@ -152,7 +156,7 @@ class TasksController < ApplicationController
     NotificationsMailer.new_task_email(@task).deliver_later!
     SpaceEventService.call(@task.space_id, @context.user_id, nil, @task, :task_reassigned)
 
-    redirect_to tasks_space_path(@task.space_id)
+    redirect_to :back, status: :see_other rescue redirect_to tasks_space_path(@task.space_id)
   end
 
   def copy
