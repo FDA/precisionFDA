@@ -39,7 +39,12 @@
         <% end %>
 
         <div class="spaces-tasks-grid">
-          <%= render "spaces/tasks/grid", tasks_grid: @tasks_grid, empty_text: "Tasks will show up here." %>
+          <%=
+            render "spaces/tasks/grid",
+            tasks_grid: @tasks_grid,
+            dates_titles: @dates_titles,
+            empty_text: "Tasks will show up here."
+          %>
         </div>
 
       </div>
