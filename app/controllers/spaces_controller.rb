@@ -348,19 +348,21 @@ class SpacesController < ApplicationController
   end
 
   def tasks
+    if params[:filter] == "all" && !@context.review_space_admin?
+      params[:filter] = "my"
+    end
+
     case params[:filter]
     when "created_by_me"
       filter = {user_id: @context.user_id}
-    when "my"
-      filter = {assignee_id: @context.user_id}
-    else
+    when "all"
       filter = {}
+    else
+      params[:filter] = "my"
+      filter = {assignee_id: @context.user_id}
     end
 
     case params[:status]
-    when "awaiting_response"
-      @tasks = @space.tasks.where(filter).awaiting_response
-      @page_title = 'Awaiting Response Tasks'
     when "completed"
       @tasks = @space.tasks.where(filter).completed
       @page_title = 'Completed Tasks'
@@ -371,8 +373,9 @@ class SpacesController < ApplicationController
       @tasks = @space.tasks.where(filter).accepted_and_failed_deadline
       @page_title = 'Active Tasks'
     else
-      @tasks = @space.tasks.where(filter)
-      @page_title = 'Other Tasks'
+      params[:status] = "awaiting_response"
+      @tasks = @space.tasks.where(filter).awaiting_response
+      @page_title = 'Awaiting Response Tasks'
     end
 
     @tasks_grid = initialize_grid(@tasks, {

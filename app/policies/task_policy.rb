@@ -1,5 +1,10 @@
 class TaskPolicy
 
+  # participants and admin can see task
+  def self.can_see?(task, member)
+    task.assignee_id == member.user_id || task.user_id == member.user_id || member.admin?
+  end
+
   # target user can accept task
   def self.can_accept?(task, member)
     statuses = ['open', 'failed_response_deadline']
@@ -9,19 +14,18 @@ class TaskPolicy
   # target user or space admin can complete task
   def self.can_complete?(task, member)
     statuses = ['accepted', 'failed_completion_deadline']
-    statuses.include?(task.status) && (task.assignee_id == member.user_id || member.role == "admin")
+    statuses.include?(task.status) && (task.assignee_id == member.user_id || member.admin?)
   end
 
   # target user or space admin can decline task
   def self.can_decline?(task, member)
     statuses = ['open', 'failed_response_deadline']
-    statuses.include?(task.status) && (task.assignee_id == member.user_id || member.role == "admin")
+    statuses.include?(task.status) && (task.assignee_id == member.user_id || member.admin?)
   end
 
-  # source or target user can comment task
+  # participants can comment task
   def self.can_comment?(task, member)
-    statuses = ['open', 'accepted', 'declined', 'completed', 'failed_response_deadline', 'failed_completion_deadline']
-    statuses.include?(task.status) && (task.user_id == member.user_id || task.assignee_id == member.user_id)
+    task.user_id == member.user_id || task.assignee_id == member.user_id
   end
 
   # target user can make active completed task
@@ -36,27 +40,24 @@ class TaskPolicy
     statuses.include?(task.status) && task.user_id == member.user_id
   end
 
-  # source or target user or space admin can clone task
+  # participants or space admin can clone task
   def self.can_clone?(task, member)
-    statuses = ['open', 'accepted', 'declined', 'completed', 'failed_response_deadline', 'failed_completion_deadline']
-    statuses.include?(task.status) && (task.user_id == member.user_id || task.assignee_id == member.user_id || member.role == "admin")
+    task.user_id == member.user_id || task.assignee_id == member.user_id || member.admin?
   end
 
-  # source or target user can edit task
+  # participants can edit task
   def self.can_edit?(task, member)
-    statuses = ['open', 'accepted', 'declined', 'completed', 'failed_response_deadline', 'failed_completion_deadline']
-    statuses.include?(task.status) && (task.user_id == member.user_id || task.assignee_id == member.user_id)
+    task.user_id == member.user_id || task.assignee_id == member.user_id
   end
 
-  # source or target user or space admin can reassign task
+  # participants or space admin can reassign task
   def self.can_reassign?(task, member)
-    statuses = ['open', 'accepted', 'declined', 'completed', 'failed_response_deadline', 'failed_completion_deadline']
-    statuses.include?(task.status) && (task.user_id == member.user_id || task.assignee_id == member.user_id || member.role == "admin")
+    task.user_id == member.user_id || task.assignee_id == member.user_id || member.admin?
   end
 
   # source user or space admin can delete task
   def self.can_delete?(task, member)
-    task.user_id == member.user_id || (task.space.space_memberships.ids.include?(member.id) && member.role == "admin")
+    task.user_id == member.user_id || member.admin?
   end
 
 end

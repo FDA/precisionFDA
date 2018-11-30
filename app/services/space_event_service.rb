@@ -1,7 +1,8 @@
 module SpaceEventService
   def self.call(space_id, user_id, membership, entity, activity_type)
     if membership.nil?
-      membership = Space.find(space_id).space_memberships.find_by!(user_id: user_id)
+      membership = Space.find(space_id).space_memberships.find_by(user_id: user_id)
+      membership = SpaceMembership.new_by_admin(User.find(user_id)) unless membership
     end
     SpaceEvent.create(space_id: space_id, user_id: user_id, side: membership[:side], role: membership[:role], entity: entity, activity_type: activity_type)
   end
