@@ -333,6 +333,7 @@ class SpacesController < ApplicationController
       ActiveRecord::Base.transaction do
         copy_service.copy(object, space.shared_space.uid)
       end
+      SpaceEventService.call(space.shared_space.id, @context.user_id, nil, object, "copy_to_cooperative")
       flash[:success] = "#{object.class} successfully copied"
     end
 
