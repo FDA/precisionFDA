@@ -1,4 +1,5 @@
 <%= grid(tasks_grid, show_filters: :when_filtered) do |g|
+
   g.blank_slate do
     content_tag :div, defined?(empty_text) ? empty_text : "No taks found", class: 'alert alert-info'
   end
@@ -20,13 +21,13 @@
   end
 
   g.column name: 'RESPONDED ON' do |task|
-    date = task.response_deadline.try(:strftime, "%m/%d/%Y")
+    date = date_value_by_status(task).respond.try(:strftime, "%m/%d/%Y")
     failed_css = task.status == 'failed_response_deadline' ? 'failed' : ''
     content_tag(:span, date, class: "#{failed_css}")
   end
 
   g.column name: 'COMPLETE BY' do |task|
-    date = task.completion_deadline.try(:strftime, "%m/%d/%Y")
+    date = date_value_by_status(task).complete.try(:strftime, "%m/%d/%Y")
     failed_css = task.status == 'failed_completion_deadline' ? 'failed' : ''
     content_tag(:span, date, class: "#{failed_css}", title: "Failed Deadline")
   end
