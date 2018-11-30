@@ -52,10 +52,10 @@ class SpaceEvent < ActiveRecord::Base
   )
 
   ROLES = %i(
-    lead
     admin
     member
     viewer
+    lead
   )
 
   belongs_to :user
