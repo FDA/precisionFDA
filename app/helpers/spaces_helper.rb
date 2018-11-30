@@ -226,44 +226,4 @@ module SpacesHelper
     end
   end
 
-  def title_by_status(task)
-    case task.status
-      when "open"
-        return {
-          respond: { title: 'RESPOND BY', value: task.response_deadline },
-          complete: { title: 'COMPLETE BY', value: task.completion_deadline }
-        }
-      when "failed_response_deadline"
-        return {
-          respond: { title: 'RESPOND BY', value: task.response_deadline },
-          complete: { title: 'COMPLETE BY', value: task.completion_deadline }
-        }
-      when "active"
-        return {
-          respond: { title: 'RESPONDED BY', value: task.response_time },
-          complete: { title: 'COMPLETE BY', value: task.completion_deadline }
-        }
-      when "failed_completion_deadline"
-        return {
-          respond: { title: 'RESPONDED ON', value: task.response_time },
-          complete: { title: 'COMPLETE BY', value: task.completion_deadline }
-        }
-      when "completed"
-        return {
-          respond: { title: 'RESPONDED ON', value: task.response_time },
-          complete: { title: 'COMPLETED ON', value: task.completion_time }
-        }
-      when "declined"
-        return {
-          respond: { title: 'RESPOND BY', value: task.response_deadline },
-          complete: { title: 'DECLINED ON', value: task.response_time }
-        }
-      else
-        return {
-          title: '',
-          value: ''
-        }
-    end
-  end
-
 end

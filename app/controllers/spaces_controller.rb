@@ -367,16 +367,32 @@ class SpacesController < ApplicationController
     when "completed"
       @tasks = @space.tasks.where(filter).completed
       @page_title = 'Completed Tasks'
+      @dates_titles = {
+        respond: 'RESPONDED ON',
+        complete: 'COMPLETED ON'
+      }
     when "declined"
       @tasks = @space.tasks.where(filter).declined
       @page_title = 'Declined Tasks'
+      @dates_titles = {
+        respond: 'RESPOND BY',
+        complete: 'DECLINED ON'
+      }
     when "accepted"
       @tasks = @space.tasks.where(filter).accepted_and_failed_deadline
       @page_title = 'Active Tasks'
+      @dates_titles = {
+        respond: 'RESPONDED BY',
+        complete: 'COMPLETE BY'
+      }
     else
       params[:status] = "awaiting_response"
       @tasks = @space.tasks.where(filter).awaiting_response
       @page_title = 'Awaiting Response Tasks'
+      @dates_titles = {
+        respond: 'RESPOND BY',
+        complete: 'COMPLETE BY'
+      }
     end
 
     @tasks_grid = initialize_grid(@tasks, {
