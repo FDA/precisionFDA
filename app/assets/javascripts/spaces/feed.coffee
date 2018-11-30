@@ -45,7 +45,10 @@ class SpacesFeedView
     @feedLoading(true)
     $.get(url, data).then((data) =>
       if concat
-        @feedItems @feedItems().concat(data)
+        if data.length > 0
+          @feedItems @feedItems().concat(data)
+        else
+          @feedPage(@feedPage() - 1) if @feedPage() > 0
       else
         @feedItems data
       @feedLoading(false)
@@ -238,12 +241,16 @@ SpacesController = Paloma.controller('Spaces', {
     $('.selectpicker').selectpicker('refresh')
 
     $(document).ready(() -> scrollTo(0))
+
     scrollPos = 0
-    $(window).scroll(() ->
+    loadMoreFeed = () ->
       goDown = scrollPos < $(window).scrollTop()
       if($(window).scrollTop() + $(window).height() >= $(document).height() - 200 and goDown)
         viewModel.loadMoreFeed() if !viewModel.feedLoading()
       scrollPos = $(window).scrollTop()
+
+    $(window).on 'scroll', loadMoreFeed
+    $(document).on 'turbolinks:before-visit', () -> $(window).off 'scroll', loadMoreFeed
     )
 
 })
