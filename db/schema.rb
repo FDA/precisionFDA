@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181119180459) do
+ActiveRecord::Schema.define(version: 20181130164656) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -554,6 +554,18 @@ ActiveRecord::Schema.define(version: 20181119180459) do
   add_index "space_memberships_spaces", ["space_id"], name: "index_space_memberships_spaces_on_space_id", using: :btree
   add_index "space_memberships_spaces", ["space_membership_id"], name: "index_space_memberships_spaces_on_space_membership_id", using: :btree
 
+  create_table "space_requests", force: :cascade do |t|
+    t.integer  "status",     limit: 4, default: 0
+    t.integer  "kind",       limit: 4, default: 0
+    t.integer  "space_id",   limit: 4
+    t.integer  "user_id",    limit: 4
+    t.datetime "created_at",                       null: false
+    t.datetime "updated_at",                       null: false
+  end
+
+  add_index "space_requests", ["space_id"], name: "index_space_requests_on_space_id", using: :btree
+  add_index "space_requests", ["user_id"], name: "fk_rails_ceb7f2ca83", using: :btree
+
   create_table "spaces", force: :cascade do |t|
     t.string   "name",           limit: 255
     t.text     "description",    limit: 65535
@@ -622,6 +634,8 @@ ActiveRecord::Schema.define(version: 20181119180459) do
     t.datetime "completion_deadline"
     t.datetime "created_at",                                    null: false
     t.datetime "updated_at",                                    null: false
+    t.datetime "response_time"
+    t.datetime "complete_time"
   end
 
   add_index "tasks", ["space_id"], name: "index_tasks_on_space_id", using: :btree
@@ -845,6 +859,8 @@ ActiveRecord::Schema.define(version: 20181119180459) do
   add_foreign_key "space_events", "spaces"
   add_foreign_key "space_events", "users"
   add_foreign_key "space_memberships", "users"
+  add_foreign_key "space_requests", "spaces"
+  add_foreign_key "space_requests", "users"
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"
   add_foreign_key "submissions", "users"
