@@ -71,7 +71,7 @@ class TasksController < ApplicationController
     if TaskPolicy.can_edit?(task, @membership)
       task.update_task(editable_params)
     end
-    redirect_to :back, status: :see_other rescue redirect_to tasks_space_path(task.space_id)
+    render json: { status: 200 }
   end
 
   def destroy
@@ -83,7 +83,7 @@ class TasksController < ApplicationController
 
       SpaceEventService.call(space_id, @context.user_id, @membership, task, :task_deleted)
     end
-    redirect_to :back, status: :see_other rescue redirect_to tasks_space_path(space_id)
+    render json: { status: 200, redirect_url: tasks_space_path(space_id) }
   end
 
   def accept
@@ -93,7 +93,7 @@ class TasksController < ApplicationController
         NotificationsMailer.task_updated_email(task, "accepted").deliver_later!
       end
     end
-    render json: {status: "success"}
+    render json: { status: 200 }
   end
 
   def decline
@@ -108,7 +108,7 @@ class TasksController < ApplicationController
         end
       end
     end
-    render json: {status: "success"}
+    render json: { status: 200 }
   end
 
   def complete
@@ -119,7 +119,7 @@ class TasksController < ApplicationController
         SpaceEventService.call(task.space_id, @context.user_id, @membership, task, :task_completed)
       end
     end
-    render json: {status: "success"}
+    render json: { status: 200 }
   end
 
   def make_active
@@ -133,7 +133,7 @@ class TasksController < ApplicationController
         end
       end
     end
-    render json: {status: "success"}
+    render json: { status: 200 }
   end
 
   def reopen
@@ -147,7 +147,7 @@ class TasksController < ApplicationController
         end
       end
     end
-    render json: {status: "success"}
+    render json: { status: 200 }
   end
 
   def reassign
