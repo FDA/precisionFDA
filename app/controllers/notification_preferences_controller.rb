@@ -24,7 +24,7 @@ class NotificationPreferencesController < ApplicationController
   private
 
   def check_user
-    return if current_user.spaces.review.any?
+    return if UserPolicy.access_notification_preference?(current_user)
     redirect_to root_url
   end
 

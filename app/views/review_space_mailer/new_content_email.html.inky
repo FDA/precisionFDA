@@ -1,6 +1,6 @@
 <wrapper>
   <div class="hidden-email-preview">
-    Space unlock for <%= @space.title %>
+    New <%= @content.klass.downcase %>
   </div>
   <spacer size="16"></spacer>
   <container class="header">
@@ -11,7 +11,7 @@
         </a>
       </columns>
       <columns>
-        <p class="header-title text-right">Space is active</p>
+        <p class="header-title text-right">New <%= @content.klass.downcase %></p>
       </columns>
     </row>
   </container>
@@ -19,12 +19,14 @@
     <row>
       <columns>
         <p>
-          The space <strong><%= link_to @space.title, space_url(@space) %></strong> was unlocked.
+          <%= @content.user.full_name %> added a new <%= @content.klass.downcase %> to the space <%= link_to @space.title, space_url(@space) %>:
         </p>
-
-        <button class="radius" href="<%= space_url(@space) %>">View Space</button>
+        <p>
+          <%= link_to(@content.title, urlify(@content)) %>
+        </p>
       </columns>
     </row>
   </container>
   <spacer size="16"></spacer>
 </wrapper>
+

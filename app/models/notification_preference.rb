@@ -3,17 +3,18 @@
 class NotificationPreference < ActiveRecord::Base
 
   SPACE_COMMON_KEYS = [
+    # :membership_changed, #added to space, removed from space, role changed within space
     :task_assignment,
-    :task_status_change,
-    :comment_activity,
-    :comment_added_or_deleted,
+    # :task_status_change,
+    :comment_activity, #mentioned in a comment, someone replies to their comment
+    :content_added_or_deleted,
+    # :app_workflow_status, #job started, job completed, job failed, job terminated
   ]
   SPACE_LEAD_AND_ADMIN_KEYS = [
-    :member_added_or_removed,
+    # :member_added_or_removed,
     :space_lock_unlock_delete,
   ]
-  SPACE_ADMIN_KEYS = [:space_lock_unlock_delete_requests]
-  ALL_KEYS = SPACE_COMMON_KEYS + SPACE_LEAD_AND_ADMIN_KEYS + SPACE_ADMIN_KEYS
+  ALL_KEYS = SPACE_COMMON_KEYS + SPACE_LEAD_AND_ADMIN_KEYS
 
   ALL_KEYS.each do |key|
     define_method("#{key}=") do |value|
@@ -31,6 +32,10 @@ class NotificationPreference < ActiveRecord::Base
   validates *ALL_KEYS, inclusion: { in: [ true, false ] }
   store :data, { accessors: ALL_KEYS, coder: JSON }
 
+  def self.find_by_user(user)
+    find_or_initialize_by(user_id: user.id)
+  end
+
   def attributes
     available_keys.each_with_object({}) do |key, memo|
       memo[key] = send(key)
@@ -38,10 +43,8 @@ class NotificationPreference < ActiveRecord::Base
   end
 
   def available_keys
-    if user.review_space_admin?
+    if user.review_space_admin? || user.space_memberships.lead.active.any?
       ALL_KEYS
-    elsif user.space_memberships.lead.active.any?
-      SPACE_LEAD_AND_ADMIN_KEYS + SPACE_COMMON_KEYS
     else
       SPACE_COMMON_KEYS
     end

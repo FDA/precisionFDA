@@ -60,7 +60,6 @@ class TasksController < ApplicationController
       render json: { errors: errors }.to_json, status: 500
     else
       SpaceEventService.call(@task.space_id, @context.user_id, nil, @task, :task_created)
-      NotificationsMailer.new_task_email(@task).deliver_now!
 
       render json: { status: 200 }
     end
@@ -90,7 +89,6 @@ class TasksController < ApplicationController
     @tasks.each do |task|
       if TaskPolicy.can_accept?(task, @membership)
         task.accepted!
-        NotificationsMailer.task_updated_email(task, "accepted").deliver_later!
       end
     end
     render json: { status: 200 }
@@ -100,7 +98,6 @@ class TasksController < ApplicationController
     @tasks.each do |task|
       if TaskPolicy.can_decline?(task, @membership)
         task.declined!
-        NotificationsMailer.task_updated_email(task, "declined").deliver_later!
         SpaceEventService.call(task.space_id, @context.user_id, @membership, task, :task_declined)
         if params.dig(:comment, :body).presence
           comment = Comment.build_from(task, @context.user_id, params[:comment][:body])
@@ -115,7 +112,6 @@ class TasksController < ApplicationController
     @tasks.each do |task|
       if TaskPolicy.can_complete?(task, @membership)
         task.completed!
-        NotificationsMailer.task_updated_email(task, "completed").deliver_later!
         SpaceEventService.call(task.space_id, @context.user_id, @membership, task, :task_completed)
       end
     end
@@ -126,7 +122,6 @@ class TasksController < ApplicationController
     @tasks.each do |task|
       if TaskPolicy.can_make_active?(task, @membership)
         task.accepted!
-        NotificationsMailer.task_updated_email(task, "made active").deliver_later!
         if params.dig(:comment, :body).presence
           comment = Comment.build_from(task, @context.user_id, params[:comment][:body])
           comment.save
@@ -140,7 +135,6 @@ class TasksController < ApplicationController
     @tasks.each do |task|
       if TaskPolicy.can_reopen?(task, @membership)
         task.open!
-        NotificationsMailer.task_updated_email(task, "reopened").deliver_later!
         if params.dig(:comment, :body).presence
           comment = Comment.build_from(task, @context.user_id, params[:comment][:body])
           comment.save
@@ -153,7 +147,6 @@ class TasksController < ApplicationController
   def reassign
     assignee = User.find(params[:task][:assignee_id])
     @task.update(assignee_id: assignee.id, status: 0) if assignee
-    NotificationsMailer.new_task_email(@task).deliver_later!
     SpaceEventService.call(@task.space_id, @context.user_id, nil, @task, :task_reassigned)
 
     redirect_to :back, status: :see_other rescue redirect_to tasks_space_path(@task.space_id)

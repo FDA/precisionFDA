@@ -1,6 +1,6 @@
 <wrapper>
   <div class="hidden-email-preview">
-    Space unlock for <%= @space.title %>
+    New comment
   </div>
   <spacer size="16"></spacer>
   <container class="header">
@@ -11,7 +11,7 @@
         </a>
       </columns>
       <columns>
-        <p class="header-title text-right">Space is active</p>
+        <p class="header-title text-right">New comment</p>
       </columns>
     </row>
   </container>
@@ -19,12 +19,14 @@
     <row>
       <columns>
         <p>
-          The space <strong><%= link_to @space.title, space_url(@space) %></strong> was unlocked.
+          <%= @comment.user.full_name %> added a new <%= link_to('comment', urlify(@comment)) %>:
         </p>
-
-        <button class="radius" href="<%= space_url(@space) %>">View Space</button>
+        <p>
+          <%= simple_format(@comment.body) %>
+        </p>
       </columns>
     </row>
   </container>
   <spacer size="16"></spacer>
 </wrapper>
+

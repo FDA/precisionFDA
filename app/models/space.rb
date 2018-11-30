@@ -8,7 +8,6 @@ class Space < ActiveRecord::Base
   has_and_belongs_to_many :space_memberships
   has_many :users, { through: :space_memberships }
   has_many :confidential_spaces, class_name: 'Space'
-  has_many :requests, class_name: 'SpaceRequest'
   belongs_to :space
   has_many :tasks, dependent: :destroy
   has_many :space_events
