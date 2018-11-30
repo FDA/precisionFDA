@@ -62,7 +62,7 @@ class SpaceEvent < ActiveRecord::Base
   belongs_to :space
   belongs_to :entity, polymorphic: true
 
-  enum side: [:sponsor, :reviewer]
+  enum side: [:reviewer, :sponsor]
   enum activity_type: ACTIVITY_TYPES
   enum object_type: OBJECT_TYPES
   enum role: ROLES
