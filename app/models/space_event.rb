@@ -118,7 +118,7 @@ class SpaceEvent < ActiveRecord::Base
   def self.collection(start_date, end_date, filters = {})
     sort = filters[:sort] ? filters[:sort] : "asc"
     filters.delete(:sort)
-    filters.reject! { |k, v| v.empty? || v.nil? || (v == "null") }
+    filters.reject! { |k, v| v == "" || v.nil? || v == "null" }
     if filters[:object_type] == "[]"
       filters[:object_type] = []
     end
@@ -134,7 +134,7 @@ class SpaceEvent < ActiveRecord::Base
   end
 
   def self.object_type_counters(start_date = nil, end_date = nil, filters = {})
-    events = SpaceEvent.date_range(start_date, end_date).where(filters).group(:object_type).count
+    events = SpaceEvent.collection(start_date, end_date, filters).group(:object_type).count
 
     OBJECT_TYPES.each_with_index do |type, i|
       events[i] = 0 unless events[i]
