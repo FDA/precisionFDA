@@ -2,18 +2,20 @@ class SpaceMembershipPolicy
 
   class << self
 
-    def can_modify_content?(space, user)
-      can_move_content_by_user?(space, user)
+    def can_modify_content?(space, item, user)
+      can_move_content_by_user?(space, item, user)
     end
 
-    def can_move_content_by_user?(space, user)
+    def can_move_content_by_user?(space, item, user)
+      owner_member = space.space_memberships.find_by!(user_id: item.user_id)
       can_move_content?(
         space,
-        space.space_memberships.find_by(user_id: user.id)
+        space.space_memberships.where(side: owner_member[:side]).find_by(user_id: user.id)
       )
     end
 
     def can_move_content?(space, member)
+      return false if member.blank?
       return false unless space.active?
       return false if member.new_record?
       return false if member.inactive?

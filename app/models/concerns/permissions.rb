@@ -70,7 +70,7 @@ module Permissions
     return user_id == context.user_id unless in_space?
 
     return false unless context.user.space_uids.include?(scope)
-    SpaceMembershipPolicy.can_modify_content?(space_object, context.user)
+    SpaceMembershipPolicy.can_modify_content?(space_object, self, context.user)
   end
 
   # Helper method, not to be called from outside the model
@@ -98,7 +98,7 @@ module Permissions
 
   def copyable_to_cooperative_by?(context)
     return false unless in_space?
-    return false unless SpaceMembershipPolicy.can_modify_content?(space_object, context.user)
+    return false unless SpaceMembershipPolicy.can_modify_content?(space_object, self, context.user)
     copyable_to_cooperative? if accessible_by?(context)
   end
 

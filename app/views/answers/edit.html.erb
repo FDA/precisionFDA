@@ -31,7 +31,7 @@
   <div class="btn-toolbar pull-right">
     <%= link_to "Back to answer", discussion_answer_path(@discussion, @answer.user.dxuser), class: "btn btn-link" %>
     <a class="btn btn-primary" data-bind="click: save, css: {disabled: !isFormReady()}, text: saveBtnText"></a>
-    <% if answer.publishable_by?(@context) %>
+    <% if @answer.publishable_by?(@context) %>
       <a class="btn btn-success" href="<%= publish_path + "?" + {id: @answer.uid}.to_param %>" data-method="post" data-bind="css: {disabled: isFormReady()}" rel="nofollow">
         <span class="fa fa-bullhorn"></span> Publish
       </a>
