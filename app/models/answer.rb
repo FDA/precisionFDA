@@ -24,6 +24,10 @@ class Answer < ActiveRecord::Base
   acts_as_votable
   acts_as_taggable
 
+  def self.can_be_in_space?
+    false
+  end
+
   def uid
     "answer-#{id}"
   end

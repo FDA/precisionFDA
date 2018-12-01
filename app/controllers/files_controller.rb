@@ -203,7 +203,7 @@ class FilesController < ApplicationController
                           pathify_folder(parent_folder)
                         else
                           if @file.in_space?
-                            feed_space_path(Space.from_scope(@file.scope))
+                            files_space_path(Space.from_scope(@file.scope))
                           elsif params[:scope] == "public"
                             explore_files_path
                           else

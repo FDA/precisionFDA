@@ -212,7 +212,7 @@ module SpacesHelper
       when "completed"
         return {
           respond: task.response_time,
-          complete: task.completion_time
+          complete: task.complete_time
         }
       when "declined"
         return {
