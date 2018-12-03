@@ -65,7 +65,7 @@ class CommentsController < ApplicationController
       if comment.save
         move_to_child(comment)
 
-        log_space_event(comment, params[:space_id], "comment_added") if params[:space_id]
+        log_space_event(comment, item, "comment_added") if comment_inside_space?(item)
       else
         flash[:error] = "There was a problem with adding your comment"
       end
@@ -82,7 +82,7 @@ class CommentsController < ApplicationController
     comment = Comment.find_by(id: params[:id], user_id: @context.user_id)
     if !comment.nil?
       if comment.update_attributes(comment_params)
-        log_space_event(comment, params[:space_id], "comment_edited") if params[:space_id]
+        log_space_event(comment, item, "comment_edited") if comment_inside_space?(item)
         redirect_to pathify_comments_redirect(item)
         return
       else
@@ -97,7 +97,7 @@ class CommentsController < ApplicationController
     comment = Comment.find_by(id: params[:id], user_id: @context.user_id)
     if !comment.nil? && comment_inside_space?(item)
       comment.deleted!
-      log_space_event(comment, params[:space_id], "comment_deleted") if params[:space_id]
+      log_space_event(comment, item, "comment_deleted") if comment_inside_space?(item)
     elsif !comment.nil?
       comment.destroy
     else
@@ -146,7 +146,13 @@ class CommentsController < ApplicationController
       end
     end
 
-    def log_space_event(comment, space_id, event)
-      SpaceEventService.call(space_id, @context.user_id, nil, comment, event.to_sym)
+    def log_space_event(comment, item, event)
+      space =
+        if item.klass == "space"
+          item
+        else
+          item_from_uid(item.scope)
+        end
+      SpaceEventService.call(space.id, @context.user_id, nil, comment, event.to_sym)
     end
 end
