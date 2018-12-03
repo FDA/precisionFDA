@@ -85,6 +85,7 @@ class SpaceEvent < ActiveRecord::Base
   end
 
   def entity_name
+    return "DELETED" if self.entity.nil?
     case object_type
     when "space", "task", "job", "file", "asset", "comparison"
       self.entity.name
@@ -98,6 +99,7 @@ class SpaceEvent < ActiveRecord::Base
   end
 
   def additional_info
+    return if self.entity.nil?
     if self.comment? && (obj = self.entity.content_object)
       name = obj.try(:name) || obj.try(:title)
       {
@@ -110,7 +112,6 @@ class SpaceEvent < ActiveRecord::Base
   def self.describe_events(collection, page = 1)
     events = collection.includes(:user, :entity)
     events.page(page).per(10)
-      .reject { |e| e.entity.nil? }
       .map do |event|
         {
           id: event.id,
