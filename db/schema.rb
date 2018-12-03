@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181130164656) do
+ActiveRecord::Schema.define(version: 20181203191154) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -97,8 +97,8 @@ ActiveRecord::Schema.define(version: 20181130164656) do
     t.datetime "created_at",                                  null: false
     t.datetime "updated_at",                                  null: false
     t.integer  "app_series_id", limit: 4
-    t.string   "uid",           limit: 255
     t.boolean  "verified",                    default: false, null: false
+    t.string   "uid",           limit: 255
   end
 
   add_index "apps", ["app_series_id"], name: "index_apps_on_app_series_id", using: :btree
@@ -521,15 +521,16 @@ ActiveRecord::Schema.define(version: 20181130164656) do
   end
 
   create_table "space_events", force: :cascade do |t|
-    t.integer  "user_id",       limit: 4,   null: false
-    t.integer  "space_id",      limit: 4,   null: false
-    t.integer  "entity_id",     limit: 4,   null: false
-    t.string   "entity_type",   limit: 255, null: false
-    t.integer  "activity_type", limit: 4,   null: false
-    t.integer  "side",          limit: 4,   null: false
-    t.datetime "created_at",                null: false
-    t.integer  "object_type",   limit: 4,   null: false
-    t.integer  "role",          limit: 4,   null: false
+    t.integer  "user_id",       limit: 4,     null: false
+    t.integer  "space_id",      limit: 4,     null: false
+    t.integer  "entity_id",     limit: 4,     null: false
+    t.string   "entity_type",   limit: 255,   null: false
+    t.integer  "activity_type", limit: 4,     null: false
+    t.integer  "side",          limit: 4,     null: false
+    t.datetime "created_at",                  null: false
+    t.integer  "object_type",   limit: 4,     null: false
+    t.integer  "role",          limit: 4,     null: false
+    t.text     "data",          limit: 65535
   end
 
   add_index "space_events", ["entity_type", "entity_id"], name: "index_space_events_on_entity_type_and_entity_id", using: :btree
@@ -556,18 +557,6 @@ ActiveRecord::Schema.define(version: 20181130164656) do
   add_index "space_memberships_spaces", ["space_id"], name: "index_space_memberships_spaces_on_space_id", using: :btree
   add_index "space_memberships_spaces", ["space_membership_id"], name: "index_space_memberships_spaces_on_space_membership_id", using: :btree
 
-  create_table "space_requests", force: :cascade do |t|
-    t.integer  "status",     limit: 4, default: 0
-    t.integer  "kind",       limit: 4, default: 0
-    t.integer  "space_id",   limit: 4
-    t.integer  "user_id",    limit: 4
-    t.datetime "created_at",                       null: false
-    t.datetime "updated_at",                       null: false
-  end
-
-  add_index "space_requests", ["space_id"], name: "index_space_requests_on_space_id", using: :btree
-  add_index "space_requests", ["user_id"], name: "fk_rails_ceb7f2ca83", using: :btree
-
   create_table "spaces", force: :cascade do |t|
     t.string   "name",           limit: 255
     t.text     "description",    limit: 65535
@@ -581,8 +570,8 @@ ActiveRecord::Schema.define(version: 20181130164656) do
     t.integer  "space_id",       limit: 4
     t.integer  "state",          limit: 4,     default: 0,     null: false
     t.integer  "space_type",     limit: 4,     default: 0,     null: false
-    t.integer  "sponsor_org_id", limit: 4
     t.boolean  "verified",                     default: false, null: false
+    t.integer  "sponsor_org_id", limit: 4
   end
 
   create_table "submissions", force: :cascade do |t|
@@ -862,8 +851,6 @@ ActiveRecord::Schema.define(version: 20181130164656) do
   add_foreign_key "space_events", "spaces"
   add_foreign_key "space_events", "users"
   add_foreign_key "space_memberships", "users"
-  add_foreign_key "space_requests", "spaces"
-  add_foreign_key "space_requests", "users"
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"
   add_foreign_key "submissions", "users"
