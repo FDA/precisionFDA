@@ -1,7 +1,7 @@
 class TasksController < ApplicationController
   before_action :find_task, only: [:show, :reassign, :copy, :task]
   before_action :find_tasks, only: [:accept, :complete, :decline, :make_active, :reopen]
-  before_action :find_space_and_membership, only: [:show, :create, :update, :accept, :complete, :decline, :destroy, :make_active, :reopen]
+  before_action :find_space_and_membership, only: [:show, :create, :update, :accept, :complete, :decline, :destroy, :make_active, :reopen, :reassign]
 
   def task
     task = @task.attributes.merge(
@@ -150,9 +150,17 @@ class TasksController < ApplicationController
   end
 
   def reassign
-    assignee = User.find(params[:task][:assignee_id])
-    @task.update(assignee_id: assignee.id, status: 0) if assignee
-    SpaceEventService.call(@task.space_id, @context.user_id, nil, @task, :task_reassigned)
+    if TaskPolicy.can_reassign?(@task, @membership)
+      assignee = User.find_by_id(params[:task][:assignee_id])
+      if assignee
+        @task.update(assignee_id: assignee.id, status: 0)
+        if params.dig(:comment, :body).presence
+          comment = Comment.build_from(@task, @context.user_id, params[:comment][:body])
+          comment.save
+        end
+        SpaceEventService.call(@task.space_id, @context.user_id, @membership, @task, :task_reassigned)
+      end
+    end
 
     redirect_to :back, status: :see_other rescue redirect_to tasks_space_path(@task.space_id)
   end

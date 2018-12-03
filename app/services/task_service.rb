@@ -7,7 +7,7 @@ class TaskService
 
   def add_task(params)
     params = params[:task].merge({space_id: params[:space_id]}) if params[:task]
-    assignee = User.find(params[:assignee_id])
+    assignee = User.find_by_id(params[:assignee_id])
     assignee_id = assignee.id if assignee
     space_id = (params[:space_id] || params[:task][:space_id]).split("-").first.to_i
 
