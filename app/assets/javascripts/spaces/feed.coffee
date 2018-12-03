@@ -143,7 +143,7 @@ class SpacesFeedView
     date_to = moment()
 
     switch type
-      when 'day' then date_at = date_at.subtract(24, 'hours')
+      when 'day' then date_at = date_at.startOf('day')
       when 'week' then date_at = date_at.startOf('week')
       when 'month' then date_at = date_at.startOf('month')
       when 'year' then date_at = date_at.startOf('year')
