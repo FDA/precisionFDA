@@ -56,7 +56,7 @@ class DocsController < ApplicationController
       },
       files: {
         how_to_upload_url: "https://www.youtube.com/embed/o5PmgUsWQGo",
-        how_to_navigate_url: "https://www.youtube.com/embed/w2lbAYYf7J8"
+        how_to_navigate_url: "https://www.youtube.com/embed/cj8a6I3KGvk"
       },
       intro: {
         url: "https://www.youtube.com/embed/U_vmcd93HkM"
@@ -71,7 +71,7 @@ class DocsController < ApplicationController
         url: "https://www.youtube.com/embed/dsOCn1zTBOo"
       },
       site_activity_reporting: {
-        url: "https://www.youtube.com/embed/O1iTuI9Fvcc"
+        url: "https://www.youtube.com/embed/KJ-Rk-ejjBM"
       }
     }
   end
