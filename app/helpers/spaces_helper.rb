@@ -199,7 +199,7 @@ module SpacesHelper
           respond: task.response_deadline,
           complete: task.completion_deadline
         }
-      when "active"
+      when "accepted"
         return {
           respond: task.response_time,
           complete: task.completion_deadline
