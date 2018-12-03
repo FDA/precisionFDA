@@ -97,6 +97,16 @@ class SpaceEvent < ActiveRecord::Base
     end
   end
 
+  def additional_info
+    if self.comment? && (obj = self.entity.content_object)
+      name = obj.try(:name) || obj.try(:title)
+      {
+        comment_object_name: name,
+        comment_object_type: obj.klass,
+      }
+    end
+  end
+
   def self.describe_events(collection, page = 1)
     events = collection.includes(:user, :entity)
     events.page(page).per(10)
@@ -111,6 +121,7 @@ class SpaceEvent < ActiveRecord::Base
           user_fullname: event.user.full_name,
           entity_name: event.entity_name,
           entity: event.entity,
+          additional_info: event.additional_info,
         }
       end
   end

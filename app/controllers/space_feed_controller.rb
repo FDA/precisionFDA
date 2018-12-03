@@ -3,6 +3,7 @@ class SpaceFeedController < ApplicationController
     collection = SpaceEvent.collection(start_date, end_date, feed_filter_params)
     results = SpaceEvent.describe_events(collection, page)
       .map { |res| find_path(res) }
+      .map { |res| find_path_for_comments(res) }
     render json: results
   end
 
@@ -50,6 +51,13 @@ class SpaceFeedController < ApplicationController
       else
         pathify(event[:entity])
       end
+    event
+  end
+
+  def find_path_for_comments(event)
+    if event.dig(:additional_info, :comment_object_name)
+      event[:additional_info][:comment_object_url] = pathify(event[:entity].content_object)
+    end
     event
   end
 end
