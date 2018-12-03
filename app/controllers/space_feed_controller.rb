@@ -4,6 +4,7 @@ class SpaceFeedController < ApplicationController
     results = SpaceEvent.describe_events(collection, page)
       .map { |res| find_path(res) }
       .map { |res| find_path_for_comments(res) }
+
     render json: results
   end
 
@@ -18,7 +19,7 @@ class SpaceFeedController < ApplicationController
   private
 
   def start_date
-    Time.parse(params[:date_at]) if params[:date_at].presence
+    Time.parse(params[:date_at]) if params[:date_at].present?
   end
 
   def end_date
@@ -36,7 +37,7 @@ class SpaceFeedController < ApplicationController
   end
 
   def page
-    if params[:page].presence
+    if params[:page].present?
       params[:page].to_i
     end
   rescue
@@ -44,6 +45,9 @@ class SpaceFeedController < ApplicationController
   end
 
   def find_path(event)
+    event[:entity_url] = ""
+    return event if event[:entity].nil?
+
     event[:entity_url] =
       case event[:object_type]
       when "comment", "membership"
@@ -51,6 +55,7 @@ class SpaceFeedController < ApplicationController
       else
         pathify(event[:entity])
       end
+
     event
   end
 
@@ -58,6 +63,7 @@ class SpaceFeedController < ApplicationController
     if event.dig(:additional_info, :comment_object_name)
       event[:additional_info][:comment_object_url] = pathify(event[:entity].content_object)
     end
+
     event
   end
 end
