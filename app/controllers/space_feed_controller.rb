@@ -1,8 +1,10 @@
 class SpaceFeedController < ApplicationController
+  before_action :find_space
+
   def index
     collection = SpaceEvent.collection(start_date, end_date, feed_filter_params)
     results = SpaceEvent.describe_events(collection, page)
-      .map { |res| find_path(res) }
+      .map { |res| find_path_for_object(res) }
       .map { |res| find_path_for_comments(res) }
 
     render json: results
@@ -44,9 +46,10 @@ class SpaceFeedController < ApplicationController
     1
   end
 
-  def find_path(event)
+  def find_path_for_object(event)
     event[:entity_url] = ""
-    return event if event[:entity].nil?
+    return event unless event[:entity]
+    return event unless SpaceMembershipPolicy.can_modify_content?(@space, event[:entity], @context.user)
 
     event[:entity_url] =
       case event[:object_type]
@@ -65,5 +68,13 @@ class SpaceFeedController < ApplicationController
     end
 
     event
+  end
+
+  def find_space
+    @space = Space.accessible_by(@context).find_by_id(params[:space_id])
+    unless @space
+      render json: []
+      return
+    end
   end
 end
