@@ -3,15 +3,13 @@
 class NotificationPreference < ActiveRecord::Base
 
   SPACE_COMMON_KEYS = [
-    # :membership_changed, #added to space, removed from space, role changed within space
+    :membership_changed, #added to space, removed from space, role changed within space
     :task_assignment,
-    # :task_status_change,
     :comment_activity, #mentioned in a comment, someone replies to their comment
     :content_added_or_deleted,
     # :app_workflow_status, #job started, job completed, job failed, job terminated
   ]
   SPACE_LEAD_AND_ADMIN_KEYS = [
-    # :member_added_or_removed,
     :space_lock_unlock_delete,
   ]
   ALL_KEYS = SPACE_COMMON_KEYS + SPACE_LEAD_AND_ADMIN_KEYS

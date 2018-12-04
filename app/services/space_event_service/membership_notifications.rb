@@ -5,7 +5,7 @@ module SpaceEventService
 
       def send(event)
         receivers(event).each do |receiver|
-          ReviewSpaceMailer.member_added_email(event.entity, receiver, ).deliver_now!
+          ReviewSpaceMailer.member_email(event, receiver, action(event)).deliver_now!
         end
       end
 
@@ -13,14 +13,14 @@ module SpaceEventService
 
       def action(event)
         {
-          "membership_added" => "Added a new member",
-          "membership_removed" => "disabled",
-          "membership_changed" => "role changed",
+          "membership_added" => "added a new member",
+          "membership_disabled" => "disabled a member",
+          "membership_changed" => "changed role of member",
         }[event.activity_type]
       end
 
       def receivers(event)
-        User.joins(:space_memberships).merge(event.entity.space_object.space_memberships.active).select do |user|
+        User.joins(:space_memberships).merge(event.space.space_memberships.active).push(event.entity.user).uniq.select do |user|
           next if user.id == event.user_id
           NotificationPreference.find_by_user(user).membership_changed
         end

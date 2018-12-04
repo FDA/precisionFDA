@@ -14,7 +14,7 @@ Rails.application.configure do
   config.action_controller.perform_caching = false
 
   # Don't care if the mailer can't send.
-  config.action_mailer.delivery_method = :file
+  config.action_mailer.delivery_method = ENV.fetch('DELIVERY_METHOD', :file).to_sym
   config.action_mailer.default_url_options = { host: "localhost", port: 3000, protocol: 'https' }
 
   # Print deprecation notices to the Rails logger.

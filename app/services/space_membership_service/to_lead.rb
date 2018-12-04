@@ -14,7 +14,12 @@ module SpaceMembershipService
 
         member.role = SpaceMembership::ROLE_LEAD
         SpaceMembershipService::Update.call(api, space, member)
+        create_event(space, member, admin_member)
       end
+    end
+
+    def self.create_event(space, member, admin_member)
+      SpaceEventService.call(space.id, admin_member.user_id, admin_member, member, :membership_changed)
     end
 
     def self.update_current_lead(space, admin_member)

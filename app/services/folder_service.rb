@@ -135,6 +135,11 @@ class FolderService
     return Rats.failure(message: "#{file.name}: file removal error.") unless file.destroyed?
 
     Event::FileDeleted.create_for(file, context.user)
+
+    if file.scope =~ /^space-(\d+)$/
+      event_type = file.klass == "asset" ? :asset_deleted : :file_deleted
+      SpaceEventService.call($1.to_i, context.user_id, nil, file, event_type)
+    end
     Rats.success(file)
   end
 
