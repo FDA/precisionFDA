@@ -30,7 +30,7 @@ class SpaceEvent < ActiveRecord::Base
 
   ACTIVITY_TYPES = %i(
     membership_added
-    membership_removed
+    membership_disabled
     membership_changed
     task_created
     task_reassigned
@@ -40,9 +40,11 @@ class SpaceEvent < ActiveRecord::Base
     job_added
     job_completed
     file_added
+    file_deleted
     note_added
     app_added
     asset_added
+    asset_deleted
     comparison_added
     comment_added
     comment_edited
@@ -58,6 +60,18 @@ class SpaceEvent < ActiveRecord::Base
     lead
   )
 
+  DATA_ATTRIBUTES = {
+    :comment    => %i(body),
+    :app        => %i(title),
+    :note       => %i(title),
+    :space      => %i(name),
+    :task       => %i(name),
+    :job        => %i(name),
+    :file       => %i(name uid),
+    :asset      => %i(name uid),
+    :comparison => %i(name),
+  }
+
   belongs_to :user
   belongs_to :space
   belongs_to :entity, polymorphic: true
@@ -66,6 +80,8 @@ class SpaceEvent < ActiveRecord::Base
   enum activity_type: ACTIVITY_TYPES
   enum object_type: OBJECT_TYPES
   enum role: ROLES
+
+  store :data, coder: JSON
 
   scope :date_range, ->(start_date=nil, end_date=nil) {
     if start_date && end_date
@@ -78,21 +94,26 @@ class SpaceEvent < ActiveRecord::Base
       all
     end
   }
-  before_create :sort_object_type
+  before_create :sort_object_type, :generate_data
 
   def activity
     activity_type.split("_").join(" ").capitalize
   end
 
   def entity_name
-    return "DELETED" if self.entity.nil?
     case object_type
-    when "space", "task", "job", "file", "asset", "comparison"
-      self.entity.name
+    when "file", "asset"
+      data["uid"]
+    when "space", "task", "job", "comparison"
+      entity.name
     when "comment"
-      self.entity.body
-    when "app", "note"
-      self.entity.title
+      data["body"]
+    when "app"
+      entity.title
+    when "note"
+      data['title']
+    when "membership"
+      "#{data['full_name']}(#{data['role']})"
     else
       ""
     end
@@ -107,6 +128,10 @@ class SpaceEvent < ActiveRecord::Base
         comment_object_type: obj.klass,
       }
     end
+  end
+
+  def data
+    super || {}
   end
 
   def self.describe_events(collection, page = 1)
@@ -178,6 +203,19 @@ class SpaceEvent < ActiveRecord::Base
 
   def sort_object_type
     self.object_type = activity_type.split("_").first
+  end
+
+  def generate_data
+    new_data = SpaceEvent::DATA_ATTRIBUTES.find(-> {{}}) do |type, attributes|
+      break entity.slice(*attributes) if type.to_s == self.object_type
+    end
+
+    if self.membership?
+      new_data['role'] = entity.role
+      new_data['full_name'] = entity.user.full_name
+    end
+
+    self.data = new_data
   end
 
 end

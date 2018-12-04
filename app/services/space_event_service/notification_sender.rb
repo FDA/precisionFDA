@@ -4,7 +4,7 @@ module SpaceEventService
     TASK_TYPES = %w(task_created task_reassigned task_completed task_declined task_deleted)
     CONTENT_TYPES = %w(file_added note_added app_added job_added asset_added comparison_added)
     COMMENT_TYPES = %w(comment_added)
-    # MEMBERSHIP_TYPES = %w(membership_added membership_removed membership_changed)
+    MEMBERSHIP_TYPES = %w(membership_added membership_disabled membership_changed)
     SPACE_TYPES = %w(space_locked space_unlocked)
 
     class << self
@@ -20,7 +20,7 @@ module SpaceEventService
         when *CONTENT_TYPES    then SpaceEventService::ContentNotifications
         when *COMMENT_TYPES    then SpaceEventService::CommentNotifications
         when *SPACE_TYPES      then SpaceEventService::SpaceNotifications
-        # when *MEMBERSHIP_TYPES then SpaceEventService::MembershipNotifications
+        when *MEMBERSHIP_TYPES then SpaceEventService::MembershipNotifications
         end
       end
     end

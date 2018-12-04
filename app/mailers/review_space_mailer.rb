@@ -13,13 +13,13 @@ class ReviewSpaceMailer < ApplicationMailer
          subject: "#{initiator.full_name} #{action} the space \"#{space.title}\""
   end
 
-  # @param new_member [SpaceMembership] Subscriber
-  # @param subscriber [SpaceMembership] Subscriber
-  def member_email(space, new_member, receiver, action)
-    @space = space
-    @new_member = new_member
+  def member_email(event, receiver, action)
+    @space = event.space
+    @initiator = event.user
+    @new_member = event.entity
+    @action = action
     mail to: receiver.email,
-         subject: "#{new_member.user.full_name} was #{action}"
+         subject: "#{@initiator.full_name} #{action}"
   end
 
   def new_comment_email(comment, receiver)

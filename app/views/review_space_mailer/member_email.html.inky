@@ -1,6 +1,6 @@
 <wrapper>
   <div class="hidden-email-preview">
-    Space unlock for <%= @space.title %>
+    <%= @action.humanize %>
   </div>
   <spacer size="16"></spacer>
   <container class="header">
@@ -11,7 +11,7 @@
         </a>
       </columns>
       <columns>
-        <p class="header-title text-right">New user</p>
+        <p class="header-title text-right"><%= @action.humanize %></p>
       </columns>
     </row>
   </container>
@@ -19,8 +19,10 @@
     <row>
       <columns>
         <p>
-          #{@new_member.user.full_name} was added to the space "#{@space.title}" as #{member_side(@space, @new_member)} #{@new_member.role}.
+          <%= @initiator.full_name %> <%= @action %>:
         </p>
+        <p>name: <%= @new_member.user.full_name %></p>
+        <p>role: <%= @new_member.role %></p>
 
         <button class="radius" href="<%= space_url(@space) %>">View Space</button>
       </columns>
