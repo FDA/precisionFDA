@@ -532,7 +532,7 @@ class SpacesController < ApplicationController
     @overall_users = users.count
     @users = users.map { |u| { name: u.full_name, value: u.id } }
     object_types = SpaceEvent.object_type_counters(Date.today.beginning_of_week.to_time, Time.now, {space_id: @space.id})
-    js({ space_id: @space.id, scopes: @space.accessible_scopes_for_move, object_types: object_types })
+    js({ space_uid: @space.uid, space_id: @space.id, scopes: @space.accessible_scopes_for_move, object_types: object_types })
   end
 
   private
