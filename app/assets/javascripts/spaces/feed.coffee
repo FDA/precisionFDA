@@ -174,7 +174,7 @@ class SpacesFeedView
       return true
 
   constructor: (params) ->
-    @space_id = params.space_uid
+    @space_id = params.space_id
     @filtersForm = $('#feed_filters_form form')
     @objectTypes = ko.observableArray(params.object_types)
     @feedItems = ko.observableArray()
