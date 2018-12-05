@@ -528,9 +528,8 @@ class SpacesController < ApplicationController
     end
     @roles = SpaceEvent.roles.map { |k, v| {name: k, value: v} }
     @sides = SpaceEvent.sides.map { |k, v| {name: k, value: v} }
-    users = @space.users
-    @overall_users = users.count
-    @users = users.map { |u| { name: u.full_name, value: u.id } }
+    @overall_users = @space.space_memberships.active.count
+    @users = @space.space_memberships.active.includes(:user).map { |m| { name: m.user.full_name, value: m.user.id } }
     object_types = SpaceEvent.object_type_counters(Date.today.beginning_of_week.to_time, Time.now, {space_id: @space.id})
     js({ space_uid: @space.uid, space_id: @space.id, scopes: @space.accessible_scopes_for_move, object_types: object_types })
   end
