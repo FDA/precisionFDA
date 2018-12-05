@@ -89,7 +89,7 @@ To execute this app locally, please ensure you have Docker (get.docker.com) and 
 
 docker build . -t url_fetcher
 
-sudo cwltool --no-match-user --no-read-only url_fetcher.cwl inputs.json
+cwltool --copy-outputs --no-match-user --no-read-only url_fetcher.cwl inputs.json
 
 ```
 
