@@ -5,7 +5,7 @@ module SpaceEventService
     CONTENT_TYPES = %w(file_added note_added app_added job_added asset_added comparison_added)
     COMMENT_TYPES = %w(comment_added)
     MEMBERSHIP_TYPES = %w(membership_added membership_disabled membership_changed)
-    SPACE_TYPES = %w(space_locked space_unlocked)
+    SPACE_TYPES = %w(space_locked space_unlocked space_deleted)
 
     class << self
       def call(event)

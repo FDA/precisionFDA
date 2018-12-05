@@ -24,6 +24,16 @@ class SpaceRequestsController < ApplicationController
     redirect_to spaces_path
   end
 
+  def delete
+    if SpaceRequestPolicy.can_delete?(current_user, space)
+      Space.transaction do
+        SpaceService::Delete.call(space, membership)
+      end
+    end
+
+    redirect_to spaces_path
+  end
+
   private
 
   def space

@@ -82,6 +82,14 @@ class User < ActiveRecord::Base
     zivana.tezak
   ).freeze
 
+  SITE_ADMINS = begin
+    if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
+      PRODUCTION_ADMINS
+    else
+      NON_PRODUCTION_ADMINS
+    end
+  end
+
   has_many :uploaded_files, {class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'}
   has_many :user_files
   has_many :assets
@@ -120,9 +128,9 @@ class User < ActiveRecord::Base
 
   scope :real, -> { where.not(dxuser: CHALLENGE_BOT_DX_USER) }
 
-  # Have the ability to create new review spaces and have full access to all the contents
-  # and activities available within reviewer and cooperative areas.
-  scope :review_space_admins, -> { where(dxuser: REVIEW_SPACE_ADMINS) }
+  # Have the ability to create new review spaces and have full access to
+  # activities available within reviewer and cooperative areas.
+  scope :review_space_admins, -> { where(dxuser: REVIEW_SPACE_ADMINS + SITE_ADMINS) }
 
   def self.challenge_bot
     find_by!(dxuser: CHALLENGE_BOT_DX_USER)
@@ -200,11 +208,11 @@ class User < ActiveRecord::Base
 
   def can_administer_site?
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
-      PRODUCTION_ADMINS.include?(dxuser)
+      SITE_ADMINS.include?(dxuser)
     else
       NON_PRODUCTION_ADMIN_ORGS.include?(org.handle) &&
       org.admin_id == id ||
-      NON_PRODUCTION_ADMINS.include?(dxuser)
+        SITE_ADMINS.include?(dxuser)
     end
   end
 

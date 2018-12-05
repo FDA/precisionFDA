@@ -295,6 +295,7 @@ Rails.application.routes.draw do
       post 'accept', on: :member
       post 'lock', on: :member, to: 'space_requests#lock'
       post 'unlock', on: :member, to: 'space_requests#unlock'
+      post 'delete', on: :member, to: 'space_requests#delete'
       post 'rename', on: :member
       post 'invite', on: :member
       post 'move', on: :member

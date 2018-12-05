@@ -51,6 +51,7 @@ class SpaceEvent < ActiveRecord::Base
     comment_deleted
     space_locked
     space_unlocked
+    space_deleted
   )
 
   ROLES = %i(

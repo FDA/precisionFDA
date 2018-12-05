@@ -18,9 +18,11 @@
   <container class="radius">
     <row>
       <columns>
-        <p>
-          The space <strong><%= link_to @space.title, space_url(@space) %></strong> was <%= @action %>.
-        </p>
+        <% if @action == 'deleted' %>
+          <p>The space <strong><%= @space.title %></strong> was <%= @action %>.</p>
+        <% else %>
+          <p>The space <strong><%= link_to @space.title, space_url(@space) %></strong> was <%= @action %>.</p>
+        <% end %>
       </columns>
     </row>
   </container>
