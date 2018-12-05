@@ -49,14 +49,17 @@ class SpaceFeedController < ApplicationController
   def find_path_for_object(event)
     event[:entity_url] = ""
     return event unless event[:entity]
-    return event unless SpaceMembershipPolicy.can_modify_content?(@space, event[:entity], @context.user)
 
     event[:entity_url] =
       case event[:object_type]
       when "comment", "membership"
         ""
       else
-        pathify(event[:entity])
+        if event[:entity].accessible_by?(@context)
+          pathify(event[:entity])
+        else
+          ""
+        end
       end
 
     event
@@ -70,9 +73,23 @@ class SpaceFeedController < ApplicationController
     event
   end
 
+  def fetch_membership
+    if @context.review_space_admin?
+      membership = @space.space_memberships.active.find_by(user_id: @context.user_id)
+      membership || SpaceMembership.new_by_admin(@context.user)
+    else
+      @space.space_memberships.active.find_by!(user_id: @context.user_id)
+    end
+  end
+
   def find_space
     @space = Space.accessible_by(@context).find_by_id(params[:space_id])
     unless @space
+      render json: []
+      return
+    end
+    @membership = fetch_membership
+    unless @membership
       render json: []
       return
     end
