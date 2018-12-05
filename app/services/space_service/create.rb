@@ -19,7 +19,7 @@ module SpaceService
         create_orgs(space)
         space.save!
         add_leads(space, space_form)
-        remove_pfda_admin_user(space)
+        remove_pfda_admin_user(space) unless space.review?
         send_emails(space)
         space
       end
@@ -76,7 +76,7 @@ module SpaceService
 
     # Remove pfda admin from orgs
     def remove_pfda_admin_user(space)
-      papi.call(space.host_dxorg, "removeMember", user: ADMIN_USER) unless space.review?
+      papi.call(space.host_dxorg, "removeMember", user: ADMIN_USER)
       papi.call(space.guest_dxorg, "removeMember", user: ADMIN_USER)
     end
 

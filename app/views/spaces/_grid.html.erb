@@ -70,6 +70,18 @@
         end
     end
   end
+  g.column do |space|
+    if SpaceRequestPolicy.can_delete?(@context.user, space)
+      button_to delete_space_path(space),
+        method: :post,
+        form_class: "button-to-form-inline",
+        class: "btn btn-xs btn-default",
+        data: { disable_with: 'Deleting...',  confirm: 'Are you sure you want to delete this space?'} do
+          content_tag(:i, ' Delete', class: 'fa fa-trash btn-fa-dark')
+        end
+    end
+
+  end
 end -%>
 <%=
 

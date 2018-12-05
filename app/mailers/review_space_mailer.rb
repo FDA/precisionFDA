@@ -37,4 +37,10 @@ class ReviewSpaceMailer < ApplicationMailer
          subject: "#{content.user.full_name} added a new #{content.klass} "
   end
 
+  def inactive_space_email(space)
+    @space = space
+    mail to: User.review_space_admins.pluck(:email),
+         subject: "Space is inactive"
+  end
+
 end
