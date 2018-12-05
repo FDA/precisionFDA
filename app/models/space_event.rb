@@ -101,12 +101,11 @@ class SpaceEvent < ActiveRecord::Base
   end
 
   def entity_name
-    return if self.entity.nil?
     case object_type
     when "file", "asset"
       data["uid"]
     when "space", "task", "job", "comparison"
-      entity.name
+      data["name"]
     when "comment"
       data["body"]
     when "app"
