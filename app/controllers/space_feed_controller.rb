@@ -67,7 +67,12 @@ class SpaceFeedController < ApplicationController
 
   def find_path_for_comments(event)
     if event.dig(:additional_info, :comment_object_name)
-      event[:additional_info][:comment_object_url] = pathify(event[:entity].content_object)
+      event[:additional_info][:comment_object_url] =
+        if event[:entity].content_object.accessible_by?(@context)
+          pathify(event[:entity].content_object)
+        else
+          ""
+        end
     end
 
     event
