@@ -23,7 +23,11 @@
             <% if comment.content_object %>
               <p>
                 <b>commented on: </b>
-                <%= link_to comment.content_object_name, pathify(comment.content_object) %>
+                <% if comment.content_object.accessible_by?(@context) %>
+                  <%= link_to comment.content_object_name, pathify(comment.content_object) %>
+                <% else %>
+                  <%= comment.content_object_name %>
+                <% end %>
               </p>
             <% elsif comment.content_object_id %>
               <p>
