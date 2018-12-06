@@ -51,10 +51,15 @@
                   <div class="activity-feed-associated">
                     <span>Associated with</span>&nbsp;
                     <span data-bind="text: $data.additional_info.comment_object_type"></span>
+                    <!-- ko if: $data.additional_info.comment_object_url.length -->
                     <a target="_blank"
                        data-bind="text: $data.additional_info.comment_object_name,
                                   attr: { href: $data.additional_info.comment_object_url }">
                     </a>
+                    <!-- /ko -->
+                    <!-- ko ifnot: $data.additional_info.comment_object_url.length -->
+                    <span data-bind="text: $data.additional_info.comment_object_name"></span>
+                    <!-- /ko -->
                   </div>
                 <!-- /ko -->
               </div>
