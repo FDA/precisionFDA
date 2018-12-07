@@ -29,12 +29,12 @@
       </p>
     </li>
     <li class="list-group-item">
-      <h5 class="list-group-item-heading">RESPONDED ON</h5>
-      <p class="list-group-item-text"><%= @task.response_deadline %></p>
+      <h5 class="list-group-item-heading"><%= @dates_titles[:respond] %></h5>
+      <p class="list-group-item-text"><%= response_date_wrapper(@task, :respond) %></p>
     </li>
     <li class="list-group-item">
-      <h5 class="list-group-item-heading">COMPLETE BY</h5>
-      <p class="list-group-item-text"><%= @task.completion_deadline %></p>
+      <h5 class="list-group-item-heading"><%= @dates_titles[:complete] %></h5>
+      <p class="list-group-item-text"><%= response_date_wrapper(@task, :complete) %></p>
     </li>
   </ul>
 </div>
