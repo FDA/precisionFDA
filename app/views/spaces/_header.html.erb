@@ -9,12 +9,12 @@
 
       <% if @space.review? && @space.active? %>
         <% if @space.confidential? %>
-          <%= link_to "TO SHARED", feed_space_path(@space.space) %>
+          <%= link_to "To Cooperative", feed_space_path(@space.space) %>
         <% else %>
-          <%= link_to "TO PRIVATE", feed_space_path(@space.confidential_space(@membership)) %>
+          <%= link_to "To Confidential", feed_space_path(@space.confidential_space(@membership)) %>
         <% end %>
       <% end %>
-      
+
       <div class="page-title">
         <span class="fa fa-object-group"></span>
         <%= @space.title %>
