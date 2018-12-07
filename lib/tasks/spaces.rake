@@ -20,7 +20,9 @@ namespace :spaces do
   task check_inactivity: :environment do
 
     InactiveSpaceFinder.find(6.months.ago).each do |space|
-      ReviewSpaceMailer.inactive_space_email(space).deliver_now!
+      if User.review_space_admins.any?
+        ReviewSpaceMailer.inactive_space_email(space).deliver_now!
+      end
       space.update(inactivity_notified: true)
     end
   end

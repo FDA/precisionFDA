@@ -90,6 +90,8 @@ class User < ActiveRecord::Base
     end
   end
 
+  SITE_ADMIN_ORGS = ENV["DNANEXUS_BACKEND"] == "production" ? [] : NON_PRODUCTION_ADMIN_ORGS
+
   has_many :uploaded_files, {class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'}
   has_many :user_files
   has_many :assets
@@ -130,7 +132,8 @@ class User < ActiveRecord::Base
 
   # Have the ability to create new review spaces and have full access to
   # activities available within reviewer and cooperative areas.
-  scope :review_space_admins, -> { where(dxuser: REVIEW_SPACE_ADMINS + SITE_ADMINS) }
+  scope :review_space_admins, -> { where.any_of(site_admins, dxuser: REVIEW_SPACE_ADMINS) }
+  scope :site_admins, -> { where(dxuser: SITE_ADMINS + Org.where(handle: User::NON_PRODUCTION_ADMIN_ORGS).joins(:admin).pluck("users.dxuser")) }
 
   def self.challenge_bot
     find_by!(dxuser: CHALLENGE_BOT_DX_USER)
