@@ -52,7 +52,7 @@ namespace :user do
       "precisionfda.admin_dev",
       "PrecisionFDA",
       "Admin - Dev",
-      "fdelacruz+precisionfda.admin_dev@dnanexus.com",
+      "aabramenko-c+precisionfda.admin_dev@dnanexus.com",
       "precisionfda",
       "project-F76jJ080xYKypQ786PVqpbqY",
       "project-F76jJp80F794xX5bGVyjpjKP",
