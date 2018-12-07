@@ -515,21 +515,19 @@ class SpacesController < ApplicationController
   end
 
   def feed
-    if @space.space_events.any?
-      start_date = @space.space_events.order(created_at: :asc).first.created_at
-      end_date = @space.space_events.order(created_at: :asc).last.created_at
-      @duration = ((end_date - start_date) / 1.days).ceil
-      @start_date = start_date.strftime("%m/%d/%Y")
-      @end_date = end_date.strftime("%m/%d/%Y")
+    if (events = @space.space_events).any?
+      @start_date = events.order(created_at: :asc).first.created_at.strftime("%m/%d/%Y")
+      @end_date = events.order(created_at: :asc).last.created_at.strftime("%m/%d/%Y")
+      @users = User.find(events.pluck(:user_id).uniq).map { |u| { name: u.full_name, value: u.id } }
     else
-      @start_date = nil
-      @end_date = nil
-      @duration = 0
+      @start_date = ""
+      @end_date = ""
+      @users = []
     end
+    @duration = ((Time.now - @space.created_at) / 1.days).ceil
     @roles = SpaceEvent.roles.map { |k, v| {name: k, value: v} }
     @sides = SpaceEvent.sides.map { |k, v| {name: k, value: v} }
     @overall_users = @space.space_memberships.active.count
-    @users = @space.space_memberships.active.includes(:user).map { |m| { name: m.user.full_name, value: m.user.id } }
     object_types = SpaceEvent.object_type_counters(Date.today.beginning_of_week.to_time, Time.now, {space_id: @space.id})
     js({ space_uid: @space.uid, space_id: @space.id, scopes: @space.accessible_scopes_for_move, object_types: object_types })
   end
