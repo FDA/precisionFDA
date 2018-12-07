@@ -18,16 +18,40 @@ class TasksController < ApplicationController
     case @task.status
     when "open"
       @status = 'Awaiting Response'
+      @dates_titles = {
+        respond: 'RESPOND BY',
+        complete: 'COMPLETE BY'
+      }
     when "completed"
       @status = 'Completed'
+      @dates_titles = {
+        respond: 'RESPONDED ON',
+        complete: 'COMPLETED ON'
+      }
     when "declined"
       @status = 'Declined'
+      @dates_titles = {
+        respond: 'RESPOND BY',
+        complete: 'DECLINED ON'
+      }
     when "accepted"
       @status = 'Accepted'
+      @dates_titles = {
+        respond: 'RESPONDED BY',
+        complete: 'COMPLETE BY'
+      }
     when "failed_response_deadline"
       @status = 'Failed Response Deadline'
+      @dates_titles = {
+        respond: 'RESPOND BY',
+        complete: 'COMPLETE BY'
+      }
     when "failed_completion_deadline"
       @status = 'Failed Completion Deadline'
+      @dates_titles = {
+        respond: 'RESPONDED BY',
+        complete: 'COMPLETE BY'
+      }
     else
       @status = ''
     end

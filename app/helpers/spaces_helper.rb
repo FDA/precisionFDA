@@ -227,4 +227,11 @@ module SpacesHelper
     end
   end
 
+  def response_date_wrapper(task, type)
+    date = date_value_by_status(task)[type].try(:strftime, "%m/%d/%Y")
+    status = type == :respond ? 'failed_response_deadline' : 'failed_completion_deadline'
+    failed_css = task.status == status ? 'failed' : ''
+    content_tag(:span, date, class: "#{failed_css}")
+  end
+
 end
