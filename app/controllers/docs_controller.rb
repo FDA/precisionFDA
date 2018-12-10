@@ -25,7 +25,8 @@ class DocsController < ApplicationController
       @sections.concat([
         { name: "challenge_workbench", title: "The Challenge Workbench" },
         { name: "site_customization", title: "Site Customization" },
-        { name: "site_activity_reporting", title: "Site Activity Reporting" }
+        { name: "site_activity_reporting", title: "Site Activity Reporting" },
+        { name: "verification_spaces", title: "Verified Apps" }
       ])
     end
 
