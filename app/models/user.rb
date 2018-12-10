@@ -132,8 +132,7 @@ class User < ActiveRecord::Base
 
   # Have the ability to create new review spaces and have full access to
   # activities available within reviewer and cooperative areas.
-  scope :review_space_admins, -> { where.any_of(site_admins, dxuser: REVIEW_SPACE_ADMINS) }
-  scope :site_admins, -> { where(dxuser: SITE_ADMINS + Org.where(handle: User::NON_PRODUCTION_ADMIN_ORGS).joins(:admin).pluck("users.dxuser")) }
+  scope :review_space_admins, -> { where(dxuser: REVIEW_SPACE_ADMINS) }
 
   def self.challenge_bot
     find_by!(dxuser: CHALLENGE_BOT_DX_USER)
@@ -176,7 +175,13 @@ class User < ActiveRecord::Base
   end
 
   def space_uids
-    spaces.pluck("distinct concat('space-', spaces.id)")
+    uids = []
+    if review_space_admin?
+      uids.concat(Space.reviewer.pluck("distinct concat('space-', spaces.id)"))
+      # TODO add here verification
+    end
+    uids.concat(spaces.pluck("distinct concat('space-', spaces.id)"))
+    uids.uniq
   end
 
   def active_spaces
@@ -224,7 +229,6 @@ class User < ActiveRecord::Base
   end
 
   def review_space_admin?
-    return true if can_administer_site?
     REVIEW_SPACE_ADMINS.include?(dxuser)
   end
 

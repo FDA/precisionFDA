@@ -127,9 +127,13 @@ class Space < ActiveRecord::Base
   end
 
   def project_for_user!(user)
-    project_dxid(
-      space_memberships.find_by!(user_id: user.id)
-    )
+    member = space_memberships.find_by(user_id: user.id)
+
+    if user.review_space_admin?
+      member ||= SpaceMembership.new_by_admin(user)
+    end
+
+    project_dxid(member)
   end
 
   def describe_fields
