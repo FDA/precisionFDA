@@ -37,6 +37,17 @@ module SpaceService
           suppressEmailNotification: true,
           suppressAllNotifications: true,
         )
+
+        if admin.host?
+          api.call(
+            project_dxid, "invite",
+            invitee: Setting.review_app_developers_org,
+            level: "CONTRIBUTE",
+            suppressEmailNotification: true,
+            suppressAllNotifications: true,
+          )
+        end
+
         space.space_memberships << admin
       end
     end

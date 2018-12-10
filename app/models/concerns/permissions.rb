@@ -98,8 +98,15 @@ module Permissions
 
   def copyable_to_cooperative_by?(context)
     return false unless in_space?
-    return false unless SpaceMembershipPolicy.can_modify_content?(space_object, self, context.user)
-    copyable_to_cooperative? if accessible_by?(context)
+    return false unless accessible_by?(context)
+    return false unless copyable_to_cooperative?
+    return false unless space_object.active?
+    return true if user_id == context.user_id
+
+    return false unless context.review_space_admin?
+
+    owner_member = space_object.space_memberships.find_by!(user_id: user_id)
+    owner_member.host?
   end
 
   def copyable_to_cooperative?

@@ -33,6 +33,14 @@ module SpaceService
           suppressAllNotifications: true
         )
 
+        api.call(
+          project_dxid, "invite",
+          invitee: Setting.review_app_developers_org,
+          level: admin.host? ? "CONTRIBUTE" : "VIEW",
+          suppressEmailNotification: true,
+          suppressAllNotifications: true,
+        )
+
         space.set_project_dxid(admin, project_dxid)
       end
 

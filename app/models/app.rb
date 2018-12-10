@@ -93,6 +93,15 @@ class App < ActiveRecord::Base
     core_publishable_by?(context, scope_to_publish_to) && private? && (app_series.private? || (app_series.scope == scope_to_publish_to))
   end
 
+  def accessible_by?(context)
+    return true if super
+
+    return false unless context.logged_in?
+    return false unless context.review_space_admin?
+
+    space_object.reviewer?
+  end
+
   def to_docker(context_token)
     # Generate Dockerfile for app
     cmds = []
