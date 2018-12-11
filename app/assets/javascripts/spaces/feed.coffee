@@ -1,8 +1,3 @@
-scrollTo = (where) ->
-  $([document.documentElement, document.body]).animate({
-    scrollTop: where
-  }, 0)
-
 class SpacesFeedView
   getTypeColor: (typeName) ->
     typeName = typeName.toLowerCase()
@@ -140,7 +135,7 @@ class SpacesFeedView
 
   setDateRange: (type = 'week') ->
     date_at = moment()
-    date_to = moment()
+    date_to = moment().endOf('day')
 
     switch type
       when 'day' then date_at = date_at.startOf('day')
@@ -153,7 +148,7 @@ class SpacesFeedView
     @dateToDatepicker.setValue(date_to)
 
   changeSortDirection: () ->
-    scrollTo($(window).height() - 50)
+    Precision.utils.scrollTo($(window).height() - 50)
     if @sortDirection() == 'asc'
       @sortDirection('desc')
     else
@@ -240,7 +235,7 @@ SpacesController = Paloma.controller('Spaces', {
 
     $('.selectpicker').selectpicker('refresh')
 
-    $(document).ready(() -> scrollTo(0))
+    $(document).ready(() -> Precision.utils.scrollTo(0))
 
     scrollPos = 0
     loadMoreFeed = () ->
@@ -251,5 +246,6 @@ SpacesController = Paloma.controller('Spaces', {
 
     $(window).on 'scroll', loadMoreFeed
     $(document).on 'turbolinks:before-visit', () -> $(window).off 'scroll', loadMoreFeed
+
 
 })

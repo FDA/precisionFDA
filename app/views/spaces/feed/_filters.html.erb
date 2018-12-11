@@ -1,13 +1,13 @@
 <div id="feed_filters_form" class="feed-filters-form collapse in" aria-expanded="true">
   <form class="form-inline">
-    <div class="panel spaces-feed-panel">
+    <div class="panel spaces-blue-panel">
       <div class="panel-heading">
         <h4>
           DATE/TIME FILTERS
           <button type="button" class="btn btn-link" data-bind="click: resetDateFilters">Reset</button>
         </h4>
       </div>
-      <div class="panel-body panel-body-feed">
+      <div class="panel-body panel-body-blue">
         <div class="btn-group pull-left" role="group" aria-label="Select date range" id="select_date_range">
           <button class="btn btn-default" data-type="day">Day</button>
           <button class="btn btn-default active" data-type="week">Week</button>
@@ -22,14 +22,14 @@
         </div>
       </div>
     </div>
-    <div class="panel spaces-feed-panel">
+    <div class="panel spaces-blue-panel">
       <div class="panel-heading">
         <h4>
           USERS FILTERS
           <button type="button" class="btn btn-link" data-bind="click: resetUserFilters">Reset</button>
         </h4>
       </div>
-      <div class="panel-body panel-body-feed">
+      <div class="panel-body panel-body-blue">
         <div class="form-group">
           <select class="form-control selectpicker" multiple="multiple" name="users[]" title="Select User">
             <% @users.each do |user| %>
@@ -54,7 +54,7 @@
         </div>
       </div>
     </div>
-    <div class="panel spaces-feed-panel">
+    <div class="panel spaces-blue-panel">
       <div class="panel-heading">
         <h4>
           OBJECT TYPES
@@ -91,7 +91,7 @@
         </div>
       </div>
     </div>
-    <div class="panel spaces-feed-panel">
+    <div class="panel spaces-blue-panel">
       <div class="panel-body">
         <div class="row">
           <div class="pull-right">

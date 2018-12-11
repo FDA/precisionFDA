@@ -73,14 +73,15 @@ $side-bar-width: 250px
       text-overflow: ellipsis
       overflow: hidden
 
-  &.pfda-action-feed
-    .spaces-feed-panel
+  &.pfda-action-feed,
+  &.pfda-action-reports
+    .spaces-blue-panel
       background-color: $brand-blue-subtler
       border-bottom: 1px solid $border-header-color
       color: $brand-blue-tertiary
       margin: 0px
       color: initial
-      .panel-body-feed
+      .panel-body-blue
         padding-top: 0px
         .form-group
           position: relative
@@ -125,9 +126,13 @@ $side-bar-width: 250px
       max-width: 1024px
       &[aria-expanded="false"]
         display: none
-    .activity-feed-container
+
+    .activity-feed-container,
+    .reports-container
       max-width: 1024px
-    .activity-feed
+
+    .activity-feed,
+    .report-feed
       margin-bottom: 10px
       .feed-type-icon
         cursor: default
@@ -141,14 +146,46 @@ $side-bar-width: 250px
           margin-right: 10px
       &-body
         padding: 10px
+
+    .space-reports-comments
+      padding-left: 50px
+      .comment-item
+        padding-bottom: 10px
+
     .sort-container
       padding-left: 20px
       cursor: pointer
+
     .sort-label
       margin-left: 10px
       color: #888
+
     .more-loading
       text-align: center
       max-width: 1024px
       color: rgba(0, 0, 0, .3)
       background-color: #FFF
+
+    .panel-body-blue.report-types-container
+      border-bottom: 15px solid #df6ccb
+      padding-bottom: 0px
+    .report-types
+      display: flex
+      white-space: nowrap
+      overflow: auto
+      .report-type
+        cursor: pointer
+        background-color: #dddddd
+        padding: 20px 10px
+        white-space: nowrap
+        max-width: 150px
+        min-width: 100px
+        margin-right: 2px
+        border-radius: 5px 5px 0px 0px
+        flex: 1 1 auto
+        overflow: hidden
+        display: flex
+        justify-content: space-between
+        &.active
+          background-color: #df6ccb
+          color: #FFF

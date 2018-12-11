@@ -1,0 +1,68 @@
+<div class="container-fluid container-padded">
+
+  <div class="row">
+    <div class="col-md-24" style="margin: 20px 10px 0;">
+      <h2>Interaction Report</h2>
+      <p>
+      Report date:
+      <%= Date.today.strftime("%m/%d/%Y") %>
+      </p>
+      <p>
+      Report by:
+      <%= @context.user.full_name %>
+      </p>
+
+      <p>Filters</p>
+      <div>
+        Start date:
+        <%= @filters[:dates][:start_date] %>
+      </div>
+      <div>
+        End date:
+        <%= @filters[:dates][:end_date] %>
+      </div>
+      <div>
+        Users:
+        <%= @filters[:users] || "all" %>
+      </div>
+
+      <% @results.each do |content_type| %>
+        <div style="margin-top: 30px;">
+        <% object_type = content_type[0] %>
+        <% objects = content_type[1] %>
+        <h4><%= object_type.upcase %></h4>
+        <p>
+          Items found:
+          <%= objects.size %>
+        </p>
+
+        <% objects.each do |item| %>
+          <div class="row" style="margin: 0;">
+            <div class="col-md-6">
+              <div>
+                User:
+                <%= item[:user_fullname] %>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div>
+                Created at:
+                <%= item[:created_at] %>
+              </div>
+            </div>
+          </div>
+          <div class="row" style="margin: 0 0 10px;">
+            <div class="col-md-12">
+              Name:
+              <b>
+                <%= item[:object_name] %>
+              </b>
+            </div>
+          </div>
+        <% end %>
+        </div>
+      <% end %>
+
+    </div>
+  </div>
+</div>
