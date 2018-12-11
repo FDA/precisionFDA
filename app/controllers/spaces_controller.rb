@@ -346,10 +346,13 @@ class SpacesController < ApplicationController
     object = item_from_uid(params[:object_id])
 
     if space && object && space.shared_space
+
       ActiveRecord::Base.transaction do
-        copy_service.copy(object, space.shared_space.uid)
+        copy_service.copy(object, space.shared_space.uid).each do |new_object|
+          SpaceEventService.call(space.shared_space.id, @context.user_id, nil, new_object, "copy_to_cooperative")
+        end
       end
-      SpaceEventService.call(space.shared_space.id, @context.user_id, nil, object, "copy_to_cooperative")
+
       flash[:success] = "#{object.class} successfully copied"
     end
 
