@@ -48,15 +48,22 @@ class SpaceFeedController < ApplicationController
 
   def find_path_for_object(event)
     event[:entity_url] = ""
-    return event unless event[:entity]
+    entity = event[:entity]
+    return event unless entity
 
     event[:entity_url] =
       case event[:object_type]
       when "comment", "membership"
         ""
+      when "task"
+        if TaskPolicy.can_see?(entity, @membership)
+          pathify(entity)
+        else
+          ""
+        end
       else
-        if event[:entity].accessible_by?(@context)
-          pathify(event[:entity])
+        if entity.accessible_by?(@context)
+          pathify(entity)
         else
           ""
         end
