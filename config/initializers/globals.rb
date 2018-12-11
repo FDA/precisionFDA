@@ -91,7 +91,9 @@ REVIEW_SPACE_ADMINS =
   elsif ENV["DNANEXUS_BACKEND"] == "production"
     %w()
   else
-    %w()
+    %w(
+      john.didion
+    )
   end
 
 # Remove X-Runtime
