@@ -36,6 +36,10 @@
           <%= video_iframe(@videos[:apps_fork][:url]) %>
         </div>
         <div class="bs-docs-section bs-docs-media-section">
+          <p>Exporting Apps</p>
+          <%= video_iframe(@videos[:apps_export][:url]) %>
+        </div>
+        <div class="bs-docs-section bs-docs-media-section">
           <p>Notes</p>
           <%= video_iframe(@videos[:notes][:url]) %>
         </div>
@@ -52,6 +56,14 @@
           <%= video_iframe(@videos[:licenses][:url]) %>
         </div>
         <% if @context.can_administer_site? %>
+          <div class="bs-docs-section bs-docs-media-section">
+            <p>The Challenge Workbench</p>
+            <%= video_iframe(@videos[:challenge_workbench][:url]) %>
+          </div>
+          <div class="bs-docs-section bs-docs-media-section">
+            <p>Site Customization</p>
+            <%= video_iframe(@videos[:site_customization][:url]) %>
+          </div>
           <div class="bs-docs-section bs-docs-media-section">
             <p>Site Activity Reporting</p>
             <%= video_iframe(@videos[:site_activity_reporting][:url]) %>
