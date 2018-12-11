@@ -10,8 +10,8 @@ module SpaceService
     end
 
     # @param admin [SpaceMembership]
-    def self.call(api, space, admin)
-      new(project_creator: project_creator_class(space).new(api)).call(space, admin)
+    def self.call(api, space, admin, context)
+      new(project_creator: project_creator_class(space).new(api, context)).call(space, admin)
     end
 
     def initialize(project_creator:)

@@ -99,7 +99,7 @@ class App < ActiveRecord::Base
     return false unless context.logged_in?
     return false unless context.review_space_admin?
 
-    space_object.reviewer?
+    space_object.reviewer? || space_object.verification?
   end
 
   def to_docker(context_token)

@@ -1,0 +1,38 @@
+<!--
+<%= grid(spaces_grid) do |g|
+
+  g.blank_slate partial:  "_partials/empty_grid"
+  g.column name: 'Id', attribute: 'id'
+  g.column name: 'Name', attribute: 'name'
+
+  g.column name: "Select & Add" do |a|
+    [content_tag(:button, "Apply"), {class: 'add-verified-space', data: space_template_add_verified_space_path(@space_template.id,space_id: a.id), style: "width: 180px; align: right"}]
+  end
+end -%>
+-->
+
+<%= text_field_tag :search, nil, class: 'add-verified-space-search', id: 'verified-search' %>
+<span class="fa fa-filter" style="margin-left: -20px"></span>
+<div class="add-verified-spaces-scroll">
+  <table class="add-verified-spaces-table">
+    <tr >
+     <td>
+        <span class="fa fa-plus"></span>
+      </td>
+      <td>
+        Verified Space Name
+      </td>
+    </tr>
+
+    <% @verified_spaces.each do |v| %>
+      <tr>
+        <td>
+          <%= check_box_tag :hello, v.id %>
+        </td>
+        <td>
+          <%= v.name %>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+</div>

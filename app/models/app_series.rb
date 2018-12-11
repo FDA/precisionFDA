@@ -117,7 +117,7 @@ class AppSeries < ActiveRecord::Base
 
     SpaceEventService.call($1.to_i, context.user_id, nil, app, :app_added)
 
-    if space.review? || space.verified?
+    if space.review? || space.verification?
       api.call(app.dxid, 'addDevelopers', { "developers": [Setting.review_app_developers_org] })
     end
   end

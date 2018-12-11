@@ -28,6 +28,8 @@ module Permissions
       if context.guest?
         none
       else
+        return false if try(:space_object).try(:verified?)
+
         raise unless context.user_id.present?
         records = where(user_id: context.user_id)
         return records unless can_be_in_space?

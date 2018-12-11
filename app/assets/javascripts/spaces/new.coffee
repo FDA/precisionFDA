@@ -9,6 +9,9 @@ class SpacesNewView
     @hostLead = ko.observable(params.host_lead_dxuser)
     @guestLead = ko.observable(params.guest_lead_dxuser)
     @sponsorOrg = ko.observable(params.sponsor_org_handle)
+    @spaceTemplates = ko.observableArray(params.space_templates)
+    @restrict_to_template = ko.observable(params.restrict_to_template)
+
     @spaceTypes = ko.observableArray([
       new SpaceTypes('groups', 'groups'),
       new SpaceTypes('review', 'review'),

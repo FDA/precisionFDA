@@ -97,8 +97,8 @@ ActiveRecord::Schema.define(version: 20181210145814) do
     t.datetime "created_at",                                  null: false
     t.datetime "updated_at",                                  null: false
     t.integer  "app_series_id", limit: 4
-    t.boolean  "verified",                    default: false, null: false
     t.string   "uid",           limit: 255
+    t.boolean  "verified",                    default: false, null: false
   end
 
   add_index "apps", ["app_series_id"], name: "index_apps_on_app_series_id", using: :btree
@@ -557,22 +557,65 @@ ActiveRecord::Schema.define(version: 20181210145814) do
   add_index "space_memberships_spaces", ["space_id"], name: "index_space_memberships_spaces_on_space_id", using: :btree
   add_index "space_memberships_spaces", ["space_membership_id"], name: "index_space_memberships_spaces_on_space_membership_id", using: :btree
 
+  create_table "space_requests", force: :cascade do |t|
+    t.integer  "status",     limit: 4, default: 0
+    t.integer  "kind",       limit: 4, default: 0
+    t.integer  "space_id",   limit: 4
+    t.integer  "user_id",    limit: 4
+    t.datetime "created_at",                       null: false
+    t.datetime "updated_at",                       null: false
+  end
+
+  add_index "space_requests", ["space_id"], name: "index_space_requests_on_space_id", using: :btree
+  add_index "space_requests", ["user_id"], name: "fk_rails_ceb7f2ca83", using: :btree
+
+  create_table "space_template_nodes", force: :cascade do |t|
+    t.string   "space_template_id", limit: 255
+    t.integer  "node_id",           limit: 4
+    t.string   "node_type",         limit: 255
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
+    t.string   "space_id",          limit: 255
+    t.string   "node_name",         limit: 255
+  end
+
+  add_index "space_template_nodes", ["node_type", "node_id"], name: "index_space_template_nodes_on_node_type_and_node_id", using: :btree
+
+  create_table "space_template_spaces", force: :cascade do |t|
+    t.string   "space_id",          limit: 255
+    t.string   "space_template_id", limit: 255
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
+    t.string   "space_name",        limit: 255
+  end
+
+  create_table "space_templates", force: :cascade do |t|
+    t.string   "name",        limit: 255
+    t.string   "description", limit: 255
+    t.datetime "created_at",                              null: false
+    t.datetime "updated_at",                              null: false
+    t.boolean  "private",                 default: false, null: false
+    t.integer  "user_id",     limit: 4
+  end
+
   create_table "spaces", force: :cascade do |t|
-    t.string   "name",                limit: 255
-    t.text     "description",         limit: 65535
-    t.string   "host_project",        limit: 255
-    t.string   "guest_project",       limit: 255
-    t.string   "host_dxorg",          limit: 255
-    t.string   "guest_dxorg",         limit: 255
-    t.text     "meta",                limit: 65535
-    t.datetime "created_at",                                        null: false
-    t.datetime "updated_at",                                        null: false
-    t.integer  "space_id",            limit: 4
-    t.integer  "state",               limit: 4,     default: 0,     null: false
-    t.integer  "space_type",          limit: 4,     default: 0,     null: false
-    t.boolean  "verified",                          default: false, null: false
-    t.integer  "sponsor_org_id",      limit: 4
-    t.boolean  "inactivity_notified",               default: false
+    t.string   "name",                 limit: 255
+    t.text     "description",          limit: 65535
+    t.string   "host_project",         limit: 255
+    t.string   "guest_project",        limit: 255
+    t.string   "host_dxorg",           limit: 255
+    t.string   "guest_dxorg",          limit: 255
+    t.text     "meta",                 limit: 65535
+    t.datetime "created_at",                                         null: false
+    t.datetime "updated_at",                                         null: false
+    t.integer  "space_id",             limit: 4
+    t.integer  "state",                limit: 4,     default: 0,     null: false
+    t.integer  "space_type",           limit: 4,     default: 0,     null: false
+    t.integer  "sponsor_org_id",       limit: 4
+    t.boolean  "verified",                           default: false, null: false
+    t.integer  "space_template_id",    limit: 4
+    t.boolean  "restrict_to_template",               default: false
+    t.boolean  "inactivity_notified",                default: false
   end
 
   create_table "submissions", force: :cascade do |t|
@@ -853,6 +896,8 @@ ActiveRecord::Schema.define(version: 20181210145814) do
   add_foreign_key "space_events", "spaces"
   add_foreign_key "space_events", "users"
   add_foreign_key "space_memberships", "users"
+  add_foreign_key "space_requests", "spaces"
+  add_foreign_key "space_requests", "users"
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"
   add_foreign_key "submissions", "users"

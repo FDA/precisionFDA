@@ -106,6 +106,7 @@ class User < ActiveRecord::Base
   has_many :licenses
   has_many :accepted_licenses
   has_many :space_memberships
+  has_many :space_templates
   has_many :spaces, -> { where("space_memberships.active = ?", true) }, { through: :space_memberships }
   has_one :appathon
   has_many :meta_appathons
@@ -178,7 +179,7 @@ class User < ActiveRecord::Base
     uids = []
     if review_space_admin?
       uids.concat(Space.reviewer.pluck("distinct concat('space-', spaces.id)"))
-      # TODO add here verification
+      uids.concat(Space.verification.pluck("distinct concat('space-', spaces.id)"))
     end
     uids.concat(spaces.pluck("distinct concat('space-', spaces.id)"))
     uids.uniq

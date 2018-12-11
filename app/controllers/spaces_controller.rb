@@ -73,6 +73,7 @@ class SpacesController < ApplicationController
   def new
     redirect_to spaces_path unless @context.user.review_space_admin?
     @space = SpaceForm.new
+    js(space_templates: SpaceTemplate.all)
   end
 
   def edit
@@ -125,7 +126,7 @@ class SpacesController < ApplicationController
     admin = space.space_memberships.lead_or_admin.find_by(user_id: @context.user_id)
 
     if admin
-      SpaceService::Accept.call(@context.api, space, admin) unless space.accepted_by?(admin)
+      SpaceService::Accept.call(@context.api, space, admin, @context) unless space.accepted_by?(admin)
     else
       flash[:error] = "You don't have permission to edit this space"
     end
@@ -547,6 +548,23 @@ class SpacesController < ApplicationController
     js({ space_uid: @space.uid, space_id: @space.id, scopes: @space.accessible_scopes_for_move, counts: @counts })
   end
 
+  def apps_and_files
+    spaces = Space.where(id: params[:spaces].split(','))
+
+    apps = {}
+    files = {}
+
+    spaces.to_a.each do |space|
+      apps[space.id] = App.accessible_by_space(space).to_a
+      files[space.id] = UserFile.accessible_by_space(space).to_a
+    end
+
+    respond_to do |r|
+      r.html{ render json: {apps: apps, files: files}}
+      r.json{ render json: {apps: apps, files: files}}
+    end
+  end
+
   private
 
   def fetch_membership
@@ -559,7 +577,7 @@ class SpacesController < ApplicationController
   end
 
   def space_params
-    p = params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser, :space_type, :cts, :sponsor_org_handle)
+    p = params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser, :space_type, :cts, :sponsor_org_handle, :space_template_id, :restrict_to_template)
     p.require(:name)
     p.require(:space_type)
     return p
@@ -604,6 +622,7 @@ class SpacesController < ApplicationController
       selectedListURL: download_list_space_path
     }
   end
+
 
   def init_parent_folder
     @parent_folder_id = params[:folder_id]

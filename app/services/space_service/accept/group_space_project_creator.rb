@@ -2,8 +2,9 @@ module SpaceService
   class Accept
     class GroupSpaceProjectCreator
 
-      def initialize(api)
+      def initialize(api, context)
         @api = api
+        @context = context
       end
 
       def create(space, admin)
@@ -25,6 +26,7 @@ module SpaceService
           suppressEmailNotification: true,
           suppressAllNotifications: true
         )
+
         api.call(
           project_dxid, "invite",
           invitee: view_org,
@@ -33,10 +35,16 @@ module SpaceService
           suppressAllNotifications: true
         )
 
+        if space.verification?
+          level = 'CONTRIBUTE'
+        else
+          level =  admin.host? ? "CONTRIBUTE" : "VIEW"
+        end
+
         api.call(
           project_dxid, "invite",
           invitee: Setting.review_app_developers_org,
-          level: admin.host? ? "CONTRIBUTE" : "VIEW",
+          level: level,
           suppressEmailNotification: true,
           suppressAllNotifications: true,
         )

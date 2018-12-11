@@ -15,6 +15,7 @@ class SpaceMembershipPolicy
     end
 
     def can_move_content?(space, member)
+      return false if space.restrict_to_template? && !space.shared?
       return false if member.blank?
       return false unless space.active?
       return false if member.new_record?
