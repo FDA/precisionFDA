@@ -48,6 +48,9 @@ class DocsController < ApplicationController
       apps_run: {
         url: "https://www.youtube.com/embed/P90E3jgL134"
       },
+      apps_export: {
+        url: "https://www.youtube.com/embed/WeF9uj9QJIo"
+      },
       comparisons: {
         url: "https://www.youtube.com/embed/qMd98K07U9M"
       },
@@ -69,6 +72,12 @@ class DocsController < ApplicationController
       },
       publishing: {
         url: "https://www.youtube.com/embed/dsOCn1zTBOo"
+      },
+      challenge_workbench: {
+        url: "https://www.youtube.com/embed/SKqH5OfO5G8"
+      },
+      site_customization: {
+        url: "https://www.youtube.com/embed/j9pEb0VTf-0"
       },
       site_activity_reporting: {
         url: "https://www.youtube.com/embed/KJ-Rk-ejjBM"
