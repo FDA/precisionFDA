@@ -8,9 +8,6 @@ class CommentItem
     @date = data.created_at
     @avatar = data.user_avatar
     @childComments = ko.observableArray(comments.map((comment) -> new CommentItem(comment)))
-    console.log('comment', data.body)
-    console.log('comments', comments)
-    console.log('@childComments', @childComments())
 
     regex   = /(^|[^@\w])@(\w+)\b/g
     replace = '$1<a href="/users/$2" target="_blank">@$2</a>'

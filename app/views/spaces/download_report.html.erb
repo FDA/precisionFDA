@@ -1,72 +1,63 @@
-<div class="container-fluid container-padded">
+<%= render "spaces/download_report/styles" %>
 
-  <div class="row">
-    <div class="col-md-24" style="margin: 20px 10px 0;">
-      <h2>Interaction Report</h2>
-      <p>
-      Report date:
-      <%= Date.today.strftime("%m/%d/%Y") %>
-      </p>
-      <p>
-      Report by:
-      <%= @context.user.full_name %>
-      </p>
+<div class="content">
+  <div class="header bg-colored">
+    <div class="view-block">
+      <h1 class="nmr ta-c pb-30">Interaction Report</h1>
+      <div class="ta-r nmr pb-5">
+        <span class="label">Report by:</span>
+        <span><%= @context.user.full_name %></span>
+      </div>
+      <div class="ta-r nmr np">
+        <span class="label">Report created:</span>
+        <span><%= Date.today.strftime("%m/%d/%Y") %></span>
+      </div>
+    </div>
+  </div>
 
-      <p>Filters</p>
-      <div>
-        Start date:
-        <%= @filters[:dates][:start_date] %>
+  <div class="filters bg-colored">
+    <div class="view-block">
+      <h3>Filters</h3>
+      <div class="pb-5">
+        <span class="label">Report dates from</span>&nbsp;
+        <span><%= @filters[:dates][:start_date] %></span>&nbsp;
+        <span class="label">to</span>&nbsp;
+        <span><%= @filters[:dates][:end_date] %></span>
       </div>
       <div>
-        End date:
-        <%= @filters[:dates][:end_date] %>
+        <span class="label">Users:</span>&nbsp;
+        <span><%= @filters[:users] || "all" %></span>
       </div>
-      <div>
-        Users:
-        <%= @filters[:users] || "all" %>
-      </div>
+    </div>
+  </div>
 
-      <% @results.each do |content_type| %>
-        <div style="margin-top: 30px;">
+  <div class="results view-block">
+    <% @results.each do |content_type| %>
+      <div class="results-block">
+
+        <!-- VARS -->
         <% object_type = content_type[0] %>
         <% objects = content_type[1] %>
-        <h4><%= object_type.upcase %></h4>
-        <p>
-          Items found:
-          <%= objects.size %>
-        </p>
+        <!-- / VARS -->
 
-        <% objects.each do |item| %>
-          <div class="row" style="margin: 0;">
-            <div class="col-md-6">
-              <div>
-                User:
-                <%= item[:user_fullname] %>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div>
-                Created at:
-                <%= item[:created_at] %>
-              </div>
-            </div>
-          </div>
-          <div class="row" style="margin: 0 0 10px;">
-            <div class="col-md-12">
-              <% if object_type.to_s == "comments" %>
-                Body:
-              <% else %>
-                Name:
-              <% end %>
-              <b>
+        <h4><%= object_type.capitalize %>&nbsp;(<%= objects.size %>)</h4>
+
+        <div class="items">
+          <% objects.each do |item| %>
+            <div class="item-block">
+              <div class="item-block-body <%= object_type.to_s != "comments" ? 'fw-b' : '' %>">
                 <%= item[:object_name] %>
-              </b>
+              </div>
+              <div class="item-block-info">
+                <span class="label">Created by</span>&nbsp;
+                <span><%= item[:user_fullname] %></span>
+                <span class="label fl-r"><%= item[:created_at] %></span>
+              </div>
             </div>
-          </div>
-        <% end %>
+          <% end %>
         </div>
-      <% end %>
 
-    </div>
+      </div>
+    <% end %>
   </div>
 </div>
