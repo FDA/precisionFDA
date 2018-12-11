@@ -92,7 +92,24 @@ REVIEW_SPACE_ADMINS =
     %w()
   else
     %w(
+      alan.fdauser
+      Adam.Berger@fda.hhs.gov
+      martin.bednar
+      zeke.maier
+      Zivana.Tezak@fda.hhs.gov
+      singeradmin.pfdadev
+      singer.admin
+      pamella.tater.2
+      ezekiel.maier
+      vijay.kandali
+      min.yi
+      nicholas.hill
       john.didion
+      singer.ma
+      naina.thangaraj
+      holly.stephens
+      aabramenko.adminstage
+      sam.westreich
     )
   end
 
