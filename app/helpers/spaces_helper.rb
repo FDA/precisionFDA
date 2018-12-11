@@ -166,6 +166,11 @@ module SpacesHelper
         active: is_active(action, 'assets'),
         count: counts[:assets]
       },
+      reports: {
+        url: reports_space_path(space),
+        active: is_active(action, 'reports'),
+        count: counts[:reports]
+      },
     }
   end
 

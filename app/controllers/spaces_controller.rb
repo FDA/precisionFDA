@@ -1,10 +1,10 @@
 class SpacesController < ApplicationController
 
   before_action :init_parent_folder, only: [:files]
-  before_action :find_space_and_membership, only: [:discuss, :members, :feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons]
-  before_action :content_counters, only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons]
+  before_action :find_space_and_membership, only: [:discuss, :members, :feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :reports]
+  before_action :content_counters, only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :reports]
 
-  layout "space_content", only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons]
+  layout "space_content", only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :reports]
 
   def index
     if @context.can_administer_site?
@@ -530,6 +530,18 @@ class SpacesController < ApplicationController
     @overall_users = @space.space_memberships.active.count
     object_types = SpaceEvent.object_type_counters(Date.today.beginning_of_week.to_time, Time.now, {space_id: @space.id})
     js({ space_uid: @space.uid, space_id: @space.id, scopes: @space.accessible_scopes_for_move, object_types: object_types })
+  end
+
+  def reports
+    @counts[:comments] = Comment.where(commentable: @space).count
+    @counts[:tasks] = @space.tasks.count
+    @counts.delete(:feed)
+    @counts.delete(:open_tasks)
+    @counts.delete(:accepted_tasks)
+    @counts.delete(:declined_tasks)
+    @counts.delete(:completed_tasks)
+    @users = @space.users.map { |u| { name: u.full_name, value: u.id } }
+    js({ space_uid: @space.uid, space_id: @space.id, scopes: @space.accessible_scopes_for_move, counts: @counts })
   end
 
   private

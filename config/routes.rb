@@ -284,11 +284,12 @@ Rails.application.routes.draw do
       get 'members', on: :member
       get 'discuss', on: :member
       get 'tasks',   on: :member
-      get 'feed',   on: :member
+      get 'feed',    on: :member
+      get 'reports', on: :member
       get 'notes',   on: :member
       get 'files',   on: :member
-      get 'apps',   on: :member
-      get 'jobs',   on: :member
+      get 'apps',    on: :member
+      get 'jobs',    on: :member
       get 'comparisons',   on: :member
       get 'assets',   on: :member
       post 'verify', on: :member
@@ -326,6 +327,12 @@ Rails.application.routes.draw do
         collection do
           get 'object_types'
           get 'chart'
+        end
+      end
+      resources :space_reports, only: [:index] do
+        collection do
+          get 'counters'
+          get 'download_report'
         end
       end
     end

@@ -102,6 +102,7 @@ SpacesController = Paloma.controller('Spaces', {
     'jobs -> common_init',
     'assets -> common_init',
     'comparisons -> common_init',
+    'reports -> common_init',
   ],
   common_init: () ->
     init(@params)

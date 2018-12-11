@@ -39,3 +39,8 @@ window.Precision.utils =
 
   splitAndCapitalize: (str = '') ->
     return str.split('_').map((item) => @capitalize(item)).join(' ')
+
+  scrollTo: (where) ->
+    $([document.documentElement, document.body]).animate({
+      scrollTop: where
+    }, 0)

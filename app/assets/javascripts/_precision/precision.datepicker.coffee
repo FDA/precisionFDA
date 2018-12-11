@@ -20,6 +20,7 @@ class Datepicker
     value = moment_date.format(RETURN_FORMAT)
     @input.value = value
     @input.setAttribute 'value', value
+    $(@input).trigger('change')
 
     if typeof default_label == 'string'
       label = default_label
@@ -27,6 +28,9 @@ class Datepicker
       label = formatDate(moment_date, @params.format)
 
     @nodes.label.innerText = label
+
+    if typeof @params.onChange == 'function'
+      @params.onChange(value)
 
   show: ->
     $(@input).data("DateTimePicker").show()
@@ -99,9 +103,7 @@ class Datepicker
       @setValue moment(dateFromDateString(value)), defaultLabel
 
     $(@input).on 'dp.change', (e) =>
-      @setValue(e.date)
-      if typeof @params.onChange == 'function'
-        @params.onChange(e)
+      @setValue(e.date, null)
 
     $(@nodes.label).on 'click', =>
       $(@input).data("DateTimePicker").show()
