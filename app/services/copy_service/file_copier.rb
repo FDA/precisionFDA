@@ -17,7 +17,7 @@ class CopyService
 
         project_files.each do |file|
           copies.push(
-            file: copy_record(file, scope, destination_project),
+            object: copy_record(file, scope, destination_project),
             source: file
           )
         end
@@ -35,7 +35,7 @@ class CopyService
         existed_file = UserFile.find_by(dxid: file.dxid, project: destination_project)
         if existed_file.present?
           copies.push(
-            file: existed_file,
+            object: existed_file,
             source: file,
             copied: false
           )
