@@ -20,8 +20,8 @@ class PlatformRack < BaseRack
     [404, {}, [{}.to_json]]
   end
 
-  def post_org_new(_params)
-    [200, {}, [{}.to_json]]
+  def post_org_new(params)
+    [200, {}, [{ id: params["handle"] }.to_json]]
   end
 
   def post_invite(_params)
@@ -49,7 +49,7 @@ class PlatformRack < BaseRack
   end
 
   def post_app_new(params)
-    [200, {}, [{}.to_json]]
+    [200, {}, [{ id: 'app-1' }.to_json]]
   end
 
   def post_remove_objects(params)
