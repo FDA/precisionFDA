@@ -166,6 +166,12 @@ class SpaceReportsController < ApplicationController
 
   def find_path(object)
     case object_type
+    when "tasks"
+      if TaskPolicy.can_see?(object, @membership)
+        pathify(object)
+      else
+        ""
+      end
     when "comments"
       discuss_space_path(object.commentable)
     else
