@@ -279,6 +279,15 @@ Rails.application.routes.draw do
       end
     end
 
+    get '/spaces/verified_space_list' => 'space_templates#verified_space_list'
+    get '/spaces/apps_and_files' => 'spaces#apps_and_files'
+    get '/spaces/unverified_apps' => 'space_templates#unverified_apps'
+
+    resources :space_templates do
+      get 'duplicate', on: :member
+      get 'app_file_list'
+      post 'add_verified_space'
+    end
 
     resources :spaces do
       get 'members', on: :member
@@ -293,6 +302,7 @@ Rails.application.routes.draw do
       get 'comparisons',   on: :member
       get 'assets',   on: :member
       post 'verify', on: :member
+
       post 'accept', on: :member
       post 'lock', on: :member, to: 'space_requests#lock'
       post 'unlock', on: :member, to: 'space_requests#unlock'

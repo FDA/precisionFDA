@@ -39,6 +39,8 @@ module SpaceService
         guest_dxorg: Org.construct_dxorg("space_guest_#{uuid}"),
         space_type: space_form.space_type,
         cts: space_form.cts,
+        space_template_id: space_form.space_template_id,
+        restrict_to_template: space_form.restrict_to_template
       )
       space.sponsor_org_id = space_form.sponsor_org.id if space.review?
       space

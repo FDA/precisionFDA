@@ -442,6 +442,7 @@ class FilesController < ApplicationController
     }
   end
 
+
   def file_params
     params.require(:file).permit(:name, :description)
   end

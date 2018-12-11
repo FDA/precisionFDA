@@ -1,0 +1,14 @@
+<ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+  <li role="presentation" class="<% if controller_name == 'spaces' %>active<% end %>">
+    <a href="/spaces" aria-controls="tab-spaces">
+      <i class="fa fa-fw fa-object-group"></i>
+      <span class="tab-label">SPACES</span>&nbsp;(<%= Space.count %>)
+    </a>
+  </li>
+  <li role="presentation" class="<% if controller_name == 'space_templates' %>active<% end %>">
+    <a href="/space_templates" aria-controls="tab-templates">
+      <i class="fa fa-fw fa-newspaper-o"></i>
+      <span class="tab-label">TEMPLATES</span>&nbsp;(<%= SpaceTemplate.count %>)
+    </a>
+  </li>
+</ul>

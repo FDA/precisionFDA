@@ -16,6 +16,7 @@ module SpaceService
           space_type: shared_space.space_type,
           cts: shared_space.cts,
           state: shared_space.state,
+          restrict_to_template: shared_space.restrict_to_template
         )
 
         contribute_org = shared_space.org_dxid(admin)
@@ -49,6 +50,31 @@ module SpaceService
         end
 
         space.space_memberships << admin
+
+        apply_space_template(space) if admin.host?
+      end
+
+      def apply_space_template(space)
+        parent_space = space.space
+        template = parent_space.space_template
+
+        if template.present?
+          template.space_template_nodes.each do |n|
+            case n.node
+            when UserFile
+              copy_service.copy(n.node, space.uid)
+            when App
+              copy_service.copy(n.node, space.uid)
+            else
+              raise("Space template #{template.id} has Unexpected node #{n.id} of #{n.node.class.to_s} class")
+            end
+          end
+        end
+
+      end
+
+      def copy_service
+        @copy_service ||= CopyService.new(api: @context.api, user: @context.user)
       end
     end
   end

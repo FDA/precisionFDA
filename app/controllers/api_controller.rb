@@ -1549,6 +1549,7 @@ class ApiController < ApplicationController
       api = DNAnexusAPI.new(@context.token)
       user = User.find(@context.user_id)
       project = user.private_files_project
+
       applet_dxid = api.call("applet", "new", {
         project: project,
         inputSpec: input_spec.map { |spec| spec.reject { |key,value| key == "default" || key == "choices" } },
@@ -1566,6 +1567,7 @@ class ApiController < ApplicationController
         dxapi: "1.0.0",
         access: internet_access ? {network: ["*"]} : {}
       })["id"]
+
       dxid = api.call("app", "new", {
         applet: applet_dxid,
         name: AppSeries.construct_dxname(@context.username, name),

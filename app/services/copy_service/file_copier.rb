@@ -12,7 +12,7 @@ class CopyService
 
       destination_project = UserFile.publication_project!(user, scope)
 
-        files_grouped_by_project(copies, files, destination_project).each do |project, project_files|
+      files_grouped_by_project(copies, files, destination_project).each do |project, project_files|
         api.call(project, "clone", objects: project_files.map(&:dxid), project: destination_project)
 
         project_files.each do |file|
@@ -43,7 +43,6 @@ class CopyService
         end
 
         next unless file.state == UserFile::STATE_CLOSED
-        next unless file.passes_consistency_check?(user)
         next if destination_project == file.project
 
         projects[file.project] = [] unless projects.has_key?(file.project)

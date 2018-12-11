@@ -9,6 +9,8 @@ class SpaceForm
     :space_type,
     :cts,
     :sponsor_org_handle,
+    :space_template_id,
+    :restrict_to_template
   )
 
   validates :name, :description, :space_type, presence: true
@@ -18,6 +20,10 @@ class SpaceForm
 
   def self.model_name
     Space.model_name
+  end
+
+  def space_templates(context)
+    SpaceTemplate.private_first(context)
   end
 
   def persist!(api)

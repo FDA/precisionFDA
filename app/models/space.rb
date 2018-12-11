@@ -13,6 +13,8 @@ class Space < ActiveRecord::Base
   has_many :tasks, dependent: :destroy
   has_many :space_events
 
+  belongs_to :space_template
+
   acts_as_commentable
 
   store :meta, accessors: [:cts], coder: JSON
