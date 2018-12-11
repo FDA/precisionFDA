@@ -123,7 +123,12 @@ class SpaceEvent < ActiveRecord::Base
   def additional_info
     return if self.entity.nil?
     if self.comment? && (obj = self.entity.content_object)
-      name = obj.try(:name) || obj.try(:title)
+      name =
+        if obj.klass == "file"
+          obj.dxid
+        else
+          obj.try(:name) || obj.try(:title)
+        end
       {
         comment_object_name: name,
         comment_object_type: obj.klass,
