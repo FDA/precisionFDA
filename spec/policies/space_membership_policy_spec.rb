@@ -5,16 +5,14 @@ RSpec.describe SpaceMembershipPolicy do
 
 
   let(:user1) { create(:user, dxuser: "user_1") }
-  let(:initiator_lead) { true }
-  let(:initiator_role) { SpaceMembership::ROLE_ADMIN }
+  let(:initiator_role) { SpaceMembership::ROLE_LEAD }
   let(:initiator_side) { SpaceMembership::SIDE_HOST }
-  let(:initiator) { create(:space_membership, lead: initiator_lead, role: initiator_role, side: initiator_side, user_id: user1.id, spaces: [space]) }
+  let(:initiator) { create(:space_membership, role: initiator_role, side: initiator_side, user_id: user1.id, spaces: [space]) }
 
   let(:user2) { create(:user, dxuser: "user_2") }
-  let(:candidate_lead) { false }
   let(:candidate_role) { SpaceMembership::ROLE_MEMBER }
   let(:candidate_side) { SpaceMembership::SIDE_HOST }
-  let(:candidate) { create(:space_membership, lead: candidate_lead, role: candidate_role, side: candidate_side, user_id: user2.id, spaces: [space]) }
+  let(:candidate) { create(:space_membership, role: candidate_role, side: candidate_side, user_id: user2.id, spaces: [space]) }
 
   subject { described_class.can_disable?(space, initiator, candidate) }
 

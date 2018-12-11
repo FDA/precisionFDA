@@ -109,10 +109,6 @@ RSpec.describe SpacesController, type: :controller do
           suppressEmailNotification: true
         })
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{last_space.guest_dxorg}/removeMember").with(body: {
-          user: ADMIN_USER
-        })
-
         expect(last_space.space_memberships.lead.host.count).to eq(1)
         expect(last_space.space_memberships.lead.guest.count).to eq(1)
       end
@@ -243,8 +239,6 @@ RSpec.describe SpacesController, type: :controller do
       before { authenticate!(host_lead) }
       it "invites an user as a member" do
         post :invite, id: space.id, space: { invitees: user.dxuser, invitees_role: "member" }
-        post :invite, id: space.id, space: { invitees: user.dxuser, invitees_role: "admin" }
-        post :invite, id: space.id, space: { invitees: user.dxuser, invitees_role: "member" }
 
         expect(SpaceMembership.where(user_id: user.id).count).to eq(1)
         expect(SpaceMembership.where(user_id: user.id).first.member?).to be_truthy
@@ -253,14 +247,6 @@ RSpec.describe SpacesController, type: :controller do
           invitee: user.dxid,
           level: "MEMBER",
           suppressEmailNotification: true
-        })
-
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{space.host_dxorg}/setMemberAccess").with(body: {
-          user.dxid => { level: "ADMIN" }
-        })
-
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{space.host_dxorg}/setMemberAccess").with(body: {
-          user.dxid => { level: "MEMBER", allowBillableActivities: false, appAccess: true, projectAccess: "CONTRIBUTE" }
         })
       end
 
