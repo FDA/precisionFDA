@@ -120,7 +120,7 @@
     <ul class="nav nav-tabs nav-tabs-padded nav-tabs-centered" role="tablist">
       <% content_actions = ['tasks', 'feed', 'notes', 'files', 'apps', 'jobs'] %>
       <li role="presentation" class="<% if content_actions.include?(action_name) %>active<% end %>">
-        <a href="<%= feed_space_path(@space) %>" aria-controls="tab-data"><span class="fa fa-fw fa-database"></span>
+        <a href="<%= main_space_path(@space) %>" aria-controls="tab-data"><span class="fa fa-fw fa-database"></span>
           <span class="tab-label">Content</span>
         </a>
       </li>

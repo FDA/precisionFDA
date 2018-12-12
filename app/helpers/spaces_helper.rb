@@ -239,4 +239,12 @@ module SpacesHelper
     content_tag(:span, date, class: "#{failed_css}")
   end
 
+  def main_space_path(space)
+    if space.review?
+      feed_space_path(space)
+    else
+      files_space_path(space)
+    end
+  end
+
 end

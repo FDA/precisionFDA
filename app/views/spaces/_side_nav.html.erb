@@ -2,6 +2,7 @@
 
 <div class="pfda-pane-sidebar pfda-pane-sidebar-dark">
   <div class="list-group list-group-spaces">
+    <% if @space.review? %>
     <%= sidenav_link(nav.dig(:feed, :url), nav.dig(:feed, :active), 'fa-list', nav.dig(:feed, :count), 'ACTIVITY') %>
     <a id="child_tasks_switch"
       href="javascript: void(0)"
@@ -23,12 +24,15 @@
       <%= child_sidenav_link(nav.dig(:completed_tasks, :url), nav.dig(:completed_tasks, :active), 'fa-check-square-o', nav.dig(:completed_tasks, :count), 'Completed Tasks') %>
       <%= child_sidenav_link(nav.dig(:declined_tasks, :url), nav.dig(:declined_tasks, :active), 'fa-times', nav.dig(:declined_tasks, :count), 'Declined Tasks') %>
     </div>
-    <%= sidenav_link(nav.dig(:notes, :url), nav.dig(:notes, :active), 'fa-sticky-note', nav.dig(:notes, :count), 'Notes') %>
+    <% end %>
     <%= sidenav_link(nav.dig(:files, :url), nav.dig(:files, :active), 'fa-files-o', nav.dig(:files, :count), 'Files') %>
+    <%= sidenav_link(nav.dig(:notes, :url), nav.dig(:notes, :active), 'fa-sticky-note', nav.dig(:notes, :count), 'Notes') %>
     <%= sidenav_link(nav.dig(:assets, :url), nav.dig(:assets, :active), 'fa-file-zip-o', nav.dig(:assets, :count), 'Assets') %>
     <%= sidenav_link(nav.dig(:apps, :url), nav.dig(:apps, :active), 'fa-cubes', nav.dig(:apps, :count), 'Apps') %>
     <%= sidenav_link(nav.dig(:jobs, :url), nav.dig(:jobs, :active), 'fa-list-ol', nav.dig(:jobs, :count), 'Jobs') %>
     <%= sidenav_link(nav.dig(:comparisons, :url), nav.dig(:comparisons, :active), 'fa-bullseye', nav.dig(:comparisons, :count), 'Comparison') %>
+    <% if @space.review? %>
     <%= sidenav_link(nav.dig(:reports, :url), nav.dig(:reports, :active), 'fa-exchange', nav.dig(:reports, :count), 'Reports') %>
+    <% end %>
   </div>
 </div>
