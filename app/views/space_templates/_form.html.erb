@@ -5,14 +5,27 @@
     <div class="form-group required">
       <%= f.label :name, label: "Name", class: "control-label col-sm-2" %>
       <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_field :name, size: 250, class: 'form-control input-lg', placeholder: 'Name this Space Template', required: "required" %>
+        <%=
+          f.text_field :name,
+          size: 250,
+          class: 'form-control input-lg',
+          placeholder: 'Name this Space Template',
+          data: {bind: "disable: readonly"},
+          required: "required"
+        %>
       </div>
     </div>
 
     <div class="form-group">
       <%= f.label :description, "Description", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_area :description, class: "form-control", rows: 10, placeholder: "What is this space template about..." %>
+        <%=
+          f.text_area :description,
+          class: "form-control",
+          rows: 10,
+          data: {bind: "disable: readonly"},
+          placeholder: "What is this space template about..."
+        %>
       </div>
     </div>
     <!-- ko if:readonly != true -->
@@ -97,7 +110,11 @@
       </div>
       <div class="form-group">
         <div class="col-sm-offset-3 col-sm-11">
-          <input name="space_template[private]" type="checkbox" <%= @space_template.private? ? 'checked=checked' : '' %>>
+          <input
+            name="space_template[private]"
+            type="checkbox"
+            data-bind="disable: readonly"
+            <%= @space_template.private? ? 'checked=checked' : '' %>>
           This is a private template. <span style="font-size: 70%">Marking a template private will only make it available to you.</span>
         </div>
       </div>
