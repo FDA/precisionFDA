@@ -1,7 +1,7 @@
 class SpacesController < ApplicationController
 
   before_action :init_parent_folder, only: [:files]
-  before_action :find_space_and_membership, only: [:discuss, :members, :feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :reports]
+  before_action :find_space_and_membership, only: [:show, :discuss, :members, :feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :reports]
   before_action :content_counters, only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :reports]
 
   layout "space_content", only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :reports]
@@ -23,7 +23,11 @@ class SpacesController < ApplicationController
   end
 
   def show
-    redirect_to feed_space_path(params[:id])
+    if @space.review?
+      redirect_to feed_space_path(params[:id])
+    else
+      redirect_to files_space_path(params[:id])
+    end
   end
 
   def discuss
