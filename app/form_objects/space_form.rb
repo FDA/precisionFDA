@@ -26,8 +26,8 @@ class SpaceForm
     SpaceTemplate.private_first(context)
   end
 
-  def persist!(api)
-    SpaceService::Create.call(self, api: api)
+  def persist!(api, user)
+    SpaceService::Create.call(self, api: api, user: user)
   end
 
   def sponsor_org

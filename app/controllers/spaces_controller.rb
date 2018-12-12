@@ -7,13 +7,8 @@ class SpacesController < ApplicationController
   layout "space_content", only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :reports]
 
   def index
-    if @context.can_administer_site?
-      spaces = Space
-    elsif @context.review_space_admin?
-      spaces = Space.where(space_type: [Space.space_types[:review],Space.space_types[:verification]])
-    else
-      spaces = Space.accessible_by(@context)
-    end
+    spaces = Space.accessible_by(@context)
+
     @spaces_grid = initialize_grid(spaces, {
       name: 'spaces',
       order: 'spaces.id',
@@ -91,7 +86,7 @@ class SpacesController < ApplicationController
     end
 
     if space_form.valid?
-      space = space_form.persist!(@context.api)
+      space = space_form.persist!(@context.api, @context.user)
 
       if space.accessible_by?(@context)
         flash[:success] = "The space was created successfully, and will be activated once both admin's accept it."

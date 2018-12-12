@@ -7,10 +7,12 @@ class SpaceMembershipPolicy
     end
 
     def can_move_content_by_user?(space, item, user)
-      owner_member = space.space_memberships.find_by!(user_id: item.user_id)
+      owner = space.space_memberships.find_by(user_id: item.user_id)
+      owner_side = owner.present? ? owner[:side] : SpaceMembership::SIDE_HOST
+
       can_move_content?(
         space,
-        space.space_memberships.where(side: owner_member[:side]).find_by(user_id: user.id)
+        space.space_memberships.where(side: owner_side).find_by(user_id: user.id)
       )
     end
 

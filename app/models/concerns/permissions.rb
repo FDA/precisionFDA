@@ -107,8 +107,8 @@ module Permissions
 
     return false unless context.review_space_admin?
 
-    owner_member = space_object.space_memberships.find_by!(user_id: user_id)
-    owner_member.host?
+    owner = space_object.space_memberships.find_by(user_id: user_id)
+    owner.present? ? owner.host? : true
   end
 
   def copyable_to_cooperative?
