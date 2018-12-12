@@ -1,30 +1,46 @@
 
 <%= grid(space_templates_grid, show_filters: :no )  do |g|
 
-  g.column do |t|
-    [
-      content_tag(:span,style:"font-size: 150%"){
-        content_tag(:span,"", class:"fa " + (t.private? ? "fa-eye-slash":"")) + " " +
-        link_to(duplicate_space_template_path(t)) { content_tag(:div,"",class: "fa fa-copy")} + " " +
-        link_to(space_template_path(t), name: t.name, 'data-bind': 'click: confirmDelete'){content_tag(:div,"", class: "fa fa-trash")}
-      },
-      {class: "col-state state-active",align: "right"}
-
-    ]
-  end
-
   g.column name: "Name", attribute: 'name', ordering: false do |t|
     content_tag(:a,t.name.blank? ? 'Untitled':t.name, {href: space_template_path(t)})
   end
 
-  g.column name: "Created", attribute: 'created_at'
+  g.column name: "Created", attribute: 'created_at', class: "space-templates-grid-created"
+
+  g.column class: "space-templates-grid-action" do |t|
+    if t.private?
+      content_tag(:i,"", class:"fa fa-eye-slash text-muted", title: 'Private Space')
+    else
+      content_tag(:i,"", class:"fa fa-eye text-success", title: 'Public Space')
+    end
+  end
+
+  g.column class: "space-templates-grid-action" do |t|
+    link_to(duplicate_space_template_path(t)) {
+      content_tag(:i, "", class: "fa fa-copy", title: 'Copy Space')
+    }
+  end
+
+  g.column class: "space-templates-grid-action" do |t|
+    link_to(space_template_path(t), name: t.name, 'data-bind': 'click: confirmDelete') {
+      content_tag(:i,"", class: "fa fa-trash text-danger", title: 'Delete Space')
+    }
+  end
+
   g.after_row do |t|
     content_tag(:tr) do
-      content_tag(:td) +
-      content_tag(:td, colspan: 3) do
-        content_tag(:span, " ", class: "fa fa-chevron-right description-uncover") +
-        ' ' + content_tag(:span, (t.description[0,64] rescue "nope") + '... ', class: 'short-description') +
-        content_tag(:div, t.description, class: 'full-description', style: 'display: none')
+      content_tag(:td, colspan: 5, class: "space-templates-grid-desc-td") do
+        content_tag(:div, t.description, class: "space-templates-grid-description") do
+          if t.description.length > 120
+            content_tag(:div, class: 'short-description')  {
+              content_tag(:span, (t.description[0,120] rescue "nope") + '... ') +
+              content_tag(:a, "more", class: 'description-uncover')
+            } +
+            content_tag(:div, t.description, class: 'full-description', style: 'display: none')
+          else
+            content_tag(:div, t.description)
+          end
+        end
       end
     end
   end
