@@ -7,13 +7,14 @@ class SpaceTemplateIndexView
     @duplicateMessage = ko.observable(duplicateMessage)
   deleteTemplate: () ->
     if @toDelete != null
-      $.ajax @toDelete,
+      $.ajax(@toDelete, {
         method: 'DELETE',
         success: (data) =>
           $("#delete-confirm").modal("hide")
           @toDelete = null
+      })
 
-  confirmDelete: (data,event) ->
+  confirmDelete: (data, event) ->
     url = $(event.currentTarget).prop('href')
     name = $(event.currentTarget).prop('name')
     @toDelete = url
@@ -22,7 +23,7 @@ class SpaceTemplateIndexView
     @toDeleteSpace(url)
     return false
 
-SpaceTemplatesController = Paloma.controller('SpaceTemplates',
+SpaceTemplatesController = Paloma.controller('SpaceTemplates', {
   index: ->
     $container = $('body main')
     viewModel = new SpaceTemplateIndexView(@params.duplicated)
@@ -35,15 +36,9 @@ SpaceTemplatesController = Paloma.controller('SpaceTemplates',
     if @params.duplicated?
       $("#duplicated").modal("show")
 
-    $('.description-uncover').click((e) ->
-      parent = $(e.target).parent()
-      if $(e.target).hasClass('fa-chevron-down')
-        $(e.target).attr('class', 'fa fa-chevron-right description-uncover')
-        $(parent.children('.full-description')[0]).hide()
-        $(parent.children('.short-description')[0]).show()
-      else
-        $(e.target).attr('class', 'fa fa-chevron-down description-uncover')
-        $(parent.children('.full-description')[0]).show()
-        $(parent.children('.short-description')[0]).hide()
-    )
-)
+    $('.short-description').on 'click', (e) ->
+      e.preventDefault()
+      if $(e.target).hasClass('description-uncover')
+        $(e.currentTarget).parent().find('.full-description').show()
+        $(e.currentTarget).hide()
+})

@@ -13,7 +13,9 @@
     </div>
   </div>
 
-  <%= render "space_templates/grid", space_templates_grid: @templates_grid unless @templates_grid.empty? %>
+  <div class="space-templates-grid">
+    <%= render "space_templates/grid", space_templates_grid: @templates_grid unless @templates_grid.empty? %>
+  </div>
 
   <% else %>
   You need admin privileges
