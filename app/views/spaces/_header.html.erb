@@ -16,22 +16,13 @@
       <% end %>
 
       <div class="page-title">
-        <span class="fa fa-object-group"></span>
-        <%= @space.title %>
+        <i class="fa fa-object-group"></i>&nbsp;<%= @space.title %>
         <% if @space.verification? %>
           - Verification Space
-          <% if @space.editable_by?(@context) && !@space.verified? && @space.can_verify_space(@context)  %>
-            <a class="btn btn-primary verify-button" data-toggle="modal" data-target="#verification-modal">
-              <span class="fa fa-check" aria-hidden="true"></span> Verify this space
-            </a>
-          <% end %>
           <% if @space.verified? %>
-            <div class="fa fa-check-circle" style="color: #1F70B5;padding-left: 20px; font-size: 42px">
-            </div>
+            &nbsp;<i class="fa fa-check-circle text-success" title="Space successfully verified"></i>
           <% end %>
         <% end %>
-
-
       </div>
 
       <% if @space.editable_by?(@context) && !@space.verified? %>
@@ -56,6 +47,13 @@
 
     <% if SpaceMembershipPolicy.can_move_content?(@space, @membership) && !@space.verified? %>
       <div class="pull-right">
+        <div class="btn-group">
+          <% if @space.editable_by?(@context) && !@space.verified? && @space.can_verify_space(@context)  %>
+            <a class="btn btn-primary verify-button" data-toggle="modal" data-target="#verification-modal">
+              <span class="fa fa-check" aria-hidden="true"></span> Verify this space
+            </a>
+          <% end %>
+        </div>
         <div class="btn-group">
           <button class="btn btn-default" data-bind="click: objectSelector.open">
             <span class="fa fa-plus" aria-hidden="true"></span> Move data to space...

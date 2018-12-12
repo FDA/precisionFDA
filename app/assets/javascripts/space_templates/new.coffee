@@ -1,6 +1,15 @@
 
 class SpaceTemplateView
-  constructor: (@space_template_id, spaces, verifiedSpacesURL, unverifiedAppsURL, apps, files, readonly, spaceData) ->
+  constructor: (
+    @space_template_id,
+    spaces,
+    verifiedSpacesURL,
+    unverifiedAppsURL,
+    apps,
+    files,
+    readonly,
+    spaceData
+  ) ->
     @spaces = spaces
     @selectedSpaces = ko.observableArray([])
     @selectedApps = ko.observableArray([])
@@ -31,12 +40,10 @@ class SpaceTemplateView
     @searchSpaceBox("")
     checked = $('[name="spaces[selected][]"]:checked')
     sp = []
-    checked.each((e, v)->
-      sp.push($(v).val())
-    )
+    checked.each (e, v) -> sp.push($(v).val())
     spaces = @spaces.filter( (space) ->
       this.indexOf(space.id + "") > -1
-    ,sp)
+    , sp)
 
     @addedSpaces(spaces)
     this.loadAppsAndFiles(spaces)
@@ -52,7 +59,7 @@ class SpaceTemplateView
       checked.each((e) ->
         found = true if $(checked[e]).attr("value") == (app.id + "")
       )
-      for k,v of @spaceApps()
+      for k, v of @spaceApps()
         if v.id == app.id
           found = false
 
@@ -76,30 +83,30 @@ class SpaceTemplateView
     $('#unverified-apps').modal('show')
 
 
-  deleteSpace: (space)->
+  deleteSpace: (space) ->
     if self.readonly != true
-      for k,v of self.spaceData.apps[space.id]
+      for k, v of self.spaceData.apps[space.id]
         i = self.spaceApps.indexOf(v)
-        self.spaceApps.splice(i,1) if i > -1
+        self.spaceApps.splice(i, 1) if i > -1
 
-      for k,v of self.spaceData.files[space.id]
+      for k, v of self.spaceData.files[space.id]
         i = self.spaceFiles.indexOf(v)
-        self.spaceFiles.splice(i,1) if i > -1
+        self.spaceFiles.splice(i, 1) if i > -1
 
       self.addedSpaces.remove(space)
 
-  deleteApp: (app)->
+  deleteApp: (app) ->
     if self.readonly != true
       i = self.selectedApps().indexOf(app)
-      self.selectedApps().splice(i,1) if i > -1
+      self.selectedApps().splice(i, 1) if i > -1
 
       self.spaceApps.remove(app)
 
-  deleteNode:(file)->
+  deleteNode: (file) ->
     if self.readonly != true
       self.spaceFiles.remove(file)
 
-  loadAppsAndFiles: (spaces)->
+  loadAppsAndFiles: (spaces) ->
     $.ajax({
         url: '/spaces/apps_and_files?spaces=' + spaces.map((e) -> e.id).join(','),
         method: 'GET',
@@ -110,10 +117,10 @@ class SpaceTemplateView
           apps = []
           files = []
 
-          for k,v of datum.apps
+          for k, v of datum.apps
             apps = apps.concat v
 
-          for k,v of datum.files
+          for k, v of datum.files
             files = files.concat v
 
           apps = apps.concat @selectedApps()
@@ -131,8 +138,7 @@ class SpaceTemplateView
         @unverifiedApps(data)
     })
 
-SpaceTemplatesController = Paloma.controller('SpaceTemplates',
-
+SpaceTemplatesController = Paloma.controller('SpaceTemplates', {
   new: ->
     @furnishForm()
 
@@ -163,7 +169,7 @@ SpaceTemplatesController = Paloma.controller('SpaceTemplates',
       params.spaceData
     )
 
-    for k,v of viewModel.spaces
+    for k, v of viewModel.spaces
       v.checked = false
 
     if params.templateApps
@@ -171,20 +177,20 @@ SpaceTemplatesController = Paloma.controller('SpaceTemplates',
       viewModel.spaceFiles(params.templateFiles)
       viewModel.addedSpaces(params.templateSpaces)
 
-      for k,v of viewModel.spaces
-        for a,b of params.templateSpaces
+      for k, v of viewModel.spaces
+        for a, b of params.templateSpaces
           if b.id == v.id
             viewModel.spaces[k].checked = true
           else
             viewModel.spaces[k].checked = false
 
 
-    ko.applyBindings(viewModel, $container[0] )
+    ko.applyBindings(viewModel, $container[0])
 
-    viewModel.searchSpaceBox.subscribe((value)->
+    viewModel.searchSpaceBox.subscribe( (value) ->
       #filter items in the modal
 
-      $("table.filter tr").each((i)->
+      $("table.filter tr").each( (i) ->
         $row = $(this)
         id = $row.find("td").text()
 
@@ -194,10 +200,10 @@ SpaceTemplatesController = Paloma.controller('SpaceTemplates',
           $(this).hide()
       )
     )
-    viewModel.searchAppBox.subscribe((value)->
+    viewModel.searchAppBox.subscribe( (value) ->
       #filter items in the modal
 
-      $("table.filter tr").each((i)->
+      $("table.filter tr").each( (i) ->
         $row = $(this)
         id = $row.find("td").text()
 
@@ -207,6 +213,4 @@ SpaceTemplatesController = Paloma.controller('SpaceTemplates',
           $(this).hide()
       )
     )
-
-
-)
+})
