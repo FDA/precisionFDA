@@ -11,7 +11,7 @@ class SpaceFeedController < ApplicationController
   end
 
   def object_types
-    render json: SpaceEvent.object_type_counters(start_date, end_date, filter_params)
+    render json: SpaceEvent.object_type_counters(start_date, end_date, counters_filter_params)
   end
 
   def chart
@@ -32,6 +32,10 @@ class SpaceFeedController < ApplicationController
 
   def feed_filter_params
     params.permit(:sort, :space_id, :side, :object_type, roles: [], users: [], object_type: [])
+  end
+
+  def counters_filter_params
+    params.permit(:space_id, :side, roles: [], users: [])
   end
 
   def filter_params
