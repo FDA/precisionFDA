@@ -73,7 +73,7 @@ class SpaceMembershipController < ApplicationController
   end
 
   def space
-    @space ||= member.spaces.shared.find_by!({})
+    @space ||= member.spaces.find_by!({})
   end
 
 end
