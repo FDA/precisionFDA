@@ -47,13 +47,13 @@
 
     <% if SpaceMembershipPolicy.can_move_content?(@space, @membership) && !@space.verified? %>
       <div class="pull-right">
-        <div class="btn-group">
-          <% if @space.editable_by?(@context) && !@space.verified? && @space.can_verify_space(@context)  %>
+        <% if @space.verification? && @space.editable_by?(@context) && !@space.verified? && @space.can_verify_space(@context) %>
+          <div class="btn-group">
             <a class="btn btn-primary verify-button" data-toggle="modal" data-target="#verification-modal">
               <span class="fa fa-check" aria-hidden="true"></span> Verify this space
             </a>
-          <% end %>
-        </div>
+          </div>
+        <% end %>
         <div class="btn-group">
           <button class="btn btn-default" data-bind="click: objectSelector.open">
             <span class="fa fa-plus" aria-hidden="true"></span> Move data to space...
