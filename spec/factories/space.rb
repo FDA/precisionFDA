@@ -53,6 +53,7 @@ FactoryBot.define do
       after(:create) do |space, evaluator|
         space.space_memberships.admin.host.create!(user_id: evaluator.host_lead_id)
         space.space_memberships.admin.guest.create!(user_id: evaluator.guest_lead_id)
+        create(:space, :private_reviewer, guest_dxorg: nil, host_dxorg: space.host_dxorg, space_id: space.id )
       end
     end
 
@@ -64,7 +65,7 @@ FactoryBot.define do
         guest_lead_id nil
       end
       after(:create) do |space, evaluator|
-        create(:space, :private_reviewer, reviewer_lead_id: evaluator.host_lead_id, guest_dxorg: nil, host_dxorg: space.host_dxorg, space_id: space.id )
+        space.confidential_reviewer_space.space_memberships.admin.host.create!(user_id: evaluator.host_lead_id)
         create(:space, :private_sponsor, sponsor_lead_id: evaluator.guest_lead_id, guest_dxorg: space.guest_dxorg, host_dxorg: nil, space_id: space.id )
       end
     end
@@ -74,9 +75,9 @@ FactoryBot.define do
       transient do
         reviewer_lead_id nil
       end
-      after(:create) do |space, evaluator|
-        space.space_memberships.admin.host.create!(user_id: evaluator.reviewer_lead_id)
-      end
+      # after(:create) do |space, evaluator|
+      #   space.space_memberships.admin.host.create!(user_id: evaluator.reviewer_lead_id) if evaluator.reviewer_lead_id
+      # end
     end
 
     trait :private_sponsor do

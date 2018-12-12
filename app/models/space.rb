@@ -75,7 +75,9 @@ class Space < ActiveRecord::Base
 
   def accepted_by?(member)
     if member.host?
-      host_project.present?
+      return false if host_project.blank?
+      return true unless review?
+      confidential_reviewer_space.host_lead_member.present?
     else
       guest_project.present?
     end
@@ -227,15 +229,17 @@ class Space < ActiveRecord::Base
 
     raise unless context.user_id.present?
 
-    if context.review_space_admin?
-      joins(:space_memberships).where.any_of(
-        { space_memberships: { active: true, user_id: context.user_id } },
-        { id: self.reviewer },
-        { id: self.all_verified }
-      ).uniq
-    else
-      joins(:space_memberships).where(space_memberships: { active: true, user_id: context.user_id }).uniq
+    queries = [].tap do |queries|
+      queries.push({ space_memberships: { active: true, user_id: context.user_id } })
+      if context.review_space_admin?
+        queries.push({ id: self.reviewer.shared })
+        queries.push({ id: self.reviewer.confidential.active })
+        queries.push({ id: self.all_verified })
+      end
+      queries.push({ id: self.groups }) if context.can_administer_site?
     end
+
+    joins(:space_memberships).where.any_of(*queries)
   end
 
   def search_content(content_type, query)

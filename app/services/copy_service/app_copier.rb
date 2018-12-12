@@ -37,6 +37,8 @@ class CopyService
     end
 
     def copy_assets(new_app, app, scope)
+      return if app.ordered_assets.blank?
+
       copies = file_copier.copy(app.assets, scope)
       new_app.assets = copies.all
 

@@ -5,11 +5,12 @@ module SpaceService
       new(options).call(space_form)
     end
 
-    def initialize(api:, papi: DNAnexusAPI.for_admin,
+    def initialize(user:, api:, papi: DNAnexusAPI.for_admin,
                    notification_mailer: NotificationsMailer)
       @api = api
       @papi = papi
       @notification_mailer = notification_mailer
+      @user = user
     end
 
     # @param [SpaceForm, #name, #description, #space_type, #cts, #host_lead_dxuser, #guest_lead_dxuser, #sponsor_org] space_form
@@ -20,6 +21,8 @@ module SpaceService
         space.save!
         add_leads(space, space_form)
         remove_pfda_admin_user(space) unless space.review?
+        create_reviewer_cooperative_project(space) if space.review?
+        create_reviewer_confidential_space(space, space_form) if space.review?
         send_emails(space)
         space
       end
@@ -27,7 +30,7 @@ module SpaceService
 
     private
 
-    attr_reader :papi, :api, :notification_mailer
+    attr_reader :user, :papi, :api, :notification_mailer
 
     def build_space(space_form)
       uuid = SecureRandom.hex
@@ -87,5 +90,112 @@ module SpaceService
         notification_mailer.space_activation_email(space, lead).deliver_now!
       end
     end
+
+    def create_reviewer_cooperative_project(space)
+      papi.call(space.host_dxorg, "invite", {
+        invitee: user.dxid,
+        level: "ADMIN",
+        suppressEmailNotification: true
+      })
+
+      project_dxid = api.call(
+        "project", "new",
+        name: "precisionfda-space-#{space.id}-HOST",
+        billTo: user.billto,
+      )["id"]
+
+      api.call(
+        project_dxid, "invite",
+        invitee: space.host_dxorg,
+        level: "CONTRIBUTE",
+        suppressEmailNotification: true,
+        suppressAllNotifications: true
+      )
+
+      api.call(
+        project_dxid, "invite",
+        invitee: space.guest_dxorg,
+        level: "VIEW",
+        suppressEmailNotification: true,
+        suppressAllNotifications: true
+      )
+
+      api.call(
+        project_dxid, "invite",
+        invitee: Setting.review_app_developers_org,
+        level: "CONTRIBUTE",
+        suppressEmailNotification: true,
+        suppressAllNotifications: true,
+      )
+
+      space.host_project = project_dxid
+      space.save!
+    end
+
+    def create_reviewer_confidential_space(shared_space, space_form)
+      space = shared_space.confidential_spaces.create!(
+        name: shared_space.name,
+        description: shared_space.description,
+        space_type: shared_space.space_type,
+        cts: shared_space.cts,
+        state: shared_space.state,
+        host_dxorg: shared_space.host_dxorg,
+        restrict_to_template: space_form.restrict_to_template,
+      )
+
+      project_dxid = api.call(
+        "project", "new",
+        name: "precisionfda-space-#{space.id}-REVIEWER-PRIVATE",
+        billTo: user.billto,
+      )["id"]
+
+      space.host_project = project_dxid
+      space.save!
+
+      api.call(
+        project_dxid, "invite",
+        invitee: space.host_dxorg,
+        level: "CONTRIBUTE",
+        suppressEmailNotification: true,
+        suppressAllNotifications: true,
+      )
+
+      api.call(
+        project_dxid, "invite",
+        invitee: Setting.review_app_developers_org,
+        level: "CONTRIBUTE",
+        suppressEmailNotification: true,
+        suppressAllNotifications: true,
+      )
+
+      apply_space_template(space)
+    end
+
+    def apply_space_template(space)
+      parent_space = space.space
+      template = parent_space.space_template
+
+      if template.present?
+        template.space_template_nodes.each do |n|
+          case n.node
+          when UserFile
+            copy_service.copy(n.node, space.uid)
+          when App
+            copy_service.copy(n.node, space.uid)
+          else
+            raise("Space template #{template.id} has Unexpected node #{n.id} of #{n.node.class.to_s} class")
+          end
+        end
+      end
+    end
+
+    def papi
+      @papi ||= DNAnexusAPI.for_admin
+    end
+
+    def copy_service
+      @copy_service ||= CopyService.new(api: api, user: user)
+    end
+
   end
 end

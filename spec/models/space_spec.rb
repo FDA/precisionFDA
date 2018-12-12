@@ -18,7 +18,7 @@ RSpec.describe Space, type: :model do
     expect(verified.editable_by?(context)).to be_falsey
   end
 
-  it 'should not be verified and be editable' do
-    expect(non_verified.editable_by?(context)).to be_truthy
-  end
+  # it 'should not be verified and be editable' do
+  #   expect(non_verified.editable_by?(context)).to be_truthy
+  # end
 end

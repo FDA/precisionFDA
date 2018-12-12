@@ -64,6 +64,10 @@ class PlatformRack < BaseRack
     [200, {}, [{}.to_json]]
   end
 
+  def post_clone(_params)
+    [200, {}, [{}.to_json]]
+  end
+
   def parse_method_name(env)
     request_type = env["REQUEST_METHOD"].downcase
 
@@ -95,6 +99,8 @@ class PlatformRack < BaseRack
         "app_new"
       when /.*\/removeObjects/
         "remove_objects"
+      when /.*\/clone/
+        "clone"
       else
         raise "Method for '#{env["PATH_INFO"]}' isn't implemented yet"
       end
