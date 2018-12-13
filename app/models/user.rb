@@ -86,7 +86,9 @@ class User < ActiveRecord::Base
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
       PRODUCTION_ADMINS
     else
-      NON_PRODUCTION_ADMINS
+      ENV.fetch("CUSTOM_SITE_ADMINS", "").split(" ").concat(
+        NON_PRODUCTION_ADMINS
+      )
     end
   end
 
