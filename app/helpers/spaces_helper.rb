@@ -23,10 +23,6 @@ module SpacesHelper
     SpaceMembership.roles.slice(:admin, :member).keys
   end
 
-  def space_header(space)
-
-  end
-
   def space_type(space)
     return 'Verification' if space.verification?
     return 'Group' if space.groups?

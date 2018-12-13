@@ -70,9 +70,9 @@ class SpacesController < ApplicationController
   end
 
   def new
-    redirect_to spaces_path unless @context.user.review_space_admin?
+    redirect_to spaces_path if !@context.can_create_spaces?
     @space = SpaceForm.new
-    js(space_templates: SpaceTemplate.all)
+    js(space_templates: SpaceTemplate.all, space_types: space_types)
   end
 
   def edit
@@ -80,7 +80,7 @@ class SpacesController < ApplicationController
   end
 
   def create
-    unless @context.user.review_space_admin?
+    unless @context.can_create_spaces?
       redirect_to spaces_path
       return
     end
@@ -97,7 +97,7 @@ class SpacesController < ApplicationController
       end
     else
       @space = space_form
-      js space_params
+      js space_params.merge(space_types: space_types)
       render :new
     end
   end
@@ -652,5 +652,13 @@ class SpacesController < ApplicationController
 
   def content_counters
     @counts ||= @space.content_counters(@context.user_id)
+  end
+
+  def space_types
+    [].tap do |types|
+      types << :groups       if @context.can_administer_site?
+      types << :review       if @context.review_space_admin?
+      types << :verification if @context.review_space_admin?
+    end
   end
 end
