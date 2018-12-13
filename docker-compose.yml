@@ -19,7 +19,7 @@ services:
     depends_on:
       - db
   db:
-    image: mysql:latest
+    image: mysql:5.6
     volumes:
       - 'pfda-mysql-volume:/var/lib/mysql'
     environment:
