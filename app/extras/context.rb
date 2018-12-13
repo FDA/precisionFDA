@@ -38,6 +38,11 @@ class Context
     return (@user_id == -1 && @username.start_with?("Guest-") && @token == "INVALID" && @expiration.present? && ((@expiration - Time.now.to_i) > 5.minutes) && @org_id == -1)
   end
 
+  def can_create_spaces?
+    return false unless logged_in?
+    user.can_administer_site? || review_space_admin?
+  end
+
   def can_administer_site?
     logged_in? && user.can_administer_site?
   end

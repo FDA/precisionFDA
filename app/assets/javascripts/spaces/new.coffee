@@ -12,11 +12,11 @@ class SpacesNewView
     @spaceTemplates = ko.observableArray(params.space_templates)
     @restrict_to_template = ko.observable(params.restrict_to_template)
 
-    @spaceTypes = ko.observableArray([
-      new SpaceTypes('groups', 'groups'),
-      new SpaceTypes('review', 'review'),
-      new SpaceTypes('verification', 'verification'),
-    ]);
+    @spaceTypes = ko.observableArray(
+      _.map(params.space_types, (type) =>
+        new SpaceTypes(type, type)
+      )
+    )
     @chosenSpaceType = ko.observable(params.space_type)
 #    @hostLeadLabel = ko.observable('123')
     @hostLeadLabel = ko.computed(() =>
