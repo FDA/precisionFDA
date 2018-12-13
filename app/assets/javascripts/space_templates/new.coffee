@@ -36,6 +36,17 @@ class SpaceTemplateView
 
     self.readonly =  readonly
 
+  dismissSpaces: () ->
+    @searchSpaceBox("")
+    $('#verified-spaces').modal("hide")
+    $('#verified-spaces input:checkbox').prop('checked','');
+
+  dismissApps: () ->
+    @searchAppBox("")
+    $('#unverified-apps').modal("hide")
+    $('#unverified-apps input:checkbox').prop('checked','');
+
+
   addSelectedSpaces: () ->
     @searchSpaceBox("")
     checked = $('[name="spaces[selected][]"]:checked')
@@ -48,7 +59,8 @@ class SpaceTemplateView
     @addedSpaces(spaces)
     this.loadAppsAndFiles(spaces)
 
-    $('#verified-spaces').modal("hide")
+    #$('#verified-spaces').modal("hide")
+    @dismissSpaces()
 
   addSelectedApps: () ->
     @searchAppBox("")
@@ -71,7 +83,8 @@ class SpaceTemplateView
 
     @spaceApps(sApps.concat(apps))
     #@spaceApps().push(apps)
-    $('#unverified-apps').modal("hide")
+    #$('#unverified-apps').modal("hide")
+    @dismissApps()
 
   showSelectSpacesModal: (e) ->
     $('#verified-spaces').modal('show')
@@ -85,13 +98,17 @@ class SpaceTemplateView
 
   deleteSpace: (space) ->
     if self.readonly != true
-      for k, v of self.spaceData.apps[space.id]
-        i = self.spaceApps.indexOf(v)
-        self.spaceApps.splice(i, 1) if i > -1
+      for k,v of self.spaceData.apps[space.id]
+        i = self.spaceApps().findIndex((e)->
+          e.id == v.id
+        )
+        self.spaceApps.splice(i,1) if i > -1
 
-      for k, v of self.spaceData.files[space.id]
-        i = self.spaceFiles.indexOf(v)
-        self.spaceFiles.splice(i, 1) if i > -1
+      for k,v of self.spaceData.files[space.id]
+        i = self.spaceFiles().findIndex((e)->
+          e.id == v.id
+        )
+        self.spaceFiles.splice(i,1) if i > -1
 
       self.addedSpaces.remove(space)
 
@@ -157,7 +174,8 @@ SpaceTemplatesController = Paloma.controller('SpaceTemplates', {
   furnishForm: ->
     params = @params
     $container = $('body main')
-
+    if params.readonly
+      $('.form input,textarea').prop('disabled', true);
     viewModel = new SpaceTemplateView(
       params.space_template_id,
       params.spaces,

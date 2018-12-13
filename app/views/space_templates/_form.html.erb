@@ -56,16 +56,7 @@
     </div>
     <!-- /ko -->
 
-    <!-- ko if:readonly != true -->
-    <div class="form-group">
-      <%= f.label :name, label: "Add Unverified Apps", class: "control-label col-sm-2" %>
-      <div class="col-sm-11 col-sm-offset-1">
-        <%=
-          content_tag(:input, nil, {id: 'add-verified-apps', 'data-toggle': "modal", 'data-bind': 'click: showSelectAppModal', placeholder: ' Add', style: 'font-family: Arial, FontAwesome'})
-        %>
-      </div>
-    </div>
-    <!-- /ko -->
+    <%= render "unverified", f: f %>
 
     <div class="form-group">
       <%= f.label :name, label: "Apps/file list", class: "control-label col-sm-2" %>
@@ -89,6 +80,7 @@
           </div>
           <!-- /ko -->
         </div>
+
 
         <div class="template-added-items-box">
           <!-- ko foreach:spaceFiles -->
@@ -130,7 +122,7 @@
             <% if @readonly == true %>
               <%= link_to "Back", space_templates_path, class: "btn btn-default" %>
             <% else %>
-              <%= f.submit (current_page?(new_space_template_path) ? "Create" : "Update") + " Template", class: 'btn btn-primary', data: {disable_with: (current_page?(new_space_template_path) ? "Creating Template..." : "Updating Template...")} %>
+              <%= f.submit (current_page?(new_space_template_path) ? "Create" : "Save") + " Template", class: 'btn btn-primary', data: {disable_with: (current_page?(new_space_template_path) ? "Creating Template..." : "Saving Template...")} %>
               <%= link_to "Cancel", space_templates_path, class: "btn btn-default" %>
             <% end %>
               <% end %>
@@ -147,7 +139,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" data-bind="click: dismissSpaces" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
         <h4 class="modal-title">Add Verified Space</h4>
@@ -181,7 +173,7 @@
         <button type="button" class="btn btn-primary verified-spaces-add" data-bind="click: addSelectedSpaces">Add
           Spaces
         </button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary" data-bind="click: dismissSpaces">Close</button>
       </div>
     </div>
   </div>
@@ -192,7 +184,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" data-bind="click: dismissApps" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
         <h4 class="modal-title">Add Unverified Apps</h4>
@@ -225,7 +217,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-primary verified-spaces-add" data-bind="click: addSelectedApps">Add Apps
         </button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary" data-bind="click: dismissApps">Close</button>
       </div>
     </div>
   </div>

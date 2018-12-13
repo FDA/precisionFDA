@@ -33,10 +33,10 @@
         content_tag(:div, t.description, class: "space-templates-grid-description") do
           if t.description.length > 120
             content_tag(:div, class: 'short-description')  {
-              content_tag(:span, (t.description[0,120] rescue "nope") + '... ') +
+              content_tag(:span, (t.description[0,128] rescue "nope") + (t.description.length > 127 ? '... ' : ''), class: 'short-description') +
               content_tag(:a, "more", class: 'description-uncover')
             } +
-            content_tag(:div, t.description, class: 'full-description', style: 'display: none')
+            content_tag(:div, simple_format(t.description), class: 'full-description', style: 'display: none')
           else
             content_tag(:div, t.description)
           end

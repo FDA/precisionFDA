@@ -72,11 +72,16 @@ class SpaceTemplatesController < ApplicationController
   end
 
   def show
+
     @readonly = true
     @space_template = SpaceTemplate.find(params[:id])
-    @verified_spaces = Space.all_verified
 
-    js({
+    if @space_template.private? && @context.user.id != @space_template.user_id
+      redirect_to space_templates_path
+    else
+      @verified_spaces = Space.all_verified
+
+      js({
            space_template_id: @space_template.id,
            spaces: @verified_spaces,
            verifiedSpacesURL: spaces_verified_space_list_path,
@@ -87,6 +92,7 @@ class SpaceTemplatesController < ApplicationController
            templateSpaces: @space_template.space_template_spaces.map(&:space),
            readonly: true
        })
+    end
   end
 
   def destroy
@@ -130,14 +136,12 @@ class SpaceTemplatesController < ApplicationController
   end
 
   def unverified_apps
-    apps = App.where(verified: false)
+    ar = App.arel_table
+    apps = App.where(ar[:scope].not_eq("public").or(ar[:verified].not_eq(true).and(ar[:dev_group].not_eq(nil))))
+
     respond_to do |f|
       f.json{ render json: apps }
     end
-  end
-
-  def app_file_list
-    # list of included files in the template
   end
 
   def duplicate
@@ -170,23 +174,6 @@ class SpaceTemplatesController < ApplicationController
     @space_template.name = "Copy of " + (@space_template.name || "")
 
     render :edit
-  end
-
-  def add_verified_space
-    @space_template = SpaceTemplate.find(verified_space_params[:space_template_id])
-    @space = Space.find(verified_space_params[:space_id])
-
-    @space_template.space_template_nodes.scope.where(space_id: @space.id).delete_all # avoid duplication on additional assigns
-
-    [App,UserFile].each do |c|
-      c.accessible_by_space(@space).each do |a|
-        @space_template.space_template_nodes << SpaceTemplateNode.create!({space_id: @space.id, space_template_id: @space_template.id, node: a})
-      end
-    end
-    respond_to do |f|
-      f.html { render text: "OK" }
-      f.json { render json: {status: "OK"}}
-    end
   end
 
   def verified_space_params
