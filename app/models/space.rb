@@ -239,7 +239,7 @@ class Space < ActiveRecord::Base
       queries.push({ id: self.groups }) if context.can_administer_site?
     end
 
-    joins(:space_memberships).where.any_of(*queries)
+    joins(:space_memberships).where.any_of(*queries).uniq
   end
 
   def search_content(content_type, query)
