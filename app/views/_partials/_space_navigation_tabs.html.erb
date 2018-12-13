@@ -5,10 +5,12 @@
       <span class="tab-label">SPACES</span>&nbsp;(<%= Space.count %>)
     </a>
   </li>
-  <li role="presentation" class="<% if controller_name == 'space_templates' %>active<% end %>">
-    <a href="/space_templates" aria-controls="tab-templates">
-      <i class="fa fa-fw fa-newspaper-o"></i>
-      <span class="tab-label">TEMPLATES</span>&nbsp;(<%= SpaceTemplate.count %>)
-    </a>
-  </li>
+  <% if @context.user.review_space_admin? %>
+    <li role="presentation" class="<% if controller_name == 'space_templates' %>active<% end %>">
+      <a href="/space_templates" aria-controls="tab-templates">
+        <i class="fa fa-fw fa-newspaper-o"></i>
+        <span class="tab-label">TEMPLATES</span>&nbsp;(<%= SpaceTemplate.all_and_private(@context).count %>)
+      </a>
+    </li>
+  <% end %>
 </ul>

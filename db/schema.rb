@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181210145814) do
+ActiveRecord::Schema.define(version: 20181212205559) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -99,6 +99,7 @@ ActiveRecord::Schema.define(version: 20181210145814) do
     t.integer  "app_series_id", limit: 4
     t.string   "uid",           limit: 255
     t.boolean  "verified",                    default: false, null: false
+    t.string   "dev_group",     limit: 255
   end
 
   add_index "apps", ["app_series_id"], name: "index_apps_on_app_series_id", using: :btree
@@ -591,10 +592,10 @@ ActiveRecord::Schema.define(version: 20181210145814) do
 
   create_table "space_templates", force: :cascade do |t|
     t.string   "name",        limit: 255
-    t.string   "description", limit: 255
-    t.datetime "created_at",                              null: false
-    t.datetime "updated_at",                              null: false
-    t.boolean  "private",                 default: false, null: false
+    t.string   "description", limit: 21300
+    t.datetime "created_at",                                null: false
+    t.datetime "updated_at",                                null: false
+    t.boolean  "private",                   default: false, null: false
     t.integer  "user_id",     limit: 4
   end
 

@@ -124,6 +124,7 @@ Rails.application.routes.draw do
     post '/api/create_asset', to: 'api#create_asset'
     post '/api/close_asset', to: 'api#close_asset'
     post '/api/create_app', to: 'api#create_app'
+    post '/api/share_with_fda', to: 'api#share_with_fda'
     post '/api/attach_to_notes', to: 'api#attach_to_notes'
     post '/api/update_note', to: 'api#update_note'
     post '/api/upvote', to: 'api#upvote'
@@ -286,7 +287,6 @@ Rails.application.routes.draw do
     resources :space_templates do
       get 'duplicate', on: :member
       get 'app_file_list'
-      post 'add_verified_space'
     end
 
     resources :spaces do

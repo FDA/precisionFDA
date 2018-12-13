@@ -137,7 +137,7 @@ class AppsController < ApplicationController
 
   def js_info(app, challenges)
     {
-      app: (app.slice(:id, :dxid, :title, :readme, :revision).merge(link: app_path(app)) rescue nil),
+      app: (app.slice(:id, :dxid, :title, :readme, :revision, :dev_group).merge(link: app_path(app)) rescue nil),
       challenges: challenges.collect do |challenge|
         {
           id: challenge.id,
@@ -157,8 +157,6 @@ class AppsController < ApplicationController
 
   def update
     @app = App.editable_by(@context).find_by!(id: params[:id])
-    @app.verified = params[:app][:verified]
-    @app.save!
 
     respond_to do |format|
       format.json { render json: {ok: 1}}

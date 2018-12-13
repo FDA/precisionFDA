@@ -130,6 +130,42 @@
       <span class="fa fa-check-circle" style="padding-left: 30px; color: #1F70B5"></span>
       Verified
     </span>
+  <% else %>
+
+  <% if @context.user.dxuser == app.user.dxuser %>
+    <script type="text/html" id="shared-template">
+      &nbsp;
+      <span class="text-success">
+        <i class="fa fa-check-circle"></i>
+        <span id="fda_text">Shared with FDA</span>
+      </span>
+    </script>
+    <% unless @app.dev_group %>
+      <!-- ko ifnot:shareSuccess -->
+      <div class="btn-group">
+        <button id="fda_button" class="btn btn-primary" data-bind="click: shareWithFDA">
+          <i class="fa fa-copy"></i>&nbsp;
+          <!-- ko ifnot:fdaSpinner -->
+          <span id="fda_text">Share with FDA</span>
+          <!-- /ko -->
+          <!-- ko if:fdaSpinner -->
+          <span id="fda_text">Sharing...</span>&nbsp;
+          <i class="fa fa-spinner fa-spin"></i>
+          <!-- /ko -->
+        </button>
+      </div>
+      <!-- /ko -->
+      <!-- ko if:shareSuccess -->
+      <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
+      <!-- /ko -->
+    <% else %>
+      <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
+    <% end %>
+  <% else %>
+    <% if @app.dev_group %>
+      <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
+    <% end %>
+  <% end %>
   <% end %>
 
   <div class="btn-group pull-right">

@@ -1581,6 +1581,7 @@ class ApiController < ApplicationController
         billTo: Rails.env.development? ? "user-#{@context.username}" : user.billto,
         access: internet_access ? {network: ["*"]} : {}
       })["id"]
+
       api.call(project, "removeObjects", {objects: [applet_dxid]})
       app = App.create!(
         dxid: dxid,
@@ -1608,6 +1609,21 @@ class ApiController < ApplicationController
     render json: { id: app.uid }
   end
 
+  def share_with_fda
+    app = App.find(params[:id])
+    api = DNAnexusAPI.new(@context.token)
+    dev_group = Setting.review_app_developers_org
+
+    data =  api.call(app.dxid, 'addDevelopers', {"developers": [dev_group]})
+    app.dev_group = dev_group
+    app.save!
+
+    respond_to do |r|
+      r.json do
+        render json: {"app_id":app.id, data: data, dxuser: @context.user.dxuser, owner: app.user.dxuser}
+      end
+    end
+  end
   # Inputs
   #
   # prefix (string, required): the prefix to search for
