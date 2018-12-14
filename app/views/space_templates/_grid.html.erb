@@ -9,9 +9,9 @@
 
   g.column class: "space-templates-grid-action" do |t|
     if t.private?
-      content_tag(:i,"", class:"fa fa-eye-slash text-muted", title: 'Private Space')
+      content_tag(:i,"", class:"fa fa-eye-slash text-muted", title: 'Private')
     else
-      content_tag(:i,"", class:"fa fa-eye text-success", title: 'Public Space')
+      content_tag(:i,"", class:"fa fa-eye text-success", title: 'Public')
     end
   end
 
@@ -32,11 +32,14 @@
       content_tag(:td, colspan: 5, class: "space-templates-grid-desc-td") do
         content_tag(:div, t.description, class: "space-templates-grid-description") do
           if t.description.length > 120
-            content_tag(:div, class: 'short-description')  {
+            content_tag(:div, class: 'short-description') {
               content_tag(:span, (t.description[0,128] rescue "nope") + (t.description.length > 127 ? '... ' : ''), class: 'short-description') +
               content_tag(:a, "more", class: 'description-uncover')
             } +
-            content_tag(:div, simple_format(t.description), class: 'full-description', style: 'display: none')
+            content_tag(:div, class: 'full-description', style: 'display: none') {
+              content_tag(:span, t.description) +
+              content_tag(:a, "less", class: 'description-cover')
+            }
           else
             content_tag(:div, t.description)
           end

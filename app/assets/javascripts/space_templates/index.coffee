@@ -41,4 +41,10 @@ SpaceTemplatesController = Paloma.controller('SpaceTemplates', {
       if $(e.target).hasClass('description-uncover')
         $(e.currentTarget).parent().find('.full-description').show()
         $(e.currentTarget).hide()
+
+    $('.full-description').on 'click', (e) ->
+      e.preventDefault()
+      if $(e.target).hasClass('description-cover')
+        $(e.currentTarget).parent().find('.short-description').show()
+        $(e.currentTarget).hide()
 })
