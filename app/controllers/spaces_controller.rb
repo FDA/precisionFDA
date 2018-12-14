@@ -134,16 +134,11 @@ class SpacesController < ApplicationController
 
 
   def invite
-    space = Space.accessible_by(@context).find(params[:id])
-    admin =
-      if @context.review_space_admin?
-        SpaceMembership.new_by_admin(@context.user)
-      else
-        space.space_memberships.lead_or_admin.find_by(user_id: @context.user_id)
-      end
+    @space = Space.accessible_by(@context).find(params[:id])
+    admin = fetch_membership
 
     if admin
-      space_invite_form = SpaceInviteForm.new(params[:space].merge(space: space))
+      space_invite_form = SpaceInviteForm.new(params[:space].merge(space: @space))
 
       if space_invite_form.valid?
         space_invite_form.invite(@context, admin)
@@ -154,7 +149,7 @@ class SpacesController < ApplicationController
       flash[:error] = "You don't have permission to edit this space"
     end
 
-    redirect_to members_space_path(space)
+    redirect_to members_space_path(@space)
   end
 
   def rename

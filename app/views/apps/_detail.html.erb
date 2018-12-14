@@ -140,7 +140,7 @@
         <span id="fda_text">Shared with FDA</span>
       </span>
     </script>
-    <% unless @app.dev_group %>
+    <% if !@app.dev_group && @app.scope != 'public' && !@app.in_verificaiton_space?  %>
       <!-- ko ifnot:shareSuccess -->
       <div class="btn-group">
         <button id="fda_button" class="btn btn-primary" data-bind="click: shareWithFDA">
@@ -158,7 +158,7 @@
       <!-- ko if:shareSuccess -->
       <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
       <!-- /ko -->
-    <% else %>
+    <% elsif @app.dev_group %>
       <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
     <% end %>
   <% else %>

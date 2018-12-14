@@ -2,7 +2,7 @@ class CreateSpaceTemplates < ActiveRecord::Migration
   def change
     create_table :space_templates do |t|
       t.string :name
-      t.text :description
+      t.string :description
 
       t.timestamps null: false
     end
