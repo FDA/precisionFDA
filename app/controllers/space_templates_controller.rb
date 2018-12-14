@@ -33,14 +33,14 @@ class SpaceTemplatesController < ApplicationController
   end
 
   def index
-    space_templates = SpaceTemplate.all_and_private(@context).order("created_at DESC")
+    space_templates = SpaceTemplate.all_and_private(@context)
 
     respond_to do |r|
 
       r.html do
         @templates_grid = initialize_grid( space_templates, {
             name: 'space_templates',
-            order: 'created_at',
+            order: 'space_templates.id',
             order_direction: 'desc',
             per_page: 100
         })
