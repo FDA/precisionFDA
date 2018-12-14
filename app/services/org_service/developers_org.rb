@@ -25,12 +25,12 @@ module OrgService
       users.update_all(review_app_developers_org: dxorg)
     end
 
-    def self.choose_dxorg(papi, handle = "app_developers", index = 1)
-      new_handle = "#{handle}_#{index}"
+    def self.choose_dxorg(papi, handle = "app_developers")
+      new_handle = "#{handle}_#{SecureRandom.hex}"
       dxorg = Org.construct_dxorg(new_handle)
 
       if papi.entity_exists?(dxorg)
-        choose_dxorg(papi, handle, index + 1)
+        choose_dxorg(papi, handle)
       else
         dxorg
       end
