@@ -128,6 +128,10 @@ module Permissions
     in_space? && space_object.verified?
   end
 
+  def in_verificaiton_space?
+    in_space? && space_object.verification?
+  end
+
   def in_space?
     !public? && !private?
   end

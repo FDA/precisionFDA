@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181212205559) do
+ActiveRecord::Schema.define(version: 20181214084328) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -97,8 +97,8 @@ ActiveRecord::Schema.define(version: 20181212205559) do
     t.datetime "created_at",                                  null: false
     t.datetime "updated_at",                                  null: false
     t.integer  "app_series_id", limit: 4
-    t.string   "uid",           limit: 255
     t.boolean  "verified",                    default: false, null: false
+    t.string   "uid",           limit: 255
     t.string   "dev_group",     limit: 255
   end
 
@@ -592,7 +592,7 @@ ActiveRecord::Schema.define(version: 20181212205559) do
 
   create_table "space_templates", force: :cascade do |t|
     t.string   "name",        limit: 255
-    t.string   "description", limit: 21300
+    t.text     "description", limit: 65535
     t.datetime "created_at",                                null: false
     t.datetime "updated_at",                                null: false
     t.boolean  "private",                   default: false, null: false
@@ -612,8 +612,8 @@ ActiveRecord::Schema.define(version: 20181212205559) do
     t.integer  "space_id",             limit: 4
     t.integer  "state",                limit: 4,     default: 0,     null: false
     t.integer  "space_type",           limit: 4,     default: 0,     null: false
-    t.integer  "sponsor_org_id",       limit: 4
     t.boolean  "verified",                           default: false, null: false
+    t.integer  "sponsor_org_id",       limit: 4
     t.integer  "space_template_id",    limit: 4
     t.boolean  "restrict_to_template",               default: false
     t.boolean  "inactivity_notified",                default: false

@@ -13,7 +13,9 @@ class CopyService
       new_app.revision = 1
 
       copy_dependencies(new_app, app, scope)
-      publish(new_app, scope)
+
+      original = App.order(:id).find_by_dxid(new_app.dxid)
+      publish(new_app, scope) unless original.scope == 'public'
 
       new_app.save!
       new_app

@@ -136,8 +136,10 @@ class SpaceTemplatesController < ApplicationController
   end
 
   def unverified_apps
-    ar = App.arel_table
-    apps = App.where(ar[:scope].not_eq("public").or(ar[:verified].not_eq(true).and(ar[:dev_group].not_eq(nil))))
+    apps = App.where.not(verified: true).any_of(
+      App.where(scope: 'public'),
+      App.where.not(dev_group: nil)
+    ).uniq
 
     respond_to do |f|
       f.json{ render json: apps }

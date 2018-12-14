@@ -33,7 +33,6 @@ class Space < ActiveRecord::Base
   scope :confidential, -> { review.where.not(space_id: nil) }
   scope :reviewer, -> { review.where.not(host_dxorg: nil) }
   scope :sponsor, -> { review.where.not(guest_dxorg: nil) }
-
   scope :all_verified, -> { where(verified: true) }
 
   def confidential_space(member)
@@ -51,7 +50,6 @@ class Space < ActiveRecord::Base
   def reviewer?
     review? && host_dxorg.present?
   end
-
   def confidential?
     space_id.present?
   end
@@ -66,20 +64,20 @@ class Space < ActiveRecord::Base
   end
 
   def accepted?
-    if confidential?
-      host_project.present? || guest_project.present?
-    else
-      host_project.present? && guest_project.present?
-    end
+    accepted_by?(host_lead_member) && accepted_by?(guest_lead_member)
   end
 
   def accepted_by?(member)
+    return false if member.blank?
+
     if member.host?
       return false if host_project.blank?
       return true unless review?
       confidential_reviewer_space.host_lead_member.present?
     else
-      guest_project.present?
+      return false if guest_project.blank?
+      return true unless review?
+      confidential_spaces.sponsor.first.guest_lead_member.present?
     end
   end
 
@@ -218,8 +216,7 @@ class Space < ActiveRecord::Base
     raise unless context.user_id.present?
 
     return true if context.review_space_admin? && reviewer?
-
-    return true if verified? && context.user.review_space_admin?
+    return true if context.review_space_admin? && verified?
 
     space_memberships.active.exists?(user_id: context.user_id)
   end
@@ -234,7 +231,7 @@ class Space < ActiveRecord::Base
       if context.review_space_admin?
         queries.push({ id: self.reviewer.shared })
         queries.push({ id: self.reviewer.confidential.active })
-        queries.push({ id: self.all_verified })
+        queries.push({ id: self.verification})
       end
       queries.push({ id: self.groups }) if context.can_administer_site?
     end

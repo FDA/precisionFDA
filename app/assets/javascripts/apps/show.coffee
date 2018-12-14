@@ -12,6 +12,7 @@ class AppShowModel
     @confirmationModal = $('#replace-challenge-app-modal')
     @selectedChallenge = ko.observable({ app: {} })
 
+    @shareSuccess = ko.observable(false)
     @fdaSpinner = ko.observable(false)
     self.fdaSpinner = @fdaSpinner
 

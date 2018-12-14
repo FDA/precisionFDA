@@ -19,7 +19,7 @@ class SpaceInviteForm
   def invite(context, admin)
     return if invalid?
 
-    api = context.review_space_admin? ? DNAnexusAPI.for_admin : context.api
+    api = admin.persisted? ? context.api : DNAnexusAPI.for_admin
 
     valid_invitees.each do |user|
       SpaceService::Invite.call(api, space, admin, user, invitees_role)
