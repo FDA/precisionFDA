@@ -89,11 +89,22 @@ REVIEW_SPACE_ADMINS =
   if ENV["REVIEW_SPACE_ADMINS"]
     ENV["REVIEW_SPACE_ADMINS"].split(" ")
   elsif ENV["DNANEXUS_BACKEND"] == "production"
-    %w()
+    %w(
+      elaine.johanson
+      ruth.bandler
+      singer.ma
+      john.didion
+      ezekiel.maier
+      holly.stephens
+    )
   else
     %w(
       john.didion
       singer.ma
+      aabramenko.adminstage
+      stagetestuser.lastname
+      ezekiel.maier
+      sam.westreich
     )
   end
 
