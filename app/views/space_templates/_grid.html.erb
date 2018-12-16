@@ -28,9 +28,9 @@
   end
 
   g.after_row do |t|
-    content_tag(:tr) do
+    content_tag(:tr, class: 'extra-row') do
       content_tag(:td, colspan: 5, class: "space-templates-grid-desc-td") do
-        content_tag(:div, t.description, class: "space-templates-grid-description") do
+        content_tag(:div, t.description, class: "space-templates-grid-description description") do
           if t.description.length > 120
             content_tag(:div, class: 'short-description') {
               content_tag(:span, (t.description[0,128] rescue "nope") + (t.description.length > 127 ? '... ' : ''), class: 'short-description') +

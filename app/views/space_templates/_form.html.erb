@@ -146,9 +146,9 @@
       </div>
       <div class="modal-body" style="height: 300px; overflow-y: scroll">
         <input type="text" id="filter-verified-spaces" data-bind="textInput: searchSpaceBox">
-        <!-- ko if:spaces.length > 0 -->
+        <!-- ko if:spaces().length > 0 -->
         <div class="template-box">
-          <!-- ko foreach: spaces -->
+          <!-- ko foreach: spaces() -->
           <table class="add-verified-spaces-table filter">
             <tr>
               <td>
@@ -162,7 +162,7 @@
           <!-- /ko -->
         </div>
         <!-- /ko -->
-        <!-- ko if:spaces < 1 -->
+        <!-- ko if:spaces() < 1 -->
         <div class="template-box">
         There are no verified spaces
         </div>
@@ -198,7 +198,7 @@
           <table class="add-verified-spaces-table filter">
             <tr>
               <td>
-                <input type="checkbox" name="apps[selected][]" data-bind="attr: {app_name: title}, value: id">
+                <input type="checkbox" name="apps[selected][]" data-bind="attr: {app_name: title}, value: id, checked: checked">
               </td>
               <td>
                 <div data-bind="text: title"></div>
