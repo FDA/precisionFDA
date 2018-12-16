@@ -10,63 +10,49 @@ class SpaceTemplateView
     readonly,
     spaceData
   ) ->
-    @spaces = spaces
-    @selectedSpaces = ko.observableArray([])
+    @spaces = ko.observableArray(spaces)
     @selectedApps = ko.observableArray([])
-    self.selectedApps = @selectedApps
     @verifiedSpacesURL = verifiedSpacesURL
     @unverifiedAppsURL = unverifiedAppsURL
-    @addedSpaces = ko.observableArray([])
-    self.addedSpaces = @addedSpaces
+
+    @addedSpaces = ko.computed( =>
+      @spaces()
+      _.filter(@spaces(), (space) ->
+        space.checked == true
+      )
+    )
+
     @searchSpaceBox = ko.observable("")
     @searchAppBox = ko.observable("")
-    @spaceApps = ko.observableArray([])
-    self.spaceApps = @spaceApps
-
+    @spaceApps = ko.observableArray(apps)
     @unverifiedApps = ko.observableArray([])
-    self.unverifiedApps = @unverifiedApps
-
-    @spaceFiles = ko.observableArray([])
-    self.spaceFiles = @spaceFiles
+    @spaceFiles = ko.observableArray(files)
 
     self.spaceData = {}
     self.spaceData = spaceData if spaceData
-
-
-
     self.readonly =  readonly
 
   dismissSpaces: () ->
     @searchSpaceBox("")
     $('#verified-spaces').modal("hide")
-    $('#verified-spaces input:checkbox').prop('checked','');
 
   dismissApps: () ->
     @searchAppBox("")
     $('#unverified-apps').modal("hide")
-    $('#unverified-apps input:checkbox').prop('checked','');
-
 
   addSelectedSpaces: () ->
     @searchSpaceBox("")
-    checked = $('[name="spaces[selected][]"]:checked')
-    sp = []
-    checked.each (e, v) -> sp.push($(v).val())
-    spaces = @spaces.filter( (space) ->
-      this.indexOf(space.id + "") > -1
-    , sp)
-
-    @addedSpaces(spaces)
-    this.loadAppsAndFiles(spaces)
-
-    #$('#verified-spaces').modal("hide")
+    @spaces.valueHasMutated()
+    this.loadAppsAndFiles(
+      _.filter(@spaces(), (space) -> space.checked == true)
+    )
     @dismissSpaces()
 
-  addSelectedApps: () ->
+  addSelectedApps: () =>
     @searchAppBox("")
     checked = $('[name="apps[selected][]"]:checked')
 
-    apps = @unverifiedApps().filter( (app) ->
+    apps = @unverifiedApps().filter( (app) =>
       found = false
       checked.each((e) ->
         found = true if $(checked[e]).attr("value") == (app.id + "")
@@ -82,48 +68,53 @@ class SpaceTemplateView
     sApps = @spaceApps()
 
     @spaceApps(sApps.concat(apps))
-    #@spaceApps().push(apps)
-    #$('#unverified-apps').modal("hide")
     @dismissApps()
 
   showSelectSpacesModal: (e) ->
     $('#verified-spaces').modal('show')
 
-  showSelectAppModal: (e) ->
-    this.loadApps(e) if self.unverifiedApps().length < 1
+  showSelectAppModal: (e) =>
+    this.loadApps(e) if @unverifiedApps().length < 1
     $('#filter-verified-apps').val("")
-    #@selectedApps([])
     $('#unverified-apps').modal('show')
 
 
-  deleteSpace: (space) ->
+  deleteSpace: (space) =>
     if self.readonly != true
       for k,v of self.spaceData.apps[space.id]
-        i = self.spaceApps().findIndex((e)->
+        i = @spaceApps().findIndex((e)->
           e.id == v.id
         )
-        self.spaceApps.splice(i,1) if i > -1
+        @spaceApps.splice(i,1) if i > -1
 
       for k,v of self.spaceData.files[space.id]
-        i = self.spaceFiles().findIndex((e)->
+        i = @spaceFiles().findIndex((e)->
           e.id == v.id
         )
-        self.spaceFiles.splice(i,1) if i > -1
+        @spaceFiles.splice(i,1) if i > -1
 
-      self.addedSpaces.remove(space)
+      index = @spaces().findIndex (item) ->
+        item.id == space.id
 
-  deleteApp: (app) ->
+      @spaces.replace(@spaces()[index], Object.assign {}, @spaces()[index], checked: false)
+
+  deleteApp: (app) =>
     if self.readonly != true
-      i = self.selectedApps().indexOf(app)
-      self.selectedApps().splice(i, 1) if i > -1
+      i = @selectedApps().indexOf(app)
+      @selectedApps().splice(i, 1) if i > -1
 
-      self.spaceApps.remove(app)
+      @spaceApps.remove(app)
 
-  deleteNode: (file) ->
+      index = @unverifiedApps().findIndex (item) ->
+        item.id == app.id
+
+      @unverifiedApps.replace(@unverifiedApps()[index], Object.assign {}, @unverifiedApps()[index], checked: false)
+
+  deleteNode: (file) =>
     if self.readonly != true
-      self.spaceFiles.remove(file)
+      @spaceFiles.remove(file)
 
-  loadAppsAndFiles: (spaces) ->
+  loadAppsAndFiles: (spaces) =>
     $.ajax({
         url: '/spaces/apps_and_files?spaces=' + spaces.map((e) -> e.id).join(','),
         method: 'GET',
@@ -152,7 +143,13 @@ class SpaceTemplateView
       method: 'GET',
       contentType: "application/json",
       success: (data) =>
-        @unverifiedApps(data)
+        @unverifiedApps(
+          _.map(data, (app) =>
+            selected = _.find(@spaceApps(), (selected_app) -> app.id == selected_app.id)
+            app.checked = !!selected
+            app
+          )
+        )
     })
 
 SpaceTemplatesController = Paloma.controller('SpaceTemplates', {
@@ -187,26 +184,17 @@ SpaceTemplatesController = Paloma.controller('SpaceTemplates', {
       params.spaceData
     )
 
-    for k, v of viewModel.spaces
-      v.checked = false
-
-    if params.templateApps
-      viewModel.spaceApps(params.templateApps)
-      viewModel.spaceFiles(params.templateFiles)
-      viewModel.addedSpaces(params.templateSpaces)
-
-      for k, v of viewModel.spaces
-        for a, b of params.templateSpaces
-          if b.id == v.id
-            viewModel.spaces[k].checked = true
-          else
-            viewModel.spaces[k].checked = false
-
+    viewModel.spaces(
+      _.map(viewModel.spaces(), (space) =>
+        selected = _.find(params.templateSpaces, (selected_space) -> space.id == selected_space.id)
+        space.checked = !!selected
+        space
+      )
+    )
 
     ko.applyBindings(viewModel, $container[0])
 
     viewModel.searchSpaceBox.subscribe( (value) ->
-      #filter items in the modal
 
       $("table.filter tr").each( (i) ->
         $row = $(this)
@@ -219,7 +207,6 @@ SpaceTemplatesController = Paloma.controller('SpaceTemplates', {
       )
     )
     viewModel.searchAppBox.subscribe( (value) ->
-      #filter items in the modal
 
       $("table.filter tr").each( (i) ->
         $row = $(this)
