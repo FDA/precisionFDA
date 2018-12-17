@@ -18,7 +18,8 @@ class DocsController < ApplicationController
       { name: "discussions", title: "Discussions" },
       { name: "tracking", title: "Tracking" },
       { name: "publishing", title: "Publishing" },
-      { name: "licenses", title: "Licenses" }
+      { name: "licenses", title: "Licenses" },
+      { name: "workflows", title: "Workflows" },
     ]
 
     if @context.can_administer_site?
@@ -82,6 +83,9 @@ class DocsController < ApplicationController
       },
       site_activity_reporting: {
         url: "https://www.youtube.com/embed/KJ-Rk-ejjBM"
+      },
+      workflows: {
+        url: "https://www.youtube.com/embed/jGYNt1Vw_Wo"
       }
     }
   end
