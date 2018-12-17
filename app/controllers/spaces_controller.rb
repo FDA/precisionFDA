@@ -8,7 +8,6 @@ class SpacesController < ApplicationController
 
   def index
     spaces = Space.accessible_by(@context)
-    @spaces_count = spaces.count
 
     @spaces_grid = initialize_grid(spaces, {
       name: 'spaces',
