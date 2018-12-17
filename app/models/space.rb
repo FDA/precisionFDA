@@ -73,6 +73,7 @@ class Space < ActiveRecord::Base
     if member.host?
       return false if host_project.blank?
       return true unless review?
+      return true if confidential?
       confidential_reviewer_space.host_lead_member.present?
     else
       return false if guest_project.blank?
