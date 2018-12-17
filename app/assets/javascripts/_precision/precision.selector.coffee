@@ -236,12 +236,18 @@ class ObjectItemModel
     @public = ko.observable(object.public)
     @private = ko.observable(object.private)
     @in_space = ko.observable(object.in_space)
+    @review_space_private = object.space_private
+    @review_space_public = object.space_public
 
     @scopeFormatted = ko.computed(=>
       if @public()
         "Public"
       else if @private()
         "Private"
+      else if @review_space_private
+        "Shared in Space(Confidential)"
+      else if @review_space_public
+        "Shared in Space(Cooperative)"
       else if @in_space()
         "Shared in Space"
     )

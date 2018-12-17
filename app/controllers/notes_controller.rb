@@ -30,7 +30,12 @@ class NotesController < ApplicationController
     @items_from_params = [@note]
     @item_path = pathify(@note)
     @item_comments_path = pathify_comments(@note)
-    @comments = @note.root_comments.order(id: :desc).page params[:comments_page]
+    if @note.in_space?
+      space = item_from_uid(@note.scope)
+      @comments = Comment.where(commentable: space, content_object: @note).order(id: :desc).page params[:comments_page]
+    else
+      @comments = @note.root_comments.order(id: :desc).page params[:comments_page]
+    end
     @commentable = @note
 
     if @note.note_type == "Answer"

@@ -93,10 +93,12 @@ class SubmissionsController < ApplicationController
 
     not_public_items = items.reject(&:public?)
 
-    unless not_public_items.all? { |item| item.publishable_by?(@context, scope) }
-      flash[:error] = "Item cannot be published in this state."
-      redirect_to pathify(item)
-      return
+    not_public_items.each do |item|
+      unless item.publishable_by?(@context, scope)
+        flash[:error] = "Item '#{item.title}' cannot be public."
+        redirect_to :back
+        return
+      end
     end
 
     js graph: GraphDecorator.for_publisher(@context, not_public_items, scope),

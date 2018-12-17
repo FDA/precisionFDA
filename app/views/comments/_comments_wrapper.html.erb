@@ -1,7 +1,7 @@
 <div class="container-fluid container-padded">
-  <%= render "comments/new_comment", url: url, object: object %>
-
-  <hr>
-
-  <%= render "comments/comments", comments: comments, items_from_params: items_from_params %>
+    <% if !in_verified_space?(object)  %>
+      <%= render "comments/new_comment", url: url, object: object %>
+      <hr>
+    <% end %>
+    <%= render "comments/comments", comments: comments, items_from_params: items_from_params %>
 </div>

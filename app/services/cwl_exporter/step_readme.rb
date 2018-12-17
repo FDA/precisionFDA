@@ -8,7 +8,7 @@ To execute this app locally, please ensure you have Docker (get.docker.com) and 
 
 ```
 docker build . -t #{app.name}
-sudo cwltool --no-match-user --no-read-only #{app.name}.cwl inputs.json
+cwltool --copy-outputs --no-match-user --no-read-only #{app.name}.cwl inputs.json
 ```
 
 where inputs.json is a standard CWL input file definition (see 'A Gentle Guide to CWL' for examples).

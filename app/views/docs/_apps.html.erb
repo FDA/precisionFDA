@@ -5,7 +5,6 @@
       <div class="bs-docs-section">
         <p>The Apps section of precisionFDA encapsulates all the activities for managing, running and sharing software. The system uses cloud technology that allows you to run any Linux software. You can explore and run apps published by other precisionFDA members, or introduce your own.</p>
       </div>
-
       <div id="apps-overview" class="h2">Overview &amp; Terminology</div>
       <div class="bs-docs-section">
         <p><strong>Apps</strong> are, in essence, shell scripts that run inside a Linux virtual machine on the cloud, and which are designed to perform whatever specific task has been envisioned by the app author. Apps come with an <strong>I/O specification</strong>, a 'contract' that describes the kinds of inputs they receive and the kinds of outputs they are expected to generate. For example, an app that performs mapping and variation calling may specify that it requires as input one or two FASTQ files, and that it will generate as output a BAM and a VCF file.</p>
@@ -57,6 +56,9 @@
         <p>Apps on precisionFDA have one or more outputs. On the cloud, those are shown in the job details page, once the job is done. In the case of the Docker container, the execution writes its outputs inside the container, in the hardcoded <code>/data/out</code> directory. We chose that convention so that if you use <code>-v</code> to map a folder of your hard drive to <code>/data</code> (as we did in the example above), you will get the outputs conveniently added inside that directory underneath an <code>out</code> subdirectory.</p>
         <p>This feature is currently in beta. Please keep in mind that due to the nature of Linux container technology, the environment inside the container is not identical to the cloud environment. Moreover, certain configuration aspects of the app such as "Internet Access" or "Instance Type" are not reflected in the exported container. As always, we welcome your feedback and ideas on how to evolve this feature.</p>
       </div>
+      <div class="bs-docs-section bs-docs-media-section">
+        <%= video_iframe(@videos[:apps_export][:url]) %>
+      </div>
       <div id="cwl-export" class="h2">CWL export</div>
       <div class="bs-docs-section">
         <p> The Common Workflow Language (CWL) is an open standard for describing scientific pipelines. The precisionFDA system, in support of open standards, can export tools and workflows into metadata compatible with CWL. You will then be able to run the resulting CWL descriptions with implementations of CWL. A common starting point will be the reference implementation. <a href="https://github.com/common-workflow-language/cwltool">https://github.com/common-workflow-language/cwltool</a></p>
@@ -87,7 +89,7 @@ To execute this app locally, please ensure you have Docker (get.docker.com) and 
 
 docker build . -t url_fetcher
 
-sudo cwltool --no-match-user --no-read-only url_fetcher.cwl inputs.json
+cwltool --copy-outputs --no-match-user --no-read-only url_fetcher.cwl inputs.json
 
 ```
 
@@ -115,10 +117,12 @@ $ cd url_fetcher
 $ cat README.md
 #url_fetcher
 
-To execute this app locally, please ensure you have Docker (get.docker.com) and Cromwell (https://github.com/broadinstitute/cromwell) and run:
+To execute this app locally, please ensure you have Docker (get.docker.com), Cromwell (https://github.com/broadinstitute/cromwell) and WDLTool (https://github.com/broadinstitute/wdltool) and run:
 
 ```
-java -jar /path/to/cromwell.jar url_fetcher.wdl -i inputs.json
+docker build . -t url_fetcher
+java -jar /path/to/wdltool.jar inputs url_fetcher.wdl > inputs.json
+java -jar /path/to/cromwell.jar run url_fetcher.wdl -i inputs.json
 ```
 
 where inputs.json is a standard WDL input file definition (see https://software.broadinstitute.org/wdl/ for examples).

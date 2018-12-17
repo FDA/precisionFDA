@@ -23,7 +23,7 @@
         </p>
 
         <p>Role: <strong><%= @membership.role %></strong></p>
-        <p>Side: <strong><%= @membership.side %></strong></p>
+        <p>Side: <strong><%= member_side(@space, @membership) %></strong></p>
 
         <p>
           Space's let you move data from your private area and share to the space members to access. You can then publish the data out of the space to the precisionFDA community.

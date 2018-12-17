@@ -24,6 +24,10 @@ class Discussion < ActiveRecord::Base
   acts_as_followable
   acts_as_taggable
 
+  def self.can_be_in_space?
+    false
+  end
+
   def uid
     "discussion-#{id}"
   end

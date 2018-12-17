@@ -5,6 +5,7 @@ FactoryBot.define do
     sequence(:name) { |n| "asset-#{n}" }
     state UserFile::STATE_CLOSED
     parent_type "Asset"
+    scope :private
 
     trait :public do
       scope :public

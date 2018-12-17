@@ -1,0 +1,22 @@
+en:
+  docs:
+    common_sections:
+      intro: Introduction
+      files: Files
+      comparisons: Comparisons
+      apps: Apps
+      creating_apps: Creating Apps
+      notes: Notes
+      discussions: Discussions
+      tracking: Tracking
+      publishing: Publishing
+      licenses: Licenses
+      workflows: Workflows
+      review_spaces: Review Spaces
+    admin_sections:
+      challenge_workbench: The Challenge Workbench
+      site_customization: Site Customization
+      site_activity_reporting: Site Activity Reporting,
+      verification_spaces: Verified Apps
+    video_sections:
+      video_tutorials: Video Tutorials

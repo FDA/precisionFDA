@@ -3,7 +3,7 @@
 <div class="page-header">
   <div class="page-title">
     <span class="fa fa-file-o"></span> <%= @file.name %>
-    <% if @file.editable_by?(@context) %>
+    <% if @file.editable_by?(@context) && !in_verified_space?(@file) %>
       <a class="pfda-rename-item" data-toggle="modal" data-target="#file-comparison-edit-modal">
         <span class="fa fa-pencil"></span>
       </a>
@@ -37,7 +37,9 @@
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Origin</h5>
       <p class="list-group-item-text">
-        <% if @file.parent_type != "User" %>
+        <% if @file.parent_type == "Node" && @file.parent.blank? %>
+          "Copied"
+        <% elsif @file.parent_type != "User" %>
           <%= unilink(@file.parent) %>
         <% else %>
           Uploaded
@@ -101,17 +103,17 @@
         <% end %>
 
         <% if @file.state == "closed" %>
-          <%= link_to download_file_path(@file.dxid, inline: true), method: :post, class: "btn btn-primary #{@file.license.present? && !@file.licensed_by?(@context) ? 'disabled' : ''}" do %>
+          <%= link_to download_file_path(@file, inline: true), method: :post, class: "btn btn-primary #{@file.license.present? && !@file.licensed_by?(@context) ? 'disabled' : ''}" do %>
             <span class="fa fa-external-link"></span> Open
           <% end %>
         <% end %>
         <% if @file.state == "closed" %>
-          <%= link_to download_file_path(@file.dxid), method: :post, class: "btn btn-primary #{@file.license.present? && !@file.licensed_by?(@context) ? 'disabled' : ''}" do %>
+          <%= link_to download_file_path(@file), method: :post, class: "btn btn-primary #{@file.license.present? && !@file.licensed_by?(@context) ? 'disabled' : ''}" do %>
             <span class="fa fa-download"></span> Download
           <% end %>
         <% end %>
         <% if @file.state == "closed" %>
-          <%= link_to link_file_path(@file.dxid), method: :post, class: "btn btn-primary #{@file.license.present? && !@file.licensed_by?(@context) ? 'disabled' : ''}" do %>
+          <%= link_to link_file_path(@file), method: :post, class: "btn btn-primary #{@file.license.present? && !@file.licensed_by?(@context) ? 'disabled' : ''}" do %>
             <span class="fa fa-link"></span> Authorized URL
           <% end %>
         <% end %>
@@ -120,7 +122,10 @@
 
     <%= render "_partials/btn_publish", item: @file %>
 
-    <% if @file.editable_by?(@context) && (!@file.parent_comparison? || @file.deletable?) %>
+    <div class="btn-group">
+      <%= render "_partials/btn_copy_to_cooperative", item: @file %>
+    </div>
+    <% if @file.editable_by?(@context) && (!@file.parent_comparison? || @file.deletable?) && !in_verified_space?(@file) %>
     <div class="btn-group">
       <div class="dropdown">
         <button class="btn btn-primary" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -137,7 +142,7 @@
           <% if @file.deletable? %>
             <li role="separator" class="divider"></li>
             <li>
-              <%= link_to file_path(@file.dxid), method: :delete, data: { confirm: 'Are you certain you want to delete this?' } do %>
+              <%= link_to file_path(@file), method: :delete, data: { confirm: 'Are you certain you want to delete this?' } do %>
                 <span class="fa fa-trash"></span> Delete
               <% end %>
             </li>
@@ -153,7 +158,13 @@
 <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
   <li role="presentation">
     <a href="#tab-comments" aria-controls="tab-comments" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
-      <span class="tab-label">Comments <span class="badge"><%= @file.comment_threads.size %></span></span>
+      <span class="tab-label">Comments <span class="badge">
+        <% if @file.in_space? %>
+          <%= @comments.active.size %>
+        <% else %>
+          <%= @file.comment_threads.size %>
+        <% end %>
+      </span></span>
     </a>
   </li>
   <% if @notes.total_count > 0 %>
@@ -238,5 +249,5 @@
 </div>
 
 <% if @file.editable_by?(@context) %>
-  <%= render "_partials/modal_file_comparison_edit", item: @file, path_to_rename: rename_file_path(@file.dxid) %>
+  <%= render "_partials/modal_file_comparison_edit", item: @file, path_to_rename: rename_file_path(@file) %>
 <% end %>

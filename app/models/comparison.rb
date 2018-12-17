@@ -141,6 +141,9 @@ class Comparison < ActiveRecord::Base
         end
         comparison.update!(scope: scope)
         count += 1
+        if scope =~ /^space-(\d+)$/
+          SpaceEventService.call($1.to_i, context.user_id, nil, comparison, :comparison_added)
+        end
       end
     end
 
@@ -150,4 +153,9 @@ class Comparison < ActiveRecord::Base
 
     return count
   end
+
+  def copyable_to_cooperative?
+    in_confidential_space?
+  end
+
 end

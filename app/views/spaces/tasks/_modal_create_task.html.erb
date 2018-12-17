@@ -1,0 +1,43 @@
+<div id="create_task_modal" class="modal fade tasks-actions-modal modal-with-loader" data-bind="css: {loading: newTaskModal.isLoading}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">
+          Create New Task
+        </h4>
+      </div>
+      <div class="loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal">
+          <%= modal_form_row('Task Name (required):', 'task[name]', true, 'text', '', '', 'value: newTaskModal.task.name') %>
+          <%= modal_form_row('Assign To (required):', 'task[assignee_id]', true) %>
+          <%= modal_form_row('Response deadline:', 'task[response_deadline]', false, 'text', 'Select date', 'add-datetimepicker') %>
+          <%= modal_form_row('Completion deadline:', 'task[completion_deadline]', false, 'text', 'Select date', 'add-datetimepicker') %>
+          <%= modal_form_row('Description:', 'task[description]', false, 'textarea') %>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button
+          class="btn btn-default"
+          data-dismiss="modal"
+          data-bind="disable: newTaskModal.actionsDisabled"
+          tabindex="-1"
+        >Cancel</button>
+        <button
+          id="create_task_modal_submit"
+          class="btn btn-primary"
+          data-bind="disable: newTaskModal.actionsDisabled"
+        >
+          <i class="fa fa-plus"></i>&nbsp;Create Task
+        </button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

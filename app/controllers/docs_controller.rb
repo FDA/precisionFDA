@@ -8,30 +8,11 @@ class DocsController < ApplicationController
   def show
     section_name = params[:section] ? params[:section] : "intro"
 
-    @sections = [
-      { name: "intro", title: "Introduction" },
-      { name: "files", title: "Files" },
-      { name: "comparisons", title: "Comparisons" },
-      { name: "apps", title: "Apps" },
-      { name: "creating_apps", title: "Creating Apps" },
-      { name: "notes", title: "Notes" },
-      { name: "discussions", title: "Discussions" },
-      { name: "tracking", title: "Tracking" },
-      { name: "publishing", title: "Publishing" },
-      { name: "licenses", title: "Licenses" }
-    ]
+    @sections = t('docs.common_sections')
+    @sections = @context.can_administer_site? ? @sections.merge(t('docs.admin_sections')) : @sections
+    @sections.merge!(t('docs.video_sections'))
 
-    if @context.can_administer_site?
-      @sections.concat([
-        { name: "challenge_workbench", title: "The Challenge Workbench" },
-        { name: "site_customization", title: "Site Customization" },
-        { name: "site_activity_reporting", title: "Site Activity Reporting" }
-      ])
-    end
-
-    @sections << { name: "video_tutorials", title: "Video Tutorials" }
-
-    @active_section = @sections.find {|s| s[:name] == section_name }
+    @active_section = @sections.select {|key, _| key == section_name.to_sym }
     raise ActiveRecord::RecordNotFound if @active_section.nil?
 
     # Use "<%= video_iframe(@videos[:KEY_1][:KEY_2]...) %>" to protect against HTML injection
@@ -48,6 +29,9 @@ class DocsController < ApplicationController
       apps_run: {
         url: "https://www.youtube.com/embed/P90E3jgL134"
       },
+      apps_export: {
+        url: "https://www.youtube.com/embed/WeF9uj9QJIo"
+      },
       comparisons: {
         url: "https://www.youtube.com/embed/qMd98K07U9M"
       },
@@ -56,7 +40,7 @@ class DocsController < ApplicationController
       },
       files: {
         how_to_upload_url: "https://www.youtube.com/embed/o5PmgUsWQGo",
-        how_to_navigate_url: "https://www.youtube.com/embed/w2lbAYYf7J8"
+        how_to_navigate_url: "https://www.youtube.com/embed/cj8a6I3KGvk"
       },
       intro: {
         url: "https://www.youtube.com/embed/U_vmcd93HkM"
@@ -70,8 +54,20 @@ class DocsController < ApplicationController
       publishing: {
         url: "https://www.youtube.com/embed/dsOCn1zTBOo"
       },
+      challenge_workbench: {
+        url: "https://www.youtube.com/embed/SKqH5OfO5G8"
+      },
+      site_customization: {
+        url: "https://www.youtube.com/embed/j9pEb0VTf-0"
+      },
       site_activity_reporting: {
-        url: "https://www.youtube.com/embed/O1iTuI9Fvcc"
+        url: "https://www.youtube.com/embed/KJ-Rk-ejjBM"
+      },
+      workflows: {
+        url: "https://www.youtube.com/embed/jGYNt1Vw_Wo"
+      },
+      review_spaces: {
+        url: "https://www.youtube.com/embed/-YfSmb_Y-gk"
       }
     }
   end

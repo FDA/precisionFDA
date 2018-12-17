@@ -244,7 +244,7 @@ class IOModel
             if defaultFileValue?
               title = defaultFileValue.title
               if _.isFunction(title) then title() else title
-            else if defaultValue.match(new RegExp(/^file-(.{24})$/, "i"))
+            else if defaultValue.match(new RegExp(/^file-(.{24,})$/, "i"))
                 params =
                   uid: defaultValue
                 Precision.api('/api/describe', params).done((value) =>
@@ -376,7 +376,7 @@ class IOModel
               value = parseFloat(value)
             when 'file'
               value = value.dxid ? value
-              if !value.match(new RegExp(/^file-(.{24})$/, "i"))
+              if !value.match(new RegExp(/^file-(.{24,})$/, "i"))
                 @error("Invalid default value: #{value}")
                 value = undefined
             when 'boolean'

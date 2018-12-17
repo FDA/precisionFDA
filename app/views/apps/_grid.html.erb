@@ -1,5 +1,9 @@
 <%= grid(apps_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
-  g.blank_slate partial:  "_partials/empty_grid"
+  if defined?(div_if_empty)
+    g.blank_slate content_tag :div, "No apps found", class: 'alert alert-info'
+  else
+    g.blank_slate partial:  "_partials/empty_grid"
+  end
 
   g.column name: 'Name', attribute: 'name' do |series|
     series.name
@@ -19,6 +23,10 @@
 
   g.column name: 'Org', attribute: 'handle', assoc: [:user, :org] do |series|
     series.user.org.handle
+  end
+
+  g.column name: 'Verified', attribute: 'verified' do |series|
+    content_tag(:span, "", class: series.verified? ? "fa fa-check" : "fa fa-times")
   end
 
   g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |series|
@@ -49,7 +57,7 @@
     elsif app_ids.present?
       "Not this revision"
     else
-      link_to "Try", new_app_job_path(series.latest_version_app.dxid), class: 'btn btn-primary btn-xs'
+      link_to "Try", new_app_job_path(series.latest_version_app), class: 'btn btn-primary btn-xs'
     end
   end
 

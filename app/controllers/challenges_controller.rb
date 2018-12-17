@@ -78,7 +78,7 @@ class ChallengesController < ApplicationController
       else
         flash.now[:error] = "The specified app could not be assigned to the current challenge: #{challenge.name} due to an internal error."
       end
-      redirect_to app_jobs_path(app.dxid)
+      redirect_to app_jobs_path(app)
     else
       flash[:error] = "The specified app was not found and could not be assigned to the current challenge: #{challenge.name}."
       redirect_to apps_path
