@@ -36,7 +36,7 @@ class Chart
         Precision.alert.show('Something went wrong')
     })
 
-  constructor: (data) ->
+  constructor: (data, chartOptions = {}) ->
 
     Highcharts.setOptions({
       global: {
@@ -51,7 +51,7 @@ class Chart
     @loading = ko.observable(false)
     @error = ko.observable(false)
 
-    @chart = Highcharts.chart(@container, {
+    options = {
       chart: {
         type: @type,
         zoomType: 'x'
@@ -83,7 +83,9 @@ class Chart
       legend: {
         enabled: false
       }
-    })
+    }
+    Object.assign(options, chartOptions)
+    @chart = Highcharts.chart(@container, options)
 
 
 window.Precision ||= {}

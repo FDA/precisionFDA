@@ -1,0 +1,27 @@
+<div id="reassign-task-modal-<%= task.id %>" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">
+          Reassign task
+          <%= task.name %>
+        </h4>
+      </div>
+      <%= form_tag reassign_space_task_path(@space, task), method: :post do %>
+        <div class="modal-body">
+          <div class="form-group required">
+            <%= label :assignee, "Assign To", class: 'control-label col-sm-2' %>
+            <%= text_field_tag :assignee, task.assignee.dxuser, class: "form-control input-lg", required: "required"  %>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Cancel</button>
+          <button type="submit" class="btn btn-primary" data-disable-with="Creating...">Reassign</button>
+        </div>
+      <% end %>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

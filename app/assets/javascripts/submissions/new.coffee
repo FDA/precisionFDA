@@ -1,5 +1,6 @@
 class SubmissionsView
   constructor: (app, @asset_licenses_to_accept) ->
+    @contentScopes = ko.observable([])
     @dxid = app.dxid
     @inputSpec = app.spec.input_spec
     @outputSpec = app.spec.output_spec

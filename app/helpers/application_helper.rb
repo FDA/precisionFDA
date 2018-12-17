@@ -1,4 +1,6 @@
 module ApplicationHelper
+  include VerifiedSpaceHelper
+
   def page_title(separator = " – ")
     [content_for(:title), 'precisionFDA'].compact.join(separator).html_safe
   end
@@ -157,4 +159,5 @@ module ApplicationHelper
   def git_revision
     "#{GIT_BRANCH}:#{GIT_REVISION}"
   end
+
 end

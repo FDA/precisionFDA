@@ -55,7 +55,22 @@ class NotifierPreview < ActionMailer::Preview
   def space_invitation_email
     space = Space.last
     membership = space.space_memberships.last
-    admin = space.space_memberships.hosts.admins.first
+    admin = space.space_memberships.host.admin.first
     NotificationsMailer.space_invitation_email(space, membership, admin)
+  end
+
+  def new_task_email
+    task = Task.last
+    NotificationsMailer.new_task_email(task)
+  end
+
+  def user_failed_to_acknowledge_task_email
+    task = Task.last
+    NotificationsMailer.user_failed_to_acknowledge_task_email(task)
+  end
+
+  def user_failed_to_complete_task_email
+    task = Task.last
+    NotificationsMailer.user_failed_to_complete_task_email(task)
   end
 end

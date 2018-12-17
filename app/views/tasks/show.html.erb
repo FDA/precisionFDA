@@ -1,0 +1,128 @@
+<% content_for :title do %><%= @task.name %><% end %>
+
+<div class="page-header">
+  <div class="page-title">
+    <div class="task-titlebar">
+      <i class="fa fa fa-check-square-o"></i>
+      <span class="task-title"><%= @task.name %></span>
+      <span class="task-status">(<%= @status %>)</span>
+    </div>
+  </div>
+</div>
+
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">ID</h5>
+      <p class="list-group-item-text"><%= @task.id %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">ASSIGNER</h5>
+      <p class="list-group-item-text">
+        <a href="/users/<%= @task.assigner.username %>" target="_blank"><%= @task.assigner.username %></a>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">ASSIGNEE</h5>
+      <p class="list-group-item-text">
+        <a href="/users/<%= @task.assignee.username %>" target="_blank"><%= @task.assignee.username %></a>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading"><%= @dates_titles[:respond] %></h5>
+      <p class="list-group-item-text"><%= response_date_wrapper(@task, :respond) %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading"><%= @dates_titles[:complete] %></h5>
+      <p class="list-group-item-text"><%= response_date_wrapper(@task, :complete) %></p>
+    </li>
+  </ul>
+</div>
+
+<div class="pfda-toolbar clearfix">
+  <div class="pull-right">
+    <div class="btn-group">
+      <% if TaskPolicy.can_accept?(@task, @membership) %>
+        <button id="task_show_accept" class="btn btn-success" data-bind="disable: actionsDisabled">
+          <i class='fa fa-thumbs-up'></i>&nbsp;Accept
+        </button>
+      <% end %>
+      <% if TaskPolicy.can_complete?(@task, @membership) %>
+        <button id="task_show_complete" class="btn btn-success" data-bind="disable: actionsDisabled">
+          <i class='fa fa-check'></i>&nbsp;Complete
+        </button>
+      <% end %>
+      <% if TaskPolicy.can_reopen?(@task, @membership) %>
+        <button id="task_show_reopen" class="btn btn-success" data-toggle="modal" data-target="#reopen_task_modal" data-bind="disable: actionsDisabled">
+          <i class='fa fa-repeat'></i>&nbsp;Reopen
+        </button>
+        <%= render 'spaces/tasks/modal_reopen_task' %>
+      <% end %>
+      <% if TaskPolicy.can_make_active?(@task, @membership) %>
+        <button id="task_show_make_active" class="btn btn-success" data-toggle="modal" data-target="#make_active_task_modal" data-bind="disable: actionsDisabled">
+          <i class='fa fa-arrow-up'></i>&nbsp;Make Active
+        </button>
+        <%= render 'spaces/tasks/modal_make_active_task' %>
+      <% end %>
+      <% if TaskPolicy.can_comment?(@task, @membership) %>
+        <button id="task_show_comment" class="btn btn-primary" data-toggle="modal" data-target="#comment_task_modal" data-bind="disable: actionsDisabled">
+          <i class='fa fa-comments'></i>&nbsp;Comment
+        </button>
+        <%= render 'spaces/tasks/modal_comment_task' %>
+      <% end %>
+      <% if TaskPolicy.can_reassign?(@task, @membership) %>
+        <button id="task_show_reassign" class="btn btn-primary" data-toggle="modal" data-target="#reassign_task_modal" data-bind="disable: actionsDisabled">
+          <i class='fa fa-share'></i>&nbsp;Reassign
+        </button>
+        <%= render 'spaces/tasks/modal_reassign_task' %>
+      <% end %>
+      <% if TaskPolicy.can_clone?(@task, @membership) %>
+        <button id="task_show_clone" class="btn btn-primary" data-toggle="modal" data-target="#clone_task_modal" data-bind="disable: actionsDisabled">
+          <i class='fa fa-clone'></i>&nbsp;Clone
+        </button>
+        <%= render 'spaces/tasks/modal_clone_task' %>
+      <% end %>
+      <% if TaskPolicy.can_edit?(@task, @membership) %>
+        <button id="task_show_edit" class="btn btn-primary" data-toggle="modal" data-target="#edit_task_modal" data-bind="disable: actionsDisabled">
+          <i class='fa fa-pencil'></i>&nbsp;Edit
+        </button>
+        <%= render 'spaces/tasks/modal_edit_task' %>
+      <% end %>
+      <% if TaskPolicy.can_decline?(@task, @membership) %>
+        <button id="task_show_decline" class="btn btn-warning" data-toggle="modal" data-target="#decline_task_modal" data-bind="disable: actionsDisabled">
+          <i class='fa fa-thumbs-down'></i>&nbsp;Decline
+        </button>
+        <%= render 'spaces/tasks/modal_decline_task' %>
+      <% end %>
+      <% if TaskPolicy.can_delete?(@task, @membership) %>
+        <button id="task_show_delete" class="btn btn-danger" data-toggle="modal" data-target="#delete_task_modal" data-bind="disable: actionsDisabled">
+          <i class='fa fa-trash'></i>&nbsp;Delete
+        </button>
+        <%= render 'spaces/tasks/modal_delete_task' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-body task-description">
+    <h3>Description</h3>
+    <p><%= @task.description %></p>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-body">
+    <div class="spaces-comments-container">
+      <%=
+        render "comments/nested_comments_wrapper",
+        comments: @comments,
+        items_from_params: @items_from_params,
+        no_add_new_form: true,
+        url: @item_comments_path,
+        object: @space
+      %>
+      <%= render 'spaces/tasks/modal_reply_comment' %>
+    </div>
+  </div>
+</div>

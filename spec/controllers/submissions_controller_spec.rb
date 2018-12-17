@@ -20,8 +20,8 @@ RSpec.describe SubmissionsController, type: :controller do
   let(:file2) { create(:user_file, :public, parent_id: user1.id, user_id: user1.id) }
   let(:valid_inputs) do
     {
-      file1: file1.dxid,
-      file2: file2.dxid,
+      file1: file1.uid,
+      file2: file2.uid,
       string1: "123",
       boolean1: true,
       int1: 123

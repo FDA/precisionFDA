@@ -1,5 +1,6 @@
 class ComparisonsNewView
   constructor: () ->
+    @contentScopes = ko.observable([])
     @busy = ko.observable(false)
 
     @licenseSelector = new Precision.models.LicensesSelectorModel({

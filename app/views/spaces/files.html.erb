@@ -1,0 +1,90 @@
+<div class="tab-content" id="ko_spaces_files_container">
+  <div role="tabpanel" class="tab-pane active" id="tab-files">
+
+    <% if defined?(@files_grid) %>
+      <div class="panel">
+        <div class="panel-heading">
+          <h4>Files</h4>
+        </div>
+        <div class="panel-body">
+          <% if !@space.verified? && !@space.restrict_to_template? %>
+            <div class="spaces-files-buttons">
+              <span class="btn btn-primary" data-toggle="modal" data-target="#create-folder-modal">
+                <span class="fa fa-plus-square fa-fw"></span> Add folder
+              </span>
+              <div class="btn-group">
+                <div class="dropdown">
+                  <button class="btn btn-primary" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="fa fa-cog"></span>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
+                    <li data-bind="css: { disabled: !isRenamingAllowed() }">
+                      <a data-toggle='modal' data-bind="click: showRenamingModal">
+                        <span class="fa fa-pencil"></span> Rename
+                      </a>
+                    </li>
+                    <li role="separator" class="divider"></li>
+                    <li data-bind="css: { disabled: !isMovingAllowed() }">
+                      <a data-toggle='modal' data-bind="click: showMoveModal">
+                        <span class="fa fa-share"></span> Move
+                      </a>
+                    </li>
+                    <li role="separator" class="divider"></li>
+                    <li data-bind="css: { disabled: !isPublishingAllowed() }">
+                      <a data-toggle='modal' data-bind="click: showPublishModal">
+                        <i class="fa fa-fw fa-bullhorn"></i> Publish
+                      </a>
+                    </li>
+                    <li role="separator" class="divider"></li>
+                    <li data-bind="css: { disabled: !isDeletingAllowed() }">
+                      <a data-toggle='modal' data-bind="click: showDeleteModal">
+                        <i class="fa fa-fw fa-trash"></i> Delete
+                      </a>
+                    </li>
+                    <li role="separator" class="divider"></li>
+                    <li data-bind="css: { disabled: !isDownloadingAllowed() }">
+                      <a data-toggle='modal' data-bind="click: showDownloadModal">
+                        <i class="fa fa-fw fa-download"></i> Download
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+            <div class="spaces-files-table">
+              <% if @counts[:files] + @counts[:folders] > 0 %>
+                <% breadcrumb :folder, @folder %>
+                <%= breadcrumbs style: :bootstrap, class: "breadcrumb no-border" %>
+              <% else %>
+                <div class="alert alert-info">
+                  No records found
+                </div>
+              <% end %>
+            </div>
+
+          <%= render "files/grid",
+                     files_grid: @files_grid,
+                     scope_icon: false,
+                     hide_access: true,
+                     show_filters: :when_filtered,
+                     show_checkboxes: @show_checkboxes,
+                     clear_blank_state: !@folder && true
+          %>
+        </div>
+      </div>
+
+      <% if @space.active? %>
+        <%= render "_partials/modal_create_folder", parent_folder_id: @parent_folder_id, create_path: create_folder_space_path %>
+        <%= render "_partials/modal_rename_js", space_id: @space.id, source: "list" %>
+        <%= render "_partials/modal_move_files", current_folder: @folder.try(:id), move_path: move_space_path(@space), scope: @space.uid %>
+        <%= render "_partials/modal_download_files" %>
+        <%= render "_partials/modal_delete_files", remove_path: remove_folder_space_path(@space) %>
+        <%= render "_partials/modal_publish_files", publish_path: publish_folder_space_path(@space) %>
+      <% end %>
+
+    <% end %>
+
+  </div>
+</div>

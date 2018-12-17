@@ -20,6 +20,10 @@ class Analysis < ActiveRecord::Base
   has_many :jobs
   belongs_to :user
 
+  def self.can_be_in_space?
+    false
+  end
+
   def self.job_hash(analyses, options={})
     analyses.reduce({}) do |acc, analysis|
       formatted_jobs = analysis.jobs.map do |job|

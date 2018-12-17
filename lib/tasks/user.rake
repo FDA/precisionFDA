@@ -52,12 +52,8 @@ namespace :user do
       "precisionfda.admin_dev",
       "PrecisionFDA",
       "Admin - Dev",
-      "fdelacruz+precisionfda.admin_dev@dnanexus.com",
-      "precisionfda",
-      "project-F76jJ080xYKypQ786PVqpbqY",
-      "project-F76jJp80F794xX5bGVyjpjKP",
-      "project-F76jJVQ0bfK2qJ5GGXJ5fF5j",
-      "public_comparisons_project",
+      "aabramenko-c+precisionfda.admin_dev@dnanexus.com",
+      "pamellaaccounttwo",
     )
   end
 end

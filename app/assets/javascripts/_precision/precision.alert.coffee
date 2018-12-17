@@ -4,7 +4,7 @@ class AlertModel
   on: (container, delay = 5000) ->
     if !container
       container = $(".flash-alert")
-    
+
     if delay > 0
       container.delay(delay).slideUp(500, ->
         container.alert('close')
@@ -18,11 +18,11 @@ class AlertModel
     @on($container)
 
   #public
-  showAboveAll: (text, style) ->
+  showAboveAll: (text, style = 'alert-danger', delay = 10000) ->
     $container = createContainer(text, style)
     $container.addClass('above-all')
     appendToPage($container)
-    @on($container, 10000)
+    @on($container, delay)
 
   #public
   showPermanent: (text, style) ->

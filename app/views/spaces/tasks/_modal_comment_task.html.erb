@@ -1,0 +1,40 @@
+<div id="comment_task_modal" class="modal fade tasks-actions-modal modal-with-loader" data-bind="css: {loading: newCommentModal.isLoading}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Add comment to task</h4>
+      </div>
+      <div class="loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div
+          name="body"
+          class="form-control add-atwho"
+          contenteditable="true"
+          data-placeholder="Comment..."
+        ></div>
+      </div>
+      <div class="modal-footer">
+        <button
+          class="btn btn-default"
+          data-dismiss="modal"
+          data-bind="disable: newCommentModal.actionsDisabled"
+          tabindex="-1"
+        >Cancel</button>
+        <button
+          id="comment_task_modal_submit"
+          class="btn btn-primary"
+          data-bind="disable: newCommentModal.actionsDisabled"
+          >
+            <i class="fa fa-comments"></i>&nbsp;Comment
+          </button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

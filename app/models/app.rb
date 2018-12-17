@@ -20,6 +20,7 @@
 class App < ActiveRecord::Base
   include Auditor
   include Permissions
+  include InternalUid
 
   belongs_to :user
   belongs_to :app_series
@@ -38,12 +39,37 @@ class App < ActiveRecord::Base
 
   VALID_IO_CLASSES = ["file", "string", "boolean", "int", "float"]
 
-  def uid
-    dxid
+  def to_param
+    uid
   end
 
-  def to_param
-    dxid
+  # Scopes of files that can be used to run an app. This makes sense only for review spaces
+  def space_scopes
+    return [] unless in_space?
+    return [] unless space_object.review?
+
+    space_object.accessible_scopes
+  end
+
+  # Scopes that can be used to run an app. This makes sense only for review spaces
+  def available_job_spaces(user)
+    return [] unless in_space?
+    return [] unless space_object.review?
+
+    Space.joins(:space_memberships)
+      .merge(SpaceMembership.where(user_id: user.id))
+      .where(id: [space_object.id, space_object.confidential_spaces.pluck(:id)])
+  end
+
+  def can_run_in_space?(user, space_id)
+    return false unless in_space?
+    return false unless space_object.review?
+    # TODO control disabled users!
+    # member = space_object.space_memberships.active.where(user_id: user.id).first
+    member = space_object.space_memberships.where(user_id: user.id).first
+    return false unless member
+
+    available_job_spaces(user).where(id: space_id).exists?
   end
 
   def name
@@ -65,6 +91,15 @@ class App < ActiveRecord::Base
   def publishable_by?(context, scope_to_publish_to = "public")
     # App series must be private, otherwise must match scope
     core_publishable_by?(context, scope_to_publish_to) && private? && (app_series.private? || (app_series.scope == scope_to_publish_to))
+  end
+
+  def accessible_by?(context)
+    return true if super
+
+    return false unless context.logged_in?
+    return false unless context.review_space_admin?
+
+    space_object.reviewer? || space_object.verification?
   end
 
   def to_docker(context_token)

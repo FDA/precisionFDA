@@ -1,0 +1,35 @@
+@import "_common"
+
+$grid-width: 1024px
+
+.pfda-controller-space_templates.pfda-action-index
+  .space-templates-grid
+    padding: 20px
+    max-width: $grid-width
+    &-desc-td
+      white-space: normal
+    &-description
+      text-align: justify
+    &-created
+      background-color: #FFF
+      font-weight: normal
+      text-align: center
+      width: 200px
+      &.sorted
+        background-color: #FFF
+        font-weight: normal
+    &-action
+      text-align: center
+      font-size: 1.2em
+      width: 35px
+      .fa
+        color: $brand-primary
+        &.text-danger
+          color: $brand-danger
+        &.text-success
+          color: $brand-success
+        &.text-muted
+          color: #CCC
+    .description-cover,
+    .description-uncover
+      padding-left: 5px

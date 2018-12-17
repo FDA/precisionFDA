@@ -82,6 +82,18 @@ class User < ActiveRecord::Base
     zivana.tezak
   ).freeze
 
+  SITE_ADMINS = begin
+    if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
+      PRODUCTION_ADMINS
+    else
+      ENV.fetch("CUSTOM_SITE_ADMINS", "").split(" ").concat(
+        NON_PRODUCTION_ADMINS
+      )
+    end
+  end
+
+  SITE_ADMIN_ORGS = ENV["DNANEXUS_BACKEND"] == "production" ? [] : NON_PRODUCTION_ADMIN_ORGS
+
   has_many :uploaded_files, {class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'}
   has_many :user_files
   has_many :assets
@@ -96,7 +108,8 @@ class User < ActiveRecord::Base
   has_many :licenses
   has_many :accepted_licenses
   has_many :space_memberships
-  has_many :spaces, {through: :space_memberships}
+  has_many :space_templates
+  has_many :spaces, -> { where("space_memberships.active = ?", true) }, { through: :space_memberships }
   has_one :appathon
   has_many :meta_appathons
   has_one :expert
@@ -105,6 +118,8 @@ class User < ActiveRecord::Base
   has_many :challenge_resources
   has_many :analyses
   has_one :usage_metric
+  has_many :tasks
+  has_one :notification_preference
 
   store :extras, accessors: [ :has_seen_guidelines ], coder: JSON
 
@@ -117,6 +132,10 @@ class User < ActiveRecord::Base
   acts_as_tagger
 
   scope :real, -> { where.not(dxuser: CHALLENGE_BOT_DX_USER) }
+
+  # Have the ability to create new review spaces and have full access to
+  # activities available within reviewer and cooperative areas.
+  scope :review_space_admins, -> { where(dxuser: REVIEW_SPACE_ADMINS) }
 
   def self.challenge_bot
     find_by!(dxuser: CHALLENGE_BOT_DX_USER)
@@ -159,7 +178,13 @@ class User < ActiveRecord::Base
   end
 
   def space_uids
-    space_memberships.pluck("distinct concat('space-', space_id)")
+    uids = []
+    if review_space_admin?
+      uids.concat(Space.reviewer.pluck("distinct concat('space-', spaces.id)"))
+      uids.concat(Space.verification.pluck("distinct concat('space-', spaces.id)"))
+    end
+    uids.concat(spaces.pluck("distinct concat('space-', spaces.id)"))
+    uids.uniq
   end
 
   def active_spaces
@@ -194,16 +219,20 @@ class User < ActiveRecord::Base
 
   def can_administer_site?
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
-      PRODUCTION_ADMINS.include?(dxuser)
+      SITE_ADMINS.include?(dxuser)
     else
       NON_PRODUCTION_ADMIN_ORGS.include?(org.handle) &&
       org.admin_id == id ||
-      NON_PRODUCTION_ADMINS.include?(dxuser)
+        SITE_ADMINS.include?(dxuser)
     end
   end
 
   def is_challenge_evaluator?
     CHALLENGE_EVALUATORS.include?(dxuser) || can_administer_site?
+  end
+
+  def review_space_admin?
+    REVIEW_SPACE_ADMINS.include?(dxuser)
   end
 
   # @param time_zone [String] new time zone
@@ -563,6 +592,9 @@ class User < ActiveRecord::Base
           job.save!
           Event::JobClosed.create_for(job, user)
         end
+      end
+      if job.scope =~ /^space-(\d+)$/
+        SpaceEventService.call($1.to_i, user.id, nil, job, :job_completed)
       end
     else
       # Job state changed but not done (no outputs)

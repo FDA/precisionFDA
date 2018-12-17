@@ -1,0 +1,73 @@
+<% no_add_new_form = defined?(no_add_new_form) && no_add_new_form %>
+<% show_new_form = !no_add_new_form %>
+<% comments.each do |comment| %>
+  <section id="<%= comment.id %>_comment" class="nested-comment <%= defined?(child) ? 'nested-comment--child' : nil %>">
+    <div class="pfda-comment">
+      <div class="media">
+        <div class="media-left nested-comment--media-collapse">
+          <% if comment.children && comment.children.length > 0 %>
+            <button class="btn btn-primary btn-xs">
+              <i class="fa fa-minus" aria-hidden="true"></i>
+            </button>
+          <% end %>
+        </div>
+        <div class="media-left">
+          <%= link_to image_tag(comment.user.gravatar_url, class: 'img-circle', height: '25px'), user_path(comment.user.dxuser) %>
+        </div>
+        <div class="media-body">
+          <ul class="pfda-comment-meta list-inline list-inline-bullets text-muted">
+            <li class="pfda-comment-user"><strong><%= link_to comment.user.full_name, user_path(comment.user.dxuser) %></strong></li>
+            <li><%= comment.user.org.name %></li>
+          </ul>
+          <% if comment.active? %>
+            <% if comment.content_object %>
+              <p>
+                <b>commented on: </b>
+                <% if comment.content_object.accessible_by?(@context) %>
+                  <%= link_to comment.content_object_name, pathify(comment.content_object) %>
+                <% else %>
+                  <%= comment.content_object_name %>
+                <% end %>
+              </p>
+            <% elsif comment.content_object_id %>
+              <p>
+                <b>commented on: </b>DELETED
+              </p>
+            <% end %>
+            <div class="pfda-comment-body"><%= simple_format(comment.body) %></div>
+            <ul class="pfda-comment-actions list-inline list-inline-bullets text-muted">
+              <% unless !comment.editable_by?(@context) && comment.commentable_type == "Task" %>
+                <li><a href="#" class="nested-comment--show-new-comment" data-parent-id="<%= comment.id %>">Reply</a></li>
+              <% end %>
+              <% if comment.editable_by?(@context) %>
+                <li><%= link_to "Edit", edit_polymorphic_path(items_from_params + [comment]) %></li>
+                <li><%= link_to "Delete", polymorphic_path(items_from_params + [comment]), method: :delete, data: { confirm: 'Are you certain you want to delete this?' } %></li>
+              <% end %>
+              <li><%= comment.created_at.to_s(:human) %></li>
+            </ul>
+          <% else %>
+            <div>DELETED</div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <div class="pfda-comment-new nested-comment--hidden">
+      <% if show_new_form %>
+        <%=
+          render "comments/nested_new_comment",
+          url: url,
+          comment: Comment.new(parent_id: comment.id),
+          hide_assoc_with: true
+        %>
+      <% end %>
+    </div>
+    <%=
+      render "comments/nested_comments",
+      comments: comment.children,
+      items_from_params: items_from_params,
+      no_add_new_form: no_add_new_form,
+      url: url,
+      child: true
+    %>
+  </section>
+<% end %>

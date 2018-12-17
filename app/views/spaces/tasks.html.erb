@@ -1,0 +1,53 @@
+<div class="tab-content" id="ko_spaces_tasks_container">
+  <div role="tabpanel" class="tab-pane active" id="tab-tasks">
+    <div class="panel">
+      <div class="panel-body">
+        <h3><%= @page_title %></h3>
+
+        <% if @space.active? && !@space.verified? %>
+          <div class="spaces-tasks-buttons">
+            <span class="btn btn-primary" data-toggle="modal" data-target="#create_task_modal">
+              <i class="fa fa-plus"></i>&nbsp;New Task
+            </span>
+          </div>
+          <%= render "spaces/tasks/modal_create_task" %>
+        <% end %>
+
+        <% if @tasks_grid.count > -1 %>
+          <div class="spaces-tasks-actions">
+            <div class="pull-left">
+              <div class="btn-group">
+                <a href="<%= tasks_space_path(@space, status: params[:status], filter: 'my') %>"
+                  class="btn <%= params[:filter] == 'my' ? 'btn-primary' : 'btn-default' %>"
+                >Assigned To Me</a>
+                <a href="<%= tasks_space_path(@space, status: params[:status], filter: 'created_by_me') %>"
+                  class="btn <%= params[:filter] == 'created_by_me' ? 'btn-primary' : 'btn-default' %>"
+                >Created By Me</a>
+                <% if @context.review_space_admin? %>
+                  <a href="<%= tasks_space_path(@space, status: params[:status], filter: 'all') %>"
+                    class="btn <%= params[:filter] == 'all' ? 'btn-primary' : 'btn-default' %>"
+                  >All</a>
+                <% end %>
+              </div>
+            </div>
+            <div class="pull-right">
+              <div class="btn-group">
+                <%= render "spaces/tasks/actions", status: params[:status], filter: params[:filter] %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="spaces-tasks-grid">
+          <%=
+            render "spaces/tasks/grid",
+            tasks_grid: @tasks_grid,
+            dates_titles: @dates_titles,
+            empty_text: "Tasks will show up here."
+          %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

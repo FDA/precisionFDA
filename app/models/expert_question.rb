@@ -72,6 +72,10 @@ class ExpertQuestion < ActiveRecord::Base
     )
   end
 
+  def in_space?
+    false
+  end
+
   def accessible_by?(context)
     context.logged_in?
   end

@@ -13,13 +13,13 @@
     <% else %>
       <span class="label label-warning"> <%= @job.state.upcase %></span>
     <% end %>
-    <span class="name"><%= link_to @job.name, job_path(@job.dxid) %></span>
+    <span class="name"><%= link_to @job.name, job_path(@job) %></span>
   </div>
 </div>
 
 <div class="pfda-toolbar">
   <div class="btn-group pull-left">
-    <%= link_to log_job_path(@job.dxid), class: "btn btn-default", data: {no_turbolink: true} do %>
+    <%= link_to log_job_path(@job), class: "btn btn-default", data: {no_turbolink: true} do %>
       <span class="fa fa-refresh"></span> Refresh
     <% end %>
   </div>
@@ -27,7 +27,7 @@
   <% if @job.user_id == @context.user_id %>
     <div class="btn-group pull-right">
       <% if !@job.terminal? %>
-        <%= link_to job_path(@job.dxid), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
+        <%= link_to job_path(@job), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
           <span class="fa fa-times-circle"></span> Terminate
         <% end %>
       <% end %>

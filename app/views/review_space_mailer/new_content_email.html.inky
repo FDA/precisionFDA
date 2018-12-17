@@ -1,0 +1,32 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    New <%= @content.klass.downcase %>
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="https://precision.fda.gov" title="precisionFDA">
+          <img class="header-image" src="https://precision.fda.gov/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right">New <%= @content.klass.downcase %></p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p>
+          <%= @content.user.full_name %> added a new <%= @content.klass.downcase %> to the space <%= link_to @space.title, space_url(@space) %>:
+        </p>
+        <p>
+          <%= link_to(@content.title, urlify(@content)) %>
+        </p>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>
+

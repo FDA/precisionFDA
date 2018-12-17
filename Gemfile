@@ -80,6 +80,8 @@ gem 'inky-rb', require: 'inky'
 gem 'nokogiri', '~> 1.8', '>= 1.8.5'
 gem 'premailer-rails'
 
+gem 'whenever', require: false
+
 gem 'mysql2', '~> 0.3.18'
 
 gem 'gretel'
@@ -94,6 +96,7 @@ gem 'simple_form'
 group :development do
   gem 'byebug'
   gem 'pry-rails'
+  gem "letter_opener"
 
   # Access an IRB console on exception pages or by using <%= console %> in views
   gem 'web-console', '~> 2.0'
