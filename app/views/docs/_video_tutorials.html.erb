@@ -55,6 +55,10 @@
           <p>Licenses</p>
           <%= video_iframe(@videos[:licenses][:url]) %>
         </div>
+        <div class="bs-docs-section bs-docs-media-section">
+          <p>Workflows</p>
+          <%= video_iframe(@videos[:workflows][:url]) %>
+        </div>
         <% if @context.can_administer_site? %>
           <div class="bs-docs-section bs-docs-media-section">
             <p>The Challenge Workbench</p>
