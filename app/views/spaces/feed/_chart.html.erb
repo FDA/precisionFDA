@@ -1,0 +1,19 @@
+<div class="panel chart-container">
+  <div class="panel-body">
+    <h3>
+      <i class="fa fa-chevron-down" data-toggle="collapse" aria-expanded="true" data-target="#activity_chart"></i>
+      Activity Chart
+    </h3>
+    <div class="chart-row collapse in" id="activity_chart" aria-expanded="true">
+      <div class="chart full-width" data-name="spaces_feed_chart">
+        <div id="spaces_feed_chart"
+            class="chart-container no-header"
+            data-bind="css: {
+              'loading': activityChart.loading,
+              'error': activityChart.error
+            }">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

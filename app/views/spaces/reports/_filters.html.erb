@@ -1,0 +1,77 @@
+<div id="reports_filters_form" class="report-filters-form">
+  <form class="form-inline">
+    <div class="panel spaces-blue-panel">
+      <div class="panel-heading">
+        <h4>
+          DATE/TIME FILTERS
+          <button type="button" class="btn btn-link" data-bind="click: resetDateFilters">Reset</button>
+        </h4>
+      </div>
+      <div class="panel-body panel-body-blue">
+        <div class="btn-group pull-left" role="group" aria-label="Select date range" id="select_date_range">
+          <button class="btn btn-default" data-type="day">Day</button>
+          <button class="btn btn-default active" data-type="week">Week</button>
+          <button class="btn btn-default" data-type="month">Month</button>
+          <button class="btn btn-default" data-type="year">Year</button>
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control add-datetimepicker" name="date_at" />
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control add-datetimepicker" name="date_to" />
+        </div>
+      </div>
+    </div>
+    <div class="panel spaces-blue-panel">
+      <div class="panel-heading">
+        <h4>
+          USERS FILTERS
+          <button type="button" class="btn btn-link" data-bind="click: resetUserFilters">Reset</button>
+        </h4>
+      </div>
+      <div class="panel-body panel-body-blue">
+        <div class="form-group">
+          <select class="form-control selectpicker" multiple="multiple" name="users[]" title="Select User">
+            <% @users.each do |user| %>
+              <option value="<%= user[:value] %>"><%= user[:name] %></option>
+            <% end %>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="panel spaces-blue-panel">
+      <div class="panel-body">
+        <div class="row">
+          <div class="pull-right">
+            <button type="button" class="btn btn-primary" data-bind="click: submitFilters">Submit</button>
+            <button type="button" class="btn btn-default" data-bind="click: resetFilters">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel spaces-blue-panel">
+      <div class="panel-heading">
+        <h4>OBJECT TYPES</h4>
+      </div>
+      <div class="panel-body panel-body-blue report-types-container">
+        <div class="report-types">
+        <!-- ko foreach: reportTypes -->
+          <div class="report-type" data-bind="click: $parent.setActiveReportType.bind($parent, $data.name), css: {
+            active: $parent.isTypeActive($data.name)
+          }, attr: {
+            title: $data.name + ' (' + $data.value + ')'
+          }">
+            <span class="report-type-label">
+              <i class="fa" data-bind="css: $parent.getLabelIcon($data.name)"></i>
+              <span data-bind="text: $data.name"></span>
+            </span>
+            <span class="report-type-count">
+              <span data-bind="text: '(' + $data.value + ')'"></span>
+            </span>
+          </div>
+        <!-- /ko -->
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

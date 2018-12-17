@@ -11,7 +11,7 @@
           Edit your <%= link_to((@answer.scope == 'public' ? 'answer' : 'draft answer'), discussion_answer_path(@discussion, @answer.user.dxuser)) %> to
         </div>
         <div class="pfda-answer-to-discussion text-muted">
-          <%= link_to(@discussion.title, discussion_path(@discussion)) %>
+            <%= link_to(@discussion.title, discussion_path(@discussion)) %>
         </div>
       </div>
       <% if @answer.scope != 'public' %>

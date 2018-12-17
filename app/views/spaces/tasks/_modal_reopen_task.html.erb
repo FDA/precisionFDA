@@ -1,0 +1,44 @@
+<div id="reopen_task_modal" class="modal fade tasks-actions-modal modal-with-loader" data-bind="css: {loading: reopenTaskModal.isLoading}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">
+          Reopen <span data-bind="text: reopenTaskModal.tasksCount"></span> Task(s)
+        </h4>
+      </div>
+      <div class="loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <div class="modal-body">
+        Please provide an explanation for reopening this task (optional):
+        <textarea
+          name="body"
+          class="form-control"
+          cols="30"
+          rows="10"
+          data-bind="value: reopenTaskModal.commentText"
+        ></textarea>
+      </div>
+      <div class="modal-footer">
+        <button
+          class="btn btn-default"
+          data-dismiss="modal"
+          data-bind="disable: reopenTaskModal.actionsDisabled"
+          tabindex="-1"
+        >Cancel</button>
+        <button
+          id="reopen_task_modal_submit"
+          class="btn btn-success"
+          data-bind="disable: reopenTaskModal.actionsDisabled"
+          >
+            <i class="fa fa-repeat"></i>&nbsp;Reopen Task(s)
+          </button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

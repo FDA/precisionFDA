@@ -1,0 +1,60 @@
+@import "_common"
+
+.pfda-autocomplete
+  input.form-control
+    padding-left: 28px
+    padding-right: 28px
+    z-index: 1
+  &--options
+    position: absolute
+    margin-top: -1px
+    list-style: none
+    padding: 0px
+    margin: 0px
+    background-color: #FFF
+    border: 1px solid #CCC
+    border-radius: 3px
+    min-width: 200px
+    max-height: 125px
+    overflow: auto
+    z-index: 100
+  &--option
+    padding: 5px 15px
+    border-bottom: 1px solid #CCC
+    &:last-child
+      border-bottom: none
+    &:hover
+      background-color: $brand-blue-primary
+      cursor: pointer
+      color: #FFF
+  &--icon
+    position: absolute
+    float: left
+    margin-top: 10px
+    margin-left: 7px
+    color: #888
+    z-index: 10
+    &.fa-times
+      color: $brand-red-secondary
+      width: 25px
+      height: 32px
+      margin-top: -33px
+      margin-right: 2px
+      display: flex
+      justify-content: center
+      flex-direction: column
+      text-align: center
+      cursor: pointer
+    &.fa-spinner
+      display: none
+    &-right
+      position: relative
+      float: right
+      margin-top: -25px
+      margin-right: 10px
+  &--loading
+    .pfda-autocomplete--icon
+      &.fa-spinner
+        display: block
+      &.fa-times
+        display: none

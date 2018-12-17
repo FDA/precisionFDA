@@ -1,0 +1,43 @@
+<%= render "spaces/header" %>
+
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane active" id="tab-verification">
+    <% if @space.editable_by?(@context) %>
+      <div class="pfda-toolbar pfda-toolbar-transparent">
+        <a class="btn btn-default" data-toggle="modal" data-target="#verification-modal">
+          <span class="fa fa-check" aria-hidden="true"></span> Verify this space
+        </a>
+      </div>
+    <% else %>
+      <div class="pfda-toolbar pfda-toolbar-trasparent">
+        This space has been <b><span class="fa fa-lock"></span>Verified.</b>
+      </div>
+    <% end %>
+    <div class="panel">
+      <!-- You need to ensure whether components will or will not change, as it will not be possible to delete/update these components after place is verified and <span class="fa fa-lock"></span>Locked -->
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="verification-modal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        <h4 class="modal-title">Confirm Verification</h4>
+      </div>
+      <%= form_for @space, url: verify_space_url, method: :post, html: {class: 'form form-horizontal'} do |f|%>
+        <%= f.hidden_field :verified, value: true %>
+        <div class="modal-body">
+          <h5>
+            This space will be locked
+          </h5>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Cancel</button>
+          <button type="submit" class="btn btn-primary"><span class="fa fa-lock"></span> Verify</button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

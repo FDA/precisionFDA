@@ -15,7 +15,7 @@
                       <%= link_to(app.user.full_name, user_path(app.user.dxuser)) %> submitted in <%= link_to flag_image_tag(appathon.flag, {width: 20}), appathon_path(appathon) %> <%= link_to appathon.title, appathon_path(appathon) %>
                   </div>
                   <div class="pfda-card-title">
-                    <%= link_to(app.title, app_path(app.dxid)) %>
+                    <%= link_to(app.title, app_path(app)) %>
                   </div>
                   <% if app.app_series.all_tags_list.count > 0 %>
                     <div class="pfda-card-metadata">

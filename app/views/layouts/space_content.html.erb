@@ -1,0 +1,15 @@
+<% content_for :content do %>
+
+  <%= render "spaces/header" %>
+
+  <% if @space.active? %>
+    <div class="pfda-pane pfda-pane-spaces container-fluid">
+      <%= render "spaces/side_nav" %>
+
+      <%= yield %>
+
+    </div>
+  <% end %>
+
+<% end %>
+<%= render template: "layouts/application" %>

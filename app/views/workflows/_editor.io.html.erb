@@ -224,10 +224,10 @@
         <!-- ko if: eligibleSlots().length > 0 -->
           <!-- ko foreach: eligibleSlots -->
             <div >
-              <a data-toggle="collapse" data-bind="attr: {'href': '#collapse_' + name}">
+              <a data-toggle="collapse" data-bind="attr: {'href': '#collapse_' + name()}">
                 <i style="padding-right: 12px;"class="indicator fa fa-caret-down pfda-padded-h" aria-hidden="true"></i><i class="fa fa-gear"></i><strong class="bold pfda-padded-b pfda-padded-v" data-bind="text: $data.name"></strong>
               </a>
-              <div data-bind="attr: {'id': 'collapse_' + name}" class="panel-collapse collapse" >
+              <div data-bind="attr: {'id': 'collapse_' + name()}" class="panel-collapse collapse" >
                 <!-- ko foreach: $data.outputs() -->
                   <!-- ko if: $data.class== $root.inputBeingEdited().class -->
                     <div class="pfda-padded-h pfda-padded">

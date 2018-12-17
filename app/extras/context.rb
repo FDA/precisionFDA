@@ -6,6 +6,8 @@
 class Context
   attr_accessor :user_id, :username, :token, :expiration, :org_id
 
+  delegate :review_space_admin?, to: :user
+
   def initialize(user_id, username, token, expiration, org_id)
     @user_id = user_id
     @username = username
@@ -36,6 +38,11 @@ class Context
     return (@user_id == -1 && @username.start_with?("Guest-") && @token == "INVALID" && @expiration.present? && ((@expiration - Time.now.to_i) > 5.minutes) && @org_id == -1)
   end
 
+  def can_create_spaces?
+    return false unless logged_in?
+    user.can_administer_site? || review_space_admin?
+  end
+
   def can_administer_site?
     logged_in? && user.can_administer_site?
   end
@@ -58,5 +65,9 @@ class Context
       targets += @user.active_spaces.map(&:uid)
     end
     return targets.select { |t| item.publishable_by?(self, t) }
+  end
+
+  def api
+    @api ||= DNAnexusAPI.new(token)
   end
 end

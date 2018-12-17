@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-
   #
   # Remove the ability to switch formats (i.e. /foo vs /foo.json or /foo.xml)
   # by wrapping everything into a scope
@@ -12,7 +11,7 @@ Rails.application.routes.draw do
 
       resources :news_items, path: 'news'
       post 'news/positions' => 'news_items#positions'
-      
+
       resources :activity_reports, only: [:index] do
         collection do
           get "total"
@@ -68,9 +67,6 @@ Rails.application.routes.draw do
     get 'exception_test' => "main#exception_test"
     get 'presskit' => 'main#presskit'
     get 'news' => 'main#news'
-
-    # News Items, public
-    get '/news_items' => 'news_items#index'
 
     # API
     namespace "api" do
@@ -128,6 +124,7 @@ Rails.application.routes.draw do
     post '/api/create_asset', to: 'api#create_asset'
     post '/api/close_asset', to: 'api#close_asset'
     post '/api/create_app', to: 'api#create_app'
+    post '/api/share_with_fda', to: 'api#share_with_fda'
     post '/api/attach_to_notes', to: 'api#attach_to_notes'
     post '/api/update_note', to: 'api#update_note'
     post '/api/upvote', to: 'api#upvote'
@@ -283,11 +280,33 @@ Rails.application.routes.draw do
       end
     end
 
+    get '/spaces/verified_space_list' => 'space_templates#verified_space_list'
+    get '/spaces/apps_and_files' => 'spaces#apps_and_files'
+    get '/spaces/unverified_apps' => 'space_templates#unverified_apps'
+
+    resources :space_templates do
+      get 'duplicate', on: :member
+      get 'app_file_list'
+    end
+
     resources :spaces do
       get 'members', on: :member
-      get 'content', on: :member
       get 'discuss', on: :member
+      get 'tasks',   on: :member
+      get 'feed',    on: :member
+      get 'reports', on: :member
+      get 'notes',   on: :member
+      get 'files',   on: :member
+      get 'apps',    on: :member
+      get 'jobs',    on: :member
+      get 'comparisons',   on: :member
+      get 'assets',   on: :member
+      post 'verify', on: :member
+
       post 'accept', on: :member
+      post 'lock', on: :member, to: 'space_requests#lock'
+      post 'unlock', on: :member, to: 'space_requests#unlock'
+      post 'delete', on: :member, to: 'space_requests#delete'
       post 'rename', on: :member
       post 'invite', on: :member
       post 'move', on: :member
@@ -296,8 +315,52 @@ Rails.application.routes.draw do
       post 'download_list', on: :member
       post 'remove_folder', on: :member, as: 'remove_folder'
       post 'publish_folder', on: :member
+      post 'copy_folder_to_cooperative', on: :member
+      post 'copy_file_to_cooperative', on: :member
+      post 'copy_to_cooperative', on: :member
+      post 'search_content', on: :member
       resources :comments
+
+      resources :tasks, only: [:create, :destroy, :update, :show] do
+        post 'accept', on: :collection
+        post 'complete', on: :collection
+        post 'decline', on: :collection
+        post 'make_active', on: :collection
+        post 'reopen', on: :collection
+        post 'reassign', on: :member
+        post 'copy', on: :member
+        get 'task', on: :member
+        resources :comments
+      end
+
+      resources :space_feed, only: [:index] do
+        collection do
+          get 'object_types'
+          get 'chart'
+        end
+      end
+      resources :space_reports, only: [:index] do
+        collection do
+          get 'counters'
+          get 'download_report'
+        end
+      end
     end
+
+    resources :space_membership, only: [] do
+      member do
+        post :to_lead
+        post :to_admin
+        post :to_viewer
+        post :to_member
+        post :to_inactive
+      end
+    end
+
+    resources :notification_preferences, only: [:index] do
+      post 'change', on: :collection
+    end
+
 
     resources :meta_appathons, constraints: {appathon_id: /[^\/]+/ }  do
       post 'rename', on: :member

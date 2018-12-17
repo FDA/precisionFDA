@@ -57,3 +57,6 @@
 
 # Ignore local scripts
 run-ui-test.sh
+
+# Ignore IDE files
+.idea/

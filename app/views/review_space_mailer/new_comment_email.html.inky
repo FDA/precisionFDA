@@ -1,0 +1,32 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    New comment
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="https://precision.fda.gov" title="precisionFDA">
+          <img class="header-image" src="https://precision.fda.gov/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right">New comment</p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p>
+          <%= @comment.user.full_name %> added a new <%= link_to('comment', urlify(@comment)) %>:
+        </p>
+        <p>
+          <%= simple_format(@comment.body) %>
+        </p>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>
+

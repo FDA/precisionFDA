@@ -10,7 +10,7 @@ class JobCreator
     @project = project
   end
 
-  def create(app:, name:, input_info:, run_instance_type: nil)
+  def create(app:, name:, input_info:, run_instance_type: nil, scope: nil)
     dxjob_id = create_dx_job(app, input_info, name, run_instance_type)
 
     Job.transaction do
@@ -23,7 +23,7 @@ class JobCreator
         state: DEFAULT_JOB_STATE,
         name: name,
         describe: {},
-        scope: DEFAULT_JOB_SCOPE,
+        scope: scope || DEFAULT_JOB_SCOPE,
         user_id: user.id,
         run_instance_type: run_instance_type
       )

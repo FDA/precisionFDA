@@ -38,6 +38,21 @@ RSpec.shared_context "type_controller", type: :controller do
     @request.headers["Authorization"] = "Key #{key}"
   end
 
+  def parsed_response
+    @parsed_response ||= JSON.parse(response.body)
+  end
+
+  def last_app
+    @app ||= App.last
+  end
+
+  def expect_valid(variable_name)
+    return unless assigns(variable_name).present?
+
+    assigns(variable_name).valid?
+    expect(assigns(variable_name).errors.messages).to be_eql({})
+  end
+
   private
 
   def context_attributes_for(user)

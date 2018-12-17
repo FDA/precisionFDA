@@ -22,6 +22,7 @@
 class Job < ActiveRecord::Base
   include Auditor
   include Permissions
+  include InternalUid
 
   INSTANCE_TYPES = {
     "baseline-2" => "mem1_ssd1_x2_fedramp",
@@ -69,10 +70,6 @@ class Job < ActiveRecord::Base
 
   scope :done, -> { where(state: STATE_DONE) }
   scope :terminal, -> { where(state: [TERMINAL_STATES]) }
-
-  def uid
-    dxid
-  end
 
   def to_param
     uid
@@ -180,6 +177,9 @@ class Job < ActiveRecord::Base
         if job.publishable_by?(context, scope)
           job.update!(scope: scope)
           count += 1
+          if scope =~ /^space-(\d+)$/
+            SpaceEventService.call($1.to_i, context.user_id, nil, job, :job_added)
+          end
         end
       end
     end
@@ -188,10 +188,10 @@ class Job < ActiveRecord::Base
   end
 
   def output_data
-    IOCollection.build(output_spec, run_outputs)
+    IOCollection.build_outputs(self)
   end
 
   def input_data
-    IOCollection.build(input_spec, run_inputs)
+    IOCollection.build_inputs(self)
   end
 end

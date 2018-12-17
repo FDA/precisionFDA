@@ -11,7 +11,7 @@ class InputSpecPreparer
     @errors = []
   end
 
-  def run(app, inputs)
+  def run(app, inputs, accessible_scopes = nil)
     @errors = []
     input_info = InputInfo.new
 
@@ -47,13 +47,19 @@ class InputSpecPreparer
           add_error "#{key}: input file value is not a string"
           next
         end
-        file = UserFile.real_files.accessible_by(@context).find_by(dxid: value)
+        file = UserFile.real_files.accessible_by(@context).find_by_uid(value)
         unless file
           add_error "#{key}: input file is not accessible or does not exist"
           next
         end
+
+        if accessible_scopes && !accessible_scopes.include?(file.scope)
+          add_error "#{key}: input file is not accessible to this space"
+          next
+        end
+
         add_error "#{key}: input file's license must be accepted" unless !file.license.present? || file.licensed_by?(@context)
-        dxvalue = {"$dnanexus_link" => value}
+        dxvalue = {"$dnanexus_link" => file.dxid}
         input_info.push_file(file)
       when "int"
         add_error "#{key}: value is not an integer" unless value.is_a?(Numeric) && (value.to_i == value)

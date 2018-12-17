@@ -11,7 +11,19 @@ class AppIndexModel
     @app = app
     @confirmationModal = $('#replace-challenge-app-modal')
     @selectedChallenge = ko.observable({ app: {} })
+    @fdaSpinner = ko.observable(false)
+    @shareSuccess = ko.observable(false)
 
+  shareWithFDA: () =>
+    return false if @fdaSpinner()
+    if $('#fda_button').hasClass('btn-primary')
+      @fdaSpinner(true)
+      $.ajax('/api/share_with_fda', {
+        method: "POST",
+        data: { id: @app.id },
+        success: () => @shareSuccess(true)
+      }).always () => @fdaSpinner(false)
+    return false
 
   showConfirmationModal: (challenge_id) =>
     @confirmationModal.modal('show')
@@ -33,10 +45,10 @@ AppsController = Paloma.controller('Apps',
   index: ->
     $container = $("body main")
     viewModel = new AppIndexModel(@params.app, @params.challenges, @params.releaseable)
-
     ko.applyBindings(viewModel, $container[0])
 
     $container.find('[data-toggle="tooltip"]').tooltip({
       container: 'body'
     })
+
 )

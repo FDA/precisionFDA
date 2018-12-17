@@ -1,0 +1,16 @@
+<ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+  <li role="presentation" class="<% if controller_name == 'spaces' %>active<% end %>">
+    <a href="/spaces" aria-controls="tab-spaces">
+      <i class="fa fa-fw fa-object-group"></i>
+      <span class="tab-label">SPACES</span>&nbsp;(<%= Space.accessible_by(@context).count %>)
+    </a>
+  </li>
+  <% if @context.user.review_space_admin? %>
+    <li role="presentation" class="<% if controller_name == 'space_templates' %>active<% end %>">
+      <a href="/space_templates" aria-controls="tab-templates">
+        <i class="fa fa-fw fa-newspaper-o"></i>
+        <span class="tab-label">TEMPLATES</span>&nbsp;(<%= SpaceTemplate.all_and_private(@context).count %>)
+      </a>
+    </li>
+  <% end %>
+</ul>

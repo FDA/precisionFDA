@@ -1,0 +1,63 @@
+<div id="copy-files-to-cooperative-modal" class="copy-files-to-cooperative-modal modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">
+          Copy
+          <span data-bind="text: copyFilesToCooperativeModal.sendingItemsCnt"></span>
+          Item(s)
+        </h4>
+      </div>
+      <div class="modal-body">
+        <!-- ko if: copyFilesToCooperativeModal.showError -->
+        <div class="alert alert-danger"
+              role="alert"
+              data-bind="text: copyFilesToCooperativeModal.errorText">
+        </div>
+        <!-- /ko -->
+        <!-- ko if: copyFilesToCooperativeModal.loading -->
+        <h4 class="text-center">Loading...</h4>
+        <!-- /ko -->
+        <!-- ko if: !copyFilesToCooperativeModal.loading() -->
+        <table class="table wice-grid file-download-list">
+          <tbody>
+            <!-- ko foreach: copyFilesToCooperativeModal.displayingItems -->
+              <tr>
+                <td>
+                  <a target="_blank" data-bind="attr: { href: $data.viewURL }">
+                    <i class="fa fa-fw" data-bind="css: {
+                      'fa-file-o': $data.type == 'file',
+                      'fa-folder': $data.type == 'folder'
+                    }"></i>
+                    <span data-bind="text: $data.name"></span>
+                  </a>
+                </td>
+                <td>
+                  <span class="file-download-path help-block" data-bind="text: $data.type"></span>
+                </td>
+                <td>
+                  <span class="file-download-path help-block" data-bind="text: $data.fsPath"></span>
+                </td>
+              </tr>
+            <!-- /ko -->
+          </tbody>
+        </table>
+        <!-- /ko -->
+        <!-- ko if: copyFilesToCooperativeModal.showNoData -->
+        <h4 class="text-center">Selected items are not owned by you</h4>
+        <!-- /ko -->
+      </div>
+      <div class="modal-footer">
+        <%= form_tag path, method: :post do %>
+          <!-- ko foreach: copyFilesToCooperativeModal.selectedItems -->
+            <input type="hidden" name="ids[]" data-bind="value: $data">
+          <!-- /ko -->
+          <input type="hidden" name="scope" data-bind="value: scope">
+          <button type="button" class="btn btn-default" data-bind="enable: !copyFilesToCooperativeModal.loading()" data-dismiss="modal" tabindex="-1">Cancel</button>
+          <button type="submit" class="btn btn-danger" data-bind="enable: !copyFilesToCooperativeModal.loading() && copyFilesToCooperativeModal.sendingItemsCnt() > 0" data-disable-with="Copying...">Copy</button>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
