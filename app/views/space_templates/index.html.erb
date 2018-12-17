@@ -1,0 +1,84 @@
+<% content_for :title do %>Space templates <% end %>
+
+<%= render '_partials/space_navigation_tabs' %>
+
+<% if @context.review_space_admin? %>
+  <div class="pfda-toolbar">
+    <div class="btn-group">
+      <%= link_to new_space_template_path, class: 'btn btn-primary' do %>
+        <span class="fa fa-plus"></span> Create a Review Space Template
+      <% end %>
+    </div>
+  </div>
+
+  <div class="space-templates-grid">
+    <%= render "space_templates/grid", space_templates_grid: @templates_grid unless @templates_grid.empty? %>
+  </div>
+
+  <% else %>
+  You need admin privileges
+<% end %>
+
+
+<div id="template-created" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Copy Review Space Template</h4>
+      </div>
+      <div class="modal-body">
+        <span data-bind="text: spaceName"></span> has been created
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="duplicated" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Copy a Review Space Template</h4>
+      </div>
+      <div class="modal-body">
+        <span data-bind="text: duplicateMessage"></span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="delete-confirm" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Delete Review Space Template</h4>
+      </div>
+      <form data-bind="action: toDeleteTemplate">
+      <div class="modal-body">
+        <div>
+        Deleting this will remove it from the templates list.
+        </div>
+        <div>
+          Would you like to delete <span data-bind="text: toDeleteSpaceName"></span>?
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bind="click: deleteTemplate">Yes</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">No</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>

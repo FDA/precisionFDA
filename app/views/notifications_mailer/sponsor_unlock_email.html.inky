@@ -1,0 +1,30 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    Space unlock for <%= @space.title %> %>
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="https://precision.fda.gov" title="precisionFDA">
+          <img class="header-image" src="https://precision.fda.gov/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right">Space is active</p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p>
+          The space <strong><%= link_to @space.title, space_url(@space) %></strong> was unlocked.
+        </p>
+
+        <button class="radius" href="<%= space_url(@space) %>">View Space Invitation</button>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>

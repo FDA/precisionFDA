@@ -10,5 +10,9 @@ FactoryBot.define do
       dxuser "vijay.kandali"
     end
 
+    trait :review_admin do
+      dxuser "review.admin_dev"
+    end
+
   end
 end

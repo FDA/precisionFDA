@@ -1,0 +1,32 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    <%= @action.humanize %>
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="https://precision.fda.gov" title="precisionFDA">
+          <img class="header-image" src="https://precision.fda.gov/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right"><%= @action.humanize %></p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p>
+          <%= @initiator.full_name %> <%= @action %>:
+        </p>
+        <p>name: <%= @new_member.user.full_name %></p>
+        <p>role: <%= @new_member.role %></p>
+
+        <button class="radius" href="<%= space_url(@space) %>">View Space</button>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>

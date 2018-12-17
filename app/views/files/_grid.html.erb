@@ -58,6 +58,8 @@
   g.column name: 'Origin' do |file|
     if file.klass == "folder"
       nil
+    elsif file.parent_type == "Node" && file.parent.blank?
+      "Copied"
     elsif file.parent_type != "User"
       unilinkfw(file.parent)
     else

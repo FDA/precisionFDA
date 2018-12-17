@@ -57,9 +57,12 @@ $select-width: 28px
       &.state-failed, &.state-error
         color: $state-danger-text
         background-color: $state-danger-bg
-      &.state-inactive
+      &.state-inactive, &.state-archived
         color: $text-muted
         background-color: $gray-subtle
+      &.state-unactivated
+        color: $state-warning-text
+        background-color: $state-warning-bg
 
   > tbody > tr > td
     &.active-filter

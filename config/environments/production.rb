@@ -66,9 +66,9 @@ Rails.application.configure do
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
   if ENV["DNANEXUS_BACKEND"] == "production"
-    config.action_mailer.default_url_options = { :host => "precision.fda.gov" }
+    config.action_mailer.default_url_options = { host: "precision.fda.gov", protocol: 'https' }
   else
-    config.action_mailer.default_url_options = { :host => "precisionfda-staging.dnanexus.com" }
+    config.action_mailer.default_url_options = { host: "precisionfda-staging.dnanexus.com", protocol: 'https' }
   end
 
   config.action_mailer.delivery_method = :salesforce

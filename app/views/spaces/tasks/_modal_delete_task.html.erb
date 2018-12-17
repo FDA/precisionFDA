@@ -1,0 +1,50 @@
+<div id="delete_task_modal" class="modal fade tasks-actions-modal modal-with-loader" data-bind="css: {loading: deleteTaskModal.isLoading}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Are you sure you want to delete this task?</h4>
+      </div>
+      <div class="loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <form class="form-horizontal">
+        <div class="modal-body">
+          <%= modal_form_row('Task Name:', 'task[name]', false, 'readonly', '', '', 'text: deleteTaskModal.task.name') %>
+          <%= modal_form_row('Assigned To:', 'task[assignee_id]', false, 'readonly', '', '', 'text: deleteTaskModal.task.assignee_id') %>
+          <%= modal_form_row('Response deadline:', 'task[response_deadline]', false, 'readonly', '', '', 'text: deleteTaskModal.task.response_deadline') %>
+          <%= modal_form_row('Completion deadline:', 'task[completion_deadline]', false, 'readonly', '', '', 'text: deleteTaskModal.task.completion_deadline') %>
+          <%= modal_form_row('Description:', 'task[description]', false, 'readonly', '', '', 'text: deleteTaskModal.task.description') %>
+          <%= modal_form_row(
+            'Please provide an explanation for deleteing this task (optional):',
+            'comment[body]',
+            false,
+            'textarea', '', '',
+            'value: deleteTaskModal.commentText'
+          ) %>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-default"
+            data-dismiss="modal"
+            tabindex="-1"
+            data-bind="disable: deleteTaskModal.actionsDisabled"
+          >Cancel</button>
+          <button
+            id="delete_task_modal_submit"
+            type="button"
+            class="btn btn-danger"
+            data-bind="disable: deleteTaskModal.actionsDisabled"
+          >
+            <i class="fa fa-trash"></i>&nbsp;Yes, Delete
+          </button>
+        </div>
+      </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

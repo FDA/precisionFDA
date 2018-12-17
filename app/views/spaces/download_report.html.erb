@@ -1,0 +1,63 @@
+<%= render "spaces/download_report/styles" %>
+
+<div class="content">
+  <div class="header bg-colored">
+    <div class="view-block">
+      <h1 class="nmr ta-c pb-30">Interaction Report</h1>
+      <div class="ta-r nmr pb-5">
+        <span class="label">Report by:</span>
+        <span><%= @context.user.full_name %></span>
+      </div>
+      <div class="ta-r nmr np">
+        <span class="label">Report created:</span>
+        <span><%= Date.today.strftime("%m/%d/%Y") %></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters bg-colored">
+    <div class="view-block">
+      <h3>Filters</h3>
+      <div class="pb-5">
+        <span class="label">Report dates from</span>&nbsp;
+        <span><%= @filters[:dates][:start_date] %></span>&nbsp;
+        <span class="label">to</span>&nbsp;
+        <span><%= @filters[:dates][:end_date] %></span>
+      </div>
+      <div>
+        <span class="label">Users:</span>&nbsp;
+        <span><%= @filters[:users] || "all" %></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="results view-block">
+    <% @results.each do |content_type| %>
+      <div class="results-block">
+
+        <!-- VARS -->
+        <% object_type = content_type[0] %>
+        <% objects = content_type[1] %>
+        <!-- / VARS -->
+
+        <h4><%= object_type.capitalize %>&nbsp;(<%= objects.size %>)</h4>
+
+        <div class="items">
+          <% objects.each do |item| %>
+            <div class="item-block">
+              <div class="item-block-body <%= object_type.to_s != "comments" ? 'fw-b' : '' %>">
+                <%= item[:object_name] %>
+              </div>
+              <div class="item-block-info">
+                <span class="label">Created by</span>&nbsp;
+                <span><%= item[:user_fullname] %></span>
+                <span class="label fl-r"><%= item[:created_at] %></span>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+      </div>
+    <% end %>
+  </div>
+</div>

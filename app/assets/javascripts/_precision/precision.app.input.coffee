@@ -37,7 +37,7 @@ class AppInputModel
                   value = @defaultFileValue()
                   @licenseToAccept({license: value.license, user_license: value.user_license}) if value.license? && !value.user_license?.accepted
                   value.title
-                else if @defaultValue.match(new RegExp(/^file-(.{24})$/, "i"))
+                else if @defaultValue.match(new RegExp(/^file-(.{24,})$/, "i"))
                     params =
                       uid: @defaultValue
                       describe:
@@ -125,7 +125,7 @@ class AppInputModel
           deferred.resolve(@value())
         listRelatedParams:
           # editable: true
-          # scopes: ["private", "public"]
+          scopes: @viewModel.contentScopes()
           classes: ["file", "note", "discussion", "answer", "comparison", "app", "asset", "job"]
         listModelConfigs: [
           {
@@ -133,6 +133,7 @@ class AppInputModel
             name: "Files"
             apiEndpoint: "list_files"
             apiParams:
+              scopes: @viewModel.contentScopes()
               states: ["closed"]
               describe:
                 include:
@@ -147,6 +148,7 @@ class AppInputModel
             name: "Notes"
             apiEndpoint: "list_notes"
             apiParams:
+              scopes: @viewModel.contentScopes()
               note_types: ["Note"]
               describe:
                 include:
@@ -159,6 +161,7 @@ class AppInputModel
             name: "Discussions"
             apiEndpoint: "list_notes"
             apiParams:
+              scopes: @viewModel.contentScopes()
               note_types: ["Discussion"]
               describe:
                 include:

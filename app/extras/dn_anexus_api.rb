@@ -1,5 +1,9 @@
 class DNAnexusAPI
 
+  def self.for_admin
+    new(ADMIN_TOKEN)
+  end
+
   def self.for_challenge_bot
     new(CHALLENGE_BOT_TOKEN)
   end

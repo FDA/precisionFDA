@@ -1,0 +1,50 @@
+
+<%= grid(space_templates_grid, show_filters: :no )  do |g|
+
+  g.column name: "Name", attribute: 'name', ordering: false do |t|
+    content_tag(:a,t.name.blank? ? 'Untitled':t.name, {href: space_template_path(t)})
+  end
+
+  g.column name: "Created", attribute: 'created_at', class: "space-templates-grid-created"
+
+  g.column class: "space-templates-grid-action" do |t|
+    if t.private?
+      content_tag(:i,"", class:"fa fa-eye-slash text-muted", title: 'Private')
+    else
+      content_tag(:i,"", class:"fa fa-eye text-success", title: 'Public')
+    end
+  end
+
+  g.column class: "space-templates-grid-action" do |t|
+    link_to(duplicate_space_template_path(t)) {
+      content_tag(:i, "", class: "fa fa-copy", title: 'Copy Space')
+    }
+  end
+
+  g.column class: "space-templates-grid-action" do |t|
+    link_to(space_template_path(t), name: t.name, 'data-bind': 'click: confirmDelete') {
+      content_tag(:i,"", class: "fa fa-trash text-danger", title: 'Delete Space')
+    }
+  end
+
+  g.after_row do |t|
+    content_tag(:tr, class: 'extra-row') do
+      content_tag(:td, colspan: 5, class: "space-templates-grid-desc-td") do
+        content_tag(:div, t.description, class: "space-templates-grid-description description") do
+          if t.description.length > 120
+            content_tag(:div, class: 'short-description') {
+              content_tag(:span, (t.description[0,128] rescue "nope") + (t.description.length > 127 ? '... ' : ''), class: 'short-description') +
+              content_tag(:a, "more", class: 'description-uncover')
+            } +
+            content_tag(:div, class: 'full-description', style: 'display: none') {
+              content_tag(:span, t.description) +
+              content_tag(:a, "less", class: 'description-cover')
+            }
+          else
+            content_tag(:div, t.description)
+          end
+        end
+      end
+    end
+  end
+end %>

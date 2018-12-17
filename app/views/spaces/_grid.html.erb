@@ -4,7 +4,7 @@
   g.after_row do |space, num_cols|
     if !space.description.blank?
       content_tag(:tr,
-        content_tag(:td, nil, {class: "col-state state-#{space.state ? space.state.downcase : 'unactivated'}"}).concat(content_tag(:td,
+        content_tag(:td, nil, { class: "col-state state-#{space.state}" }).concat(content_tag(:td,
           content_tag(:div, space.description, class: 'description'),
         colspan: num_cols - 1)),
       class: 'extra-row')
@@ -13,8 +13,8 @@
     end
   end
 
-  g.column name: 'State', attribute: 'state', custom_filter: :state_hash, auto_reload: true, allow_multiple_selection: false do |space|
-    [space.state ? space.state : "UNACTIVATED", {class: "col-state state-#{space.state ? space.state.downcase : 'unactivated'}"}]
+  g.column name: 'State', attribute: 'state', custom_filter: Space.states.to_a, auto_reload: true, allow_multiple_selection: false do |space|
+    [(space.verified == true ? content_tag(:span, nil, {class:'fa fa-lock'}):'')+ " " + space.state, { class: "col-state state-#{space.state}" }]
   end
 
   g.column name: 'Name', attribute: 'name', auto_reload: true, allow_multiple_selection: false do |space|
@@ -25,12 +25,20 @@
     end
   end
 
-  g.column name: 'Host Lead' do |space|
-    link_to("#{space.host_lead.full_name} (#{space.host_lead.org.name})", user_path(space.host_lead.dxuser))
+  g.column name: 'Type' do |space|
+    space_type(space)
   end
 
-  g.column name: 'Guest Lead' do |space|
-    link_to("#{space.guest_lead.full_name} (#{space.guest_lead.org.name})", user_path(space.guest_lead.dxuser))
+  g.column name: 'Host/Reviewer Lead' do |space|
+    if space.host_lead_member
+      link_to("#{space.host_lead.full_name} (#{space.host_lead.org.name})", user_path(space.host_lead.dxuser))
+    end
+  end
+
+  g.column name: 'Guest/Sponsor Lead' do |space|
+    if space.guest_lead_member
+      link_to("#{space.guest_lead.full_name} (#{space.guest_lead.org.name})", user_path(space.guest_lead.dxuser))
+    end
   end
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |space|
@@ -42,4 +50,40 @@
   end
 
   g.column {}
+
+  g.column do |space|
+    if SpaceRequestPolicy.can_lock?(@context.user, space)
+      button_to lock_space_path(space),
+        method: :post,
+        form_class: "button-to-form-inline",
+        class: "btn btn-xs btn-primary",
+        data: { disable_with: 'Locking...',  confirm: 'Are you sure you want to lock this space?'} do
+          content_tag(:i, ' Lock', class: 'fa fa-lock btn-fa-white')
+        end
+    elsif SpaceRequestPolicy.can_unlock?(@context.user, space)
+      button_to unlock_space_path(space),
+        method: :post,
+        form_class: "button-to-form-inline",
+        class: "btn btn-xs btn-default",
+        data: { disable_with: 'Unlocking...',  confirm: 'Are you sure you want to unlock this space?'} do
+          content_tag(:i, ' Unlock', class: 'fa fa-lock btn-fa-dark')
+        end
+    end
+  end
+  g.column do |space|
+    if SpaceRequestPolicy.can_delete?(@context.user, space)
+      button_to delete_space_path(space),
+        method: :post,
+        form_class: "button-to-form-inline",
+        class: "btn btn-xs btn-default",
+        data: { disable_with: 'Deleting...',  confirm: 'Are you sure you want to delete this space?'} do
+          content_tag(:i, ' Delete', class: 'fa fa-trash btn-fa-dark')
+        end
+    end
+
+  end
 end -%>
+<%=
+
+
+%>

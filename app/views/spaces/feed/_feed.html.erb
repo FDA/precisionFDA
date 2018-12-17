@@ -1,0 +1,76 @@
+
+<div class="panel">
+  <div class="panel-body">
+    <h3>
+      <i class="fa fa-chevron-down" data-toggle="collapse" aria-expanded="true" data-target="#activity_feed"></i>
+      Activity Feed
+    </h3>
+    <hr>
+    <h5>
+      <span class="sort-container" data-bind="click: changeSortDirection">
+        <i class="fa fa-arrows-v" aria-hidden="true"></i>
+        <span class="sort-label" data-bind="text: sortLabel"></span>
+      </span>
+    </h5>
+    <hr>
+    <div class="activity-feed-container collapse in" id="activity_feed" aria-expanded="true" data-bind="css: {
+      loading: feedLoading
+    }">
+      <!-- ko foreach: feedItems -->
+        <div class="activity-feed">
+          <div class="media">
+            <div class="media-left">
+              <div class="feed-type-icon" data-bind="style: {
+                backgroundColor: $parent.getTypeColor($data.object_type)
+                }"
+              >
+                <i class="fa" data-bind="css: $parent.getLabelIcon($data.object_type)"></i>
+              </div>
+            </div>
+            <div class="media-body">
+              <div class="activity-feed-header">
+                <div class="row">
+                  <div class="pull-left">
+                    <a target="_blank" data-bind="text: $data.user_fullname, attr: { href: '/users/' + $data.username }"></a>
+                    <span data-bind="text: $data.activity_type"></span>
+                  </div>
+                  <div class="pull-right">
+                    <span data-bind="text: $data.created_at"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="activity-feed-body bg-info">
+                <div>
+                  <!-- ko if: $data.entity_url.length -->
+                  <a target="_blank" data-bind="text: $data.entity_name, attr: { href: $data.entity_url }"></a>
+                  <!-- /ko -->
+                  <!-- ko ifnot: $data.entity_url.length -->
+                  <span data-bind="text: $data.entity_name"></span>
+                  <!-- /ko -->
+                </div>
+                <!-- ko if: $data.additional_info -->
+                  <div class="activity-feed-associated">
+                    <span>Associated with</span>&nbsp;
+                    <span data-bind="text: $data.additional_info.comment_object_type"></span>
+                    <!-- ko if: $data.additional_info.comment_object_url.length -->
+                    <a target="_blank"
+                       data-bind="text: $data.additional_info.comment_object_name,
+                                  attr: { href: $data.additional_info.comment_object_url }">
+                    </a>
+                    <!-- /ko -->
+                    <!-- ko ifnot: $data.additional_info.comment_object_url.length -->
+                    <span data-bind="text: $data.additional_info.comment_object_name"></span>
+                    <!-- /ko -->
+                  </div>
+                <!-- /ko -->
+              </div>
+            </div>
+          </div>
+        </div>
+      <!-- /ko -->
+    </div>
+    <div class="more-loading" data-bind="style: { visibility: moreFeedLoading() ? 'unset' : 'hidden' }">
+      Loading...
+    </div>
+  </div>
+</div>

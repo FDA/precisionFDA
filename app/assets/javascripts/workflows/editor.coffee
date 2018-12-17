@@ -514,7 +514,7 @@ class appModel
       Precision.api('/api/list_app_revisions', {id: @app.id})
         .done((revisions) =>
           for revision in revisions
-            @appIdToDxid[revision.id] = revision.dxid
+            @appIdToDxid[revision.id] = revision.uid
             @revisions.push(revision)
       )
     )

@@ -1,0 +1,11 @@
+<!-- ko if:readonly != true -->
+<div class="form-group">
+  <%= f.label :name, label: "Add Unverified Apps", class: "control-label col-sm-2" %>
+  <div class="col-sm-11 col-sm-offset-1">
+    <%=
+      content_tag(:input, nil, {id: 'add-verified-apps', 'data-toggle': "modal", 'data-bind': 'click: showSelectAppModal', placeholder: ' Add', style: 'font-family: Arial, FontAwesome'})
+    %>
+  </div>
+</div>
+<!-- /ko -->
+
