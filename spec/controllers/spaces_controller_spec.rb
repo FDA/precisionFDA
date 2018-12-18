@@ -331,7 +331,7 @@ RSpec.describe SpacesController, type: :controller do
           suppressEmailNotification: true
         })
 
-        expect(review_space.confidential_reviewer_space.space_memberships.count ).to eq(2)
+        expect(review_space.confidential_reviewer_space.space_memberships.count).to eq(2)
       end
     end
   end
