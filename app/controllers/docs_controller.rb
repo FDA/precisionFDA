@@ -8,8 +8,9 @@ class DocsController < ApplicationController
   def show
     section_name = params[:section] ? params[:section] : "intro"
 
-    @sections = t('docs.common_sections')
-    @sections = @context.can_administer_site? ? @sections.merge(t('docs.admin_sections')) : @sections
+    @sections = t('docs.common_sections').dup
+    @sections.merge!(t('docs.admin_sections')) if @context.can_administer_site?
+    @sections.merge!(t('docs.rsa_sections')) if @context.review_space_admin? || @context.can_administer_site?
     @sections.merge!(t('docs.video_sections'))
 
     @active_section = @sections.select {|key, _| key == section_name.to_sym }
