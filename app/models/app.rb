@@ -109,7 +109,7 @@ class App < ActiveRecord::Base
     cmds << "# The asset download links in this file are valid only for 24h."
     cmds << ""
     cmds << "# Exported app: #{name}, revision: #{revision}, authored by: #{user.username}"
-    cmds << "# https://precision.fda.gov#{Rails.application.routes.url_helpers.app_path(dxid)}"
+    cmds << "# #{Rails.application.routes.url_helpers.app_url(self)}"
     cmds << ""
     cmds << "# For more information please consult the app export section in the precisionFDA docs"
     cmds << ""
