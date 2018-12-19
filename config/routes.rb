@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  default_url_options Rails.configuration.action_mailer.default_url_options
   #
   # Remove the ability to switch formats (i.e. /foo vs /foo.json or /foo.xml)
   # by wrapping everything into a scope
