@@ -16,7 +16,8 @@ en:
     admin_sections:
       challenge_workbench: The Challenge Workbench
       site_customization: Site Customization
-      site_activity_reporting: Site Activity Reporting,
+      site_activity_reporting: Site Activity Reporting
+    rsa_sections:
       verification_spaces: Verified Apps
     video_sections:
       video_tutorials: Video Tutorials
