@@ -30,9 +30,9 @@ class Analysis < ActiveRecord::Base
         formatted_job = {
           id: job.id,
           state: job.state,
-          dxid: job.dxid,
+          uid: job.uid,
           execution: job.name,
-          app_dxid: job.app.dxid,
+          app_uid: job.app.uid,
           app_title: job.app.title,
           duration: humanizeSeconds(job.runtime),
           created: job.created_at.to_s(:db)
