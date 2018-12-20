@@ -214,7 +214,7 @@ class WorkflowEditorModel
       @inputBeingEdited().values.name = data.name
       data.configured(true)
       data.values.id = @slotBeingEdited().slotId()
-      data.values.name = @slotBeingEdited().name
+      data.values.name = @slotBeingEdited().name()
       @inputBeingEdited().outputBinding(data.name)
       @inputBeingEdited().configured(true)
       slot.nextSlot(@slotBeingEdited())
