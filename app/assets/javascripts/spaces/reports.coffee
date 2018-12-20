@@ -9,8 +9,8 @@ class CommentItem
     @avatar = data.user_avatar
     @childComments = ko.observableArray(comments.map((comment) -> new CommentItem(comment)))
 
-    regex   = /(^|[^@\w])@(\w+)\b/g
-    replace = '$1<a href="/users/$2" target="_blank">@$2</a>'
+    regex = Precision.MENTIONS_CONST.regex
+    replace = Precision.MENTIONS_CONST.replace
     @body = data.body.replace(regex, replace)
 
 class ReportItem
