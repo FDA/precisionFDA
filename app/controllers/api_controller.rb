@@ -1346,6 +1346,7 @@ class ApiController < ApplicationController
       run_instance_type: run_instance_type,
       scope: space.try(:uid),
     )
+    SpaceEventService.call(space_id, @context.user_id, nil, job, :job_added) if space && space.review?
 
     render json: { id: job.uid }
   end
