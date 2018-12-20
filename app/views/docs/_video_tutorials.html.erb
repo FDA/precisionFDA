@@ -3,80 +3,12 @@
     <div class="col-sm-24">
       <div id="tutorials" class="h1">Video Tutorials</div>
       <div class="bs-docs-section">
-        <div class="bs-docs-section bs-docs-media-section">
-          <p>Introduction</p>
-          <%= video_iframe(@videos[:intro][:url]) %>
-        </div>
-        <div class="bs-docs-section bs-docs-media-section">
-          <p>How to Upload Files</p>
-          <%= video_iframe(@videos[:files][:how_to_upload_url]) %>
-        </div>
-        <div class="bs-docs-section bs-docs-media-section">
-          <p>File & Folder Navigation</p>
-          <%= video_iframe(@videos[:files][:how_to_navigate_url]) %>
-        </div>
-        <div class="bs-docs-section bs-docs-media-section">
-          <p>Comparisons</p>
-          <%= video_iframe(@videos[:comparisons][:url]) %>
-        </div>
-        <div class="bs-docs-section bs-docs-media-section">
-          <p>Running Apps</p>
-          <%= video_iframe(@videos[:apps_run][:url]) %>
-        </div>
-        <div class="bs-docs-section bs-docs-media-section">
-          <p>Batch Running Apps</p>
-          <%= video_iframe(@videos[:apps_batch_run][:url]) %>
-        </div>
-        <div class="bs-docs-section bs-docs-media-section">
-          <p>Creating Apps</p>
-          <%= video_iframe(@videos[:apps_create][:url]) %>
-        </div>
-        <div class="bs-docs-section bs-docs-media-section">
-          <p>Exploring and Forking Apps</p>
-          <%= video_iframe(@videos[:apps_fork][:url]) %>
-        </div>
-        <div class="bs-docs-section bs-docs-media-section">
-          <p>Exporting Apps</p>
-          <%= video_iframe(@videos[:apps_export][:url]) %>
-        </div>
-        <div class="bs-docs-section bs-docs-media-section">
-          <p>Notes</p>
-          <%= video_iframe(@videos[:notes][:url]) %>
-        </div>
-        <div class="bs-docs-section bs-docs-media-section">
-          <p>Discussions</p>
-          <%= video_iframe(@videos[:discussions][:url]) %>
-        </div>
-        <div class="bs-docs-section bs-docs-media-section">
-          <p>Publishing</p>
-          <%= video_iframe(@videos[:publishing][:url]) %>
-        </div>
-        <div class="bs-docs-section bs-docs-media-section">
-          <p>Licenses</p>
-          <%= video_iframe(@videos[:licenses][:url]) %>
-        </div>
-        <div class="bs-docs-section bs-docs-media-section">
-          <p>Review Spaces</p>
-          <%= video_iframe(@videos[:review_spaces][:url]) %>
-        </div>
-        <div class="bs-docs-section bs-docs-media-section">
-          <p>Workflows</p>
-          <%= video_iframe(@videos[:workflows][:url]) %>
-        </div>
-        <% if @context.can_administer_site? %>
+        <%- videos.each_value do |value| %>
           <div class="bs-docs-section bs-docs-media-section">
-            <p>The Challenge Workbench</p>
-            <%= video_iframe(@videos[:challenge_workbench][:url]) %>
+            <p><%= value[:title] %></p>
+            <%= video_iframe(value[:url]) %>
           </div>
-          <div class="bs-docs-section bs-docs-media-section">
-            <p>Site Customization</p>
-            <%= video_iframe(@videos[:site_customization][:url]) %>
-          </div>
-          <div class="bs-docs-section bs-docs-media-section">
-            <p>Site Activity Reporting</p>
-            <%= video_iframe(@videos[:site_activity_reporting][:url]) %>
-          </div>
-        <% end %>
+        <%- end %>
       </div>
     </div>
   </div>
