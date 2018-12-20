@@ -36,6 +36,8 @@ module PrecisionFda
 
     config.autoload_paths += Dir[Rails.root.join("app", "validators", "**")]
 
+    config.middleware.use "Rack::PermanentRedirect"
+
     config.middleware.insert 0,
         Rack::UTF8Sanitizer,
         sanitizable_content_types: ['application/x-www-form-urlencoded'],
