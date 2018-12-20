@@ -4,7 +4,7 @@
       <div id="verification-spaces" class="h1">Verified Apps</div>
       <div class="bs-docs-section">
         <p>
-          Any user on precisionFDA may create an app – a program intended to perform one or more functions to analyze data. PrecisionFDA administrators are able to test these created apps in an isolated environment, called a Verification Space, in order to confirm that they function properly and perform the required steps in analysis. After the apps in a Verification Space have been successfully tested, the administrator may verify them by locking the space. Locked verification spaces may then be used to populate the reviewer confidential area of a Review Space through the use of a Review Space Template.
+          Any user on precisionFDA may create an app – a program intended to perform one or more functions to analyze data. PrecisionFDA administrators are able to test these created apps in an isolated environment, called a Verification Space, in order to confirm that they function properly and perform the required steps in analysis. After the apps in a Verification Space have been successfully tested, the administrator may verify them by locking the space. Locked verification spaces may then be used to populate the reviewer confidential area of a <a href="/docs/review_spaces">Review Space</a> through the use of a Review Space Template.
         </p>
 
         <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
@@ -49,13 +49,18 @@
           <%= image_tag("docs/verification_spaces/testing2.png") %>
         </div>
 
-        <p>Upon clicking “Verify this space”, the verification space will be locked and will no longer be mutable. All jobs, files, and apps within this space will be locked and cannot be changed further. Once the space has been locked, it will be available to be added to review space templates</p>
+        <p>Upon clicking “Verify this space”, the verification space will be locked and will no longer be mutable. All jobs, files, and apps within this space will be locked and cannot be changed further. Once the space has been locked, it will be available to be added to <a href="/docs/review_spaces">review space</a> templates.</p>
+
+        <div id="verification-video" class="bs-docs-section bs-docs-media-section">
+          <%= video_iframe('https://www.youtube.com/embed/9x8JgxpciFY') %>
+        </div>
       </div>
     </div>
 
     <div class="col-sm-6">
       <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
         <ul class="nav bs-docs-sidenav">
+          <li><a href="#verification-spaces">Verified Apps</a></li>
           <li><a href="#verification-spaces-create">Creating the Verification Space</a></li>
           <li><a href="#verification-spaces-testing">Testing Apps in the Verification Space</a></li>
         </ul>
