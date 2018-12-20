@@ -21,3 +21,64 @@ en:
       verification_spaces: Verified Apps
     video_sections:
       video_tutorials: Video Tutorials
+    videos:
+      common:
+        intro:
+          title: Introduction
+          url: https://www.youtube.com/embed/U_vmcd93HkM
+        files_upload:
+          title: How to Upload Files
+          url: https://www.youtube.com/embed/o5PmgUsWQGo
+        files_navigation:
+          title: File & Folder Navigation
+          url: https://www.youtube.com/embed/cj8a6I3KGvk
+        comparisons:
+          title: Comparisons
+          url: https://www.youtube.com/embed/qMd98K07U9M
+        apps_run:
+          title: Running Apps
+          url: https://www.youtube.com/embed/P90E3jgL134
+        apps_batch_run:
+          title: Batch Running Apps
+          url: https://www.youtube.com/embed/K9rHEef2FNs
+        apps_create:
+          title: Creating Apps
+          url: https://www.youtube.com/embed/f-DBLB2v1sM
+        apps_fork:
+          title: Exploring and Forking Apps
+          url: https://www.youtube.com/embed/oQgJ9WD7Nkg
+        apps_export:
+          title: Exporting Apps
+          url: https://www.youtube.com/embed/WeF9uj9QJIo
+        apps_import:
+          title: Importing Apps
+          url: https://www.youtube.com/embed/4-voYR-q-cw
+        notes:
+          title: Notes
+          url: https://www.youtube.com/embed/c2-VlRxTZLM
+        discussions:
+          title: Discussions
+          url: https://www.youtube.com/embed/KHgUe-a1v_k
+        publishing:
+          title: Publishing
+          url: https://www.youtube.com/embed/dsOCn1zTBOo
+        licenses:
+          title: Publishing
+          url: https://www.youtube.com/embed/7iwwnKmalyM
+        workflows:
+          title: Workflows
+          url: https://www.youtube.com/embed/jGYNt1Vw_Wo
+        review_spaces:
+          title: Review Spaces
+          url: https://www.youtube.com/embed/-YfSmb_Y-gk
+      admin:
+        challenge_workbench:
+          title: The Challenge Workbench
+          url: https://www.youtube.com/embed/SKqH5OfO5G8
+        site_customization:
+          title: Site Customization
+          url: https://www.youtube.com/embed/j9pEb0VTf-0
+        site_activity_reporting:
+          title: Site Activity Reporting
+          url: https://www.youtube.com/embed/KJ-Rk-ejjBM
+
