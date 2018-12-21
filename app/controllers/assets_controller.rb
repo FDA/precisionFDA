@@ -64,13 +64,16 @@ class AssetsController < ApplicationController
   end
 
   def edit
-    @asset = Asset.editable_by(@context).includes(:archive_entries).find_by_uid!(params[:id])
+    @asset = Asset.includes(:archive_entries).find_by_uid!(params[:id])
+    redirect_to asset_path(@asset) unless @asset.editable_by?(@context)
 
     js asset: @asset.slice(:id, :description)
   end
 
   def rename
-    @asset = Asset.editable_by(@context).find_by_uid!(params[:id])
+    @asset = Asset.find_by_uid!(params[:id])
+    redirect_to asset_path(@asset) unless @asset.editable_by?(@context)
+
     title = asset_params[:title]
     if title.is_a?(String) && title != ""
       name = title + @asset.suffix
@@ -89,7 +92,8 @@ class AssetsController < ApplicationController
   end
 
   def update
-    @asset = Asset.editable_by(@context).includes(:archive_entries).find_by_uid!(params[:id])
+    @asset = Asset.includes(:archive_entries).find_by_uid!(params[:id])
+    redirect_to asset_path(@asset) unless @asset.editable_by?(@context)
 
     Asset.transaction do
       @asset.reload
@@ -105,7 +109,8 @@ class AssetsController < ApplicationController
   end
 
   def destroy
-    @file = Asset.editable_by(@context).find_by_uid!(params[:id])
+    @file = Asset.find_by_uid!(params[:id])
+    redirect_to asset_path(@file) unless @file.editable_by?(@context)
 
     UserFile.transaction do
       @file.reload

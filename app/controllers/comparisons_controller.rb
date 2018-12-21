@@ -427,7 +427,8 @@ class ComparisonsController < ApplicationController
   end
 
   def rename
-    @comparison = Comparison.editable_by(@context).find_by!(id: params[:id])
+    @comparison = Comparison.find_by!(id: params[:id])
+    redirect_to comparison_path(@comparison.id) unless @comparison.editable_by?(@context)
 
     if @comparison.rename(comparison_params[:name], comparison_params[:description], @context)
       flash[:success] = "Comparison successfully updated"
@@ -439,7 +440,8 @@ class ComparisonsController < ApplicationController
   end
 
   def destroy
-    @comparison = Comparison.editable_by(@context).find(params[:id])
+    @comparison = Comparison.find(params[:id])
+    redirect_to :comparisons unless @comparison.editable_by?(@context)
 
     projects = nil
     file_ids = nil

@@ -1747,7 +1747,8 @@ class ApiController < ApplicationController
 
     note = nil
     Note.transaction do
-      note = Note.editable_by(@context).find_by!(id: params[:id])
+      note = Note.find_by!(id: params[:id])
+      fail unless note.editable_by?(@context)
 
       attachments_to_save.each do |uid|
         item = item_from_uid(uid)
