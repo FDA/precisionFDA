@@ -1346,6 +1346,7 @@ class ApiController < ApplicationController
       run_instance_type: run_instance_type,
       scope: space.try(:uid),
     )
+    SpaceEventService.call(space_id, @context.user_id, nil, job, :job_added) if space && space.review?
 
     render json: { id: job.uid }
   end
@@ -1746,7 +1747,8 @@ class ApiController < ApplicationController
 
     note = nil
     Note.transaction do
-      note = Note.editable_by(@context).find_by!(id: params[:id])
+      note = Note.find_by!(id: params[:id])
+      fail unless note.editable_by?(@context)
 
       attachments_to_save.each do |uid|
         item = item_from_uid(uid)

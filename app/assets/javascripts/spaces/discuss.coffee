@@ -95,8 +95,8 @@ SpacesController = Paloma.controller('Spaces', {
       Precision.nestedComments.init()
 
       commentsBodies = $(".pfda-comment-body p")
-      regex   = /(^|[^@\w])@(\w+)\b/g
-      replace = '$1<a href="/users/$2" target="_blank">@$2</a>'
+      regex = Precision.MENTIONS_CONST.regex
+      replace = Precision.MENTIONS_CONST.replace
 
       commentsBodies.each (index, commentsBody) ->
         commentsBody.innerHTML = commentsBody.innerHTML.replace(regex, replace)

@@ -42,6 +42,7 @@ class App::CwlParser
     def code(cwl)
       <<-CODE
 pip install --upgrade setuptools==12.4
+PYTHONUSERBASE=$DNANEXUS_HOME pip install --upgrade --user requests==2.21.0
 pip install cwltool
 
 cat <<EOF > description.cwl

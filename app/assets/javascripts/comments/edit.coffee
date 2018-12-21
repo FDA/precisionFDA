@@ -1,6 +1,6 @@
 class NewCommentModel
   initEditable: () ->
-    regex   = /(^|[^@\w])@(\w+)\b/g
+    regex = Precision.MENTIONS_CONST.regex
     replace = """<span class="atwho-inserted" data-atwho-at-query="@" contenteditable="false">
                     $1<a href="/users/$2" target="_blank">@$2</a>
               </span>"""
