@@ -129,7 +129,12 @@ class FolderService
       return Rats.failure(message: "You have no permissions to remove '#{file.name}', as it is part of Locked Verification space.") if file.in_locked_verificaiton_space?
     end
 
-    DNAnexusAPI.new(context.token).call(file.project, "removeObjects", objects: [file.dxid])
+    begin
+      DNAnexusAPI.new(context.token).call(file.project, "removeObjects", objects: [file.dxid])
+    rescue Net::HTTPServerException => e
+      raise e unless e.message =~ /^404/
+    end
+
     UserFile.transaction { file.destroy }
 
     return Rats.failure(message: "#{file.name}: file removal error.") unless file.destroyed?
