@@ -1,31 +1,44 @@
 en:
   docs:
-    common_sections:
-      intro: Introduction
-      files: Files
-      comparisons: Comparisons
-      apps: Apps
-      creating_apps: Creating Apps
-      notes: Notes
-      discussions: Discussions
-      tracking: Tracking
-      publishing: Publishing
-      licenses: Licenses
-      workflows: Workflows
-      review_spaces: Review Spaces
-    admin_sections:
-      challenge_workbench: The Challenge Workbench
-      site_customization: Site Customization
-      site_activity_reporting: Site Activity Reporting
-    rsa_sections:
-      verification_spaces: Verified Apps
-    video_sections:
-      video_tutorials: Video Tutorials
-    videos:
+    menu:
       common:
+        title: Documentation
+        sections:
+          intro: Introduction
+          video_tutorials: Video Tutorials
+          discussions: Discussions
+          notes: Notes
+          files: Files
+          comparisons: Comparisons
+          apps: Apps
+          creating_apps: Creating Apps
+          workflows: Workflows
+          tracking: Tracking
+          publishing: Publishing
+          licenses: Licenses
+          spaces: Spaces
+      site_admin:
+        title: Administrator Features
+        sections:
+          challenge_workbench: Challenge Workbench
+          verification_spaces: Verified Apps
+          site_activity_reporting: Site Activity Reporting
+          site_customization: Site Customization
+      review_space_admin:
+        title: Administrator Features
+        sections:
+          verification_spaces: Verified Apps
+    videos:
+      common: &common_videos
         intro:
           title: Introduction
           url: https://www.youtube.com/embed/U_vmcd93HkM
+        discussions:
+          title: Discussions
+          url: https://www.youtube.com/embed/KHgUe-a1v_k
+        notes:
+          title: Notes
+          url: https://www.youtube.com/embed/c2-VlRxTZLM
         files_upload:
           title: How to Upload Files
           url: https://www.youtube.com/embed/o5PmgUsWQGo
@@ -53,32 +66,34 @@ en:
         apps_import:
           title: Importing Apps
           url: https://www.youtube.com/embed/4-voYR-q-cw
-        notes:
-          title: Notes
-          url: https://www.youtube.com/embed/c2-VlRxTZLM
-        discussions:
-          title: Discussions
-          url: https://www.youtube.com/embed/KHgUe-a1v_k
+        workflows:
+          title: Workflows
+          url: https://www.youtube.com/embed/jGYNt1Vw_Wo
         publishing:
           title: Publishing
           url: https://www.youtube.com/embed/dsOCn1zTBOo
         licenses:
-          title: Publishing
+          title: Licenses
           url: https://www.youtube.com/embed/7iwwnKmalyM
-        workflows:
-          title: Workflows
-          url: https://www.youtube.com/embed/jGYNt1Vw_Wo
-        review_spaces:
-          title: Review Spaces
+        spaces:
+          title: Spaces
           url: https://www.youtube.com/embed/-YfSmb_Y-gk
-      admin:
+      site_admin:
+        <<: *common_videos
         challenge_workbench:
-          title: The Challenge Workbench
+          title: Challenge Workbench
           url: https://www.youtube.com/embed/SKqH5OfO5G8
-        site_customization:
-          title: Site Customization
-          url: https://www.youtube.com/embed/j9pEb0VTf-0
+        verified_apps:
+          title: Verified Apps
+          url: https://www.youtube.com/embed/9x8JgxpciFY
         site_activity_reporting:
           title: Site Activity Reporting
           url: https://www.youtube.com/embed/KJ-Rk-ejjBM
-
+        site_customization:
+          title: Site Customization
+          url: https://www.youtube.com/embed/j9pEb0VTf-0
+      review_space_admin:
+        <<: *common_videos
+        verified_apps:
+          title: Verified Apps
+          url: https://www.youtube.com/embed/9x8JgxpciFY

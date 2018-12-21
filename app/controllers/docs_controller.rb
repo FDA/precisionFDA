@@ -1,19 +1,20 @@
 class DocsController < ApplicationController
   skip_before_action :require_login
+  before_action :active_section, only: :show
 
   def index
     redirect_to show_docs_path("intro")
   end
 
-  def show
-    section_name = params[:section] ? params[:section] : "intro"
+  def show; end
 
-    @sections = t('docs.common_sections').dup
-    @sections.merge!(t('docs.admin_sections')) if @context.can_administer_site?
-    @sections.merge!(t('docs.rsa_sections')) if @context.review_space_admin? || @context.can_administer_site?
-    @sections.merge!(t('docs.video_sections'))
+  private
 
-    @active_section = @sections.select {|key, _| key == section_name.to_sym }
-    raise ActiveRecord::RecordNotFound if @active_section.nil?
+  def active_section
+    @active_section = params[:section] ? params[:section].to_sym : :intro
+    menu = view_context.menu
+    sections = menu.values.map { |value| value[:sections] }
+    sections = sections.reduce({}, :merge)
+    raise ActiveRecord::RecordNotFound unless @active_section.to_sym.in?(sections)
   end
 end
