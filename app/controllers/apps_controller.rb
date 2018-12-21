@@ -168,7 +168,8 @@ class AppsController < ApplicationController
   end
 
   def edit
-    @app = App.editable_by(@context).find_by_uid(params[:id])
+    @app = App.find_by_uid(params[:id])
+    @app = nil unless @app.editable_by?(@context)
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
       redirect_to apps_path
