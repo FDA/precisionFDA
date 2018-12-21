@@ -50,7 +50,9 @@ class NotesController < ApplicationController
   end
 
   def edit
-    @note = Note.editable_by(@context).find(params[:id])
+    @note = Note.find(params[:id])
+    redirect_to note_path(@note) unless @note.editable_by?(@context)
+
     if @note.nil?
       redirect_to note_path(@note)
     elsif @note.note_type == "Answer"
@@ -62,7 +64,9 @@ class NotesController < ApplicationController
   end
 
   def rename
-    @note = Note.editable_by(@context).find_by!(id: params[:id])
+    @note = Note.find_by!(id: params[:id])
+    redirect_to note_path(@note) unless @note.editable_by?(@context)
+
     title = note_params[:title]
     if title.is_a?(String) && title != ""
       if @note.rename(title, @context)
@@ -94,7 +98,8 @@ class NotesController < ApplicationController
   end
 
   def destroy
-    note = Note.editable_by(@context).find(params[:id])
+    note = Note.find(params[:id])
+    redirect_to :notes unless note.editable_by?(@context)
 
     if note.real_note?
       note.destroy

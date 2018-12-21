@@ -6,8 +6,6 @@
 class Context
   attr_accessor :user_id, :username, :token, :expiration, :org_id
 
-  delegate :review_space_admin?, to: :user
-
   def initialize(user_id, username, token, expiration, org_id)
     @user_id = user_id
     @username = username
@@ -69,5 +67,9 @@ class Context
 
   def api
     @api ||= DNAnexusAPI.new(token)
+  end
+
+  def review_space_admin?
+    logged_in? && user.review_space_admin?
   end
 end
