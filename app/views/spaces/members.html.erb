@@ -10,81 +10,13 @@
         </a>
       </div>
     <% end %>
-    <div class="panel">
-      <%= grid(@members_grid, show_filters: :always) do |g|
-        g.blank_slate partial:  "_partials/empty_grid"
 
-          g.row_attributes do |member|
-            if member.inactive?
-              { class: 'inactive_member' }
-            end
-          end
+    <%= render "spaces/members/members_filter" %>
 
-        g.column name: 'Role', attribute: 'role', custom_filter: :custom_role, auto_reload: true, allow_multiple_selection: false do |member|
-          member.inactive? ? "#{member.role} (disabled)" : member.role
-        end
-
-        g.column name: 'Side', attribute: 'side', custom_filter: space_sides(@space), auto_reload: true, allow_multiple_selection: false do |member|
-          member_side(@space, member)
-        end
-
-        g.column name: 'Username', attribute: 'dxuser', assoc: :user do |member|
-          member.user.dxuser
-        end
-
-        g.column name: 'Name' do |member|
-          link_to(member.user.full_name, user_path(member.user.dxuser))
-        end
-
-        g.column name: 'Org', attribute: 'name', assoc: [:user, :org] do |member|
-          member.user.org.name
-        end
-
-        g.column name: 'Joined', attribute: 'created_at', auto_reload: true, filter_type: :standard do |member|
-          member.created_at.to_s(:human)
-        end
-
-        g.column do |member|
-          if SpaceMembershipPolicy.can_disable?(@space, @membership, member)
-            link_to to_inactive_space_membership_path(member), method: :post, class: "btn btn-xs btn-default" do
-              content_tag(:span, "Disable", class: "fa fa-minus-circle")
-            end
-          end
-        end
-
-        g.column do |member|
-          if SpaceMembershipPolicy.can_lead?(@space, @membership, member)
-            link_to to_lead_space_membership_path(member), method: :post, class: "btn btn-xs btn-default" do
-              content_tag(:span, "To lead", class: "fa fa-star")
-            end
-          end
-        end
-
-        g.column do |member|
-          if SpaceMembershipPolicy.can_admin?(@space, @membership, member)
-            link_to to_admin_space_membership_path(member), method: :post, class: "btn btn-xs btn-default" do
-              content_tag(:span, "To admin", class: "fa fa-star")
-            end
-          end
-        end
-
-        g.column do |member|
-          if SpaceMembershipPolicy.can_member?(@space, @membership, member)
-            link_to to_member_space_membership_path(member), method: :post, class: "btn btn-xs btn-default" do
-              content_tag(:span, "To member", class: "fa fa-star")
-            end
-          end
-        end
-
-        g.column do |member|
-          if SpaceMembershipPolicy.can_viewer?(@space, @membership, member)
-            link_to to_viewer_space_membership_path(member), method: :post, class: "btn btn-xs btn-default" do
-              content_tag(:span, "To viewer", class: "fa fa-star")
-            end
-          end
-        end
-
-      end -%>
+    <div class="panel spaces-members-cards">
+      <% @members.each do |member| %>
+        <%= member_card(member) %>
+      <% end %>
     </div>
   </div>
 </div>
