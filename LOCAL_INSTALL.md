@@ -51,6 +51,10 @@ This requires manually "bootstrapping" the situation in steps described in
 * Prepare db
   * `docker-compose run web bundle exec rake db:create`
   * `docker-compose run web bundle exec rake db:schema:load`
+* start rails server
+  * `docker-compose up`
+* start rails console
+  * `docker compose exec web bundle exec rails c`  
 
 ## pFDA setup
 
