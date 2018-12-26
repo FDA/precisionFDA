@@ -44,12 +44,17 @@ class SpacesController < ApplicationController
   end
 
   def members
-    @members_grid = initialize_grid(@space.space_memberships, {
-      order: 'created_at',
-      order_direction: 'asc',
-      per_page: 100
-    })
-    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
+    @members =
+      case params[:filter]
+      when 'host', 'reviewer'
+        @space.space_memberships.select{ |member| member.side == 'host' }
+      when 'guest', 'sponsor'
+        @space.space_memberships.select{ |member| member.side == 'guest' }
+      else
+        @space.space_memberships
+      end
+
+    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move, members: @members })
   end
 
   def verify

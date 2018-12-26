@@ -128,7 +128,7 @@
         </a>
       </li>
       <li role="presentation" class="<% if action_name == 'members' %>active<% end %>">
-        <a href="<%= members_space_path(@space) %>" aria-controls="tab-members"><span class="fa fa-fw fa-group"></span>
+        <a href="<%= members_space_path(@space, filter: 'all') %>" aria-controls="tab-members"><span class="fa fa-fw fa-group"></span>
           <span class="tab-label">Members <span class="badge"><%= @space.space_memberships.count %></span></span>
         </a>
       </li>
