@@ -535,13 +535,11 @@ class SpacesController < ApplicationController
     counters.merge!(@counts)
     counters[:comments] = Comment.where(commentable: @space).count
     counters[:tasks] = @space.tasks.count
-    counters.delete(:feed)
-    counters.delete(:open_tasks)
-    counters.delete(:accepted_tasks)
-    counters.delete(:declined_tasks)
-    counters.delete(:completed_tasks)
-    @users = @space.users.map { |u| { name: u.full_name, value: u.id } }
-    js({ space_uid: @space.uid, space_id: @space.id, scopes: @space.accessible_scopes_for_move, counts: counters })
+    counters.except!(:feed, :open_tasks, :accepted_tasks, :declined_tasks, :completed_tasks)
+    @users = @space.users.map { |user| { name: user.full_name, value: user.id } }
+    js( space_uid: @space.uid, space_id: @space.id,
+        scopes: @space.accessible_scopes_for_move,
+        counts: counters, space_created_at: @space.created_at )
   end
 
   def apps_and_files
