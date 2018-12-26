@@ -243,4 +243,86 @@ module SpacesHelper
     end
   end
 
+  def member_card_button(title, url, icon)
+    raw """
+      <a href='#{url}' data-method='post' class='btn btn-xs btn-default'>
+        <i class='fa fa-#{icon}'></i>&nbsp;#{title}
+      </a>
+    """
+  end
+
+  def member_card(member)
+    role = member.inactive? ? "#{member.role} (disabled)" : member.role
+    card_style = member.inactive? ? 'panel-default inactive' : 'panel-info'
+
+    disable_button = nil
+    if SpaceMembershipPolicy.can_disable?(@space, @membership, member)
+      disable_button = member_card_button('Disable', to_inactive_space_membership_path(member), 'minus-circle')
+    end
+
+    to_lead_button = nil
+    if SpaceMembershipPolicy.can_lead?(@space, @membership, member)
+      to_lead_button = member_card_button('To lead', to_lead_space_membership_path(member), 'star')
+    end
+
+    to_admin_button = nil
+    if SpaceMembershipPolicy.can_admin?(@space, @membership, member)
+      to_admin_button = member_card_button('To admin', to_admin_space_membership_path(member), 'star')
+    end
+
+    to_member_button = nil
+    if SpaceMembershipPolicy.can_member?(@space, @membership, member)
+      to_member_button = member_card_button('To member', to_member_space_membership_path(member), 'star')
+    end
+
+    to_viewer_button = nil
+    if SpaceMembershipPolicy.can_viewer?(@space, @membership, member)
+      to_member_button = member_card_button('To viewer', to_viewer_space_membership_path(member), 'star')
+    end
+
+    buttons = nil
+    if disable_button || to_lead_button || to_admin_button || to_member_button || to_viewer_button
+      buttons = """
+        <div class='member-card-row member-card-buttons'>
+          #{disable_button}
+          #{to_lead_button}
+          #{to_admin_button}
+          #{to_member_button}
+          #{to_viewer_button}
+        </div>
+      """
+    end
+
+    raw """
+      <div class='member-card panel #{card_style}'>
+        <div class='member-card-header panel-heading'>
+          <a href='#{user_path(member.user.dxuser)}'>
+            <img src='#{member.user.gravatar_url}' class='img-circle' />
+            <span class='member-card-title'>#{member.user.full_name}</span>
+          </a>
+        </div>
+
+        <div class='member-card-body panel-body'>
+          <div class='member-card-row'>
+            <div class='member-card-label'>Username:</div>
+            <div class='member-card-value'>#{member.user.dxuser}</div>
+          </div>
+          <div class='member-card-row'>
+            <div class='member-card-label'>Role:</div>
+            <div class='member-card-value'>#{role}</div>
+          </div>
+          <div class='member-card-row'>
+            <div class='member-card-label'>Organization:</div>
+            <div class='member-card-value'>#{member.user.org.name}</div>
+          </div>
+          <div class='member-card-row'>
+            <div class='member-card-label'>Joined on:</div>
+            <div class='member-card-value'>#{member.created_at.to_s(:human)}</div>
+          </div>
+          #{buttons}
+        </div>
+      </div>
+    """
+  end
+
 end
