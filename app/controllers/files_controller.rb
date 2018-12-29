@@ -230,7 +230,13 @@ class FilesController < ApplicationController
   end
 
   def destroy
-    @file = UserFile.real_files.where(user_id: @context.user_id).find_by_uid!(params[:id])
+    @file = UserFile.real_files.find_by_uid!(params[:id])
+
+    unless @file.editable_by?(@context)
+      redirect_to file_path, alert: "You have no permissions to delete this file."
+      return
+    end
+
     service = FolderService.new(@context)
 
     res = service.remove([@file])

@@ -189,3 +189,45 @@ $side-bar-width: 250px
         &.active
           background-color: #df6ccb
           color: #FFF
+
+  .spaces-members-filter
+    padding: 20px
+    padding-bottom: 10px
+
+  .spaces-members-cards
+    padding: 10px
+    padding-top: 0px
+    display: flex
+    flex-wrap: wrap
+    .member-card
+      margin: 10px
+      min-width: 300px
+      &.inactive
+        color: #a4a4a4
+      &-header
+        padding: 20px 10px
+        text-transform: none
+        a
+          display: block
+          font-size: 17px
+          font-weight: bold
+        img
+          vertical-align: middle
+          height: 40px
+          margin-right: 5px
+        span
+          vertical-align: middle
+      &-buttons
+        margin-top: 15px
+        .btn
+          margin-right: 5px
+      &-row
+        width: 100%
+        margin-bottom: 5px
+        display: flex
+      &-label
+        font-weight: bold
+        min-width: 100px
+      &-value
+        text-overflow: ellipsis
+        overflow: hidden
