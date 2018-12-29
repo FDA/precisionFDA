@@ -94,9 +94,7 @@ gem 'httplog'
 gem 'simple_form'
 
 group :development do
-  gem 'byebug'
-  gem 'pry-rails'
-  gem "letter_opener"
+  gem 'letter_opener'
 
   # Access an IRB console on exception pages or by using <%= console %> in views
   gem 'web-console', '~> 2.0'
@@ -113,6 +111,12 @@ group :development do
 end
 
 group :development, :test, :ui_test do
+  gem 'byebug'
+  gem 'pry'
+  gem 'pry-rails'
+  gem 'pry-remote'
+  gem 'pry-stack_explorer'
+  gem 'pry-byebug'
   # Project-wide environment variables
   gem 'dotenv-rails'
   # Manage environment variables

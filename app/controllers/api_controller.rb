@@ -615,11 +615,20 @@ class ApiController < ApplicationController
       files = files.where(state: params["states"])
     end
 
-    result = files.order(id: :desc).map do |file|
+    if params[:offset] == 0
+      count = files.count
+    end
+
+    if params[:limit] && params[:offset]
+      files = files.limit(params[:limit]).offset(params[:offset])
+    end
+
+
+    result = files.eager_load(:license, user: :org).order(id: :desc).map do |file|
       describe_for_api(file, params[:describe])
     end
 
-    render json: result
+    render json: params[:offset] == 0 ? { objects: result, count: count } : result
   end
 
   # Inputs

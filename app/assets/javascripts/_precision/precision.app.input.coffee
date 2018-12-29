@@ -140,7 +140,7 @@ class AppInputModel
                   user: true
                   org: true
                   license: true
-                  all_tags_list: true
+                  all_tags_list: false
             patterns: @patterns
           }
           {
