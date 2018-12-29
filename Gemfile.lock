@@ -196,8 +196,17 @@ GEM
     pry (0.11.3)
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
+    pry-byebug (3.3.0)
+      byebug (~> 8.0)
+      pry (~> 0.10)
     pry-rails (0.3.6)
       pry (>= 0.10.4)
+    pry-remote (0.1.8)
+      pry (~> 0.9)
+      slop (~> 3.0)
+    pry-stack_explorer (0.4.9.3)
+      binding_of_caller (>= 0.7)
+      pry (>= 0.9.11)
     quiet_assets (1.1.0)
       railties (>= 3.1, < 5.0)
     rack (1.6.11)
@@ -295,6 +304,7 @@ GEM
     simple_form (4.0.0)
       actionpack (> 4)
       activemodel (> 4)
+    slop (3.6.0)
     soapforce (0.8.0)
       savon (>= 2.3.0, < 3.0.0)
     socksify (1.7.1)
@@ -389,7 +399,11 @@ DEPENDENCIES
   premailer-rails
   pronto (~> 0.9.5)
   pronto-rubocop (~> 0.9.0)
+  pry
+  pry-byebug
   pry-rails
+  pry-remote
+  pry-stack_explorer
   quiet_assets
   rack-utf8_sanitizer (~> 1.6)
   rails (= 4.2.11)
