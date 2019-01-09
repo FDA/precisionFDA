@@ -82,7 +82,7 @@ gem 'premailer-rails'
 
 gem 'whenever', require: false
 
-gem 'mysql2', '~> 0.3.18'
+gem 'mysql2'
 
 gem 'gretel'
 

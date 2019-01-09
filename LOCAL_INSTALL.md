@@ -28,6 +28,10 @@ This requires manually "bootstrapping" the situation in steps described in
     * `rvm install 2.2.3`
 * Install bundler
     * `gem install bundler`
+    * to keep the current bundler version from Gemfile.lock:
+        * `gem install bundler -v 1.16.6`
+* Update the `libv8` gem before `bundle i`:
+    * `gem install libv8 -v '3.16.14.13' -- --with-system-v8`
 * Install git
     * `brew install git`
 * Set up git ssh
