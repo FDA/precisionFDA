@@ -411,7 +411,7 @@ class ApiController < ApplicationController
 
     response["stages"].each_with_index do |job_id, idx|
       # Create job record
-      app = workflow.apps[idx]
+      app = workflow.stages_apps[idx]
       stage = workflow.input_spec["stages"][idx]
       run_inputs = {}
       input_file_dxids = []
