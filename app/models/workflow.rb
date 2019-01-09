@@ -44,6 +44,10 @@ class Workflow < ActiveRecord::Base
     @apps ||= App.where(dxid: stages.map { |stage| stage["app_dxid"] })
   end
 
+  def stages_apps
+    @apps ||= stages.map { |stage| App.find_by(dxid: stage["app_dxid"]) }
+  end
+
   def to_param
     uid
   end
