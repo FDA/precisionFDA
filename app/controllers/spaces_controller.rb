@@ -599,7 +599,7 @@ class SpacesController < ApplicationController
     {
       foldersPath: node.is_a?(Folder) ? pathify_folder(node) : nil,
       id: node.id,
-      name: node.name,
+      name: ERB::Util.h(node.name),
       rename_path: node.is_a?(Folder) ? rename_folder_spaces_path(node) : rename_file_path(node),
       type: node.klass
     }

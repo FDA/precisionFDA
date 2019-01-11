@@ -441,7 +441,7 @@ class FilesController < ApplicationController
     {
       id: node.id,
       foldersPath: node.is_a?(Folder) ? pathify_folder(node) : nil,
-      name: node.name,
+      name: ERB::Util.h(node.name),
       rename_path: node.is_a?(Folder) ? rename_folder_file_path(node) : rename_file_path(node),
       type: node.klass,
       in_verified_space: in_verified_space?(node)
