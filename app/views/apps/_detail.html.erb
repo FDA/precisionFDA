@@ -132,7 +132,7 @@
     </span>
   <% else %>
 
-  <% if @context.user.dxuser == app.user.dxuser %>
+  <% if @app.editable_by?(@context) && (@context.user.dxuser == app.user.dxuser) %>
     <script type="text/html" id="shared-template">
       &nbsp;
       <span class="text-success">
