@@ -93,6 +93,9 @@ gem 'httplog'
 
 gem 'simple_form'
 
+# PDF builder
+gem 'prawn'
+
 group :development do
   gem 'letter_opener'
 
