@@ -79,6 +79,7 @@ class SpacesReportsView
 
   getFormData: () -> @filtersForm.serialize()
 
+
   submitFilters: () ->
     @reportPage(1)
     data = @getFormData()
@@ -141,6 +142,10 @@ class SpacesReportsView
     params = @getFormData()
     path = "/spaces/#{@space_id}/space_reports/download_report?#{params}"
     return path
+
+  chooseReportFormat: () =>
+    $('#chooseReportFormat').modal('show')
+    return false
 
   constructor: (params) ->
     @spaceCreatedAt = params.space_created_at

@@ -25,7 +25,21 @@ class SpaceReportsController < ApplicationController
         },
         users: users
       }
-    render "spaces/download_report"
+    if params[:format] == 'pdf'
+      download_pdf
+    else
+      download_html
+    end
+  end
+
+  def download_pdf
+    pdf = SpaceReportPdf.new(@context, @filters, @results)
+    send_data pdf.render, filename: "report.pdf", type: "application/pdf", disposition: 'attachment'
+  end
+
+  def download_html
+    report = render_to_string "spaces/download_report"
+    send_data report, type: 'text/html', filename: 'report.html', disposion: 'attachment'
   end
 
   # def download_report
