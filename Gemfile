@@ -98,7 +98,8 @@ gem 'simple_form'
 # PDF builder
 gem 'prawn'
 
-gem "aws-sdk-sns"
+gem 'aws-sdk-sns'
+gem 'parallel'
 
 group :development do
   # Annotate models

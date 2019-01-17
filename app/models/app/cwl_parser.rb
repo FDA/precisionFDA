@@ -8,6 +8,7 @@ class App::CwlParser
         input_spec: input_spec(cwl),
         output_spec: output_spec(cwl),
         internet_access: true,
+        instance_type: "baseline-8",
         code: code(cwl),
         packages: %w(libxml2-dev libxslt1-dev zlib1g-dev)
       }
@@ -17,14 +18,17 @@ class App::CwlParser
 
     def input_spec(cwl)
       cwl.inputs.map do |input|
-        {
+        inputs = {
           name: input.name,
           class: input.pfda_type,
           optional: input.optional,
           label: input.label,
           help: input.doc,
-          default: input.default,
         }
+
+        inputs[:default] = input.default if input.default
+
+        inputs
       end
     end
 

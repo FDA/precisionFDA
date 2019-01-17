@@ -1,4 +1,4 @@
-<div id="import_cwl_wdl_modal" class="modal fade modal-with-loader" data-bind="css: {loading: importModalLoaing}">
+<div id="import_cwl_wdl_modal" class="modal fade modal-with-loader" data-bind="css: {loading: importModalLoading}">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -17,19 +17,19 @@
           <div class="form-group">
             <div class="browse-files-container">
               <label for="wdl_text_input">Type in <span data-bind="text: importType"></span> or</label>
-              <button class="btn btn-sm btn-primary btn-browse-files">
-                <i class="fa fa-files-o"></i>&nbsp;Select <span data-bind="text: importType"></span> file
+              <span class="btn btn-primary btn-sm btn-browse-files">
+                <span class="fa fa-files-o"></span>&nbsp;Select <span data-bind="text: importType"></span> file
                 <input  id="wdl_file_input" type="file" data-bind="attr: {accept: acceptFileType}, event: {change: fileOnChangeHandler}">
-              </button>
+              </span>
             </div>
             <textarea class="form-control" name="wdl_text" id="wdl_text_input" data-bind="value: wdlTextValue"></textarea>
           </div>
           <hr>
           <div>
-            <button class="btn btn-sm btn-primary btn-browse-files">
-              <i class="fa fa-files-o"></i>&nbsp;Select Docker Image
+            <span class="btn btn-primary btn-sm btn-browse-files">
+              <span class="fa fa-files-o"></span>&nbsp;Select Docker Image
               <input id="docker_image_file_input" type="file" accept=".tar.gz" data-bind="event: {change: dockerFileOnChangeHandler}">
-            </button>
+            </span>
           </div>
           <!-- ko if: dockerImage() -->
           <div class="docker-images-container">
