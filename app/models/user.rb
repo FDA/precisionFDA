@@ -482,7 +482,7 @@ class User < ActiveRecord::Base
               file.update!(state: remote_state)
             else
               # NOTE we should never be here
-              raise "File #{id} had local state #{file.state} (previously #{old_file_state}) and remote state #{remote_state}"
+              raise "File #{file.uid} had local state #{file.state} (previously #{old_file_state}) and remote state #{remote_state}"
             end
           end
         end

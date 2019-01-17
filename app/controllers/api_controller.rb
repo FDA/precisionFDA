@@ -6,6 +6,8 @@ class ApiController < ApplicationController
   skip_before_action :require_login
   before_action :require_api_login, except: [:list_apps, :list_assets, :list_comparisons, :list_files, :list_jobs, :list_workflows, :list_notes, :list_related, :describe, :search_assets]
   before_action :require_api_login_or_guest, only: [:list_apps, :list_assets, :list_comparisons, :list_files, :list_jobs, :list_workflows, :list_related, :describe, :search_assets]
+  before_action :validate_create_asset, only: :create_asset
+  before_action :validate_get_upload_url, only: :get_upload_url
 
   rescue_from ApiError, with: :render_error_method
 
@@ -1065,44 +1067,9 @@ class ApiController < ApplicationController
   # id (string, "file-xxxx")
   #
   def create_asset
-    name = params[:name]
-    fail "Asset name needs to be a non-empty String" unless name.is_a?(String) && name != ""
-    fail "Asset name should end with .tar or .tar.gz" unless (name.end_with?(".tar") && name.size > ".tar".size) || (name.end_with?(".tar.gz") && name.size > ".tar.gz".size)
+    asset = AssetService.create(@context, params)
 
-    description = params["description"]
-    unless description.nil?
-      fail "Asset description needs to be a String" unless description.is_a?(String)
-    end
-
-    paths = params["paths"]
-    fail "Asset paths needs to be a non-empty Array less than 100000 size" unless paths.is_a?(Array) && !paths.empty? && paths.size < 100000
-    paths.each do |path|
-      fail "Asset path should be a non-empty String of size less than 4096" unless path.is_a?(String) && path != "" && path.size < 4096
-    end
-
-    project = User.find(@context.user_id).private_files_project
-    dxid = DNAnexusAPI.new(@context.token).call("file", "new", "name": params[:name], "project": project)["id"]
-
-    Asset.transaction do
-      asset = Asset.create!(dxid: dxid,
-                            project: project,
-                            name: name,
-                            state: "open",
-                            description: description,
-                            user_id: @context.user_id,
-                            scope: 'private')
-      asset.parent = asset
-      asset.save!
-      asset.update!(parent_type: "Asset")
-      paths.each do |path|
-        name = path.split('/').last
-        if name == "" || name == "." || name == ".."
-          name = nil
-        end
-        asset.archive_entries.create!(path: path, name: name)
-      end
-      render json: { id: asset.uid }
-    end
+    render json: { id: asset.uid }
   end
 
   # Inputs:
@@ -1119,30 +1086,9 @@ class ApiController < ApplicationController
   # headers (hash of string key/values, headers must be given to HTTP PUT)
   #
   def get_upload_url
-    size = params[:size]
-    fail "Parameter 'size' needs to be a Fixnum" unless size.is_a?(Integer)
+    url_service = UploadUrlFetcher.new(@context, params[:id])
 
-    md5 = params[:md5]
-    fail "Parameter 'md5' needs to be a String" unless md5.is_a?(String)
-
-    index = params[:index]
-    fail "Parameter 'index' needs to be a Fixnum" unless index.is_a?(Integer)
-
-    id = params[:id]
-    fail "Parameter 'id' needs to be a non-empty String" unless id.is_a?(String) && id != ""
-
-    # Check that the file exists, is accessible by the user, and is in the open state. Throw 404 if otherwise.
-    file = UserFile.open.find_by_uid!(id)
-    token = @context.token
-    if file.user_id != @context.user_id
-      if file.created_by_challenge_bot? && (@context.user.can_administer_site? || @context.user.is_challenge_admin?)
-        token = CHALLENGE_BOT_TOKEN
-      else
-        fail "The current user does not have access to the file."
-      end
-    end
-
-    result = DNAnexusAPI.new(token).call(file.dxid, "upload", size: size, md5: md5, index: index)
+    result = url_service.fetch_url(params)
 
     render json: result
   end
@@ -1189,21 +1135,13 @@ class ApiController < ApplicationController
   # Outputs: nothing (empty hash)
   #
   def close_asset
-    id = params[:id]
-    fail "id needs to be a non-empty String" unless id.is_a?(String) && id != ""
+    asset_uid = params[:id]
 
-    file = Asset.where(user_id: @context.user_id).find_by_uid!(id)
-    if file.state == "open"
-      DNAnexusAPI.new(@context.token).call(file.dxid, "close")
-      UserFile.transaction do
-        # Must recheck inside the transaction
-        file.reload
-        if file.state == "open"
-          file.state = "closing"
-          file.save!
-        end
-      end
+    if !asset_uid.is_a?(String) || asset_uid.empty?
+      fail "id needs to be a non-empty String"
     end
+
+    AssetService.close(@context, uid: asset_uid)
 
     render json: {}
   end
@@ -1308,220 +1246,6 @@ class ApiController < ApplicationController
     fail "One or more assets need to be licensed. Please run the app first in order to accept the licenses." if app.assets.any? { |a| a.license.present? && !a.licensed_by?(@context) }
 
     render json: { content: app.to_docker(@context.token) }
-  end
-
-  # Inputs
-  #
-  # name, title, readme, input_spec, output_spec, internet_access, instance_type, ordered_assets, packages, code, is_new
-  #
-  # Outputs
-  #
-  # id (string, only on success): the id of the created app, if success
-  # failure (string, only on failure): a message that can be shown to the user due to failure
-  def create_app
-    name = params[:name]
-    fail "The app 'name' must be a nonempty string." unless name.is_a?(String) && name != ""
-    fail "The app 'name' can only contain the characters A-Z, a-z, 0-9, '.' (period), '_' (underscore) and '-' (dash)." unless name =~ /^[a-zA-Z0-9._-]+$/
-
-    title = params[:title]
-    fail "The app 'title' must be a nonempty string." unless title.is_a?(String) && title != ""
-
-    readme = params[:readme]
-    fail "The app 'Readme' must be a string." unless readme.is_a?(String)
-
-    internet_access = params[:internet_access]
-    fail "The app 'Internet Access' must be a boolean, true or false." unless (internet_access == true) || (internet_access == false)
-
-    instance_type = params[:instance_type]
-    fail "The app 'instance type' must be one of: #{Job::INSTANCE_TYPES.keys.join(', ')}." unless Job::INSTANCE_TYPES.include?(instance_type)
-
-    ordered_assets = params[:ordered_assets] || []
-    fail "The app 'assets' must be an array of asset ids (strings)." unless ordered_assets.is_a?(Array) && ordered_assets.all? { |a| a.is_a?(String) }
-
-    packages = params[:packages] || []
-    fail "The app 'packages' must be an array of package names (strings)." unless packages.is_a?(Array) && packages.all? { |a| a.is_a?(String) }
-
-    packages.sort!.uniq!
-
-    packages.each do |package|
-      fail "The package '#{package}' is not a valid Ubuntu package." unless UBUNTU_PACKAGES.bsearch { |p| package <=> p }
-    end
-
-    code = params[:code]
-    fail "The app 'code' must be a string." unless code.is_a?(String)
-
-    is_new = params["is_new"] == true
-
-    input_spec = params[:input_spec] || []
-    fail "The app 'input spec' must be an array of hashes." unless input_spec.is_a?(Array) && input_spec.all? { |s| s.is_a?(Hash) }
-    inputs_seen = Set.new
-    input_spec = input_spec.each_with_index.map do |spec, i|
-      i_name = spec["name"]
-      fail "The #{(i + 1).ordinalize} input is missing a name." unless i_name.is_a?(String) && i_name != ""
-      fail "The input name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless i_name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
-      fail "Duplicate definitions for the input named '#{i_name}'." if inputs_seen.include?(i_name)
-      inputs_seen << i_name
-
-      i_class = spec["class"]
-      fail "The input named '#{i_name}' is missing a type." unless i_class.is_a?(String) && i_class != ""
-      fail "The input named '#{i_name}' contains an invalid type. Valid types are: #{App::VALID_IO_CLASSES.join(', ')}." unless App::VALID_IO_CLASSES.include?(i_class)
-
-      i_optional = spec["optional"]
-      fail "The input named '#{i_name}' is missing the 'optional' designation." unless i_optional == true || i_optional == false
-
-      i_label = spec["label"]
-      fail "The input named '#{i_name}' is missing a label." unless i_label.is_a?(String)
-
-      i_help = spec["help"]
-      fail "The input named '#{i_name}' is missing help text." unless i_help.is_a?(String)
-
-      i_default = spec["default"]
-      unless i_default.nil?
-        fail "The default value provided for the input named '#{i_name}' is not of the right type." unless compatible(i_default, i_class)
-        # Fix for JSON ambiguity of float/int for ints.
-        i_default = i_default.to_i if i_class == "int"
-      end
-
-      i_choices = spec["choices"]
-      unless i_choices.nil?
-        fail "The 'choices' (possible values) provided for the input named '#{i_name}' were not a nonempty array." unless i_choices.is_a?(Array) && !i_choices.empty?
-        fail "The 'choices' (possible values) provided for the input named '#{i_name}' were incompatible with the input type." unless i_choices.all? { |choice| compatible(choice, i_class) }
-        fail "You cannot provide 'choices' (possible values) for the input named '#{i_name}' because it's not of type 'string' or 'int' or 'float'." unless %w(string int float).include?(i_class)
-        i_choices.uniq!
-      end
-
-      i_patterns = spec["patterns"]
-      unless i_patterns.nil?
-        fail "You cannot provide filename patterns for the non-file input named '#{i_name}'." unless i_class == "file"
-        fail "The filename patterns provided for the input named '#{i_name}' were not a nonempty array of nonempty strings." unless i_patterns.is_a?(Array) && !i_patterns.empty? && i_patterns.none?(&:empty?)
-        i_patterns.uniq!
-      end
-
-      ret = { "name": i_name, "class": i_class, "optional": i_optional, "label": i_label, "help": i_help }
-      ret["default"] = i_default unless i_default.nil?
-      ret["choices"] = i_choices unless i_choices.nil?
-      ret["patterns"] = i_patterns unless i_patterns.nil?
-      ret
-    end
-
-    output_spec = params[:output_spec] || []
-    fail "The app 'output spec' must be an array of hashes." unless output_spec.is_a?(Array) && output_spec.all? { |s| s.is_a?(Hash) }
-    outputs_seen = Set.new
-    output_spec = output_spec.each_with_index.map do |spec, i|
-      i_name = spec["name"]
-      fail "The #{(i + 1).ordinalize} output is missing a name." unless i_name.is_a?(String) && i_name != ""
-      fail "The output name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless i_name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
-      fail "Duplicate definitions for the output named '#{i_name}'." if outputs_seen.include?(i_name)
-      outputs_seen << i_name
-
-      i_class = spec["class"]
-      fail "The output named '#{i_name}' is missing a type." unless i_class.is_a?(String) && i_class != ""
-      fail "The output named '#{i_name}' contains an invalid type. Valid types are: #{App::VALID_IO_CLASSES.join(', ')}." unless App::VALID_IO_CLASSES.include?(i_class)
-
-      i_optional = spec["optional"]
-      fail "The output named '#{i_name}' is missing the 'optional' designation." unless i_optional == true || i_optional == false
-
-      i_label = spec["label"]
-      fail "The output named '#{i_name}' is missing a label." unless i_label.is_a?(String)
-
-      i_help = spec["help"]
-      fail "The output named '#{i_name}' is missing help text." unless i_help.is_a?(String)
-
-      i_patterns = spec["patterns"]
-      unless i_patterns.nil?
-        fail "You cannot provide filename patterns for the non-file output named '#{i_name}'." unless i_class == "file"
-        fail "The filename patterns provided for the output named '#{i_name}' were not a nonempty array of nonempty strings." unless i_patterns.is_a?(Array) && !i_patterns.empty? && i_patterns.none?(&:empty?)
-        i_patterns.uniq!
-      end
-
-      ret = { "name": i_name, "class": i_class, "optional": i_optional, "label": i_label, "help": i_help }
-      ret["patterns"] = i_patterns unless i_patterns.nil?
-      ret
-    end
-
-    app = nil
-    App.transaction do
-      ordered_assets.each do |asset_uid|
-        fail "The app asset with id '#{asset_uid}' does not exist or is not accessible by you." unless Asset.closed.accessible_by(@context).where(uid: asset_uid).exists?
-      end
-      assets = Asset.closed.accessible_by(@context).where(uid: ordered_assets)
-      app_series_dxid = AppSeries.construct_dxid(@context.username, name)
-      app_series = AppSeries.find_by(dxid: app_series_dxid)
-      if is_new
-        fail "You already have an app by the name '#{name}'." unless app_series.nil?
-        app_series = AppSeries.create!(
-          dxid: app_series_dxid,
-          name: name,
-          latest_revision_app_id: nil,
-          latest_version_app_id: nil,
-          user_id: @context.user_id,
-          scope: "private"
-        )
-        revision = 1
-      else
-        fail "You don't have an app by the name '#{name}'." if app_series.nil?
-        revision = app_series.latest_revision_app.revision + 1
-      end
-
-      api = DNAnexusAPI.new(@context.token)
-      user = User.find(@context.user_id)
-      project = user.private_files_project
-
-      applet_dxid = api.call("applet", "new",
-        project: project,
-        inputSpec: input_spec.map { |spec| spec.reject { |key, _value| key == "default" || key == "choices" } },
-        outputSpec: output_spec,
-        runSpec: {
-          code: code_remap(code),
-          interpreter: "bash",
-          systemRequirements: {
-            "*" => { instanceType: Job::INSTANCE_TYPES[instance_type] },
-          },
-          distribution: "Ubuntu",
-          release: "14.04",
-          execDepends: packages.map { |p| { name: p } },
-        },
-        dxapi: "1.0.0",
-        access: internet_access ? { network: ["*"] } : {},)["id"]
-
-      dxid = api.call("app", "new",
-        applet: applet_dxid,
-        name: AppSeries.construct_dxname(@context.username, name),
-        title: title + " ",
-        summary: " ",
-        description: readme + " ",
-        version: "r#{revision}-#{SecureRandom.hex(3)}",
-        resources: assets.map(&:dxid),
-        details: { ordered_assets: assets.map(&:dxid) },
-        openSource: false,
-        billTo: Rails.env.development? ? "user-#{@context.username}" : user.billto,
-        access: internet_access ? { network: ["*"] } : {},)["id"]
-
-      api.call(project, "removeObjects", objects: [applet_dxid])
-      app = App.create!(
-        dxid: dxid,
-        version: nil,
-        revision: revision,
-        title: title,
-        readme: readme,
-        user_id: @context.user_id,
-        scope: "private",
-        app_series_id: app_series.id,
-        input_spec: input_spec,
-        output_spec: output_spec,
-        internet_access: internet_access,
-        instance_type: instance_type,
-        ordered_assets: assets.map(&:uid),
-        packages: packages,
-        code: code
-      )
-      app.asset_ids = assets.map(&:id)
-      app.save!
-      app_series.update!(latest_revision_app_id: app.id)
-      Event::AppCreated.create_for(app, @context.user)
-    end
-
-    render json: { id: app.uid }
   end
 
   def share_with_fda
@@ -1833,33 +1557,53 @@ class ApiController < ApplicationController
     )
   end
 
-  def code_remap(code)
-    <<END_OF_CODE
-dx cat #{APPKIT_TGZ} | tar -z -x -C / --no-same-owner --no-same-permissions -f -
-source /usr/lib/app-prologue
-#{code}
-{ set +x; } 2>/dev/null
-source /usr/lib/app-epilogue
-END_OF_CODE
-  end
-
-  def compatible(value, klass)
-    if klass == "file"
-      value.is_a?(String)
-    elsif klass == "int"
-      value.is_a?(Numeric) && (value.to_i == value)
-    elsif klass == "float"
-      value.is_a?(Numeric)
-    elsif klass == "boolean"
-      value == true || value == false
-    elsif klass == "string"
-      value.is_a?(String)
-    end
-  end
-
   def check_scope!
     condition = params[:scopes].is_a?(Array)
     condition &&= params[:scopes].all? { |scope| scope == 'public' || scope == 'private' || scope =~ /^space-(\d+)$/ }
     fail(t('api.errors.invalid_scope')) unless condition
+  end
+
+  def validate_get_upload_url
+    size = params[:size]
+    fail "Parameter 'size' needs to be a Fixnum" unless size.is_a?(Fixnum)
+
+    md5 = params[:md5]
+    fail "Parameter 'md5' needs to be a String" unless md5.is_a?(String)
+
+    index = params[:index]
+    fail "Parameter 'index' needs to be a Fixnum" unless index.is_a?(Fixnum)
+
+    id = params[:id]
+    if !id.is_a?(String) || id.empty?
+      fail "Parameter 'id' needs to be a non-empty String"
+    end
+  end
+
+  def validate_create_asset
+    name = params[:name]
+
+    if !name.is_a?(String) || name.empty?
+      fail "Asset name needs to be a non-empty String"
+    end
+
+    if !name.match(/\w+\.tar(\.gz)?$/)
+      fail "Asset name should end with .tar or .tar.gz"
+    end
+
+    description = params["description"]
+
+    unless description.is_a?(String)
+      fail "Asset description needs to be a String"
+    end
+
+    paths = params["paths"]
+
+    if !paths.is_a?(Array) || paths.empty? || paths.size >= 100_000
+      fail "Asset paths needs to be a non-empty Array less than 100000 size"
+    end
+
+    if paths.any?{ |path| !path.is_a?(String) || path.empty? || path.size >= 4096 }
+      fail "Asset path should be a non-empty String of size less than 4096"
+    end
   end
 end

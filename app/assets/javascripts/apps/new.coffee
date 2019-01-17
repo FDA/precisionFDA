@@ -66,6 +66,10 @@ class NewAppViewModel extends Precision.models.AppEditorModel
 
   compareImageData: (pullData, imageData) ->
     return false if !pullData or !imageData
+    if pullData.registry
+      Precision.alert.showAboveAll('dockerPull has a public image!')
+      @clearDockerImage()
+      return false
     if pullData.namespace != imageData.namespace
       Precision.alert.showAboveAll('Wrong image namespace!')
       @clearDockerImage()
@@ -109,35 +113,51 @@ class NewAppViewModel extends Precision.models.AppEditorModel
     @wdlFileInput.val(null)
 
   importImageData: () ->
-    @importModalLoaing(true)
-    Precision.utils.mockDelay(1000).then(() => @importModalLoaing(false))
+    @importModalLoading(true)
     formData = new FormData()
-    formData.append('import_data', @wdlTextValue())
-    formData.append('docker_image', @dockerImage()) if @dockerImage()
+    formData.append('cwl', @wdlTextValue())
+    formData.append('attached_image', @dockerImage()) if @dockerImage()
     $.ajax({
-      url: '',
+      url: '/api/apps/import',
       data: formData,
       cache: false,
       contentType: false,
       processData: false,
       type: 'POST',
       success: (data) =>
-        @importModal().modal('hide')
-        @importModalLoaing(false)
+        @importModal.modal('hide')
+        @importModalLoading(false)
         @clearModalData()
-      error: (data) =>
-        @importModalLoaing(false)
-        Precision.alert.showAboveAll('Error while uploading file.')
+
+        @newAppUid(data.id)
+        @newAssetUid(data.asset_uid) if data.asset_uid
+
+        @importSuccessModal.modal('show')
+      error: (response) =>
+        try
+          data = JSON.parse(response.responseText)
+          if data.errors and Array.isArray(data.errors) and data.errors.length > 0
+            text = data.errors[0]
+        catch
+          text = 'Error while uploading file.'
+        finally
+          @importModalLoading(false)
+          Precision.alert.showAboveAll(text)
     })
 
   constructor: (data) ->
     super(data, 'new')
     @importModal = $('#import_cwl_wdl_modal')
+    @importSuccessModal = $('#import_cwl_wdl_success_modal')
     @wdlFileInput = $('#wdl_file_input')
     @dockerImageInput = $('#docker_image_file_input')
-    @importModalLoaing = ko.observable(false)
+    @importModalLoading = ko.observable(false)
     @importType = ko.observable()
     @wdlTextValue = ko.observable()
+    @newAppUid = ko.observable()
+    @newAssetUid = ko.observable()
+    @newAppURL = ko.computed(=> "/apps/#{@newAppUid()}")
+    @newAssetURL = ko.computed(=> "/app_assets/#{@newAssetUid()}")
     @dockerImage = ko.observable(null)
     @modalTitle = ko.computed(() =>
       switch @importType()

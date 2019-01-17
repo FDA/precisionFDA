@@ -54,6 +54,6 @@ module SHA1_OpenSSL
   end
 end
 
-Digest::MD5.prepend(SHA256_OpenSSL)
+# Digest::MD5.prepend(SHA256_OpenSSL)
 Digest::SHA1.prepend(SHA1_OpenSSL)
 Digest::SHA256.prepend(SHA256_OpenSSL)
