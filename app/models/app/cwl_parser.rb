@@ -3,7 +3,7 @@ class App::CwlParser
     def parse(cwl)
       {
         name: cwl.id,
-        title: cwl.id,
+        title: cwl.label,
         readme: cwl.doc,
         input_spec: input_spec(cwl),
         output_spec: output_spec(cwl),
@@ -21,8 +21,9 @@ class App::CwlParser
           name: input.name,
           class: input.pfda_type,
           optional: input.optional,
-          label: input.name,
+          label: input.label,
           help: input.doc,
+          default: input.default,
         }
       end
     end
@@ -33,7 +34,7 @@ class App::CwlParser
           name: output.name,
           class: output.pfda_type,
           optional: output.optional,
-          label: output.name,
+          label: output.label,
           help: output.doc,
         }
       end
