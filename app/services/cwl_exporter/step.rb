@@ -1,5 +1,4 @@
 class CwlExporter::Step
-
   include ::CwlExporter::Adapter
 
   def initialize(app)
@@ -7,38 +6,51 @@ class CwlExporter::Step
   end
 
   def to_s
-    {
-      "class" => "CommandLineTool",
-      "id" => app.dxid,
-      "label" => app.title,
-      "cwlVersion" => "v1.0",
-      "baseCommand" => [],
-      "requirements" => [
-        {
-          "class" => "DockerRequirement",
-          "dockerPull" => app.name,
-          "dockerOutputDirectory" => "/data/out"
-        },
-        {
-          "class" => "InlineJavascriptRequirement",
-          "expressionLib" => ['function file_string() { return self[0].contents.replace(/(\r\n|\n|\r)/gm,"") }']
-        }
-      ],
-      "inputs" => inputs(app),
-      "outputs" => outputs(app)
-    }.to_yaml
+    cwl_hash =
+      {
+        "class" => "CommandLineTool",
+        "id" => app.dxid,
+        "label" => app.title,
+        "cwlVersion" => "v1.0",
+        "baseCommand" => base_command,
+        "requirements" => [
+          {
+            "class" => "DockerRequirement",
+            "dockerPull" => app.name,
+            "dockerOutputDirectory" => "/data/out"
+          },
+          {
+            "class" => "InlineJavascriptRequirement",
+            "expressionLib" => [
+              'function file_string() ' \
+              '{ return self[0].contents.replace(/(\r\n|\n|\r)/gm,"") }'
+            ]
+          }
+        ],
+        "inputs" => inputs,
+        "outputs" => outputs
+      }
+
+    cwl_hash["doc"] = app.readme if app.readme.present?
+
+    cwl_hash.to_yaml
   end
 
   private
 
   attr_reader :app
 
-  def inputs(app)
+  def base_command
+    parsed = app.code[/baseCommand:\s+(.+)/, 1] || ""
+
+    YAML.load(parsed) || []
+  end
+
+  def inputs
     position = 1
 
     app.input_spec.each_with_object({}) do |app_input, result|
-      cwl_inp = {
-        "doc" => app_input["help"],
+      cwl_input = {
         "inputBinding" => {
           "position" => position,
           "prefix" => "--" + app_input["name"]
@@ -47,27 +59,27 @@ class CwlExporter::Step
       }
 
       if app_input.key?("default") && app_input["class"] != "file"
-        cwl_inp["default"] = app_input["default"]
+        cwl_input["default"] = app_input["default"]
       end
 
-      if app_input["optional"]
-        cwl_inp["type"] = cwl_inp["type"] + "?"
-      end
+      cwl_input["type"] += "?" if app_input["optional"]
+      cwl_input["doc"] = app_input["help"] if app_input["help"].present?
+      cwl_input["label"] = app_input["label"] if app_input["label"].present?
 
-      result[app_input["name"]] = cwl_inp
-      position = position + 1
+      result[app_input["name"]] = cwl_input
+      position += 1
     end
   end
 
-  def outputs(app)
+  def outputs
     app.output_spec.each_with_object({}) do |app_output, result|
+      cwl_output = { "type" => cwl_type(app_output["class"]) }
 
-      cwl_outp = {
-        "doc" => app_output["help"],
-        "type" => cwl_type(app_output["class"])
-      }
+      cwl_output["doc"] = app_output["help"] if app_output["help"].present?
+      cwl_output["label"] = app_output["label"] if app_output["label"].present?
+      cwl_output["type"] += "?" if app_output["optional"]
 
-      cwl_outp["outputBinding"] =
+      cwl_output["outputBinding"] =
         if app_output["class"] == "file"
           {
             "glob" => "#{app_output["name"]}/*"
@@ -80,8 +92,7 @@ class CwlExporter::Step
           }
         end
 
-      result[app_output["name"]] = cwl_outp
+      result[app_output["name"]] = cwl_output
     end
   end
-
 end
