@@ -37,7 +37,7 @@ class User < ActiveRecord::Base
     ruth.bandler
     singer.ma
     john.didion
-    ezekiel.maier
+    ezekiel.maier.2
     holly.stephens
   ).freeze
 
@@ -70,7 +70,7 @@ class User < ActiveRecord::Base
 
   CHALLENGE_EVALUATORS = %w(
     elaine.johanson
-    ezekiel.maier
+    ezekiel.maier.2
     george.asimenos
     heike.sichtig
     min.yi
