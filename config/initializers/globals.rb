@@ -94,7 +94,7 @@ REVIEW_SPACE_ADMINS =
       ruth.bandler
       singer.ma
       john.didion
-      ezekiel.maier
+      ezekiel.maier.2
       holly.stephens
     )
   else
