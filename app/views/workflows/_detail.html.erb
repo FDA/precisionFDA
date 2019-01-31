@@ -58,7 +58,7 @@
           <li class="dropdown-header">Revisions</li>
           <% @revisions.each do |workflow| %>
             <li class="<% if workflow.dxid == params[:id] %>active<% end %>">
-              <a href="<%= action_name == 'index' ? workflow_analyses_path(workflow.dxid) : workflow_path(workflow.dxid) %>" class="clearfix">
+              <a href="<%= action_name == 'index' ? workflow_analyses_path(workflow) : workflow_path(workflow) %>" class="clearfix">
                 <span class="workflow-revision"><%= workflow.revision %></span>
                 <% if @revisions.first.id == workflow.id %>
                   <span class="workflow-label-latest label label-info pull-right">Latest</span>
@@ -71,12 +71,12 @@
     </div>
     <% if @workflow.editable_by?(@context) %>
     <div class="btn-group" <% if @revisions.first.dxid != @workflow.dxid %>data-toggle="tooltip" data-placement="top" title="Only latest revision is editable"<% end %>>
-      <a class="btn btn-default <% if @revisions.first.dxid != @workflow.dxid %>disabled<% end %>" href="<%= edit_workflow_path(@workflow.dxid) %>">
+      <a class="btn btn-default <% if @revisions.first.dxid != @workflow.dxid %>disabled<% end %>" href="<%= edit_workflow_path(@workflow) %>">
         <span class="fa fa-edit"></span> Edit
       </a>
     </div>
     <% end %>
-    <a class="btn btn-default" href="<%= fork_workflow_path(@workflow.dxid) %>">
+    <a class="btn btn-default" href="<%= fork_workflow_path(@workflow) %>">
       <span class="fa fa-code-fork"></span> Fork
     </a>
     <div class="btn-group">
@@ -87,12 +87,12 @@
       <ul class="dropdown-menu">
         <li class="dropdown-header">Export To:</li>
         <li data-turbolinks="false">
-          <%= link_to cwl_export_workflow_path(@workflow.dxid), data: { confirm: 'You are about to download a CWL Workflow package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+          <%= link_to cwl_export_workflow_path(@workflow), data: { confirm: 'You are about to download a CWL Workflow package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
             CWL Workflow
           <% end %>
         </li>
         <li data-turbolinks="false">
-          <%= link_to wdl_export_workflow_path(@workflow.dxid), data: { confirm: 'You are about to download a WDL Workflow package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+          <%= link_to wdl_export_workflow_path(@workflow), data: { confirm: 'You are about to download a WDL Workflow package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
             WDL Workflow
           <% end %>
         </li>
@@ -100,9 +100,11 @@
     </div>
   </div>
   <div class="btn-group pull-right">
-    <%= link_to new_workflow_analysis_path(@workflow.dxid), class: "btn btn-primary" do %>
+    <%= link_to new_workflow_analysis_path(@workflow), class: "btn btn-primary" do %>
       Run Workflow&nbsp;&nbsp;<span class="badge rev-badge"><%= "rev#{@workflow.revision}" %></span>
     <% end %>
+    <%= render "_partials/btn_publish", item: @workflow %>
+    <%= render "_partials/btn_copy_to_cooperative", item: @workflow %>
   </div>
 </div>
 

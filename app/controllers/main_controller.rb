@@ -412,6 +412,9 @@ class MainController < ApplicationController
       # Answers
       answers = items.select { |item| item.klass == "answer" }
 
+      # Workflows
+      workflows = items.select { |item| item.klass == "workflow" }
+
       published_count = 0
 
       # Files
@@ -449,6 +452,11 @@ class MainController < ApplicationController
         published_count += Answer.publish(answers, @context, scope)
       end
 
+      if workflows.any?
+        PublishService::WorkflowPublisher.call(workflows, @context, scope)
+        published_count += workflows.count
+      end
+
       message = "#{published_count}"
       if published_count != items.count
         message += " (out of #{items.count})"
@@ -483,7 +491,7 @@ class MainController < ApplicationController
 
     js graph: GraphDecorator.for_publisher(@context, item, scope),
        space: space.nil? ? nil : space.slice(:uid, :title),
-       scope_to_publish_to: scope
+       scope_to_publish_to: scope, message: t('main.publish.apps_notification')
   end
 
   def track

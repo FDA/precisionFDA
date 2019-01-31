@@ -2,7 +2,7 @@ class WorkflowEditorModel
   setSlots: (workflow) ->
     if workflow? && !@slots().length > 0
       for stage in workflow.spec.input_spec["stages"]
-        Precision.api('/api/describe', { uid: stage.app_dxid }, null, null, false)
+        Precision.api('/api/describe', { uid: stage.app_uid }, null, null, false)
           .done((app) =>
             inputs = app.spec.input_spec.map (input) ->
               $.extend({}, input, {
@@ -268,6 +268,7 @@ class WorkflowEditorModel
     for slot in @slots()
       slot_details = {
         dxid: slot.id,
+        uid: slot.uid,
         name: slot.name(),
         instanceType: slot.instanceType(),
         inputs: slot.inputs(),
@@ -308,7 +309,7 @@ class WorkflowEditorModel
           outputs = app.spec.output_spec.map((output) => $.extend({}, output, {values: {id: null, name: null}}))
           spec =
             name: app.name
-            dxid: app.dxid
+            uid: app.uid
             instanceType: app.spec.instance_type
             revision: app.revision
             inputs: inputs
@@ -460,6 +461,7 @@ class IOModel
 class slotModel
   constructor: (spec, viewModel, stage = null, configured = false) ->
     @id = spec.dxid
+    @uid = spec.uid
     @slotId = ko.computed( () ->
       if stage?
         stage["slotId"]

@@ -13,6 +13,7 @@ module SpaceEventService
         when "asset" then :asset_added
         when "job" then :job_added
         when "note" then :note_added
+        when "workflow" then :workflow_added
         end
     end
     space_event = SpaceEvent.create(space_id: space_id, user_id: user_id, side: membership[:side], role: membership[:role], entity: entity, activity_type: activity_type)

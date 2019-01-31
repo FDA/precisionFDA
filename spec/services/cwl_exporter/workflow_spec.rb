@@ -11,6 +11,7 @@ RSpec.describe CwlExporter::Workflow do
           "next_slot": "stage-log9c5j2v40000",
           "slotId": "stage-k3kd2nw4bk0000",
           "app_dxid": "app-F82kv3Q0Y54PYgF30xyjPpV0",
+          "app_uid": "app-F82kv3Q0Y54PYgF30xyjPpV0-1",
           "inputs": [
             {
               "name": "any_a",
@@ -49,6 +50,7 @@ RSpec.describe CwlExporter::Workflow do
           "next_slot": nil,
           "slotId": "stage-log9c5j2v40000",
           "app_dxid": "app-F85KFQ00P26Kq7v3JVpkZk7J",
+          "app_uid": "app-F85KFQ00P26Kq7v3JVpkZk7J-1",
           "inputs": [
             {
               "name": "any_b",

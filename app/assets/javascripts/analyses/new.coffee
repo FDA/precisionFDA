@@ -16,7 +16,8 @@ class WorkflowViewModel
             stages.push input_spec
             break
       stages)
-    @workflowId = workflow.dxid
+    @workflowUid = workflow.uid
+    @accessibleScope = workflow.scopes
     @defaultValues = ko.observable()
     @canRunWorkflow = ko.computed(=>
       config = true
@@ -76,14 +77,17 @@ class WorkflowViewModel
     params = {
       name: @title(),
       inputs: inputs,
-      workflow_id: @workflowId
+      workflow_id: @workflowUid
     }
     Precision.api('/api/run_workflow', params)
       .done( =>
-        window.location.replace("/workflows/#{@workflowId}")
+        window.location.replace("/workflows/#{@workflowUid}")
     )
       .fail((error) ->
-        console.log(error)
+        if error.responseJSON.data.permission == 'VIEW'
+          Precision.alert.show(error.responseJSON.error.message)
+        else
+          console.log(error)
     )
 
 class stageModel
@@ -149,7 +153,7 @@ class selectorModel
         describe:
           include:
             user: true
-            all_tags_list: true
+            all_tags_list: false
         patterns: @patterns
       }
       Precision.api("/api/list_files", params, (objects) =>

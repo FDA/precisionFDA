@@ -11,6 +11,7 @@ RSpec.describe WdlExporter::Workflow do
           "next_slot": "stage-log9c5j2v40000",
           "slotId": "stage-k3kd2nw4bk0000",
           "app_dxid": "app-a",
+          "app_uid": "app-a-1",
           "inputs": [
             {
               "name": "any_a",
@@ -49,6 +50,7 @@ RSpec.describe WdlExporter::Workflow do
           "next_slot": nil,
           "slotId": "stage-log9c5j2v40000",
           "app_dxid": "app-b",
+          "app_uid": "app-b-1",
           "inputs": [
             {
               "name": "any_b",
