@@ -43,7 +43,6 @@ class WorkflowsController < ApplicationController
   end
 
   def index
-    binding.pry
     js_param = {}
     @workflow = nil
     if params[:id].present?
