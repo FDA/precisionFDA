@@ -300,8 +300,9 @@ Rails.application.routes.draw do
       get 'files',   on: :member
       get 'apps',    on: :member
       get 'jobs',    on: :member
-      get 'comparisons',   on: :member
-      get 'assets',   on: :member
+      get 'comparisons', on: :member
+      get 'assets',  on: :member
+      get 'workflows', on: :member
       post 'verify', on: :member
 
       post 'accept', on: :member

@@ -1,10 +1,10 @@
 class SpacesController < ApplicationController
 
   before_action :init_parent_folder, only: [:files]
-  before_action :find_space_and_membership, only: [:show, :discuss, :members, :feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :reports]
-  before_action :content_counters, only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :reports]
+  before_action :find_space_and_membership, only: [:show, :discuss, :members, :feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
+  before_action :content_counters, only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
 
-  layout "space_content", only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :reports]
+  layout "space_content", only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
 
   def index
     spaces = Space.accessible_by(@context)
@@ -514,6 +514,17 @@ class SpacesController < ApplicationController
       order_direction: 'desc',
       per_page: 25,
       include: [:user, {user: :org}, {taggings: :tag}]
+    })
+  end
+
+  def workflows
+    @workflows = Workflow.accessible_by_space(@space)
+    @workflows_grid = initialize_grid(@workflows, {
+      name: 'workflows',
+      order: 'workflows.name',
+      order_direction: 'desc',
+      per_page: 25,
+      include: [:user, { user: :org }]
     })
   end
 

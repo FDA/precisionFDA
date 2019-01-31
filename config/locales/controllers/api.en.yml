@@ -1,0 +1,4 @@
+en:
+  api:
+    run_workflow:
+      permission_error: You have read-only access to the %{title} within the cooperative space

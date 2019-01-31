@@ -7,7 +7,9 @@ class ApiController < ApplicationController
   rescue_from ApiError, :with => :render_error_method
 
   def render_error_method(e)
-    render json: {error: {type: "API Error", message: e.message}}, status: 422
+    json = { error: { type: "API Error", message: e.message } }
+    json[:data] = e.data unless e.data.empty?
+    render json: json, status: 422
   end
 
   # Inputs
@@ -157,9 +159,13 @@ class ApiController < ApplicationController
       name = slot["name"]
       fail "#{(slot_i+1).ordinalize} slot: Each 'name' must be a nonempty string." unless name.is_a?(String) && name != ""
 
-      dxid = slot["dxid"]
-      fail "Slot '#{name}': Each slot 'dxid' must be a nonempty string." unless dxid.is_a?(String) && dxid != ""
-      fail "Slot '#{name}': App 'dxid' for slot '#{name}' does not exist or is not accessible by you." if App.accessible_by(@context).find_by(dxid: dxid).nil?
+      uid = slot["uid"]
+      fail "Slot '#{name}': Each slot 'uid' must be a nonempty string." unless uid.is_a?(String) && uid != ""
+
+      app = App.accessible_by(@context).find_by_uid(uid)
+
+      fail "Slot '#{name}': App 'dxid' for slot '#{name}' does not exist or is not accessible by you." if app.blank?
+      dxid = app.dxid
 
       instance_type = slot["instanceType"]
       fail "Slot '#{name}': Each slot 'instanceType' must be a nonempty string." unless instance_type.is_a?(String) && instance_type != ""
@@ -213,6 +219,7 @@ class ApiController < ApplicationController
         "next_slot": next_slot,
         "slotId": slot_id,
         "app_dxid": dxid,
+        "app_uid": uid,
         "inputs": inputs,
         "outputs": outputs,
         "instanceType": instance_type
@@ -319,10 +326,11 @@ class ApiController < ApplicationController
         revision: revision,
         scope: "private",
         workflow_series_id: workflow_series.id,
+        project: current_user.private_files_project
       )
       workflow.save!
       workflow_series.update!(latest_revision_workflow_id: workflow.id)
-      render json: {id: workflow.dxid}
+      render json: { id: workflow.uid }
     end
   end
 
@@ -342,7 +350,7 @@ class ApiController < ApplicationController
 
     workflow_id = params["workflow_id"]
     fail "The workflow 'workflow_id' must be a nonempty string." unless workflow_id.is_a?(String) && workflow_id != ""
-    workflow = Workflow.accessible_by(@context).find_by(dxid: workflow_id)
+    workflow = Workflow.accessible_by(@context).find_by_uid(workflow_id)
     fail "Workflow with id #{workflow_id} does not exist or is not accessible by you" if workflow.nil?
 
     inputs = params["inputs"] || []
@@ -373,7 +381,6 @@ class ApiController < ApplicationController
         file = UserFile.real_files.accessible_by(@context).find_by_uid(input_value)
         fail "#{input_name}: input file is not accessible or does not exist" unless !file.nil?
         fail "#{input_name}: input file's license must be accepted" unless !file.license.present? || file.licensed_by?(@context)
-
         input_value = {"$dnanexus_link" => file.dxid}
       when "int"
         fail "#{input_name}: value is not an integer" unless input_value.to_i.to_s == input_value
@@ -397,7 +404,7 @@ class ApiController < ApplicationController
       end
     end
 
-    project = @context.user.private_files_project
+    project = workflow.project
     workflow_params = {
       name: analysis_name,
       input: dx_run_workflow_inputs,
@@ -405,7 +412,11 @@ class ApiController < ApplicationController
     }
 
     api = DNAnexusAPI.new(@context.token)
-    response = api.run_workflow(workflow_id, workflow_params)
+
+    permission = api.call(workflow.dxid, "listProjects")[workflow.project]
+    fail(t('api.run_workflow.permission_error', title: workflow.title), permission: permission) if permission == 'VIEW'
+
+    response = api.run_workflow(workflow.dxid, workflow_params)
     analysis_dxid = response["id"]
     analysis = Analysis.create!(name: analysis_name, workflow_id: workflow.id, dxid: analysis_dxid, user_id: current_user.id)
 
@@ -615,9 +626,7 @@ class ApiController < ApplicationController
       files = files.where(state: params["states"])
     end
 
-    if params[:offset] == 0
-      count = files.count
-    end
+    count = files.count if params[:offset] == 0
 
     if params[:limit] && params[:offset]
       files = files.limit(params[:limit]).offset(params[:offset])
@@ -1928,8 +1937,8 @@ class ApiController < ApplicationController
     )
   end
 
-  def fail(msg)
-    raise ApiError, msg
+  def fail(msg, data = {})
+    raise ApiError.new(msg, data)
   end
 
   def code_remap(code)

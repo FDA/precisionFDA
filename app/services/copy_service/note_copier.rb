@@ -1,6 +1,5 @@
 class CopyService
   class NoteCopier
-
     def initialize(api:, user:)
       @api = api
       @user = user
@@ -37,6 +36,5 @@ class CopyService
     def copy_service
       @copy_service ||= CopyService.new(user: user, api: api)
     end
-
   end
 end

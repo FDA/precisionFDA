@@ -1,4 +1,4 @@
-  # == Schema Information
+# == Schema Information
 #
 # Table name: workflows
 #
@@ -21,12 +21,13 @@
 class Workflow < ActiveRecord::Base
   include Auditor
   include Permissions
+  include InternalUid
 
   belongs_to :user
   belongs_to :workflow_series
   has_many :analyses
 
-  store :spec, accessors: [ :input_spec, :output_spec, :internet_access, :instance_type ], coder: JSON
+  store :spec, accessors: [:input_spec, :output_spec, :internet_access, :instance_type], coder: JSON
 
   def stages
     input_spec["stages"]
@@ -41,7 +42,7 @@ class Workflow < ActiveRecord::Base
   end
 
   def apps
-    @apps ||= App.where(dxid: stages.map { |stage| stage["app_dxid"] })
+    @apps ||= App.where(uid: stages.map { |stage| stage["app_uid"] })
   end
 
   def stages_apps
@@ -52,12 +53,17 @@ class Workflow < ActiveRecord::Base
     uid
   end
 
-  def uid
-    dxid
+  def jobs
+    Job.where(analysis_id: analyses.pluck(:id)).includes(:analysis)
   end
 
   def klass
     "workflow"
+  end
+
+  def publishable_by?(context, scope_to_publish_to = "public")
+    return false if scope_to_publish_to == "public" || !private?
+    super
   end
 
   def input_spec_hash
@@ -94,4 +100,13 @@ class Workflow < ActiveRecord::Base
     hash
   end
 
+  def update_stages!(stages)
+    self.input_spec = input_spec.merge("stages" => stages)
+    save!
+  end
+
+  def accessible_scopes
+    return [scope] unless in_space?
+    Space.from_scope(scope).accessible_scopes
+  end
 end

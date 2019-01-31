@@ -37,6 +37,7 @@ class SpacesReportsView
       when 'files' then return 'fa-files-o'
       when 'assets' then return 'fa-file-zip-o'
       when 'comparisons' then return 'fa-bullseye'
+      when 'workflows' then return 'fa-flash'
       when 'notes' then return 'fa-sticky-note'
       else return ''
 
