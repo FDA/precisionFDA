@@ -1314,7 +1314,7 @@ class ApiController < ApplicationController
     packages.sort!.uniq!
 
     packages.each do |package|
-      fail "The package '#{package}' is not a valid Ubuntu package." unless App::UBUNTU_PACKAGES.bsearch { |p| package <=> p }
+      fail "The package '#{package}' is not a valid Ubuntu package." unless UBUNTU_PACKAGES.bsearch { |p| package <=> p }
     end
 
     code = params[:code]
