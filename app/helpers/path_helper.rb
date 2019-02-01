@@ -97,7 +97,7 @@ module PathHelper
     when "expert-question"
       expert_expert_question_path(item.expert_id, item.id)
     when "workflow"
-      workflow_path(item.dxid)
+      workflow_path(item)
     when "workflow-series"
       pathify(item.latest_accessible(@context))
     when "folder"

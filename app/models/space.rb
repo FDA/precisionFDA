@@ -297,6 +297,7 @@ class Space < ActiveRecord::Base
       jobs: jobs,
       comparisons: comparisons,
       assets: assets,
+      workflows: Workflow.accessible_by_space(self).count,
       open_tasks: open_tasks,
       accepted_tasks: accepted_tasks,
       declined_tasks: declined_tasks,

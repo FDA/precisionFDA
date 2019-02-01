@@ -16,6 +16,7 @@ MainController = Paloma.controller('Main',
       @params.graph,
       @params.scope_to_publish_to,
       @params.space
+      @params.message
     )
     ko.applyBindings(publishViewModel, $container[0])
 )

@@ -1,0 +1,17 @@
+<div id="chooseReportFormat" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Choose Report Format</h4>
+      </div>
+      <div class="modal-body">
+        <h4>Format:</h4>
+        <a class="btn btn-primary" data-turbolinks="false" download data-bind="attr: {href: downloadHref()+'&format=pdf'}">PDF</a>
+        <a class="btn btn-primary" data-turbolinks="false" type="text/html" download data-bind="attr: {href: downloadHref()+'&format=html'}">HTML</a>
+      </div>
+    </div>
+  </div>
+</div>

@@ -22,6 +22,7 @@ class CopyService
     when App        then AppCopier
     when Note       then NoteCopier
     when Comparison then ComparisonCopier
+    when Workflow   then WorkflowCopier
     else
       raise "'#{entity.class}' class is not supported yet"
     end

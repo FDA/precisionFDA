@@ -82,7 +82,7 @@ gem 'premailer-rails'
 
 gem 'whenever', require: false
 
-gem 'mysql2', '~> 0.3.18'
+gem 'mysql2'
 
 gem 'gretel'
 
@@ -92,6 +92,9 @@ gem 'rack-utf8_sanitizer', '~> 1.6'
 gem 'httplog'
 
 gem 'simple_form'
+
+# PDF builder
+gem 'prawn'
 
 group :development do
   gem 'letter_opener'
