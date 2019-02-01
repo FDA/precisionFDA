@@ -1,6 +1,5 @@
 class CopyService
   class AppCopier
-
     def initialize(api:, user:, file_copier: nil)
       @api = api
       @user = user
@@ -50,10 +49,8 @@ class CopyService
     end
 
     def publish(app, scope)
-      api.call(app.dxid, 'addAuthorizedUsers', {
-        "authorizedUsers": AppSeries.authorized_users_for_scope!(scope)
-      })
+      api.call(app.dxid, 'addAuthorizedUsers',
+        "authorizedUsers": AppSeries.authorized_users_for_scope!(scope),)
     end
-
   end
 end

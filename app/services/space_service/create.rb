@@ -115,7 +115,7 @@ module SpaceService
       api.call(
         project_dxid, "invite",
         invitee: space.guest_dxorg,
-        level: "VIEW",
+        level: "CONTRIBUTE",
         suppressEmailNotification: true,
         suppressAllNotifications: true
       )

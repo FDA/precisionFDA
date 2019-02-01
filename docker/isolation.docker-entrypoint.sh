@@ -7,7 +7,6 @@ if [ -d "/mysql-volume/precisionfda@002dui@002dtest" ]; then
 else
   bundle exec rake db:setup
   bundle exec rake db:migrate
-  bundle exec rake db:seed
   bundle exec rake user:generate_test_users
 fi
 
