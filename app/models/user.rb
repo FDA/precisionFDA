@@ -569,6 +569,7 @@ class User < ActiveRecord::Base
             scope: 'private',
             file_size: api_result["describe"]["size"],
             parent: job,
+            parent_folder_id: job.local_folder_id
           )
         end
       end
