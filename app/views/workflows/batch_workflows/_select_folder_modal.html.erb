@@ -1,0 +1,62 @@
+<div id="select_folder_modal" class="modal fade modal-with-loader" data-bind="css: {loading: folderModalLoading}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Select or Create Folder</h4>
+      </div>
+      <div class="loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info">Please select or create a new folder for the output.</div>
+        <div id="section_folder_search" class="section-select-folder">
+          <h4>Select folder</h4>
+          <div class="folder-search">
+            <input type="text" class="form-control" placeholder="Search" data-bind="value: folderSearchValue, event: {
+              keyup: searchFolderOnChange
+            }"/>
+            <!-- ko if: folderSearchValue -->
+            <div class="folder-search-clear">
+              <i class="fa fa-times text-danger" data-bind="click: clearSearchFolder"></i>
+            </div>
+            <!-- /ko -->
+          </div>
+          <div class="form-control folder-list">
+            <!-- ko if: !folders().length -->
+              <div>You don't have folders yet</div>
+            <!-- /ko -->
+            <!-- ko if: folders().length -->
+              <!-- ko foreach: filteredFolders -->
+                <div class="folder-item" data-bind="css: { selected: $data.selected }">
+                  <span class="folder-item-label" data-bind="click: $root.onClickFolder">
+                    <i class="fa fa-folder"></i>
+                    <span data-bind="text: $data.name"></span>
+                  </span>
+                </div>
+              <!-- /ko -->
+            <!-- /ko -->
+          </div>
+          <div class="folder-buttons">
+            <button class="btn btn-primary" data-bind="click: updateFolder">Select</button>
+          </div>
+        </div>
+
+        <div id="section_folder_create" class="section-create-folder">
+          <h4>Create folder</h4>
+          <div class="create-folder">
+            <input type="text" class="form-control" placeholder="Folder Name" data-bind="value: createFolderName">
+          </div>
+          <div class="folder-buttons">
+            <button class="btn btn-default" data-bind="click: hideSelectFolderModal">Cancel</button>
+            <button class="btn btn-primary" data-bind="click: createFolder">Create</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

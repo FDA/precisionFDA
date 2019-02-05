@@ -78,6 +78,9 @@ en:
         spaces:
           title: Spaces
           url: https://www.youtube.com/embed/-YfSmb_Y-gk
+        review_spaces:
+          title: 'Review Spaces: Step by Step'
+          url: https://www.youtube.com/embed/mPW82NtdKuo
       site_admin:
         <<: *common_videos
         challenge_workbench:

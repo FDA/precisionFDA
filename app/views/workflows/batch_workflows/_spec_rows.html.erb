@@ -1,0 +1,104 @@
+<%= render "/workflows/batch_workflows/step1_input_templates" %>
+<!-- ko if: inputs().length -->
+  <table class="table table-striped table-spec table-spec-input">
+    <thead>
+      <th class="spec-heading" colspan="4">Inputs</th>
+      <th class="spec-heading">Value</th>
+      <th class="spec-heading">Batch Input 1</th>
+      <th class="spec-heading">Batch Input 2</th>
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="6"></td>
+        <td>
+          <div class="radio">
+            <label for="noval_batch_input_2">
+              <input
+                type="radio"
+                name="batch_input_2"
+                id="noval_batch_input_2"
+                value="none"
+                data-bind="checked: $root.batchInputTwoSelected,
+                event: {
+                  change: $root.selectBatchTwo.bind($root, null)
+                }, attr: {
+                  disabled: !$root.batchInputOneSelected()
+                }"
+              />
+              <span>none</span>
+            </label>
+          </div>
+        </td>
+      </tr>
+      <!-- ko foreach: inputs -->
+        <tr>
+          <td>
+            <p class="spec-class" data-bind="text: $data.type"></p>
+          </td>
+          <td class="spec-info">
+            <p class="spec-label" data-bind="text: $data.label"></p>
+            <p class="spec-help" data-bind="text: $data.help"></p>
+          </td>
+          <td>
+            <!-- ko if: $data.required -->
+              <label class="spec-required label label-info">Required</label>
+            <!-- /ko -->
+          </td>
+          <td>
+            <i class="fa fa-gear fa-branded center-block" aria-hidden="true"></i>
+            <span data-bind="text: $data.stageName"></span>
+          </td>
+          <td>
+            <div data-bind="template: { name: 'batch_input_templates_step1', data: $data }"></div>
+          </td>
+          <td>
+            <!-- ko if: $data.showBatchInput -->
+              <div class="radio">
+                <label data-bind="attr: {for: $data.id + '_batch_input_1'}">
+                  <input
+                    type="radio"
+                    name="batch_input_1"
+                    data-bind="checked: $root.batchInputOneSelected,
+                    event: {
+                      change: $root.selectBatchOne
+                    }, attr: {
+                      id: $data.id + '_batch_input_1',
+                      value: $data.id + '_batch_input_1_value'
+                    }"
+                  />
+                  <span data-bind="text: $data.type"></span>
+                </label>
+              </div>
+            <!-- /ko -->
+          </td>
+          <td>
+            <!-- ko if: $data.showBatchInput -->
+              <div class="radio">
+                <label data-bind="attr: {for: $data.id + '_batch_input_2'}">
+                  <input
+                    type="radio"
+                    name="batch_input_2"
+                    data-bind="checked: $root.batchInputTwoSelected,
+                    event: {
+                      change: $root.selectBatchTwo
+                    }, attr: {
+                      id: $data.id + '_batch_input_2',
+                      value: $data.id + '_batch_input_2_value',
+                      disabled: !$root.batchInputOneSelected() || $data._disabledBatchTwo
+                    }"
+                  />
+                  <span data-bind="text: $data.type"></span>
+                </label>
+              </div>
+            <!-- /ko -->
+          </td>
+        </tr>
+      <!-- /ko -->
+    </tbody>
+  </table>
+<!-- /ko -->
+
+
+<!-- ko if: !inputs().length -->
+  <div class="text-muted">No fields specified</div>
+<!-- /ko -->
