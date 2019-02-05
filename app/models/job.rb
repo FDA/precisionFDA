@@ -47,6 +47,8 @@ class Job < ActiveRecord::Base
   STATE_FAILED = "failed"
   TERMINAL_STATES = [STATE_TERMINATED, STATE_DONE, STATE_FAILED]
 
+  STATE_TERMINATING = "terminating"
+
   belongs_to :app
   belongs_to :user
   belongs_to :app_series

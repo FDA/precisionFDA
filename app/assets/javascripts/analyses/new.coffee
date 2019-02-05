@@ -83,11 +83,10 @@ class WorkflowViewModel
       .done( =>
         window.location.replace("/workflows/#{@workflowUid}")
     )
-      .fail((error) ->
-        if error.responseJSON.data.permission == 'VIEW'
-          Precision.alert.show(error.responseJSON.error.message)
-        else
-          console.log(error)
+      .fail((error) =>
+        @isRunning(false)
+        Precision.alert.show(error.responseJSON.error.message)
+        console.log(error)
     )
 
 class stageModel

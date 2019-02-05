@@ -57,7 +57,7 @@
         <% else %>
           <li class="dropdown-header">Revisions</li>
           <% @revisions.each do |workflow| %>
-            <li class="<% if workflow.dxid == params[:id] %>active<% end %>">
+            <li class="<% if workflow.uid == params[:id] %>active<% end %>">
               <a href="<%= action_name == 'index' ? workflow_analyses_path(workflow) : workflow_path(workflow) %>" class="clearfix">
                 <span class="workflow-revision"><%= workflow.revision %></span>
                 <% if @revisions.first.id == workflow.id %>
@@ -100,8 +100,15 @@
     </div>
   </div>
   <div class="btn-group pull-right">
-    <%= link_to new_workflow_analysis_path(@workflow), class: "btn btn-primary" do %>
-      Run Workflow&nbsp;&nbsp;<span class="badge rev-badge"><%= "rev#{@workflow.revision}" %></span>
+    <% if action_name == 'index' || action_name == 'show' %>
+      <%= link_to new_workflow_analysis_path(@workflow), class: "btn btn-primary" do %>
+        Run Workflow&nbsp;&nbsp;<span class="badge rev-badge"><%= "rev#{@workflow.revision}" %></span>
+      <% end %>
+      <% if @workflow.allow_batch_run? %>
+        <%= link_to batch_workflow_workflow_path(@workflow), class: "btn btn-primary" do %>
+          Run Batch Workflow&nbsp;&nbsp;<span class="badge rev-badge"><%= "rev#{@workflow.revision}" %></span>
+        <% end %>
+      <% end %>
     <% end %>
     <%= render "_partials/btn_publish", item: @workflow %>
     <%= render "_partials/btn_copy_to_cooperative", item: @workflow %>
@@ -159,30 +166,34 @@
 
   <% if @workflow.present? %>
     <div role="tabpanel" class="tab-pane tab-pane-padded <% if !@analyses_grid.present? %>active<% end %>" id="workflow-spec">
-      <div class="list-group">
-        <div class="list-group-item app-spec-group">
-          <div class="app-spec">
-            <div class="row">
-              <div class="app-spec-column col-md-12">
-                <div class="spec-heading">Inputs</div>
-                <table class="table table-striped table-spec table-spec-input">
-                  <tbody>
-                    <%= render "workflows/spec_rows", spec: @workflow.all_input_spec %>
-                  </tbody>
-                </table>
-              </div>
-              <div class="app-spec-column col-md-12">
-                <div class="spec-heading">Outputs</div>
-                <table class="table table-striped table-spec table-spec-output">
-                  <tbody>
-                    <%= render "workflows/spec_rows", spec: @workflow.all_output_spec %>
-                  </tbody>
-                </table>
+      <% if action_name == 'batch_workflow' %>
+        <%= render "/workflows/batch_workflows/run_batch_page", workflow: @workflow %>
+      <% else %>
+        <div class="list-group">
+          <div class="list-group-item app-spec-group">
+            <div class="app-spec">
+              <div class="row">
+                <div class="app-spec-column col-md-12">
+                  <div class="spec-heading">Inputs</div>
+                  <table class="table table-striped table-spec table-spec-input">
+                    <tbody>
+                      <%= render "workflows/spec_rows", spec: @workflow.all_input_spec %>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="app-spec-column col-md-12">
+                  <div class="spec-heading">Outputs</div>
+                  <table class="table table-striped table-spec table-spec-output">
+                    <tbody>
+                      <%= render "workflows/spec_rows", spec: @workflow.all_output_spec %>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      <% end %>
     </div>
 
     <div role="tabpanel" class="tab-pane tab-pane-padded" id="workflow-diagram">
