@@ -1,0 +1,32 @@
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane active" id="step-1">
+    <div id="batch_workfows_wizard" class="batch-workfows-wizard" data-bind="css: {'wizard-loading': wizardLoading}">
+      <div class="wizard-loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <div class="wizard-body">
+        <%= render "/workflows/batch_workflows/page_1" %>
+        <%= render "/workflows/batch_workflows/page_2" %>
+        <%= render "/workflows/batch_workflows/page_3" %>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="run-batch-modal" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+          <h3>Error - Run Batch Workflow</h3>
+          <p>A bacth workflow can not be run because there is no “Required workflow input” configured.</p>
+          <p>Please configure at least one string or file input as a “Required workflow input” to be able to run a batch workflow.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default center-block" data-dismiss="modal" aria-label="Close">Back</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

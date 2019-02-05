@@ -172,7 +172,14 @@ Rails.application.routes.draw do
         get 'fork'
         get 'cwl_export'
         get 'wdl_export'
+        get 'batch_workflow'
+        post 'run_batch'
+        get 'terminate_batch'
+        get 'output_folders_list'
+        get 'output_folder_create'
+        get 'output_folder_update'
       end
+      post 'convert_file_with_strings', on: :collection, as: 'convert_file_with_strings'
     end
 
     resources :jobs, except: :index do

@@ -36,7 +36,8 @@ SecureHeaders::Configuration.default do |config|
       {sha256: 'OV/2vGzq4A/PlbCUFpy5W2dHmMLPvHZ9N/FVDOPNvQw='},
       {sha256: 'Hxbr0eK3F0xc4UkeXRvapzSvj3I0efJ+2h2Q70MpltM='},
       {sha256: 'AGLBxCqwOTXOZg/v14oxVzHbU0GVWr1QlHR7DQqnzvU='},
-      {sha256: '154XxB1J9PKgQ2rcgEEsTY+0CPdx03PpIiiJPlJzAXk='}
+      {sha256: '154XxB1J9PKgQ2rcgEEsTY+0CPdx03PpIiiJPlJzAXk='},
+      {sha256: 'HWAfTqWuHb8+lgjCtyWUW9+XgIF0wxZ42EQR2ETS41k='}
     ]
     hpkp[:max_age] = 7.days.to_i
   else

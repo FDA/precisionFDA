@@ -33,6 +33,28 @@ class Workflow < ActiveRecord::Base
     input_spec["stages"]
   end
 
+  def stage(slot_id)
+    stages.find {|stage| stage[:slotId] == slot_id}
+  end
+
+  def allow_batch_run?
+    return unless stages.any?
+    batch_input_spec.select { |s| s["allow_batch"] }.any?
+  end
+
+  def batch_input_spec
+    app = stages.find { |s| s["prev_slot"].nil? }
+    slot_id = app["slotId"]
+    all_input_spec.map do |input|
+      input["allow_batch"] = allow_batch?(input, slot_id)
+      input
+    end
+  end
+
+  def allow_batch?(input, slot_id)
+    input["parent_slot"] == slot_id && input["requiredRunInput"] && ["file", "string"].include?(input["class"])
+  end
+
   def all_input_spec
     stages.reduce([]) { |inputs, stage| inputs + stage["inputs"] }
   end
@@ -100,13 +122,17 @@ class Workflow < ActiveRecord::Base
     hash
   end
 
-  def update_stages!(stages)
-    self.input_spec = input_spec.merge("stages" => stages)
-    save!
-  end
-
   def accessible_scopes
     return [scope] unless in_space?
     Space.from_scope(scope).accessible_scopes
+  end
+
+  def stages_ids
+    stages.map{|stage| stage['slotId']}
+  end
+
+  def update_stages!(stages)
+    self.input_spec = input_spec.merge("stages" => stages)
+    save!
   end
 end

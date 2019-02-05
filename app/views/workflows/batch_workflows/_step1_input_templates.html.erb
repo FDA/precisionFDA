@@ -1,0 +1,54 @@
+<script type="text/html" id="batch_input_templates_step1">
+<div data-bind="css: {'has-error': !valid()}">
+  <!-- ko if: template == 'default' -->
+    <input
+      type="text"
+      class="form-control"
+      data-bind="value: $data.value, event: {
+        change: onChange
+      }, attr: {
+        name: $data.id + '_batch_value_input',
+        disabled: $data.disabled
+      }"
+    />
+  <!-- /ko -->
+  <!-- ko if: template == 'boolean' -->
+    <div class="text-center">
+      <input type="hidden" data-bind="value: $data.value, event: {
+        change: onChange
+      }, attr: {
+        name: $data.id + '_batch_value_input'
+      }" />
+      <div class="btn-group">
+        <button class="btn btn-default" data-bind="click: setBoolValueTrue, css: {
+          active: ($data.value() == true)
+        }">True</button>
+        <button class="btn btn-default" data-bind="click: setBoolValueFalse, css: {
+          active: ($data.value() == false)
+        }">False</button>
+      </div>
+    </div>
+  <!-- /ko -->
+  <!-- ko if: template == 'file' -->
+    <!-- ko if: $data.fileTitle -->
+    <div class="text-center spec-input-file-title" data-bind="text: $data.fileTitle"></div>
+    <!-- /ko -->
+    <div class="text-center">
+      <input type="hidden" data-bind="value: $data.value, event: {
+        change: onChange
+      }, attr: {
+        name: $data.id + '_batch_value_input'
+      }" />
+      <div class="btn-group">
+        <button class="btn btn-primary" data-bind="click: $root.openSelectorModal, attr: {
+          disabled: $data.disabled
+        }">Select File</button>
+        <button class="btn btn-link" data-bind="click: clearFileValue, attr: {
+          disabled: $data.disabled
+        }">Clear</button>
+      </div>
+    </div>
+  <!-- /ko -->
+</div>
+</script>
+<%= render "workflows/selector_modal" %>
