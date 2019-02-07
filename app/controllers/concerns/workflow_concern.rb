@@ -22,7 +22,7 @@ module WorkflowConcern
     workflow_input_spec = workflow.input_spec_hash
     unseen_workflow_inputs = workflow.unused_input_spec_hash
     dx_run_workflow_inputs = {}
-    stage_inputs = Hash.new { |h,k| h[k] = {} }
+    stage_inputs = Hash.new { |h, k| h[k] = {} }
 
     inputs.each do |api_input|
       input_name = api_input["input_name"]
@@ -42,11 +42,11 @@ module WorkflowConcern
       when "file"
         fail "#{input_name}: input file value is not a string" unless input_value.is_a?(String)
         file = UserFile.real_files.accessible_by(@context).find_by_uid(input_value)
-        fail "#{input_name}: input file is not accessible or does not exist" unless !file.nil?
+        fail "#{input_name}: input file is not accessible or does not exist" if file.nil?
         fail "#{file.name}: input file is not accessible to this space" unless file.scope.in?(workflow.accessible_scopes)
         fail "#{input_name}: input file's license must be accepted" unless !file.license.present? || file.licensed_by?(@context)
 
-        input_value = {"$dnanexus_link" => file.dxid}
+        input_value = { "$dnanexus_link" => file.dxid }
       when "int"
         fail "#{input_name}: value is not an integer" unless input_value.to_i.to_s == input_value
         input_value = input_value.to_i
@@ -58,14 +58,14 @@ module WorkflowConcern
       when "string"
         fail "#{input_name}: value is not a string" unless input_value.is_a?(String)
       end
-      dx_run_workflow_inputs.merge!(input_name => input_value)
+      dx_run_workflow_inputs[input_name] = input_value
 
       stage_inputs[stage][matched_input_name] = input_value
     end
 
     unseen_workflow_inputs.each do |stage, inputs|
       inputs.each do |name, input|
-        fail "The required input '#{stage}.#{name}' is missing" if !input["optional"]
+        fail "The required input '#{stage}.#{name}' is missing" unless input["optional"]
       end
     end
 
@@ -73,7 +73,7 @@ module WorkflowConcern
     workflow_params = {
       name: analysis_name,
       input: dx_run_workflow_inputs,
-      project: project
+      project: project,
     }
 
     api = DNAnexusAPI.new(@context.token)
@@ -111,11 +111,11 @@ module WorkflowConcern
         state: "idle",
         name: app.title,
         describe: {},
-        scope: "private",
+        scope: workflow.in_space? ? workflow.scope : "private",
         user_id: @context.user_id,
-        run_instance_type: stage["instanceType"]
+        run_instance_type: stage["instanceType"],
       }
-      provenance = {job_id => {workflow_dxid: workflow.dxid, workflow_id: workflow.id, inputs: run_inputs}}
+      provenance = { job_id => { workflow_dxid: workflow.dxid, workflow_id: workflow.id, inputs: run_inputs } }
       input_file_dxids.uniq!
       input_file_ids = []
       UserFile.accessible_by(@context).where(dxid: input_file_dxids).find_each do |file|
@@ -136,7 +136,7 @@ module WorkflowConcern
         Event::JobRun.create_for(job, @context.user)
       end
     end
-    return analysis_dxid
+    analysis_dxid
   end
 
   def fail(msg, data = {})

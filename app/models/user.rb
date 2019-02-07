@@ -561,12 +561,12 @@ class User < ActiveRecord::Base
           # Push avoids creating a new array as opposed to +/+=
           output_file_cache.push(
             dxid: slice_of_file_ids[i],
-            project: user.private_files_project,
+            project: job.project || user.private_files_project,
             name: api_result["describe"]["name"],
             state: 'closed',
             description: "",
             user_id: user.id,
-            scope: 'private',
+            scope: job.scope || 'private',
             file_size: api_result["describe"]["size"],
             parent: job,
             parent_folder_id: job.local_folder_id
