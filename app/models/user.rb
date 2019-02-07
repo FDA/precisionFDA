@@ -399,7 +399,7 @@ class User < ActiveRecord::Base
       parentJob: nil,
       parentAnalysis: job.analysis.try(:dxid),
       describe: true,)["results"][0]
-
+    return if result.blank?
     sync_job_state(result, job, user, token)
   end
 
