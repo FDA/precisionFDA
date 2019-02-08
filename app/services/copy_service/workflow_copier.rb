@@ -11,11 +11,22 @@ class CopyService
       new_workflow.scope = scope
       space = Space.from_scope(scope)
       destination_project = space.project_for_user!(user)
-      api.call(workflow.project, "clone", objects: [workflow.dxid], project: destination_project)
-      new_workflow.project = destination_project
-      new_workflow.save!
+      Workflow.transaction do
+        api.call(workflow.project, "clone", objects: [workflow.dxid], project: destination_project)
+        new_workflow.project = destination_project
+        new_workflow.save!
 
-      copy_dependencies(new_workflow, workflow, scope)
+        copy_dependencies(new_workflow, workflow, scope)
+
+        workflow_series = WorkflowSeries.create!(
+          dxid: WorkflowSeries.construct_dxid(user.dxuser, new_workflow.name),
+          name: new_workflow.name,
+          latest_revision_workflow_id: new_workflow.id,
+          user_id: user.id,
+          scope: "private"
+        )
+        new_workflow.update!(workflow_series_id: workflow_series.id)
+      end
       new_workflow
     end
 
