@@ -70,7 +70,7 @@ class WorkflowViewModel
               input = {"class": workflow_input.class, "input_name": input_name, "input_value": workflow_input.defaultValues()[0]}
           else
             if workflow_input.optional && workflow_input.selectorModel.defaultValues()?
-              break
+              input = {"class": workflow_input.class, "input_name": input_name, "input_value": workflow_input.defaultValues()}
             else if !workflow_input.optional || !workflow_input.defaultValues()?
               input = {"class": workflow_input.class, "input_name": input_name, "input_value": workflow_input.defaultValues()}
         inputs.push input
