@@ -147,6 +147,10 @@ class WorkflowEditorModel
       availapps
     )
 
+    $('#mapper-modal').on 'hidden.bs.modal', () ->
+      if $('.modal.in').length > 0
+        $('body').addClass('modal-open')
+
   filterSetOfObjects: (objects, query) ->
     return objects if _.isEmpty(query)
     if _.isArray(query)
@@ -221,14 +225,13 @@ class WorkflowEditorModel
       @slotBeingEdited().prevSlot(slot)
       @sortSlots()
       config = false
-      ko.utils.arrayForEach(@slotBeingEdited().inputs(), (input) =>
+      ko.utils.arrayForEach(@slotBeingEdited().inputs(), (input) ->
         if input.optional == false
           config = input.configured()
       )
       @slotBeingEdited().configured(config)
       @configureEligibleSlots()
-      $('#mapper-modal').removeClass('in')
-        .attr('aria-hidden', true)
+      $('#mapper-modal').modal('hide')
     else
       @errorMessage("Input Output Type do not match")
       $('.workflows-alert-danger').fadeIn().delay(1000).fadeOut();
