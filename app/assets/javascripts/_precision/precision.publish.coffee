@@ -48,7 +48,8 @@ class PublishViewModel
     nodeModels = _.values(@treeHash)
     isRootAWorkflow = _.find(nodeModels, { isRoot: true, klass: 'workflow' })
     return true unless isRootAWorkflow
-    apps = _.filter(nodeModels, (app) => app.klass == 'app' && app.publish() == false && app.isInSpace == false )
+    apps = _.filter(nodeModels,
+      (app) => app.klass == 'app' && !app.publish() && !app.isInSpace && !app.isPublic )
     return true if _.isEmpty(apps)
     if confirm(@message)
       _.each(apps, (app) => app.publish(true))
