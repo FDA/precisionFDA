@@ -1,7 +1,8 @@
 class PublishViewModel
-  constructor: (graph, scope_to_publish_to, space) ->
+  constructor: (graph, scope_to_publish_to, space, message = null) ->
     @treeHash = {}
     @rootID = graph[0].uid
+    @message = message
     @publishingObjectsUids = ko.observableArray(@getObjectsIds(graph))
     @treeRoot = ko.observableArray(@generateTree(graph))
     @selectedScope = ko.observable(scope_to_publish_to)
@@ -42,6 +43,20 @@ class PublishViewModel
     for note in graph
       treeRoot.push @generateSubTree(note, true)
     return treeRoot
+
+  confirm: (data, event) ->
+    nodeModels = _.values(@treeHash)
+    isRootAWorkflow = _.find(nodeModels, { isRoot: true, klass: 'workflow' })
+    return true unless isRootAWorkflow
+    apps = _.filter(nodeModels,
+      (app) => app.klass == 'app' && !app.publish() && !app.isInSpace && !app.isPublic )
+    return true if _.isEmpty(apps)
+    if confirm(@message)
+      _.each(apps, (app) => app.publish(true))
+      true
+    else
+      false
+
 
 class NodeModel
   constructor: (node, children, @isRoot) ->

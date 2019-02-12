@@ -1,6 +1,5 @@
 class CopyService
   class Copies
-
     Copy = Struct.new(:object, :source, :copied)
 
     def self.wrap(object)
@@ -44,6 +43,5 @@ class CopyService
     private
 
     attr_reader :copies
-
   end
 end

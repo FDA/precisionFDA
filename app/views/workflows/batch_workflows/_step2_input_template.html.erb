@@ -1,0 +1,44 @@
+<script type="text/html" id="batch_input_templates_step2">
+<div>
+  <div class="input-header" data-bind="text: input.title"></div>
+  <!-- ko if: input.type() == 'string' -->
+  <div data-bind="css: {'has-error': !input.valid()}">
+    <textarea class="form-control" data-bind="value: input.value, event: {
+      change: input.onChange
+    }, attr: {
+      name: input.name
+    }"></textarea>
+  </div>
+  <!-- /ko -->
+  <!-- ko if: input.type() == 'file' -->
+  <div class="input-file-search">
+    <input type="text" class="form-control" data-bind="value: input.searchValue, event: {
+      keyup: input.searchOnChange
+    }"/>
+    <!-- ko if: input.searchValue -->
+    <div class="input-file-search-clear">
+      <i class="fa fa-times text-danger" data-bind="click: input.clearSearch"></i>
+    </div>
+    <!-- /ko -->
+  </div>
+  <div data-bind="css: {'has-error': !input.valid()}">
+    <div class="form-control input-file-selector">
+      <!-- ko foreach: { data: input.filteredFiles, as: 'file' } -->
+        <div class="checkbox">
+          <label data-bind="attr: { id: 'step2_select_batch_file_' + file.uid }">
+            <input
+              type="checkbox"
+              name="step2_select_batch_file"
+              data-bind="checkedValue: file.uid, checked: input.selectedFiles, attr: {
+                name: input.name,
+                id: 'step2_select_batch_file_' + file.uid
+            }" />
+            <span data-bind="text: file.title"></span>
+          </label>
+        </div>
+      <!-- /ko -->
+    </div>
+  </div>
+  <!-- /ko -->
+</div>
+</script>

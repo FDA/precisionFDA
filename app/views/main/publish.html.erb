@@ -1,7 +1,7 @@
 <% content_for :title do %>Publisher<% end %>
 
 
-<%= form_for :main, url: publish_path do |f| %>
+<%= form_for :main, url: publish_path, data: { bind: "submit: $root.confirm" } do |f| %>
   <div class="container container-padded-v">
     <!-- ko if: !isScopeASpace() -->
     <div class='pfda-help-block'>

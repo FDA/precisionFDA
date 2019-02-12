@@ -30,7 +30,7 @@ module SpaceService
         api.call(
           project_dxid, "invite",
           invitee: view_org,
-          level: "VIEW",
+          level: "CONTRIBUTE",
           suppressEmailNotification: true,
           suppressAllNotifications: true
         )

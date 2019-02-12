@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181214084328) do
+ActiveRecord::Schema.define(version: 20190130070225) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -32,6 +32,7 @@ ActiveRecord::Schema.define(version: 20181214084328) do
     t.datetime "created_at",              null: false
     t.datetime "updated_at",              null: false
     t.integer  "workflow_id", limit: 4
+    t.string   "batch_id",    limit: 255
   end
 
   add_index "analyses", ["user_id"], name: "index_analyses_on_user_id", using: :btree
@@ -340,21 +341,22 @@ ActiveRecord::Schema.define(version: 20181214084328) do
   add_index "job_inputs", ["user_file_id"], name: "index_job_inputs_on_user_file_id", using: :btree
 
   create_table "jobs", force: :cascade do |t|
-    t.string   "dxid",          limit: 255
-    t.integer  "app_id",        limit: 4
-    t.string   "project",       limit: 255
-    t.text     "run_data",      limit: 65535
-    t.text     "describe",      limit: 65535
-    t.text     "provenance",    limit: 65535
-    t.string   "state",         limit: 255
-    t.string   "name",          limit: 255
-    t.integer  "user_id",       limit: 4
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
-    t.integer  "app_series_id", limit: 4
-    t.string   "scope",         limit: 255
-    t.integer  "analysis_id",   limit: 4
-    t.string   "uid",           limit: 255
+    t.string   "dxid",            limit: 255
+    t.integer  "app_id",          limit: 4
+    t.string   "project",         limit: 255
+    t.text     "run_data",        limit: 65535
+    t.text     "describe",        limit: 65535
+    t.text     "provenance",      limit: 65535
+    t.string   "state",           limit: 255
+    t.string   "name",            limit: 255
+    t.integer  "user_id",         limit: 4
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
+    t.integer  "app_series_id",   limit: 4
+    t.string   "scope",           limit: 255
+    t.integer  "analysis_id",     limit: 4
+    t.string   "uid",             limit: 255
+    t.integer  "local_folder_id", limit: 4
   end
 
   add_index "jobs", ["analysis_id"], name: "fk_rails_0a95efec7a", using: :btree
@@ -834,8 +836,11 @@ ActiveRecord::Schema.define(version: 20181214084328) do
     t.integer  "workflow_series_id", limit: 4
     t.datetime "created_at",                       null: false
     t.datetime "updated_at",                       null: false
+    t.string   "project",            limit: 255
+    t.string   "uid",                limit: 255
   end
 
+  add_index "workflows", ["uid"], name: "index_workflows_on_uid", unique: true, using: :btree
   add_index "workflows", ["user_id"], name: "index_workflows_on_user_id", using: :btree
   add_index "workflows", ["workflow_series_id"], name: "index_workflows_on_workflow_series_id", using: :btree
 

@@ -128,8 +128,8 @@ class JobsController < ApplicationController
 
     if @job.from_submission?
       User.sync_challenge_job!(@job.id)
-    else
-      User.sync_job!(@context, @job.id) if @job.user_id == @context.user_id
+    elsif @job.user_id == @context.user_id
+      User.sync_job!(@context, @job.id)
     end
   end
 end

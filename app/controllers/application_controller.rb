@@ -170,6 +170,9 @@ class ApplicationController < ActionController::Base
       else
         pathify(item)
       end
+    when "workflow"
+      return workflow_analyses_path(item) if request.referer =~ /analyses/
+      workflow_path(item)
     when "space"
       discuss_space_path(item)
     when "task"
@@ -182,21 +185,15 @@ class ApplicationController < ActionController::Base
   end
 
   def item_from_uid(uid, specified_klass = nil)
-    if  uid =~ /^(job|app|file)-(.{24,})$/
+    if  uid =~ /^(job|app|file|workflow)-(.{24,})$/
       klass = {
         "app" => App,
         "file" => UserFile,
         "job" => Job,
+        "workflow" => Workflow,
       }[$1]
       raise "Class '#{klass}' did not match specified class '#{specified_klass}'" if specified_klass && klass != specified_klass
       klass.find_by_uid!(uid)
-    elsif uid =~ /^(workflow)-(.{24})$/
-      klass = {
-        "workflow" => Workflow,
-        "file" => Node,
-      }[$1]
-      raise "Class '#{klass}' did not match specified class '#{specified_klass}'" if specified_klass && klass != specified_klass
-      klass.find_by!(dxid: uid)
     elsif uid =~ /^(app-series|workflow-series|appathon|comparison|note|discussion|answer|user|license|space|challenge)-(\d+)$/
       klass = {
         "app-series" => AppSeries,
@@ -229,6 +226,10 @@ class ApplicationController < ActionController::Base
   end
 
   def get_item_array_from_params
+    if params[:workflow_id].present?
+      workflow = Workflow.find_by_uid(params[:workflow_id])
+      return [workflow]
+    end
     if params[:discussion_id].present?
       discussion = Discussion.find(params[:discussion_id])
       if params[:answer_id].present?

@@ -1,0 +1,5 @@
+en:
+  api:
+    errors:
+      invalid_permission: You have read-only access to the %{title} within the cooperative space
+      invalid_scope: Scopes can only be an Array of Strings that are one of public, private or a space-xxxx id.

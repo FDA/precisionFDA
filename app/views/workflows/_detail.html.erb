@@ -57,8 +57,8 @@
         <% else %>
           <li class="dropdown-header">Revisions</li>
           <% @revisions.each do |workflow| %>
-            <li class="<% if workflow.dxid == params[:id] %>active<% end %>">
-              <a href="<%= action_name == 'index' ? workflow_analyses_path(workflow.dxid) : workflow_path(workflow.dxid) %>" class="clearfix">
+            <li class="<% if workflow.uid == params[:id] %>active<% end %>">
+              <a href="<%= action_name == 'index' ? workflow_analyses_path(workflow) : workflow_path(workflow) %>" class="clearfix">
                 <span class="workflow-revision"><%= workflow.revision %></span>
                 <% if @revisions.first.id == workflow.id %>
                   <span class="workflow-label-latest label label-info pull-right">Latest</span>
@@ -71,12 +71,12 @@
     </div>
     <% if @workflow.editable_by?(@context) %>
     <div class="btn-group" <% if @revisions.first.dxid != @workflow.dxid %>data-toggle="tooltip" data-placement="top" title="Only latest revision is editable"<% end %>>
-      <a class="btn btn-default <% if @revisions.first.dxid != @workflow.dxid %>disabled<% end %>" href="<%= edit_workflow_path(@workflow.dxid) %>">
+      <a class="btn btn-default <% if @revisions.first.dxid != @workflow.dxid %>disabled<% end %>" href="<%= edit_workflow_path(@workflow) %>">
         <span class="fa fa-edit"></span> Edit
       </a>
     </div>
     <% end %>
-    <a class="btn btn-default" href="<%= fork_workflow_path(@workflow.dxid) %>">
+    <a class="btn btn-default" href="<%= fork_workflow_path(@workflow) %>">
       <span class="fa fa-code-fork"></span> Fork
     </a>
     <div class="btn-group">
@@ -87,12 +87,12 @@
       <ul class="dropdown-menu">
         <li class="dropdown-header">Export To:</li>
         <li data-turbolinks="false">
-          <%= link_to cwl_export_workflow_path(@workflow.dxid), data: { confirm: 'You are about to download a CWL Workflow package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+          <%= link_to cwl_export_workflow_path(@workflow), data: { confirm: 'You are about to download a CWL Workflow package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
             CWL Workflow
           <% end %>
         </li>
         <li data-turbolinks="false">
-          <%= link_to wdl_export_workflow_path(@workflow.dxid), data: { confirm: 'You are about to download a WDL Workflow package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+          <%= link_to wdl_export_workflow_path(@workflow), data: { confirm: 'You are about to download a WDL Workflow package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
             WDL Workflow
           <% end %>
         </li>
@@ -100,9 +100,18 @@
     </div>
   </div>
   <div class="btn-group pull-right">
-    <%= link_to new_workflow_analysis_path(@workflow.dxid), class: "btn btn-primary" do %>
-      Run Workflow&nbsp;&nbsp;<span class="badge rev-badge"><%= "rev#{@workflow.revision}" %></span>
+    <% if action_name == 'index' || action_name == 'show' %>
+      <%= link_to new_workflow_analysis_path(@workflow), class: "btn btn-primary" do %>
+        Run Workflow&nbsp;&nbsp;<span class="badge rev-badge"><%= "rev#{@workflow.revision}" %></span>
+      <% end %>
+      <% if @workflow.allow_batch_run? %>
+        <%= link_to batch_workflow_workflow_path(@workflow), class: "btn btn-primary" do %>
+          Run Batch Workflow&nbsp;&nbsp;<span class="badge rev-badge"><%= "rev#{@workflow.revision}" %></span>
+        <% end %>
+      <% end %>
     <% end %>
+    <%= render "_partials/btn_publish", item: @workflow %>
+    <%= render "_partials/btn_copy_to_cooperative", item: @workflow %>
   </div>
 </div>
 
@@ -131,7 +140,13 @@
       <span class="tab-label">README</span>
     </a>
   </li>
+
   <% end %>
+    <li role="presentation">
+    <a href="#comments" aria-controls="workflow-diagram" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
+      <span class="tab-label">Comment</span>
+    </a>
+  </li>
 </ul>
 <% end %>
 
@@ -157,30 +172,34 @@
 
   <% if @workflow.present? %>
     <div role="tabpanel" class="tab-pane tab-pane-padded <% if !@analyses_grid.present? %>active<% end %>" id="workflow-spec">
-      <div class="list-group">
-        <div class="list-group-item app-spec-group">
-          <div class="app-spec">
-            <div class="row">
-              <div class="app-spec-column col-md-12">
-                <div class="spec-heading">Inputs</div>
-                <table class="table table-striped table-spec table-spec-input">
-                  <tbody>
-                    <%= render "workflows/spec_rows", spec: @workflow.all_input_spec %>
-                  </tbody>
-                </table>
-              </div>
-              <div class="app-spec-column col-md-12">
-                <div class="spec-heading">Outputs</div>
-                <table class="table table-striped table-spec table-spec-output">
-                  <tbody>
-                    <%= render "workflows/spec_rows", spec: @workflow.all_output_spec %>
-                  </tbody>
-                </table>
+      <% if action_name == 'batch_workflow' %>
+        <%= render "/workflows/batch_workflows/run_batch_page", workflow: @workflow %>
+      <% else %>
+        <div class="list-group">
+          <div class="list-group-item app-spec-group">
+            <div class="app-spec">
+              <div class="row">
+                <div class="app-spec-column col-md-12">
+                  <div class="spec-heading">Inputs</div>
+                  <table class="table table-striped table-spec table-spec-input">
+                    <tbody>
+                      <%= render "workflows/spec_rows", spec: @workflow.all_input_spec %>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="app-spec-column col-md-12">
+                  <div class="spec-heading">Outputs</div>
+                  <table class="table table-striped table-spec table-spec-output">
+                    <tbody>
+                      <%= render "workflows/spec_rows", spec: @workflow.all_output_spec %>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      <% end %>
     </div>
 
     <div role="tabpanel" class="tab-pane tab-pane-padded" id="workflow-diagram">
@@ -195,4 +214,13 @@
     </div>
     <% end %>
   <% end %>
+
+  <div role="tabpanel"  class="tab-pane tab-pane-padded"  id="comments">
+      <div class="row">
+        <div class="col-md-12">
+          <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @workflow if(@workflow.present? && action_name != 'batch_workflow') %>
+        </div>
+      </div>
+  </div>
 </div>
+

@@ -162,6 +162,11 @@ module SpacesHelper
         active: is_active(action, 'assets'),
         count: counts[:assets]
       },
+      workflows: {
+        url: workflows_space_path(space),
+        active: is_active(action, 'workflows'),
+        count: counts[:workflows]
+      },
       reports: {
         url: reports_space_path(space),
         active: is_active(action, 'reports'),

@@ -1,6 +1,5 @@
 class CopyService
   class JobCopier
-
     def initialize(api:, user:, file_copier: nil)
       @api = api
       @user = user
@@ -41,8 +40,6 @@ class CopyService
     end
 
     def copy_app(new_job, job, scope)
-
     end
-
   end
 end

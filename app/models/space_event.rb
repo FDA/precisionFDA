@@ -25,6 +25,7 @@ class SpaceEvent < ActiveRecord::Base
     file
     asset
     comparison
+    workflow
     note
   )
 
@@ -46,6 +47,7 @@ class SpaceEvent < ActiveRecord::Base
     asset_added
     asset_deleted
     comparison_added
+    workflow_added
     comment_added
     comment_edited
     comment_deleted
@@ -71,6 +73,7 @@ class SpaceEvent < ActiveRecord::Base
     :file       => %i(name uid),
     :asset      => %i(name uid),
     :comparison => %i(name),
+    :workflow   => %i(name),
   }
 
   belongs_to :user
@@ -105,7 +108,7 @@ class SpaceEvent < ActiveRecord::Base
     case object_type
     when "file", "asset"
       data["uid"]
-    when "space", "task", "job", "comparison"
+    when "space", "task", "job", "comparison", "workflow"
       data["name"]
     when "comment"
       data["body"]

@@ -174,13 +174,16 @@ class ObjectListModel
 
   getObjects: (offset = 0, limit = 100) ->
     return $.Deferred().resolve() if !@apiEndpoint?
+    rootContext = ko.contextFor(@selectorModel.modal.get(0)).$root
     if @className == 'file'
       @apiParams['offset'] = offset
       @apiParams['limit'] = limit
+      @apiParams['scopes'] = rootContext.accessibleScope if rootContext.accessibleScope
+
     params = _.defaults(@apiParams, {
       describe:
         include:
-          all_tags_list: true
+          all_tags_list: false
           user: true
           org: true
     })

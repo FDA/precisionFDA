@@ -1,6 +1,5 @@
 class CopyService
   class FileCopier
-
     def initialize(api:, user:)
       @api = api
       @user = user
@@ -45,7 +44,7 @@ class CopyService
         next unless file.state == UserFile::STATE_CLOSED
         next if destination_project == file.project
 
-        projects[file.project] = [] unless projects.has_key?(file.project)
+        projects[file.project] ||= []
         projects[file.project].push(file)
       end
     end
@@ -60,6 +59,5 @@ class CopyService
       new_file.save!
       new_file
     end
-
   end
 end
