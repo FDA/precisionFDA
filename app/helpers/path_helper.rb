@@ -35,6 +35,8 @@ module PathHelper
       discussion_answer_comments_path(item.discussion, item.user.dxuser)
     when "space"
       space_comments_path(item)
+    when "workflow"
+      workflow_comments_path(item)
     when "task"
       space_task_comments_path(item.space_id, item)
     when "meta-appathon"

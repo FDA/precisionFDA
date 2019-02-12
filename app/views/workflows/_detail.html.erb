@@ -140,7 +140,13 @@
       <span class="tab-label">README</span>
     </a>
   </li>
+
   <% end %>
+    <li role="presentation">
+    <a href="#comments" aria-controls="workflow-diagram" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
+      <span class="tab-label">Comment</span>
+    </a>
+  </li>
 </ul>
 <% end %>
 
@@ -208,4 +214,13 @@
     </div>
     <% end %>
   <% end %>
+
+  <div role="tabpanel"  class="tab-pane tab-pane-padded"  id="comments">
+      <div class="row">
+        <div class="col-md-12">
+          <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @workflow if(@workflow.present? && action_name != 'batch_workflow') %>
+        </div>
+      </div>
+  </div>
 </div>
+

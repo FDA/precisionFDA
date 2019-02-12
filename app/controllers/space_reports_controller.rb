@@ -108,6 +108,7 @@ class SpaceReportsController < ApplicationController
     jobs = Job.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).count
     comparisons = Comparison.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).count
     apps = App.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).count
+    workflows = Workflow.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).count
     assets = Asset.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).count
     notes = Note.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).count
     tasks = @space.tasks.where(filters).where("created_at <= ?", end_date).count
@@ -122,6 +123,7 @@ class SpaceReportsController < ApplicationController
       notes: notes,
       tasks: tasks,
       comments: comments,
+      workflows: workflows,
     }
   end
 
@@ -137,6 +139,8 @@ class SpaceReportsController < ApplicationController
       Comparison.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).order(created_at: sort)
     when 'apps'
       App.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).order(created_at: sort)
+    when 'workflows'
+      Workflow.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).order(created_at: sort)
     when 'assets'
       Asset.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).order(created_at: sort)
     when 'notes'
@@ -171,7 +175,7 @@ class SpaceReportsController < ApplicationController
       object.name
     when "comments"
       object.body
-    when "apps", "notes"
+    when "apps", "notes", "workflows"
       object.title
     else
       ""
@@ -242,6 +246,7 @@ class SpaceReportsController < ApplicationController
     jobs = Job.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).includes(:user)
     comparisons = Comparison.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).includes(:user)
     apps = App.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).includes(:user)
+    workflows = Workflow.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).includes(:user)
     assets = Asset.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).includes(:user)
     notes = Note.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).includes(:user)
     tasks = @space.tasks.where(filters).where("created_at <= ?", end_date).includes(:user)
@@ -256,6 +261,7 @@ class SpaceReportsController < ApplicationController
       notes: describe_objects_for_export(notes, "notes"),
       tasks: describe_objects_for_export(tasks, "tasks"),
       comments: describe_objects_for_export(comments, "comments"),
+      workflows: describe_objects_for_export(workflows, "workflows"),
     }.to_a
   end
 

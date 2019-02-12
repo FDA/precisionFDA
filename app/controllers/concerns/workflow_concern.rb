@@ -78,7 +78,7 @@ module WorkflowConcern
 
     api = DNAnexusAPI.new(@context.token)
     permission = api.call(workflow.dxid, "listProjects")[workflow.project]
-    fail(t('api.run_workflow.permission_error', title: workflow.title), permission: permission) if permission == 'VIEW'
+    fail(t('api.errors.invalid_permission', title: workflow.title), permission: permission) if permission == 'VIEW'
     response = api.run_workflow(workflow.dxid, workflow_params)
     analysis_dxid = response["id"]
     analysis = Analysis.create!(name: analysis_name, workflow_id: workflow.id, dxid: analysis_dxid, user_id: current_user.id)
@@ -133,7 +133,6 @@ module WorkflowConcern
         job = Job.create!(opts)
         job.input_file_ids = input_file_ids
         job.save!
-        Event::JobRun.create_for(job, @context.user)
       end
     end
     analysis_dxid
