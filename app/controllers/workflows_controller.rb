@@ -261,18 +261,23 @@ class WorkflowsController < ApplicationController
   def output_folders_list
     parent_folder_id ||= params[:parent_folder_id]
 
-    folders = Folder
-                .private_for(@context)
-                .editable_by(@context)
-                .where(parent_folder_id: parent_folder_id)
+    workflow = Workflow.find_by_uid(params[:id])
+    folders =
+      if workflow.in_space?
+        space = Space.from_scope(workflow.scope)
+        Folder.accessible_by_space(space)
+      else
+        Folder
+          .private_for(@context)
+          .editable_by(@context)
+          .where(parent_folder_id: parent_folder_id)
+      end
     if folders.blank?
       result = { folders: [] }
     else
       folders_attr = folders.pluck(:id, :name)
       result = { folders: folders_attr.map{ |el| { id: el[0], name: el[1] } } }
     end
-
-    # render json: result
   end
 
   # usage on the platform
@@ -294,6 +299,8 @@ class WorkflowsController < ApplicationController
   # params[:parent_folder_id] = nil
   # params[:public] = false
   def output_folder_create
+    workflow = Workflow.find_by_uid(params[:id])
+
     is_public_folder = params[:public] == "true"
 
     if is_public_folder
@@ -305,6 +312,9 @@ class WorkflowsController < ApplicationController
         redirect_to explore_files_path
         return
       end
+    elsif workflow.in_space?
+      parent_folder = Folder.editable_by(@context).find_by(id: params[:parent_folder_id])
+      scope = workflow.scope
     else
       parent_folder = Folder.editable_by(@context).find_by(id: params[:parent_folder_id])
       scope = "private"

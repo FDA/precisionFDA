@@ -580,6 +580,9 @@ class User < ActiveRecord::Base
         if state != job.state
           output_file_cache.each do |output_file|
             user_file = UserFile.create!(output_file)
+            if user_file.scope =~ /^space-(\d+)$/
+              user_file.update(scoped_parent_folder_id: user_file.parent_folder_id)
+            end
             Event::FileCreated.create_for(user_file, user)
           end
           job.run_outputs = output
