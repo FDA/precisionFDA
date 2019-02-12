@@ -13,12 +13,16 @@ class WorkflowsController < ApplicationController
   end
 
   def show
+
+
     @workflow = Workflow.accessible_by(@context).find_by_uid(params[:id])
     if @workflow.nil?
       flash[:error] = "Sorry, this workflow does not exist or is not accessible by you"
       redirect_to workflows_path
       return
     end
+
+    comment_data
 
     @revisions = @workflow.workflow_series.accessible_revisions(@context).select(:title, :id, :dxid, :uid, :revision)
 
@@ -83,6 +87,8 @@ class WorkflowsController < ApplicationController
       end
       batch_hash = Analysis.batch_hash(analyses.where("batch_id is not NULL"))
       js_param[:batch_hash] = batch_hash
+
+      comment_data
 
       js_param[:analyses_jobs] = Analysis.job_hash(analyses.where(batch_id: nil), workflow_details: true, batches: batch_hash)
     else
@@ -374,4 +380,21 @@ class WorkflowsController < ApplicationController
       workflow: @workflow
     )
   end
+
+  private
+
+  def comment_data
+    @items_from_params = [@workflow]
+    @item_path = pathify(@workflow)
+    @item_comments_path = pathify_comments(@workflow)
+
+    if @workflow.in_space?
+      space = item_from_uid(@workflow.scope)
+      @comments = Comment.where(commentable: space, content_object: @workflow).order(id: :desc).page params[:comments_page]
+    else
+      @comments = @workflow.root_comments.order(id: :desc).page params[:comments_page]
+    end
+
+  end
+
 end

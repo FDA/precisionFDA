@@ -133,7 +133,6 @@ module WorkflowConcern
         job = Job.create!(opts)
         job.input_file_ids = input_file_ids
         job.save!
-        Event::JobRun.create_for(job, @context.user)
       end
     end
     analysis_dxid

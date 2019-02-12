@@ -181,6 +181,7 @@ Rails.application.routes.draw do
         get 'output_folder_update'
       end
       post 'convert_file_with_strings', on: :collection, as: 'convert_file_with_strings'
+      resources :comments
     end
 
     resources :jobs, except: :index do

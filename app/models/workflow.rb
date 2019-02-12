@@ -29,6 +29,8 @@ class Workflow < ActiveRecord::Base
 
   store :spec, accessors: [:input_spec, :output_spec, :internet_access, :instance_type], coder: JSON
 
+  acts_as_commentable
+
   def stages
     input_spec["stages"]
   end

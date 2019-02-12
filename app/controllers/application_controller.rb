@@ -170,6 +170,9 @@ class ApplicationController < ActionController::Base
       else
         pathify(item)
       end
+    when "workflow"
+      return workflow_analyses_path(item) if request.referer =~ /analyses/
+      workflow_path(item)
     when "space"
       discuss_space_path(item)
     when "task"
@@ -223,6 +226,10 @@ class ApplicationController < ActionController::Base
   end
 
   def get_item_array_from_params
+    if params[:workflow_id].present?
+      workflow = Workflow.find_by_uid(params[:workflow_id])
+      return [workflow]
+    end
     if params[:discussion_id].present?
       discussion = Discussion.find(params[:discussion_id])
       if params[:answer_id].present?
