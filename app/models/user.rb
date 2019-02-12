@@ -409,7 +409,7 @@ class User < ActiveRecord::Base
     token = context.token
     user = User.find(user_id)
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-    jobs.where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs_batch|
+    jobs.where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).limit(SYNC_JOBS_LIMIT).each_slice(1000) do |jobs_batch|
 
       jobs_hash = jobs_batch.map { |j| [j.dxid, j] }.to_h
       response = DNAnexusAPI.new(token).call("system", "findJobs",
@@ -419,6 +419,7 @@ class User < ActiveRecord::Base
         parentJob: nil,
         describe: true,)
       response["results"].each do |result|
+        next if result.blank?
         sync_job_state(result, jobs_hash[result["id"]], user, token)
       end
     end

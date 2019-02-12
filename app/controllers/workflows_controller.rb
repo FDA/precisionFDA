@@ -72,9 +72,10 @@ class WorkflowsController < ApplicationController
       js_param[:workflow] = @workflow.slice(:id, :dxid, :uid, :readme, :spec)
     end
 
-    jobs = Job.includes(:analysis).where(user_id: @context.user_id).where.not(state: Job::TERMINAL_STATES)
-    jobs.each { |job| User.sync_job!(@context, job.id) }
     User.sync_jobs!(@context)
+
+    jobs = Job.includes(:analysis).where(user_id: @context.user_id).where.not(state: Job::TERMINAL_STATES).limit(SYNC_JOBS_LIMIT)
+    jobs.each { |job| User.sync_job!(@context, job.id) }
 
     if @workflow.present?
       analysis_arel = Analysis.arel_table
