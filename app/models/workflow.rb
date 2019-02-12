@@ -29,12 +29,14 @@ class Workflow < ActiveRecord::Base
 
   store :spec, accessors: [:input_spec, :output_spec, :internet_access, :instance_type], coder: JSON
 
+  acts_as_commentable
+
   def stages
     input_spec["stages"]
   end
 
   def stage(slot_id)
-    stages.find {|stage| stage[:slotId] == slot_id}
+    stages.find { |stage| stage[:slotId] == slot_id }
   end
 
   def allow_batch_run?
@@ -52,7 +54,7 @@ class Workflow < ActiveRecord::Base
   end
 
   def allow_batch?(input, slot_id)
-    input["parent_slot"] == slot_id && input["requiredRunInput"] && ["file", "string"].include?(input["class"])
+    input["parent_slot"] == slot_id && input["requiredRunInput"] && %w(file string).include?(input["class"])
   end
 
   def all_input_spec
@@ -128,11 +130,15 @@ class Workflow < ActiveRecord::Base
   end
 
   def stages_ids
-    stages.map{|stage| stage['slotId']}
+    stages.map { |stage| stage['slotId'] }
   end
 
   def update_stages!(stages)
     self.input_spec = input_spec.merge("stages" => stages)
     save!
+  end
+
+  def describe_fields
+    %w(title name edit_version revision readme spec dxid uid)
   end
 end

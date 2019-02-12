@@ -18,7 +18,6 @@
   end
 
   g.column name: 'Name', attribute: 'name', assoc: :job do |submission|
-    #binding.pry
     [content_tag(:a, submission.job.name,
       :"tabindex" => 0,
       :"role" => "button",

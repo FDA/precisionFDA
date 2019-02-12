@@ -112,6 +112,7 @@ Rails.application.routes.draw do
     post '/api/list_apps', to: 'api#list_apps'
     post '/api/list_assets', to: 'api#list_assets'
     post '/api/list_jobs', to: 'api#list_jobs'
+    post '/api/list_workflows', to: 'api#list_workflows'
     post '/api/describe_license', to: 'api#describe_license'
     post '/api/accept_licenses', to: 'api#accept_licenses'
     post '/api/run_app', to: 'api#run_app'
@@ -180,6 +181,7 @@ Rails.application.routes.draw do
         get 'output_folder_update'
       end
       post 'convert_file_with_strings', on: :collection, as: 'convert_file_with_strings'
+      resources :comments
     end
 
     resources :jobs, except: :index do
