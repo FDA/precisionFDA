@@ -1,10 +1,10 @@
 class SpacesController < ApplicationController
 
   before_action :init_parent_folder, only: [:files]
-  before_action :find_space_and_membership, only: [:show, :discuss, :members, :feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :reports]
-  before_action :content_counters, only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :reports]
+  before_action :find_space_and_membership, only: [:show, :discuss, :members, :feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
+  before_action :content_counters, only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
 
-  layout "space_content", only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :reports]
+  layout "space_content", only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
 
   def index
     spaces = Space.accessible_by(@context)
@@ -26,7 +26,7 @@ class SpacesController < ApplicationController
   end
 
   def discuss
-    @associate_with_options = ['Note', 'File', 'App', 'Job', 'Asset', 'Comparison']
+    @associate_with_options = ['Note', 'File', 'App', 'Job', 'Asset', 'Comparison', 'Workflow']
     @items_from_params = [@space]
     @item_path = pathify(@space)
     @item_comments_path = pathify_comments(@space)
@@ -517,6 +517,17 @@ class SpacesController < ApplicationController
     })
   end
 
+  def workflows
+    @workflows = Workflow.accessible_by_space(@space)
+    @workflows_grid = initialize_grid(@workflows, {
+      name: 'workflows',
+      order: 'workflows.name',
+      order_direction: 'desc',
+      per_page: 25,
+      include: [:user, { user: :org }]
+    })
+  end
+
   def feed
     if (events = @space.space_events).any?
       @start_date = events.order(created_at: :asc).first.created_at.strftime("%m/%d/%Y")
@@ -599,7 +610,7 @@ class SpacesController < ApplicationController
     {
       foldersPath: node.is_a?(Folder) ? pathify_folder(node) : nil,
       id: node.id,
-      name: node.name,
+      name: ERB::Util.h(node.name),
       rename_path: node.is_a?(Folder) ? rename_folder_spaces_path(node) : rename_file_path(node),
       type: node.klass
     }

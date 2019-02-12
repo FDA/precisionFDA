@@ -73,6 +73,15 @@ class SpacesContentView
             editable: true,
             scopes: scopes
           }
+        },
+        {
+          className: "workflow",
+          name: "Workflows",
+          apiEndpoint: "list_workflows",
+          apiParams: {
+            editable: true,
+            scopes: scopes
+          }
         }
       ]
     })

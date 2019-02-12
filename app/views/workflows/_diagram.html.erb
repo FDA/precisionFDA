@@ -1,7 +1,9 @@
 <div class="workflows standard container">
   <div class="workflows container jumbotron">
+    <!-- ko if: length() > -1 -->
       <ul class="stage-inputs-container" data-bind="sortable: {template: 'stage-inputs', data: slots}">
       </ul>
+    <!-- /ko -->
   </div>
 </div>
 <script id='stage-inputs'  type='text/html'>

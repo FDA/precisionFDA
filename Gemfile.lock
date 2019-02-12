@@ -166,7 +166,7 @@ GEM
     multi_json (1.11.2)
     multi_xml (0.6.0)
     multipart-post (2.0.0)
-    mysql2 (0.3.20)
+    mysql2 (0.4.10)
     nokogiri (1.8.5)
       mini_portile2 (~> 2.3.0)
     nori (2.6.0)
@@ -176,7 +176,11 @@ GEM
     parallel (1.12.1)
     parser (2.5.0.5)
       ast (~> 2.4.0)
+    pdf-core (0.7.0)
     powerpack (0.1.1)
+    prawn (2.2.2)
+      pdf-core (~> 0.7.0)
+      ttfunk (~> 1.5)
     premailer (1.8.7)
       css_parser (>= 1.4.5)
       htmlentities (>= 4.0.0)
@@ -329,6 +333,7 @@ GEM
     thor (0.19.4)
     thread_safe (0.3.6)
     tilt (2.0.5)
+    ttfunk (1.5.1)
     turbolinks (5.0.0)
       turbolinks-source (~> 5)
     turbolinks-source (5.2.0)
@@ -393,9 +398,10 @@ DEPENDENCIES
   kaminari
   letter_opener
   local_time (~> 1.0, >= 1.0.3)
-  mysql2 (~> 0.3.18)
+  mysql2
   nokogiri (~> 1.8, >= 1.8.5)
   paloma (= 5.0.0)
+  prawn
   premailer-rails
   pronto (~> 0.9.5)
   pronto-rubocop (~> 0.9.0)

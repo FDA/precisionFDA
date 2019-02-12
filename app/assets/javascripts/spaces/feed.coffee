@@ -11,6 +11,7 @@ class SpacesFeedView
       when 'file' then return '#df6dcc'
       when 'asset' then return '#56d699'
       when 'comparison' then return '#e05f5b'
+      when 'workflow' then return '#983c49'
       when 'note' then return '#f0ad4e'
       else return ''
 
@@ -26,6 +27,7 @@ class SpacesFeedView
       when 'file' then return 'fa-files-o'
       when 'asset' then return 'fa-file-zip-o'
       when 'comparison' then return 'fa-bullseye'
+      when 'workflow' then return 'fa-flash'
       when 'note' then return 'fa-sticky-note'
       else return ''
 

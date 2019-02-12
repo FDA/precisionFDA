@@ -23,8 +23,8 @@
       :"role" => "button",
       :"data-trigger" => "focus",
       :"data-toggle" => "popover",
-      :"name" => "#{submission.name}",
-      :"desc" => "#{submission.desc}",
+      :"name" => "#{ERB::Util.h(submission.name)}",
+      :"desc" => "#{ERB::Util.h(submission.desc)}",
       :"class" => "strong"), {class: "submission-popover"}]
   end
 

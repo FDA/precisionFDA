@@ -1,6 +1,5 @@
 class CopyService
   class ComparisonCopier
-
     def initialize(api:, user:, file_copier: nil)
       @api = api
       @user = user
@@ -31,6 +30,5 @@ class CopyService
       new_comparison.outputs = file_copier.copy(comparison.outputs, scope).all
       new_comparison.save!
     end
-
   end
 end

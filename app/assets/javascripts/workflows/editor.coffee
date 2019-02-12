@@ -2,7 +2,7 @@ class WorkflowEditorModel
   setSlots: (workflow) ->
     if workflow? && !@slots().length > 0
       for stage in workflow.spec.input_spec["stages"]
-        Precision.api('/api/describe', { uid: stage.app_dxid }, null, null, false)
+        Precision.api('/api/describe', { uid: stage.app_uid }, null, null, false)
           .done((app) =>
             inputs = app.spec.input_spec.map (input) ->
               $.extend({}, input, {
@@ -147,6 +147,10 @@ class WorkflowEditorModel
       availapps
     )
 
+    $('#mapper-modal').on 'hidden.bs.modal', () ->
+      if $('.modal.in').length > 0
+        $('body').addClass('modal-open')
+
   filterSetOfObjects: (objects, query) ->
     return objects if _.isEmpty(query)
     if _.isArray(query)
@@ -221,14 +225,13 @@ class WorkflowEditorModel
       @slotBeingEdited().prevSlot(slot)
       @sortSlots()
       config = false
-      ko.utils.arrayForEach(@slotBeingEdited().inputs(), (input) =>
+      ko.utils.arrayForEach(@slotBeingEdited().inputs(), (input) ->
         if input.optional == false
           config = input.configured()
       )
       @slotBeingEdited().configured(config)
       @configureEligibleSlots()
-      $('#mapper-modal').removeClass('in')
-        .attr('aria-hidden', true)
+      $('#mapper-modal').modal('hide')
     else
       @errorMessage("Input Output Type do not match")
       $('.workflows-alert-danger').fadeIn().delay(1000).fadeOut();
@@ -268,6 +271,7 @@ class WorkflowEditorModel
     for slot in @slots()
       slot_details = {
         dxid: slot.id,
+        uid: slot.uid,
         name: slot.name(),
         instanceType: slot.instanceType(),
         inputs: slot.inputs(),
@@ -308,7 +312,7 @@ class WorkflowEditorModel
           outputs = app.spec.output_spec.map((output) => $.extend({}, output, {values: {id: null, name: null}}))
           spec =
             name: app.name
-            dxid: app.dxid
+            uid: app.uid
             instanceType: app.spec.instance_type
             revision: app.revision
             inputs: inputs
@@ -460,6 +464,7 @@ class IOModel
 class slotModel
   constructor: (spec, viewModel, stage = null, configured = false) ->
     @id = spec.dxid
+    @uid = spec.uid
     @slotId = ko.computed( () ->
       if stage?
         stage["slotId"]
