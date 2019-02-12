@@ -126,7 +126,7 @@ class AppInputModel
         listRelatedParams:
           # editable: true
           scopes: @viewModel.contentScopes()
-          classes: ["file", "note", "discussion", "answer", "comparison", "app", "asset", "job"]
+          classes: ["file", "note", "discussion", "answer", "comparison", "app", "asset", "job", "workflow"]
         listModelConfigs: [
           {
             className: "file"
