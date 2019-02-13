@@ -543,7 +543,12 @@ class SpacesController < ApplicationController
     @sides = SpaceEvent.sides.map { |k, v| {name: k, value: v} }
     @overall_users = @space.space_memberships.active.count
     object_types = SpaceEvent.object_type_counters(Date.today.beginning_of_week.to_time, Time.now, {space_id: @space.id})
-    js({ space_uid: @space.uid, space_id: @space.id, scopes: @space.accessible_scopes_for_move, object_types: object_types })
+    js({
+      space_uid: @space.uid,
+      space_id: @space.id,
+      scopes: @space.accessible_scopes_for_move,
+      space_created_at: @space.created_at,
+      object_types: object_types })
   end
 
   def reports
@@ -555,7 +560,8 @@ class SpacesController < ApplicationController
     @users = @space.users.map { |user| { name: user.full_name, value: user.id } }
     js( space_uid: @space.uid, space_id: @space.id,
         scopes: @space.accessible_scopes_for_move,
-        counts: counters, space_created_at: @space.created_at )
+        counts: counters,
+        space_created_at: @space.created_at )
   end
 
   def apps_and_files
