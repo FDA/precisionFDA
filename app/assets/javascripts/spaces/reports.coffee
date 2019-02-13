@@ -89,7 +89,7 @@ class SpacesReportsView
 
   resetDateFilters: () ->
     $('#select_date_range button').removeClass('active')
-    @setDateRange('reset')
+    @setDateRange('space_created_at')
 
   resetUserFilters: () ->
     @filtersForm[0].querySelectorAll('select').forEach(
@@ -116,7 +116,7 @@ class SpacesReportsView
       when 'week' then date_at = date_at.startOf('week')
       when 'month' then date_at = date_at.startOf('month')
       when 'year' then date_at = date_at.startOf('year')
-      when 'reset' then date_at = moment(@spaceCreatedAt)
+      when 'space_created_at' then date_at = moment(@spaceCreatedAt)
       else return false
 
     @dateAtDatepicker.setValue(date_at)
@@ -144,7 +144,7 @@ class SpacesReportsView
     path = "/spaces/#{@space_id}/space_reports/download_report?#{params}"
     return path
 
-  chooseReportFormat: () =>
+  chooseReportFormat: () ->
     $('#chooseReportFormat').modal('show')
     return false
 
