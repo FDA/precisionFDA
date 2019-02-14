@@ -107,7 +107,9 @@ class WorkflowsController < ApplicationController
       order: 'analyses.id',
       order_direction: 'desc',
       per_page: 100,)
-    @my_workflows = WorkflowSeries.editable_by(@context).order(name: :asc).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
+    @my_workflows = WorkflowSeries.eager_load(latest_revision_workflow: [user: :org])
+                        .editable_by(@context).order(name: :asc)
+                        .map { |series| series.latest_accessible(@context) }.compact
 
     js js_param.merge({ batches: batch_hash })
   end
