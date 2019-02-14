@@ -2,6 +2,9 @@ AllCops:
   Exclude:
   - 'db/schema.rb'
   DisabledByDefault: true
+  DisplayCopNames: true
+  StyleGuideCopsOnly: false
+  TargetRubyVersion: 2.2.3
 
 Layout/AccessModifierIndentation:
   EnforcedStyle: indent
@@ -527,6 +530,10 @@ Metrics/LineLength:
 Metrics/ParameterLists:
   Max: 5
   CountKeywordArgs: false
+
+Metrics/MethodLength:
+  Enabled: true
+  Max: 20
 
 Layout/BlockAlignment:
   EnforcedStyleAlignWith: either
