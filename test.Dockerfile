@@ -9,5 +9,4 @@ RUN mkdir -p $APP_DIR
 COPY Gemfile Gemfile.lock $APP_DIR/
 RUN bundle install
 COPY . $APP_DIR
-COPY config/database.test.yml $APP_DIR/config/database.yml
 CMD $APP_DIR/docker-test-entrypoint.sh

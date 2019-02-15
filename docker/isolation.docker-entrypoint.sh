@@ -2,6 +2,8 @@
 
 dockerize -wait tcp://db:3306
 
+cp config/database.yml.sample config/database.yml
+
 if [ -d "/mysql-volume/precisionfda@002dui@002dtest" ]; then
   bundle exec rake db:migrate
 else
