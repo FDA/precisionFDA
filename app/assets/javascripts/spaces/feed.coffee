@@ -115,8 +115,7 @@ class SpacesFeedView
 
   resetDateFilters: () ->
     $('#select_date_range button').removeClass('active')
-    $('#select_date_range button[data-type="week"]').addClass('active')
-    @setDateRange()
+    @setDateRange('space_created_at')
 
   resetUserFilters: () ->
     @filtersForm[0].querySelectorAll('select').forEach(
@@ -144,6 +143,7 @@ class SpacesFeedView
       when 'week' then date_at = date_at.startOf('week')
       when 'month' then date_at = date_at.startOf('month')
       when 'year' then date_at = date_at.startOf('year')
+      when 'space_created_at' then date_at = moment(@spaceCreatedAt)
       else return false
 
     @dateAtDatepicker.setValue(date_at)
@@ -171,6 +171,7 @@ class SpacesFeedView
       return true
 
   constructor: (params) ->
+    @spaceCreatedAt = params.space_created_at
     @space_id = params.space_id
     @filtersForm = $('#feed_filters_form form')
     @objectTypes = ko.observableArray(params.object_types)

@@ -54,7 +54,7 @@ class SpacesController < ApplicationController
         @space.space_memberships
       end
 
-    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move, members: @members })
+    js(common_fields.merge(members: @members))
   end
 
   def verify
@@ -429,7 +429,7 @@ class SpacesController < ApplicationController
       @group_tasks = @space.tasks.where(user_id: user_ids)
     end
 
-    js({ space_uid: @space.uid, space_id: @space.id, scopes: @space.accessible_scopes_for_move, users: users })
+    js(common_fields.merge(users: users))
   end
 
   def notes
@@ -467,7 +467,7 @@ class SpacesController < ApplicationController
 
     @show_checkboxes = @space.accessible_by?(@context)
 
-    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move, space_id: @space.id }.merge(files_ids_with_descriptions(nodes, @space)))
+    js(common_fields.merge(files_ids_with_descriptions(nodes, @space)))
   end
 
   def apps
@@ -479,7 +479,7 @@ class SpacesController < ApplicationController
       per_page: 25,
       include: [{user: :org}, :latest_version_app, {taggings: :tag}]
     })
-    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
+    js(common_fields)
   end
 
   def jobs
@@ -491,7 +491,7 @@ class SpacesController < ApplicationController
       per_page: 25,
       include: [{user: :org}, {taggings: :tag}]
     })
-    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
+    js(common_fields)
   end
 
   def assets
@@ -503,7 +503,7 @@ class SpacesController < ApplicationController
       per_page: 25,
       include: [:user, {user: :org}, {taggings: :tag}]
     })
-    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
+    js(common_fields)
   end
 
   def comparisons
@@ -526,6 +526,7 @@ class SpacesController < ApplicationController
       per_page: 25,
       include: [:user, { user: :org }]
     })
+    js(common_fields)
   end
 
   def feed
@@ -543,7 +544,7 @@ class SpacesController < ApplicationController
     @sides = SpaceEvent.sides.map { |k, v| {name: k, value: v} }
     @overall_users = @space.space_memberships.active.count
     object_types = SpaceEvent.object_type_counters(Date.today.beginning_of_week.to_time, Time.now, {space_id: @space.id})
-    js({ space_uid: @space.uid, space_id: @space.id, scopes: @space.accessible_scopes_for_move, object_types: object_types })
+    js(common_fields.merge(object_types: object_types, space_created_at: @space.created_at))
   end
 
   def reports
@@ -553,9 +554,7 @@ class SpacesController < ApplicationController
     counters[:tasks] = @space.tasks.count
     counters.except!(:feed, :open_tasks, :accepted_tasks, :declined_tasks, :completed_tasks)
     @users = @space.users.map { |user| { name: user.full_name, value: user.id } }
-    js( space_uid: @space.uid, space_id: @space.id,
-        scopes: @space.accessible_scopes_for_move,
-        counts: counters, space_created_at: @space.created_at )
+    js(common_fields.merge(counts: counters, space_created_at: @space.created_at))
   end
 
   def apps_and_files
@@ -590,7 +589,7 @@ class SpacesController < ApplicationController
     p = params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser, :space_type, :cts, :sponsor_org_handle, :space_template_id, :restrict_to_template)
     p.require(:name)
     p.require(:space_type)
-    return p
+    p
   end
 
   def update_space_params
@@ -671,5 +670,9 @@ class SpacesController < ApplicationController
       types << :review       if @context.review_space_admin?
       types << :verification if @context.review_space_admin?
     end
+  end
+
+  def common_fields
+    { space_uid: @space.uid, scopes: @space.accessible_scopes_for_move, space_id: @space.id }
   end
 end
