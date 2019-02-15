@@ -203,6 +203,7 @@ class IOModel
     @defaultValue = ko.observable(defaultValue)
     @defaultFileValue = ko.observable()
     @isOptional = ko.observable(spec.optional ? false)
+    @requiredRunInput = ko.observable(spec.requiredRunInput ? false)
     # @patterns = ko.observable(spec.patterns)
     @choices = ko.observableArray(spec.choices)
     @choicesValue = ko.computed({
@@ -336,6 +337,7 @@ class IOModel
       name: @name.peek()
       optional: @isOptional() ? false
       choices: @choices() ? []
+      requiredRunInput: @requiredRunInput() ? false
 
     if @ioType == "input"
       defaultValue = @getValueForDefault()
