@@ -8,13 +8,22 @@ class WorkflowEditorModel
               $.extend({}, input, {
                 values: { id: null, name: null }
               })
+            for input, ind in inputs
+              value = stage.inputs[ind]['requiredRunInput']
+              input['requiredRunInput'] = value
+
             outputs = app.spec.output_spec.map (output) ->
               $.extend({}, output, {
                 values: { id: null, name: null }
               })
+            for output, ind in outputs
+              value = stage.outputs[ind]['requiredRunInput']
+              output['requiredRunInput'] = value
+
             spec = {
               name: stage.name,
               originalName: app.name,
+              uid: app.uid,
               dxid: app.dxid,
               instanceType: app.spec.instance_type,
               revision: app.revision,
@@ -281,7 +290,7 @@ class WorkflowEditorModel
         nextSlot: slot.nextSlot()?.slotId()
       }
       workflow_inputs.push(slot_details)
-    params = {slots: workflow_inputs, workflow_name: @name(), readme: @readme.peek() ? "", workflow_title: @title(), workflow_id: @workflow?.dxid, is_new: @isNewWorkflow}
+    params = {slots: workflow_inputs, workflow_name: @name(), readme: @readme.peek() ? "", workflow_title: @title(), workflow_id: @workflow?.uid, is_new: @isNewWorkflow}
     Precision.api('/api/create_workflow', params)
       .done((res)=>
         window.location.replace("/workflows/#{res.id}")
@@ -433,9 +442,9 @@ class IOModel
     @value = io.value
     @configured = ko.observable(configured)
     @outputBinding = ko.observable(@values.name)
+    @requiredRunInput = (if io.requiredRunInput != undefined then io.requiredRunInput else false)
     @isSelected = ko.observable(io.requiredRunInput)
     @optional = io.optional
-    @requiredRunInput = false
     @label = io.label
     @defaultValues = (if io.default != undefined then io.default else io.defaultValues)
   workflowRequired: (data, e) ->
