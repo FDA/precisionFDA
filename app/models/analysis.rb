@@ -33,7 +33,7 @@ class Analysis < ActiveRecord::Base
 
   def self.batch_hash(analyses)
     batches = {}
-    analyses.each do |analysis|
+    analyses.includes(batch_items: [:workflow, jobs: :app]).each do |analysis|
       batches[analysis.id] =
           analysis.batch_items.map do |batch_item|
             jobs =
@@ -69,7 +69,7 @@ class Analysis < ActiveRecord::Base
   end
 
   def self.job_hash(analyses, options={})
-    analyses.reduce({}) do |acc, analysis|
+    analyses.includes(:workflow, :batch_items, jobs: :app).reduce({}) do |acc, analysis|
       formatted_jobs = analysis.jobs.flatten.map do |job|
         formatted_job = {
           id: job.id,

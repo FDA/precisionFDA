@@ -28,7 +28,6 @@ class AppsController < ApplicationController
         else
           @comments = @app.root_comments.order(id: :desc).page params[:comments_page]
         end
-
         @revisions = @app.app_series.accessible_revisions(@context).select(:title, :id, :uid, :revision, :version)
         @notes = @app.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
         @answers = @app.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
@@ -38,10 +37,15 @@ class AppsController < ApplicationController
         @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@context, @app) }
       end
     end
+    @my_apps = AppSeries.editable_by(@context)
+                   .eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org]).order(name: :asc)
+                   .map { |series| series.latest_accessible(@context) }.compact
 
-    @my_apps = AppSeries.editable_by(@context).order(name: :asc).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
-
-    @ran_apps = AppSeries.accessible_by(@context).order(name: :asc).where.not(user_id: @context.user_id).joins(:jobs).distinct.where(:jobs => { :user_id => @context.user_id }).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
+    @ran_apps = AppSeries.accessible_by(@context)
+                    .eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org])
+                    .order(name: :asc).where.not(user_id: @context.user_id).joins(:jobs).distinct
+                    .where(:jobs => { :user_id => @context.user_id })
+                    .map { |series| series.latest_accessible(@context) }.compact
 
     User.sync_jobs!(@context)
     if @app.present?
