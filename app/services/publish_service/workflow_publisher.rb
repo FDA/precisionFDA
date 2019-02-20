@@ -11,6 +11,8 @@ module PublishService
         api.call(old_project, "removeObjects", objects: [workflow.dxid])
         workflow.update(scope: scope, project: project)
         SpaceEventService.call(space.id, context.user_id, nil, workflow, :workflow_added)
+        series = workflow.workflow_series
+        series.update(scope: scope) if series.scope != scope
       end
     end
   end
