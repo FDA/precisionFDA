@@ -180,7 +180,7 @@ class AssetService
       end
 
     unless res.is_a?(Net::HTTPSuccess)
-      fail "Failed to upload chunk ##{index}. Please try again later. " \
+      raise "Failed to upload chunk ##{index}. Please try again later. " \
             "If the problem persists, contact precisionFDA support."
     end
   end
