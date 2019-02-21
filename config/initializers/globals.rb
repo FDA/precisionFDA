@@ -102,6 +102,7 @@ REVIEW_SPACE_ADMINS =
       john.didion
       singer.ma
       aabramenko.adminstage
+      alekadmin.suradmin
       stagetestuser.lastname
       ezekiel.maier
       sam.westreich
