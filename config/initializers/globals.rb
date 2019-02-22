@@ -103,6 +103,7 @@ REVIEW_SPACE_ADMINS =
       singer.ma
       aabramenko.adminstage
       alekadmin.suradmin
+      alekone.surone
       stagetestuser.lastname
       ezekiel.maier
       sam.westreich
