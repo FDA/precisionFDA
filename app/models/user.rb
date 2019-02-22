@@ -59,6 +59,7 @@ class User < ActiveRecord::Base
     naina.thangaraj
     holly.stephens
     aabramenko.adminstage
+    alekadmin.suradmin
     sam.westreich
   ).freeze
 
