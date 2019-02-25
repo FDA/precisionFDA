@@ -226,29 +226,28 @@ class SpacesFeedView
 
 SpacesController = Paloma.controller('Spaces', {
   feed: () ->
-    $container = $("#ko_spaces_feed_container")
-    viewModel = new SpacesFeedView(@params)
-    ko.applyBindings(viewModel, $container[0])
+    if @params.active
+      $container = $("#ko_spaces_feed_container")
+      viewModel = new SpacesFeedView(@params)
+      ko.applyBindings(viewModel, $container[0])
 
-    $('#select_date_range').on 'click', (e) ->
-      e.preventDefault()
-      $(this).find('button').removeClass('active')
-      $(e.target).addClass('active')
-      viewModel.setDateRange $(e.target).attr('data-type')
+      $('#select_date_range').on 'click', (e) ->
+        e.preventDefault()
+        $(this).find('button').removeClass('active')
+        $(e.target).addClass('active')
+        viewModel.setDateRange $(e.target).attr('data-type')
 
-    $('.selectpicker').selectpicker('refresh')
+      $('.selectpicker').selectpicker('refresh')
 
-    $(document).ready(() -> Precision.utils.scrollTo(0))
+      $(document).ready(() -> Precision.utils.scrollTo(0))
 
-    scrollPos = 0
-    loadMoreFeed = () ->
-      goDown = scrollPos < $(window).scrollTop()
-      if($(window).scrollTop() + $(window).height() >= $(document).height() - 200 and goDown)
-        viewModel.loadMoreFeed() if !viewModel.feedLoading()
-      scrollPos = $(window).scrollTop()
+      scrollPos = 0
+      loadMoreFeed = () ->
+        goDown = scrollPos < $(window).scrollTop()
+        if($(window).scrollTop() + $(window).height() >= $(document).height() - 200 and goDown)
+          viewModel.loadMoreFeed() if !viewModel.feedLoading()
+        scrollPos = $(window).scrollTop()
 
-    $(window).on 'scroll', loadMoreFeed
-    $(document).on 'turbolinks:before-visit', () -> $(window).off 'scroll', loadMoreFeed
-
-
+      $(window).on 'scroll', loadMoreFeed
+      $(document).on 'turbolinks:before-visit', () -> $(window).off 'scroll', loadMoreFeed
 })
