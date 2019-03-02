@@ -1,13 +1,13 @@
 <% content_for :title do %>Spaces<% end %>
 
-<% if @context.can_administer_site? %>
-<div class="pfda-toolbar">
-  <div class="btn-group">
+<%= render '_partials/space_navigation_tabs' %>
+
+<% if @context.can_create_spaces? %>
+  <div class="pfda-padded">
     <%= link_to new_space_path, class: 'btn btn-primary' do %>
       <span class="fa fa-plus fa-fw"></span> Provision a Space
     <% end %>
   </div>
-</div>
 <% end %>
 
 <%= render "spaces/grid", spaces_grid: @spaces_grid %>

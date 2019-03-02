@@ -1,5 +1,37 @@
 @import "_common"
 
+.pfda-comments-container
+  .pfda-comment
+    &--with-mentions
+      .new-comment-editable
+        min-height: 150px
+        overflow: auto
+        &:empty:before
+          content: attr(data-placeholder)
+          color: #999
+      .new-comment-textarea
+        resize: vertical
+        min-height: 150px
+        margin-top: 0px
+        margin-bottom: 0px
+      .search-row
+        display: flex
+        &--label
+          min-width: 185px
+          margin-right: 10px
+          span
+            position: relative
+            top: 4px
+        &--select
+          min-width: 250px
+          margin-right: 10px
+        &--searchfield
+          width: 100%
+      .submit-button-container
+        text-align: right
+        button > i
+          margin-right: 5px
+
 .pfda-comments
   .pfda-comment
     margin-top: 15px
@@ -13,3 +45,13 @@
   .pfda-comment-actions
     margin-top: 5px
     font-size: $font-size-small
+  .nested-comment
+    &--media-collapse
+      min-width: 32px
+      button
+        padding: 0px 5px
+        font-size: 12px
+    &--child
+      padding-left: 40px
+    &--hidden
+      display: none

@@ -1,0 +1,19 @@
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane active" id="tab-apps">
+    <div class="panel">
+      <div class="panel-heading">
+        <h4>Apps</h4>
+      </div>
+      <div class="panel-body">
+        <%=
+          render "apps/grid",
+          apps_grid: @apps_grid,
+          scope_icon: false,
+          hide_access: true,
+          show_filters: :when_filtered,
+          div_if_empty: true
+        %>
+      </div>
+    </div>
+  </div>
+</div>

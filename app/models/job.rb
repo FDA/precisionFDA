@@ -20,30 +20,34 @@
 #
 
 class Job < ActiveRecord::Base
+  include Auditor
   include Permissions
+  include InternalUid
 
   INSTANCE_TYPES = {
-    "baseline-2" => "mem1_ssd1_x2",
-    "baseline-4" => "mem1_ssd1_x4",
-    "baseline-8" => "mem1_ssd1_x8",
-    "baseline-16" => "mem1_ssd1_x16",
-    "baseline-32" => "mem1_ssd1_x32",
-    "himem-2" => "mem3_ssd1_x2",
-    "himem-4" => "mem3_ssd1_x4",
-    "himem-8" => "mem3_ssd1_x8",
-    "himem-16" => "mem3_ssd1_x16",
-    "himem-32" => "mem3_ssd1_x32",
-    "hidisk-2" => "mem1_ssd2_x2",
-    "hidisk-4" => "mem1_ssd2_x4",
-    "hidisk-8" => "mem1_ssd2_x8",
-    "hidisk-16" => "mem1_ssd2_x16",
-    "hidisk-36" => "mem1_ssd2_x36"
+    "baseline-2" => "mem1_ssd1_x2_fedramp",
+    "baseline-4" => "mem1_ssd1_x4_fedramp",
+    "baseline-8" => "mem1_ssd1_x8_fedramp",
+    "baseline-16" => "mem1_ssd1_x16_fedramp",
+    "baseline-36" => "mem1_ssd1_x36_fedramp",
+    "himem-2" => "mem3_ssd1_x2_fedramp",
+    "himem-4" => "mem3_ssd1_x4_fedramp",
+    "himem-8" => "mem3_ssd1_x8_fedramp",
+    "himem-16" => "mem3_ssd1_x16_fedramp",
+    "himem-32" => "mem3_ssd1_x32_fedramp",
+    "hidisk-2" => "mem1_ssd2_x2_fedramp",
+    "hidisk-4" => "mem1_ssd2_x4_fedramp",
+    "hidisk-8" => "mem1_ssd2_x8_fedramp",
+    "hidisk-16" => "mem1_ssd2_x16_fedramp",
+    "hidisk-36" => "mem1_ssd2_x36_fedramp"
   }
 
   STATE_DONE = "done"
   STATE_TERMINATED = "terminated"
   STATE_FAILED = "failed"
   TERMINAL_STATES = [STATE_TERMINATED, STATE_DONE, STATE_FAILED]
+
+  STATE_TERMINATING = "terminating"
 
   belongs_to :app
   belongs_to :user
@@ -68,10 +72,6 @@ class Job < ActiveRecord::Base
 
   scope :done, -> { where(state: STATE_DONE) }
   scope :terminal, -> { where(state: [TERMINAL_STATES]) }
-
-  def uid
-    dxid
-  end
 
   def to_param
     uid
@@ -142,16 +142,18 @@ class Job < ActiveRecord::Base
   end
 
   def update_provenance!
-    new_value = { dxid => { app_dxid: app.dxid, app_id: app.id, inputs: run_inputs }}
+    Auditor.suppress do
+      new_value = { dxid => { app_dxid: app.dxid, app_id: app.id, inputs: run_inputs }}
 
-    # TODO: USE SCOPE OF USER_FILE MODEL!
-    input_files.where(parent_type: "Job").find_each do |file|
-      parent_job = file.parent
-      new_value.merge!(parent_job.provenance)
-      new_value[file.dxid] = parent_job.dxid
+      # TODO: USE SCOPE OF USER_FILE MODEL!
+      input_files.where(parent_type: "Job").find_each do |file|
+        parent_job = file.parent
+        new_value.merge!(parent_job.provenance)
+        new_value[file.dxid] = parent_job.dxid
+      end
+
+      update_attribute(:provenance, new_value)
     end
-
-    update_attribute(:provenance, new_value)
   end
 
   def publishable_by?(context, scope_to_publish_to = "public")
@@ -177,6 +179,9 @@ class Job < ActiveRecord::Base
         if job.publishable_by?(context, scope)
           job.update!(scope: scope)
           count += 1
+          if scope =~ /^space-(\d+)$/
+            SpaceEventService.call($1.to_i, context.user_id, nil, job, :job_added)
+          end
         end
       end
     end
@@ -185,10 +190,10 @@ class Job < ActiveRecord::Base
   end
 
   def output_data
-    IOCollection.build(output_spec, run_outputs)
+    IOCollection.build_outputs(self)
   end
 
   def input_data
-    IOCollection.build(input_spec, run_inputs)
+    IOCollection.build_inputs(self)
   end
 end

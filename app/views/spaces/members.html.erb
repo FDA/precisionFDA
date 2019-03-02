@@ -6,38 +6,17 @@
     <% if @space.editable_by?(@context) %>
       <div class="pfda-toolbar pfda-toolbar-transparent">
         <a class="btn btn-default" data-toggle="modal" data-target="#members-modal">
-          <span class="fa fa-user-plus" aria-hidden="true"></span> Add or update members
+          <span class="fa fa-user-plus" aria-hidden="true"></span> Add members
         </a>
       </div>
     <% end %>
-    <div class="panel">
-      <%= grid(@members_grid, show_filters: :always) do |g|
-        g.blank_slate partial:  "_partials/empty_grid"
 
-        g.column name: 'Role', attribute: 'role', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false do |member|
-          member.role
-        end
+    <%= render "spaces/members/members_filter" %>
 
-        g.column name: 'Side', attribute: 'side', custom_filter: :auto, auto_reload: true, allow_multiple_selection: false do |member|
-          member.side
-        end
-
-        g.column name: 'Username', attribute: 'dxuser', assoc: :user do |member|
-          member.user.dxuser
-        end
-
-        g.column name: 'Name' do |member|
-          link_to(member.user.full_name, user_path(member.user.dxuser))
-        end
-
-        g.column name: 'Org', attribute: 'name', assoc: [:user, :org] do |member|
-          member.user.org.name
-        end
-
-        g.column name: 'Joined', attribute: 'created_at', auto_reload: true, filter_type: :standard do |member|
-          member.created_at.to_s(:human)
-        end
-      end -%>
+    <div class="panel spaces-members-cards">
+      <% @members.each do |member| %>
+        <%= member_card(member) %>
+      <% end %>
     </div>
   </div>
 </div>
@@ -48,7 +27,7 @@
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">
-          Add or Update Member/s
+          Add Member/s
         </h4>
       </div>
       <%= form_for @space, url: invite_space_path, method: :post, html: {class: 'form form-horizontal'} do |f| %>
@@ -62,16 +41,13 @@
         <div class="form-group required">
           <label for="space[invitees_role]" class="col-sm-4 control-label">Role</label>
           <div class="col-sm-19 col-sm-offset-1">
-            <select name="space[invitees_role]" class="form-control input-lg">
-              <option value="MEMBER" selected="selected">Member</option>
-              <option value="ADMIN">Admin</option>
-            </select>
+            <%= f.select :invitees_role, options_for_select(space_initial_roles), {}, class: "form-control input-lg" %>
           </div>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Cancel</button>
-        <button type="submit" class="btn btn-primary" data-disable-with="Adding..."><span class="fa fa-user-plus" aria-hidden="true"></span> Add or Update Member/s</button>
+        <button type="submit" class="btn btn-primary" data-disable-with="Adding..."><span class="fa fa-user-plus" aria-hidden="true"></span> Add Member/s</button>
       </div>
       <% end %>
     </div><!-- /.modal-content -->

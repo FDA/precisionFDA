@@ -1,6 +1,7 @@
 class BatchAppNewView
   constructor: (app, @asset_licenses_to_accept) ->
-    @dxid = app.dxid
+    @contentScopes = ko.observable([])
+    @uid = app.uid
     @inputSpec = app.spec.input_spec
     @outputSpec = app.spec.output_spec
 
@@ -104,7 +105,7 @@ class BatchAppNewView
       if _.isString(batchFileIds) || _.isNumber(batchFileIds)
         counter += 1
         params =
-          id: @dxid
+          id: @uid
           name: @name.peek()
           jobName: "#{@name.peek()}_#{counter}"
           inputs: {}
@@ -119,7 +120,7 @@ class BatchAppNewView
         Precision.api('/api/run_app', params)
           .done((rs) =>
             if !rs.error?
-              window.location = "/apps/#{@dxid}"
+              window.location = "/apps/#{@uid}"
             else
               @busy(false)
               @running(false)
@@ -150,7 +151,7 @@ class BatchAppNewView
       nextBatchFileIds = currentBatchFileIds.slice(1, currentBatchFileIds.length)
       @runBtnText("Running #{counter + 1} of #{totalBatchFileIds}...")
       params =
-        id: @dxid
+        id: @uid
         name: "#{@name.peek()} (#{counter + 1} of #{totalBatchFileIds})"
         inputs: {}
       params.instance_type = @instanceType.peek() if @instanceType.peek()?
@@ -174,7 +175,7 @@ class BatchAppNewView
           @_batchRun(batchData, totalBatchFileIds, nextBatchFileIds, counter + 1)
         )
     else
-      window.location = "/apps/#{@dxid}"
+      window.location = "/apps/#{@uid}"
 #########################################################
 #
 #

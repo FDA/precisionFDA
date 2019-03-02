@@ -16,16 +16,18 @@
 #
 
 class Org < ActiveRecord::Base
+  include Auditor
+
   has_many :users
   belongs_to :admin, {class_name: 'User'}
-
-  def real_org?
-    !singular
-  end
 
   def self.construct_dxorg(handle)
     raise unless handle.present? && handle =~ /^[0-9a-z][0-9a-z_.]*$/
     "org-pfda..#{handle}"
+  end
+
+  def self.handle_by_id(id)
+    id.sub(/^org-/, '')
   end
 
   def self.featured
@@ -36,37 +38,12 @@ class Org < ActiveRecord::Base
     return where(singular: false)
   end
 
+  def real_org?
+    !singular
+  end
+
   def dxorg
     Org.construct_dxorg(handle)
   end
 
-  def self.provision_dxorg(context, org, billable = false)
-    api = DNAnexusAPI.new(context.token)
-    papi = DNAnexusAPI.new(ADMIN_TOKEN)
-
-    raise "We did not expect #{org[:id]} to exist on DNAnexus" if api.entity_exists?(org[:id])
-
-    org = papi.call("org", "new", {handle: org[:handle], name: org[:name]})
-
-    AUDIT_LOGGER.info("The system is about to start provisioning a new dxorg '#{org[:id]}'")
-
-    if billable
-      auth = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
-      billing_info = {
-        email: "billing@dnanexus.com",
-        name: "Elaine Johanson",
-        companyName: "FDA",
-        address1: "10903 New Hampshire Ave",
-        address2: "Bldg. 32 room 2254",
-        city: "Silver Spring",
-        state: "MD",
-        postCode: "20993",
-        country: "USA",
-        phone: "(301) 706-1836"
-      }
-      auth.call(org[:dxorg], "updateBillingInformation", {billingInformation: billing_info, autoConfirm: BILLING_CONFIRMATION})
-    end
-
-    return org
-  end
 end

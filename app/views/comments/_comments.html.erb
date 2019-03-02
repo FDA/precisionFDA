@@ -11,14 +11,18 @@
               <li class="pfda-comment-user"><strong><%= link_to comment.user.full_name, user_path(comment.user.dxuser) %></strong></li>
               <li><%= comment.user.org.name %></li>
             </ul>
-            <div class="pfda-comment-body"><%= simple_format(comment.body) %></div>
-            <ul class="pfda-comment-actions list-inline list-inline-bullets text-muted">
-              <% if comment.editable_by?(@context) %>
-              <li><%= link_to "Edit", edit_polymorphic_path(items_from_params + [comment]) %></li>
-              <li><%= link_to "Delete", polymorphic_path(items_from_params + [comment]), method: :delete, data: { confirm: 'Are you certain you want to delete this?' } %></li>
-              <% end %>
-              <li><%= comment.created_at.to_s(:human) %></li>
-            </ul>
+            <% if comment.active? %>
+              <div class="pfda-comment-body"><%= simple_format(comment.body) %></div>
+              <ul class="pfda-comment-actions list-inline list-inline-bullets text-muted">
+                <% if comment.editable_by?(@context) %>
+                <li><%= link_to "Edit", edit_polymorphic_path(items_from_params + [comment]) %></li>
+                <li><%= link_to "Delete", polymorphic_path(items_from_params + [comment]), method: :delete, data: { confirm: 'Are you certain you want to delete this?' } %></li>
+                <% end %>
+                <li><%= comment.created_at.to_s(:human) %></li>
+              </ul>
+            <% else %>
+              <div>DELETED</div>
+            <% end %>
           </div>
         </div>
       </div>

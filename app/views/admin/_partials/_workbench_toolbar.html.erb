@@ -1,0 +1,22 @@
+<div class="pfda-toolbar">
+  <ul class="nav nav-pills nav-pills-center nav-pills-sm">
+    <li class="<% if controller_name == 'get_started_boxes' %>active<% end %>">
+      <%= link_to admin_get_started_boxes_path do %>
+        <span class="fa fa-sticky-note"></span>
+        <span class="pill-label">Get started boxes</span>
+      <% end %>
+    </li>
+    <li class="<% if controller_name == 'news_items' %>active<% end %>">
+      <%= link_to admin_news_items_path do %>
+        <span class="fa fa-newspaper-o"></span>
+        <span class="pill-label">News</span>
+      <% end %>
+    </li>
+    <li class="<% if controller_name == 'participants' %>active<% end %>">
+      <%= link_to admin_participants_path do %>
+        <span class="fa fa-users"></span>
+        <span class="pill-label">Participants</span>
+      <% end %>
+    </li>
+  </ul>
+</div>

@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  default_url_options Rails.configuration.action_mailer.default_url_options
   #
   # Remove the ability to switch formats (i.e. /foo vs /foo.json or /foo.xml)
   # by wrapping everything into a scope
@@ -8,6 +9,9 @@ Rails.application.routes.draw do
     namespace(:admin) do
 
       root "dashboard#index"
+
+      resources :news_items, path: 'news'
+      post 'news/positions' => 'news_items#positions'
 
       resources :activity_reports, only: [:index] do
         collection do
@@ -33,7 +37,16 @@ Rails.application.routes.draw do
       end
 
       get "active_users", to: "users#active"
+      resources :get_started_boxes, except: [:show] do
+        post :update_positions, on: :collection
+      end
+      resources :participants, except: [:show] do
+        post :update_positions, on: :collection
+      end
     end
+
+    # hotfix for PFDA-557
+    get "/mislabeling" => redirect("/challenges/5")
 
     # Main controller
     get 'login' => 'main#login'
@@ -41,6 +54,7 @@ Rails.application.routes.draw do
     get 'return_from_login' => 'main#return_from_login'
     post 'publish' => 'main#publish'
     get 'track' => 'main#track'
+    get 'mislabeling' => 'main#mislabeling'
     get 'request_access' => 'main#request_access'
     post 'request_access' => 'main#request_access'
     get 'browse_access' => 'main#browse_access'
@@ -56,6 +70,33 @@ Rails.application.routes.draw do
     get 'news' => 'main#news'
 
     # API
+    namespace "api" do
+      get "update_active", to: "base#update_active"
+      namespace "activity_reports" do
+        get "total"
+        get "data_upload"
+        get "data_download"
+        get "data_generated"
+        get "app_created"
+        get "app_published"
+        get "app_run"
+        get "job_run"
+        get "job_failed"
+        get "user_access_requested"
+        get "user_logged_in"
+        get "user_viewed"
+        get "users_signed_up_for_challenge"
+        get "submissions_created"
+      end
+      resources :challenges, only: [] do
+        post 'save_editor_page', on: :member
+      end
+
+      resources :apps, only: [] do
+        post 'attributes_by_cwl', on: :collection
+      end
+    end
+
     post '/api/publish', to: 'api#publish'
     post '/api/create_file', to: 'api#create_file'
     post '/api/create_challenge_card_image', to: 'api#create_challenge_card_image'
@@ -71,6 +112,7 @@ Rails.application.routes.draw do
     post '/api/list_apps', to: 'api#list_apps'
     post '/api/list_assets', to: 'api#list_assets'
     post '/api/list_jobs', to: 'api#list_jobs'
+    post '/api/list_workflows', to: 'api#list_workflows'
     post '/api/describe_license', to: 'api#describe_license'
     post '/api/accept_licenses', to: 'api#accept_licenses'
     post '/api/run_app', to: 'api#run_app'
@@ -84,6 +126,7 @@ Rails.application.routes.draw do
     post '/api/create_asset', to: 'api#create_asset'
     post '/api/close_asset', to: 'api#close_asset'
     post '/api/create_app', to: 'api#create_app'
+    post '/api/share_with_fda', to: 'api#share_with_fda'
     post '/api/attach_to_notes', to: 'api#attach_to_notes'
     post '/api/update_note', to: 'api#update_note'
     post '/api/upvote', to: 'api#upvote'
@@ -130,7 +173,15 @@ Rails.application.routes.draw do
         get 'fork'
         get 'cwl_export'
         get 'wdl_export'
+        get 'batch_workflow'
+        post 'run_batch'
+        get 'terminate_batch'
+        get 'output_folders_list'
+        get 'output_folder_create'
+        get 'output_folder_update'
       end
+      post 'convert_file_with_strings', on: :collection, as: 'convert_file_with_strings'
+      resources :comments
     end
 
     resources :jobs, except: :index do
@@ -177,6 +228,7 @@ Rails.application.routes.draw do
       resources :comments
     end
 
+    get "challenges/mislabeling" => redirect("/mislabeling")
     get "challenges/#{ACTIVE_META_APPATHON}" => "meta_appathons#show", as: 'active_meta_appathon'
     get "challenges/#{APPATHON_IN_A_BOX_HANDLE}", as: 'appathon_in_a_box'
     resources :challenges do
@@ -238,11 +290,34 @@ Rails.application.routes.draw do
       end
     end
 
+    get '/spaces/verified_space_list' => 'space_templates#verified_space_list'
+    get '/spaces/apps_and_files' => 'spaces#apps_and_files'
+    get '/spaces/unverified_apps' => 'space_templates#unverified_apps'
+
+    resources :space_templates do
+      get 'duplicate', on: :member
+      get 'app_file_list'
+    end
+
     resources :spaces do
       get 'members', on: :member
-      get 'content', on: :member
       get 'discuss', on: :member
+      get 'tasks',   on: :member
+      get 'feed',    on: :member
+      get 'reports', on: :member
+      get 'notes',   on: :member
+      get 'files',   on: :member
+      get 'apps',    on: :member
+      get 'jobs',    on: :member
+      get 'comparisons', on: :member
+      get 'assets',  on: :member
+      get 'workflows', on: :member
+      post 'verify', on: :member
+
       post 'accept', on: :member
+      post 'lock', on: :member, to: 'space_requests#lock'
+      post 'unlock', on: :member, to: 'space_requests#unlock'
+      post 'delete', on: :member, to: 'space_requests#delete'
       post 'rename', on: :member
       post 'invite', on: :member
       post 'move', on: :member
@@ -251,8 +326,52 @@ Rails.application.routes.draw do
       post 'download_list', on: :member
       post 'remove_folder', on: :member, as: 'remove_folder'
       post 'publish_folder', on: :member
+      post 'copy_folder_to_cooperative', on: :member
+      post 'copy_file_to_cooperative', on: :member
+      post 'copy_to_cooperative', on: :member
+      post 'search_content', on: :member
       resources :comments
+
+      resources :tasks, only: [:create, :destroy, :update, :show] do
+        post 'accept', on: :collection
+        post 'complete', on: :collection
+        post 'decline', on: :collection
+        post 'make_active', on: :collection
+        post 'reopen', on: :collection
+        post 'reassign', on: :member
+        post 'copy', on: :member
+        get 'task', on: :member
+        resources :comments
+      end
+
+      resources :space_feed, only: [:index] do
+        collection do
+          get 'object_types'
+          get 'chart'
+        end
+      end
+      resources :space_reports, only: [:index] do
+        collection do
+          get 'counters'
+          get 'download_report'
+        end
+      end
     end
+
+    resources :space_membership, only: [] do
+      member do
+        post :to_lead
+        post :to_admin
+        post :to_viewer
+        post :to_member
+        post :to_inactive
+      end
+    end
+
+    resources :notification_preferences, only: [:index] do
+      post 'change', on: :collection
+    end
+
 
     resources :meta_appathons, constraints: {appathon_id: /[^\/]+/ }  do
       post 'rename', on: :member

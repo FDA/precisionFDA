@@ -1,127 +1,192 @@
-<% content_for :title do %><%= @space.title %><% end %>
+<% content_for :title do %><%= @space.title %>
+<% end %>
 
-<div class="page-header clearfix">
-  <div class="pull-left">
-    <div class="page-title">
-      <span class="fa fa-object-group"></span> <%= @space.title %>
-      <% if @space.editable_by?(@context) %>
-        <a class="pfda-rename-item" data-toggle="modal" data-target="#rename-modal">
-          <span class="fa fa-pencil"></span>
-        </a>
+
+<div id="ko_spaces_header_container">
+
+  <div class="page-header clearfix">
+    <div class="pull-left">
+
+      <% if @space.review? && @space.active? %>
+        <% if @space.confidential? %>
+          <%= link_to "To Cooperative", feed_space_path(@space.space) %>
+        <% else %>
+          <%= link_to "To Confidential", feed_space_path(@space.confidential_space(@membership)) %>
+        <% end %>
+      <% end %>
+
+      <div class="page-title">
+        <i class="fa fa-object-group"></i>&nbsp;<%= @space.title %>
+        <% if @space.verification? %>
+          - Verification Space
+          <% if @space.verified? %>
+            &nbsp;<i class="fa fa-check-circle text-success" title="Space successfully verified"></i>
+          <% end %>
+        <% end %>
+      </div>
+
+      <% if @space.editable_by?(@context) && !@space.verified? %>
+        <div>
+          <% if @space.active? %>
+            <a class="pfda-rename-item" data-toggle="modal" data-target="#rename-modal">
+              <i class="fa fa-pencil"></i>&nbsp;Rename
+            </a>
+          <% end %>
+          <a class="pfda-rename-item" href="<%= edit_space_path(@space) %>">
+            <span class="fa fa-external-link" aria-hidden="true"></span>&nbsp;Edit
+          </a>
+        </div>
+      <% end %>
+
+      <% if !@space.description.blank? %>
+        <div class="description">
+          <%= @space.description %>
+        </div>
       <% end %>
     </div>
-    <% if !@space.description.blank? %>
-    <div class="description">
-      <%= @space.description %>
-    </div>
-    <% end %>
-  </div>
-  <% if @space.editable_by?(@context) %>
-    <div class="pull-right">
-      <div class="btn-group">
-        <div class="dropdown">
-          <button class="btn btn-link btn-lg" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <span class="fa fa-cog"></span>
+
+    <% if SpaceMembershipPolicy.can_move_content?(@space, @membership) && !@space.verified? %>
+      <div class="pull-right">
+        <% if @space.verification? && @space.editable_by?(@context) && !@space.verified? && @space.can_verify_space(@context) %>
+          <div class="btn-group">
+            <a class="btn btn-primary verify-button" data-toggle="modal" data-target="#verification-modal">
+              <span class="fa fa-check" aria-hidden="true"></span> Verify this space
+            </a>
+          </div>
+        <% end %>
+        <div class="btn-group">
+          <button class="btn btn-default" data-bind="click: objectSelector.open">
+            <span class="fa fa-plus" aria-hidden="true"></span> Move data to space...
           </button>
-          <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
-            <li>
-              <%= link_to edit_space_path(@space) do %>
-                <span class="fa fa-pencil"></span> Edit
-              <% end %>
-            </li>
-          </ul>
         </div>
       </div>
-    </div>
+    <% end %>
+  </div>
+
+  <div class="metadata-section metadata-header">
+    <ul class="list-group list-group-inline">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">ID</h5>
+        <p class="list-group-item-text"><%= @space.uid %></p>
+      </li>
+      <% if @space.state != "ACTIVE" %>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">State</h5>
+          <p class="list-group-item-text">
+          <%= @space.state? ? @space.state : "UNACTIVATED" %>
+          </p>
+        </li>
+      <% end %>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Your Role</h5>
+        <p class="list-group-item-text"><%= @membership.role %> <small>(<%= member_side(@space, @membership) %>)</small></p>
+      </li>
+
+      <% @space.leads.each do |lead| %>
+        <%= render "spaces/header_lead", lead: lead %>
+      <% end %>
+
+      <% if @space.cts.present? %>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">CTS</h5>
+          <p class="list-group-item-text">
+          <%= @space.cts  %>
+          </p>
+        </li>
+      <% end %>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Created</h5>
+        <p class="list-group-item-text"><%= @space.created_at.to_s(:human) %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">&nbsp;</h5>
+        <p class="list-group-item-text"><%= @space.created_at_in_ny.to_s(:human) %></p>
+      </li>
+    </ul>
+  </div>
+
+  <% if @space.active? %>
+
+    <% if @space.review? && @membership.new_record? %>
+      <div class='pfda-help-block'>
+        <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span>You have no full access to this space.</p>
+        <p>You have to be a member of space for access to all content.</p>
+      </div>
+    <% end %>
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs nav-tabs-padded nav-tabs-centered" role="tablist">
+      <% content_actions = ['tasks', 'feed', 'notes', 'files', 'apps', 'jobs'] %>
+      <li role="presentation" class="<% if content_actions.include?(action_name) %>active<% end %>">
+        <a href="<%= main_space_path(@space) %>" aria-controls="tab-data"><span class="fa fa-fw fa-database"></span>
+          <span class="tab-label">Content</span>
+        </a>
+      </li>
+      <li role="presentation" class="<% if action_name == 'discuss' %>active<% end %>">
+        <a href="<%= discuss_space_path(@space) %>" aria-controls="tab-comments"><span class="fa fa-fw fa-comment"></span>
+          <span class="tab-label">Comments <span class="badge"><%= @space.comment_threads.size %></span></span>
+        </a>
+      </li>
+      <li role="presentation" class="<% if action_name == 'members' %>active<% end %>">
+        <a href="<%= members_space_path(@space, filter: 'all') %>" aria-controls="tab-members"><span class="fa fa-fw fa-group"></span>
+          <span class="tab-label">Members <span class="badge"><%= @space.space_memberships.count %></span></span>
+        </a>
+      </li>
+    </ul>
+
+    <% if @space.editable_by?(@context) && !@space.verified? %>
+      <%= render "_partials/modal_rename", item: @space, path_to_rename: rename_space_path(@space.id) %>
+    <% end %>
+
+    <%= render "_partials/selector_modal" %>
   <% end %>
 </div>
 
-<div class="metadata-section metadata-header">
-  <ul class="list-group list-group-inline">
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">ID</h5>
-      <p class="list-group-item-text"><%= @space.uid %></p>
-    </li>
-    <% if @space.state != "ACTIVE" %>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">State</h5>
-      <p class="list-group-item-text">
-        <%= @space.state? ? @space.state : "UNACTIVATED" %>
-      </p>
-    </li>
-    <% end %>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Your Role</h5>
-      <p class="list-group-item-text"><%= @membership.role %> <small>(<%= @membership.side %>)</small></p>
-    </li>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Host Lead</h5>
-      <p class="list-group-item-text">
-        <%= link_to("#{@space.host_lead.full_name} (#{@space.host_lead.org.name})", user_path(@space.host_lead.dxuser)) %>
-      </p>
-      <% if !@space.active? && @space.host_project.blank? %>
-        <% if @space.host_lead?(@context) %>
-          <%= link_to accept_space_path(@space.id), method: :post, class: "btn btn-xs btn-success" do %>
-            <span class="fa fa-check"></span> Accept space
-          <% end %>
+<% if @space.unactivated? %>
+
+    <div class='pfda-help-block'>
+      <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
+      <% if @space.review? %>
+        <% if @space.confidential? %>
+          <p>Both reviewer and sponsor leads must click "Accept space" to activate the <%= link_to 'cooperative space', space_path(@space.shared_space) %>.</p>
         <% else %>
-          <div class="text-warning"><span class="fa fa-clock-o"></span> Waiting on acceptance</div>
+          <p>Both reviewer and sponsor leads must click "Accept space" to activate it.</p>
         <% end %>
+      <% else %>
+        <p>Both host and guest leads must click "Accept space" to activate it.</p>
       <% end %>
-    </li>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Guest Lead</h5>
-      <p class="list-group-item-text">
-        <%= link_to("#{@space.guest_lead.full_name} (#{@space.guest_lead.org.name})", user_path(@space.guest_lead.dxuser)) %>
-      </p>
-      <% if !@space.active? && @space.guest_project.blank? %>
-        <% if @space.guest_lead?(@context)%>
-          <%= link_to accept_space_path(@space.id), method: :post, class: "btn btn-xs btn-success" do %>
-            <span class="fa fa-check"></span> Accept Space
-          <% end %>
-        <% else %>
-          <div class="text-warning"><span class="fa fa-clock-o"></span> Waiting on Acceptance</div>
-        <% end %>
+    </div>
+
+  <% elsif(@space.locked? || @space.verified?) %>
+
+    <div class='pfda-help-block'>
+      <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has been locked</p>
+    </div>
+
+  <% end %>
+
+<div class="modal fade" id="verification-modal">
+  <div class="modal-dialog" role="document" style="width: 660px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        <h3 class="modal-title">Verify Space</h3>
+      </div>
+      <%= form_for @space, url: verify_space_url, method: :post, html: {class: 'form form-horizontal'} do |f|%>
+        <%= f.hidden_field :verified, value: true %>
+        <div class="modal-body">
+          <h4>
+            Verifying a space will lock the space and now will be visible to all reviewers<br>
+            Would you like to lock the space?
+
+          </h4>
+        </div>
+        <div class="modal-footer">
+          <div class="col-lg-14"></div>
+          <button type="submit" class="btn btn-primary col-lg-4">Yes</button>
+          <button type="button" class="btn btn-default col-lg-4" data-dismiss="modal" tabindex="-1">Cancel</button>
+        </div>
       <% end %>
-    </li>
-    <% if !@space.cts.blank? %>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">CTS</h5>
-      <p class="list-group-item-text">
-        <%= @space.cts  %>
-      </p>
-    </li>
-    <% end %>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Created</h5>
-      <p class="list-group-item-text"><%= @space.created_at.to_s(:human) %></p>
-    </li>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">&nbsp;</h5>
-      <p class="list-group-item-text"><%= @space.created_at_in_ny.to_s(:human) %></p>
-    </li>
-  </ul>
+    </div>
+  </div>
 </div>
-
-<!-- Nav tabs -->
-<ul class="nav nav-tabs nav-tabs-padded" role="tablist">
-  <li role="presentation" class="<% if action_name == 'content' %>active<% end %>">
-    <a href="<%= content_space_path(@space) %>" aria-controls="tab-data"><span class="fa fa-fw fa-database"></span>
-      <span class="tab-label">Content</span>
-    </a>
-  </li>
-  <li role="presentation" class="<% if action_name == 'discuss' %>active<% end %>">
-    <a href="<%= discuss_space_path(@space) %>" aria-controls="tab-comments"><span class="fa fa-fw fa-comment"></span>
-      <span class="tab-label">Comments <span class="badge"><%= @space.comment_threads.size %></span></span>
-    </a>
-  </li>
-  <li role="presentation" class="<% if action_name == 'members' %>active<% end %>">
-    <a href="<%= members_space_path(@space) %>" aria-controls="tab-members"><span class="fa fa-fw fa-group"></span>
-      <span class="tab-label">Members <span class="badge"><%= @space.space_memberships.count %></span></span>
-    </a>
-  </li>
-</ul>
-
-<% if @space.editable_by?(@context) %>
-  <%= render "_partials/modal_rename", item: @space, path_to_rename: rename_space_path(@space.id) %>
-<% end %>

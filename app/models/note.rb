@@ -13,6 +13,7 @@
 #
 
 class Note < ActiveRecord::Base
+  include Auditor
   include Permissions
 
   belongs_to :user
@@ -112,10 +113,18 @@ class Note < ActiveRecord::Base
         if note.publishable_by?(context, scope)
           note.update!(scope: scope)
           count += 1
+          if scope =~ /^space-(\d+)$/
+            SpaceEventService.call($1.to_i, context.user_id, nil, note, :note_added)
+          end
         end
       end
     end
 
     return count
   end
+
+  def copyable_to_cooperative?
+    in_confidential_space?
+  end
+
 end

@@ -13,6 +13,7 @@
 #
 
 class Challenge < ActiveRecord::Base
+  include Auditor
 
   STATUS_SETUP =    "setup"
   STATUS_OPEN =     "open"
@@ -59,7 +60,7 @@ class Challenge < ActiveRecord::Base
 
     Challenge.transaction do
       app = App.find_by(id: app_id)
-      user = User.find_by!(dxuser: CHALLENGE_BOT_DX_USER)
+      user = User.challenge_bot
       api.call(app.dxid, "addDevelopers", {developers: [user.dxid]})
       challenge = Challenge.find_by!(id: challenge_id)
       challenge.update!(app_id: app_id)
@@ -216,7 +217,7 @@ class Challenge < ActiveRecord::Base
     return unless previous_changes.key?(:card_image_id)
     return unless card_image_id.present?
 
-    card_image = UserFile.find_by!(dxid: card_image_id)
+    card_image = UserFile.find_by_uid!(card_image_id)
     update_attributes(
       card_image_url: DNAnexusAPI.for_challenge_bot.generate_permanent_link(card_image)
     )

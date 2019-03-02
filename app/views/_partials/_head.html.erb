@@ -27,3 +27,9 @@
   ga('send', 'pageview');
 </script>
 <% end %>
+
+<% if @context.logged_in? %>
+  <script>
+    Precision.session_checker.run();
+  </script>
+<% end %>

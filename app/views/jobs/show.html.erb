@@ -57,8 +57,8 @@
 
 <div class="pfda-toolbar">
   <div class="btn-group">
-    <% if @job.accessible_by?(@context) %>
-      <%= link_to log_job_path(@job.dxid), class: "btn btn-default" do %>
+    <% if @context.user_id == @job.user_id %>
+      <%= link_to log_job_path(@job), class: "btn btn-default" do %>
         <span class="fa fa-file-code-o"></span> View Log
       <% end %>
     <% end %>
@@ -74,13 +74,14 @@
 
   <div class="btn-group pull-right">
     <% if @job.app.accessible_by?(@context) %>
-      <%= link_to new_app_job_path(@job.app.dxid), class: "btn btn-primary" do %>
+      <%= link_to new_app_job_path(@job.app), class: "btn btn-primary" do %>
         <span class="fa fa-bolt"></span> Run App &nbsp;&nbsp;<span class="badge"><%= @job.app.version ? "v#{@job.app.version}" : "rev#{@job.app.revision}" %></span>
       <% end %>
     <% end %>
     <%= render "_partials/btn_publish", item: @job %>
+    <%= render "_partials/btn_copy_to_cooperative", item: @job %>
     <% if @job.user_id == @context.user_id && !@job.terminal? %>
-      <%= link_to job_path(@job.dxid), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
+      <%= link_to job_path(@job), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
         <span class="fa fa-times-circle"></span> Terminate
       <% end %>
     <% end %>
@@ -111,7 +112,14 @@
   <% if @job.accessible_by?(@context) %>
     <li role="presentation">
       <a href="#tab-comments" aria-controls="tab-comments" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
-        <span class="tab-label">Comments <span class="badge"><%= @job.comment_threads.size %></span></span>
+        <span class="tab-label">Comments <span class="badge">
+          <% if @job.in_space? %>
+            <%= @comments.active.size %>
+          <% else %>
+            <%= @job.comment_threads.size %>
+          <% end %>
+          </span>
+        </span>
       </a>
     </li>
   <% end %>

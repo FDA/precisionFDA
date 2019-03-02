@@ -1,19 +1,12 @@
 <%= render "spaces/header" %>
 
-<!-- Tab panes -->
-<div class="tab-content">
-  <div role="tabpanel" class="tab-pane tab-pane-padded-lg active" id="tab-comments">
-    <% if !@space.active? %>
-      <div class='pfda-help-block'>
-        <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
-        <p>Both host and guest leads must click "Accept space" to activate it.</p>
-      </div>
-    <% end %>
-
-    <div class="row">
-      <div class="col-md-12">
-        <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @space %>
+<% if @space.active? %>
+  <!-- Tab panes -->
+  <div class="tab-content" id="ko_spaces_discuss_container">
+    <div role="tabpanel" class="tab-pane tab-pane-padded-lg active" id="tab-comments">
+      <div class="spaces-comments-container">
+        <%= render "comments/nested_comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @space %>
       </div>
     </div>
   </div>
-</div>
+<% end %>

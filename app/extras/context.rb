@@ -36,6 +36,11 @@ class Context
     return (@user_id == -1 && @username.start_with?("Guest-") && @token == "INVALID" && @expiration.present? && ((@expiration - Time.now.to_i) > 5.minutes) && @org_id == -1)
   end
 
+  def can_create_spaces?
+    return false unless logged_in?
+    user.can_administer_site? || review_space_admin?
+  end
+
   def can_administer_site?
     logged_in? && user.can_administer_site?
   end
@@ -53,10 +58,26 @@ class Context
   end
 
   def valid_publish_targets_for(item)
-    targets = ["public"]
+    targets = item.is_a?(Workflow) ? [] : ["public"]
     if logged_in?
-      targets += @user.active_spaces.map(&:uid)
+      targets += active_spaces_for(item).map(&:uid)
     end
-    return targets.select { |t| item.publishable_by?(self, t) }
+    targets.select { |t| item.publishable_by?(self, t) }
+  end
+
+  def active_spaces_for(item)
+    if item.is_a?(Workflow)
+      @user.active_spaces.review
+    else
+      @user.active_spaces
+    end
+  end
+
+  def api
+    @api ||= DNAnexusAPI.new(token)
+  end
+
+  def review_space_admin?
+    logged_in? && user.review_space_admin?
   end
 end

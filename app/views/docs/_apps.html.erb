@@ -5,7 +5,6 @@
       <div class="bs-docs-section">
         <p>The Apps section of precisionFDA encapsulates all the activities for managing, running and sharing software. The system uses cloud technology that allows you to run any Linux software. You can explore and run apps published by other precisionFDA members, or introduce your own.</p>
       </div>
-
       <div id="apps-overview" class="h2">Overview &amp; Terminology</div>
       <div class="bs-docs-section">
         <p><strong>Apps</strong> are, in essence, shell scripts that run inside a Linux virtual machine on the cloud, and which are designed to perform whatever specific task has been envisioned by the app author. Apps come with an <strong>I/O specification</strong>, a 'contract' that describes the kinds of inputs they receive and the kinds of outputs they are expected to generate. For example, an app that performs mapping and variation calling may specify that it requires as input one or two FASTQ files, and that it will generate as output a BAM and a VCF file.</p>
@@ -30,7 +29,7 @@
         <p>Once you click the "Run App" button on the upper right, the system will generate a new job that encapsulates that particular execution.</p>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(@videos[:apps_run][:url]) %>
+        <%= video_iframe(videos[:apps_run][:url]) %>
       </div>
       <div id="apps-batch-run" class="h2">Batch running an app</div>
       <div class="bs-docs-section">
@@ -38,19 +37,27 @@
         <p>The system will launch separate jobs for each of the varying input values.</p>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(@videos[:apps_batch_run][:url]) %>
+        <%= video_iframe(videos[:apps_batch_run][:url]) %>
       </div>
       <div id="apps-export" class="h2">Exporting an app</div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("export_screenshot.png") %>
+      </div>
       <div class="bs-docs-section">
         <p>This feature allows you to export an app into a portable format (Docker container), so that you can run it on your own computer.</p>
-        <p>Docker is a popular implementation of the Linux container technology. It allows Linux executables to run in an isolated fashion, and it works on all popular platforms (Windows, Mac, and Linux). For more information, and to download and install Docker on your computer, visit <a href="https://www.docker.com/">the Docker website</a>.</p>
-        <p>To export an app, click "Export" and select "Docker Container". The system will generate a file named "Dockerfile", and you will be prompted to download it. This file contains machine instructions on how to assemble a Linux system with all the ingredients required to run the app: the default Ubuntu 14 operating system, additional Ubuntu packages required by the app, and the app's assets (executables and other files).</p>
+        <p>Docker is a software application that enables Linux executables to run in an isolated fashion, in a virtual system environment known as a container. See <a href="https://www.docker.com/why-docker">Why Docker?</a> to obtain a further understanding of it’s utility.</p>
+        <p>Docker runs on all popular platforms (Windows, Mac, and Linux). Visit <a href="https://www.docker.com/get-started">Get Started</a> to download and install Docker on your computer.</p>
+        <p>To export an app, click "Export" and select "Docker Container". The system will generate a file named "Dockerfile", and you will be prompted to download it. This file contains machine instructions on how to assemble a Linux system with all the ingredients required to run the app: the default Ubuntu 14.04 operating system, additional Ubuntu packages required by the app, and the app's assets (executables and other files).</p>
         <p>To make Docker interpret these instructions and create a corresponding Linux image, place the Dockerfile into an empty folder in your computer, and run the following command inside that folder: <code>docker build --tag myapp .</code></p>
         <p>This command will build a Linux image called "myapp" (feel free to change the tag to whatever you like). You only need to run this command once.</p>
+        <p>To verify that the image is on your system, run <code>docker images</code>. If the build was successful, you will see the "myapp" image listed as one of your available local images.</p>
         <p><strong>IMPORTANT</strong>: If an app includes any assets, the Dockerfile includes download links to these assets that are only valid for 24h. Therefore, any apps that include assets will only build successfully within 24h of downloading the Dockerfile.</p>
-        <p>To launch the app using Docker on your computer, run the following command: <code>docker run myapp</code> -- this will instantiate a new container and try to run the app without any other input parameters. Since most apps require one or more inputs, this will result in the system displaying help on how to specify app inputs. Follow the instructions to specify app inputs; for example, if the app needs a BAM file called "mappings", you will need to run: <code>docker run myapp --mappings /path/to/file.bam</code>. <strong>IMPORTANT</strong>: The file paths given to the "run" command refer to locations inside the container, not your hard drive. To make a directory of your hard drive appear in some location inside the container, you must tell Docker about it using the <code>-v /path/to/host/directory:/path/inside/container</code> option. For example, let's say <code>file.bam</code> is in your Desktop on your Mac, i.e. <code>/Users/smith/Desktop/file.bam</code>. To make your Desktop appear as <code>/data</code> inside the container, use <code>docker run -v /Users/smith/Desktop:/data</code>, and to specify the use of <code>file.bam</code> as "mappings", run <code>docker run -v /Users/smith/Desktop:/data myapp --mappings /data/file.bam</code> (note how we specified <code>/data/file.bam</code>, since that's where we mapped the Desktop folder inside the container).</p>
+        <p>To launch the app using Docker on your computer, run the following command: <code>docker run myapp</code> - this will instantiate a new container and try to run the app without any other input parameters. Since most apps require one or more inputs, this will result in the system displaying help on how to specify app inputs. Follow the instructions to specify app inputs; for example, if the app needs a BAM file called "mappings", you will need to run: <code>docker run myapp --mappings /path/to/file.bam</code>. <strong>IMPORTANT</strong>: The file paths given to the "run" command refer to locations inside the container, not your hard drive. To make a directory of your hard drive appear in some location inside the container, you must tell Docker about it using the <code>-v /path/to/host/directory:/path/inside/container</code> option. For example, let's say <code>file.bam</code> is in your Desktop on your Mac, i.e. <code>/Users/smith/Desktop/file.bam</code>. To make your Desktop appear as <code>/data</code> inside the container, use <code>docker run -v /Users/smith/Desktop:/data</code>, and to specify the use of <code>file.bam</code> as "mappings", run <code>docker run -v /Users/smith/Desktop:/data myapp --mappings /data/file.bam</code> (note how we specified <code>/data/file.bam</code>, since that's where we mapped the Desktop folder inside the container).</p>
         <p>Apps on precisionFDA have one or more outputs. On the cloud, those are shown in the job details page, once the job is done. In the case of the Docker container, the execution writes its outputs inside the container, in the hardcoded <code>/data/out</code> directory. We chose that convention so that if you use <code>-v</code> to map a folder of your hard drive to <code>/data</code> (as we did in the example above), you will get the outputs conveniently added inside that directory underneath an <code>out</code> subdirectory.</p>
         <p>This feature is currently in beta. Please keep in mind that due to the nature of Linux container technology, the environment inside the container is not identical to the cloud environment. Moreover, certain configuration aspects of the app such as "Internet Access" or "Instance Type" are not reflected in the exported container. As always, we welcome your feedback and ideas on how to evolve this feature.</p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section">
+        <%= video_iframe(videos[:apps_export][:url]) %>
       </div>
       <div id="cwl-export" class="h2">CWL export</div>
       <div class="bs-docs-section">
@@ -82,7 +89,7 @@ To execute this app locally, please ensure you have Docker (get.docker.com) and 
 
 docker build . -t url_fetcher
 
-sudo cwltool --no-match-user --no-read-only url_fetcher.cwl inputs.json
+cwltool --copy-outputs --no-match-user --no-read-only url_fetcher.cwl inputs.json
 
 ```
 
@@ -107,13 +114,15 @@ x README.md
 x url_fetcher.wdl
 x Dockerfile
 $ cd url_fetcher
-$ cat README.md 
+$ cat README.md
 #url_fetcher
 
-To execute this app locally, please ensure you have Docker (get.docker.com) and Cromwell (https://github.com/broadinstitute/cromwell) and run:
+To execute this app locally, please ensure you have Docker (get.docker.com), Cromwell (https://github.com/broadinstitute/cromwell) and WDLTool (https://github.com/broadinstitute/wdltool) and run:
 
 ```
-java -jar /path/to/cromwell.jar url_fetcher.wdl -i inputs.json
+docker build . -t url_fetcher
+java -jar /path/to/wdltool.jar inputs url_fetcher.wdl > inputs.json
+java -jar /path/to/cromwell.jar run url_fetcher.wdl -i inputs.json
 ```
 
 where inputs.json is a standard WDL input file definition (see https://software.broadinstitute.org/wdl/ for examples).

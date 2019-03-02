@@ -1,0 +1,116 @@
+<div id="about-docs" class="bs-docs-container docs-content">
+  <div class="row">
+    <div class="col-sm-18">
+      <div id="workflows" class="h1">Workflows</div>
+      <div class="bs-docs-section">
+        <p>
+          <strong>Workflows</strong> on precisionFDA allow multiple applications to be chained together, with the output from one application serving as the input for the next. A workflow is an object, just like an app.  You can build a unique workflow, save it, and rerun it as many times as you choose.
+          Workflows can be edited to update app versions, add or remove apps, and make other configuration changes whenever you choose to do so.
+        </p>
+      </div>
+      <div id="workflow-create" class="h2">Creating a Workflow</div>
+      <div class="bs-docs-section">
+        <p>To create a workflow, navigate to the Workflows page and select <strong>Create Workflow</strong>.</p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/workflows/create.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          On this page, you can choose a <strong>name</strong> and <strong>title</strong> for the workflow.
+          Note that, just like an app name, the workflow name is <strong>permanent and cannot be changed later.</strong>
+        </p>
+      </div>
+      <div id="workflow-add-apps" class="h2">Add apps to a Workflow</div>
+      <div class="bs-docs-section">
+        <p>
+          To add apps to the workflow, click on <strong>Add Stage</strong>.
+          You may add either public apps, private apps, or a combination of the two.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/workflows/stages.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          Workflows are <strong>private</strong> by default, so private apps may be used in a workflow.
+          You may select which revision of an app you choose to add to the workflow by using the dropdown menu.
+          Click the <strong>Add</strong> button next to an app to add it to the workflow.
+        </p>
+        <p>
+          After apps have been added to the workflow, they will appear on the <strong>workflow diagram grid</strong>.
+          Each app is shown as a box, which is highlighted to show whether it is properly configured (green) or needs additional attention (red).
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/workflows/diagram_grid.png") %>
+      </div>
+      <div id="workflow-configure-apps" class="h2">Configure a Workflow's apps</div>
+      <div class="bs-docs-section">
+        <p>
+          To configure each app in a workflow, click the <strong>app name</strong>.
+          You must specify the source of each input to that app for it to be properly configured.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/workflows/configure_apps.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          Each input can either come from another app in the workflow, or can be set as required workflow input by using the checkbox.
+          All inputs that are set as required workflow input must be specified when you run the workflow (similar to how you specify inputs when running an app).
+        </p>
+        <p>
+          Because workflows are linear, inputs to the first app in the workflow must be set as required workflow input.
+          Inputs to later apps further downstream in the workflow can either be set as required inputs, or can come from the output of previous apps.
+        </p>
+        <p>
+          To set an app input as the output from a previous app, click the blue <strong>Set</strong> button on the right.
+          This will bring up a list of all outputs from other apps in the workflow.
+          You may select the desired output by clicking <strong>Select</strong>.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/workflows/select_outputs.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          Once an app in a workflow is properly configured, the highlighted box around the app will change from red to green.
+          Similarly, the color of the funnels that indicate inputs and outputs for that app will change from red to green as they are configured.
+          For a workflow to run successfully, all required inputs must be green.
+        </p>
+        <p>
+          To remove an app from a workflow, you may click the <strong>small X</strong> in a circle in the upper-right corner of that app’s box.
+        </p>
+        <p>
+          You may add documentation and additional information about the workflow in the <strong>Readme tab</strong>.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/workflows/finish.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <div class="alert alert-info">
+          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong>
+          After you have created a workflow, it can be executed from the Workflows page, just like running an app.
+          A workflow can be edited to create a new revision; apps may be added, removed, and inputs and/or outputs may be changed.
+          After a workflow has run, all outputs are provided in the output location.
+        </div>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section">
+        <%= video_iframe(videos[:workflows][:url]) %>
+      </div>
+    </div>
+    <!-- SIDEBAR NAVIGATION -->
+    <div class="col-sm-6">
+      <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
+        <ul class="nav bs-docs-sidenav">
+          <li><a href="#workflows">Overview</a></li>
+          <li><a href="#workflow-create">Creating a Workflow</a></li>
+          <li><a href="#workflow-add-apps">Add apps to a Workflow</a></li>
+          <li><a href="#workflow-configure-apps">Configure a Workflow's apps</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>

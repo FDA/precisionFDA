@@ -1,0 +1,12 @@
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane active" id="tab-notes">
+    <div class="panel">
+      <div class="panel-heading">
+        <h4>Jobs</h4>
+      </div>
+      <div class="panel-body">
+        <%= render "jobs/grid", jobs_grid: @jobs_grid, scope_icon: false, hide_access: true, show_filters: :when_filtered %>
+      </div>
+    </div>
+  </div>
+</div>

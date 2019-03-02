@@ -1,0 +1,224 @@
+<div class="container-fluid container-padded">
+  <%= simple_form_for @space_template, html: {class: 'form form-horizontal'} do |f| %>
+    <%= render "_partials/form_errors", object: @space_template %>
+
+    <div class="form-group required">
+      <%= f.label :name, label: "Name", class: "control-label col-sm-2" %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%=
+          f.text_field :name,
+          size: 250,
+          class: 'form-control input-lg',
+          placeholder: 'Name this Space Template',
+          data: {bind: "disable: readonly"},
+          required: "required"
+        %>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :description, "Description", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%=
+          f.text_area :description,
+          class: "form-control",
+          rows: 10,
+          data: {bind: "disable: readonly"},
+          placeholder: "What is this space template about..."
+        %>
+      </div>
+    </div>
+    <!-- ko if:readonly != true -->
+    <div class="form-group">
+      <%= f.label :name, label: "Add Verified Spaces", class: "control-label col-sm-2" %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%=
+          content_tag(:input, nil, {id: 'add-multiple-spaces', 'data-toggle': "modal", 'data-bind': 'click: showSelectSpacesModal', placeholder: ' Add', style: 'font-family: Arial, FontAwesome'})
+        %>
+      </div>
+    </div>
+    <!-- /ko -->
+
+    <!-- ko if: addedSpaces().length > 0 -->
+    <div class="form-group">
+      <div id="verified-spaces-box" class="col-lg-11 col-lg-offset-3" >
+        <!-- ko foreach:addedSpaces -->
+        <span style="padding-right: 10px">
+        <span class="verified-space-added" data-bind="attr: {space_id: id}"><span data-bind="text: name"></span></span>
+        <span class='fa fa-times delete-node' data-bind="click: $parent.deleteSpace"></span>
+
+        <input class="form-control hidden" data-bind="value: id" type="hidden" name="space_template[space_template_spaces_attributes][][space_id]" id="space_template_space_template_spaces_space_id"/>
+        <input class="form-control hidden" data-bind="value: name" type="hidden" name="space_template[space_template_spaces_attributes][][space_name]" id="space_template_space_template_spaces_space_name"/>
+
+        </span>
+        <!-- /ko -->
+      </div>
+    </div>
+    <!-- /ko -->
+
+    <%= render "unverified", f: f %>
+
+    <div class="form-group">
+      <%= f.label :name, label: "Apps/file list", class: "control-label col-sm-2" %>
+
+      <div class="col-sm-11 col-sm-offset-1 verified-space-apps">
+        <div class="template-added-items-box">
+          <!-- ko foreach:spaceApps -->
+          <div>
+            <div class="verified-space-added-items">
+              <span class="fa fa-cubes"></span>
+              <span data-bind="attr: {app_id: id}">
+
+                  <input class="form-control hidden" data-bind="value: id" type="hidden" name="space_template[space_template_nodes_attributes][][node_id]" id="space_template_space_template_nodes_node_id"/>
+                  <input class="form-control hidden" value="App" type="hidden" name="space_template[space_template_nodes_attributes][][node_type]" id="space_template_space_template_nodes_node_type"/>
+                  <input class="form-control hidden" data-bind="value: title" type="hidden" name="space_template[space_template_nodes_attributes][][node_name]" id="space_template_space_template_nodes_node_name"/>
+
+                <span data-bind="text: title"></span>
+              </span>
+            </div>
+            <span class='fa fa-times delete-node' data-bind="click: $parent.deleteApp"></span>
+          </div>
+          <!-- /ko -->
+        </div>
+
+
+        <div class="template-added-items-box">
+          <!-- ko foreach:spaceFiles -->
+          <div>
+            <div class="verified-space-added-items">
+              <span class="fa fa-file"></span>
+              <span data-bind="attr: {file_id: id}">
+              <input class="form-control hidden" data-bind="value: id" type="hidden" name="space_template[space_template_nodes_attributes][][node_id]" id="space_template_space_template_nodes_node_id"/>
+              <input class="form-control hidden" value="Node" type="hidden" name="space_template[space_template_nodes_attributes][][node_type]" id="space_template_space_template_nodes_node_type"/>
+              <input class="form-control hidden" data-bind="value: name" type="hidden" name="space_template[space_template_nodes_attributes][][node_name]" id="space_template_space_template_nodes_node_name"/>
+
+                <span data-bind="text: name"></span>
+              </span>
+            </div>
+            <span class='fa fa-times delete-node' data-bind="click: $parent.deleteNode"></span>
+          </div>
+          <!-- /ko -->
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-11">
+          <input
+            name="space_template[private]"
+            type="checkbox"
+            data-bind="disable: readonly"
+            <%= @space_template.private? ? 'checked=checked' : '' %>>
+          This is a private template. <span style="font-size: 70%">Marking a template private will only make it available to you.</span>
+        </div>
+      </div>
+
+
+      <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-12 pull-right">
+          <div>
+            <% if action_name == 'duplicate' %>
+              <%= f.submit "Copy Template" , class: 'btn btn-primary', data: {disable_with: "Saving Template..."} %>
+              <%= link_to "Cancel", space_templates_path, class: "btn btn-default" %>
+              <% else %>
+            <% if @readonly == true %>
+              <%= link_to "Back", space_templates_path, class: "btn btn-default" %>
+            <% else %>
+              <%= f.submit (current_page?(new_space_template_path) ? "Create" : "Save") + " Template", class: 'btn btn-primary', data: {disable_with: (current_page?(new_space_template_path) ? "Creating Template..." : "Saving Template...")} %>
+              <%= link_to "Cancel", space_templates_path, class: "btn btn-default" %>
+            <% end %>
+              <% end %>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  <% end %>
+</div>
+
+<div id="verified-spaces" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-bind="click: dismissSpaces" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Add Verified Space</h4>
+      </div>
+      <div class="modal-body" style="height: 300px; overflow-y: scroll">
+        <input type="text" id="filter-verified-spaces" data-bind="textInput: searchSpaceBox">
+        <!-- ko if:spaces().length > 0 -->
+        <div class="template-box">
+          <!-- ko foreach: spaces() -->
+          <table class="add-verified-spaces-table filter">
+            <tr>
+              <td>
+                <input type="checkbox" name="spaces[selected][]" data-bind="attr: {space_name: name}, value: id, checked: checked">
+              </td>
+              <td>
+                <div data-bind="text: name"></div>
+              </td>
+            </tr>
+          </table>
+          <!-- /ko -->
+        </div>
+        <!-- /ko -->
+        <!-- ko if:spaces() < 1 -->
+        <div class="template-box">
+        There are no verified spaces
+        </div>
+        <!-- /ko -->
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary verified-spaces-add" data-bind="click: addSelectedSpaces">Add
+          Spaces
+        </button>
+        <button type="button" class="btn btn-secondary" data-bind="click: dismissSpaces">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="unverified-apps" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-bind="click: dismissApps" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Add Unverified Apps</h4>
+      </div>
+      <div class="modal-body" style="height: 300px; overflow-y: scroll">
+        <input type="text" id="filter-verified-apps" data-bind="textInput: searchAppBox">
+
+        <!-- ko if:unverifiedApps().length > 0 -->
+        <div class="template-box">
+          <!-- ko foreach: unverifiedApps -->
+          <table class="add-verified-spaces-table filter">
+            <tr>
+              <td>
+                <input type="checkbox" name="apps[selected][]" data-bind="attr: {app_name: title}, value: id, checked: checked">
+              </td>
+              <td>
+                <div data-bind="text: title"></div>
+              </td>
+            </tr>
+          </table>
+          <!-- /ko -->
+        </div>
+        <!-- /ko -->
+        <!-- ko if:unverifiedApps() < 1 -->
+        <div class="template-box">
+        There are no unverified apps
+        </div>
+        <!-- /ko -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary verified-spaces-add" data-bind="click: addSelectedApps">Add Apps
+        </button>
+        <button type="button" class="btn btn-secondary" data-bind="click: dismissApps">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

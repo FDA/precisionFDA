@@ -10,6 +10,7 @@ class FilesListView
     @deleteModal = $('#delete-files-modal')
     @publishModal = $('#publish-files-modal')
     @nodes = nodes
+    self.nodes = @nodes
     @scope = scope
 
     @moveFilesModal = new Precision.models.MoveFilesModal({
@@ -64,7 +65,13 @@ class FilesListView
     else
       @selectedItems.remove(value)
 
+  anyInVerifiedSpace: (ids) ->
+    ids.some((node) ->
+      @nodes[node].in_verified_space == true
+    )
+
   isRenamingAllowed: ->
+    return false if @anyInVerifiedSpace(@selectedItems())
     @selectedItems().length == 1
 
   showRenamingModal: ->
@@ -80,6 +87,7 @@ class FilesListView
     $('#rename_form').attr('action', selected.rename_path)
 
   isMovingAllowed: ->
+    return false if @anyInVerifiedSpace(@selectedItems())
     @selectedItems().length > 0
 
   showMoveModal: ->
@@ -95,6 +103,7 @@ class FilesListView
       @downloadModal.modal('show')
 
   isDeletingAllowed: ->
+    return false if @anyInVerifiedSpace(@selectedItems())
     @selectedItems().length > 0
 
   showDeleteModal: ->
@@ -103,6 +112,7 @@ class FilesListView
       @deleteModal.modal('show')
 
   isPublishingAllowed: ->
+    return false if @anyInVerifiedSpace(@selectedItems())
     @selectedItems().length > 0
 
   showPublishModal: ->

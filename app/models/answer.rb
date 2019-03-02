@@ -11,6 +11,7 @@
 #
 
 class Answer < ActiveRecord::Base
+  include Auditor
   # This includes permissions but many methods must be redefined
   # given that the real permissions are mandated by the note
   include Permissions
@@ -22,6 +23,10 @@ class Answer < ActiveRecord::Base
   acts_as_commentable
   acts_as_votable
   acts_as_taggable
+
+  def self.can_be_in_space?
+    false
+  end
 
   def uid
     "answer-#{id}"

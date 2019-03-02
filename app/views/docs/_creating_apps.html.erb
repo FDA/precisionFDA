@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(@videos[:apps_create][:url]) %>
+        <%= video_iframe(videos[:apps_create][:url]) %>
       </div>
       <div id="dev-name" class="h2">App naming conventions</div>
       <div class="bs-docs-section">
@@ -219,8 +219,8 @@
               <td>320 GB</td>
             </tr>
             <tr>
-              <td>Baseline 32</td>
-              <td>32</td>
+              <td>Baseline 36</td>
+              <td>36</td>
               <td>60 GB</td>
               <td>640 GB</td>
             </tr>
@@ -389,9 +389,9 @@ tabix -p vcf file.vcf.gz
 
 http://www.htslib.org/doc/tabix-1.2.1.html  
 https://github.com/samtools/htslib/releases/tag/1.2.1</pre>
-        <p>Download the precisionFDA uploader by clicking the respective button in the "Create Assets" page. The downloaded archive contains a single python script, <code>pfda</code>, which you can run to upload the asset. (NOTE: It requires Python 2.7, as well as the python 'requests' and 'futures' packages, so ensure you have those available in your environment).</p>
+        <p>Download the precisionFDA uploader by clicking the respective button for your operating system (os) and architecture (arch) in the "Create Assets" page. The downloaded archive contains a single binary, <code>pfda_{os}_{arch}</code>, which you can run to upload the asset.</p>
         <p>The tool requires an "authorization key" in order to authenticate the client against the precisionFDA system. You can get a key by clicking the respective link in the "Add Assets" page. Copy the key from that page and paste it in the command below where it says <strong>KEY</strong>. For your security, the key is valid for 24h.</p>
-        <p>Run <code>./pfda upload-asset --auth KEY --name my-asset.tar.gz --root /path/to/fake_root --readme my-asset.txt</code>. This command will archive the contents of the fake root into the named tarball, and upload it to precisionFDA along with the contents of the readme file. The tarball name must end in either <code>.tar.gz</code> or <code>.tar</code> (in which latter case it will not be compressed).</p>
+        <p>Run <code>./pfda --cmd upload-asset --key KEY --name my-asset.tar.gz --root /path/to/fake_root --readme my-asset.txt</code>. This command will archive the contents of the fake root into the named tarball, and upload it to precisionFDA along with the contents of the readme file. The tarball name must end in either <code>.tar.gz</code> or <code>.tar</code> (in which latter case it will not be compressed).</p>
         <div class="alert alert-info">
           <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> The uploader saves your key in <code>$HOME/.config/precision-fda/config.json</code>, so after you have run it once, you don't need to specify the key in subsequent invocations.
         </div>
@@ -505,7 +505,154 @@ https://github.com/samtools/htslib/releases/tag/1.2.1</pre>
         <p>In addition, this feature can be used to take a peek at the insides of an app &mdash; just fork it to bring up the editor, and the simply cancel the operation. This allows you to see the app's script, assets, etc.</p>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(@videos[:apps_fork][:url]) %>
+        <%= video_iframe(videos[:apps_fork][:url]) %>
+      </div>
+      <div id="dev-import" class="h2">App Import</div>
+      <div class="bs-docs-section">
+        <p>
+          On precisionFDA, there are two methods for building apps.
+          You may create apps on precisionFDA using the UI, as is described in <%= link_to 'Creating Apps', show_docs_path(:creating_apps, anchor: :dev) %>.
+          However, advanced users may choose to instead create their app by writing a CWL file that contains all the pertinent details for the app and uploading this to precisionFDA.
+        </p>
+      </div>
+      <div id="dev-import-reasons" class="h2">Why Use App Import?</div>
+      <div class="bs-docs-section">
+        <p>This import method for creating precisionFDA apps offers several advantages over the step-by-step UI method:</p>
+        <ul>
+          <li>If you are familiar with CWL, you may specify all of the parameters for your app without needing to click through multiple UI screens.</li>
+          <li>Importing an app via a CWL script is an easy way to make use of public Docker images in an application format on precisionFDA.</li>
+          <li>A CWL app script may be easily shared with other collaborators, allowing them to build and customize their own versions of this app, either on or off precisionFDA.</li>
+          <li>Because the CWL script contains all parameters used by the app, it can be shared with collaborators who do not have precisionFDA accounts to explain how an analysis was performed.</li>
+        </ul>
+      </div>
+      <div id="cwl-script-structure" class="h2">How to Structure a CWL Script</div>
+      <div class="bs-docs-section">
+        <p>In order to successfully import as an app in precisionFDA, a CWL script must include several key features.</p>
+        <p>
+          First, the input and outputs specified in the CWL script must be one of the five data types used on precisionFDA - <strong>file, string, float, integer, or Boolean</strong>.
+          Arrays are not supported as a data type on precisionFDA, and any CWL script that specifies an array as an input or output will not import successfully as an app.
+        </p>
+        <p>
+          Second, our CWL script includes a baseCommand, which is the actual instruction that the app will execute.
+          If this baseCommand is not present, the script will not import successfully as an app, because the app will not see a valid set of commands to run.
+        </p>
+        <p>
+          Finally, note the DockerRequirement under requirements.
+          Using this method, we specify a public Docker image that will be automatically pulled and used to execute the commands of the app.
+        </p>
+        <p>
+          Other useful notes for creating a CWL script for app import:
+        </p>
+        <ul>
+          <li>The <strong>id</strong> field will become the app name.</li>
+          <li>The <strong>label</strong> field will become the title of the app.</li>
+          <li>Information in the <strong>doc</strong> field will be included in the Readme of the app. You may provide details about how your app functions and what dependencies are used in this area.</li>
+        </ul>
+        <p>Here is our example CWL script:</p>
+        <pre>
+#!/usr/bin/env cwl-runner
+
+class: CommandLineTool
+
+id: "cgp-chksum"
+
+label: "CGP file checksum generator"
+
+cwlVersion: v1.0
+
+doc: |
+![build_status](https://quay.io/repository/wtsicgp/dockstore-cgp-chksum/status)
+    A Docker container for producing file md5sum and sha512sum. See the [dockstore-cgp-chksum](https://github.com/cancerit/dockstore-cgp-chksum) website for more information.
+
+requirements:
+  - class: DockerRequirement
+    dockerPull: "quay.io/wtsicgp/dockstore-cgp-chksum:0.1.0"
+
+inputs:
+  in_file:
+    type: File
+    doc: "file to have checksum generated from"
+    inputBinding:
+      position: 1
+
+  post_address:
+    type: ["null", string]
+    doc: "Optional POST address to send JSON results"
+    inputBinding:
+      position: 2
+
+outputs:
+  chksum_json:
+    type: File
+    outputBinding:
+      glob: check_sums.json
+
+  post_server_response:
+    type: ["null", File]
+    outputBinding:
+      glob: post_server_response.txt
+
+baseCommand: ["/opt/wtsi-cgp/bin/sums2json.sh"]
+        </pre>
+      </div>
+      <div id="cwl-import" class="h2">How to Import a CWL File</div>
+      <div class="bs-docs-section">
+        <p>
+          To import our CWL file and create a precisionFDA app, you begin by navigating to the Apps page, where you select <strong>Create App</strong>.
+          On the Create App page, you can see a button labeled <strong>Import from .cwl file</strong>.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/creating_apps/import.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          When you click on this button, you’ll be prompted to select a local file from your computer with a .cwl extension.
+          Once you select the CWL app file, the details will be automatically loaded into precisionFDA.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/creating_apps/import_error.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          If you see a red error bar at the top of the page, there may be one or more components missing from your CWL script, or there may be a non-authorized data type specified in the script.
+          Make sure that all components are present in the CWL script; you may consult the example CWL script in this help.
+        </p>
+        <p>
+          If the script successfully imports, all relevant fields in the app creation UI will be populated from the CWL file.
+          Before you click on <strong>Create</strong> to make the new app, you may review the contents of each field to confirm that the proper options are specified.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/creating_apps/review_content.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          Inputs and outputs specified in the CWL file are loaded as inputs and outputs for the precisionFDA app.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/creating_apps/script.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          The Script tab includes the full CWL file’s text, along with the instructions to execute the CWL script and provide the results as outputs.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/creating_apps/script_tabs.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          Documentation information appears in the Readme section.
+        </p>
+        <p>
+          After you have verified that all the imported information is correct, you may click <strong>Create</strong> to build the app.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section">
+        <%= video_iframe(videos[:apps_import][:url]) %>
       </div>
     </div>
     <!-- SIDEBAR NAVIGATION -->
@@ -521,6 +668,10 @@ https://github.com/samtools/htslib/releases/tag/1.2.1</pre>
           <li><a href="#dev-script">App script</a></li>
           <li><a href="#dev-bash">Bash tips</a></li>
           <li><a href="#dev-fork">Forking an app</a></li>
+          <li><a href="#dev-import">App Import</a></li>
+          <li><a href="#dev-import-reasons">Why Use App Import?</a></li>
+          <li><a href="#cwl-script-structure">How to Structure a CWL Script</a></li>
+          <li><a href="#cwl-import">How to Import a CWL File</a></li>
         </ul>
       </nav>
     </div>

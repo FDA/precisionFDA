@@ -1,7 +1,7 @@
 {
   "name": "precision-fda",
   "version": "0.0.1",
-  "homepage": "https://github.com/FDA/precisionFDA",
+  "homepage": "https://github.com/dnanexus/precision-fda",
   "authors": [
     "Fahd Butt <fbutt@dnanexus.com>",
     "Evan Worley <evan@dnanexus.com>"
@@ -31,6 +31,7 @@
     "knockout-sortable": "~0.11.0",
     "sortable": "~0.8.0",
     "ace-builds": "~1.2.3",
-    "tablesort": "table.sort#^4.0.1"
+    "tablesort": "table.sort#^4.0.1",
+    "eonasdan-bootstrap-datetimepicker": "^4.17.47"
   }
 }

@@ -16,7 +16,8 @@ class WorkflowViewModel
             stages.push input_spec
             break
       stages)
-    @workflowId = workflow.dxid
+    @workflowUid = workflow.uid
+    @accessibleScope = workflow.scopes
     @defaultValues = ko.observable()
     @canRunWorkflow = ko.computed(=>
       config = true
@@ -69,20 +70,22 @@ class WorkflowViewModel
               input = {"class": workflow_input.class, "input_name": input_name, "input_value": workflow_input.defaultValues()[0]}
           else
             if workflow_input.optional && workflow_input.selectorModel.defaultValues()?
-              break
+              input = {"class": workflow_input.class, "input_name": input_name, "input_value": workflow_input.defaultValues()}
             else if !workflow_input.optional || !workflow_input.defaultValues()?
               input = {"class": workflow_input.class, "input_name": input_name, "input_value": workflow_input.defaultValues()}
         inputs.push input
     params = {
       name: @title(),
       inputs: inputs,
-      workflow_id: @workflowId
+      workflow_id: @workflowUid
     }
     Precision.api('/api/run_workflow', params)
       .done( =>
-        window.location.replace("/workflows/#{@workflowId}")
+        window.location.replace("/workflows/#{@workflowUid}")
     )
-      .fail((error) ->
+      .fail((error) =>
+        @isRunning(false)
+        Precision.alert.show(error.responseJSON.error.message)
         console.log(error)
     )
 
@@ -149,7 +152,7 @@ class selectorModel
         describe:
           include:
             user: true
-            all_tags_list: true
+            all_tags_list: false
         patterns: @patterns
       }
       Precision.api("/api/list_files", params, (objects) =>

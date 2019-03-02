@@ -3,14 +3,14 @@
 <div class="page-header">
   <div class="page-title">
     <span class="fa fa-edit"></span>
-    Editing <small><a href="<%= asset_path(@asset.dxid) %>"><%= @asset.name %></a></small>
+    Editing <small><a href="<%= asset_path(@asset) %>"><%= @asset.name %></a></small>
   </div>
 </div>
 
 <div class="pfda-toolbar">
   <div class="btn-group pull-right">
       <div class="btn-group">
-        <%= form_for @asset, url: asset_path(@asset.dxid), method: :put, html: {class: "form form-inline"} do |f| %>
+        <%= form_for @asset, url: asset_path(@asset), method: :put, html: {class: "form form-inline"} do |f| %>
           <input type="hidden" data-bind="attr: {name: 'asset[description]'}, value: description"/>
 
           <button class="btn btn-primary" type="submit">

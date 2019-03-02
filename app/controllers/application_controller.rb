@@ -1,4 +1,5 @@
 class ApplicationController < ActionController::Base
+  include PathHelper
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
@@ -7,7 +8,10 @@ class ApplicationController < ActionController::Base
   rescue_from ActionController::InvalidAuthenticityToken, with: :invalid_token
 
   # Decode context
-  before_action :decode_context
+  before_action :handle_session, :decode_context
+
+  # Audit log
+  before_action :save_current_user_for_audit
 
   # Require login
   before_action :require_login
@@ -24,7 +28,7 @@ class ApplicationController < ActionController::Base
   private
 
   def invalid_token
-    redirect_to root_path, status: 303, alert: "Invalid session"
+    redirect_to root_path, status: :see_other, alert: "Invalid session"
   end
 
   def current_context
@@ -43,6 +47,10 @@ class ApplicationController < ActionController::Base
     @context = Context.new(session[:user_id], session[:username], session[:token], session[:expiration], session[:org_id])
   end
 
+  def save_current_user_for_audit
+    Auditor.current_user = AuditLogUser.new(@context.username, request.remote_ip)
+  end
+
   def generate_auth_key(duration = 1.day)
     # Generate new token for pfda uploader
     context = @context.as_json.slice("user_id", "username", "token", "expiration", "org_id")
@@ -57,6 +65,7 @@ class ApplicationController < ActionController::Base
     session[:token] = token
     session[:expiration] = expiration
     session[:org_id] = org_id
+    Session.create(user_id: user_id, key: session.id)
   end
 
   def require_login
@@ -123,7 +132,7 @@ class ApplicationController < ActionController::Base
   end
 
   def get_preview_link(context, id)
-    file = UserFile.accessible_by(context).find_by!(dxid: id)
+    file = UserFile.accessible_by(context).find_by_uid!(id)
     if file.nil? || file.state != "closed" || file.file_size > 5000000
       return false
     else
@@ -134,56 +143,7 @@ class ApplicationController < ActionController::Base
     return url
   end
 
-  def pathify(item)
-    case item.klass
-    when "file"
-      file_path(item.dxid)
-    when "note"
-      if item.note_type == "Answer"
-        pathify(item.answer)
-      elsif item.note_type == "Discussion"
-        pathify(item.discussion)
-      else
-        note_path(item)
-      end
-    when "app"
-      app_path(item.dxid)
-    when "app-series"
-      pathify(item.latest_accessible(@context))
-    when "job"
-      job_path(item.dxid)
-    when "asset"
-      asset_path(item.dxid)
-    when "comparison"
-      comparison_path(item)
-    when "discussion"
-      discussion_path(item)
-    when "answer"
-      discussion_answer_path(item.discussion, item.user.dxuser)
-    when "user"
-      user_path(item.dxuser)
-    when "license"
-      license_path(item)
-    when "space"
-      space_path(item)
-    when "meta-appathon"
-      meta_appathon_path(item)
-    when "appathon"
-      appathon_path(item)
-    when "expert"
-      expert_path(item)
-    when "expert-question"
-      expert_expert_question_path(item.expert_id, item.id)
-    when "workflow"
-      workflow_path(item.dxid)
-    when "workflow-series"
-      pathify(item.latest_accessible(@context))
-    when "folder"
-      pathify_folder(item)
-    else
-      raise "Unknown class #{item.klass}"
-    end
-  end
+
 
   def pathify_folder(folder)
     if folder.private?
@@ -192,46 +152,9 @@ class ApplicationController < ActionController::Base
       explore_files_path(folder_id: folder.id)
     elsif folder.in_space?
       space = folder.space
-      content_space_path(id: space.id, folder_id: folder.id)
+      files_space_path(id: space.id, folder_id: folder.id)
     else
       raise "Unable to build folder's path"
-    end
-  end
-
-  def pathify_comments(item)
-    case item.klass
-    when "file"
-      file_comments_path(item.dxid)
-    when "note"
-      if item.note_type == "Answer"
-        pathify_comments(item.answer)
-      elsif item.note_type == "Discussion"
-        pathify_comments(item.discussion)
-      else
-        note_comments_path(item)
-      end
-    when "app"
-      app_comments_path(item.dxid)
-    when "job"
-      job_comments_path(item.dxid)
-    when "asset"
-      asset_comments_path(item.dxid)
-    when "comparison"
-      comparison_comments_path(item)
-    when "discussion"
-      discussion_comments_path(item)
-    when "answer"
-      discussion_answer_comments_path(item.discussion, item.user.dxuser)
-    when "space"
-      space_comments_path(item)
-    when "meta-appathon"
-      meta_appathon_comments_path(item)
-    when "appathon"
-      appathon_comments_path(item)
-    when "expert-question"
-      expert_expert_question_comments_path(item.expert_id, item.id)
-    else
-      raise "Unknown class #{item.klass}"
     end
   end
 
@@ -247,8 +170,13 @@ class ApplicationController < ActionController::Base
       else
         pathify(item)
       end
+    when "workflow"
+      return workflow_analyses_path(item) if request.referer =~ /analyses/
+      workflow_path(item)
     when "space"
       discuss_space_path(item)
+    when "task"
+      space_task_path(item.space_id, item)
     when "expert", "expert-question", "meta-appathon", "appathon", "file", "app", "job", "asset", "comparison", "answer", "space", "folder"
       pathify(item)
     else
@@ -257,15 +185,15 @@ class ApplicationController < ActionController::Base
   end
 
   def item_from_uid(uid, specified_klass = nil)
-    if uid =~ /^(job|app|file|workflow)-(.{24})$/
+    if  uid =~ /^(job|app|file|workflow)-(.{24,})$/
       klass = {
-        "job" => Job,
         "app" => App,
+        "file" => UserFile,
+        "job" => Job,
         "workflow" => Workflow,
-        "file" => Node,
       }[$1]
       raise "Class '#{klass}' did not match specified class '#{specified_klass}'" if specified_klass && klass != specified_klass
-      klass.find_by!(dxid: uid)
+      klass.find_by_uid!(uid)
     elsif uid =~ /^(app-series|workflow-series|appathon|comparison|note|discussion|answer|user|license|space|challenge)-(\d+)$/
       klass = {
         "app-series" => AppSeries,
@@ -298,6 +226,10 @@ class ApplicationController < ActionController::Base
   end
 
   def get_item_array_from_params
+    if params[:workflow_id].present?
+      workflow = Workflow.find_by_uid(params[:workflow_id])
+      return [workflow]
+    end
     if params[:discussion_id].present?
       discussion = Discussion.find(params[:discussion_id])
       if params[:answer_id].present?
@@ -319,18 +251,21 @@ class ApplicationController < ActionController::Base
       return [Appathon.find(params[:appathon_id])]
     elsif params[:note_id].present?
       return [Note.find(params[:note_id])]
+    elsif params[:task_id].present?
+      task = Task.find(params[:task_id])
+      return [task.space, task]
     elsif params[:space_id].present?
       return [Space.find(params[:space_id])]
     elsif params[:comparison_id].present?
       return [Comparison.find(params[:comparison_id])]
     elsif params[:file_id].present?
-      return [UserFile.find_by!(dxid: params[:file_id])]
+      return [UserFile.find_by_uid!(params[:file_id])]
     elsif params[:asset_id].present?
-      return [Asset.find_by!(dxid: params[:asset_id])]
+      return [Asset.find_by_uid!(params[:asset_id])]
     elsif params[:job_id].present?
-      return [Job.find_by!(dxid: params[:job_id])]
+      return [Job.find_by_uid!(params[:job_id])]
     elsif params[:app_id].present?
-      return [App.find_by!(dxid: params[:app_id])]
+      return [App.find_by_uid!(params[:app_id])]
     elsif params[:expert_id].present?
       expert = Expert.find(params[:expert_id])
       if params[:expert_question_id].present?
@@ -346,6 +281,7 @@ class ApplicationController < ActionController::Base
 
     accessible = object.accessible_by?(@context)
     item_sliced = object.context_slice(@context, *object.describe_fields)
+    review_space = object.space_object if object.in_space?
 
     describe = {
       id: item_sliced[:id],
@@ -358,7 +294,9 @@ class ApplicationController < ActionController::Base
       accessible: accessible,
       public: object.public?,
       private: object.private?,
-      in_space: object.in_space?
+      in_space: object.in_space?,
+      space_private: review_space.present? && review_space.confidential?,
+      space_public: review_space.present? && review_space.shared?,
     }
 
     if accessible && !item_sliced[:item].nil?
@@ -417,4 +355,28 @@ class ApplicationController < ActionController::Base
 
     Event::UserViewed.create_for(@context, request.path)
   end
+
+  def handle_session
+    return unless session[:user_id]
+
+    ar_session = Session.find_by(key: session.id)
+
+    unless ar_session
+      reset_session
+      return
+    end
+
+    if ar_session.expired?
+      ar_session.destroy!
+      reset_session
+    else
+      ar_session.touch
+      cookies[:sessionExpiredAt] = MAX_MINUTES_INACTIVITY.minutes.since.to_i
+    end
+  end
+
+  def not_found!
+    raise ActionController::RoutingError.new('Not Found')
+  end
+
 end

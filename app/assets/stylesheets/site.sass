@@ -123,6 +123,7 @@ table.table-nowrap
 .pfda-rename-item
   font-size: 12px
   color: $link-muted-color
+  margin-right: 10px
 
   &:hover
     color: $link-muted-hover-color
@@ -216,3 +217,55 @@ table.table-nowrap
   position: absolute
   top: 10px
   right: 10px
+
+.fisma-alert
+  background-color: #c54641
+  p
+    margin: 0 !important
+    color: #f0f7fd
+    padding: 10px 40px
+    font-size: 16px !important
+    text-shadow: none !important
+    font-weight: normal !important
+  a
+    color: #f0f7fd
+    text-decoration: underline
+
+.jumbotron
+  .fisma-alert
+    max-width: 1390px
+    margin-left: auto
+    margin-right: auto
+
+.turbolinks-progress-bar
+  height: 3px
+  background-color: #0ff
+  box-shadow: 0px 0px 1px 0px #0ff
+
+.button-to-form-inline
+  display: inline
+
+.btn-fa-white
+  color: #ffffff !important
+.btn-fa-dark
+  color: #575757 !important
+
+.modal-with-loader
+  .loader-container
+    display: none
+  &.loading
+    pointer-events: none
+    .modal-footer
+      position: relative
+    .loader-container
+      position: absolute
+      display: flex
+      height: 100%
+      width: 100%
+      top: 0
+      .loader
+        margin: auto
+        font-size: 30px
+    .modal-body,
+    .modal-footer
+      visibility: hidden

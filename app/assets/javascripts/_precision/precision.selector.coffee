@@ -149,6 +149,11 @@ class ObjectListModel
 
       if @className != "selected"
         objects = @filterByProperty(objects, 'editable') if @selectorModel.filterByEditable()
+
+      if @className == 'file' && @totalCount && @totalCount != @objects().length && !_.isEmpty(@filterQuery())
+        @objects.removeAll()
+        @getObjects(0, @totalCount)
+
       objects = @filterSetOfObjects(objects, @patternQuery()) if @patternQuery()?
       objects = @filterSetOfObjects(objects, @filterQuery())
       objects = _.sortBy(objects, 'name')
@@ -167,25 +172,33 @@ class ObjectListModel
   clearActiveRelated: () ->
     @activeRelatedObjects([])
 
-  getObjects: () ->
+  getObjects: (offset = 0, limit = 100) ->
     return $.Deferred().resolve() if !@apiEndpoint?
+    rootContext = ko.contextFor(@selectorModel.modal.get(0)).$root
+    if @className == 'file'
+      @apiParams['offset'] = offset
+      @apiParams['limit'] = limit
+      @apiParams['scopes'] = rootContext.accessibleScope if rootContext.accessibleScope
+
     params = _.defaults(@apiParams, {
       describe:
         include:
-          all_tags_list: true
+          all_tags_list: false
           user: true
           org: true
     })
 
-    @objects.removeAll()
+    @objects.removeAll() unless @className == 'file'
     @busy(true)
-    Precision.api("/api/#{@apiEndpoint}", params, (objects) =>
+    Precision.api("/api/#{@apiEndpoint}", params, (result) =>
+      @totalCount = result['count'] if result['count']
+      objects = if result['objects'] then result['objects'] else result
       objectModels = _.map(objects, (object) =>
         objectModel = new ObjectItemModel(@selectorModel, this, object)
         @selectorModel.objectsHash[objectModel.uid] = objectModel
         objectModel
       )
-      @objects(objectModels)
+      @objects(@objects().concat(objectModels))
     ).always(=>
       @busy(false)
     )
@@ -236,12 +249,18 @@ class ObjectItemModel
     @public = ko.observable(object.public)
     @private = ko.observable(object.private)
     @in_space = ko.observable(object.in_space)
+    @review_space_private = object.space_private
+    @review_space_public = object.space_public
 
     @scopeFormatted = ko.computed(=>
       if @public()
         "Public"
       else if @private()
         "Private"
+      else if @review_space_private
+        "Shared in Space(Confidential)"
+      else if @review_space_public
+        "Shared in Space(Cooperative)"
       else if @in_space()
         "Shared in Space"
     )
@@ -351,3 +370,12 @@ class ObjectItemModel
 window.Precision ||= {}
 window.Precision.models ||= {}
 window.Precision.models.SelectorModel = SelectorModel
+
+$ ->
+  $('.object-selector-modal .modal-body').on 'scroll', (event) ->
+    element = $(@).find('.tab-pane.active').find('.list-group').get(1)
+    return unless element
+    context = ko.contextFor(element)
+    currentNumberOfObjects = context.$data.objects().length
+    if element && context.$data.className == 'file' && (@scrollTop == (@scrollHeight - @offsetHeight)) && currentNumberOfObjects != context.$data.totalCount
+      context.$data.getObjects(currentNumberOfObjects)

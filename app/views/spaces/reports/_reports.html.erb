@@ -1,0 +1,69 @@
+<div class="panel">
+  <div class="panel-body">
+    <h5>
+      <span class="sort-container" data-bind="click: changeSortDirection">
+        <i class="fa fa-arrows-v" aria-hidden="true"></i>
+        <span class="sort-label" data-bind="text: sortLabel"></span>
+      </span>
+    </h5>
+    <hr>
+    <div class="reports-container" data-bind="css: {
+      loading: reportLoading
+    }">
+      <!-- ko foreach: reportItems -->
+        <div class="report-feed">
+          <div class="media">
+
+            <div class="media-left">
+              <img class="img-circle" height="25px" data-bind="attr: { src: $data.avatar }">
+            </div>
+
+            <div class="media-body">
+              <div class="report-feed-header">
+                <div class="row">
+                  <div class="pull-left">
+                    <a target="_blank" data-bind="text: $data.user_fullname, attr: { href: '/users/' + $data.username }"></a>
+                  </div>
+                  <div class="pull-right text-muted">
+                    <span>Created:</span>
+                    <span data-bind="text: $data.date"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="report-feed-body bg-info">
+                <div class="row">
+                  <!-- ko if: $data.url.length -->
+                  <a target="_blank" data-bind="text: $data.name, attr: { href: $data.url }"></a>
+                  <!-- /ko -->
+                  <!-- ko ifnot: $data.url.length -->
+                  <span data-bind="text: $data.name"></span>
+                  <!-- /ko -->
+                </div>
+                <!-- ko if: $data.additional_info -->
+                <div class="row">
+                  <span>Associated with</span>&nbsp;
+                  <span data-bind="text: $data.additional_info.comment_object_type"></span>
+                  <a target="_blank"
+                      data-bind="text: $data.additional_info.comment_object_name,
+                                attr: { href: $data.additional_info.comment_object_url }">
+                  </a>
+                </div>
+                <!-- /ko -->
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <%= render 'spaces/reports/comments' %>
+
+      <!-- /ko -->
+    </div>
+    <div class="more-loading" data-bind="style: { visibility: moreReportLoading() ? 'unset' : 'hidden' }">
+      Loading...
+    </div>
+  </div>
+
+  <%= render "_partials/choose_report_format" %>
+</div>

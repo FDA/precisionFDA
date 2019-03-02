@@ -64,8 +64,8 @@
         <% else %>
           <li class="dropdown-header">Revisions</li>
           <% @revisions.each do |app| %>
-            <li class="<% if app.dxid == params[:id] %>active<% end %>">
-              <a href="<%= action_name == 'index' ? app_jobs_path(app.dxid) : app_path(app.dxid) %>" class="clearfix">
+            <li class="<% if app.uid == params[:id] %>active<% end %>">
+              <a href="<%= action_name == 'index' ? app_jobs_path(app) : app_path(app) %>" class="clearfix">
                 <span class="app-revision"><%= app.revision %></span>
                 <% if @revisions.first.id == app.id %>
                   <span class="app-label-latest label label-info pull-right">Latest</span>
@@ -84,13 +84,13 @@
       </ul>
     </div>
     <% if @app.editable_by?(@context) %>
-    <div class="btn-group" <% if @revisions.first.dxid != @app.dxid %>data-toggle="tooltip" data-placement="top" title="Only latest revision is editable"<% end %>>
-      <a class="btn btn-default <% if @revisions.first.dxid != @app.dxid %>disabled<% end %>" href="<%= edit_app_path(@revisions.first.dxid) %>">
+    <div class="btn-group" <% if @revisions.first.uid != @app.uid %>data-toggle="tooltip" data-placement="top" title="Only latest revision is editable"<% end %>>
+      <a class="btn btn-default <% if @revisions.first.uid != @app.uid %>disabled<% end %>" href="<%= edit_app_path(@revisions.first) %>">
         <span class="fa fa-edit"></span> Edit
       </a>
     </div>
     <% end %>
-    <a class="btn btn-default" href="<%= fork_app_path(@app.dxid) %>">
+    <a class="btn btn-default" href="<%= fork_app_path(@app) %>">
       <span class="fa fa-code-fork"></span> Fork
     </a>
     <div class="btn-group">
@@ -101,17 +101,17 @@
       <ul class="dropdown-menu">
         <li class="dropdown-header">Export To:</li>
         <li data-turbolinks="false">
-          <%= link_to export_app_path(@app.dxid), method: :post, data: { confirm: 'You are about to download a Dockerfile to run this app in a Docker container on your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+          <%= link_to export_app_path(@app), method: :post, data: { confirm: 'You are about to download a Dockerfile to run this app in a Docker container on your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
             Docker Container
           <% end %>
         </li>
         <li data-turbolinks="false">
-          <%= link_to cwl_export_app_path(@app.dxid), data: { confirm: 'You are about to download a CWL Tool package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+          <%= link_to cwl_export_app_path(@app), data: { confirm: 'You are about to download a CWL Tool package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
             CWL Tool
           <% end %>
         </li>
         <li data-turbolinks="false">
-          <%= link_to wdl_export_app_path(@app.dxid), data: { confirm: 'You are about to download a WDL Task package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+          <%= link_to wdl_export_app_path(@app), data: { confirm: 'You are about to download a WDL Task package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
             WDL Task
           <% end %>
         </li>
@@ -125,17 +125,60 @@
       <span class="fa fa-flip-vertical fa-sitemap"></span> Track
     <% end %>
   </div>
+  <% if @app.verified? %>
+    <span>
+      <span class="fa fa-check-circle" style="padding-left: 30px; color: #1F70B5"></span>
+      Verified
+    </span>
+  <% else %>
+
+  <% if @app.editable_by?(@context) && (@context.user.dxuser == app.user.dxuser) %>
+    <script type="text/html" id="shared-template">
+      &nbsp;
+      <span class="text-success">
+        <i class="fa fa-check-circle"></i>
+        <span id="fda_text">Shared with FDA</span>
+      </span>
+    </script>
+    <% if !@app.dev_group && @app.scope != 'public' && !@app.in_verificaiton_space?  %>
+      <!-- ko ifnot:shareSuccess -->
+      <div class="btn-group">
+        <button id="fda_button" class="btn btn-primary" data-bind="click: shareWithFDA">
+          <i class="fa fa-copy"></i>&nbsp;
+          <!-- ko ifnot:fdaSpinner -->
+          <span id="fda_text">Share with FDA</span>
+          <!-- /ko -->
+          <!-- ko if:fdaSpinner -->
+          <span id="fda_text">Sharing...</span>&nbsp;
+          <i class="fa fa-spinner fa-spin"></i>
+          <!-- /ko -->
+        </button>
+      </div>
+      <!-- /ko -->
+      <!-- ko if:shareSuccess -->
+      <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
+      <!-- /ko -->
+    <% elsif @app.dev_group %>
+      <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
+    <% end %>
+  <% else %>
+    <% if @app.dev_group %>
+      <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
+    <% end %>
+  <% end %>
+  <% end %>
 
   <div class="btn-group pull-right">
     <%= render "_partials/btn_challenge_app", app: @app %>
 
-    <%= link_to new_app_job_path(@app.dxid), class: "btn btn-primary" do %>
+    <%= link_to new_app_job_path(@app), class: "btn btn-primary" do %>
       <span class="fa fa-bolt"></span> Run App&nbsp;&nbsp;<span class="badge"><%= @app.version ? "v#{@app.version}" : "rev#{@app.revision}" %></span>
     <% end %>
-    <%= link_to batch_app_app_path(@app.dxid), class: "btn btn-primary" do %>
+    <%= link_to batch_app_app_path(@app), class: "btn btn-primary" do %>
         <span class="fa fa-bolt"></span> Run Batch App&nbsp;&nbsp;<span class="badge"><%= @app.version ? "v#{@app.version}" : "rev#{@app.revision}" %></span>
     <% end %>
     <%= render "_partials/btn_publish", item: @app %>
+    <%= render "_partials/btn_copy_to_cooperative", item: @app %>
   </div>
 
   <% if @context.logged_in? && app.user == @context.user %>
@@ -173,7 +216,13 @@
   <% end %>
   <li role="presentation">
     <a href="#tab-comments" aria-controls="tab-comments" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
-      <span class="tab-label">Comments <span class="badge"><%= @app.comment_threads.size %></span></span>
+      <span class="tab-label">Comments <span class="badge">
+        <% if @app.in_space? %>
+          <%= @comments.active.size %>
+        <% else %>
+          <%= @app.comment_threads.size %>
+        <% end %>
+      </span></span>
     </a>
   </li>
   <% if @notes.present? && @notes.total_count > 0 %>

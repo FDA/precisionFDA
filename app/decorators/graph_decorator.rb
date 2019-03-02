@@ -5,6 +5,7 @@ module GraphDecorator
   FILE_NODES = %w(file asset).freeze
   JOB_NODES = %w(job).freeze
   APP_NODE = %w(app).freeze
+  WORKFLOW_NODE = %w(workflow).freeze
 
   class << self
 
@@ -25,6 +26,7 @@ module GraphDecorator
       when *FILE_NODES       then GraphDecorator::FileNode
       when *JOB_NODES        then GraphDecorator::JobNode
       when *APP_NODE         then GraphDecorator::AppNode
+      when *WORKFLOW_NODE    then GraphDecorator::WorkflowNode
       else
         raise "Invalid klass #{record.klass}"
       end

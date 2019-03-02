@@ -1,0 +1,26 @@
+
+<div class="tab-content" id="ko_spaces_reports_container">
+  <div role="tabpanel" class="tab-pane active" id="tab-reports">
+    <div class="pfda-padded">
+      <div class="row">
+        <div class="pull-right">
+          <a href="" class="btn btn-default" download data-bind="click: chooseReportFormat">
+            <i class="fa fa-download" aria-hidden="true"></i>
+            Download report
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel spaces-blue-panel">
+      <div class="panel-body">
+        <h3>Interaction Report</h3>
+      </div>
+    </div>
+
+    <%= render "spaces/reports/filters" %>
+    <%= render "spaces/reports/reports" %>
+
+  </div>
+</div>
+

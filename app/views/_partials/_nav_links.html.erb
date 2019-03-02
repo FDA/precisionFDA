@@ -55,7 +55,7 @@
         <div class="nav-pill-title">Workflows</div>
       <% end %>
     </li>
-    <% if @context.logged_in? && (@context.user.can_administer_site? || @context.user.spaces.count > 0) %>
+    <% if UserPolicy.can_see_spaces?(@context) %>
       <li class="nav-spacer"></li>
       <li class="<%= 'active' if params[:controller] == 'spaces' %>" role="presentation">
         <%= link_to spaces_path do %>
@@ -77,6 +77,9 @@
           <li><%= link_to "Public Profile", user_path(@context.username) %></li>
         <% end %>
         <li><%= link_to "Manage Licenses", licenses_path %></li>
+        <% if @context.logged_in? && UserPolicy.access_notification_preference?(@context.user) %>
+          <li><a href="#" data-toggle="modal" data-target="#notification_settings_modal">Notification Settings</a></li>
+        <% end %>
         <li role="separator" class="divider"></li>
         <li><a href="<%= about_path %>"><span class="fa fa-fw fa-info-circle"></span> About</a></li>
         <li><a href="<%= guidelines_path %>"><span class="fa fa-fw fa-institution"></span> Guidelines</a></li>

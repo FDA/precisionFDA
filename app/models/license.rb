@@ -13,6 +13,7 @@
 #
 
 class License < ActiveRecord::Base
+  include Auditor
   include Permissions
   include Licenses
 

@@ -7,24 +7,24 @@
       </div>
       <div id="files-list" class="h2">Listing files</div>
       <div class="bs-docs-section">
-        <p>Clicking on "Files" at the top navigation bar takes you to the a page that lists all the files accessible by your account. Files owned by you are shown under "My Files" Members' contributions (including yours) are shown under "Explore". You can further filter files (for example, search for a given filename keyword) by clicking on the "eye" icon, which will reveal a filter bar. Choose any filters and apply them by clicking on the "funnel" icon.</p>
+        <p>Clicking on "Files" at the top navigation bar takes you to the a page that lists all the files accessible by your account. Files owned by you are shown under "My Files." Public precisionFDA members' contributions (including yours) are shown under "Explore". You can further filter files by clicking on the "eye" icon, which will reveal a filter bar. For example, you can search on filename by entering a keyword in the "Name" field. Choose any filters and apply them by clicking on the "funnel" icon.</p>
         <p>
-        The precisionFDA system also allows users to organize files into folders, putting similar files together. Users may generate a new folder in the current folder, which will prompt the user for the name of the folder to use. Files can be moved into a folder by selecting them, and using the button in the top right to move into a folder.
+        The precisionFDA system also allows users to organize files into folders, putting similar files together. Click "Add folder" to create a new sub-folder in the current folder. This will prompt the you for the name of the new folder. Files can be moved into a folder by selecting them, clicking the "gear" button (top right), selecting "Move," and choosing the destination folder.
         </p>
         <p>
-        You can multiselect files to perform an operation on each of them. All files and folders have a checkbox on the left, checking that will select that file. If an individual file is selected, you can rename the file. With one or more file or folder selected, you can move the selected objects into another folder. In addition to that, you can publish the selected files and any files inside the folders you have selected. A dialog will pop up to confirm the files you have selected. You can also delete these file, which will similarly show a dialog to confirm all the files. Finally, you can download these files, which will show a dialog allowing you to download each individual file. Due to the size of files, generating a tarball is not possible at this time.
+        Each file and folder has a checkbox on the left; checking it will select that file/folder. If an individual file is selected, you can rename the file. You can multiselect files/folders to perform an operation on all of them. With one or more file or folder selected, you can move the selected objects into another folder or publish the selected files and any files inside the folders you have selected. A dialog will pop up to confirm the files you have selected. You can also choose to delete these files, which will similarly show a confirmation dialog. Finally, you can choose to download these files, which will show a dialog allowing you to download each individual file. Due to the size of files, generating a tarball is not possible at this time.
         </p>
       </div>
       <div id="files-uploading" class="h2">Uploading files</div>
       <div class="bs-docs-section">
         <p>You can upload small files directly from your web browser by clicking "Add files". Choose the files you want to upload, and click "Upload all" to begin the upload to cloud storage. To ensure integrity, your web browser will automatically calculate a checksum of the uploaded content and ensure that it matches the checksum calculated on the cloud side.</p>
 
-        <p>Once the upload is complete, the system will perform some additional finalization. This process usually takes a few seconds, during which the file is in a "closing" state. After finalization is completed, the file becomes "closed" and can now be used within precisionFDA (downloaded, published, or provided as input in apps). Its contents can never be changed, and it is given a unique immutable id of the form "file-Bk0kjkQ0ZP01x1KJqQyqJ7yq" to distinguish it across the whole site.</p>
+        <p>Once the upload is complete, the system will perform some additional finalization. This process usually takes a few seconds, during which the file is in a "closing" state. After finalization is completed, the file becomes "closed" and can now be used within precisionFDA (downloaded, published, or provided as input in apps). Its contents can never be changed, and it is given a unique, immutable id of the form "file-Bk0kjkQ0ZP01x1KJqQyqJ7yq" to distinguish it across the whole site.</p>
 
         <p>If the upload gets interrupted for any reason, you will see the partially-uploaded file in your list of files, marked with an "open" state. Please delete the file and reupload it. Periodically, the precisionFDA system may automatically clean up partially uploaded files.</p>
 
         <div class="alert alert-info">
-          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> Web browsers have limitations regarding the upload capabilities. Therefore, you should only use that method for small files. Read below for additional options if you have large data to upload.
+          <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> Web browsers have limitations with regards to their upload capabilities. Therefore, you should only use the browser-based method for small files. Read below for additional options if you have large data to upload.
         </div>
 
         <p>For large files that are accessible over the Internet, we suggest running the "Fetch file from URL" app, which has been provided by the precisionFDA team. The app allows you to fetch a file from a given URL.</p>
@@ -32,15 +32,15 @@
         <p>For large files that are on your computer, we suggest using the <strong>precisionFDA uploader</strong>, a command-line tool capable of uploading with multiple threads and more resilient to transient errors.
         The precisionFDA uploader can be used for both files and app assets, and it's available through the <a href="<%= new_asset_path %>">Create Assets</a> page.</p>
 
-        <p>Visit that page and download the precisionFDA uploader by clicking the respective button under "Step 3". (NOTE: The uploader requires Python 2.7, as well as the python 'requests' and 'futures' packages, so ensure you have those available in your environment).</p>
+        <p>Visit that page and download the precisionFDA uploader for your operating system and architecture by clicking the respective button under "Step 3".</p>
         <p>The tool requires an "authorization key" in order to authenticate the client against the precisionFDA system. You can get a key by clicking the respective button under "Step 4" in the "Add Assets" page. Copy the key from that page and paste it in the command below where it says <strong>KEY</strong>. For your security, the key is valid for 24h.</p>
-        <p>Run <code>./pfda upload-file --auth KEY /path/to/file</code>. This command will upload the file to precisionFDA.</p>
+        <p>Run <code>./pfda --cmd upload-file --key KEY --file /path/to/file</code>. This command will upload the file to precisionFDA.</p>
         <div class="alert alert-info">
           <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> The uploader saves your key in <code>$HOME/.config/precision-fda/config.json</code>, so after you have run it once, you don't need to specify the key in subsequent invocations.
         </div>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(@videos[:files][:url]) %>
+        <%= video_iframe(videos[:files_upload][:url]) %>
       </div>
       <div id="files-origin" class="h2">Examining file origin</div>
       <div class="bs-docs-section">
@@ -89,7 +89,12 @@
           </tbody>
         </table>
       </div>
+
+      <div class="bs-docs-section bs-docs-media-section">
+        <%= video_iframe(videos[:files_navigation][:url]) %>
+      </div>
     </div>
+
     <!-- SIDEBAR NAVIGATION -->
     <div class="col-sm-6">
       <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">

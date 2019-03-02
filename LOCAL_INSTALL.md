@@ -28,6 +28,10 @@ This requires manually "bootstrapping" the situation in steps described in
     * `rvm install 2.2.3`
 * Install bundler
     * `gem install bundler`
+    * to keep the current bundler version from Gemfile.lock:
+        * `gem install bundler -v 1.16.6`
+* Update the `libv8` gem before `bundle i`:
+    * `gem install libv8 -v '3.16.14.13' -- --with-system-v8`
 * Install git
     * `brew install git`
 * Set up git ssh
@@ -84,13 +88,7 @@ with your account, access your profile on the upper right.
 - Click the link to confirm.
 
 Create a User and Org, and other required records by running
-```
-bundle exec rake db:seed \
-  PFDA_USER_FIRST_NAME=Florante \
-  PFDA_USER_LAST_NAME=DelaCruz \
-  PFDA_USER_EMAIL=fdelacruz+pfdalocal@dnanexus.com \
-  PFDA_USER_ORG_HANDLE=floranteorg
-```
+
 
 The _dxuser_ of the user record must match your DNAnexus username, and the _handle_ of the org record must
 match the DNAnexus org handle without the pfda.. prefix, i.e. floranteorg.

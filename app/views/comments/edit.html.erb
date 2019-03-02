@@ -8,14 +8,19 @@
 </div>
 
 <div class="container-fluid container-padded">
-  <%= form_for @comment, url: polymorphic_path(@items_from_params + [@comment]), html: {class: 'form form-horizontal'} do |f| %>
-    <%= render "_partials/form_errors", object: @comment %>
-
-    <div class="form-group required">
-      <%= f.text_area :body, class: "form-control", rows: 10, placeholder: "Comment..." %>
+  <% if @item.klass == 'space' %>
+    <div class="pfda-comments-container">
+      <div class="pfda-comment">
+        <div class="pfda-comment--with-mentions">
+              <%= render "comments/nested_form",
+                comment: @comment,
+                url: polymorphic_path(@items_from_params + [@comment]),
+                hide_assoc_with: true
+              %>
+        </div>
+      </div>
     </div>
-    <div class="form-group">
-      <%= f.submit "Update", class: 'btn btn-primary', data: {disable_with: "Update..."} %>
-    </div>
+  <% else %>
+    <%= render "comments/form", comment: @comment, url: polymorphic_path(@items_from_params + [@comment]) %>
   <% end %>
 </div>

@@ -1,42 +1,142 @@
-# == Schema Information
-#
-# Table name: spaces
-#
-#  id            :integer          not null, primary key
-#  name          :string
-#  description   :text
-#  host_project  :string
-#  guest_project :string
-#  host_dxorg    :string
-#  guest_dxorg   :string
-#  space_type    :string
-#  state         :string
-#  meta          :text
-#  created_at    :datetime         not null
-#  updated_at    :datetime         not null
-#
-
+# TODO Items can be moved from private submitter/reviewer workspaces to a shared space.
 class Space < ActiveRecord::Base
-  validates :space_type, presence: true, inclusion: {in: ['group', 'submission']}
+  include Auditor
 
-  has_many :space_memberships
-  has_many :users, {through: :space_memberships}
+  TYPES = %i(groups review verification)
+  STATES = %i(unactivated active locked deleted)
+
+  belongs_to :sponsor_org, { class_name: 'Org' }
+  has_and_belongs_to_many :space_memberships
+  has_many :users, { through: :space_memberships }
+  has_many :confidential_spaces, class_name: 'Space'
+  belongs_to :space
+  has_many :tasks, dependent: :destroy
+  has_many :space_events
+
+  belongs_to :space_template
 
   acts_as_commentable
 
   store :meta, accessors: [:cts], coder: JSON
+
+  alias_method :shared_space, :space
+
+  attr_accessor :invitees, :invitees_role
+
   attr_accessor :host_lead_dxuser, :guest_lead_dxuser, :invitees, :invitees_role
+
+  enum space_type: TYPES
+  enum state: STATES
+
+  scope :top_level, -> { where(space_id: nil) }
+  scope :shared, -> { review.top_level }
+  scope :confidential, -> { review.where.not(space_id: nil) }
+  scope :reviewer, -> { review.where.not(host_dxorg: nil) }
+  scope :sponsor, -> { review.where.not(guest_dxorg: nil) }
+  scope :all_verified, -> { where(verified: true) }
+
+  def confidential_space(member)
+    if member.host?
+      confidential_reviewer_space
+    else
+      confidential_spaces.sponsor.first
+    end
+  end
+
+  def confidential_reviewer_space
+    confidential_spaces.reviewer.first
+  end
+
+  def reviewer?
+    review? && host_dxorg.present?
+  end
+  def confidential?
+    space_id.present?
+  end
+
+  def shared?
+    review? && !confidential?
+  end
+
+  def verified?
+    return false if space_type != 'verification'
+    verified ? true : false
+  end
+
+  def accepted?
+    accepted_by?(host_lead_member) && accepted_by?(guest_lead_member)
+  end
+
+  def accepted_by?(member)
+    return false if member.blank?
+
+    if member.host?
+      return false if host_project.blank?
+      return true unless review?
+      return true if confidential?
+      confidential_reviewer_space.host_lead_member.present?
+    else
+      return false if guest_project.blank?
+      return true unless review?
+      confidential_spaces.sponsor.first.guest_lead_member.present?
+    end
+  end
 
   def uid
     "space-#{id}"
   end
 
   def title
-    name
+    return name unless review?
+    confidential? ? "#{name}(Confidential)" : "#{name}(Cooperative)"
   end
 
   def klass
     "space"
+  end
+
+  def project_dxid(member)
+    if member.host?
+      host_project
+    else
+      guest_project
+    end
+  end
+
+  def set_project_dxid(member, value)
+    self.host_project = value if member.host?
+    self.guest_project = value if member.guest?
+  end
+
+  def org_dxid(member)
+    if member.host?
+      host_dxorg
+    else
+      guest_dxorg
+    end
+  end
+
+  def set_org_dxid(member, value)
+    self.host_dxorg = value if member.host?
+    self.guest_dxorg = value if member.guest?
+  end
+
+  def opposite_org_dxid(member)
+    if member.host?
+      guest_dxorg
+    else
+      host_dxorg
+    end
+  end
+
+  def project_for_user!(user)
+    member = space_memberships.find_by(user_id: user.id)
+
+    if user.review_space_admin?
+      member ||= SpaceMembership.new_by_admin(user)
+    end
+
+    project_dxid(member)
   end
 
   def describe_fields
@@ -55,12 +155,12 @@ class Space < ActiveRecord::Base
     end
   end
 
-  def active?
-    state == "ACTIVE"
-  end
-
   def rename(new_name, context)
     update_attributes(name: new_name)
+  end
+
+  def leads
+    space_memberships.lead
   end
 
   def host_lead
@@ -68,11 +168,7 @@ class Space < ActiveRecord::Base
   end
 
   def host_lead_member
-    space_memberships.hosts.admins.first
-  end
-
-  def host_lead?(context)
-    host_lead.id == context.user_id
+    leads.host.first
   end
 
   def guest_lead
@@ -80,141 +176,11 @@ class Space < ActiveRecord::Base
   end
 
   def guest_lead_member
-    space_memberships.guests.admins.first
-  end
-
-  def guest_lead?(context)
-    guest_lead.id == context.user_id
-  end
-
-  def project_for_user!(user)
-    space_memberships.find_by!(user_id: user.id).project
+    leads.guest.first
   end
 
   def authorized_users_for_apps
-    return [host_dxorg, guest_dxorg]
-  end
-
-  def add_or_update_member(api, org_id, dxuser, role, side)
-    user = User.find_by(dxuser: dxuser)
-    if !user.nil?
-      member = space_memberships.find_by(user_id: user.id)
-      if member.nil?
-        api.call(org_id, "invite", {invitee: user.dxid, level: role, suppressEmailNotification: true})
-        member = space_memberships.create!(user_id: user.id, role: role, side: side)
-      elsif ![guest_lead.id, host_lead.id].include?(member.user.id)
-        if member.side == side
-          apiParam = {}
-          if member.role == "ADMIN" && role != "ADMIN"
-            apiParam[user.dxid] = {
-              level: role,
-              allowBillableActivities: false,
-              appAccess: true,
-              projectAccess: "CONTRIBUTE"
-            }
-          else
-            apiParam[user.dxid] = {
-              level: role
-            }
-          end
-          api.call(org_id, "setMemberAccess", apiParam)
-          member.update_attributes(role: role)
-          member.reload
-        else
-          # TODO: remove from SIDE and create new invite
-        end
-      else
-        return false
-      end
-      return member
-    else
-      return false
-    end
-  end
-
-  def remove_member(api, org_id, dxuser)
-    user = User.find_by(dxuser: dxuser)
-    if !user.nil?
-      member = space_memberships.find_by(user_id: user.id)
-      if !member.nil?
-        api.call(org_id, "removeMember", {user: user.dxid})
-        member.destroy
-      end
-    end
-  end
-
-  def create_space_project(context, contribute_org, view_org, admin)
-    api = DNAnexusAPI.new(context.token)
-    space_project = api.call("project", "new", {name: "precisionfda-space-#{id}-#{admin[:side]}", billTo: admin.user.billto})["id"]
-    api.call(space_project, "invite", {invitee: contribute_org, level: "CONTRIBUTE", suppressEmailNotification: true, suppressAllNotifications: true})
-    api.call(space_project, "invite", {invitee: view_org, level: "VIEW", suppressEmailNotification: true, suppressAllNotifications: true})
-    return space_project
-  end
-
-  def state_hash
-    state.blank? ? { "UNACTIVATED" => "NULL" } : { state => state }
-  end
-
-  # space:
-  #   name
-  #   description
-  #   space_type ("submission")
-  #   meta
-  #   host_lead_dxuser
-  #   guest_lead_dxuser
-  #
-  def self.provision(context, space_params)
-    raise unless space_params[:host_lead_dxuser] != space_params[:guest_lead_dxuser]
-
-    papi = DNAnexusAPI.new(ADMIN_TOKEN)
-    space = nil
-    Space.transaction do
-      uuid = SecureRandom.hex
-      host_dxorg = Org.construct_dxorg("space_host_#{uuid}")
-      guest_dxorg = Org.construct_dxorg("space_guest_#{uuid}")
-      host_dxorghandle = host_dxorg.sub(/^org-/, '')
-      guest_dxorghandle = guest_dxorg.sub(/^org-/, '')
-
-      # Provision Host and Guest orgs
-      Org.provision_dxorg(context, {
-        id: host_dxorg,
-        handle: host_dxorghandle,
-        name: host_dxorghandle
-      })
-
-      Org.provision_dxorg(context, {
-        id: guest_dxorg,
-        handle: guest_dxorghandle,
-        name: guest_dxorghandle
-      })
-
-      # Create the space
-      space_params[:host_dxorg] = host_dxorg
-      space_params[:guest_dxorg] = guest_dxorg
-      space = Space.create!(space_params)
-
-      # Add leads as ADMINs
-      host_lead = space.add_or_update_member(papi, host_dxorg, space_params[:host_lead_dxuser], 'ADMIN', 'HOST')
-      guest_lead = space.add_or_update_member(papi, guest_dxorg, space_params[:guest_lead_dxuser], 'ADMIN', 'GUEST')
-
-      # Remove pfda admin from orgs
-      papi.call(host_dxorg, "removeMember", {user: ADMIN_USER})
-      papi.call(guest_dxorg, "removeMember", {user: ADMIN_USER})
-    end
-
-    return space
-  end
-
-  def self.active
-    where(state: "ACTIVE")
-  end
-
-  def self.submissions
-    where(space_type: "submission")
-  end
-
-  def self.groups
-    where(space_type: "group")
+    [host_dxorg, guest_dxorg].compact
   end
 
   def self.from_scope(scope)
@@ -226,30 +192,116 @@ class Space < ActiveRecord::Base
   end
 
   def editable_by?(context)
-    if !context.guest?
-      raise unless context.user_id.present?
-      space_memberships.exists?(user_id: context.user_id, role: 'ADMIN')
-    end
+    return if context.guest?
+    return if verified?
+    raise unless context.user_id.present?
+
+    return true if context.review_space_admin? && reviewer?
+
+    space_memberships.active.lead_or_admin.exists?(user_id: context.user_id)
+  end
+
+  # Scopes of files that can be used to run an app.
+  def accessible_scopes
+    [uid, shared_space.try(:uid)].compact
+  end
+
+  # Scopes of content that can be moved to an space.
+  def accessible_scopes_for_move
+    ["private"]
   end
 
   def accessible_by?(context)
-    if !context.guest?
-      raise unless context.user_id.present?
-      space_memberships.exists?(user_id: context.user_id)
-    end
-  end
+    return if context.guest?
 
-  def self.editable_by(context)
-    if !context.guest?
-      raise unless context.user_id.present?
-      joins(:space_memberships).where(space_memberships: {user_id: context.user_id, role: 'ADMIN'}).uniq
-    end
+    raise unless context.user_id.present?
+
+    return true if context.review_space_admin? && reviewer?
+    return true if context.review_space_admin? && verified?
+
+    space_memberships.active.exists?(user_id: context.user_id)
   end
 
   def self.accessible_by(context)
-    if !context.guest?
-      raise unless context.user_id.present?
-      joins(:space_memberships).where(space_memberships: {user_id: context.user_id}).uniq
+    return if context.guest?
+
+    raise unless context.user_id.present?
+
+    queries = [].tap do |queries|
+      queries.push({ space_memberships: { active: true, user_id: context.user_id } })
+      if context.review_space_admin?
+        queries.push({ id: self.reviewer.shared })
+        queries.push({ id: self.reviewer.confidential.active })
+        queries.push({ id: self.verification})
+      end
+      queries.push({ id: self.groups }) if context.can_administer_site?
     end
+
+    joins(:space_memberships).where.any_of(*queries).uniq
+  end
+
+  def search_content(content_type, query)
+    case content_type
+    when "Note"
+      Note.real_notes.accessible_by_space(self).where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
+        .map { |note| [note.id, note.title]}
+    when "File"
+      UserFile.accessible_by_space(self).where("LOWER(name) LIKE LOWER(?)", "%#{query}%").where(parent_type: "User")
+        .map { |file| [file.id, file.name]}
+    when "Asset"
+      Asset.accessible_by_space(self).where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
+        .map { |asset| [asset.id, asset.name]}
+    when "Comparison"
+      Comparison.accessible_by_space(self).where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
+        .map { |comparison| [comparison.id, comparison.name]}
+    when "App"
+      App.accessible_by_space(self).where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
+        .map { |app| [app.id, app.title]}
+    when "Workflow"
+      Workflow.accessible_by_space(self).where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
+        .map { |workflow| [workflow.id, workflow.title]}
+    when "Job"
+      Job.accessible_by_space(self).where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
+        .map { |job| [job.id, job.name]}
+    else
+      []
+    end.map { |i, j| { id: i, name: j } }
+  end
+  def can_verify_space(context)
+    (space_memberships.host.lead[0].user.dxuser == context.user.dxuser) && active?
+  end
+
+  def content_counters(user_id)
+    notes = Note.real_notes.accessible_by_space(self).count
+    files = UserFile.real_files.accessible_by_space(self).count
+    apps = App.accessible_by_space(self).count
+    jobs = Job.accessible_by_space(self).count
+    comparisons = Comparison.accessible_by_space(self).count
+    assets = Asset.accessible_by_space(self).count
+
+    tasks = self.tasks.where("user_id = :user_id or assignee_id = :user_id", user_id: user_id)
+    open_tasks = tasks.open.count
+    accepted_tasks = tasks.accepted_and_failed_deadline.count
+    declined_tasks = tasks.declined.count
+    completed_tasks = tasks.completed.count
+    tasks = open_tasks + accepted_tasks + declined_tasks + completed_tasks
+
+    feed = self.space_events.count
+
+    {
+      feed: feed,
+      tasks: tasks,
+      notes: notes,
+      files: files,
+      apps: apps,
+      jobs: jobs,
+      comparisons: comparisons,
+      assets: assets,
+      workflows: Workflow.accessible_by_space(self).count,
+      open_tasks: open_tasks,
+      accepted_tasks: accepted_tasks,
+      declined_tasks: declined_tasks,
+      completed_tasks: completed_tasks,
+    }
   end
 end

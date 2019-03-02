@@ -1,0 +1,30 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    <%= @task.name %> task's completion deadline is over
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="https://precision.fda.gov" title="precisionFDA">
+          <img class="header-image" src="https://precision.fda.gov/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right"><%= @task.name %> task's completion deadline is over</p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p>
+          Completion deadline is over for <strong><%= @task.name %></strong> task.
+        </p>
+
+        <button class="radius" href="<%= space_task_url(@task.space, @task) %>">View Task</button>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>

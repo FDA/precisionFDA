@@ -27,3 +27,20 @@ window.Precision.utils =
       $('html, body').animate({
         scrollTop: $selected.parent().offset().top
     }, 250)
+
+  mockDelay: (time) ->
+    return new Promise (resolve) ->
+      T = setTimeout(() ->
+        resolve()
+        clearTimeout(T)
+      , time)
+
+  capitalize: (str) -> (str || '').replace(/\b\w/g, (l) -> l.toUpperCase())
+
+  splitAndCapitalize: (str = '') ->
+    return str.split('_').map((item) => @capitalize(item)).join(' ')
+
+  scrollTo: (where) ->
+    $([document.documentElement, document.body]).animate({
+      scrollTop: where
+    }, 0)

@@ -3,7 +3,7 @@
     content_tag :div, "No analyses found", class: 'alert alert-info'
   end
 
-  g.column do
+  g.column class: 'toggle-row'  do
     content_tag(:span, " ", class: "indicator fa fa-caret-down fa-fw")
   end
 
@@ -16,7 +16,7 @@
   end
 
   g.column name: 'Execution name', attribute: 'name' do |analysis|
-    analysis.name
+    analysis.batch_id.nil? ? analysis.name : content_tag(:b){ content_tag(:span, "BATCH ", class: "text-info") } + analysis.name
   end
 
   if !defined?(workflow)
@@ -35,5 +35,13 @@
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |analysis|
     analysis.created_at.to_s(:db)
+  end
+
+  g.column name: 'Terminate' do |analysis|
+    if analysis.can_terminate?
+      content_tag(:a, href: terminate_batch_workflow_path(id: analysis.batch_id || analysis.dxid),data: { confirm: 'Are you certainly want to Terminate this?' }, class: "btn batch_terminate") do
+        content_tag(:span, "", class: "fa fa-times") + " Terminate"
+      end
+    end
   end
 end -%>

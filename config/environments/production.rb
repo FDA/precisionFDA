@@ -66,10 +66,13 @@ Rails.application.configure do
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
   if ENV["DNANEXUS_BACKEND"] == "production"
-    config.action_mailer.default_url_options = { :host => "precision.fda.gov" }
+    config.action_mailer.default_url_options = { host: "precision.fda.gov", protocol: 'https' }
   else
-    config.action_mailer.default_url_options = { :host => "precisionfda-staging.dnanexus.com" }
+    config.action_mailer.default_url_options = { host: "precisionfda-staging.dnanexus.com", protocol: 'https' }
   end
+
+  config.action_mailer.delivery_method = :salesforce
+  config.action_mailer.perform_deliveries = true
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
@@ -92,7 +95,7 @@ Rails.application.configure do
   Rails.application.config.middleware.use ExceptionNotification::Rack,
     :ignore_if => ->(env, exception) { ip = env["HTTP_X_FORWARDED_FOR"]; ip == "73.158.44.186" || ip == "76.191.184.242" || IPAddr.new("64.39.96.0/20").include?(IPAddr.new(ip)) rescue false },
     :email => {
-      :email_prefix => "[PrecisionFDA]",
+      :email_prefix => ENV["DNANEXUS_BACKEND"] == "production" ? "[PrecisionFDA]" : "[PrecisionFDA-Stage]",
       :sender_address => %{"notifier" <notification@dnanexus.com>},
       :exception_recipients => %w{precisionfda-dev@dnanexus.com},
       :email_format => :html

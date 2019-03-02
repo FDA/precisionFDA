@@ -1,0 +1,35 @@
+<%= grid(tasks_grid, show_filters: :when_filtered) do |g|
+
+  g.blank_slate do
+    content_tag :div, defined?(empty_text) ? empty_text : "No taks found", class: 'alert alert-info'
+  end
+
+  g.column name: content_tag(:input, '', type: 'checkbox', class: 'select-all-tasks') do |task|
+    content_tag(:input, '', type: 'checkbox', class: 'select-task', value: task.id, 'data-actions': allowed_task_actions(task, @membership, params[:filter]))
+  end
+
+  g.column name: 'TASK', html: { class: 'task-name-column' } do |task|
+    content_tag(:a, task.name, href: "/spaces/#{@space.id}/tasks/#{task.id}", target: "_blank", title: task.name)
+  end
+
+  g.column name: 'ASSIGNER' do |task|
+    content_tag(:a, task.assigner.username, href: "/users/#{task.assigner.username}", target: "_blank")
+  end
+
+  g.column name: 'ASSIGNEE' do |task|
+    content_tag(:a, task.assignee.username, href: "/users/#{task.assignee.username}", target: "_blank")
+  end
+
+  g.column name: dates_titles[:respond] do |task|
+    response_date_wrapper(task, :respond)
+  end
+
+  g.column name: dates_titles[:complete] do |task|
+    response_date_wrapper(task, :complete)
+  end
+
+  g.column name: 'COMMENTS' do |task|
+    content_tag(:a, task.root_comments.size, href: "/spaces/#{@space.id}/tasks/#{task.id}", target: "_blank")
+  end
+
+end -%>

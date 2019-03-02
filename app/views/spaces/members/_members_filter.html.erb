@@ -1,0 +1,28 @@
+<% if @members.count > 0 %>
+  <div class="spaces-members-filter">
+    <div class="btn-group">
+      <a href="<%= members_space_path(@space, filter: 'all') %>"
+        class="btn <%= params[:filter] == 'all' ? 'btn-primary' : 'btn-default' %>"
+      >All</a>
+
+      <% if @space.groups? || @space.verification? %>
+        <a href="<%= members_space_path(@space, filter: 'host') %>"
+          class="btn <%= params[:filter] == 'host' ? 'btn-primary' : 'btn-default' %>"
+        >Hosts</a>
+        <a href="<%= members_space_path(@space, filter: 'guest') %>"
+          class="btn <%= params[:filter] == 'guest' ? 'btn-primary' : 'btn-default' %>"
+        >Guests</a>
+
+      <% elsif @space.review? %>
+
+        <a href="<%= members_space_path(@space, filter: 'reviewer') %>"
+          class="btn <%= params[:filter] == 'reviewer' ? 'btn-primary' : 'btn-default' %>"
+        >Reviewers</a>
+        <a href="<%= members_space_path(@space, filter: 'sponsor') %>"
+          class="btn <%= params[:filter] == 'sponsor' ? 'btn-primary' : 'btn-default' %>"
+        >Sponsors</a>
+      <% end %>
+
+    </div>
+  </div>
+<% end %>

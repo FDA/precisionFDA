@@ -14,7 +14,7 @@
 #= require polyfills
 #= require vendor
 #= require cookies-js
-#= require jquery
+#= require jquery3
 #= require jquery-ui
 #= require jquery_ujs
 #= require turbolinks
@@ -51,4 +51,7 @@
 #= require highcharts/highcharts
 #= require eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min
 #= require jstree
+#= require atwho-js/js/jquery.atwho.min
+#= require jquery.caret.min.js
+#= require bootstrap-select/bootstrap-select.min.js
 #= require_tree .

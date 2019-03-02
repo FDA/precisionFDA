@@ -14,10 +14,16 @@
 #  rgt              :integer
 #  created_at       :datetime
 #  updated_at       :datetime
+#  content_object_id    :integer
+#  content_object_type  :string
+#  state                :integer
 #
 
 class Comment < ActiveRecord::Base
+  include Auditor
   include Permissions
+
+  STATES = %i(active deleted)
 
   acts_as_nested_set :scope => [:commentable_id, :commentable_type]
 
@@ -30,10 +36,13 @@ class Comment < ActiveRecord::Base
   # want user to vote on the quality of comments.
   #acts_as_votable
 
-  belongs_to :commentable, :polymorphic => true
+  belongs_to :commentable, polymorphic: true
+  belongs_to :content_object, polymorphic: true
 
   # NOTE: Comments belong to a user
   belongs_to :user
+
+  enum state: STATES
 
   # Helper class method that allows you to build a comment
   # by passing a commentable object, a user_id, and comment text
@@ -43,6 +52,10 @@ class Comment < ActiveRecord::Base
       :commentable => obj,
       :body        => comment,
       :user_id     => user_id
+  end
+
+  def klass
+    'comment'
   end
 
   #helper method to check if a comment has children
@@ -67,4 +80,20 @@ class Comment < ActiveRecord::Base
   def self.find_commentable(commentable_str, commentable_id)
     commentable_str.constantize.find(commentable_id)
   end
+
+  def content_object_name
+    method = ["Note", "App", "Workflow"].include?(content_object_type) ? :title : :name
+    content_object.send(method)
+  end
+
+  def in_space?
+    false
+  end
+
+  def mentioned_users
+    User.where(
+      dxuser: body.scan(/\@([^[:space:]]*)/)
+    )
+  end
+
 end

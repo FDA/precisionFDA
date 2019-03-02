@@ -11,6 +11,8 @@
 #
 
 class ExpertQuestion < ActiveRecord::Base
+  include Auditor
+
   acts_as_commentable
 
   belongs_to :user
@@ -68,6 +70,10 @@ class ExpertQuestion < ActiveRecord::Base
       :_original => q_body,
       :_edited => false.to_s
     )
+  end
+
+  def in_space?
+    false
   end
 
   def accessible_by?(context)

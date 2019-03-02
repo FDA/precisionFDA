@@ -2,18 +2,20 @@
   <div class="pfda-pane">
     <div class="pfda-pane-sidebar pfda-pane-sidebar-dark">
       <ul class="list-group">
-        <li class="list-group-item list-group-item-header">
-          Documentation
-        </li>
-        <% @sections.each do |section| %>
-          <a href="<%= show_docs_path(section[:name]) %>" class="list-group-item <%= @active_section[:name] == section[:name] ? 'active' : '' %>">
-            <%= section[:title] %>
-          </a>
+        <% menu.each_value do |value| %>
+          <li class="list-group-item list-group-item-header">
+            <%= value[:title] %>
+          </li>
+          <% value[:sections].each do |name, title| %>
+            <a href="<%= show_docs_path(name) %>" class="list-group-item <%= @active_section == name ? 'active' : '' %>">
+              <%= title %>
+            </a>
+          <% end %>
         <% end %>
       </ul>
     </div>
     <div class="pfda-pane-content pfda-pane-content-padded-xl">
-      <%= render partial: "docs/#{@active_section[:name]}" %>
+      <%= render partial: "docs/#{@active_section}" %>
     </div>
   </div>
 </div>

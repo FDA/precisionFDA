@@ -12,7 +12,6 @@ window.onYouTubeIframeAPIReady = ->
       controls: 2
       enablejsapi: 1
       loop: 0
-      playlist: 'Zs9dW4ZEjn8'
       modestbranding: 1
       rel: 0
       showinfo: 0

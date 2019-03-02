@@ -1,0 +1,46 @@
+<script type="text/html" id="comment_template">
+  <div class="comment-item">
+    <div class="media">
+
+      <div class="media-left">
+        <img class="img-circle" height="25px" data-bind="attr: { src: avatar }">
+      </div>
+
+      <div class="media-body">
+        <ul class="pfda-comment-meta list-inline list-inline-bullets text-muted">
+          <li class="pfda-comment-user">
+            <strong>
+              <a target="_blank" data-bind="text: user, attr: { href: '/users/' + username }"></a>
+            </strong>
+          </li>
+          <li>
+            <span data-bind="text: org"></span>
+          </li>
+        </ul>
+
+        <div class="pfda-comment-body">
+          <p data-bind="html: body"></p>
+        </div>
+
+        <ul class="pfda-comment-actions list-inline list-inline-bullets text-muted">
+          <li data-bind="text: date"></li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+  <!-- ko if: childComments().length > 0 -->
+  <div class="pfda-comments space-reports-comments">
+    <div data-bind="template: { name: 'comment_template', foreach: childComments }"></div>
+  </div>
+  <!-- /ko -->
+</script>
+<script type="text/html" id="comment_nested_template">
+  <div class="pfda-comments space-reports-comments">
+    <div data-bind="template: { name: 'comment_template', foreach: comments }"></div>
+  </div>
+</script>
+
+<div class="pfda-comments space-reports-comments">
+  <div data-bind="template: { name: 'comment_template', foreach: $data.comments }"></div>
+</div>

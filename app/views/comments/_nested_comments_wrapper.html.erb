@@ -1,0 +1,21 @@
+<div class="container-fluid container-padded pfda-comments-container">
+  <% no_add_new_form = (defined?(no_add_new_form) && no_add_new_form) || @space.try(:verified?) %>
+  <% show_new_form = !no_add_new_form %>
+  <% if show_new_form %>
+    <%= render "comments/nested_new_comment", url: url %>
+    <hr>
+  <% end %>
+  <div class="pfda-comments">
+    <% if comments.size > 0 %>
+      <%=
+        render "comments/nested_comments",
+        comments: comments,
+        items_from_params: items_from_params,
+        no_add_new_form: no_add_new_form,
+        url: url
+      %>
+    <% else %>
+      <div class="text-muted">No comments yet.</div>
+    <% end %>
+  </div>
+</div>

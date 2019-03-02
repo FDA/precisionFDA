@@ -4,6 +4,8 @@ class FilesController < ApplicationController
   before_action :redirect_guest,         only: [:index]
   before_action :init_parent_folder,     only: [:index, :featured, :explore]
 
+  include VerifiedSpaceHelper
+
   def index
     if request.xhr?
       render_folders(private_folders(@parent_folder_id))
@@ -38,12 +40,11 @@ class FilesController < ApplicationController
     org = Org.featured
 
     if org
-      user_files = UserFile
-                     .real_files
-                     .accessible_by(@context)
-                     .includes(:user, :taggings)
-                     .where(users: { org_id: org.id })
-                     .where.not(:users => { id: User.challenge_bot.id})
+      user_files =
+        UserFile.real_files
+          .accessible_by(@context)
+          .includes(:user, :taggings)
+          .where(user: User.real.where(org: org))
 
       @files_grid = files_grid(user_files)
       @new_folder_is_public = false
@@ -83,7 +84,7 @@ class FilesController < ApplicationController
   end
 
   def show
-    @file = UserFile.not_assets.accessible_by(@context).includes(:user).find_by!(dxid: params[:id])
+    @file = UserFile.not_assets.accessible_by(@context).includes(:user).find_by_uid!(params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
@@ -112,7 +113,12 @@ class FilesController < ApplicationController
     @items_from_params = [@file]
     @item_path = pathify(@file)
     @item_comments_path = pathify_comments(@file)
-    @comments = @file.root_comments.order(id: :desc).page params[:comments_page]
+    if @file.in_space?
+      space = item_from_uid(@file.scope)
+      @comments = Comment.where(commentable: space, content_object: @file).order(id: :desc).page params[:comments_page]
+    else
+      @comments = @file.root_comments.order(id: :desc).page params[:comments_page]
+    end
 
     @notes = @file.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @file.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
@@ -126,7 +132,7 @@ class FilesController < ApplicationController
 
   def download
     # Allow assets as well
-    @file = UserFile.accessible_by(@context).find_by!(dxid: params[:id])
+    @file = UserFile.accessible_by(@context).find_by_uid!(params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
@@ -140,10 +146,10 @@ class FilesController < ApplicationController
 
     if @file.state != "closed"
       flash[:error] = "Files can only be downloaded if they are in the 'closed' state"
-      redirect_to file_path(@file.dxid)
+      redirect_to file_path(@file)
     elsif @file.license.present? && !@file.licensed_by?(@context)
       flash[:error] = "You must accept the license before you can download this"
-      redirect_to @file.parent_type == "Asset" ? asset_path(@file.dxid) : file_path(@file.dxid)
+      redirect_to @file.parent_type == "Asset" ? asset_path(@file) : file_path(@file)
     else
       opts = {project: @file.project, preauthenticated: true}
       opts[:filename] = @file.name
@@ -155,7 +161,7 @@ class FilesController < ApplicationController
 
   def link
     # Allow assets as well, thought not currently exposed in the UI
-    @file = UserFile.accessible_by(@context).find_by!(dxid: params[:id])
+    @file = UserFile.accessible_by(@context).find_by_uid!(params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
@@ -169,10 +175,10 @@ class FilesController < ApplicationController
 
     if @file.state != "closed"
       flash[:error] = "Files can only be downloaded if they are in the 'closed' state"
-      redirect_to file_path(@file.dxid)
+      redirect_to file_path(@file)
     elsif @file.license.present? && !@file.licensed_by?(@context)
       flash[:error] = "You must accept the license before you can get the download link"
-      redirect_to @file.parent_type == "Asset" ? asset_path(@file.dxid) : file_path(@file.dxid)
+      redirect_to @file.parent_type == "Asset" ? asset_path(@file) : file_path(@file)
     else
       opts = {project: @file.project, preauthenticated: true, filename: @file.name, duration: 86400}
       @url = DNAnexusAPI.new(@file.is_submission_output? ? CHALLENGE_BOT_TOKEN : @context.token).call(@file.dxid, "download", opts)["url"]
@@ -181,7 +187,7 @@ class FilesController < ApplicationController
   end
 
   def rename
-    @file = UserFile.real_files.find_by(dxid: params[:id])
+    @file = UserFile.real_files.find_by_uid(params[:id])
 
     unless @file.present?
       flash[:error] = "File not found"
@@ -197,7 +203,7 @@ class FilesController < ApplicationController
                           pathify_folder(parent_folder)
                         else
                           if @file.in_space?
-                            content_space_path(Space.from_scope(@file.scope))
+                            files_space_path(Space.from_scope(@file.scope))
                           elsif params[:scope] == "public"
                             explore_files_path
                           else
@@ -205,7 +211,7 @@ class FilesController < ApplicationController
                           end
                         end
                       else
-                        file_path(@file.dxid)
+                        file_path(@file)
                       end
 
     unless @file.editable_by?(@context)
@@ -224,7 +230,13 @@ class FilesController < ApplicationController
   end
 
   def destroy
-    @file = UserFile.real_files.where(user_id: @context.user_id).find_by!(dxid: params[:id])
+    @file = UserFile.real_files.find_by_uid!(params[:id])
+
+    unless @file.editable_by?(@context)
+      redirect_to file_path, alert: "You have no permissions to delete this file."
+      return
+    end
+
     service = FolderService.new(@context)
 
     res = service.remove([@file])
@@ -234,7 +246,7 @@ class FilesController < ApplicationController
       redirect_path = files_path
     else
       flash[:error] = res.value.values.first
-      redirect_path = file_path(@file.dxid)
+      redirect_path = file_path(@file)
     end
 
     redirect_to redirect_path
@@ -323,6 +335,9 @@ class FilesController < ApplicationController
     redirect_to redirect_target
   end
 
+  # TODO move to api
+  skip_before_action :require_login, only: :download_list
+  before_action :require_api_login, only: :download_list
   def download_list
     task = params[:task]
     files = []
@@ -348,10 +363,10 @@ class FilesController < ApplicationController
         name: file.name,
         type: file.klass,
         fsPath: ([root_name] + file.ancestors(params[:scope]).map(&:name).reverse).compact.join(" / "),
-        viewURL: file.is_a?(UserFile) ? file_path(file.dxid) : pathify_folder(file)
+        viewURL: file.is_a?(UserFile) ? file_path(file) : pathify_folder(file)
       }
 
-      info.merge!(downloadURL: download_file_path(file.dxid)) if task == "download" && file.is_a?(UserFile)
+      info.merge!(downloadURL: download_file_path(file)) if task == "download" && file.is_a?(UserFile)
 
       info
     end
@@ -426,11 +441,13 @@ class FilesController < ApplicationController
     {
       id: node.id,
       foldersPath: node.is_a?(Folder) ? pathify_folder(node) : nil,
-      name: node.name,
+      name: ERB::Util.h(node.name),
       rename_path: node.is_a?(Folder) ? rename_folder_file_path(node) : rename_file_path(node),
-      type: node.klass
+      type: node.klass,
+      in_verified_space: in_verified_space?(node)
     }
   end
+
 
   def file_params
     params.require(:file).permit(:name, :description)
@@ -471,4 +488,5 @@ class FilesController < ApplicationController
   def init_parent_folder
     @parent_folder_id = params[:folder_id]
   end
+
 end

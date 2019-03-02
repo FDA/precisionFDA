@@ -8,6 +8,10 @@ class WdlExporter::Task
 
   def to_s
   <<-TEXT
+workflow single_task {
+  call #{app.name}
+}
+
 task #{app.name} {
 
 #{inputs.join("\n")}
@@ -15,14 +19,14 @@ task #{app.name} {
   command {
     #{command}
   }
-  
+
   runtime {
-    docker: "repository/name"
+    docker: "#{app.name}:latest"
   }
-  
+
   output {
 #{outputs.join("\n")}
-  } 
+  }
 }
   TEXT
   end

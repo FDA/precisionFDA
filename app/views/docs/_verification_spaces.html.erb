@@ -1,0 +1,70 @@
+<div id="about-docs" class="bs-docs-container docs-content">
+  <div class="row">
+    <div class="col-sm-18">
+      <div id="verification-spaces" class="h1">Verified Apps</div>
+      <div class="bs-docs-section">
+        <p>
+          Any user on precisionFDA may create an app – a program intended to perform one or more functions to analyze data. PrecisionFDA administrators are able to test these created apps in an isolated environment, called a Verification Space, in order to confirm that they function properly and perform the required steps in analysis. After the apps in a Verification Space have been successfully tested, the administrator may verify them by locking the space. Locked verification spaces may then be used to populate the reviewer confidential area of a <a href="/docs/review_spaces">Review Space</a> through the use of a Review Space Template.
+        </p>
+
+        <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+          <%= image_tag("docs/verification_spaces/menu.png") %>
+        </div>
+      </div>
+
+      <div id="verification-spaces-create" class="h2">Creating the Verification Space</div>
+      <div class="bs-docs-section">
+        <p>To begin the process of verifying one or more apps, you will create a verification space. You can start this by navigating to the Spaces area of the precisionFDA website from the top menu bar and selecting “Provision a space.”</p>
+
+        <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+          <%= image_tag("docs/verification_spaces/create1.png") %>
+        </div>
+
+        <p>You must select “verification” as the type of space.  You can then provide a name for the space, a description, and a host lead and guest lead. The host lead should be the individual planning on leading the app review, as their account will have permission to complete the verification process.  You may choose someone else to aid in testing as the guest lead, or you can leave this field blank.</p>
+
+        <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+          <%= image_tag("docs/verification_spaces/create2.png") %>
+        </div>
+
+        <p>After creating the verification space, the host lead and guest lead (if applicable) must accept the space.  The space will only be created once both parties have accepted the invitations to the space.</p>
+
+        <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+          <%= image_tag("docs/verification_spaces/create3.png") %>
+        </div>
+      </div>
+
+      <div id="verification-spaces-testing" class="h2">Testing Apps in the Verification Space</div>
+      <div class="bs-docs-section">
+        <p>Once all parties have accepted the space, it will be created.  Both users may now move data into the space, including notes, files, assets, apps, and jobs.  To move data to the space, use the “Move data to space…” button in the upper right hand corner.  Additionally, in this space, all users can see a feed of all activity within the space and can filter this feed for specific elements they choose.  Users may also create tasks, which they can assign to themself or to the other member of the space.</p>
+
+        <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+          <%= image_tag("docs/verification_spaces/testing1.png") %>
+        </div>
+
+        <p>In this space, the members may perform any tests they choose for the selected app. The app can be added to the space and can be run in the space, using other files added to the space as inputs. These jobs are logged in the verification space.</p>
+
+        <p>Once the app has passed all tests and is ready for verification, the host lead of the space may verify the app and lock the space by clicking the large “Verify this space” button at the top of the page. This button is visible only to the host lead, not to the guest lead.</p>
+
+        <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+          <%= image_tag("docs/verification_spaces/testing2.png") %>
+        </div>
+
+        <p>Upon clicking “Verify this space”, the verification space will be locked and will no longer be mutable. All jobs, files, and apps within this space will be locked and cannot be changed further. Once the space has been locked, it will be available to be added to <a href="/docs/review_spaces">review space</a> templates.</p>
+
+        <div id="verification-video" class="bs-docs-section bs-docs-media-section">
+          <%= video_iframe(videos[:verified_apps][:url]) %>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6">
+      <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
+        <ul class="nav bs-docs-sidenav">
+          <li><a href="#verification-spaces">Verified Apps</a></li>
+          <li><a href="#verification-spaces-create">Creating the Verification Space</a></li>
+          <li><a href="#verification-spaces-testing">Testing Apps in the Verification Space</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>

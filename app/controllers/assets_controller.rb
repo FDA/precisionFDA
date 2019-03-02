@@ -34,7 +34,7 @@ class AssetsController < ApplicationController
   end
 
   def show
-    @asset = Asset.accessible_by(@context).includes(:archive_entries).find_by!(dxid: params[:id])
+    @asset = Asset.accessible_by(@context).includes(:archive_entries).find_by_uid!(params[:id])
 
     # Refresh state of asset, if needed
     if @asset.state != "closed"
@@ -45,7 +45,12 @@ class AssetsController < ApplicationController
     @items_from_params = [@asset]
     @item_path = pathify(@asset)
     @item_comments_path = pathify_comments(@asset)
-    @comments = @asset.root_comments.order(id: :desc).page params[:comments_page]
+    if @asset.in_space?
+      space = item_from_uid(@asset.scope)
+      @comments = Comment.where(commentable: space, content_object: @asset).order(id: :desc).page params[:comments_page]
+    else
+      @comments = @asset.root_comments.order(id: :desc).page params[:comments_page]
+    end
 
     @notes = @asset.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @asset.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
@@ -59,13 +64,16 @@ class AssetsController < ApplicationController
   end
 
   def edit
-    @asset = Asset.editable_by(@context).includes(:archive_entries).find_by!(dxid: params[:id])
+    @asset = Asset.includes(:archive_entries).find_by_uid!(params[:id])
+    redirect_to asset_path(@asset) unless @asset.editable_by?(@context)
 
     js asset: @asset.slice(:id, :description)
   end
 
   def rename
-    @asset = Asset.editable_by(@context).find_by!(dxid: params[:id])
+    @asset = Asset.find_by_uid!(params[:id])
+    redirect_to asset_path(@asset) unless @asset.editable_by?(@context)
+
     title = asset_params[:title]
     if title.is_a?(String) && title != ""
       name = title + @asset.suffix
@@ -80,18 +88,19 @@ class AssetsController < ApplicationController
       flash[:error] = "The new name is not a valid string"
     end
 
-    redirect_to asset_path(@asset.dxid)
+    redirect_to asset_path(@asset)
   end
 
   def update
-    @asset = Asset.editable_by(@context).includes(:archive_entries).find_by!(dxid: params[:id])
+    @asset = Asset.includes(:archive_entries).find_by_uid!(params[:id])
+    redirect_to asset_path(@asset) unless @asset.editable_by?(@context)
 
     Asset.transaction do
       @asset.reload
       if @asset.update(asset_params)
         # Handle a successful update.
         flash[:success] = "Asset updated"
-        redirect_to asset_path(@asset.dxid)
+        redirect_to asset_path(@asset)
       else
         flash[:error] = "Error: Could not update the asset. Please try again."
         render 'edit'
@@ -100,14 +109,15 @@ class AssetsController < ApplicationController
   end
 
   def destroy
-    @file = Asset.editable_by(@context).find_by!(dxid: params[:id])
+    @file = Asset.find_by_uid!(params[:id])
+    redirect_to asset_path(@file) unless @file.editable_by?(@context)
 
     UserFile.transaction do
       @file.reload
 
       if @file.license.present? && !@file.apps.empty?
         flash[:error] = "This asset contains a license, and has been included in one or more apps. Deleting it would render the license inaccessible to these apps, breaking reproducibility. You can either first remove the license (allowing these existing apps to run without requiring a license) or contact the precisionFDA team to discuss other options."
-        redirect_to asset_path(@file.dxid)
+        redirect_to asset_path(@file)
         return
       end
       @file.destroy

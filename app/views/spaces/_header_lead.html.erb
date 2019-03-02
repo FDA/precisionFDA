@@ -1,0 +1,21 @@
+<li class="list-group-item">
+
+  <h5 class="list-group-item-heading"><%= member_side(@space, lead) %> Lead</h5>
+
+  <p class="list-group-item-text">
+    <%= link_to("#{lead.user.full_name} (#{lead.user.org.name})", user_path(lead.user.dxuser)) %>
+  </p>
+
+  <% if !@space.active? && !@space.accepted_by?(lead) %>
+
+    <% if lead.user_id == @context.user_id %>
+      <%= link_to accept_space_path(@space.id), method: :post, class: "btn btn-xs btn-success" do %>
+        <span class="fa fa-check"></span> Accept space
+      <% end %>
+    <% else %>
+      <div class="text-warning"><span class="fa fa-clock-o"></span> Waiting on acceptance</div>
+    <% end %>
+
+  <% end %>
+
+</li>

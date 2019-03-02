@@ -11,6 +11,17 @@
   <%= form_for @space, url: spaces_path, html: {class: 'form form-horizontal'} do |f| %>
     <%= render "_partials/form_errors", object: @space %>
     <div class="form-group required">
+      <%= f.label :space_type, "Type", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <select name="space[space_type]" required=required" class="form-control" data-bind="value: chosenSpaceType(), options: spaceTypes,
+          optionsText: 'Name',
+          optionsValue: 'Id',
+          value: chosenSpaceType,
+          optionsCaption: 'Choose...'"></select>
+      </div>
+    </div>
+
+    <div class="form-group required">
       <%= f.label :name, "Name", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
         <%= f.text_field :name, class: "form-control input-lg", placeholder: "Name this space...", required: "required"  %>
@@ -22,24 +33,38 @@
         <%= f.text_area :description, class: "form-control", rows: 10, placeholder: "What is this space about..." %>
       </div>
     </div>
-    <div class="form-group required">
-      <%= f.label :host_lead_dxuser, "Host Lead", class: 'control-label col-sm-2' %>
+    <div class="form-group required" data-bind="visible: chosenSpaceType()" style="display: none;">
+      <%= f.label :host_lead_dxuser, "Host Lead", class: 'control-label col-sm-2', 'data-bind' => "text: hostLeadLabel" %>
       <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_field :host_lead_dxuser, class: "form-control", placeholder: "Host username...", required: "required"  %>
+        <input class="form-control" placeholder="Username..." type="text" name="space[host_lead_dxuser]" id="space_host_lead_dxuser" data-bind="value: hostLead, attr: {disable: !chosenSpaceType()}">
       </div>
     </div>
-    <div class="form-group required">
+    <div class="form-group required" data-bind="visible: chosenSpaceType() == 'groups' || chosenSpaceType() == 'verification'" style="display: none;">
       <%= f.label :guest_lead_dxuser, "Guest Lead", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
-        <%= f.text_field :guest_lead_dxuser, class: "form-control", placeholder: "Guest username...", required: "required"  %>
+        <input class="form-control" placeholder="Guest username..." type="text" name="space[guest_lead_dxuser]" id="space_guest_lead_dxuser" data-bind="value: guestLead, attr: {disable: chosenSpaceType() != 'groups'}">
       </div>
     </div>
-    <div class="form-group required">
-      <%= f.label :space_type, "Type", class: 'control-label col-sm-2' %>
+    <div class="form-group required" data-bind="visible: chosenSpaceType() == 'review'" style="display: none;">
+      <%= f.label :sponsor_org_handle, "Sponsor Org", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
-        <%= f.select :space_type, options_for_select("Group" => "group", "Submission" => "submission"), {}, class: "form-control" %>
+        <input class="form-control" placeholder="Sponsor org..." type="text" name="space[sponsor_org_handle]" id="space_sponsor_org_handle" data-bind="value: sponsorOrg, attr: {disable: chosenSpaceType() != 'review'}">
       </div>
     </div>
+
+    <div class="form-group required" data-bind="visible: chosenSpaceType() == 'review'" style="display: none;">
+      <div class="col-sm-11 col-sm-offset-3">
+      Template (optional)<br>
+      <%= select :space, :space_template_id, extract_options(@space.space_templates(@context)) %>
+      </div>
+    </div>
+    <div class="form-group required" data-bind="visible: chosenSpaceType() == 'review'" style="display: none;">
+      <div class="col-sm-1 col-sm-offset-3" style="width: 20px">
+        <input class="" type="checkbox" name="space[restrict_to_template]" data-bind="checked: restrict_to_template, attr: {disable: chosenSpaceType() != 'review'}">
+      </div>
+      <span>Restrict reviewers to use only apps and/or files outlines in the template.</span>
+    </div>
+
     <div class="form-group">
       <%= f.label :cts, "CTS #", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">

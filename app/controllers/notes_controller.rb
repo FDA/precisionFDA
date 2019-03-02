@@ -30,7 +30,12 @@ class NotesController < ApplicationController
     @items_from_params = [@note]
     @item_path = pathify(@note)
     @item_comments_path = pathify_comments(@note)
-    @comments = @note.root_comments.order(id: :desc).page params[:comments_page]
+    if @note.in_space?
+      space = item_from_uid(@note.scope)
+      @comments = Comment.where(commentable: space, content_object: @note).order(id: :desc).page params[:comments_page]
+    else
+      @comments = @note.root_comments.order(id: :desc).page params[:comments_page]
+    end
     @commentable = @note
 
     if @note.note_type == "Answer"
@@ -45,7 +50,9 @@ class NotesController < ApplicationController
   end
 
   def edit
-    @note = Note.editable_by(@context).find(params[:id])
+    @note = Note.find(params[:id])
+    redirect_to note_path(@note) unless @note.editable_by?(@context)
+
     if @note.nil?
       redirect_to note_path(@note)
     elsif @note.note_type == "Answer"
@@ -57,7 +64,9 @@ class NotesController < ApplicationController
   end
 
   def rename
-    @note = Note.editable_by(@context).find_by!(id: params[:id])
+    @note = Note.find_by!(id: params[:id])
+    redirect_to note_path(@note) unless @note.editable_by?(@context)
+
     title = note_params[:title]
     if title.is_a?(String) && title != ""
       if @note.rename(title, @context)
@@ -89,7 +98,8 @@ class NotesController < ApplicationController
   end
 
   def destroy
-    note = Note.editable_by(@context).find(params[:id])
+    note = Note.find(params[:id])
+    redirect_to :notes unless note.editable_by?(@context)
 
     if note.real_note?
       note.destroy

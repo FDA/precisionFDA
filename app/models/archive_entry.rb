@@ -9,5 +9,7 @@
 #
 
 class ArchiveEntry < ActiveRecord::Base
+  include Auditor
+
   belongs_to :asset
 end

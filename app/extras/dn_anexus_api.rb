@@ -1,5 +1,9 @@
 class DNAnexusAPI
 
+  def self.for_admin
+    new(ADMIN_TOKEN)
+  end
+
   def self.for_challenge_bot
     new(CHALLENGE_BOT_TOKEN)
   end
@@ -17,10 +21,10 @@ class DNAnexusAPI
 
   def call(subject, method, input = {})
     uri = URI("#{@apiserver_url}#{subject}/#{method}")
-    Net::HTTP.start(uri.host, uri.port, {read_timeout: 90, use_ssl: true}) do |http|
-      response = http.post(uri.path, input.to_json, {"Content-Type" => "application/json", "Authorization" => "Bearer #{@bearer_token}"})
-      response.value
-      return JSON.parse(response.body)
+    Net::HTTP.start(uri.host, uri.port, {read_timeout: 180, use_ssl: true}) do |http|
+      handle_response(
+        http.post(uri.path, input.to_json, {"Content-Type" => "application/json", "Authorization" => "Bearer #{@bearer_token}"})
+      )
     end
   end
 
@@ -72,6 +76,15 @@ class DNAnexusAPI
       end
     end
     return true
+  end
+
+  private
+
+  def handle_response(response)
+    response.value
+    JSON.parse(response.body)
+  rescue Net::HTTPServerException => e
+    raise e, "#{e.message}. #{response.body}", e.backtrace
   end
 
 end

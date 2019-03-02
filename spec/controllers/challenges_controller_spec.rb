@@ -12,7 +12,7 @@ RSpec.describe ChallengesController, type: :controller do
   describe "GET index" do
     context "by a guest" do
       before { authenticate_as_guest! }
-      it "doesn't raise a exception" do
+      it "doesn't raise an exception" do
         get :index
       end
     end
@@ -21,7 +21,7 @@ RSpec.describe ChallengesController, type: :controller do
   describe "GET consistency" do
     context "by a guest" do
       before { authenticate_as_guest! }
-      it "doesn't raise a exception" do
+      it "doesn't raise an exception" do
         get :consistency
       end
     end
@@ -30,7 +30,7 @@ RSpec.describe ChallengesController, type: :controller do
   describe "GET truth" do
     context "by a guest" do
       before { authenticate_as_guest! }
-      it "doesn't raise a exception" do
+      it "doesn't raise an exception" do
         get :truth
       end
     end
@@ -39,7 +39,7 @@ RSpec.describe ChallengesController, type: :controller do
   describe "GET join" do
     context "by a guest" do
       before { authenticate_as_guest! }
-      it "doesn't raise a exception" do
+      it "doesn't raise an exception" do
         get :join, id: challenge.id
         expect(response).to redirect_to request_access_path
       end
@@ -49,7 +49,7 @@ RSpec.describe ChallengesController, type: :controller do
   describe "GET show" do
     context "by a guest" do
       before { authenticate_as_guest! }
-      it "doesn't raise a exception" do
+      it "doesn't raise an exception" do
         get :show, id: challenge.id
       end
     end

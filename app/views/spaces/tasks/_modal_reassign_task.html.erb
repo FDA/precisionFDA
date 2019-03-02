@@ -1,0 +1,50 @@
+<div id="reassign_task_modal" class="modal fade tasks-actions-modal modal-with-loader" data-bind="css: {loading: reassignTaskModal.isLoading}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Reassign task</h4>
+      </div>
+      <div class="loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <form class="form-horizontal">
+        <div class="modal-body">
+          <%= modal_form_row('Task Name:', 'task[name]', false, 'readonly', '', '', 'text: reassignTaskModal.task.name') %>
+          <%= modal_form_row('Reassign To (required):', 'task[assignee_id]', true) %>
+          <%= modal_form_row('Response deadline:', 'task[response_deadline]', false, 'readonly', '', '', 'text: reassignTaskModal.task.response_deadline') %>
+          <%= modal_form_row('Completion deadline:', 'task[completion_deadline]', false, 'readonly', '', '', 'text: reassignTaskModal.task.completion_deadline') %>
+          <%= modal_form_row('Description:', 'task[description]', false, 'readonly', '', 'text-area', 'text: reassignTaskModal.task.description') %>
+          <%= modal_form_row(
+            'Please provide an explanation for reassigning this task (optional):',
+            'comment[body]',
+            false,
+            'textarea', '', '',
+            'value: reassignTaskModal.commentText'
+          ) %>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-default"
+            data-dismiss="modal"
+            tabindex="-1"
+            data-bind="disable: reassignTaskModal.actionsDisabled"
+          >Cancel</button>
+          <button
+            id="reassign_task_modal_submit"
+            type="button"
+            class="btn btn-primary"
+            data-bind="disable: reassignTaskModal.actionsDisabled"
+          >
+            <i class="fa fa-share"></i>&nbsp;Reassign
+          </button>
+        </div>
+      </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

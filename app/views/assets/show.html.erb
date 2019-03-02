@@ -87,12 +87,12 @@
         <% end %>
 
         <% if @asset.state == "closed" %>
-          <%= link_to download_file_path(@asset.dxid), method: :post, class: "btn btn-download btn-primary #{@asset.license.present? && !@asset.licensed_by?(@context) ? 'disabled' : ''}" do %>
+          <%= link_to download_file_path(@asset), method: :post, class: "btn btn-download btn-primary #{@asset.license.present? && !@asset.licensed_by?(@context) ? 'disabled' : ''}" do %>
             <span class="fa fa-download"></span> Download
           <% end %>
         <% end %>
         <% if @asset.state == "closed" %>
-          <%= link_to link_file_path(@asset.dxid), method: :post, class: "btn btn-primary #{@asset.license.present? && !@asset.licensed_by?(@context) ? 'disabled' : ''}" do %>
+          <%= link_to link_file_path(@asset), method: :post, class: "btn btn-primary #{@asset.license.present? && !@asset.licensed_by?(@context) ? 'disabled' : ''}" do %>
             <span class="fa fa-link"></span> Authorized URL
           <% end %>
         <% end %>
@@ -100,17 +100,18 @@
     </div>
 
     <div class="btn-group">
-      <% if @asset.user_id == @context.user_id %>
+      <% if @asset.editable_by?(@context) %>
         <div class="btn-group">
-          <%= link_to edit_asset_path(@asset.dxid), class: "btn btn-primary" do %>
+          <%= link_to edit_asset_path(@asset), class: "btn btn-primary" do %>
             <span class="fa fa-edit"></span> Edit
           <% end %>
         </div>
       <% end %>
       <%= render "_partials/btn_publish", item: @asset %>
+      <%= render "_partials/btn_copy_to_cooperative", item: @asset %>
     </div>
 
-    <% if @asset.editable_by?(@context) %>
+    <% if @asset.editable_by?(@context) && !in_verified_space?(@asset) %>
     <div class="btn-group">
       <div class="dropdown">
         <button class="btn btn-primary" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -124,7 +125,7 @@
           </li>
           <li role="separator" class="divider"></li>
           <li>
-            <%= link_to asset_path(@asset.dxid), method: :delete, data: { confirm: 'Are you certain you want to delete this?' } do %>
+            <%= link_to asset_path(@asset), method: :delete, data: { confirm: 'Are you certain you want to delete this?' } do %>
               <span class="fa fa-trash"></span> Delete
             <% end %>
           </li>
@@ -149,7 +150,13 @@
   </li>
   <li role="presentation">
     <a href="#tab-comments" aria-controls="tab-comments" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
-      <span class="tab-label">Comments <span class="badge"><%= @asset.comment_threads.size %></span></span>
+      <span class="tab-label">Comments <span class="badge">
+        <% if @asset.in_space? %>
+          <%= @comments.active.size %>
+        <% else %>
+          <%= @asset.comment_threads.size %>
+        <% end %>
+      </span></span>
     </a>
   </li>
   <% if @notes.total_count > 0 %>
@@ -236,5 +243,5 @@
 </div>
 
 <% if @asset.editable_by?(@context) %>
-  <%= render "_partials/modal_rename", item: @asset, path_to_rename: rename_asset_path(@asset.dxid) %>
+  <%= render "_partials/modal_rename", item: @asset, path_to_rename: rename_asset_path(@asset) %>
 <% end %>

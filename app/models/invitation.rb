@@ -21,6 +21,7 @@
 #
 
 class Invitation < ActiveRecord::Base
+  include Auditor
   include Humanizer
   validates :first_name, :last_name, :email, :address, :phone, :req_reason, presence: true
   validates :singular, :research_intent, :clinical_intent, :participate_intent, :organize_intent, inclusion: [true, false]

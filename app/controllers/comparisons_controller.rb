@@ -140,9 +140,7 @@ class ComparisonsController < ApplicationController
       comparison = Comparison.accessible_by_public.find_by(id: $1)
     end
 
-    if !comparison
-      raise ActionController::RoutingError, 'Not Found'
-    end
+    not_found! unless comparison
 
     sequence = generate_sequence(comparison)
     if request.content_type =~ /xml/
@@ -322,7 +320,12 @@ class ComparisonsController < ApplicationController
     @items_from_params = [@comparison]
     @item_path = pathify(@comparison)
     @item_comments_path = pathify_comments(@comparison)
-    @comments = @comparison.root_comments.order(id: :desc).page params[:comments_page]
+    if @comparison.in_space?
+      space = item_from_uid(@comparison.scope)
+      @comments = Comment.where(commentable: space, content_object: @comparison).order(id: :desc).page params[:comments_page]
+    else
+      @comments = @comparison.root_comments.order(id: :desc).page params[:comments_page]
+    end
 
     @notes = @comparison.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
     @answers = @comparison.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
@@ -375,12 +378,12 @@ class ComparisonsController < ApplicationController
     files = {}
     # Required files
     ["test_vcf", "ref_vcf"].each do |role|
-      files[role] = UserFile.real_files.accessible_by(@context).find_by!(dxid: comp_params["#{role}_uid"])
+      files[role] = UserFile.real_files.accessible_by(@context).find_by_uid!(comp_params["#{role}_uid"])
     end
     # Optional files
     ["test_bed", "ref_bed"].each do |role|
       if comp_params["#{role}_uid"].present?
-        files[role] = UserFile.real_files.accessible_by(@context).find_by!(dxid: comp_params["#{role}_uid"])
+        files[role] = UserFile.real_files.accessible_by(@context).find_by_uid!(comp_params["#{role}_uid"])
       end
     end
 
@@ -398,7 +401,7 @@ class ComparisonsController < ApplicationController
     run_input = {
       name: comp_params[:name],
       project: project,
-      input: Hash[files.map {|k,v| [k, {"$dnanexus_link": {project: v.project, id: v.uid}}]}]
+      input: Hash[files.map {|k,v| [k, {"$dnanexus_link": {project: v.project, id: v.dxid}}]}]
     }
     jobid = DNAnexusAPI.new(@context.token).call(DEFAULT_COMPARISON_APP, "run", run_input)["id"]
 
@@ -424,7 +427,8 @@ class ComparisonsController < ApplicationController
   end
 
   def rename
-    @comparison = Comparison.editable_by(@context).find_by!(id: params[:id])
+    @comparison = Comparison.find_by!(id: params[:id])
+    redirect_to comparison_path(@comparison.id) unless @comparison.editable_by?(@context)
 
     if @comparison.rename(comparison_params[:name], comparison_params[:description], @context)
       flash[:success] = "Comparison successfully updated"
@@ -436,7 +440,8 @@ class ComparisonsController < ApplicationController
   end
 
   def destroy
-    @comparison = Comparison.editable_by(@context).find(params[:id])
+    @comparison = Comparison.find(params[:id])
+    redirect_to :comparisons unless @comparison.editable_by?(@context)
 
     projects = nil
     file_ids = nil

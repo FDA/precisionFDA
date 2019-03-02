@@ -1,0 +1,51 @@
+
+<div class="tab-content" id="ko_spaces_feed_container">
+  <div role="tabpanel" class="tab-pane active" id="tab-feed">
+    <div class="panel spaces-blue-panel">
+      <div class="panel-body">
+        <h3>
+          <i class="fa fa-chevron-down" data-toggle="collapse" aria-expanded="true" data-target="#feed_filters_form"></i>
+          Activity Summary
+        </h3>
+
+        <% unless @space.active? %>
+          <div class="pfda-help-block">
+            <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
+            <p>Both host and guest leads must click "Accept space" to activate it.</p>
+          </div>
+        <% end %>
+
+      </div>
+    </div>
+
+    <% if @space.active? %>
+      <div class="spaces-feed-panel">
+        <div class="metadata-section metadata-header">
+          <ul class="list-group list-group-inline">
+            <li class="list-group-item">
+              <h4 class="list-group-item-heading">FIRST ACTIVITY</h4>
+              <p class="list-group-item-text"><%= @start_date %></p>
+            </li>
+            <li class="list-group-item">
+              <h4 class="list-group-item-heading">LAST ACTIVITY</h4>
+              <p class="list-group-item-text"><%= @end_date %></p>
+            </li>
+            <li class="list-group-item">
+              <h4 class="list-group-item-heading">DURATION</h4>
+              <p class="list-group-item-text"><%= @duration %> day(s)</p>
+            </li>
+            <li class="list-group-item">
+              <h4 class="list-group-item-heading">OVERALL USERS</h4>
+              <p class="list-group-item-text"><%= @overall_users %></p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    <% end %>
+
+    <%= render "spaces/feed/filters" %>
+    <%= render "spaces/feed/chart" %>
+    <%= render "spaces/feed/feed" %>
+
+  </div>
+</div>

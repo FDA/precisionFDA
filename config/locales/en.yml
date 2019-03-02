@@ -26,3 +26,9 @@ en:
       invitation:
         humanizer_answer: "Answer"
         org: "Organization"
+
+  activemodel:
+    attributes:
+      cwl_presenter:
+        base_command: "baseCommand"
+        docker_requirement: "DockerRequirement"

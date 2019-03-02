@@ -42,9 +42,10 @@
 class UserFile < Node
 
   include Licenses
+  include InternalUid
   require 'uri'
 
-  DESCRIPTION_MAX_LENGTH = 1000
+  DESCRIPTION_MAX_LENGTH = 65535
 
   STATE_CLOSING = "closing"
   STATE_CLOSED = "closed"
@@ -78,12 +79,14 @@ class UserFile < Node
               too_long: "Description could not be greater than #{DESCRIPTION_MAX_LENGTH} characters"
             }
 
+  scope :open, -> { where(state: STATE_OPEN) }
+
   def self.model_name
     ActiveModel::Name.new(self, nil, "File")
   end
 
   def self.real_files
-    return where(parent_type: ['User', 'Job'])
+    where(parent_type: ['User', 'Job', 'Node'])
   end
 
   def self.not_assets
@@ -134,16 +137,16 @@ class UserFile < Node
     return parent_type != "Asset"
   end
 
+  def asset?
+    sti_type == "Asset"
+  end
+
   def independent?
     !parent_comparison?
   end
 
   def parent_comparison?
     parent_type == PARENT_TYPE_COMPARISON
-  end
-
-  def uid
-    dxid
   end
 
   def klass
@@ -155,7 +158,7 @@ class UserFile < Node
   end
 
   def feedback(context)
-    if uid == NIST_VCF_UID && context
+    if dxid == NIST_VCF_UID && context
       if context.guest?
         return "https://docs.google.com/forms/d/1cF0XoeGbLJUSRC3pvEz36DMdlpWA9nFwUXJA_o-oxrU/viewform?entry.556919704=NISTv2.19"
       else
@@ -170,7 +173,7 @@ class UserFile < Node
   end
 
   def deletable?
-    return ((parent_type == "User") || (parent_type == "Job"))
+    return ((parent_type == "User") || (parent_type == "Job")) && ( (scope == "private" || scope == "public") || !(in_space? && space_object.verified?))
   end
 
   def publishable_by?(context, scope_to_publish_to = "public")

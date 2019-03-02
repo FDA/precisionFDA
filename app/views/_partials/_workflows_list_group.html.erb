@@ -1,8 +1,12 @@
 <% workflows.each do |workflow| %>
-  <a href="<%= workflow_analyses_path(workflow.dxid) %>"
+  <a href="<%= workflow_analyses_path(workflow) %>"
     class="list-group-item word-break-all workflow-<%= workflow.workflow_series_id %> <%= workflow.workflow_series_id == active ? 'active' : ''%>"
     data-app="<%= workflow.dxid %>">
     <div class="app-list-group-item-title"><%= workflow.title %></div>
+    <% if workflow.in_space? %>
+      <small class="text-muted"><%= "Published in #{item_from_uid(workflow.scope).title}" %></small>
+      <br>
+    <% end %>
     <small class="text-muted"><%= workflow.user.org.handle %>/<%= workflow.user.dxuser %></small>
   </a>
 <% end %>

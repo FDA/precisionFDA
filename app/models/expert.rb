@@ -12,6 +12,8 @@
 #
 
 class Expert < ActiveRecord::Base
+  include Auditor
+
   has_many :expert_questions, dependent: :destroy
   has_many :expert_answers, through: :expert_questions, dependent: :destroy
   belongs_to :user
@@ -113,7 +115,7 @@ class Expert < ActiveRecord::Base
   end
 
   def self.get_perm_link(context, id)
-    file = UserFile.accessible_by(context).find_by!(dxid: id)
+    file = UserFile.accessible_by(context).find_by_uid!(id)
     if file.nil? || file.state != "closed" || file.file_size > 5000000
       return nil
     end

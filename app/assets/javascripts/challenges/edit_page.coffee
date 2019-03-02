@@ -39,7 +39,7 @@ class EditorModel
       payload.regions = regions
       payload.id = @challenge_id
 
-      route = "/challenges/#{@challenge_id}/editor/save_page"
+      route = " /api/challenges/#{@challenge_id}/save_editor_page"
       Precision.api(route, payload)
         .done((data) =>
 
@@ -121,7 +121,7 @@ EditorController = Paloma.controller('Challenges',
     ko.applyBindings(viewModel, $container[0])
 
     $(document).on 'page:before-change', ->
-      if viewModel.editor.getState() == 'editing'
+      if viewModel.editor.getState() == 'editing' and !window.Precision.SESSION_CHECKER_MODAL_OPEN
         if confirm 'Changes you made may not be saved.'
           viewModel.editor.unmount()
           viewModel.initEditor()

@@ -14,6 +14,7 @@
 #
 
 class AppSeries < ActiveRecord::Base
+  include Auditor
   include Permissions
 
   has_many :apps
@@ -102,10 +103,22 @@ class AppSeries < ActiveRecord::Base
           series_updates[:latest_version_app_id] = app.id unless series.latest_version_app_id.present? && series.latest_version_app.revision > app.revision
           series.update!(series_updates) if series_updates.present?
           Event::AppPublished.create_for(app, scope, context.user)
+          prepare_to_space(api, context, app, scope)
         end
       end
     end
 
     return count
+  end
+
+  def self.prepare_to_space(api, context, app, scope)
+    return unless scope =~ /^space-(\d+)$/
+    space = Space.from_scope(scope)
+
+    SpaceEventService.call($1.to_i, context.user_id, nil, app, :app_added)
+
+    if space.review? || space.verification?
+      api.call(app.dxid, 'addDevelopers', { "developers": [Setting.review_app_developers_org] })
+    end
   end
 end

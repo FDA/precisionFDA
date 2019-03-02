@@ -11,7 +11,7 @@
   <main role="main">
     <noscript>This website requires JavaScript</noscript>
     <%= render partial: "_partials/messages", flash: flash %>
-    <%= yield %>
+    <%= content_for?(:content) ? yield(:content) : yield %>
   </main>
   <footer>
     <%= render "_partials/footer" %>

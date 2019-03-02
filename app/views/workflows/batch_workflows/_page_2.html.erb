@@ -1,0 +1,82 @@
+<div class="hidden" data-bind="css: { hidden: step() != 2 }">
+<!-- ko if: step() == 2 -->
+
+  <h4 class="batch-workfows-wizard-header">
+    <span>Page 2 of 3: Conﬁgure Batch Inputs - </span>
+    <span data-bind="text: titleStep2"></span>
+  </h4>
+
+  <!-- ko if: batchInputOneType() == 'string' -->
+  <div class="batch-workfows-wizard-info">
+    <div class="alert alert-info">
+      <div class="row">
+        <div class="col-sm-1 text-center">
+          <i class="fa fa-info-circle"></i>
+        </div>
+        <div class="col-sm-23">
+          <div>
+            Inputs should be entered individually per line.
+          </div>
+          <!-- ko if: batchInputTwoType() -->
+          <div>
+            The number of inputs should be the same for both columns.
+          </div>
+          <!-- /ko -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /ko -->
+
+  <div class="batch-workfows-wizard-step2-inputs">
+    <%= render "workflows/batch_workflows/step2_input_template" %>
+    <!-- ko if: batchInputOneType() -->
+      <div class="batch-workfows-wizard-step2-input" data-bind="template: {
+        name: 'batch_input_templates_step2',
+        data: batchInputOne,
+        as: 'input'
+      }"></div>
+    <!-- /ko -->
+    <!-- ko if: batchInputTwoType() -->
+      <div class="batch-workfows-wizard-step2-input" data-bind="template: {
+        name: 'batch_input_templates_step2',
+        data: batchInputTwo,
+        as: 'input'
+      }"></div>
+    <!-- /ko -->
+  </div>
+
+  <!-- ko if: batchInputOneType() == 'string' -->
+  <div class="batch-workfows-wizard-step2-fileloader">
+    <div class="spec-input-file-title" data-bind="text: $data.fileTitle"></div>
+    <div class="">
+      <div class="file-uploader">
+        <label for="step2_load_file_input" class="btn btn-primary">
+          <i class="fa fa-plus"></i>
+          Add text ﬁle (optional)
+        </label>
+        <input type="file" id="step2_load_file_input" data-bind="event: {change: step2LoadFileInputOnChange}" />
+      </div>
+      <p>
+        <div>
+          *Uploading a text ﬁle will overwrite any current inputs above.
+        </div>
+        <!-- ko if: batchInputTwoType() -->
+        <div>
+          *The text ﬁle should be tab-delimited with two columns.
+        </div>
+        <!-- /ko -->
+      </p>
+    </div>
+  </div>
+  <!-- /ko -->
+
+  <div class="batch-workfows-wizard-buttons row">
+    <div class="pull-right">
+      <button class="btn btn-default" data-bind="click: backToStep1">Back</button>
+      <button class="btn btn-primary" data-bind="click: nextToStep3">Next</button>
+    </div>
+  </div>
+
+<!-- /ko -->
+</div>

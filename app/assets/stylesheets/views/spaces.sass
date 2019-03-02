@@ -1,3 +1,233 @@
-// Place all the styles related to the Spaces controller here.
-// They will automatically be included in application.css.
-// You can use Sass here: http://sass-lang.com/
+@import "_common"
+$side-bar-width: 250px
+
+.pfda-controller-spaces
+  .fa-chevron-down
+    transition: transform 300ms ease-out
+    cursor: pointer
+  .collapsed
+    &.fa-chevron-down
+      transform: rotate(-90deg)
+    .fa-chevron-down
+      transform: rotate(-90deg)
+
+  &.pfda-action-discuss
+    .spaces-comments-container
+      max-width: 1024px
+      margin: auto
+
+  .pfda-pane-spaces
+    background-color: #FFF
+    .tab-content
+      width: 100%
+      max-width: 100%
+      overflow: auto
+
+  .pfda-pane-sidebar
+    flex: 0 $side-bar-width
+    width: $side-bar-width
+    min-width: $side-bar-width
+    min-height: 650px
+    &.pfda-pane-sidebar-dark
+      .list-group-spaces
+        padding: 0px
+        a.list-item-spaces
+          color: #FFF
+          font-size: 17px
+          &.list-child-item-spaces
+            font-size: 14px
+            padding: 5px 15px
+            padding-left: 30px
+          &.active
+            color: $brand-blue-secondary
+            background-color: lighten($brand-blue-secondary, 25%)
+          .fa
+            margin-right: 5px
+          .list-group-item-cnt
+            float: right
+  .verify-button
+    margin-left: 200px
+  .spaces-files-buttons,
+  .spaces-tasks-buttons
+    text-align: right
+    margin-bottom: 10px
+
+  .spaces-tasks-buttons
+    margin-bottom: 50px
+
+  .spaces-tasks-actions
+    float: left
+    margin-bottom: 10px
+    clear: both
+    width: 100%
+    .pull-right button
+      border-radius: 3px !important
+      margin-left: 5px !important
+
+  .spaces-tasks-grid
+    clear: both
+    .failed
+      color: $brand-red-tertiary
+    .task-name-column
+      max-width: 100px
+      text-overflow: ellipsis
+      overflow: hidden
+
+  &.pfda-action-feed,
+  &.pfda-action-reports
+    .spaces-blue-panel
+      background-color: $brand-blue-subtler
+      border-bottom: 1px solid $border-header-color
+      color: $brand-blue-tertiary
+      margin: 0px
+      color: initial
+      .panel-body-blue
+        padding-top: 0px
+        .form-group
+          position: relative
+          .form-control
+            width: 100%
+      .btn-link
+        outline: none
+        padding-right: 0px
+      .metadata-header
+        border: none
+        .list-group-item-heading
+          font-weight: 500
+        .list-group-item-text
+          text-align: center
+
+    .pfda-datetimepicker
+      height: 34px
+      width: 150px
+      text-align: center
+    .spaces-feed-types
+      display: flex
+      justify-content: space-around
+      max-width: 1024px
+    .feed-type
+      &-label
+        cursor: pointer
+        input
+          cursor: pointer
+      &-icon
+        border-radius: 50%
+        color: #FFF
+        padding-top: 6px
+        text-align: center
+        width: 40px
+        height: 40px
+        vertical-align: middle
+        cursor: pointer
+        font-size: 1.4em
+      &-count
+        text-align: center
+    .chart-row
+      max-width: 1024px
+      &[aria-expanded="false"]
+        display: none
+
+    .activity-feed-container,
+    .reports-container
+      max-width: 1024px
+
+    .activity-feed,
+    .report-feed
+      margin-bottom: 10px
+      .feed-type-icon
+        cursor: default
+      .media-body
+        border: 1px solid $border-header-color
+        border-radius: 5px
+      &-header
+        padding: 10px
+        border-bottom: 1px solid $border-header-color
+        a
+          margin-right: 10px
+      &-body
+        padding: 10px
+
+    .space-reports-comments
+      padding-left: 50px
+      .comment-item
+        padding-bottom: 10px
+
+    .sort-container
+      padding-left: 20px
+      cursor: pointer
+
+    .sort-label
+      margin-left: 10px
+      color: #888
+
+    .more-loading
+      text-align: center
+      max-width: 1024px
+      color: rgba(0, 0, 0, .3)
+      background-color: #FFF
+
+    .panel-body-blue.report-types-container
+      border-bottom: 15px solid #df6ccb
+      padding-bottom: 0px
+    .report-types
+      display: flex
+      white-space: nowrap
+      overflow: auto
+      .report-type
+        cursor: pointer
+        background-color: #dddddd
+        padding: 20px 10px
+        white-space: nowrap
+        max-width: 150px
+        min-width: 100px
+        margin-right: 2px
+        border-radius: 5px 5px 0px 0px
+        flex: 1 1 auto
+        overflow: hidden
+        display: flex
+        justify-content: space-between
+        &.active
+          background-color: #df6ccb
+          color: #FFF
+
+  .spaces-members-filter
+    padding: 20px
+    padding-bottom: 10px
+
+  .spaces-members-cards
+    padding: 10px
+    padding-top: 0px
+    display: flex
+    flex-wrap: wrap
+    .member-card
+      margin: 10px
+      min-width: 300px
+      &.inactive
+        color: #a4a4a4
+      &-header
+        padding: 20px 10px
+        text-transform: none
+        a
+          display: block
+          font-size: 17px
+          font-weight: bold
+        img
+          vertical-align: middle
+          height: 40px
+          margin-right: 5px
+        span
+          vertical-align: middle
+      &-buttons
+        margin-top: 15px
+        .btn
+          margin-right: 5px
+      &-row
+        width: 100%
+        margin-bottom: 5px
+        display: flex
+      &-label
+        font-weight: bold
+        min-width: 100px
+      &-value
+        text-overflow: ellipsis
+        overflow: hidden

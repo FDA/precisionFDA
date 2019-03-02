@@ -1,0 +1,53 @@
+<% tasks.each do |task| %>
+  <div>
+    <h5>
+      <a href="#" data-toggle="modal" data-target="#task-modal-<%= task.id %>">
+        <%= task.name %>
+      </a>
+    </h5>
+    <% if task.source_user?(@context) || task.editable_by?(@context) %>
+      <%= link_to "Delete", space_task_path(@space, task), method: :delete, data: { confirm: 'Are you certain you want to delete this task?' } %>
+    <% end %>
+    <% if (task.target_user?(@context) || task.editable_by?(@context)) && (task.open? || task.accepted?) %>
+      <a href="#" data-toggle="modal" data-target="#reassign-task-modal-<%= task.id %>">Reassign</a>
+    <% end %>
+    <% if task.open? && task.target_user?(@context) %>
+      <%= link_to "Accept", accept_space_tasks_path(@space, task_ids: []), method: :post %>
+      <%= link_to "Decline", decline_space_tasks_path(@space, task_ids: []), method: :post %>
+    <% end %>
+    <% if task.accepted? && task.target_user?(@context) %>
+      <%= link_to "Decline", decline_space_tasks_path(@space, task_ids: []), method: :post %>
+      <%= link_to "Complete", complete_space_tasks_path(@space, task_ids: []), method: :post %>
+    <% end %>
+    <%= link_to "Copy", copy_space_task_path(@space, task), method: :post %>
+  </div>
+  <div>
+    <div>
+      <b>
+        <%= "Status: " %>
+        <%= task.status %>
+      </b>
+    </div>
+    <div>
+    <%= "Assigner: " %>
+    <%= assigner(task) %>
+    <%= "Assignee: " %>
+    <%= assignee(task) %>
+    <%= "Description: " %>
+    <%= task.description %>
+    </div>
+    <div>
+    <%= "Response: " %>
+    <%= task.response_deadline %>
+    <%= "Complete by: " %>
+    <%= task.completion_deadline %>
+    </div>
+    <div>
+      <%= "Comments: " %>
+      <%= task.comment_threads.size %>
+    </div>
+  </div>
+
+  <%= render "_partials/modal_reassign_task", task: task  %>
+  <%= render "_partials/modal_task", task: task  %>
+<% end %>

@@ -2,7 +2,7 @@ class WorkflowEditorModel
   setSlots: (workflow) ->
     if workflow? && !@slots().length > 0
       for stage in workflow.spec.input_spec["stages"]
-        Precision.api('/api/describe', { uid: stage.app_dxid }, null, null, false)
+        Precision.api('/api/describe', { uid: stage.app_uid }, null, null, false)
           .done((app) =>
             inputs = app.spec.input_spec.map (input) ->
               $.extend({}, input, {
@@ -13,7 +13,8 @@ class WorkflowEditorModel
                 values: { id: null, name: null }
               })
             spec = {
-              name: app.name,
+              name: stage.name,
+              originalName: app.name,
               dxid: app.dxid,
               instanceType: app.spec.instance_type,
               revision: app.revision,
@@ -146,6 +147,10 @@ class WorkflowEditorModel
       availapps
     )
 
+    $('#mapper-modal').on 'hidden.bs.modal', () ->
+      if $('.modal.in').length > 0
+        $('body').addClass('modal-open')
+
   filterSetOfObjects: (objects, query) ->
     return objects if _.isEmpty(query)
     if _.isArray(query)
@@ -213,21 +218,20 @@ class WorkflowEditorModel
       @inputBeingEdited().values.name = data.name
       data.configured(true)
       data.values.id = @slotBeingEdited().slotId()
-      data.values.name = @slotBeingEdited().name
+      data.values.name = @slotBeingEdited().name()
       @inputBeingEdited().outputBinding(data.name)
       @inputBeingEdited().configured(true)
       slot.nextSlot(@slotBeingEdited())
       @slotBeingEdited().prevSlot(slot)
       @sortSlots()
       config = false
-      ko.utils.arrayForEach(@slotBeingEdited().inputs(), (input) =>
+      ko.utils.arrayForEach(@slotBeingEdited().inputs(), (input) ->
         if input.optional == false
           config = input.configured()
       )
       @slotBeingEdited().configured(config)
       @configureEligibleSlots()
-      $('#mapper-modal').removeClass('in')
-        .attr('aria-hidden', true)
+      $('#mapper-modal').modal('hide')
     else
       @errorMessage("Input Output Type do not match")
       $('.workflows-alert-danger').fadeIn().delay(1000).fadeOut();
@@ -267,7 +271,8 @@ class WorkflowEditorModel
     for slot in @slots()
       slot_details = {
         dxid: slot.id,
-        name: slot.name,
+        uid: slot.uid,
+        name: slot.name(),
         instanceType: slot.instanceType(),
         inputs: slot.inputs(),
         outputs: slot.outputs(),
@@ -307,7 +312,7 @@ class WorkflowEditorModel
           outputs = app.spec.output_spec.map((output) => $.extend({}, output, {values: {id: null, name: null}}))
           spec =
             name: app.name
-            dxid: app.dxid
+            uid: app.uid
             instanceType: app.spec.instance_type
             revision: app.revision
             inputs: inputs
@@ -316,6 +321,7 @@ class WorkflowEditorModel
           @slots.push(new_slot)
           if spec.outputs.length > 0
             @eligibleSlots.push(new_slot)
+          @renameSameStages(new_slot.originalName)
         )
         .fail((error) =>
           errorObject = JSON.parse error.responseText
@@ -325,9 +331,30 @@ class WorkflowEditorModel
     else
       alert("Please wait a few seconds for this app to load.")
 
+  renameSameStages: (originalName) =>
+    sameSlots = ko.utils.arrayFilter @slots(), (slot) ->
+      slot.originalName == originalName
+    if sameSlots.length > 1
+      for slot, index in sameSlots
+        slotNewName = "#{originalName}-#{index + 1}"
+        slot.name(slotNewName)
+        @renameSlotInputsOutputs slot
+    else if sameSlots.length == 1 &&
+            sameSlots[0].originalName != sameSlots[0].name()
+      slot = sameSlots[0]
+      slot.name(slot.originalName)
+      @renameSlotInputsOutputs slot
+
+  renameSlotInputsOutputs: (slot) ->
+    for input in slot.inputs()
+      input.stageName = slot.name()
+    for output in slot.outputs()
+      output.stageName = slot.name()
+
   configureSlot: (slot) =>
     @slotBeingEdited(slot)
     @configureEligibleSlots()
+
   eligibleSlotsBasedOnInput: () =>
     new_slots= []
     for slot in @eligibleSlots()
@@ -386,6 +413,7 @@ class WorkflowEditorModel
       nextSlot.prevSlot(null)
       nextSlot.configured(false)
     @slots.remove slot
+    @renameSameStages(slot.originalName)
 
 class StageModel
   constructor: (spec, @viewModel) ->
@@ -436,6 +464,7 @@ class IOModel
 class slotModel
   constructor: (spec, viewModel, stage = null, configured = false) ->
     @id = spec.dxid
+    @uid = spec.uid
     @slotId = ko.computed( () ->
       if stage?
         stage["slotId"]
@@ -443,7 +472,8 @@ class slotModel
         _slotId = Math.round((Math.pow(36, 14 + 1) - Math.random() * Math.pow(36, 14)))
         'stage-' + _slotId.toString(36).slice(1)
     )
-    @name = spec.name
+    @name = ko.observable(spec.name)
+    @originalName = spec.originalName || spec.name
     @revision = spec.revision
     @instanceTypes = Precision.INSTANCES
     @instanceType = ko.observable(stage?.instanceType || spec?.instanceType)
@@ -454,24 +484,24 @@ class slotModel
         ko.utils.arrayForEach(stage["inputs"], (input) =>
           if !input.optional
             configured = false
-          @inputs.push(new IOModel(input, @slotId(), @name, true, viewModel))
+          @inputs.push(new IOModel(input, @slotId(), spec.name, true, viewModel))
         )
       else
         ko.utils.arrayForEach(spec.inputs, (input) =>
           if !input.optional
             configured = false
-          @inputs.push(new IOModel(input, @slotId(), @name, false, viewModel))
+          @inputs.push(new IOModel(input, @slotId(), spec.name, false, viewModel))
         )
     )
     @outputs = ko.observableArray()
     @addOutputs = ko.computed(=>
       if stage?
         ko.utils.arrayForEach(stage["outputs"], (output) =>
-          @outputs.push(new IOModel(output, @slotId(), @name, output.values.id?, viewModel))
+          @outputs.push(new IOModel(output, @slotId(), spec.name, output.values.id?, viewModel))
         )
       else
         ko.utils.arrayForEach(spec.outputs, (output) =>
-          @outputs.push(new IOModel(output, @slotId(), @name, false, viewModel))
+          @outputs.push(new IOModel(output, @slotId(), spec.name, false, viewModel))
         )
     )
     @configured = ko.observable(configured)
@@ -489,7 +519,7 @@ class appModel
       Precision.api('/api/list_app_revisions', {id: @app.id})
         .done((revisions) =>
           for revision in revisions
-            @appIdToDxid[revision.id] = revision.dxid
+            @appIdToDxid[revision.id] = revision.uid
             @revisions.push(revision)
       )
     )

@@ -1,0 +1,19 @@
+<%= render partial: "admin/_partials/workbench_toolbar" %>
+
+<div class="news-container" id="news-main">
+
+  <div class="pfda-toolbar">
+    <div class="btn-group">
+      <%= link_to new_admin_news_item_path, class: 'btn btn-primary' do %>
+        <span class="fa fa-plus fa-fw"></span> New article
+      <% end %>
+    </div>
+    <div class="btn-group" data-bind="attr:{style:displaySave}">
+      <button class="btn btn-success" data-bind="click: saveSortBoxes">
+        <span class="fa fa-save fa-fw"></span> Save
+      </button>
+    </div>
+  </div>
+
+  <%= render partial: "news_blocks", locals: { isAdmin: true } %>
+</div>

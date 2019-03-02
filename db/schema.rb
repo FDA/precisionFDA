@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180417083411) do
+ActiveRecord::Schema.define(version: 20190130070225) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -32,6 +32,7 @@ ActiveRecord::Schema.define(version: 20180417083411) do
     t.datetime "created_at",              null: false
     t.datetime "updated_at",              null: false
     t.integer  "workflow_id", limit: 4
+    t.string   "batch_id",    limit: 255
   end
 
   add_index "analyses", ["user_id"], name: "index_analyses_on_user_id", using: :btree
@@ -56,8 +57,9 @@ ActiveRecord::Schema.define(version: 20180417083411) do
     t.integer  "latest_version_app_id",  limit: 4
     t.integer  "user_id",                limit: 4
     t.string   "scope",                  limit: 255
-    t.datetime "created_at",                         null: false
-    t.datetime "updated_at",                         null: false
+    t.datetime "created_at",                                         null: false
+    t.datetime "updated_at",                                         null: false
+    t.boolean  "verified",                           default: false, null: false
   end
 
   add_index "app_series", ["dxid"], name: "index_app_series_on_dxid", using: :btree
@@ -93,14 +95,18 @@ ActiveRecord::Schema.define(version: 20180417083411) do
     t.string   "scope",         limit: 255
     t.text     "spec",          limit: 65535
     t.text     "internal",      limit: 65535
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
+    t.datetime "created_at",                                  null: false
+    t.datetime "updated_at",                                  null: false
     t.integer  "app_series_id", limit: 4
+    t.boolean  "verified",                    default: false, null: false
+    t.string   "uid",           limit: 255
+    t.string   "dev_group",     limit: 255
   end
 
   add_index "apps", ["app_series_id"], name: "index_apps_on_app_series_id", using: :btree
   add_index "apps", ["dxid"], name: "index_apps_on_dxid", using: :btree
   add_index "apps", ["scope"], name: "index_apps_on_scope", using: :btree
+  add_index "apps", ["uid"], name: "index_apps_on_uid", unique: true, using: :btree
   add_index "apps", ["user_id"], name: "index_apps_on_user_id", using: :btree
   add_index "apps", ["version"], name: "index_apps_on_version", using: :btree
 
@@ -167,20 +173,24 @@ ActiveRecord::Schema.define(version: 20180417083411) do
   add_index "challenges", ["status"], name: "index_challenges_on_status", using: :btree
 
   create_table "comments", force: :cascade do |t|
-    t.integer  "commentable_id",   limit: 4
-    t.string   "commentable_type", limit: 255
-    t.string   "title",            limit: 255
-    t.text     "body",             limit: 65535
-    t.string   "subject",          limit: 255
-    t.integer  "user_id",          limit: 4,     null: false
-    t.integer  "parent_id",        limit: 4
-    t.integer  "lft",              limit: 4
-    t.integer  "rgt",              limit: 4
+    t.integer  "commentable_id",      limit: 4
+    t.string   "commentable_type",    limit: 255
+    t.string   "title",               limit: 255
+    t.text     "body",                limit: 65535
+    t.string   "subject",             limit: 255
+    t.integer  "user_id",             limit: 4,                 null: false
+    t.integer  "parent_id",           limit: 4
+    t.integer  "lft",                 limit: 4
+    t.integer  "rgt",                 limit: 4
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "content_object_id",   limit: 4
+    t.string   "content_object_type", limit: 255
+    t.integer  "state",               limit: 4,     default: 0
   end
 
   add_index "comments", ["commentable_id", "commentable_type"], name: "index_comments_on_commentable_id_and_commentable_type", using: :btree
+  add_index "comments", ["content_object_type", "content_object_id"], name: "index_comments_on_content_object_type_and_content_object_id", using: :btree
   add_index "comments", ["user_id"], name: "index_comments_on_user_id", using: :btree
 
   create_table "comparison_inputs", force: :cascade do |t|
@@ -287,6 +297,18 @@ ActiveRecord::Schema.define(version: 20180417083411) do
   add_index "follows", ["followable_id", "followable_type"], name: "fk_followables", using: :btree
   add_index "follows", ["follower_id", "follower_type"], name: "fk_follows", using: :btree
 
+  create_table "get_started_boxes", force: :cascade do |t|
+    t.string   "title",             limit: 255
+    t.string   "feature_url",       limit: 255
+    t.string   "documentation_url", limit: 255
+    t.text     "description",       limit: 65535
+    t.boolean  "public"
+    t.integer  "kind",              limit: 4,     default: 0
+    t.integer  "position",          limit: 4,     default: 0
+    t.datetime "created_at",                                  null: false
+    t.datetime "updated_at",                                  null: false
+  end
+
   create_table "invitations", force: :cascade do |t|
     t.string   "first_name", limit: 255
     t.string   "last_name",  limit: 255
@@ -319,20 +341,22 @@ ActiveRecord::Schema.define(version: 20180417083411) do
   add_index "job_inputs", ["user_file_id"], name: "index_job_inputs_on_user_file_id", using: :btree
 
   create_table "jobs", force: :cascade do |t|
-    t.string   "dxid",          limit: 255
-    t.integer  "app_id",        limit: 4
-    t.string   "project",       limit: 255
-    t.text     "run_data",      limit: 65535
-    t.text     "describe",      limit: 65535
-    t.text     "provenance",    limit: 65535
-    t.string   "state",         limit: 255
-    t.string   "name",          limit: 255
-    t.integer  "user_id",       limit: 4
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
-    t.integer  "app_series_id", limit: 4
-    t.string   "scope",         limit: 255
-    t.integer  "analysis_id",   limit: 4
+    t.string   "dxid",            limit: 255
+    t.integer  "app_id",          limit: 4
+    t.string   "project",         limit: 255
+    t.text     "run_data",        limit: 65535
+    t.text     "describe",        limit: 65535
+    t.text     "provenance",      limit: 65535
+    t.string   "state",           limit: 255
+    t.string   "name",            limit: 255
+    t.integer  "user_id",         limit: 4
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
+    t.integer  "app_series_id",   limit: 4
+    t.string   "scope",           limit: 255
+    t.integer  "analysis_id",     limit: 4
+    t.string   "uid",             limit: 255
+    t.integer  "local_folder_id", limit: 4
   end
 
   add_index "jobs", ["analysis_id"], name: "fk_rails_0a95efec7a", using: :btree
@@ -341,6 +365,7 @@ ActiveRecord::Schema.define(version: 20180417083411) do
   add_index "jobs", ["dxid"], name: "index_jobs_on_dxid", using: :btree
   add_index "jobs", ["scope"], name: "index_jobs_on_scope", using: :btree
   add_index "jobs", ["state"], name: "index_jobs_on_state", using: :btree
+  add_index "jobs", ["uid"], name: "index_jobs_on_uid", unique: true, using: :btree
   add_index "jobs", ["user_id"], name: "index_jobs_on_user_id", using: :btree
 
   create_table "licensed_items", force: :cascade do |t|
@@ -381,6 +406,21 @@ ActiveRecord::Schema.define(version: 20180417083411) do
 
   add_index "meta_appathons", ["handle"], name: "index_meta_appathons_on_handle", unique: true, using: :btree
 
+  create_table "news_items", force: :cascade do |t|
+    t.string   "title",      limit: 255
+    t.string   "link",       limit: 255
+    t.date     "when"
+    t.text     "content",    limit: 65535
+    t.integer  "user_id",    limit: 4
+    t.string   "video",      limit: 255
+    t.integer  "position",   limit: 4,     default: 0, null: false
+    t.boolean  "published"
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+  end
+
+  add_index "news_items", ["position"], name: "position_news_items_idx", using: :btree
+
   create_table "nodes", force: :cascade do |t|
     t.string   "dxid",                    limit: 255
     t.string   "project",                 limit: 255
@@ -397,11 +437,13 @@ ActiveRecord::Schema.define(version: 20180417083411) do
     t.integer  "parent_folder_id",        limit: 4
     t.string   "sti_type",                limit: 255
     t.integer  "scoped_parent_folder_id", limit: 4
+    t.string   "uid",                     limit: 255
   end
 
   add_index "nodes", ["parent_type", "parent_id"], name: "index_nodes_on_parent_type_and_parent_id", using: :btree
   add_index "nodes", ["scope"], name: "index_nodes_on_scope", using: :btree
   add_index "nodes", ["state"], name: "index_nodes_on_state", using: :btree
+  add_index "nodes", ["uid"], name: "index_nodes_on_uid", unique: true, using: :btree
   add_index "nodes", ["user_id"], name: "index_nodes_on_user_id", using: :btree
 
   create_table "notes", force: :cascade do |t|
@@ -416,6 +458,13 @@ ActiveRecord::Schema.define(version: 20180417083411) do
 
   add_index "notes", ["scope"], name: "index_notes_on_scope", using: :btree
   add_index "notes", ["user_id"], name: "index_notes_on_user_id", using: :btree
+
+  create_table "notification_preferences", force: :cascade do |t|
+    t.integer "user_id", limit: 4
+    t.text    "data",    limit: 65535
+  end
+
+  add_index "notification_preferences", ["user_id"], name: "index_notification_preferences_on_user_id", unique: true, using: :btree
 
   create_table "orgs", force: :cascade do |t|
     t.string   "handle",     limit: 255
@@ -433,6 +482,19 @@ ActiveRecord::Schema.define(version: 20180417083411) do
   add_index "orgs", ["admin_id"], name: "index_orgs_on_admin_id", using: :btree
   add_index "orgs", ["handle"], name: "index_orgs_on_handle", unique: true, using: :btree
 
+  create_table "participants", force: :cascade do |t|
+    t.string   "title",      limit: 255
+    t.string   "image_url",  limit: 255
+    t.integer  "node_id",    limit: 4
+    t.boolean  "public"
+    t.integer  "kind",       limit: 4,   default: 0
+    t.integer  "position",   limit: 4,   default: 0
+    t.datetime "created_at",                         null: false
+    t.datetime "updated_at",                         null: false
+  end
+
+  add_index "participants", ["node_id"], name: "fk_rails_12f54662db", using: :btree
+
   create_table "saved_queries", force: :cascade do |t|
     t.string   "name",        limit: 255
     t.string   "grid_name",   limit: 255
@@ -447,40 +509,105 @@ ActiveRecord::Schema.define(version: 20180417083411) do
   add_index "saved_queries", ["grid_name"], name: "index_saved_queries_on_grid_name", using: :btree
   add_index "saved_queries", ["user_id"], name: "index_saved_queries_on_user_id", using: :btree
 
+  create_table "sessions", force: :cascade do |t|
+    t.string   "key",        limit: 255, null: false
+    t.integer  "user_id",    limit: 4,   null: false
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+  end
+
+  add_index "sessions", ["user_id"], name: "index_sessions_on_user_id", using: :btree
+
   create_table "settings", force: :cascade do |t|
     t.string "key",   limit: 255, null: false
     t.string "value", limit: 255, null: false
   end
 
+  create_table "space_events", force: :cascade do |t|
+    t.integer  "user_id",       limit: 4,     null: false
+    t.integer  "space_id",      limit: 4,     null: false
+    t.integer  "entity_id",     limit: 4,     null: false
+    t.string   "entity_type",   limit: 255,   null: false
+    t.integer  "activity_type", limit: 4,     null: false
+    t.integer  "side",          limit: 4,     null: false
+    t.datetime "created_at",                  null: false
+    t.integer  "object_type",   limit: 4,     null: false
+    t.integer  "role",          limit: 4,     null: false
+    t.text     "data",          limit: 65535
+  end
+
+  add_index "space_events", ["entity_type", "entity_id"], name: "index_space_events_on_entity_type_and_entity_id", using: :btree
+  add_index "space_events", ["space_id"], name: "index_space_events_on_space_id", using: :btree
+  add_index "space_events", ["user_id"], name: "index_space_events_on_user_id", using: :btree
+
   create_table "space_memberships", force: :cascade do |t|
     t.integer  "user_id",    limit: 4
-    t.integer  "space_id",   limit: 4
-    t.string   "role",       limit: 255
-    t.string   "side",       limit: 255
     t.text     "meta",       limit: 65535
-    t.datetime "created_at",               null: false
-    t.datetime "updated_at",               null: false
+    t.datetime "created_at",                              null: false
+    t.datetime "updated_at",                              null: false
+    t.boolean  "active",                   default: true
+    t.integer  "role",       limit: 4,     default: 0,    null: false
+    t.integer  "side",       limit: 4,     default: 0,    null: false
   end
 
-  add_index "space_memberships", ["space_id"], name: "index_space_memberships_on_space_id", using: :btree
   add_index "space_memberships", ["user_id"], name: "index_space_memberships_on_user_id", using: :btree
 
-  create_table "spaces", force: :cascade do |t|
-    t.string   "name",          limit: 255
-    t.text     "description",   limit: 65535
-    t.string   "host_project",  limit: 255
-    t.string   "guest_project", limit: 255
-    t.string   "host_dxorg",    limit: 255
-    t.string   "guest_dxorg",   limit: 255
-    t.string   "space_type",    limit: 255
-    t.string   "state",         limit: 255
-    t.text     "meta",          limit: 65535
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
+  create_table "space_memberships_spaces", id: false, force: :cascade do |t|
+    t.integer "space_id",            limit: 4
+    t.integer "space_membership_id", limit: 4
   end
 
-  add_index "spaces", ["space_type"], name: "index_spaces_on_space_type", using: :btree
-  add_index "spaces", ["state"], name: "index_spaces_on_state", using: :btree
+  add_index "space_memberships_spaces", ["space_id"], name: "index_space_memberships_spaces_on_space_id", using: :btree
+  add_index "space_memberships_spaces", ["space_membership_id"], name: "index_space_memberships_spaces_on_space_membership_id", using: :btree
+
+  create_table "space_template_nodes", force: :cascade do |t|
+    t.string   "space_template_id", limit: 255
+    t.integer  "node_id",           limit: 4
+    t.string   "node_type",         limit: 255
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
+    t.string   "space_id",          limit: 255
+    t.string   "node_name",         limit: 255
+  end
+
+  add_index "space_template_nodes", ["node_type", "node_id"], name: "index_space_template_nodes_on_node_type_and_node_id", using: :btree
+
+  create_table "space_template_spaces", force: :cascade do |t|
+    t.string   "space_id",          limit: 255
+    t.string   "space_template_id", limit: 255
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
+    t.string   "space_name",        limit: 255
+  end
+
+  create_table "space_templates", force: :cascade do |t|
+    t.string   "name",        limit: 255
+    t.text     "description", limit: 65535
+    t.datetime "created_at",                                null: false
+    t.datetime "updated_at",                                null: false
+    t.boolean  "private",                   default: false, null: false
+    t.integer  "user_id",     limit: 4
+  end
+
+  create_table "spaces", force: :cascade do |t|
+    t.string   "name",                 limit: 255
+    t.text     "description",          limit: 65535
+    t.string   "host_project",         limit: 255
+    t.string   "guest_project",        limit: 255
+    t.string   "host_dxorg",           limit: 255
+    t.string   "guest_dxorg",          limit: 255
+    t.text     "meta",                 limit: 65535
+    t.datetime "created_at",                                         null: false
+    t.datetime "updated_at",                                         null: false
+    t.integer  "space_id",             limit: 4
+    t.integer  "state",                limit: 4,     default: 0,     null: false
+    t.integer  "space_type",           limit: 4,     default: 0,     null: false
+    t.boolean  "verified",                           default: false, null: false
+    t.integer  "sponsor_org_id",       limit: 4
+    t.integer  "space_template_id",    limit: 4
+    t.boolean  "restrict_to_template",               default: false
+    t.boolean  "inactivity_notified",                default: false
+  end
 
   create_table "submissions", force: :cascade do |t|
     t.integer  "challenge_id", limit: 4
@@ -522,6 +649,24 @@ ActiveRecord::Schema.define(version: 20180417083411) do
   end
 
   add_index "tags", ["name"], name: "index_tags_on_name", unique: true, using: :btree
+
+  create_table "tasks", force: :cascade do |t|
+    t.integer  "user_id",             limit: 4
+    t.integer  "space_id",            limit: 4
+    t.integer  "assignee_id",         limit: 4,                 null: false
+    t.integer  "status",              limit: 4,     default: 0, null: false
+    t.string   "name",                limit: 255
+    t.text     "description",         limit: 65535
+    t.datetime "response_deadline"
+    t.datetime "completion_deadline"
+    t.datetime "created_at",                                    null: false
+    t.datetime "updated_at",                                    null: false
+    t.datetime "response_time"
+    t.datetime "complete_time"
+  end
+
+  add_index "tasks", ["space_id"], name: "index_tasks_on_space_id", using: :btree
+  add_index "tasks", ["user_id"], name: "index_tasks_on_user_id", using: :btree
 
   create_table "truth_challenge_results", force: :cascade do |t|
     t.integer "answer_id",                 limit: 4
@@ -621,8 +766,8 @@ ActiveRecord::Schema.define(version: 20180417083411) do
     t.string   "private_comparisons_project", limit: 255
     t.string   "public_comparisons_project",  limit: 255
     t.integer  "schema_version",              limit: 4
-    t.datetime "created_at",                                null: false
-    t.datetime "updated_at",                                null: false
+    t.datetime "created_at",                                             null: false
+    t.datetime "updated_at",                                             null: false
     t.integer  "org_id",                      limit: 4
     t.string   "first_name",                  limit: 255
     t.string   "last_name",                   limit: 255
@@ -631,6 +776,7 @@ ActiveRecord::Schema.define(version: 20180417083411) do
     t.datetime "last_login"
     t.text     "extras",                      limit: 65535
     t.string   "time_zone",                   limit: 255
+    t.string   "review_app_developers_org",   limit: 255,   default: ""
   end
 
   add_index "users", ["dxuser"], name: "index_users_on_dxuser", unique: true, using: :btree
@@ -690,8 +836,11 @@ ActiveRecord::Schema.define(version: 20180417083411) do
     t.integer  "workflow_series_id", limit: 4
     t.datetime "created_at",                       null: false
     t.datetime "updated_at",                       null: false
+    t.string   "project",            limit: 255
+    t.string   "uid",                limit: 255
   end
 
+  add_index "workflows", ["uid"], name: "index_workflows_on_uid", unique: true, using: :btree
   add_index "workflows", ["user_id"], name: "index_workflows_on_user_id", using: :btree
   add_index "workflows", ["workflow_series_id"], name: "index_workflows_on_workflow_series_id", using: :btree
 
@@ -734,12 +883,17 @@ ActiveRecord::Schema.define(version: 20180417083411) do
   add_foreign_key "licenses", "users"
   add_foreign_key "nodes", "users"
   add_foreign_key "notes", "users"
+  add_foreign_key "notification_preferences", "users"
   add_foreign_key "orgs", "users", column: "admin_id"
+  add_foreign_key "participants", "nodes"
   add_foreign_key "saved_queries", "users"
-  add_foreign_key "space_memberships", "spaces"
+  add_foreign_key "space_events", "spaces"
+  add_foreign_key "space_events", "users"
   add_foreign_key "space_memberships", "users"
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"
   add_foreign_key "submissions", "users"
+  add_foreign_key "tasks", "spaces"
+  add_foreign_key "tasks", "users"
   add_foreign_key "users", "orgs"
 end

@@ -1,0 +1,128 @@
+<div id="about-docs" class="bs-docs-container docs-content">
+  <div class="row">
+    <div class="col-sm-18">
+      <div id="review-spaces" class="h1">Review Spaces</div>
+      <div class="bs-docs-section">
+        <p>
+          <strong>Review spaces</strong> are custom environments on precisionFDA, designed to let two collaborating groups work cooperatively on a project.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/review_spaces/schema.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          A <strong>review space</strong> provides two private areas - one for the reviewer, and one for the sponsor organization.
+          Both groups also have access to a shared, cooperative space, where they may both interact with common files, run apps, examine jobs, and create tasks to be assigned to specific members or groups.
+        </p>
+      </div>
+      <div id="review-space-create" class="h2">Creating the Review Space</div>
+      <div class="bs-docs-section">
+        <p>
+          To begin working with a sponsor org as a review lead, you will create a review space.
+          You can start this by navigating to the Spaces area of the precisionFDA website from the top menu bar and selecting <strong>Provision a space</strong>.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/review_spaces/creating.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          You must select <strong>review</strong> as the type of space.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/review_spaces/creating2.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          You can then provide a name for the space, a description, and a reviewer lead and sponsor org.
+          <strong>The reviewer</strong> lead should be either yourself or the person leading the review, as their account will have permission to complete the space setup process.
+          <strong>The sponsor org</strong> should be the organization whose work you are reviewing.
+          You may also choose to load a template space that was used for app verification, if you choose to do so.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/review_spaces/testing.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          After creating the review space, both the reviewer lead and the sponsor org must accept the space.
+          Both groups will receive an email prompting them to accept the space, and they must log in to precisionFDA to do so.
+        </p>
+      </div>
+      <div id="review-space-confidential" class="h2">Using the Confidential Review Space</div>
+      <div class="bs-docs-section">
+        <p>
+          Once the review space has been accepted by both groups, it will activate, and both the review lead and the sponsor org administrator may log into their <strong>confidential spaces</strong>.
+          From here, they may add files, apps, jobs, and notes, they may add other members to the space, and they can create tasks to assign to either themselves or other members of their confidential spaces.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/review_spaces/confidential.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          To add data to a space, you can click on the <strong>Move data to space</strong> button located in the upper right hand corner.
+          To invite other users to a space, you can click on the <strong>Members</strong> tab, located in the middle of the page, and add them by username.
+          When adding new members, you may also set their permissions level for the space.
+        </p>
+        <p>
+          Tasks are a method of assigning jobs to yourself or other members of the space.
+          When you click on one of the Tasks options, you’ll see a button labeled <strong>New Task</strong>, that allows you to create a new task.
+          When you assign a task to someone else, they will receive an email alerting them.
+          They can choose to either accept or decline the task.
+          They can then mark the task complete when they choose to do so.
+      </div>
+      <div id="review-space-cooperative" class="h2">Using the Cooperative Review Space</div>
+      <div class="bs-docs-section">
+        <p>
+          To access the shared, cooperative review space, you can click the link labeled <strong>To Cooperative</strong> in the upper left, next to the name of the review space.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/review_spaces/cooperative.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          <strong>The cooperative space</strong> appears very similar to the private space, and includes all of the same features.
+          You can create tasks, add files, notes, assets, apps, and jobs, and run apps in this space.
+          Here, however, you’ll note that the members of both spaces have access - any data objects you add to this space can be accessed by both parties, so make sure you only add objects that you wish to share!
+        </p>
+        <p>
+          To add data directly to the cooperative space, you can use the <strong>Move data to space</strong> button located in the upper right corner, just like in the private space.
+        </p>
+        <p>
+          If you wish to transfer a data object from your private, confidential space to the shared, cooperative space, you may do so by going to the page of that data object.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/review_spaces/transfer.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          If this data object does not currently exist in the cooperative space, you will see a green button labeled <strong>Copy to Cooperative</strong>.
+          When you click this button, a copy of this data object will be created in the shared cooperative space.
+          Once again, note that this action cannot be undone, so you will receive an <strong>Are you sure?</strong> prompt.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section">
+        <%= video_iframe(videos[:spaces][:url]) %>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section">
+        <%= video_iframe(videos[:review_spaces][:url]) %>
+      </div>
+    </div>
+    <!-- SIDEBAR NAVIGATION -->
+    <div class="col-sm-6">
+      <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
+        <ul class="nav bs-docs-sidenav">
+          <li><a href="#review-spaces">Overview</a></li>
+          <li><a href="#review-space-create">Creating the Review Space</a></li>
+          <li><a href="#review-space-confidential">Using the Confidential Review Space</a></li>
+          <li><a href="#review-space-cooperative">Using the Cooperative Review Space</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>

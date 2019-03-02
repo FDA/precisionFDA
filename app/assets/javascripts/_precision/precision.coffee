@@ -36,7 +36,7 @@ window.Precision.INSTANCES = [
   {value: "baseline-4", label: "Baseline 4"}
   {value: "baseline-8", label: "Baseline 8"}
   {value: "baseline-16", label: "Baseline 16"}
-  {value: "baseline-32", label: "Baseline 32"}
+  {value: "baseline-36", label: "Baseline 36"}
   {value: "himem-2", label: "High Mem 2"}
   {value: "himem-4", label: "High Mem 4"}
   {value: "himem-8", label: "High Mem 8"}

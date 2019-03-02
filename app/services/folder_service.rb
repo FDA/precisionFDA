@@ -33,6 +33,9 @@ class FolderService
     unless folder.editable_by?(context)
       return Rats.failure(message: "You have no permissions to rename '#{folder.name}'")
     end
+
+    return Rats.failure(message: "You have no permissions to remove '#{folder.name}', as it is part of Locked Verification space.") if folder.in_locked_verificaiton_space?
+
     folder.name = new_name
     folder.save ? Rats.success(folder) : Rats.failure(folder.errors.messages)
   end
@@ -60,6 +63,8 @@ class FolderService
         break
       end
 
+      errors << "You have no permissions to move '#{node.name}', as it is part of Locked Verification space." if node.in_locked_verificaiton_space?
+
       if node.is_a?(Folder)
         if node.scope != computed_scope && !node.private?
           return Rats.failure(message: "Unexpected scope")
@@ -84,6 +89,7 @@ class FolderService
 
     nodes.each do |node|
       return Rats.failure(message: "You have no permissions to remove '#{node.name}'") unless node.editable_by?(context)
+      return Rats.failure(message: "You have no permissions to remove '#{node.name}', as it is part of Locked Verification space.") if node.in_locked_verificaiton_space?
       res = node.is_a?(Folder) ? remove_folder(node) : remove_file(node)
       break unless res.success?
     end
@@ -119,12 +125,26 @@ class FolderService
       return Rats.failure(message: "File #{file.name} cannot be deleted because it participates in one or more comparisons. Please delete all the comparisons first.")
     end
 
-    DNAnexusAPI.new(context.token).call(file.project, "removeObjects", objects: [file.dxid])
+    if Participant.by_file(file).any?
+      return Rats.failure(message: "You have no permissions to remove '#{file.name}', as it is part of Locked Verification space.") if file.in_locked_verificaiton_space?
+    end
+
+    begin
+      DNAnexusAPI.new(context.token).call(file.project, "removeObjects", objects: [file.dxid])
+    rescue Net::HTTPServerException => e
+      raise e unless e.message =~ /^404/
+    end
+
     UserFile.transaction { file.destroy }
 
     return Rats.failure(message: "#{file.name}: file removal error.") unless file.destroyed?
 
     Event::FileDeleted.create_for(file, context.user)
+
+    if file.scope =~ /^space-(\d+)$/
+      event_type = file.klass == "asset" ? :asset_deleted : :file_deleted
+      SpaceEventService.call($1.to_i, context.user_id, nil, file, event_type)
+    end
     Rats.success(file)
   end
 

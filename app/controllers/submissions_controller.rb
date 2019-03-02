@@ -93,10 +93,12 @@ class SubmissionsController < ApplicationController
 
     not_public_items = items.reject(&:public?)
 
-    unless not_public_items.all? { |item| item.publishable_by?(@context, scope) }
-      flash[:error] = "Item cannot be published in this state."
-      redirect_to pathify(item)
-      return
+    not_public_items.each do |item|
+      unless item.publishable_by?(@context, scope)
+        flash[:error] = "Item '#{item.title}' cannot be public."
+        redirect_to :back
+        return
+      end
     end
 
     js graph: GraphDecorator.for_publisher(@context, not_public_items, scope),
@@ -284,10 +286,10 @@ class SubmissionsController < ApplicationController
       handshake << socket.readline
     end
     raise unless handshake.valid?
-    frame = WebSocket::Frame::Outgoing::Server.new(version: handshake.version, data: {access_token: CHALLENGE_BOT_TOKEN, token_type: "Bearer", tail: false}.to_json, type: :text).to_s
+    frame = WebSocket::Frame::Outgoing::Client.new(version: handshake.version, data: {access_token: CHALLENGE_BOT_TOKEN, token_type: "Bearer", tail: false}.to_json, type: :text).to_s
     socket.write(frame)
 
-    srv = WebSocket::Frame::Incoming::Server.new(version: handshake.version)
+    client = WebSocket::Frame::Incoming::Client.new(version: handshake.version)
 
     @log_times = []
     @log_levels = []
@@ -295,8 +297,8 @@ class SubmissionsController < ApplicationController
     while true do
       data = socket.getc
       break if data.nil? || data.empty?
-      srv << data
-      while (msg = srv.next) do
+      client << data
+      while (msg = client.next) do
         msg = JSON.parse(msg.to_s)
         # source, msg, timestamp, level, job, line|
         # source=SYSTEM, msg=END_LOG
@@ -325,7 +327,7 @@ class SubmissionsController < ApplicationController
   end
 
   def challenge_bot
-    @challenge_bot ||= User.find_by(dxuser: CHALLENGE_BOT_DX_USER)
+    @challenge_bot ||= User.challenge_bot
   end
 
 end

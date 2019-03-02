@@ -15,7 +15,7 @@
                 <%= link_to(app.user.full_name, user_path(app.user.dxuser)) %> (<%= app.user.org.name %>)
               </div>
               <div class="pfda-card-title">
-                <%= link_to(app.title, app_path(app.dxid)) %>
+                <%= link_to(app.title, app_path(app)) %>
               </div>
               <% if app.app_series.all_tags_list.count > 0 %>
                 <div class="pfda-card-metadata">
@@ -24,7 +24,7 @@
               <% end %>
               <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
                 <li>
-                  <%= link_to app_comments_path(app.dxid), class: "text-muted" do %>
+                  <%= link_to app_comments_path(app), class: "text-muted" do %>
                     <%= app.comment_threads.size %> <%= 'comment'.pluralize(app.comment_threads.size) %>
                   <% end %>
                 </li>

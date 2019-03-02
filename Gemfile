@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.2.7.1'
+gem 'rails', '4.2.11'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
 # Use Uglifier as compressor for JavaScript assets
@@ -17,7 +17,7 @@ gem 'turnout', '~> 2.2.0'
 # Use jquery as the JavaScript library
 gem 'jquery-rails', '~> 4.3', '>= 4.3.1'
 # Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
-gem 'turbolinks'
+gem 'turbolinks', '= 5.0.0'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.0'
 # bundle exec rake doc:rails generates the API under doc/api.
@@ -41,6 +41,9 @@ gem 'paloma', '5.0.0'
 # Websocket support (for fetching logs)
 gem 'websocket'
 
+# Affix sprocket version as per vuln derscribed in PFDA-495
+gem 'sprockets', '> 3.7.1'
+
 # Semantic versioning parsing
 gem 'semverly'
 
@@ -51,7 +54,7 @@ gem 'humanizer'
 gem 'axlsx', '3.0.0.pre'
 
 # Secure headers
-gem 'secure_headers'
+gem 'secure_headers', '~> 6.0'
 
 # Gravatar profile image helper
 gem 'gravtastic'
@@ -74,18 +77,27 @@ gem 'acts_as_votable'
 
 # For inline-css in emails
 gem 'inky-rb', require: 'inky'
-gem 'nokogiri', '~> 1.8', '>= 1.8.2'
+gem 'nokogiri', '~> 1.8', '>= 1.8.5'
 gem 'premailer-rails'
 
-gem 'mysql2', '~> 0.3.18'
+gem 'whenever', require: false
+
+gem 'mysql2'
 
 gem 'gretel'
+
+gem 'rack-utf8_sanitizer', '~> 1.6'
 
 # View outgoing HTTP requests
 gem 'httplog'
 
+gem 'simple_form'
+
+# PDF builder
+gem 'prawn'
+
 group :development do
-  gem 'byebug'
+  gem 'letter_opener'
 
   # Access an IRB console on exception pages or by using <%= console %> in views
   gem 'web-console', '~> 2.0'
@@ -102,6 +114,12 @@ group :development do
 end
 
 group :development, :test, :ui_test do
+  gem 'byebug'
+  gem 'pry'
+  gem 'pry-rails'
+  gem 'pry-remote'
+  gem 'pry-stack_explorer'
+  gem 'pry-byebug'
   # Project-wide environment variables
   gem 'dotenv-rails'
   # Manage environment variables
@@ -121,4 +139,8 @@ group :production do
   gem 'exception_notification', '4.1.1'
   # Use Unicorn as the app server
   gem 'unicorn', '~> 4.9.0'
+  gem 'soapforce'
 end
+
+gem 'rubyzip', '=1.2.2'
+

@@ -1,0 +1,50 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    Task <%= @task.name %> for <%= @task.space.title %> was assigned to you
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="https://precision.fda.gov" title="precisionFDA">
+          <img class="header-image" src="https://precision.fda.gov/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right">New task</p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p>
+          A task <strong><%= @task.name %></strong> in <%= link_to @task.space.title, space_url(@task.space) %> space was created and assigned to you.
+        </p>
+
+        <p>
+          Text of the task:
+        </p>
+
+        <p>
+          <%= @task.description %>
+        </p>
+
+        <p>
+          Please visit the space and acknowledge the task before the response deadline (if it is present).
+        </p>
+
+        <p>
+          <%- if @task.response_deadline%>
+            Response deadline: <%= @task.response_deadline.strftime("%Y-%m-%d %H:%M:%S") %>
+          <%- else %>
+            Response deadline is not specified.
+          <% end %>
+        </p>
+
+        <button class="radius" href="<%= space_task_url(@task.space, @task) %>">Open task</button>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>
