@@ -21,7 +21,7 @@ class ApplicationController < ActionController::Base
   # Use time zone of current user
   around_action :user_time_zone, if: lambda { !@context.guest? && current_user }
 
-  helper_method :pathify, :pathify_comments, :item_from_uid, :pathify_folder
+  helper_method :pathify, :pathify_comments, :item_from_uid, :pathify_folder, :current_user
 
   rescue_from ActionView::MissingTemplate, with: :missing_template
 
@@ -32,7 +32,7 @@ class ApplicationController < ActionController::Base
   end
 
   def current_context
-    return @context
+    @context
   end
 
   def current_user
@@ -55,7 +55,7 @@ class ApplicationController < ActionController::Base
     # Generate new token for pfda uploader
     context = @context.as_json.slice("user_id", "username", "token", "expiration", "org_id")
     context["expiration"] = [context["expiration"], Time.now.to_i + duration].min
-    return rails_encryptor.encrypt_and_sign({context: context}.to_json)
+    rails_encryptor.encrypt_and_sign({context: context}.to_json)
   end
 
   def save_session(user_id, username, token, expiration, org_id)

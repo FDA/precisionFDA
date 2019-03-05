@@ -147,7 +147,9 @@ Rails.application.routes.draw do
 
     # Profile
     get 'profile', to: 'profile#index'
+    put 'profile', to: 'profile#update'
     post 'profile/provision_user', to: 'profile#provision_user', as: 'provision_user'
+    get 'profile/provision_org', to: 'profile#provision_org'
     post 'profile/provision_org', to: 'profile#provision_org', as: 'provision_org'
     post 'profile/run_report', to: 'profile#run_report', as: 'run_report'
 
@@ -290,6 +292,8 @@ Rails.application.routes.draw do
       end
     end
 
+    resource :org, only: :update
+
     get '/spaces/verified_space_list' => 'space_templates#verified_space_list'
     get '/spaces/apps_and_files' => 'spaces#apps_and_files'
     get '/spaces/unverified_apps' => 'space_templates#unverified_apps'
@@ -389,6 +393,10 @@ Rails.application.routes.draw do
 
     resources :docs do
       get ":section", on: :collection, action: :show, as: 'show'
+    end
+
+    resources :phone_confirmations, only: [:create] do
+      get 'check_code', on: :collection
     end
 
     user_constraints = { username: /[^\/]*/ }

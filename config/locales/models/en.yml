@@ -1,0 +1,5 @@
+en:
+  errors:
+    messages:
+      format: has invalid format
+      match: "does not match %{match_object} state"

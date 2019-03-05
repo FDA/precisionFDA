@@ -1,6 +1,7 @@
 require_relative 'migrate/20180516114442_seed_news_items'
 require_relative 'migrate/20180510104759_create_get_started_boxes'
 require_relative 'migrate/20180629093507_create_participants'
+require_relative 'migrate/20190212131903_create_countries.rb'
 
 first_name = ENV.fetch('PFDA_USER_FIRST_NAME', 'Alice')
 last_name = ENV.fetch('PFDA_USER_LAST_NAME', 'Black')
@@ -87,4 +88,5 @@ ActiveRecord::Base.transaction do
   SeedNewsItems.new.up
   CreateGetStartedBoxes.new.up
   CreateParticipants.new.migrate_data
+  CreateCountries.migrate_data unless Rails.env.test?
 end
