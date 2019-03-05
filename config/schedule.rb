@@ -20,3 +20,7 @@ end
 every 1.day do
   rake "spaces:check_inactivity"
 end
+
+every 1.week do
+  runner "PhoneConfirmationService.check_expired_phone_confirmations"
+end

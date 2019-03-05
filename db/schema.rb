@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190130070225) do
+ActiveRecord::Schema.define(version: 20190301112055) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -219,6 +219,13 @@ ActiveRecord::Schema.define(version: 20190130070225) do
   add_index "comparisons", ["state"], name: "index_comparisons_on_state", using: :btree
   add_index "comparisons", ["user_id"], name: "index_comparisons_on_user_id", using: :btree
 
+  create_table "countries", force: :cascade do |t|
+    t.string "name",      limit: 255
+    t.string "dial_code", limit: 255
+  end
+
+  add_index "countries", ["name"], name: "index_countries_on_name", unique: true, using: :btree
+
   create_table "discussions", force: :cascade do |t|
     t.integer  "user_id",    limit: 4
     t.datetime "created_at",           null: false
@@ -310,21 +317,28 @@ ActiveRecord::Schema.define(version: 20190130070225) do
   end
 
   create_table "invitations", force: :cascade do |t|
-    t.string   "first_name", limit: 255
-    t.string   "last_name",  limit: 255
-    t.string   "email",      limit: 255
-    t.string   "org",        limit: 255
+    t.string   "first_name",         limit: 255
+    t.string   "last_name",          limit: 255
+    t.string   "email",              limit: 255
+    t.string   "org",                limit: 255
     t.boolean  "singular"
-    t.string   "address",    limit: 255
-    t.string   "phone",      limit: 255
-    t.string   "duns",       limit: 255
-    t.string   "ip",         limit: 255
-    t.datetime "created_at",               null: false
-    t.datetime "updated_at",               null: false
-    t.text     "extras",     limit: 65535
-    t.integer  "user_id",    limit: 4
-    t.string   "state",      limit: 255
-    t.string   "code",       limit: 255
+    t.string   "phone",              limit: 255
+    t.string   "duns",               limit: 255
+    t.string   "ip",                 limit: 255
+    t.datetime "created_at",                                       null: false
+    t.datetime "updated_at",                                       null: false
+    t.text     "extras",             limit: 65535
+    t.integer  "user_id",            limit: 4
+    t.string   "state",              limit: 255
+    t.string   "code",               limit: 255
+    t.string   "country",            limit: 255
+    t.string   "city",               limit: 255
+    t.string   "us_state",           limit: 255
+    t.string   "postal_code",        limit: 255
+    t.string   "address1",           limit: 255
+    t.string   "address2",           limit: 255
+    t.string   "phone_country_code", limit: 255
+    t.boolean  "organization_admin",               default: false, null: false
   end
 
   add_index "invitations", ["code"], name: "index_invitations_on_code", unique: true, using: :btree
@@ -494,6 +508,32 @@ ActiveRecord::Schema.define(version: 20190130070225) do
   end
 
   add_index "participants", ["node_id"], name: "fk_rails_12f54662db", using: :btree
+
+  create_table "phone_confirmations", force: :cascade do |t|
+    t.string   "number",     limit: 255, null: false
+    t.string   "code",       limit: 255, null: false
+    t.datetime "expired_at",             null: false
+  end
+
+  create_table "profiles", force: :cascade do |t|
+    t.string  "address1",         limit: 255
+    t.string  "address2",         limit: 255
+    t.string  "city",             limit: 255
+    t.string  "email",            limit: 255
+    t.boolean "email_confirmed",              default: false
+    t.string  "postal_code",      limit: 255
+    t.string  "phone",            limit: 255
+    t.boolean "phone_confirmed",              default: false
+    t.string  "us_state",         limit: 255
+    t.integer "user_id",          limit: 4
+    t.integer "country_id",       limit: 4
+    t.integer "phone_country_id", limit: 4
+  end
+
+  add_index "profiles", ["country_id"], name: "index_profiles_on_country_id", using: :btree
+  add_index "profiles", ["email"], name: "index_profiles_on_email", unique: true, using: :btree
+  add_index "profiles", ["phone_country_id"], name: "fk_rails_2bcf548678", using: :btree
+  add_index "profiles", ["user_id"], name: "index_profiles_on_user_id", using: :btree
 
   create_table "saved_queries", force: :cascade do |t|
     t.string   "name",        limit: 255
@@ -836,8 +876,8 @@ ActiveRecord::Schema.define(version: 20190130070225) do
     t.integer  "workflow_series_id", limit: 4
     t.datetime "created_at",                       null: false
     t.datetime "updated_at",                       null: false
-    t.string   "project",            limit: 255
     t.string   "uid",                limit: 255
+    t.string   "project",            limit: 255
   end
 
   add_index "workflows", ["uid"], name: "index_workflows_on_uid", unique: true, using: :btree
@@ -886,6 +926,9 @@ ActiveRecord::Schema.define(version: 20190130070225) do
   add_foreign_key "notification_preferences", "users"
   add_foreign_key "orgs", "users", column: "admin_id"
   add_foreign_key "participants", "nodes"
+  add_foreign_key "profiles", "countries"
+  add_foreign_key "profiles", "countries", column: "phone_country_id", on_delete: :nullify
+  add_foreign_key "profiles", "users"
   add_foreign_key "saved_queries", "users"
   add_foreign_key "space_events", "spaces"
   add_foreign_key "space_events", "users"

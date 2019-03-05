@@ -122,6 +122,8 @@ class User < ActiveRecord::Base
   has_many :tasks
   has_many :workflows
   has_one :notification_preference
+  has_one :profile
+  has_one :invitation
 
   store :extras, accessors: [:has_seen_guidelines], coder: JSON
 
@@ -138,6 +140,10 @@ class User < ActiveRecord::Base
   # Have the ability to create new review spaces and have full access to
   # activities available within reviewer and cooperative areas.
   scope :review_space_admins, -> { where(dxuser: REVIEW_SPACE_ADMINS) }
+
+  validates :first_name, length: { minimum: 2, message: "The first name must be at least two letters long." }, presence: true
+  validates :last_name, length: { minimum: 2, message: "The last name must be at least two letters long." }, presence: true
+  validates :email, presence: true, uniqueness: { case_sensitive: false }
 
   def self.challenge_bot
     find_by!(dxuser: CHALLENGE_BOT_DX_USER)
@@ -252,6 +258,10 @@ class User < ActiveRecord::Base
 
   def self.validate_email(email)
     /^(([^<>()\[\]\\.,;:\s@\"]+(\.[^<>()\[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/ =~ email
+  end
+
+  def self.validate_state(state, zip_code)
+    Country.state_matches_zip_code?(state, zip_code)
   end
 
   def self.construct_username(first, last)

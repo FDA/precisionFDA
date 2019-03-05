@@ -1,4 +1,5 @@
 class ApiController < ApplicationController
+  include ErrorProcessable
   include WorkflowConcern
 
   skip_before_action :verify_authenticity_token

@@ -1,9 +1,8 @@
 class WorkflowsController < ApplicationController
   include WorkflowConcern
+  include ErrorProcessable
 
   before_action :validate_workflow_before_export, only: %i(cwl_export wdl_export)
-
-  rescue_from ApiError, with: :render_error_method
 
   def new
     app_series = AppSeries.accessible_by(@context).joins(:apps).merge(App.accessible_by(@context)).distinct

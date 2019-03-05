@@ -18,8 +18,11 @@
 class Org < ActiveRecord::Base
   include Auditor
 
+  validates :name, presence: true, uniqueness: { case_sensitive: false, message: "There is already an organization with that name" }
+  validates :handle, presence: true, uniqueness: { case_sensitive: false, message: "There is already an organization with that handle" }
+
   has_many :users
-  belongs_to :admin, {class_name: 'User'}
+  belongs_to :admin, { class_name: 'User' }
 
   def self.construct_dxorg(handle)
     raise unless handle.present? && handle =~ /^[0-9a-z][0-9a-z_.]*$/
