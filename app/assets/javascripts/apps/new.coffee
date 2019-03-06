@@ -32,7 +32,7 @@ class NewAppViewModel extends Precision.models.AppEditorModel
     version = dockerPull[1] || 'latest'
 
     imageName = imageName.split('/')
-    if imageName.length < 2
+    if imageName.length < 2 || imageName.length > 3
       Precision.alert.showAboveAll('Wrong docker image name format')
       return false
 
@@ -50,7 +50,7 @@ class NewAppViewModel extends Precision.models.AppEditorModel
   getDockerImageData: (fileName) ->
     fileName = fileName.replace(/\.tar\.gz/g, '')
     fileName = fileName.split('_')
-    if fileName.length < 2
+    if fileName.length < 2 || fileName.length > 3
       Precision.alert.showAboveAll('Wrong docker image name format')
       return false
 
@@ -66,21 +66,13 @@ class NewAppViewModel extends Precision.models.AppEditorModel
 
   compareImageData: (pullData, imageData) ->
     return false if !pullData or !imageData
-    if pullData.registry
-      Precision.alert.showAboveAll('dockerPull has a public image!')
-      @clearDockerImage()
-      return false
-    if pullData.namespace != imageData.namespace
-      Precision.alert.showAboveAll('Wrong image namespace!')
-      @clearDockerImage()
-      return false
-    if pullData.repository != imageData.repository
-      Precision.alert.showAboveAll('Wrong image repository!')
-      @clearDockerImage()
-      return false
-    if pullData.version != imageData.version
-      @clearDockerImage()
-      Precision.alert.showAboveAll('Wrong image version!')
+    if pullData.registry ||
+       pullData.namespace != imageData.namespace ||
+       pullData.repository != imageData.repository ||
+       pullData.version != imageData.version
+      Precision.alert.showAboveAll(
+        'The selected image file do not match image in CWL!'
+      )
       return false
     return true
 
@@ -99,7 +91,9 @@ class NewAppViewModel extends Precision.models.AppEditorModel
       return false
 
     file = e.target.files[0]
-    return false if !@validateDockerImage(file)
+    if !@validateDockerImage(file)
+      @clearDockerImage()
+      return false
 
     @dockerImage(file)
 
@@ -113,7 +107,12 @@ class NewAppViewModel extends Precision.models.AppEditorModel
     @wdlFileInput.val(null)
 
   importImageData: () ->
+    return false if @dockerImage() &&
+                    !@validateDockerImage(@dockerImage()) ||
+                    !@getDockerPullData(@wdlTextValue())
+
     @importModalLoading(true)
+
     formData = new FormData()
     formData.append('cwl', @wdlTextValue())
     formData.append('attached_image', @dockerImage()) if @dockerImage()
