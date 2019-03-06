@@ -67,14 +67,29 @@ class ProfileContactsModel
     )
     return valid
 
+  isEmailChaged: () -> @email() != @contactsDefaults().email
+
   updateData: (root, e) =>
     e.preventDefault()
+    if @isEmailChaged()
+      @authCredentialsModal.showModal() if @validateForm()
+    else
+      @sendRequest(root, e)
+
+  sendRequest: (root, e) =>
+    e.preventDefault()
     if @validateForm()
-      @isLoading(true)
 
       data = @contactsForm.serializeArray()
       state = data.filter (param) -> param.name == 'profile[us_state]'
       data.push({ name: 'profile[us_state]', value: null }) if !state.length
+
+      if @isEmailChaged()
+        @authCredentialsModal.isLoading(true)
+        data.push({ name: 'password', value: @authCredentialsModal.passwordInputValue() })
+        data.push({ name: 'otp', value: @authCredentialsModal.otpInputValue() })
+      else
+        @isLoading(true)
 
       $.ajax({
         method: 'PUT',
@@ -82,20 +97,32 @@ class ProfileContactsModel
         contentType: 'multipart/form-data',
         data: data,
         success: (data) =>
-          Precision.alert.showAboveAll('Data successfully updated!', 'alert-success')
+          message = 'Data successfully updated!'
+
+          if @isEmailChaged()
+            message = 'Your email will be updated once the verification link sent to the new email address has been verified<br>'
+            message += 'All other contact information has been updated'
+
+          Precision.alert.showAboveAll(message, 'alert-success')
           @contactsDefaults(data)
           @setDefaults()
+          @authCredentialsModal.isLoading(false)
+          @authCredentialsModal.hideModal()
         error: (data) =>
           try
             errors = JSON.parse(data.responseText)
             errorText = ''
             for field, error of errors
-              errorText += "<b>Error: </b>#{field} #{error}<br>"
+              if field == 'error' and typeof error == 'object'
+                errorText += "<b>#{error.type || ''}: </b>#{error.message || ''}<br>"
+              else
+                errorText += "<b>Error: </b>#{field} #{error}<br>"
             Precision.alert.showAboveAll(errorText)
           catch
             Precision.alert.showAboveAll('Something went wrong.')
           finally
             @isLoading(false)
+            @authCredentialsModal.isLoading(false)
       })
 
   phoneInputOnChange: (value = '') =>
@@ -137,6 +164,10 @@ class ProfileContactsModel
             @isLoading(false)
       })
 
+  showCredentialsModal: (root, e) ->
+    e.preventDefault()
+    @authCredentialsModal.showModal()
+
   constructor: (params, contactsDefaults = {}) ->
     @contactsForm = $('#profile_form')
     @phoneForm = $('#profile_phone_form')
@@ -145,8 +176,6 @@ class ProfileContactsModel
     @pristin = ko.observable(true)
     @contactsDefaults = ko.observable(contactsDefaults)
 
-    @email = ko.observable('')
-    @emailConfirmed = ko.observable(false)
     @address1 = ko.observable('')
     @address2 = ko.observable('')
     @city = ko.observable('')
@@ -154,6 +183,12 @@ class ProfileContactsModel
     @countryName = ko.observable('')
     @state = ko.observable('')
     @postalCode = ko.observable('')
+
+    ### Email Edit ###
+    @authCredentialsModal = new Precision.AuthCredentialsModal(@sendRequest)
+    @email = ko.observable('')
+    @emailConfirmed = ko.observable(false)
+    ### Email Edit ###
 
     ### Phone ###
     @phoneInputValue = ko.observable('')
@@ -264,6 +299,7 @@ class ProfilePageView
 
   constructor: (params, contactsDefaults) ->
     @contacts = new ProfileContactsModel(params, contactsDefaults)
+    @authCredentialsModal = @contacts.authCredentialsModal
     @phoneConfirm = new Precision.ConfirmPhoneModal(
       @contacts.phoneInputValue,
       @contacts.phoneCountryCodeValue,
@@ -297,7 +333,6 @@ ProfileController = Paloma.controller('Profile', {
     viewModel = new ProfilePageView(@params, @params.profile)
     ko.applyBindings(viewModel, $container[0])
     ### Page Model ###
-
     $time_zone_select = $(".JS-TimeZone-selector")
 
     $time_zone_select.on('change', (e) ->

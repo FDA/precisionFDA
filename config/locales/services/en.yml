@@ -1,0 +1,6 @@
+en:
+  profiles:
+    updater:
+      OTPMismatchError: The one-time password was incorrect
+      UsernameOrPasswordError: The password was incorrect
+      InvalidInput: Password or one-time password are not supplied
