@@ -1,4 +1,5 @@
 class ProfileController < ApplicationController
+  include ErrorProcessable
   helper_method :time_zones
   before_action :find_admin, only: [:provision_org]
 
@@ -15,12 +16,13 @@ class ProfileController < ApplicationController
       order_direction: 'asc',
       per_page: 100
     )
-    js(usa_id: usa_id, country_codes: Country.countries_for_codes, profile: Profiles::Getter.call(@user).view_fields)
+    profile = Profiles::Getter.call(@user, @context).view_fields
+    js(usa_id: usa_id, country_codes: Country.countries_for_codes, profile: profile)
   end
 
   def update
     profile = current_user.profile || current_user.build_profile
-    if profile.update(profile_params)
+    if Profiles::Updater.call(params, @context, profile)
       render json: profile.view_fields, status: :ok
     else
       render json: profile.errors, status: :unprocessable_entity
@@ -307,10 +309,5 @@ class ProfileController < ApplicationController
     ActiveSupport::TimeZone.all.map do |time_zone|
       ["(GMT#{time_zone.now.formatted_offset}) #{time_zone.name}", time_zone.name]
     end
-  end
-
-  def profile_params
-    params.require(:profile).permit(:address1, :address2, :city, :country_id, :us_state, :phone,
-                                    :postal_code, :phone_country_id, :email, :phone_confirmed)
   end
 end

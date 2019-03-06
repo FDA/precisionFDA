@@ -1,22 +1,32 @@
 require 'rails_helper'
 
 RSpec.describe Profiles::Getter, type: :service do
-  let(:service_response) { described_class.call(user) }
+  before do
+    stub_request(:post, "#{DNANEXUS_APISERVER_URI}#{ORG_DUMMY}/invite").to_return(status: 404)
+  end
+
+  after { WebMock.reset! }
+
+  let(:service_response) { described_class.call(user, context) }
+  let(:context) { Context.new(user.id, nil, nil, nil, nil) }
   let(:user) { create(:user) }
 
   describe '#call' do
-    context 'when a user has a profile' do
-      let!(:profile) { create(:profile, user: user) }
+    context 'when an user has a profile' do
+      let!(:profile) { create(:profile, user: user, email_confirmed: true) }
 
       it 'return the profile' do
         expect(service_response).to have_attributes(profile.attributes)
       end
     end
 
-    context 'when a user does not has a profile' do
+    context 'when an user does not have a profile, but has an invitation' do
       let!(:org) { create(:org, admin: user) }
-      let(:invitation) { build(:invitation, user: user, org: org) }
-
+      let(:country) { create(:country) }
+      let(:invitation) do
+        build(:invitation, user: user, org: org,
+                               country: country.id, phone_country_code: country.id)
+      end
       before { invitation.save(validate: false) }
 
       it 'build a profile by using user invitation' do
@@ -24,6 +34,12 @@ RSpec.describe Profiles::Getter, type: :service do
         attributes[:country_id] = invitation.country.to_i
         attributes[:phone_country_id] = invitation.phone_country_code.to_i
         expect(service_response).to have_attributes(attributes)
+      end
+    end
+
+    context 'when an user does not have a profile and an invitation' do
+      it 'create a new profile' do
+        expect(service_response).to eq(user.profile)
       end
     end
   end

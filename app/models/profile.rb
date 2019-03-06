@@ -6,6 +6,9 @@ class Profile < ActiveRecord::Base
   validates :address1, :country, :city, :postal_code, presence: true, if: 'fields_changed?'
   validates :postal_code, postal_code: true
   validates :us_state, presence: true, if: 'country.try(:usa?) && fields_changed?'
+  validates :email, presence: true,
+            uniqueness: { case_sensitive: false },
+            email: true, if: 'email_changed?'
 
   def view_fields
     fields = slice(:address1, :address2, :city, :country, :email_confirmed,
