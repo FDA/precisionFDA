@@ -4,6 +4,11 @@ class CwlPresenter
 
   VALID_TYPES = %w(string long File boolean double int)
 
+  validates :id,
+            format: {
+              with: /\A[a-zA-Z0-9._-]+\z/,
+              message: "can contain only letters, digits or symbols ._-"
+            }
   validates :base_command, presence: { message: "doesn't exist" }
   validates :inputs, :outputs, presence: { message: "are invalid or don't exist" }
   validate :validate_io_objects
@@ -83,6 +88,15 @@ class CwlPresenter
     image_name, tag = docker_pull.match(/\A([^:]+):?([^:]+)?$/).try(:captures)
 
     image_name_parts = image_name.split("/")
+
+    unless image_name_parts.size.between?(2, 3)
+      errors.add(
+        :docker_requirement,
+        "has incorrect image name format"
+      )
+
+      return
+    end
 
     namespace, repository = image_name_parts.pop(2)
     registry = image_name_parts.first
