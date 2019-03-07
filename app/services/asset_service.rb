@@ -13,7 +13,7 @@ class AssetService
     end
 
     def close(context, options)
-      new(context).close(options)
+      new(context).close(options[:uid])
     end
 
     def create_and_upload(context, options)
