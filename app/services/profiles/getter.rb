@@ -25,10 +25,8 @@ module Profiles
     attr_reader :user, :context
 
     def build_profile_from_invitation
-      invitation = user.invitation
-      attributes = user.invitation.slice(:address1, :address2, :phone, :city, :us_state, :postal_code, :email)
-      attributes[:country_id] = invitation.country
-      attributes[:phone_country_id] = invitation.phone_country_code
+      attributes = user.invitation.slice(:address1, :address2, :phone, :city, :us_state,
+                                         :postal_code, :email, :country, :phone_country)
       profile = user.build_profile(attributes)
       profile.save(validate: false)
       profile

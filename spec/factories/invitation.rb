@@ -8,8 +8,7 @@ FactoryBot.define do
     address2 { FFaker::Address.street_address }
     city { FFaker::Address.city }
     postal_code { FFaker::AddressDE.zip_code }
-    country { 1 }
-    phone_country_code { 1 }
+    country
     singular { FFaker::Boolean.maybe }
     req_reason { FFaker::Lorem.sentence }
     organization_admin { FFaker::Boolean.maybe }
