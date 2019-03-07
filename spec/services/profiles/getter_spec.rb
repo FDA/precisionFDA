@@ -23,16 +23,12 @@ RSpec.describe Profiles::Getter, type: :service do
     context 'when an user does not have a profile, but has an invitation' do
       let!(:org) { create(:org, admin: user) }
       let(:country) { create(:country) }
-      let(:invitation) do
-        build(:invitation, user: user, org: org,
-                               country: country.id, phone_country_code: country.id)
-      end
+      let(:invitation) { build(:invitation, user: user, org: org, country: country, phone_country: country) }
       before { invitation.save(validate: false) }
 
       it 'build a profile by using user invitation' do
-        attributes = invitation.slice(:address1, :address2, :phone, :city, :us_state, :postal_code)
-        attributes[:country_id] = invitation.country.to_i
-        attributes[:phone_country_id] = invitation.phone_country_code.to_i
+        attributes = invitation.slice(:address1, :address2, :phone, :city,
+                                      :us_state, :postal_code, :country, :phone_country)
         expect(service_response).to have_attributes(attributes)
       end
     end
