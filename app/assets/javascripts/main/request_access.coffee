@@ -1,6 +1,6 @@
-COUNTRY_INPUT = '#invitation_country'
+COUNTRY_INPUT = '#invitation_country_id'
 STATE_SELECT = '#invitation_us_state'
-COUNTRY_CODE_SELECT = '#invitation_phone_country_code'
+COUNTRY_CODE_SELECT = '#invitation_phone_country_id'
 
 class RequestAccessPageView
   showConfirmPhoneModal: (root, e) ->

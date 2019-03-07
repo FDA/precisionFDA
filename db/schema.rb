@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190301112055) do
+ActiveRecord::Schema.define(version: 20190305143321) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -331,18 +331,20 @@ ActiveRecord::Schema.define(version: 20190301112055) do
     t.integer  "user_id",            limit: 4
     t.string   "state",              limit: 255
     t.string   "code",               limit: 255
-    t.string   "country",            limit: 255
     t.string   "city",               limit: 255
     t.string   "us_state",           limit: 255
     t.string   "postal_code",        limit: 255
     t.string   "address1",           limit: 255
     t.string   "address2",           limit: 255
-    t.string   "phone_country_code", limit: 255
     t.boolean  "organization_admin",               default: false, null: false
+    t.integer  "country_id",         limit: 4
+    t.integer  "phone_country_id",   limit: 4
   end
 
   add_index "invitations", ["code"], name: "index_invitations_on_code", unique: true, using: :btree
+  add_index "invitations", ["country_id"], name: "index_invitations_on_country_id", using: :btree
   add_index "invitations", ["email"], name: "index_invitations_on_email", using: :btree
+  add_index "invitations", ["phone_country_id"], name: "fk_rails_ddca68253c", using: :btree
   add_index "invitations", ["state"], name: "index_invitations_on_state", using: :btree
   add_index "invitations", ["user_id"], name: "index_invitations_on_user_id", using: :btree
 
@@ -914,6 +916,8 @@ ActiveRecord::Schema.define(version: 20190301112055) do
   add_foreign_key "expert_questions", "experts"
   add_foreign_key "expert_questions", "users"
   add_foreign_key "experts", "users"
+  add_foreign_key "invitations", "countries", column: "phone_country_id", on_delete: :nullify
+  add_foreign_key "invitations", "countries", on_delete: :nullify
   add_foreign_key "invitations", "users"
   add_foreign_key "jobs", "analyses"
   add_foreign_key "jobs", "app_series"
