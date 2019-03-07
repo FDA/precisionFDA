@@ -15,7 +15,7 @@ module Profiles
         return user.profile
       end
       return build_profile_from_invitation if user.invitation
-      profile = user.build_profile(email: user.normalized_email)
+      profile = user.build_profile(email: user.email)
       profile.save(validate: false)
       profile
     end
@@ -26,7 +26,7 @@ module Profiles
 
     def build_profile_from_invitation
       invitation = user.invitation
-      attributes = user.invitation.slice(:address1, :address2, :phone, :city, :us_state, :postal_code)
+      attributes = user.invitation.slice(:address1, :address2, :phone, :city, :us_state, :postal_code, :email)
       attributes[:country_id] = invitation.country
       attributes[:phone_country_id] = invitation.phone_country_code
       profile = user.build_profile(attributes)

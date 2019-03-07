@@ -33,6 +33,8 @@ class Invitation < ActiveRecord::Base
   include Humanizer
 
   belongs_to :user
+  belongs_to :country
+  belongs_to :phone_country, class_name: 'Country'
 
   validates :first_name,
             :last_name,
@@ -41,7 +43,7 @@ class Invitation < ActiveRecord::Base
             :country,
             :city,
             :postal_code,
-            :phone_country_code,
+            :phone_country,
             :phone,
             :req_reason,
             presence: true
@@ -96,14 +98,18 @@ class Invitation < ActiveRecord::Base
   end
 
   def new_phone_format?
-    phone && phone_country_code
+    phone && phone_country_id
   end
 
   private
 
+  def phone_country_code
+    phone_country.try(:dial_code)
+  end
+
   def validate_phone_country_code
     if usa? && !usa_phone_code?
-      errors.add(:phone_country_code, "doesn't match USA phone code")
+      errors.add(:phone_country_id, "doesn't match USA phone code")
     end
   end
 
@@ -112,7 +118,7 @@ class Invitation < ActiveRecord::Base
   end
 
   def usa?
-    country == "United States"
+    country.name == "United States"
   end
 
   def validate_org

@@ -322,9 +322,6 @@ class MainController < ApplicationController
       p[:organization_admin] = p[:organization_admin] == "1"
       p[:email] = p[:email].to_s.strip
       p[:code] = SecureRandom.uuid
-      country = Country.find(p[:country])
-      p[:country] = country.name
-      p[:phone_country_code] = country.dial_code
 
       Invitation.transaction do
         @invitation = Invitation.create(p)
@@ -578,11 +575,11 @@ class MainController < ApplicationController
       duns
       address1
       address2
-      country
+      country_id
       us_state
       city
       postal_code
-      phone_country_code
+      phone_country_id
       phone
       singular
       organization_admin

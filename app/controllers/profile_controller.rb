@@ -134,7 +134,7 @@ class ProfileController < ApplicationController
     @address1 = (params[:address1] || @invitation.address1).to_s.strip
     @address2 = (params[:address2] || @invitation.address2).to_s.strip
     @postal_code = (params[:postal_code] || @invitation.postal_code).to_s.strip
-    @country = (params[:country] || @invitation.country).to_s.strip
+    @country = (params[:country] || @invitation.country.name).to_s.strip
     @city = (params[:city] || @invitation.city).to_s.strip
     @us_state = (params[:us_state] || @invitation.us_state).to_s.strip
     @full_phone = (params[:full_phone] || @invitation.full_phone).to_s.strip
@@ -180,10 +180,9 @@ class ProfileController < ApplicationController
         @invitation.update!(user_id: user.id)
 
         phone_confirmed = @invitation.new_phone_format? ? true :false
-        user.create_profile(address1: @invitation.address1, address2: @invitation.address2, city: @invitation.city,
-                            email: @email, postal_code: @invitation.postal_code, us_state: @invitation.us_state,
-                            phone: @invitation.phone, phone_country: Country.find_by_dial_code(@invitation.phone_country_code),
-                            phone_confirmed: phone_confirmed, country: Country.find_by_name(@invitation.country))
+        profile = user.build_profile(invitation.slice(:address1, :address2, :phone, :city, :us_state, :postal_code, :email,
+                                                      :country, :phone_country).merge(phone_confirmed: phone_confirmed))
+        profile.save(validate: false)
         Auditor.perform_audit(action: "create", record_type: "Provision Org",
                               record: { message: "A new admin and organization have been created: user=#{user.as_json}, org=#{org.as_json} by '#{@user.dxuser}'" })
       end
@@ -224,7 +223,7 @@ class ProfileController < ApplicationController
               u = User.where.any_of({ first_name: inv.first_name, last_name: inv.last_name }, normalized_email: inv.email.downcase.strip).take
               row << (u ? "maybe #{u.dxuser}" : "")
             end
-            row += [inv.first_name, inv.last_name, inv.email, inv.org, inv.singular, inv.country, inv.city, inv.us_state, inv.postal_code, inv.address1, inv.address2, inv.full_phone, inv.duns, inv.participate_intent, inv.organize_intent, inv.research_intent, inv.clinical_intent, inv.req_data, inv.req_software, inv.req_reason]
+            row += [inv.first_name, inv.last_name, inv.email, inv.org, inv.singular, inv.country.try(:name), inv.city, inv.us_state, inv.postal_code, inv.address1, inv.address2, inv.full_phone, inv.duns, inv.participate_intent, inv.organize_intent, inv.research_intent, inv.clinical_intent, inv.req_data, inv.req_software, inv.req_reason]
             sheet.add_row row
           end
         end
