@@ -1,0 +1,15 @@
+<% content_for :title, "Pending users" %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-body">
+      <div class="page-title">
+        <i class="fa fa-users" aria-hidden="true"></i>
+        Deactivated Users
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<%= render partial: "admin/users/grid", activate_users: true %>

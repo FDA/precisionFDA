@@ -61,6 +61,8 @@ class User < ActiveRecord::Base
     aabramenko.adminstage
     alekadmin.suradmin
     sam.westreich
+    pavelz
+    pavelz2
   ).freeze
 
   NON_PRODUCTION_ADMIN_ORGS = %w(
@@ -82,6 +84,8 @@ class User < ActiveRecord::Base
     you.li
     zivana.tezak
   ).freeze
+
+  enum user_state: [:enabled, :locked, :deactivated]
 
   SITE_ADMINS = begin
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
@@ -144,6 +148,7 @@ class User < ActiveRecord::Base
   validates :first_name, length: { minimum: 2, message: "The first name must be at least two letters long." }, presence: true
   validates :last_name, length: { minimum: 2, message: "The last name must be at least two letters long." }, presence: true
   validates :email, presence: true, uniqueness: { case_sensitive: false }
+  validates :disable_message, length: {maximum: 250}
 
   def self.challenge_bot
     find_by!(dxuser: CHALLENGE_BOT_DX_USER)
@@ -199,6 +204,10 @@ class User < ActiveRecord::Base
     spaces.active
   end
 
+  def activated?
+    private_files_project.present? && last_login.present?
+  end
+
   def username
     dxuser
   end
@@ -217,6 +226,10 @@ class User < ActiveRecord::Base
 
   def is_self(context)
     id == context.user_id
+  end
+
+  def logged_in?
+    return (expiration || 0) - Time.now.to_i > 5.minutes
   end
 
   def appathon_from_meta(meta_appathon)

@@ -35,8 +35,25 @@ Rails.application.routes.draw do
       resources :usage_reports, only: [:index] do
         post :update_custom_range, on: :collection
       end
-
+      get "users", to: "users#all_users"
       get "active_users", to: "users#active"
+      get "reset_mfa_user", to: "users#reset_2fa"
+      get "toggle_activate_user", to: "users#toggle_activate_user"
+      post "toggle_activate_user", to: "users#toggle_activate_user"
+      get "toggle_lock_user", to: "users#toggle_lock_user"
+      post "toggle_lock_user", to: "users#toggle_lock_user"
+      get "pending_users", to: "users#pending_users"
+      get "deactivated_users", to: "users#deactivated_users"
+      get "resend_activation_email", to: "users#resend_activation_email"
+      get "edit_user", to: "users#edit"
+      get "update_user", to: "users#update"
+
+      get 'orgs', to: "organizations#index"
+      get 'show_org', to: "organizations#show", param: :handle
+      get 'provision_org', to: "organizations#provision_org"
+      post 'provision_org', to: "organizations#create_org"
+      post 'change_org_admin', to: "organizations#change_admin"
+
       resources :get_started_boxes, except: [:show] do
         post :update_positions, on: :collection
       end

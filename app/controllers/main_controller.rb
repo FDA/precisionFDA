@@ -228,6 +228,10 @@ class MainController < ApplicationController
       log_session("User #{username} attempted to log in from an existing DNAnexus account")
 
       render "_partials/_error", status: 403, locals: { message: "ERROR: You cannot use an existing DNAnexus account (#{username}) to log into precisionFDA. You need to apply for and obtain a separate precisionFDA account." }
+    elsif user.present? && user.user_state != 'enabled'
+      log_session("User #{username} attempted to log in from locked/disabled DNAnexus account")
+
+      render "_partials/_error", status: 403, locals: { message: "ERROR: You cannot use an existing DNAnexus account (#{username}) to log into precisionFDA. You need to contact ADMIN to re-enable your account." }
     else
       if user.last_login.nil? && user.private_files_project.nil?
         api = DNAnexusAPI.new(token)

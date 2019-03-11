@@ -1,0 +1,28 @@
+<div id="deactivate_user_modal" class="modal fade tasks-actions-modal modal-with-loader">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Are you sure you want to deactivate user?</h4>
+      </div>
+      <div class="loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <%= form_tag admin_toggle_activate_user_path(dxuser: user.dxuser) do %>
+        <div class="modal-body">
+          <div class="pfda-padded-b">
+            <textarea class="form-control" name="message" placeholder="You can leave reason for user deactivation"></textarea>
+          </div>
+          </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Deactivate User</button>
+        </div>
+      <% end %>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

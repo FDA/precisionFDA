@@ -63,6 +63,8 @@ else
 end
 BILLING_CONFIRMATION = ENV["BILLING_CONFIRMATION"]
 
+DNANEXUS_INVALID_EMAIL = "@dnanexus.invalid"
+
 # Challenge 1 - Consistency
 CONSISTENCY_CHALLENGE_START_DATE = DateTime.new(2016,2,25).in_time_zone.end_of_day + 4.hours
 CONSISTENCY_CHALLENGE_END_DATE = DateTime.new(2016,4,25).in_time_zone.end_of_day + 4.hours
