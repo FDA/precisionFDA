@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190305143321) do
+ActiveRecord::Schema.define(version: 20190309183231) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -808,8 +808,8 @@ ActiveRecord::Schema.define(version: 20190305143321) do
     t.string   "private_comparisons_project", limit: 255
     t.string   "public_comparisons_project",  limit: 255
     t.integer  "schema_version",              limit: 4
-    t.datetime "created_at",                                            null: false
-    t.datetime "updated_at",                                            null: false
+    t.datetime "created_at",                                             null: false
+    t.datetime "updated_at",                                             null: false
     t.integer  "org_id",                      limit: 4
     t.string   "first_name",                  limit: 255
     t.string   "last_name",                   limit: 255
@@ -819,8 +819,9 @@ ActiveRecord::Schema.define(version: 20190305143321) do
     t.text     "extras",                      limit: 65535
     t.string   "time_zone",                   limit: 255
     t.string   "review_app_developers_org",   limit: 255,   default: ""
-    t.integer  "user_state",                  limit: 4,     default: 0, null: false
+    t.integer  "user_state",                  limit: 4,     default: 0,  null: false
     t.integer  "expiration",                  limit: 4
+    t.string   "disable_message",             limit: 255
   end
 
   add_index "users", ["dxuser"], name: "index_users_on_dxuser", unique: true, using: :btree
