@@ -45,6 +45,10 @@ class Org < ActiveRecord::Base
     !singular
   end
 
+  def dxid
+    "org-pfda.." + handle
+  end
+
   def dxorg
     Org.construct_dxorg(handle)
   end

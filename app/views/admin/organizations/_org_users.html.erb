@@ -1,0 +1,17 @@
+<%= grid(@org_users) do |g|
+
+  g.column name: "First Name", attribute: "first_name" do |user|
+    user.first_name
+  end
+  g.column name: "Last Name", attribute: "last_name" do |user|
+    user.last_name
+  end
+  g.column name: "DX", attribute: "dxuser" do |user|
+    user.dxuser
+  end
+
+  g.column name: "Role" do |user|
+    @org.admin.dxuser == user.dxuser ? "Admin" : "User"
+  end
+end
+ -%>

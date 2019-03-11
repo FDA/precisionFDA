@@ -808,8 +808,8 @@ ActiveRecord::Schema.define(version: 20190305143321) do
     t.string   "private_comparisons_project", limit: 255
     t.string   "public_comparisons_project",  limit: 255
     t.integer  "schema_version",              limit: 4
-    t.datetime "created_at",                                             null: false
-    t.datetime "updated_at",                                             null: false
+    t.datetime "created_at",                                            null: false
+    t.datetime "updated_at",                                            null: false
     t.integer  "org_id",                      limit: 4
     t.string   "first_name",                  limit: 255
     t.string   "last_name",                   limit: 255
@@ -818,7 +818,8 @@ ActiveRecord::Schema.define(version: 20190305143321) do
     t.datetime "last_login"
     t.text     "extras",                      limit: 65535
     t.string   "time_zone",                   limit: 255
-    t.string   "review_app_developers_org",   limit: 255,   default: ""
+    t.integer  "user_state",                  limit: 4,     default: 0, null: false
+    t.integer  "expiration",                  limit: 4
   end
 
   add_index "users", ["dxuser"], name: "index_users_on_dxuser", unique: true, using: :btree
@@ -878,8 +879,8 @@ ActiveRecord::Schema.define(version: 20190305143321) do
     t.integer  "workflow_series_id", limit: 4
     t.datetime "created_at",                       null: false
     t.datetime "updated_at",                       null: false
-    t.string   "uid",                limit: 255
     t.string   "project",            limit: 255
+    t.string   "uid",                limit: 255
   end
 
   add_index "workflows", ["uid"], name: "index_workflows_on_uid", unique: true, using: :btree
@@ -930,8 +931,8 @@ ActiveRecord::Schema.define(version: 20190305143321) do
   add_foreign_key "notification_preferences", "users"
   add_foreign_key "orgs", "users", column: "admin_id"
   add_foreign_key "participants", "nodes"
-  add_foreign_key "profiles", "countries"
   add_foreign_key "profiles", "countries", column: "phone_country_id", on_delete: :nullify
+  add_foreign_key "profiles", "countries", on_delete: :nullify
   add_foreign_key "profiles", "users"
   add_foreign_key "saved_queries", "users"
   add_foreign_key "space_events", "spaces"

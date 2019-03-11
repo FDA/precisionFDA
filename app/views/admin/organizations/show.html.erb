@@ -1,0 +1,25 @@
+<% content_for :title do %>Admin Dashboard<% end %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-body">
+      <div class="page-title">
+        <i class="fa fa-bar-chart" aria-hidden="true"></i>
+        <%= @org.name %> administration
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <% if @can_change_admin %>
+    <div class="pfda-padded-b">
+      <button class="btn btn-primary" data-bind="click: showChangeAdminModal">Change Administrator</button>
+    </div>
+  <% end %>
+  <div>
+    <%= render partial: "admin/organizations/org_users" %>
+  </div>
+</div>
+
+<%= render "admin/organizations/change_admin_modal" %>

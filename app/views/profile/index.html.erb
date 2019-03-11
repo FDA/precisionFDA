@@ -116,27 +116,5 @@
   </div>
 <% end %>
 
-<% if @user.can_administer_site? %>
-  <div class="infoframe-outer">
-    <div class="infoframe-inner">
-      <h4 class="infoframe-title">Site Administration</h4>
-      <ul class="list-group infoframe-inline">
-        <li class="list-group-item">
-          <h5 class="list-group-item-heading">Contributors</h5>
-          <p class="list-group-item-text"><%= User.real.count %></p>
-        </li>
-        <li class="list-group-item">
-          <h5 class="list-group-item-heading">Contributor Orgs</h5>
-          <p class="list-group-item-text"><%= Org.count %></p>
-        </li>
-        <li class="list-group-item">
-          <h5 class="list-group-item-heading">Browse Access</h5>
-          <p class="list-group-item-text"><%= Invitation.count %></p>
-        </li>
-      </ul>
-      <%= link_to(content_tag(:span, "", class: "fa fa-plus") + " Provision new organization & admin", profile_provision_org_path, class: 'btn btn-primary') %>
-      <%= link_to(content_tag(:span, "", class: "fa fa-file-excel-o") + " Generate report", run_report_path, method: 'post', class: 'btn btn-default') %>
-    </div>
-  </div>
 
-<% end %>
+
