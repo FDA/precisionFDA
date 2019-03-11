@@ -1,6 +1,7 @@
 COUNTRY_INPUT = '#invitation_country_id'
 STATE_SELECT = '#invitation_us_state'
 COUNTRY_CODE_SELECT = '#invitation_phone_country_id'
+PHONE_CONFIRMED_INPUT = '#invitation_phone_confirmed'
 
 class RequestAccessPageView
   showConfirmPhoneModal: (root, e) ->
@@ -28,9 +29,9 @@ class RequestAccessPageView
     @adminOrgAgreed(true)
     @adminOrgModal.modal('hide')
 
-  constructor: () ->
+  constructor: (organizationAdmin = false) ->
     @phoneInputValue = ko.observable('')
-    @phoneConfirmed = ko.observable(false)
+    @phoneConfirmed = ko.observable()
     @phoneCountryCodeValue = ko.observable('')
     @isPhoneInputValid = ko.observable(false)
     @phoneFullValue = ko.computed( =>
@@ -55,7 +56,7 @@ class RequestAccessPageView
     ### Org Adm Agreement ###
     @adminOrgModal = $('#admin_org_agreement_modal')
     @noOrgChecked = ko.observable(false)
-    @adminOrgChecked = ko.observable(false)
+    @adminOrgChecked = ko.observable(organizationAdmin)
     @adminOrgModalAgreementRead = ko.observable(false)
     @adminOrgAgreed = ko.observable(false)
     @adminOrgEnableButton = ko.computed( => @adminOrgModalAgreementRead())
@@ -85,7 +86,9 @@ isFormValid = () ->
 MainController = Paloma.controller('Main', {
   request_access: ->
     $container = $("body main")
-    viewModel = new RequestAccessPageView()
+    phone_confirmed = if @params.phone_confirmed == 'true' then true else false
+    organization_admin = if @params.organization_admin == '1' then true else false
+    viewModel = new RequestAccessPageView(organization_admin)
     ko.applyBindings(viewModel, $container[0])
 
     $container.on "click", ".accessible-btn-success", (e) ->
@@ -95,6 +98,7 @@ MainController = Paloma.controller('Main', {
 
       if isFormValid()
         e.preventDefault()
+        $(PHONE_CONFIRMED_INPUT).val(viewModel.phoneConfirmed())
         $("#confirm-request-access-modal").modal()
 
     $(COUNTRY_INPUT).on 'change', (e) =>
@@ -121,4 +125,7 @@ MainController = Paloma.controller('Main', {
       v = viewModel
       v.phoneCountryCodeValue(option[0].label) if option and option[0]
       v.isPhoneInputValid(v.phoneInput.validate(v.phoneCountryCodeValue()))
+
+    $(COUNTRY_INPUT).trigger('change')
+    viewModel.phoneConfirmed(phone_confirmed)
 })

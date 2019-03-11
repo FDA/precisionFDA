@@ -42,6 +42,7 @@ class PhoneInput
 
   constructor: (@input, options = {}) ->
     @createDOM()
+    @setValue(@input.value) if @input.value
 
     inputListener = _.debounce((e) =>
       e.preventDefault()
