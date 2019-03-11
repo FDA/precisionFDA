@@ -59,7 +59,7 @@
         </li>
       <% end %>
 
-        <% Rails.env.development? || @user.locked? %>
+        <% if Rails.env.development? || @user.locked? %>
           <li class="list-group-item">
             <h5 class="list-group-item-heading">Unlock User</h5>
             <div disabled="" class="btn btn-primary" href="<%= admin_toggle_lock_user_path(dxuser: @user.dxuser) %>" id="toggleLockUser"><span class="fa fa-unlock"></span>Unlock</div>
@@ -70,7 +70,7 @@
             <div class="btn btn-primary" disabled=""><span class="fa fa-unlock"></span>Unlock</div>
           </li>
         <% end %>
-
+      <% end %>
   </ul>
 </div>
 
