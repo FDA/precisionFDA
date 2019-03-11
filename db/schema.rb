@@ -818,6 +818,7 @@ ActiveRecord::Schema.define(version: 20190305143321) do
     t.datetime "last_login"
     t.text     "extras",                      limit: 65535
     t.string   "time_zone",                   limit: 255
+    t.string   "review_app_developers_org",   limit: 255,   default: ""
     t.integer  "user_state",                  limit: 4,     default: 0, null: false
     t.integer  "expiration",                  limit: 4
   end
