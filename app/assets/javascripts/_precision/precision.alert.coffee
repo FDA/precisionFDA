@@ -22,6 +22,9 @@ class AlertModel
     $container = createContainer(text, style)
     $container.addClass('above-all')
     appendToPage($container)
+    $container.on 'click', (e) ->
+      $container.alert('close')
+      $container = null
     @on($container, delay)
 
   #public
