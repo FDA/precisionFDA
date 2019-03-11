@@ -343,7 +343,9 @@ class MainController < ApplicationController
       end
     end
 
-    js usa_id: usa_id, country_codes: Country.countries_for_codes
+    phone_confirmed = params.dig(:invitation, :phone_confirmed)
+    organization_admin = params.dig(:invitation, :organization_admin)
+    js usa_id: usa_id, country_codes: Country.countries_for_codes, phone_confirmed: phone_confirmed, organization_admin: organization_admin
   end
 
   def browse_access
