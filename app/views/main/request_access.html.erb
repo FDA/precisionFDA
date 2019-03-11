@@ -138,13 +138,13 @@
           </div>
           <div class="col-sm-offset-1 col-sm-6">
             <%= f.telephone_field :phone, class: 'form-control input-lg', required: 'required' %>
-            <input type="hidden" name="invitation[phone_confirmed]" id="invitation_phone_confirmed" />
+            <input type="hidden" name="invitation[phone_confirmed]" id="invitation_phone_confirmed" value="true" />
           </div>
           <div class="col-sm-offset-1 col-sm-6">
-            <button class="btn btn-lg btn-primary hidden" data-bind="click: showConfirmPhoneModal, disable: disableConfirmPhoneButton, css: {
+          <%#= <button class="btn btn-lg btn-primary hidden" data-bind="click: showConfirmPhoneModal, disable: disableConfirmPhoneButton, css: {
               hidden: !showConfirmPhoneButton()
             }">Request text validation code</button>
-            <div class="text-success hidden phone-confirmed" data-bind="css: {hidden: !phoneConfirmed()}">Phone number has been validated</div>
+            <div class="text-success hidden phone-confirmed" data-bind="css: {hidden: !phoneConfirmed()}">Phone number has been validated</div> %>
           </div>
         </div>
         <div class="form-group form-group-lg form-group-optional">
@@ -154,7 +154,7 @@
           </div>
         </div>
 
-        <%= render "_partials/phone_confirmation_modal" %>
+        <%#= render "_partials/phone_confirmation_modal" %>
 
         <br>
         <br>

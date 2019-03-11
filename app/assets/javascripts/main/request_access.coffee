@@ -11,7 +11,7 @@ class RequestAccessPageView
   phoneInputOnChange: (value = '') =>
     @phoneInputValue(value)
     @isPhoneInputValid(@phoneInput.validate(@phoneCountryCodeValue()))
-    @phoneConfirmed(false)
+    # @phoneConfirmed(false)
 
   showOrgAdminAgreement: () ->
     if @adminOrgChecked()
@@ -31,11 +31,11 @@ class RequestAccessPageView
 
   constructor: (organizationAdmin = false) ->
     @phoneInputValue = ko.observable('')
-    @phoneConfirmed = ko.observable()
+    @phoneConfirmed = ko.observable(true)
     @phoneCountryCodeValue = ko.observable('')
     @isPhoneInputValid = ko.observable(false)
     @phoneFullValue = ko.computed( =>
-      @phoneConfirmed(false)
+      # @phoneConfirmed(false)
       return "#{@phoneCountryCodeValue().replace(/ /g, '')}#{@phoneInputValue()}"
     )
 
@@ -127,5 +127,8 @@ MainController = Paloma.controller('Main', {
       v.isPhoneInputValid(v.phoneInput.validate(v.phoneCountryCodeValue()))
 
     $(COUNTRY_INPUT).trigger('change')
-    viewModel.phoneConfirmed(phone_confirmed)
+
+    ### This is for turning off sms verification for some time ###
+    # viewModel.phoneConfirmed(phone_confirmed)
+    viewModel.phoneConfirmed(true)
 })

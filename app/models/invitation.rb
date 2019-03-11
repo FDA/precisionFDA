@@ -58,6 +58,7 @@ class Invitation < ActiveRecord::Base
 
   validate :validate_email,
            :validate_state,
+           :validate_phone,
            :validate_org,
            :validate_org_admin,
            :validate_phone_country_code,
@@ -110,6 +111,12 @@ class Invitation < ActiveRecord::Base
   def validate_phone_country_code
     if usa? && !usa_phone_code?
       errors.add(:phone_country_id, "doesn't match USA phone code")
+    end
+  end
+
+  def validate_phone
+    if full_phone.gsub(/[^0-9]/, '').length != 11
+      errors.add(:phone, "wrong format")
     end
   end
 

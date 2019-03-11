@@ -1,6 +1,7 @@
 COUNTRY_SELECT = '#profile_country_id'
 US_STATE = '#profile_us_state'
-PHONE_COUNTRY_CODE = '#profile_phone_phone_country_id'
+# PHONE_COUNTRY_CODE = '#profile_phone_phone_country_id'
+PHONE_COUNTRY_CODE = '#profile_phone_country_id'
 PHONE_INPUT = '#profile_phone'
 
 getCountryId =  (vals) -> if vals.country then vals.country.id else ''
@@ -29,7 +30,8 @@ class ProfileContactsModel
 
     @state(vals.us_state || '')
     @phoneCountryCode(getCountryCodeId(vals))
-    @phoneConfirmed(vals.phone_confirmed)
+    # @phoneConfirmed(vals.phone_confirmed)
+    @phoneConfirmed(true)
 
     @isLoading(false)
     if !continueEditing
@@ -128,7 +130,7 @@ class ProfileContactsModel
   phoneInputOnChange: (value = '') =>
     @phoneInputValue(value)
     @isPhoneInputValid(@phoneInput.validate(@phoneCountryCodeValue()))
-    @phoneConfirmed(false)
+    # @phoneConfirmed(false)
 
   saveMobilePhone: (phoneModal) =>
     if @phoneConfirmed()
@@ -192,12 +194,12 @@ class ProfileContactsModel
 
     ### Phone ###
     @phoneInputValue = ko.observable('')
-    @phoneConfirmed = ko.observable(false)
+    @phoneConfirmed = ko.observable(true)
     @phoneCountryCode = ko.observable('')
     @phoneCountryCodeValue = ko.observable('')
     @isPhoneInputValid = ko.observable(false)
     @phoneFullValue = ko.computed( =>
-      @phoneConfirmed(false)
+      # @phoneConfirmed(false)
       return "#{@phoneCountryCodeValue().replace(/ /g, '')}#{@phoneInputValue()}"
     )
 
