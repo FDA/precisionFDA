@@ -4,7 +4,7 @@ class Profile < ActiveRecord::Base
   belongs_to :phone_country, class_name: 'Country'
 
   validates :address1, :country, :city, :postal_code, presence: true, if: 'fields_changed?'
-  validates :postal_code, postal_code: true
+  # validates :postal_code, postal_code: true
   validates :us_state, presence: true, if: 'country.try(:usa?) && fields_changed?'
   validates :email, presence: true,
             uniqueness: { case_sensitive: false },

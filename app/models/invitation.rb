@@ -57,8 +57,8 @@ class Invitation < ActiveRecord::Base
             inclusion: [true, false]
 
   validate :validate_email,
-           :validate_state,
            :validate_phone,
+           # :validate_state,
            :validate_org,
            :validate_org_admin,
            :validate_phone_country_code,
