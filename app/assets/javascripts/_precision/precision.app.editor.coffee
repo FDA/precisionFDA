@@ -29,7 +29,7 @@ class AppEditorModel
     # Assets
     @assetsSelector = new Precision.models.AssetsModel
     @assets = ko.observableArray()
-    if app?.internal.ordered_assets.length > 0
+    if app?.internal.ordered_assets && app?.internal.ordered_assets.length > 0
       @loading(true)
       Precision.api '/api/list_assets', {ids: app.internal.ordered_assets}, (assets) =>
         @assets(_.map(@assetsSelector.createAssetModels(assets)))
