@@ -3,6 +3,7 @@ US_STATE = '#profile_us_state'
 # PHONE_COUNTRY_CODE = '#profile_phone_phone_country_id'
 PHONE_COUNTRY_CODE = '#profile_phone_country_id'
 PHONE_INPUT = '#profile_phone'
+DEACTIVATE_URL = '/admin/toggle_activate_user?dxuser='
 
 getCountryId =  (vals) -> if vals.country then vals.country.id else ''
 getCountryName =  (vals) -> if vals.country then vals.country.name else ''
@@ -266,6 +267,12 @@ class ProfilePageView
     @editOrgNameModalValue(@orgNameValue.text())
     @editOrgNameModal.modal('show')
 
+  showDeactivateUserModal: (root, e) ->
+    e.preventDefault()
+    @deactivateUserModal.modal('show')
+    dxuser = e.currentTarget.getAttribute('data-dxuser')
+    @deactivateUserModal.find('form').get(0).action = DEACTIVATE_URL + dxuser
+
   changeOrgName: () ->
     if @editOrgNameModalValue() and @editOrgNameModalValue().length
       @editOrgNameModalIsLoading(true)
@@ -310,6 +317,10 @@ class ProfilePageView
         onSuccessVerify: @contacts.saveMobilePhone
       }
     )
+
+    ### Deactivate an user###
+    @deactivateUserModal = $('#deactivate_user_modal')
+    ### Deactivate an user###
 
     ### Edit Org Name ###
     @editOrgNameModal = $('#edit_org_name_modal')

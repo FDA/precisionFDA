@@ -90,7 +90,8 @@
 
       <% if is_user_org_admin? %>
         <%= render 'profile/edit_organization_name_modal' %>
-      <% end %>
+        <%= render '/users/deactivate_user_modal', user: nil %>
+    <% end %>
 
       <div class="infoframe-grid">
         <%= grid(@users_grid, show_filters: :always) do |g|
@@ -106,6 +107,18 @@
 
           g.column name: 'Joined', attribute: 'created_at', auto_reload: true, filter_type: :standard do |user|
             user.created_at.to_s(:human)
+          end
+
+          if is_user_org_admin?
+            g.column name: 'Deactivate user' do |user|
+              if user.enabled?
+                button_tag class: "btn btn-xs btn-primary",
+                disabled: user.id == user.org.admin_id ? true : false,
+                data: { bind: 'click: showDeactivateUserModal', dxuser: user.dxuser } do
+                  content_tag(:span, 'Deactivate', class: 'btn-fa-white')
+                end
+              end
+            end
           end
         end -%>
       </div>
