@@ -12,7 +12,7 @@
           <i class="fa fa-spinner fa-spin"></i>
         </div>
       </div>
-      <%= form_tag admin_toggle_activate_user_path(dxuser: user.dxuser) do %>
+      <%= form_tag admin_toggle_activate_user_path(dxuser: user.try(:dxuser)) do %>
         <div class="modal-body">
           <div class="pfda-padded-b">
             <textarea class="form-control" name="message" placeholder="You can leave reason for user deactivation"></textarea>

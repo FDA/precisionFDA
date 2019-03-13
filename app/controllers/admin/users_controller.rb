@@ -2,11 +2,10 @@ module Admin
   class UsersController < BaseController
 
     def toggle_activate_user
-      if @context.user.can_administer_site?
+      if @context.user.can_administer_site? || user_org_admin?
         user = User.find_by_dxuser(params[:dxuser])
-        state = nil
 
-        if user == @context.user
+        if user == current_user
           redirect_to :back, alert: "Cannot disable self."
           return
         end
@@ -164,6 +163,10 @@ module Admin
     def all_users
       query = ['%' + params["search"] + '%']
       render json:{users: User.where("dxuser like ? or first_name like ? or last_name like ?", *(query * 3)).limit(20)}
+    end
+
+    def user_org_admin?
+      current_user.id == User.find_by_dxuser(params[:dxuser]).org.admin_id
     end
   end
 end
