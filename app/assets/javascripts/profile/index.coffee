@@ -70,7 +70,7 @@ class ProfileContactsModel
     )
     return valid
 
-  isEmailChaged: () -> @email() != @contactsDefaults().email
+  isEmailChaged: () -> @email().toLowerCase() != @contactsDefaults().email.toLowerCase()
 
   updateData: (root, e) =>
     e.preventDefault()

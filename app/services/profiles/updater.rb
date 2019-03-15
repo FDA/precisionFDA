@@ -15,7 +15,7 @@ module Profiles
     def call
       profile.assign_attributes(profile_params)
       return false unless profile.valid?
-      update_email if profile.email_changed? && !profile.new_record?
+      update_email if profile.validate_email? && !profile.new_record?
       profile.save(validate: false)
     end
 

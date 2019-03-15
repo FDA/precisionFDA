@@ -29,7 +29,7 @@ RSpec.describe Profiles::Getter, type: :service do
       it 'build a profile by using user invitation' do
         attributes = invitation.slice(:address1, :address2, :phone, :city,
                                       :us_state, :postal_code, :country, :phone_country)
-        expect(service_response).to have_attributes(attributes)
+        expect(service_response).to have_attributes(attributes.merge(email: user.normalized_email))
       end
     end
 

@@ -4,6 +4,7 @@ FactoryBot.define do
     last_name { FFaker::Name.last_name }
     dxuser "test_user"
     email "test_user@pfda"
+    normalized_email "test_user@pfda"
     association :org
     last_login 1.day.ago
     private_files_project "project-test"
