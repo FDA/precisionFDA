@@ -40,7 +40,7 @@
       <% end %>
       <li class="list-group-item">
         <h5 class="list-group-item-heading">Reset multi-factor authentication</h5>
-        <div disabled="" class="btn btn-primary" href="<%=  admin_reset_mfa_user_path(dxuser: @user.dxuser) %>">Reset</div>
+        <a class="btn btn-primary" href="<%=  admin_reset_mfa_user_path(dxuser: @user.dxuser) %>">Reset</a>
       </li>
       <% if ["enabled","deactivated"].include?(@user.user_state) %>
         <li class="list-group-item">
