@@ -47,7 +47,7 @@ else
   APPKIT_TGZ = "project-Bk0YZkj0YkbBg6bk38PzQkVV:/appkit.tgz"
   ORG_EVERYONE_HANDLE = ENV["DEV_HOST"] ? "precisionfda_dev" : "precisionfda"
   ORG_EVERYONE = "org-#{ORG_EVERYONE_HANDLE}"
-  ORG_DUMMY = ENV["DEV_HOST"] ? "org-precisionfda.dummy" : "org-precisionfda.dummy"
+  ORG_DUMMY = ENV["DEV_HOST"] ? "org-precisionfda.dummy_dev" : "org-precisionfda.dummy"
   ADMIN_TOKEN = ENV["ADMIN_TOKEN"]
   ADMIN_USER = ENV["DEV_HOST"] ? "user-precisionfda.admin_dev" : "user-precisionfda.admin"
   DEFAULT_COMPARISON_APP = "app-pfda-comparator/0.2.4"
