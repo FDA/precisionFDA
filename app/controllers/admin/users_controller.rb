@@ -15,15 +15,15 @@ module Admin
         when "enabled"
           state = "deactivated"
           user.disable_message = params[:message]
-          user.email = Base64.encode64(user.email)
-          user.normalized_email = Base64.encode64(user.normalized_email) + DNANEXUS_INVALID_EMAIL
+          user.email = Base64.encode64(user.email).sub("\n","") + DNANEXUS_INVALID_EMAIL
+          user.normalized_email = Base64.encode64(user.normalized_email).sub("\n","") + DNANEXUS_INVALID_EMAIL
 
         when "deactivated"
           if state != ''
             state = "enabled"
             user.disable_message = nil
-            user.email = Base64.decode64(user.email.sub(DNANEXUS_INVALID_EMAIL, ""))
-            user.normalized_email = Base64.decode64(user.normalized_email)
+            user.email = Base64.decode64(user.email.sub(DNANEXUS_INVALID_EMAIL, "\n"))
+            user.normalized_email = Base64.decode64(user.normalized_email.sub(DNANEXUS_INVALID_EMAIL, "\n"))
           end
         end
 
