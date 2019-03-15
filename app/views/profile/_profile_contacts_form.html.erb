@@ -30,17 +30,23 @@
     </form>
     <hr> %>
     <form class="form-horizontal" id="profile_form">
-      <div class="form-group required">
-        <label for="profile_phone" class="col-sm-3 control-label">Phone:</label>
-        <div class="col-sm-2">
-          <%= select 'profile', 'phone_country_id', dial_codes, { include_blank: true }, {
-            class: 'form-control',
-            required: 'required',
-            data: {bind: 'value: contacts.phoneCountryCode'}
-          } %>
+      <div  class="row">
+        <div class="form-group required col-sm-6">
+          <div class="row">
+            <div class="col-sm-3">
+              <label for="profile_phone" class="control-label">Phone:</label>
+            </div>
+            <div class="col-sm-offset-9 col-sm-6">
+              <%= select 'profile', 'phone_country_id', dial_codes, { include_blank: true }, {
+                  class: 'form-control',
+                  required: 'required',
+                  data: {bind: 'value: contacts.phoneCountryCode'}
+              } %>
+            </div>
+          </div>
         </div>
-        <div class="col-sm-offset-1 col-sm-5">
-          <input type="text" class="form-control" name="profile[phone]" id="profile_phone" required/>
+        <div class="form-group required col-sm-offset-1 col-sm-5">
+            <input type="text" class="form-control" name="profile[phone]" id="profile_phone" required/>
         </div>
       </div>
       <div class="form-group required">
