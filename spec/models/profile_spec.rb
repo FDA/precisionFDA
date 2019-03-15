@@ -30,41 +30,6 @@ RSpec.describe Profile, type: :model do
       it { is_expected.to validate_presence_of(:us_state) }
     end
 
-    context 'when postal does not match the state' do
-      before do
-        stub_request(:get, "https://www.zipcodeapi.com/rest//info.json/#{profile.postal_code}/degrees")
-            .to_return(body: "{\"state\":\"WY\"}")
-        profile.valid?
-      end
-      it { expect(profile.errors[:postal_code]).not_to be_empty }
-    end
-
-    context 'when postal code matches the state' do
-      before do
-        stub_request(:get, "https://www.zipcodeapi.com/rest//info.json/#{profile.postal_code}/degrees")
-            .to_return(body: "{\"state\":\"TX\"}")
-      end
-      it { is_expected.to be_valid }
-    end
-
-    context 'When the state was changed on non-matching zip code' do
-      before do
-        stub_request(:get, "https://www.zipcodeapi.com/rest//info.json/#{profile.postal_code}/degrees")
-           .to_return(body: "{\"state\":\"TX\"}")
-        profile.save
-        profile.update(us_state: 'Wyoming')
-      end
-      it { expect(profile.errors[:postal_code]).not_to be_empty }
-    end
-
-    context 'When zip code was not found' do
-      before do
-        stub_request(:get, "https://www.zipcodeapi.com/rest//info.json/#{profile.postal_code}/degrees")
-          .to_raise('')
-        profile.valid?
-      end
-      it { is_expected.not_to be_valid }
-    end
   end
 
   describe 'email validations' do
@@ -76,6 +41,18 @@ RSpec.describe Profile, type: :model do
         profile.update(email: FFaker::Internet.email)
       end
       it { is_expected.to validate_presence_of(:email) }
+      it { is_expected.to validate_uniqueness_of(:email).case_insensitive }
+    end
+
+    context 'when email was changed to upper case' do
+      before do
+        profile.save
+        WebMock.reset!
+        stub_request(:post, "#{DNANEXUS_APISERVER_URI}#{ORG_DUMMY}/invite").to_return(body: "{}")
+        stub_request(:post, "#{DNANEXUS_APISERVER_URI}#{ORG_DUMMY}/findMembers").to_return(body: "{\"results\":{}}")
+        profile.update(email: profile.email.upcase)
+      end
+      it { expect(profile.errors[:email]).to be_empty }
     end
 
     context 'when email has invalid format' do
@@ -87,6 +64,7 @@ RSpec.describe Profile, type: :model do
     context 'when email has already been taken on platform' do
       let(:profile) { build(:profile) }
       before do
+        WebMock.reset!
         stub_request(:post, "#{DNANEXUS_APISERVER_URI}#{ORG_DUMMY}/invite").to_return(body: "{}")
         stub_request(:post, "#{DNANEXUS_APISERVER_URI}#{ORG_DUMMY}/findMembers").to_return(body: "{\"results\":{}}")
         profile.valid?

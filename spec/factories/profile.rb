@@ -5,6 +5,7 @@ FactoryBot.define do
     address1 { FFaker::Address.street_address }
     city { FFaker::Address.city }
     postal_code { FFaker::AddressDE.zip_code }
+    us_state FFaker::AddressUS.state
     country
     user
   end
