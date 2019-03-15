@@ -1,15 +1,18 @@
 module Admin
   class UsersController < BaseController
+    skip_before_action  :check_admin, only: :toggle_activate_user
 
     def toggle_activate_user
-      if @context.user.can_administer_site? || user_org_admin?
-        user = User.find_by_dxuser(params[:dxuser])
+      user = User.find_by_dxuser(params[:dxuser])
 
-        if user == current_user
-          redirect_to :back, alert: "Cannot disable self."
-          return
-        end
-        state = params[:state]
+      if !current_user.can_administer_site? && !user_org_admin?(user)
+         redirect_to root_path and return
+      end
+
+      if user == current_user
+        redirect_to :back, alert: "Cannot disable self." and return
+      end
+      state = params[:state]
 
         case user.user_state
         when "enabled"
@@ -27,13 +30,12 @@ module Admin
           end
         end
 
-        if state.present?
-          user.user_state = state
-          user.save!(validate: false)
-          redirect_to :back, alert: "User has been #{state == 'enabled' ? 're-activated':'de-activated'}"
-        else
-          redirect_to :back, error: "There was an error locking the user"
-        end
+      if state.present?
+        user.user_state = state
+        user.save!(validate: false)
+        redirect_to :back, alert: "User has been #{state == 'enabled' ? 're-activated':'de-activated'}"
+      else
+        redirect_to :back, error: "There was an error locking the user"
       end
     end
 
@@ -165,8 +167,8 @@ module Admin
       render json:{users: User.where("dxuser like ? or first_name like ? or last_name like ?", *(query * 3)).limit(20)}
     end
 
-    def user_org_admin?
-      current_user.id == User.find_by_dxuser(params[:dxuser]).org.admin_id
+    def user_org_admin?(user)
+      current_user.id == user.org.admin_id
     end
   end
 end
