@@ -144,6 +144,9 @@ class NewAppViewModel extends Precision.models.AppEditorModel
           Precision.alert.showAboveAll(text)
     })
 
+  wdlTextValueOnInput: (root, e) =>
+    @wdlTextValue(e.target.value)
+
   constructor: (data) ->
     super(data, 'new')
     @importModal = $('#import_cwl_wdl_modal')
