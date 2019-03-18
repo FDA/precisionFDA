@@ -148,7 +148,7 @@ class User < ActiveRecord::Base
   validates :first_name, length: { minimum: 2, message: "The first name must be at least two letters long." }, presence: true
   validates :last_name, length: { minimum: 2, message: "The last name must be at least two letters long." }, presence: true
   validates :email, presence: true, uniqueness: { case_sensitive: false }
-  validates :disable_message, length: {maximum: 250}
+  validates :disable_message, length: { maximum: 250 }
 
   def self.challenge_bot
     find_by!(dxuser: CHALLENGE_BOT_DX_USER)

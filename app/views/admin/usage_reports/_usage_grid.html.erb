@@ -25,7 +25,7 @@
     end
   end
 
-  g.column name: "User State" do |metric|
+  g.column name: "State" do |metric|
     metric.user.user_state == "enabled" ? metric.user.logged_in? ? "Logged In" : "Not Logged In" : "Locked"
   end
 

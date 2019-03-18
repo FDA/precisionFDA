@@ -6,6 +6,7 @@ module Admin
       @custom_range_begin = Setting.get_value("custom_range_begin")
       @custom_range_end = Setting.get_value("custom_range_end")
       @selected_range = Setting.get_value("selected_range")
+      @selected_range = @selected_range.blank? ? "week" : @selected_range
 
       date_string = Time.now.strftime("%Y-%m-%d")
 
@@ -35,7 +36,7 @@ module Admin
 
       if date_from && date_to
         Setting.set_usage_metrics_custom_range(date_from, date_to)
-        Setting.set_value("selected_range", params[:custom_range][:selected_range])
+        Setting.set_value("selected_range", params[:custom_range][:selected_range].blank? ? "week" : params[:custom_range][:selected_range])
         Setting.set_value("custom_range_begin", params[:custom_range][:date_from])
         Setting.set_value("custom_range_end", params[:custom_range][:date_to])
 

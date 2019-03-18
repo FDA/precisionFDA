@@ -42,7 +42,11 @@ module Admin
     def deactivated_users
       @users = User.deactivated
       @users_grid = initialize_grid(@users)
-      render 'admin/users/deactivated'
+
+      respond_to do |format|
+       format.html { render 'admin/users/deactivated' }
+       format.json { render json: { users: @users } }
+      end
     end
 
     def pending_users
@@ -55,8 +59,15 @@ module Admin
     def resend_activation_email
       if @context.user.can_administer_site?
         user = User.find_by_dxuser(params[:dxuser])
+
+        if user.org.admin_id ==  @context.user.id
+          token = @context.token
+        else
+          token = ADMIN_TOKEN
+        end
+
         begin
-          api = DNAnexusAPI.new(@context.token, DNANEXUS_AUTHSERVER_URI)
+          api = DNAnexusAPI.new(token, DNANEXUS_AUTHSERVER_URI)
           result = api.call(
               'account',
              "resendActivationEmail",
@@ -74,8 +85,15 @@ module Admin
       if @context.user.can_administer_site?
         user = User.find_by_dxuser(params[:dxuser])
 
+        if user.org.admin_id ==  @context.user.id
+          token = @context.token
+        else
+          token = ADMIN_TOKEN
+        end
+
+
         begin
-          api = DNAnexusAPI.new(@context.token, DNANEXUS_AUTHSERVER_URI)
+          api = DNAnexusAPI.new(token, DNANEXUS_AUTHSERVER_URI)
           result = api.call(
             user.dxid,
            "resetUserMFA",
@@ -83,7 +101,11 @@ module Admin
             org_id: "org-pfda.." + user.org.handle
           )
         rescue Net::HTTPServerException => e
-          redirect_to :back, alert: "There was a server error, please try again"
+          if e.message =~ /MFA is already reset/
+            redirect_to :back, alert: "MFA is already reset or not yet configured for the user"
+          else
+            redirect_to :back, alert: "There was a server error, please try again"
+          end
         else
           redirect_to :back, alert: "Reset successfully"
         end
@@ -101,8 +123,14 @@ module Admin
           to_call = 'unlockUserAccount'
         end
 
+        if user.org.admin_id ==  @context.user.id
+          token = @context.token
+        else
+          token = ADMIN_TOKEN
+        end
+
         begin
-          api = DNAnexusAPI.new(@context.token, DNANEXUS_AUTHSERVER_URI)
+          api = DNAnexusAPI.new(token, DNANEXUS_AUTHSERVER_URI)
           result = api.call(
               @context.user.dxid,
               to_call,
@@ -112,7 +140,7 @@ module Admin
         rescue Net::HTTPServerException => e
           puts "ERROR: #{e}"
           if request.method == 'POST'
-            render json: {ok: 'error'}, status: 403
+            render json: { ok: 'error' }, status: 403
           else
             error = "There was an error, please try again later."
             if e.message =~ /must be an admin/
@@ -130,7 +158,7 @@ module Admin
 
             user.save!(validate:false)
             if request.method == 'POST'
-            render json: {ok: true}
+            render json: { ok: true }
             else
               redirect_to :back, alert: "User has been #{user.user_state}"
             end
@@ -164,7 +192,10 @@ module Admin
 
     def all_users
       query = ['%' + params["search"] + '%']
-      render json:{users: User.where("dxuser like ? or first_name like ? or last_name like ?", *(query * 3)).limit(20)}
+      org = params[:org]
+      org = Org.find_by_handle(org) rescue nil
+      org_id = org.id rescue nil
+      render json: { users: User.where("(dxuser like ? or first_name like ? or last_name like ?) and org_id = ? and id <> ?", *(query * 3),org_id, org.admin.id).limit(20) }
     end
 
     def user_org_admin?(user)

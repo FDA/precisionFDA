@@ -1,69 +1,14 @@
-class User
-  constructor: (data) ->
-    @id = data.id
-    @name = "#{data.first_name} #{data.last_name} (#{data.dxuser})"
-    @dxuser = data.dxuser
-    @selected = ko.observable(false)
-
 class PageAdminOrgView
-  selectNewAdmin: () ->
-    @changeAdminModalForm.submit()
-
-  resetModalData: () ->
-    @changeAdminModalIsLoading(false)
-    @selectedUser(null)
-    @searchString('')
-    @changeAdminModalSearch.val('')
-
-  getUsers: () ->
-    if !@searchString() or !@searchString().length
-      @users([])
-      return false
-    @changeAdminModalIsLoading(true)
-    $.get('/admin/users', { search: @searchString() }).then(
-      (data) =>
-        users = data.users.map((user) -> new User(user))
-        @users(users)
-        @changeAdminModalIsLoading(false)
-      () =>
-        Precision.alert.showAboveAll('Something went wrong!')
-        @changeAdminModalIsLoading(false)
-    )
-
   showChangeAdminModal: () ->
-    @changeAdminModal.modal('show')
+    @changeAdminModal.showChangeAdminModal()
 
-  selectUser: (user) =>
-    @users().map((user) -> user.selected(false))
-    user.selected(true)
-    @selectedUser(user)
+  showDeactivateUserModal: (root, e) ->
+    dxuser = $(e.target).attr('data-dxuser')
+    @deactivateUserModal.showModal(dxuser)
 
   constructor: (orgid = null) ->
-    @changeAdminModal = $('#change_admin_modal')
-    @changeAdminModalSearch = $('#change_admin_modal_search')
-    @changeAdminModalForm = $('#change_admin_modal_form')
-    @changeAdminModalIsLoading = ko.observable(false)
-    @orgid = ko.observable(orgid)
-    @users = ko.observableArray([])
-    @selectedUser = ko.observable()
-    @selectedUserDxuser = ko.computed(() =>
-      return null if !@selectedUser()
-      return @selectedUser().dxuser
-    )
-    @isUserSelected = ko.computed(() => !!@selectedUser())
-
-    @searchString = ko.observable()
-    @showNoUsersFound = ko.computed(() =>
-      return !!@searchString() and @searchString().length and !@users().length
-    )
-    @searchInputListener = _.debounce((root, e) =>
-      e.preventDefault()
-      @searchString(e.target.value)
-      @getUsers()
-    , 300)
-
-    @changeAdminModal.on 'hidden.bs.modal', () =>
-      @resetModalData()
+    @changeAdminModal = new Precision.ChangeAdminModal(orgid)
+    @deactivateUserModal = new Precision.DeactivateUserModal()
 
 #########################################################
 #
@@ -75,8 +20,27 @@ class PageAdminOrgView
 
 
 ParticipantsController = Paloma.controller('Admin/Organizations', {
+  index: ->
+    modals = []
+    for org in @params.orgs
+      modal = $($("#change_admin_modal")[0]).clone()
+      modal.prop("id",null)
+      modal.appendTo("body main")
+      modals.push(modal)
+
+    for org in @params.orgs
+      modal = modals.shift()
+      $container = $('#org-' + org.handle)
+
+      console.log($container)
+      console.log(org)
+      viewModel = new PageAdminOrgView(org.handle, modal)
+      ko.applyBindings(viewModel, $container[0])
+      ko.applyBindings(viewModel, modal[0])
+
   show: ->
     $container = $("body main")
-    viewModel = new PageAdminOrgView(@params.org.dxid)
+    modal = $($("#change_admin_modal")[0])
+    viewModel = new PageAdminOrgView(@params.org.dxid, modal)
     ko.applyBindings(viewModel, $container[0])
 })

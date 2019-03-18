@@ -268,10 +268,8 @@ class ProfilePageView
     @editOrgNameModal.modal('show')
 
   showDeactivateUserModal: (root, e) ->
-    e.preventDefault()
-    @deactivateUserModal.modal('show')
-    dxuser = e.currentTarget.getAttribute('data-dxuser')
-    @deactivateUserModal.find('form').get(0).action = DEACTIVATE_URL + dxuser
+    dxuser = $(e.target).attr('data-dxuser')
+    @deactivateUserModal.showModal(dxuser)
 
   changeOrgName: () ->
     if @editOrgNameModalValue() and @editOrgNameModalValue().length
@@ -319,7 +317,7 @@ class ProfilePageView
     )
 
     ### Deactivate an user###
-    @deactivateUserModal = $('#deactivate_user_modal')
+    @deactivateUserModal = new Precision.DeactivateUserModal()
     ### Deactivate an user###
 
     ### Edit Org Name ###
