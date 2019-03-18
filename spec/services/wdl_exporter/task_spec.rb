@@ -1,35 +1,48 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe WdlExporter::Task do
-
   let(:input) do
     [
       {
-        name: "anything",
+        name: "in_string",
         class: "string",
         optional: false,
         label: "anything",
-        help: "anything"
-      }
+        help: "anything",
+      },
+      {
+        name: "in_boolean",
+        class: "boolean",
+        optional: false,
+        label: "anything",
+        help: "anything",
+      },
+      {
+        name: "in_file",
+        class: "file",
+        optional: false,
+        label: "anything",
+        help: "anything",
+      },
     ]
   end
 
   let(:output) do
     [
       {
-        "name": "my_file",
+        "name": "out_file",
         "class": "file",
         "optional": false,
-        "label": "my_file",
-        "help": "my_file"
+        "label": "out_file",
+        "help": "out_file",
       },
       {
-        "name": "my_string",
+        "name": "out_string",
         "class": "string",
         "optional": false,
-        "label": "my_string",
-        "help": "my_string"
-      }
+        "label": "out_string",
+        "help": "out_string",
+      },
     ]
   end
 
