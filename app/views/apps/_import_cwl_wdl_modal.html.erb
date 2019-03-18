@@ -22,7 +22,12 @@
                 <input  id="wdl_file_input" type="file" data-bind="attr: {accept: acceptFileType}, event: {change: fileOnChangeHandler}">
               </span>
             </div>
-            <textarea class="form-control" name="wdl_text" id="wdl_text_input" data-bind="value: wdlTextValue"></textarea>
+            <textarea
+              class="form-control"
+              name="wdl_text"
+              id="wdl_text_input"
+              data-bind="value: wdlTextValue, event: {input: wdlTextValueOnInput}">
+            </textarea>
           </div>
           <hr>
           <div>
