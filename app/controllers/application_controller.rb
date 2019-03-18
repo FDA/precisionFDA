@@ -25,6 +25,8 @@ class ApplicationController < ActionController::Base
 
   rescue_from ActionView::MissingTemplate, with: :missing_template
 
+  add_flash_types :success, :error
+
   private
 
   def invalid_token
