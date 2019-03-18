@@ -20,7 +20,12 @@ class NewAppViewModel extends Precision.models.AppEditorModel
 
   getDockerPullData: (importText) ->
     dockerPull = importText.match(/dockerPull:(.*$)/gm)
-    dockerPull = dockerPull[0].replace(/(dockerPull:)(.*$)/gm, '$2').trim() if dockerPull.length
+
+    if !dockerPull or !dockerPull.length
+      Precision.alert.showAboveAll('Wrong docker image name format')
+      return false
+
+    dockerPull = dockerPull[0].replace(/(dockerPull:)(.*$)/gm, '$2').trim()
     dockerPull = dockerPull.replace(/"/g, '') if dockerPull.length
 
     if typeof dockerPull != 'string' or !dockerPull.length
