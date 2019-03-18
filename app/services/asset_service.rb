@@ -7,6 +7,8 @@ class AssetService
 
   include ActionView::Helpers::NumberHelper
 
+  class AssetServiceError < StandardError; end
+
   class << self
     def create(context, options)
       new(context).create(options)
@@ -49,11 +51,12 @@ class AssetService
 
     asset_size = asset_io.length
 
-    if (asset_size = asset_io.length) > MAX_ASSET_SIZE
-      raise "Size of asset #{asset_name} " \
-            "(#{number_to_human_size(asset_size)}) " \
-            "exceeds maximum allowed file size " \
-            "(#{number_to_human_size(MAX_ASSET_SIZE)})"
+    if asset_size > MAX_ASSET_SIZE
+      raise AssetServiceError,
+        "Size of asset #{asset_name} " \
+        "(#{number_to_human_size(asset_size)}) " \
+        "exceeds maximum allowed file size " \
+        "(#{number_to_human_size(MAX_ASSET_SIZE)})"
     end
 
     Asset.transaction do
@@ -79,7 +82,7 @@ class AssetService
 
   def upload(uid, asset_io, chunk_size = CHUNK_SIZE)
     chunks = -> do
-      unless asset_io.eof?
+      if !asset_io.eof?
         chunk = asset_io.read(chunk_size)
 
         [chunk, md5sum(chunk), chunk.length]
@@ -118,19 +121,22 @@ class AssetService
       api.call(
         "file",
         "new",
-        { "name": asset_name, "project": project }
+        "name": asset_name,
+        "project": project
       )["id"]
 
     asset = nil
 
     Asset.transaction do
-      asset = Asset.create!(dxid: dxid,
-                            project: project,
-                            name: asset_name,
-                            state: "open",
-                            description: description,
-                            user_id: context.user_id,
-                            scope: "private")
+      asset = Asset.create!(
+        dxid: dxid,
+        project: project,
+        name: asset_name,
+        state: "open",
+        description: description,
+        user_id: context.user_id,
+        scope: "private"
+      )
       asset.parent = asset
       asset.save!
       asset.update!(parent_type: "Asset")
@@ -161,6 +167,33 @@ class AssetService
     asset
   end
 
+  # we need to wait until the asset becomes closed
+  # otherwise we won't create an app with the assed linked to it
+  def wait_for_asset_to_close(asset_dxid, max_retries = 5)
+    return unless block_given?
+
+    retries = 0
+
+    loop do
+      data = describe(asset_dxid)
+
+      if data["state"] == "closed"
+        yield data
+
+        break
+      end
+
+      retries += 1
+
+      if retries > max_retries - 1
+        raise AssetServiceError,
+          "The asset #{asset.uid} can't be closed. Please try again later."
+      end
+
+      sleep 3
+    end
+  end
+
   protected
 
   def send_to_store(url, headers, chunk, index)
@@ -180,8 +213,9 @@ class AssetService
       end
 
     unless res.is_a?(Net::HTTPSuccess)
-      raise "Failed to upload chunk ##{index}. Please try again later. " \
-            "If the problem persists, contact precisionFDA support."
+      raise AssetServiceError,
+        "Failed to upload chunk ##{index}. Please try again later. " \
+        "If the problem persists, contact precisionFDA support."
     end
   end
 

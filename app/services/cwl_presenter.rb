@@ -5,16 +5,16 @@ class CwlPresenter
   VALID_TYPES = %w(string long File boolean double int)
 
   validates :id,
-            format: {
-              with: /\A[a-zA-Z0-9._-]+\z/,
-              message: "can contain only letters, digits or symbols ._-"
-            }
+    format: {
+      with: /\A[a-zA-Z0-9._-]+\z/,
+      message: "can contain only letters, digits or symbols ._-",
+    }
   validates :base_command, presence: { message: "doesn't exist" }
   validates :inputs, :outputs, presence: { message: "are invalid or don't exist" }
   validate :validate_io_objects
   validate :validate_requirements
 
-  attr_reader :docker_image, :docker_pull
+  attr_reader :docker_formatted, :docker
 
   def initialize(cwl_string)
     @cwl_string = cwl_string.strip
@@ -27,27 +27,27 @@ class CwlPresenter
   end
 
   def base_command
-    cwl_data['baseCommand'].join(' ') if cwl_data['baseCommand']
+    cwl_data["baseCommand"].join(" ") if cwl_data["baseCommand"]
   end
 
   def doc
-    cwl_data['doc']
+    cwl_data["doc"]
   end
 
   def id
-    cwl_data['id']
+    cwl_data["id"]
   end
 
   def label
-    cwl_data['label']
+    cwl_data["label"]
   end
 
   def inputs
-    @inputs ||= IOObject.build(cwl_data['inputs'])
+    @inputs ||= IOObject.build(cwl_data["inputs"])
   end
 
   def outputs
-    @outputs ||= IOObject.build(cwl_data['outputs'])
+    @outputs ||= IOObject.build(cwl_data["outputs"])
   end
 
   private
@@ -55,7 +55,7 @@ class CwlPresenter
   attr_reader :cwl_data
 
   def validate_requirements
-    unless cwl_data['requirements']
+    unless cwl_data["requirements"]
       errors.add(:requirements, "don't exist")
       return
     end
@@ -65,8 +65,8 @@ class CwlPresenter
 
   def validate_docker_requirements
     docker_requirement =
-      cwl_data['requirements'].find do |requirement|
-        requirement['class'] == 'DockerRequirement'
+      cwl_data["requirements"].find do |requirement|
+        requirement["class"] == "DockerRequirement"
       end
 
     unless docker_requirement
@@ -74,18 +74,18 @@ class CwlPresenter
       return
     end
 
-    @docker_pull = docker_requirement['dockerPull']
+    @docker = docker_requirement["dockerPull"]
 
-    unless @docker_pull
+    unless @docker
       errors.add(:docker_requirement, "doesn't include dockerPull")
       return
     end
 
-    validate_docker_pull
+    validate_docker
   end
 
-  def validate_docker_pull
-    image_name, tag = docker_pull.match(/\A([^:]+):?([^:]+)?$/).try(:captures)
+  def validate_docker
+    image_name, tag = docker.match(/\A([^:]+):?([^:]+)?$/).try(:captures)
 
     image_name_parts = image_name.split("/")
 
@@ -110,7 +110,7 @@ class CwlPresenter
       return
     end
 
-    @docker_image = {
+    @docker_formatted = {
       registry: registry,
       namespace: namespace,
       repository: repository,

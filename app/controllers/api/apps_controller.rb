@@ -4,7 +4,8 @@ module Api
 
     # Inputs
     #
-    # name, title, readme, input_spec, output_spec, internet_access, instance_type, ordered_assets, packages, code, is_new
+    # name, title, readme, input_spec, output_spec, internet_access,
+    # instance_type, ordered_assets, packages, code, is_new
     #
     # Outputs
     #
@@ -19,28 +20,24 @@ module Api
     end
 
     def import
-      if cwl_presenter.valid?
+      if presenter.valid?
         app, asset = nil
 
         ActiveRecord::Base.transaction do
-          asset = process_docker_image
+          asset = DockerImporter.new(
+            context: @context,
+            attached_image: params[:attached_image],
+            formatted_image: presenter.docker_formatted
+          ).import
 
-          opts = App::CwlParser.parse(cwl_presenter).merge(
-            ordered_assets: [asset.try(:uid)].compact
-          )
-
-          if asset
-            opts[:code] = inject_docker_load(opts[:code])
-          end
-
-          app = create_app(opts)
+          app = create_app(build_app_opts(asset))
         end
 
         render json: { id: app.uid, asset_uid: asset.try(:uid) }
       else
-        render json: { errors: cwl_presenter.errors.full_messages }, status: 422
+        render json: { errors: presenter.errors.full_messages }, status: 422
       end
-    rescue Psych::SyntaxError => e
+    rescue Psych::SyntaxError
       render json: { errors: ["CWL has incorrect format"] }, status: 422
     rescue => e
       logger.error e.message
@@ -50,16 +47,35 @@ module Api
 
     private
 
+    def build_app_opts(asset)
+      imported_opts =
+        if params[:format] == "wdl"
+          presenter.build
+        else
+          App::CwlParser.parse(presenter)
+        end
+
+      opts = imported_opts.merge(
+        ordered_assets: [asset.try(:uid)].compact
+      )
+
+      if asset
+        opts[:code] = inject_docker_load(opts[:code])
+      end
+
+      opts
+    end
+
     def inject_docker_load(code)
       filename = params[:attached_image].original_filename
       cache_dir = "/tmp/dx-docker-cache"
 
       <<-CODE
 gunzip #{filename}
-docker2aci #{filename.sub(".gz", "")}
+docker2aci #{filename.sub('.gz', '')}
 mkdir -p #{cache_dir}
 aci_file=`find . -name "*.aci"`
-mv $aci_file #{cache_dir}/#{CGI.escape(docker_pull)}.aci
+mv $aci_file #{cache_dir}/#{CGI.escape(presenter.docker)}.aci
 
 #{code}
 CODE
@@ -69,101 +85,11 @@ CODE
       AppService.create_app(@context, opts)
     end
 
-    def process_docker_image
-      return unless is_attached_image_valid_and_matched?
-
-      attached_image = params[:attached_image]
-      image_filename = attached_image.original_filename
-
-      asset_name =
-        "#{docker_image[:repository]}-#{docker_image[:tag]}.tar.gz".freeze
-      asset_readme = %Q{
-        This asset contains the locally uploaded Docker
-        image #{image_filename}.
-      }.squish.freeze
-
-      image_filepath =
-        File.join(
-          "work",
-          image_filename
-        )
-
-      asset = AssetService.create_and_upload(
-        @context,
-        name: asset_name,
-        readme: asset_readme,
-        files: { image_filepath => attached_image }
-      )
-
-      wait_for_asset_to_close(asset)
-
-      asset
-    end
-
-    # we need to wait until the asset becomes closed
-    # otherwise we won't create an app with the assed linked to it
-    def wait_for_asset_to_close(asset, max_retries = 5)
-      retries = 0
-      service = AssetService.new(@context)
-
-      loop do
-        data = service.describe(asset.dxid)
-
-        if data["state"] == "closed"
-          asset.update!(
-            state: "closed",
-            file_size: data["size"]
-          )
-          Event::FileCreated.create_for(asset, @context.user)
-          break
-        end
-
-        retries += 1
-
-        if retries > max_retries - 1
-          raise ApiError.new(
-            "The asset #{asset.uid} can't be closed. Please try again later."
-          )
-        end
-
-        sleep 3
+    def presenter
+      @presenter ||= begin
+        klass = params[:format] == "wdl" ? App::WdlPresenter : CwlPresenter
+        klass.new(params[:file])
       end
-    end
-
-    def is_attached_image_valid_and_matched?
-      docker_image[:registry].nil? &&
-      is_image_attached? &&
-      is_attached_image_valid? &&
-      is_attached_image_matched?
-    end
-
-    def is_image_attached?
-      params[:attached_image].present?
-    end
-
-    def is_attached_image_valid?
-      filename = params[:attached_image].original_filename
-
-      return false unless filename.match(/\.tar\.gz$/)
-
-      splitted_filename = filename.sub(".tar.gz", "").split("_")
-
-      splitted_filename.size.between?(2, 3)
-    end
-
-    def is_attached_image_matched?
-      filename = params[:attached_image].original_filename
-
-      namespace, repository, tag = filename.sub(".tar.gz", "").split("_")
-      tag ||= "latest"
-
-      namespace == docker_image[:namespace] &&
-      repository == docker_image[:repository] &&
-      tag == docker_image[:tag]
-    end
-
-    def cwl_presenter
-      @cwl_presenter ||= CwlPresenter.new(params['cwl'])
     end
 
     def validate_app
@@ -235,7 +161,7 @@ CODE
       end[false]
 
       unless missed_assets.blank?
-        fail "The app assets with uids '#{missed_assets.join(", ")}' do " \
+        fail "The app assets with uids '#{missed_assets.join(', ')}' do " \
              "not exist or are not accessible by you."
       end
 
@@ -256,7 +182,7 @@ CODE
         i_name = spec["name"]
 
         if !i_name.is_a?(String) || i_name.empty?
-          fail "The #{(i+1).ordinalize} input is missing a name."
+          fail "The #{(i + 1).ordinalize} input is missing a name."
         end
 
         unless i_name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
@@ -316,7 +242,7 @@ CODE
         i_choices = spec["choices"].try(:uniq)
 
         if i_choices.present?
-          if !i_choices.is_a?(Array)
+          unless i_choices.is_a?(Array)
             fail "The 'choices' (possible values) provided for the input " \
                  "named '#{i_name}' is not an array."
           end
@@ -336,7 +262,7 @@ CODE
         i_patterns = spec["patterns"].try(:uniq)
 
         if i_patterns.present?
-          if !i_patterns.is_a?(Array)
+          unless i_patterns.is_a?(Array)
             fail "The filename patterns provided for the input named " \
                  "'#{i_name}' is not an array"
           end
@@ -357,7 +283,7 @@ CODE
           "class": i_class,
           "optional": i_optional,
           "label": i_label,
-          "help": i_help
+          "help": i_help,
         }
 
         ret["default"] = i_default if i_default
@@ -381,7 +307,7 @@ CODE
         i_name = spec["name"]
 
         if !i_name.is_a?(String) || i_name.empty?
-          fail "The #{(i+1).ordinalize} output is missing a name."
+          fail "The #{(i + 1).ordinalize} output is missing a name."
         end
 
         unless i_name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
@@ -429,7 +355,7 @@ CODE
         i_patterns = spec["patterns"].try(:uniq)
 
         if i_patterns.present?
-          if !i_patterns.is_a?(Array)
+          unless i_patterns.is_a?(Array)
             fail "The filename patterns provided for the output named " \
                  "'#{i_name}' is not an array"
           end
@@ -450,7 +376,7 @@ CODE
           "class": i_class,
           "optional": i_optional,
           "label": i_label,
-          "help": i_help
+          "help": i_help,
         }
 
         ret["patterns"] = i_patterns if i_patterns
@@ -472,7 +398,5 @@ CODE
         value.is_a?(String)
       end
     end
-
-    delegate :docker_image, :docker_pull, to: :cwl_presenter
   end
 end
