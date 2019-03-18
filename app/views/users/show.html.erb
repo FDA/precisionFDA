@@ -20,6 +20,11 @@
       <p class="list-group-item-text"><%= @user.dxuser %></p>
     </li>
 
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Email ID </h5>
+      <p class="list-group-item-text"><%= @user.email %></p>
+    </li>
+
     <% if @user.org_id.present? %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Organization</h5>
@@ -46,10 +51,10 @@
         <li class="list-group-item">
           <% if @user.user_state == 'enabled' %>
             <h5 class="list-group-item-heading">Disable User</h5>
-            <button class="btn btn-primary" id="toggleDisableUser" data-toggle="modal" data-target="#deactivate_user_modal">
+            <button class="btn btn-primary" id="toggleDisableUser" data-dxuser="<%= @user.dxuser %>" data-bind="click: showDeactivateUserModal">
               Deactivate
             </button>
-            <%= render '/users/deactivate_user_modal', user: @user %>
+            <%= render '/_partials/deactivate_user_modal' %>
           <% else %>
             <h5 class="list-group-item-heading">Disable User</h5>
             <a href="<%= admin_toggle_activate_user_path(dxuser: @user.dxuser) %>" class="btn btn-primary">
@@ -59,12 +64,12 @@
         </li>
       <% end %>
 
-        <% if Rails.env.development? || @user.locked? %>
+        <% if @user.locked? %>
           <li class="list-group-item">
             <h5 class="list-group-item-heading">Unlock User</h5>
-            <div disabled="" class="btn btn-primary" href="<%= admin_toggle_lock_user_path(dxuser: @user.dxuser) %>" id="toggleLockUser"><span class="fa fa-unlock"></span>Unlock</div>
+            <a class="btn btn-primary" href="<%= admin_toggle_lock_user_path(dxuser: @user.dxuser) %>" id="toggleLockUser"><span class="fa fa-unlock"></span>Unlock</a>
           </li>
-        <% elsif @user.enabled? && !Rails.env.development? %>
+        <% else %>
           <li class="list-group-item">
             <h5 class="list-group-item-heading">Unlock User</h5>
             <div class="btn btn-primary" disabled=""><span class="fa fa-unlock"></span>Unlock</div>

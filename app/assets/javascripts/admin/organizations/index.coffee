@@ -1,3 +1,11 @@
+class PageAdminOrgsView
+  showChangeAdminModal: (root, e) ->
+    orgid = e.target.getAttribute('data-orgid')
+    @changeAdminModal.showChangeAdminModal(orgid)
+
+  constructor: () ->
+    @changeAdminModal = new Precision.ChangeAdminModal()
+
 #########################################################
 #
 #
@@ -6,8 +14,10 @@
 #
 #########################################################
 
-ParticipantsController = Paloma.controller('Admin/Organizations',
+
+ParticipantsController = Paloma.controller('Admin/Organizations', {
   index: ->
     $container = $("body main")
-    initWiceGrid()  #for some reason explicit init needed otherwise filters don't work
-)
+    viewModel = new PageAdminOrgsView()
+    ko.applyBindings(viewModel, $container[0])
+})

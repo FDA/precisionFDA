@@ -4,6 +4,10 @@
     link_to user.dxuser, user_path(user.dxuser)
   end
 
+  g.column name:"Email ID", attribute: 'email' do |user|
+    link_to user.email, user_path(user.dxuser)
+  end
+
   if action_name == 'pending_users'
     g.column name:"Resend" do |user|
       content_tag(:a, "Resend Activation", href: admin_resend_activation_email_path(dxuser: user.dxuser), class:"btn btn-primary")

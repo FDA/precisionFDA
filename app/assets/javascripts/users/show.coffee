@@ -6,10 +6,7 @@
 #
 #########################################################
 
-class UserShowModel
-  constructor: (user_state) ->
-    @user_state = ko.observable(user_state)
-
+class UserShowView
   # disable / enable user
   toggleLockUser: (data, ev) ->
     href = $(ev.currentTarget).prop('href')
@@ -21,11 +18,20 @@ class UserShowModel
       Precision.alert.show("Successfully unlocked", "alert-success")
     )
 
+  showDeactivateUserModal: (root, e) ->
+    dxuser = $(e.target).attr('data-dxuser')
+    @deactivateUserModal.showModal(dxuser)
+
+  constructor: (user_state) ->
+    @user_state = ko.observable(user_state)
+    @deactivateUserModal = new Precision.DeactivateUserModal()
+
+
 UsersController = Paloma.controller('Users', {
   show: ->
     $container = $("body main")
 
-    viewModel = new UserShowModel(@params.user_state)
+    viewModel = new UserShowView(@params.user_state)
     ko.applyBindings(viewModel, $container[0])
 
     $tabs = $container.find(".nav-tabs > li")
