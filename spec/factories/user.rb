@@ -3,8 +3,8 @@ FactoryBot.define do
     first_name { FFaker::Name.first_name }
     last_name { FFaker::Name.last_name }
     dxuser "test_user"
-    email "test_user@pfda"
-    normalized_email "test_user@pfda"
+    email { FFaker::Internet.email }
+    normalized_email { email.downcase }
     association :org
     last_login 1.day.ago
     private_files_project "project-test"

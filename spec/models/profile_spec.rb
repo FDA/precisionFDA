@@ -5,11 +5,6 @@ RSpec.describe Profile, type: :model do
   let(:profile) { build(:profile, country: country) }
   let(:country) { create(:country, name: 'Russia') }
 
-  before do
-    stub_request(:post, "#{DNANEXUS_APISERVER_URI}#{ORG_DUMMY}/invite").to_return(status: 404)
-  end
-  after { WebMock.reset! }
-
   describe 'common_validations' do
     it { is_expected.to be_valid }
     it { is_expected.to validate_presence_of(:address1) }

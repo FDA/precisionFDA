@@ -186,7 +186,7 @@ RSpec.describe SpacesController, type: :controller do
 
         expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-HOST/invite").with(body: {
           invitee: space.guest_dxorg,
-          level: "VIEW",
+          level: "CONTRIBUTE",
           suppressEmailNotification: true,
           suppressAllNotifications: true
         })
@@ -231,7 +231,7 @@ RSpec.describe SpacesController, type: :controller do
 
         expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite").with(body: {
           invitee: space.host_dxorg,
-          level: "VIEW",
+          level: "CONTRIBUTE",
           suppressEmailNotification: true,
           suppressAllNotifications: true
         })
@@ -260,7 +260,7 @@ RSpec.describe SpacesController, type: :controller do
 
           expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite").with(body: {
             invitee: space.host_dxorg,
-            level: "VIEW",
+            level: "CONTRIBUTE",
             suppressEmailNotification: true,
             suppressAllNotifications: true
           })

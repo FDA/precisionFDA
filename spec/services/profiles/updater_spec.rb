@@ -2,12 +2,6 @@ require 'rails_helper'
 include Requests::ProfileControllerHelper
 
 RSpec.describe Profiles::Updater, type: :service do
-  before do
-    stub_request(:post, "#{DNANEXUS_APISERVER_URI}#{ORG_DUMMY}/invite").to_return(status: 404)
-  end
-
-  after { WebMock.reset! }
-
   let(:service_response) { described_class.call(params, context, profile) }
   let(:profile) { create(:profile, email_confirmed: true) }
   let(:context) { Context.new(profile.user.id, nil, SecureRandom.uuid, nil, nil) }

@@ -1,12 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe Profiles::Getter, type: :service do
-  before do
-    stub_request(:post, "#{DNANEXUS_APISERVER_URI}#{ORG_DUMMY}/invite").to_return(status: 404)
-  end
-
-  after { WebMock.reset! }
-
   let(:service_response) { described_class.call(user, context) }
   let(:context) { Context.new(user.id, nil, nil, nil, nil) }
   let(:user) { create(:user) }
