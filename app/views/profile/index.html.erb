@@ -74,7 +74,7 @@
         <li class="list-group-item">
           <h5 class="list-group-item-heading">
             <span>Name</span>&nbsp;
-            <% if is_user_org_admin? %>
+            <% if user_org_admin? %>
               <a href="#" class="organization-info-change-b" data-bind="click: showEditOrgNameModal">
                 <i class="fa fa-pencil text-danger"></i>&nbsp;Edit
               </a>
@@ -88,7 +88,7 @@
         </li>
       </ul>
 
-      <% if is_user_org_admin? %>
+      <% if user_org_admin? %>
         <%= render 'profile/edit_organization_name_modal' %>
         <%= render '_partials/deactivate_user_modal' %>
     <% end %>
@@ -109,7 +109,7 @@
             user.created_at.to_s(:human)
           end
 
-          if is_user_org_admin?
+          if user_org_admin?
             g.column name: 'Deactivate user' do |user|
               if user.enabled?
                 button_tag class: "btn btn-xs btn-primary",

@@ -5,13 +5,13 @@ module ProfileHelper
 
   def dial_codes
     Country.pluck(:dial_code, :id)
-        .reject {|i| i[0].empty? }
-        .to_h
-        .to_a
-        .sort
+      .reject { |i| i[0].empty? }
+      .to_h
+      .to_a
+      .sort
   end
 
-  def is_user_org_admin?
+  def user_org_admin?
     return false if @context.guest?
     current_user.id == current_user.org.admin_id
   end
