@@ -1,12 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe Profiles::EmailSynchronizer, type: :service do
-  after { WebMock.reset! }
-
-  before do
-    stub_request(:post, "#{DNANEXUS_APISERVER_URI}#{ORG_DUMMY}/invite").to_return(status: 404)
-  end
-
   let(:service_response) { described_class.call(user, context) }
   let(:user) { create(:user) }
   let!(:profile) { create(:profile, email_confirmed: false, user: user) }

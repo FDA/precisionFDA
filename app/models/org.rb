@@ -18,8 +18,8 @@
 class Org < ActiveRecord::Base
   include Auditor
 
-  validates :name, presence: true, uniqueness: { case_sensitive: false, message: "There is already an organization with that name" }
-  validates :handle, presence: true, uniqueness: { case_sensitive: false, message: "There is already an organization with that handle" }
+  validates :name, presence: true, uniqueness: { case_sensitive: false }
+  validates :handle, presence: true, uniqueness: { case_sensitive: false }
 
   has_many :users
   belongs_to :admin, { class_name: 'User' }

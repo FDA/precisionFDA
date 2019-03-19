@@ -4,7 +4,7 @@ module PhoneConfirmationService
   def send_code(phone)
     text = PhoneConfirmationService.generate_code
     PhoneConfirmation.create(number: phone, code: text, expired_at: Time.now + 5.minutes)
-    if Rails.env.development? || Rails.env.ui_test?
+    if Rails.env.development? || Rails.env.test? || Rails.env.ui_test?
       tmp_file = "#{Rails.root}/tmp/phone_code.txt"
       File.open(tmp_file, 'w') { |f| f.write(text) }
     else
