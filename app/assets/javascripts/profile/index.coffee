@@ -3,7 +3,6 @@ US_STATE = '#profile_us_state'
 # PHONE_COUNTRY_CODE = '#profile_phone_phone_country_id'
 PHONE_COUNTRY_CODE = '#profile_phone_country_id'
 PHONE_INPUT = '#profile_phone'
-DEACTIVATE_URL = '/admin/toggle_activate_user?dxuser='
 
 getCountryId =  (vals) -> if vals.country then vals.country.id else ''
 getCountryName =  (vals) -> if vals.country then vals.country.name else ''
@@ -268,7 +267,7 @@ class ProfilePageView
     @editOrgNameModal.modal('show')
 
   showDeactivateUserModal: (root, e) ->
-    dxuser = $(e.target).attr('data-dxuser')
+    dxuser = $(e.currentTarget).attr('data-dxuser')
     @deactivateUserModal.showModal(dxuser)
 
   changeOrgName: () ->
