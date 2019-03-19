@@ -8,7 +8,7 @@
     user.email
   end
 
-  g.column name: "STATE" do |user|
+  g.column name: "STATUS" do |user|
     user.user_state == "enabled" ? (user.logged_in? ? "Logged In" : "Not Logged In") : ( user.locked? ? "Locked" : "Not Logged In")
   end
 
