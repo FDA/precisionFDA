@@ -64,17 +64,10 @@
         </li>
       <% end %>
 
-        <% if @user.locked? %>
           <li class="list-group-item">
             <h5 class="list-group-item-heading">Unlock User</h5>
-            <a class="btn btn-primary" href="<%= admin_toggle_lock_user_path(dxuser: @user.dxuser) %>" id="toggleLockUser"><span class="fa fa-unlock"></span>Unlock</a>
+            <a class="btn btn-primary" href="<%= admin_unlock_user_path(dxuser: @user.dxuser) %>" id="toggleLockUser"><span class="fa fa-unlock"></span>Unlock</a>
           </li>
-        <% else %>
-          <li class="list-group-item">
-            <h5 class="list-group-item-heading">Unlock User</h5>
-            <div class="btn btn-primary" disabled=""><span class="fa fa-unlock"></span>Unlock</div>
-          </li>
-        <% end %>
       <% end %>
   </ul>
 </div>
