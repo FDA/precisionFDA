@@ -22,11 +22,13 @@ class PageUsageReportsView
     $dateAtDatepicker = $('.add-datetimepicker[name="custom_range[date_from]"]')
     @dateAtDatepicker = new Precision.Datepicker $dateAtDatepicker[0], {
       icon: true,
+      noDefaultValue: true,
       format: 'MM/DD/YYYY'
     }
     $dateToDatepicker = $('.add-datetimepicker[name="custom_range[date_to]"]')
     @dateToDatepicker = new Precision.Datepicker $dateToDatepicker[0], {
       icon: true,
+      noDefaultValue: true,
       format: 'MM/DD/YYYY'
     }
     @showCustomDates = ko.observable(false)
