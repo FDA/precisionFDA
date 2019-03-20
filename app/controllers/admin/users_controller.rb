@@ -60,14 +60,8 @@ module Admin
       if @context.user.can_administer_site?
         user = User.find_by_dxuser(params[:dxuser])
 
-        if user.org.admin_id ==  @context.user.id
-          token = @context.token
-        else
-          token = ADMIN_TOKEN
-        end
-
         begin
-          api = DNAnexusAPI.new(token, DNANEXUS_AUTHSERVER_URI)
+          api = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
           result = api.call(
               'account',
              "resendActivationEmail",
@@ -84,16 +78,8 @@ module Admin
     def reset_2fa
       if @context.user.can_administer_site?
         user = User.find_by_dxuser(params[:dxuser])
-
-        if user.org.admin_id ==  @context.user.id
-          token = @context.token
-        else
-          token = ADMIN_TOKEN
-        end
-
-
         begin
-          api = DNAnexusAPI.new(token, DNANEXUS_AUTHSERVER_URI)
+          api = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
           result = api.call(
             user.dxid,
            "resetUserMFA",
@@ -122,15 +108,8 @@ module Admin
         elsif user.user_state == 'locked'
           to_call = 'unlockUserAccount'
         end
-
-        if user.org.admin_id ==  @context.user.id
-          token = @context.token
-        else
-          token = ADMIN_TOKEN
-        end
-
         begin
-          api = DNAnexusAPI.new(token, DNANEXUS_AUTHSERVER_URI)
+          api = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
           result = api.call(
               @context.user.dxid,
               to_call,
