@@ -379,13 +379,6 @@ Lint/SafeNavigationChain:
 Style/Semicolon:
   AllowAsExpressionSeparator: false
 
-Style/SignalException:
-  EnforcedStyle: only_raise
-  SupportedStyles:
-  - only_raise
-  - only_fail
-  - semantic
-
 Style/SingleLineMethods:
   AllowIfMethodIsEmpty: true
 
@@ -403,6 +396,12 @@ Style/StabbyLambdaParentheses:
   SupportedStyles:
   - require_parentheses
   - require_no_parentheses
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+  SupportedStyles:
+    - single_quotes
+    - double_quotes
 
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: single_quotes
@@ -929,9 +928,6 @@ Style/WhileUntilDo:
 
 Style/ZeroLengthPredicate:
   Enabled: true
-
-Layout/IndentHeredoc:
-  EnforcedStyle: squiggly
 
 Lint/AmbiguousOperator:
   Enabled: true
