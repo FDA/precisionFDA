@@ -186,7 +186,15 @@ class AssetService
   end
 
   def md5sum(chunk)
-    Digest::MD5.hexdigest(chunk, false)
+    file = Tempfile.new("")
+    file.binmode
+    file.write(chunk)
+    file.rewind
+
+    `md5sum #{file.path} | cut -d ' ' -f 1`.strip
+  ensure
+    file.close
+    file.unlink
   end
 
   def api

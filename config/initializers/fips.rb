@@ -2,29 +2,6 @@ OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:ssl_version] ="TLSv1_2"
 OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:ciphers] = "TLSv1.2+FIPS:kRSA+FIPS:!eNULL:!aNULL"
 OpenSSL.fips_mode = true unless ENV['NO_FIPS']
 
-module MD5_OpenSSL
-  def self.prepended(base)
-    class << base
-      prepend ClassMethods
-    end
-  end
-
-  module ClassMethods
-    def new(override = true)
-      override ? OpenSSL::Digest::SHA256.new : super()
-    end
-
-    def hexdigest(s = '', override = true)
-      override ? OpenSSL::Digest('SHA256').hexdigest(s) :
-                 Digest.hexencode(new(false).digest(s))
-    end
-
-    def digest(s = '', override = true)
-      override ? OpenSSL::Digest('SHA256').digest(s) : super(s)
-    end
-  end
-end
-
 module SHA256_OpenSSL
   def self.prepended(base)
     base.prepend(InstanceMethods)
@@ -77,6 +54,6 @@ module SHA1_OpenSSL
   end
 end
 
-Digest::MD5.prepend(MD5_OpenSSL)
+Digest::MD5.prepend(SHA256_OpenSSL)
 Digest::SHA1.prepend(SHA1_OpenSSL)
 Digest::SHA256.prepend(SHA256_OpenSSL)
