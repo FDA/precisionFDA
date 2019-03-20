@@ -84,7 +84,7 @@ module Admin
             user.dxid,
            "resetUserMFA",
             user_id: user.dxid,
-            org_id: "org-pfda.." + user.org.handle
+            org_id: ORG_EVERYONE
           )
         rescue Net::HTTPServerException => e
           if e.message =~ /MFA is already reset/
@@ -114,7 +114,7 @@ module Admin
               @context.user.dxid,
               to_call,
               user_id: user.dxid,
-              org_id: "org-pfda.." + user.org.handle
+              org_id: ORG_EVERYONE
           )
         rescue Net::HTTPServerException => e
           puts "ERROR: #{e}"
