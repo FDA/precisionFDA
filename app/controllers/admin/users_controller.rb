@@ -98,26 +98,17 @@ module Admin
       end
     end
 
-    def toggle_lock_user
-      if @context.user.can_administer_site?
+    def unlock_user
         user = User.find_by_dxuser(params[:dxuser])
-        to_call = nil
-
-        if user.user_state == 'enabled'
-          to_call = 'lockUserAccount'
-        elsif user.user_state == 'locked'
-          to_call = 'unlockUserAccount'
-        end
         begin
           api = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
           result = api.call(
               @context.user.dxid,
-              to_call,
+              "unlockUserAccount",
               user_id: user.dxid,
               org_id: ORG_EVERYONE
           )
         rescue Net::HTTPServerException => e
-          puts "ERROR: #{e}"
           if request.method == 'POST'
             render json: { ok: 'error' }, status: 403
           else
@@ -128,24 +119,8 @@ module Admin
             redirect_to :back, alert: error
           end
         else
-          if result.present? && result["user_id"].present?
-            if to_call == 'lockUserAccount'
-              user.user_state = 'locked'
-            else
-              user.user_state = 'enabled'
-            end
-
-            user.save!(validate:false)
-            if request.method == 'POST'
-            render json: { ok: true }
-            else
-              redirect_to :back, alert: "User has been #{user.user_state}"
-            end
-          end
+          redirect_to :back, alert: "User has been unlocked"
         end
-      else
-        redirect_to root_path, status: 403
-      end
     end
 
     def active
