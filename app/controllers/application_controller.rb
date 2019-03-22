@@ -7,6 +7,8 @@ class ApplicationController < ActionController::Base
   # if we have some invalid forms redirect to root page.
   rescue_from ActionController::InvalidAuthenticityToken, with: :invalid_token
 
+  before_action :cache_headers
+
   # Decode context
   before_action :handle_session, :decode_context
 
@@ -381,4 +383,9 @@ class ApplicationController < ActionController::Base
     raise ActionController::RoutingError.new('Not Found')
   end
 
+  def cache_headers
+    response.headers['Cache-Control'] = 'no-cache, no-store, max-age=0, must-revalidate, private'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+  end
 end
