@@ -513,6 +513,7 @@ class SpacesController < ApplicationController
       per_page: 25,
       include: [:user, { user: :org }, { taggings: :tag }],
     })
+    js(common_fields)
   end
 
   def workflows

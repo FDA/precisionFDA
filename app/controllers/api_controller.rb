@@ -492,7 +492,7 @@ class ApiController < ApplicationController
     User.sync_files!(@context)
 
     files = if params[:editable]
-      UserFile.real_files.editable_by(@context)
+      UserFile.real_files.editable_by(@context).accessible_by_private
     else
       UserFile.real_files.accessible_by(@context)
     end
@@ -541,7 +541,7 @@ class ApiController < ApplicationController
   #
   def list_notes
     notes = if params[:editable]
-      Note.editable_by(@context).where.not(title: nil)
+      Note.editable_by(@context).where.not(title: nil).accessible_by_private
     else
       Note.accessible_by(@context).where.not(title: nil)
     end
@@ -591,7 +591,7 @@ class ApiController < ApplicationController
   def list_comparisons
     # TODO: sync comparisons?
     comparisons = if params[:editable]
-      Comparison.editable_by(@context)
+      Comparison.editable_by(@context).accessible_by_private
     else
       Comparison.accessible_by(@context)
     end
@@ -628,7 +628,7 @@ class ApiController < ApplicationController
   #
   def list_apps
     app_series = if params[:editable]
-      AppSeries.editable_by(@context)
+      AppSeries.editable_by(@context).accessible_by_private
     else
       AppSeries.accessible_by(@context)
     end
@@ -669,7 +669,7 @@ class ApiController < ApplicationController
   #
   def list_jobs
     jobs = if params[:editable]
-      Job.editable_by(@context)
+      Job.editable_by(@context).accessible_by_private
     else
       Job.accessible_by(@context)
     end
@@ -711,7 +711,7 @@ class ApiController < ApplicationController
 
     ids = params[:ids]
     assets = if params[:editable]
-      Asset.closed.editable_by(@context)
+      Asset.closed.editable_by(@context).accessible_by_private
     else
       Asset.closed.accessible_by(@context)
     end
@@ -741,7 +741,7 @@ class ApiController < ApplicationController
 
   def list_workflows
     workflow_series = if params[:editable]
-      WorkflowSeries.editable_by(@context)
+      WorkflowSeries.editable_by(@context).accessible_by_private
     else
       WorkflowSeries.accessible_by(@context)
     end

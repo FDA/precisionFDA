@@ -41,6 +41,10 @@ module Permissions
       where(scope: "public")
     end
 
+    def accessible_by_private
+      where(scope: "private")
+    end
+
     def accessible_by_space(space)
       where(scope: space.uid)
     end
