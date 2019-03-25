@@ -30,12 +30,12 @@ module Admin
           end
         end
 
-      if state.present?
+      if state.present? && user.valid?
         user.user_state = state
         user.save!(validate: false)
         redirect_to :back, alert: "User has been #{state == 'enabled' ? 're-activated':'de-activated'}"
       else
-        redirect_to :back, error: "There was an error locking the user"
+        redirect_to :back, error: "There was an error locking the user: #{ user.errors.map{|k,v| v }.join(",\n") }"
       end
     end
 
