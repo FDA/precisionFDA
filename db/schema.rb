@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190309183231) do
+ActiveRecord::Schema.define(version: 20190322143409) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -799,6 +799,8 @@ ActiveRecord::Schema.define(version: 20190309183231) do
     t.integer  "yearly_byte_hours",          limit: 8
     t.integer  "custom_range_byte_hours",    limit: 8
     t.decimal  "custom_range_compute_price",           precision: 30, scale: 20
+    t.decimal  "cumulative_compute_price",             precision: 30, scale: 20
+    t.integer  "cumulative_byte_hours",      limit: 8
   end
 
   create_table "users", force: :cascade do |t|
