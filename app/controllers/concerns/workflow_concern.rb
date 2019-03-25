@@ -1,12 +1,6 @@
 module WorkflowConcern
   include ActiveSupport::Concern
 
-  def render_error_method(error)
-    json = { error: { type: "API Error", message: error.message } }
-    json[:data] = error.data unless error.data.empty?
-    render json: json, status: 422
-  end
-
   def run_workflow_once(workflow_params)
     analysis_name = workflow_params["name"]
     fail "The workflow 'analysis_name' must be a nonempty string." unless analysis_name.is_a?(String) && analysis_name != ""
@@ -136,9 +130,5 @@ module WorkflowConcern
       end
     end
     analysis_dxid
-  end
-
-  def fail(msg, data = {})
-    raise ApiError.new(msg, data)
   end
 end

@@ -198,25 +198,26 @@ table.table-nowrap
     max-height: initial
     overflow: initial
 
-.pfda-datetimepicker
+.pfda-datetimepicker,
+.pfda-phone-input,
   &.with-icon
     position: relative
-
-.pfda-datetimepicker-label
-  overflow: hidden
-  white-space: nowrap
-  text-overflow: ellipsis
-.pfda-datetimepicker-value
-  height: 0px
-  padding: 0px
-  box-sizing: border-box
-  box-shadow: none
-  border: none
-  width: 0px
-.pfda-datetimepicker-icon
-  position: absolute
-  top: 10px
-  right: 10px
+  &-label
+    overflow: hidden
+    white-space: nowrap
+    text-overflow: ellipsis
+  &-value
+    height: 0px
+    padding: 0px
+    box-sizing: border-box
+    box-shadow: none
+    border: none
+    width: 0px
+    position: absolute
+  &-icon
+    position: absolute
+    top: 10px
+    right: 10px
 
 .fisma-alert
   background-color: #c54641
@@ -269,3 +270,27 @@ table.table-nowrap
     .modal-body,
     .modal-footer
       visibility: hidden
+
+#confirm_phone_modal
+  .modal-body
+    padding-top: 30px
+    padding-bottom: 30px
+  .send-new-code
+    position: relative
+    top: 5px
+
+.phone-confirmed
+  height: 46px
+  padding-top: 10px
+  &-small
+    height: 34px
+    padding-top: 5px
+
+#auth_credentials_modal
+  .modal-body
+    .input-row
+      width: 300px
+      margin: auto
+  .popover
+    width: 100%
+    max-width: 360px

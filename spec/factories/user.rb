@@ -1,7 +1,10 @@
 FactoryBot.define do
   factory :user do
-    dxuser "test_user"
-    email "test_user@pfda"
+    first_name { FFaker::Name.first_name }
+    last_name { FFaker::Name.last_name }
+    sequence(:dxuser) { |n| "dxuser-#{n}" }
+    email { FFaker::Internet.email }
+    normalized_email { email.downcase }
     association :org
     last_login 1.day.ago
     private_files_project "project-test"

@@ -1,9 +1,8 @@
 class WorkflowsController < ApplicationController
   include WorkflowConcern
+  include ErrorProcessable
 
   before_action :validate_workflow_before_export, only: %i(cwl_export wdl_export)
-
-  rescue_from ApiError, :with => :render_error_method
 
   def new
     app_series = AppSeries.accessible_by(@context).joins(:apps).merge(App.accessible_by(@context)).distinct
@@ -13,8 +12,6 @@ class WorkflowsController < ApplicationController
   end
 
   def show
-
-
     @workflow = Workflow.accessible_by(@context).find_by_uid(params[:id])
     if @workflow.nil?
       flash[:error] = "Sorry, this workflow does not exist or is not accessible by you"
@@ -23,16 +20,15 @@ class WorkflowsController < ApplicationController
     end
 
     comment_data
-
     @revisions = @workflow.workflow_series.accessible_revisions(@context).select(:title, :id, :dxid, :uid, :revision)
 
     @workflow.in_space? ? User.sync_jobs!(@context, @workflow.jobs, @workflow.project) : User.sync_jobs!(@context)
 
     a = Analysis.arel_table
     batch_ids = ActiveRecord::Base.connection.execute("select min(id) from analyses where batch_id is not null group by batch_id").to_a.flatten
-    all_analyses = @workflow.analyses.editable_by(@context).includes(jobs: :app).where( a["batch_id"].eq(nil).or(a["id"].in(batch_ids)))
+    all_analyses = @workflow.analyses.editable_by(@context).where(a["batch_id"].eq(nil).or(a["id"].in(batch_ids)))
 
-    batch_hash = Analysis.batch_hash(all_analyses.where("batch_id is not NULL"))
+    batch_hash = Analysis.batch_hash(all_analyses.where("analyses.batch_id is not NULL"))
 
     @analyses_grid = initialize_grid(all_analyses,
       name: 'analyses',
@@ -72,20 +68,22 @@ class WorkflowsController < ApplicationController
       js_param[:workflow] = @workflow.slice(:id, :dxid, :uid, :readme, :spec)
     end
 
-    jobs = Job.includes(:analysis).where(user_id: @context.user_id).where.not(state: Job::TERMINAL_STATES)
-    jobs.each { |job| User.sync_job!(@context, job.id) }
     User.sync_jobs!(@context)
+
+    jobs = Job.includes(:analysis).where(user_id: @context.user_id).where.not(state: Job::TERMINAL_STATES).limit(SYNC_JOBS_LIMIT)
+    jobs.reload.each { |job| User.sync_job!(@context, job.id) }
 
     if @workflow.present?
       analysis_arel = Analysis.arel_table
       batch_ids = ActiveRecord::Base.connection.execute("select min(id) from analyses where batch_id is not null group by batch_id").to_a.flatten
-      analyses = @workflow.analyses.editable_by(@context).includes({jobs: :app}, :workflow).where( analysis_arel["batch_id"].eq(nil).or(analysis_arel["id"].in(batch_ids)))
+      analyses = @workflow.analyses.editable_by(@context)
+                     .where(analysis_arel["batch_id"].eq(nil).or(analysis_arel["id"].in(batch_ids)))
 
       batches = Analysis.where(id: batch_ids)
       batches.each do |b|
         batch_json[b.batch_id] = Analysis.where(batch_id: b.batch_id)
       end
-      batch_hash = Analysis.batch_hash(analyses.where("batch_id is not NULL"))
+      batch_hash = Analysis.batch_hash(analyses.where("analyses.batch_id is not NULL"))
       js_param[:batch_hash] = batch_hash
 
       comment_data
@@ -94,21 +92,30 @@ class WorkflowsController < ApplicationController
     else
       analysis_arel = Analysis.arel_table
       batch_ids = ActiveRecord::Base.connection.execute("select min(id) from analyses where batch_id is not null group by batch_id").to_a.flatten
-      analyses = Analysis.editable_by(@context).includes({jobs: :app}, :workflow).where( analysis_arel["batch_id"].eq(nil).or(analysis_arel["id"].in(batch_ids)))
+      analyses = Analysis.editable_by(@context)
+                     .where(analysis_arel["batch_id"].eq(nil).or(analysis_arel["id"].in(batch_ids)))
 
-      batch_hash = Analysis.batch_hash(analyses.where("batch_id is not NULL"))
+      batch_hash = Analysis.batch_hash(analyses.where("analyses.batch_id is not NULL"))
       js_param[:batch_hash] = batch_hash
       js_param[:analyses_jobs] = Analysis.job_hash(analyses.where(batch_id: nil), workflow_details: true, batches: batch_json)
     end
 
-    @analyses_grid = initialize_grid(analyses,
+    @analyses_grid = initialize_grid(analyses.eager_load(:jobs),
       name: 'analyses',
       order: 'analyses.id',
       order_direction: 'desc',
       per_page: 100,)
-    @my_workflows = WorkflowSeries.editable_by(@context).order(name: :asc).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
+    
+    @my_workflows = WorkflowSeries.includes(latest_revision_workflow: [user: :org])
+      .editable_by(@context).order(name: :asc)
+      .map { |series| series.latest_accessible(@context) }.compact
 
-    js js_param.merge({ batches: batch_hash })
+    @run_workflows = WorkflowSeries.eager_load(latest_revision_workflow: [user: :org])
+                      .accessible_by(@context).order(name: :asc)
+                       .where.not(user_id: @context.user_id)
+                       .map { |series| series.latest_accessible(@context) }.compact
+
+    js js_param.merge(batches: batch_hash)
   end
 
   def fork
@@ -158,7 +165,7 @@ class WorkflowsController < ApplicationController
     workflow_object = Workflow.find_by_uid(params[:id])
     folder = Folder.find(params[:folder_id]) if params[:folder_id].present?
 
-    batch_id = workflow_object.dxid + '_' + "#{DateTime.now.to_i}"
+    batch_id = workflow_object.dxid + '_' + DateTime.now.to_i.to_s
     batch_one = params[:batch_input_one]
     batch_two = params[:batch_input_two]
 
@@ -185,7 +192,7 @@ class WorkflowsController < ApplicationController
       if params["inputs"]
         others = params["inputs"].dup.map do |v|
           val = v.dup
-          val["input_name"] = workflow_object.all_input_spec.find{|s| s["name"] == v["input_name"]}["parent_slot"] + "." +  v["input_name"]
+          val["input_name"] = workflow_object.all_input_spec.find { |s| s["name"] == v["input_name"] }["parent_slot"] + "." + v["input_name"]
           val
         end
 
@@ -193,9 +200,9 @@ class WorkflowsController < ApplicationController
       end
 
       workflow = {
-          "workflow_id" => workflow_object.uid,
-          "name" => workflow_object.name,
-          "inputs" => inputs
+        "workflow_id" => workflow_object.uid,
+        "name" => workflow_object.name,
+        "inputs" => inputs,
       }
       to_run = workflow.dup
       to_run["api"] = workflow.dup
@@ -209,11 +216,10 @@ class WorkflowsController < ApplicationController
     end
 
     if folder.present?
-      list_analyses.each{|a| a.reload; a.jobs.each{|j| j.local_folder_id = folder.id; j.save}}
+      list_analyses.each { |a| a.reload; a.jobs.each { |j| j.local_folder_id = folder.id; j.save } }
     end
 
-    render json: {url: workflow_path(workflow_object)}
-
+    render json: { url: workflow_path(workflow_object) }
   end
 
   def terminate_batch
@@ -238,7 +244,7 @@ class WorkflowsController < ApplicationController
   def convert_file_with_strings
     file = params[:file_field]
     file_content = file.tempfile.read
-    file_content = file_content.each_line.reject{|x| x.strip == ""}.join.force_encoding('utf-8')
+    file_content = file_content.each_line.reject { |x| x.strip == "" }.join.force_encoding('utf-8')
     size_of_inputs = file_content.each_line.first.split("\t").size
     content =
       if size_of_inputs > 1
@@ -276,7 +282,7 @@ class WorkflowsController < ApplicationController
       result = { folders: [] }
     else
       folders_attr = folders.pluck(:id, :name)
-      result = { folders: folders_attr.map{ |el| { id: el[0], name: el[1] } } }
+      result = { folders: folders_attr.map { |el| { id: el[0], name: el[1] } } }
     end
   end
 
@@ -323,20 +329,20 @@ class WorkflowsController < ApplicationController
     service = FolderService.new(@context)
     result = service.add_folder(params[:name], parent_folder, scope)
 
-    if result.failure?
-      res = { folders: result.value.values }
+    result = if result.failure?
+      { folders: result.value.values }
     else
-      res = { folders: { id: result.value.id, name: result.value.name } }
+      { folders: { id: result.value.id, name: result.value.name } }
     end
 
-    render json: res
+    render json: result
   end
 
   # usage on the platform
   def output_folder_create_platform
     response = output_folder_service.create(params[:folder])
     if response['id'] == @context.user.private_files_project || response['id'] == @context.user.public_files_project
-      result = {result: 'Status Update: 200'}
+      result = { result: 'Status Update: 200' }
       output_folder_update
     else
       result = JSON.parse(response.body)['error']
@@ -404,7 +410,5 @@ class WorkflowsController < ApplicationController
     else
       @comments = @workflow.root_comments.order(id: :desc).page params[:comments_page]
     end
-
   end
-
 end

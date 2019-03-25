@@ -44,3 +44,37 @@ window.Precision.utils =
     $([document.documentElement, document.body]).animate({
       scrollTop: where
     }, 0)
+
+  digitsOnly: (str = '') ->
+    return str if typeof str != 'string'
+    return str.replace(/[^0-9.]/g, '')
+
+  formatToPhoneNumber: (str = '') ->
+    return str if typeof str != 'string'
+    str = @digitsOnly(str)
+    return str
+    # ln = str.length
+    # switch
+    #   when ln > 0 and ln <= 3
+    #     return str.replace(/(.*)/, '($1)')
+    #   when ln > 3 and ln <= 6
+    #     return str.replace(/(.{3})(.*)/, '($1) $2')
+    #   when ln > 6 and ln <= 8
+    #     return str.replace(/(.{3})(.{3})(.*)/, '($1) $2-$3')
+    #   when ln > 8 and ln <= 10
+    #     return str.replace(/(.{3})(.{3})(.{2})(.*)/, '($1) $2-$3-$4')
+    #   else
+    #     return str.replace(/(.{3})(.{3})(.{2})(.{2})(.*)/, '($1) $2-$3-$4')
+
+  validatePhoneNumber: (number = '', countryCode = '') ->
+    return false if typeof number != 'string' or typeof countryCode != 'string'
+    number = @digitsOnly(number).length
+    code = @digitsOnly(countryCode).length
+    return (number + code) == 11
+
+  findCountryCode: (country_codes = {}, countryID) ->
+    return false if !countryID or isNaN(parseInt(countryID))
+    countryID = parseInt(countryID)
+    for code, ids of country_codes
+      return code if ids.indexOf(countryID) > -1
+    return false

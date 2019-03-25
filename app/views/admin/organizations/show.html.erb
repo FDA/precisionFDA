@@ -1,0 +1,45 @@
+<% content_for :title do %>Admin Dashboard<% end %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-body">
+      <div class="page-title">
+        <i class="fa fa-bar-chart" aria-hidden="true"></i>
+        <%= @org.name %> administration
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <div class="pfda-padded-v">
+    <%= render partial: "admin/organizations/org_admins_grid" %>
+  </div>
+
+  <h3 class="pull-left"><%= params[:filter] || "active" %> users</h3>
+  <div class="pfda-padded-v">
+    <div class="pfda-padded-b row">
+      <div class="pull-right">
+        <a class="btn btn-default" rel="nofollow" href="<%= admin_show_org_path(handle: @org.handle) %>">
+          <i class="fa fa-users" aria-hidden="true"></i> View Active Users
+        </a>
+        <a class="btn btn-default" rel="nofollow" href="<%= admin_show_org_path(handle: @org.handle, filter: "pending") %>">
+          <i class="fa fa-users" aria-hidden="true"></i> View Pending Users
+        </a>
+        <a class="btn btn-default" rel="nofollow" href="<%= admin_show_org_path(handle: @org.handle, filter: "deactivated") %>">
+          <i class="fa fa-users" aria-hidden="true"></i> View Deactivated Users
+        </a>
+      </div>
+    </div>
+
+    <% if @org.users.empty? %>
+       <h3> There are no users in this org</h3>
+    <% else %>
+      <%= render partial: "admin/organizations/org_users_grid" %>
+    <% end %>
+  </div>
+</div>
+
+<%= render "_partials/admin/change_admin_modal" %>
+
+<%= render '/_partials/deactivate_user_modal' %>

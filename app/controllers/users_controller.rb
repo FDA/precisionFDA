@@ -61,6 +61,7 @@ class UsersController < ApplicationController
         include: [{user: :org}, :latest_version_app, {taggings: :tag}]
       })
     end
+    js(user_state: @user.user_state)
   end
 
 end

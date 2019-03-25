@@ -1,0 +1,32 @@
+<div id="edit_org_name_modal" class="modal fade tasks-actions-modal modal-with-loader" data-bind="css: {loading: editOrgNameModalIsLoading}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Change Organization Name</h4>
+      </div>
+      <div class="loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-12">
+            <input
+              id="edit_org_name_modal_input"
+              type="text" class="form-control"
+              placeholder="Enter new org name"
+              data-bind="value: editOrgNameModalValue, event: {'input': editOrgNameModalValueOnChange}"
+            />
+          </div>
+          <div class="col-sm-offset-1 col-sm-6">
+            <button class="btn btn-primary" data-bind="click: changeOrgName, disable: editOrgNameModalButtonDisabled">Save</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

@@ -1,6 +1,7 @@
 require_relative 'migrate/20180516114442_seed_news_items'
 require_relative 'migrate/20180510104759_create_get_started_boxes'
 require_relative 'migrate/20180629093507_create_participants'
+require_relative 'migrate/20190212131903_create_countries.rb'
 
 first_name = ENV.fetch('PFDA_USER_FIRST_NAME', 'Alice')
 last_name = ENV.fetch('PFDA_USER_LAST_NAME', 'Black')
@@ -77,14 +78,15 @@ ActiveRecord::Base.transaction do
     end_at: 2.weeks.from_now
   )
 
-  User.create!(
+  User.new(
     dxuser: CHALLENGE_BOT_DX_USER,
     private_files_project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
     public_files_project: CHALLENGE_BOT_PUBLIC_FILES_PROJECT
-  )
+  ).save!(validate: false)
 
   # load articles generated from stuff.
   SeedNewsItems.new.up
   CreateGetStartedBoxes.new.up
   CreateParticipants.new.migrate_data
+  CreateCountries.migrate_data unless Rails.env.test?
 end

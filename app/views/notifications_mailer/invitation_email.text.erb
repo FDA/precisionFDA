@@ -7,7 +7,8 @@ Submitted information:
   Email: <%= @invitation.email %>
   Organization: <%= @invitation.org %>
   Self-representing? <%= !!@invitation.singular %>
-  Address: <%= @invitation.address %>
+  Org Admin?: <%= @invitation.organization_admin %>
+  Address: <%= @invitation.address1 %>
   Phone: <%= @invitation.phone %>
   DUNS: <%= @invitation.duns %>
   Reason: <%= @invitation.req_reason %>
