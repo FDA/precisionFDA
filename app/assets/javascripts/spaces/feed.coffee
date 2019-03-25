@@ -115,8 +115,7 @@ class SpacesFeedView
 
   resetDateFilters: () ->
     $('#select_date_range button').removeClass('active')
-    $('#select_date_range button[data-type="week"]').addClass('active')
-    @setDateRange()
+    @setDateRange('space_created_at')
 
   resetUserFilters: () ->
     @filtersForm[0].querySelectorAll('select').forEach(
@@ -144,6 +143,7 @@ class SpacesFeedView
       when 'week' then date_at = date_at.startOf('week')
       when 'month' then date_at = date_at.startOf('month')
       when 'year' then date_at = date_at.startOf('year')
+      when 'space_created_at' then date_at = moment(@spaceCreatedAt)
       else return false
 
     @dateAtDatepicker.setValue(date_at)
@@ -171,6 +171,7 @@ class SpacesFeedView
       return true
 
   constructor: (params) ->
+    @spaceCreatedAt = params.space_created_at
     @space_id = params.space_id
     @filtersForm = $('#feed_filters_form form')
     @objectTypes = ko.observableArray(params.object_types)
@@ -225,29 +226,28 @@ class SpacesFeedView
 
 SpacesController = Paloma.controller('Spaces', {
   feed: () ->
-    $container = $("#ko_spaces_feed_container")
-    viewModel = new SpacesFeedView(@params)
-    ko.applyBindings(viewModel, $container[0])
+    if @params.active
+      $container = $("#ko_spaces_feed_container")
+      viewModel = new SpacesFeedView(@params)
+      ko.applyBindings(viewModel, $container[0])
 
-    $('#select_date_range').on 'click', (e) ->
-      e.preventDefault()
-      $(this).find('button').removeClass('active')
-      $(e.target).addClass('active')
-      viewModel.setDateRange $(e.target).attr('data-type')
+      $('#select_date_range').on 'click', (e) ->
+        e.preventDefault()
+        $(this).find('button').removeClass('active')
+        $(e.target).addClass('active')
+        viewModel.setDateRange $(e.target).attr('data-type')
 
-    $('.selectpicker').selectpicker('refresh')
+      $('.selectpicker').selectpicker('refresh')
 
-    $(document).ready(() -> Precision.utils.scrollTo(0))
+      $(document).ready(() -> Precision.utils.scrollTo(0))
 
-    scrollPos = 0
-    loadMoreFeed = () ->
-      goDown = scrollPos < $(window).scrollTop()
-      if($(window).scrollTop() + $(window).height() >= $(document).height() - 200 and goDown)
-        viewModel.loadMoreFeed() if !viewModel.feedLoading()
-      scrollPos = $(window).scrollTop()
+      scrollPos = 0
+      loadMoreFeed = () ->
+        goDown = scrollPos < $(window).scrollTop()
+        if($(window).scrollTop() + $(window).height() >= $(document).height() - 200 and goDown)
+          viewModel.loadMoreFeed() if !viewModel.feedLoading()
+        scrollPos = $(window).scrollTop()
 
-    $(window).on 'scroll', loadMoreFeed
-    $(document).on 'turbolinks:before-visit', () -> $(window).off 'scroll', loadMoreFeed
-
-
+      $(window).on 'scroll', loadMoreFeed
+      $(document).on 'turbolinks:before-visit', () -> $(window).off 'scroll', loadMoreFeed
 })

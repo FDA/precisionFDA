@@ -45,6 +45,7 @@ class UsageCollector
           monthly_compute_price,
           yearly_compute_price,
           custom_range_compute_price,
+          cumulative_compute_price,
           created_at
         ) SELECT
           t0.id AS user_id,
@@ -54,6 +55,7 @@ class UsageCollector
           IFNULL(t5.month_price, 0) AS monthly_compute_price,
           IFNULL(t6.year_price, 0) AS yearly_compute_price,
           IFNULL(t7.custom_price, 0) AS custom_range_compute_price,
+          IFNULL(t8.cumulative_price, 0) AS cumulatvie_compute_price,
           NOW() as created_at
         FROM users AS t0
         LEFT JOIN (
@@ -77,6 +79,9 @@ class UsageCollector
         LEFT JOIN (
           SELECT dxuser, SUM(param3) AS custom_price FROM events WHERE type = 'Event::JobClosed' AND created_at >= #{sql_date(custom_range_start)} AND created_at < #{sql_date(custom_range_end)} GROUP BY dxuser
         ) AS t7 ON t0.dxuser = t7.dxuser
+        LEFT JOIN (
+          SELECT dxuser, SUM(param3) AS cumulative_price FROM events WHERE type = 'Event::JobClosed' AND GROUP BY dxuser
+        ) AS t8 ON t0.dxuser = t8.dxuser
         WHERE t0.dxuser != #{ActiveRecord::Base.sanitize(CHALLENGE_BOT_DX_USER)};
       SQL
     end
@@ -90,7 +95,8 @@ class UsageCollector
           daily_byte_hours: CloudResource.daily_consumption(user),
           weekly_byte_hours: CloudResource.weekly_consumption(user),
           monthly_byte_hours: CloudResource.monthly_consumption(user),
-          yearly_byte_hours: CloudResource.yearly_consumption(user)
+          yearly_byte_hours: CloudResource.yearly_consumption(user),
+          cumulative_byte_hours: CloudResource.cumulative_consumption(user)
         )
       end
     end

@@ -2,6 +2,9 @@ AllCops:
   Exclude:
   - 'db/schema.rb'
   DisabledByDefault: true
+  DisplayCopNames: true
+  StyleGuideCopsOnly: false
+  TargetRubyVersion: 2.2.3
 
 Layout/AccessModifierIndentation:
   EnforcedStyle: indent
@@ -376,13 +379,6 @@ Lint/SafeNavigationChain:
 Style/Semicolon:
   AllowAsExpressionSeparator: false
 
-Style/SignalException:
-  EnforcedStyle: only_raise
-  SupportedStyles:
-  - only_raise
-  - only_fail
-  - semantic
-
 Style/SingleLineMethods:
   AllowIfMethodIsEmpty: true
 
@@ -400,6 +396,12 @@ Style/StabbyLambdaParentheses:
   SupportedStyles:
   - require_parentheses
   - require_no_parentheses
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+  SupportedStyles:
+    - single_quotes
+    - double_quotes
 
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: single_quotes
@@ -514,7 +516,7 @@ Metrics/BlockNesting:
   Max: 3
 
 Metrics/LineLength:
-  Max: 120
+  Max: 100
   AllowHeredoc: true
   AllowURI: true
   URISchemes:
@@ -527,6 +529,10 @@ Metrics/LineLength:
 Metrics/ParameterLists:
   Max: 5
   CountKeywordArgs: false
+
+Metrics/MethodLength:
+  Enabled: true
+  Max: 20
 
 Layout/BlockAlignment:
   EnforcedStyleAlignWith: either
@@ -922,9 +928,6 @@ Style/WhileUntilDo:
 
 Style/ZeroLengthPredicate:
   Enabled: true
-
-Layout/IndentHeredoc:
-  EnforcedStyle: squiggly
 
 Lint/AmbiguousOperator:
   Enabled: true

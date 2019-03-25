@@ -1,5 +1,5 @@
 class ApiError < StandardError
-  def initialize(msg, data)
+  def initialize(msg, data = {})
     super(msg)
     @data = data
   end

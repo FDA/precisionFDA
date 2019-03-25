@@ -29,7 +29,7 @@ class AppEditorModel
     # Assets
     @assetsSelector = new Precision.models.AssetsModel
     @assets = ko.observableArray()
-    if app?.internal.ordered_assets.length > 0
+    if app?.internal.ordered_assets && app?.internal.ordered_assets.length > 0
       @loading(true)
       Precision.api '/api/list_assets', {ids: app.internal.ordered_assets}, (assets) =>
         @assets(_.map(@assetsSelector.createAssetModels(assets)))
@@ -174,7 +174,7 @@ class AppEditorModel
       packages: @packages.peek()
       code: @code.peek() ? ""
 
-    Precision.api('/api/create_app', params)
+    Precision.api('/api/apps', params)
       .done((data) =>
         Precision.unbind.traps()
         window.location.replace("/apps/#{data.id}/jobs")
@@ -203,6 +203,7 @@ class IOModel
     @defaultValue = ko.observable(defaultValue)
     @defaultFileValue = ko.observable()
     @isOptional = ko.observable(spec.optional ? false)
+    @requiredRunInput = ko.observable(spec.requiredRunInput ? false)
     # @patterns = ko.observable(spec.patterns)
     @choices = ko.observableArray(spec.choices)
     @choicesValue = ko.computed({
@@ -336,6 +337,7 @@ class IOModel
       name: @name.peek()
       optional: @isOptional() ? false
       choices: @choices() ? []
+      requiredRunInput: @requiredRunInput() ? false
 
     if @ioType == "input"
       defaultValue = @getValueForDefault()

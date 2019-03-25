@@ -1,0 +1,22 @@
+<% content_for :title do %>Organizations<% end %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-body">
+      <div class="page-title">
+        <i class="fa fa-bar-chart" aria-hidden="true"></i>
+        Organizations
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <div class="pfda-padded-b">
+    <a class="btn btn-primary" rel="nofollow" href="/profile/provision_org">
+      <i class="fa fa-plus"></i>&nbsp;Provision new organization &amp; admin
+    </a>
+  </div>
+  <%= render partial: "admin/organizations/admin_orgs_grid" %>
+  <%= render "_partials/admin/change_admin_modal" %>
+</div>

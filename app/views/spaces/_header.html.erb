@@ -1,9 +1,7 @@
 <% content_for :title do %><%= @space.title %>
 <% end %>
 
-
 <div id="ko_spaces_header_container">
-
   <div class="page-header clearfix">
     <div class="pull-left">
 
@@ -82,7 +80,7 @@
         <p class="list-group-item-text"><%= @membership.role %> <small>(<%= member_side(@space, @membership) %>)</small></p>
       </li>
 
-      <% @space.leads.each do |lead| %>
+      <% space_leads.each do |lead| %>
         <%= render "spaces/header_lead", lead: lead %>
       <% end %>
 
@@ -143,27 +141,23 @@
 </div>
 
 <% if @space.unactivated? %>
-
-    <div class='pfda-help-block'>
-      <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
-      <% if @space.review? %>
-        <% if @space.confidential? %>
-          <p>Both reviewer and sponsor leads must click "Accept space" to activate the <%= link_to 'cooperative space', space_path(@space.shared_space) %>.</p>
-        <% else %>
-          <p>Both reviewer and sponsor leads must click "Accept space" to activate it.</p>
-        <% end %>
+  <div class='pfda-help-block'>
+    <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
+    <% if @space.review? %>
+      <% if @space.confidential? %>
+        <p>Both reviewer and sponsor leads must click "Accept space" to activate the <%= link_to 'cooperative space', space_path(@space.shared_space) %>.</p>
       <% else %>
-        <p>Both host and guest leads must click "Accept space" to activate it.</p>
+        <p>Both reviewer and sponsor leads must click "Accept space" to activate it.</p>
       <% end %>
-    </div>
-
-  <% elsif(@space.locked? || @space.verified?) %>
-
-    <div class='pfda-help-block'>
-      <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has been locked</p>
-    </div>
-
-  <% end %>
+    <% else %>
+      <p>Both host and guest leads must click "Accept space" to activate it.</p>
+    <% end %>
+  </div>
+<% elsif(@space.locked? || @space.verified?) %>
+  <div class='pfda-help-block'>
+    <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has been locked</p>
+  </div>
+<% end %>
 
 <div class="modal fade" id="verification-modal">
   <div class="modal-dialog" role="document" style="width: 660px">
@@ -178,7 +172,6 @@
           <h4>
             Verifying a space will lock the space and now will be visible to all reviewers<br>
             Would you like to lock the space?
-
           </h4>
         </div>
         <div class="modal-footer">

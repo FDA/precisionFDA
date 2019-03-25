@@ -1,0 +1,48 @@
+<div id="change_admin_modal" class="modal fade tasks-actions-modal modal-with-loader" data-bind="css: {loading: changeAdminModal.isLoading}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Change Admin of this Organizaiton</h4>
+      </div>
+      <div class="loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="pfda-padded-b">
+          <input
+            id="change_admin_modal_search"
+            type="text"
+            class="form-control"
+            placeholder="Start typing user name"
+            data-bind="event: {input: changeAdminModal.searchInputListener}"
+          />
+        </div>
+        <div class="user-list">
+          <!-- ko foreach: changeAdminModal.users() -->
+            <div class="user-list-item" data-bind="click: $root.changeAdminModal.selectUser, text: $data.name, css: {selected: $data.selected}"></div>
+          <!-- /ko -->
+          <!-- ko if: changeAdminModal.showNoUsersFound() -->
+            <div class="pfda-padded-v">No Users Found</div>
+          <!-- /ko -->
+        </div>
+        <%= form_tag "/admin/change_org_admin", id:"change_admin_modal_form", method:"POST",class:"hidden" do %>
+          <input type="text" name="user[dxuser]" data-bind="value: changeAdminModal.selectedUserDxuser" />
+          <input type="text" name="org[dxid]" data-bind="value: changeAdminModal.orgid" />
+        <% end %>
+       </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-bind="click: changeAdminModal.selectNewAdmin, enable: changeAdminModal.isUserSelected()"
+        >Select</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

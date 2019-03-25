@@ -1,7 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe ApiController, type: :controller do
-
+RSpec.describe Api::AppsController, type: :controller do
   let(:user) { create(:user, dxuser: "user") }
   let(:asset) { create(:asset, dxid: 'file-test', user_id: user.id) }
 
@@ -13,14 +12,13 @@ RSpec.describe ApiController, type: :controller do
     [{ name:  "my_file", class:  "file", optional:  false, label:  "my_file", help:  "my_file" }]
   end
 
-  describe "POST create_app" do
-
+  describe "POST create" do
     before { authenticate!(user) }
 
     it "creates an app" do
       expect(Event::AppCreated).to receive(:create_for)
 
-      post :create_app , {
+      post :create, {
         name: 'test-name',
         title: 'test-title',
         readme: 'test-readme',
@@ -43,7 +41,10 @@ RSpec.describe ApiController, type: :controller do
           { name: "my_file", class: "file", optional: false, label: "my_file", help: "my_file" }
         ],
         runSpec: {
-          code: "dx cat project-Bk0YZkj0YkbBg6bk38PzQkVV:/appkit.tgz | tar -z -x -C / --no-same-owner --no-same-permissions -f -\nsource /usr/lib/app-prologue\ntest-code\n{ set +x; } 2\u003e/dev/null\nsource /usr/lib/app-epilogue\n",
+          code: "dx cat project-Bk0YZkj0YkbBg6bk38PzQkVV:/appkit.tgz | " \
+                 "tar -z -x -C / --no-same-owner --no-same-permissions -f " \
+                 "-\nsource /usr/lib/app-prologue\ntest-code\n{ set +x; } " \
+                 "2\u003e/dev/null\nsource /usr/lib/app-epilogue\n",
           interpreter: "bash",
           systemRequirements: { "*": { instanceType: "mem1_ssd1_x8_fedramp" }},
           distribution: "Ubuntu",
@@ -68,9 +69,14 @@ RSpec.describe ApiController, type: :controller do
         access: {},
       })
 
-      expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project-test/removeObjects").with(body: {
-        objects: [nil]
-      })
+      expect(WebMock).to(
+        have_requested(
+          :post,
+          "#{DNANEXUS_APISERVER_URI}project-test/removeObjects"
+        ).with(
+          body: { objects: [nil] }
+        )
+      )
 
       expect(App.where(title: 'test-title', readme: 'test-readme', scope: 'private',).first)
         .to be_present
@@ -80,6 +86,5 @@ RSpec.describe ApiController, type: :controller do
       expect(last_app.code).to eq('test-code')
       expect(response).to have_http_status(200)
     end
-
   end
 end
