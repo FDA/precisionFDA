@@ -229,7 +229,7 @@ class User < ActiveRecord::Base
   end
 
   def logged_in?
-    return (expiration || 0) - Time.now.to_i > 5.minutes
+    !Session.find_by_user_id(id).expired? rescue false
   end
 
   def appathon_from_meta(meta_appathon)
