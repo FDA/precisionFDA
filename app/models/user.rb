@@ -61,8 +61,6 @@ class User < ActiveRecord::Base
     aabramenko.adminstage
     alekadmin.suradmin
     sam.westreich
-    pavelz
-    pavelz2
   ).freeze
 
   NON_PRODUCTION_ADMIN_ORGS = %w(

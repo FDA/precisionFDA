@@ -80,7 +80,7 @@
         <p class="list-group-item-text"><%= @membership.role %> <small>(<%= member_side(@space, @membership) %>)</small></p>
       </li>
 
-      <% @space.leads.each do |lead| %>
+      <% space_leads.each do |lead| %>
         <%= render "spaces/header_lead", lead: lead %>
       <% end %>
 

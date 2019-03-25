@@ -1,7 +1,6 @@
 module SpaceService
-  class Accept
-    class ReviewSpaceProjectCreator < GroupSpaceProjectCreator
-
+  module ProjectBuilders
+    class ReviewSpace < GroupSpace
       def create(space, admin)
         if admin.host?
           space.confidential_reviewer_space.space_memberships << admin
@@ -45,7 +44,6 @@ module SpaceService
 
         space.space_memberships << admin
       end
-
     end
   end
 end

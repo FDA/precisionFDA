@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :user do
     first_name { FFaker::Name.first_name }
     last_name { FFaker::Name.last_name }
-    dxuser "test_user"
+    sequence(:dxuser) { |n| "dxuser-#{n}" }
     email { FFaker::Internet.email }
     normalized_email { email.downcase }
     association :org

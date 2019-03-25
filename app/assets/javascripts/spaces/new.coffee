@@ -18,12 +18,18 @@ class SpacesNewView
       )
     )
     @chosenSpaceType = ko.observable(params.space_type)
-#    @hostLeadLabel = ko.observable('123')
     @hostLeadLabel = ko.computed(() =>
       if @chosenSpaceType() == 'groups' || @chosenSpaceType() == 'verification'
         'Host Lead'
       else
         'Reviewer Lead'
+    )
+
+    @guestPlaceholder = ko.computed(() =>
+      if @chosenSpaceType() == 'verification'
+        'Guest username...(optional)'
+      else
+        'Guest username...'
     )
 
 #########################################################

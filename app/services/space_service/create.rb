@@ -5,10 +5,8 @@ module SpaceService
       new(options).call(space_form)
     end
 
-    def initialize(user:, api:, papi: DNAnexusAPI.for_admin,
-                   notification_mailer: NotificationsMailer)
+    def initialize(user:, api:, notification_mailer: NotificationsMailer)
       @api = api
-      @papi = papi
       @notification_mailer = notification_mailer
       @user = user
     end
@@ -17,10 +15,11 @@ module SpaceService
     def call(space_form)
       Space.transaction do
         space = build_space(space_form)
-        create_orgs(space)
+        org_dxs = [space.host_dxorg, space.guest_dxorg].uniq.compact
+        create_orgs(org_dxs)
         space.save!
         add_leads(space, space_form)
-        remove_pfda_admin_user(space) unless space.review?
+        remove_pfda_admin_user(org_dxs) unless space.review?
         create_reviewer_cooperative_project(space) if space.review?
         create_reviewer_confidential_space(space, space_form) if space.review?
         send_emails(space)
@@ -30,7 +29,7 @@ module SpaceService
 
     private
 
-    attr_reader :user, :papi, :api, :notification_mailer
+    attr_reader :user, :api, :notification_mailer
 
     def build_space(space_form)
       uuid = SecureRandom.hex
@@ -39,20 +38,19 @@ module SpaceService
         name: space_form.name,
         description: space_form.description,
         host_dxorg: Org.construct_dxorg("space_host_#{uuid}"),
-        guest_dxorg: Org.construct_dxorg("space_guest_#{uuid}"),
         space_type: space_form.space_type,
         cts: space_form.cts,
         space_template_id: space_form.space_template_id,
         restrict_to_template: space_form.restrict_to_template
       )
+      space.guest_dxorg = guest_dx_org(uuid, space, space_form)
       space.sponsor_org_id = space_form.sponsor_org.id if space.review?
       space
     end
 
     # Provision Host and Guest orgs
-    def create_orgs(space)
-      OrgService::Create.call(api, space.host_dxorg)
-      OrgService::Create.call(api, space.guest_dxorg)
+    def create_orgs(orgs_dxs)
+      orgs_dxs.each { |dxorg| OrgService::Create.call(api, dxorg) }
     end
 
     # Add leads as ADMINs
@@ -62,7 +60,7 @@ module SpaceService
         User.find_by!(dxuser: space_form.host_lead_dxuser),
         SpaceMembership::SIDE_HOST
       )
-
+      return if guest_blank?(space, space_form)
       add_lead(
         space,
         space.review? ? space.sponsor_org.admin : User.find_by!(dxuser: space_form.guest_lead_dxuser),
@@ -80,9 +78,8 @@ module SpaceService
     end
 
     # Remove pfda admin from orgs
-    def remove_pfda_admin_user(space)
-      papi.call(space.host_dxorg, "removeMember", user: ADMIN_USER)
-      papi.call(space.guest_dxorg, "removeMember", user: ADMIN_USER)
+    def remove_pfda_admin_user(orgs_dxs)
+      orgs_dxs.each { |dxorg| papi.call(dxorg, "removeMember", user: ADMIN_USER) }
     end
 
     def send_emails(space)
@@ -92,11 +89,10 @@ module SpaceService
     end
 
     def create_reviewer_cooperative_project(space)
-      papi.call(space.host_dxorg, "invite", {
+      papi.call(space.host_dxorg, "invite",
         invitee: user.dxid,
         level: "ADMIN",
-        suppressEmailNotification: true
-      })
+        suppressEmailNotification: true,)
 
       project_dxid = api.call(
         "project", "new",
@@ -183,7 +179,7 @@ module SpaceService
           when App
             copy_service.copy(n.node, space.uid)
           else
-            raise("Space template #{template.id} has Unexpected node #{n.id} of #{n.node.class.to_s} class")
+            raise("Space template #{template.id} has Unexpected node #{n.id} of #{n.node.class} class")
           end
         end
       end
@@ -197,5 +193,19 @@ module SpaceService
       @copy_service ||= CopyService.new(api: api, user: user)
     end
 
+    def guest_dx_org(uuid, space, space_form)
+      return if guest_blank?(space, space_form)
+      return Org.construct_dxorg("space_host_#{uuid}") if guest_and_host_equal?(space, space_form)
+      Org.construct_dxorg("space_guest_#{uuid}")
+    end
+
+    def guest_and_host_equal?(space, space_form)
+      return false unless space.verification?
+      space_form.guest_lead_dxuser == space_form.host_lead_dxuser
+    end
+
+    def guest_blank?(space, space_form)
+      space.verification? && space_form.guest_lead_dxuser.blank?
+    end
   end
 end
