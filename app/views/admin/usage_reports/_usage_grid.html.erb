@@ -13,16 +13,17 @@
     number_to_human_size(metric.storage_usage || 0)
   end
 
-  if @selected_range != "custom"
 
-    g.column name: "Compute / #{@selected_range}", attribute: "#{@selected_range.present? ? (@selected_range=='day'?'dai':@selected_range) : 'week' }ly_compute_price" do |metric|
-
+  g.column name: "Compute / #{@selected_range}", attribute: "#{selected_range_name(@selected_range)}_compute_price" do |metric|
+    unless @selected_range == "custom"
       number_to_currency(metric.compute_price(@selected_range) || 0)
+    else
+      "None"
     end
+  end
 
-    g.column name: "Consumption / #{@selected_range}", attribute: "#{@selected_range.present? ? (@selected_range=='day'?'dai':@selected_range) : 'week' }ly_compute_price" do |metric|
-      number_to_human_size(metric.byte_hours(@selected_range) || 0) + "-Hours"
-    end
+  g.column name: "Consumption / #{@selected_range}", attribute: "#{selected_range_name(@selected_range)}_compute_price" do |metric|
+    number_to_human_size(metric.byte_hours(@selected_range) || 0) + "-Hours"
   end
 
   g.column name: "Status" do |metric|

@@ -16,7 +16,7 @@ class UsageMetric < ActiveRecord::Base
     when 'cumulative'
       yearly_byte_hours
     when 'custom'
-      ""
+      custom_range_byte_hours
     end
   end
 
@@ -31,9 +31,9 @@ class UsageMetric < ActiveRecord::Base
     when 'year'
       yearly_compute_price
     when 'cumulative'
-      yearly_compute_price
+      cumulative_compute_price
     when 'custom'
-      ""
+      custom_range_compute_price
     end
   end
 end
