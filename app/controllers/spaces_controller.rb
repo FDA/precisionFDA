@@ -131,8 +131,8 @@ class SpacesController < ApplicationController
     space = Space.accessible_by(@context).find(params[:id])
     admin = space.space_memberships.lead_or_admin.find_by(user_id: @context.user_id)
 
-    if admin
-      SpaceService::Accept.call(@context.api, space, admin, @context) unless space.accepted_by?(admin)
+    if admin && !space.accepted_by?(admin)
+      SpaceService::Accept.call(@context.api, space, admin)
     else
       flash[:error] = "You don't have permission to edit this space"
     end

@@ -1,5 +1,13 @@
 module SpacesHelper
 
+  def space_leads
+    leads = @space.leads
+    condition = @space.verification?
+    condition &&= @space.host_lead_member.user == @space.guest_lead_member.try(:user)
+    return leads.host if condition
+    leads
+  end
+
   def member_side(space, member)
     if space.groups? || space.verification?
       member.host? ? "host" : "guest"

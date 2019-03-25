@@ -1,14 +1,14 @@
-# TODO Items can be moved from private submitter/reviewer workspaces to a shared space.
+# TODO: Items can be moved from private submitter/reviewer workspaces to a shared space.
 class Space < ActiveRecord::Base
   include Auditor
 
   TYPES = %i(groups review verification)
   STATES = %i(unactivated active locked deleted)
 
-  belongs_to :sponsor_org, { class_name: 'Org' }
+  belongs_to :sponsor_org, class_name: "Org"
   has_and_belongs_to_many :space_memberships
-  has_many :users, { through: :space_memberships }
-  has_many :confidential_spaces, class_name: 'Space'
+  has_many :users, through: :space_memberships
+  has_many :confidential_spaces, class_name: "Space"
   belongs_to :space
   has_many :tasks, dependent: :destroy
   has_many :space_events
@@ -50,6 +50,7 @@ class Space < ActiveRecord::Base
   def reviewer?
     review? && host_dxorg.present?
   end
+
   def confidential?
     space_id.present?
   end
@@ -59,12 +60,16 @@ class Space < ActiveRecord::Base
   end
 
   def verified?
-    return false if space_type != 'verification'
+    return false if space_type != "verification"
     verified ? true : false
   end
 
   def accepted?
-    accepted_by?(host_lead_member) && accepted_by?(guest_lead_member)
+    accepted_by_host = accepted_by?(host_lead_member)
+    condition = verification?
+    condition &&= (guest_lead_member.blank? || host_lead_member.user == guest_lead_member.user)
+    return accepted_by_host if condition
+    accepted_by_host && accepted_by?(guest_lead_member)
   end
 
   def accepted_by?(member)
@@ -140,7 +145,7 @@ class Space < ActiveRecord::Base
   end
 
   def describe_fields
-    ["title", "description", "state"]
+    %w(title description state)
   end
 
   def created_at_in_ny
@@ -155,7 +160,7 @@ class Space < ActiveRecord::Base
     end
   end
 
-  def rename(new_name, context)
+  def rename(new_name, _context)
     update_attributes(name: new_name)
   end
 
@@ -185,7 +190,7 @@ class Space < ActiveRecord::Base
 
   def self.from_scope(scope)
     if scope =~ /^space-(\d+)$/
-      return Space.find_by!(id: $1.to_i)
+      Space.find_by!(id: Regexp.last_match(1).to_i)
     else
       raise "Invalid scope #{scope} in Space.from_scope"
     end
@@ -228,13 +233,13 @@ class Space < ActiveRecord::Base
     raise unless context.user_id.present?
 
     queries = [].tap do |queries|
-      queries.push({ space_memberships: { active: true, user_id: context.user_id } })
+      queries.push(space_memberships: { active: true, user_id: context.user_id })
       if context.review_space_admin?
-        queries.push({ id: self.reviewer.shared })
-        queries.push({ id: self.reviewer.confidential.active })
-        queries.push({ id: self.verification})
+        queries.push(id: reviewer.shared)
+        queries.push(id: reviewer.confidential.active)
+        queries.push(id: verification)
       end
-      queries.push({ id: self.groups }) if context.can_administer_site?
+      queries.push(id: groups) if context.can_administer_site?
     end
 
     joins(:space_memberships).where.any_of(*queries).uniq
@@ -244,29 +249,30 @@ class Space < ActiveRecord::Base
     case content_type
     when "Note"
       Note.real_notes.accessible_by_space(self).where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
-        .map { |note| [note.id, note.title]}
+        .map { |note| [note.id, note.title] }
     when "File"
       UserFile.accessible_by_space(self).where("LOWER(name) LIKE LOWER(?)", "%#{query}%").where(parent_type: "User")
-        .map { |file| [file.id, file.name]}
+        .map { |file| [file.id, file.name] }
     when "Asset"
       Asset.accessible_by_space(self).where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
-        .map { |asset| [asset.id, asset.name]}
+        .map { |asset| [asset.id, asset.name] }
     when "Comparison"
       Comparison.accessible_by_space(self).where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
-        .map { |comparison| [comparison.id, comparison.name]}
+        .map { |comparison| [comparison.id, comparison.name] }
     when "App"
       App.accessible_by_space(self).where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
-        .map { |app| [app.id, app.title]}
+        .map { |app| [app.id, app.title] }
     when "Workflow"
       Workflow.accessible_by_space(self).where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
-        .map { |workflow| [workflow.id, workflow.title]}
+        .map { |workflow| [workflow.id, workflow.title] }
     when "Job"
       Job.accessible_by_space(self).where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
-        .map { |job| [job.id, job.name]}
+        .map { |job| [job.id, job.name] }
     else
       []
     end.map { |i, j| { id: i, name: j } }
   end
+
   def can_verify_space(context)
     (space_memberships.host.lead[0].user.dxuser == context.user.dxuser) && active?
   end
@@ -286,7 +292,7 @@ class Space < ActiveRecord::Base
     completed_tasks = tasks.completed.count
     tasks = open_tasks + accepted_tasks + declined_tasks + completed_tasks
 
-    feed = self.space_events.count
+    feed = space_events.count
 
     {
       feed: feed,

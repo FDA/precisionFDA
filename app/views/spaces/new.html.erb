@@ -42,7 +42,8 @@
     <div class="form-group required" data-bind="visible: chosenSpaceType() == 'groups' || chosenSpaceType() == 'verification'" style="display: none;">
       <%= f.label :guest_lead_dxuser, "Guest Lead", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
-        <input class="form-control" placeholder="Guest username..." type="text" name="space[guest_lead_dxuser]" id="space_guest_lead_dxuser" data-bind="value: guestLead, attr: {disable: chosenSpaceType() != 'groups'}">
+        <input class="form-control" type="text" name="space[guest_lead_dxuser]" id="space_guest_lead_dxuser"
+               data-bind="value: guestLead, attr: {disable: chosenSpaceType() != 'groups', placeholder: guestPlaceholder }">
       </div>
     </div>
     <div class="form-group required" data-bind="visible: chosenSpaceType() == 'review'" style="display: none;">
