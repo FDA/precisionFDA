@@ -180,13 +180,12 @@ class ProfileController < ApplicationController
         @invitation.update!(user_id: user.id)
 
         phone_confirmed = @invitation.new_phone_format? ? true :false
-        profile = user.build_profile(@invitation.slice(:address1, :address2, :phone, :city, :us_state, :postal_code, :email,
-                                                      :country, :phone_country).merge(phone_confirmed: phone_confirmed))
+        profile = user.build_profile(@invitation.slice(:address1, :address2, :phone, :city, :us_state, :postal_code,
+                                                       :country, :phone_country).merge(phone_confirmed: phone_confirmed, email: @email))
         profile.save(validate: false)
         Auditor.perform_audit(action: "create", record_type: "Provision Org",
                               record: { message: "A new admin and organization have been created: user=#{user.as_json}, org=#{org.as_json} by '#{@user.dxuser}'" })
       end
-
       @state = "step4"
     end
   end
