@@ -130,6 +130,7 @@ Rails.application.routes.draw do
       post 'list_apps'
       post 'list_assets'
       post 'list_jobs'
+      post 'list_workflows'
       post 'describe_license'
       post 'accept_licenses'
       post 'run_app'
