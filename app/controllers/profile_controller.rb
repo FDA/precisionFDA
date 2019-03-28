@@ -258,6 +258,7 @@ class ProfileController < ApplicationController
     @errors << "There is already an organization with that handle" if @org_handle.present? && Org.find_by(handle: @org_handle).present?
     @errors << "There is already an organization with that name" if @org.present? && Org.find_by(name: @org).present?
     @errors << "You must either provide both the organization name and the handle (for org admins), or leave them both empty (for self-represented)." if @org.present? != @org_handle.present?
+    @errors << "This email address is in use by an existing DNAnexus account. Please ask the person to provide you with a different email to be used for precisionFDA." if DNAnexusAPI.email_exists?(email)
   end
 
   def add_warnings(first_name, last_name, invitation, org, org_handle)
