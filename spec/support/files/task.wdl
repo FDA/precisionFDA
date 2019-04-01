@@ -3,11 +3,12 @@ workflow single_task {
 }
 
 task app_a {
-
-  String anything
+  String in_string
+  Boolean in_boolean
+  File in_file
 
   command {
-    /usr/bin/run --anything "${anything}" && mv /data/out/* .
+    /usr/bin/run --in_string "${in_string}" --in_boolean "${in_boolean}" --in_file "${in_file}" && mv /data/out/* .
   }
 
   runtime {
@@ -15,7 +16,7 @@ task app_a {
   }
 
   output {
-    File my_file = select_first(glob("my_file/*"))
-    String my_string = read_string("my_string")
+    File out_file = select_first(glob("out_file/*"))
+    String out_string = read_string("out_string")
   }
 }

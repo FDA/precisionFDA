@@ -180,13 +180,12 @@ class ProfileController < ApplicationController
         @invitation.update!(user_id: user.id)
 
         phone_confirmed = @invitation.new_phone_format? ? true :false
-        profile = user.build_profile(@invitation.slice(:address1, :address2, :phone, :city, :us_state, :postal_code, :email,
-                                                      :country, :phone_country).merge(phone_confirmed: phone_confirmed))
+        profile = user.build_profile(@invitation.slice(:address1, :address2, :phone, :city, :us_state, :postal_code,
+                                                       :country, :phone_country).merge(phone_confirmed: phone_confirmed, email: @email))
         profile.save(validate: false)
         Auditor.perform_audit(action: "create", record_type: "Provision Org",
                               record: { message: "A new admin and organization have been created: user=#{user.as_json}, org=#{org.as_json} by '#{@user.dxuser}'" })
       end
-
       @state = "step4"
     end
   end
@@ -259,6 +258,7 @@ class ProfileController < ApplicationController
     @errors << "There is already an organization with that handle" if @org_handle.present? && Org.find_by(handle: @org_handle).present?
     @errors << "There is already an organization with that name" if @org.present? && Org.find_by(name: @org).present?
     @errors << "You must either provide both the organization name and the handle (for org admins), or leave them both empty (for self-represented)." if @org.present? != @org_handle.present?
+    @errors << "This email address is in use by an existing DNAnexus account. Please ask the person to provide you with a different email to be used for precisionFDA." if DNAnexusAPI.email_exists?(email)
   end
 
   def add_warnings(first_name, last_name, invitation, org, org_handle)
