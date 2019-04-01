@@ -36,8 +36,12 @@
     end
   end
 
-  g.column name: "Org", attribute: "name", assoc: [:user, :org] do |metric|
+  g.column name: "Org", attribute: "name", assoc: [:user, :org], in_csv: false do |metric|
     metric.user.org ? link_to(metric.user.org.name, admin_show_org_path(handle: metric.user.org.handle)) : "Self-representing"
+  end
+
+  g.column name: "Org", attribute: "name", assoc: [:user, :org], in_html: false do |metric|
+    metric.user.org ? metric.user.org.name + "  " + metric.user.org.handle : "Self-representing"
   end
 
   g.column name: "Email", attribute: "email", assoc: :user do |metric|

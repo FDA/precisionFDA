@@ -70,12 +70,16 @@
       </li>
     </ul>
   </div>
-
-  <div class="pfda-toolbar">
-    <div class="btn btn-default wg-external-csv-export-button" data-grid-name="usage">
-      <i class="fa fa-file-excel-o"></i> Export to CSV
-    </div>
-  </div>
 <% end %>
 
-<%= render partial: 'admin/usage_reports/usage_grid' %>
+<div class="pfda-padded">
+  <% if @storage_date %>
+    <div class="pfda-padded-b">
+      <a href="/admin/usage_reports?usage%5Bexport%5D=csv" class="btn btn-default" download>
+        <i class="fa fa-file-excel-o"></i>&nbsp;&nbsp; Export to CSV
+      </a>
+    </div>
+  <% end %>
+
+  <%= render partial: 'admin/usage_reports/usage_grid' %>
+</div>
