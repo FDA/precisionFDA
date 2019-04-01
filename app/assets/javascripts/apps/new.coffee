@@ -18,23 +18,23 @@ class NewAppViewModel extends Precision.models.AppEditorModel
     reader.readAsText(file)
     e.target.value = ''
 
-  getDockerPullData: (importText) ->
-    dockerPull = importText.match(/dockerPull:(.*$)/gm)
+  getDockerData: (importText) ->
+    docker = importText.match(///#{@dockerAttr()}:(.*$)///gm)
 
-    if !dockerPull or !dockerPull.length
+    if !docker or !docker.length
       Precision.alert.showAboveAll('Wrong docker image name format')
       return false
 
-    dockerPull = dockerPull[0].replace(/(dockerPull:)(.*$)/gm, '$2').trim()
-    dockerPull = dockerPull.replace(/"/g, '') if dockerPull.length
+    docker = docker[0].replace(///(#{@dockerAttr()}:)(.*$)///gm, '$2').trim()
+    docker = docker.replace(/"/g, '') if docker.length
 
-    if typeof dockerPull != 'string' or !dockerPull.length
+    if typeof docker != 'string' or !docker.length
       Precision.alert.showAboveAll('Wrong docker image name format')
       return false
 
-    dockerPull = dockerPull.split(':')
-    imageName = dockerPull[0]
-    version = dockerPull[1] || 'latest'
+    docker = docker.split(':')
+    imageName = docker[0]
+    version = docker[1] || 'latest'
 
     imageName = imageName.split('/')
     if imageName.length < 2 || imageName.length > 3
@@ -69,23 +69,23 @@ class NewAppViewModel extends Precision.models.AppEditorModel
       version
     }
 
-  compareImageData: (pullData, imageData) ->
-    return false if !pullData or !imageData
-    if pullData.registry ||
-       pullData.namespace != imageData.namespace ||
-       pullData.repository != imageData.repository ||
-       pullData.version != imageData.version
+  compareImageData: (dockerData, imageData) ->
+    return false if !dockerData or !imageData
+    if dockerData.registry ||
+       dockerData.namespace != imageData.namespace ||
+       dockerData.repository != imageData.repository ||
+       dockerData.version != imageData.version
       Precision.alert.showAboveAll(
-        'The selected image file do not match image in CWL!'
+        "The selected image file do not match image in #{@importType()}!"
       )
       return false
     return true
 
   validateDockerImage: (file) ->
     return false if !file
-    dockerPullData = @getDockerPullData(@wdlTextValue())
+    dockerData = @getDockerData(@wdlTextValue())
     dockerImageData = @getDockerImageData(file.name)
-    return @compareImageData(dockerPullData, dockerImageData)
+    return @compareImageData(dockerData, dockerImageData)
 
   dockerFileOnChangeHandler: (root, e) ->
     importText = @wdlTextValue()
@@ -114,15 +114,16 @@ class NewAppViewModel extends Precision.models.AppEditorModel
   importImageData: () ->
     return false if @dockerImage() &&
                     !@validateDockerImage(@dockerImage()) ||
-                    !@getDockerPullData(@wdlTextValue())
+                    !@getDockerData(@wdlTextValue())
 
     @importModalLoading(true)
 
     formData = new FormData()
-    formData.append('cwl', @wdlTextValue())
+    formData.append('format', @importType().toLowerCase())
+    formData.append('file', @wdlTextValue())
     formData.append('attached_image', @dockerImage()) if @dockerImage()
     $.ajax({
-      url: '/api/apps/import',
+      url: "/api/apps/import",
       data: formData,
       cache: false,
       contentType: false,
@@ -176,6 +177,12 @@ class NewAppViewModel extends Precision.models.AppEditorModel
       switch @importType()
         when CWL then return '.cwl'
         when WDL then return '.wdl'
+        else return ''
+    )
+    @dockerAttr = ko.computed(() =>
+      switch @importType()
+        when CWL then return 'dockerPull'
+        when WDL then return 'docker'
         else return ''
     )
     @importImageDisabled = ko.computed(() => !@wdlTextValue() or !@wdlTextValue().length)
