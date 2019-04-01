@@ -25,6 +25,7 @@ module Admin
       @compute_date = (@storage_date - 1.day).end_of_day if @storage_date
 
       export_grid_if_requested("usage" => "usage_grid")
+
       js(
         selected_range: @selected_range,
         custom_range_begin: @custom_range_begin,
