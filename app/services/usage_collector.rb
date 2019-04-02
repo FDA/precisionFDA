@@ -80,7 +80,7 @@ class UsageCollector
           SELECT dxuser, SUM(param3) AS custom_price FROM events WHERE type = 'Event::JobClosed' AND created_at >= #{sql_date(custom_range_start)} AND created_at < #{sql_date(custom_range_end)} GROUP BY dxuser
         ) AS t7 ON t0.dxuser = t7.dxuser
         LEFT JOIN (
-          SELECT dxuser, SUM(param3) AS cumulative_price FROM events WHERE type = 'Event::JobClosed' AND GROUP BY dxuser
+          SELECT dxuser, SUM(param3) AS cumulative_price FROM events WHERE type = 'Event::JobClosed' GROUP BY dxuser
         ) AS t8 ON t0.dxuser = t8.dxuser
         WHERE t0.dxuser != #{ActiveRecord::Base.sanitize(CHALLENGE_BOT_DX_USER)};
       SQL
