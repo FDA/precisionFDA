@@ -1,4 +1,4 @@
-<%= grid(@users_grid, show_filters: false, hide_csv_button: true) do |g|
+<%= grid(@users_grid, show_filters: defined?(show_filters) ? show_filters : :no, hide_csv_button: true) do |g|
 
   g.column name:"Username", attribute: 'dxuser' do |user|
     link_to user.dxuser, user_path(user.dxuser)
