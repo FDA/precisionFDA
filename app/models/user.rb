@@ -168,6 +168,21 @@ class User < ActiveRecord::Base
     "user"
   end
 
+  def status
+    if last_login.nil?
+      "Pending"
+    else
+      case user_state
+      when "enabled"
+        "Active"
+      when "deactivated"
+        "Disabled"
+      else
+        "N/A"
+      end
+    end
+  end
+
   def org
     challenge_bot? ? Org.new : super
   end
