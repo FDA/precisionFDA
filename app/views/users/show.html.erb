@@ -25,6 +25,11 @@
       <p class="list-group-item-text"><%= @user.email %></p>
     </li>
 
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Status</h5>
+      <p class="list-group-item-text"><%= @user.status %></p>
+    </li>
+
     <% if @user.org_id.present? %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Organization</h5>
@@ -35,7 +40,11 @@
       <h5 class="list-group-item-heading">Joined</h5>
       <p class="list-group-item-text"><%= @user.created_at.to_s(:human) %></p>
     </li>
+  </ul>
+</div>
 
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
     <% if @context.user.can_administer_site? && @context.user != @user %>
       <% if !@user.activated? %>
         <li class="list-group-item">
