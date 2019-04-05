@@ -114,6 +114,7 @@ class TasksController < ApplicationController
       if TaskPolicy.can_accept?(task, @membership)
         task.accepted!
         task.update(response_time: Time.now)
+        SpaceEventService.call(task.space_id, @context.user_id, @membership, task, :task_accepted)
       end
     end
     render json: { status: 200 }
