@@ -37,6 +37,14 @@ class ReviewSpaceMailer < ApplicationMailer
          subject: "#{content.user.full_name} added a new #{content.klass} "
   end
 
+  def content_deleted_email(content, receiver)
+    @content = content
+    @space = content.space_object
+    @receiver = receiver
+    mail to: receiver.email,
+         subject: "#{content.user.full_name} deleted a #{content.klass} "
+  end
+
   def inactive_space_email(space)
     @space = space
     mail to: User.review_space_admins.pluck(:email),

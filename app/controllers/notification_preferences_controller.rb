@@ -3,7 +3,7 @@ class NotificationPreferencesController < ApplicationController
   before_action :check_user
 
   def index
-    render json: { preference: preference }
+    render json: { preference: preference.all_attributes }
   end
 
   def change
