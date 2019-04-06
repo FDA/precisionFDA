@@ -107,11 +107,11 @@ class WorkflowsController < ApplicationController
       per_page: 100,)
     
     @my_workflows = WorkflowSeries.includes(latest_revision_workflow: [user: :org])
-      .editable_by(@context).order(name: :asc)
-      .map { |series| series.latest_accessible(@context) }.compact
+                      .editable_by(@context).order(name: :asc)
+                      .map { |series| series.latest_accessible(@context) }.compact
 
     @run_workflows = WorkflowSeries.eager_load(latest_revision_workflow: [user: :org])
-                      .accessible_by(@context).order(name: :asc)
+                       .accessible_by(@context).order(name: :asc)
                        .where.not(user_id: @context.user_id)
                        .map { |series| series.latest_accessible(@context) }.compact
 
