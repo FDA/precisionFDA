@@ -1,3 +1,5 @@
+### REMOVE THIS FILE AFTER FULL NEW EDITOR INTEGRATION ###
+
 class WorkflowEditorModel
   setSlots: (workflow) ->
     if workflow? && !@slots().length > 0
@@ -290,7 +292,15 @@ class WorkflowEditorModel
         nextSlot: slot.nextSlot()?.slotId()
       }
       workflow_inputs.push(slot_details)
-    params = {slots: workflow_inputs, workflow_name: @name(), readme: @readme.peek() ? "", workflow_title: @title(), workflow_id: @workflow?.uid, is_new: @isNewWorkflow}
+    params = {
+      slots: workflow_inputs,
+      workflow_name: @name(),
+      readme: @readme.peek() ? "",
+      workflow_title: @title(),
+      workflow_id: @workflow?.uid,
+      is_new: @isNewWorkflow
+    }
+
     Precision.api('/api/create_workflow', params)
       .done((res)=>
         window.location.replace("/workflows/#{res.id}")
