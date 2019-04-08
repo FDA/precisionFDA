@@ -23,7 +23,7 @@ class CopyService
           name: new_workflow.name,
           latest_revision_workflow_id: new_workflow.id,
           user_id: user.id,
-          scope: "private"
+          scope: scope
         )
         new_workflow.update!(workflow_series_id: workflow_series.id)
       end
