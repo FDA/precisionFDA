@@ -48,6 +48,9 @@
     <span class="workflow-warning"> - Required</span>
     <!-- /ko -->
     <span class="col-sm-offset-1" data-bind="text: classLabel"></span>
+    <!-- ko if: connected -->
+    <span class="col-sm-offset-1 text-success">Connected</span>
+    <!-- /ko -->
   </div>
   <div data-bind="template: {name: 'io-field'}"></div>
   <div>
@@ -75,11 +78,27 @@
 
 <script type="text/html" id="io-field">
   <div class="input-group">
-    <input type="text" class="form-control" data-bind="textInput: inputValue, attr: {disabled: isRequired()}"/>
+    <div class="form-control" data-bind="text: inputValue"></div>
     <span class="input-group-btn">
-      <button class="btn btn-primary" data-bind="click: $root.showMapSlotIOModal, text: setButtonText, attr: {
-        disabled: isRequired()
-      }"></button>
+      <!-- ko if: configured() -->
+        <button class="btn btn-danger" data-bind="click: $root.mapSlotIOModalResetInput, attr: {
+          disabled: isRequired()
+        }">
+          <i class="fa fa-times"></i>
+        </button>
+      <!-- /ko -->
+      <!-- ko if: !configured() -->
+        <button class="btn btn-primary" title="Set Value" data-bind="click: $root.showSetIOValueModal, attr: {
+          disabled: isRequired()
+        }">
+          <i class="fa fa-pencil"></i>
+        </button>
+        <button class="btn btn-success" title="Connect With Output" data-bind="click: $root.showMapSlotIOModal, attr: {
+          disabled: isRequired()
+        }">
+          <i class="fa fa-share-alt"></i>
+        </button>
+      <!-- /ko -->
     </span>
   </div>
 </script>

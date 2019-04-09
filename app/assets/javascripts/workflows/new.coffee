@@ -173,8 +173,8 @@ class NewWorkflowView extends Precision.wfEditor.WorkflowEditorModel
   wdlTextValueOnInput: (root, e) =>
     @wdlTextValue(e.target.value)
 
-  constructor: (apps) ->
-    super(apps, null, 'new')
+  constructor: (apps, scope) ->
+    super(apps, null, scope, 'new')
     @importModal = $('#import_cwl_wdl_modal')
     @importSuccessModal = $('#import_cwl_wdl_success_modal')
     @wdlFileInput = $('#wdl_file_input')
@@ -220,7 +220,6 @@ class NewWorkflowView extends Precision.wfEditor.WorkflowEditorModel
 WorkflowsController = Paloma.controller('Workflows', {
   new: ->
     $container = $("body main")
-    viewModel = new NewWorkflowView(@params.apps)
+    viewModel = new NewWorkflowView(@params.apps, @params.scope)
     ko.applyBindings(viewModel, $container[0])
-    window.viewModel = viewModel
 })

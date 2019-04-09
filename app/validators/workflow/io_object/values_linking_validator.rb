@@ -2,9 +2,9 @@ class Workflow
   module IOObject
     class ValuesLinkingValidator < ActiveModel::EachValidator
       def validate_each(record, attribute, value)
-        if record.slot.slot_number == 0 && !record.optional && !record.required_run_input
+        if record.slot.slot_number == 0 && !record.optional && !record.required_run_input && record.default_workflow_value.nil?
           record.errors.add(attribute, :compatible_linking, message_options(record))
-        elsif !record.optional && !record.required_run_input && !record.linked_to_a_stage?
+        elsif !record.optional && !record.required_run_input && !record.linked_to_a_stage? && record.default_workflow_value.nil?
           record.errors.add(attribute, :stage_output_linking, message_options(record))
         elsif record.linked_to_a_stage?
           linked_to_stage_validations(value, attribute, record)
