@@ -60,6 +60,9 @@ class User < ActiveRecord::Base
     holly.stephens
     aabramenko.adminstage
     alekadmin.suradmin
+    dzverevadmin.lnadmin
+    ebarashevastageadmin.lnadmin
+    pzaitsevstageadmin.lnadmin
     sam.westreich
   ).freeze
 
