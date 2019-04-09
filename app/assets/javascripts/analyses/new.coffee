@@ -107,18 +107,22 @@ class IOModel
     @value = ko.observable(data.value)
     @optional = data.optional
     @selectorModel = new selectorModel(@class, data)
-    @defaultValues = ko.observableArray([data.defaultValues])
+    @defaultValues = ko.observableArray([data.default_workflow_value || data.defaultValues])
     @isTrueActive = ko.computed( =>
       if @defaultValues()? && _.isArray(@defaultValues())
-        @defaultValues()[0] == 'true'
+        value = @defaultValues()[0]
+        value = value.toString() if value
+        return value == 'true'
       else if @defaultValues()? && _.isBoolean(@defaultValues())
-        @defaultValues() == true
+        return @defaultValues() == true
     )
     @isFalseActive = ko.computed( =>
       if @defaultValues()? && _.isArray(@defaultValues())
-        @defaultValues()[0] == 'false'
+        value = @defaultValues()[0]
+        value = value.toString() if value
+        return value == 'false'
       else if @defaultValues()? && _.isBoolean(@defaultValues())
-        @defaultValues() == false
+        return @defaultValues() == false
     )
 
   toggleTrue: (e) ->
@@ -138,7 +142,7 @@ class selectorModel
     @id = _.uniqueId("io-field-")
     @klass = klass
     @fileValues = ko.observableArray()
-    @defaultValues = ko.observableArray([data.defaultValues])
+    @defaultValues = ko.observableArray([data.default_workflow_value || data.defaultValues])
     @buttonType = ko.computed(=>
       switch @klass
         when "file"
