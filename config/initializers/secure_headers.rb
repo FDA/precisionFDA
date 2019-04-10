@@ -25,27 +25,4 @@ SecureHeaders::Configuration.default do |config|
     style_src: %w('self' 'unsafe-inline' https://fonts.googleapis.com https://dnanexus.github.io https://cdnjs.cloudflare.com),
     report_only: false
   }
-  hpkp = {
-    report_only: false,
-    max_age: 5.minutes.to_i,
-    include_subdomains: false
-  }
-  if ENV["DNANEXUS_BACKEND"] == "production"
-    hpkp[:pins] = [
-      {sha256: 'fxEEsh8jbNNYeHp09gkzFaRSpr6MYOAQRoRtGkMnw+c='},
-      {sha256: 'OV/2vGzq4A/PlbCUFpy5W2dHmMLPvHZ9N/FVDOPNvQw='},
-      {sha256: 'Hxbr0eK3F0xc4UkeXRvapzSvj3I0efJ+2h2Q70MpltM='},
-      {sha256: 'AGLBxCqwOTXOZg/v14oxVzHbU0GVWr1QlHR7DQqnzvU='},
-      {sha256: '154XxB1J9PKgQ2rcgEEsTY+0CPdx03PpIiiJPlJzAXk='},
-      {sha256: 'HWAfTqWuHb8+lgjCtyWUW9+XgIF0wxZ42EQR2ETS41k='}
-    ]
-    hpkp[:max_age] = 7.days.to_i
-  else
-    hpkp[:pins] = [
-      {sha256: 'gtfblKFG3oCmgxfjddilwzBgaudaW3XyH7M90LrfjOU='},
-      {sha256: 'x8W1sshBVav03Hgxxp+PRD5f3xs0yIBmNpph3krjGqM='},
-      {sha256: 'TZqk8OpJ8n7+4M25OqUSfDZ+917bcso0RVa4ZMvdvXQ='}
-    ]
-  end
-  config.hpkp = hpkp
 end
