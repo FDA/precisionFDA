@@ -118,7 +118,7 @@ class ProfileController < ApplicationController
 
   def provision_org
     if request.get?
-      @invitations = Invitation.order(id: :desc)
+      @invitations = Invitation.order(id: :desc).page(params[:page]).per(10)
       @state = "step1"
       return
     end
