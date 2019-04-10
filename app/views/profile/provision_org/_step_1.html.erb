@@ -42,6 +42,9 @@
         <td><%= inv.organize_intent ? 'YES' : ('&ndash;'.html_safe) %></td>
       </tr>
     <% end %>
+    <br/>
+    <%= paginate @invitations %>
     </tbody>
   </table>
+  <%= paginate @invitations %>
 <% end %>
