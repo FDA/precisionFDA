@@ -155,6 +155,7 @@ class TasksController < ApplicationController
           comment = Comment.build_from(task, @context.user_id, params[:comment][:body])
           comment.save
         end
+        SpaceEventService.call(task.space_id, @context.user_id, @membership, task, :task_reopened)
       end
     end
     render json: { status: 200 }
@@ -169,6 +170,7 @@ class TasksController < ApplicationController
           comment = Comment.build_from(task, @context.user_id, params[:comment][:body])
           comment.save
         end
+        SpaceEventService.call(task.space_id, @context.user_id, @membership, task, :task_reopened)
       end
     end
     render json: { status: 200 }

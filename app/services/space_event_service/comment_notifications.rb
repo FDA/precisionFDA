@@ -12,7 +12,9 @@ module SpaceEventService
       private
 
       def receivers(event)
-        candidates = event.entity.mentioned_users
+        candidates = []
+        mentioned = event.entity.mentioned_users
+        mentioned.map { |u| candidates << u }
         candidates << event.entity.parent.user if event.entity.parent.present?
 
         candidates.uniq.select do |user|
