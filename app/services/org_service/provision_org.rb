@@ -28,7 +28,7 @@ module OrgService
       auth.call("user", "new", username: username, email: email,
                                first: first_name, last: last_name, billTo: ORG_EVERYONE)
       papi.call(dxorg, "invite", invitee: dxuserid, level: 'ADMIN', suppressEmailNotification: true )
-      papi.call(dxorg, "removeMember", user: ADMIN_USER)
+      #papi.call(dxorg, "removeMember", user: ADMIN_USER)
       papi.call(ORG_EVERYONE, "invite", invitee: dxuserid, level: 'MEMBER', allowBillableActivities: false,
                                         appAccess: true, projectAccess: 'VIEW', suppressEmailNotification: true)
     end
