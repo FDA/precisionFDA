@@ -41,8 +41,16 @@
   end
 
   g.column name: "Org", in_html: false do |metric|
-    metric.user.org ? metric.user.org.name + "  " + metric.user.org.handle : "Self-representing"
-  end
+    if metric.user.org
+      if !(metric.user.org.name.blank? or metric.user.org.handle.blank?)
+        metric.user.org.name + "  " + metric.user.org.handle
+      else
+        "No Org data"
+      end
+    else
+     "Self-representing"
+    end
+ end
 
   g.column name: "Email", attribute: "email", assoc: :user do |metric|
     metric.user.email
