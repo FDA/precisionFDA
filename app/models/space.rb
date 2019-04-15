@@ -34,6 +34,7 @@ class Space < ActiveRecord::Base
   scope :reviewer, -> { review.where.not(host_dxorg: nil) }
   scope :sponsor, -> { review.where.not(guest_dxorg: nil) }
   scope :all_verified, -> { where(verified: true) }
+  scope :non_groups, -> { where.not(space_type: 0) }
 
   def confidential_space(member)
     if member.host?
@@ -92,8 +93,13 @@ class Space < ActiveRecord::Base
   end
 
   def title
-    return name unless review?
-    confidential? ? "#{name}(Confidential)" : "#{name}(Cooperative)"
+    if review?
+      confidential? ? "#{name}(Confidential)" : "#{name}(Cooperative)"
+    elsif verification?
+      "#{name}(Verification)"
+    else
+      name
+    end
   end
 
   def klass
