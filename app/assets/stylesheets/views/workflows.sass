@@ -65,24 +65,6 @@ a.btn.batch_terminate
   span.fa.fa-times
     color: red
 
-.unconfigured
-  width: 200px
-  height: 50px
-  background-color: $brand-red-tertiary
-  box-shadow: 0 0 10px $brand-red-tertiary
-  -moz-box-shadow: 0 0 10px $brand-red-tertiary
-  -webkit-box-shadow: 0 0 10px $brand-red-tertiary
-  -o-box-shadow: 0 0 10px $brand-red-tertiary
-
-.configured
-  width: 200px
-  height: 50px
-  background-color: $brand-green-secondary
-  box-shadow: 0 0 10px $brand-green-secondary
-  -moz-box-shadow: 0 0 10px $brand-green-secondary
-  -webkit-box-shadow: 0 0 10px $brand-green-secondary
-  -o-box-shadow: 0 0 10px $brand-green-secondary
-
 .input-configured
   width: 220px
   height: 80px
@@ -317,3 +299,80 @@ a.btn.batch_terminate
           margin-top: -25px
           margin-left: -20px
           cursor: pointer
+
+.wf-loader
+  text-align: center
+  font-size: 4rem
+  margin: 50px
+
+#disable-screen-modal
+  pointer-events: none
+  .workflows
+    padding: 50px
+
+.wf-stages-container
+  background-color: transparent
+  display: flex
+  flex-direction: column
+  align-items: center
+
+.wf-stage
+  display: inline-block
+  max-width: 100%
+  &-slots
+    width: 100%
+    display: flex
+    flex-wrap: wrap
+    justify-content: center
+    .wf-slot
+      flex: 1 1 auto
+      margin: 0px 10px
+      &-body
+        width: 200px
+        height: 50px
+      &-title
+        white-space: nowrap
+        text-overflow: ellipsis
+        overflow: hidden
+      &-remove
+        cursor: pointer
+      &.unconfigured
+        .wf-slot-body
+          background-color: $brand-red-tertiary
+          box-shadow: 0 0 10px $brand-red-tertiary
+        .wf-slot-remove,
+        .wf-slot-io
+          color: $brand-red-tertiary
+      &.configured
+        .wf-slot
+          background-color: $brand-green-secondary
+          box-shadow: 0 0 10px $brand-green-secondary
+        .wf-slot-remove,
+        .wf-slot-io
+          color: $brand-green-secondary
+
+
+.pfda-controller-workflows.pfda-action-new
+  #import_cwl_wdl_success_modal
+    .modal-body
+      p
+        b
+          margin-right: 5px
+  #import_cwl_wdl_modal
+    .docker-images-container
+      padding: 10px
+    .docker-image
+      &-name
+        padding-right: 10px
+        position: relative
+        top: -1px
+      &-remove
+        cursor: pointer
+    .browse-files-container
+      margin-bottom: 10px
+    .btn
+      margin-left: 5px
+    textarea
+      resize: vertical
+      height: 150px
+      max-height: 300px

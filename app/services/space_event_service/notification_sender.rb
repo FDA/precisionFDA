@@ -1,8 +1,8 @@
 module SpaceEventService
   class NotificationSender
 
-    TASK_TYPES = %w(task_created task_reassigned task_completed task_declined task_deleted)
-    CONTENT_TYPES = %w(file_added note_added app_added job_added asset_added comparison_added workflow_added)
+    TASK_TYPES = %w(task_created task_reassigned task_accepted task_completed task_declined task_deleted task_reopened)
+    CONTENT_TYPES = %w(file_added note_added app_added job_added asset_added comparison_added workflow_added file_deleted asset_deleted)
     COMMENT_TYPES = %w(comment_added)
     MEMBERSHIP_TYPES = %w(membership_added membership_disabled membership_changed)
     SPACE_TYPES = %w(space_locked space_unlocked space_deleted)

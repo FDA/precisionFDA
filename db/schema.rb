@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190322143409) do
+ActiveRecord::Schema.define(version: 20190325144741) do
 
   create_table "accepted_licenses", force: :cascade do |t|
     t.integer  "license_id", limit: 4
@@ -883,8 +883,8 @@ ActiveRecord::Schema.define(version: 20190322143409) do
     t.integer  "workflow_series_id", limit: 4
     t.datetime "created_at",                       null: false
     t.datetime "updated_at",                       null: false
-    t.string   "project",            limit: 255
     t.string   "uid",                limit: 255
+    t.string   "project",            limit: 255
   end
 
   add_index "workflows", ["uid"], name: "index_workflows_on_uid", unique: true, using: :btree
@@ -935,8 +935,8 @@ ActiveRecord::Schema.define(version: 20190322143409) do
   add_foreign_key "notification_preferences", "users"
   add_foreign_key "orgs", "users", column: "admin_id"
   add_foreign_key "participants", "nodes"
+  add_foreign_key "profiles", "countries"
   add_foreign_key "profiles", "countries", column: "phone_country_id", on_delete: :nullify
-  add_foreign_key "profiles", "countries", on_delete: :nullify
   add_foreign_key "profiles", "users"
   add_foreign_key "saved_queries", "users"
   add_foreign_key "space_events", "spaces"

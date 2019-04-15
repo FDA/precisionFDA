@@ -133,7 +133,7 @@ class CommentsController < ApplicationController
     end
 
     def comment_inside_space?(item)
-      (item.klass == "space") || item.respond_to?(:scope) && item.in_space?
+      ["space", "task"].include?(item.klass) || item.respond_to?(:scope) && item.in_space?
     end
 
     def move_to_child(comment)
@@ -150,6 +150,8 @@ class CommentsController < ApplicationController
       space =
         if item.klass == "space"
           item
+        elsif item.klass == "task"
+          item.space
         else
           item_from_uid(item.scope)
         end

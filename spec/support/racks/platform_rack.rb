@@ -68,6 +68,10 @@ class PlatformRack < BaseRack
     [200, {}, [{}.to_json]]
   end
 
+  def post_workflow_new(params)
+    [200, {}, [{ id: "workflow-1", "editVersion": 0 }.to_json]]
+  end
+
   def parse_method_name(env)
     request_type = env["REQUEST_METHOD"].downcase
 
@@ -101,6 +105,8 @@ class PlatformRack < BaseRack
         "remove_objects"
       when /.*\/clone/
         "clone"
+      when "/workflow/new"
+        "workflow_new"
       else
         raise "Method for '#{env["PATH_INFO"]}' isn't implemented yet"
       end

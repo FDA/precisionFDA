@@ -70,7 +70,7 @@ class Context
 
   def active_spaces_for(item)
     if item.is_a?(Workflow)
-      @user.active_spaces.review
+      @user.active_spaces.non_groups
     else
       @user.active_spaces
     end

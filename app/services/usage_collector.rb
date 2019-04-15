@@ -29,6 +29,7 @@ class UsageCollector
     end
 
     def collect_data_query(on_date)
+
       day_start = sql_date(on_date)
       day_after_start = sql_date(on_date + 1.day)
       day_before_start = sql_date(on_date - 1.day)
@@ -36,6 +37,18 @@ class UsageCollector
       month_before_start = sql_date(on_date - 1.month)
       year_before_start = sql_date(on_date - 1.year)
 
+      cumulative_sql = ""
+      cumulative_field = ""
+      cumulative_select = ""
+      if File.basename($0) == 'rake'
+        cumulative_sql = <<-CMU
+        LEFT JOIN (
+          SELECT dxuser, SUM(param3) AS cumulative_price FROM events WHERE type = 'Event::JobClosed' GROUP BY dxuser
+        ) AS t8 ON t0.dxuser = t8.dxuser
+        CMU
+        cumulative_field = "          cumulative_compute_price,"
+        cumulative_select = "          IFNULL(t8.cumulative_price, 0) AS cumulatvie_compute_price,"
+      end
       <<-SQL
         INSERT INTO #{TABLE_NAME} (
           user_id,
@@ -45,7 +58,7 @@ class UsageCollector
           monthly_compute_price,
           yearly_compute_price,
           custom_range_compute_price,
-          cumulative_compute_price,
+          #{cumulative_field}
           created_at
         ) SELECT
           t0.id AS user_id,
@@ -55,7 +68,7 @@ class UsageCollector
           IFNULL(t5.month_price, 0) AS monthly_compute_price,
           IFNULL(t6.year_price, 0) AS yearly_compute_price,
           IFNULL(t7.custom_price, 0) AS custom_range_compute_price,
-          IFNULL(t8.cumulative_price, 0) AS cumulatvie_compute_price,
+          #{cumulative_select}
           NOW() as created_at
         FROM users AS t0
         LEFT JOIN (
@@ -79,9 +92,7 @@ class UsageCollector
         LEFT JOIN (
           SELECT dxuser, SUM(param3) AS custom_price FROM events WHERE type = 'Event::JobClosed' AND created_at >= #{sql_date(custom_range_start)} AND created_at < #{sql_date(custom_range_end)} GROUP BY dxuser
         ) AS t7 ON t0.dxuser = t7.dxuser
-        LEFT JOIN (
-          SELECT dxuser, SUM(param3) AS cumulative_price FROM events WHERE type = 'Event::JobClosed' AND GROUP BY dxuser
-        ) AS t8 ON t0.dxuser = t8.dxuser
+        #{cumulative_sql}
         WHERE t0.dxuser != #{ActiveRecord::Base.sanitize(CHALLENGE_BOT_DX_USER)};
       SQL
     end
@@ -95,9 +106,13 @@ class UsageCollector
           daily_byte_hours: CloudResource.daily_consumption(user),
           weekly_byte_hours: CloudResource.weekly_consumption(user),
           monthly_byte_hours: CloudResource.monthly_consumption(user),
-          yearly_byte_hours: CloudResource.yearly_consumption(user),
-          cumulative_byte_hours: CloudResource.cumulative_consumption(user)
+          yearly_byte_hours: CloudResource.yearly_consumption(user)
         )
+        if File.basename($0) == 'rake'
+          metric.update(
+            cumulative_byte_hours: CloudResource.cumulative_consumption(user)
+          )
+        end
       end
     end
 

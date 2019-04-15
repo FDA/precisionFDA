@@ -7,9 +7,10 @@
 #
 #########################################################
 
-WorkflowsController = Paloma.controller('Workflows',
+WorkflowsController = Paloma.controller('Workflows', {
   edit: ->
     $container = $("body main")
-    viewModel = new Precision.models.WorkflowEditorModel(@params.apps, @params.workflow, 'edit')
+    viewModel = new Precision.wfEditor.WorkflowEditorModel(@params.apps, @params.workflow, @params.scope, 'edit')
     ko.applyBindings(viewModel, $container[0])
-)
+    window.viewModel = viewModel
+})

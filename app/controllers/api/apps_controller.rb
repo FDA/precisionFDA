@@ -24,62 +24,32 @@ module Api
         app, asset = nil
 
         ActiveRecord::Base.transaction do
-          asset = DockerImporter.new(
+          asset = DockerImporter.import(
             context: @context,
             attached_image: params[:attached_image],
-            formatted_image: presenter.docker_formatted
-          ).import
+            docker_image: presenter.docker_image
+          )
 
-          app = create_app(build_app_opts(asset))
+          presenter.asset = asset
+
+          opts = params[:format] == "wdl" ? presenter.build : App::CwlParser.parse(presenter)
+
+          app = create_app(opts)
         end
 
         render json: { id: app.uid, asset_uid: asset.try(:uid) }
       else
-        render json: { errors: presenter.errors.full_messages }, status: 422
+        render json: { errors: presenter.errors.full_messages }, status: :unprocessable_entity
       end
     rescue Psych::SyntaxError
-      render json: { errors: ["CWL has incorrect format"] }, status: 422
+      render json: { errors: ["CWL has incorrect format"] }, status: :unprocessable_entity
     rescue => e
       logger.error e.message
       logger.error e.backtrace.join("\n")
-      render json: { errors: ["Something went wrong"] }, status: 422
+      render json: { errors: ["Something went wrong"] }, status: :unprocessable_entity
     end
 
     private
-
-    def build_app_opts(asset)
-      imported_opts =
-        if params[:format] == "wdl"
-          presenter.build
-        else
-          App::CwlParser.parse(presenter)
-        end
-
-      opts = imported_opts.merge(
-        ordered_assets: [asset.try(:uid)].compact
-      )
-
-      if asset
-        opts[:code] = inject_docker_load(opts[:code])
-      end
-
-      opts
-    end
-
-    def inject_docker_load(code)
-      filename = params[:attached_image].original_filename
-      cache_dir = "/tmp/dx-docker-cache"
-
-      <<-CODE
-gunzip #{filename}
-docker2aci #{filename.sub('.gz', '')}
-mkdir -p #{cache_dir}
-aci_file=`find . -name "*.aci"`
-mv $aci_file #{cache_dir}/#{CGI.escape(presenter.docker)}.aci
-
-#{code}
-CODE
-    end
 
     def create_app(opts)
       AppService.create_app(@context, opts)
@@ -286,7 +256,7 @@ CODE
           "help": i_help,
         }
 
-        ret["default"] = i_default if i_default
+        ret["default"] = i_default if !i_default.nil?
         ret["choices"] = i_choices if i_choices
         ret["patterns"] = i_patterns if i_patterns
 

@@ -2,17 +2,37 @@
 #   (not the rights to receive a notification).
 class NotificationPreference < ActiveRecord::Base
 
-  SPACE_COMMON_KEYS = [
-    :membership_changed, #added to space, removed from space, role changed within space
-    :task_assignment,
-    :comment_activity, #mentioned in a comment, someone replies to their comment
-    :content_added_or_deleted,
-    # :app_workflow_status, #job started, job completed, job failed, job terminated
+  COMMON_KEYS = [
+    :all_membership_changed,
+    :all_new_task_assigned,
+    :all_task_status_changed,
+    :all_comment_activity, #mentioned in a comment, someone replies to their comment
+    :all_content_added_or_deleted,
+    # :all_app_or_workflow_status_changed, #job started, job completed, job failed, job terminated
   ]
-  SPACE_LEAD_AND_ADMIN_KEYS = [
-    :space_lock_unlock_delete,
+  LEAD_KEYS = [
+    :lead_membership_changed,
+    :lead_new_task_assigned,
+    :lead_task_status_changed,
+    :lead_comment_activity, #mentioned in a comment, someone replies to their comment
+    :lead_content_added_or_deleted,
+    # :lead_app_or_workflow_status_changed, #job started, job completed, job failed, job terminated
+    :lead_member_added_or_removed_from_space,
+    :lead_space_locked_unlocked_deleted,
   ]
-  ALL_KEYS = SPACE_COMMON_KEYS + SPACE_LEAD_AND_ADMIN_KEYS
+  ADMIN_KEYS = [
+    :admin_membership_changed,
+    :admin_new_task_assigned,
+    :admin_task_status_changed,
+    :admin_comment_activity, #mentioned in a comment, someone replies to their comment
+    :admin_content_added_or_deleted,
+    # :admin_app_or_workflow_status_changed, #job started, job completed, job failed, job terminated
+    :admin_member_added_or_removed_from_space,
+    :admin_space_locked_unlocked_deleted,
+    :admin_space_lock_unlock_delete_requests,
+  ]
+
+  ALL_KEYS = COMMON_KEYS + LEAD_KEYS + ADMIN_KEYS
 
   ALL_KEYS.each do |key|
     define_method("#{key}=") do |value|
@@ -28,24 +48,27 @@ class NotificationPreference < ActiveRecord::Base
   belongs_to :user
 
   validates *ALL_KEYS, inclusion: { in: [ true, false ] }
-  store :data, { accessors: ALL_KEYS, coder: JSON }
+  store :data, accessors: ALL_KEYS, coder: JSON
 
   def self.find_by_user(user)
     find_or_initialize_by(user_id: user.id)
   end
 
-  def attributes
-    available_keys.each_with_object({}) do |key, memo|
+  def all_attributes
+    {
+      review_space_admin: keys_list(ADMIN_KEYS),
+      lead_reviewer: keys_list(LEAD_KEYS),
+      reviewer: keys_list(COMMON_KEYS)
+    }
+  end
+
+  def keys_list(keys)
+    keys.each_with_object({}) do |key, memo|
       memo[key] = send(key)
     end
   end
 
   def available_keys
-    if user.review_space_admin? || user.space_memberships.lead.active.any?
-      ALL_KEYS
-    else
-      SPACE_COMMON_KEYS
-    end
+    ALL_KEYS
   end
-
 end
