@@ -4,7 +4,6 @@ module Api
       ActiveRecord::Base.transaction do
         if presenter.valid?
           workflow = Workflows::Builder.call(presenter)
-
           render json: { id: workflow.uid, asset_uids: presenter.assets.map(&:uid) }
         else
           render json: { errors: presenter.errors.full_messages }, status: :unprocessable_entity

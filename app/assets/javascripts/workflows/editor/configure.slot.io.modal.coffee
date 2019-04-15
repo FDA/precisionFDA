@@ -6,15 +6,9 @@ class MapSlotIOModal
     return !outputs.length
 
   showModal: (input, nextStage) =>
-    if input.configured()
-      @resetValue(input)
-    else
-      @editingInput(input)
-      @nextStage(nextStage)
-      @modal.modal('show')
-
-  resetValue: (input) ->
-    input.reset()
+    @editingInput(input)
+    @nextStage(nextStage)
+    @modal.modal('show')
 
   mapIO: (output) =>
     @editingInput().mapIO(output)

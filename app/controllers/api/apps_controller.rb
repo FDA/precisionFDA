@@ -256,7 +256,7 @@ module Api
           "help": i_help,
         }
 
-        ret["default"] = i_default if i_default
+        ret["default"] = i_default if !i_default.nil?
         ret["choices"] = i_choices if i_choices
         ret["patterns"] = i_patterns if i_patterns
 

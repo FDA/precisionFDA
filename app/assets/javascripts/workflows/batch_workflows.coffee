@@ -102,7 +102,7 @@ class InputModel
     @help = input.help
     @required = !input.optional
     @stageName = input.stageName
-    @value = ko.observable(input.defaultValues)
+    @value = ko.observable(input.default_workflow_value || input.defaultValues)
     @defaultValue = input.defaultValues
     @batchOne = ko.observable(false)
     @batchTwo = ko.observable(false)
