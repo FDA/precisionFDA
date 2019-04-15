@@ -3,9 +3,10 @@ class App
     include ActiveModel::Validations
 
     validate :wdl_object_should_be_valid
-    validates :tasks, length: { is: 1 }
+    validates :tasks, length: { is: 1, message: "number is wrong" }
 
     attr_reader :raw
+    attr_accessor :asset
 
     def initialize(wdl_text)
       @raw = wdl_text
@@ -21,7 +22,13 @@ class App
         internet_access: true,
         instance_type: "baseline-8",
         code: code,
-        packages: %w(libxml2-dev libxslt1-dev zlib1g-dev),
+        packages: %w(
+          libxml2-dev
+          libxslt1-dev
+          zlib1g-dev
+          openjdk-8-jre-headless
+        ),
+        ordered_assets: Array(asset.try(:uid)),
       }
     end
 
@@ -85,7 +92,7 @@ CODE
       end
     end
 
-    delegate :inputs, :outputs, :docker, :docker_formatted, to: :task
+    delegate :inputs, :outputs, :docker, :docker_image, to: :task
     delegate :tasks, :workflow, to: :wdl_object
     delegate :name, to: :task, prefix: "app"
     delegate :name, to: :workflow, prefix: true, allow_nil: true

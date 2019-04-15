@@ -115,3 +115,6 @@ REVIEW_SPACE_ADMINS =
 # Remove X-Runtime
 Rails.application.config.middleware.delete(Rack::Runtime)
 SYNC_JOBS_LIMIT = ENV.fetch("SYNC_JOBS_LIMIT", 30).to_i
+
+# dx-docker cache directory
+DX_DOCKER_CACHE = "/tmp/dx-docker-cache"

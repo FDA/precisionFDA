@@ -8,7 +8,9 @@ class WdlObject
 
   validates :tasks, presence: { message: "are not found!" }
 
-  validate :tasks_should_be_valid, :workflow_should_be_valid
+  validate :tasks_should_be_valid,
+           :workflow_should_be_valid,
+           :tasks_should_have_prev_and_next_slots
 
   attr_reader :raw
 
@@ -22,9 +24,31 @@ class WdlObject
   end
 
   def tasks
-    @tasks ||= parser.parse_tasks.map do |task_text|
-      Task.new(task_text)
+    @tasks ||= parser.parse_tasks.each_with_object([]) do |task_text, res|
+      task = Task.new(task_text)
+
+      if res.size > 0
+        prev_task = res.last
+        prev_task.next_task = task
+        task.prev_task = prev_task
+      end
+
+      res << task
     end
+  end
+
+  # return just a raw text by default
+  def to_s(names = nil)
+    return raw if names.blank?
+
+    output = ""
+    output << workflow.raw if workflow
+
+    tasks.each do |task|
+      output << "\n #{task.raw}" if names.include?(task.name)
+    end
+
+    output
   end
 
   private
@@ -44,6 +68,19 @@ class WdlObject
     if workflow && workflow.invalid?
       workflow.errors.full_messages.each do |msg|
         errors.add("base", "Workflow #{msg.downcase}")
+      end
+    end
+  end
+
+  def tasks_should_have_prev_and_next_slots
+    tasks.each do |task|
+      if task == tasks.first
+        errors.add("base", "Task '#{task.name}': should not have previous slot") if task.prev_slot
+      elsif task == tasks.last
+        errors.add("base", "Task '#{task.name}': should not have next slot") if task.next_slot
+      else
+        errors.add("base", "Task '#{task.name}': should have previous slot") unless task.prev_slot
+        errors.add("base", "Task '#{task.name}': should have next slot") unless task.next_slot
       end
     end
   end
