@@ -1,0 +1,57 @@
+<div class="workflows modal right fade in" id="mapper-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header workflows workflow-modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h1 class="modal-title" id="mapper-modal-label">Select Outputs</h1>
+      </div>
+      <div class="modal-body">
+        <!-- ko if: !mapSlotIOModal.nextStageSlots().length -->
+          <div class="alert-danger">
+            <span> No configurable Apps Available </span>
+          </div>
+        <!-- /ko -->
+        <!-- ko if: mapSlotIOModal.nextStageSlots().length -->
+          <div data-bind="template: {name: 'next-slot-app', foreach: mapSlotIOModal.nextStageSlots}"></div>
+        <!-- /ko -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default btn-link modal-btn modal fade in" data-dismiss="modal" tabindex="-1">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/html" id="next-slot-app">
+  <div>
+    <a data-toggle="collapse" data-bind="attr: {'href': '#collapse_' + appName()}">
+      <i class="indicator fa fa-caret-down" aria-hidden="true"></i>
+      <i class="fa fa-gear"></i>&nbsp;
+      <strong class="bold pfda-padded-v" data-bind="text: appName()"></strong>
+    </a>
+    <div data-bind="attr: {'id': 'collapse_' + appName()}" class="panel-collapse collapse" >
+      <!-- ko if: $root.mapSlotIOModal.checkAvailableOutputs($data) -->
+        <div class="alert-danger">
+          <span> No configurable Apps Available </span>
+        </div>
+      <!-- /ko -->
+      <!-- ko foreach: outputs() -->
+        <!-- ko if: $root.mapSlotIOModal.checkOutoutClass($data) -->
+          <div class="pfda-padded-h pfda-padded">
+            <div class="workflows io-field-default">
+              <div class="row">
+                <div class="workflows io-field-default col-md-3" data-bind="text: $data.class"></div>
+                <div class="workflows io-field-default col-md-6" data-bind="text: name"></div>
+                <div class="workflows io-field-default pull-right col-md-3">
+                  <a class="io-field-default" tabindex="-1" data-bind="click: $root.mapIO">Select</a>
+                </div>
+            </div>
+            </div>
+          </div>
+        <!--/ko -->
+      <!--/ko -->
+    </div>
+  </div>
+</script>

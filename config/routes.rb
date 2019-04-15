@@ -115,6 +115,8 @@ Rails.application.routes.draw do
         post "import", on: :collection
       end
 
+      resources :workflows, only: %w(create)
+
       post 'publish'
       post 'create_file'
       post 'create_challenge_card_image'

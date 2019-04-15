@@ -23,7 +23,7 @@ RSpec.describe SpaceService::ProjectBuilders::VerificationSpace, type: :service 
     context "when guest org is not empty" do
       before { service_response }
 
-      it "does not send response to create guest org on the platform" do
+      it "sends response to create guest org on the platform" do
         expect(WebMock).to have_requested(:post, response_path).with(body: {
           invitee: space.guest_dxorg,
           level: "CONTRIBUTE",

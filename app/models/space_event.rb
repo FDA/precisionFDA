@@ -54,6 +54,8 @@ class SpaceEvent < ActiveRecord::Base
     space_locked
     space_unlocked
     space_deleted
+    task_accepted
+    task_reopened
   )
 
   ROLES = %i(

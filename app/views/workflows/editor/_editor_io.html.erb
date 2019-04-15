@@ -1,0 +1,34 @@
+<div class="section-io">
+  <div class="section-io-input">
+    <div class="panel-heading clearfix">
+      <div class="btn-group pull-left">
+        <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#build-workflow-modal">
+          Add Stage
+        </button>
+        <span
+          class="small pfda-padded-h"
+          data-bind="text: stagesText, css: stagesTextStyle"></span>
+      </div>
+    </div>
+    <div class="wf-loader hidden" data-bind="css: {hidden: !wfIsLoading()}">
+      <i class="fa fa-spinner fa-spin"></i>
+    </div>
+    <div class="workflows standard container hidden" data-bind="css: {hidden: wfIsLoading()}">
+      <!-- ko if: !stages().length -->
+      <div class="workflow centered-div">
+        <p class="workflow centered-text"> No Stages Added. Add Stage by clicking on "Add Stage" above. </p>
+      </div>
+      <!-- /ko -->
+      <!-- ko if: stages().length -->
+      <%= render 'workflows/editor/stages_template' %>
+      <!-- /ko -->
+    </div>
+  </div>
+</div>
+
+<%= render 'workflows/editor/add_stages_modal' %>
+<%= render 'workflows/editor/configure_slot_io_modal' %>
+<%= render 'workflows/editor/map_io_modal' %>
+<%= render 'workflows/editor/set_io_value_modal' %>
+<%= render 'workflows/editor/disable_screen_modal' %>
+<%= render "workflows/selector_modal" %>

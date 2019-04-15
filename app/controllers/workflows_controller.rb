@@ -8,7 +8,11 @@ class WorkflowsController < ApplicationController
     app_series = AppSeries.accessible_by(@context).joins(:apps).merge(App.accessible_by(@context)).distinct
     private_app_series = app_series.where(scope: "private")
     public_app_series = app_series.where(scope: "public")
-    js apps: { private_apps: private_app_series.map { |app_series| app_series.slice(:id, :name) }, public_apps: public_app_series.map { |app_series| app_series.slice(:id, :name) } }
+    js(
+      apps: { private_apps: private_app_series.map { |app_series| app_series.slice(:id, :name) },
+      public_apps: public_app_series.map { |app_series| app_series.slice(:id, :name) } },
+      scope: ["private"]
+    )
   end
 
   def show
@@ -49,7 +53,12 @@ class WorkflowsController < ApplicationController
     app_series = AppSeries.accessible_by(@context).joins(:apps).merge(App.accessible_by(@context)).distinct
     private_app_series = app_series.where(scope: "private")
     public_app_series = app_series.where(scope: "public")
-    js apps: { private_apps: private_app_series.map { |app_series| app_series.slice(:id, :name) }, public_apps: public_app_series.map { |app_series| app_series.slice(:id, :name) } }, workflow: @workflow
+    js(
+      apps: { private_apps: private_app_series.map { |app_series| app_series.slice(:id, :name) },
+      public_apps: public_app_series.map { |app_series| app_series.slice(:id, :name) } },
+      scope: @workflow.accessible_scopes,
+      workflow: @workflow
+    )
   end
 
   def index
@@ -105,13 +114,13 @@ class WorkflowsController < ApplicationController
       order: 'analyses.id',
       order_direction: 'desc',
       per_page: 100,)
-    
+
     @my_workflows = WorkflowSeries.includes(latest_revision_workflow: [user: :org])
-      .editable_by(@context).order(name: :asc)
-      .map { |series| series.latest_accessible(@context) }.compact
+                      .editable_by(@context).order(name: :asc)
+                      .map { |series| series.latest_accessible(@context) }.compact
 
     @run_workflows = WorkflowSeries.eager_load(latest_revision_workflow: [user: :org])
-                      .accessible_by(@context).order(name: :asc)
+                       .accessible_by(@context).order(name: :asc)
                        .where.not(user_id: @context.user_id)
                        .map { |series| series.latest_accessible(@context) }.compact
 
@@ -128,7 +137,12 @@ class WorkflowsController < ApplicationController
     app_series = AppSeries.accessible_by(@context).joins(:apps).merge(App.accessible_by(@context)).distinct
     private_app_series = app_series.where(scope: "private")
     public_app_series = app_series.where(scope: "public")
-    js apps: { private_apps: private_app_series.map { |app_series| app_series.slice(:id, :name) }, public_apps: public_app_series.map { |app_series| app_series.slice(:id, :name) } }, workflow: @workflow
+    js(
+      apps: {private_apps: private_app_series.map { |app_series| app_series.slice(:id, :name) },
+      public_apps: public_app_series.map { |app_series| app_series.slice(:id, :name) } },
+      scope: @workflow.accessible_scopes,
+      workflow: @workflow
+    )
   end
 
   def cwl_export

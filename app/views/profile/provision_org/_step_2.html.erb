@@ -94,26 +94,20 @@
         <tr>
           <td><%= label_tag("org", "Organization name") %></td>
           <td><%= @invitation.org %></td>
-          <td><%= text_field_tag("org", @org, class: 'form-control') %></td>
+          <td><%= text_field_tag("org", @org, class: 'form-control', :"data-bind" => "disable: org_admin() != 'admin'") %></td>
           <td>The organization name. Previous examples:<br>"OSTP"<br>"23andMe"<br>"Broad Institute"<br>"Roche Sequencing"<br>"Baylor College of Medicine"<br><strong>Leave empty for self-represented user.</strong></td>
         </tr>
         <tr>
           <td><%= label_tag("org_handle", "Organization handle") %></td>
           <td></td>
-          <td><%= text_field_tag("org_handle", @org_handle, class: 'form-control') %></td>
+          <td><%= text_field_tag("org_handle", @org_handle, class: 'form-control', :"data-bind" => "disable: org_admin() != 'admin'") %></td>
           <td>A system handle for the organization.<br>This can only contain lowercase English letters.<br>It will be shown in all tables (org column).<br>Acronyms are sometimes better,<br>i.e. <code>rtg</code> for Real Time Genomics<br>or <code>hli</code> for Human Longevity.<br>Previous examples:<br><code>ostp</code><br><code>23andme</code><br><code>broad</code><br><code>roche</code><br><code>baylor</code><br><strong>Leave empty for self-represented user.</strong></td>
         </tr>
         <tr>
-          <td>Organization Admin?</td>
+          <td>Organization Administration</td>
           <td><%= @invitation.organization_admin ? "YES" : "NO" %></td>
-          <td></td>
-          <td>If user choose that he's the organization admin</td>
-        </tr>
-        <tr>
-          <td>Self-represented?</td>
-          <td><%= @invitation.singular ? "YES" : "NO" %></td>
-          <td></td>
-          <td>To make this user self-represented,<br>leave both the organization name<br>and the organization handle blank.</td>
+          <td><%= select_tag("organization_administration", options_for_select(["admin", "self-representing"], @invitation.organization_admin ? "admin" : (@invitation.singular ? "self-representing" : nil) ), :"data-bind" => "value: org_admin", class: "form-control") %></td>
+          <td>If user choose that he's the organization admin or he'll self represented.</td>
         </tr>
       </tbody>
     </table>

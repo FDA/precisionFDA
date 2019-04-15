@@ -60,6 +60,9 @@ class User < ActiveRecord::Base
     holly.stephens
     aabramenko.adminstage
     alekadmin.suradmin
+    dzverevadmin.lnadmin
+    ebarashevastageadmin.lnadmin
+    pzaitsevstageadmin.lnadmin
     sam.westreich
   ).freeze
 
@@ -166,6 +169,21 @@ class User < ActiveRecord::Base
 
   def klass
     "user"
+  end
+
+  def status
+    if last_login.nil?
+      "Pending"
+    else
+      case user_state
+      when "enabled"
+        "Active"
+      when "deactivated"
+        "Disabled"
+      else
+        "N/A"
+      end
+    end
   end
 
   def org
