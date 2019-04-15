@@ -11,14 +11,14 @@ class WorkflowEditorModel
     for stage in stages
       for slot in stage.slots()
         for input in slot.inputs()
-          if input.value.appID and input.value.name
+          if input.value().appID and input.value().name
             mappedInputs.push(input)
         for output in slot.outputs()
           outputs.push(output)
 
     for input in mappedInputs
       for output in outputs
-        if input.value.appID == output.appData.slotId and input.value.name == output.name
+        if input.value().appID == output.appData.slotId and input.value().name == output.name
           input.mapIO(output)
           break
 
@@ -67,12 +67,18 @@ class WorkflowEditorModel
   mapIO: (output) =>
     @mapSlotIOModal.mapIO(output)
 
+  mapSlotIOModalResetInput: (input, e) ->
+    input.reset()
+
   showMapSlotIOModal: (input, e) =>
     nextStage = @stages()[input.stageIndex() - 1]
     if nextStage
       @mapSlotIOModal.showModal(input, nextStage)
     else
       Precision.alert.showAboveAll('No configurable Apps Available', 'alert-info')
+
+  showSetIOValueModal: (input, e) =>
+    @setIOValueModal.showModal(input)
 
   saveWorkflow: () ->
     return false if @wfIsSaving()
@@ -103,7 +109,7 @@ class WorkflowEditorModel
       is_new: @isNewWorkflow
     }
 
-    Precision.api('/api/create_workflow', params)
+    Precision.api('/api/workflows', params)
       .done((res) ->
         window.location.replace("/workflows/#{res.id}")
       )
@@ -155,7 +161,10 @@ class WorkflowEditorModel
       )
     return apps
 
-  constructor: (apps, @workflow, @mode = EDIT_MODE) ->
+  openSelectorModal: (input) =>
+    @selectorModel.openModal(input)
+
+  constructor: (apps, @workflow, scope, @mode = EDIT_MODE) ->
     editableModes = [EDIT_MODE, FORK_MODE]
     isNewModes = [CREATE_MODE, FORK_MODE]
     @instanceTypes = Precision.INSTANCES
@@ -231,12 +240,15 @@ class WorkflowEditorModel
       @addStagesFilterQuery('')
     ### ADD STAGES MODAL ###
 
+    @selectorModel = new Precision.wfEditor.SelectorModel(scope)
+
     @canCreateWorkflow = ko.computed( =>
       @stages().length and @allStagesValid() and !_.isEmpty(@wfTitle()) and !_.isEmpty(@wfName())
     )
 
     @slotIOModal = new Precision.wfEditor.ConfigureSlotIOModal()
     @mapSlotIOModal = new Precision.wfEditor.MapSlotIOModal()
+    @setIOValueModal = new Precision.wfEditor.SetIOValueModal()
 
     @disableScreenModal = $('#disable-screen-modal')
 

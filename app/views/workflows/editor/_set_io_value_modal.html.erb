@@ -1,0 +1,56 @@
+<div class="workflows modal right fade in" id="set-io-value-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header workflows workflow-modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h1 class="modal-title" id="mapper-modal-label">Set Input Value</h1>
+      </div>
+      <div class="modal-body">
+        <div data-bind="template: { name: 'set-io-value-templates', data: setIOValueModal }"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default btn-link modal-btn" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-bind="click: setIOValueModal.saveValue, attr: {
+          disabled: setIOValueModal.disableSaveButton
+        }"
+        >Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/html" id="set-io-value-templates">
+<div data-bind="css: {'has-error': !valid()}">
+  <!-- ko if: template() == 'default' -->
+    <input type="text" class="form-control" data-bind="textInput: value"/>
+  <!-- /ko -->
+  <!-- ko if: template() == 'boolean' -->
+    <div class="text-center">
+      <input type="hidden" data-bind="value: value" />
+      <div class="btn-group">
+        <button class="btn btn-default" data-bind="click: setBoolValueTrue, css: {
+          active: value() == true
+        }">True</button>
+        <button class="btn btn-default" data-bind="click: setBoolValueFalse, css: {
+          active: value() == false
+        }">False</button>
+      </div>
+    </div>
+  <!-- /ko -->
+  <!-- ko if: template() == 'file' -->
+    <!-- ko if: fileTitle -->
+    <div class="text-center pfda-padded-b" data-bind="text: fileTitle"></div>
+    <!-- /ko -->
+    <div class="text-center">
+      <input type="hidden" data-bind="value: value" />
+      <div class="btn-group">
+        <button class="btn btn-primary" data-bind="click: $root.openSelectorModal">Select File</button>
+        <button class="btn btn-link" data-bind="click: clearFileValue">Clear</button>
+      </div>
+    </div>
+  <!-- /ko -->
+</div>
+</script>

@@ -55,6 +55,10 @@ class Workflow
         input["values"]
       end
 
+      def default_workflow_value
+        input["default_workflow_value"]
+      end
+
       def linked_to_a_stage?
         values["id"].try(:present?) && values["name"].try(:present?)
       end

@@ -12,9 +12,10 @@ class IOModel
       parent_slot: @appData.slotId,
       requiredRunInput: @requiredRunInput,
       stageName: @appData.appName,
+      default_workflow_value: @wfValue(),
       values: {
-        id: @value?.appID,
-        name: @value?.name
+        id: @value().appID,
+        name: @value().name
       }
     }
 
@@ -24,43 +25,70 @@ class IOModel
     @configured(checked)
 
   reset: () =>
+    @setValAppID(null)
+    @setValName(null)
     @inputValue(null)
+    @wfValue(null)
     @configured(false)
 
     mappedInput = @mappedInput()
     if mappedInput
-      mappedInput.value.appID = null
-      mappedInput.value.name = null
+      mappedInput.setValAppID(null)
+      mappedInput.setValName(null)
       mappedInput.mappedOutput(null)
       mappedInput.configured(false)
 
     mappedOutput = @mappedOutput()
     if mappedOutput
       mappedOutput.mappedInput(null)
-      mappedOutput.value.appID = null
-      mappedOutput.value.name = null
+      mappedOutput.setValAppID(null)
+      mappedOutput.setValName(null)
       mappedOutput.configured(false)
       @mappedOutput(null)
 
   mapIO: (output) =>
-    @value.appID = output.appData.slotId
-    @value.name = output.name
+    @setValAppID(output.appData.slotId)
+    @setValName(output.name)
     @configured(true)
-    @inputValue(output.name)
+    @inputValue("#{output.name} (#{output.appData.appName})")
 
     output.mappedInput(@)
-    output.value.appID = @appData.slotId
-    output.value.name = @appData.appName
+    output.setValAppID(@appData.slotId)
+    output.setValName(@appData.appName)
     output.configured(true)
     @mappedOutput(output)
 
-  isConfiguredByDefault: () -> @requiredRunInput || !!@value.appID
+  setWFvalue: (value, label) =>
+    label = label || value
+    @wfValue(value)
+    @inputValue(label)
+    @configured(true)
+
+  isConfiguredByDefault: () -> @requiredRunInput || @connected()
+
+  setValAppID: (value = null) ->
+    value = Object.assign({}, @value(), { appID: value })
+    @value(value)
+
+  setValName: (value = null) ->
+    value = Object.assign({}, @value(), { name: value })
+    @value(value)
+
+  setDefaultWFValue: () =>
+    if typeof @data.default_workflow_value != 'undefined'
+      @setWFvalue(@data.default_workflow_value)
+      return true
+    if typeof @defaultValue != 'undefined'
+      @setWFvalue(@defaultValue)
+      return true
+    return false
 
   constructor: (@data, @type, @stageIndex, @appData) ->
-    @value = {
+    @value = ko.observable({
       appID: @data.values?.id || null,
       name: @data.values?.name || null
-    }
+    })
+    @wfValue = ko.observable(null)
 
     @class = @data.class
     @classLabel = 'Type: ' + @class
@@ -77,13 +105,15 @@ class IOModel
     @requiredRunInput = !!@data.requiredRunInput
     @isRequired = ko.observable(@requiredRunInput)
     @inputValue = ko.observable(null)
+    @connected = ko.computed(() => !!@value().appID)
     @configured = ko.observable(@isConfiguredByDefault())
     @valid = ko.computed(() =>
       if (@isOptional or @type == 'output') then true else @configured()
     )
 
     @style = ko.computed( => if @valid() then 'workflow-info' else 'workflow-warning')
-    @setButtonText = ko.computed( => if @configured() then 'Reset' else 'Set')
+
+    @setDefaultWFValue()
 
 
 class SlotModel
