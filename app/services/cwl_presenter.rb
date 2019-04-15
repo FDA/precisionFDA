@@ -14,7 +14,8 @@ class CwlPresenter
   validate :validate_io_objects
   validate :validate_requirements
 
-  attr_reader :docker_formatted, :docker
+  attr_reader :docker, :docker_image
+  attr_accessor :asset
 
   def initialize(cwl_string)
     @cwl_string = cwl_string.strip
@@ -81,41 +82,15 @@ class CwlPresenter
       return
     end
 
-    validate_docker
-  end
+    @docker_image = DockerImage.new(@docker)
 
-  def validate_docker
-    image_name, tag = docker.match(/\A([^:]+):?([^:]+)?$/).try(:captures)
-
-    image_name_parts = image_name.split("/")
-
-    unless image_name_parts.size.between?(2, 3)
-      errors.add(
-        :docker_requirement,
-        "has incorrect image name format"
-      )
+    unless @docker_image.valid?
+      @docker_image.errors.full_messages.each do |msg|
+        errors.add("base", msg)
+      end
 
       return
     end
-
-    namespace, repository = image_name_parts.pop(2)
-    registry = image_name_parts.first
-
-    unless [namespace, repository].all?
-      errors.add(
-        :docker_requirement,
-        "has incorrect image name format"
-      )
-
-      return
-    end
-
-    @docker_formatted = {
-      registry: registry,
-      namespace: namespace,
-      repository: repository,
-      tag: tag || "latest",
-    }
   end
 
   def validate_io_objects

@@ -102,6 +102,14 @@ class App < ActiveRecord::Base
     space_object.reviewer? || space_object.verification?
   end
 
+  def find_input(name)
+    spec["input_spec"].select { |input| input["name"] == name }.first
+  end
+
+  def find_output(name)
+    spec["output_spec"].select { |input| input["name"] == name }.first
+  end
+
   def to_docker(context_token)
     # Generate Dockerfile for app
     cmds = []

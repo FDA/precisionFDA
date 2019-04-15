@@ -350,3 +350,29 @@ a.btn.batch_terminate
         .wf-slot-remove,
         .wf-slot-io
           color: $brand-green-secondary
+
+
+.pfda-controller-workflows.pfda-action-new
+  #import_cwl_wdl_success_modal
+    .modal-body
+      p
+        b
+          margin-right: 5px
+  #import_cwl_wdl_modal
+    .docker-images-container
+      padding: 10px
+    .docker-image
+      &-name
+        padding-right: 10px
+        position: relative
+        top: -1px
+      &-remove
+        cursor: pointer
+    .browse-files-container
+      margin-bottom: 10px
+    .btn
+      margin-left: 5px
+    textarea
+      resize: vertical
+      height: 150px
+      max-height: 300px

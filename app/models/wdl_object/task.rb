@@ -6,6 +6,7 @@ require "wdl_object/task/output"
 class WdlObject
   class Task
     include ActiveModel::Validations
+    include ::Workflow::Common
 
     validates :name, presence: { message: "is not found!" }
     validates :command, presence: { message: "is not found!" }
@@ -15,9 +16,11 @@ class WdlObject
     validate :inputs_should_be_valid,
              :outputs_should_be_valid,
              :inputs_should_be_unique,
-             :outputs_should_be_unique
+             :outputs_should_be_unique,
+             :docker_image_should_be_valid
 
     attr_reader :raw
+    attr_accessor :next_task, :prev_task
 
     def initialize(task_text)
       @raw = task_text
@@ -37,45 +40,11 @@ class WdlObject
     end
 
     def docker
-      @docker ||= (runtime && runtime[%r{docker:\s*["']([\w\/:\-.]+)}, 1])
+      @docker ||= parse_docker
     end
 
-    def docker_formatted
-      return if docker.nil?
-
-      @docker_formatted ||= begin
-        image_name, tag = docker.match(/\A([^:]+):?([^:]+)?$/).try(:captures)
-
-        image_name_parts = image_name.split("/")
-
-        unless image_name_parts.size.between?(2, 3)
-          errors.add(
-            :base,
-            "Docker image in task '#{name}' has incorrect format"
-          )
-
-          return
-        end
-
-        namespace, repository = image_name_parts.pop(2)
-        registry = image_name_parts.first
-
-        unless [namespace, repository].all?
-          errors.add(
-            :base,
-            "Docker image in task '#{name}' has incorrect format"
-          )
-
-          return
-        end
-
-        {
-          registry: registry,
-          namespace: namespace,
-          repository: repository,
-          tag: tag || "latest",
-        }
-      end
+    def docker_image
+      @docker_image ||= (docker && DockerImage.new(docker))
     end
 
     def inputs
@@ -90,9 +59,25 @@ class WdlObject
       end
     end
 
+    def slot_name
+      @slot_name ||= generate_slot_id
+    end
+
+    def next_slot
+      next_task.try(:slot_name)
+    end
+
+    def prev_slot
+      prev_task.try(:slot_name)
+    end
+
     private
 
     attr_reader :parser
+
+    def parse_docker
+      runtime && runtime[%r{docker:\s*["']([\w\/:\-.]+)}, 1]
+    end
 
     def inputs_should_be_valid
       inputs.each do |input|
@@ -123,6 +108,14 @@ class WdlObject
     def items_should_be_unique(items, item_type)
       find_duplicates(items).each do |duplicate|
         errors.add("base", "Duplicate definitions for the #{item_type} named '#{duplicate}'")
+      end
+    end
+
+    def docker_image_should_be_valid
+      if docker_image && docker_image.invalid?
+        docker_image.errors.full_messages.each do |msg|
+          errors.add("base", msg)
+        end
       end
     end
 
