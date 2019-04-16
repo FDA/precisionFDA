@@ -125,6 +125,6 @@ class Workflow
     end
 
     delegate :tasks, :workflow, to: :parser
-    delegate :name, to: :workflow
+    delegate :name, to: :workflow, allow_nil: true
   end
 end

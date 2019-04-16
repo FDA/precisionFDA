@@ -12,8 +12,7 @@ module Api
     rescue => e
       logger.error e.message
       logger.error e.backtrace.join("\n")
-      message = e.message.include?('line') ? e.message.split(':').last.strip : "Something went wrong"
-      render json: { errors: [message] }, status: :unprocessable_entity
+      render json: { errors: ["Something went wrong"] }, status: :unprocessable_entity
     end
 
     def presenter
