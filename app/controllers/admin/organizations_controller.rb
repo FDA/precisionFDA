@@ -1,7 +1,7 @@
 module Admin
   class OrganizationsController < BaseController
     def index
-      @orgs = Org.where(admin_id: @context.user.id)
+      @orgs = Org.all
 
       @orgs_grid = initialize_grid(@orgs,{
           name: 'admin_orgs',
