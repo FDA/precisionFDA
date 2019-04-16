@@ -12,7 +12,6 @@ class WdlObject
     validates :command, presence: { message: "is not found!" }
     validates :runtime, presence: { message: "is not found!" }
     validates :docker, presence: { message: "is not found!" }
-    validates :inputs, presence: { message: "are not found!" }
     validate :inputs_should_be_valid,
              :outputs_should_be_valid,
              :inputs_should_be_unique,

@@ -2,8 +2,6 @@ class Workflow
   class WdlPresenter < Presenter
     attr_accessor :attached_images
 
-    validate :wdl_object_should_be_valid
-
     def slots
       @slots ||=
         (tasks.map do |task|
@@ -68,7 +66,7 @@ class Workflow
     private
 
     def create_app(task)
-      app_presenter = App::WdlPresenter.new(wdl_object.to_s([task.name]))
+      app_presenter = App::WdlPresenter.new(parser.to_s([task.name]))
 
       raise if app_presenter.invalid?
 
@@ -122,19 +120,11 @@ class Workflow
       end
     end
 
-    def wdl_object
-      @wdl_object ||= WdlObject.new(raw)
+    def parser
+      @parser ||= WdlObject.new(raw)
     end
 
-    def wdl_object_should_be_valid
-      if wdl_object.invalid?
-        wdl_object.errors.full_messages.each do |msg|
-          errors.add("base", msg)
-        end
-      end
-    end
-
-    delegate :tasks, :workflow, to: :wdl_object
-    delegate :name, to: :workflow
+    delegate :tasks, :workflow, to: :parser
+    delegate :name, to: :workflow, allow_nil: true
   end
 end
