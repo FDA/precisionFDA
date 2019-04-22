@@ -139,6 +139,7 @@ class ProfileController < ApplicationController
     @us_state = (params[:us_state] || @invitation.us_state).to_s.strip
     @full_phone = (params[:full_phone] || @invitation.full_phone).to_s.strip
     @duns = (params[:duns] || @invitation.duns).to_s.strip
+    @organization_administration = params[:organization_administration]
 
     case params[:state]
     when "step2"
@@ -266,10 +267,13 @@ class ProfileController < ApplicationController
       @errors << "Internal precisionFDA policies require that usernames be formed according to the pattern <first_name>.<last_name> using only lowercase English letters. Based on the name provided (#{first_name} #{last_name}), the constructed username ('#{username}') would not have been acceptable. Please adjust the name accordingly."
     end
 
-    @errors << "Invalid characters in the organization handle" if @org_handle.gsub(/[^a-z]/, '') != @org_handle
-    @errors << "There is already an organization with that handle" if @org_handle.present? && Org.find_by(handle: @org_handle).present? && params[:organization_administration] == 'admin'
-    @errors << "There is already an organization with that name" if @org.present? && Org.find_by(name: @org).present?
-    @errors << "You must either provide both the organization name and the handle (for org admins), or leave them both empty (for self-represented)." if @org.present? != @org_handle.present?
+    if params[:organization_administration] == 'admin'
+      @errors << "You must provide both the organization name and the handle" if !@org.present? && !@org_handle.present?
+      @errors << "Invalid characters in the organization handle" if @org_handle.gsub(/[^a-z]/, '') != @org_handle
+      @errors << "There is already an organization with that handle" if @org_handle.present? && Org.find_by(handle: @org_handle).present?
+      @errors << "There is already an organization with that name" if @org.present? && Org.find_by(name: @org).present?
+      @errors << "You must either provide both the organization name and the handle (for org admins), or leave them both empty (for self-represented)." if @org.present? != @org_handle.present?
+    end
     @errors << "This email address is in use by an existing DNAnexus account. Please ask the person to provide you with a different email to be used for precisionFDA." if DNAnexusAPI.email_exists?(email)
   end
 
