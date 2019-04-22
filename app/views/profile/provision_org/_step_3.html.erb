@@ -52,6 +52,7 @@
       <%= hidden_field_tag("address", @address) %>
       <%= hidden_field_tag("phone", @phone) %>
       <%= hidden_field_tag("duns", @duns) %>
+      <%= hidden_field_tag("organization_administration", @organization_administration) %>
       <%= button_tag(content_tag(:span, "", class: "fa fa-backward") + " Back", class: "btn btn-default") %>
     <% end -%>
     <%= form_tag(provision_org_path, method: 'post', class: "pull-left") do -%>

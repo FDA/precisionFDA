@@ -106,8 +106,8 @@
         <tr>
           <td>Organization Administration</td>
           <td><%= @invitation.organization_admin ? "YES" : "NO" %></td>
-          <td><%= select_tag("organization_administration", options_for_select(["admin", "self-representing"], @invitation.organization_admin ? "admin" : (@invitation.singular ? "self-representing" : nil) ), :"data-bind" => "value: org_admin", class: "form-control") %></td>
-          <td>If user choose that he's the organization admin or he'll self represented.</td>
+          <td><%= select_tag("organization_administration", options_for_select(["admin", "self-representing"], @organization_administration ? @organization_administration : (@invitation.organization_admin ? "admin" : (@invitation.singular ? "self-representing" : nil)) ), :"data-bind" => "value: org_admin", class: "form-control") %></td>
+          <td>Should the user be provisioned as an org administrator or self-representing?</td>
         </tr>
       </tbody>
     </table>
