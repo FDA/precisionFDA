@@ -4,11 +4,11 @@ class WorkflowViewModel
     @title = ko.observable(workflow.title)
     @errorMessage = ko.observable()
     @isRunning = ko.observable(false)
-    @stages = ko.computed(=>
+    @stages = ko.computed( ->
       for io in workflow.spec.input_spec.stages
         new stageModel(io)
     )
-    @inputs = ko.computed(=>
+    @inputs = ko.computed( =>
       stages = []
       for  input_spec in @stages()
         for i in input_spec.inputs()
@@ -21,13 +21,14 @@ class WorkflowViewModel
     @defaultValues = ko.observable()
     @canRunWorkflow = ko.computed(=>
       config = true
-      ko.utils.arrayMap(@inputs(), (slot) =>
-        ko.utils.arrayMap(slot.inputs(), (input) =>
-          if input.optional == false && config == true && input.values.id==null
-            if input['class'] == 'file' || input['class'] =='array:file'
+      ko.utils.arrayMap(@inputs(), (slot) ->
+        ko.utils.arrayMap(slot.inputs(), (input) ->
+          if input.optional == false && config && input.values.id == null
+            if input['class'] == 'file' || input['class'] == 'array:file'
               config = (input.selectorModel.defaultValues()? && input.selectorModel.defaultValues().length > 0 && input.selectorModel.defaultValues()[0]!=undefined)|| (input.selectorModel.fileValues()? && input.selectorModel.fileValues().length > 0 && input.selectorModel.fileValues()[0]!=undefined)
             else if input['class'] == 'boolean'
-              config = (input.defaultValues()? && !_.isArray(input.defaultValues()) && _.isBoolean(input.defaultValues())) || (input.defaultValues()? && _.isArray(input.defaultValues()) && _.isString(input.defaultValues()[0]))
+              config = (input.defaultValues()? && !_.isArray(input.defaultValues()) && _.isBoolean(input.defaultValues())) ||
+                       (input.defaultValues()? && _.isArray(input.defaultValues()) && (_.isString(input.defaultValues()[0]) || _.isBoolean(input.defaultValues()[0])))
             else
               config = (input.defaultValues()? && input.defaultValues().length > 0 && input.defaultValues()[0]!=undefined)
         )
@@ -35,10 +36,8 @@ class WorkflowViewModel
       return config && !_.isEmpty(@title())
     )
 
-  data_inputs: (data) =>
-    ko.utils.arrayFilter(data.inputs(), (input) =>
-      !input.values.id?
-    )
+  data_inputs: (data) ->
+    ko.utils.arrayFilter(data.inputs(), (input) -> !input.values.id?)
 
   run_workflow: () =>
     @isRunning(true)
@@ -98,6 +97,11 @@ class stageModel
     )
 
 class IOModel
+  getDefaultValues: (data) ->
+    if typeof data.default_workflow_value == 'boolean'
+      return [data.default_workflow_value]
+    return [data.default_workflow_value || data.defaultValues]
+
   constructor: (data) ->
     @class = data.class
     @parent_slot = data.parent_slot
@@ -107,12 +111,12 @@ class IOModel
     @value = ko.observable(data.value)
     @optional = data.optional
     @selectorModel = new selectorModel(@class, data)
-    @defaultValues = ko.observableArray([data.default_workflow_value || data.defaultValues])
+    @defaultValues = ko.observableArray(@getDefaultValues(data))
     @isTrueActive = ko.computed( =>
       if @defaultValues()? && _.isArray(@defaultValues())
         value = @defaultValues()[0]
         value = value.toString() if value
-        return value == 'true'
+        return (typeof value == 'boolean' and value) or value == 'true'
       else if @defaultValues()? && _.isBoolean(@defaultValues())
         return @defaultValues() == true
     )
@@ -120,20 +124,20 @@ class IOModel
       if @defaultValues()? && _.isArray(@defaultValues())
         value = @defaultValues()[0]
         value = value.toString() if value
-        return value == 'false'
+        return (typeof value == 'boolean' and !value) or value == 'false'
       else if @defaultValues()? && _.isBoolean(@defaultValues())
         return @defaultValues() == false
     )
 
   toggleTrue: (e) ->
     if @defaultValues() == true
-      @defaultValues(null)
+      @defaultValues([])
     else
       @defaultValues(true)
 
   toggleFalse: (e) ->
     if @defaultValues() == false
-      @defaultValues(null)
+      @defaultValues([])
     else
       @defaultValues(false)
 
