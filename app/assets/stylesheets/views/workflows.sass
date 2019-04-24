@@ -245,10 +245,16 @@ a.btn.batch_terminate
       padding: 10px 0px
       .input-header
         color: #8198BC
-        text-transform: uppercase
-        font-weight: 400
-        font-size: 14px
         margin-bottom: 10px
+        &-title
+          text-transform: uppercase
+          font-weight: 400
+          font-size: 14px
+        &-sort
+          float: right
+          margin-left: 10px
+          i.fa
+            font-size: 12px
       textarea
         width: 100%
         min-height: 150px
@@ -258,16 +264,29 @@ a.btn.batch_terminate
         overflow: auto
         .checkbox
           color: #555555
+        hr
+          margin-top: 10px
+          margin-bottom: 10px
       .input-file-search
         margin-bottom: 10px
-      .input-file-search-clear
-        text-align: right
-        position: relative
-        i.fa
-          position: absolute
-          margin-top: -25px
-          margin-left: -20px
-          cursor: pointer
+        display: flex
+        &-regexp,
+        &-flags
+          padding: 0px 5px
+          border: none
+          outline: none
+        &-regexp
+          width: 100%
+        &-flags
+          width: 100px
+        &-clear
+          text-align: right
+          position: relative
+          i.fa
+            position: absolute
+            margin-top: 2px
+            margin-left: -20px
+            cursor: pointer
     &-step2-fileloader
       #step2_load_file_input
         display: none
