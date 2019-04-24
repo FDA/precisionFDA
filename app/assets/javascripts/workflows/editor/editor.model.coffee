@@ -108,6 +108,7 @@ class WorkflowEditorModel
       workflow_id: @workflow?.uid,
       is_new: @isNewWorkflow
     }
+    console.log params
 
     Precision.api('/api/workflows', params)
       .done((res) ->
