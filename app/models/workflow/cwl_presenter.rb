@@ -1,11 +1,5 @@
 class Workflow
-  class CwlPresenter < Presenter
-
-    def initialize(raw, context, steps_strings = nil)
-      super(raw, context)
-      @steps_strings = steps_strings
-    end
-
+  class CwlPresenter < BaseImportPresenter
     def params
       {
         workflow_name: name,
@@ -33,12 +27,14 @@ class Workflow
     end
 
     def docker_images
-      [].map(&:docker_image).select(&:local?)
+      parser.steps_objects.map(&:docker_image).select do
+        |image| image.present? && image.local?
+      end
     end
 
     def cwl_stages_object
       @cwl_stages_object ||= Workflow::Cwl::StagesPresenter.new(
-        parser.steps, context, steps_strings
+        parser.steps, context, nil
       )
     end
 
@@ -49,9 +45,5 @@ class Workflow
     def new?
       true
     end
-
-    private
-
-    attr_reader :steps_strings
   end
 end

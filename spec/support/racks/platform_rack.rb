@@ -40,19 +40,19 @@ class PlatformRack < BaseRack
     [200, {}, [{ id: "project-#{params["name"]}"}.to_json]]
   end
 
-  def post_set_member_access(params)
+  def post_set_member_access(_params)
     [200, {}, [{}.to_json]]
   end
 
-  def post_applet_new(params)
+  def post_applet_new(_params)
     [200, {}, [{}.to_json]]
   end
 
-  def post_app_new(params)
+  def post_app_new(_params)
     [200, {}, [{ id: 'app-1' }.to_json]]
   end
 
-  def post_remove_objects(params)
+  def post_remove_objects(_params)
     [200, {}, [{}.to_json]]
   end
 
@@ -68,9 +68,17 @@ class PlatformRack < BaseRack
     [200, {}, [{}.to_json]]
   end
 
-  def post_workflow_new(params)
+  def post_workflow_new(_params)
     [200, {}, [{ id: "workflow-1", "editVersion": 0 }.to_json]]
   end
+
+  def post_file_new(_params)
+   [200, {}, [{ id: "file-A1S1" }.to_json]]
+  end
+
+  def post_file_close(_params)
+   [200, {}, [{}.to_json]]
+ end
 
   def parse_method_name(env)
     request_type = env["REQUEST_METHOD"].downcase
@@ -107,6 +115,10 @@ class PlatformRack < BaseRack
         "clone"
       when "/workflow/new"
         "workflow_new"
+      when "/file/new"
+        "file_new"
+      when /.*\/close/
+        "file_close"
       else
         raise "Method for '#{env["PATH_INFO"]}' isn't implemented yet"
       end

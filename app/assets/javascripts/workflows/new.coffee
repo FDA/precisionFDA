@@ -48,7 +48,6 @@ class NewWorkflowView extends Precision.wfEditor.WorkflowEditorModel
       }
 
   getDockerData: (importText) ->
-    return [] if @importType() == CWL
     images = importText.match(///#{@dockerAttr()}:(.*$)///gm)
 
     if !images or !images.length

@@ -5,7 +5,9 @@ include Imports::AppSpecHelper
 
 RSpec.describe Workflow::CwlPresenter, type: :model do
   context "when input data is cwl file" do
-    let(:raw) { IO.read(Rails.root.join("spec/support/files/workflow_import/workflow.cwl")) }
+    let(:raw) do
+      { file: IO.read(Rails.root.join("spec/support/files/workflow_import/workflow.cwl")) }
+    end
     let(:stages) { presenter.send(:cwl_stages_object) }
     let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, nil, nil) }
     let!(:first_app) do

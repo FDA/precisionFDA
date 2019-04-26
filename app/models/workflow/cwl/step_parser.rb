@@ -13,6 +13,7 @@ class Workflow
       validates :outputs, 'cwl/outs': true
       validate :inputs_valid?
       validate :outputs_valid?
+      validate :docker_image_valid?, if: 'requirements'
 
       def initialize(title, step_json, step_number, parser)
         @title = title
@@ -45,6 +46,15 @@ class Workflow
         step_json["out"]
       end
 
+      def requirements
+        step_json["requirements"]
+      end
+
+      def docker_image
+        return unless requirements
+        @docker_image ||= DockerImage.new(requirements["DockerRequirement"]["dockerPull"])
+      end
+
       def input_objects
         @input_objects ||= inputs.map { |input, link|  InputParser.new(input, link, self) }
       end
@@ -60,6 +70,13 @@ class Workflow
       def allowable_link_outputs
         prev_step.outputs.map do |output|
           [prev_step.name, output].join('/')
+        end
+      end
+
+      def docker_image_valid?
+        return if errors.any? || docker_image.valid?
+        docker_image.errors.full_messages.each do |value|
+            errors.add(:base, value)
         end
       end
 
