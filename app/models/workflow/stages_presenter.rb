@@ -24,6 +24,10 @@ class Workflow
       slot_objects.select { |slot| slot.slot_id == slots_ids[slot_number] }.first
     end
 
+    def find_slots(stage_index)
+      slot_objects.select { |slot| slot.stage_index == stage_index }
+    end
+
     def slots_ids
       @slots_ids ||= slot_objects.each_with_object({}) do |slot_presenter, ids|
         ids[slot_presenter.slot_number] = slot_presenter.slot_id
