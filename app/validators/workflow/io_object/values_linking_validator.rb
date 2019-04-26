@@ -12,6 +12,7 @@ class Workflow
       end
 
       def linked_to_stage_validations(value, attribute, record)
+        return if record.slot.stage_index
         slot_id_mismatch = record.slot.previous_slot_object.slot_id != value["id"]
         linked_to_previous_stage = record.slot.linked_to_previous_stage?(value["name"])
         if !record.required_run_input && (slot_id_mismatch || !linked_to_previous_stage)
