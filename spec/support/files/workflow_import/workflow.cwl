@@ -9,6 +9,9 @@ steps:
  app-776-first-step-1:
    id: app-FXKBg3803PFFYJjz11BgJ4b4-1
    run: app-776-first-step-1.cwl
+   requirements:
+     DockerRequirement:
+       dockerPull: "wtsicgp/dockstore-cgp-chksum:0.1.0"
    in:
      input_file_param_1: input_file_param_1
      input_string_param_1: input_string_param_1

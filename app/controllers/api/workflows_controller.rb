@@ -12,20 +12,23 @@ module Api
     rescue => e
       logger.error e.message
       logger.error e.backtrace.join("\n")
-      render json: { errors: ["Something went wrong"] }, status: :unprocessable_entity
+      message =
+        if e.message.include?('line') && presenter.is_a?(Workflow::CwlPresenter)
+          e.message.split(':').last.strip
+        else
+          "Something went wrong"
+        end
+      render json: { errors: [message] }, status: :unprocessable_entity
     end
 
     def presenter
       @presenter ||= begin
-        pr =
           if params[:file]
             klass = params[:format] == "wdl" ? Workflow::WdlPresenter : Workflow::CwlPresenter
-            klass.new(params[:file], @context)
           else
-            Workflow::Presenter.new(params, @context)
+            klass = Workflow::Presenter
           end
-        pr.attached_images = params[:attached_images] if pr.is_a?(Workflow::WdlPresenter)
-        pr
+          klass.new(params, @context)
       end
     end
   end

@@ -18,22 +18,59 @@ RSpec.describe Workflows::Builder, type: :service do
   end
 
   describe "#call" do
-    it "sends a request to platform" do
-      service_response
-      expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}workflow/new")
-        .with(body: workflow_presenter.build)
+    context "when a workflow is created through common way" do
+      it "sends a request to platform" do
+        service_response
+        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}workflow/new")
+          .with(body: workflow_presenter.build)
+      end
+
+      it "create workflow" do
+        expect{ service_response }.to change(Workflow, :count).by(1)
+      end
+
+      it "create workflow with params" do
+        service_response
+        WorkflowSeries.last.destroy
+        attributes = builder.spec_presenter.build.
+            merge(dxid: "workflow-1", edit_version: "0")
+        expect(Workflow.last).to have_attributes(attributes)
+      end
     end
 
-    it "create workflow" do
-      expect{ service_response }.to change(Workflow, :count).by(1)
-    end
+    context "when a workflow is imported in CWL format" do
+      before do
+        allow_any_instance_of(AssetService).to receive(:upload)
+        allow_any_instance_of(AssetService).to receive(:wait_for_asset_to_close)
+        stub_request(:post, "#{DNANEXUS_APISERVER_URI}#{App.second.dxid}/describe")
+            .to_return(body: "{\"details\":{\"ordered_assets\":[]}}")
+        stub_request(:post, "#{DNANEXUS_APISERVER_URI}#{App.second.dxid}/update")
+            .to_return(body: "{}")
+      end
 
-    it "create workflow with params" do
-      service_response
-      WorkflowSeries.last.destroy
-      attributes = builder.spec_presenter.build.
-          merge(dxid: "workflow-1", edit_version: "0")
-      expect(Workflow.last).to have_attributes(attributes)
+      let(:docker_image) do
+        ActionDispatch::Http::UploadedFile.new(
+            {
+                filename: "wtsicgp_dockstore-cgp-chksum_0.1.0.tar.gz",
+                tempfile: Tempfile.new("wtsicgp_dockstore-cgp-chksum_0.1.0.tar.gz")
+            }
+        )
+      end
+      let(:presenter_params) do
+        {
+          file: IO.read(Rails.root.join("spec/support/files/workflow_import/workflow.cwl")),
+          attached_images: [docker_image]
+        }
+      end
+      let(:workflow_presenter) { Workflow::CwlPresenter.new(presenter_params, context) }
+
+      it "create a workflow" do
+        expect{ service_response }.to change(Workflow, :count).by(1)
+      end
+
+      it "create an asset" do
+        expect{ service_response }.to change(Asset, :count).by(1)
+      end
     end
   end
 end
