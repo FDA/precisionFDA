@@ -106,6 +106,71 @@
           Once again, note that this action cannot be undone, so you will receive an <strong>Are you sure?</strong> prompt.
         </p>
       </div>
+      <div id="workflow-running" class="h1">Running Workflows in Review Spaces</div>
+      <div class="bs-docs-section">
+        <p>
+          Similar to apps, workflows can be made available in group, verification, and review spaces. There are two methods for moving a workflow to a space: 1) publishing the workflow from the “Workflows” screen, or 2) moving the workflow to a space from the “Spaces” screen.
+        </p>
+        <p>
+          Workflows cannot be removed from a space once added, so take caution when adding a workflow to a space. Additionally, once a workflow has been added to one space, it cannot be added to any other space. However, a workflow can be “forked” to create a new copy of the workflow that can optionally be modified and then added to another space if desired.
+        </p>
+      </div>
+      <div id="workflow-publishing" class="h2">Publishing a Workflow</div>
+      <div class="bs-docs-section">
+        <p>
+          To publish a workflow, go to the workflows tab, select the workflow you would like to publish, and then select the ‘Publish’ button. An example is shown below.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/review_spaces/workflow_publish1.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          Upon pressing ‘Publish’, the spaces you have available will appear as a set of selections. Find and choose the workspace that you would like to publish the workflow to. An example is shown below.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/review_spaces/workflow_publish2.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          This will take you to a page which will ask if you are willing to share the objects which are included in the workflow that is being published. If, for example, a component app was privately built by you, then you must check “share” to include all of the resources contained within that app. Alternatively, if the component object in your workflow is public, it will be automatically shared to the space. See the example case below.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/review_spaces/workflow_publish3.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          Once the ‘Share’ button has been checked, the resources contained in the object that will be shared will appear.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/review_spaces/workflow_publish4.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          After you’ve decided to share all of the data objects within the workflow, you may press 'Share select objects to “&lt;space name&gt;”'. The workflow will then be published to that space. Only public objects can be shared with cooperative spaces. Both public and private objects can be shared to confidential spaces.
+        </p>
+      </div>
+      <div id="workflow-moving" class="h2">Moving a workflow</div>
+      <div class="bs-docs-section">
+        <p>
+          A workflow may also be added to a Space by clicking the “Move data to space…” button in the upper right corner, and selecting the workflow in the popup.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/review_spaces/workflow_moving1.png") %>
+      </div>
+      <div class="bs-docs-section">
+        <p>
+          After the workflow has been added to the space, it is now runnable in the space, and can be accessed under the “Workflows” tab on the left side.
+        </p>
+      </div>
+      <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+        <%= image_tag("docs/review_spaces/workflow_moving2.png") %>
+      </div>
+
       <div class="bs-docs-section bs-docs-media-section">
         <%= video_iframe(videos[:spaces][:url]) %>
       </div>
@@ -121,6 +186,9 @@
           <li><a href="#review-space-create">Creating the Review Space</a></li>
           <li><a href="#review-space-confidential">Using the Confidential Review Space</a></li>
           <li><a href="#review-space-cooperative">Using the Cooperative Review Space</a></li>
+          <li><a href="#workflow-running">Running Workflows in Review Spaces</a></li>
+          <li><a href="#workflow-publishing">Publishing a Workflow</a></li>
+          <li><a href="#workflow-moving">Moving a Workflow</a></li>
         </ul>
       </nav>
     </div>
