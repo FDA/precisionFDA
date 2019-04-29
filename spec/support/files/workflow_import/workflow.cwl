@@ -2,6 +2,9 @@ cwlVersion: v1.0
 class: Workflow
 id: workflow-776-4
 label: workflow-776-4
+requirements:
+  DockerRequirement:
+    dockerPull: "wtsicgp/dockstore-cgp-chksum:0.2.0"
 inputs:
  input_file_param_1: File
  input_string_param_1: string

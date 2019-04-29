@@ -42,6 +42,51 @@ RSpec.describe Workflows::Builder, type: :service do
       before do
         allow_any_instance_of(AssetService).to receive(:upload)
         allow_any_instance_of(AssetService).to receive(:wait_for_asset_to_close)
+        App.all.each do |app|
+          stub_request(:post, "#{DNANEXUS_APISERVER_URI}#{app.dxid}/describe")
+              .to_return(body: "{\"details\":{\"ordered_assets\":[]}}")
+          stub_request(:post, "#{DNANEXUS_APISERVER_URI}#{app.dxid}/update")
+              .to_return(body: "{}")
+        end
+      end
+
+      let(:docker_images) do
+        [
+        ActionDispatch::Http::UploadedFile.new(
+            {
+                filename: "wtsicgp_dockstore-cgp-chksum_0.1.0.tar.gz",
+                tempfile: Tempfile.new("wtsicgp_dockstore-cgp-chksum_0.1.0.tar.gz")
+            }
+        ),
+        ActionDispatch::Http::UploadedFile.new(
+            {
+                filename: "wtsicgp_dockstore-cgp-chksum_0.2.0.tar.gz",
+                tempfile: Tempfile.new("wtsicgp_dockstore-cgp-chksum_0.2.0.tar.gz")
+            }
+        )
+        ]
+      end
+      let(:presenter_params) do
+        {
+          file: IO.read(Rails.root.join("spec/support/files/workflow_import/workflow.cwl")),
+          attached_images: docker_images
+        }
+      end
+      let(:workflow_presenter) { Workflow::CwlPresenter.new(presenter_params, context) }
+
+      it "create a workflow" do
+        expect{ service_response }.to change(Workflow, :count).by(1)
+      end
+
+      it "create an asset" do
+        expect{ service_response }.to change(Asset, :count).by(2)
+      end
+    end
+
+    context "when a workflow is imported in CWL format" do
+      before do
+        allow_any_instance_of(AssetService).to receive(:upload)
+        allow_any_instance_of(AssetService).to receive(:wait_for_asset_to_close)
         stub_request(:post, "#{DNANEXUS_APISERVER_URI}#{App.second.dxid}/describe")
             .to_return(body: "{\"details\":{\"ordered_assets\":[]}}")
         stub_request(:post, "#{DNANEXUS_APISERVER_URI}#{App.second.dxid}/update")
