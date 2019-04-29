@@ -2,6 +2,7 @@
 <div>
   <div class="input-header">
     <span class="input-header-title" data-bind="text: input.title"></span>
+    <!-- ko if: input.type() == 'file' -->
     <a href="#" class="input-header-sort" data-bind="click: input.sortByName">
       <span>sort by name</span>&nbsp;
       <i class="fa" data-bind="css: input.sortNameArrow"></i>
@@ -10,6 +11,7 @@
       <span>sort by color</span>&nbsp;
       <i class="fa" data-bind="css: input.sortColorArrow"></i>
     </a>
+    <!-- /ko -->
   </div>
   <!-- ko if: input.type() == 'string' -->
   <div data-bind="css: {'has-error': !input.valid()}">
