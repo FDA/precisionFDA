@@ -44,7 +44,7 @@ class SpaceForm
 
   def validate_guest_lead_dxuser
     if guest_admin.blank?
-      errors.add(:host_lead_dxuser, "'#{guest_lead_dxuser}' not found")
+      errors.add(:guest_lead_dxuser, "'#{guest_lead_dxuser}' not found")
     end
     if guest_lead_dxuser == host_lead_dxuser
       errors.add(:guest_lead_dxuser, "can't be the same as Host lead")
