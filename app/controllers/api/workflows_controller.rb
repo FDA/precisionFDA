@@ -12,12 +12,11 @@ module Api
     rescue => e
       logger.error e.message
       logger.error e.backtrace.join("\n")
-      message =
-        if e.message.include?('line') && presenter.is_a?(Workflow::CwlPresenter)
-          e.message.split(':').last.strip
-        else
-          "Something went wrong"
-        end
+      message = if presenter.is_a?(Workflow::CwlPresenter) && e.message.include?('line')
+                  e.message.split(':').last.strip
+                else
+                  "Something went wrong"
+                end
       render json: { errors: [message] }, status: :unprocessable_entity
     end
 

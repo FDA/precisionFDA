@@ -10,6 +10,7 @@ class Workflow
       validates :readme, 'workflow/non_empty_string': { allow_empty: true }
       validates :inputs, :outputs, presence: true
       validates :steps, 'cwl/steps': true
+      validate :docker_image_valid?, if: 'requirements'
       validate :steps_valid?
 
       def initialize(cwl_string, context)
@@ -47,6 +48,15 @@ class Workflow
         @steps ||= cwl_data["steps"]
       end
 
+      def requirements
+        @requirements = cwl_data["requirements"]
+      end
+
+      def docker_image
+        return unless requirements
+        @docker_image ||= DockerImage.new(requirements["DockerRequirement"]["dockerPull"])
+      end
+
       def steps_objects
         @steps_objects ||= steps.map.with_index do |(title, step), index|
           StepParser.new(title, step, index, self)
@@ -55,6 +65,13 @@ class Workflow
 
       def find_step(step_number)
         steps_objects.select { |step| step.step_number == step_number }.first
+      end
+
+      def docker_image_valid?
+        return if errors.any? || docker_image.valid?
+        docker_image.errors.full_messages.each do |value|
+          errors.add(:base, value)
+        end
       end
 
       def steps_valid?
