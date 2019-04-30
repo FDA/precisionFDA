@@ -53,6 +53,8 @@ en:
               unique: "Slot '%{name}': Each slot 'slotId' must be unique."
               link_next_slot: "Slot '%{name}': Each slot 'slotId' must be the value of the previous slot's 'nextSlot'."
               link_prev_slot: "Slot '%{name}': Each slot 'prevSlot' must be the value of the previous slot's 'slotId'."
+              next_slot_not_linked: "Slot '%{name}': The slot wasn't correctly linked to a next slot."
+              prev_slot_not_linked: "Slot '%{name}': The slot wasn't correctly linked to a previous slot."
         workflow/stages/input_presenter:
           attributes:
             name:

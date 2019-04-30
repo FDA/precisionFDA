@@ -95,6 +95,7 @@ class Workflow
           "inputs": slot_presenter.inputs,
           "outputs": slot_presenter.outputs,
           "instanceType": slot_presenter.instance_type,
+          "stageIndex": slot_presenter.stage_index,
         }
       end
     end
