@@ -48,13 +48,13 @@ class WorkflowViewModel
           input_name = workflow_input.parent_slot+"."+workflow_input.stageName
           if workflow_input.class == 'file'
             if workflow_input.optional && workflow_input.selectorModel.defaultValues()?
-              break
+              continue
             else if !workflow_input.optional || !workflow_input.selectorModel.defaultValues()?
               uid = if workflow_input.selectorModel.defaultValues()[0].uid !=undefined then  workflow_input.selectorModel.defaultValues()[0].uid else workflow_input.selectorModel.defaultValues()[0]
               input = {"class": workflow_input.class, "input_name": input_name, "input_value": uid}
           else if workflow_input.class == 'array:file'
             if workflow_input.optional && workflow_input.selectorModel.defaultValues()?
-              break
+              continue
             else if !workflow_input.optional || !workflow_input.selectorModel.defaultValues()?
               values = if _.isArray(workflow_input.selectorModel.defaultValues()[0]) then workflow_input.selectorModel.defaultValues()[0] else workflow_input.selectorModel.defaultValues()
               files = []
@@ -64,7 +64,7 @@ class WorkflowViewModel
               input = {"class": workflow_input.class, "input_name": input_name, "input_value": files}
           else if _.isArray(workflow_input.defaultValues())
             if workflow_input.optional && workflow_input.defaultValues()[0]?
-              break
+              continue
             else if !workflow_input.optional || !workflow_input.defaultValues()[0]?
               input = {"class": workflow_input.class, "input_name": input_name, "input_value": workflow_input.defaultValues()[0]}
           else
