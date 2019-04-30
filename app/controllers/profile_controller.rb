@@ -269,7 +269,7 @@ class ProfileController < ApplicationController
 
     if params[:organization_administration] == 'admin'
       @errors << "You must provide both the organization name and the handle" if !@org.present? && !@org_handle.present?
-      @errors << "Invalid characters in the organization handle" if @org_handle.gsub(/[^a-z]/, '') != @org_handle
+      @errors << "Invalid characters in the organization handle" if @org_handle.present? && @org_handle.gsub(/[^a-z]/, '') != @org_handle
       @errors << "There is already an organization with that handle" if @org_handle.present? && Org.find_by(handle: @org_handle).present?
       @errors << "There is already an organization with that name" if @org.present? && Org.find_by(name: @org).present?
       @errors << "You must either provide both the organization name and the handle (for org admins), or leave them both empty (for self-represented)." if @org.present? != @org_handle.present?
