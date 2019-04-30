@@ -63,6 +63,22 @@ class Workflow
         @app ||= App.accessible_by(context).find_by_uid(uid)
       end
 
+      def stage_index
+        slot["stageIndex"]
+      end
+
+      def next_slot_linked?
+        slots_ids = base_presenter.find_slots(stage_index + 1)
+                                  .map(&:slot_id)
+        slots_ids.include?(next_slot)
+      end
+
+      def prev_slot_linked?
+        slots_ids = base_presenter.find_slots(stage_index - 1)
+                                  .map(&:slot_id)
+        slots_ids.include?(prev_slot)
+      end
+
       def instance_type
         slot["instanceType"]
       end

@@ -24,8 +24,12 @@ class WorkflowEditorModel
 
   recreateApp: (app, loadedApp) ->
     data = Object.assign(loadedApp, app)
-    index = @stages().length
-    @stages.push(new Precision.wfEditor.StageModel(data, index))
+    index = data.stageIndex
+    stage = @stages()[index]
+    if stage
+      stage.addSlot(data)
+    else
+      @stages.push(new Precision.wfEditor.StageModel(data, index))
 
   recreateWorkflow: () ->
     apps = @workflow.spec.input_spec.stages
@@ -108,6 +112,7 @@ class WorkflowEditorModel
       workflow_id: @workflow?.uid,
       is_new: @isNewWorkflow
     }
+    console.log params
 
     Precision.api('/api/workflows', params)
       .done((res) ->

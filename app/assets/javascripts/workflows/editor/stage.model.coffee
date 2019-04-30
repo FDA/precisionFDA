@@ -125,6 +125,7 @@ class SlotModel
       instanceType: @instanceType(),
       inputs: @inputs().map((input) -> input.prepareDataForSaving()),
       outputs: @outputs().map((output) -> output.prepareDataForSaving()),
+      stageIndex: @stageIndex(),
       slotId: @slotId
     }
 
