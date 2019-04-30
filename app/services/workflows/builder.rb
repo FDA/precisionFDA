@@ -39,24 +39,29 @@ module Workflows
 
     def create_assets
       assets = presenter.assets
+      workflow_asset = assets.find do |item|
+        filename = File.basename(item.file_paths.first)
+        presenter.parser.docker_image == DockerImage.from_filename(filename)
+      end
       presenter.parser.steps_objects.each do |step|
         asset = assets.find do |item|
           filename = File.basename(item.file_paths.first)
           step.docker_image == DockerImage.from_filename(filename)
         end
-        next unless asset
-        update_app(step, asset)
+        if asset
+          update_app(step, asset)
+        elsif workflow_asset
+          details = api.call(step.app.dxid, "describe")["details"]
+          update_app(step, workflow_asset) if details && details["ordered_assets"].empty?
+        end
       end
     end
 
     def update_app(step, asset)
       assets = Asset.accessible_by(context).where(state: Asset::STATE_CLOSED, uid: asset.try(:uid))
-      details = api.call(step.app.dxid, "describe")["details"]
-      if details && details["ordered_assets"].empty?
-        ordered_assets = assets.map(&:dxid)
-        api.call(step.app.dxid, "update", details: { ordered_assets: ordered_assets })
-        step.app.assets << asset
-      end
+      ordered_assets = assets.map(&:dxid)
+      api.call(step.app.dxid, "update", details: { ordered_assets: ordered_assets })
+      step.app.assets = assets
     end
   end
 end

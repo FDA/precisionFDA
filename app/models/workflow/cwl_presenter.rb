@@ -27,8 +27,11 @@ class Workflow
     end
 
     def docker_images
-      parser.steps_objects.map(&:docker_image).select do
-        |image| image.present? && image.local?
+      @docker_images ||= begin
+        images = parser.steps_objects.map(&:docker_image) + [parser.docker_image]
+        images.select do
+          |image| image.present? && image.local?
+        end
       end
     end
 
