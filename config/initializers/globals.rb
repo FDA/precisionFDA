@@ -98,6 +98,7 @@ REVIEW_SPACE_ADMINS =
       john.didion
       ezekiel.maier.2
       holly.stephens
+      sam.westreich
     )
   else
     %w(
