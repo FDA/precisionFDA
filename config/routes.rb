@@ -72,6 +72,7 @@ Rails.application.routes.draw do
     post 'publish' => 'main#publish'
     get 'track' => 'main#track'
     get 'mislabeling' => 'main#mislabeling'
+    get 'bco_appathon' => 'main#bco_appathon'
     get 'request_access' => 'main#request_access'
     post 'request_access' => 'main#request_access'
     get 'browse_access' => 'main#browse_access'

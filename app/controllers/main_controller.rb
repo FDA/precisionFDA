@@ -533,6 +533,10 @@ class MainController < ApplicationController
 
   end
 
+  def bco_appathon
+
+  end
+
   def tokify
     @key = generate_auth_key
   end
