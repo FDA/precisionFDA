@@ -324,10 +324,6 @@ class BatchWorkflowPageModel
         two.valid(false)
         return false
       if two and one.value().length != two.value().length
-        console.log 'one', one
-        console.log 'one.value()', one.value()
-        console.log 'two', two
-        console.log 'two.value()', two.value()
         showAlert('Different number of files for the first and second input')
         one.valid(false)
         two.valid(false)
