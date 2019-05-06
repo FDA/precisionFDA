@@ -159,11 +159,6 @@ class Invitation < ActiveRecord::Base
         :base,
         "You can't be an administrator of the organization if you represent yourself"
       )
-    elsif !organization_admin && !singular
-      errors.add(
-        :base,
-        "Choose I do not represent any organization if you represent yourself"
-      )
     end
   end
 
