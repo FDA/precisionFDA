@@ -154,9 +154,9 @@ extendBatchInput = (files) ->
   ### SORT ###
 
   @selectHighlightedFiles = (files) =>
+    @selectedFiles([])
     files.forEach((file) =>
       @selectedFiles.push(file.uid) if file.highlighted()
-      @selectedFiles.remove(file.uid) if !file.highlighted()
     )
 
   @selectAllFiles = (root, e) =>
