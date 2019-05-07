@@ -43,27 +43,27 @@ class App < ActiveRecord::Base
     uid
   end
 
-  # Scopes of files that can be used to run an app. This makes sense only for review spaces
+  # Scopes of files that can be used to run an app.
   def space_scopes
-    return [] unless in_space?
-    return [] unless space_object.review?
+    return [] if !in_space? || !space_object.review? && !space_object.verification?
 
     space_object.accessible_scopes
   end
 
-  # Scopes that can be used to run an app. This makes sense only for review spaces
+  # Scopes that can be used to run an app.
   def available_job_spaces(user)
-    return [] unless in_space?
-    return [] unless space_object.review?
+    return [] if !in_space? || !space_object.review? && !space_object.verification?
 
-    Space.joins(:space_memberships)
-      .merge(SpaceMembership.where(user_id: user.id))
-      .where(id: [space_object.id, space_object.confidential_spaces.pluck(:id)])
+    Space.joins(:space_memberships).
+      where(
+        id: [space_object.id, space_object.confidential_spaces.pluck(:id)],
+        space_memberships: { user_id: user.id }
+      )
   end
 
   def can_run_in_space?(user, space_id)
-    return false unless in_space?
-    return false unless space_object.review?
+    return false if !in_space? || !space_object.review? && !space_object.verification?
+
     # TODO control disabled users!
     # member = space_object.space_memberships.active.where(user_id: user.id).first
     member = space_object.space_memberships.where(user_id: user.id).first
