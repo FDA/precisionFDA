@@ -160,10 +160,9 @@ extendBatchInput = (files) ->
     )
 
   @selectAllFiles = (root, e) =>
+    @selectedFiles([])
     if e.target.checked
       @filteredFiles().forEach((file) => @selectedFiles.push(file.uid))
-    else
-      @selectedFiles([])
 
   @searchValue = ko.observable(null)
   @searchFlagsValue = ko.observable('ig')
