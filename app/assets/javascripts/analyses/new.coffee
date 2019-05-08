@@ -107,6 +107,7 @@ class IOModel
     @parent_slot = data.parent_slot
     @stageName = data.name
     @label = data.label
+    @inputLabel = data.label || data.name
     @values = data.values
     @value = ko.observable(data.value)
     @optional = data.optional

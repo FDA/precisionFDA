@@ -52,7 +52,7 @@
     </div>
     <!-- ko foreach: $root.data_inputs($data) -->
     <div class="pfda-padded row form-group required">
-      <label class="col-md-3 control-label workflow-input-label" data-bind="css: $data.optional? '' : 'data-required', text: stageName"></label>
+      <label class="col-md-3 control-label workflow-input-label" data-bind="css: $data.optional? '' : 'data-required', text: inputLabel"></label>
       <div class="col-md-6 io-field-default" data-bind="template: { name: 'io-field-'+$data.class}"></div>
     </div>
     <!-- /ko -->
