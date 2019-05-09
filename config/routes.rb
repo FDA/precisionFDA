@@ -63,6 +63,7 @@ Rails.application.routes.draw do
     end
 
     # hotfix for PFDA-557
+    get "/challenges/6" => 'main#bco_appathon'
     get "/mislabeling" => redirect("/challenges/5")
 
     # Main controller
@@ -72,7 +73,6 @@ Rails.application.routes.draw do
     post 'publish' => 'main#publish'
     get 'track' => 'main#track'
     get 'mislabeling' => 'main#mislabeling'
-    get 'bco_appathon' => 'main#bco_appathon'
     get 'request_access' => 'main#request_access'
     post 'request_access' => 'main#request_access'
     get 'browse_access' => 'main#browse_access'
