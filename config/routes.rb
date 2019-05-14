@@ -115,7 +115,7 @@ Rails.application.routes.draw do
       resources :apps, only: %w(create) do
         post "import", on: :collection
       end
-I
+
       resources :workflows, only: %w(create)
 
       post 'publish'
