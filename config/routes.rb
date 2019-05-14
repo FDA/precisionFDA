@@ -63,7 +63,7 @@ Rails.application.routes.draw do
     end
 
     # hotfix for PFDA-557
-    get "/challenges/6" => 'main#bco_appathon'
+    get "/challenges/6" => redirect("/challenges/7")
     get "/mislabeling" => redirect("/challenges/5")
 
     # Main controller
@@ -115,7 +115,7 @@ Rails.application.routes.draw do
       resources :apps, only: %w(create) do
         post "import", on: :collection
       end
-
+I
       resources :workflows, only: %w(create)
 
       post 'publish'
