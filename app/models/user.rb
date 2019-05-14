@@ -128,7 +128,7 @@ class User < ActiveRecord::Base
   has_many :workflows
   has_one :notification_preference
   has_one :profile, dependent: :destroy
-  has_one :invitation
+  has_one :invitation, dependent: :nullify
 
   store :extras, accessors: [:has_seen_guidelines], coder: JSON
 
