@@ -17,7 +17,7 @@ class SelectorModel
     @saving = ko.observable(false)
     @error = ko.observable()
 
-    @filterByEditable = ko.observable(false)
+    @filterByOwned = ko.observable(false)
 
     @calls = []
     @callsDeferred = $.Deferred()
@@ -148,7 +148,7 @@ class ObjectListModel
         objects = @objects()
 
       if @className != "selected"
-        objects = @filterByProperty(objects, 'editable') if @selectorModel.filterByEditable()
+        objects = @filterByProperty(objects, 'owned') if @selectorModel.filterByOwned()
 
       if @className == 'file' && @totalCount && @totalCount != @objects().length && !_.isEmpty(@filterQuery())
         @objects.removeAll()
@@ -244,6 +244,7 @@ class ObjectItemModel
     @orgName = ko.observable(object.org?.name)
     @all_tags_list = ko.observable(object.all_tags_list)
 
+    @owned = ko.observable(object.owned)
     @editable = ko.observable(object.editable)
     @accessible = ko.observable(object.accessible)
     @public = ko.observable(object.public)
@@ -306,6 +307,7 @@ class ObjectItemModel
     @path(object.path)
     @userName(object.user?.full_name)
     @orgName(object.org?.name)
+    @owned(object.owned)
     @editable(object.editable)
     @accessible(object.accessible)
     @public(object.public)

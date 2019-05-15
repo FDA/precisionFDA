@@ -294,6 +294,7 @@ class ApplicationController < ActionController::Base
       fa_class: view_context.fa_class(object),
       scope: item_sliced[:scope],
       path: accessible ? pathify(object) : nil,
+      owned: object.owned_by?(@context),
       editable: object.editable_by?(@context),
       accessible: accessible,
       public: object.public?,
