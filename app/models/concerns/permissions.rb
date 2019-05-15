@@ -79,6 +79,10 @@ module Permissions
     SpaceMembershipPolicy.can_modify_content?(space_object, self, context.user)
   end
 
+  def owned_by?(context)
+    user_id == context.user_id
+  end
+
   # Helper method, not to be called from outside the model
   def core_publishable_by?(context, scope_to_publish_to)
     if context.guest?
