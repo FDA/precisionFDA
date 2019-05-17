@@ -49,8 +49,11 @@ class CopyService
     end
 
     def publish(app, scope)
-      api.call(app.dxid, 'addAuthorizedUsers',
-        "authorizedUsers": AppSeries.authorized_users_for_scope!(scope),)
+      api.call(
+        app.dxid,
+        'addAuthorizedUsers',
+        "authorizedUsers": AppSeries.authorized_users_for_scope(scope)
+      )
     end
   end
 end
