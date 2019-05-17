@@ -8,16 +8,12 @@ default: &default
 
 development:
   <<: *default
-  database: precision-fda
+  database: precision_fda
 
 test:
   <<: *default
-  database: precisionfda-test
+  database: precisionfda_test
 
 ui_test:
   <<: *default
-  database: precisionfda-ui-test
-
-production:
-  <<: *default
-  database: precisionfda-production
+  database: precisionfda_ui_test
