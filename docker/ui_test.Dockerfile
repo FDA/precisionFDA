@@ -57,7 +57,7 @@ WORKDIR $APP_DIR/test/functional
 RUN mvn -B compile test-compile
 WORKDIR $APP_DIR
 
-ENV DATABASE_URL=mysql2://root:password@localhost/precisionfda_ui_test
+ENV DATABASE_URL=mysql2://root:password@localhost/precision-fda-uitest
 ENV RAILS_ENV=ui_test
 ENV PFDA_USER_ORG_HANDLE=alice_org
 ENV PFDA_USER_DXUSER=alice
