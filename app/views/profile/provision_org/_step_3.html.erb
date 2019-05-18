@@ -65,6 +65,7 @@
       <%= hidden_field_tag("org_handle", @org_handle) %>
       <%= hidden_field_tag("duns", @duns) %>
       <%= hidden_field_tag("suggested_username", @suggested_username) %>
+      <%= hidden_field_tag("organization_administration", @organization_administration) %>
       <% opts = {class: "btn btn-primary", data: {disable_with: "Please wait..."}} -%>
       <% opts[:data][:confirm] = "Are you sure? The system has detected one or more warnings shown on the page. Only proceed if you believe you have addressed these warnings." if @warnings.present? -%>
       <%= button_tag(content_tag(:span, "", class: "fa fa-plus-circle") + " Provision", opts) %>
