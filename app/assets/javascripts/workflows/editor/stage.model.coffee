@@ -195,6 +195,24 @@ class StageModel
       return !invalidSlots.length
     )
 
+    @renameSlots = ko.computed( =>
+      slots = @slots()
+      slots.forEach((slot, index) ->
+        originalName = slot.data.name
+        slotsCnt = 1
+        sameSlots = slots.filter((childSlot, childIndex) ->
+          if originalName == childSlot.data.name and index != childIndex
+            childSlot.appName("#{originalName}-#{slotsCnt}")
+            slotsCnt++
+            return true
+        )
+        if sameSlots.length
+          slot.appName("#{originalName}-#{slotsCnt}")
+        else
+          slot.appName(originalName)
+      )
+    )
+
 window.Precision ||= {}
 window.Precision.wfEditor ||= {}
 window.Precision.wfEditor.StageModel = StageModel
