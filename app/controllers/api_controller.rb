@@ -1270,15 +1270,24 @@ class ApiController < ApplicationController
   #
   # Outputs:
   #
-  # ids (array:string): the matching asset dxids
+  # uids (array:string): the matching asset uids
   #
   def search_assets
-    # Prefix should be a string with at least three characters
     prefix = params[:prefix]
-    fail "Prefix should be a String of at least 3 characters" unless prefix.is_a?(String) && prefix.size >= 3
 
-    ids = Asset.closed.accessible_by(@context).with_search_keyword(prefix).order(:name).select(:dxid).distinct.limit(1000).map(&:dxid)
-    render json: { ids: ids }
+    if !prefix.is_a?(String) || prefix.size < 3
+      fail "Prefix should be a String of at least 3 characters"
+    end
+
+    assets = Asset.closed.
+      accessible_by(@context).
+      order(:name).
+      with_search_keyword(prefix).
+      select(:uid).
+      distinct.
+      limit(ASSETS_SEARCH_LIMIT)
+
+    render json: { uids: assets.map(&:uid) }
   end
 
   # Use this to add multiple items of the same type to a note
