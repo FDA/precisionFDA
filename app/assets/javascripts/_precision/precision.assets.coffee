@@ -4,12 +4,12 @@ class AssetsModel
     @refreshing = ko.observable(false)
     @query = ko.observable()
     @assets = ko.observableArray()
-    @assets.searchedIDs = ko.observableArray()
+    @assets.searchedIDs = ko.observableArray([])
     @assets.filtered = ko.computed(=>
       assets = @assets()
       query = @query()
       if !_.isEmpty(query)
-        assetsSearchIDs = @assets.searchedIDs()
+        assetsSearchIDs = @assets.searchedIDs() || []
         if assetsSearchIDs.length
           return _.filter(assets, (asset) -> _.includes(assetsSearchIDs, asset.uid))
         else

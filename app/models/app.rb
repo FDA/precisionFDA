@@ -182,7 +182,7 @@ class App < ActiveRecord::Base
       cmds << "# Download app assets"
       assets.sort_by { |asset| ordered_assets.find_index(asset.dxid) }.each do |asset|
         url = DNAnexusAPI.new(context_token).call(asset.dxid, "download", {filename: asset.name, project: asset.project, preauthenticated: true})["url"]
-        tar_opts = asset.is_gzipped? ? 'xzf -' : 'xf -'
+        tar_opts = asset.gzipped? ? 'xzf -' : 'xf -'
         cmds << "RUN curl #{url} | tar #{tar_opts} -C / --no-same-owner --no-same-permissions"
       end
       cmds << ""
