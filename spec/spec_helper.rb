@@ -1,3 +1,15 @@
+require 'simplecov'
+SimpleCov.start 'rails' do
+  add_filter '/errors/'
+  add_filter '/extras/audit_log_user.rb'
+  add_filter '/mailers/application_mailer.rb'
+  add_filter '/bin/'
+  add_filter '/db/'
+  add_filter '/config/'
+  add_filter '/spec/' # for rspec
+  add_filter '/test/' # for minitest
+  end
+
 require 'webmock/rspec'
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 

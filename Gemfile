@@ -136,13 +136,17 @@ group :development, :test, :ui_test do
   gem 'thin'
 end
 
-group :test do
+group :test, :ui_test do
   gem 'database_cleaner', '~> 1.5', '>= 1.5.3'
   gem 'factory_bot_rails', '~> 4.8', '>= 4.8.2'
   gem 'rspec-rails', '~> 3.7', '>= 3.7.1'
   gem 'webmock', '~> 3.1', '>= 3.1.1'
   gem 'shoulda-matchers'
   gem 'ffaker'
+  gem 'simplecov', require: false
+  gem 'ruby_dep', '~> 1.3.1'
+  gem 'guard', '2.13.0'
+  gem 'guard-rspec', require: false
 end
 
 group :production do
