@@ -48,6 +48,7 @@ module Imports
                   "label" => "" },
               ],
               instanceType: "baseline-8",
+              stageIndex: nil,
             },
             {
               name: "app-776-second-step-1",
@@ -93,6 +94,7 @@ module Imports
                   "label" => "" },
               ],
               instanceType: "baseline-8",
+              stageIndex: nil,
             },
           ] },
         output_spec: { stages: [] } }
