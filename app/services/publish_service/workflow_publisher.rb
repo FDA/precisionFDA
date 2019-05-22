@@ -23,10 +23,6 @@ module PublishService
       api.call(old_project, "clone", objects: [wf_dxid], project: new_project)
       api.call(old_project, "removeObjects", objects: [wf_dxid])
 
-      workflow.apps.each do |app|
-        AppSeries.authorize_users_for_app(api, app, scope)
-      end
-
       workflow.update(scope: scope, project: new_project)
     end
 
@@ -36,10 +32,6 @@ module PublishService
 
     def new_project
       @space_project ||= space.project_for_user!(context.user)
-    end
-
-    def authorized_users
-      AppSeries.authorized_users_for_scope(scope)
     end
 
     def space
