@@ -2,7 +2,7 @@ require "rails_helper"
 include Imports::WorkflowHelper
 include Imports::WorkflowSpecificationHelper
 
-RSpec.describe Workflow::SpecificationPresenter, type: :model do
+RSpec.describe Workflow::SpecificationPresenter, type: :model  do
   subject { presenter }
 
   let(:user) { create(:user) }
@@ -86,7 +86,7 @@ RSpec.describe Workflow::SpecificationPresenter, type: :model do
       presenter.valid?
     end
 
-    it "add errors for name attribute" do
+    it "add errors for title attribute" do
       expect(presenter.errors[:title])
         .to include(I18n.t("title.non_empty_string", scope: locale_scope))
     end
@@ -98,7 +98,7 @@ RSpec.describe Workflow::SpecificationPresenter, type: :model do
       presenter.valid?
     end
 
-    it "add errors for name attribute" do
+    it "add errors for is_new attribute" do
       expect(presenter.errors[:is_new]).to include(I18n.t("is_new.inclusion", scope: locale_scope))
     end
   end
@@ -109,7 +109,7 @@ RSpec.describe Workflow::SpecificationPresenter, type: :model do
       presenter.valid?
     end
 
-    it "add errors for name attribute" do
+    it "add errors for workflow_series" do
       options = { scope: locale_scope, name: raw["workflow_name"] }
       expect(presenter.errors[:workflow_series])
         .to include(I18n.t("workflow_series.unique", options))
@@ -122,7 +122,7 @@ RSpec.describe Workflow::SpecificationPresenter, type: :model do
       presenter.valid?
     end
 
-    it "add errors for name attribute" do
+    it "add errors for workflow_series" do
       options = { scope: locale_scope, name: raw["workflow_name"] }
       expect(presenter.errors[:workflow_series])
         .to include(I18n.t("workflow_series.blank", options))

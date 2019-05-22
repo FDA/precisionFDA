@@ -111,7 +111,10 @@ match the DNAnexus org handle without the pfda.. prefix, i.e. floranteorg.
 * start rails console
     * `bundle exec rails c`
 
-## Testing
+## Dev team Backend Testing
 
 * Run all tests
-    * `rake test`
+    * `bundle exec rspec
+    `
+* Check current code coverage:
+    * `open coverage/index.html`

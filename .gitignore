@@ -14,6 +14,9 @@
 # Ignore database config
 /config/database.yml
 
+# Ignore Rspec code coverage data
+/coverage/*
+
 # Ignore all logfiles and tempfiles.
 /log/*
 !/log/.keep
