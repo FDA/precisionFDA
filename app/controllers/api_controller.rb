@@ -29,7 +29,7 @@ class ApiController < ApplicationController
       if scope != "public"
         # Check that scope is a valid scope:
         # - must be of the form space-xxxx
-        # - must exist in the Spa`ce table
+        # - must exist in the Space table
         # - must be accessible by context
         fail "Invalid scope (only 'public' or 'space-xxxx' are accepted)" unless scope =~ /^space-(\d+)$/
         space = Space.find_by(id: $1.to_i)
@@ -82,11 +82,6 @@ class ApiController < ApplicationController
       published_count += Comparison.publish(comparisons, @context, scope)
     end
 
-    # Apps
-    unless apps.empty?
-      published_count += AppSeries.publish(apps, @context, scope)
-    end
-
     # Jobs
     unless jobs.empty?
       published_count += Job.publish(jobs, @context, scope)
@@ -110,6 +105,16 @@ class ApiController < ApplicationController
     if workflows.any?
       PublishService::WorkflowPublisher.call(workflows, @context, scope)
       published_count += workflows.count
+
+      workflows.flat_map(&:apps).each do |app|
+        next if apps.include?(app) || app.public? || app.scope == scope
+        apps << app
+      end
+    end
+
+    # Apps
+    unless apps.empty?
+      published_count += AppSeries.publish(apps, @context, scope)
     end
 
     render json: { published: published_count }
@@ -129,215 +134,6 @@ class ApiController < ApplicationController
     app_series = AppSeries.accessible_by(@context).find_by(id: params["id"])
     fail "AppSeries not found" if app_series.nil?
     render json: app_series.accessible_revisions(@context).select(:title, :id, :uid, :revision, :version)
-  end
-
-  # Inputs
-  #
-  # workflow_name, workflow_title, readme, is_new, slots
-  #
-  # Outputs
-  #
-  # id (string, only on success): the id of the created workflow, if success
-  # failure (string, only on failure): a message that can be shown to the user due to failure
-  def create_workflow
-    workflow_name = params[:workflow_name]
-    fail "The workflow 'workflow_name' must be a nonempty string." unless workflow_name.is_a?(String) && workflow_name != ""
-    fail "The workflow 'workflow_name' can only contain the characters A-Z, a-z, 0-9, '.' (period), '_' (underscore) and '-' (dash)." unless workflow_name =~ /^[a-zA-Z0-9._-]+$/
-
-    title = params[:workflow_title]
-    fail "The workflow 'title' must be a nonempty string." unless title.is_a?(String) && title != ""
-
-    readme = params[:readme]
-    fail "The workflow 'Readme' must be a string." unless readme.is_a?(String)
-
-    is_new = params[:is_new]
-    fail "The workflow 'is_new' must be a boolean, true or false." unless !!is_new == is_new
-
-    slots = params[:slots] || []
-    fail "The workflow 'slots' must be an array of hashes." unless slots.is_a?(Array) && slots.all? { |slot| slot.is_a?(Hash) }
-
-    spec = { input_spec: { stages: [] }, output_spec: { stages: [] } }
-    stages = []
-    slot_details_by_slot_id = {}
-    slot_idx_to_slot_id = {}
-    output_classes = {}
-    slots.each_with_index do |slot, slot_i|
-      name = slot["name"]
-      fail "#{(slot_i + 1).ordinalize} slot: Each 'name' must be a nonempty string." unless name.is_a?(String) && name != ""
-
-      uid = slot["uid"]
-      fail "Slot '#{name}': Each slot 'uid' must be a nonempty string." unless uid.is_a?(String) && uid != ""
-
-      app = App.accessible_by(@context).find_by_uid(uid)
-
-      fail "Slot '#{name}': App 'dxid' for slot '#{name}' does not exist or is not accessible by you." if app.blank?
-      dxid = app.dxid
-
-      instance_type = slot["instanceType"]
-      fail "Slot '#{name}': Each slot 'instanceType' must be a nonempty string." unless instance_type.is_a?(String) && instance_type != ""
-      fail "Slot '#{name}': Each slot 'instanceType' must be a valid instance type selected" unless Job::INSTANCE_TYPES.key?(instance_type)
-
-      slot_id = slot["slotId"]
-      fail "Slot '#{name}': Each slot 'slotId' must be a nonempty string." unless slot_id.is_a?(String) && slot_id != ""
-      fail "Slot '#{name}': Each slot 'slotId' must be unique." if slot_details_by_slot_id.key?(slot_id)
-      slot_details_by_slot_id[slot_id] = { prev_slot: nil, next_slot: nil, idx: slot_i }
-      slot_idx_to_slot_id[slot_i] = slot_id
-
-      inputs = slot["inputs"] || []
-      fail "Slot '#{name}': Each slot 'inputs' must be an array of hashes." unless inputs.is_a?(Array) && inputs.all? { |slot| slot.is_a?(Hash) }
-      prev_slot_expected = inputs.any? { |input| input["values"]["id"] }
-
-      outputs = slot["outputs"] || []
-      fail "Slot '#{name}': Each slot 'outputs' must be an array of hashes." unless outputs.is_a?(Array) && outputs.all? { |slot| slot.is_a?(Hash) }
-      outputs.each do |output|
-        output_classes[slot_id] ||= {}
-        output_classes[slot_id][output["name"]] = output["class"]
-      end
-      next_slot_expected = outputs.any? { |output| output["values"]["id"] }
-
-      if slot_i != 0
-        defined_prev_slot_id = slot_idx_to_slot_id[slot_i - 1]
-        fail "Slot '#{name}': Each slot 'slotId' must be the value of the previous slot's 'nextSlot'." if slot_details_by_slot_id[defined_prev_slot_id][:next_slot_expected] && slot_details_by_slot_id[defined_prev_slot_id][:next_slot] != slot_id
-
-        prev_slot = slot["prevSlot"]
-        if prev_slot_expected
-          fail "Slot '#{name}': Each slot 'prevSlot' must be a non empty string." unless prev_slot.is_a?(String) && prev_slot != ""
-          fail "Slot '#{name}': Each slot 'prevSlot' must be the value of the previous slot's 'slotId'." if prev_slot != defined_prev_slot_id
-        end
-      else
-        prev_slot = nil
-      end
-
-      if slot_i != slots.size - 1
-        next_slot = slot["nextSlot"]
-        if next_slot_expected
-          fail "Slot '#{name}': Each slot 'nextSlot' must be a non empty string if any element of 'outputs' refers to another stage's input." unless next_slot.is_a?(String) && next_slot != ""
-        end
-      else
-        next_slot = nil
-      end
-
-      slot_details_by_slot_id[slot_id] = { prev_slot: prev_slot, next_slot: next_slot, idx: slot_i, next_slot_expected: next_slot_expected }
-
-      spec[:input_spec][:stages] << {
-        "name": name,
-        "prev_slot": prev_slot,
-        "next_slot": next_slot,
-        "slotId": slot_id,
-        "app_dxid": dxid,
-        "app_uid": uid,
-        "inputs": inputs,
-        "outputs": outputs,
-        "instanceType": instance_type,
-      }
-
-      stage_inputs = {}
-      stage_inputs_seen = Set.new
-      inputs.each_with_index do |input, input_i|
-        i_name = input["name"]
-        fail "Slot '#{name}': The #{(input_i + 1).ordinalize} input is missing a name." unless i_name.is_a?(String) && i_name != ""
-        fail "Slot '#{name}': The input name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless i_name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
-        fail "Slot '#{name}': Duplicate definitions for the input named '#{i_name}'." if stage_inputs_seen.include?(i_name)
-        stage_inputs_seen << i_name
-
-        i_class = input["class"]
-        fail "Slot '#{name}': The input named '#{i_name}' is missing a type." unless i_class.is_a?(String) && i_class != ""
-        fail "Slot '#{name}': The input named '#{i_name}' contains an invalid type. Valid types are: #{App::VALID_IO_CLASSES.join(', ')}." unless App::VALID_IO_CLASSES.include?(i_class)
-
-        i_optional = input["optional"]
-        fail "Slot '#{name}': The input named '#{i_name}' is missing the 'optional' designation." unless i_optional == true || i_optional == false
-
-        i_label = input["label"]
-        fail "Slot '#{name}': The input named '#{i_name}' is missing a label." unless i_label.is_a?(String)
-
-        i_required_run_input = input["requiredRunInput"]
-        fail "Slot '#{name}': The input named '#{i_name}' is missing the 'required_run_input' designation." unless i_required_run_input == true || i_required_run_input == false
-
-        i_parent_slot = input["parent_slot"]
-        fail "Slot '#{name}': The input named '#{i_name}' has the 'parent_slot' value of '#{i_parent_slot}' but is expected to be '#{slot_id}'." unless i_parent_slot == slot_id
-
-        i_stage_name = input["stageName"]
-        fail "Slot '#{name}': The input named '#{i_name}' has the 'stageName' value of '#{i_stage_name}' but is expected to be '#{name}'." unless i_stage_name == name
-
-        i_values = input["values"]
-        fail "Slot '#{name}': The input named '#{i_name}' is expected to have a 'values' hash with keys 'id' and 'name'." unless i_values.is_a?(Hash) && i_values.key?("id") && i_values.key?("name")
-
-        if slot_i == 0
-          fail "Slot '#{name}': The input named '#{i_name}' must be desginated as a required input or be linked to a compatible stage output." if !i_optional && !i_required_run_input
-        else
-          unless i_optional
-            i_values_id = i_values["id"]
-            i_values_name = i_values["name"]
-            linked_to_a_stage = i_values_id.present? && i_values_name.present?
-            fail "Slot '#{name}': The input named '#{i_name}' must be desginated as a required input or be linked to another stage's output." if !i_required_run_input && !linked_to_a_stage
-            if linked_to_a_stage
-              slot_id_mismatch = defined_prev_slot_id != i_values_id
-              linked_to_previous_stage = output_classes.key?(defined_prev_slot_id) && output_classes[defined_prev_slot_id].key?(i_values_name)
-              fail "Slot '#{name}': The input named '#{i_name}' is linked to an output that does not belong to the previous stage." if !i_required_run_input && (slot_id_mismatch || !linked_to_previous_stage)
-
-              output_class = output_classes[defined_prev_slot_id][i_values_name]
-              fail "Slot '#{name}': The input named '#{i_name}' is linked to an output with the wrong class. Input type is '#{i_class}', but output type is '#{output_class}'." if i_class != output_class
-            end
-          end
-        end
-
-        unless i_values_id.nil?
-          stage_inputs.merge!(i_name => { "$dnanexus_link": { "outputField": i_values_name, "stage": i_values_id } })
-        end
-      end
-      each_stage = {
-        "executable":  dxid,
-        "id": slot_id,
-        "systemRequirements": { "main" => { "instanceType": Job::INSTANCE_TYPES[instance_type] } },
-      }
-      each_stage[:input] = stage_inputs unless stage_inputs.blank?
-      stages << each_stage
-    end
-
-    workflow_params = {
-      project: current_user.private_files_project,
-      name: workflow_name,
-      title: title,
-      stages: stages,
-    }
-
-    Workflow.transaction do
-      workflow_series_dxid = WorkflowSeries.construct_dxid(@context.username, workflow_name)
-      workflow_series = WorkflowSeries.find_by(dxid: workflow_series_dxid)
-      if is_new
-        fail "You already have a workflow by the name '#{workflow_name}'." unless workflow_series.nil?
-        workflow_series = WorkflowSeries.create!(
-          dxid: workflow_series_dxid,
-          name: workflow_name,
-          latest_revision_workflow_id: nil,
-          user_id: @context.user_id,
-          scope: "private"
-        )
-
-        revision = 1
-      else
-        fail "You don't have a workflow by the name '#{workflow_name}'." if workflow_series.nil?
-        revision = workflow_series.latest_revision_workflow.revision + 1
-      end
-      api = DNAnexusAPI.new(@context.token)
-      response = api.create_workflow(workflow_params)
-      workflow = Workflow.create!(
-        name: workflow_name,
-        title: title,
-        dxid: response["id"],
-        edit_version: response["editVersion"],
-        user_id: current_user.id,
-        spec: spec,
-        readme: readme,
-        revision: revision,
-        scope: "private",
-        workflow_series_id: workflow_series.id,
-        project: current_user.private_files_project
-      )
-      workflow.save!
-      workflow_series.update!(latest_revision_workflow_id: workflow.id)
-      render json: { id: workflow.uid }
-    end
   end
 
   # Inputs
