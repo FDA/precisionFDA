@@ -20,4 +20,5 @@ ParticipantsController = Paloma.controller('Admin/Organizations', {
     $container = $("body main")
     viewModel = new PageAdminOrgsView()
     ko.applyBindings(viewModel, $container[0])
+    initWiceGrid()
 })
