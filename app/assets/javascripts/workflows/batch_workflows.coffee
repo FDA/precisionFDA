@@ -100,6 +100,7 @@ class InputModel
     @id = "#{input.stageName}_#{input.name}"
     @type = input.class
     @name = input.name
+    @uniq_input_name = input.uniq_input_name
     @label = input.label || input.name
     @help = input.help
     @required = !input.optional
@@ -249,7 +250,8 @@ class BatchWorkflowPageModel
       return {
         class: input.type,
         input_name: input.name,
-        input_value: input.value()
+        input_value: input.value(),
+        uniq_input_name: input.uniq_input_name
       }
     )
 

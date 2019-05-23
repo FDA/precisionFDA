@@ -15,6 +15,7 @@ module WorkflowConcern
 
     workflow_input_spec = workflow.input_spec_hash
     unseen_workflow_inputs = workflow.unused_input_spec_hash
+
     dx_run_workflow_inputs = {}
     stage_inputs = Hash.new { |h, k| h[k] = {} }
 
@@ -73,7 +74,9 @@ module WorkflowConcern
     api = DNAnexusAPI.new(@context.token)
     permission = api.call(workflow.dxid, "listProjects")[workflow.project]
     fail(t('api.errors.invalid_permission', title: workflow.title), permission: permission) if permission == 'VIEW'
+
     response = api.run_workflow(workflow.dxid, workflow_params)
+
     analysis_dxid = response["id"]
     analysis = Analysis.create!(name: analysis_name, workflow_id: workflow.id, dxid: analysis_dxid, user_id: current_user.id)
 

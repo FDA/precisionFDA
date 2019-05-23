@@ -171,6 +171,8 @@ class WorkflowsController < ApplicationController
     inputs = @workflow.batch_input_spec.select { |input| input[:values][:id].nil? }
     outputs = @workflow.all_output_spec
 
+    inputs.map {|v| v["uniq_input_name"] = v["parent_slot"] + "." + v["name"] }
+
     js workflow: @workflow, inputs: inputs, outputs: outputs,
                  folders: output_folders_list, scope: @workflow.accessible_scopes
   end
@@ -189,16 +191,16 @@ class WorkflowsController < ApplicationController
     inputs2 = batch_two[:value].split(/\n/) rescue [] if batch_two.present? && batch_two['class'] == "string"
     inputs2 = batch_two[:value] if batch_two.present? && batch_two['class'] == "file"
 
-
-    spec_names = workflow_object.all_input_spec.reject{|s| params['inputs'].map{|i| i["input_name"]}.include?(s["name"]) } rescue workflow_object.all_input_spec
+    all_uniq_inputs = workflow_object.all_input_spec.map {|v| v["uniq_input_name"] = v["parent_slot"] + "." + v["name"] } rescue workflow_object.all_input_spec
+    spec_names = workflow_object.all_input_spec.reject{|s| params['inputs'].map{|i| i["uniq_input_name"]}.include?(s["uniq_input_name"]) } rescue all_uniq_inputs
 
     list_analyses = []
     inputs1.each do |i1|
       i2 = inputs2.shift rescue nil
 
       inputs = []
-      input_spec_one = workflow_object.all_input_spec.find{|s| s["name"] == spec_names[0]["name"]}
-      input_spec_two = workflow_object.all_input_spec.find{|s| s["name"] == spec_names[1]["name"]} rescue nil
+      input_spec_one = workflow_object.all_input_spec.find{|s| s["uniq_input_name"] == spec_names[0]["uniq_input_name"]}
+      input_spec_two = workflow_object.all_input_spec.find{|s| s["uniq_input_name"] == spec_names[1]["uniq_input_name"]} rescue nil
 
       inputs.unshift({"class" => batch_one["class"], 'input_name' => input_spec_one["parent_slot"] + "." + input_spec_one[:name], 'input_value' => i1}) if batch_one.present?
       inputs.unshift({"class" => batch_two["class"], 'input_name' => input_spec_two["parent_slot"] + "." + input_spec_two[:name], 'input_value' => i2}) if batch_two && input_spec_two.present? rescue nil && inputs2.present?
@@ -206,7 +208,7 @@ class WorkflowsController < ApplicationController
       if params["inputs"]
         others = params["inputs"].dup.map do |v|
           val = v.dup
-          val["input_name"] = workflow_object.all_input_spec.find { |s| s["name"] == v["input_name"] }["parent_slot"] + "." + v["input_name"]
+          val["input_name"] = workflow_object.all_input_spec.find { |s| s["uniq_input_name"] == v["uniq_input_name"] }["parent_slot"] + "." + v["input_name"]
           val
         end
 
