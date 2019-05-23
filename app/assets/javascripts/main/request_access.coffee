@@ -67,7 +67,7 @@ class RequestAccessPageView
       @adminOrgModalAgreementRead(false)
     @adminOrgModal.find('.modal-body').first().on 'scroll', (e) =>
       elem = $(e.currentTarget)
-      if elem[0].scrollHeight - elem.scrollTop() == elem.outerHeight()
+      if elem[0].scrollHeight - elem.scrollTop() <= elem.outerHeight() + 10
         @adminOrgModalAgreementRead(true)
     ### Org Adm Agreement ###
 
