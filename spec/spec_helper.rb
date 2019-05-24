@@ -8,7 +8,7 @@ SimpleCov.start 'rails' do
   add_filter '/config/'
   add_filter '/spec/' # for rspec
   add_filter '/test/' # for minitest
-  end
+end
 
 require 'webmock/rspec'
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }

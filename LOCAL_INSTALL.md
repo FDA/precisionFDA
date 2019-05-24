@@ -114,7 +114,13 @@ match the DNAnexus org handle without the pfda.. prefix, i.e. floranteorg.
 ## Dev team Backend Testing
 
 * Run all tests
-    * `bundle exec rspec
-    `
+    * `bundle exec rspec`
+
+* Run tests with Rspec Guard
+    * `bundle exec guard`
+    
+* To exit from Guard mode:
+    * `exit`
+
 * Check current code coverage:
     * `open coverage/index.html`
