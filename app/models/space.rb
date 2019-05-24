@@ -75,7 +75,6 @@ class Space < ActiveRecord::Base
 
   def accepted_by?(member)
     return false if member.blank?
-
     if member.host?
       return false if host_project.blank?
       return true unless review?
@@ -84,7 +83,8 @@ class Space < ActiveRecord::Base
     else
       return false if guest_project.blank?
       return true unless review?
-      confidential_spaces.sponsor.first.guest_lead_member.present?
+      confidential_spaces.sponsor.first.guest_lead_member.present? unless confidential?
+      guest_lead_member.present?
     end
   end
 
