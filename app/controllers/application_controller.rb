@@ -337,10 +337,16 @@ class ApplicationController < ActionController::Base
         end
       end
       if opts[:include][:user]
-        describe[:user] = object.user.slice(:dxuser, :full_name)
+        user = object.user
+        if user.present?
+          describe[:user] = object.user.slice(:dxuser, :full_name)
+        end
       end
       if opts[:include][:org]
-        describe[:org] = object.user.org.slice(:handle, :name)
+        user = object.user
+        if user && user.org
+          describe[:org] = object.user.org.slice(:handle, :name)
+        end
       end
     end
     return describe

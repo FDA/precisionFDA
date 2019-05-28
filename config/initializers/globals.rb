@@ -99,6 +99,7 @@ REVIEW_SPACE_ADMINS =
       ezekiel.maier.2
       holly.stephens
       sam.westreich
+      pamella.tater.2
     )
   else
     %w(
