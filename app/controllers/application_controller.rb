@@ -349,7 +349,8 @@ class ApplicationController < ActionController::Base
         end
       end
     end
-    return describe
+
+    describe
   end
 
   def user_time_zone(&block)
