@@ -115,7 +115,7 @@ class Invitation < ActiveRecord::Base
   end
 
   def validate_phone
-    if full_phone.gsub(/[^0-9]/, '').length != 11
+    if full_phone.gsub(/[^0-9]/, '').length < 9
       errors.add(:phone, "wrong format")
     end
   end
