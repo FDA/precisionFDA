@@ -13,13 +13,8 @@
     number_to_human_size(metric.storage_usage || 0)
   end
 
-
   g.column name: "Compute / #{@selected_range}", attribute: "#{selected_range_name(@selected_range)}_compute_price" do |metric|
-    unless @selected_range == "custom"
-      number_to_currency(metric.compute_price(@selected_range) || 0)
-    else
-      "None"
-    end
+    number_to_currency(metric.compute_price(@selected_range) || 0)
   end
 
   g.column name: "Consumption / #{@selected_range}", attribute: "#{selected_range_name(@selected_range)}_compute_price" do |metric|
@@ -28,12 +23,6 @@
 
   g.column name: "Status" do |metric|
     metric.user.user_state == "enabled" ? metric.user.logged_in? ? "Logged In" : "Not Logged In" : "Locked"
-  end
-
-  if @selected_range != "custom"
-    g.column name: "Consumption in custom range", attribute: "custom_range_byte_hours" do |metric|
-      number_to_human_size(metric.custom_range_byte_hours || 0) + "-Hours"
-    end
   end
 
   g.column name: "Org", attribute: "name", assoc: [:user, :org], in_csv: false do |metric|

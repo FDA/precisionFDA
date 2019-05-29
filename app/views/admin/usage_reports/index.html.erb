@@ -64,10 +64,12 @@
         <h5 class="list-group-item-heading">Storage usage info is actual as of</h5>
         <p class="list-group-item-text"><%= @storage_date.to_s(:human) %></p>
       </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Computation info is actual as of</h5>
-        <p class="list-group-item-text"><%= @compute_date.to_s(:human) %></p>
-      </li>
+      <% if @selected_range != "custom" %>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Computation info is actual as of</h5>
+          <p class="list-group-item-text"><%= @compute_date.to_s(:human) %></p>
+        </li>
+      <% end %>
     </ul>
   </div>
 <% end %>

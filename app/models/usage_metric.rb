@@ -1,6 +1,8 @@
 class UsageMetric < ActiveRecord::Base
   include Auditor
 
+  USER_STATES = %w(enabled locked).freeze
+
   belongs_to :user
 
   def byte_hours(range)
