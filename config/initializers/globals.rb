@@ -3,27 +3,12 @@
 # by using: if Rails.env.development? { .... }
 #
 
-if Rails.env.development? || Rails.env.ui_test?
-  OAUTH2_REDIRECT_URI = "https://localhost:3000/return_from_login"
-  OAUTH2_CLIENT_ID = "precision_fda"
-elsif ENV["DNANEXUS_BACKEND"] == "production"
-  OAUTH2_REDIRECT_URI = "https://precision.fda.gov/return_from_login"
-  OAUTH2_CLIENT_ID = "precision_fda_gov"
-elsif ENV["DEV_HOST"]
-  OAUTH2_REDIRECT_URI = "https://#{ENV["DEV_HOST"]}/return_from_login"
-  OAUTH2_CLIENT_ID = "precision_fda"
-else
-  OAUTH2_REDIRECT_URI = "https://precisionfda-staging.dnanexus.com/return_from_login"
-  OAUTH2_CLIENT_ID = "precision_fda_gov"
-end
-
-# The following depend on whether we are talking
-# to staging or not
-
 if ENV["DNANEXUS_BACKEND"] == "production"
+  HOST = "https://precision.fda.gov"
   DNANEXUS_AUTHSERVER_URI = "https://auth.dnanexus.com/"
   DNANEXUS_APISERVER_URI = "https://api.dnanexus.com/"
   DNANEXUS_PLATFORM_URI = "https://platform.dnanexus.com/"
+  OAUTH2_CLIENT_ID = "precision_fda_gov"
   APPKIT_TGZ = "project-Bk0j9YQ09Zjky196xkJ4Bzgy:/appkit.tgz"
   ORG_EVERYONE_HANDLE = "precisionfda"
   ORG_EVERYONE = "org-#{ORG_EVERYONE_HANDLE}"
@@ -41,6 +26,22 @@ if ENV["DNANEXUS_BACKEND"] == "production"
   CHALLENGE_BOT_PUBLIC_FILES_PROJECT = "project-F5g2fGj0458P90BP9ZbpkpvG"
   CHALLENGE_BOT_PRIVATE_FILES_PROJECT = "project-F5g2fGj06B2Vy5Yx7pKPVb50"
 else
+  HOST =
+    if Rails.env.development? || Rails.env.ui_test?
+      "https://localhost:3000"
+    elsif ENV["DEV_HOST"]
+      "https://#{ENV["DEV_HOST"]}"
+    else
+      "https://precisionfda-staging.dnanexus.com"
+    end
+
+  OAUTH2_CLIENT_ID =
+    if Rails.env.development? || Rails.env.ui_test? || ENV["DEV_HOST"]
+      "precision_fda"
+    else
+      "precision_fda_gov"
+    end
+
   DNANEXUS_AUTHSERVER_URI = "https://stagingauth.dnanexus.com/"
   DNANEXUS_APISERVER_URI = "https://stagingapi.dnanexus.com/"
   DNANEXUS_PLATFORM_URI = "https://staging.dnanexus.com/"
@@ -61,6 +62,9 @@ else
   CHALLENGE_BOT_PUBLIC_FILES_PROJECT = "project-F53j4F806B0v3GjVB81yQY8F"
   CHALLENGE_BOT_PRIVATE_FILES_PROJECT = "project-F53j4F80PQGQ73yV87JKb0p3"
 end
+
+OAUTH2_REDIRECT_URI = "#{HOST}/return_from_login"
+
 BILLING_CONFIRMATION = ENV["BILLING_CONFIRMATION"]
 
 DNANEXUS_INVALID_EMAIL = "@dnanexus.invalid"
