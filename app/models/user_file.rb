@@ -52,8 +52,6 @@ class UserFile < Node
 
   PARENT_TYPE_COMPARISON = "Comparison"
 
-  belongs_to :user
-  belongs_to :parent, {polymorphic: true}
   has_many :notes, {through: :attachments}
   has_many :attachments, {as: :item, dependent: :destroy}
   has_many :comparison_inputs
