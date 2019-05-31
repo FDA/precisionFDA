@@ -52,6 +52,7 @@ class User < ActiveRecord::Base
     pamella.tater.2
     ezekiel.maier
     vijay.kandali
+    sam.westreich
     min.yi
     nicholas.hill
     john.didion
@@ -60,10 +61,7 @@ class User < ActiveRecord::Base
     holly.stephens
     aabramenko.adminstage
     alekadmin.suradmin
-    dzverevadmin.lnadmin
-    ebarashevastageadmin.lnadmin
-    pzaitsevstageadmin.lnadmin
-    sam.westreich
+    aleksandr.moroz.3
   ).freeze
 
   NON_PRODUCTION_ADMIN_ORGS = %w(
