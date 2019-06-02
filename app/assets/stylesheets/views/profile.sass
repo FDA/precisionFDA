@@ -25,3 +25,42 @@
     -webkit-box-shadow: none
     -moz-box-shadow: none
     box-shadow: none
+
+.pfda-controller-profile.pfda-action-index
+  .contact-information
+    background-color: #FFF
+    .infoframe-inner,
+    .infoframe-title
+      background-color: #FFF
+    &-label
+      padding-top: 7px
+      display: inline-block
+    &-form,
+    &-view
+      label
+        text-align: left
+    &-form
+      .loader-container
+        display: none
+      &.loading
+        pointer-events: none
+        position: relative
+        .loader-container
+          position: absolute
+          display: flex
+          height: 100%
+          width: 100%
+          top: 0
+          .loader
+            margin: auto
+            font-size: 30px
+        .form-container
+          visibility: hidden
+
+.organization-info
+  &-change-b
+    text-transform: initial
+    font-weight: bold
+    cursor: pointer
+    font-size: 12px
+    float: right

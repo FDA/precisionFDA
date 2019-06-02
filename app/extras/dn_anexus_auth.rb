@@ -1,17 +1,17 @@
 class DNAnexusAuth
   FETCH_TOKEN_PATH = "oauth2/token".freeze
 
-  def initialize(authserver_url)
+  def initialize(authserver_url, bearer_token = nil)
     @authserver_url = authserver_url
+    @bearer_token = bearer_token
   end
 
   def call(subject, method, input = {})
-    uri = URI("#{@authserver_url}#{subject}/#{method}")
-
-    Net::HTTP.start(uri.host, uri.port, {use_ssl: true}) do |http|
-      response = http.post(uri.path, input.to_json, {"Content-Type" => "application/json"})
-      response.value
-      JSON.parse(response.body)
+    uri = URI("#{authserver_url}#{subject}/#{method}")
+    headers = { "Content-Type" => "application/json" }
+    headers["Authorization"] = "Bearer #{bearer_token}" if bearer_token.present?
+    Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
+      handle_response(http.post(uri.path, input.to_json, headers))
     end
   end
 
@@ -22,10 +22,10 @@ class DNAnexusAuth
       grant_type: "authorization_code",
       code: code,
       redirect_uri: OAUTH2_REDIRECT_URI,
-      client_id: OAUTH2_CLIENT_ID
+      client_id: OAUTH2_CLIENT_ID,
     }
 
-    Net::HTTP.start(uri.host, uri.port, { use_ssl: true }) do |http|
+    Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
       response = http.post(
         uri.path,
         URI.encode_www_form(post_params)
@@ -37,5 +37,16 @@ class DNAnexusAuth
     end
   rescue Net::HTTPServerException => e
     {}
+  end
+
+  private
+
+  attr_reader :bearer_token, :authserver_url
+
+  def handle_response(response)
+    response.value
+    JSON.parse(response.body)
+  rescue Net::HTTPServerException => e
+    raise AuthError.new("#{e.message}. #{e.backtrace}", JSON.parse(response.body))
   end
 end

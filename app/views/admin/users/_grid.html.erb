@@ -1,0 +1,28 @@
+<%= grid(@users_grid, show_filters: defined?(show_filters) ? show_filters : :no, hide_csv_button: true) do |g|
+
+  g.column name:"Username", attribute: 'dxuser' do |user|
+    link_to user.dxuser, user_path(user.dxuser)
+  end
+
+  g.column name:"Email ID", attribute: 'email' do |user|
+    link_to user.email, user_path(user.dxuser)
+  end
+
+  if action_name == 'pending_users'
+    g.column name:"Resend" do |user|
+      content_tag(:a, "Resend Activation", href: admin_resend_activation_email_path(dxuser: user.dxuser), class:"btn btn-primary")
+    end
+  end
+
+  if action_name == 'deactivated_users'
+    g.column name:"Reason" do |user|
+      user.disable_message
+    end
+
+    g.column name:"Activate" do |user|
+      content_tag(:a, "Activate User", href: admin_toggle_activate_user_path(dxuser: user.dxuser), class:"btn btn-primary")
+    end
+  end
+
+end
+%>

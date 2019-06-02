@@ -1,0 +1,19 @@
+<%= grid(@org_admins) do |g|
+
+  g.column name: "MEMBER NAME", attribute: "first_name" do |user|
+    raw """<a href='/users/#{user.dxuser}'>#{user.first_name} #{user.last_name}</a>"""
+  end
+
+  g.column name: "EMAIL ADDRESS", attribute: "email" do |user|
+    user.email
+  end
+
+  g.column name: "ROLE" do |user|
+    @org.admin.dxuser == user.dxuser ? "Admin" : "User"
+  end
+
+  g.column name: "" do |user|
+    raw (@can_change_admin) ?
+      """<button class='btn btn-primary pull-right' data-bind='click: showChangeAdminModal'>Change Administrator</button>""" : ""
+  end
+end %>

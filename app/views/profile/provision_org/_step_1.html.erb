@@ -1,0 +1,50 @@
+<%= form_tag(provision_org_path, method: 'post', class: "form container-padded") do -%>
+  <%= button_tag(content_tag(:i, "", class: "fa fa-forward") + " Next", {
+    class: "btn btn-primary",
+    data: {bind: 'enable: enableNext'}
+  }) %>
+  <%= hidden_field_tag("state", "step2") %>
+  <table class="table table-hover sortable-theme-minimal" data-sortable>
+    <thead>
+      <tr>
+        <th>Select</th>
+        <th>In System?</th>
+        <th>First name</th>
+        <th>Last name</th>
+        <th>Email</th>
+        <th>Organization</th>
+        <th>Self?</th>
+        <th>Org Admin?</th>
+        <th>Address</th>
+        <th>Phone</th>
+        <th>DUNS</th>
+        <th>Participate Intent?</th>
+        <th>Organize Intent?</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% @invitations.each do |inv| %>
+      <tr>
+        <td><%= radio_button_tag("inv", inv.id, false, {
+          data: {bind: 'checked: selectedRequest'}
+        }) %></td>
+        <td><%= inv.user_id.present? ? User.find(inv.user_id).dxuser : "-" %></td>
+        <td><%= inv.first_name %></td>
+        <td><%= inv.last_name %></td>
+        <td><%= inv.email %></td>
+        <td><%= inv.org %></td>
+        <td><%= inv.singular ? 'YES' : ('&ndash;'.html_safe) %></td>
+        <td><%= inv.organization_admin ? 'YES' : ('&ndash;'.html_safe) %></td>
+        <td><%= inv.address1 %></td>
+        <td><%= inv.full_phone %></td>
+        <td><%= inv.duns %></td>
+        <td><%= inv.participate_intent ? 'YES' : ('&ndash;'.html_safe) %></td>
+        <td><%= inv.organize_intent ? 'YES' : ('&ndash;'.html_safe) %></td>
+      </tr>
+    <% end %>
+    <br/>
+    <%= paginate @invitations %>
+    </tbody>
+  </table>
+  <%= paginate @invitations %>
+<% end %>

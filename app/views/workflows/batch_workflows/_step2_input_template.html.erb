@@ -1,6 +1,18 @@
 <script type="text/html" id="batch_input_templates_step2">
 <div>
-  <div class="input-header" data-bind="text: input.title"></div>
+  <div class="input-header">
+    <span class="input-header-title" data-bind="text: input.title"></span>
+    <!-- ko if: input.type() == 'file' -->
+    <a href="#" class="input-header-sort" data-bind="click: input.sortByName">
+      <span>sort by name</span>&nbsp;
+      <i class="fa" data-bind="css: input.sortNameArrow"></i>
+    </a>
+    <a href="#" class="input-header-sort" data-bind="click: input.sortByColor">
+      <span>sort by color</span>&nbsp;
+      <i class="fa" data-bind="css: input.sortColorArrow"></i>
+    </a>
+    <!-- /ko -->
+  </div>
   <!-- ko if: input.type() == 'string' -->
   <div data-bind="css: {'has-error': !input.valid()}">
     <textarea class="form-control" data-bind="value: input.value, event: {
@@ -11,10 +23,13 @@
   </div>
   <!-- /ko -->
   <!-- ko if: input.type() == 'file' -->
-  <div class="input-file-search">
-    <input type="text" class="form-control" data-bind="value: input.searchValue, event: {
+  <div class="input-file-search form-control">
+    <span class="text-muted">/</span>
+    <input type="text" class="input-file-search-regexp" placeholder="Regular Expression" data-bind="value: input.searchValue, event: {
       keyup: input.searchOnChange
     }"/>
+    <span class="text-muted">/</span>
+    <input type="text" class="input-file-search-flags" placeholder="Flags" data-bind="textInput: input.searchFlagsValue"/>
     <!-- ko if: input.searchValue -->
     <div class="input-file-search-clear">
       <i class="fa fa-times text-danger" data-bind="click: input.clearSearch"></i>
@@ -23,9 +38,25 @@
   </div>
   <div data-bind="css: {'has-error': !input.valid()}">
     <div class="form-control input-file-selector">
+      <!-- ko if: input.filteredFiles().length -->
+        <div class="checkbox">
+          <label id="step2_select_all_batch_files">
+            <input
+              type="checkbox"
+              id="step2_select_all_batch_files"
+              name="step2_select_all_batch_files"
+              data-bind="event: {
+                change: input.selectAllFiles
+              }"
+            />
+            <span>select all</span>
+          </label>
+        </div>
+        <hr>
+      <!-- /ko -->
       <!-- ko foreach: { data: input.filteredFiles, as: 'file' } -->
         <div class="checkbox">
-          <label data-bind="attr: { id: 'step2_select_batch_file_' + file.uid }">
+          <label data-bind="attr: { id: 'step2_select_batch_file_' + file.uid }, css: {'text-primary': file.highlighted()}">
             <input
               type="checkbox"
               name="step2_select_batch_file"

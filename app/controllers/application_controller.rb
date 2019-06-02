@@ -7,6 +7,8 @@ class ApplicationController < ActionController::Base
   # if we have some invalid forms redirect to root page.
   rescue_from ActionController::InvalidAuthenticityToken, with: :invalid_token
 
+  before_action :cache_headers
+
   # Decode context
   before_action :handle_session, :decode_context
 
@@ -21,9 +23,11 @@ class ApplicationController < ActionController::Base
   # Use time zone of current user
   around_action :user_time_zone, if: lambda { !@context.guest? && current_user }
 
-  helper_method :pathify, :pathify_comments, :item_from_uid, :pathify_folder
+  helper_method :pathify, :pathify_comments, :item_from_uid, :pathify_folder, :current_user
 
   rescue_from ActionView::MissingTemplate, with: :missing_template
+
+  add_flash_types :success, :error
 
   private
 
@@ -32,7 +36,7 @@ class ApplicationController < ActionController::Base
   end
 
   def current_context
-    return @context
+    @context
   end
 
   def current_user
@@ -55,7 +59,7 @@ class ApplicationController < ActionController::Base
     # Generate new token for pfda uploader
     context = @context.as_json.slice("user_id", "username", "token", "expiration", "org_id")
     context["expiration"] = [context["expiration"], Time.now.to_i + duration].min
-    return rails_encryptor.encrypt_and_sign({context: context}.to_json)
+    rails_encryptor.encrypt_and_sign({context: context}.to_json)
   end
 
   def save_session(user_id, username, token, expiration, org_id)
@@ -290,6 +294,7 @@ class ApplicationController < ActionController::Base
       fa_class: view_context.fa_class(object),
       scope: item_sliced[:scope],
       path: accessible ? pathify(object) : nil,
+      owned: object.owned_by?(@context),
       editable: object.editable_by?(@context),
       accessible: accessible,
       public: object.public?,
@@ -332,13 +337,20 @@ class ApplicationController < ActionController::Base
         end
       end
       if opts[:include][:user]
-        describe[:user] = object.user.slice(:dxuser, :full_name)
+        user = object.user
+        if user.present?
+          describe[:user] = object.user.slice(:dxuser, :full_name)
+        end
       end
       if opts[:include][:org]
-        describe[:org] = object.user.org.slice(:handle, :name)
+        user = object.user
+        if user && user.org
+          describe[:org] = object.user.org.slice(:handle, :name)
+        end
       end
     end
-    return describe
+
+    describe
   end
 
   def user_time_zone(&block)
@@ -379,4 +391,9 @@ class ApplicationController < ActionController::Base
     raise ActionController::RoutingError.new('Not Found')
   end
 
+  def cache_headers
+    response.headers['Cache-Control'] = 'no-cache, no-store, max-age=0, must-revalidate, private'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+  end
 end

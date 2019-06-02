@@ -87,6 +87,8 @@ class User < ActiveRecord::Base
   has_many :tasks
   has_many :workflows
   has_one :notification_preference
+  has_one :profile, dependent: :destroy
+  has_one :invitation, dependent: :nullify
 
   store :extras, accessors: [:has_seen_guidelines], coder: JSON
 
@@ -103,6 +105,11 @@ class User < ActiveRecord::Base
   # Have the ability to create new review spaces and have full access to
   # activities available within reviewer and cooperative areas.
   scope :review_space_admins, -> { where(dxuser: REVIEW_SPACE_ADMINS) }
+
+  validates :first_name, length: { minimum: 2, message: "The first name must be at least two letters long." }, presence: true
+  validates :last_name, length: { minimum: 2, message: "The last name must be at least two letters long." }, presence: true
+  validates :email, presence: true, uniqueness: { case_sensitive: false }
+  validates :disable_message, length: { maximum: 250 , message: "Deactivation reason is too long (over 250 characters)"}
 
   def self.challenge_bot
     find_by!(dxuser: CHALLENGE_BOT_DX_USER)
@@ -122,6 +129,21 @@ class User < ActiveRecord::Base
 
   def klass
     "user"
+  end
+
+  def status
+    if last_login.nil?
+      "Pending"
+    else
+      case user_state
+      when "enabled"
+        "Active"
+      when "deactivated"
+        "Disabled"
+      else
+        "N/A"
+      end
+    end
   end
 
   def org
@@ -158,6 +180,10 @@ class User < ActiveRecord::Base
     spaces.active
   end
 
+  def activated?
+    private_files_project.present? && last_login.present?
+  end
+
   def username
     dxuser
   end
@@ -176,6 +202,10 @@ class User < ActiveRecord::Base
 
   def is_self(context)
     id == context.user_id
+  end
+
+  def logged_in?
+    !Session.find_by_user_id(id).expired? rescue false
   end
 
   def appathon_from_meta(meta_appathon)
@@ -375,7 +405,7 @@ class User < ActiveRecord::Base
     token = context.token
     user = User.find(user_id)
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-    jobs.where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs_batch|
+    jobs.where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).limit(SYNC_JOBS_LIMIT).each_slice(1000) do |jobs_batch|
 
       jobs_hash = jobs_batch.map { |j| [j.dxid, j] }.to_h
       response = DNAnexusAPI.new(token).call("system", "findJobs",
@@ -385,6 +415,7 @@ class User < ActiveRecord::Base
         parentJob: nil,
         describe: true,)
       response["results"].each do |result|
+        next if result.blank?
         sync_job_state(result, jobs_hash[result["id"]], user, token)
       end
     end
@@ -436,7 +467,7 @@ class User < ActiveRecord::Base
               file.update!(state: remote_state)
             else
               # NOTE we should never be here
-              raise "File #{id} had local state #{file.state} (previously #{old_file_state}) and remote state #{remote_state}"
+              raise "File #{file.uid} had local state #{file.state} (previously #{old_file_state}) and remote state #{remote_state}"
             end
           end
         end

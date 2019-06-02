@@ -41,6 +41,10 @@ module Permissions
       where(scope: "public")
     end
 
+    def accessible_by_private
+      where(scope: "private")
+    end
+
     def accessible_by_space(space)
       where(scope: space.uid)
     end
@@ -73,6 +77,10 @@ module Permissions
 
     return false unless context.user.space_uids.include?(scope)
     SpaceMembershipPolicy.can_modify_content?(space_object, self, context.user)
+  end
+
+  def owned_by?(context)
+    user_id == context.user_id
   end
 
   # Helper method, not to be called from outside the model

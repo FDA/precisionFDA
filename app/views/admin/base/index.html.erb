@@ -11,6 +11,34 @@
   </div>
 </div>
 
+
+<% if @context.user.can_administer_site? %>
+  <div class="infoframe-outer">
+    <div class="infoframe-inner">
+      <h4 class="infoframe-title">Site Administration</h4>
+      <ul class="list-group infoframe-inline">
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Contributors</h5>
+          <p class="list-group-item-text"><%= User.real.count %></p>
+        </li>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Contributor Orgs</h5>
+          <p class="list-group-item-text"><%= Org.count %></p>
+        </li>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Browse Access</h5>
+          <p class="list-group-item-text"><%= Invitation.count %></p>
+        </li>
+      </ul>
+
+      <a class="btn btn-default" rel="nofollow" href="<%= admin_orgs_path %>">
+        <i class="fa fa-users" aria-hidden="true"></i> Organizations
+      </a>
+      <%= link_to(content_tag(:span, "", class: "fa fa-file-excel-o") + " Generate report", run_report_path, method: 'post', class: 'btn btn-default') %>
+    </div>
+  </div>
+<% end %>
+
 <div class="infoframe-outer">
   <div class="infoframe-inner">
     <h4 class="infoframe-title">Site Activity</h4>
@@ -18,16 +46,33 @@
       <a class="btn btn-default" rel="nofollow" href="<%= admin_activity_reports_path %>">
         <i class="fa fa-line-chart" aria-hidden="true"></i> Site Activity reporting
       </a>
-      <a class="btn btn-default" data-confirm="You are about to download CSV file" data-turbolinks="false" href="<%= admin_active_users_path %>" rel="nofollow">
-        <i class="fa fa-file-text-o" aria-hidden="true"></i> Active Users
-      </a>
 
       <a class="btn btn-default" rel="nofollow" href="<%= admin_usage_reports_path %>">
-        <i class="fa fa-users" aria-hidden="true"></i> Users & Usage
+        <i class="fa fa-users" aria-hidden="true"></i> Active Users
       </a>
+
+      <a class="btn btn-default" rel="nofollow" href="<%= admin_pending_users_path %>">
+        <i class="fa fa-users" aria-hidden="true"></i> Pending Users
+      </a>
+
+      <a class="btn btn-default" rel="nofollow" href="<%= admin_deactivated_users_path %>">
+        <i class="fa fa-users" aria-hidden="true"></i> Deactivated Users
+      </a>
+
+
+
       <a class="btn btn-default" rel="nofollow" href="<%= admin_get_started_boxes_path %>">
         <i class="fa fa-gear" aria-hidden="true"></i> Site Customization Workbench
       </a>
+    </div>
+  </div>
+</div>
+
+<div class="infoframe-outer">
+  <div class="infoframe-inner">
+    <h4 class="infoframe-title">Users Search</h4>
+    <div>
+      <%= render partial: "admin/users/grid", locals: { show_filters: :always } %>
     </div>
   </div>
 </div>

@@ -10,7 +10,7 @@
         <% if !item[:patterns].blank? %>
           <p class="spec-patterns">Patterns: <%= item[:patterns].map(&:inspect).join(', ') %></p>
         <% end %>
-        <% if !item[:default].blank? %>
+        <% if !item[:default].nil? %>
           <p class="spec-default">Default: <%= item[:default] %></p>
         <% end %>
         <% if !item[:choices].blank? %>

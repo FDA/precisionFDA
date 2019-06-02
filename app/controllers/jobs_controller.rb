@@ -83,6 +83,7 @@ class JobsController < ApplicationController
 
   def new
     @app = App.accessible_by(@context).find_by_uid(params[:app_id])
+
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
       redirect_to apps_path
@@ -99,13 +100,30 @@ class JobsController < ApplicationController
       end
     end
 
-    licenses_accepted = @context.user.accepted_licenses.map{|l| {id: l.license_id, pending: l.pending?, active: l.active?, unset: !l.pending? && !l.active?}}
+    licenses_accepted = @context.user.accepted_licenses.map do |license|
+      {
+        id: license.license_id,
+        pending: license.pending?,
+        active: license.active?,
+        unset: !license.pending? && !license.active?
+      }
+    end
+
     available_spaces = @app.available_job_spaces(@context.user)
 
+    selectable_spaces = available_spaces.map do |space|
+      { value: space.id, label: space.title, space_type: space.space_type }
+    end
+
+    content_scopes = available_spaces.each_with_object({}) do |space, memo|
+      memo[space.id] = space.accessible_scopes
+    end
+
     js app: @app.slice(:uid, :spec, :title, :space_scopes),
-       licenses_to_accept: licenses_to_accept.uniq { |l| l.id}, licenses_accepted: licenses_accepted,
-       selectable_spaces: available_spaces.map { |space| { value: space.id, label: space.title } },
-       content_scopes: available_spaces.each_with_object({}) {  |space, memo| memo[space.id] = space.accessible_scopes }
+       licenses_to_accept: licenses_to_accept.uniq(&:id),
+       licenses_accepted: licenses_accepted,
+       selectable_spaces: selectable_spaces,
+       content_scopes: content_scopes
   end
 
   def destroy

@@ -16,6 +16,9 @@ class Context
     # Cache user, if logged in
     if logged_in?
       @user = User.find(@user_id)
+
+      @user.expiration = @expiration
+      @user.save!(validate: false)
     end
   end
 
@@ -29,7 +32,7 @@ class Context
   end
 
   def logged_in?
-    return (@user_id.present? && @username.present? && @token.present? && @expiration.present? && ((@expiration - Time.now.to_i) > 5.minutes) && @org_id.present?) && (@user_id != -1 && @token != "INVALID" && @org_id != -1)
+    return (@user_id.present? && @username.present? && @token.present? && @expiration.present? && ((@expiration - Time.now.to_i) > 5.minutes) && @org_id.present?) && (@user_id != -1 && @token != "INVALID" && @org_id != -1) && (@user.present? ? @user.user_state == 'enabled' : true)
   end
 
   def guest?
@@ -67,7 +70,7 @@ class Context
 
   def active_spaces_for(item)
     if item.is_a?(Workflow)
-      @user.active_spaces.review
+      @user.active_spaces.non_groups
     else
       @user.active_spaces
     end

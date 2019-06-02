@@ -1,0 +1,46 @@
+<div id="confirm_phone_modal" class="modal fade tasks-actions-modal modal-with-loader" data-bind="css: {loading: phoneConfirm.isLoading}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Verify phone number</h4>
+      </div>
+      <div class="loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <div class="modal-body">
+        <p>
+          <div>
+            A verification message containing a 6-digit code validation was sent via a text message to
+          </div>
+          <div data-bind="text: phoneConfirm.phoneValueLabel"></div>
+        </p>
+        <p>Enter this code into the validation code field and click verify phone number to complete the Request Access process.</p>
+        <p>
+          <div class="row">
+            <div class="col-sm-12">
+              <input id="confirm_phone_modal_input" type="text" class="form-control input-lg" placeholder="Validation code" data-bind="event: {
+                keyup: phoneConfirm.codeInputOnKeyUp
+              }">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-18">
+              <a href="#" class="send-new-code" data-bind="click: phoneConfirm.requestCode">Send New Code</a>
+            </div>
+          </div>
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-lg btn-default" data-dismiss="modal">Cancel</button>
+        <button class="btn btn-lg btn-primary" data-bind="click: phoneConfirm.sendCode, enable: phoneConfirm.enableButton">
+          Verify phone number
+        </button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

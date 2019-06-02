@@ -40,7 +40,6 @@
 # independent: U || J || A
 #
 class UserFile < Node
-
   include Licenses
   include InternalUid
   require 'uri'
@@ -81,47 +80,49 @@ class UserFile < Node
 
   scope :open, -> { where(state: STATE_OPEN) }
 
-  def self.model_name
-    ActiveModel::Name.new(self, nil, "File")
-  end
+  class << self
+    def model_name
+      ActiveModel::Name.new(self, nil, "File")
+    end
 
-  def self.real_files
-    where(parent_type: ['User', 'Job', 'Node'])
-  end
+    def real_files
+      where(parent_type: ['User', 'Job', 'Node'])
+    end
 
-  def self.not_assets
-    return where.not(parent_type: 'Asset')
-  end
+    def not_assets
+      where.not(parent_type: 'Asset')
+    end
 
-  def self.independent
-    return where.not(parent_type: PARENT_TYPE_COMPARISON)
-  end
+    def independent
+      where.not(parent_type: PARENT_TYPE_COMPARISON)
+    end
 
-  def self.closed
-    return where(state: 'closed')
-  end
+    def closed
+      where(state: 'closed')
+    end
 
-  def self.publication_project!(user, scope)
-    # This is a class method for independent files.
-    # For comparison files, use Comparison.publication_project!
-    if scope == "public"
-      user.public_files_project
-    else
-      Space.from_scope(scope).project_for_user!(user)
+    def publication_project!(user, scope)
+      # This is a class method for independent files.
+      # For comparison files, use Comparison.publication_project!
+      if scope == "public"
+        user.public_files_project
+      else
+        Space.from_scope(scope).project_for_user!(user)
+      end
+    end
+
+    def publish(files, context, scope)
+      file_publisher = FilePublisher.by_context(context)
+      file_publisher.publish(files, scope)
     end
   end
 
-  def self.publish(files, context, scope)
-    file_publisher = FilePublisher.by_context(context)
-    file_publisher.publish(files, scope)
-  end
-
   def real_file?
-    return parent_type == "User" || parent_type == "Job"
+    parent_type == "User" || parent_type == "Job"
   end
 
   def is_submission_output?
-    return parent_type == "Job" && parent.submission.present?
+    parent_type == "Job" && parent.submission.present?
   end
 
   def to_param
@@ -134,11 +135,15 @@ class UserFile < Node
   end
 
   def not_asset?
-    return parent_type != "Asset"
+    parent_type != "Asset"
   end
 
   def asset?
     sti_type == "Asset"
+  end
+
+  def open?
+    state == STATE_OPEN
   end
 
   def independent?
@@ -173,7 +178,7 @@ class UserFile < Node
   end
 
   def deletable?
-    return ((parent_type == "User") || (parent_type == "Job")) && ( (scope == "private" || scope == "public") || !(in_space? && space_object.verified?))
+    ((parent_type == "User") || (parent_type == "Job")) && ( (scope == "private" || scope == "public") || !(in_space? && space_object.verified?))
   end
 
   def publishable_by?(context, scope_to_publish_to = "public")
@@ -197,20 +202,18 @@ class UserFile < Node
   def passes_consistency_check?(user)
     if private?
       if independent?
-        return project == user.private_files_project
+        project == user.private_files_project
       else
-        return project == user.private_comparisons_project
+        project == user.private_comparisons_project
       end
     elsif public?
-      return project == user.public_files_project
+      project == user.public_files_project
     else
-      return project == space_object.project_for_user!(user)
+      project == space_object.project_for_user!(user)
     end
   end
 
   def created_by_challenge_bot?
-    return true if challenge_resources.any?
-    User.challenge_bot == user
+    challenge_resources.any? || User.challenge_bot == user
   end
-
 end

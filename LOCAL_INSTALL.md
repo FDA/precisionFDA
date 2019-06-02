@@ -51,6 +51,10 @@ This requires manually "bootstrapping" the situation in steps described in
 * Prepare db
   * `docker-compose run web bundle exec rake db:create`
   * `docker-compose run web bundle exec rake db:schema:load`
+* start rails server
+  * `docker-compose up`
+* start rails console
+  * `docker compose exec web bundle exec rails c`  
 
 ## pFDA setup
 
@@ -101,7 +105,16 @@ match the DNAnexus org handle without the pfda.. prefix, i.e. floranteorg.
 * start rails console
     * `bundle exec rails c`
 
-## Testing
+## Dev team Backend Testing
 
 * Run all tests
-    * `rake test`
+    * `bundle exec rspec`
+
+* Run tests with Rspec Guard
+    * `bundle exec guard`
+    
+* To exit from Guard mode:
+    * `exit`
+
+* Check current code coverage:
+    * `open coverage/index.html`

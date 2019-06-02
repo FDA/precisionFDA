@@ -20,6 +20,16 @@
       <p class="list-group-item-text"><%= @user.dxuser %></p>
     </li>
 
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Email ID </h5>
+      <p class="list-group-item-text"><%= @user.email %></p>
+    </li>
+
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Status</h5>
+      <p class="list-group-item-text"><%= @user.status %></p>
+    </li>
+
     <% if @user.org_id.present? %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Organization</h5>
@@ -30,6 +40,45 @@
       <h5 class="list-group-item-heading">Joined</h5>
       <p class="list-group-item-text"><%= @user.created_at.to_s(:human) %></p>
     </li>
+  </ul>
+</div>
+
+
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <% if !@context.guest? && @context.user.can_administer_site? && @context.user != @user %>
+      <% if !@user.activated? %>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Resend Activation Email</h5>
+          <a class="btn btn-primary" href="<%=   admin_resend_activation_email_path(dxuser: @user.dxuser) %>"><span class="fa fa-key"></span> Resend</a>
+        </li>
+      <% end %>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Reset multi-factor authentication</h5>
+        <a class="btn btn-primary" href="<%=  admin_reset_mfa_user_path(dxuser: @user.dxuser) %>">Reset</a>
+      </li>
+      <% if ["enabled","deactivated"].include?(@user.user_state) %>
+        <li class="list-group-item">
+          <% if @user.user_state == 'enabled' %>
+            <h5 class="list-group-item-heading">Disable User</h5>
+            <button class="btn btn-primary" id="toggleDisableUser" data-dxuser="<%= @user.dxuser %>" data-bind="click: showDeactivateUserModal">
+              Deactivate
+            </button>
+            <%= render '/_partials/deactivate_user_modal' %>
+          <% else %>
+            <h5 class="list-group-item-heading">Disable User</h5>
+            <a href="<%= admin_toggle_activate_user_path(dxuser: @user.dxuser) %>" class="btn btn-primary">
+              Activate
+            </a>
+          <% end %>
+        </li>
+      <% end %>
+
+          <li class="list-group-item">
+            <h5 class="list-group-item-heading">Unlock User</h5>
+            <a class="btn btn-primary" href="<%= admin_unlock_user_path(dxuser: @user.dxuser) %>" id="toggleLockUser"><span class="fa fa-unlock"></span>Unlock</a>
+          </li>
+      <% end %>
   </ul>
 </div>
 

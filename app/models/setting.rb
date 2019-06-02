@@ -18,6 +18,10 @@ class Setting < ActiveRecord::Base
         .update(value: value)
     end
 
+    def get_value(key)
+      self[key]
+    end
+
     def set_usage_metrics_custom_range(date_from, date_to)
       set_value(USAGE_METRICS_CUSTOM_RANGE_KEY, date_from: date_from, date_to: date_to)
     end

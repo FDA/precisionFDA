@@ -30,7 +30,7 @@ class Asset < UserFile
 
   has_many :archive_entries, dependent: :destroy
 
-  has_and_belongs_to_many :apps, {join_table: "apps_assets"}
+  has_and_belongs_to_many :apps, join_table: :apps_assets
 
   def self.model_name
     ActiveModel::Name.new(self, nil, "Asset")
@@ -38,7 +38,11 @@ class Asset < UserFile
 
   def self.with_search_keyword(prefix)
     prefix = sanitize_sql_like(prefix)
-    return joins(:archive_entries).where("(archive_entries.name LIKE ? OR nodes.name LIKE ?)", "#{prefix}%", "%#{prefix}%")
+
+    joins(:archive_entries).where(
+      "(archive_entries.name LIKE ? OR nodes.name LIKE ?)",
+      "#{prefix}%", "%#{prefix}%"
+    )
   end
 
   def file_paths
@@ -51,20 +55,19 @@ class Asset < UserFile
 
   def suffix
     if name.ends_with?(".tar.gz")
-      return ".tar.gz"
+      ".tar.gz"
     elsif name.ends_with?(".tar")
-      return ".tar"
+      ".tar"
     else
       raise "Found an asset that is not a .tar[.gz]"
     end
   end
 
-  def is_gzipped?
-    return name.ends_with?(".gz")
+  def gzipped?
+    name.ends_with?(".gz")
   end
 
   def describe_fields
-    ["title", "name", "prefix", "description", "file_paths"]
+    %w(title name prefix description file_paths)
   end
-
 end
