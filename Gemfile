@@ -134,6 +134,8 @@ group :development, :test, :ui_test do
   gem 'figaro'
   gem 'quiet_assets'
   gem 'thin'
+  gem 'mailcatcher'
+  gem 'actionview-encoded_mail_to'
 end
 
 group :test, :ui_test do
