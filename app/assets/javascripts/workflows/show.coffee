@@ -1,18 +1,7 @@
 class WorkflowShowModel
   constructor: (workflow) ->
-    if workflow?
-      @noteAttachModel = new Precision.models.NoteAttachModel(workflow.id, 'Workflow')
-      @readmeDisplay = Precision.md.render(workflow.readme)
-      @stages = workflow.spec.input_spec.stages
-      @length = ko.computed( => @stages.length - 1)
-      @firstStage = ko.computed( -> workflow.spec.input_spec.stages[0])
-      @lastStage = ko.computed(=> workflow.spec.input_spec.stages[@length()])
-      @slots = workflow.spec
-      @slotsWithoutFirstAndLast = ko.computed(=>
-        ko.utils.arrayFilter( @stages, (stage) =>
-          !(stage == @stages[0] || stage == @stages[@stages.length - 1])
-        )
-      )
+    @diagram = new Precision.WorkflowDiagramModel(workflow)
+
 
 #########################################################
 #

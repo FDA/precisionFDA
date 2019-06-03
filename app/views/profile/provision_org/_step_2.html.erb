@@ -1,0 +1,116 @@
+<div class="container-padded">
+  <%= link_to(content_tag(:span, "", class: "fa fa-backward") + " Back", profile_provision_org_path, class: 'btn btn-default') %>
+  <%= form_tag(provision_org_path, method: 'post', class: "form") do -%>
+    <%= hidden_field_tag("state", "step3") %>
+    <%= hidden_field_tag("inv", @inv) %>
+    <h4>&nbsp;</h4>
+    <% if @errors.present? %>
+      <div class="form-group">
+        <div class="alert alert-danger">
+          <strong><span class="fa fa-warning"></span>
+            <% @errors.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </strong>
+        </div>
+      </div>
+    <% end %>
+    <table class="table table-bordered table-hover">
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Original value</th>
+          <th>Edited value</th>
+          <th>Instructions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><%= label_tag("first_name", "First Name") %></td>
+          <td><%= @invitation.first_name %></td>
+          <td><%= text_field_tag("first_name", @first_name, class: 'form-control') %></td>
+          <td>Required, must be at least 2 letters</td>
+        </tr>
+        <tr>
+          <td><%= label_tag("last_name", "Last Name") %></td>
+          <td><%= @invitation.last_name %></td>
+          <td><%= text_field_tag("last_name", @last_name, class: 'form-control') %></td>
+          <td>Required, must be at least 2 letters</td>
+        </tr>
+        <tr>
+          <td><%= label_tag("email", "Email") %></td>
+          <td><%= @invitation.email %></td>
+          <td><%= email_field_tag("email", @email, class: 'form-control') %></td>
+          <td>Required, must be previously unused email</td>
+        </tr>
+        <tr>
+          <td><%= label_tag("address1", "Address1") %></td>
+          <td><%= @invitation.address1 %></td>
+          <td><%= text_field_tag("address", @address1, disabled: true, class: 'form-control') %></td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td><%= label_tag("address2", "Address2") %></td>
+          <td><%= @invitation.address2 %></td>
+          <td><%= text_field_tag("address", @address2, disabled: true, class: 'form-control') %></td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td><%= label_tag("country", "Country") %></td>
+          <td><%= @invitation.country.name %></td>
+          <td><%= text_field_tag("country", @country, disabled: true, class: 'form-control') %></td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td><%= label_tag("city", "City") %></td>
+          <td><%= @invitation.city %></td>
+          <td><%= text_field_tag("city", @city, disabled: true, class: 'form-control') %></td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td><%= label_tag("us_state", "State") %></td>
+          <td><%= @invitation.us_state %></td>
+          <td><%= text_field_tag("us_state", @us_state, disabled: true, class: 'form-control') %></td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td><%= label_tag("postal_code", "Postal Code") %></td>
+          <td><%= @invitation.postal_code %></td>
+          <td><%= text_field_tag("postal_code", @postal_code, disabled: true, class: 'form-control') %></td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td><%= label_tag("phone", "Phone") %></td>
+          <td><%= @invitation.full_phone %></td>
+          <td><%= text_field_tag("phone", @full_phone, disabled: true, class: 'form-control') %></td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td><%= label_tag("duns", "DUNS") %></td>
+          <td><%= @invitation.duns %></td>
+          <td><%= text_field_tag("duns", @duns, class: 'form-control') %></td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td><%= label_tag("org", "Organization name") %></td>
+          <td><%= @invitation.org %></td>
+          <td><%= text_field_tag("org", @org, class: 'form-control', :"data-bind" => "disable: org_admin() != 'admin'") %></td>
+          <td>The organization name. Previous examples:<br>"OSTP"<br>"23andMe"<br>"Broad Institute"<br>"Roche Sequencing"<br>"Baylor College of Medicine"<br><strong>Leave empty for self-represented user.</strong></td>
+        </tr>
+        <tr>
+          <td><%= label_tag("org_handle", "Organization handle") %></td>
+          <td></td>
+          <td><%= text_field_tag("org_handle", @org_handle, class: 'form-control', :"data-bind" => "disable: org_admin() != 'admin'") %></td>
+          <td>A system handle for the organization.<br>This can only contain lowercase English letters.<br>It will be shown in all tables (org column).<br>Acronyms are sometimes better,<br>i.e. <code>rtg</code> for Real Time Genomics<br>or <code>hli</code> for Human Longevity.<br>Previous examples:<br><code>ostp</code><br><code>23andme</code><br><code>broad</code><br><code>roche</code><br><code>baylor</code><br><strong>Leave empty for self-represented user.</strong></td>
+        </tr>
+        <tr>
+          <td>Organization Administration</td>
+          <td><%= @invitation.organization_admin ? "YES" : "NO" %></td>
+          <td><%= select_tag("organization_administration", options_for_select(["admin", "self-representing"], @organization_administration ? @organization_administration : (@invitation.organization_admin ? "admin" : (@invitation.singular ? "self-representing" : nil)) ), :"data-bind" => "value: org_admin", class: "form-control") %></td>
+          <td>Should the user be provisioned as an org administrator or self-representing?</td>
+        </tr>
+      </tbody>
+    </table>
+    <%= button_tag(content_tag(:span, "", class: "fa fa-forward") + " Next", class: "btn btn-primary") %>
+  <% end %>
+</div>

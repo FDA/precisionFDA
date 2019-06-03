@@ -44,13 +44,16 @@ class CopyService
       new_app.assets = copies.all
 
       new_app.ordered_assets = app.ordered_assets.map do |ordered_uid|
-        copies.find { |_, source| source.uid == ordered_uid }.file.uid
+        copies.find { |_, source| source.uid == ordered_uid }.object.uid
       end
     end
 
     def publish(app, scope)
-      api.call(app.dxid, 'addAuthorizedUsers',
-        "authorizedUsers": AppSeries.authorized_users_for_scope!(scope),)
+      api.call(
+        app.dxid,
+        'addAuthorizedUsers',
+        "authorizedUsers": AppSeries.authorized_users_for_scope(scope)
+      )
     end
   end
 end

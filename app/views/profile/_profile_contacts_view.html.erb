@@ -1,0 +1,34 @@
+<div class="contact-information-view" data-bind="css: {hidden: contacts.isEditing()}">
+  <form class="form-horizontal">
+    <div class="form-group required">
+      <label class="col-sm-3 control-label">Email address:</label>
+      <div class="col-sm-8">
+        <span class="contact-information-label" data-bind="text: contacts.emailLabel"></span>
+      </div>
+    </div>
+    <div class="form-group required">
+      <label class="col-sm-3 control-label">Address:</label>
+      <div class="col-sm-8">
+        <div>
+          <span class="contact-information-label" data-bind="text: contacts.address1Label"></span>
+        </div>
+         <!-- ko if: contacts.address2Label().length -->
+        <div>
+          <span class="contact-information-label" data-bind="text: contacts.address2Label"></span>
+        </div>
+        <!-- /ko -->
+         <!-- ko if: contacts.cityLabel().length -->
+        <div>
+          <span class="contact-information-label" data-bind="text: contacts.cityLabel"></span>
+        </div>
+        <!-- /ko -->
+      </div>
+    </div>
+    <div class="form-group required">
+      <label class="col-sm-3 control-label">Phone number:</label>
+      <div class="col-sm-8">
+        <span class="contact-information-label" data-bind="text: contacts.phoneLabel"></span>
+      </div>
+    </div>
+  </form>
+</div>

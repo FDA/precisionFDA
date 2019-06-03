@@ -1,0 +1,33 @@
+<div class="wf-stages-container" data-bind="template: {name: 'stage-model', foreach: stages}"></div>
+
+<script id='stage-model'  type='text/html'>
+  <div class="wf-stage">
+    <div class="wf-stage-header pfda-padded-b">
+      <span data-bind="text: title"></span>
+      <button class="btn btn-xs btn-primary pull-right" data-bind="click: $root.showAddStagesModal">Add App</button>
+    </div>
+    <div class="wf-stage-slots" data-bind="template: {name: 'slot-model', foreach: slots}"></div>
+  </div>
+</script>
+
+<script id='slot-model'  type='text/html'>
+  <div class="pfda-padded-b wf-slot" data-bind="css: style">
+    <div class="workflows center-block wf-slot-io" data-bind='foreach: inputs'>
+      <span data-bind="css: style" class="glyphicon glyphicon-filter"></span>
+    </div>
+    <div class="wf-slot-body">
+      <i class="fa fa-times-circle-o wf-slot-remove pull-right" data-bind="click: $parent.removeSlot"></i>
+      <a  href="#" data-bind="click: $root.configureSlot">
+        <div class="workflows stage-item">
+          <div class="wf-slot-title">
+            <i class="fa fa-gear"></i>
+            <span data-bind="text: appName, attr: {title: appName}"></span>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="workflows center-block wf-slot-io" data-bind='foreach: outputs'>
+      <span data-bind="css: style", class="glyphicon glyphicon-filter gly-flip-vertical"></span>
+    </div>
+  </div>
+</script>

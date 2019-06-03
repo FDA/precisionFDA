@@ -1,10 +1,13 @@
 class ApiController < ApplicationController
+  include ErrorProcessable
   include WorkflowConcern
 
   skip_before_action :verify_authenticity_token
   skip_before_action :require_login
   before_action :require_api_login, except: [:list_apps, :list_assets, :list_comparisons, :list_files, :list_jobs, :list_workflows, :list_notes, :list_related, :describe, :search_assets]
   before_action :require_api_login_or_guest, only: [:list_apps, :list_assets, :list_comparisons, :list_files, :list_jobs, :list_workflows, :list_related, :describe, :search_assets]
+  before_action :validate_create_asset, only: :create_asset
+  before_action :validate_get_upload_url, only: :get_upload_url
 
   rescue_from ApiError, with: :render_error_method
 
@@ -26,7 +29,7 @@ class ApiController < ApplicationController
       if scope != "public"
         # Check that scope is a valid scope:
         # - must be of the form space-xxxx
-        # - must exist in the Spa`ce table
+        # - must exist in the Space table
         # - must be accessible by context
         fail "Invalid scope (only 'public' or 'space-xxxx' are accepted)" unless scope =~ /^space-(\d+)$/
         space = Space.find_by(id: $1.to_i)
@@ -79,11 +82,6 @@ class ApiController < ApplicationController
       published_count += Comparison.publish(comparisons, @context, scope)
     end
 
-    # Apps
-    unless apps.empty?
-      published_count += AppSeries.publish(apps, @context, scope)
-    end
-
     # Jobs
     unless jobs.empty?
       published_count += Job.publish(jobs, @context, scope)
@@ -107,6 +105,16 @@ class ApiController < ApplicationController
     if workflows.any?
       PublishService::WorkflowPublisher.call(workflows, @context, scope)
       published_count += workflows.count
+
+      workflows.flat_map(&:apps).each do |app|
+        next if apps.include?(app) || app.public? || app.scope == scope
+        apps << app
+      end
+    end
+
+    # Apps
+    unless apps.empty?
+      published_count += AppSeries.publish(apps, @context, scope)
     end
 
     render json: { published: published_count }
@@ -126,215 +134,6 @@ class ApiController < ApplicationController
     app_series = AppSeries.accessible_by(@context).find_by(id: params["id"])
     fail "AppSeries not found" if app_series.nil?
     render json: app_series.accessible_revisions(@context).select(:title, :id, :uid, :revision, :version)
-  end
-
-  # Inputs
-  #
-  # workflow_name, workflow_title, readme, is_new, slots
-  #
-  # Outputs
-  #
-  # id (string, only on success): the id of the created workflow, if success
-  # failure (string, only on failure): a message that can be shown to the user due to failure
-  def create_workflow
-    workflow_name = params[:workflow_name]
-    fail "The workflow 'workflow_name' must be a nonempty string." unless workflow_name.is_a?(String) && workflow_name != ""
-    fail "The workflow 'workflow_name' can only contain the characters A-Z, a-z, 0-9, '.' (period), '_' (underscore) and '-' (dash)." unless workflow_name =~ /^[a-zA-Z0-9._-]+$/
-
-    title = params[:workflow_title]
-    fail "The workflow 'title' must be a nonempty string." unless title.is_a?(String) && title != ""
-
-    readme = params[:readme]
-    fail "The workflow 'Readme' must be a string." unless readme.is_a?(String)
-
-    is_new = params[:is_new]
-    fail "The workflow 'is_new' must be a boolean, true or false." unless !!is_new == is_new
-
-    slots = params[:slots] || []
-    fail "The workflow 'slots' must be an array of hashes." unless slots.is_a?(Array) && slots.all? { |slot| slot.is_a?(Hash) }
-
-    spec = { input_spec: { stages: [] }, output_spec: { stages: [] } }
-    stages = []
-    slot_details_by_slot_id = {}
-    slot_idx_to_slot_id = {}
-    output_classes = {}
-    slots.each_with_index do |slot, slot_i|
-      name = slot["name"]
-      fail "#{(slot_i + 1).ordinalize} slot: Each 'name' must be a nonempty string." unless name.is_a?(String) && name != ""
-
-      uid = slot["uid"]
-      fail "Slot '#{name}': Each slot 'uid' must be a nonempty string." unless uid.is_a?(String) && uid != ""
-
-      app = App.accessible_by(@context).find_by_uid(uid)
-
-      fail "Slot '#{name}': App 'dxid' for slot '#{name}' does not exist or is not accessible by you." if app.blank?
-      dxid = app.dxid
-
-      instance_type = slot["instanceType"]
-      fail "Slot '#{name}': Each slot 'instanceType' must be a nonempty string." unless instance_type.is_a?(String) && instance_type != ""
-      fail "Slot '#{name}': Each slot 'instanceType' must be a valid instance type selected" unless Job::INSTANCE_TYPES.key?(instance_type)
-
-      slot_id = slot["slotId"]
-      fail "Slot '#{name}': Each slot 'slotId' must be a nonempty string." unless slot_id.is_a?(String) && slot_id != ""
-      fail "Slot '#{name}': Each slot 'slotId' must be unique." if slot_details_by_slot_id.key?(slot_id)
-      slot_details_by_slot_id[slot_id] = { prev_slot: nil, next_slot: nil, idx: slot_i }
-      slot_idx_to_slot_id[slot_i] = slot_id
-
-      inputs = slot["inputs"] || []
-      fail "Slot '#{name}': Each slot 'inputs' must be an array of hashes." unless inputs.is_a?(Array) && inputs.all? { |slot| slot.is_a?(Hash) }
-      prev_slot_expected = inputs.any? { |input| input["values"]["id"] }
-
-      outputs = slot["outputs"] || []
-      fail "Slot '#{name}': Each slot 'outputs' must be an array of hashes." unless outputs.is_a?(Array) && outputs.all? { |slot| slot.is_a?(Hash) }
-      outputs.each do |output|
-        output_classes[slot_id] ||= {}
-        output_classes[slot_id][output["name"]] = output["class"]
-      end
-      next_slot_expected = outputs.any? { |output| output["values"]["id"] }
-
-      if slot_i != 0
-        defined_prev_slot_id = slot_idx_to_slot_id[slot_i - 1]
-        fail "Slot '#{name}': Each slot 'slotId' must be the value of the previous slot's 'nextSlot'." if slot_details_by_slot_id[defined_prev_slot_id][:next_slot_expected] && slot_details_by_slot_id[defined_prev_slot_id][:next_slot] != slot_id
-
-        prev_slot = slot["prevSlot"]
-        if prev_slot_expected
-          fail "Slot '#{name}': Each slot 'prevSlot' must be a non empty string." unless prev_slot.is_a?(String) && prev_slot != ""
-          fail "Slot '#{name}': Each slot 'prevSlot' must be the value of the previous slot's 'slotId'." if prev_slot != defined_prev_slot_id
-        end
-      else
-        prev_slot = nil
-      end
-
-      if slot_i != slots.size - 1
-        next_slot = slot["nextSlot"]
-        if next_slot_expected
-          fail "Slot '#{name}': Each slot 'nextSlot' must be a non empty string if any element of 'outputs' refers to another stage's input." unless next_slot.is_a?(String) && next_slot != ""
-        end
-      else
-        next_slot = nil
-      end
-
-      slot_details_by_slot_id[slot_id] = { prev_slot: prev_slot, next_slot: next_slot, idx: slot_i, next_slot_expected: next_slot_expected }
-
-      spec[:input_spec][:stages] << {
-        "name": name,
-        "prev_slot": prev_slot,
-        "next_slot": next_slot,
-        "slotId": slot_id,
-        "app_dxid": dxid,
-        "app_uid": uid,
-        "inputs": inputs,
-        "outputs": outputs,
-        "instanceType": instance_type,
-      }
-
-      stage_inputs = {}
-      stage_inputs_seen = Set.new
-      inputs.each_with_index do |input, input_i|
-        i_name = input["name"]
-        fail "Slot '#{name}': The #{(input_i + 1).ordinalize} input is missing a name." unless i_name.is_a?(String) && i_name != ""
-        fail "Slot '#{name}': The input name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless i_name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
-        fail "Slot '#{name}': Duplicate definitions for the input named '#{i_name}'." if stage_inputs_seen.include?(i_name)
-        stage_inputs_seen << i_name
-
-        i_class = input["class"]
-        fail "Slot '#{name}': The input named '#{i_name}' is missing a type." unless i_class.is_a?(String) && i_class != ""
-        fail "Slot '#{name}': The input named '#{i_name}' contains an invalid type. Valid types are: #{App::VALID_IO_CLASSES.join(', ')}." unless App::VALID_IO_CLASSES.include?(i_class)
-
-        i_optional = input["optional"]
-        fail "Slot '#{name}': The input named '#{i_name}' is missing the 'optional' designation." unless i_optional == true || i_optional == false
-
-        i_label = input["label"]
-        fail "Slot '#{name}': The input named '#{i_name}' is missing a label." unless i_label.is_a?(String)
-
-        i_required_run_input = input["requiredRunInput"]
-        fail "Slot '#{name}': The input named '#{i_name}' is missing the 'required_run_input' designation." unless i_required_run_input == true || i_required_run_input == false
-
-        i_parent_slot = input["parent_slot"]
-        fail "Slot '#{name}': The input named '#{i_name}' has the 'parent_slot' value of '#{i_parent_slot}' but is expected to be '#{slot_id}'." unless i_parent_slot == slot_id
-
-        i_stage_name = input["stageName"]
-        fail "Slot '#{name}': The input named '#{i_name}' has the 'stageName' value of '#{i_stage_name}' but is expected to be '#{name}'." unless i_stage_name == name
-
-        i_values = input["values"]
-        fail "Slot '#{name}': The input named '#{i_name}' is expected to have a 'values' hash with keys 'id' and 'name'." unless i_values.is_a?(Hash) && i_values.key?("id") && i_values.key?("name")
-
-        if slot_i == 0
-          fail "Slot '#{name}': The input named '#{i_name}' must be desginated as a required input or be linked to a compatible stage output." if !i_optional && !i_required_run_input
-        else
-          unless i_optional
-            i_values_id = i_values["id"]
-            i_values_name = i_values["name"]
-            linked_to_a_stage = i_values_id.present? && i_values_name.present?
-            fail "Slot '#{name}': The input named '#{i_name}' must be desginated as a required input or be linked to another stage's output." if !i_required_run_input && !linked_to_a_stage
-            if linked_to_a_stage
-              slot_id_mismatch = defined_prev_slot_id != i_values_id
-              linked_to_previous_stage = output_classes.key?(defined_prev_slot_id) && output_classes[defined_prev_slot_id].key?(i_values_name)
-              fail "Slot '#{name}': The input named '#{i_name}' is linked to an output that does not belong to the previous stage." if !i_required_run_input && (slot_id_mismatch || !linked_to_previous_stage)
-
-              output_class = output_classes[defined_prev_slot_id][i_values_name]
-              fail "Slot '#{name}': The input named '#{i_name}' is linked to an output with the wrong class. Input type is '#{i_class}', but output type is '#{output_class}'." if i_class != output_class
-            end
-          end
-        end
-
-        unless i_values_id.nil?
-          stage_inputs.merge!(i_name => { "$dnanexus_link": { "outputField": i_values_name, "stage": i_values_id } })
-        end
-      end
-      each_stage = {
-        "executable":  dxid,
-        "id": slot_id,
-        "systemRequirements": { "main" => { "instanceType": Job::INSTANCE_TYPES[instance_type] } },
-      }
-      each_stage[:input] = stage_inputs unless stage_inputs.blank?
-      stages << each_stage
-    end
-
-    workflow_params = {
-      project: current_user.private_files_project,
-      name: workflow_name,
-      title: title,
-      stages: stages,
-    }
-
-    Workflow.transaction do
-      workflow_series_dxid = WorkflowSeries.construct_dxid(@context.username, workflow_name)
-      workflow_series = WorkflowSeries.find_by(dxid: workflow_series_dxid)
-      if is_new
-        fail "You already have a workflow by the name '#{workflow_name}'." unless workflow_series.nil?
-        workflow_series = WorkflowSeries.create!(
-          dxid: workflow_series_dxid,
-          name: workflow_name,
-          latest_revision_workflow_id: nil,
-          user_id: @context.user_id,
-          scope: "private"
-        )
-
-        revision = 1
-      else
-        fail "You don't have a workflow by the name '#{workflow_name}'." if workflow_series.nil?
-        revision = workflow_series.latest_revision_workflow.revision + 1
-      end
-      api = DNAnexusAPI.new(@context.token)
-      response = api.create_workflow(workflow_params)
-      workflow = Workflow.create!(
-        name: workflow_name,
-        title: title,
-        dxid: response["id"],
-        edit_version: response["editVersion"],
-        user_id: current_user.id,
-        spec: spec,
-        readme: readme,
-        revision: revision,
-        scope: "private",
-        workflow_series_id: workflow_series.id,
-        project: current_user.private_files_project
-      )
-      workflow.save!
-      workflow_series.update!(latest_revision_workflow_id: workflow.id)
-      render json: { id: workflow.uid }
-    end
   end
 
   # Inputs
@@ -489,7 +288,7 @@ class ApiController < ApplicationController
     User.sync_files!(@context)
 
     files = if params[:editable]
-      UserFile.real_files.editable_by(@context)
+      UserFile.real_files.editable_by(@context).accessible_by_private
     else
       UserFile.real_files.accessible_by(@context)
     end
@@ -538,7 +337,7 @@ class ApiController < ApplicationController
   #
   def list_notes
     notes = if params[:editable]
-      Note.editable_by(@context).where.not(title: nil)
+      Note.editable_by(@context).where.not(title: nil).accessible_by_private
     else
       Note.accessible_by(@context).where.not(title: nil)
     end
@@ -588,7 +387,7 @@ class ApiController < ApplicationController
   def list_comparisons
     # TODO: sync comparisons?
     comparisons = if params[:editable]
-      Comparison.editable_by(@context)
+      Comparison.editable_by(@context).accessible_by_private
     else
       Comparison.accessible_by(@context)
     end
@@ -625,7 +424,7 @@ class ApiController < ApplicationController
   #
   def list_apps
     app_series = if params[:editable]
-      AppSeries.editable_by(@context)
+      AppSeries.editable_by(@context).accessible_by_private
     else
       AppSeries.accessible_by(@context)
     end
@@ -666,7 +465,7 @@ class ApiController < ApplicationController
   #
   def list_jobs
     jobs = if params[:editable]
-      Job.editable_by(@context)
+      Job.editable_by(@context).accessible_by_private
     else
       Job.accessible_by(@context)
     end
@@ -708,7 +507,7 @@ class ApiController < ApplicationController
 
     ids = params[:ids]
     assets = if params[:editable]
-      Asset.closed.editable_by(@context)
+      Asset.closed.editable_by(@context).accessible_by_private
     else
       Asset.closed.accessible_by(@context)
     end
@@ -738,7 +537,7 @@ class ApiController < ApplicationController
 
   def list_workflows
     workflow_series = if params[:editable]
-      WorkflowSeries.editable_by(@context)
+      WorkflowSeries.editable_by(@context).accessible_by_private
     else
       WorkflowSeries.accessible_by(@context)
     end
@@ -1064,44 +863,9 @@ class ApiController < ApplicationController
   # id (string, "file-xxxx")
   #
   def create_asset
-    name = params[:name]
-    fail "Asset name needs to be a non-empty String" unless name.is_a?(String) && name != ""
-    fail "Asset name should end with .tar or .tar.gz" unless (name.end_with?(".tar") && name.size > ".tar".size) || (name.end_with?(".tar.gz") && name.size > ".tar.gz".size)
+    asset = AssetService.create(@context, params)
 
-    description = params["description"]
-    unless description.nil?
-      fail "Asset description needs to be a String" unless description.is_a?(String)
-    end
-
-    paths = params["paths"]
-    fail "Asset paths needs to be a non-empty Array less than 100000 size" unless paths.is_a?(Array) && !paths.empty? && paths.size < 100000
-    paths.each do |path|
-      fail "Asset path should be a non-empty String of size less than 4096" unless path.is_a?(String) && path != "" && path.size < 4096
-    end
-
-    project = User.find(@context.user_id).private_files_project
-    dxid = DNAnexusAPI.new(@context.token).call("file", "new", "name": params[:name], "project": project)["id"]
-
-    Asset.transaction do
-      asset = Asset.create!(dxid: dxid,
-                            project: project,
-                            name: name,
-                            state: "open",
-                            description: description,
-                            user_id: @context.user_id,
-                            scope: 'private')
-      asset.parent = asset
-      asset.save!
-      asset.update!(parent_type: "Asset")
-      paths.each do |path|
-        name = path.split('/').last
-        if name == "" || name == "." || name == ".."
-          name = nil
-        end
-        asset.archive_entries.create!(path: path, name: name)
-      end
-      render json: { id: asset.uid }
-    end
+    render json: { id: asset.uid }
   end
 
   # Inputs:
@@ -1118,30 +882,9 @@ class ApiController < ApplicationController
   # headers (hash of string key/values, headers must be given to HTTP PUT)
   #
   def get_upload_url
-    size = params[:size]
-    fail "Parameter 'size' needs to be a Fixnum" unless size.is_a?(Integer)
+    url_service = UploadUrlFetcher.new(@context, params[:id])
 
-    md5 = params[:md5]
-    fail "Parameter 'md5' needs to be a String" unless md5.is_a?(String)
-
-    index = params[:index]
-    fail "Parameter 'index' needs to be a Fixnum" unless index.is_a?(Integer)
-
-    id = params[:id]
-    fail "Parameter 'id' needs to be a non-empty String" unless id.is_a?(String) && id != ""
-
-    # Check that the file exists, is accessible by the user, and is in the open state. Throw 404 if otherwise.
-    file = UserFile.open.find_by_uid!(id)
-    token = @context.token
-    if file.user_id != @context.user_id
-      if file.created_by_challenge_bot? && (@context.user.can_administer_site? || @context.user.is_challenge_admin?)
-        token = CHALLENGE_BOT_TOKEN
-      else
-        fail "The current user does not have access to the file."
-      end
-    end
-
-    result = DNAnexusAPI.new(token).call(file.dxid, "upload", size: size, md5: md5, index: index)
+    result = url_service.fetch_url(params)
 
     render json: result
   end
@@ -1188,21 +931,13 @@ class ApiController < ApplicationController
   # Outputs: nothing (empty hash)
   #
   def close_asset
-    id = params[:id]
-    fail "id needs to be a non-empty String" unless id.is_a?(String) && id != ""
+    asset_uid = params[:id]
 
-    file = Asset.where(user_id: @context.user_id).find_by_uid!(id)
-    if file.state == "open"
-      DNAnexusAPI.new(@context.token).call(file.dxid, "close")
-      UserFile.transaction do
-        # Must recheck inside the transaction
-        file.reload
-        if file.state == "open"
-          file.state = "closing"
-          file.save!
-        end
-      end
+    if !asset_uid.is_a?(String) || asset_uid.empty?
+      fail "id needs to be a non-empty String"
     end
+
+    AssetService.close(@context, uid: asset_uid)
 
     render json: {}
   end
@@ -1309,220 +1044,6 @@ class ApiController < ApplicationController
     render json: { content: app.to_docker(@context.token) }
   end
 
-  # Inputs
-  #
-  # name, title, readme, input_spec, output_spec, internet_access, instance_type, ordered_assets, packages, code, is_new
-  #
-  # Outputs
-  #
-  # id (string, only on success): the id of the created app, if success
-  # failure (string, only on failure): a message that can be shown to the user due to failure
-  def create_app
-    name = params[:name]
-    fail "The app 'name' must be a nonempty string." unless name.is_a?(String) && name != ""
-    fail "The app 'name' can only contain the characters A-Z, a-z, 0-9, '.' (period), '_' (underscore) and '-' (dash)." unless name =~ /^[a-zA-Z0-9._-]+$/
-
-    title = params[:title]
-    fail "The app 'title' must be a nonempty string." unless title.is_a?(String) && title != ""
-
-    readme = params[:readme]
-    fail "The app 'Readme' must be a string." unless readme.is_a?(String)
-
-    internet_access = params[:internet_access]
-    fail "The app 'Internet Access' must be a boolean, true or false." unless (internet_access == true) || (internet_access == false)
-
-    instance_type = params[:instance_type]
-    fail "The app 'instance type' must be one of: #{Job::INSTANCE_TYPES.keys.join(', ')}." unless Job::INSTANCE_TYPES.include?(instance_type)
-
-    ordered_assets = params[:ordered_assets] || []
-    fail "The app 'assets' must be an array of asset ids (strings)." unless ordered_assets.is_a?(Array) && ordered_assets.all? { |a| a.is_a?(String) }
-
-    packages = params[:packages] || []
-    fail "The app 'packages' must be an array of package names (strings)." unless packages.is_a?(Array) && packages.all? { |a| a.is_a?(String) }
-
-    packages.sort!.uniq!
-
-    packages.each do |package|
-      fail "The package '#{package}' is not a valid Ubuntu package." unless UBUNTU_PACKAGES.bsearch { |p| package <=> p }
-    end
-
-    code = params[:code]
-    fail "The app 'code' must be a string." unless code.is_a?(String)
-
-    is_new = params["is_new"] == true
-
-    input_spec = params[:input_spec] || []
-    fail "The app 'input spec' must be an array of hashes." unless input_spec.is_a?(Array) && input_spec.all? { |s| s.is_a?(Hash) }
-    inputs_seen = Set.new
-    input_spec = input_spec.each_with_index.map do |spec, i|
-      i_name = spec["name"]
-      fail "The #{(i + 1).ordinalize} input is missing a name." unless i_name.is_a?(String) && i_name != ""
-      fail "The input name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless i_name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
-      fail "Duplicate definitions for the input named '#{i_name}'." if inputs_seen.include?(i_name)
-      inputs_seen << i_name
-
-      i_class = spec["class"]
-      fail "The input named '#{i_name}' is missing a type." unless i_class.is_a?(String) && i_class != ""
-      fail "The input named '#{i_name}' contains an invalid type. Valid types are: #{App::VALID_IO_CLASSES.join(', ')}." unless App::VALID_IO_CLASSES.include?(i_class)
-
-      i_optional = spec["optional"]
-      fail "The input named '#{i_name}' is missing the 'optional' designation." unless i_optional == true || i_optional == false
-
-      i_label = spec["label"]
-      fail "The input named '#{i_name}' is missing a label." unless i_label.is_a?(String)
-
-      i_help = spec["help"]
-      fail "The input named '#{i_name}' is missing help text." unless i_help.is_a?(String)
-
-      i_default = spec["default"]
-      unless i_default.nil?
-        fail "The default value provided for the input named '#{i_name}' is not of the right type." unless compatible(i_default, i_class)
-        # Fix for JSON ambiguity of float/int for ints.
-        i_default = i_default.to_i if i_class == "int"
-      end
-
-      i_choices = spec["choices"]
-      unless i_choices.nil?
-        fail "The 'choices' (possible values) provided for the input named '#{i_name}' were not a nonempty array." unless i_choices.is_a?(Array) && !i_choices.empty?
-        fail "The 'choices' (possible values) provided for the input named '#{i_name}' were incompatible with the input type." unless i_choices.all? { |choice| compatible(choice, i_class) }
-        fail "You cannot provide 'choices' (possible values) for the input named '#{i_name}' because it's not of type 'string' or 'int' or 'float'." unless %w(string int float).include?(i_class)
-        i_choices.uniq!
-      end
-
-      i_patterns = spec["patterns"]
-      unless i_patterns.nil?
-        fail "You cannot provide filename patterns for the non-file input named '#{i_name}'." unless i_class == "file"
-        fail "The filename patterns provided for the input named '#{i_name}' were not a nonempty array of nonempty strings." unless i_patterns.is_a?(Array) && !i_patterns.empty? && i_patterns.none?(&:empty?)
-        i_patterns.uniq!
-      end
-
-      ret = { "name": i_name, "class": i_class, "optional": i_optional, "label": i_label, "help": i_help }
-      ret["default"] = i_default unless i_default.nil?
-      ret["choices"] = i_choices unless i_choices.nil?
-      ret["patterns"] = i_patterns unless i_patterns.nil?
-      ret
-    end
-
-    output_spec = params[:output_spec] || []
-    fail "The app 'output spec' must be an array of hashes." unless output_spec.is_a?(Array) && output_spec.all? { |s| s.is_a?(Hash) }
-    outputs_seen = Set.new
-    output_spec = output_spec.each_with_index.map do |spec, i|
-      i_name = spec["name"]
-      fail "The #{(i + 1).ordinalize} output is missing a name." unless i_name.is_a?(String) && i_name != ""
-      fail "The output name '#{i_name}' contains invalid characters. It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9." unless i_name =~ /^[a-zA-Z_][0-9a-zA-Z_]*$/
-      fail "Duplicate definitions for the output named '#{i_name}'." if outputs_seen.include?(i_name)
-      outputs_seen << i_name
-
-      i_class = spec["class"]
-      fail "The output named '#{i_name}' is missing a type." unless i_class.is_a?(String) && i_class != ""
-      fail "The output named '#{i_name}' contains an invalid type. Valid types are: #{App::VALID_IO_CLASSES.join(', ')}." unless App::VALID_IO_CLASSES.include?(i_class)
-
-      i_optional = spec["optional"]
-      fail "The output named '#{i_name}' is missing the 'optional' designation." unless i_optional == true || i_optional == false
-
-      i_label = spec["label"]
-      fail "The output named '#{i_name}' is missing a label." unless i_label.is_a?(String)
-
-      i_help = spec["help"]
-      fail "The output named '#{i_name}' is missing help text." unless i_help.is_a?(String)
-
-      i_patterns = spec["patterns"]
-      unless i_patterns.nil?
-        fail "You cannot provide filename patterns for the non-file output named '#{i_name}'." unless i_class == "file"
-        fail "The filename patterns provided for the output named '#{i_name}' were not a nonempty array of nonempty strings." unless i_patterns.is_a?(Array) && !i_patterns.empty? && i_patterns.none?(&:empty?)
-        i_patterns.uniq!
-      end
-
-      ret = { "name": i_name, "class": i_class, "optional": i_optional, "label": i_label, "help": i_help }
-      ret["patterns"] = i_patterns unless i_patterns.nil?
-      ret
-    end
-
-    app = nil
-    App.transaction do
-      ordered_assets.each do |asset_uid|
-        fail "The app asset with id '#{asset_uid}' does not exist or is not accessible by you." unless Asset.closed.accessible_by(@context).where(uid: asset_uid).exists?
-      end
-      assets = Asset.closed.accessible_by(@context).where(uid: ordered_assets)
-      app_series_dxid = AppSeries.construct_dxid(@context.username, name)
-      app_series = AppSeries.find_by(dxid: app_series_dxid)
-      if is_new
-        fail "You already have an app by the name '#{name}'." unless app_series.nil?
-        app_series = AppSeries.create!(
-          dxid: app_series_dxid,
-          name: name,
-          latest_revision_app_id: nil,
-          latest_version_app_id: nil,
-          user_id: @context.user_id,
-          scope: "private"
-        )
-        revision = 1
-      else
-        fail "You don't have an app by the name '#{name}'." if app_series.nil?
-        revision = app_series.latest_revision_app.revision + 1
-      end
-
-      api = DNAnexusAPI.new(@context.token)
-      user = User.find(@context.user_id)
-      project = user.private_files_project
-
-      applet_dxid = api.call("applet", "new",
-        project: project,
-        inputSpec: input_spec.map { |spec| spec.reject { |key, _value| key == "default" || key == "choices" } },
-        outputSpec: output_spec,
-        runSpec: {
-          code: code_remap(code),
-          interpreter: "bash",
-          systemRequirements: {
-            "*" => { instanceType: Job::INSTANCE_TYPES[instance_type] },
-          },
-          distribution: "Ubuntu",
-          release: "14.04",
-          execDepends: packages.map { |p| { name: p } },
-        },
-        dxapi: "1.0.0",
-        access: internet_access ? { network: ["*"] } : {},)["id"]
-
-      dxid = api.call("app", "new",
-        applet: applet_dxid,
-        name: AppSeries.construct_dxname(@context.username, name),
-        title: title + " ",
-        summary: " ",
-        description: readme + " ",
-        version: "r#{revision}-#{SecureRandom.hex(3)}",
-        resources: assets.map(&:dxid),
-        details: { ordered_assets: assets.map(&:dxid) },
-        openSource: false,
-        billTo: Rails.env.development? ? "user-#{@context.username}" : user.billto,
-        access: internet_access ? { network: ["*"] } : {},)["id"]
-
-      api.call(project, "removeObjects", objects: [applet_dxid])
-      app = App.create!(
-        dxid: dxid,
-        version: nil,
-        revision: revision,
-        title: title,
-        readme: readme,
-        user_id: @context.user_id,
-        scope: "private",
-        app_series_id: app_series.id,
-        input_spec: input_spec,
-        output_spec: output_spec,
-        internet_access: internet_access,
-        instance_type: instance_type,
-        ordered_assets: assets.map(&:uid),
-        packages: packages,
-        code: code
-      )
-      app.asset_ids = assets.map(&:id)
-      app.save!
-      app_series.update!(latest_revision_app_id: app.id)
-      Event::AppCreated.create_for(app, @context.user)
-    end
-
-    render json: { id: app.uid }
-  end
-
   def share_with_fda
     app = App.find(params[:id])
     api = DNAnexusAPI.new(@context.token)
@@ -1545,15 +1066,24 @@ class ApiController < ApplicationController
   #
   # Outputs:
   #
-  # ids (array:string): the matching asset dxids
+  # uids (array:string): the matching asset uids
   #
   def search_assets
-    # Prefix should be a string with at least three characters
     prefix = params[:prefix]
-    fail "Prefix should be a String of at least 3 characters" unless prefix.is_a?(String) && prefix.size >= 3
 
-    ids = Asset.closed.accessible_by(@context).with_search_keyword(prefix).order(:name).select(:dxid).distinct.limit(1000).map(&:dxid)
-    render json: { ids: ids }
+    if !prefix.is_a?(String) || prefix.size < 3
+      fail "Prefix should be a String of at least 3 characters"
+    end
+
+    assets = Asset.closed.
+      accessible_by(@context).
+      order(:name).
+      with_search_keyword(prefix).
+      select(:uid).
+      distinct.
+      limit(ASSETS_SEARCH_LIMIT)
+
+    render json: { uids: assets.map(&:uid) }
   end
 
   # Use this to add multiple items of the same type to a note
@@ -1832,33 +1362,53 @@ class ApiController < ApplicationController
     )
   end
 
-  def code_remap(code)
-    <<END_OF_CODE
-dx cat #{APPKIT_TGZ} | tar -z -x -C / --no-same-owner --no-same-permissions -f -
-source /usr/lib/app-prologue
-#{code}
-{ set +x; } 2>/dev/null
-source /usr/lib/app-epilogue
-END_OF_CODE
-  end
-
-  def compatible(value, klass)
-    if klass == "file"
-      value.is_a?(String)
-    elsif klass == "int"
-      value.is_a?(Numeric) && (value.to_i == value)
-    elsif klass == "float"
-      value.is_a?(Numeric)
-    elsif klass == "boolean"
-      value == true || value == false
-    elsif klass == "string"
-      value.is_a?(String)
-    end
-  end
-
   def check_scope!
     condition = params[:scopes].is_a?(Array)
     condition &&= params[:scopes].all? { |scope| scope == 'public' || scope == 'private' || scope =~ /^space-(\d+)$/ }
     fail(t('api.errors.invalid_scope')) unless condition
+  end
+
+  def validate_get_upload_url
+    size = params[:size]
+    fail "Parameter 'size' needs to be a Fixnum" unless size.is_a?(Fixnum)
+
+    md5 = params[:md5]
+    fail "Parameter 'md5' needs to be a String" unless md5.is_a?(String)
+
+    index = params[:index]
+    fail "Parameter 'index' needs to be a Fixnum" unless index.is_a?(Fixnum)
+
+    id = params[:id]
+    if !id.is_a?(String) || id.empty?
+      fail "Parameter 'id' needs to be a non-empty String"
+    end
+  end
+
+  def validate_create_asset
+    name = params[:name]
+
+    if !name.is_a?(String) || name.empty?
+      fail "Asset name needs to be a non-empty String"
+    end
+
+    if !name.match(/\w+\.tar(\.gz)?$/)
+      fail "Asset name should end with .tar or .tar.gz"
+    end
+
+    description = params["description"]
+
+    unless description.is_a?(String)
+      fail "Asset description needs to be a String"
+    end
+
+    paths = params["paths"]
+
+    if !paths.is_a?(Array) || paths.empty? || paths.size >= 100_000
+      fail "Asset paths needs to be a non-empty Array less than 100000 size"
+    end
+
+    if paths.any?{ |path| !path.is_a?(String) || path.empty? || path.size >= 4096 }
+      fail "Asset path should be a non-empty String of size less than 4096"
+    end
   end
 end

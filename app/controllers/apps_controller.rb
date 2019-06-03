@@ -28,7 +28,6 @@ class AppsController < ApplicationController
         else
           @comments = @app.root_comments.order(id: :desc).page params[:comments_page]
         end
-
         @revisions = @app.app_series.accessible_revisions(@context).select(:title, :id, :uid, :revision, :version)
         @notes = @app.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
         @answers = @app.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
@@ -38,10 +37,15 @@ class AppsController < ApplicationController
         @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@context, @app) }
       end
     end
+    @my_apps = AppSeries.editable_by(@context)
+                   .eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org]).order(name: :asc)
+                   .map { |series| series.latest_accessible(@context) }.compact
 
-    @my_apps = AppSeries.editable_by(@context).order(name: :asc).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
-
-    @ran_apps = AppSeries.accessible_by(@context).order(name: :asc).where.not(user_id: @context.user_id).joins(:jobs).distinct.where(:jobs => { :user_id => @context.user_id }).map { |s| s.latest_accessible(@context) }.reject(&:nil?)
+    @ran_apps = AppSeries.accessible_by(@context)
+                    .eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org])
+                    .order(name: :asc).where.not(user_id: @context.user_id).joins(:jobs).distinct
+                    .where(:jobs => { :user_id => @context.user_id })
+                    .map { |series| series.latest_accessible(@context) }.compact
 
     User.sync_jobs!(@context)
     if @app.present?
@@ -164,7 +168,8 @@ class AppsController < ApplicationController
   end
 
   def edit
-    @app = App.editable_by(@context).find_by_uid(params[:id])
+    @app = App.find_by_uid(params[:id])
+    @app = nil unless @app.editable_by?(@context)
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
       redirect_to apps_path
@@ -184,6 +189,7 @@ class AppsController < ApplicationController
 
   def batch_app
     @app = App.accessible_by(@context).find_by_uid(params[:id])
+
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
       redirect_to apps_path
@@ -200,9 +206,30 @@ class AppsController < ApplicationController
       end
     end
 
-    licenses_accepted = @context.user.accepted_licenses.map{|l| {id: l.license_id, pending: l.pending?, active: l.active?, unset: !l.pending? && !l.active?}}
+    licenses_accepted = @context.user.accepted_licenses.map do |license|
+      {
+        id: license.license_id,
+        pending: license.pending?,
+        active: license.active?,
+        unset: !license.pending? && !license.active?
+      }
+    end
 
-    js app: @app.slice(:uid, :spec, :title), licenses_to_accept: licenses_to_accept.uniq { |l| l.id}, licenses_accepted: licenses_accepted
+    available_spaces = @app.available_job_spaces(@context.user)
+
+    selectable_spaces = available_spaces.map do |space|
+      { value: space.id, label: space.title, space_type: space.space_type }
+    end
+
+    content_scopes = available_spaces.each_with_object({}) do |space, memo|
+      memo[space.id] = space.accessible_scopes
+    end
+
+    js app: @app.slice(:uid, :spec, :title, :space_scopes),
+       licenses_to_accept: licenses_to_accept.uniq(&:id),
+       licenses_accepted: licenses_accepted,
+       selectable_spaces: selectable_spaces,
+       content_scopes: content_scopes
   end
 
   def fork

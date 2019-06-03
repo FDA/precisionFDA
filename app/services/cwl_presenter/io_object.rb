@@ -4,13 +4,17 @@ class CwlPresenter
       def build(io_data)
         io_data.map do |data|
           parsed_type = parse_type(data.second['type'])
-          default = data.second['default'] if parsed_type != "File"
+          default = data.second['default']
+
+          if default.blank? || parsed_type == "File"
+            default = nil
+          end
 
           new(
             name: data.first,
-            label: data.second['label'],
+            label: data.second['label'] || "",
             type: parsed_type,
-            doc: data.second['doc'],
+            doc: data.second['doc'] || "",
             optional: parse_optional(data.second['type']),
             default: default
           )

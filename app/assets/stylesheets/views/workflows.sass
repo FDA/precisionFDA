@@ -65,23 +65,16 @@ a.btn.batch_terminate
   span.fa.fa-times
     color: red
 
-.unconfigured
-  width: 200px
-  height: 50px
-  background-color: $brand-red-tertiary
-  box-shadow: 0 0 10px $brand-red-tertiary
-  -moz-box-shadow: 0 0 10px $brand-red-tertiary
-  -webkit-box-shadow: 0 0 10px $brand-red-tertiary
-  -o-box-shadow: 0 0 10px $brand-red-tertiary
-
-.configured
-  width: 200px
-  height: 50px
-  background-color: $brand-green-secondary
-  box-shadow: 0 0 10px $brand-green-secondary
-  -moz-box-shadow: 0 0 10px $brand-green-secondary
-  -webkit-box-shadow: 0 0 10px $brand-green-secondary
-  -o-box-shadow: 0 0 10px $brand-green-secondary
+.wf-diagram
+  padding: 20px
+  &-slots
+    display: flex
+    flex-wrap: wrap
+    justify-content: space-around
+    margin-bottom: 30px
+    .shifted-io
+      i.workflow-digaram-gly
+        font-size: 1.2em
 
 .input-configured
   width: 220px
@@ -112,11 +105,25 @@ a.btn.batch_terminate
     position: relative
     margin-top: -15px
 
+.workflow-analysis-label
+  &.control-label
+    text-align: left
+    padding-left: 36px
+    width: 208px
+
+.workflow-input-label
+  &.control-label
+    text-align: left
+    margin-right: 25px
+    width: 150px
+    float: left
+
 .data-required:after
   color: $brand-red-primary
   content: "*"
+  position: absolute
+  margin-top: -10px
   margin-left: 5px
-  margin-right: 25px
   font-size: 20px
 
 .gi-2x
@@ -263,10 +270,16 @@ a.btn.batch_terminate
       padding: 10px 0px
       .input-header
         color: #8198BC
-        text-transform: uppercase
-        font-weight: 400
-        font-size: 14px
         margin-bottom: 10px
+        &-title
+          text-transform: uppercase
+          font-weight: 400
+          font-size: 14px
+        &-sort
+          float: right
+          margin-left: 10px
+          i.fa
+            font-size: 12px
       textarea
         width: 100%
         min-height: 150px
@@ -276,16 +289,29 @@ a.btn.batch_terminate
         overflow: auto
         .checkbox
           color: #555555
+        hr
+          margin-top: 10px
+          margin-bottom: 10px
       .input-file-search
         margin-bottom: 10px
-      .input-file-search-clear
-        text-align: right
-        position: relative
-        i.fa
-          position: absolute
-          margin-top: -25px
-          margin-left: -20px
-          cursor: pointer
+        display: flex
+        &-regexp,
+        &-flags
+          padding: 0px 5px
+          border: none
+          outline: none
+        &-regexp
+          width: 100%
+        &-flags
+          width: 100px
+        &-clear
+          text-align: right
+          position: relative
+          i.fa
+            position: absolute
+            margin-top: 2px
+            margin-left: -20px
+            cursor: pointer
     &-step2-fileloader
       #step2_load_file_input
         display: none
@@ -317,3 +343,80 @@ a.btn.batch_terminate
           margin-top: -25px
           margin-left: -20px
           cursor: pointer
+
+.wf-loader
+  text-align: center
+  font-size: 4rem
+  margin: 50px
+
+#disable-screen-modal
+  pointer-events: none
+  .workflows
+    padding: 50px
+
+.wf-stages-container
+  background-color: transparent
+  display: flex
+  flex-direction: column
+  align-items: center
+
+.wf-stage
+  display: inline-block
+  max-width: 100%
+  &-slots
+    width: 100%
+    display: flex
+    flex-wrap: wrap
+    justify-content: center
+    .wf-slot
+      flex: 1 1 auto
+      margin: 0px 10px
+      &-body
+        width: 200px
+        height: 50px
+      &-title
+        white-space: nowrap
+        text-overflow: ellipsis
+        overflow: hidden
+      &-remove
+        cursor: pointer
+      &.unconfigured
+        .wf-slot-body
+          background-color: $brand-red-tertiary
+          box-shadow: 0 0 10px $brand-red-tertiary
+        .wf-slot-remove,
+        .wf-slot-io
+          color: $brand-red-tertiary
+      &.configured
+        .wf-slot
+          background-color: $brand-green-secondary
+          box-shadow: 0 0 10px $brand-green-secondary
+        .wf-slot-remove,
+        .wf-slot-io
+          color: $brand-green-secondary
+
+
+.pfda-controller-workflows.pfda-action-new
+  #import_cwl_wdl_success_modal
+    .modal-body
+      p
+        b
+          margin-right: 5px
+  #import_cwl_wdl_modal
+    .docker-images-container
+      padding: 10px
+    .docker-image
+      &-name
+        padding-right: 10px
+        position: relative
+        top: -1px
+      &-remove
+        cursor: pointer
+    .browse-files-container
+      margin-bottom: 10px
+    .btn
+      margin-left: 5px
+    textarea
+      resize: vertical
+      height: 150px
+      max-height: 300px

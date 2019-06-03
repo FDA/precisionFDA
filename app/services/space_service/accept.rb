@@ -3,15 +3,17 @@ module SpaceService
     # @param [Space] space
     def self.project_creator_class(space)
       if space.review?
-        ReviewSpaceProjectCreator
+        ProjectBuilders::ReviewSpace
+      elsif space.verification?
+        ProjectBuilders::VerificationSpace
       else
-        GroupSpaceProjectCreator
+        ProjectBuilders::GroupSpace
       end
     end
 
     # @param admin [SpaceMembership]
-    def self.call(api, space, admin, context)
-      new(project_creator: project_creator_class(space).new(api, context)).call(space, admin)
+    def self.call(api, space, admin)
+      new(project_creator: project_creator_class(space).new(api)).call(space, admin)
     end
 
     def initialize(project_creator:)

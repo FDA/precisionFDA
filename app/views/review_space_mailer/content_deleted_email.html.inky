@@ -1,0 +1,32 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    <%= @content.klass.downcase.capitalize %> was deleted
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="<%= HOST %>" title="precisionFDA">
+          <img class="header-image" src="<%= HOST %>/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right"><%= @content.klass.downcase.capitalize %> was deleted</p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p>
+          <%= @content.user.full_name %> deleted <%= @content.klass.downcase %> from space <%= link_to @space.title, space_url(@space) %>:
+        </p>
+        <p>
+          <%= link_to(@content.title, urlify(@content)) %>
+        </p>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>
+

@@ -6,8 +6,8 @@
   <container class="header">
     <row>
       <columns>
-        <a class="brand" href="https://precision.fda.gov" title="precisionFDA">
-          <img class="header-image" src="https://precision.fda.gov/assets/precisionFDA.email.dark.png" />
+        <a class="brand" href="<%= HOST %>" title="precisionFDA">
+          <img class="header-image" src="<%= HOST %>/assets/precisionFDA.email.dark.png" />
         </a>
       </columns>
       <columns>
@@ -26,7 +26,8 @@
           <tr><td>Email:</td><td><%= @invitation.email %></td></tr>
           <tr><td>Organization:</td><td><%= @invitation.org %></td></tr>
           <tr><td>Self-representing?</td><td><%= !!@invitation.singular %></td></tr>
-          <tr><td>Address:</td><td><%= @invitation.address %></td></tr>
+          <tr><td>Org Admin?:</td><td><%= @invitation.organization_admin %></td></tr>
+          <tr><td>Address:</td><td><%= @invitation.address1 %></td></tr>
           <tr><td>Phone:</td><td><%= @invitation.phone %></td></tr>
           <tr><td>DUNS:</td><td><%= @invitation.duns %></td></tr>
           <tr><td>Request reason:</td><td><%= @invitation.req_reason %></td></tr>

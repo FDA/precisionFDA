@@ -9,6 +9,7 @@
     user.dxuser
   end
 
+
   g.column name: 'Org', attribute: 'name', assoc: [:org] do |user|
     if user.org.real_org?
       user.org.name

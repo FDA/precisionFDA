@@ -22,6 +22,10 @@ class UsageCollector
         consumption(1.year.ago, Time.zone.now, user)
       end
 
+      def cumulative_consumption(user)
+        consumption(10.year.ago, Time.zone.now, user)
+      end
+
       def consumption(date_from, date_to, user)
         result = StorageResult.new(0, storage_at(date_from, user))
 

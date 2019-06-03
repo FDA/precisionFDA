@@ -70,25 +70,81 @@
           <div class="col-sm-offset-1 col-sm-5">
             <%= f.text_field :org, class: 'form-control input-lg' %>
           </div>
-          <div class="col-sm-offset-1 col-sm-8">
+          <div class="col-sm-offset-1 col-sm-10">
             <div class="checkbox">
               <label>
-                <%= f.check_box :singular %>
+                <%= f.check_box :singular, data: {
+                  bind: "checked: noOrgChecked, event: {change: noOrgOnChange}"
+                } %>
                 I do not represent any organization
               </label>
             </div>
+            <div class="checkbox">
+              <label>
+                <input name="invitation[organization_admin]" type="hidden" value="0">
+                <input
+                  type="checkbox"
+                  value="1"
+                  name="invitation[organization_admin]"
+                  id="invitation_organization_admin"
+                  data-bind="checked: adminOrgChecked, event: {change: showOrgAdminAgreement}"
+                />
+                I'm an administrator of this organization
+              </label>
+            </div>
+            <%= render 'main/request_access_adm_org_agreement_modal' %>
           </div>
         </div>
         <div class="form-group form-group-lg">
-          <%= f.label :address, "Address", class: 'control-label col-sm-4' %>
+          <%= f.label :address1, "Address 1", class: 'control-label col-sm-4' %>
           <div class="col-sm-offset-1 col-sm-10">
-            <%= f.text_field :address, class: 'form-control input-lg', required: 'required' %>
+            <%= f.text_field :address1, class: 'form-control input-lg', required: 'required' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <%= f.label :address2, "Address 2", class: 'control-label col-sm-4' %>
+          <div class="col-sm-offset-1 col-sm-10">
+            <%= f.text_field :address2, class: 'form-control input-lg', placeholder: 'Optional' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <%= f.label :city, "City", class: 'control-label col-sm-4' %>
+          <div class="col-sm-offset-1 col-sm-10">
+            <%= f.text_field :city, class: 'form-control input-lg', required: 'required' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <%= f.label :country, "Country", class: 'control-label col-sm-4' %>
+          <div class="col-sm-offset-1 col-sm-10">
+            <%= f.select :country_id, @countries, {include_blank: true}, {class: 'form-control input-lg', required: 'required'} %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <%= f.label :postal_code, "Postal Code", class: 'control-label col-sm-4' %>
+          <div class="col-sm-offset-1 col-sm-10">
+            <%= f.text_field :postal_code, class: 'form-control input-lg', required: 'required' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <%= f.label :us_state, "US State", class: 'control-label col-sm-4' %>
+          <div class="col-sm-offset-1 col-sm-10">
+            <%= f.select :us_state, @us_states_list, {include_blank: true}, {class: 'form-control input-lg', required: 'required', disabled: true} %>
           </div>
         </div>
         <div class="form-group form-group-lg">
           <%= f.label :phone, "Phone #", class: 'control-label col-sm-4' %>
-          <div class="col-sm-offset-1 col-sm-10">
+          <div class="col-sm-offset-1 col-sm-3">
+            <%= f.select :phone_country_id, @dial_codes, {include_blank: true}, {class: 'form-control input-lg', required: 'required'} %>
+          </div>
+          <div class="col-sm-offset-1 col-sm-6">
             <%= f.telephone_field :phone, class: 'form-control input-lg', required: 'required' %>
+            <input type="hidden" name="invitation[phone_confirmed]" id="invitation_phone_confirmed" value="true" />
+          </div>
+          <div class="col-sm-offset-1 col-sm-6">
+          <%#= <button class="btn btn-lg btn-primary hidden" data-bind="click: showConfirmPhoneModal, disable: disableConfirmPhoneButton, css: {
+              hidden: !showConfirmPhoneButton()
+            }">Request text validation code</button>
+            <div class="text-success hidden phone-confirmed" data-bind="css: {hidden: !phoneConfirmed()}">Phone number has been validated</div> %>
           </div>
         </div>
         <div class="form-group form-group-lg form-group-optional">
@@ -97,6 +153,8 @@
             <%= f.text_field :duns, class: 'form-control input-lg', placeholder: 'Optional' %>
           </div>
         </div>
+
+        <%#= render "_partials/phone_confirmation_modal" %>
 
         <br>
         <br>
@@ -213,4 +271,3 @@
 <% end %>
 
 <%= render "_partials/fda_footer" %>
-

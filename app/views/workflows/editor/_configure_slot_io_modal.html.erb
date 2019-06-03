@@ -1,0 +1,104 @@
+<div class="modal fade" id="configure-stage-modal">
+  <div class="modal-dialog" role="document">
+    <!-- ko if: slotIOModal.editingSlot()-->
+    <div class="modal-content">
+      <div class="modal-header workflows workflow-modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h1 class="modal-title" id="workspace-sharing-modal-label" data-bind="text: slotIOModal.mainTitle"></h1>
+        <h5 data-bind="text: slotIOModal.revisionTitle"></h5>
+      </div>
+      <div class="modal-body">
+        <div class="error-section workflows-alert-danger hidden" data-bind="css: {hidden: !errorMessage()}">
+          <div class="alert alert-danger">
+            <strong>Please fix the issue and retry:</strong> <span data-bind="text: errorMessage"></span>
+          </div>
+        </div>
+        <!-- ko if: slotIOModal.hasInputs -->
+          <h5 class="strong text-uppercase"> Inputs</h5>
+          <div class="pfda-padded-b" data-bind="template: {name: 'slot-io-modal-input', foreach: slotIOModal.inputs}"></div>
+        <!-- /ko -->
+        <!-- ko if: slotIOModal.hasOutputs -->
+          <h5 class="strong text-uppercase"> Outputs</h5>
+          <div class="pfda-padded-b" data-bind="template: {name: 'slot-io-modal-output', foreach: slotIOModal.outputs}"></div>
+        <!-- /ko -->
+        <h5 class="strong text-uppercase"> Config</h5>
+        <div class="pfda-padded-b">
+          <div>Instance Type </div>
+          <select name="instance_type" class="form-control" data-bind="options: $root.instanceTypes,
+              optionsText: 'label',
+              optionsValue: 'value',
+              value: slotIOModal.editingSlot().instanceType">
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default btn-link modal-btn" data-dismiss="modal" tabindex="-1">Close</button>
+      </div>
+    </div>
+    <!-- /ko -->
+  </div>
+</div>
+
+<script id='slot-io-modal-input'  type='text/html'>
+  <div>
+    <span data-bind="text: title"></span>
+    <!-- ko if: !isOptional -->
+    <span class="workflow-warning"> - Required</span>
+    <!-- /ko -->
+    <span class="col-sm-offset-1" data-bind="text: classLabel"></span>
+    <!-- ko if: connected -->
+    <span class="col-sm-offset-1 text-success">Connected</span>
+    <!-- /ko -->
+  </div>
+  <div data-bind="template: {name: 'io-field'}"></div>
+  <div>
+    <label>
+      <input type="checkbox" data-bind="checked: isRequired, attr: {
+        disabled: !isRequired() && configured
+      }, event: {
+        change: setRequired
+      }" />
+      Set as required workflow input
+    </label>
+  </div>
+</script>
+
+<script id='slot-io-modal-output'  type='text/html'>
+  <div class="pfda-padded-b">
+    <div class="workflows io-field-default">
+      <div class="row">
+        <div class="imbed-checkbox col-sm-8" data-bind="text: title"></div>
+        <div class="col-sm-offset-2 " data-bind="text: classLabel"></div>
+      </div>
+    </div>
+  </div>
+</script>
+
+<script type="text/html" id="io-field">
+  <div class="input-group">
+    <div class="form-control" data-bind="text: inputValue"></div>
+    <span class="input-group-btn">
+      <!-- ko if: configured() -->
+        <button class="btn btn-danger" data-bind="click: $root.mapSlotIOModalResetInput, attr: {
+          disabled: isRequired()
+        }">
+          <i class="fa fa-times"></i>
+        </button>
+      <!-- /ko -->
+      <!-- ko if: !configured() -->
+        <button class="btn btn-primary" title="Set Value" data-bind="click: $root.showSetIOValueModal, attr: {
+          disabled: isRequired()
+        }">
+          <i class="fa fa-pencil"></i>
+        </button>
+        <button class="btn btn-success" title="Connect With Output" data-bind="click: $root.showMapSlotIOModal, attr: {
+          disabled: isRequired()
+        }">
+          <i class="fa fa-share-alt"></i>
+        </button>
+      <!-- /ko -->
+    </span>
+  </div>
+</script>

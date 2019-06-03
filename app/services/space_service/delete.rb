@@ -23,7 +23,7 @@ module SpaceService
       api = DNAnexusAPI.for_admin
       projects = {}
       files.uniq.each do |file|
-        projects[file.project] = [] unless projects.has_key?(file.project)
+        projects[file.project] ||= []
         projects[file.project].push(file)
       end
 

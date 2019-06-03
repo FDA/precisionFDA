@@ -1,7 +1,7 @@
 class MainController < ApplicationController
   skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines, :browse_access, :destroy, :presskit, :news, :mislabeling]}
 
-  skip_before_action :require_login,     only: [:track, :mislabeling]
+  skip_before_action :require_login,     only: [:track, :mislabeling, :bco_appathon]
   before_action :require_login_or_guest, only: [:track]
 
   def index
@@ -41,7 +41,7 @@ class MainController < ApplicationController
             user = User.find(@context.user_id)
             if !user.has_seen_guidelines
               user.has_seen_guidelines = true
-              user.save!
+              user.save(validate: false)
               show_guidelines = true
             end
           end
@@ -228,6 +228,10 @@ class MainController < ApplicationController
       log_session("User #{username} attempted to log in from an existing DNAnexus account")
 
       render "_partials/_error", status: 403, locals: { message: "ERROR: You cannot use an existing DNAnexus account (#{username}) to log into precisionFDA. You need to apply for and obtain a separate precisionFDA account." }
+    elsif user.present? && user.user_state != 'enabled'
+      log_session("User #{username} attempted to log in from locked/disabled DNAnexus account")
+
+      render "_partials/_error", status: 403, locals: { message: "ERROR: You cannot use an existing DNAnexus account (#{username}) to log into precisionFDA. You need to contact ADMIN to re-enable your account." }
     else
       if user.last_login.nil? && user.private_files_project.nil?
         api = DNAnexusAPI.new(token)
@@ -271,14 +275,14 @@ class MainController < ApplicationController
             log_session("User #{username} is logging in for the first time; account setup step 9 of 9 completed")
           end
           user.last_login = Time.now
-          user.save!
+          user.save(validate: false)
           set_time_zone(user)
         end
       else
         User.transaction do
           user.reload
           user.last_login = Time.now
-          user.save!
+          user.save(validate: false)
         end
       end
 
@@ -300,18 +304,32 @@ class MainController < ApplicationController
 
   def request_access
     @invitation = Invitation.new
+    @countries = Country.pluck(:name, :id)
+    @us_states_list = Country.us_states_list
+
+    @dial_codes = Country.pluck(:dial_code, :id)
+                    .reject {|i| i[0].empty? }
+                    .to_h
+                    .to_a
+                    .sort
+
+    usa_id = Country.find_by(name: "United States").id
+
     if request.post?
-      p = params.require(:invitation).permit(:first_name, :last_name, :email, :org, :duns, :address, :phone, :singular, :participate_intent, :organize_intent, :req_reason, :req_data, :req_software, :research_intent, :clinical_intent, :humanizer_answer, :humanizer_question_id)
+      p = invitation_params
       p[:ip] = request.remote_ip.to_s
-      p[:participate_intent] = (p[:participate_intent] == "1")
-      p[:organize_intent] = (p[:organize_intent] == "1")
-      p[:research_intent] = (p[:research_intent] == "1")
-      p[:clinical_intent] = (p[:clinical_intent] == "1")
       p[:state] = "guest"
+      p[:participate_intent] = p[:participate_intent] == "1"
+      p[:organize_intent] = p[:organize_intent] == "1"
+      p[:research_intent] = p[:research_intent] == "1"
+      p[:clinical_intent] = p[:clinical_intent] == "1"
+      p[:organization_admin] = p[:organization_admin] == "1"
       p[:email] = p[:email].to_s.strip
       p[:code] = SecureRandom.uuid
+
       Invitation.transaction do
         @invitation = Invitation.create(p)
+
         if @invitation.persisted?
           auditor_data = {
             action: "create",
@@ -320,6 +338,7 @@ class MainController < ApplicationController
               message: "Access requested: #{p.to_json}"
             }
           }
+
           Auditor.perform_audit(auditor_data)
           NotificationsMailer.invitation_email(@invitation).deliver_now!
           NotificationsMailer.guest_access_email(@invitation).deliver_now!
@@ -327,6 +346,10 @@ class MainController < ApplicationController
         end
       end
     end
+
+    phone_confirmed = params.dig(:invitation, :phone_confirmed)
+    organization_admin = params.dig(:invitation, :organization_admin)
+    js usa_id: usa_id, country_codes: Country.countries_for_codes, phone_confirmed: phone_confirmed, organization_admin: organization_admin
   end
 
   def browse_access
@@ -510,6 +533,10 @@ class MainController < ApplicationController
 
   end
 
+  def bco_appathon
+
+  end
+
   def tokify
     @key = generate_auth_key
   end
@@ -548,6 +575,37 @@ class MainController < ApplicationController
   end
 
   private
+
+  def invitation_params
+    fields = %i(
+      first_name
+      last_name
+      email
+      org
+      duns
+      address1
+      address2
+      country_id
+      us_state
+      city
+      postal_code
+      phone_country_id
+      phone
+      singular
+      organization_admin
+      participate_intent
+      organize_intent
+      req_reason
+      req_data
+      req_software
+      research_intent
+      clinical_intent
+      humanizer_answer
+      humanizer_question_id
+    )
+
+    params.require(:invitation).permit(*fields)
+  end
 
   def collect_feed
     [Note, Answer, Discussion, UserFile, Comparison, App, Asset].map do |klass|

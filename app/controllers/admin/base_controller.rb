@@ -7,7 +7,6 @@ module Admin
       return if @context.can_administer_site?
       redirect_to root_path
     end
-
   end
 end
 

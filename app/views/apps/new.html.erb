@@ -10,11 +10,16 @@
 <div class="pfda-toolbar">
   <div class="form-group text-centered">
     <div class="control-group">
-      <span class="btn btn-primary btn-lg btn-browse-files">
-        <span class="fa fa-files-o"></span> Import from *.cwl file<input class="event-browse-files" type="file" accept=".cwl">
-      </span>
+      <button class="btn btn-primary btn-sm btn-browse-files" data-bind="click: openCwlImport">
+        <i class="fa fa-files-o"></i>&nbsp;Import from *.cwl file
+      </button>
+      <button class="btn btn-primary btn-sm btn-browse-files" data-bind="click: openWdlImport">
+        <i class="fa fa-files-o"></i>&nbsp;Import from *.wdl file
+      </button>
     </div>
   </div>
 </div>
 
 <%= render "apps/editor", app: @app %>
+<%= render "apps/import_cwl_wdl_modal" %>
+<%= render "apps/import_cwl_wdl_success_modal" %>
