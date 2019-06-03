@@ -120,4 +120,10 @@ class NotificationsMailer < ApplicationMailer
     mail to: @task.user.email,
          subject: "User failed to complete task \"#{@task.name}\" in time"
   end
+
+  def challenge_results file
+    @user = User.first
+    attachments["#{File.basename(file)}.xls"] = File.read(file)
+    mail(from: "ptater@dnanexus.com", to: 'ptater@dnanexus.com', subject: "Results of NCI-CPTAC challenge")
+  end
 end
