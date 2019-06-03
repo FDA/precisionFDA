@@ -1,5 +1,4 @@
 class DNAnexusAPI
-
   def self.for_admin
     new(ADMIN_TOKEN)
   end
@@ -21,9 +20,10 @@ class DNAnexusAPI
 
   def call(subject, method, input = {})
     uri = URI("#{@apiserver_url}#{subject}/#{method}")
-    Net::HTTP.start(uri.host, uri.port, {read_timeout: 180, use_ssl: true}) do |http|
+    Net::HTTP.start(uri.host, uri.port, read_timeout: 180, use_ssl: true) do |http|
       handle_response(
-        http.post(uri.path, input.to_json, {"Content-Type" => "application/json", "Authorization" => "Bearer #{@bearer_token}"})
+        http.post(uri.path, input.to_json, "Content-Type" => "application/json",
+                                             "Authorization" => "Bearer #{@bearer_token}")
       )
     end
   end
@@ -37,7 +37,7 @@ class DNAnexusAPI
       end
       raise e
     end
-    return true
+    true
   end
 
   def entity_exists?(entity)
@@ -49,7 +49,7 @@ class DNAnexusAPI
       end
       raise e
     end
-    return true
+    true
   end
 
   def run_workflow(workflow_id, params)
@@ -61,9 +61,9 @@ class DNAnexusAPI
   end
 
   def self.email_exists?(email)
-    api = self.new(ADMIN_TOKEN)
+    api = new(ADMIN_TOKEN)
     begin
-      api.call(ORG_DUMMY, "invite", {invitee: email, suppressEmailNotification: true})
+      api.call(ORG_DUMMY, "invite", invitee: email, suppressEmailNotification: true)
     rescue Net::HTTPServerException => e
       if e.message =~ /^404/
         return false
@@ -86,5 +86,4 @@ class DNAnexusAPI
   rescue Net::HTTPServerException => e
     raise e, "#{e.message}. #{response.body}", e.backtrace
   end
-
 end

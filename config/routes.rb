@@ -35,8 +35,25 @@ Rails.application.routes.draw do
       resources :usage_reports, only: [:index] do
         post :update_custom_range, on: :collection
       end
-
+      get "users", to: "users#all_users"
       get "active_users", to: "users#active"
+      get "reset_mfa_user", to: "users#reset_2fa"
+      get "toggle_activate_user", to: "users#toggle_activate_user"
+      post "toggle_activate_user", to: "users#toggle_activate_user"
+      get "unlock_user", to: "users#unlock_user"
+      post "unlock_user", to: "users#unlock_user"
+      get "pending_users", to: "users#pending_users"
+      get "deactivated_users", to: "users#deactivated_users"
+      get "resend_activation_email", to: "users#resend_activation_email"
+      get "edit_user", to: "users#edit"
+      get "update_user", to: "users#update"
+
+      get 'orgs', to: "organizations#index"
+      get 'show_org', to: "organizations#show", param: :handle
+      get 'provision_org', to: "organizations#provision_org"
+      post 'provision_org', to: "organizations#create_org"
+      post 'change_org_admin', to: "organizations#change_admin"
+
       resources :get_started_boxes, except: [:show] do
         post :update_positions, on: :collection
       end
@@ -46,6 +63,7 @@ Rails.application.routes.draw do
     end
 
     # hotfix for PFDA-557
+    get "/challenges/6" => redirect("/challenges/7")
     get "/mislabeling" => redirect("/challenges/5")
 
     # Main controller
@@ -72,6 +90,7 @@ Rails.application.routes.draw do
     # API
     namespace "api" do
       get "update_active", to: "base#update_active"
+
       namespace "activity_reports" do
         get "total"
         get "data_upload"
@@ -88,55 +107,56 @@ Rails.application.routes.draw do
         get "users_signed_up_for_challenge"
         get "submissions_created"
       end
+
       resources :challenges, only: [] do
         post 'save_editor_page', on: :member
       end
 
-      resources :apps, only: [] do
-        post 'attributes_by_cwl', on: :collection
+      resources :apps, only: %w(create) do
+        post "import", on: :collection
       end
-    end
 
-    post '/api/publish', to: 'api#publish'
-    post '/api/create_file', to: 'api#create_file'
-    post '/api/create_challenge_card_image', to: 'api#create_challenge_card_image'
-    post '/api/create_image_file', to: 'api#create_image_file'
-    post '/api/get_upload_url', to: 'api#get_upload_url'
-    post '/api/get_file_link', to: 'api#get_file_link'
-    post '/api/list_related', to: 'api#list_related'
-    post '/api/close_file', to: 'api#close_file'
-    post '/api/describe', to: 'api#describe'
-    post '/api/list_files', to: 'api#list_files'
-    post '/api/list_notes', to: 'api#list_notes'
-    post '/api/list_comparisons', to: 'api#list_comparisons'
-    post '/api/list_apps', to: 'api#list_apps'
-    post '/api/list_assets', to: 'api#list_assets'
-    post '/api/list_jobs', to: 'api#list_jobs'
-    post '/api/list_workflows', to: 'api#list_workflows'
-    post '/api/describe_license', to: 'api#describe_license'
-    post '/api/accept_licenses', to: 'api#accept_licenses'
-    post '/api/run_app', to: 'api#run_app'
-    post '/api/list_app_revisions', to: 'api#list_app_revisions'
-    post '/api/create_workflow', to: 'api#create_workflow'
-    post '/api/run_workflow', to: 'api#run_workflow'
-    post '/api/get_app_spec', to: 'api#get_app_spec'
-    post '/api/get_app_script', to: 'api#get_app_script'
-    post '/api/export_app', to: 'api#export_app'
-    post '/api/search_assets', to: 'api#search_assets'
-    post '/api/create_asset', to: 'api#create_asset'
-    post '/api/close_asset', to: 'api#close_asset'
-    post '/api/create_app', to: 'api#create_app'
-    post '/api/share_with_fda', to: 'api#share_with_fda'
-    post '/api/attach_to_notes', to: 'api#attach_to_notes'
-    post '/api/update_note', to: 'api#update_note'
-    post '/api/upvote', to: 'api#upvote'
-    post '/api/remove_upvote', to: 'api#remove_upvote'
-    post '/api/follow', to: 'api#follow'
-    post '/api/unfollow', to: 'api#unfollow'
-    post '/api/update_submission', to: 'api#update_submission'
-    post '/api/update_time_zone', to: 'api#update_time_zone'
-    post '/api/create_challenge_resource', to: 'api#create_challenge_resource'
-    post '/api/create_resource_link', to: 'api#create_resource_link'
+      resources :workflows, only: %w(create)
+
+      post 'publish'
+      post 'create_file'
+      post 'create_challenge_card_image'
+      post 'create_image_file'
+      post 'get_upload_url'
+      post 'get_file_link'
+      post 'list_related'
+      post 'close_file'
+      post 'describe'
+      post 'list_files'
+      post 'list_notes'
+      post 'list_comparisons'
+      post 'list_apps'
+      post 'list_assets'
+      post 'list_jobs'
+      post 'list_workflows'
+      post 'describe_license'
+      post 'accept_licenses'
+      post 'run_app'
+      post 'list_app_revisions'
+      post 'run_workflow'
+      post 'get_app_spec'
+      post 'get_app_script'
+      post 'export_app'
+      post 'search_assets'
+      post 'create_asset'
+      post 'close_asset'
+      post 'share_with_fda'
+      post 'attach_to_notes'
+      post 'update_note'
+      post 'upvote'
+      post 'remove_upvote'
+      post 'follow'
+      post 'unfollow'
+      post 'update_submission'
+      post 'update_time_zone'
+      post 'create_challenge_resource'
+      post 'create_resource_link'
+    end
 
     # FHIR
     scope '/fhir' do
@@ -147,7 +167,9 @@ Rails.application.routes.draw do
 
     # Profile
     get 'profile', to: 'profile#index'
+    put 'profile', to: 'profile#update'
     post 'profile/provision_user', to: 'profile#provision_user', as: 'provision_user'
+    get 'profile/provision_org', to: 'profile#provision_org'
     post 'profile/provision_org', to: 'profile#provision_org', as: 'provision_org'
     post 'profile/run_report', to: 'profile#run_report', as: 'run_report'
 
@@ -290,6 +312,8 @@ Rails.application.routes.draw do
       end
     end
 
+    resource :org, only: :update
+
     get '/spaces/verified_space_list' => 'space_templates#verified_space_list'
     get '/spaces/apps_and_files' => 'spaces#apps_and_files'
     get '/spaces/unverified_apps' => 'space_templates#unverified_apps'
@@ -389,6 +413,10 @@ Rails.application.routes.draw do
 
     resources :docs do
       get ":section", on: :collection, action: :show, as: 'show'
+    end
+
+    resources :phone_confirmations, only: [:create] do
+      get 'check_code', on: :collection
     end
 
     user_constraints = { username: /[^\/]*/ }

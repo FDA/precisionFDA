@@ -1,9 +1,30 @@
 class BatchAppNewView
-  constructor: (app, @asset_licenses_to_accept) ->
-    @contentScopes = ko.observable([])
+  constructor: (app, @asset_licenses_to_accept, selectable_spaces, available_content_scopes) ->
     @uid = app.uid
     @inputSpec = app.spec.input_spec
     @outputSpec = app.spec.output_spec
+    @spaceId = ko.observable()
+
+    @available_content_scopes = available_content_scopes
+
+    @isInSpace = selectable_spaces.length > 0
+    @isReviewSpace = ko.computed(=>
+      return @isInSpace &&
+             _.first(selectable_spaces).space_type == "review"
+    )
+
+    @needSelectSpace = @isInSpace &&
+                       @isReviewSpace()
+
+    if @isInSpace && !@isReviewSpace()
+      @spaceId(_.first(selectable_spaces).value)
+
+    @contentScopes = ko.computed( =>
+      if @needSelectSpace
+        available_content_scopes[@spaceId()]
+      else
+        app.space_scopes
+    )
 
     @licenseSelector = new Precision.models.LicensesSelectorModel({
       onAcceptCallback: @run
@@ -34,6 +55,7 @@ class BatchAppNewView
     @availableInstances = Precision.INSTANCES
     @defaultInstanceType = app.spec.instance_type
     @instanceType = ko.observable(app.spec.instance_type)
+    @selectableSpaces = selectable_spaces
 
   validateLicenses: () ->
     # Reset licenses and recompute which ones to accept
@@ -110,6 +132,7 @@ class BatchAppNewView
           jobName: "#{@name.peek()}_#{counter}"
           inputs: {}
         params.instance_type = @instanceType.peek() if @instanceType.peek()?
+        params.space_id = @spaceId.peek() if @spaceId.peek()?
 
         params.inputs[batchData.name] = batchFileIds if batchFileIds?
         for inputModel in @otherInputSpec()
@@ -155,7 +178,10 @@ class BatchAppNewView
         name: "#{@name.peek()} (#{counter + 1} of #{totalBatchFileIds})"
         inputs: {}
       params.instance_type = @instanceType.peek() if @instanceType.peek()?
+      params.space_id = @spaceId.peek() if @spaceId.peek()?
+
       params.inputs[batchData.name] = currentFileId if currentFileId?
+
       for inputModel in @otherInputSpec()
         data = inputModel.getDataForRun()
         params.inputs[inputModel.name] = data if data?
@@ -187,7 +213,7 @@ class BatchAppNewView
 AppsController = Paloma.controller('Apps',
   batch_app: ->
     $container = $("body main")
-    viewModel = new BatchAppNewView(@params.app, @params.licenses_to_accept)
+    viewModel = new BatchAppNewView(@params.app, @params.licenses_to_accept, @params.selectable_spaces, @params.content_scopes)
     ko.applyBindings(viewModel, $container[0])
 
     $affixContainer = $container.find(".affix-container")

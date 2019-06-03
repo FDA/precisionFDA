@@ -1,29 +1,60 @@
-<% content_for :title, "Users and usage" %>
+<% content_for :title, "Active Users" %>
 
 <div class="page-header">
   <div class="media">
     <div class="media-body">
       <div class="page-title">
         <i class="fa fa-users" aria-hidden="true"></i>
-        Users and usage
+        Active Users
       </div>
     </div>
   </div>
 </div>
 
 <div class="pfda-toolbar">
-  <div class="row">
-    <div class="col-md-10">
-      <div class="pull-left">
-        <h5 class="list-group-item-heading">Custom range</h5>
-        <%= form_for :custom_range, url: update_custom_range_admin_usage_reports_path do |f| %>
-          <%= f.text_field :date_from, value: @custom_range_begin, class: "form-control add-datetimepicker" %>
-          <%= f.text_field :date_to, value: @custom_range_end, class: "form-control add-datetimepicker" %>
-          <%= f.submit "Submit", class: "btn btn-primary" %>
-        <% end %>
+  <%= form_for :custom_range, url: update_custom_range_admin_usage_reports_path do |f| %>
+    <div class="row">
+      <h5 class="list-group-item-heading">Filter by Date range</h5>
+    </div>
+    <div class="row pfda-padded-b">
+      <div class="btn-group pull-left" role="group" aria-label="Select date range" id="select_date_range">
+        <button class="btn btn-default" data-type="day">Past Day</button>
+        <button class="btn btn-default active" data-type="week">Week</button>
+        <button class="btn btn-default" data-type="month">Month</button>
+        <button class="btn btn-default" data-type="year">Year</button>
+        <button class="btn btn-default" data-type="cumulative">Cumulative</button>
+        <button class="btn btn-default" data-type="custom">Custom</button>
+      </div>
+      <div class="pull-right">
+        <%= f.submit "Submit", class: "btn btn-primary" %>
       </div>
     </div>
-  </div>
+
+    <div class="row pfda-padded-v hidden" data-bind="css: {'hidden': !showCustomDates()}">
+      <h5 class="list-group-item-heading">Custom range</h5>
+      <div>
+        <input
+          class="form-control add-datetimepicker"
+          type="text"
+          name="custom_range[date_from]"
+          id="custom_range_date_from"
+        />
+        <input
+          class="form-control add-datetimepicker"
+          type="text"
+          name="custom_range[date_to]"
+          id="custom_range_date_to"
+        />
+        <input
+          type="hidden"
+          name="custom_range[selected_range]"
+          id="custom_range_selected_range"
+          data-bind="value: filterType"
+        />
+      </div>
+    </div>
+
+  <% end %>
 </div>
 
 <% if @storage_date %>
@@ -33,18 +64,24 @@
         <h5 class="list-group-item-heading">Storage usage info is actual as of</h5>
         <p class="list-group-item-text"><%= @storage_date.to_s(:human) %></p>
       </li>
-      <li class="list-group-item">
-        <h5 class="list-group-item-heading">Computation info is actual as of</h5>
-        <p class="list-group-item-text"><%= @compute_date.to_s(:human) %></p>
-      </li>
+      <% if @selected_range != "custom" %>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Computation info is actual as of</h5>
+          <p class="list-group-item-text"><%= @compute_date.to_s(:human) %></p>
+        </li>
+      <% end %>
     </ul>
-  </div>
-
-  <div class="pfda-toolbar">
-    <div class="btn btn-default wg-external-csv-export-button" data-grid-name="usage">
-      <i class="fa fa-file-excel-o"></i> Export to CSV
-    </div>
   </div>
 <% end %>
 
-<%= render partial: 'admin/usage_reports/usage_grid' %>
+<div class="pfda-padded">
+  <% if @storage_date %>
+    <div class="pfda-padded-b">
+      <a href="/admin/usage_reports?usage%5Bexport%5D=csv" class="btn btn-default" download>
+        <i class="fa fa-file-excel-o"></i>&nbsp;&nbsp; Export to CSV
+      </a>
+    </div>
+  <% end %>
+
+  <%= render partial: 'admin/usage_reports/usage_grid' %>
+</div>

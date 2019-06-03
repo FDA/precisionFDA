@@ -15,8 +15,9 @@ class SpaceForm
 
   validates :name, :description, :space_type, presence: true
   validate :validate_host_lead_dxuser
-  validate :validate_guest_lead_dxuser, if: -> { space_type == 'groups' || space_type == 'verification' }
-  validate :validate_sponsor_org, if: -> { space_type == 'review' }
+  validate :validate_guest_lead_dxuser,
+    if: -> { space_type.in?(%w(groups verification)) && guest_lead_dxuser.present? }
+  validate :validate_sponsor_org, if: -> { space_type == "review" }
 
   def self.model_name
     Space.model_name
@@ -37,26 +38,19 @@ class SpaceForm
   private
 
   def validate_host_lead_dxuser
-    if host_admin.blank?
-      errors.add(:host_lead_dxuser, "'#{host_lead_dxuser}' not found")
-    end
+    errors.add(:host_lead_dxuser, "'#{host_lead_dxuser}' not found") unless host_admin
   end
 
   def validate_guest_lead_dxuser
-    return unless space_type == 'groups'
+    errors.add(:guest_lead_dxuser, "'#{guest_lead_dxuser}' not found") unless guest_admin
 
-    if guest_admin.blank?
-      errors.add(:host_lead_dxuser, "'#{guest_lead_dxuser}' not found")
-    end
     if guest_lead_dxuser == host_lead_dxuser
       errors.add(:guest_lead_dxuser, "can't be the same as Host lead")
     end
   end
 
   def validate_sponsor_org
-    if sponsor_org.blank?
-      errors.add(:sponsor_org_handle, "'#{sponsor_org_handle}' not found")
-    end
+    errors.add(:sponsor_org_handle, "'#{sponsor_org_handle}' not found") unless sponsor_org
   end
 
   def host_admin
@@ -66,5 +60,4 @@ class SpaceForm
   def guest_admin
     User.find_by(dxuser: guest_lead_dxuser)
   end
-
 end

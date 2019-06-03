@@ -15,7 +15,7 @@ class SpacesContentView
       listRelatedParams: {
         editable: true,
         scopes: scopes,
-        classes: ["file", "note", "comparison", "app", "asset", "job"]
+        classes: ["file", "note", "comparison", "app", "asset", "job", 'workflow']
       },
       listModelConfigs: [
         {
@@ -112,6 +112,7 @@ SpacesController = Paloma.controller('Spaces', {
     'assets -> common_init',
     'comparisons -> common_init',
     'reports -> common_init',
+    'workflows -> common_init'
   ],
   common_init: () ->
     init(@params)

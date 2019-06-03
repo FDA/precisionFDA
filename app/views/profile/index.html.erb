@@ -41,6 +41,9 @@
     </div><%= link_to(content_tag(:span, "", class: "fa fa-fw fa-user") + " View public profile", user_path(@user.dxuser), class: 'btn btn-default') %>
     <div class="btn-group">
       <%= link_to(content_tag(:span, "", class: "fa fa-fw fa-lock") + " Change password", "#{DNANEXUS_PLATFORM_URI}profile/#{@user.dxuser}/changePassword?client_id=precision_fda_gov", class: 'btn btn-default') %>
+      <a href="#" class="btn btn-default" data-bind="click: contacts.showForm">
+        <i class="fa fa-fw fa-pencil"></i>&nbsp;Update Contact Information
+      </a>
       <%= link_to "http://en.gravatar.com/emails/", class: 'btn btn-default', target: "_blank" do %>
         <span class="fa fa-fw fa-image"></span> Set Profile Gravatar
       <% end %>
@@ -49,8 +52,18 @@
   </div>
 </div>
 
-<% if !@user.singular? %>
-  <div class="infoframe-outer">
+<div class="infoframe-outer contact-information">
+  <div class="infoframe-inner">
+    <h4 class="infoframe-title">Contact Information</h4>
+      <%= render 'profile/profile_contacts_view' %>
+      <%= render 'profile/profile_contacts_form' %>
+      <%#= render '_partials/phone_confirmation_modal' %>
+      <%= render '_partials/auth_credentials_modal' %>
+  </div>
+</div>
+
+<% unless @user.singular? %>
+  <div class="infoframe-outer organization-info">
     <div class="infoframe-inner">
       <h4 class="infoframe-title">About your organization</h4>
       <ul class="list-group infoframe-inline">
@@ -59,14 +72,26 @@
           <p class="list-group-item-text"><%= @user.org.handle %></p>
         </li>
         <li class="list-group-item">
-          <h5 class="list-group-item-heading">Name</h5>
-          <p class="list-group-item-text"><%= @user.org.name %></p>
+          <h5 class="list-group-item-heading">
+            <span>Name</span>&nbsp;
+            <% if user_org_admin? %>
+              <a href="#" class="organization-info-change-b" data-bind="click: showEditOrgNameModal">
+                <i class="fa fa-pencil text-danger"></i>&nbsp;Edit
+              </a>
+            <% end %>
+          </h5>
+          <p id="organization_info_name" class="list-group-item-text"><%= @user.org.name %></p>
         </li>
         <li class="list-group-item">
           <h5 class="list-group-item-heading">Administrator</h5>
           <p class="list-group-item-text"><%= @user.org.admin.full_name %></p>
         </li>
       </ul>
+
+      <% if user_org_admin? %>
+        <%= render 'profile/edit_organization_name_modal' %>
+        <%= render '_partials/deactivate_user_modal' %>
+    <% end %>
 
       <div class="infoframe-grid">
         <%= grid(@users_grid, show_filters: :always) do |g|
@@ -83,6 +108,18 @@
           g.column name: 'Joined', attribute: 'created_at', auto_reload: true, filter_type: :standard do |user|
             user.created_at.to_s(:human)
           end
+
+          if user_org_admin?
+            g.column name: 'Deactivate user' do |user|
+              if user.enabled?
+                button_tag class: "btn btn-xs btn-primary",
+                disabled: user.id == user.org.admin_id ? true : false,
+                data: { bind: 'click: showDeactivateUserModal', dxuser: user.dxuser } do
+                  content_tag(:span, 'Deactivate', class: 'btn-fa-white')
+                end
+              end
+            end
+          end
         end -%>
       </div>
       <% if @user.can_provision_accounts? %>
@@ -90,29 +127,4 @@
       <% end %>
     </div>
   </div>
-<% end %>
-
-<% if @user.can_administer_site? %>
-  <div class="infoframe-outer">
-    <div class="infoframe-inner">
-      <h4 class="infoframe-title">Site Administration</h4>
-      <ul class="list-group infoframe-inline">
-        <li class="list-group-item">
-          <h5 class="list-group-item-heading">Contributors</h5>
-          <p class="list-group-item-text"><%= User.real.count %></p>
-        </li>
-        <li class="list-group-item">
-          <h5 class="list-group-item-heading">Contributor Orgs</h5>
-          <p class="list-group-item-text"><%= Org.count %></p>
-        </li>
-        <li class="list-group-item">
-          <h5 class="list-group-item-heading">Browse Access</h5>
-          <p class="list-group-item-text"><%= Invitation.count %></p>
-        </li>
-      </ul>
-      <%= link_to(content_tag(:span, "", class: "fa fa-plus") + " Provision new organization & admin", provision_org_path, method: 'post', class: 'btn btn-primary') %>
-      <%= link_to(content_tag(:span, "", class: "fa fa-file-excel-o") + " Generate report", run_report_path, method: 'post', class: 'btn btn-default') %>
-    </div>
-  </div>
-
 <% end %>

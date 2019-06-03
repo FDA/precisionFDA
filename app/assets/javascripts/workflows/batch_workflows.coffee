@@ -1,3 +1,5 @@
+ASC = 'asc'
+DESC = 'desc'
 ERROR_MSG = 'Please fill in all required fields properly.'
 showAlert = (msg, color = 'alert-danger') -> Precision.alert.showAboveAll(msg, color, 3000)
 showStandartAlert = () -> showAlert(ERROR_MSG)
@@ -98,11 +100,12 @@ class InputModel
     @id = "#{input.stageName}_#{input.name}"
     @type = input.class
     @name = input.name
+    @uniq_input_name = input.uniq_input_name
     @label = input.label || input.name
     @help = input.help
     @required = !input.optional
     @stageName = input.stageName
-    @value = ko.observable(input.defaultValues)
+    @value = ko.observable(input.default_workflow_value || input.defaultValues)
     @defaultValue = input.defaultValues
     @batchOne = ko.observable(false)
     @batchTwo = ko.observable(false)
@@ -122,22 +125,94 @@ class InputModel
 ### Input Model ###
 
 ### Batch Input Model ###
+class BatchInputFile
+  constructor: (data) ->
+    @uid = data.uid
+    @title = data.title
+    @highlighted = ko.observable(false)
+
 extendBatchInput = (files) ->
-  @files = ko.observableArray(files)
+  @files = ko.observableArray(files.map((file) -> new BatchInputFile(file)))
   @selectedFiles = ko.observableArray([])
-  @setValue = ko.computed( =>
-    @value(@selectedFiles())
+
+  ### SORT ###
+  @sortNameDirection = ko.observable(DESC)
+  @sortNameArrow = ko.computed(() =>
+    return if @sortNameDirection() == DESC then 'fa-long-arrow-up' else 'fa-long-arrow-down'
   )
+  @sortColorDirection = ko.observable(DESC)
+  @sortColorArrow = ko.computed(() =>
+    return if @sortColorDirection() == DESC then 'fa-long-arrow-up' else 'fa-long-arrow-down'
+  )
+  @sortByName = (root, e) =>
+    e.preventDefault()
+    _sortDirection = if @sortNameDirection() == ASC then DESC else ASC
+    @sortNameDirection(_sortDirection)
+  @sortByColor = (root, e) =>
+    e.preventDefault()
+    _sortDirection = if @sortColorDirection() == ASC then DESC else ASC
+    @sortColorDirection(_sortDirection)
+  ### SORT ###
+
+  @selectHighlightedFiles = (files) =>
+    @selectedFiles([])
+    files.forEach((file) =>
+      @selectedFiles.push(file.uid) if file.highlighted()
+    )
+
+  @selectAllFiles = (root, e) =>
+    @selectedFiles([])
+    if e.target.checked
+      @filteredFiles().forEach((file) => @selectedFiles.push(file.uid))
+
   @searchValue = ko.observable(null)
+  @searchFlagsValue = ko.observable('ig')
   @filteredFiles = ko.computed( =>
-    if @searchValue()
-      return @files().filter (file) =>
-        file.title.toLowerCase().indexOf(@searchValue().toLowerCase()) > -1
+    sortNameHandler = (a, b) =>
+      if @sortNameDirection() == ASC
+        return 1 if (a.title > b.title)
+        return -1 if (a.title < b.title)
+      else
+        return 1 if (a.title < b.title)
+        return -1 if (a.title > b.title)
+      return 0
+
+    sortColorHandler = (a, b) =>
+      if @sortColorDirection() == ASC
+        return a.highlighted() - b.highlighted()
+      else
+        return b.highlighted() - a.highlighted()
+
+    searchValue = @searchValue()
+    flagsValue = @searchFlagsValue()
+    files = @files()
+    if searchValue
+      try
+        regexp = new RegExp(searchValue, flagsValue)
+      catch
+        Precision.alert.showAboveAll('Wrong Regular Expression!', null, 1000)
+        regexp = new RegExp('.*', 'ig')
+      files.forEach((file) ->
+        file.highlighted(file.title.search(regexp) > -1)
+        return file
+      )
     else
-      return @files()
+      files.forEach((file) ->
+        file.highlighted(false)
+        return file
+      )
+    @selectHighlightedFiles(files)
+    return files.sort(sortNameHandler).sort(sortColorHandler)
   )
-  @searchOnChange = (root, e) => @searchValue(e.target.value)
-  @clearSearch = (root, e) => @searchValue(null)
+  @searchOnChange = _.debounce(
+    (root, e) => @searchValue(e.target.value)
+    400
+  )
+  @clearSearch = (root, e) =>
+    @searchFlagsValue('ig')
+    @searchValue(null)
+  @setValue = ko.computed( => @value(@selectedFiles()))
+
 
 class BatchInputModel
   onChange: () ->
@@ -175,7 +250,8 @@ class BatchWorkflowPageModel
       return {
         class: input.type,
         input_name: input.name,
-        input_value: input.value()
+        input_value: input.value(),
+        uniq_input_name: input.uniq_input_name
       }
     )
 

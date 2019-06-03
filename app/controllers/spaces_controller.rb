@@ -1,10 +1,12 @@
 class SpacesController < ApplicationController
-
   before_action :init_parent_folder, only: [:files]
-  before_action :find_space_and_membership, only: [:show, :discuss, :members, :feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
-  before_action :content_counters, only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
+  before_action :find_space_and_membership, only:
+    [:show, :discuss, :members, :feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
+  before_action :content_counters, only:
+    [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
 
-  layout "space_content", only: [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
+  layout "space_content", only:
+    [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
 
   def index
     spaces = Space.accessible_by(@context)
@@ -13,7 +15,7 @@ class SpacesController < ApplicationController
       name: 'spaces',
       order: 'spaces.id',
       order_direction: 'desc',
-      per_page: 100
+      per_page: 100,
     })
   end
 
@@ -32,7 +34,7 @@ class SpacesController < ApplicationController
     @item_comments_path = pathify_comments(@space)
     @comments = @space.root_comments.order(id: :desc).page params[:comments_page]
     user_ids = @space.space_memberships.active.map(&:user_id)
-    users = User.find(user_ids).map {|u| {name: u.dxuser} }
+    users = User.find(user_ids).map { |u| { name: u.dxuser } }
     space_id = @space.to_param
     js users: users, space_id: space_id, space_uid: @space.uid, scopes: @space.accessible_scopes_for_move
   end
@@ -47,14 +49,14 @@ class SpacesController < ApplicationController
     @members =
       case params[:filter]
       when 'host', 'reviewer'
-        @space.space_memberships.select{ |member| member.side == 'host' }
+        @space.space_memberships.select { |member| member.side == 'host' }
       when 'guest', 'sponsor'
-        @space.space_memberships.select{ |member| member.side == 'guest' }
+        @space.space_memberships.select { |member| member.side == 'guest' }
       else
         @space.space_memberships
       end
 
-    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move, members: @members })
+    js(common_fields.merge(members: @members))
   end
 
   def verify
@@ -70,12 +72,12 @@ class SpacesController < ApplicationController
     App.where(id: apps.map(&:id)).update_all(verified: true)
     AppSeries.where(id: app_series.map(&:id)).update_all(verified: true)
 
-    session[:verified] =  @space.id
+    session[:verified] = @space.id
     redirect_to @space
   end
 
   def new
-    redirect_to spaces_path if !@context.can_create_spaces?
+    redirect_to spaces_path unless @context.can_create_spaces?
     @space = SpaceForm.new
     js(space_templates: SpaceTemplate.all, space_types: space_types)
   end
@@ -129,14 +131,13 @@ class SpacesController < ApplicationController
     space = Space.accessible_by(@context).find(params[:id])
     admin = space.space_memberships.lead_or_admin.find_by(user_id: @context.user_id)
 
-    if admin
-      SpaceService::Accept.call(@context.api, space, admin, @context) unless space.accepted_by?(admin)
+    if admin && !space.accepted_by?(admin)
+      SpaceService::Accept.call(@context.api, space, admin)
     else
       flash[:error] = "You don't have permission to edit this space"
     end
     redirect_to space
   end
-
 
   def invite
     @space = Space.accessible_by(@context).find(params[:id])
@@ -243,7 +244,7 @@ class SpacesController < ApplicationController
     redirect_to redirect_path
   end
 
-  # TODO move to api
+  # TODO: move to api
   skip_before_action :require_login, only: :download_list
   before_action :require_api_login, only: :download_list
   def download_list
@@ -253,19 +254,19 @@ class SpacesController < ApplicationController
     files = []
 
     case task
-      when "download"
-        nodes = Node.accessible_by_space(space).accessible_by(@context).where(id: params[:ids])
-        nodes.each { |node| files += node.is_a?(Folder) ? node.all_files : [node] }
-      when "publish"
-        nodes = Node.accessible_by_space(space).editable_by(@context).where(id: params[:ids], scope: space.uid)
-        nodes.each { |node| files += node.is_a?(Folder) ? node.all_files(Node.where(scope: space.uid)) : [node] }
-      when "delete"
-        nodes = Node.accessible_by_space(space).editable_by(@context).where(id: params[:ids]).to_a
-        files += nodes
-        nodes.each { |node| files += node.all_children if node.is_a?(Folder) }
-      when "copy_to_cooperative"
-        nodes = Node.accessible_by_space(space).editable_by(@context).where(id: params[:ids], scope: space.uid)
-        nodes.each { |node| files += node.is_a?(Folder) ? node.all_files(Node.where(scope: space.uid)) : [node] }
+    when "download"
+      nodes = Node.accessible_by_space(space).accessible_by(@context).where(id: params[:ids])
+      nodes.each { |node| files += node.is_a?(Folder) ? node.all_files : [node] }
+    when "publish"
+      nodes = Node.accessible_by_space(space).editable_by(@context).where(id: params[:ids], scope: space.uid)
+      nodes.each { |node| files += node.is_a?(Folder) ? node.all_files(Node.where(scope: space.uid)) : [node] }
+    when "delete"
+      nodes = Node.accessible_by_space(space).editable_by(@context).where(id: params[:ids]).to_a
+      files += nodes
+      nodes.each { |node| files += node.all_children if node.is_a?(Folder) }
+    when "copy_to_cooperative"
+      nodes = Node.accessible_by_space(space).editable_by(@context).where(id: params[:ids], scope: space.uid)
+      nodes.each { |node| files += node.is_a?(Folder) ? node.all_files(Node.where(scope: space.uid)) : [node] }
     end
 
     res = files.map do |file|
@@ -274,7 +275,7 @@ class SpacesController < ApplicationController
         name: file.name,
         type: file.klass,
         fsPath: ([root_name] + file.ancestors(params[:scope]).map(&:name).reverse).compact.join(" / "),
-        viewURL: file.is_a?(UserFile) ? file_path(file) : pathify_folder(file)
+        viewURL: file.is_a?(UserFile) ? file_path(file) : pathify_folder(file),
       }
 
       info.merge!(downloadURL: download_file_path(file)) if task == "download" && file.is_a?(UserFile)
@@ -303,9 +304,9 @@ class SpacesController < ApplicationController
   def publish_folder
     space = Space.accessible_by(@context).find(params[:id])
     files = UserFile
-              .accessible_by_space(space)
-              .editable_by(@context)
-              .where(id: params[:ids])
+      .accessible_by_space(space)
+      .editable_by(@context)
+      .where(id: params[:ids])
 
     if files.size == 0
       flash[:error] = "No nodes selected"
@@ -328,9 +329,9 @@ class SpacesController < ApplicationController
   def copy_folder_to_cooperative
     space = Space.accessible_by(@context).find(params[:id])
     files = UserFile
-              .accessible_by_space(space)
-              .editable_by(@context)
-              .where(id: params[:ids])
+      .accessible_by_space(space)
+      .editable_by(@context)
+      .where(id: params[:ids])
 
     shared_space = space.shared_space
     if shared_space
@@ -374,12 +375,12 @@ class SpacesController < ApplicationController
 
     case params[:filter]
     when "created_by_me"
-      filter = {user_id: @context.user_id}
+      filter = { user_id: @context.user_id }
     when "all"
       filter = {}
     else
       params[:filter] = "my"
-      filter = {assignee_id: @context.user_id}
+      filter = { assignee_id: @context.user_id }
     end
 
     case params[:status]
@@ -388,21 +389,21 @@ class SpacesController < ApplicationController
       @page_title = 'Completed Tasks'
       @dates_titles = {
         respond: 'RESPONDED ON',
-        complete: 'COMPLETED ON'
+        complete: 'COMPLETED ON',
       }
     when "declined"
       @tasks = @space.tasks.where(filter).declined
       @page_title = 'Declined Tasks'
       @dates_titles = {
         respond: 'RESPOND BY',
-        complete: 'DECLINED ON'
+        complete: 'DECLINED ON',
       }
     when "accepted"
       @tasks = @space.tasks.where(filter).accepted_and_failed_deadline
       @page_title = 'Active Tasks'
       @dates_titles = {
         respond: 'RESPONDED BY',
-        complete: 'COMPLETE BY'
+        complete: 'COMPLETE BY',
       }
     else
       params[:status] = "awaiting_response"
@@ -410,7 +411,7 @@ class SpacesController < ApplicationController
       @page_title = 'Awaiting Response Tasks'
       @dates_titles = {
         respond: 'RESPOND BY',
-        complete: 'COMPLETE BY'
+        complete: 'COMPLETE BY',
       }
     end
 
@@ -419,17 +420,17 @@ class SpacesController < ApplicationController
       order: 'tasks.created_at',
       order_direction: 'desc',
       per_page: 25,
-      include: [{user: :org}]
+      include: [{user: :org}],
     })
 
-    users = @space.users.map {|u| {label: u.dxuser, value: u.id} }
+    users = @space.users.map { |u| { label: u.dxuser, value: u.id } }
 
     if @context.user.can_administer_site?
       user_ids = @space.space_memberships.where(side: @membership.side).pluck(:user_id)
       @group_tasks = @space.tasks.where(user_id: user_ids)
     end
 
-    js({ space_uid: @space.uid, space_id: @space.id, scopes: @space.accessible_scopes_for_move, users: users })
+    js(common_fields.merge(users: users))
   end
 
   def notes
@@ -442,7 +443,6 @@ class SpacesController < ApplicationController
     @folder_id = params[:folder_id]
     @folder = Folder.accessible_by_space(@space).find_by(id: @folder_id)
     @folders = folders(@folder_id)
-
     if request.xhr?
       render_folders(@folders)
       return
@@ -453,21 +453,19 @@ class SpacesController < ApplicationController
       @folders
     )
 
-    @counts.merge!({folders: folders.limit(1).count})
-
+    @counts.merge!({ folders: folders.limit(1).count })
     @files_grid = initialize_grid(nodes.includes(:taggings), {
       name: 'files',
       order: 'name',
       order_direction: 'desc',
       per_page: 25,
-      include: [:user, {user: :org}, {taggings: :tag}],
-      custom_order: { "nodes.sti_type" => "nodes.sti_type, nodes.name" }
+      include: [:user, { user: :org }, { taggings: :tag }],
+      custom_order: { "nodes.sti_type" => "nodes.sti_type, nodes.name" },
     })
     @scope = @space.uid
-
     @show_checkboxes = @space.accessible_by?(@context)
 
-    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move, space_id: @space.id }.merge(files_ids_with_descriptions(nodes, @space)))
+    js(common_fields.merge(files_ids_with_descriptions(nodes, @space)))
   end
 
   def apps
@@ -477,9 +475,9 @@ class SpacesController < ApplicationController
       order: 'apps.title',
       order_direction: 'desc',
       per_page: 25,
-      include: [{user: :org}, :latest_version_app, {taggings: :tag}]
+      include: [{ user: :org }, :latest_version_app, { taggings: :tag }],
     })
-    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
+    js(common_fields)
   end
 
   def jobs
@@ -489,9 +487,9 @@ class SpacesController < ApplicationController
       order: 'jobs.created_at',
       order_direction: 'desc',
       per_page: 25,
-      include: [{user: :org}, {taggings: :tag}]
+      include: [{ user: :org }, { taggings: :tag }],
     })
-    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
+    js(common_fields)
   end
 
   def assets
@@ -501,9 +499,9 @@ class SpacesController < ApplicationController
       order: 'nodes.name',
       order_direction: 'asc',
       per_page: 25,
-      include: [:user, {user: :org}, {taggings: :tag}]
+      include: [:user, {user: :org}, { taggings: :tag }],
     })
-    js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
+    js(common_fields)
   end
 
   def comparisons
@@ -513,8 +511,9 @@ class SpacesController < ApplicationController
       order: 'comparisons.name',
       order_direction: 'desc',
       per_page: 25,
-      include: [:user, {user: :org}, {taggings: :tag}]
+      include: [:user, { user: :org }, { taggings: :tag }],
     })
+    js(common_fields)
   end
 
   def workflows
@@ -524,8 +523,9 @@ class SpacesController < ApplicationController
       order: 'workflows.name',
       order_direction: 'desc',
       per_page: 25,
-      include: [:user, { user: :org }]
+      include: [:user, { user: :org }],
     })
+    js(common_fields)
   end
 
   def feed
@@ -539,11 +539,11 @@ class SpacesController < ApplicationController
       @users = []
     end
     @duration = ((Time.now - @space.created_at) / 1.days).ceil
-    @roles = SpaceEvent.roles.map { |k, v| {name: k, value: v} }
-    @sides = SpaceEvent.sides.map { |k, v| {name: k, value: v} }
+    @roles = SpaceEvent.roles.map { |k, v| { name: k, value: v } }
+    @sides = SpaceEvent.sides.map { |k, v| { name: k, value: v } }
     @overall_users = @space.space_memberships.active.count
-    object_types = SpaceEvent.object_type_counters(Date.today.beginning_of_week.to_time, Time.now, {space_id: @space.id})
-    js({ space_uid: @space.uid, space_id: @space.id, scopes: @space.accessible_scopes_for_move, object_types: object_types })
+    object_types = SpaceEvent.object_type_counters(Date.today.beginning_of_week.to_time, Time.now, { space_id: @space.id })
+    js(common_fields.merge(object_types: object_types, space_created_at: @space.created_at))
   end
 
   def reports
@@ -553,9 +553,7 @@ class SpacesController < ApplicationController
     counters[:tasks] = @space.tasks.count
     counters.except!(:feed, :open_tasks, :accepted_tasks, :declined_tasks, :completed_tasks)
     @users = @space.users.map { |user| { name: user.full_name, value: user.id } }
-    js( space_uid: @space.uid, space_id: @space.id,
-        scopes: @space.accessible_scopes_for_move,
-        counts: counters, space_created_at: @space.created_at )
+    js(common_fields.merge(counts: counters, space_created_at: @space.created_at))
   end
 
   def apps_and_files
@@ -570,8 +568,8 @@ class SpacesController < ApplicationController
     end
 
     respond_to do |r|
-      r.html{ render json: {apps: apps, files: files}}
-      r.json{ render json: {apps: apps, files: files}}
+      r.html{ render json: { apps: apps, files: files } }
+      r.json{ render json: { apps: apps, files: files } }
     end
   end
 
@@ -587,10 +585,12 @@ class SpacesController < ApplicationController
   end
 
   def space_params
-    p = params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser, :space_type, :cts, :sponsor_org_handle, :space_template_id, :restrict_to_template)
+    p = params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser,
+                                      :space_type, :cts, :sponsor_org_handle, :space_template_id,
+                                      :restrict_to_template)
     p.require(:name)
     p.require(:space_type)
-    return p
+    p
   end
 
   def update_space_params
@@ -612,7 +612,7 @@ class SpacesController < ApplicationController
       id: node.id,
       name: ERB::Util.h(node.name),
       rename_path: node.is_a?(Folder) ? rename_folder_spaces_path(node) : rename_file_path(node),
-      type: node.klass
+      type: node.klass,
     }
   end
 
@@ -629,10 +629,9 @@ class SpacesController < ApplicationController
         memo[node.id] = render_node(node)
         memo
       end,
-      selectedListURL: download_list_space_path
+      selectedListURL: download_list_space_path,
     }
   end
-
 
   def init_parent_folder
     @parent_folder_id = params[:folder_id]
@@ -671,5 +670,9 @@ class SpacesController < ApplicationController
       types << :review       if @context.review_space_admin?
       types << :verification if @context.review_space_admin?
     end
+  end
+
+  def common_fields
+    { space_uid: @space.uid, scopes: @space.accessible_scopes_for_move, space_id: @space.id, active: @space.active? }
   end
 end

@@ -1,5 +1,10 @@
 source 'https://rubygems.org'
 
+git_source(:github) do |repo_name|
+  repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?("/")
+  "https://github.com/#{repo_name}.git"
+end
+
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.11'
 # Use SCSS for stylesheets
@@ -22,9 +27,6 @@ gem 'turbolinks', '= 5.0.0'
 gem 'jbuilder', '~> 2.0'
 # bundle exec rake doc:rails generates the API under doc/api.
 gem 'sdoc', '~> 0.4.0', group: :doc
-
-# Annotate models
-gem 'annotate', '~> 2.6.6'
 
 # Support for OR queries (needed for UserFile.accessible_by)
 gem 'activerecord_any_of'
@@ -96,7 +98,13 @@ gem 'simple_form'
 # PDF builder
 gem 'prawn'
 
+gem 'aws-sdk-sns'
+gem 'parallel'
+
 group :development do
+  # Annotate models
+  gem 'annotate', '~> 2.6.6'
+
   gem 'letter_opener'
 
   # Access an IRB console on exception pages or by using <%= console %> in views
@@ -128,11 +136,17 @@ group :development, :test, :ui_test do
   gem 'thin'
 end
 
-group :test do
+group :test, :ui_test do
   gem 'database_cleaner', '~> 1.5', '>= 1.5.3'
   gem 'factory_bot_rails', '~> 4.8', '>= 4.8.2'
   gem 'rspec-rails', '~> 3.7', '>= 3.7.1'
   gem 'webmock', '~> 3.1', '>= 3.1.1'
+  gem 'shoulda-matchers'
+  gem 'ffaker'
+  gem 'simplecov', require: false
+  gem 'ruby_dep', '~> 1.3.1'
+  gem 'guard', '2.13.0'
+  gem 'guard-rspec', require: false
 end
 
 group :production do

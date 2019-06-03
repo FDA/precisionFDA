@@ -33,13 +33,13 @@ class Analysis < ActiveRecord::Base
 
   def self.batch_hash(analyses)
     batches = {}
-    analyses.each do |analysis|
+    analyses.includes(batch_items: [:workflow, jobs: :app]).each do |analysis|
       batches[analysis.id] =
           analysis.batch_items.map do |batch_item|
             jobs =
             {
                  id: batch_item.jobs.first.id,
-                 state: batch_item.jobs.first.state,
+                 state: jobs_state(batch_item.jobs),
                  uid: batch_item.jobs.first.uid,
                  execution: batch_item.workflow.name,
                  workflow_uid: batch_item.workflow.uid,
@@ -68,8 +68,13 @@ class Analysis < ActiveRecord::Base
     batches
   end
 
+  FSTATES = ['terminated', 'failed']
+  def self.jobs_state(jobs)
+    jobs.map(&:state).reduce{|v, acc| acc = FSTATES.include?(v) ? v : acc; FSTATES.include?(v) ? v : acc}
+  end
+
   def self.job_hash(analyses, options={})
-    analyses.reduce({}) do |acc, analysis|
+    analyses.includes(:workflow, :batch_items, jobs: :app).reduce({}) do |acc, analysis|
       formatted_jobs = analysis.jobs.flatten.map do |job|
         formatted_job = {
           id: job.id,
@@ -116,31 +121,40 @@ class Analysis < ActiveRecord::Base
   end
 
   def all_state
-    state = 'done'
-    important_state = ""
-    analyses = []
+    analysis_state = ""
+    last_analysis = ""
+
     if batch_id.nil?
       analyses = [self]
     else
       analyses = batch_items
     end
+    full_state = ""
+    finished = false
     analyses.each do |analysis|
-      analysis.jobs.each do |job|
-        if job.state != 'done'
-          state = job.state
-          if Job::TERMINAL_STATES.include?(job.state)
-            if job.state == 'terminated' && important_state != 'failed'
-              important_state = job.state
-            end
 
-            if job.state == 'failed'
-              important_state = job.state
-            end
-          end
+      finished = analysis.jobs.all?{|v| Job::TERMINAL_STATES.include?(v)} if finished
+      analysis.jobs.each do |job|
+        if job.state == 'terminated' && analysis_state != 'failed'
+          analysis_state = job.state
+        elsif job.state == 'failed'
+          analysis_state = job.state
+        else
+          analysis_state = job.state
         end
       end
+        if analysis_state == 'terminated' && full_state != 'failed'
+          full_state = analysis_state
+        elsif analysis_state == 'failed'
+          full_state = analysis_state
+        else
+          full_state = analysis_state
+        end
+      last_analysis = analysis_state
+      analysis_state = ""
     end
-    state != "done" && Job::TERMINAL_STATES.include?(important_state) && Job::TERMINAL_STATES.include?(state) ? important_state : state
+
+    finished ? full_state : last_analysis
   end
 
   def output_files

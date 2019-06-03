@@ -1,0 +1,129 @@
+<div id="about-docs" class="bs-docs-container docs-content">
+  <div class="row">
+    <div class="col-sm-18">
+      <div id="administration" class="h1">Site Administration</div>
+      <div class="bs-docs-section">
+        <p>
+          Site administrators on precisionFDA are able to provide some services for users,
+          including viewing account activations, resending activation emails, modifying user
+          profiles, and granting account unlocks and multi-factor authentication resets.
+          Additionally, site administrators are able to manually enable and disable accounts.
+        </p>
+      </div>
+
+      <div id="admin-dashboard" class="h2">The Admin Dashboard</div>
+      <div class="bs-docs-section">
+        <p>
+          From the Admin Dashboard, accessible from the drop-down menu under the admin’s name in
+          the upper-right corner, an administrator may access statistics and lists of active,
+          pending, and deactivated users.
+        </p>
+
+        <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+          <%= image_tag("docs/site_administration/admin_dashboard.png") %>
+        </div>
+      </div>
+
+      <div id="exploring-users" class="h2">Exploring Active Users</div>
+      <div class="bs-docs-section">
+        <p>
+          Clicking on the “Active Users” button under Site Activity brings up a list of all active
+          users, with additional tools to sort and filter the list.
+        </p>
+
+        <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+          <%= image_tag("docs/site_administration/exploring_users1.png") %>
+        </div>
+
+        <p>
+          At the top, the admin may filter by a specific date range, or can export
+          the list to a downloaded CSV file.
+        </p>
+
+        <p>
+          For each user, the following data is displayed:
+          <ul>
+            <li>Their current level of data being stored</li>
+            <li>Their average compute cost for the selected range</li>
+            <li>Their data consumption for the selected range</li>
+            <li>Their status (whether or not the user is logged in)</li>
+            <li>Their total data consumption</li>
+            <li>The org with which that user is affiliated</li>
+            <li>The email address used by the user to sign up.</li>
+          </ul>
+        </p>
+
+        <p>
+          Clicking on an individual user brings up additional information
+          about that user’s account.
+        </p>
+
+        <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+          <%= image_tag("docs/site_administration/exploring_users2.png") %>
+        </div>
+
+        <p>
+          The administrator can, using the buttons available, reset the user’s
+          multi-factor authentication, deactivate the user account, or unlock the user account
+          if it has been locked.  These actions will take effect when the user next logs in.
+          Note that, if the account is not locked, the “Unlock” button will be grayed out.
+        </p>
+
+        <p>
+          The administrator may also view the different objects and jobs performed by this user account.
+          This includes viewing notes created by the user, discussions posted by the user, answers
+          provided by the user, files uploaded by the user, comparisons run by the user,
+          and applications created by the user.
+        </p>
+
+        <p>
+          When deactivating a user, a prompt will pop up, asking the administrator to confirm
+          the deactivation and, optionally, provide a reason for the deactivation.
+        </p>
+
+        <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+          <%= image_tag("docs/site_administration/exploring_users3.png") %>
+        </div>
+      </div>
+
+      <div id="pending-users" class="h2">Pending Users</div>
+      <div class="bs-docs-section">
+        <p>
+          Clicking on Pending Users from the Admin Dashboard brings up a list of all pending
+          users - users for whom accounts have been provisioned, but have not yet been activated by
+          the user.  Here, the admin has the option to resend the activation email.
+        </p>
+
+        <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+          <%= image_tag("docs/site_administration/pending_users.png") %>
+        </div>
+      </div>
+
+      <div id="deactivated-users" class="h2">Deactivated Users</div>
+      <div class="bs-docs-section">
+        <p>
+          Clicking on Deactivated Users from the Admin Dashboard brings up a list of all
+          deactivated users, with the option to reactivate the user profile.
+          This will restore their permissions and original email address.
+        </p>
+
+        <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
+          <%= image_tag("docs/site_administration/deactivated_users.png") %>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <div class="col-sm-6">
+      <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
+        <ul class="nav bs-docs-sidenav">
+          <li><a href="#administration">Overview</a></li>
+          <li><a href="#admin-dashboard">The Admin Dashboard</a></li>
+          <li><a href="#exploring-users">Exploring Active Users</a></li>
+          <li><a href="#pending-users">Pending Users</a></li>
+          <li><a href="#deactivated-users">Deactivated Users</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
