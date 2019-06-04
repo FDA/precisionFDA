@@ -1,6 +1,26 @@
 module WorkflowConcern
   include ActiveSupport::Concern
 
+  def collect_inputs(batch)
+    case batch[:class]
+    when "string"
+      batch[:value].split(/\n/)
+    when "file"
+      batch[:value]
+    else
+      []
+    end
+  end
+
+  def input_object(batch, input_spec, value)
+    {
+      "class" => batch[:class],
+      "input_name" => input_spec[:parent_slot] + "." + input_spec[:name],
+      "input_value" => value,
+      "uniq_input_name" => input_spec[:uniq_input_name],
+    }
+  end
+
   def run_workflow_once(workflow_params)
     analysis_name = workflow_params["name"]
     fail "The workflow 'analysis_name' must be a nonempty string." unless analysis_name.is_a?(String) && analysis_name != ""
