@@ -6,13 +6,17 @@ namespace :challenges do
     files.each do |file_name|
       if !File.directory? file_name
         File.open(file_name) do |file|
-          send_result_email file
+          username = File.basename(file).split('_').last.chomp(".xlsx")
+          user_id = User.find_by_dxuser(username)
+          if user_id.present?
+            send_result_email(file, user_id)
+          end
         end
       end
     end
   end
 end
 
-def send_result_email file
-  NotificationsMailer.challenge_results(file).deliver_now!
+def send_result_email(file, user_id)
+  NotificationsMailer.challenge_results(file, user_id).deliver_now!
 end
