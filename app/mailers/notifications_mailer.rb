@@ -121,15 +121,15 @@ class NotificationsMailer < ApplicationMailer
          subject: "User failed to complete task \"#{@task.name}\" in time"
   end
 
-  def challenge_results(file, user_id, bool)
+  def challenge_results(file, user_id, test_email=nil)
     @user = User.find(user_id)
 
     attachments[File.basename(file)] = {
       content: Base64.encode64(File.read(file))
     }
 
-    if bool =='test'
-      mail(to: 'Elaine.Johanson@fda.hhs.gov', from: 'ptater@dnanexus.com', subject: "Results of NCI-CPTAC challenge")
+    if test_email.present?
+      mail(to: test_email, from: 'ptater@dnanexus.com', subject: "Results of NCI-CPTAC challenge")
     else
       mail(to: @user.email, subject: "Results of NCI-CPTAC challenge")
     end
