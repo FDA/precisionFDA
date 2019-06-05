@@ -29,6 +29,7 @@ RSpec.describe ApiController, type: :controller do
         timeoutPolicyByExecutable: {
           app.dxid => { "*": { days: 2 }}
         },
+        singleContext: true,
         systemRequirements: {
           main: { instanceType: "mem3_ssd1_x32_fedramp" }
         }
