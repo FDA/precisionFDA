@@ -1,8 +1,8 @@
 class NotificationsMailer < ApplicationMailer
   add_template_helper(SpacesHelper)
   helper :application
-  # default  from: 'PrecisionFDA <PrecisionFDA@fda.hhs.gov>',
-  #          reply_to: "PrecisionFDA@fda.hhs.gov"
+  default  from: 'PrecisionFDA <PrecisionFDA@fda.hhs.gov>',
+           reply_to: "PrecisionFDA@fda.hhs.gov"
 
   # Subject can be set in your I18n file at config/locales/en.yml
   # with the following lookup:
@@ -121,13 +121,17 @@ class NotificationsMailer < ApplicationMailer
          subject: "User failed to complete task \"#{@task.name}\" in time"
   end
 
-  def challenge_results(file, user_id)
+  def challenge_results(file, user_id, bool)
     @user = User.find(user_id)
 
     attachments[File.basename(file)] = {
       content: Base64.encode64(File.read(file))
     }
 
-    mail(to: @user.email, subject: "Results of NCI-CPTAC challenge")
+    if bool =='test'
+      mail(to: 'Elaine.Johanson@fda.hhs.gov', from: 'ptater@dnanexus.com', subject: "Results of NCI-CPTAC challenge")
+    else
+      mail(to: @user.email, subject: "Results of NCI-CPTAC challenge")
+    end
   end
 end
