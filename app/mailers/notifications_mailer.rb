@@ -129,7 +129,7 @@ class NotificationsMailer < ApplicationMailer
     }
 
     if test_email.present?
-      mail(to: test_email, from: 'ptater@dnanexus.com', subject: "Results of NCI-CPTAC challenge")
+      mail(to: test_email, from: 'notification@dnanexus.com', subject: "Results of NCI-CPTAC challenge")
     else
       mail(to: @user.email, subject: "Results of NCI-CPTAC challenge")
     end
