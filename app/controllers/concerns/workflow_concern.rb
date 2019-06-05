@@ -68,6 +68,7 @@ module WorkflowConcern
     workflow_params = {
       name: analysis_name,
       input: dx_run_workflow_inputs,
+      singleContext: true,
       project: project,
     }
 
