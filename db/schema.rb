@@ -476,11 +476,21 @@ ActiveRecord::Schema.define(version: 20190531084008) do
   add_index "notes", ["user_id"], name: "index_notes_on_user_id", using: :btree
 
   create_table "notification_preferences", force: :cascade do |t|
-    t.integer "user_id", limit: 4
-    t.text    "data",    limit: 65535
+    t.integer "user_id",            limit: 4
+    t.text    "data",               limit: 65535
+    t.text    "review_space_admin", limit: 65535
+    t.text    "lead_reviewer",      limit: 65535
+    t.text    "reviewer",           limit: 65535
   end
 
   add_index "notification_preferences", ["user_id"], name: "index_notification_preferences_on_user_id", unique: true, using: :btree
+
+  create_table "org_admins", force: :cascade do |t|
+    t.integer  "org_id",     limit: 4
+    t.integer  "user_id",    limit: 4
+    t.datetime "created_at",           null: false
+    t.datetime "updated_at",           null: false
+  end
 
   create_table "orgs", force: :cascade do |t|
     t.string   "handle",     limit: 255
@@ -521,7 +531,7 @@ ActiveRecord::Schema.define(version: 20190531084008) do
     t.string  "address1",         limit: 255
     t.string  "address2",         limit: 255
     t.string  "city",             limit: 255
-    t.string  "email",            limit: 255
+    t.string  "email",            limit: 255,                 null: false
     t.boolean "email_confirmed",              default: false
     t.string  "postal_code",      limit: 255
     t.string  "phone",            limit: 255
@@ -891,8 +901,6 @@ ActiveRecord::Schema.define(version: 20190531084008) do
   add_index "workflows", ["user_id"], name: "index_workflows_on_user_id", using: :btree
   add_index "workflows", ["workflow_series_id"], name: "index_workflows_on_workflow_series_id", using: :btree
 
-  add_foreign_key "accepted_licenses", "licenses"
-  add_foreign_key "accepted_licenses", "users"
   add_foreign_key "analyses", "workflows"
   add_foreign_key "answers", "discussions"
   add_foreign_key "answers", "notes"
