@@ -5,7 +5,7 @@ class Node < ActiveRecord::Base
 
   include Permissions
 
-  belongs_to :user
+  belongs_to :user, required: true
   belongs_to :parent, { polymorphic: true }
 
   acts_as_taggable
