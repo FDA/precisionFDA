@@ -15,7 +15,8 @@
         <th>Organization</th>
         <th>Self?</th>
         <th>Org Admin?</th>
-        <th>Address</th>
+        <th>Address 1</th>
+        <th>Address 2</th>
         <th>Phone</th>
         <th>DUNS</th>
         <th>Participate Intent?</th>
@@ -36,6 +37,7 @@
         <td><%= inv.singular ? 'YES' : ('&ndash;'.html_safe) %></td>
         <td><%= inv.organization_admin ? 'YES' : ('&ndash;'.html_safe) %></td>
         <td><%= inv.address1 %></td>
+        <td><%= inv.address2 %></td>
         <td><%= inv.full_phone %></td>
         <td><%= inv.duns %></td>
         <td><%= inv.participate_intent ? 'YES' : ('&ndash;'.html_safe) %></td>

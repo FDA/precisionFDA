@@ -27,7 +27,8 @@
           <tr><td>Organization:</td><td><%= @invitation.org %></td></tr>
           <tr><td>Self-representing?</td><td><%= !!@invitation.singular %></td></tr>
           <tr><td>Org Admin?:</td><td><%= @invitation.organization_admin %></td></tr>
-          <tr><td>Address:</td><td><%= @invitation.address1 %></td></tr>
+          <tr><td>Address 1:</td><td><%= @invitation.address1 %></td></tr>
+          <tr><td>Address 2:</td><td><%= @invitation.address2 %></td></tr>
           <tr><td>Phone:</td><td><%= @invitation.phone %></td></tr>
           <tr><td>DUNS:</td><td><%= @invitation.duns %></td></tr>
           <tr><td>Request reason:</td><td><%= @invitation.req_reason %></td></tr>
