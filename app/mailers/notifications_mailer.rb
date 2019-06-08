@@ -1,8 +1,11 @@
 class NotificationsMailer < ApplicationMailer
   add_template_helper(SpacesHelper)
   helper :application
-  default  from: 'PrecisionFDA <PrecisionFDA@fda.hhs.gov>',
-           reply_to: "PrecisionFDA@fda.hhs.gov"
+
+  if ENV["DNANEXUS_BACKEND"] == "production"
+    default  from: 'PrecisionFDA <PrecisionFDA@fda.hhs.gov>',
+             reply_to: "PrecisionFDA@fda.hhs.gov"
+  end
 
   # Subject can be set in your I18n file at config/locales/en.yml
   # with the following lookup:
