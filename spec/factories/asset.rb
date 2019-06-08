@@ -1,5 +1,6 @@
 FactoryBot.define do
   factory :asset do
+    user
 
     sequence(:dxid) { |n| "file-A1S1#{n}" }
     sequence(:name) { |n| "asset-#{n}" }

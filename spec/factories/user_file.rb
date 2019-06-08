@@ -1,5 +1,6 @@
 FactoryBot.define do
   factory :user_file do
+    user
 
     sequence(:dxid) { |n| "file-F8Y8#{n}" }
     sequence(:name) { |n| "file-#{n}" }
