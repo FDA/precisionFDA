@@ -40,24 +40,25 @@ RSpec.describe Auditor do
 
   describe "logging models changes" do
     let(:ip) { "172.18.0.1" }
-    let(:user_name) { "user1" }
+    let(:user) { create(:user) }
 
     before(:each) do
-      Auditor.current_user = AuditLogUser.new(user_name, ip)
+      Auditor.current_user = AuditLogUser.new(user.username, ip)
     end
 
     without_transactional_fixtures do
       it "writes to the audit log on create" do
         Auditor.file = StringIO.new
 
-        note = create(:note)
+        note = create(:note, user: user)
+
         Auditor.file.rewind
 
         raw_result = Auditor.file.read
         result = parse_log(raw_result)
 
         expect(result.timestamp).not_to eq(nil)
-        expect(result.username).to eq(user_name)
+        expect(result.username).to eq(user.username)
         expect(result.user_ip).to eq(ip)
         expect(result.event).to eq("create")
         expect(result.record_type).to eq("Note")
@@ -67,7 +68,7 @@ RSpec.describe Auditor do
 
     without_transactional_fixtures do
       it "writes to the audit log on update" do
-        note = create(:note)
+        note = create(:note, user: user)
         Auditor.file = StringIO.new
         note.update(title: "new title")
 
@@ -77,7 +78,7 @@ RSpec.describe Auditor do
         result = parse_log(raw_result)
 
         expect(result.timestamp).not_to eq(nil)
-        expect(result.username).to eq(user_name)
+        expect(result.username).to eq(user.username)
         expect(result.user_ip).to eq(ip)
         expect(result.event).to eq("update")
         expect(result.record_type).to eq("Note")
@@ -87,7 +88,7 @@ RSpec.describe Auditor do
 
     without_transactional_fixtures do
       it "writes to the audit log on destroy" do
-        note = create(:note)
+        note = create(:note, user: user)
         Auditor.file = StringIO.new
         note.destroy!
 
@@ -97,7 +98,7 @@ RSpec.describe Auditor do
         result = parse_log(raw_result)
 
         expect(result.timestamp).not_to eq(nil)
-        expect(result.username).to eq(user_name)
+        expect(result.username).to eq(user.username)
         expect(result.user_ip).to eq(ip)
         expect(result.event).to eq("destroy")
         expect(result.record_type).to eq("Note")
@@ -109,7 +110,7 @@ RSpec.describe Auditor do
       it "writes to the audit log on transaction" do
         Auditor.file = StringIO.new
         Note.transaction do
-          note = create(:note)
+          note = create(:note, user: user)
           note.destroy!
         end
 
@@ -121,14 +122,14 @@ RSpec.describe Auditor do
         result2 = parse_log(results[1])
 
         expect(result1.timestamp).not_to eq(nil)
-        expect(result1.username).to eq(user_name)
+        expect(result1.username).to eq(user.username)
         expect(result1.user_ip).to eq(ip)
         expect(result1.event).to eq("create")
         expect(result1.record_type).to eq("Note")
         expect(result1.record).not_to eq(nil)
 
         expect(result2.timestamp).not_to eq(nil)
-        expect(result2.username).to eq(user_name)
+        expect(result2.username).to eq(user.username)
         expect(result2.user_ip).to eq(ip)
         expect(result2.event).to eq("destroy")
         expect(result2.record_type).to eq("Note")
