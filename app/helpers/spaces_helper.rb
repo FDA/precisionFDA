@@ -28,7 +28,7 @@ module SpacesHelper
   end
 
   def space_initial_roles
-    SpaceMembership.roles.slice(:admin, :member).keys
+    SpaceMembership.roles.slice(:admin, :contributor, :viewer).keys
   end
 
   def space_type(space)
@@ -283,24 +283,25 @@ module SpacesHelper
       to_admin_button = member_card_button('To admin', to_admin_space_membership_path(member), 'star')
     end
 
-    to_member_button = nil
-    if SpaceMembershipPolicy.can_member?(@space, @membership, member)
-      to_member_button = member_card_button('To member', to_member_space_membership_path(member), 'star')
+    to_contributor_button = nil
+
+    if SpaceMembershipPolicy.can_contributor?(@space, @membership, member)
+      to_contributor_button = member_card_button('To contributor', to_contributor_space_membership_path(member), 'star')
     end
 
     to_viewer_button = nil
     if SpaceMembershipPolicy.can_viewer?(@space, @membership, member)
-      to_member_button = member_card_button('To viewer', to_viewer_space_membership_path(member), 'star')
+      to_viewer_button = member_card_button('To viewer', to_viewer_space_membership_path(member), 'star')
     end
 
     buttons = nil
-    if disable_button || to_lead_button || to_admin_button || to_member_button || to_viewer_button
+    if disable_button || to_lead_button || to_admin_button || to_contributor_button || to_viewer_button
       buttons = """
         <div class='member-card-row member-card-buttons'>
           #{disable_button}
           #{to_lead_button}
           #{to_admin_button}
-          #{to_member_button}
+          #{to_contributor_button}
           #{to_viewer_button}
         </div>
       """

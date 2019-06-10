@@ -6,11 +6,20 @@ module SpaceMembershipService
     def self.call(api, space, membership)
       org_dxid = space.org_dxid(membership)
 
-      api.call(org_dxid, "invite", {
+      attrs = {
         invitee: membership.user.dxid,
         level: membership.lead_or_admin? ? "ADMIN" : "MEMBER",
         suppressEmailNotification: true
-      })
+      }
+
+      unless membership.lead_or_admin?
+        attrs.merge!(
+          projectAccess: membership.contributor? ? "CONTRIBUTE" : "VIEW",
+          appAccess: membership.contributor?
+        )
+      end
+
+      api.call(org_dxid, "invite", attrs)
 
       space.space_memberships << membership
 

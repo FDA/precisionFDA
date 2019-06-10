@@ -20,10 +20,10 @@ class SpaceMembershipController < ApplicationController
     redirect_to :back
   end
 
-  def to_member
+  def to_contributor
     member.with_lock do
-      if SpaceMembershipService::ToMember.call(api, space, member, admin_member)
-        flash[:success] = "#{member.user.full_name} was successfully designated as member"
+      if SpaceMembershipService::ToContributor.call(api, space, member, admin_member)
+        flash[:success] = "#{member.user.full_name} was successfully designated as contributor"
       end
     end
 

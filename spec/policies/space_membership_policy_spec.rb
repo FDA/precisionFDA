@@ -10,7 +10,7 @@ RSpec.describe SpaceMembershipPolicy do
   let(:initiator) { create(:space_membership, role: initiator_role, side: initiator_side, user_id: user1.id, spaces: [space]) }
 
   let(:user2) { create(:user, dxuser: "user_2") }
-  let(:candidate_role) { SpaceMembership::ROLE_MEMBER }
+  let(:candidate_role) { SpaceMembership::ROLE_CONTRIBUTOR }
   let(:candidate_side) { SpaceMembership::SIDE_HOST }
   let(:candidate) { create(:space_membership, role: candidate_role, side: candidate_side, user_id: user2.id, spaces: [space]) }
 

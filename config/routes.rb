@@ -387,7 +387,7 @@ Rails.application.routes.draw do
         post :to_lead
         post :to_admin
         post :to_viewer
-        post :to_member
+        post :to_contributor
         post :to_inactive
       end
     end
