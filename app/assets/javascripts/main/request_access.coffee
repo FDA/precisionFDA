@@ -57,18 +57,20 @@ class RequestAccessPageView
     @adminOrgModal = $('#admin_org_agreement_modal')
     @noOrgChecked = ko.observable(false)
     @adminOrgChecked = ko.observable(organizationAdmin)
-    @adminOrgModalAgreementRead = ko.observable(false)
+    @adminOrgModalAgreementRead = ko.observable(true)
     @adminOrgAgreed = ko.observable(false)
     @adminOrgEnableButton = ko.computed( => @adminOrgModalAgreementRead())
     @adminOrgModal.on 'hidden.bs.modal', () =>
       @adminOrgChecked(@adminOrgAgreed())
-    @adminOrgModal.on 'shown.bs.modal', () =>
-      @adminOrgModal.find('.modal-body').first().scrollTop(0)
-      @adminOrgModalAgreementRead(false)
-    @adminOrgModal.find('.modal-body').first().on 'scroll', (e) =>
-      elem = $(e.currentTarget)
-      if elem[0].scrollHeight - elem.scrollTop() <= elem.outerHeight() + 10
-        @adminOrgModalAgreementRead(true)
+    ### Don't remove following code. We'll need it when we've got ageement text ###
+    # @adminOrgModal.on 'shown.bs.modal', () =>
+    #   @adminOrgModal.find('.modal-body').first().scrollTop(0)
+    #   @adminOrgModalAgreementRead(false)
+    # @adminOrgModal.find('.modal-body').first().on 'scroll', (e) =>
+    #   elem = $(e.currentTarget)
+    #   if elem[0].scrollHeight - elem.scrollTop() <= elem.outerHeight() + 10
+    #     @adminOrgModalAgreementRead(true)
+    ### Don't remove code above. We'll need it when we've got ageement text ###
     ### Org Adm Agreement ###
 
 #########################################################
