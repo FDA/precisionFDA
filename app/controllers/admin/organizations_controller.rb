@@ -64,14 +64,7 @@ module Admin
       org_admin = org.admin
       raise "Org must have admin" if org_admin.blank?
       org_info = api.call(org.dxid, "describe")
-      #activation_user = org_info["billingInformation"]["activatedBy"] rescue nil
-
       api.call(org.dxid,"setMemberAccess", "#{user.dxid}": {level:"ADMIN"})
-
-
-      #if org_admin.dxid != activation_user # lowering ADMIN privileges of activation user leads to ORG clear out.
-      #  api.call(org.dxid,"setMemberAccess", "#{org_admin.dxid}": {level:"MEMBER", allowBillableActivities:true, appAccess: true, projectAccess: "CONTRIBUTE"})
-      #end
     end
 
     def get_users_of_org(api, org, user = nil)

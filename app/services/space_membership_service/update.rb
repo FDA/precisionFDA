@@ -21,7 +21,7 @@ module SpaceMembershipService
         { level: "MEMBER", allowBillableActivities: false, appAccess: false, projectAccess: "NONE" }
       elsif membership.lead_or_admin?
         { level: "ADMIN" }
-      elsif membership.member?
+      elsif membership.contributor?
         { level: "MEMBER", allowBillableActivities: false, appAccess: true, projectAccess: "CONTRIBUTE" }
       elsif membership.viewer?
         { level: "MEMBER", allowBillableActivities: false, appAccess: false, projectAccess: "VIEW" }

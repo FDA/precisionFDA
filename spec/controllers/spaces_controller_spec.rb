@@ -295,20 +295,37 @@ RSpec.describe SpacesController, type: :controller do
 
     context "by host_admin" do
       before { authenticate!(host_lead) }
-      it "invites an user as a member" do
-        post :invite, id: space.id, space: { invitees: user.dxuser, invitees_role: "member" }
+      it "invites a user as a contributor" do
+        post :invite, id: space.id, space: { invitees: user.dxuser, invitees_role: "contributor" }
 
         expect(SpaceMembership.where(user_id: user.id).count).to eq(1)
-        expect(SpaceMembership.where(user_id: user.id).first.member?).to be_truthy
+        expect(SpaceMembership.where(user_id: user.id).first.contributor?).to be_truthy
 
         expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{space.host_dxorg}/invite").with(body: {
           invitee: user.dxid,
           level: "MEMBER",
-          suppressEmailNotification: true
+          suppressEmailNotification: true,
+          projectAccess: "CONTRIBUTE",
+          appAccess: true,
         })
       end
 
-      it "invites an user as an admin" do
+      it "invites a user as a viewer" do
+        post :invite, id: space.id, space: { invitees: user.dxuser, invitees_role: "viewer" }
+
+        expect(SpaceMembership.where(user_id: user.id).count).to eq(1)
+        expect(SpaceMembership.where(user_id: user.id).first.viewer?).to be_truthy
+
+        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{space.host_dxorg}/invite").with(body: {
+          invitee: user.dxid,
+          level: "MEMBER",
+          suppressEmailNotification: true,
+          projectAccess: "VIEW",
+          appAccess: false,
+        })
+      end
+
+      it "invites a user as an admin" do
         post :invite, id: space.id, space: { invitees: user.dxuser, invitees_role: "admin" }
 
         expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{space.host_dxorg}/invite").with(body: {
@@ -322,13 +339,29 @@ RSpec.describe SpacesController, type: :controller do
     context "if review space" do
       before { authenticate!(host_lead) }
 
-      it "invites an user as a member" do
-        post :invite, id: review_space.id, space: { invitees: user.dxuser, invitees_role: "member" }
+      it "invites an user as a contributor" do
+        post :invite, id: review_space.id, space: { invitees: user.dxuser, invitees_role: "contributor" }
 
         expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{review_space.host_dxorg}/invite").with(body: {
           invitee: user.dxid,
           level: "MEMBER",
-          suppressEmailNotification: true
+          suppressEmailNotification: true,
+          projectAccess: "CONTRIBUTE",
+          appAccess: true,
+        })
+
+        expect(review_space.confidential_reviewer_space.space_memberships.count).to eq(2)
+      end
+
+      it "invites an user as a viewer" do
+        post :invite, id: review_space.id, space: { invitees: user.dxuser, invitees_role: "viewer" }
+
+        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{review_space.host_dxorg}/invite").with(body: {
+          invitee: user.dxid,
+          level: "MEMBER",
+          suppressEmailNotification: true,
+          projectAccess: "VIEW",
+          appAccess: false,
         })
 
         expect(review_space.confidential_reviewer_space.space_memberships.count).to eq(2)

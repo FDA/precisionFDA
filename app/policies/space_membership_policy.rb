@@ -23,7 +23,7 @@ class SpaceMembershipPolicy
       return false if member.new_record?
       return false if member.inactive?
 
-      member.lead_or_admin_or_member?
+      member.lead_or_admin_or_contributor?
     end
 
     def can_disable?(space, admin, member)
@@ -40,9 +40,9 @@ class SpaceMembershipPolicy
       true
     end
 
-    def can_member?(space, admin, member)
+    def can_contributor?(space, admin, member)
       return false unless suitable_admin_and_member?(space, admin, member)
-      return false if member.member?
+      return false if member.contributor?
       true
     end
 
