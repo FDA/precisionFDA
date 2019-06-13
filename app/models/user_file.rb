@@ -46,11 +46,12 @@ class UserFile < Node
 
   DESCRIPTION_MAX_LENGTH = 65535
 
-  STATE_CLOSING = "closing"
-  STATE_CLOSED = "closed"
-  STATE_OPEN = "open"
+  STATE_ABANDONED = "abandoned".freeze
+  STATE_CLOSING = "closing".freeze
+  STATE_CLOSED = "closed".freeze
+  STATE_OPEN = "open".freeze
 
-  PARENT_TYPE_COMPARISON = "Comparison"
+  PARENT_TYPE_COMPARISON = "Comparison".freeze
 
   has_many :notes, {through: :attachments}
   has_many :attachments, {as: :item, dependent: :destroy}
