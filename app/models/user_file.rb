@@ -84,7 +84,7 @@ class UserFile < Node
     end
 
     def real_files
-      where(parent_type: ['User', 'Job', 'Node'])
+      where(parent_type: ['User', 'Job', 'Node', 'Comparison'])
     end
 
     def not_assets

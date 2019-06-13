@@ -20,6 +20,7 @@ class FilesController < ApplicationController
               .editable_by(@context)
               .where(parent_folder_id: @parent_folder_id)
               .where(scope:["private","public",nil])
+              .where.not(parent_type:["Comparison", nil])
               .includes(:taggings)
 
     folders = private_folders(@parent_folder_id).includes(:taggings)
