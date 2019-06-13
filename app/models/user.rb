@@ -495,6 +495,7 @@ class User < ActiveRecord::Base
       end
     elsif result["describe"].present?
       remote_state = result["describe"]["state"]
+
       # Only begin transaction if stale file detected
       if remote_state != file.state
         UserFile.transaction do
@@ -502,21 +503,23 @@ class User < ActiveRecord::Base
           file.reload
           # confirm local file state is stale
           if remote_state != file.state
-            if remote_state == "closed"
+            if remote_state == UserFile::STATE_CLOSED
               file.update!(state: remote_state, file_size: result["describe"]["size"])
               Event::FileCreated.create_for(file, user)
-            elsif remote_state == "closing" && file.state == "open"
+            elsif remote_state == UserFile::STATE_CLOSING && file.state == UserFile::STATE_OPEN ||
+                  remote_state == UserFile::STATE_ABANDONED
               file.update!(state: remote_state)
             else
               # NOTE we should never be here
-              raise "File #{file.uid} had local state #{file.state} (previously #{old_file_state}) and remote state #{remote_state}"
+              raise "File #{file.uid} had local state #{file.state} " \
+                    "(previously #{old_file_state}) and remote state #{remote_state}"
             end
           end
         end
       end
     else
       # NOTE we should never be here
-      raise
+      raise "Unsupported response for file #{file.uid}: #{result}"
     end
   end
 
