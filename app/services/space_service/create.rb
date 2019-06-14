@@ -19,9 +19,14 @@ module SpaceService
         create_orgs(org_dxs)
         space.save!
         add_leads(space, space_form)
-        remove_pfda_admin_user(org_dxs) unless space.review?
-        create_reviewer_cooperative_project(space) if space.review?
-        create_reviewer_confidential_space(space, space_form) if space.review?
+
+        if space.review?
+          create_reviewer_cooperative_project(space)
+          create_reviewer_confidential_space(space, space_form)
+        else
+          remove_pfda_admin_user(org_dxs)
+        end
+
         send_emails(space)
         space
       end

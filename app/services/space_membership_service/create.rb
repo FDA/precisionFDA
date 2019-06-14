@@ -8,14 +8,16 @@ module SpaceMembershipService
 
       attrs = {
         invitee: membership.user.dxid,
-        level: membership.lead_or_admin? ? "ADMIN" : "MEMBER",
-        suppressEmailNotification: true
+        level: "ADMIN",
+        suppressEmailNotification: true,
       }
 
       unless membership.lead_or_admin?
         attrs.merge!(
+          level: "MEMBER",
           projectAccess: membership.contributor? ? "CONTRIBUTE" : "VIEW",
-          appAccess: membership.contributor?
+          allowBillableActivities: false,
+          appAccess: membership.contributor?,
         )
       end
 
@@ -23,9 +25,7 @@ module SpaceMembershipService
 
       space.space_memberships << membership
 
-      return membership unless space.review?
-
-      return membership unless space.accepted?
+      return membership if !space.review? || !space.accepted?
 
       if space.confidential?
         space.space.space_memberships << membership

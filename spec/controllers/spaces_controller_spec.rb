@@ -307,6 +307,7 @@ RSpec.describe SpacesController, type: :controller do
           suppressEmailNotification: true,
           projectAccess: "CONTRIBUTE",
           appAccess: true,
+          allowBillableActivities: false,
         })
       end
 
@@ -322,6 +323,7 @@ RSpec.describe SpacesController, type: :controller do
           suppressEmailNotification: true,
           projectAccess: "VIEW",
           appAccess: false,
+          allowBillableActivities: false,
         })
       end
 
@@ -348,6 +350,7 @@ RSpec.describe SpacesController, type: :controller do
           suppressEmailNotification: true,
           projectAccess: "CONTRIBUTE",
           appAccess: true,
+          allowBillableActivities: false,
         })
 
         expect(review_space.confidential_reviewer_space.space_memberships.count).to eq(2)
@@ -362,6 +365,7 @@ RSpec.describe SpacesController, type: :controller do
           suppressEmailNotification: true,
           projectAccess: "VIEW",
           appAccess: false,
+          allowBillableActivities: false,
         })
 
         expect(review_space.confidential_reviewer_space.space_memberships.count).to eq(2)
