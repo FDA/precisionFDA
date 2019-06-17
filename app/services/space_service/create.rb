@@ -83,7 +83,10 @@ module SpaceService
     end
 
     # Remove pfda admin from orgs
+    # Skip if the host user is actual ADMIN_USER
     def remove_pfda_admin_user(orgs_dxs)
+      return if user.dxid == ADMIN_USER
+
       orgs_dxs.each { |dxorg| papi.call(dxorg, "removeMember", user: ADMIN_USER) }
     end
 
@@ -94,10 +97,13 @@ module SpaceService
     end
 
     def create_reviewer_cooperative_project(space)
-      papi.call(space.host_dxorg, "invite",
-        invitee: user.dxid,
-        level: "ADMIN",
-        suppressEmailNotification: true,)
+      if ADMIN_USER != user.dxid
+        papi.call(space.host_dxorg, "invite",
+          invitee: user.dxid,
+          level: "ADMIN",
+          suppressEmailNotification: true
+        )
+      end
 
       project_dxid = api.call(
         "project", "new",
