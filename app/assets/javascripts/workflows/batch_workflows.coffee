@@ -465,6 +465,7 @@ class BatchWorkflowPageModel
     @step = ko.observable(1)
     @wizardLoading = ko.observable(false)
     @accessibleScope = scope
+    @diagram = new Precision.WorkflowDiagramModel(workflow)
 
     ### some defaults for other tabs. Copied from show.coffee ###
     @readmeDisplay = Precision.md.render(workflow.readme)
