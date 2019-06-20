@@ -128,6 +128,7 @@ Rails.application.routes.draw do
       post 'close_file'
       post 'describe'
       post 'list_files'
+      post 'folder_tree'
       post 'list_notes'
       post 'list_comparisons'
       post 'list_apps'
