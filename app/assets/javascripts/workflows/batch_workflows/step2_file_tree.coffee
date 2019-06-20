@@ -1,21 +1,32 @@
+loadFolderTree = (parentId = null) ->
+  params = {
+    parent_folder_id: parentId,
+    states: ['closed'],
+    scopes: ['private'],
+    describe: {
+      include: { user: true, all_tags_list: false }
+    }
+  }
+  return $.post('/api/folder_tree', params)
 
-class BatchWorkflowFileTree extends window.Precision.FileTree
+
+class FileTree extends Precision.FileTree
   loadNodes: (data) ->
     $node = data.instance.get_node(data.node.id, true)
     children = data.node.children
     if !children or children.length == 0
       $node.addClass("jstree-loading")
       @disabled = true
-      $.ajax('/', {
-        dataType: 'json',
-        success: (nodes) ->
+
+      loadFolderTree().then(
+        (nodes) =>
           @addNodes(data, @prepareNodes(nodes))
           @disabled = false
           $node.removeClass("jstree-loading")
-        error: (e) ->
+        (error) =>
           Precision.alert.showAboveAll('Something went wrong!')
           @disabled = false
-      })
+      )
 
   onChange: (e, data) =>
     if !@disabled and data.node.id != 'root'
@@ -30,15 +41,29 @@ class BatchWorkflowFileTree extends window.Precision.FileTree
       }
     )
 
-  constructor: (defaultNodes = []) ->
+  constructor: (defaultNodes = [], container) ->
     jsTreeParams = {
-      container: $('#accessible_files_tree'),
+      container: container,
       defaultNodes: @prepareNodes(data.nodes),
       rootName: 'My accessible files'
     }
     super(jsTreeParams)
-
     @disabled = false
+
+
+class BatchWorkflowFileTree
+  createNewTree: (container) ->
+    tree = new FileTree(@rootNodes, container)
+    @folderTrees.push(tree)
+    return tree
+
+  constructor: () ->
+    @folderTrees = []
+    @rootNodes = []
+    loadFolderTree().then(
+      (nodes) => @rootNodes = nodes || []
+      (error) -> Precision.alert.showAboveAll('Something went wrong!')
+    )
 
 window.Precision ||= {}
 window.Precision.BatchWorkflowFileTree = BatchWorkflowFileTree

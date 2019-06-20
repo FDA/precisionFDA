@@ -1,4 +1,4 @@
-class MoveFilesModal extends window.Precision.FileTree
+class MoveFilesModal extends Precision.FileTree
 
   getPath: (data) ->
     ids = data.instance.get_path(data.node, false, true)
