@@ -31,7 +31,8 @@ class FileTree
         data.instance.set_icon(data.node, 'fa fa-folder')
 
     @treeContainer.on 'changed.jstree', (e, data) =>
-      @onChange(e, data)
+      if data.action == 'select_node'
+        @onChange(e, data)
 
   constructor: (params) ->
     @TREE = {
