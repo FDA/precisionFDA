@@ -31,7 +31,7 @@ class MoveFilesModal extends window.Precision.FileTree
       })
 
   onChange: (e, data) =>
-    if data.action == 'select_node' and !@disabled
+    if !@disabled
       @targetId(data.node.id)
       @fullFoldersPath(@getPath(data))
       if data.node.id != 'root'
