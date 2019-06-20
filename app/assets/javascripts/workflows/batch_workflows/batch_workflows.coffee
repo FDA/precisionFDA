@@ -513,6 +513,7 @@ class BatchWorkflowPageModel
     @batchInputOne = ko.observable(null)
     @batchInputTwo = ko.observable(null)
     @step2LoadFileInput = $('#step2_load_file_input')
+    batchWorkflowFileTree = new Precision.BatchWorkflowFileTree()
     ### step 2 ###
 
     ### step 3 ###
@@ -551,16 +552,6 @@ class BatchWorkflowPageModel
 WorkflowsController = Paloma.controller('Workflows', {
   batch_workflow: ->
     $container = $('body main')
-
-    mockFolders = [
-      { id: 'folder-1-id', name: 'folder-1-name', type: 'folder' },
-      { id: 'folder-2-id', name: 'folder-2-name', type: 'folder' },
-      { id: 'folder-3-id', name: 'folder-3-name', type: 'folder' },
-      { id: 'file-1-id', name: 'file-1-name', type: 'file' },
-      { id: 'file-2-id', name: 'file-2-name', type: 'file' },
-      { id: 'file-3-id', name: 'file-3-name', type: 'file' }
-    ]
-
     viewModel = new BatchWorkflowPageModel(
       @params.workflow,
       @params.inputs,
