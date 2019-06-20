@@ -43,25 +43,31 @@ This requires manually "bootstrapping" the situation in steps described in
     * `git config --global user.name “FirstName LastName”`
     * `git config --global push.default simple`
 
-### Docker setup
-
-* Install Docker and Docker-Compose. See [instructions](https://docs.docker.com/compose/install/)
-* Install gems
-  * `docker-compose run web bundle install`
-* Prepare db
-  * `docker-compose run web bundle exec rake db:create`
-  * `docker-compose run web bundle exec rake db:schema:load`
-* start rails server
-  * `docker-compose up`
-* start rails console
-  * `docker compose exec web bundle exec rails c`  
-
-## pFDA setup
+### pFDA with Docker setup
 
 * Clone Repo
     * `git clone git@github.com:dnanexus/precision-fda.git`
-* `bundle install`
-* `bundle exec rake db:schema:load`
+
+### Docker install and run
+
+* Install Docker and Docker-Compose. See [instructions](https://docs.docker.com/compose/install/)
+
+* Docker Run
+  * `docker-compose -f docker/isolation.docker-compose.yml up --build`
+* start localhost in browser
+  * `https://localhost:3000`
+
+##### Deprecated Docker usage
+
+###### Install gems
+  * `docker-compose run web bundle install`
+###### Prepare db
+  * `docker-compose run web bundle exec rake db:create`
+  * `docker-compose run web bundle exec rake db:schema:load`
+###### start rails server
+  * `docker-compose up`
+###### start rails console
+  * `docker compose exec web bundle exec rails c`  
 
 ### Issues
 
@@ -103,11 +109,26 @@ bundle exec rake db:seed \
 The _dxuser_ of the user record must match your DNAnexus username, and the _handle_ of the org record must
 match the DNAnexus org handle without the pfda.. prefix, i.e. floranteorg.
 
-## pFDA running
+## pFDA setup and running without Docker
 
-* start rails server
-    * `bundle exec thin --ssl start`
-    * **You must use https, ex: [https://localhost:3000](https://localhost:3000)**
+* Clone Repo
+  * `git clone git@github.com:dnanexus/precision-fda.git`
+
+* Bundler
+  * `bundle install`
+
+* DB setup
+  * update your own version of `config/database.yml`
+  * `bundle exec rake db:setup`
+  * `bundle exec rake db:schema:load`
+  * `bundle exec rake db:migrate`
+  * `bundle exec rake db:seed`
+  * `bundle exec rake db:seed`
+  * `bundle exec rake user:generate_test_users`
+
+* start app on a local server
+    * `bundle exec thin --ssl --debug start`
+    * You must use https, ex: [https://localhost:3000](https://localhost:3000)**
 * start rails console
     * `bundle exec rails c`
 

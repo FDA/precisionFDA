@@ -156,6 +156,8 @@ class WorkflowsController < ApplicationController
   end
 
   def batch_workflow
+    puts("In Workflows Contr/batch_workflow: params = #{params.inspect}")
+
     @workflow = Workflow.accessible_by(@context).find_by_uid(params[:id])
 
     if @workflow.nil?
@@ -180,6 +182,8 @@ class WorkflowsController < ApplicationController
   end
 
   def run_batch
+    puts("In Workflows Contr/run_batch: params = #{params.inspect}")
+
     workflow_object = Workflow.find_by_uid(params[:id])
     folder = Folder.find(params[:folder_id]) if params[:folder_id].present?
 
@@ -293,6 +297,7 @@ class WorkflowsController < ApplicationController
   end
 
   def output_folders_list
+    puts("In output_folders_list: params = #{params.inspect}")
     parent_folder_id ||= params[:parent_folder_id]
 
     workflow = Workflow.find_by_uid(params[:id])
@@ -306,12 +311,16 @@ class WorkflowsController < ApplicationController
           .editable_by(@context)
           .where(parent_folder_id: parent_folder_id)
       end
+    puts("In output_folders_list: folders = #{folders.inspect}")
+
     if folders.blank?
       result = { folders: [] }
     else
       folders_attr = folders.pluck(:id, :name)
       result = { folders: folders_attr.map { |el| { id: el[0], name: el[1] } } }
     end
+    puts("In output_folders_list: result = #{result.inspect}")
+    result
   end
 
   # usage on the platform
