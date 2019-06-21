@@ -33,7 +33,7 @@ class FileTree extends Precision.FileTree
       @loadNodes(data)
 
   prepareNodes: (nodes) ->
-    return _.values(nodes).filter((node) -> node.type == 'folder').map((node) ->
+    return _.values(nodes).map((node) ->
       {
         icon: 'fa fa-folder',
         id: node.id,
