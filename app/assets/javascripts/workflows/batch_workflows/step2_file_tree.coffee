@@ -53,11 +53,11 @@ class FileTree extends Precision.FileTree
     }
     super(jsTreeParams)
     @disabled = false
+    do @initTree
 
 
 class BatchWorkflowFileTree
   createNewTree: (container) ->
-    console.log(container)
     tree = new FileTree(@rootNodes, container)
     @folderTrees.push(tree)
     return tree
