@@ -55,20 +55,6 @@
         <hr>
       <!-- /ko -->
       <div data-bind="attr: {id: input.name}"></div>
-      <!-- ko foreach: { data: input.filteredFiles, as: 'file' } -->
-        <div class="checkbox">
-          <label data-bind="attr: { id: 'step2_select_batch_file_' + file.uid }, css: {'text-primary': file.highlighted()}">
-            <input
-              type="checkbox"
-              name="step2_select_batch_file"
-              data-bind="checkedValue: file.uid, checked: input.selectedFiles, attr: {
-                name: input.name,
-                id: 'step2_select_batch_file_' + file.uid
-            }" />
-            <span data-bind="text: file.title"></span>
-          </label>
-        </div>
-      <!-- /ko -->
     </div>
   </div>
   <!-- /ko -->
