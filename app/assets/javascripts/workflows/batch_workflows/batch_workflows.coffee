@@ -131,7 +131,8 @@ class BatchInputFile
     @title = data.title
     @highlighted = ko.observable(false)
 
-extendBatchInput = (files) ->
+extendBatchInput = () ->
+  files = @batchWorkflowFileTree.rootNodes
   @files = ko.observableArray(files.map((file) -> new BatchInputFile(file)))
   @selectedFiles = ko.observableArray([])
 
@@ -215,6 +216,9 @@ extendBatchInput = (files) ->
 
 
 class BatchInputModel
+  initTree: () ->
+    @batchWorkflowFileTree.createNewTree($("##{@name}"))
+
   onChange: () ->
     @valid(true)
 
@@ -224,13 +228,13 @@ class BatchInputModel
       return @value().split(/\r*\n/).length
     else
       return 0
-  constructor: (type, title, files) ->
+  constructor: (type, title, @batchWorkflowFileTree) ->
     @type = ko.observable(type)
     @value = ko.observable(null)
     @valid = ko.observable(true)
     @title = ko.observable(title)
     @name = "step2_select_batch_file_#{title.replace(/\s/g, '_')}"
-    extendBatchInput.call(@, files) if type == 'file'
+    extendBatchInput.call(@) if type == 'file'
 ### Batch Input Model ###
 
 ### FolderModel ###
@@ -290,13 +294,12 @@ class BatchWorkflowPageModel
 
   nextToStep2: () ->
     return false if !@validateStep1()
-    files = @selectorModel.listedFiles()
     @batchInputOne(null)
     if @batchInputOneType()
-      @batchInputOne new BatchInputModel(@batchInputOneType(), 'INPUT 1', files)
+      @batchInputOne new BatchInputModel(@batchInputOneType(), 'INPUT 1', @batchWorkflowFileTree)
     @batchInputTwo(null)
     if @batchInputTwoType()
-      @batchInputTwo new BatchInputModel(@batchInputTwoType(), 'INPUT 2', files)
+      @batchInputTwo new BatchInputModel(@batchInputTwoType(), 'INPUT 2', @batchWorkflowFileTree)
     @step(2)
 
   nextToStep3: () ->
@@ -513,7 +516,7 @@ class BatchWorkflowPageModel
     @batchInputOne = ko.observable(null)
     @batchInputTwo = ko.observable(null)
     @step2LoadFileInput = $('#step2_load_file_input')
-    batchWorkflowFileTree = new Precision.BatchWorkflowFileTree()
+    @batchWorkflowFileTree = new Precision.BatchWorkflowFileTree()
     ### step 2 ###
 
     ### step 3 ###
@@ -560,4 +563,5 @@ WorkflowsController = Paloma.controller('Workflows', {
       @params.scope
     )
     ko.applyBindings(viewModel, $container[0])
+    window.viewModel = viewModel
 })

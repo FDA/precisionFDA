@@ -54,6 +54,7 @@
         </div>
         <hr>
       <!-- /ko -->
+      <div data-bind="attr: {id: input.name}"></div>
       <!-- ko foreach: { data: input.filteredFiles, as: 'file' } -->
         <div class="checkbox">
           <label data-bind="attr: { id: 'step2_select_batch_file_' + file.uid }, css: {'text-primary': file.highlighted()}">

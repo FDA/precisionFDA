@@ -37,14 +37,18 @@ class FileTree extends Precision.FileTree
       {
         icon: 'fa fa-folder',
         id: node.id,
-        text: node.name
+        uid: node.uid,
+        text: node.name.replace(/\//g, ''),
+        type: node.type.toLowerCase(),
+        name: node.name,
+        highlighted: false
       }
     )
 
   constructor: (defaultNodes = [], container) ->
     jsTreeParams = {
       container: container,
-      defaultNodes: @prepareNodes(data.nodes),
+      defaultNodes: @prepareNodes(defaultNodes),
       rootName: 'My accessible files'
     }
     super(jsTreeParams)
@@ -53,6 +57,7 @@ class FileTree extends Precision.FileTree
 
 class BatchWorkflowFileTree
   createNewTree: (container) ->
+    console.log(container)
     tree = new FileTree(@rootNodes, container)
     @folderTrees.push(tree)
     return tree
