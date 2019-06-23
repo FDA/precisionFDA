@@ -1,4 +1,4 @@
-class AddExtrasToOrg < ActiveRecord::Migration
+class AddExtrasToOrg < ActiveRecord::Migration[4.2]
   def change
     add_column :orgs, :address, :text
     add_column :orgs, :duns, :string

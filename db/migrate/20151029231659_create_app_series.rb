@@ -1,4 +1,4 @@
-class CreateAppSeries < ActiveRecord::Migration
+class CreateAppSeries < ActiveRecord::Migration[4.2]
   def change
     create_table :app_series do |t|
       t.string :dxid

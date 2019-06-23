@@ -1,4 +1,4 @@
-class AddIndexesToEvents < ActiveRecord::Migration
+class AddIndexesToEvents < ActiveRecord::Migration[4.2]
   ATTRIBUTES = %w(org_handle dxuser param2 created_at)
 
   def change

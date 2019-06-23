@@ -1,4 +1,4 @@
-class AddStateToComments < ActiveRecord::Migration
+class AddStateToComments < ActiveRecord::Migration[4.2]
   def change
     add_column :comments, :state, :integer, default: 0
 

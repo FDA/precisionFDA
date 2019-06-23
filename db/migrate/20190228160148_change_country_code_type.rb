@@ -1,4 +1,4 @@
-class ChangeCountryCodeType < ActiveRecord::Migration
+class ChangeCountryCodeType < ActiveRecord::Migration[4.2]
   def change
     remove_column :profiles, :phone_country_code, :string
     add_column :profiles, :phone_country_id, :integer, index: true

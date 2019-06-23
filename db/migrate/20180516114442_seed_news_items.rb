@@ -1,4 +1,4 @@
-class SeedNewsItems < ActiveRecord::Migration
+class SeedNewsItems < ActiveRecord::Migration[4.2]
   def up
     NewsItem.create([
       {

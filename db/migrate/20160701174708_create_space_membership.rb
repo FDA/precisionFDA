@@ -1,4 +1,4 @@
-class CreateSpaceMembership < ActiveRecord::Migration
+class CreateSpaceMembership < ActiveRecord::Migration[4.2]
   def change
     create_table :space_memberships do |t|
       t.references :user, index: true, foreign_key: true

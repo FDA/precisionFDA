@@ -1,4 +1,4 @@
-class FixPermissionsInComparisons < ActiveRecord::Migration
+class FixPermissionsInComparisons < ActiveRecord::Migration[4.2]
   def change
     add_column :comparisons, :scope, :string
     add_index :comparisons, :scope

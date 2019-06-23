@@ -1,4 +1,4 @@
-class MigrateSpaceMembership < ActiveRecord::Migration
+class MigrateSpaceMembership < ActiveRecord::Migration[4.2]
 
   class Space < ActiveRecord::Base
     has_and_belongs_to_many :space_memberships

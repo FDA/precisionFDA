@@ -1,4 +1,4 @@
-class AddJobClosedToEvents < ActiveRecord::Migration
+class AddJobClosedToEvents < ActiveRecord::Migration[4.2]
   def change
 
     add_column :events, :param4, :string
