@@ -1,4 +1,4 @@
-class AddParentToUserFile < ActiveRecord::Migration
+class AddParentToUserFile < ActiveRecord::Migration[4.2]
   def change
     add_reference :user_files, :parent, index: true, polymorphic: true
 

@@ -1,4 +1,4 @@
-class AddChallengeBot < ActiveRecord::Migration
+class AddChallengeBot < ActiveRecord::Migration[4.2]
   def up
     return unless defined? CHALLENGE_BOT_DX_USER
     return unless defined? CHALLENGE_BOT_PRIVATE_FILES_PROJECT

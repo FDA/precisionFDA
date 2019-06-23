@@ -1,4 +1,4 @@
-class CreateNodes < ActiveRecord::Migration
+class CreateNodes < ActiveRecord::Migration[4.2]
   def change
     change_table :user_files do |t|
       t.integer :parent_folder_id

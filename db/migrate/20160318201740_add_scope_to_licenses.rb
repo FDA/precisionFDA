@@ -1,4 +1,4 @@
-class AddScopeToLicenses < ActiveRecord::Migration
+class AddScopeToLicenses < ActiveRecord::Migration[4.2]
   def change
     add_column :licenses, :scope, :string
     add_index :licenses, :scope

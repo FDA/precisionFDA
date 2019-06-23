@@ -1,4 +1,4 @@
-class CreateSpaceEvents < ActiveRecord::Migration
+class CreateSpaceEvents < ActiveRecord::Migration[4.2]
   def change
     create_table :space_events do |t|
       t.references :user, null: false, index: true, foreign_key: true

@@ -1,4 +1,4 @@
-class AddCountryAndCityAndUsStateAndPostalCodeToInvitations < ActiveRecord::Migration
+class AddCountryAndCityAndUsStateAndPostalCodeToInvitations < ActiveRecord::Migration[4.2]
   def change
     add_column :invitations, :country, :string
     add_column :invitations, :city, :string

@@ -1,4 +1,4 @@
-class CreateAppathons < ActiveRecord::Migration
+class CreateAppathons < ActiveRecord::Migration[4.2]
   def change
     create_table :appathons do |t|
       t.string :name, required: true

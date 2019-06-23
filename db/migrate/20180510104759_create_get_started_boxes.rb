@@ -1,4 +1,4 @@
-class CreateGetStartedBoxes < ActiveRecord::Migration
+class CreateGetStartedBoxes < ActiveRecord::Migration[4.2]
   def up
     GetStartedBox.create(
       [

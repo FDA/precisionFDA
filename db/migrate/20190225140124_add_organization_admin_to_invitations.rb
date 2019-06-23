@@ -1,4 +1,4 @@
-class AddOrganizationAdminToInvitations < ActiveRecord::Migration
+class AddOrganizationAdminToInvitations < ActiveRecord::Migration[4.2]
   def change
     add_column :invitations,
                :organization_admin,
