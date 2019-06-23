@@ -3,10 +3,10 @@ FactoryBot.define do
 
     sequence(:name) { |n| "name-#{n}" }
     sequence(:description) { |n| "description-#{n}" }
-    private false
+    private { false }
 
     transient do
-      nodes []
+      nodes { [] }
     end
 
     after(:create) do |template, evaluator|

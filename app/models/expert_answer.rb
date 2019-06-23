@@ -8,7 +8,7 @@
 #  updated_at    :datetime         not null
 #
 
-class ExpertAnswer < ActiveRecord::Base
+class ExpertAnswer < ApplicationRecord
   include Auditor
 
   belongs_to :expert

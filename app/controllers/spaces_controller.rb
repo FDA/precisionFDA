@@ -443,15 +443,17 @@ class SpacesController < ApplicationController
     @folder_id = params[:folder_id]
     @folder = Folder.accessible_by_space(@space).find_by(id: @folder_id)
     @folders = folders(@folder_id)
+
     if request.xhr?
       render_folders(@folders)
       return
     end
 
-    nodes = Node.where.any_of(
-      UserFile.real_files.accessible_by_space(@space).where(scoped_parent_folder_id: @folder_id),
-      @folders
-    )
+    user_files = UserFile.real_files.
+      accessible_by_space(@space).
+      where(scoped_parent_folder_id: @folder_id)
+
+    nodes = Node.where(id: (user_files + @folders).map(&:id))
 
     @counts.merge!({ folders: folders.limit(1).count })
     @files_grid = initialize_grid(nodes.includes(:taggings), {

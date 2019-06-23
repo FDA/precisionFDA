@@ -34,7 +34,7 @@ RSpec.describe SpacesController, type: :controller do
 
     context "when data is correct" do
       it "creates a space" do
-        post :create, space: space_params
+        post :create, params: { space: space_params }
 
         last_space = Space.last
         expect(Space.count).to eq(1)
@@ -78,7 +78,7 @@ RSpec.describe SpacesController, type: :controller do
 
     context "if type is review" do
       it "creates a space" do
-        post :create, space: review_space_params
+        post :create, params: { space: review_space_params }
 
         expect_valid(:space)
         cooperative_space = Space.first
@@ -140,7 +140,7 @@ RSpec.describe SpacesController, type: :controller do
 
       it "creates a space" do
 
-        post :create, space: review_space_params.merge(space_template_id: template.id)
+        post :create, params: { space: review_space_params.merge(space_template_id: template.id) }
 
         last_space = Space.last
 
@@ -167,7 +167,7 @@ RSpec.describe SpacesController, type: :controller do
       before { authenticate!(host_lead) }
 
       it "creates a dnanexus project" do
-        post :accept, id: space.id
+        post :accept, params: { id: space.id }
 
         space.reload
         expect(space.host_project).to be_present
@@ -197,7 +197,7 @@ RSpec.describe SpacesController, type: :controller do
         let(:space) { create(:space, :review, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id) }
 
         it "adds user to the membership" do
-          post :accept, id: space.id
+          post :accept, params: { id: space.id }
 
           expect(WebMock).not_to have_requested(:any, /.*/)
 
@@ -212,7 +212,7 @@ RSpec.describe SpacesController, type: :controller do
       before { authenticate!(guest_lead) }
 
       it "creates a dnanexus project" do
-        post :accept, id: space.id
+        post :accept, params: { id: space.id }
 
         space.reload
         expect(space.guest_project).to be_present
@@ -241,7 +241,7 @@ RSpec.describe SpacesController, type: :controller do
         let(:space) { create(:space, :review, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id) }
 
         it "creates a dnanexus project" do
-          post :accept, id: space.id
+          post :accept, params: { id: space.id }
 
           space.reload
           expect(space.guest_project).to be_present
@@ -296,7 +296,7 @@ RSpec.describe SpacesController, type: :controller do
     context "by host_admin" do
       before { authenticate!(host_lead) }
       it "invites a user as a contributor" do
-        post :invite, id: space.id, space: { invitees: user.dxuser, invitees_role: "contributor" }
+        post :invite, params: { id: space.id, space: { invitees: user.dxuser, invitees_role: "contributor" } }
 
         expect(SpaceMembership.where(user_id: user.id).count).to eq(1)
         expect(SpaceMembership.where(user_id: user.id).first.contributor?).to be_truthy
@@ -312,7 +312,7 @@ RSpec.describe SpacesController, type: :controller do
       end
 
       it "invites a user as a viewer" do
-        post :invite, id: space.id, space: { invitees: user.dxuser, invitees_role: "viewer" }
+        post :invite, params: { id: space.id, space: { invitees: user.dxuser, invitees_role: "viewer" } }
 
         expect(SpaceMembership.where(user_id: user.id).count).to eq(1)
         expect(SpaceMembership.where(user_id: user.id).first.viewer?).to be_truthy
@@ -328,7 +328,7 @@ RSpec.describe SpacesController, type: :controller do
       end
 
       it "invites a user as an admin" do
-        post :invite, id: space.id, space: { invitees: user.dxuser, invitees_role: "admin" }
+        post :invite, params: { id: space.id, space: { invitees: user.dxuser, invitees_role: "admin" } }
 
         expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{space.host_dxorg}/invite").with(body: {
           invitee: user.dxid,
@@ -342,7 +342,7 @@ RSpec.describe SpacesController, type: :controller do
       before { authenticate!(host_lead) }
 
       it "invites an user as a contributor" do
-        post :invite, id: review_space.id, space: { invitees: user.dxuser, invitees_role: "contributor" }
+        post :invite, params: { id: review_space.id, space: { invitees: user.dxuser, invitees_role: "contributor" } }
 
         expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{review_space.host_dxorg}/invite").with(body: {
           invitee: user.dxid,
@@ -357,7 +357,7 @@ RSpec.describe SpacesController, type: :controller do
       end
 
       it "invites an user as a viewer" do
-        post :invite, id: review_space.id, space: { invitees: user.dxuser, invitees_role: "viewer" }
+        post :invite, params: { id: review_space.id, space: { invitees: user.dxuser, invitees_role: "viewer" } }
 
         expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{review_space.host_dxorg}/invite").with(body: {
           invitee: user.dxid,
@@ -379,7 +379,7 @@ RSpec.describe SpacesController, type: :controller do
     context "by host_admin" do
       before { authenticate!(host_lead) }
       it "lists tasks" do
-        get :tasks, id: space
+        get :tasks, params: { id: space }
 
         expect(response).to be_successful
       end

@@ -1,4 +1,4 @@
-class GetStartedBox < ActiveRecord::Base
+class GetStartedBox < ApplicationRecord
 
   enum kind: %i(default upload_file add_asset create_app launch_app run_comparison create_note)
 

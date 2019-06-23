@@ -1,4 +1,4 @@
-class SpaceMembership < ActiveRecord::Base
+class SpaceMembership < ApplicationRecord
   include Auditor
 
   SIDE_HOST = 'host'
@@ -19,7 +19,7 @@ class SpaceMembership < ActiveRecord::Base
   enum side: [SIDE_HOST, SIDE_GUEST]
 
   scope :active, -> { where(active: true) }
-  scope :lead_or_admin, -> { where.any_of(lead, admin) }
+  scope :lead_or_admin, -> { where(role: [ROLE_LEAD, ROLE_ADMIN]) }
 
   def self.new_by_admin(user)
     new(side: SIDE_HOST, role: ROLE_ADMIN, user: user)

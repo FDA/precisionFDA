@@ -350,5 +350,5 @@ class AppInputModel
     return value
 
 window.Precision ||= {}
-window.Precision.models || = {}
+window.Precision.models ||= {}
 window.Precision.models.AppInputModel = AppInputModel

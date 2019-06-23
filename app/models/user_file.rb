@@ -53,16 +53,18 @@ class UserFile < Node
 
   PARENT_TYPE_COMPARISON = "Comparison".freeze
 
-  has_many :notes, { through: :attachments }
-  has_many :attachments, { as: :item, dependent: :destroy }
+  has_many :attachments, as: :item, dependent: :destroy
+  has_many :notes, through: :attachments
   has_many :comparison_inputs
-  has_many :comparisons, -> { distinct }, { through: :comparison_inputs, dependent: :restrict_with_exception }
+  has_many :comparisons, ->{ distinct },
+           through: :comparison_inputs,
+           dependent: :restrict_with_exception
 
-  has_and_belongs_to_many :jobs_as_input, { join_table: "job_inputs", class_name: "Job" }
+  has_and_belongs_to_many :jobs_as_input, join_table: "job_inputs", class_name: "Job"
 
-  has_one :licensed_item, { as: :licenseable, dependent: :destroy }
-  has_one :license, { through: :licensed_item }
-  has_many :accepted_licenses, { through: :license }
+  has_one :licensed_item, as: :licenseable, dependent: :destroy
+  has_one :license, through: :licensed_item
+  has_many :accepted_licenses, through: :license
 
   has_many :challenge_resources
 
@@ -71,14 +73,14 @@ class UserFile < Node
 
   validates :name, presence: { message: "Name could not be blank" }
   validates :description,
-            allow_blank:
-              true,
+            allow_blank: true,
             length: {
               maximum: DESCRIPTION_MAX_LENGTH,
               too_long: "Description could not be greater than #{DESCRIPTION_MAX_LENGTH} characters",
             }
 
   scope :open, -> { where(state: STATE_OPEN) }
+
   scope :files_conditions, -> {
     where(state: "closed").where.not(parent_type: ["Comparison", nil]).includes(:taggings)
   }

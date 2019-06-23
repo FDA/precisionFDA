@@ -15,7 +15,7 @@
 #  updated_at          :datetime        not null
 #
 
-class Task < ActiveRecord::Base
+class Task < ApplicationRecord
   belongs_to :user
   belongs_to :space
 

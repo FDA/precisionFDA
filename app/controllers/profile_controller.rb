@@ -232,7 +232,9 @@ class ProfileController < ApplicationController
             if inv.user.present?
               row << inv.user.dxuser
             else
-              u = User.where.any_of({ first_name: inv.first_name, last_name: inv.last_name }, normalized_email: inv.email.downcase.strip).take
+              u = User.where(first_name: inv.first_name, last_name: inv.last_name).
+                or(User.where({normalized_email: inv.email.downcase.strip})).take
+
               row << (u ? "maybe #{u.dxuser}" : "")
             end
             row += [inv.first_name, inv.last_name, inv.email, inv.org, inv.singular, inv.country.try(:name), inv.city, inv.us_state, inv.postal_code, inv.address1, inv.address2, inv.full_phone, inv.duns, inv.participate_intent, inv.organize_intent, inv.research_intent, inv.clinical_intent, inv.req_data, inv.req_software, inv.req_reason]

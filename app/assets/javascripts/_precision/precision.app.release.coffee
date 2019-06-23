@@ -30,5 +30,5 @@ class AppReleaseModel
       )
 
 window.Precision ||= {}
-window.Precision.models || = {}
+window.Precision.models ||= {}
 window.Precision.models.AppReleaseModel = AppReleaseModel

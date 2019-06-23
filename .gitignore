@@ -19,13 +19,25 @@
 
 # Ignore all logfiles and tempfiles.
 /log/*
-!/log/.keep
 /tmp/*
+!/log/.keep
 !/tmp/.keep
 *.swp
 
+# Ignore uploaded files in development
+/storage/*
+!/storage/.keep
+
+/node_modules
+/yarn-error.log
+
 # Ignore generated assets
 /public/assets
+
+.byebug_history
+
+# Ignore master key for decrypting credentials and more.
+/config/master.key
 
 # Ignore deployed gems
 /vendor/bundle
@@ -35,6 +47,14 @@
 
 # Ignore OSX hidden file
 .DS_Store
+
+.gems/
+
+# Ignore local environment
+.env
+
+# Ignore IDE files
+.idea/
 
 # Ignore application configuration
 /config/application.yml
@@ -55,14 +75,5 @@
 /test/functional/src/main/resources/tempFiles/*.gz
 /test/functional/src/main/resources/tempFiles/*.csv
 
-.gems/
-
-# Ignore local environment
-.env
-.env.*
-
 # Ignore local scripts
 run-ui-test.sh
-
-# Ignore IDE files
-.idea/

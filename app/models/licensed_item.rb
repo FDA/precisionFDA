@@ -10,7 +10,7 @@
 #  updated_at       :datetime         not null
 #
 
-class LicensedItem < ActiveRecord::Base
+class LicensedItem < ApplicationRecord
   include Auditor
 
   belongs_to :license

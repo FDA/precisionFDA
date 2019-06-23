@@ -18,7 +18,7 @@
 #  updated_at          :datetime         not null
 #
 
-class Workflow < ActiveRecord::Base
+class Workflow < ApplicationRecord
   include Auditor
   include Permissions
   include InternalUid

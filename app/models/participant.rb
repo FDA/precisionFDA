@@ -11,7 +11,7 @@
 # created_at  :datetime     not null
 # updated_at  :datetime     not null
 #
-class Participant < ActiveRecord::Base
+class Participant < ApplicationRecord
   enum kind: %i(invisible org person)
 
   validates :title, :image_url, presence: true

@@ -15,7 +15,7 @@
 #  scope       :string
 #
 
-class Comparison < ActiveRecord::Base
+class Comparison < ApplicationRecord
   include Auditor
   include Permissions
 
@@ -24,13 +24,13 @@ class Comparison < ActiveRecord::Base
   # comparison.user => returns the user who created the comparison
   belongs_to :user
 
-  # comparison.user_files => returns the collection of UserFile
-  # objects which participated in this comparison
-  has_many :user_files, {through: :inputs}
-
   # comparison.inputs => returns the collection of ComparisonInput
   # objects associated with this comparison
-  has_many :inputs, {class_name: "ComparisonInput", dependent: :destroy}
+  has_many :inputs, class_name: "ComparisonInput", dependent: :destroy
+
+  # comparison.user_files => returns the collection of UserFile
+  # objects which participated in this comparison
+  has_many :user_files, through: :inputs
 
   # comparison.outputs => returns the UserFile objects that are
   # part of the comparison outputs. These UserFile objects have
@@ -120,7 +120,7 @@ class Comparison < ActiveRecord::Base
     comparisons.uniq.each do |comparison|
       next unless comparison.publishable_by?(context, scope)
       comparisons_to_publish << comparison
-      comparison.outputs.flatten.each do |file|
+      comparison.outputs.to_a.flatten.each do |file|
         raise "Consistency check failure for file #{file.id} (#{file.dxid})" unless file.passes_consistency_check?(context.user)
         raise "Source and destination collision for file #{file.id} (#{file.dxid})" if destination_project == file.project
         projects[file.project] = [] unless projects.has_key?(file.project)

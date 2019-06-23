@@ -10,7 +10,7 @@
 #  updated_at    :datetime         not null
 #
 
-class ExpertQuestion < ActiveRecord::Base
+class ExpertQuestion < ApplicationRecord
   include Auditor
 
   acts_as_commentable

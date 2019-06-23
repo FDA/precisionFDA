@@ -1,4 +1,4 @@
-class Profile < ActiveRecord::Base
+class Profile < ApplicationRecord
   belongs_to :user
   belongs_to :country
   belongs_to :phone_country, class_name: 'Country'

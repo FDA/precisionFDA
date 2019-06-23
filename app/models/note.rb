@@ -12,7 +12,7 @@
 #  note_type  :string
 #
 
-class Note < ActiveRecord::Base
+class Note < ApplicationRecord
   include Auditor
   include Permissions
 

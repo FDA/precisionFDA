@@ -27,7 +27,7 @@
 #  organization_admin :boolean          default(FALSE), not null
 #
 
-class Invitation < ActiveRecord::Base
+class Invitation < ApplicationRecord
   include Auditor
   include Humanizer
 

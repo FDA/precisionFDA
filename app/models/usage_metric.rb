@@ -1,4 +1,4 @@
-class UsageMetric < ActiveRecord::Base
+class UsageMetric < ApplicationRecord
   include Auditor
 
   USER_STATES = %w(enabled locked).freeze

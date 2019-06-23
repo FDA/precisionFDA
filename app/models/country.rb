@@ -7,7 +7,7 @@
 #  dial_code     :string
 #
 
-class Country < ActiveRecord::Base
+class Country < ApplicationRecord
   US_STATES_LIST =
     {
       "AL": "Alabama",
