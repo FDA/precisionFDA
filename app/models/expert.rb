@@ -11,7 +11,7 @@
 #  updated_at    :datetime         not null
 #
 
-class Expert < ActiveRecord::Base
+class Expert < ApplicationRecord
   include Auditor
 
   has_many :expert_questions, dependent: :destroy
@@ -103,7 +103,7 @@ class Expert < ActiveRecord::Base
   def self.editable_by(context)
     if !context.guest?
       raise unless context.user_id.present?
-      Expert.where(user_id: context.user_id).uniq
+      Expert.where(user_id: context.user_id).distinct
     end
   end
 

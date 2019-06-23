@@ -2,7 +2,6 @@ module Permissions
   extend ActiveSupport::Concern
 
   module ClassMethods
-
     def can_be_in_space?
       true
     end
@@ -13,14 +12,13 @@ module Permissions
       else
         raise unless context.user_id.present? && context.user.present?
 
-        queries = [].tap do |queries|
-          queries.push({ user_id: context.user_id, scope: "private" })
-          queries.push({ scope: "public" })
-          queries.push({ scope: context.user.space_uids })
-          queries.push({ user_id: User.challenge_bot.id }) if context.challenge_evaluator?
-        end
+        query = where(user_id: context.user_id, scope: "private").
+          or(where(scope: "public")).
+          or(where(scope: context.user.space_uids))
 
-        where.any_of(*queries)
+        query = query.or(where(user_id: User.challenge_bot.id)) if context.challenge_evaluator?
+
+        query
       end
     end
 

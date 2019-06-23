@@ -1,4 +1,4 @@
-class Event < ActiveRecord::Base
+class Event < ApplicationRecord
   include Auditor
 
   scope :date_range, ->(begin_at, end_at) { where(created_at: begin_at..end_at) }

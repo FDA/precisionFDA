@@ -12,7 +12,7 @@
 #  updated_at       :datetime         not null
 #
 
-class Challenge < ActiveRecord::Base
+class Challenge < ApplicationRecord
   include Auditor
 
   STATUS_SETUP =    "setup"

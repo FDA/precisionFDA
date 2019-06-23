@@ -5,7 +5,7 @@ FactoryBot.define do
 
     trait :with_attachments do
       transient do
-        attachments []
+        attachments { [] }
       end
 
       after(:create) do |discussion, evaluator|

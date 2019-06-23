@@ -19,7 +19,7 @@
 #  analysis_id   :integer
 #
 
-class Job < ActiveRecord::Base
+class Job < ApplicationRecord
   include Auditor
   include Permissions
   include InternalUid
@@ -54,17 +54,17 @@ class Job < ActiveRecord::Base
   belongs_to :app_series
   belongs_to :analysis
 
-  has_and_belongs_to_many :input_files, {join_table: "job_inputs", class_name: "UserFile"}
+  has_and_belongs_to_many :input_files, join_table: "job_inputs", class_name: "UserFile"
   has_many :output_files, as: :parent, class_name: "UserFile"
 
-  has_many :notes, {through: :attachments}
-  has_many :attachments, {as: :item, dependent: :destroy}
+  has_many :attachments, as: :item, dependent: :destroy
+  has_many :notes, through: :attachments
 
   has_one :submission
 
-  store :describe, {coder: JSON}
-  store :run_data, {accessors: [ :run_inputs, :run_outputs, :run_instance_type ], coder: JSON}
-  store :provenance, {coder: JSON}
+  store :describe, coder: JSON
+  store :run_data, accessors: %i(run_inputs run_outputs run_instance_type), coder: JSON
+  store :provenance, coder: JSON
 
   acts_as_commentable
   acts_as_taggable

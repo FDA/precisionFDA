@@ -8,7 +8,7 @@
 #  item_type :string
 #
 
-class Attachment < ActiveRecord::Base
+class Attachment < ApplicationRecord
   include Auditor
 
   belongs_to :note

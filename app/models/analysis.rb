@@ -11,7 +11,7 @@
 #  workflow_id :integer
 #
 
-class Analysis < ActiveRecord::Base
+class Analysis < ApplicationRecord
   include Auditor
   include Permissions
   extend ApplicationHelper

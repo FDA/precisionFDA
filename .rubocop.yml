@@ -1,5 +1,6 @@
 require:
   - rubocop-rspec
+  - rubocop-rails
 
 AllCops:
   Exclude:
@@ -632,6 +633,10 @@ Rails/UniqBeforePluck:
   SupportedStyles:
   - conservative
   - aggressive
+
+Rails/Validation:
+  Include:
+  - app/models/**/*.rb
 
 Lint/UselessAccessModifier:
   ContextCreatingMethods: []

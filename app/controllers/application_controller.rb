@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   include PathHelper
+
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
@@ -30,6 +31,10 @@ class ApplicationController < ActionController::Base
   add_flash_types :success, :error
 
   private
+
+  def unsafe_params
+    params.to_unsafe_h
+  end
 
   def invalid_token
     redirect_to root_path, status: :see_other, alert: "Invalid session"

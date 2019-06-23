@@ -19,7 +19,7 @@
 #  state                :integer
 #
 
-class Comment < ActiveRecord::Base
+class Comment < ApplicationRecord
   include Auditor
   include Permissions
 

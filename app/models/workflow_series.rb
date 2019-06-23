@@ -12,7 +12,7 @@
 #  updated_at                  :datetime         not null
 #
 
-class WorkflowSeries < ActiveRecord::Base
+class WorkflowSeries < ApplicationRecord
   include Auditor
   include Permissions
 

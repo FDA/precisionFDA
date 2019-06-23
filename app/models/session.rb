@@ -1,4 +1,4 @@
-class Session < ActiveRecord::Base
+class Session < ApplicationRecord
   include Auditor
 
   validates :key, :user_id, presence: true

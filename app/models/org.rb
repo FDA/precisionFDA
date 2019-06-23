@@ -15,7 +15,7 @@
 #  singular   :boolean
 #
 
-class Org < ActiveRecord::Base
+class Org < ApplicationRecord
   include Auditor
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }

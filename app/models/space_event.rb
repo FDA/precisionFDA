@@ -14,7 +14,7 @@
 #  role                :integer         not null
 #
 
-class SpaceEvent < ActiveRecord::Base
+class SpaceEvent < ApplicationRecord
   OBJECT_TYPES = %i(
     space
     membership

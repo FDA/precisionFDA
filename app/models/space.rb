@@ -1,5 +1,5 @@
 # TODO: Items can be moved from private submitter/reviewer workspaces to a shared space.
-class Space < ActiveRecord::Base
+class Space < ApplicationRecord
   include Auditor
 
   TYPES = %i(groups review verification)
@@ -251,17 +251,18 @@ class Space < ActiveRecord::Base
 
     raise unless context.user_id.present?
 
-    queries = [].tap do |queries|
-      queries.push(space_memberships: { active: true, user_id: context.user_id })
-      if context.review_space_admin?
-        queries.push(id: reviewer.shared)
-        queries.push(id: reviewer.confidential.active)
-        queries.push(id: verification)
-      end
-      queries.push(id: groups) if context.can_administer_site?
+    query = joins(:space_memberships).
+      where(space_memberships: { active: true, user_id: context.user_id })
+
+    if context.review_space_admin?
+      query = query.or(where(id: reviewer.shared)).
+        or(where(id: reviewer.confidential.active)).
+        or(where(id: verification))
     end
 
-    joins(:space_memberships).where.any_of(*queries).uniq
+    query = query.or(where(id: groups)) if context.can_administer_site?
+
+    query.distinct
   end
 
   def search_content(content_type, query)

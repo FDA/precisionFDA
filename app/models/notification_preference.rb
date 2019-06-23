@@ -1,6 +1,6 @@
 # The current class is responsible only for storing user's preferences
 #   (not the rights to receive a notification).
-class NotificationPreference < ActiveRecord::Base
+class NotificationPreference < ApplicationRecord
 
   COMMON_KEYS = [
     :all_membership_changed,

@@ -21,7 +21,7 @@
 #  extras                      :text
 #
 
-class User < ActiveRecord::Base
+class User < ApplicationRecord
   include Auditor
 
   # The "schema_version" field is used to denote the schema

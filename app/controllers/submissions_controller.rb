@@ -80,8 +80,7 @@ class SubmissionsController < ApplicationController
 
     unless items.all? { |item| item.editable_by?(@context) }
       flash[:error] = "Item is not owned by you."
-      redirect_to :back
-      return
+      redirect_back(fallback_location: root_path) and return
     end
 
     if items.all?(&:public?)
@@ -96,8 +95,7 @@ class SubmissionsController < ApplicationController
     not_public_items.each do |item|
       unless item.publishable_by?(@context, scope)
         flash[:error] = "Item '#{item.title}' cannot be public."
-        redirect_to :back
-        return
+        redirect_back(fallback_location: root_path) and return
       end
     end
 

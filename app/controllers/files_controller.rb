@@ -24,7 +24,8 @@ class FilesController < ApplicationController
               .includes(:taggings)
 
     folders = private_folders(@parent_folder_id).includes(:taggings)
-    user_files = Node.where.any_of(files, folders)
+
+    user_files = Node.where(id: (files + folders).map(&:id))
 
     @current_folder = Folder.private_for(@context).editable_by(@context).find_by(id: @parent_folder_id)
     @files_grid = files_grid(user_files)
@@ -69,7 +70,8 @@ class FilesController < ApplicationController
               .where(scoped_parent_folder_id: @parent_folder_id)
 
     folders = explore_folders(@parent_folder_id).includes(:taggings)
-    user_files = Node.where.any_of(files, folders)
+
+    user_files = Node.where(id: (files + folders).map(&:id))
 
     @current_folder = Folder.accessible_by_public.find_by(id: @parent_folder_id)
     @files_grid = files_grid(user_files)

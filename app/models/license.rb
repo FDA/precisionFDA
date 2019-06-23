@@ -12,7 +12,7 @@
 #  approval_required :boolean          default(FALSE), not null
 #
 
-class License < ActiveRecord::Base
+class License < ApplicationRecord
   include Auditor
   include Permissions
   include Licenses
