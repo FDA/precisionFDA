@@ -13,7 +13,7 @@ RSpec.describe ApiController, type: :controller do
     it "publishes an app" do
       expect(Event::AppPublished).to receive(:create_for)
 
-      post :publish , {
+      post :publish , params: {
         scope: "public",
         uids: [app.uid],
       }

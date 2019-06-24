@@ -11,8 +11,8 @@ class Workflow
       validates :instance_type, 'workflow/non_empty_string': true,
                 'workflow/slot/instance_type_inclusion': true
       validates :inputs, :outputs, 'workflow/array_of_hashes': true
-      validates :prev_slot, 'workflow/non_empty_string': true, if: "prev_slot_condition"
-      validates :next_slot, 'workflow/non_empty_string': true, if: "next_slot_condition"
+      validates :prev_slot, 'workflow/non_empty_string': true, if: :prev_slot_condition
+      validates :next_slot, 'workflow/non_empty_string': true, if: :next_slot_condition
       validate :input_objects_valid?
 
       delegate :context, :slot_objects, to: :base_presenter

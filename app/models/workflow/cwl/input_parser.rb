@@ -7,8 +7,8 @@ class Workflow
 
       validates :name, 'workflow/non_empty_string':true,
                 'cwl/in_name':true
-      validates :link, 'cwl/in_link_first_step': true, if: 'step_number == 0'
-      validates :link, 'cwl/in_link': true, if: 'step_number > 0'
+      validates :link, 'cwl/in_link_first_step': true, if: -> { step_number == 0 }
+      validates :link, 'cwl/in_link': true, if: -> { step_number > 0 }
 
       def initialize(name, link, step)
         @name = name

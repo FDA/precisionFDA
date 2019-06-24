@@ -6,7 +6,7 @@ RSpec.describe PhoneConfirmationsController, type: :controller do
 
     it "sends an confirmation code" do
       phone = "1234567890"
-      post :create, phone: phone
+      post :create, params: { phone: phone }
 
       expect(response.status).to eq(200)
     end
@@ -19,7 +19,7 @@ RSpec.describe PhoneConfirmationsController, type: :controller do
       phone = "1234567890"
       PhoneConfirmationService.send_code(phone)
       last_phone_confirmation = PhoneConfirmation.last
-      get :check_code, phone: phone, code: last_phone_confirmation.code
+      get :check_code, params: { phone: phone, code: last_phone_confirmation.code }
 
       expect(response.status).to eq(200)
     end
@@ -27,7 +27,7 @@ RSpec.describe PhoneConfirmationsController, type: :controller do
     it "checks that confirmation code is invalid" do
       phone = "1234567890"
       PhoneConfirmationService.send_code(phone)
-      get :check_code, phone: phone, code: "123456"
+      get :check_code, params: { phone: phone, code: "123456" }
 
       expect(response.status).to eq(422)
     end
