@@ -7,7 +7,7 @@ class ExpertsController < ApplicationController
   end
 
   def blog
-    @expert = Expert.find(params[:id])
+    @expert = Expert.find(unsafe_params[:id])
     if !@expert.is_public?
       if !@expert.editable_by?(@context)
         redirect_to experts_path and return
@@ -48,14 +48,14 @@ class ExpertsController < ApplicationController
   end
 
   def edit
-    @expert = Expert.find(params[:id])
+    @expert = Expert.find(unsafe_params[:id])
     redirect_to experts_path(@expert) and return unless @expert.editable_by?(@context) || @context.user.can_administer_site?
 
     js imageUrl: @expert.image, fileId: @expert._image_id
   end
 
   def update
-    @expert = Expert.find(params[:id])
+    @expert = Expert.find(unsafe_params[:id])
     redirect_to experts_path and return unless @expert.editable_by?(@context) || @context.user.can_administer_site?
 
     Expert.transaction do
@@ -70,7 +70,7 @@ class ExpertsController < ApplicationController
   end
 
   def open
-    @expert = Expert.find(params[:id])
+    @expert = Expert.find(unsafe_params[:id])
     redirect_to experts_path and return unless @expert.editable_by?(@context)
 
     Expert.transaction do
@@ -84,7 +84,7 @@ class ExpertsController < ApplicationController
   end
 
   def close
-    @expert = Expert.find(params[:id])
+    @expert = Expert.find(unsafe_params[:id])
     redirect_to experts_path and return unless @expert.editable_by?(@context)
 
     Expert.transaction do
@@ -98,11 +98,11 @@ class ExpertsController < ApplicationController
   end
 
   def ask_question
-    expert = Expert.find(params[:id])
+    expert = Expert.find(unsafe_params[:id])
     redirect_to experts_path and return unless expert.askable?
 
     if @context.logged_in?
-      exp_question = ExpertQuestion.provision(expert, @context, params[:expert][:question])
+      exp_question = ExpertQuestion.provision(expert, @context, unsafe_params[:expert][:question])
       if exp_question
         NotificationsMailer.new_expert_question_email(expert, exp_question).deliver_now!
         flash[:success] = "Your question was submitted successfully."
@@ -114,8 +114,8 @@ class ExpertsController < ApplicationController
           :user_id => nil,
           :expert_id => expert.id,
           :state => "open",
-          :body => params[:expert][:question],
-          :_original => params[:expert][:question],
+          :body => unsafe_params[:expert][:question],
+          :_original => unsafe_params[:expert][:question],
           :_edited => false.to_s
       )
       if verify_recaptcha(model: @exp_question) && @exp_question.save!
@@ -130,7 +130,7 @@ class ExpertsController < ApplicationController
   end
 
   def dashboard
-    @expert = Expert.find(params[:id])
+    @expert = Expert.find(unsafe_params[:id])
     redirect_to experts_path unless @expert.editable_by?(@context)
 
     @answered_questions = @expert.answered_questions
@@ -140,7 +140,7 @@ class ExpertsController < ApplicationController
   end
 
   def show
-    @expert = Expert.find(params[:id])
+    @expert = Expert.find(unsafe_params[:id])
     if !@expert.is_public?
       if !@expert.editable_by?(@context)
         redirect_to experts_path and return
@@ -154,7 +154,7 @@ class ExpertsController < ApplicationController
   end
 
   def destroy
-    expert = Event.editable_by(@context).find(params[:id])
+    expert = Event.editable_by(@context).find(unsafe_params[:id])
     redirect_to experts_path unless @expert.editable_by?(@context)
 
     name = user_title(expert.user)

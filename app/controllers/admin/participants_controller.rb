@@ -35,15 +35,15 @@ module Admin
     end
 
     def update_positions
-      Array.wrap(params[:org_participants]).each_with_index do |id, index|
+      Array.wrap(unsafe_params[:org_participants]).each_with_index do |id, index|
         Participant.update(id, position: index, kind: :org)
       end
 
-      Array.wrap(params[:person_participants]).each_with_index do |id, index|
+      Array.wrap(unsafe_params[:person_participants]).each_with_index do |id, index|
         Participant.update(id, position: index, kind: :person)
       end
 
-      Array.wrap(params[:invisible_participants]).each_with_index do |id, index|
+      Array.wrap(unsafe_params[:invisible_participants]).each_with_index do |id, index|
         Participant.update(id, position: index, kind: :invisible)
       end
 
@@ -66,7 +66,7 @@ module Admin
     end
 
     def set_participant
-      @participant = Participant.find(params[:id])
+      @participant = Participant.find(unsafe_params[:id])
     end
 
     def participant_params

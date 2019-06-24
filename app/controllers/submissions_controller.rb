@@ -3,7 +3,7 @@ class SubmissionsController < ApplicationController
   before_action :require_login_or_guest, only: []
 
   def new
-    @challenge = Challenge.find_by_id!(params[:challenge_id])
+    @challenge = Challenge.find_by_id!(unsafe_params[:challenge_id])
     if @context.logged_in?
       unless @challenge.followed_by?(@context.user)
         flash[:warning] = "Please join the challenge to enter submissions."
@@ -42,14 +42,14 @@ class SubmissionsController < ApplicationController
 
     licenses_accepted = @context.user.accepted_licenses.map{|l| {id: l.license_id, pending: l.pending?, active: l.active?, unset: !l.pending? && !l.active?}}
 
-    js challenge_id: params[:challenge_id], app: @app.slice(:dxid, :spec, :title), licenses_to_accept: licenses_to_accept.uniq { |l| l.id}, licenses_accepted: licenses_accepted
+    js challenge_id: unsafe_params[:challenge_id], app: @app.slice(:dxid, :spec, :title), licenses_to_accept: licenses_to_accept.uniq { |l| l.id}, licenses_accepted: licenses_accepted
   end
 
   def edit
-    @submission = Submission.editable_by(@context).find(params[:id])
+    @submission = Submission.editable_by(@context).find(unsafe_params[:id])
     if @submission.nil?
       flash[:error] = "Sorry, this submission does not exist or its log is not accessible by you"
-      redirect_to challenge_path(params[:challenge_id])
+      redirect_to challenge_path(unsafe_params[:challenge_id])
       return
     end
 
@@ -57,13 +57,13 @@ class SubmissionsController < ApplicationController
   end
 
   def create
-    if params[:submission] && params[:submission][:inputs]
-      submission_inputs = JSON.parse(params[:submission][:inputs])
+    if unsafe_params[:submission] && unsafe_params[:submission][:inputs]
+      submission_inputs = JSON.parse(unsafe_params[:submission][:inputs])
     else
       raise "Submission parameters not found in submission#create params."
     end
 
-    challenge = Challenge.find(params[:challenge_id])
+    challenge = Challenge.find(unsafe_params[:challenge_id])
     raise "Challenge ID not found in submission#create params." unless challenge
 
     input_info = input_spec_preparer.run(challenge.app, submission_inputs)
@@ -86,7 +86,7 @@ class SubmissionsController < ApplicationController
     if items.all?(&:public?)
       flash[:warning] = "All input files are already public." unless items.empty?
       run_job_create_submission(params)
-      redirect_to show_challenge_path(params[:challenge_id], "my_entries")
+      redirect_to show_challenge_path(unsafe_params[:challenge_id], "my_entries")
       return
     end
 
@@ -106,18 +106,18 @@ class SubmissionsController < ApplicationController
   end
 
   def publish
-    sub_params = JSON.parse(params[:sub_params])
+    sub_params = JSON.parse(unsafe_params[:sub_params])
     if sub_params["submission"].nil? || sub_params["challenge_id"].nil?
       raise "Submission parameters not available."
     end
 
-    id = params[:id]
+    id = unsafe_params[:id]
     raise "Missing id in publish route" unless id.is_a?(String) && id.present?
     scope = "public"
 
     # Only applicable after selections have been made
-    if params[:uids]
-      uids = params[:uids]
+    if unsafe_params[:uids]
+      uids = unsafe_params[:uids]
       raise "The object 'uids' must be a hash of object ids (strings) with value 'on'." unless uids.is_a?(Hash) && uids.all? { |uid, checked| uid.is_a?(String) && checked == "on" }
 
       items = ([id] + uids.keys).uniq.map { |uid| item_from_uid(uid) }.reject { |item| item.public? || item.scope == scope }
@@ -194,7 +194,7 @@ class SubmissionsController < ApplicationController
       end
       flash[:success] = message
       run_job_create_submission(sub_params)
-      redirect_to show_challenge_path(params[:challenge_id], 'my_entries')
+      redirect_to show_challenge_path(unsafe_params[:challenge_id], 'my_entries')
       return
     end
   end
@@ -213,10 +213,10 @@ class SubmissionsController < ApplicationController
   def run_job_create_submission(params)
     # Parameter 'id' should be of type String
     # Get challenge
-    challenge = Challenge.find_by(id: params["challenge_id"])
+    challenge = Challenge.find_by(id: unsafe_params["challenge_id"])
     raise "No associated challenge found" unless challenge
 
-    submission = params["submission"]
+    submission = unsafe_params["submission"]
     raise "No submission info found" unless submission
 
     # Name should be a nonempty string
@@ -259,7 +259,7 @@ class SubmissionsController < ApplicationController
   end
 
   def log
-    @submission = Submission.editable_by(@context).find(params[:id])
+    @submission = Submission.editable_by(@context).find(unsafe_params[:id])
     if @submission.nil?
       flash[:error] = "Sorry, this submission does not exist or its log is not accessible by you"
       redirect_to challenges_path

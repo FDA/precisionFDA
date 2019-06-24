@@ -33,10 +33,10 @@ class ProfileController < ApplicationController
     @user = User.includes(:org).find(@context.user_id)
     raise unless @user.can_provision_accounts?
 
-    @first = params[:first].to_s.strip
-    @last = params[:last].to_s.strip
-    @email = params[:email].to_s.strip
-    @state = params[:state].to_s.strip
+    @first = unsafe_params[:first].to_s.strip
+    @last = unsafe_params[:last].to_s.strip
+    @email = unsafe_params[:email].to_s.strip
+    @state = unsafe_params[:state].to_s.strip
 
     if @state == "step1" || @state == "step2"
       @username = User.construct_username(@first, @last)
@@ -78,7 +78,7 @@ class ProfileController < ApplicationController
         @state = "step2"
       else
         @suggested_username = find_unused_username(@username)
-        if @suggested_username == params[:suggested_username]
+        if @suggested_username == unsafe_params[:suggested_username]
           dxuserid = "user-#{@suggested_username}"
           dxorg = @user.org.dxorg
 
@@ -120,36 +120,36 @@ class ProfileController < ApplicationController
 
   def provision_org
     if request.get?
-      @invitations = Invitation.order(id: :desc).page(params[:page]).per(10)
+      @invitations = Invitation.order(id: :desc).page(unsafe_params[:page]).per(10)
       @state = "step1"
       return
     end
 
-    @inv = params[:inv]
+    @inv = unsafe_params[:inv]
     @invitation = Invitation.find_by(id: @inv)
 
-    @first_name = (params[:first_name] || @invitation.first_name).to_s.strip
-    @last_name = (params[:last_name] || @invitation.last_name).to_s.strip
-    @email = (params[:email] || @invitation.email).to_s.strip
-    @org = (params[:org] || @invitation.org).to_s.strip
-    @org_handle = (params[:org_handle] || @invitation.org_handle).to_s
-    @address1 = (params[:address1] || @invitation.address1).to_s.strip
-    @address2 = (params[:address2] || @invitation.address2).to_s.strip
-    @postal_code = (params[:postal_code] || @invitation.postal_code).to_s.strip
-    @country = (params[:country] || @invitation.country.name).to_s.strip
-    @city = (params[:city] || @invitation.city).to_s.strip
-    @us_state = (params[:us_state] || @invitation.us_state).to_s.strip
-    @full_phone = (params[:full_phone] || @invitation.full_phone).to_s.strip
-    @duns = (params[:duns] || @invitation.duns).to_s.strip
-    @organization_administration = params[:organization_administration]
+    @first_name = (unsafe_params[:first_name] || @invitation.first_name).to_s.strip
+    @last_name = (unsafe_params[:last_name] || @invitation.last_name).to_s.strip
+    @email = (unsafe_params[:email] || @invitation.email).to_s.strip
+    @org = (unsafe_params[:org] || @invitation.org).to_s.strip
+    @org_handle = (unsafe_params[:org_handle] || @invitation.org_handle).to_s
+    @address1 = (unsafe_params[:address1] || @invitation.address1).to_s.strip
+    @address2 = (unsafe_params[:address2] || @invitation.address2).to_s.strip
+    @postal_code = (unsafe_params[:postal_code] || @invitation.postal_code).to_s.strip
+    @country = (unsafe_params[:country] || @invitation.country.name).to_s.strip
+    @city = (unsafe_params[:city] || @invitation.city).to_s.strip
+    @us_state = (unsafe_params[:us_state] || @invitation.us_state).to_s.strip
+    @full_phone = (unsafe_params[:full_phone] || @invitation.full_phone).to_s.strip
+    @duns = (unsafe_params[:duns] || @invitation.duns).to_s.strip
+    @organization_administration = unsafe_params[:organization_administration]
 
-    case params[:state]
+    case unsafe_params[:state]
     when "step2"
       @state = "step2"
 
     when "step3"
 
-      if params[:organization_administration] != 'admin'
+      if unsafe_params[:organization_administration] != 'admin'
         # clean out org vars.
         @org = nil
         @org_handle = nil
@@ -173,7 +173,7 @@ class ProfileController < ApplicationController
 
       @state = "step3"
     when "step4"
-      if params[:organization_administration] != 'admin'
+      if unsafe_params[:organization_administration] != 'admin'
         # clean out org vars.
         @org = nil
         @org_handle = nil

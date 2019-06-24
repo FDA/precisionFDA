@@ -11,7 +11,7 @@ class DocsController < ApplicationController
   private
 
   def active_section
-    @active_section = params[:section] ? params[:section].to_sym : :intro
+    @active_section = unsafe_params[:section] ? unsafe_params[:section].to_sym : :intro
     menu = view_context.menu
     sections = menu.values.map { |value| value[:sections] }
     sections = sections.reduce({}, :merge)
