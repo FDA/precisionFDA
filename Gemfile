@@ -117,8 +117,7 @@ group :development do
   gem "spring"
 
   # Automatic Ruby code checking tool
-  gem "rubocop", "~> 0.71.0", require: false
-
+  gem "rubocop-rails", require: false
   gem "pronto", "~> 0.10.0"
   gem "pronto-rubocop", require: false
 end
