@@ -52,7 +52,7 @@ class SpaceMembershipController < ApplicationController
   private
 
   def member
-    @member ||= SpaceMembership.find_by_id!(params[:id])
+    @member ||= SpaceMembership.find_by_id!(unsafe_params[:id])
   end
 
   def admin_member

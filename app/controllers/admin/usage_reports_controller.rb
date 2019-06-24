@@ -28,8 +28,8 @@ module Admin
 
       if selected_range == "custom" && date_from && date_to
         Setting.set_usage_metrics_custom_range(date_from, date_to)
-        Setting.set_value("custom_range_begin", params.dig(:custom_range, :date_from))
-        Setting.set_value("custom_range_end", params.dig(:custom_range, :date_to))
+        Setting.set_value("custom_range_begin", unsafe_params.dig(:custom_range, :date_from))
+        Setting.set_value("custom_range_end", unsafe_params.dig(:custom_range, :date_to))
         UsageCollector.collect_for_custom_range
       end
 
@@ -70,15 +70,15 @@ module Admin
     end
 
     def selected_range
-      params.dig(:custom_range, :selected_range).presence || "week"
+      unsafe_params.dig(:custom_range, :selected_range).presence || "week"
     end
 
     def date_from
-      (from = params.dig(:custom_range, :date_from)) && Date.parse(from)
+      (from = unsafe_params.dig(:custom_range, :date_from)) && Date.parse(from)
     end
 
     def date_to
-      (to = params.dig(:custom_range, :date_to)) && Date.parse(to)
+      (to = unsafe_params.dig(:custom_range, :date_to)) && Date.parse(to)
     end
   end
 end

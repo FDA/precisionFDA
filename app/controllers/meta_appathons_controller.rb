@@ -3,12 +3,12 @@ class MetaAppathonsController < ApplicationController
   before_action :require_login_or_guest, only: []
 
   def index
-    @meta_appathons = MetaAppathon.all.page params[:meta_appathons_page]
+    @meta_appathons = MetaAppathon.all.page unsafe_params[:meta_appathons_page]
   end
 
   def show
-    if !params[:id].nil?
-      @meta_appathon = MetaAppathon.find(params[:id])
+    if !unsafe_params[:id].nil?
+      @meta_appathon = MetaAppathon.find(unsafe_params[:id])
       if @meta_appathon.handle == ACTIVE_META_APPATHON
         redirect_to active_meta_appathon_path and return
       end
@@ -56,8 +56,8 @@ class MetaAppathonsController < ApplicationController
   end
 
   def edit
-    @meta_appathon = MetaAppathon.editable_by(@context).find_by(id: params[:id])
-    redirect_to meta_appathon_path(params[:id]) if @meta_appathon.nil?
+    @meta_appathon = MetaAppathon.editable_by(@context).find_by(id: unsafe_params[:id])
+    redirect_to meta_appathon_path(unsafe_params[:id]) if @meta_appathon.nil?
   end
 
   def create
@@ -77,8 +77,8 @@ class MetaAppathonsController < ApplicationController
   end
 
   def update
-    @meta_appathon = MetaAppathon.editable_by(@context).find_by(id: params[:id])
-    redirect_to meta_appathon_path(params[:id]) if @meta_appathon.nil?
+    @meta_appathon = MetaAppathon.editable_by(@context).find_by(id: unsafe_params[:id])
+    redirect_to meta_appathon_path(unsafe_params[:id]) if @meta_appathon.nil?
 
     MetaAppathon.transaction do
       if @meta_appathon.update(meta_appathon_params)

@@ -63,8 +63,8 @@ class ChallengesController < ApplicationController
   def assign_app
     return unless @context.logged_in?
 
-    challenge = Challenge.find_by!(id: params[:id])
-    app = App.editable_by(@context).find_by(id: params[:app_id])
+    challenge = Challenge.find_by!(id: unsafe_params[:id])
+    app = App.editable_by(@context).find_by(id: unsafe_params[:app_id])
 
     unless challenge.can_assign_specific_app?(@context, app)
       flash[:error] = "This app cannot be assigned to the current challenge."
@@ -92,7 +92,7 @@ class ChallengesController < ApplicationController
       return
     end
 
-    challenge = Challenge.find_by!(id: params[:id])
+    challenge = Challenge.find_by!(id: unsafe_params[:id])
 
     if !challenge.followed_by?(@context.user)
       @context.user.follow(challenge)
@@ -121,7 +121,7 @@ class ChallengesController < ApplicationController
 
 
   def show
-    @challenge = Challenge.find_by(id: params[:id])
+    @challenge = Challenge.find_by(id: unsafe_params[:id])
 
     if @challenge.nil? || !@challenge.is_viewable?(@context)
       redirect_to challenges_path
@@ -129,7 +129,7 @@ class ChallengesController < ApplicationController
     end
 
     User.sync_challenge_jobs!
-    @tab = params[:tab]
+    @tab = unsafe_params[:tab]
     @submissions = Submission.none
     @my_entries = false
     @csv = nil
@@ -213,7 +213,7 @@ class ChallengesController < ApplicationController
       @btn_class = "accessible-btn-danger"
     end
 
-    @tab = params[:tab]
+    @tab = unsafe_params[:tab]
 
     if @tab == "results-peek" || @tab == "results-explore-peek" || (@truth_challenge[:results_announced] && (@tab == "results" || @tab == "results-explore"))
 
@@ -224,17 +224,17 @@ class ChallengesController < ApplicationController
         per_page: 50
       }
 
-      if !params.has_key?(:truth_results)
-        if params.has_key?(:query_id)
-          @saved_query = SavedQuery.find_by_id_and_grid_name(params[:query_id], 'truth_results')
+      if !unsafe_params.has_key?(:truth_results)
+        if unsafe_params.has_key?(:query_id)
+          @saved_query = SavedQuery.find_by_id_and_grid_name(unsafe_params[:query_id], 'truth_results')
           if !@saved_query.nil?
-            params[:truth_results] = JSON.parse(@saved_query.query)["truth_results"]
+            unsafe_params[:truth_results] = JSON.parse(@saved_query.query)["truth_results"]
           else
             redirect_to truth_challenges_path({tab: @tab})
           end
         else
           # "?truth_results[f][type][]=SNP&truth_results[f][subtype][]=*&truth_results[f][subset][]=*&truth_results[f][genotype][]=*"
-          params[:truth_results] = {
+          unsafe_params[:truth_results] = {
             f: {
               type: ["SNP"],
               subtype: ["*"],
@@ -277,7 +277,7 @@ class ChallengesController < ApplicationController
   end
 
   def find_editable_challenge
-    @challenge = Challenge.find(params[:id])
+    @challenge = Challenge.find(unsafe_params[:id])
 
     if @challenge.nil?
       flash[:alert] = "The challenge not found."

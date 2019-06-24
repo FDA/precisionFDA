@@ -195,13 +195,13 @@ class MainController < ApplicationController
 
   def return_from_login
     # Ensure we were sent here from DNAnexus
-    if params[:code].blank? || !params[:code].is_a?(String)
+    if unsafe_params[:code].blank? || !unsafe_params[:code].is_a?(String)
       redirect_to(root_url) and return
     end
 
     # Exchange the code for a token
     result = DNAnexusAuth.new(DNANEXUS_AUTHSERVER_URI).
-               fetch_token(params[:code])
+               fetch_token(unsafe_params[:code])
 
     if result["access_token"].blank? ||
        result["token_type"] != "bearer"
@@ -347,8 +347,8 @@ class MainController < ApplicationController
       end
     end
 
-    phone_confirmed = params.dig(:invitation, :phone_confirmed)
-    organization_admin = params.dig(:invitation, :organization_admin)
+    phone_confirmed = unsafe_params.dig(:invitation, :phone_confirmed)
+    organization_admin = unsafe_params.dig(:invitation, :organization_admin)
     js usa_id: usa_id, country_codes: Country.countries_for_codes, phone_confirmed: phone_confirmed, organization_admin: organization_admin
   end
 
@@ -358,7 +358,7 @@ class MainController < ApplicationController
       return
     end
 
-    code = params[:code].to_s
+    code = unsafe_params[:code].to_s
     @invitation = Invitation.find_by(code: code, state: "guest")
     if @invitation.blank?
       render "_partials/_error", status: 403, locals: {message: "Invalid access code. If you believe this is an error, contact precisionFDA support."}
@@ -385,10 +385,10 @@ class MainController < ApplicationController
   end
 
   def publish
-    id = params[:id]
+    id = unsafe_params[:id]
     raise "Missing id in publish route" unless id.is_a?(String) && id.present?
 
-    scope = params[:scope]
+    scope = unsafe_params[:scope]
     if scope.blank?
       scope = "public"
     elsif scope.is_a?(String)
@@ -405,8 +405,8 @@ class MainController < ApplicationController
       raise "Publish route called with invalid scope #{scope.inspect}"
     end
 
-    if params[:uids]
-      uids = params[:uids]
+    if unsafe_params[:uids]
+      uids = unsafe_params[:uids]
       raise "The object 'uids' must be a hash of object ids (strings) with value 'on'." if !uids.is_a?(Hash) || !uids.all? { |uid, checked| uid.is_a?(String) && checked == "on" }
 
       items = ([id] + uids.keys).uniq.map { |uid| item_from_uid(uid) }.reject { |item| item.public? || item.scope == scope }
@@ -518,7 +518,7 @@ class MainController < ApplicationController
   end
 
   def track
-    id = params[:id]
+    id = unsafe_params[:id]
     raise "Missing id in track route" unless id.is_a?(String) && id.present?
     @item = item_from_uid(id)
     unless @item.accessible_by?(@context)
@@ -549,18 +549,18 @@ class MainController < ApplicationController
   # suggested_tags (array[strings], optional): array of tags
   # tag_context (string, optional): indicates the tag context to use
   def set_tags
-    taggable_uid = params["taggable_uid"]
+    taggable_uid = unsafe_params["taggable_uid"]
     fail "Taggable uid needs to be a non-empty string" unless taggable_uid.is_a?(String) && taggable_uid != ""
 
-    tags = params["tags"]
+    tags = unsafe_params["tags"]
     fail "Tags need to be comma-separated strings" unless tags.is_a?(String)
 
-    suggested_tags = params["suggested_tags"] # Optional
+    suggested_tags = unsafe_params["suggested_tags"] # Optional
     if suggested_tags.is_a?(Array)
       tags = (tags.split(',') + suggested_tags).join(',')
     end
 
-    tag_context = params["tag_context"] # Optional
+    tag_context = unsafe_params["tag_context"] # Optional
 
     taggable = item_from_uid(taggable_uid)
 

@@ -26,13 +26,13 @@ module Api
         ActiveRecord::Base.transaction do
           asset = DockerImporter.import(
             context: @context,
-            attached_image: params[:attached_image],
+            attached_image: unsafe_params[:attached_image],
             docker_image: presenter.docker_image
           )
 
           presenter.asset = asset
 
-          opts = params[:format] == "wdl" ? presenter.build : App::CwlParser.parse(presenter)
+          opts = unsafe_params[:format] == "wdl" ? presenter.build : App::CwlParser.parse(presenter)
 
           app = create_app(opts)
         end
@@ -107,13 +107,13 @@ module Api
 
     def presenter
       @presenter ||= begin
-        klass = params[:format] == "wdl" ? App::WdlPresenter : CwlPresenter
-        klass.new(params[:file])
+        klass = unsafe_params[:format] == "wdl" ? App::WdlPresenter : CwlPresenter
+        klass.new(unsafe_params[:file])
       end
     end
 
     def validate_app
-      name = params[:name]
+      name = unsafe_params[:name]
 
       if !name.is_a?(String) || name.empty?
         fail "The app 'name' must be a nonempty string."
@@ -124,32 +124,32 @@ module Api
              "'.' (period), '_' (underscore) and '-' (dash)."
       end
 
-      title = params[:title]
+      title = unsafe_params[:title]
 
       if !title.is_a?(String) || title.empty?
         fail "The app 'title' must be a nonempty string."
       end
 
-      readme = params[:readme]
+      readme = unsafe_params[:readme]
 
       unless readme.is_a?(String)
         fail "The app 'Readme' must be a string."
       end
 
-      internet_access = params[:internet_access]
+      internet_access = unsafe_params[:internet_access]
 
       unless [true, false].include?(internet_access)
         fail "The app 'Internet Access' must be a boolean, true or false."
       end
 
-      instance_type = params[:instance_type]
+      instance_type = unsafe_params[:instance_type]
 
       unless Job::INSTANCE_TYPES.include?(instance_type)
         fail "The app 'instance type' must be one of: " \
              "#{Job::INSTANCE_TYPES.keys.join(', ')}."
       end
 
-      packages = params[:packages] || []
+      packages = unsafe_params[:packages] || []
 
       if !packages.is_a?(Array) || !packages.all? { |a| a.is_a?(String) }
         fail "The app 'packages' must be an array of package names (strings)."
@@ -163,13 +163,13 @@ module Api
         end
       end
 
-      params[:packages] = packages
+      unsafe_params[:packages] = packages
 
-      code = params[:code]
+      code = unsafe_params[:code]
 
       fail "The app 'code' must be a string." unless code.is_a?(String)
 
-      ordered_assets = params[:ordered_assets] || []
+      ordered_assets = unsafe_params[:ordered_assets] || []
 
       if !ordered_assets.is_a?(Array) ||
          !ordered_assets.all? { |a| a.is_a?(String) }
@@ -190,7 +190,7 @@ module Api
     end
 
     def validate_app_input_spec
-      input_spec = params[:input_spec] || []
+      input_spec = unsafe_params[:input_spec] || []
 
       if !input_spec.is_a?(Array) || !input_spec.all? { |s| s.is_a?(Hash) }
         fail "The app 'input spec' must be an array of hashes."
@@ -198,7 +198,7 @@ module Api
 
       inputs_seen = Set.new
 
-      params[:input_spec] = input_spec.each_with_index.map do |spec, i|
+      unsafe_params[:input_spec] = input_spec.each_with_index.map do |spec, i|
         i_name = spec["name"]
 
         if !i_name.is_a?(String) || i_name.empty?
@@ -315,7 +315,7 @@ module Api
     end
 
     def validate_app_output_spec
-      output_spec = params[:output_spec] || []
+      output_spec = unsafe_params[:output_spec] || []
 
       if !output_spec.is_a?(Array) || !output_spec.all? { |s| s.is_a?(Hash) }
         fail "The app 'output spec' must be an array of hashes."
@@ -323,7 +323,7 @@ module Api
 
       outputs_seen = Set.new
 
-      params[:output_spec] = output_spec.each_with_index.map do |spec, i|
+      unsafe_params[:output_spec] = output_spec.each_with_index.map do |spec, i|
         i_name = spec["name"]
 
         if !i_name.is_a?(String) || i_name.empty?
