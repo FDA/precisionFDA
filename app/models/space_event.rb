@@ -82,7 +82,7 @@ class SpaceEvent < ApplicationRecord
   belongs_to :space
   belongs_to :entity, polymorphic: true
 
-  enum side: [:reviewer, :sponsor]
+  enum side: [SpaceMembership::SIDE_HOST, SpaceMembership::SIDE_GUEST]
   enum activity_type: ACTIVITY_TYPES
   enum object_type: OBJECT_TYPES
   enum role: ROLES
