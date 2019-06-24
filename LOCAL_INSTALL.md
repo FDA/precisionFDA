@@ -128,8 +128,13 @@ match the DNAnexus org handle without the pfda.. prefix, i.e. floranteorg.
   * `bundle exec rake db:seed`
   * `bundle exec rake user:generate_test_users`
 
+* prepare env
+  * create `.env` file in a project root folder
+  * place `NO_FIPS=1` to `.env` file
+  * ask Dev team for additional parameters to add into `.env` file
+
 * start rails server
-    * `bundle exec thin --ssl start`
+    * `bundle exec thin --ssl --debug start`
     * You must use https, ex: [https://localhost:3000](https://localhost:3000)**
 * start rails console
     * `bundle exec rails c`
@@ -147,3 +152,8 @@ match the DNAnexus org handle without the pfda.. prefix, i.e. floranteorg.
 
 * Check current code coverage:
     * `open coverage/index.html`
+
+## Run Backend Ruby linter
+
+* Run rubocop:
+    * `rubocop`
