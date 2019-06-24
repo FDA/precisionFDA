@@ -75,7 +75,7 @@ class TasksController < ApplicationController
 
   def create
     service = TaskService.new(@context)
-    @task = service.add_task(params)
+    @task = service.add_task(unsafe_params)
 
     result = @task.save ? Rats.success(@task) : Rats.failure(@task.errors.messages)
 
