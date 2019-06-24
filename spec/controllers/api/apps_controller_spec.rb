@@ -16,18 +16,19 @@ RSpec.describe Api::AppsController, type: :controller do
     before do
       authenticate!(user)
 
-      post :create,
-           name:   "test-name",
-           title:  "test-title",
-           readme: "test-readme",
-           internet_access: false,
-           instance_type: "baseline-8",
-           ordered_assets: [asset.uid],
-           packages: %w(ikiwiki),
-           code: "test-code",
-           is_new: true,
-           input_spec: input,
-           output_spec: output
+      post :create, params: {
+        name:   "test-name",
+        title:  "test-title",
+        readme: "test-readme",
+        internet_access: false,
+        instance_type: "baseline-8",
+        ordered_assets: [asset.uid],
+        packages: %w(ikiwiki),
+        code: "test-code",
+        is_new: true,
+        input_spec: input,
+        output_spec: output
+      }
     end
 
     it "creates an applet" do

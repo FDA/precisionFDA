@@ -1,5 +1,5 @@
-def without_transactional_fixtures(&block)
-  self.use_transactional_fixtures = false
+def without_transactional_tests(&block)
+  self.use_transactional_tests = false
 
   before(:all) do
     DatabaseCleaner.strategy = :truncation
