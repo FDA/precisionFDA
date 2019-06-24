@@ -52,6 +52,8 @@ gem 'sprockets', '> 3.7.1'
 # Semantic versioning parsing
 gem 'semverly'
 
+gem "hashdiff", [">= 1.0.0.beta1", "< 2.0.0"]
+
 # Captcha
 gem 'humanizer'
 
