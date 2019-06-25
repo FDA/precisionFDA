@@ -27,8 +27,8 @@ RSpec.describe Api::AppsController, type: :controller do
         code: "test-code",
         is_new: true,
         input_spec: input,
-        output_spec: output
-      }
+        output_spec: output,
+      }, as: :json
     end
 
     it "creates an applet" do

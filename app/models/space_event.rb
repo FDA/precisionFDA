@@ -166,7 +166,7 @@ class SpaceEvent < ApplicationRecord
   def self.collection(start_date, end_date, filters = {})
     sort = filters[:sort] ? filters[:sort] : "asc"
     filters.delete(:sort)
-    filters.reject! { |k, v| v == "" || v.nil? || v == "null" }
+    filters.reject! { |_, v| v.blank? || v == "null" }
     if filters[:object_type] == "[]"
       filters[:object_type] = []
     end
@@ -177,14 +177,14 @@ class SpaceEvent < ApplicationRecord
   end
 
   def self.object_type_counters(start_date = nil, end_date = nil, filters = {})
-    events = SpaceEvent.collection(start_date, end_date, filters).group(:object_type).count
+    events = collection(start_date, end_date, filters).group(:object_type).count
 
     OBJECT_TYPES.each_with_index do |type, i|
       events[i] = 0 unless events[i]
       events[type] = events.delete(i)
     end
 
-    events.map { |k, v| { name: k, value: v, type_id: SpaceEvent.object_types[k] } }
+    events.map { |k, v| { name: k, value: v, type_id: object_types[k] } }
   end
 
   def self.group_by_hour
