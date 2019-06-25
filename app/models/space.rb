@@ -251,8 +251,7 @@ class Space < ApplicationRecord
 
     raise unless context.user_id.present?
 
-    query = joins(:space_memberships).
-      where(space_memberships: { active: true, user_id: context.user_id })
+    query = where(space_memberships: { active: true, user_id: context.user_id })
 
     if context.review_space_admin?
       query = query.or(where(id: reviewer.shared)).
@@ -262,7 +261,7 @@ class Space < ApplicationRecord
 
     query = query.or(where(id: groups)) if context.can_administer_site?
 
-    query.distinct
+    query.joins(:space_memberships).distinct
   end
 
   def search_content(content_type, query)

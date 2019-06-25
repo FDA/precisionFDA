@@ -76,7 +76,7 @@ class Analysis < ApplicationRecord
 
   def self.job_hash(analyses, options={})
     analyses.includes(:workflow, :batch_items, jobs: :app).reduce({}) do |acc, analysis|
-      formatted_jobs = analysis.jobs.flatten.map do |job|
+      formatted_jobs = analysis.jobs.to_a.flatten.map do |job|
         formatted_job = {
           id: job.id,
           state: job.state,
