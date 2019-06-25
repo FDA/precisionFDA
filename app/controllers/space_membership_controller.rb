@@ -6,7 +6,7 @@ class SpaceMembershipController < ApplicationController
       end
     end
 
-    redirect_to :back
+    redirect_back(fallback_location: members_space_path(space))
   end
 
   def to_admin
@@ -16,7 +16,7 @@ class SpaceMembershipController < ApplicationController
       end
     end
 
-    redirect_to :back
+    redirect_back(fallback_location: members_space_path(space))
   end
 
   def to_contributor
@@ -26,7 +26,7 @@ class SpaceMembershipController < ApplicationController
       end
     end
 
-    redirect_to :back
+    redirect_back(fallback_location: members_space_path(space))
   end
 
   def to_viewer
@@ -36,7 +36,7 @@ class SpaceMembershipController < ApplicationController
       end
     end
 
-    redirect_to :back
+    redirect_back(fallback_location: members_space_path(space))
   end
 
   def to_inactive
@@ -46,7 +46,7 @@ class SpaceMembershipController < ApplicationController
       end
     end
 
-    redirect_to :back
+    redirect_back(fallback_location: members_space_path(space))
   end
 
   private

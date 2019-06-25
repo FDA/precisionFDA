@@ -497,19 +497,17 @@ class MainController < ApplicationController
     item = item_from_uid(id)
     if !item.editable_by?(@context)
       flash[:error] = "This item is not owned by you."
-      redirect_to :back
-      return
+      redirect_back(fallback_location: root_path) and return
     end
+
     if item.public?
       flash[:error] = "This item is already public."
-      redirect_to pathify(item)
-      return
+      redirect_to(pathify(item)) and return
     end
 
     if !item.publishable_by?(@context, scope)
       flash[:error] = "This item cannot be published in this state."
-      redirect_to pathify(item)
-      return
+      redirect_to(pathify(item)) and return
     end
 
     js graph: GraphDecorator.for_publisher(@context, item, scope),

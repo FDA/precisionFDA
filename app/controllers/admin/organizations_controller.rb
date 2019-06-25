@@ -46,10 +46,13 @@ module Admin
 
         @org.admin = @user
         @org.save!
-        redirect_to :back, success: "Admin of the org was updated."
+
+        redirect_back(fallback_location: admin_orgs_path, success: "Admin of the org was updated.")
       rescue Net::HTTPServerError => e
-        error = "There was an error setting user #{@user.dxid} be an ADMIN of #{org.dxid}"
-        redirect_to :back, error
+        redirect_back(
+          fallback_location: admin_orgs_path,
+          error: "There was an error setting user #{@user.dxid} be an ADMIN of #{org.dxid}"
+        )
       end
     end
 

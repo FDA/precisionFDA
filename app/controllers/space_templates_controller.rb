@@ -97,7 +97,7 @@ class SpaceTemplatesController < ApplicationController
 
   def destroy
     SpaceTemplate.find(unsafe_params[:id]).destroy!
-    redirect_to :back
+    redirect_back(fallback_location: space_templates_path) and return
   end
 
 
