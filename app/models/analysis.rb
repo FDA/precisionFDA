@@ -20,7 +20,7 @@ class Analysis < ApplicationRecord
   has_many :jobs, dependent: :destroy
 
   belongs_to :user
-  has_many :batch_items, class_name: Analysis, foreign_key: :batch_id, primary_key: :batch_id
+  has_many :batch_items, class_name: "Analysis", foreign_key: :batch_id, primary_key: :batch_id
 
   def batch_jobs
     batch_items.map do |i|

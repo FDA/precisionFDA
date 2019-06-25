@@ -21,8 +21,8 @@ class Challenge < ApplicationRecord
   STATUS_ARCHIVED = "archived"
   STATUS_RESULT_ANNOUNCED = "result_announced"
 
-  belongs_to :app_owner, { class_name: 'User', foreign_key: 'app_owner_id' }
-  belongs_to :app, { class_name: 'App', foreign_key: 'app_id' }
+  belongs_to :app_owner, class_name: 'User', foreign_key: 'app_owner_id'
+  belongs_to :app, class_name: 'App', foreign_key: 'app_id'
 
   has_many :submissions, dependent: :destroy
   has_many :jobs, through: :submissions

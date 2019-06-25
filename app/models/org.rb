@@ -22,7 +22,7 @@ class Org < ApplicationRecord
   validates :handle, presence: true, uniqueness: { case_sensitive: false }
 
   has_many :users
-  belongs_to :admin, { class_name: 'User' }
+  belongs_to :admin, class_name: "User"
 
   def self.construct_dxorg(handle)
     raise unless handle.present? && handle =~ /^[0-9a-z][0-9a-z_.]*$/
