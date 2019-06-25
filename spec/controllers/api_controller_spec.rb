@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe ApiController, type: :controller do # , focus: true do
+RSpec.describe ApiController, type: :controller do
   let(:user) { create(:user, dxuser: "user") }
   let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, nil, nil) }
   let(:file_one) { create(:user_file, :private) }
