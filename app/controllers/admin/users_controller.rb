@@ -10,32 +10,39 @@ module Admin
       end
 
       if user == current_user
-        redirect_to :back, alert: "Cannot disable self." and return
+        redirect_back(fallback_location: user_path(user), alert: "Cannot disable self.") and return
       end
+
       state = unsafe_params[:state]
 
-        case user.user_state
-        when "enabled"
-          state = "deactivated"
-          user.disable_message = unsafe_params[:message]
-          user.email = Base64.encode64(user.email).sub("\n","") + DNANEXUS_INVALID_EMAIL
-          user.normalized_email = Base64.encode64(user.normalized_email).sub("\n","") + DNANEXUS_INVALID_EMAIL
+      case user.user_state
+      when "enabled"
+        state = "deactivated"
+        user.disable_message = unsafe_params[:message]
+        user.email = Base64.encode64(user.email).sub("\n","") + DNANEXUS_INVALID_EMAIL
+        user.normalized_email = Base64.encode64(user.normalized_email).sub("\n","") + DNANEXUS_INVALID_EMAIL
 
-        when "deactivated"
-          if state != ''
-            state = "enabled"
-            user.disable_message = nil
-            user.email = Base64.decode64(user.email.sub(DNANEXUS_INVALID_EMAIL, "\n"))
-            user.normalized_email = Base64.decode64(user.normalized_email.sub(DNANEXUS_INVALID_EMAIL, "\n"))
-          end
+      when "deactivated"
+        if state != ''
+          state = "enabled"
+          user.disable_message = nil
+          user.email = Base64.decode64(user.email.sub(DNANEXUS_INVALID_EMAIL, "\n"))
+          user.normalized_email = Base64.decode64(user.normalized_email.sub(DNANEXUS_INVALID_EMAIL, "\n"))
         end
+      end
 
       if state.present? && user.valid?
         user.user_state = state
         user.save!(validate: false)
-        redirect_to :back, alert: "User has been #{state == 'enabled' ? 're-activated':'de-activated'}"
+        redirect_back(
+          fallback_location: user_path(user),
+          alert: "User has been #{state == 'enabled' ? 're-activated':'de-activated'}"
+        )
       else
-        redirect_to :back, error: "There was an error locking the user: #{ user.errors.map{|k,v| v }.join(",\n") }"
+        redirect_back(
+          fallback_location: user_path(user),
+          error: "There was an error locking the user: #{ user.errors.map{|k,v| v }.join(",\n") }"
+        )
       end
     end
 
@@ -68,9 +75,12 @@ module Admin
               usernameOrEmail: user.dxid
             )
         rescue Net::HTTPServerException => e
-          redirect_to :back, error: "There was a platform error"
+          redirect_back(fallback_location: user_path(user), error: "There was a platform error")
         else
-          redirect_to :back, success: "Activation email has been resent"
+          redirect_back(
+            fallback_location: user_path(user),
+            success: "Activation email has been resent"
+          )
         end
       end
     end
@@ -88,12 +98,18 @@ module Admin
           )
         rescue Net::HTTPServerException => e
           if e.message =~ /MFA is already reset/
-            redirect_to :back, alert: "MFA is already reset or not yet configured for the user"
+            redirect_back(
+              fallback_location: user_path(user),
+              alert: "MFA is already reset or not yet configured for the user"
+            )
           else
-            redirect_to :back, alert: "There was a server error, please try again"
+            redirect_back(
+              fallback_location: user_path(user),
+              alert: "There was a server error, please try again"
+            )
           end
         else
-          redirect_to :back, alert: "Reset successfully"
+          redirect_back(fallback_location: user_path(user), alert: "Reset successfully")
         end
       end
     end
@@ -116,10 +132,10 @@ module Admin
             if e.message =~ /must be an admin/
               error = "permission denied, must be a user of the org."
             end
-            redirect_to :back, alert: error
+            redirect_back(fallback_location: user_path(user), alert: error)
           end
         else
-          redirect_to :back, alert: "User has been unlocked"
+          redirect_back(fallback_location: user_path(user), alert: "User has been unlocked")
         end
     end
 

@@ -189,7 +189,7 @@ class TasksController < ApplicationController
       end
     end
 
-    redirect_to :back, status: :see_other rescue redirect_to tasks_space_path(@task.space_id)
+    redirect_back(fallback_location: space_task_path(@task), status: :see_other)
   end
 
   def copy

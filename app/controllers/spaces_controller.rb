@@ -339,7 +339,7 @@ class SpacesController < ApplicationController
     end
 
     flash[:success] = "#{new_files.count} file(s) successfully copied"
-    redirect_to :back
+    redirect_back(fallback_location: space_path(space)) and return
   end
 
   def copy_to_cooperative
@@ -347,7 +347,6 @@ class SpacesController < ApplicationController
     object = item_from_uid(unsafe_params[:object_id])
 
     if space && object && space.shared_space
-
       ActiveRecord::Base.transaction do
         copy_service.copy(object, space.shared_space.uid).each do |new_object|
           SpaceEventService.call(space.shared_space.id, @context.user_id, nil, new_object, "copy_to_cooperative")
@@ -357,7 +356,7 @@ class SpacesController < ApplicationController
       flash[:success] = "#{object.class} successfully copied"
     end
 
-    redirect_to :back
+    redirect_back(fallback_location: space_path(space)) and return
   end
 
   def copy_service
