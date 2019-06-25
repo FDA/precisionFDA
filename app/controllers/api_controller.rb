@@ -265,18 +265,7 @@ class ApiController < ApplicationController
   #
   # parent_folder_id (integer): primary key of the folder selected;
   #                             for root folder parent_folder_id = nil
-  # states (array of strings; optional): the file state/s to be returned "closed", "closing", and/or "open"
   # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
-  # editable (Boolean, optional): if filtering for only editable_by the context user, otherwise accessible_by
-  # describe (object, optional)
-  #     fields (array, optional):
-  #         Array containing field name [field_1, field_2, ...]
-  #         to indicate which object fields to include
-  #     include (object, optional)
-  #         license (boolean, optional)
-  #         user (boolean, optional)
-  #         org (boolean, optional)
-  #         all_tags_list (boolean, optional)
   #
   # Outputs:
   #
@@ -284,53 +273,32 @@ class ApiController < ApplicationController
   # id (integer): primary key of the file or the folder
   # name (string): the filename or the folder name
   # type (string): file or folder sti_type, "UserFile" or "Folder"
-  # uid (string): the file's unique id (file-xxxxxx); for folder = nil
+  # uid (string): the file's unique id (file-xxxxxx); for any folder uid = nil
   #
   def folder_tree
     parent_folder_id = params[:parent_folder_id] == "" ? nil : params[:parent_folder_id].to_i
 
-    # Refresh state of files, if needed
     User.sync_files!(@context)
 
-    files = UserFile
-              .real_files
-              .editable_by(@context)
-              .where(parent_folder_id: parent_folder_id)
-              .where(scope:["private","public",nil])
-              .where.not(parent_type:["Comparison", nil])
-              .includes(:taggings)
+    files = UserFile.folder_files(@context, parent_folder_id)
 
     if params[:scopes].present?
       check_scope!
       files = files.where(scope: params[:scopes])
     end
 
-    if params[:states].present?
-      fail "Invalid states" unless params[:states].is_a?(Array) && params[:states].all? { |state| %w(closed closing open).include?(state) }
-      files = files.where(state: params["states"])
-    end
-
-    if params[:limit] && params[:offset]
-      files = files.limit(params[:limit]).offset(params[:offset])
-    end
-
-    folders = private_folders(parent_folder_id).includes(:taggings)
-    files_with_folders = Node.where.any_of(files, folders)
-
+    folders = Folder.private_folders(@context, parent_folder_id).includes(:taggings)
     folder_tree = []
-    files_with_folders.each do |item|
-      file_object = { id: item[:id], name: item[:name], type: item[:sti_type], uid: item[:uid] }
-      folder_tree << file_object
+    Node.folder_content(files, folders).each do |item|
+      folder_tree << {
+        id: item[:id],
+        name: item[:name],
+        type: item[:sti_type],
+        uid: item[:uid]
+      }
     end
 
     render json: folder_tree
-  end
-
-  def private_folders(parent_folder_id = nil)
-    Folder
-      .private_for(@context)
-      .editable_by(@context)
-      .where(parent_folder_id: parent_folder_id)
   end
 
   # Inputs:

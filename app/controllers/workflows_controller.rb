@@ -297,7 +297,6 @@ class WorkflowsController < ApplicationController
   end
 
   def output_folders_list
-    puts("In output_folders_list: params = #{params.inspect}")
     parent_folder_id ||= params[:parent_folder_id]
 
     workflow = Workflow.find_by_uid(params[:id])
@@ -311,7 +310,6 @@ class WorkflowsController < ApplicationController
           .editable_by(@context)
           .where(parent_folder_id: parent_folder_id)
       end
-    puts("In output_folders_list: folders = #{folders.inspect}")
 
     if folders.blank?
       result = { folders: [] }
@@ -319,7 +317,6 @@ class WorkflowsController < ApplicationController
       folders_attr = folders.pluck(:id, :name)
       result = { folders: folders_attr.map { |el| { id: el[0], name: el[1] } } }
     end
-    puts("In output_folders_list: result = #{result.inspect}")
     result
   end
 
