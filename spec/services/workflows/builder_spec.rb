@@ -52,18 +52,10 @@ RSpec.describe Workflows::Builder, type: :service do
 
       let(:docker_images) do
         [
-        Rack::Test::UploadedFile.new(
-            {
-                filename: "wtsicgp_dockstore-cgp-chksum_0.1.0.tar.gz",
-                tempfile: Tempfile.new("wtsicgp_dockstore-cgp-chksum_0.1.0.tar.gz")
-            }
-        ),
-        Rack::Test::UploadedFile.new(
-            {
-                filename: "wtsicgp_dockstore-cgp-chksum_0.2.0.tar.gz",
-                tempfile: Tempfile.new("wtsicgp_dockstore-cgp-chksum_0.2.0.tar.gz")
-            }
-        )
+          Rack::Test::UploadedFile.new(
+            "spec/support/files/wtsicgp_dockstore-cgp-chksum_0.1.0.tar.gz",
+            "application/gzip"
+          ),
         ]
       end
       let(:presenter_params) do
@@ -79,7 +71,7 @@ RSpec.describe Workflows::Builder, type: :service do
       end
 
       it "create an asset" do
-        expect{ service_response }.to change(Asset, :count).by(2)
+        expect{ service_response }.to change(Asset, :count).by(1)
       end
     end
 
@@ -95,10 +87,8 @@ RSpec.describe Workflows::Builder, type: :service do
 
       let(:docker_image) do
         Rack::Test::UploadedFile.new(
-            {
-                filename: "wtsicgp_dockstore-cgp-chksum_0.1.0.tar.gz",
-                tempfile: Tempfile.new("wtsicgp_dockstore-cgp-chksum_0.1.0.tar.gz")
-            }
+          "spec/support/files/wtsicgp_dockstore-cgp-chksum_0.1.0.tar.gz",
+          "application/gzip"
         )
       end
       let(:presenter_params) do
