@@ -21,6 +21,13 @@ class Folder < Node
                           message: "This folder already has node named '%{value}'",
                           unless: lambda { private? }
 
+  def self.private_folders(context, parent_folder_id = nil)
+    Folder
+      .private_for(context)
+      .editable_by(context)
+      .where(parent_folder_id: parent_folder_id)
+  end
+
   def klass
     "folder"
   end
@@ -73,5 +80,4 @@ class Folder < Node
     sub_folders.each { |folder| collected += folder.all_children(where).to_a }
     collected
   end
-
 end

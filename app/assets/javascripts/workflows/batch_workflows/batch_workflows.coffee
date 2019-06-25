@@ -10,16 +10,12 @@ class SelectorModel
     @objectSelector.open()
   getListedFiles: () ->
     params = {
-      states: ["closed"],
       scopes: @accessibleScope,
-      describe: {
-        include: {
-          user: true
-          all_tags_list: false
-        }
-      }
+      parent_folder_id: null,
     }
-    $.post('/api/list_files', params).then (objects) => @listedFiles(objects)
+    console.log(" Before folder_tree: params = ", params)
+    $.post('/api/folder_tree', params).then (objects) => @listedFiles(objects)
+#    $.post('/api/list_files', params).then (objects) => @listedFiles(objects)
 
   constructor: (scope) ->
     @editingInput = ko.observable(null)
@@ -37,7 +33,8 @@ class SelectorModel
         {
           className: 'file'
           name: 'Files'
-          apiEndpoint: 'list_files'
+          apiEndpoint: 'folder_tree'
+#          apiEndpoint: 'list_files'
           listedFiles: @listedFiles()
 
         }

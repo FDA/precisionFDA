@@ -6,10 +6,14 @@ FactoryBot.define do
     sequence(:name) { |n| "file-#{n}" }
     state UserFile::STATE_CLOSED
     parent_type "User"
+    sti_type "UserFile"
 
     trait :public do
       scope :public
     end
 
+    trait :private do
+      scope :private
+    end
   end
 end
