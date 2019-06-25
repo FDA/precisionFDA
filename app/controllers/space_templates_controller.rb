@@ -137,7 +137,7 @@ class SpaceTemplatesController < ApplicationController
 
   def unverified_apps
     apps = App.where(scope: 'public').or(App.where.not(dev_group: nil)).
-      where.not(verified: true).uniq
+      where.not(verified: true).distinct
 
     respond_to do |f|
       f.json{ render json: apps }
