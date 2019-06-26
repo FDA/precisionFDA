@@ -31,9 +31,16 @@ class AppEditorModel
     @assets = ko.observableArray()
     if app?.internal.ordered_assets && app?.internal.ordered_assets.length > 0
       @loading(true)
-      Precision.api '/api/list_assets', {ids: app.internal.ordered_assets}, (assets) =>
-        @assets(_.map(@assetsSelector.createAssetModels(assets)))
-        @loading(false)
+      Precision.api(
+        '/api/list_assets',
+        { ids: app.internal.ordered_assets },
+        (assets) =>
+          @loading(false)
+          @assets(_.map(@assetsSelector.createAssetModels(assets)))
+        (error) =>
+          Precision.alert.showAboveAll('Error while loading assets list!')
+          @loading(false)
+      )
 
     @assetsSelector.assets.saved.subscribe((assetsSaved) =>
       @assets(assetsSaved)
