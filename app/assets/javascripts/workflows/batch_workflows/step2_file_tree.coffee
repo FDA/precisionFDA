@@ -1,3 +1,7 @@
+TYPE_FILE = 'UserFile'
+TYPE_FOLDER = 'Folder'
+
+
 loadFolderTree = (parentId = null) ->
   params = {
     parent_folder_id: parentId,
@@ -18,7 +22,7 @@ class FileTree extends Precision.FileTree
       $node.addClass("jstree-loading")
       @disabled = true
 
-      loadFolderTree().then(
+      loadFolderTree(data.node.original.id).then(
         (nodes) =>
           @addNodes(data, @prepareNodes(nodes))
           @disabled = false
@@ -29,20 +33,24 @@ class FileTree extends Precision.FileTree
       )
 
   onChange: (e, data) =>
-    if !@disabled and data.node.id != 'root'
+    if !@disabled and data.node.id != 'root' and data.node.original.type == TYPE_FOLDER
       @loadNodes(data)
 
   prepareNodes: (nodes) ->
     return _.values(nodes).map((node) ->
       {
-        icon: 'fa fa-folder',
+        icon: if node.type == TYPE_FOLDER then 'fa fa-folder' else 'fa fa-file-o',
         id: node.id,
         uid: node.uid,
         text: node.name.replace(/\//g, ''),
-        type: node.type.toLowerCase(),
+        type: node.type,
         name: node.name,
         highlighted: false
       }
+    ).sort((a, b) ->
+      return 1 if a.type > b.type
+      return -1 if a.type < b.type
+      return 0
     )
 
   constructor: (defaultNodes = [], container) ->

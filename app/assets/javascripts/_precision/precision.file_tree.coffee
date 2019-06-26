@@ -42,7 +42,6 @@ class FileTree
       state: { opened: true },
       children: params.defaultNodes
     }
-    console.log(params.defaultNodes)
     @treeContainer = params.container
 
 window.Precision ||= {}
