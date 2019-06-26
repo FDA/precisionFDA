@@ -12,7 +12,7 @@ class SpaceMembershipPolicy
 
       can_move_content?(
         space,
-        space.space_memberships.where(side: owner_side).find_by(user_id: user.id)
+        space.space_memberships.find_by(user_id: user.id)
       )
     end
 
