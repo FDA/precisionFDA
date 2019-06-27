@@ -1,5 +1,3 @@
-require "usage_collector/cloud_resource"
-
 class UsageCollector
   TABLE_NAME = "usage_metrics".freeze
 
