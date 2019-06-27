@@ -179,12 +179,9 @@ class SpaceEvent < ApplicationRecord
   def self.object_type_counters(start_date = nil, end_date = nil, filters = {})
     events = collection(start_date, end_date, filters).group(:object_type).count
 
-    OBJECT_TYPES.each_with_index do |type, i|
-      events[i] = 0 unless events[i]
-      events[type] = events.delete(i)
+    object_types.map do |type, type_idx|
+      { name: type.to_sym, value: events[type.to_s].to_i, type_id: type_idx }
     end
-
-    events.map { |k, v| { name: k, value: v, type_id: object_types[k] } }
   end
 
   def self.group_by_hour
