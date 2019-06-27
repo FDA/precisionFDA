@@ -19,11 +19,11 @@ class Note < ApplicationRecord
   belongs_to :user, required: true
   has_one :answer
   has_one :discussion
-  has_many :attachments, {dependent: :destroy}
-  has_many :nodes, { through: :attachments, source: :item, source_type: 'Node' }
-  has_many :apps, { through: :attachments, source: :item, source_type: 'App' }
-  has_many :comparisons, { through: :attachments, source: :item, source_type: 'Comparison' }
-  has_many :jobs, { through: :attachments, source: :item, source_type: 'Job' }
+  has_many :attachments, dependent: :destroy
+  has_many :nodes, through: :attachments, source: :item, source_type: 'Node'
+  has_many :apps, through: :attachments, source: :item, source_type: 'App'
+  has_many :comparisons, through: :attachments, source: :item, source_type: 'Comparison'
+  has_many :jobs, through: :attachments, source: :item, source_type: 'Job'
 
   acts_as_followable
   acts_as_commentable
