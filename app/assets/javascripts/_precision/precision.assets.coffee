@@ -71,21 +71,36 @@ class AssetsModel
   getAssets: () =>
     if !@loading()
       @loading(true)
-      Precision.api '/api/list_assets', {}, (assets) =>
-        @loading(false)
-        @refreshing(false)
-        @updateAssetModels(assets)
-        @setSelected(@assets.selected.peek())
+      Precision.api(
+        '/api/list_assets',
+        {},
+        (assets) =>
+          @loading(false)
+          @refreshing(false)
+          @updateAssetModels(assets)
+          @setSelected(@assets.selected.peek())
+        (error) =>
+          Precision.alert.showAboveAll('Error while loading assets list!')
+          @loading(false)
+          @refreshing(false)
+      )
 
   refreshAssets: () ->
     @refreshing(true)
     @getAssets()
 
   searchAssets: _.debounce((query) ->
-    Precision.api '/api/search_assets', {prefix: query}, (result) =>
-      @loading(false)
-      @previewedAsset(null)
-      @assets.searchedIDs(result.ids)
+    Precision.api(
+      '/api/search_assets',
+      { prefix: query },
+      (result) =>
+        @loading(false)
+        @previewedAsset(null)
+        @assets.searchedIDs(result.ids)
+      (error) =>
+        Precision.alert.showAboveAll('Error while assets search!')
+        @loading(false)
+    )
   , 500)
 
   setSelected: (selectedAssets) ->
