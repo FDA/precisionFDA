@@ -39,10 +39,10 @@ class Comparison < ApplicationRecord
   # scope of UserFile (which is set to 'parent_type != Comparison')
   has_many :outputs, class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'
 
-  has_many :notes, {through: :attachments}
-  has_many :attachments, {as: :item, dependent: :destroy}
+  has_many :attachments, as: :item, dependent: :destroy
+  has_many :notes, through: :attachments
 
-  store :meta, {coder: JSON}
+  store :meta, coder: JSON
 
   acts_as_commentable
   acts_as_taggable
