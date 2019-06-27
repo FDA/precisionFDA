@@ -217,7 +217,7 @@ extendBatchInput = () ->
 
 class BatchInputModel
   initTree: () ->
-    @batchWorkflowFileTree.createNewTree($("##{@name}"))
+    @fileTree = @batchWorkflowFileTree.createNewTree($("##{@name}"))
 
   onChange: () ->
     @valid(true)

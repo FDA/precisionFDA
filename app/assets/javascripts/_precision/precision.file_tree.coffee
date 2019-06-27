@@ -14,14 +14,17 @@ class FileTree
     @treeContainer.jstree('select_node', node)
 
   initTree: ->
-    @treeContainer.jstree({
+    config = {
       core: {
         check_callback: true,
         animation: 0,
         data: @TREE,
         worker: false
-      }
-    })
+      },
+    }
+    config.plugins = ['checkbox'] if @params.addCheckboxes
+
+    @treeContainer.jstree(config)
     @treeContainer.on 'open_node.jstree', (e, data) ->
       if data.node.id != 'root'
         data.instance.set_icon(data.node, 'fa fa-folder-open')
@@ -34,15 +37,15 @@ class FileTree
       if data.action == 'select_node'
         @onChange(e, data)
 
-  constructor: (params) ->
+  constructor: (@params) ->
     @TREE = {
       id: 'root',
-      text: params.rootName,
+      text: @params.rootName,
       icon: 'fa fa-files-o',
       state: { opened: true },
-      children: params.defaultNodes
+      children: @params.defaultNodes
     }
-    @treeContainer = params.container
+    @treeContainer = @params.container
 
 window.Precision ||= {}
 window.Precision.FileTree = FileTree
