@@ -79,6 +79,7 @@ class UserFile < Node
               too_long: "Description could not be greater than #{DESCRIPTION_MAX_LENGTH} characters",
             }
 
+  class << self; undef_method :open; end
   scope :open, -> { where(state: STATE_OPEN) }
 
   scope :files_conditions, -> {
