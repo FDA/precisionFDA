@@ -33,7 +33,7 @@ class ApplicationController < ActionController::Base
   private
 
   def unsafe_params
-    params.to_unsafe_h
+    @unsafe_params ||= params.to_unsafe_h
   end
 
   def invalid_token

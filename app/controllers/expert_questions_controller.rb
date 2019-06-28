@@ -41,7 +41,7 @@ class ExpertQuestionsController < ApplicationController
     @selected_question = ExpertQuestion.find(unsafe_params[:id])
 
     ExpertQuestion.transaction do
-      raise unless @selected_question.update_answer(@expert, params)
+      raise unless @selected_question.update_answer(@expert, unsafe_params)
 
       new_state = @selected_question.state
       case unsafe_params[:commit]
