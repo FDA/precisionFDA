@@ -31,104 +31,11 @@ class FilesController < ApplicationController
     @edit_access_present = true
     @new_folder_is_public = false
     @scope = "private"
-
-    folder_tree(nil)
-
     js files_ids_with_descriptions(
          user_files,
          private_folders,
          @scope
        )
-  end
-
-  def folder_tree(parent_folder_id)
-    # branch Sergei: PFDA-843-batch-wf-folder-checking
-
-    puts("In Files/folder_tree: params = #{params.inspect}")
-    puts("In Files/folder_tree: parent_folder_id = #{parent_folder_id.inspect}")
-    folder_tree = []
-    puts("In Files/folder_tree: folder_tree = #{folder_tree.inspect}")
-
-    if request.xhr?
-      render_folders(private_folders(parent_folder_id))
-      return
-    end
-
-    # Refresh state of files, if needed
-    User.sync_files!(@context)
-
-    files = UserFile
-              .real_files
-              .editable_by(@context)
-              .where(parent_folder_id: parent_folder_id)
-              .where(scope:["private","public",nil])
-              .where.not(parent_type:["Comparison", nil])
-              .includes(:taggings)
-    puts("In Files/folder_tree: files = #{files.inspect}")
-
-    folders = private_folders(parent_folder_id).includes(:taggings)
-    puts("In Files/folder_tree: folders = #{folders.inspect}")
-    # priv_folders = private_folders
-    # puts("In Files/files_folders_list: priv_folders = #{priv_folders.inspect}")
-    # folders.each do |folder_data|
-    #   # next_list = files_folders_list(folder_data[:parent_folder_id])
-    #   # puts("In Files/files_folders_tree: next_list = #{next_list.inspect}")
-    #   # puts("In Files/files_folders_tree: next_list[:folders] = #{next_list[:folders].inspect}")
-    #   # folder_object = folder_data.map { |item| { id: item[:id], name: item[:name], type: item[:sti_type] } }
-    #   folder_object = { id: folder_data[:id], name: folder_data[:name], type: folder_data[:sti_type] }
-    #
-    #   puts("In Files/files_folders_tree: folder_object = #{folder_object.inspect}")
-    #   folder_tree << folder_object
-    #   # folders = next_list[:folders]
-    #       puts("In Files/files_folders_list: in EACH folder_tree = #{folder_tree.inspect}")
-    # end
-
-    # puts("In Files/files_folders_list: After EACH folder_tree = #{folder_tree.inspect}")
-
-
-
-    #########
-    files_for_api = files.eager_load(:license, user: :org).order(id: :desc).map do |file|
-      describe_for_api(file, params[:describe])
-    end
-    puts("In api/folder_tree: files_for_api = #{files_for_api.inspect}")
-
-
-##########
-
-    user_files = Node.where.any_of(files, folders)
-    puts("In Files/folder_tree: user_files = #{user_files.inspect}")
-    user_files.each do |file_data|
-      file_object = { id: file_data[:id], name: file_data[:name], type: file_data[:sti_type] }
-
-      puts("In Files/folder_tree: file_object = #{file_object.inspect}")
-      folder_tree << file_object
-      # folders = next_list[:folders]
-      puts("In Files/folder_tree: in EACH folder_tree = #{folder_tree.inspect}")
-    end
-
-    puts("In Files/folder_tree: TOTAL After 2-nd EACH folder_tree = #{folder_tree.inspect}")
-
-    # TODO: compare: folders vs priv_folders
-    # branch Sergei: PFDA-843-batch-wf-folder-checking
-    # @current_folder = Folder
-    #                     .private_for(@context)
-    #                     .editable_by(@context)
-    #                     .find_by(id: parent_folder_id)
-    # @files_grid = files_grid(user_files)
-    # @edit_access_present = true
-    # @new_folder_is_public = false
-    # scope = "private"
-
-    # js files_ids_with_descriptions(
-    # res = {
-    #   # parent_folder_id: parent_folder_id,
-    #   files: user_files,
-    #   folders: priv_folders,
-    #   # scope: scope,
-    # }
-    puts("In Files/folder_tree: folder_tree = #{folder_tree.inspect}")
-    folder_tree
   end
 
   def featured
