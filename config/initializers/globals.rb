@@ -108,7 +108,7 @@ REVIEW_SPACE_ADMINS =
       holly.stephens
       sam.westreich
       pamella.tater.2
-    )
+    ).freeze
   else
     %w(
       john.didion
@@ -120,7 +120,8 @@ REVIEW_SPACE_ADMINS =
       ezekiel.maier
       sam.westreich
       hollystephens723
-    )
+      vladimir.rainish.6
+    ).freeze
   end
 
 # Remove X-Runtime

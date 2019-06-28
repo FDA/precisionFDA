@@ -25,7 +25,7 @@ This requires manually "bootstrapping" the situation in steps described in
     * `gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3`
     * `\curl -sSL https://get.rvm.io | bash -s stable`
 * Install ruby
-    * `rvm install 2.2.3`
+    * `rvm install 2.3.8`
 * Install bundler
     * `gem install bundler`
     * to keep the current bundler version from Gemfile.lock:
@@ -43,7 +43,7 @@ This requires manually "bootstrapping" the situation in steps described in
     * `git config --global user.name “FirstName LastName”`
     * `git config --global push.default simple`
 
-### pFDA with Docker setup
+## pFDA setup
 
 * Clone Repo
     * `git clone git@github.com:dnanexus/precision-fda.git`
@@ -56,6 +56,7 @@ This requires manually "bootstrapping" the situation in steps described in
   * `docker-compose -f docker/isolation.docker-compose.yml up --build`
 * start localhost in browser
   * `https://localhost:3000`
+
 
 ##### Deprecated Docker usage
 
@@ -126,7 +127,12 @@ match the DNAnexus org handle without the pfda.. prefix, i.e. floranteorg.
   * `bundle exec rake db:seed`
   * `bundle exec rake user:generate_test_users`
 
-* start app on a local server
+* prepare env
+  * create `.env` file in a project root folder
+  * place `NO_FIPS=1` to `.env` file
+  * ask Dev team for additional parameters to add into `.env` file
+
+* start rails server
     * `bundle exec thin --ssl --debug start`
     * You must use https, ex: [https://localhost:3000](https://localhost:3000)**
 * start rails console
@@ -139,9 +145,14 @@ match the DNAnexus org handle without the pfda.. prefix, i.e. floranteorg.
 
 * Run tests with Rspec Guard
     * `bundle exec guard`
-    
+
 * To exit from Guard mode:
     * `exit`
 
 * Check current code coverage:
     * `open coverage/index.html`
+
+## Run Backend Ruby linter
+
+* Run rubocop:
+    * `rubocop`

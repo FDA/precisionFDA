@@ -140,7 +140,7 @@ class Space < ActiveRecord::Base
     end
   end
 
-  def project_for_user!(user)
+  def project_for_user(user)
     member = space_memberships.find_by(user_id: user.id)
 
     if user.review_space_admin?

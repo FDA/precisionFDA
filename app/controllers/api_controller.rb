@@ -542,6 +542,8 @@ class ApiController < ApplicationController
   # An array of hashes
   #
   def list_assets
+    logger.debug "######### In api/list_assets ##########"
+    logger.debug "## In list_assets: params = #{params.inspect}"
     # Refresh state of assets, if needed
     User.sync_assets!(@context)
 
@@ -551,6 +553,7 @@ class ApiController < ApplicationController
     else
       Asset.closed.accessible_by(@context)
     end
+    logger.debug "## In list_assets: After params[:editable]?: assets: = #{assets.inspect}"
 
     unless ids.nil?
       fail "The 'ids' parameter needs to be an Array of String asset ids" unless ids.is_a?(Array) && ids.all? { |id| id.is_a?(String) }
@@ -561,8 +564,11 @@ class ApiController < ApplicationController
       check_scope!
       assets = assets.where(scope: params[:scopes])
     end
+    logger.debug "## In list_assets: Before map: assets: = #{assets.inspect}"
 
     result = assets.order(:name).map do |asset|
+      logger.debug "## In list_assets: in map: asset = #{asset.inspect}"
+      logger.debug "## In list_assets: in map: params[:describe] = #{params[:describe].inspect}"
       describe_for_api(asset, params[:describe])
     end
 
@@ -571,6 +577,8 @@ class ApiController < ApplicationController
       # For now silently drop the asset -- allows for asset deletion
       # raise unless ids.size == result.size
     end
+    logger.debug "## In list_assets: result = #{result.inspect}"
+    logger.debug "###################"
 
     render json: result
   end
@@ -1030,6 +1038,17 @@ class ApiController < ApplicationController
       fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.key?(params["instance_type"]) # Checks also that it's a string
     end
 
+    project = space ? space.project_for_user(@context.user) : @context.user.private_files_project
+
+    fail "You don't have permissions to run app in space #{space.name}" unless project
+
+    job_creator = JobCreator.new(
+      api: DNAnexusAPI.new(@context.token),
+      context: @context,
+      user: @context.user,
+      project: project
+    )
+
     job = job_creator.create(
       app: @app,
       name: name,
@@ -1037,7 +1056,10 @@ class ApiController < ApplicationController
       run_instance_type: run_instance_type,
       scope: space.try(:uid),
     )
-    SpaceEventService.call(space_id, @context.user_id, nil, job, :job_added) if space && space.review?
+
+    if space&.review?
+      SpaceEventService.call(space_id, @context.user_id, nil, job, :job_added)
+    end
 
     render json: { id: job.uid }
   end
@@ -1391,15 +1413,6 @@ class ApiController < ApplicationController
 
   def input_spec_preparer
     @input_spec_preparer ||= InputSpecPreparer.new(@context)
-  end
-
-  def job_creator
-    @job_creator ||= JobCreator.new(
-      api: DNAnexusAPI.new(@context.token),
-      context: @context,
-      user: @context.user,
-      project: @context.user.private_files_project
-    )
   end
 
   def check_scope!

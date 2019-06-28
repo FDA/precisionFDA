@@ -100,7 +100,7 @@ class Comparison < ActiveRecord::Base
     if scope == "public"
       context.user.public_comparisons_project
     else
-      Space.from_scope(scope).project_for_user!(context.user)
+      Space.from_scope(scope).project_for_user(context.user)
     end
   end
 

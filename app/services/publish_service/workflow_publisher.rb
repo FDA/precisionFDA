@@ -31,7 +31,7 @@ module PublishService
     attr_reader :workflows, :scope
 
     def new_project
-      @space_project ||= space.project_for_user!(context.user)
+      @space_project ||= space.project_for_user(context.user)
     end
 
     def space
