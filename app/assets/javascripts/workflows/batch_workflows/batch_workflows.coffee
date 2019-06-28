@@ -191,7 +191,7 @@ extendBatchInput = () ->
 
     searchValue = @searchValue()
     flagsValue = @searchFlagsValue()
-    files = @files()
+
     if searchValue
       try
         regexp = new RegExp(searchValue, flagsValue)
@@ -199,7 +199,7 @@ extendBatchInput = () ->
         Precision.alert.showAboveAll('Wrong Regular Expression!', null, 1000)
         regexp = new RegExp('.*', 'ig')
       files.forEach((file) ->
-        file.highlighted(file.name.search(regexp) > -1)
+        file.highlighted(file.text.search(regexp) > -1)
         return file
       )
     else
