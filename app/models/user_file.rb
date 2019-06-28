@@ -107,7 +107,7 @@ class UserFile < Node
       if scope == "public"
         user.public_files_project
       else
-        Space.from_scope(scope).project_for_user!(user)
+        Space.from_scope(scope).project_for_user(user)
       end
     end
 
@@ -220,7 +220,7 @@ class UserFile < Node
     elsif public?
       project == user.public_files_project
     else
-      project == space_object.project_for_user!(user)
+      project == space_object.project_for_user(user)
     end
   end
 

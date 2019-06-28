@@ -1,4 +1,4 @@
-FROM ruby:2.2.8
+FROM ruby:2.3.8
 RUN apt-get update
 RUN echo 'mysql-server mysql-server/root_password password password' | debconf-set-selections
 RUN echo 'mysql-server mysql-server/root_password_again password password' | debconf-set-selections

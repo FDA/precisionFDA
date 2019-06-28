@@ -62,6 +62,8 @@ class User < ActiveRecord::Base
     aabramenko.adminstage
     alekadmin.suradmin
     aleksandr.moroz.3
+    vladimir.rainish.4
+    aleksei.ivanishchev
   ).freeze
 
   NON_PRODUCTION_ADMIN_ORGS = %w(
@@ -427,7 +429,7 @@ class User < ActiveRecord::Base
     return if context.guest?
     user = context.user
     token = context.token
-    job = user.jobs.find(job_id) # Re-check job id
+    job = Job.accessible_by(context).find(job_id) # Re-check job id
     return if job.terminal?
 
     result = DNAnexusAPI.new(token).call("system", "findJobs",
