@@ -131,7 +131,7 @@ class ApiController < ApplicationController
   # id (string, only on success): the id of the created analysis, if success
   # failure (string, only on failure): a message that can be shown to the user due to failure
   def run_workflow
-    analysis_dxid = run_workflow_once(params)
+    analysis_dxid = run_workflow_once(unsafe_params)
 
     render json: { id: analysis_dxid }
   end
@@ -923,7 +923,7 @@ class ApiController < ApplicationController
   # id (string, "file-xxxx")
   #
   def create_asset
-    asset = AssetService.create(@context, params)
+    asset = AssetService.create(@context, unsafe_params)
 
     render json: { id: asset.uid }
   end
@@ -944,7 +944,7 @@ class ApiController < ApplicationController
   def get_upload_url
     url_service = UploadUrlFetcher.new(@context, unsafe_params[:id])
 
-    result = url_service.fetch_url(params)
+    result = url_service.fetch_url(unsafe_params)
 
     render json: result
   end

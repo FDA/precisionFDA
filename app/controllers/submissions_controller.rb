@@ -85,7 +85,7 @@ class SubmissionsController < ApplicationController
 
     if items.all?(&:public?)
       flash[:warning] = "All input files are already public." unless items.empty?
-      run_job_create_submission(params)
+      run_job_create_submission(unsafe_params)
       redirect_to show_challenge_path(unsafe_params[:challenge_id], "my_entries")
       return
     end
@@ -102,7 +102,7 @@ class SubmissionsController < ApplicationController
     js graph: GraphDecorator.for_publisher(@context, not_public_items, scope),
        space: nil,
        scope_to_publish_to: scope,
-       params: params
+       params: unsafe_params
   end
 
   def publish
@@ -199,65 +199,6 @@ class SubmissionsController < ApplicationController
     end
   end
 
-  # Inputs
-  #
-  # id (string, required): the dxid of the app to run
-  # name (string, required): the name of the job
-  # inputs (hash, required): the inputs
-  # instance_type (string, optional): override of the default instance type
-  #
-  # Outputs
-  #
-  # id (string): the dxid of the resulting job
-  #
-  def run_job_create_submission(params)
-    # Parameter 'id' should be of type String
-    # Get challenge
-    challenge = Challenge.find_by(id: unsafe_params["challenge_id"])
-    raise "No associated challenge found" unless challenge
-
-    submission = unsafe_params["submission"]
-    raise "No submission info found" unless submission
-
-    # Name should be a nonempty string
-    name = submission["name"]
-    raise "Name should be a non-empty string" unless name.is_a?(String) && name != ""
-
-    # Name should be a nonempty string
-    desc = submission["desc"]
-    raise "Description should not be empty" unless desc.present?
-
-    # Inputs should be a hash (more checks later)
-    inputs = JSON.parse(submission["inputs"])
-    raise "Inputs should be a hash" unless inputs.is_a?(Hash)
-
-    # TODO: Does challengebot need to worry about licenses?
-    # Check if asset licenses have been accepted
-    # raise "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
-
-    @app = App.find(challenge.app_id)
-
-    input_info = input_spec_preparer.run(@app, inputs)
-
-    job = job_creator.create(
-      app: @app,
-      name: name,
-      input_info: input_info
-    )
-
-    submission = Submission.create!(
-      job_id: job.id,
-      desc: desc,
-      user_id: @context.user_id,
-      challenge_id: challenge.id,
-      _inputs: input_info.file_dxids
-    )
-
-    Event::SubmissionCreated.create_for(submission, @context.user)
-
-    flash[:success] = "Your entry was submitted successfully."
-  end
-
   def log
     @submission = Submission.editable_by(@context).find(unsafe_params[:id])
     if @submission.nil?
@@ -310,6 +251,65 @@ class SubmissionsController < ApplicationController
   end
 
   private
+
+  # Inputs
+  #
+  # id (string, required): the dxid of the app to run
+  # name (string, required): the name of the job
+  # inputs (hash, required): the inputs
+  # instance_type (string, optional): override of the default instance type
+  #
+  # Outputs
+  #
+  # id (string): the dxid of the resulting job
+  #
+  def run_job_create_submission(opts)
+    # Parameter 'id' should be of type String
+    # Get challenge
+    challenge = Challenge.find_by(id: opts["challenge_id"])
+    raise "No associated challenge found" unless challenge
+
+    submission = opts["submission"]
+    raise "No submission info found" unless submission
+
+    # Name should be a nonempty string
+    name = submission["name"]
+    raise "Name should be a non-empty string" unless name.is_a?(String) && name != ""
+
+    # Name should be a nonempty string
+    desc = submission["desc"]
+    raise "Description should not be empty" unless desc.present?
+
+    # Inputs should be a hash (more checks later)
+    inputs = JSON.parse(submission["inputs"])
+    raise "Inputs should be a hash" unless inputs.is_a?(Hash)
+
+    # TODO: Does challengebot need to worry about licenses?
+    # Check if asset licenses have been accepted
+    # raise "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
+
+    @app = App.find(challenge.app_id)
+
+    input_info = input_spec_preparer.run(@app, inputs)
+
+    job = job_creator.create(
+      app: @app,
+      name: name,
+      input_info: input_info
+    )
+
+    submission = Submission.create!(
+      job_id: job.id,
+      desc: desc,
+      user_id: @context.user_id,
+      challenge_id: challenge.id,
+      _inputs: input_info.file_dxids
+    )
+
+    Event::SubmissionCreated.create_for(submission, @context.user)
+
+    flash[:success] = "Your entry was submitted successfully."
+  end
 
   def input_spec_preparer
     @input_spec_preparer ||= InputSpecPreparer.new(@context)

@@ -27,7 +27,7 @@ module Api
           else
             klass = Workflow::Presenter
           end
-          klass.new(params, @context)
+          klass.new(unsafe_params, @context)
       end
     end
   end

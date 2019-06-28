@@ -12,7 +12,7 @@ module Api
     # id (string, only on success): the id of the created app, if success
     # failure (string, only on failure): a message that can be shown to the user due to failure
     def create
-      app = create_app(params)
+      app = create_app(unsafe_params)
 
       render json: { id: app.uid }
     rescue => e
