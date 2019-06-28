@@ -502,10 +502,9 @@ class ApiController < ApplicationController
   # An array of hashes
   #
   def list_assets
+    logger.debug "######### In api/list_assets ##########"
+    logger.debug "## In list_assets: params = #{params.inspect}"
     # Refresh state of assets, if needed
-    puts("######### In api/list_assets ##########")
-    puts("## In list_assets: params = #{params.inspect}")
-
     User.sync_assets!(@context)
 
     ids = params[:ids]
@@ -514,7 +513,7 @@ class ApiController < ApplicationController
     else
       Asset.closed.accessible_by(@context)
     end
-    puts("## In list_assets: After params[:editable]?: assets: = #{assets.inspect}")
+    logger.debug "## In list_assets: After params[:editable]?: assets: = #{assets.inspect}"
 
     unless ids.nil?
       fail "The 'ids' parameter needs to be an Array of String asset ids" unless ids.is_a?(Array) && ids.all? { |id| id.is_a?(String) }
@@ -525,11 +524,11 @@ class ApiController < ApplicationController
       check_scope!
       assets = assets.where(scope: params[:scopes])
     end
-    puts("## In list_assets: Before map: assets: = #{assets.inspect}")
+    logger.debug "## In list_assets: Before map: assets: = #{assets.inspect}"
 
     result = assets.order(:name).map do |asset|
-      puts("## In list_assets: in map: asset = #{asset.inspect}")
-      puts("## In list_assets: in map: params[:describe] = #{params[:describe].inspect}")
+      logger.debug "## In list_assets: in map: asset = #{asset.inspect}"
+      logger.debug "## In list_assets: in map: params[:describe] = #{params[:describe].inspect}"
       describe_for_api(asset, params[:describe])
     end
 
@@ -538,9 +537,8 @@ class ApiController < ApplicationController
       # For now silently drop the asset -- allows for asset deletion
       # raise unless ids.size == result.size
     end
-    puts("## In list_assets: result = #{result.inspect}")
-
-    puts("###################")
+    logger.debug "## In list_assets: result = #{result.inspect}"
+    logger.debug "###################"
 
     render json: result
   end
