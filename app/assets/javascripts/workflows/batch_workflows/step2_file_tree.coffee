@@ -58,9 +58,7 @@ class FileTree extends Precision.FileTree
       container: container,
       defaultNodes: @prepareNodes(defaultNodes),
       rootName: 'My accessible files',
-      addCheckboxes: true,
-      addSearch: true,
-      addSort: true
+      addCheckboxes: true
     }
     super(jsTreeParams)
     @disabled = false

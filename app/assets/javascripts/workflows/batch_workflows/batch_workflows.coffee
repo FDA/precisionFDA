@@ -169,6 +169,11 @@ extendBatchInput = () ->
   @searchValue = ko.observable(null)
   @searchFlagsValue = ko.observable('ig')
   @filteredFiles = ko.computed( =>
+    if @fileTree
+      files = @fileTree.treeContainer.jstree(true).get_json('#', { flat: true })
+    else
+      files = []
+
     sortNameHandler = (a, b) =>
       if @sortNameDirection() == ASC
         return 1 if (a.name > b.name)
