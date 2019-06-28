@@ -39,20 +39,6 @@
   <div data-bind="css: {'has-error': !input.valid()}">
     <div class="form-control input-file-selector">
       <!-- ko if: input.filteredFiles().length -->
-        <div class="checkbox">
-          <label id="step2_select_all_batch_files">
-            <input
-              type="checkbox"
-              id="step2_select_all_batch_files"
-              name="step2_select_all_batch_files"
-              data-bind="event: {
-                change: input.selectAllFiles
-              }"
-            />
-            <span>select all</span>
-          </label>
-        </div>
-        <hr>
         <div data-bind="attr: {id: input.name}"></div>
       <!-- /ko -->
     </div>

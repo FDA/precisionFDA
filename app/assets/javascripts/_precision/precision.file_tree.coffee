@@ -19,12 +19,15 @@ class FileTree
         check_callback: true,
         animation: 0,
         data: @TREE,
-        worker: false
+        worker: false,
       },
+      plugins: []
     }
-    config.plugins = ['checkbox'] if @params.addCheckboxes
-
+    config.plugins.push('checkbox') if @params.addCheckboxes
+    config.plugins.push('search') if @params.addSearch
+    config.plugins.push('sort') if @params.addSort
     @treeContainer.jstree(config)
+
     @treeContainer.on 'open_node.jstree', (e, data) ->
       if data.node.id != 'root'
         data.instance.set_icon(data.node, 'fa fa-folder-open')
