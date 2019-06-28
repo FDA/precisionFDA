@@ -93,7 +93,12 @@ class AppEditorModel
         when 'new'
           if saving then "Creating..." else "Create"
         when 'fork'
-          if saving then "Forking..." else "Fork"
+          if saving
+            "Forking..."
+          if loadingAssets
+            "Loading Assets..."
+          else
+            "Fork"
         else
           if saving
             "Saving Revision #{parseInt(@revision()) + 1}..."
@@ -109,7 +114,10 @@ class AppEditorModel
         when 'new'
           "fa fa-plus"
         when 'fork'
-          "fa fa-code-fork"
+          if loadingAssets
+            "fa fa-spinner fa-spin"
+          else
+            "fa fa-code-fork"
         else
           if loadingAssets
             "fa fa-spinner fa-spin"
