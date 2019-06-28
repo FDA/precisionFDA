@@ -171,11 +171,11 @@ extendBatchInput = () ->
   @filteredFiles = ko.computed( =>
     sortNameHandler = (a, b) =>
       if @sortNameDirection() == ASC
-        return 1 if (a.title > b.title)
-        return -1 if (a.title < b.title)
+        return 1 if (a.name > b.name)
+        return -1 if (a.name < b.name)
       else
-        return 1 if (a.title < b.title)
-        return -1 if (a.title > b.title)
+        return 1 if (a.name < b.name)
+        return -1 if (a.name > b.name)
       return 0
 
     sortColorHandler = (a, b) =>
@@ -194,7 +194,7 @@ extendBatchInput = () ->
         Precision.alert.showAboveAll('Wrong Regular Expression!', null, 1000)
         regexp = new RegExp('.*', 'ig')
       files.forEach((file) ->
-        file.highlighted(file.title.search(regexp) > -1)
+        file.highlighted(file.name.search(regexp) > -1)
         return file
       )
     else
