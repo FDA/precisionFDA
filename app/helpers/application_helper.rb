@@ -1,5 +1,6 @@
 module ApplicationHelper
   include VerifiedSpaceHelper
+  include Rails.application.routes.url_helpers
 
   def page_title(separator = " – ")
     [content_for(:title), 'precisionFDA'].compact.join(separator).html_safe
