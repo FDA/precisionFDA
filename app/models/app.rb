@@ -56,7 +56,7 @@ class App < ApplicationRecord
 
     Space.joins(:space_memberships).
       where(
-        id: [space_object.id, space_object.confidential_spaces.pluck(:id)],
+        id: [space_object.id, space_object.confidential_spaces.pluck(:id)].flatten,
         space_memberships: { user_id: user.id }
       )
   end
