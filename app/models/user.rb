@@ -35,28 +35,23 @@ class User < ActiveRecord::Base
   PRODUCTION_ADMINS = %w(
     elaine.johanson
     ruth.bandler
-    singer.ma
     john.didion
     ezekiel.maier.2
     holly.stephens
+    pamella.tater.2
   ).freeze
 
   NON_PRODUCTION_ADMINS = %w(
-    alan.fdauser
     Adam.Berger@fda.hhs.gov
     martin.bednar
     zeke.maier
     Zivana.Tezak@fda.hhs.gov
-    singeradmin.pfdadev
-    singer.admin
     pamella.tater.2
     ezekiel.maier
     vijay.kandali
     sam.westreich
     min.yi
-    nicholas.hill
     john.didion
-    singer.ma
     naina.thangaraj
     holly.stephens
     aabramenko.adminstage
@@ -80,10 +75,10 @@ class User < ActiveRecord::Base
     min.yi
     ruth.bandler
     sharon.liang
-    singer.ma
     yi.yan
     you.li
     zivana.tezak
+    pamella.tater.2
   ).freeze
 
   enum user_state: [:enabled, :locked, :deactivated]
