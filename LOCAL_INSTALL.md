@@ -25,7 +25,7 @@ This requires manually "bootstrapping" the situation in steps described in
     * `gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3`
     * `\curl -sSL https://get.rvm.io | bash -s stable`
 * Install ruby
-    * `rvm install 2.3.8`
+    * `rvm install 2.2.3`
 * Install bundler
     * `gem install bundler`
     * to keep the current bundler version from Gemfile.lock:
@@ -69,7 +69,7 @@ This requires manually "bootstrapping" the situation in steps described in
 ###### start rails server
   * `docker-compose up`
 ###### start rails console
-  * `docker compose exec web bundle exec rails c`
+  * `docker compose exec web bundle exec rails c`  
 
 
 ### Issues
@@ -146,7 +146,7 @@ match the DNAnexus org handle without the pfda.. prefix, i.e. floranteorg.
 
 * Run tests with Rspec Guard
     * `bundle exec guard`
-
+    
 * To exit from Guard mode:
     * `exit`
 

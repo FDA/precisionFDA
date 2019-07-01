@@ -6,7 +6,7 @@
 #-e PFDA_BASIC_AUTH_DNX_PASSWORD_LOC \
 #--mount type=bind,source="$(pwd)"/tmp/,target=/log_storage \
 #autoui
-FROM ruby:2.3.8
+FROM ruby:2.2.3
 
 RUN echo deb http://http.debian.net/debian jessie-backports main >> /etc/apt/sources.list
 RUN apt-get update
