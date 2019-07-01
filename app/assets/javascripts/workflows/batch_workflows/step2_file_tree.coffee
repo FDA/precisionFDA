@@ -5,11 +5,7 @@ TYPE_FOLDER = 'Folder'
 loadFolderTree = (parentId = null) ->
   params = {
     parent_folder_id: parentId,
-    states: ['closed'],
     scopes: ['private'],
-    describe: {
-      include: { user: true, all_tags_list: false }
-    }
   }
   return $.post('/api/folder_tree', params)
 
@@ -45,6 +41,7 @@ class FileTree extends Precision.FileTree
         text: node.name.replace(/\//g, ''),
         type: node.type,
         name: node.name,
+        data: {kek: 'lol'},
         highlighted: false
       }
     ).sort((a, b) ->

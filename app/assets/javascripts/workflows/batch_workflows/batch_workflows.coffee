@@ -125,15 +125,8 @@ class InputModel
 ### Input Model ###
 
 ### Batch Input Model ###
-class BatchInputFile
-  constructor: (data) ->
-    @uid = data.uid
-    @title = data.title
-    @highlighted = ko.observable(false)
-
 extendBatchInput = () ->
   files = @batchWorkflowFileTree.rootNodes
-  @files = ko.observableArray(files.map((file) -> new BatchInputFile(file)))
   @selectedFiles = ko.observableArray([])
 
   ### SORT ###
@@ -170,10 +163,11 @@ extendBatchInput = () ->
   @searchFlagsValue = ko.observable('ig')
   @filteredFiles = ko.computed( =>
     if @fileTree
-      files = @fileTree.treeContainer.jstree(true).get_json('#', { flat: true })
+      nodes = @fileTree.treeContainer.jstree(true).get_json('#', { flat: true })
     else
-      files = []
+      nodes = []
 
+    console.log 'nodes', nodes
     sortNameHandler = (a, b) =>
       if @sortNameDirection() == ASC
         return 1 if (a.name > b.name)
@@ -185,9 +179,9 @@ extendBatchInput = () ->
 
     sortColorHandler = (a, b) =>
       if @sortColorDirection() == ASC
-        return a.highlighted() - b.highlighted()
+        return a.highlighted - b.highlighted
       else
-        return b.highlighted() - a.highlighted()
+        return b.highlighted - a.highlighted
 
     searchValue = @searchValue()
     flagsValue = @searchFlagsValue()
@@ -198,17 +192,21 @@ extendBatchInput = () ->
       catch
         Precision.alert.showAboveAll('Wrong Regular Expression!', null, 1000)
         regexp = new RegExp('.*', 'ig')
-      files.forEach((file) ->
-        file.highlighted(file.text.search(regexp) > -1)
-        return file
+      nodes.forEach((node) ->
+        node.highlighted(node.text.search(regexp) > -1)
+        return node
       )
-    else
-      files.forEach((file) ->
-        file.highlighted(false)
-        return file
-      )
-    @selectHighlightedFiles(files)
-    return files.sort(sortNameHandler).sort(sortColorHandler)
+    # else
+    #   files.forEach((file) ->
+    #     file.highlighted(false)
+    #     return file
+    #   )
+    # @selectHighlightedFiles(files)
+
+    @fileTree.treeContainer.jstree(true).settings.core.data = nodes
+    @fileTree.treeContainer.jstree(true).refresh()
+
+    return nodes.sort(sortNameHandler).sort(sortColorHandler)
   )
   @searchOnChange = _.debounce(
     (root, e) => @searchValue(e.target.value)
