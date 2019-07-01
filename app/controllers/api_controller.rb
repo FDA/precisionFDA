@@ -1017,7 +1017,7 @@ class ApiController < ApplicationController
       scope: space.try(:uid),
     )
 
-    if space&.review?
+    if space && space.review?
       SpaceEventService.call(space_id, @context.user_id, nil, job, :job_added)
     end
 
