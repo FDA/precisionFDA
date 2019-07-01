@@ -22,7 +22,8 @@ class ProfileController < ApplicationController
 
   def update
     profile = current_user.profile || current_user.build_profile
-    if Profiles::Updater.call(unsafe_params, @context, profile)
+
+    if Profiles::Updater.call(params, @context, profile)
       render json: profile.view_fields, status: :ok
     else
       render json: profile.errors, status: :unprocessable_entity
