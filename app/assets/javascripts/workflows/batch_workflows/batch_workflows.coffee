@@ -203,8 +203,9 @@ extendBatchInput = () ->
     #   )
     # @selectHighlightedFiles(files)
 
-    @fileTree.treeContainer.jstree(true).settings.core.data = nodes
-    @fileTree.treeContainer.jstree(true).refresh()
+    if @fileTree
+      @fileTree.treeContainer.jstree(true).settings.core.data = nodes
+      @fileTree.treeContainer.jstree(true).refresh()
 
     return nodes.sort(sortNameHandler).sort(sortColorHandler)
   )
