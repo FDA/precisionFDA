@@ -134,7 +134,6 @@ group :development, :test, :ui_test do
   gem 'figaro'
   gem 'quiet_assets'
   gem 'thin'
-  gem 'mailcatcher'
   gem 'actionview-encoded_mail_to'
   gem 'brakeman', '~> 3.3.3'
 
