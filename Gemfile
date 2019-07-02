@@ -136,6 +136,8 @@ group :development, :test, :ui_test do
   gem 'thin'
   gem 'mailcatcher'
   gem 'actionview-encoded_mail_to'
+  gem 'brakeman', '~> 3.3.3'
+
 end
 
 group :test, :ui_test do
