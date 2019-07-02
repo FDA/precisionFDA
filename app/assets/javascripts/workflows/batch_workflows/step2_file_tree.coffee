@@ -41,7 +41,7 @@ class FileTree extends Precision.FileTree
         text: node.name.replace(/\//g, ''),
         type: node.type,
         name: node.name,
-        data: {kek: 'lol'},
+        data: { test: 'default' },
         highlighted: false
       }
     ).sort((a, b) ->
