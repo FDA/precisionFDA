@@ -79,6 +79,7 @@ GEM
     bootstrap-kaminari-views (0.0.5)
       kaminari (>= 0.13)
       rails (>= 3.1)
+    brakeman (3.3.5)
     builder (3.2.3)
     byebug (8.2.1)
     chronic (0.10.2)
@@ -466,6 +467,7 @@ DEPENDENCIES
   aws-sdk-sns
   axlsx (= 3.0.0.pre)
   bootstrap-kaminari-views
+  brakeman (~> 3.3.3)
   byebug
   coffee-rails (~> 4.1.0)
   database_cleaner (~> 1.5, >= 1.5.3)
