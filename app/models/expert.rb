@@ -119,7 +119,7 @@ class Expert < ActiveRecord::Base
     if file.nil? || file.state != "closed" || file.file_size > 5000000
       return nil
     end
-    DNAnexusAPI.for_challenge_bot.generate_permanent_link(file)
+    DNAnexusAPI.new(context.token).generate_permanent_link(file)
   end
 
   def self.provision(context, expert_params)
