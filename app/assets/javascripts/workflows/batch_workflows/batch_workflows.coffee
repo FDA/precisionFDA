@@ -167,7 +167,7 @@ extendBatchInput = () ->
     else
       nodes = []
 
-    console.log 'nodes', nodes
+    console.log 'nodes before', nodes
     sortNameHandler = (a, b) =>
       if @sortNameDirection() == ASC
         return 1 if (a.name > b.name)
@@ -193,7 +193,8 @@ extendBatchInput = () ->
         Precision.alert.showAboveAll('Wrong Regular Expression!', null, 1000)
         regexp = new RegExp('.*', 'ig')
       nodes.forEach((node) ->
-        node.highlighted(node.text.search(regexp) > -1)
+        node.data.test = 'test'
+        node.highlighted = node.text.search(regexp) > -1
         return node
       )
     # else
@@ -207,6 +208,7 @@ extendBatchInput = () ->
       @fileTree.treeContainer.jstree(true).settings.core.data = nodes
       @fileTree.treeContainer.jstree(true).refresh()
 
+    console.log 'nodes after', nodes
     return nodes.sort(sortNameHandler).sort(sortColorHandler)
   )
   @searchOnChange = _.debounce(
