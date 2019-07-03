@@ -40,9 +40,7 @@ class FileTree extends Precision.FileTree
         uid: node.uid,
         text: node.name.replace(/\//g, ''),
         type: node.type,
-        name: node.name,
-        data: { test: 'default' },
-        highlighted: false
+        name: node.name
       }
     ).sort((a, b) ->
       return 1 if a.type > b.type

@@ -1,3 +1,6 @@
+TYPE_FILE = 'UserFile'
+TYPE_FOLDER = 'Folder'
+
 ASC = 'asc'
 DESC = 'desc'
 ERROR_MSG = 'Please fill in all required fields properly.'
@@ -147,41 +150,35 @@ extendBatchInput = () ->
     _sortDirection = if @sortColorDirection() == ASC then DESC else ASC
     @sortColorDirection(_sortDirection)
   ### SORT ###
-
-  @selectHighlightedFiles = (files) =>
-    @selectedFiles([])
-    files.forEach((file) =>
-      @selectedFiles.push(file.uid) if file.highlighted()
-    )
-
-  @selectAllFiles = (root, e) =>
-    @selectedFiles([])
-    if e.target.checked
-      @filteredFiles().forEach((file) => @selectedFiles.push(file.uid))
-
   @searchValue = ko.observable(null)
   @searchFlagsValue = ko.observable('ig')
   @filteredFiles = ko.computed( =>
+    fileTree = null
+    selectedFiles = []
+    sortNameDirection = @sortNameDirection()
+    sortColorDirection = @sortColorDirection()
     if @fileTree
-      nodes = @fileTree.treeContainer.jstree(true).get_json('#', { flat: true })
+      fileTree = @fileTree.treeContainer.jstree(true)
+      nodes = fileTree.get_json('#', { flat: true })
     else
       nodes = []
 
-    console.log 'nodes before', nodes
-    sortNameHandler = (a, b) =>
-      if @sortNameDirection() == ASC
-        return 1 if (a.name > b.name)
-        return -1 if (a.name < b.name)
+    sortNameHandler = (a, b) ->
+      if sortNameDirection == ASC
+        return 1 if (a.text > b.text)
+        return -1 if (a.text < b.text)
       else
-        return 1 if (a.name < b.name)
-        return -1 if (a.name > b.name)
+        return 1 if (a.text < b.text)
+        return -1 if (a.text > b.text)
       return 0
 
-    sortColorHandler = (a, b) =>
-      if @sortColorDirection() == ASC
-        return a.highlighted - b.highlighted
+    sortColorHandler = (a, b) ->
+      a_selected = fileTree.is_selected(a.id)
+      b_selected = fileTree.is_selected(b.id)
+      if sortColorDirection == ASC
+        return a_selected - b_selected
       else
-        return b.highlighted - a.highlighted
+        return b_selected - a_selected
 
     searchValue = @searchValue()
     flagsValue = @searchFlagsValue()
@@ -193,23 +190,23 @@ extendBatchInput = () ->
         Precision.alert.showAboveAll('Wrong Regular Expression!', null, 1000)
         regexp = new RegExp('.*', 'ig')
       nodes.forEach((node) ->
-        node.data.test = 'test'
-        node.highlighted = node.text.search(regexp) > -1
-        return node
+        if node.text.search(regexp) > -1
+         fileTree.select_node(node.id)
+         selectedFiles.push(node.uid) if node.type == TYPE_FILE
+        else
+         fileTree.deselect_node(node.id)
       )
-    # else
-    #   files.forEach((file) ->
-    #     file.highlighted(false)
-    #     return file
-    #   )
-    # @selectHighlightedFiles(files)
+    else
+      nodes.forEach((node) -> fileTree.deselect_node(node.id))
+
+    nodes = nodes.sort(sortNameHandler).sort(sortColorHandler)
 
     if @fileTree
-      @fileTree.treeContainer.jstree(true).settings.core.data = nodes
-      @fileTree.treeContainer.jstree(true).refresh()
+      fileTree.settings.core.data = nodes
+      fileTree.refresh()
 
-    console.log 'nodes after', nodes
-    return nodes.sort(sortNameHandler).sort(sortColorHandler)
+    @selectedFiles(selectedFiles)
+    return nodes
   )
   @searchOnChange = _.debounce(
     (root, e) => @searchValue(e.target.value)
