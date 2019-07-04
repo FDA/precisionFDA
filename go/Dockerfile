@@ -10,7 +10,7 @@
 #  --root /pfda/fake_root
 #  --readme /pfda/readme.txt
 
-FROM golang:1.12.5-stretch
+FROM goboring/golang:1.8.3b4
 
 RUN mkdir /pfda && \
     curl -o /pfda/pfda-2.0.0.tar.gz https://precision.fda.gov/pfda-2.0.0.tar.gz && \
