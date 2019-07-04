@@ -20,8 +20,6 @@ GEM
       erubis (~> 2.7.0)
       rails-dom-testing (~> 1.0, >= 1.0.5)
       rails-html-sanitizer (~> 1.0, >= 1.0.3)
-    actionview-encoded_mail_to (1.0.9)
-      rails
     activejob (4.2.11)
       activesupport (= 4.2.11)
       globalid (>= 0.3.0)
@@ -431,7 +429,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  actionview-encoded_mail_to
   activerecord_any_of
   acts-as-taggable-on
   acts_as_commentable_with_threading
