@@ -141,15 +141,17 @@ class AssetService
       asset.save!
       asset.update!(parent_type: "Asset")
 
-      paths.each do |path|
+      entries = paths.map do |path|
         name = path.split("/").last
 
         if name == "" || name == "." || name == ".."
           name = nil
         end
 
-        asset.archive_entries.create!(path: path, name: name)
+        asset.archive_entries.build(path: path, name: name)
       end
+
+      ArchiveEntry.import(entries)
     end
 
     asset
