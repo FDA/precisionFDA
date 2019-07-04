@@ -31,6 +31,9 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # Support for OR queries (needed for UserFile.accessible_by)
 gem 'activerecord_any_of'
 
+# Support for bulk inserting data using ActiveRecord
+gem 'activerecord-import'
+
 # Parameter validation for the API
 gem 'rails_param'
 
