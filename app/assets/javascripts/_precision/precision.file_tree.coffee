@@ -1,6 +1,8 @@
 class FileTree
   #should be redefined in child class
-  onChange: (e, data) ->
+  onSelectNode: (e, data) ->
+    return data
+  onDeselectNode: (e, data) ->
     return data
 
   addNodes: (data, nodes, cb) ->
@@ -38,7 +40,9 @@ class FileTree
 
     @treeContainer.on 'changed.jstree', (e, data) =>
       if data.action == 'select_node'
-        @onChange(e, data)
+        @onSelectNode(e, data)
+      if data.action == 'deselect_node'
+        @onDeselectNode(e, data)
 
   constructor: (@params) ->
     @TREE = {

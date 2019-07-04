@@ -30,7 +30,7 @@ class MoveFilesModal extends Precision.FileTree
           @disabled = false
       })
 
-  onChange: (e, data) =>
+  onSelectNode: (e, data) =>
     if !@disabled
       @targetId(data.node.id)
       @fullFoldersPath(@getPath(data))
