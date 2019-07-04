@@ -152,9 +152,9 @@ extendBatchInput = () ->
   ### SORT ###
   @searchValue = ko.observable(null)
   @searchFlagsValue = ko.observable('ig')
+
   @filteredFiles = ko.computed( =>
     fileTree = null
-    selectedFiles = []
     sortNameDirection = @sortNameDirection()
     sortColorDirection = @sortColorDirection()
     if @fileTree
@@ -192,7 +192,6 @@ extendBatchInput = () ->
       nodes.forEach((node) ->
         if node.text.search(regexp) > -1
          fileTree.select_node(node.id)
-         selectedFiles.push(node.uid) if node.type == TYPE_FILE
         else
          fileTree.deselect_node(node.id)
       )
@@ -205,7 +204,6 @@ extendBatchInput = () ->
       fileTree.settings.core.data = nodes
       fileTree.refresh()
 
-    @selectedFiles(selectedFiles)
     return nodes
   )
   @searchOnChange = _.debounce(
@@ -217,11 +215,20 @@ extendBatchInput = () ->
     @searchValue(null)
   @setValue = ko.computed( => @value(@selectedFiles()))
 
+  @selectNodeHandler = (data) =>
+    selectedFiles = []
+    nodes = @fileTree.treeContainer.jstree(true).get_json('#', { flat: true })
+    for node in nodes
+      if data.selected.indexOf(node.id) > -1 and node.data.type == TYPE_FILE
+        selectedFiles.push(node.data.uid)
+    @selectedFiles(selectedFiles)
+
+  @initTree = () =>
+    @fileTree = @batchWorkflowFileTree.createNewTree($("##{@name}"))
+    @fileTree.onSelectNodeCallback = (e, data) => @selectNodeHandler(data)
+    @fileTree.onDeselectNodeCallback = (e, data) => @selectNodeHandler(data)
 
 class BatchInputModel
-  initTree: () ->
-    @fileTree = @batchWorkflowFileTree.createNewTree($("##{@name}"))
-
   onChange: () ->
     @valid(true)
 

@@ -11,6 +11,10 @@ loadFolderTree = (parentId = null) ->
 
 
 class FileTree extends Precision.FileTree
+  onSelectNodeCallback: (e, data) ->
+
+  onDeselectNodeCallback: (e, data) ->
+
   loadNodes: (data) ->
     $node = data.instance.get_node(data.node.id, true)
     children = data.node.children
@@ -28,19 +32,26 @@ class FileTree extends Precision.FileTree
           @disabled = false
       )
 
-  onChange: (e, data) =>
-    if !@disabled and data.node.id != 'root' and data.node.original.type == TYPE_FOLDER
+  onSelectNode: (e, data) =>
+    if !@disabled and data.node.id != 'root' and data.node.data.type == TYPE_FOLDER
       @loadNodes(data)
+    @onSelectNodeCallback(e, data)
+
+  onDeselectNode: (e, data) =>
+    @onDeselectNodeCallback(e, data)
 
   prepareNodes: (nodes) ->
     return _.values(nodes).map((node) ->
       {
         icon: if node.type == TYPE_FOLDER then 'fa fa-folder' else 'fa fa-file-o',
         id: node.id,
-        uid: node.uid,
         text: node.name.replace(/\//g, ''),
         type: node.type,
-        name: node.name
+        name: node.name,
+        data: {
+          uid: node.uid,
+          type: node.type
+        }
       }
     ).sort((a, b) ->
       return 1 if a.type > b.type
