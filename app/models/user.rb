@@ -59,6 +59,7 @@ class User < ActiveRecord::Base
     aleksandr.moroz.3
     vladimir.rainish.4
     aleksei.ivanishchev
+    siteadmin.aabramenko
   ).freeze
 
   NON_PRODUCTION_ADMIN_ORGS = %w(
