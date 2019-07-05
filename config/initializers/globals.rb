@@ -121,6 +121,7 @@ REVIEW_SPACE_ADMINS =
       sam.westreich
       hollystephens723
       vladimir.rainish.6
+      rsa.aabramenko
     ).freeze
   end
 
