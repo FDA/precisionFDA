@@ -1,12 +1,10 @@
-require: rubocop-rails
-
 AllCops:
   Exclude:
   - 'db/schema.rb'
   DisabledByDefault: true
   DisplayCopNames: true
   StyleGuideCopsOnly: false
-  TargetRubyVersion: 2.3.8
+  TargetRubyVersion: 2.2.3
 
 Layout/AccessModifierIndentation:
   EnforcedStyle: indent
