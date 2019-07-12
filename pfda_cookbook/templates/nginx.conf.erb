@@ -17,6 +17,7 @@ http {
   sendfile on;
   tcp_nopush on;
   tcp_nodelay on;
+  limit_req_zone $binary_remote_addr zone=pfdazone:10m rate=5r/s;
 
   server {
    listen 80 default_server;
@@ -41,6 +42,7 @@ http {
     try_files $uri/index.html $uri @pfda;
 
     location @pfda {
+      limit_req zone=pfdazone burst=20 nodelay;
       proxy_pass http://pfda;
       <%= render 'proxy_settings.conf.erb' %>
     }
