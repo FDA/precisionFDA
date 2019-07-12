@@ -148,6 +148,7 @@ class ApiController < ApplicationController
   # failure (string, only on failure): a message that can be shown to the user due to failure
   def run_workflow
     analysis_dxid = run_workflow_once(params)
+
     render json: { id: analysis_dxid }
   end
 
