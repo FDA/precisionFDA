@@ -27,6 +27,7 @@ module WorkflowConcern
 
     workflow_id = workflow_params["workflow_id"]
     fail "The workflow 'workflow_id' must be a nonempty string." unless workflow_id.is_a?(String) && workflow_id != ""
+
     workflow = Workflow.accessible_by(@context).find_by_uid(workflow_id)
     fail "Workflow with id #{workflow_id} does not exist or is not accessible by you" if workflow.nil?
 
@@ -41,8 +42,10 @@ module WorkflowConcern
 
     inputs.each do |api_input|
       input_name = api_input["input_name"]
+
       stage_input_name_match = /^(stage-\w{14}).(\w+)$/.match(input_name)
       fail "Invalid value for input_name" if stage_input_name_match.captures.size != 2
+
       stage = stage_input_name_match[1]
       matched_input_name = stage_input_name_match[2]
 
@@ -51,6 +54,10 @@ module WorkflowConcern
 
       input_value = api_input["input_value"]
       optional = workflow_input_spec[stage][matched_input_name]["optional"]
+
+      default_workflow_value_input = unseen_workflow_inputs[stage][matched_input_name]["default_workflow_value"]
+      value = default_workflow_value_input ? input_value.to_s : input_value
+
       unseen_workflow_inputs[stage].delete(matched_input_name)
       next if optional && !input_value.present?
       case input_klass
@@ -63,7 +70,7 @@ module WorkflowConcern
 
         input_value = { "$dnanexus_link" => file.dxid }
       when "int"
-        fail "#{input_name}: value is not an integer" unless input_value.to_i.to_s == input_value
+        fail "#{input_name}: value is not an integer" unless input_value.to_i.to_s == value
         input_value = input_value.to_i
       when "float"
         fail "#{input_name}: value is not a float" unless input_value.starts_with?(input_value.to_f.to_s)
@@ -94,7 +101,7 @@ module WorkflowConcern
 
     api = DNAnexusAPI.new(@context.token)
     permission = api.call(workflow.dxid, "listProjects")[workflow.project]
-    fail(t('api.errors.invalid_permission', title: workflow.title), permission: permission) if permission == 'VIEW'
+    fail(t('api.errors.invalid_permission', title: workflow.title), permission: permission) if permission == "VIEW"
 
     response = api.run_workflow(workflow.dxid, workflow_params)
 
