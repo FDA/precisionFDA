@@ -15,7 +15,7 @@ class FileTree extends Precision.FileTree
 
   onDeselectNodeCallback: (e, data) ->
 
-  loadNodes: (data) ->
+  loadNodes: (e, data) ->
     $node = data.instance.get_node(data.node.id, true)
     children = data.node.children
     if !children or children.length == 0
@@ -27,15 +27,20 @@ class FileTree extends Precision.FileTree
           @addNodes(data, @prepareNodes(nodes))
           @disabled = false
           $node.removeClass("jstree-loading")
+          @onSelectNodeCallback(e, data)
         (error) =>
-          Precision.alert.showAboveAll('Something went wrong!')
+          Precision.alert.showAboveAll('Something went wrong while loading nodes!')
           @disabled = false
+          @onSelectNodeCallback(e, data)
       )
+    else
+      @onSelectNodeCallback(e, data)
 
   onSelectNode: (e, data) =>
     if !@disabled and data.node.id != 'root' and data.node.data.type == TYPE_FOLDER
-      @loadNodes(data)
-    @onSelectNodeCallback(e, data)
+      @loadNodes(e, data)
+    else
+      @onSelectNodeCallback(e, data)
 
   onDeselectNode: (e, data) =>
     @onDeselectNodeCallback(e, data)
