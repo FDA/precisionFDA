@@ -677,22 +677,29 @@ class ApiController < ApplicationController
 
     folder = Folder.editable_by(@context).find_by(id: params[:folder_id])
 
-    project = @context.user.private_files_project
-    dxid = DNAnexusAPI.new(@context.token).call("file", "new", "name": params[:name], "project": project)["id"]
+    scope = "private"
+    user = @context.user
+    project = user.private_files_project
 
-    file = UserFile.transaction do
-      UserFile.create!(
-        dxid: dxid,
-        project: project,
-        name: name,
-        state: "open",
-        description: description,
-        user_id: @context.user_id,
-        parent: @context.user,
-        scope: 'private',
-        parent_folder_id: folder.try(:id)
-      )
+    if request.referrer =~ /\/experts\/new/
+      scope = "public"
+      project = user.public_files_project
     end
+
+    api = DNAnexusAPI.new(@context.token)
+    dxid = api.call("file", "new", "name": params[:name], "project": project)["id"]
+
+    file = UserFile.create!(
+      dxid: dxid,
+      project: project,
+      name: name,
+      state: "open",
+      description: description,
+      user_id: user.id,
+      parent: user,
+      scope: scope,
+      parent_folder_id: folder.try(:id)
+    )
 
     render json: { id: file.uid }
   end
