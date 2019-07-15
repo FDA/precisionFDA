@@ -244,6 +244,9 @@ class BatchInputModel
     @valid = ko.observable(true)
     @title = ko.observable(title)
     @name = "step2_select_batch_file_#{title.replace(/\s/g, '_')}"
+
+    ### this function is calling from template (_page_2.html.erb) but it is valid only for file ###
+    @initTree = () -> return false
     extendBatchInput.call(@) if type == 'file'
 ### Batch Input Model ###
 
