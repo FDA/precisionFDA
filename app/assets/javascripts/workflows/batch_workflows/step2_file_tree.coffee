@@ -24,7 +24,7 @@ class FileTree extends Precision.FileTree
 
       loadFolderTree(data.node.original.id).then(
         (nodes) =>
-          @addNodes(data, @prepareNodes(nodes))
+          @addNodes(data, @prepareNodes(nodes, data.node.state.selected))
           @disabled = false
           $node.removeClass("jstree-loading")
           @onSelectNodeCallback(e, data)
@@ -45,7 +45,7 @@ class FileTree extends Precision.FileTree
   onDeselectNode: (e, data) =>
     @onDeselectNodeCallback(e, data)
 
-  prepareNodes: (nodes) ->
+  prepareNodes: (nodes, selected = false) ->
     return _.values(nodes).map((node) ->
       {
         icon: if node.type == TYPE_FOLDER then 'fa fa-folder' else 'fa fa-file-o',
@@ -56,6 +56,9 @@ class FileTree extends Precision.FileTree
         data: {
           uid: node.uid,
           type: node.type
+        },
+        state: {
+          selected: selected
         }
       }
     ).sort((a, b) ->
