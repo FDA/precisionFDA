@@ -25,6 +25,9 @@ class FileTree
         data: @TREE,
         worker: false,
       },
+      checkbox: {
+        whole_node: false
+      },
       plugins: []
     }
     config.plugins.push('checkbox') if @params.addCheckboxes
