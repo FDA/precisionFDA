@@ -215,23 +215,19 @@ extendBatchInput = () ->
     @searchValue(null)
   @setValue = ko.computed( => @value(@selectedFiles()))
 
-  @selectNodeHandler = (data) =>
-    # console.log 'data', data
+  @selectNodeHandler = () =>
     selectedFiles = []
     nodes = @fileTree.treeContainer.jstree(true).get_json('#', { flat: true })
+    _selected = @fileTree.treeContainer.jstree(true).get_selected()
     for node in nodes
-      # console.log 'data.selected.indexOf(node.id)', data.selected.indexOf(node.id)
-      # console.log 'data.selected', data.selected
-      # console.log 'node.id', node.id
-      if data.selected.indexOf(node.id) > -1 and node.data.type == TYPE_FILE
+      if _selected.indexOf(node.id) > -1 and node.data.type == TYPE_FILE
         selectedFiles.push(node.data.uid)
-      console.log 'selectedFiles', selectedFiles
     @selectedFiles(selectedFiles)
 
   @initTree = () =>
     @fileTree = @batchWorkflowFileTree.createNewTree($("##{@name}"))
-    @fileTree.onSelectNodeCallback = (e, data) => @selectNodeHandler(data)
-    @fileTree.onDeselectNodeCallback = (e, data) => @selectNodeHandler(data)
+    @fileTree.onSelectNodeCallback = () => @selectNodeHandler()
+    @fileTree.onDeselectNodeCallback = () => @selectNodeHandler()
 
 class BatchInputModel
   onChange: () ->
