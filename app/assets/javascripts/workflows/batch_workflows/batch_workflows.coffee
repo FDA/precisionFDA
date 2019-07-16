@@ -189,11 +189,13 @@ extendBatchInput = () ->
       catch
         Precision.alert.showAboveAll('Wrong Regular Expression!', null, 1000)
         regexp = new RegExp('.*', 'ig')
+      fileTree.deselect_all()
       nodes.forEach((node) ->
-        if node.text.search(regexp) > -1
-         fileTree.select_node(node.id)
-        else
-         fileTree.deselect_node(node.id)
+        if node.data.type == TYPE_FILE
+          if node.text.search(regexp) > -1
+            fileTree.select_node(node.id)
+          else
+            fileTree.deselect_node(node.id)
       )
     else
       nodes.forEach((node) -> fileTree.deselect_node(node.id))
