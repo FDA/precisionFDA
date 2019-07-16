@@ -677,14 +677,14 @@ class ApiController < ApplicationController
 
     folder = Folder.editable_by(@context).find_by(id: params[:folder_id])
 
-    # scope = "private"
+    scope = "private"
     user = @context.user
-    # project = user.private_files_project
+    project = user.private_files_project
 
-    # if request.referrer =~ /\/experts\/new/
+    if request.referrer =~ /\/experts/
       scope = "public"
       project = user.public_files_project
-    # end
+    end
 
     api = DNAnexusAPI.new(@context.token)
     dxid = api.call("file", "new", "name": params[:name], "project": project)["id"]
