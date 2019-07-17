@@ -265,9 +265,7 @@ class ApiController < ApplicationController
   # Inputs:
   #
   # parent_folder_id (integer): primary key of the folder selected;
-  #                             for root folder parent_folder_id = nil
-  # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
-  #
+  #                             for root folder parent_folder_id = nil #
   # Outputs:
   #
   # An array of hashes, each of which has these fields:
@@ -283,11 +281,6 @@ class ApiController < ApplicationController
 
     files = UserFile.folder_files(@context, parent_folder_id)
 
-    if params[:scopes].present?
-      check_scope!
-      files = files.where(scope: params[:scopes])
-    end
-
     folders = Folder.private_folders(@context, parent_folder_id).includes(:taggings)
     folder_tree = []
     Node.folder_content(files, folders).each do |item|
@@ -295,7 +288,7 @@ class ApiController < ApplicationController
         id: item[:id],
         name: item[:name],
         type: item[:sti_type],
-        uid: item[:uid]
+        uid: item[:uid],
       }
     end
 

@@ -119,10 +119,9 @@ class UserFile < Node
     def folder_files(context, parent_folder_id)
       UserFile
         .real_files
-        .editable_by(context)
+        .accessible_by(context)
         .where(parent_folder_id: parent_folder_id)
         .where(state: "closed")
-        .where(scope: ["private", "public", nil])
         .where.not(parent_type: ["Comparison", nil])
         .includes(:taggings)
     end
