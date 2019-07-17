@@ -4,8 +4,11 @@ RSpec.describe ApiController, type: :controller do
   let(:user) { create(:user, dxuser: "user") }
   let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, nil, nil) }
   let(:file_one) { create(:user_file, :private) }
+  let(:file_two) { create(:user_file, :public) }
+  let(:file_three) { create(:user_file, :private) }
   let(:folder_one) { create(:folder, :private) }
-  let(:params) { { "scopes" => ["private"], "parent_folder_id" => "" } }
+  let(:verified) { FactoryBot.create(:space, :verification, :verified, host_lead_id: user.id) }
+  let(:params) { { "parent_folder_id" => "" } }
 
   describe "GET list_files" do
     context "js api" do
@@ -49,8 +52,11 @@ RSpec.describe ApiController, type: :controller do
     before do
       authenticate!(user)
       file_one.update(user_id: user.id)
+      file_two.update(user_id: user.id)
+      file_three.update(user_id: user.id, scope: "space-2")
       folder_one.update(user_id: user.id)
     end
+
     context "js api" do
       it "returns a http_status 200" do
         post :folder_tree, params
@@ -63,16 +69,21 @@ RSpec.describe ApiController, type: :controller do
       end
 
       it "returns a tree of folder of proper size" do
+        allow_any_instance_of(User).to receive(:space_uids).and_return(["space-2"])
         post :folder_tree, params
-        expect(parsed_response.size).to eq(2)
+        expect(parsed_response.size).to eq 4
       end
 
       it "returns a tree of folder with proper content" do
+        allow_any_instance_of(User).to receive(:space_uids).and_return(["space-2"])
         post :folder_tree, params
 
         expect(parsed_response.first["uid"].first(5)).to eq("file-")
+        expect(parsed_response.first["type"]).to eq("UserFile")
         expect(parsed_response.second["uid"]).to eq(nil)
         expect(parsed_response.second["type"]).to eq("Folder")
+        expect(parsed_response.third["type"]).to eq("UserFile")
+        expect(parsed_response[3]["name"].first(5)).to eq("file-")
       end
 
       context "after 15 minutes inactivity" do
@@ -107,16 +118,21 @@ RSpec.describe ApiController, type: :controller do
         end
 
         it "returns a tree of folder of proper size" do
+          allow_any_instance_of(User).to receive(:space_uids).and_return(["space-2"])
           post :folder_tree, params
-          expect(parsed_response.size).to eq(2)
+          expect(parsed_response.size).to eq(4)
         end
 
         it "returns a tree of folder with proper content" do
+          allow_any_instance_of(User).to receive(:space_uids).and_return(["space-2"])
           post :folder_tree, params
 
+          expect(parsed_response.size).to eq(4)
           expect(parsed_response.first["uid"].first(5)).to eq("file-")
           expect(parsed_response.second["uid"]).to eq(nil)
           expect(parsed_response.second["type"]).to eq("Folder")
+          expect(parsed_response.third["name"].first(5)).to eq("file-")
+          expect(parsed_response[3]["name"].first(5)).to eq("file-")
         end
       end
     end
