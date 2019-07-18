@@ -19,7 +19,7 @@
           </li>
         <% end %>
         <% if @context.user.active_spaces.count > 0 %>
-          <% @context.active_spaces_for(item).each do |space| %>
+          <% @context.user.active_spaces.each do |space| %>
             <% if SpaceMembershipPolicy.can_move_content_by_user?(space, item, @context.user) && item.publishable_by?(@context, space.uid) && !space.verified? %>
               <li>
                 <%= link_to publish_path + "?" + {id: item.uid, scope: space.uid}.to_param, method: :post do %>

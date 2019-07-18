@@ -98,7 +98,7 @@ class Space < ActiveRecord::Base
     elsif verification?
       "#{name}(Verification)"
     else
-      name
+      "#{name}(Group)"
     end
   end
 

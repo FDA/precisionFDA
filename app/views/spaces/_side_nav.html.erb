@@ -31,8 +31,8 @@
     <%= sidenav_link(nav.dig(:apps, :url), nav.dig(:apps, :active), 'fa-cubes', nav.dig(:apps, :count), 'Apps') %>
     <%= sidenav_link(nav.dig(:jobs, :url), nav.dig(:jobs, :active), 'fa-list-ol', nav.dig(:jobs, :count), 'Jobs') %>
     <%= sidenav_link(nav.dig(:comparisons, :url), nav.dig(:comparisons, :active), 'fa-bullseye', nav.dig(:comparisons, :count), 'Comparisons') %>
+    <%= sidenav_link(nav.dig(:workflows, :url), nav.dig(:workflows, :active), 'fa-flash', nav.dig(:workflows, :count), 'Workflows') %>
     <% unless @space.groups? %>
-      <%= sidenav_link(nav.dig(:workflows, :url), nav.dig(:workflows, :active), 'fa-flash', nav.dig(:workflows, :count), 'Workflows') %>
       <%= sidenav_link(nav.dig(:reports, :url), nav.dig(:reports, :active), 'fa-exchange', nav.dig(:reports, :count), 'Reports') %>
     <% end %>
   </div>
