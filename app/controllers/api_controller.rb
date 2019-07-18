@@ -681,7 +681,7 @@ class ApiController < ApplicationController
     user = @context.user
     project = user.private_files_project
 
-    if request.referrer =~ /\/experts/
+    if params[:public_scope]
       scope = "public"
       project = user.public_files_project
     end
