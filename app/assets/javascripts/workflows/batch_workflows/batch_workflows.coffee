@@ -189,11 +189,13 @@ extendBatchInput = () ->
       catch
         Precision.alert.showAboveAll('Wrong Regular Expression!', null, 1000)
         regexp = new RegExp('.*', 'ig')
+      fileTree.deselect_all()
       nodes.forEach((node) ->
-        if node.text.search(regexp) > -1
-         fileTree.select_node(node.id)
-        else
-         fileTree.deselect_node(node.id)
+        if node.data.type == TYPE_FILE
+          if node.text.search(regexp) > -1
+            fileTree.select_node(node.id)
+          else
+            fileTree.deselect_node(node.id)
       )
     else
       nodes.forEach((node) -> fileTree.deselect_node(node.id))
@@ -215,18 +217,19 @@ extendBatchInput = () ->
     @searchValue(null)
   @setValue = ko.computed( => @value(@selectedFiles()))
 
-  @selectNodeHandler = (data) =>
+  @selectNodeHandler = () =>
     selectedFiles = []
     nodes = @fileTree.treeContainer.jstree(true).get_json('#', { flat: true })
+    _selected = @fileTree.treeContainer.jstree(true).get_selected()
     for node in nodes
-      if data.selected.indexOf(node.id) > -1 and node.data.type == TYPE_FILE
+      if _selected.indexOf(node.id) > -1 and node.data.type == TYPE_FILE
         selectedFiles.push(node.data.uid)
     @selectedFiles(selectedFiles)
 
   @initTree = () =>
     @fileTree = @batchWorkflowFileTree.createNewTree($("##{@name}"))
-    @fileTree.onSelectNodeCallback = (e, data) => @selectNodeHandler(data)
-    @fileTree.onDeselectNodeCallback = (e, data) => @selectNodeHandler(data)
+    @fileTree.onSelectNodeCallback = () => @selectNodeHandler()
+    @fileTree.onDeselectNodeCallback = () => @selectNodeHandler()
 
 class BatchInputModel
   onChange: () ->
@@ -244,6 +247,9 @@ class BatchInputModel
     @valid = ko.observable(true)
     @title = ko.observable(title)
     @name = "step2_select_batch_file_#{title.replace(/\s/g, '_')}"
+
+    ### this function is calling from template (_page_2.html.erb) but it is valid only for file ###
+    @initTree = () -> return false
     extendBatchInput.call(@) if type == 'file'
 ### Batch Input Model ###
 

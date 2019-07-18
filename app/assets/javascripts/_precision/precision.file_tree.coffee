@@ -7,7 +7,9 @@ class FileTree
 
   addNodes: (data, nodes, cb) ->
     for node in nodes
-      data.instance.create_node(data.node, node, 'last')
+      data.instance.create_node(data.node, node, 'last', (n) ->
+        data.instance.select_node(n) if n.state.selected
+      )
     data.instance.open_node(data.node)
 
   selectNode: (id) ->
@@ -22,6 +24,9 @@ class FileTree
         animation: 0,
         data: @TREE,
         worker: false,
+      },
+      checkbox: {
+        whole_node: false
       },
       plugins: []
     }
