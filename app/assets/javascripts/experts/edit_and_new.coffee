@@ -1,6 +1,10 @@
 class ExpertsEditView
   constructor: (params) ->
-    @modalUploader = new window.Precision.ModalImageUploader(params.imageUrl, params.fileId)
+    @modalUploader = new window.Precision.ModalImageUploader(
+      params.imageUrl,
+      params.fileId,
+      { public_scope: true }
+    )
 
 #########################################################
 #
