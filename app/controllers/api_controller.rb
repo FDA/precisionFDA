@@ -667,12 +667,14 @@ class ApiController < ApplicationController
   # id (string, "file-xxxx")
   #
   def create_file
-    name = params[:name]
-    fail "File name needs to be a non-empty String" unless name.is_a?(String) && name != ""
+    file_name = params[:name]
+    if file_name.blank? || !file_name.is_a?(String)
+      fail "File name needs to be a non-empty String"
+    end
 
-    description = params["description"]
-    unless description.nil?
-      fail "File description needs to be a String" unless description.is_a?(String)
+    description = params[:description]
+    if description && !description.is_a?(String)
+      fail "File description needs to be a String"
     end
 
     folder = Folder.editable_by(@context).find_by(id: params[:folder_id])
@@ -687,12 +689,12 @@ class ApiController < ApplicationController
     end
 
     api = DNAnexusAPI.new(@context.token)
-    dxid = api.call("file", "new", "name": params[:name], "project": project)["id"]
+    dxid = api.call("file", "new", "name": file_name, "project": project)["id"]
 
     file = UserFile.create!(
       dxid: dxid,
       project: project,
-      name: name,
+      name: file_name,
       state: "open",
       description: description,
       user_id: user.id,
