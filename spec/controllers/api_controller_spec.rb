@@ -71,7 +71,7 @@ RSpec.describe ApiController, type: :controller do
       it "returns a tree of folder of proper size" do
         allow_any_instance_of(User).to receive(:space_uids).and_return(["space-2"])
         post :folder_tree, params
-        expect(parsed_response.size).to eq 4
+        expect(parsed_response.size).to eq 2
       end
 
       it "returns a tree of folder with proper content" do
@@ -80,10 +80,8 @@ RSpec.describe ApiController, type: :controller do
 
         expect(parsed_response.first["uid"].first(5)).to eq("file-")
         expect(parsed_response.first["type"]).to eq("UserFile")
-        expect(parsed_response.second["uid"]).to eq(nil)
+        expect(parsed_response.second["uid"]).to be_nil
         expect(parsed_response.second["type"]).to eq("Folder")
-        expect(parsed_response.third["type"]).to eq("UserFile")
-        expect(parsed_response[3]["name"].first(5)).to eq("file-")
       end
 
       context "after 15 minutes inactivity" do
@@ -120,19 +118,17 @@ RSpec.describe ApiController, type: :controller do
         it "returns a tree of folder of proper size" do
           allow_any_instance_of(User).to receive(:space_uids).and_return(["space-2"])
           post :folder_tree, params
-          expect(parsed_response.size).to eq(4)
+          expect(parsed_response.size).to eq 2
         end
 
         it "returns a tree of folder with proper content" do
           allow_any_instance_of(User).to receive(:space_uids).and_return(["space-2"])
           post :folder_tree, params
 
-          expect(parsed_response.size).to eq(4)
           expect(parsed_response.first["uid"].first(5)).to eq("file-")
-          expect(parsed_response.second["uid"]).to eq(nil)
+          expect(parsed_response.first["type"]).to eq("UserFile")
+          expect(parsed_response.second["uid"]).to be_nil
           expect(parsed_response.second["type"]).to eq("Folder")
-          expect(parsed_response.third["name"].first(5)).to eq("file-")
-          expect(parsed_response[3]["name"].first(5)).to eq("file-")
         end
       end
     end
