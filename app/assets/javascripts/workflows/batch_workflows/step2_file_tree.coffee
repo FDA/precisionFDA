@@ -2,10 +2,10 @@ TYPE_FILE = 'UserFile'
 TYPE_FOLDER = 'Folder'
 
 
-loadFolderTree = (parentId = null) ->
+loadFolderTree = (parentId = null, scope = scope) ->
   params = {
     parent_folder_id: parentId,
-    scopes: ['private'],
+    scopes: scope,
   }
   return $.post('/api/folder_tree', params)
 
@@ -22,7 +22,7 @@ class FileTree extends Precision.FileTree
       $node.addClass("jstree-loading")
       @disabled = true
 
-      loadFolderTree(data.node.original.id).then(
+      loadFolderTree(data.node.original.id, @folderTreeScope).then(
         (nodes) =>
           @addNodes(data, @prepareNodes(nodes, data.node.state.selected))
           @disabled = false
@@ -67,7 +67,8 @@ class FileTree extends Precision.FileTree
       return 0
     )
 
-  constructor: (defaultNodes = [], container) ->
+  constructor: (defaultNodes = [], container, folderTreeScope) ->
+    @folderTreeScope = folderTreeScope
     jsTreeParams = {
       container: container,
       defaultNodes: @prepareNodes(defaultNodes),
@@ -81,14 +82,15 @@ class FileTree extends Precision.FileTree
 
 class BatchWorkflowFileTree
   createNewTree: (container) ->
-    tree = new FileTree(@rootNodes, container)
+    tree = new FileTree(@rootNodes, container, @folderTreeScope)
     @folderTrees.push(tree)
     return tree
 
-  constructor: () ->
+  constructor: (scope) ->
     @folderTrees = []
     @rootNodes = []
-    loadFolderTree().then(
+    @folderTreeScope = scope
+    loadFolderTree(null, scope).then(
       (nodes) => @rootNodes = nodes || []
       (error) -> Precision.alert.showAboveAll('Something went wrong!')
     )

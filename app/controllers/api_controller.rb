@@ -265,7 +265,9 @@ class ApiController < ApplicationController
   # Inputs:
   #
   # parent_folder_id (integer): primary key of the folder selected;
-  #                             for root folder parent_folder_id = nil #
+  #                             for root folder parent_folder_id = nil
+  # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
+  #
   # Outputs:
   #
   # An array of hashes, each of which has these fields:
@@ -280,6 +282,16 @@ class ApiController < ApplicationController
     User.sync_files!(@context)
 
     files = UserFile.folder_files(@context, parent_folder_id)
+
+    if params[:scopes].present?
+      check_scope!
+      # exclude 'public' scope
+      if params[:scopes].first =~ /^space-(\d+)$/
+        files = files.where(scope: params[:scopes])
+      else
+        files = files.where(scope: ["private", nil])
+      end
+    end
 
     folders = Folder.private_folders(@context, parent_folder_id).includes(:taggings)
     folder_tree = []
@@ -1411,7 +1423,7 @@ class ApiController < ApplicationController
 
   def check_scope!
     condition = params[:scopes].is_a?(Array)
-    condition &&= params[:scopes].all? { |scope| scope == 'public' || scope == 'private' || scope =~ /^space-(\d+)$/ }
+    condition &&= params[:scopes].all? { |scope| scope == 'public' || scope == 'private' || scope =~ /^space-(\d+)$/ || scope == nil}
     fail(t('api.errors.invalid_scope')) unless condition
   end
 

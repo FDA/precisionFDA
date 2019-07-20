@@ -6,9 +6,9 @@ RSpec.describe ApiController, type: :controller do
   let(:file_one) { create(:user_file, :private) }
   let(:file_two) { create(:user_file, :public) }
   let(:file_three) { create(:user_file, :private) }
+  let(:file_four) { create(:user_file, :private) }
   let(:folder_one) { create(:folder, :private) }
   let(:verified) { FactoryBot.create(:space, :verification, :verified, host_lead_id: user.id) }
-  let(:params) { { "parent_folder_id" => "" } }
 
   describe "GET list_files" do
     context "js api" do
@@ -48,12 +48,15 @@ RSpec.describe ApiController, type: :controller do
     end
   end
 
-  describe "POST folder_tree" do
+  describe "POST folder_tree for 'private' scope" do
+    let(:params) { { "parent_folder_id" => "", "scopes"=>["private"] } }
+
     before do
       authenticate!(user)
       file_one.update(user_id: user.id)
       file_two.update(user_id: user.id)
       file_three.update(user_id: user.id, scope: "space-2")
+      file_four.update(user_id: user.id, scope: "space-2")
       folder_one.update(user_id: user.id)
     end
 
@@ -130,6 +133,49 @@ RSpec.describe ApiController, type: :controller do
           expect(parsed_response.second["uid"]).to be_nil
           expect(parsed_response.second["type"]).to eq("Folder")
         end
+      end
+    end
+  end
+
+  describe "POST folder_tree for 'space-XXX' scope" do
+    let(:params) { { "parent_folder_id" => "", "scopes"=>["space-2"] } }
+
+    before do
+      authenticate!(user)
+      file_one.update(user_id: user.id)
+      file_two.update(user_id: user.id)
+      file_three.update(user_id: user.id, scope: "space-2")
+      file_four.update(user_id: user.id, scope: "space-2")
+      folder_one.update(user_id: user.id)
+    end
+
+    context "js api" do
+      it "returns a http_status 200" do
+        post :folder_tree, params
+        expect(response.content_type).to eq "application/json"
+      end
+
+      it "returns a http_status 200" do
+        post :folder_tree, params
+        expect(response).to have_http_status(200)
+      end
+
+      it "returns a tree of folder of proper size" do
+        allow_any_instance_of(User).to receive(:space_uids).and_return(["space-2"])
+        post :folder_tree, params
+        expect(parsed_response.size).to eq 3
+      end
+
+      it "returns a tree of folder with proper content" do
+        allow_any_instance_of(User).to receive(:space_uids).and_return(["space-2"])
+        post :folder_tree, params
+
+        expect(parsed_response.first["uid"].first(5)).to eq("file-")
+        expect(parsed_response.first["type"]).to eq("UserFile")
+        expect(parsed_response.second["uid"].first(5)).to eq("file-")
+        expect(parsed_response.second["type"]).to eq("UserFile")
+        expect(parsed_response.third["uid"]).to be_nil
+        expect(parsed_response.third["type"]).to eq("Folder")
       end
     end
   end

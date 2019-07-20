@@ -122,7 +122,6 @@ class UserFile < Node
         .editable_by(context)
         .where(parent_folder_id: parent_folder_id)
         .where(state: "closed")
-        .where(scope: ["private", nil])
         .where.not(parent_type: ["Comparison", nil])
         .includes(:taggings)
     end
