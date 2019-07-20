@@ -532,7 +532,7 @@ class BatchWorkflowPageModel
     @batchInputOne = ko.observable(null)
     @batchInputTwo = ko.observable(null)
     @step2LoadFileInput = $('#step2_load_file_input')
-    @batchWorkflowFileTree = new Precision.BatchWorkflowFileTree()
+    @batchWorkflowFileTree = new Precision.BatchWorkflowFileTree(scope)
     ### step 2 ###
 
     ### step 3 ###
