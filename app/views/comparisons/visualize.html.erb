@@ -2,12 +2,13 @@
 <html>
   <head>
     <title>Browser</title>
-    <script language="javascript" src="https://dnanexus.github.io/reporting-assets/dalliance/5412566/dalliance-all.js"></script>
   </head>
 
   <body>
-    <div id='svgHolder'>Dalliance genome browser goes here. If this note does not disappear soon, there was a problem loading the code.</div>
+    <div id="svgHolder">Dalliance genome browser goes here. If this note does not disappear soon, there was a problem loading the code.</div>
+    <div id="loadingStatus">Loading...</div>
     <script language="javascript">
+      function renderBrowser() {
         var options = {files:<%= raw @files_json %>};
         var sources = [];
 
@@ -21,12 +22,12 @@
 
         sources.push(
                       {name: 'Genes',
-                       desc: 'Gene structures from GENCODE 19',
-                       bwgURI: 'https://api.dnanexus.com/F/D/f9032P65QG3xf2qzpf1g57Yy9q86BPQq4p47YxxY/gencode19.bb',
-                       stylesheet_uri: 'https://api.dnanexus.com/F/D/fqGXGzYKyQVzQ187FzZ1jPB21kv7gXBxzxfx2g52/gencode19.xml',
-                       collapseSuperGroups: true,
-                       trixURI: 'https://api.dnanexus.com/F/D/xF1fQqjPx0gjFfBKpkzFygzj6qbJf0pfjBjfK722/gencode19.ix',
-                       trixxURI: 'https://api.dnanexus.com/F/D/F9G97gXP6Pby7PQj9G3y3G4v7Q4G6qf91q9p8jy1/gencode19.ixx'});
+                      desc: 'Gene structures from GENCODE 19',
+                      bwgURI: 'https://api.dnanexus.com/F/D/f9032P65QG3xf2qzpf1g57Yy9q86BPQq4p47YxxY/gencode19.bb',
+                      stylesheet_uri: 'https://api.dnanexus.com/F/D/fqGXGzYKyQVzQ187FzZ1jPB21kv7gXBxzxfx2g52/gencode19.xml',
+                      collapseSuperGroups: true,
+                      trixURI: 'https://api.dnanexus.com/F/D/xF1fQqjPx0gjFfBKpkzFygzj6qbJf0pfjBjfK722/gencode19.ix',
+                      trixxURI: 'https://api.dnanexus.com/F/D/F9G97gXP6Pby7PQj9G3y3G4v7Q4G6qf91q9p8jy1/gencode19.ixx'});
 
 
         // Auto cluster the files
@@ -67,7 +68,23 @@
         };
 
         var b = new Browser(browser_options);
+      }
+
+      var statusContainer = document.getElementById('loadingStatus');
+      var script = document.createElement('script');
+      script.src = "https://dnanexus.github.io/reporting-assets/dalliance/5412566/dalliance-all.js"
+      document.body.appendChild(script);
+
+      script.onload = function() {
+        console.info('Browser script successfully loaded.');
+        renderBrowser();
+        statusContainer.parentNode.removeChild(statusContainer);
+      };
+
+      script.onerror = function() {
+        console.error('Error while loading Browser script.');
+        statusContainer.innerText = 'Error while loading Browser script.';
+      };
     </script>
   </body>
 </html>
-
