@@ -238,10 +238,10 @@ func main() {
       Key: *authKey,
     })
     if err != nil {
-       fmt.Printf("While the file has been uploaded succesfully\n, the authorization key can't be marshaled to json and saved in '%s'.\n", configPath)
+       fmt.Printf("While the file has been uploaded succesfully\n, the authorization key can't be marshaled to json and saved in '%s': %s\n", configPath, err.Error())
        fmt.Printf("You will need to submit authorization key in the command line in the next upload.\n")
        // exit gracefully, without panic
-       os.Exit(1)
+       os.Exit(0)
     }
 
     // below is a more compact and cleaner implementation which is recommended when writing small files
@@ -249,17 +249,14 @@ func main() {
     // ioutil.WriteFile which opens, writes and closes a file in one swoop
     // denote, that it also works on Windows ( checked on AWS EC2 windows instance )
     // despite Linux style file permissions are given
-    // if .pfda_config exists it truncaters it before writing
-    // denote also there is no need in defer f.Close(), since Ioutil.WriteFile closes the file immediately after writing it  
+    // if .pfda_config exists it is truncaters before writing
+    // denote also there is no need in defer f.Close(), since ioutil.WriteFile closes the file immediately after writing it  
     err = ioutil.WriteFile(configPath, jsonData, 0644)  // 0644 is '-rw -r- -r-'  
     if err != nil {
-       fmt.Printf("While the file has been uploaded succesfully, the authorization key hasn't been saved in config file '%s'.\n", configPath)
-       fmt.Printf("The reason is most likely lack of write permission for '%s'. Please, ensure you have it.\n", configPath)
-       fmt.Printf("You will need to submit authorisation key in the command line in the next upload.\n")
-       // exit gracefully, without panic
-       os.Exit(1)
+       fmt.Printf("Could not save authorization key in config file '%s': %s\n", configPath, err.Error())
+    } else { 
+       fmt.Printf("Saved authorization key in config file '%s'. \nA new key does not need to be provided for 24 hours from the generation time of the provided key.\n", configPath)
     }
-    fmt.Printf("Saved authorization key in config file '%s'. \nA new key does not need to be provided for 24 hours from the generation time of the provided key.\n", configPath)
   }
 }
 
