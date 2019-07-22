@@ -462,6 +462,9 @@ class BatchWorkflowPageModel
 
   constructor: (workflow, inputs, outputs, folders, scope) ->
     @workflow = workflow
+
+    @diagram = new Precision.WorkflowDiagramModel(workflow)
+
     @step = ko.observable(1)
     @wizardLoading = ko.observable(false)
     @accessibleScope = scope
@@ -558,6 +561,4 @@ WorkflowsController = Paloma.controller('Workflows', {
       @params.scope
     )
     ko.applyBindings(viewModel, $container[0])
-
-    window.viewModel = viewModel
 })
