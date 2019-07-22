@@ -2,7 +2,7 @@ TYPE_FILE = 'UserFile'
 TYPE_FOLDER = 'Folder'
 
 
-loadFolderTree = (parentId = null, scope = scope) ->
+loadFolderTree = (parentId = null, scope = ['private']) ->
   params = {
     parent_folder_id: parentId,
     scopes: scope,
@@ -67,8 +67,7 @@ class FileTree extends Precision.FileTree
       return 0
     )
 
-  constructor: (defaultNodes = [], container, folderTreeScope) ->
-    @folderTreeScope = folderTreeScope
+  constructor: (defaultNodes = [], container, @folderTreeScope) ->
     jsTreeParams = {
       container: container,
       defaultNodes: @prepareNodes(defaultNodes),
