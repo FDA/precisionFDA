@@ -24,8 +24,11 @@ class Folder < Node
   def self.private_folders(context, parent_folder_id = nil)
     Folder
       .private_for(context)
-      .editable_by(context)
       .where(parent_folder_id: parent_folder_id)
+  end
+
+  def self.space_tree_folders(scope, scoped_parent_folder_id)
+    where(scope: scope, scoped_parent_folder_id: scoped_parent_folder_id)
   end
 
   def klass

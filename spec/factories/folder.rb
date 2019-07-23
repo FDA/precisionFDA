@@ -10,5 +10,9 @@ FactoryBot.define do
     trait :private do
       scope :private
     end
+
+    trait :space do
+      scope "space-2"
+    end
   end
 end
