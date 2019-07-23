@@ -116,14 +116,21 @@ class UserFile < Node
       file_publisher.publish(files, scope)
     end
 
-    def folder_files(context, parent_folder_id)
+    def space_tree_files(scope, scoped_parent_folder_id)
+      where(scope: scope, scoped_parent_folder_id: scoped_parent_folder_id)
+    end
+
+    def folder_files(context)
       UserFile
         .real_files
         .editable_by(context)
-        .where(parent_folder_id: parent_folder_id)
         .where(state: "closed")
         .where.not(parent_type: ["Comparison", nil])
         .includes(:taggings)
+    end
+
+    def tree_private_files(scopes, parent_folder_id)
+      where(scope: scopes, parent_folder_id: parent_folder_id)
     end
   end
 

@@ -266,6 +266,9 @@ class ApiController < ApplicationController
   #
   # parent_folder_id (integer): primary key of the folder selected;
   #                             for root folder parent_folder_id = nil
+  # scoped_parent_folder_id (integer): used in spaces scopes only;
+  #                             primary key of the folder selected;
+  #                             for root folder parent_folder_id = nil
   # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
   #
   # Outputs:
@@ -278,22 +281,25 @@ class ApiController < ApplicationController
   #
   def folder_tree
     parent_folder_id = params[:parent_folder_id] == "" ? nil : params[:parent_folder_id].to_i
+    scoped_parent_folder_id = params[:scoped_parent_folder_id] == "" ? nil : params[:scoped_parent_folder_id].to_i
 
     User.sync_files!(@context)
 
-    files = UserFile.folder_files(@context, parent_folder_id)
+    files = UserFile.folder_files(@context)
+    folders = Folder.editable_by(@context).includes(:taggings)
 
     if params[:scopes].present?
       check_scope!
       # exclude 'public' scope
       if params[:scopes].first =~ /^space-(\d+)$/
-        files = files.where(scope: params[:scopes])
+        files = files.space_tree_files(params[:scopes], scoped_parent_folder_id)
+        folders = folders.space_tree_folders(params[:scopes], scoped_parent_folder_id)
       else
-        files = files.where(scope: ["private", nil])
+        files = files.tree_private_files(["private", nil], parent_folder_id)
+        folders = Folder.private_folders(@context, parent_folder_id)
       end
     end
 
-    folders = Folder.private_folders(@context, parent_folder_id).includes(:taggings)
     folder_tree = []
     Node.folder_content(files, folders).each do |item|
       folder_tree << {
@@ -301,6 +307,7 @@ class ApiController < ApplicationController
         name: item[:name],
         type: item[:sti_type],
         uid: item[:uid],
+        scope: item[:scope],
       }
     end
 

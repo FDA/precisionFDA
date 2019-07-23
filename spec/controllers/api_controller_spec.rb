@@ -8,6 +8,7 @@ RSpec.describe ApiController, type: :controller do
   let(:file_three) { create(:user_file, :private) }
   let(:file_four) { create(:user_file, :private) }
   let(:folder_one) { create(:folder, :private) }
+  let(:folder_two) { create(:folder, :space) }
   let(:verified) { FactoryBot.create(:space, :verification, :verified, host_lead_id: user.id) }
 
   describe "GET list_files" do
@@ -48,6 +49,33 @@ RSpec.describe ApiController, type: :controller do
     end
   end
 
+  describe "POST folder_tree has no user's files and folders" do
+    let(:params) { { "parent_folder_id" => "", "scoped_parent_folder_id" => "", "scopes"=>["private"] } }
+
+    before do
+      authenticate!(user)
+    end
+
+    context "js api" do
+      it "returns a http_status 200" do
+        post :folder_tree, params
+        expect(response.content_type).to eq "application/json"
+      end
+
+      it "returns a http_status 200" do
+        post :folder_tree, params
+        expect(response).to have_http_status(200)
+      end
+
+      it "returns an empty tree of zero size" do
+        allow_any_instance_of(User).to receive(:space_uids).and_return(["space-2"])
+        post :folder_tree, params
+        expect(parsed_response.size).to eq 0
+        expect(parsed_response).to eq([])
+      end
+    end
+  end
+
   describe "POST folder_tree for 'private' scope" do
     let(:params) { { "parent_folder_id" => "", "scopes"=>["private"] } }
 
@@ -58,6 +86,7 @@ RSpec.describe ApiController, type: :controller do
       file_three.update(user_id: user.id, scope: "space-2")
       file_four.update(user_id: user.id, scope: "space-2")
       folder_one.update(user_id: user.id)
+      folder_two.update(user_id: user.id)
     end
 
     context "js api" do
@@ -138,7 +167,7 @@ RSpec.describe ApiController, type: :controller do
   end
 
   describe "POST folder_tree for 'space-XXX' scope" do
-    let(:params) { { "parent_folder_id" => "", "scopes"=>["space-2"] } }
+    let(:params) { { "parent_folder_id" => "", "scoped_parent_folder_id" => "", "scopes"=>["space-2"] } }
 
     before do
       authenticate!(user)
@@ -147,6 +176,7 @@ RSpec.describe ApiController, type: :controller do
       file_three.update(user_id: user.id, scope: "space-2")
       file_four.update(user_id: user.id, scope: "space-2")
       folder_one.update(user_id: user.id)
+      folder_two.update(user_id: user.id)
     end
 
     context "js api" do
@@ -172,10 +202,13 @@ RSpec.describe ApiController, type: :controller do
 
         expect(parsed_response.first["uid"].first(5)).to eq("file-")
         expect(parsed_response.first["type"]).to eq("UserFile")
+        expect(parsed_response.first["scope"]).to eq("space-2")
         expect(parsed_response.second["uid"].first(5)).to eq("file-")
         expect(parsed_response.second["type"]).to eq("UserFile")
+        expect(parsed_response.second["scope"]).to eq("space-2")
         expect(parsed_response.third["uid"]).to be_nil
         expect(parsed_response.third["type"]).to eq("Folder")
+        expect(parsed_response.third["scope"]).to eq("space-2")
       end
     end
   end

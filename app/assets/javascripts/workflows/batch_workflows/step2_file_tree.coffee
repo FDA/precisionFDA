@@ -5,6 +5,7 @@ TYPE_FOLDER = 'Folder'
 loadFolderTree = (parentId = null, scope = ['private']) ->
   params = {
     parent_folder_id: parentId,
+    scoped_parent_folder_id: parentId,
     scopes: scope,
   }
   return $.post('/api/folder_tree', params)
