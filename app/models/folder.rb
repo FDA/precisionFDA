@@ -27,8 +27,8 @@ class Folder < Node
       .where(parent_folder_id: parent_folder_id)
   end
 
-  def self.space_tree_folders(scope, scoped_parent_folder_id)
-    where(scope: scope, scoped_parent_folder_id: scoped_parent_folder_id)
+  def self.space_tree_folders(scopes, scoped_parent_folder_id)
+    where(scope: scopes, scoped_parent_folder_id: scoped_parent_folder_id)
   end
 
   def klass
