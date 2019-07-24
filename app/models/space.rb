@@ -202,6 +202,14 @@ class Space < ActiveRecord::Base
     end
   end
 
+  def self.spaces_members_ids(scopes)
+    ids = []
+    scopes.each do |scope|
+      ids=ids + Space.space_members_ids(scope)
+    end
+    ids.uniq
+  end
+
   def self.space_members_ids(scope)
     space = Space.from_scope(scope)
     space.space_memberships.map &:user_id

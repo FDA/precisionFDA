@@ -116,8 +116,8 @@ class UserFile < Node
       file_publisher.publish(files, scope)
     end
 
-    def space_tree_files(scope, scoped_parent_folder_id)
-      where(scope: scope, scoped_parent_folder_id: scoped_parent_folder_id)
+    def space_tree_files(scopes, scoped_parent_folder_id)
+      where(scope: scopes, scoped_parent_folder_id: scoped_parent_folder_id)
     end
 
     def folder_files(context)

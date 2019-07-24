@@ -280,6 +280,7 @@ class ApiController < ApplicationController
   # uid (string): the file's unique id (file-xxxxxx); for any folder uid = nil
   #
   def folder_tree
+    puts("In API folder_tree: in space: params = #{params.inspect}")
     parent_folder_id =
       params[:parent_folder_id] == "" ? nil : params[:parent_folder_id].to_i
     scoped_parent_folder_id =
@@ -291,12 +292,16 @@ class ApiController < ApplicationController
       check_scope!
       # exclude 'public' scope
       if params[:scopes].first =~ /^space-(\d+)$/
-        space_members_ids = Space.space_members_ids(params[:scopes].first)
+        # space_members_ids = Space.space_members_ids(params[:scopes].first)
+        spaces_members_ids = Space.spaces_members_ids(params[:scopes])
+        puts("In API folder_tree: in space: spaces_members_ids = #{spaces_members_ids.inspect}")
 
-        files = UserFile.space_folder_files(@context, space_members_ids)
+        files = UserFile.space_folder_files(@context, spaces_members_ids)
+        puts("In API folder_tree: BEFORE scope check: files = #{files.inspect}")
         files = files.space_tree_files(params[:scopes], scoped_parent_folder_id)
 
-        folders = Folder.editable_in_space(@context, space_members_ids).includes(:taggings)
+        folders = Folder.editable_in_space(@context, spaces_members_ids).includes(:taggings)
+        puts("In API folder_tree: BEFORE scope check: folders = #{folders.inspect}")
         folders = folders.space_tree_folders(params[:scopes], scoped_parent_folder_id)
       else
         files = UserFile.folder_files(@context)
@@ -305,6 +310,8 @@ class ApiController < ApplicationController
         folders = Folder.private_folders(@context, parent_folder_id)
       end
     end
+    logger.debug("In API folder_tree: AFTER scope check: files = #{files.inspect}")
+    logger.debug("In API folder_tree: AFTER scope check: folders = #{folders.inspect}")
 
     folder_tree = []
     Node.folder_content(files, folders).each do |item|
@@ -316,6 +323,7 @@ class ApiController < ApplicationController
         scope: item[:scope],
       }
     end
+    logger.debug("In API folder_tree: folder_tree = #{folder_tree.inspect}")
 
     render json: folder_tree
   end
