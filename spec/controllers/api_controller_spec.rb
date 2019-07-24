@@ -2,11 +2,13 @@ require "rails_helper"
 
 RSpec.describe ApiController, type: :controller do
   let(:user) { create(:user, dxuser: "user") }
+  let(:user_two) { create(:user, dxuser: "user_two") }
   let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, nil, nil) }
   let(:file_one) { create(:user_file, :private) }
   let(:file_two) { create(:user_file, :public) }
   let(:file_three) { create(:user_file, :private) }
   let(:file_four) { create(:user_file, :private) }
+  let(:file_space_member_one) { create(:user_file, :private) }
   let(:folder_one) { create(:folder, :private) }
   let(:folder_two) { create(:folder, :space) }
   let(:verified) { FactoryBot.create(:space, :verification, :verified, host_lead_id: user.id) }
@@ -50,14 +52,18 @@ RSpec.describe ApiController, type: :controller do
   end
 
   describe "POST folder_tree has no user's files and folders" do
-    let(:params) { { "parent_folder_id" => "", "scoped_parent_folder_id" => "", "scopes"=>["private"] } }
+    let(:params) { {
+      "parent_folder_id" => "",
+      "scoped_parent_folder_id" => "",
+      "scopes"=>["private"],
+    } }
 
     before do
       authenticate!(user)
     end
 
     context "js api" do
-      it "returns a http_status 200" do
+      it "returns a content_type 'json'" do
         post :folder_tree, params
         expect(response.content_type).to eq "application/json"
       end
@@ -77,7 +83,7 @@ RSpec.describe ApiController, type: :controller do
   end
 
   describe "POST folder_tree for 'private' scope" do
-    let(:params) { { "parent_folder_id" => "", "scopes"=>["private"] } }
+    let(:params) { { "parent_folder_id" => "", "scopes" => ["private"] } }
 
     before do
       authenticate!(user)
@@ -90,7 +96,7 @@ RSpec.describe ApiController, type: :controller do
     end
 
     context "js api" do
-      it "returns a http_status 200" do
+      it "returns a content_type 'json'" do
         post :folder_tree, params
         expect(response.content_type).to eq "application/json"
       end
@@ -137,7 +143,7 @@ RSpec.describe ApiController, type: :controller do
       context "after 15 minutes inactivity" do
         before { expire_session! }
 
-        it "returns a http_status 200" do
+        it "returns a content_type 'json'" do
           post :folder_tree, params
           expect(response.content_type).to eq "application/json"
         end
@@ -167,7 +173,11 @@ RSpec.describe ApiController, type: :controller do
   end
 
   describe "POST folder_tree for 'space-XXX' scope" do
-    let(:params) { { "parent_folder_id" => "", "scoped_parent_folder_id" => "", "scopes"=>["space-2"] } }
+    let(:params) { {
+      "parent_folder_id" => "",
+      "scoped_parent_folder_id" => "",
+      "scopes" => ["space-2"],
+    } }
 
     before do
       authenticate!(user)
@@ -180,24 +190,39 @@ RSpec.describe ApiController, type: :controller do
     end
 
     context "js api" do
-      it "returns a http_status 200" do
+      it "returns a content_type 'json'" do
+        allow_any_instance_of(User)
+          .to receive(:space_uids)
+          .with(["space-2"])
+          .and_return(["space-2"])
+        allow(Space).to receive(:space_members_ids).and_return([user.id])
         post :folder_tree, params
         expect(response.content_type).to eq "application/json"
       end
 
       it "returns a http_status 200" do
+        allow_any_instance_of(User)
+          .to receive(:space_uids)
+          .with(["space-2"])
+          .and_return(["space-2"])
+        allow(Space).to receive(:space_members_ids).and_return([user.id])
         post :folder_tree, params
         expect(response).to have_http_status(200)
       end
 
       it "returns a tree of folder of proper size" do
-        allow_any_instance_of(User).to receive(:space_uids).and_return(["space-2"])
+        allow_any_instance_of(User)
+          .to receive(:space_uids)
+          .with(["space-2"])
+          .and_return(["space-2"])
+        allow(Space).to receive(:space_members_ids).and_return([user.id])
         post :folder_tree, params
         expect(parsed_response.size).to eq 3
       end
 
       it "returns a tree of folder with proper content" do
         allow_any_instance_of(User).to receive(:space_uids).and_return(["space-2"])
+        allow(Space).to receive(:space_members_ids).and_return([user.id])
         post :folder_tree, params
 
         expect(parsed_response.first["uid"].first(5)).to eq("file-")
@@ -209,6 +234,76 @@ RSpec.describe ApiController, type: :controller do
         expect(parsed_response.third["uid"]).to be_nil
         expect(parsed_response.third["type"]).to eq("Folder")
         expect(parsed_response.third["scope"]).to eq("space-2")
+      end
+    end
+  end
+
+  describe "POST folder_tree for 'space-XXX' scope with space member's files" do
+    let(:params) { {
+      "parent_folder_id" => "",
+      "scoped_parent_folder_id" => "",
+      "scopes"=>["space-2"],
+    } }
+
+    before do
+      authenticate!(user)
+      file_one.update(user_id: user.id)
+      file_two.update(user_id: user.id)
+      file_three.update(user_id: user.id, scope: "space-2")
+      file_four.update(user_id: user.id, scope: "space-2")
+      file_space_member_one.update(user_id: user_two.id, scope: "space-2")
+      folder_one.update(user_id: user.id)
+      folder_two.update(user_id: user.id)
+    end
+
+    context "js api" do
+      it "returns a content_type 'json'" do
+        allow_any_instance_of(User)
+          .to receive(:space_uids)
+          .with(["space-2"])
+          .and_return(["space-2"])
+        allow(Space).to receive(:space_members_ids).and_return([user.id, user_two.id])
+        post :folder_tree, params
+        expect(response.content_type).to eq "application/json"
+      end
+
+      it "returns a http_status 200" do
+        allow_any_instance_of(User)
+          .to receive(:space_uids)
+          .with(["space-2"])
+          .and_return(["space-2"])
+        allow(Space).to receive(:space_members_ids).and_return([user.id, user_two.id])
+        post :folder_tree, params
+        expect(response).to have_http_status(200)
+      end
+
+      it "returns a tree of folder of proper size with space member file" do
+        allow_any_instance_of(User)
+          .to receive(:space_uids)
+          .with(["space-2"])
+          .and_return(["space-2"])
+        allow(Space).to receive(:space_members_ids).and_return([user.id, user_two.id])
+        post :folder_tree, params
+        expect(parsed_response.size).to eq 4
+      end
+
+      it "returns a tree of folder with proper content with space member file" do
+        allow_any_instance_of(User).to receive(:space_uids).and_return(["space-2"])
+        allow(Space).to receive(:space_members_ids).and_return([user.id, user_two.id])
+        post :folder_tree, params
+
+        expect(parsed_response.first["uid"].first(5)).to eq("file-")
+        expect(parsed_response.first["type"]).to eq("UserFile")
+        expect(parsed_response.first["scope"]).to eq("space-2")
+        expect(parsed_response.second["uid"].first(5)).to eq("file-")
+        expect(parsed_response.second["type"]).to eq("UserFile")
+        expect(parsed_response.second["scope"]).to eq("space-2")
+        expect(parsed_response.third["uid"].first(5)).to eq("file-")
+        expect(parsed_response.third["type"]).to eq("UserFile")
+        expect(parsed_response.third["scope"]).to eq("space-2")
+        expect(parsed_response[3]["uid"]).to be_nil
+        expect(parsed_response[3]["type"]).to eq("Folder")
+        expect(parsed_response[3]["scope"]).to eq("space-2")
       end
     end
   end

@@ -202,6 +202,11 @@ class Space < ActiveRecord::Base
     end
   end
 
+  def self.space_members_ids(scope)
+    space = Space.from_scope(scope)
+    space.space_memberships.map &:user_id
+  end
+
   def editable_by?(context)
     return if context.guest?
     return if verified?

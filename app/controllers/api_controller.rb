@@ -280,22 +280,28 @@ class ApiController < ApplicationController
   # uid (string): the file's unique id (file-xxxxxx); for any folder uid = nil
   #
   def folder_tree
-    parent_folder_id = params[:parent_folder_id] == "" ? nil : params[:parent_folder_id].to_i
-    scoped_parent_folder_id = params[:scoped_parent_folder_id] == "" ? nil : params[:scoped_parent_folder_id].to_i
+    parent_folder_id =
+      params[:parent_folder_id] == "" ? nil : params[:parent_folder_id].to_i
+    scoped_parent_folder_id =
+      params[:scoped_parent_folder_id] == "" ? nil : params[:scoped_parent_folder_id].to_i
 
     User.sync_files!(@context)
-
-    files = UserFile.folder_files(@context)
-    folders = Folder.editable_by(@context).includes(:taggings)
 
     if params[:scopes].present?
       check_scope!
       # exclude 'public' scope
       if params[:scopes].first =~ /^space-(\d+)$/
+        space_members_ids = Space.space_members_ids(params[:scopes].first)
+
+        files = UserFile.space_folder_files(@context, space_members_ids)
         files = files.space_tree_files(params[:scopes], scoped_parent_folder_id)
+
+        folders = Folder.editable_in_space(@context, space_members_ids).includes(:taggings)
         folders = folders.space_tree_folders(params[:scopes], scoped_parent_folder_id)
       else
+        files = UserFile.folder_files(@context)
         files = files.tree_private_files(["private", nil], parent_folder_id)
+
         folders = Folder.private_folders(@context, parent_folder_id)
       end
     end
