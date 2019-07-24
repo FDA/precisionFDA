@@ -129,6 +129,15 @@ class UserFile < Node
         .includes(:taggings)
     end
 
+    def space_folder_files(context, ids)
+      UserFile
+        .real_files
+        .editable_in_space(context, ids)
+        .where(state: "closed")
+        .where.not(parent_type: ["Comparison", nil])
+        .includes(:taggings)
+    end
+
     def tree_private_files(scopes, parent_folder_id)
       where(scope: scopes, parent_folder_id: parent_folder_id)
     end
