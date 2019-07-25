@@ -1,4 +1,4 @@
-FROM goboring/golang:1.8.3b4
+FROM goboring/golang:1.9.2b4
 
 RUN go get github.com/hashicorp/go-retryablehttp \
     && go get github.com/golang/lint/golint
