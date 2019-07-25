@@ -29,21 +29,20 @@ class ExpertsController < ApplicationController
     redirect_to experts_path unless @context.user.can_administer_site?
 
     user = User.real.find_by(dxuser: expert_params[:username])
-    if user.nil?
-      flash[:error] = "Expert username #{expert_params[:username]} not found!"
-    else
+
+    if user
       expert = Expert.provision(@context, expert_params)
       if expert
         NotificationsMailer.new_expert_email(expert).deliver_now!
-        redirect_to experts_path
         flash[:success] = "A new Expert of the Month was successfully created for #{expert.user.full_name.titleize} (#{expert.user.dxuser})."
-        return
+        redirect_to experts_path and return
       else
         flash[:error] = "The Expert could not be provisioned because of an unknown reason."
       end
+    else
+      flash[:error] = "Expert username #{expert_params[:username]} not found!"
     end
 
-    # Here only if error
     @expert = Expert.new(expert_params)
     redirect_to new_expert_path(@expert)
   end

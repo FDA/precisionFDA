@@ -63,17 +63,9 @@ class Context
   def valid_publish_targets_for(item)
     targets = item.is_a?(Workflow) ? [] : ["public"]
     if logged_in?
-      targets += active_spaces_for(item).map(&:uid)
+      targets += @user.active_spaces.map(&:uid)
     end
     targets.select { |t| item.publishable_by?(self, t) }
-  end
-
-  def active_spaces_for(item)
-    if item.is_a?(Workflow)
-      @user.active_spaces.non_groups
-    else
-      @user.active_spaces
-    end
   end
 
   def api

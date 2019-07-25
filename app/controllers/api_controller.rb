@@ -725,32 +725,41 @@ class ApiController < ApplicationController
   # id (string, "file-xxxx")
   #
   def create_file
-    name = params[:name]
-    fail "File name needs to be a non-empty String" unless name.is_a?(String) && name != ""
+    file_name = params[:name]
+    if file_name.blank? || !file_name.is_a?(String)
+      fail "File name needs to be a non-empty String"
+    end
 
-    description = params["description"]
-    unless description.nil?
-      fail "File description needs to be a String" unless description.is_a?(String)
+    description = params[:description]
+    if description && !description.is_a?(String)
+      fail "File description needs to be a String"
     end
 
     folder = Folder.editable_by(@context).find_by(id: params[:folder_id])
 
-    project = @context.user.private_files_project
-    dxid = DNAnexusAPI.new(@context.token).call("file", "new", "name": params[:name], "project": project)["id"]
+    scope = "private"
+    user = @context.user
+    project = user.private_files_project
 
-    file = UserFile.transaction do
-      UserFile.create!(
-        dxid: dxid,
-        project: project,
-        name: name,
-        state: "open",
-        description: description,
-        user_id: @context.user_id,
-        parent: @context.user,
-        scope: 'private',
-        parent_folder_id: folder.try(:id)
-      )
+    if params[:public_scope]
+      scope = "public"
+      project = user.public_files_project
     end
+
+    api = DNAnexusAPI.new(@context.token)
+    dxid = api.call("file", "new", "name": file_name, "project": project)["id"]
+
+    file = UserFile.create!(
+      dxid: dxid,
+      project: project,
+      name: file_name,
+      state: "open",
+      description: description,
+      user_id: user.id,
+      parent: user,
+      scope: scope,
+      parent_folder_id: folder.try(:id)
+    )
 
     render json: { id: file.uid }
   end

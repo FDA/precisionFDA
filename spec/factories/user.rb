@@ -8,6 +8,7 @@ FactoryBot.define do
     association :org
     last_login 1.day.ago
     private_files_project "project-test"
+    public_files_project "public-files-project"
 
     trait :admin do
       dxuser "vijay.kandali"

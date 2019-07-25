@@ -48,14 +48,16 @@
   </ul>
 </div>
 
-<% if !@meta_appathon.followed_by?(@context.user) %>
-<div class="pfda-toolbar">
-  <div class="btn-group">
-    <%= link_to new_meta_appathon_appathon_path(@meta_appathon), class: 'btn btn-primary' do %>
-      <span class="fa fa-plus fa-fw"></span> Create an appathon
-    <% end %>
+<% unless @context.guest? %>
+  <% if !@meta_appathon.followed_by?(@context.user) %>
+  <div class="pfda-toolbar">
+    <div class="btn-group">
+      <%= link_to new_meta_appathon_appathon_path(@meta_appathon), class: 'btn btn-primary' do %>
+        <span class="fa fa-plus fa-fw"></span> Create an appathon
+      <% end %>
+    </div>
   </div>
-</div>
+  <% end %>
 <% end %>
 
 <%= render "appathons/cards", meta_appathon: @meta_appathon, appathons: @appathons %>
