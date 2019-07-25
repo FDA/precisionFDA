@@ -32,7 +32,7 @@ class FileModel
     )
 
 class ModalImageUploader
-  constructor: (imageUrl, fileId) ->
+  constructor: (imageUrl, fileId, @metadata = { public_scope: false }) ->
     @files = ko.observableArray()
 
     @imageUrl = ko.observable(imageUrl)
@@ -100,11 +100,9 @@ class ModalImageUploader
       @uploadState("DONE") if uploadCounter == filesLength
 
     for fileModel, i in files
-      metadata = {}
-
       do (fileModel) =>
         fileModel.state("UPLOADING")
-        Precision.uploader.uploadImage({ fileModel: fileModel, metadata: metadata }, () =>
+        Precision.uploader.uploadImage({ fileModel: fileModel, metadata: @metadata }, () =>
           @getFileLink(fileModel, doneFn)
         )
 

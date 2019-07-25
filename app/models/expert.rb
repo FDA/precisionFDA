@@ -116,10 +116,10 @@ class Expert < ActiveRecord::Base
 
   def self.get_perm_link(context, id)
     file = UserFile.accessible_by(context).find_by_uid!(id)
-    if file.nil? || file.state != "closed" || file.file_size > 5000000
-      return nil
+
+    if file && file.state == "closed" && file.file_size <= 5000000
+      DNAnexusAPI.for_challenge_bot.generate_permanent_link(file)
     end
-    DNAnexusAPI.new(context.token).generate_permanent_link(file)
   end
 
   def self.provision(context, expert_params)
