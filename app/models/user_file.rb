@@ -42,7 +42,7 @@
 class UserFile < Node
   include Licenses
   include InternalUid
-  require 'uri'
+  require "uri"
 
   DESCRIPTION_MAX_LENGTH = 65535
 
@@ -53,16 +53,16 @@ class UserFile < Node
 
   PARENT_TYPE_COMPARISON = "Comparison".freeze
 
-  has_many :notes, {through: :attachments}
-  has_many :attachments, {as: :item, dependent: :destroy}
+  has_many :notes, { through: :attachments }
+  has_many :attachments, { as: :item, dependent: :destroy }
   has_many :comparison_inputs
-  has_many :comparisons, -> { distinct }, {through: :comparison_inputs, dependent: :restrict_with_exception}
+  has_many :comparisons, -> { distinct }, { through: :comparison_inputs, dependent: :restrict_with_exception }
 
-  has_and_belongs_to_many :jobs_as_input, {join_table: "job_inputs", class_name: "Job"}
+  has_and_belongs_to_many :jobs_as_input, { join_table: "job_inputs", class_name: "Job" }
 
-  has_one :licensed_item, {as: :licenseable, dependent: :destroy}
-  has_one :license, {through: :licensed_item}
-  has_many :accepted_licenses, {through: :license}
+  has_one :licensed_item, { as: :licenseable, dependent: :destroy }
+  has_one :license, { through: :licensed_item }
+  has_many :accepted_licenses, { through: :license }
 
   has_many :challenge_resources
 
@@ -71,13 +71,17 @@ class UserFile < Node
 
   validates :name, presence: { message: "Name could not be blank" }
   validates :description,
-            allow_blank: true,
+            allow_blank:
+              true,
             length: {
               maximum: DESCRIPTION_MAX_LENGTH,
-              too_long: "Description could not be greater than #{DESCRIPTION_MAX_LENGTH} characters"
+              too_long: "Description could not be greater than #{DESCRIPTION_MAX_LENGTH} characters",
             }
 
   scope :open, -> { where(state: STATE_OPEN) }
+  scope :files_conditions, -> {
+    where(state: "closed").where.not(parent_type: ["Comparison", nil]).includes(:taggings)
+  }
 
   class << self
     def model_name
@@ -85,11 +89,11 @@ class UserFile < Node
     end
 
     def real_files
-      where(parent_type: ['User', 'Job', 'Node', 'Comparison'])
+      where(parent_type: ["User", "Job", "Node", "Comparison"])
     end
 
     def not_assets
-      where.not(parent_type: 'Asset')
+      where.not(parent_type: "Asset")
     end
 
     def independent
@@ -97,7 +101,7 @@ class UserFile < Node
     end
 
     def closed
-      where(state: 'closed')
+      where(state: "closed")
     end
 
     def publication_project!(user, scope)
@@ -113,6 +117,30 @@ class UserFile < Node
     def publish(files, context, scope)
       file_publisher = FilePublisher.by_context(context)
       file_publisher.publish(files, scope)
+    end
+
+    def batch_private_files(context,scopes, parent_folder_id)
+      UserFile
+        .real_files
+        .editable_by(context)
+        .files_conditions
+        .where(scope: scopes, parent_folder_id: parent_folder_id)
+    end
+
+    def batch_space_files(spaces_params)
+      space_folder_files(spaces_params[:context], spaces_params[:spaces_members_ids])
+      space_tree_files(spaces_params[:scopes], spaces_params[:scoped_parent_folder_id])
+    end
+
+    def space_folder_files(context, ids)
+      UserFile
+        .real_files
+        .editable_in_space(context, ids)
+        .files_conditions
+    end
+
+    def space_tree_files(scopes, scoped_parent_folder_id)
+      where(scope: scopes, scoped_parent_folder_id: scoped_parent_folder_id)
     end
   end
 
@@ -177,7 +205,7 @@ class UserFile < Node
   end
 
   def deletable?
-    ((parent_type == "User") || (parent_type == "Job")) && ( (scope == "private" || scope == "public") || !(in_space? && space_object.verified?))
+    ((parent_type == "User") || (parent_type == "Job")) && ((scope == "private" || scope == "public") || !(in_space? && space_object.verified?))
   end
 
   def publishable_by?(context, scope_to_publish_to = "public")
@@ -190,7 +218,7 @@ class UserFile < Node
 
     return false unless valid?
 
-    if DNAnexusAPI.new(context.token).call(dxid, "rename", {project: project, name: new_name})
+    if DNAnexusAPI.new(context.token).call(dxid, "rename", { project: project, name: new_name })
       update_attributes(name: new_name, description: description)
     else
       errors.add(:base, "File info could not be updated.")

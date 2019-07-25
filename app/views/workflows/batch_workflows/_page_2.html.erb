@@ -34,6 +34,7 @@
       <div class="batch-workfows-wizard-step2-input" data-bind="template: {
         name: 'batch_input_templates_step2',
         data: batchInputOne,
+        afterRender: function() { batchInputOne().initTree(); },
         as: 'input'
       }"></div>
     <!-- /ko -->
@@ -41,6 +42,7 @@
       <div class="batch-workfows-wizard-step2-input" data-bind="template: {
         name: 'batch_input_templates_step2',
         data: batchInputTwo,
+        afterRender: function() { batchInputTwo().initTree(); },
         as: 'input'
       }"></div>
     <!-- /ko -->

@@ -58,7 +58,6 @@ This requires manually "bootstrapping" the situation in steps described in
   * `https://localhost:3000`
 
 
-
 ##### Deprecated Docker usage
 
 ###### Install gems
@@ -69,8 +68,7 @@ This requires manually "bootstrapping" the situation in steps described in
 ###### start rails server
   * `docker-compose up`
 ###### start rails console
-  * `docker compose exec web bundle exec rails c`  
-
+  * `docker compose exec web bundle exec rails c`
 
 ### Issues
 
@@ -113,6 +111,7 @@ The _dxuser_ of the user record must match your DNAnexus username, and the _hand
 match the DNAnexus org handle without the pfda.. prefix, i.e. floranteorg.
 
 ## pFDA setup and running without Docker
+
 * Clone Repo
   * `git clone git@github.com:dnanexus/precision-fda.git`
 
