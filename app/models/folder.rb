@@ -21,6 +21,21 @@ class Folder < Node
                           message: "This folder already has node named '%{value}'",
                           unless: lambda { private? }
 
+  class << self
+    def batch_private_folders(context, parent_folder_id = nil)
+      Folder
+        .private_for(context)
+        .where(parent_folder_id: parent_folder_id)
+    end
+
+    def batch_space_folders(spaces_params)
+      Folder
+        .editable_in_space(spaces_params[:context], spaces_params[:spaces_members_ids])
+        .includes(:taggings)
+        .where(scope: spaces_params[:scopes], scoped_parent_folder_id: spaces_params[:scoped_parent_folder_id])
+    end
+  end
+
   def klass
     "folder"
   end
@@ -73,5 +88,4 @@ class Folder < Node
     sub_folders.each { |folder| collected += folder.all_children(where).to_a }
     collected
   end
-
 end

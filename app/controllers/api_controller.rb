@@ -264,6 +264,64 @@ class ApiController < ApplicationController
 
   # Inputs:
   #
+  # parent_folder_id (integer): primary key of the folder selected;
+  #                             for root folder parent_folder_id = nil
+  # scoped_parent_folder_id (integer): used in spaces scopes only;
+  #                             primary key of the folder selected;
+  #                             for root folder parent_folder_id = nil
+  # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
+  #
+  # Outputs:
+  #
+  # An array of hashes, each of which has these fields:
+  # id (integer): primary key of the file or the folder
+  # name (string): the filename or the folder name
+  # type (string): file or folder sti_type, "UserFile" or "Folder"
+  # uid (string): the file's unique id (file-xxxxxx); for any folder uid = nil
+  #
+  def folder_tree
+    parent_folder_id =
+      params[:parent_folder_id] == "" ? nil : params[:parent_folder_id].to_i
+    scoped_parent_folder_id =
+      params[:scoped_parent_folder_id] == "" ? nil : params[:scoped_parent_folder_id].to_i
+
+    User.sync_files!(@context)
+
+    if params[:scopes].present?
+      check_scope!
+      # exclude 'public' scope
+      if params[:scopes].first =~ /^space-(\d+)$/
+        spaces_members_ids = Space.spaces_members_ids(params[:scopes])
+        spaces_params = {
+          context: @context,
+          spaces_members_ids: spaces_members_ids,
+          scopes: params[:scopes],
+          scoped_parent_folder_id: scoped_parent_folder_id,
+        }
+        files = UserFile.batch_space_files(spaces_params)
+        folders = Folder.batch_space_folders(spaces_params)
+      else
+        files = UserFile.batch_private_files(@context,["private", nil], parent_folder_id)
+        folders = Folder.batch_private_folders(@context, parent_folder_id)
+      end
+    end
+
+    folder_tree = []
+    Node.folder_content(files, folders).each do |item|
+      folder_tree << {
+        id: item[:id],
+        name: item[:name],
+        type: item[:sti_type],
+        uid: item[:uid],
+        scope: item[:scope],
+      }
+    end
+
+    render json: folder_tree
+  end
+
+  # Inputs:
+  #
   # states (array of strings; optional): the file state/s to be returned "closed", "closing", and/or "open"
   # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
   # editable (Boolean, optional): if filtering for only editable_by the context user, otherwise accessible_by
@@ -1387,7 +1445,7 @@ class ApiController < ApplicationController
 
   def check_scope!
     condition = params[:scopes].is_a?(Array)
-    condition &&= params[:scopes].all? { |scope| scope == 'public' || scope == 'private' || scope =~ /^space-(\d+)$/ }
+    condition &&= params[:scopes].all? { |scope| scope == 'public' || scope == 'private' || scope =~ /^space-(\d+)$/ || scope == nil}
     fail(t('api.errors.invalid_scope')) unless condition
   end
 

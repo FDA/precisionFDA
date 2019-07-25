@@ -37,6 +37,16 @@ module Permissions
       end
     end
 
+    def editable_in_space(context, ids)
+      if context.guest?
+        none
+      else
+        return false if try(:space_object).try(:verified?)
+        raise unless context.user_id.present?
+        where(user_id: ids)
+      end
+    end
+
     def accessible_by_public
       where(scope: "public")
     end
