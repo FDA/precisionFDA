@@ -21,14 +21,19 @@ class Folder < Node
                           message: "This folder already has node named '%{value}'",
                           unless: lambda { private? }
 
-  def self.private_folders(context, parent_folder_id = nil)
-    Folder
-      .private_for(context)
-      .where(parent_folder_id: parent_folder_id)
-  end
+  class << self
+    def batch_private_folders(context, parent_folder_id = nil)
+      Folder
+        .private_for(context)
+        .where(parent_folder_id: parent_folder_id)
+    end
 
-  def self.space_tree_folders(scopes, scoped_parent_folder_id)
-    where(scope: scopes, scoped_parent_folder_id: scoped_parent_folder_id)
+    def batch_space_folders(spaces_params)
+      Folder
+        .editable_in_space(spaces_params[:context], spaces_params[:spaces_members_ids])
+        .includes(:taggings)
+        .where(scope: spaces_params[:scopes], scoped_parent_folder_id: spaces_params[:scoped_parent_folder_id])
+    end
   end
 
   def klass
