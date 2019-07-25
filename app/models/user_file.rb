@@ -79,6 +79,9 @@ class UserFile < Node
             }
 
   scope :open, -> { where(state: STATE_OPEN) }
+  scope :files_conditions, -> {
+    where(state: "closed").where.not(parent_type: ["Comparison", nil]).includes(:taggings)
+  }
 
   class << self
     def model_name
@@ -116,30 +119,28 @@ class UserFile < Node
       file_publisher.publish(files, scope)
     end
 
-    def space_tree_files(scopes, scoped_parent_folder_id)
-      where(scope: scopes, scoped_parent_folder_id: scoped_parent_folder_id)
-    end
-
-    def folder_files(context)
+    def batch_private_files(context,scopes, parent_folder_id)
       UserFile
         .real_files
         .editable_by(context)
-        .where(state: "closed")
-        .where.not(parent_type: ["Comparison", nil])
-        .includes(:taggings)
+        .files_conditions
+        .where(scope: scopes, parent_folder_id: parent_folder_id)
+    end
+
+    def batch_space_files(spaces_params)
+      space_folder_files(spaces_params[:context], spaces_params[:spaces_members_ids])
+      space_tree_files(spaces_params[:scopes], spaces_params[:scoped_parent_folder_id])
     end
 
     def space_folder_files(context, ids)
       UserFile
         .real_files
         .editable_in_space(context, ids)
-        .where(state: "closed")
-        .where.not(parent_type: ["Comparison", nil])
-        .includes(:taggings)
+        .files_conditions
     end
 
-    def tree_private_files(scopes, parent_folder_id)
-      where(scope: scopes, parent_folder_id: parent_folder_id)
+    def space_tree_files(scopes, scoped_parent_folder_id)
+      where(scope: scopes, scoped_parent_folder_id: scoped_parent_folder_id)
     end
   end
 
