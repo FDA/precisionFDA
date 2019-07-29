@@ -251,6 +251,7 @@ func main() {
     // despite Linux style file permissions are given
     // if .pfda_config exists it is truncaters before writing
     // denote also there is no need in defer f.Close(), since ioutil.WriteFile closes the file immediately after writing it  
+    fmt.Printf("Saving authorization key in config file '%s'\n", configPath)
     err = ioutil.WriteFile(configPath, jsonData, 0644)  // 0644 is '-rw -r- -r-'  
     if err != nil {
        fmt.Printf("Could not save authorization key in config file '%s': %s\n", configPath, err.Error())
