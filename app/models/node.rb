@@ -32,7 +32,7 @@ class Node < ApplicationRecord
     end
 
     def folder_content(files, folders)
-      Node.where.any_of(files, folders)
+      Node.where(id: (files + folders).map(&:id))
     end
   end
 
