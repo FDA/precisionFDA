@@ -265,21 +265,21 @@ class ApiController < ApplicationController
   #
   def folder_tree
     parent_folder_id =
-      params[:parent_folder_id] == "" ? nil : params[:parent_folder_id].to_i
+      unsafe_params[:parent_folder_id] == "" ? nil : unsafe_params[:parent_folder_id].to_i
     scoped_parent_folder_id =
-      params[:scoped_parent_folder_id] == "" ? nil : params[:scoped_parent_folder_id].to_i
+      unsafe_params[:scoped_parent_folder_id] == "" ? nil : unsafe_params[:scoped_parent_folder_id].to_i
 
     User.sync_files!(@context)
 
-    if params[:scopes].present?
+    if unsafe_params[:scopes].present?
       check_scope!
       # exclude 'public' scope
-      if params[:scopes].first =~ /^space-(\d+)$/
-        spaces_members_ids = Space.spaces_members_ids(params[:scopes])
+      if unsafe_params[:scopes].first =~ /^space-(\d+)$/
+        spaces_members_ids = Space.spaces_members_ids(unsafe_params[:scopes])
         spaces_params = {
           context: @context,
           spaces_members_ids: spaces_members_ids,
-          scopes: params[:scopes],
+          scopes: unsafe_params[:scopes],
           scoped_parent_folder_id: scoped_parent_folder_id,
         }
         files = UserFile.batch_space_files(spaces_params)
@@ -724,8 +724,9 @@ class ApiController < ApplicationController
     scope = "private"
     user = @context.user
     project = user.private_files_project
+    public_scope = ActiveModel::Type::Boolean.new.cast(params[:public_scope])
 
-    if params[:public_scope]
+    if public_scope
       scope = "public"
       project = user.public_files_project
     end

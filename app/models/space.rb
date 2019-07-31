@@ -212,7 +212,7 @@ class Space < ApplicationRecord
 
   def self.space_members_ids(scope)
     space = Space.from_scope(scope)
-    space.space_memberships.map &:user_id
+    space.space_memberships.map(&:user_id)
   end
 
   def editable_by?(context)
