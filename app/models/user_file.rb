@@ -128,19 +128,14 @@ class UserFile < Node
     end
 
     def batch_space_files(spaces_params)
-      space_folder_files(spaces_params[:context], spaces_params[:spaces_members_ids])
-      space_tree_files(spaces_params[:scopes], spaces_params[:scoped_parent_folder_id])
-    end
-
-    def space_folder_files(context, ids)
       UserFile
         .real_files
-        .editable_in_space(context, ids)
+        .editable_in_space(spaces_params[:context], spaces_params[:spaces_members_ids])
         .files_conditions
-    end
-
-    def space_tree_files(scopes, scoped_parent_folder_id)
-      where(scope: scopes, scoped_parent_folder_id: scoped_parent_folder_id)
+        .where(
+          scope: spaces_params[:scopes],
+          scoped_parent_folder_id: spaces_params[:scoped_parent_folder_id]
+        )
     end
   end
 
