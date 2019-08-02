@@ -1,17 +1,12 @@
+require:
+  - rubocop-rspec
+
 AllCops:
   Exclude:
   - 'db/schema.rb'
-  DisabledByDefault: true
   DisplayCopNames: true
   StyleGuideCopsOnly: false
   TargetRubyVersion: 2.2.3
-
-Layout/AccessModifierIndentation:
-  EnforcedStyle: indent
-  SupportedStyles:
-  - outdent
-  - indent
-  IndentationWidth:
 
 Style/Alias:
   EnforcedStyle: prefer_alias_method
@@ -126,7 +121,7 @@ Style/ConditionalAssignment:
   SingleLineConditionsOnly: true
 
 Layout/DotPosition:
-  EnforcedStyle: leading
+  EnforcedStyle: trailing
   SupportedStyles:
   - leading
   - trailing
@@ -368,13 +363,6 @@ Style/RegexpLiteral:
   - mixed
   AllowInnerSlashes: false
 
-Style/SafeNavigation:
-  ConvertCodeThatCanStartToReturnNil: false
-  Enabled: true
-
-Lint/SafeNavigationChain:
-  Enabled: true
-
 Style/Semicolon:
   AllowAsExpressionSeparator: false
 
@@ -500,9 +488,6 @@ Naming/VariableName:
   - snake_case
   - camelCase
 
-Style/WhileUntilModifier:
-  Enabled: true
-
 Style/WordArray:
   EnforcedStyle: percent
   SupportedStyles:
@@ -513,6 +498,10 @@ Style/WordArray:
 
 Metrics/BlockNesting:
   Max: 3
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*.rb'
 
 Metrics/LineLength:
   Max: 100
@@ -530,7 +519,6 @@ Metrics/ParameterLists:
   CountKeywordArgs: false
 
 Metrics/MethodLength:
-  Enabled: true
   Max: 20
 
 Layout/BlockAlignment:
@@ -645,485 +633,26 @@ Rails/UniqBeforePluck:
   - conservative
   - aggressive
 
-Rails/Validation:
-  Include:
-  - app/models/**/*.rb
-
-Naming/AccessorMethodName:
-  Enabled: true
-
-Layout/AlignArray:
-  Enabled: true
-
-Style/ArrayJoin:
-  Enabled: true
-
-Naming/AsciiIdentifiers:
-  Enabled: true
-
-Style/Attr:
-  Enabled: true
-
-Style/BeginBlock:
-  Enabled: true
-
-Style/BlockComments:
-  Enabled: true
-
-Layout/BlockEndNewline:
-  Enabled: true
-
-Style/CaseEquality:
-  Enabled: true
-
-Style/CharacterLiteral:
-  Enabled: true
-
-Naming/ClassAndModuleCamelCase:
-  Enabled: true
-
-Style/ClassMethods:
-  Enabled: true
-
-Style/ClassVars:
-  Enabled: true
-
-Layout/ClosingParenthesisIndentation:
-  Enabled: true
-
-Style/ColonMethodCall:
-  Enabled: true
-
-Layout/CommentIndentation:
-  Enabled: true
-
-Naming/ConstantName:
-  Enabled: true
-
-Style/DateTime:
-  Enabled: true
-
-Style/DefWithParentheses:
-  Enabled: true
-
-Style/EachForSimpleLoop:
-  Enabled: true
-
-Style/EachWithObject:
-  Enabled: true
-
-Layout/ElseAlignment:
-  Enabled: true
-
-Style/EmptyCaseCondition:
-  Enabled: true
-
-Layout/EmptyLines:
-  Enabled: true
-
-Layout/EmptyLinesAroundAccessModifier:
-  Enabled: true
-
-Layout/EmptyLinesAroundMethodBody:
-  Enabled: true
-
-Style/EmptyLiteral:
-  Enabled: true
-
-Style/EndBlock:
-  Enabled: true
-
-Layout/EndOfLine:
-  Enabled: true
-
-Style/EvenOdd:
-  Enabled: true
-
-Layout/InitialIndentation:
-  Enabled: true
-
-Style/IfInsideElse:
-  Enabled: true
-
-Lint/FlipFlop:
-  Enabled: true
-
-Style/IfUnlessModifierOfIfUnless:
-  Enabled: true
-
-Style/IfWithSemicolon:
-  Enabled: true
-
-Style/IdenticalConditionalBranches:
-  Enabled: true
-
-Style/InfiniteLoop:
-  Enabled: true
-
-Layout/LeadingCommentSpace:
-  Enabled: true
-
-Style/LineEndConcatenation:
-  Enabled: true
-
-Style/MethodCallWithoutArgsParentheses:
-  Enabled: true
-
-Style/MultilineBlockChain:
-  Enabled: true
-
-Layout/MultilineBlockLayout:
-  Enabled: true
-
-Style/MultilineIfThen:
-  Enabled: true
-
-Style/MultilineMemoization:
-  Enabled: true
-
-Style/MultilineTernaryOperator:
-  Enabled: true
-
-Style/NegatedIf:
-  Enabled: true
-
-Style/NegatedWhile:
-  Enabled: true
-
-Style/NestedModifier:
-  Enabled: true
-
-Style/NestedParenthesizedCalls:
-  Enabled: true
-
-Style/NestedTernaryOperator:
-  Enabled: true
-
-Style/NilComparison:
-  Enabled: true
-
-Style/Not:
-  Enabled: true
-
-Style/OneLineConditional:
-  Enabled: true
-
-Naming/BinaryOperatorParameterName:
-  Enabled: true
-
-Style/OptionalArguments:
-  Enabled: true
-
-Style/ParallelAssignment:
-  Enabled: true
-
-Style/PerlBackrefs:
-  Enabled: true
-
-Style/Proc:
-  Enabled: true
-
-Style/RedundantBegin:
-  Enabled: true
-
-Style/RedundantException:
-  Enabled: true
-
-Style/RedundantFreeze:
-  Enabled: true
-
-Style/RedundantParentheses:
-  Enabled: true
-
-Style/RedundantSelf:
-  Enabled: true
-
-Layout/RescueEnsureAlignment:
-  Enabled: true
-
-Style/RescueModifier:
-  Enabled: true
-
-Style/SelfAssignment:
-  Enabled: true
-
-Layout/SpaceAfterColon:
-  Enabled: true
-
-Layout/SpaceAfterComma:
-  Enabled: true
-
-Layout/SpaceAfterMethodName:
-  Enabled: true
-
-Layout/SpaceAfterNot:
-  Enabled: true
-
-Layout/SpaceAfterSemicolon:
-  Enabled: true
-
-Layout/SpaceBeforeComma:
-  Enabled: true
-
-Layout/SpaceBeforeComment:
-  Enabled: true
-
-Layout/SpaceBeforeSemicolon:
-  Enabled: true
-
-Layout/SpaceAroundKeyword:
-  Enabled: true
-
-Layout/SpaceInsideArrayPercentLiteral:
-  Enabled: true
-
-Layout/SpaceInsidePercentLiteralDelimiters:
-  Enabled: true
-
-Layout/SpaceInsideArrayLiteralBrackets:
-  Enabled: true
-
-Layout/SpaceInsideParens:
-  Enabled: true
-
-Layout/SpaceInsideRangeLiteral:
-  Enabled: true
-
-Style/SymbolLiteral:
-  Enabled: true
-
-Layout/Tab:
-  Enabled: true
-
-Layout/TrailingWhitespace:
-  Enabled: true
-
-Style/UnlessElse:
-  Enabled: true
-
-Style/UnneededCapitalW:
-  Enabled: true
-
-Style/UnneededInterpolation:
-  Enabled: true
-
-Style/UnneededPercentQ:
-  Enabled: true
-
-Style/VariableInterpolation:
-  Enabled: true
-
-Style/WhenThen:
-  Enabled: true
-
-Style/WhileUntilDo:
-  Enabled: true
-
-Style/ZeroLengthPredicate:
-  Enabled: true
-
-Lint/AmbiguousOperator:
-  Enabled: true
-
-Lint/AmbiguousRegexpLiteral:
-  Enabled: true
-
-Lint/CircularArgumentReference:
-  Enabled: true
-
-Layout/ConditionPosition:
-  Enabled: true
-
-Lint/Debugger:
-  Enabled: true
-
-Lint/DeprecatedClassMethods:
-  Enabled: true
-
-Lint/DuplicateMethods:
-  Enabled: true
-
-Lint/DuplicatedKey:
-  Enabled: true
-
-Lint/EachWithObjectArgument:
-  Enabled: true
-
-Lint/ElseLayout:
-  Enabled: true
-
-Lint/EmptyEnsure:
-  Enabled: true
-
-Lint/EmptyInterpolation:
-  Enabled: true
-
-Lint/EndInMethod:
-  Enabled: true
-
-Lint/EnsureReturn:
-  Enabled: true
-
-Lint/FloatOutOfRange:
-  Enabled: true
-
-Lint/FormatParameterMismatch:
-  Enabled: true
-
-Lint/HandleExceptions:
-  Enabled: true
-
-Lint/ImplicitStringConcatenation:
-  Description: Checks for adjacent string literals on the same line, which could
-    better be represented as a single string literal.
-
-Lint/IneffectiveAccessModifier:
-  Description: Checks for attempts to use `private` or `protected` to set the visibility
-    of a class method, which does not work.
-
-Lint/LiteralAsCondition:
-  Enabled: true
-
-Lint/LiteralInInterpolation:
-  Enabled: true
-
-Lint/Loop:
-  Description: Use Kernel#loop with break rather than begin/end/until or begin/end/while
-    for post-loop tests.
-
-Lint/NestedMethodDefinition:
-  Enabled: true
-
-Lint/NextWithoutAccumulator:
-  Description: Do not omit the accumulator when calling `next` in a `reduce`/`inject`
-    block.
-
-Lint/NonLocalExitFromIterator:
-  Enabled: true
-
-Lint/ParenthesesAsGroupedExpression:
-  Enabled: true
-
-Lint/PercentStringArray:
-  Enabled: true
-
-Lint/PercentSymbolArray:
-  Enabled: true
-
-Lint/RandOne:
-  Description: Checks for `rand(1)` calls. Such calls always return `0` and most
-    likely a mistake.
-
-Lint/RequireParentheses:
-  Enabled: true
-
-Lint/RescueException:
-  Enabled: true
-
-Lint/ShadowedException:
-  Enabled: true
-
-Lint/ShadowingOuterLocalVariable:
-  Enabled: true
-
-Lint/StringConversionInInterpolation:
-  Enabled: true
-
-Lint/UnderscorePrefixedVariableName:
-  Enabled: true
-
-Lint/UnifiedInteger:
-  Enabled: true
-
-Lint/UnneededCopDisableDirective:
-  Enabled: true
-
-Lint/UnneededCopEnableDirective:
-  Enabled: true
-
-Lint/UnneededSplatExpansion:
-  Enabled: true
-
-Lint/UnreachableCode:
-  Enabled: true
-
 Lint/UselessAccessModifier:
   ContextCreatingMethods: []
-
-Lint/UselessAssignment:
-  Enabled: true
-
-Lint/UselessComparison:
-  Enabled: true
-
-Lint/UselessElseWithoutRescue:
-  Enabled: true
-
-Lint/UselessSetterCall:
-  Enabled: true
-
-Lint/Void:
-  Enabled: true
-
-Rails/DelegateAllowBlank:
-  Enabled: true
 
 Rails/HttpPositionalArguments:
   Include:
   - spec/**/*
   - test/**/*
 
-Rails/OutputSafety:
-  Enabled: true
-
-Rails/PluralizationGrammar:
-  Enabled: true
-
-Security/Eval:
-  Enabled: true
-
-Security/JSONLoad:
-  Enabled: true
-
-Security/Open:
-  Enabled: true
-
-Lint/BigDecimalNew:
-  Enabled: true
-
-Style/TrailingBodyOnClass:
-  Enabled: true
-
-Style/TrailingBodyOnModule:
-  Enabled: true
-
 Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: comma
-  Enabled: true
 
 Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma
-  Enabled: true
+
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: comma
 
 Layout/SpaceInsideReferenceBrackets:
   EnforcedStyle: no_space
   EnforcedStyleForEmptyBrackets: no_space
-  Enabled: true
-
-Style/Sample:
-  Enabled: true
 
 Style/ModuleFunction:
   EnforcedStyle: extend_self
-
-Style/RedundantSortBy:
-  Enabled: true
-
-Lint/OrderedMagicComments:
-  Enabled: true
-
-Style/MethodMissingSuper:
-  Enabled: true
-
-Style/MissingRespondToMissing:
-  Enabled: true
