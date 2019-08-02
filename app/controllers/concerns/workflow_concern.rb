@@ -42,6 +42,7 @@ module WorkflowConcern
 
     inputs.each do |api_input|
       input_name = api_input["input_name"]
+      input_field = input_name.partition(".").last
 
       stage_input_name_match = /^(stage-\w{14}).(\w+)$/.match(input_name)
       fail "Invalid value for input_name" if stage_input_name_match.captures.size != 2
@@ -70,10 +71,12 @@ module WorkflowConcern
 
         input_value = { "$dnanexus_link" => file.dxid }
       when "int"
-        fail "#{input_name}: value is not an integer" unless input_value.to_i.to_s == value
+        fail "#{input_field}: value is not an integer" unless input_value.to_i.to_s == value
         input_value = input_value.to_i
       when "float"
-        fail "#{input_name}: value is not a float" unless input_value.starts_with?(input_value.to_f.to_s)
+        fail "#{input_field}: value is not a float" unless input_value.starts_with?(
+          input_value.to_f.to_s
+        )
         input_value = input_value.to_f
       when "boolean"
         fail "#{input_name}: value is not a boolean" unless input_value == true || input_value == false
@@ -101,12 +104,16 @@ module WorkflowConcern
 
     api = DNAnexusAPI.new(@context.token)
     permission = api.call(workflow.dxid, "listProjects")[workflow.project]
-    fail(t('api.errors.invalid_permission', title: workflow.title), permission: permission) if permission == "VIEW"
+    fail(
+      t("api.errors.invalid_permission", title: workflow.title), permission: permission
+    ) if permission == "VIEW"
 
     response = api.run_workflow(workflow.dxid, workflow_params)
 
     analysis_dxid = response["id"]
-    analysis = Analysis.create!(name: analysis_name, workflow_id: workflow.id, dxid: analysis_dxid, user_id: current_user.id)
+    analysis = Analysis.create!(
+      name: analysis_name, workflow_id: workflow.id, dxid: analysis_dxid, user_id: current_user.id
+    )
 
     response["stages"].each_with_index do |job_id, idx|
       # Create job record
@@ -140,7 +147,10 @@ module WorkflowConcern
         user_id: @context.user_id,
         run_instance_type: stage["instanceType"],
       }
-      provenance = { job_id => { workflow_dxid: workflow.dxid, workflow_id: workflow.id, inputs: run_inputs } }
+      provenance =
+        {
+          job_id => { workflow_dxid: workflow.dxid, workflow_id: workflow.id, inputs: run_inputs },
+        }
       input_file_dxids.uniq!
       input_file_ids = []
       UserFile.accessible_by(@context).where(dxid: input_file_dxids).find_each do |file|

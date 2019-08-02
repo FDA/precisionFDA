@@ -40,17 +40,18 @@ RSpec.describe ApiController, type: :controller do
   let(:slot_id) { "stage-#{SecureRandom.hex(7)}" }
 
   let(:run_inputs) { { "s1" => "AAA", "s2" => "ddd", "i1" => 111, "i2" => 555 } }
+  let(:run_inputs_failed_int) { { "i2" => "ccc" } }
 
   let(:workflow_inputs) do
     [
       { class: "string", label: "s1", name: "s1", optional: false, requiredRunInput: false, \
         parent_slot: slot_id, defaultValues: run_inputs["s1"], \
-        default_workflow_value: run_inputs["s1"], values: values }, # AAA"
+        default_workflow_value: run_inputs["s1"], values: values }, # "AAA"
       { class: "string", label: "s2", name: "s2", optional: false, requiredRunInput: true, \
         parent_slot: slot_id, default_workflow_value: nil, values: values },
       { class: "int", label: "i1", name: "i1", optional: false, requiredRunInput: false, \
         parent_slot: slot_id, defaultValues: run_inputs["i1"], \
-        default_workflow_value: run_inputs["i1"], values: values },
+        default_workflow_value: run_inputs["i1"], values: values }, # 111
       { class: "int", label: "i2", name: "i2", optional: false, requiredRunInput: true, \
         parent_slot: slot_id, default_workflow_value: nil, values: values },
     ]
@@ -93,10 +94,28 @@ RSpec.describe ApiController, type: :controller do
 
   let(:params_inputs) do
     [
-      { class: "string", input_name: slot_id + "." + "s1", input_value: run_inputs["s1"] }, # default value
+      # default value
+      { class: "string", input_name: slot_id + "." + "s1", input_value: run_inputs["s1"] },
       { class: "string", input_name: slot_id + "." + "s2", input_value: run_inputs["s2"] },
-      { class: "int", input_name: slot_id + "." + "i1", input_value: run_inputs["i1"] }, # default value
+      # default value
+      { class: "int", input_name: slot_id + "." + "i1", input_value: run_inputs["i1"] },
       { class: "int", input_name: slot_id + "." + "i2", input_value: run_inputs["i2"].to_s },
+    ]
+  end
+
+  let(:params_inputs_failed_int) do
+    [
+      # default value
+      { class: "string", input_name: slot_id + "." + "s1", input_value: run_inputs["s1"] },
+      { class: "string", input_name: slot_id + "." + "s2", input_value: run_inputs["s2"] },
+      # default value
+      { class: "int", input_name: slot_id + "." + "i1", input_value: run_inputs["i1"] },
+      # wrong value
+      {
+        class: "int",
+        input_name: slot_id + "." + "i2",
+        input_value: run_inputs_failed_int["i2"].to_s,
+      },
     ]
   end
 
@@ -109,6 +128,20 @@ RSpec.describe ApiController, type: :controller do
         {
           name: app.title,
           inputs: params_inputs,
+          workflow_id: workflow.uid,
+        },
+    }
+  end
+
+  let(:params_failed_int) do
+    {
+      name: app.title,
+      inputs: params_inputs_failed_int,
+      workflow_id: workflow.uid,
+      api:
+        {
+          name: app.title,
+          inputs: params_inputs_failed_int,
           workflow_id: workflow.uid,
         },
     }
@@ -152,25 +185,36 @@ RSpec.describe ApiController, type: :controller do
     before { authenticate!(user) }
 
     it "runs a workflow" do
-      lust_projects_response = { "#{workflow.project}": "ADMINISTER" }
-      expect_any_instance_of(DNAnexusAPI).to receive(:call)
-                                               .with(workflow.dxid, "listProjects")
-                                               .and_return(lust_projects_response)
+      list_projects_response = { "#{workflow.project}": "ADMINISTER" }
+      expect_any_instance_of(DNAnexusAPI)
+        .to receive(:call)
+        .with(workflow.dxid, "listProjects")
+        .and_return(list_projects_response)
 
       run_response = {
         "id" => "analysis-#{SecureRandom.hex(12)}",
         "stages" => ["job-#{SecureRandom.hex(12)}"],
       }
-      expect_any_instance_of(DNAnexusAPI).to receive(:call)
-                                               .with(workflow.dxid, "run", api_run_params)
-                                               .and_return(run_response)
+      expect_any_instance_of(DNAnexusAPI)
+        .to receive(:call)
+        .with(workflow.dxid, "run", api_run_params)
+        .and_return(run_response)
 
       post "run_workflow", params
 
       expect(response).to have_http_status(200)
       expect(parsed_response["id"]).to_not be_nil
       expect(Job.count).to eql(1)
-      expect(Job.first.run_data["run_inputs"]).to eql(run_inputs)
+      expect(Job.first.run_data["run_inputs"]).to eq(run_inputs)
+    end
+
+    it "do not runs a workflow with incorrect integer value and got error message" do
+      post "run_workflow", params_failed_int
+
+      expect(response).to have_http_status(422)
+      expect(parsed_response["error"]["type"]).to eq("API Error")
+      expect(parsed_response["error"]["message"])
+        .to eq("#{run_inputs_failed_int.keys[0]}: value is not an integer")
     end
   end
 end
