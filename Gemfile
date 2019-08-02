@@ -119,6 +119,7 @@ group :development do
 
   # Automatic Ruby code checking tool
   gem 'rubocop', require: false
+  gem 'rubocop-rspec', '~> 1.32.0', require: false
 
   gem 'pronto', '~> 0.9.5'
   gem 'pronto-rubocop', '~> 0.9.0', require: false
