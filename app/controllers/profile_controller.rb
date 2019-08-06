@@ -53,7 +53,9 @@ class ProfileController < ApplicationController
       elsif User.find_by(normalized_email: @normalized_email).present?
         @error = "This email address is already in use by another precisionFDA account."
       elsif DNAnexusAPI.email_exists?(@email)
-        @error = "This email address is in use by an existing DNAnexus account. Please ask the person to provide you with a different email to be used for precisionFDA."
+        @error =
+          "Email address is already in use in precisionFDA. " \
+          "Please ask the person to provide you with a different email to be used in precisionFDA."
       end
 
       if @error.present?
@@ -266,7 +268,7 @@ class ProfileController < ApplicationController
     end
 
     if email.present? && DNAnexusAPI.email_exists?(email)
-      @errors << "This email address is in use by an existing DNAnexus account." \
+      @errors << "Email address is already in use in precisionFDA. " \
                  "Please ask the person to provide you with a different email to " \
                  "be used for precisionFDA."
     end
