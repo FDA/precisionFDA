@@ -554,7 +554,7 @@ func printInfo() {
   fmt.Printf("  Uploader Version :  %s\n",Version)
   fmt.Printf("  Os/Arch :           %s\n",OsArch)
   fmt.Printf("  Build Time :        %s\n",BuildTime)
-  fmt.Printf("  Goboring Version :  %s\n",runtime.Version())
+  fmt.Printf("  Go Version :        %s\n",runtime.Version())
 }
 
 func sendToStore(id string, chunk uploadChunk) {
