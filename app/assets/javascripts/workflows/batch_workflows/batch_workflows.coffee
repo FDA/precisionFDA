@@ -470,10 +470,19 @@ class BatchWorkflowPageModel
         @selectedFolder(null)
         @createFolderName(null)
         showAlert('Output Folder Successfully Created', 'alert-success')
-      (data) =>
+      (error) =>
         @wizardLoading(false)
         @folderModalLoading(false)
-        showAlert('Error while creating folder')
+        try
+          errorObject = error.responseJSON
+          errorText = ''
+          if errorObject and errorObject.error_message
+            errorText += "<b>Error while creating folder: #{errorObject.error_message}<br>"
+          else
+            errorText += "<b>Error: </b>#{errorObject}<br>"
+          showAlert(errorText)
+        catch
+          showAlert('Something went wrong.')
     )
 
   searchFolderOnChange: (root, e) => @folderSearchValue(e.target.value)
