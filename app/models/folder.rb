@@ -8,17 +8,17 @@ class Folder < Node
             presence: { message: "Name could not be blank" },
             length: {
               maximum: MAX_NAME_LENGTH,
-              too_long: "Name could not be longer than #{MAX_NAME_LENGTH} characters."
+              too_long: "Name could not be longer than #{MAX_NAME_LENGTH} characters"
             }
 
   validates_uniqueness_of :name,
                           scope: %i[user_id scope parent_folder_id],
-                          message: "This folder already has node named '%{value}'",
+                          message: "A folder with this name '%{value}' already exists",
                           if: lambda { private? }
 
   validates_uniqueness_of :name,
                           scope: %i[scope scoped_parent_folder_id],
-                          message: "This folder already has node named '%{value}'",
+                          message: "A folder with this name '%{value}' already exists",
                           unless: lambda { private? }
 
   class << self
@@ -32,7 +32,10 @@ class Folder < Node
       Folder
         .editable_in_space(spaces_params[:context], spaces_params[:spaces_members_ids])
         .includes(:taggings)
-        .where(scope: spaces_params[:scopes], scoped_parent_folder_id: spaces_params[:scoped_parent_folder_id])
+        .where(
+          scope: spaces_params[:scopes],
+          scoped_parent_folder_id: spaces_params[:scoped_parent_folder_id]
+        )
     end
   end
 

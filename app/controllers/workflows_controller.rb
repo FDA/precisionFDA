@@ -356,14 +356,13 @@ class WorkflowsController < ApplicationController
 
     service = FolderService.new(@context)
     result = service.add_folder(params[:name], parent_folder, scope)
-
-    result = if result.failure?
-      { folders: result.value.values }
+    if result.failure?
+      full_messages =
+        result.value[:name] ? result.value[:name].join(". ") : "Error in create output folder"
+      render json: { error_message: full_messages }, status: 500
     else
-      { folders: { id: result.value.id, name: result.value.name } }
+      render json: { folders: { id: result.value.id, name: result.value.name } }
     end
-
-    render json: result
   end
 
   # usage on the platform
