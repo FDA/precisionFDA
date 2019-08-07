@@ -211,7 +211,7 @@ RSpec.describe ApiController, type: :controller do
     end
 
     it "do not runs a workflow with incorrect integer value and got error message" do
-      post "run_workflow", params_failed_int
+      post "run_workflow", params: params_failed_int
 
       expect(response).to have_http_status(422)
       expect(parsed_response["error"]["type"]).to eq("API Error")
