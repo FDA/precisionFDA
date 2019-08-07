@@ -70,7 +70,7 @@ gem "local_time"
 # Add comments on any model
 gem "acts-as-taggable-on", "~> 6.0"
 gem "acts_as_commentable_with_threading"
-gem "acts_as_follower"
+gem "acts_as_follower", github: "tcocca/acts_as_follower", branch: "master"
 gem "acts_as_votable"
 
 # For inline-css in emails
