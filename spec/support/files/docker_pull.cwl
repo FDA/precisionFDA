@@ -30,12 +30,40 @@ inputs:
       position: 2
       prefix: --address
 
-  test_type_simplification:
+  optional_string:
     type: string?
-    doc: "Optional POST address to send JSON results"
+    doc: "Some optional string"
     inputBinding:
-      position: 2
-      prefix: --address
+      position: 3
+      prefix: --tt
+
+  bool_flag:
+    type: boolean?
+    doc: "Some boolean flag"
+    inputBinding:
+      position: 4
+      prefix: --bf
+
+  int_input:
+    type: int?
+    doc: "Some int input"
+    inputBinding:
+      position: 5
+      prefix: --int-input
+
+  float_input:
+    type: float?
+    doc: "Some boolean flag"
+    inputBinding:
+      position: 6
+      prefix: --float-input
+
+  double_input:
+    type: double?
+    doc: "Some double input"
+    inputBinding:
+      position: 7
+      prefix: --double-input
 
 outputs:
   chksum_json:
