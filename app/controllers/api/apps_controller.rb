@@ -259,7 +259,7 @@ module Api
           i_default = i_default.to_i if i_class == "int"
         end
 
-        i_choices = spec["choices"].try(:uniq)
+        i_choices = spec["choices"].try(:uniq).presence
 
         if i_choices.present?
           unless i_choices.is_a?(Array)
