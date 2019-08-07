@@ -10,5 +10,5 @@ RUN chmod -R 777 /go
 RUN chmod -R 777 /usr/local/go
 
 ENTRYPOINT filename="pfda_${GOOS}_${GOARCH}" \
-           && go build -o tmp/$filename -a go/pfda.go \
+           && go build -ldflags "-X main.Version=${VERSION} -X main.BuildTime=${BUILDTIME} -X main.commitID=${COMMITID} -X main.OsArch=${GOOS}/${GOARCH}"  -o tmp/$filename -a go/pfda.go \
            && chmod 777 tmp/$filename

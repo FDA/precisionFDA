@@ -23,6 +23,7 @@ import (
   "os"
   "os/exec"
   "path/filepath"
+  "runtime"
   "strconv"
   "strings"
   "sync"
@@ -62,6 +63,13 @@ To upload an asset:
 To call a precisionFDA API route:
 
   pfda --cmd api [--key <KEY>] --route <API_ROUTE> --json <JSON_PAYLOAD> [--output </PATH/TO/OUTPUT/FILE>]
+
+To print version info and exit : 
+
+  pfda --version
+
+(--version flag can also be given with --cmd,
+then version info is printed before obtaining key and executing command)
 `
 //
 // GLOBAL VARIABLES
@@ -81,6 +89,14 @@ var client = &retryablehttp.Client{
   RetryMax:     maxRetryCount,
   CheckRetry:   retryablehttp.DefaultRetryPolicy,
 }
+
+// these varaibles are populated by -ldflags -X command line options
+var (
+  commitID string
+  Version string
+  BuildTime string
+  OsArch string
+)
 
 // Structs: Note that exported members (those visible to other packages) must be capitalized
 type jsonID struct {
@@ -124,9 +140,20 @@ func main() {
   inputNumRoutines := flag.Int("threads", defaultNumRoutines, "[optional] Maximum number of upload threads to spawn (Max 100).")
   server := flag.String("server", defaultURL, "[optional] Server to connect and make requests to.")
   skipVerify := flag.String("skipverify", defaultSkipVerify, "[optional] Boolean string to skip certificate verification.")
+  pfda_version := flag.Bool("version",false , "[optional] Print version")
+
 
   // Parse command line args
   flag.Parse()
+  
+  // if --version flag was given, print pfda info
+  if *pfda_version {
+    printInfo()
+    // if only --version without any command , exit 
+    if *command == "" {
+       os.Exit(0)
+    }
+  }
 
   if *authKey == "" {
     // Check config if '-key' not provided
@@ -221,6 +248,7 @@ func main() {
     fmt.Println(usageString)
     flag.Usage()
     fmt.Println("Command to execute is required. Provide it as '--cmd {'upload-file','upload-asset','api'}'")
+    printInfo()
     os.Exit(1)
 
   default:
@@ -518,6 +546,15 @@ func readAndChunk(f io.ReadCloser, c chan<- uploadChunk, size int64) {
     }
     chunkIndex++
   }
+}
+
+func printInfo() {
+  fmt.Printf("Uploader Info\n")
+  fmt.Printf("  Commit ID :         %s\n",commitID)
+  fmt.Printf("  Uploader Version :  %s\n",Version)
+  fmt.Printf("  Os/Arch :           %s\n",OsArch)
+  fmt.Printf("  Build Time :        %s\n",BuildTime)
+  fmt.Printf("  Go Version :        %s\n",runtime.Version())
 }
 
 func sendToStore(id string, chunk uploadChunk) {
