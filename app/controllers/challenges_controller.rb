@@ -26,7 +26,7 @@ class ChallengesController < ApplicationController
         @challenge.update_card_image_url!
         redirect_to challenge_path(@challenge)
       else
-        js challenge_params
+        js challenge_params.to_h
         render action: :new
       end
     end
@@ -43,7 +43,7 @@ class ChallengesController < ApplicationController
         flash[:success] = "The challenge was updated successfully."
         redirect_to challenge_path(@challenge)
       else
-        js update_challenge_params
+        js update_challenge_params.to_h
         render action: :edit
       end
     end
