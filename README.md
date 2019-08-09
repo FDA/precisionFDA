@@ -41,4 +41,7 @@ https://github.com/RealTimeGenomics/rtg-tools
 
 ## Links
 
-* [Localhost Setup](LOCAL_INSTALL.md)
+To set up development environment you can choose either:
+
+* [Localhost Setup](docs/LOCAL_INSTALL.md)
+* [Docker setup](docs/DOCKER_SETUP.md)

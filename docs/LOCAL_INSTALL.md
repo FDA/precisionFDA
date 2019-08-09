@@ -21,7 +21,7 @@ This requires manually "bootstrapping" the situation in steps described in
 * Install [Homebrew](http://brew.sh/)
     * `/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
     * Run `brew update` to make sure all your formulas are current
-* Install RVM
+* Install RV
     * `gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3`
     * `\curl -sSL https://get.rvm.io | bash -s stable`
 * Install ruby
@@ -43,75 +43,7 @@ This requires manually "bootstrapping" the situation in steps described in
     * `git config --global user.name “FirstName LastName”`
     * `git config --global push.default simple`
 
-## pFDA setup
-
-* Clone Repo
-    * `git clone git@github.com:dnanexus/precision-fda.git`
-
-### Docker install and run
-
-* Install Docker and Docker-Compose. See [instructions](https://docs.docker.com/compose/install/)
-
-* Docker Run
-  * `docker-compose -f docker/isolation.docker-compose.yml up --build`
-* start localhost in browser
-  * `https://localhost:3000`
-
-
-##### Deprecated Docker usage
-
-###### Install gems
-  * `docker-compose run web bundle install`
-###### Prepare db
-  * `docker-compose run web bundle exec rake db:create`
-  * `docker-compose run web bundle exec rake db:schema:load`
-###### start rails server
-  * `docker-compose up`
-###### start rails console
-  * `docker compose exec web bundle exec rails c`
-
-### Issues
-
-On your first `bundle`, you may have issues installing the libv8 and
-therubyracer gems. See [here](https://github.com/cowboyd/libv8/issues/205) for
-potential solutions. Try `bundle update libv8`.
-
-## pFDA localhost user
-
-Register for a new user account at [https://staging.dnanexus.com/register](https://staging.dnanexus.com/register).
-Note: the first time you visit this, you will be prompted to enter the credentials (ask around for what it is).
-You must choose an unused email address, but you can use the google "+" trick
-to signup with a variable email address, e.g. yourname+pfdalocal@dnanexus.com.
-Activate your account with the link sent to your email.
-
-Create a new organization:
-- Choose an unused handle, such as floranteorg. Prepend pfda.. (two dots), so that the final handle will be pfda..floranteorg.
-- Get access to the "dx" command line client [https://wiki.dnanexus.com/Downloads](https://wiki.dnanexus.com/Downloads).
-- Type `dx login --staging` and log in with your new account.
-- Type `dx new org --handle pfda..floranteorg "Florante's org"`
-- Log into the web UI [https://staging.dnanexus.com](https://staging.dnanexus.com)
-with your account, access your profile on the upper right.
-- Click __Billing Accounts__
-- Click __Add Billing Info__ in the pfda..floranteorg entry.
-- Enter info (it doesn't have to be real, you can type "." in most entries). Enter your real DNAnexus email, however.
-- Click __Update Billing Information__
-- Check your email for a new email message asking you to confirm by clicking the link
-- Click the link to confirm.
-
-Create a User and Org, and other required records by running
-```
-bundle exec rake db:seed \
-  PFDA_USER_FIRST_NAME=Florante \
-  PFDA_USER_LAST_NAME=DelaCruz \
-  PFDA_USER_EMAIL=fdelacruz+pfdalocal@dnanexus.com \
-  PFDA_USER_ORG_HANDLE=floranteorg
-```
-
-The _dxuser_ of the user record must match your DNAnexus username, and the _handle_ of the org record must
-match the DNAnexus org handle without the pfda.. prefix, i.e. floranteorg.
-
-## pFDA setup and running without Docker
-
+## pFDA setup and running
 * Clone Repo
   * `git clone git@github.com:dnanexus/precision-fda.git`
 
@@ -137,6 +69,46 @@ match the DNAnexus org handle without the pfda.. prefix, i.e. floranteorg.
     * You must use https, ex: [https://localhost:3000](https://localhost:3000)**
 * start rails console
     * `bundle exec rails c`
+### Issues
+
+On your first `bundle`, you may have issues installing the libv8 and
+therubyracer gems. See [here](https://github.com/cowboyd/libv8/issues/205) for
+potential solutions. Try `bundle update libv8`.
+
+### pFDA localhost user
+
+Register for a new user account at [https://staging.dnanexus.com/register](https://staging.dnanexus.com/register).
+Note: the first time you visit this, you will be prompted to enter the credentials (ask around for what it is).
+You must choose an unused email address, but you can use the google "+" trick
+to signup with a variable email address, e.g. yourname+pfdalocal@dnanexus.com.
+Activate your account with the link sent to your email.
+
+Create a new organization:
+- Choose an unused handle, such as floranteorg. Prepend pfda.. (two dots), so that the final handle will be pfda..floranteorg.
+- Get access to the "dx" command line client [https://wiki.dnanexus.com/Downloads](https://wiki.dnanexus.com/Downloads).
+- Type `dx login --staging` and log in with your new account.
+- Type `dx new org --handle pfda..floranteorg "Florante's org"`
+- Log into the web UI [https://staging.dnanexus.com](https://staging.dnanexus.com)
+with your account, access your profile on the upper right.
+- Click __Billing Accounts__
+- Click __Add Billing Info__ in the pfda..floranteorg entry.
+- Enter info (it doesn't have to be real, you can type "." in most entries). Enter your real DNAnexus email, however.
+- Click __Update Billing Information__
+- Check your email for a new email message asking you to confirm by clicking the link
+- Click the link to confirm.
+
+
+Create a User and Org, and other required records by running
+```
+bundle exec rake db:seed \
+  PFDA_USER_FIRST_NAME=Florante \
+  PFDA_USER_LAST_NAME=DelaCruz \
+  PFDA_USER_EMAIL=fdelacruz+pfdalocal@dnanexus.com \
+  PFDA_USER_ORG_HANDLE=floranteorg
+```
+
+The _dxuser_ of the user record must match your DNAnexus username, and the _handle_ of the org record must
+match the DNAnexus org handle without the pfda.. prefix, i.e. floranteorg.
 
 ## Dev team Backend Testing
 
