@@ -129,7 +129,7 @@ RSpec.describe WorkflowsController, type: :controller do
 
       it "returns an error message" do
         post :output_folder_create, params
-        expect(parsed_response["errors"]).to eq "Name could not be blank"
+        expect(parsed_response["error_message"]).to eq "Name could not be blank"
       end
     end
 
@@ -160,7 +160,7 @@ RSpec.describe WorkflowsController, type: :controller do
 
       it "returns a folder name uniqueness validation error message" do
         post :output_folder_create, params
-        expect(parsed_response["errors"])
+        expect(parsed_response["error_message"])
           .to eq("A folder with this name '#{folder_name}' already exists")
       end
     end
