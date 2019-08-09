@@ -61,7 +61,8 @@ class Folder < Node
   end
 
   def children
-    Node.where(Node.scope_column_name(scope) => self.id)
+    column = self.class.connection.quote_column_name(Node.scope_column_name(scope))
+    Node.where("#{column} = ?", self.id)
   end
 
   def sub_folders
