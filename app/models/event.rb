@@ -5,7 +5,8 @@ class Event < ActiveRecord::Base
 
   def self.select_sum(attribute)
     original_name = attribute_alias(attribute)
-    select("SUM(#{original_name}) as #{original_name}")
+    query = sanitize_query_with_args("SUM(?) as ?", [original_name, original_name])
+    select(query)
   end
 
   def self.select_count
@@ -14,7 +15,8 @@ class Event < ActiveRecord::Base
 
   def self.select_count_uniq_by(attribute)
     original_name = attribute_alias(attribute) || attribute
-    select("COUNT(DISTINCT #{original_name}) as count")
+    query = sanitize_query_with_args("COUNT(DISTINCT ?) as count", [original_name])
+    select(query)
   end
 
   def self.group_by_hour
@@ -27,5 +29,9 @@ class Event < ActiveRecord::Base
 
   def self.group_by_month
     select("DATE(DATE_FORMAT(created_at, '%Y-%m-01')) AS date").group("date")
+  end
+
+  def self.sanitize_query_with_args(sql, args)
+    sanitize_sql_array([sql, args].flatten)
   end
 end
