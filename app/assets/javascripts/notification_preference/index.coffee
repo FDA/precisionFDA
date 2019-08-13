@@ -6,7 +6,7 @@
 #
 #########################################################
 
-MainController = Paloma.controller('Main',
+NotificationPreferencesController = Paloma.controller('NotificationPreferences',
   index: ->
     params = @params
     $container = $("body main")
