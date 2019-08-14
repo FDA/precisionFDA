@@ -39,6 +39,8 @@ class User < ActiveRecord::Base
     ezekiel.maier.2
     holly.stephens
     pamella.tater.2
+    davis.feng
+    stanley.lan
   ).freeze
 
   NON_PRODUCTION_ADMINS = %w(
@@ -60,6 +62,8 @@ class User < ActiveRecord::Base
     vladimir.rainish.4
     aleksei.ivanishchev
     siteadmin.aabramenko
+    davis.feng
+    stanley.lan
   ).freeze
 
   NON_PRODUCTION_ADMIN_ORGS = %w(
