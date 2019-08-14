@@ -449,7 +449,7 @@ class User < ActiveRecord::Base
 
       jobs_hash = jobs_batch.map { |j| [j.dxid, j] }.to_h
       jobs_hash.keys.each do |job_dxid|
-        job_project = Job.find_by(dxid: job_dxid).project
+        job_project = project ? project : Job.find_by(dxid: job_dxid).project
 
         response = DNAnexusAPI.new(token).call("system", "findJobs",
           includeSubjobs: false,
