@@ -448,15 +448,19 @@ class User < ActiveRecord::Base
     jobs.where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).limit(SYNC_JOBS_LIMIT).each_slice(1000) do |jobs_batch|
 
       jobs_hash = jobs_batch.map { |j| [j.dxid, j] }.to_h
-      response = DNAnexusAPI.new(token).call("system", "findJobs",
-        includeSubjobs: false,
-        id: jobs_hash.keys,
-        project: project || user.private_files_project,
-        parentJob: nil,
-        describe: true,)
-      response["results"].each do |result|
-        next if result.blank?
-        sync_job_state(result, jobs_hash[result["id"]], user, token)
+      jobs_hash.keys.each do |job_dxid|
+        job_project = Job.find_by(dxid: job_dxid).project
+
+        response = DNAnexusAPI.new(token).call("system", "findJobs",
+          includeSubjobs: false,
+          id: [job_dxid],
+          project: job_project || user.private_files_project,
+          parentJob: nil,
+          describe: true,)
+        response["results"].each do |result|
+          next if result.blank?
+          sync_job_state(result, jobs_hash[result["id"]], user, token)
+        end
       end
     end
   end
