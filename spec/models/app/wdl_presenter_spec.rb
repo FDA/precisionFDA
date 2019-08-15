@@ -59,7 +59,7 @@ RSpec.describe App::WdlPresenter do
 
     context "code" do
       it "returns correct inputs settings in json" do
-        inputs = JSON.parse(result[:code][/inputs.json\s*?\n(.+)EOF/m, 1])
+        inputs = JSON.parse(result[:code][/inputs.json\s*?\n(.+?)(?=EOF)/m, 1])
         expected = {
           "single_task.app_a.in_boolean" => "${in_boolean}",
           "single_task.app_a.in_string" => "${in_string}",
@@ -68,6 +68,12 @@ RSpec.describe App::WdlPresenter do
 
         expect(inputs.size).to eq(3)
         expect(inputs).to include(expected)
+      end
+
+      it "includes udocker run call in cromwell config" do
+        expected = "udocker --allow-root run -v ${cwd}:${docker_cwd} ${docker} ${job_shell} ${docker_script}"
+
+        expect(result[:code]).to include(expected)
       end
     end
   end
