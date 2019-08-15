@@ -11,7 +11,6 @@ module Admin
       js(orgs: @orgs)
     end
 
-
     def provision_org
       @org = Org.new
     end
@@ -114,7 +113,7 @@ module Admin
     end
 
     def org_params
-      params.require("org").permit!  #!
+      params.require(:org).permit(:name, :handle, :address, :duns, :phone, :state, :singular)  #!
     end
   end
 end
