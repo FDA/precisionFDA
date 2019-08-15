@@ -3,7 +3,8 @@ class App
     include ActiveModel::Validations
 
     CROMWELL_LINK =
-      "https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar".freeze
+      "https://github.com/broadinstitute/cromwell/releases/download/44/cromwell-44.jar".freeze
+    UDOCKER_LINK = "https://download.ncg.ingrid.pt/webdav/udocker/udocker-1.1.2.tar.gz".freeze
 
     validate :wdl_object_should_be_valid
     validates :tasks, length: { is: 1, message: "number is wrong" }
@@ -72,20 +73,38 @@ class App
     end
 
     def code
-      wdl_filename = "#{workflow_name || 'description'}.wdl"
+      wdl_filename = "#{workflow_name}.wdl"
+      inputs_filename = "inputs.json"
+      cromwell_jar = "cromwell.jar"
+      cromwell_conf = "cromwell.conf"
 
       <<-CODE
-wget -q -O cromwell.jar #{CROMWELL_LINK}
+#{udocker_install_code}
+wget -q -O #{cromwell_jar} #{CROMWELL_LINK}
 
 cat <<"EOF" > #{wdl_filename}
 #{raw}
 EOF
 
-cat <<EOF > inputs.json
+cat <<EOF > #{inputs_filename}
 #{JSON.pretty_generate(input_settings)}
 EOF
 
-java -jar cromwell.jar run #{wdl_filename} -i inputs.json
+cat <<"EOF" > #{cromwell_conf}
+#{File.read(File.expand_path("../#{cromwell_conf}", __FILE__))}
+EOF
+
+java -Dconfig.file=#{cromwell_conf} -jar #{cromwell_jar} run #{wdl_filename} -i #{inputs_filename}
+CODE
+    end
+
+    def udocker_install_code
+      <<-CODE
+wget -q -O udocker.tgz #{UDOCKER_LINK}
+tar xzvf udocker.tgz udocker
+chmod u+rx ./udocker
+UDOCKER_TARBALL=$(pwd)/udocker.tgz ./udocker --allow-root install || true
+mv udocker /usr/local/bin
 CODE
     end
 
