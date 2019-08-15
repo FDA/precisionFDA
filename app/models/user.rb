@@ -446,7 +446,6 @@ class User < ActiveRecord::Base
     user = User.find(user_id)
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
     jobs.where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).limit(SYNC_JOBS_LIMIT).each_slice(1000) do |jobs_batch|
-
       jobs_hash = jobs_batch.map { |j| [j.dxid, j] }.to_h
       jobs_hash.keys.each do |job_dxid|
         job_project = project ? project : Job.find_by(dxid: job_dxid).project
