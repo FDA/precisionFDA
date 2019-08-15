@@ -385,4 +385,22 @@ RSpec.describe SpacesController, type: :controller do
       end
     end
   end
+
+  describe "jobs" do
+    let(:space) { create(:space, :group, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id) }
+    let(:app) { create(:app, scope: space.id, user_id: host_lead.id) }
+    let(:job_one) do
+      create(:job, scope: space.id, user_id: host_lead.id, app_id: app.id, state: "running")
+    end
+    let(:job_two) do
+      create(:job, scope: space.id, user_id: host_lead.id, app_id: app.id, state: "done")
+    end
+
+    before { authenticate!(host_lead) }
+    it "lists jobs" do
+      get :jobs, id: space
+      expect(response.content_type).to eq "text/html"
+      expect(response).to be_successful
+    end
+  end
 end
