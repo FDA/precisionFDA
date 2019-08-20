@@ -2,6 +2,7 @@ class App
   class WdlPresenter
     include ActiveModel::Validations
 
+    # TODO: it's better to upload these two as assets and do not download them every time!
     CROMWELL_LINK =
       "https://github.com/broadinstitute/cromwell/releases/download/44/cromwell-44.jar".freeze
     UDOCKER_LINK = "https://download.ncg.ingrid.pt/webdav/udocker/udocker-1.1.2.tar.gz".freeze
@@ -77,6 +78,7 @@ class App
       inputs_filename = "inputs.json"
       cromwell_jar = "cromwell.jar"
       cromwell_conf = "cromwell.conf"
+      job_outputs = "job_outputs.json"
 
       <<-CODE
 #{udocker_install_code}
@@ -94,7 +96,29 @@ cat <<"EOF" > #{cromwell_conf}
 #{File.read(File.expand_path("../#{cromwell_conf}", __FILE__))}
 EOF
 
-java -Dconfig.file=#{cromwell_conf} -jar #{cromwell_jar} run #{wdl_filename} -i #{inputs_filename}
+java -Dconfig.file=#{cromwell_conf} -jar #{cromwell_jar} run #{wdl_filename} \
+-i #{inputs_filename} \
+-m #{job_outputs}
+
+python <<EOF
+import json
+import subprocess
+import re
+
+def sh(cmd, ignore_error=False):
+  try:
+    print cmd
+    subprocess.check_call(cmd, shell=True)
+  except subprocess.CalledProcessError as e:
+    sys.exit(e.returncode)
+
+with open("#{job_outputs}") as f:
+  cwloutputs = json.loads(f.read())['outputs']
+
+for oname, ovalue in cwloutputs.items():
+  if ovalue is not None:
+    sh("emit {} {}".format(re.sub("#{workflow_name}.#{app_name}.", "", oname), ovalue))
+EOF
 CODE
     end
 

@@ -71,9 +71,17 @@ RSpec.describe App::WdlPresenter do
       end
 
       it "includes udocker run call in cromwell config" do
-        expected = "udocker --allow-root run -v ${cwd}:${docker_cwd} ${docker} ${job_shell} ${docker_script}"
+        expected = "udocker --allow-root run -v ${cwd}:${docker_cwd} " \
+                   "${docker} ${job_shell} ${docker_script}"
 
         expect(result[:code]).to include(expected)
+      end
+
+      it "includes python script that links outputs" do
+        py_code = result[:code][/python\s*<<EOF(.+?)(?=EOF)/m, 1]
+
+        expect(py_code).to include('re.sub("single_task.app_a.')
+        expect(py_code).to include('with open("job_outputs.json") as')
       end
     end
   end
