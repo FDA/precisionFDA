@@ -93,7 +93,7 @@ cat <<EOF > #{inputs_filename}
 EOF
 
 cat <<"EOF" > #{cromwell_conf}
-#{File.read(File.expand_path("../#{cromwell_conf}", __FILE__))}
+#{File.read(Rails.root.join('config', 'cromwell.conf'))}
 EOF
 
 java -Dconfig.file=#{cromwell_conf} -jar #{cromwell_jar} run #{wdl_filename} \
