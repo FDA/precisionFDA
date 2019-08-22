@@ -73,12 +73,20 @@ class App
       end
     end
 
+    # How to prepare docker container tarball for WDL-importing to pFDL.
+    # Example:
+    #
+    # docker create --name cgp-chksum quay.io/wtsicgp/dockstore-cgp-chksum:0.4.1
+    # docker export cgp-chksum | gzip -9 > cgp-chksum.tar.gz
+    #
     def code
+      # rubocop:disable Layout/IndentHeredoc
       wdl_filename = "#{workflow_name}.wdl"
       inputs_filename = "inputs.json"
       cromwell_jar = "cromwell.jar"
       cromwell_conf = "cromwell.conf"
       job_outputs = "job_outputs.json"
+      image_filename = File.basename(asset.file_paths.first) if asset
 
       <<-CODE
 #{udocker_install_code}
@@ -93,9 +101,9 @@ cat <<EOF > #{inputs_filename}
 EOF
 
 cat <<"EOF" > #{cromwell_conf}
-#{File.read(Rails.root.join('config', 'cromwell.conf'))}
+#{File.read(Rails.root.join('config', cromwell_conf))}
 EOF
-
+#{"\nudocker --allow-root import #{image_filename} #{docker}\n" if image_filename}
 java -Dconfig.file=#{cromwell_conf} -jar #{cromwell_jar} run #{wdl_filename} \
 -i #{inputs_filename} \
 -m #{job_outputs}
@@ -119,7 +127,7 @@ for oname, ovalue in cwloutputs.items():
   if ovalue is not None:
     sh("emit {} {}".format(re.sub("#{workflow_name}.#{app_name}.", "", oname), ovalue))
 EOF
-CODE
+      CODE
     end
 
     def udocker_install_code
@@ -129,7 +137,8 @@ tar xzvf udocker.tgz udocker
 chmod u+rx ./udocker
 UDOCKER_TARBALL=$(pwd)/udocker.tgz ./udocker --allow-root install || true
 mv udocker /usr/local/bin
-CODE
+      CODE
+      # rubocop:enable Layout/IndentHeredoc
     end
 
     def task

@@ -45,3 +45,4 @@ To set up development environment you can choose either:
 
 * [Localhost Setup](docs/LOCAL_INSTALL.md)
 * [Docker setup](docs/DOCKER_SETUP.md)
+* [udocker user manual](https://github.com/indigo-dc/udocker/blob/master/doc/user_manual.md)
