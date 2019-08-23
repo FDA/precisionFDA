@@ -221,4 +221,5 @@ WorkflowsController = Paloma.controller('Workflows', {
     $container = $("body main")
     viewModel = new NewWorkflowView(@params.apps, @params.scope)
     ko.applyBindings(viewModel, $container[0])
+    Precision.wfEditor.addLoadAppsOnScroll(viewModel)
 })

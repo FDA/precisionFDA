@@ -120,22 +120,6 @@ class ApiController < ApplicationController
     render json: { published: published_count }
   end
 
-  # Inputs:
-  #
-  # id (Integer; required): app series id
-  #
-  # Outputs:
-  #
-  # An array of hashes
-  #
-  def list_app_revisions
-    app_series_id = params["id"]
-    fail "id needs to be an Integer" unless app_series_id.is_a?(Numeric) && (app_series_id.to_i == app_series_id)
-    app_series = AppSeries.accessible_by(@context).find_by(id: params["id"])
-    fail "AppSeries not found" if app_series.nil?
-    render json: app_series.accessible_revisions(@context).select(:title, :id, :uid, :revision, :version)
-  end
-
   # Inputs
   #
   # workflow_id (string, required): the dxid of the workflow to run

@@ -14,6 +14,8 @@
 #
 
 class AppSeries < ActiveRecord::Base
+  paginates_per 15
+
   include Auditor
   include Permissions
 
