@@ -49,6 +49,56 @@ module Api
       render json: { errors: ["Something went wrong"] }, status: :unprocessable_entity
     end
 
+    # Inputs
+    #
+    # page (integer, optional): current page number (1 by default)
+    # scope (string, optional): app scope (public or private, both by default)
+    # query (string, optional): search term
+    #
+    # Outputs
+    #
+    # json (array): accessible app revisions
+    #
+    def accessible_apps # rubocop:disable Metrics/MethodLength
+      page = params[:page].to_i > 0 ? params[:page] : 1
+      scope = %w(public private).include?(params[:scope]) ? params[:scope] : %w(public private)
+      query = params[:query].presence
+
+      app_series = AppSeries.includes(:latest_revision_app)
+        .accessible_by(@context)
+        .where(scope: scope)
+        .page(page)
+
+      if query
+        app_series = app_series.eager_load(:tags)
+          .where("app_series.name REGEXP ? OR tags.name  REGEXP ?", query, query)
+      end
+
+      apps = app_series.map do |app_serie|
+        revisions = app_serie.accessible_revisions(@context).map do |app|
+          {
+            revision: app.revision,
+            id: app.id,
+            uid: app.uid,
+            title: app.title,
+            version: app.version,
+          }
+        end
+
+        latest_revision_app = app_serie.latest_revision_app
+
+        {
+          id: latest_revision_app.id,
+          name: latest_revision_app.name,
+          scope: latest_revision_app.scope,
+          spec: latest_revision_app.spec,
+          revisions: revisions,
+        }
+      end
+
+      render json: apps
+    end
+
     private
 
     def create_app(opts)

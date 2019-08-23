@@ -26,36 +26,44 @@
           </div>
 
           <div class="pfda-padded-v">
-            <input type="text" class="form-control input-md input-square" placeholder="Filter..." data-bind="textInput: addStagesFilterQuery" />
+            <input type="text" class="form-control input-md input-square" placeholder="Filter..." data-bind="value: appsFilterQuery, event: {
+              input: filterAppsByQuery
+            }" />
           </div>
 
           <div class="tab-content">
             <div role="tabpanel" class="tab-pane" id="private-apps">
               <div class="container-fluid container-padded">
-                <div class="workflow-pre-scrollable">
+                <div class="workflow-pre-scrollable" id="private-apps-scrollable">
                   <form class="form form-horizontal">
-                    <div class="pfda-padded-v" data-bind='template: {name: "add-stages", foreach: filteredPrivateApps()}'></div>
+                    <div class="pfda-padded-v scrollable-apps-container" data-bind='template: {name: "add-stages", foreach: privateApps()}'></div>
                   </form>
                 </div>
               </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="public-apps">
               <div class="container-fluid container-padded">
-                <div class="workflow-pre-scrollable">
+                <div class="workflow-pre-scrollable" id="public-apps-scrollable">
                   <form class="form form-horizontal">
-                    <div class="pfda-padded-v" data-bind='template: {name: "add-stages", foreach: filteredPublicApps()}'></div>
+                    <div class="pfda-padded-v scrollable-apps-container" data-bind='template: {name: "add-stages", foreach: publicApps()}'></div>
                   </form>
                 </div>
               </div>
             </div>
             <div role="tabpanel" class="tab-pane active" id="all-apps">
               <div class="container-fluid container-padded">
-                <div class="workflow-pre-scrollable">
+                <div class="workflow-pre-scrollable" id="all-apps-scrollable">
                   <form class="form form-horizontal">
-                    <div class="pfda-padded-v" data-bind='template: {name: "add-stages", foreach: filteredAllApps()}'></div>
+                    <div class="pfda-padded-v scrollable-apps-container" data-bind='template: {name: "add-stages", foreach: allApps()}'></div>
                   </form>
                 </div>
               </div>
+            </div>
+            <div class="text-center all-apps-loading">
+            <!-- ko if: loadingAllApps() -->
+              <i class="fa fa-spinner fa-spin"></i>&nbsp;
+              <span>loading Apps</span>
+            <!-- /ko -->
             </div>
           </div>
 

@@ -113,7 +113,10 @@ Rails.application.routes.draw do
       end
 
       resources :apps, only: %w(create) do
-        post "import", on: :collection
+        collection do
+          post "import"
+          get "accessible_apps"
+        end
       end
 
       resources :workflows, only: %w(create)
@@ -138,7 +141,6 @@ Rails.application.routes.draw do
       post 'describe_license'
       post 'accept_licenses'
       post 'run_app'
-      post 'list_app_revisions'
       post 'run_workflow'
       post 'get_app_spec'
       post 'get_app_script'
