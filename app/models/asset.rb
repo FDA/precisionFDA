@@ -28,7 +28,7 @@
 class Asset < UserFile
   default_scope { where(parent_type: "Asset") }
 
-  has_many :archive_entries, dependent: :destroy
+  has_many :archive_entries, dependent: :delete_all
 
   has_and_belongs_to_many :apps, join_table: :apps_assets
 
