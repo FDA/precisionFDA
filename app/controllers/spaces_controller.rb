@@ -104,7 +104,7 @@ class SpacesController < ApplicationController
       end
     else
       @space = space_form
-      js space_params.merge(space_types: space_types)
+      js space_params.to_h.merge(space_types: space_types)
       render :new
     end
   end
@@ -589,12 +589,9 @@ class SpacesController < ApplicationController
   end
 
   def space_params
-    p = params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser,
-                                      :space_type, :cts, :sponsor_org_handle, :space_template_id,
-                                      :restrict_to_template)
-    p.require(:name)
-    p.require(:space_type)
-    p
+    params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser,
+                                  :space_type, :cts, :sponsor_org_handle, :space_template_id,
+                                  :restrict_to_template)
   end
 
   def update_space_params
