@@ -398,7 +398,7 @@ RSpec.describe SpacesController, type: :controller do
 
     before { authenticate!(host_lead) }
     it "lists jobs" do
-      get :jobs, id: space
+      get :jobs, params: { id: space }
       expect(response.content_type).to eq "text/html"
       expect(response).to be_successful
     end
