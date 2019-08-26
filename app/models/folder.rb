@@ -8,18 +8,36 @@ class Folder < Node
             presence: { message: "Name could not be blank" },
             length: {
               maximum: MAX_NAME_LENGTH,
-              too_long: "Name could not be longer than #{MAX_NAME_LENGTH} characters."
+              too_long: "Name could not be longer than #{MAX_NAME_LENGTH} characters"
             }
 
   validates_uniqueness_of :name,
                           scope: %i[user_id scope parent_folder_id],
-                          message: "This folder already has node named '%{value}'",
+                          message: "A folder with this name '%{value}' already exists",
                           if: lambda { private? }
 
   validates_uniqueness_of :name,
                           scope: %i[scope scoped_parent_folder_id],
-                          message: "This folder already has node named '%{value}'",
+                          message: "A folder with this name '%{value}' already exists",
                           unless: lambda { private? }
+
+  class << self
+    def batch_private_folders(context, parent_folder_id = nil)
+      Folder
+        .private_for(context)
+        .where(parent_folder_id: parent_folder_id)
+    end
+
+    def batch_space_folders(spaces_params)
+      Folder
+        .editable_in_space(spaces_params[:context], spaces_params[:spaces_members_ids])
+        .includes(:taggings)
+        .where(
+          scope: spaces_params[:scopes],
+          scoped_parent_folder_id: spaces_params[:scoped_parent_folder_id]
+        )
+    end
+  end
 
   def klass
     "folder"
@@ -43,7 +61,8 @@ class Folder < Node
   end
 
   def children
-    Node.where(Node.scope_column_name(scope) => self.id)
+    column = self.class.connection.quote_column_name(Node.scope_column_name(scope))
+    Node.where("#{column} = ?", self.id)
   end
 
   def sub_folders
@@ -73,5 +92,4 @@ class Folder < Node
     sub_folders.each { |folder| collected += folder.all_children(where).to_a }
     collected
   end
-
 end

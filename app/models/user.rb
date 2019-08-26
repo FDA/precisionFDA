@@ -385,7 +385,7 @@ class User < ActiveRecord::Base
     return if context.guest?
     user = context.user
     token = context.token
-    job = user.jobs.find(job_id) # Re-check job id
+    job = Job.accessible_by(context).find(job_id) # Re-check job id
     return if job.terminal?
 
     result = DNAnexusAPI.new(token).call("system", "findJobs",
@@ -406,17 +406,20 @@ class User < ActiveRecord::Base
     user = User.find(user_id)
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
     jobs.where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).limit(SYNC_JOBS_LIMIT).each_slice(1000) do |jobs_batch|
-
       jobs_hash = jobs_batch.map { |j| [j.dxid, j] }.to_h
-      response = DNAnexusAPI.new(token).call("system", "findJobs",
-        includeSubjobs: false,
-        id: jobs_hash.keys,
-        project: project || user.private_files_project,
-        parentJob: nil,
-        describe: true,)
-      response["results"].each do |result|
-        next if result.blank?
-        sync_job_state(result, jobs_hash[result["id"]], user, token)
+      jobs_hash.keys.each do |job_dxid|
+        job_project = project ? project : Job.find_by(dxid: job_dxid).project
+
+        response = DNAnexusAPI.new(token).call("system", "findJobs",
+          includeSubjobs: false,
+          id: [job_dxid],
+          project: job_project || user.private_files_project,
+          parentJob: nil,
+          describe: true,)
+        response["results"].each do |result|
+          next if result.blank?
+          sync_job_state(result, jobs_hash[result["id"]], user, token)
+        end
       end
     end
   end
@@ -448,11 +451,12 @@ class User < ActiveRecord::Base
         file = UserFile.find_by(id: file.id)
         if file.present?
           Event::FileDeleted.create_for(file, user)
-          file.destroy!
+          file.destroy
         end
       end
     elsif result["describe"].present?
       remote_state = result["describe"]["state"]
+
       # Only begin transaction if stale file detected
       if remote_state != file.state
         UserFile.transaction do
@@ -460,21 +464,23 @@ class User < ActiveRecord::Base
           file.reload
           # confirm local file state is stale
           if remote_state != file.state
-            if remote_state == "closed"
+            if remote_state == UserFile::STATE_CLOSED
               file.update!(state: remote_state, file_size: result["describe"]["size"])
               Event::FileCreated.create_for(file, user)
-            elsif remote_state == "closing" && file.state == "open"
+            elsif remote_state == UserFile::STATE_CLOSING && file.state == UserFile::STATE_OPEN ||
+                  remote_state == UserFile::STATE_ABANDONED
               file.update!(state: remote_state)
             else
               # NOTE we should never be here
-              raise "File #{file.uid} had local state #{file.state} (previously #{old_file_state}) and remote state #{remote_state}"
+              raise "File #{file.uid} had local state #{file.state} " \
+                    "(previously #{old_file_state}) and remote state #{remote_state}"
             end
           end
         end
       end
     else
       # NOTE we should never be here
-      raise
+      raise "Unsupported response for file #{file.uid}: #{result}"
     end
   end
 

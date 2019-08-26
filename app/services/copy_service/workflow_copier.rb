@@ -10,7 +10,7 @@ class CopyService
       new_workflow = workflow.dup
       new_workflow.scope = scope
       space = Space.from_scope(scope)
-      destination_project = space.project_for_user!(user)
+      destination_project = space.project_for_user(user)
       Workflow.transaction do
         api.call(workflow.project, "clone", objects: [workflow.dxid], project: destination_project)
         new_workflow.project = destination_project

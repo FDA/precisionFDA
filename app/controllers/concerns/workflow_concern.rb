@@ -1,12 +1,33 @@
 module WorkflowConcern
   include ActiveSupport::Concern
 
+  def collect_inputs(batch)
+    case batch[:class]
+    when "string"
+      batch[:value].split(/\n/)
+    when "file"
+      batch[:value]
+    else
+      []
+    end
+  end
+
+  def input_object(batch, input_spec, value)
+    {
+      "class" => batch[:class],
+      "input_name" => input_spec[:parent_slot] + "." + input_spec[:name],
+      "input_value" => value,
+      "uniq_input_name" => input_spec[:uniq_input_name],
+    }
+  end
+
   def run_workflow_once(workflow_params)
     analysis_name = workflow_params["name"]
     fail "The workflow 'analysis_name' must be a nonempty string." unless analysis_name.is_a?(String) && analysis_name != ""
 
     workflow_id = workflow_params["workflow_id"]
     fail "The workflow 'workflow_id' must be a nonempty string." unless workflow_id.is_a?(String) && workflow_id != ""
+
     workflow = Workflow.accessible_by(@context).find_by_uid(workflow_id)
     fail "Workflow with id #{workflow_id} does not exist or is not accessible by you" if workflow.nil?
 
@@ -21,8 +42,11 @@ module WorkflowConcern
 
     inputs.each do |api_input|
       input_name = api_input["input_name"]
+      input_field = input_name.partition(".").last
+
       stage_input_name_match = /^(stage-\w{14}).(\w+)$/.match(input_name)
       fail "Invalid value for input_name" if stage_input_name_match.captures.size != 2
+
       stage = stage_input_name_match[1]
       matched_input_name = stage_input_name_match[2]
 
@@ -31,6 +55,10 @@ module WorkflowConcern
 
       input_value = api_input["input_value"]
       optional = workflow_input_spec[stage][matched_input_name]["optional"]
+
+      default_workflow_value_input = unseen_workflow_inputs[stage][matched_input_name]["default_workflow_value"]
+      value = default_workflow_value_input ? input_value.to_s : input_value
+
       unseen_workflow_inputs[stage].delete(matched_input_name)
       next if optional && !input_value.present?
       case input_klass
@@ -43,10 +71,12 @@ module WorkflowConcern
 
         input_value = { "$dnanexus_link" => file.dxid }
       when "int"
-        fail "#{input_name}: value is not an integer" unless input_value.to_i.to_s == input_value
+        fail "#{input_field}: value is not an integer" unless input_value.to_i.to_s == value
         input_value = input_value.to_i
       when "float"
-        fail "#{input_name}: value is not a float" unless input_value.starts_with?(input_value.to_f.to_s)
+        fail "#{input_field}: value is not a float" unless input_value.starts_with?(
+          input_value.to_f.to_s
+        )
         input_value = input_value.to_f
       when "boolean"
         fail "#{input_name}: value is not a boolean" unless input_value == true || input_value == false
@@ -68,17 +98,22 @@ module WorkflowConcern
     workflow_params = {
       name: analysis_name,
       input: dx_run_workflow_inputs,
+      singleContext: true,
       project: project,
     }
 
     api = DNAnexusAPI.new(@context.token)
     permission = api.call(workflow.dxid, "listProjects")[workflow.project]
-    fail(t('api.errors.invalid_permission', title: workflow.title), permission: permission) if permission == 'VIEW'
+    fail(
+      t("api.errors.invalid_permission", title: workflow.title), permission: permission
+    ) if permission == "VIEW"
 
     response = api.run_workflow(workflow.dxid, workflow_params)
 
     analysis_dxid = response["id"]
-    analysis = Analysis.create!(name: analysis_name, workflow_id: workflow.id, dxid: analysis_dxid, user_id: current_user.id)
+    analysis = Analysis.create!(
+      name: analysis_name, workflow_id: workflow.id, dxid: analysis_dxid, user_id: current_user.id
+    )
 
     response["stages"].each_with_index do |job_id, idx|
       # Create job record
@@ -112,7 +147,10 @@ module WorkflowConcern
         user_id: @context.user_id,
         run_instance_type: stage["instanceType"],
       }
-      provenance = { job_id => { workflow_dxid: workflow.dxid, workflow_id: workflow.id, inputs: run_inputs } }
+      provenance =
+        {
+          job_id => { workflow_dxid: workflow.dxid, workflow_id: workflow.id, inputs: run_inputs },
+        }
       input_file_dxids.uniq!
       input_file_ids = []
       UserFile.accessible_by(@context).where(dxid: input_file_dxids).find_each do |file|

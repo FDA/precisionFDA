@@ -138,8 +138,10 @@ class WorkflowsController < ApplicationController
     private_app_series = app_series.where(scope: "private")
     public_app_series = app_series.where(scope: "public")
     js(
-      apps: {private_apps: private_app_series.map { |app_series| app_series.slice(:id, :name) },
-      public_apps: public_app_series.map { |app_series| app_series.slice(:id, :name) } },
+      apps: {
+        private_apps: private_app_series.map { |app_series| app_series.slice(:id, :name) },
+        public_apps: public_app_series.map { |app_series| app_series.slice(:id, :name) },
+      },
       scope: @workflow.accessible_scopes,
       workflow: @workflow
     )
@@ -171,7 +173,7 @@ class WorkflowsController < ApplicationController
     inputs = @workflow.batch_input_spec.select { |input| input[:values][:id].nil? }
     outputs = @workflow.all_output_spec
 
-    inputs.map {|v| v["uniq_input_name"] = v["parent_slot"] + "." + v["name"] }
+    inputs.map { |v| v["uniq_input_name"] = v["parent_slot"] + "." + v["name"] }
 
     js workflow: @workflow, inputs: inputs, outputs: outputs,
                  folders: output_folders_list, scope: @workflow.accessible_scopes
@@ -181,37 +183,48 @@ class WorkflowsController < ApplicationController
     workflow_object = Workflow.find_by_uid(params[:id])
     folder = Folder.find(params[:folder_id]) if params[:folder_id].present?
 
-    batch_id = workflow_object.dxid + '_' + DateTime.now.to_i.to_s
-    batch_one = params[:batch_input_one]
-    batch_two = params[:batch_input_two]
+    batch_id = workflow_object.dxid + "_" + Time.now.to_i.to_s
+    batch_one = params[:batch_input_one].presence || {}
+    batch_two = params[:batch_input_two].presence || {}
 
-    inputs1 = batch_one[:value].split(/\n/) rescue [] if batch_one.present? && batch_one['class'] == "string"
-    inputs1 = batch_one[:value] if batch_one.present? && batch_one['class'] == "file"
+    inputs1 = collect_inputs(batch_one) if batch_one.present?
+    inputs2 = collect_inputs(batch_two) if batch_two.present?
 
-    inputs2 = batch_two[:value].split(/\n/) rescue [] if batch_two.present? && batch_two['class'] == "string"
-    inputs2 = batch_two[:value] if batch_two.present? && batch_two['class'] == "file"
+    workflow_all_input_spec = workflow_object.all_input_spec
+    workflow_all_input_spec.map { |v| v[:uniq_input_name] = v[:parent_slot] + "." + v[:name] }
 
-    all_uniq_inputs = workflow_object.all_input_spec.map {|v| v["uniq_input_name"] = v["parent_slot"] + "." + v["name"] } rescue workflow_object.all_input_spec
-    spec_names = workflow_object.all_input_spec.reject{|s| params['inputs'].map{|i| i["uniq_input_name"]}.include?(s["uniq_input_name"]) } rescue all_uniq_inputs
+    if params[:inputs]
+      stages_inputs = params[:inputs].map { |i| i[:uniq_input_name] }
+      spec_names = workflow_all_input_spec.reject { |s| stages_inputs.include?(s[:uniq_input_name]) }
+    else
+      spec_names = workflow_all_input_spec
+    end
 
     list_analyses = []
+
     inputs1.each do |i1|
-      i2 = inputs2.shift rescue nil
-
       inputs = []
-      input_spec_one = workflow_object.all_input_spec.find{|s| s["uniq_input_name"] == spec_names[0]["uniq_input_name"]}
-      input_spec_two = workflow_object.all_input_spec.find{|s| s["uniq_input_name"] == spec_names[1]["uniq_input_name"]} rescue nil
+      input_spec_one = workflow_all_input_spec.find { |s| s[:uniq_input_name] == spec_names[0][:uniq_input_name] }
+      input_spec_two = workflow_all_input_spec.find { |s| s[:uniq_input_name] == (spec_names[1] || {})[:uniq_input_name] }
 
-      inputs.unshift({"class" => batch_one["class"], 'input_name' => input_spec_one["parent_slot"] + "." + input_spec_one[:name], 'input_value' => i1}) if batch_one.present?
-      inputs.unshift({"class" => batch_two["class"], 'input_name' => input_spec_two["parent_slot"] + "." + input_spec_two[:name], 'input_value' => i2}) if batch_two && input_spec_two.present? rescue nil && inputs2.present?
+      if batch_one.present?
+        input_object_one = input_object(batch_one, input_spec_one, i1)
+        inputs.unshift(input_object_one)
+      end
 
-      if params["inputs"]
-        others = params["inputs"].dup.map do |v|
+      batch_two_condition = batch_two.present? && input_spec_two.present?
+      if batch_two_condition
+        i2 = inputs2.shift
+        input_object_two = input_object(batch_two, input_spec_two, i2)
+        (inputs || []).unshift(input_object_two)
+      end
+
+      if params[:inputs]
+        others = params[:inputs].dup.map do |v|
           val = v.dup
-          val["input_name"] = workflow_object.all_input_spec.find { |s| s["uniq_input_name"] == v["uniq_input_name"] }["parent_slot"] + "." + v["input_name"]
+          val["input_name"] = workflow_all_input_spec.find { |s| s["uniq_input_name"] == v["uniq_input_name"] }["parent_slot"] + "." + v["input_name"]
           val
         end
-
         inputs.unshift(*others)
       end
 
@@ -224,7 +237,6 @@ class WorkflowsController < ApplicationController
       to_run["api"] = workflow.dup
 
       analysis_dxid = run_workflow_once(to_run)
-
       analysis = Analysis.find_by_dxid(analysis_dxid)
       analysis.batch_id = batch_id
       analysis.save
@@ -344,14 +356,13 @@ class WorkflowsController < ApplicationController
 
     service = FolderService.new(@context)
     result = service.add_folder(params[:name], parent_folder, scope)
-
-    result = if result.failure?
-      { folders: result.value.values }
+    if result.failure?
+      full_messages =
+        result.value[:name] ? result.value[:name].join(". ") : "Error in create output folder"
+      render json: { error_message: full_messages }, status: 500
     else
-      { folders: { id: result.value.id, name: result.value.name } }
+      render json: { folders: { id: result.value.id, name: result.value.name } }
     end
-
-    render json: result
   end
 
   # usage on the platform

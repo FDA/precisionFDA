@@ -128,6 +128,7 @@ Rails.application.routes.draw do
       post 'close_file'
       post 'describe'
       post 'list_files'
+      post 'folder_tree'
       post 'list_notes'
       post 'list_comparisons'
       post 'list_apps'
@@ -387,7 +388,7 @@ Rails.application.routes.draw do
         post :to_lead
         post :to_admin
         post :to_viewer
-        post :to_member
+        post :to_contributor
         post :to_inactive
       end
     end

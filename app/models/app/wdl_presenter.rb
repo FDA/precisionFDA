@@ -2,6 +2,9 @@ class App
   class WdlPresenter
     include ActiveModel::Validations
 
+    CROMWELL_LINK =
+      "https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar".freeze
+
     validate :wdl_object_should_be_valid
     validates :tasks, length: { is: 1, message: "number is wrong" }
 
@@ -22,12 +25,7 @@ class App
         internet_access: true,
         instance_type: "baseline-8",
         code: code,
-        packages: %w(
-          libxml2-dev
-          libxslt1-dev
-          zlib1g-dev
-          openjdk-8-jre-headless
-        ),
+        packages: %w(openjdk-8-jre-headless),
         ordered_assets: Array(asset.try(:uid)),
       }
     end
@@ -58,20 +56,35 @@ class App
       end
     end
 
+    def input_settings
+      inputs.each_with_object({}) do |input, memo|
+        input_name = "#{workflow_name}.#{app_name}.#{input.name}"
+        memo[input_name] = settings_for(input)
+      end
+    end
+
+    def settings_for(input)
+      if input.object_type == "File"
+        "${#{input.name}_path}"
+      else
+        "${#{input.name}}"
+      end
+    end
+
     def code
       wdl_filename = "#{workflow_name || 'description'}.wdl"
 
       <<-CODE
-wget -O cromwell.jar \
-https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar
-wget -O womtool.jar \
-https://github.com/broadinstitute/cromwell/releases/download/38/womtool-38.jar
+wget -q -O cromwell.jar #{CROMWELL_LINK}
 
-cat <<EOF > #{wdl_filename}
+cat <<"EOF" > #{wdl_filename}
 #{raw}
 EOF
 
-java -jar womtool.jar inputs #{wdl_filename} > inputs.json
+cat <<EOF > inputs.json
+#{JSON.pretty_generate(input_settings)}
+EOF
+
 java -jar cromwell.jar run #{wdl_filename} -i inputs.json
 CODE
     end

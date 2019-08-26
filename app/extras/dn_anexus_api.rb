@@ -72,10 +72,10 @@ class DNAnexusAPI
     end
     api.call(ORG_DUMMY, "findMembers")["results"].each do |result|
       if result["level"] == "MEMBER"
-        api.call(ORG_DUMMY, "removeMember", {user: result["id"]})
+        api.call(ORG_DUMMY, "removeMember", user: result["id"])
       end
     end
-    return true
+    true
   end
 
   private

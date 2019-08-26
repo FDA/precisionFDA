@@ -53,7 +53,9 @@ class ProfileController < ApplicationController
       elsif User.find_by(normalized_email: @normalized_email).present?
         @error = "This email address is already in use by another precisionFDA account."
       elsif DNAnexusAPI.email_exists?(@email)
-        @error = "This email address is in use by an existing DNAnexus account. Please ask the person to provide you with a different email to be used for precisionFDA."
+        @error =
+          "Email address is already in use in precisionFDA. " \
+          "Please ask the person to provide you with a different email to be used in precisionFDA."
       end
 
       if @error.present?
@@ -212,17 +214,7 @@ class ProfileController < ApplicationController
       Time.use_zone ActiveSupport::TimeZone.new('America/New_York') do
         p.workbook.add_worksheet(name: "Users") do |sheet|
           sheet.add_row ["", "", "username", "first name", "last name", "email", "provisioned at", "last login", "bytes stored", "apps count", "jobs count"]
-          Org.order(:name).all.each do |org|
-            %w(name handle address phone).each do |label|
-              sheet.add_row ["Organization #{label}:", org.send(label)]
-            end
-            users = [org.admin] + org.users.order(:dxuser).all.reject { |u| u.id == org.admin_id }
-            users.each do |user|
-              role = user.id == org.admin_id ? "Admin:" : "Member:"
-              sheet.add_row [role, "", user.dxuser, user.first_name, user.last_name, user.email, user.created_at.strftime("%Y-%m-%d %H:%M"), user.last_login ? user.last_login.strftime("%Y-%m-%d %H:%M") : "", user.user_files.sum(:file_size), user.app_series.count, user.jobs.count]
-            end
-            sheet.add_row
-          end
+          Org.reports(sheet)
         end
         p.workbook.add_worksheet(name: "Requests") do |sheet|
           sheet.add_row ["time", "in_system?", "first name", "last name", "email", "organization", "self-represent?", "country", "city", "state", "postal code", "address1", "address2", "phone", "duns", "consistency challenge?", "truth challenge?", "research?", "clinical?", "has data?", "has software?", "reason"]
@@ -276,7 +268,7 @@ class ProfileController < ApplicationController
     end
 
     if email.present? && DNAnexusAPI.email_exists?(email)
-      @errors << "This email address is in use by an existing DNAnexus account." \
+      @errors << "Email address is already in use in precisionFDA. " \
                  "Please ask the person to provide you with a different email to " \
                  "be used for precisionFDA."
     end

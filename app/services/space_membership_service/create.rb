@@ -4,19 +4,31 @@ module SpaceMembershipService
     # @param [Space] space
     # @param [SpaceMembership] membership
     def self.call(api, space, membership)
+      invitee = membership.user.dxid
       org_dxid = space.org_dxid(membership)
 
-      api.call(org_dxid, "invite", {
-        invitee: membership.user.dxid,
-        level: membership.lead_or_admin? ? "ADMIN" : "MEMBER",
-        suppressEmailNotification: true
-      })
+      if ADMIN_USER != invitee || !admin_user_member?(api, org_dxid)
+        attrs = {
+          invitee: invitee,
+          level: "ADMIN",
+          suppressEmailNotification: true,
+        }
+
+        unless membership.lead_or_admin?
+          attrs.merge!(
+            level: "MEMBER",
+            projectAccess: membership.contributor? ? "CONTRIBUTE" : "VIEW",
+            allowBillableActivities: false,
+            appAccess: membership.contributor?,
+          )
+        end
+
+        api.call(org_dxid, "invite", attrs)
+      end
 
       space.space_memberships << membership
 
-      return membership unless space.review?
-
-      return membership unless space.accepted?
+      return membership if !space.review? || !space.accepted?
 
       if space.confidential?
         space.space.space_memberships << membership
@@ -26,6 +38,12 @@ module SpaceMembershipService
       end
 
       membership
+    end
+
+    def self.admin_user_member?(api, org_dxid)
+      api.call(org_dxid, "findMembers", id: [ADMIN_USER])["results"].present?
+    rescue
+      false
     end
   end
 end

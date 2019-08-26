@@ -327,7 +327,7 @@ class SubmissionsController < ApplicationController
   end
 
   def challenge_bot
-    @challenge_bot ||= User.challenge_bot
+    @challenge_bot ||= User.CHALLENGE_BOT
   end
 
 end

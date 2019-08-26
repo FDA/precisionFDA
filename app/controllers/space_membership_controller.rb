@@ -1,5 +1,4 @@
 class SpaceMembershipController < ApplicationController
-
   def to_lead
     member.with_lock do
       if SpaceMembershipService::ToLead.call(api, space, member, admin_member)
@@ -20,10 +19,10 @@ class SpaceMembershipController < ApplicationController
     redirect_to :back
   end
 
-  def to_member
+  def to_contributor
     member.with_lock do
-      if SpaceMembershipService::ToMember.call(api, space, member, admin_member)
-        flash[:success] = "#{member.user.full_name} was successfully designated as member"
+      if SpaceMembershipService::ToContributor.call(api, space, member, admin_member)
+        flash[:success] = "#{member.user.full_name} was successfully designated as contributor"
       end
     end
 
@@ -56,24 +55,15 @@ class SpaceMembershipController < ApplicationController
     @member ||= SpaceMembership.find_by_id!(params[:id])
   end
 
-  def api
-    if @context.review_space_admin? && admin_member.new_record?
-      DNAnexusAPI.for_admin
-    else
-      @context.api
-    end
-  end
-
   def admin_member
-    if @context.review_space_admin? && member.host?
-      SpaceMembership.new_by_admin(current_user)
-    else
-      SpaceMembership.lead_or_admin.find_by!(user_id: current_user)
-    end
+    @admin_member ||= space.space_memberships.lead_or_admin.find_by!(user: current_user)
   end
 
   def space
     @space ||= member.spaces.find_by!({})
   end
 
+  def api
+    @context.api
+  end
 end

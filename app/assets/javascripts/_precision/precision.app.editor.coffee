@@ -2,7 +2,7 @@ class AppEditorModel
   constructor: (app, @mode = 'edit') ->
     @isNewApp = @mode != 'edit'
     @saving = ko.observable(false)
-    @loading = ko.observable(false)
+    @loadingAssets = ko.observable(false)
     @errorMessage = ko.observable()
 
     @dxid = app?.dxid
@@ -30,10 +30,17 @@ class AppEditorModel
     @assetsSelector = new Precision.models.AssetsModel
     @assets = ko.observableArray()
     if app?.internal.ordered_assets && app?.internal.ordered_assets.length > 0
-      @loading(true)
-      Precision.api '/api/list_assets', {ids: app.internal.ordered_assets}, (assets) =>
-        @assets(_.map(@assetsSelector.createAssetModels(assets)))
-        @loading(false)
+      @loadingAssets(true)
+      Precision.api(
+        '/api/list_assets',
+        { ids: app.internal.ordered_assets },
+        (assets) =>
+          @loadingAssets(false)
+          @assets(_.map(@assetsSelector.createAssetModels(assets)))
+        (error) =>
+          Precision.alert.showAboveAll('Error while loading assets list!')
+          @loadingAssets(false)
+      )
 
     @assetsSelector.assets.saved.subscribe((assetsSaved) =>
       @assets(assetsSaved)
@@ -75,32 +82,47 @@ class AppEditorModel
     ]
 
     @isSaveReady = ko.computed(=>
-      return false if @saving() || @loading()
+      return false if @saving() || @loadingAssets()
       return !_.isEmpty(@title()) && !_.isEmpty(@name())
     )
 
     @saveButtonText = ko.computed(=>
       saving = @saving()
+      loadingAssets = @loadingAssets()
       switch @mode
         when 'new'
           if saving then "Creating..." else "Create"
         when 'fork'
-          if saving then "Forking..." else "Fork"
+          if saving
+            "Forking..."
+          if loadingAssets
+            "Loading Assets..."
+          else
+            "Fork"
         else
           if saving
             "Saving Revision #{parseInt(@revision()) + 1}..."
+          if loadingAssets
+            "Loading Assets..."
           else
             "Save Revision #{parseInt(@revision() + 1)}"
     )
 
     @saveIcon = ko.computed(=>
+      loadingAssets = @loadingAssets()
       switch @mode
         when 'new'
           "fa fa-plus"
         when 'fork'
-          "fa fa-code-fork"
+          if loadingAssets
+            "fa fa-spinner fa-spin"
+          else
+            "fa fa-code-fork"
         else
-          "fa fa-save"
+          if loadingAssets
+            "fa fa-spinner fa-spin"
+          else
+            "fa fa-save"
     )
 
     @isContentVisible = ko.computed(=>

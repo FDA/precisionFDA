@@ -31,6 +31,9 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # Support for OR queries (needed for UserFile.accessible_by)
 gem 'activerecord_any_of'
 
+# Support for bulk inserting data using ActiveRecord
+gem 'activerecord-import'
+
 # Parameter validation for the API
 gem 'rails_param'
 
@@ -115,7 +118,7 @@ group :development do
   gem 'spring'
 
   # Automatic Ruby code checking tool
-  gem 'rubocop', '~> 0.54.0', require: false
+  gem 'rubocop', require: false
 
   gem 'pronto', '~> 0.9.5'
   gem 'pronto-rubocop', '~> 0.9.0', require: false
@@ -134,6 +137,8 @@ group :development, :test, :ui_test do
   gem 'figaro'
   gem 'quiet_assets'
   gem 'thin'
+  gem 'brakeman', '~> 3.3.3'
+
 end
 
 group :test, :ui_test do

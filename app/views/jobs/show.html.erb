@@ -57,7 +57,7 @@
 
 <div class="pfda-toolbar">
   <div class="btn-group">
-    <% if @context.user_id == @job.user_id %>
+    <% if @job.accessible_by?(@context) %>
       <%= link_to log_job_path(@job), class: "btn btn-default" do %>
         <span class="fa fa-file-code-o"></span> View Log
       <% end %>
