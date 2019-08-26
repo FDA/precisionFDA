@@ -17,16 +17,18 @@
     </div>
     <div class="col-md-8">
       <% if @challenge.active? %>
-        <% if !@context.logged_in? || !@challenge.followed_by?(@context.user) %>
-          <a class="btn btn-success btn-block btn-lg text-uppercase" href="<%= join_challenge_path(@challenge) %>" role="button">
-            <span class="fa fa-lg fa-user-plus" aria-hidden="true"></span>
-            &nbsp;Join Challenge
-          </a>
-        <% elsif @challenge.accepting_submissions? %>
-          <a class="btn btn-primary btn-block btn-lg text-uppercase" href="<%= new_challenge_submission_path(challenge_id: @challenge.id, app_dxid: @challenge.app) %>" role="button">
-            <span class="fa fa-lg fa-inbox" aria-hidden="true"></span>
-            &nbsp;Submit Challenge Entry
-          </a>
+        <% unless @context.guest? %>
+          <% if !@context.logged_in? || !@challenge.followed_by?(@context.user) %>
+            <a class="btn btn-success btn-block btn-lg text-uppercase" href="<%= join_challenge_path(@challenge) %>" role="button">
+              <span class="fa fa-lg fa-user-plus" aria-hidden="true"></span>
+              &nbsp;Join Challenge
+            </a>
+          <% elsif @challenge.accepting_submissions? %>
+            <a class="btn btn-primary btn-block btn-lg text-uppercase" href="<%= new_challenge_submission_path(challenge_id: @challenge.id, app_dxid: @challenge.app) %>" role="button">
+              <span class="fa fa-lg fa-inbox" aria-hidden="true"></span>
+              &nbsp;Submit Challenge Entry
+            </a>
+          <% end %>
         <% end %>
       <% else %>
         <% if @challenge.over? %>

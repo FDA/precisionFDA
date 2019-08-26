@@ -60,7 +60,7 @@ class SpaceEvent < ActiveRecord::Base
 
   ROLES = %i(
     admin
-    member
+    contributor
     viewer
     lead
   )

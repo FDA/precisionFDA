@@ -1,3 +1,6 @@
+TYPE_FILE = 'UserFile'
+TYPE_FOLDER = 'Folder'
+
 ASC = 'asc'
 DESC = 'desc'
 ERROR_MSG = 'Please fill in all required fields properly.'
@@ -125,14 +128,8 @@ class InputModel
 ### Input Model ###
 
 ### Batch Input Model ###
-class BatchInputFile
-  constructor: (data) ->
-    @uid = data.uid
-    @title = data.title
-    @highlighted = ko.observable(false)
-
-extendBatchInput = (files) ->
-  @files = ko.observableArray(files.map((file) -> new BatchInputFile(file)))
+extendBatchInput = () ->
+  files = @batchWorkflowFileTree.rootNodes
   @selectedFiles = ko.observableArray([])
 
   ### SORT ###
@@ -153,56 +150,63 @@ extendBatchInput = (files) ->
     _sortDirection = if @sortColorDirection() == ASC then DESC else ASC
     @sortColorDirection(_sortDirection)
   ### SORT ###
-
-  @selectHighlightedFiles = (files) =>
-    @selectedFiles([])
-    files.forEach((file) =>
-      @selectedFiles.push(file.uid) if file.highlighted()
-    )
-
-  @selectAllFiles = (root, e) =>
-    @selectedFiles([])
-    if e.target.checked
-      @filteredFiles().forEach((file) => @selectedFiles.push(file.uid))
-
   @searchValue = ko.observable(null)
   @searchFlagsValue = ko.observable('ig')
+
   @filteredFiles = ko.computed( =>
-    sortNameHandler = (a, b) =>
-      if @sortNameDirection() == ASC
-        return 1 if (a.title > b.title)
-        return -1 if (a.title < b.title)
+    fileTree = null
+    sortNameDirection = @sortNameDirection()
+    sortColorDirection = @sortColorDirection()
+    if @fileTree
+      fileTree = @fileTree.treeContainer.jstree(true)
+      nodes = fileTree.get_json('#', { flat: true })
+    else
+      nodes = []
+
+    sortNameHandler = (a, b) ->
+      if sortNameDirection == ASC
+        return 1 if (a.text > b.text)
+        return -1 if (a.text < b.text)
       else
-        return 1 if (a.title < b.title)
-        return -1 if (a.title > b.title)
+        return 1 if (a.text < b.text)
+        return -1 if (a.text > b.text)
       return 0
 
-    sortColorHandler = (a, b) =>
-      if @sortColorDirection() == ASC
-        return a.highlighted() - b.highlighted()
+    sortColorHandler = (a, b) ->
+      a_selected = fileTree.is_selected(a.id)
+      b_selected = fileTree.is_selected(b.id)
+      if sortColorDirection == ASC
+        return a_selected - b_selected
       else
-        return b.highlighted() - a.highlighted()
+        return b_selected - a_selected
 
     searchValue = @searchValue()
     flagsValue = @searchFlagsValue()
-    files = @files()
+
     if searchValue
       try
         regexp = new RegExp(searchValue, flagsValue)
       catch
         Precision.alert.showAboveAll('Wrong Regular Expression!', null, 1000)
         regexp = new RegExp('.*', 'ig')
-      files.forEach((file) ->
-        file.highlighted(file.title.search(regexp) > -1)
-        return file
+      fileTree.deselect_all()
+      nodes.forEach((node) ->
+        if node.data.type == TYPE_FILE
+          if node.text.search(regexp) > -1
+            fileTree.select_node(node.id)
+          else
+            fileTree.deselect_node(node.id)
       )
     else
-      files.forEach((file) ->
-        file.highlighted(false)
-        return file
-      )
-    @selectHighlightedFiles(files)
-    return files.sort(sortNameHandler).sort(sortColorHandler)
+      nodes.forEach((node) -> fileTree.deselect_node(node.id))
+
+    nodes = nodes.sort(sortNameHandler).sort(sortColorHandler)
+
+    if @fileTree
+      fileTree.settings.core.data = nodes
+      fileTree.refresh()
+
+    return nodes
   )
   @searchOnChange = _.debounce(
     (root, e) => @searchValue(e.target.value)
@@ -213,6 +217,19 @@ extendBatchInput = (files) ->
     @searchValue(null)
   @setValue = ko.computed( => @value(@selectedFiles()))
 
+  @selectNodeHandler = () =>
+    selectedFiles = []
+    nodes = @fileTree.treeContainer.jstree(true).get_json('#', { flat: true })
+    _selected = @fileTree.treeContainer.jstree(true).get_selected()
+    for node in nodes
+      if _selected.indexOf(node.id) > -1 and node.data.type == TYPE_FILE
+        selectedFiles.push(node.data.uid)
+    @selectedFiles(selectedFiles)
+
+  @initTree = () =>
+    @fileTree = @batchWorkflowFileTree.createNewTree($("##{@name}"))
+    @fileTree.onSelectNodeCallback = () => @selectNodeHandler()
+    @fileTree.onDeselectNodeCallback = () => @selectNodeHandler()
 
 class BatchInputModel
   onChange: () ->
@@ -224,13 +241,16 @@ class BatchInputModel
       return @value().split(/\r*\n/).length
     else
       return 0
-  constructor: (type, title, files) ->
+  constructor: (type, title, @batchWorkflowFileTree) ->
     @type = ko.observable(type)
     @value = ko.observable(null)
     @valid = ko.observable(true)
     @title = ko.observable(title)
     @name = "step2_select_batch_file_#{title.replace(/\s/g, '_')}"
-    extendBatchInput.call(@, files) if type == 'file'
+
+    ### this function is calling from template (_page_2.html.erb) but it is valid only for file ###
+    @initTree = () -> return false
+    extendBatchInput.call(@) if type == 'file'
 ### Batch Input Model ###
 
 ### FolderModel ###
@@ -290,13 +310,12 @@ class BatchWorkflowPageModel
 
   nextToStep2: () ->
     return false if !@validateStep1()
-    files = @selectorModel.listedFiles()
     @batchInputOne(null)
     if @batchInputOneType()
-      @batchInputOne new BatchInputModel(@batchInputOneType(), 'INPUT 1', files)
+      @batchInputOne new BatchInputModel(@batchInputOneType(), 'INPUT 1', @batchWorkflowFileTree)
     @batchInputTwo(null)
     if @batchInputTwoType()
-      @batchInputTwo new BatchInputModel(@batchInputTwoType(), 'INPUT 2', files)
+      @batchInputTwo new BatchInputModel(@batchInputTwoType(), 'INPUT 2', @batchWorkflowFileTree)
     @step(2)
 
   nextToStep3: () ->
@@ -451,10 +470,19 @@ class BatchWorkflowPageModel
         @selectedFolder(null)
         @createFolderName(null)
         showAlert('Output Folder Successfully Created', 'alert-success')
-      (data) =>
+      (error) =>
         @wizardLoading(false)
         @folderModalLoading(false)
-        showAlert('Error while creating folder')
+        try
+          errorObject = error.responseJSON
+          errorText = ''
+          if errorObject and errorObject.error_message
+            errorText += "<b>Error while creating folder: #{errorObject.error_message}<br>"
+          else
+            errorText += "<b>Error: </b>#{errorObject}<br>"
+          showAlert(errorText)
+        catch
+          showAlert('Something went wrong.')
     )
 
   searchFolderOnChange: (root, e) => @folderSearchValue(e.target.value)
@@ -462,9 +490,13 @@ class BatchWorkflowPageModel
 
   constructor: (workflow, inputs, outputs, folders, scope) ->
     @workflow = workflow
+
+    @diagram = new Precision.WorkflowDiagramModel(workflow)
+
     @step = ko.observable(1)
     @wizardLoading = ko.observable(false)
     @accessibleScope = scope
+    @diagram = new Precision.WorkflowDiagramModel(workflow)
 
     ### some defaults for other tabs. Copied from show.coffee ###
     @readmeDisplay = Precision.md.render(workflow.readme)
@@ -512,6 +544,7 @@ class BatchWorkflowPageModel
     @batchInputOne = ko.observable(null)
     @batchInputTwo = ko.observable(null)
     @step2LoadFileInput = $('#step2_load_file_input')
+    @batchWorkflowFileTree = new Precision.BatchWorkflowFileTree(scope)
     ### step 2 ###
 
     ### step 3 ###
@@ -558,6 +591,4 @@ WorkflowsController = Paloma.controller('Workflows', {
       @params.scope
     )
     ko.applyBindings(viewModel, $container[0])
-
-    window.viewModel = viewModel
 })

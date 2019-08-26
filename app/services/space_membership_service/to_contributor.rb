@@ -1,5 +1,5 @@
 module SpaceMembershipService
-  module ToMember
+  module ToContributor
     # @param [DNAnexusAPI] api
     # @param [Space] space
     # @param [SpaceMembership] member
@@ -7,9 +7,9 @@ module SpaceMembershipService
     def self.call(api, space, member, admin_member)
       return false unless member
       return false unless admin_member
-      return false unless SpaceMembershipPolicy.can_member?(space, admin_member, member)
+      return false unless SpaceMembershipPolicy.can_contributor?(space, admin_member, member)
 
-      member.role = SpaceMembership::ROLE_MEMBER
+      member.role = SpaceMembership::ROLE_CONTRIBUTOR
 
       SpaceMembershipService::Update.call(api, space, member)
       create_event(space, member, admin_member)

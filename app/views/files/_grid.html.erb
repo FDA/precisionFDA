@@ -7,7 +7,6 @@
     g.blank_slate partial: "_partials/empty_grid"
   end
 
-
   g.after_row do |file, num_cols|
     if file.description.present?
       content_tag(:tr,
@@ -71,7 +70,12 @@
     file.created_at.to_s(:human)
   end
 
-  g.column name: 'State', attribute: 'state', allow_multiple_selection: false, custom_filter: :auto
+  g.column name: 'State',
+           attribute: 'state',
+           allow_multiple_selection: false,
+           custom_filter: :auto do |file|
+    content_tag(:div, file.state, file.state == "abandoned" ? { class: "highlighted" } : {})
+  end
 
   if !defined?(hide_access) || !hide_access
     g.column name: 'Access', attribute: 'scope', allow_multiple_selection: false,

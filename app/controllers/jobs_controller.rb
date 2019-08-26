@@ -30,8 +30,7 @@ class JobsController < ApplicationController
   end
 
   def log
-    @job = Job.accessible_by(@context).where(user_id: @context.user_id)
-             .find_by_uid(params[:id])
+    @job = Job.accessible_by(@context).find_by_uid(params[:id])
 
     if @job.nil?
       flash[:error] = "Sorry, this job does not exist or its log is not accessible by you"
@@ -53,7 +52,16 @@ class JobsController < ApplicationController
       handshake << socket.readline
     end
     raise unless handshake.valid?
-    frame = WebSocket::Frame::Outgoing::Client.new(version: handshake.version, data: {access_token: @job.from_submission? ? CHALLENGE_BOT_TOKEN : @context.token, token_type: "Bearer", tail: false}.to_json, type: :text).to_s
+
+    frame = WebSocket::Frame::Outgoing::Client.new(
+      version: handshake.version,
+      data: {
+        access_token: @job.from_submission? ? CHALLENGE_BOT_TOKEN : @context.token,
+        token_type: "Bearer", tail: false
+      }.to_json,
+      type: :text
+    ).to_s
+
     socket.write(frame)
 
     client = WebSocket::Frame::Incoming::Client.new(version: handshake.version)
@@ -61,6 +69,7 @@ class JobsController < ApplicationController
     @log_times = []
     @log_levels = []
     @log_contents = []
+
     while true do
       data = socket.getc
       break if data.nil? || data.empty?
@@ -70,7 +79,7 @@ class JobsController < ApplicationController
         # source, msg, timestamp, level, job, line|
         # source=SYSTEM, msg=END_LOG
         if msg["code"]
-          flash[:error] = "Sorry, something went wrong. Please, try later"
+          flash[:error] = "Sorry, something went wrong with message code: #{msg["code"]}. Please, try later"
           return
         end
         return if msg["source"] == "SYSTEM" && msg["msg"] == "END_LOG"
@@ -146,7 +155,7 @@ class JobsController < ApplicationController
 
     if @job.from_submission?
       User.sync_challenge_job!(@job.id)
-    elsif @job.user_id == @context.user_id
+    else
       User.sync_job!(@context, @job.id)
     end
   end

@@ -5,8 +5,8 @@ class Node < ActiveRecord::Base
 
   include Permissions
 
-  belongs_to :user
-  belongs_to :parent, { polymorphic: true }
+  belongs_to :user, required: true
+  belongs_to :parent, polymorphic: true
 
   acts_as_taggable
 
@@ -26,8 +26,14 @@ class Node < ActiveRecord::Base
     Folder.find_by(id: self[self.class.scope_column_name(scope)])
   end
 
-  def self.scope_column_name(scope)
-    scope == "private" ? :parent_folder_id : :scoped_parent_folder_id
+  class << self
+    def scope_column_name(scope)
+      scope == "private" ? :parent_folder_id : :scoped_parent_folder_id
+    end
+
+    def folder_content(files, folders)
+      Node.where.any_of(files, folders)
+    end
   end
 
   private
@@ -43,5 +49,4 @@ class Node < ActiveRecord::Base
 
     parents
   end
-
 end

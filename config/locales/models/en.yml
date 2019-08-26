@@ -1,0 +1,165 @@
+en:
+  errors:
+    messages:
+      format: has invalid format
+      match: "does not match %{match_object} state"
+      non_empty_string: "Slot '%{name}': Each slot %{attribute}' must be a nonempty string."
+      array_of_hashes: "Slot '#{name}': Each slot %{attribute}' must be an array of hashes."
+  activemodel:
+    errors:
+      models:
+        workflow/presenter:
+          attributes:
+            slots:
+              array_of_hashes: "The workflow 'slots' must be an array of hashes."
+            name:
+              non_empty_string: "The workflow 'workflow_name' must be a nonempty string."
+              format: >
+                The workflow 'workflow_name' can only contain
+                the characters A-Z, a-z, 0-9, '.' (period), '_' (underscore) and '-' (dash).
+            readme:
+              format: "The workflow 'Readme' must be a string."
+            title:
+              non_empty_string: "The workflow 'title' must be a nonempty string."
+        workflow/specification_presenter:
+          attributes:
+            name:
+              non_empty_string: "The workflow 'workflow_name' must be a nonempty string."
+              format: >
+                The workflow 'workflow_name' can only contain
+                the characters A-Z, a-z, 0-9, '.' (period), '_' (underscore) and '-' (dash).
+            readme:
+              non_empty_string: "The workflow 'Readme' must be a string."
+            title:
+              non_empty_string: "The workflow 'title' must be a nonempty string."
+            is_new:
+              inclusion: "The workflow 'is_new' must be a boolean, true or false."
+            workflow_series:
+              blank: "You don't have a workflow by the name '%{name}'."
+              unique: "You already have a workflow by the name '%{name}'."
+        workflow/stages/slot_presenter:
+          attributes:
+            name:
+              non_empty_string: "%{number} slot: Each 'name' must be a nonempty string."
+            app:
+              blank: "Slot '%{name}': App 'dxid' for slot does not exist or is not accessible by you."
+            next_slot:
+              non_empty_string: >
+                Slot '#{name}': Each slot 'nextSlot' must be a non empty string
+                if any element of 'outputs' refers to another stage's input.
+            instance_type:
+              inclusion: "Slot '%{name}': Each slot 'instanceType' must be a valid instance type selected"
+            slot_id:
+              unique: "Slot '%{name}': Each slot 'slotId' must be unique."
+              link_next_slot: "Slot '%{name}': Each slot 'slotId' must be the value of the previous slot's 'nextSlot'."
+              link_prev_slot: "Slot '%{name}': Each slot 'prevSlot' must be the value of the previous slot's 'slotId'."
+              next_slot_not_linked: "Slot '%{name}': The slot wasn't correctly linked to a next slot."
+              prev_slot_not_linked: "Slot '%{name}': The slot wasn't correctly linked to a previous slot."
+        workflow/stages/input_presenter:
+          attributes:
+            name:
+              non_empty_string: "Slot '%{slot_name}': The %{input_number} input is missing a name."
+              format: >
+                Slot '%{slot_name}': The input name '%{input_name}' contains invalid characters.
+                It must start with a-z, A-Z or '_', and continue with a-z, A-Z, '_' or 0-9.
+              unique: "Slot '%{slot_name}': Duplicate definitions for the input named '%{input_name}'."
+            input_class:
+              non_empty_string: "Slot '%{slot_name}': The input named '%{input_name}' is missing a type."
+              inclusion: >
+                Slot '%{slot_name}': The input named '%{input_name}' contains an invalid type.
+                Valid types are: %{types}.
+            optional:
+              inclusion: "Slot '%{slot_name}': The input named '%{input_name}' is missing the 'optional' designation."
+            label:
+              non_empty_string: "Slot '%{slot_name}': The input named '%{input_name}' is missing a label."
+            required_run_input:
+              inclusion: >
+                Slot '%{slot_name}': The input named '%{input_name}' is missing the 'required_run_input' designation.
+            parent_slot:
+              match: >
+                Slot '%{slot_name}': The input named '%{input_name}' has the 'parent_slot' value of '%{parent_slot}'
+                but is expected to be '%{slot_id}'.
+            stage_name:
+              match: >
+                Slot '%{slot_name}': The input named '%{input_name}' has the 'stageName' value of '%{stage_name}'
+                but is expected to be '%{expected_name}'.
+            values:
+              format: >
+                Slot '%{slot_name}': The input named '%{input_name}' is expected to have a
+                'values' hash with keys 'id' and 'name'.
+              compatible_linking: >
+                Slot '%{slot_name}': The input named '%{input_name}' must be desginated as a required input
+                or be linked to a compatible stage output.
+              stage_output_linking: >
+                Slot '%{slot_name}': The input named '%{input_name}' must be desginated as a required input
+                or be linked to another stage's output.
+              wrong_output_stage_linking: >
+                Slot '%{slot_name}': The input named '%{input_name}' is linked to an output
+                that does not belong to the previous stage.
+              wrong_output_class_linking: >
+                Slot '%{slot_name}': The input named '%{input_name}' is linked to an output with the wrong class.
+                Input type is '%{input_class}', but output type is '%{output_class}'.
+        workflow/cwl/parser:
+          attributes:
+            cwl_class:
+              format: "'class' must be Workflow"
+            name:
+              non_empty_string: "'id' parameter is required in CWL"
+              format: >
+                The workflow 'id' can only contain
+                the characters A-Z, a-z, 0-9, '.' (period), '_' (underscore) and '-' (dash).
+            readme:
+              non_empty_string: "'doc' parameter is required in CWL"
+            title:
+              non_empty_string: "'label' is required in CWL"
+            steps:
+              format: "CWL steps have wrong format"
+        workflow/cwl/step_parser:
+          attributes:
+            name:
+              format: number %{step_number} must be title of an existing app accessible by you.
+            app:
+              blank: >
+                App 'id' for step does not exist or is not accessible by you.
+            run:
+              blank: "'run' parameter must be defined"
+              format: "'run' should have %{name}.cwl format"
+            id:
+              blank: "'id' must be defined"
+            inputs:
+              blank: "'in' must be defined"
+            outputs:
+              blank: "'out' must be defined"
+              format: >
+               'outs' must be array of strings. You probably need to add '- ' before each 'out' parameter
+
+        workflow/cwl/input_parser:
+          attributes:
+            name:
+              inclusion: >
+                CWL format is wrong:
+                Each parameter at 'in' should be named as one of the inputs
+                of the appropriate app: %{app_name}. Valid names are: %{inputs}.
+            link:
+              first_step_inclusion: >
+                CWL format is wrong: input: %{input_name} : %{link}.
+                Each link of parameters at 'in' of first step should be one of the parameters defined in 'inputs'.
+                Valid link names are: %{inputs}.
+              inclusion: >
+                CWL format is wrong: input: %{input_name} : %{link} each link of parameters at
+                'in' should be one of the parameters defined in 'inputs' or outputs of previous step.
+                Valid link names are: %{inputs}.
+              wrong_type: >
+                CWL format is wrong: The input named '%{input_name}' is linked to an parameter with the wrong class.
+                Input type is '%{input_class}', but parameter type is '%{parameter_class}'.
+        workflow/cwl/output_parser:
+          attributes:
+            name:
+              inclusion: >
+                CWL format is wrong:
+                Each parameter at 'out' should be named as one of the outputs
+                of the appropriate app: %{app_name}. Valid names are: %{outputs}.
+
+
+
+

@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="workflow suite">
+    <test name="WorkflowTest">
+        <classes>
+            <class name="precisionFDA.cases.WorkflowTest" />
+        </classes>
+    </test>
+</suite>

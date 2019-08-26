@@ -482,6 +482,9 @@ class SpacesController < ApplicationController
 
   def jobs
     @jobs = Job.accessible_by_space(@space)
+
+    User.sync_jobs!(@context, @jobs)
+
     @jobs_grid = initialize_grid(@jobs.includes(:taggings), {
       name: 'jobs',
       order: 'jobs.created_at',

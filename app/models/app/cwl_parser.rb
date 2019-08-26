@@ -56,12 +56,12 @@ pip install --upgrade setuptools==12.4
 PYTHONUSERBASE=$DNANEXUS_HOME pip install --upgrade --user requests==2.21.0 networkx==2.2
 pip install cwltool
 
-cat <<EOF > description.cwl
+cat <<"EOF" > description.cwl
 #{cwl}
 EOF
 
 cat <<EOF > input_settings.json
-#{input_settings(cwl).to_json}
+#{normalize_inputs_json(cwl, input_settings(cwl).to_json)}
 EOF
 
 cwltool --user-space-docker-cmd=dx-docker description.cwl input_settings.json > cwl_job_outputs.json
@@ -118,9 +118,9 @@ CODE
       end
 
       def settings_for(input)
-        if input.type == 'File'
+        if input.type == "File"
           {
-            class: 'File',
+            class: "File",
             path: "${#{input.name}_path}"
           }
         else
@@ -132,6 +132,17 @@ CODE
         cwl.inputs.each_with_object({}) do |input, memo|
           memo[input.name] = settings_for(input)
         end
+      end
+
+      # remove double/single quotes from input values that are supposed to be
+      #   int/double/float/boolean type
+      def normalize_inputs_json(cwl, json)
+        normalized = json.dup
+        cwl.inputs.each do |input|
+          next if %w(File string).include?(input.type)
+          normalized.sub!("\"${#{input.name}}\"", " ${#{input.name}}")
+        end
+        normalized
       end
     end
   end

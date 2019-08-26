@@ -148,6 +148,7 @@ class ApiController < ApplicationController
   # failure (string, only on failure): a message that can be shown to the user due to failure
   def run_workflow
     analysis_dxid = run_workflow_once(params)
+
     render json: { id: analysis_dxid }
   end
 
@@ -259,6 +260,64 @@ class ApiController < ApplicationController
     else
       fail "You do not have permission to access #{id}"
     end
+  end
+
+  # Inputs:
+  #
+  # parent_folder_id (integer): primary key of the folder selected;
+  #                             for root folder parent_folder_id = nil
+  # scoped_parent_folder_id (integer): used in spaces scopes only;
+  #                             primary key of the folder selected;
+  #                             for root folder parent_folder_id = nil
+  # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
+  #
+  # Outputs:
+  #
+  # An array of hashes, each of which has these fields:
+  # id (integer): primary key of the file or the folder
+  # name (string): the filename or the folder name
+  # type (string): file or folder sti_type, "UserFile" or "Folder"
+  # uid (string): the file's unique id (file-xxxxxx); for any folder uid = nil
+  #
+  def folder_tree
+    parent_folder_id =
+      params[:parent_folder_id] == "" ? nil : params[:parent_folder_id].to_i
+    scoped_parent_folder_id =
+      params[:scoped_parent_folder_id] == "" ? nil : params[:scoped_parent_folder_id].to_i
+
+    User.sync_files!(@context)
+
+    if params[:scopes].present?
+      check_scope!
+      # exclude 'public' scope
+      if params[:scopes].first =~ /^space-(\d+)$/
+        spaces_members_ids = Space.spaces_members_ids(params[:scopes])
+        spaces_params = {
+          context: @context,
+          spaces_members_ids: spaces_members_ids,
+          scopes: params[:scopes],
+          scoped_parent_folder_id: scoped_parent_folder_id,
+        }
+        files = UserFile.batch_space_files(spaces_params)
+        folders = Folder.batch_space_folders(spaces_params)
+      else
+        files = UserFile.batch_private_files(@context,["private", nil], parent_folder_id)
+        folders = Folder.batch_private_folders(@context, parent_folder_id)
+      end
+    end
+
+    folder_tree = []
+    Node.folder_content(files, folders).each do |item|
+      folder_tree << {
+        id: item[:id],
+        name: item[:name],
+        type: item[:sti_type],
+        uid: item[:uid],
+        scope: item[:scope],
+      }
+    end
+
+    render json: folder_tree
   end
 
   # Inputs:
@@ -511,6 +570,7 @@ class ApiController < ApplicationController
     else
       Asset.closed.accessible_by(@context)
     end
+    logger.debug "## In list_assets: After params[:editable]?: assets: = #{assets.inspect}"
 
     unless ids.nil?
       fail "The 'ids' parameter needs to be an Array of String asset ids" unless ids.is_a?(Array) && ids.all? { |id| id.is_a?(String) }
@@ -658,32 +718,41 @@ class ApiController < ApplicationController
   # id (string, "file-xxxx")
   #
   def create_file
-    name = params[:name]
-    fail "File name needs to be a non-empty String" unless name.is_a?(String) && name != ""
+    file_name = params[:name]
+    if file_name.blank? || !file_name.is_a?(String)
+      fail "File name needs to be a non-empty String"
+    end
 
-    description = params["description"]
-    unless description.nil?
-      fail "File description needs to be a String" unless description.is_a?(String)
+    description = params[:description]
+    if description && !description.is_a?(String)
+      fail "File description needs to be a String"
     end
 
     folder = Folder.editable_by(@context).find_by(id: params[:folder_id])
 
-    project = @context.user.private_files_project
-    dxid = DNAnexusAPI.new(@context.token).call("file", "new", "name": params[:name], "project": project)["id"]
+    scope = "private"
+    user = @context.user
+    project = user.private_files_project
 
-    file = UserFile.transaction do
-      UserFile.create!(
-        dxid: dxid,
-        project: project,
-        name: name,
-        state: "open",
-        description: description,
-        user_id: @context.user_id,
-        parent: @context.user,
-        scope: 'private',
-        parent_folder_id: folder.try(:id)
-      )
+    if params[:public_scope]
+      scope = "public"
+      project = user.public_files_project
     end
+
+    api = DNAnexusAPI.new(@context.token)
+    dxid = api.call("file", "new", "name": file_name, "project": project)["id"]
+
+    file = UserFile.create!(
+      dxid: dxid,
+      project: project,
+      name: file_name,
+      state: "open",
+      description: description,
+      user_id: user.id,
+      parent: user,
+      scope: scope,
+      parent_folder_id: folder.try(:id)
+    )
 
     render json: { id: file.uid }
   end
@@ -990,6 +1059,17 @@ class ApiController < ApplicationController
       fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.key?(params["instance_type"]) # Checks also that it's a string
     end
 
+    project = space ? space.project_for_user(@context.user) : @context.user.private_files_project
+
+    fail "You don't have permissions to run app in space #{space.name}" unless project
+
+    job_creator = JobCreator.new(
+      api: DNAnexusAPI.new(@context.token),
+      context: @context,
+      user: @context.user,
+      project: project
+    )
+
     job = job_creator.create(
       app: @app,
       name: name,
@@ -997,7 +1077,10 @@ class ApiController < ApplicationController
       run_instance_type: run_instance_type,
       scope: space.try(:uid),
     )
-    SpaceEventService.call(space_id, @context.user_id, nil, job, :job_added) if space && space.review?
+
+    if space && space.review?
+      SpaceEventService.call(space_id, @context.user_id, nil, job, :job_added)
+    end
 
     render json: { id: job.uid }
   end
@@ -1353,18 +1436,9 @@ class ApiController < ApplicationController
     @input_spec_preparer ||= InputSpecPreparer.new(@context)
   end
 
-  def job_creator
-    @job_creator ||= JobCreator.new(
-      api: DNAnexusAPI.new(@context.token),
-      context: @context,
-      user: @context.user,
-      project: @context.user.private_files_project
-    )
-  end
-
   def check_scope!
     condition = params[:scopes].is_a?(Array)
-    condition &&= params[:scopes].all? { |scope| scope == 'public' || scope == 'private' || scope =~ /^space-(\d+)$/ }
+    condition &&= params[:scopes].all? { |scope| scope == 'public' || scope == 'private' || scope =~ /^space-(\d+)$/ || scope == nil}
     fail(t('api.errors.invalid_scope')) unless condition
   end
 

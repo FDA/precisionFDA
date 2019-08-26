@@ -1,0 +1,4 @@
+en:
+  org:
+    errors:
+      org_admin_error: This action is only available to organization administrators
