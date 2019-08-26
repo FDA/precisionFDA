@@ -1,0 +1,106 @@
+en:
+  docs:
+    menu:
+      common:
+        title: Documentation
+        sections:
+          intro: Introduction
+          video_tutorials: Video Tutorials
+          discussions: Discussions
+          notes: Notes
+          files: Files
+          comparisons: Comparisons
+          apps: Apps
+          creating_apps: Creating Apps
+          workflows: Workflows
+          tracking: Tracking
+          publishing: Publishing
+          licenses: Licenses
+          spaces: Spaces
+      site_admin:
+        title: Administrator Features
+        sections:
+          challenge_workbench: Challenge Workbench
+          verification_spaces: Verified Apps
+          site_activity_reporting: Site Activity Reporting
+          site_customization: Site Customization
+          site_administration: Site Administration
+      review_space_admin:
+        title: Administrator Features
+        sections:
+          verification_spaces: Verified Apps
+    videos:
+      common: &common_videos
+        intro:
+          title: Introduction
+          url: https://www.youtube.com/embed/U_vmcd93HkM
+        discussions:
+          title: Discussions
+          url: https://www.youtube.com/embed/KHgUe-a1v_k
+        notes:
+          title: Notes
+          url: https://www.youtube.com/embed/c2-VlRxTZLM
+        files_upload:
+          title: How to Upload Files
+          url: https://www.youtube.com/embed/o5PmgUsWQGo
+        files_navigation:
+          title: File & Folder Navigation
+          url: https://www.youtube.com/embed/cj8a6I3KGvk
+        comparisons:
+          title: Comparisons
+          url: https://www.youtube.com/embed/qMd98K07U9M
+        apps_run:
+          title: Running Apps
+          url: https://www.youtube.com/embed/P90E3jgL134
+        apps_batch_run:
+          title: Batch Running Apps
+          url: https://www.youtube.com/embed/K9rHEef2FNs
+        apps_create:
+          title: Creating Apps
+          url: https://www.youtube.com/embed/f-DBLB2v1sM
+        apps_fork:
+          title: Exploring and Forking Apps
+          url: https://www.youtube.com/embed/oQgJ9WD7Nkg
+        apps_export:
+          title: Exporting Apps
+          url: https://www.youtube.com/embed/WeF9uj9QJIo
+        apps_import:
+          title: Importing Apps
+          url: https://www.youtube.com/embed/4-voYR-q-cw
+        workflows:
+          title: Workflows
+          url: https://www.youtube.com/embed/jGYNt1Vw_Wo
+        publishing:
+          title: Publishing
+          url: https://www.youtube.com/embed/dsOCn1zTBOo
+        licenses:
+          title: Licenses
+          url: https://www.youtube.com/embed/7iwwnKmalyM
+        spaces:
+          title: Spaces
+          url: https://www.youtube.com/embed/-YfSmb_Y-gk
+        review_spaces:
+          title: 'Review Spaces: Step by Step'
+          url: https://www.youtube.com/embed/mPW82NtdKuo
+      site_admin:
+        <<: *common_videos
+        challenge_workbench:
+          title: Challenge Workbench
+          url: https://www.youtube.com/embed/SKqH5OfO5G8
+        verified_apps:
+          title: Verified Apps
+          url: https://www.youtube.com/embed/9x8JgxpciFY
+        site_activity_reporting:
+          title: Site Activity Reporting
+          url: https://www.youtube.com/embed/KJ-Rk-ejjBM
+        site_customization:
+          title: Site Customization
+          url: https://www.youtube.com/embed/j9pEb0VTf-0
+        review spaces:
+          title: 'Review Spaces: Step by Step'
+          url: https://www.youtube.com/embed/mPW82NtdKuo
+      review_space_admin:
+        <<: *common_videos
+        verified_apps:
+          title: Verified Apps
+          url: https://www.youtube.com/embed/9x8JgxpciFY

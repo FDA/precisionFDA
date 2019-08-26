@@ -98,7 +98,7 @@ class Space < ActiveRecord::Base
     elsif verification?
       "#{name}(Verification)"
     else
-      name
+      "#{name}(Group)"
     end
   end
 
@@ -140,7 +140,7 @@ class Space < ActiveRecord::Base
     end
   end
 
-  def project_for_user!(user)
+  def project_for_user(user)
     member = space_memberships.find_by(user_id: user.id)
 
     if user.review_space_admin?
@@ -200,6 +200,19 @@ class Space < ActiveRecord::Base
     else
       raise "Invalid scope #{scope} in Space.from_scope"
     end
+  end
+
+  def self.spaces_members_ids(scopes)
+    ids = []
+    scopes.each do |scope|
+      ids=ids + Space.space_members_ids(scope)
+    end
+    ids.uniq
+  end
+
+  def self.space_members_ids(scope)
+    space = Space.from_scope(scope)
+    space.space_memberships.map &:user_id
   end
 
   def editable_by?(context)

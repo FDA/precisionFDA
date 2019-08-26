@@ -16,7 +16,7 @@ class Note < ActiveRecord::Base
   include Auditor
   include Permissions
 
-  belongs_to :user
+  belongs_to :user, required: true
   has_one :answer
   has_one :discussion
   has_many :attachments, {dependent: :destroy}

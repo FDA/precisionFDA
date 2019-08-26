@@ -9,7 +9,7 @@ class CopyService
     def copy(job, scope)
       new_job = job.dup
       new_job.scope = scope
-      new_job.project = Space.from_scope(scope).project_for_user!(user)
+      new_job.project = Space.from_scope(scope).project_for_user(user)
       new_job.save!
 
       copy_dependencies(new_job, job, scope)

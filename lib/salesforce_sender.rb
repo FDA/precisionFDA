@@ -9,6 +9,7 @@ class SalesforceSender
     check_delivery_params!(mail)
     mail_from = Array.wrap(mail.from).first
     authenticate!
+
     response = client.client.call(:send_email, {
       :message => {
         :messages => {
@@ -18,6 +19,7 @@ class SalesforceSender
           :subject     => mail.subject,
           :htmlBody    => mail.html_part.body,
           :orgWideEmailAddressId => org_wide_email_address_id(mail_from),
+          :fileAttachments => attachments(mail)
         }
       }
     })
@@ -26,6 +28,12 @@ class SalesforceSender
   end
 
   private
+
+  def attachments(mail)
+    mail.attachments.map do |attachment|
+      { fileName: attachment.filename, body: attachment.body.raw_source }
+    end
+  end
 
   def from_emails
     {

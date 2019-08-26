@@ -8,7 +8,6 @@
 #  email              :string(255)
 #  org                :string(255)
 #  singular           :boolean
-#  address            :string(255)
 #  phone              :string(255)
 #  duns               :string(255)
 #  ip                 :string(255)

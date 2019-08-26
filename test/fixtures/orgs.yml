@@ -1,0 +1,28 @@
+# == Schema Information
+#
+# Table name: orgs
+#
+#  id         :integer          not null, primary key
+#  handle     :string
+#  name       :string
+#  admin_id   :integer
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#  address    :text
+#  duns       :string
+#  phone      :string
+#  state      :string
+#  singular   :boolean
+#
+
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  handle: MyString
+  name: MyString
+  admin_id: 
+
+two:
+  handle: MyStringTwo
+  name: MyString
+  admin_id: 

@@ -6,7 +6,7 @@ class SpaceMembership < ActiveRecord::Base
 
   ROLE_LEAD   = 'lead'
   ROLE_ADMIN  = 'admin'
-  ROLE_MEMBER = 'member'
+  ROLE_CONTRIBUTOR = 'contributor'
   ROLE_VIEWER = 'viewer'
 
   belongs_to :user
@@ -15,7 +15,7 @@ class SpaceMembership < ActiveRecord::Base
 
   store :meta, { coder: JSON }
 
-  enum role: [ROLE_ADMIN, ROLE_MEMBER, ROLE_VIEWER, ROLE_LEAD]
+  enum role: [ROLE_ADMIN, ROLE_CONTRIBUTOR, ROLE_VIEWER, ROLE_LEAD]
   enum side: [SIDE_HOST, SIDE_GUEST]
 
   scope :active, -> { where(active: true) }
@@ -42,12 +42,11 @@ class SpaceMembership < ActiveRecord::Base
     lead? || admin?
   end
 
-  def lead_or_admin_or_member?
-    lead_or_admin? || member?
+  def lead_or_admin_or_contributor?
+    lead_or_admin? || contributor?
   end
 
   def custom_role
     { role => self[:role] }
   end
-
 end
