@@ -14,8 +14,7 @@ class Workflow
       validates :required_run_input, 'workflow/i_o_object/boolean_inclusion': true
       validates :parent_slot, 'workflow/i_o_object/parent_slot': true
       validates :stage_name, 'workflow/i_o_object/stage_name': true
-      validates :values, 'workflow/i_o_object/values_format': true,
-                'workflow/i_o_object/values_linking': true
+      validates :values, 'workflow/i_o_object/values_format': true
 
       def initialize(input, input_number, slot)
         @input = input

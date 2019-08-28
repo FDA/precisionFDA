@@ -15,6 +15,7 @@ class Workflow
             outputs: build_outputs(task, app.name),
             slotId: task.slot_name,
             nextSlot: task.next_slot,
+            prevSlot: task.prev_slot,
           }.with_indifferent_access
         end || [])
     end
@@ -76,9 +77,9 @@ class Workflow
           class: input.pfda_type,
           parent_slot: task.slot_name,
           stageName: app_name,
-          values: { id: nil, name: nil },
-          requiredRunInput: true,
-          optional: false,
+          values: { id: input.linked_task.try(:slot_name), name: input.linked_output.try(:name) },
+          requiredRunInput: input.required?,
+          optional: input.optional?,
           label: "",
         }.with_indifferent_access
       end
@@ -91,16 +92,16 @@ class Workflow
           class: output.pfda_type,
           parent_slot: task.slot_name,
           stageName: app_name,
-          values: { id: nil, name: nil },
-          requiredRunInput: true,
-          optional: false,
+          values: { id: output.linked_task.try(:slot_name), name: output.linked_input.try(:name) },
+          requiredRunInput: output.required?,
+          optional: output.optional?,
           label: "",
         }.with_indifferent_access
       end
     end
 
     def parser
-      @parser ||= WdlObject.new(raw)
+      @parser ||= WDLObject.new(raw)
     end
 
     delegate :tasks, :workflow, to: :parser

@@ -25,7 +25,7 @@ class Workflow < ActiveRecord::Base
 
   belongs_to :user
   belongs_to :workflow_series
-  has_many :analyses
+  has_many :analyses, dependent: :destroy
 
   store :spec, accessors: [:input_spec, :output_spec, :internet_access, :instance_type], coder: JSON
 
