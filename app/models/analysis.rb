@@ -17,7 +17,8 @@ class Analysis < ActiveRecord::Base
   extend ApplicationHelper
 
   belongs_to :workflow
-  has_many :jobs
+  has_many :jobs, dependent: :destroy
+
   belongs_to :user
   has_many :batch_items, class_name: Analysis, foreign_key: :batch_id, primary_key: :batch_id
 
