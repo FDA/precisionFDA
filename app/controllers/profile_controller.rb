@@ -53,9 +53,9 @@ class ProfileController < ApplicationController
       elsif User.find_by(normalized_email: @normalized_email).present?
         @error = "This email address is already in use by another precisionFDA account."
       elsif DNAnexusAPI.email_exists?(@email)
-        @error =
-          "Email address is already in use in precisionFDA. " \
-          "Please ask the person to provide you with a different email to be used in precisionFDA."
+        name = User.find_by(email: email) ? "precisionFDA" : "DNAnexus"
+        @error = "This email address is already in use in #{name}. Please ask the person " \
+         "to provide you with a different email to be used for precisionFDA."
       end
 
       if @error.present?
@@ -154,7 +154,15 @@ class ProfileController < ApplicationController
         @org = nil
         @org_handle = nil
       end
-      add_errors(@first_name, @last_name, @email, @org, @org_handle)
+
+      errors_verifiable_attributes = {
+        first_name: @first_name,
+        last_name: @last_name,
+        email: @email,
+        org: @org,
+        org_handle: @org_handle,
+      }
+      @errors = add_errors(errors_verifiable_attributes)
 
       if @errors.any?
         @state = "step2"
@@ -246,32 +254,17 @@ class ProfileController < ApplicationController
     raise unless @user.can_administer_site?
   end
 
-  def add_errors(first_name, last_name, email, org, org_handle)
-    @errors = []
+  def add_errors(attributes)
+    first_name = attributes[:first_name]
+    last_name = attributes[:last_name]
+    email = attributes[:email]
 
-    new_user = User.new(first_name: first_name, last_name: last_name, email: email)
-    if new_user.invalid?
-      @errors += new_user.errors.full_messages
-    end
-
-    username = User.construct_username(first_name, last_name)
-    if !User.authserver_acceptable?(username)
-      @errors << "Internal precisionFDA policies require that usernames be formed according to the pattern <first_name>.<last_name> using only lowercase English letters. Based on the name provided (#{first_name} #{last_name}), the constructed username ('#{username}') would not have been acceptable. Please adjust the name accordingly."
-    end
-
-    if params[:organization_administration] == 'admin'
-      @errors << "You must provide both the organization name and the handle" if !@org.present? && !@org_handle.present?
-      @errors << "Invalid characters in the organization handle" if @org_handle.present? && @org_handle.gsub(/[^a-z]/, '') != @org_handle
-      @errors << "There is already an organization with that handle" if @org_handle.present? && Org.find_by(handle: @org_handle).present?
-      @errors << "There is already an organization with that name" if @org.present? && Org.find_by(name: @org).present?
-      @errors << "You must either provide both the organization name and the handle (for org admins), or leave them both empty (for self-represented)." if @org.present? != @org_handle.present?
-    end
-
-    if email.present? && DNAnexusAPI.email_exists?(email)
-      @errors << "Email address is already in use in precisionFDA. " \
-                 "Please ask the person to provide you with a different email to " \
-                 "be used for precisionFDA."
-    end
+    errors = []
+    errors += user_invalid_errors(first_name: first_name, last_name: last_name, email: email)
+    errors << user_name_pattern_error(first_name, last_name)
+    errors += org_errors(attributes[:org], attributes[:org_handle])
+    errors << email_exists_error(email)
+    errors.reject(&:blank?)
   end
 
   def add_warnings(first_name, last_name, invitation, org, org_handle)
