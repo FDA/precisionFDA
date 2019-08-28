@@ -132,7 +132,7 @@ EOF
 
     def udocker_install_code
       <<-CODE
-wget -q -O udocker.tgz #{UDOCKER_LINK}
+wget --no-check-certificate -q -O udocker.tgz #{UDOCKER_LINK}
 tar xzvf udocker.tgz udocker
 chmod u+rx ./udocker
 UDOCKER_TARBALL=$(pwd)/udocker.tgz ./udocker --allow-root install || true
