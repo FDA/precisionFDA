@@ -14,4 +14,62 @@ module ErrorProcessable
   def fail(msg, data = {})
     raise ApiError.new(msg, data)
   end
+
+  def user_invalid_errors(opts = {})
+    new_user = User.new(opts)
+    new_user.invalid? ? new_user.errors.full_messages : []
+  end
+
+  def user_name_pattern_error(first_name, last_name)
+    username = User.construct_username(first_name, last_name)
+    return if User.authserver_acceptable?(username)
+
+    "Internal precisionFDA policies require that usernames be formed according" \
+    "to the pattern <first_name>.<last_name> using only lowercase English letters. " \
+    "\nBased on the name provided (#{first_name} #{last_name}), the constructed username" \
+    " ('#{username}') would not have been acceptable. \nPlease adjust the name accordingly."
+  end
+
+  def org_errors(org, org_handle)
+    return [] if params[:organization_administration] != "admin"
+
+    [].tap do |errors|
+      errors << name_handle_present(org, org_handle)
+      errors << handle_invalid(org_handle)
+      errors << org_with_name_present(org)
+      errors << org_with_handle_present(org_handle)
+    end
+  end
+
+  def name_handle_present(org, org_handle)
+    return if org.present? && org_handle.present?
+
+    "You must provide both the organization name and the handle"
+  end
+
+  def handle_invalid(org_handle)
+    return if org_handle.present? && org_handle.gsub(/[^a-z]/, "") == org_handle
+
+    "Invalid characters in the organization handle"
+  end
+
+  def org_with_handle_present(org_handle)
+    return if org_handle.present? && !Org.find_by(handle: org_handle)
+
+    "There is already an organization with that handle"
+  end
+
+  def org_with_name_present(org)
+    return if org.present? && !Org.find_by(name: org)
+
+    "There is already an organization with that name"
+  end
+
+  def email_exists_error(email)
+    return if email.blank? || !DNAnexusAPI.email_exists?(email)
+
+    name = User.find_by(email: email) ? "precisionFDA" : "DNAnexus"
+    "This email address is already in use in #{name}. " \
+    "Please ask the person to provide you with a different email to be used for precisionFDA."
+  end
 end
