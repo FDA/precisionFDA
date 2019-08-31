@@ -1,7 +1,8 @@
 module ParticipantsManager
 
   def self.save(context, participant, params)
-    file = UserFile.accessible_by(context).find_by_uid(params[:node_dxid])
+    uid = Node.find_by(dxid: params[:node_dxid]).uid
+    file = UserFile.accessible_by(context).find_by_uid(uid)
     file_id = file.id if file && file.state == "closed" && file.file_size <= 5000000
 
     participant.node_id = file_id
