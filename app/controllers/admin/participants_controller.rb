@@ -61,7 +61,7 @@ module Admin
     end
 
     def set_js_params(action)
-      js "##{action}", imageUrl: @participant.image_url, fileId: @participant.file_dxid
+      js "##{action}", imageUrl: @participant.image_url, fileId: @participant.file_uid
     end
 
     def set_participant
