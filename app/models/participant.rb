@@ -9,7 +9,7 @@ class   Participant < ActiveRecord::Base
   scope :positioned, -> { order(position: :ASC, id: :ASC) }
   scope :by_file, ->(file) { where(node_id: file.id) }
 
-  def file_dxid
-    file.dxid if file.present?
+  def file_uid
+    file.uid if file.present?
   end
 end
