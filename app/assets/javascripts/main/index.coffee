@@ -1,29 +1,6 @@
 window.Precision ||= {}
 window.Precision.player = null
 
-# This function creates an <iframe> (and YouTube player)
-# after the API code downloads.
-window.onYouTubeIframeAPIReady = ->
-  window.Precision.player = new YT.Player('ytplayer',
-    width: '100%'
-    videoId: 'Zs9dW4ZEjn8'
-    playerVars:
-      autoplay: 0
-      controls: 2
-      enablejsapi: 1
-      loop: 0
-      modestbranding: 1
-      rel: 0
-      showinfo: 0
-    events:
-      'onReady': onPlayerReady
-  )
-
-# The API will call this function when the video player is ready.
-window.onPlayerReady = (event) ->
-  event.target.setPlaybackQuality("hd720")
-  event.target.playVideo()
-
 #########################################################
 #
 #
@@ -32,27 +9,33 @@ window.onPlayerReady = (event) ->
 #
 #########################################################
 
-MainController = Paloma.controller('Main',
+MainController = Paloma.controller('Main', {
   index: ->
     $container = $("body main")
 
     if $('body.pfda-guest').length > 0
       $container.on("click", ".btn-player", (e) ->
-        # This code loads the IFrame Player API code asynchronously.
-        tag = document.createElement('script')
-
-        tag.src = 'https://www.youtube.com/iframe_api'
-        firstScriptTag = document.getElementsByTagName('script')[0]
-        firstScriptTag.parentNode.insertBefore tag, firstScriptTag
-        # Replace the 'ytplayer' element with an <iframe> and
-        # YouTube player after the API code downloads.
+        url = 'https://www.youtube.com/embed/Zs9dW4ZEjn8?'
+        params = {
+          autoplay: 1,
+          controls: 2,
+          enablejsapi: 0,
+          loop: 0,
+          modestbranding: 1,
+          rel: 0,
+          showinfo: 0,
+          origin: window.location.href,
+          widgetid: 1
+        }
+        url = url + $.param(params)
+        $('#ytplayer').attr('src', url)
 
         $(e.target).closest(".btn-player-wrapper").addClass("player-playing")
       )
 
     $tooltips = $container.find("[data-toggle='tooltip']")
     if $tooltips.length > 0
-      $tooltips.tooltip({container: 'body'})
+      $tooltips.tooltip({ container: 'body' })
 
     if $container.find("#quotes-carousel").length > 0
       Precision.carousel.setHeight("#quotes-carousel")
@@ -68,14 +51,14 @@ MainController = Paloma.controller('Main',
 
       progressBarCarousel = ->
         if !pause
-          percent += (intervalTime/readingMS * 100)
+          percent += (intervalTime / readingMS * 100)
           if percent >= 100
-            $bar.css width: '100%'
+            $bar.css({ width: '100%' })
             percent = 0
             clearInterval(barInterval)
             $crsl.carousel 'next'
           else
-            $bar.css width: percent + '%'
+            $bar.css({ width: percent + '%' })
 
       restart = (e, $active) ->
         $active = $(e.relatedTarget) if e?
@@ -83,18 +66,18 @@ MainController = Paloma.controller('Main',
         if _.size(text) > 0
           clearInterval(barInterval)
           percent = 0
-          readingMinutes = _.size(text.split(' '))/WPM
+          readingMinutes = _.size(text.split(' ')) / WPM
           readingMS = readingMinutes * 60 * 1000
           barInterval = setInterval(progressBarCarousel, intervalTime)
 
       $crsl
         .on('slid.bs.carousel', restart)
-        .on(
+        .on({
           mouseenter: ->
             pause = true
           mouseleave: ->
             pause = false
-        )
+        })
 
       restart(null, $active)
 
@@ -105,12 +88,12 @@ MainController = Paloma.controller('Main',
         keyboard: false
       }).modal('show')
 
-      $modal.on("shown.bs.modal", () =>
+      $modal.on("shown.bs.modal", () ->
         Precision.carousel.setHeight("#guidelines-carousel")
       )
 
       $carousel = $modal.find('.carousel')
-      $carousel.on('slid.bs.carousel', (e) =>
+      $carousel.on('slid.bs.carousel', (e) ->
         $(".btn-previous").addClass('hide')
         $(".btn-next").addClass('hide')
         $(".btn-done").addClass('hide')
@@ -123,4 +106,5 @@ MainController = Paloma.controller('Main',
           $(".btn-previous").removeClass('hide')
           $(".btn-next").removeClass('hide')
       )
-)
+
+})
