@@ -123,6 +123,9 @@ class SelectorModel
       })
 
 class ObjectListModel
+  setFilterQuery: (root, e) ->
+    @filterQuery(e.target.value)
+
   constructor: (@selectorModel, config) ->
     @className = config.className
     @name = config.name
@@ -134,6 +137,7 @@ class ObjectListModel
 
     @patternQuery = ko.observable(config.patterns)
     @filterQuery = ko.observable()
+    @filterQueryOnInput = _.debounce(@setFilterQuery, 400)
 
     if @className == "selected" && @selectorModel.selectionType == "radio"
       @objects = ko.observable()
@@ -157,7 +161,6 @@ class ObjectListModel
       objects = @filterSetOfObjects(objects, @patternQuery()) if @patternQuery()?
       objects = @filterSetOfObjects(objects, @filterQuery())
       objects = _.sortBy(objects, 'name')
-
       return objects
     )
     @numFilteredObjects = ko.computed(=>
