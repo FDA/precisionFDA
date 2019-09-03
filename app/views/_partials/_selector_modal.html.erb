@@ -41,11 +41,15 @@
             <div data-bind="visible: !isRelatedVisible()">
               <div class="objects-filter pfda-toolbar" data-bind="visible: !(className == 'selected' && $parent.selectionType == 'radio')">
                 <!-- ko if: className == 'selected' -->
-                  <input type="text" class="form-control input-lg input-square" placeholder="Filter..." data-bind="textInput: filterQuery" />
+                  <input type="text" class="form-control input-lg input-square" placeholder="Filter..." data-bind="value: filterQuery, event: {
+                    input: filterQueryOnInput
+                  }" />
                 <!-- /ko -->
                 <!-- ko if: className != 'selected' -->
                 <div class="input-group">
-                  <input type="text" class="form-control input-lg input-square" placeholder="Filter..." data-bind="textInput: filterQuery" />
+                  <input type="text" class="form-control input-lg input-square" placeholder="Filter..." data-bind="value: filterQuery, event: {
+                    input: filterQueryOnInput
+                  }" />
                   <span class="input-group-btn">
                     <div class="btn-group">
                       <label class="btn btn-default btn-filter" data-bind="css: {active: selectorModel.filterByOwned}">
