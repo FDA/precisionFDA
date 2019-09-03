@@ -656,3 +656,12 @@ Layout/SpaceInsideReferenceBrackets:
 
 Style/ModuleFunction:
   EnforcedStyle: extend_self
+
+RSpec/ExampleLength:
+  Max: 20
+
+RSpec/MultipleExpectations:
+  Max: 3
+
+RSpec/NestedGroups:
+  Max: 4
