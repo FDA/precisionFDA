@@ -3,6 +3,18 @@
 #
 
 class SelectorModel
+  addFilesScrollListener: () ->
+    $('.object-selector-modal .modal-body').on 'scroll', (event) ->
+      element = $(this).find('.tab-pane.active').find('.list-group').get(1)
+      return unless element
+      context = ko.contextFor(element)
+      currentNumberOfObjects = context.$data.objects().length
+      isFile = context.$data.className == 'file'
+      scrolledDown = (this.scrollTop == (this.scrollHeight - this.offsetHeight))
+      if element && isFile && scrolledDown && currentNumberOfObjects != context.$data.totalCount
+        context.$data.getObjects(currentNumberOfObjects)
+
+
   constructor: (@opts) ->
     @id = _.uniqueId('object-selector-modal-')
     @modal = null
@@ -375,12 +387,3 @@ class ObjectItemModel
 window.Precision ||= {}
 window.Precision.models ||= {}
 window.Precision.models.SelectorModel = SelectorModel
-
-$ ->
-  $('.object-selector-modal .modal-body').on 'scroll', (event) ->
-    element = $(@).find('.tab-pane.active').find('.list-group').get(1)
-    return unless element
-    context = ko.contextFor(element)
-    currentNumberOfObjects = context.$data.objects().length
-    if element && context.$data.className == 'file' && (@scrollTop == (@scrollHeight - @offsetHeight)) && currentNumberOfObjects != context.$data.totalCount
-      context.$data.getObjects(currentNumberOfObjects)
