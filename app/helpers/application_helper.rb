@@ -100,6 +100,7 @@ module ApplicationHelper
   # noicon: false              # Show/hide the icon
   #
   def unilink(item, opts = {})
+    return if item.nil?
     icon = fa_class(item)
     if opts[:scope_icon]
       if item.public?
