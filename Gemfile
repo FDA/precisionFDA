@@ -96,6 +96,8 @@ gem "prawn"
 
 gem "aws-sdk-sns"
 gem "parallel"
+gem 'execjs'
+gem 'therubyracer'
 
 group :development do
   # Annotate models
