@@ -15,6 +15,7 @@ RSpec.describe Api::AppsController, type: :controller do
   describe "POST create" do
     before do
       authenticate!(user)
+
       post :create,
            name:   "test-name",
            title:  "test-title",
@@ -27,10 +28,6 @@ RSpec.describe Api::AppsController, type: :controller do
            is_new: true,
            input_spec: input,
            output_spec: output
-    end
-
-    it "creates an event" do
-      expect(Event::AppCreated).to have_received(:create_for)
     end
 
     it "creates an applet" do
@@ -71,7 +68,7 @@ RSpec.describe Api::AppsController, type: :controller do
 
       expect(response).to have_http_status(200)
 
-      expect(last_app.attributes.slice(%w(instance_type internet_access code))).to include(
+      expect(last_app).to have_attributes(
         "instance_type" => "baseline-8",
         "internet_access" => false,
         "code" => "test-code",
@@ -88,6 +85,11 @@ RSpec.describe Api::AppsController, type: :controller do
           body: { objects: [nil] },
         ),
       )
+    end
+
+    it "creates an event" do
+      expect(Event::AppCreated.count).to eq(1)
+      expect(Event::AppCreated.first.param1).to eq(last_app.dxid)
     end
   end
 end
