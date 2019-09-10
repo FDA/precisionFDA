@@ -52,7 +52,9 @@ class App < ActiveRecord::Base
 
   # Scopes that can be used to run an app.
   def available_job_spaces(user)
-    return [] if !in_space? || !space_object.review? && !space_object.verification?
+
+    return [] if !in_space? || !space_object.review? && !space_object.verification? && !space_object.groups?
+    [space_object] if space_object.groups?
 
     Space.joins(:space_memberships).
       where(
@@ -62,7 +64,7 @@ class App < ActiveRecord::Base
   end
 
   def can_run_in_space?(user, space_id)
-    return false if !in_space? || !space_object.review? && !space_object.verification?
+    return false if !in_space? || !space_object.review? && !space_object.verification? && !space_object.groups?
 
     # TODO control disabled users!
     # member = space_object.space_memberships.active.where(user_id: user.id).first
