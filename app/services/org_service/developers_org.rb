@@ -13,6 +13,8 @@ module OrgService
     def self.update_members(dxorg)
       papi = DNAnexusAPI.for_admin
       users = User.review_space_admins.where.not(review_app_developers_org: dxorg)
+puts("In update_members: dxorg = #{dxorg.inspect}")
+      puts("In update_members: users = #{users.inspect}")
       users.pluck(:dxuser).each do |dxuser|
         papi.call(
           dxorg, "invite",

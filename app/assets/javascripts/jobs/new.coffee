@@ -20,8 +20,7 @@ class JobsNewView
              _.first(selectable_spaces).space_type == "review"
     )
 
-    @needSelectSpace = @isInSpace &&
-                       @isReviewSpace()
+    @needSelectSpace = @isInSpace
 
     if @isInSpace && !@isReviewSpace()
       @spaceId(_.first(selectable_spaces).value)
