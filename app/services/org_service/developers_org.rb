@@ -1,6 +1,5 @@
 module OrgService
   module DevelopersOrg
-
     def self.create
       papi = DNAnexusAPI.for_admin
       dxorg = choose_dxorg(papi, "app_developers")
@@ -13,13 +12,11 @@ module OrgService
     def self.update_members(dxorg)
       papi = DNAnexusAPI.for_admin
       users = User.review_space_admins.where.not(review_app_developers_org: dxorg)
-puts("In update_members: dxorg = #{dxorg.inspect}")
-      puts("In update_members: users = #{users.inspect}")
       users.pluck(:dxuser).each do |dxuser|
         papi.call(
           dxorg, "invite",
           invitee: "user-#{dxuser}",
-          level: 'ADMIN',
+          level: "ADMIN",
           suppressEmailNotification: true
         )
       end
@@ -38,5 +35,4 @@ puts("In update_members: dxorg = #{dxorg.inspect}")
       end
     end
   end
-
 end
