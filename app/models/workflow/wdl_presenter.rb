@@ -2,7 +2,7 @@ class Workflow
   class WdlPresenter < BaseImportPresenter
     def slots
       @slots ||=
-        (tasks.map do |task|
+        (tasks.map.with_index do |task, idx|
           app = create_app(task)
 
           break unless app
@@ -16,6 +16,7 @@ class Workflow
             slotId: task.slot_name,
             nextSlot: task.next_slot,
             prevSlot: task.prev_slot,
+            stageIndex: idx,
           }.with_indifferent_access
         end || [])
     end

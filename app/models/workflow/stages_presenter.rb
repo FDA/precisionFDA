@@ -30,6 +30,10 @@ class Workflow
       end
     end
 
+    def max_stage_index
+      slot_objects.map(&:stage_index).compact.max
+    end
+
     def slot_objects_valid?
       slot_objects.each do |slot_object|
         next if slot_object.valid?
