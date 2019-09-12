@@ -15,7 +15,7 @@ class Workflow
       validates :next_slot, 'workflow/non_empty_string': true, if: :next_slot_condition
       validate :input_objects_valid?
 
-      delegate :context, :slot_objects, to: :base_presenter
+      delegate :context, :slot_objects, :max_stage_index, to: :base_presenter
 
       def initialize(slot, slot_number, base_presenter)
         @slot = slot
@@ -74,11 +74,11 @@ class Workflow
       end
 
       def prev_slot_condition
-        slot_number != 0
+        stage_index && stage_index != 0
       end
 
       def next_slot_condition
-        slot_number != slot_objects.length - 1
+        stage_index && stage_index != max_stage_index
       end
 
       def input_objects_valid?

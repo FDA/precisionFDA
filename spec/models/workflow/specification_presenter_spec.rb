@@ -3,14 +3,13 @@ include Imports::WorkflowHelper
 include Imports::WorkflowSpecificationHelper
 
 RSpec.describe Workflow::SpecificationPresenter, type: :model  do
-  subject { presenter }
+  subject(:presenter) do
+    described_class.new(workflow_presenter.params, context, workflow_presenter.slot_objects)
+  end
 
   let(:user) { create(:user) }
   let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, nil, nil) }
   let(:raw) { params }
-  let(:presenter) do
-    described_class.new(workflow_presenter.params, context, workflow_presenter.slot_objects)
-  end
   let(:subject_response) { presenter.build }
   let(:workflow_presenter) { Workflow::Presenter.new(raw, context) }
   let(:locale_scope) { "activemodel.errors.models.workflow/specification_presenter.attributes" }
@@ -28,7 +27,7 @@ RSpec.describe Workflow::SpecificationPresenter, type: :model  do
     allow_any_instance_of(Context).to receive(:logged_in?).and_return(true)
   end
 
-  describe ".build" do
+  describe "#build" do
     let(:result) do
       {
         name: raw["workflow_name"], title: raw["workflow_title"], user_id: user.id,
