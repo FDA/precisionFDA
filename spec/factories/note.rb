@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :note do
     user
-    title "note_title"
+    title { "note_title" }
   end
 end

@@ -3,7 +3,7 @@ ENV['RAILS_ENV'] ||= 'test'
 ENV['ADMIN_TOKEN'] ||= 'admin_token'
 ENV['CHALLENGE_BOT_TOKEN'] ||= 'challenge_bot_token'
 ENV['REVIEW_SPACE_ADMINS'] ||= 'review.admin_dev'
-require File.expand_path('../../config/environment', __FILE__)
+require_relative '../config/environment'
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 require 'rspec/rails'
 

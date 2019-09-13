@@ -3,7 +3,7 @@ class JobsController < ApplicationController
   before_action :require_login_or_guest, only: [:show]
 
   def show
-    @job = Job.accessible_by(@context).includes(:user).find_by_uid(params[:id])
+    @job = Job.accessible_by(@context).includes(:user).find_by_uid(unsafe_params[:id])
 
     if @job.nil?
       flash[:error] = "Sorry, this job does not exist or is not accessible by you"
@@ -18,19 +18,19 @@ class JobsController < ApplicationController
     @item_comments_path = pathify_comments(@job)
     if @job.in_space?
       space = item_from_uid(@job.scope)
-      @comments = Comment.where(commentable: space, content_object: @job).order(id: :desc).page params[:comments_page]
+      @comments = Comment.where(commentable: space, content_object: @job).order(id: :desc).page unsafe_params[:comments_page]
     else
-      @comments = @job.root_comments.order(id: :desc).page params[:comments_page]
+      @comments = @job.root_comments.order(id: :desc).page unsafe_params[:comments_page]
     end
 
-    @notes = @job.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
-    @answers = @job.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
-    @discussions = @job.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
+    @notes = @job.notes.real_notes.accessible_by(@context).order(id: :desc).page unsafe_params[:notes_page]
+    @answers = @job.notes.accessible_by(@context).answers.order(id: :desc).page unsafe_params[:answers_page]
+    @discussions = @job.notes.accessible_by(@context).discussions.order(id: :desc).page unsafe_params[:discussions_page]
     js id: @job.id, desc: @job.from_submission? ? @job.submission.desc : ""
   end
 
   def log
-    @job = Job.accessible_by(@context).find_by_uid(params[:id])
+    @job = Job.accessible_by(@context).find_by_uid(unsafe_params[:id])
 
     if @job.nil?
       flash[:error] = "Sorry, this job does not exist or its log is not accessible by you"
@@ -91,7 +91,7 @@ class JobsController < ApplicationController
   end
 
   def new
-    @app = App.accessible_by(@context).find_by_uid(params[:app_id])
+    @app = App.accessible_by(@context).find_by_uid(unsafe_params[:app_id])
 
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
@@ -136,7 +136,7 @@ class JobsController < ApplicationController
   end
 
   def destroy
-    @job = Job.where(user_id: @context.user_id).find_by_uid(params[:id])
+    @job = Job.where(user_id: @context.user_id).find_by_uid(unsafe_params[:id])
     if @job.nil?
       flash[:error] = "Sorry, this job does not exist or is not accessible by you"
       redirect_to apps_path

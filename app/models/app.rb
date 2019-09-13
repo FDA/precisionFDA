@@ -17,7 +17,7 @@
 #  app_series_id :integer
 #
 
-class App < ActiveRecord::Base
+class App < ApplicationRecord
   include Auditor
   include Permissions
   include InternalUid
@@ -25,10 +25,10 @@ class App < ActiveRecord::Base
   belongs_to :user
   belongs_to :app_series
   has_many :jobs
-  has_many :notes, {through: :attachments}
-  has_many :attachments, {as: :item, dependent: :destroy}
+  has_many :attachments, as: :item, dependent: :destroy
+  has_many :notes, through: :attachments
 
-  has_and_belongs_to_many :assets, {join_table: 'apps_assets'}
+  has_and_belongs_to_many :assets, join_table: "apps_assets"
 
   has_many :challenges
 
@@ -62,7 +62,7 @@ class App < ActiveRecord::Base
     Space.joins(:space_memberships).
       where(
         id: [space_object.id, space_object.confidential_spaces.pluck(:id)].flatten,
-        space_memberships: { user_id: user.id },
+        space_memberships: { user_id: user.id }
       )
   end
 

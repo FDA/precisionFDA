@@ -1,4 +1,4 @@
-class CreateNotificationPreferences < ActiveRecord::Migration
+class CreateNotificationPreferences < ActiveRecord::Migration[4.2]
   def change
     create_table :notification_preferences do |t|
       t.belongs_to :user, foreign_key: true, index: { unique: true }

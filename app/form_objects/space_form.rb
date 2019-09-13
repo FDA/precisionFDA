@@ -15,9 +15,8 @@ class SpaceForm
 
   validates :name, :description, :space_type, presence: true
   validate :validate_host_lead_dxuser
-  validate :validate_guest_lead_dxuser,
-    if: -> { space_type.in?(%w(groups verification)) && guest_lead_dxuser.present? }
-  validate :validate_sponsor_org, if: -> { space_type == "review" }
+  validate :validate_guest_lead_dxuser, if: ->{ space_type.in?(%w(groups verification)) }
+  validate :validate_sponsor_org, if: ->{ space_type == "review" }
 
   def self.model_name
     Space.model_name
@@ -42,10 +41,13 @@ class SpaceForm
   end
 
   def validate_guest_lead_dxuser
-    errors.add(:guest_lead_dxuser, "'#{guest_lead_dxuser}' not found") unless guest_admin
-
     if guest_lead_dxuser == host_lead_dxuser
       errors.add(:guest_lead_dxuser, "can't be the same as Host lead")
+    end
+
+    if space_type == "groups" && !(guest_lead_dxuser.present? && guest_admin) ||
+      space_type == "verification" && guest_lead_dxuser.present? && guest_admin.nil?
+      errors.add(:guest_lead_dxuser, "'#{guest_lead_dxuser}' not found")
     end
   end
 

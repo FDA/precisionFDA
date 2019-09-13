@@ -1,4 +1,4 @@
-class Setting < ActiveRecord::Base
+class Setting < ApplicationRecord
   include Auditor
 
   USAGE_METRICS_CUSTOM_RANGE_KEY = 'usage_metrics_custom_range'.freeze

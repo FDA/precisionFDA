@@ -20,7 +20,7 @@ module SpaceEventService
       end
 
       def receivers(event)
-        User.joins(:space_memberships).merge(event.space.space_memberships.active).push(event.entity.user).uniq.select do |user|
+        User.joins(:space_memberships).merge(event.space.space_memberships.active).to_a.push(event.entity.user).uniq.select do |user|
           next if user.id == event.user_id
           notification_preference_by_role(event, user)
         end

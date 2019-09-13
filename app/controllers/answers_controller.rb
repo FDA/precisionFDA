@@ -3,14 +3,14 @@ class AnswersController < ApplicationController
   before_action :require_login_or_guest, only: [:index, :show]
 
   def index
-    discussion = Discussion.accessible_by(@context).find(params[:discussion_id])
+    discussion = Discussion.accessible_by(@context).find(unsafe_params[:discussion_id])
     redirect_to discussion_path(discussion)
   end
 
   def show
-    username = params[:id]
+    username = unsafe_params[:id]
     user = User.find_by!(dxuser: username)
-    @answer = Answer.where(discussion_id: params[:discussion_id], user_id: user.id).take
+    @answer = Answer.where(discussion_id: unsafe_params[:discussion_id], user_id: user.id).take
 
     if @answer.nil?
       flash[:error] = "Sorry, this answer is not accessible"
@@ -22,7 +22,7 @@ class AnswersController < ApplicationController
       @items_from_params = [@discussion, @answer]
       @item_path = pathify(@answer)
       @item_comments_path = pathify_comments(@answer)
-      @comments = @answer.root_comments.order(id: :desc).page params[:comments_page]
+      @comments = @answer.root_comments.order(id: :desc).page unsafe_params[:comments_page]
       @commentable = @answer
 
       js note_js(@answer.note)
@@ -31,11 +31,11 @@ class AnswersController < ApplicationController
 
   def edit
     @user = User.find(@context.user_id)
-    @answer = Answer.editable_by(@context).where(discussion_id: params[:discussion_id], user_id: @user.id).take
+    @answer = Answer.editable_by(@context).where(discussion_id: unsafe_params[:discussion_id], user_id: @user.id).take
 
     if @answer.nil?
       flash[:error] = "Sorry, this answer is not editable by you"
-      redirect_to discussion_path(params[:discussion_id])
+      redirect_to discussion_path(unsafe_params[:discussion_id])
       return
     else
       @note = @answer.note
@@ -53,7 +53,7 @@ class AnswersController < ApplicationController
           note_type: "Answer"
         })
         Answer.transaction do
-          discussion = Discussion.accessible_by(@context).find(params[:discussion_id])
+          discussion = Discussion.accessible_by(@context).find(unsafe_params[:discussion_id])
           @answer = Answer.create!(
             user_id: @context.user_id,
             note_id: note.id,
@@ -67,7 +67,7 @@ class AnswersController < ApplicationController
   end
 
   def destroy
-    answer = Answer.editable_by(@context).find_by!(discussion_id: params[:discussion_id], user_id: @context.user_id)
+    answer = Answer.editable_by(@context).find_by!(discussion_id: unsafe_params[:discussion_id], user_id: @context.user_id)
     discussion_id = answer.discussion_id
 
     answer.destroy
@@ -91,6 +91,6 @@ class AnswersController < ApplicationController
         jobs: (jobs.map { |o| describe_for_api(o)}),
         assets: (assets.map { |o| describe_for_api(o)}),
       }
-      return {note: note.slice(:id, :content, :title), attachments: attachments, edit: params[:edit], editable: note.editable_by?(@context)}
+      return {note: note.slice(:id, :content, :title), attachments: attachments, edit: unsafe_params[:edit], editable: note.editable_by?(@context)}
     end
 end

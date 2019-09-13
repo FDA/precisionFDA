@@ -17,7 +17,7 @@ class SpaceTemplatesController < ApplicationController
   end
 
   def edit
-    @space_template = SpaceTemplate.find(params[:id])
+    @space_template = SpaceTemplate.find(unsafe_params[:id])
     @verified_spaces = Space.all_verified
 
     js({
@@ -62,10 +62,10 @@ class SpaceTemplatesController < ApplicationController
   end
 
   def update
-    @space_template = SpaceTemplate.find(params[:id])
+    @space_template = SpaceTemplate.find(unsafe_params[:id])
     @space_template.space_template_nodes.delete_all
     @space_template.space_template_spaces.delete_all
-    @space_template.update!(template_params.merge({private: template_params[:private].present? ? true : false}))
+    @space_template.update!(template_params.merge(private: template_params[:private].present?))
     @space_template.save!
 
     redirect_to space_templates_path
@@ -74,7 +74,7 @@ class SpaceTemplatesController < ApplicationController
   def show
 
     @readonly = true
-    @space_template = SpaceTemplate.find(params[:id])
+    @space_template = SpaceTemplate.find(unsafe_params[:id])
 
     if @space_template.private? && @context.user.id != @space_template.user_id
       redirect_to space_templates_path
@@ -96,8 +96,8 @@ class SpaceTemplatesController < ApplicationController
   end
 
   def destroy
-    SpaceTemplate.find(params[:id]).destroy!
-    redirect_to :back
+    SpaceTemplate.find(unsafe_params[:id]).destroy!
+    redirect_back(fallback_location: space_templates_path) and return
   end
 
 
@@ -136,10 +136,8 @@ class SpaceTemplatesController < ApplicationController
   end
 
   def unverified_apps
-    apps = App.where.not(verified: true).any_of(
-      App.where(scope: 'public'),
-      App.where.not(dev_group: nil)
-    ).uniq
+    apps = App.where(scope: 'public').or(App.where.not(dev_group: nil)).
+      where.not(verified: true).distinct
 
     respond_to do |f|
       f.json{ render json: apps }
@@ -147,7 +145,7 @@ class SpaceTemplatesController < ApplicationController
   end
 
   def duplicate
-    @space_template = SpaceTemplate.find(params[:id])
+    @space_template = SpaceTemplate.find(unsafe_params[:id])
     @verified_spaces = Space.all_verified
 
     space_ids = @space_template.space_template_spaces.map(&:space).map(&:id)

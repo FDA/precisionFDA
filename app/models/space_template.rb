@@ -1,4 +1,4 @@
-class SpaceTemplate < ActiveRecord::Base
+class SpaceTemplate < ApplicationRecord
 
   has_many :space_template_nodes, dependent: :destroy
   accepts_nested_attributes_for :space_template_nodes

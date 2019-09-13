@@ -1,4 +1,4 @@
-class CreateExpertQuestions < ActiveRecord::Migration
+class CreateExpertQuestions < ActiveRecord::Migration[4.2]
   def change
     create_table :expert_questions do |t|
       t.references :expert, index: true, foreign_key: true

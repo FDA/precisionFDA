@@ -1,4 +1,4 @@
-class CreateGetStartedBoxesTable < ActiveRecord::Migration
+class CreateGetStartedBoxesTable < ActiveRecord::Migration[4.2]
   def change
     create_table :get_started_boxes do |t|
       t.string :title

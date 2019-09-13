@@ -1,8 +1,3 @@
-require "rats/version"
-require 'rats/maybe'
-require 'rats/try'
-require 'rats/result'
-
 module Rats
   def self.try(&block)
     begin

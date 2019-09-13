@@ -5,6 +5,8 @@ default: &default
   host: db
   username: root
   password: password
+  variables:
+    sql_mode: TRADITIONAL
 
 development:
   <<: *default

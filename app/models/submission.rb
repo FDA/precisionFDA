@@ -12,7 +12,7 @@
 #  updated_at    :datetime         not null
 #
 
-class Submission < ActiveRecord::Base
+class Submission < ApplicationRecord
   include Auditor
 
   belongs_to :user

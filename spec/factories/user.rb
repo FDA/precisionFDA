@@ -6,17 +6,16 @@ FactoryBot.define do
     email { FFaker::Internet.email }
     normalized_email { email.downcase }
     association :org
-    last_login 1.day.ago
-    private_files_project "project-test"
-    public_files_project "public-files-project"
+    last_login { 1.day.ago }
+    private_files_project { "project-test" }
+    public_files_project { "public-files-project" }
 
     trait :admin do
-      dxuser "vijay.kandali"
+      dxuser { "vijay.kandali" }
     end
 
     trait :review_admin do
-      dxuser "review.admin_dev"
+      dxuser { "review.admin_dev" }
     end
-
   end
 end

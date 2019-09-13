@@ -24,7 +24,8 @@ class FilesController < ApplicationController
               .includes(:taggings)
 
     folders = private_folders(@parent_folder_id).includes(:taggings)
-    user_files = Node.where.any_of(files, folders)
+
+    user_files = Node.where(id: (files + folders).map(&:id))
 
     @current_folder = Folder.private_for(@context).editable_by(@context).find_by(id: @parent_folder_id)
     @files_grid = files_grid(user_files)
@@ -69,7 +70,8 @@ class FilesController < ApplicationController
               .where(scoped_parent_folder_id: @parent_folder_id)
 
     folders = explore_folders(@parent_folder_id).includes(:taggings)
-    user_files = Node.where.any_of(files, folders)
+
+    user_files = Node.where(id: (files + folders).map(&:id))
 
     @current_folder = Folder.accessible_by_public.find_by(id: @parent_folder_id)
     @files_grid = files_grid(user_files)
@@ -86,7 +88,7 @@ class FilesController < ApplicationController
   end
 
   def show
-    @file = UserFile.not_assets.accessible_by(@context).includes(:user).find_by_uid!(params[:id])
+    @file = UserFile.not_assets.accessible_by(@context).includes(:user).find_by_uid!(unsafe_params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
@@ -117,24 +119,24 @@ class FilesController < ApplicationController
     @item_comments_path = pathify_comments(@file)
     if @file.in_space?
       space = item_from_uid(@file.scope)
-      @comments = Comment.where(commentable: space, content_object: @file).order(id: :desc).page params[:comments_page]
+      @comments = Comment.where(commentable: space, content_object: @file).order(id: :desc).page unsafe_params[:comments_page]
     else
-      @comments = @file.root_comments.order(id: :desc).page params[:comments_page]
+      @comments = @file.root_comments.order(id: :desc).page unsafe_params[:comments_page]
     end
 
-    @notes = @file.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
-    @answers = @file.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
-    @discussions = @file.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
+    @notes = @file.notes.real_notes.accessible_by(@context).order(id: :desc).page unsafe_params[:notes_page]
+    @answers = @file.notes.accessible_by(@context).answers.order(id: :desc).page unsafe_params[:answers_page]
+    @discussions = @file.notes.accessible_by(@context).discussions.order(id: :desc).page unsafe_params[:discussions_page]
     js file: @file.slice(:uid, :id), license: @file.license ? @file.license.slice(:uid, :content) : nil
   end
 
   def new
-    js folder_id: params[:folder_id]
+    js folder_id: unsafe_params[:folder_id]
   end
 
   def download
     # Allow assets as well
-    @file = UserFile.accessible_by(@context).find_by_uid!(params[:id])
+    @file = UserFile.accessible_by(@context).find_by_uid!(unsafe_params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
@@ -155,7 +157,7 @@ class FilesController < ApplicationController
     else
       opts = {project: @file.project, preauthenticated: true}
       opts[:filename] = @file.name
-      file_url = DNAnexusAPI.new(@file.is_submission_output? ? CHALLENGE_BOT_TOKEN : @context.token).call(@file.dxid, "download", opts)["url"] + (params[:inline] == "true" ? '?inline' : '')
+      file_url = DNAnexusAPI.new(@file.is_submission_output? ? CHALLENGE_BOT_TOKEN : @context.token).call(@file.dxid, "download", opts)["url"] + (unsafe_params[:inline] == "true" ? '?inline' : '')
       Event::FileDownloaded.create_for(@file, @context.user)
       redirect_to file_url
     end
@@ -163,7 +165,7 @@ class FilesController < ApplicationController
 
   def link
     # Allow assets as well, thought not currently exposed in the UI
-    @file = UserFile.accessible_by(@context).find_by_uid!(params[:id])
+    @file = UserFile.accessible_by(@context).find_by_uid!(unsafe_params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
@@ -189,7 +191,7 @@ class FilesController < ApplicationController
   end
 
   def rename
-    @file = UserFile.real_files.find_by_uid(params[:id])
+    @file = UserFile.real_files.find_by_uid(unsafe_params[:id])
 
     unless @file.present?
       flash[:error] = "File not found"
@@ -198,15 +200,15 @@ class FilesController < ApplicationController
     end
 
     description = file_params.key?(:description) ? file_params[:description] : @file.description
-    parent_folder = @file.parent_folder(params[:scope])
+    parent_folder = @file.parent_folder(unsafe_params[:scope])
 
-    redirect_target = if params[:source] == "list"
+    redirect_target = if unsafe_params[:source] == "list"
                         if parent_folder.present?
                           pathify_folder(parent_folder)
                         else
                           if @file.in_space?
                             files_space_path(Space.from_scope(@file.scope))
-                          elsif params[:scope] == "public"
+                          elsif unsafe_params[:scope] == "public"
                             explore_files_path
                           else
                             files_path
@@ -232,7 +234,7 @@ class FilesController < ApplicationController
   end
 
   def destroy
-    @file = UserFile.real_files.find_by_uid!(params[:id])
+    @file = UserFile.real_files.find_by_uid!(unsafe_params[:id])
 
     unless @file.editable_by?(@context)
       redirect_to file_path, alert: "You have no permissions to delete this file."
@@ -255,11 +257,11 @@ class FilesController < ApplicationController
   end
 
   def create_folder
-    is_public_folder = params[:public] == "true"
+    is_public_folder = unsafe_params[:public] == "true"
 
     if is_public_folder
       if @context.user.can_administer_site?
-        parent_folder = Folder.accessible_by_public.find_by(id: params[:parent_folder_id])
+        parent_folder = Folder.accessible_by_public.find_by(id: unsafe_params[:parent_folder_id])
         scope = "public"
       else
         flash[:error] = "You are not allowed to create public folders"
@@ -267,12 +269,12 @@ class FilesController < ApplicationController
         return
       end
     else
-      parent_folder = Folder.editable_by(@context).find_by(id: params[:parent_folder_id])
+      parent_folder = Folder.editable_by(@context).find_by(id: unsafe_params[:parent_folder_id])
       scope = "private"
     end
 
     service = FolderService.new(@context)
-    result = service.add_folder(params[:name], parent_folder, scope)
+    result = service.add_folder(unsafe_params[:name], parent_folder, scope)
 
     if result.failure?
       flash[:error] = result.value.values
@@ -290,7 +292,7 @@ class FilesController < ApplicationController
   end
 
   def rename_folder
-    folder = Folder.editable_by(@context).find(params[:id])
+    folder = Folder.editable_by(@context).find(unsafe_params[:id])
     folder_service = FolderService.new(@context)
     result = folder_service.rename(folder, file_params[:name])
     parent_folder = folder.parent_folder
@@ -311,14 +313,14 @@ class FilesController < ApplicationController
   end
 
   def move
-    target_folder_id = params[:target_id] == 'root' ? nil : params[:target_id]
+    target_folder_id = unsafe_params[:target_id] == 'root' ? nil : unsafe_params[:target_id]
     target_folder = target_folder_id ? Folder.editable_by(@context).find(target_folder_id) : nil
     service = FolderService.new(@context)
 
     result = service.move(
-      Node.where(id: params[:nodes]),
+      Node.where(id: unsafe_params[:nodes]),
       target_folder,
-      params[:scope]
+      unsafe_params[:scope]
     )
 
     if result.success?
@@ -341,30 +343,30 @@ class FilesController < ApplicationController
   skip_before_action :require_login, only: :download_list
   before_action :require_api_login, only: :download_list
   def download_list
-    task = params[:task]
+    task = unsafe_params[:task]
     files = []
 
     case task
       when "download"
-        nodes = Node.accessible_by(@context).where(id: params[:ids])
+        nodes = Node.accessible_by(@context).where(id: unsafe_params[:ids])
         nodes.each { |node| files += node.is_a?(Folder) ? node.all_files : [node] }
       when "publish"
-        nodes = Node.editable_by(@context).where(id: params[:ids]).where.not(scope: "public")
+        nodes = Node.editable_by(@context).where(id: unsafe_params[:ids]).where.not(scope: "public")
         nodes.each { |node| files += node.is_a?(Folder) ? node.all_files(Node.where.not(scope: "public")) : [node] }
       when "delete"
-        nodes = Node.editable_by(@context).where(id: params[:ids]).to_a
+        nodes = Node.editable_by(@context).where(id: unsafe_params[:ids]).to_a
         files += nodes
         nodes.each { |node| files += node.all_children if node.is_a?(Folder) }
     end
 
-    root_name = determine_scope_name(params[:scope])
+    root_name = determine_scope_name(unsafe_params[:scope])
 
     res = files.map do |file|
       info = {
         id: file.id,
         name: file.name,
         type: file.klass,
-        fsPath: ([root_name] + file.ancestors(params[:scope]).map(&:name).reverse).compact.join(" / "),
+        fsPath: ([root_name] + file.ancestors(unsafe_params[:scope]).map(&:name).reverse).compact.join(" / "),
         viewURL: file.is_a?(UserFile) ? file_path(file) : pathify_folder(file)
       }
 
@@ -378,7 +380,7 @@ class FilesController < ApplicationController
 
   def remove
     service = FolderService.new(@context)
-    files = Node.editable_by(@context).where(id: params[:ids])
+    files = Node.editable_by(@context).where(id: unsafe_params[:ids])
     res = service.remove(files)
 
     if res.success?
@@ -387,12 +389,12 @@ class FilesController < ApplicationController
       flash[:error] = res.value.values
     end
 
-    redirect_path = params[:scope] == "public" ? explore_files_path : files_path
+    redirect_path = unsafe_params[:scope] == "public" ? explore_files_path : files_path
     redirect_to redirect_path
   end
 
   def publish
-    files = UserFile.editable_by(@context).where(id: params[:ids], scope: "private")
+    files = UserFile.editable_by(@context).where(id: unsafe_params[:ids], scope: "private")
 
     begin
       count = UserFile.publish(files, @context, "public")
@@ -488,7 +490,7 @@ class FilesController < ApplicationController
   end
 
   def init_parent_folder
-    @parent_folder_id = params[:folder_id]
+    @parent_folder_id = unsafe_params[:folder_id]
   end
 
 end

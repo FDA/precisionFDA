@@ -18,14 +18,14 @@
 #  updated_at          :datetime         not null
 #
 
-class Workflow < ActiveRecord::Base
+class Workflow < ApplicationRecord
   include Auditor
   include Permissions
   include InternalUid
 
   belongs_to :user
   belongs_to :workflow_series
-  has_many :analyses
+  has_many :analyses, dependent: :destroy
 
   store :spec, accessors: [:input_spec, :output_spec, :internet_access, :instance_type], coder: JSON
 

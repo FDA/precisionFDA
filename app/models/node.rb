@@ -1,4 +1,4 @@
-class Node < ActiveRecord::Base
+class Node < ApplicationRecord
   include Auditor
 
   self.inheritance_column = :sti_type
@@ -32,7 +32,7 @@ class Node < ActiveRecord::Base
     end
 
     def folder_content(files, folders)
-      Node.where.any_of(files, folders)
+      Node.where(id: (files + folders).map(&:id))
     end
   end
 

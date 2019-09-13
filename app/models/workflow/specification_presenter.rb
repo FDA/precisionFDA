@@ -73,7 +73,8 @@ class Workflow
     end
 
     def new_workflow_series
-      return nil unless is_new
+      return unless is_new
+
       WorkflowSeries.create!(
         dxid: workflow_series_dxid,
         name: name,

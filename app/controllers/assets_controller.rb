@@ -34,7 +34,7 @@ class AssetsController < ApplicationController
   end
 
   def show
-    @asset = Asset.accessible_by(@context).includes(:archive_entries).find_by_uid!(params[:id])
+    @asset = Asset.accessible_by(@context).includes(:archive_entries).find_by_uid!(unsafe_params[:id])
 
     # Refresh state of asset, if needed
     if @asset.state != "closed"
@@ -47,14 +47,14 @@ class AssetsController < ApplicationController
     @item_comments_path = pathify_comments(@asset)
     if @asset.in_space?
       space = item_from_uid(@asset.scope)
-      @comments = Comment.where(commentable: space, content_object: @asset).order(id: :desc).page params[:comments_page]
+      @comments = Comment.where(commentable: space, content_object: @asset).order(id: :desc).page unsafe_params[:comments_page]
     else
-      @comments = @asset.root_comments.order(id: :desc).page params[:comments_page]
+      @comments = @asset.root_comments.order(id: :desc).page unsafe_params[:comments_page]
     end
 
-    @notes = @asset.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
-    @answers = @asset.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
-    @discussions = @asset.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
+    @notes = @asset.notes.real_notes.accessible_by(@context).order(id: :desc).page unsafe_params[:notes_page]
+    @answers = @asset.notes.accessible_by(@context).answers.order(id: :desc).page unsafe_params[:answers_page]
+    @discussions = @asset.notes.accessible_by(@context).discussions.order(id: :desc).page unsafe_params[:discussions_page]
 
     if @asset.editable_by?(@context)
       @licenses = License.editable_by(@context)
@@ -64,14 +64,14 @@ class AssetsController < ApplicationController
   end
 
   def edit
-    @asset = Asset.includes(:archive_entries).find_by_uid!(params[:id])
+    @asset = Asset.includes(:archive_entries).find_by_uid!(unsafe_params[:id])
     redirect_to asset_path(@asset) unless @asset.editable_by?(@context)
 
     js asset: @asset.slice(:id, :description)
   end
 
   def rename
-    @asset = Asset.find_by_uid!(params[:id])
+    @asset = Asset.find_by_uid!(unsafe_params[:id])
     redirect_to asset_path(@asset) unless @asset.editable_by?(@context)
 
     title = asset_params[:title]
@@ -92,7 +92,7 @@ class AssetsController < ApplicationController
   end
 
   def update
-    @asset = Asset.includes(:archive_entries).find_by_uid!(params[:id])
+    @asset = Asset.includes(:archive_entries).find_by_uid!(unsafe_params[:id])
     redirect_to asset_path(@asset) unless @asset.editable_by?(@context)
 
     Asset.transaction do
@@ -109,7 +109,7 @@ class AssetsController < ApplicationController
   end
 
   def destroy
-    @file = Asset.find_by_uid!(params[:id])
+    @file = Asset.find_by_uid!(unsafe_params[:id])
     redirect_to asset_path(@file) unless @file.editable_by?(@context)
 
     UserFile.transaction do

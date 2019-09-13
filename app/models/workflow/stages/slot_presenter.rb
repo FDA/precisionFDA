@@ -6,17 +6,16 @@ class Workflow
 
       validates :name, 'workflow/slot/name_non_empty': true
       validates :uid, :slot_id, 'workflow/non_empty_string': true
-      validates :slot_id, 'workflow/slot/slot_id_unique': true,
-                'workflow/slot/slot_id_linking': true
+      validates :slot_id, 'workflow/slot/slot_id_unique': true
       validates :app, 'workflow/slot/app_presence': true
       validates :instance_type, 'workflow/non_empty_string': true,
                 'workflow/slot/instance_type_inclusion': true
       validates :inputs, :outputs, 'workflow/array_of_hashes': true
-      validates :prev_slot, 'workflow/non_empty_string': true, if: "prev_slot_condition"
-      validates :next_slot, 'workflow/non_empty_string': true, if: "next_slot_condition"
+      validates :prev_slot, 'workflow/non_empty_string': true, if: :prev_slot_condition
+      validates :next_slot, 'workflow/non_empty_string': true, if: :next_slot_condition
       validate :input_objects_valid?
 
-      delegate :output_classes, :context, :slot_objects, to: :base_presenter
+      delegate :context, :slot_objects, :max_stage_index, to: :base_presenter
 
       def initialize(slot, slot_number, base_presenter)
         @slot = slot
@@ -46,15 +45,6 @@ class Workflow
         slot["slotId"]
       end
 
-      def previous_slot_object
-        base_presenter.find_slot(slot_number - 1)
-      end
-
-      def linked_to_previous_stage?(values_name)
-        output_classes.key?(previous_slot_object.slot_id) &&
-            output_classes[previous_slot_object.slot_id].key?(values_name)
-      end
-
       def uid
         slot["uid"]
       end
@@ -65,18 +55,6 @@ class Workflow
 
       def stage_index
         slot["stageIndex"]
-      end
-
-      def next_slot_linked?
-        slots_ids = base_presenter.find_slots(stage_index + 1)
-                                  .map(&:slot_id)
-        slots_ids.include?(next_slot)
-      end
-
-      def prev_slot_linked?
-        slots_ids = base_presenter.find_slots(stage_index - 1)
-                                  .map(&:slot_id)
-        slots_ids.include?(prev_slot)
       end
 
       def instance_type
@@ -95,20 +73,12 @@ class Workflow
         slot["nextSlot"]
       end
 
-      def prev_slot_expected?
-        inputs.any? { |input| input["values"]["id"] }
-      end
-
-      def next_slot_expected?
-        outputs.any? { |output| output["values"]["id"] }
-      end
-
       def prev_slot_condition
-        slot_number != 0 && prev_slot_expected?
+        stage_index && stage_index != 0
       end
 
       def next_slot_condition
-        slot_number != slot_objects.length - 1 && next_slot_expected?
+        stage_index && stage_index != max_stage_index
       end
 
       def input_objects_valid?

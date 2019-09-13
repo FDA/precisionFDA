@@ -11,7 +11,7 @@
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
 
-class ChallengeResource < ActiveRecord::Base
+class ChallengeResource < ApplicationRecord
   include Auditor
 
   belongs_to :challenge

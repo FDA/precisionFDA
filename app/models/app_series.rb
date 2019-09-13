@@ -13,7 +13,7 @@
 #  updated_at             :datetime         not null
 #
 
-class AppSeries < ActiveRecord::Base
+class AppSeries < ApplicationRecord
   paginates_per 15
 
   include Auditor

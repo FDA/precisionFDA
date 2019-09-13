@@ -1,4 +1,5 @@
-require File.expand_path('../boot', __FILE__)
+require_relative 'boot'
+require_relative "../app/middleware/rack/permanent_redirect"
 
 require 'rails/all'
 
@@ -8,9 +9,13 @@ Bundler.require(*Rails.groups)
 
 module PrecisionFda
   class Application < Rails::Application
+    # Initialize configuration defaults for originally generated Rails version.
+    config.load_defaults 5.2
+
     # Settings in config/environments/* take precedence over those specified here.
-    # Application configuration should go into files in config/initializers
-    # -- all .rb files in that directory are automatically loaded.
+    # Application configuration can go into files in config/initializers
+    # -- all .rb files in that directory are automatically loaded after loading
+    # the framework and any gems in your application.
 
     # Set Time.zone default to the specified zone and make Active Record auto-convert to this zone.
     # Run "rake -D time" for a list of tasks for finding time zone names. Default is UTC.
@@ -18,10 +23,6 @@ module PrecisionFda
     # The default locale is :en and all translations from config/locales/*.rb,yml are auto loaded.
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
-    config.autoload_paths << Rails.root.join('lib')
-
-    # Do not swallow errors in after_commit/after_rollback callbacks.
-    config.active_record.raise_in_transactional_callbacks = true
 
     config.sass.preferred_syntax = :sass
 
@@ -34,9 +35,7 @@ module PrecisionFda
     # Precompile icon fonts
     config.assets.precompile << %r(bootstrap-sass/assets/fonts/bootstrap/[\w-]+\.(?:eot|svg|ttf|woff2?)$)
 
-    config.autoload_paths += Dir[Rails.root.join("app", "validators", "**")]
-
-    config.middleware.use "Rack::PermanentRedirect"
+    config.middleware.use Rack::PermanentRedirect
 
     config.middleware.insert 0,
         Rack::UTF8Sanitizer,
@@ -46,5 +45,7 @@ module PrecisionFda
 
     # Minimum Sass number precision required by bootstrap-sass
     ::Sass::Script::Value::Number.precision = [8, ::Sass::Script::Value::Number.precision].max
+
+    config.active_record.belongs_to_required_by_default = false
   end
 end

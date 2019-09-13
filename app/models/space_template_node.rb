@@ -1,4 +1,4 @@
-class SpaceTemplateNode < ActiveRecord::Base
+class SpaceTemplateNode < ApplicationRecord
   belongs_to :space_templates
   belongs_to :node, polymorphic: true
   attr :name

@@ -51,10 +51,6 @@ en:
               inclusion: "Slot '%{name}': Each slot 'instanceType' must be a valid instance type selected"
             slot_id:
               unique: "Slot '%{name}': Each slot 'slotId' must be unique."
-              link_next_slot: "Slot '%{name}': Each slot 'slotId' must be the value of the previous slot's 'nextSlot'."
-              link_prev_slot: "Slot '%{name}': Each slot 'prevSlot' must be the value of the previous slot's 'slotId'."
-              next_slot_not_linked: "Slot '%{name}': The slot wasn't correctly linked to a next slot."
-              prev_slot_not_linked: "Slot '%{name}': The slot wasn't correctly linked to a previous slot."
         workflow/stages/input_presenter:
           attributes:
             name:
@@ -87,18 +83,6 @@ en:
               format: >
                 Slot '%{slot_name}': The input named '%{input_name}' is expected to have a
                 'values' hash with keys 'id' and 'name'.
-              compatible_linking: >
-                Slot '%{slot_name}': The input named '%{input_name}' must be desginated as a required input
-                or be linked to a compatible stage output.
-              stage_output_linking: >
-                Slot '%{slot_name}': The input named '%{input_name}' must be desginated as a required input
-                or be linked to another stage's output.
-              wrong_output_stage_linking: >
-                Slot '%{slot_name}': The input named '%{input_name}' is linked to an output
-                that does not belong to the previous stage.
-              wrong_output_class_linking: >
-                Slot '%{slot_name}': The input named '%{input_name}' is linked to an output with the wrong class.
-                Input type is '%{input_class}', but output type is '%{output_class}'.
         workflow/cwl/parser:
           attributes:
             cwl_class:

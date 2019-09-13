@@ -1,4 +1,4 @@
-class AddUidToNodes < ActiveRecord::Migration
+class AddUidToNodes < ActiveRecord::Migration[4.2]
   def change
     add_column :nodes, :uid, :string
 

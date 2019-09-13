@@ -21,11 +21,11 @@ class SpaceFeedController < ApplicationController
   private
 
   def start_date
-    Time.parse(params[:date_at]) if params[:date_at].present?
+    Time.parse(unsafe_params[:date_at]) if unsafe_params[:date_at].present?
   end
 
   def end_date
-    Time.parse(params[:date_to])
+    Time.parse(unsafe_params[:date_to])
   rescue
     Time.now
   end
@@ -43,8 +43,8 @@ class SpaceFeedController < ApplicationController
   end
 
   def page
-    if params[:page].present?
-      params[:page].to_i
+    if unsafe_params[:page].present?
+      unsafe_params[:page].to_i
     end
   rescue
     1
@@ -99,7 +99,7 @@ class SpaceFeedController < ApplicationController
   end
 
   def find_space
-    @space = Space.accessible_by(@context).find_by_id(params[:space_id])
+    @space = Space.accessible_by(@context).find_by_id(unsafe_params[:space_id])
     unless @space
       render json: []
       return

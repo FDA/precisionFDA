@@ -1,8 +1,8 @@
-class NewsItem < ActiveRecord::Base
+class NewsItem < ApplicationRecord
   belongs_to :user
   validates :link, :video, url: true
   validates :title, presence: true
- 
+
   scope :published, -> { where(published: true) }
   scope :positioned, -> { order("position ASC") }
   after_create :set_position

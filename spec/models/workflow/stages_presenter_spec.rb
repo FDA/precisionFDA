@@ -3,12 +3,11 @@ include Imports::WorkflowHelper
 include Imports::StagesHelper
 
 RSpec.describe Workflow::StagesPresenter, type: :model do
-  subject { presenter }
+  subject(:presenter) { described_class.new(raw, context) }
 
   let(:user) { create(:user) }
   let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, nil, nil) }
   let(:raw) { params["slots"] }
-  let(:presenter) { described_class.new(raw, context) }
   let(:subject_response) { presenter.build }
 
   before do
@@ -17,9 +16,15 @@ RSpec.describe Workflow::StagesPresenter, type: :model do
     allow_any_instance_of(Context).to receive(:logged_in?).and_return(true)
   end
 
-  describe ".build" do
+  describe "#build" do
     it "returns stages json" do
       expect(subject_response).to eq(presenter_result)
+    end
+  end
+
+  describe "#max_stage_index" do
+    it "returns max stage index" do
+      expect(presenter.max_stage_index).to eq(1)
     end
   end
 

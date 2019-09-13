@@ -3,7 +3,7 @@ class UsersController < ApplicationController
   before_action :require_login_or_guest, only: [:show]
 
   def show
-    @user = User.find_by!(dxuser: params[:username])
+    @user = User.find_by!(dxuser: unsafe_params[:username])
 
     @counts = {
       notes: @user.notes.real_notes.accessible_by_public.order(id: :desc).count,
@@ -14,29 +14,29 @@ class UsersController < ApplicationController
       apps: @user.app_series.accessible_by_public.count
     }
 
-    if !params.has_key?(:tab)
+    if !unsafe_params.has_key?(:tab)
       if @counts[:notes] > 0
-        params[:tab] = 'notes'
+        unsafe_params[:tab] = 'notes'
       elsif @counts[:discussions] > 0
-        params[:tab] = 'discussions'
+        unsafe_params[:tab] = 'discussions'
       elsif @counts[:answers] > 0
-        params[:tab] = 'answers'
+        unsafe_params[:tab] = 'answers'
       elsif @counts[:files] > 0
-        params[:tab] = 'files'
+        unsafe_params[:tab] = 'files'
       elsif @counts[:comparisons] > 0
-        params[:tab] = 'comparisons'
+        unsafe_params[:tab] = 'comparisons'
       elsif @counts[:apps] > 0
-        params[:tab] = 'apps'
+        unsafe_params[:tab] = 'apps'
       end
     end
 
-    if params[:tab] == 'notes' && @counts[:notes] > 0
-      @notes = @user.notes.real_notes.accessible_by_public.order(id: :desc).page params[:notes_page]
-    elsif params[:tab] == 'discussions' && @counts[:discussions] > 0
-      @discussions = @user.discussions.accessible_by_public.order(id: :desc).page params[:discussions_page]
-    elsif params[:tab] == 'answers' && @counts[:answers] > 0
-      @answers = @user.notes.accessible_by_public.answers.order(id: :desc).page params[:answers_page]
-    elsif params[:tab] == 'files' && @counts[:files] > 0
+    if unsafe_params[:tab] == 'notes' && @counts[:notes] > 0
+      @notes = @user.notes.real_notes.accessible_by_public.order(id: :desc).page unsafe_params[:notes_page]
+    elsif unsafe_params[:tab] == 'discussions' && @counts[:discussions] > 0
+      @discussions = @user.discussions.accessible_by_public.order(id: :desc).page unsafe_params[:discussions_page]
+    elsif unsafe_params[:tab] == 'answers' && @counts[:answers] > 0
+      @answers = @user.notes.accessible_by_public.answers.order(id: :desc).page unsafe_params[:answers_page]
+    elsif unsafe_params[:tab] == 'files' && @counts[:files] > 0
       @files_grid = initialize_grid(@user.real_files.accessible_by_public.includes(:taggings), {
         name: 'files',
         order: 'created_at',
@@ -44,7 +44,7 @@ class UsersController < ApplicationController
         per_page: 25,
         include: [:user, {user: :org}, {taggings: :tag}]
       })
-    elsif params[:tab] == 'comparisons' && @counts[:comparisons] > 0
+    elsif unsafe_params[:tab] == 'comparisons' && @counts[:comparisons] > 0
       @comparisons_grid = initialize_grid(@user.comparisons.accessible_by_public.includes(:taggings), {
         name: 'comparisons',
         order: 'comparisons.id',
@@ -52,7 +52,7 @@ class UsersController < ApplicationController
         per_page: 25,
         include: [:user, {user: :org}, {taggings: :tag}]
       })
-    elsif params[:tab] == 'apps' && @counts[:apps] > 0
+    elsif unsafe_params[:tab] == 'apps' && @counts[:apps] > 0
       @apps_grid = initialize_grid(@user.app_series.accessible_by_public.includes(:latest_version_app, :tags), {
         name: 'apps',
         order: 'apps.created_at',

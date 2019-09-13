@@ -12,7 +12,7 @@
 #  updated_at  :datetime         not null
 #
 
-class SavedQuery < ActiveRecord::Base  #:nodoc:
+class SavedQuery < ApplicationRecord
   include Auditor
 
   belongs_to :user

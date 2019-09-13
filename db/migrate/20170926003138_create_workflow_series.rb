@@ -1,4 +1,4 @@
-class CreateWorkflowSeries < ActiveRecord::Migration
+class CreateWorkflowSeries < ActiveRecord::Migration[4.2]
   def change
     create_table :workflow_series do |t|
       t.string :dxid

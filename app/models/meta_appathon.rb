@@ -14,7 +14,7 @@
 #  updated_at  :datetime         not null
 #
 
-class MetaAppathon < ActiveRecord::Base
+class MetaAppathon < ApplicationRecord
   include Auditor
 
   has_many :appathons
