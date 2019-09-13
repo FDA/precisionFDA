@@ -1,4 +1,4 @@
-class CreateSpace < ActiveRecord::Migration
+class CreateSpace < ActiveRecord::Migration[4.2]
   def change
     create_table :spaces do |t|
       t.string :name, required: true

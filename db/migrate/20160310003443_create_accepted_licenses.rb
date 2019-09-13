@@ -1,4 +1,4 @@
-class CreateAcceptedLicenses < ActiveRecord::Migration
+class CreateAcceptedLicenses < ActiveRecord::Migration[4.2]
   def change
     create_table :accepted_licenses do |t|
       t.references :license, index: true, foreign_key: true

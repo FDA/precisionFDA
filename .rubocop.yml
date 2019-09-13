@@ -1,12 +1,13 @@
 require:
   - rubocop-rspec
+  - rubocop-rails
 
 AllCops:
   Exclude:
   - 'db/schema.rb'
   DisplayCopNames: true
   StyleGuideCopsOnly: false
-  TargetRubyVersion: 2.2.3
+  TargetRubyVersion: 2.3.8
 
 Style/Alias:
   EnforcedStyle: prefer_alias_method
@@ -632,6 +633,10 @@ Rails/UniqBeforePluck:
   SupportedStyles:
   - conservative
   - aggressive
+
+Rails/Validation:
+  Include:
+  - app/models/**/*.rb
 
 Lint/UselessAccessModifier:
   ContextCreatingMethods: []

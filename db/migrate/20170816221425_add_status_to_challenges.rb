@@ -1,4 +1,4 @@
-class AddStatusToChallenges < ActiveRecord::Migration
+class AddStatusToChallenges < ActiveRecord::Migration[4.2]
   def change
     add_column :challenges, :status, :string
     add_column :challenges, :automated, :boolean, default: true

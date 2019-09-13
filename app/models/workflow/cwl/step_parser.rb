@@ -13,7 +13,7 @@ class Workflow
       validates :outputs, 'cwl/outs': true
       validate :inputs_valid?
       validate :outputs_valid?
-      validate :docker_image_valid?, if: 'requirements'
+      validate :docker_image_valid?, if: :requirements
 
       def initialize(title, step_json, step_number, parser)
         @title = title

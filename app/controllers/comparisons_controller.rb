@@ -63,7 +63,7 @@ class ComparisonsController < ApplicationController
   end
 
   def fhir_index
-    user_params = params.except(:controller, :action)
+    user_params = unsafe_params.except(:controller, :action)
     page_number = 1
     page_size = 10
     list = nil
@@ -136,7 +136,7 @@ class ComparisonsController < ApplicationController
 
   def fhir_export
     comparison = nil
-    if params[:id] =~ /^comparison-(\d+)$/
+    if unsafe_params[:id] =~ /^comparison-(\d+)$/
       comparison = Comparison.accessible_by_public.find_by(id: $1)
     end
 
@@ -292,7 +292,7 @@ class ComparisonsController < ApplicationController
   end
 
   def show
-    @comparison = Comparison.accessible_by(@context).find(params[:id])
+    @comparison = Comparison.accessible_by(@context).find(unsafe_params[:id])
 
     if @comparison.state == "pending"
       User.sync_comparison!(@context, @comparison.id)
@@ -322,20 +322,20 @@ class ComparisonsController < ApplicationController
     @item_comments_path = pathify_comments(@comparison)
     if @comparison.in_space?
       space = item_from_uid(@comparison.scope)
-      @comments = Comment.where(commentable: space, content_object: @comparison).order(id: :desc).page params[:comments_page]
+      @comments = Comment.where(commentable: space, content_object: @comparison).order(id: :desc).page unsafe_params[:comments_page]
     else
-      @comments = @comparison.root_comments.order(id: :desc).page params[:comments_page]
+      @comments = @comparison.root_comments.order(id: :desc).page unsafe_params[:comments_page]
     end
 
-    @notes = @comparison.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
-    @answers = @comparison.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
-    @discussions = @comparison.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
+    @notes = @comparison.notes.real_notes.accessible_by(@context).order(id: :desc).page unsafe_params[:notes_page]
+    @answers = @comparison.notes.accessible_by(@context).answers.order(id: :desc).page unsafe_params[:answers_page]
+    @discussions = @comparison.notes.accessible_by(@context).discussions.order(id: :desc).page unsafe_params[:discussions_page]
 
     js id: @comparison.id, roc: @meta["weighted_roc"], state: @comparison.state
   end
 
   def visualize
-    comparison = Comparison.accessible_by(@context).find(params[:id])
+    comparison = Comparison.accessible_by(@context).find(unsafe_params[:id])
     if comparison.state != "done"
       flash[:error] = "You can only visualize comparisons in the 'done' state"
       redirect_to comparison_path(comparison.id)
@@ -373,7 +373,7 @@ class ComparisonsController < ApplicationController
       c.param! :ref_bed_uid, String
     end
 
-    comp_params = params[:comparison]
+    comp_params = unsafe_params[:comparison]
 
     files = {}
     # Required files
@@ -427,7 +427,7 @@ class ComparisonsController < ApplicationController
   end
 
   def rename
-    @comparison = Comparison.find_by!(id: params[:id])
+    @comparison = Comparison.find_by!(id: unsafe_params[:id])
     redirect_to comparison_path(@comparison.id) unless @comparison.editable_by?(@context)
 
     if @comparison.rename(comparison_params[:name], comparison_params[:description], @context)
@@ -440,7 +440,7 @@ class ComparisonsController < ApplicationController
   end
 
   def destroy
-    @comparison = Comparison.find(params[:id])
+    @comparison = Comparison.find(unsafe_params[:id])
     redirect_to :comparisons unless @comparison.editable_by?(@context)
 
     projects = nil

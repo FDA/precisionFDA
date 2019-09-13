@@ -1,5 +1,5 @@
 FactoryBot.define do
   factory :app_series do
-    scope "private"
+    scope { "private" }
   end
 end

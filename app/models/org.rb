@@ -15,14 +15,14 @@
 #  singular   :boolean
 #
 
-class Org < ActiveRecord::Base
+class Org < ApplicationRecord
   include Auditor
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }
   validates :handle, presence: true, uniqueness: { case_sensitive: false }
 
   has_many :users
-  belongs_to :admin, { class_name: 'User' }
+  belongs_to :admin, class_name: "User"
 
   def self.construct_dxorg(handle)
     raise unless handle.present? && handle =~ /^[0-9a-z][0-9a-z_.]*$/

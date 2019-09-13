@@ -15,13 +15,14 @@
 #  updated_at          :datetime        not null
 #
 
-class Task < ActiveRecord::Base
+class Task < ApplicationRecord
   belongs_to :user
   belongs_to :space
 
   validates :assignee_id, presence: true
   validates :name, presence: true, length: { maximum: 255 }
 
+  class << self; undef_method :open; end
   enum status: [:open, :accepted, :declined, :completed, :failed_response_deadline, :failed_completion_deadline]
 
   scope :active, -> { where(status: [0, 1, 4, 5]) }

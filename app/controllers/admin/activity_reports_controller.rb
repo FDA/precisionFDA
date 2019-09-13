@@ -1,7 +1,7 @@
 module Admin
   class ActivityReportsController < BaseController
 
-    def index      
+    def index
       js other_data: other_data
     end
 

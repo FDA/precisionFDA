@@ -7,5 +7,5 @@
 #  code                        :string
 #  expired_at                  :datetime
 
-class PhoneConfirmation < ActiveRecord::Base
+class PhoneConfirmation < ApplicationRecord
 end

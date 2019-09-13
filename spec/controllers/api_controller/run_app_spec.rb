@@ -15,7 +15,7 @@ RSpec.describe ApiController, type: :controller do
     it "runs an app" do
       expect(Event::JobRun).to receive(:create_for)
 
-      post :run_app , {
+      post :run_app, params: {
         id: app.uid,
         name: "test-job",
         inputs: { anything: 'foo' },

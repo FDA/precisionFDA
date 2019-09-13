@@ -1,4 +1,4 @@
-class CreateAppsAssets < ActiveRecord::Migration
+class CreateAppsAssets < ActiveRecord::Migration[4.2]
   def change
     create_table :apps_assets do |t|
       t.belongs_to :app, index: true, foreign_key: true

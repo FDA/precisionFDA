@@ -4,12 +4,12 @@ FactoryBot.define do
 
     sequence(:dxid) { |n| "file-A1S1#{n}" }
     sequence(:name) { |n| "asset-#{n}" }
-    state UserFile::STATE_CLOSED
-    parent_type "Asset"
-    scope :private
+    state { UserFile::STATE_CLOSED }
+    parent_type { "Asset" }
+    scope { :private }
 
     trait :public do
-      scope :public
+      scope { :public }
     end
 
   end

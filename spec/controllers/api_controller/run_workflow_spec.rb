@@ -186,6 +186,7 @@ RSpec.describe ApiController, type: :controller do
 
     it "runs a workflow" do
       list_projects_response = { "#{workflow.project}": "ADMINISTER" }
+
       expect_any_instance_of(DNAnexusAPI)
         .to receive(:call)
         .with(workflow.dxid, "listProjects")
@@ -195,12 +196,13 @@ RSpec.describe ApiController, type: :controller do
         "id" => "analysis-#{SecureRandom.hex(12)}",
         "stages" => ["job-#{SecureRandom.hex(12)}"],
       }
+
       expect_any_instance_of(DNAnexusAPI)
         .to receive(:call)
         .with(workflow.dxid, "run", api_run_params)
         .and_return(run_response)
 
-      post "run_workflow", params
+      post "run_workflow", params: params
 
       expect(response).to have_http_status(200)
       expect(parsed_response["id"]).to_not be_nil
@@ -209,7 +211,7 @@ RSpec.describe ApiController, type: :controller do
     end
 
     it "do not runs a workflow with incorrect integer value and got error message" do
-      post "run_workflow", params_failed_int
+      post "run_workflow", params: params_failed_int
 
       expect(response).to have_http_status(422)
       expect(parsed_response["error"]["type"]).to eq("API Error")

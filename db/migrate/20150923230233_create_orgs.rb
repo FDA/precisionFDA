@@ -1,4 +1,4 @@
-class CreateOrgs < ActiveRecord::Migration
+class CreateOrgs < ActiveRecord::Migration[4.2]
   def change
     create_table :orgs do |t|
       t.string :handle, required: true

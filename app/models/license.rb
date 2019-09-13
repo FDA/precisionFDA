@@ -12,7 +12,7 @@
 #  approval_required :boolean          default(FALSE), not null
 #
 
-class License < ActiveRecord::Base
+class License < ApplicationRecord
   include Auditor
   include Permissions
   include Licenses
@@ -21,9 +21,9 @@ class License < ActiveRecord::Base
   has_many :licensed_items, dependent: :destroy
   has_many :accepted_licenses, dependent: :destroy
 
-  has_many :files, {through: :licensed_items, source: :licenseable, source_type: 'UserFile'}
-  has_many :assets, {through: :licensed_items, source: :licenseable, source_type: 'Asset'}
-  has_many :licensed_users, {through: :accepted_licenses, source: :user}
+  has_many :files, through: :licensed_items, source: :licenseable, source_type: "UserFile"
+  has_many :assets, through: :licensed_items, source: :licenseable, source_type: "Asset"
+  has_many :licensed_users, through: :accepted_licenses, source: :user
 
   def uid
     "license-#{id}"

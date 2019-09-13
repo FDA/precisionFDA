@@ -21,13 +21,13 @@ module Admin
     end
 
     def update
-      @org = Org.find_by_handle(params[:handle])
+      @org = Org.find_by_handle(unsafe_params[:handle])
     end
 
     def change_admin
-      @user = User.find_by_dxuser(params[:user][:dxuser])
+      @user = User.find_by_dxuser(unsafe_params[:user][:dxuser])
 
-      @org = Org.find_by_handle(params[:org][:dxid])
+      @org = Org.find_by_handle(unsafe_params[:org][:dxid])
 
       api = DNAnexusAPI.new(@context.token)
 
@@ -46,10 +46,13 @@ module Admin
 
         @org.admin = @user
         @org.save!
-        redirect_to :back, success: "Admin of the org was updated."
+
+        redirect_back(fallback_location: admin_orgs_path, success: "Admin of the org was updated.")
       rescue Net::HTTPServerError => e
-        error = "There was an error setting user #{@user.dxid} be an ADMIN of #{org.dxid}"
-        redirect_to :back, error
+        redirect_back(
+          fallback_location: admin_orgs_path,
+          error: "There was an error setting user #{@user.dxid} be an ADMIN of #{org.dxid}"
+        )
       end
     end
 
@@ -73,10 +76,10 @@ module Admin
     public
 
     def show
-      @org = Org.find_by_handle(params[:handle])
+      @org = Org.find_by_handle(unsafe_params[:handle])
       @can_change_admin = nil
       user = @context.user
-      filter = params[:filter]
+      filter = unsafe_params[:filter]
 
       api = DNAnexusAPI.new(@context.token)
       begin

@@ -7,7 +7,7 @@ FactoryBot.define do
     response_deadline { Time.now + 1.day }
     completion_deadline { Time.now + 2.days }
     sequence(:name) { |n| "name-#{n}" }
-    description "description"
-    status 0
+    description { "description" }
+    status { 0 }
   end
 end

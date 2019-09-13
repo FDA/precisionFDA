@@ -39,7 +39,7 @@ class App
         {
           name: input.name,
           class: input.pfda_type,
-          optional: false,
+          optional: input.optional?,
           label: "",
           help: "",
         }
@@ -51,7 +51,7 @@ class App
         {
           name: output.name,
           class: output.pfda_type,
-          optional: false,
+          optional: output.optional?,
           label: "",
           help: "",
         }
@@ -146,7 +146,7 @@ mv udocker /usr/local/bin
     end
 
     def wdl_object
-      @wdl_object ||= WdlObject.new(raw)
+      @wdl_object ||= WDLObject.new(raw)
     end
 
     def wdl_object_should_be_valid

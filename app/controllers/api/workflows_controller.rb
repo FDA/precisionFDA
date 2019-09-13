@@ -22,12 +22,12 @@ module Api
 
     def presenter
       @presenter ||= begin
-          if params[:file]
-            klass = params[:format] == "wdl" ? Workflow::WdlPresenter : Workflow::CwlPresenter
+          if unsafe_params[:file]
+            klass = unsafe_params[:format] == "wdl" ? Workflow::WdlPresenter : Workflow::CwlPresenter
           else
             klass = Workflow::Presenter
           end
-          klass.new(params, @context)
+          klass.new(unsafe_params, @context)
       end
     end
   end

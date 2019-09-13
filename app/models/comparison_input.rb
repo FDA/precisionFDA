@@ -8,7 +8,7 @@
 #  role          :string
 #
 
-class ComparisonInput < ActiveRecord::Base
+class ComparisonInput < ApplicationRecord
   include Auditor
 
   belongs_to :comparison

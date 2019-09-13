@@ -3,12 +3,11 @@ include Imports::WorkflowHelper
 include Imports::AppSpecHelper
 
 RSpec.describe Workflow::Cwl::Presenter, type: :model do
-  subject { presenter }
+  subject(:presenter) { described_class.new(workflow_cwl, context) }
 
   let(:user) { create(:user) }
   let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, nil, nil) }
   let(:workflow_cwl) { IO.read(Rails.root.join("spec/support/files/workflow_import/workflow.cwl")) }
-  let(:presenter) { described_class.new(workflow_cwl, context) }
   let(:stages) { presenter.send(:stages_object) }
   let(:subject_response) { presenter.build }
 
@@ -23,7 +22,7 @@ RSpec.describe Workflow::Cwl::Presenter, type: :model do
       .and_return(params["slots"].second["slotId"])
   end
 
-  describe ".build" do
+  describe "#build" do
     it "returns workflow json" do
       expect(subject_response).to eq(params)
     end

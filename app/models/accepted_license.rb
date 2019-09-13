@@ -11,7 +11,7 @@
 #  message    :text
 #
 
-class AcceptedLicense < ActiveRecord::Base
+class AcceptedLicense < ApplicationRecord
   include Auditor
   belongs_to :license
   belongs_to :user

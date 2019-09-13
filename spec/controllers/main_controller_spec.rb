@@ -17,7 +17,7 @@ RSpec.describe MainController, type: :controller do
     before { authenticate!(user) }
 
     it "doesn't raise an exception" do
-      post :publish, id: discussion.uid, scope: "public"
+      post :publish, params: { id: discussion.uid, scope: "public" }
     end
 
   end
@@ -25,7 +25,7 @@ RSpec.describe MainController, type: :controller do
   describe "GET return_from_login" do
 
     it "doesn't flash an error" do
-      get :return_from_login, code: "123"
+      get :return_from_login, params: { code: "123" }
       expect(flash[:error]).to be_falsey
     end
 
@@ -38,7 +38,7 @@ RSpec.describe MainController, type: :controller do
       end
 
       it "flashes an error" do
-        get :return_from_login, code: "123"
+        get :return_from_login, params: { code: "123" }
         expect(flash[:error]).to be_present
       end
     end

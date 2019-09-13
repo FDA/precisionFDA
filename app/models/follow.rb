@@ -12,7 +12,7 @@
 #  updated_at      :datetime
 #
 
-class Follow < ActiveRecord::Base
+class Follow < ApplicationRecord
   include Auditor
 
   extend ActsAsFollower::FollowerLib

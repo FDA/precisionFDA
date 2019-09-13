@@ -11,15 +11,16 @@
 #  workflow_id :integer
 #
 
-class Analysis < ActiveRecord::Base
+class Analysis < ApplicationRecord
   include Auditor
   include Permissions
   extend ApplicationHelper
 
   belongs_to :workflow
-  has_many :jobs
+  has_many :jobs, dependent: :destroy
+
   belongs_to :user
-  has_many :batch_items, class_name: Analysis, foreign_key: :batch_id, primary_key: :batch_id
+  has_many :batch_items, class_name: "Analysis", foreign_key: :batch_id, primary_key: :batch_id
 
   def batch_jobs
     batch_items.map do |i|
@@ -75,7 +76,7 @@ class Analysis < ActiveRecord::Base
 
   def self.job_hash(analyses, options={})
     analyses.includes(:workflow, :batch_items, jobs: :app).reduce({}) do |acc, analysis|
-      formatted_jobs = analysis.jobs.flatten.map do |job|
+      formatted_jobs = analysis.jobs.to_a.flatten.map do |job|
         formatted_job = {
           id: job.id,
           state: job.state,

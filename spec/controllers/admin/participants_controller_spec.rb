@@ -22,19 +22,20 @@ RSpec.describe Admin::ParticipantsController, type: :controller do
       end
 
       it "edit participant" do
-        post :edit, id: participant.id
+        post :edit, params: { id: participant.id }
 
         expect(response).to have_http_status(200)
       end
 
       it "updates participant title" do
-        post :update,
-             id: participant.id,
-             participant: {
-               title: "updated_title",
-               node_dxid: file.uid,
-               image_url: participant.image_url,
-             }
+        post :update, params: {
+              id: participant.id,
+              participant: {
+                title: "updated_title",
+                node_dxid: file.uid,
+                image_url: participant.image_url,
+              }
+            }
         updated_participant = Participant.find(participant.id)
 
         expect(response).to redirect_to("/admin/participants")
@@ -43,13 +44,14 @@ RSpec.describe Admin::ParticipantsController, type: :controller do
       end
 
       it "updates participant image file" do
-        post :update,
-             id: participant.id,
-             participant: {
-               title: participant.title,
-               node_dxid: file_two.uid,
-               image_url: file_two_url,
-             }
+        post :update, params: {
+              id: participant.id,
+              participant: {
+                title: participant.title,
+                node_dxid: file_two.uid,
+                image_url: file_two_url,
+              }
+            }
         updated_participant = Participant.find(participant.id)
 
         expect(response).to redirect_to("/admin/participants")

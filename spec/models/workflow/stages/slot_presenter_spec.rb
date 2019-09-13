@@ -68,30 +68,6 @@ RSpec.describe Workflow::Stages::SlotPresenter, type: :model do
     end
   end
 
-  context "when the slot's prevSlot isn't linked to the previous slot_id" do
-    before do
-      slots.second["prevSlot"] = "wrongSlotId"
-      presenter.valid?
-    end
-
-    it "add errors to the attribute" do
-      expect(presenter.errors[:slot_id])
-        .to include(I18n.t("slot_id.link_prev_slot", locale_options))
-    end
-  end
-
-  context "when the previous slot's nextSlot isn't linked to the slot's slot_id " do
-    before do
-      slots.first["nextSlot"] = "wrongSlotId"
-      presenter.valid?
-    end
-
-    it "add errors to the attribute" do
-      expect(presenter.errors[:slot_id])
-        .to include(I18n.t("slot_id.link_next_slot", locale_options))
-    end
-  end
-
   context "when slot's name is empty" do
     before do
       slot["name"] = ""

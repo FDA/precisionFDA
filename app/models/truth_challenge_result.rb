@@ -43,7 +43,7 @@
 #  meta                      :text
 #
 
-class TruthChallengeResult < ActiveRecord::Base
+class TruthChallengeResult < ApplicationRecord
   include Auditor
   store :meta, {coder: JSON}
 

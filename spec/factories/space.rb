@@ -4,14 +4,14 @@ FactoryBot.define do
     sequence(:description) { |n| "description-#{n}" }
     sequence(:host_dxorg) { |n| "host_dxorg-#{n}" }
     sequence(:guest_dxorg) { |n| "guest_dxorg-#{n}" }
-    space_id nil
+    space_id { nil }
 
     trait :group do
-      space_type :groups
+      space_type { :groups }
 
       transient do
-        host_lead_id nil
-        guest_lead_id nil
+        host_lead_id { nil }
+        guest_lead_id { nil }
       end
 
       after(:create) do |space, evaluator|
@@ -21,11 +21,11 @@ FactoryBot.define do
     end
 
     trait :verification do
-      space_type :verification
+      space_type { :verification }
 
       transient do
-        host_lead_id nil
-        guest_lead_id nil
+        host_lead_id { nil }
+        guest_lead_id { nil }
       end
 
       after(:create) do |space, evaluator|
@@ -35,19 +35,19 @@ FactoryBot.define do
     end
 
     trait :verified do
-      verified 1
+      verified { 1 }
     end
 
     trait :non_verified do
-      verified 0
+      verified { 0 }
     end
 
     trait :review do
-      space_type :review
+      space_type { :review }
 
       transient do
-        host_lead_id nil
-        guest_lead_id nil
+        host_lead_id { nil }
+        guest_lead_id { nil }
       end
 
       after(:create) do |space, evaluator|
@@ -61,8 +61,8 @@ FactoryBot.define do
     end
 
     trait :accepted do
-      host_project 'project-01'
-      guest_project 'project-02'
+      host_project { 'project-01' }
+      guest_project { 'project-02' }
 
       after(:create) do |space, evaluator|
         return unless space.review?
@@ -75,7 +75,7 @@ FactoryBot.define do
     end
 
     trait :confidential do
-      space_type :review
+      space_type { :review }
     end
 
   end

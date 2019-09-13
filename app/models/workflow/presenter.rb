@@ -4,7 +4,7 @@ class Workflow
 
     attr_reader :raw, :context
 
-    validate :parser_valid?, if: 'parser'
+    validate :parser_valid?, if: :parser
     validates :name, 'workflow/non_empty_string': true,
               'workflow/name_format': true
     validates :title, 'workflow/non_empty_string': true

@@ -10,7 +10,7 @@ class Workflow
       validates :readme, 'workflow/non_empty_string': { allow_empty: true }
       validates :inputs, :outputs, presence: true
       validates :steps, 'cwl/steps': true
-      validate :docker_image_valid?, if: 'requirements'
+      validate :docker_image_valid?, if: :requirements
       validate :steps_valid?
 
       def initialize(cwl_string, context)

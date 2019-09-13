@@ -10,7 +10,7 @@
 #  note_id       :integer
 #
 
-class Answer < ActiveRecord::Base
+class Answer < ApplicationRecord
   include Auditor
   # This includes permissions but many methods must be redefined
   # given that the real permissions are mandated by the note
@@ -67,7 +67,8 @@ class Answer < ActiveRecord::Base
       accessible_by_public
     else
       raise unless context.user_id.present? && context.user.present?
-      joins(:note).where.any_of({user_id: context.user_id}, {notes: {scope: "public"}})
+      joins(:note).where(user_id: context.user_id).
+        or(joins(:note).where({ notes: { scope: "public" } }))
     end
   end
 

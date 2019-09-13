@@ -16,11 +16,11 @@
 #  updated_at       :datetime         not null
 #
 
-class Appathon < ActiveRecord::Base
+class Appathon < ApplicationRecord
   include Auditor
 
   belongs_to :meta_appathon
-  belongs_to :admin, {class_name: 'User'}
+  belongs_to :admin, class_name: "User"
 
   acts_as_commentable
   acts_as_followable

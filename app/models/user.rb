@@ -21,7 +21,7 @@
 #  extras                      :text
 #
 
-class User < ActiveRecord::Base
+class User < ApplicationRecord
   include Auditor
 
   # The "schema_version" field is used to denote the schema
@@ -208,11 +208,14 @@ class User < ActiveRecord::Base
 
   def space_uids
     uids = []
+
+    select_query = Arel.sql("distinct concat('space-', spaces.id)")
+
     if review_space_admin?
-      uids.concat(Space.reviewer.pluck("distinct concat('space-', spaces.id)"))
-      uids.concat(Space.verification.pluck("distinct concat('space-', spaces.id)"))
+      uids.concat(Space.reviewer.pluck(select_query))
+      uids.concat(Space.verification.pluck(select_query))
     end
-    uids.concat(spaces.pluck("distinct concat('space-', spaces.id)"))
+    uids.concat(spaces.pluck(select_query))
     uids.uniq
   end
 
