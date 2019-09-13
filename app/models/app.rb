@@ -61,7 +61,7 @@ class App < ActiveRecord::Base
     [space_object] if space_object.groups?
     Space.joins(:space_memberships).
       where(
-        id: [space_object.id, space_object.confidential_spaces.pluck(:id)].flatten(1),
+        id: [space_object.id, space_object.confidential_spaces.pluck(:id)].flatten,
         space_memberships: { user_id: user.id },
       )
   end
