@@ -96,6 +96,7 @@ GEM
     bootstrap-kaminari-views (0.0.5)
       kaminari (>= 0.13)
       rails (>= 3.1)
+    brakeman (4.6.1)
     builder (3.2.3)
     byebug (11.0.1)
     chronic (0.10.2)
@@ -475,6 +476,7 @@ DEPENDENCIES
   axlsx (= 3.0.0.pre)
   bootsnap (>= 1.1.0)
   bootstrap-kaminari-views
+  brakeman
   byebug
   coffee-rails (~> 4.2)
   database_cleaner (~> 1.5, >= 1.5.3)

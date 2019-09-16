@@ -133,6 +133,7 @@ group :development do
 end
 
 group :development, :test, :ui_test do
+  gem "brakeman"
   gem "dotenv-rails"
   gem "thin"
 end
