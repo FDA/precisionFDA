@@ -199,7 +199,11 @@ class App < ApplicationRecord
     cmds << ""
 
     # Generate Docker command with embedded spec and script
-    shell_friendly_spec = { spec: spec, assets: ordered_assets, packages: packages }.to_json.shellescape
+    shell_friendly_spec = {
+      spec: spec,
+      assets: ordered_assets,
+      packages: packages,
+    }.to_json.shellescape
     shell_friendly_code = { code: code }.to_json.shellescape
 
     cmds << "# Write app spec and code to root folder"

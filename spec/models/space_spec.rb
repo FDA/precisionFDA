@@ -4,7 +4,7 @@ RSpec.describe Space, type: :model do
   let(:host_lead) { create(:user, dxuser: "user_1") }
   let(:guest_lead) { create(:user, dxuser: "user_2") }
   let(:verified) do
-    FactoryBot.create(
+    create(
       :space,
       :verification,
       :verified,
@@ -13,7 +13,7 @@ RSpec.describe Space, type: :model do
     )
   end
   let(:non_verified) do
-    FactoryBot.create(
+    create(
       :space,
       :verification,
       :non_verified,
@@ -21,10 +21,10 @@ RSpec.describe Space, type: :model do
       guest_lead_id: guest_lead.id,
     )
   end
-  let(:membership_host) { FactoryBot.create(:space_membership, user_id: host_lead.id) }
-  let(:membership_guest) { FactoryBot.create(:space_membership, user_id: guest_lead.id) }
+  let(:membership_host) { create(:space_membership, user_id: host_lead.id) }
+  let(:membership_guest) { create(:space_membership, user_id: guest_lead.id) }
 
-  let(:context) { double("context") }
+  let(:context) { instance_double("context") }
 
   before do
     allow(context).to receive(:guest?).and_return(false)

@@ -7,7 +7,7 @@ RSpec.describe App, type: :model do
   let(:host_lead) { create(:user, dxuser: "user_1") }
   let(:guest_lead) { create(:user, dxuser: "user_2") }
   let(:verified) do
-    FactoryBot.create(
+    create(
       :space,
       :verification,
       :verified,
@@ -16,7 +16,7 @@ RSpec.describe App, type: :model do
     )
   end
   let(:non_verified) do
-    FactoryBot.create(
+    create(
       :space,
       :verification,
       :non_verified,
@@ -24,12 +24,12 @@ RSpec.describe App, type: :model do
       guest_lead_id: guest_lead.id,
     )
   end
-  let(:membership_host) { FactoryBot.create(:space_membership, user_id: host_lead.id) }
-  let(:membership_guest) { FactoryBot.create(:space_membership, user_id: guest_lead.id) }
+  let(:membership_host) { create(:space_membership, user_id: host_lead.id) }
+  let(:membership_guest) { create(:space_membership, user_id: guest_lead.id) }
   let(:space_scope) { verified.uid }
 
   let(:groups) do
-    FactoryBot.create(:space, :group, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
+    create(:space, :group, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
   end
   let(:space_scope_groups) { groups.uid }
 
@@ -92,7 +92,7 @@ RSpec.describe App, type: :model do
       let(:space) { Space.find(verified.id) }
 
       it "returns a proper app space scopes" do
-        expect(can_run_in_space).to eq false
+        expect(can_run_in_space).to be_falsey
       end
     end
   end
@@ -122,7 +122,7 @@ RSpec.describe App, type: :model do
       let(:space) { Space.find(verified.id) }
 
       it "returns a proper app space scopes" do
-        expect(can_run_in_space).to eq true
+        expect(can_run_in_space).to be_truthy
       end
     end
   end
@@ -156,7 +156,7 @@ RSpec.describe App, type: :model do
       let(:space) { Space.find(groups.id) }
 
       it "returns a proper app space scopes" do
-        expect(can_run_in_space).to eq true
+        expect(can_run_in_space).to be_truthy
       end
     end
   end
