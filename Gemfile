@@ -75,7 +75,7 @@ gem "acts_as_votable"
 
 # For inline-css in emails
 gem "inky-rb", require: "inky"
-gem "nokogiri", "~> 1.8", ">= 1.8.5"
+gem "nokogiri", "~> 1.10", ">= 1.10.4"
 gem "premailer-rails"
 
 gem "whenever", require: false
