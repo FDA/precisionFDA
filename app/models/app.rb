@@ -53,6 +53,9 @@ class App < ApplicationRecord
     space_object.accessible_scopes
   end
 
+  # Check whether app is not in space of any type
+  # @param space_object [Object]
+  # @return [true] if so
   def not_in_spaces
     !in_space? || !space_object.review? && !space_object.verification? && !space_object.groups?
   end
@@ -61,7 +64,6 @@ class App < ApplicationRecord
   def available_job_spaces(user)
     return [] if not_in_spaces
 
-    [space_object] if space_object.groups?
     Space.joins(:space_memberships).
       where(
         id: [space_object.id, space_object.confidential_spaces.pluck(:id)].flatten,
