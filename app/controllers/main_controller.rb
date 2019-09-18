@@ -457,7 +457,7 @@ class MainController < ApplicationController
 
       # Jobs
       if jobs.size > 0
-        published_count += Job.publish(jobs, @context, scope)
+        published_count += PublishService::JobPublisher.new(@context).publish(jobs, scope)
       end
 
       # Notes
