@@ -60,6 +60,10 @@ class DNAnexusAPI
     call("workflow", "new", params)
   end
 
+  def project_clone(source_project_dxid, params)
+    call(source_project_dxid, "clone", params)
+  end
+
   def self.email_exists?(email)
     api = new(ADMIN_TOKEN)
     begin

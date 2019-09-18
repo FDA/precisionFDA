@@ -1,3 +1,27 @@
+# == Schema Information
+#
+# Table name: spaces
+#
+#  id                   :integer          not null, primary key
+#  name                 :string(255)
+#  description          :text(65535)
+#  host_project         :string(255)
+#  guest_project        :string(255)
+#  host_dxorg           :string(255)
+#  guest_dxorg          :string(255)
+#  meta                 :text(65535)
+#  created_at           :datetime         not null
+#  updated_at           :datetime         not null
+#  space_id             :integer
+#  state                :integer          default(0), not null
+#  space_type           :integer          default(0), not null
+#  verified             :boolean          default(FALSE), not null
+#  sponsor_org_id       :integer
+#  space_template_id    :integer
+#  restrict_to_template :boolean          default(FALSE)
+#  inactivity_notified  :boolean          default(FALSE)
+#
+
 require "rails_helper"
 
 RSpec.describe Space, type: :model do

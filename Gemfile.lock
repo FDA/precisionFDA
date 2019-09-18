@@ -96,6 +96,7 @@ GEM
     bootstrap-kaminari-views (0.0.5)
       kaminari (>= 0.13)
       rails (>= 3.1)
+    brakeman (4.6.1)
     builder (3.2.3)
     byebug (11.0.1)
     chronic (0.10.2)
@@ -230,7 +231,7 @@ GEM
     mysql2 (0.5.2)
     nenv (0.3.0)
     nio4r (2.3.1)
-    nokogiri (1.10.3)
+    nokogiri (1.10.4)
       mini_portile2 (~> 2.4.0)
     nori (2.6.0)
     notiffany (0.1.1)
@@ -475,6 +476,7 @@ DEPENDENCIES
   axlsx (= 3.0.0.pre)
   bootsnap (>= 1.1.0)
   bootstrap-kaminari-views
+  brakeman
   byebug
   coffee-rails (~> 4.2)
   database_cleaner (~> 1.5, >= 1.5.3)
@@ -497,7 +499,7 @@ DEPENDENCIES
   listen (>= 3.0.5, < 3.2)
   local_time
   mysql2
-  nokogiri (~> 1.8, >= 1.8.5)
+  nokogiri (~> 1.10, >= 1.10.4)
   paloma (~> 5.1.0)
   parallel
   prawn
