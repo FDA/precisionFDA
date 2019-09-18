@@ -1,6 +1,8 @@
 require "rails_helper"
 
 RSpec.describe App, type: :model do
+  subject { app }
+
   let(:user) { create(:user, dxuser: "user") }
 
   # spaces
@@ -62,13 +64,11 @@ RSpec.describe App, type: :model do
   end
 
   describe "when app is valid" do
-    subject { app }
-
     it { is_expected.to be_valid }
   end
 
   describe "when app is not in any space" do
-    let(:app_space_scopes) { app.space_scopes }
+    let(:app_space_scopes) { subject.space_scopes }
 
     it "app with a proper 'private' scope" do
       expect(app.scope).to eq "private"
@@ -79,7 +79,7 @@ RSpec.describe App, type: :model do
     end
 
     context "with available_job_spaces for host_lead user" do
-      let(:available_job_spaces) { app.available_job_spaces(host_lead) }
+      let(:available_job_spaces) { subject.available_job_spaces(host_lead) }
       let(:space) { Space.find(verified.id) }
 
       it "returns a proper app space scopes" do
@@ -88,7 +88,7 @@ RSpec.describe App, type: :model do
     end
 
     context "with can_run_in_space for host_lead user" do
-      let(:can_run_in_space) { app.can_run_in_space?(host_lead, verified.id) }
+      let(:can_run_in_space) { subject.can_run_in_space?(host_lead, verified.id) }
       let(:space) { Space.find(verified.id) }
 
       it "returns a proper app space scopes" do
@@ -102,14 +102,14 @@ RSpec.describe App, type: :model do
       app.update(scope: space_scope)
     end
 
-    let(:app_space_scopes) { app.space_scopes }
+    let(:app_space_scopes) { subject.space_scopes }
 
     it "returns a proper app space scopes" do
       expect(app_space_scopes).to eq [space_scope]
     end
 
     context "with available_job_spaces for host_lead user" do
-      let(:available_job_spaces) { app.available_job_spaces(host_lead) }
+      let(:available_job_spaces) { subject.available_job_spaces(host_lead) }
       let(:space) { Space.find(verified.id) }
 
       it "returns a proper app space scopes" do
@@ -118,7 +118,7 @@ RSpec.describe App, type: :model do
     end
 
     context "with can_run_in_space for host_lead user" do
-      let(:can_run_in_space) { app.can_run_in_space?(host_lead, verified.id) }
+      let(:can_run_in_space) { subject.can_run_in_space?(host_lead, verified.id) }
       let(:space) { Space.find(verified.id) }
 
       it "returns a proper app space scopes" do
@@ -132,7 +132,7 @@ RSpec.describe App, type: :model do
       app.update(scope: space_scope_groups)
     end
 
-    let(:app_space_scopes) { app.space_scopes }
+    let(:app_space_scopes) { subject.space_scopes }
 
     it "app with a proper scope" do
       expect(app.scope).to eq space_scope_groups
@@ -143,7 +143,7 @@ RSpec.describe App, type: :model do
     end
 
     context "with available_job_spaces for host_lead user" do
-      let(:available_job_spaces) { app.available_job_spaces(host_lead) }
+      let(:available_job_spaces) { subject.available_job_spaces(host_lead) }
       let(:space) { Space.find(groups.id) }
 
       it "returns a proper app space scopes" do
@@ -152,7 +152,7 @@ RSpec.describe App, type: :model do
     end
 
     context "with can_run_in_space for host_lead user" do
-      let(:can_run_in_space) { app.can_run_in_space?(host_lead, groups.id) }
+      let(:can_run_in_space) { subject.can_run_in_space?(host_lead, groups.id) }
       let(:space) { Space.find(groups.id) }
 
       it "returns a proper app space scopes" do
