@@ -1,0 +1,1 @@
+class NotASpaceError < StandardError; end
