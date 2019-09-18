@@ -313,8 +313,17 @@ class ProfileController < ApplicationController
     candidate
   end
 
+  # Returns array of time zones ordered by UTC offset.
+  # @return [Array[Array<String, String>]] Array of time zones info.
+  #   Each element of returning array is array where:
+  #     First element is formatted GMT offset.
+  #     Second element is time zone name.
   def time_zones
-    ActiveSupport::TimeZone.all.map do |time_zone|
+    sorted_time_zones = ActiveSupport::TimeZone.all.sort_by do |time_zone|
+      [time_zone.now.utc_offset, time_zone.name]
+    end
+
+    sorted_time_zones.map do |time_zone|
       ["(GMT#{time_zone.now.formatted_offset}) #{time_zone.name}", time_zone.name]
     end
   end
