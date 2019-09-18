@@ -84,7 +84,7 @@ class ApiController < ApplicationController
 
     # Jobs
     unless jobs.empty?
-      published_count += Job.publish(jobs, @context, scope)
+      published_count += PublishService::JobPublisher.new(@context).publish(jobs, scope)
     end
 
     # Notes

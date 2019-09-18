@@ -172,23 +172,6 @@ class Job < ApplicationRecord
     submission.present?
   end
 
-  def self.publish(jobs, context, scope)
-    count = 0
-    jobs.uniq.each do |job|
-      job.with_lock do
-        if job.publishable_by?(context, scope)
-          job.update!(scope: scope)
-          count += 1
-          if scope =~ /^space-(\d+)$/
-            SpaceEventService.call($1.to_i, context.user_id, nil, job, :job_added)
-          end
-        end
-      end
-    end
-
-    return count
-  end
-
   def output_data
     IOCollection.build_outputs(self)
   end
