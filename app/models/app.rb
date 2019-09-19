@@ -54,8 +54,7 @@ class App < ApplicationRecord
   end
 
   # Check whether app is not in space of any type
-  # @param space_object [Object]
-  # @return [true] if so
+  # @return [true, false]
   def not_in_spaces
     !in_space? || !space_object.review? && !space_object.verification? && !space_object.groups?
   end
