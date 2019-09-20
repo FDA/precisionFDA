@@ -1,6 +1,5 @@
 module OrgService
   module DevelopersOrg
-
     def self.create
       papi = DNAnexusAPI.for_admin
       dxorg = choose_dxorg(papi, "app_developers")
@@ -17,7 +16,7 @@ module OrgService
         papi.call(
           dxorg, "invite",
           invitee: "user-#{dxuser}",
-          level: 'ADMIN',
+          level: "ADMIN",
           suppressEmailNotification: true
         )
       end
@@ -36,5 +35,4 @@ module OrgService
       end
     end
   end
-
 end

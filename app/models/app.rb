@@ -48,14 +48,20 @@ class App < ApplicationRecord
 
   # Scopes of files that can be used to run an app.
   def space_scopes
-    return [] if !in_space? || !space_object.review? && !space_object.verification?
+    return [] if not_in_spaces
 
     space_object.accessible_scopes
   end
 
+  # Check whether app is not in space of any type
+  # @return [true, false]
+  def not_in_spaces
+    !in_space? || !space_object.review? && !space_object.verification? && !space_object.groups?
+  end
+
   # Scopes that can be used to run an app.
   def available_job_spaces(user)
-    return [] if !in_space? || !space_object.review? && !space_object.verification?
+    return [] if not_in_spaces
 
     Space.joins(:space_memberships).
       where(
@@ -65,9 +71,9 @@ class App < ApplicationRecord
   end
 
   def can_run_in_space?(user, space_id)
-    return false if !in_space? || !space_object.review? && !space_object.verification?
+    return false if not_in_spaces
 
-    # TODO control disabled users!
+    # TODO: control disabled users!
     # member = space_object.space_memberships.active.where(user_id: user.id).first
     member = space_object.space_memberships.where(user_id: user.id).first
     return false unless member
@@ -197,8 +203,12 @@ class App < ApplicationRecord
     cmds << ""
 
     # Generate Docker command with embedded spec and script
-    shell_friendly_spec = {spec: spec, assets: ordered_assets, packages: packages}.to_json.shellescape
-    shell_friendly_code = {code: code}.to_json.shellescape
+    shell_friendly_spec = {
+      spec: spec,
+      assets: ordered_assets,
+      packages: packages,
+    }.to_json.shellescape
+    shell_friendly_code = { code: code }.to_json.shellescape
 
     cmds << "# Write app spec and code to root folder"
     cmds << "RUN " + ["/bin/bash", "-c", "echo -E #{shell_friendly_spec} > /spec.json"].to_json
@@ -216,6 +226,6 @@ class App < ApplicationRecord
     cmds << "ENTRYPOINT [\"/usr/bin/run\"]"
     cmds << ""
 
-    cmds.join("\n")    # Join with newlines
+    cmds.join("\n") # Join with newlines
   end
 end
