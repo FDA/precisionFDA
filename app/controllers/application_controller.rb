@@ -302,6 +302,7 @@ class ApplicationController < ActionController::Base
       owned: object.owned_by?(@context),
       editable: object.editable_by?(@context),
       accessible: accessible,
+      parent_folder_name: object.is_a?(UserFile) ? object.parent_folder_name : nil,
       public: object.public?,
       private: object.private?,
       in_space: object.in_space?,

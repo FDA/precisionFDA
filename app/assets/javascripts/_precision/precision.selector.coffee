@@ -258,6 +258,7 @@ class ObjectItemModel
     @scope = ko.observable(object.scope)
 
     @path = ko.observable(object.path)
+    @parentFolderName = ko.observable(object.parent_folder_name)
     @userName = ko.observable(object.user?.full_name)
     @orgName = ko.observable(object.org?.name)
     @all_tags_list = ko.observable(object.all_tags_list)
