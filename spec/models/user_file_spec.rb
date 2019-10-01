@@ -32,8 +32,8 @@ RSpec.describe UserFile, type: :model do
       end
     end
 
-    context "when scope is not private" do
-      let(:folder_name_one) { file_public_one.parent_folder_name("public") }
+    context "when file scope is in space" do
+      let(:folder_name_one) { file_public_one.parent_folder_name("space") }
 
       context "when file is in public folder" do
         it "as a non root folder" do
