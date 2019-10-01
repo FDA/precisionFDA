@@ -28,7 +28,7 @@ class Node < ApplicationRecord
 
   class << self
     def scope_column_name(scope)
-      scope == "private" ? :parent_folder_id : :scoped_parent_folder_id
+      ["private", "public"].include?(scope) ? :parent_folder_id : :scoped_parent_folder_id
     end
 
     def folder_content(files, folders)
