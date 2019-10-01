@@ -116,7 +116,9 @@
                 <span data-bind="text: scopeFormatted" class="text-capitalize"></span>
               </li>
               <!-- ko if: loaded -->
-              <li data-bind="text: parentFolderName"></li>
+                <!-- ko if: className() == 'file' && showFolderName() -->
+                  <li data-bind="text: parentFolderName"></li>
+                <!-- /ko -->
               <li data-bind="text: userName"></li>
               <li data-bind="text: orgName"></li>
                 <!-- ko if: _.size(all_tags_list()) -->

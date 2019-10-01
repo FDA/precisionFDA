@@ -272,6 +272,12 @@ class ObjectItemModel
     @review_space_private = object.space_private
     @review_space_public = object.space_public
 
+    @showFolderName = ko.computed(=>
+      if @owned() || (!@owned() && @in_space())
+        return true
+      else
+        return false
+    )
     @scopeFormatted = ko.computed(=>
       if @public()
         "Public"
