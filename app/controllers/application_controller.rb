@@ -290,6 +290,7 @@ class ApplicationController < ActionController::Base
 
     accessible = object.accessible_by?(@context)
     item_sliced = object.context_slice(@context, *object.describe_fields)
+    scope = item_sliced[:scope]
     review_space = object.space_object if object.in_space?
 
     describe = {
@@ -297,11 +298,12 @@ class ApplicationController < ActionController::Base
       uid: item_sliced[:uid],
       className: item_sliced[:klass],
       fa_class: view_context.fa_class(object),
-      scope: item_sliced[:scope],
+      scope: scope,
       path: accessible ? pathify(object) : nil,
       owned: object.owned_by?(@context),
       editable: object.editable_by?(@context),
       accessible: accessible,
+      parent_folder_name: object.is_a?(UserFile) ? object.parent_folder_name(scope) : nil,
       public: object.public?,
       private: object.private?,
       in_space: object.in_space?,
