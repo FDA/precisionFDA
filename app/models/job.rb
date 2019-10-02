@@ -179,4 +179,8 @@ class Job < ApplicationRecord
   def input_data
     IOCollection.build_inputs(self)
   end
+
+  def log_unaccessible?(context)
+    scope == "public" && user_id != context.user_id
+  end
 end
