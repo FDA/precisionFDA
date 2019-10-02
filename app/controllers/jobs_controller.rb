@@ -32,7 +32,7 @@ class JobsController < ApplicationController
   def log
     @job = Job.accessible_by(@context).find_by_uid(unsafe_params[:id])
 
-    if @job.nil?
+    if @job.nil? || @job.log_unaccessible?(@context)
       flash[:error] = "Sorry, this job does not exist or its log is not accessible by you"
       redirect_to apps_path
       return
