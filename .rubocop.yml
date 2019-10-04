@@ -534,7 +534,7 @@ Metrics/ParameterLists:
   CountKeywordArgs: false
 
 Metrics/MethodLength:
-  Max: 20
+  Max: 30
 
 Layout/BlockAlignment:
   EnforcedStyleAlignWith: either
