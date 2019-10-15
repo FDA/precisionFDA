@@ -65,6 +65,7 @@ Rails.application.routes.draw do
     # hotfix for PFDA-557
     get "/challenges/6" => redirect("/challenges/7")
     get "/mislabeling" => redirect("/challenges/5")
+    get "/challenges/8" => "main#georgetown"
 
     # Main controller
     get 'login' => 'main#login'
