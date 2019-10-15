@@ -1,7 +1,7 @@
 class MainController < ApplicationController
   skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines, :browse_access, :destroy, :presskit, :news, :mislabeling]}
 
-  skip_before_action :require_login,     only: [:track, :mislabeling, :bco_appathon]
+  skip_before_action :require_login,     only: [:track, :mislabeling, :bco_appathon, :georgetown]
   before_action :require_login_or_guest, only: [:track]
 
   def index
@@ -532,6 +532,10 @@ class MainController < ApplicationController
   end
 
   def bco_appathon
+
+  end
+
+  def georgetown
 
   end
 
