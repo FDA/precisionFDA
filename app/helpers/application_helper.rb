@@ -1,5 +1,6 @@
 module ApplicationHelper
   include VerifiedSpaceHelper
+  include OrgService::RequestFilter
   include Rails.application.routes.url_helpers
 
   def page_title(separator = " – ")
@@ -166,10 +167,6 @@ module ApplicationHelper
     return if !@context.logged_in?
     return if controller_name == "main" && action_name == "index"
 
-    action_request = OrgActionRequest.leave_or_remove.where(
-      org: current_user.org
-    ).first
-
-    action_request&.approved?
+    filter_requests(current_user, OrgActionRequest::State::APPROVED).first.present?
   end
 end

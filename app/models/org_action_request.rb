@@ -53,12 +53,6 @@ class OrgActionRequest < ApplicationRecord
     )
   }
 
-  scope :leave_or_remove, -> {
-    leave.or(
-      where(action_type: Type::REMOVE_MEMBER)
-    )
-  }
-
   [State::NEW, State::APPROVED, State::PROCESSING, State::RESOLVED].each do |state_value|
     define_method "#{state_value}?" do
       state == state_value
