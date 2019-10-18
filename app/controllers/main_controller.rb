@@ -14,7 +14,7 @@ class MainController < ApplicationController
     news
     mislabeling
   )
-  skip_before_action :require_login, only: %i(track mislabeling bco_appathon)
+  skip_before_action :require_login, only: %i(track mislabeling bco_appathon georgetown)
   before_action :require_login_or_guest, only: %i(track)
   before_action :init_countries, only: %i(request_access create_request_access)
 
@@ -513,6 +513,10 @@ class MainController < ApplicationController
   end
 
   def bco_appathon
+
+  end
+
+  def georgetown
 
   end
 
