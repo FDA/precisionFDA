@@ -47,9 +47,9 @@
       </div>
     </div>
     <div class="form-group required" data-bind="visible: chosenSpaceType() == 'review'" style="display: none;">
-      <%= f.label :sponsor_org_handle, "Sponsor Org", class: 'control-label col-sm-2' %>
+      <%= f.label :sponsor_lead_dxuser, "Sponsor Lead", class: 'control-label col-sm-2' %>
       <div class="col-sm-11 col-sm-offset-1">
-        <input class="form-control" placeholder="Sponsor org..." type="text" name="space[sponsor_org_handle]" id="space_sponsor_org_handle" data-bind="value: sponsorOrg, attr: {disable: chosenSpaceType() != 'review'}">
+        <input class="form-control" placeholder="Sponsor lead..." type="text" name="space[sponsor_lead_dxuser]" id="space_sponsor_org_handle" data-bind="value: sponsorLead, attr: {disable: chosenSpaceType() != 'review'}">
       </div>
     </div>
 

@@ -16,17 +16,27 @@
 #
 
 class Org < ApplicationRecord
+  default_scope { where.not(state: "deleted") }
+
+  PFDA_PREFIX = "org-pfda..".freeze
+
   include Auditor
 
-  validates :name, presence: true, uniqueness: { case_sensitive: false }
   validates :handle, presence: true, uniqueness: { case_sensitive: false }
+  validates :name, presence: true
 
   has_many :users
+  has_many :org_action_requests
   belongs_to :admin, class_name: "User"
+
+  has_one :dissolve_org_action_request,
+          -> { where(action_type: OrgActionRequest::Type::DISSOLVE) },
+          class_name: "OrgActionRequest"
 
   def self.construct_dxorg(handle)
     raise unless handle.present? && handle =~ /^[0-9a-z][0-9a-z_.]*$/
-    "org-pfda..#{handle}"
+
+    PFDA_PREFIX + handle
   end
 
   def self.handle_by_id(id)
@@ -92,11 +102,10 @@ class Org < ApplicationRecord
   end
 
   def dxid
-    "org-pfda.." + handle
+    PFDA_PREFIX + handle
   end
 
   def dxorg
     Org.construct_dxorg(handle)
   end
-
 end

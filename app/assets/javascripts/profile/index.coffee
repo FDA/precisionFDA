@@ -200,7 +200,7 @@ class ProfileContactsModel
     @isPhoneInputValid = ko.observable(false)
     @phoneFullValue = ko.computed( =>
       # @phoneConfirmed(false)
-      return "#{@phoneCountryCodeValue().replace(/ /g, '')}#{@phoneInputValue()}"
+      return "#{@phoneCountryCodeValue().replace(/\s/g, '')}#{@phoneInputValue()}"
     )
 
     @phoneInput = new Precision.PhoneInput($(PHONE_INPUT)[0], {
@@ -270,6 +270,11 @@ class ProfilePageView
     dxuser = $(e.currentTarget).attr('data-dxuser')
     @deactivateUserModal.showModal(dxuser)
 
+  showRemoveUserModal: (root, e) ->
+    user = $(e.currentTarget).attr('data-user')
+    org = $(e.currentTarget).attr('data-org')
+    @removeUserModal.showModal(user, org)
+
   changeOrgName: () ->
     if @editOrgNameModalValue() and @editOrgNameModalValue().length
       @editOrgNameModalIsLoading(true)
@@ -303,7 +308,66 @@ class ProfilePageView
   editOrgNameModalValueOnChange: (root, e) ->
     @editOrgNameModalValue(e.target.value)
 
+  showLeaveOrgModal: (root, e) ->
+    @leaveOrgModal.modal('show')
+
+  closeLeaveOrgModal: (root, e) ->
+    @leaveOrgModal.modal('hide')
+
+  showDissolveOrgModal: (root, e) ->
+    @dissolveOrgModal.modal('show')
+
+  closeDissolveOrgModal: (root, e) ->
+    @dissolveOrgModal.modal('hide')
+
+  createLeaveOrgRequest: (root, e) =>
+    $.ajax({
+      method: "POST",
+      url: "/org_requests/leave",
+      data: {
+        id: @orgId,
+      },
+      success: () =>
+        window.location = '/profile'
+      error: (data) =>
+        @createLeaveOrgRequestButtonDisabled(false)
+        try
+          errors = JSON.parse(data.responseText)
+          errorText = ''
+          for field, error of errors
+            errorText += "<b>Error: </b>#{field} #{error}<br>"
+          Precision.alert.showAboveAll(errorText)
+        catch
+          Precision.alert.showAboveAll('Something went wrong.')
+      beforeSend: () =>
+        @createLeaveOrgRequestButtonDisabled(true)
+    })
+
+  createDissolveOrgRequest: (root, e) =>
+    $.ajax({
+      method: "POST",
+      url: "/org_requests/dissolve",
+      data: {
+        id: @orgId,
+      },
+      success: () =>
+        window.location = '/profile'
+      error: (data) =>
+        @createDissolveOrgRequestButtonDisabled(false)
+        try
+          errors = JSON.parse(data.responseText)
+          errorText = ''
+          for field, error of errors
+            errorText += "<b>Error: </b>#{field} #{error}<br>"
+          Precision.alert.showAboveAll(errorText)
+        catch
+          Precision.alert.showAboveAll('Something went wrong.')
+      beforeSend: () =>
+        @createDissolveOrgRequestButtonDisabled(true)
+    })
+
   constructor: (params, contactsDefaults) ->
+    @orgId = params.org_id
     @contacts = new ProfileContactsModel(params, contactsDefaults)
     @authCredentialsModal = @contacts.authCredentialsModal
     @phoneConfirm = new Precision.ConfirmPhoneModal(
@@ -315,9 +379,13 @@ class ProfilePageView
       }
     )
 
-    ### Deactivate an user###
+    ### Deactivate user###
     @deactivateUserModal = new Precision.DeactivateUserModal()
-    ### Deactivate an user###
+    ### Deactivate user###
+
+    ### Remove user###
+    @removeUserModal = new Precision.RemoveUserModal()
+    ### Remove user###
 
     ### Edit Org Name ###
     @editOrgNameModal = $('#edit_org_name_modal')
@@ -328,6 +396,11 @@ class ProfilePageView
       return (!@editOrgNameModalValue() or !@editOrgNameModalValue().length)
     )
     ### Edit Org Name ###
+
+    @leaveOrgModal = $('#leave_org_modal')
+    @dissolveOrgModal = $('#dissolve_org_modal')
+    @createLeaveOrgRequestButtonDisabled = ko.observable(false)
+    @createDissolveOrgRequestButtonDisabled = ko.observable(false)
 #########################################################
 #
 #

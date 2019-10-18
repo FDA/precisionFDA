@@ -133,3 +133,16 @@ SYNC_JOBS_LIMIT = ENV.fetch("SYNC_JOBS_LIMIT", 30).to_i
 DX_DOCKER_CACHE = "/tmp/dx-docker-cache"
 
 ASSETS_SEARCH_LIMIT = 1000
+
+BILLING_INFO = {
+  email: "billing@dnanexus.com",
+  name: "Elaine Johanson",
+  companyName: "FDA",
+  address1: "10903 New Hampshire Ave",
+  address2: "Bldg. 32 room 2254",
+  city: "Silver Spring",
+  state: "MD",
+  postCode: "20993",
+  country: "USA",
+  phone: "(301) 706-1836",
+}.freeze

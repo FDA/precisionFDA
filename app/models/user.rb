@@ -24,6 +24,11 @@
 class User < ApplicationRecord
   include Auditor
 
+  EMAIL_FORMAT = %r{
+    ^(([^<>()\[\]\\.,;:\s@\"]+(\.[^<>()\[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.
+    [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$
+  }x.freeze
+
   # The "schema_version" field is used to denote the schema
   # associated with this user on the platform. Changing the
   # Rails schema (for example, adding a new whatever_project
@@ -129,6 +134,10 @@ class User < ApplicationRecord
   has_one :notification_preference
   has_one :profile, dependent: :destroy
   has_one :invitation, dependent: :nullify
+  has_many :org_action_requests,
+           inverse_of: :initiator,
+           foreign_key: :initiator_id,
+           dependent: :destroy
 
   store :extras, accessors: [:has_seen_guidelines], coder: JSON
 
@@ -153,6 +162,10 @@ class User < ApplicationRecord
 
   def self.challenge_bot
     find_by!(dxuser: CHALLENGE_BOT_DX_USER)
+  end
+
+  def active_leave_org_request
+    org_action_requests.leave.find_by(org: org)
   end
 
   def challenge_bot?
@@ -289,7 +302,7 @@ class User < ApplicationRecord
   end
 
   def self.validate_email(email)
-    /^(([^<>()\[\]\\.,;:\s@\"]+(\.[^<>()\[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/ =~ email
+    EMAIL_FORMAT =~ email
   end
 
   def self.validate_state(state, zip_code)
@@ -486,6 +499,19 @@ class User < ApplicationRecord
         sync_job_state(result, jobs_hash[result["id"]], user, CHALLENGE_BOT_TOKEN)
       end
     end
+  end
+
+  def self.provision_params(id)
+    user = find(id)
+    {
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+    }
+  end
+
+  def self.user_helper_attribute(id, attribute)
+    find(id)[attribute]
   end
 
   private

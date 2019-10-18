@@ -1,8 +1,22 @@
 class MainController < ApplicationController
-  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines, :browse_access, :destroy, :presskit, :news, :mislabeling]}
-
-  skip_before_action :require_login,     only: [:track, :mislabeling, :bco_appathon]
-  before_action :require_login_or_guest, only: [:track]
+  skip_before_action :require_login, only: %i(
+    index
+    about
+    exception_test
+    login
+    return_from_login
+    request_access
+    create_request_access terms
+    guidelines
+    browse_access
+    destroy
+    presskit
+    news
+    mislabeling
+  )
+  skip_before_action :require_login, only: %i(track mislabeling bco_appathon)
+  before_action :require_login_or_guest, only: %i(track)
+  before_action :init_countries, only: %i(request_access create_request_access)
 
   def index
     show_guidelines = false
@@ -46,6 +60,9 @@ class MainController < ApplicationController
             end
           end
         end
+
+        login_tasks_processor = container.resolve("orgs.login_tasks_processor")
+        login_tasks_processor.call(@context.user)
       else
         @tutorials = [
           {
@@ -304,52 +321,16 @@ class MainController < ApplicationController
 
   def request_access
     @invitation = Invitation.new
-    @countries = Country.pluck(:name, :id)
-    @us_states_list = Country.us_states_list
 
-    @dial_codes = Country.pluck(:dial_code, :id)
-                    .reject {|i| i[0].empty? }
-                    .to_h
-                    .to_a
-                    .sort
+    js usa_id: Country.find_by(name: "United States").id,
+       country_codes: Country.countries_for_codes,
+       phone_confirmed: unsafe_params.dig(:invitation, :phone_confirmed)
+  end
 
-    usa_id = Country.find_by(name: "United States").id
+  def create_request_access
+    @invitation = RequestAccessService.create_request_for_access(invitation_params)
 
-    if request.post?
-      p = invitation_params
-      p[:ip] = request.remote_ip.to_s
-      p[:state] = "guest"
-      p[:participate_intent] = p[:participate_intent] == "1"
-      p[:organize_intent] = p[:organize_intent] == "1"
-      p[:research_intent] = p[:research_intent] == "1"
-      p[:clinical_intent] = p[:clinical_intent] == "1"
-      p[:organization_admin] = p[:organization_admin] == "1"
-      p[:email] = p[:email].to_s.strip
-      p[:code] = SecureRandom.uuid
-
-      Invitation.transaction do
-        @invitation = Invitation.create(p)
-
-        if @invitation.persisted?
-          auditor_data = {
-            action: "create",
-            record_type: "Access Request",
-            record: {
-              message: "Access requested: #{p.to_json}"
-            }
-          }
-
-          Auditor.perform_audit(auditor_data)
-          NotificationsMailer.invitation_email(@invitation).deliver_now!
-          NotificationsMailer.guest_access_email(@invitation).deliver_now!
-          Event::UserAccessRequested.create_for(@invitation)
-        end
-      end
-    end
-
-    phone_confirmed = unsafe_params.dig(:invitation, :phone_confirmed)
-    organization_admin = unsafe_params.dig(:invitation, :organization_admin)
-    js usa_id: usa_id, country_codes: Country.countries_for_codes, phone_confirmed: phone_confirmed, organization_admin: organization_admin
+    render :request_access
   end
 
   def browse_access
@@ -574,12 +555,18 @@ class MainController < ApplicationController
 
   private
 
+  def init_countries
+    @countries = Country.pluck(:name, :id)
+    @us_states_list = Country.us_states_list
+    @dial_codes = Country.dial_codes
+  end
+
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def invitation_params
     fields = %i(
       first_name
       last_name
       email
-      org
       duns
       address1
       address2
@@ -589,8 +576,6 @@ class MainController < ApplicationController
       postal_code
       phone_country_id
       phone
-      singular
-      organization_admin
       participate_intent
       organize_intent
       req_reason
@@ -602,8 +587,19 @@ class MainController < ApplicationController
       humanizer_question_id
     )
 
-    params.require(:invitation).permit(*fields)
+    hsh = unsafe_params[:invitation].slice(*fields)
+
+    hsh.merge(
+      "ip" => request.remote_ip.to_s,
+      "state" => "guest",
+      "participate_intent" => hsh["participate_intent"] == "1",
+      "organize_intent" => hsh["organize_intent"] == "1",
+      "research_intent" => hsh["research_intent"] == "1",
+      "clinical_intent" => hsh["clinical_intent"] == "1",
+      "email" => hsh["email"].to_s.strip,
+    )
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   def collect_feed
     [Note, Answer, Discussion, UserFile, Comparison, App, Asset].map do |klass|

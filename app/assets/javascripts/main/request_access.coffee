@@ -36,7 +36,7 @@ class RequestAccessPageView
     @isPhoneInputValid = ko.observable(false)
     @phoneFullValue = ko.computed( =>
       # @phoneConfirmed(false)
-      return "#{@phoneCountryCodeValue().replace(/ /g, '')}#{@phoneInputValue()}"
+      return "#{@phoneCountryCodeValue().replace(/\s+/g, '')}#{@phoneInputValue()}"
     )
 
     @phoneConfirm = new Precision.ConfirmPhoneModal(

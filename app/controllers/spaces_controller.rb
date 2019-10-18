@@ -1,12 +1,19 @@
+# TODO: to be refactored
 class SpacesController < ApplicationController
-  before_action :init_parent_folder, only: [:files]
-  before_action :find_space_and_membership, only:
-    [:show, :discuss, :members, :feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
-  before_action :content_counters, only:
-    [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
+  before_action :init_parent_folder, only: :files
 
-  layout "space_content", only:
-    [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
+  before_action :find_space_and_membership, only: %i(
+    show discuss members feed tasks files apps invite
+    notes jobs assets comparisons workflows reports
+  )
+
+  before_action :content_counters, only: %i(
+    feed tasks files apps notes jobs assets comparisons workflows reports
+  )
+
+  layout "space_content", only: %i(
+    feed tasks files apps notes jobs assets comparisons workflows reports
+  )
 
   def index
     spaces = Space.accessible_by(@context)
@@ -91,7 +98,6 @@ class SpacesController < ApplicationController
       redirect_to spaces_path
       return
     end
-
     if space_form.valid?
       space = space_form.persist!(@context.api, @context.user)
 
@@ -123,10 +129,6 @@ class SpacesController < ApplicationController
     end
   end
 
-  def destroy
-    # TODO: figure out if and how spaces should be deleted
-  end
-
   def accept
     space = Space.accessible_by(@context).find(unsafe_params[:id])
     admin = space.space_memberships.lead_or_admin.find_by(user_id: @context.user_id)
@@ -140,19 +142,27 @@ class SpacesController < ApplicationController
   end
 
   def invite
-    @space = Space.accessible_by(@context).find(unsafe_params[:id])
-    admin = fetch_membership
-
-    if admin
-      space_invite_form = SpaceInviteForm.new(unsafe_params[:space].merge(space: @space))
+    if @membership
+      space_invite_form = SpaceInviteForm.new(space_invite_params.merge(space: @space))
 
       if space_invite_form.valid?
-        space_invite_form.invite(@context, admin)
+        api = @membership.persisted? ? @context.api : DNAnexusAPI.for_admin
+
+        begin
+          invited_emails = space_invite_form.invite(@membership, api)
+        rescue StandardError
+          flash[:error] = "An error has occurred during inviting"
+        end
+
+        if invited_emails.present?
+          flash[:success] = "The invitations to the space have been sent to the following " \
+                            "emails: #{invited_emails.to_sentence}"
+        end
       else
-        flash[:error] = space_invite_form.errors.messages.values.join(", ")
+        flash[:error] = space_invite_form.errors.full_messages.join(", ")
       end
     else
-      flash[:error] = "You don't have permission to edit this space"
+      flash[:error] = "You don't have permission to invite members to this space"
     end
 
     redirect_to members_space_path(@space)
@@ -561,7 +571,7 @@ class SpacesController < ApplicationController
   end
 
   def apps_and_files
-    spaces = Space.where(id: unsafe_params[:spaces].split(','))
+    spaces = Space.where(id: unsafe_params[:spaces].split(","))
 
     apps = {}
     files = {}
@@ -572,26 +582,21 @@ class SpacesController < ApplicationController
     end
 
     respond_to do |r|
-      r.html{ render json: { apps: apps, files: files } }
-      r.json{ render json: { apps: apps, files: files } }
+      r.html { render json: { apps: apps, files: files } }
+      r.json { render json: { apps: apps, files: files } }
     end
   end
 
   private
 
-  def fetch_membership
-    if @context.review_space_admin?
-      membership = @space.space_memberships.active.find_by(user_id: @context.user_id)
-      membership || SpaceMembership.new_by_admin(@context.user)
-    else
-      @space.space_memberships.active.find_by!(user_id: @context.user_id)
-    end
-  end
-
   def space_params
     params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser,
                                   :space_type, :cts, :sponsor_org_handle, :space_template_id,
-                                  :restrict_to_template)
+                                  :sponsor_lead_dxuser, :restrict_to_template)
+  end
+
+  def space_invite_params
+    params.require(:space).permit(:invitees, :invitees_role)
   end
 
   def update_space_params
@@ -652,12 +657,23 @@ class SpacesController < ApplicationController
     CopyService::FileCopier.new(api: @context.api, user: @context.user)
   end
 
-  def find_space_and_membership
-    @space = Space.accessible_by(@context).find_by_id(unsafe_params[:id])
-    unless @space
-      redirect_to root_url
-      return
+  def fetch_membership
+    membership = @space.space_memberships.active.find_by(user_id: @context.user_id)
+
+    if membership.nil? && @context.review_space_admin?
+      SpaceMembership.new_by_admin(@context.user)
+    else
+      membership
     end
+  end
+
+  def find_space_and_membership
+    @space = Space.accessible_by(@context).find(params[:id])
+
+    unless @space
+      redirect_back(fallback_location: root_path, alert: "Space doesn't exist") && return
+    end
+
     @membership = fetch_membership
   end
 
@@ -674,6 +690,11 @@ class SpacesController < ApplicationController
   end
 
   def common_fields
-    { space_uid: @space.uid, scopes: @space.accessible_scopes_for_move, space_id: @space.id, active: @space.active? }
+    {
+      space_uid: @space.uid,
+      scopes: @space.accessible_scopes_for_move,
+      space_id: @space.id,
+      active: @space.active?,
+    }
   end
 end

@@ -11,7 +11,12 @@ module SpaceService
       @user = user
     end
 
-    # @param [SpaceForm, #name, #description, #space_type, #cts, #host_lead_dxuser, #guest_lead_dxuser, #sponsor_org] space_form
+    # Creates a space based on space_form data and returns new space
+    # @param [
+    #   SpaceForm, #name, #description, #space_type, #cts, #host_lead_dxuser,
+    #   #guest_lead_dxuser, #sponsor_org
+    # ] space_form
+    # @return [Space]
     def call(space_form)
       Space.transaction do
         space = build_space(space_form)
@@ -46,10 +51,12 @@ module SpaceService
         space_type: space_form.space_type,
         cts: space_form.cts,
         space_template_id: space_form.space_template_id,
-        restrict_to_template: space_form.restrict_to_template
+        restrict_to_template: space_form.restrict_to_template,
       )
       space.guest_dxorg = guest_dx_org(uuid, space, space_form)
-      space.sponsor_org_id = space_form.sponsor_org.id if space.review?
+      space.sponsor_org_id = space_form.space_sponsor.org_id if space.review?
+      # TODO: set up a migration to add sponsor_lead_dxuser?
+      # space.sponsor_lead_dxuser = space_form.sponsor.id if space.review?
       space
     end
 
@@ -58,18 +65,23 @@ module SpaceService
       orgs_dxs.each { |dxorg| OrgService::Create.call(api, dxorg) }
     end
 
-    # Add leads as ADMINs
+    # Add host and guest leads as ADMINs
+    # @param [Space]
+    # @param [SpaceForm]
     def add_leads(space, space_form)
+      form_host_lead_dxuser = space_form.host_lead_dxuser
       add_lead(
         space,
-        User.find_by!(dxuser: space_form.host_lead_dxuser),
-        SpaceMembership::SIDE_HOST
+        User.find_by!(dxuser: form_host_lead_dxuser),
+        SpaceMembership::SIDE_HOST,
       )
       return if guest_blank?(space, space_form)
+
+      form_guest_lead_dxuser = space_form.guest_lead_dxuser
       add_lead(
         space,
-        space.review? ? space.sponsor_org.admin : User.find_by!(dxuser: space_form.guest_lead_dxuser),
-        SpaceMembership::SIDE_GUEST
+        space.review? ? space_form.space_sponsor : User.find_by!(dxuser: form_guest_lead_dxuser),
+        SpaceMembership::SIDE_GUEST,
       )
     end
 
@@ -78,7 +90,7 @@ module SpaceService
         papi,
         space,
         user,
-        side
+        side,
       )
     end
 
@@ -90,15 +102,20 @@ module SpaceService
       orgs_dxs.each { |dxorg| papi.call(dxorg, "removeMember", user: ADMIN_USER) }
     end
 
+    # Send an activation email to all space leads
+    # @param [Space]
     def send_emails(space)
       space.leads.find_each do |lead|
         notification_mailer.space_activation_email(space, lead).deliver_now!
       end
     end
 
+    # Create a project of a cooperative review space.
+    # @param [Space]
     def create_reviewer_cooperative_project(space)
       if ADMIN_USER != user.dxid
-        papi.call(space.host_dxorg, "invite",
+        papi.call(
+          space.host_dxorg, "invite",
           invitee: user.dxid,
           level: "ADMIN",
           suppressEmailNotification: true
@@ -139,6 +156,9 @@ module SpaceService
       space.save!
     end
 
+    # Create a project of a confidential review space.
+    # @param [Space]
+    # @param [SpaceForm]
     def create_reviewer_confidential_space(shared_space, space_form)
       space = shared_space.confidential_spaces.create!(
         name: shared_space.name,
@@ -178,20 +198,25 @@ module SpaceService
       apply_space_template(space)
     end
 
+    # TODO: to be refactored
+    # Apply space_template to the space if space_template exists
+    # @param [Space]
     def apply_space_template(space)
       parent_space = space.space
-      template = parent_space.space_template
+      return if parent_space.blank?
 
-      if template.present?
-        template.space_template_nodes.each do |n|
-          case n.node
-          when UserFile
-            copy_service.copy(n.node, space.uid)
-          when App
-            copy_service.copy(n.node, space.uid)
-          else
-            raise("Space template #{template.id} has Unexpected node #{n.id} of #{n.node.class} class")
-          end
+      template = parent_space.space_template
+      return if template.blank?
+
+      template.space_template_nodes.each do |n|
+        node = n.node
+        case node
+        when UserFile
+          copy_service.copy(node, space.uid)
+        when App
+          copy_service.copy(node, space.uid)
+        else
+          raise("Space template #{template.id} has Unexpected node #{n.id} of #{node.class} class")
         end
       end
     end
@@ -207,11 +232,13 @@ module SpaceService
     def guest_dx_org(uuid, space, space_form)
       return if guest_blank?(space, space_form)
       return Org.construct_dxorg("space_host_#{uuid}") if guest_and_host_equal?(space, space_form)
+
       Org.construct_dxorg("space_guest_#{uuid}")
     end
 
     def guest_and_host_equal?(space, space_form)
       return false unless space.verification?
+
       space_form.guest_lead_dxuser == space_form.host_lead_dxuser
     end
 

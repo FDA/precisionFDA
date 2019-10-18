@@ -22,12 +22,6 @@
       </p>
     </li>
     <li class="list-group-item">
-      <h5 class="list-group-item-heading">Org</h5>
-      <p class="list-group-item-text">
-        <%= @submission.user.org.handle %>
-      </p>
-    </li>
-    <li class="list-group-item">
       <h5 class="list-group-item-heading">Added by</h5>
       <p class="list-group-item-text">
         <%= link_to(@submission.user.dxuser, user_path(@submission.user.dxuser))  %>

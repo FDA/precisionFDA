@@ -73,6 +73,9 @@ Rails.application.configure do
   # SSL
   config.force_ssl = true
 
+  # Allow access from any ip
+  config.web_console.whiny_requests = false
+
   # STDOUT logging
   if ENV['RAILS_LOG_TO_STDOUT']
     STDOUT.sync = true
