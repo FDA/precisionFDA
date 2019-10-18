@@ -35,7 +35,7 @@ Rails.application.routes.draw do
       resources :usage_reports, only: [:index] do
         post :update_custom_range, on: :collection
       end
-      get "users", to: "users#all_users"
+      get "users", to: "users#index"
       get "active_users", to: "users#active"
       get "reset_mfa_user", to: "users#reset_2fa"
       get "toggle_activate_user", to: "users#toggle_activate_user"
@@ -43,22 +43,28 @@ Rails.application.routes.draw do
       get "unlock_user", to: "users#unlock_user"
       post "unlock_user", to: "users#unlock_user"
       get "pending_users", to: "users#pending_users"
+      get "org_action_requests", to: "org_requests#index"
       get "deactivated_users", to: "users#deactivated_users"
       get "resend_activation_email", to: "users#resend_activation_email"
       get "edit_user", to: "users#edit"
       get "update_user", to: "users#update"
 
-      get 'orgs', to: "organizations#index"
-      get 'show_org', to: "organizations#show", param: :handle
-      get 'provision_org', to: "organizations#provision_org"
-      post 'provision_org', to: "organizations#create_org"
-      post 'change_org_admin', to: "organizations#change_admin"
+      resources :organizations, only: %i(index show create) do
+        post :change_org_admin, on: :collection
+        post :dissolve
+      end
 
       resources :get_started_boxes, except: [:show] do
         post :update_positions, on: :collection
       end
       resources :participants, except: [:show] do
         post :update_positions, on: :collection
+      end
+
+      resources :org_requests do
+        member do
+          put "approve", to: "org_requests#approve"
+        end
       end
     end
 
@@ -74,7 +80,7 @@ Rails.application.routes.draw do
     get 'track' => 'main#track'
     get 'mislabeling' => 'main#mislabeling'
     get 'request_access' => 'main#request_access'
-    post 'request_access' => 'main#request_access'
+    post "request_access" => "main#create_request_access"
     get 'browse_access' => 'main#browse_access'
     post 'browse_access' => 'main#browse_access'
     get 'about' => 'main#about'
@@ -86,6 +92,14 @@ Rails.application.routes.draw do
     get 'exception_test' => "main#exception_test"
     get 'presskit' => 'main#presskit'
     get 'news' => 'main#news'
+
+    resources :org_requests do
+      collection do
+        post "leave", to: "org_requests#create_leave"
+        post "remove_member", to: "org_requests#remove_member"
+        post "dissolve", to: "org_requests#create_dissolve"
+      end
+    end
 
     # API
     namespace "api" do
@@ -172,6 +186,8 @@ Rails.application.routes.draw do
     get 'profile', to: 'profile#index'
     put 'profile', to: 'profile#update'
     post 'profile/provision_user', to: 'profile#provision_user', as: 'provision_user'
+    get "profile/provision_new_user", to: "profile#provision_new_user"
+    post "profile/provision_new_user", to: "profile#provision_new_user", as: "provision_new_user"
     get 'profile/provision_org', to: 'profile#provision_org'
     post 'profile/provision_org', to: 'profile#provision_org', as: 'provision_org'
     post 'profile/run_report', to: 'profile#run_report', as: 'run_report'
@@ -326,7 +342,7 @@ Rails.application.routes.draw do
       get 'app_file_list'
     end
 
-    resources :spaces do
+    resources :spaces, except: %(destroy) do
       get 'members', on: :member
       get 'discuss', on: :member
       get 'tasks',   on: :member
@@ -357,6 +373,7 @@ Rails.application.routes.draw do
       post 'copy_file_to_cooperative', on: :member
       post 'copy_to_cooperative', on: :member
       post 'search_content', on: :member
+
       resources :comments
 
       resources :tasks, only: [:create, :destroy, :update, :show] do

@@ -99,6 +99,8 @@ gem "parallel"
 gem 'execjs'
 gem 'therubyracer'
 
+gem "dry-container"
+
 group :development do
   # Annotate models
   gem "annotate"

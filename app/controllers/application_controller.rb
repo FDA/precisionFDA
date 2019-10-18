@@ -403,4 +403,8 @@ class ApplicationController < ActionController::Base
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
   end
+
+  def container
+    @container ||= IOC::Container.new(@context.token, @context.user)
+  end
 end

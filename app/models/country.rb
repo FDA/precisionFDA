@@ -100,4 +100,8 @@ class Country < ApplicationRecord
     country_codes_array.each { |country, id| new_hash[country] << id }
     new_hash
   end
+
+  def self.dial_codes
+    Country.pluck(:dial_code, :id).reject { |i| i[0].empty? }.to_h.to_a.sort
+  end
 end

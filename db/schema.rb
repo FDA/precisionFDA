@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_07_31_224937) do
+ActiveRecord::Schema.define(version: 2019_10_02_100618) do
 
   create_table "accepted_licenses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -450,6 +450,23 @@ ActiveRecord::Schema.define(version: 2019_07_31_224937) do
     t.index ["user_id"], name: "index_notification_preferences_on_user_id", unique: true
   end
 
+  create_table "org_action_requests", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+    t.integer "org_id", null: false
+    t.integer "initiator_id", null: false
+    t.string "action_type", null: false
+    t.string "state", null: false
+    t.integer "member_id"
+    t.datetime "created_at", null: false
+    t.integer "approver_id"
+    t.datetime "approved_at"
+    t.datetime "resolved_at"
+    t.text "info"
+    t.index ["approver_id"], name: "index_org_action_requests_on_approver_id"
+    t.index ["initiator_id"], name: "index_org_action_requests_on_initiator_id"
+    t.index ["member_id"], name: "index_org_action_requests_on_member_id"
+    t.index ["org_id"], name: "index_org_action_requests_on_org_id"
+  end
+
   create_table "orgs", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "handle"
     t.string "name"
@@ -542,6 +559,17 @@ ActiveRecord::Schema.define(version: 2019_07_31_224937) do
     t.index ["entity_type", "entity_id"], name: "index_space_events_on_entity_type_and_entity_id"
     t.index ["space_id"], name: "index_space_events_on_space_id"
     t.index ["user_id"], name: "index_space_events_on_user_id"
+  end
+
+  create_table "space_invitations", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+    t.integer "space_id", null: false
+    t.integer "inviter_id"
+    t.string "email", null: false
+    t.string "role", null: false
+    t.datetime "created_at", null: false
+    t.index ["inviter_id"], name: "index_space_invitations_on_inviter_id"
+    t.index ["space_id", "email"], name: "index_space_invitations_on_space_id_and_email", unique: true
+    t.index ["space_id"], name: "index_space_invitations_on_space_id"
   end
 
   create_table "space_memberships", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
@@ -643,7 +671,7 @@ ActiveRecord::Schema.define(version: 2019_07_31_224937) do
   end
 
   create_table "tags", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
-    t.string "name"
+    t.string "name", collation: "utf8_bin"
     t.integer "taggings_count", default: 0
     t.index ["name"], name: "index_tags_on_name", unique: true
   end
@@ -882,6 +910,10 @@ ActiveRecord::Schema.define(version: 2019_07_31_224937) do
   add_foreign_key "nodes", "users"
   add_foreign_key "notes", "users"
   add_foreign_key "notification_preferences", "users"
+  add_foreign_key "org_action_requests", "orgs"
+  add_foreign_key "org_action_requests", "users", column: "approver_id"
+  add_foreign_key "org_action_requests", "users", column: "initiator_id"
+  add_foreign_key "org_action_requests", "users", column: "member_id"
   add_foreign_key "orgs", "users", column: "admin_id"
   add_foreign_key "participants", "nodes"
   add_foreign_key "profiles", "countries"
@@ -890,6 +922,8 @@ ActiveRecord::Schema.define(version: 2019_07_31_224937) do
   add_foreign_key "saved_queries", "users"
   add_foreign_key "space_events", "spaces"
   add_foreign_key "space_events", "users"
+  add_foreign_key "space_invitations", "spaces"
+  add_foreign_key "space_invitations", "users", column: "inviter_id"
   add_foreign_key "space_memberships", "users"
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"

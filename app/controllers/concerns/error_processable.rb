@@ -15,6 +15,19 @@ module ErrorProcessable
     raise ApiError.new(msg, data)
   end
 
+  def add_errors(attributes)
+    first_name = attributes[:first_name]
+    last_name = attributes[:last_name]
+    email = attributes[:email]
+
+    errors = []
+    errors += user_invalid_errors(first_name: first_name, last_name: last_name, email: email)
+    errors << user_name_pattern_error(first_name, last_name)
+    errors += org_errors(attributes[:org], attributes[:org_handle])
+    errors << email_exists_error(email)
+    errors.reject(&:blank?)
+  end
+
   def user_invalid_errors(opts = {})
     new_user = User.new(opts)
     new_user.invalid? ? new_user.errors.full_messages : []

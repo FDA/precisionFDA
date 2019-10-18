@@ -29,28 +29,31 @@ class Space < ActiveRecord::Base
   TYPES = %i(groups review verification)
   STATES = %i(unactivated active locked deleted)
 
+  belongs_to :space
+  belongs_to :space_template
   belongs_to :sponsor_org, class_name: "Org"
+
   has_and_belongs_to_many :space_memberships
+
   has_many :users, through: :space_memberships
   has_many :confidential_spaces, class_name: "Space"
-  belongs_to :space
   has_many :tasks, dependent: :destroy
   has_many :space_events
-
-  belongs_to :space_template
+  has_many :space_invitations
 
   acts_as_commentable
 
   store :meta, accessors: [:cts], coder: JSON
 
-  alias_method :shared_space, :space
-
-  attr_accessor :invitees, :invitees_role
-
-  attr_accessor :host_lead_dxuser, :guest_lead_dxuser, :invitees, :invitees_role
-
   enum space_type: TYPES
   enum state: STATES
+
+  alias_method :shared_space, :space
+
+  attr_accessor :invitees,
+                :invitees_role,
+                :host_lead_dxuser,
+                :guest_lead_dxuser
 
   scope :top_level, -> { where(space_id: nil) }
   scope :shared, -> { review.top_level }

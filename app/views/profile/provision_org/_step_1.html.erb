@@ -14,8 +14,6 @@
           <th>Last name</th>
           <th>Email</th>
           <th>Organization</th>
-          <th>Self?</th>
-          <th>Org Admin?</th>
           <th>Address 1</th>
           <th>Address 2</th>
           <th>Phone</th>
@@ -35,8 +33,6 @@
           <td><%= inv.last_name %></td>
           <td><%= inv.email %></td>
           <td><%= inv.org %></td>
-          <td><%= inv.singular ? 'YES' : ('&ndash;'.html_safe) %></td>
-          <td><%= inv.organization_admin ? 'YES' : ('&ndash;'.html_safe) %></td>
           <td><%= inv.address1 %></td>
           <td><%= inv.address2 %></td>
           <td><%= inv.full_phone %></td>

@@ -162,4 +162,14 @@ module ApplicationHelper
     "#{GIT_BRANCH}:#{GIT_REVISION}"
   end
 
+  def leave_org_alert_shown?
+    return if !@context.logged_in?
+    return if controller_name == "main" && action_name == "index"
+
+    action_request = OrgActionRequest.leave_or_remove.where(
+      org: current_user.org
+    ).first
+
+    action_request&.approved?
+  end
 end

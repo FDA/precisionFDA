@@ -1,0 +1,28 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    Your request for removal of <%= @member.full_name %> from your organization was approved by <%= @approver.full_name %>
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="<%= HOST %>" title="precisionFDA">
+          <img class="header-image" src="<%= HOST %>/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right">Request for removal of <%= @member.full_name %> from your organization was approved</p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p>
+          Your request for removal of <%= @member.full_name %> from your organization was approved by <%= @approver.full_name %>
+        </p>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>
