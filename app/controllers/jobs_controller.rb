@@ -32,7 +32,7 @@ class JobsController < ApplicationController
   def log
     @job = Job.accessible_by(@context).find_by_uid(unsafe_params[:id])
 
-    if @job.nil?
+    if @job.nil? || @job.log_unaccessible?(@context)
       flash[:error] = "Sorry, this job does not exist or its log is not accessible by you"
       redirect_to apps_path
       return
@@ -41,16 +41,12 @@ class JobsController < ApplicationController
     sync_job!
 
     uri = URI(DNANEXUS_APISERVER_URI)
-
     raw_socket = TCPSocket.new(uri.host, uri.port)
     socket = OpenSSL::SSL::SSLSocket.new(raw_socket)
     socket.connect
     handshake = WebSocket::Handshake::Client.new(url: "wss://#{uri.host}:#{uri.port}/#{@job.dxid}/getLog/websocket")
     socket.write(handshake.to_s)
-
-    while !handshake.finished?
-      handshake << socket.readline
-    end
+    handshake << socket.readline until handshake.finished?
     raise unless handshake.valid?
 
     frame = WebSocket::Frame::Outgoing::Client.new(
@@ -59,7 +55,7 @@ class JobsController < ApplicationController
         access_token: @job.from_submission? ? CHALLENGE_BOT_TOKEN : @context.token,
         token_type: "Bearer", tail: false
       }.to_json,
-      type: :text
+      type: :text,
     ).to_s
 
     socket.write(frame)
@@ -70,22 +66,26 @@ class JobsController < ApplicationController
     @log_levels = []
     @log_contents = []
 
-    while true do
+    loop do
       data = socket.getc
       break if data.nil? || data.empty?
+
       client << data
-      while (msg = client.next) do
-        msg = JSON.parse(msg.to_s)
+      while (msg = client.next)
+        json = JSON.parse(msg.to_s)
         # source, msg, timestamp, level, job, line|
         # source=SYSTEM, msg=END_LOG
-        if msg["code"]
+
+        if json["code"]
           flash[:error] = "Sorry, something went wrong. Please, try later"
           return
         end
-        return if msg["source"] == "SYSTEM" && msg["msg"] == "END_LOG"
-        @log_times << msg["timestamp"]
-        @log_levels << msg["level"]
-        @log_contents << msg["msg"]
+
+        return if json["source"] == "SYSTEM" && json["msg"] == "END_LOG"
+
+        @log_times << json["timestamp"]
+        @log_levels << json["level"]
+        @log_contents << json["msg"]
       end
     end
   end

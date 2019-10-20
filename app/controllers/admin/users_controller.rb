@@ -2,6 +2,11 @@ module Admin
   class UsersController < BaseController
     skip_before_action  :check_admin, only: :toggle_activate_user
 
+    def index
+      @users = User.all
+      @users_grid = initialize_grid(@users)
+    end
+
     def toggle_activate_user
       user = User.find_by_dxuser(unsafe_params[:dxuser])
 

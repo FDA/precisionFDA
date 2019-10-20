@@ -30,7 +30,7 @@
             <div class="pfda-padded-v">No Users Found</div>
           <!-- /ko -->
         </div>
-        <%= form_tag "/admin/change_org_admin", id:"change_admin_modal_form", method:"POST",class:"hidden" do %>
+        <%= form_tag change_org_admin_admin_organizations_path, id:"change_admin_modal_form", method: "POST", class: "hidden" do %>
           <input type="text" name="user[dxuser]" data-bind="value: changeAdminModal.selectedUserDxuser" />
           <input type="text" name="org[dxid]" data-bind="value: changeAdminModal.orgid" />
         <% end %>

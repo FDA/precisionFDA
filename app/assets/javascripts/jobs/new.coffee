@@ -13,28 +13,29 @@ class JobsNewView
     @running = ko.observable(false)
     @name = ko.observable(app.title)
     @spaceId = ko.observable()
-
     @isInSpace = selectable_spaces.length > 0
+    @defaultSelectedSpace = ko.computed(() =>
+      if selectable_spaces.length == 1
+        return selectable_spaces[0]
+      else
+        return null
+    )
     @isReviewSpace = ko.computed(=>
       return @isInSpace &&
              _.first(selectable_spaces).space_type == "review"
     )
-
-    @needSelectSpace = @isInSpace &&
-                       @isReviewSpace()
-
     if @isInSpace && !@isReviewSpace()
       @spaceId(_.first(selectable_spaces).value)
 
     @contentScopes = ko.computed( =>
-      if @needSelectSpace
+      if @isInSpace
         available_content_scopes[@spaceId()]
       else
         app.space_scopes
     )
 
     @inputModels = ko.computed(=>
-      return if @needSelectSpace && !@spaceId()
+      return if @isInSpace && !@spaceId()
       _.map(@inputSpec, (spec) =>
         new Precision.models.AppInputModel(spec, this)
       )

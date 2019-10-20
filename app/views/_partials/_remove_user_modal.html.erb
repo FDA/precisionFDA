@@ -1,0 +1,30 @@
+<div id="remove_user_modal" class="modal fade tasks-actions-modal modal-with-loader" data-bind="css: {loading: removeUserModal.isLoading}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Remove user</h4>
+      </div>
+      <div class="loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <div class="pfda-padded">Are you sure you want to remove user?</div>
+      <%= form_tag remove_member_org_requests_path, method: 'post', id: 'remove_user_modal_form' do %>
+        <div class="modal-body">
+          <div class="pfda-padded-b">
+            <input type="hidden" name="user_id" data-bind="value: removeUserModal.user">
+            <input type="hidden" name="org_id" data-bind="value: removeUserModal.org">
+          </div>
+          </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" data-bind="click: removeUserModal.submit">Remove User</button>
+        </div>
+      <% end %>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

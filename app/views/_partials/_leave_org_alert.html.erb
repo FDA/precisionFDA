@@ -1,0 +1,6 @@
+<% if leave_org_alert_shown? %>
+  <div class="alert alert-success fade in">
+    You have been removed from "<%= current_user.org.name %>" organization.
+    Please click <%= link_to "here", root_path %> to leave the organization completely.
+  </div>
+<% end %>

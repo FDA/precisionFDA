@@ -66,36 +66,6 @@
           </div>
         </div>
         <div class="form-group form-group-lg">
-          <%= f.label :org, "Organization", class: 'control-label col-sm-4' %>
-          <div class="col-sm-offset-1 col-sm-5">
-            <%= f.text_field :org, class: 'form-control input-lg' %>
-          </div>
-          <div class="col-sm-offset-1 col-sm-10">
-            <div class="checkbox">
-              <label>
-                <%= f.check_box :singular, data: {
-                  bind: "checked: noOrgChecked, event: {change: noOrgOnChange}"
-                } %>
-                I do not represent any organization
-              </label>
-            </div>
-            <div class="checkbox">
-              <label>
-                <input name="invitation[organization_admin]" type="hidden" value="0">
-                <input
-                  type="checkbox"
-                  value="1"
-                  name="invitation[organization_admin]"
-                  id="invitation_organization_admin"
-                  data-bind="checked: adminOrgChecked, event: {change: showOrgAdminAgreement}"
-                />
-                I'm an administrator of this organization
-              </label>
-            </div>
-            <%= render 'main/request_access_adm_org_agreement_modal' %>
-          </div>
-        </div>
-        <div class="form-group form-group-lg">
           <%= f.label :address1, "Address 1", class: 'control-label col-sm-4' %>
           <div class="col-sm-offset-1 col-sm-10">
             <%= f.text_field :address1, class: 'form-control input-lg', required: 'required' %>

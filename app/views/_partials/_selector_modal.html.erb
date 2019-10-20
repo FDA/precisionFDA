@@ -63,16 +63,19 @@
                   </div>
                   <!-- /ko -->
                 </div>
-                <!-- ko if: !busy() -->
+                <!-- ko if: !busy() || (busy() && className == 'file') -->
                   <!-- ko if: numFilteredObjects() > 0 -->
                     <div class="list-group" data-bind="template: {name: 'object-item-template', foreach: objects.filtered}"></div>
                   <!-- /ko -->
-                  <!-- ko if: numFilteredObjects() == 0 -->
-                    <div class="alert alert-warning alert-single">No <span data-bind="text: className"></span> objects found</div>
-                  <!-- /ko -->
                 <!-- /ko -->
-                <!-- ko if: busy() -->
+                <!-- ko if: !busy() && numFilteredObjects() == 0 -->
+                  <div class="alert alert-warning alert-single">No <span data-bind="text: className"></span> objects found</div>
+                <!-- /ko -->
+                <!-- ko if: busy() && className != 'file' -->
                   <div class="precision-loading alert text-muted">Loading...</div>
+                <!-- /ko -->
+                <!-- ko if: className == 'file' -->
+                  <div class="pfda-padded text-muted" data-bind="style: {visibility: !busy() ? 'hidden' : ''}">Loading...</div>
                 <!-- /ko -->
               </div>
               <!-- /ko -->
@@ -113,6 +116,9 @@
                 <span data-bind="text: scopeFormatted" class="text-capitalize"></span>
               </li>
               <!-- ko if: loaded -->
+                <!-- ko if: className() == 'file' && showFolderName() -->
+                  <li data-bind="text: parentFolderName"></li>
+                <!-- /ko -->
               <li data-bind="text: userName"></li>
               <li data-bind="text: orgName"></li>
                 <!-- ko if: _.size(all_tags_list()) -->

@@ -1,6 +1,5 @@
 module Admin
   class BaseController < ApplicationController
-
     before_action :check_admin
 
     def check_admin
@@ -10,4 +9,3 @@ module Admin
     end
   end
 end
-

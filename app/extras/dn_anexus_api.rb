@@ -1,4 +1,12 @@
+# Platform API client.
 class DNAnexusAPI
+  include DXClient::Constants
+  include DXClient::Endpoints::Apps
+  include DXClient::Endpoints::Users
+  include DXClient::Endpoints::Organizations
+  include DXClient::Endpoints::Workflows
+  include DXClient::Endpoints::Projects
+
   def self.for_admin
     new(ADMIN_TOKEN)
   end
@@ -9,8 +17,8 @@ class DNAnexusAPI
 
   def initialize(bearer_token, apiserver_url = DNANEXUS_APISERVER_URI)
     raise "Bearer is nil" if bearer_token.nil?
-    @bearer_token = bearer_token
-    @apiserver_url = apiserver_url
+
+    @transport = DXClient::Transport.new(bearer_token, apiserver_url)
   end
 
   def generate_permanent_link(file)
@@ -19,18 +27,24 @@ class DNAnexusAPI
   end
 
   def call(subject, method, input = {})
-    uri = URI("#{@apiserver_url}#{subject}/#{method}")
-    Net::HTTP.start(uri.host, uri.port, read_timeout: 180, use_ssl: true) do |http|
-      handle_response(
-        http.post(uri.path, input.to_json, "Content-Type" => "application/json",
-                                             "Authorization" => "Bearer #{@bearer_token}")
-      )
-    end
+    @transport.call(subject, method, input)
   end
 
   def user_exists?(username)
     begin
       call("user-#{username}", "describe")
+    rescue Net::HTTPServerException => e
+      if e.message =~ /^404/
+        return false
+      end
+      raise e
+    end
+    true
+  end
+
+  def org_exists?(orgname)
+    begin
+      call("org-#{orgname}", "describe")
     rescue Net::HTTPServerException => e
       if e.message =~ /^404/
         return false
@@ -52,14 +66,6 @@ class DNAnexusAPI
     true
   end
 
-  def run_workflow(workflow_id, params)
-    call(workflow_id, "run", params)
-  end
-
-  def create_workflow(params)
-    call("workflow", "new", params)
-  end
-
   def self.email_exists?(email)
     api = new(ADMIN_TOKEN)
     begin
@@ -76,14 +82,5 @@ class DNAnexusAPI
       end
     end
     true
-  end
-
-  private
-
-  def handle_response(response)
-    response.value
-    JSON.parse(response.body)
-  rescue Net::HTTPServerException => e
-    raise e, "#{e.message}. #{response.body}", e.backtrace
   end
 end

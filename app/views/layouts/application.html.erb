@@ -12,6 +12,7 @@
   <main role="main">
     <noscript>This website requires JavaScript</noscript>
     <%= render partial: "_partials/messages", flash: flash %>
+    <%= render partial: "_partials/leave_org_alert" %>
     <%= content_for?(:content) ? yield(:content) : yield %>
   </main>
   <footer>
