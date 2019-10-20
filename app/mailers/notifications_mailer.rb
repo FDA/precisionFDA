@@ -78,8 +78,53 @@ class NotificationsMailer < ApplicationMailer
     @user = membership.user
     @admin = admin
     mail to: @user.email,
-         reply_to: @admin.user.email,
-         subject: "#{@admin.user.full_name} added you to the space \"#{@space.title}\""
+         reply_to: admin.user.email,
+         subject: "#{admin.user.full_name} added you to the space \"#{space.title}\""
+  end
+
+  def external_user_invited_to_space_email(space, email, admin, role)
+    @space = space
+    @admin = admin
+    @role = role
+    @email = email
+
+    subject = %(You have been invited to join "#{space.title}" space)
+
+    mail to: email,
+         reply_to: admin.user.email,
+         subject: subject
+  end
+
+  def user_remove_approved_email(org, member, approver)
+    @org = org
+    @member = member
+    @approver = approver
+
+    mail to: @org.admin.email,
+         reply_to: @approver.email,
+         subject: "#{@approver.full_name} approved your request to remove #{@member.full_name} "\
+                  "from your org (\"#{@org.name}\")"
+  end
+
+  def user_leave_approved_email(org, member, approver)
+    @org = org
+    @member = member
+    @approver = approver
+
+    mail to: @org.admin.email,
+         reply_to: @approver.email,
+         subject: "#{@approver.full_name} approved #{@member.full_name}'s request to leave "\
+                  "your organization (\"#{@org.name}\")"
+  end
+
+
+  def org_dissolve_approved_email(org, approver)
+    @org = org
+    @approver = approver
+
+    mail to: @org.admin.email,
+         reply_to: @approver.email,
+         subject: "#{@approver.full_name} approved your request to dissolve \"#{@org.name}\" org"
   end
 
   def new_expert_email(expert)

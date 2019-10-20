@@ -10,8 +10,10 @@ class SelectorModel
       context = ko.contextFor(element)
       currentNumberOfObjects = context.$data.objects().length
       isFile = context.$data.className == 'file'
-      scrolledDown = (this.scrollTop == (this.scrollHeight - this.offsetHeight))
-      if element && isFile && scrolledDown && currentNumberOfObjects != context.$data.totalCount
+      scrolledDown = this.scrollTop == (this.scrollHeight - this.offsetHeight)
+      notBusy = !context.$data.busy()
+      notAllLoaded = currentNumberOfObjects != context.$data.totalCount
+      if element && isFile && scrolledDown && notAllLoaded && notBusy
         context.$data.getObjects(currentNumberOfObjects)
 
 
@@ -144,6 +146,7 @@ class ObjectListModel
     @apiEndpoint = config.apiEndpoint
     @apiParams = config.apiParams ? {}
     @selectable = config.selectable ? false
+    @totalCount = 0
 
     @busy = ko.observable(false)
 
@@ -166,7 +169,7 @@ class ObjectListModel
       if @className != "selected"
         objects = @filterByProperty(objects, 'owned') if @selectorModel.filterByOwned()
 
-      if @className == 'file' && @totalCount && @totalCount != @objects().length && !_.isEmpty(@filterQuery())
+      if @className == 'file' && @totalCount != @objects().length && !_.isEmpty(@filterQuery())
         @objects.removeAll()
         @getObjects(0, @totalCount)
 
@@ -179,7 +182,7 @@ class ObjectListModel
       @objects.filtered().length
     )
 
-    @activeRelatedObjects = ko.observableArray().extend({notify: 'always'})
+    @activeRelatedObjects = ko.observableArray().extend({ notify: 'always' })
     @isRelatedVisible = ko.computed(=>
       _.size(@activeRelatedObjects()) > 0
     )
@@ -255,6 +258,7 @@ class ObjectItemModel
     @scope = ko.observable(object.scope)
 
     @path = ko.observable(object.path)
+    @parentFolderName = ko.observable(object.parent_folder_name)
     @userName = ko.observable(object.user?.full_name)
     @orgName = ko.observable(object.org?.name)
     @all_tags_list = ko.observable(object.all_tags_list)
@@ -268,6 +272,12 @@ class ObjectItemModel
     @review_space_private = object.space_private
     @review_space_public = object.space_public
 
+    @showFolderName = ko.computed(=>
+      if @owned() || (!@owned() && @in_space())
+        return true
+      else
+        return false
+    )
     @scopeFormatted = ko.computed(=>
       if @public()
         "Public"

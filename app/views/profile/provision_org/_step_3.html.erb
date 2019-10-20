@@ -27,8 +27,6 @@
     <dd><%= @org %></dd>
     <dt>Organization handle:</dt>
     <dd><%= @org_handle %></dd>
-    <dt>Self-represented?</dt>
-    <dd><%= @org_handle.blank? ? "YES" : "NO" %></dd>
   </dl>
   <p> Internal precisionFDA policies require that usernames be formed according to the pattern "<em>first_name.last_name</em>", using only lowercase English letters. </p>
   <p> Based on the information you provided, the system will allocate the following: </p>
@@ -54,7 +52,6 @@
       <%= hidden_field_tag("address", @address) %>
       <%= hidden_field_tag("phone", @phone) %>
       <%= hidden_field_tag("duns", @duns) %>
-      <%= hidden_field_tag("organization_administration", @organization_administration) %>
       <%= button_tag(content_tag(:span, "", class: "fa fa-backward") + " Back", class: "btn btn-default") %>
     <% end -%>
     <%= form_tag(provision_org_path, method: 'post', class: "pull-left") do -%>
@@ -67,7 +64,6 @@
       <%= hidden_field_tag("org_handle", @org_handle) %>
       <%= hidden_field_tag("duns", @duns) %>
       <%= hidden_field_tag("suggested_username", @suggested_username) %>
-      <%= hidden_field_tag("organization_administration", @organization_administration) %>
       <% opts = {class: "btn btn-primary", data: {disable_with: "Please wait..."}} -%>
       <% opts[:data][:confirm] = "Are you sure? The system has detected one or more warnings shown on the page. Only proceed if you believe you have addressed these warnings." if @warnings.present? -%>
       <%= button_tag(content_tag(:span, "", class: "fa fa-plus-circle") + " Provision", opts) %>

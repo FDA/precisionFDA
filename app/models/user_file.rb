@@ -154,6 +154,14 @@ class UserFile < Node
     uid
   end
 
+  # Returns a parent folder name of UserFile
+  # @param [scope] a file scope
+  # @return [String] folder name or "/" for root
+  def parent_folder_name(scope = "private")
+    folder = parent_folder(scope)
+    folder.blank? ? "/" : folder.name
+  end
+
   def parent_folder(scope = "private")
     column_name = Node.scope_column_name(scope)
     Folder.find_by(id: self[column_name])

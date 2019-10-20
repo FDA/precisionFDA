@@ -75,7 +75,7 @@ gem "acts_as_votable"
 
 # For inline-css in emails
 gem "inky-rb", require: "inky"
-gem "nokogiri", "~> 1.8", ">= 1.8.5"
+gem "nokogiri", "~> 1.10", ">= 1.10.4"
 gem "premailer-rails"
 
 gem "whenever", require: false
@@ -98,6 +98,8 @@ gem "aws-sdk-sns"
 gem "parallel"
 gem 'execjs'
 gem 'therubyracer'
+
+gem "dry-container"
 
 group :development do
   # Annotate models
@@ -133,6 +135,7 @@ group :development do
 end
 
 group :development, :test, :ui_test do
+  gem "brakeman"
   gem "dotenv-rails"
   gem "thin"
 end

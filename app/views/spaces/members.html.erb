@@ -35,7 +35,12 @@
         <div class="form-group required">
           <label for="space[invitees]" class="col-sm-4 control-label">Username/s</label>
           <div class="col-sm-19 col-sm-offset-1">
-            <%= f.text_area'invitees', class: "form-control input-lg", placeholder: "Write username/s separated by commas...", required: "required", rows: 5  %>
+            <%=
+              f.text_area'invitees', class: "form-control input-lg",
+                placeholder: "Write usernames or emails separated by commas...",
+                required: "required",
+                rows: 5
+            %>
           </div>
         </div>
         <div class="form-group required">

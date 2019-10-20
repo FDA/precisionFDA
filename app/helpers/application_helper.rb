@@ -1,5 +1,6 @@
 module ApplicationHelper
   include VerifiedSpaceHelper
+  include OrgService::RequestFilter
   include Rails.application.routes.url_helpers
 
   def page_title(separator = " – ")
@@ -162,4 +163,10 @@ module ApplicationHelper
     "#{GIT_BRANCH}:#{GIT_REVISION}"
   end
 
+  def leave_org_alert_shown?
+    return if !@context.logged_in?
+    return if controller_name == "main" && action_name == "index"
+
+    filter_requests(current_user, OrgActionRequest::State::APPROVED).first.present?
+  end
 end

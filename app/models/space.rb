@@ -1,32 +1,59 @@
-# TODO: Items can be moved from private submitter/reviewer workspaces to a shared space.
-class Space < ApplicationRecord
+# == Schema Information
+#
+# Table name: spaces
+#
+#  id                   :integer          not null, primary key
+#  name                 :string(255)
+#  description          :text(65535)
+#  host_project         :string(255)
+#  guest_project        :string(255)
+#  host_dxorg           :string(255)
+#  guest_dxorg          :string(255)
+#  meta                 :text(65535)
+#  created_at           :datetime         not null
+#  updated_at           :datetime         not null
+#  space_id             :integer
+#  state                :integer          default(0), not null
+#  space_type           :integer          default(0), not null
+#  verified             :boolean          default(FALSE), not null
+#  sponsor_org_id       :integer
+#  space_template_id    :integer
+#  restrict_to_template :boolean          default(FALSE)
+#  inactivity_notified  :boolean          default(FALSE)
+#
+
+class Space < ActiveRecord::Base
+  # TODO: Items can be moved from private submitter/reviewer workspaces to a shared space.
   include Auditor
 
   TYPES = %i(groups review verification)
   STATES = %i(unactivated active locked deleted)
 
+  belongs_to :space
+  belongs_to :space_template
   belongs_to :sponsor_org, class_name: "Org"
+
   has_and_belongs_to_many :space_memberships
+
   has_many :users, through: :space_memberships
   has_many :confidential_spaces, class_name: "Space"
-  belongs_to :space
   has_many :tasks, dependent: :destroy
   has_many :space_events
-
-  belongs_to :space_template
+  has_many :space_invitations
 
   acts_as_commentable
 
   store :meta, accessors: [:cts], coder: JSON
 
-  alias_method :shared_space, :space
-
-  attr_accessor :invitees, :invitees_role
-
-  attr_accessor :host_lead_dxuser, :guest_lead_dxuser, :invitees, :invitees_role
-
   enum space_type: TYPES
   enum state: STATES
+
+  alias_method :shared_space, :space
+
+  attr_accessor :invitees,
+                :invitees_role,
+                :host_lead_dxuser,
+                :guest_lead_dxuser
 
   scope :top_level, -> { where(space_id: nil) }
   scope :shared, -> { review.top_level }
@@ -198,7 +225,7 @@ class Space < ApplicationRecord
     if scope =~ /^space-(\d+)$/
       Space.find_by!(id: Regexp.last_match(1).to_i)
     else
-      raise "Invalid scope #{scope} in Space.from_scope"
+      raise NotASpaceError, "Invalid scope #{scope} in Space.from_scope"
     end
   end
 

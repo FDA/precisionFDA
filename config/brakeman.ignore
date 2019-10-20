@@ -1,16 +1,15 @@
 {
   "ignored_warnings": [
     {
-      "warning_type": "Cross-Site Scripting",
+      "warning_type": "Cross Site Scripting",
       "warning_code": 2,
       "fingerprint": "0a34a4be283e215eea08d14581cd554df63509263038ad25e9d9a9a352438e5c",
-      "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
       "file": "app/views/challenges/show.html.erb",
-      "line": 59,
+      "line": 64,
       "link": "http://brakemanscanner.org/docs/warning_types/cross_site_scripting",
       "code": "Challenge.find_by(:id => params[:id]).regions[\"intro\"]",
-      "render_path": [{"type":"controller","class":"ChallengesController","method":"show","line":178,"file":"app/controllers/challenges_controller.rb"}],
+      "render_path": [{"type":"controller","class":"ChallengesController","method":"show","line":185,"file":"app/controllers/challenges_controller.rb"}],
       "location": {
         "type": "template",
         "template": "challenges/show"
@@ -20,10 +19,27 @@
       "note": ""
     },
     {
+      "warning_type": "Dynamic Render Path",
+      "warning_code": 15,
+      "fingerprint": "29580600f7047514f77caf4d965dc2bcdd18430315429e711a9694123442631a",
+      "message": "Render path contains parameter value",
+      "file": "app/views/docs/show.html.erb",
+      "line": 18,
+      "link": "http://brakemanscanner.org/docs/warning_types/dynamic_render_path/",
+      "code": "render(partial => \"docs/#{(params[:section].to_sym or :intro)}\", {})",
+      "render_path": [{"type":"controller","class":"DocsController","method":"show","line":10,"file":"app/controllers/docs_controller.rb"}],
+      "location": {
+        "type": "template",
+        "template": "docs/show"
+      },
+      "user_input": "params[:section].to_sym",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
       "warning_type": "Redirect",
       "warning_code": 18,
       "fingerprint": "86e051ad0b912694bd514dfeefed2d2d4bafb599b71a1e2b5cd79947c263c652",
-      "check_name": "Redirect",
       "message": "Possible unprotected redirect",
       "file": "app/controllers/licenses_controller.rb",
       "line": 143,
@@ -49,7 +65,15 @@
       "line": 22,
       "link": "http://brakemanscanner.org/docs/warning_types/cross_site_scripting",
       "code": "graph_nodes(graph_decorator.for_track(item_from_uid(params[:id])))",
-      "render_path": [{"type":"controller","class":"MainController","method":"track","line":503,"file":"app/controllers/main_controller.rb"}],
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "MainController",
+          "method": "track",
+          "line": 503,
+          "file": "app/controllers/main_controller.rb"
+        }
+      ],
       "location": {
         "type": "template",
         "template": "main/track"
@@ -68,7 +92,15 @@
       "line": 23,
       "link": "http://brakemanscanner.org/docs/warning_types/cross_site_scripting",
       "code": "graph_edges(graph_decorator.for_track(item_from_uid(params[:id])))",
-      "render_path": [{"type":"controller","class":"MainController","method":"track","line":503,"file":"app/controllers/main_controller.rb"}],
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "MainController",
+          "method": "track",
+          "line": 503,
+          "file": "app/controllers/main_controller.rb"
+        }
+      ],
       "location": {
         "type": "template",
         "template": "main/track"
@@ -81,7 +113,6 @@
       "warning_type": "Redirect",
       "warning_code": 18,
       "fingerprint": "d29d718fc2a17edf14e8a65d256b156d8dbf41dc172edf343730b135b82dd35f",
-      "check_name": "Redirect",
       "message": "Possible unprotected redirect",
       "file": "app/controllers/licenses_controller.rb",
       "line": 165,
@@ -101,10 +132,9 @@
       "warning_type": "Redirect",
       "warning_code": 18,
       "fingerprint": "ebfa61651b7ab1438714a535a9ce0ba5d01e4dd66a3ca70923620429bcdc93eb",
-      "check_name": "Redirect",
       "message": "Possible unprotected redirect",
       "file": "app/controllers/main_controller.rb",
-      "line": 535,
+      "line": 570,
       "link": "http://brakemanscanner.org/docs/warning_types/redirect/",
       "code": "redirect_to(pathify(item_from_uid(params[\"taggable_uid\"])))",
       "render_path": null,
@@ -121,10 +151,9 @@
       "warning_type": "Redirect",
       "warning_code": 18,
       "fingerprint": "fd47c515849391ac7d14ddf3ee81b605a671fa1e67e53806731860da78a47e71",
-      "check_name": "Redirect",
       "message": "Possible unprotected redirect",
       "file": "app/controllers/main_controller.rb",
-      "line": 466,
+      "line": 493,
       "link": "http://brakemanscanner.org/docs/warning_types/redirect/",
       "code": "redirect_to(pathify(item_from_uid(params[:id])))",
       "render_path": null,
@@ -141,10 +170,9 @@
       "warning_type": "Redirect",
       "warning_code": 18,
       "fingerprint": "fd47c515849391ac7d14ddf3ee81b605a671fa1e67e53806731860da78a47e71",
-      "check_name": "Redirect",
       "message": "Possible unprotected redirect",
       "file": "app/controllers/main_controller.rb",
-      "line": 478,
+      "line": 505,
       "link": "http://brakemanscanner.org/docs/warning_types/redirect/",
       "code": "redirect_to(pathify(item_from_uid(params[:id])))",
       "render_path": null,
@@ -161,10 +189,9 @@
       "warning_type": "Redirect",
       "warning_code": 18,
       "fingerprint": "fd47c515849391ac7d14ddf3ee81b605a671fa1e67e53806731860da78a47e71",
-      "check_name": "Redirect",
       "message": "Possible unprotected redirect",
       "file": "app/controllers/main_controller.rb",
-      "line": 484,
+      "line": 511,
       "link": "http://brakemanscanner.org/docs/warning_types/redirect/",
       "code": "redirect_to(pathify(item_from_uid(params[:id])))",
       "render_path": null,
@@ -178,6 +205,6 @@
       "note": ""
     }
   ],
-  "updated": "2017-12-12 20:53:25 +0300",
-  "brakeman_version": "4.0.1"
+  "updated": "2019-09-04 16:19:31 +0000",
+  "brakeman_version": "3.3.5"
 }

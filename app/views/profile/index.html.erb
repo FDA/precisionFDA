@@ -91,7 +91,24 @@
       <% if user_org_admin? %>
         <%= render 'profile/edit_organization_name_modal' %>
         <%= render '_partials/deactivate_user_modal' %>
-    <% end %>
+        <%= render '_partials/remove_user_modal' %>
+      <% else %>
+        <% if active_leave_org_request_present? %>
+          <div class="btn-group leave-org-group">
+            <button class="btn btn-default" disabled>
+              <i class="fa fa-fw fa-sign-out"></i> <%= leave_org_label %>
+            </button>
+          </div>
+        <% else %>
+          <div class="btn-group leave-org-group">
+            <button class="btn btn-default" data-bind="click: showLeaveOrgModal">
+              <i class="fa fa-fw fa-sign-out"></i> <%= leave_org_label %>
+            </button>
+          </div>
+
+          <%= render "profile/leave_organization_modal" %>
+        <% end %>
+      <% end %>
 
       <div class="infoframe-grid">
         <%= grid(@users_grid, show_filters: :always) do |g|
@@ -119,11 +136,51 @@
                 end
               end
             end
+
+            g.column name: 'Remove user' do |user|
+              if user.id != user.org.admin_id
+                if active_remove_member_request_present?(user)
+                  remove_member_label(user)
+                else
+                  button_tag class: "btn btn-xs btn-primary",
+                    data: { bind: 'click: showRemoveUserModal', user: user.id, org: user.org_id } do
+                      content_tag(:span, 'Remove', class: 'btn-fa-white')
+                    end
+                end
+              end
+            end
           end
+
         end -%>
       </div>
+
       <% if @user.can_provision_accounts? %>
         <%= link_to(content_tag(:span, "", class: "fa fa-plus") + " Provision new user under \"#{@user.org.name}\"", provision_user_path, method: 'post', class: 'btn btn-primary') %>
+      <% end %>
+
+      <% if user_org_admin? %>
+        <% if dissolve_button_shown? %>
+          <%
+            dissolve_request = current_user.org.dissolve_org_action_request
+
+            extra_attrs =
+              if dissolve_request
+                "disabled"
+              else
+                %{data-bind=\"click: showDissolveOrgModal"}.html_safe
+              end
+          %>
+
+          <div class="btn-group dissolve-org-group">
+            <button class="btn btn-default" <%= extra_attrs %>>
+              <i class="fa fa-fw fa-trash"></i> <%= dissolve_org_btn_text %>
+            </button>
+          </div>
+
+          <% unless dissolve_request %>
+            <%= render "profile/dissolve_organization_modal" %>
+          <% end %>
+        <% end %>
       <% end %>
     </div>
   </div>

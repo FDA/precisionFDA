@@ -30,12 +30,6 @@
       <p class="list-group-item-text"><%= @user.status %></p>
     </li>
 
-    <% if @user.org_id.present? %>
-    <li class="list-group-item">
-      <h5 class="list-group-item-heading">Organization</h5>
-      <p class="list-group-item-text"><%= @user.org.name %></p>
-    </li>
-    <% end %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Joined</h5>
       <p class="list-group-item-text"><%= @user.created_at.to_s(:human) %></p>

@@ -13,8 +13,8 @@ module OrgService
         action: "create",
         record_type: "Org Provision",
         record: {
-          message: "The system is about to start provisioning a new dxorg '#{org[:id]}'"
-        }
+          message: "The system is about to start provisioning a new dxorg '#{org[:id]}'",
+        },
       }
       Auditor.perform_audit(auditor_data)
 
@@ -22,29 +22,12 @@ module OrgService
         auth = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
         auth.call(
           org[:dxorg], "updateBillingInformation",
-          billingInformation: billing_info,
+          billingInformation: BILLING_INFO,
           autoConfirm: BILLING_CONFIRMATION
         )
       end
 
       org
-    end
-
-    # private
-
-    def self.billing_info
-      {
-        email: "billing@dnanexus.com",
-        name: "Elaine Johanson",
-        companyName: "FDA",
-        address1: "10903 New Hampshire Ave",
-        address2: "Bldg. 32 room 2254",
-        city: "Silver Spring",
-        state: "MD",
-        postCode: "20993",
-        country: "USA",
-        phone: "(301) 706-1836",
-      }
     end
   end
 end

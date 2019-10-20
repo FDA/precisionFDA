@@ -15,8 +15,10 @@ module Api
       app = create_app(unsafe_params)
 
       render json: { id: app.uid }
+    rescue DXClient::Errors::ChargesMismatchError => e
+      render json: { error: { message: e.message } }, status: :unprocessable_entity
     rescue => e
-      render json: { errors: [e.message], status: 422 }
+      render json: { error: { message: "Something went wrong" } }, status: :unprocessable_entity
     end
 
     def import
@@ -43,6 +45,8 @@ module Api
       end
     rescue Psych::SyntaxError
       render json: { errors: ["CWL has incorrect format"] }, status: :unprocessable_entity
+    rescue DXClient::Errors::ChargesMismatchError => e
+      render json: { errors: [e.message] }, status: :unprocessable_entity
     rescue => e
       logger.error e.message
       logger.error e.backtrace.join("\n")

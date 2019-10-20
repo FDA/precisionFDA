@@ -1,14 +1,19 @@
 require "rails_helper"
 
 RSpec.describe Org, type: :model do
-  let(:org) { create(:org) }
+  subject(:org) { create(:org) }
 
   describe "common org validations" do
-    subject { org }
-
     it { is_expected.to be_valid }
     it { is_expected.to validate_presence_of(:name) }
-    it { is_expected.to validate_uniqueness_of(:name).case_insensitive }
+  end
+
+  describe ".dissolve_org_action_request" do
+    it "returns org dissolving action request" do
+      org_action_request = create(:org_action_request_dissolve, org: org)
+
+      expect(org.dissolve_org_action_request).to eq(org_action_request)
+    end
   end
 
   describe "Org report" do

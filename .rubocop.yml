@@ -15,6 +15,10 @@ Style/Alias:
   - prefer_alias
   - prefer_alias_method
 
+Style/Documentation:
+  Exclude:
+    - 'db/**/*'
+
 Layout/AlignHash:
   EnforcedHashRocketStyle: key
   EnforcedColonStyle: key
@@ -357,7 +361,7 @@ Style/RedundantReturn:
   AllowMultipleReturnValues: false
 
 Style/RegexpLiteral:
-  EnforcedStyle: slashes
+  EnforcedStyle: mixed
   SupportedStyles:
   - slashes
   - percent_r
@@ -497,12 +501,22 @@ Style/WordArray:
   MinSize: 0
   WordRegex: !ruby/regexp /\A[\p{Word}\n\t]+\z/
 
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
 Metrics/BlockNesting:
   Max: 3
 
 Metrics/BlockLength:
   Exclude:
     - 'spec/**/*.rb'
+    - 'config/routes.rb'
 
 Metrics/LineLength:
   Max: 100
@@ -520,7 +534,7 @@ Metrics/ParameterLists:
   CountKeywordArgs: false
 
 Metrics/MethodLength:
-  Max: 20
+  Max: 30
 
 Layout/BlockAlignment:
   EnforcedStyleAlignWith: either
