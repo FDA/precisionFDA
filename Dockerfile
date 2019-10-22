@@ -6,4 +6,6 @@ WORKDIR /precision-fda
 
 COPY Gemfile Gemfile.lock ./
 
-RUN bundle check || bundle install
+EXPOSE 3000
+
+ENTRYPOINT ["./docker/development.entrypoint.sh"]
