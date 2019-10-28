@@ -3,10 +3,10 @@
 # Table name: saved_queries
 #
 #  id          :integer          not null, primary key
-#  name        :string
-#  grid_name   :string
-#  query       :text
-#  description :text
+#  name        :string(255)
+#  grid_name   :string(255)
+#  query       :text(65535)
+#  description :text(65535)
 #  user_id     :integer
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null

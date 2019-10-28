@@ -1,3 +1,14 @@
+# == Schema Information
+#
+# Table name: sessions
+#
+#  id         :integer          not null, primary key
+#  key        :string(255)      not null
+#  user_id    :integer          not null
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#
+
 class Session < ApplicationRecord
   include Auditor
 

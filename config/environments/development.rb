@@ -1,3 +1,4 @@
+# rubocop:disable Metrics/BlockLength
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -10,16 +11,16 @@ Rails.application.configure do
   config.eager_load = false
 
   # Show full error reports and disable caching.
-  config.consider_all_requests_local       = true
+  config.consider_all_requests_local = true
 
   # Enable/disable caching. By default caching is disabled.
   # Run rails dev:cache to toggle caching.
-  if Rails.root.join('tmp', 'caching-dev.txt').exist?
+  if Rails.root.join("tmp", "caching-dev.txt").exist?
     config.action_controller.perform_caching = true
 
     config.cache_store = :memory_store
     config.public_file_server.headers = {
-      'Cache-Control' => "public, max-age=#{2.days.to_i}"
+      "Cache-Control" => "public, max-age=#{2.days.to_i}",
     }
   else
     config.action_controller.perform_caching = false
@@ -34,8 +35,8 @@ Rails.application.configure do
   # config.action_mailer.raise_delivery_errors = false
   # config.action_mailer.perform_caching = false
 
-  config.action_mailer.delivery_method = ENV.fetch('DELIVERY_METHOD', :file).to_sym
-  config.action_mailer.default_url_options = { host: "localhost", port: 3000, protocol: 'https' }
+  config.action_mailer.delivery_method = ENV.fetch("DELIVERY_METHOD", :file).to_sym
+  config.action_mailer.default_url_options = { host: "localhost", port: 3000, protocol: "https" }
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
@@ -58,6 +59,9 @@ Rails.application.configure do
   # Suppress logger output for asset requests.
   config.assets.quiet = true
 
+  # Mailers preview path
+  config.action_mailer.preview_path = Rails.root.join("spec", "mailers", "preview")
+
   # Adds additional error checking when serving assets at runtime.
   # Checks for improperly declared sprockets dependencies.
   # Raises helpful error messages.
@@ -77,10 +81,11 @@ Rails.application.configure do
   config.web_console.whiny_requests = false
 
   # STDOUT logging
-  if ENV['RAILS_LOG_TO_STDOUT']
+  if ENV["RAILS_LOG_TO_STDOUT"]
     STDOUT.sync = true
-    logger           = ActiveSupport::Logger.new(STDOUT)
+    logger = ActiveSupport::Logger.new(STDOUT)
     logger.formatter = config.log_formatter
     config.logger = ActiveSupport::TaggedLogging.new(logger)
   end
 end
+# rubocop:enable Metrics/BlockLength

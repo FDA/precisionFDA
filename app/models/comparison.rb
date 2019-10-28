@@ -3,16 +3,16 @@
 # Table name: comparisons
 #
 #  id          :integer          not null, primary key
-#  name        :string
-#  description :text
+#  name        :string(255)
+#  description :text(65535)
 #  user_id     :integer
-#  state       :string
-#  dxjobid     :string
-#  project     :string
-#  meta        :text
+#  state       :string(255)
+#  dxjobid     :string(255)
+#  project     :string(255)
+#  meta        :text(65535)
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
-#  scope       :string
+#  scope       :string(255)
 #
 
 class Comparison < ApplicationRecord

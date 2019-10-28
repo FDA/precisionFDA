@@ -3,8 +3,8 @@
 # Table name: archive_entries
 #
 #  id       :integer          not null, primary key
-#  path     :text
-#  name     :string
+#  path     :text(65535)
+#  name     :string(255)
 #  asset_id :integer
 #
 

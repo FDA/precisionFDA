@@ -1,3 +1,12 @@
+# == Schema Information
+#
+# Table name: settings
+#
+#  id    :integer          not null, primary key
+#  key   :string(255)      not null
+#  value :string(255)      not null
+#
+
 class Setting < ApplicationRecord
   include Auditor
 

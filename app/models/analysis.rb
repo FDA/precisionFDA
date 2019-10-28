@@ -3,12 +3,13 @@
 # Table name: analyses
 #
 #  id          :integer          not null, primary key
-#  name        :string
-#  dxid        :string
+#  name        :string(255)
+#  dxid        :string(255)
 #  user_id     :integer
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #  workflow_id :integer
+#  batch_id    :string(255)
 #
 
 class Analysis < ApplicationRecord

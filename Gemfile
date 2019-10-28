@@ -95,9 +95,9 @@ gem "simple_form"
 gem "prawn"
 
 gem "aws-sdk-sns"
+gem "execjs"
 gem "parallel"
-gem 'execjs'
-gem 'therubyracer'
+gem "therubyracer"
 
 gem "dry-container"
 
@@ -116,8 +116,8 @@ group :development do
 
   # Automatic Ruby code checking tool
   gem "rubocop", "~> 0.71.0", require: false
-  gem "rubocop-rspec", require: false
   gem "rubocop-rails", require: false
+  gem "rubocop-rspec", require: false
 
   gem "pronto", "~> 0.10.0"
   gem "pronto-rubocop", require: false
@@ -125,10 +125,10 @@ group :development do
   gem "byebug", platforms: %i(mri mingw x64_mingw)
 
   gem "pry"
+  gem "pry-byebug"
   gem "pry-rails"
   gem "pry-remote"
   gem "pry-stack_explorer"
-  gem "pry-byebug"
 
   gem "guard"
   gem "guard-rspec", require: false
@@ -143,18 +143,18 @@ end
 group :test, :ui_test do
   gem "database_cleaner", "~> 1.5", ">= 1.5.3"
   gem "factory_bot_rails", "~> 4.8", ">= 4.8.2"
-  gem "rspec-rails", "~> 3.7", ">= 3.7.1"
-  gem "rails-controller-testing"
-  gem "webmock", "~> 3.1", ">= 3.1.1"
-  gem "shoulda-matchers"
   gem "ffaker"
+  gem "rails-controller-testing"
+  gem "rspec-rails", "~> 3.7", ">= 3.7.1"
+  gem "shoulda-matchers"
   gem "simplecov", require: false
+  gem "webmock", "~> 3.1", ">= 3.1.1"
 end
 
 group :production do
   gem "exception_notification", "4.1.1"
-  gem "unicorn", "~> 4.9.0"
   gem "soapforce"
+  gem "unicorn", "~> 4.9.0"
 end
 
 gem "rubyzip", "=1.2.2"
