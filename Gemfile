@@ -157,4 +157,4 @@ group :production do
   gem "unicorn", "~> 4.9.0"
 end
 
-gem "rubyzip", "=1.2.2"
+gem "rubyzip", "=1.3.0"
