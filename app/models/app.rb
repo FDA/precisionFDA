@@ -46,9 +46,14 @@ class App < ApplicationRecord
     uid
   end
 
+  # Scopes of files when an app is running out of spaces.
+  def permitted_scopes
+    %w(private public)
+  end
+
   # Scopes of files that can be used to run an app.
   def space_scopes
-    return [] if not_in_spaces
+    return permitted_scopes if not_in_spaces
 
     space_object.accessible_scopes
   end
