@@ -13,8 +13,8 @@
 #  created_at           :datetime         not null
 #  updated_at           :datetime         not null
 #  space_id             :integer
-#  state                :integer          default(0), not null
-#  space_type           :integer          default(0), not null
+#  state                :integer          default("unactivated"), not null
+#  space_type           :integer          default("groups"), not null
 #  verified             :boolean          default(FALSE), not null
 #  sponsor_org_id       :integer
 #  space_template_id    :integer

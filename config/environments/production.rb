@@ -1,3 +1,4 @@
+# rubocop:disable Metrics/BlockLength
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -20,7 +21,7 @@ Rails.application.configure do
 
   # Disable serving static files from the `/public` folder by default since
   # Apache or NGINX already handles this.
-  config.public_file_server.enabled = ENV['RAILS_SERVE_STATIC_FILES'].present?
+  config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"].present?
 
   # Compress JavaScripts and CSS.
   config.assets.js_compressor = :uglifier
@@ -37,7 +38,8 @@ Rails.application.configure do
   config.assets.debug = false
   config.assets.digest = true
 
-  # `config.assets.precompile` and `config.assets.version` have moved to config/initializers/assets.rb
+  # `config.assets.precompile` and `config.assets.version`
+  # have moved to config/initializers/assets.rb
 
   # Specifies the header that your server uses for sending files.
   # config.action_dispatch.x_sendfile_header = 'X-Sendfile' # for Apache
@@ -75,10 +77,10 @@ Rails.application.configure do
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
 
-  if ENV["DNANEXUS_BACKEND"] == "production"
-    config.action_mailer.default_url_options = { host: "precision.fda.gov", protocol: 'https' }
+  config.action_mailer.default_url_options = if ENV["DNANEXUS_BACKEND"] == "production"
+    { host: "precision.fda.gov", protocol: "https" }
   else
-    config.action_mailer.default_url_options = { host: "precisionfda-staging.dnanexus.com", protocol: 'https' }
+    { host: "precisionfda-staging.dnanexus.com", protocol: "https" }
   end
 
   config.action_mailer.delivery_method = :salesforce
@@ -101,12 +103,26 @@ Rails.application.configure do
   config.force_ssl = true
 
   # Email us when an exception occurs
-  Rails.application.config.middleware.use ExceptionNotification::Rack,
-    :ignore_if => ->(env, exception) { ip = env["HTTP_X_FORWARDED_FOR"]; ip == "73.158.44.186" || ip == "76.191.184.242" || IPAddr.new("64.39.96.0/20").include?(IPAddr.new(ip)) rescue false },
-    :email => {
-      :email_prefix => ENV["DNANEXUS_BACKEND"] == "production" ? "[PrecisionFDA]" : "[PrecisionFDA-Stage]",
-      :sender_address => %{"notifier" <notification@dnanexus.com>},
-      :exception_recipients => %w{precisionfda-dev@dnanexus.com},
-      :email_format => :html
-    }
+  Rails.application.config.middleware.use(
+    ExceptionNotification::Rack,
+    ignore_if: lambda do |env, _exception|
+      ip = env["HTTP_X_FORWARDED_FOR"]
+
+      begin
+        ip.in?(%w(73.158.44.186 76.191.184.242)) ||
+          IPAddr.new("64.39.96.0/20").include?(IPAddr.new(ip))
+      rescue IPAddr::Error
+        false
+      end
+    end,
+    email: {
+      email_prefix: (
+        ENV["DNANEXUS_BACKEND"] == "production" ? "[PrecisionFDA]" : "[PrecisionFDA-Stage]"
+      ),
+      sender_address: "\"notifier\" <notification@dnanexus.com>",
+      exception_recipients: %w(precisionfda-dev@dnanexus.com),
+      email_format: :html,
+    },
+  )
 end
+# rubocop:enable Metrics/BlockLength

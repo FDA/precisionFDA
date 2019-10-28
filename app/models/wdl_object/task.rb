@@ -1,3 +1,22 @@
+# == Schema Information
+#
+# Table name: tasks
+#
+#  id                  :integer          not null, primary key
+#  user_id             :integer
+#  space_id            :integer
+#  assignee_id         :integer          not null
+#  status              :integer          default("open"), not null
+#  name                :string(255)
+#  description         :text(65535)
+#  response_deadline   :datetime
+#  completion_deadline :datetime
+#  created_at          :datetime         not null
+#  updated_at          :datetime         not null
+#  response_time       :datetime
+#  complete_time       :datetime
+#
+
 require "wdl_object/input"
 require "wdl_object/output"
 

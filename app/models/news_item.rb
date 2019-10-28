@@ -1,3 +1,20 @@
+# == Schema Information
+#
+# Table name: news_items
+#
+#  id         :integer          not null, primary key
+#  title      :string(255)
+#  link       :string(255)
+#  when       :date
+#  content    :text(65535)
+#  user_id    :integer
+#  video      :string(255)
+#  position   :integer          default(0), not null
+#  published  :boolean
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#
+
 class NewsItem < ApplicationRecord
   belongs_to :user
   validates :link, :video, url: true
