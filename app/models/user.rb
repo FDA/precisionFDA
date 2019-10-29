@@ -46,6 +46,7 @@ class User < ApplicationRecord
     pamella.tater.2
     davis.feng
     stanley.lan
+    sam.westreich
   ).freeze
 
   NON_PRODUCTION_ADMINS = %w(
@@ -69,6 +70,7 @@ class User < ApplicationRecord
     siteadmin.aabramenko
     davis.feng
     stanley.lan
+    sean.watford
   ).freeze
 
   NON_PRODUCTION_ADMIN_ORGS = %w(
