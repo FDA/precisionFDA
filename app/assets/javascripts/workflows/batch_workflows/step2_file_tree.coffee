@@ -16,6 +16,10 @@ class FileTree extends Precision.FileTree
 
   onDeselectNodeCallback: (e, data) ->
 
+  onRootNodesReady: (e, data) ->
+
+  onRootNodesLoad: (e, data) ->
+
   loadNodes: (e, data) ->
     $node = data.instance.get_node(data.node.id, true)
     children = data.node.children
@@ -68,7 +72,7 @@ class FileTree extends Precision.FileTree
       return 0
     )
 
-  constructor: (defaultNodes = [], container, @folderTreeScope) ->
+  constructor: (defaultNodes = [], container, @folderTreeScope, isLoadingRootNodes, @onRootNodesLoad) ->
     jsTreeParams = {
       container: container,
       defaultNodes: @prepareNodes(defaultNodes),
@@ -77,12 +81,13 @@ class FileTree extends Precision.FileTree
     }
     super(jsTreeParams)
     @disabled = false
+    do @onRootNodesLoad if isLoadingRootNodes
     do @initTree
 
 
 class BatchWorkflowFileTree
-  createNewTree: (container) ->
-    tree = new FileTree(@rootNodes, container, @folderTreeScope)
+  createNewTree: (container, onRootNodesLoad) ->
+    tree = new FileTree(@rootNodes, container, @folderTreeScope, @isLoadingRootNodes, onRootNodesLoad)
     @folderTrees.push(tree)
     return tree
 
@@ -90,8 +95,19 @@ class BatchWorkflowFileTree
     @folderTrees = []
     @rootNodes = []
     @folderTreeScope = scope
+    @isLoadingRootNodes = true
     loadFolderTree(null, scope).then(
-      (nodes) => @rootNodes = nodes || []
+      (nodes) =>
+        @isLoadingRootNodes = false
+        @rootNodes = nodes || []
+        @folderTrees.forEach((tree) =>
+          fileTree = tree.treeContainer.jstree(true)
+          tree.onRootNodesReady()
+          defaultNodes = tree.prepareNodes(@rootNodes)
+          data = Object.assign(tree.TREE, { children: defaultNodes })
+          fileTree.settings.core.data = data
+          fileTree.refresh()
+        )
       (error) -> Precision.alert.showAboveAll('Something went wrong!')
     )
 
