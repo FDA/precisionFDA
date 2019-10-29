@@ -6,6 +6,23 @@
     <span data-bind="text: titleStep2"></span>
   </h4>
 
+  <!-- ko if: batchInputOneType() == 'file' -->
+  <div class="batch-workfows-wizard-info">
+    <div class="alert alert-info">
+      <div class="row">
+        <div class="col-sm-1 text-center">
+          <i class="fa fa-info-circle"></i>
+        </div>
+        <div class="col-sm-23">
+          <div>
+            You can choose file or folder with all files inside using folder tree. Or choose files using regular expression.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /ko -->
+
   <!-- ko if: batchInputOneType() == 'string' -->
   <div class="batch-workfows-wizard-info">
     <div class="alert alert-info">
@@ -34,7 +51,7 @@
       <div class="batch-workfows-wizard-step2-input" data-bind="template: {
         name: 'batch_input_templates_step2',
         data: batchInputOne,
-        afterRender: function() { batchInputOne().initTree(); },
+        afterRender: function() { batchInputOne().afterRender(); },
         as: 'input'
       }"></div>
     <!-- /ko -->
@@ -42,7 +59,7 @@
       <div class="batch-workfows-wizard-step2-input" data-bind="template: {
         name: 'batch_input_templates_step2',
         data: batchInputTwo,
-        afterRender: function() { batchInputTwo().initTree(); },
+        afterRender: function() { batchInputTwo().afterRender(); },
         as: 'input'
       }"></div>
     <!-- /ko -->
