@@ -10,17 +10,13 @@ describe UserRemovalPolicy do
   describe ".satisfied?" do
     context "when user is not org member" do
       it "returns false" do
-        result = policy.satisfied?(org, not_member)
-
-        expect(result).to be_falsey
+        expect(policy).not_to be_satisfied(org, not_member)
       end
     end
 
     context "when user is org member" do
       it "returns true" do
-        result = policy.satisfied?(org, member)
-
-        expect(result).to be_truthy
+        expect(policy).to be_satisfied(org, member)
       end
     end
   end

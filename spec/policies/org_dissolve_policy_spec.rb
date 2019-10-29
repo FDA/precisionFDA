@@ -10,17 +10,13 @@ describe OrgDissolvePolicy do
   describe ".satisfied?" do
     context "when user is org admin" do
       it "returns true" do
-        result = policy.satisfied?(org, admin)
-
-        expect(result).to be_truthy
+        expect(policy).to be_satisfied(org, admin)
       end
     end
 
     context "when user is not org admin" do
       it "returns false" do
-        result = policy.satisfied?(org, user)
-
-        expect(result).to be_falsey
+        expect(policy).not_to be_satisfied(org, user)
       end
     end
   end
