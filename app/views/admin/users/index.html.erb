@@ -11,13 +11,11 @@
   </div>
 </div>
 
-<% if current_user.can_provision_accounts? %>
-  <div class="pfda-padded">
-    <a class="btn btn-primary" rel="nofollow" href="<%=provision_new_user_path%>">
-      <i class="fa fa-plus"></i>&nbsp;Provision new user
-    </a>
-  </div>
-<% end %>
+<div class="pfda-padded">
+  <a class="btn btn-primary" rel="nofollow" href="<%=provision_new_user_path%>">
+    <i class="fa fa-plus"></i>&nbsp;Provision new user
+  </a>
+</div>
 
 <div class="infoframe-outer">
   <div class="infoframe-inner">
