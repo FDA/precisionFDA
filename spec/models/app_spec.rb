@@ -96,8 +96,8 @@ RSpec.describe App, type: :model do
       expect(app.scope).to eq "private"
     end
 
-    it "returns a proper app space scopes" do
-      expect(app_space_scopes).to eq []
+    it "returns a permitted app scopes" do
+      expect(app_space_scopes).to eq %w(private public)
     end
 
     context "with available_job_spaces for host_lead user" do
