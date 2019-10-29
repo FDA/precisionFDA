@@ -71,6 +71,7 @@ class User < ApplicationRecord
     aleksandr.moroz.3
     vladimir.rainish.4
     aleksei.ivanishchev
+    singularmasterr.singularmasterr
     siteadmin.aabramenko
     davis.feng
     stanley.lan
