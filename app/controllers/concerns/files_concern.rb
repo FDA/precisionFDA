@@ -5,8 +5,6 @@ module FilesConcern
 
   def user_real_files(params, context)
     # rubocop:disable Style/SignalException
- #   User.sync_files!(context)
-
     scopes = params[:scopes]
     states = params[:states]
 
