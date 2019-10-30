@@ -20,7 +20,7 @@ class BatchAppNewView
       @spaceId(_.first(selectable_spaces).value)
 
     @contentScopes = ko.computed( =>
-      if @needSelectSpace
+      if @isInSpace
         available_content_scopes[@spaceId()]
       else
         app.space_scopes

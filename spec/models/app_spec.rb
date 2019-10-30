@@ -1,3 +1,25 @@
+# == Schema Information
+#
+# Table name: apps
+#
+#  id            :integer          not null, primary key
+#  dxid          :string(255)
+#  version       :string(255)
+#  revision      :integer
+#  title         :string(255)
+#  readme        :text(65535)
+#  user_id       :integer
+#  scope         :string(255)
+#  spec          :text(65535)
+#  internal      :text(65535)
+#  created_at    :datetime         not null
+#  updated_at    :datetime         not null
+#  app_series_id :integer
+#  verified      :boolean          default(FALSE), not null
+#  uid           :string(255)
+#  dev_group     :string(255)
+#
+
 require "rails_helper"
 
 RSpec.describe App, type: :model do
@@ -74,8 +96,8 @@ RSpec.describe App, type: :model do
       expect(app.scope).to eq "private"
     end
 
-    it "returns a proper app space scopes" do
-      expect(app_space_scopes).to eq []
+    it "returns a permitted app scopes" do
+      expect(app_space_scopes).to eq %w(private public)
     end
 
     context "with available_job_spaces for host_lead user" do

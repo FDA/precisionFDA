@@ -2,9 +2,9 @@
 #
 # Table name: countries
 #
-#  id            :integer          not null, primary key
-#  name          :string
-#  dial_code     :string
+#  id        :integer          not null, primary key
+#  name      :string(255)
+#  dial_code :string(255)
 #
 
 class Country < ApplicationRecord

@@ -1,45 +1,19 @@
 <script type="text/html" id="batch_input_templates_step2">
 <div>
+  <!-- ko if: input.type() == 'file' -->
+  <%= render "workflows/batch_workflows/step2_file_input_template" %>
+  <!-- /ko -->
+
+  <!-- ko if: input.type() == 'string' -->
   <div class="input-header">
     <span class="input-header-title" data-bind="text: input.title"></span>
-    <!-- ko if: input.type() == 'file' -->
-    <a href="#" class="input-header-sort" data-bind="click: input.sortByName">
-      <span>sort by name</span>&nbsp;
-      <i class="fa" data-bind="css: input.sortNameArrow"></i>
-    </a>
-    <a href="#" class="input-header-sort" data-bind="click: input.sortByColor">
-      <span>sort by color</span>&nbsp;
-      <i class="fa" data-bind="css: input.sortColorArrow"></i>
-    </a>
-    <!-- /ko -->
   </div>
-  <!-- ko if: input.type() == 'string' -->
   <div data-bind="css: {'has-error': !input.valid()}">
     <textarea class="form-control" data-bind="value: input.value, event: {
       change: input.onChange
     }, attr: {
       name: input.name
     }"></textarea>
-  </div>
-  <!-- /ko -->
-  <!-- ko if: input.type() == 'file' -->
-  <div class="input-file-search form-control">
-    <span class="text-muted">/</span>
-    <input type="text" class="input-file-search-regexp" placeholder="Regular Expression" data-bind="value: input.searchValue, event: {
-      keyup: input.searchOnChange
-    }"/>
-    <span class="text-muted">/</span>
-    <input type="text" class="input-file-search-flags" placeholder="Flags" data-bind="textInput: input.searchFlagsValue"/>
-    <!-- ko if: input.searchValue -->
-    <div class="input-file-search-clear">
-      <i class="fa fa-times text-danger" data-bind="click: input.clearSearch"></i>
-    </div>
-    <!-- /ko -->
-  </div>
-  <div data-bind="css: {'has-error': !input.valid()}">
-    <div class="form-control input-file-selector">
-      <div data-bind="attr: {id: input.name}"></div>
-    </div>
   </div>
   <!-- /ko -->
 </div>

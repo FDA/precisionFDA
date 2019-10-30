@@ -1,4 +1,5 @@
 require "rails_helper"
+# rubocop:disable RSpec/AnyInstance
 
 RSpec.describe ApiController, type: :controller do
   let(:user) { create(:user, dxuser: "user") }
@@ -370,7 +371,245 @@ RSpec.describe ApiController, type: :controller do
     end
   end
 
-  describe "POST create_file"  do
+  describe "POST files_regex_search" do
+    before do
+      authenticate!(user)
+    end
+
+    context "with valid search RegEx string" do
+      let(:params) do
+        {
+          page: 1,
+          search_string: "abc",
+          flag: "ig",
+          scopes: %w(private),
+        }
+      end
+
+      before { post :files_regex_search, params: params }
+
+      it "returns a content_type 'json'" do
+        expect(response.content_type).to eq "application/json"
+      end
+
+      it "returns a http_status 200" do
+        expect(response).to have_http_status(200)
+      end
+    end
+
+    context "with invalid search RegEx string" do
+      let(:params) do
+        {
+          page: 1,
+          search_string: "*",
+          flag: "ig",
+          scopes: %w(private),
+        }
+      end
+
+      before { post :files_regex_search, params: params }
+
+      it "returns a content_type 'json'" do
+        expect(response.content_type).to eq "application/json"
+      end
+
+      it "returns a http_status 422" do
+        expect(response).to have_http_status(422)
+      end
+
+      it "returns an error message" do
+        expect(parsed_response["error"]["message"]).to include "RegEx Invalid:"
+        expect(parsed_response["error"]["type"]).to eq "API Error"
+      end
+    end
+
+    context "when user has no any user's files" do
+      let(:params) do
+        {
+          page: 1,
+          search_string: "abc",
+          flag: "ig",
+          scopes: %w(private),
+        }
+      end
+
+      before do
+        allow_any_instance_of(User).to receive(:space_uids).and_return([review_space_uid])
+        post :files_regex_search, params: params
+      end
+
+      context "with js api" do
+        it "returns a content_type 'json'" do
+          expect(response.content_type).to eq "application/json"
+        end
+
+        it "returns a http_status 200" do
+          expect(response).to have_http_status(200)
+        end
+
+        it "has no any files and folders" do
+          expect(UserFile.all.count).to eq 0
+          expect(Folder.all.count).to eq 0
+        end
+
+        it "returns an empty tree of zero size" do
+          expect(parsed_response["search_result"]).to eq []
+        end
+      end
+    end
+
+    context "when user has user's files in 'private' scope in folders" do
+      let(:params) do
+        {
+          page: 1,
+          search_string: "fil",
+          flag: "ig",
+          scopes: %w(private),
+        }
+      end
+
+      before do
+        allow_any_instance_of(User).to receive(:space_uids).and_return([verified_space_uid])
+        file_one.update(user_id: user.id)
+        file_two.update(user_id: user.id, parent_folder_id: folder_one.id)
+        file_three.update(user_id: user.id, parent_folder_id: folder_two.id)
+        file_four.update(user_id: user.id, parent_folder_id: folder_two.id)
+        folder_one.update(user_id: user.id)
+        folder_two.update(user_id: user.id, scope: verified_space_uid)
+
+        post :files_regex_search, params: params
+      end
+
+      context "with js api" do
+        let(:result) { parsed_response["search_result"] }
+
+        it "returns a content_type 'json'" do
+          expect(response.content_type).to eq "application/json"
+        end
+
+        it "returns a http_status 200" do
+          expect(response).to have_http_status(200)
+        end
+
+        it "returns a search result of proper size" do
+          expect(result.size).to eq 3
+        end
+
+        it "returns a search result with a proper content of first result" do
+          expect(result.first["title"]).to eq(file_four.name)
+          expect(result.first["path"]).to eq("/#{folder_two.name}/")
+        end
+
+        it "returns a search result with a proper content of second result" do
+          expect(result.second["title"]).to eq(file_three.name)
+          expect(result.second["path"]).to eq("/#{folder_two.name}/")
+        end
+
+        it "returns a search result with a proper content of third result" do
+          expect(result.third["title"]).to eq(file_one.name)
+          expect(result.third["path"]).to eq("/")
+        end
+      end
+
+      context "with no request to return found files uids" do
+        let(:params) do
+          {
+            page: 1,
+            search_string: "fil",
+            flag: "ig",
+            scopes: %w(private),
+            uids: nil,
+          }
+        end
+
+        it "returns a content_type 'json' with http status 200" do
+          expect(response.content_type).to eq "application/json"
+          expect(response).to have_http_status(200)
+        end
+
+        it "do not return an array of found files uids" do
+          expect(parsed_response["uids"]).to eq []
+        end
+      end
+
+      context "with request to return found files uids array" do
+        let(:params) do
+          {
+            page: 1,
+            search_string: "fil",
+            flag: "ig",
+            scopes: %w(private),
+            uids: true,
+          }
+        end
+
+        it "returns a content_type 'json' with http status 200" do
+          expect(response.content_type).to eq "application/json"
+          expect(response).to have_http_status(200)
+        end
+
+        it "returns an array of found files uids" do
+          expect(parsed_response["uids"]).to include(file_one.uid && file_two.uid && file_three.uid)
+        end
+      end
+    end
+
+    context "when user has user's files in a space scope" do
+      let(:params) do
+        {
+          page: 1,
+          search_string: "fil",
+          flag: "ig",
+          scopes: [review_space_uid, verified_space_uid],
+        }
+      end
+
+      before do
+        allow_any_instance_of(User).
+          to receive(:space_uids).and_return([review_space_uid, verified_space_uid])
+        file_one.update(user_id: user.id)
+        file_two.update(user_id: user.id, parent_folder_id: folder_one.id)
+        file_three.update(
+          user_id: user.id,
+          scoped_parent_folder_id: folder_two.id,
+          scope: review_space_uid,
+        )
+        file_four.update(
+          user_id: user.id,
+          scoped_parent_folder_id: folder_two.id,
+          scope: verified_space_uid,
+        )
+        folder_one.update(user_id: user.id)
+        folder_two.update(user_id: user.id, scope: verified_space_uid)
+
+        post :files_regex_search, params: params
+      end
+
+      context "with js api" do
+        let(:result) { parsed_response["search_result"] }
+
+        it "returns a content_type 'json'" do
+          expect(response.content_type).to eq "application/json"
+        end
+
+        it "returns a http_status 200" do
+          expect(response).to have_http_status(200)
+        end
+
+        it "returns a search result of proper size" do
+          expect(result.size).to eq 2
+        end
+
+        it "returns a search result with a proper content" do
+          expect(result.first["title"]).to eq(file_four.name)
+          expect(result.second["title"]).to eq(file_three.name)
+          expect(result.second["path"]).to eq("/#{folder_two.name}/")
+        end
+      end
+    end
+  end
+
+  describe "POST create_file" do
     before do
       authenticate!(user)
 
@@ -429,4 +668,5 @@ RSpec.describe ApiController, type: :controller do
       end
     end
   end
+  # rubocop:enable RSpec/AnyInstance
 end

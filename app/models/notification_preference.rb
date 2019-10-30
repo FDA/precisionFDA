@@ -1,3 +1,12 @@
+# == Schema Information
+#
+# Table name: notification_preferences
+#
+#  id      :integer          not null, primary key
+#  user_id :integer
+#  data    :text(65535)
+#
+
 # The current class is responsible only for storing user's preferences
 #   (not the rights to receive a notification).
 class NotificationPreference < ApplicationRecord

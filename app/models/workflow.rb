@@ -2,20 +2,22 @@
 #
 # Table name: workflows
 #
-#  id                  :integer          not null, primary key
-#  title               :string
-#  name                :string
-#  dxid                :string
-#  user_id             :integer
-#  readme              :text
-#  edit_version        :string
-#  spec                :text
-#  default_instance    :string
-#  scope               :string
-#  revision            :integer
+#  id                 :integer          not null, primary key
+#  title              :string(255)
+#  name               :string(255)
+#  dxid               :string(255)
+#  user_id            :integer
+#  readme             :text(65535)
+#  edit_version       :string(255)
+#  spec               :text(65535)
+#  default_instance   :string(255)
+#  scope              :string(255)
+#  revision           :integer
 #  workflow_series_id :integer
-#  created_at          :datetime         not null
-#  updated_at          :datetime         not null
+#  created_at         :datetime         not null
+#  updated_at         :datetime         not null
+#  uid                :string(255)
+#  project            :string(255)
 #
 
 class Workflow < ApplicationRecord

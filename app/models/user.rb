@@ -4,21 +4,26 @@
 # Table name: users
 #
 #  id                          :integer          not null, primary key
-#  dxuser                      :string
-#  private_files_project       :string
-#  public_files_project        :string
-#  private_comparisons_project :string
-#  public_comparisons_project  :string
+#  dxuser                      :string(255)
+#  private_files_project       :string(255)
+#  public_files_project        :string(255)
+#  private_comparisons_project :string(255)
+#  public_comparisons_project  :string(255)
 #  schema_version              :integer
 #  created_at                  :datetime         not null
 #  updated_at                  :datetime         not null
 #  org_id                      :integer
-#  first_name                  :string
-#  last_name                   :string
-#  email                       :string
-#  normalized_email            :string
+#  first_name                  :string(255)
+#  last_name                   :string(255)
+#  email                       :string(255)
+#  normalized_email            :string(255)
 #  last_login                  :datetime
-#  extras                      :text
+#  extras                      :text(65535)
+#  time_zone                   :string(255)
+#  review_app_developers_org   :string(255)      default("")
+#  user_state                  :integer          default("enabled"), not null
+#  expiration                  :integer
+#  disable_message             :string(255)
 #
 
 class User < ApplicationRecord
@@ -67,6 +72,7 @@ class User < ApplicationRecord
     aleksandr.moroz.3
     vladimir.rainish.4
     aleksei.ivanishchev
+    singularmasterr.singularmasterr
     siteadmin.aabramenko
     davis.feng
     stanley.lan

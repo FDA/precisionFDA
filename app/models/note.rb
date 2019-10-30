@@ -3,13 +3,13 @@
 # Table name: notes
 #
 #  id         :integer          not null, primary key
-#  title      :string
-#  content    :text
-#  user_id    :integer
+#  title      :string(255)
+#  content    :text(65535)
+#  user_id    :integer          not null
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
-#  scope      :string
-#  note_type  :string
+#  scope      :string(255)
+#  note_type  :string(255)
 #
 
 class Note < ApplicationRecord

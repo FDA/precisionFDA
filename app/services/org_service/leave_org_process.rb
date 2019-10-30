@@ -34,14 +34,15 @@ module OrgService
       @projects_old_names_map = nil
       @orgname = nil
 
-      # Mapping should be built before database update since it replaces user's org.
-      mapping = { projects: projects_map, organizations: org_map }
-
       check_admin!
       check_membership!
       provide_new_org!
       invite_user_to_new_org!
       rename_projects!
+
+      # Mapping should be built before database update since it replaces user's org.
+      mapping = { projects: projects_map, organizations: org_map }
+
       update_database!
 
       mapping
