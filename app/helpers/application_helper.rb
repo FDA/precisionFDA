@@ -166,6 +166,7 @@ module ApplicationHelper
   def leave_org_alert_shown?
     return if !@context.logged_in?
     return if controller_name == "main" && action_name == "index"
+    return if current_user.org.admin == current_user && current_user.org.users.size > 1
 
     filter_requests(current_user, OrgActionRequest::State::APPROVED).first.present?
   end

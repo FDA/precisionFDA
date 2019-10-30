@@ -1,4 +1,5 @@
 .gems/
 .git/
+.idea/
 log/
 tmp/

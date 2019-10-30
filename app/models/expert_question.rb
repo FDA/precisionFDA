@@ -2,12 +2,14 @@
 #
 # Table name: expert_questions
 #
-#  id            :integer          not null, primary key
-#  state         :string
-#  body          :text
-#  meta          :text
-#  created_at    :datetime         not null
-#  updated_at    :datetime         not null
+#  id         :integer          not null, primary key
+#  expert_id  :integer
+#  user_id    :integer
+#  body       :text(65535)
+#  meta       :text(65535)
+#  state      :string(255)
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
 #
 
 class ExpertQuestion < ApplicationRecord

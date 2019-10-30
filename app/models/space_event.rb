@@ -2,16 +2,17 @@
 #
 # Table name: space_events
 #
-#  id                  :integer         not null, primary key
-#  user_id             :integer         not null
-#  space_id            :integer         not null
-#  entity_id           :integer         not null
-#  entity_type         :string          not null
-#  side                :integer         not null
-#  activity_type       :integer         not null
-#  created_at          :datetime        not null
-#  object_type         :integer         not null
-#  role                :integer         not null
+#  id            :integer          not null, primary key
+#  user_id       :integer          not null
+#  space_id      :integer          not null
+#  entity_id     :integer          not null
+#  entity_type   :string(255)      not null
+#  activity_type :integer          not null
+#  side          :integer          not null
+#  created_at    :datetime         not null
+#  object_type   :integer          not null
+#  role          :integer          not null
+#  data          :text(65535)
 #
 
 class SpaceEvent < ApplicationRecord

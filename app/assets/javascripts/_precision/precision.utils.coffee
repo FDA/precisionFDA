@@ -78,3 +78,18 @@ window.Precision.utils =
     for code, ids of country_codes
       return code if ids.indexOf(countryID) > -1
     return false
+
+  createOnScrollHandler: (parentNodeID, dataCont, getData) ->
+    $parentNodeDIV = $("##{parentNodeID}")
+    return false if !$parentNodeDIV.length
+
+    _getData = _.debounce(getData, 150)
+
+    scrollPos = 0
+    onScrollHandler = () ->
+      goDown = scrollPos < $parentNodeDIV.scrollTop()
+      $dataCont = $parentNodeDIV.find(dataCont)
+      if($parentNodeDIV.scrollTop() + $parentNodeDIV.height() >= $dataCont.height() - 20 and goDown)
+        _getData()
+      scrollPos = $parentNodeDIV.scrollTop()
+    $parentNodeDIV.on 'scroll', onScrollHandler

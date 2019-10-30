@@ -2,13 +2,14 @@
 #
 # Table name: experts
 #
-#  id            :integer          not null, primary key
-#  state         :string
-#  image         :string
-#  scope         :string
-#  meta          :text
-#  created_at    :datetime         not null
-#  updated_at    :datetime         not null
+#  id         :integer          not null, primary key
+#  user_id    :integer
+#  image      :string(255)
+#  state      :string(255)
+#  scope      :string(255)
+#  meta       :text(65535)
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
 #
 
 class Expert < ApplicationRecord

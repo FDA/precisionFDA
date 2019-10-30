@@ -42,7 +42,11 @@ class SubmissionsController < ApplicationController
 
     licenses_accepted = @context.user.accepted_licenses.map{|l| {id: l.license_id, pending: l.pending?, active: l.active?, unset: !l.pending? && !l.active?}}
 
-    js challenge_id: unsafe_params[:challenge_id], app: @app.slice(:dxid, :spec, :title), licenses_to_accept: licenses_to_accept.uniq { |l| l.id}, licenses_accepted: licenses_accepted
+    js challenge_id: unsafe_params[:challenge_id],
+       app: @app.slice(:dxid, :spec, :title),
+       scopes_permitted: %w(public private),
+       licenses_to_accept: licenses_to_accept.uniq { |l| l.id },
+       licenses_accepted: licenses_accepted
   end
 
   def edit

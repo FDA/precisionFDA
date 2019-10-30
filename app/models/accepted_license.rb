@@ -7,8 +7,8 @@
 #  user_id    :integer
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
-#  state      :string
-#  message    :text
+#  state      :string(255)
+#  message    :text(65535)
 #
 
 class AcceptedLicense < ApplicationRecord

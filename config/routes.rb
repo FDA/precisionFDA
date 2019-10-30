@@ -147,6 +147,7 @@ Rails.application.routes.draw do
       post 'describe'
       post 'list_files'
       post 'folder_tree'
+      post "files_regex_search"
       post 'list_notes'
       post 'list_comparisons'
       post 'list_apps'

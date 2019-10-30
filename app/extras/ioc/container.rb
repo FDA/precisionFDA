@@ -22,7 +22,6 @@ module IOC
     def configure
       import NS::API
       import NS::Orgs
-      import NS::Services
     end
   end
 end

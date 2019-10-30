@@ -2,7 +2,6 @@ module IOC
   module NS
     Orgs = Dry::Container::Namespace.new("orgs") do
       import API
-      import Services
 
       register("user_removal_policy") { UserRemovalPolicy }
       register("member_removal_policy") { MemberRemovalPolicy }

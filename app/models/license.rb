@@ -3,12 +3,12 @@
 # Table name: licenses
 #
 #  id                :integer          not null, primary key
-#  content           :text
+#  content           :text(65535)
 #  user_id           :integer
 #  created_at        :datetime         not null
 #  updated_at        :datetime         not null
-#  title             :string
-#  scope             :string
+#  title             :string(255)
+#  scope             :string(255)
 #  approval_required :boolean          default(FALSE), not null
 #
 

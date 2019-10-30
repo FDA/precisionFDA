@@ -1,6 +1,7 @@
 class ApiController < ApplicationController
   include ErrorProcessable
   include WorkflowConcern
+  include FilesConcern
 
   skip_before_action :verify_authenticity_token
   skip_before_action :require_login
@@ -269,7 +270,7 @@ class ApiController < ApplicationController
     scoped_parent_folder_id =
       unsafe_params[:scoped_parent_folder_id] == "" ? nil : unsafe_params[:scoped_parent_folder_id].to_i
 
-    User.sync_files!(@context)
+ #   User.sync_files!(@context)
 
     if unsafe_params[:scopes].present?
       check_scope!
@@ -285,7 +286,7 @@ class ApiController < ApplicationController
         files = UserFile.batch_space_files(spaces_params)
         folders = Folder.batch_space_folders(spaces_params)
       else
-        files = UserFile.batch_private_files(@context,["private", nil], parent_folder_id)
+        files = UserFile.batch_private_files(@context, ["private", nil], parent_folder_id)
         folders = Folder.batch_private_folders(@context, parent_folder_id)
       end
     end
@@ -304,11 +305,60 @@ class ApiController < ApplicationController
     render json: folder_tree
   end
 
+  # Return files array found by RegEx
+  # Inputs:
+  # @param [String] searchValue string
+  # @param [String] flagsValue string
+  # @param [Integer] page - current page number
+  # @param [Array] scopes (Array, optional): array of valid scopes e.g.
+  #   ["private", "public", "space-1234"] or leave blank for all
+  # @param [Nil or True] uids
+  #
+  # @return [Array of Hashes]
+  #  search_result: array of hashes, each of which has these fields:
+  #    id (integer): primary key of the file
+  #    uid (strinf): string key of the file
+  #    title (string): the file name
+  #    path (string): a file path collected
+  #  uids: array of all found file's uid values
+  #
+  # rubocop:disable Style/SignalException
+  def files_regex_search
+    page = params[:page].to_i.positive? ? params[:page] : 1
+    files = user_real_files(params, @context).files_conditions
+
+    begin
+      regexp = Regexp.new(params[:search_string], params[:flag])
+      search_result = files.eager_load(:license, user: :org).order(id: :desc).map do |file|
+        describe_for_api(file) if file.name.scan(regexp).present?
+      end
+      result = search_result.compact.
+        map do |file|
+        {
+          id: file[:id],
+          uid: file[:uid],
+          title: file["title"],
+          path: file[:file_path],
+        }
+      end
+      paginated_result = Kaminari.paginate_array(result).page(page).per(20)
+      uids = params[:uids].present? && to_bool(params[:uids]) ? result.compact.pluck(:uid) : []
+
+      render json: { search_result: paginated_result, uids: uids }
+    rescue RegexpError => e
+      fail "RegEx Invalid: #{e}"
+    end
+    # rubocop:enable Style/SignalException
+  end
+
   # Inputs:
   #
-  # states (array of strings; optional): the file state/s to be returned "closed", "closing", and/or "open"
-  # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
-  # editable (Boolean, optional): if filtering for only editable_by the context user, otherwise accessible_by
+  # states (array of strings; optional): the file state/s to be returned "closed", "closing",
+  #   and/or "open"
+  # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or
+  #   leave blank for all
+  # editable (Boolean, optional): if filtering for only editable_by the context user,
+  #   otherwise accessible_by
   # describe (object, optional)
   #     fields (array, optional):
   #         Array containing field name [field_1, field_2, ...]
@@ -328,23 +378,7 @@ class ApiController < ApplicationController
   # path (string): file_path of the file
   #
   def list_files
-    User.sync_files!(@context)
-
-    files = if unsafe_params[:editable]
-      UserFile.real_files.editable_by(@context).accessible_by_private
-    else
-      UserFile.real_files.accessible_by(@context)
-    end
-
-    if unsafe_params[:scopes].present?
-      check_scope!
-      files = files.where(scope: unsafe_params[:scopes])
-    end
-
-    if unsafe_params[:states].present?
-      fail "Invalid states" unless unsafe_params[:states].is_a?(Array) && unsafe_params[:states].all? { |state| %w(closed closing open).include?(state) }
-      files = files.where(state: unsafe_params["states"])
-    end
+    files = user_real_files(params, @context)
 
     count = files.count if unsafe_params[:offset] == 0
 
