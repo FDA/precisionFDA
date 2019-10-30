@@ -1,9 +1,6 @@
 class WDLObject
   # Contains common parsing methods for a WDL
   module Parseable
-    # rubocop:disable Metrics/CyclomaticComplexity
-    # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/PerceivedComplexity
     # rubocop:disable Metrics/MethodLength
     def parse_sections(raw, name, options = {})
       opts = options.reverse_merge(limit: 0, with_identifier: false)
@@ -83,13 +80,10 @@ class WDLObject
       raw_outputs = parse_section(raw, "output") || ""
 
       raw_outputs.each_line.each_with_object([]) do |line, outputs|
-        outputs << line.strip if line =~ /^\s*[A-Z][\w_\?]+\s+[a-zA-Z][a-zA-Z0-9_]+\s*=\s*\S+\s*$/
+        outputs << line.strip if line =~ /^\s*[A-Z][\w_?]+\s+[a-zA-Z][\w]+\s*=\s*\S+[\S\s]*$/
       end
     end
 
-    # rubocop:enable Metrics/CyclomaticComplexity
-    # rubocop:enable Metrics/AbcSize
-    # rubocop:enable Metrics/PerceivedComplexity
     # rubocop:enable Metrics/MethodLength
   end
 end
