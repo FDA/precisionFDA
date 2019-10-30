@@ -270,8 +270,6 @@ class ApiController < ApplicationController
     scoped_parent_folder_id =
       unsafe_params[:scoped_parent_folder_id] == "" ? nil : unsafe_params[:scoped_parent_folder_id].to_i
 
- #   User.sync_files!(@context)
-
     if unsafe_params[:scopes].present?
       check_scope!
       # exclude 'public' scope
@@ -378,6 +376,7 @@ class ApiController < ApplicationController
   # path (string): file_path of the file
   #
   def list_files
+    User.sync_files!(@context)
     files = user_real_files(params, @context)
 
     count = files.count if unsafe_params[:offset] == 0
