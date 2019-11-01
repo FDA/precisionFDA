@@ -103,7 +103,7 @@ module Permissions
 
   def core_publishable_by_user?(user, scope_to_publish_to)
     return false unless user
-    user_id == user.id && (private? || in_space?
+    user_id == user.id && (private? || in_space?)
   end
 
   def publishable_by?(context, scope_to_publish_to = "public")
