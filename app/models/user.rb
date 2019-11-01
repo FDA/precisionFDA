@@ -56,21 +56,17 @@ class User < ApplicationRecord
 
   NON_PRODUCTION_ADMINS = %w(
     Adam.Berger@fda.hhs.gov
-    martin.bednar
     zeke.maier
     Zivana.Tezak@fda.hhs.gov
     pamella.tater.2
     ezekiel.maier
-    vijay.kandali
     sam.westreich
     min.yi
     john.didion
-    naina.thangaraj
     holly.stephens
     aabramenko.adminstage
     alekadmin.suradmin
     aleksandr.moroz.3
-    vladimir.rainish.4
     aleksei.ivanishchev
     singularmasterr.singularmasterr
     siteadmin.aabramenko
@@ -88,7 +84,6 @@ class User < ApplicationRecord
   CHALLENGE_EVALUATORS = %w(
     elaine.johanson
     ezekiel.maier.2
-    george.asimenos
     heike.sichtig
     min.yi
     ruth.bandler

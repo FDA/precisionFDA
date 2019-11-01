@@ -102,7 +102,6 @@ REVIEW_SPACE_ADMINS =
     %w(
       elaine.johanson
       ruth.bandler
-      singer.ma
       john.didion
       ezekiel.maier.2
       holly.stephens
@@ -120,7 +119,6 @@ REVIEW_SPACE_ADMINS =
       ezekiel.maier
       sam.westreich
       hollystephens723
-      vladimir.rainish.6
       rsa.aabramenko
     ).freeze
   end
