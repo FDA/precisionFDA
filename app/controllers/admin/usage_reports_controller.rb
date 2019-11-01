@@ -1,4 +1,5 @@
 module Admin
+  # Responsible for usage metrics related actions.
   class UsageReportsController < BaseController
     before_action :init_dates, only: :index
 
@@ -10,8 +11,8 @@ module Admin
         per_page: 100,
         include: [:user],
         enable_export_to_csv: true,
-        csv_file_name: "users_usage_#{Time.now.strftime('%Y-%m-%d')}",
-        name: "usage"
+        csv_file_name: "users_usage_#{Time.current.strftime('%Y-%m-%d')}",
+        name: "usage",
       )
 
       export_grid_if_requested("usage" => "usage_grid")
@@ -19,7 +20,7 @@ module Admin
       js(
         selected_range: @selected_range,
         custom_range_begin: @custom_range_begin,
-        custom_range_end: @custom_range_end
+        custom_range_end: @custom_range_end,
       )
     end
 
@@ -44,7 +45,8 @@ module Admin
       @selected_range = Setting.get_value("selected_range").presence || "week"
 
       @storage_date = UsageMetric.where.not(storage_usage: nil).
-                        order(:created_at).limit(1).pluck(:created_at).first
+        order(:created_at).limit(1).pluck(:created_at).first
+
       @compute_date = (@storage_date - 1.day).end_of_day if @storage_date
     end
 
@@ -60,12 +62,12 @@ module Admin
 
     def period
       case @selected_range
-        when "day" then "daily"
-        when "week" then "weekly"
-        when "month" then "monthly"
-        when "year" then "yearly"
-        when "cumulative" then "cumulative"
-        else "weekly"
+      when "day" then "daily"
+      when "week" then "weekly"
+      when "month" then "monthly"
+      when "year" then "yearly"
+      when "cumulative" then "cumulative"
+      else "weekly"
       end
     end
 
