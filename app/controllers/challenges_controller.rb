@@ -272,8 +272,11 @@ class ChallengesController < ApplicationController
     redirect_to challenges_path unless @context.challenge_admin?
   end
 
+  # Returns a collecttion of users-owners of apps for selection on challenge create or edit
+  # each User should be valid, i.e. to have an Org, otherwise skipped
+  # @return [Array] Array<Array> of users info: user names with org name, user id
   def app_owners_for_select
-    @app_owners_candidates = User.real.map { |u| [u.select_text, u.id] }
+    @app_owners_candidates = User.real.map { |u| [u.select_text, u.id] if u.org }.compact
   end
 
   def find_editable_challenge
