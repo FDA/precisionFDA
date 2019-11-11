@@ -1,15 +1,15 @@
-require_relative 'migrate/20180516114442_seed_news_items'
-require_relative 'migrate/20180510104759_create_get_started_boxes'
-require_relative 'migrate/20180629093507_create_participants'
-require_relative 'migrate/20190212131903_create_countries.rb'
+require_relative "migrate/20180516114442_seed_news_items"
+require_relative "migrate/20180510104759_create_get_started_boxes"
+require_relative "migrate/20180629093507_create_participants"
+require_relative "migrate/20190212131903_create_countries.rb"
 
-first_name = ENV.fetch('PFDA_USER_FIRST_NAME', 'Alice')
-last_name = ENV.fetch('PFDA_USER_LAST_NAME', 'Black')
-email = ENV.fetch('PFDA_USER_EMAIL', 'alice.black@alice.black.com')
-dxuser = ENV.fetch('PFDA_USER_DXUSER', 'automationtestuser')
-org_handle = ENV.fetch('PFDA_USER_ORG_HANDLE', 'automationtestinggmbh')
+first_name = ENV.fetch("PFDA_USER_FIRST_NAME", "Alice")
+last_name = ENV.fetch("PFDA_USER_LAST_NAME", "Black")
+email = ENV.fetch("PFDA_USER_EMAIL", "alice.black@alice.black.com")
+dxuser = ENV.fetch("PFDA_USER_DXUSER", "automationtestuser")
+org_handle = ENV.fetch("PFDA_USER_ORG_HANDLE", "automationtestinggmbh")
 
-
+# rubocop:disable Metrics/BlockLength
 ActiveRecord::Base.transaction do
   user = User.create!(
     dxuser: dxuser,
@@ -17,7 +17,7 @@ ActiveRecord::Base.transaction do
     first_name: first_name,
     last_name: last_name,
     email: email,
-    normalized_email: email
+    normalized_email: email,
   )
 
   org = Org.create!(
@@ -28,7 +28,7 @@ ActiveRecord::Base.transaction do
     duns: "",
     phone: "",
     state: "complete",
-    singular: false
+    singular: false,
   )
 
   user.update!(org_id: org.id)
@@ -50,38 +50,38 @@ ActiveRecord::Base.transaction do
     user: user,
     title: "#{last_name}'s consistency note title",
     content: "#{last_name}'s consistency note content",
-    scope: 'public'
+    scope: "public",
   )
 
   # Create discussions
   Discussion.create!(
     id: TRUTH_DISCUSSION_ID,
     user: user,
-    note: truth_note
+    note: truth_note,
   )
 
   Discussion.create!(
     id: CONSISTENCY_DISCUSSION_ID,
     user: user,
-    note: consistency_note
+    note: consistency_note,
   )
 
   Discussion.create!(
     user: user,
-    note: challenge_note
+    note: challenge_note,
   )
 
   MetaAppathon.create!(
     handle: "app-a-thon-in-a-box",
     name: "meta appathon title placeholder",
     start_at: 2.weeks.ago,
-    end_at: 2.weeks.from_now
+    end_at: 2.weeks.from_now,
   )
 
   User.new(
     dxuser: CHALLENGE_BOT_DX_USER,
     private_files_project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
-    public_files_project: CHALLENGE_BOT_PUBLIC_FILES_PROJECT
+    public_files_project: CHALLENGE_BOT_PUBLIC_FILES_PROJECT,
   ).save!(validate: false)
 
   # load articles generated from stuff.
@@ -90,3 +90,4 @@ ActiveRecord::Base.transaction do
   CreateParticipants.new.migrate_data
   CreateCountries.migrate_data unless Rails.env.test?
 end
+# rubocop:enable Metrics/BlockLength
