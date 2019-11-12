@@ -36,6 +36,8 @@ look [here](https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/).
 * Update the `libv8` gem before `bundle i`:
     * `gem install libv8 -v '3.16.14.13' -- --with-system-v8`
     
+* Set MySQL root password to anything that is set in development -> password in `config/database.yml`.
+    
 * Create database with the environment variables set with your account's data (if you don't have
 an account yet, please refer to [new account registration](DEVELOPMENT_SETUP.md#New account registration)):
     * ```
