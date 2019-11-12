@@ -73,7 +73,7 @@
         <span class="fa fa-flip-vertical fa-sitemap"></span> Track
       <% end %>
     <% end %>
-    <% if @licenses.present? %>
+    <% if @licenses.present? && @file.owned_by?(@context) %>
       <%= render "licenses/set_dropdown", licenses: @licenses, item: @file %>
     <% end %>
   </div>

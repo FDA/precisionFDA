@@ -87,6 +87,10 @@ module Permissions
     SpaceMembershipPolicy.can_modify_content?(space_object, self, context.user)
   end
 
+  # Check if the object belongs to current user
+  # @param context [Context] a user which is logged in
+  # @return [true, false] Returns true if the object belongs to current user,
+  #   false otherwise.
   def owned_by?(context)
     user_id == context.user_id
   end
