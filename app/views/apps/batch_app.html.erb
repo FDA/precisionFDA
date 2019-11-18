@@ -5,7 +5,34 @@
     <div class="page-header clearfix">
       <div class="page-title pull-left"><span class="fa fa-cube"></span> Run <%= link_to @app.title, app_path(@app.uid), target: "_blank" %></div>
       <div class="btn-group pull-right">
-        <button type="button" class="btn btn-lg" data-bind="css: {disabled: !isRunnable(), 'btn-danger': !isRunnable(), 'btn-danger': isRunnable()}, attr: {disabled: !isRunnable()}, disable: !isRunnable(), click: run"><span data-bind="text: runBtnText()"></span></button>
+        <!-- ko if: isInSpace -->
+          <button
+            type="button"
+            class="btn btn-lg"
+            data-bind=
+              "css: {disabled: !isRunnable() || !spaceId(), 'btn-danger': !isRunnable(), 'btn-danger': isRunnable()},
+               attr: {disabled: !isRunnable() || !spaceId()},
+               disable: !isRunnable() || !spaceId(),
+               click: run"
+          >
+            <span class="fa fa-bolt"></span>
+            <span data-bind="text: runBtnText()"></span>
+          </button>
+        <!-- /ko -->
+        <!-- ko if: !isInSpace -->
+          <button
+            type="button"
+            class="btn btn-lg"
+            data-bind=
+              "css: {disabled: !isRunnable(), 'btn-danger': !isRunnable(), 'btn-danger': isRunnable()},
+               attr: {disabled: !isRunnable()},
+               disable: !isRunnable(),
+               click: run"
+          >
+            <span class="fa fa-bolt"></span>
+            <span data-bind="text: runBtnText()"></span>
+          </button>
+        <!-- /ko -->
       </div>
     </div>
   </div>
