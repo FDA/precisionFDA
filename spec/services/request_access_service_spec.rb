@@ -6,7 +6,6 @@ describe RequestAccessService do
 
   describe "::create_request_for_access" do
     before do
-      allow(Auditor).to receive(:perform_audit)
       allow(Event::UserAccessRequested).to receive(:create_for)
       allow(NotificationsMailer).to receive_messages(
         invitation_email: invitation_mail,
@@ -17,7 +16,10 @@ describe RequestAccessService do
     context "when invitation was created" do
       let!(:invitation) { create(:invitation, org: nil) }
 
-      before { allow(Invitation).to receive(:create).and_return(invitation) }
+      before do
+        allow(Invitation).to receive(:create).and_return(invitation)
+        allow(Auditor).to receive(:perform_audit)
+      end
 
       it "creates new invitation" do
         service.create_request_for_access({})
@@ -53,7 +55,10 @@ describe RequestAccessService do
     context "when invitation was not created" do
       let!(:invitation) { build(:invitation, org: nil) }
 
-      before { allow(Invitation).to receive(:create).and_return(invitation) }
+      before do
+        allow(Invitation).to receive(:create).and_return(invitation)
+        allow(Auditor).to receive(:perform_audit)
+      end
 
       it "returns non persisted invitation" do
         built_invitation = service.create_request_for_access({})
