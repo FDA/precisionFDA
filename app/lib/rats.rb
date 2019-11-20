@@ -1,10 +1,9 @@
+# Common code to deal with successes, failures, etc.
 module Rats
-  def self.try(&block)
-    begin
-      Ok.new(yield)
-    rescue => e
-      Error.new(e)
-    end
+  def self.try
+    Ok.new(yield)
+  rescue StandardError => e
+    Error.new(e)
   end
 
   def self.success(value)

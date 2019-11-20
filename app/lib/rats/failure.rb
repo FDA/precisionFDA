@@ -1,14 +1,15 @@
 module Rats
+  # Represents a failure state object
   class Failure < Result
     def initialize(value)
       @value = value
     end
 
-    def map(&block)
+    def map
       self
     end
 
-    def flat_map(&block)
+    def flat_map
       self
     end
 
@@ -20,7 +21,7 @@ module Rats
       true
     end
 
-    def fold(failure_proc, success_proc)
+    def fold(failure_proc, _success_proc)
       failure_proc.call(value)
     end
 

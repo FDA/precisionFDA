@@ -1,14 +1,15 @@
 module Rats
+  # Represents a success state object
   class Success < Result
     def initialize(value)
       @value = value
     end
 
-    def map(&block)
+    def map
       Success.new(yield value)
     end
 
-    def flat_map(&block)
+    def flat_map
       (yield value).tap do |val|
         unless val.is_a?(Result)
           raise TypeError, "Passed block should return `Result`, it returns `#{val.class}` instead"
@@ -16,7 +17,7 @@ module Rats
       end
     end
 
-    def fold(failure_proc, success_proc)
+    def fold(_failure_proc, success_proc)
       success_proc.call(value)
     end
 

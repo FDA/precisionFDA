@@ -2,6 +2,7 @@ module Rats
   class Try
   end
 
+  # Represents an OK state object
   class Ok < Try
     attr_accessor :value
 
@@ -9,29 +10,27 @@ module Rats
       @value = value
     end
 
-    def map(&block)
-      begin
-        Ok.new(yield value)
-      rescue => e
-        Error.new(e)
-      end
+    def map
+      Ok.new(yield value)
+    rescue StandardError => e
+      Error.new(e)
     end
 
-    def flat_map(&block)
+    def flat_map
       t_val = nil
       catch :type_error do
         begin
           t_val = yield value
           throw :type_error unless t_val.is_a?(Try)
           return t_val
-        rescue => e
+        rescue StandardError => e
           return Error.new(e)
         end
       end
       raise TypeError, "Passed block should return `Try`, it returned `#{t_val.class}` instead"
     end
 
-    def recover(&block)
+    def recover
       self
     end
 
@@ -47,18 +46,22 @@ module Rats
       false
     end
 
-    def ==(obj)
-      obj.class == Ok && obj.value == value
+    def ==(other)
+      other.class == Ok && other.value == value
     end
 
     alias_method :then, :flat_map
   end
 
+  # Represents an error state object
   class Error < Try
     attr_reader :error
 
     def initialize(error)
-      raise ArgumentError, "`error` should be a sub-class of `Exception`" unless error.is_a?(Exception)
+      unless error.is_a?(Exception)
+        raise ArgumentError, "`error` should be a sub-class of `Exception`"
+      end
+
       @error = error
     end
 
@@ -66,15 +69,15 @@ module Rats
       raise @error
     end
 
-    def map(&block)
+    def map
       self
     end
 
-    def flat_map(&block)
+    def flat_map
       self
     end
 
-    def recover(&block)
+    def recover
       yield @error
     end
 
@@ -90,8 +93,8 @@ module Rats
       true
     end
 
-    def ==(obj)
-      obj.class == Error && obj.error == error
+    def ==(other)
+      other.class == Error && other.error == error
     end
 
     alias_method :then, :flat_map
