@@ -1,6 +1,5 @@
 module GraphDecorator
   class JobNode < BaseNode
-
     def children
       return [] unless record.accessible_by?(context)
 
@@ -10,6 +9,5 @@ module GraphDecorator
 
       children.push(build_child(record.app))
     end
-
   end
 end

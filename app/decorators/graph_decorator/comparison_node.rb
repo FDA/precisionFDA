@@ -1,6 +1,5 @@
 module GraphDecorator
   class ComparisonNode < BaseNode
-
     def children
       return [] unless record.accessible_by?(context)
 
@@ -8,6 +7,5 @@ module GraphDecorator
         build_child(file)
       end
     end
-
   end
 end
