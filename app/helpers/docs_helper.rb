@@ -9,7 +9,7 @@ module DocsHelper
     menu = root.slice(:common)
     menu = menu.merge(root.slice(:site_admin)) if @context.can_administer_site?
     menu = menu.merge(root.slice(:review_space_admin)) if @context.review_space_admin?
-    menu = menu.merge(root.slice(:org_admin)) if non_singular_org_admin?(@context.user)
+    menu = menu.merge(root.slice(:org_admin)) if @context.logged_in? && non_singular_org_admin?(@context.user)
 
     menu
   end
