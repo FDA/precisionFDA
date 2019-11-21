@@ -109,10 +109,6 @@ group :development do
 
   gem "listen", ">= 3.0.5", "< 3.2"
 
-  # Spring speeds up development by keeping your application running in the background
-  gem "spring"
-  gem "spring-watcher-listen", "~> 2.0.0"
-
   # Automatic Ruby code checking tool
   gem "rubocop", "~> 0.71.0", require: false
   gem "rubocop-rails", require: false
