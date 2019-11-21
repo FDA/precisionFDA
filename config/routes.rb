@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+  if Rails.env.development?
+    require "sidekiq/web"
+    Sidekiq::Web.app_url = "/"
+    Sidekiq::Web.set :session_secret, Rails.application.credentials[:secret_key_base]
+    mount Sidekiq::Web => "/sidekiq"
+  end
+
   default_url_options Rails.configuration.action_mailer.default_url_options
   #
   # Remove the ability to switch formats (i.e. /foo vs /foo.json or /foo.xml)

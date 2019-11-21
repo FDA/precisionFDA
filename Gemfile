@@ -100,6 +100,10 @@ gem "therubyracer"
 
 gem "dry-container"
 
+gem "rubyzip", "=1.3.0"
+
+gem "sidekiq"
+
 group :development do
   # Annotate models
   gem "annotate"
@@ -151,5 +155,3 @@ group :production do
   gem "soapforce"
   gem "unicorn", "~> 4.9.0"
 end
-
-gem "rubyzip", "=1.3.0"
