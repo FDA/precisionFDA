@@ -41,7 +41,7 @@ class SelectorModel
       name: "Selected"
     })
     @selected = @selectedList.objects
-    @numSelected = ko.computed(=>
+    @numSelected = ko.computed( =>
       if _.isArray(@selected())
         _.size(@selected())
       else if _.isObject(@selected())
@@ -93,7 +93,7 @@ class SelectorModel
       if @selectionType == "radio"
         @selected(null)
       else
-        @selected.removeAll()
+        @selected([])
       @error(null)
     )
     @modal.on("click", ".object-related-link, .list-group-item.not-selectable label", () ->
@@ -192,18 +192,20 @@ class ObjectListModel
 
   getObjects: (offset = 0, limit = 100) ->
     return $.Deferred().resolve() if !@apiEndpoint?
-    rootContext = ko.contextFor(@selectorModel.modal.get(0)).$root
+    accessibleScope = @selectorModel.listRelatedParams.scopes
     if @className == 'file'
       @apiParams['offset'] = offset
       @apiParams['limit'] = limit
-      @apiParams['scopes'] = rootContext.accessibleScope if rootContext.accessibleScope
+      @apiParams['scopes'] = accessibleScope
 
     params = _.defaults(@apiParams, {
-      describe:
-        include:
-          all_tags_list: false
-          user: true
+      describe: {
+        include: {
+          all_tags_list: false,
+          user: true,
           org: true
+        }
+      }
     })
 
     @objects.removeAll() unless @className == 'file'
@@ -301,7 +303,7 @@ class ObjectItemModel
 
     @activeRelatedObjects = @listModel.activeRelatedObjects
 
-    @relatedObjects = ko.observable().extend({notify: 'always'})
+    @relatedObjects = ko.observable().extend({ notify: 'always' })
     @numRelatedObjects = ko.computed(=> _.size(@relatedObjects()))
 
     @loadingRelated = ko.observable(false)
@@ -313,8 +315,9 @@ class ObjectItemModel
     @user_license.pending = ko.computed(=> @user_license()?.pending)
     @user_license.unset = ko.computed(=> @user_license()?.unset)
 
-    @isSelectable = ko.computed(=>
-      @selectableClasses == true || (_.isArray(@selectableClasses) && _.includes(@selectableClasses, @className()))
+    @isSelectable = ko.computed( =>
+      isArray = _.isArray(@selectableClasses)
+      @selectableClasses == true || (isArray && _.includes(@selectableClasses, @className()))
     )
 
     if opts.update
@@ -346,12 +349,14 @@ class ObjectItemModel
 
   describe: () ->
     params = _.defaults(@listModel.apiParams, {
-      uid: @uid
-      describe:
-        include:
-          all_tags_list: true
-          user: true
+      uid: @uid,
+      describe: {
+        include: {
+          all_tags_list: true,
+          user: true,
           org: true
+        }
+      }
     })
     Precision.api("/api/describe", params)
 
@@ -361,16 +366,19 @@ class ObjectItemModel
 
     if !@loadedRelated()
       @loadingRelated(true)
-      @selectorModel.callsDeferred.done(=>
-        params =
-          uid: @uid
+      @selectorModel.callsDeferred.done( =>
+        params = {
+          uid: @uid,
           opts: _.extend({
-            describe:
-              include:
-                all_tags_list: true
-                user: true
+            describe: {
+              include: {
+                all_tags_list: true,
+                user: true,
                 org: true
+              }
+            }
           }, @selectorModel.listRelatedParams)
+        }
         Precision.api("/api/list_related", params)
           .done((objects) =>
             relatedObjects = []
