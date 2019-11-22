@@ -116,12 +116,14 @@ class SelectorModel
     @saving(true)
     @error(null)
     @opts.onSave(@selected())
-      .done(() =>
-        @modal.modal('hide')
+      .done((data, hideModal = true) =>
+        if hideModal
+          @modal.modal('hide')
+          @saving(false)
         @opts.onAfterSave?()
       )
-      .fail(@onError)
-      .always(=>
+      .fail(() =>
+        @onError()
         @saving(false)
       )
 

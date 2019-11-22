@@ -1,7 +1,10 @@
 <div data-bind="template: { name: 'object-selector-modal-template', afterRender: objectSelector.addFilesScrollListener }"></div>
 
 <script type="text/html" id="object-selector-modal-template">
-  <div class="object-selector-modal selector-modal modal fade" data-bind="with: objectSelector, attr: {id: objectSelector.id}">
+  <div class="object-selector-modal selector-modal modal fade modal-with-loader" data-bind="with: objectSelector,
+    attr: { id: objectSelector.id},
+    css: { loading: objectSelector.saving }"
+  >
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
@@ -17,6 +20,13 @@
           </div>
           <!-- /ko -->
         </div>
+
+        <div class="loader-container">
+          <div class="loader">
+            <i class="fa fa-spinner fa-spin"></i>
+          </div>
+        </div>
+
         <div class="modal-body modal-body-padless">
           <!-- Nav tabs -->
           <ul class="nav nav-pills nav-tabs-padded" role="tablist">

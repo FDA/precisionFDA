@@ -133,6 +133,7 @@ Rails.application.routes.draw do
       resources :workflows, only: %w(create)
 
       post "publish"
+      post "related_to_publish"
       post "create_file"
       post "create_challenge_card_image"
       post "create_image_file"

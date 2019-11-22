@@ -369,22 +369,11 @@ class MainController < ApplicationController
     id = unsafe_params[:id]
     raise "Missing id in publish route" unless id.is_a?(String) && id.present?
 
-    scope = unsafe_params[:scope]
-    if scope.blank?
-      scope = "public"
-    elsif scope.is_a?(String)
-      if scope != "public"
-        # Check that scope is a valid scope:
-        # - must be of the form space-xxxx
-        # - must exist in the Space table
-        # - must be accessible by context
-        raise "Publish route called with invalid scope #{scope}" unless scope =~ /^space-(\d+)$/
-        space = Space.find_by(id: $1.to_i)
-        raise "Publish route called with invalid space #{scope}" unless space.present? && space.active? && space.accessible_by?(@context)
-      end
-    else
-      raise "Publish route called with invalid scope #{scope.inspect}"
-    end
+    service = SpaceService::Publishing.new(@context)
+
+    check_result = service.scope_check(unsafe_params[:scope])
+    scope = check_result[:scope]
+    space = check_result[:space]
 
     if unsafe_params[:uids]
       uids = unsafe_params[:uids]
@@ -508,17 +497,11 @@ class MainController < ApplicationController
     @graph = GraphDecorator.build(@context, @item)
   end
 
-  def mislabeling
+  def mislabeling; end
 
-  end
+  def bco_appathon; end
 
-  def bco_appathon
-
-  end
-
-  def georgetown
-
-  end
+  def georgetown; end
 
   def tokify
     @key = generate_auth_key
