@@ -1,0 +1,51 @@
+<div id="add_related_objects_modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Share related objects?</h4>
+        <small class="text-muted">All apps related to workflow will be shared automatically</small>
+      </div>
+      <div class="modal-body">
+        <div class="pfda-padded-b related-object-container">
+          <!-- ko foreach: relatedObjects -->
+
+            <div class="related-object">
+              <div class="related-object-parent">
+                <div>
+                  <a target="_blank" data-bind="attr: { href: $data.url }">
+                    <i data-bind="attr: { class: $data.icon }"></i>
+                    <span class="related-object-parent-title" data-bind="text: $data.title"></span>
+                  </a>
+                  <span class="text-muted" data-bind="text: $data.type"></span>
+                </div>
+                <div>
+                  <input type="checkbox" class="related-object-parent-checkbox" data-bind="event: { change: $data.toggleChildren }" />
+                  <span class="text-muted">select all</span>
+                </div>
+              </div>
+              <hr>
+              <div class="related-object-children" data-bind="foreach: $data.relatedObjects">
+                <div class="related-object-child">
+                  <input type="checkbox" class="related-object-child-checkbox" data-bind="value: uid, checked: checked, disable: disabled" />
+                  <span class="text-muted" data-bind="text: $data.type"></span>
+                  <a target="_blank" data-bind="attr: { href: url }">
+                    <i data-bind="attr: { class: icon }"></i>
+                    <span class="related-object-child-title" data-bind="text: title"></span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+          <!-- /ko -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-bind="click: shareRelatedObjects">Ok</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
