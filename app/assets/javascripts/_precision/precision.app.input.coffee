@@ -26,7 +26,7 @@ class AppInputModel
     @licenseToAccept = ko.observable()
     @userLicense = ko.observable()
 
-    @value = ko.observable()
+    @value = ko.observable(spec.default)
     @valueDisplay = ko.computed({
       read: () =>
         switch @className
@@ -100,8 +100,10 @@ class AppInputModel
       isRequired = @isRequired
       hasData = false
       getDataForRun = @getDataForRun()
-      if getDataForRun && _.isArray(getDataForRun)
+      if _.isArray(getDataForRun)
         hasData = getDataForRun.length > 0 && @validArray(getDataForRun) && getDataForRun != ''
+      else if _.isBoolean(getDataForRun)
+        hasData = true
       else
         hasData = getDataForRun && getDataForRun != ''
       hasError = @error() != null
@@ -267,23 +269,25 @@ class AppInputModel
     @valueDisplay(null)
 
   getDataForRun: () ->
-    if @className=='boolean'
+    if @className == 'boolean'
       if @value()? && _.isArray(@value())? && @value().length > 0
         selectedData = @value()
       else if _.isBoolean(@value())
         selectedData = @value()
-      else if @defaultvalue?
-        selectedData = @defaultvalue
+      else if @defaultValue?
+        selectedData = @defaultValue
 
-    else if @value()?
+    if @defaultValue?
+      selectedData = @defaultValue
+
+    if @value()?
       selectedData = @value()
-    else if @defaultvalue?
-      selectedData = @defaultvalue
 
     if selectedData? && selectedData != ''
       try
         if @isClassAnArray && _.isString(selectedData)
-          selectedData = selectedData.replace(/(^\s*,)|(,\s*$)/g, '') # Remove any trailing/leading commas
+          # Remove any trailing/leading commas
+          selectedData = selectedData.replace(/(^\s*,)|(,\s*$)/g, '')
           selectedData = _.map(selectedData.split(','), (data) =>
             data = $.trim(data) # Remove trailing/leading whitespace
             _data = data
