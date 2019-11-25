@@ -61,7 +61,7 @@ class ApplicationController < ActionController::Base
     render nothing: true, status: :not_acceptable
   end
 
-  # Creates application context from session and returns it.
+  # Creates application context from session.
   def decode_context
     init_context(
       session[:user_id],
