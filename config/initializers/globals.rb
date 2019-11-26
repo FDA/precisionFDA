@@ -111,7 +111,6 @@ REVIEW_SPACE_ADMINS =
   else
     %w(
       john.didion
-      singer.ma
       aabramenko.adminstage
       alekadmin.suradmin
       alekone.surone
@@ -120,6 +119,7 @@ REVIEW_SPACE_ADMINS =
       sam.westreich
       hollystephens723
       rsa.aabramenko
+      erik.barraza
     ).freeze
   end
 
