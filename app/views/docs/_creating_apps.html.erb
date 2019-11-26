@@ -512,17 +512,17 @@ https://github.com/samtools/htslib/releases/tag/1.2.1</pre>
         <p>
           On precisionFDA, there are two methods for building apps.
           You may create apps on precisionFDA using the UI, as is described in <%= link_to 'Creating Apps', show_docs_path(:creating_apps, anchor: :dev) %>.
-          However, advanced users may choose to instead create their app by writing a CWL file that contains all the pertinent details for the app and uploading this to precisionFDA.
+          However, advanced users may choose to instead create their app by writing a CWL or WDL file that contains all the pertinent details for the app and uploading this to precisionFDA.
         </p>
       </div>
       <div id="dev-import-reasons" class="h2">Why Use App Import?</div>
       <div class="bs-docs-section">
         <p>This import method for creating precisionFDA apps offers several advantages over the step-by-step UI method:</p>
         <ul>
-          <li>If you are familiar with CWL, you may specify all of the parameters for your app without needing to click through multiple UI screens.</li>
-          <li>Importing an app via a CWL script is an easy way to make use of public Docker images in an application format on precisionFDA.</li>
-          <li>A CWL app script may be easily shared with other collaborators, allowing them to build and customize their own versions of this app, either on or off precisionFDA.</li>
-          <li>Because the CWL script contains all parameters used by the app, it can be shared with collaborators who do not have precisionFDA accounts to explain how an analysis was performed.</li>
+          <li>If you are familiar with CWL or WDL, you may specify all of the parameters for your app without needing to click through multiple UI screens.</li>
+          <li>Importing an app via a CWL or WDL script is an easy way to make use of public Docker images in an application format on precisionFDA.</li>
+          <li>A CWL or WDL app script may be easily shared with other collaborators, allowing them to build and customize their own versions of this app, either on or off precisionFDA.</li>
+          <li>Because the CWL or WDL script contains all parameters used by the app, it can be shared with collaborators who do not have precisionFDA accounts to explain how an analysis was performed.</li>
         </ul>
       </div>
       <div id="cwl-script-structure" class="h2">How to Structure a CWL Script</div>
