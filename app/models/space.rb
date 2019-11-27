@@ -177,6 +177,15 @@ class Space < ActiveRecord::Base
     project_dxid(member)
   end
 
+  # Determine, whether a user can run an app from current space.
+  # @param project [String or nil] - project id or nil.
+  # @param user [User] - current user.
+  # @return [true or false] - depends upon user'r role and project value
+  def have_permission?(project, user)
+    member = space_memberships.find_by(user: user)
+    project.present? && member.lead_or_admin_or_contributor?
+  end
+
   def describe_fields
     %w(title description state)
   end

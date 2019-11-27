@@ -1087,6 +1087,7 @@ class ApiController < ApplicationController
   # id (string): the dxid of the resulting job
   #
   def run_app
+    # rubocop:disable Style/SignalException
     # Parameter 'id' should be of type String
     id = unsafe_params[:id]
     fail "App ID is not a string" unless id.is_a?(String) && id != ""
@@ -1123,9 +1124,14 @@ class ApiController < ApplicationController
       fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.key?(unsafe_params["instance_type"]) # Checks also that it's a string
     end
 
-    project = space ? space.project_for_user(@context.user) : @context.user.private_files_project
+    if space
+      project = space.project_for_user(@context.user)
+      permission = space.have_permission?(project, @context.user)
+      fail "You don't have permissions to run app in space #{space.name}" unless permission
 
-    fail "You don't have permissions to run app in space #{space.name}" unless project
+    else
+      project = @context.user.private_files_project
+    end
 
     job_creator = JobCreator.new(
       api: DNAnexusAPI.new(@context.token),
@@ -1145,6 +1151,7 @@ class ApiController < ApplicationController
     if space && space.review?
       SpaceEventService.call(space_id, @context.user_id, nil, job, :job_added)
     end
+    # rubocop:enable Style/SignalException
 
     render json: { id: job.uid }
   end

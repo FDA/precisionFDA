@@ -27,6 +27,7 @@ require "rails_helper"
 RSpec.describe Space, type: :model do
   let(:host_lead) { create(:user, dxuser: "user_1") }
   let(:guest_lead) { create(:user, dxuser: "user_2") }
+  let(:user_member) { create(:user, dxuser: "user_3") }
   let(:verified) do
     create(
       :space,
@@ -81,6 +82,72 @@ RSpec.describe Space, type: :model do
 
       it "raise RuntimeError" do
         expect { raise RuntimeError }.to raise_error(RuntimeError)
+      end
+    end
+  end
+
+  describe "have_permission? to run app in space" do
+    before { verified.update(host_project: "project-#{SecureRandom.hex(12)}") }
+
+    describe "with a valid space host_project" do
+      let(:project) { verified.host_project }
+
+      context "when user_member has a viewer role" do
+        before { verified.space_memberships.viewer.host.create!(user_id: user_member.id) }
+
+        it "returns no permission due to viewer role of a space member" do
+          result = verified.have_permission?(project, user_member)
+          expect(result).to be_falsey
+        end
+      end
+
+      context "when space member has an admin role" do
+        before { verified.space_memberships.admin.host.create!(user_id: user_member.id) }
+
+        it "returns a permission" do
+          result = verified.have_permission?(project, user_member)
+          expect(result).to be_truthy
+        end
+      end
+
+      context "when space member has a contributor role" do
+        before { verified.space_memberships.contributor.host.create!(user_id: user_member.id) }
+
+        it "returns a permission" do
+          result = verified.have_permission?(project, user_member)
+          expect(result).to be_truthy
+        end
+      end
+    end
+
+    describe "with invalid space host_project" do
+      let(:project) { nil }
+
+      context "when space member has a viewer role" do
+        before { verified.space_memberships.viewer.host.create!(user_id: user_member.id) }
+
+        it "returns no permission due to invalid space host_project" do
+          result = verified.have_permission?(project, user_member)
+          expect(result).to be_falsey
+        end
+      end
+
+      context "when space member has an admin role" do
+        before { verified.space_memberships.admin.host.create!(user_id: user_member.id) }
+
+        it "returns no permission due to invalid space host_project" do
+          result = verified.have_permission?(project, user_member)
+          expect(result).to be_falsey
+        end
+      end
+
+      context "when space member has a contributor role" do
+        before { verified.space_memberships.contributor.host.create!(user_id: user_member.id) }
+
+        it "returns no permission due to invalid space host_project" do
+          result = verified.have_permission?(project, user_member)
+          expect(result).to be_falsey
+        end
       end
     end
   end
