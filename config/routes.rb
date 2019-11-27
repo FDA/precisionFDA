@@ -92,7 +92,6 @@ Rails.application.routes.draw do
     post "tokify" => "main#tokify"
     post "set_tags" => "main#set_tags"
     get "guidelines" => "main#guidelines"
-    get "exception_test" => "main#exception_test"
     get "presskit" => "main#presskit"
     get "news" => "main#news"
 
