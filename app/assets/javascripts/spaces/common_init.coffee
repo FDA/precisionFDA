@@ -92,6 +92,7 @@ class SpacesContentView
     @objectSelector = new Precision.models.SelectorModel({
       title: "Move data to space",
       help: HELP_TEXT,
+      useFileLimit: true,
       onSave: (selected) =>
         @relatedIDs = []
         @selected = []
