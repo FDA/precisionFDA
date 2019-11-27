@@ -2,7 +2,6 @@ class MainController < ApplicationController
   skip_before_action :require_login, only: %i(
     index
     about
-    exception_test
     login
     return_from_login
     request_access
@@ -197,10 +196,6 @@ class MainController < ApplicationController
         height: "250px"
       }
     ]
-  end
-
-  def exception_test
-    raise "This is an intentionally raised exception for testing email notification. Please contact Evan with any concerns"
   end
 
   def login
