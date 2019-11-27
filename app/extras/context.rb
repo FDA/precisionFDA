@@ -9,11 +9,11 @@ class Context
   class << self
     def build(session)
       new(
-        session[:user_id],
-        session[:username],
-        session[:token],
-        session[:expiration],
-        session[:org_id],
+        session["user_id"],
+        session["username"],
+        session["token"],
+        session["expiration"],
+        session["org_id"],
       )
     end
   end
