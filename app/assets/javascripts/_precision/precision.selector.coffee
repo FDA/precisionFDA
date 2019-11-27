@@ -2,6 +2,9 @@
 #   listModelConfigs (required): array of listModel configurations
 #
 
+MAX_OBJECTS = 20
+FILES_NUM_HELP_TEXT = "You can select only #{MAX_OBJECTS} objects at the same time."
+
 class SelectorModel
   addFilesScrollListener: () ->
     $('.object-selector-modal .modal-body').on 'scroll', (event) ->
@@ -23,6 +26,7 @@ class SelectorModel
 
     @title = ko.observable(@opts.title ? "Select data")
     @help = ko.observable(@opts.help)
+    @useFileLimit = @opts.useFileLimit
     @selectionType = @opts.selectionType ? "checkbox"
     @selectableClasses = @opts.selectableClasses ? true
     @listRelatedParams = @opts.listRelatedParams
@@ -51,6 +55,11 @@ class SelectorModel
     @objectLists = ko.observableArray([@selectedList].concat(_.map(@opts.listModelConfigs, (listModelConfig) =>
       new ObjectListModel(this, listModelConfig)
     )))
+
+    @filesNumhelp = ko.computed(() =>
+      "#{FILES_NUM_HELP_TEXT} #{@numSelected()} object(s) selected."
+    )
+
     @objectsHash = {}
 
     @canSave = ko.computed(=>
@@ -320,6 +329,15 @@ class ObjectItemModel
     @isSelectable = ko.computed( =>
       isArray = _.isArray(@selectableClasses)
       @selectableClasses == true || (isArray && _.includes(@selectableClasses, @className()))
+    )
+
+    @disabledToCheck = ko.computed(() =>
+      if @selectionType == 'checkbox'
+        selected = @selected.indexOf(this) > -1
+        maxObjectsSelected = @selectorModel.numSelected() == MAX_OBJECTS
+        useFileLimit = @selectorModel.useFileLimit
+        return maxObjectsSelected and !selected and useFileLimit
+      return false
     )
 
     if opts.update

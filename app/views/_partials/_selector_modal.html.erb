@@ -11,7 +11,14 @@
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           <h4 class="modal-title" data-bind="text: title"></h4>
           <!-- ko if: help -->
-            <small class="text-muted" data-bind="text: help"></small>
+            <div>
+              <small class="text-muted" data-bind="text: help"></small>
+            </div>
+          <!-- /ko -->
+          <!-- ko if: useFileLimit -->
+            <div>
+              <small class="text-muted" data-bind="text: filesNumhelp"></small>
+            </div>
           <!-- /ko -->
           <!-- ko if: hasError -->
           <div class="alert alert-danger alert-single">
@@ -112,10 +119,16 @@
         <label data-bind="attr: {title: uid}">
           <!-- ko if: isSelectable -->
             <!-- ko if: selectionType == "radio" -->
-              <input type="radio" data-bind="checked: selected, checkedValue: $data, attr: {name: $parent.className == 'selected' ? 'selected-object' : 'list-selected-object'}">
+              <input type="radio" data-bind="
+                checked: selected,
+                checkedValue: $data,
+                attr: {
+                  name: $parent.className == 'selected' ? 'selected-object' : 'list-selected-object'
+                }
+              ">
             <!-- /ko -->
             <!-- ko if: selectionType == "checkbox" -->
-              <input type="checkbox" data-bind="checked: selected, checkedValue: $data">
+              <input type="checkbox" data-bind="checked: selected, checkedValue: $data, disable: disabledToCheck">
             <!-- /ko -->
           <!-- /ko -->
           <span data-bind="css: classIcon" aria-hidden="true"></span> <span class="object-name" data-bind="text: title"></span>
