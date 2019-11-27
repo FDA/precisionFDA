@@ -394,6 +394,12 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def session_auth_params
+    session.to_hash.
+      slice("user_id", "username", "token", "expiration", "org_id").
+      with_indifferent_access
+  end
+
   # Raises RoutingError.
   # @raise ActionController::RoutingError
   def not_found!
