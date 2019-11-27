@@ -1,29 +1,50 @@
-version: "3.2"
+version: "3.7"
+
+x-shared:
+  &shared
+  build:
+    context: .
+  volumes:
+    - type: bind
+      source: .
+      target: /precision-fda
+    - type: volume
+      source: gems
+      target: /usr/local/bundle
+
 services:
   web:
-    build:
-      context: .
-    volumes:
-      - type: bind
-        source: .
-        target: /precision-fda
-      - type: volume
-        source: gems
-        target: /usr/local/bundle
+    <<: *shared
+    entrypoint: ./docker/web.entrypoint.sh
     ports:
-      - '3000:3000'
+      - 3000:3000
     depends_on:
       - db
+      - redis
+      - sidekiq
     stdin_open: true
     tty: true
+
   db:
     image: mysql:5.6
     volumes:
-      - 'pfda-mysql-volume:/var/lib/mysql'
+      - pfda-mysql-volume:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=password
     ports:
-      - '3306:3306'
+      - 3306:3306
+
+  redis:
+    image: redis:5.0
+    ports:
+      - 6379:6379
+
+  sidekiq:
+    <<: *shared
+    depends_on:
+      - redis
+    entrypoint: ./docker/sidekiq.entrypoint.sh
+
 volumes:
   pfda-mysql-volume:
   gems:
