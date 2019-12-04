@@ -20,11 +20,11 @@
       <columns>
         <p>Dear <%= @invitation.first_name %> <%= @invitation.last_name %>,</p>
 
-        <p>Thank you for your interest in the precisionFDA beta project. As a first step, we have granted you "browse access" to the precisionFDA community. Below you will find your personal link, which you can use to browse the public areas of precisionFDA for the next 30 days -- no user account is required. This link is personal; if you know of others who need access, please ask them to file their own requests.</p>
+        <p>Thank you for your interest in the precisionFDA production project. As a first step, we have granted you "browse access" to the precisionFDA community. Below you will find your personal link, which you can use to browse the public areas of precisionFDA for the next 30 days -- no user account is required. This link is personal; if you know of others who need access, please ask them to file their own requests.</p>
 
         <p><button class="radius" href="<%= HOST %>/browse_access?code=<%= @invitation.code %>">Click here to browse precisionFDA</button></p>
 
-        <callout class="primary">Note: PrecisionFDA is a beta regulatory research sandbox and is intended to inform a broad community. As you browse precisionFDA, you may become interested in obtaining a precisionFDA user account, in order to be able to actively contribute. In that case, please contact PrecisionFDA@fda.hhs.gov with your plan. Community members who have committed to providing information and programs that can be useful in our initial focus of NGS Clinical Test Development and Validation will be assessed for contributor level access.</callout>
+        <callout class="primary">Note: PrecisionFDA is a production regulatory research sandbox and is intended to inform a broad community. As you browse precisionFDA, you may become interested in obtaining a precisionFDA user account, in order to be able to actively contribute. In that case, please contact PrecisionFDA@fda.hhs.gov with your plan. Community members who have committed to providing information and programs that can be useful in our initial focus of NGS Clinical Test Development and Validation will be assessed for contributor level access.</callout>
 
         <p>We are looking forward to seeing you on-line!</p>
         <p>&mdash;The precisionFDA team</p>

@@ -1,17 +1,122 @@
 HELP_TEXT = "Only private data can be moved to a Space. Data in a Space can be published, but cannot be made private again."
 
+getRelatedObjects = (item, spaceUID) ->
+  Precision.promisifyApi('/api/related_to_publish', {
+    uid: item.uid,
+    scopes: spaceUID
+  })
+
+class RelateObjectChild
+  constructor: (data, isWF = false) ->
+    console.log data
+    @uid = data.uid
+    @title = data.title
+    @type = data.className
+    @icon = "fa #{data.fa_class}"
+    @url = data.path
+    @isWFapp = isWF and @type == 'app'
+    @checked = ko.observable(@isWFapp)
+    @disabled = ko.observable(@isWFapp)
+
+class RelateObject
+  toggleChildren: (data, e) =>
+    if e.target.checked
+      @relatedObjects().forEach((child) -> child.checked(true))
+    else
+      @relatedObjects().forEach((child) -> child.checked(false) if !child.isWFapp)
+
+  constructor: (data) ->
+    @uid = data.uid
+    @title = data.title
+    @type = data.className()
+    @icon = data.classIcon().replace(/fa-fw/, '')
+    @url = data.path()
+
+    isWF = @type == 'workflow'
+    @relatedObjects = ko.observableArray(data.loadedRelatedObjects.map(
+      (item) -> new RelateObjectChild(item, isWF))
+    )
+
 class SpacesContentView
+  shareRelatedObjects: () ->
+    @relatedObjects().forEach((item) =>
+      item.relatedObjects().forEach((child) =>
+        @relatedIDs.push(child.uid) if child.checked()
+      )
+    )
+    $('#add_related_objects_modal').modal('hide')
+    @objectSelector.saving(true)
+    @onSaveHandler(@selected)
+
+  checkRelatedItems: (selected, spaceUID) ->
+    new Promise((resolve, reject) ->
+      relatedItemsGetters = []
+      selected.forEach((item) ->
+        relatedItemsGetters.push(getRelatedObjects(item, spaceUID))
+      )
+      Promise.all(relatedItemsGetters).then(
+        (data) ->
+          resolve(data)
+        (error) ->
+          Precision.alert.showAboveAll('Something went wrong while checking related objects!')
+          reject(error)
+      )
+    )
+
+  onSaveHandler: (selected) ->
+    # selectedFiles = selected.filter((item) -> item.className() == 'file')
+    # if selectedFiles.length
+    #   selectorModel = selectedFiles[0].selectorModel
+    #   selectorModel.saving(false)
+    #   selectorModel.modal.modal('hide')
+    #   $('#add_files_to_space_modal').modal('show')
+    uids = _.map(selected, 'uid')
+    uids = _.union(uids, @relatedIDs)
+
+    Precision.api("/api/publish/", {
+      scope: @space_uid,
+      uids: uids
+    }).then(
+      () ->
+        # if !selectedFiles.length
+        #   window.location.reload(true)
+        window.location.reload(true)
+      () ->
+        Precision.alert.showAboveAll('Something went wrong!')
+    )
+
   constructor: (@space_uid, scopes) ->
+    @selected = []
+    @relatedIDs = []
+    @relatedObjects = ko.observableArray([])
     @objectSelector = new Precision.models.SelectorModel({
       title: "Move data to space",
       help: HELP_TEXT,
+      useFileLimit: true,
       onSave: (selected) =>
-        Precision.api("/api/publish/", {
-          scope: @space_uid,
-          uids: _.map(selected, "uid")
-        })
-      onAfterSave: () ->
-        window.location.reload(true)
+        @relatedIDs = []
+        @selected = []
+        @relatedObjects([])
+
+        @checkRelatedItems(selected, @space_uid).then((data) =>
+          noRelated = true
+          selected.forEach((item, index) ->
+            item.loadedRelatedObjects = data[index]
+            noRelated = false if item.loadedRelatedObjects.length
+          )
+          return @onSaveHandler(selected) if noRelated
+
+          @relatedObjects(selected.filter((item) -> item.loadedRelatedObjects.length)
+                                  .map((item) -> new RelateObject(item)))
+
+          @objectSelector.saving(false)
+          @selected = selected
+          $('#add_related_objects_modal').modal('show')
+        )
+
+        deferred = $.Deferred()
+        deferred.resolve(selected, false)
+
       listRelatedParams: {
         editable: true,
         scopes: scopes,

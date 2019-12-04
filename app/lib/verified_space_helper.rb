@@ -1,3 +1,4 @@
+# Verified Space helpers
 module VerifiedSpaceHelper
   def in_verified_space?(object)
     if object.in_space?

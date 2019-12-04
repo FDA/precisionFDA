@@ -1,7 +1,6 @@
 module GraphDecorator
   # @abstract implement #children in a child
   class BaseNode
-
     attr_reader :record
     delegate :uid, :klass, :title, to: :record
 
@@ -31,7 +30,5 @@ module GraphDecorator
     def build_child(record)
       ::GraphDecorator.build(context, record, scope)
     end
-
   end
 end
-

@@ -1,5 +1,4 @@
 module GraphDecorator
-
   COMPARISON_NODES = %w(comparison).freeze
   NOTE_NODES = %w(note answer discussion).freeze
   FILE_NODES = %w(file asset).freeze
@@ -8,7 +7,6 @@ module GraphDecorator
   WORKFLOW_NODE = %w(workflow).freeze
 
   class << self
-
     def for_publisher(context, roots, scope)
       Array.wrap(roots).map { |root| build(context, root, scope) }
     end
@@ -31,6 +29,5 @@ module GraphDecorator
         raise "Invalid klass #{record.klass}"
       end
     end
-
   end
 end

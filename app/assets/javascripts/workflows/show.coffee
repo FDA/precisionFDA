@@ -65,13 +65,15 @@ renderBatchJobRow = (job, analysis_id, index) ->
 renderSimpleAnalysis = (analyses_jobs) ->
   for own analysis_id, jobs of analyses_jobs
     $analysis_row = $("#analysis-#{analysis_id}")
+    jobs = jobs.reverse()
     for job in jobs
       $job = renderJobRow(job, analysis_id)
       $analysis_row.after($job)
 
-renderBatchAnalysis = (batches) ->
+renderBatchAnalysis = (batches = []) ->
   for own analysis_id, batch_runs of batches
     $analysis_row = $("#analysis-#{analysis_id}")
+    batch_runs = batch_runs.reverse()
     for batch, index in batch_runs
       $batch = renderBatchJobRow(batch, analysis_id, index)
       $analysis_row.after($batch)

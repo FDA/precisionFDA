@@ -1,4 +1,6 @@
 module MainHelper
+  include Concerns::OrgAdmin
+
   def graph_nodes(graph)
     s = ""
     nodes = {}
