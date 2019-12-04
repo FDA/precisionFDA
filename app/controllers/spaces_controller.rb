@@ -308,7 +308,8 @@ class SpacesController < ApplicationController
       Sidekiq::Client.push_bulk("class" => RemoveFolderWorker, "args" => job_args)
     end
 
-    flash[:success] = "Object(s) are being removed. This could take a while."
+    flash[:success] = "Object(s) are being removed. This could take a while. " \
+                      "Refresh page to see existing files and folders."
 
     redirect_to files_space_path(space)
   end
