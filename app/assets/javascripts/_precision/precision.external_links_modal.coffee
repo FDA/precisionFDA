@@ -12,7 +12,8 @@ class ExternalLinkModal
           isExternal = e.currentTarget.host != window.location.host
           notModalURL = @modalUrl[0] and @modalUrl[0] != e.currentTarget
           isSameWindow = e.currentTarget.target != "_blank"
-          if isExternal and notModalURL and notMailTo and isSameWindow
+          notJsVoid = e.currentTarget.href != "javascript: void(0)"
+          if isExternal and notModalURL and notMailTo and isSameWindow and notJsVoid
             e.preventDefault()
             @url =  e.currentTarget.href
             @modalUrl.text(@url)

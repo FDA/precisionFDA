@@ -24,7 +24,7 @@ module OrgService
 
     # Responsible for entire process of leaving an organization by user.
     # @param org [Org] Organization user should leave.
-    # @params user [User] User that should leave provided org.
+    # @param user [User] User that should leave provided org.
     # @return [Hash] Mapping:
     #   1. between old and new projects,
     #   2. between old and new organizations.
@@ -78,7 +78,7 @@ module OrgService
     # Constructs and returns name of new organization.
     # @return [String] Name of new organization.
     def new_org_name
-      "#{@user.first_name.capitalize} #{@user.last_name.capitalize}"
+      "#{@user.first_name.upcase_first} #{@user.last_name.upcase_first}"
     end
 
     # Constructs and returns dxid of new organization.
@@ -182,6 +182,10 @@ module OrgService
         level: DNAnexusAPI::ORG_MEMBERSHIP_ADMIN,
         suppressEmailNotification: true,
       )
+    # TODO: Temporary fix, DXClient exceptions should be raised via reflection mechanism.
+    rescue Net::HTTPServerException => e
+      # Allow to proceed for case when SITE ADMIN leaves organization.
+      raise e unless e.message =~ /Cannot invite yourself to an organization/
     end
 
     # Renames projects on the platform.

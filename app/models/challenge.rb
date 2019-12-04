@@ -110,6 +110,15 @@ class Challenge < ApplicationRecord
     "#{name.parameterize}"
   end
 
+  # Add string "Challenge" to challenge name if it does not contain such word.
+  # Usage in a challenges cards on Main#index
+  # @param name [String] challenge name from the model
+  # @return [String] name to display, modified with a word "Challenge" appending or
+  #  not modified, if it has such word already.
+  def modified_name(name)
+    name =~ /challenge/i ? name : name.concat(" Challenge")
+  end
+
   def title
     name
   end

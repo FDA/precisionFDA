@@ -5,11 +5,7 @@ describe RequestAccessService do
   let(:guest_access_mail) { instance_double("Mailer", deliver_now!: nil) }
 
   describe "::create_request_for_access" do
-    let!(:invitation) { create(:invitation, org: nil) }
-
     before do
-      allow(Invitation).to receive(:create).and_return(invitation)
-      allow(Auditor).to receive(:perform_audit)
       allow(Event::UserAccessRequested).to receive(:create_for)
       allow(NotificationsMailer).to receive_messages(
         invitation_email: invitation_mail,
@@ -17,34 +13,78 @@ describe RequestAccessService do
       )
     end
 
-    it "creates new invitation" do
-      service.create_request_for_access({})
-      expect(Invitation).to have_received(:create)
+    context "when invitation was created" do
+      let!(:invitation) { create(:invitation, org: nil) }
+
+      before do
+        allow(Invitation).to receive(:create).and_return(invitation)
+        allow(Auditor).to receive(:perform_audit)
+      end
+
+      it "creates new invitation" do
+        service.create_request_for_access({})
+        expect(Invitation).to have_received(:create)
+      end
+
+      it "returns created invitation" do
+        created_invitation = service.create_request_for_access({})
+        expect(created_invitation).to eq(invitation)
+      end
+
+      it "creates audit record" do
+        service.create_request_for_access({})
+        expect(Auditor).to have_received(:perform_audit)
+      end
+
+      it "creates event" do
+        service.create_request_for_access({})
+        expect(Event::UserAccessRequested).to have_received(:create_for)
+      end
+
+      it "sends invitation email" do
+        service.create_request_for_access({})
+        expect(NotificationsMailer).to have_received(:invitation_email).with(invitation)
+      end
+
+      it "sends guest access email" do
+        service.create_request_for_access({})
+        expect(NotificationsMailer).to have_received(:guest_access_email).with(invitation)
+      end
     end
 
-    it "returns created invitation" do
-      created_invitation = service.create_request_for_access({})
-      expect(created_invitation).to eq(invitation)
-    end
+    context "when invitation was not created" do
+      let!(:invitation) { build(:invitation, org: nil) }
 
-    it "creates audit record" do
-      service.create_request_for_access({})
-      expect(Auditor).to have_received(:perform_audit)
-    end
+      before do
+        allow(Invitation).to receive(:create).and_return(invitation)
+        allow(Auditor).to receive(:perform_audit)
+      end
 
-    it "creates event" do
-      service.create_request_for_access({})
-      expect(Event::UserAccessRequested).to have_received(:create_for)
-    end
+      it "returns non persisted invitation" do
+        built_invitation = service.create_request_for_access({})
+        expect(Invitation).to have_received(:create)
+        expect(built_invitation).to eq(invitation)
+      end
 
-    it "sends invitation email" do
-      service.create_request_for_access({})
-      expect(NotificationsMailer).to have_received(:invitation_email).with(invitation)
-    end
+      it "does not creates audit record" do
+        service.create_request_for_access({})
+        expect(Auditor).not_to have_received(:perform_audit)
+      end
 
-    it "sends guest access email" do
-      service.create_request_for_access({})
-      expect(NotificationsMailer).to have_received(:guest_access_email).with(invitation)
+      it "does not creates event" do
+        service.create_request_for_access({})
+        expect(Event::UserAccessRequested).not_to have_received(:create_for)
+      end
+
+      it "does not sends invitation email" do
+        service.create_request_for_access({})
+        expect(NotificationsMailer).not_to have_received(:invitation_email).with(invitation)
+      end
+
+      it "does not sends guest access email" do
+        service.create_request_for_access({})
+        expect(NotificationsMailer).not_to have_received(:guest_access_email).with(invitation)
+      end
     end
   end
 end

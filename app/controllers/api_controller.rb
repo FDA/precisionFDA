@@ -121,6 +121,52 @@ class ApiController < ApplicationController
     render json: { published: published_count }
   end
 
+  # Collects an Array of children for object in params.
+  # @param uid [Object Id].
+  # @param scope [String] A scope to be published into.
+  # @return [Hash with Array value] An Array of relative children for a given Object.
+  def related_to_publish
+    id = unsafe_params[:uid]
+    raise "Missing id in publish route" unless id.is_a?(String) && id.present?
+
+    item = item_from_uid(id)
+    raise "You do not have permission to access #{id}" unless item.accessible_by?(@context)
+
+    publishing_service = SpaceService::Publishing.new(@context)
+    check_result = publishing_service.scope_check(unsafe_params[:scope])
+    scope = check_result[:scope]
+
+    relatives_graph = GraphDecorator.for_publisher(@context, item, scope).to_json
+    children = children_to_publish(relatives_graph)
+
+    render json: children
+  end
+
+  # Collects an array of children from a relatives graph.
+  # Filtering by private objects only to be included into children array.
+  # Prepare values for 'path' and 'fa_class' attributes.
+  # @param relatives_graph [Array of Objects] From GraphDecorator.
+  # @return children [Array of Objects] With the following example content:
+  #  {
+  #    \"uid\"=>\"app-0b9811c31ff0812273068d54-1\",
+  #    \"klass\"=>\"app\", \"title\"=>\"default_title\", \"owned\"=>false,
+  #    \"public\"=>true, \"in_space\"=>false, \"publishable\"=>false,
+  #    \"children\"=>[]
+  #  }
+  def children_to_publish(relatives_graph)
+    all_children = JSON.parse(relatives_graph)[0]["children"]
+    children = []
+    all_children.uniq.each do |child|
+      next if child["in_space"] || child["public"]
+
+      object = item_from_uid(child["uid"])
+      child["path"] = object.accessible_by?(@context) ? pathify(object) : nil
+      child["fa_class"] = view_context.fa_class(object)
+      children << child
+    end
+    children
+  end
+
   # Inputs
   #
   # workflow_id (string, required): the dxid of the workflow to run
@@ -241,6 +287,7 @@ class ApiController < ApplicationController
       end
 
       related = related.uniq.map { |o| describe_for_api(o, unsafe_params[:opts][:describe]) }
+
       render json: related
     else
       fail "You do not have permission to access #{id}"
@@ -578,8 +625,6 @@ class ApiController < ApplicationController
   # An array of hashes
   #
   def list_assets
-    logger.debug "######### In api/list_assets ##########"
-    logger.debug "## In list_assets: params = #{unsafe_params.inspect}"
     # Refresh state of assets, if needed
     User.sync_assets!(@context)
 
@@ -589,7 +634,6 @@ class ApiController < ApplicationController
     else
       Asset.closed.accessible_by(@context)
     end
-    logger.debug "## In list_assets: After params[:editable]?: assets: = #{assets.inspect}"
 
     unless ids.nil?
       fail "The 'ids' parameter needs to be an Array of String asset ids" unless ids.is_a?(Array) && ids.all? { |id| id.is_a?(String) }
@@ -600,11 +644,8 @@ class ApiController < ApplicationController
       check_scope!
       assets = assets.where(scope: unsafe_params[:scopes])
     end
-    logger.debug "## In list_assets: Before map: assets: = #{assets.inspect}"
 
     result = assets.order(:name).map do |asset|
-      logger.debug "## In list_assets: in map: asset = #{asset.inspect}"
-      logger.debug "## In list_assets: in map: params[:describe] = #{unsafe_params[:describe].inspect}"
       describe_for_api(asset, unsafe_params[:describe])
     end
 
@@ -613,8 +654,6 @@ class ApiController < ApplicationController
       # For now silently drop the asset -- allows for asset deletion
       # raise unless ids.size == result.size
     end
-    logger.debug "## In list_assets: result = #{result.inspect}"
-    logger.debug "###################"
 
     render json: result
   end
@@ -1048,6 +1087,7 @@ class ApiController < ApplicationController
   # id (string): the dxid of the resulting job
   #
   def run_app
+    # rubocop:disable Style/SignalException
     # Parameter 'id' should be of type String
     id = unsafe_params[:id]
     fail "App ID is not a string" unless id.is_a?(String) && id != ""
@@ -1084,9 +1124,14 @@ class ApiController < ApplicationController
       fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.key?(unsafe_params["instance_type"]) # Checks also that it's a string
     end
 
-    project = space ? space.project_for_user(@context.user) : @context.user.private_files_project
+    if space
+      project = space.project_for_user(@context.user)
+      permission = space.have_permission?(project, @context.user)
+      fail "You don't have permissions to run app in space #{space.name}" unless permission
 
-    fail "You don't have permissions to run app in space #{space.name}" unless project
+    else
+      project = @context.user.private_files_project
+    end
 
     job_creator = JobCreator.new(
       api: DNAnexusAPI.new(@context.token),
@@ -1106,6 +1151,7 @@ class ApiController < ApplicationController
     if space && space.review?
       SpaceEventService.call(space_id, @context.user_id, nil, job, :job_added)
     end
+    # rubocop:enable Style/SignalException
 
     render json: { id: job.uid }
   end

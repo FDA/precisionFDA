@@ -2,6 +2,9 @@
 #   listModelConfigs (required): array of listModel configurations
 #
 
+MAX_OBJECTS = 20
+FILES_NUM_HELP_TEXT = "You can select only #{MAX_OBJECTS} objects at the same time."
+
 class SelectorModel
   addFilesScrollListener: () ->
     $('.object-selector-modal .modal-body').on 'scroll', (event) ->
@@ -23,6 +26,7 @@ class SelectorModel
 
     @title = ko.observable(@opts.title ? "Select data")
     @help = ko.observable(@opts.help)
+    @useFileLimit = @opts.useFileLimit
     @selectionType = @opts.selectionType ? "checkbox"
     @selectableClasses = @opts.selectableClasses ? true
     @listRelatedParams = @opts.listRelatedParams
@@ -41,7 +45,7 @@ class SelectorModel
       name: "Selected"
     })
     @selected = @selectedList.objects
-    @numSelected = ko.computed(=>
+    @numSelected = ko.computed( =>
       if _.isArray(@selected())
         _.size(@selected())
       else if _.isObject(@selected())
@@ -51,6 +55,11 @@ class SelectorModel
     @objectLists = ko.observableArray([@selectedList].concat(_.map(@opts.listModelConfigs, (listModelConfig) =>
       new ObjectListModel(this, listModelConfig)
     )))
+
+    @filesNumhelp = ko.computed(() =>
+      "#{FILES_NUM_HELP_TEXT} #{@numSelected()} object(s) selected."
+    )
+
     @objectsHash = {}
 
     @canSave = ko.computed(=>
@@ -93,7 +102,7 @@ class SelectorModel
       if @selectionType == "radio"
         @selected(null)
       else
-        @selected.removeAll()
+        @selected([])
       @error(null)
     )
     @modal.on("click", ".object-related-link, .list-group-item.not-selectable label", () ->
@@ -116,12 +125,14 @@ class SelectorModel
     @saving(true)
     @error(null)
     @opts.onSave(@selected())
-      .done(() =>
-        @modal.modal('hide')
+      .done((data, hideModal = true) =>
+        if hideModal
+          @modal.modal('hide')
+          @saving(false)
         @opts.onAfterSave?()
       )
-      .fail(@onError)
-      .always(=>
+      .fail(() =>
+        @onError()
         @saving(false)
       )
 
@@ -192,18 +203,20 @@ class ObjectListModel
 
   getObjects: (offset = 0, limit = 100) ->
     return $.Deferred().resolve() if !@apiEndpoint?
-    rootContext = ko.contextFor(@selectorModel.modal.get(0)).$root
+    accessibleScope = @selectorModel.listRelatedParams.scopes
     if @className == 'file'
       @apiParams['offset'] = offset
       @apiParams['limit'] = limit
-      @apiParams['scopes'] = rootContext.accessibleScope if rootContext.accessibleScope
+      @apiParams['scopes'] = accessibleScope
 
     params = _.defaults(@apiParams, {
-      describe:
-        include:
-          all_tags_list: false
-          user: true
+      describe: {
+        include: {
+          all_tags_list: false,
+          user: true,
           org: true
+        }
+      }
     })
 
     @objects.removeAll() unless @className == 'file'
@@ -301,7 +314,7 @@ class ObjectItemModel
 
     @activeRelatedObjects = @listModel.activeRelatedObjects
 
-    @relatedObjects = ko.observable().extend({notify: 'always'})
+    @relatedObjects = ko.observable().extend({ notify: 'always' })
     @numRelatedObjects = ko.computed(=> _.size(@relatedObjects()))
 
     @loadingRelated = ko.observable(false)
@@ -313,8 +326,18 @@ class ObjectItemModel
     @user_license.pending = ko.computed(=> @user_license()?.pending)
     @user_license.unset = ko.computed(=> @user_license()?.unset)
 
-    @isSelectable = ko.computed(=>
-      @selectableClasses == true || (_.isArray(@selectableClasses) && _.includes(@selectableClasses, @className()))
+    @isSelectable = ko.computed( =>
+      isArray = _.isArray(@selectableClasses)
+      @selectableClasses == true || (isArray && _.includes(@selectableClasses, @className()))
+    )
+
+    @disabledToCheck = ko.computed(() =>
+      if @selectionType == 'checkbox'
+        selected = @selected.indexOf(this) > -1
+        maxObjectsSelected = @selectorModel.numSelected() == MAX_OBJECTS
+        useFileLimit = @selectorModel.useFileLimit
+        return maxObjectsSelected and !selected and useFileLimit
+      return false
     )
 
     if opts.update
@@ -346,12 +369,14 @@ class ObjectItemModel
 
   describe: () ->
     params = _.defaults(@listModel.apiParams, {
-      uid: @uid
-      describe:
-        include:
-          all_tags_list: true
-          user: true
+      uid: @uid,
+      describe: {
+        include: {
+          all_tags_list: true,
+          user: true,
           org: true
+        }
+      }
     })
     Precision.api("/api/describe", params)
 
@@ -361,16 +386,19 @@ class ObjectItemModel
 
     if !@loadedRelated()
       @loadingRelated(true)
-      @selectorModel.callsDeferred.done(=>
-        params =
-          uid: @uid
+      @selectorModel.callsDeferred.done( =>
+        params = {
+          uid: @uid,
           opts: _.extend({
-            describe:
-              include:
-                all_tags_list: true
-                user: true
+            describe: {
+              include: {
+                all_tags_list: true,
+                user: true,
                 org: true
+              }
+            }
           }, @selectorModel.listRelatedParams)
+        }
         Precision.api("/api/list_related", params)
           .done((objects) =>
             relatedObjects = []

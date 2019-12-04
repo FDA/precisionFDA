@@ -29,6 +29,10 @@ en:
         title: Administrator Features
         sections:
           verification_spaces: Verified Apps
+      org_admin:
+        title: Organizations deprecation
+        sections:
+          organizations_deprecation: Organizations Deprecation
     videos:
       common: &common_videos
         intro:
@@ -96,7 +100,7 @@ en:
         site_customization:
           title: Site Customization
           url: https://www.youtube.com/embed/j9pEb0VTf-0
-        review spaces:
+        review_spaces:
           title: 'Review Spaces: Step by Step'
           url: https://www.youtube.com/embed/mPW82NtdKuo
       review_space_admin:

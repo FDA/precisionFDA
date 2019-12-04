@@ -17,6 +17,18 @@
         <h1>WELCOME to precisionFDA</h1>
       </div>
     </div>
+    <% if non_singular_org_admin?(@context.user) %>
+      <div class="container-fluid">
+        <div class="alert alert-success">
+          In an effort to streamline the processes of creating and managing user accounts, as of October 2019,
+          the use of organizations in precisionFDA will be eliminated. All new users will be provisioned
+          as self-representing. Existing organizations will remain in place, but org members can choose to move
+          from the organization to become self-representing.
+          Additional information can be found at
+          <a href="<%= doc_path("organizations_deprecation") %>">documentation</a>.
+        </div>
+      </div>
+    <% end %>
   <% end %>
 
   <div class="container-fluid container-padded">
@@ -87,7 +99,7 @@
               <span class="fa fa-trophy" aria-hidden="true"></span>
             </div>
             <div class="pfda-card-title lead lead-bold text-center">
-              <%= challenge.name %> Challenge
+              <%= challenge.modified_name(challenge.name) %>
             </div>
           </a>
         <% end %>
