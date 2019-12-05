@@ -22,10 +22,15 @@ class SpaceForm
     :restrict_to_template,
   )
 
+  TYPE_GROUPS = "groups".freeze
+  TYPE_REVIEW = "review".freeze
+  TYPE_VERIFICATION = "verification".freeze
+
   validates :name, :description, :space_type, presence: true
   validate :validate_host_lead_dxuser
-  validate :validate_guest_lead_dxuser, if: -> { space_type.in?(%w(groups verification)) }
-  validate :validate_sponsor_lead_dxuser, if: -> { space_type == "review" }
+  validate :validate_leads_orgs, if: -> { space_type == TYPE_REVIEW }
+  validate :validate_guest_lead_dxuser, if: -> { space_type.in?([TYPE_GROUPS, TYPE_VERIFICATION]) }
+  validate :validate_sponsor_lead_dxuser, if: -> { space_type == TYPE_REVIEW }
 
   def self.model_name
     Space.model_name
@@ -73,7 +78,21 @@ class SpaceForm
 
   # A sponsor lead user validation
   def validate_sponsor_lead_dxuser
+    if sponsor_lead_dxuser == host_lead_dxuser
+      errors.add(:sponsor_lead_dxuser, "can't be the same as Reviewer lead")
+    end
+
     errors.add(:sponsor_lead_dxuser, "'#{sponsor_lead_dxuser}' not found") unless space_sponsor
+  end
+
+  # Validation of host admin and space sponsor orgs:
+  #   both admins should not be in the same Org.
+  def validate_leads_orgs
+    return unless space_sponsor && host_admin
+
+    return unless space_sponsor.org_id == host_admin.org_id
+
+    errors.add(:sponsor_lead_dxuser, "can't belong to the same Org as Reviewer lead")
   end
 
   def host_admin
