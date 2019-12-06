@@ -120,6 +120,7 @@ REVIEW_SPACE_ADMINS =
       hollystephens723
       rsa.aabramenko
       erik.barraza
+      nainathangaraj.spaceadmin
     ).freeze
   end
 
