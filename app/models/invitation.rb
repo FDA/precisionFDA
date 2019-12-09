@@ -129,7 +129,17 @@ class Invitation < ApplicationRecord
   end
 
   def validate_email
-    errors.add(:email, "is invalid") if User.validate_email(email).nil?
+    if User.validate_email(email).nil?
+      errors.add(:email, "is invalid")
+      return
+    end
+
+    if User.exists?(email: email)
+      errors.add(:email, I18n.t(:email_taken, side: "precisionFDA"))
+      return
+    end
+
+    errors.add(:email, I18n.t(:email_taken, side: "DNAnexus")) if DNAnexusAPI.email_exists?(email)
   end
 
   def validate_state

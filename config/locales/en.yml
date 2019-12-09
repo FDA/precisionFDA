@@ -21,6 +21,8 @@
 
 en:
   hello: "Hello world"
+  email_taken: address is already in use in %{side}.
+
   activerecord:
     attributes:
       invitation:
