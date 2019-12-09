@@ -1,3 +1,4 @@
+# Base controller for whole application.
 class ApplicationController < ActionController::Base
   include PathHelper
 
@@ -22,7 +23,7 @@ class ApplicationController < ActionController::Base
   before_action :create_user_viewed_event
 
   # Use time zone of current user
-  around_action :user_time_zone, if: lambda { !@context.guest? && current_user }
+  around_action :user_time_zone, if: -> { !@context.guest? && current_user }
 
   helper_method :pathify, :pathify_comments, :item_from_uid, :pathify_folder, :current_user
 
@@ -32,41 +33,57 @@ class ApplicationController < ActionController::Base
 
   private
 
+  # Returns hash of params.
+  # @return [Hash] Params.
   def unsafe_params
     @unsafe_params ||= params.to_unsafe_h
   end
 
+  # Redirects user to root with a error message.
   def invalid_token
     redirect_to root_path, status: :see_other, alert: "Invalid session"
   end
 
+  # Returns application context.
+  # @return [Context] Application context.
   def current_context
     @context
   end
 
+  # Returns current user.
+  # @return [User] Current user.
   def current_user
     @context.user
   end
 
+  # Renders nothing with Not Acceptable status.
   def missing_template
-    render nothing: true, status: 406
+    render nothing: true, status: :not_acceptable
   end
 
+  # Creates application context from session and returns it.
+  # @return [Context] Application context.
   def decode_context
     @context = Context.new(session[:user_id], session[:username], session[:token], session[:expiration], session[:org_id])
   end
 
+  # Sets user for audit log.
   def save_current_user_for_audit
     Auditor.current_user = AuditLogUser.new(@context.username, request.remote_ip)
   end
 
+  # Generates auth key and returns it.
+  # @param duration [ActiveSupport::Duration] Period of time the key will be valid for.
+  # @return [String] Generated key.
   def generate_auth_key(duration = 1.day)
     # Generate new token for pfda uploader
     context = @context.as_json.slice("user_id", "username", "token", "expiration", "org_id")
     context["expiration"] = [context["expiration"], Time.now.to_i + duration].min
-    rails_encryptor.encrypt_and_sign({context: context}.to_json)
+    rails_encryptor.encrypt_and_sign({ context: context }.to_json)
   end
 
+  # Resets and saves new session.
+  # @return [Session] Created session.
   def save_session(user_id, username, token, expiration, org_id)
     reset_session
     session[:user_id] = user_id
@@ -77,54 +94,52 @@ class ApplicationController < ActionController::Base
     Session.create(user_id: user_id, key: session.id)
   end
 
+  # Redirects user to login page if user is not logged in.
   def require_login
-    unless @context.logged_in?
-      redirect_to login_url
-    end
+    redirect_to login_url unless @context.logged_in?
   end
 
+  # Redirect user to login page if user is not either guest or logged in.
   def require_login_or_guest
-    unless @context.logged_in_or_guest?
-      redirect_to login_url
-    end
+    redirect_to login_url unless @context.logged_in_or_guest?
   end
 
+  # Tries to authorize user if the user is not authorized or guest one yet.
+  # Renders Unauthorized if it was unable to authorize user.
   def require_api_login_or_guest
     if @context.logged_in_or_guest?
-      if verified_request?
-        return
-      end
+      return if verified_request?
     else
       process_authorization_header
-      if @context.logged_in?
-        return
-      end
+      return if @context.logged_in?
     end
-    render status: :unauthorized, json: {failure: "Authentication failure"}
+
+    render status: :unauthorized, json: { failure: "Authentication failure" }
   end
 
+  # Tries to authorize user if the user is not authorized.
+  # Renders Unauthorized if it was unable to authorize user.
   def require_api_login
     if @context.logged_in?
-      if verified_request?
-        return
-      end
+      return if verified_request?
     else
       process_authorization_header
-      if @context.logged_in?
-        return
-      end
+      return if @context.logged_in?
     end
-    render status: :unauthorized, json: {failure: "Authentication failure"}
+
+    render status: :unauthorized, json: { failure: "Authentication failure" }
   end
 
+  # Tries to authorize user from Authentication header and to set application context.
   def process_authorization_header
     auth = request.headers["Authorization"]
+
     if auth.is_a?(String) && auth =~ /^Key (.+)$/
       key = $1
       begin
         decrypted = JSON.parse(rails_encryptor.decrypt_and_verify(key))
         if decrypted.is_a?(Hash) && decrypted["context"].is_a?(Hash)
-          fields = [:user_id, :username, :token, :expiration, :org_id].map { |f| decrypted["context"][f.to_s] }
+          fields = %w(user_id username token expiration org_id).map { |f| decrypted["context"][f] }
           @context = Context.new(*fields)
         end
       rescue
@@ -132,77 +147,30 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # Returns configured encryptor.
+  # @return [ActiveSupport::MessageEncryptor]
   def rails_encryptor
-    config = Rails.application.config
-    key_generator = ActiveSupport::KeyGenerator.new(Rails.application.secrets.secret_key_base, iterations: 1000)
-    secret = key_generator.generate_key(config.action_dispatch.encrypted_cookie_salt)
-    sign_secret = key_generator.generate_key(config.action_dispatch.encrypted_signed_cookie_salt)
-    encryptor = ActiveSupport::MessageEncryptor.new(secret, sign_secret)
+    Rails.configuration.encryptor
   end
 
-  def get_preview_link(context, id)
-    file = UserFile.accessible_by(context).find_by_uid!(id)
-    if file.nil? || file.state != "closed" || file.file_size > 5000000
-      return false
-    else
-      # Preview only lasts 5 minutes
-      opts = {project: file.project, preauthenticated: true, filename: file.name, duration: 300}
-      url = DNAnexusAPI.new(context.token).call(file.dxid, "download", opts)["url"]
-    end
-    return url
-  end
-
-
-
-  def pathify_folder(folder)
-    if folder.private?
-      files_path(folder_id: folder.id)
-    elsif folder.public?
-      explore_files_path(folder_id: folder.id)
-    elsif folder.in_space?
-      space = folder.space
-      files_space_path(id: space.id, folder_id: folder.id)
-    else
-      raise "Unable to build folder's path"
-    end
-  end
-
-  def pathify_comments_redirect(item)
-    case item.klass
-    when "discussion"
-      discussion_comments_path(item)
-    when "note"
-      if item.note_type == "Answer"
-        pathify_comments_redirect(item.answer)
-      elsif item.note_type == "Discussion"
-        pathify_comments_redirect(item.discussion)
-      else
-        pathify(item)
-      end
-    when "workflow"
-      return workflow_analyses_path(item) if request.referer =~ /analyses/
-      workflow_path(item)
-    when "space"
-      discuss_space_path(item)
-    when "task"
-      space_task_path(item.space_id, item)
-    when "expert", "expert-question", "meta-appathon", "appathon", "file", "app", "job", "asset", "comparison", "answer", "space", "folder"
-      pathify(item)
-    else
-      raise "Unknown class #{item.klass}"
-    end
-  end
-
+  # Tries to find entity by uid.
+  # @raise [RuntimeError] If there is an attempt to find entity of not specified type.
+  # @raise [ActiveRecord::RecordNotFound] If unable to find entity.
+  # @return [Mixed] Found entity.
   def item_from_uid(uid, specified_klass = nil)
-    if  uid =~ /^(job|app|file|workflow)-(.{24,})$/
+    if uid =~ /^(job|app|file|workflow)-(.{24,})$/
       klass = {
         "app" => App,
         "file" => UserFile,
         "job" => Job,
         "workflow" => Workflow,
       }[$1]
-      raise "Class '#{klass}' did not match specified class '#{specified_klass}'" if specified_klass && klass != specified_klass
-      klass.find_by_uid!(uid)
+
+      if specified_klass && klass != specified_klass
+        raise "Class '#{klass}' did not match specified class '#{specified_klass}'"
+      end
+
+      klass.find_by!(uid: uid)
     elsif uid =~ /^(app-series|workflow-series|appathon|comparison|note|discussion|answer|user|license|space|challenge)-(\d+)$/
       klass = {
         "app-series" => AppSeries,
@@ -215,47 +183,56 @@ class ApplicationController < ActionController::Base
         "user" => User,
         "license" => License,
         "space" => Space,
-        "challenge" => Challenge
+        "challenge" => Challenge,
       }[$1]
+
       id = $2.to_i
-      raise "Class '#{klass}' did not match specified class '#{specified_klass}'" if specified_klass && klass != specified_klass
+
+      if specified_klass && klass != specified_klass
+        raise "Class '#{klass}' did not match specified class '#{specified_klass}'"
+      end
+
       klass.find_by!(id: id)
     else
       raise "Invalid id '#{uid}' in item_from_uid"
     end
   end
 
+  # Returns capitalized matched form of provided klass.
+  # @param klass [String] Class to process.
+  # @return [String] Capitalized class name.
   def type_from_classname(klass)
-    case klass
-    when "file"
-      "UserFile"
-    else
-      klass.capitalize
-    end
+    klass == "file" ? "UserFile" : klass.capitalize
   end
 
+  # Tries to find entity by provided data.
+  # @raise [ActiveRecord::RecordNotFound] If entity could not be found.
+  # @return [Array<Mixed>] Found entities array.
   def get_item_array_from_params
     if unsafe_params[:workflow_id].present?
-      workflow = Workflow.find_by_uid(unsafe_params[:workflow_id])
+      workflow = Workflow.find_by(uid: unsafe_params[:workflow_id])
       return [workflow]
     end
+
     if unsafe_params[:discussion_id].present?
       discussion = Discussion.find(unsafe_params[:discussion_id])
-      if unsafe_params[:answer_id].present?
-        user = User.find_by!(dxuser: unsafe_params[:answer_id])
-        answer = Answer.find_by!(discussion_id: unsafe_params[:discussion_id], user_id: user.id)
-        return [discussion, answer]
-      else
-        return [discussion]
-      end
+
+      return [discussion] if unsafe_params[:answer_id].blank?
+
+      user = User.find_by!(dxuser: unsafe_params[:answer_id])
+      answer = Answer.find_by!(discussion_id: unsafe_params[:discussion_id], user_id: user.id)
+      return [discussion, answer]
     elsif unsafe_params[:meta_appathon_id].present?
-        meta_appathon = MetaAppathon.find(unsafe_params[:meta_appathon_id])
-        if unsafe_params[:appathon_id].present?
-          appathon = Appathon.find_by!(meta_appathon_id: unsafe_params[:meta_appathon_id], id: unsafe_params[:appathon_id])
-          return [meta_appathon, appathon]
-        else
-          return [meta_appathon]
-        end
+      meta_appathon = MetaAppathon.find(unsafe_params[:meta_appathon_id])
+
+      return [meta_appathon] if unsafe_params[:appathon_id].blank?
+
+      appathon = Appathon.find_by!(
+        meta_appathon_id: unsafe_params[:meta_appathon_id],
+        id: unsafe_params[:appathon_id],
+      )
+
+      return [meta_appathon, appathon]
     elsif unsafe_params[:appathon_id].present?
       return [Appathon.find(unsafe_params[:appathon_id])]
     elsif unsafe_params[:note_id].present?
@@ -268,23 +245,28 @@ class ApplicationController < ActionController::Base
     elsif unsafe_params[:comparison_id].present?
       return [Comparison.find(unsafe_params[:comparison_id])]
     elsif unsafe_params[:file_id].present?
-      return [UserFile.find_by_uid!(unsafe_params[:file_id])]
+      return [UserFile.find_by!(uid: unsafe_params[:file_id])]
     elsif unsafe_params[:asset_id].present?
-      return [Asset.find_by_uid!(unsafe_params[:asset_id])]
+      return [Asset.find_by!(uid: unsafe_params[:asset_id])]
     elsif unsafe_params[:job_id].present?
-      return [Job.find_by_uid!(unsafe_params[:job_id])]
+      return [Job.find_by!(uid: unsafe_params[:job_id])]
     elsif unsafe_params[:app_id].present?
-      return [App.find_by_uid!(unsafe_params[:app_id])]
+      return [App.find_by!(uid: unsafe_params[:app_id])]
     elsif unsafe_params[:expert_id].present?
       expert = Expert.find(unsafe_params[:expert_id])
+
       if unsafe_params[:expert_question_id].present?
         return [expert, ExpertQuestion.find(unsafe_params[:expert_question_id])]
       end
+
       return [expert]
     end
-    return
   end
 
+  # Builds and returns describing hash for given entity.
+  # @param object [Mixed] Entity to build description for.
+  # @param opts [Hash] Additional opts.
+  # @return [Hash] Describing hash.
   def describe_for_api(object, opts = {})
     opts = {} if opts.nil? || !opts.is_a?(Hash)
 
@@ -333,49 +315,47 @@ class ApplicationController < ActionController::Base
           describe[:user_license] = {
             accepted: object.licensed_by?(@context),
             pending: object.licensed_by_pending?(@context),
-            unset: !object.licensed_by_set?(@context)
+            unset: !object.licensed_by_set?(@context),
           }
         end
       end
+
       if opts[:include][:all_tags_list]
-        if object.klass == 'app'
+        if object.klass == "app"
           describe[:all_tags_list] = object.app_series.all_tags_list
         elsif ALLOWED_CLASSES_FOR_TAGGING.include?(object.klass)
           describe[:all_tags_list] = object.all_tags_list
         end
       end
+
       if opts[:include][:user]
         user = object.user
-        if user.present?
-          describe[:user] = object.user.slice(:dxuser, :full_name)
-        end
+        describe[:user] = object.user.slice(:dxuser, :full_name) if user.present?
       end
+
       if opts[:include][:org]
         user = object.user
-        if user && user.org
-          describe[:org] = object.user.org.slice(:handle, :name)
-        end
+        describe[:org] = object.user.org.slice(:handle, :name) if user&.org
       end
     end
 
     describe
   end
 
+  # Sets time zone for current user.
+  # @yield
   def user_time_zone(&block)
-    if current_user.time_zone
-      Time.use_zone(current_user.time_zone, &block)
-    else
-      yield
-    end
+    current_user.time_zone ? Time.use_zone(current_user.time_zone, &block) : yield
   end
 
+  # Creates Event::UserViewed event if request is neither XHR nor non-GET.
   def create_user_viewed_event
-    return if request.xhr?
-    return unless request.get?
+    return if request.xhr? || !request.get?
 
     Event::UserViewed.create_for(@context, request.path)
   end
 
+  # Destroys expired session or updates expiration time of not expired one.
   def handle_session
     return unless session[:user_id]
 
@@ -390,21 +370,28 @@ class ApplicationController < ActionController::Base
       ar_session.destroy!
       reset_session
     else
+      # rubocop:disable Rails/SkipsModelValidations
       ar_session.touch
+      # rubocop:enable Rails/SkipsModelValidations
       cookies[:sessionExpiredAt] = MAX_MINUTES_INACTIVITY.minutes.since.to_i
     end
   end
 
+  # Raises RoutingError.
+  # @raise ActionController::RoutingError
   def not_found!
-    raise ActionController::RoutingError.new('Not Found')
+    raise ActionController::RoutingError, "Not Found"
   end
 
+  # Sets cache headers for response.
   def cache_headers
-    response.headers['Cache-Control'] = 'no-cache, no-store, max-age=0, must-revalidate, private'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
+    response.headers["Cache-Control"] = "no-cache, no-store, max-age=0, must-revalidate, private"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
   end
 
+  # Builds if required and returns IoC Container instance.
+  # @return [IOC::Container] IoC Container.
   def container
     @container ||= IOC::Container.new(@context.token, @context.user)
   end
