@@ -44,9 +44,9 @@ RSpec.describe IOC::Container do
       let(:auth_api) { "Auth API implementation" }
 
       before do
-        container.stub("orgs.api.user", user_api)
-        container.stub("orgs.api.admin", admin_api)
-        container.stub("orgs.api.auth", auth_api)
+        container.stub("api.user", user_api)
+        container.stub("api.admin", admin_api)
+        container.stub("api.auth", auth_api)
       end
 
       it "resolves user removal policy" do

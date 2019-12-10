@@ -112,7 +112,7 @@ class ProfileController < ApplicationController
         singular: singular,
       }
 
-      service = container.resolve("orgs.provisioner")
+      service = DIContainer.resolve("orgs.provisioner")
       service.call(@user, @invitation, provision_params)
 
       @state = "step4"
@@ -282,7 +282,7 @@ class ProfileController < ApplicationController
         singular: @singular,
       }
 
-      service = container.resolve("orgs.provisioner")
+      service = DIContainer.resolve("orgs.provisioner")
       service.call(@user, @invitation, provision_params)
 
       @state = "step4"
