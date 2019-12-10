@@ -62,9 +62,14 @@ class ApplicationController < ActionController::Base
   end
 
   # Creates application context from session and returns it.
-  # @return [Context] Application context.
   def decode_context
-    @context = Context.new(session[:user_id], session[:username], session[:token], session[:expiration], session[:org_id])
+    init_context(
+      session[:user_id],
+      session[:username],
+      session[:token],
+      session[:expiration],
+      session[:org_id],
+    )
   end
 
   # Sets user for audit log.
@@ -140,11 +145,22 @@ class ApplicationController < ActionController::Base
         decrypted = JSON.parse(rails_encryptor.decrypt_and_verify(key))
         if decrypted.is_a?(Hash) && decrypted["context"].is_a?(Hash)
           fields = %w(user_id username token expiration org_id).map { |f| decrypted["context"][f] }
-          @context = Context.new(*fields)
+          init_context(*fields)
         end
       rescue
       end
     end
+  end
+
+  # Initializes context and IOC container.
+  # @param user_id [Integer] User's ID.
+  # @param username [String] User's name.
+  # @param token [String] User's token.
+  # @param expiration [Integer] Token's expiration.
+  # @param org_id [Integer] User org's ID.
+  def init_context(user_id, username, token, expiration, org_id)
+    @context = Context.new(user_id, username, token, expiration, org_id)
+    DIContainer.configure(@context.user, token)
   end
 
   # Returns configured encryptor.
@@ -368,6 +384,7 @@ class ApplicationController < ActionController::Base
 
     if ar_session.expired?
       ar_session.destroy!
+      DIContainer.shutdown
       reset_session
     else
       # rubocop:disable Rails/SkipsModelValidations
@@ -388,11 +405,5 @@ class ApplicationController < ActionController::Base
     response.headers["Cache-Control"] = "no-cache, no-store, max-age=0, must-revalidate, private"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
-  end
-
-  # Builds if required and returns IoC Container instance.
-  # @return [IOC::Container] IoC Container.
-  def container
-    @container ||= IOC::Container.new(@context.token, @context.user)
   end
 end

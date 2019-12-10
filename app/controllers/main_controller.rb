@@ -61,7 +61,7 @@ class MainController < ApplicationController
           end
         end
 
-        login_tasks_processor = container.resolve("orgs.login_tasks_processor")
+        login_tasks_processor = DIContainer.resolve("orgs.login_tasks_processor")
         login_tasks_processor.call(@context.user)
       else
         @tutorials = [
@@ -125,6 +125,7 @@ class MainController < ApplicationController
     end
 
     Session.where(key: session.id).delete_all
+    DIContainer.shutdown
     reset_session
     flash[:success] = "You were successfully logged out of precisionFDA"
     redirect_to root_url
