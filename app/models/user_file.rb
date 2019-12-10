@@ -126,23 +126,41 @@ class UserFile < Node
       file_publisher.publish(files, scope)
     end
 
-    def batch_private_files(context,scopes, parent_folder_id)
-      UserFile
-        .real_files
-        .editable_by(context)
-        .files_conditions
-        .where(scope: scopes, parent_folder_id: parent_folder_id)
+    def batch_private_files(context, scopes, parent_folder_id)
+      UserFile.
+        real_files.
+        editable_by(context).
+        files_conditions.
+        where(scope: scopes, parent_folder_id: parent_folder_id)
     end
 
     def batch_space_files(spaces_params)
-      UserFile
-        .real_files
-        .editable_in_space(spaces_params[:context], spaces_params[:spaces_members_ids])
-        .files_conditions
-        .where(
+      UserFile.
+        real_files.
+        editable_in_space(spaces_params[:context], spaces_params[:spaces_members_ids]).
+        files_conditions.
+        where(
           scope: spaces_params[:scopes],
-          scoped_parent_folder_id: spaces_params[:scoped_parent_folder_id]
+          scoped_parent_folder_id: spaces_params[:scoped_parent_folder_id],
         )
+    end
+
+    # Check, whether file with a uid given is accessible by @context and exists.
+    # @param [Context] current_user Object
+    # @param [uid] file uid
+    # @return [Object] file
+    def exist_refresh_state(context, uid)
+      file = accessible_found_by(context, uid)
+      file&.refresh_state(context)
+      file
+    end
+
+    # Check, whether file with a uid given is accessible by @context and exists.
+    # @param [Context] current_user Object
+    # @param [uid] file uid
+    # @return [Object] file
+    def accessible_found_by(context, uid)
+      accessible_by(context).find_by!(uid: uid)
     end
   end
 
@@ -150,8 +168,57 @@ class UserFile < Node
     parent_type == "User" || parent_type == "Job"
   end
 
-  def is_submission_output?
+  # Refresh state of file, if needed.
+  #   Allow assets as well.
+  # @param [Context] current_user Object
+  def refresh_state(context)
+    return unless state != "closed"
+
+    if parent_type == "Asset"
+      User.sync_asset!(context, id)
+    else
+      challenge_file? ? User.sync_challenge_file!(id) : User.sync_file!(context, id)
+    end
+    reload
+  end
+
+  # Get a file url with given params for current context user.
+  # @param [context] current user context.
+  # @param [inline] UI attribute to provide url redirection property.
+  # @return [url] a file url.
+  def file_url(context, inline)
+    opts = {
+      project: project,
+      preauthenticated: true,
+      filename: name,
+      duration: 86_400,
+    }
+    inline_attribute = inline == "true" ? "?inline" : ""
+
+    token = challenge_file? ? CHALLENGE_BOT_TOKEN : context.token
+    api = DNAnexusAPI.new(token)
+    url = api.file_download(dxid, opts)["url"] + inline_attribute
+    Event::FileDownloaded.create_for(self, context.user)
+
+    url
+  end
+
+  # Check if the current file is one of challenge usage.
+  # @return [true or false] - depends upon whether file is of challenge usage.
+  def challenge_file?
+    submission_output? || challenge_card_image?
+  end
+
+  # Check if the current file is a submission file.
+  # @return [true or false] - depends upon whether file is a submission file.
+  def submission_output?
     parent_type == "Job" && parent.submission.present?
+  end
+
+  # Check if the current file is a challenge card image.
+  # @return [true or false] - depends upon whether file is a challenge card image.
+  def challenge_card_image?
+    parent_type == "User" && parent == User.challenge_bot && scope == "public"
   end
 
   def to_param

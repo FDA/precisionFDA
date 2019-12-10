@@ -64,8 +64,8 @@ describe DNAnexusAPI do
             message: "The specified user or org (org-pfda..garry.potter) that will be " \
                       "responsible for charges associated with this app version does " \
                       "not match the one responsible for charges associated with the app " \
-                      "(org-pfda..albus.dumbledore)"
-          }
+                      "(org-pfda..albus.dumbledore)",
+          },
         }.to_json
 
         allow(transport).to receive(:call).and_raise(RuntimeError, response_error)
@@ -81,8 +81,8 @@ describe DNAnexusAPI do
         response_error = {
           error: {
             type: "InvalidInput",
-            message: "Some error message"
-          }
+            message: "Some error message",
+          },
         }.to_json
 
         allow(transport).to receive(:call).and_raise(RuntimeError, response_error)
@@ -91,6 +91,33 @@ describe DNAnexusAPI do
       it "raises an appropriate exception" do
         expect { client.app_new(payload) }.to raise_error(RuntimeError)
       end
+    end
+  end
+
+  describe "#file_new" do
+    it_behaves_like "call" do
+      let(:name) { "some-name" }
+      let(:project) { "some-project" }
+
+      let(:client_method) { :file_new }
+      let(:client_method_args) { [name, project, payload] }
+
+      let(:expected_subject) { "file" }
+      let(:expected_method) { "new" }
+      let(:expected_payload) { payload.merge(name: name, project: project) }
+    end
+  end
+
+  describe "#file_download" do
+    it_behaves_like "call" do
+      let(:file_dxid) { "some-file_dxid" }
+
+      let(:client_method) { :file_download }
+      let(:client_method_args) { [file_dxid, payload] }
+
+      let(:expected_subject) { file_dxid }
+      let(:expected_method) { "download" }
+      let(:expected_payload) { payload }
     end
   end
 

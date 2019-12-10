@@ -2,10 +2,11 @@
 class DNAnexusAPI
   include DXClient::Constants
   include DXClient::Endpoints::Apps
-  include DXClient::Endpoints::Users
+  include DXClient::Endpoints::Files
   include DXClient::Endpoints::Organizations
-  include DXClient::Endpoints::Workflows
   include DXClient::Endpoints::Projects
+  include DXClient::Endpoints::Users
+  include DXClient::Endpoints::Workflows
 
   def self.for_admin
     new(ADMIN_TOKEN)
@@ -22,7 +23,12 @@ class DNAnexusAPI
   end
 
   def generate_permanent_link(file)
-    opts = { project: file.project, preauthenticated: true, filename: file.name, duration: 9999999999 }
+    opts = {
+      project: file.project,
+      preauthenticated: true,
+      filename: file.name,
+      duration: 9_999_999_999,
+    }
     call(file.dxid, "download", opts)["url"]
   end
 

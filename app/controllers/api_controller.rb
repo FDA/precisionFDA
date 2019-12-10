@@ -11,6 +11,7 @@ class ApiController < ApplicationController
   before_action :validate_get_upload_url, only: :get_upload_url
 
   rescue_from ApiError, with: :render_error_method
+  # rubocop:disable Style/SignalException
 
   # Inputs
   #
@@ -821,6 +822,10 @@ class ApiController < ApplicationController
     render json: { id: file.uid }
   end
 
+  # Creates a challenge logo - to be visible as a challenge card image
+  # @return [Hash] - a uid of a file uploaded as a card image
+  #
+  # rubocop:disable Style/SignalException
   def create_challenge_card_image
     return unless @context.can_administer_site? || @context.challenge_admin?
 
@@ -832,8 +837,9 @@ class ApiController < ApplicationController
       fail "File description needs to be a String" unless description.is_a?(String)
     end
 
+    api = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN)
     project = CHALLENGE_BOT_PRIVATE_FILES_PROJECT
-    dxid = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call("file", "new", "name": unsafe_params[:name], "project": CHALLENGE_BOT_PRIVATE_FILES_PROJECT)["id"]
+    dxid = api.file_new(unsafe_params[:name], project)["id"]
 
     file = UserFile.create!(
       dxid: dxid,
@@ -843,9 +849,10 @@ class ApiController < ApplicationController
       description: description,
       user_id: User.challenge_bot.id,
       parent: User.challenge_bot,
-      scope: 'private'
+      scope: "public",
     )
 
+    # rubocop:enable Style/SignalException
     render json: { id: file.uid }
   end
 
@@ -1561,4 +1568,5 @@ class ApiController < ApplicationController
       fail "Asset path should be a non-empty String of size less than 4096"
     end
   end
+  # rubocop:enable Style/SignalException
 end
