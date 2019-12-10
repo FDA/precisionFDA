@@ -92,7 +92,11 @@ class FilesController < ApplicationController
 
     # Refresh state of file, if needed
     if @file.state != "closed"
-      @file.is_submission_output? ? User.sync_challenge_file!(@file.id) : User.sync_file!(@context, @file.id)
+      if @file.challenge_file?
+        User.sync_challenge_file!(@file.id)
+      else
+        User.sync_file!(@context, @file.id)
+      end
       @file.reload
     end
 
@@ -134,19 +138,12 @@ class FilesController < ApplicationController
     js folder_id: unsafe_params[:folder_id]
   end
 
+  # Downloading file and show it in a browser tab.
+  # Allow assets as well
+  # Redirecting to a new tab by file url.
+  #
   def download
-    # Allow assets as well
-    @file = UserFile.accessible_by(@context).find_by_uid!(unsafe_params[:id])
-
-    # Refresh state of file, if needed
-    if @file.state != "closed"
-      if @file.parent_type == "Asset"
-        User.sync_asset!(@context, @file.id)
-      else
-        @file.is_submission_output? ? User.sync_challenge_file!(@file.id) : User.sync_file!(@context, @file.id)
-      end
-      @file.reload
-    end
+    @file = UserFile.exist_refresh_state(@context, unsafe_params[:id])
 
     if @file.state != "closed"
       flash[:error] = "Files can only be downloaded if they are in the 'closed' state"
@@ -155,27 +152,18 @@ class FilesController < ApplicationController
       flash[:error] = "You must accept the license before you can download this"
       redirect_to @file.parent_type == "Asset" ? asset_path(@file) : file_path(@file)
     else
-      opts = {project: @file.project, preauthenticated: true}
-      opts[:filename] = @file.name
-      file_url = DNAnexusAPI.new(@file.is_submission_output? ? CHALLENGE_BOT_TOKEN : @context.token).call(@file.dxid, "download", opts)["url"] + (unsafe_params[:inline] == "true" ? '?inline' : '')
-      Event::FileDownloaded.create_for(@file, @context.user)
+      file_url = @file.file_url(@context, unsafe_params[:inline])
+
       redirect_to file_url
     end
   end
 
+  # Downloading file and provide it's url to be downloaded with.
+  # Allow assets as well, thought not currently exposed in the UI
+  # @return [@url] file url.
+  #
   def link
-    # Allow assets as well, thought not currently exposed in the UI
-    @file = UserFile.accessible_by(@context).find_by_uid!(unsafe_params[:id])
-
-    # Refresh state of file, if needed
-    if @file.state != "closed"
-      if @file.parent_type == "Asset"
-        User.sync_asset!(@context, @file.id)
-      else
-        @file.is_submission_output? ? User.sync_challenge_file!(@file.id) : User.sync_file!(@context, @file.id)
-      end
-      @file.reload
-    end
+    @file = UserFile.exist_refresh_state(@context, unsafe_params[:id])
 
     if @file.state != "closed"
       flash[:error] = "Files can only be downloaded if they are in the 'closed' state"
@@ -184,9 +172,7 @@ class FilesController < ApplicationController
       flash[:error] = "You must accept the license before you can get the download link"
       redirect_to @file.parent_type == "Asset" ? asset_path(@file) : file_path(@file)
     else
-      opts = {project: @file.project, preauthenticated: true, filename: @file.name, duration: 86400}
-      @url = DNAnexusAPI.new(@file.is_submission_output? ? CHALLENGE_BOT_TOKEN : @context.token).call(@file.dxid, "download", opts)["url"]
-      Event::FileDownloaded.create_for(@file, @context.user)
+      @url = @file.file_url(@context, nil)
     end
   end
 

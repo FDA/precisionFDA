@@ -5,6 +5,7 @@ RSpec.describe ApiController, type: :controller do
   let(:user) { create(:user, dxuser: "user") }
   let(:user_two) { create(:user, dxuser: "user_two") }
   let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, nil, nil) }
+  let(:challenge_bot) { create(:user, dxuser: "challenge.bot") }
   let(:file_one) { create(:user_file, :private) }
   let(:file_two) { create(:user_file, :public) }
   let(:file_three) { create(:user_file, :private) }
@@ -22,7 +23,7 @@ RSpec.describe ApiController, type: :controller do
   let(:review_space_uid) { review_space.uid }
 
   describe "GET list_files" do
-    context "js api" do
+    context "with js api" do
       before { authenticate!(user) }
 
       it "returns a list of files" do
@@ -30,7 +31,7 @@ RSpec.describe ApiController, type: :controller do
         expect(response).to have_http_status(200)
       end
 
-      context "after 15 minutes inactivity" do
+      context "when after 15 minutes inactivity" do
         before { expire_session! }
 
         it "returns a response with unauthorized http status" do
@@ -40,7 +41,7 @@ RSpec.describe ApiController, type: :controller do
       end
     end
 
-    context "api" do
+    context "with api" do
       before { response_with_authorization_key!(user) }
 
       it "returns a list of files" do
@@ -48,7 +49,7 @@ RSpec.describe ApiController, type: :controller do
         expect(response).to have_http_status(200)
       end
 
-      context "after 15 minutes inactivity" do
+      context "when after 15 minutes inactivity" do
         before { expire_session! }
 
         it "returns a list of files" do
@@ -169,7 +170,7 @@ RSpec.describe ApiController, type: :controller do
       {
         "parent_folder_id" => "",
         "scoped_parent_folder_id" => "",
-        "scopes" => ["private"],
+        "scopes" => %w(private),
       }
     end
 
@@ -177,7 +178,7 @@ RSpec.describe ApiController, type: :controller do
       authenticate!(user)
     end
 
-    context "js api" do
+    context "with js api" do
       it "returns a content_type 'json'" do
         post :folder_tree, params: params
         expect(response.content_type).to eq "application/json"
@@ -198,7 +199,7 @@ RSpec.describe ApiController, type: :controller do
   end
 
   describe "POST folder_tree for 'private' scope" do
-    let(:params) { { "parent_folder_id" => "", "scopes" => ["private"] } }
+    let(:params) { { "parent_folder_id" => "", "scopes" => %w(private) } }
 
     before do
       authenticate!(user)
@@ -210,7 +211,7 @@ RSpec.describe ApiController, type: :controller do
       folder_two.update(user_id: user.id, scope: verified_space_uid)
     end
 
-    context "js api" do
+    context "with js api" do
       it "returns a content_type 'json'" do
         post :folder_tree, params: params
         expect(response.content_type).to eq "application/json"
@@ -240,7 +241,7 @@ RSpec.describe ApiController, type: :controller do
         expect(parsed_response.second["scope"]).to eq("private")
       end
 
-      context "after 15 minutes inactivity" do
+      context "when after 15 minutes inactivity" do
         before { expire_session! }
 
         it "returns a response with unauthorized http status" do
@@ -250,7 +251,7 @@ RSpec.describe ApiController, type: :controller do
       end
     end
 
-    context "api" do
+    context "with api" do
       before { response_with_authorization_key!(user) }
 
       it "returns a http_status 200" do
@@ -258,7 +259,7 @@ RSpec.describe ApiController, type: :controller do
         expect(response).to have_http_status(200)
       end
 
-      context "after 15 minutes inactivity" do
+      context "when after 15 minutes inactivity" do
         before { expire_session! }
 
         it "returns a content_type 'json'" do
@@ -310,10 +311,10 @@ RSpec.describe ApiController, type: :controller do
       file_four.update(user_id: user.id, scope: review_space_uid)
       folder_one.update(user_id: user.id)
       folder_two.update(user_id: user.id, scope: review_space_uid)
-      allow_any_instance_of(User)
-        .to receive(:space_uids)
-        .with([review_space_uid])
-        .and_return([review_space_uid])
+      allow_any_instance_of(User).
+        to receive(:space_uids).
+        with([review_space_uid]).
+        and_return([review_space_uid])
       allow(Space).to receive(:space_members_ids).and_return([user.id])
     end
 
@@ -351,6 +352,86 @@ RSpec.describe ApiController, type: :controller do
     end
   end
 
+  describe "POST create_challenge_card_image" do
+    let(:file_card) { create(:user_file, :private, description: "description") }
+    let(:params) { { name: file_card.name, description: file_card.description } }
+    let(:opts) { { name: params[:name], project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT } }
+    let(:dxid) { rand(10_000).to_s }
+
+    before do
+      authenticate!(user)
+      file_card.update(id: dxid)
+      allow_any_instance_of(DNAnexusAPI).to receive(:call).
+        with("file", "new", opts).and_return(file_card)
+      allow_any_instance_of(UserFile).to receive(:id).and_return(dxid)
+    end
+
+    context "when user is site admin" do
+      before { allow_any_instance_of(User).to receive(:can_administer_site?).and_return(true) }
+
+      context "with js api" do
+        it "returns a content_type 'json'" do
+          post :create_challenge_card_image, params: params
+          expect(response.content_type).to eq "application/json"
+        end
+
+        it "returns a http_status 200" do
+          post :create_challenge_card_image, params: params
+          expect(response).to have_http_status 200
+        end
+
+        it "returns a challenge card image file uid" do
+          post :create_challenge_card_image, params: params
+          expect(parsed_response["id"]).to eq dxid.concat("-1")
+        end
+
+        it "returns a public challenge card image file" do
+          post :create_challenge_card_image, params: params
+          file = UserFile.find_by(uid: parsed_response["id"])
+          expect(file.scope).to eq "public"
+        end
+      end
+    end
+
+    context "when user can not administer site" do
+      it "returns a http_status 204 with no content" do
+        post :create_challenge_card_image, params: params
+        expect(response).to have_http_status 204
+      end
+    end
+
+    context "when name is not valid" do
+      context "when name is not a String" do
+        before { params[:name] = 1 }
+
+        it "returns a http_status 204 with no content" do
+          post :create_challenge_card_image, params: params
+          expect(response).to have_http_status 204
+        end
+      end
+
+      context "when name is an empty string" do
+        before { params[:name] = "" }
+
+        it "returns a http_status 204 with no content" do
+          post :create_challenge_card_image, params: params
+          expect(response).to have_http_status 204
+        end
+      end
+    end
+
+    context "when description is not valid" do
+      context "when description is not a String" do
+        before { params[:description] = 1 }
+
+        it "returns a http_status 204 with no content" do
+          post :create_challenge_card_image, params: params
+          expect(response).to have_http_status 204
+        end
+      end
+    end
+  end
+
   describe "POST folder_tree for 'space-XXX' scope with space member's files" do
     let(:params) do
       {
@@ -369,14 +450,14 @@ RSpec.describe ApiController, type: :controller do
       file_space_member_one.update(user_id: user_two.id, scope: review_space_uid)
       folder_one.update(user_id: user.id)
       folder_two.update(user_id: user.id, scope: review_space_uid)
-      allow_any_instance_of(User)
-        .to receive(:space_uids)
-        .with([review_space_uid])
-        .and_return([review_space_uid])
+      allow_any_instance_of(User).
+        to receive(:space_uids).
+        with([review_space_uid]).
+        and_return([review_space_uid])
       allow(Space).to receive(:space_members_ids).and_return([user.id, user_two.id])
     end
 
-    context "js api" do
+    context "with js api" do
       it "returns a content_type 'json'" do
         post :folder_tree, params: params
         expect(response.content_type).to eq "application/json"
@@ -438,7 +519,7 @@ RSpec.describe ApiController, type: :controller do
       allow(Space).to receive(:space_members_ids).and_return([user.id, user_two.id])
     end
 
-    context "js api" do
+    context "with js api" do
       it "returns a content_type 'json'" do
         post :folder_tree, params: params
         expect(response.content_type).to eq "application/json"
@@ -720,7 +801,7 @@ RSpec.describe ApiController, type: :controller do
 
       allow_any_instance_of(DNAnexusAPI).to(
         receive(:call).with("file", "new", anything).and_return(
-          "id" => "file-Bx46ZqQ04Pz5Bq3x20pkBXP4"
+          "id" => "file-Bx46ZqQ04Pz5Bq3x20pkBXP4",
         )
       )
     end
@@ -730,7 +811,7 @@ RSpec.describe ApiController, type: :controller do
         it "doesn't create a file" do
           post :create_file, params: { description: "some_desc" }
 
-          expect(response).to_not have_http_status(200)
+          expect(response).not_to have_http_status(200)
         end
       end
     end
