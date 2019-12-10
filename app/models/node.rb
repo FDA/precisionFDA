@@ -31,6 +31,8 @@ class Node < ApplicationRecord
   belongs_to :user, required: true
   belongs_to :parent, polymorphic: true
 
+  has_many :participants, dependent: :destroy
+
   acts_as_taggable
 
   def title
