@@ -3,6 +3,7 @@ class FilesController < ApplicationController
   before_action :require_login_or_guest, only: [:index, :featured, :explore]
   before_action :redirect_guest,         only: [:index]
   before_action :init_parent_folder,     only: [:index, :featured, :explore]
+  before_action :check_file_state, only: %i(show)
 
   include VerifiedSpaceHelper
 
@@ -479,4 +480,9 @@ class FilesController < ApplicationController
     @parent_folder_id = unsafe_params[:folder_id]
   end
 
+  def check_file_state
+    file = UserFile.find_by(uid: params[:id])
+
+    not_found! if file.nil? || file.state == UserFile::STATE_REMOVING
+  end
 end

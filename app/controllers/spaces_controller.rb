@@ -296,20 +296,24 @@ class SpacesController < ApplicationController
     render json: res
   end
 
-  # TODO: need to make changes to UI as well
   def remove_folder
     space = Space.accessible_by(@context).find(params[:id])
 
-    Array(params[:ids]).in_groups_of(1000, false) do |ids|
-      job_args = ids.map do |file_id|
-        [file_id, session_auth_params]
-      end
+    files = Node.editable_by(@context).where(id: params[:ids])
 
-      Sidekiq::Client.push_bulk("class" => RemoveFolderWorker, "args" => job_args)
+    UserFile.transaction do
+      files.update(state: UserFile::STATE_REMOVING)
+
+      Array(files.pluck(:id)).in_groups_of(1000, false) do |ids|
+        job_args = ids.map do |file_id|
+          [file_id, session_auth_params]
+        end
+
+        Sidekiq::Client.push_bulk("class" => RemoveFileWorker, "args" => job_args)
+      end
     end
 
-    flash[:success] = "Object(s) are being removed. This could take a while. " \
-                      "Refresh page to see existing files and folders."
+    flash[:success] = "Object(s) are being removed. This could take a while."
 
     redirect_to files_space_path(space)
   end
@@ -452,7 +456,7 @@ class SpacesController < ApplicationController
   end
 
   def files
-    @folder_id = unsafe_params[:folder_id]
+    @folder_id = params[:folder_id]
     @folder = Folder.accessible_by_space(@space).find_by(id: @folder_id)
     @folders = folders(@folder_id)
 
@@ -463,7 +467,8 @@ class SpacesController < ApplicationController
 
     user_files = UserFile.real_files.
       accessible_by_space(@space).
-      where(scoped_parent_folder_id: @folder_id)
+      where(scoped_parent_folder_id: @folder_id).
+      where.not(state: UserFile::STATE_REMOVING)
 
     nodes = Node.where(id: (user_files + @folders).map(&:id))
 
