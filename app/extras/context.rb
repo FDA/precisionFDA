@@ -6,18 +6,6 @@
 class Context
   attr_accessor :user_id, :username, :token, :expiration, :org_id
 
-  class << self
-    def build(session)
-      new(
-        session[:user_id],
-        session[:username],
-        session[:token],
-        session[:expiration],
-        session[:org_id],
-      )
-    end
-  end
-
   def initialize(user_id, username, token, expiration, org_id)
     @user_id = user_id
     @username = username
