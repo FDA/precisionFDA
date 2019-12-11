@@ -265,7 +265,7 @@ class User < ApplicationRecord
   end
 
   def is_challenge_admin?
-    (can_administer_site? || ["singer.ma", "ezekiel.maier", "errol.strain"].include?(dxuser))
+    (can_administer_site? || [].include?(dxuser))
   end
 
   def self.validate_email(email)
