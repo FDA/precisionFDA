@@ -28,6 +28,8 @@ class Node < ApplicationRecord
 
   include Permissions
 
+  STATE_REMOVING = "removing".freeze # pfda internal state
+
   belongs_to :user, required: true
   belongs_to :parent, polymorphic: true
 

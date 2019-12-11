@@ -54,7 +54,6 @@ class UserFile < Node
   STATE_CLOSING = "closing".freeze
   STATE_CLOSED = "closed".freeze
   STATE_OPEN = "open".freeze
-  STATE_REMOVING = "removing".freeze # pfda internal state
 
   PARENT_TYPE_COMPARISON = "Comparison".freeze
 
