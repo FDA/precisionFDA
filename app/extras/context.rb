@@ -7,6 +7,11 @@ class Context
   attr_accessor :user_id, :username, :token, :expiration, :org_id
 
   class << self
+    # Build context from request's session
+    #
+    # @param [ActionDispatch::Request::Session] Session
+    #
+    # @return [Context] User's context
     def build(session)
       new(
         session["user_id"],

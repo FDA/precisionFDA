@@ -299,18 +299,15 @@ class SpacesController < ApplicationController
   def remove_folder
     space = Space.accessible_by(@context).find(params[:id])
 
-    files = Node.editable_by(@context).where(id: params[:ids])
+    nodes = Node.editable_by(@context).where(id: params[:ids])
 
     UserFile.transaction do
-      files.update(state: UserFile::STATE_REMOVING)
+      nodes.update(state: UserFile::STATE_REMOVING)
 
-      Array(files.pluck(:id)).in_groups_of(1000, false) do |ids|
-        job_args = ids.map do |file_id|
-          [file_id, session_auth_params]
-        end
-
-        Sidekiq::Client.push_bulk("class" => RemoveFileWorker, "args" => job_args)
-      end
+      Sidekiq::Client.push(
+        "class" => RemoveFolderWorker,
+        "args" => [nodes.pluck(:id), session_auth_params],
+      )
     end
 
     flash[:success] = "Object(s) are being removed. This could take a while."
@@ -612,7 +609,12 @@ class SpacesController < ApplicationController
   end
 
   def folders(parent_folder_id = nil)
-    Folder.accessible_by_space(@space).where(scoped_parent_folder_id: parent_folder_id)
+    Folder.accessible_by_space(@space).
+      where(scoped_parent_folder_id: parent_folder_id).
+      merge(
+        Folder.where.not(state: Node::STATE_REMOVING).
+        or(Folder.where(state: nil)),
+      )
   end
 
   def render_folders(folders)

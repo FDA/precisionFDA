@@ -108,25 +108,36 @@ class FolderService
 
     folder.sub_folders.each do |sub_folder|
       res = remove_folder(sub_folder)
-      return res unless res.success?
+      return res if res.failure?
     end
 
     folder.files.each do |file|
       res = remove_file(file)
-      return res unless res.success?
+      return res if res.failure?
     end
 
     folder.destroy
-    folder.destroyed? ? Rats.success(folder) : Rats.failure(message: "#{folder.name}: folder removal error")
+
+    if folder.destroyed?
+      Rats.success(folder)
+    else
+      Rats.failure(message: "#{folder.name}: folder removal error")
+    end
   end
 
   def remove_file(file)
     if file.comparisons.count > 0
-      return Rats.failure(message: "File #{file.name} cannot be deleted because it participates in one or more comparisons. Please delete all the comparisons first.")
+      return Rats.failure(
+        message: "File #{file.name} cannot be deleted because it participates in one or " \
+                 "more comparisons. Please delete all the comparisons first.",
+      )
     end
 
-    if Participant.by_file(file).any?
-      return Rats.failure(message: "You have no permissions to remove '#{file.name}', as it is part of Locked Verification space.") if file.in_locked_verificaiton_space?
+    if Participant.by_file(file).any? && file.in_locked_verificaiton_space?
+      return Rats.failure(
+        message: "You have no permissions to remove '#{file.name}', " \
+                 "as it is part of Locked Verification space.",
+      )
     end
 
     begin
@@ -145,7 +156,7 @@ class FolderService
       event_type = file.klass == "asset" ? :asset_deleted : :file_deleted
       SpaceEventService.call($1.to_i, context.user_id, nil, file, event_type)
     end
+
     Rats.success(file)
   end
-
 end
