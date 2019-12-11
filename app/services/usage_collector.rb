@@ -1,36 +1,40 @@
-require "usage_collector/cloud_resource"
-
+# Collects usage statistics.
+# rubocop:disable Metrics/ClassLength
 class UsageCollector
   TABLE_NAME = "usage_metrics".freeze
 
   class << self
-    def call(on_date = Date.today)
+    # Collects usage statistics and stores it in database.
+    # @param on_date [Date] Date to compute statistics for.
+    def call(on_date = Time.zone.today)
       truncate_table
       collect_compute_prices(on_date)
       collect_consumptions
     end
 
+    # Creates or updates usage metrics for every real user.
     def collect_for_custom_range
       User.real.find_each do |user|
         metric = UsageMetric.find_or_initialize_by(user: user)
 
         metric.update(
           custom_range_byte_hours: custom_range_consumption(user),
-          custom_range_compute_price: custom_range_compute_price(user)
+          custom_range_compute_price: custom_range_compute_price(user),
         )
       end
     end
 
     private
 
-    def truncate_table(table = TABLE_NAME)
-      execute("TRUNCATE #{table};")
+    # Truncates usage table.
+    def truncate_table
+      execute("TRUNCATE #{TABLE_NAME};")
     end
 
-    # Update cloud resource consumption for all periods
+    # Update cloud resource consumption for all periods for each user.
     def collect_consumptions
       User.real.find_each do |user|
-        metric =  UsageMetric.find_or_initialize_by(user: user)
+        metric = UsageMetric.find_or_initialize_by(user: user)
 
         metric.update(
           custom_range_byte_hours: custom_range_consumption(user),
@@ -43,10 +47,14 @@ class UsageCollector
       end
     end
 
+    # Creates usage records for every user at given date.
+    # @param on_date [Date] Date to collect data for.
     def collect_compute_prices(on_date)
       execute(compute_prices_query(on_date))
     end
 
+    # Builds SQL query to insert records by.
+    # @param on_date [Date] Date to collect data for.
     def compute_prices_query(on_date)
       day_start = sql_date(on_date)
       day_after_start = sql_date(on_date + 1.day)
@@ -140,39 +148,59 @@ class UsageCollector
       SQL
     end
 
+    # Returns sanitized challenge bot's dxid.
+    # @return [String] Sanitized dxid.
     def sanitized_bot_user
-      ActiveRecord::Base.sanitize(CHALLENGE_BOT_DX_USER)
+      ActiveRecord::Base.connection.quote(CHALLENGE_BOT_DX_USER)
     end
 
+    # Returns aggregated price for given user at aggregation period.
+    # @param user [User] User to aggregate price for.
+    # @return [Numeric] Aggregated price.
     def custom_range_compute_price(user)
-      Event::JobClosed
-        .date_range(custom_range_start, custom_range_end)
-        .where(dxuser: user.dxuser)
-        .sum(:price)
+      Event::JobClosed.
+        date_range(custom_range_start, custom_range_end).
+        where(dxuser: user.dxuser).
+        sum(:price)
     end
 
+    # Returns aggregated consumed resources for given user at aggregated period.
+    # @param user [User] User to aggregate resources for.
+    # @return [Numeric] Aggregated resources.
     def custom_range_consumption(user)
-      CloudResource.consumption(custom_range_start, custom_range_end, user)
+      ::UsageCollector::CloudResource.consumption(custom_range_start, custom_range_end, user)
     end
 
+    # Executes given SQL query.
+    # @param sql [String] SQL query to execute.
     def execute(sql)
       ActiveRecord::Base.connection.execute(sql)
     end
 
+    # Returns sanitized date for usage in SQL query.
+    # @param date [Date] Date to sanitize.
+    # @return [String] Sanitized date.
     def sql_date(date)
-      ActiveRecord::Base.sanitize(date.strftime("%Y-%m-%d"))
+      ActiveRecord::Base.connection.quote(date.strftime("%Y-%m-%d"))
     end
 
+    # Returns beginning of aggregation period.
+    # @return [Time] Beginning of period.
     def custom_range_start
-      Date.parse(custom_range["date_from"]).beginning_of_day
+      Time.zone.parse(custom_range["date_from"]).beginning_of_day
     end
 
+    # Returns end of aggregation period.
+    # @return [Time] End of period.
     def custom_range_end
-      Date.parse(custom_range["date_to"]).end_of_day
+      Time.zone.parse(custom_range["date_to"]).end_of_day
     end
 
+    # Returns aggregation period.
+    # @return [Hash<String, Date>] Aggregation period.
     def custom_range
       Setting.usage_metrics_custom_range
     end
   end
 end
+# rubocop:enable Metrics/ClassLength

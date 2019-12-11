@@ -97,9 +97,7 @@ module WorkflowConcern
     project = workflow.project
     workflow_params = {
       name: analysis_name,
-      input: dx_run_workflow_inputs,
       singleContext: true,
-      project: project,
     }
 
     api = DNAnexusAPI.new(@context.token)
@@ -108,7 +106,7 @@ module WorkflowConcern
       t("api.errors.invalid_permission", title: workflow.title), permission: permission
     ) if permission == "VIEW"
 
-    response = api.run_workflow(workflow.dxid, workflow_params)
+    response = api.workflow_run(workflow.dxid, project, dx_run_workflow_inputs, workflow_params)
 
     analysis_dxid = response["id"]
     analysis = Analysis.create!(

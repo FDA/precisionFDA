@@ -64,7 +64,7 @@ class WorkflowViewModel
               input = {"class": workflow_input.class, "input_name": input_name, "input_value": files}
           else if _.isArray(workflow_input.defaultValues())
             if workflow_input.optional && workflow_input.defaultValues()[0]?
-              continue
+              input = {"class": workflow_input.class, "input_name": input_name, "input_value": workflow_input.defaultValues()[0]}
             else if !workflow_input.optional || !workflow_input.defaultValues()[0]?
               input = {"class": workflow_input.class, "input_name": input_name, "input_value": workflow_input.defaultValues()[0]}
           else
@@ -72,7 +72,7 @@ class WorkflowViewModel
               input = {"class": workflow_input.class, "input_name": input_name, "input_value": workflow_input.defaultValues()}
             else if !workflow_input.optional || !workflow_input.defaultValues()?
               input = {"class": workflow_input.class, "input_name": input_name, "input_value": workflow_input.defaultValues()}
-        inputs.push input
+          inputs.push input
     params = {
       name: @title(),
       inputs: inputs,

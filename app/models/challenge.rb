@@ -2,17 +2,24 @@
 #
 # Table name: challenges
 #
-#  id               :integer          not null, primary key
-#  name             :string
-#  description      :text
-#  start_at         :datetime
-#  end_at           :datetime
-#  meta             :text
-#  created_at       :datetime         not null
-#  updated_at       :datetime         not null
+#  id             :integer          not null, primary key
+#  name           :string(255)
+#  admin_id       :integer
+#  app_owner_id   :integer
+#  app_id         :integer
+#  description    :text(65535)
+#  meta           :text(65535)
+#  start_at       :datetime
+#  end_at         :datetime
+#  created_at     :datetime         not null
+#  updated_at     :datetime         not null
+#  status         :string(255)
+#  automated      :boolean          default(TRUE)
+#  card_image_url :string(255)
+#  card_image_id  :string(255)
 #
 
-class Challenge < ActiveRecord::Base
+class Challenge < ApplicationRecord
   include Auditor
 
   STATUS_SETUP =    "setup"
@@ -21,8 +28,8 @@ class Challenge < ActiveRecord::Base
   STATUS_ARCHIVED = "archived"
   STATUS_RESULT_ANNOUNCED = "result_announced"
 
-  belongs_to :app_owner, { class_name: 'User', foreign_key: 'app_owner_id' }
-  belongs_to :app, { class_name: 'App', foreign_key: 'app_id' }
+  belongs_to :app_owner, class_name: "User"
+  belongs_to :app
 
   has_many :submissions, dependent: :destroy
   has_many :jobs, through: :submissions
@@ -46,7 +53,7 @@ class Challenge < ActiveRecord::Base
   validates :meta, meta: true
   validates :app_id,
             presence: true,
-            if: ->(challenge) { !challenge.status_setup? }
+            unless: :status_setup?
   validate :validate_end_at
   validate :validate_start_at
 
@@ -101,6 +108,15 @@ class Challenge < ActiveRecord::Base
 
   def handle
     "#{name.parameterize}"
+  end
+
+  # Add string "Challenge" to challenge name if it does not contain such word.
+  # Usage in a challenges cards on Main#index
+  # @param name [String] challenge name from the model
+  # @return [String] name to display, modified with a word "Challenge" appending or
+  #  not modified, if it has such word already.
+  def modified_name(name)
+    name =~ /challenge/i ? name : name.concat(" Challenge")
   end
 
   def title
@@ -250,5 +266,4 @@ class Challenge < ActiveRecord::Base
       errors.add(:start_at, "can't be after the challenge end time")
     end
   end
-
 end

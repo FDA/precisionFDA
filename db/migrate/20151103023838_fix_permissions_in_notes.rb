@@ -1,4 +1,4 @@
-class FixPermissionsInNotes < ActiveRecord::Migration
+class FixPermissionsInNotes < ActiveRecord::Migration[4.2]
   def change
     add_column :notes, :scope, :string
     add_index :notes, :scope

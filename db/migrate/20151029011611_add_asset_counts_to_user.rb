@@ -1,4 +1,4 @@
-class AddAssetCountsToUser < ActiveRecord::Migration
+class AddAssetCountsToUser < ActiveRecord::Migration[4.2]
   def change
     add_column :users, :open_assets_count, :int
     add_column :users, :closing_assets_count, :int

@@ -2,13 +2,16 @@
 #
 # Table name: expert_answers
 #
-#  id            :integer          not null, primary key
-#  body          :text
-#  created_at    :datetime         not null
-#  updated_at    :datetime         not null
+#  id                 :integer          not null, primary key
+#  expert_id          :integer
+#  expert_question_id :integer
+#  body               :text(65535)
+#  state              :string(255)
+#  created_at         :datetime         not null
+#  updated_at         :datetime         not null
 #
 
-class ExpertAnswer < ActiveRecord::Base
+class ExpertAnswer < ApplicationRecord
   include Auditor
 
   belongs_to :expert

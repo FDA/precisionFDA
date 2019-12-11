@@ -22,6 +22,10 @@ class Workflow
         end
       end
 
+      def max_stage_index
+        slot_objects.values.map(&:stage_index).compact.max
+      end
+
       def find_slot_by_index(index)
         slot_objects.values.select { |slot_object| slot_object.slot_id == slots_ids[index] }.first
       end

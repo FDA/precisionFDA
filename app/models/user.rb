@@ -4,25 +4,35 @@
 # Table name: users
 #
 #  id                          :integer          not null, primary key
-#  dxuser                      :string
-#  private_files_project       :string
-#  public_files_project        :string
-#  private_comparisons_project :string
-#  public_comparisons_project  :string
+#  dxuser                      :string(255)
+#  private_files_project       :string(255)
+#  public_files_project        :string(255)
+#  private_comparisons_project :string(255)
+#  public_comparisons_project  :string(255)
 #  schema_version              :integer
 #  created_at                  :datetime         not null
 #  updated_at                  :datetime         not null
 #  org_id                      :integer
-#  first_name                  :string
-#  last_name                   :string
-#  email                       :string
-#  normalized_email            :string
+#  first_name                  :string(255)
+#  last_name                   :string(255)
+#  email                       :string(255)
+#  normalized_email            :string(255)
 #  last_login                  :datetime
-#  extras                      :text
+#  extras                      :text(65535)
+#  time_zone                   :string(255)
+#  review_app_developers_org   :string(255)      default("")
+#  user_state                  :integer          default("enabled"), not null
+#  expiration                  :integer
+#  disable_message             :string(255)
 #
 
-class User < ActiveRecord::Base
+class User < ApplicationRecord
   include Auditor
+
+  EMAIL_FORMAT = %r{
+    ^(([^<>()\[\]\\.,;:\s@\"]+(\.[^<>()\[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.
+    [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$
+  }x.freeze
 
   # The "schema_version" field is used to denote the schema
   # associated with this user on the platform. Changing the
@@ -47,6 +57,8 @@ class User < ActiveRecord::Base
   CHALLENGE_EVALUATORS = %w(
 
   ).freeze
+
+  enum user_state: [:enabled, :locked, :deactivated]
 
   SITE_ADMINS = begin
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
@@ -89,6 +101,10 @@ class User < ActiveRecord::Base
   has_one :notification_preference
   has_one :profile, dependent: :destroy
   has_one :invitation, dependent: :nullify
+  has_many :org_action_requests,
+           inverse_of: :initiator,
+           foreign_key: :initiator_id,
+           dependent: :destroy
 
   store :extras, accessors: [:has_seen_guidelines], coder: JSON
 
@@ -113,6 +129,10 @@ class User < ActiveRecord::Base
 
   def self.challenge_bot
     find_by!(dxuser: CHALLENGE_BOT_DX_USER)
+  end
+
+  def active_leave_org_request
+    org_action_requests.leave.find_by(org: org)
   end
 
   def challenge_bot?
@@ -168,11 +188,14 @@ class User < ActiveRecord::Base
 
   def space_uids
     uids = []
+
+    select_query = Arel.sql("distinct concat('space-', spaces.id)")
+
     if review_space_admin?
-      uids.concat(Space.reviewer.pluck("distinct concat('space-', spaces.id)"))
-      uids.concat(Space.verification.pluck("distinct concat('space-', spaces.id)"))
+      uids.concat(Space.reviewer.pluck(select_query))
+      uids.concat(Space.verification.pluck(select_query))
     end
-    uids.concat(spaces.pluck("distinct concat('space-', spaces.id)"))
+    uids.concat(spaces.pluck(select_query))
     uids.uniq
   end
 
@@ -246,7 +269,11 @@ class User < ActiveRecord::Base
   end
 
   def self.validate_email(email)
-    /^(([^<>()\[\]\\.,;:\s@\"]+(\.[^<>()\[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/ =~ email
+    EMAIL_FORMAT =~ email
+  end
+
+  def self.validate_state(state, zip_code)
+    Country.state_matches_zip_code?(state, zip_code)
   end
 
   def self.construct_username(first, last)
@@ -441,6 +468,19 @@ class User < ActiveRecord::Base
     end
   end
 
+  def self.provision_params(id)
+    user = find(id)
+    {
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+    }
+  end
+
+  def self.user_helper_attribute(id, attribute)
+    find(id)[attribute]
+  end
+
   private
 
   def self.sync_file_state(result, file, user)
@@ -451,7 +491,7 @@ class User < ActiveRecord::Base
         file = UserFile.find_by(id: file.id)
         if file.present?
           Event::FileDeleted.create_for(file, user)
-          file.destroy
+          file.destroy!
         end
       end
     elsif result["describe"].present?

@@ -1,4 +1,4 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe SpacesController, type: :controller do
   let(:admin) { create(:user, :admin) }
@@ -6,6 +6,7 @@ RSpec.describe SpacesController, type: :controller do
   let(:host_lead) { create(:user, dxuser: "user_1") }
   let(:guest_lead) { create(:user, dxuser: "user_2") }
   let(:user) { create(:user, dxuser: "user_3") }
+  let(:sponsor_lead) { create(:user, dxuser: "user_4") }
   let(:org) { create(:org, admin_id: guest_lead.id) }
 
   let(:space_params) do
@@ -14,7 +15,7 @@ RSpec.describe SpacesController, type: :controller do
       description: "space_description",
       host_lead_dxuser: host_lead.dxuser,
       guest_lead_dxuser: guest_lead.dxuser,
-      space_type: "groups"
+      space_type: "groups",
     }
   end
 
@@ -25,122 +26,233 @@ RSpec.describe SpacesController, type: :controller do
       host_lead_dxuser: host_lead.dxuser,
       guest_lead_dxuser: guest_lead.dxuser,
       space_type: "review",
-      sponsor_org_handle: org.handle,
+      sponsor_lead_dxuser: sponsor_lead.dxuser,
     }
   end
 
   describe "POST create" do
-    before { authenticate!(review_space_admin) }
+    before do
+      authenticate!(review_space_admin)
+      sponsor_lead.org.update admin_id: sponsor_lead.id
+    end
 
     context "when data is correct" do
+      before { post :create, params: { space: space_params } }
+
+      let(:last_space) { Space.last }
+
       it "creates a space" do
-        post :create, space: space_params
-
-        last_space = Space.last
         expect(Space.count).to eq(1)
+      end
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{last_space.host_dxorg}/describe")
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}org/new").with(body: {
-          handle: Org.handle_by_id(last_space.host_dxorg),
-          name: Org.handle_by_id(last_space.host_dxorg),
-        })
+      it "creates a host org" do
+        expect(WebMock).to have_requested(
+          :post,
+          "#{DNANEXUS_APISERVER_URI}#{last_space.host_dxorg}/describe",
+        )
+        expect(WebMock).
+          to have_requested(:post, "#{DNANEXUS_APISERVER_URI}org/new").
+          with(
+            body: {
+              handle: Org.handle_by_id(last_space.host_dxorg),
+              name: Org.handle_by_id(last_space.host_dxorg),
+            },
+          )
+      end
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{last_space.guest_dxorg}/describe")
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}org/new").with(body: {
-          handle: Org.handle_by_id(last_space.guest_dxorg),
-          name: Org.handle_by_id(last_space.guest_dxorg),
-        })
+      it "creates a guest org" do
+        expect(WebMock).to have_requested(
+          :post,
+          "#{DNANEXUS_APISERVER_URI}#{last_space.guest_dxorg}/describe",
+        )
+        expect(WebMock).
+          to have_requested(
+            :post,
+            "#{DNANEXUS_APISERVER_URI}org/new",
+          ).
+          with(
+            body: {
+              handle: Org.handle_by_id(last_space.guest_dxorg),
+              name: Org.handle_by_id(last_space.guest_dxorg),
+            },
+          )
+      end
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{last_space.host_dxorg}/invite").with(body: {
-          invitee: host_lead.dxid,
-          level: "ADMIN",
-          suppressEmailNotification: true
-        })
+      it "invites admins" do
+        expect(WebMock).
+          to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{last_space.host_dxorg}/invite").
+          with(
+            body: {
+              invitee: host_lead.dxid,
+              level: "ADMIN",
+              suppressEmailNotification: true,
+            },
+          )
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{last_space.guest_dxorg}/invite").with(body: {
-          invitee: guest_lead.dxid,
-          level: "ADMIN",
-          suppressEmailNotification: true
-        })
+        expect(WebMock).
+          to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{last_space.guest_dxorg}/invite").
+          with(
+            body: {
+              invitee: guest_lead.dxid,
+              level: "ADMIN",
+              suppressEmailNotification: true,
+            },
+          )
+      end
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{last_space.host_dxorg}/removeMember").with(body: {
-          user: ADMIN_USER
-        })
+      it "removes members from orgs" do
+        expect(WebMock).
+          to have_requested(
+            :post,
+            "#{DNANEXUS_APISERVER_URI}#{last_space.host_dxorg}/removeMember",
+          ).
+          with(body: { user: ADMIN_USER })
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{last_space.guest_dxorg}/removeMember").with(body: {
-          user: ADMIN_USER
-        })
+        expect(WebMock).
+          to have_requested(
+            :post,
+            "#{DNANEXUS_APISERVER_URI}#{last_space.guest_dxorg}/removeMember",
+          ).
+          with(body: { user: ADMIN_USER })
+      end
 
+      it "creates a space_memberships" do
         expect(last_space.space_memberships.lead.host.count).to eq(1)
         expect(last_space.space_memberships.lead.guest.count).to eq(1)
       end
     end
 
-    context "if type is review" do
+    context "when type is review" do
+      before { post :create, params: { space: review_space_params } }
+
+      let(:cooperative_space) { Space.first }
+      let(:confidential_space) { Space.confidential.first }
+
       it "creates a space" do
-        post :create, space: review_space_params
-
         expect_valid(:space)
-        cooperative_space = Space.first
-        confidential_space = Space.confidential.first
         expect(Space.count).to eq(2)
+      end
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{cooperative_space.host_dxorg}/describe")
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}org/new").with(body: {
-          handle: Org.handle_by_id(cooperative_space.host_dxorg),
-          name: Org.handle_by_id(cooperative_space.host_dxorg),
-        })
+      context "with cooperative space" do
+        it "creates a new host org" do
+          expect(WebMock).to have_requested(
+            :post,
+            "#{DNANEXUS_APISERVER_URI}#{cooperative_space.host_dxorg}/describe",
+          )
+          expect(WebMock).
+            to have_requested(:post, "#{DNANEXUS_APISERVER_URI}org/new").
+            with(
+              body: {
+                handle: Org.handle_by_id(cooperative_space.host_dxorg),
+                name: Org.handle_by_id(cooperative_space.host_dxorg),
+              },
+            )
+        end
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{cooperative_space.guest_dxorg}/describe")
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}org/new").with(body: {
-          handle: Org.handle_by_id(cooperative_space.guest_dxorg),
-          name: Org.handle_by_id(cooperative_space.guest_dxorg),
-        })
+        it "creates a new guest org" do
+          expect(WebMock).to have_requested(
+            :post,
+            "#{DNANEXUS_APISERVER_URI}#{cooperative_space.guest_dxorg}/describe",
+          )
+          expect(WebMock).
+            to have_requested(:post, "#{DNANEXUS_APISERVER_URI}org/new").
+            with(
+              body: {
+                handle: Org.handle_by_id(cooperative_space.guest_dxorg),
+                name: Org.handle_by_id(cooperative_space.guest_dxorg),
+              },
+            )
+        end
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{cooperative_space.host_dxorg}/invite").with(body: {
-          invitee: host_lead.dxid,
-          level: "ADMIN",
-          suppressEmailNotification: true
-        })
+        it "invites host admin" do
+          expect(WebMock).
+            to have_requested(
+              :post,
+              "#{DNANEXUS_APISERVER_URI}#{cooperative_space.host_dxorg}/invite",
+            ).
+            with(
+              body: {
+                invitee: host_lead.dxid,
+                level: "ADMIN",
+                suppressEmailNotification: true,
+              },
+            )
+        end
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{cooperative_space.guest_dxorg}/invite").with(body: {
-          invitee: guest_lead.dxid,
-          level: "ADMIN",
-          suppressEmailNotification: true
-        })
+        it "invites guest admin" do
+          expect(WebMock).
+            to have_requested(
+              :post,
+              "#{DNANEXUS_APISERVER_URI}#{cooperative_space.guest_dxorg}/invite",
+            ).
+            with(
+              body: {
+                invitee: sponsor_lead.dxid,
+                level: "ADMIN",
+                suppressEmailNotification: true,
+              },
+            )
+        end
+      end
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").with(body: {
-          name: "precisionfda-space-#{confidential_space.id}-REVIEWER-PRIVATE",
-          billTo: review_space_admin.billto,
-        })
+      context "with confidential space" do
+        it "creates a new project" do
+          expect(WebMock).
+            to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").
+            with(
+              body: {
+                name: "precisionfda-space-#{confidential_space.id}-REVIEWER-PRIVATE",
+                billTo: review_space_admin.billto,
+              },
+            )
+        end
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{confidential_space.host_project}/invite").with(body: {
-          invitee: confidential_space.host_dxorg,
-          level: "CONTRIBUTE",
-          suppressEmailNotification: true,
-          suppressAllNotifications: true
-        })
+        it "invites host contributor" do
+          expect(WebMock).
+            to have_requested(
+              :post,
+              "#{DNANEXUS_APISERVER_URI}#{confidential_space.host_project}/invite",
+            ).
+            with(
+              body: {
+                invitee: confidential_space.host_dxorg,
+                level: "CONTRIBUTE",
+                suppressEmailNotification: true,
+                suppressAllNotifications: true,
+              },
+            )
+        end
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{confidential_space.host_project}/invite").with(body: {
-          invitee: Setting.review_app_developers_org,
-          level: "CONTRIBUTE",
-          suppressEmailNotification: true,
-          suppressAllNotifications: true
-        })
+        it "invites a developer contributor" do
+          expect(WebMock).
+            to have_requested(
+              :post,
+              "#{DNANEXUS_APISERVER_URI}#{confidential_space.host_project}/invite",
+            ).
+            with(
+              body: {
+                invitee: Setting.review_app_developers_org,
+                level: "CONTRIBUTE",
+                suppressEmailNotification: true,
+                suppressAllNotifications: true,
+              },
+            )
+        end
+      end
 
+      it "creates a space_memberships" do
         expect(cooperative_space.space_memberships.lead.host.count).to eq(1)
         expect(cooperative_space.space_memberships.lead.guest.count).to eq(1)
       end
     end
 
-    context "if type is review and template" do
+    context "when type is review and template" do
       let(:app) { create(:app) }
       let(:file) { create(:user_file) }
       let(:template) { create(:space_template, nodes: [app, file]) }
 
       it "creates a space" do
-
-        post :create, space: review_space_params.merge(space_template_id: template.id)
+        post :create, params: { space: review_space_params.merge(space_template_id: template.id) }
 
         last_space = Space.last
 
@@ -149,224 +261,314 @@ RSpec.describe SpacesController, type: :controller do
           project: last_space.host_project,
         })
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{app.dxid}/addAuthorizedUsers").with(body: {
-          authorizedUsers: [last_space.host_dxorg],
-        })
+        expect(WebMock).
+          to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{app.dxid}/addAuthorizedUsers").
+          with(body: { authorizedUsers: [last_space.host_dxorg] })
 
         expect_valid(:space)
-        cooperative_space = Space.first
         expect(Space.count).to eq(2)
       end
     end
   end
 
   describe "POST accept" do
-    let(:space) { create(:space, :group, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id) }
+    let(:space) do
+      create(:space, :group, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
+    end
 
-    context "by host_admin" do
-      before { authenticate!(host_lead) }
+    let(:guest_contribute_invite) do
+      {
+        invitee: space.guest_dxorg,
+        level: "CONTRIBUTE",
+        suppressEmailNotification: true,
+        suppressAllNotifications: true,
+      }
+    end
 
-      it "creates a dnanexus project" do
-        post :accept, id: space.id
+    let(:host_contribute_invite) do
+      {
+        invitee: space.host_dxorg,
+        level: "CONTRIBUTE",
+        suppressEmailNotification: true,
+        suppressAllNotifications: true,
+      }
+    end
 
+    context "with host_admin" do
+      before do
+        authenticate!(host_lead)
+        post :accept, params: { id: space.id }
         space.reload
-        expect(space.host_project).to be_present
-
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").with(body: {
-          name: "precisionfda-space-#{space.id}-HOST",
-          billTo: host_lead.billto
-        })
-
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-HOST/invite").with(body: {
-          invitee: space.host_dxorg,
-          level: "CONTRIBUTE",
-          suppressEmailNotification: true,
-          suppressAllNotifications: true
-        })
-
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-HOST/invite").with(body: {
-          invitee: space.guest_dxorg,
-          level: "CONTRIBUTE",
-          suppressEmailNotification: true,
-          suppressAllNotifications: true
-        })
       end
 
-      context "if review space" do
+      it "creates a dnanexus project" do
+        expect(space.host_project).to be_present
 
-        let(:space) { create(:space, :review, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id) }
+        expect(WebMock).
+          to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").
+          with(
+            body: {
+              name: "precisionfda-space-#{space.id}-HOST",
+              billTo: host_lead.billto,
+            },
+          )
+      end
+
+      it "invites hosts" do
+        expect(WebMock).
+          to have_requested(
+            :post,
+            "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-HOST/invite",
+          ).with(body: host_contribute_invite)
+
+        expect(WebMock).
+          to have_requested(
+            :post,
+            "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-HOST/invite",
+          ).with(body: guest_contribute_invite)
+      end
+
+      context "when review space" do
+        let(:space) do
+          create(:space, :review, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
+        end
 
         it "adds user to the membership" do
-          post :accept, id: space.id
-
           expect(WebMock).not_to have_requested(:any, /.*/)
 
           private_space = space.confidential_spaces.reviewer.first
           expect(private_space.space_memberships.count).to eq(1)
         end
-
       end
     end
 
-    context "by guest_admin" do
-      before { authenticate!(guest_lead) }
-
-      it "creates a dnanexus project" do
-        post :accept, id: space.id
+    context "with guest_admin" do
+      before do
+        authenticate!(guest_lead)
+        post :accept, params: { id: space.id }
 
         space.reload
-        expect(space.guest_project).to be_present
-
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").with(body: {
-          name: "precisionfda-space-#{space.id}-GUEST",
-          billTo: guest_lead.billto
-        })
-
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite").with(body: {
-          invitee: space.guest_dxorg,
-          level: "CONTRIBUTE",
-          suppressEmailNotification: true,
-          suppressAllNotifications: true
-        })
-
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite").with(body: {
-          invitee: space.host_dxorg,
-          level: "CONTRIBUTE",
-          suppressEmailNotification: true,
-          suppressAllNotifications: true
-        })
       end
 
-      context "if review space" do
-        let(:space) { create(:space, :review, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id) }
+      it "creates a dnanexus project" do
+        expect(space.guest_project).to be_present
 
-        it "creates a dnanexus project" do
-          post :accept, id: space.id
+        expect(WebMock).
+          to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").
+          with(
+            body: {
+              name: "precisionfda-space-#{space.id}-GUEST",
+              billTo: guest_lead.billto,
+            },
+          )
+      end
+
+      it "invites guests" do
+        expect(WebMock).
+          to have_requested(
+            :post,
+            "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite",
+          ).with(body: guest_contribute_invite)
+
+        expect(WebMock).
+          to have_requested(
+            :post,
+            "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite",
+          ).with(body: host_contribute_invite)
+      end
+
+      context "when review space" do
+        before do
+          post :accept, params: { id: space.id }
 
           space.reload
+        end
+
+        let(:space) do
+          create(:space, :review, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
+        end
+
+        it "creates a dnanexus project" do
           expect(space.guest_project).to be_present
 
-          expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").with(body: {
-            name: "precisionfda-space-#{space.id}-GUEST",
-            billTo: guest_lead.billto
-          })
+          expect(WebMock).
+            to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").
+            with(
+              body: {
+                name: "precisionfda-space-#{space.id}-GUEST",
+                billTo: guest_lead.billto,
+              },
+            )
+        end
 
-          expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite").with(body: {
-            invitee: space.guest_dxorg,
-            level: "CONTRIBUTE",
-            suppressEmailNotification: true,
-            suppressAllNotifications: true
-          })
+        it "invites guests" do
+          expect(WebMock).
+            to have_requested(
+              :post,
+              "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite",
+            ).with(body: guest_contribute_invite)
 
-          expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite").with(body: {
-            invitee: space.host_dxorg,
-            level: "CONTRIBUTE",
-            suppressEmailNotification: true,
-            suppressAllNotifications: true
-          })
+          expect(WebMock).
+            to have_requested(
+              :post,
+              "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{space.id}-GUEST/invite",
+            ).with(body: host_contribute_invite)
+        end
+      end
 
-          private_space = space.confidential_spaces.sponsor.first
+      context "when private review space" do
+        before do
+          post :accept, params: { id: space.id }
 
-          expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").with(body: {
-            name: "precisionfda-space-#{private_space.id}-GUEST-PRIVATE",
-            billTo: guest_lead.billto
-          })
+          space.reload
+        end
 
-          expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project-precisionfda-space-#{private_space.id}-GUEST-PRIVATE/invite").with(body: {
-            invitee: private_space.guest_dxorg,
-            level: "CONTRIBUTE",
-            suppressEmailNotification: true,
-            suppressAllNotifications: true
-          })
+        let(:space) do
+          create(:space, :review, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
+        end
+        let(:private_space) { space.confidential_spaces.sponsor.first }
 
-          expect(private_space.space_memberships.count).to eq(1)
-
+        it "creates a dnanexus project" do
+          expect(WebMock).
+            to have_requested(:post, "#{DNANEXUS_APISERVER_URI}project/new").
+            with(
+              body: {
+                name: "precisionfda-space-#{private_space.id}-GUEST-PRIVATE",
+                billTo: guest_lead.billto,
+              },
+            )
           expect(private_space.guest_project).to be_present
           expect(private_space.guest_dxorg).to be_present
         end
 
+        it "invites a guest" do
+          call_string = "project-precisionfda-space-#{private_space.id}-GUEST-PRIVATE/invite"
+          expect(WebMock).
+            to have_requested(
+              :post,
+              "#{DNANEXUS_APISERVER_URI}#{call_string}",
+            ).
+            with(
+              body: {
+                invitee: private_space.guest_dxorg,
+                level: "CONTRIBUTE",
+                suppressEmailNotification: true,
+                suppressAllNotifications: true,
+              },
+            )
+        end
+
+        it "creates a membership" do
+          expect(private_space.space_memberships.count).to eq(1)
+        end
       end
     end
   end
 
   describe "POST invite" do
     let(:space) { create(:space, :group, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id) }
-    let(:review_space) { create(:space, :review, :accepted, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id) }
+    let(:review_space) do
+      create(:space, :review, :accepted, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
+    end
 
-    context "by host_admin" do
+    let(:member_contribute_invite) do
+      {
+        invitee: user.dxid,
+        level: "MEMBER",
+        suppressEmailNotification: true,
+        projectAccess: "CONTRIBUTE",
+        appAccess: true,
+        allowBillableActivities: false,
+      }
+    end
+
+    let(:member_view_invite) do
+      {
+        invitee: user.dxid,
+        level: "MEMBER",
+        suppressEmailNotification: true,
+        projectAccess: "VIEW",
+        appAccess: false,
+        allowBillableActivities: false,
+      }
+    end
+
+    context "with host_admin" do
       before { authenticate!(host_lead) }
+
       it "invites a user as a contributor" do
-        post :invite, id: space.id, space: { invitees: user.dxuser, invitees_role: "contributor" }
+        post :invite, params: {
+          id: space.id,
+          space: { invitees: user.dxuser, invitees_role: "contributor" },
+        }
+        be_contributor = SpaceMembership.where(user_id: user.id).first.contributor?
 
         expect(SpaceMembership.where(user_id: user.id).count).to eq(1)
-        expect(SpaceMembership.where(user_id: user.id).first.contributor?).to be_truthy
+        expect(be_contributor).to be_truthy
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{space.host_dxorg}/invite").with(body: {
-          invitee: user.dxid,
-          level: "MEMBER",
-          suppressEmailNotification: true,
-          projectAccess: "CONTRIBUTE",
-          appAccess: true,
-          allowBillableActivities: false,
-        })
+        expect(WebMock).
+          to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{space.host_dxorg}/invite").
+          with(body: member_contribute_invite)
       end
 
       it "invites a user as a viewer" do
-        post :invite, id: space.id, space: { invitees: user.dxuser, invitees_role: "viewer" }
+        post :invite, params: {
+          id: space.id,
+          space: { invitees: user.dxuser, invitees_role: "viewer" },
+        }
+        be_viewer = SpaceMembership.where(user_id: user.id).first.viewer?
 
         expect(SpaceMembership.where(user_id: user.id).count).to eq(1)
-        expect(SpaceMembership.where(user_id: user.id).first.viewer?).to be_truthy
+        expect(be_viewer).to be_truthy
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{space.host_dxorg}/invite").with(body: {
-          invitee: user.dxid,
-          level: "MEMBER",
-          suppressEmailNotification: true,
-          projectAccess: "VIEW",
-          appAccess: false,
-          allowBillableActivities: false,
-        })
+        expect(WebMock).
+          to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{space.host_dxorg}/invite").
+          with(body: member_view_invite)
       end
 
       it "invites a user as an admin" do
-        post :invite, id: space.id, space: { invitees: user.dxuser, invitees_role: "admin" }
+        post :invite, params: {
+          id: space.id,
+          space: { invitees: user.dxuser, invitees_role: "admin" },
+        }
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{space.host_dxorg}/invite").with(body: {
-          invitee: user.dxid,
-          level: "ADMIN",
-          suppressEmailNotification: true
-        })
+        expect(WebMock).
+          to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{space.host_dxorg}/invite").
+          with(
+            body: {
+              invitee: user.dxid,
+              level: "ADMIN",
+              suppressEmailNotification: true,
+            },
+          )
       end
     end
 
-    context "if review space" do
+    context "when review space" do
       before { authenticate!(host_lead) }
 
       it "invites an user as a contributor" do
-        post :invite, id: review_space.id, space: { invitees: user.dxuser, invitees_role: "contributor" }
+        post :invite, params: {
+          id: review_space.id,
+          space: { invitees: user.dxuser, invitees_role: "contributor" },
+        }
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{review_space.host_dxorg}/invite").with(body: {
-          invitee: user.dxid,
-          level: "MEMBER",
-          suppressEmailNotification: true,
-          projectAccess: "CONTRIBUTE",
-          appAccess: true,
-          allowBillableActivities: false,
-        })
+        expect(WebMock).
+          to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{review_space.host_dxorg}/invite").
+          with(body: member_contribute_invite)
 
         expect(review_space.confidential_reviewer_space.space_memberships.count).to eq(2)
       end
 
       it "invites an user as a viewer" do
-        post :invite, id: review_space.id, space: { invitees: user.dxuser, invitees_role: "viewer" }
+        post :invite, params: {
+          id: review_space.id,
+          space: { invitees: user.dxuser, invitees_role: "viewer" },
+        }
 
-        expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{review_space.host_dxorg}/invite").with(body: {
-          invitee: user.dxid,
-          level: "MEMBER",
-          suppressEmailNotification: true,
-          projectAccess: "VIEW",
-          appAccess: false,
-          allowBillableActivities: false,
-        })
+        expect(WebMock).
+          to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{review_space.host_dxorg}/invite").
+          with(body: member_view_invite)
 
         expect(review_space.confidential_reviewer_space.space_memberships.count).to eq(2)
       end
@@ -376,10 +578,11 @@ RSpec.describe SpacesController, type: :controller do
   describe "tasks" do
     let(:space) { create(:space, :group, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id) }
 
-    context "by host_admin" do
+    context "when host_admin" do
       before { authenticate!(host_lead) }
+
       it "lists tasks" do
-        get :tasks, id: space
+        get :tasks, params: { id: space }
 
         expect(response).to be_successful
       end
@@ -397,8 +600,9 @@ RSpec.describe SpacesController, type: :controller do
     end
 
     before { authenticate!(host_lead) }
+
     it "lists jobs" do
-      get :jobs, id: space
+      get :jobs, params: { id: space }
       expect(response.content_type).to eq "text/html"
       expect(response).to be_successful
     end

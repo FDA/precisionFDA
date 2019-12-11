@@ -12,8 +12,8 @@ class AppsController < ApplicationController
     @app = nil
     @assignable_challenges = []
 
-    if params[:id].present?
-      @app = App.accessible_by(@context).find_by_uid(params[:id])
+    if unsafe_params[:id].present?
+      @app = App.accessible_by(@context).find_by_uid(unsafe_params[:id])
       if @app.nil?
         flash[:error] = "Sorry, this app does not exist or is not accessible by you"
         redirect_to apps_path
@@ -24,14 +24,14 @@ class AppsController < ApplicationController
         @item_comments_path = pathify_comments(@app)
         if @app.in_space?
           space = item_from_uid(@app.scope)
-          @comments = Comment.where(commentable: space, content_object: @app).order(id: :desc).page params[:comments_page]
+          @comments = Comment.where(commentable: space, content_object: @app).order(id: :desc).page unsafe_params[:comments_page]
         else
-          @comments = @app.root_comments.order(id: :desc).page params[:comments_page]
+          @comments = @app.root_comments.order(id: :desc).page unsafe_params[:comments_page]
         end
         @revisions = @app.app_series.accessible_revisions(@context).select(:title, :id, :uid, :revision, :version)
-        @notes = @app.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
-        @answers = @app.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
-        @discussions = @app.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
+        @notes = @app.notes.real_notes.accessible_by(@context).order(id: :desc).page unsafe_params[:notes_page]
+        @answers = @app.notes.accessible_by(@context).answers.order(id: :desc).page unsafe_params[:answers_page]
+        @discussions = @app.notes.accessible_by(@context).discussions.order(id: :desc).page unsafe_params[:discussions_page]
 
         @assigned_challenges = Challenge.where(app_id: @app.id)
         @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@context, @app) }
@@ -101,7 +101,7 @@ class AppsController < ApplicationController
   end
 
   def show
-    @app = App.accessible_by(@context).find_by_uid(params[:id])
+    @app = App.accessible_by(@context).find_by_uid(unsafe_params[:id])
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
       redirect_to apps_path
@@ -109,9 +109,9 @@ class AppsController < ApplicationController
     end
 
     @revisions = @app.app_series.accessible_revisions(@context).select(:title, :id, :uid, :revision, :version)
-    @notes = @app.notes.real_notes.accessible_by(@context).order(id: :desc).page params[:notes_page]
-    @answers = @app.notes.accessible_by(@context).answers.order(id: :desc).page params[:answers_page]
-    @discussions = @app.notes.accessible_by(@context).discussions.order(id: :desc).page params[:discussions_page]
+    @notes = @app.notes.real_notes.accessible_by(@context).order(id: :desc).page unsafe_params[:notes_page]
+    @answers = @app.notes.accessible_by(@context).answers.order(id: :desc).page unsafe_params[:answers_page]
+    @discussions = @app.notes.accessible_by(@context).discussions.order(id: :desc).page unsafe_params[:discussions_page]
     @assigned_challenges = Challenge.where(app_id: @app.id)
     @assignable_challenges = Challenge.select{ |c| c.can_assign_specific_app?(@context, @app) }
 
@@ -120,9 +120,9 @@ class AppsController < ApplicationController
     @item_comments_path = pathify_comments(@app)
     if @app.in_space?
       space = item_from_uid(@app.scope)
-      @comments = Comment.where(commentable: space, content_object: @app).order(id: :desc).page params[:comments_page]
+      @comments = Comment.where(commentable: space, content_object: @app).order(id: :desc).page unsafe_params[:comments_page]
     else
-      @comments = @app.root_comments.order(id: :desc).page params[:comments_page]
+      @comments = @app.root_comments.order(id: :desc).page unsafe_params[:comments_page]
     end
 
     User.sync_jobs!(@context)
@@ -160,7 +160,7 @@ class AppsController < ApplicationController
   end
 
   def update
-    @app = App.editable_by(@context).find_by!(id: params[:id])
+    @app = App.editable_by(@context).find_by!(id: unsafe_params[:id])
 
     respond_to do |format|
       format.json { render json: {ok: 1}}
@@ -168,7 +168,7 @@ class AppsController < ApplicationController
   end
 
   def edit
-    @app = App.find_by_uid(params[:id])
+    @app = App.find_by_uid(unsafe_params[:id])
     @app = nil unless @app.editable_by?(@context)
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
@@ -188,7 +188,7 @@ class AppsController < ApplicationController
   end
 
   def batch_app
-    @app = App.accessible_by(@context).find_by_uid(params[:id])
+    @app = App.accessible_by(@context).find_by_uid(unsafe_params[:id])
 
     if @app.nil?
       flash[:error] = "Sorry, this app does not exist or is not accessible by you"
@@ -233,7 +233,7 @@ class AppsController < ApplicationController
   end
 
   def fork
-    @app = App.accessible_by(@context).find_by_uid(params[:id])
+    @app = App.accessible_by(@context).find_by_uid(unsafe_params[:id])
     if @app.nil?
       flash[:error] = "Sorry, you do not have permissions to fork this app"
       redirect_to apps_path
@@ -255,7 +255,7 @@ class AppsController < ApplicationController
 
   def validate_app_before_export
     # App should exist and be accessible
-    @app = App.accessible_by(@context).find_by_uid!(params[:id])
+    @app = App.accessible_by(@context).find_by_uid!(unsafe_params[:id])
 
     # Assets should be accessible and licenses accepted
     if @app.assets.accessible_by(@context).count != @app.assets.count

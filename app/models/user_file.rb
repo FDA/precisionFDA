@@ -1,20 +1,24 @@
 # == Schema Information
 #
-# Table name: user_files
+# Table name: nodes
 #
-#  id          :integer          not null, primary key
-#  dxid        :string
-#  project     :string
-#  name        :string
-#  state       :string
-#  description :text
-#  user_id     :integer
-#  file_size   :integer
-#  created_at  :datetime         not null
-#  updated_at  :datetime         not null
-#  parent_id   :integer
-#  parent_type :string
-#  scope       :string
+#  id                      :integer          not null, primary key
+#  dxid                    :string(255)
+#  project                 :string(255)
+#  name                    :string(255)
+#  state                   :string(255)
+#  description             :text(65535)
+#  user_id                 :integer          not null
+#  file_size               :bigint
+#  created_at              :datetime         not null
+#  updated_at              :datetime         not null
+#  parent_id               :integer
+#  parent_type             :string(255)
+#  scope                   :string(255)
+#  parent_folder_id        :integer
+#  sti_type                :string(255)
+#  scoped_parent_folder_id :integer
+#  uid                     :string(255)
 #
 
 # Parent types:
@@ -53,16 +57,18 @@ class UserFile < Node
 
   PARENT_TYPE_COMPARISON = "Comparison".freeze
 
-  has_many :notes, { through: :attachments }
-  has_many :attachments, { as: :item, dependent: :destroy }
+  has_many :attachments, as: :item, dependent: :destroy
+  has_many :notes, through: :attachments
   has_many :comparison_inputs
-  has_many :comparisons, -> { distinct }, { through: :comparison_inputs, dependent: :restrict_with_exception }
+  has_many :comparisons, ->{ distinct },
+           through: :comparison_inputs,
+           dependent: :restrict_with_exception
 
-  has_and_belongs_to_many :jobs_as_input, { join_table: "job_inputs", class_name: "Job" }
+  has_and_belongs_to_many :jobs_as_input, join_table: "job_inputs", class_name: "Job"
 
-  has_one :licensed_item, { as: :licenseable, dependent: :destroy }
-  has_one :license, { through: :licensed_item }
-  has_many :accepted_licenses, { through: :license }
+  has_one :licensed_item, as: :licenseable, dependent: :destroy
+  has_one :license, through: :licensed_item
+  has_many :accepted_licenses, through: :license
 
   has_many :challenge_resources
 
@@ -71,14 +77,15 @@ class UserFile < Node
 
   validates :name, presence: { message: "Name could not be blank" }
   validates :description,
-            allow_blank:
-              true,
+            allow_blank: true,
             length: {
               maximum: DESCRIPTION_MAX_LENGTH,
               too_long: "Description could not be greater than #{DESCRIPTION_MAX_LENGTH} characters",
             }
 
+  class << self; undef_method :open; end
   scope :open, -> { where(state: STATE_OPEN) }
+
   scope :files_conditions, -> {
     where(state: "closed").where.not(parent_type: ["Comparison", nil]).includes(:taggings)
   }
@@ -151,9 +158,42 @@ class UserFile < Node
     uid
   end
 
+  # Returns a parent folder name of UserFile
+  # @param [scope] a file scope
+  # @return [String] folder name or "/" for root
+  def parent_folder_name(scope = "private")
+    folder = parent_folder(scope)
+    folder.blank? ? "/" : folder.name
+  end
+
   def parent_folder(scope = "private")
     column_name = Node.scope_column_name(scope)
     Folder.find_by(id: self[column_name])
+  end
+
+  # Returns a full path to current file
+  # @param [scope] a file scope]
+  # @return [String] file path or "/" for root
+  def file_full_path(scope = "private")
+    parent_folder = parent_folder(scope)
+    folders = []
+    if parent_folder.blank?
+      "/"
+    else
+      folders << parent_folder_name(scope)
+      folders << parent_folder.ancestors(scope).pluck(:name)
+    end
+
+    collect_path_string(folders.flatten.reverse)
+  end
+
+  # Collects a string of file's path.
+  # @param [dir_set] Array of strings: ["second_level_folder", "third_level_folder"]
+  # @return [String] file path or "/" for root. Ex. "/second_level_folder/third_level_folder/"
+  def collect_path_string(dir_set)
+    path = "/"
+    dir_set.each { |dir| path = path + dir + "/" }
+    path
   end
 
   def not_asset?

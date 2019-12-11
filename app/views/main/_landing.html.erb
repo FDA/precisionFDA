@@ -9,7 +9,7 @@
       </a>
       <div class="jumbovideo">
         <div class="jumbovideo-player-wrapper">
-          <div id="ytplayer" class="jumbovideo-player"></div>
+          <iframe id="ytplayer" src="" frameborder="0" allowfullscreen allow="autoplay"></iframe>
         </div>
       </div>
     </div>
@@ -37,7 +37,7 @@
     <div class="row">
       <div class="col-sm-3 col-md-2 col-lg-2 landing-btn">
         <div class="h2">
-          <span class="fa fa-2x fa-trophy"</span>
+          <span class="fa fa-2x fa-trophy"></span>
         </div>
       </div>
       <div class="col-sm-13 col-md-14 col-lg-14 text-margin">
@@ -50,7 +50,7 @@
       </div>
       <div class="col-sm-8 col-md-8 landing-btn">
         <% if Challenge.current.present? && Challenge.current.active? %>
-          <a class="btn accessible-btn-success btn-lg btn-block" href=<%= challenge_path(Challenge.current) %> style="white-space: normal">
+          <a class="btn accessible-btn-success btn-lg btn-block" href="<%= challenge_path(Challenge.current) %>" style="white-space: normal">
             <span class="fa fa-user-plus"></span>
             &nbsp;Participate in the Current Challenge
           </a>
@@ -82,7 +82,7 @@
       </div>
       <div class="col-sm-8 col-md-8 landing-btn">
         <div class="h1">
-          <a class="btn accessible-btn-default btn-lg btn-block" href="/news">
+          <a class="btn accessible-btn-default btn-lg btn-block" href="<%= news_path %>">
             <span class="fa fa-newspaper-o"></span> &nbsp;View News
           </a>
         </div>
@@ -110,6 +110,10 @@
   </div>
   <hr>
   <div class="lead text-center">
-    The comparison framework uses open-source software by <%= image_tag "/participants/rtg.png", alt: "Real Time Genomics", title: "Real Time Genomics", height: "50px", "data-toggle": "tooltip" %></div>
+    The comparison framework uses open-source software by <%= image_tag "/participants/rtg.png", alt: "Real Time Genomics", title: "Real Time Genomics", height: "50px", "data-toggle": "tooltip" %>
+  </div>
+  <hr>
+  <div class="lead text-center">
+    FISMA authorization <%= link_to "document", "/FISMA_docs/2018_FDA_OC_PrecisionFDA Decision Memo.pdf", target: "_blank" %>
   </div>
 </div>

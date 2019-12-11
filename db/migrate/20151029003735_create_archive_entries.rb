@@ -1,4 +1,4 @@
-class CreateArchiveEntries < ActiveRecord::Migration
+class CreateArchiveEntries < ActiveRecord::Migration[4.2]
   def change
     create_table :archive_entries do |t|
       t.text :path

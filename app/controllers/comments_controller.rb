@@ -8,7 +8,7 @@ class CommentsController < ApplicationController
     if @item.accessible_by?(@context)
       @item_path = pathify(@item)
       @item_comments_path = pathify_comments(@item)
-      @comments = @item.root_comments.page params[:comments_page]
+      @comments = @item.root_comments.page(unsafe_params[:comments_page])
     else
       flash[:error] = "You do not have permissions to comment on this item"
       redirect_to root_url
@@ -21,7 +21,7 @@ class CommentsController < ApplicationController
     if @item.accessible_by?(@context)
       @item_path = pathify(@item)
       @item_comments_path = pathify_comments(@item)
-      @comment = Comment.find_by!(id: params[:id], user_id: @context.user_id)
+      @comment = Comment.find_by!(id: unsafe_params[:id], user_id: @context.user_id)
     else
       flash[:error] = "You do not have permissions to see this comment"
       redirect_to root_url
@@ -31,7 +31,7 @@ class CommentsController < ApplicationController
   def edit
     @items_from_params = get_item_array_from_params
     @item = @items_from_params.last
-    @comment = Comment.find_by!(id: params[:id], user_id: @context.user_id)
+    @comment = Comment.find_by!(id: unsafe_params[:id], user_id: @context.user_id)
     if @item.accessible_by?(@context) && @comment.active?
       @item_path = pathify(@item)
       @item_comments_path = pathify_comments(@item)
@@ -61,7 +61,7 @@ class CommentsController < ApplicationController
         comment.content_object = item
       end
       comment = Comment.build_from(item, @context.user_id, comment_params[:body]) unless comment
-      comment = attach_content(comment, params)
+      comment = attach_content(comment)
       if comment.save
         move_to_child(comment)
 
@@ -79,7 +79,7 @@ class CommentsController < ApplicationController
   def update
     items_from_params = get_item_array_from_params
     item = items_from_params.last
-    comment = Comment.find_by(id: params[:id], user_id: @context.user_id)
+    comment = Comment.find_by(id: unsafe_params[:id], user_id: @context.user_id)
     if !comment.nil?
       if comment.update_attributes(comment_params)
         log_space_event(comment, item, "comment_edited") if comment_inside_space?(item)
@@ -94,7 +94,7 @@ class CommentsController < ApplicationController
   def destroy
     items_from_params = get_item_array_from_params
     item =  items_from_params.last
-    comment = Comment.find_by(id: params[:id], user_id: @context.user_id)
+    comment = Comment.find_by(id: unsafe_params[:id], user_id: @context.user_id)
     if !comment.nil? && comment_inside_space?(item)
       comment.deleted!
       log_space_event(comment, item, "comment_deleted") if comment_inside_space?(item)
@@ -121,8 +121,8 @@ class CommentsController < ApplicationController
       end
     end
 
-    def attach_content(comment, params)
-      if (content_type = params.dig(:comments_content, :content_type).presence) && (content_id = params.dig(:comments_content, :id).presence)
+    def attach_content(comment)
+      if (content_type = unsafe_params.dig(:comments_content, :content_type).presence) && (content_id = unsafe_params.dig(:comments_content, :id).presence)
         comment.content_object = find_content_object(content_type, content_id)
       end
       comment

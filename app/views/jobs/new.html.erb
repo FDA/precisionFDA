@@ -5,7 +5,34 @@
     <div class="page-header clearfix">
       <div class="page-title pull-left"><span class="fa fa-cube"></span> Run <%= link_to @app.title, app_path(@app.uid), target: "_blank" %></div>
       <div class="btn-group pull-right">
-        <button type="button" class="btn btn-lg" data-bind="css: {disabled: !isRunnable(), 'btn-default': !isRunnable(), 'btn-primary': isRunnable()}, attr: {disabled: !isRunnable()}, disable: !isRunnable(), click: run"><span class="fa fa-bolt"></span> <span data-bind="text: running() ? 'Running...':'Run App'"></span></button>
+        <!-- ko if: isInSpace -->
+          <button
+            type="button"
+            class="btn btn-lg"
+            data-bind=
+              "css: {ddisabled: !isRunnable() || !spaceId(), 'btn-default': !isRunnable(), 'btn-primary': isRunnable()},
+               attr: {disabled: !isRunnable() || !spaceId()},
+               disable: !isRunnable() || !spaceId(),
+               click: run"
+          >
+            <span class="fa fa-bolt"></span>
+            <span data-bind="text: running() ? 'Running...':'Run App'"></span>
+          </button>
+        <!-- /ko -->
+        <!-- ko if: !isInSpace -->
+          <button
+            type="button"
+            class="btn btn-lg"
+            data-bind=
+              "css: {disabled: !isRunnable(), 'btn-default': !isRunnable(), 'btn-primary': isRunnable()},
+               attr: {disabled: !isRunnable()},
+               disable: !isRunnable(),
+               click: run"
+          >
+            <span class="fa fa-bolt"></span>
+            <span data-bind="text: running() ? 'Running...':'Run App'"></span>
+          </button>
+        <!-- /ko -->
       </div>
     </div>
   </div>
@@ -25,7 +52,7 @@
             <input type="text" name="name" class="form-control" placeholder="Enter a name for this job" data-bind="textInput: name">
           </div>
         </div>
-        <!-- ko if: needSelectSpace -->
+        <!-- ko if: isInSpace -->
           <div class="form-group required">
             <label class= "col-sm-4 control-label" for="space_id">Space scope</label>
             <div class="col-sm-10 col-sm-offset-1">
@@ -33,6 +60,7 @@
                    optionsText: 'label',
                    optionsValue: 'value',
                    value: spaceId,
+                   selectedOptions: defaultSelectedSpace,
                    optionsCaption: 'Choose...'"></select>
             </div>
           </div>
@@ -58,10 +86,10 @@
         <div class="form-group" data-bind="css: {required: isRequired, 'has-error': error}">
           <label class= "col-sm-4 control-label" data-bind="text: label || name, attr: {title: help}, css: {'text-danger': needsToBeSet}"></label>
           <div class="col-sm-10 col-sm-offset-1" data-bind="css: 'field-'+className">
-            <!-- ko if: choices -->
+            <!-- ko if: !_.isEmpty(choices) -->
               <select class="form-control" data-bind="options: choices, optionsCaption: !defaultValue ? 'Select...' : undefined, value: valueDisplay, disable: $root.busy"></select>
             <!-- /ko -->
-            <!-- ko ifnot: choices -->
+            <!-- ko if: _.isEmpty(choices) -->
               <!-- ko if: className == 'int' || className == 'float' || className == 'string' -->
                 <input type="text" class="form-control" data-bind="textInput: valueDisplay, attr: {name: name, placeholder: placeholder, disable: $root.busy}">
               <!-- /ko -->

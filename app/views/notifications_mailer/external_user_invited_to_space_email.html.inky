@@ -1,0 +1,40 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    Start by collaborating and sharing data to this space
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="<%= HOST %>" title="precisionFDA">
+          <img class="header-image" src="<%= HOST %>/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right">Invited to Space</p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p>
+          You were invited to the space <strong><%= @space.title %></strong>
+          by <%= @admin.user.full_name %>. To be able to use the space, it's required to sign up
+          using the current email address <b><%= @email %></b>.
+        </p>
+
+        <p>Role: <strong><%= @role %></strong></p>
+        <p>Side: <strong><%= member_side(@space, @admin) %></strong></p>
+
+        <p>
+          Space's let you move data from your private area and share to the space members to access.
+          You can then publish the data out of the space to the precisionFDA community.
+        </p>
+
+        <button class="radius" href="<%= request_access_url %>">Sign Up</button>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>

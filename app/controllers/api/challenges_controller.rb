@@ -4,7 +4,7 @@ module Api
     before_action :check_admin
 
     def save_editor_page
-      return if params[:regions].blank?
+      return if unsafe_params[:regions].blank?
 
       if challenge.nil?
         render json: { error: "The challenge not found." }.to_json, status: 404
@@ -12,7 +12,7 @@ module Api
         render json: { error: "You do not have permission to edit this challenge." }.to_json, status: 403
       end
 
-      challenge.regions = challenge.regions.merge(params[:regions])
+      challenge.regions = challenge.regions.merge(unsafe_params[:regions])
 
       if challenge.save
         render json: { msg: "saved" }
@@ -24,7 +24,7 @@ module Api
     private
 
     def challenge
-      @challenge ||= Challenge.find(params[:id])
+      @challenge ||= Challenge.find(unsafe_params[:id])
     end
 
   end

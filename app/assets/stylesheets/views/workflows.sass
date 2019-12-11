@@ -52,7 +52,10 @@
 
 .workflow-pre-scrollable
   max-height: 240px
-  overflow-y: scroll
+  overflow-y: auto
+
+.all-apps-loading
+  height: 20px
 
 // #configure-stage-modal
 
@@ -193,6 +196,23 @@ a.btn.batch_terminate
     padding: 10px
     &:last-child
       margin-bottom: 30px
+  .batch-workfows-nav-tabs
+    border: none
+    & > li
+      font-size: 12px
+      a
+        padding: 5px
+
+  .batch-workfows-tab-content
+    padding-top: 10px
+  .batch-workfows-fs-item
+    font-size: 1.1em
+    padding-bottom: 5px
+    white-space: nowrap
+    input, span
+      cursor: pointer
+    &-path
+      color: #CCC
   .batch-workfows-wizard
     .wizard-loader-container
       display: none
@@ -292,14 +312,30 @@ a.btn.batch_terminate
         hr
           margin-top: 10px
           margin-bottom: 10px
+      .wf-fs-more-loader
+        position: relative
+        &-spinner
+          position: absolute
+          text-align: center
+          width: 100%
+          top: -20px
+      .wf-no-poiner-events
+        pointer-events: none
       .input-file-search
         margin-bottom: 10px
+        margin-right: 5px
         display: flex
+        &-container
+          display: flex
+        &-fs-loading
+          background-color: #DDD
         &-regexp,
         &-flags
           padding: 0px 5px
           border: none
           outline: none
+          &[disabled]
+            background-color: #DDD
         &-regexp
           width: 100%
         &-flags

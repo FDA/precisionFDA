@@ -40,11 +40,11 @@ module Admin
     end
 
     def update_positions
-      Array.wrap(params['public_boxes']).each_with_index do |id, index|
+      Array.wrap(unsafe_params['public_boxes']).each_with_index do |id, index|
         GetStartedBox.update(id, position: index, public: true)
       end
 
-      Array.wrap(params['private_boxes']).each_with_index do |id, index|
+      Array.wrap(unsafe_params['private_boxes']).each_with_index do |id, index|
         GetStartedBox.update(id, position: index, public: false)
       end
 
@@ -54,7 +54,7 @@ module Admin
     private
 
     def set_admin_get_started_box
-      @admin_get_started_box = GetStartedBox.find(params[:id])
+      @admin_get_started_box = GetStartedBox.find(unsafe_params[:id])
     end
 
     def admin_get_started_box_params

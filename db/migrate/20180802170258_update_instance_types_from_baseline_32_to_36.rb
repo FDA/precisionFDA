@@ -1,8 +1,8 @@
-class UpdateInstanceTypesFromBaseline32To36 < ActiveRecord::Migration
+class UpdateInstanceTypesFromBaseline32To36 < ActiveRecord::Migration[4.2]
   def up
     change_instance("baseline-32", "baseline-36")
   end
-  
+
   def down
     change_instance("baseline-36", "baseline-32")
   end

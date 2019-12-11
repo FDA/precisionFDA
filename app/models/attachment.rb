@@ -5,10 +5,10 @@
 #  id        :integer          not null, primary key
 #  note_id   :integer
 #  item_id   :integer
-#  item_type :string
+#  item_type :string(255)
 #
 
-class Attachment < ActiveRecord::Base
+class Attachment < ApplicationRecord
   include Auditor
 
   belongs_to :note

@@ -1,8 +1,22 @@
 class MainController < ApplicationController
-  skip_before_action :require_login, {only: [:index, :about, :exception_test, :login, :return_from_login, :request_access, :terms, :guidelines, :browse_access, :destroy, :presskit, :news, :mislabeling]}
-
-  skip_before_action :require_login,     only: [:track, :mislabeling, :bco_appathon]
-  before_action :require_login_or_guest, only: [:track]
+  skip_before_action :require_login, only: %i(
+    index
+    about
+    exception_test
+    login
+    return_from_login
+    request_access
+    create_request_access terms
+    guidelines
+    browse_access
+    destroy
+    presskit
+    news
+    mislabeling
+  )
+  skip_before_action :require_login, only: %i(track mislabeling bco_appathon georgetown)
+  before_action :require_login_or_guest, only: %i(track)
+  before_action :init_countries, only: %i(request_access create_request_access)
 
   def index
     show_guidelines = false
@@ -46,6 +60,9 @@ class MainController < ApplicationController
             end
           end
         end
+
+        login_tasks_processor = container.resolve("orgs.login_tasks_processor")
+        login_tasks_processor.call(@context.user)
       else
         @tutorials = [
           {
@@ -195,13 +212,13 @@ class MainController < ApplicationController
 
   def return_from_login
     # Ensure we were sent here from DNAnexus
-    if params[:code].blank? || !params[:code].is_a?(String)
+    if unsafe_params[:code].blank? || !unsafe_params[:code].is_a?(String)
       redirect_to(root_url) and return
     end
 
     # Exchange the code for a token
     result = DNAnexusAuth.new(DNANEXUS_AUTHSERVER_URI).
-               fetch_token(params[:code])
+               fetch_token(unsafe_params[:code])
 
     if result["access_token"].blank? ||
        result["token_type"] != "bearer"
@@ -304,52 +321,16 @@ class MainController < ApplicationController
 
   def request_access
     @invitation = Invitation.new
-    @countries = Country.pluck(:name, :id)
-    @us_states_list = Country.us_states_list
 
-    @dial_codes = Country.pluck(:dial_code, :id)
-                    .reject {|i| i[0].empty? }
-                    .to_h
-                    .to_a
-                    .sort
+    js usa_id: Country.find_by(name: "United States").id,
+       country_codes: Country.countries_for_codes,
+       phone_confirmed: unsafe_params.dig(:invitation, :phone_confirmed)
+  end
 
-    usa_id = Country.find_by(name: "United States").id
+  def create_request_access
+    @invitation = RequestAccessService.create_request_for_access(invitation_params)
 
-    if request.post?
-      p = invitation_params
-      p[:ip] = request.remote_ip.to_s
-      p[:state] = "guest"
-      p[:participate_intent] = p[:participate_intent] == "1"
-      p[:organize_intent] = p[:organize_intent] == "1"
-      p[:research_intent] = p[:research_intent] == "1"
-      p[:clinical_intent] = p[:clinical_intent] == "1"
-      p[:organization_admin] = p[:organization_admin] == "1"
-      p[:email] = p[:email].to_s.strip
-      p[:code] = SecureRandom.uuid
-
-      Invitation.transaction do
-        @invitation = Invitation.create(p)
-
-        if @invitation.persisted?
-          auditor_data = {
-            action: "create",
-            record_type: "Access Request",
-            record: {
-              message: "Access requested: #{p.to_json}"
-            }
-          }
-
-          Auditor.perform_audit(auditor_data)
-          NotificationsMailer.invitation_email(@invitation).deliver_now!
-          NotificationsMailer.guest_access_email(@invitation).deliver_now!
-          Event::UserAccessRequested.create_for(@invitation)
-        end
-      end
-    end
-
-    phone_confirmed = params.dig(:invitation, :phone_confirmed)
-    organization_admin = params.dig(:invitation, :organization_admin)
-    js usa_id: usa_id, country_codes: Country.countries_for_codes, phone_confirmed: phone_confirmed, organization_admin: organization_admin
+    render :request_access
   end
 
   def browse_access
@@ -358,7 +339,7 @@ class MainController < ApplicationController
       return
     end
 
-    code = params[:code].to_s
+    code = unsafe_params[:code].to_s
     @invitation = Invitation.find_by(code: code, state: "guest")
     if @invitation.blank?
       render "_partials/_error", status: 403, locals: {message: "Invalid access code. If you believe this is an error, contact precisionFDA support."}
@@ -385,28 +366,17 @@ class MainController < ApplicationController
   end
 
   def publish
-    id = params[:id]
+    id = unsafe_params[:id]
     raise "Missing id in publish route" unless id.is_a?(String) && id.present?
 
-    scope = params[:scope]
-    if scope.blank?
-      scope = "public"
-    elsif scope.is_a?(String)
-      if scope != "public"
-        # Check that scope is a valid scope:
-        # - must be of the form space-xxxx
-        # - must exist in the Space table
-        # - must be accessible by context
-        raise "Publish route called with invalid scope #{scope}" unless scope =~ /^space-(\d+)$/
-        space = Space.find_by(id: $1.to_i)
-        raise "Publish route called with invalid space #{scope}" unless space.present? && space.active? && space.accessible_by?(@context)
-      end
-    else
-      raise "Publish route called with invalid scope #{scope.inspect}"
-    end
+    service = SpaceService::Publishing.new(@context)
 
-    if params[:uids]
-      uids = params[:uids]
+    check_result = service.scope_check(unsafe_params[:scope])
+    scope = check_result[:scope]
+    space = check_result[:space]
+
+    if unsafe_params[:uids]
+      uids = unsafe_params[:uids]
       raise "The object 'uids' must be a hash of object ids (strings) with value 'on'." if !uids.is_a?(Hash) || !uids.all? { |uid, checked| uid.is_a?(String) && checked == "on" }
 
       items = ([id] + uids.keys).uniq.map { |uid| item_from_uid(uid) }.reject { |item| item.public? || item.scope == scope }
@@ -457,7 +427,7 @@ class MainController < ApplicationController
 
       # Jobs
       if jobs.size > 0
-        published_count += Job.publish(jobs, @context, scope)
+        published_count += PublishService::JobPublisher.new(@context).publish(jobs, scope)
       end
 
       # Notes
@@ -497,19 +467,17 @@ class MainController < ApplicationController
     item = item_from_uid(id)
     if !item.editable_by?(@context)
       flash[:error] = "This item is not owned by you."
-      redirect_to :back
-      return
+      redirect_back(fallback_location: root_path) and return
     end
+
     if item.public?
       flash[:error] = "This item is already public."
-      redirect_to pathify(item)
-      return
+      redirect_to(pathify(item)) and return
     end
 
     if !item.publishable_by?(@context, scope)
       flash[:error] = "This item cannot be published in this state."
-      redirect_to pathify(item)
-      return
+      redirect_to(pathify(item)) and return
     end
 
     js graph: GraphDecorator.for_publisher(@context, item, scope),
@@ -518,7 +486,7 @@ class MainController < ApplicationController
   end
 
   def track
-    id = params[:id]
+    id = unsafe_params[:id]
     raise "Missing id in track route" unless id.is_a?(String) && id.present?
     @item = item_from_uid(id)
     unless @item.accessible_by?(@context)
@@ -529,13 +497,11 @@ class MainController < ApplicationController
     @graph = GraphDecorator.build(@context, @item)
   end
 
-  def mislabeling
+  def mislabeling; end
 
-  end
+  def bco_appathon; end
 
-  def bco_appathon
-
-  end
+  def georgetown; end
 
   def tokify
     @key = generate_auth_key
@@ -549,18 +515,18 @@ class MainController < ApplicationController
   # suggested_tags (array[strings], optional): array of tags
   # tag_context (string, optional): indicates the tag context to use
   def set_tags
-    taggable_uid = params["taggable_uid"]
+    taggable_uid = unsafe_params["taggable_uid"]
     fail "Taggable uid needs to be a non-empty string" unless taggable_uid.is_a?(String) && taggable_uid != ""
 
-    tags = params["tags"]
+    tags = unsafe_params["tags"]
     fail "Tags need to be comma-separated strings" unless tags.is_a?(String)
 
-    suggested_tags = params["suggested_tags"] # Optional
+    suggested_tags = unsafe_params["suggested_tags"] # Optional
     if suggested_tags.is_a?(Array)
       tags = (tags.split(',') + suggested_tags).join(',')
     end
 
-    tag_context = params["tag_context"] # Optional
+    tag_context = unsafe_params["tag_context"] # Optional
 
     taggable = item_from_uid(taggable_uid)
 
@@ -576,12 +542,18 @@ class MainController < ApplicationController
 
   private
 
+  def init_countries
+    @countries = Country.pluck(:name, :id)
+    @us_states_list = Country.us_states_list
+    @dial_codes = Country.dial_codes
+  end
+
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def invitation_params
     fields = %i(
       first_name
       last_name
       email
-      org
       duns
       address1
       address2
@@ -591,8 +563,6 @@ class MainController < ApplicationController
       postal_code
       phone_country_id
       phone
-      singular
-      organization_admin
       participate_intent
       organize_intent
       req_reason
@@ -604,8 +574,19 @@ class MainController < ApplicationController
       humanizer_question_id
     )
 
-    params.require(:invitation).permit(*fields)
+    hsh = unsafe_params[:invitation].slice(*fields)
+
+    hsh.merge(
+      "ip" => request.remote_ip.to_s,
+      "state" => "guest",
+      "participate_intent" => hsh["participate_intent"] == "1",
+      "organize_intent" => hsh["organize_intent"] == "1",
+      "research_intent" => hsh["research_intent"] == "1",
+      "clinical_intent" => hsh["clinical_intent"] == "1",
+      "email" => hsh["email"].to_s.strip,
+    )
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   def collect_feed
     [Note, Answer, Discussion, UserFile, Comparison, App, Asset].map do |klass|

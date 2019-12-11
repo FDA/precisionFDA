@@ -2,16 +2,17 @@
 #
 # Table name: experts
 #
-#  id            :integer          not null, primary key
-#  state         :string
-#  image         :string
-#  scope         :string
-#  meta          :text
-#  created_at    :datetime         not null
-#  updated_at    :datetime         not null
+#  id         :integer          not null, primary key
+#  user_id    :integer
+#  image      :string(255)
+#  state      :string(255)
+#  scope      :string(255)
+#  meta       :text(65535)
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
 #
 
-class Expert < ActiveRecord::Base
+class Expert < ApplicationRecord
   include Auditor
 
   has_many :expert_questions, dependent: :destroy
@@ -103,7 +104,7 @@ class Expert < ActiveRecord::Base
   def self.editable_by(context)
     if !context.guest?
       raise unless context.user_id.present?
-      Expert.where(user_id: context.user_id).uniq
+      Expert.where(user_id: context.user_id).distinct
     end
   end
 

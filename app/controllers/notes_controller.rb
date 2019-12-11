@@ -8,33 +8,33 @@ class NotesController < ApplicationController
       return
     end
 
-    @notes = Note.editable_by(@context).real_notes.order(id: :desc).page params[:notes_page]
+    @notes = Note.editable_by(@context).real_notes.order(id: :desc).page unsafe_params[:notes_page]
   end
 
   def featured
     org = Org.featured
     if org
-      @notes = Note.accessible_by(@context).real_notes.joins(:user).where(:users => { :org_id => org.id }).order(id: :desc).page params[:notes_page]
+      @notes = Note.accessible_by(@context).real_notes.joins(:user).where(:users => { :org_id => org.id }).order(id: :desc).page unsafe_params[:notes_page]
     end
     render :index
   end
 
   def explore
-    @notes = Note.accessible_by_public.real_notes.order(id: :desc).page params[:notes_page]
+    @notes = Note.accessible_by_public.real_notes.order(id: :desc).page unsafe_params[:notes_page]
     render :index
   end
 
   def show
-    @note = Note.accessible_by(@context).find(params[:id])
+    @note = Note.accessible_by(@context).find(unsafe_params[:id])
 
     @items_from_params = [@note]
     @item_path = pathify(@note)
     @item_comments_path = pathify_comments(@note)
     if @note.in_space?
       space = item_from_uid(@note.scope)
-      @comments = Comment.where(commentable: space, content_object: @note).order(id: :desc).page params[:comments_page]
+      @comments = Comment.where(commentable: space, content_object: @note).order(id: :desc).page unsafe_params[:comments_page]
     else
-      @comments = @note.root_comments.order(id: :desc).page params[:comments_page]
+      @comments = @note.root_comments.order(id: :desc).page unsafe_params[:comments_page]
     end
     @commentable = @note
 
@@ -50,7 +50,7 @@ class NotesController < ApplicationController
   end
 
   def edit
-    @note = Note.find(params[:id])
+    @note = Note.find(unsafe_params[:id])
     redirect_to note_path(@note) unless @note.editable_by?(@context)
 
     if @note.nil?
@@ -64,7 +64,7 @@ class NotesController < ApplicationController
   end
 
   def rename
-    @note = Note.find_by!(id: params[:id])
+    @note = Note.find_by!(id: unsafe_params[:id])
     redirect_to note_path(@note) unless @note.editable_by?(@context)
 
     title = note_params[:title]
@@ -98,7 +98,7 @@ class NotesController < ApplicationController
   end
 
   def destroy
-    note = Note.find(params[:id])
+    note = Note.find(unsafe_params[:id])
     redirect_to :notes unless note.editable_by?(@context)
 
     if note.real_note?
@@ -127,6 +127,6 @@ class NotesController < ApplicationController
         jobs: (jobs.map { |o| describe_for_api(o)}),
         assets: (assets.map { |o| describe_for_api(o)}),
       }
-      return {note: note.slice(:id, :content, :title), attachments: attachments, edit: params[:edit], editable: note.editable_by?(@context)}
+      return {note: note.slice(:id, :content, :title), attachments: attachments, edit: unsafe_params[:edit], editable: note.editable_by?(@context)}
     end
 end

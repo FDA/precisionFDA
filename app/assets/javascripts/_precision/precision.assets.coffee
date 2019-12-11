@@ -141,5 +141,5 @@ class AssetModel
 
 
 window.Precision ||= {}
-window.Precision.models || = {}
+window.Precision.models ||= {}
 window.Precision.models.AssetsModel = AssetsModel

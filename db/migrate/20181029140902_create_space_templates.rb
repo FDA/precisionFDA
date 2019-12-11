@@ -1,4 +1,4 @@
-class CreateSpaceTemplates < ActiveRecord::Migration
+class CreateSpaceTemplates < ActiveRecord::Migration[4.2]
   def change
     create_table :space_templates do |t|
       t.string :name

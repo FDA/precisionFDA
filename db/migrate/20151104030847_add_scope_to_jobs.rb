@@ -1,4 +1,4 @@
-class AddScopeToJobs < ActiveRecord::Migration
+class AddScopeToJobs < ActiveRecord::Migration[4.2]
   def change
     add_column :jobs, :scope, :string
     add_index :jobs, :scope

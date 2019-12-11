@@ -1,4 +1,4 @@
-class MigrateSpacesStates < ActiveRecord::Migration
+class MigrateSpacesStates < ActiveRecord::Migration[4.2]
   def change
     rename_column :spaces, :state, :old_state
     add_column :spaces, :state, :int, default: 0, null: false

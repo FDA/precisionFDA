@@ -1,5 +1,7 @@
 module ApplicationHelper
   include VerifiedSpaceHelper
+  include OrgService::RequestFilter
+  include Rails.application.routes.url_helpers
 
   def page_title(separator = " – ")
     [content_for(:title), 'precisionFDA'].compact.join(separator).html_safe
@@ -100,6 +102,7 @@ module ApplicationHelper
   # noicon: false              # Show/hide the icon
   #
   def unilink(item, opts = {})
+    return if item.nil?
     icon = fa_class(item)
     if opts[:scope_icon]
       if item.public?
@@ -160,4 +163,11 @@ module ApplicationHelper
     "#{GIT_BRANCH}:#{GIT_REVISION}"
   end
 
+  def leave_org_alert_shown?
+    return if !@context.logged_in?
+    return if controller_name == "main" && action_name == "index"
+    return if current_user.org.admin == current_user && current_user.org.users.size > 1
+
+    filter_requests(current_user, OrgActionRequest::State::APPROVED).first.present?
+  end
 end

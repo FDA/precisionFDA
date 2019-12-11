@@ -25,7 +25,7 @@ class SpaceReportsController < ApplicationController
         },
         users: users
       }
-    if params[:format] == 'pdf'
+    if unsafe_params[:format] == 'pdf'
       download_pdf
     else
       download_html
@@ -62,39 +62,39 @@ class SpaceReportsController < ApplicationController
   private
 
   def start_date
-    Time.parse(params[:date_at])
+    Time.parse(unsafe_params[:date_at])
   rescue
     Date.today.beginning_of_week.to_time
   end
 
   def end_date
-    Time.parse(params[:date_to])
+    Time.parse(unsafe_params[:date_to])
   rescue
     Time.now
   end
 
   def users
-    if params[:users]
-      User.where(id: params[:users])
+    if unsafe_params[:users]
+      User.where(id: unsafe_params[:users])
         .map { |u| u.full_name }
         .join(", ")
     end
   end
 
   def object_type
-    params[:type]
+    unsafe_params[:type]
   end
 
   def page
-    if params[:page].presence
-      params[:page].to_i
+    if unsafe_params[:page].presence
+      unsafe_params[:page].to_i
     end
   rescue
     1
   end
 
   def sort
-    ["asc", "desc"].include?(params[:sort]) ? params[:sort] : "asc"
+    ["asc", "desc"].include?(unsafe_params[:sort]) ? unsafe_params[:sort] : "asc"
   end
 
   def filter_params
@@ -286,7 +286,7 @@ class SpaceReportsController < ApplicationController
   end
 
   def find_space
-    @space = Space.accessible_by(@context).find_by_id(params[:space_id])
+    @space = Space.accessible_by(@context).find_by_id(unsafe_params[:space_id])
     unless @space
       render json: []
       return

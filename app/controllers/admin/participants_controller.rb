@@ -6,6 +6,7 @@ module Admin
       @org_participants = Participant.org.positioned
       @person_participants = Participant.person.positioned
       @invisible_participants = Participant.invisible.positioned
+
       js org_participants: @org_participants,
          person_participants: @person_participants,
          invisible_participants: @invisible_participants
@@ -21,7 +22,7 @@ module Admin
     end
 
     def edit
-      set_js_params(:edit)
+      js_params(:edit)
     end
 
     def update
@@ -34,15 +35,15 @@ module Admin
     end
 
     def update_positions
-      Array.wrap(params['org_participants']).each_with_index do |id, index|
+      Array.wrap(unsafe_params[:org_participants]).each_with_index do |id, index|
         Participant.update(id, position: index, kind: :org)
       end
 
-      Array.wrap(params['person_participants']).each_with_index do |id, index|
+      Array.wrap(unsafe_params[:person_participants]).each_with_index do |id, index|
         Participant.update(id, position: index, kind: :person)
       end
 
-      Array.wrap(params['invisible_participants']).each_with_index do |id, index|
+      Array.wrap(unsafe_params[:invisible_participants]).each_with_index do |id, index|
         Participant.update(id, position: index, kind: :invisible)
       end
 
@@ -55,22 +56,21 @@ module Admin
       if ParticipantsManager.save(@context, @participant, participant_params)
         redirect_to admin_participants_path
       else
-        set_js_params(action)
+        js_params(action)
         render action
       end
     end
 
-    def set_js_params(action)
-      js "##{action}", imageUrl: @participant.image_url, fileId: @participant.file_dxid
+    def js_params(action)
+      js "##{action}", imageUrl: @participant.image_url, fileId: @participant.file_uid
     end
 
     def set_participant
-      @participant = Participant.find(params[:id])
+      @participant = Participant.find(unsafe_params[:id])
     end
 
     def participant_params
       params.require(:participant).permit(:title, :node_dxid, :image_url)
     end
-
   end
 end

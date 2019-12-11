@@ -20,13 +20,13 @@
   <div class="pfda-padded-v">
     <div class="pfda-padded-b row">
       <div class="pull-right">
-        <a class="btn btn-default" rel="nofollow" href="<%= admin_show_org_path(handle: @org.handle) %>">
+        <a class="btn btn-default" rel="nofollow" href="<%= admin_organization_path(@org) %>">
           <i class="fa fa-users" aria-hidden="true"></i> View Active Users
         </a>
-        <a class="btn btn-default" rel="nofollow" href="<%= admin_show_org_path(handle: @org.handle, filter: "pending") %>">
+        <a class="btn btn-default" rel="nofollow" href="<%= admin_organization_path(@org, filter: "pending") %>">
           <i class="fa fa-users" aria-hidden="true"></i> View Pending Users
         </a>
-        <a class="btn btn-default" rel="nofollow" href="<%= admin_show_org_path(handle: @org.handle, filter: "deactivated") %>">
+        <a class="btn btn-default" rel="nofollow" href="<%= admin_organization_path(@org, filter: "deactivated") %>">
           <i class="fa fa-users" aria-hidden="true"></i> View Deactivated Users
         </a>
       </div>

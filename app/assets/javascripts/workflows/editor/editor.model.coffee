@@ -157,27 +157,112 @@ class WorkflowEditorModel
     else
       Precision.alert.showAboveAll('Please wait a few seconds for this app to load', 'alert-info')
 
-  filterAppsByQuery: (apps, query = '') ->
-    if query.length
-      regexp = new RegExp(query, "i")
-      return apps.filter((app) ->
-        app.app.name.match(regexp) || _.some(app.all_tags_list, (tag) -> tag.match(regexp))
-      )
-    return apps
-
   openSelectorModal: (input) =>
     @selectorModel.openModal(input)
+
+  getAppsOnScroll: (scope) =>
+    @loadingAllApps(true)
+
+  getApps: (params) ->
+    return new Promise((resolve, reject) ->
+      $.get('/api/apps/accessible_apps', params).then(
+        (data) ->
+          resolve(data)
+        (error) ->
+          reject(error)
+      )
+    )
+
+  getPrivateApps: () =>
+    return false if @loadingAllApps()
+    @loadingAllApps(true)
+    query = @appsFilterQuery()
+    @getApps({ page: @privateAppsPage, scope: 'private', query: query }).then(
+      (apps) =>
+        @loadingAllApps(false)
+        apps = apps || []
+        newPrivateApps = @privateAppsOriginal().concat(apps)
+        @privateAppsOriginal(newPrivateApps)
+        @privateAppsPage++ if apps.length
+      (error) =>
+        @loadingAllApps(false)
+        Precision.alert.showAboveAll("Error while loading private apps.")
+    )
+
+  getPublicApps: () =>
+    return false if @loadingAllApps()
+    @loadingAllApps(true)
+    query = @appsFilterQuery()
+    @getApps({ page: @publicAppsPage, scope: 'public', query: query }).then(
+      (apps) =>
+        @loadingAllApps(false)
+        apps = apps || []
+        newPublicApps = @publicAppsOriginal().concat(apps)
+        @publicAppsOriginal(newPublicApps)
+        @publicAppsPage++ if apps.length
+      (error) =>
+        @loadingAllApps(false)
+        Precision.alert.showAboveAll("Error while loading public apps.")
+    )
+
+  getAllApps: () =>
+    return false if @loadingAllApps()
+    @loadingAllApps(true)
+    query = @appsFilterQuery()
+    getPrivateApps = @getApps({ page: @privateAppsPage, scope: 'private', query: query })
+    getPublicApps = @getApps({ page: @publicAppsPage, scope: 'public', query: query })
+    requests = [getPrivateApps, getPublicApps]
+
+    Promise.all(requests).then(
+      (loadedApps) =>
+        privateApps = loadedApps[0] || []
+        newPrivateApps = @privateAppsOriginal().concat(privateApps || [])
+        @privateAppsOriginal(newPrivateApps)
+        @privateAppsPage++ if privateApps.length
+
+        publicApps = loadedApps[1] || []
+        newPublicApps = @publicAppsOriginal().concat(publicApps || [])
+        @publicAppsOriginal(newPublicApps)
+        @publicAppsPage++ if publicApps.length
+
+        @loadingAllApps(false)
+      (error) =>
+        Precision.alert.showAboveAll('Error while loading all apps.')
+        @loadingAllApps(false)
+    )
+
+  filterAllApps: () =>
+    return false if @loadingAllApps()
+
+    query = @appsFilterQuery()
+    @privateAppsPage = 1
+    @publicAppsPage = 1
+
+    @loadingAllApps(true)
+    getPrivateApps = @getApps({ page: @privateAppsPage, scope: 'private', query: query })
+    getPublicApps = @getApps({ page: @publicAppsPage, scope: 'public', query: query })
+    requests = [getPrivateApps, getPublicApps]
+
+    Promise.all(requests).then(
+      (loadedApps) =>
+        privateApps = loadedApps[0] || []
+        @privateAppsOriginal(privateApps)
+        @privateAppsPage++ if privateApps.length
+
+        publicApps = loadedApps[1] || []
+        @publicAppsOriginal(publicApps)
+        @publicAppsPage++ if publicApps.length
+
+        @loadingAllApps(false)
+      (error) =>
+        Precision.alert.showAboveAll('Error while filtering apps.')
+        @loadingAllApps(false)
+    )
 
   constructor: (apps, @workflow, scope, @mode = EDIT_MODE) ->
     editableModes = [EDIT_MODE, FORK_MODE]
     isNewModes = [CREATE_MODE, FORK_MODE]
     @instanceTypes = Precision.INSTANCES
-
-    all_apps = apps.private_apps.concat(apps.public_apps).sort((a, b) -> a.id - b.id)
-    @allApps = all_apps.map((app) -> new Precision.wfEditor.AppModel(app))
-    @privateApps = apps.private_apps.map((app) -> new Precision.wfEditor.AppModel(app))
-    @publicApps = apps.public_apps.map((app) -> new Precision.wfEditor.AppModel(app))
-
     @readme = ko.observable(@workflow?.readme)
     @readmePreview = ko.computed(=>
       Precision.md.render(@readme())
@@ -228,20 +313,35 @@ class WorkflowEditorModel
     ### STAGES ###
 
     ### ADD STAGES MODAL ###
+    @loadingAllApps = ko.observable(false)
+    @publicAppsPage = 1
+    @privateAppsPage = 1
+    @privateAppsOriginal = ko.observable([])
+    @publicAppsOriginal = ko.observable([])
+    @appsFilterQuery = ko.observable('')
+    @privateApps = ko.computed( =>
+      return @privateAppsOriginal().map((app) -> new Precision.wfEditor.AppModel(app))
+    )
+    @publicApps = ko.computed( =>
+      return @publicAppsOriginal().map((app) -> new Precision.wfEditor.AppModel(app))
+    )
+    @allApps = ko.computed( =>
+      return @privateApps().concat(@publicApps())
+    )
+    @getAllApps()
+
     @addStagesModal = $('#build-workflow-modal')
-    @addStagesFilterQuery = ko.observable()
-    @filteredPrivateApps = ko.computed ( =>
-      @filterAppsByQuery(@privateApps, @addStagesFilterQuery())
+    @filterAppsByQuery = _.debounce(
+      (root, e) =>
+        @appsFilterQuery(e.target.value)
+        @filterAllApps()
+      400
     )
-    @filteredPublicApps = ko.computed ( =>
-      @filterAppsByQuery(@publicApps, @addStagesFilterQuery())
-    )
-    @filteredAllApps = ko.computed ( =>
-      @filterAppsByQuery(@allApps, @addStagesFilterQuery())
-    )
+
     @addStagesModal.on 'hidden.bs.modal', () =>
       @editingStage(null)
-      @addStagesFilterQuery('')
+      @appsFilterQuery('')
+      @filterAllApps()
     ### ADD STAGES MODAL ###
 
     @selectorModel = new Precision.wfEditor.SelectorModel(scope)

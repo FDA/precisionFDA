@@ -11,7 +11,7 @@ RSpec.describe Auditor do
       Auditor.current_user = AuditLogUser.new(user_name, ip)
     end
 
-    without_transactional_fixtures do
+    without_transactional_tests do
       it "writes given information to the audit log" do
         Auditor.file = StringIO.new
 
@@ -46,7 +46,7 @@ RSpec.describe Auditor do
       Auditor.current_user = AuditLogUser.new(user.username, ip)
     end
 
-    without_transactional_fixtures do
+    without_transactional_tests do
       it "writes to the audit log on create" do
         Auditor.file = StringIO.new
 
@@ -66,7 +66,7 @@ RSpec.describe Auditor do
       end
     end
 
-    without_transactional_fixtures do
+    without_transactional_tests do
       it "writes to the audit log on update" do
         note = create(:note, user: user)
         Auditor.file = StringIO.new
@@ -86,7 +86,7 @@ RSpec.describe Auditor do
       end
     end
 
-    without_transactional_fixtures do
+    without_transactional_tests do
       it "writes to the audit log on destroy" do
         note = create(:note, user: user)
         Auditor.file = StringIO.new
@@ -106,7 +106,7 @@ RSpec.describe Auditor do
       end
     end
 
-    without_transactional_fixtures do
+    without_transactional_tests do
       it "writes to the audit log on transaction" do
         Auditor.file = StringIO.new
         Note.transaction do
@@ -139,7 +139,7 @@ RSpec.describe Auditor do
   end
 
   describe "suppress audit logging" do
-    without_transactional_fixtures do
+    without_transactional_tests do
       it "doesn't log events when suppressed" do
         Auditor.file = StringIO.new
         Auditor.suppress do

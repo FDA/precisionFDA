@@ -16,7 +16,8 @@ module Workflows
       ActiveRecord::Base.transaction do
         @api = DNAnexusAPI.new(context.token)
         create_assets if presenter.is_a?(Workflow::CwlPresenter)
-        response = api.create_workflow(presenter.build)
+        built = presenter.build
+        response = api.workflow_new(built[:project], built.except(:project))
         workflow = Workflow.create!(workflow_params(response))
         workflow.workflow_series.update!(latest_revision_workflow_id: workflow.id)
         workflow

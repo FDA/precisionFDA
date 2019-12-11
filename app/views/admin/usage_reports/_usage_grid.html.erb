@@ -26,7 +26,7 @@
   end
 
   g.column name: "Org", attribute: "name", assoc: [:user, :org], in_csv: false do |metric|
-    metric.user.org ? link_to(metric.user.org.name, admin_show_org_path(handle: metric.user.org.handle)) : "Self-representing"
+    metric.user.org ? link_to(metric.user.org.name, admin_organization_path(metric.user.org)) : "Self-representing"
   end
 
   g.column name: "Org", in_html: false do |metric|

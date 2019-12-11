@@ -4,14 +4,14 @@
 #
 #  id                        :integer          not null, primary key
 #  answer_id                 :integer
-#  entry                     :string
-#  type                      :string
-#  subtype                   :string
-#  subset                    :string
-#  filter                    :string
-#  genotype                  :string
-#  qq_field                  :string
-#  qq                        :string
+#  entry                     :string(255)
+#  type                      :string(255)
+#  subtype                   :string(255)
+#  subset                    :string(255)
+#  filter                    :string(255)
+#  genotype                  :string(255)
+#  qq_field                  :string(255)
+#  qq                        :string(255)
 #  metric_recall             :decimal(7, 6)
 #  metric_precision          :decimal(7, 6)
 #  metric_frac_na            :decimal(7, 6)
@@ -40,10 +40,10 @@
 #  query_tp_het_hom_ratio    :decimal(10, 6)
 #  query_unk_titv_ratio      :decimal(10, 6)
 #  query_unk_het_hom_ratio   :decimal(10, 6)
-#  meta                      :text
+#  meta                      :text(65535)
 #
 
-class TruthChallengeResult < ActiveRecord::Base
+class TruthChallengeResult < ApplicationRecord
   include Auditor
   store :meta, {coder: JSON}
 

@@ -1,6 +1,7 @@
 class ApiController < ApplicationController
   include ErrorProcessable
   include WorkflowConcern
+  include FilesConcern
 
   skip_before_action :verify_authenticity_token
   skip_before_action :require_login
@@ -22,7 +23,7 @@ class ApiController < ApplicationController
   def publish
     space = nil
 
-    scope = params[:scope]
+    scope = unsafe_params[:scope]
     if scope.nil?
       scope = "public"
     elsif scope.is_a?(String)
@@ -39,7 +40,7 @@ class ApiController < ApplicationController
       fail "The optional 'scope' input must be a string (either 'public' or 'space-xxxx')"
     end
 
-    uids = params[:uids]
+    uids = unsafe_params[:uids]
     fail "The input 'uids' must be an array of object ids (strings)" unless uids.is_a?(Array) && uids.all? { |uid| uid.is_a?(String) }
 
     items = uids.uniq.map { |uid| item_from_uid(uid) }.reject { |item| item.public? || item.scope == scope }
@@ -84,7 +85,7 @@ class ApiController < ApplicationController
 
     # Jobs
     unless jobs.empty?
-      published_count += Job.publish(jobs, @context, scope)
+      published_count += PublishService::JobPublisher.new(@context).publish(jobs, scope)
     end
 
     # Notes
@@ -120,20 +121,50 @@ class ApiController < ApplicationController
     render json: { published: published_count }
   end
 
-  # Inputs:
-  #
-  # id (Integer; required): app series id
-  #
-  # Outputs:
-  #
-  # An array of hashes
-  #
-  def list_app_revisions
-    app_series_id = params["id"]
-    fail "id needs to be an Integer" unless app_series_id.is_a?(Numeric) && (app_series_id.to_i == app_series_id)
-    app_series = AppSeries.accessible_by(@context).find_by(id: params["id"])
-    fail "AppSeries not found" if app_series.nil?
-    render json: app_series.accessible_revisions(@context).select(:title, :id, :uid, :revision, :version)
+  # Collects an Array of children for object in params.
+  # @param uid [Object Id].
+  # @param scope [String] A scope to be published into.
+  # @return [Hash with Array value] An Array of relative children for a given Object.
+  def related_to_publish
+    id = unsafe_params[:uid]
+    raise "Missing id in publish route" unless id.is_a?(String) && id.present?
+
+    item = item_from_uid(id)
+    raise "You do not have permission to access #{id}" unless item.accessible_by?(@context)
+
+    publishing_service = SpaceService::Publishing.new(@context)
+    check_result = publishing_service.scope_check(unsafe_params[:scope])
+    scope = check_result[:scope]
+
+    relatives_graph = GraphDecorator.for_publisher(@context, item, scope).to_json
+    children = children_to_publish(relatives_graph)
+
+    render json: children
+  end
+
+  # Collects an array of children from a relatives graph.
+  # Filtering by private objects only to be included into children array.
+  # Prepare values for 'path' and 'fa_class' attributes.
+  # @param relatives_graph [Array of Objects] From GraphDecorator.
+  # @return children [Array of Objects] With the following example content:
+  #  {
+  #    \"uid\"=>\"app-0b9811c31ff0812273068d54-1\",
+  #    \"klass\"=>\"app\", \"title\"=>\"default_title\", \"owned\"=>false,
+  #    \"public\"=>true, \"in_space\"=>false, \"publishable\"=>false,
+  #    \"children\"=>[]
+  #  }
+  def children_to_publish(relatives_graph)
+    all_children = JSON.parse(relatives_graph)[0]["children"]
+    children = []
+    all_children.uniq.each do |child|
+      next if child["in_space"] || child["public"]
+
+      object = item_from_uid(child["uid"])
+      child["path"] = object.accessible_by?(@context) ? pathify(object) : nil
+      child["fa_class"] = view_context.fa_class(object)
+      children << child
+    end
+    children
   end
 
   # Inputs
@@ -147,7 +178,7 @@ class ApiController < ApplicationController
   # id (string, only on success): the id of the created analysis, if success
   # failure (string, only on failure): a message that can be shown to the user due to failure
   def run_workflow
-    analysis_dxid = run_workflow_once(params)
+    analysis_dxid = run_workflow_once(unsafe_params)
 
     render json: { id: analysis_dxid }
   end
@@ -176,18 +207,18 @@ class ApiController < ApplicationController
   #             all_tags_list (boolean, optional)
   #
   def list_related
-    uid = params[:uid]
+    uid = unsafe_params[:uid]
     item = item_from_uid(uid)
 
     if item.accessible_by?(@context)
-      params[:opts] = params[:opts].is_a?(Hash) ? params[:opts] : {}
+      unsafe_params[:opts] = unsafe_params[:opts].is_a?(Hash) ? unsafe_params[:opts] : {}
 
-      scopes = params[:opts][:scopes]
+      scopes = unsafe_params[:opts][:scopes]
       unless scopes.nil?
         fail "Option 'scopes' can only be an Array of Strings that are one of public, private or a space-xxxx id." unless scopes.is_a?(Array) && scopes.all? { |s| s == 'public' || s == 'private' || s =~ /^space-(\d+)$/ }
       end
 
-      classes = params[:opts][:classes]
+      classes = unsafe_params[:opts][:classes]
       unless classes.nil?
         fail "Option 'classes' can be undefined or an array of strings" unless classes.is_a?(Array) && classes.all? { |k| k.is_a?(String) }
       end
@@ -197,7 +228,7 @@ class ApiController < ApplicationController
           scope_query = scopes_override ? scopes_override : { scope: scopes }
           scoped_item = scoped_item.where(scope_query)
         end
-        scoped_item = if params[:opts][:editable]
+        scoped_item = if unsafe_params[:opts][:editable]
           scoped_item.editable_by(@context)
         else
           scoped_item.accessible_by(@context)
@@ -255,7 +286,8 @@ class ApiController < ApplicationController
         fail "Unknown class #{item.klass}"
       end
 
-      related = related.uniq.map { |o| describe_for_api(o, params[:opts][:describe]) }
+      related = related.uniq.map { |o| describe_for_api(o, unsafe_params[:opts][:describe]) }
+
       render json: related
     else
       fail "You do not have permission to access #{id}"
@@ -281,27 +313,25 @@ class ApiController < ApplicationController
   #
   def folder_tree
     parent_folder_id =
-      params[:parent_folder_id] == "" ? nil : params[:parent_folder_id].to_i
+      unsafe_params[:parent_folder_id] == "" ? nil : unsafe_params[:parent_folder_id].to_i
     scoped_parent_folder_id =
-      params[:scoped_parent_folder_id] == "" ? nil : params[:scoped_parent_folder_id].to_i
+      unsafe_params[:scoped_parent_folder_id] == "" ? nil : unsafe_params[:scoped_parent_folder_id].to_i
 
-    User.sync_files!(@context)
-
-    if params[:scopes].present?
+    if unsafe_params[:scopes].present?
       check_scope!
       # exclude 'public' scope
-      if params[:scopes].first =~ /^space-(\d+)$/
-        spaces_members_ids = Space.spaces_members_ids(params[:scopes])
+      if unsafe_params[:scopes].first =~ /^space-(\d+)$/
+        spaces_members_ids = Space.spaces_members_ids(unsafe_params[:scopes])
         spaces_params = {
           context: @context,
           spaces_members_ids: spaces_members_ids,
-          scopes: params[:scopes],
+          scopes: unsafe_params[:scopes],
           scoped_parent_folder_id: scoped_parent_folder_id,
         }
         files = UserFile.batch_space_files(spaces_params)
         folders = Folder.batch_space_folders(spaces_params)
       else
-        files = UserFile.batch_private_files(@context,["private", nil], parent_folder_id)
+        files = UserFile.batch_private_files(@context, ["private", nil], parent_folder_id)
         folders = Folder.batch_private_folders(@context, parent_folder_id)
       end
     end
@@ -320,11 +350,60 @@ class ApiController < ApplicationController
     render json: folder_tree
   end
 
+  # Return files array found by RegEx
+  # Inputs:
+  # @param [String] searchValue string
+  # @param [String] flagsValue string
+  # @param [Integer] page - current page number
+  # @param [Array] scopes (Array, optional): array of valid scopes e.g.
+  #   ["private", "public", "space-1234"] or leave blank for all
+  # @param [Nil or True] uids
+  #
+  # @return [Array of Hashes]
+  #  search_result: array of hashes, each of which has these fields:
+  #    id (integer): primary key of the file
+  #    uid (strinf): string key of the file
+  #    title (string): the file name
+  #    path (string): a file path collected
+  #  uids: array of all found file's uid values
+  #
+  # rubocop:disable Style/SignalException
+  def files_regex_search
+    page = params[:page].to_i.positive? ? params[:page] : 1
+    files = user_real_files(params, @context).files_conditions
+
+    begin
+      regexp = Regexp.new(params[:search_string], params[:flag])
+      search_result = files.eager_load(:license, user: :org).order(id: :desc).map do |file|
+        describe_for_api(file) if file.name.scan(regexp).present?
+      end
+      result = search_result.compact.
+        map do |file|
+        {
+          id: file[:id],
+          uid: file[:uid],
+          title: file["title"],
+          path: file[:file_path],
+        }
+      end
+      paginated_result = Kaminari.paginate_array(result).page(page).per(20)
+      uids = params[:uids].present? && to_bool(params[:uids]) ? result.compact.pluck(:uid) : []
+
+      render json: { search_result: paginated_result, uids: uids }
+    rescue RegexpError => e
+      fail "RegEx Invalid: #{e}"
+    end
+    # rubocop:enable Style/SignalException
+  end
+
   # Inputs:
   #
-  # states (array of strings; optional): the file state/s to be returned "closed", "closing", and/or "open"
-  # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or leave blank for all
-  # editable (Boolean, optional): if filtering for only editable_by the context user, otherwise accessible_by
+  # states (array of strings; optional): the file state/s to be returned "closed", "closing",
+  #   and/or "open"
+  # scopes (Array, optional): array of valid scopes e.g. ["private", "public", "space-1234"] or
+  #   leave blank for all
+  # editable (Boolean, optional): if filtering for only editable_by the context user,
+  #   otherwise accessible_by
   # describe (object, optional)
   #     fields (array, optional):
   #         Array containing field name [field_1, field_2, ...]
@@ -345,34 +424,19 @@ class ApiController < ApplicationController
   #
   def list_files
     User.sync_files!(@context)
+    files = user_real_files(params, @context)
 
-    files = if params[:editable]
-      UserFile.real_files.editable_by(@context).accessible_by_private
-    else
-      UserFile.real_files.accessible_by(@context)
-    end
+    count = files.count if unsafe_params[:offset] == 0
 
-    if params[:scopes].present?
-      check_scope!
-      files = files.where(scope: params[:scopes])
-    end
-
-    if params[:states].present?
-      fail "Invalid states" unless params[:states].is_a?(Array) && params[:states].all? { |state| %w(closed closing open).include?(state) }
-      files = files.where(state: params["states"])
-    end
-
-    count = files.count if params[:offset] == 0
-
-    if params[:limit] && params[:offset]
-      files = files.limit(params[:limit]).offset(params[:offset])
+    if unsafe_params[:limit] && unsafe_params[:offset]
+      files = files.limit(unsafe_params[:limit]).offset(unsafe_params[:offset])
     end
 
     result = files.eager_load(:license, user: :org).order(id: :desc).map do |file|
-      describe_for_api(file, params[:describe])
+      describe_for_api(file, unsafe_params[:describe])
     end
 
-    render json: params[:offset] == 0 ? { objects: result, count: count } : result
+    render json: unsafe_params[:offset] == 0 ? { objects: result, count: count } : result
   end
 
   # Inputs
@@ -395,21 +459,21 @@ class ApiController < ApplicationController
   # An array of hashes
   #
   def list_notes
-    notes = if params[:editable]
+    notes = if unsafe_params[:editable]
       Note.editable_by(@context).where.not(title: nil).accessible_by_private
     else
       Note.accessible_by(@context).where.not(title: nil)
     end
 
-    if params[:scopes].present?
+    if unsafe_params[:scopes].present?
       check_scope!
-      notes = notes.where(scope: params[:scopes])
+      notes = notes.where(scope: unsafe_params[:scopes])
     end
 
-    if params[:note_types].present?
-      fail "Param note_types can only be an Array of Strings containing 'Note', 'Answer', or 'Discussion'" unless params[:note_types].is_a?(Array) && params[:note_types].all? { |type| %w(Note Answer Discussion).include?(type) }
+    if unsafe_params[:note_types].present?
+      fail "Param note_types can only be an Array of Strings containing 'Note', 'Answer', or 'Discussion'" unless unsafe_params[:note_types].is_a?(Array) && unsafe_params[:note_types].all? { |type| %w(Note Answer Discussion).include?(type) }
 
-      note_types = params[:note_types].map { |type| type == "Note" ? nil : type }
+      note_types = unsafe_params[:note_types].map { |type| type == "Note" ? nil : type }
       notes = notes.where(note_type: note_types)
     end
 
@@ -419,7 +483,7 @@ class ApiController < ApplicationController
       elsif note.note_type == "Answer"
         note = note.answer
       end
-      describe_for_api(note, params[:describe])
+      describe_for_api(note, unsafe_params[:describe])
     end
 
     render json: result
@@ -445,19 +509,19 @@ class ApiController < ApplicationController
   #
   def list_comparisons
     # TODO: sync comparisons?
-    comparisons = if params[:editable]
+    comparisons = if unsafe_params[:editable]
       Comparison.editable_by(@context).accessible_by_private
     else
       Comparison.accessible_by(@context)
     end
 
-    if params[:scopes].present?
+    if unsafe_params[:scopes].present?
       check_scope!
-      comparisons = comparisons.where(scope: params[:scopes])
+      comparisons = comparisons.where(scope: unsafe_params[:scopes])
     end
 
     result = comparisons.order(id: :desc).map do |comparison|
-      describe_for_api(comparison, params[:describe])
+      describe_for_api(comparison, unsafe_params[:describe])
     end
 
     render json: result
@@ -482,7 +546,7 @@ class ApiController < ApplicationController
   # An array of hashes
   #
   def list_apps
-    app_series = if params[:editable]
+    app_series = if unsafe_params[:editable]
       AppSeries.editable_by(@context).accessible_by_private
     else
       AppSeries.accessible_by(@context)
@@ -492,13 +556,13 @@ class ApiController < ApplicationController
     apps = app_series.map { |series| series.latest_accessible(@context) }.compact
 
     # The scope applies to the App and not the AppSeries
-    if params[:scopes].present?
+    if unsafe_params[:scopes].present?
       check_scope!
-      apps = apps.select { |app| params[:scopes].include?(app.scope) }
+      apps = apps.select { |app| unsafe_params[:scopes].include?(app.scope) }
     end
 
     result = apps.map do |app|
-      describe_for_api(app, params[:describe])
+      describe_for_api(app, unsafe_params[:describe])
     end
 
     render json: result
@@ -523,19 +587,19 @@ class ApiController < ApplicationController
   # An array of hashes
   #
   def list_jobs
-    jobs = if params[:editable]
+    jobs = if unsafe_params[:editable]
       Job.editable_by(@context).accessible_by_private
     else
       Job.accessible_by(@context)
     end
 
-    if params[:scopes].present?
+    if unsafe_params[:scopes].present?
       check_scope!
-      jobs = jobs.where(scope: params[:scopes])
+      jobs = jobs.where(scope: unsafe_params[:scopes])
     end
 
     result = jobs.eager_load(user: :org).order(id: :desc).map do |job|
-      describe_for_api(job, params[:describe])
+      describe_for_api(job, unsafe_params[:describe])
     end
 
     render json: result
@@ -564,26 +628,25 @@ class ApiController < ApplicationController
     # Refresh state of assets, if needed
     User.sync_assets!(@context)
 
-    ids = params[:ids]
-    assets = if params[:editable]
+    ids = unsafe_params[:ids]
+    assets = if unsafe_params[:editable]
       Asset.closed.editable_by(@context).accessible_by_private
     else
       Asset.closed.accessible_by(@context)
     end
-    logger.debug "## In list_assets: After params[:editable]?: assets: = #{assets.inspect}"
 
     unless ids.nil?
       fail "The 'ids' parameter needs to be an Array of String asset ids" unless ids.is_a?(Array) && ids.all? { |id| id.is_a?(String) }
       assets = assets.where(uid: ids)
     end
 
-    if params[:scopes].present?
+    if unsafe_params[:scopes].present?
       check_scope!
-      assets = assets.where(scope: params[:scopes])
+      assets = assets.where(scope: unsafe_params[:scopes])
     end
 
     result = assets.order(:name).map do |asset|
-      describe_for_api(asset, params[:describe])
+      describe_for_api(asset, unsafe_params[:describe])
     end
 
     unless ids.nil?
@@ -596,7 +659,7 @@ class ApiController < ApplicationController
   end
 
   def list_workflows
-    workflow_series = if params[:editable]
+    workflow_series = if unsafe_params[:editable]
       WorkflowSeries.editable_by(@context).accessible_by_private
     else
       WorkflowSeries.accessible_by(@context)
@@ -605,13 +668,13 @@ class ApiController < ApplicationController
     workflow_series = workflow_series.eager_load(:latest_revision_workflow).order(id: :desc)
     workflows = workflow_series.map { |series| series.latest_accessible(@context) }.compact
 
-    if params[:scopes].present?
+    if unsafe_params[:scopes].present?
       check_scope!
-      workflows = workflows.select { |workflow| params[:scopes].include?(workflow.scope) }
+      workflows = workflows.select { |workflow| unsafe_params[:scopes].include?(workflow.scope) }
     end
 
     result = workflows.map do |workflow|
-      describe_for_api(workflow, params[:describe])
+      describe_for_api(workflow, unsafe_params[:describe])
     end
 
     render json: result
@@ -638,12 +701,12 @@ class ApiController < ApplicationController
   #
   def describe
     # Item id should be a string
-    uid = params[:uid]
+    uid = unsafe_params[:uid]
     fail "The parameter 'uid' should be of type String" unless uid.is_a?(String) && uid != ""
 
     item = item_from_uid(uid)
 
-    render json: describe_for_api(item, params[:describe])
+    render json: describe_for_api(item, unsafe_params[:describe])
   end
 
   # Inputs:
@@ -655,7 +718,7 @@ class ApiController < ApplicationController
   # accepted_licenses: license_ids (same as input)
   #
   def accept_licenses
-    license_ids = params["license_ids"]
+    license_ids = unsafe_params["license_ids"]
     fail "License license_ids needs to be an Array of Integers" unless license_ids.is_a?(Array) && license_ids.all? do |license_id|
                                                                           license_id.is_a?(Numeric) && (license_id.to_i == license_id)
                                                                         end && !license_ids.empty?
@@ -684,13 +747,13 @@ class ApiController < ApplicationController
   # items_licensed (Array[string]): array of object uids attached to license
   #
   def license_items
-    license_id = params["license_id"]
+    license_id = unsafe_params["license_id"]
     fail "License license_id needs to be an Integer" unless license_id.is_a?(Numeric) && (license_id.to_i == license_id)
 
     # Check if the license exists and is editable by the user. Throw 404 if otherwise.
     License.editable_by(@context).find(license_id)
 
-    items_to_license = params["items_to_license"]
+    items_to_license = unsafe_params["items_to_license"]
     fail "License items_o_license needs to be an Array of Strings" unless items_to_license.is_a?(Array) && items_to_license.all? do |item|
                                                                              item.is_a?(String)
                                                                            end
@@ -718,23 +781,24 @@ class ApiController < ApplicationController
   # id (string, "file-xxxx")
   #
   def create_file
-    file_name = params[:name]
+    file_name = unsafe_params[:name]
     if file_name.blank? || !file_name.is_a?(String)
       fail "File name needs to be a non-empty String"
     end
 
-    description = params[:description]
+    description = unsafe_params[:description]
     if description && !description.is_a?(String)
       fail "File description needs to be a String"
     end
 
-    folder = Folder.editable_by(@context).find_by(id: params[:folder_id])
+    folder = Folder.editable_by(@context).find_by(id: unsafe_params[:folder_id])
 
     scope = "private"
     user = @context.user
     project = user.private_files_project
+    public_scope = ActiveModel::Type::Boolean.new.cast(params[:public_scope])
 
-    if params[:public_scope]
+    if public_scope
       scope = "public"
       project = user.public_files_project
     end
@@ -760,16 +824,16 @@ class ApiController < ApplicationController
   def create_challenge_card_image
     return unless @context.can_administer_site? || @context.challenge_admin?
 
-    name = params[:name]
+    name = unsafe_params[:name]
     fail "File name needs to be a non-empty String" unless name.is_a?(String) && name != ""
 
-    description = params["description"]
+    description = unsafe_params["description"]
     unless description.nil?
       fail "File description needs to be a String" unless description.is_a?(String)
     end
 
     project = CHALLENGE_BOT_PRIVATE_FILES_PROJECT
-    dxid = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call("file", "new", "name": params[:name], "project": CHALLENGE_BOT_PRIVATE_FILES_PROJECT)["id"]
+    dxid = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call("file", "new", "name": unsafe_params[:name], "project": CHALLENGE_BOT_PRIVATE_FILES_PROJECT)["id"]
 
     file = UserFile.create!(
       dxid: dxid,
@@ -797,21 +861,21 @@ class ApiController < ApplicationController
   def create_challenge_resource
     return unless @context.challenge_admin?
 
-    challenge = Challenge.find_by!(id: params[:challenge_id])
+    challenge = Challenge.find_by!(id: unsafe_params[:challenge_id])
     unless challenge.editable_by?(@context)
       fail "Challenge cannot be modified by current user."
     end
 
-    name = params[:name]
+    name = unsafe_params[:name]
     fail "File name needs to be a non-empty String" unless name.is_a?(String) && name != ""
 
-    description = params["description"]
+    description = unsafe_params["description"]
     unless description.nil?
       fail "File description needs to be a String" unless description.is_a?(String)
     end
 
     project = CHALLENGE_BOT_PRIVATE_FILES_PROJECT
-    dxid = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call("file", "new", "name": params[:name], "project": CHALLENGE_BOT_PRIVATE_FILES_PROJECT)["id"]
+    dxid = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call("file", "new", "name": unsafe_params[:name], "project": CHALLENGE_BOT_PRIVATE_FILES_PROJECT)["id"]
     challenge_bot = User.challenge_bot
 
     UserFile.transaction do
@@ -837,8 +901,8 @@ class ApiController < ApplicationController
   end
 
   def create_resource_link
-    file = UserFile.where(user_id: User.challenge_bot.id).find_by_uid!(params[:id])
-    resource = ChallengeResource.find_by!(user_id: @context.user_id, challenge_id: params[:challenge_id], user_file_id: file.id)
+    file = UserFile.where(user_id: User.challenge_bot.id).find_by_uid!(unsafe_params[:id])
+    resource = ChallengeResource.find_by!(user_id: @context.user_id, challenge_id: unsafe_params[:challenge_id], user_file_id: file.id)
 
     unless resource.editable_by?(@context)
       fail "Challenge resource cannot be modified by current user."
@@ -875,7 +939,7 @@ class ApiController < ApplicationController
     error = false
 
     # Allow assets as well, thought not currently exposed in the UI
-    file = UserFile.accessible_by(@context).find_by_uid!(params[:id])
+    file = UserFile.accessible_by(@context).find_by_uid!(unsafe_params[:id])
 
     # Refresh state of file, if needed
     if file.state != "closed"
@@ -932,7 +996,7 @@ class ApiController < ApplicationController
   # id (string, "file-xxxx")
   #
   def create_asset
-    asset = AssetService.create(@context, params)
+    asset = AssetService.create(@context, unsafe_params)
 
     render json: { id: asset.uid }
   end
@@ -951,9 +1015,9 @@ class ApiController < ApplicationController
   # headers (hash of string key/values, headers must be given to HTTP PUT)
   #
   def get_upload_url
-    url_service = UploadUrlFetcher.new(@context, params[:id])
+    url_service = UploadUrlFetcher.new(@context, unsafe_params[:id])
 
-    result = url_service.fetch_url(params)
+    result = url_service.fetch_url(unsafe_params)
 
     render json: result
   end
@@ -965,7 +1029,7 @@ class ApiController < ApplicationController
   # Outputs: nothing (empty hash)
   #
   def close_file
-    id = params[:id]
+    id = unsafe_params[:id]
     fail "id needs to be a non-empty string" unless id.is_a?(String) && id != ""
 
     file = UserFile.where(parent_type: "User").find_by_uid!(id)
@@ -1000,7 +1064,7 @@ class ApiController < ApplicationController
   # Outputs: nothing (empty hash)
   #
   def close_asset
-    asset_uid = params[:id]
+    asset_uid = unsafe_params[:id]
 
     if !asset_uid.is_a?(String) || asset_uid.empty?
       fail "id needs to be a non-empty String"
@@ -1023,16 +1087,17 @@ class ApiController < ApplicationController
   # id (string): the dxid of the resulting job
   #
   def run_app
+    # rubocop:disable Style/SignalException
     # Parameter 'id' should be of type String
-    id = params[:id]
+    id = unsafe_params[:id]
     fail "App ID is not a string" unless id.is_a?(String) && id != ""
 
     # Name should be a nonempty string
-    name = params[:name]
+    name = unsafe_params[:name]
     fail "Name should be a non-empty string" unless name.is_a?(String) && name != ""
 
     # Inputs should be a hash (more checks later)
-    inputs = params["inputs"]
+    inputs = unsafe_params["inputs"]
     fail "Inputs should be a hash" unless inputs.is_a?(Hash)
 
     # App should exist and be accessible
@@ -1041,7 +1106,7 @@ class ApiController < ApplicationController
     # Check if asset licenses have been accepted
     fail "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
 
-    space_id = params[:space_id]
+    space_id = unsafe_params[:space_id]
     if space_id
       fail "Invalid space_id" unless @app.can_run_in_space?(@context.user, space_id)
     end
@@ -1052,16 +1117,21 @@ class ApiController < ApplicationController
 
     fail input_spec_preparer.first_error unless input_spec_preparer.valid?
 
-    run_instance_type = params[:instance_type]
+    run_instance_type = unsafe_params[:instance_type]
 
     # User can override the instance type
     if run_instance_type
-      fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.key?(params["instance_type"]) # Checks also that it's a string
+      fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.key?(unsafe_params["instance_type"]) # Checks also that it's a string
     end
 
-    project = space ? space.project_for_user(@context.user) : @context.user.private_files_project
+    if space
+      project = space.project_for_user(@context.user)
+      permission = space.have_permission?(project, @context.user)
+      fail "You don't have permissions to run app in space #{space.name}" unless permission
 
-    fail "You don't have permissions to run app in space #{space.name}" unless project
+    else
+      project = @context.user.private_files_project
+    end
 
     job_creator = JobCreator.new(
       api: DNAnexusAPI.new(@context.token),
@@ -1081,6 +1151,7 @@ class ApiController < ApplicationController
     if space && space.review?
       SpaceEventService.call(space_id, @context.user_id, nil, job, :job_added)
     end
+    # rubocop:enable Style/SignalException
 
     render json: { id: job.uid }
   end
@@ -1094,7 +1165,7 @@ class ApiController < ApplicationController
   # json (string, only on success): spec, ordered_assets, and packages of the specified app
   def get_app_spec
     # App should exist and be accessible
-    app = App.accessible_by(@context).find_by_uid(params[:id])
+    app = App.accessible_by(@context).find_by_uid(unsafe_params[:id])
     fail "Invalid app id" if app.nil?
 
     render json: { spec: app.spec, assets: app.ordered_assets, packages: app.packages }
@@ -1109,7 +1180,7 @@ class ApiController < ApplicationController
   # plain text (string, only on success): code for the specified app
   def get_app_script
     # App should exist and be accessible
-    app = App.accessible_by(@context).find_by_uid(params[:id])
+    app = App.accessible_by(@context).find_by_uid(unsafe_params[:id])
     fail "Invalid app id" if app.nil?
 
     render plain: app.code
@@ -1117,7 +1188,7 @@ class ApiController < ApplicationController
 
   def export_app
     # App should exist and be accessible
-    app = App.accessible_by(@context).find_by_uid(params[:id])
+    app = App.accessible_by(@context).find_by_uid(unsafe_params[:id])
     fail "Invalid app id" if app.nil?
 
     # Assets should be accessible and licenses accepted
@@ -1128,7 +1199,7 @@ class ApiController < ApplicationController
   end
 
   def share_with_fda
-    app = App.find(params[:id])
+    app = App.find(unsafe_params[:id])
     api = DNAnexusAPI.new(@context.token)
     dev_group = Setting.review_app_developers_org
 
@@ -1152,7 +1223,7 @@ class ApiController < ApplicationController
   # uids (array:string): the matching asset uids
   #
   def search_assets
-    prefix = params[:prefix]
+    prefix = unsafe_params[:prefix]
 
     if !prefix.is_a?(String) || prefix.size < 3
       fail "Prefix should be a String of at least 3 characters"
@@ -1183,10 +1254,10 @@ class ApiController < ApplicationController
   # items_added (Array[Integer])
   #
   def attach_to_notes
-    note_uids = params[:note_uids]
+    note_uids = unsafe_params[:note_uids]
     fail "Parameter 'note_uids' need to be an Array of Note, Answer, or Discussion uids" unless note_uids.is_a?(Array) && note_uids.all? { |uid| uid =~ /^(note|discussion|answer)-(\d+)$/ }
 
-    items = params[:items]
+    items = unsafe_params[:items]
     fail "Items need to be an array of objects with id and type (one of App, Comparison, Job, or UserFile)" unless items.is_a?(Array) && items.all? { |item| item[:id].is_a?(Numeric) && item[:type].is_a?(String) && %w(App Comparison Job UserFile).include?(item[:type]) }
 
     notes_added = {}
@@ -1221,18 +1292,18 @@ class ApiController < ApplicationController
   # id: the submission id
   #
   def update_submission
-    id = params[:id].to_i
+    id = unsafe_params[:id].to_i
     fail "id needs to be an Integer" unless id.is_a?(Integer)
 
-    title = params[:title]
+    title = unsafe_params[:title]
     fail "title needs to be a String" unless title.is_a?(String)
 
-    content = params[:content] || ""
+    content = unsafe_params[:content] || ""
     fail "content needs to be a String" unless content.is_a?(String)
 
     submission = nil
     Submission.transaction do
-      submission = Submission.editable_by(@context).find(params[:id])
+      submission = Submission.editable_by(@context).find(unsafe_params[:id])
       fail "no submission found" unless submission
       submission.update!(desc: content)
       submission.job.update!(name: title)
@@ -1256,24 +1327,24 @@ class ApiController < ApplicationController
   # path (string): the human readable path of the note (which could have changed if the title changed)
   #
   def update_note
-    id = params[:id].to_i
+    id = unsafe_params[:id].to_i
     fail "id needs to be an Integer" unless id.is_a?(Integer)
 
-    title = params[:title]
+    title = unsafe_params[:title]
     fail "title needs to be a String" unless title.is_a?(String)
 
-    content = params[:content] || ""
+    content = unsafe_params[:content] || ""
     fail "content needs to be a String" unless content.is_a?(String)
 
-    attachments_to_save = params[:attachments_to_save] || []
+    attachments_to_save = unsafe_params[:attachments_to_save] || []
     fail "attachments_to_save needs to be an array" unless attachments_to_save.is_a?(Array)
 
-    attachments_to_delete = params[:attachments_to_delete] || []
+    attachments_to_delete = unsafe_params[:attachments_to_delete] || []
     fail "attachments_to_delete neeeds to be an array" unless attachments_to_delete.is_a?(Array)
 
     note = nil
     Note.transaction do
-      note = Note.find_by!(id: params[:id])
+      note = Note.find_by!(id: unsafe_params[:id])
       fail '' unless note.editable_by?(@context)
 
       attachments_to_save.each do |uid|
@@ -1305,10 +1376,10 @@ class ApiController < ApplicationController
   # upvote_count (integer): latest upvote count for item
   #
   def upvote
-    uid = params[:uid]
+    uid = unsafe_params[:uid]
     fail "Item uid needs to be a non-empty string" unless uid.is_a?(String) && uid != ""
 
-    vote_scope = params[:vote_scope]
+    vote_scope = unsafe_params[:vote_scope]
 
     item = item_from_uid(uid)
     if item.accessible_by?(@context) && ["app-series", "discussion", "answer", "note", "comparison", "job", "file", "asset"].include?(item.klass)
@@ -1343,10 +1414,10 @@ class ApiController < ApplicationController
   # upvote_count (integer): latest upvote count for item
   #
   def remove_upvote
-    uid = params[:uid]
+    uid = unsafe_params[:uid]
     fail "Item uid needs to be a non-empty string" unless uid.is_a?(String) && uid != ""
 
-    vote_scope = params[:vote_scope]
+    vote_scope = unsafe_params[:vote_scope]
 
     item = item_from_uid(uid)
     if item.accessible_by?(@context) && ["app-series", "discussion", "answer", "note", "comparison", "job", "file", "asset"].include?(item.klass)
@@ -1381,7 +1452,7 @@ class ApiController < ApplicationController
   # follow_count (integer): latest count of follows on the followable item
   #
   def follow
-    followable_uid = params["followable_uid"]
+    followable_uid = unsafe_params["followable_uid"]
     fail "Followable uid needs to be a non-empty string" unless followable_uid.is_a?(String) && followable_uid != ""
 
     followable = item_from_uid(followable_uid)
@@ -1408,7 +1479,7 @@ class ApiController < ApplicationController
   # follow_count (integer): latest count of follows on the followable item
   #
   def unfollow
-    followable_uid = params["followable_uid"]
+    followable_uid = unsafe_params["followable_uid"]
     fail "Followable uid needs to be a non-empty string" unless followable_uid.is_a?(String) && followable_uid != ""
 
     followable = item_from_uid(followable_uid)
@@ -1426,7 +1497,7 @@ class ApiController < ApplicationController
   end
 
   def update_time_zone
-    current_user.update_time_zone(params[:time_zone])
+    current_user.update_time_zone(unsafe_params[:time_zone])
     render json: { success: true }
   end
 
@@ -1437,29 +1508,34 @@ class ApiController < ApplicationController
   end
 
   def check_scope!
-    condition = params[:scopes].is_a?(Array)
-    condition &&= params[:scopes].all? { |scope| scope == 'public' || scope == 'private' || scope =~ /^space-(\d+)$/ || scope == nil}
+    scopes = unsafe_params[:scopes]
+
+    condition = scopes.is_a?(Array) &&
+      scopes.all? do |scope|
+        ["public", "private", nil].include?(scope) || scope =~ /^space-\d+$/
+      end
+
     fail(t('api.errors.invalid_scope')) unless condition
   end
 
   def validate_get_upload_url
-    size = params[:size]
+    size = unsafe_params[:size]
     fail "Parameter 'size' needs to be a Fixnum" unless size.is_a?(Fixnum)
 
-    md5 = params[:md5]
+    md5 = unsafe_params[:md5]
     fail "Parameter 'md5' needs to be a String" unless md5.is_a?(String)
 
-    index = params[:index]
+    index = unsafe_params[:index]
     fail "Parameter 'index' needs to be a Fixnum" unless index.is_a?(Fixnum)
 
-    id = params[:id]
+    id = unsafe_params[:id]
     if !id.is_a?(String) || id.empty?
       fail "Parameter 'id' needs to be a non-empty String"
     end
   end
 
   def validate_create_asset
-    name = params[:name]
+    name = unsafe_params[:name]
 
     if !name.is_a?(String) || name.empty?
       fail "Asset name needs to be a non-empty String"
@@ -1469,13 +1545,13 @@ class ApiController < ApplicationController
       fail "Asset name should end with .tar or .tar.gz"
     end
 
-    description = params["description"]
+    description = unsafe_params["description"]
 
     unless description.is_a?(String)
       fail "Asset description needs to be a String"
     end
 
-    paths = params["paths"]
+    paths = unsafe_params["paths"]
 
     if !paths.is_a?(Array) || paths.empty? || paths.size >= 100_000
       fail "Asset paths needs to be a non-empty Array less than 100000 size"

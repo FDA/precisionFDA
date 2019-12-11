@@ -69,28 +69,6 @@ On your first `bundle`, you may have issues installing the libv8 and
 therubyracer gems. See [here](https://github.com/cowboyd/libv8/issues/205) for
 potential solutions. Try `bundle update libv8`.
 
-## pFDA localhost user
-
-Register for a new user account at [https://staging.dnanexus.com/register](https://staging.dnanexus.com/register).
-Note: the first time you visit this, you will be prompted to enter the credentials (ask around for what it is).
-You must choose an unused email address, but you can use the google "+" trick
-to signup with a variable email address, e.g. yourname+pfdalocal@dnanexus.com.
-Activate your account with the link sent to your email.
-
-Create a new organization:
-- Choose an unused handle, such as floranteorg. Prepend pfda.. (two dots), so that the final handle will be pfda..floranteorg.
-- Get access to the "dx" command line client [https://wiki.dnanexus.com/Downloads](https://wiki.dnanexus.com/Downloads).
-- Type `dx login --staging` and log in with your new account.
-- Type `dx new org --handle pfda..floranteorg "Florante's org"`
-- Log into the web UI [https://staging.dnanexus.com](https://staging.dnanexus.com)
-with your account, access your profile on the upper right.
-- Click __Billing Accounts__
-- Click __Add Billing Info__ in the pfda..floranteorg entry.
-- Enter info (it doesn't have to be real, you can type "." in most entries). Enter your real DNAnexus email, however.
-- Click __Update Billing Information__
-- Check your email for a new email message asking you to confirm by clicking the link
-- Click the link to confirm.
-
 Create a User and Org, and other required records by running
 
 

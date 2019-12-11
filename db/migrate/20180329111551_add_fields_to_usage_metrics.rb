@@ -1,4 +1,4 @@
-class AddFieldsToUsageMetrics < ActiveRecord::Migration
+class AddFieldsToUsageMetrics < ActiveRecord::Migration[4.2]
   def change
     create_table :settings do |t|
       t.string :key, null: false
