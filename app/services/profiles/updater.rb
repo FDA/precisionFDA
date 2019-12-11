@@ -34,8 +34,11 @@ module Profiles
     end
 
     def profile_params
-      params.require(:profile).permit(:address1, :address2, :city, :country_id, :us_state, :phone,
-        :postal_code, :phone_country_id, :email, :phone_confirmed)
+      ActionController::Parameters.new(params).require(:profile).
+        permit(
+          :address1, :address2, :city, :country_id, :us_state, :phone,
+          :postal_code, :phone_country_id, :email, :phone_confirmed
+        )
     end
   end
 end

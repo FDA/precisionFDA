@@ -2,19 +2,20 @@
 #
 # Table name: space_events
 #
-#  id                  :integer         not null, primary key
-#  user_id             :integer         not null
-#  space_id            :integer         not null
-#  entity_id           :integer         not null
-#  entity_type         :string          not null
-#  side                :integer         not null
-#  activity_type       :integer         not null
-#  created_at          :datetime        not null
-#  object_type         :integer         not null
-#  role                :integer         not null
+#  id            :integer          not null, primary key
+#  user_id       :integer          not null
+#  space_id      :integer          not null
+#  entity_id     :integer          not null
+#  entity_type   :string(255)      not null
+#  activity_type :integer          not null
+#  side          :integer          not null
+#  created_at    :datetime         not null
+#  object_type   :integer          not null
+#  role          :integer          not null
+#  data          :text(65535)
 #
 
-class SpaceEvent < ActiveRecord::Base
+class SpaceEvent < ApplicationRecord
   OBJECT_TYPES = %i(
     space
     membership
@@ -82,7 +83,7 @@ class SpaceEvent < ActiveRecord::Base
   belongs_to :space
   belongs_to :entity, polymorphic: true
 
-  enum side: [:reviewer, :sponsor]
+  enum side: [SpaceMembership::SIDE_HOST, SpaceMembership::SIDE_GUEST]
   enum activity_type: ACTIVITY_TYPES
   enum object_type: OBJECT_TYPES
   enum role: ROLES
@@ -166,7 +167,7 @@ class SpaceEvent < ActiveRecord::Base
   def self.collection(start_date, end_date, filters = {})
     sort = filters[:sort] ? filters[:sort] : "asc"
     filters.delete(:sort)
-    filters.reject! { |k, v| v == "" || v.nil? || v == "null" }
+    filters.reject! { |_, v| v.blank? || v == "null" }
     if filters[:object_type] == "[]"
       filters[:object_type] = []
     end
@@ -177,14 +178,11 @@ class SpaceEvent < ActiveRecord::Base
   end
 
   def self.object_type_counters(start_date = nil, end_date = nil, filters = {})
-    events = SpaceEvent.collection(start_date, end_date, filters).group(:object_type).count
+    events = collection(start_date, end_date, filters).group(:object_type).count
 
-    OBJECT_TYPES.each_with_index do |type, i|
-      events[i] = 0 unless events[i]
-      events[type] = events.delete(i)
+    object_types.map do |type, type_idx|
+      { name: type.to_sym, value: events[type.to_s].to_i, type_id: type_idx }
     end
-
-    events.map { |k, v| { name: k, value: v, type_id: SpaceEvent.object_types[k] } }
   end
 
   def self.group_by_hour

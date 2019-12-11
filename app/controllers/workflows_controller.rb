@@ -16,7 +16,7 @@ class WorkflowsController < ApplicationController
   end
 
   def show
-    @workflow = Workflow.accessible_by(@context).find_by_uid(params[:id])
+    @workflow = Workflow.accessible_by(@context).find_by_uid(unsafe_params[:id])
     if @workflow.nil?
       flash[:error] = "Sorry, this workflow does not exist or is not accessible by you"
       redirect_to workflows_path
@@ -44,7 +44,7 @@ class WorkflowsController < ApplicationController
   end
 
   def edit
-    @workflow = Workflow.editable_by(@context).find_by_uid(params[:id])
+    @workflow = Workflow.editable_by(@context).find_by_uid(unsafe_params[:id])
     if @workflow.nil?
       flash[:error] = "Sorry, you do not have permissions to edit this workflow"
       redirect_to workflows_path
@@ -65,8 +65,8 @@ class WorkflowsController < ApplicationController
     js_param = {}
     batch_json = {}
     @workflow = nil
-    if params[:id].present?
-      @workflow = Workflow.accessible_by(@context).find_by_uid(params[:id])
+    if unsafe_params[:id].present?
+      @workflow = Workflow.accessible_by(@context).find_by_uid(unsafe_params[:id])
       if @workflow.nil?
         flash[:error] = "Sorry, this workflow does not exist or is not accessible by you"
         redirect_to workflows_path
@@ -128,7 +128,7 @@ class WorkflowsController < ApplicationController
   end
 
   def fork
-    @workflow = Workflow.accessible_by(@context).find_by_uid(params[:id])
+    @workflow = Workflow.accessible_by(@context).find_by_uid(unsafe_params[:id])
     if @workflow.nil?
       flash[:error] = "Sorry, you do not have permissions to fork this workflow"
       redirect_to workflows_path
@@ -156,7 +156,7 @@ class WorkflowsController < ApplicationController
   end
 
   def batch_workflow
-    @workflow = Workflow.accessible_by(@context).find_by_uid(params[:id])
+    @workflow = Workflow.accessible_by(@context).find_by_uid(unsafe_params[:id])
 
     if @workflow.nil?
       flash[:error] = "Sorry, this workflow does not exist or is not accessible by you"
@@ -180,12 +180,12 @@ class WorkflowsController < ApplicationController
   end
 
   def run_batch
-    workflow_object = Workflow.find_by_uid(params[:id])
-    folder = Folder.find(params[:folder_id]) if params[:folder_id].present?
+    workflow_object = Workflow.find_by_uid(unsafe_params[:id])
+    folder = Folder.find(unsafe_params[:folder_id]) if unsafe_params[:folder_id].present?
 
     batch_id = workflow_object.dxid + "_" + Time.now.to_i.to_s
-    batch_one = params[:batch_input_one].presence || {}
-    batch_two = params[:batch_input_two].presence || {}
+    batch_one = unsafe_params[:batch_input_one].presence || {}
+    batch_two = unsafe_params[:batch_input_two].presence || {}
 
     inputs1 = collect_inputs(batch_one) if batch_one.present?
     inputs2 = collect_inputs(batch_two) if batch_two.present?
@@ -193,8 +193,8 @@ class WorkflowsController < ApplicationController
     workflow_all_input_spec = workflow_object.all_input_spec
     workflow_all_input_spec.map { |v| v[:uniq_input_name] = v[:parent_slot] + "." + v[:name] }
 
-    if params[:inputs]
-      stages_inputs = params[:inputs].map { |i| i[:uniq_input_name] }
+    if unsafe_params[:inputs]
+      stages_inputs = unsafe_params[:inputs].map { |i| i[:uniq_input_name] }
       spec_names = workflow_all_input_spec.reject { |s| stages_inputs.include?(s[:uniq_input_name]) }
     else
       spec_names = workflow_all_input_spec
@@ -219,8 +219,8 @@ class WorkflowsController < ApplicationController
         (inputs || []).unshift(input_object_two)
       end
 
-      if params[:inputs]
-        others = params[:inputs].dup.map do |v|
+      if unsafe_params[:inputs]
+        others = unsafe_params[:inputs].dup.map do |v|
           val = v.dup
           val["input_name"] = workflow_all_input_spec.find { |s| s["uniq_input_name"] == v["uniq_input_name"] }["parent_slot"] + "." + v["input_name"]
           val
@@ -251,7 +251,7 @@ class WorkflowsController < ApplicationController
   end
 
   def terminate_batch
-    terminate_analyses = Analysis.where(batch_id: params[:id])
+    terminate_analyses = Analysis.where(batch_id: unsafe_params[:id])
     if terminate_analyses.present?
       terminated_analyses = []
       terminate_analyses.each do |a|
@@ -270,7 +270,7 @@ class WorkflowsController < ApplicationController
   end
 
   def convert_file_with_strings
-    file = params[:file_field]
+    file = unsafe_params[:file_field]
     file_content = file.tempfile.read
     file_content = file_content.each_line.reject { |x| x.strip == "" }.join.force_encoding('utf-8')
     size_of_inputs = file_content.each_line.first.split("\t").size
@@ -293,9 +293,9 @@ class WorkflowsController < ApplicationController
   end
 
   def output_folders_list
-    parent_folder_id ||= params[:parent_folder_id]
+    parent_folder_id ||= unsafe_params[:parent_folder_id]
 
-    workflow = Workflow.find_by_uid(params[:id])
+    workflow = Workflow.find_by_uid(unsafe_params[:id])
     folders =
       if workflow.in_space?
         space = Space.from_scope(workflow.scope)
@@ -316,7 +316,7 @@ class WorkflowsController < ApplicationController
 
   # usage on the platform
   def output_folders_list_platform
-    current_folder = params[:current_folder] || "/"
+    current_folder = unsafe_params[:current_folder] || "/"
     response = output_folder_service.list(current_folder)
     if response['folders']
       result = { folders: response['folders'] }
@@ -329,17 +329,17 @@ class WorkflowsController < ApplicationController
 
   # TODO: checkout the :public
   # TODO: parent_folder_id usage with nested folders lists
-  # params[:name] = 'More NEXT'
-  # params[:parent_folder_id] = nil
-  # params[:public] = false
+  # unsafe_params[:name] = 'More NEXT'
+  # unsafe_params[:parent_folder_id] = nil
+  # unsafe_params[:public] = false
   def output_folder_create
-    workflow = Workflow.find_by_uid(params[:id])
+    workflow = Workflow.find_by_uid(unsafe_params[:id])
 
-    is_public_folder = params[:public] == "true"
+    is_public_folder = unsafe_params[:public] == "true"
 
     if is_public_folder
       if @context.user.can_administer_site?
-        parent_folder = Folder.accessible_by_public.find_by(id: params[:parent_folder_id])
+        parent_folder = Folder.accessible_by_public.find_by(id: unsafe_params[:parent_folder_id])
         scope = "public"
       else
         flash[:error] = "You are not allowed to create public folders"
@@ -347,15 +347,16 @@ class WorkflowsController < ApplicationController
         return
       end
     elsif workflow.in_space?
-      parent_folder = Folder.editable_by(@context).find_by(id: params[:parent_folder_id])
+      parent_folder = Folder.editable_by(@context).find_by(id: unsafe_params[:parent_folder_id])
       scope = workflow.scope
     else
-      parent_folder = Folder.editable_by(@context).find_by(id: params[:parent_folder_id])
+      parent_folder = Folder.editable_by(@context).find_by(id: unsafe_params[:parent_folder_id])
       scope = "private"
     end
 
     service = FolderService.new(@context)
-    result = service.add_folder(params[:name], parent_folder, scope)
+    result = service.add_folder(unsafe_params[:name], parent_folder, scope)
+
     if result.failure?
       full_messages =
         result.value[:name] ? result.value[:name].join(". ") : "Error in create output folder"
@@ -367,7 +368,7 @@ class WorkflowsController < ApplicationController
 
   # usage on the platform
   def output_folder_create_platform
-    response = output_folder_service.create(params[:folder])
+    response = output_folder_service.create(unsafe_params[:folder])
     if response['id'] == @context.user.private_files_project || response['id'] == @context.user.public_files_project
       result = { result: 'Status Update: 200' }
       output_folder_update
@@ -380,7 +381,7 @@ class WorkflowsController < ApplicationController
 
   # usage on the platform
   def output_folder_update_platform
-    response = output_folder_service.update(@workflow, params[:folder])
+    response = output_folder_service.update(@workflow, unsafe_params[:folder])
     if response['id'] == @workflow.dxid
       result = {result: 'Status Update: 200'}
     else
@@ -402,7 +403,7 @@ class WorkflowsController < ApplicationController
 
   def validate_workflow_before_export
     # App should exist and be accessible
-    @workflow = Workflow.accessible_by(@context).find_by_uid!(params[:id])
+    @workflow = Workflow.accessible_by(@context).find_by_uid!(unsafe_params[:id])
 
     # Assets should be accessible and licenses accepted
     @workflow.apps.each do |app|
@@ -433,9 +434,9 @@ class WorkflowsController < ApplicationController
 
     if @workflow.in_space?
       space = item_from_uid(@workflow.scope)
-      @comments = Comment.where(commentable: space, content_object: @workflow).order(id: :desc).page params[:comments_page]
+      @comments = Comment.where(commentable: space, content_object: @workflow).order(id: :desc).page unsafe_params[:comments_page]
     else
-      @comments = @workflow.root_comments.order(id: :desc).page params[:comments_page]
+      @comments = @workflow.root_comments.order(id: :desc).page unsafe_params[:comments_page]
     end
   end
 end

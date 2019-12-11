@@ -3,14 +3,19 @@ class BatchAppNewView
     @uid = app.uid
     @inputSpec = app.spec.input_spec
     @outputSpec = app.spec.output_spec
+
+    @availableInstances = Precision.INSTANCES
+    @defaultInstanceType = app.spec.instance_type
+    @instanceType = ko.observable(app.spec.instance_type)
+    @selectableSpaces = selectable_spaces
+
     @spaceId = ko.observable()
 
     @available_content_scopes = available_content_scopes
 
     @isInSpace = selectable_spaces.length > 0
-    @isReviewSpace = ko.computed(=>
-      return @isInSpace &&
-             _.first(selectable_spaces).space_type == "review"
+    @isReviewSpace = ko.computed( =>
+      return @isInSpace && _.first(selectable_spaces).space_type == "review"
     )
 
     @needSelectSpace = @isInSpace &&
@@ -20,7 +25,7 @@ class BatchAppNewView
       @spaceId(_.first(selectable_spaces).value)
 
     @contentScopes = ko.computed( =>
-      if @needSelectSpace
+      if @isInSpace
         available_content_scopes[@spaceId()]
       else
         app.space_scopes
@@ -39,23 +44,46 @@ class BatchAppNewView
     ))
 
     @batchInputName = ko.observableArray()
+
+    @batchInputSpec = ko.computed(() =>
+      availableBatchInputs = @inputSpec.filter((spec) => @batchInputName() == spec.name)
+      return availableBatchInputs.map((spec) =>
+        new Precision.models.AppInputModel(spec, this, true)
+      )
+    )
+
+    @otherInputSpec = ko.computed(() =>
+      availableOtherInputs = @inputSpec.filter((spec) => !(@batchInputName() == spec.name))
+      return availableOtherInputs.map((spec) =>
+        new Precision.models.AppInputModel(spec, this)
+      )
+    )
+
     @isRunnable = ko.computed(() =>
       isConfigReady = !_.isEmpty(@name())
-      areInputsReady = _.every(@inputModels(), (inputModel) ->
-        inputModel.isReady()
-      )
+      areBatchInputsReady = _.every(@batchInputSpec(), (input) -> input.isReady())
+      areOtherInputsReady = _.every(@otherInputSpec(), (input) -> input.isReady())
+      areInputsReady = areBatchInputsReady && areOtherInputsReady
       if @batchInputSpec()[0]
         getDataForBatchRun = @batchInputSpec()[0].getDataForBatchRun()
         isBatchInputReady = @batchInputSpec().length && getDataForBatchRun &&
-          (_.isArray(getDataForBatchRun) && getDataForBatchRun.length || _.isString(getDataForBatchRun) || _.isObject(getDataForBatchRun) && !_.isArray(getDataForBatchRun) )
+          (
+            _.isArray(getDataForBatchRun) &&
+            getDataForBatchRun.length ||
+            _.isString(getDataForBatchRun) ||
+            _.isObject(getDataForBatchRun) &&
+            !_.isArray(getDataForBatchRun)
+          )
 
       return !@busy() && isConfigReady && areInputsReady && isBatchInputReady
     )
 
-    @availableInstances = Precision.INSTANCES
-    @defaultInstanceType = app.spec.instance_type
-    @instanceType = ko.observable(app.spec.instance_type)
-    @selectableSpaces = selectable_spaces
+    @disableRunBtn = ko.computed(() =>
+      if @isInSpace
+        return !@isRunnable() || !@spaceId()
+      else
+        return !@isRunnable()
+    )
 
   validateLicenses: () ->
     # Reset licenses and recompute which ones to accept
@@ -77,35 +105,19 @@ class BatchAppNewView
       return true
 
   availableInputs: () =>
-    ko.utils.arrayFilter(@inputSpec, (input) =>
+    ko.utils.arrayFilter(@inputSpec, (input) ->
       input.class != 'boolean' && !input.choices)
 
   selectBatchInput: () ->
     @resetDefaultFileStates()
     @batchInputName($('#batch-input-name option:selected').val())
 
-  batchInputSpec:() ->
-    availableBatchInputs = ko.utils.arrayFilter(@inputModels(), (inputModel) =>
-       @batchInputName() == inputModel.name
-    )
-    if availableBatchInputs.length > 0
-      availableBatchInputs[0].batchInput(true)
-    return availableBatchInputs
-
-  otherInputSpec:() ->
-    availableOtherInputs = ko.utils.arrayFilter(@inputModels(), (inputModel) =>
-      !(@batchInputName() == inputModel.name)
-    )
-    if availableOtherInputs.length > 0
-      for app in availableOtherInputs
-        app.batchInput(false)
-    return availableOtherInputs
-
   resetDefaultFileStates: () =>
-    newInputModels = _.map(@inputModels(), (inputModel) =>
-      if inputModel.className == "file" && _.isArray(inputModel.value()) && inputModel.value().length == 0
+    newInputModels = _.map(@inputModels(), (inputModel) ->
+      _val = inputModel.value()
+      if inputModel.className == "file" && _.isArray(_val) && _val.length == 0
         inputModel.value(undefined)
-      inputModel
+      return inputModel
     )
     @inputModels(newInputModels)
 
@@ -126,11 +138,12 @@ class BatchAppNewView
       counter = 0
       if _.isString(batchFileIds) || _.isNumber(batchFileIds)
         counter += 1
-        params =
-          id: @uid
-          name: @name.peek()
-          jobName: "#{@name.peek()}_#{counter}"
+        params = {
+          id: @uid,
+          name: @name.peek(),
+          jobName: "#{@name.peek()}_#{counter}",
           inputs: {}
+        }
         params.instance_type = @instanceType.peek() if @instanceType.peek()?
         params.space_id = @spaceId.peek() if @spaceId.peek()?
 
@@ -173,10 +186,11 @@ class BatchAppNewView
       currentFileId = currentBatchFileIds[0]
       nextBatchFileIds = currentBatchFileIds.slice(1, currentBatchFileIds.length)
       @runBtnText("Running #{counter + 1} of #{totalBatchFileIds}...")
-      params =
-        id: @uid
-        name: "#{@name.peek()} (#{counter + 1} of #{totalBatchFileIds})"
+      params = {
+        id: @uid,
+        name: "#{@name.peek()} (#{counter + 1} of #{totalBatchFileIds})",
         inputs: {}
+      }
       params.instance_type = @instanceType.peek() if @instanceType.peek()?
       params.space_id = @spaceId.peek() if @spaceId.peek()?
 
@@ -187,12 +201,12 @@ class BatchAppNewView
         params.inputs[inputModel.name] = data if data?
 
       Precision.api('/api/run_app', params)
-        .done((rs) =>
+        .done((rs) ->
           if rs.error?
             alert "App could not be run on due to: #{rs.error.message}"
             console.error rs.error
           )
-        .fail((error) =>
+        .fail((error) ->
           errorObject = JSON.parse error.responseText
           alert "App could not be run due to: #{errorObject.error.message}"
           console.error error
@@ -210,16 +224,22 @@ class BatchAppNewView
 #
 #########################################################
 
-AppsController = Paloma.controller('Apps',
+AppsController = Paloma.controller('Apps', {
   batch_app: ->
     $container = $("body main")
-    viewModel = new BatchAppNewView(@params.app, @params.licenses_to_accept, @params.selectable_spaces, @params.content_scopes)
+    viewModel = new BatchAppNewView(
+      @params.app,
+      @params.licenses_to_accept,
+      @params.selectable_spaces,
+      @params.content_scopes
+    )
     ko.applyBindings(viewModel, $container[0])
 
     $affixContainer = $container.find(".affix-container")
     $affixContainer.affix({
-      offset:
+      offset: {
         top: $affixContainer.offset().top
+      }
     })
 
     $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
@@ -229,7 +249,7 @@ AppsController = Paloma.controller('Apps',
       $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
     )
 
-    $('.license-modal').on("click", ".list-group-item", (e) =>
+    $('.license-modal').on("click", ".list-group-item", (e) ->
       viewModel.licenseSelector.previewLicense(ko.dataFor(e.currentTarget))
     )
-)
+})

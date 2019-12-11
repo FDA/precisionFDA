@@ -1,4 +1,17 @@
-class SpaceTemplate < ActiveRecord::Base
+# == Schema Information
+#
+# Table name: space_templates
+#
+#  id          :integer          not null, primary key
+#  name        :string(255)
+#  description :text(65535)
+#  created_at  :datetime         not null
+#  updated_at  :datetime         not null
+#  private     :boolean          default(FALSE), not null
+#  user_id     :integer
+#
+
+class SpaceTemplate < ApplicationRecord
 
   has_many :space_template_nodes, dependent: :destroy
   accepts_nested_attributes_for :space_template_nodes

@@ -1,6 +1,6 @@
 class AppInputModel
-  constructor: (spec, @viewModel) ->
-    @batchInput = ko.observable(false)
+  constructor: (spec, @viewModel, isBatch = false) ->
+    @batchInput = ko.observable(isBatch)
     @className = spec.class
     @help = spec.help
     @label = spec.label
@@ -26,8 +26,8 @@ class AppInputModel
     @licenseToAccept = ko.observable()
     @userLicense = ko.observable()
 
-    @value = ko.observable()
-    @valueDisplay = ko.computed(
+    @value = ko.observable(spec.default)
+    @valueDisplay = ko.computed({
       read: () =>
         switch @className
           when 'file'
@@ -35,17 +35,33 @@ class AppInputModel
               if @defaultValue?
                 if @defaultFileValue()?
                   value = @defaultFileValue()
-                  @licenseToAccept({license: value.license, user_license: value.user_license}) if value.license? && !value.user_license?.accepted
+                  if value.license? && !value.user_license?.accepted
+                    @licenseToAccept({
+                      license: value.license,
+                      user_license: value.user_license
+                    })
                   value.title
                 else if @defaultValue.match(new RegExp(/^file-(.{24,})$/, "i"))
-                    params =
-                      uid: @defaultValue
-                      describe:
-                        include:
+                    params = {
+                      uid: @defaultValue,
+                      describe: {
+                        include: {
                           license: true
+                        }
+                      }
+                    }
+                    oldValue = @defaultValue
+                    @defaultValue = 'Loading...'
                     Precision.api('/api/describe', params).done((value) =>
                       @defaultFileValue(value)
-                      @licenseToAccept({license: value.license, user_license: value.user_license}) if value.license? && !value.user_license?.accepted
+                      if value.license? && !value.user_license?.accepted
+                        @licenseToAccept({
+                          license: value.license,
+                          user_license: value.user_license
+                        })
+                    ).fail( =>
+                      @defaultValue = oldValue
+                      Precision.alert.showAboveAll('Something went wrong while getting file name')
                     )
                     @defaultValue
                 else
@@ -60,6 +76,7 @@ class AppInputModel
               @defaultValue
             else
               @value()
+
       write: (value) =>
         if !value?
           @value(null)
@@ -74,6 +91,7 @@ class AppInputModel
                 @value(null)
             else
               @value(value)
+    }
     )
 
     @isReady = ko.computed(=>
@@ -81,10 +99,13 @@ class AppInputModel
       hasDefault = @defaultValue?
       isRequired = @isRequired
       hasData = false
-      if @getDataForRun()? && _.isArray(@getDataForRun())
-        hasData = (@getDataForRun()? && @getDataForRun().length > 0 && @validArray(@getDataForRun()) && @getDataForRun() != '')
+      getDataForRun = @getDataForRun()
+      if _.isArray(getDataForRun)
+        hasData = getDataForRun.length > 0 && @validArray(getDataForRun) && getDataForRun != ''
+      else if _.isBoolean(getDataForRun)
+        hasData = true
       else
-        hasData = (@getDataForRun()? && @getDataForRun() != '')
+        hasData = getDataForRun && getDataForRun != ''
       hasError = @error() != null
       return !hasError && (!isRequired || (isRequired && (hasData || hasDefault)))
     )
@@ -93,12 +114,16 @@ class AppInputModel
       return @isRequired && !@isReady()
     )
 
-    @fileSelector = ko.computed(=>
-      @objectSelector = new Precision.models.SelectorModel({
-        title: "Select input for #{@label}"
-        help: @help
-        selectionType: @buttonType()
-        selectableClasses: ["file"]
+    @createSelectorModel()
+
+  createSelectorModel: () =>
+    return false if @className != 'file'
+    @createSelectorModelOpts = ko.computed( =>
+      return {
+        title: "Select input for #{@label}",
+        help: @help,
+        selectionType: @buttonType(),
+        selectableClasses: ["file"],
         onSave: (selected) =>
           @licenseToAccept(null)
           if !_.isArray(selected)
@@ -107,12 +132,19 @@ class AppInputModel
               name: selected.title()
             })
             if selected.license()? && !selected.user_license.accepted()
-              @licenseToAccept({license: selected.license(), user_license: selected.user_license()})
+              @licenseToAccept({
+                license: selected.license(),
+                user_license: selected.user_license()
+              })
           else
             licensesToAccept = []
             # FIXME: This is untested
-            @value(_.map(selected, (object) =>
-              licensesToAccept.push({license: object.license(), user_license: object.user_license()}) if object.license()? && !object.user_license.accepted()
+            @value(_.map(selected, (object) ->
+              if object.license()? && !object.user_license.accepted()
+                licensesToAccept.push({
+                  license: object.license(),
+                  user_license: object.user_license()
+                })
               return {
                 uid: object.uid
                 name: object.title()
@@ -123,59 +155,92 @@ class AppInputModel
 
           deferred = $.Deferred()
           deferred.resolve(@value())
-        listRelatedParams:
-          # editable: true
-          scopes: @viewModel.contentScopes()
-          classes: ["file", "note", "discussion", "answer", "comparison", "app", "asset", "job", "workflow"]
+
+        listRelatedParams: {
+          scopes: @viewModel.contentScopes(),
+          classes: [
+            "file",
+            "note",
+            "discussion",
+            "answer",
+            "comparison",
+            "app",
+            "asset",
+            "job",
+            "workflow"
+          ]
+        },
         listModelConfigs: [
           {
-            className: "file"
-            name: "Files"
-            apiEndpoint: "list_files"
-            apiParams:
+            className: "file",
+            name: "Files",
+            apiEndpoint: "list_files",
+            apiParams: {
               scopes: @viewModel.contentScopes()
               states: ["closed"]
-              describe:
-                include:
-                  user: true
-                  org: true
-                  license: true
+              describe: {
+                include: {
+                  user: true,
+                  org: true,
+                  license: true,
                   all_tags_list: false
+                }
+              }
+            },
             patterns: @patterns
-          }
+          },
           {
             className: "note"
             name: "Notes"
             apiEndpoint: "list_notes"
-            apiParams:
-              scopes: @viewModel.contentScopes()
-              note_types: ["Note"]
-              describe:
-                include:
-                  user: true
-                  org: true
+            apiParams: {
+              scopes: @viewModel.contentScopes(),
+              note_types: ["Note"],
+              describe: {
+                include: {
+                  user: true,
+                  org: true,
                   all_tags_list: true
-          }
+                }
+              }
+            }
+          },
           {
             className: "discussion"
             name: "Discussions"
             apiEndpoint: "list_notes"
-            apiParams:
-              scopes: @viewModel.contentScopes()
-              note_types: ["Discussion"]
-              describe:
-                include:
-                  user: true
-                  org: true
+            apiParams: {
+              scopes: @viewModel.contentScopes(),
+              note_types: ["Discussion"],
+              describe: {
+                include: {
+                  user: true,
+                  org: true,
                   all_tags_list: true
+                }
+              }
+            }
           }
         ]
-      })
+      }
+    )
+    ### we need prop and observable here because it was defined in old implementation ###
+    ### and i afraid both props used somethere else ###
+    @objectSelector = new Precision.models.SelectorModel(@createSelectorModelOpts())
+    @fileSelector = ko.observable(@objectSelector)
+
+    @updateSelectorOpts = ko.computed( =>
+      opts = @createSelectorModelOpts()
+      @objectSelector.opts.onSave = opts.onSave
+      @objectSelector.selectionType = opts.selectionType
+      @objectSelector.listRelatedParams = opts.listRelatedParams
+      @objectSelector.listModelConfigs = opts.listModelConfigs
+      @fileSelector(@objectSelector)
     )
 
-  validArray: (array) =>
+  validArray: (array) ->
     value = true
-    _.map(array, (object) =>
+    _.map(array, (object) ->
       if !object?
         value = false
       )
@@ -204,23 +269,25 @@ class AppInputModel
     @valueDisplay(null)
 
   getDataForRun: () ->
-    if @className=='boolean'
+    if @className == 'boolean'
       if @value()? && _.isArray(@value())? && @value().length > 0
         selectedData = @value()
       else if _.isBoolean(@value())
         selectedData = @value()
-      else if @defaultvalue?
-        selectedData = @defaultvalue
+      else if @defaultValue?
+        selectedData = @defaultValue
 
-    else if @value()?
+    if @defaultValue?
+      selectedData = @defaultValue
+
+    if @value()?
       selectedData = @value()
-    else if @defaultvalue?
-      selectedData = @defaultvalue
 
     if selectedData? && selectedData != ''
       try
         if @isClassAnArray && _.isString(selectedData)
-          selectedData = selectedData.replace(/(^\s*,)|(,\s*$)/g, '') # Remove any trailing/leading commas
+          # Remove any trailing/leading commas
+          selectedData = selectedData.replace(/(^\s*,)|(,\s*$)/g, '')
           selectedData = _.map(selectedData.split(','), (data) =>
             data = $.trim(data) # Remove trailing/leading whitespace
             _data = data
@@ -350,5 +417,5 @@ class AppInputModel
     return value
 
 window.Precision ||= {}
-window.Precision.models || = {}
+window.Precision.models ||= {}
 window.Precision.models.AppInputModel = AppInputModel

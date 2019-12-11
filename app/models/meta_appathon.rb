@@ -3,18 +3,18 @@
 # Table name: meta_appathons
 #
 #  id          :integer          not null, primary key
-#  name        :string
-#  handle      :string
-#  template    :string
-#  description :text
-#  meta        :text
+#  name        :string(255)
+#  handle      :string(255)
+#  template    :string(255)
+#  description :text(65535)
+#  meta        :text(65535)
 #  start_at    :datetime
 #  end_at      :datetime
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #
 
-class MetaAppathon < ActiveRecord::Base
+class MetaAppathon < ApplicationRecord
   include Auditor
 
   has_many :appathons

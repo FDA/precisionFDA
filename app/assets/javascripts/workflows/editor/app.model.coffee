@@ -2,15 +2,7 @@ class AppModel
   onChangeHandler: () ->
     @setInputOutput()
 
-  selectedAppDxid: () => @appIdToDxid[@selectedApp()]
-
-  setRevisions: () ->
-    Precision.api('/api/list_app_revisions', { id: @app.id })
-        .done((revisions) =>
-          for revision in revisions
-            @appIdToDxid[revision.id] = revision.uid
-            @revisions.push(revision)
-      )
+  selectedAppDxid: () => @appIdToDxid()[@selectedApp()]
 
   setInputOutput: () ->
     if @selectedApp()
@@ -20,19 +12,20 @@ class AppModel
           @outputsForApp(app.spec.output_spec)
         )
 
-  init: () ->
-    @setInputOutput()
-    @setRevisions()
-
   constructor: (app, mode) ->
     @app = app
-    @inputsForApp = ko.observableArray()
-    @outputsForApp = ko.observableArray()
-    @revisions = ko.observableArray()
-    @appIdToDxid = {}
+    @public = app.scope == 'public'
+    @private = app.scope == 'private'
+    @inputsForApp = ko.observableArray(app.spec.input_spec || [])
+    @outputsForApp = ko.observableArray(app.spec.output_spec || [])
+    @revisions = ko.observableArray(app.revisions || [])
+    @appIdToDxid = ko.computed( =>
+      appIdToDxid = {}
+      for revision in @revisions()
+        appIdToDxid[revision.id] = revision.uid
+      return appIdToDxid
+    )
     @selectedApp = ko.observable()
-
-    @init()
 
 window.Precision ||= {}
 window.Precision.wfEditor ||= {}

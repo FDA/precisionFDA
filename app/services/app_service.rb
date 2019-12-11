@@ -99,7 +99,7 @@ class AppService
   end
 
   def new_app(opts)
-    api.call("app", "new", {
+    api.app_new(
       applet: opts[:applet_dxid],
       name: AppSeries.construct_dxname(context.username, opts[:name]),
       title: "#{opts[:title]} ",
@@ -111,7 +111,7 @@ class AppService
       openSource: false,
       billTo: bill_to,
       access: opts[:internet_access] ? { network: ["*"] } : {}
-    })["id"]
+    )["id"]
   end
 
   private
@@ -129,11 +129,7 @@ class AppService
   end
 
   def bill_to
-    if Rails.env.development?
-      "user-#{context.username}"
-    else
-      context.user.billto
-    end
+    context.user.billto
   end
 
   def project

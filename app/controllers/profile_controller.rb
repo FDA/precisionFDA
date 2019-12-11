@@ -1,31 +1,121 @@
+# TODO: to be refactored
+#
 class ProfileController < ApplicationController
+  # rubocop:disable Metrics/MethodLength
   include ErrorProcessable
   helper_method :time_zones
-  before_action :find_admin, only: [:provision_org]
+  before_action :find_admin, only: %i(provision_org provision_new_user)
 
   def index
     usa_id = Country.find_by(name: "United States").id
     @user = User.includes(:org).find(@context.user_id)
+    org_id = @user.singular? ? nil : @user.org_id
+
     users = if !@user.singular?
       User.where(org_id: @user.org_id)
     else
       User.where(id: @user.id)
     end
-    @users_grid = initialize_grid(users,
-      order: 'dxuser',
-      order_direction: 'asc',
-      per_page: 100
+
+    @users_grid = initialize_grid(
+      users,
+      order: "dxuser",
+      order_direction: "asc",
+      per_page: 100,
     )
+
     profile = Profiles::Getter.call(@user, @context).view_fields
-    js(usa_id: usa_id, country_codes: Country.countries_for_codes, profile: profile)
+
+    js(usa_id: usa_id, country_codes: Country.countries_for_codes, profile: profile, org_id: org_id)
   end
 
   def update
     profile = current_user.profile || current_user.build_profile
-    if Profiles::Updater.call(params, @context, profile)
+
+    if Profiles::Updater.call(unsafe_params, @context, profile)
       render json: profile.view_fields, status: :ok
     else
       render json: profile.errors, status: :unprocessable_entity
+    end
+  end
+
+  def provision_new_user
+    if request.get?
+      @invitations = Invitation.includes(space_invitations: :space).
+        order(id: :desc).
+        page(params[:page])
+      @state = "step1"
+      return
+    end
+
+    @inv = unsafe_params[:inv]
+    @invitation = Invitation.find(@inv)
+
+    if @invitation.user
+      editable_params = User.provision_params(@invitation.user_id)
+      @first_name = (unsafe_params[:first_name] || editable_params[:first_name]).to_s.strip
+      @last_name = (unsafe_params[:last_name] || editable_params[:last_name]).to_s.strip
+      @email = (unsafe_params[:email] || editable_params[:email]).to_s.strip
+    else
+      @first_name = (unsafe_params[:first_name] || @invitation.first_name).to_s.strip
+      @last_name = (unsafe_params[:last_name] || @invitation.last_name).to_s.strip
+      @email = (unsafe_params[:email] || @invitation.email).to_s.strip
+    end
+
+    @address1 = (unsafe_params[:address1] || @invitation.address1).to_s.strip
+    @address2 = (unsafe_params[:address2] || @invitation.address2).to_s.strip
+    @postal_code = (unsafe_params[:postal_code] || @invitation.postal_code).to_s.strip
+    @country = (unsafe_params[:country] || @invitation.country.name).to_s.strip
+    @city = (unsafe_params[:city] || @invitation.city).to_s.strip
+    @us_state = (unsafe_params[:us_state] || @invitation.us_state).to_s.strip
+    @full_phone = (unsafe_params[:full_phone] || @invitation.full_phone).to_s.strip
+    @duns = (unsafe_params[:duns] || @invitation.duns).to_s.strip
+
+    username = User.construct_username(@first_name, @last_name)
+    @suggested_username = find_unused_username(username)
+    org = "#{@first_name} #{@last_name} (#{@suggested_username})"
+    org_handle = @suggested_username
+    singular = true
+
+    case unsafe_params[:state]
+    when "step2"
+      @state = "step2"
+
+    when "step3"
+      errors_verifiable_attributes = {
+        first_name: @first_name,
+        last_name: @last_name,
+        email: @email,
+        org: org,
+        org_handle: org_handle,
+      }
+      @errors = add_errors(errors_verifiable_attributes)
+
+      if @errors.any?
+        @state = "step2"
+        return
+      end
+      add_warnings(@first_name, @last_name, @invitation, org, org_handle)
+      @state = "step3"
+
+    when "step4"
+      provision_params = {
+        org: org,
+        username: @suggested_username,
+        org_handle: org_handle,
+        email: @email,
+        first_name: @first_name,
+        last_name: @last_name,
+        address: @address1,
+        duns: @duns,
+        phone: @full_phone,
+        singular: singular,
+      }
+
+      service = container.resolve("orgs.provisioner")
+      service.call(@user, @invitation, provision_params)
+
+      @state = "step4"
     end
   end
 
@@ -33,10 +123,10 @@ class ProfileController < ApplicationController
     @user = User.includes(:org).find(@context.user_id)
     raise unless @user.can_provision_accounts?
 
-    @first = params[:first].to_s.strip
-    @last = params[:last].to_s.strip
-    @email = params[:email].to_s.strip
-    @state = params[:state].to_s.strip
+    @first = unsafe_params[:first].to_s.strip
+    @last = unsafe_params[:last].to_s.strip
+    @email = unsafe_params[:email].to_s.strip
+    @state = unsafe_params[:state].to_s.strip
 
     if @state == "step1" || @state == "step2"
       @username = User.construct_username(@first, @last)
@@ -53,9 +143,9 @@ class ProfileController < ApplicationController
       elsif User.find_by(normalized_email: @normalized_email).present?
         @error = "This email address is already in use by another precisionFDA account."
       elsif DNAnexusAPI.email_exists?(@email)
-        @error =
-          "Email address is already in use in precisionFDA. " \
-          "Please ask the person to provide you with a different email to be used in precisionFDA."
+        name = User.find_by(email: email) ? "precisionFDA" : "DNAnexus"
+        @error = "This email address is already in use in #{name}. Please ask the person " \
+         "to provide you with a different email to be used for precisionFDA."
       end
 
       if @error.present?
@@ -78,7 +168,7 @@ class ProfileController < ApplicationController
         @state = "step2"
       else
         @suggested_username = find_unused_username(@username)
-        if @suggested_username == params[:suggested_username]
+        if @suggested_username == unsafe_params[:suggested_username]
           dxuserid = "user-#{@suggested_username}"
           dxorg = @user.org.dxorg
 
@@ -120,87 +210,81 @@ class ProfileController < ApplicationController
 
   def provision_org
     if request.get?
-      @invitations = Invitation.order(id: :desc).page(params[:page]).per(10)
+      @invitations = Invitation.non_singular.includes(space_invitations: :space).
+        order(id: :desc).
+        page(params[:page])
       @state = "step1"
       return
     end
 
-    @inv = params[:inv]
+    @inv = unsafe_params[:inv]
     @invitation = Invitation.find_by(id: @inv)
 
-    @first_name = (params[:first_name] || @invitation.first_name).to_s.strip
-    @last_name = (params[:last_name] || @invitation.last_name).to_s.strip
-    @email = (params[:email] || @invitation.email).to_s.strip
-    @org = (params[:org] || @invitation.org).to_s.strip
-    @org_handle = (params[:org_handle] || @invitation.org_handle).to_s
-    @address1 = (params[:address1] || @invitation.address1).to_s.strip
-    @address2 = (params[:address2] || @invitation.address2).to_s.strip
-    @postal_code = (params[:postal_code] || @invitation.postal_code).to_s.strip
-    @country = (params[:country] || @invitation.country.name).to_s.strip
-    @city = (params[:city] || @invitation.city).to_s.strip
-    @us_state = (params[:us_state] || @invitation.us_state).to_s.strip
-    @full_phone = (params[:full_phone] || @invitation.full_phone).to_s.strip
-    @duns = (params[:duns] || @invitation.duns).to_s.strip
-    @organization_administration = params[:organization_administration]
+    @first_name = (unsafe_params[:first_name] || @invitation.first_name).to_s.strip
+    @last_name = (unsafe_params[:last_name] || @invitation.last_name).to_s.strip
+    @email = (unsafe_params[:email] || @invitation.email).to_s.strip
+    @address1 = (unsafe_params[:address1] || @invitation.address1).to_s.strip
+    @address2 = (unsafe_params[:address2] || @invitation.address2).to_s.strip
+    @postal_code = (unsafe_params[:postal_code] || @invitation.postal_code).to_s.strip
+    @country = (unsafe_params[:country] || @invitation.country.name).to_s.strip
+    @city = (unsafe_params[:city] || @invitation.city).to_s.strip
+    @us_state = (unsafe_params[:us_state] || @invitation.us_state).to_s.strip
+    @full_phone = (unsafe_params[:full_phone] || @invitation.full_phone).to_s.strip
+    @duns = (unsafe_params[:duns] || @invitation.duns).to_s.strip
 
-    case params[:state]
+    raise unless @org.present? == @org_handle.present?
+
+    username = User.construct_username(@first_name, @last_name)
+    @suggested_username = find_unused_username(username)
+    @org = "#{@first_name.capitalize} #{@last_name.capitalize}"
+    @org_handle = @suggested_username
+    @singular = true
+
+    case unsafe_params[:state]
     when "step2"
       @state = "step2"
 
     when "step3"
 
-      if params[:organization_administration] != 'admin'
+      if unsafe_params[:organization_administration] != 'admin'
         # clean out org vars.
         @org = nil
         @org_handle = nil
       end
-      add_errors(@first_name, @last_name, @email, @org, @org_handle)
+
+      errors_verifiable_attributes = {
+        first_name: @first_name,
+        last_name: @last_name,
+        email: @email,
+        org: @org,
+        org_handle: @org_handle,
+      }
+      @errors = add_errors(errors_verifiable_attributes)
 
       if @errors.any?
         @state = "step2"
         return
       end
-
       add_warnings(@first_name, @last_name, @invitation, @org, @org_handle)
-
       @state = "step3"
+
     when "step4"
-      if params[:organization_administration] != 'admin'
-        # clean out org vars.
-        @org = nil
-        @org_handle = nil
-      end
-      raise unless @org.present? == @org_handle.present?
-      username = User.construct_username(@first_name, @last_name)
-      @suggested_username = find_unused_username(username)
+      provision_params = {
+        org: @org,
+        username: @suggested_username,
+        org_handle: @org_handle,
+        email: @email,
+        first_name: @first_name,
+        last_name: @last_name,
+        address: @address1,
+        duns: @duns,
+        phone: @full_phone,
+        singular: @singular,
+      }
 
-      @singular = false
-      unless @org_handle.present?
-        @org = "#{@first_name} #{@last_name} (#{@suggested_username})"
-        @org_handle = @suggested_username
-        @singular = true
-      end
+      service = container.resolve("orgs.provisioner")
+      service.call(@user, @invitation, provision_params)
 
-      Auditor.perform_audit(action: "create", record_type: "Provision Org", record: { message: "The system is about to start provisioning admin '#{@suggested_username}' and org '#{@org_handle}'#{@singular ? ' (self-represented)' : ''} initiated by '#{@user.dxuser}'" })
-
-      OrgService::ProvisionOrg.call(@context.token, org: @org, username: @suggested_username, org_handle: @org_handle,
-                                    email: @email, first_name: @first_name, last_name: @last_name)
-
-      User.transaction do
-        org = Org.create!(name: @org, handle: @org_handle, address: @address1,
-                          duns: @duns, phone: @full_phone, singular: @singular, state: "complete")
-        user = org.users.create!(dxuser: @suggested_username, schema_version: User::CURRENT_SCHEMA, email: @email,
-                                 first_name: @first_name, last_name: @last_name, normalized_email: @email.downcase)
-        org.update!(admin_id: user.id)
-        @invitation.update!(user_id: user.id)
-
-        phone_confirmed = @invitation.new_phone_format? ? true :false
-        profile = user.build_profile(@invitation.slice(:address1, :address2, :phone, :city, :us_state, :postal_code,
-                                                       :country, :phone_country).merge(phone_confirmed: phone_confirmed, email: @email))
-        profile.save(validate: false)
-        Auditor.perform_audit(action: "create", record_type: "Provision Org",
-                              record: { message: "A new admin and organization have been created: user=#{user.as_json}, org=#{org.as_json} by '#{@user.dxuser}'" })
-      end
       @state = "step4"
     end
   end
@@ -224,7 +308,9 @@ class ProfileController < ApplicationController
             if inv.user.present?
               row << inv.user.dxuser
             else
-              u = User.where.any_of({ first_name: inv.first_name, last_name: inv.last_name }, normalized_email: inv.email.downcase.strip).take
+              u = User.where(first_name: inv.first_name, last_name: inv.last_name).
+                or(User.where({normalized_email: inv.email.downcase.strip})).take
+
               row << (u ? "maybe #{u.dxuser}" : "")
             end
             row += [inv.first_name, inv.last_name, inv.email, inv.org, inv.singular, inv.country.try(:name), inv.city, inv.us_state, inv.postal_code, inv.address1, inv.address2, inv.full_phone, inv.duns, inv.participate_intent, inv.organize_intent, inv.research_intent, inv.clinical_intent, inv.req_data, inv.req_software, inv.req_reason]
@@ -244,34 +330,6 @@ class ProfileController < ApplicationController
   def find_admin
     @user = User.find(@context.user_id)
     raise unless @user.can_administer_site?
-  end
-
-  def add_errors(first_name, last_name, email, org, org_handle)
-    @errors = []
-
-    new_user = User.new(first_name: first_name, last_name: last_name, email: email)
-    if new_user.invalid?
-      @errors += new_user.errors.full_messages
-    end
-
-    username = User.construct_username(first_name, last_name)
-    if !User.authserver_acceptable?(username)
-      @errors << "Internal precisionFDA policies require that usernames be formed according to the pattern <first_name>.<last_name> using only lowercase English letters. Based on the name provided (#{first_name} #{last_name}), the constructed username ('#{username}') would not have been acceptable. Please adjust the name accordingly."
-    end
-
-    if params[:organization_administration] == 'admin'
-      @errors << "You must provide both the organization name and the handle" if !@org.present? && !@org_handle.present?
-      @errors << "Invalid characters in the organization handle" if @org_handle.present? && @org_handle.gsub(/[^a-z]/, '') != @org_handle
-      @errors << "There is already an organization with that handle" if @org_handle.present? && Org.find_by(handle: @org_handle).present?
-      @errors << "There is already an organization with that name" if @org.present? && Org.find_by(name: @org).present?
-      @errors << "You must either provide both the organization name and the handle (for org admins), or leave them both empty (for self-represented)." if @org.present? != @org_handle.present?
-    end
-
-    if email.present? && DNAnexusAPI.email_exists?(email)
-      @errors << "Email address is already in use in precisionFDA. " \
-                 "Please ask the person to provide you with a different email to " \
-                 "be used for precisionFDA."
-    end
   end
 
   def add_warnings(first_name, last_name, invitation, org, org_handle)
@@ -308,18 +366,22 @@ class ProfileController < ApplicationController
 
   def find_unused_username(username)
     api = DNAnexusAPI.new(@context.token)
-    candidate = username
-    i = 2
-    while api.user_exists?(candidate)
-      candidate = "#{username}.#{i}"
-      i += 1
-    end
-    candidate
+    UnusedUsernameGenerator.new(api).call(username)
   end
 
+  # Returns array of time zones ordered by UTC offset.
+  # @return [Array[Array<String, String>]] Array of time zones info.
+  #   Each element of returning array is array where:
+  #     First element is formatted GMT offset.
+  #     Second element is time zone name.
   def time_zones
-    ActiveSupport::TimeZone.all.map do |time_zone|
+    sorted_time_zones = ActiveSupport::TimeZone.all.sort_by do |time_zone|
+      [time_zone.now.utc_offset, time_zone.name]
+    end
+
+    sorted_time_zones.map do |time_zone|
       ["(GMT#{time_zone.now.formatted_offset}) #{time_zone.name}", time_zone.name]
     end
   end
+  # rubocop:enable Metrics/MethodLength
 end

@@ -3,12 +3,12 @@ class DiscussionsController < ApplicationController
   before_action :require_login_or_guest, only: [:index, :show, :followers]
 
   def index
-    @discussions = Discussion.accessible_by(@context).order(id: :desc).page params[:discussions_page]
+    @discussions = Discussion.accessible_by(@context).order(id: :desc).page unsafe_params[:discussions_page]
   end
 
   def show
-    @discussion = Discussion.accessible_by(@context).find(params[:id])
-    @answers = @discussion.answers.accessible_by(@context).page params[:answers_page]
+    @discussion = Discussion.accessible_by(@context).find(unsafe_params[:id])
+    @answers = @discussion.answers.accessible_by(@context).page unsafe_params[:answers_page]
     @followers = @discussion.user_followers.limit(100)
     orgs = @discussion.user_followers.map(&:org)
     orgs = orgs.uniq { |org| org.id }.sort_by!{ |org| org.name.downcase }
@@ -23,13 +23,13 @@ class DiscussionsController < ApplicationController
   end
 
   def followers
-    @discussion = Discussion.accessible_by(@context).find(params[:id])
+    @discussion = Discussion.accessible_by(@context).find(unsafe_params[:id])
     @followers = @discussion.user_followers
   end
 
   def edit
     @user = User.find(@context.user_id)
-    @discussion = Discussion.editable_by(@context).find(params[:id])
+    @discussion = Discussion.editable_by(@context).find(unsafe_params[:id])
     @note = @discussion.note
 
     if @discussion.nil?
@@ -42,7 +42,7 @@ class DiscussionsController < ApplicationController
   end
 
   def rename
-    @discussion = Discussion.editable_by(@context).find_by!(id: params[:id])
+    @discussion = Discussion.editable_by(@context).find_by!(id: unsafe_params[:id])
     title = discussion_params[:title]
     if title.is_a?(String) && title != ""
       if @discussion.rename(title, @context)
@@ -86,7 +86,7 @@ class DiscussionsController < ApplicationController
   end
 
   def destroy
-    discussion = Discussion.editable_by(@context).find(params[:id])
+    discussion = Discussion.editable_by(@context).find(unsafe_params[:id])
     title = discussion.title
 
     discussion.destroy
@@ -119,7 +119,7 @@ class DiscussionsController < ApplicationController
     {
       note: note.slice(:id, :content, :title),
       attachments: attachments,
-      edit: params[:edit],
+      edit: unsafe_params[:edit],
       editable: note.editable_by?(@context)
     }
   end

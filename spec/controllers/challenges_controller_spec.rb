@@ -1,7 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe ChallengesController, type: :controller do
-
   let(:admin) { create(:user, :admin) }
   let(:user1) { create(:user, dxuser: "user_1") }
   let(:user2) { create(:user, dxuser: "user_2") }
@@ -40,7 +39,7 @@ RSpec.describe ChallengesController, type: :controller do
     context "by a guest" do
       before { authenticate_as_guest! }
       it "doesn't raise an exception" do
-        get :join, id: challenge.id
+        get :join, params: { id: challenge.id }
         expect(response).to redirect_to request_access_path
       end
     end
@@ -50,7 +49,7 @@ RSpec.describe ChallengesController, type: :controller do
     context "by a guest" do
       before { authenticate_as_guest! }
       it "doesn't raise an exception" do
-        get :show, id: challenge.id
+        get :show, params: { id: challenge.id }
       end
     end
   end

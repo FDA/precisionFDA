@@ -1,20 +1,24 @@
 # == Schema Information
 #
-# Table name: user_files
+# Table name: nodes
 #
-#  id          :integer          not null, primary key
-#  dxid        :string
-#  project     :string
-#  name        :string
-#  state       :string
-#  description :text
-#  user_id     :integer
-#  file_size   :integer
-#  created_at  :datetime         not null
-#  updated_at  :datetime         not null
-#  parent_id   :integer
-#  parent_type :string
-#  scope       :string
+#  id                      :integer          not null, primary key
+#  dxid                    :string(255)
+#  project                 :string(255)
+#  name                    :string(255)
+#  state                   :string(255)
+#  description             :text(65535)
+#  user_id                 :integer          not null
+#  file_size               :bigint
+#  created_at              :datetime         not null
+#  updated_at              :datetime         not null
+#  parent_id               :integer
+#  parent_type             :string(255)
+#  scope                   :string(255)
+#  parent_folder_id        :integer
+#  sti_type                :string(255)
+#  scoped_parent_folder_id :integer
+#  uid                     :string(255)
 #
 
 #
@@ -28,7 +32,7 @@
 class Asset < UserFile
   default_scope { where(parent_type: "Asset") }
 
-  has_many :archive_entries, dependent: :destroy
+  has_many :archive_entries, dependent: :delete_all
 
   has_and_belongs_to_many :apps, join_table: :apps_assets
 

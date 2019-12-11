@@ -1,0 +1,15 @@
+<% content_for :title, "Organization leaving pending requests" %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-body">
+      <div class="page-title">
+        <i class="fa fa-users" aria-hidden="true"></i>
+        Organizations action requests
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= render partial: "approve_modal" %>
+<%= render partial: "grid", locals: {locked: "hey", show_filters: :always} %>

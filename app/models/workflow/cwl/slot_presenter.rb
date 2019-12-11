@@ -4,7 +4,7 @@ class Workflow
       include ::Workflow::Common
 
       attr_reader :title, :step, :slot_number, :stages
-      delegate :context, :slot_objects, to: :stages
+      delegate :context, :slot_objects, :max_stage_index, to: :stages
 
       def initialize(title, step_json, slot_number, stages)
         @title = title
@@ -23,6 +23,7 @@ class Workflow
           hash["slotId"] = slot_id
           hash["prevSlot"] = prev_slot.slot_id if prev_slot_expected?
           hash["nextSlot"] = next_slot.slot_id if next_slot_expected?
+          hash["stageIndex"] = stage_index
         end
       end
 
@@ -71,7 +72,11 @@ class Workflow
       end
 
       def prev_slot_expected?
-        slot_number != 0
+        stage_index != 0
+      end
+
+      def stage_index
+        slot_number
       end
 
       def next_slot
@@ -79,7 +84,7 @@ class Workflow
       end
 
       def next_slot_expected?
-        slot_number != slot_objects.length - 1
+        stage_index != max_stage_index
       end
     end
   end

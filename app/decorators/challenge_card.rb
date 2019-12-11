@@ -4,7 +4,7 @@ class ChallengeCard
   def self.by_context(challenge, context)
     new(
       challenge,
-      context.logged_in? ? context.user : User.new
+      context.logged_in? ? context.user : User.new,
     )
   end
 
@@ -76,5 +76,4 @@ class ChallengeCard
   def show_challenge_path(challenge, params = {})
     Rails.application.routes.url_helpers.show_challenge_path(challenge, params)
   end
-
 end

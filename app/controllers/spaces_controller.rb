@@ -1,12 +1,19 @@
+# TODO: to be refactored
 class SpacesController < ApplicationController
-  before_action :init_parent_folder, only: [:files]
-  before_action :find_space_and_membership, only:
-    [:show, :discuss, :members, :feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
-  before_action :content_counters, only:
-    [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
+  before_action :init_parent_folder, only: :files
 
-  layout "space_content", only:
-    [:feed, :tasks, :files, :apps, :notes, :jobs, :assets, :comparisons, :workflows, :reports]
+  before_action :find_space_and_membership, only: %i(
+    show discuss members feed tasks files apps invite
+    notes jobs assets comparisons workflows reports
+  )
+
+  before_action :content_counters, only: %i(
+    feed tasks files apps notes jobs assets comparisons workflows reports
+  )
+
+  layout "space_content", only: %i(
+    feed tasks files apps notes jobs assets comparisons workflows reports
+  )
 
   def index
     spaces = Space.accessible_by(@context)
@@ -21,9 +28,9 @@ class SpacesController < ApplicationController
 
   def show
     if @space.review?
-      redirect_to feed_space_path(params[:id])
+      redirect_to feed_space_path(unsafe_params[:id])
     else
-      redirect_to files_space_path(params[:id])
+      redirect_to files_space_path(unsafe_params[:id])
     end
   end
 
@@ -32,7 +39,7 @@ class SpacesController < ApplicationController
     @items_from_params = [@space]
     @item_path = pathify(@space)
     @item_comments_path = pathify_comments(@space)
-    @comments = @space.root_comments.order(id: :desc).page params[:comments_page]
+    @comments = @space.root_comments.order(id: :desc).page unsafe_params[:comments_page]
     user_ids = @space.space_memberships.active.map(&:user_id)
     users = User.find(user_ids).map { |u| { name: u.dxuser } }
     space_id = @space.to_param
@@ -40,14 +47,14 @@ class SpacesController < ApplicationController
   end
 
   def search_content
-    space = Space.find(params[:id])
-    results = space.search_content(params[:content_type], params[:query])
+    space = Space.find(unsafe_params[:id])
+    results = space.search_content(unsafe_params[:content_type], unsafe_params[:query])
     render json: results
   end
 
   def members
     @members =
-      case params[:filter]
+      case unsafe_params[:filter]
       when 'host', 'reviewer'
         @space.space_memberships.select { |member| member.side == 'host' }
       when 'guest', 'sponsor'
@@ -60,7 +67,7 @@ class SpacesController < ApplicationController
   end
 
   def verify
-    @space = Space.accessible_by(@context).find(params[:id])
+    @space = Space.accessible_by(@context).find(unsafe_params[:id])
     if @space.space_type == 'verification'
       @space.verified = true
       @space.save!
@@ -91,7 +98,6 @@ class SpacesController < ApplicationController
       redirect_to spaces_path
       return
     end
-
     if space_form.valid?
       space = space_form.persist!(@context.api, @context.user)
 
@@ -104,7 +110,7 @@ class SpacesController < ApplicationController
       end
     else
       @space = space_form
-      js space_params.merge(space_types: space_types)
+      js space_params.to_h.merge(space_types: space_types)
       render :new
     end
   end
@@ -123,12 +129,8 @@ class SpacesController < ApplicationController
     end
   end
 
-  def destroy
-    # TODO: figure out if and how spaces should be deleted
-  end
-
   def accept
-    space = Space.accessible_by(@context).find(params[:id])
+    space = Space.accessible_by(@context).find(unsafe_params[:id])
     admin = space.space_memberships.lead_or_admin.find_by(user_id: @context.user_id)
 
     if admin && !space.accepted_by?(admin)
@@ -140,19 +142,27 @@ class SpacesController < ApplicationController
   end
 
   def invite
-    @space = Space.accessible_by(@context).find(params[:id])
-    admin = fetch_membership
-
-    if admin
-      space_invite_form = SpaceInviteForm.new(params[:space].merge(space: @space))
+    if @membership
+      space_invite_form = SpaceInviteForm.new(space_invite_params.merge(space: @space))
 
       if space_invite_form.valid?
-        space_invite_form.invite(@context, admin)
+        api = @membership.persisted? ? @context.api : DNAnexusAPI.for_admin
+
+        begin
+          invited_emails = space_invite_form.invite(@membership, api)
+        rescue StandardError
+          flash[:error] = "An error has occurred during inviting"
+        end
+
+        if invited_emails.present?
+          flash[:success] = "The invitations to the space have been sent to the following " \
+                            "emails: #{invited_emails.to_sentence}"
+        end
       else
-        flash[:error] = space_invite_form.errors.messages.values.join(", ")
+        flash[:error] = space_invite_form.errors.full_messages.join(", ")
       end
     else
-      flash[:error] = "You don't have permission to edit this space"
+      flash[:error] = "You don't have permission to invite members to this space"
     end
 
     redirect_to members_space_path(@space)
@@ -160,7 +170,7 @@ class SpacesController < ApplicationController
 
   def rename
     @space = editable_space
-    name = params[:space][:name]
+    name = unsafe_params[:space][:name]
     if name.is_a?(String) && name != ""
       if @space.rename(name, @context)
         @space.reload
@@ -176,10 +186,10 @@ class SpacesController < ApplicationController
   end
 
   def rename_folder
-    space = Space.accessible_by(@context).find(params[:space_id])
-    folder = Folder.accessible_by_space(space).find(params[:file][:id])
+    space = Space.accessible_by(@context).find(unsafe_params[:space_id])
+    folder = Folder.accessible_by_space(space).find(unsafe_params[:file][:id])
     folder_service = FolderService.new(@context)
-    result = folder_service.rename(folder, params[:file][:name])
+    result = folder_service.rename(folder, unsafe_params[:file][:name])
     parent_folder = folder.parent_folder
 
     if result.success?
@@ -198,10 +208,10 @@ class SpacesController < ApplicationController
   end
 
   def create_folder
-    space = Space.accessible_by(@context).find(params[:id])
-    parent_folder = Folder.accessible_by_space(space).find_by(id: params[:parent_folder_id])
+    space = Space.accessible_by(@context).find(unsafe_params[:id])
+    parent_folder = Folder.accessible_by_space(space).find_by(id: unsafe_params[:parent_folder_id])
     service = FolderService.new(@context)
-    result = service.add_folder(params[:name], parent_folder, space.uid)
+    result = service.add_folder(unsafe_params[:name], parent_folder, space.uid)
 
     if result.failure?
       flash[:error] = result.value.values
@@ -214,13 +224,13 @@ class SpacesController < ApplicationController
   end
 
   def move
-    space = Space.accessible_by(@context).find(params[:id])
-    target_folder_id = params[:target_id] == 'root' ? nil : params[:target_id]
+    space = Space.accessible_by(@context).find(unsafe_params[:id])
+    target_folder_id = unsafe_params[:target_id] == 'root' ? nil : unsafe_params[:target_id]
     target_folder = target_folder_id ? Folder.accessible_by_space(space).find_by(id: target_folder_id) : nil
     service = FolderService.new(@context)
 
     result = service.move(
-      Node.where(id: params[:nodes]),
+      Node.where(id: unsafe_params[:nodes]),
       target_folder,
       space.uid
     )
@@ -236,7 +246,7 @@ class SpacesController < ApplicationController
 
       flash[:success] = "Successfully moved #{result.value[:count]} item(s) to #{target_folder_name}"
     else
-      current_folder = Folder.accessible_by_space(space).find_by(id: params[:current_folder])
+      current_folder = Folder.accessible_by_space(space).find_by(id: unsafe_params[:current_folder])
       redirect_path = current_folder.present? ? pathify_folder(current_folder) : files_space_path(space)
       flash[:error] = result.value.values
     end
@@ -248,24 +258,24 @@ class SpacesController < ApplicationController
   skip_before_action :require_login, only: :download_list
   before_action :require_api_login, only: :download_list
   def download_list
-    task = params[:task]
-    space = Space.accessible_by(@context).find(params[:id])
+    task = unsafe_params[:task]
+    space = Space.accessible_by(@context).find(unsafe_params[:id])
     root_name = space.name
     files = []
 
     case task
     when "download"
-      nodes = Node.accessible_by_space(space).accessible_by(@context).where(id: params[:ids])
+      nodes = Node.accessible_by_space(space).accessible_by(@context).where(id: unsafe_params[:ids])
       nodes.each { |node| files += node.is_a?(Folder) ? node.all_files : [node] }
     when "publish"
-      nodes = Node.accessible_by_space(space).editable_by(@context).where(id: params[:ids], scope: space.uid)
+      nodes = Node.accessible_by_space(space).editable_by(@context).where(id: unsafe_params[:ids], scope: space.uid)
       nodes.each { |node| files += node.is_a?(Folder) ? node.all_files(Node.where(scope: space.uid)) : [node] }
     when "delete"
-      nodes = Node.accessible_by_space(space).editable_by(@context).where(id: params[:ids]).to_a
+      nodes = Node.accessible_by_space(space).editable_by(@context).where(id: unsafe_params[:ids]).to_a
       files += nodes
       nodes.each { |node| files += node.all_children if node.is_a?(Folder) }
     when "copy_to_cooperative"
-      nodes = Node.accessible_by_space(space).editable_by(@context).where(id: params[:ids], scope: space.uid)
+      nodes = Node.accessible_by_space(space).editable_by(@context).where(id: unsafe_params[:ids], scope: space.uid)
       nodes.each { |node| files += node.is_a?(Folder) ? node.all_files(Node.where(scope: space.uid)) : [node] }
     end
 
@@ -274,7 +284,7 @@ class SpacesController < ApplicationController
         id: file.id,
         name: file.name,
         type: file.klass,
-        fsPath: ([root_name] + file.ancestors(params[:scope]).map(&:name).reverse).compact.join(" / "),
+        fsPath: ([root_name] + file.ancestors(unsafe_params[:scope]).map(&:name).reverse).compact.join(" / "),
         viewURL: file.is_a?(UserFile) ? file_path(file) : pathify_folder(file),
       }
 
@@ -288,8 +298,8 @@ class SpacesController < ApplicationController
 
   def remove_folder
     service = FolderService.new(@context)
-    space = Space.accessible_by(@context).find(params[:id])
-    files = Node.editable_by(@context).where(id: params[:ids])
+    space = Space.accessible_by(@context).find(unsafe_params[:id])
+    files = Node.editable_by(@context).where(id: unsafe_params[:ids])
     res = service.remove(files)
 
     if res.success?
@@ -302,11 +312,11 @@ class SpacesController < ApplicationController
   end
 
   def publish_folder
-    space = Space.accessible_by(@context).find(params[:id])
+    space = Space.accessible_by(@context).find(unsafe_params[:id])
     files = UserFile
       .accessible_by_space(space)
       .editable_by(@context)
-      .where(id: params[:ids])
+      .where(id: unsafe_params[:ids])
 
     if files.size == 0
       flash[:error] = "No nodes selected"
@@ -327,11 +337,11 @@ class SpacesController < ApplicationController
   end
 
   def copy_folder_to_cooperative
-    space = Space.accessible_by(@context).find(params[:id])
+    space = Space.accessible_by(@context).find(unsafe_params[:id])
     files = UserFile
       .accessible_by_space(space)
       .editable_by(@context)
-      .where(id: params[:ids])
+      .where(id: unsafe_params[:ids])
 
     shared_space = space.shared_space
     if shared_space
@@ -339,15 +349,14 @@ class SpacesController < ApplicationController
     end
 
     flash[:success] = "#{new_files.count} file(s) successfully copied"
-    redirect_to :back
+    redirect_back(fallback_location: space_path(space)) and return
   end
 
   def copy_to_cooperative
-    space = Space.accessible_by(@context).find(params[:id])
-    object = item_from_uid(params[:object_id])
+    space = Space.accessible_by(@context).find(unsafe_params[:id])
+    object = item_from_uid(unsafe_params[:object_id])
 
     if space && object && space.shared_space
-
       ActiveRecord::Base.transaction do
         copy_service.copy(object, space.shared_space.uid).each do |new_object|
           SpaceEventService.call(space.shared_space.id, @context.user_id, nil, new_object, "copy_to_cooperative")
@@ -357,7 +366,7 @@ class SpacesController < ApplicationController
       flash[:success] = "#{object.class} successfully copied"
     end
 
-    redirect_to :back
+    redirect_back(fallback_location: space_path(space)) and return
   end
 
   def copy_service
@@ -369,21 +378,21 @@ class SpacesController < ApplicationController
   end
 
   def tasks
-    if params[:filter] == "all" && !@context.review_space_admin?
-      params[:filter] = "my"
+    if unsafe_params[:filter] == "all" && !@context.review_space_admin?
+      unsafe_params[:filter] = "my"
     end
 
-    case params[:filter]
+    case unsafe_params[:filter]
     when "created_by_me"
       filter = { user_id: @context.user_id }
     when "all"
       filter = {}
     else
-      params[:filter] = "my"
+      unsafe_params[:filter] = "my"
       filter = { assignee_id: @context.user_id }
     end
 
-    case params[:status]
+    case unsafe_params[:status]
     when "completed"
       @tasks = @space.tasks.where(filter).completed
       @page_title = 'Completed Tasks'
@@ -406,7 +415,7 @@ class SpacesController < ApplicationController
         complete: 'COMPLETE BY',
       }
     else
-      params[:status] = "awaiting_response"
+      unsafe_params[:status] = "awaiting_response"
       @tasks = @space.tasks.where(filter).awaiting_response
       @page_title = 'Awaiting Response Tasks'
       @dates_titles = {
@@ -435,23 +444,25 @@ class SpacesController < ApplicationController
 
   def notes
     @notes = Note.real_notes.accessible_by_space(@space)
-    @notes_list = @notes.order(title: :desc).page params[:notes_page]
+    @notes_list = @notes.order(title: :desc).page unsafe_params[:notes_page]
     js({ space_uid: @space.uid, scopes: @space.accessible_scopes_for_move })
   end
 
   def files
-    @folder_id = params[:folder_id]
+    @folder_id = unsafe_params[:folder_id]
     @folder = Folder.accessible_by_space(@space).find_by(id: @folder_id)
     @folders = folders(@folder_id)
+
     if request.xhr?
       render_folders(@folders)
       return
     end
 
-    nodes = Node.where.any_of(
-      UserFile.real_files.accessible_by_space(@space).where(scoped_parent_folder_id: @folder_id),
-      @folders
-    )
+    user_files = UserFile.real_files.
+      accessible_by_space(@space).
+      where(scoped_parent_folder_id: @folder_id)
+
+    nodes = Node.where(id: (user_files + @folders).map(&:id))
 
     @counts.merge!({ folders: folders.limit(1).count })
     @files_grid = initialize_grid(nodes.includes(:taggings), {
@@ -560,7 +571,7 @@ class SpacesController < ApplicationController
   end
 
   def apps_and_files
-    spaces = Space.where(id: params[:spaces].split(','))
+    spaces = Space.where(id: unsafe_params[:spaces].split(","))
 
     apps = {}
     files = {}
@@ -571,29 +582,21 @@ class SpacesController < ApplicationController
     end
 
     respond_to do |r|
-      r.html{ render json: { apps: apps, files: files } }
-      r.json{ render json: { apps: apps, files: files } }
+      r.html { render json: { apps: apps, files: files } }
+      r.json { render json: { apps: apps, files: files } }
     end
   end
 
   private
 
-  def fetch_membership
-    if @context.review_space_admin?
-      membership = @space.space_memberships.active.find_by(user_id: @context.user_id)
-      membership || SpaceMembership.new_by_admin(@context.user)
-    else
-      @space.space_memberships.active.find_by!(user_id: @context.user_id)
-    end
+  def space_params
+    params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser,
+                                  :space_type, :cts, :sponsor_org_handle, :space_template_id,
+                                  :sponsor_lead_dxuser, :restrict_to_template)
   end
 
-  def space_params
-    p = params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser,
-                                      :space_type, :cts, :sponsor_org_handle, :space_template_id,
-                                      :restrict_to_template)
-    p.require(:name)
-    p.require(:space_type)
-    p
+  def space_invite_params
+    params.require(:space).permit(:invitees, :invitees_role)
   end
 
   def update_space_params
@@ -637,11 +640,11 @@ class SpacesController < ApplicationController
   end
 
   def init_parent_folder
-    @parent_folder_id = params[:folder_id]
+    @parent_folder_id = unsafe_params[:folder_id]
   end
 
   def editable_space
-    space = Space.find(params[:id])
+    space = Space.find(unsafe_params[:id])
     not_found! unless space.editable_by?(@context)
     space
   end
@@ -654,12 +657,23 @@ class SpacesController < ApplicationController
     CopyService::FileCopier.new(api: @context.api, user: @context.user)
   end
 
-  def find_space_and_membership
-    @space = Space.accessible_by(@context).find_by_id(params[:id])
-    unless @space
-      redirect_to root_url
-      return
+  def fetch_membership
+    membership = @space.space_memberships.active.find_by(user_id: @context.user_id)
+
+    if membership.nil? && @context.review_space_admin?
+      SpaceMembership.new_by_admin(@context.user)
+    else
+      membership
     end
+  end
+
+  def find_space_and_membership
+    @space = Space.accessible_by(@context).find(params[:id])
+
+    unless @space
+      redirect_back(fallback_location: root_path, alert: "Space doesn't exist") && return
+    end
+
     @membership = fetch_membership
   end
 
@@ -676,6 +690,11 @@ class SpacesController < ApplicationController
   end
 
   def common_fields
-    { space_uid: @space.uid, scopes: @space.accessible_scopes_for_move, space_id: @space.id, active: @space.active? }
+    {
+      space_uid: @space.uid,
+      scopes: @space.accessible_scopes_for_move,
+      space_id: @space.id,
+      active: @space.active?,
+    }
   end
 end

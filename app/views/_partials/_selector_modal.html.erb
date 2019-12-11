@@ -1,88 +1,116 @@
-<div class="object-selector-modal selector-modal modal fade" data-bind="with: objectSelector, attr: {id: objectSelector.id}">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" data-bind="text: title"></h4>
-        <!-- ko if: help -->
-          <small class="text-muted" data-bind="text: help"></small>
-        <!-- /ko -->
-        <!-- ko if: hasError -->
-        <div class="alert alert-danger alert-single">
-          <strong><span class="fa fa-warning"></span> <span data-bind="text: error().type"></span></strong>
-          <div data-bind="text: error().message"></div>
-        </div>
-        <!-- /ko -->
-      </div>
-      <div class="modal-body modal-body-padless">
-        <!-- Nav tabs -->
-        <ul class="nav nav-pills nav-tabs-padded" role="tablist">
-          <!-- ko foreach: objectLists -->
-          <li role="presentation" data-bind="attr: {'data-classname': className}">
-            <a role="tab" data-toggle="tab" data-bind="attr: {href: '#tab-' + $parent.id + '-' + className}">
-              <span data-bind="text: name"></span>
-              <span class="badge" data-bind="visible: numFilteredObjects, text: numFilteredObjects"></span>
-            </a>
-          </li>
-          <!-- /ko -->
-        </ul>
+<div data-bind="template: { name: 'object-selector-modal-template', afterRender: objectSelector.addFilesScrollListener }"></div>
 
-        <!-- Tab panes -->
-        <div class="tab-content">
-          <!-- ko foreach: objectLists -->
-          <div role="tabpanel" class="tab-pane" data-bind="attr: {id: 'tab-' + $parent.id + '-' + className}">
-            <div data-bind="visible: isRelatedVisible()">
-              <div class="pfda-toolbar">
-                <a class="btn btn-default" data-bind="click: clearActiveRelated"><span class="fa fa-fw fa-chevron-left"></span> Back to <span data-bind="text: name"></span></a>
-              </div>
-              <div class="list-group" data-bind="template: {name: 'object-item-template', foreach: activeRelatedObjects}"></div>
+<script type="text/html" id="object-selector-modal-template">
+  <div class="object-selector-modal selector-modal modal fade modal-with-loader" data-bind="with: objectSelector,
+    attr: { id: objectSelector.id},
+    css: { loading: objectSelector.saving }"
+  >
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" data-bind="text: title"></h4>
+          <!-- ko if: help -->
+            <div>
+              <small class="text-muted" data-bind="text: help"></small>
             </div>
+          <!-- /ko -->
+          <!-- ko if: useFileLimit -->
+            <div>
+              <small class="text-muted" data-bind="text: filesNumhelp"></small>
+            </div>
+          <!-- /ko -->
+          <!-- ko if: hasError -->
+          <div class="alert alert-danger alert-single">
+            <strong><span class="fa fa-warning"></span> <span data-bind="text: error().type"></span></strong>
+            <div data-bind="text: error().message"></div>
+          </div>
+          <!-- /ko -->
+        </div>
 
-            <div data-bind="visible: !isRelatedVisible()">
-              <div class="objects-filter pfda-toolbar" data-bind="visible: !(className == 'selected' && $parent.selectionType == 'radio')">
-                <!-- ko if: className == 'selected' -->
-                  <input type="text" class="form-control input-lg input-square" placeholder="Filter..." data-bind="textInput: filterQuery" />
-                <!-- /ko -->
-                <!-- ko if: className != 'selected' -->
-                <div class="input-group">
-                  <input type="text" class="form-control input-lg input-square" placeholder="Filter..." data-bind="textInput: filterQuery" />
-                  <span class="input-group-btn">
-                    <div class="btn-group">
-                      <label class="btn btn-default btn-filter" data-bind="css: {active: selectorModel.filterByOwned}">
-                        <input type="checkbox" autocomplete="off" data-bind="checked: selectorModel.filterByOwned"> Only mine
-                      </label>
-                    </div>
-                  </span>
+        <div class="loader-container">
+          <div class="loader">
+            <i class="fa fa-spinner fa-spin"></i>
+          </div>
+        </div>
+
+        <div class="modal-body modal-body-padless">
+          <!-- Nav tabs -->
+          <ul class="nav nav-pills nav-tabs-padded" role="tablist">
+            <!-- ko foreach: objectLists -->
+            <li role="presentation" data-bind="attr: {'data-classname': className}">
+              <a role="tab" data-toggle="tab" data-bind="attr: {href: '#tab-' + $parent.id + '-' + className}">
+                <span data-bind="text: name"></span>
+                <span class="badge" data-bind="visible: numFilteredObjects, text: numFilteredObjects"></span>
+              </a>
+            </li>
+            <!-- /ko -->
+          </ul>
+
+          <!-- Tab panes -->
+          <div class="tab-content">
+            <!-- ko foreach: objectLists -->
+            <div role="tabpanel" class="tab-pane" data-bind="attr: {id: 'tab-' + $parent.id + '-' + className}">
+              <div data-bind="visible: isRelatedVisible()">
+                <div class="pfda-toolbar">
+                  <a class="btn btn-default" data-bind="click: clearActiveRelated"><span class="fa fa-fw fa-chevron-left"></span> Back to <span data-bind="text: name"></span></a>
                 </div>
-                <!-- /ko -->
+                <div class="list-group" data-bind="template: {name: 'object-item-template', foreach: activeRelatedObjects}"></div>
               </div>
-              <!-- ko if: !busy() -->
-                <!-- ko if: numFilteredObjects() > 0 -->
-                  <div class="list-group" data-bind="template: {name: 'object-item-template', foreach: objects.filtered}"></div>
+
+              <div data-bind="visible: !isRelatedVisible()">
+                <div class="objects-filter pfda-toolbar" data-bind="visible: !(className == 'selected' && $parent.selectionType == 'radio')">
+                  <!-- ko if: className == 'selected' -->
+                    <input type="text" class="form-control input-lg input-square" placeholder="Filter..." data-bind="value: filterQuery, event: {
+                      input: filterQueryOnInput
+                    }" />
+                  <!-- /ko -->
+                  <!-- ko if: className != 'selected' -->
+                  <div class="input-group">
+                    <input type="text" class="form-control input-lg input-square" placeholder="Filter..." data-bind="value: filterQuery, event: {
+                      input: filterQueryOnInput
+                    }" />
+                    <span class="input-group-btn">
+                      <div class="btn-group">
+                        <label class="btn btn-default btn-filter" data-bind="css: {active: selectorModel.filterByOwned}">
+                          <input type="checkbox" autocomplete="off" data-bind="checked: selectorModel.filterByOwned"> Only mine
+                        </label>
+                      </div>
+                    </span>
+                  </div>
+                  <!-- /ko -->
+                </div>
+                <!-- ko if: !busy() || (busy() && className == 'file') -->
+                  <!-- ko if: numFilteredObjects() > 0 -->
+                    <div class="list-group" data-bind="template: {name: 'object-item-template', foreach: objects.filtered}"></div>
+                  <!-- /ko -->
                 <!-- /ko -->
-                <!-- ko if: numFilteredObjects() == 0 -->
+                <!-- ko if: !busy() && numFilteredObjects() == 0 -->
                   <div class="alert alert-warning alert-single">No <span data-bind="text: className"></span> objects found</div>
                 <!-- /ko -->
-              <!-- /ko -->
-              <!-- ko if: busy() -->
-                <div class="precision-loading alert text-muted">Loading...</div>
+                <!-- ko if: busy() && className != 'file' -->
+                  <div class="precision-loading alert text-muted">Loading...</div>
+                <!-- /ko -->
+                <!-- ko if: className == 'file' -->
+                  <div class="pfda-padded text-muted" data-bind="style: {visibility: !busy() ? 'hidden' : ''}">Loading...</div>
+                <!-- /ko -->
+              </div>
               <!-- /ko -->
             </div>
             <!-- /ko -->
           </div>
-          <!-- /ko -->
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" data-bind="click: save, css: {disabled: !canSave()}, disable: !canSave()">
-          <span data-bind="text: saving() ? 'Selecting...':'Select'"></span>
-          <span class="badge" data-bind="visible: numSelected, text: numSelected"></span>
-        </button>
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" data-bind="click: save, css: {disabled: !canSave()}, disable: !canSave()">
+            <span data-bind="text: saving() ? 'Selecting...':'Select'"></span>
+            <span class="badge" data-bind="visible: numSelected, text: numSelected"></span>
+          </button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+</script>
 
 <script type="text/html" id="object-item-template">
   <div class="list-group-item" data-bind="css: {selectable: isSelectable, 'not-selectable': !isSelectable(), radio: selectionType == 'radio', checkbox: selectionType == 'checkbox'}">
@@ -91,10 +119,16 @@
         <label data-bind="attr: {title: uid}">
           <!-- ko if: isSelectable -->
             <!-- ko if: selectionType == "radio" -->
-              <input type="radio" data-bind="checked: selected, checkedValue: $data, attr: {name: $parent.className == 'selected' ? 'selected-object' : 'list-selected-object'}">
+              <input type="radio" data-bind="
+                checked: selected,
+                checkedValue: $data,
+                attr: {
+                  name: $parent.className == 'selected' ? 'selected-object' : 'list-selected-object'
+                }
+              ">
             <!-- /ko -->
             <!-- ko if: selectionType == "checkbox" -->
-              <input type="checkbox" data-bind="checked: selected, checkedValue: $data">
+              <input type="checkbox" data-bind="checked: selected, checkedValue: $data, disable: disabledToCheck">
             <!-- /ko -->
           <!-- /ko -->
           <span data-bind="css: classIcon" aria-hidden="true"></span> <span class="object-name" data-bind="text: title"></span>
@@ -105,6 +139,9 @@
                 <span data-bind="text: scopeFormatted" class="text-capitalize"></span>
               </li>
               <!-- ko if: loaded -->
+                <!-- ko if: className() == 'file' && showFolderName() -->
+                  <li data-bind="text: parentFolderName"></li>
+                <!-- /ko -->
               <li data-bind="text: userName"></li>
               <li data-bind="text: orgName"></li>
                 <!-- ko if: _.size(all_tags_list()) -->

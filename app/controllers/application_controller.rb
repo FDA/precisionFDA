@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   include PathHelper
+
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
@@ -30,6 +31,10 @@ class ApplicationController < ActionController::Base
   add_flash_types :success, :error
 
   private
+
+  def unsafe_params
+    @unsafe_params ||= params.to_unsafe_h
+  end
 
   def invalid_token
     redirect_to root_path, status: :see_other, alert: "Invalid session"
@@ -230,50 +235,50 @@ class ApplicationController < ActionController::Base
   end
 
   def get_item_array_from_params
-    if params[:workflow_id].present?
-      workflow = Workflow.find_by_uid(params[:workflow_id])
+    if unsafe_params[:workflow_id].present?
+      workflow = Workflow.find_by_uid(unsafe_params[:workflow_id])
       return [workflow]
     end
-    if params[:discussion_id].present?
-      discussion = Discussion.find(params[:discussion_id])
-      if params[:answer_id].present?
-        user = User.find_by!(dxuser: params[:answer_id])
-        answer = Answer.find_by!(discussion_id: params[:discussion_id], user_id: user.id)
+    if unsafe_params[:discussion_id].present?
+      discussion = Discussion.find(unsafe_params[:discussion_id])
+      if unsafe_params[:answer_id].present?
+        user = User.find_by!(dxuser: unsafe_params[:answer_id])
+        answer = Answer.find_by!(discussion_id: unsafe_params[:discussion_id], user_id: user.id)
         return [discussion, answer]
       else
         return [discussion]
       end
-    elsif params[:meta_appathon_id].present?
-        meta_appathon = MetaAppathon.find(params[:meta_appathon_id])
-        if params[:appathon_id].present?
-          appathon = Appathon.find_by!(meta_appathon_id: params[:meta_appathon_id], id: params[:appathon_id])
+    elsif unsafe_params[:meta_appathon_id].present?
+        meta_appathon = MetaAppathon.find(unsafe_params[:meta_appathon_id])
+        if unsafe_params[:appathon_id].present?
+          appathon = Appathon.find_by!(meta_appathon_id: unsafe_params[:meta_appathon_id], id: unsafe_params[:appathon_id])
           return [meta_appathon, appathon]
         else
           return [meta_appathon]
         end
-    elsif params[:appathon_id].present?
-      return [Appathon.find(params[:appathon_id])]
-    elsif params[:note_id].present?
-      return [Note.find(params[:note_id])]
-    elsif params[:task_id].present?
-      task = Task.find(params[:task_id])
+    elsif unsafe_params[:appathon_id].present?
+      return [Appathon.find(unsafe_params[:appathon_id])]
+    elsif unsafe_params[:note_id].present?
+      return [Note.find(unsafe_params[:note_id])]
+    elsif unsafe_params[:task_id].present?
+      task = Task.find(unsafe_params[:task_id])
       return [task.space, task]
-    elsif params[:space_id].present?
-      return [Space.find(params[:space_id])]
-    elsif params[:comparison_id].present?
-      return [Comparison.find(params[:comparison_id])]
-    elsif params[:file_id].present?
-      return [UserFile.find_by_uid!(params[:file_id])]
-    elsif params[:asset_id].present?
-      return [Asset.find_by_uid!(params[:asset_id])]
-    elsif params[:job_id].present?
-      return [Job.find_by_uid!(params[:job_id])]
-    elsif params[:app_id].present?
-      return [App.find_by_uid!(params[:app_id])]
-    elsif params[:expert_id].present?
-      expert = Expert.find(params[:expert_id])
-      if params[:expert_question_id].present?
-        return [expert, ExpertQuestion.find(params[:expert_question_id])]
+    elsif unsafe_params[:space_id].present?
+      return [Space.find(unsafe_params[:space_id])]
+    elsif unsafe_params[:comparison_id].present?
+      return [Comparison.find(unsafe_params[:comparison_id])]
+    elsif unsafe_params[:file_id].present?
+      return [UserFile.find_by_uid!(unsafe_params[:file_id])]
+    elsif unsafe_params[:asset_id].present?
+      return [Asset.find_by_uid!(unsafe_params[:asset_id])]
+    elsif unsafe_params[:job_id].present?
+      return [Job.find_by_uid!(unsafe_params[:job_id])]
+    elsif unsafe_params[:app_id].present?
+      return [App.find_by_uid!(unsafe_params[:app_id])]
+    elsif unsafe_params[:expert_id].present?
+      expert = Expert.find(unsafe_params[:expert_id])
+      if unsafe_params[:expert_question_id].present?
+        return [expert, ExpertQuestion.find(unsafe_params[:expert_question_id])]
       end
       return [expert]
     end
@@ -285,6 +290,7 @@ class ApplicationController < ActionController::Base
 
     accessible = object.accessible_by?(@context)
     item_sliced = object.context_slice(@context, *object.describe_fields)
+    scope = item_sliced[:scope]
     review_space = object.space_object if object.in_space?
 
     describe = {
@@ -292,11 +298,13 @@ class ApplicationController < ActionController::Base
       uid: item_sliced[:uid],
       className: item_sliced[:klass],
       fa_class: view_context.fa_class(object),
-      scope: item_sliced[:scope],
+      scope: scope,
       path: accessible ? pathify(object) : nil,
       owned: object.owned_by?(@context),
       editable: object.editable_by?(@context),
       accessible: accessible,
+      file_path: object.is_a?(UserFile) ? object.file_full_path(scope) : nil,
+      parent_folder_name: object.is_a?(UserFile) ? object.parent_folder_name(scope) : nil,
       public: object.public?,
       private: object.private?,
       in_space: object.in_space?,
@@ -395,5 +403,9 @@ class ApplicationController < ActionController::Base
     response.headers['Cache-Control'] = 'no-cache, no-store, max-age=0, must-revalidate, private'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
+  end
+
+  def container
+    @container ||= IOC::Container.new(@context.token, @context.user)
   end
 end

@@ -1,3 +1,6 @@
+<div data-bind="template: { name: 'wf-object-selector-modal-template', afterRender: selectorModel.objectSelector.addFilesScrollListener }"></div>
+
+<script type="text/html" id="wf-object-selector-modal-template">
 <div class="object-selector-modal selector-modal modal fade" data-bind="with: selectorModel.objectSelector, attr: {id: selectorModel.objectSelector.id}">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -81,6 +84,8 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+</script>
+
 
 <script type="text/html" id="object-item-template">
   <div class="list-group-item" data-bind="css: {selectable: isSelectable, 'not-selectable': !isSelectable(), radio: selectionType == 'radio', checkbox: selectionType == 'checkbox'}">
@@ -103,6 +108,9 @@
                 <span data-bind="text: scopeFormatted" class="text-capitalize"></span>
               </li>
               <!-- ko if: loaded -->
+                <!-- ko if: className() == 'file' && showFolderName() -->
+                <li data-bind="text: parentFolderName"></li>
+                <!-- /ko -->
               <li data-bind="text: userName"></li>
               <!-- ko if: _.size(all_tags_list()) -->
               <li>

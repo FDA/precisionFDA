@@ -39,9 +39,10 @@ You can access it at the following GitHub repo:
 
 https://github.com/RealTimeGenomics/rtg-tools
 
-## Links
+## Development setup
 
-To set up development environment you can choose either:
+To set up development environment please refer to [Development Setup](docs/DEVELOPMENT_SETUP.md).
 
-* [Localhost Setup](docs/LOCAL_INSTALL.md)
-* [Docker setup](docs/DOCKER_SETUP.md)
+## Using udocker
+
+To use udocker please refer to [udocker user manual](https://github.com/indigo-dc/udocker/blob/master/doc/user_manual.md).

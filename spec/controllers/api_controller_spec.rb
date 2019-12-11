@@ -1,4 +1,5 @@
 require "rails_helper"
+# rubocop:disable RSpec/AnyInstance
 
 RSpec.describe ApiController, type: :controller do
   let(:user) { create(:user, dxuser: "user") }
@@ -58,6 +59,111 @@ RSpec.describe ApiController, type: :controller do
     end
   end
 
+  describe "POST related_to_publish" do
+    let(:app_series) { create(:app_series) }
+    let(:app) { create(:app, app_series_id: app_series.id) }
+    let(:job) { create(:job, app_id: app.id, app_series_id: app_series.id) }
+
+    before do
+      authenticate!(user)
+      allow_any_instance_of(SpaceService::Publishing).
+        to receive(:scope_check).
+        with(params[:scope]).
+        and_return(scope: params[:scope])
+    end
+
+    context "when api call with app" do
+      let(:params) do
+        {
+          uid: app.uid,
+          scope: review_space_uid,
+        }
+      end
+
+      before do
+        allow_any_instance_of(App).to receive(:accessible_by?).and_return(true)
+      end
+
+      it "returns a content_type 'json'" do
+        post :related_to_publish, params: params
+        expect(response.content_type).to eq "application/json"
+      end
+
+      it "returns a http_status 200" do
+        post :related_to_publish, params: params
+        expect(response).to have_http_status 200
+      end
+
+      it "returns an empty array of children for the App object" do
+        post :related_to_publish, params: params
+        expect(parsed_response).to eq []
+      end
+    end
+
+    context "when api call with job" do
+      let(:params) do
+        {
+          uid: job.uid,
+          scope: review_space_uid,
+        }
+      end
+
+      before do
+        allow_any_instance_of(Job).to receive(:accessible_by?).and_return(true)
+        allow_any_instance_of(App).to receive(:accessible_by?).and_return(true)
+      end
+
+      it "returns a content_type 'json'" do
+        post :related_to_publish, params: params
+        expect(response.content_type).to eq "application/json"
+      end
+
+      it "returns a http_status 200" do
+        post :related_to_publish, params: params
+        expect(response).to have_http_status 200
+      end
+
+      it "returns a non empty array of children for the Job object" do
+        post :related_to_publish, params: params
+        expect(parsed_response).not_to eq []
+      end
+
+      it "returns an array of children contains an App object" do
+        post :related_to_publish, params: params
+        expect(parsed_response[0]["uid"]).to eq app.uid
+      end
+
+      it "returns an array where child contains path and fa_class of an App object" do
+        post :related_to_publish, params: params
+        child = parsed_response[0]
+        expect(child["path"]).to eq "/apps/".concat(app.uid)
+        expect(child["fa_class"]).to eq "fa-cube"
+      end
+
+      context "when app is public" do
+        before do
+          app.update(scope: "public")
+        end
+
+        it "returns an empty array of children for the App object" do
+          post :related_to_publish, params: params
+          expect(parsed_response).to eq []
+        end
+      end
+
+      context "when app is published in a space" do
+        before do
+          app.update(scope: review_space_uid)
+        end
+
+        it "returns an empty array of children for the App object" do
+          post :related_to_publish, params: params
+          expect(parsed_response).to eq []
+        end
+      end
+    end
+  end
+
   describe "POST folder_tree has no user's files and folders" do
     let(:params) do
       {
@@ -73,18 +179,18 @@ RSpec.describe ApiController, type: :controller do
 
     context "js api" do
       it "returns a content_type 'json'" do
-        post :folder_tree, params
+        post :folder_tree, params: params
         expect(response.content_type).to eq "application/json"
       end
 
       it "returns a http_status 200" do
-        post :folder_tree, params
+        post :folder_tree, params: params
         expect(response).to have_http_status(200)
       end
 
       it "returns an empty tree of zero size" do
         allow_any_instance_of(User).to receive(:space_uids).and_return([review_space_uid])
-        post :folder_tree, params
+        post :folder_tree, params: params
         expect(parsed_response.size).to eq 0
         expect(parsed_response).to eq([])
       end
@@ -106,24 +212,24 @@ RSpec.describe ApiController, type: :controller do
 
     context "js api" do
       it "returns a content_type 'json'" do
-        post :folder_tree, params
+        post :folder_tree, params: params
         expect(response.content_type).to eq "application/json"
       end
 
       it "returns a http_status 200" do
-        post :folder_tree, params
+        post :folder_tree, params: params
         expect(response).to have_http_status(200)
       end
 
       it "returns a tree of folder of proper size" do
         allow_any_instance_of(User).to receive(:space_uids).and_return([verified_space_uid])
-        post :folder_tree, params
+        post :folder_tree, params: params
         expect(parsed_response.size).to eq 2
       end
 
       it "returns a tree of folder with proper content" do
         allow_any_instance_of(User).to receive(:space_uids).and_return([verified_space_uid])
-        post :folder_tree, params
+        post :folder_tree, params: params
 
         expect(parsed_response.first["uid"].first(5)).to eq("file-")
         expect(parsed_response.first["type"]).to eq("UserFile")
@@ -138,7 +244,7 @@ RSpec.describe ApiController, type: :controller do
         before { expire_session! }
 
         it "returns a response with unauthorized http status" do
-          post :folder_tree, params
+          post :folder_tree, params: params
           expect(response).to have_http_status(401)
         end
       end
@@ -148,7 +254,7 @@ RSpec.describe ApiController, type: :controller do
       before { response_with_authorization_key!(user) }
 
       it "returns a http_status 200" do
-        post :folder_tree, params
+        post :folder_tree, params: params
         expect(response).to have_http_status(200)
       end
 
@@ -156,24 +262,24 @@ RSpec.describe ApiController, type: :controller do
         before { expire_session! }
 
         it "returns a content_type 'json'" do
-          post :folder_tree, params
+          post :folder_tree, params: params
           expect(response.content_type).to eq "application/json"
         end
 
         it "returns a tree of folder" do
-          post :folder_tree, params
+          post :folder_tree, params: params
           expect(response).to have_http_status(200)
         end
 
         it "returns a tree of folder of proper size" do
           allow_any_instance_of(User).to receive(:space_uids).and_return([review_space_uid])
-          post :folder_tree, params
+          post :folder_tree, params: params
           expect(parsed_response.size).to eq 2
         end
 
         it "returns a tree of folder with proper content" do
           allow_any_instance_of(User).to receive(:space_uids).and_return([review_space_uid])
-          post :folder_tree, params
+          post :folder_tree, params: params
 
           expect(parsed_response.first["uid"].first(5)).to eq("file-")
           expect(parsed_response.first["type"]).to eq("UserFile")
@@ -213,22 +319,22 @@ RSpec.describe ApiController, type: :controller do
 
     context "js api" do
       it "returns a content_type 'json'" do
-        post :folder_tree, params
+        post :folder_tree, params: params
         expect(response.content_type).to eq "application/json"
       end
 
       it "returns a http_status 200" do
-        post :folder_tree, params
+        post :folder_tree, params: params
         expect(response).to have_http_status(200)
       end
 
       it "returns a tree of folder of proper size" do
-        post :folder_tree, params
+        post :folder_tree, params: params
         expect(parsed_response.size).to eq 3
       end
 
       it "returns a tree of folder with proper content" do
-        post :folder_tree, params
+        post :folder_tree, params: params
 
         expect(parsed_response.first["uid"].first(5)).to eq("file-")
         expect(parsed_response.first["type"]).to eq("UserFile")
@@ -272,22 +378,22 @@ RSpec.describe ApiController, type: :controller do
 
     context "js api" do
       it "returns a content_type 'json'" do
-        post :folder_tree, params
+        post :folder_tree, params: params
         expect(response.content_type).to eq "application/json"
       end
 
       it "returns a http_status 200" do
-        post :folder_tree, params
+        post :folder_tree, params: params
         expect(response).to have_http_status(200)
       end
 
       it "returns a tree of folder of proper size with space member file" do
-        post :folder_tree, params
+        post :folder_tree, params: params
         expect(parsed_response.size).to eq 4
       end
 
       it "returns a tree of folder with proper content with space member file" do
-        post :folder_tree, params
+        post :folder_tree, params: params
 
         expect(parsed_response.first["uid"].first(5)).to eq("file-")
         expect(parsed_response.first["type"]).to eq("UserFile")
@@ -334,22 +440,22 @@ RSpec.describe ApiController, type: :controller do
 
     context "js api" do
       it "returns a content_type 'json'" do
-        post :folder_tree, params
+        post :folder_tree, params: params
         expect(response.content_type).to eq "application/json"
       end
 
       it "returns a http_status 200" do
-        post :folder_tree, params
+        post :folder_tree, params: params
         expect(response).to have_http_status(200)
       end
 
       it "returns a tree of folder of proper size with space member file" do
-        post :folder_tree, params
+        post :folder_tree, params: params
         expect(parsed_response.size).to eq 4
       end
 
       it "returns a tree of folder with proper content with space member file" do
-        post :folder_tree, params
+        post :folder_tree, params: params
 
         expect(parsed_response.first["uid"].first(5)).to eq("file-")
         expect(parsed_response.first["type"]).to eq("UserFile")
@@ -370,7 +476,245 @@ RSpec.describe ApiController, type: :controller do
     end
   end
 
-  describe "POST create_file"  do
+  describe "POST files_regex_search" do
+    before do
+      authenticate!(user)
+    end
+
+    context "with valid search RegEx string" do
+      let(:params) do
+        {
+          page: 1,
+          search_string: "abc",
+          flag: "ig",
+          scopes: %w(private),
+        }
+      end
+
+      before { post :files_regex_search, params: params }
+
+      it "returns a content_type 'json'" do
+        expect(response.content_type).to eq "application/json"
+      end
+
+      it "returns a http_status 200" do
+        expect(response).to have_http_status(200)
+      end
+    end
+
+    context "with invalid search RegEx string" do
+      let(:params) do
+        {
+          page: 1,
+          search_string: "*",
+          flag: "ig",
+          scopes: %w(private),
+        }
+      end
+
+      before { post :files_regex_search, params: params }
+
+      it "returns a content_type 'json'" do
+        expect(response.content_type).to eq "application/json"
+      end
+
+      it "returns a http_status 422" do
+        expect(response).to have_http_status(422)
+      end
+
+      it "returns an error message" do
+        expect(parsed_response["error"]["message"]).to include "RegEx Invalid:"
+        expect(parsed_response["error"]["type"]).to eq "API Error"
+      end
+    end
+
+    context "when user has no any user's files" do
+      let(:params) do
+        {
+          page: 1,
+          search_string: "abc",
+          flag: "ig",
+          scopes: %w(private),
+        }
+      end
+
+      before do
+        allow_any_instance_of(User).to receive(:space_uids).and_return([review_space_uid])
+        post :files_regex_search, params: params
+      end
+
+      context "with js api" do
+        it "returns a content_type 'json'" do
+          expect(response.content_type).to eq "application/json"
+        end
+
+        it "returns a http_status 200" do
+          expect(response).to have_http_status(200)
+        end
+
+        it "has no any files and folders" do
+          expect(UserFile.all.count).to eq 0
+          expect(Folder.all.count).to eq 0
+        end
+
+        it "returns an empty tree of zero size" do
+          expect(parsed_response["search_result"]).to eq []
+        end
+      end
+    end
+
+    context "when user has user's files in 'private' scope in folders" do
+      let(:params) do
+        {
+          page: 1,
+          search_string: "fil",
+          flag: "ig",
+          scopes: %w(private),
+        }
+      end
+
+      before do
+        allow_any_instance_of(User).to receive(:space_uids).and_return([verified_space_uid])
+        file_one.update(user_id: user.id)
+        file_two.update(user_id: user.id, parent_folder_id: folder_one.id)
+        file_three.update(user_id: user.id, parent_folder_id: folder_two.id)
+        file_four.update(user_id: user.id, parent_folder_id: folder_two.id)
+        folder_one.update(user_id: user.id)
+        folder_two.update(user_id: user.id, scope: verified_space_uid)
+
+        post :files_regex_search, params: params
+      end
+
+      context "with js api" do
+        let(:result) { parsed_response["search_result"] }
+
+        it "returns a content_type 'json'" do
+          expect(response.content_type).to eq "application/json"
+        end
+
+        it "returns a http_status 200" do
+          expect(response).to have_http_status(200)
+        end
+
+        it "returns a search result of proper size" do
+          expect(result.size).to eq 3
+        end
+
+        it "returns a search result with a proper content of first result" do
+          expect(result.first["title"]).to eq(file_four.name)
+          expect(result.first["path"]).to eq("/#{folder_two.name}/")
+        end
+
+        it "returns a search result with a proper content of second result" do
+          expect(result.second["title"]).to eq(file_three.name)
+          expect(result.second["path"]).to eq("/#{folder_two.name}/")
+        end
+
+        it "returns a search result with a proper content of third result" do
+          expect(result.third["title"]).to eq(file_one.name)
+          expect(result.third["path"]).to eq("/")
+        end
+      end
+
+      context "with no request to return found files uids" do
+        let(:params) do
+          {
+            page: 1,
+            search_string: "fil",
+            flag: "ig",
+            scopes: %w(private),
+            uids: nil,
+          }
+        end
+
+        it "returns a content_type 'json' with http status 200" do
+          expect(response.content_type).to eq "application/json"
+          expect(response).to have_http_status(200)
+        end
+
+        it "do not return an array of found files uids" do
+          expect(parsed_response["uids"]).to eq []
+        end
+      end
+
+      context "with request to return found files uids array" do
+        let(:params) do
+          {
+            page: 1,
+            search_string: "fil",
+            flag: "ig",
+            scopes: %w(private),
+            uids: true,
+          }
+        end
+
+        it "returns a content_type 'json' with http status 200" do
+          expect(response.content_type).to eq "application/json"
+          expect(response).to have_http_status(200)
+        end
+
+        it "returns an array of found files uids" do
+          expect(parsed_response["uids"]).to include(file_one.uid && file_two.uid && file_three.uid)
+        end
+      end
+    end
+
+    context "when user has user's files in a space scope" do
+      let(:params) do
+        {
+          page: 1,
+          search_string: "fil",
+          flag: "ig",
+          scopes: [review_space_uid, verified_space_uid],
+        }
+      end
+
+      before do
+        allow_any_instance_of(User).
+          to receive(:space_uids).and_return([review_space_uid, verified_space_uid])
+        file_one.update(user_id: user.id)
+        file_two.update(user_id: user.id, parent_folder_id: folder_one.id)
+        file_three.update(
+          user_id: user.id,
+          scoped_parent_folder_id: folder_two.id,
+          scope: review_space_uid,
+        )
+        file_four.update(
+          user_id: user.id,
+          scoped_parent_folder_id: folder_two.id,
+          scope: verified_space_uid,
+        )
+        folder_one.update(user_id: user.id)
+        folder_two.update(user_id: user.id, scope: verified_space_uid)
+
+        post :files_regex_search, params: params
+      end
+
+      context "with js api" do
+        let(:result) { parsed_response["search_result"] }
+
+        it "returns a content_type 'json'" do
+          expect(response.content_type).to eq "application/json"
+        end
+
+        it "returns a http_status 200" do
+          expect(response).to have_http_status(200)
+        end
+
+        it "returns a search result of proper size" do
+          expect(result.size).to eq 2
+        end
+
+        it "returns a search result with a proper content" do
+          expect(result.first["title"]).to eq(file_four.name)
+          expect(result.second["title"]).to eq(file_three.name)
+          expect(result.second["path"]).to eq("/#{folder_two.name}/")
+        end
+      end
+    end
+  end
+
+  describe "POST create_file" do
     before do
       authenticate!(user)
 
@@ -384,7 +728,7 @@ RSpec.describe ApiController, type: :controller do
     context "when sends a file with incorrect params" do
       context "with empty name" do
         it "doesn't create a file" do
-          post :create_file, description: "some_desc"
+          post :create_file, params: { description: "some_desc" }
 
           expect(response).to_not have_http_status(200)
         end
@@ -393,7 +737,7 @@ RSpec.describe ApiController, type: :controller do
 
     context "when sends a file with correct params" do
       it "creates a file" do
-        post :create_file, name: "some_name", description: "some_desc"
+        post :create_file, params: { name: "some_name", description: "some_desc" }
 
         expect(response).to have_http_status(200)
 
@@ -406,14 +750,14 @@ RSpec.describe ApiController, type: :controller do
       end
 
       it "creates a private file" do
-        post :create_file, name: anything, public_scope: false
+        post :create_file, params: { name: anything, public_scope: false }
 
         expect(UserFile.last.project).to eq(user.private_files_project)
         expect(UserFile.last.scope).to eq("private")
       end
 
       it "creates a public file" do
-        post :create_file, name: anything, public_scope: true
+        post :create_file, params: { name: anything, public_scope: true }
 
         expect(UserFile.last.project).to eq(user.public_files_project)
         expect(UserFile.last.scope).to eq("public")
@@ -421,7 +765,7 @@ RSpec.describe ApiController, type: :controller do
 
       context "when public_scope param doesn't exist" do
         it "creates a private file" do
-          post :create_file, name: anything
+          post :create_file, params: { name: anything }
 
           expect(UserFile.last.project).to eq(user.private_files_project)
           expect(UserFile.last.scope).to eq("private")
@@ -429,4 +773,5 @@ RSpec.describe ApiController, type: :controller do
       end
     end
   end
+  # rubocop:enable RSpec/AnyInstance
 end

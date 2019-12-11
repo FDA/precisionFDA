@@ -1,6 +1,5 @@
 module Rack
   class PermanentRedirect
-
     def initialize(app)
       @app = app
     end
@@ -38,6 +37,5 @@ module Rack
     def permanent_redirect(location)
       [301, { 'Location' => location, 'Content-Type' => 'text/html' }, ['Moved Permanently']]
     end
-
   end
 end

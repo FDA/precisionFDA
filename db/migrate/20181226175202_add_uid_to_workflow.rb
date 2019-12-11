@@ -1,4 +1,4 @@
-class AddUidToWorkflow < ActiveRecord::Migration
+class AddUidToWorkflow < ActiveRecord::Migration[4.2]
   def change
     add_column :workflows, :uid, :string
 

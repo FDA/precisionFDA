@@ -3,19 +3,19 @@
 # Table name: comparisons
 #
 #  id          :integer          not null, primary key
-#  name        :string
-#  description :text
+#  name        :string(255)
+#  description :text(65535)
 #  user_id     :integer
-#  state       :string
-#  dxjobid     :string
-#  project     :string
-#  meta        :text
+#  state       :string(255)
+#  dxjobid     :string(255)
+#  project     :string(255)
+#  meta        :text(65535)
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
-#  scope       :string
+#  scope       :string(255)
 #
 
-class Comparison < ActiveRecord::Base
+class Comparison < ApplicationRecord
   include Auditor
   include Permissions
 
@@ -24,25 +24,25 @@ class Comparison < ActiveRecord::Base
   # comparison.user => returns the user who created the comparison
   belongs_to :user
 
-  # comparison.user_files => returns the collection of UserFile
-  # objects which participated in this comparison
-  has_many :user_files, {through: :inputs}
-
   # comparison.inputs => returns the collection of ComparisonInput
   # objects associated with this comparison
-  has_many :inputs, {class_name: "ComparisonInput", dependent: :destroy}
+  has_many :inputs, class_name: "ComparisonInput", dependent: :destroy
+
+  # comparison.user_files => returns the collection of UserFile
+  # objects which participated in this comparison
+  has_many :user_files, through: :inputs
 
   # comparison.outputs => returns the UserFile objects that are
   # part of the comparison outputs. These UserFile objects have
   # 'parent' set to this comparison, hence do not participate
   # in usual UserFile queries as they don't match the default
   # scope of UserFile (which is set to 'parent_type != Comparison')
-  has_many :outputs, {class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'}
+  has_many :outputs, class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'
 
-  has_many :notes, {through: :attachments}
-  has_many :attachments, {as: :item, dependent: :destroy}
+  has_many :attachments, as: :item, dependent: :destroy
+  has_many :notes, through: :attachments
 
-  store :meta, {coder: JSON}
+  store :meta, coder: JSON
 
   acts_as_commentable
   acts_as_taggable
@@ -120,7 +120,7 @@ class Comparison < ActiveRecord::Base
     comparisons.uniq.each do |comparison|
       next unless comparison.publishable_by?(context, scope)
       comparisons_to_publish << comparison
-      comparison.outputs.flatten.each do |file|
+      comparison.outputs.to_a.flatten.each do |file|
         raise "Consistency check failure for file #{file.id} (#{file.dxid})" unless file.passes_consistency_check?(context.user)
         raise "Source and destination collision for file #{file.id} (#{file.dxid})" if destination_project == file.project
         projects[file.project] = [] unless projects.has_key?(file.project)

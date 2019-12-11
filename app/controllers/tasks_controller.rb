@@ -75,7 +75,7 @@ class TasksController < ApplicationController
 
   def create
     service = TaskService.new(@context)
-    @task = service.add_task(params)
+    @task = service.add_task(unsafe_params)
 
     result = @task.save ? Rats.success(@task) : Rats.failure(@task.errors.messages)
 
@@ -90,7 +90,7 @@ class TasksController < ApplicationController
   end
 
   def update
-    task = Task.find(params[:id])
+    task = Task.find(unsafe_params[:id])
     if TaskPolicy.can_edit?(task, @membership)
       task.update_task(editable_params)
     end
@@ -98,7 +98,7 @@ class TasksController < ApplicationController
   end
 
   def destroy
-    task = Task.find(params[:id])
+    task = Task.find(unsafe_params[:id])
     space_id = task.space_id
 
     if TaskPolicy.can_delete?(task, @membership) && (task.editable_by?(@context) || task.source_user?(@context))
@@ -126,8 +126,8 @@ class TasksController < ApplicationController
         task.declined!
         task.update(response_time: Time.now)
         SpaceEventService.call(task.space_id, @context.user_id, @membership, task, :task_declined)
-        if params.dig(:comment, :body).presence
-          comment = Comment.build_from(task, @context.user_id, params[:comment][:body])
+        if unsafe_params.dig(:comment, :body).present?
+          comment = Comment.build_from(task, @context.user_id, unsafe_params[:comment][:body])
           comment.save
         end
       end
@@ -151,8 +151,8 @@ class TasksController < ApplicationController
       if TaskPolicy.can_make_active?(task, @membership)
         task.accepted!
         task.update(complete_time: nil)
-        if params.dig(:comment, :body).presence
-          comment = Comment.build_from(task, @context.user_id, params[:comment][:body])
+        if unsafe_params.dig(:comment, :body).present?
+          comment = Comment.build_from(task, @context.user_id, unsafe_params[:comment][:body])
           comment.save
         end
         SpaceEventService.call(task.space_id, @context.user_id, @membership, task, :task_reopened)
@@ -166,8 +166,8 @@ class TasksController < ApplicationController
       if TaskPolicy.can_reopen?(task, @membership)
         task.open!
         task.update(complete_time: nil, response_time: nil)
-        if params.dig(:comment, :body).presence
-          comment = Comment.build_from(task, @context.user_id, params[:comment][:body])
+        if unsafe_params.dig(:comment, :body).present?
+          comment = Comment.build_from(task, @context.user_id, unsafe_params[:comment][:body])
           comment.save
         end
         SpaceEventService.call(task.space_id, @context.user_id, @membership, task, :task_reopened)
@@ -178,22 +178,22 @@ class TasksController < ApplicationController
 
   def reassign
     if TaskPolicy.can_reassign?(@task, @membership)
-      assignee = User.find_by_id(params[:task][:assignee_id])
+      assignee = User.find_by_id(unsafe_params[:task][:assignee_id])
       if assignee
         @task.update(assignee_id: assignee.id, status: 0)
-        if params.dig(:comment, :body).presence
-          comment = Comment.build_from(@task, @context.user_id, params[:comment][:body])
+        if unsafe_params.dig(:comment, :body).present?
+          comment = Comment.build_from(@task, @context.user_id, unsafe_params[:comment][:body])
           comment.save
         end
         SpaceEventService.call(@task.space_id, @context.user_id, @membership, @task, :task_reassigned)
       end
     end
 
-    redirect_to :back, status: :see_other rescue redirect_to tasks_space_path(@task.space_id)
+    redirect_back(fallback_location: space_task_path(@task), status: :see_other)
   end
 
   def copy
-    @space = Space.accessible_by(@context).find(params[:space_id])
+    @space = Space.accessible_by(@context).find(unsafe_params[:space_id])
     @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
 
     attributes = @task.attributes.merge(assignee_id: @task.assignee.dxuser)
@@ -214,13 +214,13 @@ class TasksController < ApplicationController
   end
 
   def find_task
-    @task = Task.find(params[:id])
+    @task = Task.find(unsafe_params[:id])
   rescue
-    redirect_to tasks_space_path(params[:space_id], filter: :my, status: :awaiting_response)
+    redirect_to tasks_space_path(unsafe_params[:space_id], filter: :my, status: :awaiting_response)
   end
 
   def find_tasks
-    @tasks = Task.find(params[:task_ids] || [])
+    @tasks = Task.find(unsafe_params[:task_ids] || [])
   end
 
   def fetch_membership
@@ -233,7 +233,7 @@ class TasksController < ApplicationController
   end
 
   def find_space_and_membership
-    @space = Space.accessible_by(@context).find(params[:space_id])
+    @space = Space.accessible_by(@context).find(unsafe_params[:space_id])
     @membership = fetch_membership
   end
 end

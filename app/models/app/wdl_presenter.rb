@@ -2,8 +2,10 @@ class App
   class WdlPresenter
     include ActiveModel::Validations
 
+    # TODO: it's better to upload these two as assets and do not download them every time!
     CROMWELL_LINK =
-      "https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar".freeze
+      "https://github.com/broadinstitute/cromwell/releases/download/44/cromwell-44.jar".freeze
+    UDOCKER_LINK = "https://download.ncg.ingrid.pt/webdav/udocker/udocker-1.1.2.tar.gz".freeze
 
     validate :wdl_object_should_be_valid
     validates :tasks, length: { is: 1, message: "number is wrong" }
@@ -37,7 +39,7 @@ class App
         {
           name: input.name,
           class: input.pfda_type,
-          optional: false,
+          optional: input.optional?,
           label: "",
           help: "",
         }
@@ -49,7 +51,7 @@ class App
         {
           name: output.name,
           class: output.pfda_type,
-          optional: false,
+          optional: output.optional?,
           label: "",
           help: "",
         }
@@ -71,22 +73,72 @@ class App
       end
     end
 
+    # How to prepare docker container tarball for WDL-importing to pFDL.
+    # Example:
+    #
+    # docker create --name cgp-chksum quay.io/wtsicgp/dockstore-cgp-chksum:0.4.1
+    # docker export cgp-chksum | gzip -9 > cgp-chksum.tar.gz
+    #
     def code
-      wdl_filename = "#{workflow_name || 'description'}.wdl"
+      # rubocop:disable Layout/IndentHeredoc
+      wdl_filename = "#{workflow_name}.wdl"
+      inputs_filename = "inputs.json"
+      cromwell_jar = "cromwell.jar"
+      cromwell_conf = "cromwell.conf"
+      job_outputs = "job_outputs.json"
+      image_filename = File.basename(asset.file_paths.first) if asset
 
       <<-CODE
-wget -q -O cromwell.jar #{CROMWELL_LINK}
+#{udocker_install_code}
+wget -q -O #{cromwell_jar} #{CROMWELL_LINK}
 
 cat <<"EOF" > #{wdl_filename}
 #{raw}
 EOF
 
-cat <<EOF > inputs.json
+cat <<EOF > #{inputs_filename}
 #{JSON.pretty_generate(input_settings)}
 EOF
 
-java -jar cromwell.jar run #{wdl_filename} -i inputs.json
-CODE
+cat <<"EOF" > #{cromwell_conf}
+#{File.read(Rails.root.join('config', cromwell_conf))}
+EOF
+#{"\nudocker --allow-root import #{image_filename} #{docker}\n" if image_filename}
+java -Dconfig.file=#{cromwell_conf} -jar #{cromwell_jar} run #{wdl_filename} \
+-i #{inputs_filename} \
+-m #{job_outputs}
+
+python <<EOF
+import json
+import subprocess
+import re
+
+def sh(cmd, ignore_error=False):
+  try:
+    print cmd
+    subprocess.check_call(cmd, shell=True)
+  except subprocess.CalledProcessError as e:
+    sys.exit(e.returncode)
+
+with open("#{job_outputs}") as f:
+  cwloutputs = json.loads(f.read())['outputs']
+
+for oname, ovalue in cwloutputs.items():
+  if ovalue is not None:
+    sh("emit {} {}".format(re.sub("#{workflow_name}.#{app_name}.", "", oname), ovalue))
+EOF
+      CODE
+    end
+
+    def udocker_install_code
+      <<-CODE
+wget --no-check-certificate -q -O udocker.tgz #{UDOCKER_LINK}
+tar xzvf udocker.tgz udocker
+chmod u+rx ./udocker
+UDOCKER_TARBALL=$(pwd)/udocker.tgz ./udocker --allow-root install || true
+mv udocker /usr/local/bin
+      CODE
+      # rubocop:enable Layout/IndentHeredoc
     end
 
     def task
@@ -94,7 +146,7 @@ CODE
     end
 
     def wdl_object
-      @wdl_object ||= WdlObject.new(raw)
+      @wdl_object ||= WDLObject.new(raw)
     end
 
     def wdl_object_should_be_valid

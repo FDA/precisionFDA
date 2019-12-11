@@ -5,24 +5,24 @@ class AppathonsController < ApplicationController
   def index
     @meta_appathon = MetaAppathon.active
 
-    @appathons = @meta_appathon.appathons.page params[:appathons_page]
+    @appathons = @meta_appathon.appathons.page unsafe_params[:appathons_page]
   end
 
   def show
-    @appathon = Appathon.find(params[:id])
+    @appathon = Appathon.find(unsafe_params[:id])
     @meta_appathon = @appathon.meta_appathon
 
     @apps = @appathon.apps
 
     @items_from_params = [@appathon]
     @item_comments_path = pathify_comments(@appathon)
-    @comments = @appathon.root_comments.order(id: :desc).page params[:comments_page]
+    @comments = @appathon.root_comments.order(id: :desc).page unsafe_params[:comments_page]
     @commentable = @appathon
   end
 
   def new
-    if !params[:meta_appathon_id].nil?
-      @meta_appathon = MetaAppathon.find(params[:meta_appathon_id])
+    if !unsafe_params[:meta_appathon_id].nil?
+      @meta_appathon = MetaAppathon.find(unsafe_params[:meta_appathon_id])
     else
       @meta_appathon = MetaAppathon.active
     end
@@ -34,17 +34,17 @@ class AppathonsController < ApplicationController
   end
 
   def edit
-    @appathon = Appathon.editable_by(@context).find_by(id: params[:id])
+    @appathon = Appathon.editable_by(@context).find_by(id: unsafe_params[:id])
     @meta_appathon = @appathon.meta_appathon
     if @appathon.nil?
       flash[:error] = "You do not have permission to edit this appathon"
-      redirect_to appathon_path(params[:id])
+      redirect_to appathon_path(unsafe_params[:id])
     end
   end
 
   def create
-    if !params[:meta_appathon_id].nil?
-      @meta_appathon = MetaAppathon.find(params[:meta_appathon_id])
+    if !unsafe_params[:meta_appathon_id].nil?
+      @meta_appathon = MetaAppathon.find(unsafe_params[:meta_appathon_id])
     else
       @meta_appathon = MetaAppathon.active
     end
@@ -84,8 +84,8 @@ class AppathonsController < ApplicationController
   end
 
   def update
-    @appathon = Appathon.editable_by(@context).find_by(id: params[:id])
-    redirect_to appathon_path(params[:id]) if @appathon.nil?
+    @appathon = Appathon.editable_by(@context).find_by(id: unsafe_params[:id])
+    redirect_to appathon_path(unsafe_params[:id]) if @appathon.nil?
 
     Appathon.transaction do
       if @appathon.update(appathon_params)
@@ -100,7 +100,7 @@ class AppathonsController < ApplicationController
   end
 
   def join
-    @appathon = Appathon.find_by(id: params[:id])
+    @appathon = Appathon.find_by(id: unsafe_params[:id])
     redirect_to meta_appathon_path(MetaAppathon.active) if @appathon.nil?
 
     @meta_appathon = @appathon.meta_appathon

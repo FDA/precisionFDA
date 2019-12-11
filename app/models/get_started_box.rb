@@ -1,4 +1,20 @@
-class GetStartedBox < ActiveRecord::Base
+# == Schema Information
+#
+# Table name: get_started_boxes
+#
+#  id                :integer          not null, primary key
+#  title             :string(255)
+#  feature_url       :string(255)
+#  documentation_url :string(255)
+#  description       :text(65535)
+#  public            :boolean
+#  kind              :integer          default("default")
+#  position          :integer          default(0)
+#  created_at        :datetime         not null
+#  updated_at        :datetime         not null
+#
+
+class GetStartedBox < ApplicationRecord
 
   enum kind: %i(default upload_file add_asset create_app launch_app run_comparison create_note)
 

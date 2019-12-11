@@ -17,23 +17,27 @@
 #  user_id            :integer
 #  state              :string(255)
 #  code               :string(255)
-#  country            :string(255)
 #  city               :string(255)
 #  us_state           :string(255)
 #  postal_code        :string(255)
 #  address1           :string(255)
 #  address2           :string(255)
-#  phone_country_code :string(255)
 #  organization_admin :boolean          default(FALSE), not null
+#  country_id         :integer
+#  phone_country_id   :integer
 #
 
-class Invitation < ActiveRecord::Base
+class Invitation < ApplicationRecord
+  paginates_per 10
+
   include Auditor
   include Humanizer
 
   belongs_to :user
   belongs_to :country
   belongs_to :phone_country, class_name: 'Country'
+
+  has_many :space_invitations, primary_key: :email, foreign_key: :email
 
   validates :first_name,
             :last_name,
@@ -47,9 +51,7 @@ class Invitation < ActiveRecord::Base
             :req_reason,
             presence: true
 
-  validates :singular,
-            :organization_admin,
-            :research_intent,
+  validates :research_intent,
             :clinical_intent,
             :participate_intent,
             :organize_intent,
@@ -58,12 +60,10 @@ class Invitation < ActiveRecord::Base
   validate :validate_email,
            :validate_phone,
            # :validate_state,
-           :validate_org,
-           :validate_org_admin,
            :validate_phone_country_code,
            on: :create
 
-  require_human_on :create
+  require_human_on :create, unless: -> { Rails.env.test? }
 
   store :extras,
         accessors: %i(
@@ -80,6 +80,7 @@ class Invitation < ActiveRecord::Base
         coder: JSON
 
   scope :guest, lambda { where(state: "guest") }
+  scope :non_singular, -> { where(singular: false) }
 
   def expires_at
     [created_at, Time.zone.local(2015, 12, 15)].max + 30.days
@@ -127,42 +128,8 @@ class Invitation < ActiveRecord::Base
     country.name == "United States"
   end
 
-  def validate_org
-    if org.blank?
-      if !singular
-        errors.add(
-          :org,
-          "can't be blank unless you represent yourself"
-        )
-      end
-
-      if organization_admin
-        errors.add(
-          :org,
-          "can't be blank if you chose that you're an admin of it"
-        )
-      end
-    else
-      if singular
-        errors.add(
-          :org,
-          "should be blank if you represent yourself"
-        )
-      end
-    end
-  end
-
-  def validate_org_admin
-    if organization_admin && singular
-      errors.add(
-        :base,
-        "You can't be an administrator of the organization if you represent yourself"
-      )
-    end
-  end
-
   def validate_email
-    errors.add(:email, "is invalid") unless User.validate_email(email)
+    errors.add(:email, "is invalid") if User.validate_email(email).nil?
   end
 
   def validate_state

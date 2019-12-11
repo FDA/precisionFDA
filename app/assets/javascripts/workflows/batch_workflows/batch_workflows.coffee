@@ -128,6 +128,170 @@ class InputModel
 ### Input Model ###
 
 ### Batch Input Model ###
+class FSItem
+  constructor: (data) ->
+    @name = data.title
+    @path = data.path
+    @uid = data.uid
+    @checked = ko.observable(true)
+
+
+extendBatchInputFilesSearch = () ->
+  @fsActiveTab = ko.observable("#{@name}_tree_container")
+  @fsFiles = ko.observableArray([])
+  @fsSelectedFiles = ko.observableArray([])
+  @fsIsLoading = ko.observable(false)
+  @fsIsMoreLoading = ko.observable(false)
+  @fsPage = 1
+  @fsSearchFilesData = {}
+
+  ### SORT ###
+  @fsSortNameDirection = ko.observable(DESC)
+  @fsSortNameArrow = ko.computed(() =>
+    return if @fsSortNameDirection() == DESC then 'fa-long-arrow-up' else 'fa-long-arrow-down'
+  )
+  @fsSortCheckedDirection = ko.observable(DESC)
+  @fsSortCheckedArrow = ko.computed(() =>
+    return if @fsSortCheckedDirection() == DESC then 'fa-long-arrow-up' else 'fa-long-arrow-down'
+  )
+  @fsSortPathDirection = ko.observable(DESC)
+  @fsSortPathArrow = ko.computed(() =>
+    return if @fsSortPathDirection() == DESC then 'fa-long-arrow-up' else 'fa-long-arrow-down'
+  )
+  @fsSortByName = (root, e) =>
+    e.preventDefault()
+    _sortDirection = if @fsSortNameDirection() == ASC then DESC else ASC
+    _files = @fsFiles().sort((a, b) ->
+      if _sortDirection == ASC
+        return 1 if (a.name > b.name)
+        return -1 if (a.name < b.name)
+      else
+        return 1 if (a.name < b.name)
+        return -1 if (a.name > b.name)
+      return 0
+    )
+    @fsFiles(_files)
+    @fsSortNameDirection(_sortDirection)
+  @fsSortByChecked = (root, e) =>
+    e.preventDefault()
+    _sortDirection = if @fsSortCheckedDirection() == ASC then DESC else ASC
+    _files = @fsFiles().sort((a, b) ->
+      if _sortDirection == ASC
+        return a.checked() - b.checked()
+      else
+        return b.checked() - a.checked()
+    )
+    @fsFiles(_files)
+    @fsSortCheckedDirection(_sortDirection)
+  @fsSortByPath = (root, e) =>
+    e.preventDefault()
+    _sortDirection = if @fsSortPathDirection() == ASC then DESC else ASC
+    _files = @fsFiles().sort((a, b) ->
+      if _sortDirection == ASC
+        return 1 if (a.path > b.path)
+        return -1 if (a.path < b.path)
+      else
+        return 1 if (a.path < b.path)
+        return -1 if (a.path > b.path)
+      return 0
+    )
+    @fsFiles(_files)
+    @fsSortPathDirection(_sortDirection)
+  ### SORT ###
+  @fsSearchValue = ko.observable(null)
+  @fsSearchFlagsValue = ko.observable('ig')
+
+  @fsSetTab = (data, e) =>
+    tabId = e.currentTarget.getAttribute('data-id')
+    @fsActiveTab(tabId)
+    @fsSelectedFiles([])
+    @selectedFiles([])
+    if @fileTree
+      @fileTree.treeContainer.jstree(true).refresh()
+  @fsToggleCheckbox = (data, e) =>
+    checked = @fsSelectedFiles.indexOf(data.uid) > -1
+    if checked
+      @fsSelectedFiles.remove(data.uid)
+      data.checked(false)
+    else
+      @fsSelectedFiles.push(data.uid)
+      data.checked(true)
+  @fsClearSearch = (data, e) =>
+    return false if @fsIsLoading()
+    @fsSearchFlagsValue('ig')
+    @fsSearchValue(null)
+    @fsFiles([])
+    @fsSelectedFiles([])
+  @fsSearchOnEnder = (data, e) =>
+    @fsGetFilesByRegExp() if e.keyCode == 13
+  @fsGetFilesByRegExp = () =>
+    searchValue = @fsSearchValue() || ''
+    flagsValue = @fsSearchFlagsValue() || ''
+    regexp = null
+    if !searchValue.length
+      @fsFiles([])
+      @fsSelectedFiles([])
+      return false
+
+    try
+      regexp = new RegExp(searchValue, flagsValue)
+    catch
+      Precision.alert.showAboveAll('Wrong Regular Expression!', null, 1000)
+      return false
+
+    if regexp and !@fsIsLoading()
+      @fsPage = 1
+      @fsSearchFilesData = {
+        page: 1,
+        scopes: @batchWorkflowFileTree.folderTreeScope,
+        search_string: searchValue,
+        flag: flagsValue,
+        uids: true
+      }
+      @fsIsLoading(true)
+      $.post('/api/files_regex_search', @fsSearchFilesData).then(
+        (data) =>
+          @fsFiles data.search_result.map((file) -> new FSItem(file))
+          @fsSelectedFiles(data.uids)
+          @fsIsLoading(false)
+          $("""##{@name}_regexp_search_input""").focus()
+        (errorData) ->
+          if errorData and typeof errorData.error == 'string'
+            Precision.alert.showAboveAll(errorData.error, null, 1000)
+          else
+            Precision.alert.showAboveAll('Something went wrong!', null, 1000)
+          @fsIsLoading(false)
+      )
+
+  @fsSetValue = ko.computed( => @value(@fsSelectedFiles()))
+
+  @fsLoadMoreFiles = () =>
+    return false if @fsIsMoreLoading()
+    @fsPage++
+    _data = { page: @fsPage, scopes: @batchWorkflowFileTree.folderTreeScope, uids: false }
+    data = Object.assign(@fsSearchFilesData, _data)
+    @fsIsMoreLoading(true)
+    $.post('/api/files_regex_search', data).then(
+      (data) =>
+        newFiles = @fsFiles()
+        newFiles = newFiles.concat(data.search_result.map((file) -> new FSItem(file)))
+        @fsFiles(newFiles)
+        @fsSelectedFiles @fsFiles().map((item) -> item.uid)
+        @fsIsMoreLoading(false)
+      (errorData) ->
+        if errorData and typeof errorData.error == 'string'
+          Precision.alert.showAboveAll(errorData.error, null, 1000)
+        else
+          Precision.alert.showAboveAll('Something went wrong!', null, 1000)
+        @fsIsMoreLoading(false)
+    )
+
+  @fsInitOnscrollLoad = () =>
+    createOnScrollHandler = window.Precision.utils.createOnScrollHandler
+    container = "#{@name}_scroll_container"
+    dataCont = '.fs-scrollable-files-container'
+    createOnScrollHandler(container, dataCont, @fsLoadMoreFiles)
+
 extendBatchInput = () ->
   files = @batchWorkflowFileTree.rootNodes
   @selectedFiles = ko.observableArray([])
@@ -137,26 +301,28 @@ extendBatchInput = () ->
   @sortNameArrow = ko.computed(() =>
     return if @sortNameDirection() == DESC then 'fa-long-arrow-up' else 'fa-long-arrow-down'
   )
-  @sortColorDirection = ko.observable(DESC)
-  @sortColorArrow = ko.computed(() =>
-    return if @sortColorDirection() == DESC then 'fa-long-arrow-up' else 'fa-long-arrow-down'
+  @sortCheckedDirection = ko.observable(DESC)
+  @sortCheckedArrow = ko.computed(() =>
+    return if @sortCheckedDirection() == DESC then 'fa-long-arrow-up' else 'fa-long-arrow-down'
   )
   @sortByName = (root, e) =>
     e.preventDefault()
     _sortDirection = if @sortNameDirection() == ASC then DESC else ASC
     @sortNameDirection(_sortDirection)
-  @sortByColor = (root, e) =>
+  @sortByChecked = (root, e) =>
     e.preventDefault()
-    _sortDirection = if @sortColorDirection() == ASC then DESC else ASC
-    @sortColorDirection(_sortDirection)
+    _sortDirection = if @sortCheckedDirection() == ASC then DESC else ASC
+    @sortCheckedDirection(_sortDirection)
   ### SORT ###
-  @searchValue = ko.observable(null)
-  @searchFlagsValue = ko.observable('ig')
+  # @searchValue = ko.observable(null)
+  # @searchFlagsValue = ko.observable('ig')
+
+  @isTreeLoading = ko.observable(false)
 
   @filteredFiles = ko.computed( =>
     fileTree = null
     sortNameDirection = @sortNameDirection()
-    sortColorDirection = @sortColorDirection()
+    sortCheckedDirection = @sortCheckedDirection()
     if @fileTree
       fileTree = @fileTree.treeContainer.jstree(true)
       nodes = fileTree.get_json('#', { flat: true })
@@ -172,35 +338,33 @@ extendBatchInput = () ->
         return -1 if (a.text > b.text)
       return 0
 
-    sortColorHandler = (a, b) ->
+    sortCheckedHandler = (a, b) ->
       a_selected = fileTree.is_selected(a.id)
       b_selected = fileTree.is_selected(b.id)
-      if sortColorDirection == ASC
+      if sortCheckedDirection == ASC
         return a_selected - b_selected
       else
         return b_selected - a_selected
 
-    searchValue = @searchValue()
-    flagsValue = @searchFlagsValue()
+    # searchValue = @searchValue()
+    # flagsValue = @searchFlagsValue()
 
-    if searchValue
-      try
-        regexp = new RegExp(searchValue, flagsValue)
-      catch
-        Precision.alert.showAboveAll('Wrong Regular Expression!', null, 1000)
-        regexp = new RegExp('.*', 'ig')
-      fileTree.deselect_all()
-      nodes.forEach((node) ->
-        if node.data.type == TYPE_FILE
-          if node.text.search(regexp) > -1
-            fileTree.select_node(node.id)
-          else
-            fileTree.deselect_node(node.id)
-      )
-    else
-      nodes.forEach((node) -> fileTree.deselect_node(node.id))
+    # if searchValue
+    #   try
+    #     regexp = new RegExp(searchValue, flagsValue)
+    #   catch
+    #     Precision.alert.showAboveAll('Wrong Regular Expression!', null, 1000)
+    #     regexp = new RegExp('.*', 'ig')
+    #   fileTree.deselect_all()
+    #   nodes.forEach((node) ->
+    #     if node.data.type == TYPE_FILE
+    #       if node.text.search(regexp) > -1
+    #         fileTree.select_node(node.id)
+    #       else
+    #         fileTree.deselect_node(node.id)
+    #   )
 
-    nodes = nodes.sort(sortNameHandler).sort(sortColorHandler)
+    nodes = nodes.sort(sortNameHandler).sort(sortCheckedHandler)
 
     if @fileTree
       fileTree.settings.core.data = nodes
@@ -208,13 +372,14 @@ extendBatchInput = () ->
 
     return nodes
   )
-  @searchOnChange = _.debounce(
-    (root, e) => @searchValue(e.target.value)
-    400
-  )
-  @clearSearch = (root, e) =>
-    @searchFlagsValue('ig')
-    @searchValue(null)
+  # @searchOnChange = _.debounce(
+  #   (root, e) => @searchValue(e.target.value)
+  #   400
+  # )
+  # @clearSearch = (root, e) =>
+  #   @searchFlagsValue('ig')
+  #   @searchValue(null)
+  #   @fileTree.treeContainer.jstree(true).deselect_all()
   @setValue = ko.computed( => @value(@selectedFiles()))
 
   @selectNodeHandler = () =>
@@ -227,9 +392,10 @@ extendBatchInput = () ->
     @selectedFiles(selectedFiles)
 
   @initTree = () =>
-    @fileTree = @batchWorkflowFileTree.createNewTree($("##{@name}"))
+    onRootNodesLoad = () => @isTreeLoading(true)
+    @fileTree = @batchWorkflowFileTree.createNewTree($("##{@name}"), onRootNodesLoad)
     @fileTree.onSelectNodeCallback = () => @selectNodeHandler()
-    @fileTree.onDeselectNodeCallback = () => @selectNodeHandler()
+    @fileTree.onRootNodesReady = () => @isTreeLoading(false)
 
 class BatchInputModel
   onChange: () ->
@@ -247,10 +413,14 @@ class BatchInputModel
     @valid = ko.observable(true)
     @title = ko.observable(title)
     @name = "step2_select_batch_file_#{title.replace(/\s/g, '_')}"
-
     ### this function is calling from template (_page_2.html.erb) but it is valid only for file ###
     @initTree = () -> return false
+    @fsInitOnscrollLoad = () -> false
+    @afterRender = () ->
+      @initTree()
+      @fsInitOnscrollLoad()
     extendBatchInput.call(@) if type == 'file'
+    extendBatchInputFilesSearch.call(@) if type == 'file'
 ### Batch Input Model ###
 
 ### FolderModel ###
