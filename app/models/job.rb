@@ -2,24 +2,26 @@
 #
 # Table name: jobs
 #
-#  id            :integer          not null, primary key
-#  dxid          :string
-#  app_id        :integer
-#  project       :string
-#  run_data      :text
-#  describe      :text
-#  provenance    :text
-#  state         :string
-#  name          :string
-#  user_id       :integer
-#  created_at    :datetime         not null
-#  updated_at    :datetime         not null
-#  app_series_id :integer
-#  scope         :string
-#  analysis_id   :integer
+#  id              :integer          not null, primary key
+#  dxid            :string(255)
+#  app_id          :integer
+#  project         :string(255)
+#  run_data        :text(65535)
+#  describe        :text(65535)
+#  provenance      :text(65535)
+#  state           :string(255)
+#  name            :string(255)
+#  user_id         :integer
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#  app_series_id   :integer
+#  scope           :string(255)
+#  analysis_id     :integer
+#  uid             :string(255)
+#  local_folder_id :integer
 #
 
-class Job < ActiveRecord::Base
+class Job < ApplicationRecord
   include Auditor
   include Permissions
   include InternalUid
@@ -54,17 +56,17 @@ class Job < ActiveRecord::Base
   belongs_to :app_series
   belongs_to :analysis
 
-  has_and_belongs_to_many :input_files, {join_table: "job_inputs", class_name: "UserFile"}
+  has_and_belongs_to_many :input_files, join_table: "job_inputs", class_name: "UserFile"
   has_many :output_files, as: :parent, class_name: "UserFile"
 
-  has_many :notes, {through: :attachments}
-  has_many :attachments, {as: :item, dependent: :destroy}
+  has_many :attachments, as: :item, dependent: :destroy
+  has_many :notes, through: :attachments
 
   has_one :submission
 
-  store :describe, {coder: JSON}
-  store :run_data, {accessors: [ :run_inputs, :run_outputs, :run_instance_type ], coder: JSON}
-  store :provenance, {coder: JSON}
+  store :describe, coder: JSON
+  store :run_data, accessors: %i(run_inputs run_outputs run_instance_type), coder: JSON
+  store :provenance, coder: JSON
 
   acts_as_commentable
   acts_as_taggable
@@ -172,28 +174,15 @@ class Job < ActiveRecord::Base
     submission.present?
   end
 
-  def self.publish(jobs, context, scope)
-    count = 0
-    jobs.uniq.each do |job|
-      job.with_lock do
-        if job.publishable_by?(context, scope)
-          job.update!(scope: scope)
-          count += 1
-          if scope =~ /^space-(\d+)$/
-            SpaceEventService.call($1.to_i, context.user_id, nil, job, :job_added)
-          end
-        end
-      end
-    end
-
-    return count
-  end
-
   def output_data
     IOCollection.build_outputs(self)
   end
 
   def input_data
     IOCollection.build_inputs(self)
+  end
+
+  def log_unaccessible?(context)
+    scope == "public" && user_id != context.user_id
   end
 end

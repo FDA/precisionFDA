@@ -1,4 +1,27 @@
-class Node < ActiveRecord::Base
+# == Schema Information
+#
+# Table name: nodes
+#
+#  id                      :integer          not null, primary key
+#  dxid                    :string(255)
+#  project                 :string(255)
+#  name                    :string(255)
+#  state                   :string(255)
+#  description             :text(65535)
+#  user_id                 :integer          not null
+#  file_size               :bigint
+#  created_at              :datetime         not null
+#  updated_at              :datetime         not null
+#  parent_id               :integer
+#  parent_type             :string(255)
+#  scope                   :string(255)
+#  parent_folder_id        :integer
+#  sti_type                :string(255)
+#  scoped_parent_folder_id :integer
+#  uid                     :string(255)
+#
+
+class Node < ApplicationRecord
   include Auditor
 
   self.inheritance_column = :sti_type
@@ -28,11 +51,11 @@ class Node < ActiveRecord::Base
 
   class << self
     def scope_column_name(scope)
-      scope == "private" ? :parent_folder_id : :scoped_parent_folder_id
+      ["private", "public"].include?(scope) ? :parent_folder_id : :scoped_parent_folder_id
     end
 
     def folder_content(files, folders)
-      Node.where.any_of(files, folders)
+      Node.where(id: (files + folders).map(&:id))
     end
   end
 

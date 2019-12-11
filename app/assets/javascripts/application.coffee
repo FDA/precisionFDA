@@ -27,7 +27,7 @@
 #= require human-format
 #= require knockout
 #= require knockout-sortable
-#= require local_time
+#= require local-time
 #= require moment
 #= require moment-timezone.min
 #= require wice_grid

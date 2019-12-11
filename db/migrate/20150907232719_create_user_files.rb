@@ -1,4 +1,4 @@
-class CreateUserFiles < ActiveRecord::Migration
+class CreateUserFiles < ActiveRecord::Migration[4.2]
   def change
     create_table :user_files do |t|
       t.string :dxid, required: true

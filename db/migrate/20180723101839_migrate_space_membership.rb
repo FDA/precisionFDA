@@ -1,11 +1,11 @@
-class MigrateSpaceMembership < ActiveRecord::Migration
+class MigrateSpaceMembership < ActiveRecord::Migration[4.2]
 
-  class Space < ActiveRecord::Base
+  class Space < ApplicationRecord
     has_and_belongs_to_many :space_memberships
     has_many :old_space_memberships, foreign_key: "space_id", class_name: "SpaceMembership"
   end
 
-  class SpaceMembership < ActiveRecord::Base
+  class SpaceMembership < ApplicationRecord
     has_and_belongs_to_many :space
   end
 

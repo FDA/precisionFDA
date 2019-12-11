@@ -15,7 +15,7 @@ class LicensesController < ApplicationController
   end
 
   def show
-    @license = License.find(params[:id])
+    @license = License.find(unsafe_params[:id])
 
     @items_count = @license.licensed_items.size
     if @license.editable_by?(@context)
@@ -26,7 +26,7 @@ class LicensesController < ApplicationController
   end
 
   def items
-    @license = License.find(params[:id])
+    @license = License.find(unsafe_params[:id])
 
     @items = @license.licensed_items.includes(:licenseable)
     @items_count = @license.licensed_items.size
@@ -36,7 +36,7 @@ class LicensesController < ApplicationController
   end
 
   def users
-    @license = License.find(params[:id])
+    @license = License.find(unsafe_params[:id])
     redirect_to license_path(@license) unless @license.editable_by?(@context)
 
     @items_count = @license.licensed_items.size
@@ -45,7 +45,7 @@ class LicensesController < ApplicationController
   end
 
   def edit
-    @license = License.editable_by(@context).find_by_id(params[:id])
+    @license = License.editable_by(@context).find_by_id(unsafe_params[:id])
 
     if @license.nil?
       flash[:error] = "Sorry, this license does not exist or is not accessible by you"
@@ -56,7 +56,7 @@ class LicensesController < ApplicationController
   end
 
   def update
-    @license = License.editable_by(@context).find(params[:id])
+    @license = License.editable_by(@context).find(unsafe_params[:id])
 
     License.transaction do
       if @license.update(license_params)
@@ -84,21 +84,21 @@ class LicensesController < ApplicationController
   end
 
   def destroy
-    license = License.editable_by(@context).find(params[:id])
+    license = License.editable_by(@context).find(unsafe_params[:id])
     license.destroy
     flash[:success] = "License \"#{license.title}\" has been successfully deleted"
     redirect_to licenses_path
   end
 
   def request_approval
-    @license = License.accessible_by(@context).find(params[:id])
+    @license = License.accessible_by(@context).find(unsafe_params[:id])
     if @license.nil?
       flash[:error] = "Sorry, this license does not exist or is not accessible by you"
       redirect_to license_path(@license)
       return
     end
 
-    message = !params[:accepted_license].nil? ? params[:accepted_license][:message] : nil
+    message = !unsafe_params[:accepted_license].nil? ? unsafe_params[:accepted_license][:message] : nil
 
     if request.post? && !message.nil? && message.is_a?(String)
       accepted_license = AcceptedLicense.create!({
@@ -124,9 +124,9 @@ class LicensesController < ApplicationController
 
   # Called from license#show, file#show, asset#show
   def accept
-    license = License.accessible_by(@context).find(params[:id])
-    if params[:redirect_to_uid].present?
-      redirect_to_item = item_from_uid(params[:redirect_to_uid])
+    license = License.accessible_by(@context).find(unsafe_params[:id])
+    if unsafe_params[:redirect_to_uid].present?
+      redirect_to_item = item_from_uid(unsafe_params[:redirect_to_uid])
     end
 
     if license.approval_required
@@ -146,8 +146,8 @@ class LicensesController < ApplicationController
   end
 
   def license_item
-    license = License.find(params[:id])
-    item = item_from_uid(params[:item_uid])
+    license = License.find(unsafe_params[:id])
+    item = item_from_uid(unsafe_params[:item_uid])
 
     if license.editable_by?(@context) && item.editable_by?(@context)
       LicensedItem.transaction do
@@ -166,8 +166,8 @@ class LicensesController < ApplicationController
   end
 
   def remove_item
-    license = License.find(params[:id])
-    item = item_from_uid(params[:item_uid])
+    license = License.find(unsafe_params[:id])
+    item = item_from_uid(unsafe_params[:item_uid])
     if license.editable_by?(@context)
       LicensedItem.transaction do
         licensedItem = license.licensed_items.find_by(licenseable: item)
@@ -175,8 +175,8 @@ class LicensesController < ApplicationController
           licensedItem.destroy
         end
       end
-      if params[:redirect_to_uid].present?
-        redirect_path = pathify(item_from_uid(params[:redirect_to_uid]))
+      if unsafe_params[:redirect_to_uid].present?
+        redirect_path = pathify(item_from_uid(unsafe_params[:redirect_to_uid]))
       else
         redirect_path = items_license_path(license)
       end
@@ -185,9 +185,9 @@ class LicensesController < ApplicationController
   end
 
   def remove_user
-    license = License.find(params[:id])
+    license = License.find(unsafe_params[:id])
     if license.editable_by?(@context)
-      user = item_from_uid(params[:user_uid], User)
+      user = item_from_uid(unsafe_params[:user_uid], User)
       LicensedItem.transaction do
         userLicense = license.accepted_licenses.find_by(user_id: user.id)
         if !userLicense.nil?
@@ -197,8 +197,8 @@ class LicensesController < ApplicationController
       end
     end
 
-    if params[:redirect_to_uid].present?
-      redirect_path = pathify(item_from_uid(params[:redirect_to_uid]))
+    if unsafe_params[:redirect_to_uid].present?
+      redirect_path = pathify(item_from_uid(unsafe_params[:redirect_to_uid]))
     else
       redirect_path = users_license_path(license)
     end
@@ -206,9 +206,9 @@ class LicensesController < ApplicationController
   end
 
   def approve_user
-    license = License.find(params[:id])
+    license = License.find(unsafe_params[:id])
     if license.editable_by?(@context)
-      user = item_from_uid(params[:user_uid], User)
+      user = item_from_uid(unsafe_params[:user_uid], User)
       AcceptedLicense.transaction do
         accepted_license = license.accepted_licenses.find_by(user_id: user.id)
         if !accepted_license.nil?
@@ -219,8 +219,8 @@ class LicensesController < ApplicationController
       end
     end
 
-    if params[:redirect_to_uid].present?
-      redirect_path = pathify(item_from_uid(params[:redirect_to_uid]))
+    if unsafe_params[:redirect_to_uid].present?
+      redirect_path = pathify(item_from_uid(unsafe_params[:redirect_to_uid]))
     else
       redirect_path = users_license_path(license)
     end
@@ -228,7 +228,7 @@ class LicensesController < ApplicationController
   end
 
   def remove_items
-    license = License.find(params[:id])
+    license = License.find(unsafe_params[:id])
     if license.editable_by?(@context)
       LicensedItem.transaction do
         license.licensed_items.destroy_all
@@ -238,7 +238,7 @@ class LicensesController < ApplicationController
   end
 
   def remove_users
-    license = License.find(params[:id])
+    license = License.find(unsafe_params[:id])
     if license.editable_by?(@context)
       AcceptedLicense.transaction do
         license.accepted_licenses.destroy_all
@@ -248,7 +248,7 @@ class LicensesController < ApplicationController
   end
 
   def approve_users
-    license = License.find(params[:id])
+    license = License.find(unsafe_params[:id])
     if license.editable_by?(@context)
       AcceptedLicense.transaction do
         license.accepted_licenses.update_all(state: 'active')
@@ -258,7 +258,7 @@ class LicensesController < ApplicationController
   end
 
   def rename
-    @license = License.editable_by(@context).find_by!(id: params[:id])
+    @license = License.editable_by(@context).find_by!(id: unsafe_params[:id])
     title = license_params[:title]
     if title.is_a?(String) && title != ""
       if @license.rename(title, @context)

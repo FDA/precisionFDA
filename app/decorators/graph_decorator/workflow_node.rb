@@ -1,6 +1,5 @@
 module GraphDecorator
   class WorkflowNode < BaseNode
-
     def children
       return [] unless record.accessible_by?(context)
 
@@ -8,6 +7,5 @@ module GraphDecorator
         build_child(app)
       end
     end
-
   end
 end

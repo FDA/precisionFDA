@@ -3,24 +3,24 @@
 # Table name: appathons
 #
 #  id               :integer          not null, primary key
-#  name             :string
+#  name             :string(255)
 #  admin_id         :integer
 #  meta_appathon_id :integer
-#  description      :text
-#  flag             :string
-#  location         :string
+#  description      :text(65535)
+#  flag             :string(255)
+#  location         :string(255)
 #  start_at         :datetime
 #  end_at           :datetime
-#  meta             :text
+#  meta             :text(65535)
 #  created_at       :datetime         not null
 #  updated_at       :datetime         not null
 #
 
-class Appathon < ActiveRecord::Base
+class Appathon < ApplicationRecord
   include Auditor
 
   belongs_to :meta_appathon
-  belongs_to :admin, {class_name: 'User'}
+  belongs_to :admin, class_name: "User"
 
   acts_as_commentable
   acts_as_followable

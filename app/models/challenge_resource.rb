@@ -2,16 +2,17 @@
 #
 # Table name: challenge_resources
 #
-#  id            :integer          not null, primary key
-#  challenge_id  :integer
-#  user_file_id  :integer
-#  user_id       :integer
-#  url           :text
-#  meta          :text
-#  created_at    :datetime         not null
-#  updated_at    :datetime         not null
+#  id           :integer          not null, primary key
+#  challenge_id :integer
+#  user_file_id :integer
+#  user_id      :integer
+#  url          :text(65535)
+#  meta         :text(65535)
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
+#
 
-class ChallengeResource < ActiveRecord::Base
+class ChallengeResource < ApplicationRecord
   include Auditor
 
   belongs_to :challenge

@@ -32,7 +32,7 @@ RSpec.describe SubmissionsController, type: :controller do
     context "with invalid data" do
       before { authenticate!(user1) }
       it "flashes a error" do
-        post :create, challenge_id: challenge.id, submission: { inputs: {}.to_json }
+        post :create, params: { challenge_id: challenge.id, submission: { inputs: {}.to_json } }
         expect(flash[:error]).to be_present
       end
     end
@@ -40,9 +40,10 @@ RSpec.describe SubmissionsController, type: :controller do
     context "with valid data" do
       before { authenticate!(user1) }
       it "creates a job" do
-        post :create,
-             challenge_id: challenge.id,
-             submission: { name: "1", desc: "1", inputs: valid_inputs.to_json }
+        post :create, params: {
+          challenge_id: challenge.id,
+          submission: { name: "1", desc: "1", inputs: valid_inputs.to_json }
+        }
         expect(Job.any?).to be_truthy
       end
     end

@@ -1,0 +1,27 @@
+<% content_for :title, "Users" %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-body">
+      <div class="page-title">
+        <i class="fa fa-users" aria-hidden="true"></i>
+        Users
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pfda-padded">
+  <a class="btn btn-primary" rel="nofollow" href="<%=provision_new_user_path%>">
+    <i class="fa fa-plus"></i>&nbsp;Provision new user
+  </a>
+</div>
+
+<div class="infoframe-outer">
+  <div class="infoframe-inner">
+    <h4 class="infoframe-title">Users Search</h4>
+    <div>
+      <%= render partial: "admin/users/grid", locals: { show_filters: :always } %>
+    </div>
+  </div>
+</div>

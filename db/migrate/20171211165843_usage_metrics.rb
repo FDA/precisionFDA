@@ -1,4 +1,4 @@
-class UsageMetrics < ActiveRecord::Migration
+class UsageMetrics < ActiveRecord::Migration[4.2]
   def change
 
     create_table :usage_metrics do |t|

@@ -3,30 +3,41 @@
 # Table name: orgs
 #
 #  id         :integer          not null, primary key
-#  handle     :string
-#  name       :string
+#  handle     :string(255)
+#  name       :string(255)
 #  admin_id   :integer
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
-#  address    :text
-#  duns       :string
-#  phone      :string
-#  state      :string
+#  address    :text(65535)
+#  duns       :string(255)
+#  phone      :string(255)
+#  state      :string(255)
 #  singular   :boolean
+#  fedramp    :boolean          default(FALSE)
 #
 
-class Org < ActiveRecord::Base
+class Org < ApplicationRecord
+  default_scope { where.not(state: "deleted") }
+
+  PFDA_PREFIX = "org-pfda..".freeze
+
   include Auditor
 
-  validates :name, presence: true, uniqueness: { case_sensitive: false }
   validates :handle, presence: true, uniqueness: { case_sensitive: false }
+  validates :name, presence: true
 
   has_many :users
-  belongs_to :admin, { class_name: 'User' }
+  has_many :org_action_requests
+  belongs_to :admin, class_name: "User"
+
+  has_one :dissolve_org_action_request,
+          -> { where(action_type: OrgActionRequest::Type::DISSOLVE) },
+          class_name: "OrgActionRequest"
 
   def self.construct_dxorg(handle)
     raise unless handle.present? && handle =~ /^[0-9a-z][0-9a-z_.]*$/
-    "org-pfda..#{handle}"
+
+    PFDA_PREFIX + handle
   end
 
   def self.handle_by_id(id)
@@ -92,11 +103,10 @@ class Org < ActiveRecord::Base
   end
 
   def dxid
-    "org-pfda.." + handle
+    PFDA_PREFIX + handle
   end
 
   def dxorg
     Org.construct_dxorg(handle)
   end
-
 end

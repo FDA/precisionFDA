@@ -11,7 +11,7 @@ RSpec.describe CommentsController, type: :controller do
     context "create comment without associated obj" do
 
       it "creates a comment" do
-        post :create, space_id: space, comment: { body: "test" }
+        post :create, params: { space_id: space, comment: { body: "test" } }
 
         expect(Comment.count).to eq(1)
       end
@@ -22,7 +22,7 @@ RSpec.describe CommentsController, type: :controller do
 
       it "creates a comment associated with a note" do
         note = create(:note, scope: "space-#{space.id}")
-        post :create, space_id: space, comment: { body: "test" }, comments_content: { content_type: "Note", id: note.id }
+        post :create, params: { space_id: space, comment: { body: "test" }, comments_content: { content_type: "Note", id: note.id } }
 
         expect(Comment.last.content_object).to eq(note)
       end
@@ -30,7 +30,7 @@ RSpec.describe CommentsController, type: :controller do
       it "creates a replay to a comment associated with a note" do
         note = create(:note, scope: "space-#{space.id}")
         comment = create(:comment, commentable: space, content_object: note, user_id: host_lead.id)
-        post :create, space_id: space, comment: { body: "test", parent_id: comment.id }
+        post :create, params: { space_id: space, comment: { body: "test", parent_id: comment.id } }
 
         expect(Comment.last.content_object).to eq(note)
       end
@@ -44,8 +44,8 @@ RSpec.describe CommentsController, type: :controller do
     context "deleted comments are displayed in threads as DELETED" do
 
       it "destroys a comment in space" do
-        post :create, space_id: space, comment: { body: "test" }
-        delete :destroy, space_id: space, id: Comment.last.id
+        post :create, params: { space_id: space, comment: { body: "test" } }
+        delete :destroy, params: { space_id: space, id: Comment.last.id }
 
         expect(Comment.count).to eq(1)
       end

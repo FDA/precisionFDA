@@ -1,4 +1,4 @@
-class CreateChallengeResources < ActiveRecord::Migration
+class CreateChallengeResources < ActiveRecord::Migration[4.2]
   def change
     create_table :challenge_resources do |t|
       t.references :challenge, index: true, foreign_key: true

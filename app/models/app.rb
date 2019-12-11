@@ -3,21 +3,24 @@
 # Table name: apps
 #
 #  id            :integer          not null, primary key
-#  dxid          :string
-#  version       :string
+#  dxid          :string(255)
+#  version       :string(255)
 #  revision      :integer
-#  title         :string
-#  readme        :text
+#  title         :string(255)
+#  readme        :text(65535)
 #  user_id       :integer
-#  scope         :string
-#  spec          :text
-#  internal      :text
+#  scope         :string(255)
+#  spec          :text(65535)
+#  internal      :text(65535)
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
 #  app_series_id :integer
+#  verified      :boolean          default(FALSE), not null
+#  uid           :string(255)
+#  dev_group     :string(255)
 #
 
-class App < ActiveRecord::Base
+class App < ApplicationRecord
   include Auditor
   include Permissions
   include InternalUid
@@ -25,10 +28,10 @@ class App < ActiveRecord::Base
   belongs_to :user
   belongs_to :app_series
   has_many :jobs
-  has_many :notes, {through: :attachments}
-  has_many :attachments, {as: :item, dependent: :destroy}
+  has_many :attachments, as: :item, dependent: :destroy
+  has_many :notes, through: :attachments
 
-  has_and_belongs_to_many :assets, {join_table: 'apps_assets'}
+  has_and_belongs_to_many :assets, join_table: "apps_assets"
 
   has_many :challenges
 
@@ -43,28 +46,39 @@ class App < ActiveRecord::Base
     uid
   end
 
+  # Scopes of files when an app is running out of spaces.
+  def permitted_scopes
+    %w(private public)
+  end
+
   # Scopes of files that can be used to run an app.
   def space_scopes
-    return [] if !in_space? || !space_object.review? && !space_object.verification?
+    return permitted_scopes if not_in_spaces
 
     space_object.accessible_scopes
   end
 
+  # Check whether app is not in space of any type
+  # @return [true, false]
+  def not_in_spaces
+    !in_space? || !space_object.review? && !space_object.verification? && !space_object.groups?
+  end
+
   # Scopes that can be used to run an app.
   def available_job_spaces(user)
-    return [] if !in_space? || !space_object.review? && !space_object.verification?
+    return [] if not_in_spaces
 
     Space.joins(:space_memberships).
       where(
-        id: [space_object.id, space_object.confidential_spaces.pluck(:id)],
+        id: [space_object.id, space_object.confidential_spaces.pluck(:id)].flatten,
         space_memberships: { user_id: user.id }
       )
   end
 
   def can_run_in_space?(user, space_id)
-    return false if !in_space? || !space_object.review? && !space_object.verification?
+    return false if not_in_spaces
 
-    # TODO control disabled users!
+    # TODO: control disabled users!
     # member = space_object.space_memberships.active.where(user_id: user.id).first
     member = space_object.space_memberships.where(user_id: user.id).first
     return false unless member
@@ -194,8 +208,12 @@ class App < ActiveRecord::Base
     cmds << ""
 
     # Generate Docker command with embedded spec and script
-    shell_friendly_spec = {spec: spec, assets: ordered_assets, packages: packages}.to_json.shellescape
-    shell_friendly_code = {code: code}.to_json.shellescape
+    shell_friendly_spec = {
+      spec: spec,
+      assets: ordered_assets,
+      packages: packages,
+    }.to_json.shellescape
+    shell_friendly_code = { code: code }.to_json.shellescape
 
     cmds << "# Write app spec and code to root folder"
     cmds << "RUN " + ["/bin/bash", "-c", "echo -E #{shell_friendly_spec} > /spec.json"].to_json
@@ -213,6 +231,6 @@ class App < ActiveRecord::Base
     cmds << "ENTRYPOINT [\"/usr/bin/run\"]"
     cmds << ""
 
-    cmds.join("\n")    # Join with newlines
+    cmds.join("\n") # Join with newlines
   end
 end

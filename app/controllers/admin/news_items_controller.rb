@@ -27,7 +27,7 @@ module Admin
     def destroy
       @news_post = NewsItem.find(id_param[:id])
       @news_post.destroy()
-      redirect_to :back, alert: "News Item \"#{@news_post.title}\" deleted"
+      redirect_back alert: "News Item \"#{@news_post.title}\" deleted", fallback_location: root_path
     end
 
     def index

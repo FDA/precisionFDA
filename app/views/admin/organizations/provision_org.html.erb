@@ -12,7 +12,7 @@
 </div>
 
 <div class="container-fluid container-padded">
-  <%= form_for @org, url: admin_provision_org_path, method: "POST", html: {class: 'form form-horizontal'}  do |f| %>
+  <%= form_for @org, url: admin_organizations_path, method: "POST", html: { class: 'form form-horizontal' }  do |f| %>
 
     <div class="form-group required">
       <%= f.label :name, "Name", class: 'control-label col-sm-2' %>

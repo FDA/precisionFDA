@@ -2,12 +2,12 @@
 #
 # Table name: countries
 #
-#  id            :integer          not null, primary key
-#  name          :string
-#  dial_code     :string
+#  id        :integer          not null, primary key
+#  name      :string(255)
+#  dial_code :string(255)
 #
 
-class Country < ActiveRecord::Base
+class Country < ApplicationRecord
   US_STATES_LIST =
     {
       "AL": "Alabama",
@@ -99,5 +99,9 @@ class Country < ActiveRecord::Base
     country_codes_hash.keys.each { |key| new_hash[key] = [] }
     country_codes_array.each { |country, id| new_hash[country] << id }
     new_hash
+  end
+
+  def self.dial_codes
+    Country.pluck(:dial_code, :id).reject { |i| i[0].empty? }.to_h.to_a.sort
   end
 end

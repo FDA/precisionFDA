@@ -1,4 +1,4 @@
-class CreateComparisons < ActiveRecord::Migration
+class CreateComparisons < ActiveRecord::Migration[4.2]
   def change
     create_table :comparisons do |t|
       t.string :name, required: true

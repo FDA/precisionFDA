@@ -1,4 +1,4 @@
-class ChangeCountryAndPhoneCountryCodeTypeInInvitations < ActiveRecord::Migration
+class ChangeCountryAndPhoneCountryCodeTypeInInvitations < ActiveRecord::Migration[4.2]
   def change
     remove_column :invitations, :country, :string
     add_reference :invitations, :country, index: true, foreign_key: { on_delete: :nullify }

@@ -24,9 +24,6 @@
           <tr><td>First name:</td><td><%= @invitation.first_name %></td></tr>
           <tr><td>Last name:</td><td><%= @invitation.last_name %></td></tr>
           <tr><td>Email:</td><td><%= @invitation.email %></td></tr>
-          <tr><td>Organization:</td><td><%= @invitation.org %></td></tr>
-          <tr><td>Self-representing?</td><td><%= !!@invitation.singular %></td></tr>
-          <tr><td>Org Admin?:</td><td><%= @invitation.organization_admin %></td></tr>
           <tr><td>Address 1:</td><td><%= @invitation.address1 %></td></tr>
           <tr><td>Address 2:</td><td><%= @invitation.address2 %></td></tr>
           <tr><td>Phone:</td><td><%= @invitation.phone %></td></tr>

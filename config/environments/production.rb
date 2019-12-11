@@ -1,3 +1,4 @@
+# rubocop:disable Metrics/BlockLength
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -12,18 +13,15 @@ Rails.application.configure do
 
   # Full error reports are disabled and caching is turned on.
   config.consider_all_requests_local       = false
-  #config.action_controller.perform_caching = true
   config.action_controller.perform_caching = false
 
-  # Enable Rack::Cache to put a simple HTTP cache in front of your application
-  # Add `rack-cache` to your Gemfile before enabling this.
-  # For large-scale production use, consider using a caching reverse proxy like
-  # NGINX, varnish or squid.
-  # config.action_dispatch.rack_cache = true
+  # Ensures that a master key has been made available in either ENV["RAILS_MASTER_KEY"]
+  # or in config/master.key. This key is used to decrypt credentials (and other encrypted files).
+  # config.require_master_key = true
 
   # Disable serving static files from the `/public` folder by default since
   # Apache or NGINX already handles this.
-  config.serve_static_files = ENV['RAILS_SERVE_STATIC_FILES'].present?
+  config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"].present?
 
   # Compress JavaScripts and CSS.
   config.assets.js_compressor = :uglifier
@@ -32,16 +30,28 @@ Rails.application.configure do
   # Do not fallback to assets pipeline if a precompiled asset is missed.
   config.assets.compile = true
 
+  # Enable serving of images, stylesheets, and JavaScripts from an asset server.
+  # config.action_controller.asset_host = 'http://assets.example.com'
+
   # Asset digests allow you to set far-future HTTP expiration dates on all assets,
   # yet still be able to expire them through the digest params.
   config.assets.debug = false
   config.assets.digest = true
 
-  # `config.assets.precompile` and `config.assets.version` have moved to config/initializers/assets.rb
+  # `config.assets.precompile` and `config.assets.version`
+  # have moved to config/initializers/assets.rb
 
   # Specifies the header that your server uses for sending files.
   # config.action_dispatch.x_sendfile_header = 'X-Sendfile' # for Apache
   # config.action_dispatch.x_sendfile_header = 'X-Accel-Redirect' # for NGINX
+
+  # Store uploaded files on the local file system (see config/storage.yml for options)
+  config.active_storage.service = :local
+
+  # Mount Action Cable outside main process or domain
+  # config.action_cable.mount_path = nil
+  # config.action_cable.url = 'wss://example.com/cable'
+  # config.action_cable.allowed_request_origins = [ 'http://example.com', /http:\/\/example.*/ ]
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   # config.force_ssl = true
@@ -51,7 +61,7 @@ Rails.application.configure do
   config.log_level = :debug
 
   # Prepend all log lines with the following tags.
-  # config.log_tags = [ :subdomain, :uuid ]
+  # config.log_tags = [ :request_id ]
 
   # Use a different logger for distributed setups.
   # config.logger = ActiveSupport::TaggedLogging.new(SyslogLogger.new)
@@ -59,16 +69,18 @@ Rails.application.configure do
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
 
-  # Enable serving of images, stylesheets, and JavaScripts from an asset server.
-  # config.action_controller.asset_host = 'http://assets.example.com'
+  # Use a real queuing backend for Active Job (and separate queues per environment)
+  # config.active_job.queue_adapter     = :resque
+  # config.active_job.queue_name_prefix = "pfda_#{Rails.env}"
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
-  if ENV["DNANEXUS_BACKEND"] == "production"
-    config.action_mailer.default_url_options = { host: "precision.fda.gov", protocol: 'https' }
+
+  config.action_mailer.default_url_options = if ENV["DNANEXUS_BACKEND"] == "production"
+    { host: "precision.fda.gov", protocol: "https" }
   else
-    config.action_mailer.default_url_options = { host: "precisionfda-staging.dnanexus.com", protocol: 'https' }
+    { host: "precisionfda-staging.dnanexus.com", protocol: "https" }
   end
 
   config.action_mailer.delivery_method = :salesforce
@@ -91,13 +103,26 @@ Rails.application.configure do
   config.force_ssl = true
 
   # Email us when an exception occurs
+  Rails.application.config.middleware.use(
+    ExceptionNotification::Rack,
+    ignore_if: lambda do |env, _exception|
+      ip = env["HTTP_X_FORWARDED_FOR"]
 
-  Rails.application.config.middleware.use ExceptionNotification::Rack,
-    :ignore_if => ->(env, exception) { ip = env["HTTP_X_FORWARDED_FOR"]; ip == "73.158.44.186" || ip == "76.191.184.242" || IPAddr.new("64.39.96.0/20").include?(IPAddr.new(ip)) rescue false },
-    :email => {
-      :email_prefix => ENV["DNANEXUS_BACKEND"] == "production" ? "[PrecisionFDA]" : "[PrecisionFDA-Stage]",
-      :sender_address => %{"notifier" <notification@dnanexus.com>},
-      :exception_recipients => %w{precisionfda-dev@dnanexus.com},
-      :email_format => :html
-    }
+      begin
+        ip.in?(%w(73.158.44.186 76.191.184.242)) ||
+          IPAddr.new("64.39.96.0/20").include?(IPAddr.new(ip))
+      rescue IPAddr::Error
+        false
+      end
+    end,
+    email: {
+      email_prefix: (
+        ENV["DNANEXUS_BACKEND"] == "production" ? "[PrecisionFDA]" : "[PrecisionFDA-Stage]"
+      ),
+      sender_address: "\"notifier\" <notification@dnanexus.com>",
+      exception_recipients: %w(precisionfda-dev@dnanexus.com),
+      email_format: :html,
+    },
+  )
 end
+# rubocop:enable Metrics/BlockLength

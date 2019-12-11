@@ -2,17 +2,17 @@
 #
 # Table name: submissions
 #
-#  id            :integer          not null, primary key
-#  challenge_id  :integer
-#  job_id        :integer
-#  user_id       :integer
-#  desc          :text
-#  meta          :text
-#  created_at    :datetime         not null
-#  updated_at    :datetime         not null
+#  id           :integer          not null, primary key
+#  challenge_id :integer
+#  user_id      :integer
+#  job_id       :integer
+#  desc         :text(65535)
+#  meta         :text(65535)
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
 #
 
-class Submission < ActiveRecord::Base
+class Submission < ApplicationRecord
   include Auditor
 
   belongs_to :user

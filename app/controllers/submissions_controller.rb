@@ -3,7 +3,7 @@ class SubmissionsController < ApplicationController
   before_action :require_login_or_guest, only: []
 
   def new
-    @challenge = Challenge.find_by_id!(params[:challenge_id])
+    @challenge = Challenge.find_by_id!(unsafe_params[:challenge_id])
     if @context.logged_in?
       unless @challenge.followed_by?(@context.user)
         flash[:warning] = "Please join the challenge to enter submissions."
@@ -42,14 +42,18 @@ class SubmissionsController < ApplicationController
 
     licenses_accepted = @context.user.accepted_licenses.map{|l| {id: l.license_id, pending: l.pending?, active: l.active?, unset: !l.pending? && !l.active?}}
 
-    js challenge_id: params[:challenge_id], app: @app.slice(:dxid, :spec, :title), licenses_to_accept: licenses_to_accept.uniq { |l| l.id}, licenses_accepted: licenses_accepted
+    js challenge_id: unsafe_params[:challenge_id],
+       app: @app.slice(:dxid, :spec, :title),
+       scopes_permitted: %w(public private),
+       licenses_to_accept: licenses_to_accept.uniq { |l| l.id },
+       licenses_accepted: licenses_accepted
   end
 
   def edit
-    @submission = Submission.editable_by(@context).find(params[:id])
+    @submission = Submission.editable_by(@context).find(unsafe_params[:id])
     if @submission.nil?
       flash[:error] = "Sorry, this submission does not exist or its log is not accessible by you"
-      redirect_to challenge_path(params[:challenge_id])
+      redirect_to challenge_path(unsafe_params[:challenge_id])
       return
     end
 
@@ -57,13 +61,13 @@ class SubmissionsController < ApplicationController
   end
 
   def create
-    if params[:submission] && params[:submission][:inputs]
-      submission_inputs = JSON.parse(params[:submission][:inputs])
+    if unsafe_params[:submission] && unsafe_params[:submission][:inputs]
+      submission_inputs = JSON.parse(unsafe_params[:submission][:inputs])
     else
       raise "Submission parameters not found in submission#create params."
     end
 
-    challenge = Challenge.find(params[:challenge_id])
+    challenge = Challenge.find(unsafe_params[:challenge_id])
     raise "Challenge ID not found in submission#create params." unless challenge
 
     input_info = input_spec_preparer.run(challenge.app, submission_inputs)
@@ -80,14 +84,13 @@ class SubmissionsController < ApplicationController
 
     unless items.all? { |item| item.editable_by?(@context) }
       flash[:error] = "Item is not owned by you."
-      redirect_to :back
-      return
+      redirect_back(fallback_location: root_path) and return
     end
 
     if items.all?(&:public?)
       flash[:warning] = "All input files are already public." unless items.empty?
-      run_job_create_submission(params)
-      redirect_to show_challenge_path(params[:challenge_id], "my_entries")
+      run_job_create_submission(unsafe_params)
+      redirect_to show_challenge_path(unsafe_params[:challenge_id], "my_entries")
       return
     end
 
@@ -96,30 +99,29 @@ class SubmissionsController < ApplicationController
     not_public_items.each do |item|
       unless item.publishable_by?(@context, scope)
         flash[:error] = "Item '#{item.title}' cannot be public."
-        redirect_to :back
-        return
+        redirect_back(fallback_location: root_path) and return
       end
     end
 
     js graph: GraphDecorator.for_publisher(@context, not_public_items, scope),
        space: nil,
        scope_to_publish_to: scope,
-       params: params
+       params: unsafe_params
   end
 
   def publish
-    sub_params = JSON.parse(params[:sub_params])
+    sub_params = JSON.parse(unsafe_params[:sub_params])
     if sub_params["submission"].nil? || sub_params["challenge_id"].nil?
       raise "Submission parameters not available."
     end
 
-    id = params[:id]
+    id = unsafe_params[:id]
     raise "Missing id in publish route" unless id.is_a?(String) && id.present?
     scope = "public"
 
     # Only applicable after selections have been made
-    if params[:uids]
-      uids = params[:uids]
+    if unsafe_params[:uids]
+      uids = unsafe_params[:uids]
       raise "The object 'uids' must be a hash of object ids (strings) with value 'on'." unless uids.is_a?(Hash) && uids.all? { |uid, checked| uid.is_a?(String) && checked == "on" }
 
       items = ([id] + uids.keys).uniq.map { |uid| item_from_uid(uid) }.reject { |item| item.public? || item.scope == scope }
@@ -167,7 +169,7 @@ class SubmissionsController < ApplicationController
 
       # Jobs
       if jobs.size > 0
-        published_count += Job.publish(jobs, @context, scope)
+        published_count += PublishService::JobPublisher.new(@context).publish(jobs, scope)
       end
 
       # Notes
@@ -196,72 +198,13 @@ class SubmissionsController < ApplicationController
       end
       flash[:success] = message
       run_job_create_submission(sub_params)
-      redirect_to show_challenge_path(params[:challenge_id], 'my_entries')
+      redirect_to show_challenge_path(unsafe_params[:challenge_id], 'my_entries')
       return
     end
   end
 
-  # Inputs
-  #
-  # id (string, required): the dxid of the app to run
-  # name (string, required): the name of the job
-  # inputs (hash, required): the inputs
-  # instance_type (string, optional): override of the default instance type
-  #
-  # Outputs
-  #
-  # id (string): the dxid of the resulting job
-  #
-  def run_job_create_submission(params)
-    # Parameter 'id' should be of type String
-    # Get challenge
-    challenge = Challenge.find_by(id: params["challenge_id"])
-    raise "No associated challenge found" unless challenge
-
-    submission = params["submission"]
-    raise "No submission info found" unless submission
-
-    # Name should be a nonempty string
-    name = submission["name"]
-    raise "Name should be a non-empty string" unless name.is_a?(String) && name != ""
-
-    # Name should be a nonempty string
-    desc = submission["desc"]
-    raise "Description should not be empty" unless desc.present?
-
-    # Inputs should be a hash (more checks later)
-    inputs = JSON.parse(submission["inputs"])
-    raise "Inputs should be a hash" unless inputs.is_a?(Hash)
-
-    # TODO: Does challengebot need to worry about licenses?
-    # Check if asset licenses have been accepted
-    # raise "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
-
-    @app = App.find(challenge.app_id)
-
-    input_info = input_spec_preparer.run(@app, inputs)
-
-    job = job_creator.create(
-      app: @app,
-      name: name,
-      input_info: input_info
-    )
-
-    submission = Submission.create!(
-      job_id: job.id,
-      desc: desc,
-      user_id: @context.user_id,
-      challenge_id: challenge.id,
-      _inputs: input_info.file_dxids
-    )
-
-    Event::SubmissionCreated.create_for(submission, @context.user)
-
-    flash[:success] = "Your entry was submitted successfully."
-  end
-
   def log
-    @submission = Submission.editable_by(@context).find(params[:id])
+    @submission = Submission.editable_by(@context).find(unsafe_params[:id])
     if @submission.nil?
       flash[:error] = "Sorry, this submission does not exist or its log is not accessible by you"
       redirect_to challenges_path
@@ -313,6 +256,65 @@ class SubmissionsController < ApplicationController
 
   private
 
+  # Inputs
+  #
+  # id (string, required): the dxid of the app to run
+  # name (string, required): the name of the job
+  # inputs (hash, required): the inputs
+  # instance_type (string, optional): override of the default instance type
+  #
+  # Outputs
+  #
+  # id (string): the dxid of the resulting job
+  #
+  def run_job_create_submission(opts)
+    # Parameter 'id' should be of type String
+    # Get challenge
+    challenge = Challenge.find_by(id: opts["challenge_id"])
+    raise "No associated challenge found" unless challenge
+
+    submission = opts["submission"]
+    raise "No submission info found" unless submission
+
+    # Name should be a nonempty string
+    name = submission["name"]
+    raise "Name should be a non-empty string" unless name.is_a?(String) && name != ""
+
+    # Name should be a nonempty string
+    desc = submission["desc"]
+    raise "Description should not be empty" unless desc.present?
+
+    # Inputs should be a hash (more checks later)
+    inputs = JSON.parse(submission["inputs"])
+    raise "Inputs should be a hash" unless inputs.is_a?(Hash)
+
+    # TODO: Does challengebot need to worry about licenses?
+    # Check if asset licenses have been accepted
+    # raise "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
+
+    @app = App.find(challenge.app_id)
+
+    input_info = input_spec_preparer.run(@app, inputs)
+
+    job = job_creator.create(
+      app: @app,
+      name: name,
+      input_info: input_info
+    )
+
+    submission = Submission.create!(
+      job_id: job.id,
+      desc: desc,
+      user_id: @context.user_id,
+      challenge_id: challenge.id,
+      _inputs: input_info.file_dxids
+    )
+
+    Event::SubmissionCreated.create_for(submission, @context.user)
+
+    flash[:success] = "Your entry was submitted successfully."
+  end
+
   def input_spec_preparer
     @input_spec_preparer ||= InputSpecPreparer.new(@context)
   end
@@ -327,7 +329,7 @@ class SubmissionsController < ApplicationController
   end
 
   def challenge_bot
-    @challenge_bot ||= User.CHALLENGE_BOT
+    @challenge_bot ||= User.challenge_bot
   end
 
 end

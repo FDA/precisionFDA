@@ -3,27 +3,27 @@
 # Table name: notes
 #
 #  id         :integer          not null, primary key
-#  title      :string
-#  content    :text
-#  user_id    :integer
+#  title      :string(255)
+#  content    :text(65535)
+#  user_id    :integer          not null
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
-#  scope      :string
-#  note_type  :string
+#  scope      :string(255)
+#  note_type  :string(255)
 #
 
-class Note < ActiveRecord::Base
+class Note < ApplicationRecord
   include Auditor
   include Permissions
 
   belongs_to :user, required: true
   has_one :answer
   has_one :discussion
-  has_many :attachments, {dependent: :destroy}
-  has_many :nodes, { through: :attachments, source: :item, source_type: 'Node' }
-  has_many :apps, { through: :attachments, source: :item, source_type: 'App' }
-  has_many :comparisons, { through: :attachments, source: :item, source_type: 'Comparison' }
-  has_many :jobs, { through: :attachments, source: :item, source_type: 'Job' }
+  has_many :attachments, dependent: :destroy
+  has_many :nodes, through: :attachments, source: :item, source_type: 'Node'
+  has_many :apps, through: :attachments, source: :item, source_type: 'App'
+  has_many :comparisons, through: :attachments, source: :item, source_type: 'Comparison'
+  has_many :jobs, through: :attachments, source: :item, source_type: 'Job'
 
   acts_as_followable
   acts_as_commentable

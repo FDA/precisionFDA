@@ -1,6 +1,6 @@
 class SubmissionsView
-  constructor: (app, @asset_licenses_to_accept) ->
-    @contentScopes = ko.observable([])
+  constructor: (app, scopes_permitted, @asset_licenses_to_accept) ->
+    @contentScopes = ko.observable(scopes_permitted)
     @dxid = app.dxid
     @inputSpec = app.spec.input_spec
     @outputSpec = app.spec.output_spec
@@ -68,7 +68,7 @@ class SubmissionsView
 ChallengeSubmissionsController = Paloma.controller('Submissions',
   new: ->
     $container = $("body main")
-    viewModel = new SubmissionsView(@params.app, @params.licenses_to_accept)
+    viewModel = new SubmissionsView(@params.app, @params.scopes_permitted, @params.licenses_to_accept)
     ko.applyBindings(viewModel, $container[0])
 
     $affixContainer = $container.find(".affix-container")

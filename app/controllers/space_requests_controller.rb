@@ -37,7 +37,7 @@ class SpaceRequestsController < ApplicationController
   private
 
   def space
-    @space ||= Space.shared.accessible_by(@context).find_by!(id: params[:id])
+    @space ||= Space.shared.accessible_by(@context).find_by!(id: unsafe_params[:id])
   end
 
   def membership

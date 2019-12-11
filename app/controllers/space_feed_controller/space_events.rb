@@ -26,11 +26,10 @@ class SpaceFeedController
     end
 
     def data
-      objects_list.map do |type|
-        object_type = SpaceEvent::OBJECT_TYPES[type]
+      objects_list.map do |object_type|
         {
-          name: object_type,
-          data: object_type_dates(object_type)
+          name: object_type.to_sym,
+          data: object_type_dates(object_type.to_sym)
         }
       end
     end

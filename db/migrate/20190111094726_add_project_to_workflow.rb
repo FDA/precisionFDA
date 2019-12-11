@@ -1,4 +1,4 @@
-class AddProjectToWorkflow < ActiveRecord::Migration
+class AddProjectToWorkflow < ActiveRecord::Migration[4.2]
   def change
     add_column :workflows, :project, :string
 

@@ -5,10 +5,10 @@
 #  id            :integer          not null, primary key
 #  comparison_id :integer
 #  user_file_id  :integer
-#  role          :string
+#  role          :string(255)
 #
 
-class ComparisonInput < ActiveRecord::Base
+class ComparisonInput < ApplicationRecord
   include Auditor
 
   belongs_to :comparison

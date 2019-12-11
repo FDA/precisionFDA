@@ -8,6 +8,9 @@
         </h4>
       </div>
       <%= form_tag nil, id: :rename_form, method: :post do %>
+        <input name="authenticity_token"
+               type="hidden"
+               value="<%= form_authenticity_token %>"/>
         <input type="hidden" name="source" value="list">
         <input type="hidden" name="file[id]">
         <input type="hidden" name="space_id" value="<%= defined?(space_id) ? space_id : nil %>">
