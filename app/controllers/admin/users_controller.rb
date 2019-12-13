@@ -77,8 +77,6 @@ module Admin
     end
 
     def resend_activation_email
-      return unless @context.user.can_administer_site?
-
       user = User.find_by(dxuser: unsafe_params[:dxuser])
 
       begin
@@ -95,8 +93,6 @@ module Admin
     end
 
     def reset_2fa
-      return unless @context.user.can_administer_site?
-
       user = User.find_by(dxuser: unsafe_params[:dxuser])
 
       begin
