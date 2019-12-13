@@ -1,4 +1,5 @@
 module Admin
+  # Responsible for users related actions.
   class UsersController < BaseController
     skip_before_action  :check_admin, only: :toggle_activate_user
 
@@ -8,14 +9,14 @@ module Admin
     end
 
     def toggle_activate_user
-      user = User.find_by_dxuser(unsafe_params[:dxuser])
+      user = User.find_by(dxuser: unsafe_params[:dxuser])
 
       if !current_user.can_administer_site? && !user_org_admin?(user)
-         redirect_to root_path and return
+        redirect_to root_path && return
       end
 
       if user == current_user
-        redirect_back(fallback_location: user_path(user), alert: "Cannot disable self.") and return
+        redirect_back(fallback_location: user_path(user), alert: "Cannot disable self.") && return
       end
 
       state = unsafe_params[:state]
@@ -24,15 +25,20 @@ module Admin
       when "enabled"
         state = "deactivated"
         user.disable_message = unsafe_params[:message]
-        user.email = Base64.encode64(user.email).sub("\n","") + DNANEXUS_INVALID_EMAIL
-        user.normalized_email = Base64.encode64(user.normalized_email).sub("\n","") + DNANEXUS_INVALID_EMAIL
+        user.email = Base64.encode64(user.email).sub("\n", "") + DNANEXUS_INVALID_EMAIL
+
+        user.normalized_email = Base64.
+          encode64(user.normalized_email).sub("\n", "") + DNANEXUS_INVALID_EMAIL
 
       when "deactivated"
-        if state != ''
+        if state != ""
           state = "enabled"
           user.disable_message = nil
           user.email = Base64.decode64(user.email.sub(DNANEXUS_INVALID_EMAIL, "\n"))
-          user.normalized_email = Base64.decode64(user.normalized_email.sub(DNANEXUS_INVALID_EMAIL, "\n"))
+
+          user.normalized_email = Base64.decode64(
+            user.normalized_email.sub(DNANEXUS_INVALID_EMAIL, "\n"),
+          )
         end
       end
 
@@ -41,12 +47,14 @@ module Admin
         user.save!(validate: false)
         redirect_back(
           fallback_location: user_path(user),
-          alert: "User has been #{state == 'enabled' ? 're-activated':'de-activated'}"
+          alert: "User has been #{state == 'enabled' ? 're-activated' : 'de-activated'}",
         )
       else
+        errors = user.errors.map { |_k, v| v }.join(",\n")
+
         redirect_back(
           fallback_location: user_path(user),
-          error: "There was an error locking the user: #{ user.errors.map{|k,v| v }.join(",\n") }"
+          error: "There was an error locking the user: #{errors}",
         )
       end
     end
@@ -56,8 +64,8 @@ module Admin
       @users_grid = initialize_grid(@users)
 
       respond_to do |format|
-       format.html { render 'admin/users/deactivated' }
-       format.json { render json: { users: @users } }
+        format.html { render "admin/users/deactivated" }
+        format.json { render json: { users: @users } }
       end
     end
 
@@ -65,87 +73,79 @@ module Admin
       @users = User.where(private_files_project: nil)
 
       @users_grid = initialize_grid(@users)
-      render 'admin/users/pending'
+      render "admin/users/pending"
     end
 
     def resend_activation_email
-      if @context.user.can_administer_site?
-        user = User.find_by_dxuser(unsafe_params[:dxuser])
+      return unless @context.user.can_administer_site?
 
-        begin
-          api = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
-          result = api.call(
-              'account',
-             "resendActivationEmail",
-              usernameOrEmail: user.dxid
-            )
-        rescue Net::HTTPClientException => e
-          redirect_back(fallback_location: user_path(user), error: "There was a platform error")
-        else
-          redirect_back(
-            fallback_location: user_path(user),
-            success: "Activation email has been resent"
-          )
-        end
+      user = User.find_by(dxuser: unsafe_params[:dxuser])
+
+      begin
+        api = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
+        api.call("account", "resendActivationEmail", usernameOrEmail: user.dxid)
+      rescue Net::HTTPServerException
+        redirect_back(fallback_location: user_path(user), error: "There was a platform error")
+      else
+        redirect_back(
+          fallback_location: user_path(user),
+          success: "Activation email has been resent",
+        )
       end
     end
 
     def reset_2fa
-      if @context.user.can_administer_site?
-        user = User.find_by_dxuser(unsafe_params[:dxuser])
-        begin
-          api = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
-          result = api.call(
-            user.dxid,
-           "resetUserMFA",
-            user_id: user.dxid,
-            org_id: ORG_EVERYONE
+      return unless @context.user.can_administer_site?
+
+      user = User.find_by(dxuser: unsafe_params[:dxuser])
+
+      begin
+        api = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
+        api.call(user.dxid, "resetUserMFA", user_id: user.dxid, org_id: ORG_EVERYONE)
+      rescue Net::HTTPServerException => e
+        if e.message =~ /MFA is already reset/
+          redirect_back(
+            fallback_location: user_path(user),
+            alert: "MFA is already reset or not yet configured for the user",
           )
-        rescue Net::HTTPClientException => e
-          if e.message =~ /MFA is already reset/
-            redirect_back(
-              fallback_location: user_path(user),
-              alert: "MFA is already reset or not yet configured for the user"
-            )
-          else
-            redirect_back(
-              fallback_location: user_path(user),
-              alert: "There was a server error, please try again"
-            )
-          end
         else
-          redirect_back(fallback_location: user_path(user), alert: "Reset successfully")
+          redirect_back(
+            fallback_location: user_path(user),
+            alert: "There was a server error, please try again",
+          )
         end
+      else
+        redirect_back(fallback_location: user_path(user), alert: "Reset successfully")
       end
     end
 
     def unlock_user
-        user = User.find_by_dxuser(unsafe_params[:dxuser])
-        begin
-          api = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
-          result = api.call(
-              @context.user.dxid,
-              "unlockUserAccount",
-              user_id: user.dxid,
-              org_id: ORG_EVERYONE
-          )
-        rescue Net::HTTPClientException => e
-          if request.method == 'POST'
-            render json: { ok: 'error' }, status: 403
-          else
-            error = "There was an error, please try again later."
-            if e.message =~ /must be an admin/
-              error = "permission denied, must be a user of the org."
-            end
-            redirect_back(fallback_location: user_path(user), alert: error)
-          end
+      user = User.find_by(dxuser: unsafe_params[:dxuser])
+
+      begin
+        api = DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI)
+        api.call(
+          @context.user.dxid,
+          "unlockUserAccount",
+          user_id: user.dxid,
+          org_id: ORG_EVERYONE,
+        )
+      rescue Net::HTTPServerException => e
+        if request.post?
+          render json: { ok: "error" }, status: :forbidden
         else
-          redirect_back(fallback_location: user_path(user), alert: "User has been unlocked")
+          error = "There was an error, please try again later."
+          error = "permission denied, must be a user of the org." if e.message =~ /must be an admin/
+
+          redirect_back(fallback_location: user_path(user), alert: error)
         end
+      else
+        redirect_back(fallback_location: user_path(user), alert: "User has been unlocked")
+      end
     end
 
     def active
-      date_string = Time.now.strftime("%Y-%m-%d")
+      date_string = Time.zone.now.strftime("%Y-%m-%d")
       csv_data = UsersCsvExporter.export_active_users
 
       send_data csv_data,
@@ -155,14 +155,11 @@ module Admin
     end
 
     def edit
-      # 1. get information from dnanexusAPI
-      # 2. set information to dnanexusAUTH server
-
-      @user = User.find_by_dxuser(unsafe_params[:dxuser])
+      @user = User.find_by(dxuser: unsafe_params[:dxuser])
     end
 
     def update
-      @user = User.find_by_dxuser(unsafe_params[:dxuser])
+      @user = User.find_by(dxuser: unsafe_params[:dxuser])
     end
 
     # Selects all users, according search string for the given org.
