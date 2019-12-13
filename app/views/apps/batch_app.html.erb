@@ -65,6 +65,7 @@
         <h4>Batch Input</h4>
       </div>
       <div class="panel-body">
+        <!-- ko if: needSelectSpace && spaceId || !needSelectSpace -->
         <div class="row">
           <p>1. Select Batch Input</p>
           <p class="text-muted">You can only select one batch input to vary between executions.</p>
@@ -156,11 +157,13 @@
             <!-- /ko -->
           <!-- /ko -->
         <!-- /ko -->
+        <!-- /ko -->
 
       </div>
     </div>
     <!-- ko if: otherInputSpec().length > 0 -->
       <div class="panel panel-default">
+        <!-- ko if: needSelectSpace && spaceId || !needSelectSpace -->
         <div class="panel-heading">
           <h4>Other Inputs</h4>
         </div>
@@ -198,6 +201,7 @@
           </div>
           <!-- /ko -->
         </div>
+        <!-- /ko -->
       </div>
     <!-- /ko -->
   </form>
