@@ -48,15 +48,16 @@ class Workflow < ApplicationRecord
 
   def batch_input_spec
     app = stages.find { |s| s["prev_slot"].nil? }
-    slot_id = app["slotId"]
+    #slot_id = app["slotId"]
     all_input_spec.map do |input|
-      input["allow_batch"] = allow_batch?(input, slot_id)
+      input["allow_batch"] = allow_batch?(input) #, slot_id)
       input
     end
   end
 
-  def allow_batch?(input, slot_id)
-    input["parent_slot"] == slot_id && input["requiredRunInput"] && %w(file string).include?(input["class"])
+  def allow_batch?(input)#, slot_id)
+    #input["parent_slot"] == slot_id && input["requiredRunInput"] && %w(file string).include?(input["class"])
+    input["requiredRunInput"] && %w(file string).include?(input["class"])
   end
 
   def all_input_spec
