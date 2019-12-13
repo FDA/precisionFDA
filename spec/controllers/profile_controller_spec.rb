@@ -1,6 +1,14 @@
 require "rails_helper"
 
 RSpec.describe ProfileController, type: :controller do
+  # rubocop:disable RSpec/AnyInstance
+  before do
+    authenticate!(site_admin)
+    allow_any_instance_of(User).to receive(:can_administer_site?).and_return(true)
+    allow(DNAnexusAPI).to receive(:email_exists?).and_return(false)
+  end
+  # rubocop:enable RSpec/AnyInstance
+
   let(:controller) { instance_double(described_class) }
   let(:site_admin) { create(:user, :admin, dxuser: "user_site_admin") }
   let!(:invitation) { create(:invitation, org: nil) }
@@ -13,13 +21,6 @@ RSpec.describe ProfileController, type: :controller do
   let(:view_step2_path) { "profile/provision_new_user/_step_2" }
 
   describe "new user provisioning" do
-    # rubocop:disable RSpec/AnyInstance
-
-    before do
-      authenticate!(site_admin)
-      allow_any_instance_of(User).to receive(:can_administer_site?).and_return(true)
-    end
-
     context "when Step 1 starts" do
       before { get :provision_new_user }
 
@@ -95,6 +96,5 @@ RSpec.describe ProfileController, type: :controller do
         end
       end
     end
-    # rubocop:enable RSpec/AnyInstance
   end
 end
