@@ -66,6 +66,7 @@ Rails.application.routes.draw do
       post "restore_comparison_app", to: "apps#restore_comparison_app"
       get "provision_new_user", to: "provision#provision_new_user"
       post "provision_new_user", to: "provision#provision_new_user"
+      get "search_invitations", to: "provision#search_invitations"
 
       resources :organizations, only: %i(index show create) do
         post :change_org_admin, on: :collection
