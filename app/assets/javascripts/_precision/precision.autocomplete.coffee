@@ -127,6 +127,7 @@ class AutocompleteModel
     @value = e.target.getAttribute('data-value')
     @nodes.hiddenInput.value = @value
     @dispatchInputEvent('SETVALUE')
+    @params.onOptionClick(e, this) if typeof @params.onOptionClick == 'function'
 
   onKeyUp: (e) =>
     @dispatchInputEvent('KEYUP')
