@@ -20,6 +20,9 @@ module Admin
     ERROR_KEYS = %i(first_name last_name email org org_handle).freeze
     WARNING_KEYS = %i(org org_handle username).freeze
 
+    # Lists invitations.
+    def invitations; end
+
     # Searches invitations.
     def search_invitations
       invitations = InvitationSearcher.call(unsafe_params[:query]).map do |invitation|
