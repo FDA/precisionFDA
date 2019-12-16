@@ -37,6 +37,28 @@ module Admin
       end
     end
 
+    # Searches invitations.
+    def search_invitations
+      invitations = InvitationSearcher.call(unsafe_params[:query]).map do |invitation|
+        {
+          id: invitation.id,
+          first_name: invitation.first_name,
+          last_name: invitation.last_name,
+          email: invitation.email,
+          address1: invitation.address1,
+          address2: invitation.address2,
+          country: invitation.country.name,
+          city: invitation.city,
+          us_state: invitation.us_state,
+          postal_code: invitation.postal_code,
+          phone: invitation.full_phone,
+          duns: invitation.duns,
+        }
+      end
+
+      render json: invitations
+    end
+
     private
 
     def init_provision_params
