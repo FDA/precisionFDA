@@ -10,6 +10,21 @@ module Admin
     STEP_2 = "step2".freeze
     STEP_3 = "step3".freeze
     STEP_4 = "step4".freeze
+    USER_FIELDS = %i(
+      org
+      org_handle
+      username
+      email
+      first_name
+      last_name
+      country
+      address
+      duns
+      phone
+    ).freeze
+
+    ERROR_KEYS = %i(first_name last_name email org org_handle).freeze
+    WARNING_KEYS = %i(org org_handle username).freeze
 
     def provision_new_user
       if request.get?
@@ -57,6 +72,25 @@ module Admin
       end
 
       render json: invitations
+    end
+
+    def provision_user
+      results = {}
+
+      unsafe_params[:invitations].each do |id, opts|
+        current_result = {}
+        invitation = Invitation.find(id)
+        errors = add_errors(opts.slice(*ERROR_KEYS))
+        current_result[:errors] = errors && next if errors.present?
+        warnings = add_warnings(invitation, *opts.slice(*WARNING_KEYS).values)
+        current_result[:warnings] = warnings if warnings.present?
+
+        save_user(invitation, opts)
+
+        results[id] = current_result
+      end
+
+      render json: results
     end
 
     private
@@ -119,7 +153,8 @@ module Admin
     end
 
     def step_4
-      provision_params = {
+      save_user(
+        @invitation,
         org: @org,
         username: @suggested_username,
         org_handle: @org_handle,
@@ -129,13 +164,15 @@ module Admin
         address: @address1,
         duns: @duns,
         phone: @full_phone,
-        singular: true,
-      }
-
-      service = DIContainer.resolve("orgs.provisioner")
-      service.call(@user, @invitation, provision_params)
+      )
 
       @state = STEP_4
+    end
+
+    def save_user(invitation, opts)
+      service = DIContainer.resolve("orgs.provisioner")
+      user_params = opts.slice(*USER_FIELDS).merge(singular: true)
+      service.call(context.user, invitation, user_params)
     end
   end
 end
