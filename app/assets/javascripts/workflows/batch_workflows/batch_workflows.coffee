@@ -100,7 +100,8 @@ class InputModel
     @valid(true)
 
   constructor: (input) ->
-    @id = "#{input.stageName}_#{input.name}"
+    @id = input.uniq_input_name
+    @stageId = input.uniq_input_name.split('.')[0]
     @type = input.class
     @name = input.name
     @uniq_input_name = input.uniq_input_name
@@ -567,7 +568,7 @@ class BatchWorkflowPageModel
 
   selectBatchOne: (input) =>
     @inputs().forEach( (_input) ->
-      if _input.type != input.type
+      if _input.type != input.type or _input.stageId != input.stageId
         _input.disabledBatchTwo(true)
       else
         _input.disabledBatchTwo(false)
