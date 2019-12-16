@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe ProfileController, type: :controller do
+RSpec.describe Admin::ProvisionController, type: :controller do
   # rubocop:disable RSpec/AnyInstance
   before do
     authenticate!(site_admin)
@@ -17,14 +17,14 @@ RSpec.describe ProfileController, type: :controller do
   let!(:constructed_username) do
     "#{first_name.downcase.gsub(/[^a-z]/, '')}.#{last_name.downcase.gsub(/[^a-z]/, '')}"
   end
-  let(:view_path) { "profile/provision_new_user" }
-  let(:view_step2_path) { "profile/provision_new_user/_step_2" }
+  let(:view_path) { "admin/provision/provision_new_user" }
+  let(:view_step2_path) { "admin/provision/provision_new_user/_step_2" }
 
   describe "new user provisioning" do
     context "when Step 1 starts" do
       before { get :provision_new_user }
 
-      let(:view_step1_path) { "profile/provision_new_user/_step_1" }
+      let(:view_step1_path) { "admin/provision/provision_new_user/_step_1" }
 
       it "a new invitation created" do
         expect(Invitation.count).to eq 1
@@ -54,7 +54,7 @@ RSpec.describe ProfileController, type: :controller do
     end
 
     context "when Step 3 starts" do
-      let(:view_step3_path) { "profile/provision_new_user/_step_3" }
+      let(:view_step3_path) { "admin/provision/provision_new_user/_step_3" }
       let(:step3_params) { { state: "step3", inv: invitation.id } }
       let(:dna_instance) { instance_double(DNAnexusAPI) }
 
