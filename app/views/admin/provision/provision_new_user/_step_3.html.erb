@@ -1,5 +1,5 @@
 <div class="container-padded">
-  <%= form_tag(provision_new_user_path, method: 'post', class: "form") do -%>
+  <%= form_tag(admin_provision_new_user_path, method: 'post', class: "form") do -%>
     <div class="pfda-padded-b">
       <%= hidden_field_tag("state", "step2") %>
       <%= hidden_field_tag("inv", @inv) %>
@@ -48,7 +48,7 @@
   <% end %>
   <p> You are about to provision username <strong><%= @suggested_username %></strong>. This action cannot be undone. </p>
   <div class="clearfix">
-    <%= form_tag(provision_new_user_path, method: 'post', class: "pull-left") do -%>
+    <%= form_tag(admin_provision_new_user_path, method: 'post', class: "pull-left") do -%>
       <%= hidden_field_tag("state", "step4") %>
       <%= hidden_field_tag("inv", @inv) %>
       <%= hidden_field_tag("first_name", @first_name) %>

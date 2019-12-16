@@ -62,6 +62,10 @@ Rails.application.routes.draw do
       end
 
       get "comparator_settings", to: "comparator_settings#index"
+      post "comparison_app", to: "apps#comparison_app"
+      post "restore_comparison_app", to: "apps#restore_comparison_app"
+      get "provision_new_user", to: "provision#provision_new_user"
+      post "provision_new_user", to: "provision#provision_new_user"
 
       resources :organizations, only: %i(index show create) do
         post :change_org_admin, on: :collection
@@ -363,8 +367,6 @@ Rails.application.routes.draw do
     get "profile", to: "profile#index"
     put "profile", to: "profile#update"
     post "profile/provision_user", to: "profile#provision_user", as: "provision_user"
-    get "profile/provision_new_user", to: "profile#provision_new_user"
-    post "profile/provision_new_user", to: "profile#provision_new_user", as: "provision_new_user"
     get "profile/provision_org", to: "profile#provision_org"
     post "profile/provision_org", to: "profile#provision_org", as: "provision_org"
     post "profile/run_report", to: "profile#run_report", as: "run_report"
