@@ -1,0 +1,7 @@
+<div class="container-padded">
+  <p>You have successfully provisioned
+    a new self-represented user with username <strong><%= @suggested_username %></strong>."
+    An activation email will be sent to <%= @email %> with
+    further instructions.</p>
+  <%= link_to("Return to Admin Dashboard", admin_root_path, class: "btn btn-primary") %>
+</div>

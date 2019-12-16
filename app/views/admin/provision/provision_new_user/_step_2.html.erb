@@ -1,7 +1,7 @@
 <div class="container-padded">
-  <%= form_tag(provision_new_user_path, method: 'post', class: "form") do -%>
+  <%= form_tag(admin_provision_new_user_path, method: 'post', class: "form") do -%>
     <div class="pfda-padded-b">
-      <%= link_to(content_tag(:i, "", class: "fa fa-backward") + " Back", provision_new_user_path, class: 'btn btn-default') %>&nbsp;
+      <%= link_to(content_tag(:i, "", class: "fa fa-backward") + " Back", admin_provision_new_user_path, class: 'btn btn-default') %>&nbsp;
       <%= button_tag(raw("""<i class='fa fa-forward'></i>&nbsp;Next"""), {
         class: "btn btn-primary",
         data: {'disable-with': raw("""<i class='fa fa-forward'></i>&nbsp;Next""")}

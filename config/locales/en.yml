@@ -59,6 +59,36 @@ en:
   error_default: Something went wrong!
   workflow_not_accessible: Sorry, this workflow does not exist or is not accessible by you.
 
+  provision:
+    org_invitation_but_self_represented_on:
+      The original invitation included an organization
+      but also ticked the 'self-represented' box. Make sure you are making the right
+      choice between those two options.
+
+    both_org_admin_and_self_represented_on:
+      The original invitation ticked both the organization
+      admin and 'self-represented' boxes. Make sure you are making the right choice
+      between those two options.
+
+    self_represented_on_but_org:
+      The original invitation ticked the 'self-represented' box but you supplied
+      an organization. Please double-check this is what you want.
+
+    org_but_self_represented_on:
+      The original invitation supplied an organization but you are about to
+      provision a self-represented user. Please double-check this is what you want.
+
+    org_admin_but_self_represented_on:
+      The original invitation ticked the organization admin box but you are about
+      to provision a self-represented user. Please double-check this is what you want.
+
+    profile_link: Click here to visit their profile
+
+    dxuser_already_used:
+      There is already another user on precisionFDA with the username '%{username}'.
+      %{link} to make sure that the person you are trying to provision doesn't already exist
+      on precisionFDA. The suggested username has been adjusted to avoid conflicts.
+
   activerecord:
     attributes:
       invitation:

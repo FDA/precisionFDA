@@ -4,7 +4,7 @@ class PageProvisionNewUserView
     @enableNext = ko.computed(() => !!@selectedRequest())
     @org_admin = ko.observable()
 
-ProfileController = Paloma.controller('Profile', {
+AdminProvisionController = Paloma.controller('Admin/Provision', {
   provision_new_user: ->
     ### Page Model ###
     $container = $("body main")

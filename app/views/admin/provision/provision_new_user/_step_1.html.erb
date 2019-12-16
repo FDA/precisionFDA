@@ -1,5 +1,5 @@
 <div style="overflow: auto;">
-  <%= form_tag(provision_new_user_path, method: 'post', class: "form container-padded") do -%>
+  <%= form_tag(admin_provision_new_user_path, method: 'post', class: "form container-padded") do -%>
     <div class="pfda-padded-b">
       <%= link_to(raw("""<i class='fa fa-backward'></i>&nbsp;Back"""), admin_users_path, class: 'btn btn-default') %>&nbsp;
       <%= button_tag(raw("""<i class='fa fa-forward'></i>&nbsp;Next"""), {
@@ -28,7 +28,7 @@
       <% @invitations.each do |inv| %>
         <tr>
           <td><%= radio_button_tag("inv", inv.id, false, {
-            data: {bind: 'checked: selectedRequest'}
+            data: { bind: "checked: selectedRequest" }
           }) %></td>
           <td><%= inv.user_id.present? ? User.find(inv.user_id).dxuser : "-" %></td>
           <td><%= user_exists_attribute(inv, :first_name) %></td>

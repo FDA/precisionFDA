@@ -87,4 +87,41 @@ module ErrorProcessable
     "Error: This email address is already being used for a #{name} account." \
     "Please choose a different email address for precisionFDA."
   end
+
+  def add_warnings(invitation, org, org_handle, suggested_username)
+    warnings = []
+
+    if User.find_by(dxuser: suggested_username).present?
+      link = view_context.link_to(
+        I18n.t("provision.profile_link"),
+        user_path(suggested_username),
+        target: "_blank",
+        rel: "noopener",
+      )
+
+      warnings << I18n.t("provision.dxuser_already_used", link: link, username: suggested_username)
+    end
+
+    if invitation.singular && invitation.org.present?
+      warnings << I18n.t("provision.org_invitation_but_self_represented_on")
+    end
+
+    if invitation.singular && invitation.organization_admin
+      warnings << I18n.t("provision.both_org_admin_and_self_represented_on")
+    end
+
+    if invitation.singular && invitation.org.blank? && org.present?
+      warnings << I18n.t("provision.self_represented_on_but_org")
+    end
+
+    if !invitation.singular && invitation.org.present? && org.blank? && org_handle.blank?
+      warnings << I18n.t("provision.org_but_self_represented_on")
+    end
+
+    if invitation.organization_admin && org.blank?
+      warnings << I18n.t("provision.org_but_self_represented_on")
+    end
+
+    warnings
+  end
 end

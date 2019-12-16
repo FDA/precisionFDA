@@ -1,0 +1,15 @@
+<% content_for :title, "New user" %>
+
+<div class="page-header">
+  <div class="page-title">New user</div>
+</div>
+
+<% if @state == "step1" %>
+  <%= render "admin/provision/provision_new_user/step_1" %>
+<% elsif @state == "step2" %>
+  <%= render "admin/provision/provision_new_user/step_2" %>
+<% elsif @state == "step3" %>
+  <%= render "admin/provision/provision_new_user/step_3" %>
+<% elsif @state == "step4" %>
+  <%= render "admin/provision/provision_new_user/step_4" %>
+<% end %>
