@@ -138,7 +138,6 @@ class FilesController < ApplicationController
     js(
       file: @file.slice(:uid, :id),
       license: @file.license ? @file.license.slice(:uid, :content) : nil,
-      enable_delete: @enable_delete,
     )
   end
 

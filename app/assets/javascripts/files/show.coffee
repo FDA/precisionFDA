@@ -18,9 +18,6 @@ FilesController = Paloma.controller('Files',
     viewModel = new FileViewModel(@params.file, @params.license)
 
     ko.applyBindings(viewModel, $container[0])
-    $linkToDelete = $container.find("#linkToDelete")
-    if !@params.enable_delete
-      $linkToDelete.addClass("disabled")
 
     $tabs = $container.find(".nav-tabs > li")
     if $tabs.length > 0 && !$tabs.hasClass("active")
