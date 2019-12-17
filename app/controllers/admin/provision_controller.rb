@@ -49,22 +49,33 @@ module Admin
       results = {}
 
       unsafe_params[:invitations].each do |id, opts|
-        current_result = {}
         invitation = Invitation.find(id)
-        errors = add_errors(opts.slice(*ERROR_KEYS))
-        current_result[:errors] = errors && next if errors.present?
-        warnings = add_warnings(invitation, *opts.slice(*WARNING_KEYS).values)
-        current_result[:warnings] = warnings if warnings.present?
-
-        save_user(invitation, opts)
-
-        results[id] = current_result
+        results[id] = provision_user(invitation, opts)
       end
 
       render json: results
     end
 
     private
+
+    def provision_user(invitation, opts)
+      result = {}
+      result[:errors] = errors(opts)
+
+      return result if result[:errors].present?
+
+      result[:warnings] = warnings(invitation, opts)
+      save_user(invitation, opts)
+      result.reject { |_k, v| v.blank? }
+    end
+
+    def errors(opts)
+      add_errors(opts.slice(*ERROR_KEYS))
+    end
+
+    def warnings(invitation, opts)
+      add_warnings(invitation, *opts.slice(*WARNING_KEYS).values)
+    end
 
     def save_user(invitation, opts)
       service = DIContainer.resolve("orgs.provisioner")
