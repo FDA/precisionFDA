@@ -39,6 +39,8 @@ module Admin
           postal_code: invitation.postal_code,
           phone: invitation.full_phone,
           duns: invitation.duns,
+          organize_intent: invitation.organize_intent,
+          participate_intent: invitation.participate_intent,
         }
       end
 
