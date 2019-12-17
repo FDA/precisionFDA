@@ -119,8 +119,6 @@ class FilesController < ApplicationController
       @licenses = License.editable_by(@context)
     end
 
-    @enable_delete = @file.owned_by?(@context)
-
     @items_from_params = [@file]
     @item_path = pathify(@file)
     @item_comments_path = pathify_comments(@file)
@@ -137,7 +135,7 @@ class FilesController < ApplicationController
 
     js(
       file: @file.slice(:uid, :id),
-      license: @file.license ? @file.license.slice(:uid, :content) : nil,
+      license: @file.license&.slice(:uid, :content),
     )
   end
 
