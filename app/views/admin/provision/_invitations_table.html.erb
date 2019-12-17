@@ -1,0 +1,76 @@
+<table class="table table-striped">
+  <thead>
+    <th>First Name</th>
+    <th>Last Name</th>
+    <th>Email</th>
+    <th>Address 1</th>
+    <th>Address 2</th>
+    <th>Country</th>
+    <th>City</th>
+    <th>Us State</th>
+    <th>Postal Code</th>
+    <th>Phone</th>
+    <th>Duns</th>
+    <th></th>
+  </thead>
+  <tbody>
+  <form id="provision_new_users">
+    <!-- ko foreach: invitations -->
+      <tr>
+        <td>
+          <input type="text" class="form-control" data-bind="value: $data.first_name" />
+        </td>
+        <td>
+          <input type="text" class="form-control" data-bind="value: $data.last_name" />
+        </td>
+        <td>
+          <input type="text" class="form-control" data-bind="value: $data.email" />
+        </td>
+        <td>
+          <input type="text" class="form-control" data-bind="value: $data.address1" />
+        </td>
+        <td>
+          <input type="text" class="form-control" data-bind="value: $data.address2" />
+        </td>
+        <td>
+          <input type="text" class="form-control" data-bind="value: $data.country" />
+        </td>
+        <td>
+          <input type="text" class="form-control" data-bind="value: $data.city" />
+        </td>
+        <td>
+          <input type="text" class="form-control" data-bind="value: $data.us_state" />
+        </td>
+        <td>
+          <input type="text" class="form-control" data-bind="value: $data.postal_code" />
+        </td>
+        <td>
+          <input type="text" class="form-control" data-bind="value: $data.phone" />
+        </td>
+        <td>
+          <input type="text" class="form-control" data-bind="value: $data.duns" />
+        </td>
+        <td data-bind="click: $root.removeInvitation">
+          <button class="btn btn-danger">
+            <i class="fa fa-times"></i>
+          </button>
+        </td>
+      </tr>
+      <tr class="invitations-original-values">
+        <td data-bind="text: $data.first_name"></td>
+        <td data-bind="text: $data.last_name"></td>
+        <td data-bind="text: $data.email"></td>
+        <td data-bind="text: $data.address1"></td>
+        <td data-bind="text: $data.address2"></td>
+        <td data-bind="text: $data.country"></td>
+        <td data-bind="text: $data.city"></td>
+        <td data-bind="text: $data.us_state"></td>
+        <td data-bind="text: $data.postal_code"></td>
+        <td data-bind="text: $data.phone"></td>
+        <td data-bind="text: $data.duns"></td>
+        <td></td>
+      </tr>
+    <!-- /ko -->
+  </form>
+  </tbody>
+</table>
