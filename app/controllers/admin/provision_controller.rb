@@ -4,19 +4,6 @@ module Admin
     include ErrorProcessable
     include Naming
 
-    USER_FIELDS = %i(
-      org
-      org_handle
-      username
-      email
-      first_name
-      last_name
-      country
-      address
-      duns
-      phone
-    ).freeze
-
     ERROR_KEYS = %i(first_name last_name email org org_handle).freeze
     WARNING_KEYS = %i(org org_handle username).freeze
 
@@ -81,7 +68,7 @@ module Admin
 
     def save_user(invitation, opts)
       service = DIContainer.resolve("orgs.provisioner")
-      user_params = opts.slice(*USER_FIELDS).merge(singular: true)
+      user_params = opts.merge(singular: true)
       service.call(context.user, invitation, user_params)
     end
   end
