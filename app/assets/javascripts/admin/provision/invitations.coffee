@@ -1,4 +1,7 @@
 class PageInvitationsView
+  renderSearchInvLabel: (item) ->
+    "#{item.email} | #{item.first_name} #{item.last_name}"
+
   removeInvitation: (data) =>
     @invitations.remove(data)
 
@@ -13,7 +16,7 @@ class PageInvitationsView
         .then(
           (data) =>
             @searchedInvitations = data
-            return data.map (item) -> { value: item.id, label: item.email }
+            return data.map (item) => { value: item.id, label: @renderSearchInvLabel(item) }
           (error) -> console.log error
         )
     })
