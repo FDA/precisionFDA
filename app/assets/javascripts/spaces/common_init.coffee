@@ -176,7 +176,8 @@ class SpacesContentView
           apiEndpoint: "list_jobs",
           apiParams: {
             editable: true,
-            scopes: scopes
+            scopes: scopes,
+            space_uid: @space_uid,
           }
         },
         {
