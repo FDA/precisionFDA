@@ -2,6 +2,9 @@ class PageInvitationsView
   renderSearchInvLabel: (item) ->
     "#{item.email} | #{item.first_name} #{item.last_name}"
 
+  clearInvitations: () ->
+    @invitations.removeAll()
+
   removeInvitation: (data) =>
     @invitations.remove(data)
 
