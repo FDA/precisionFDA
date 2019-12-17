@@ -4,18 +4,20 @@ class AutocompleteModel
   EVENTS = {
     CHANGE_EVENT: "#{PREFIX}.change",
     KEYUP: "#{PREFIX}.keyup",
-    SETVALUE: "#{PREFIX}.setvalue"
+    SETVALUE: "#{PREFIX}.setvalue",
+    OPTION_CLICK: "#{PREFIX}.optionClick"
   }
 
   createEvents = () -> {
     CHANGE_EVENT: new Event(EVENTS.CHANGE_EVENT),
     KEYUP: new Event(EVENTS.KEYUP),
-    SETVALUE: new Event(EVENTS.SETVALUE)
+    SETVALUE: new Event(EVENTS.SETVALUE),
+    OPTION_CLICK: new Event(EVENTS.OPTION_CLICK)
   }
 
-  dispatchEvent = (el, e, eName) ->
-    el.dispatchEvent(e)
-    $(el).trigger(eName)
+  dispatchEvent = (el, e, eName, data) ->
+    el.dispatchEvent(e, [data])
+    $(el).trigger(eName, [data])
 
   convertOptionValues = (options = []) ->
     simpleTypes = ['string', 'number', 'boolean']
@@ -127,7 +129,7 @@ class AutocompleteModel
     @value = e.target.getAttribute('data-value')
     @nodes.hiddenInput.value = @value
     @dispatchInputEvent('SETVALUE')
-    @params.onOptionClick(e, this) if typeof @params.onOptionClick == 'function'
+    @dispatchInputEvent('OPTION_CLICK', @value)
 
   onKeyUp: (e) =>
     @dispatchInputEvent('KEYUP')
@@ -162,8 +164,8 @@ class AutocompleteModel
     if notAutocomplete and notHidden
       @nodes.optionsContainer.classList.add('hidden')
 
-  dispatchInputEvent: (event) ->
-    dispatchEvent(@nodes.inputNode, @events[event], @eventNames[event])
+  dispatchInputEvent: (event, data) ->
+    dispatchEvent(@nodes.inputNode, @events[event], @eventNames[event], data)
 
   disabled: (disabled) ->
     if disabled
@@ -225,3 +227,9 @@ class AutocompleteModel
 
 window.Precision ||= {}
 window.Precision.autocomplete = AutocompleteModel
+
+### PARAMS ###
+# @params.inputNode - input type text (DOM Node, not JQuery) [DOM Node] [REQUIRED]
+# @params.getOptionsAsync - Promise to get options with api [function -> promise]
+# @params.disabled - disable input node [boolean]
+# @params.options - default options [Array[int|string|boolean]] | [Array[Object{value, label}]]

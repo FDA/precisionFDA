@@ -5,3 +5,19 @@
 </div>
 
 <input type="text" id="search_input" class="form-control input-lg">
+
+<!-- ko if: invitations().length -->
+<div class="pfda-padded">
+  <table>
+    <thead></thead>
+    <tbody>
+    <!-- ko foreach: invitations -->
+      <tr>
+        <td data-bind="text: $data.email"></td>
+        <td data-bind="click: $root.removeInvitation">remove</td>
+      </tr>
+    <!-- /ko -->
+    </tbody>
+  </table>
+</div>
+  <!-- /ko -->
