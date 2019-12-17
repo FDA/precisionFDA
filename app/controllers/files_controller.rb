@@ -119,6 +119,8 @@ class FilesController < ApplicationController
       @licenses = License.editable_by(@context)
     end
 
+    @enable_delete = @file.owned_by?(@context)
+
     @items_from_params = [@file]
     @item_path = pathify(@file)
     @item_comments_path = pathify_comments(@file)
@@ -132,7 +134,12 @@ class FilesController < ApplicationController
     @notes = @file.notes.real_notes.accessible_by(@context).order(id: :desc).page unsafe_params[:notes_page]
     @answers = @file.notes.accessible_by(@context).answers.order(id: :desc).page unsafe_params[:answers_page]
     @discussions = @file.notes.accessible_by(@context).discussions.order(id: :desc).page unsafe_params[:discussions_page]
-    js file: @file.slice(:uid, :id), license: @file.license ? @file.license.slice(:uid, :content) : nil
+
+    js(
+      file: @file.slice(:uid, :id),
+      license: @file.license ? @file.license.slice(:uid, :content) : nil,
+      enable_delete: @enable_delete,
+    )
   end
 
   def new
