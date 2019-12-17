@@ -15,6 +15,11 @@ class PageInvitationsView
         return $.get('/admin/search_invitations', { query: searchStr })
         .then(
           (data) =>
+            data = data.filter((item) =>
+              filter = true
+              @invitations().forEach((inv) -> filter = false if inv.id == item.id)
+              return filter
+            )
             @searchedInvitations = data
             return data.map (item) => { value: item.id, label: @renderSearchInvLabel(item) }
           (error) -> console.log error
