@@ -14,63 +14,61 @@
     <th></th>
   </thead>
   <tbody>
-  <form id="provision_new_users">
-    <!-- ko foreach: invitations -->
-      <tr>
-        <td>
-          <input type="text" class="form-control" data-bind="value: $data.first_name" />
-        </td>
-        <td>
-          <input type="text" class="form-control" data-bind="value: $data.last_name" />
-        </td>
-        <td>
-          <input type="text" class="form-control" data-bind="value: $data.email" />
-        </td>
-        <td>
-          <input type="text" class="form-control" data-bind="value: $data.address1" />
-        </td>
-        <td>
-          <input type="text" class="form-control" data-bind="value: $data.address2" />
-        </td>
-        <td>
-          <input type="text" class="form-control" data-bind="value: $data.country" />
-        </td>
-        <td>
-          <input type="text" class="form-control" data-bind="value: $data.city" />
-        </td>
-        <td>
-          <input type="text" class="form-control" data-bind="value: $data.us_state" />
-        </td>
-        <td>
-          <input type="text" class="form-control" data-bind="value: $data.postal_code" />
-        </td>
-        <td>
-          <input type="text" class="form-control" data-bind="value: $data.phone" />
-        </td>
-        <td>
-          <input type="text" class="form-control" data-bind="value: $data.duns" />
-        </td>
-        <td data-bind="click: $root.removeInvitation">
-          <button class="btn btn-danger">
-            <i class="fa fa-times"></i>
-          </button>
-        </td>
-      </tr>
-      <tr class="invitations-original-values">
-        <td data-bind="text: $data.first_name"></td>
-        <td data-bind="text: $data.last_name"></td>
-        <td data-bind="text: $data.email"></td>
-        <td data-bind="text: $data.address1"></td>
-        <td data-bind="text: $data.address2"></td>
-        <td data-bind="text: $data.country"></td>
-        <td data-bind="text: $data.city"></td>
-        <td data-bind="text: $data.us_state"></td>
-        <td data-bind="text: $data.postal_code"></td>
-        <td data-bind="text: $data.phone"></td>
-        <td data-bind="text: $data.duns"></td>
-        <td></td>
-      </tr>
-    <!-- /ko -->
-  </form>
+  <!-- ko foreach: invitations -->
+    <tr>
+      <td>
+        <input type="text" class="form-control" data-bind="textInput: $data.firstName" />
+      </td>
+      <td>
+        <input type="text" class="form-control" data-bind="textInput: $data.lastName" />
+      </td>
+      <td>
+        <input type="text" class="form-control" data-bind="textInput: $data.email" />
+      </td>
+      <td>
+        <input type="text" class="form-control" data-bind="textInput: $data.address1" />
+      </td>
+      <td>
+        <input type="text" class="form-control" data-bind="textInput: $data.address2" />
+      </td>
+      <td>
+        <input type="text" class="form-control" data-bind="textInput: $data.country" />
+      </td>
+      <td>
+        <input type="text" class="form-control" data-bind="textInput: $data.city" />
+      </td>
+      <td>
+        <input type="text" class="form-control" data-bind="textInput: $data.usState" />
+      </td>
+      <td>
+        <input type="text" class="form-control" data-bind="textInput: $data.postalCode" />
+      </td>
+      <td>
+        <input type="text" class="form-control" data-bind="textInput: $data.phone" />
+      </td>
+      <td>
+        <input type="text" class="form-control" data-bind="textInput: $data.duns" />
+      </td>
+      <td data-bind="click: $root.removeInvitation">
+        <button class="btn btn-danger">
+          <i class="fa fa-times"></i>
+        </button>
+      </td>
+    </tr>
+    <tr class="invitations-original-values">
+      <td data-bind="text: $data.original.first_name"></td>
+      <td data-bind="text: $data.original.last_name"></td>
+      <td data-bind="text: $data.original.email"></td>
+      <td data-bind="text: $data.original.address1"></td>
+      <td data-bind="text: $data.original.address2"></td>
+      <td data-bind="text: $data.original.country"></td>
+      <td data-bind="text: $data.original.city"></td>
+      <td data-bind="text: $data.original.us_state"></td>
+      <td data-bind="text: $data.original.postal_code"></td>
+      <td data-bind="text: $data.original.phone"></td>
+      <td data-bind="text: $data.original.duns"></td>
+      <td></td>
+    </tr>
+  <!-- /ko -->
   </tbody>
 </table>
