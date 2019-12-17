@@ -582,11 +582,13 @@ class ApiController < ApplicationController
   #         user (boolean, optional)
   #         org (boolean, optional)
   #         all_tags_list (boolean, optional)
+  # space_uid (String, optional): if a job is being moved to space with this space_id value.
   #
   # Outputs:
   #
   # An array of hashes
   #
+
   def list_jobs
     jobs = if unsafe_params[:editable]
       Job.editable_by(@context).accessible_by_private
@@ -597,6 +599,10 @@ class ApiController < ApplicationController
     if unsafe_params[:scopes].present?
       check_scope!
       jobs = jobs.where(scope: unsafe_params[:scopes])
+    end
+
+    if unsafe_params[:space_uid].present?
+      jobs = jobs.terminal
     end
 
     result = jobs.eager_load(user: :org).order(id: :desc).map do |job|
