@@ -67,10 +67,11 @@ class AutocompleteModel
     inputGroup.classList.add('#{PREFIX}--input-group')
     return inputGroup
 
-  renderRootNode = () ->
+  renderRootNode = (inputNode) ->
     rootNode = document.createElement('div')
     rootNode.classList.add("#{PREFIX}")
     rootNode.classList.add("#{PREFIX}--wrapper")
+    rootNode.classList.add("#{PREFIX}--lg") if inputNode.classList.contains('input-lg')
     return rootNode
 
   renderHiddenInput = (hiddenInput) ->
@@ -178,7 +179,7 @@ class AutocompleteModel
     @eventNames = EVENTS
 
     @nodes = {}
-    @nodes.rootNode = renderRootNode()
+    @nodes.rootNode = renderRootNode(@params.inputNode)
     @nodes.inputNode = renderInputNode(@params.inputNode)
     @nodes.hiddenInput = renderHiddenInput(@params.inputNode)
     @nodes.inputGroup = renderInputGroup()
