@@ -119,7 +119,7 @@ module ErrorProcessable
     end
 
     if invitation.organization_admin && org.blank?
-      warnings << I18n.t("provision.org_but_self_represented_on")
+      warnings << I18n.t("provision.org_admin_but_self_represented_on")
     end
 
     warnings
