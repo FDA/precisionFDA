@@ -13,5 +13,9 @@
 <!-- ko if: invitations().length -->
 <div class="pfda-padded invitations">
   <%= render "admin/provision/invitations_table" %>
+  <div class="pfda-padded-v">
+    <button class="btn btn-primary btn-lg">Submit</button>
+    <button class="btn btn-default btn-lg" data-bind="click: clearInvitations">Clear</button>
+  </div>
 </div>
   <!-- /ko -->
