@@ -334,7 +334,7 @@ class Space < ActiveRecord::Base
 
   def content_counters(user_id)
     notes = Note.real_notes.accessible_by_space(self).count
-    files = UserFile.real_files.accessible_by_space(self).count
+    files = UserFile.real_files.not_removing.accessible_by_space(self).count
     apps = App.accessible_by_space(self).count
     jobs = Job.accessible_by_space(self).count
     comparisons = Comparison.accessible_by_space(self).count

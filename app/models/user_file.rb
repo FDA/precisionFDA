@@ -84,7 +84,9 @@ class UserFile < Node
             }
 
   class << self; undef_method :open; end
+
   scope :open, -> { where(state: STATE_OPEN) }
+  scope :not_removing, -> { where.not(state: STATE_REMOVING) }
 
   scope :files_conditions, -> {
     where(state: "closed").where.not(parent_type: ["Comparison", nil]).includes(:taggings)
