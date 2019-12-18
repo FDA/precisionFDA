@@ -56,8 +56,10 @@ class PageInvitationsView
     @search = new Precision.autocomplete({
       inputNode: @searchValue,
       getOptionsAsync: (searchStr) =>
-        return $.post('/admin/invitations/search', { query: searchStr })
-        .then(
+        return $.post('/admin/invitations/search', {
+          query: searchStr,
+          exclude: @invitations().map((invitation) => invitation.id)
+        }).then(
           (data) =>
             data = data.filter((item) =>
               filter = true
