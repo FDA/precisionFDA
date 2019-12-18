@@ -57,7 +57,7 @@ module Admin
 
       render json: {
         grid: render_to_string(
-          partial: "admin/provision/invitations_grid",
+          partial: "admin/invitations/invitations_grid",
           locals: {
             invitations: invitations_grid,
           },
