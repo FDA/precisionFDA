@@ -7,26 +7,26 @@ RSpec.describe InvitationSearcher do
     let(:email) { "email@example.com" }
     let(:not_exists) { "not_exists" }
 
+    let!(:invitation) do
+      invitation_params = {
+        email: email,
+        first_name: first_name,
+        last_name: last_name,
+        user_id: nil,
+      }
+
+      create(:invitation, invitation_params)
+    end
+
     context "when query is blank" do
       let(:query) { nil }
 
-      it "returns empty relation" do
-        expect(searcher.call(query)).to eq([])
+      it "returns all relations" do
+        expect(searcher.call(query).size).to eq(1)
       end
     end
 
     context "when query is given" do
-      let!(:invitation) do
-        invitation_params = {
-          email: email,
-          first_name: first_name,
-          last_name: last_name,
-          user_id: nil,
-        }
-
-        create(:invitation, invitation_params)
-      end
-
       context "when query is any part of email" do
         it "returns matched results" do
           expect(searcher.call("mail").size).to eq(1)

@@ -69,6 +69,7 @@ Rails.application.routes.draw do
       get "search_invitations", to: "provision#search_invitations"
       get "invitations", to: "provision#invitations"
       post "provision_users", to: "provision#provision_users"
+      post "browse", to: "provision#browse"
 
       resources :organizations, only: %i(index show create) do
         post :change_org_admin, on: :collection

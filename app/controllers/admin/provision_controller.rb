@@ -7,6 +7,10 @@ module Admin
     ERROR_KEYS = %i(first_name last_name email org org_handle).freeze
     WARNING_KEYS = %i(org org_handle username).freeze
 
+    before_action :redirect_to_list,
+                  only: %i(search_invitations provision_users browse),
+                  unless: -> { request.xhr? }
+
     # Lists invitations.
     def invitations; end
 
@@ -47,7 +51,25 @@ module Admin
       render json: results
     end
 
+    def browse
+      invitations = InvitationSearcher.call(nil, unsafe_params[:exclude])
+      invitations_grid = initialize_grid(invitations)
+
+      render json: {
+        grid: render_to_string(
+          partial: "admin/provision/invitations_grid",
+          locals: {
+            invitations: invitations_grid,
+          },
+        ),
+      }
+    end
+
     private
+
+    def redirect_to_list
+      redirect_to admin_invitations_path
+    end
 
     def provision_user(invitation, opts)
       result = {}
