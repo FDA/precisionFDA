@@ -16,7 +16,7 @@ RSpec.describe InvitationSearcher do
     end
 
     context "when query is given" do
-      before do
+      let!(:invitation) do
         invitation_params = {
           email: email,
           first_name: first_name,
@@ -48,6 +48,12 @@ RSpec.describe InvitationSearcher do
           expect(searcher.call("do").size).to eq(1)
           expect(searcher.call("oe").size).to eq(1)
           expect(searcher.call(not_exists).size).to eq(0)
+        end
+      end
+
+      context "when exclude is given" do
+        it "excludes given ids" do
+          expect(searcher.call("mail", invitation.id).size).to eq(0)
         end
       end
     end
