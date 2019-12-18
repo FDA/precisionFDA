@@ -1,6 +1,6 @@
 module Admin
   # Responsible for users provisioning.
-  class ProvisionController < BaseController
+  class InvitationsController < BaseController
     include ErrorProcessable
     include Naming
 
@@ -12,10 +12,10 @@ module Admin
                   unless: -> { request.xhr? }
 
     # Lists invitations.
-    def invitations; end
+    def index; end
 
     # Searches invitations.
-    def search_invitations
+    def search
       query = unsafe_params[:query]
       exclude = unsafe_params[:exclude]
       invitations = InvitationSearcher.call(query, exclude).map do |invitation|
@@ -40,7 +40,7 @@ module Admin
       render json: invitations
     end
 
-    def provision_users
+    def provision
       results = {}
 
       unsafe_params[:invitations].each do |id, opts|

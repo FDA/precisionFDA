@@ -64,12 +64,14 @@ Rails.application.routes.draw do
       get "comparator_settings", to: "comparator_settings#index"
       post "comparison_app", to: "apps#comparison_app"
       post "restore_comparison_app", to: "apps#restore_comparison_app"
-      get "provision_new_user", to: "provision#provision_new_user"
-      post "provision_new_user", to: "provision#provision_new_user"
-      get "search_invitations", to: "provision#search_invitations"
-      get "invitations", to: "provision#invitations"
-      post "provision_users", to: "provision#provision_users"
-      post "browse", to: "provision#browse"
+
+      resources :invitations, only: %i(index) do
+        collection do
+          post "search"
+          post "provision"
+          post "browse"
+        end
+      end
 
       resources :organizations, only: %i(index show create) do
         post :change_org_admin, on: :collection
