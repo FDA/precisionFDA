@@ -59,7 +59,7 @@ module Admin
         grid: render_to_string(
           partial: "admin/invitations/invitations_grid",
           locals: {
-            invitations: invitations_grid,
+            invitations_grid: invitations_grid,
           },
         ),
       }

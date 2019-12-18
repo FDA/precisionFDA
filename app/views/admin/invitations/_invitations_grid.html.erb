@@ -1,4 +1,4 @@
-<%= grid(invitations) do |g|
+<%= grid(invitations_grid) do |g|
   g.column name: "First Name", attribute: "first_name" do |invitation|
     content_tag(:span, invitation.first_name)
   end
