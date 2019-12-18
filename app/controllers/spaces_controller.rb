@@ -609,12 +609,7 @@ class SpacesController < ApplicationController
   end
 
   def folders(parent_folder_id = nil)
-    Folder.accessible_by_space(@space).
-      where(scoped_parent_folder_id: parent_folder_id).
-      merge(
-        Folder.where.not(state: Node::STATE_REMOVING).
-        or(Folder.where(state: nil)),
-      )
+    Folder.accessible_by_space(@space).where(scoped_parent_folder_id: parent_folder_id).not_removing
   end
 
   def render_folders(folders)
