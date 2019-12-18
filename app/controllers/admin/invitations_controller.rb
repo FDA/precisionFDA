@@ -8,7 +8,7 @@ module Admin
     WARNING_KEYS = %i(org org_handle username).freeze
 
     before_action :redirect_to_list,
-                  only: %i(search_invitations provision_users browse),
+                  only: %i(search provision browse),
                   unless: -> { request.xhr? }
 
     # Lists invitations.
