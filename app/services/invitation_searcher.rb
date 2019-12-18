@@ -4,8 +4,8 @@ class InvitationSearcher
     # Performs user searching by invitation's email, first name or last name.
     # @param query [String] Query to search users.
     # @return [ActiveRecord::Relation<Invitation>] Found invitations.
-    def call(query, exclude = [])
-      query.present? ? Invitation.where(conditions(query, exclude)) : Invitation.none
+    def call(query = nil, exclude = [])
+      query.present? ? Invitation.where(conditions(query, exclude)) : Invitation.all
     end
 
     private
