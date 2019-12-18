@@ -41,7 +41,7 @@ class PageInvitationsView
         duns: invitation.duns()
       }
     )
-    $.post('/admin/provision_users', { invitations: data })
+    $.post('/admin/invitations/provision', { invitations: data })
       .then(
         (data) ->
           Precision.alert.showAboveAll('Users successfully provisioned!', 'alert-success')
@@ -56,7 +56,7 @@ class PageInvitationsView
     @search = new Precision.autocomplete({
       inputNode: @searchValue,
       getOptionsAsync: (searchStr) =>
-        return $.get('/admin/search_invitations', { query: searchStr })
+        return $.post('/admin/invitations/search', { query: searchStr })
         .then(
           (data) =>
             data = data.filter((item) =>
@@ -76,8 +76,8 @@ class PageInvitationsView
       invitation = _invitation.length and _invitation[0]
       @invitations.push(new InvitationModel(invitation))
 
-AdminProvisionController = Paloma.controller('Admin/Provision', {
-  invitations: ->
+AdminProvisionController = Paloma.controller('Admin/Invitations', {
+  index: ->
     $container = $("body main")
     viewModel = new PageInvitationsView()
     ko.applyBindings(viewModel, $container[0])
