@@ -4,8 +4,8 @@ class InvitationSearcher
     # Performs user searching by invitation's email, first name or last name.
     # @param query [String] Query to search users.
     # @return [ActiveRecord::Relation<Invitation>] Found invitations.
-    def call(query)
-      query.present? ? Invitation.where(conditions(query)) : Invitation.none
+    def call(query, exclude = [])
+      query.present? ? Invitation.where(conditions(query, exclude)) : Invitation.none
     end
 
     private
@@ -20,12 +20,13 @@ class InvitationSearcher
     # Returns search conditions.
     # @param query [String] Search query.
     # @return [Arel::Nodes::Node] Arel node containing search conditions.
-    def conditions(query)
+    def conditions(query, exclude)
       or_conditions = fields.inject(nil) do |relation, field|
         condition = invitations[field].matches(sanitized_like_query(query))
         relation ? relation.or(condition) : condition
       end
 
+      or_conditions = or_conditions.and(invitations[:id].not_in(exclude)) if exclude.present?
       or_conditions.and(invitations[:user_id].eq(nil))
     end
 

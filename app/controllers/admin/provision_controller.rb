@@ -12,7 +12,9 @@ module Admin
 
     # Searches invitations.
     def search_invitations
-      invitations = InvitationSearcher.call(unsafe_params[:query]).map do |invitation|
+      query = unsafe_params[:query]
+      exclude = unsafe_params[:exclude]
+      invitations = InvitationSearcher.call(query, exclude).map do |invitation|
         {
           id: invitation.id,
           first_name: invitation.first_name,
