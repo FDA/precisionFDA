@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe Admin::ProvisionController, type: :controller do
+RSpec.describe Admin::InvitationsController, type: :controller do
   # rubocop:disable RSpec/AnyInstance
   before do
     authenticate!(site_admin)
