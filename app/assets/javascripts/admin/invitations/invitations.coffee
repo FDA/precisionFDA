@@ -17,11 +17,10 @@ class PageInvitationsView
   showGridModal: () ->
     @gridModal.modal('show')
     @invitationGridLoading(true)
-    console.log @invitationsExclude()
     $.post('/admin/invitations/browse', { exclude: @invitationsExclude() })
       .then(
         (data) =>
-          console.log data
+          @gridContainer.html(data.grid)
           @invitationGridLoading(false)
         (error) =>
           Precision.alert.showAboveAll('Something went wrong while browsing users')
