@@ -5,7 +5,9 @@ class InvitationSearcher
     # @param query [String] Query to search users.
     # @return [ActiveRecord::Relation<Invitation>] Found invitations.
     def call(query = nil, exclude = [])
-      query.present? ? Invitation.where(conditions(query, exclude)) : Invitation.all
+      return Invitation.where.not(id: exclude) if query.blank?
+
+      Invitation.where(conditions(query, exclude))
     end
 
     private
