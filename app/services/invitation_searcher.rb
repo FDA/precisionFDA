@@ -5,8 +5,6 @@ class InvitationSearcher
     # @param query [String] Query to search users.
     # @return [ActiveRecord::Relation<Invitation>] Found invitations.
     def call(query = nil, exclude = [])
-      return Invitation.where.not(id: exclude) if query.blank?
-
       Invitation.where(conditions(query, exclude))
     end
 
@@ -23,13 +21,19 @@ class InvitationSearcher
     # @param query [String] Search query.
     # @return [Arel::Nodes::Node] Arel node containing search conditions.
     def conditions(query, exclude)
-      or_conditions = fields.inject(nil) do |relation, field|
-        condition = invitations[field].matches(sanitized_like_query(query))
-        relation ? relation.or(condition) : condition
+      full_conditions = invitations[:user_id].eq(nil)
+      full_conditions = full_conditions.and(invitations[:id].not_in(exclude)) if exclude.present?
+
+      if query.present?
+        or_conditions = fields.inject(nil) do |relation, field|
+          condition = invitations[field].matches(sanitized_like_query(query))
+          relation ? relation.or(condition) : condition
+        end
+
+        full_conditions = full_conditions.and(or_conditions)
       end
 
-      or_conditions = or_conditions.and(invitations[:id].not_in(exclude)) if exclude.present?
-      or_conditions.and(invitations[:user_id].eq(nil))
+      full_conditions
     end
 
     # Returns Arel table for Invitation model.
