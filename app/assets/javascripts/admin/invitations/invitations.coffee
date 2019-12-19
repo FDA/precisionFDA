@@ -14,6 +14,20 @@ class InvitationModel
      @duns = ko.observable(@original.duns)
 
 class PageInvitationsView
+  showGridModal: () ->
+    @gridModal.modal('show')
+    @invitationGridLoading(true)
+    console.log @invitationsExclude()
+    $.post('/admin/invitations/browse', { exclude: @invitationsExclude() })
+      .then(
+        (data) =>
+          console.log data
+          @invitationGridLoading(false)
+        (error) =>
+          Precision.alert.showAboveAll('Something went wrong while browsing users')
+          @invitationGridLoading(false)
+      )
+
   renderSearchInvLabel: (item) ->
     "#{item.email} | #{item.first_name} #{item.last_name}"
 
@@ -50,7 +64,13 @@ class PageInvitationsView
       )
 
   constructor: () ->
+    @gridModal = $('#invitation_grid_modal')
+    @gridContainer = $('#invitation_grid_container')
+    @invitationGridLoading = ko.observable(false)
     @invitations = ko.observableArray([])
+    @invitationsExclude = ko.computed(() =>
+      @invitations().map((invitation) -> invitation.id)
+    )
     @searchValue = document.getElementById('search_input')
     @searchedInvitations = []
     @search = new Precision.autocomplete({
@@ -58,7 +78,7 @@ class PageInvitationsView
       getOptionsAsync: (searchStr) =>
         return $.post('/admin/invitations/search', {
           query: searchStr,
-          exclude: @invitations().map((invitation) => invitation.id)
+          exclude: @invitationsExclude()
         }).then(
           (data) =>
             data = data.filter((item) =>

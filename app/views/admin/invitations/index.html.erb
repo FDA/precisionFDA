@@ -4,14 +4,18 @@
   <div class="page-title">Invitations</div>
 </div>
 
-<div class="pfda-padded">
-  <div class="invitations-search">
+<div class="pfda-padded invitations-search">
+  <div class="invitations-search-input">
     <input
       type="text"
       id="search_input"
       class="form-control input-lg"
       placeholder="Search user by First name, Last name or Email..."
     />
+  </div>
+  <div class="invitations-search-browse">
+    <button class="btn btn-success btn-lg" data-bind="click: showGridModal">Browse</button>
+    <%= render "admin/invitations/grid_modal" %>
   </div>
 </div>
 
