@@ -271,7 +271,7 @@ class SpacesController < ApplicationController
       nodes = Node.accessible_by_space(space).editable_by(@context).where(id: unsafe_params[:ids], scope: space.uid)
       nodes.each { |node| files += node.is_a?(Folder) ? node.all_files(Node.where(scope: space.uid)) : [node] }
     when "delete"
-      nodes = Node.accessible_by_space(space).editable_by(@context).where(id: unsafe_params[:ids]).to_a
+      nodes = Node.accessible_by_space(space).where(id: unsafe_params[:ids]).to_a
       files += nodes
       nodes.each { |node| files += node.all_children if node.is_a?(Folder) }
     when "copy_to_cooperative"
