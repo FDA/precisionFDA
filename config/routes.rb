@@ -6,10 +6,8 @@ Rails.application.routes.draw do
 
   default_url_options Rails.configuration.action_mailer.default_url_options
 
-  #
   # Remove the ability to switch formats (i.e. /foo vs /foo.json or /foo.xml)
-  # by wrapping everything into a scope
-  #
+  #   by wrapping everything into a scope.
   scope(format: false) do
     namespace(:admin) do
       root "dashboard#index"
@@ -39,6 +37,7 @@ Rails.application.routes.draw do
       resources :usage_reports, only: [:index] do
         post :update_custom_range, on: :collection
       end
+
       get "users", to: "users#index"
       get "active_users", to: "users#active"
       get "reset_mfa_user", to: "users#reset_2fa"
@@ -353,46 +352,48 @@ Rails.application.routes.draw do
 
     resource :org, only: :update
 
-    get "/spaces/verified_space_list" => "space_templates#verified_space_list"
-    get "/spaces/apps_and_files" => "spaces#apps_and_files"
-    get "/spaces/unverified_apps" => "space_templates#unverified_apps"
-
     resources :space_templates do
       get "duplicate", on: :member
-      get "app_file_list"
     end
 
-    resources :spaces, except: %(destroy) do
-      get "members", on: :member
-      get "discuss", on: :member
-      get "tasks",   on: :member
-      get "feed",    on: :member
-      get "reports", on: :member
-      get "notes",   on: :member
-      get "files",   on: :member
-      get "apps",    on: :member
-      get "jobs",    on: :member
-      get "comparisons", on: :member
-      get "assets", on: :member
-      get "workflows", on: :member
-      post "verify", on: :member
+    resources :spaces, except: :destroy do
+      member do
+        get "members"
+        get "discuss"
+        get "tasks"
+        get "feed"
+        get "reports"
+        get "notes"
+        get "files"
+        get "apps"
+        get "jobs"
+        get "comparisons"
+        get "assets"
+        get "workflows"
+        post "verify"
+        post "accept"
+        post "rename"
+        post "invite"
+        post "move"
+        post "create_folder"
+        post "download_list"
+        post "publish_folder"
+        post "copy_folder_to_cooperative"
+        post "copy_file_to_cooperative"
+        post "copy_to_cooperative"
+        post "search_content"
+        post "remove_folder"
+        post "lock", controller: "space_requests"
+        post "unlock", controller: "space_requests"
+        post "delete", controller: "space_requests"
+      end
 
-      post "accept", on: :member
-      post "lock", on: :member, to: "space_requests#lock"
-      post "unlock", on: :member, to: "space_requests#unlock"
-      post "delete", on: :member, to: "space_requests#delete"
-      post "rename", on: :member
-      post "invite", on: :member
-      post "move", on: :member
-      post "create_folder", on: :member
-      post "rename_folder", on: :collection
-      post "download_list", on: :member
-      post "remove_folder", on: :member, as: "remove_folder"
-      post "publish_folder", on: :member
-      post "copy_folder_to_cooperative", on: :member
-      post "copy_file_to_cooperative", on: :member
-      post "copy_to_cooperative", on: :member
-      post "search_content", on: :member
+      collection do
+        get "verified_space_list", controller: "space_templates"
+        get "unverified_apps", controller: "space_templates"
+        get "apps_and_files"
+        post "rename_folder"
+      end
 
       resources :comments
 
@@ -414,6 +415,7 @@ Rails.application.routes.draw do
           get "chart"
         end
       end
+
       resources :space_reports, only: [:index] do
         collection do
           get "counters"
@@ -447,8 +449,7 @@ Rails.application.routes.draw do
       resources :comments
     end
 
-    resources :queries do
-    end
+    resources :queries, only: %i(create destroy)
 
     resources :docs do
       get ":section", on: :collection, action: :show, as: "show"
