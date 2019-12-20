@@ -139,7 +139,7 @@ group :development, :test, :ui_test do
   gem "thin"
 end
 
-group :test, :ui_test do
+group :test do
   gem "database_cleaner", "~> 1.5", ">= 1.5.3"
   gem "factory_bot_rails", "~> 4.8", ">= 4.8.2"
   gem "ffaker"
