@@ -3,16 +3,14 @@ class SpaceTemplatesController < ApplicationController
     @space_template = SpaceTemplate.new
     @space_template.space_template_nodes.build
 
-    #redirect_to edit_space_template_path(@space_template)
-
     @verified_spaces = Space.all_verified
 
     js({
            space_template_id: @space_template.id,
            spaces: @verified_spaces,
-           verifiedSpacesURL: spaces_verified_space_list_path,
-           space_apps_files_path: spaces_apps_and_files_path,
-           unverifiedAppsURL: spaces_unverified_apps_path
+           verifiedSpacesURL: verified_space_list_spaces_path,
+           space_apps_files_path: apps_and_files_spaces_path,
+           unverifiedAppsURL: unverified_apps_spaces_path
        })
   end
 
@@ -23,9 +21,9 @@ class SpaceTemplatesController < ApplicationController
     js({
            space_template_id: @space_template.id,
            spaces: @verified_spaces,
-           verifiedSpacesURL: spaces_verified_space_list_path,
-           space_apps_files_path: spaces_apps_and_files_path,
-           unverifiedAppsURL: spaces_unverified_apps_path,
+           verifiedSpacesURL: verified_space_list_spaces_path,
+           space_apps_files_path: apps_and_files_spaces_path,
+           unverifiedAppsURL: unverified_apps_spaces_path,
            templateFiles: @space_template.space_template_nodes.where(node_type: 'Node').map(&:node),
            templateApps: @space_template.space_template_nodes.where(node_type: 'App').map(&:node),
            templateSpaces: @space_template.space_template_spaces.map(&:space)
@@ -84,9 +82,9 @@ class SpaceTemplatesController < ApplicationController
       js({
            space_template_id: @space_template.id,
            spaces: @verified_spaces,
-           verifiedSpacesURL: spaces_verified_space_list_path,
-           space_apps_files_path: spaces_apps_and_files_path,
-           unverifiedAppsURL: spaces_unverified_apps_path,
+           verifiedSpacesURL: verified_space_list_spaces_path,
+           space_apps_files_path: apps_and_files_spaces_path,
+           unverifiedAppsURL: unverified_apps_spaces_path,
            templateFiles: @space_template.space_template_nodes.where(node_type: 'Node').map(&:node),
            templateApps: @space_template.space_template_nodes.where(node_type: 'App').map(&:node),
            templateSpaces: @space_template.space_template_spaces.map(&:space),
@@ -102,8 +100,8 @@ class SpaceTemplatesController < ApplicationController
 
 
   def create
-
     space_template = SpaceTemplate.new(template_params.merge({user_id: @context.user.id}))
+
     unless space_template.valid?
       @space_template = space_template
       @verified_spaces = Space.all_verified
@@ -111,9 +109,9 @@ class SpaceTemplatesController < ApplicationController
       js({
              space_template_id: @space_template.id,
              spaces: @verified_spaces,
-             verifiedSpacesURL: spaces_verified_space_list_path,
-             space_apps_files_path: spaces_apps_and_files_path,
-             unverifiedAppsURL: spaces_unverified_apps_path,
+             verifiedSpacesURL: verified_space_list_spaces_path,
+             space_apps_files_path: apps_and_files_spaces_path,
+             unverifiedAppsURL: unverified_apps_spaces_path,
              templateFiles: template_params["space_template_nodes_attributes"].reject{|f| f['node_type'] == "Node"}.map{|n| n.map{|k,v| f = k.gsub(/node_/,''); [f, v]}.to_h },
              templateApps: template_params["space_template_nodes_attributes"].reject{|f| f['node_type'] == "App"}.map{|n| n.map{|k,v| f = k.gsub(/node_/,'');c = f.gsub(/name/,'title'); [c, v]}.to_h },
              templateSpaces: template_params["space_template_spaces_attributes"].map{|n| n.map{|k,v| f = k.gsub(/space_/,''); [f, v]}.to_h }
@@ -162,9 +160,9 @@ class SpaceTemplatesController < ApplicationController
     js({
            space_template_id: @space_template.id,
            spaces: @verified_spaces,
-           verifiedSpacesURL: spaces_verified_space_list_path,
-           space_apps_files_path: spaces_apps_and_files_path,
-           unverifiedAppsURL: spaces_unverified_apps_path,
+           verifiedSpacesURL: verified_space_list_spaces_path,
+           space_apps_files_path: apps_and_files_spaces_path,
+           unverifiedAppsURL: unverified_apps_spaces_path,
            templateFiles: @space_template.space_template_nodes.where(node_type: 'Node').map(&:node),
            templateApps: @space_template.space_template_nodes.where(node_type: 'App').map(&:node),
            templateSpaces: @space_template.space_template_spaces.map(&:space),
