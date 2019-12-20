@@ -18,7 +18,31 @@ module Admin
     def search
       query = unsafe_params[:query]
       exclude = unsafe_params[:exclude]
-      invitations = InvitationSearcher.call(query, exclude).map do |invitation|
+
+      render_invitations(query, exclude)
+    end
+
+    def provision
+      results = {}
+
+      unsafe_params[:invitations].each do |id, opts|
+        invitation = Invitation.find(id)
+        results[id] = provision_user(invitation, opts)
+      end
+
+      render json: results
+    end
+
+    def browse
+      render_invitations(nil, unsafe_params[:exclude])
+    end
+
+    private
+
+    def render_invitations(query, exclude)
+      invitations = InvitationSearcher.call(query, exclude)
+
+      render json: invitations.map do |invitation|
         {
           id: invitation.id,
           first_name: invitation.first_name,
@@ -36,36 +60,7 @@ module Admin
           participate_intent: invitation.participate_intent,
         }
       end
-
-      render json: invitations
     end
-
-    def provision
-      results = {}
-
-      unsafe_params[:invitations].each do |id, opts|
-        invitation = Invitation.find(id)
-        results[id] = provision_user(invitation, opts)
-      end
-
-      render json: results
-    end
-
-    def browse
-      invitations = InvitationSearcher.call(nil, unsafe_params[:exclude])
-      invitations_grid = initialize_grid(invitations)
-
-      render json: {
-        grid: render_to_string(
-          partial: "admin/invitations/invitations_grid",
-          locals: {
-            invitations_grid: invitations_grid,
-          },
-        ),
-      }
-    end
-
-    private
 
     def redirect_to_list
       redirect_to admin_invitations_path
