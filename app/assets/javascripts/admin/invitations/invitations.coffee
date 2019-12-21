@@ -6,7 +6,7 @@ class InvitationModel
      @email = ko.observable(@original.email)
      @address1 = ko.observable(@original.address1)
      @address2 = ko.observable(@original.address2)
-     @country = ko.observable(@original.country)
+     @country = ko.observable(@original.country_id)
      @city = ko.observable(@original.city)
      @usState = ko.observable(@original.us_state)
      @postalCode = ko.observable(@original.postal_code)
@@ -17,15 +17,9 @@ class PageInvitationsView
   showGridModal: () ->
     @gridModal.modal('show')
     @invitationGridLoading(true)
-    $.post('/admin/invitations/browse', { exclude: @invitationsExclude() })
-      .then(
-        (data) =>
-          @gridContainer.html(data.grid)
-          @invitationGridLoading(false)
-        (error) =>
-          Precision.alert.showAboveAll('Something went wrong while browsing users')
-          @invitationGridLoading(false)
-      )
+    @invitationsDataGrid.ajax.reload((json) =>
+      @invitationGridLoading(false)
+    )
 
   renderSearchInvLabel: (item) ->
     "#{item.email} | #{item.first_name} #{item.last_name}"
@@ -46,7 +40,7 @@ class PageInvitationsView
         email: invitation.email(),
         address1: invitation.address1(),
         address2: invitation.address2(),
-        country: invitation.country(),
+        country_id: invitation.country(),
         city: invitation.city(),
         us_state: invitation.usState(),
         postal_code: invitation.postalCode(),
@@ -64,12 +58,34 @@ class PageInvitationsView
 
   constructor: () ->
     @gridModal = $('#invitation_grid_modal')
-    @gridContainer = $('#invitation_grid_container')
     @invitationGridLoading = ko.observable(false)
     @invitations = ko.observableArray([])
     @invitationsExclude = ko.computed(() =>
       @invitations().map((invitation) -> invitation.id)
     )
+
+    @invitationsDataGrid = $('#invitations_data_grid').DataTable({
+      ajax: {
+        url: '/admin/invitations/browse',
+        type: 'POST',
+        data: () => { exclude: @invitationsExclude() },
+        dataSrc: ''
+      },
+      columns: [
+        { data: 'first_name' },
+        { data: 'last_name' },
+        { data: 'email' },
+        { data: 'address1' },
+        { data: 'address2' },
+        { data: 'country_id' },
+        { data: 'city' },
+        { data: 'us_state' },
+        { data: 'postal_code' },
+        { data: 'phone' },
+        { data: 'duns' },
+      ]
+    })
+
     @searchValue = document.getElementById('search_input')
     @searchedInvitations = []
     @search = new Precision.autocomplete({
