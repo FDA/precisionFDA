@@ -32,7 +32,12 @@
         <input type="text" class="form-control" data-bind="textInput: $data.address2" />
       </td>
       <td>
-        <input type="text" class="form-control" data-bind="textInput: $data.country" />
+        <select class="form-control" data-bind="
+          options: $data.countries,
+          optionsText: 'name',
+          optionsValue: 'id',
+          value: $data.countryId,">
+        </select>
       </td>
       <td>
         <input type="text" class="form-control" data-bind="textInput: $data.city" />
@@ -61,7 +66,7 @@
       <td data-bind="text: $data.original.email"></td>
       <td data-bind="text: $data.original.address1"></td>
       <td data-bind="text: $data.original.address2"></td>
-      <td data-bind="text: $data.original.country"></td>
+      <td data-bind="text: $data.originalCountry"></td>
       <td data-bind="text: $data.original.city"></td>
       <td data-bind="text: $data.original.us_state"></td>
       <td data-bind="text: $data.original.postal_code"></td>

@@ -12,7 +12,9 @@ module Admin
                   unless: -> { request.xhr? }
 
     # Lists invitations.
-    def index; end
+    def index
+      js countries: Country.pluck(:name, :id)
+    end
 
     # Searches invitations.
     def search

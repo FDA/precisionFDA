@@ -1,17 +1,28 @@
 class InvitationModel
-  constructor: (@original) ->
-     @id = @original.id
-     @firstName = ko.observable(@original.first_name)
-     @lastName = ko.observable(@original.last_name)
-     @email = ko.observable(@original.email)
-     @address1 = ko.observable(@original.address1)
-     @address2 = ko.observable(@original.address2)
-     @country = ko.observable(@original.country_id)
-     @city = ko.observable(@original.city)
-     @usState = ko.observable(@original.us_state)
-     @postalCode = ko.observable(@original.postal_code)
-     @phone = ko.observable(@original.phone)
-     @duns = ko.observable(@original.duns)
+  findCountryName: () =>
+    id = @countryId()
+    name = ''
+    for country in @countries
+      if id == country.id
+        name = country.name
+        break
+    return name
+
+  constructor: (@original, @countries) ->
+    @id = @original.id
+    @firstName = ko.observable(@original.first_name)
+    @lastName = ko.observable(@original.last_name)
+    @email = ko.observable(@original.email)
+    @address1 = ko.observable(@original.address1)
+    @address2 = ko.observable(@original.address2)
+    @countryId = ko.observable(@original.country_id)
+    @originalCountry = @findCountryName()
+    @country = ko.computed(@findCountryName)
+    @city = ko.observable(@original.city)
+    @usState = ko.observable(@original.us_state)
+    @postalCode = ko.observable(@original.postal_code)
+    @phone = ko.observable(@original.phone)
+    @duns = ko.observable(@original.duns)
 
 class PageInvitationsView
   showGridModal: () ->
@@ -40,7 +51,7 @@ class PageInvitationsView
         email: invitation.email(),
         address1: invitation.address1(),
         address2: invitation.address2(),
-        country_id: invitation.country(),
+        country_id: invitation.countryId(),
         city: invitation.city(),
         us_state: invitation.usState(),
         postal_code: invitation.postalCode(),
@@ -56,7 +67,8 @@ class PageInvitationsView
         (error) -> Precision.alert.showAboveAll('Something went wrong while provisioning users')
       )
 
-  constructor: () ->
+  constructor: (params) ->
+    @countries = params.countries.map((country) -> { id: country[1], name: country[0] })
     @gridModal = $('#invitation_grid_modal')
     @invitationGridLoading = ko.observable(false)
     @invitations = ko.observableArray([])
@@ -111,11 +123,11 @@ class PageInvitationsView
       @search.clearInput()
       _invitation = @searchedInvitations.filter((invitation) -> invitation.id.toString() == data)
       invitation = _invitation.length and _invitation[0]
-      @invitations.push(new InvitationModel(invitation))
+      @invitations.push(new InvitationModel(invitation, @countries))
 
 AdminProvisionController = Paloma.controller('Admin/Invitations', {
   index: ->
     $container = $("body main")
-    viewModel = new PageInvitationsView()
+    viewModel = new PageInvitationsView(@params)
     ko.applyBindings(viewModel, $container[0])
 })
