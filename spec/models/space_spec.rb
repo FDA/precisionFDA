@@ -25,6 +25,7 @@
 require "rails_helper"
 
 RSpec.describe Space, type: :model do
+  # rubocop:disable RSpec/AnyInstance
   let(:host_lead) { create(:user, dxuser: "user_1") }
   let(:guest_lead) { create(:user, dxuser: "user_2") }
   let(:user_member) { create(:user, dxuser: "user_3") }
@@ -151,4 +152,125 @@ RSpec.describe Space, type: :model do
       end
     end
   end
+
+  describe "member" do
+    context "when user is a space member" do
+      let(:id) { host_lead.id }
+
+      it "returns SpaceMembership object with user member id" do
+        expect(verified.member(id).user_id).to eq id
+      end
+    end
+
+    context "when user is not a space member" do
+      let(:id) { FFaker::Random.rand(5) }
+
+      it "returns nil" do
+        expect(verified.member(id)).to be_nil
+      end
+    end
+  end
+
+  describe "contributor_permission" do
+    subject(:contributor_permission) { verified.contributor_permission(context) }
+
+    let(:context) { Context.new(host_lead.id, host_lead.dxuser, SecureRandom.uuid, nil, nil) }
+
+    before do
+      allow_any_instance_of(Context).
+        to receive(:user).
+        and_return(host_lead)
+    end
+
+    context "when a space is accessible by context" do
+      context "when user is a space member - lead and can not move content" do
+        it "returns false" do
+          expect(contributor_permission).to be_falsey
+        end
+      end
+
+      context "when user is a space member - lead and can move content" do
+        before { verified.update(state: 1) }
+
+        it "returns true" do
+          expect(contributor_permission).to be_truthy
+        end
+      end
+
+      context "when user is a space member - contributor and can move content" do
+        before do
+          verified.update(state: 1)
+          verified.member(host_lead.id).update(role: "contributor")
+        end
+
+        it "returns true" do
+          expect(contributor_permission).to be_truthy
+        end
+      end
+
+      context "when user is a space member - viewer and can not move content" do
+        before do
+          verified.update(state: 1)
+          verified.member(host_lead.id).update(role: "viewer")
+        end
+
+        it "returns false" do
+          expect(contributor_permission).to be_falsey
+        end
+      end
+
+      context "when user context is not a space member" do
+        before do
+          allow_any_instance_of(Context).
+            to receive(:user).
+            and_return(user_member)
+        end
+
+        it "returns false" do
+          expect(contributor_permission).to be_falsey
+        end
+      end
+    end
+
+    context "when a space is not accessible by context" do
+      before { verified.member(host_lead.id).update(active: false) }
+
+      context "when user context is not active space member" do
+        it "returns false" do
+          expect(contributor_permission).to be_falsey
+        end
+      end
+    end
+  end
+
+  describe "accessible_by?" do
+    subject(:accessible_by) { verified.accessible_by?(context) }
+
+    let(:context) { Context.new(host_lead.id, host_lead.dxuser, SecureRandom.uuid, nil, nil) }
+
+    context "when user context is a space member and space_membership is active" do
+      it "returns true" do
+        expect(accessible_by).to be_truthy
+      end
+    end
+
+    context "when user context is space member and space_memberships are not active" do
+      before { verified.space_memberships.map { |membership| membership.update(active: false) } }
+
+      it "returns false" do
+        expect(accessible_by).to be_falsey
+      end
+    end
+
+    context "when user context is not a space member" do
+      before do
+        verified.space_memberships.map { |membership| membership.update(user_id: user_member.id) }
+      end
+
+      it "returns false" do
+        expect(accessible_by).to be_falsey
+      end
+    end
+  end
+  # rubocop:enable RSpec/AnyInstance
 end
