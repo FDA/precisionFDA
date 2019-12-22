@@ -1,12 +1,12 @@
+findCountryName = (id, countries) ->
+  name = 'No Country'
+  for country in countries
+    if id == country.id
+      name = country.name
+      break
+  return name
+
 class InvitationModel
-  findCountryName: () =>
-    id = @countryId()
-    name = ''
-    for country in @countries
-      if id == country.id
-        name = country.name
-        break
-    return name
 
   constructor: (@original, @countries) ->
     @id = @original.id
@@ -16,8 +16,8 @@ class InvitationModel
     @address1 = ko.observable(@original.address1)
     @address2 = ko.observable(@original.address2)
     @countryId = ko.observable(@original.country_id)
-    @originalCountry = @findCountryName()
-    @country = ko.computed(@findCountryName)
+    @originalCountry = findCountryName(@countryId(), @countries)
+    @country = ko.computed(() => findCountryName(@countryId(), @countries))
     @city = ko.observable(@original.city)
     @usState = ko.observable(@original.us_state)
     @postalCode = ko.observable(@original.postal_code)
@@ -67,6 +67,10 @@ class PageInvitationsView
         (error) -> Precision.alert.showAboveAll('Something went wrong while provisioning users')
       )
 
+  selectUser: (invitation) ->
+    @invitations.push(new InvitationModel(invitation, @countries))
+    @gridModal.modal('hide')
+
   constructor: (params) ->
     @countries = params.countries.map((country) -> { id: country[1], name: country[0] })
     @gridModal = $('#invitation_grid_modal')
@@ -84,6 +88,7 @@ class PageInvitationsView
         dataSrc: ''
       },
       columns: [
+        { data: 'id' },
         { data: 'first_name' },
         { data: 'last_name' },
         { data: 'email' },
@@ -95,6 +100,22 @@ class PageInvitationsView
         { data: 'postal_code' },
         { data: 'phone' },
         { data: 'duns' },
+      ],
+      "columnDefs": [
+        { 'orderable': false, 'targets': 0 },
+        {
+          targets: 0,
+          data: 'id',
+          render: (data, type, row, meta) ->
+            "<a href=\"#\" class=\"select-user\">Select</a>"
+        },
+        {
+          targets: 6,
+          data: 'country_id',
+          render: (data, type, row, meta) =>
+            country = findCountryName(data, @countries)
+            return "<span>#{country}</span>"
+        }
       ]
     })
 
@@ -130,4 +151,11 @@ AdminProvisionController = Paloma.controller('Admin/Invitations', {
     $container = $("body main")
     viewModel = new PageInvitationsView(@params)
     ko.applyBindings(viewModel, $container[0])
+
+    $('#invitations_data_grid').on 'click', 'tbody td', (e) ->
+      if e.target.classList.contains('select-user')
+        e.preventDefault()
+        idx = viewModel.invitationsDataGrid.cell(this).index().row
+        data = viewModel.invitationsDataGrid.cells( idx, '' ).render( 'display' )
+        viewModel.selectUser(data.data()[idx])
 })
