@@ -42,9 +42,7 @@ module Admin
     private
 
     def render_invitations(query, exclude)
-      invitations = InvitationSearcher.call(query, exclude)
-
-      render json: invitations.map do |invitation|
+      invitations = InvitationSearcher.call(query, exclude).map do |invitation|
         {
           id: invitation.id,
           first_name: invitation.first_name,
@@ -52,7 +50,8 @@ module Admin
           email: invitation.email,
           address1: invitation.address1,
           address2: invitation.address2,
-          country: invitation.country.name,
+          country_name: invitation.country.name,
+          country_id: invitation.country.id,
           city: invitation.city,
           us_state: invitation.us_state,
           postal_code: invitation.postal_code,
@@ -62,6 +61,8 @@ module Admin
           participate_intent: invitation.participate_intent,
         }
       end
+
+      render json: invitations
     end
 
     def redirect_to_list
