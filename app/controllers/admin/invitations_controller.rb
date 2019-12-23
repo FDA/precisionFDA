@@ -29,7 +29,18 @@ module Admin
 
       unsafe_params[:invitations].each do |id, opts|
         invitation = Invitation.find(id)
-        results[id] = provision_user(invitation, opts)
+        first_name = opts[:first_name]
+        last_name = opts[:last_name]
+        username = User.construct_username(first_name, last_name)
+        org = "#{first_name.capitalize} #{last_name.capitalize}"
+
+        full_opts = opts.merge(
+          username: username,
+          org: org,
+          org_handle: username,
+        )
+
+        results[id] = provision_user(invitation, full_opts)
       end
 
       render json: results
@@ -70,14 +81,16 @@ module Admin
     end
 
     def provision_user(invitation, opts)
-      result = {}
-      result[:errors] = errors(opts)
+      result = {
+        errors: errors(opts),
+        warnings: warnings(invitation, opts),
+      }
 
-      return result if result[:errors].present?
+      return result if result[:warnings].present? || result[:errors].present?
 
-      result[:warnings] = warnings(invitation, opts)
       save_user(invitation, opts)
-      result.reject { |_k, v| v.blank? }
+
+      result
     end
 
     def errors(opts)
@@ -91,7 +104,7 @@ module Admin
     def save_user(invitation, opts)
       service = DIContainer.resolve("orgs.provisioner")
       user_params = opts.merge(singular: true)
-      service.call(context.user, invitation, user_params)
+      service.call(@context.user, invitation, user_params)
     end
   end
 end
