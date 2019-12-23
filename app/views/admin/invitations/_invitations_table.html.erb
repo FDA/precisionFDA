@@ -33,7 +33,7 @@
       </td>
       <td>
         <select class="form-control" data-bind="
-          options: $data.countries,
+          options: $root.countries,
           optionsText: 'name',
           optionsValue: 'id',
           value: $data.countryId,">
@@ -66,7 +66,7 @@
       <td data-bind="text: $data.original.email"></td>
       <td data-bind="text: $data.original.address1"></td>
       <td data-bind="text: $data.original.address2"></td>
-      <td data-bind="text: $data.originalCountry"></td>
+      <td data-bind="text: $data.original.country_name"></td>
       <td data-bind="text: $data.original.city"></td>
       <td data-bind="text: $data.original.us_state"></td>
       <td data-bind="text: $data.original.postal_code"></td>

@@ -1,14 +1,5 @@
-findCountryName = (id, countries) ->
-  name = 'No Country'
-  for country in countries
-    if id == country.id
-      name = country.name
-      break
-  return name
-
 class InvitationModel
-
-  constructor: (@original, @countries) ->
+  constructor: (@original) ->
     @id = @original.id
     @firstName = ko.observable(@original.first_name)
     @lastName = ko.observable(@original.last_name)
@@ -16,8 +7,6 @@ class InvitationModel
     @address1 = ko.observable(@original.address1)
     @address2 = ko.observable(@original.address2)
     @countryId = ko.observable(@original.country_id)
-    @originalCountry = findCountryName(@countryId(), @countries)
-    @country = ko.computed(() => findCountryName(@countryId(), @countries))
     @city = ko.observable(@original.city)
     @usState = ko.observable(@original.us_state)
     @postalCode = ko.observable(@original.postal_code)
@@ -64,7 +53,9 @@ class PageInvitationsView
         (data) ->
           Precision.alert.showAboveAll('Users successfully provisioned!', 'alert-success')
           window.location.reload()
-        (error) -> Precision.alert.showAboveAll('Something went wrong while provisioning users')
+        (error) ->
+          Precision.alert.showAboveAll('Something went wrong while provisioning users')
+          $('#disable-screen-modal').modal('hide')
       )
 
   selectUser: (invitation) ->
@@ -94,7 +85,7 @@ class PageInvitationsView
         { data: 'email' },
         { data: 'address1' },
         { data: 'address2' },
-        { data: 'country_id' },
+        { data: 'country_name' },
         { data: 'city' },
         { data: 'us_state' },
         { data: 'postal_code' },
@@ -108,13 +99,6 @@ class PageInvitationsView
           data: 'id',
           render: (data, type, row, meta) ->
             "<a href=\"#\" class=\"select-user\">Select</a>"
-        },
-        {
-          targets: 6,
-          data: 'country_id',
-          render: (data, type, row, meta) =>
-            country = findCountryName(data, @countries)
-            return "<span>#{country}</span>"
         }
       ]
     })
