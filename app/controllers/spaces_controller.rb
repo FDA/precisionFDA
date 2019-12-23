@@ -254,7 +254,10 @@ class SpacesController < ApplicationController
     redirect_to redirect_path
   end
 
-  # TODO: move to api
+  # Produce list of actions in a service menu on files grid in space.
+  # Set up actions control in dependence upon context user accessibility to the node selected.
+  # @param context [Context] - project id or nil.
+  # @return [Array of nodes] - nodes - UserFile or Folder
   skip_before_action :require_login, only: :download_list
   before_action :require_api_login, only: :download_list
   def download_list
@@ -262,6 +265,7 @@ class SpacesController < ApplicationController
     space = Space.accessible_by(@context).find(unsafe_params[:id])
     root_name = space.name
     files = []
+    contributor_permission = space.contributor_permission(@context)
 
     case task
     when "download"
@@ -271,7 +275,17 @@ class SpacesController < ApplicationController
       nodes = Node.accessible_by_space(space).editable_by(@context).where(id: unsafe_params[:ids], scope: space.uid)
       nodes.each { |node| files += node.is_a?(Folder) ? node.all_files(Node.where(scope: space.uid)) : [node] }
     when "delete"
-      nodes = Node.accessible_by_space(space).editable_by(@context).where(id: unsafe_params[:ids]).to_a
+      nodes = if contributor_permission
+        Node.
+          accessible_by_space(space).
+          accessible_by(@context).
+          where(id: unsafe_params[:ids]).to_a
+      else
+        Node.
+          accessible_by_space(space).
+          editable_by(@context).
+          where(id: unsafe_params[:ids]).to_a
+      end
       files += nodes
       nodes.each { |node| files += node.all_children if node.is_a?(Folder) }
     when "copy_to_cooperative"
@@ -296,22 +310,29 @@ class SpacesController < ApplicationController
     render json: res
   end
 
+  # POST action of removing nodes (user_files or/and folders) from space, when
+  # nodes are being passed to this action, by their ids.
+  # Maintain a context user accessibility check of current space and nodes selected for action.
+  # Fires a background Sidekiq worker RemoveFolderWorker when all permissions are passed.
+  # Shows a informative flash meesage and redirects to a space files grid view.
+  # @param context [Context] - project id or nil.
   def remove_folder
     space = Space.accessible_by(@context).find(params[:id])
+    if space.contributor_permission(@context)
+      nodes = Node.accessible_by(@context).where(id: params[:ids])
 
-    nodes = Node.editable_by(@context).where(id: params[:ids])
+      UserFile.transaction do
+        nodes.update(state: UserFile::STATE_REMOVING)
 
-    UserFile.transaction do
-      nodes.update(state: UserFile::STATE_REMOVING)
-
-      Sidekiq::Client.push(
-        "class" => RemoveFolderWorker,
-        "args" => [nodes.pluck(:id), session_auth_params],
-      )
+        Sidekiq::Client.push(
+          "class" => RemoveFolderWorker,
+          "args" => [nodes.pluck(:id), session_auth_params],
+        )
+      end
+      flash[:success] = "Object(s) are being removed. This could take a while."
+    else
+      flash[:warning] = "You have no permission to remove object(s)."
     end
-
-    flash[:success] = "Object(s) are being removed. This could take a while."
-
     redirect_to files_space_path(space)
   end
 
