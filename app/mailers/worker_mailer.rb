@@ -6,4 +6,11 @@ class WorkerMailer < ApplicationMailer
     mail to: email,
          subject: "An error occurred during the removing of files in space '#{space.title}'."
   end
+
+  def alert_email(email, message, subject)
+    @message = message
+    @subject = subject
+
+    mail to: email, subject: subject
+  end
 end

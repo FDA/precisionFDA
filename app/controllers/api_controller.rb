@@ -20,106 +20,11 @@ class ApiController < ApplicationController
   #
   # Outputs
   #
-  # published (number): the count of published objects
+  # message (string): result message
   def publish
-    space = nil
+    PublishWorker.perform_async(params[:scope], params[:uids], session_auth_params)
 
-    scope = unsafe_params[:scope]
-    if scope.nil?
-      scope = "public"
-    elsif scope.is_a?(String)
-      if scope != "public"
-        # Check that scope is a valid scope:
-        # - must be of the form space-xxxx
-        # - must exist in the Space table
-        # - must be accessible by context
-        fail "Invalid scope (only 'public' or 'space-xxxx' are accepted)" unless scope =~ /^space-(\d+)$/
-        space = Space.find_by(id: $1.to_i)
-        fail "Invalid space" unless space.present? && space.active? && space.accessible_by?(@context)
-      end
-    else
-      fail "The optional 'scope' input must be a string (either 'public' or 'space-xxxx')"
-    end
-
-    uids = unsafe_params[:uids]
-    fail "The input 'uids' must be an array of object ids (strings)" unless uids.is_a?(Array) && uids.all? { |uid| uid.is_a?(String) }
-
-    items = uids.uniq.map { |uid| item_from_uid(uid) }.reject { |item| item.public? || item.scope == scope }
-    fail "Unpublishable items detected" unless items.all? { |item| item.publishable_by?(@context, scope) }
-
-    # Files to publish:
-    # - All real_files selected by the user
-    # - All assets selected by the user
-    files = items.select { |item| item.klass == "file" || item.klass == "asset" }
-
-    # Comparisons
-    comparisons = items.select { |item| item.klass == "comparison" }
-
-    # Apps
-    apps = items.select { |item| item.klass == "app" }
-
-    # Jobs
-    jobs = items.select { |item| item.klass == "job" }
-
-    # Notes
-    notes = items.select { |item| item.klass == "note" }
-
-    # Discussions
-    discussions = items.select { |item| item.klass == "discussion" }
-
-    # Answers
-    answers = items.select { |item| item.klass == "answer" }
-
-    workflows = items.select { |item| item.klass == "workflow" }
-
-    published_count = 0
-
-    # Files
-    unless files.empty?
-      published_count += UserFile.publish(files, @context, scope)
-    end
-
-    # Comparisons
-    unless comparisons.empty?
-      published_count += Comparison.publish(comparisons, @context, scope)
-    end
-
-    # Jobs
-    unless jobs.empty?
-      published_count += PublishService::JobPublisher.new(@context).publish(jobs, scope)
-    end
-
-    # Notes
-    unless notes.empty?
-      published_count += Note.publish(notes, @context, scope)
-    end
-
-    # Discussions
-    unless discussions.empty?
-      published_count += Discussion.publish(discussions, @context, scope)
-    end
-
-    # Answers
-    unless answers.empty?
-      published_count += Answer.publish(answers, @context, scope)
-    end
-
-    if workflows.any?
-      PublishService::WorkflowPublisher.call(workflows, @context, scope)
-      published_count += workflows.count
-
-      workflows.flat_map(&:apps).each do |app|
-        next if apps.include?(app) || app.public? || app.scope == scope
-        apps << app
-      end
-    end
-
-    # Apps
-    unless apps.empty?
-      published_count += AppSeries.publish(apps, @context, scope)
-    end
-
-    render json: { published: published_count }
+    render json: { message: "Object(s) are being published. This could take a while." }
   end
 
   # Collects an Array of children for object in params.
@@ -1268,22 +1173,35 @@ class ApiController < ApplicationController
   #
   def attach_to_notes
     note_uids = unsafe_params[:note_uids]
-    fail "Parameter 'note_uids' need to be an Array of Note, Answer, or Discussion uids" unless note_uids.is_a?(Array) && note_uids.all? { |uid| uid =~ /^(note|discussion|answer)-(\d+)$/ }
+    unless note_uids.is_a?(Array) && note_uids.all? { |uid| uid =~ /^(note|discussion|answer)-(\d+)$/ }
+      fail "Parameter 'note_uids' need to be an Array of Note, Answer, or Discussion uids"
+    end
 
     items = unsafe_params[:items]
-    fail "Items need to be an array of objects with id and type (one of App, Comparison, Job, or UserFile)" unless items.is_a?(Array) && items.all? { |item| item[:id].is_a?(Numeric) && item[:type].is_a?(String) && %w(App Comparison Job UserFile).include?(item[:type]) }
+    unless items.is_a?(Array) && items.all? { |item| item[:id].is_a?(Numeric) && item[:type].is_a?(String) && %w(App Comparison Job UserFile).include?(item[:type]) }
+      fail "Items need to be an array of objects with id and type (one of App, Comparison, Job, or UserFile)"
+    end
 
     notes_added = {}
     items_added = {}
+
     Note.transaction do
       note_uids.each do |note_uid|
         note_item = item_from_uid(note_uid)
+
         next unless !note_item.nil? && note_item.editable_by?(@context)
+
         items.each do |item|
-          item[:type] = item[:type].present? ? item[:type] : type_from_classname(item[:className])
+          item[:type] = if item[:type].blank?
+            item[:className] == "file" ? "UserFile" : item[:className].capitalize
+          else
+            item[:type]
+          end
+
           note_item.attachments.find_or_create_by(item_id: item[:id], item_type: item[:type])
           items_added["#{item[:type]}-#{item[:id]}"] = true
         end
+
         notes_added[note_uid] = true
         note_item.save
       end
