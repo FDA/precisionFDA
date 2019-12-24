@@ -173,7 +173,7 @@ RSpec.describe UserFile, type: :model do
       end
 
       it "returns true" do
-        expect(file_private_one.submission_output?).to be true
+        expect(file_private_one.submission_output?).to be_truthy
       end
     end
 
@@ -181,7 +181,7 @@ RSpec.describe UserFile, type: :model do
       before { file_private_one.update(parent_type: "User", parent_id: challenge_bot.id) }
 
       it "returns false" do
-        expect(file_private_one.submission_output?).to be false
+        expect(file_private_one.submission_output?).to be_falsy
       end
     end
   end
@@ -203,7 +203,7 @@ RSpec.describe UserFile, type: :model do
       end
 
       it "returns true" do
-        expect(file_public.challenge_card_image?).to be true
+        expect(file_public.challenge_card_image?).to be_truthy
       end
     end
 
@@ -215,7 +215,7 @@ RSpec.describe UserFile, type: :model do
       end
 
       it "returns false" do
-        expect(file_public.challenge_card_image?).to be false
+        expect(file_public.challenge_card_image?).to be_falsy
       end
     end
   end
@@ -301,12 +301,12 @@ RSpec.describe UserFile, type: :model do
       end
 
       it "returns a file object" do
-        expect(file_private_one.challenge_file?).to eq(false)
+        expect(file_private_one.challenge_file?).to be_falsy
         expect(file_private_one.refresh_state(context)).to eq(file_private_one)
       end
 
       it "returns a file object with a parent user" do
-        expect(file_private_one.challenge_file?).to eq(false)
+        expect(file_private_one.challenge_file?).to be_falsy
         expect(file_private_one.refresh_state(context).parent).to eq(user)
       end
     end
@@ -323,13 +323,92 @@ RSpec.describe UserFile, type: :model do
       end
 
       it "returns a file object" do
-        expect(file_private_one.challenge_file?).to eq(true)
+        expect(file_private_one.challenge_file?).to be_truthy
         expect(file_private_one.refresh_state(context)).to eq(file_private_one)
       end
 
       it "returns a file object with a parent job" do
-        expect(file_private_one.challenge_file?).to eq(true)
+        expect(file_private_one.challenge_file?).to be_truthy
         expect(file_private_one.refresh_state(context).parent).to eq(job)
+      end
+    end
+  end
+
+  describe "deletable?" do
+    context "when a file is 'private'" do
+      context "when a file has 'User' parent_type" do
+        it "is deletable" do
+          expect(file_private_one.deletable?).to be_truthy
+        end
+      end
+
+      context "when a file has 'Job' parent_type" do
+        before { file_private_one.update(parent_type: "Job") }
+
+        it "is deletable" do
+          expect(file_private_one.deletable?).to be_truthy
+        end
+      end
+    end
+
+    context "when a file is 'public'" do
+      before { file_private_one.update(scope: "public") }
+
+      context "when a file has 'Job' parent_type" do
+        before { file_private_one.update(parent_type: "Job") }
+
+        it "is deletable" do
+          expect(file_private_one.deletable?).to be_truthy
+        end
+      end
+
+      context "when a file has 'Comparison' parent_type" do
+        before { file_private_one.update(parent_type: "Comparison") }
+
+        it "is not deletable" do
+          expect(file_private_one.deletable?).to be_falsy
+        end
+      end
+    end
+
+    context "when a file is 'private' and has 'User' parent_type" do
+      let(:host_lead) { create(:user, dxuser: "user_1") }
+      let(:guest_lead) { create(:user, dxuser: "user_2") }
+      let(:verified) do
+        create(
+          :space,
+          :verification,
+          :verified,
+          host_lead_id: host_lead.id,
+          guest_lead_id: guest_lead.id,
+        )
+      end
+      let(:non_verified) do
+        create(
+          :space,
+          :verification,
+          :non_verified,
+          host_lead_id: host_lead.id,
+          guest_lead_id: guest_lead.id,
+        )
+      end
+
+      before { file_private_one.update(scope: "public") }
+
+      context "when a file is in verified space" do
+        before { file_private_one.update(scope: verified.uid) }
+
+        it "is not deletable" do
+          expect(file_private_one.deletable?).to be_falsy
+        end
+      end
+
+      context "when a file is in non_verified space" do
+        before { file_private_one.update(scope: non_verified.uid) }
+
+        it "is deletable" do
+          expect(file_private_one.deletable?).to be_truthy
+        end
       end
     end
   end
