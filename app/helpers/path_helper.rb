@@ -1,5 +1,4 @@
 module PathHelper
-
   def urlify_by_path(path)
     config = Rails.configuration.action_mailer.default_url_options
     URI::HTTPS.build(host: config[:host], port: config[:port], path: path).to_s

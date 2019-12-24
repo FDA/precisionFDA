@@ -1,6 +1,7 @@
 # Base controller for whole application.
 class ApplicationController < ActionController::Base
   include PathHelper
+  include UidFindable
 
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
@@ -167,116 +168,6 @@ class ApplicationController < ActionController::Base
   # @return [ActiveSupport::MessageEncryptor]
   def rails_encryptor
     Rails.configuration.encryptor
-  end
-
-  # Tries to find entity by uid.
-  # @raise [RuntimeError] If there is an attempt to find entity of not specified type.
-  # @raise [ActiveRecord::RecordNotFound] If unable to find entity.
-  # @return [Mixed] Found entity.
-  def item_from_uid(uid, specified_klass = nil)
-    if uid =~ /^(job|app|file|workflow)-(.{24,})$/
-      klass = {
-        "app" => App,
-        "file" => UserFile,
-        "job" => Job,
-        "workflow" => Workflow,
-      }[$1]
-
-      if specified_klass && klass != specified_klass
-        raise "Class '#{klass}' did not match specified class '#{specified_klass}'"
-      end
-
-      klass.find_by!(uid: uid)
-    elsif uid =~ /^(app-series|workflow-series|appathon|comparison|note|discussion|answer|user|license|space|challenge)-(\d+)$/
-      klass = {
-        "app-series" => AppSeries,
-        "workflow-series" => WorkflowSeries,
-        "appathon" => Appathon,
-        "comparison" => Comparison,
-        "note" => Note,
-        "discussion" => Discussion,
-        "answer" => Answer,
-        "user" => User,
-        "license" => License,
-        "space" => Space,
-        "challenge" => Challenge,
-      }[$1]
-
-      id = $2.to_i
-
-      if specified_klass && klass != specified_klass
-        raise "Class '#{klass}' did not match specified class '#{specified_klass}'"
-      end
-
-      klass.find_by!(id: id)
-    else
-      raise "Invalid id '#{uid}' in item_from_uid"
-    end
-  end
-
-  # Returns capitalized matched form of provided klass.
-  # @param klass [String] Class to process.
-  # @return [String] Capitalized class name.
-  def type_from_classname(klass)
-    klass == "file" ? "UserFile" : klass.capitalize
-  end
-
-  # Tries to find entity by provided data.
-  # @raise [ActiveRecord::RecordNotFound] If entity could not be found.
-  # @return [Array<Mixed>] Found entities array.
-  def get_item_array_from_params
-    if unsafe_params[:workflow_id].present?
-      workflow = Workflow.find_by(uid: unsafe_params[:workflow_id])
-      return [workflow]
-    end
-
-    if unsafe_params[:discussion_id].present?
-      discussion = Discussion.find(unsafe_params[:discussion_id])
-
-      return [discussion] if unsafe_params[:answer_id].blank?
-
-      user = User.find_by!(dxuser: unsafe_params[:answer_id])
-      answer = Answer.find_by!(discussion_id: unsafe_params[:discussion_id], user_id: user.id)
-      return [discussion, answer]
-    elsif unsafe_params[:meta_appathon_id].present?
-      meta_appathon = MetaAppathon.find(unsafe_params[:meta_appathon_id])
-
-      return [meta_appathon] if unsafe_params[:appathon_id].blank?
-
-      appathon = Appathon.find_by!(
-        meta_appathon_id: unsafe_params[:meta_appathon_id],
-        id: unsafe_params[:appathon_id],
-      )
-
-      return [meta_appathon, appathon]
-    elsif unsafe_params[:appathon_id].present?
-      return [Appathon.find(unsafe_params[:appathon_id])]
-    elsif unsafe_params[:note_id].present?
-      return [Note.find(unsafe_params[:note_id])]
-    elsif unsafe_params[:task_id].present?
-      task = Task.find(unsafe_params[:task_id])
-      return [task.space, task]
-    elsif unsafe_params[:space_id].present?
-      return [Space.find(unsafe_params[:space_id])]
-    elsif unsafe_params[:comparison_id].present?
-      return [Comparison.find(unsafe_params[:comparison_id])]
-    elsif unsafe_params[:file_id].present?
-      return [UserFile.find_by!(uid: unsafe_params[:file_id])]
-    elsif unsafe_params[:asset_id].present?
-      return [Asset.find_by!(uid: unsafe_params[:asset_id])]
-    elsif unsafe_params[:job_id].present?
-      return [Job.find_by!(uid: unsafe_params[:job_id])]
-    elsif unsafe_params[:app_id].present?
-      return [App.find_by!(uid: unsafe_params[:app_id])]
-    elsif unsafe_params[:expert_id].present?
-      expert = Expert.find(unsafe_params[:expert_id])
-
-      if unsafe_params[:expert_question_id].present?
-        return [expert, ExpertQuestion.find(unsafe_params[:expert_question_id])]
-      end
-
-      return [expert]
-    end
   end
 
   # Builds and returns describing hash for given entity.
