@@ -9,7 +9,7 @@ class PublishWorker < ApplicationWorker
   class << self
     def notify_user(job)
       context = Context.build(job["args"].last)
-      email = "amoroz-cf+asjkhdajshd@dnanexus.com" #context.user.email
+      email = context.user.email
       scope = job["args"].first
 
       subject = "An error occurred during the publishing in scope '#{scope}'"
