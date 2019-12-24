@@ -314,25 +314,34 @@ class SpacesController < ApplicationController
   # nodes are being passed to this action, by their ids.
   # Maintain a context user accessibility check of current space and nodes selected for action.
   # Fires a background Sidekiq worker RemoveFolderWorker when all permissions are passed.
-  # Shows a informative flash meesage and redirects to a space files grid view.
-  # @param context [Context] - project id or nil.
+  # Shows an informative flash meesage and redirects to a space files grid view.
   def remove_folder
     space = Space.accessible_by(@context).find(params[:id])
+
     if space.contributor_permission(@context)
       nodes = Node.accessible_by(@context).where(id: params[:ids])
 
       UserFile.transaction do
         nodes.update(state: UserFile::STATE_REMOVING)
 
-        Sidekiq::Client.push(
-          "class" => RemoveFolderWorker,
-          "args" => [nodes.pluck(:id), session_auth_params],
-        )
+        nodes.where(sti_type: "Folder").find_each do |folder|
+          folder.all_children.each { |node| node.update(state: UserFile::STATE_REMOVING) }
+        end
+
+        Array(nodes.pluck(:id)).in_groups_of(1000, false) do |ids|
+          job_args = ids.map do |node_id|
+            [node_id, session_auth_params]
+          end
+
+          Sidekiq::Client.push_bulk("class" => RemoveNodeWorker, "args" => job_args)
+        end
       end
+
       flash[:success] = "Object(s) are being removed. This could take a while."
     else
       flash[:warning] = "You have no permission to remove object(s)."
     end
+
     redirect_to files_space_path(space)
   end
 
