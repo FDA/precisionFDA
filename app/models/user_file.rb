@@ -308,8 +308,14 @@ class UserFile < Node
     end
   end
 
+  # Check, whether file can be deleted by current user context.
+  # Permits to be deleted when parent_type has only values of: 'User', 'Node' and 'Job';
+  # scope - to be non-space, i.e. 'private' or 'public';
+  # and not to be in verified space object.
+  # @return [true or false] - depends upon whether file can be deleted.
   def deletable?
-    ((parent_type == "User") || (parent_type == "Job")) && ((scope == "private" || scope == "public") || !(in_space? && space_object.verified?))
+    %w(User Node Job).include?(parent_type) &&
+      ((scope == "private" || scope == "public") || !(in_space? && space_object.verified?))
   end
 
   def publishable_by?(context, scope_to_publish_to = "public")
