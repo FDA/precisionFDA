@@ -82,7 +82,7 @@ module ErrorProcessable
     return if email.blank? || !DNAnexusAPI.email_exists?(email)
 
     name = User.find_by(email: email) ? "precisionFDA" : "DNAnexus"
-    "Error: This email address is already being used for a #{name} account. " \
+    "Error: This email address is already being used for a #{name} account." \
     "Please choose a different email address for precisionFDA."
   end
 end
