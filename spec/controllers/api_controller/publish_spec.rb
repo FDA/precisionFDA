@@ -1,14 +1,15 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe ApiController, type: :controller do
-
   let(:user) { create(:user, dxuser: "user") }
-  let(:app) { create(:app, user_id: user.id) }
-
+  let(:app) { create(:app, user: user) }
 
   describe "POST publish" do
-
     before { authenticate!(user) }
+
+    around do |example|
+      Sidekiq::Testing.inline! { example.run }
+    end
 
     it "publishes an app" do
       expect(Event::AppPublished).to receive(:create_for)
@@ -19,13 +20,16 @@ RSpec.describe ApiController, type: :controller do
       }
 
       expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}system/greet")
-      expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{app.dxid}/addAuthorizedUsers").with(body: {
+      expect(WebMock).to have_requested(
+        :post,
+        "#{DNANEXUS_APISERVER_URI}#{app.dxid}/addAuthorizedUsers"
+      ).with(body: {
         authorizedUsers: [ORG_EVERYONE]
       })
 
-      expect(WebMock).to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{app.dxid}/publish").with(body: {})
-      expect(parsed_response["published"]).to eql(1)
+      expect(WebMock).to have_requested(
+        :post, "#{DNANEXUS_APISERVER_URI}#{app.dxid}/publish"
+      ).with(body: {})
     end
-
   end
 end
