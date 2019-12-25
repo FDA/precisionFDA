@@ -325,7 +325,7 @@ class SpacesController < ApplicationController
         nodes.update(state: UserFile::STATE_REMOVING)
 
         nodes.where(sti_type: "Folder").find_each do |folder|
-          folder.all_children.each { |node| node.update(state: UserFile::STATE_REMOVING) }
+          folder.all_children.each { |node| node.update!(state: UserFile::STATE_REMOVING) }
         end
 
         Array(nodes.pluck(:id)).in_groups_of(1000, false) do |ids|
