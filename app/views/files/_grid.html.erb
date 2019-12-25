@@ -74,7 +74,7 @@
            attribute: 'state',
            allow_multiple_selection: false,
            custom_filter: :auto do |file|
-    content_tag(:div, file.state, file.state == "abandoned" ? { class: "highlighted" } : {})
+    content_tag(:div, file.state, %w(abandoned removing).include?(file.state) ? { class: "highlighted" } : {})
   end
 
   if !defined?(hide_access) || !hide_access
