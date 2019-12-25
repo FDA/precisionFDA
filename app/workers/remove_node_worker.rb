@@ -1,9 +1,12 @@
 # Removes a list of files and folders
 class RemoveNodeWorker < ApplicationWorker
   sidekiq_retries_exhausted do |job, _ex|
-    failed_nodes = rollback_nodes_state(job["args"].first)
+    node_ids = job["args"].first
+    space = Node.where(id: node_ids).first.space
+
+    rollback_nodes_state(node_ids)
+
     context = Context.build(job["args"].last)
-    space = failed_nodes[:files].first&.space || failed_nodes[:folders].first&.space
 
     notify_user(
       context.user.email,
@@ -15,8 +18,6 @@ class RemoveNodeWorker < ApplicationWorker
   class << self
     # Rollback the states of failed files and folders to a normal.
     # @param node_ids [Array<Integer>] Node IDs.
-    # @return [Hash] Files and folders that are failed to remove.
-    #   and folders that was not removed due to an error.
     def rollback_nodes_state(node_ids)
       query = { id: node_ids, state: Node::STATE_REMOVING }
 
@@ -35,8 +36,6 @@ class RemoveNodeWorker < ApplicationWorker
           end
         end
       end
-
-      { files: files, folders: folders }
     end
 
     # Sends an email to user about an error during removing.

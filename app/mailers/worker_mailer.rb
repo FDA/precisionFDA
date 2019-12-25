@@ -4,6 +4,6 @@ class WorkerMailer < ApplicationMailer
     @error_message = error_message
 
     mail to: email,
-         subject: "An error occurred during the removing of files in space '#{@space.title}'."
+         subject: "An error occurred during the removing of files in space '#{space.title}'."
   end
 end
