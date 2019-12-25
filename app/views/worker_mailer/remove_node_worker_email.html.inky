@@ -1,6 +1,6 @@
 <wrapper>
   <div class="hidden-email-preview">
-    <%= @subject %>
+    An error occurred during the removing of files in space '<%= @space.title %>'.
   </div>
   <spacer size="16"></spacer>
   <container class="header">
@@ -11,7 +11,7 @@
         </a>
       </columns>
       <columns>
-        <p class="header-title text-right"><%= @subject %></p>
+        <p class="header-title text-right">ERROR</p>
       </columns>
     </row>
   </container>
@@ -19,7 +19,8 @@
     <row>
       <columns>
         <p>
-          <%= @message %>
+          An error occurred during the removing of files in space
+          <%= link_to @space.title, space_url(@space) %>: <%= @error_message %>
         </p>
       </columns>
     </row>

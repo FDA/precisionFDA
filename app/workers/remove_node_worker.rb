@@ -1,20 +1,21 @@
 # Removes a list of files and folders
 class RemoveNodeWorker < ApplicationWorker
   sidekiq_retries_exhausted do |job, _ex|
-    nodes = rollback_nodes_state(job["args"].first)
+    failed_nodes = rollback_nodes_state(job["args"].first)
     context = Context.build(job["args"].last)
+    space = failed_nodes[:files].first&.space || failed_nodes[:folders].first&.space
 
     notify_user(
       context.user.email,
+      space,
       job["error_message"],
-      nodes,
     )
   end
 
   class << self
     # Rollback the states of failed files and folders to a normal.
     # @param node_ids [Array<Integer>] Node IDs.
-    # @return [Array<UserFile::ActiveRecord_Relation, Folder::ActiveRecord_Relation>] Files
+    # @return [Hash] Files and folders that are failed to remove.
     #   and folders that was not removed due to an error.
     def rollback_nodes_state(node_ids)
       query = { id: node_ids, state: Node::STATE_REMOVING }
@@ -23,7 +24,7 @@ class RemoveNodeWorker < ApplicationWorker
       folders = Folder.where(query)
 
       Node.transaction do
-        files.update!(state: UserFile::STATE_CLOSED)
+        files.update(state: UserFile::STATE_CLOSED)
 
         folders.find_each do |folder|
           folder.update!(state: nil)
@@ -35,32 +36,19 @@ class RemoveNodeWorker < ApplicationWorker
         end
       end
 
-      [files, folders]
+      { files: files, folders: folders }
     end
 
     # Sends an email to user about an error during removing.
     # @param email [String] User's email.
+    # @param space [Space] Space.
     # @param error_message [String] Error message.
-    # @param nodes [Array<UserFile::ActiveRecord_Relation, Folder::ActiveRecord_Relation>] Files
     #   and folders that was not removed due to an error.
-    def notify_user(email, error_message, nodes)
-      files, folders = nodes
-
-      space = files.first&.scope || folders.first&.scope
-
-      files = files.pluck(:name)
-      folders = folders.pluck(:name)
-
-      subject = "An error occurred during the removing of files in space '#{space}'"
-
-      message = "#{subject.dup}: #{error_message}."
-      message << "\nFailed to remove the files: #{files.join(', ')}." if files.present?
-      message << "\nFailed to remove the folders: #{folders.join(', ')}." if folders.present?
-
+    def notify_user(email, space, error_message)
       WorkerMailer.remove_node_worker_email(
         email,
         space,
-        message,
+        error_message,
       ).deliver_now
     end
   end
