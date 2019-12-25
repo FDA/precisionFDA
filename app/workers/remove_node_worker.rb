@@ -22,14 +22,16 @@ class RemoveNodeWorker < ApplicationWorker
       files = UserFile.where(query)
       folders = Folder.where(query)
 
-      files.update(state: UserFile::STATE_CLOSED)
+      Node.transaction do
+        files.update!(state: UserFile::STATE_CLOSED)
 
-      folders.find_each do |folder|
-        folder.update(state: nil)
+        folders.find_each do |folder|
+          folder.update!(state: nil)
 
-        folder.all_children.each do |node|
-          state = node.is_a?(UserFile) ? UserFile::STATE_CLOSED : nil
-          node.update(state: state)
+          folder.all_children.each do |node|
+            state = node.is_a?(UserFile) ? UserFile::STATE_CLOSED : nil
+            node.update!(state: state)
+          end
         end
       end
 
