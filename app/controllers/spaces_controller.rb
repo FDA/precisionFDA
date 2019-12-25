@@ -494,8 +494,7 @@ class SpacesController < ApplicationController
 
     user_files = UserFile.real_files.
       accessible_by_space(@space).
-      where(scoped_parent_folder_id: @folder_id).
-      where.not(state: UserFile::STATE_REMOVING)
+      where(scoped_parent_folder_id: @folder_id)
 
     nodes = Node.where(id: (user_files + @folders).map(&:id))
 
@@ -639,7 +638,7 @@ class SpacesController < ApplicationController
   end
 
   def folders(parent_folder_id = nil)
-    Folder.accessible_by_space(@space).where(scoped_parent_folder_id: parent_folder_id).not_removing
+    Folder.accessible_by_space(@space).where(scoped_parent_folder_id: parent_folder_id)
   end
 
   def render_folders(folders)
