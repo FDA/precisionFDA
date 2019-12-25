@@ -79,7 +79,7 @@ module Permissions
   def editable_by?(context)
     return false if context.guest?
 
-    return false if in_locked_verificaiton_space?
+    return false if in_locked_verification_space?
 
     return user_id == context.user_id unless in_space?
 
@@ -144,7 +144,7 @@ module Permissions
     scope == "private" || scope.nil?
   end
 
-  def in_locked_verificaiton_space?
+  def in_locked_verification_space?
     in_space? && space_object.verified?
   end
 
