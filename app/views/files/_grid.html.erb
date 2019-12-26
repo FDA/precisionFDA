@@ -18,7 +18,9 @@
   end
 
   if defined?(show_checkboxes) && show_checkboxes
-    g.action_column html_check_box: true
+    g.action_column html_check_box: false do |file|
+      file.state != 'removing'
+    end
   end
 
   g.column name: 'Name', attribute: 'name' do |file|
