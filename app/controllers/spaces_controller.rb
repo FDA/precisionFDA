@@ -512,7 +512,7 @@ class SpacesController < ApplicationController
       return
     end
 
-    user_files = UserFile.real_files.
+    user_files = UserFile.real_files.not_blocked.
       accessible_by_space(@space).
       where(scoped_parent_folder_id: @folder_id)
 

@@ -54,7 +54,7 @@ class UserFile < Node
   STATE_CLOSING = "closing".freeze
   STATE_CLOSED = "closed".freeze
   STATE_OPEN = "open".freeze
-  STATE_PUBLISHING = "publishing".freeze
+  STATE_PUBLISHING = "publishing".freeze # pFDA internal state
 
   PARENT_TYPE_COMPARISON = "Comparison".freeze
 

@@ -494,8 +494,8 @@ class FilesController < ApplicationController
   end
 
   def check_file_state
-    file = UserFile.find_by(uid: params[:id])
+    file = UserFile.not_blocked.find_by(uid: params[:id])
 
-    not_found! if file.nil? || file.state == UserFile::STATE_REMOVING
+    not_found! unless file
   end
 end
