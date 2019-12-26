@@ -27,7 +27,7 @@
   end
 
   g.column name: 'Name', attribute: 'name' do |file|
-    unilinkfw(file, scope_icon: (defined?(scope_icon) ? scope_icon : true))
+    unilinkfw(file, scope_icon: (defined?(scope_icon) ? scope_icon : true), nolink: file.state == 'removing')
   end
 
   g.column name: toggle_all_descriptions do |file|
