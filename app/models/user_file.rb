@@ -54,6 +54,7 @@ class UserFile < Node
   STATE_CLOSING = "closing".freeze
   STATE_CLOSED = "closed".freeze
   STATE_OPEN = "open".freeze
+  STATE_PUBLISHING = "publishing".freeze
 
   PARENT_TYPE_COMPARISON = "Comparison".freeze
 
@@ -87,6 +88,8 @@ class UserFile < Node
 
   scope :open, -> { where(state: STATE_OPEN) }
   scope :not_removing, -> { where.not(state: STATE_REMOVING) }
+  scope :not_publishing, -> { where.not(state: STATE_PUBLISHING) }
+  scope :not_blocked, -> { not_removing.not_publishing }
 
   scope :files_conditions, -> {
     where(state: "closed").where.not(parent_type: ["Comparison", nil]).includes(:taggings)
