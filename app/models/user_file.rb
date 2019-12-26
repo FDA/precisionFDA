@@ -322,7 +322,9 @@ class UserFile < Node
   end
 
   def publishable_by?(context, scope_to_publish_to = "public")
-    core_publishable_by?(context, scope_to_publish_to) && !parent_comparison? && state == "closed"
+    core_publishable_by?(context, scope_to_publish_to) &&
+      !parent_comparison? &&
+      [STATE_CLOSED, STATE_PUBLISHING].include?(state)
   end
 
   def rename(new_name, description, context)
