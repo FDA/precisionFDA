@@ -37,7 +37,7 @@ class ApiController < ApplicationController
     workflows = @items.select { |item| item.klass == "workflow" }
 
     unless files.empty?
-      UserFile.transaction
+      UserFile.transaction do
         files.each { |file| file.update!(state: UserFile::STATE_PUBLISHING ) }
         FilePublishWorker.perform_async(@scope, files.map(&:id), session_auth_params)
       end
@@ -67,7 +67,7 @@ class ApiController < ApplicationController
     published_count += AppSeries.publish(apps, @context, @scope) unless apps.empty?
 
     render json: {
-      message: "#{published_count} objects have been published. "
+      message: "#{published_count} objects have been published. " \
                "Files are being processed, this could take a while."
     }
   end

@@ -2,15 +2,18 @@
 class FilePublishWorker < ApplicationWorker
   class PublishError < StandardError; end
 
-  sidekiq_retries_exhausted { |job, _ex| notify_user(job) }
+  sidekiq_retries_exhausted do |job, _ex|
+    files = UserFile.where(id: job["args"].second)
+
+    rollback_file_states(files)
+    notify_user(job)
+  end
 
   class << self
     def notify_user(job)
       scope = job["args"].first
-      file_ids = job["args"].second
-      context = Context.build(job["args"].last)
 
-      rollback_file_states(file_ids)
+      context = Context.build(job["args"].last)
 
       subject = "An error occurred during the publishing in scope '#{scope}'"
       message = "#{subject}: #{job['error_message']}"
@@ -20,13 +23,12 @@ class FilePublishWorker < ApplicationWorker
       WorkerMailer.alert_email(context.user.email, message, subject).deliver_now
     end
 
-    def rollback_file_states(file_ids)
-      files = UserFile.where(id: file_ids, state: UserFile::STATE_PUBLISHING)
+    def rollback_file_states(files)
       files.update(state: UserFile::STATE_CLOSED)
     end
   end
 
-  # Publishes items.
+  # Publishes files.
   # @param scope [String] File scope (public, private, space-xx).
   # @param file_ids [Array<String>] File IDs to publish.
   # @param session_auth_params [Hash] User session auth params.
@@ -34,10 +36,11 @@ class FilePublishWorker < ApplicationWorker
   def perform(scope, file_ids, session_auth_params)
     @context = Context.build(session_auth_params)
     @scope = scope || "public"
-    @files = UserFile.where(id: file_ids).
-                      where.not(scope: ["public", @scope].uniq)
+    @files = UserFile.where(id: file_ids).where.not(scope: ["public", @scope].uniq)
 
     publish
+
+    self.rollback_file_states(@files)
   end
 
   private
@@ -50,10 +53,10 @@ class FilePublishWorker < ApplicationWorker
     UserFile.publish(@files, @context, @scope)
   end
 
-  # Checks if items are publishable by a user.
-  # @raise [FilePublishWorker::PublishError] If any item isn't publishable by a user.
+  # Checks if files are publishable by a user.
+  # @raise [FilePublishWorker::PublishError] If any file isn't publishable by a user.
   def check_files!
-    return if @files.present? && @files.all? { |item| item.publishable_by?(@context, @scope) }
+    return if @files.present? && @files.all? { |file| file.publishable_by?(@context, @scope) }
 
     raise PublishError, "Unpublishable items detected"
   end
