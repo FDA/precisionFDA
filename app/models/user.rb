@@ -111,7 +111,11 @@ class User < ApplicationRecord
 
   SITE_ADMIN_ORGS = ENV["DNANEXUS_BACKEND"] == "production" ? [] : NON_PRODUCTION_ADMIN_ORGS
 
-  SYNC_EXCLUDED_FILE_STATES = [UserFile::STATE_CLOSED, UserFile::STATE_REMOVING].freeze
+  SYNC_EXCLUDED_FILE_STATES = [
+    UserFile::STATE_CLOSED,
+    UserFile::STATE_PUBLISHING,
+    UserFile::STATE_REMOVING,
+  ].freeze
 
   has_many :uploaded_files, class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'
   has_many :user_files

@@ -2,6 +2,7 @@ class ApiController < ApplicationController
   include ErrorProcessable
   include WorkflowConcern
   include FilesConcern
+  include UidFindable
 
   skip_before_action :verify_authenticity_token
   skip_before_action :require_login
@@ -9,6 +10,8 @@ class ApiController < ApplicationController
   before_action :require_api_login_or_guest, only: [:list_apps, :list_assets, :list_comparisons, :list_files, :list_jobs, :list_workflows, :list_related, :describe, :search_assets]
   before_action :validate_create_asset, only: :create_asset
   before_action :validate_get_upload_url, only: :get_upload_url
+
+  before_action :check_space, :check_uids, :check_items, only: :publish
 
   rescue_from ApiError, with: :render_error_method
   # rubocop:disable Style/SignalException
@@ -22,9 +25,51 @@ class ApiController < ApplicationController
   #
   # message (string): result message
   def publish
-    PublishWorker.perform_async(params[:scope], params[:uids], session_auth_params)
+    published_count = 0
 
-    render json: { message: "Object(s) are being published. This could take a while." }
+    files = @items.select { |item| item.klass == "file" || item.klass == "asset" }
+    comparisons = @items.select { |item| item.klass == "comparison" }
+    apps = @items.select { |item| item.klass == "app" }
+    jobs = @items.select { |item| item.klass == "job" }
+    notes = @items.select { |item| item.klass == "note" }
+    discussions = @items.select { |item| item.klass == "discussion" }
+    answers = @items.select { |item| item.klass == "answer" }
+    workflows = @items.select { |item| item.klass == "workflow" }
+
+    unless files.empty?
+      UserFile.transaction
+        files.each { |file| file.update!(state: UserFile::STATE_PUBLISHING ) }
+        FilePublishWorker.perform_async(@scope, files.map(&:id), session_auth_params)
+      end
+    end
+
+    published_count += Comparison.publish(comparisons, @context, @scope) unless comparisons.empty?
+
+    unless jobs.empty?
+      published_count += PublishService::JobPublisher.new(@context).publish(jobs, @scope)
+    end
+
+    published_count += Note.publish(notes, @context, @scope) unless notes.empty?
+    published_count += Discussion.publish(discussions, @context, @scope) unless discussions.empty?
+    published_count += Answer.publish(answers, @context, @scope) unless answers.empty?
+
+    unless workflows.empty?
+      PublishService::WorkflowPublisher.call(workflows, @context, @scope)
+      published_count += workflows.count
+
+      workflows.flat_map(&:apps).each do |app|
+        next if apps.include?(app) || app.public? || app.scope == @scope
+
+        apps << app
+      end
+    end
+
+    published_count += AppSeries.publish(apps, @context, @scope) unless apps.empty?
+
+    render json: {
+      message: "#{published_count} objects have been published. "
+               "Files are being processed, this could take a while."
+    }
   end
 
   # Collects an Array of children for object in params.
@@ -1433,6 +1478,51 @@ class ApiController < ApplicationController
   end
 
   protected
+
+  # Checks if scope is valid and space is accessible by a user.
+  # @raise [ApiError] If scope is invalid or space isn't accessible by a user.
+  def check_space
+    @scope = params[:scope] || "public"
+
+    return if @scope == "public"
+
+    unless @scope.is_a?(String)
+      fail "The optional 'scope' input must be a string (either 'public' or 'space-xxxx')"
+    end
+
+    # Check that scope is a valid scope:
+    # - must be of the form space-xxxx
+    # - must exist in the Space table
+    # - must be accessible by context
+    space_id = @scope[/^space-(\d+)$/, 1]
+
+    fail "Invalid scope (only 'public' or 'space-xxxx' are accepted)" unless space_id
+
+    space = Space.active.find_by(id: space_id)
+
+    fail "Invalid space" unless space&.accessible_by?(@context)
+  end
+
+  # Checks if uids is an array of strings.
+  # @raise [ApiError] If uids is not an array of strings.
+  def check_uids
+    @uids = params[:uids]
+
+    if !@uids.is_a?(Array) || @uids.any? { |uid| !uid.is_a?(String) }
+      fail "The input 'uids' must be an array of object ids (strings)"
+    end
+  end
+
+  # Checks if items are publishable by a user.
+  # @raise [ApiError] If any item isn't publishable by a user.
+  def check_items
+    @items = @uids.uniq.map { |uid| item_from_uid(uid) }.
+      reject { |item| item.public? || item.scope == @scope }
+
+    if @items.any? { |item| !item.publishable_by?(@context, @scope) }
+      fail "Unpublishable items detected"
+    end
+  end
 
   def input_spec_preparer
     @input_spec_preparer ||= InputSpecPreparer.new(@context)
