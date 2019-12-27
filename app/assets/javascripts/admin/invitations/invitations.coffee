@@ -1,3 +1,8 @@
+class WarningModel
+  approve: () => @approved(true)
+  constructor: (@warning) ->
+    @approved = ko.observable(false)
+
 class InvitationModel
   constructor: (@original) ->
     @id = @original.id
@@ -12,6 +17,13 @@ class InvitationModel
     @postalCode = ko.observable(@original.postal_code)
     @phone = ko.observable(@original.phone)
     @duns = ko.observable(@original.duns)
+    @errors = ko.observableArray([])
+    @warnings = ko.observableArray([])
+    @approved = ko.computed(() =>
+      approved = true
+      @warnings().forEach((warning) -> approved = false if !warning.approved())
+      return approved
+    )
 
 class PageInvitationsView
   showGridModal: () ->
@@ -30,6 +42,19 @@ class PageInvitationsView
   removeInvitation: (data) =>
     @invitations.remove(data)
 
+  handleResponse: (data) =>
+    noErrors = true
+    noWarnings = true
+    @invitations().forEach((invitation) ->
+      errors = data[invitation.id].errors
+      warnings = data[invitation.id].warnings
+      invitation.errors(errors)
+      invitation.warnings(warnings.map((warning) -> new WarningModel(warning)))
+      noErrors = false if errors.length
+      noWarnings = false if warnings.length
+    )
+    return noErrors and noWarnings
+
   provisionUsers: () ->
     $('#disable-screen-modal').modal('show')
     data = {}
@@ -46,13 +71,19 @@ class PageInvitationsView
         postal_code: invitation.postalCode(),
         phone: invitation.phone(),
         duns: invitation.duns()
+        approved: invitation.approved()
       }
     )
     $.post('/admin/invitations/provision', { invitations: data })
       .then(
-        (data) ->
-          Precision.alert.showAboveAll('Users successfully provisioned!', 'alert-success')
-          window.location.reload()
+        (data) =>
+          responseIsOk = @handleResponse(data)
+          if responseIsOk
+            Precision.alert.showAboveAll('Users successfully provisioned!', 'alert-success')
+            window.location.reload()
+          else
+            $('#disable-screen-modal').modal('hide')
+            Precision.alert.showAboveAll('Some fields filled incorrectly.', 'alert-warning')
         (error) ->
           Precision.alert.showAboveAll('Something went wrong while provisioning users')
           $('#disable-screen-modal').modal('hide')
@@ -142,4 +173,5 @@ AdminProvisionController = Paloma.controller('Admin/Invitations', {
         idx = viewModel.invitationsDataGrid.cell(this).index().row
         data = viewModel.invitationsDataGrid.cells( idx, '' ).render( 'display' )
         viewModel.selectUser(data.data()[idx])
+    window.viewModel = viewModel
 })
