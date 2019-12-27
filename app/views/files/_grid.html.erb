@@ -20,14 +20,14 @@
 
   if defined?(show_checkboxes) && show_checkboxes
     g.column name: toggle_all_checkboxes do |file|
-      if file.state != 'removing'
+      if %w(removing publishing).include?(file.state)
         content_tag(:input, nil, type: 'checkbox', name: 'files[selected][]', value: file.id, disabled: file.state == 'removing')
       end
     end
   end
 
   g.column name: 'Name', attribute: 'name' do |file|
-    unilinkfw(file, scope_icon: (defined?(scope_icon) ? scope_icon : true), nolink: file.state == 'removing')
+    unilinkfw(file, scope_icon: (defined?(scope_icon) ? scope_icon : true), nolink: %w(removing publishing).include?(file.state))
   end
 
   g.column name: toggle_all_descriptions do |file|
