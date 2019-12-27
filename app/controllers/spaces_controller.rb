@@ -1,4 +1,3 @@
-# TODO: to be refactored
 class SpacesController < ApplicationController
   before_action :init_parent_folder, only: :files
 

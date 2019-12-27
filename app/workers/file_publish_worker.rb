@@ -10,6 +10,8 @@ class FilePublishWorker < ApplicationWorker
   end
 
   class << self
+    # Notifies a user if there was any error with publishing.
+    # @param job [Sidekiq::Job] Current job.
     def notify_user(job)
       scope = job["args"].first
 
@@ -23,6 +25,9 @@ class FilePublishWorker < ApplicationWorker
       WorkerMailer.alert_email(context.user.email, message, subject).deliver_now
     end
 
+    # Rollbacks files to "closed" state.
+    # @param files [UserFile::ActiveRecord_Relation] Files to update.
+    # @return [Array<UserFile>] Updated files.
     def rollback_file_states(files)
       files.update(state: UserFile::STATE_CLOSED)
     end
@@ -40,7 +45,7 @@ class FilePublishWorker < ApplicationWorker
 
     publish
 
-    self.rollback_file_states(@files)
+    self.class.rollback_file_states(@files)
   end
 
   private
