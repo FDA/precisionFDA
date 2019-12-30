@@ -1,8 +1,3 @@
-class WarningModel
-  approve: () => @approved(true)
-  constructor: (@warning) ->
-    @approved = ko.observable(false)
-
 class InvitationModel
   constructor: (@original) ->
     @id = @original.id
@@ -18,12 +13,6 @@ class InvitationModel
     @phone = ko.observable(@original.phone)
     @duns = ko.observable(@original.duns)
     @errors = ko.observableArray([])
-    @warnings = ko.observableArray([])
-    @approved = ko.computed(() =>
-      approved = true
-      @warnings().forEach((warning) -> approved = false if !warning.approved())
-      return approved
-    )
 
 class PageInvitationsView
   showGridModal: () ->
@@ -44,16 +33,12 @@ class PageInvitationsView
 
   handleResponse: (data) =>
     noErrors = true
-    noWarnings = true
     @invitations().forEach((invitation) ->
       errors = data[invitation.id].errors
-      warnings = data[invitation.id].warnings
       invitation.errors(errors)
-      invitation.warnings(warnings.map((warning) -> new WarningModel(warning)))
       noErrors = false if errors.length
-      noWarnings = false if warnings.length
     )
-    return noErrors and noWarnings
+    return noErrors
 
   provisionUsers: () ->
     $('#disable-screen-modal').modal('show')
@@ -70,8 +55,7 @@ class PageInvitationsView
         us_state: invitation.usState(),
         postal_code: invitation.postalCode(),
         phone: invitation.phone(),
-        duns: invitation.duns()
-        approved: invitation.approved()
+        duns: invitation.duns(),
       }
     )
     $.post('/admin/invitations/provision', { invitations: data })

@@ -81,21 +81,6 @@
       </tr>
       <!-- /ko -->
     <!-- /ko -->
-    <!-- ko if: $data.warnings().length -->
-      <!-- ko foreach: $data.warnings -->
-      <tr class='bg-warning text-warning'>
-        <td colspan="11" data-bind="text: $data.warning"></td>
-        <td>
-          <!-- ko if: !$data.approved() -->
-          <button class="btn btn-warning" data-bind="click: $data.approve">Ignore</button>
-          <!-- /ko -->
-          <!-- ko if: $data.approved -->
-          Ignored!
-          <!-- /ko -->
-        </td>
-      </tr>
-      <!-- /ko -->
-    <!-- /ko -->
   <!-- /ko -->
   </tbody>
 </table>
