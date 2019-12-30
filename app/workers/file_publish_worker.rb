@@ -25,11 +25,11 @@ class FilePublishWorker < ApplicationWorker
       WorkerMailer.alert_email(context.user.email, message, subject).deliver_now
     end
 
-    # Rollbacks files to "closed" state.
+    # Rollbacks files to "closed" state and returns "private" scope.
     # @param files [UserFile::ActiveRecord_Relation] Files to update.
     # @return [Array<UserFile>] Updated files.
     def rollback_file_states(files)
-      files.update(state: UserFile::STATE_CLOSED)
+      files.update(state: UserFile::STATE_CLOSED, scope: "private")
     end
   end
 
@@ -41,11 +41,9 @@ class FilePublishWorker < ApplicationWorker
   def perform(scope, file_ids, session_auth_params)
     @context = Context.build(session_auth_params)
     @scope = scope || "public"
-    @files = UserFile.where(id: file_ids).where.not(scope: ["public", @scope].uniq)
+    @files = UserFile.where(id: file_ids).where.not(scope: "public")
 
     publish
-
-    self.class.rollback_file_states(@files)
   end
 
   private

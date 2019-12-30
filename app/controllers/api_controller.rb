@@ -38,7 +38,7 @@ class ApiController < ApplicationController
 
     unless files.empty?
       UserFile.transaction do
-        files.each { |file| file.update!(state: UserFile::STATE_PUBLISHING ) }
+        files.each { |file| file.update!(scope: @scope, state: UserFile::STATE_PUBLISHING ) }
         FilePublishWorker.perform_async(@scope, files.map(&:id), session_auth_params)
       end
     end

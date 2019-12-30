@@ -54,8 +54,15 @@ class FilePublisher
             raise "Race condition for file #{file.id} (#{file.dxid})"
           end
 
-          file.update!(scope: scope, project: destination_project, scoped_parent_folder_id: nil)
+          file.update!(
+            state: UserFile::STATE_CLOSED,
+            scope: scope,
+            project: destination_project,
+            scoped_parent_folder_id: nil
+          )
+
           count += 1
+
           if scope =~ /^space-(\d+)$/
             event_type = file.klass == "asset" ? :asset_added : :file_added
             SpaceEventService.call($1.to_i, user.id, nil, file, event_type)
