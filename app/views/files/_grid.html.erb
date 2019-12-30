@@ -20,14 +20,14 @@
 
   if defined?(show_checkboxes) && show_checkboxes
     g.column name: toggle_all_checkboxes do |file|
-      if %w(removing publishing).include?(file.state)
-        content_tag(:input, nil, type: 'checkbox', name: 'files[selected][]', value: file.id, disabled: file.state == 'removing')
+      unless file.blocked?
+        content_tag(:input, nil, type: 'checkbox', name: 'files[selected][]', value: file.id, disabled: file.blocked? )
       end
     end
   end
 
   g.column name: 'Name', attribute: 'name' do |file|
-    unilinkfw(file, scope_icon: (defined?(scope_icon) ? scope_icon : true), nolink: %w(removing publishing).include?(file.state))
+    unilinkfw(file, scope_icon: (defined?(scope_icon) ? scope_icon : true), nolink: file.blocked?)
   end
 
   g.column name: toggle_all_descriptions do |file|
@@ -79,7 +79,8 @@
            attribute: 'state',
            allow_multiple_selection: false,
            custom_filter: :auto do |file|
-    content_tag(:div, file.state, %w(abandoned removing).include?(file.state) ? { class: "highlighted" } : {})
+    options = %w(abandoned publishing removing).include?(file.state) ? { class: "highlighted" } : {}
+    content_tag(:div, file.state, options)
   end
 
   if !defined?(hide_access) || !hide_access
