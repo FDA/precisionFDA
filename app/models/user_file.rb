@@ -356,8 +356,10 @@ class UserFile < Node
       end
     elsif public?
       project == user.public_files_project
-    else
+    elsif state != STATE_PUBLISHING
       project == space_object.project_for_user(user)
+    else
+      true
     end
   end
 
