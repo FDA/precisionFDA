@@ -28,7 +28,8 @@ class Node < ApplicationRecord
 
   include Permissions
 
-  STATE_REMOVING = "removing".freeze # pFDA internal state
+  # pFDA internal state, used for files that are being removing by a worker.
+  STATE_REMOVING = "removing".freeze
 
   belongs_to :user, required: true
   belongs_to :parent, polymorphic: true

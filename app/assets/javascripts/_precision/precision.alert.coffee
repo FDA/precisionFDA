@@ -28,6 +28,7 @@ class AlertModel
     @on($container, delay)
 
   #public
+  # FIXME: doesn't work
   showPermanent: (text, style) ->
     $container = createNode(text, style)
     $container.addClass('above-all')

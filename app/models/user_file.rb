@@ -54,7 +54,9 @@ class UserFile < Node
   STATE_CLOSING = "closing".freeze
   STATE_CLOSED = "closed".freeze
   STATE_OPEN = "open".freeze
-  STATE_PUBLISHING = "publishing".freeze # pFDA internal state
+
+  # pFDA internal state, used for files that are being publishing by a worker.
+  STATE_PUBLISHING = "publishing".freeze
 
   PARENT_TYPE_COMPARISON = "Comparison".freeze
 
@@ -167,6 +169,10 @@ class UserFile < Node
     def accessible_found_by(context, uid)
       accessible_by(context).find_by!(uid: uid)
     end
+  end
+
+  def blocked?
+    [STATE_REMOVING, STATE_PUBLISHING].include?(state)
   end
 
   def real_file?

@@ -67,6 +67,10 @@ class Folder < Node
     "folder"
   end
 
+  def blocked?
+    state == STATE_REMOVING
+  end
+
   def editable_by?(context)
     public? ? context.user.can_administer_site? : super
   end
