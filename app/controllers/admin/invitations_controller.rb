@@ -81,12 +81,9 @@ module Admin
     end
 
     def provision_user(invitation, opts)
-      result = {
-        errors: errors(opts),
-        warnings: warnings(invitation, opts),
-      }
+      result = { errors: errors(opts) }
 
-      return result if result[:warnings].present? || result[:errors].present?
+      return result if result[:errors].present?
 
       save_user(invitation, opts)
 
@@ -95,10 +92,6 @@ module Admin
 
     def errors(opts)
       add_errors(opts.slice(*ERROR_KEYS))
-    end
-
-    def warnings(invitation, opts)
-      add_warnings(invitation, *opts.slice(*WARNING_KEYS).values)
     end
 
     def save_user(invitation, opts)
