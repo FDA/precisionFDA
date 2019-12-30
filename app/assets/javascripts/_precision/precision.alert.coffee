@@ -28,11 +28,12 @@ class AlertModel
     @on($container, delay)
 
   #public
-  # FIXME: doesn't work
   showPermanent: (text, style) ->
-    $container = createNode(text, style)
-    $container.addClass('above-all')
+    $container = createContainer(text, style)
     appendToPage($container)
+    $container.on 'click', (e) ->
+      $container.alert('close')
+      $container = null
     @on($container, -1)
 
   #private

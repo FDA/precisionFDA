@@ -8,7 +8,6 @@ getRelatedObjects = (item, spaceUID) ->
 
 class RelateObjectChild
   constructor: (data, isWF = false) ->
-    console.log data
     @uid = data.uid
     @title = data.title
     @type = data.className
@@ -64,12 +63,7 @@ class SpacesContentView
     )
 
   onSaveHandler: (selected) ->
-    # selectedFiles = selected.filter((item) -> item.className() == 'file')
-    # if selectedFiles.length
-    #   selectorModel = selectedFiles[0].selectorModel
-    #   selectorModel.saving(false)
-    #   selectorModel.modal.modal('hide')
-    #   $('#add_files_to_space_modal').modal('show')
+    selectedFiles = selected.filter((item) -> item.className() == 'file')
     uids = _.map(selected, 'uid')
     uids = _.union(uids, @relatedIDs)
 
@@ -77,16 +71,26 @@ class SpacesContentView
       scope: @space_uid,
       uids: uids
     }).then(
-      () ->
-        # if !selectedFiles.length
-        #   window.location.reload(true)
-        window.location.reload(true)
-      () ->
-        Precision.alert.showAboveAll('Something went wrong!')
+      () =>
+        if selectedFiles.length
+          @selectedFilesCount(selectedFiles.length)
+          @objectSelector.saving(false)
+          @objectSelector.modal.modal('hide')
+          $('#add_files_to_space_modal').modal('show')
+        else
+          window.location.reload(true)
+      (response) =>
+        @objectSelector.saving(false)
+        try
+          responseJSON = JSON.parse(response.responseText)
+          Precision.alert.showAboveAll("#{responseJSON.error.type}: #{responseJSON.error.message}")
+        catch
+          Precision.alert.showAboveAll('Something went wrong!')
     )
 
   constructor: (@space_uid, scopes) ->
     @selected = []
+    @selectedFilesCount = ko.observable(0)
     @relatedIDs = []
     @relatedObjects = ko.observableArray([])
     @objectSelector = new Precision.models.SelectorModel({
