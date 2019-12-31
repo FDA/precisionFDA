@@ -20,18 +20,23 @@ class Note < ApplicationRecord
   has_one :answer
   has_one :discussion
   has_many :attachments, dependent: :destroy
-  has_many :nodes, through: :attachments, source: :item, source_type: 'Node'
-  has_many :apps, through: :attachments, source: :item, source_type: 'App'
-  has_many :comparisons, through: :attachments, source: :item, source_type: 'Comparison'
-  has_many :jobs, through: :attachments, source: :item, source_type: 'Job'
+  has_many :nodes, through: :attachments, source: :item, source_type: "Node"
+  has_many :user_files, through: :attachments, source: :item, source_type: "UserFile"
+  has_many :apps, through: :attachments, source: :item, source_type: "App"
+  has_many :comparisons, through: :attachments, source: :item, source_type: "Comparison"
+  has_many :jobs, through: :attachments, source: :item, source_type: "Job"
 
   acts_as_followable
   acts_as_commentable
   acts_as_taggable
   acts_as_votable
 
+  # Collects note files attachments of both item types: "Node" and "UserFile".
+  # @return [ActiveRecord::Relation<UserFile>] selected as real_files by file parent_type.
   def files
-    UserFile.where(id: nodes)
+    nodes_files = UserFile.where(id: nodes)
+    nodes_user_files = UserFile.where(id: user_files)
+    nodes_files.or(nodes_user_files).real_files
   end
 
   def assets

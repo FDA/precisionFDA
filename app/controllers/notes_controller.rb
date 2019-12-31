@@ -115,7 +115,7 @@ class NotesController < ApplicationController
 
     def note_js(note)
       comparisons = note.comparisons
-      files = note.real_files
+      files = note.files
       apps = note.apps
       jobs = note.jobs
       assets = note.assets
