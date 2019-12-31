@@ -13,9 +13,6 @@ class InvitationModel
     @phone = ko.observable(@original.phone)
     @duns = ko.observable(@original.duns)
     @errors = ko.observableArray([])
-    @enableUsState = ko.computed(() =>
-      @countryId() == 189
-    )
 
 class PageInvitationsView
   showGridModal: () ->

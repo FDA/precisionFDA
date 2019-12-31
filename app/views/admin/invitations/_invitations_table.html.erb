@@ -26,13 +26,13 @@
         <input type="text" class="form-control" data-bind="textInput: $data.email" />
       </td>
       <td>
-        <input type="text" class="form-control" data-bind="textInput: $data.address1" />
+        <input type="text" class="form-control" data-bind="textInput: $data.address1" disabled />
       </td>
       <td>
-        <input type="text" class="form-control" data-bind="textInput: $data.address2" />
+        <input type="text" class="form-control" data-bind="textInput: $data.address2" disabled />
       </td>
       <td>
-        <select class="form-control" data-bind="
+        <select class="form-control" disabled data-bind="
           options: $root.countries,
           optionsText: 'name',
           optionsValue: 'id',
@@ -40,16 +40,16 @@
         </select>
       </td>
       <td>
-        <input type="text" class="form-control" data-bind="textInput: $data.city" />
+        <input type="text" class="form-control" data-bind="textInput: $data.city" disabled />
       </td>
       <td>
-        <input type="text" class="form-control" data-bind="textInput: $data.usState, enable: $data.enableUsState" />
+        <input type="text" class="form-control" data-bind="textInput: $data.usState" disabled />
       </td>
       <td>
-        <input type="text" class="form-control" data-bind="textInput: $data.postalCode" />
+        <input type="text" class="form-control" data-bind="textInput: $data.postalCode" disabled />
       </td>
       <td>
-        <input type="text" class="form-control" data-bind="textInput: $data.phone" />
+        <input type="text" class="form-control" data-bind="textInput: $data.phone" disabled />
       </td>
       <td>
         <input type="text" class="form-control" data-bind="textInput: $data.duns" />
