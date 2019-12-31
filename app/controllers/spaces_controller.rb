@@ -256,49 +256,66 @@ class SpacesController < ApplicationController
 
   # Produce list of actions in a service menu on files grid in space.
   # Set up actions control in dependence upon context user accessibility to the node selected.
+  # When "delete": do not allow to delete a comparison input file.
   # @param context [Context] - project id or nil.
   # @return [Array of nodes] - nodes - UserFile or Folder
   skip_before_action :require_login, only: :download_list
   before_action :require_api_login, only: :download_list
   def download_list
-    task = unsafe_params[:task]
-    space = Space.accessible_by(@context).find(unsafe_params[:id])
+    task = params[:task]
+    space = Space.accessible_by(@context).find(params[:id])
     root_name = space.name
     files = []
     contributor_permission = space.contributor_permission(@context)
 
     case task
     when "download"
-      nodes = Node.accessible_by_space(space).accessible_by(@context).where(id: unsafe_params[:ids])
+      nodes = Node.accessible_by_space(space).accessible_by(@context).where(id: params[:ids])
       nodes.each { |node| files += node.is_a?(Folder) ? node.all_files : [node] }
     when "publish"
-      nodes = Node.accessible_by_space(space).editable_by(@context).where(id: unsafe_params[:ids], scope: space.uid)
+      nodes = Node.
+        accessible_by_space(space).
+        editable_by(@context).
+        where(id: params[:ids], scope: space.uid)
       nodes.each { |node| files += node.is_a?(Folder) ? node.all_files(Node.where(scope: space.uid)) : [node] }
     when "delete"
       nodes = if contributor_permission
         Node.
           accessible_by_space(space).
           accessible_by(@context).
-          where(id: unsafe_params[:ids]).to_a
+          where(id: params[:ids]).to_a
       else
         Node.
           accessible_by_space(space).
           editable_by(@context).
-          where(id: unsafe_params[:ids]).to_a
+          where(id: params[:ids]).to_a
       end
       files += nodes
       nodes.each { |node| files += node.all_children if node.is_a?(Folder) }
     when "copy_to_cooperative"
-      nodes = Node.accessible_by_space(space).editable_by(@context).where(id: unsafe_params[:ids], scope: space.uid)
-      nodes.each { |node| files += node.is_a?(Folder) ? node.all_files(Node.where(scope: space.uid)) : [node] }
+      nodes = Node.
+        accessible_by_space(space).
+        editable_by(@context).
+        where(id: params[:ids], scope: space.uid)
+      nodes.each do |node|
+        files += node.is_a?(Folder) ? node.all_files(Node.where(scope: space.uid)) : [node]
+      end
     end
 
+    comparison_file = false
     res = files.map do |file|
+      if file.is_a?(UserFile) && file.comparisons.present?
+        comparison_file = true
+        next
+      end
+
       info = {
         id: file.id,
         name: file.name,
         type: file.klass,
-        fsPath: ([root_name] + file.ancestors(unsafe_params[:scope]).map(&:name).reverse).compact.join(" / "),
+        fsPath: ([root_name] + file.ancestors(params[:scope]).map(&:name).reverse).
+          compact.
+          join(" / "),
         viewURL: file.is_a?(UserFile) ? file_path(file) : pathify_folder(file),
       }
 
@@ -306,6 +323,8 @@ class SpacesController < ApplicationController
 
       info
     end
+    res.compact!
+    res = { comparisonFile: true } if comparison_file && res.blank?
 
     render json: res
   end
@@ -317,9 +336,10 @@ class SpacesController < ApplicationController
   # Shows an informative flash meesage and redirects to a space files grid view.
   def remove_folder
     space = Space.accessible_by(@context).find(params[:id])
+    ids = Node.sin_comparison_inputs(unsafe_params[:ids])
 
     if space.contributor_permission(@context)
-      nodes = Node.accessible_by(@context).where(id: params[:ids])
+      nodes = Node.accessible_by(@context).where(id: ids)
 
       UserFile.transaction do
         nodes.update(state: UserFile::STATE_REMOVING)
