@@ -1,4 +1,5 @@
 HELP_TEXT = "Only private data can be moved to a Space. Data in a Space can be published, but cannot be made private again."
+STORAGE_MSG = 'pfda_publish_files_success_msg'
 
 getRelatedObjects = (item, spaceUID) ->
   Precision.promisifyApi('/api/related_to_publish', {
@@ -62,6 +63,18 @@ class SpacesContentView
       )
     )
 
+  publishFilesOnSuccess: (count) ->
+    msg = """#{count} objects have been published.
+            Files are being processed, this could take a while."""
+    window.localStorage.setItem(STORAGE_MSG, msg)
+    window.location.reload(true)
+
+  clearStorage: () ->
+    msg = window.localStorage.getItem(STORAGE_MSG)
+    if msg
+      Precision.alert.showPermanent(msg, 'alert-success')
+      window.localStorage.removeItem(STORAGE_MSG)
+
   onSaveHandler: (selected) ->
     selectedFiles = selected.filter((item) -> item.className() == 'file')
     uids = _.map(selected, 'uid')
@@ -71,14 +84,9 @@ class SpacesContentView
       scope: @space_uid,
       uids: uids
     }).then(
-      () =>
-        if selectedFiles.length
-          @selectedFilesCount(selectedFiles.length)
-          @objectSelector.saving(false)
-          @objectSelector.modal.modal('hide')
-          $('#add_files_to_space_modal').modal('show')
-        else
-          window.location.reload(true)
+      (data) =>
+        @publishFilesOnSuccess(data.published_count) if selectedFiles.length
+        window.location.reload(true) if !selectedFiles.length
       (response) =>
         @objectSelector.saving(false)
         try
@@ -93,6 +101,9 @@ class SpacesContentView
     @selectedFilesCount = ko.observable(0)
     @relatedIDs = []
     @relatedObjects = ko.observableArray([])
+
+    @clearStorage()
+
     @objectSelector = new Precision.models.SelectorModel({
       title: "Move data to space",
       help: HELP_TEXT,

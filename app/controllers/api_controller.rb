@@ -67,8 +67,7 @@ class ApiController < ApplicationController
     published_count += AppSeries.publish(apps, @context, @scope) unless apps.empty?
 
     render json: {
-      message: "#{published_count} objects have been published. " \
-               "Files are being processed, this could take a while."
+      published_count: published_count
     }
   end
 
