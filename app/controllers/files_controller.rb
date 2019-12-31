@@ -89,7 +89,7 @@ class FilesController < ApplicationController
   end
 
   def show
-    @file = UserFile.not_assets.accessible_by(@context).includes(:user).find_by_uid!(unsafe_params[:id])
+    @file = UserFile.not_assets.accessible_by(@context).includes(:user).find_by!(uid: params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
@@ -104,34 +104,43 @@ class FilesController < ApplicationController
     if @file.parent_type != "Comparison"
       User.sync_comparisons!(@context)
 
-      @comparisons_grid = initialize_grid(@file.comparisons.accessible_by(@context).includes(:taggings), {
-        name: 'comparisons',
-        order: 'comparisons.id',
-        order_direction: 'desc',
-        per_page: 100,
-        include: [:user, {user: :org}, {taggings: :tag}]
-      })
+      @comparisons_grid =
+        initialize_grid(
+          @file.comparisons.accessible_by(@context).includes(:taggings),
+          name: "comparisons",
+          order: "comparisons.id",
+          order_direction: "desc",
+          per_page: 100,
+          include: [:user, { user: :org }, { taggings: :tag }],
+        )
     else
       @comparison = @file.parent
     end
 
-    if @file.editable_by?(@context)
-      @licenses = License.editable_by(@context)
-    end
+    @licenses = License.editable_by(@context) if @file.editable_by?(@context)
 
     @items_from_params = [@file]
     @item_path = pathify(@file)
     @item_comments_path = pathify_comments(@file)
     if @file.in_space?
       space = item_from_uid(@file.scope)
-      @comments = Comment.where(commentable: space, content_object: @file).order(id: :desc).page unsafe_params[:comments_page]
+      @comments =
+        Comment.where(commentable: space, content_object: @file).
+          order(id: :desc).page(params[:comments_page])
     else
-      @comments = @file.root_comments.order(id: :desc).page unsafe_params[:comments_page]
+      @comments = @file.root_comments.order(id: :desc).page(params[:comments_page])
     end
 
-    @notes = @file.notes.real_notes.accessible_by(@context).order(id: :desc).page unsafe_params[:notes_page]
-    @answers = @file.notes.accessible_by(@context).answers.order(id: :desc).page unsafe_params[:answers_page]
-    @discussions = @file.notes.accessible_by(@context).discussions.order(id: :desc).page unsafe_params[:discussions_page]
+    notes_ids = Attachment.file_attachments(@file.id).pluck(:note_id)
+    @notes = Note.where(id: notes_ids).real_notes.
+      accessible_by(@context).order(id: :desc).page(params[:notes_page])
+
+    @answers = @file.notes.
+      accessible_by(@context).
+      answers.order(id: :desc).page(params[:answers_page])
+    @discussions = @file.notes.
+      accessible_by(@context).
+      discussions.order(id: :desc).page(params[:discussions_page])
 
     js(
       file: @file.slice(:uid, :id),
