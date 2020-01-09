@@ -44,7 +44,6 @@ class User < ApplicationRecord
 
   PRODUCTION_ADMINS = %w(
     elaine.johanson
-    ruth.bandler
     john.didion
     ezekiel.maier.2
     holly.stephens
@@ -89,7 +88,6 @@ class User < ApplicationRecord
     ezekiel.maier.2
     heike.sichtig
     min.yi
-    ruth.bandler
     sharon.liang
     yi.yan
     you.li

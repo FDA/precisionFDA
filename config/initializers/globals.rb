@@ -101,7 +101,6 @@ REVIEW_SPACE_ADMINS =
   elsif ENV["DNANEXUS_BACKEND"] == "production"
     %w(
       elaine.johanson
-      ruth.bandler
       john.didion
       ezekiel.maier.2
       holly.stephens
