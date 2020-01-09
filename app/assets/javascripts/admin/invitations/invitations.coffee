@@ -63,7 +63,7 @@ class PageInvitationsView
         (data) =>
           responseIsOk = @handleResponse(data)
           if responseIsOk
-            Precision.alert.showAboveAll('Users successfully provisioned!', 'alert-success')
+            Precision.alert.showAfterReload('Users successfully provisioned!', 'alert-success')
             window.location.reload()
           else
             $('#disable-screen-modal').modal('hide')
