@@ -73,18 +73,27 @@ class PageInvitationsView
           $('#disable-screen-modal').modal('hide')
       )
 
-  selectUser: (invitation) ->
-    @invitations.push(new InvitationModel(invitation, @countries))
+  selectUser: (e, invitation) ->
+    @selectedInvitations.push(invitation) if e.target.checked
+    @selectedInvitations.remove(invitation) if !e.target.checked
+
+  addSelectedUsers: () ->
+    @selectedInvitations().forEach((invitation) =>
+      @invitations.push(new InvitationModel(invitation))
+    )
+    @selectedInvitations([])
     @gridModal.modal('hide')
 
   constructor: (params) ->
     @countries = params.countries.map((country) -> { id: country[1], name: country[0] })
     @gridModal = $('#invitation_grid_modal')
     @invitationGridLoading = ko.observable(false)
+    @selectedInvitations = ko.observableArray([])
     @invitations = ko.observableArray([])
     @invitationsExclude = ko.computed(() =>
       @invitations().map((invitation) -> invitation.id)
     )
+    @addSelectedEnabled = ko.computed(() => @selectedInvitations().length)
 
     @invitationsDataGrid = $('#invitations_data_grid').DataTable({
       ajax: {
@@ -108,12 +117,12 @@ class PageInvitationsView
         { data: 'duns' },
       ],
       "columnDefs": [
-        { 'orderable': false, 'targets': 0 },
         {
           targets: 0,
+          orderable: false,
           data: 'id',
-          render: (data, type, row, meta) ->
-            "<a href=\"#\" class=\"select-user\">Select</a>"
+          render: (data) ->
+            "<input value=\"#{data}\" type=\"checkbox\" class=\"select-user\" />"
         }
       ]
     })
@@ -151,11 +160,9 @@ AdminProvisionController = Paloma.controller('Admin/Invitations', {
     viewModel = new PageInvitationsView(@params)
     ko.applyBindings(viewModel, $container[0])
 
-    $('#invitations_data_grid').on 'click', 'tbody td', (e) ->
+    $('#invitations_data_grid').on 'change', 'tbody td', (e) ->
       if e.target.classList.contains('select-user')
-        e.preventDefault()
         idx = viewModel.invitationsDataGrid.cell(this).index().row
         data = viewModel.invitationsDataGrid.cells( idx, '' ).render( 'display' )
-        viewModel.selectUser(data.data()[idx])
-    window.viewModel = viewModel
+        viewModel.selectUser(e, data.data()[idx])
 })
