@@ -121,8 +121,8 @@ class User < ApplicationRecord
 
   validates :first_name, length: { minimum: 2, message: "The first name must be at least two letters long." }, presence: true
   validates :last_name, length: { minimum: 2, message: "The last name must be at least two letters long." }, presence: true
-  validates :email, presence: true, uniqueness: { case_sensitive: false }
-  validates :disable_message, length: { maximum: 250, message: "Deactivation reason is too long (over 250 characters)" }
+  validates :email, presence: true, uniqueness: { case_sensitive: false }, format: EMAIL_FORMAT
+  validates :disable_message, length: { maximum: 250 , message: "Deactivation reason is too long (over 250 characters)"}
 
   def self.challenge_bot
     find_by!(dxuser: CHALLENGE_BOT_DX_USER)
