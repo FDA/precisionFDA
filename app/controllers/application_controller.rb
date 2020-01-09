@@ -161,7 +161,7 @@ class ApplicationController < ActionController::Base
   # @param org_id [Integer] User org's ID.
   def init_context(user_id, username, token, expiration, org_id)
     @context = Context.new(user_id, username, token, expiration, org_id)
-    DIContainer.configure(@context.user, token)
+    DIContainer.configure(@context.user, token) unless @context.guest?
   end
 
   # Returns configured encryptor.
