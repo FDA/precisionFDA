@@ -74,13 +74,13 @@ Rails.application.routes.draw do
     # hotfix for PFDA-557
     get "/challenges/6" => redirect("/challenges/7")
     get "/mislabeling" => redirect("/challenges/5")
+    get "/challenges/9" => "main#ae_anomaly_detection"
     # Main controller
     get "login" => "main#login"
     delete "logout" => "main#destroy"
     get "return_from_login" => "main#return_from_login"
     post "publish" => "main#publish"
     get "track" => "main#track"
-    get "mislabeling" => "main#mislabeling"
     get "request_access" => "main#request_access"
     post "request_access" => "main#create_request_access"
     get "browse_access" => "main#browse_access"
