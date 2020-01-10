@@ -13,7 +13,7 @@ class MainController < ApplicationController
     news
     mislabeling
   )
-  skip_before_action :require_login, only: %i(track mislabeling bco_appathon georgetown)
+  skip_before_action :require_login, only: %i(track ae_anomaly_detection)
   before_action :require_login_or_guest, only: %i(track)
   before_action :init_countries, only: %i(request_access create_request_access)
 
@@ -493,11 +493,7 @@ class MainController < ApplicationController
     @graph = GraphDecorator.build(@context, @item)
   end
 
-  def mislabeling; end
-
-  def bco_appathon; end
-
-  def georgetown; end
+  def ae_anomaly_detection; end
 
   def tokify
     @key = generate_auth_key
