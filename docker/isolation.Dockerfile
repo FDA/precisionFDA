@@ -13,6 +13,4 @@ RUN apt-get update && \
     tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
     rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
-RUN bundle install
-
 CMD $APP_DIR/docker/isolation.docker-entrypoint.sh

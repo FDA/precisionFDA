@@ -29,9 +29,11 @@ class AlertModel
 
   #public
   showPermanent: (text, style) ->
-    $container = createNode(text, style)
-    $container.addClass('above-all')
+    $container = createContainer(text, style)
     appendToPage($container)
+    $container.on 'click', (e) ->
+      $container.alert('close')
+      $container = null
     @on($container, -1)
 
   #private

@@ -101,7 +101,6 @@ REVIEW_SPACE_ADMINS =
   elsif ENV["DNANEXUS_BACKEND"] == "production"
     %w(
       elaine.johanson
-      ruth.bandler
       john.didion
       ezekiel.maier.2
       holly.stephens
@@ -120,6 +119,7 @@ REVIEW_SPACE_ADMINS =
       hollystephens723
       rsa.aabramenko
       erik.barraza
+      nainathangaraj.spaceadmin
     ).freeze
   end
 

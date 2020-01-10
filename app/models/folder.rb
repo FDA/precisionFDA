@@ -22,7 +22,6 @@
 #
 
 class Folder < Node
-
   MAX_NAME_LENGTH = 255
 
   scope :private_for, lambda { |context| where(user_id: context.user.id, scope: "private") }
@@ -44,6 +43,8 @@ class Folder < Node
                           message: "A folder with this name '%{value}' already exists",
                           unless: lambda { private? }
 
+  scope :not_removing, -> { where.not(state: STATE_REMOVING).or(where(state: nil)) }
+
   class << self
     def batch_private_folders(context, parent_folder_id = nil)
       Folder
@@ -64,6 +65,10 @@ class Folder < Node
 
   def klass
     "folder"
+  end
+
+  def blocked?
+    state == STATE_REMOVING
   end
 
   def editable_by?(context)

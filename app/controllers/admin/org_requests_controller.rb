@@ -35,7 +35,7 @@ module Admin
       OrgService::DissolveOrgApprove.new(
         @context.user,
         NotificationsMailer,
-        container.resolve("orgs.leave_org_request_creator"),
+        DIContainer.resolve("orgs.leave_org_request_creator"),
       ).call(@request)
     end
 

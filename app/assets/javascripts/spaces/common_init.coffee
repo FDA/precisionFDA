@@ -1,4 +1,5 @@
 HELP_TEXT = "Only private data can be moved to a Space. Data in a Space can be published, but cannot be made private again."
+STORAGE_MSG = 'pfda_publish_files_success_msg'
 
 getRelatedObjects = (item, spaceUID) ->
   Precision.promisifyApi('/api/related_to_publish', {
@@ -8,7 +9,6 @@ getRelatedObjects = (item, spaceUID) ->
 
 class RelateObjectChild
   constructor: (data, isWF = false) ->
-    console.log data
     @uid = data.uid
     @title = data.title
     @type = data.className
@@ -63,13 +63,20 @@ class SpacesContentView
       )
     )
 
+  publishFilesOnSuccess: (count) ->
+    msg = """#{count} objects have been published.
+            Files are being processed, this could take a while."""
+    window.localStorage.setItem(STORAGE_MSG, msg)
+    window.location.reload(true)
+
+  clearStorage: () ->
+    msg = window.localStorage.getItem(STORAGE_MSG)
+    if msg
+      Precision.alert.showPermanent(msg, 'alert-success')
+      window.localStorage.removeItem(STORAGE_MSG)
+
   onSaveHandler: (selected) ->
-    # selectedFiles = selected.filter((item) -> item.className() == 'file')
-    # if selectedFiles.length
-    #   selectorModel = selectedFiles[0].selectorModel
-    #   selectorModel.saving(false)
-    #   selectorModel.modal.modal('hide')
-    #   $('#add_files_to_space_modal').modal('show')
+    selectedFiles = selected.filter((item) -> item.className() == 'file')
     uids = _.map(selected, 'uid')
     uids = _.union(uids, @relatedIDs)
 
@@ -77,18 +84,26 @@ class SpacesContentView
       scope: @space_uid,
       uids: uids
     }).then(
-      () ->
-        # if !selectedFiles.length
-        #   window.location.reload(true)
-        window.location.reload(true)
-      () ->
-        Precision.alert.showAboveAll('Something went wrong!')
+      (data) =>
+        @publishFilesOnSuccess(data.published_count) if selectedFiles.length
+        window.location.reload(true) if !selectedFiles.length
+      (response) =>
+        @objectSelector.saving(false)
+        try
+          responseJSON = JSON.parse(response.responseText)
+          Precision.alert.showAboveAll("#{responseJSON.error.type}: #{responseJSON.error.message}")
+        catch
+          Precision.alert.showAboveAll('Something went wrong!')
     )
 
   constructor: (@space_uid, scopes) ->
     @selected = []
+    @selectedFilesCount = ko.observable(0)
     @relatedIDs = []
     @relatedObjects = ko.observableArray([])
+
+    @clearStorage()
+
     @objectSelector = new Precision.models.SelectorModel({
       title: "Move data to space",
       help: HELP_TEXT,
@@ -176,7 +191,8 @@ class SpacesContentView
           apiEndpoint: "list_jobs",
           apiParams: {
             editable: true,
-            scopes: scopes
+            scopes: scopes,
+            space_uid: @space_uid,
           }
         },
         {

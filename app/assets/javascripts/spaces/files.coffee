@@ -134,6 +134,14 @@ SpacesController = Paloma.controller('Spaces', {
     $container.on('change', '[name="files[selected][]"]', (e) ->
       viewModel.updateSelectedNodes(e)
     )
+    $container.on('change', '[name="files[select_all]"]', (e) ->
+      checked = e.currentTarget.checked
+      $('[name="files[selected][]"]').each((i, checkbox) ->
+        checkbox.checked = checked if not checkbox.disabled
+        $(checkbox).trigger('change')
+        return true
+      )
+    )
     $container.on('show.bs.modal', '#rename-modal-js', (e) ->
       viewModel.fillModal()
     )

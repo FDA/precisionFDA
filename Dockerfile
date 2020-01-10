@@ -5,7 +5,3 @@ RUN apt-get update && apt-get install -y cmake libssl-dev
 WORKDIR /precision-fda
 
 COPY Gemfile Gemfile.lock ./
-
-EXPOSE 3000
-
-ENTRYPOINT ["./docker/development.entrypoint.sh"]

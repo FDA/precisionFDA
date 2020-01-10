@@ -1,19 +1,28 @@
 <div class="workflows standard container">
   <div class="workflows">
     <!-- ko if: $root.diagram.stages().length -->
-
       <div class="wf-diagram">
-        <div data-bind="foreach: $root.diagram.stages" class="wf-diagram-stages">
-          <h3 data-bind="text: title"></h3>
-          <div data-bind="foreach: slots" class="wf-diagram-slots">
-            <div class="wf diagram-slot">
+        <div class="wf-diagram-stages" data-bind="template: { foreach: $root.diagram.stages, as: 'stage' }">
+          <h3 data-bind="text: stage.title"></h3>
+          <div data-bind="foreach: stage.slots" class="wf-diagram-slots">
+            <div class="wf-diagram-slot">
               <div class="" data-bind='foreach: inputs'>
                 <div class="shifted-io">
                   <!-- ko if: values.id -->
-                    <i class="glyphicon glyphicon-filter workflow-digaram-gly" data-bind="attr: {id: name, title: name}"></i>
+                    <i class="glyphicon glyphicon-filter workflow-digaram-gly" data-type="input" data-bind="attr: {
+                      id: name,
+                      title: name,
+                      'data-value-id': values.id,
+                      'data-value-name': values.name,
+                      'data-slot-id': parent_slot,
+                      'data-stage-index': stage.index
+                    }"></i>
                   <!-- /ko -->
                   <!-- ko ifnot: values.id -->
-                    <i class="glyphicon glyphicon-filter text-muted" data-bind="attr: {id: name, title: name}"></i>
+                    <i class="glyphicon glyphicon-filter text-muted" data-bind="attr: {
+                      id: name,
+                      title: name
+                    }"></i>
                   <!-- /ko -->
                 </div>
               </div>
@@ -28,18 +37,30 @@
               <div data-bind="foreach: outputs">
                 <div class="shifted-io">
                   <!-- ko if: values.id -->
-                    <i class="fa fa-arrow-down workflow-digaram-gly" data-bind="attr: {id: name, title: name}"></i>
+                    <i class="fa fa-arrow-down workflow-digaram-gly" data-type="output" data-bind="attr: {
+                      id: name,
+                      title: name,
+                      'data-value-id': values.id,
+                      'data-output-name': name,
+                      'data-slot-id': parent_slot,
+                      'data-stage-index': stage.index
+                    }"></i>
                   <!-- /ko -->
                   <!-- ko ifnot: values.id -->
-                    <i class="fa fa-arrow-down text-muted" data-bind="attr: {id: name, title: name}"></i>
+                    <i class="fa fa-arrow-down text-muted" data-bind="attr: {
+                      id: name,
+                      title: name
+                    }"></i>
                   <!-- /ko -->
                 </div>
               </div>
             </div>
           </div>
+          <div class="wf-diagram-arrows">
+            <svg class="wf-diagram-arrows-svg" data-bind="attr: { 'data-stage-index': stage.index }"></svg>
+          </div>
         </div>
       </div>
-
     <!-- /ko -->
   </div>
 </div>

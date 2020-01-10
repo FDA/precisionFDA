@@ -1,4 +1,5 @@
 <% toggle_all_descriptions = content_tag(:a, nil, href: '#', class: 'fa fa-info-circle', 'data-bind' => 'click: toggleAll') %>
+<% toggle_all_checkboxes = content_tag(:input, nil, type: 'checkbox', class: 'wg-select-all', name: 'files[select_all]', value: 1) %>
 
 <%= grid(files_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
   if defined?(clear_blank_state) && clear_blank_state
@@ -18,11 +19,15 @@
   end
 
   if defined?(show_checkboxes) && show_checkboxes
-    g.action_column html_check_box: true
+    g.column name: toggle_all_checkboxes do |file|
+      unless file.blocked?
+        content_tag(:input, nil, type: 'checkbox', name: 'files[selected][]', value: file.id, disabled: file.blocked? )
+      end
+    end
   end
 
   g.column name: 'Name', attribute: 'name' do |file|
-    unilinkfw(file, scope_icon: (defined?(scope_icon) ? scope_icon : true))
+    unilinkfw(file, scope_icon: (defined?(scope_icon) ? scope_icon : true), nolink: file.blocked?)
   end
 
   g.column name: toggle_all_descriptions do |file|
@@ -74,7 +79,8 @@
            attribute: 'state',
            allow_multiple_selection: false,
            custom_filter: :auto do |file|
-    content_tag(:div, file.state, file.state == "abandoned" ? { class: "highlighted" } : {})
+    options = %w(abandoned publishing removing).include?(file.state) ? { class: "highlighted" } : {}
+    content_tag(:div, file.state, options)
   end
 
   if !defined?(hide_access) || !hide_access

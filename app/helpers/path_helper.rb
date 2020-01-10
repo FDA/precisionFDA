@@ -1,5 +1,4 @@
 module PathHelper
-
   def urlify_by_path(path)
     config = Rails.configuration.action_mailer.default_url_options
     URI::HTTPS.build(host: config[:host], port: config[:port], path: path).to_s
@@ -109,4 +108,50 @@ module PathHelper
     end
   end
 
+  # Returns URL to the specified folder.
+  # @param folder [Folder] Folder to get URL for.
+  # @return [String] Folder's URL.
+  def pathify_folder(folder)
+    if folder.private?
+      files_path(folder_id: folder.id)
+    elsif folder.public?
+      explore_files_path(folder_id: folder.id)
+    elsif folder.in_space?
+      space = folder.space
+      files_space_path(id: space.id, folder_id: folder.id)
+    else
+      raise "Unable to build folder's path"
+    end
+  end
+
+  # Returns redirect URL for comments.
+  # @param item [Mixed] Item that holds comments to redirect to.
+  # @return [String] URL to redirect to.
+  def pathify_comments_redirect(item)
+    case item.klass
+    when "discussion"
+      discussion_comments_path(item)
+    when "note"
+      if item.note_type == "Answer"
+        pathify_comments_redirect(item.answer)
+      elsif item.note_type == "Discussion"
+        pathify_comments_redirect(item.discussion)
+      else
+        pathify(item)
+      end
+    when "workflow"
+      return workflow_analyses_path(item) if request.referer =~ /analyses/
+
+      workflow_path(item)
+    when "space"
+      discuss_space_path(item)
+    when "task"
+      space_task_path(item.space_id, item)
+    when "expert", "expert-question", "meta-appathon", "appathon", "file", "app", "job", "asset",
+      "comparison", "answer", "folder"
+      pathify(item)
+    else
+      raise "Unknown class #{item.klass}"
+    end
+  end
 end
