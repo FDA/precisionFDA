@@ -1,31 +1,64 @@
-version: "3.2"
+version: "3.7"
+
+x-shared:
+  &shared
+  build:
+    context: ../
+    dockerfile: docker/isolation.Dockerfile
+  environment:
+    - RAILS_LOG_TO_STDOUT=1
+    - RAILS_ENV=ui_test
+    - NO_FIPS=1
+    - CUSTOM_SITE_ADMINS=precisionfda.admin_dev
+    - REDIS_WORKER_URL=redis://redis:6379/0
+
 services:
   web:
-    build:
-      context: ../
-      dockerfile: docker/isolation.Dockerfile
+    <<: *shared
     volumes:
-      - 'pfda-mysql-volume:/mysql-volume'
       - type: bind
         source: ../
         target: /precision-fda
-    environment:
-      - RAILS_LOG_TO_STDOUT=1
-      - RAILS_ENV=ui_test
-      - NO_FIPS=1
-      - CUSTOM_SITE_ADMINS=precisionfda.admin_dev
+      - type: volume
+        source: pfda-gems
+        target: /usr/local/bundle
+      - pfda-mysql-volume:/var/lib/mysql
     working_dir: /precision-fda
     ports:
-      - '3000:3000'
+      - 3000:3000
     depends_on:
       - db
+      - redis
+      - sidekiq
+    entrypoint: ./docker/isolation.docker-entrypoint.sh
+
   db:
     image: mysql:5.6
     volumes:
-      - 'pfda-mysql-volume:/var/lib/mysql'
+      - pfda-mysql-volume:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=password
     ports:
       - 3306
+
+  redis:
+    image: redis:5.0
+    ports:
+      - 6379:6379
+
+  sidekiq:
+    <<: *shared
+    volumes:
+      - type: bind
+        source: ../
+        target: /precision-fda
+      - type: volume
+        source: pfda-gems
+        target: /usr/local/bundle
+    entrypoint: docker/sidekiq.entrypoint.sh
+    depends_on:
+      - redis
+
 volumes:
   pfda-mysql-volume:
+  pfda-gems:

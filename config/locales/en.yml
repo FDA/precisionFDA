@@ -21,6 +21,10 @@
 
 en:
   hello: "Hello world"
+  email_taken: |
+    Error. This email address is already being used for a %{side} account.
+    Please choose a different email address for precisionFDA.
+
   activerecord:
     attributes:
       invitation:

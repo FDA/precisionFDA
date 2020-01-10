@@ -143,21 +143,16 @@
     <% if !@app.dev_group && @app.scope != 'public' && !@app.in_verificaiton_space?  %>
       <!-- ko ifnot:shareSuccess -->
       <div class="btn-group">
-        <button id="fda_button" class="btn btn-primary" data-bind="click: shareWithFDA">
+        <button class="btn btn-primary" data-toggle="modal" data-target="#share_with_fda_modal">
           <i class="fa fa-copy"></i>&nbsp;
-          <!-- ko ifnot:fdaSpinner -->
           <span id="fda_text">Share with FDA</span>
-          <!-- /ko -->
-          <!-- ko if:fdaSpinner -->
-          <span id="fda_text">Sharing...</span>&nbsp;
-          <i class="fa fa-spinner fa-spin"></i>
-          <!-- /ko -->
         </button>
       </div>
       <!-- /ko -->
       <!-- ko if:shareSuccess -->
       <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
       <!-- /ko -->
+      <%= render partial: "apps/share_with_fda_modal" %>
     <% elsif @app.dev_group %>
       <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
     <% end %>

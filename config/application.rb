@@ -47,5 +47,7 @@ module PrecisionFda
     ::Sass::Script::Value::Number.precision = [8, ::Sass::Script::Value::Number.precision].max
 
     config.active_record.belongs_to_required_by_default = false
+
+    config.active_job.queue_adapter = :sidekiq
   end
 end

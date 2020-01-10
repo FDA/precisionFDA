@@ -20,11 +20,11 @@ class ProtocolErrors
           window.location = "/login"
       when 404
         Precision.alert.showPermanent("Action not found")
-      else
-        Precision.alert.showPermanent("There was a server error")
+      # else
+        # Precision.alert.showPermanent("There was a server error")
 
   status500: (xhr) ->
-    Precision.alert.showPermanent("There was a server error")
+    # Precision.alert.showPermanent("There was a server error")
 
   constructor: () ->
     # blank controller

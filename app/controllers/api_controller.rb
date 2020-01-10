@@ -2,6 +2,7 @@ class ApiController < ApplicationController
   include ErrorProcessable
   include WorkflowConcern
   include FilesConcern
+  include UidFindable
 
   skip_before_action :verify_authenticity_token
   skip_before_action :require_login
@@ -10,7 +11,10 @@ class ApiController < ApplicationController
   before_action :validate_create_asset, only: :create_asset
   before_action :validate_get_upload_url, only: :get_upload_url
 
+  before_action :check_space, :check_uids, :check_items, only: :publish
+
   rescue_from ApiError, with: :render_error_method
+  # rubocop:disable Style/SignalException
 
   # Inputs
   #
@@ -19,106 +23,98 @@ class ApiController < ApplicationController
   #
   # Outputs
   #
-  # published (number): the count of published objects
+  # message (string): result message
   def publish
-    space = nil
-
-    scope = unsafe_params[:scope]
-    if scope.nil?
-      scope = "public"
-    elsif scope.is_a?(String)
-      if scope != "public"
-        # Check that scope is a valid scope:
-        # - must be of the form space-xxxx
-        # - must exist in the Space table
-        # - must be accessible by context
-        fail "Invalid scope (only 'public' or 'space-xxxx' are accepted)" unless scope =~ /^space-(\d+)$/
-        space = Space.find_by(id: $1.to_i)
-        fail "Invalid space" unless space.present? && space.active? && space.accessible_by?(@context)
-      end
-    else
-      fail "The optional 'scope' input must be a string (either 'public' or 'space-xxxx')"
-    end
-
-    uids = unsafe_params[:uids]
-    fail "The input 'uids' must be an array of object ids (strings)" unless uids.is_a?(Array) && uids.all? { |uid| uid.is_a?(String) }
-
-    items = uids.uniq.map { |uid| item_from_uid(uid) }.reject { |item| item.public? || item.scope == scope }
-    fail "Unpublishable items detected" unless items.all? { |item| item.publishable_by?(@context, scope) }
-
-    # Files to publish:
-    # - All real_files selected by the user
-    # - All assets selected by the user
-    files = items.select { |item| item.klass == "file" || item.klass == "asset" }
-
-    # Comparisons
-    comparisons = items.select { |item| item.klass == "comparison" }
-
-    # Apps
-    apps = items.select { |item| item.klass == "app" }
-
-    # Jobs
-    jobs = items.select { |item| item.klass == "job" }
-
-    # Notes
-    notes = items.select { |item| item.klass == "note" }
-
-    # Discussions
-    discussions = items.select { |item| item.klass == "discussion" }
-
-    # Answers
-    answers = items.select { |item| item.klass == "answer" }
-
-    workflows = items.select { |item| item.klass == "workflow" }
-
     published_count = 0
 
-    # Files
+    files = @items.select { |item| item.klass == "file" || item.klass == "asset" }
+    comparisons = @items.select { |item| item.klass == "comparison" }
+    apps = @items.select { |item| item.klass == "app" }
+    jobs = @items.select { |item| item.klass == "job" }
+    notes = @items.select { |item| item.klass == "note" }
+    discussions = @items.select { |item| item.klass == "discussion" }
+    answers = @items.select { |item| item.klass == "answer" }
+    workflows = @items.select { |item| item.klass == "workflow" }
+
     unless files.empty?
-      published_count += UserFile.publish(files, @context, scope)
+      UserFile.transaction do
+        files.each { |file| file.update!(scope: @scope, state: UserFile::STATE_PUBLISHING ) }
+        FilePublishWorker.perform_async(@scope, files.map(&:id), session_auth_params)
+      end
     end
 
-    # Comparisons
-    unless comparisons.empty?
-      published_count += Comparison.publish(comparisons, @context, scope)
-    end
+    published_count += Comparison.publish(comparisons, @context, @scope) unless comparisons.empty?
 
-    # Jobs
     unless jobs.empty?
-      published_count += PublishService::JobPublisher.new(@context).publish(jobs, scope)
+      published_count += PublishService::JobPublisher.new(@context).publish(jobs, @scope)
     end
 
-    # Notes
-    unless notes.empty?
-      published_count += Note.publish(notes, @context, scope)
-    end
+    published_count += Note.publish(notes, @context, @scope) unless notes.empty?
+    published_count += Discussion.publish(discussions, @context, @scope) unless discussions.empty?
+    published_count += Answer.publish(answers, @context, @scope) unless answers.empty?
 
-    # Discussions
-    unless discussions.empty?
-      published_count += Discussion.publish(discussions, @context, scope)
-    end
-
-    # Answers
-    unless answers.empty?
-      published_count += Answer.publish(answers, @context, scope)
-    end
-
-    if workflows.any?
-      PublishService::WorkflowPublisher.call(workflows, @context, scope)
+    unless workflows.empty?
+      PublishService::WorkflowPublisher.call(workflows, @context, @scope)
       published_count += workflows.count
 
       workflows.flat_map(&:apps).each do |app|
-        next if apps.include?(app) || app.public? || app.scope == scope
+        next if apps.include?(app) || app.public? || app.scope == @scope
+
         apps << app
       end
     end
 
-    # Apps
-    unless apps.empty?
-      published_count += AppSeries.publish(apps, @context, scope)
-    end
+    published_count += AppSeries.publish(apps, @context, @scope) unless apps.empty?
 
-    render json: { published: published_count }
+    render json: {
+      published_count: published_count
+    }
+  end
+
+  # Collects an Array of children for object in params.
+  # @param uid [Object Id].
+  # @param scope [String] A scope to be published into.
+  # @return [Hash with Array value] An Array of relative children for a given Object.
+  def related_to_publish
+    id = unsafe_params[:uid]
+    raise "Missing id in publish route" unless id.is_a?(String) && id.present?
+
+    item = item_from_uid(id)
+    raise "You do not have permission to access #{id}" unless item.accessible_by?(@context)
+
+    publishing_service = SpaceService::Publishing.new(@context)
+    check_result = publishing_service.scope_check(unsafe_params[:scope])
+    scope = check_result[:scope]
+
+    relatives_graph = GraphDecorator.for_publisher(@context, item, scope).to_json
+    children = children_to_publish(relatives_graph)
+
+    render json: children
+  end
+
+  # Collects an array of children from a relatives graph.
+  # Filtering by private objects only to be included into children array.
+  # Prepare values for 'path' and 'fa_class' attributes.
+  # @param relatives_graph [Array of Objects] From GraphDecorator.
+  # @return children [Array of Objects] With the following example content:
+  #  {
+  #    \"uid\"=>\"app-0b9811c31ff0812273068d54-1\",
+  #    \"klass\"=>\"app\", \"title\"=>\"default_title\", \"owned\"=>false,
+  #    \"public\"=>true, \"in_space\"=>false, \"publishable\"=>false,
+  #    \"children\"=>[]
+  #  }
+  def children_to_publish(relatives_graph)
+    all_children = JSON.parse(relatives_graph)[0]["children"]
+    children = []
+    all_children.uniq.each do |child|
+      next if child["in_space"] || child["public"]
+
+      object = item_from_uid(child["uid"])
+      child["path"] = object.accessible_by?(@context) ? pathify(object) : nil
+      child["fa_class"] = view_context.fa_class(object)
+      children << child
+    end
+    children
   end
 
   # Collects an Array of children for object in params.
@@ -581,11 +577,13 @@ class ApiController < ApplicationController
   #         user (boolean, optional)
   #         org (boolean, optional)
   #         all_tags_list (boolean, optional)
+  # space_uid (String, optional): if a job is being moved to space with this space_id value.
   #
   # Outputs:
   #
   # An array of hashes
   #
+
   def list_jobs
     jobs = if unsafe_params[:editable]
       Job.editable_by(@context).accessible_by_private
@@ -596,6 +594,10 @@ class ApiController < ApplicationController
     if unsafe_params[:scopes].present?
       check_scope!
       jobs = jobs.where(scope: unsafe_params[:scopes])
+    end
+
+    if unsafe_params[:space_uid].present?
+      jobs = jobs.terminal
     end
 
     result = jobs.eager_load(user: :org).order(id: :desc).map do |job|
@@ -821,6 +823,10 @@ class ApiController < ApplicationController
     render json: { id: file.uid }
   end
 
+  # Creates a challenge logo - to be visible as a challenge card image
+  # @return [Hash] - a uid of a file uploaded as a card image
+  #
+  # rubocop:disable Style/SignalException
   def create_challenge_card_image
     return unless @context.can_administer_site? || @context.challenge_admin?
 
@@ -832,8 +838,9 @@ class ApiController < ApplicationController
       fail "File description needs to be a String" unless description.is_a?(String)
     end
 
+    api = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN)
     project = CHALLENGE_BOT_PRIVATE_FILES_PROJECT
-    dxid = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call("file", "new", "name": unsafe_params[:name], "project": CHALLENGE_BOT_PRIVATE_FILES_PROJECT)["id"]
+    dxid = api.file_new(unsafe_params[:name], project)["id"]
 
     file = UserFile.create!(
       dxid: dxid,
@@ -843,9 +850,10 @@ class ApiController < ApplicationController
       description: description,
       user_id: User.challenge_bot.id,
       parent: User.challenge_bot,
-      scope: 'private'
+      scope: "public",
     )
 
+    # rubocop:enable Style/SignalException
     render json: { id: file.uid }
   end
 
@@ -1255,22 +1263,35 @@ class ApiController < ApplicationController
   #
   def attach_to_notes
     note_uids = unsafe_params[:note_uids]
-    fail "Parameter 'note_uids' need to be an Array of Note, Answer, or Discussion uids" unless note_uids.is_a?(Array) && note_uids.all? { |uid| uid =~ /^(note|discussion|answer)-(\d+)$/ }
+    unless note_uids.is_a?(Array) && note_uids.all? { |uid| uid =~ /^(note|discussion|answer)-(\d+)$/ }
+      fail "Parameter 'note_uids' need to be an Array of Note, Answer, or Discussion uids"
+    end
 
     items = unsafe_params[:items]
-    fail "Items need to be an array of objects with id and type (one of App, Comparison, Job, or UserFile)" unless items.is_a?(Array) && items.all? { |item| item[:id].is_a?(Numeric) && item[:type].is_a?(String) && %w(App Comparison Job UserFile).include?(item[:type]) }
+    unless items.is_a?(Array) && items.all? { |item| item[:id].is_a?(Numeric) && item[:type].is_a?(String) && %w(App Comparison Job UserFile).include?(item[:type]) }
+      fail "Items need to be an array of objects with id and type (one of App, Comparison, Job, or UserFile)"
+    end
 
     notes_added = {}
     items_added = {}
+
     Note.transaction do
       note_uids.each do |note_uid|
         note_item = item_from_uid(note_uid)
+
         next unless !note_item.nil? && note_item.editable_by?(@context)
+
         items.each do |item|
-          item[:type] = item[:type].present? ? item[:type] : type_from_classname(item[:className])
+          item[:type] = if item[:type].blank?
+            item[:className] == "file" ? "UserFile" : item[:className].capitalize
+          else
+            item[:type]
+          end
+
           note_item.attachments.find_or_create_by(item_id: item[:id], item_type: item[:type])
           items_added["#{item[:type]}-#{item[:id]}"] = true
         end
+
         notes_added[note_uid] = true
         note_item.save
       end
@@ -1503,6 +1524,51 @@ class ApiController < ApplicationController
 
   protected
 
+  # Checks if scope is valid and space is accessible by a user.
+  # @raise [ApiError] If scope is invalid or space isn't accessible by a user.
+  def check_space
+    @scope = params[:scope] || "public"
+
+    return if @scope == "public"
+
+    unless @scope.is_a?(String)
+      fail "The optional 'scope' input must be a string (either 'public' or 'space-xxxx')"
+    end
+
+    # Check that scope is a valid scope:
+    # - must be of the form space-xxxx
+    # - must exist in the Space table
+    # - must be accessible by context
+    space_id = @scope[/^space-(\d+)$/, 1]
+
+    fail "Invalid scope (only 'public' or 'space-xxxx' are accepted)" unless space_id
+
+    space = Space.active.find_by(id: space_id)
+
+    fail "Invalid space" unless space&.accessible_by?(@context)
+  end
+
+  # Checks if uids is an array of strings.
+  # @raise [ApiError] If uids is not an array of strings.
+  def check_uids
+    @uids = params[:uids]
+
+    if !@uids.is_a?(Array) || @uids.any? { |uid| !uid.is_a?(String) }
+      fail "The input 'uids' must be an array of object ids (strings)"
+    end
+  end
+
+  # Checks if items are publishable by a user.
+  # @raise [ApiError] If any item isn't publishable by a user.
+  def check_items
+    @items = @uids.uniq.map { |uid| item_from_uid(uid) }.
+      reject { |item| item.public? || item.scope == @scope }
+
+    if @items.any? { |item| !item.publishable_by?(@context, @scope) }
+      fail "Unpublishable items detected"
+    end
+  end
+
   def input_spec_preparer
     @input_spec_preparer ||= InputSpecPreparer.new(@context)
   end
@@ -1561,4 +1627,5 @@ class ApiController < ApplicationController
       fail "Asset path should be a non-empty String of size less than 4096"
     end
   end
+  # rubocop:enable Style/SignalException
 end

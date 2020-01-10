@@ -186,6 +186,22 @@ class Space < ActiveRecord::Base
     project.present? && member.lead_or_admin_or_contributor?
   end
 
+  # Determines a space member by its user id.
+  # @param id [Integer] - user id.
+  # @return [SpaceMembership] - an Object with a user data, who is space member.
+  def member(id)
+    space_memberships.find_by(user_id: id)
+  end
+
+  # Determine, whether a space provide a contributor (non-viewer) permission for user actions.
+  # @param context [Context] - a context user
+  # @return [true or false] - depends upon user'r role, context accessibility to space and
+  #   possibility to move space content.
+  def contributor_permission(context)
+    accessible_by?(context) &&
+      SpaceMembershipPolicy.can_move_content?(self, member(context.user.id))
+  end
+
   def describe_fields
     %w(title description state)
   end
@@ -271,10 +287,14 @@ class Space < ActiveRecord::Base
     ["private"]
   end
 
+  # Determine, whether an object is accessible by context user in space.
+  #   A space provides a contributor (non-viewer) permission for user actions,
+  #   for ex.: to publish to space, to delete a not owned file, etc.
+  # @param context [Context] - project id or nil.
+  # @return [true or false] - depends upon user'r role and project value
   def accessible_by?(context)
     return if context.guest?
-
-    raise unless context.user_id.present?
+    raise if context.user_id.blank?
 
     return true if context.review_space_admin? && reviewer?
     return true if context.review_space_admin? && verified?
@@ -334,7 +354,7 @@ class Space < ActiveRecord::Base
 
   def content_counters(user_id)
     notes = Note.real_notes.accessible_by_space(self).count
-    files = UserFile.real_files.accessible_by_space(self).count
+    files = UserFile.real_files.not_removing.accessible_by_space(self).count
     apps = App.accessible_by_space(self).count
     jobs = Job.accessible_by_space(self).count
     comparisons = Comparison.accessible_by_space(self).count

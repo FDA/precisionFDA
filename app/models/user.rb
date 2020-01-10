@@ -44,7 +44,6 @@ class User < ApplicationRecord
 
   PRODUCTION_ADMINS = %w(
     elaine.johanson
-    ruth.bandler
     john.didion
     ezekiel.maier.2
     holly.stephens
@@ -89,7 +88,6 @@ class User < ApplicationRecord
     ezekiel.maier.2
     heike.sichtig
     min.yi
-    ruth.bandler
     sharon.liang
     yi.yan
     you.li
@@ -110,6 +108,12 @@ class User < ApplicationRecord
   end
 
   SITE_ADMIN_ORGS = ENV["DNANEXUS_BACKEND"] == "production" ? [] : NON_PRODUCTION_ADMIN_ORGS
+
+  SYNC_EXCLUDED_FILE_STATES = [
+    UserFile::STATE_CLOSED,
+    UserFile::STATE_PUBLISHING,
+    UserFile::STATE_REMOVING,
+  ].freeze
 
   has_many :uploaded_files, class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'
   has_many :user_files
@@ -327,10 +331,16 @@ class User < ApplicationRecord
     user = User.challenge_bot
     token = CHALLENGE_BOT_TOKEN
     file = user.uploaded_files.find(file_id) # Re-check file id
-    if file.state != "closed"
-      result = DNAnexusAPI.new(token).call("system", "describeDataObjects", objects: [file.dxid])["results"][0]
-      sync_file_state(result, file, user)
-    end
+
+    return if SYNC_EXCLUDED_FILE_STATES.include?(file.state)
+
+    result = DNAnexusAPI.new(token).call(
+      "system",
+      "describeDataObjects",
+      objects: [file.dxid],
+    )["results"][0]
+
+    sync_file_state(result, file, user)
   end
 
   def self.sync_file!(context, file_id)
@@ -340,20 +350,33 @@ class User < ApplicationRecord
     file = user.uploaded_files.find(file_id) # Re-check file id
     token = context.token
 
-    if file.state != "closed"
-      result = DNAnexusAPI.new(token).call("system", "describeDataObjects", objects: [file.dxid])["results"][0]
-      sync_file_state(result, file, user)
-    end
+    return if SYNC_EXCLUDED_FILE_STATES.include?(file.state)
+
+    result = DNAnexusAPI.new(token).call(
+      "system",
+      "describeDataObjects",
+      objects: [file.dxid],
+    )["results"][0]
+
+    sync_file_state(result, file, user)
   end
 
   def self.sync_files!(context)
     Auditor.suppress do
       return if context.guest?
+
       user = context.user
       token = context.token
+
       # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-      user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
-        DNAnexusAPI.new(token).call("system", "describeDataObjects", objects: files.map(&:dxid))["results"].each_with_index do |result, i|
+      user.uploaded_files.
+        where.not(state: SYNC_EXCLUDED_FILE_STATES).
+        all.each_slice(1000) do |files|
+        DNAnexusAPI.new(token).call(
+          "system",
+          "describeDataObjects",
+          objects: files.map(&:dxid),
+        )["results"].each_with_index do |result, i|
           sync_file_state(result, files[i], user)
         end
       end
@@ -364,9 +387,14 @@ class User < ApplicationRecord
     return if context.guest?
     user = User.challenge_bot
     token = CHALLENGE_BOT_TOKEN
+
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-    user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
-      DNAnexusAPI.new(token).call("system", "describeDataObjects", objects: files.map(&:dxid))["results"].each_with_index do |result, i|
+    user.uploaded_files.where.not(state: SYNC_EXCLUDED_FILE_STATES).all.each_slice(1000) do |files|
+      DNAnexusAPI.new(token).call(
+        "system",
+        "describeDataObjects",
+        objects: files.map(&:dxid),
+      )["results"].each_with_index do |result, i|
         sync_file_state(result, files[i], user)
       end
     end
@@ -374,21 +402,29 @@ class User < ApplicationRecord
 
   def self.sync_asset!(context, file_id)
     return if context.guest?
+
     user = context.user
     token = context.token
     file = user.assets.find(file_id) # Re-check file id
-    if file.state != "closed"
-      result = DNAnexusAPI.new(token).call("system", "describeDataObjects", objects: [file.dxid])["results"][0]
-      sync_file_state(result, file, user)
-    end
+
+    return if SYNC_EXCLUDED_FILE_STATES.include?(file.state)
+
+    result = DNAnexusAPI.new(token).call(
+      "system",
+      "describeDataObjects",
+      objects: [file.dxid],
+    )["results"][0]
+
+    sync_file_state(result, file, user)
   end
 
   def self.sync_assets!(context)
     return if context.guest?
     user = context.user
     token = context.token
+
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-    user.assets.where.not(state: "closed").all.each_slice(1000) do |files|
+    user.assets.where.not(state: SYNC_EXCLUDED_FILE_STATES).all.each_slice(1000) do |files|
       DNAnexusAPI.new(token).call("system", "describeDataObjects", objects: files.map(&:dxid))["results"].each_with_index do |result, i|
         sync_file_state(result, files[i], user)
       end

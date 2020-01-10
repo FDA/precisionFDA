@@ -2,7 +2,6 @@ class MainController < ApplicationController
   skip_before_action :require_login, only: %i(
     index
     about
-    exception_test
     login
     return_from_login
     request_access
@@ -14,7 +13,7 @@ class MainController < ApplicationController
     news
     mislabeling
   )
-  skip_before_action :require_login, only: %i(track mislabeling bco_appathon georgetown)
+  skip_before_action :require_login, only: %i(track ae_anomaly_detection)
   before_action :require_login_or_guest, only: %i(track)
   before_action :init_countries, only: %i(request_access create_request_access)
 
@@ -61,7 +60,7 @@ class MainController < ApplicationController
           end
         end
 
-        login_tasks_processor = container.resolve("orgs.login_tasks_processor")
+        login_tasks_processor = DIContainer.resolve("orgs.login_tasks_processor")
         login_tasks_processor.call(@context.user)
       else
         @tutorials = [
@@ -125,6 +124,7 @@ class MainController < ApplicationController
     end
 
     Session.where(key: session.id).delete_all
+    DIContainer.shutdown
     reset_session
     flash[:success] = "You were successfully logged out of precisionFDA"
     redirect_to root_url
@@ -196,10 +196,6 @@ class MainController < ApplicationController
         height: "250px"
       }
     ]
-  end
-
-  def exception_test
-    raise "This is an intentionally raised exception for testing email notification. Please contact Evan with any concerns"
   end
 
   def login
@@ -497,11 +493,7 @@ class MainController < ApplicationController
     @graph = GraphDecorator.build(@context, @item)
   end
 
-  def mislabeling; end
-
-  def bco_appathon; end
-
-  def georgetown; end
+  def ae_anomaly_detection; end
 
   def tokify
     @key = generate_auth_key

@@ -129,7 +129,7 @@ class FilesListView
 #
 #########################################################
 
-FilesController = Paloma.controller('Files',
+FilesController = Paloma.controller('Files', {
   index: ->
     $container = $("body main")
     viewModel = new FilesListView @params.filesIdsWithDescription,
@@ -143,10 +143,18 @@ FilesController = Paloma.controller('Files',
     $container.on('change', '[name="files[selected][]"]', (e) ->
       viewModel.updateSelectedNodes(e)
     )
+    $container.on('change', '[name="files[select_all]"]', (e) ->
+      checked = e.currentTarget.checked
+      $('[name="files[selected][]"]').each((i, checkbox) ->
+        checkbox.checked = checked if not checkbox.disabled
+        $(checkbox).trigger('change')
+        return true
+      )
+    )
     $container.on('show.bs.modal', '#rename-modal-js', (e) ->
       viewModel.fillModal()
     )
     $container.on('shown.bs.modal', '#rename-modal-js', (e) ->
       viewModel.focusInput()
     )
-)
+})
