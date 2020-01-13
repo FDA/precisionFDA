@@ -171,7 +171,7 @@ AdminProvisionController = Paloma.controller('Admin/Invitations', {
     $('#invitations_data_grid').on 'change', 'tbody td', (e) ->
       if e.target.classList.contains('select-user')
         invCount = viewModel.selectedInvitations().length + viewModel.invitations().length
-        disabled = invCount < MAX_USERS
+        disabled = invCount >= MAX_USERS
 
         $('input.select-user').each((index, checkbox) ->
           checkbox.setAttribute('disabled', true) if disabled and !checkbox.checked
