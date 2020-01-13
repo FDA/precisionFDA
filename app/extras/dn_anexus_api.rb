@@ -2,6 +2,7 @@
 class DNAnexusAPI
   include DXClient::Constants
   include DXClient::Endpoints::Apps
+  include DXClient::Endpoints::Applets
   include DXClient::Endpoints::Files
   include DXClient::Endpoints::Organizations
   include DXClient::Endpoints::Projects

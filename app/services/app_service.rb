@@ -1,27 +1,35 @@
+# Responsible for creating new apps and applets.
 class AppService
   class << self
+    # Creates new app on the platform and stores it in the database.
+    # @param context [Context] Application context.
+    # @param options [Hash] Options to create app with.
     def create_app(context, options)
       new(context).create_app(options)
     end
   end
 
+  # Constructor.
+  # @param context [Context] Application context.
   def initialize(context)
     @context = context
   end
 
+  # Creates new app on the platform and stores it in database.
+  # @param opts [Hash] Options to create app with.
+  # @return [App] Created app.
   def create_app(opts)
     app = nil
 
-    assets =
-      Asset.accessible_by(context).
-        where(
-          state: Asset::STATE_CLOSED,
-          uid: opts[:ordered_assets]
-        )
+    assets = Asset.accessible_by(context).
+      where(
+        state: Asset::STATE_CLOSED,
+        uid: opts[:ordered_assets],
+      )
 
     App.transaction do
       app_series = create_app_series(opts[:name])
-
+      release = opts.fetch(:release, UBUNTU_16)
       revision = app_series.latest_revision_app.try(:revision).to_i + 1
 
       applet_dxid = new_applet(
@@ -32,8 +40,9 @@ class AppService
           :code,
           :instance_type,
           :packages,
-          :internet_access
-        )
+          :internet_access,
+        ),
+        release,
       )
 
       app_dxid = new_app(
@@ -41,15 +50,15 @@ class AppService
           :name,
           :title,
           :internet_access,
-          :readme
+          :readme,
         ).merge(
           applet_dxid: applet_dxid,
           asset_dxids: assets.map(&:dxid),
-          revision: revision
-        )
+          revision: revision,
+        ),
       )
 
-      api.call(project, "removeObjects", { objects: [applet_dxid] } )
+      api.project_remove_objects(project, [applet_dxid])
 
       app = App.create!(
         dxid: app_dxid,
@@ -67,7 +76,8 @@ class AppService
         ordered_assets: opts[:ordered_assets],
         packages: opts[:packages],
         code: opts[:code].strip,
-        assets: assets
+        assets: assets,
+        release: release,
       )
 
       app_series.update!(latest_revision_app_id: app.id)
@@ -78,26 +88,32 @@ class AppService
     app
   end
 
-  def new_applet(opts)
-    api.call("applet", "new", {
-      project: project,
-      inputSpec: opts[:input_spec].map{ |spec| spec.except("default", "choices") },
+  # Creates new applet on the platform.
+  # @param opts [Hash] Opts to create hash with.
+  # @return [String] Created applet id.
+  def new_applet(opts, release)
+    api.applet_new(
+      project,
+      inputSpec: opts[:input_spec].map { |spec| spec.except("default", "choices") },
       outputSpec: opts[:output_spec],
       runSpec: {
         code: code_remap(opts[:code].strip),
         interpreter: "bash",
         systemRequirements: {
-          "*" => { instanceType: Job::INSTANCE_TYPES[opts[:instance_type]] }
+          "*" => { instanceType: Job::INSTANCE_TYPES[opts[:instance_type]] },
         },
         distribution: "Ubuntu",
-        release: "14.04",
-        execDepends: opts[:packages].map { |package| { name: package } }
+        release: release,
+        execDepends: opts[:packages].map { |package| { name: package } },
       },
       dxapi: "1.0.0",
-      access: opts[:internet_access] ? { network: ["*"] } : {}
-    })["id"]
+      access: opts[:internet_access] ? { network: ["*"] } : {},
+    )["id"]
   end
 
+  # Creates new app on the platform.
+  # @param opts [Hash] Options to create app with.
+  # @return [String] Created app id.
   def new_app(opts)
     api.app_new(
       applet: opts[:applet_dxid],
@@ -110,42 +126,53 @@ class AppService
       details: { ordered_assets: opts[:asset_dxids] },
       openSource: false,
       billTo: bill_to,
-      access: opts[:internet_access] ? { network: ["*"] } : {}
+      access: opts[:internet_access] ? { network: ["*"] } : {},
     )["id"]
   end
 
   private
 
+  # Finds or creates new app series.
+  # @param app_name [String] Name of app series to create with or to find by.
+  # @return [AppSeries] Found or created app series.
   def create_app_series(app_name)
     app_series_dxid = AppSeries.construct_dxid(context.username, app_name)
 
     AppSeries.create_with(
       name: app_name,
       user: context.user,
-      scope: "private"
+      scope: "private",
     ).find_or_create_by(
-      dxid: app_series_dxid
+      dxid: app_series_dxid,
     )
   end
 
+  # Returns user's billTo.
+  # @return [String] User's billTo.
   def bill_to
     context.user.billto
   end
 
+  # Returns user's private files project.
+  # @return [String] User private files project's dxid.
   def project
     context.user.private_files_project
   end
 
+  # Remaps the code.
+  # @param code [String] Code to remap.
   def code_remap(code)
-    <<-END_OF_CODE
-dx cat #{APPKIT_TGZ} | tar -z -x -C / --no-same-owner --no-same-permissions -f -
-source /usr/lib/app-prologue
-#{code}
-{ set +x; } 2>/dev/null
-source /usr/lib/app-epilogue
-END_OF_CODE
+    <<~END_OF_CODE
+      dx cat #{APPKIT_TGZ} | tar -z -x -C / --no-same-owner --no-same-permissions -f -
+      source /usr/lib/app-prologue
+      #{code}
+      { set +x; } 2>/dev/null
+      source /usr/lib/app-epilogue
+    END_OF_CODE
   end
 
+  # Returns user API instance.
+  # @return [DNAnexusAPI] User API instance.
   def api
     @api ||= DNAnexusAPI.new(context.token)
   end

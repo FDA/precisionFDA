@@ -1,4 +1,5 @@
 module DXClient
+  # Provides files-related API calls.
   module Endpoints
     # Contains files related methods.
     module Files

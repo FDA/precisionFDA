@@ -338,4 +338,44 @@ describe DNAnexusAPI do
       let(:expected_payload) { payload }
     end
   end
+
+  describe "#project_remove_objects" do
+    it_behaves_like "call" do
+      let(:project) { "project" }
+      let(:objects) { %w(some-objects) }
+
+      let(:client_method) { :project_remove_objects }
+      let(:client_method_args) { [project, objects, payload] }
+
+      let(:expected_subject) { project }
+      let(:expected_method) { "removeObjects" }
+      let(:expected_payload) { payload.merge(objects: objects) }
+    end
+  end
+
+  describe "#applet_new" do
+    it_behaves_like "call" do
+      let(:project) { "project" }
+
+      let(:client_method) { :applet_new }
+      let(:client_method_args) { [project, payload] }
+
+      let(:expected_subject) { "applet" }
+      let(:expected_method) { "new" }
+      let(:expected_payload) { payload.merge(project: project) }
+    end
+  end
+
+  describe "#file_download" do
+    it_behaves_like "call" do
+      let(:file) { "some-file" }
+
+      let(:client_method) { :file_download }
+      let(:client_method_args) { [file, payload] }
+
+      let(:expected_subject) { file }
+      let(:expected_method) { "download" }
+      let(:expected_payload) { payload }
+    end
+  end
 end
