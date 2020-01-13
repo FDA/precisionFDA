@@ -11,11 +11,13 @@ module Admin
                   only: %i(search provision browse),
                   unless: -> { request.xhr? }
 
+    # GET
     # Lists invitations.
     def index
       js countries: Country.pluck(:name, :id)
     end
 
+    # GET
     # Searches invitations.
     def search
       query = unsafe_params[:query]
@@ -24,6 +26,8 @@ module Admin
       render_invitations(query, exclude)
     end
 
+    # POST
+    # Responsible for users provision.
     def provision
       results = {}
 
@@ -46,12 +50,17 @@ module Admin
       render json: results
     end
 
+    # GET
+    # Renders list of invitations for browsing.
     def browse
       render_invitations(nil, unsafe_params[:exclude])
     end
 
     private
 
+    # Searches and renders invitations.
+    # @param query [String] Query to search invitations.
+    # @param exclude [Array<Integer>] Invitations ids to exclude from search.
     def render_invitations(query, exclude)
       invitations = InvitationSearcher.call(query, exclude)
       serialized = invitations.map { |invitation| InvitationSerializer.call(invitation) }
@@ -59,10 +68,15 @@ module Admin
       render json: serialized
     end
 
+    # Redirects to invitations index page.
     def redirect_to_list
       redirect_to admin_invitations_path
     end
 
+    # Provisions user.
+    # @param invitation [Invitation] Invitation to use for provision.
+    # @param opts [Hash] Options to use for provision.
+    # @return [Hash] Hash containing array of errors if any.
     def provision_user(invitation, opts)
       result = { errors: errors(opts) }
 
@@ -73,10 +87,15 @@ module Admin
       result
     end
 
+    # Validates provided opts.
+    # @param opts [Hash] Options to validate.
     def errors(opts)
       add_errors(opts.slice(*ERROR_KEYS))
     end
 
+    # Performs user provisioning.
+    # @param invitation [Invitation] Invitation to use for provision.
+    # @param opts [Hash] Options to use for provision.
     def save_user(invitation, opts)
       service = DIContainer.resolve("orgs.provisioner")
       user_params = opts.merge(singular: true)
