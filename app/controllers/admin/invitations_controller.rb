@@ -17,7 +17,7 @@ module Admin
       js countries: Country.pluck(:name, :id)
     end
 
-    # GET
+    # POST
     # Searches invitations.
     def search
       query = unsafe_params[:query]
@@ -50,7 +50,7 @@ module Admin
       render json: results
     end
 
-    # GET
+    # POST
     # Renders list of invitations for browsing.
     def browse
       render_invitations(nil, unsafe_params[:exclude])
