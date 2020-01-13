@@ -162,6 +162,9 @@ class PageInvitationsView
       return disabled
     )
 
+    @gridModal.on 'hidden.bs.modal', () =>
+      @selectedInvitations([])
+
 AdminProvisionController = Paloma.controller('Admin/Invitations', {
   index: ->
     $container = $("body main")
