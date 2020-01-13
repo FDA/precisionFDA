@@ -14,9 +14,14 @@
     />
   </div>
   <div class="invitations-search-browse">
-    <button class="btn btn-success btn-lg" data-bind="click: showGridModal">Browse</button>
+    <button class="btn btn-success btn-lg" data-bind="click: showGridModal, disable: selectionDisabled">Browse</button>
     <%= render "admin/invitations/grid_modal" %>
   </div>
+</div>
+
+<div class="alert alert-info invitations-search-info">
+  <i class="fa fa-info-circle"></i>
+  <span>Find users with search field or browse from user list. You can handle not more than <b>five</b> users at the same time.</span>
 </div>
 
 <!-- ko if: invitations().length -->
