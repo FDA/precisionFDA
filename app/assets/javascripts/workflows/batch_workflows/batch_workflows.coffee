@@ -11,7 +11,7 @@ class SelectorModel
   openModal: (input) =>
     @editingInput(input)
     @objectSelector.open()
-  getListedFiles: () ->
+  getListedFiles: () =>
     params = {
       states: ["closed"],
       scopes: @accessibleScope,
@@ -24,25 +24,24 @@ class SelectorModel
     }
     $.post('/api/list_files', params).then (objects) => @listedFiles(objects)
 
-  constructor: (scope) ->
+  constructor: (@accessibleScope) ->
     @editingInput = ko.observable(null)
     @listedFiles = ko.observableArray([])
-    @accessibleScope = scope
     @objectSelector = new Precision.models.SelectorModel({
       title: 'Select default file for field',
       selectionType: 'radio',
       selectableClasses: ['file'],
       studies: [],
       listRelatedParams: {
-        classes: ['file']
+        classes: ['file'],
+        scopes: @accessibleScope
       },
       listModelConfigs: [
         {
-          className: 'file'
-          name: 'Files'
-          apiEndpoint: 'list_files'
+          className: 'file',
+          name: 'Files',
+          apiEndpoint: 'list_files',
           listedFiles: @listedFiles()
-
         }
       ],
       onSave: (selected) =>
@@ -100,8 +99,7 @@ class InputModel
     @valid(true)
 
   constructor: (input) ->
-    @id = input.uniq_input_name
-    @stageId = input.uniq_input_name.split('.')[0]
+    @id = "#{input.stageName}_#{input.name}"
     @type = input.class
     @name = input.name
     @uniq_input_name = input.uniq_input_name
@@ -568,7 +566,7 @@ class BatchWorkflowPageModel
 
   selectBatchOne: (input) =>
     @inputs().forEach( (_input) ->
-      if _input.type != input.type or _input.stageId != input.stageId
+      if _input.type != input.type
         _input.disabledBatchTwo(true)
       else
         _input.disabledBatchTwo(false)
