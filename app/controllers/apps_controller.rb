@@ -141,7 +141,8 @@ class AppsController < ApplicationController
 
   def js_info(app, challenges)
     {
-      app: (app.slice(:id, :dxid, :title, :readme, :revision, :dev_group).merge(link: app_path(app)) rescue nil),
+      app: (app.slice(:id, :dxid, :title, :readme, :revision, :dev_group, :release).merge(link: app_path(app)) rescue nil),
+      ubuntu_releases: UBUNTU_RELEASES,
       challenges: challenges.collect do |challenge|
         {
           id: challenge.id,
@@ -179,12 +180,15 @@ class AppsController < ApplicationController
         redirect_to edit_app_path(@app.app_series.latest_revision_app)
         return
       else
-        js app: @app.slice(:dxid, :name, :title, :version, :revision, :readme, :spec, :internal)
+        js app: @app.slice(:dxid, :name, :title, :version, :revision, :readme, :spec,
+                           :internal, :release),
+           ubuntu_releases: UBUNTU_RELEASES
       end
     end
   end
 
   def new
+    js ubuntu_releases: UBUNTU_RELEASES, app: { release: UBUNTU_16 }
   end
 
   def batch_app
@@ -239,7 +243,9 @@ class AppsController < ApplicationController
       redirect_to apps_path
       return
     else
-      js app: @app.slice(:dxid, :name, :title, :version, :revision, :readme, :spec, :internal)
+      js app: @app.slice(:dxid, :name, :title, :version, :revision, :readme, :spec, :internal,
+                         :release),
+         ubuntu_releases: UBUNTU_RELEASES
     end
   end
 

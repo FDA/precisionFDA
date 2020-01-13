@@ -57,6 +57,15 @@ module DXClient
       def project_describe(project_dxid, opts = {})
         call(project_dxid, "describe", opts)
       end
+
+      # Removes specified objects from project.
+      # @see https://documentation.dnanexus.com/developer/api/data-containers/folders-and-deletion#api-method-class-xxxx-removeobjects
+      # @param project_dxid [String] Project to remove objects from.
+      # @param objects [Array<String>] Objects to remove from project.
+      # @return [Hash]
+      def project_remove_objects(project_dxid, objects, opts = {})
+        call(project_dxid, "removeObjects", opts.merge(objects: objects))
+      end
     end
   end
 end
