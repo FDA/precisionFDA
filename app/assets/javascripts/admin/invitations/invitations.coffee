@@ -173,6 +173,10 @@ AdminProvisionController = Paloma.controller('Admin/Invitations', {
 
     $('#invitations_data_grid').on 'change', 'tbody td', (e) ->
       if e.target.classList.contains('select-user')
+        idx = viewModel.invitationsDataGrid.cell(this).index().row
+        data = viewModel.invitationsDataGrid.cells( idx, '' ).render( 'display' )
+        viewModel.selectUser(e, data.data()[idx])
+
         invCount = viewModel.selectedInvitations().length + viewModel.invitations().length
         disabled = invCount >= MAX_USERS
 
@@ -181,8 +185,5 @@ AdminProvisionController = Paloma.controller('Admin/Invitations', {
           checkbox.removeAttribute('disabled') if !disabled
         )
 
-        idx = viewModel.invitationsDataGrid.cell(this).index().row
-        data = viewModel.invitationsDataGrid.cells( idx, '' ).render( 'display' )
-        viewModel.selectUser(e, data.data()[idx])
       return false
 })
