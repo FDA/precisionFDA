@@ -1,17 +1,23 @@
 @import "_common"
 
+$invitations-search-width: 900px
+
 .pfda-controller-invitations.pfda-action-index
   .invitations-search
-    float: left
     width: 100%
     clear: both
+    display: table
     &-input
-      max-width: 900px
+      max-width: $invitations-search-width
       width: 100%
       float: left
       margin-right: 10px
     &-browse
       float: left
+    &-info
+      max-width: $invitations-search-width
+      margin: 16px
+      margin-top: 0px
   .invitations
     &-original-values
       td

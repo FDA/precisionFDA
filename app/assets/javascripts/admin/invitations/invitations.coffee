@@ -1,3 +1,5 @@
+MAX_USERS = 5
+
 class InvitationModel
   constructor: (@original) ->
     @id = @original.id
@@ -154,6 +156,12 @@ class PageInvitationsView
       invitation = _invitation.length and _invitation[0]
       @invitations.push(new InvitationModel(invitation, @countries))
 
+    @selectionDisabled = ko.computed(() =>
+      disabled = @invitations().length >= MAX_USERS
+      @search.disabled(disabled)
+      return disabled
+    )
+
 AdminProvisionController = Paloma.controller('Admin/Invitations', {
   index: ->
     $container = $("body main")
@@ -162,7 +170,16 @@ AdminProvisionController = Paloma.controller('Admin/Invitations', {
 
     $('#invitations_data_grid').on 'change', 'tbody td', (e) ->
       if e.target.classList.contains('select-user')
+        invCount = viewModel.selectedInvitations().length + viewModel.invitations().length
+        disabled = invCount < MAX_USERS
+
+        $('input.select-user').each((index, checkbox) ->
+          checkbox.setAttribute('disabled', true) if disabled and !checkbox.checked
+          checkbox.removeAttribute('disabled') if !disabled
+        )
+
         idx = viewModel.invitationsDataGrid.cell(this).index().row
         data = viewModel.invitationsDataGrid.cells( idx, '' ).render( 'display' )
         viewModel.selectUser(e, data.data()[idx])
+      return false
 })
