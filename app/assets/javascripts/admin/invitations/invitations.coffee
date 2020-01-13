@@ -15,6 +15,7 @@ class InvitationModel
     @phone = ko.observable(@original.phone)
     @duns = ko.observable(@original.duns)
     @errors = ko.observableArray([])
+    @success = ko.observable(false)
 
 class PageInvitationsView
   showGridModal: () ->
@@ -35,17 +36,20 @@ class PageInvitationsView
 
   handleResponse: (data) =>
     noErrors = true
-    @invitations().forEach((invitation) ->
+    @undoneInvitations().forEach((invitation) ->
       errors = data[invitation.id].errors
+      console.log 'errors', errors
       invitation.errors(errors)
+      invitation.success(errors.length == 0)
       noErrors = false if errors.length
     )
+    console.log 'noErrors', noErrors
     return noErrors
 
   provisionUsers: () ->
     $('#disable-screen-modal').modal('show')
     data = {}
-    @invitations().forEach((invitation) ->
+    @undoneInvitations().forEach((invitation) ->
       data[invitation.id] = {
         first_name: invitation.firstName(),
         last_name: invitation.lastName(),
@@ -92,6 +96,9 @@ class PageInvitationsView
     @invitationGridLoading = ko.observable(false)
     @selectedInvitations = ko.observableArray([])
     @invitations = ko.observableArray([])
+    @undoneInvitations = ko.computed(() =>
+      @invitations().filter((invitation) -> !invitation.success())
+    )
     @invitationsExclude = ko.computed(() =>
       @invitations().map((invitation) -> invitation.id)
     )
