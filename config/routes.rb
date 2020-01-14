@@ -50,18 +50,6 @@ Rails.application.routes.draw do
       get "org_action_requests", to: "org_requests#index"
       get "deactivated_users", to: "users#deactivated_users"
       get "resend_activation_email", to: "users#resend_activation_email"
-      get "edit_user", to: "users#edit"
-      get "update_user", to: "users#update"
-
-      resources :apps, only: [], param: :uid do
-        collection do
-          post :set_comparison_app
-          post :remove_from_comparators
-          post :add_to_comparators
-        end
-      end
-
-      get "comparator_settings", to: "comparator_settings#index"
       post "comparison_app", to: "apps#comparison_app"
       post "restore_comparison_app", to: "apps#restore_comparison_app"
 
