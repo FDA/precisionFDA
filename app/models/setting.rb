@@ -13,7 +13,6 @@ class Setting < ApplicationRecord
 
   USAGE_METRICS_CUSTOM_RANGE_KEY = "usage_metrics_custom_range".freeze
   REVIEW_APP_DEVELOPERS_ORG_KEY = "review_app_org_key".freeze
-  COMPARISON_APP = "comparison_app".freeze
 
   serialize :value, JSON
 
@@ -63,12 +62,6 @@ class Setting < ApplicationRecord
 
       OrgService::DevelopersOrg.update_members(dxorg)
       dxorg
-    end
-
-    # Returns default comparator app.
-    # @return [String] Comparison app's dxid.
-    def comparison_app
-      self[COMPARISON_APP] || DEFAULT_COMPARISON_APP
     end
   end
 end
