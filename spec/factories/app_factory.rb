@@ -27,5 +27,6 @@ FactoryBot.define do
     scope { "private" }
     association :app_series
     sequence(:dxid) { |n| "app-#{SecureRandom.hex(12)}" }
+    release { UBUNTU_14 }
   end
 end
