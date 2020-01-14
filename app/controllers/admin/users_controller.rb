@@ -3,11 +3,15 @@ module Admin
   class UsersController < BaseController
     skip_before_action  :check_admin, only: :toggle_activate_user
 
+    # GET
+    # Renders users.
     def index
       @users = User.all
       @users_grid = initialize_grid(@users)
     end
 
+    # POST
+    # Toggles user's active status.
     def toggle_activate_user
       user = User.find_by(dxuser: unsafe_params[:dxuser])
 
@@ -59,6 +63,8 @@ module Admin
       end
     end
 
+    # GET
+    # Renders deactivated users.
     def deactivated_users
       @users = User.deactivated
       @users_grid = initialize_grid(@users)
@@ -69,6 +75,8 @@ module Admin
       end
     end
 
+    # GET
+    # Renders pending users.
     def pending_users
       @users = User.where(private_files_project: nil)
 
@@ -76,6 +84,8 @@ module Admin
       render "admin/users/pending"
     end
 
+    # POST
+    # Sends activation email.
     def resend_activation_email
       user = User.find_by(dxuser: unsafe_params[:dxuser])
 
@@ -92,6 +102,8 @@ module Admin
       end
     end
 
+    # POST
+    # Resets 2FA.
     def reset_2fa
       user = User.find_by(dxuser: unsafe_params[:dxuser])
 
@@ -115,6 +127,8 @@ module Admin
       end
     end
 
+    # POST
+    # Unlocks user.
     def unlock_user
       user = User.find_by(dxuser: unsafe_params[:dxuser])
 
@@ -140,6 +154,8 @@ module Admin
       end
     end
 
+    # GET
+    # Exports active users to CSV.
     def active
       date_string = Time.zone.now.strftime("%Y-%m-%d")
       csv_data = UsersCsvExporter.export_active_users
