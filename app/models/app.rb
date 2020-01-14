@@ -43,16 +43,13 @@ class App < ApplicationRecord
 
   VALID_IO_CLASSES = ["file", "string", "boolean", "int", "float"]
 
-  SCOPE_PUBLIC = "public".freeze
-  SCOPE_PRIVATE = "private".freeze
-
   def to_param
     uid
   end
 
   # Scopes of files when an app is running out of spaces.
   def permitted_scopes
-    [SCOPE_PRIVATE, SCOPE_PUBLIC]
+    %w(private public)
   end
 
   # Scopes of files that can be used to run an app.
@@ -106,7 +103,7 @@ class App < ApplicationRecord
     version.present?
   end
 
-  def publishable_by?(context, scope_to_publish_to = SCOPE_PUBLIC)
+  def publishable_by?(context, scope_to_publish_to = "public")
     # App series must be private, otherwise must match scope
     core_publishable_by?(context, scope_to_publish_to) && private? && (app_series.private? || (app_series.scope == scope_to_publish_to))
   end

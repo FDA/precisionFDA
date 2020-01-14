@@ -125,16 +125,6 @@
       <span class="fa fa-flip-vertical fa-sitemap"></span> Track
     <% end %>
   </div>
-
-  <% if show_swap_comparison_app_button?(@context, @app) %>
-    <div class="btn-group">
-      <button class="btn btn-default" data-toggle="modal" data-target="#set_comparison_app_modal">
-        Set this app as comparison default
-      </button>
-      <%= render partial: "apps/set_comparison_app_modal", locals: { app_id: @app.id } %>
-    </div>
-  <% end %>
-
   <% if @app.verified? %>
     <span>
       <span class="fa fa-check-circle" style="padding-left: 30px; color: #1F70B5"></span>
