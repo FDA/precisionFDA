@@ -166,25 +166,6 @@ module Admin
                 type: "text/csv"
     end
 
-    def edit
-      @user = User.find_by(dxuser: unsafe_params[:dxuser])
-    end
-
-    def update
-      @user = User.find_by(dxuser: unsafe_params[:dxuser])
-    end
-
-    # Selects all users, according search string for the given org.
-    # Users selected are not in 'pending' state.
-    # @param search [String] - search string
-    # @param org [String] - org handle string
-    # @return users [Array of User objects] - an array of users, searched by search string match.
-    def all_users
-      users = User.org_members(params[:search], params[:org])
-
-      render json: { users: users }
-    end
-
     def user_org_admin?(user)
       current_user.id == user.org.admin_id
     end
