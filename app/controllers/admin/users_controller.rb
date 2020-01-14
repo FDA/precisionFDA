@@ -166,6 +166,11 @@ module Admin
                 type: "text/csv"
     end
 
+    private
+
+    # Checks if current user is organization admin.
+    # @param user [User] User to check.
+    # @return [Boolean] Returns true if current user is organization admin, false otherwise.
     def user_org_admin?(user)
       current_user.id == user.org.admin_id
     end
