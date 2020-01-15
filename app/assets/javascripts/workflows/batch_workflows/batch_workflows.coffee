@@ -313,8 +313,6 @@ extendBatchInput = () ->
     _sortDirection = if @sortCheckedDirection() == ASC then DESC else ASC
     @sortCheckedDirection(_sortDirection)
   ### SORT ###
-  # @searchValue = ko.observable(null)
-  # @searchFlagsValue = ko.observable('ig')
 
   @isTreeLoading = ko.observable(false)
 
@@ -345,24 +343,6 @@ extendBatchInput = () ->
       else
         return b_selected - a_selected
 
-    # searchValue = @searchValue()
-    # flagsValue = @searchFlagsValue()
-
-    # if searchValue
-    #   try
-    #     regexp = new RegExp(searchValue, flagsValue)
-    #   catch
-    #     Precision.alert.showAboveAll('Wrong Regular Expression!', null, 1000)
-    #     regexp = new RegExp('.*', 'ig')
-    #   fileTree.deselect_all()
-    #   nodes.forEach((node) ->
-    #     if node.data.type == TYPE_FILE
-    #       if node.text.search(regexp) > -1
-    #         fileTree.select_node(node.id)
-    #       else
-    #         fileTree.deselect_node(node.id)
-    #   )
-
     nodes = nodes.sort(sortNameHandler).sort(sortCheckedHandler)
 
     if @fileTree
@@ -371,14 +351,7 @@ extendBatchInput = () ->
 
     return nodes
   )
-  # @searchOnChange = _.debounce(
-  #   (root, e) => @searchValue(e.target.value)
-  #   400
-  # )
-  # @clearSearch = (root, e) =>
-  #   @searchFlagsValue('ig')
-  #   @searchValue(null)
-  #   @fileTree.treeContainer.jstree(true).deselect_all()
+
   @setValue = ko.computed( => @value(@selectedFiles()))
 
   @selectNodeHandler = () =>
@@ -394,6 +367,7 @@ extendBatchInput = () ->
     onRootNodesLoad = () => @isTreeLoading(true)
     @fileTree = @batchWorkflowFileTree.createNewTree($("##{@name}"), onRootNodesLoad)
     @fileTree.onSelectNodeCallback = () => @selectNodeHandler()
+    @fileTree.onDeselectNodeCallback = () => @selectNodeHandler()
     @fileTree.onRootNodesReady = () => @isTreeLoading(false)
 
 class BatchInputModel

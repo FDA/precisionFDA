@@ -106,7 +106,7 @@
         </div>
       </div>
       <div data-bind="css: {'has-error': !input.valid(), 'wf-no-poiner-events': input.fsIsMoreLoading()}">
-        <div class="form-control input-file-selector" data-bind="attr: {id: input.name + '_scroll_container'}">
+        <div class="form-control input-file-selector input-file-selector-regexp" data-bind="attr: {id: input.name + '_scroll_container'}">
         <!-- ko if: !input.fsIsLoading() -->
           <div class="fs-scrollable-files-container">
             <!-- ko foreach: input.fsFiles() -->
