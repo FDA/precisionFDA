@@ -117,6 +117,52 @@ class ApiController < ApplicationController
     children
   end
 
+  # Collects an Array of children for object in params.
+  # @param uid [Object Id].
+  # @param scope [String] A scope to be published into.
+  # @return [Hash with Array value] An Array of relative children for a given Object.
+  def related_to_publish
+    id = unsafe_params[:uid]
+    raise "Missing id in publish route" unless id.is_a?(String) && id.present?
+
+    item = item_from_uid(id)
+    raise "You do not have permission to access #{id}" unless item.accessible_by?(@context)
+
+    publishing_service = SpaceService::Publishing.new(@context)
+    check_result = publishing_service.scope_check(unsafe_params[:scope])
+    scope = check_result[:scope]
+
+    relatives_graph = GraphDecorator.for_publisher(@context, item, scope).to_json
+    children = children_to_publish(relatives_graph)
+
+    render json: children
+  end
+
+  # Collects an array of children from a relatives graph.
+  # Filtering by private objects only to be included into children array.
+  # Prepare values for 'path' and 'fa_class' attributes.
+  # @param relatives_graph [Array of Objects] From GraphDecorator.
+  # @return children [Array of Objects] With the following example content:
+  #  {
+  #    \"uid\"=>\"app-0b9811c31ff0812273068d54-1\",
+  #    \"klass\"=>\"app\", \"title\"=>\"default_title\", \"owned\"=>false,
+  #    \"public\"=>true, \"in_space\"=>false, \"publishable\"=>false,
+  #    \"children\"=>[]
+  #  }
+  def children_to_publish(relatives_graph)
+    all_children = JSON.parse(relatives_graph)[0]["children"]
+    children = []
+    all_children.uniq.each do |child|
+      next if child["in_space"] || child["public"]
+
+      object = item_from_uid(child["uid"])
+      child["path"] = object.accessible_by?(@context) ? pathify(object) : nil
+      child["fa_class"] = view_context.fa_class(object)
+      children << child
+    end
+    children
+  end
+
   # Inputs
   #
   # workflow_id (string, required): the dxid of the workflow to run
