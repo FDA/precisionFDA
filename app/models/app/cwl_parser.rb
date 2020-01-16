@@ -15,6 +15,7 @@ class App
           code: code(cwl),
           packages: %w(libxml2-dev libxslt1-dev zlib1g-dev),
           ordered_assets: Array(asset.try(:uid)),
+          release: cwl.release,
         }
       end
 

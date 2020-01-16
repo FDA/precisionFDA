@@ -11,7 +11,7 @@ class App
     validates :tasks, length: { is: 1, message: "number is wrong" }
 
     attr_reader :raw
-    attr_accessor :asset
+    attr_accessor :asset, :release
 
     def initialize(wdl_text)
       @raw = wdl_text
@@ -29,6 +29,7 @@ class App
         code: code,
         packages: %w(openjdk-8-jre-headless),
         ordered_assets: Array(asset.try(:uid)),
+        release: release,
       }
     end
 
