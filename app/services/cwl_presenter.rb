@@ -15,7 +15,7 @@ class CwlPresenter
   validate :validate_requirements
 
   attr_reader :docker, :docker_image
-  attr_accessor :asset
+  attr_accessor :asset, :release
 
   def initialize(cwl_string)
     @cwl_string = cwl_string.strip
