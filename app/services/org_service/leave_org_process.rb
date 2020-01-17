@@ -183,7 +183,7 @@ module OrgService
         suppressEmailNotification: true,
       )
     # TODO: Temporary fix, DXClient exceptions should be raised via reflection mechanism.
-    rescue Net::HTTPServerException => e
+    rescue Net::HTTPClientException => e
       # Allow to proceed for case when SITE ADMIN leaves organization.
       raise e unless e.message =~ /Cannot invite yourself to an organization/
     end
