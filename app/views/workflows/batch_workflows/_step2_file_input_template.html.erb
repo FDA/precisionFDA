@@ -113,7 +113,12 @@
               <div class="batch-workfows-fs-item">
                 <input type="checkbox"
                   class="batch-workfows-fs-item-checkbox"
-                  data-bind="name: input.name + '_search_checkbox', checkedValue: $data.uid, checked: input.fsSelectedFiles()"
+                  data-bind="
+                    name: input.name + '_search_checkbox',
+                    checkedValue: $data.uid,
+                    checked: input.fsSelectedFiles(),
+                    event: { change: input.fsHandleChangeCheckbox }
+                  "
                 />
                 <span data-bind="click: input.fsToggleCheckbox">
                   <span class="batch-workfows-fs-item-path" data-bind="text: $data.path"></span>
