@@ -1,5 +1,7 @@
 #!/bin/sh
 
+sed -i '/^#/!s/CipherString = DEFAULT@SECLEVEL=2/#CipherString = DEFAULT@SECLEVEL=2/g' /etc/ssl/openssl.cnf
+
 dockerize -wait tcp://db:3306
 
 cp config/database.yml.sample config/database.yml
