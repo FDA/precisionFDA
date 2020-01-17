@@ -9,9 +9,11 @@
         <div class="panel-body">
           <% if !@space.verified? && !@space.restrict_to_template? %>
             <div class="spaces-files-buttons">
-              <span class="btn btn-primary" data-toggle="modal" data-target="#create-folder-modal">
-                <span class="fa fa-plus-square fa-fw"></span> Add folder
-              </span>
+              <% if @space.contributor_permission(@context) %>
+                <span class="btn btn-primary" data-toggle="modal" data-target="#create-folder-modal">
+                  <span class="fa fa-plus-square fa-fw"></span> Add folder
+                </span>
+              <% end %>
               <div class="btn-group">
                 <div class="dropdown">
                   <button class="btn btn-primary" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
