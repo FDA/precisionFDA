@@ -4,7 +4,7 @@ require 'pp'
 def want_404
   begin
     yield
-  rescue Net::HTTPServerException => e
+  rescue Net::HTTPClientException => e
     if e.message =~ /^404/
       return
     end

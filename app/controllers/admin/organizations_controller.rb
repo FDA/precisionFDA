@@ -25,7 +25,7 @@ module Admin
         else
           @can_change_admin = false
         end
-      rescue Net::HTTPServerException
+      rescue Net::HTTPClientException
         @can_change_admin = false # likely no access to that group
       end
 

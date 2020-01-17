@@ -141,7 +141,7 @@ RSpec.describe OrgService::LeaveOrgProcess do
         context "when org_invite raises self-invite error" do
           before do
             allow(admin_api).to receive(:org_invite).
-              and_raise(Net::HTTPServerException.
+              and_raise(Net::HTTPClientException.
                 new("Cannot invite yourself to an organization", nil))
           end
 
@@ -153,11 +153,11 @@ RSpec.describe OrgService::LeaveOrgProcess do
         context "when org_invite raises not self-invite error" do
           before do
             allow(admin_api).to receive(:org_invite).
-              and_raise(Net::HTTPServerException.new("Some error", nil))
+              and_raise(Net::HTTPClientException.new("Some error", nil))
           end
 
           it "re-raises error" do
-            expect { service.call(org, admin) }.to raise_error(Net::HTTPServerException)
+            expect { service.call(org, admin) }.to raise_error(Net::HTTPClientException)
           end
         end
 

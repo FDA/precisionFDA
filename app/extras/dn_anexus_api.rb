@@ -41,7 +41,7 @@ class DNAnexusAPI
   def user_exists?(username)
     begin
       call("user-#{username}", "describe")
-    rescue Net::HTTPServerException => e
+    rescue Net::HTTPClientException => e
       if e.message =~ /^404/
         return false
       end
@@ -53,7 +53,7 @@ class DNAnexusAPI
   def org_exists?(orgname)
     begin
       call("org-#{orgname}", "describe")
-    rescue Net::HTTPServerException => e
+    rescue Net::HTTPClientException => e
       if e.message =~ /^404/
         return false
       end
@@ -65,7 +65,7 @@ class DNAnexusAPI
   def entity_exists?(entity)
     begin
       call(entity.to_s, "describe")
-    rescue Net::HTTPServerException => e
+    rescue Net::HTTPClientException => e
       if e.message =~ /^404/
         return false
       end
@@ -78,7 +78,7 @@ class DNAnexusAPI
     api = new(ADMIN_TOKEN)
     begin
       api.call(ORG_DUMMY, "invite", invitee: email, suppressEmailNotification: true)
-    rescue Net::HTTPServerException => e
+    rescue Net::HTTPClientException => e
       if e.message =~ /^404/
         return false
       end

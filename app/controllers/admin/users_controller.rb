@@ -79,7 +79,7 @@ module Admin
              "resendActivationEmail",
               usernameOrEmail: user.dxid
             )
-        rescue Net::HTTPServerException => e
+        rescue Net::HTTPClientException => e
           redirect_back(fallback_location: user_path(user), error: "There was a platform error")
         else
           redirect_back(
@@ -101,7 +101,7 @@ module Admin
             user_id: user.dxid,
             org_id: ORG_EVERYONE
           )
-        rescue Net::HTTPServerException => e
+        rescue Net::HTTPClientException => e
           if e.message =~ /MFA is already reset/
             redirect_back(
               fallback_location: user_path(user),
@@ -129,7 +129,7 @@ module Admin
               user_id: user.dxid,
               org_id: ORG_EVERYONE
           )
-        rescue Net::HTTPServerException => e
+        rescue Net::HTTPClientException => e
           if request.method == 'POST'
             render json: { ok: 'error' }, status: 403
           else

@@ -35,7 +35,7 @@ class DNAnexusAuth
 
       JSON.parse(response.body)
     end
-  rescue Net::HTTPServerException => e
+  rescue Net::HTTPClientException => e
     {}
   end
 
@@ -46,7 +46,7 @@ class DNAnexusAuth
   def handle_response(response)
     response.value
     JSON.parse(response.body)
-  rescue Net::HTTPServerException => e
+  rescue Net::HTTPClientException => e
     raise AuthError.new("#{e.message}. #{e.backtrace}", JSON.parse(response.body))
   end
 end

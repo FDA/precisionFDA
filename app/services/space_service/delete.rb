@@ -30,7 +30,7 @@ module SpaceService
       projects.each do |project, project_files|
         begin
           api.call(project, "removeObjects", objects: project_files.map(&:dxid))
-        rescue Net::HTTPServerException => e
+        rescue Net::HTTPClientException => e
           raise e unless e.message =~ /^404/
         end
       end

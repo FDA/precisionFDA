@@ -44,7 +44,7 @@ module DXClient
     def handle_response(response)
       response.value
       JSON.parse(response.body)
-    rescue Net::HTTPServerException => e
+    rescue Net::HTTPClientException => e
       raise e, "#{e.message}. #{response.body}", e.backtrace
     end
   end

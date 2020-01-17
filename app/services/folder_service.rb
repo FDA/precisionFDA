@@ -169,7 +169,7 @@ class FolderService
 
     begin
       DNAnexusAPI.new(context.token).call(file.project, "removeObjects", objects: [file.dxid])
-    rescue Net::HTTPServerException => e
+    rescue Net::HTTPClientException => e
       raise e unless e.message =~ /^404/
     end
 
