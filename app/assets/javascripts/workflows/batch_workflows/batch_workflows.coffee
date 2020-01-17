@@ -217,6 +217,8 @@ extendBatchInputFilesSearch = () ->
     else
       @fsSelectedFiles.push(data.uid)
       data.checked(true)
+  @fsHandleChangeCheckbox = (data, e) ->
+    data.checked(e.target.checked)
   @fsClearSearch = (data, e) =>
     return false if @fsIsLoading()
     @fsSearchFlagsValue('ig')
@@ -278,7 +280,9 @@ extendBatchInputFilesSearch = () ->
         newFiles = @fsFiles()
         newFiles = newFiles.concat(data.search_result.map((file) -> new FSItem(file)))
         @fsFiles(newFiles)
-        @fsSelectedFiles @fsFiles().map((item) -> item.uid)
+        selectedFiles = @fsFiles().filter((item) -> item.checked())
+                                  .map((item) -> item.uid)
+        @fsSelectedFiles(selectedFiles)
         @fsIsMoreLoading(false)
       (errorData) ->
         if errorData and typeof errorData.error == 'string'
