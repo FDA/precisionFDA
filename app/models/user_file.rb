@@ -327,8 +327,14 @@ class UserFile < Node
       ((scope == "private" || scope == "public") || !(in_space? && space_object.verified?))
   end
 
+  # Check, whether file is piblishable, i.e. to be 'public'.
+  #   A file should have scope 'private' or in space.
+  # @param context [Context] a Context object, who is going to publish.
+  # @param scope_to_publish_to [String] a scope to be published to.
+  # @return [true, false] Returns true if a file can be published by a user,
+  #   false otherwise.
   def publishable_by?(context, scope_to_publish_to = "public")
-    core_publishable_by?(context, scope_to_publish_to) &&
+    publishable?(context.user) &&
       !parent_comparison? &&
       [STATE_CLOSED, STATE_PUBLISHING].include?(state)
   end
@@ -347,6 +353,11 @@ class UserFile < Node
     end
   end
 
+  # Checks, wether file is consistent to be used it by current user in
+  #   publishing actions, in comparisons as well.
+  # @param user [User] a user object, who is going to publish
+  # @return [true, false] Returns true if a file is consistent,
+  #   false otherwise.
   def passes_consistency_check?(user)
     if private?
       if independent?
@@ -356,7 +367,7 @@ class UserFile < Node
       end
     elsif public?
       project == user.public_files_project
-    elsif state != STATE_PUBLISHING
+    elsif ![STATE_CLOSED, STATE_PUBLISHING].include?(state)
       project == space_object.project_for_user(user)
     else
       true

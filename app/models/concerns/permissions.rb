@@ -110,6 +110,17 @@ module Permissions
     user_id == user.id && (private? || in_space?)
   end
 
+  # Check, whether file is piblishable, i.e. to be 'public'.
+  #   A file should have scope 'private' or in space.
+  # @param user [User] a user object, who is going to publish
+  # @return [true, false] Returns true if a file can be published by a user,
+  #   false otherwise.
+  def publishable?(user)
+    return false unless user
+
+    private? || in_space?
+  end
+
   def publishable_by?(context, scope_to_publish_to = "public")
     core_publishable_by?(context, scope_to_publish_to)
   end

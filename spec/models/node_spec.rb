@@ -34,6 +34,78 @@ RSpec.describe Node, type: :model do
       scoped_parent_folder_id: nil,
       )
   end
+  let(:user_two) { create(:user, dxuser: "user2") }
+  let(:file_two) do
+    create(
+      :user_file,
+      :private,
+      user_id: user_two.id,
+      parent_folder_id: nil,
+      scoped_parent_folder_id: nil,
+    )
+  end
+
+  describe "permitted_in_space_context" do
+    subject(:permitted_in_space_context) do
+      described_class.permitted_in_space_context(space_context)
+    end
+
+    let!(:space) { create(:space, :review, state: :active) }
+
+    let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, nil, nil) }
+    let(:nodes_ids) { [file_one.id] }
+    let(:space_context) { { context: context, space: space, nodes_ids: nodes_ids } }
+
+    before do
+      file_one.update(scope: space.uid)
+      allow(space).to receive(:contributor_permission).
+        with(context).and_return(true)
+      allow(context).to receive(:user).
+        and_return(user)
+      allow(user).to receive(:space_uids).
+        and_return([space.uid])
+    end
+
+    context "when context user is a contributor" do
+      before do
+        allow(space).to receive(:contributor_permission).
+          with(context).and_return(true)
+      end
+
+      it "returns an array of a node object, permitted for space contributor context" do
+        expect(permitted_in_space_context).to eq [file_one]
+      end
+    end
+
+    context "when context user is a viewer and file is not belongs to him" do
+      before do
+        file_one.update(user_id: 2)
+        allow(space).to receive(:contributor_permission).
+          with(context).and_return(false)
+      end
+
+      it "returns an empty array" do
+        expect(permitted_in_space_context).to eq []
+      end
+    end
+
+    context "when context user is a viewer and file belongs to him" do
+      let(:nodes_ids) { [file_two.id] }
+
+      before do
+        file_two.update(
+          user_id: context.user_id,
+          scope: space.uid,
+        )
+        allow(space).to receive(:contributor_permission).
+          with(context).and_return(false)
+      end
+
+      it "returns an array with a node object, permitted for space viewer context" do
+        expect(permitted_in_space_context).to eq [file_two]
+      end
+    end
+  end
 
   describe "sin_comparison_inputs" do
     subject(:sin_comparison_inputs) { described_class.sin_comparison_inputs(ids) }

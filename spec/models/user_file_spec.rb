@@ -47,6 +47,130 @@ RSpec.describe UserFile, type: :model do
     )
   end
 
+  describe "passes_consistency_check?" do
+    context "when user_file is private" do
+      subject(:passes_consistency_check) { file_private_one.passes_consistency_check?(user) }
+
+      context "when user_file is independent and have proper projects with user" do
+        before { file_private_one.update(project: user.private_files_project) }
+
+        it "passes_consistency_check" do
+          expect(passes_consistency_check).to be_truthy
+        end
+      end
+
+      context "when user_file is independent and does not have proper projects with user" do
+        before { file_private_one.update(project: user.public_files_project) }
+
+        it "passes_consistency_check" do
+          expect(passes_consistency_check).to be_falsey
+        end
+      end
+
+      context "when user_file is not independent, a 'comparison' type and with proper project" do
+        before do
+          user.update(
+            private_comparisons_project: "private-comparison-files-project\"",
+          )
+          file_private_one.update(
+            parent_type: "Comparison",
+            project: user.private_comparisons_project,
+          )
+        end
+
+        it "passes_consistency_check" do
+          expect(passes_consistency_check).to be_truthy
+        end
+      end
+
+      context "when user_file is not independent and with unproper project" do
+        before do
+          file_private_one.update(
+            parent_type: "Comparison",
+            project: user.private_files_project,
+          )
+        end
+
+        it "passes_consistency_check" do
+          expect(passes_consistency_check).to be_falsey
+        end
+      end
+    end
+
+    context "when user_file is public" do
+      subject(:passes_consistency_check) { file_public.passes_consistency_check?(user) }
+
+      context "when user_file and user have proper projects" do
+        before { file_public.update(project: user.public_files_project) }
+
+        it "passes_consistency_check" do
+          expect(passes_consistency_check).to be_truthy
+        end
+      end
+
+      context "when user_file and user have different projects" do
+        before { file_public.update(project: user.private_files_project) }
+
+        it "passes_consistency_check" do
+          expect(passes_consistency_check).to be_falsey
+        end
+      end
+    end
+
+    context "when user_file has space scope" do
+      subject(:passes_consistency_check) { file_public.passes_consistency_check?(user) }
+
+      let!(:space) { create(:space, :review, state: :active) }
+
+      context "when user_file has state 'closed' and user have proper projects with space" do
+        before do
+          file_public.update(
+            scope: space.uid,
+            project: user.public_files_project,
+          )
+        end
+
+        it "passes_consistency_check" do
+          expect(passes_consistency_check).to be_truthy
+        end
+      end
+
+      context "when user_file has state 'open' and have proper projects with space" do
+        before do
+          space.update(host_project: "host_project_for_user")
+          allow(file_public).to receive(:space_object).
+            and_return(space)
+          allow(space).to receive(:project_for_user).
+            with(user).and_return(space.host_project)
+          file_public.update(
+            scope: space.uid,
+            project: space.host_project,
+            state: "open",
+          )
+        end
+
+        it "passes_consistency_check" do
+          expect(passes_consistency_check).to be_truthy
+        end
+      end
+
+      context "when user_file has state 'open' and does not have proper projects with space" do
+        before do
+          space.update(host_project: "host_project_for_user")
+          allow(file_public).to receive(:space_object).
+            and_return(space)
+          allow(space).to receive(:project_for_user).
+            with(user).and_return(space.host_project)
+          file_public.update(scope: space.uid, state: "open")
+        end
+
+        it "passes_consistency_check" do
+          expect(passes_consistency_check).to be_falsey
+        end
+      end
+    end
+  end
+
   describe "return parent_folder_name" do
     let(:folder_one) { create(:folder, :private) }
     let(:folder_two) { create(:folder) }

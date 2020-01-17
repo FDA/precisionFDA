@@ -254,8 +254,8 @@ class SpacesController < ApplicationController
   end
 
   # Produce list of actions in a service menu on files grid in space.
-  # Set up actions control in dependence upon context user accessibility to the node selected.
-  # When "delete": do not allow to delete a comparison input file.
+  #   Set up actions control in dependence upon context user accessibility to the node selected.
+  #   When "delete": do not allow to delete a comparison input file.
   # @param context [Context] - project id or nil.
   # @return [Array of nodes] - nodes - UserFile or Folder
   skip_before_action :require_login, only: :download_list
@@ -265,31 +265,19 @@ class SpacesController < ApplicationController
     space = Space.accessible_by(@context).find(params[:id])
     root_name = space.name
     files = []
-    contributor_permission = space.contributor_permission(@context)
+    space_context = { context: @context, space: space, nodes_ids: params[:ids] }
 
     case task
     when "download"
       nodes = Node.accessible_by_space(space).accessible_by(@context).where(id: params[:ids])
       nodes.each { |node| files += node.is_a?(Folder) ? node.all_files : [node] }
     when "publish"
-      nodes = Node.
-        accessible_by_space(space).
-        editable_by(@context).
-        where(id: params[:ids], scope: space.uid)
+      nodes = Node.permitted_in_space_context(space_context)
       nodes.each { |node| files += node.is_a?(Folder) ? node.all_files(Node.where(scope: space.uid)) : [node] }
     when "delete"
-      nodes = if contributor_permission
-        Node.
-          accessible_by_space(space).
-          accessible_by(@context).
-          where(id: params[:ids]).to_a
-      else
-        Node.
-          accessible_by_space(space).
-          editable_by(@context).
-          where(id: params[:ids]).to_a
-      end
+      nodes = Node.permitted_in_space_context(space_context)
       files += nodes
+
       nodes.each { |node| files += node.all_children if node.is_a?(Folder) }
     when "copy_to_cooperative"
       nodes = Node.
@@ -365,27 +353,30 @@ class SpacesController < ApplicationController
   end
 
   def publish_folder
-    space = Space.accessible_by(@context).find(unsafe_params[:id])
-    files = UserFile
-      .accessible_by_space(space)
-      .editable_by(@context)
-      .where(id: unsafe_params[:ids])
+    space = Space.accessible_by(@context).find(params[:id])
 
-    if files.size == 0
-      flash[:error] = "No nodes selected"
-      redirect_to files_space_path(space)
-      return
+    if space.contributor_permission(@context)
+      files = Node.accessible_by(@context).where(id: params[:ids])
+
+      if files.size == 0
+        flash[:error] = "No nodes selected"
+        redirect_to files_space_path(space)
+        return
+      end
+
+      begin
+        count = UserFile.publish(files, @context, "public")
+      rescue RuntimeError => e
+        flash[:error] = e.message
+        redirect_to files_space_path(space)
+        return
+      end
+
+      flash[:success] = "#{count} file(s) successfully published"
+    else
+      flash[:warning] = "You have no permission to publish object(s)."
     end
 
-    begin
-      count = UserFile.publish(files, @context, "public")
-    rescue RuntimeError => e
-      flash[:error] = e.message
-      redirect_to files_space_path(space)
-      return
-    end
-
-    flash[:success] = "#{count} file(s) successfully published"
     redirect_to files_space_path(space)
   end
 

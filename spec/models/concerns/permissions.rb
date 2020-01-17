@@ -1,5 +1,5 @@
-require 'rails_helper'
-require 'auditor_helper'
+require "rails_helper"
+require "auditor_helper"
 
 RSpec.describe Permissions do
   let(:viewer_role) { SpaceMembership::ROLE_VIEWER }
