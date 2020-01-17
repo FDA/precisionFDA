@@ -74,6 +74,30 @@ class Node < ApplicationRecord
     def folder_content(files, folders)
       Node.where(id: (files + folders).map(&:id))
     end
+
+    # Selects nodes (files and folders), permitted to be accessible/editable in space
+    #   by current context user. A context permission level depends upon context role in space:
+    #   contributor vs viewer.
+    # @param space_context [Hash] of the following content:
+    #   nodes_ids: [Array] - an array of nodes ids.
+    #   context: [Context] - a context user object.
+    #   space: [Space] - a space object.
+    # @return nodes [Array] - an array of nodes objects, permitted for space context given.
+    def permitted_in_space_context(space_context)
+      context = space_context[:context]
+      space = space_context[:space]
+      nodes_ids = space_context[:nodes_ids]
+
+      nodes = Node.accessible_by_space(space).where(id: nodes_ids)
+
+      nodes = if space.contributor_permission(context)
+        nodes.accessible_by(context)
+      else
+        nodes.editable_by(context)
+      end
+
+      nodes.to_a
+    end
   end
 
   private

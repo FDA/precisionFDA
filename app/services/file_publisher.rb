@@ -18,14 +18,18 @@ class FilePublisher
     @user = user
   end
 
+  # Publish a file - to make its scope 'public'
+  # @param files [Array] - array of UserFile objects to be published.
+  # @param scope [String] - a new scope of a file.
+  # @param user [User] - a current user, who is going to publish. A current class attribute.
+  # @return count [Integer] - files quantity, being published successfully.
+  #   returns 0 when no files were published.
   def publish(files, scope = "public")
     count = 0
     destination_project = UserFile.publication_project!(user, scope)
-
     projects = {}
-
     files.uniq.each do |file|
-      next unless file.publishable_by_user?(user, scope)
+      next unless file.publishable?(user)
 
       unless [UserFile::STATE_CLOSED, UserFile::STATE_PUBLISHING].include?(file.state)
         raise "Unable to publish #{file.name} - file is not closed"
@@ -50,9 +54,7 @@ class FilePublisher
         project_files.each do |file|
           file.reload
 
-          unless file.publishable_by_user?(user, scope)
-            raise "Race condition for file #{file.id} (#{file.dxid})"
-          end
+          raise "Race condition for file #{file.id} (#{file.dxid})" unless file.publishable?(user)
 
           file.update!(
             state: UserFile::STATE_CLOSED,
@@ -60,7 +62,6 @@ class FilePublisher
             project: destination_project,
             scoped_parent_folder_id: nil
           )
-
           count += 1
 
           if scope =~ /^space-(\d+)$/
