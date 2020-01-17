@@ -157,8 +157,7 @@ extendBatchInputFilesSearch = () ->
   @fsSortPathArrow = ko.computed(() =>
     return if @fsSortPathDirection() == DESC then 'fa-long-arrow-up' else 'fa-long-arrow-down'
   )
-  @fsSortByName = (root, e) =>
-    e.preventDefault()
+  @_fsSortByName = () =>
     _sortDirection = if @fsSortNameDirection() == ASC then DESC else ASC
     _files = @fsFiles().sort((a, b) ->
       if _sortDirection == ASC
@@ -171,6 +170,9 @@ extendBatchInputFilesSearch = () ->
     )
     @fsFiles(_files)
     @fsSortNameDirection(_sortDirection)
+  @fsSortByName = (root, e) =>
+    e.preventDefault()
+    @_fsSortByName()
   @fsSortByChecked = (root, e) =>
     e.preventDefault()
     _sortDirection = if @fsSortCheckedDirection() == ASC then DESC else ASC
@@ -254,6 +256,7 @@ extendBatchInputFilesSearch = () ->
           @fsSelectedFiles(data.uids)
           @fsIsLoading(false)
           $("""##{@name}_regexp_search_input""").focus()
+          @_fsSortByName()
         (errorData) ->
           if errorData and typeof errorData.error == 'string'
             Precision.alert.showAboveAll(errorData.error, null, 1000)
