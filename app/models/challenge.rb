@@ -258,10 +258,6 @@ class Challenge < ApplicationRecord
     return unless start_at_changed?
     return if start_at.blank?
 
-    if start_at <= DateTime.now
-      errors.add(:start_at, "can't be before the current time")
-    end
-
     if end_at && end_at <= start_at
       errors.add(:start_at, "can't be after the challenge end time")
     end
