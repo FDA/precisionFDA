@@ -1,5 +1,7 @@
 class App
   class CwlParser
+    CWL_FILE_NAME = "description.cwl".freeze
+
     class << self
       def parse(cwl)
         asset = cwl.asset
@@ -53,6 +55,32 @@ class App
         image_filename = asset && File.basename(asset.file_paths.first)
 
         <<-CODE
+#{setup_python3}
+#{docker_load(image_filename)}
+cat <<"EOF" > #{CWL_FILE_NAME}
+#{cwl}
+EOF
+
+#{replace_docker_pull if image_filename}
+cat <<EOF > input_settings.json
+#{normalize_inputs_json(cwl, input_settings(cwl).to_json)}
+EOF
+
+cwltool #{CWL_FILE_NAME} input_settings.json > cwl_job_outputs.json
+
+# deactivate python3 environment
+deactivate
+
+#{link_outputs}
+CODE
+      end
+
+      def replace_docker_pull
+        %{sed -i "s|dockerPull:.*|dockerImageId: \"$dockerImageId\"|g" #{CWL_FILE_NAME}\n}
+      end
+
+      def setup_python3
+        <<-CODE
 unset PYTHONPATH
 
 python3 -m venv venv
@@ -60,20 +88,17 @@ source venv/bin/activate
 
 pip install -U pip
 pip install cwltool
+CODE
+      end
 
-cat <<"EOF" > description.cwl
-#{cwl}
-EOF
+      def docker_load(image_filename)
+        return if image_filename.blank?
 
-cat <<EOF > input_settings.json
-#{normalize_inputs_json(cwl, input_settings(cwl).to_json)}
-EOF
+        "dockerImageId=`docker load < #{image_filename} | sed -n -e 's/^Loaded image: //p'`\n"
+      end
 
-#{"docker load < #{image_filename}\n" if image_filename}
-cwltool description.cwl input_settings.json > cwl_job_outputs.json
-
-deactivate
-
+      def link_outputs
+        <<-CODE
 PYTHONPATH=$DNANEXUS_HOME/lib/python2.7/site-packages python2 <<EOF
 import os
 import json
@@ -129,10 +154,12 @@ CODE
       #   int/double/float/boolean type
       def normalize_inputs_json(cwl, json)
         normalized = json.dup
+
         cwl.inputs.each do |input|
           next if %w(File string).include?(input.type)
           normalized.sub!("\"${#{input.name}}\"", " ${#{input.name}}")
         end
+
         normalized
       end
     end
