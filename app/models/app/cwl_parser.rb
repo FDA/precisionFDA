@@ -13,9 +13,8 @@ class App
           internet_access: true,
           instance_type: "baseline-8",
           code: code(cwl),
-          packages: %w(libxml2-dev libxslt1-dev zlib1g-dev),
+          packages: %w(python3-pip python3-venv python3-dev),
           ordered_assets: Array(asset.try(:uid)),
-          release: cwl.release,
         }
       end
 
@@ -51,10 +50,15 @@ class App
 
       def code(cwl)
         asset = cwl.asset
+        image_filename = asset && File.basename(asset.file_paths.first)
 
-        script = <<-CODE
-pip install --upgrade setuptools==12.4
-PYTHONUSERBASE=$DNANEXUS_HOME pip install --upgrade --user requests==2.21.0 networkx==2.2
+        <<-CODE
+unset PYTHONPATH
+
+python3 -m venv venv
+source venv/bin/activate
+
+pip install -U pip
 pip install cwltool
 
 cat <<"EOF" > description.cwl
@@ -65,9 +69,12 @@ cat <<EOF > input_settings.json
 #{normalize_inputs_json(cwl, input_settings(cwl).to_json)}
 EOF
 
-cwltool --user-space-docker-cmd=dx-docker description.cwl input_settings.json > cwl_job_outputs.json
+#{"docker load < #{image_filename}\n" if image_filename}
+cwltool description.cwl input_settings.json > cwl_job_outputs.json
 
-python <<EOF
+deactivate
+
+PYTHONPATH=$DNANEXUS_HOME/lib/python2.7/site-packages python2 <<EOF
 import os
 import json
 import subprocess
@@ -99,23 +106,6 @@ for oname, ovalue in cwloutputs.items():
   compile_output_generic(oname, ovalue)
 EOF
 CODE
-
-        if asset
-          image_filename = File.basename(asset.file_paths.first)
-
-          script.prepend(
-            <<-CODE
-gunzip #{image_filename}
-docker2aci #{image_filename.sub('.gz', '')}
-mkdir -p #{DX_DOCKER_CACHE}
-aci_file=`find . -name "*.aci"`
-mv $aci_file #{DX_DOCKER_CACHE}/#{CGI.escape(cwl.docker)}.aci
-
-CODE
-          )
-        end
-
-        script
       end
 
       def settings_for(input)

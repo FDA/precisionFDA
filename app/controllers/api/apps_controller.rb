@@ -34,7 +34,6 @@ module Api
           )
 
           presenter.asset = asset
-          presenter.release = unsafe_params[:release]
 
           opts = unsafe_params[:format] == "wdl" ? presenter.build : App::CwlParser.parse(presenter)
 
