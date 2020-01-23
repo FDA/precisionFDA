@@ -396,21 +396,32 @@ class SpacesController < ApplicationController
     redirect_back(fallback_location: space_path(space)) and return
   end
 
+  # Copies an item from a current confidential space to cooperative one.
   def copy_to_cooperative
     space = Space.accessible_by(@context).find(unsafe_params[:id])
     object = item_from_uid(unsafe_params[:object_id])
 
-    if space && object && space.shared_space
-      ActiveRecord::Base.transaction do
-        copy_service.copy(object, space.shared_space.uid).each do |new_object|
-          SpaceEventService.call(space.shared_space.id, @context.user_id, nil, new_object, "copy_to_cooperative")
+    if space.contributor_permission(@context) && space.member_in_cooperative?(@context.user_id)
+      if object && space.shared_space
+        ActiveRecord::Base.transaction do
+          copy_service.copy(object, space.shared_space.uid).each do |new_object|
+            SpaceEventService.call(
+              space.shared_space.id,
+              @context.user_id,
+              nil,
+              new_object,
+              "copy_to_cooperative",
+            )
+          end
         end
-      end
 
-      flash[:success] = "#{object.class} successfully copied"
+        flash[:success] = "#{object.class} successfully copied"
+      end
+    else
+      flash[:warning] = "You have no permission to copy object(s) to cooperative."
     end
 
-    redirect_back(fallback_location: space_path(space)) and return
+    redirect_back(fallback_location: space_path(space))
   end
 
   def copy_service

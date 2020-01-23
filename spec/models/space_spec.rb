@@ -155,18 +155,85 @@ RSpec.describe Space, type: :model do
 
   describe "member" do
     context "when user is a space member" do
-      let(:id) { host_lead.id }
+      let(:lead_id) { host_lead.id }
 
       it "returns SpaceMembership object with user member id" do
-        expect(verified.member(id).user_id).to eq id
+        expect(verified.member(lead_id).user_id).to eq lead_id
       end
     end
 
     context "when user is not a space member" do
-      let(:id) { FFaker::Random.rand(5) }
+      let(:lead_id) { FFaker::Random.rand(5) }
 
       it "returns nil" do
-        expect(verified.member(id)).to be_nil
+        expect(verified.member(lead_id)).to be_nil
+      end
+    end
+  end
+
+  describe "member_in_cooperative?" do
+    let(:review) do
+      create(
+        :space,
+        :review,
+        :verified,
+        host_lead_id: host_lead.id,
+        guest_lead_id: guest_lead.id,
+      )
+    end
+    let(:confidential) do
+      create(
+        :space,
+        :review,
+        :verified,
+        space_id: review.id,
+        host_lead_id: host_lead.id,
+        guest_lead_id: guest_lead.id,
+      )
+    end
+    let(:member_id) { user_member.id }
+
+    context "when user is a confidential space member" do
+      before { confidential.space_memberships.contributor.host.create!(user_id: member_id) }
+
+      context "when a confidential space member has a non-viewer role" do
+        it "returns SpaceMembership object with user member id" do
+          expect(confidential.member(member_id).lead_or_admin_or_contributor?).to be_truthy
+        end
+      end
+
+      it "returns SpaceMembership object with user member id" do
+        expect(confidential.member_in_cooperative?(member_id)).to be_falsey
+      end
+
+      context "when user is also a cooperative space member" do
+        before { review.space_memberships.contributor.host.create!(user_id: member_id) }
+
+        it "returns SpaceMembership object with user member id" do
+          expect(confidential.member_in_cooperative?(member_id)).to be_truthy
+        end
+      end
+    end
+
+    context "when user is a confidential space member" do
+      before { confidential.space_memberships.viewer.host.create!(user_id: member_id) }
+
+      context "when a confidential space member has a viewer role" do
+        it "returns SpaceMembership object with user member id" do
+          expect(confidential.member(member_id).viewer?).to be_truthy
+        end
+      end
+
+      it "returns SpaceMembership object with user member id" do
+        expect(confidential.member_in_cooperative?(member_id)).to be_falsey
+      end
+
+      context "when user is also a cooperative space member" do
+        before { review.space_memberships.viewer.host.create!(user_id: member_id) }
+
+        it "returns SpaceMembership object with user member id" do
+          expect(confidential.member_in_cooperative?(member_id)).to be_truthy
+        end
       end
     end
   end

@@ -193,6 +193,17 @@ class Space < ActiveRecord::Base
     space_memberships.find_by(user_id: id)
   end
 
+  # Determines whether a current space is confidential and if it's context member
+  #   is a member of appropriate cooperative space also.
+  # @param id [Integer] - user id.
+  # @return [true or false] - depends upon a user is a cooperative space member.
+  #   In case that current space is not confidential - returns false.
+  def member_in_cooperative?(id)
+    return false unless self.confidential?
+
+    Space.find(self.space_id).member(id).present?
+  end
+
   # Determine, whether a space provide a contributor (non-viewer) permission for user actions.
   # @param context [Context] - a context user
   # @return [true or false] - depends upon user'r role, context accessibility to space and
