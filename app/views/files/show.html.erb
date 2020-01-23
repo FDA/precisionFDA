@@ -122,9 +122,12 @@
 
     <%= render "_partials/btn_publish", item: @file %>
 
-    <div class="btn-group">
-      <%= render "_partials/btn_copy_to_cooperative", item: @file %>
-    </div>
+    <%# if @file.space_object.member(@context.user.id).lead_or_admin? %>
+      <div class="btn-group">
+        <%= render "_partials/btn_copy_to_cooperative", item: @file %>
+      </div>
+    <%# end %>
+
     <% if @file.editable_by?(@context) && (!@file.parent_comparison? || @file.deletable?) && !in_verified_space?(@file) %>
     <div class="btn-group">
       <div class="dropdown">
