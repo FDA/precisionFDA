@@ -55,7 +55,7 @@ gem "recaptcha", require: "recaptcha/rails"
 gem "axlsx", "3.0.0.pre"
 
 # Secure headers
-gem "secure_headers", "~> 6.0"
+gem "secure_headers", "~> 6.3"
 
 # Gravatar profile image helper
 gem "gravtastic"
