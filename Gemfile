@@ -107,6 +107,7 @@ gem "sidekiq"
 group :development do
   # Annotate models
   gem "annotate"
+  gem "brakeman"
 
   # Access an interactive console on exception pages or by calling 'console' anywhere in the code
   gem "web-console"
@@ -134,7 +135,6 @@ group :development do
 end
 
 group :development, :test, :ui_test do
-  gem "brakeman"
   gem "dotenv-rails"
   gem "thin"
 end
