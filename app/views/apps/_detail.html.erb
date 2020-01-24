@@ -35,7 +35,18 @@
   </ul>
 </div>
 
-<%= render "_partials/tags_metadata", item: @app.app_series, item_name: @app.title, tags_list: @app.app_series.all_tags_list, is_editable: @app.editable_by?(@context), suggested_tags: AppSeries::SUGGESTED_TAGS %>
+<% if @app.release == UBUNTU_14 %>
+  <div class="pfda-padded">
+    <div class="alert alert-warning">
+      <p><b>WARNING!</b></p>
+      <p>
+        This app was created using a previous version of Ubuntu (14.04).  For security and stability, please update this app to use Ubuntu 16.04 by creating a new forked version.
+      </p>
+    </div>
+  </div>
+<% end %>
+
+  <%= render "_partials/tags_metadata", item: @app.app_series, item_name: @app.title, tags_list: @app.app_series.all_tags_list, is_editable: @app.editable_by?(@context), suggested_tags: AppSeries::SUGGESTED_TAGS %>
 
 <div class="pfda-toolbar">
   <div class="btn-group">
