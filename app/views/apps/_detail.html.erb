@@ -184,7 +184,11 @@
         <span class="fa fa-bolt"></span> Run Batch App&nbsp;&nbsp;<span class="badge"><%= @app.version ? "v#{@app.version}" : "rev#{@app.revision}" %></span>
     <% end %>
     <%= render "_partials/btn_publish", item: @app %>
-    <%= render "_partials/btn_copy_to_cooperative", item: @app %>
+
+    <% if @app.in_space? && @app.space_object.contributor_permission(@context) %>
+      <%= render "_partials/btn_copy_to_cooperative", item: @app %>
+    <% end %>
+
   </div>
 
   <% if @context.logged_in? && app.user == @context.user %>

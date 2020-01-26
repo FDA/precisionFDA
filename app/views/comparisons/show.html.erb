@@ -77,7 +77,11 @@
         <% end %>
       <% end %>
       <%= render "_partials/btn_publish", item: @comparison %>
-      <%= render "_partials/btn_copy_to_cooperative", item: @comparison %>
+
+      <% if @comparison.in_space? && @comparison.space_object.contributor_permission(@context) %>
+        <%= render "_partials/btn_copy_to_cooperative", item: @comparison %>
+      <% end %>
+
     </div>
 
     <% if @comparison.editable_by?(@context) %>
