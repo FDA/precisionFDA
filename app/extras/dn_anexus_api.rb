@@ -6,6 +6,7 @@ class DNAnexusAPI
   include DXClient::Endpoints::Files
   include DXClient::Endpoints::Organizations
   include DXClient::Endpoints::Projects
+  include DXClient::Endpoints::System
   include DXClient::Endpoints::Users
   include DXClient::Endpoints::Workflows
 

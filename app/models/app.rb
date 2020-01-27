@@ -25,6 +25,7 @@ class App < ApplicationRecord
   include Auditor
   include Permissions
   include InternalUid
+  include Scopes
 
   belongs_to :user
   belongs_to :app_series
@@ -49,7 +50,7 @@ class App < ApplicationRecord
 
   # Scopes of files when an app is running out of spaces.
   def permitted_scopes
-    %w(private public)
+    [SCOPE_PRIVATE, SCOPE_PUBLIC]
   end
 
   # Scopes of files that can be used to run an app.
@@ -103,7 +104,7 @@ class App < ApplicationRecord
     version.present?
   end
 
-  def publishable_by?(context, scope_to_publish_to = "public")
+  def publishable_by?(context, scope_to_publish_to = SCOPE_PUBLIC)
     # App series must be private, otherwise must match scope
     core_publishable_by?(context, scope_to_publish_to) && private? && (app_series.private? || (app_series.scope == scope_to_publish_to))
   end

@@ -19,5 +19,6 @@ FactoryBot.define do
     name { FFaker::Lorem.word }
     state { "done" }
     scope { "private" }
+    sequence(:dxjobid) { |n| "job-#{n}" }
   end
 end

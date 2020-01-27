@@ -102,7 +102,8 @@ class FilesController < ApplicationController
     end
 
     if @file.parent_type != "Comparison"
-      User.sync_comparisons!(@context)
+      synchronizer = DIContainer.resolve("comparisons.sync.synchronizer")
+      synchronizer.sync_comparisons!(@context.user)
 
       @comparisons_grid =
         initialize_grid(

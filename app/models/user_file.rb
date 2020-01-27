@@ -46,6 +46,8 @@
 class UserFile < Node
   include Licenses
   include InternalUid
+  include Scopes
+
   require "uri"
 
   DESCRIPTION_MAX_LENGTH = 65535
@@ -121,7 +123,7 @@ class UserFile < Node
     def publication_project!(user, scope)
       # This is a class method for independent files.
       # For comparison files, use Comparison.publication_project!
-      if scope == "public"
+      if scope == UserFile::SCOPE_PUBLIC
         user.public_files_project
       else
         Space.from_scope(scope).project_for_user(user)
@@ -229,7 +231,7 @@ class UserFile < Node
   # Check if the current file is a challenge card image.
   # @return [true or false] - depends upon whether file is a challenge card image.
   def challenge_card_image?
-    parent_type == "User" && parent == User.challenge_bot && scope == "public"
+    parent_type == "User" && parent == User.challenge_bot && scope == SCOPE_PUBLIC
   end
 
   def to_param
@@ -239,12 +241,12 @@ class UserFile < Node
   # Returns a parent folder name of UserFile
   # @param [scope] a file scope
   # @return [String] folder name or "/" for root
-  def parent_folder_name(scope = "private")
+  def parent_folder_name(scope = SCOPE_PRIVATE)
     folder = parent_folder(scope)
     folder.blank? ? "/" : folder.name
   end
 
-  def parent_folder(scope = "private")
+  def parent_folder(scope = SCOPE_PRIVATE)
     column_name = Node.scope_column_name(scope)
     Folder.find_by(id: self[column_name])
   end
@@ -252,7 +254,7 @@ class UserFile < Node
   # Returns a full path to current file
   # @param [scope] a file scope]
   # @return [String] file path or "/" for root
-  def file_full_path(scope = "private")
+  def file_full_path(scope = SCOPE_PRIVATE)
     parent_folder = parent_folder(scope)
     folders = []
     if parent_folder.blank?
@@ -324,7 +326,7 @@ class UserFile < Node
   # @return [true or false] - depends upon whether file can be deleted.
   def deletable?
     %w(User Node Job).include?(parent_type) &&
-      ((scope == "private" || scope == "public") || !(in_space? && space_object.verified?))
+      (scope.in?([SCOPE_PUBLIC, SCOPE_PRIVATE]) || !(in_space? && space_object.verified?))
   end
 
   # Check, whether file is piblishable, i.e. to be 'public'.
@@ -333,7 +335,7 @@ class UserFile < Node
   # @param scope_to_publish_to [String] a scope to be published to.
   # @return [true, false] Returns true if a file can be published by a user,
   #   false otherwise.
-  def publishable_by?(context, scope_to_publish_to = "public")
+  def publishable_by?(context, scope_to_publish_to = SCOPE_PUBLIC)
     publishable?(context.user) &&
       !parent_comparison? &&
       [STATE_CLOSED, STATE_PUBLISHING].include?(state)

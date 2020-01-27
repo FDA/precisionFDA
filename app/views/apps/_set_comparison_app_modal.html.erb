@@ -1,0 +1,22 @@
+<div id="set_comparison_app_modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Set comparison app</h4>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to set this app as comparison default?</p>
+      </div>
+      <div class="modal-footer">
+        <%= form_tag admin_comparison_app_path, method: :post do %>
+          <input type="hidden" name="id" value="<%= app_id %>">
+          <button class="btn btn-default" data-dismiss="modal" tabindex="-1" >No</button>
+          <button type="submit" class="btn btn-primary">Yes</button>
+        <% end %>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

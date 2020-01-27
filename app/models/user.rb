@@ -431,42 +431,6 @@ class User < ApplicationRecord
     end
   end
 
-  def self.sync_comparison!(context, comparison_id)
-    return if context.guest?
-    user = context.user
-    token = context.token
-    comparison = user.comparisons.find(comparison_id)
-    if comparison.state == "pending"
-      result = DNAnexusAPI.new(token).call("system", "findJobs",
-        includeSubjobs: false,
-        id: [comparison.dxjobid],
-        project: user.private_comparisons_project,
-        parentJob: nil,
-        parentAnalysis: nil,
-        describe: true,)["results"][0]
-      sync_comparison_state(result, comparison, user, token)
-    end
-  end
-
-  def self.sync_comparisons!(context)
-    return if context.guest?
-    user = context.user
-    token = context.token
-    # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-    Comparison.where(user_id: user.id).where(state: "pending").all.each_slice(1000) do |comparisons|
-      comparisons_hash = comparisons.map { |c| [c.dxjobid, c] }.to_h
-      DNAnexusAPI.new(token).call("system", "findJobs",
-        includeSubjobs: false,
-        id: comparisons_hash.keys,
-        project: user.private_comparisons_project,
-        parentJob: nil,
-        parentAnalysis: nil,
-        describe: true,)["results"].each do |result|
-        sync_comparison_state(result, comparisons_hash[result["id"]], user, token)
-      end
-    end
-  end
-
   def self.sync_challenge_job!(job_id)
     user = User.challenge_bot
     token = CHALLENGE_BOT_TOKEN
@@ -596,62 +560,6 @@ class User < ApplicationRecord
     else
       # NOTE we should never be here
       raise "Unsupported response for file #{file.uid}: #{result}"
-    end
-  end
-
-  def self.sync_comparison_state(result, comparison, user, token)
-    state = result["describe"]["state"]
-    return unless (state == "done") || (state == "failed")
-    # NOTE: comparison and job state are only comparable here because state is either "done" or "failed"
-    return if state == comparison.state
-    if state == "done"
-      temp_meta = result["describe"]["output"]["meta"]
-      temp_meta["weighted_roc"]["data"] = temp_meta["weighted_roc"]["data"].last(100)
-      output_keys = []
-      output_ids = []
-      output_file_cache = []
-      result["describe"]["output"].keys.each do |key|
-        # NOTE: meta is the only field of result["describe"]["output"] modified
-        next if key == "meta"
-        output_keys << key
-        output_ids << result["describe"]["output"][key]["$dnanexus_link"]
-      end
-      DNAnexusAPI.new(token).call("system", "describeDataObjects", objects: output_ids)["results"].each_with_index do |api_result, i|
-        raise unless api_result["describe"].present? && api_result["describe"]["state"] == "closed"
-        output_file_cache.push(
-          dxid: output_ids[i],
-          project: user.private_comparisons_project,
-          name: api_result["describe"]["name"],
-          state: 'closed',
-          description: output_keys[i],
-          user_id: user.id,
-          scope: 'private',
-          file_size: api_result["describe"]["size"],
-          parent: comparison,
-        )
-      end
-
-      Comparison.transaction do
-        comparison.reload
-        if state != comparison.state
-          output_file_cache.each do |output_file|
-            file = UserFile.create!(output_file)
-            Event::FileCreated.create_for(file, user)
-          end
-          comparison.meta = temp_meta
-          comparison.state = state
-          comparison.save!
-        end
-      end
-    else
-      # Comparison state failed
-      Comparison.transaction do
-        comparison.reload
-        if state != comparison.state
-          comparison.state = state
-          comparison.save!
-        end
-      end
     end
   end
 
