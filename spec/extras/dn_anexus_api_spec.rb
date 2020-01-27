@@ -378,4 +378,55 @@ describe DNAnexusAPI do
       let(:expected_payload) { payload }
     end
   end
+
+  describe "#system_describe_data_objects" do
+    it_behaves_like "call" do
+      let(:objects) { ["some-file"] }
+
+      let(:client_method) { :system_describe_data_objects }
+      let(:client_method_args) { [objects, payload] }
+
+      let(:expected_subject) { "system" }
+      let(:expected_method) { "describeDataObjects" }
+      let(:expected_payload) { payload.merge(objects: objects) }
+    end
+  end
+
+  describe "#system_find_jobs" do
+    it_behaves_like "call" do
+      let(:client_method) { :system_find_jobs }
+      let(:client_method_args) { [payload] }
+
+      let(:expected_subject) { "system" }
+      let(:expected_method) { "findJobs" }
+      let(:expected_payload) { payload }
+    end
+  end
+
+  describe "#app_run" do
+    let(:app_dxid) { "some-dxid" }
+
+    context "when no revision given" do
+      it_behaves_like "call" do
+        let(:client_method) { :app_run }
+        let(:client_method_args) { [app_dxid, nil, payload] }
+
+        let(:expected_subject) { app_dxid }
+        let(:expected_method) { "run" }
+        let(:expected_payload) { payload }
+      end
+    end
+
+    context "when revision given" do
+      it_behaves_like "call" do
+        let(:revision) { "some-revision" }
+        let(:client_method) { :app_run }
+        let(:client_method_args) { [app_dxid, revision, payload] }
+
+        let(:expected_subject) { "#{app_dxid}/#{revision}" }
+        let(:expected_method) { "run" }
+        let(:expected_payload) { payload }
+      end
+    end
+  end
 end

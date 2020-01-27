@@ -51,6 +51,8 @@ Rails.application.routes.draw do
       get "resend_activation_email", to: "users#resend_activation_email"
       get "edit_user", to: "users#edit"
       get "update_user", to: "users#update"
+      post "comparison_app", to: "apps#comparison_app"
+      post "restore_comparison_app", to: "apps#restore_comparison_app"
 
       resources :organizations, only: %i(index show create) do
         post :change_org_admin, on: :collection

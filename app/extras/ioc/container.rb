@@ -81,6 +81,35 @@ module IOC
           OrgService::Provision.new(resolve("on_platform_provisioner"))
         end
       end
+
+      namespace("comparisons") do
+        namespace "sync" do
+          register("updater") { SyncService::Comparisons::ComparisonUpdater }
+
+          register("filter") { SyncService::Comparisons::ComparisonsFilter }
+
+          register("state_processor") do
+            SyncService::Comparisons::StateProcessor.new(
+              container.resolve("api.user"),
+            )
+          end
+
+          register("comparison_processor") do
+            SyncService::Comparisons::ComparisonProcessor.new(
+              resolve("state_processor"),
+              resolve("updater"),
+            )
+          end
+
+          register("synchronizer") do
+            SyncService::Comparisons::Synchronizer.new(
+              container.resolve("api.user"),
+              resolve("filter"),
+              resolve("comparison_processor"),
+            )
+          end
+        end
+      end
     end
   end
 end

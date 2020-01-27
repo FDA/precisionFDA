@@ -18,8 +18,13 @@
 class Comparison < ApplicationRecord
   include Auditor
   include Permissions
+  include Scopes
 
   DESCRIPTION_MAX_LENGTH = 1000
+
+  STATE_DONE = "done".freeze
+  STATE_FAILED = "failed".freeze
+  STATE_PENDING = "pending".freeze
 
   # comparison.user => returns the user who created the comparison
   belongs_to :user
@@ -97,7 +102,7 @@ class Comparison < ApplicationRecord
   end
 
   def self.publication_project!(context, scope)
-    if scope == "public"
+    if scope == SCOPE_PUBLIC
       context.user.public_comparisons_project
     else
       Space.from_scope(scope).project_for_user(context.user)
