@@ -936,7 +936,7 @@ class ApiController < ApplicationController
         @context.token
       end
 
-      opts = { project: file.project, preauthenticated: true, filename: file.name, duration: 300 }
+      opts = { project: file.project, preauthenticated: true, filename: file.name, duration: 9_999_999_999 }
       url = DNAnexusAPI.new(token).call(file.dxid, "download", opts)["url"]
     end
 
