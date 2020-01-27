@@ -41,7 +41,7 @@ class ProfileController < ApplicationController
 
   def provision_new_user
     if request.get?
-      @invitations = Invitation.includes(space_invitations: :space).
+      @invitations = Invitation.
         order(id: :desc).
         page(params[:page])
       @state = "step1"
