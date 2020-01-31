@@ -64,7 +64,9 @@ class SpaceFeedController
     end
 
     def null_hourly_data
-      (find_start_date.beginning_of_hour.to_i..end_date.beginning_of_hour.to_i).step(1.hour).map do |timestamp|
+      period = find_start_date.beginning_of_hour.to_i..end_date.beginning_of_hour.to_i
+
+      period.step(1.hour.seconds.to_i).map do |timestamp|
         [timestamp * 1000, 0]
       end.to_h
     end
