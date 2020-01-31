@@ -28,7 +28,7 @@ look [here](https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/).
 
       __OR__ to keep the current bundler version from Gemfile.lock, run
 
-      `gem install bundler -v 1.16.6`
+      `gem install bundler -v 2.1.4`
 
 * Install required gems
     * `bundle install`
