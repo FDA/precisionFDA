@@ -3,6 +3,7 @@ class FileViewModel
     @id = file.id
     @licenseDisplay = Precision.md.render(license?.content)
     @noteAttachModel = new Precision.models.NoteAttachModel(@id, 'UserFile')
+    @descToggle = new Precision.DescriptionToggleModel('comparisons_grid')
 
 #########################################################
 #
@@ -12,7 +13,7 @@ class FileViewModel
 #
 #########################################################
 
-FilesController = Paloma.controller('Files',
+FilesController = Paloma.controller('Files', {
   show: ->
     $container = $("body main")
     viewModel = new FileViewModel(@params.file, @params.license)
@@ -26,4 +27,4 @@ FilesController = Paloma.controller('Files',
     $container.find('[data-toggle="tooltip"]').tooltip({
       container: 'body'
     })
-)
+})

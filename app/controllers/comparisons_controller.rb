@@ -22,7 +22,6 @@ class ComparisonsController < ApplicationController
       include: [:user, {user: :org}, {taggings: :tag}]
     })
 
-    js comparisons_ids_with_descriptions(comparisons)
   end
 
   def fhir_cap
