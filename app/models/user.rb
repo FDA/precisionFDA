@@ -75,6 +75,8 @@ class User < ApplicationRecord
     davis.feng
     stanley.lan
     sean.watford
+    mitchell.mello
+    xavier.autoteststagesiteadmin
   ).freeze
 
   NON_PRODUCTION_ADMIN_ORGS = %w(
@@ -93,6 +95,7 @@ class User < ApplicationRecord
     you.li
     zivana.tezak
     pamella.tater.2
+    mitchell.mello
   ).freeze
 
   enum user_state: [:enabled, :locked, :deactivated]
