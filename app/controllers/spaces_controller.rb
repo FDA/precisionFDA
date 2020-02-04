@@ -15,7 +15,7 @@ class SpacesController < ApplicationController
   )
 
   def index
-    spaces = Space.accessible_by(@context)
+    spaces = Space.accessible_by(@context).undeleted
 
     @spaces_grid = initialize_grid(spaces, {
       name: 'spaces',
