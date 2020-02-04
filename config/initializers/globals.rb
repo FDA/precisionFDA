@@ -120,6 +120,8 @@ REVIEW_SPACE_ADMINS =
       rsa.aabramenko
       erik.barraza
       nainathangaraj.spaceadmin
+      mitchell.mello
+      william.autoteststagersa
     ).freeze
   end
 
