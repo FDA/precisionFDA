@@ -156,7 +156,6 @@ class FilesController < ApplicationController
   # Downloading file and show it in a browser tab.
   # Allow assets as well
   # Redirecting to a new tab by file url.
-  # Brakeman Security Warning of type 'Possible unprotected redirect' fix added.
   def download
     @file = UserFile.exist_refresh_state(@context, params[:id])
     if @file.state != "closed"
