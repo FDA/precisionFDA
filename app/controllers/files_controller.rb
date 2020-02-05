@@ -156,10 +156,9 @@ class FilesController < ApplicationController
   # Downloading file and show it in a browser tab.
   # Allow assets as well
   # Redirecting to a new tab by file url.
-  #
+  # Brakeman Security Warning of type 'Possible unprotected redirect' fix added.
   def download
-    @file = UserFile.exist_refresh_state(@context, unsafe_params[:id])
-
+    @file = UserFile.exist_refresh_state(@context, params[:id])
     if @file.state != "closed"
       flash[:error] = "Files can only be downloaded if they are in the 'closed' state"
       redirect_to file_path(@file)
@@ -167,9 +166,8 @@ class FilesController < ApplicationController
       flash[:error] = "You must accept the license before you can download this"
       redirect_to @file.parent_type == "Asset" ? asset_path(@file) : file_path(@file)
     else
-      file_url = @file.file_url(@context, unsafe_params[:inline])
-
-      redirect_to file_url
+      file_url = @file.file_url(@context, params[:inline])
+      redirect_to URI.parse(file_url).to_s
     end
   end
 
