@@ -28,6 +28,10 @@ class AppEditorModel
     )
     @code = ko.observable(app?.internal?.code)
 
+    @showUbuntuVersionSelect = ko.computed(() =>
+      return !@isNewApp or @mode == 'fork'
+    )
+
     # Assets
     @assetsSelector = new Precision.models.AssetsModel
     @assets = ko.observableArray()
