@@ -10,26 +10,12 @@
         <label>Title</label>
         <input type="text" class="form-control" placeholder="Enter app title - you can change this later" data-bind="textInput: title" />
       </div>
+      <!-- ko if: showUbuntuVersionSelect -->
       <div class="form-group">
         <label>Ubuntu Release</label>
-        <select
-          class="form-control"
-          data-bind="
-            attr: { disabled: !isNewApp},
-            options: ubuntuReleases,
-            value: release,
-            optionsCaption: 'Please select...',
-          "
-        ></select>
-        <span
-          class="fa fa-question-circle"
-          data-bind="visible: !isNewApp"
-          data-placement="top"
-          data-toggle="tooltip"
-          title="Unable to change Ubuntu release when editing an app.
-          To change Ubuntu release you have to fork an app or to create a new one."
-        ></span>
+        <select class="form-control" data-bind="options: ubuntuReleases, value: release, optionsCaption: 'Please select...'"></select>
       </div>
+      <!-- /ko -->
       <div class="pull-right">
         <span class="btn-static text-muted" data-bind="visible: !isNewApp" style="display: none"><span data-bind="text: 'Revision ' + revision()"></span>&nbsp;<span class="fa fa-long-arrow-right fa-fw"></span></span>
         <div class="btn-group">
