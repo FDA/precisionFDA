@@ -17,18 +17,20 @@
 </div>
 
 <script>
-var g = new dagreD3.graphlib.Graph().setGraph({});
+window.trackPageDrawGraph = function() {
+  var g = new dagreD3.graphlib.Graph().setGraph({});
 
-<%= raw graph_nodes(@graph) %>
-<%= raw graph_edges(@graph) %>
+  <%= raw graph_nodes(@graph) %>
+  <%= raw graph_edges(@graph) %>
 
-var svg = d3.select("svg.track-canvas"),
-    inner = svg.select("g");
+  var svg = d3.select("svg.track-canvas"),
+      inner = svg.select("g");
 
-var render = new dagreD3.render();
+  var render = new dagreD3.render();
 
-render(inner, g);
+  render(inner, g);
 
-svg.attr("height", g.graph().height + 2);
-svg.attr("width", g.graph().width + 2);
+  svg.attr("height", g.graph().height + 2);
+  svg.attr("width", g.graph().width + 2);
+}
 </script>
