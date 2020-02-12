@@ -191,18 +191,21 @@ class Challenge < ApplicationRecord
     closed?
   end
 
+  # Checks if user can assign a new app to a challenge.
+  # @param context [Context] User context.
+  # @param checked_app [App] Assignable app.
+  # @return [Boolean] Returns true if user can assign a new app to a challenge,
+  #   false otherwise.
   def can_assign_specific_app?(context, checked_app)
-    return false unless context.logged_in?
-    return false if over?
-
-    return unless [STATUS_PAUSED, STATUS_SETUP].include?(status)
-
-    return false unless app_owner == context.user
-    return true if app_id.blank?
-    return false if app_id == checked_app.id
-    return true if submissions.empty?
-
-    app.input_spec == checked_app.input_spec
+    if !context.logged_in? ||
+       over? ||
+       ![STATUS_PAUSED, STATUS_SETUP].include?(status) ||
+       app_owner != context.user ||
+       app_id == checked_app.id
+      false
+    else
+      true
+    end
   end
 
   def is_viewable?(context)
