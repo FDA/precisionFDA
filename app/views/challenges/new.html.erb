@@ -13,8 +13,14 @@
     <%= render "common_inputs", f: f %>
     <div class="form-group">
       <div class="col-sm-offset-3">
-        <%= f.submit "Create", class: 'btn btn-primary', data: {disable_with: "Creating..."} %>
+        <%= f.submit "Create", class: 'btn btn-primary', data: {
+          disable_with: "Creating...",
+          bind: 'enable: imageUrl'
+        } %>
       </div>
+    </div>
+    <div class="col-sm-offset-3 text-muted pfda-padded-v" data-bind="visible: !imageUrl()">
+      Please upload an image for the challenge.
     </div>
   <% end %>
 </div>
