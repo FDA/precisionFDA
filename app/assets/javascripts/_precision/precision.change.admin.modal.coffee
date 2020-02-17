@@ -22,7 +22,7 @@ class ChangeAdminModal
       @users([])
       return false
     @isLoading(true)
-    $.get('/admin/users', { search: @searchString(), org: @orgid }).then(
+    $.get('/admin/all_users', { search: @searchString(), org: @orgid }).then(
       (data) =>
         users = data.users.map((user) -> new User(user))
         @users(users)
