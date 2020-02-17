@@ -165,12 +165,15 @@ module Admin
       @user = User.find_by_dxuser(unsafe_params[:dxuser])
     end
 
+    # Selects all users, according search string for the given org.
+    # Users selected are not in 'pending' state.
+    # @param search [String] - search string
+    # @param org [String] - org handle string
+    # @return users [Array of User objects] - an array of users, searched by search string match.
     def all_users
-      query = ['%' + unsafe_params["search"] + '%']
-      org = unsafe_params[:org]
-      org = Org.find_by_handle(org) rescue nil
-      org_id = org.id rescue nil
-      render json: { users: User.where("(dxuser like ? or first_name like ? or last_name like ?) and org_id = ? and id <> ?", *(query * 3),org_id, org.admin.id).limit(20) }
+      users = User.org_members(params[:search], params[:org])
+
+      render json: { users: users }
     end
 
     def user_org_admin?(user)

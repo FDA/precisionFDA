@@ -118,7 +118,7 @@ class User < ApplicationRecord
     UserFile::STATE_REMOVING,
   ].freeze
 
-  has_many :uploaded_files, class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'
+  has_many :uploaded_files, class_name: "UserFile", dependent: :restrict_with_exception, as: "parent"
   has_many :user_files
   has_many :assets
   has_many :comparisons
@@ -137,7 +137,7 @@ class User < ApplicationRecord
   has_one :appathon
   has_many :meta_appathons
   has_one :expert
-  has_many :challenge_app_owners, class_name: 'Challenge', foreign_key: 'app_owner_id'
+  has_many :challenge_app_owners, class_name: "Challenge", foreign_key: "app_owner_id"
   has_many :submissions
   has_many :challenge_resources
   has_many :analyses
@@ -163,6 +163,8 @@ class User < ApplicationRecord
   acts_as_tagger
 
   scope :real, -> { where.not(dxuser: CHALLENGE_BOT_DX_USER) }
+  scope :pending, -> { where.not(last_login: nil) }
+  scope :belongs_to_org, ->(org_id) { where(org_id: org_id) }
 
   # Have the ability to create new review spaces and have full access to
   # activities available within reviewer and cooperative areas.
@@ -171,7 +173,7 @@ class User < ApplicationRecord
   validates :first_name, length: { minimum: 2, message: "The first name must be at least two letters long." }, presence: true
   validates :last_name, length: { minimum: 2, message: "The last name must be at least two letters long." }, presence: true
   validates :email, presence: true, uniqueness: { case_sensitive: false }
-  validates :disable_message, length: { maximum: 250 , message: "Deactivation reason is too long (over 250 characters)"}
+  validates :disable_message, length: { maximum: 250, message: "Deactivation reason is too long (over 250 characters)" }
 
   def self.challenge_bot
     find_by!(dxuser: CHALLENGE_BOT_DX_USER)
@@ -278,7 +280,7 @@ class User < ApplicationRecord
   end
 
   def appathon_from_meta(meta_appathon)
-    following_by_type('Appathon').find do |appathon|
+    following_by_type("Appathon").find do |appathon|
       appathon.meta_appathon.uid == meta_appathon.uid
     end
   end
@@ -288,7 +290,7 @@ class User < ApplicationRecord
       SITE_ADMINS.include?(dxuser)
     else
       NON_PRODUCTION_ADMIN_ORGS.include?(org.handle) &&
-      org.admin_id == id ||
+        org.admin_id == id ||
         SITE_ADMINS.include?(dxuser)
     end
   end
@@ -312,6 +314,26 @@ class User < ApplicationRecord
 
   def is_challenge_admin?
     (can_administer_site? || ["singer.ma", "ezekiel.maier", "errol.strain"].include?(dxuser))
+  end
+
+  # Selects users, according search string.
+  # Users selected are the given org members and are not in 'pending' state.
+  # @param search [String] - search string
+  # @param org [String] - org handle string
+  # @return [ActiveRecord::Relation<User>] - an array of users, searched by search string match.
+  def self.org_members(search, org)
+    org = Org.find_by(handle: org)
+    org_id = org&.id
+
+    query = "%" + sanitize_sql_like(search) + "%"
+    users = User.arel_table
+
+    where(users[:dxuser].matches(query).
+      or(users[:first_name].matches(query)).
+      or(users[:last_name].matches(query))).
+      belongs_to_org(org_id).
+      pending.
+      limit(ORG_MEMBERS_SEARCH_LIMIT)
   end
 
   def self.validate_email(email)
@@ -388,6 +410,7 @@ class User < ApplicationRecord
 
   def self.sync_challenge_bot_files!(context)
     return if context.guest?
+
     user = User.challenge_bot
     token = CHALLENGE_BOT_TOKEN
 
@@ -423,6 +446,7 @@ class User < ApplicationRecord
 
   def self.sync_assets!(context)
     return if context.guest?
+
     user = context.user
     token = context.token
 
@@ -452,6 +476,7 @@ class User < ApplicationRecord
 
   def self.sync_job!(context, job_id)
     return if context.guest?
+
     user = context.user
     token = context.token
     job = Job.accessible_by(context).find(job_id) # Re-check job id
@@ -465,11 +490,13 @@ class User < ApplicationRecord
       parentAnalysis: job.analysis.try(:dxid),
       describe: true,)["results"][0]
     return if result.blank?
+
     sync_job_state(result, job, user, token)
   end
 
   def self.sync_jobs!(context, jobs = Job.includes(:analysis), project = nil)
     return if context.guest?
+
     user_id = context.user_id
     token = context.token
     user = User.find(user_id)
@@ -479,14 +506,18 @@ class User < ApplicationRecord
       jobs_hash.keys.each do |job_dxid|
         job_project = project ? project : Job.find_by(dxid: job_dxid).project
 
-        response = DNAnexusAPI.new(token).call("system", "findJobs",
+        response = DNAnexusAPI.new(token).call(
+          "system",
+          "findJobs",
           includeSubjobs: false,
           id: [job_dxid],
           project: job_project || user.private_files_project,
           parentJob: nil,
-          describe: true,)
+          describe: true,
+        )
         response["results"].each do |result|
           next if result.blank?
+
           sync_job_state(result, jobs_hash[result["id"]], user, token)
         end
       end
@@ -570,6 +601,7 @@ class User < ApplicationRecord
     state = result["describe"]["state"]
     # Only do anything if local job state is stale
     return if state == job.state
+
     if state == "done"
       # Use serialization to deep copy result since output will be modified
       output = JSON.parse(result["describe"]["output"].to_json)
@@ -580,6 +612,7 @@ class User < ApplicationRecord
         raise if output[key].is_a?(Array)
         next unless output[key].is_a?(Hash)
         raise unless output[key].key?("$dnanexus_link")
+
         output_file_id = output[key]["$dnanexus_link"]
         output_file_ids << output_file_id
         output[key] = output_file_id
@@ -592,13 +625,13 @@ class User < ApplicationRecord
             dxid: slice_of_file_ids[i],
             project: job.project || user.private_files_project,
             name: api_result["describe"]["name"],
-            state: 'closed',
+            state: "closed",
             description: "",
             user_id: user.id,
-            scope: job.scope || 'private',
+            scope: job.scope || "private",
             file_size: api_result["describe"]["size"],
             parent: job,
-            parent_folder_id: job.local_folder_id
+            parent_folder_id: job.local_folder_id,
           )
         end
       end
