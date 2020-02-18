@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_30_035747) do
+ActiveRecord::Schema.define(version: 2019_11_14_163821) do
 
   create_table "accepted_licenses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -155,7 +155,6 @@ ActiveRecord::Schema.define(version: 2020_01_30_035747) do
     t.boolean "automated", default: true
     t.string "card_image_url"
     t.string "card_image_id"
-    t.integer "specified_order"
     t.index ["admin_id"], name: "index_challenges_on_admin_id"
     t.index ["app_id"], name: "index_challenges_on_app_id"
     t.index ["app_owner_id"], name: "index_challenges_on_app_owner_id"
@@ -870,6 +869,8 @@ ActiveRecord::Schema.define(version: 2020_01_30_035747) do
     t.index ["workflow_series_id"], name: "index_workflows_on_workflow_series_id"
   end
 
+  add_foreign_key "accepted_licenses", "licenses"
+  add_foreign_key "accepted_licenses", "users"
   add_foreign_key "analyses", "workflows"
   add_foreign_key "answers", "discussions"
   add_foreign_key "answers", "notes"
