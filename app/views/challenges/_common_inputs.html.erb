@@ -28,6 +28,14 @@
     <%= f.text_field :end_at, value: @challenge.end_at.try(:to_s, :datepicker), class: "form-control add-datetimepicker", placeholder: 'Select date', required: "required", readonly: @challenge.over? %>
   </div>
 </div>
+<% if @challenge.persisted? %>
+  <div class="form-group required">
+  <%= f.label :replacement_id, "Order", class: 'control-label col-sm-2' %>
+  <div class="col-sm-11 col-sm-offset-1">
+    <%= f.select :replacement_id, options_for_select(challenge_order_for_select, selected: @challenge.id), {}, class: "form-control" %>
+  </div>
+</div>
+<% end %>
 <div class="form-group required">
   <%= f.label :card_image_url, "Card image", class: 'control-label col-sm-2' %>
   <div class="col-sm-11 col-sm-offset-1">
