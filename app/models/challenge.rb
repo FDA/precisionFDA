@@ -17,7 +17,6 @@
 #  automated      :boolean          default(TRUE)
 #  card_image_url :string(255)
 #  card_image_id  :string(255)
-#  specified_order  :integer
 #
 
 class Challenge < ApplicationRecord
@@ -38,9 +37,6 @@ class Challenge < ApplicationRecord
 
   acts_as_followable
 
-  after_create :initialize_order
-
-  attr_accessor :replacement_id
   store :meta, accessors: [:regions], coder: JSON
 
   scope :automated, -> { where(automated: true) }
@@ -60,12 +56,6 @@ class Challenge < ApplicationRecord
             unless: :status_setup?
   validate :validate_end_at
   validate :validate_start_at
-
-  # Add specified_order to challenge equal to it's id.
-  # Usage in a challenges create on Challenges#new
-  def initialize_order
-    self.specified_order = self.id
-  end
 
   def self.available_statuses
     [STATUS_SETUP, STATUS_OPEN, STATUS_PAUSED, STATUS_ARCHIVED, STATUS_RESULT_ANNOUNCED]
@@ -89,9 +79,9 @@ class Challenge < ApplicationRecord
 
   def self.featured(context)
     if context.challenge_admin?
-      not_archived.order(specified_order: "desc")
+      not_archived
     else
-      where.not(status: [STATUS_SETUP, STATUS_ARCHIVED]).order(specified_order: "desc")
+      where.not(status: [STATUS_SETUP, STATUS_ARCHIVED])
     end
   end
 
@@ -247,29 +237,6 @@ class Challenge < ApplicationRecord
     update_attributes(
       card_image_url: DNAnexusAPI.for_challenge_bot.generate_permanent_link(card_image)
     )
-  end
-
-  # Updates specified_order of challenges setting challenge to appear after replacement challenge.
-  # Usage in edit on Challenges#edit
-  def update_order(replacement_id)
-    return unless replacement_id
-    replacement_challenge = Challenge.find(replacement_id)
-    order_array = Challenge.order(specified_order: "desc").pluck(:id)
-    order_array.delete(id)
-    order_array.insert(order_array.index(replacement_challenge.id) + 1, id)
-    ids = Challenge.order(id: "desc").pluck(:id)
-    order_array.each.with_index do |o, i|
-      Challenge.find(o).update(specified_order: ids[i])
-    end
-  end
-
-  # Returns a string that contains name of the challenge followed by its specified order.
-  # Usage in challenge_order_for_select on Challenges#new and Challenges#edit
-  # @example Challenge display name
-  #   challenge.display_name => "test challenge (1)"
-  # @return [String] name to display on challenge new/edit page.
-  def display_name
-    "#{name} (#{specified_order})"
   end
 
   private
