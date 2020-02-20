@@ -96,7 +96,6 @@ class ProfileContactsModel
       $.ajax({
         method: 'PUT',
         url: '',
-        contentType: 'multipart/form-data',
         data: data,
         success: (data) =>
           message = 'Data successfully updated!'
