@@ -31,7 +31,6 @@ class Invitation < ApplicationRecord
   paginates_per 10
 
   include Auditor
-  include Humanizer
 
   belongs_to :user
   belongs_to :country
@@ -62,8 +61,6 @@ class Invitation < ApplicationRecord
            # :validate_state,
            :validate_phone_country_code,
            on: :create
-
-  require_human_on :create, unless: -> { Rails.env.test? }
 
   store :extras,
         accessors: %i(
