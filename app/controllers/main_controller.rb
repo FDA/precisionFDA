@@ -1,11 +1,13 @@
 class MainController < ApplicationController
+  include Recaptcha::Adapters::ControllerMethods
+
   skip_before_action :require_login, only: %i(
     index
     about
     login
     return_from_login
     request_access
-    create_request_access terms
+    create_request_access
     guidelines
     browse_access
     destroy
@@ -13,6 +15,7 @@ class MainController < ApplicationController
     news
     mislabeling
   )
+
   skip_before_action :require_login, only: %i(track ae_anomaly_detection)
   before_action :require_login_or_guest, only: %i(track)
   before_action :init_countries, only: %i(request_access create_request_access)
@@ -318,7 +321,7 @@ class MainController < ApplicationController
   def request_access
     @invitation = Invitation.new
 
-    js usa_id: Country.find_by(name: "United States").id,
+    js usa_id: Country.usa.id,
        country_codes: Country.countries_for_codes,
        phone_confirmed: unsafe_params.dig(:invitation, :phone_confirmed)
   end
@@ -562,8 +565,6 @@ class MainController < ApplicationController
       req_software
       research_intent
       clinical_intent
-      humanizer_answer
-      humanizer_question_id
     )
 
     hsh = unsafe_params[:invitation].slice(*fields)

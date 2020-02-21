@@ -32,7 +32,6 @@ en:
   activerecord:
     attributes:
       invitation:
-        humanizer_answer: "Answer"
         org: "Organization"
 
   activemodel:

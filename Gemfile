@@ -45,11 +45,8 @@ gem "sprockets", ">= 3.7.2"
 
 gem "hashdiff", [">= 1.0.0.beta1", "< 2.0.0"]
 
-# Captcha
-gem "humanizer"
-
 # For reCaptcha
-gem "recaptcha", require: "recaptcha/rails"
+gem "recaptcha"
 
 # Excel spreadsheet generation
 gem "axlsx", "3.0.0.pre"
