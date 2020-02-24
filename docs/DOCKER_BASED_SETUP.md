@@ -19,16 +19,42 @@ your OS.
 
 ## Setting up
 
-In order to set up application you have to setup database first. To do so
-you have to run application by executing this command from project's root:
+### 1. Configure
+
+- Create a `config/database.yml` file containing the database configuration for the portal.
+  - You can use [`database.yml.sample` file](../config/database.yml.sample) as a template.
+  - *Optionally*, update the configuration copied from the sample file as needed.
+- Create a `.env` file in the project root with an additional environment variables to be passed into Docker containers.
+  - See [`.env.sample` file](../.env.sample) for a reference.
+  - To run the portal on a local machine, configure at least:
+    - `NO_FIPS=1` - disables FIPS mode
+    - `REDIS_WORKER_URL=redis://redis` - points Sidekiq to a running Redis instance. Use `redis` hostname to point to an instance created with `docker-compose`.
+    - `ADMIN_TOKEN` (ask your teammate for this one)
+
+### 2. Build & start
+
+Execute the following command from project's root:
 
 `$ docker-compose up --build`
 
-This could take awhile since during first run all required software 
-will be installed. Once you have containers up and running, run this command to
+This could take a while since during first run all required software 
+will be installed.
+
+### 3. Prepare the database
+
+#### Quick setup
+
+Once you have containers up and running, run this command to set-up your database:
+`docker-compose exec web bundle exec rake {db:setup,db:migrate,user:generate_test_users}`
+
+After this, you'll be able to use shared DEV credentials to log-in to the system (ask Pamella or somebody from the team to get those).
+
+#### Full setup
+
+To use your own account to log-in to the system, run the command to
 create database with the environment variables set with your account's data (if you don't have
-an account yet, please refer to 
-[new account registration](DEVELOPMENT_SETUP.md#New account registration)):
+an account yet, please refer to
+[New account registration](DEVELOPMENT_SETUP.md#new-account-registration)):
 ```
 docker-compose exec \
     -e PFDA_USER_FIRST_NAME=Florante \
@@ -39,14 +65,12 @@ docker-compose exec \
     web bundle exec rake {db:setup,db:migrate,user:generate_test_users}
 ```
 
-__OR__
+### 4. Validate the setup
 
-If you don't want to use your personal account you may omit all
-environment variables and just run
-
-`docker-compose exec web bundle exec rake {db:setup,db:migrate,user:generate_test_users}`
-
-After this step you have all the required to start development.
+Once the application is correctly installed & configured, you should be able to access the portal at:
+```
+https://localhost:3000/
+```
 
 ## Running application
 
