@@ -4,7 +4,7 @@ class ChallengesController < ApplicationController
   before_action :check_on_challenge_admin, only: %i(new create)
   before_action :find_editable_challenge, only: %i(edit update edit_page announce_result)
 
-  helper_method :app_owners_for_select
+  helper_method :app_owners_for_select, :host_lead_dxusers, :guest_lead_dxusers
 
   def index
     @consistency_challenge = FixedChallenge.consistency(@context)
@@ -24,6 +24,7 @@ class ChallengesController < ApplicationController
 
       if @challenge.save
         @challenge.update_card_image_url!
+        @challenge.provision_space!(@context, challenge_params[:host_lead_dxuser], challenge_params[:guest_lead_dxuser])
         redirect_to challenge_path(@challenge)
       else
         js challenge_params.to_h
@@ -40,6 +41,11 @@ class ChallengesController < ApplicationController
     ActiveRecord::Base.transaction do
       if @challenge.update(update_challenge_params)
         @challenge.update_card_image_url!
+
+        unless @challenge.space
+          @challenge.provision_space!(@context, challenge_params[:host_lead_dxuser], challenge_params[:guest_lead_dxuser])
+        end
+
         flash[:success] = "The challenge was updated successfully."
         redirect_to challenge_path(@challenge)
       else
@@ -279,6 +285,18 @@ class ChallengesController < ApplicationController
     @app_owners_candidates = User.real.map { |u| [u.select_text, u.id] if u.org }.compact
   end
 
+  # Returns a collection of Site admins and challenge admins
+  # @return [Array<String>] dxids of Site admins and challenge admins
+  def host_lead_dxusers
+    User::SITE_ADMINS + User::CHALLENGE_ADMINS
+  end
+
+  # Returns a collection of Site admins, challenge evaluators and challenge admins
+  # @return [Array<String>] dxids of Site admins, challenge evaluators and challenge admins
+  def guest_lead_dxusers
+    host_lead_dxusers + User::CHALLENGE_EVALUATORS
+  end
+
   def find_editable_challenge
     @challenge = Challenge.find(unsafe_params[:id])
 
@@ -295,7 +313,7 @@ class ChallengesController < ApplicationController
     params.require(:challenge)
       .permit(
         :name, :description, :app_owner_id, :start_at, :end_at, :status,
-        :regions, :card_image_id, :card_image_url
+        :regions, :card_image_id, :card_image_url, :host_lead_dxuser, :guest_lead_dxuser
       )
 
   end

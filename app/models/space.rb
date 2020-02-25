@@ -32,6 +32,7 @@ class Space < ActiveRecord::Base
   belongs_to :space
   belongs_to :space_template
   belongs_to :sponsor_org, class_name: "Org"
+  has_one :challenge
 
   has_and_belongs_to_many :space_memberships
 
@@ -246,8 +247,20 @@ class Space < ActiveRecord::Base
     leads.host.first
   end
 
+  # Returns dxuser of host_lead of the space.
+  # @return [String] dxuser of the host lead of the space.
+  def host_lead_dxuser
+    host_lead_member.user.dxuser
+  end
+
   def guest_lead
     guest_lead_member.user
+  end
+
+  # Returns dxuser of guest_lead of the space.
+  # @return [String] dxuser of the guest lead of the space.
+  def guest_lead_dxuser
+    guest_lead_member.user.dxuser
   end
 
   def guest_lead_member
