@@ -239,7 +239,7 @@ GEM
     mysql2 (0.5.2)
     nenv (0.3.0)
     nio4r (2.3.1)
-    nokogiri (1.10.4)
+    nokogiri (1.10.8)
       mini_portile2 (~> 2.4.0)
     nori (2.6.0)
     notiffany (0.1.1)
