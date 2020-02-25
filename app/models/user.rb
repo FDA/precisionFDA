@@ -98,6 +98,11 @@ class User < ApplicationRecord
     mitchell.mello
   ).freeze
 
+  CHALLENGE_ADMINS = %w(
+    ezekiel.maier
+    errol.strain
+  ).freeze
+
   enum user_state: [:enabled, :locked, :deactivated]
 
   SITE_ADMINS = begin
@@ -313,7 +318,7 @@ class User < ApplicationRecord
   end
 
   def is_challenge_admin?
-    (can_administer_site? || ["singer.ma", "ezekiel.maier", "errol.strain"].include?(dxuser))
+    can_administer_site? || CHALLENGE_ADMINS.include?(dxuser)
   end
 
   # Selects users, according search string.

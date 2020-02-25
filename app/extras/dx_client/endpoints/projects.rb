@@ -40,6 +40,17 @@ module DXClient
         call(project_dxid, "invite", opts.merge(invitee: invitee, level: level))
       end
 
+      # Decreases user permissions from provided project.
+      # @see https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-decreasepermissions
+      # @param project_dxid [String] Projects's dxid.
+      # @param level [String] level of permission
+      # @param user_dxid [String] User's dxid.
+      # @param opts [Hash] Additional options.
+      # @return [Hash]
+      def project_decrease_permissions(project_dxid, level, user_dxid)
+        call(project_dxid, "decreasePermissions", {"#{user_dxid}": level})
+      end
+
       # Destroys project.
       # @see https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-xxxx-destroy
       # @param project_dxid [String] Project to destroy.
