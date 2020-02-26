@@ -69,7 +69,7 @@ class Country < ApplicationRecord
     "WA": "Washington",
     "WV": "West Virginia",
     "WI": "Wisconsin",
-    "WY": "Wyoming"
+    "WY": "Wyoming",
   }.freeze
 
   class << self
@@ -90,8 +90,8 @@ class Country < ApplicationRecord
     end
 
     def countries_for_codes
-      country_codes_array = Country.pluck(:dial_code, :id)
-                             .reject {|i| i[0].empty? }
+      country_codes_array = Country.pluck(:dial_code, :id).
+        reject { |i| i[0].empty? }
       country_codes_hash = country_codes_array.to_h
       new_hash = {}
       country_codes_hash.keys.each { |key| new_hash[key] = [] }
