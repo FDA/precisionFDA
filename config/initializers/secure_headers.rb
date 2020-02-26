@@ -1,3 +1,4 @@
+# rubocop:disable Lint/PercentStringArray
 SecureHeaders::Configuration.default do |config|
   config.hsts = "max-age=#{20.years.to_i}; includeSubDomains; preload"
   config.x_frame_options = "DENY"
@@ -58,3 +59,4 @@ SecureHeaders::Configuration.default do |config|
     report_only: false
   }
 end
+# rubocop:enable Lint/PercentStringArray
