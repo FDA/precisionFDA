@@ -327,7 +327,11 @@ class MainController < ApplicationController
   end
 
   def create_request_access
-    @invitation = RequestAccessService.create_request_for_access(invitation_params)
+    @invitation = Invitation.new
+
+    if verify_recaptcha(model: @invitation)
+      @invitation = RequestAccessService.create_request_for_access(invitation_params)
+    end
 
     render :request_access
   end
