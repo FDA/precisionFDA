@@ -310,7 +310,7 @@ class SubmissionsController < ApplicationController
   def clone_inputs_to_space
     api = DIContainer.resolve("api.user")
     api.project_invite(@context.user.private_files_project, "user-#{CHALLENGE_BOT_DX_USER}", "VIEW", {suppressEmailNotification: true, suppressAllNotifications: true})
-    files = @inputs.values.map {|v| UserFile.accessible_by(@context).where(uid: v).first }
+    files = @inputs.values.map { |v| UserFile.accessible_by(@context).find_by(uid: v) }.compact
 
     unless files.empty?
       UserFile.transaction do
