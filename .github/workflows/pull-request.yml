@@ -1,0 +1,84 @@
+name: Pull-Request Check
+on: pull_request
+
+jobs:
+  staticAnalysis:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Fetch Git branches
+        run: git fetch
+
+      - name: Lint
+        uses: HeRoMo/pronto-action@v0.4.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          runner: rubocop
+
+      - name: Brakeman
+        uses: HeRoMo/pronto-action@v0.4.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          runner: brakeman
+
+      - name: Rails Best Practices
+        uses: HeRoMo/pronto-action@v0.4.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          runner: rails_best_practices
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: staticAnalysis # Skip this if static analysis failed
+    container: ruby:2.6.5
+
+    services:
+      mysql:
+        image: mysql:5.6
+        env:
+          MYSQL_ROOT_PASSWORD: password
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install & Build
+        run: |
+          apt-get update
+          apt-get install -y cmake libssl-dev
+          gem install bundler -v 2.1.4
+          bundle install --jobs 4 --retry 3
+
+      - name: Configure
+        env:
+          NO_FIPS: 1
+        run: |
+          cp config/database.yml.ci config/database.yml
+          bundle exec rake db:setup
+
+      - name: Unit Tests
+        env:
+          NO_FIPS: 1
+        run: bundle exec rake
+
+  checkDependencies:
+    name: Dependencies Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node Environment
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10.x
+
+      - name: Install Snyk
+        run: npm i -g snyk
+
+      - name: Check
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          snyk test --file=Gemfile.lock --org=dnanexus
