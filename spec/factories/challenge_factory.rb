@@ -17,11 +17,11 @@
 #  automated      :boolean          default(TRUE)
 #  card_image_url :string(255)
 #  card_image_id  :string(255)
+#  space_id       :integer
 #
 
 FactoryBot.define do
   factory :challenge do
-
     name { "challenge_name" }
     status { Challenge::STATUS_SETUP }
     start_at { 10.days.ago }
@@ -40,6 +40,5 @@ FactoryBot.define do
     trait :skip_validate do
       to_create { |instance| instance.save(validate: false) }
     end
-
   end
 end

@@ -1,7 +1,7 @@
-require_relative 'base_rack'
+require_relative "base_rack"
+
 # Rack for testing platform requests
 class PlatformRack < BaseRack
-
   def path
     DNANEXUS_APISERVER_URI
   end
@@ -78,7 +78,11 @@ class PlatformRack < BaseRack
 
   def post_file_close(_params)
    [200, {}, [{}.to_json]]
- end
+  end
+
+  def post_project_decrease_permissions(_params)
+    [200, {}, [{ 'user-1': "NONE" }.to_json]]
+  end
 
   def parse_method_name(env)
     request_type = env["REQUEST_METHOD"].downcase
@@ -119,11 +123,12 @@ class PlatformRack < BaseRack
         "file_new"
       when /.*\/close/
         "file_close"
+      when %r{.*\/decreasePermissions}
+        "project_decrease_permissions"
       else
         raise "Method for '#{env["PATH_INFO"]}' isn't implemented yet"
       end
 
     "#{request_type}_#{method_name}"
   end
-
 end
