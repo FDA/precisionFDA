@@ -62,23 +62,3 @@ jobs:
         env:
           NO_FIPS: 1
         run: bundle exec rake
-
-  checkDependencies:
-    name: Dependencies Scan
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Setup Node Environment
-        uses: actions/setup-node@v1
-        with:
-          node-version: 10.x
-
-      - name: Install Snyk
-        run: npm i -g snyk
-
-      - name: Check
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: |
-          snyk test --file=Gemfile.lock --org=dnanexus
