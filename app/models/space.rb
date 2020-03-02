@@ -172,9 +172,7 @@ class Space < ActiveRecord::Base
   def project_for_user(user)
     member = space_memberships.find_by(user_id: user.id)
 
-    if user.review_space_admin?
-      member ||= SpaceMembership.new_by_admin(user)
-    end
+    member ||= SpaceMembership.new_by_admin(user) if user.review_space_admin? || user.challenge_bot?
 
     project_dxid(member)
   end
