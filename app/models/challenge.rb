@@ -247,11 +247,26 @@ class Challenge < ApplicationRecord
 
   # Provisions a new group space for each challenge
   # with host lead and guest lead selected by challenge creator
-  def provision_space! context, host_lead_dxuser, guest_lead_dxuser
-    space_form = SpaceForm.new(name: self.name, description: self.description, host_lead_dxuser: host_lead_dxuser, guest_lead_dxuser: guest_lead_dxuser, space_type: "groups")
+  def provision_space!(context, host_lead_dxuser, guest_lead_dxuser)
+    space_form = SpaceForm.new(
+      name: name,
+      description: description,
+      host_lead_dxuser: host_lead_dxuser,
+      guest_lead_dxuser: guest_lead_dxuser,
+      space_type: "groups",
+    )
+
     space = SpaceService::Create.call(space_form, api: context.api, user: context.user)
     membership = space.space_memberships.find_by(user_id: space.host_lead.id)
-    SpaceService::Invite.call(context.api, space, membership, User.find_by_dxuser(CHALLENGE_BOT_DX_USER), SpaceMembership::ROLE_ADMIN)
+
+    SpaceService::Invite.call(
+      context.api,
+      space,
+      membership,
+      User.find_by(dxuser: CHALLENGE_BOT_DX_USER),
+      SpaceMembership::ROLE_ADMIN,
+    )
+
     update!(space: space)
   end
 
