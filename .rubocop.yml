@@ -19,7 +19,7 @@ Style/Documentation:
   Exclude:
     - 'db/**/*'
 
-Layout/AlignHash:
+Layout/HashAlignment:
   EnforcedHashRocketStyle: key
   EnforcedColonStyle: key
   EnforcedLastArgumentHashStyle: ignore_implicit
@@ -29,7 +29,7 @@ Layout/AlignHash:
   - ignore_implicit
   - ignore_explicit
 
-Layout/AlignParameters:
+Layout/ParameterAlignment:
   EnforcedStyle: with_fixed_indentation
   SupportedStyles:
   - with_first_parameter
@@ -74,13 +74,6 @@ Style/BlockDelimiters:
   - lambda
   - proc
   - it
-
-Style/BracesAroundHashParameters:
-  EnforcedStyle: no_braces
-  SupportedStyles:
-  - braces
-  - no_braces
-  - context_dependent
 
 Layout/CaseIndentation:
   EnforcedStyle: end
@@ -171,7 +164,7 @@ Naming/FileName:
   Regex:
   IgnoreExecutableScripts: true
 
-Layout/IndentFirstArgument:
+Layout/FirstArgumentIndentation:
   EnforcedStyle: consistent
   SupportedStyles:
   - consistent
@@ -224,7 +217,7 @@ Layout/IndentationConsistency:
 Layout/IndentationWidth:
   Width: 2
 
-Layout/IndentFirstArrayElement:
+Layout/FirstArrayElementIndentation:
   EnforcedStyle: consistent
   SupportedStyles:
   - special_inside_parentheses
@@ -232,10 +225,10 @@ Layout/IndentFirstArrayElement:
   - align_brackets
   IndentationWidth:
 
-Layout/IndentAssignment:
+Layout/AssignmentIndentation:
   IndentationWidth:
 
-Layout/IndentFirstHashElement:
+Layout/FirstHashElementIndentation:
   EnforcedStyle: consistent
   SupportedStyles:
   - special_inside_parentheses
@@ -338,9 +331,9 @@ Style/PercentQLiterals:
 Naming/PredicateName:
   NamePrefix:
   - is_
-  NamePrefixBlacklist:
+  ForbiddenPrefixes:
   - is_
-  NameWhitelist:
+  AllowedMethods:
   - is_a?
   Exclude:
   - 'spec/**/*'
@@ -457,7 +450,7 @@ Style/TernaryParentheses:
   - require_no_parentheses
   AllowSafeAssignment: true
 
-Layout/TrailingBlankLines:
+Layout/TrailingEmptyLines:
   EnforcedStyle: final_newline
   SupportedStyles:
   - final_newline
@@ -468,7 +461,7 @@ Style/TrivialAccessors:
   AllowPredicates: true
   AllowDSLWriters: false
   IgnoreClassMethods: false
-  Whitelist:
+  AllowedMethods:
   - to_ary
   - to_a
   - to_c
@@ -518,7 +511,7 @@ Metrics/BlockLength:
     - 'spec/**/*.rb'
     - 'config/routes.rb'
 
-Metrics/LineLength:
+Layout/LineLength:
   Max: 100
   AllowHeredoc: true
   AllowURI: true
@@ -684,3 +677,12 @@ RSpec/MultipleExpectations:
 
 RSpec/NestedGroups:
   Max: 5
+
+Style/HashEachMethods:
+  Enabled: true
+
+Style/HashTransformKeys:
+  Enabled: true
+
+Style/HashTransformValues:
+  Enabled: true
