@@ -55,16 +55,25 @@
             </div>
           <% end %>
 
-            <div class="spaces-files-table">
-              <% if @counts[:files] + @counts[:folders] > 0 %>
+          <div class="spaces-files-table">
+            <% if @counts[:files] + @counts[:folders] > 0 %>
+              <% if @folder&.in_space? && @folder.scoped_parent_folder_id %>
                 <% breadcrumb :folder, @folder %>
-                <%= breadcrumbs style: :bootstrap, class: "breadcrumb no-border" %>
+                  <%= breadcrumbs style: :bootstrap, class: "breadcrumb no-border" %>
               <% else %>
-                <div class="alert alert-info">
-                  No records found
-                </div>
+                <ul class="breadcrumb no-border">
+                  <li class="active">
+                    <%= @folder&.name %>
+                  </li>
+                </ul>
               <% end %>
-            </div>
+
+            <% else %>
+              <div class="alert alert-info">
+                No records found
+              </div>
+            <% end %>
+          </div>
 
           <%= render "files/grid",
                      files_grid: @files_grid,
