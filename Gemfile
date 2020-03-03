@@ -117,7 +117,7 @@ group :development do
   gem "rails_best_practices", "1.19.5"
 
   # Automatic Ruby code checking tool
-  gem "rubocop", "~> 0.71.0", require: false
+  gem "rubocop"
   gem "rubocop-rails", require: false
   gem "rubocop-rspec", require: false
 
