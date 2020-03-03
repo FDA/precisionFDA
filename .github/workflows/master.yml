@@ -1,0 +1,60 @@
+name: Pull-Request Check
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Full Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Build
+        run: |
+          gem install bundler
+          bundle install --jobs 4 --retry 3
+
+      - name: Lint
+        run: rubocop
+
+      - name: Brakeman
+        run: brakeman -A --parser-timeout 30 -o gha_out/brakeman.html -w2
+
+      - name: Rails Best Practices
+        run: rails_best_practices
+
+      - name: Unit Tests
+        run: bundle exec rake
+
+  checkDependencies:
+    name: Dependencies Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node Environment
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10.x
+
+      - name: Install Snyk
+        run: npm i -g snyk
+
+      - name: Check
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk test --file=Gemfile.lock --org=dnanexus
+
+      - name: Publish
+        if: always()
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          snyk monitor --org=dnanexus --file=Gemfile.lock --project-name=precision-fda

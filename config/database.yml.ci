@@ -1,0 +1,21 @@
+default: &default
+  adapter: mysql2
+  pool: 5
+  timeout: 5000
+  host: mysql
+  username: root
+  password: password
+  variables:
+    sql_mode: TRADITIONAL
+
+development:
+  <<: *default
+  database: "dev_db"
+
+test:
+  <<: *default
+  database: "test_db"
+
+production:
+  <<: *default
+  database: "production_db"

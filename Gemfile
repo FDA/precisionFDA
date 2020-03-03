@@ -114,6 +114,8 @@ group :development do
 
   gem "listen", ">= 3.0.5", "< 3.2"
 
+  gem "rails_best_practices", "1.19.5"
+
   # Automatic Ruby code checking tool
   gem "rubocop", "~> 0.71.0", require: false
   gem "rubocop-rails", require: false
