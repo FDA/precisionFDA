@@ -239,8 +239,7 @@ class SubmissionsController < ApplicationController
       client << data
       while (msg = client.next)
         msg = JSON.parse(msg.to_s)
-        # source, msg, timestamp, level, job, line|
-        # source=SYSTEM, msg=END_LOG
+
         raise if msg["code"]
         return if msg["source"] == "SYSTEM" && msg["msg"] == "END_LOG"
 
