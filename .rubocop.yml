@@ -677,12 +677,3 @@ RSpec/MultipleExpectations:
 
 RSpec/NestedGroups:
   Max: 5
-
-Style/HashEachMethods:
-  Enabled: true
-
-Style/HashTransformKeys:
-  Enabled: true
-
-Style/HashTransformValues:
-  Enabled: true
