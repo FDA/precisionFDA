@@ -123,6 +123,7 @@ group :development do
 
   gem "pronto", "~> 0.10.0"
   gem "pronto-rubocop", require: false
+  gem "pronto-rails_best_practices", require: false
 
   gem "byebug", platforms: %i(mri mingw x64_mingw)
 
