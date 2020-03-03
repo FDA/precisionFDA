@@ -49,8 +49,6 @@ RSpec.describe SubmissionsController, type: :controller do
       before { authenticate!(user1) }
 
       it "creates a job" do
-        # expect(challenge.space.space_n).to eq({})
-
         post :create, params: {
           challenge_id: challenge.id,
           submission: { name: "1", desc: "1", inputs: valid_inputs.to_json },
