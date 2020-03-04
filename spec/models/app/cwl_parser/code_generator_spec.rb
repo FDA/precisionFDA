@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe App::CwlParser::CodeGenerator do
-  let(:cwl_file_content) { IO.read(Rails.root.join("spec", "support", "files", "docker_pull.cwl")) }
+  let(:cwl_file_content) { IO.read(Rails.root.join("spec/support/files/docker_pull.cwl")) }
   let(:cwl) { CwlPresenter.new(cwl_file_content) }
   let(:image_filepath) { "repo_image_0.1.0.tar.gz" }
 
