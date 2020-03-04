@@ -39,22 +39,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Node Environment
-        uses: actions/setup-node@v1
-        with:
-          node-version: 10.x
-
-      - name: Install Snyk
-        run: npm i -g snyk
-
-      - name: Check
+      - name: Run Snyk
+        uses: snyk/actions/ruby@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk test --file=Gemfile.lock --org=dnanexus
+        with:
+          args: --file=Gemfile.lock --org=dnanexus
 
       - name: Publish
         if: always()
+        uses: snyk/actions/ruby@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: |
-          snyk monitor --org=dnanexus --file=Gemfile.lock --project-name=precision-fda
+        with:
+          args: --file=Gemfile.lock --org=dnanexus --project-name=precision-fda
+          command: monitor
