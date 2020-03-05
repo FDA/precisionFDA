@@ -59,6 +59,14 @@
     <%= f.select :guest_lead_dxuser, options_for_select(guest_lead_dxusers, @challenge&.space&.guest_lead_dxuser), {}, selected: @challenge&.space&.guest_lead_dxuser, class: "form-control", required: "required" %>
   </div>
 </div>
+<% if @challenge.persisted? %>
+  <div class="form-group required">
+  <%= f.label :replacement_id, "Order After Challenge", class: 'control-label col-sm-2' %>
+  <div class="col-sm-11 col-sm-offset-1">
+    <%= f.select :replacement_id, options_for_select(challenge_order_for_select, selected: @challenge.id), {}, class: "form-control" %>
+  </div>
+</div>
+<% end %>
 <div class="form-group required">
   <%= f.label :card_image_url, "Card image", class: 'control-label col-sm-2' %>
   <div class="col-sm-11 col-sm-offset-1">

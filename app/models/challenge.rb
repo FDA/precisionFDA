@@ -17,16 +17,17 @@
 #  automated      :boolean          default(TRUE)
 #  card_image_url :string(255)
 #  card_image_id  :string(255)
+#  specified_order  :integer
 #
 
 class Challenge < ApplicationRecord
   include Auditor
 
-  STATUS_SETUP =    "setup"
-  STATUS_OPEN =     "open"
-  STATUS_PAUSED =   "paused"
-  STATUS_ARCHIVED = "archived"
-  STATUS_RESULT_ANNOUNCED = "result_announced"
+  STATUS_SETUP =    "setup".freeze
+  STATUS_OPEN =     "open".freeze
+  STATUS_PAUSED =   "paused".freeze
+  STATUS_ARCHIVED = "archived".freeze
+  STATUS_RESULT_ANNOUNCED = "result_announced".freeze
 
   belongs_to :app_owner, class_name: "User"
   belongs_to :app
@@ -38,6 +39,9 @@ class Challenge < ApplicationRecord
 
   acts_as_followable
 
+  after_create :initialize_order
+
+  attr_accessor :replacement_id
   store :meta, accessors: [:regions], coder: JSON
 
   scope :automated, -> { where(automated: true) }
@@ -48,9 +52,9 @@ class Challenge < ApplicationRecord
 
   validates :start_at, :end_at, presence: true
   validates :title, length: { maximum: 150 }
-  validates :description, length: { maximum: 50000 }
+  validates :description, length: { maximum: 50_000 }
 
-  validates :status, inclusion: { :in => ->(challenge) { challenge.available_statuses } }
+  validates :status, inclusion: { in: ->(challenge) { challenge.available_statuses } }
   validates :meta, meta: true
   validates :app_id,
             presence: true,
@@ -71,25 +75,23 @@ class Challenge < ApplicationRecord
     Challenge.transaction do
       app = App.find_by(id: app_id)
       user = User.challenge_bot
-      api.call(app.dxid, "addDevelopers", {developers: [user.dxid]})
+      api.call(app.dxid, "addDevelopers", developers: [user.dxid])
       challenge = Challenge.find_by!(id: challenge_id)
       challenge.update!(app_id: app_id)
       result = true
     end
 
-    return result
+    result
   end
 
   def self.featured(context)
-    if context.challenge_admin?
-      not_archived
-    else
-      where.not(status: [STATUS_SETUP, STATUS_ARCHIVED])
-    end
+    challenges = context.challenge_admin? ? not_archived : where.not(status: [STATUS_SETUP, STATUS_ARCHIVED])
+    challenges.order(specified_order: "desc")
   end
 
   def self.app_owned_by(context)
     return none unless context.logged_in?
+
     where(app_owner_id: context.user_id).where("end_at > ?", DateTime.now)
   end
 
@@ -110,7 +112,7 @@ class Challenge < ApplicationRecord
   end
 
   def handle
-    "#{name.parameterize}"
+    name.parameterize.to_s
   end
 
   # Add string "Challenge" to challenge name if it does not contain such word.
@@ -155,7 +157,7 @@ class Challenge < ApplicationRecord
   end
 
   def status_result_announced!
-    update_attributes!(status: STATUS_RESULT_ANNOUNCED)
+    update!(status: STATUS_RESULT_ANNOUNCED)
   end
 
   def state
@@ -177,11 +179,13 @@ class Challenge < ApplicationRecord
 
   def started?
     return false if new_record?
+
     DateTime.now >= start_at_was
   end
 
   def over?
     return false if new_record?
+
     DateTime.now >= end_at_was
   end
 
@@ -191,6 +195,7 @@ class Challenge < ApplicationRecord
 
   def can_announce_result?
     return false if result_announced?
+
     closed?
   end
 
@@ -237,12 +242,27 @@ class Challenge < ApplicationRecord
 
   def update_card_image_url!
     return unless previous_changes.key?(:card_image_id)
-    return unless card_image_id.present?
+    return if card_image_id.blank?
 
-    card_image = UserFile.find_by_uid!(card_image_id)
-    update_attributes(
-      card_image_url: DNAnexusAPI.for_challenge_bot.generate_permanent_link(card_image)
+    card_image = UserFile.find_by!(uid: card_image_id)
+    update(
+      card_image_url: DNAnexusAPI.for_challenge_bot.generate_permanent_link(card_image),
     )
+  end
+
+  # Updates specified_order of challenges setting challenge to appear after replacement challenge.
+  # Usage in edit on Challenges#edit
+  def update_order(replacement_id)
+    return unless replacement_id && replacement_id.to_i != id
+
+    replacement_challenge = Challenge.find(replacement_id)
+    order_array = Challenge.order(specified_order: "desc").pluck(:id)
+    order_array.delete(id)
+    order_array.insert(order_array.index(replacement_challenge.id) + 1, id)
+    ids = Challenge.order(id: "desc").pluck(:id)
+    order_array.each.with_index do |o, i|
+      Challenge.find(o).update(specified_order: ids[i])
+    end
   end
 
   # Provisions a new group space for each challenge
@@ -272,6 +292,12 @@ class Challenge < ApplicationRecord
 
   private
 
+  # Add specified_order to challenge equal to it's id.
+  # Usage in a challenges create on Challenges#new
+  def initialize_order
+    self.specified_order = id
+  end
+
   def validate_end_at
     return unless end_at_changed?
     return if end_at.blank?
@@ -280,18 +306,14 @@ class Challenge < ApplicationRecord
       errors.add(:end_at, "can't be before the challenge start time")
     end
 
-    if end_at <= DateTime.now
-      errors.add(:end_at, "can't be before the current time")
-    end
+    errors.add(:end_at, "can't be before the current time") if end_at <= DateTime.now
   end
 
   def validate_start_at
     return unless start_at_changed?
     return if start_at.blank?
 
-    if end_at && end_at <= start_at
-      errors.add(:start_at, "can't be after the challenge end time")
-    end
+    errors.add(:start_at, "can't be after the challenge end time") if end_at && end_at <= start_at
   end
 
   # Check if Chalenge can be opened?
@@ -299,6 +321,6 @@ class Challenge < ApplicationRecord
   # @return errors Can't open challenge unless space is accepted if challenge active and
   # space not accepted by leads
   def can_open?
-    errors.add(:status,"Can't open challenge unless space is accepted") if active? && !space&.accepted?
+    errors.add(:status, "Can't open challenge unless space is accepted") if active? && !space&.accepted?
   end
 end
