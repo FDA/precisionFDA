@@ -78,6 +78,8 @@ class User < ApplicationRecord
     sean.watford
     mitchell.mello
     xavier.autoteststagesiteadmin
+    collin.lobb
+    brijesh.prajapati
   ).freeze
 
   NON_PRODUCTION_ADMIN_ORGS = %w(
