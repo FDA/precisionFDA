@@ -63,7 +63,7 @@ jobs:
       - name: Unit Tests
         env:
           NO_FIPS: 1
-        run: bundle exec rake
+        run: bundle exec rspec
 
   test-js:
     name: Test (JS)
