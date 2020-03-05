@@ -1,4 +1,6 @@
-name: Pull-Request Check
+# Project Docs: https://confluence.internal.dnanexus.com/pages/viewpage.action?pageId=20124178
+
+name: Master Workflow
 on:
   push:
     branches:
@@ -30,7 +32,38 @@ jobs:
       - name: Rails Best Practices
         run: rails_best_practices
 
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: staticAnalysis # Skip this if static analysis failed
+    container: ruby:2.6.5
+
+    services:
+      mysql:
+        image: mysql:5.6
+        env:
+          MYSQL_ROOT_PASSWORD: password
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install & Build
+        run: |
+          apt-get update
+          apt-get install -y cmake libssl-dev
+          gem install bundler -v 2.1.4
+          bundle install --jobs 4 --retry 3
+
+      - name: Configure
+        env:
+          NO_FIPS: 1
+        run: |
+          cp config/database.yml.ci config/database.yml
+          bundle exec rake db:setup
+
       - name: Unit Tests
+        env:
+          NO_FIPS: 1
         run: bundle exec rake
 
   checkDependencies:
@@ -39,22 +72,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Node Environment
-        uses: actions/setup-node@v1
-        with:
-          node-version: 10.x
-
-      - name: Install Snyk
-        run: npm i -g snyk
-
-      - name: Check
+      - name: Run Snyk
+        uses: snyk/actions/ruby@0.1.1
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk test --file=Gemfile.lock --org=dnanexus
+        with:
+          args: --file=Gemfile.lock --org=dnanexus
 
       - name: Publish
         if: always()
+        uses: snyk/actions/ruby@0.1.1
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: |
-          snyk monitor --org=dnanexus --file=Gemfile.lock --project-name=precision-fda
+        with:
+          args: --file=Gemfile.lock --org=dnanexus --project-name=precision-fda
+          command: monitor
