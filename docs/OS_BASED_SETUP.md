@@ -71,6 +71,13 @@ To start rails server, run:
 * Point your browser to [https://localhost:3000](https://localhost:3000), if you're seeing
 index page, setup is done.
 
+## Test
+
+To run unit & integration tests, use the following commands
+* Rails (RSpec): `rake` or `bundle exec rake`
+  * Note: some of these tests require a DB to be configured
+* CoffeeScript (Jest): `yarn test` or `yarn test:watch` for watch mode
+
 ### Issues
 
 On your first `bundle`, you may have issues installing the libv8 and
