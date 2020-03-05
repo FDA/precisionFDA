@@ -8,7 +8,7 @@
     "coffeescript": "^2.5.1",
     "jest": "^25.1.0",
     "knockout": "^3.5.1",
-    "underscore": "^1.9.2"
+    "lodash": "^4.17.15"
   },
   "scripts": {
     "test": "jest",

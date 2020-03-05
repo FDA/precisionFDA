@@ -1,5 +1,5 @@
 const ko = require("knockout");
-const _ = require("underscore");
+const _ = require("lodash");
 require("../precision.selector.coffee");
 const ObjectItemModel = global.Precision.models.ObjectItemModel;
 
