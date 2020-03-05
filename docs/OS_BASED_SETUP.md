@@ -74,7 +74,7 @@ index page, setup is done.
 ## Test
 
 To run unit & integration tests, use the following commands
-* Rails (RSpec): `rake` or `bundle exec rake`
+* Rails (RSpec):  `rspec` or `bundle exec rspec`
   * Note: some of these tests require a DB to be configured
 * CoffeeScript (Jest): `yarn test` or `yarn test:watch` for watch mode
 
