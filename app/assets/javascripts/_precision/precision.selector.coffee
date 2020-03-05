@@ -429,3 +429,4 @@ class ObjectItemModel
 window.Precision ||= {}
 window.Precision.models ||= {}
 window.Precision.models.SelectorModel = SelectorModel
+window.Precision.models.ObjectItemModel = ObjectItemModel
