@@ -569,6 +569,7 @@ RSpec.describe ApiController, type: :controller do
           search_string: "abc",
           flag: "ig",
           scopes: %w(private),
+          order_by_name: "asc",
         }
       end
 
@@ -590,6 +591,7 @@ RSpec.describe ApiController, type: :controller do
           search_string: "*",
           flag: "ig",
           scopes: %w(private),
+          order_by_name: "asc",
         }
       end
 
@@ -616,6 +618,7 @@ RSpec.describe ApiController, type: :controller do
           search_string: "abc",
           flag: "ig",
           scopes: %w(private),
+          order_by_name: "asc",
         }
       end
 
@@ -644,13 +647,14 @@ RSpec.describe ApiController, type: :controller do
       end
     end
 
-    context "when user has user's files in 'private' scope in folders" do
+    context "when user has user's files in 'private' scope in folders and 'desc' order selected" do
       let(:params) do
         {
           page: 1,
           search_string: "fil",
           flag: "ig",
           scopes: %w(private),
+          order_by_name: "desc",
         }
       end
 
@@ -704,6 +708,7 @@ RSpec.describe ApiController, type: :controller do
             search_string: "fil",
             flag: "ig",
             scopes: %w(private),
+            order_by_name: "asc",
             uids: nil,
           }
         end
@@ -725,6 +730,7 @@ RSpec.describe ApiController, type: :controller do
             search_string: "fil",
             flag: "ig",
             scopes: %w(private),
+            order_by_name: "asc",
             uids: true,
           }
         end
@@ -740,13 +746,14 @@ RSpec.describe ApiController, type: :controller do
       end
     end
 
-    context "when user has user's files in a space scope" do
+    context "when user has user's files in a space scope and 'desc' order selected" do
       let(:params) do
         {
           page: 1,
           search_string: "fil",
           flag: "ig",
           scopes: [review_space_uid, verified_space_uid],
+          order_by_name: "desc",
         }
       end
 
