@@ -301,41 +301,42 @@ class ApiController < ApplicationController
   end
 
   # Return files array found by RegEx
-  # Inputs:
-  # @param [String] searchValue string
-  # @param [String] flagsValue string
-  # @param [Integer] page - current page number
-  # @param [Array] scopes (Array, optional): array of valid scopes e.g.
-  #   ["private", "public", "space-1234"] or leave blank for all
-  # @param [Nil or True] uids
-  #
-  # @return [Array of Hashes]
-  #  search_result: array of hashes, each of which has these fields:
+  # @param search_string [String] Search string.
+  # @param flag [String] Regex flag.
+  # @param page [Integer] Current page number.
+  # @param order_by_name [String] Order direction: 'asc' or 'desc'.
+  # @param uids [Nil, True] Uids of files checked.
+  # @return search_result [Array<Hash>]
+  #  array of hashes, each of which has these fields:
   #    id (integer): primary key of the file
   #    uid (strinf): string key of the file
   #    title (string): the file name
   #    path (string): a file path collected
+  #     search_result is a sorted array, according params[:order_by_name] value
+  #     It consists of folders part if any and a files part.
+  #     Files inside folders are also sorted.
   #  uids: array of all found file's uid values
   #
   # rubocop:disable Style/SignalException
   def files_regex_search
     page = params[:page].to_i.positive? ? params[:page] : 1
     files = user_real_files(params, @context).files_conditions
-
     begin
       regexp = Regexp.new(params[:search_string], params[:flag])
-      search_result = files.eager_load(:license, user: :org).order(id: :desc).map do |file|
-        describe_for_api(file) if file.name.scan(regexp).present?
-      end
-      result = search_result.compact.
+      direction = params[:order_by_name]
+
+      search_result = files.
+        eager_load(:license, user: :org).
+        order(name: direction.to_s).
         map do |file|
-        {
-          id: file[:id],
-          uid: file[:uid],
-          title: file["title"],
-          path: file[:file_path],
-        }
+          describe_for_api(file) if file.name.downcase.scan(regexp).present?
+        end
+
+      result = []
+      if search_result.compact.present?
+        result = UserFile.files_search_results(search_result, direction)
       end
+
       paginated_result = Kaminari.paginate_array(result).page(page).per(20)
       uids = params[:uids].present? && to_bool(params[:uids]) ? result.compact.pluck(:uid) : []
 

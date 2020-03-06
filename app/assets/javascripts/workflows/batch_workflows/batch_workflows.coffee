@@ -249,7 +249,8 @@ extendBatchInputFilesSearch = () ->
         scopes: @batchWorkflowFileTree.folderTreeScope,
         search_string: searchValue,
         flag: flagsValue,
-        uids: true
+        uids: true,
+        order_by_name: @fsSortNameDirection
       }
       @fsIsLoading(true)
       $.post('/api/files_regex_search', @fsSearchFilesData).then(
@@ -258,7 +259,6 @@ extendBatchInputFilesSearch = () ->
           @fsSelectedFiles(data.uids)
           @fsIsLoading(false)
           $("""##{@name}_regexp_search_input""").focus()
-          @_fsSortByName()
         (errorData) ->
           if errorData and typeof errorData.error == 'string'
             Precision.alert.showAboveAll(errorData.error, null, 1000)
@@ -275,6 +275,7 @@ extendBatchInputFilesSearch = () ->
     _data = { page: @fsPage, scopes: @batchWorkflowFileTree.folderTreeScope, uids: false }
     data = Object.assign(@fsSearchFilesData, _data)
     @fsIsMoreLoading(true)
+
     $.post('/api/files_regex_search', data).then(
       (data) =>
         newFiles = @fsFiles()

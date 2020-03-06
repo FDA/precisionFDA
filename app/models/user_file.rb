@@ -171,6 +171,44 @@ class UserFile < Node
     def accessible_found_by(context, uid)
       accessible_by(context).find_by!(uid: uid)
     end
+
+    # Divide search results in Files into two parts:
+    #   first - files in folders, second - files in root folder.
+    #   Both parts are sorted by :path and :title, not case-sensitive.
+    # @param search_result [Array] An array of UserFile objects.
+    # @param direction [String] Order direction: 'asc' or 'desc'.
+    def files_search_results(search_result, direction)
+      files, files_in_folders = search_result.compact.partition { |v| v[:file_path] == "/" }
+
+      folders_result = files_in_folders.
+        map do |file|
+        {
+          id: file[:id],
+          uid: file[:uid],
+          title: file["title"],
+          path: file[:file_path],
+        }
+      end
+
+      sorted_folders = folders_result.sort_by { |k| [k[:path].downcase, k[:title].downcase] }
+
+      files_result = files.
+        map do |file|
+        {
+          id: file[:id],
+          uid: file[:uid],
+          title: file["title"],
+          path: file[:file_path],
+        }
+      end
+      sorted_files = files_result.sort_by { |k| k[:title].downcase }
+
+      if direction == "desc"
+        sorted_folders = sorted_folders.reverse
+        sorted_files = sorted_files.reverse
+      end
+      sorted_folders + sorted_files
+    end
   end
 
   def blocked?
