@@ -74,9 +74,7 @@ module WorkflowConcern
         fail "#{input_field}: value is not an integer" unless input_value.to_i.to_s == value
         input_value = input_value.to_i
       when "float"
-        fail "#{input_field}: value is not a float" unless input_value.starts_with?(
-          input_value.to_f.to_s
-        )
+        fail "#{input_field}: value is not a float" unless input_value.to_s =~ /\-?\d+\.\d+/
         input_value = input_value.to_f
       when "boolean"
         fail "#{input_name}: value is not a boolean" unless input_value == true || input_value == false

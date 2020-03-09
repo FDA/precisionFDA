@@ -58,6 +58,10 @@ class User < ApplicationRecord
 
   ).freeze
 
+  CHALLENGE_ADMINS = %w(
+
+  ).freeze
+
   enum user_state: [:enabled, :locked, :deactivated]
 
   SITE_ADMINS = begin
@@ -72,7 +76,13 @@ class User < ApplicationRecord
 
   SITE_ADMIN_ORGS = ENV["DNANEXUS_BACKEND"] == "production" ? [] : NON_PRODUCTION_ADMIN_ORGS
 
-  has_many :uploaded_files, class_name: "UserFile", dependent: :restrict_with_exception, as: 'parent'
+  SYNC_EXCLUDED_FILE_STATES = [
+    UserFile::STATE_CLOSED,
+    UserFile::STATE_PUBLISHING,
+    UserFile::STATE_REMOVING,
+  ].freeze
+
+  has_many :uploaded_files, class_name: "UserFile", dependent: :restrict_with_exception, as: "parent"
   has_many :user_files
   has_many :assets
   has_many :comparisons
@@ -91,7 +101,7 @@ class User < ApplicationRecord
   has_one :appathon
   has_many :meta_appathons
   has_one :expert
-  has_many :challenge_app_owners, class_name: 'Challenge', foreign_key: 'app_owner_id'
+  has_many :challenge_app_owners, class_name: "Challenge", foreign_key: "app_owner_id"
   has_many :submissions
   has_many :challenge_resources
   has_many :analyses
@@ -117,6 +127,8 @@ class User < ApplicationRecord
   acts_as_tagger
 
   scope :real, -> { where.not(dxuser: CHALLENGE_BOT_DX_USER) }
+  scope :pending, -> { where.not(last_login: nil) }
+  scope :belongs_to_org, ->(org_id) { where(org_id: org_id) }
 
   # Have the ability to create new review spaces and have full access to
   # activities available within reviewer and cooperative areas.
@@ -125,7 +137,7 @@ class User < ApplicationRecord
   validates :first_name, length: { minimum: 2, message: "The first name must be at least two letters long." }, presence: true
   validates :last_name, length: { minimum: 2, message: "The last name must be at least two letters long." }, presence: true
   validates :email, presence: true, uniqueness: { case_sensitive: false }
-  validates :disable_message, length: { maximum: 250 , message: "Deactivation reason is too long (over 250 characters)"}
+  validates :disable_message, length: { maximum: 250, message: "Deactivation reason is too long (over 250 characters)" }
 
   def self.challenge_bot
     find_by!(dxuser: CHALLENGE_BOT_DX_USER)
@@ -232,7 +244,7 @@ class User < ApplicationRecord
   end
 
   def appathon_from_meta(meta_appathon)
-    following_by_type('Appathon').find do |appathon|
+    following_by_type("Appathon").find do |appathon|
       appathon.meta_appathon.uid == meta_appathon.uid
     end
   end
@@ -242,7 +254,7 @@ class User < ApplicationRecord
       SITE_ADMINS.include?(dxuser)
     else
       NON_PRODUCTION_ADMIN_ORGS.include?(org.handle) &&
-      org.admin_id == id ||
+        org.admin_id == id ||
         SITE_ADMINS.include?(dxuser)
     end
   end
@@ -265,7 +277,27 @@ class User < ApplicationRecord
   end
 
   def is_challenge_admin?
-    (can_administer_site? || [].include?(dxuser))
+    can_administer_site? || CHALLENGE_ADMINS.include?(dxuser)
+  end
+
+  # Selects users, according search string.
+  # Users selected are the given org members and are not in 'pending' state.
+  # @param search [String] - search string
+  # @param org [String] - org handle string
+  # @return [ActiveRecord::Relation<User>] - an array of users, searched by search string match.
+  def self.org_members(search, org)
+    org = Org.find_by(handle: org)
+    org_id = org&.id
+
+    query = "%" + sanitize_sql_like(search) + "%"
+    users = User.arel_table
+
+    where(users[:dxuser].matches(query).
+      or(users[:first_name].matches(query)).
+      or(users[:last_name].matches(query))).
+      belongs_to_org(org_id).
+      pending.
+      limit(ORG_MEMBERS_SEARCH_LIMIT)
   end
 
   def self.validate_email(email)
@@ -288,10 +320,16 @@ class User < ApplicationRecord
     user = User.challenge_bot
     token = CHALLENGE_BOT_TOKEN
     file = user.uploaded_files.find(file_id) # Re-check file id
-    if file.state != "closed"
-      result = DNAnexusAPI.new(token).call("system", "describeDataObjects", objects: [file.dxid])["results"][0]
-      sync_file_state(result, file, user)
-    end
+
+    return if SYNC_EXCLUDED_FILE_STATES.include?(file.state)
+
+    result = DNAnexusAPI.new(token).call(
+      "system",
+      "describeDataObjects",
+      objects: [file.dxid],
+    )["results"][0]
+
+    sync_file_state(result, file, user)
   end
 
   def self.sync_file!(context, file_id)
@@ -301,20 +339,33 @@ class User < ApplicationRecord
     file = user.uploaded_files.find(file_id) # Re-check file id
     token = context.token
 
-    if file.state != "closed"
-      result = DNAnexusAPI.new(token).call("system", "describeDataObjects", objects: [file.dxid])["results"][0]
-      sync_file_state(result, file, user)
-    end
+    return if SYNC_EXCLUDED_FILE_STATES.include?(file.state)
+
+    result = DNAnexusAPI.new(token).call(
+      "system",
+      "describeDataObjects",
+      objects: [file.dxid],
+    )["results"][0]
+
+    sync_file_state(result, file, user)
   end
 
   def self.sync_files!(context)
     Auditor.suppress do
       return if context.guest?
+
       user = context.user
       token = context.token
+
       # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-      user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
-        DNAnexusAPI.new(token).call("system", "describeDataObjects", objects: files.map(&:dxid))["results"].each_with_index do |result, i|
+      user.uploaded_files.
+        where.not(state: SYNC_EXCLUDED_FILE_STATES).
+        all.each_slice(1000) do |files|
+        DNAnexusAPI.new(token).call(
+          "system",
+          "describeDataObjects",
+          objects: files.map(&:dxid),
+        )["results"].each_with_index do |result, i|
           sync_file_state(result, files[i], user)
         end
       end
@@ -323,11 +374,17 @@ class User < ApplicationRecord
 
   def self.sync_challenge_bot_files!(context)
     return if context.guest?
+
     user = User.challenge_bot
     token = CHALLENGE_BOT_TOKEN
+
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-    user.uploaded_files.where.not(state: "closed").all.each_slice(1000) do |files|
-      DNAnexusAPI.new(token).call("system", "describeDataObjects", objects: files.map(&:dxid))["results"].each_with_index do |result, i|
+    user.uploaded_files.where.not(state: SYNC_EXCLUDED_FILE_STATES).all.each_slice(1000) do |files|
+      DNAnexusAPI.new(token).call(
+        "system",
+        "describeDataObjects",
+        objects: files.map(&:dxid),
+      )["results"].each_with_index do |result, i|
         sync_file_state(result, files[i], user)
       end
     end
@@ -335,59 +392,32 @@ class User < ApplicationRecord
 
   def self.sync_asset!(context, file_id)
     return if context.guest?
+
     user = context.user
     token = context.token
     file = user.assets.find(file_id) # Re-check file id
-    if file.state != "closed"
-      result = DNAnexusAPI.new(token).call("system", "describeDataObjects", objects: [file.dxid])["results"][0]
-      sync_file_state(result, file, user)
-    end
+
+    return if SYNC_EXCLUDED_FILE_STATES.include?(file.state)
+
+    result = DNAnexusAPI.new(token).call(
+      "system",
+      "describeDataObjects",
+      objects: [file.dxid],
+    )["results"][0]
+
+    sync_file_state(result, file, user)
   end
 
   def self.sync_assets!(context)
     return if context.guest?
+
     user = context.user
     token = context.token
+
     # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-    user.assets.where.not(state: "closed").all.each_slice(1000) do |files|
+    user.assets.where.not(state: SYNC_EXCLUDED_FILE_STATES).all.each_slice(1000) do |files|
       DNAnexusAPI.new(token).call("system", "describeDataObjects", objects: files.map(&:dxid))["results"].each_with_index do |result, i|
         sync_file_state(result, files[i], user)
-      end
-    end
-  end
-
-  def self.sync_comparison!(context, comparison_id)
-    return if context.guest?
-    user = context.user
-    token = context.token
-    comparison = user.comparisons.find(comparison_id)
-    if comparison.state == "pending"
-      result = DNAnexusAPI.new(token).call("system", "findJobs",
-        includeSubjobs: false,
-        id: [comparison.dxjobid],
-        project: user.private_comparisons_project,
-        parentJob: nil,
-        parentAnalysis: nil,
-        describe: true,)["results"][0]
-      sync_comparison_state(result, comparison, user, token)
-    end
-  end
-
-  def self.sync_comparisons!(context)
-    return if context.guest?
-    user = context.user
-    token = context.token
-    # Prefer "all.each_slice" to "find_batches" as the latter might not be transaction-friendly
-    Comparison.where(user_id: user.id).where(state: "pending").all.each_slice(1000) do |comparisons|
-      comparisons_hash = comparisons.map { |c| [c.dxjobid, c] }.to_h
-      DNAnexusAPI.new(token).call("system", "findJobs",
-        includeSubjobs: false,
-        id: comparisons_hash.keys,
-        project: user.private_comparisons_project,
-        parentJob: nil,
-        parentAnalysis: nil,
-        describe: true,)["results"].each do |result|
-        sync_comparison_state(result, comparisons_hash[result["id"]], user, token)
       end
     end
   end
@@ -410,6 +440,7 @@ class User < ApplicationRecord
 
   def self.sync_job!(context, job_id)
     return if context.guest?
+
     user = context.user
     token = context.token
     job = Job.accessible_by(context).find(job_id) # Re-check job id
@@ -423,11 +454,13 @@ class User < ApplicationRecord
       parentAnalysis: job.analysis.try(:dxid),
       describe: true,)["results"][0]
     return if result.blank?
+
     sync_job_state(result, job, user, token)
   end
 
   def self.sync_jobs!(context, jobs = Job.includes(:analysis), project = nil)
     return if context.guest?
+
     user_id = context.user_id
     token = context.token
     user = User.find(user_id)
@@ -437,14 +470,18 @@ class User < ApplicationRecord
       jobs_hash.keys.each do |job_dxid|
         job_project = project ? project : Job.find_by(dxid: job_dxid).project
 
-        response = DNAnexusAPI.new(token).call("system", "findJobs",
+        response = DNAnexusAPI.new(token).call(
+          "system",
+          "findJobs",
           includeSubjobs: false,
           id: [job_dxid],
           project: job_project || user.private_files_project,
           parentJob: nil,
-          describe: true,)
+          describe: true,
+        )
         response["results"].each do |result|
           next if result.blank?
+
           sync_job_state(result, jobs_hash[result["id"]], user, token)
         end
       end
@@ -524,66 +561,11 @@ class User < ApplicationRecord
     end
   end
 
-  def self.sync_comparison_state(result, comparison, user, token)
-    state = result["describe"]["state"]
-    return unless (state == "done") || (state == "failed")
-    # NOTE: comparison and job state are only comparable here because state is either "done" or "failed"
-    return if state == comparison.state
-    if state == "done"
-      temp_meta = result["describe"]["output"]["meta"]
-      temp_meta["weighted_roc"]["data"] = temp_meta["weighted_roc"]["data"].last(100)
-      output_keys = []
-      output_ids = []
-      output_file_cache = []
-      result["describe"]["output"].keys.each do |key|
-        # NOTE: meta is the only field of result["describe"]["output"] modified
-        next if key == "meta"
-        output_keys << key
-        output_ids << result["describe"]["output"][key]["$dnanexus_link"]
-      end
-      DNAnexusAPI.new(token).call("system", "describeDataObjects", objects: output_ids)["results"].each_with_index do |api_result, i|
-        raise unless api_result["describe"].present? && api_result["describe"]["state"] == "closed"
-        output_file_cache.push(
-          dxid: output_ids[i],
-          project: user.private_comparisons_project,
-          name: api_result["describe"]["name"],
-          state: 'closed',
-          description: output_keys[i],
-          user_id: user.id,
-          scope: 'private',
-          file_size: api_result["describe"]["size"],
-          parent: comparison,
-        )
-      end
-
-      Comparison.transaction do
-        comparison.reload
-        if state != comparison.state
-          output_file_cache.each do |output_file|
-            file = UserFile.create!(output_file)
-            Event::FileCreated.create_for(file, user)
-          end
-          comparison.meta = temp_meta
-          comparison.state = state
-          comparison.save!
-        end
-      end
-    else
-      # Comparison state failed
-      Comparison.transaction do
-        comparison.reload
-        if state != comparison.state
-          comparison.state = state
-          comparison.save!
-        end
-      end
-    end
-  end
-
   def self.sync_job_state(result, job, user, token)
     state = result["describe"]["state"]
     # Only do anything if local job state is stale
     return if state == job.state
+
     if state == "done"
       # Use serialization to deep copy result since output will be modified
       output = JSON.parse(result["describe"]["output"].to_json)
@@ -594,6 +576,7 @@ class User < ApplicationRecord
         raise if output[key].is_a?(Array)
         next unless output[key].is_a?(Hash)
         raise unless output[key].key?("$dnanexus_link")
+
         output_file_id = output[key]["$dnanexus_link"]
         output_file_ids << output_file_id
         output[key] = output_file_id
@@ -606,13 +589,13 @@ class User < ApplicationRecord
             dxid: slice_of_file_ids[i],
             project: job.project || user.private_files_project,
             name: api_result["describe"]["name"],
-            state: 'closed',
+            state: "closed",
             description: "",
             user_id: user.id,
-            scope: job.scope || 'private',
+            scope: job.scope || "private",
             file_size: api_result["describe"]["size"],
             parent: job,
-            parent_folder_id: job.local_folder_id
+            parent_folder_id: job.local_folder_id,
           )
         end
       end

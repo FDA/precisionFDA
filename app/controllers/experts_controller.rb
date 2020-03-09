@@ -21,7 +21,7 @@ class ExpertsController < ApplicationController
 
   def new
     redirect_to experts_path and return unless @context.can_administer_site?
-    @users = User.real.includes(:org).order(:first_name)
+    @users = User.enabled.real.includes(:org).order(:first_name)
     @expert = Expert.new
   end
 

@@ -31,6 +31,7 @@ class Challenge < ApplicationRecord
   belongs_to :app_owner, class_name: "User"
   belongs_to :app
 
+  belongs_to :space
   has_many :submissions, dependent: :destroy
   has_many :jobs, through: :submissions
   has_many :challenge_resources, dependent: :destroy
@@ -56,6 +57,8 @@ class Challenge < ApplicationRecord
             unless: :status_setup?
   validate :validate_end_at
   validate :validate_start_at
+  validate :can_open?
+  attr_accessor :host_lead_dxuser, :guest_lead_dxuser
 
   def self.available_statuses
     [STATUS_SETUP, STATUS_OPEN, STATUS_PAUSED, STATUS_ARCHIVED, STATUS_RESULT_ANNOUNCED]
@@ -191,18 +194,21 @@ class Challenge < ApplicationRecord
     closed?
   end
 
+  # Checks if user can assign a new app to a challenge.
+  # @param context [Context] User context.
+  # @param checked_app [App] Assignable app.
+  # @return [Boolean] Returns true if user can assign a new app to a challenge,
+  #   false otherwise.
   def can_assign_specific_app?(context, checked_app)
-    return false unless context.logged_in?
-    return false if over?
-
-    return unless [STATUS_PAUSED, STATUS_SETUP].include?(status)
-
-    return false unless app_owner == context.user
-    return true if app_id.blank?
-    return false if app_id == checked_app.id
-    return true if submissions.empty?
-
-    app.input_spec == checked_app.input_spec
+    if !context.logged_in? ||
+       over? ||
+       ![STATUS_PAUSED, STATUS_SETUP].include?(status) ||
+       app_owner != context.user ||
+       app_id == checked_app.id
+      false
+    else
+      true
+    end
   end
 
   def is_viewable?(context)
@@ -239,6 +245,16 @@ class Challenge < ApplicationRecord
     )
   end
 
+  # Provisions a new group space for each challenge
+  # with host lead and guest lead selected by challenge creator
+  def provision_space! context, host_lead_dxuser, guest_lead_dxuser
+    space_form = SpaceForm.new(name: self.name, description: self.description, host_lead_dxuser: host_lead_dxuser, guest_lead_dxuser: guest_lead_dxuser, space_type: "groups")
+    space = SpaceService::Create.call(space_form, api: context.api, user: context.user)
+    membership = space.space_memberships.find_by(user_id: space.host_lead.id)
+    SpaceService::Invite.call(context.api, space, membership, User.find_by_dxuser(CHALLENGE_BOT_DX_USER), SpaceMembership::ROLE_ADMIN)
+    update!(space: space)
+  end
+
   private
 
   def validate_end_at
@@ -258,12 +274,16 @@ class Challenge < ApplicationRecord
     return unless start_at_changed?
     return if start_at.blank?
 
-    if start_at <= DateTime.now
-      errors.add(:start_at, "can't be before the current time")
-    end
-
     if end_at && end_at <= start_at
       errors.add(:start_at, "can't be after the challenge end time")
     end
+  end
+
+  # Check if Chalenge can be opened?
+  # Usage in a challenges cards on Challenges#create and Challenges#update
+  # @return errors Can't open challenge unless space is accepted if challenge active and
+  # space not accepted by leads
+  def can_open?
+    errors.add(:status,"Can't open challenge unless space is accepted") if active? && !space&.accepted?
   end
 end

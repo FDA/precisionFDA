@@ -27,55 +27,56 @@ class AppInputModel
     @userLicense = ko.observable()
 
     @value = ko.observable(spec.default)
+    @showClearButton = ko.computed(() =>
+      @value() and !@defaultFileValue()
+    )
+    @showResetButton = ko.computed(() =>
+      @value() and @defaultFileValue() and @value() != @defaultFileValue().uid
+    )
     @valueDisplay = ko.computed({
       read: () =>
-        switch @className
-          when 'file'
-            if !@value()?
-              if @defaultValue?
-                if @defaultFileValue()?
-                  value = @defaultFileValue()
-                  if value.license? && !value.user_license?.accepted
-                    @licenseToAccept({
-                      license: value.license,
-                      user_license: value.user_license
-                    })
-                  value.title
-                else if @defaultValue.match(new RegExp(/^file-(.{24,})$/, "i"))
-                    params = {
-                      uid: @defaultValue,
-                      describe: {
-                        include: {
-                          license: true
-                        }
-                      }
-                    }
-                    oldValue = @defaultValue
-                    @defaultValue = 'Loading...'
-                    Precision.api('/api/describe', params).done((value) =>
-                      @defaultFileValue(value)
-                      if value.license? && !value.user_license?.accepted
-                        @licenseToAccept({
-                          license: value.license,
-                          user_license: value.user_license
-                        })
-                    ).fail( =>
-                      @defaultValue = oldValue
-                      Precision.alert.showAboveAll('Something went wrong while getting file name')
-                    )
-                    @defaultValue
-                else
-                  @error("Invalid default value: #{@defaultValue}")
-                  @defaultValue
-              else
-                "Select file..."
-            else
-              @value().name
-          else
-            if !@value()?
-              @defaultValue
-            else
-              @value()
+        appValue = @value()
+        return appValue || @defaultValue if @className != 'file'
+        return appValue.name if appValue and appValue.name
+        return "Select file..." if !@defaultValue
+
+        if @defaultFileValue()
+          value = @defaultFileValue()
+          if value.license? and !value.user_license?.accepted
+            @licenseToAccept({
+              license: value.license,
+              user_license: value.user_license
+            })
+          return value.title
+
+        if @defaultValue.match(new RegExp(/^file-(.{24,})$/, "i"))
+          params = {
+            uid: @defaultValue,
+            describe: {
+              include: {
+                license: true
+              }
+            }
+          }
+          oldValue = @defaultValue
+          @defaultValue = 'Loading...'
+          Precision.api('/api/describe', params).done((value) =>
+            @defaultFileValue(value)
+            if value.license? && !value.user_license?.accepted
+              @licenseToAccept({
+                license: value.license,
+                user_license: value.user_license
+              })
+          ).fail( =>
+            @defaultValue = oldValue
+            Precision.alert.showAboveAll('Something went wrong while getting file name')
+          )
+          return @defaultValue
+        else
+          console.error 'defaultValue', @defaultValue
+          @error("Invalid default value: #{@defaultValue}")
+          return @defaultValue
+
 
       write: (value) =>
         if !value?
@@ -267,6 +268,9 @@ class AppInputModel
 
   clear: () ->
     @valueDisplay(null)
+
+  resetFileValue: () ->
+    @valueDisplay(@defaultFileValue().uid)
 
   getDataForRun: () ->
     if @className == 'boolean'

@@ -64,8 +64,8 @@ describe DNAnexusAPI do
             message: "The specified user or org (org-pfda..garry.potter) that will be " \
                       "responsible for charges associated with this app version does " \
                       "not match the one responsible for charges associated with the app " \
-                      "(org-pfda..albus.dumbledore)"
-          }
+                      "(org-pfda..albus.dumbledore)",
+          },
         }.to_json
 
         allow(transport).to receive(:call).and_raise(RuntimeError, response_error)
@@ -81,8 +81,8 @@ describe DNAnexusAPI do
         response_error = {
           error: {
             type: "InvalidInput",
-            message: "Some error message"
-          }
+            message: "Some error message",
+          },
         }.to_json
 
         allow(transport).to receive(:call).and_raise(RuntimeError, response_error)
@@ -91,6 +91,33 @@ describe DNAnexusAPI do
       it "raises an appropriate exception" do
         expect { client.app_new(payload) }.to raise_error(RuntimeError)
       end
+    end
+  end
+
+  describe "#file_new" do
+    it_behaves_like "call" do
+      let(:name) { "some-name" }
+      let(:project) { "some-project" }
+
+      let(:client_method) { :file_new }
+      let(:client_method_args) { [name, project, payload] }
+
+      let(:expected_subject) { "file" }
+      let(:expected_method) { "new" }
+      let(:expected_payload) { payload.merge(name: name, project: project) }
+    end
+  end
+
+  describe "#file_download" do
+    it_behaves_like "call" do
+      let(:file_dxid) { "some-file_dxid" }
+
+      let(:client_method) { :file_download }
+      let(:client_method_args) { [file_dxid, payload] }
+
+      let(:expected_subject) { file_dxid }
+      let(:expected_method) { "download" }
+      let(:expected_payload) { payload }
     end
   end
 
@@ -309,6 +336,97 @@ describe DNAnexusAPI do
       let(:expected_subject) { project }
       let(:expected_method) { "describe" }
       let(:expected_payload) { payload }
+    end
+  end
+
+  describe "#project_remove_objects" do
+    it_behaves_like "call" do
+      let(:project) { "project" }
+      let(:objects) { %w(some-objects) }
+
+      let(:client_method) { :project_remove_objects }
+      let(:client_method_args) { [project, objects, payload] }
+
+      let(:expected_subject) { project }
+      let(:expected_method) { "removeObjects" }
+      let(:expected_payload) { payload.merge(objects: objects) }
+    end
+  end
+
+  describe "#applet_new" do
+    it_behaves_like "call" do
+      let(:project) { "project" }
+
+      let(:client_method) { :applet_new }
+      let(:client_method_args) { [project, payload] }
+
+      let(:expected_subject) { "applet" }
+      let(:expected_method) { "new" }
+      let(:expected_payload) { payload.merge(project: project) }
+    end
+  end
+
+  describe "#file_download" do
+    it_behaves_like "call" do
+      let(:file) { "some-file" }
+
+      let(:client_method) { :file_download }
+      let(:client_method_args) { [file, payload] }
+
+      let(:expected_subject) { file }
+      let(:expected_method) { "download" }
+      let(:expected_payload) { payload }
+    end
+  end
+
+  describe "#system_describe_data_objects" do
+    it_behaves_like "call" do
+      let(:objects) { ["some-file"] }
+
+      let(:client_method) { :system_describe_data_objects }
+      let(:client_method_args) { [objects, payload] }
+
+      let(:expected_subject) { "system" }
+      let(:expected_method) { "describeDataObjects" }
+      let(:expected_payload) { payload.merge(objects: objects) }
+    end
+  end
+
+  describe "#system_find_jobs" do
+    it_behaves_like "call" do
+      let(:client_method) { :system_find_jobs }
+      let(:client_method_args) { [payload] }
+
+      let(:expected_subject) { "system" }
+      let(:expected_method) { "findJobs" }
+      let(:expected_payload) { payload }
+    end
+  end
+
+  describe "#app_run" do
+    let(:app_dxid) { "some-dxid" }
+
+    context "when no revision given" do
+      it_behaves_like "call" do
+        let(:client_method) { :app_run }
+        let(:client_method_args) { [app_dxid, nil, payload] }
+
+        let(:expected_subject) { app_dxid }
+        let(:expected_method) { "run" }
+        let(:expected_payload) { payload }
+      end
+    end
+
+    context "when revision given" do
+      it_behaves_like "call" do
+        let(:revision) { "some-revision" }
+        let(:client_method) { :app_run }
+        let(:client_method_args) { [app_dxid, revision, payload] }
+
+        let(:expected_subject) { "#{app_dxid}/#{revision}" }
+        let(:expected_method) { "run" }
+        let(:expected_payload) { payload }
+      end
     end
   end
 end

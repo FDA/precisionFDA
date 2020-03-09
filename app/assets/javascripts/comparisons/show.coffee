@@ -137,6 +137,10 @@ class LineChart
     @svg.select('g.x.axis').call(xAxis)
     @svg.select('g.y.axis').call(yAxis)
 
+class ComparisonsShowPageModel
+  constructor: (@id) ->
+    @noteAttachModel = new Precision.models.NoteAttachModel(@id, 'Comparison')
+
 #########################################################
 #
 #
@@ -145,9 +149,8 @@ class LineChart
 #
 #########################################################
 
-ComparisonsController = Paloma.controller('Comparisons',
+ComparisonsController = Paloma.controller('Comparisons', {
   show: ->
-    $container = $("body main")
     if @params.state == "done"
       roc = @params.roc
       dataset = _.map(roc["data"], (datum) ->
@@ -173,9 +176,7 @@ ComparisonsController = Paloma.controller('Comparisons',
           max: 1
       })
 
-    viewModel = {
-      noteAttachModel: new Precision.models.NoteAttachModel(@params.id, 'Comparison')
-    }
-
+    $container = $("body main")
+    viewModel = new ComparisonsShowPageModel(@params.id)
     ko.applyBindings(viewModel, $container[0])
-)
+})

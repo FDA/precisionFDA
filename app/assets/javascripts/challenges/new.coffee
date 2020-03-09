@@ -64,6 +64,10 @@ class ChallengesFormView
       @uploadState() == "UPLOADING"
     )
 
+    @disableActionsCss = ko.computed( =>
+      if @disableActions() then 'pfda-no-pointer-events' else ''
+    )
+
   handleInputChange: (e) =>
     @files(new FileModel(file) for file in e.target.files)
 

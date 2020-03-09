@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_10_02_100618) do
+ActiveRecord::Schema.define(version: 2020_02_16_060726) do
 
   create_table "accepted_licenses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -95,6 +95,7 @@ ActiveRecord::Schema.define(version: 2019_10_02_100618) do
     t.boolean "verified", default: false, null: false
     t.string "uid"
     t.string "dev_group"
+    t.string "release", null: false
     t.index ["app_series_id"], name: "index_apps_on_app_series_id"
     t.index ["dxid"], name: "index_apps_on_dxid"
     t.index ["scope"], name: "index_apps_on_scope"
@@ -154,9 +155,11 @@ ActiveRecord::Schema.define(version: 2019_10_02_100618) do
     t.boolean "automated", default: true
     t.string "card_image_url"
     t.string "card_image_id"
+    t.integer "space_id"
     t.index ["admin_id"], name: "index_challenges_on_admin_id"
     t.index ["app_id"], name: "index_challenges_on_app_id"
     t.index ["app_owner_id"], name: "index_challenges_on_app_owner_id"
+    t.index ["space_id"], name: "index_challenges_on_space_id"
     t.index ["status"], name: "index_challenges_on_status"
   end
 

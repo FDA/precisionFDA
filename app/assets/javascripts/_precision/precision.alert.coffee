@@ -1,3 +1,5 @@
+STORAGE_ITEMS = 'precision_fda_alert_msgs'
+
 class AlertModel
 
   #public
@@ -29,10 +31,32 @@ class AlertModel
 
   #public
   showPermanent: (text, style) ->
-    $container = createNode(text, style)
-    $container.addClass('above-all')
+    $container = createContainer(text, style)
     appendToPage($container)
+    $container.on 'click', (e) ->
+      $container.alert('close')
+      $container = null
     @on($container, -1)
+
+  #public
+  showAfterReload: (text, style, above) ->
+    items = Precision.localStorage.get(STORAGE_ITEMS) || []
+    items.push({ text: text, style: style, above: above })
+    Precision.localStorage.set(STORAGE_ITEMS, items)
+
+  #public
+  clearStorageItems: () ->
+    Precision.localStorage.set(STORAGE_ITEMS, [])
+
+  #public
+  showIfStored: () =>
+    items = Precision.localStorage.get(STORAGE_ITEMS) || []
+    if items.length
+      items.forEach((item) =>
+        @showPermanent(item.text, item.style) if !item.above
+        @showAboveAll(item.text, item.style) if item.above
+      )
+      @clearStorageItems()
 
   #private
   default_style = ''
@@ -62,6 +86,7 @@ class AlertModel
 
   constructor: () ->
     default_style = 'alert-danger'
+    $('document').ready(() => @showIfStored())
 
 window.Precision ||= {}
-window.Precision.alert = new AlertModel()
+window.Precision.AlertModel = AlertModel

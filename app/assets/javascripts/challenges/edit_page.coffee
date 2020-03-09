@@ -22,8 +22,8 @@ class EditorModel
 
   initEditor: ->
     @editor = ContentTools.EditorApp.get()
+    @editor.destroy() # remove editor bindings
     @editor.init '[data-editable], [data-fixture]', 'data-name'
-
     @editor.addEventListener 'saved', (ev) =>
       # Check if this was a passive save
       passive = ev.detail().passive
@@ -62,9 +62,7 @@ class EditorModel
           @editor.busy false
         )
 
-  constructor: (challenge_id) ->
-
-    @challenge_id = challenge_id
+  constructor: (@challenge_id) ->
 
     ContentTools.StylePalette.add [
       new (ContentTools.Style)('By-line', 'article__by-line', [ 'p' ])
@@ -113,7 +111,7 @@ class EditorModel
 #
 #########################################################
 
-EditorController = Paloma.controller('Challenges',
+EditorController = Paloma.controller('Challenges', {
   edit_page: ->
     $container = $("body main")
     params = @params
@@ -132,5 +130,4 @@ EditorController = Paloma.controller('Challenges',
           return true
         else
           return false
-
-)
+})

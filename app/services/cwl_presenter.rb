@@ -32,7 +32,7 @@ class CwlPresenter
   end
 
   def doc
-    cwl_data["doc"]
+    cwl_data["doc"].strip
   end
 
   def id

@@ -1,7 +1,12 @@
 <% content_for :title do %><%= @app.title %><% end %>
 
 <div class="page-header clearfix">
-  <div class="page-title"><span class="fa fa-cube"></span> <%= @app.title %></div>
+  <div class="page-title">
+    <span class="fa fa-cube"></span> <%= @app.title %>
+    <% if show_comparison_app_label?(@context, @app) %>
+      <span class="label label-info">Default comparator app</span>
+    <% end %>
+  </div>
 </div>
 
 <div class="pfda-pane-content">

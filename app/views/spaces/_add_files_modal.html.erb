@@ -8,7 +8,13 @@
         <h4 class="modal-title">Moving files to space</h4>
       </div>
       <div class="modal-body">
-        <div class="pfda-padded-b">Moving the files can take some time. Please check the space later.</div>
+        <div class="pfda-padded-b">
+          <p>
+            <span data-bind="text: selectedFilesCount"></span>
+            <span> objects have been published.</span>
+          </p>
+          <p>Files are being processed, this could take a while.</p>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>

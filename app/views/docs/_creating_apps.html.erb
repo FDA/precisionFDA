@@ -144,7 +144,23 @@
         <div class="alert alert-info">
           <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> Make a smart choice of default instance type. Select an instance that would be suitable for typical inputs, and use the app's Readme to guide users as to how to adjust it when running your app with larger inputs. Jobs consume energy depending on the instance type used, so your pipeline may be wasteful if it does not use its default instance type efficiently.
         </div>
-        <p>The operating system of the virtual machine is Ubuntu 14.04, with several <a href="/assets/packages.txt">preinstalled packages</a>. If your app requires additional Ubuntu packages, you can specify so in the "VM Environment" tab. For example, if your app needs Java, we recommend adding the "openjdk-7-jre-headless" package. If you are unsure as to what a certain package is called, you can use the <a href="http://packages.ubuntu.com">packages.ubuntu.com</a> website to locate packages (make sure to select the "trusty" distribution in the search form, as that is the codename for Ubuntu 14.04). Note that, specifically for Java 8, we support additional packages (such as "openjdk-8-jre-headless") which are not listed on the Ubuntu packages website.</p>
+        <p>
+          The operating system of the virtual machine depends on your selection (either Ubuntu 14.04 or Ubuntu 16.04), with several
+          preinstalled packages:
+          <ul>
+            <li><a href="/assets/ubuntu-14-packages.txt">Ubuntu 14.04 preinstalled packages</a></li>
+            <li><a href="/assets/ubuntu-16-packages.txt">Ubuntu 16.04 preinstalled packages</a></li>
+          </ul>
+        </p>
+        <p>
+          If your app requires additional Ubuntu packages,
+          you can specify so in the "VM Environment" tab. For example, if your app needs Java, we recommend
+          adding the "openjdk-7-jre-headless" package. If you are unsure as to what a certain package is called,
+          you can use the <a href="http://packages.ubuntu.com">packages.ubuntu.com</a> website to locate
+          packages (make sure to select the "trusty" distribution in the search form, as that is
+          the codename for Ubuntu 14.04 or "xenial" for Ubuntu 16.04). Note that, specifically for Java 8, we support additional
+          packages (such as "openjdk-8-jre-headless") which are not listed on the Ubuntu packages website.
+        </p>
         <p>If you need to load additional files onto the virtual machine and have them available to your app's shell script, such as executables, libraries, reference genome files or pretty much any other static files required for your execution, you can use <b>App assets</b>. Assets are tarballs that are uncompressed in the root folder of the virtual machine right before running your app script. The <a href="#dev-assets">App assets</a> section discusses in detail how to create, manage, and select assets for your app.</p>
         <p>The shell script of an app contains the shell code that will run inside the virtual machine. The script runs as root. During the script execution, the default working directory (home directory) is <code>/work</code>. For more information about the shell variables available to your script, and the handling of app inputs and outputs from your script, consult the <a href="#dev-script">App script</a> section.</p>
         <p>To summarize, here is what happens when your app is launched:</p>
@@ -157,7 +173,7 @@
           <tbody>
             <tr>
               <td>1</td>
-              <td>A new virtual machine with Ubuntu 14.04 and <a href="/assets/packages.txt">these preinstalled packages</a> is initialized.</td>
+              <td>A new virtual machine with selected Ubuntu release and preinstalled packages is initialized.</td>
             </tr>
             <tr>
               <td>2</td>
@@ -340,7 +356,7 @@
         <p>To upload an asset, you must first prepare the files that will be included in the tarball archive. On your computer, start by creating a "fake root" folder and by assembling your files underneath it.</p>
         <p>Since the asset will be uncompressed in the root folder on the cloud, it is important for the tarball to contain the proper subfolders inside of it. If an asset tarball does not have any subfolders, then its files will be placed directly inside the root folder (i.e. in <code>/</code>), which is not typically desired.</p>
         <p>Therefore, create the <code>usr/bin</code> subfolder under the "fake root" and place there any binaries, and create the <code>work</code> subfolder for any working directory files. Since your app's script starts its execution inside <code>/work</code>, any files you place under that folder will be readily accessible. For example, if your asset includes a file <code>/work/GenomeAnalysisTK.jar</code>, you can use it inside your script without any other folder designation, i.e. like this: <code>java -jar GenomeAnalysisTK.jar</code>.</p>
-        <p>If you need to compile binaries for Ubuntu 14.04, or otherwise experiment with a Linux environment similar to the one that apps run on, download and install the freely available <a href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a> virtualizer. Then, from the "Create Assets" page, download the precisionFDA virtual machine image and double-click it to open it in VirtualBox. Power on the machine and log in as the <code>ubuntu</code> user. This environment contains the same Ubuntu packages as the cloud environment where apps run.</p>
+        <p>If you need to compile binaries for Ubuntu, or otherwise experiment with a Linux environment similar to the one that apps run on, download and install the freely available <a href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a> virtualizer. Then, from the "Create Assets" page, download the precisionFDA virtual machine image and double-click it to open it in VirtualBox. Power on the machine and log in as the <code>ubuntu</code> user. This environment contains the same Ubuntu packages as the cloud environment where apps run.</p>
         <div class="alert alert-info">
           <span class="fa fa-lightbulb-o" aria-hidden="true"></span> <strong>TIP:</strong> From your host operating system (such as the OS X Terminal) you can SSH into the VM by typing <code>ssh -p 2222 ubuntu@localhost</code>. This will allow you to use your host operating system's copy/paste capabilities, or to transfer files in and out of the VM.
         </div>
