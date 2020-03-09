@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby "2.3.8"
+ruby "2.6.5"
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem "rails", "~> 5.2.3"
@@ -55,7 +55,7 @@ gem "recaptcha", require: "recaptcha/rails"
 gem "axlsx", "3.0.0.pre"
 
 # Secure headers
-gem "secure_headers", "~> 6.0"
+gem "secure_headers", "~> 6.3"
 
 # Gravatar profile image helper
 gem "gravtastic"
@@ -100,9 +100,14 @@ gem "therubyracer"
 
 gem "dry-container"
 
+gem "rubyzip", "=1.3.0"
+
+gem "sidekiq"
+
 group :development do
   # Annotate models
   gem "annotate"
+  gem "brakeman"
 
   # Access an interactive console on exception pages or by calling 'console' anywhere in the code
   gem "web-console"
@@ -130,12 +135,11 @@ group :development do
 end
 
 group :development, :test, :ui_test do
-  gem "brakeman"
   gem "dotenv-rails"
   gem "thin"
 end
 
-group :test, :ui_test do
+group :test do
   gem "database_cleaner", "~> 1.5", ">= 1.5.3"
   gem "factory_bot_rails", "~> 4.8", ">= 4.8.2"
   gem "ffaker"
@@ -151,5 +155,3 @@ group :production do
   gem "soapforce"
   gem "unicorn", "~> 4.9.0"
 end
-
-gem "rubyzip", "=1.3.0"

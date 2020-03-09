@@ -164,7 +164,6 @@ class NoteModel
       title: @title.peek()
       attachments_to_save: attachmentsToSave
       attachments_to_delete: attachmentsToDelete
-
     Precision.api("/api/update_note/", params)
       .done((res) =>
         _.each(@attachments, (attachmentSection) ->

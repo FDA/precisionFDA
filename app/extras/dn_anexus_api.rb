@@ -2,10 +2,13 @@
 class DNAnexusAPI
   include DXClient::Constants
   include DXClient::Endpoints::Apps
-  include DXClient::Endpoints::Users
+  include DXClient::Endpoints::Applets
+  include DXClient::Endpoints::Files
   include DXClient::Endpoints::Organizations
-  include DXClient::Endpoints::Workflows
   include DXClient::Endpoints::Projects
+  include DXClient::Endpoints::System
+  include DXClient::Endpoints::Users
+  include DXClient::Endpoints::Workflows
 
   def self.for_admin
     new(ADMIN_TOKEN)
@@ -22,7 +25,12 @@ class DNAnexusAPI
   end
 
   def generate_permanent_link(file)
-    opts = { project: file.project, preauthenticated: true, filename: file.name, duration: 9999999999 }
+    opts = {
+      project: file.project,
+      preauthenticated: true,
+      filename: file.name,
+      duration: 9_999_999_999,
+    }
     call(file.dxid, "download", opts)["url"]
   end
 
@@ -33,7 +41,7 @@ class DNAnexusAPI
   def user_exists?(username)
     begin
       call("user-#{username}", "describe")
-    rescue Net::HTTPServerException => e
+    rescue Net::HTTPClientException => e
       if e.message =~ /^404/
         return false
       end
@@ -45,7 +53,7 @@ class DNAnexusAPI
   def org_exists?(orgname)
     begin
       call("org-#{orgname}", "describe")
-    rescue Net::HTTPServerException => e
+    rescue Net::HTTPClientException => e
       if e.message =~ /^404/
         return false
       end
@@ -57,7 +65,7 @@ class DNAnexusAPI
   def entity_exists?(entity)
     begin
       call(entity.to_s, "describe")
-    rescue Net::HTTPServerException => e
+    rescue Net::HTTPClientException => e
       if e.message =~ /^404/
         return false
       end
@@ -70,7 +78,7 @@ class DNAnexusAPI
     api = new(ADMIN_TOKEN)
     begin
       api.call(ORG_DUMMY, "invite", invitee: email, suppressEmailNotification: true)
-    rescue Net::HTTPServerException => e
+    rescue Net::HTTPClientException => e
       if e.message =~ /^404/
         return false
       end

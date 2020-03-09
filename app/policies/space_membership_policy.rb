@@ -1,7 +1,8 @@
+# A class contains methods to determine permissions of different types
+#   for space members
+#
 class SpaceMembershipPolicy
-
   class << self
-
     def can_modify_content?(space, item, user)
       can_move_content_by_user?(space, item, user)
     end
@@ -12,10 +13,15 @@ class SpaceMembershipPolicy
 
       can_move_content?(
         space,
-        space.space_memberships.find_by(user_id: user.id)
+        space.space_memberships.find_by(user_id: user.id),
       )
     end
 
+    # Check, whether space member can make actions with a space content, for ex. with a file.
+    #   Actions could be one of: 'publish', 'delete' or 'copy_to_cooperative'.
+    # @param space [Space] - space.
+    # @param member [SpaceMembership] - an Object with a user data, who is space member.
+    # @return [true or false] - depends upon: space, member and member's role.
     def can_move_content?(space, member)
       return false if space.restrict_to_template? && !space.shared?
       return false if member.blank?
@@ -37,18 +43,21 @@ class SpaceMembershipPolicy
     def can_admin?(space, admin, member)
       return false unless suitable_admin_and_member?(space, admin, member)
       return false if member.admin?
+
       true
     end
 
     def can_contributor?(space, admin, member)
       return false unless suitable_admin_and_member?(space, admin, member)
       return false if member.contributor?
+
       true
     end
 
     def can_viewer?(space, admin, member)
       return false unless suitable_admin_and_member?(space, admin, member)
       return false if member.viewer?
+
       true
     end
 
@@ -60,8 +69,8 @@ class SpaceMembershipPolicy
       return false unless admin.lead_or_admin?
       return false if member.inactive?
       return false if member.lead?
+
       admin.side == member.side
     end
-
   end
 end

@@ -14,11 +14,11 @@ RSpec.describe ErrorProcessable do
       end
 
       it "show message for DNAnexus for platform user email" do
-        expect(controller_class.email_exists_error(non_pfda_email)).to include "use in DNAnexus"
+        expect(controller_class.email_exists_error(non_pfda_email)).to include "used for a DNAnexus account."
       end
 
       it "show message for PrecisionFDA for pfda user email" do
-        expect(controller_class.email_exists_error(exist_email)).to include "use in precisionFDA"
+        expect(controller_class.email_exists_error(exist_email)).to include "used for a precisionFDA account."
       end
     end
 

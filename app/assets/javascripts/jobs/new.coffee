@@ -14,7 +14,7 @@ class JobsNewView
     @name = ko.observable(app.title)
     @spaceId = ko.observable()
     @isInSpace = selectable_spaces.length > 0
-    @defaultSelectedSpace = ko.computed(() =>
+    @defaultSelectedSpace = ko.computed(() ->
       if selectable_spaces.length == 1
         return selectable_spaces[0]
       else
@@ -73,10 +73,11 @@ class JobsNewView
       @licenseSelector.previewedLicense(_.first(@licenseSelector.licensesToAccept.peek()))
       @licenseSelector.toggleLicensesModal()
     else
-      params =
-        id: @uid
-        name: @name.peek()
+      params = {
+        id: @uid,
+        name: @name.peek(),
         inputs: {}
+      }
 
       params.instance_type = @instanceType.peek() if @instanceType.peek()?
       params.space_id = @spaceId.peek() if @spaceId.peek()?
@@ -113,16 +114,22 @@ class JobsNewView
 #
 #########################################################
 
-JobsController = Paloma.controller('Jobs',
+JobsController = Paloma.controller('Jobs', {
   new: ->
     $container = $("body main")
-    viewModel = new JobsNewView(@params.app, @params.licenses_to_accept, @params.selectable_spaces, @params.content_scopes)
+    viewModel = new JobsNewView(
+      @params.app,
+      @params.licenses_to_accept,
+      @params.selectable_spaces,
+      @params.content_scopes
+    )
     ko.applyBindings(viewModel, $container[0])
 
     $affixContainer = $container.find(".affix-container")
     $affixContainer.affix({
-      offset:
+      offset: {
         top: $affixContainer.offset().top
+      }
     })
 
     $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
@@ -132,7 +139,7 @@ JobsController = Paloma.controller('Jobs',
       $affixContainer.parent(".affix-spacer").css("min-height", $affixContainer.height())
     )
 
-    $('.license-modal').on("click", ".list-group-item", (e) =>
+    $('.license-modal').on("click", ".list-group-item", (e) ->
       viewModel.licenseSelector.previewLicense(ko.dataFor(e.currentTarget))
     )
-)
+})

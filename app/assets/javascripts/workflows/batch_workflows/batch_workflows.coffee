@@ -11,7 +11,7 @@ class SelectorModel
   openModal: (input) =>
     @editingInput(input)
     @objectSelector.open()
-  getListedFiles: () ->
+  getListedFiles: () =>
     params = {
       states: ["closed"],
       scopes: @accessibleScope,
@@ -24,25 +24,24 @@ class SelectorModel
     }
     $.post('/api/list_files', params).then (objects) => @listedFiles(objects)
 
-  constructor: (scope) ->
+  constructor: (@accessibleScope) ->
     @editingInput = ko.observable(null)
     @listedFiles = ko.observableArray([])
-    @accessibleScope = scope
     @objectSelector = new Precision.models.SelectorModel({
       title: 'Select default file for field',
       selectionType: 'radio',
       selectableClasses: ['file'],
       studies: [],
       listRelatedParams: {
-        classes: ['file']
+        classes: ['file'],
+        scopes: @accessibleScope
       },
       listModelConfigs: [
         {
-          className: 'file'
-          name: 'Files'
-          apiEndpoint: 'list_files'
+          className: 'file',
+          name: 'Files',
+          apiEndpoint: 'list_files',
           listedFiles: @listedFiles()
-
         }
       ],
       onSave: (selected) =>
@@ -158,8 +157,7 @@ extendBatchInputFilesSearch = () ->
   @fsSortPathArrow = ko.computed(() =>
     return if @fsSortPathDirection() == DESC then 'fa-long-arrow-up' else 'fa-long-arrow-down'
   )
-  @fsSortByName = (root, e) =>
-    e.preventDefault()
+  @_fsSortByName = () =>
     _sortDirection = if @fsSortNameDirection() == ASC then DESC else ASC
     _files = @fsFiles().sort((a, b) ->
       if _sortDirection == ASC
@@ -172,6 +170,9 @@ extendBatchInputFilesSearch = () ->
     )
     @fsFiles(_files)
     @fsSortNameDirection(_sortDirection)
+  @fsSortByName = (root, e) =>
+    e.preventDefault()
+    @_fsSortByName()
   @fsSortByChecked = (root, e) =>
     e.preventDefault()
     _sortDirection = if @fsSortCheckedDirection() == ASC then DESC else ASC
@@ -216,6 +217,8 @@ extendBatchInputFilesSearch = () ->
     else
       @fsSelectedFiles.push(data.uid)
       data.checked(true)
+  @fsHandleChangeCheckbox = (data, e) ->
+    data.checked(e.target.checked)
   @fsClearSearch = (data, e) =>
     return false if @fsIsLoading()
     @fsSearchFlagsValue('ig')
@@ -255,6 +258,7 @@ extendBatchInputFilesSearch = () ->
           @fsSelectedFiles(data.uids)
           @fsIsLoading(false)
           $("""##{@name}_regexp_search_input""").focus()
+          @_fsSortByName()
         (errorData) ->
           if errorData and typeof errorData.error == 'string'
             Precision.alert.showAboveAll(errorData.error, null, 1000)
@@ -276,7 +280,9 @@ extendBatchInputFilesSearch = () ->
         newFiles = @fsFiles()
         newFiles = newFiles.concat(data.search_result.map((file) -> new FSItem(file)))
         @fsFiles(newFiles)
-        @fsSelectedFiles @fsFiles().map((item) -> item.uid)
+        selectedFiles = @fsFiles().filter((item) -> item.checked())
+                                  .map((item) -> item.uid)
+        @fsSelectedFiles(selectedFiles)
         @fsIsMoreLoading(false)
       (errorData) ->
         if errorData and typeof errorData.error == 'string'
@@ -314,8 +320,6 @@ extendBatchInput = () ->
     _sortDirection = if @sortCheckedDirection() == ASC then DESC else ASC
     @sortCheckedDirection(_sortDirection)
   ### SORT ###
-  # @searchValue = ko.observable(null)
-  # @searchFlagsValue = ko.observable('ig')
 
   @isTreeLoading = ko.observable(false)
 
@@ -346,24 +350,6 @@ extendBatchInput = () ->
       else
         return b_selected - a_selected
 
-    # searchValue = @searchValue()
-    # flagsValue = @searchFlagsValue()
-
-    # if searchValue
-    #   try
-    #     regexp = new RegExp(searchValue, flagsValue)
-    #   catch
-    #     Precision.alert.showAboveAll('Wrong Regular Expression!', null, 1000)
-    #     regexp = new RegExp('.*', 'ig')
-    #   fileTree.deselect_all()
-    #   nodes.forEach((node) ->
-    #     if node.data.type == TYPE_FILE
-    #       if node.text.search(regexp) > -1
-    #         fileTree.select_node(node.id)
-    #       else
-    #         fileTree.deselect_node(node.id)
-    #   )
-
     nodes = nodes.sort(sortNameHandler).sort(sortCheckedHandler)
 
     if @fileTree
@@ -372,14 +358,7 @@ extendBatchInput = () ->
 
     return nodes
   )
-  # @searchOnChange = _.debounce(
-  #   (root, e) => @searchValue(e.target.value)
-  #   400
-  # )
-  # @clearSearch = (root, e) =>
-  #   @searchFlagsValue('ig')
-  #   @searchValue(null)
-  #   @fileTree.treeContainer.jstree(true).deselect_all()
+
   @setValue = ko.computed( => @value(@selectedFiles()))
 
   @selectNodeHandler = () =>
@@ -395,6 +374,7 @@ extendBatchInput = () ->
     onRootNodesLoad = () => @isTreeLoading(true)
     @fileTree = @batchWorkflowFileTree.createNewTree($("##{@name}"), onRootNodesLoad)
     @fileTree.onSelectNodeCallback = () => @selectNodeHandler()
+    @fileTree.onDeselectNodeCallback = () => @selectNodeHandler()
     @fileTree.onRootNodesReady = () => @isTreeLoading(false)
 
 class BatchInputModel

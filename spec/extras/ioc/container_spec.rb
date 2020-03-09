@@ -7,6 +7,10 @@ RSpec.describe IOC::Container do
   let(:user) { build(:user) }
 
   describe "#resolve" do
+    let(:user_api) { "User API implementation" }
+    let(:admin_api) { "Admin API implementation" }
+    let(:auth_api) { "Auth API implementation" }
+
     before do
       container.enable_stubs!
     end
@@ -39,14 +43,10 @@ RSpec.describe IOC::Container do
     end
 
     describe "Organizations" do
-      let(:user_api) { "User API implementation" }
-      let(:admin_api) { "Admin API implementation" }
-      let(:auth_api) { "Auth API implementation" }
-
       before do
-        container.stub("orgs.api.user", user_api)
-        container.stub("orgs.api.admin", admin_api)
-        container.stub("orgs.api.auth", auth_api)
+        container.stub("api.user", user_api)
+        container.stub("api.admin", admin_api)
+        container.stub("api.auth", auth_api)
       end
 
       it "resolves user removal policy" do
@@ -200,6 +200,21 @@ RSpec.describe IOC::Container do
 
           expect(OrgService::Provision).to have_received(:new).with(provision_on_platform)
         end
+      end
+    end
+
+    describe "Comparisons" do
+      before do
+        container.stub("api.user", user_api)
+        container.stub("api.admin", admin_api)
+        container.stub("api.auth", auth_api)
+      end
+
+      it "resolves synchronizer" do
+        allow(SyncService::Comparisons::Synchronizer).to receive(:new).and_call_original
+
+        expect(container.resolve("comparisons.sync.synchronizer")).
+          to be_an_instance_of(SyncService::Comparisons::Synchronizer)
       end
     end
   end

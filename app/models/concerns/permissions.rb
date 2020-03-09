@@ -79,7 +79,7 @@ module Permissions
   def editable_by?(context)
     return false if context.guest?
 
-    return false if in_locked_verificaiton_space?
+    return false if in_locked_verification_space?
 
     return user_id == context.user_id unless in_space?
 
@@ -108,6 +108,17 @@ module Permissions
   def core_publishable_by_user?(user, scope_to_publish_to)
     return false unless user
     user_id == user.id && (private? || in_space?)
+  end
+
+  # Check, whether file is piblishable, i.e. to be 'public'.
+  #   A file should have scope 'private' or in space.
+  # @param user [User] a user object, who is going to publish
+  # @return [true, false] Returns true if a file can be published by a user,
+  #   false otherwise.
+  def publishable?(user)
+    return false unless user
+
+    private? || in_space?
   end
 
   def publishable_by?(context, scope_to_publish_to = "public")
@@ -144,7 +155,7 @@ module Permissions
     scope == "private" || scope.nil?
   end
 
-  def in_locked_verificaiton_space?
+  def in_locked_verification_space?
     in_space? && space_object.verified?
   end
 

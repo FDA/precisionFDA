@@ -21,6 +21,14 @@
 
 en:
   hello: "Hello world"
+  email_taken: |
+    Error. This email address is already being used for a %{side} account.
+    Please choose a different email address for precisionFDA.
+  unable_to_set_comparsion_app: Unable to set non-public app as comparison default.
+  comparison_app_set: App successfully set as comparison default app.
+  comparison_file_not_closed: File "%{file}" is not in a 'closed' state and
+    cannot be used as a Comparison input.
+
   activerecord:
     attributes:
       invitation:

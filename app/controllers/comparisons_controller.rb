@@ -10,7 +10,8 @@ class ComparisonsController < ApplicationController
       return
     end
 
-    User.sync_comparisons!(@context)
+    synchronizer = DIContainer.resolve("comparisons.sync.synchronizer")
+    synchronizer.sync_comparisons!(@context.user)
 
     comparisons = Comparison.editable_by(@context).includes(:taggings)
     @comparisons_grid = initialize_grid(comparisons, {
@@ -21,7 +22,6 @@ class ComparisonsController < ApplicationController
       include: [:user, {user: :org}, {taggings: :tag}]
     })
 
-    js comparisons_ids_with_descriptions(comparisons)
   end
 
   def fhir_cap
@@ -294,8 +294,10 @@ class ComparisonsController < ApplicationController
   def show
     @comparison = Comparison.accessible_by(@context).find(unsafe_params[:id])
 
-    if @comparison.state == "pending"
-      User.sync_comparison!(@context, @comparison.id)
+    if @comparison.state == Comparison::STATE_PENDING
+      synchronizer = DIContainer.resolve("comparisons.sync.synchronizer")
+      synchronizer.sync_comparisons!(@context.user, [@comparison.id])
+
       @comparison.reload
     end
 
@@ -363,57 +365,73 @@ class ComparisonsController < ApplicationController
   def new
   end
 
+  # Creates new comparison.
   def create
     param! :comparison, Hash do |c|
-      c.param! :name, String, {required: true}
-      c.param! :description, String, {default: ""}
-      c.param! :test_vcf_uid, String, {required: true}
+      c.param! :name, String, required: true
+      c.param! :description, String, default: ""
+      c.param! :test_vcf_uid, String, required: true
       c.param! :test_bed_uid, String
-      c.param! :ref_vcf_uid, String, {required: true}
+      c.param! :ref_vcf_uid, String, required: true
       c.param! :ref_bed_uid, String
     end
 
     comp_params = unsafe_params[:comparison]
-
     files = {}
+
     # Required files
-    ["test_vcf", "ref_vcf"].each do |role|
-      files[role] = UserFile.real_files.accessible_by(@context).find_by_uid!(comp_params["#{role}_uid"])
+    %w(test_vcf ref_vcf).each do |role|
+      files[role] = accessible_real_file(comp_params["#{role}_uid"])
     end
+
     # Optional files
-    ["test_bed", "ref_bed"].each do |role|
-      if comp_params["#{role}_uid"].present?
-        files[role] = UserFile.real_files.accessible_by(@context).find_by_uid!(comp_params["#{role}_uid"])
-      end
+    %w(test_bed ref_bed).each do |role|
+      next if comp_params["#{role}_uid"].blank?
+
+      files[role] = accessible_real_file(comp_params["#{role}_uid"])
     end
 
     # Throw error if a file is not in a 'closed' state
     files.each_key do |role|
       file = files[role]
-      if file[:state] != "closed"
-        flash[:error] = "File \"#{file[:name]}\" is not in a 'closed' state and cannot be used as a Comparison input."
-        redirect_to new_comparison_path
-        return
+
+      unless file[:state] == UserFile::STATE_CLOSED
+        flash[:error] = I18n.t("comparison_file_not_closed", file: file[:name])
+        redirect_to(new_comparison_path) && (return nil)
       end
     end
 
+    input = Hash[files.map { |k, v| [k, { "$dnanexus_link": { project: v.project, id: v.dxid } }] }]
     project = User.find(@context.user_id).private_comparisons_project
     run_input = {
       name: comp_params[:name],
       project: project,
-      input: Hash[files.map {|k,v| [k, {"$dnanexus_link": {project: v.project, id: v.dxid}}]}]
+      input: input,
     }
-    jobid = DNAnexusAPI.new(@context.token).call(DEFAULT_COMPARISON_APP, "run", run_input)["id"]
+
+    api = DIContainer.resolve("api.user")
+
+    begin
+      job_id = api.app_run(Setting.comparison_app, nil, run_input)["id"]
+    rescue => e
+      json_error = e.message.scan(/({"error".*)/).flatten.first
+
+      raise e if json_error.blank?
+
+      flash[:error] = JSON.parse(json_error).dig("error", "message")
+      redirect_to new_comparison_path
+      return
+    end
 
     opts = {
       name: comp_params[:name],
       description: comp_params[:description],
       user_id: @context.user_id,
-      scope: "private",
-      state: "pending",
-      dxjobid: jobid,
+      scope: Comparison::SCOPE_PRIVATE,
+      state: Comparison::STATE_PENDING,
+      dxjobid: job_id,
       project: project,
-      meta: {}
+      meta: {},
     }
 
     Comparison.transaction do
@@ -472,15 +490,24 @@ class ComparisonsController < ApplicationController
   end
 
   private
-    def comparison_params
-      params.require(:comparison).permit(:name, :description)
-    end
 
-    def query_params
-      params.permit(:id, :name, :page, :_format)
-    end
+  # Tries to find real accessible by user file by file's UID.
+  # @param uid [String] UID to try to find file by.
+  # @raise [ActiveRecord::RecordNotFound] if file wasn't found.
+  # @return [UserFile] Found file.
+  def accessible_real_file(uid)
+    UserFile.real_files.accessible_by(@context).find_by!(uid: uid)
+  end
 
-    def comparisons_ids_with_descriptions(comparisons)
-      { comparisonsIdsWithDescription: comparisons.select { |comparison| comparison.description.present? }.collect(&:id) }
-    end
+  def comparison_params
+    params.require(:comparison).permit(:name, :description)
+  end
+
+  def query_params
+    params.permit(:id, :name, :page, :_format)
+  end
+
+  def comparisons_ids_with_descriptions(comparisons)
+    { comparisonsIdsWithDescription: comparisons.select { |comparison| comparison.description.present? }.collect(&:id) }
+  end
 end

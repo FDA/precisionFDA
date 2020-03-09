@@ -1,4 +1,3 @@
-# TODO: to be refactored
 class SpacesController < ApplicationController
   before_action :init_parent_folder, only: :files
 
@@ -16,7 +15,7 @@ class SpacesController < ApplicationController
   )
 
   def index
-    spaces = Space.accessible_by(@context)
+    spaces = Space.accessible_by(@context).undeleted
 
     @spaces_grid = initialize_grid(spaces, {
       name: 'spaces',
@@ -254,37 +253,56 @@ class SpacesController < ApplicationController
     redirect_to redirect_path
   end
 
-  # TODO: move to api
+  # Produce list of actions in a service menu on files grid in space.
+  #   Set up actions control in dependence upon context user accessibility to the node selected.
+  #   When "delete": do not allow to delete a comparison input file.
+  # @param context [Context] - project id or nil.
+  # @return [Array of nodes] - nodes - UserFile or Folder
   skip_before_action :require_login, only: :download_list
   before_action :require_api_login, only: :download_list
   def download_list
-    task = unsafe_params[:task]
-    space = Space.accessible_by(@context).find(unsafe_params[:id])
+    task = params[:task]
+    space = Space.accessible_by(@context).find(params[:id])
     root_name = space.name
     files = []
+    space_context = { context: @context, space: space, nodes_ids: params[:ids] }
 
     case task
     when "download"
-      nodes = Node.accessible_by_space(space).accessible_by(@context).where(id: unsafe_params[:ids])
+      nodes = Node.accessible_by_space(space).accessible_by(@context).where(id: params[:ids])
       nodes.each { |node| files += node.is_a?(Folder) ? node.all_files : [node] }
     when "publish"
-      nodes = Node.accessible_by_space(space).editable_by(@context).where(id: unsafe_params[:ids], scope: space.uid)
+      nodes = Node.permitted_in_space_context(space_context)
       nodes.each { |node| files += node.is_a?(Folder) ? node.all_files(Node.where(scope: space.uid)) : [node] }
     when "delete"
-      nodes = Node.accessible_by_space(space).editable_by(@context).where(id: unsafe_params[:ids]).to_a
+      nodes = Node.permitted_in_space_context(space_context)
       files += nodes
+
       nodes.each { |node| files += node.all_children if node.is_a?(Folder) }
     when "copy_to_cooperative"
-      nodes = Node.accessible_by_space(space).editable_by(@context).where(id: unsafe_params[:ids], scope: space.uid)
-      nodes.each { |node| files += node.is_a?(Folder) ? node.all_files(Node.where(scope: space.uid)) : [node] }
+      nodes = Node.
+        accessible_by_space(space).
+        editable_by(@context).
+        where(id: params[:ids], scope: space.uid)
+      nodes.each do |node|
+        files += node.is_a?(Folder) ? node.all_files(Node.where(scope: space.uid)) : [node]
+      end
     end
 
+    comparison_file = false
     res = files.map do |file|
+      if file.is_a?(UserFile) && file.comparisons.present?
+        comparison_file = true
+        next
+      end
+
       info = {
         id: file.id,
         name: file.name,
         type: file.klass,
-        fsPath: ([root_name] + file.ancestors(unsafe_params[:scope]).map(&:name).reverse).compact.join(" / "),
+        fsPath: ([root_name] + file.ancestors(params[:scope]).map(&:name).reverse).
+          compact.
+          join(" / "),
         viewURL: file.is_a?(UserFile) ? file_path(file) : pathify_folder(file),
       }
 
@@ -292,47 +310,73 @@ class SpacesController < ApplicationController
 
       info
     end
+    res.compact!
+    res = { comparisonFile: true } if comparison_file && res.blank?
 
     render json: res
   end
 
+  # POST action of removing nodes (user_files or/and folders) from space, when
+  # nodes are being passed to this action, by their ids.
+  # Maintain a context user accessibility check of current space and nodes selected for action.
+  # Fires a background Sidekiq worker RemoveFolderWorker when all permissions are passed.
+  # Shows an informative flash meesage and redirects to a space files grid view.
   def remove_folder
-    service = FolderService.new(@context)
-    space = Space.accessible_by(@context).find(unsafe_params[:id])
-    files = Node.editable_by(@context).where(id: unsafe_params[:ids])
-    res = service.remove(files)
+    space = Space.accessible_by(@context).find(params[:id])
+    ids = Node.sin_comparison_inputs(unsafe_params[:ids])
 
-    if res.success?
-      flash[:success] = "Objects(s) successfully removed"
+    if space.contributor_permission(@context)
+      nodes = Node.accessible_by(@context).where(id: ids)
+
+      UserFile.transaction do
+        nodes.update(state: UserFile::STATE_REMOVING)
+
+        nodes.where(sti_type: "Folder").find_each do |folder|
+          folder.all_children.each { |node| node.update!(state: UserFile::STATE_REMOVING) }
+        end
+
+        Array(nodes.pluck(:id)).in_groups_of(1000, false) do |ids|
+          job_args = ids.map do |node_id|
+            [node_id, session_auth_params]
+          end
+
+          Sidekiq::Client.push_bulk("class" => RemoveNodeWorker, "args" => job_args)
+        end
+      end
+
+      flash[:success] = "Object(s) are being removed. This could take a while."
     else
-      flash[:error] = res.value.values
+      flash[:warning] = "You have no permission to remove object(s)."
     end
 
     redirect_to files_space_path(space)
   end
 
   def publish_folder
-    space = Space.accessible_by(@context).find(unsafe_params[:id])
-    files = UserFile
-      .accessible_by_space(space)
-      .editable_by(@context)
-      .where(id: unsafe_params[:ids])
+    space = Space.accessible_by(@context).find(params[:id])
 
-    if files.size == 0
-      flash[:error] = "No nodes selected"
-      redirect_to files_space_path(space)
-      return
+    if space.contributor_permission(@context)
+      files = Node.accessible_by(@context).where(id: params[:ids])
+
+      if files.size == 0
+        flash[:error] = "No nodes selected"
+        redirect_to files_space_path(space)
+        return
+      end
+
+      begin
+        count = UserFile.publish(files, @context, "public")
+      rescue RuntimeError => e
+        flash[:error] = e.message
+        redirect_to files_space_path(space)
+        return
+      end
+
+      flash[:success] = "#{count} file(s) successfully published"
+    else
+      flash[:warning] = "You have no permission to publish object(s)."
     end
 
-    begin
-      count = UserFile.publish(files, @context, "public")
-    rescue RuntimeError => e
-      flash[:error] = e.message
-      redirect_to files_space_path(space)
-      return
-    end
-
-    flash[:success] = "#{count} file(s) successfully published"
     redirect_to files_space_path(space)
   end
 
@@ -352,21 +396,32 @@ class SpacesController < ApplicationController
     redirect_back(fallback_location: space_path(space)) and return
   end
 
+  # Copies an item from a current confidential space to cooperative one.
   def copy_to_cooperative
     space = Space.accessible_by(@context).find(unsafe_params[:id])
     object = item_from_uid(unsafe_params[:object_id])
 
-    if space && object && space.shared_space
-      ActiveRecord::Base.transaction do
-        copy_service.copy(object, space.shared_space.uid).each do |new_object|
-          SpaceEventService.call(space.shared_space.id, @context.user_id, nil, new_object, "copy_to_cooperative")
+    if space.contributor_permission(@context) && space.member_in_cooperative?(@context.user_id)
+      if object && space.shared_space
+        ActiveRecord::Base.transaction do
+          copy_service.copy(object, space.shared_space.uid).each do |new_object|
+            SpaceEventService.call(
+              space.shared_space.id,
+              @context.user_id,
+              nil,
+              new_object,
+              "copy_to_cooperative",
+            )
+          end
         end
-      end
 
-      flash[:success] = "#{object.class} successfully copied"
+        flash[:success] = "#{object.class} successfully copied"
+      end
+    else
+      flash[:warning] = "You have no permission to copy object(s) to cooperative."
     end
 
-    redirect_back(fallback_location: space_path(space)) and return
+    redirect_back(fallback_location: space_path(space))
   end
 
   def copy_service
@@ -449,7 +504,7 @@ class SpacesController < ApplicationController
   end
 
   def files
-    @folder_id = unsafe_params[:folder_id]
+    @folder_id = params[:folder_id]
     @folder = Folder.accessible_by_space(@space).find_by(id: @folder_id)
     @folders = folders(@folder_id)
 

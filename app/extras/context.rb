@@ -6,6 +6,23 @@
 class Context
   attr_accessor :user_id, :username, :token, :expiration, :org_id
 
+  class << self
+    # Build context from request's session
+    #
+    # @param [ActionDispatch::Request::Session] Session
+    #
+    # @return [Context] User's context
+    def build(session)
+      new(
+        session["user_id"],
+        session["username"],
+        session["token"],
+        session["expiration"],
+        session["org_id"],
+      )
+    end
+  end
+
   def initialize(user_id, username, token, expiration, org_id)
     @user_id = user_id
     @username = username

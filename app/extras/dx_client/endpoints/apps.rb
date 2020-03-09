@@ -27,6 +27,20 @@ module DXClient
 
         raise
       end
+
+      # Runs app.
+      # @see https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-xxxx-yyyy-run
+      # @param app_dxid [String] App's dxid to run.
+      # @param revision [String, nil] App's revision to run. Should be nil if no revision is
+      #   planned to run.
+      # @param opts [Hash] Additional options.
+      # @return [Hash]
+      def app_run(app_dxid, revision = nil, opts = {})
+        full_dxid = app_dxid
+        full_dxid = "#{app_dxid}/#{revision}" if revision.present?
+
+        call(full_dxid, "run", opts)
+      end
     end
   end
 end

@@ -2,7 +2,6 @@ class MainController < ApplicationController
   skip_before_action :require_login, only: %i(
     index
     about
-    exception_test
     login
     return_from_login
     request_access
@@ -14,7 +13,7 @@ class MainController < ApplicationController
     news
     mislabeling
   )
-  skip_before_action :require_login, only: %i(track mislabeling bco_appathon georgetown)
+  skip_before_action :require_login, only: %i(track ae_anomaly_detection)
   before_action :require_login_or_guest, only: %i(track)
   before_action :init_countries, only: %i(request_access create_request_access)
 
@@ -61,7 +60,7 @@ class MainController < ApplicationController
           end
         end
 
-        login_tasks_processor = container.resolve("orgs.login_tasks_processor")
+        login_tasks_processor = DIContainer.resolve("orgs.login_tasks_processor")
         login_tasks_processor.call(@context.user)
       else
         @tutorials = [
@@ -125,6 +124,7 @@ class MainController < ApplicationController
     end
 
     Session.where(key: session.id).delete_all
+    DIContainer.shutdown
     reset_session
     flash[:success] = "You were successfully logged out of precisionFDA"
     redirect_to root_url
@@ -198,10 +198,6 @@ class MainController < ApplicationController
     ]
   end
 
-  def exception_test
-    raise "This is an intentionally raised exception for testing email notification. Please contact Evan with any concerns"
-  end
-
   def login
     if @context.guest?
       render "_partials/_error", status: 403, locals: {message: "You are currently browsing precisionFDA as a guest. To log in and complete this action, you need a user account. Contact precisionfda@fda.hhs.gov if you need to upgrade to a user account with contributor-level access."}
@@ -248,7 +244,7 @@ class MainController < ApplicationController
     elsif user.present? && user.user_state != 'enabled'
       log_session("User #{username} attempted to log in from locked/disabled DNAnexus account")
 
-      render "_partials/_error", status: 403, locals: { message: "ERROR: You cannot use an existing DNAnexus account (#{username}) to log into precisionFDA. You need to contact ADMIN to re-enable your account." }
+      render "_partials/_error", status: 403, locals: { message: "ERROR: You need to contact ADMIN to re-enable your account." }
     else
       if user.last_login.nil? && user.private_files_project.nil?
         api = DNAnexusAPI.new(token)
@@ -497,11 +493,7 @@ class MainController < ApplicationController
     @graph = GraphDecorator.build(@context, @item)
   end
 
-  def mislabeling; end
-
-  def bco_appathon; end
-
-  def georgetown; end
+  def ae_anomaly_detection; end
 
   def tokify
     @key = generate_auth_key

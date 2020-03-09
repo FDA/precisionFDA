@@ -11,19 +11,29 @@ class AppIndexModel
     @app = app
     @confirmationModal = $('#replace-challenge-app-modal')
     @selectedChallenge = ko.observable({ app: {} })
-    @fdaSpinner = ko.observable(false)
+
     @shareSuccess = ko.observable(false)
+    @sharingWithFDA = ko.observable(false)
+
+    @assignToChallengeModal = $('#assign_app_to_challenge_modal')
+    @assignToChallengeModalLoading = ko.observable(false)
+    @assignToChallengeId = ''
 
   shareWithFDA: () =>
-    return false if @fdaSpinner()
-    if $('#fda_button').hasClass('btn-primary')
-      @fdaSpinner(true)
-      $.ajax('/api/share_with_fda', {
-        method: "POST",
-        data: { id: @app.id },
-        success: () => @shareSuccess(true)
-      }).always () => @fdaSpinner(false)
-    return false
+    @sharingWithFDA(true)
+    $.ajax('/api/share_with_fda', {
+      method: 'POST',
+      data: {
+        id: @app.id
+      },
+      success: (data) =>
+        $('#share_with_fda_modal').modal('hide')
+        @sharingWithFDA(false)
+        @shareSuccess(true)
+      error: (data) =>
+        @sharingWithFDA(false)
+        Precision.alert.showAboveAll('Something went wrong while sharing with FDA!')
+    })
 
   showConfirmationModal: (challenge_id) =>
     @confirmationModal.modal('show')
@@ -32,6 +42,22 @@ class AppIndexModel
         @selectedChallenge(item)
     )
 
+  showAssignToChallengeModal: (data, e) =>
+    e.preventDefault()
+    @assignToChallengeId = e.target.getAttribute('data-challenge-id')
+    @assignToChallengeModal.modal('show')
+
+  assignToChallenge: () =>
+    @assignToChallengeModalLoading(true)
+    $.ajax("/challenges/#{@assignToChallengeId}/assign_app", {
+      method: 'POST',
+      data: {
+        app_id: @app.id
+      },
+      error: (data) =>
+        @assignToChallengeModalLoading(false)
+        Precision.alert.showAboveAll('Something went wrong while assigning to Challenge!')
+    })
 
 #########################################################
 #
@@ -41,7 +67,7 @@ class AppIndexModel
 #
 #########################################################
 
-AppsController = Paloma.controller('Apps',
+AppsController = Paloma.controller('Apps', {
   index: ->
     $container = $("body main")
     viewModel = new AppIndexModel(@params.app, @params.challenges, @params.releaseable)
@@ -50,5 +76,4 @@ AppsController = Paloma.controller('Apps',
     $container.find('[data-toggle="tooltip"]').tooltip({
       container: 'body'
     })
-
-)
+})

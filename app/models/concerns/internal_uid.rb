@@ -15,5 +15,4 @@ module InternalUid
       self.uid = "#{dxid}-#{self.class.where(dxid: dxid).count + 1}"
     end
   end
-
 end

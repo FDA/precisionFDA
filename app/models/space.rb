@@ -32,6 +32,7 @@ class Space < ActiveRecord::Base
   belongs_to :space
   belongs_to :space_template
   belongs_to :sponsor_org, class_name: "Org"
+  has_one :challenge
 
   has_and_belongs_to_many :space_memberships
 
@@ -61,7 +62,8 @@ class Space < ActiveRecord::Base
   scope :reviewer, -> { review.where.not(host_dxorg: nil) }
   scope :sponsor, -> { review.where.not(guest_dxorg: nil) }
   scope :all_verified, -> { where(verified: true) }
-  scope :non_groups, -> { where.not(space_type: 0) }
+  scope :non_groups, -> { where.not(space_type: :groups) }
+  scope :undeleted, -> { where.not(state: :deleted) }
 
   def confidential_space(member)
     if member.host?
@@ -186,6 +188,33 @@ class Space < ActiveRecord::Base
     project.present? && member.lead_or_admin_or_contributor?
   end
 
+  # Determines a space member by its user id.
+  # @param id [Integer] - user id.
+  # @return [SpaceMembership] - an Object with a user data, who is space member.
+  def member(id)
+    space_memberships.find_by(user_id: id)
+  end
+
+  # Determines whether a current space is confidential and if it's context member
+  #   is a member of appropriate cooperative space also.
+  # @param id [Integer] - user id.
+  # @return [true or false] - depends upon a user is a cooperative space member.
+  #   In case that current space is not confidential - returns false.
+  def member_in_cooperative?(id)
+    return false unless self.confidential?
+
+    Space.find(self.space_id).member(id).present?
+  end
+
+  # Determine, whether a space provide a contributor (non-viewer) permission for user actions.
+  # @param context [Context] - a context user
+  # @return [true or false] - depends upon user'r role, context accessibility to space and
+  #   possibility to move space content.
+  def contributor_permission(context)
+    accessible_by?(context) &&
+      SpaceMembershipPolicy.can_move_content?(self, member(context.user.id))
+  end
+
   def describe_fields
     %w(title description state)
   end
@@ -218,8 +247,20 @@ class Space < ActiveRecord::Base
     leads.host.first
   end
 
+  # Returns dxuser of host_lead of the space.
+  # @return [String] dxuser of the host lead of the space.
+  def host_lead_dxuser
+    host_lead_member.user.dxuser
+  end
+
   def guest_lead
     guest_lead_member.user
+  end
+
+  # Returns dxuser of guest_lead of the space.
+  # @return [String] dxuser of the guest lead of the space.
+  def guest_lead_dxuser
+    guest_lead_member.user.dxuser
   end
 
   def guest_lead_member
@@ -271,10 +312,14 @@ class Space < ActiveRecord::Base
     ["private"]
   end
 
+  # Determine, whether an object is accessible by context user in space.
+  #   A space provides a contributor (non-viewer) permission for user actions,
+  #   for ex.: to publish to space, to delete a not owned file, etc.
+  # @param context [Context] - project id or nil.
+  # @return [true or false] - depends upon user'r role and project value
   def accessible_by?(context)
     return if context.guest?
-
-    raise unless context.user_id.present?
+    raise if context.user_id.blank?
 
     return true if context.review_space_admin? && reviewer?
     return true if context.review_space_admin? && verified?
@@ -334,7 +379,7 @@ class Space < ActiveRecord::Base
 
   def content_counters(user_id)
     notes = Note.real_notes.accessible_by_space(self).count
-    files = UserFile.real_files.accessible_by_space(self).count
+    files = UserFile.real_files.not_removing.accessible_by_space(self).count
     apps = App.accessible_by_space(self).count
     jobs = Job.accessible_by_space(self).count
     comparisons = Comparison.accessible_by_space(self).count

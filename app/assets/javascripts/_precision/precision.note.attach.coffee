@@ -117,7 +117,6 @@ class NoteAttachModel
         id: @id
         type: @type
       }]
-
     Precision.api "/api/attach_to_notes", params, (res) =>
       location.reload()
 
