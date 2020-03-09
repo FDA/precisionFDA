@@ -1,12 +1,12 @@
 const ko = require("knockout");
 const _ = require("lodash");
-require("../precision.selector.coffee");
+require("../../../app/assets/javascripts/_precision/precision.selector.coffee");
 const ObjectItemModel = global.Precision.models.ObjectItemModel;
 
-// Set global dependencies
-Object.assign(global, { ko, _ })
-
 describe("ObjectItemModel", () => {
+  // Set global dependencies
+  Object.assign(global, { ko, _ })
+
   const objectItemModelInstance = new ObjectItemModel({}, {}, {});
 
   test("should sanitize full path to file", () => {
