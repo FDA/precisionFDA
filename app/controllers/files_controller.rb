@@ -3,6 +3,7 @@ class FilesController < ApplicationController
   before_action :require_login_or_guest, only: [:index, :featured, :explore]
   before_action :redirect_guest,         only: [:index]
   before_action :init_parent_folder,     only: [:index, :featured, :explore]
+  before_action :check_file_state, only: %i(show)
 
   include VerifiedSpaceHelper
 
@@ -88,66 +89,75 @@ class FilesController < ApplicationController
   end
 
   def show
-    @file = UserFile.not_assets.accessible_by(@context).includes(:user).find_by_uid!(unsafe_params[:id])
+    @file = UserFile.not_assets.accessible_by(@context).includes(:user).find_by!(uid: params[:id])
 
     # Refresh state of file, if needed
     if @file.state != "closed"
-      @file.is_submission_output? ? User.sync_challenge_file!(@file.id) : User.sync_file!(@context, @file.id)
+      if @file.challenge_file?
+        User.sync_challenge_file!(@file.id)
+      else
+        User.sync_file!(@context, @file.id)
+      end
       @file.reload
     end
 
     if @file.parent_type != "Comparison"
-      User.sync_comparisons!(@context)
+      synchronizer = DIContainer.resolve("comparisons.sync.synchronizer")
+      synchronizer.sync_comparisons!(@context.user)
 
-      @comparisons_grid = initialize_grid(@file.comparisons.accessible_by(@context).includes(:taggings), {
-        name: 'comparisons',
-        order: 'comparisons.id',
-        order_direction: 'desc',
-        per_page: 100,
-        include: [:user, {user: :org}, {taggings: :tag}]
-      })
+      @comparisons_grid =
+        initialize_grid(
+          @file.comparisons.accessible_by(@context).includes(:taggings),
+          name: "comparisons",
+          order: "comparisons.id",
+          order_direction: "desc",
+          per_page: 100,
+          include: [:user, { user: :org }, { taggings: :tag }],
+        )
     else
       @comparison = @file.parent
     end
 
-    if @file.editable_by?(@context)
-      @licenses = License.editable_by(@context)
-    end
+    @licenses = License.editable_by(@context) if @file.editable_by?(@context)
 
     @items_from_params = [@file]
     @item_path = pathify(@file)
     @item_comments_path = pathify_comments(@file)
     if @file.in_space?
       space = item_from_uid(@file.scope)
-      @comments = Comment.where(commentable: space, content_object: @file).order(id: :desc).page unsafe_params[:comments_page]
+      @comments =
+        Comment.where(commentable: space, content_object: @file).
+          order(id: :desc).page(params[:comments_page])
     else
-      @comments = @file.root_comments.order(id: :desc).page unsafe_params[:comments_page]
+      @comments = @file.root_comments.order(id: :desc).page(params[:comments_page])
     end
 
-    @notes = @file.notes.real_notes.accessible_by(@context).order(id: :desc).page unsafe_params[:notes_page]
-    @answers = @file.notes.accessible_by(@context).answers.order(id: :desc).page unsafe_params[:answers_page]
-    @discussions = @file.notes.accessible_by(@context).discussions.order(id: :desc).page unsafe_params[:discussions_page]
-    js file: @file.slice(:uid, :id), license: @file.license ? @file.license.slice(:uid, :content) : nil
+    notes_ids = Attachment.file_attachments(@file.id).pluck(:note_id)
+    @notes = Note.where(id: notes_ids).real_notes.
+      accessible_by(@context).order(id: :desc).page(params[:notes_page])
+
+    @answers = @file.notes.
+      accessible_by(@context).
+      answers.order(id: :desc).page(params[:answers_page])
+    @discussions = @file.notes.
+      accessible_by(@context).
+      discussions.order(id: :desc).page(params[:discussions_page])
+
+    js(
+      file: @file.slice(:uid, :id),
+      license: @file.license&.slice(:uid, :content),
+    )
   end
 
   def new
     js folder_id: unsafe_params[:folder_id]
   end
 
+  # Downloading file and show it in a browser tab.
+  # Allow assets as well
+  # Redirecting to a new tab by file url.
   def download
-    # Allow assets as well
-    @file = UserFile.accessible_by(@context).find_by_uid!(unsafe_params[:id])
-
-    # Refresh state of file, if needed
-    if @file.state != "closed"
-      if @file.parent_type == "Asset"
-        User.sync_asset!(@context, @file.id)
-      else
-        @file.is_submission_output? ? User.sync_challenge_file!(@file.id) : User.sync_file!(@context, @file.id)
-      end
-      @file.reload
-    end
-
+    @file = UserFile.exist_refresh_state(@context, params[:id])
     if @file.state != "closed"
       flash[:error] = "Files can only be downloaded if they are in the 'closed' state"
       redirect_to file_path(@file)
@@ -155,27 +165,17 @@ class FilesController < ApplicationController
       flash[:error] = "You must accept the license before you can download this"
       redirect_to @file.parent_type == "Asset" ? asset_path(@file) : file_path(@file)
     else
-      opts = {project: @file.project, preauthenticated: true}
-      opts[:filename] = @file.name
-      file_url = DNAnexusAPI.new(@file.is_submission_output? ? CHALLENGE_BOT_TOKEN : @context.token).call(@file.dxid, "download", opts)["url"] + (unsafe_params[:inline] == "true" ? '?inline' : '')
-      Event::FileDownloaded.create_for(@file, @context.user)
-      redirect_to file_url
+      file_url = @file.file_url(@context, params[:inline])
+      redirect_to URI.parse(file_url).to_s
     end
   end
 
+  # Downloading file and provide it's url to be downloaded with.
+  # Allow assets as well, thought not currently exposed in the UI
+  # @return [@url] file url.
+  #
   def link
-    # Allow assets as well, thought not currently exposed in the UI
-    @file = UserFile.accessible_by(@context).find_by_uid!(unsafe_params[:id])
-
-    # Refresh state of file, if needed
-    if @file.state != "closed"
-      if @file.parent_type == "Asset"
-        User.sync_asset!(@context, @file.id)
-      else
-        @file.is_submission_output? ? User.sync_challenge_file!(@file.id) : User.sync_file!(@context, @file.id)
-      end
-      @file.reload
-    end
+    @file = UserFile.exist_refresh_state(@context, unsafe_params[:id])
 
     if @file.state != "closed"
       flash[:error] = "Files can only be downloaded if they are in the 'closed' state"
@@ -184,9 +184,7 @@ class FilesController < ApplicationController
       flash[:error] = "You must accept the license before you can get the download link"
       redirect_to @file.parent_type == "Asset" ? asset_path(@file) : file_path(@file)
     else
-      opts = {project: @file.project, preauthenticated: true, filename: @file.name, duration: 86400}
-      @url = DNAnexusAPI.new(@file.is_submission_output? ? CHALLENGE_BOT_TOKEN : @context.token).call(@file.dxid, "download", opts)["url"]
-      Event::FileDownloaded.create_for(@file, @context.user)
+      @url = @file.file_url(@context, nil)
     end
   end
 
@@ -493,4 +491,9 @@ class FilesController < ApplicationController
     @parent_folder_id = unsafe_params[:folder_id]
   end
 
+  def check_file_state
+    file = UserFile.not_blocked.find_by(uid: params[:id])
+
+    not_found! unless file
+  end
 end

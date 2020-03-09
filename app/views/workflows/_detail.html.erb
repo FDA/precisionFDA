@@ -111,7 +111,11 @@
       <% end %>
     <% end %>
     <%= render "_partials/btn_publish", item: @workflow %>
-    <%= render "_partials/btn_copy_to_cooperative", item: @workflow %>
+
+    <% if @workflow.in_space? && @workflow.space_object.contributor_permission(@context) %>
+      <%= render "_partials/btn_copy_to_cooperative", item: @workflow %>
+    <% end %>
+
   </div>
 </div>
 
@@ -130,7 +134,8 @@
     </a>
   </li>
   <li role="presentation">
-    <a href="#workflow-diagram" aria-controls="workflow-diagram" role="tab" data-toggle="tab"><span class="fa fa-fw fa-info"></span>
+    <a href="#workflow-diagram" aria-controls="workflow-diagram" role="tab" data-toggle="tab">
+      <span class="fa fa-fw fa-info"></span>
       <span class="tab-label">Workflow Diagram</span>
     </a>
   </li>
@@ -223,4 +228,3 @@
       </div>
   </div>
 </div>
-

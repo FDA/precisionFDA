@@ -101,8 +101,11 @@
               <!-- /ko -->
               <!-- ko if: className == 'file' -->
                 <button class="btn btn-info" data-bind="text: valueDisplay, attr: {name: name, disable: $root.busy}, click: openFileSelector, css: { 'btn-info': !value(), 'btn-default': value}">Select file...</button>
-                <!-- ko if: value -->
+                <!-- ko if: showClearButton -->
                   <button class="btn btn-link btn-link-danger" data-bind="click: clear">Clear</button>
+                <!-- /ko -->
+                <!-- ko if: showResetButton -->
+                  <button class="btn btn-link btn-link-danger" data-bind="click: resetFileValue">Reset</button>
                 <!-- /ko -->
                 <%= render "_partials/selector_modal" %>
               <!-- /ko -->

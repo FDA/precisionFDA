@@ -18,6 +18,7 @@ module Api
     rescue DXClient::Errors::ChargesMismatchError => e
       render json: { error: { message: e.message } }, status: :unprocessable_entity
     rescue => e
+      logger.error([e.message, e.backtrace.join("\n")].join("\n"))
       render json: { error: { message: "Something went wrong" } }, status: :unprocessable_entity
     end
 
@@ -29,7 +30,7 @@ module Api
           asset = DockerImporter.import(
             context: @context,
             attached_image: unsafe_params[:attached_image],
-            docker_image: presenter.docker_image
+            docker_image: presenter.docker_image,
           )
 
           presenter.asset = asset
@@ -117,6 +118,9 @@ module Api
     end
 
     def validate_app
+      release = unsafe_params[:release]
+      fail "Unacceptable release" unless release.in?(UBUNTU_RELEASES)
+
       name = unsafe_params[:name]
 
       if !name.is_a?(String) || name.empty?
@@ -162,7 +166,7 @@ module Api
       packages.sort!.uniq!
 
       packages.each do |package|
-        unless UBUNTU_PACKAGES.bsearch { |p| package <=> p }
+        unless UBUNTU_PACKAGES[release].bsearch { |p| package <=> p }
           fail "The package '#{package}' is not a valid Ubuntu package."
         end
       end

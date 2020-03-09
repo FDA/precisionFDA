@@ -1,10 +1,11 @@
 class AppEditorModel
-  constructor: (app, @mode = 'edit') ->
+  constructor: (app, ubuntuReleases, @mode = 'edit') ->
     @isNewApp = @mode != 'edit'
     @saving = ko.observable(false)
     @loadingAssets = ko.observable(false)
     @errorMessage = ko.observable()
 
+    @ubuntuReleases = ko.observableArray(ubuntuReleases)
     @dxid = app?.dxid
     @name = ko.observable(app?.name)
     @name.cache = ko.computed(
@@ -19,21 +20,26 @@ class AppEditorModel
     )
 
     @title = ko.observable(app?.title)
+    @release = ko.observable(app?.release)
     @revision = ko.observable(app?.revision)
     @readme = ko.observable(app?.readme)
     @readme.preview = ko.computed(=>
       Precision.md.render(@readme())
     )
-    @code = ko.observable(app?.internal.code)
+    @code = ko.observable(app?.internal?.code)
+
+    @showUbuntuVersionSelect = ko.computed(() =>
+      return !@isNewApp or @mode == 'fork'
+    )
 
     # Assets
     @assetsSelector = new Precision.models.AssetsModel
     @assets = ko.observableArray()
-    if app?.internal.ordered_assets && app?.internal.ordered_assets.length > 0
+    if app?.internal?.ordered_assets && app?.internal?.ordered_assets.length > 0
       @loadingAssets(true)
       Precision.api(
         '/api/list_assets',
-        { ids: app.internal.ordered_assets },
+        { ids: app?.internal?.ordered_assets },
         (assets) =>
           @loadingAssets(false)
           @assets(_.map(@assetsSelector.createAssetModels(assets)))
@@ -47,21 +53,21 @@ class AppEditorModel
     )
 
     # Packages
-    @packages = ko.observableArray(app?.internal.packages)
+    @packages = ko.observableArray(app?.internal?.packages)
     @packageToAdd = ko.observable("")
 
-    @inputSpec = app?.spec.input_spec
-    @outputSpec = app?.spec.output_spec
+    @inputSpec = app?.spec?.input_spec
+    @outputSpec = app?.spec?.output_spec
 
     @inputs = ko.observableArray()
     @createInputs(@inputSpec)
     @outputs = ko.observableArray()
     @createOutputs(@outputSpec)
 
-    @internetAccess = ko.observable(app?.spec.internet_access ? false)
+    @internetAccess = ko.observable(app?.spec?.internet_access ? false)
 
     @availableInstances = Precision.INSTANCES
-    @defaultInstanceType = app?.spec.instance_type ? "baseline-8"
+    @defaultInstanceType = app?.spec?.instance_type ? "baseline-8"
     @instanceType = ko.observable(@defaultInstanceType)
 
     @availableInputClasses = [
@@ -83,7 +89,7 @@ class AppEditorModel
 
     @isSaveReady = ko.computed(=>
       return false if @saving() || @loadingAssets()
-      return !_.isEmpty(@title()) && !_.isEmpty(@name())
+      return !_.isEmpty(@title()) && !_.isEmpty(@name()) && !_.isEmpty(@release())
     )
 
     @saveButtonText = ko.computed(=>
@@ -127,13 +133,14 @@ class AppEditorModel
 
     @isContentVisible = ko.computed(=>
       if @isNewApp
-        return !_.isEmpty(@name()) && !_.isEmpty(@title())
+        return !_.isEmpty(@name()) && !_.isEmpty(@title()) && !_.isEmpty(@release())
       else
         true
     )
 
     Precision.bind.save(this, @save)
     Precision.bind.traps()
+    $('[data-toggle="tooltip"]').tooltip()
 
   createInputs: (inputSpec) =>
     @inputs.removeAll()
@@ -187,6 +194,7 @@ class AppEditorModel
       is_new: @isNewApp
       name: @name.peek()
       title: @title.peek()
+      release: @release.peek()
       readme: @readme.peek() ? ""
       input_spec: _.map(@inputs.peek(), (inputModel) -> inputModel.getDataForSave())
       output_spec: _.map(@outputs.peek(), (outputModel) -> outputModel.getDataForSave())
@@ -207,6 +215,8 @@ class AppEditorModel
         console.error(error)
         @saving(false)
       )
+  initTooltips: () ->
+    console.log(@isNewApp)
 
 class IOModel
   constructor: (spec, @ioType, @viewModel) ->

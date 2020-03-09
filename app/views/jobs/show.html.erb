@@ -79,7 +79,11 @@
       <% end %>
     <% end %>
     <%= render "_partials/btn_publish", item: @job %>
-    <%= render "_partials/btn_copy_to_cooperative", item: @job %>
+
+    <% if @job.in_space? && @job.space_object.contributor_permission(@context) %>
+      <%= render "_partials/btn_copy_to_cooperative", item: @job %>
+    <% end %>
+
     <% if @job.user_id == @context.user_id && !@job.terminal? %>
       <%= link_to job_path(@job), method: :delete, data: { confirm: 'Are you certain you want to Terminate this?' }, class: "btn btn-danger" do %>
         <span class="fa fa-times-circle"></span> Terminate

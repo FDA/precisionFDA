@@ -1,8 +1,0 @@
-<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="apps suite">
-    <test name="AppsTest">
-        <classes>
-            <class name="precisionFDA.cases.AppsTest" />
-        </classes>
-    </test>
-</suite>

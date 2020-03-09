@@ -18,6 +18,7 @@
 #  verified      :boolean          default(FALSE), not null
 #  uid           :string(255)
 #  dev_group     :string(255)
+#  release       :string(255)      not null
 #
 
 FactoryBot.define do
@@ -26,5 +27,6 @@ FactoryBot.define do
     scope { "private" }
     association :app_series
     sequence(:dxid) { |n| "app-#{SecureRandom.hex(12)}" }
+    release { UBUNTU_14 }
   end
 end

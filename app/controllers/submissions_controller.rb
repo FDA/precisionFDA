@@ -79,7 +79,6 @@ class SubmissionsController < ApplicationController
       return
     end
 
-    scope = "public"
     items = input_info.uniq_files
 
     unless items.all? { |item| item.editable_by?(@context) }
@@ -87,26 +86,8 @@ class SubmissionsController < ApplicationController
       redirect_back(fallback_location: root_path) and return
     end
 
-    if items.all?(&:public?)
-      flash[:warning] = "All input files are already public." unless items.empty?
-      run_job_create_submission(unsafe_params)
-      redirect_to show_challenge_path(unsafe_params[:challenge_id], "my_entries")
-      return
-    end
-
-    not_public_items = items.reject(&:public?)
-
-    not_public_items.each do |item|
-      unless item.publishable_by?(@context, scope)
-        flash[:error] = "Item '#{item.title}' cannot be public."
-        redirect_back(fallback_location: root_path) and return
-      end
-    end
-
-    js graph: GraphDecorator.for_publisher(@context, not_public_items, scope),
-       space: nil,
-       scope_to_publish_to: scope,
-       params: unsafe_params
+    run_job_create_submission(unsafe_params, input_info)
+    redirect_to show_challenge_path(unsafe_params[:challenge_id], "my_entries")
   end
 
   def publish
@@ -267,11 +248,15 @@ class SubmissionsController < ApplicationController
   #
   # id (string): the dxid of the resulting job
   #
-  def run_job_create_submission(opts)
+  # Run scoring app, create corresponding job and submission record
+  # @param opts [Array] - array of UserFile objects to be published.
+  # @param input_info [Hash] - a new scope of a file.
+  #
+  def run_job_create_submission(opts, input_info = nil)
     # Parameter 'id' should be of type String
     # Get challenge
-    challenge = Challenge.find_by(id: opts["challenge_id"])
-    raise "No associated challenge found" unless challenge
+    @challenge = Challenge.find_by(id: opts["challenge_id"])
+    raise "No associated challenge found" unless @challenge
 
     submission = opts["submission"]
     raise "No submission info found" unless submission
@@ -285,16 +270,18 @@ class SubmissionsController < ApplicationController
     raise "Description should not be empty" unless desc.present?
 
     # Inputs should be a hash (more checks later)
-    inputs = JSON.parse(submission["inputs"])
-    raise "Inputs should be a hash" unless inputs.is_a?(Hash)
+    @inputs = JSON.parse(submission["inputs"])
+    raise "Inputs should be a hash" unless @inputs.is_a?(Hash)
 
     # TODO: Does challengebot need to worry about licenses?
     # Check if asset licenses have been accepted
     # raise "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
 
-    @app = App.find(challenge.app_id)
+    @app = App.find(@challenge.app_id)
 
-    input_info = input_spec_preparer.run(@app, inputs)
+    clone_inputs_to_space
+
+    input_info ||= input_spec_preparer.run(@app, @inputs)
 
     job = job_creator.create(
       app: @app,
@@ -306,7 +293,7 @@ class SubmissionsController < ApplicationController
       job_id: job.id,
       desc: desc,
       user_id: @context.user_id,
-      challenge_id: challenge.id,
+      challenge_id: @challenge.id,
       _inputs: input_info.file_dxids
     )
 
@@ -317,6 +304,22 @@ class SubmissionsController < ApplicationController
 
   def input_spec_preparer
     @input_spec_preparer ||= InputSpecPreparer.new(@context)
+  end
+
+  # Clones user's submission file into challenge space
+  def clone_inputs_to_space
+    api = DIContainer.resolve("api.user")
+    api.project_invite(@context.user.private_files_project, "user-#{CHALLENGE_BOT_DX_USER}", "VIEW", {suppressEmailNotification: true, suppressAllNotifications: true})
+    files = @inputs.values.map { |v| UserFile.accessible_by(@context).find_by(uid: v) }.compact
+
+    unless files.empty?
+      UserFile.transaction do
+        file_cloner = FileCloner.by_challenge_bot
+        file_cloner.publish(files, @challenge.space.uid)
+      end
+    end
+    
+    api.project_decrease_permissions(@context.user.private_files_project, "NONE", "user-#{CHALLENGE_BOT_DX_USER}")
   end
 
   def job_creator

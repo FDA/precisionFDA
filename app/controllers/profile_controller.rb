@@ -41,7 +41,7 @@ class ProfileController < ApplicationController
 
   def provision_new_user
     if request.get?
-      @invitations = Invitation.includes(space_invitations: :space).
+      @invitations = Invitation.
         order(id: :desc).
         page(params[:page])
       @state = "step1"
@@ -112,7 +112,7 @@ class ProfileController < ApplicationController
         singular: singular,
       }
 
-      service = container.resolve("orgs.provisioner")
+      service = DIContainer.resolve("orgs.provisioner")
       service.call(@user, @invitation, provision_params)
 
       @state = "step4"
@@ -282,7 +282,7 @@ class ProfileController < ApplicationController
         singular: @singular,
       }
 
-      service = container.resolve("orgs.provisioner")
+      service = DIContainer.resolve("orgs.provisioner")
       service.call(@user, @invitation, provision_params)
 
       @state = "step4"

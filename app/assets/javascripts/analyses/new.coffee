@@ -4,9 +4,10 @@ class WorkflowViewModel
     @title = ko.observable(workflow.title)
     @errorMessage = ko.observable()
     @isRunning = ko.observable(false)
-    @stages = ko.computed( ->
+    @accessibleScope = workflow.scopes
+    @stages = ko.computed( =>
       for io in workflow.spec.input_spec.stages
-        new stageModel(io)
+        new stageModel(io, @accessibleScope)
     )
     @inputs = ko.computed( =>
       stages = []
@@ -17,7 +18,6 @@ class WorkflowViewModel
             break
       stages)
     @workflowUid = workflow.uid
-    @accessibleScope = workflow.scopes
     @defaultValues = ko.observable()
     @canRunWorkflow = ko.computed(=>
       config = true
@@ -89,11 +89,11 @@ class WorkflowViewModel
     )
 
 class stageModel
-  constructor: (spec) ->
+  constructor: (spec, @accessibleScope) ->
     @name = spec.name
-    @inputs = ko.computed(=>
+    @inputs = ko.computed( =>
       for io in spec.inputs
-        new IOModel(io)
+        new IOModel(io, @accessibleScope)
     )
 
 class IOModel
@@ -102,7 +102,7 @@ class IOModel
       return [data.default_workflow_value]
     return [data.default_workflow_value || data.defaultValues]
 
-  constructor: (data) ->
+  constructor: (data, @accessibleScope) ->
     @class = data.class
     @parent_slot = data.parent_slot
     @stageName = data.name
@@ -111,7 +111,7 @@ class IOModel
     @values = data.values
     @value = ko.observable(data.value)
     @optional = data.optional
-    @selectorModel = new selectorModel(@class, data)
+    @selectorModel = new selectorModel(@class, data, @accessibleScope)
     @defaultValues = ko.observableArray(@getDefaultValues(data))
     @isTrueActive = ko.computed( =>
       if @defaultValues()? && _.isArray(@defaultValues())
@@ -143,7 +143,7 @@ class IOModel
       @defaultValues(false)
 
 class selectorModel
-  constructor: (klass, data) ->
+  constructor: (klass, data, @accessibleScope) ->
     @id = _.uniqueId("io-field-")
     @klass = klass
     @fileValues = ko.observableArray()
@@ -192,9 +192,9 @@ class selectorModel
     )
 
     @objectSelector = new Precision.models.SelectorModel({
-      title: "Select default file for field"
+      title: 'Select default file for field'
       selectionType: @buttonType()
-      selectableClasses: ["file"]
+      selectableClasses: ['file']
       studies: []
       onSave: (selected) =>
 
@@ -210,17 +210,19 @@ class selectorModel
           @defaultValues(arr)
         deferred = $.Deferred()
         deferred.resolve(selected)
-      listRelatedParams:
-        classes: ["file"]
-      listModelConfigs: [
-        {
-          className: "file"
-          name: "Files"
-          apiEndpoint: "list_files"
-          listedFiles: @listedFiles
-
+      listRelatedParams: {
+        scopes: @accessibleScope,
+        classes: ['file']
+      }
+      listModelConfigs: [{
+        className: 'file',
+        name: 'Files',
+        apiEndpoint: 'list_files',
+        listedFiles: @listedFiles,
+        apiParams: {
+          scopes: @accessibleScope
         }
-      ]
+      }]
     })
 
   clear: () ->
@@ -238,9 +240,9 @@ class selectorModel
 #
 #########################################################
 
-AnalysesController = Paloma.controller('Analyses',
+AnalysesController = Paloma.controller('Analyses', {
   new: ->
     $container = $("body main")
     viewModel = new WorkflowViewModel(@params.workflow)
     ko.applyBindings(viewModel, $container[0])
-)
+})

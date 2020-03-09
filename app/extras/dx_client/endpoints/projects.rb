@@ -40,6 +40,17 @@ module DXClient
         call(project_dxid, "invite", opts.merge(invitee: invitee, level: level))
       end
 
+      # Decreases user permissions from provided project.
+      # @see https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-decreasepermissions
+      # @param project_dxid [String] Projects's dxid.
+      # @param level [String] level of permission
+      # @param user_dxid [String] User's dxid.
+      # @param opts [Hash] Additional options.
+      # @return [Hash]
+      def project_decrease_permissions(project_dxid, level, user_dxid)
+        call(project_dxid, "decreasePermissions", {"#{user_dxid}": level})
+      end
+
       # Destroys project.
       # @see https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-xxxx-destroy
       # @param project_dxid [String] Project to destroy.
@@ -56,6 +67,15 @@ module DXClient
       # @return [Hash]
       def project_describe(project_dxid, opts = {})
         call(project_dxid, "describe", opts)
+      end
+
+      # Removes specified objects from project.
+      # @see https://documentation.dnanexus.com/developer/api/data-containers/folders-and-deletion#api-method-class-xxxx-removeobjects
+      # @param project_dxid [String] Project to remove objects from.
+      # @param objects [Array<String>] Objects to remove from project.
+      # @return [Hash]
+      def project_remove_objects(project_dxid, objects, opts = {})
+        call(project_dxid, "removeObjects", opts.merge(objects: objects))
       end
     end
   end

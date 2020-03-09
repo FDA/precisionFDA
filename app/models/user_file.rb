@@ -46,6 +46,8 @@
 class UserFile < Node
   include Licenses
   include InternalUid
+  include Scopes
+
   require "uri"
 
   DESCRIPTION_MAX_LENGTH = 65535
@@ -54,6 +56,9 @@ class UserFile < Node
   STATE_CLOSING = "closing".freeze
   STATE_CLOSED = "closed".freeze
   STATE_OPEN = "open".freeze
+
+  # pFDA internal state, used for files that are being publishing by a worker.
+  STATE_PUBLISHING = "publishing".freeze
 
   PARENT_TYPE_COMPARISON = "Comparison".freeze
 
@@ -84,7 +89,11 @@ class UserFile < Node
             }
 
   class << self; undef_method :open; end
+
   scope :open, -> { where(state: STATE_OPEN) }
+  scope :not_removing, -> { where.not(state: STATE_REMOVING) }
+  scope :not_publishing, -> { where.not(state: STATE_PUBLISHING) }
+  scope :not_blocked, -> { not_removing.not_publishing }
 
   scope :files_conditions, -> {
     where(state: "closed").where.not(parent_type: ["Comparison", nil]).includes(:taggings)
@@ -114,7 +123,7 @@ class UserFile < Node
     def publication_project!(user, scope)
       # This is a class method for independent files.
       # For comparison files, use Comparison.publication_project!
-      if scope == "public"
+      if scope == UserFile::SCOPE_PUBLIC
         user.public_files_project
       else
         Space.from_scope(scope).project_for_user(user)
@@ -126,32 +135,103 @@ class UserFile < Node
       file_publisher.publish(files, scope)
     end
 
-    def batch_private_files(context,scopes, parent_folder_id)
-      UserFile
-        .real_files
-        .editable_by(context)
-        .files_conditions
-        .where(scope: scopes, parent_folder_id: parent_folder_id)
+    def batch_private_files(context, scopes, parent_folder_id)
+      UserFile.
+        real_files.
+        editable_by(context).
+        files_conditions.
+        where(scope: scopes, parent_folder_id: parent_folder_id)
     end
 
     def batch_space_files(spaces_params)
-      UserFile
-        .real_files
-        .editable_in_space(spaces_params[:context], spaces_params[:spaces_members_ids])
-        .files_conditions
-        .where(
+      UserFile.
+        real_files.
+        editable_in_space(spaces_params[:context], spaces_params[:spaces_members_ids]).
+        files_conditions.
+        where(
           scope: spaces_params[:scopes],
-          scoped_parent_folder_id: spaces_params[:scoped_parent_folder_id]
+          scoped_parent_folder_id: spaces_params[:scoped_parent_folder_id],
         )
     end
+
+    # Check, whether file with a uid given is accessible by @context and exists.
+    # @param [Context] current_user Object
+    # @param [uid] file uid
+    # @return [Object] file
+    def exist_refresh_state(context, uid)
+      file = accessible_found_by(context, uid)
+      file&.refresh_state(context)
+      file
+    end
+
+    # Check, whether file with a uid given is accessible by @context and exists.
+    # @param [Context] current_user Object
+    # @param [uid] file uid
+    # @return [Object] file
+    def accessible_found_by(context, uid)
+      accessible_by(context).find_by!(uid: uid)
+    end
+  end
+
+  def blocked?
+    [STATE_REMOVING, STATE_PUBLISHING].include?(state)
   end
 
   def real_file?
     parent_type == "User" || parent_type == "Job"
   end
 
-  def is_submission_output?
+  # Refresh state of file, if needed.
+  #   Allow assets as well.
+  # @param [Context] current_user Object
+  def refresh_state(context)
+    return unless state != "closed"
+
+    if parent_type == "Asset"
+      User.sync_asset!(context, id)
+    else
+      challenge_file? ? User.sync_challenge_file!(id) : User.sync_file!(context, id)
+    end
+    reload
+  end
+
+  # Get a file url with given params for current context user.
+  # @param [context] current user context.
+  # @param [inline] UI attribute to provide url redirection property.
+  # @return [url] a file url.
+  def file_url(context, inline)
+    opts = {
+      project: project,
+      preauthenticated: true,
+      filename: name,
+      duration: 86_400,
+    }
+    inline_attribute = inline == "true" ? "?inline" : ""
+
+    token = challenge_file? ? CHALLENGE_BOT_TOKEN : context.token
+    api = DNAnexusAPI.new(token)
+    url = api.file_download(dxid, opts)["url"] + inline_attribute
+    Event::FileDownloaded.create_for(self, context.user)
+
+    url
+  end
+
+  # Check if the current file is one of challenge usage.
+  # @return [true or false] - depends upon whether file is of challenge usage.
+  def challenge_file?
+    submission_output? || challenge_card_image?
+  end
+
+  # Check if the current file is a submission file.
+  # @return [true or false] - depends upon whether file is a submission file.
+  def submission_output?
     parent_type == "Job" && parent.submission.present?
+  end
+
+  # Check if the current file is a challenge card image.
+  # @return [true or false] - depends upon whether file is a challenge card image.
+  def challenge_card_image?
+    parent_type == "User" && parent == User.challenge_bot && scope == SCOPE_PUBLIC
   end
 
   def to_param
@@ -161,12 +241,12 @@ class UserFile < Node
   # Returns a parent folder name of UserFile
   # @param [scope] a file scope
   # @return [String] folder name or "/" for root
-  def parent_folder_name(scope = "private")
+  def parent_folder_name(scope = SCOPE_PRIVATE)
     folder = parent_folder(scope)
     folder.blank? ? "/" : folder.name
   end
 
-  def parent_folder(scope = "private")
+  def parent_folder(scope = SCOPE_PRIVATE)
     column_name = Node.scope_column_name(scope)
     Folder.find_by(id: self[column_name])
   end
@@ -174,7 +254,7 @@ class UserFile < Node
   # Returns a full path to current file
   # @param [scope] a file scope]
   # @return [String] file path or "/" for root
-  def file_full_path(scope = "private")
+  def file_full_path(scope = SCOPE_PRIVATE)
     parent_folder = parent_folder(scope)
     folders = []
     if parent_folder.blank?
@@ -239,12 +319,26 @@ class UserFile < Node
     end
   end
 
+  # Check, whether file can be deleted by current user context.
+  # Permits to be deleted when parent_type has only values of: 'User', 'Node' and 'Job';
+  # scope - to be non-space, i.e. 'private' or 'public';
+  # and not to be in verified space object.
+  # @return [true or false] - depends upon whether file can be deleted.
   def deletable?
-    ((parent_type == "User") || (parent_type == "Job")) && ((scope == "private" || scope == "public") || !(in_space? && space_object.verified?))
+    %w(User Node Job).include?(parent_type) &&
+      (scope.in?([SCOPE_PUBLIC, SCOPE_PRIVATE]) || !(in_space? && space_object.verified?))
   end
 
-  def publishable_by?(context, scope_to_publish_to = "public")
-    core_publishable_by?(context, scope_to_publish_to) && !parent_comparison? && state == "closed"
+  # Check, whether file is piblishable, i.e. to be 'public'.
+  #   A file should have scope 'private' or in space.
+  # @param context [Context] a Context object, who is going to publish.
+  # @param scope_to_publish_to [String] a scope to be published to.
+  # @return [true, false] Returns true if a file can be published by a user,
+  #   false otherwise.
+  def publishable_by?(context, scope_to_publish_to = SCOPE_PUBLIC)
+    publishable?(context.user) &&
+      !parent_comparison? &&
+      [STATE_CLOSED, STATE_PUBLISHING].include?(state)
   end
 
   def rename(new_name, description, context)
@@ -261,6 +355,11 @@ class UserFile < Node
     end
   end
 
+  # Checks, wether file is consistent to be used it by current user in
+  #   publishing actions, in comparisons as well.
+  # @param user [User] a user object, who is going to publish
+  # @return [true, false] Returns true if a file is consistent,
+  #   false otherwise.
   def passes_consistency_check?(user)
     if private?
       if independent?
@@ -270,8 +369,10 @@ class UserFile < Node
       end
     elsif public?
       project == user.public_files_project
-    else
+    elsif ![STATE_CLOSED, STATE_PUBLISHING].include?(state)
       project == space_object.project_for_user(user)
+    else
+      true
     end
   end
 

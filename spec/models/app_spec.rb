@@ -18,6 +18,7 @@
 #  verified      :boolean          default(FALSE), not null
 #  uid           :string(255)
 #  dev_group     :string(255)
+#  release       :string(255)      not null
 #
 
 require "rails_helper"

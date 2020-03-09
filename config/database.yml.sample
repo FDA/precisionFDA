@@ -3,13 +3,23 @@ default: &default
   pool: 5
   timeout: 5000
   host: db
-  username:
-  password:
+  username: root
+  password: password
   variables:
     sql_mode: TRADITIONAL
 
 development:
   <<: *default
-  database: pfda
+  database: precision-fda
 
+test:
+  <<: *default
+  database: precisionfda-test
 
+ui_test:
+  <<: *default
+  database: precisionfda-ui-test
+
+production:
+  <<: *default
+  database: precisionfda-production

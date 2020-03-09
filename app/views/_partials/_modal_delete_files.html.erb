@@ -44,9 +44,17 @@
           </tbody>
         </table>
         <!-- /ko -->
+
         <!-- ko if: deleteFilesModal.showNoData -->
-        <h4 class="text-center">Selected items are either already deleted or not owned by you</h4>
+          <!-- ko if: deleteFilesModal.skipComparisonInputDeletion() -->
+            <h4 class="text-center">Selected file cannot be deleted because it participates in one or</h4>
+            <h4 class="text-center">more comparisons. Please delete all the comparisons first</h4>
+          <!-- /ko -->
+          <!-- ko if: !deleteFilesModal.skipComparisonInputDeletion() -->
+            <h4 class="text-center">Selected items are either already deleted or not owned by you</h4>
+          <!-- /ko -->
         <!-- /ko -->
+
       </div>
       <div class="modal-footer">
         <%= form_tag remove_path, method: :post do %>

@@ -2,6 +2,7 @@ class ActionsWithFilesModal
 
   getItems: () ->
     @loading(true)
+    @skipComparisonInputDeletion(false)
     @sendingItems([])
     $.ajax({
       url: @selectedListURL,
@@ -15,6 +16,9 @@ class ActionsWithFilesModal
         @loading(false)
         @showError(false)
         @displayingItems(data)
+        if data.comparisonFile
+          @skipComparisonInputDeletion(true)
+
         for item in data
           @sendingItems.push(item.id)
       error: () =>
@@ -30,6 +34,8 @@ class ActionsWithFilesModal
     @selectedItems = data.selectedItems
     @scope = data.scope
     @task = data.task
+
+    @skipComparisonInputDeletion = ko.observable(false)
 
     @displayingItems = ko.observableArray()
 

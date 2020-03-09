@@ -106,14 +106,19 @@
         </div>
       </div>
       <div data-bind="css: {'has-error': !input.valid(), 'wf-no-poiner-events': input.fsIsMoreLoading()}">
-        <div class="form-control input-file-selector" data-bind="attr: {id: input.name + '_scroll_container'}">
+        <div class="form-control input-file-selector input-file-selector-regexp" data-bind="attr: {id: input.name + '_scroll_container'}">
         <!-- ko if: !input.fsIsLoading() -->
           <div class="fs-scrollable-files-container">
             <!-- ko foreach: input.fsFiles() -->
               <div class="batch-workfows-fs-item">
                 <input type="checkbox"
                   class="batch-workfows-fs-item-checkbox"
-                  data-bind="name: input.name + '_search_checkbox', checkedValue: $data.uid, checked: input.fsSelectedFiles()"
+                  data-bind="
+                    name: input.name + '_search_checkbox',
+                    checkedValue: $data.uid,
+                    checked: input.fsSelectedFiles(),
+                    event: { change: input.fsHandleChangeCheckbox }
+                  "
                 />
                 <span data-bind="click: input.fsToggleCheckbox">
                   <span class="batch-workfows-fs-item-path" data-bind="text: $data.path"></span>

@@ -35,7 +35,18 @@
   </ul>
 </div>
 
-<%= render "_partials/tags_metadata", item: @app.app_series, item_name: @app.title, tags_list: @app.app_series.all_tags_list, is_editable: @app.editable_by?(@context), suggested_tags: AppSeries::SUGGESTED_TAGS %>
+<% if @app.release == UBUNTU_14 %>
+  <div class="pfda-padded">
+    <div class="alert alert-warning">
+      <p><b>WARNING!</b></p>
+      <p>
+        This app was created using a previous version of Ubuntu (14.04).  For security and stability, please update this app to use Ubuntu 16.04 by creating a new forked version.
+      </p>
+    </div>
+  </div>
+<% end %>
+
+  <%= render "_partials/tags_metadata", item: @app.app_series, item_name: @app.title, tags_list: @app.app_series.all_tags_list, is_editable: @app.editable_by?(@context), suggested_tags: AppSeries::SUGGESTED_TAGS %>
 
 <div class="pfda-toolbar">
   <div class="btn-group">
@@ -125,6 +136,16 @@
       <span class="fa fa-flip-vertical fa-sitemap"></span> Track
     <% end %>
   </div>
+
+  <% if show_swap_comparison_app_button?(@context, @app) %>
+    <div class="btn-group">
+      <button class="btn btn-default" data-toggle="modal" data-target="#set_comparison_app_modal">
+        Set this app as comparison default
+      </button>
+      <%= render partial: "apps/set_comparison_app_modal", locals: { app_id: @app.id } %>
+    </div>
+  <% end %>
+
   <% if @app.verified? %>
     <span>
       <span class="fa fa-check-circle" style="padding-left: 30px; color: #1F70B5"></span>
@@ -143,21 +164,16 @@
     <% if !@app.dev_group && @app.scope != 'public' && !@app.in_verificaiton_space?  %>
       <!-- ko ifnot:shareSuccess -->
       <div class="btn-group">
-        <button id="fda_button" class="btn btn-primary" data-bind="click: shareWithFDA">
+        <button class="btn btn-primary" data-toggle="modal" data-target="#share_with_fda_modal">
           <i class="fa fa-copy"></i>&nbsp;
-          <!-- ko ifnot:fdaSpinner -->
           <span id="fda_text">Share with FDA</span>
-          <!-- /ko -->
-          <!-- ko if:fdaSpinner -->
-          <span id="fda_text">Sharing...</span>&nbsp;
-          <i class="fa fa-spinner fa-spin"></i>
-          <!-- /ko -->
         </button>
       </div>
       <!-- /ko -->
       <!-- ko if:shareSuccess -->
       <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
       <!-- /ko -->
+      <%= render partial: "apps/share_with_fda_modal" %>
     <% elsif @app.dev_group %>
       <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
     <% end %>
@@ -178,7 +194,11 @@
         <span class="fa fa-bolt"></span> Run Batch App&nbsp;&nbsp;<span class="badge"><%= @app.version ? "v#{@app.version}" : "rev#{@app.revision}" %></span>
     <% end %>
     <%= render "_partials/btn_publish", item: @app %>
-    <%= render "_partials/btn_copy_to_cooperative", item: @app %>
+
+    <% if @app.in_space? && @app.space_object.contributor_permission(@context) %>
+      <%= render "_partials/btn_copy_to_cooperative", item: @app %>
+    <% end %>
+
   </div>
 
   <% if @context.logged_in? && app.user == @context.user %>

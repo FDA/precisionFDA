@@ -1,0 +1,25 @@
+<div id="assign_app_to_challenge_modal" class="modal fade modal-with-loader" data-bind="css: {loading: assignToChallengeModalLoading}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Attention!</h4>
+      </div>
+      <div class="loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to assign this app to challenge?</p>
+        <p>You won't be able to cancel this action.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" data-dismiss="modal" tabindex="-1" >Cancel</button>
+        <button class="btn btn-primary" data-bind="click: assignToChallenge">Assign</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

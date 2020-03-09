@@ -28,6 +28,7 @@ RSpec.describe Api::AppsController, type: :controller do
         is_new: true,
         input_spec: input,
         output_spec: output,
+        release: UBUNTU_14,
       }, as: :json
     end
 

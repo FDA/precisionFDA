@@ -38,6 +38,16 @@
         <i class="fa fa-users" aria-hidden="true"></i> Organizations
       </a>
       <%= link_to(content_tag(:span, "", class: "fa fa-file-excel-o") + " Generate report", run_report_path, method: 'post', class: 'btn btn-default') %>
+      <a class="btn btn-default" rel="nofollow" href="<%= sidekiq_web_path %>" target="_blank">
+        <i class="fa fa-bar-chart" aria-hidden="true"></i> Sidekiq
+      </a>
+      <% if show_restore_comparison_app_button?(@context) %>
+        <span class="btn btn-default" data-toggle="modal" data-target="#restore_comparison_app_modal">
+          <i class="fa fa-recycle"></i>
+          Restore default comparison app
+        </span>
+        <%= render partial: "admin/_partials/restore_comparison_app_modal" %>
+      <% end %>
     </div>
   </div>
 <% end %>
