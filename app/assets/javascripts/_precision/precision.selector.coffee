@@ -272,6 +272,7 @@ class ObjectItemModel
 
     @path = ko.observable(object.path)
     @parentFolderName = ko.observable(object.parent_folder_name)
+    @filePath = ko.observable(@sanitizeFilePath(object.file_path))
     @userName = ko.observable(object.user?.full_name)
     @orgName = ko.observable(object.org?.name)
     @all_tags_list = ko.observable(object.all_tags_list)
@@ -346,6 +347,9 @@ class ObjectItemModel
       )
     else
       @loaded(true)
+
+  sanitizeFilePath: (filePath) ->
+    if filePath && filePath.length > 1 then filePath.replace(/\/$/, "") else filePath
 
   update: (object) ->
     @title(object.title)
@@ -425,3 +429,4 @@ class ObjectItemModel
 window.Precision ||= {}
 window.Precision.models ||= {}
 window.Precision.models.SelectorModel = SelectorModel
+window.Precision.models.ObjectItemModel = ObjectItemModel

@@ -64,7 +64,7 @@ jobs:
       - name: Unit Tests
         env:
           NO_FIPS: 1
-        run: bundle exec rake
+        run: bundle exec rspec
 
   checkDependencies:
     name: Dependencies Scan
@@ -87,3 +87,19 @@ jobs:
         with:
           args: --file=Gemfile.lock --org=dnanexus --project-name=precision-fda
           command: monitor
+
+  test-js:
+    name: Test (JS)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+
+      - name: Install
+        run: yarn
+
+      - name: Test
+        run: yarn test
