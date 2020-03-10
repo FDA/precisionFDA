@@ -123,8 +123,9 @@ class AppsController < ApplicationController
       page unsafe_params[:discussions_page]
     @assigned_challenges = Challenge.where(app_id: @app.id).
       order(created_at: :desc)
-    @assignable_challenges = Challenge.select { |c| c.can_assign_specific_app?(@context, @app) }.
-      order(created_at: :desc)
+    @assignable_challenges = Challenge.
+      order(created_at: :desc).
+      select { |c| c.can_assign_specific_app?(@context, @app) }
 
     @items_from_params = [@app]
     @item_path = pathify(@app)
@@ -281,11 +282,11 @@ class AppsController < ApplicationController
                       name: challenge.name,
                       link: (challenge.is_viewable?(@context) ? challenge_path(challenge.id) : nil),
                       assign_link: assign_app_challenge_path(id: challenge.id, app_id: app.id),
-                      app: {
-                        id: (challenge.app.dxid || nil),
-                        title: (challenge.app.title || nil),
-                        revision: (challenge.app.revision || nil),
-                        link: (app_path(challenge.app) || nil),
+                      app: challenge.app && {
+                        id: challenge.app.dxid,
+                        title: challenge.app.title,
+                        revision: challenge.app.revision,
+                        link: app_path(challenge.app),
                       },
                     }
                   end,
