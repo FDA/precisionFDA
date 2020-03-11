@@ -52,12 +52,8 @@ module Admin
 
     def usage_metric
       metric = UsageMetric.joins(:user).where(users: { user_state: UsageMetric::USER_STATES })
-
-      if @selected_range != "custom"
-        metric.where.not("#{period}_compute_price" => nil, "#{period}_byte_hours" => nil)
-      else
-        metric
-      end
+      metric = metric.where.not(range_dependent_query, nil, nil) if @selected_range != "custom"
+      metric
     end
 
     def period
@@ -69,6 +65,12 @@ module Admin
       when "cumulative" then "cumulative"
       else "weekly"
       end
+    end
+
+    # Create a dynamic query depends upon a report range selected.
+    # To avoid SQL Injection in usage_metric query
+    def range_dependent_query
+      "#{period}_compute_price = ? and #{period}_byte_hours = ?"
     end
 
     def selected_range

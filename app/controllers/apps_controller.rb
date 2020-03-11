@@ -208,7 +208,7 @@ class AppsController < ApplicationController
       }
     end
 
-    available_spaces = @app.available_job_spaces(@context.user).order(:name)
+    available_spaces = @app.available_job_spaces(@context.user)
 
     selectable_spaces = available_spaces.map do |space|
       { value: space.id, label: space.title, space_type: space.space_type }
