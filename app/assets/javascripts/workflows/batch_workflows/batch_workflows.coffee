@@ -145,11 +145,11 @@ extendBatchInputFilesSearch = () ->
   @fsSearchFilesData = {}
 
   ### SORT ###
-  @fsSortNameDirection = ko.observable(DESC)
+  @fsSortNameDirection = ko.observable(ASC)
   @fsSortNameArrow = ko.computed(() =>
     return if @fsSortNameDirection() == DESC then 'fa-long-arrow-up' else 'fa-long-arrow-down'
   )
-  @fsSortCheckedDirection = ko.observable(DESC)
+  @fsSortCheckedDirection = ko.observable(ASC)
   @fsSortCheckedArrow = ko.computed(() =>
     return if @fsSortCheckedDirection() == DESC then 'fa-long-arrow-up' else 'fa-long-arrow-down'
   )
