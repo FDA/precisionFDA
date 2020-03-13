@@ -13,17 +13,11 @@
 #  updated_at :datetime         not null
 #
 class Participant < ApplicationRecord
-  enum kind: %i(invisible org person)
+  enum kind: { invisible: 0, org: 1, person: 2 }
 
   validates :title, :image_url, presence: true
 
-  belongs_to :file, class_name: "Node", foreign_key: "node_id"
+  belongs_to :file, class_name: "UserFile", foreign_key: :node_id, inverse_of: :participants
 
-  scope :positioned, -> { order(position: :ASC, id: :ASC) }
-  scope :by_file, ->(file) { where(node_id: file.id) }
-
-  # Returns an uid of a participant's image file if it's not blank.
-  def file_uid
-    file.uid if file.present?
-  end
+  scope :positioned, -> { order(:position, :id) }
 end

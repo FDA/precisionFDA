@@ -160,7 +160,7 @@ class FolderService
       )
     end
 
-    if Participant.by_file(file).any? && file.in_locked_verification_space?
+    if Participant.where(file: file).exists? && file.in_locked_verification_space?
       return Rats.failure(
         message: "You have no permissions to remove '#{file.name}', " \
                  "as it is part of Locked Verification space.",

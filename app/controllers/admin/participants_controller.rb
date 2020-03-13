@@ -3,9 +3,10 @@ module Admin
     before_action :set_participant, only: [:edit, :update, :destroy]
 
     def index
-      @org_participants = Participant.org.positioned
-      @person_participants = Participant.person.positioned
-      @invisible_participants = Participant.invisible.positioned
+      participants = assign_image_urls!(Participant.positioned)
+
+      @org_participants, @person_participants, @invisible_participants =
+        participants.group_by(&:kind).fetch_values("org", "person", "invisible") { [] }
 
       js org_participants: @org_participants,
          person_participants: @person_participants,
@@ -52,6 +53,13 @@ module Admin
 
     private
 
+    # Sets image paths for participants.
+    # @param participants [Participant::ActiveRecord_Relation, Array<Participant>] Participants.
+    def assign_image_urls!(participants)
+      participants.each { |pnt| pnt.image_url = view_context.image_path(pnt.image_url) }
+      participants
+    end
+
     def save_participant(action)
       if ParticipantsManager.save(@context, @participant, participant_params)
         redirect_to admin_participants_path
@@ -62,7 +70,8 @@ module Admin
     end
 
     def js_params(action)
-      js "##{action}", imageUrl: @participant.image_url, fileId: @participant.file_uid
+      js "##{action}", imageUrl: view_context.image_path(@participant.image_url),
+        fileId: @participant.file&.uid
     end
 
     def set_participant

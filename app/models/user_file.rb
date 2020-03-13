@@ -69,6 +69,8 @@ class UserFile < Node
            through: :comparison_inputs,
            dependent: :restrict_with_exception
 
+  has_many :participants, inverse_of: :file, foreign_key: :node_id, dependent: :destroy
+
   has_and_belongs_to_many :jobs_as_input, join_table: "job_inputs", class_name: "Job"
 
   has_one :licensed_item, as: :licenseable, dependent: :destroy
