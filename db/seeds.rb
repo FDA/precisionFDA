@@ -78,11 +78,14 @@ ActiveRecord::Base.transaction do
     end_at: 2.weeks.from_now,
   )
 
-  User.new(
+  User.create!(
     dxuser: CHALLENGE_BOT_DX_USER,
     private_files_project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
     public_files_project: CHALLENGE_BOT_PUBLIC_FILES_PROJECT,
-  ).save!(validate: false)
+    first_name: "Challenge",
+    last_name: "Bot",
+    email: "challengebot+123@dnanexus.com",
+  )
 
   # load articles generated from stuff.
   SeedNewsItems.new.up

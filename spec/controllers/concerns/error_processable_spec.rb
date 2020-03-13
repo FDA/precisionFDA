@@ -39,6 +39,7 @@ RSpec.describe ErrorProcessable do
       let(:first_name) { FFaker::Name.first_name }
       let(:last_name) { FFaker::Name.last_name }
       let(:email) { FFaker::Internet.email }
+
       let(:opts) { { first_name: first_name, last_name: last_name, email: email } }
 
       it "do not show any error message" do
@@ -49,7 +50,7 @@ RSpec.describe ErrorProcessable do
     context "when name and email are invalid" do
       let(:first_name) {}
       let(:last_name) { FFaker::Name.last_name }
-      let(:email) {}
+      let(:email) { "" }
       let(:opts) { { first_name: first_name, last_name: last_name, email: email } }
       let(:errors) { controller_class.user_invalid_errors(opts) }
 
@@ -58,7 +59,7 @@ RSpec.describe ErrorProcessable do
       end
 
       it "get array of error messages of proper size" do
-        expect(errors.size).to eq 4
+        expect(errors.size).to eq 3
       end
 
       it "get error messages describing first name" do
