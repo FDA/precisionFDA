@@ -16,7 +16,10 @@ module SyncService
       # @param job [Hash] Job description from platform.
       def call(user, comparison, job)
         meta, output_files = @state_processor.call(user, job, comparison)
-        return if meta.blank? || output_files.blank?
+
+        return if output_files.blank?
+
+        return if comparison.app_dxid == DEFAULT_COMPARISON_APP && meta.blank?
 
         @comparison_updater.done!(comparison, output_files, meta, user)
       rescue EmptyMetaError, JobFailedError

@@ -5,7 +5,7 @@ module Admin
     def check_admin
       return if current_context.can_administer_site?
 
-      redirect_to root_path
+      head :forbidden
     end
   end
 end

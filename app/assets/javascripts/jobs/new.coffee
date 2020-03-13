@@ -88,7 +88,7 @@ class JobsNewView
 
       @busy(true)
       @running(true)
-      Precision.api('/api/run_app', params)
+      Precision.api('/apps/run', params)
         .done((rs) =>
           if !rs.error?
             window.location = "/apps/#{@uid}/jobs"

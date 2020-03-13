@@ -23,7 +23,7 @@ module SyncService
 
         case state
         when Job::STATE_DONE
-          process_done_job(user, job)
+          process_done_job(user, job, comparison.app_dxid)
         when Job::STATE_FAILED
           raise JobFailedError
         else
@@ -38,12 +38,15 @@ module SyncService
       # @return [Array<Array<String>, Array<Hash>>] Returns and array of results where
       #   first element is job's meta data, second is array of user files attributes.
       # @raise [EmptyMetaError] if meta is empty.
-      def process_done_job(user, job)
-        meta = job.dig("output", "meta")
+      def process_done_job(user, job, comparator_dxid)
+        if comparator_dxid == DEFAULT_COMPARISON_APP
+          meta = job.dig("output", "meta")
 
-        raise EmptyMetaError if meta.blank?
+          raise EmptyMetaError if meta.blank?
 
-        meta["weighted_roc"]["data"] = meta["weighted_roc"]["data"].last(100)
+          meta["weighted_roc"]["data"] = meta["weighted_roc"]["data"].last(100)
+        end
+
         output_keys = []
         output_ids = []
         output_files = []
@@ -52,8 +55,14 @@ module SyncService
           # NOTE: meta is the only field of result["describe"]["output"] modified
           next if key == "meta"
 
+          # rubocop:disable Style/RescueModifier
+          file_link = job.dig("output", key, "$dnanexus_link") rescue nil
+          # rubocop:enable Style/RescueModifier
+
+          next unless file_link
+
           output_keys << key
-          output_ids << job["output"][key]["$dnanexus_link"]
+          output_ids << file_link
         end
 
         files_descriptions(output_ids).each_with_index do |output_file, i|

@@ -1,5 +1,13 @@
 # Helper for AppsController.
 module AppsHelper
+  # Determines if app is added to the comparators list
+  # @param app [App] App to check.
+  # @return [Boolean] Returns true if app is added to the comparators list.
+  #   false otherwise.
+  def app_added_to_comparators?(app)
+    Setting.comparator_apps.include?(app.dxid)
+  end
+
   # Determines if swap comparison app button should be shown.
   # @param context [Context] App context.
   # @param app [App] App to show button for.
@@ -8,7 +16,8 @@ module AppsHelper
   def show_swap_comparison_app_button?(context, app)
     context.can_administer_site? &&
       app.scope == App::SCOPE_PUBLIC &&
-      app.dxid != Setting.comparison_app
+      !default_comparator_app?(app) &&
+      (app_added_to_comparators?(app) || global_comparison_app?(app))
   end
 
   # Determines if comparison app label should be shown.
@@ -20,10 +29,11 @@ module AppsHelper
     context.can_administer_site? && app.dxid == Setting.comparison_app
   end
 
-  # Determines if restore comparison app button should be shown.
-  # @param context [Context] App context.
-  # @return [Boolean] Returns true if button should be shown, false otherwise.
-  def show_restore_comparison_app_button?(context)
-    context.can_administer_site? && Setting.comparison_app != DEFAULT_COMPARISON_APP
+  def default_comparator_app?(app)
+    Setting.comparison_app == app.dxid
+  end
+
+  def global_comparison_app?(app)
+    app.dxid == DEFAULT_COMPARISON_APP
   end
 end

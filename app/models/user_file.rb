@@ -234,10 +234,11 @@ class UserFile < Node
   end
 
   # Get a file url with given params for current context user.
-  # @param [context] current user context.
-  # @param [inline] UI attribute to provide url redirection property.
+  # @param context [Context] current user context.
+  # @param inline [String] UI attribute to provide url redirection property.
+  # @param generate_event [true, false] Either to generate Event::FileDownloaded or not.
   # @return [url] a file url.
-  def file_url(context, inline)
+  def file_url(context, inline, generate_event = true)
     opts = {
       project: project,
       preauthenticated: true,
@@ -249,7 +250,7 @@ class UserFile < Node
     token = challenge_file? ? CHALLENGE_BOT_TOKEN : context.token
     api = DNAnexusAPI.new(token)
     url = api.file_download(dxid, opts)["url"] + inline_attribute
-    Event::FileDownloaded.create_for(self, context.user)
+    Event::FileDownloaded.create_for(self, context.user) if generate_event
 
     url
   end

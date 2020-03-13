@@ -151,7 +151,7 @@ class ComparisonsShowPageModel
 
 ComparisonsController = Paloma.controller('Comparisons', {
   show: ->
-    if @params.state == "done"
+    if @params.state == "done" && @params.render
       roc = @params.roc
       dataset = _.map(roc["data"], (datum) ->
         datumObject = {}

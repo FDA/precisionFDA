@@ -52,8 +52,16 @@ Rails.application.routes.draw do
       get "resend_activation_email", to: "users#resend_activation_email"
       get "edit_user", to: "users#edit"
       get "update_user", to: "users#update"
-      post "comparison_app", to: "apps#comparison_app"
-      post "restore_comparison_app", to: "apps#restore_comparison_app"
+
+      resources :apps, only: [], param: :uid do
+        collection do
+          post :set_comparison_app
+          post :remove_from_comparators
+          post :add_to_comparators
+        end
+      end
+
+      get "comparator_settings", to: "comparator_settings#index"
 
       resources :organizations, only: %i(index show create) do
         post :change_org_admin, on: :collection
@@ -159,7 +167,6 @@ Rails.application.routes.draw do
       post "list_workflows"
       post "describe_license"
       post "accept_licenses"
-      post "run_app"
       post "run_workflow"
       post "get_app_spec"
       post "get_app_script"
@@ -209,6 +216,7 @@ Rails.application.routes.draw do
       end
       get "featured", on: :collection, as: "featured"
       get "explore", on: :collection, as: "explore"
+      post "run", on: :collection
       resources :comments
     end
 
@@ -243,6 +251,12 @@ Rails.application.routes.draw do
       get "featured", on: :collection, as: "featured"
       get "explore", on: :collection, as: "explore"
       resources :comments
+    end
+
+    resources :comparators, only: [] do
+      collection do
+        get "/", to: "comparators#show"
+      end
     end
 
     resources :files do

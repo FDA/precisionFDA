@@ -1,4 +1,5 @@
-<%= render "/workflows/batch_workflows/step1_input_templates" %>
+<%= render "/_partials/apps/app_input_template" %>
+<%= render "/workflows/selector_modal" %>
 <!-- ko if: inputs().length -->
   <table class="table table-striped table-spec table-spec-input">
     <thead>
@@ -49,7 +50,7 @@
             <span data-bind="text: $data.stageName"></span>
           </td>
           <td>
-            <div data-bind="template: { name: 'batch_input_templates_step1', data: $data }"></div>
+            <div data-bind="template: { name: 'pfda_app_input_template', data: $data }"></div>
           </td>
           <td>
             <!-- ko if: $data.showBatchInput -->

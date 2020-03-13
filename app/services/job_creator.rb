@@ -1,8 +1,5 @@
+# Responsible for creating jobs.
 class JobCreator
-
-  DEFAULT_JOB_STATE = "idle"
-  DEFAULT_JOB_SCOPE = "private"
-
   def initialize(api:, context:, user:, project:)
     @api = api
     @context = context
@@ -20,12 +17,12 @@ class JobCreator
         app_id: app.id,
         project: project,
         run_inputs: input_info.run_inputs,
-        state: DEFAULT_JOB_STATE,
+        state: Job::STATE_IDLE,
         name: name,
         describe: {},
-        scope: scope || DEFAULT_JOB_SCOPE,
+        scope: scope || Job::SCOPE_PRIVATE,
         user_id: user.id,
-        run_instance_type: run_instance_type
+        run_instance_type: run_instance_type,
       )
       job.input_file_ids = input_info.file_ids
       job.save!
@@ -37,7 +34,8 @@ class JobCreator
 
   def create_dx_job(app, input_info, name, run_instance_type)
     input = api_input(app, name, input_info, run_instance_type)
-    api.call(app.dxid, "run", input)["id"]
+
+    api.app_run(app.dxid, nil, input)["id"]
   end
 
   private
@@ -49,15 +47,15 @@ class JobCreator
       name: name,
       input: input_info.dx_run_input,
       project: project,
-      timeoutPolicyByExecutable: { app.dxid => { "*" => { "days" => 2 }}},
+      timeoutPolicyByExecutable: { app.dxid => { "*" => { "days" => 2 } } },
       singleContext: true,
-      systemRequirements: system_requirements(run_instance_type)
+      systemRequirements: system_requirements(run_instance_type),
     }.delete_if { |_, value| value.nil? }
   end
 
   def system_requirements(run_instance_type)
     return unless run_instance_type
-    { main: { instanceType: Job::INSTANCE_TYPES[run_instance_type] }}
-  end
 
+    { main: { instanceType: Job::INSTANCE_TYPES[run_instance_type] } }
+  end
 end

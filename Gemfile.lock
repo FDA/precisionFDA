@@ -330,7 +330,7 @@ GEM
       json
       require_all (~> 3.0)
       ruby-progressbar
-    rails_param (0.10.2)
+    rails_param (0.11.0)
     railties (5.2.3)
       actionpack (= 5.2.3)
       activesupport (= 5.2.3)

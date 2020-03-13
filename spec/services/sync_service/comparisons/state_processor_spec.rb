@@ -3,13 +3,22 @@ describe SyncService::Comparisons::StateProcessor do
 
   let(:outputs) { { "results" => [] } }
   let(:api) { instance_double(DNAnexusAPI, system_describe_data_objects: outputs) }
-  let(:comparison) { create(:comparison, user: user, state: Comparison::STATE_PENDING) }
+  let(:comparison) do
+    create(
+      :comparison,
+      user: user,
+      state: Comparison::STATE_PENDING,
+      app_dxid: DEFAULT_COMPARISON_APP,
+    )
+  end
 
   describe("#call") do
     let(:user) { create(:user) }
 
     context "when comparison's state equals to job's state" do
-      let(:comparison) { create(:comparison, user: user, state: Job::STATE_DONE) }
+      let(:comparison) do
+        create(:comparison, user: user, state: Job::STATE_DONE, app_dxid: DEFAULT_COMPARISON_APP)
+      end
       let(:job_result) { { "state" => Job::STATE_DONE } }
 
       it "does nothing" do
