@@ -686,12 +686,12 @@ RSpec.describe ApiController, type: :controller do
         end
 
         it "returns a search result with a proper content of first result" do
-          expect(result.first["title"]).to eq(file_four.name)
+          expect(result.first["title"]).to eq(file_three.name)
           expect(result.first["path"]).to eq("/#{folder_two.name}/")
         end
 
         it "returns a search result with a proper content of second result" do
-          expect(result.second["title"]).to eq(file_three.name)
+          expect(result.second["title"]).to eq(file_four.name)
           expect(result.second["path"]).to eq("/#{folder_two.name}/")
         end
 
@@ -794,8 +794,8 @@ RSpec.describe ApiController, type: :controller do
         end
 
         it "returns a search result with a proper content" do
-          expect(result.first["title"]).to eq(file_four.name)
-          expect(result.second["title"]).to eq(file_three.name)
+          expect(result.first["title"]).to eq(file_three.name)
+          expect(result.second["title"]).to eq(file_four.name)
           expect(result.second["path"]).to eq("/#{folder_two.name}/")
         end
       end
