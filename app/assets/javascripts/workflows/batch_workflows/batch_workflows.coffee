@@ -56,73 +56,20 @@ class SelectorModel
 
 ### Input Model ###
 
-extendFileInput = () ->
-  @clearFileValue = () => @value(null)
-  @fileTitle = ko.observable('')
-  @getFileTitle = ko.computed( =>
-    @valid(true)
-    if typeof @value() == 'string'
-      $.post('/api/describe', { uid: @value() }).then (fileInfo) =>
-        @fileTitle(fileInfo.title)
-    else
-      @fileTitle('')
-  )
-
-extendBooleanInput = () ->
-  @setBoolValueTrue = (value) => @value(true)
-  @setBoolValueFalse = (value) => @value(false)
-
-class InputModel
-  isEmpty: () ->
-    nullVals = [undefined, null]
-    return true if nullVals.indexOf(@value()) > -1
-    return true if typeof @value() == 'string' and !@value().trim().length
-    return false
-
+class InputModel extends Precision.appTemplate.InputTemplateModel
   validate: () ->
     if @batchOne() or @batchTwo()
       @valid(true)
       return true
-    if @required and @isEmpty()
-      @valid(false)
-      return false
-    if !@isEmpty() and @type == 'int' and isNaN(parseInt(@value()))
-      @valid(false)
-      return false
-    if !@isEmpty() and @type == 'float' and isNaN(parseFloat(@value()))
-      @valid(false)
-      return false
-    @valid(true)
-    return true
-
-  onChange: () ->
-    @valid(true)
+    @_validate()
 
   constructor: (input) ->
-    @id = "#{input.stageName}_#{input.name}"
-    @type = input.class
-    @name = input.name
-    @uniq_input_name = input.uniq_input_name
-    @label = input.label || input.name
-    @help = input.help
-    @required = !input.optional
-    @stageName = input.stageName
-    @value = ko.observable(input.default_workflow_value || input.defaultValues)
-    @defaultValue = input.defaultValues
+    super(input, 'batch_value_input')
     @batchOne = ko.observable(false)
     @batchTwo = ko.observable(false)
-    @disabled = ko.observable(false)
     @disabledBatchTwo = ko.observable(false)
     @_disabledBatchTwo = ko.computed( => @disabled() || @disabledBatchTwo())
-    @valid = ko.observable(true)
     @showBatchInput = input.allow_batch
-    @template = do () =>
-      switch @type
-        when 'file' then return 'file'
-        when 'boolean' then return 'boolean'
-        else return 'default'
-    extendBooleanInput.call(@) if @type == 'boolean'
-    extendFileInput.call(@) if @type == 'file'
 
 ### Input Model ###
 
@@ -388,6 +335,7 @@ class BatchInputModel
       return @value().split(/\r*\n/).length
     else
       return 0
+
   constructor: (type, title, @batchWorkflowFileTree) ->
     @type = ko.observable(type)
     @value = ko.observable(null)

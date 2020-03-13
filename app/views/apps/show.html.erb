@@ -3,12 +3,23 @@
 <div class="page-header clearfix">
   <div class="page-title">
     <span class="fa fa-cube"></span> <%= @app.title %>
+    <% if app_added_to_comparators?(@app) %>
+      <span class="small label label-success">
+        <i class="fa fa-bullseye"></i>&nbsp;
+        Comparator
+      </span>
+    <% end %>
     <% if show_comparison_app_label?(@context, @app) %>
-      <span class="label label-info">Default comparator app</span>
+      <span class="small label label-default">
+        <i class="fa fa-bullseye"></i>&nbsp;
+        Default comparator
+      </span>
     <% end %>
   </div>
 </div>
 
 <div class="pfda-pane-content">
-  <%= render "/apps/detail", app: @app %>
+  <%= render "/apps/detail", app: @app, context: @context, revisions: @revisions,
+    jobs_grid: @jobs_grid, comments: @comments, items_from_params: @items_from_params,
+    item_comments_path: @item_comments_path %>
 </div>

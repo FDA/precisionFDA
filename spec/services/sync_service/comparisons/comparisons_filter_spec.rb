@@ -4,10 +4,41 @@ describe SyncService::Comparisons::ComparisonsFilter do
   let(:user_1) { create(:user) }
   let(:user_2) { create(:user) }
 
-  let!(:comparison_1) { create(:comparison, user: user_1, state: Comparison::STATE_PENDING) }
-  let!(:comparison_2) { create(:comparison, user: user_1, state: Comparison::STATE_PENDING) }
-  let!(:comparison_3) { create(:comparison, user: user_1, state: Comparison::STATE_DONE) }
-  let!(:comparison_4) { create(:comparison, user: user_2, state: Comparison::STATE_PENDING) }
+  let!(:comparison_1) do
+    create(
+      :comparison,
+      user: user_1,
+      state: Comparison::STATE_PENDING,
+      app_dxid: DEFAULT_COMPARISON_APP,
+    )
+  end
+
+  let!(:comparison_2) do
+    create(
+      :comparison,
+      user: user_1,
+      state: Comparison::STATE_PENDING,
+      app_dxid: DEFAULT_COMPARISON_APP,
+    )
+  end
+
+  let!(:comparison_3) do
+    create(
+      :comparison,
+      user: user_1,
+      state: Comparison::STATE_DONE,
+      app_dxid: DEFAULT_COMPARISON_APP,
+    )
+  end
+
+  let!(:comparison_4) do
+    create(
+      :comparison,
+      user: user_2,
+      state: Comparison::STATE_PENDING,
+      app_dxid: DEFAULT_COMPARISON_APP,
+    )
+  end
 
   describe "::call" do
     context "when no ids given" do

@@ -25,6 +25,7 @@ class Job < ApplicationRecord
   include Auditor
   include Permissions
   include InternalUid
+  include Scopes
 
   INSTANCE_TYPES = {
     "baseline-2" => "mem1_ssd1_x2_fedramp",
@@ -41,15 +42,16 @@ class Job < ApplicationRecord
     "hidisk-4" => "mem1_ssd2_x4_fedramp",
     "hidisk-8" => "mem1_ssd2_x8_fedramp",
     "hidisk-16" => "mem1_ssd2_x16_fedramp",
-    "hidisk-36" => "mem1_ssd2_x36_fedramp"
-  }
+    "hidisk-36" => "mem1_ssd2_x36_fedramp",
+  }.freeze
 
-  STATE_DONE = "done"
-  STATE_TERMINATED = "terminated"
-  STATE_FAILED = "failed"
-  TERMINAL_STATES = [STATE_TERMINATED, STATE_DONE, STATE_FAILED]
+  STATE_DONE = "done".freeze
+  STATE_FAILED = "failed".freeze
+  STATE_IDLE = "idle".freeze
+  STATE_TERMINATED = "terminated".freeze
+  STATE_TERMINATING = "terminating".freeze
 
-  STATE_TERMINATING = "terminating"
+  TERMINAL_STATES = [STATE_TERMINATED, STATE_DONE, STATE_FAILED].freeze
 
   belongs_to :app
   belongs_to :user
@@ -75,6 +77,8 @@ class Job < ApplicationRecord
   scope :done, -> { where(state: STATE_DONE) }
   scope :terminal, -> { where(state: [TERMINAL_STATES]) }
 
+  delegate :input_spec, :output_spec, to: :app
+
   def to_param
     uid
   end
@@ -92,7 +96,7 @@ class Job < ApplicationRecord
   end
 
   def describe_fields
-    ["title"]
+    %w(title)
   end
 
   def terminal?
@@ -100,52 +104,38 @@ class Job < ApplicationRecord
   end
 
   def done?
-    state == "done"
+    state == STATE_DONE
   end
 
   def failed?
-    state == "failed"
+    state == STATE_FAILED
   end
 
   def failure_message
-    if failed? && describe.has_key?("failureMessage")
-      describe["failureMessage"]
-    else
-      ""
-    end
+    return "" if !failed? || !describe.key?("failureMessage")
+
+    describe["failureMessage"]
   end
 
   def runtime
-    if describe.has_key?("startedRunning") && describe.has_key?("stoppedRunning")
-      (describe["stoppedRunning"] - describe["startedRunning"]) / 1000
-    else
-      0
-    end
+    return 0 if !describe.key?("startedRunning") || !describe.key?("stoppedRunning")
+
+    (describe["stoppedRunning"] - describe["startedRunning"]) / 1000
   end
 
   def energy
-    if describe.has_key?("totalPrice")
-      ((describe["totalPrice"] * 400 + 5).to_i / 5.0).to_i * 5
-    else
-      nil
-    end
+    return nil unless describe.key?("totalPrice")
+
+    ((describe["totalPrice"] * 400 + 5).to_i / 5.0).to_i * 5
   end
 
   def energy_string
     (energy || "TBD").to_s
   end
 
-  def input_spec
-    app.input_spec
-  end
-
-  def output_spec
-    app.output_spec
-  end
-
   def update_provenance!
     Auditor.suppress do
-      new_value = { dxid => { app_dxid: app.dxid, app_id: app.id, inputs: run_inputs }}
+      new_value = { dxid => { app_dxid: app.dxid, app_id: app.id, inputs: run_inputs } }
 
       # TODO: USE SCOPE OF USER_FILE MODEL!
       input_files.where(parent_type: "Job").find_each do |file|
@@ -158,15 +148,15 @@ class Job < ApplicationRecord
     end
   end
 
-  def publishable_by?(context, scope_to_publish_to = "public")
+  def publishable_by?(context, scope_to_publish_to = SCOPE_PUBLIC)
     super && terminal?
   end
 
-  def publishable_by_user?(user, scope_to_publish_to = "public")
+  def publishable_by_user?(user, scope_to_publish_to = SCOPE_PUBLIC)
     super && terminal?
   end
 
-  def publish_by_user(user, scope = "public")
+  def publish_by_user(user, scope = SCOPE_PUBLIC)
     update!(scope: scope) if publishable_by_user?(user, scope)
   end
 
@@ -183,6 +173,6 @@ class Job < ApplicationRecord
   end
 
   def log_unaccessible?(context)
-    scope == "public" && user_id != context.user_id
+    scope == SCOPE_PUBLIC && user_id != context.user_id
   end
 end

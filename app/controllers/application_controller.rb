@@ -136,6 +136,12 @@ class ApplicationController < ActionController::Base
     render status: :unauthorized, json: { failure: "Authentication failure" }
   end
 
+  # Redirects user to given URL if request isn't XHR.
+  # @param redirect [String] URL to redirect user to.
+  def require_xhr(redirect = root_path)
+    redirect_to(redirect) unless request.xhr?
+  end
+
   # Tries to authorize user from Authentication header and to set application context.
   def process_authorization_header
     auth = request.headers["Authorization"]

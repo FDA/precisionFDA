@@ -2,7 +2,7 @@ describe SyncService::Comparisons::ComparisonUpdater do
   subject(:updater) { described_class }
 
   let(:user) { create(:user) }
-  let(:comparison) { create(:comparison, user: user) }
+  let(:comparison) { create(:comparison, user: user, app_dxid: DEFAULT_COMPARISON_APP) }
 
   before do
     allow(comparison).to receive(:update!)
@@ -19,7 +19,14 @@ describe SyncService::Comparisons::ComparisonUpdater do
     end
 
     context "when comparison's state is done" do
-      let(:comparison) { create(:comparison, user: user, state: Comparison::STATE_DONE) }
+      let(:comparison) do
+        create(
+          :comparison,
+          user: user,
+          state: Comparison::STATE_DONE,
+          app_dxid: DEFAULT_COMPARISON_APP,
+        )
+      end
 
       it "does nothing" do
         expect(updater.done!(comparison, output_files, meta, user)).to eq(nil)
@@ -32,7 +39,14 @@ describe SyncService::Comparisons::ComparisonUpdater do
       let(:output_files) { [output_1, output_2] }
       let(:user_file_1) { create(:user_file, user: user) }
       let(:user_file_2) { create(:user_file, user: user) }
-      let(:comparison) { create(:comparison, user: user, state: Comparison::STATE_PENDING) }
+      let(:comparison) do
+        create(
+          :comparison,
+          user: user,
+          state: Comparison::STATE_PENDING,
+          app_dxid: DEFAULT_COMPARISON_APP,
+        )
+      end
 
       before do
         allow(UserFile).to receive(:create!).and_return(user_file_1, user_file_2)

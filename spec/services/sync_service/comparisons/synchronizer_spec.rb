@@ -14,8 +14,8 @@ describe SyncService::Comparisons::Synchronizer do
   end
 
   describe "#sync_comparisons!" do
-    let(:comparison_1) { create(:comparison, user: user) }
-    let(:comparison_2) { create(:comparison, user: user) }
+    let(:comparison_1) { create(:comparison, user: user, app_dxid: DEFAULT_COMPARISON_APP) }
+    let(:comparison_2) { create(:comparison, user: user, app_dxid: DEFAULT_COMPARISON_APP) }
     let(:comparisons_ids) { [comparison_1.id, comparison_2.id] }
     let(:jobs_dxids) { [comparison_1.dxjobid, comparison_2.dxjobid] }
     let(:job_1) { { "id" => comparison_1.dxjobid } }

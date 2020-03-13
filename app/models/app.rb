@@ -88,10 +88,6 @@ class App < ApplicationRecord
     available_job_spaces(user).where(id: space_id).exists?
   end
 
-  def name
-    app_series.name
-  end
-
   def klass
     "app"
   end
@@ -134,4 +130,6 @@ class App < ApplicationRecord
     exporter = DockerExporter.new(api, Rails.application.routes.url_helpers)
     exporter.call(self)
   end
+
+  delegate :name, to: :app_series
 end

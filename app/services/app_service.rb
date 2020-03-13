@@ -67,7 +67,7 @@ class AppService
         title: opts[:title],
         readme: opts[:readme],
         user: context.user,
-        scope: "private",
+        scope: App::SCOPE_PRIVATE,
         app_series: app_series,
         input_spec: opts[:input_spec],
         output_spec: opts[:output_spec],
@@ -141,7 +141,7 @@ class AppService
     AppSeries.create_with(
       name: app_name,
       user: context.user,
-      scope: "private",
+      scope: Scopes::SCOPE_PRIVATE,
     ).find_or_create_by(
       dxid: app_series_dxid,
     )

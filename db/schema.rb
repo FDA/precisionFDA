@@ -205,6 +205,8 @@ ActiveRecord::Schema.define(version: 2020_02_16_060726) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "scope"
+    t.string "app_dxid", null: false
+    t.text "run_input"
     t.index ["scope"], name: "index_comparisons_on_scope"
     t.index ["state"], name: "index_comparisons_on_state"
     t.index ["user_id"], name: "index_comparisons_on_user_id"
@@ -548,7 +550,7 @@ ActiveRecord::Schema.define(version: 2020_02_16_060726) do
 
   create_table "settings", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "key", null: false
-    t.string "value", null: false
+    t.text "value", null: false
   end
 
   create_table "space_events", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|

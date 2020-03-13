@@ -13,7 +13,7 @@ MoveCodeIntoControllerCheck: { }
 MoveCodeIntoHelperCheck: { array_count: 3 }
 MoveCodeIntoModelCheck: { use_count: 2 }
 MoveFinderToNamedScopeCheck: { }
-MoveModelLogicIntoModelCheck: { use_count: 4 }
+# MoveModelLogicIntoModelCheck: { use_count: 4 }
 NeedlessDeepNestingCheck: { nested_count: 2 }
 NotRescueExceptionCheck: { }
 NotUseDefaultRouteCheck: { }
@@ -28,6 +28,7 @@ RemoveUnusedMethodsInHelpersCheck: { except_methods: [] }
 RemoveUnusedMethodsInModelsCheck:
   except_methods:
     - Setting#get_value
+    - Job#publish_by_user
     - Country#state_matches_zip_code?
     - Country#usa?
 ReplaceComplexCreationWithFactoryMethodCheck: { attribute_assignment_count: 2 }

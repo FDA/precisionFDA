@@ -4,6 +4,13 @@ $withHeight: 100px
 $comparator-border-color: lighten($brand-blue-tertiary, 25%)
 
 .pfda-controller-comparisons main
+  select#select_comparator_app
+    width: 50%
+    max-width: 600px
+
+  .input-name
+    margin-right: 5px
+
   .variants
     @include flexbox
     @include align-items(stretch)
@@ -12,6 +19,7 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
     border: 4px solid $comparator-border-color
     border-radius: $border-radius-base
     overflow-x: hidden
+    min-height: 200px
 
   .variant-test, .variant-ref
     position: relative
@@ -73,13 +81,16 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
       &:active
         background-color: darken($brand-green-primary, 20%)
 
-  .variant-input-cell
-    display: inline-block
-    vertical-align: top
-    font-size: 16px
+  .variant-input-tr
+    &-padded
+      td
+        padding-top: 5px
+        padding-bottom: 15px
+    .text-center
+      text-align: left
 
-    &:first-child
-      min-width: 100px
+  .variant-input-td-label
+    padding-right: 50px
 
   .variant-title
     font-size: $font-size-h3
@@ -94,17 +105,17 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
       font-weight: 300
       display: inline-block
 
-    // .close
-    //   display: inline-block
-    //   margin-right: 5px
-    //   float: none
-    //   vertical-align: top
-
     .file-optional
       color: lighten($brand-blue-tertiary, 15%)
       font-size: 12px
       text-transform: uppercase
-      margin-left: 25px
+      margin-left: 10px
+
+    .file-help-text
+      color: lighten($brand-blue-tertiary, 15%)
+      font-size: 11px
+      margin-left: 10px
+      line-height: 20px
 
     .required
       .file-label
@@ -155,7 +166,7 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
         text-decoration: none
         &:hover
           background-color: $dropdown-link-hover-bg
-        color: $link-hover-color
+          color: $link-hover-color
 
       li.disabled > a
         color: lighten($dropdown-link-disabled-color, 10%)
@@ -170,13 +181,10 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
   .cell-file-name > a
     color: $brand-blue-dark
 
-  .variant-input-cell
-    vertical-align: middle
-
   .nav-comparisons
     margin-bottom: 20px
     li > a
-      font-weight: 18px
+      font-size: 18px
       text-transform: uppercase
 
   form
@@ -263,6 +271,14 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
     tfoot
       display: none
 
+  .comparison-output
+    width: 100%
+    border: solid 1px $comparator-border-color
+    border-radius: $border-radius-base
+
+    & + &
+      margin-top: 20px
+
 @media (max-width: $screen-xs-max)
   .variant-title
     margin: 0 auto 5px
@@ -298,3 +314,8 @@ $comparator-border-color: lighten($brand-blue-tertiary, 25%)
         padding-top: $withHeight/2
         border-left-width: 0
         border-top: 1px solid $comparator-border-color
+
+.pfda-controller-comparisons.pfda-action-index
+  .wice-grid-title-row
+    th
+      white-space: nowrap

@@ -124,7 +124,7 @@ RSpec.describe Node, type: :model do
       end
 
       context "when file_one is a comparison input" do
-        let(:comparison) { create(:comparison, user_id: user.id) }
+        let(:comparison) { create(:comparison, user_id: user.id, app_dxid: DEFAULT_COMPARISON_APP) }
         let(:comparison_input) do
           create(
             :comparison_input,
@@ -155,7 +155,10 @@ RSpec.describe Node, type: :model do
       end
 
       context "when file_two is a comparison input" do
-        let(:comparison) { create(:comparison, user_id: user.id, scope: :public) }
+        let(:comparison) do
+          create(:comparison, user_id: user.id, scope: :public, app_dxid: DEFAULT_COMPARISON_APP)
+        end
+
         let(:comparison_input) do
           create(
             :comparison_input,
@@ -198,7 +201,15 @@ RSpec.describe Node, type: :model do
       end
 
       context "when file_two is a comparison input" do
-        let(:comparison) { create(:comparison, user_id: user.id, scope: space_scope) }
+        let(:comparison) do
+          create(
+            :comparison,
+            user_id: user.id,
+            scope: space_scope,
+            app_dxid: DEFAULT_COMPARISON_APP,
+          )
+        end
+
         let(:comparison_input) do
           create(
             :comparison_input,

@@ -1040,87 +1040,6 @@ class ApiController < ApplicationController
 
   # Inputs
   #
-  # id (string, required): the dxid of the app to run
-  # name (string, required): the name of the job
-  # inputs (hash, required): the inputs
-  # instance_type (string, optional): override of the default instance type
-  #
-  # Outputs
-  #
-  # id (string): the dxid of the resulting job
-  #
-  def run_app
-    # rubocop:disable Style/SignalException
-    # Parameter 'id' should be of type String
-    id = unsafe_params[:id]
-    fail "App ID is not a string" unless id.is_a?(String) && id != ""
-
-    # Name should be a nonempty string
-    name = unsafe_params[:name]
-    fail "Name should be a non-empty string" unless name.is_a?(String) && name != ""
-
-    # Inputs should be a hash (more checks later)
-    inputs = unsafe_params["inputs"]
-    fail "Inputs should be a hash" unless inputs.is_a?(Hash)
-
-    # App should exist and be accessible
-    @app = App.accessible_by(@context).find_by_uid!(id)
-
-    # Check if asset licenses have been accepted
-    fail "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
-
-    space_id = unsafe_params[:space_id]
-    if space_id
-      fail "Invalid space_id" unless @app.can_run_in_space?(@context.user, space_id)
-    end
-    space = Space.find_by_id(space_id)
-    # Inputs should be compatible
-    # (The following also normalizes them)
-    input_info = input_spec_preparer.run(@app, inputs, space.try(:accessible_scopes))
-
-    fail input_spec_preparer.first_error unless input_spec_preparer.valid?
-
-    run_instance_type = unsafe_params[:instance_type]
-
-    # User can override the instance type
-    if run_instance_type
-      fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.key?(unsafe_params["instance_type"]) # Checks also that it's a string
-    end
-
-    if space
-      project = space.project_for_user(@context.user)
-      permission = space.have_permission?(project, @context.user)
-      fail "You don't have permissions to run app in space #{space.name}" unless permission
-
-    else
-      project = @context.user.private_files_project
-    end
-
-    job_creator = JobCreator.new(
-      api: DNAnexusAPI.new(@context.token),
-      context: @context,
-      user: @context.user,
-      project: project
-    )
-
-    job = job_creator.create(
-      app: @app,
-      name: name,
-      input_info: input_info,
-      run_instance_type: run_instance_type,
-      scope: space.try(:uid),
-    )
-
-    if space && space.review?
-      SpaceEventService.call(space_id, @context.user_id, nil, job, :job_added)
-    end
-    # rubocop:enable Style/SignalException
-
-    render json: { id: job.uid }
-  end
-
-  # Inputs
-  #
   # app_id
   #
   # Outputs
@@ -1522,10 +1441,6 @@ class ApiController < ApplicationController
     if @items.any? { |item| !item.publishable_by?(@context, @scope) }
       fail "Unpublishable items detected"
     end
-  end
-
-  def input_spec_preparer
-    @input_spec_preparer ||= InputSpecPreparer.new(@context)
   end
 
   def check_scope!
