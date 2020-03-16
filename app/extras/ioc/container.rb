@@ -80,6 +80,12 @@ module IOC
         register("provisioner") do
           OrgService::Provision.new(resolve("on_platform_provisioner"))
         end
+
+        register("admin_member_provisioner") do
+          OrgService::ProvisionAdminOrgMember.new(
+              container.resolve("api.admin"),
+              )
+        end
       end
 
       namespace("comparisons") do
