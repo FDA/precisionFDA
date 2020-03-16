@@ -23,6 +23,21 @@ ActiveRecord::Schema.define(version: 2020_03_13_123024) do
     t.index ["user_id"], name: "index_accepted_licenses_on_user_id"
   end
 
+  create_table "admin_groups", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.integer "role"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "admin_memberships", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "admin_group_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_group_id"], name: "index_admin_memberships_on_admin_group_id"
+    t.index ["user_id"], name: "index_admin_memberships_on_user_id"
+  end
+
   create_table "analyses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "dxid"

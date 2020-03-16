@@ -80,12 +80,15 @@ Rails.application.routes.draw do
           put "approve", to: "org_requests#approve"
         end
       end
+      resources :admin_groups
+      post "provision", to: "admin_groups#provision", as: "provision"
+      get "new_admin", to: "admin_groups#new_admin"
     end
 
     # hotfix for PFDA-557
     get "/challenges/6" => redirect("/challenges/7")
     get "/mislabeling" => redirect("/challenges/5")
-    # Main controller
+    # Mains controller
     get "login" => "main#login"
     delete "logout" => "main#destroy"
     get "return_from_login" => "main#return_from_login"

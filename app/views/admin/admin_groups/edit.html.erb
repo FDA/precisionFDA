@@ -1,0 +1,31 @@
+<% content_for :title, "Edit Billing Information" %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-body">
+      <div class="page-title">
+        <i class="fa fa-users" aria-hidden="true"></i>
+        Edit Billing information for <%= @user.dxid %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <%= form_for @form, url: admin_update_user_path(dxuser: @user.dxuser), html: {class: 'form form-horizontal'} do |f| %>
+    <%= f.hidden_field :dxuser, value: params[:dxuser] %>
+    <% @form.class.column_names.reject{|a| a == :dxuser}.each do |a| %>
+      <div class="form-group required">
+        <%= f.label a, class: 'control-label col-sm-2'  %>
+        <div class="col-sm-11 col-sm-offset-1">
+          <%= f.text_field a %>
+        </div>
+      </div>
+    <% end %>
+    <div class="form-group required">
+      <div class="col-sm-11 col-sm-offset-3">
+        <%= f.submit "Update User" %>
+      </div>
+    </div>
+  <% end %>
+</div>

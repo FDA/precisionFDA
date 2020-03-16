@@ -143,6 +143,8 @@ class User < ApplicationRecord
   belongs_to :org
   has_many :licenses
   has_many :accepted_licenses
+  has_many :admin_memberships
+  has_many :admin_groups, through: :admin_memberships
   has_many :space_memberships
   has_many :space_templates
   has_many :spaces, -> { where("space_memberships.active = ?", true) }, through: :space_memberships
@@ -299,20 +301,24 @@ class User < ApplicationRecord
 
   def can_administer_site?
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
-      SITE_ADMINS.include?(dxuser)
+      admin_groups.any?{|g| g.site?}
     else
       NON_PRODUCTION_ADMIN_ORGS.include?(org.handle) &&
         org.admin_id == id ||
-        SITE_ADMINS.include?(dxuser)
+        admin_groups.any?{|g| g.site?}
     end
   end
 
   def is_challenge_evaluator?
-    CHALLENGE_EVALUATORS.include?(dxuser) || can_administer_site?
+    admin_groups.any?{|g| g.challenge_eval?} || can_administer_site?
+  end
+
+  def challenge_eval?
+    admin_groups.any?{|g| g.challenge_eval?}
   end
 
   def review_space_admin?
-    REVIEW_SPACE_ADMINS.include?(dxuser)
+    admin_groups.any?{|g| g.space?}
   end
 
   # @param time_zone [String] new time zone
@@ -325,7 +331,11 @@ class User < ApplicationRecord
   end
 
   def is_challenge_admin?
-    can_administer_site? || CHALLENGE_ADMINS.include?(dxuser)
+    can_administer_site? || admin_groups.any?{|g| g.challenge_admin?}
+  end
+
+  def challenge_admin?
+    admin_groups.any?{|g| g.challenge_admin?}
   end
 
   # Selects users, according search string.

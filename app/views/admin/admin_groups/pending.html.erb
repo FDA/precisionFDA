@@ -1,0 +1,15 @@
+<% content_for :title, "Pending users" %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-body">
+      <div class="page-title">
+        <i class="fa fa-users" aria-hidden="true"></i>
+        Pending Users
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<%= render partial: "admin/users/grid", locals: {locked: "hey", show_filters: :always} %>
