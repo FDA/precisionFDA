@@ -166,6 +166,11 @@ class AppsController < ApplicationController
   end
 
   def new
+    if @context.guest?
+      redirect_to login_url
+      return
+    end
+
     js(ubuntu_releases: UBUNTU_RELEASES, app: { release: UBUNTU_16 })
   end
 
