@@ -16,11 +16,11 @@
 #  last_name                   :string(255)
 #  email                       :string(255)
 #  normalized_email            :string(255)
-#  last_login                  :datetime         not null
+#  last_login                  :datetime
 #  extras                      :text(65535)
 #  time_zone                   :string(255)
-#  review_app_developers_org   :string(255)
-#  user_state                  :integer   default(0), not null
+#  review_app_developers_org   :string(255)      default("")
+#  user_state                  :integer          default("enabled"), not null
 #  expiration                  :integer
 #  disable_message             :string(255)
 #

@@ -13,8 +13,6 @@
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #  scope       :string(255)
-#  app_dxid    :string(255)      not null
-#  run_input   :text(65535)
 #
 
 class Comparison < ApplicationRecord
