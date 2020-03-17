@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 # == Schema Information
 #
 # Table name: users
@@ -110,14 +109,14 @@ class User < ApplicationRecord
     errol.strain
   ).freeze
 
-  enum user_state: [:enabled, :locked, :deactivated]
+  enum user_state: { enabled: 0, locked: 1, deactivated: 2 }
 
   SITE_ADMINS = begin
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
       PRODUCTION_ADMINS
     else
       ENV.fetch("CUSTOM_SITE_ADMINS", "").split(" ").concat(
-        NON_PRODUCTION_ADMINS
+        NON_PRODUCTION_ADMINS,
       )
     end
   end
@@ -232,9 +231,7 @@ class User < ApplicationRecord
     challenge_bot? ? Org.new : super
   end
 
-  def real_files
-    user_files.real_files
-  end
+  delegate :real_files, to: :user_files
 
   def singular?
     org_id.blank? || org.singular
@@ -290,7 +287,9 @@ class User < ApplicationRecord
   end
 
   def logged_in?
-    !Session.find_by_user_id(id).expired? rescue false
+    !Session.find_by(user_id: id).expired?
+  rescue StandardError
+    false
   end
 
   def appathon_from_meta(meta_appathon)
@@ -301,24 +300,24 @@ class User < ApplicationRecord
 
   def can_administer_site?
     if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
-      admin_groups.any?{|g| g.site?}
+      admin_groups.any?(&:site?)
     else
       NON_PRODUCTION_ADMIN_ORGS.include?(org.handle) &&
         org.admin_id == id ||
-        admin_groups.any?{|g| g.site?}
+        admin_groups.any?(&:site?)
     end
   end
 
   def is_challenge_evaluator?
-    admin_groups.any?{|g| g.challenge_eval?} || can_administer_site?
+    admin_groups.any?(&:challenge_eval?) || can_administer_site?
   end
 
   def challenge_eval?
-    admin_groups.any?{|g| g.challenge_eval?}
+    admin_groups.any?(&:challenge_eval?)
   end
 
   def review_space_admin?
-    admin_groups.any?{|g| g.space?}
+    admin_groups.any?(&:space?)
   end
 
   # @param time_zone [String] new time zone
@@ -331,11 +330,11 @@ class User < ApplicationRecord
   end
 
   def is_challenge_admin?
-    can_administer_site? || admin_groups.any?{|g| g.challenge_admin?}
+    can_administer_site? || admin_groups.any?(&:challenge_admin?)
   end
 
   def challenge_admin?
-    admin_groups.any?{|g| g.challenge_admin?}
+    admin_groups.any?(&:challenge_admin?)
   end
 
   # Selects users, according search string.
@@ -486,12 +485,12 @@ class User < ApplicationRecord
     job = user.jobs.find(job_id) # Re-check job id
     unless job.terminal?
       result = DNAnexusAPI.new(token).call("system", "findJobs",
-        includeSubjobs: false,
-        id: [job.dxid],
-        project: user.private_files_project,
-        parentJob: nil,
-        parentAnalysis: nil,
-        describe: true,)["results"][0]
+                                           includeSubjobs: false,
+                                           id: [job.dxid],
+                                           project: user.private_files_project,
+                                           parentJob: nil,
+                                           parentAnalysis: nil,
+                                           describe: true)["results"][0]
       sync_job_state(result, job, user, token)
     end
   end
@@ -505,12 +504,12 @@ class User < ApplicationRecord
     return if job.terminal?
 
     result = DNAnexusAPI.new(token).call("system", "findJobs",
-      includeSubjobs: false,
-      id: [job.dxid],
-      project:  job.project || user.private_files_project,
-      parentJob: nil,
-      parentAnalysis: job.analysis.try(:dxid),
-      describe: true,)["results"][0]
+                                         includeSubjobs: false,
+                                         id: [job.dxid],
+                                         project:  job.project || user.private_files_project,
+                                         parentJob: nil,
+                                         parentAnalysis: job.analysis.try(:dxid),
+                                         describe: true)["results"][0]
     return if result.blank?
 
     sync_job_state(result, job, user, token)
@@ -526,7 +525,7 @@ class User < ApplicationRecord
     jobs.where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).limit(SYNC_JOBS_LIMIT).each_slice(1000) do |jobs_batch|
       jobs_hash = jobs_batch.map { |j| [j.dxid, j] }.to_h
       jobs_hash.keys.each do |job_dxid|
-        job_project = project ? project : Job.find_by(dxid: job_dxid).project
+        job_project = project || Job.find_by(dxid: job_dxid).project
 
         response = DNAnexusAPI.new(token).call(
           "system",
@@ -552,12 +551,12 @@ class User < ApplicationRecord
     Job.where(user_id: user.id).where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs|
       jobs_hash = jobs.map { |j| [j.dxid, j] }.to_h
       DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call("system", "findJobs",
-        includeSubjobs: false,
-        id: jobs_hash.keys,
-        project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
-        parentJob: nil,
-        parentAnalysis: nil,
-        describe: true,)["results"].each do |result|
+                                                includeSubjobs: false,
+                                                id: jobs_hash.keys,
+                                                project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
+                                                parentJob: nil,
+                                                parentAnalysis: nil,
+                                                describe: true)["results"].each do |result|
         sync_job_state(result, jobs_hash[result["id"]], user, CHALLENGE_BOT_TOKEN)
       end
     end
