@@ -20,8 +20,7 @@ module Admin
     end
 
     def provision
-byebug
-      user = User.find_by_dxuser(unsafe_params[:dxuser])
+      user = User.find(unsafe_params[:user_id])
 
       if !current_user.can_administer_site?
         redirect_to root_path and return
@@ -31,9 +30,9 @@ byebug
         redirect_back(fallback_location: user_path(user), alert: "Cannot add self.") and return
       end
 
-      role = unsafe_params[:group]
+      group = unsafe_params[:group]
 
-      case role
+      case group
         when "site"
           membership = AdminMembership.create!(admin_group_id: @admin_group.id, user_id: user.id)
           add_user_to_org(user.dxuser)
@@ -44,12 +43,12 @@ byebug
 
       if membership.present?
         redirect_back(
-            fallback_location: admin_admin_groups_path(:group => role),
+            fallback_location: admin_admin_groups_path(:group => group),
             alert: "User has been added"
         )
       else
         redirect_back(
-            fallback_location: admin_admin_groups_path(:group => role),
+            fallback_location: admin_admin_groups_path(:group => group),
             error: "There was an adding user"
         )
       end
@@ -87,26 +86,20 @@ byebug
       end
     end
 
-    def edit
-      # 1. get information from dnanexusAPI
-      # 2. set information to dnanexusAUTH server
-
-      @user = User.find_by_dxuser(unsafe_params[:dxuser])
-    end
-
-    def update
-      @user = User.find_by_dxuser(unsafe_params[:dxuser])
-    end
-
-    # Selects all users, according search string for the given org.
-    # Users selected are not in 'pending' state.
-    # @param search [String] - search string
-    # @param org [String] - org handle string
-    # @return users [Array of User objects] - an array of users, searched by search string match.
-    def all_users
-      users = User.org_members(params[:search], params[:org])
-
-      render json: { users: users }
+    def destroy
+      @user = User.find(unsafe_params[:id])
+      membership = AdminMembership.where(user: @user, admin_group: @admin_group).first
+      if membership.destroy!
+           redirect_back(
+               fallback_location: admin_admin_groups_path(:group => params[:group]),
+               alert: "User has been removed"
+           )
+      else
+        redirect_back(
+            fallback_location: admin_admin_groups_path(:group => params[:group]),
+            success: "User could not be removed"
+        )
+      end
     end
 
     private
