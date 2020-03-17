@@ -2,7 +2,6 @@ module Admin
   # Responsible for maintaining admin groups actions.
   class AdminGroupsController < BaseController
     before_action :init_admin_group
-    skip_before_action :check_admin
 
     def index
       @members_grid = initialize_grid(@admin_group.users,
@@ -23,14 +22,12 @@ module Admin
 
       redirect_to(root_path) && return unless current_user.can_administer_site?
 
-      if user == current_user
-        redirect_back(fallback_location: admin_admin_groups_path(group: group), alert: "Cannot add self.") && return
-      end
-
       group = unsafe_params[:group]
 
-      membership = AdminMembership.find_or_create_by!(admin_group_id: @admin_group.id, user_id: user.id)
-      add_user_to_org(user.dxuser) if group == 'site'
+      membership = AdminMembership.
+        find_or_create_by!(admin_group_id: @admin_group.id, user_id: user.id)
+
+      add_user_to_org(user.dxuser) if group == "site"
 
       if membership.present?
         redirect_back(
