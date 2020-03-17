@@ -9,11 +9,9 @@ module OrgService
       @admin_api = admin_api
     end
 
-    # rubocop:disable Metrics/MethodLength
     # Adds user to admin_org on the platform.
     # @param username [String] User's name.
     def call(username)
-
       dxuserid = "user-#{username}"
 
       @admin_api.org_invite(PFDA_ADMIN_ORG, dxuserid,
@@ -23,6 +21,5 @@ module OrgService
                             projectAccess: DNAnexusAPI::PROJECT_ACCESS_VIEW,
                             suppressEmailNotification: true)
     end
-    # rubocop:enable Metrics/MethodLength
   end
 end

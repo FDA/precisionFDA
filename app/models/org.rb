@@ -13,7 +13,6 @@
 #  phone      :string(255)
 #  state      :string(255)
 #  singular   :boolean
-#  fedramp    :boolean          default(FALSE)
 #
 
 class Org < ApplicationRecord
