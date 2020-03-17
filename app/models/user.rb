@@ -142,7 +142,7 @@ class User < ApplicationRecord
   belongs_to :org
   has_many :licenses
   has_many :accepted_licenses
-  has_many :admin_memberships
+  has_many :admin_memberships, dependent: :destroy
   has_many :admin_groups, through: :admin_memberships
   has_many :space_memberships
   has_many :space_templates
