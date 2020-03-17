@@ -170,8 +170,8 @@ ActiveRecord::Schema.define(version: 2020_03_13_123024) do
     t.boolean "automated", default: true
     t.string "card_image_url"
     t.string "card_image_id"
-    t.integer "space_id"
     t.integer "specified_order"
+    t.integer "space_id"
     t.index ["admin_id"], name: "index_challenges_on_admin_id"
     t.index ["app_id"], name: "index_challenges_on_app_id"
     t.index ["app_owner_id"], name: "index_challenges_on_app_owner_id"
@@ -889,8 +889,6 @@ ActiveRecord::Schema.define(version: 2020_03_13_123024) do
     t.index ["workflow_series_id"], name: "index_workflows_on_workflow_series_id"
   end
 
-  add_foreign_key "accepted_licenses", "licenses"
-  add_foreign_key "accepted_licenses", "users"
   add_foreign_key "analyses", "workflows"
   add_foreign_key "answers", "discussions"
   add_foreign_key "answers", "notes"
