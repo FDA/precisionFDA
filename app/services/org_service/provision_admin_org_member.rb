@@ -12,7 +12,8 @@ module OrgService
     # rubocop:disable Metrics/MethodLength
     # Adds user to admin_org on the platform.
     # @param username [String] User's name.
-    def call(username:,)
+    def call(username)
+
       dxuserid = "user-#{username}"
 
       @admin_api.org_invite(PFDA_ADMIN_ORG, dxuserid,

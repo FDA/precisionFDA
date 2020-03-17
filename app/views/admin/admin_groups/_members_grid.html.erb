@@ -7,5 +7,9 @@
   g.column name:"Email ID", attribute: 'email' do |user|
     link_to user.email, user_path(user.dxuser)
   end
+
+  g.column name:"Action" do |user|
+    link_to 'Remove', { action: :destroy, id: user.id, group: params[:group] },  method: :delete, data: { confirm: 'Are you sure?' }
+  end
 end
 %>
