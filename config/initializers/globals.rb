@@ -122,6 +122,7 @@ REVIEW_SPACE_ADMINS =
       nainathangaraj.spaceadmin
       mitchell.mello
       william.autoteststagersa
+      pavlos.krischenikos
     ).freeze
   end
 
