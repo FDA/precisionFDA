@@ -42,9 +42,6 @@
 # Ignore deployed gems
 /vendor/bundle
 
-# Ignore CSV in assets
-/app/assets/csv
-
 # Ignore OSX hidden file
 .DS_Store
 
@@ -59,21 +56,10 @@
 # Ignore application configuration
 /config/application.yml
 
-# Ignore autotest's config files
-/test/functional/.idea
-/test/functional/target
-/test/functional/*.iml
-
-#Ignore test browser drivers
-/test/functional/drivers/chromedriver
-/test/functional/drivers/geckodriver
-
-#Ignore test temp files
-/test/functional/src/main/resources/tempFiles/*.txt
-/test/functional/src/main/resources/tempFiles/*.png
-/test/functional/src/main/resources/tempFiles/Docker*
-/test/functional/src/main/resources/tempFiles/*.gz
-/test/functional/src/main/resources/tempFiles/*.csv
+# Ignore client node_modules
+/client/node_modules
+/client/coverage
+/app/assets/packs
 
 # Ignore local scripts
 run-ui-test.sh
