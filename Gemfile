@@ -4,16 +4,16 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby "2.6.5"
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem "rails", "~> 5.2.4", ">= 5.2.4.2"
+gem "rails", "~> 5.2.3"
 # Use SCSS for stylesheets
-gem "sass-rails", "~> 5.0", ">= 5.0.7"
+gem "sass-rails", "~> 5.0"
 # Use Uglifier as compressor for JavaScript assets
 gem "uglifier", ">= 1.3.0"
 # Use CoffeeScript for .coffee assets and views
-gem "coffee-rails", "~> 4.2", ">= 4.2.2"
+gem "coffee-rails", "~> 4.2"
 
 # Use jquery as the JavaScript library
-gem "jquery-rails", "~> 4.3", ">= 4.3.5"
+gem "jquery-rails", "~> 4.3", ">= 4.3.1"
 # Turbolinks makes navigating your web application faster
 gem "turbolinks", "~> 5"
 # Build JSON APIs with ease
@@ -23,7 +23,7 @@ gem "jbuilder", "~> 2.5"
 gem "bootsnap", ">= 1.1.0", require: false
 
 # bundle exec rake doc:rails generates the API under doc/api.
-gem "sdoc", ">= 1.0.0", group: :doc
+gem "sdoc", group: :doc
 
 # Support for bulk inserting data using ActiveRecord
 gem "activerecord-import"
@@ -32,7 +32,7 @@ gem "activerecord-import"
 gem "rails_param"
 
 # WiceGrid is a Rails grid plugin: https://github.com/leikind/wice_grid
-gem "wice_grid", ">= 4.1.0"
+gem "wice_grid"
 
 # Page-specific javascript for Rails done right
 gem "paloma", "~> 5.1.0"
@@ -46,7 +46,7 @@ gem "sprockets", ">= 3.7.2"
 gem "hashdiff", [">= 1.0.0.beta1", "< 2.0.0"]
 
 # For reCaptcha
-gem "recaptcha", ">= 5.3.0"
+gem "recaptcha"
 
 # Excel spreadsheet generation
 gem "axlsx", "3.0.0.pre"
@@ -58,8 +58,8 @@ gem "secure_headers", "~> 6.3"
 gem "gravtastic"
 
 # Adds pagination support to models
-gem "bootstrap-kaminari-views", ">= 0.0.5"
-gem "kaminari", ">= 1.1.1"
+gem "bootstrap-kaminari-views"
+gem "kaminari"
 
 # For getting user's local time
 gem "local_time"
@@ -72,20 +72,20 @@ gem "acts_as_votable"
 
 # For inline-css in emails
 gem "inky-rb", require: "inky"
-gem "premailer-rails", ">= 1.10.2"
+gem "premailer-rails"
 
 gem "whenever", require: false
 
 gem "mysql2"
 
-gem "gretel", ">= 3.0.9"
+gem "gretel"
 
 gem "rack-utf8_sanitizer", "~> 1.6"
 
 # View outgoing HTTP requests
 gem "httplog"
 
-gem "simple_form", "~> 5.0.1"
+gem "simple_form", "~> 5.0.0"
 
 # PDF builder
 gem "prawn"
@@ -107,7 +107,7 @@ group :development do
   gem "brakeman"
 
   # Access an interactive console on exception pages or by calling 'console' anywhere in the code
-  gem "web-console", ">= 3.7.0"
+  gem "web-console"
 
   gem "listen", ">= 3.0.5", "< 3.2"
 
@@ -120,7 +120,7 @@ group :development do
 
   gem "pronto", "~> 0.10.0"
   gem "pronto-rubocop", require: false
-  gem "pronto-rails_best_practices", ">= 0.10.0", require: false
+  gem "pronto-rails_best_practices", require: false
 
   gem "byebug", platforms: %i(mri mingw x64_mingw)
 
@@ -135,18 +135,18 @@ group :development do
 end
 
 group :development, :test, :ui_test do
-  gem "dotenv-rails", ">= 2.7.2"
+  gem "dotenv-rails"
   gem "thin"
 end
 
 group :test do
   gem "database_cleaner", "~> 1.5", ">= 1.5.3"
-  gem "factory_bot_rails", "~> 4.11", ">= 4.11.1"
+  gem "factory_bot_rails", "~> 4.8", ">= 4.8.2"
   gem "ffaker"
-  gem "rails-controller-testing", ">= 1.0.4"
-  gem "rspec-rails", "~> 3.8", ">= 3.8.2"
+  gem "rails-controller-testing"
+  gem "rspec-rails", "~> 3.7", ">= 3.7.1"
   gem "shoulda-matchers"
-  gem "simplecov", ">= 0.16.1", require: false
+  gem "simplecov", require: false
   gem "webmock", "~> 3.1", ">= 3.1.1"
 end
 
