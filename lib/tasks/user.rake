@@ -43,7 +43,7 @@ namespace :user do
 
   desc "Generate test users"
   task :generate_test_users do
-    file = File.expand_path("../users.yml", __FILE__)
+    file = File.expand_path("users.yml", __dir__)
     users = YAML.load_file(file)
 
     users.each do |user|
