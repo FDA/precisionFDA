@@ -55,6 +55,7 @@ class User < ApplicationRecord
     alison.williams
     brijesh.prajapati
     ben.busby.3
+    linda.jackson
   ).freeze
 
   NON_PRODUCTION_ADMINS = %w(

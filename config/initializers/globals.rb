@@ -109,6 +109,7 @@ REVIEW_SPACE_ADMINS =
       ben.busby.3
       alison.williams
       alexis.norris
+      linda.jackson
     ).freeze
   else
     %w(
