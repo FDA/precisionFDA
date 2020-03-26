@@ -13,21 +13,20 @@ namespace :user do
       public_comparisons_project
     ) => :environment do |_, args|
     ActiveRecord::Base.transaction do
-      user = User.create!(
-        dxuser: args.dxuser,
-        schema_version: 1,
-        first_name: args.first_name,
-        last_name: args.last_name,
-        email: args.email,
-        normalized_email: args.email,
-        private_files_project: args.private_files_project,
-        public_files_project: args.public_files_project,
-        private_comparisons_project: args.private_comparisons_project,
-        public_comparisons_project: args.public_comparisons_project,
-        has_seen_guidelines: true,
-      )
+      user = User.find_or_create_by!(dxuser: args.dxuser) do |u|
+        u.schema_version = 1
+        u.first_name = args.first_name
+        u.last_name = args.last_name
+        u.email = args.email
+        u.normalized_email = args.email
+        u.private_files_project = args.private_files_project
+        u.public_files_project = args.public_files_project
+        u.private_comparisons_project = args.private_comparisons_project
+        u.public_comparisons_project = args.public_comparisons_project
+        u.has_seen_guidelines = true
+      end
 
-      user_org = Org.find_or_create_by!(handle: args.org_handle) do |org|
+      user_org = Org.unscoped.find_or_create_by!(handle: args.org_handle) do |org|
         org.name = "#{args.last_name}'s org"
         org.admin = user
         org.address = "703 Market"
