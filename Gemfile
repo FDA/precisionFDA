@@ -23,7 +23,7 @@ gem "jbuilder", "~> 2.5"
 gem "bootsnap", ">= 1.1.0", require: false
 
 # bundle exec rake doc:rails generates the API under doc/api.
-gem "sdoc", group: :doc
+gem "sdoc", ">= 1.0.0", group: :doc
 
 # Support for bulk inserting data using ActiveRecord
 gem "activerecord-import"
@@ -46,7 +46,7 @@ gem "sprockets", ">= 3.7.2"
 gem "hashdiff", [">= 1.0.0.beta1", "< 2.0.0"]
 
 # For reCaptcha
-gem "recaptcha"
+gem "recaptcha", ">= 5.3.0"
 
 # Excel spreadsheet generation
 gem "axlsx", "3.0.0.pre"
@@ -143,7 +143,7 @@ group :test do
   gem "rails-controller-testing"
   gem "rspec-rails", "~> 3.7", ">= 3.7.1"
   gem "shoulda-matchers"
-  gem "simplecov", require: false
+  gem "simplecov", ">= 0.16.1", require: false
   gem "webmock", "~> 3.1", ">= 3.1.1"
 end
 
