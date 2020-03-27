@@ -37,12 +37,28 @@ FactoryBot.define do
     private_files_project { "project-test" }
     public_files_project { "public-files-project" }
 
+    trait :with_role do
+      transient do
+        role { AdminGroup::ROLE_SITE_ADMIN }
+      end
+
+      after(:create) do |user, evaluator|
+        user.admin_groups << create(:admin_group, role: evaluator.role)
+      end
+    end
+
     trait :admin do
       dxuser { "vijay.kandali" }
+
+      with_role
+      role { AdminGroup::ROLE_SITE_ADMIN }
     end
 
     trait :review_admin do
       dxuser { "review.admin_dev" }
+
+      with_role
+      role { AdminGroup::ROLE_REVIEW_SPACE_ADMIN }
     end
   end
 end
