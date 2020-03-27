@@ -14,5 +14,6 @@ fi
 
 bundle exec rake db:migrate
 bundle exec rake user:generate_test_users
+bundle exec rake admins:setup
 
 bundle exec thin --ssl --debug start
