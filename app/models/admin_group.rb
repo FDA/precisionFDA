@@ -13,5 +13,15 @@ class AdminGroup < ApplicationRecord
   has_many :admin_memberships, dependent: :destroy
   has_many :users, through: :admin_memberships
 
-  enum role: { site: 0, space: 1, challenge_admin: 2, challenge_eval: 3 }
+  ROLE_SITE_ADMIN = "site".freeze
+  ROLE_REVIEW_SPACE_ADMIN = "space".freeze
+  ROLE_CHALLENGE_ADMIN = "challenge_admin".freeze
+  ROLE_CHALLENGE_EVALUATOR = "challenge_eval".freeze
+
+  enum role: {
+    ROLE_SITE_ADMIN => 0,
+    ROLE_REVIEW_SPACE_ADMIN => 1,
+    ROLE_CHALLENGE_ADMIN => 2,
+    ROLE_CHALLENGE_EVALUATOR => 3,
+  }
 end

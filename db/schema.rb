@@ -23,18 +23,20 @@ ActiveRecord::Schema.define(version: 2020_03_13_123024) do
     t.index ["user_id"], name: "index_accepted_licenses_on_user_id"
   end
 
-  create_table "admin_groups", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.integer "role"
+  create_table "admin_groups", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+    t.integer "role", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["role"], name: "index_admin_groups_on_role", unique: true
   end
 
-  create_table "admin_memberships", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.bigint "user_id"
-    t.bigint "admin_group_id"
+  create_table "admin_memberships", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.bigint "admin_group_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["admin_group_id"], name: "index_admin_memberships_on_admin_group_id"
+    t.index ["user_id", "admin_group_id"], name: "index_admin_memberships_on_user_id_and_admin_group_id", unique: true
     t.index ["user_id"], name: "index_admin_memberships_on_user_id"
   end
 
@@ -170,8 +172,8 @@ ActiveRecord::Schema.define(version: 2020_03_13_123024) do
     t.boolean "automated", default: true
     t.string "card_image_url"
     t.string "card_image_id"
-    t.integer "specified_order"
     t.integer "space_id"
+    t.integer "specified_order"
     t.index ["admin_id"], name: "index_challenges_on_admin_id"
     t.index ["app_id"], name: "index_challenges_on_app_id"
     t.index ["app_owner_id"], name: "index_challenges_on_app_owner_id"
@@ -889,6 +891,10 @@ ActiveRecord::Schema.define(version: 2020_03_13_123024) do
     t.index ["workflow_series_id"], name: "index_workflows_on_workflow_series_id"
   end
 
+  add_foreign_key "accepted_licenses", "licenses"
+  add_foreign_key "accepted_licenses", "users"
+  add_foreign_key "admin_memberships", "admin_groups"
+  add_foreign_key "admin_memberships", "users"
   add_foreign_key "analyses", "workflows"
   add_foreign_key "answers", "discussions"
   add_foreign_key "answers", "notes"
