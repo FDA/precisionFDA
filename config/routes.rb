@@ -80,7 +80,9 @@ Rails.application.routes.draw do
           put "approve", to: "org_requests#approve"
         end
       end
-      resources :admin_groups
+
+      resources :admin_groups, only: %i(index destroy)
+
       post "provision", to: "admin_groups#provision", as: "provision"
       get "new_admin", to: "admin_groups#new_admin"
     end
