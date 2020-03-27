@@ -149,7 +149,7 @@ class User < ApplicationRecord
   has_many :spaces, -> { where("space_memberships.active = ?", true) }, through: :space_memberships
   has_one :appathon
   has_many :meta_appathons
-  has_one :expert
+  has_one :expert, dependent: :destroy
   has_many :challenge_app_owners, class_name: "Challenge", foreign_key: "app_owner_id"
   has_many :submissions
   has_many :challenge_resources

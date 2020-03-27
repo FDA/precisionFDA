@@ -1,36 +1,54 @@
 <%= grid(users_grid, show_filters: defined?(show_filters) ? show_filters : :no, hide_csv_button: true) do |g|
-
-  g.column name:"Username", attribute: 'dxuser' do |user|
+  g.column name:"Username", attribute: "dxuser" do |user|
     link_to user.dxuser, user_path(user.dxuser)
   end
 
-  g.column name:"Email ID", attribute: 'email' do |user|
+  g.column name:"Email ID", attribute: "email" do |user|
     link_to user.email, user_path(user.dxuser)
   end
 
   g.column name:"Site Admin" do |user|
-    link_to content_tag(:a, ""), href: admin_provision_path(user_id: user.id, group: 'site'), method: :post, data: { confirm: 'Are you certain about this action?' } do
-      check_box_tag('', 'challenge', user.can_administer_site?)
+    link_to(
+      content_tag(:a, ""),
+      href: admin_provision_path(user_id: user.id, group: "site"),
+      method: :post,
+      data: { confirm: "Are you certain about this action?" },
+    ) do
+      check_box_tag("", "challenge", user.can_administer_site?)
     end
   end
 
   g.column name:"Space Admin" do |user|
-    link_to content_tag(:a, ""), href: admin_provision_path(user_id: user.id, group: 'space'), method: :post, data: { confirm: 'Are you certain about this action?' } do
-      check_box_tag('', 'challenge', user.review_space_admin?)
+    link_to(
+      content_tag(:a, ""),
+      href: admin_provision_path(user_id: user.id, group: "space"),
+      method: :post,
+      data: { confirm: "Are you certain about this action?" },
+    ) do
+      check_box_tag("", "challenge", user.review_space_admin?)
     end
   end
 
   g.column name:"Challenge Admin" do |user|
-    link_to content_tag(:a, ""), href: admin_provision_path(user_id: user.id, group: 'challenge_admin'), method: :post, data: { confirm: 'Are you certain about this action?' } do
-      check_box_tag('', 'challenge_admin', user.challenge_admin?)
+    link_to(
+      content_tag(:a, ""),
+      href: admin_provision_path(user_id: user.id, group: "challenge_admin"),
+      method: :post,
+      data: { confirm: "Are you certain about this action?" },
+    ) do
+      check_box_tag("", "challenge_admin", user.challenge_admin?)
     end
   end
 
    g.column name:"Challenge Evaluator" do |user|
-    link_to content_tag(:a, ""), href: admin_provision_path(user_id: user.id, group: 'challenge_eval'), method: :post, data: { confirm: 'Are you certain about this action?' } do
-      check_box_tag('', 'challenge_evaluators', user.challenge_eval?)
+    link_to(
+      content_tag(:a, ""),
+      href: admin_provision_path(user_id: user.id, group: "challenge_eval"),
+      method: :post,
+      data: { confirm: "Are you certain about this action?" },
+    ) do
+      check_box_tag("", "challenge_evaluators", user.challenge_eval?)
     end
   end
-
 end
 %>
