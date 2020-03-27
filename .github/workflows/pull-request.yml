@@ -25,12 +25,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           runner: brakeman
 
-      - name: Rails Best Practices
-        uses: HeRoMo/pronto-action@v0.4.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          runner: rails_best_practices
-
   test-ruby:
     name: Test (Ruby)
     runs-on: ubuntu-latest
