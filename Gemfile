@@ -111,8 +111,6 @@ group :development do
 
   gem "listen", ">= 3.0.5", "< 3.2"
 
-  gem "rails_best_practices", "1.19.5"
-
   # Automatic Ruby code checking tool
   gem "rubocop", "=0.79.0", require: false
   gem "rubocop-rails", require: false
@@ -120,7 +118,6 @@ group :development do
 
   gem "pronto", "~> 0.10.0"
   gem "pronto-rubocop", require: false
-  gem "pronto-rails_best_practices", require: false
 
   gem "byebug", platforms: %i(mri mingw x64_mingw)
 

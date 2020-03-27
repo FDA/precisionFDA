@@ -29,9 +29,6 @@ jobs:
       - name: Brakeman
         run: brakeman -A --parser-timeout 30 -o gha_out/brakeman.html -w2
 
-      - name: Rails Best Practices
-        run: rails_best_practices
-
   test:
     name: Test
     runs-on: ubuntu-latest
