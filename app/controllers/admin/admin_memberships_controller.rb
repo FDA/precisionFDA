@@ -68,7 +68,7 @@ module Admin
 
     def init_role
       params[:group] = (AdminGroup.roles.keys & Array(params[:group])).first ||
-                        AdminGroup::ROLE_SITE_ADMIN
+                       AdminGroup::ROLE_SITE_ADMIN
     end
 
     def add_user_to_org(dxuser)
