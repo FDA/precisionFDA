@@ -1,0 +1,57 @@
+<% content_for :title, "Admins" %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-body">
+      <div class="page-title">
+        <i class="fa fa-user-secret" aria-hidden="true"></i>
+        Admins
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pfda-padded">
+  <a class="btn btn-primary" rel="nofollow" href="<%= new_admin_admin_membership_path %>">
+    <i class="fa fa-plus"></i>&nbsp;Provision new admin
+  </a>
+</div>
+
+<div class="pfda-toolbar">
+  <ul class="nav nav-pills nav-pills-center nav-pills-sm">
+    <li<%= " class=active" if params[:group] == "site" %>>
+      <%= link_to admin_admin_memberships_path(group: "site") do %>
+        <span class="fa fa-globe"></span>
+        <span class="pill-label">Site Admins</span>
+      <% end %>
+    </li>
+    <li<%= " class=active" if params[:group] == "space" %>>
+      <%= link_to admin_admin_memberships_path(group: "space")  do %>
+        <span class="fa fa-folder"></span>
+        <span class="pill-label">Space Admins</span>
+      <% end %>
+    </li>
+    <li<%= " class=active" if params[:group] == "challenge_admin" %>>
+      <%= link_to admin_admin_memberships_path(group: "challenge_admin")  do %>
+        <span class="fa fa-trophy"></span>
+        <span class="pill-label">Challenge Admins</span>
+      <% end %>
+    </li>
+    <li<%= " class=active" if params[:group] == "challenge_eval" %>>
+      <%= link_to admin_admin_memberships_path(group: "challenge_eval")  do %>
+        <span class="fa fa-trophy"></span>
+        <span class="pill-label">Challenge Evaluators</span>
+      <% end %>
+    </li>
+  </ul>
+</div>
+
+<% if @memberships_grid.present? %>
+  <%= render "memberships_grid", memberships_grid: @memberships_grid %>
+<% else %>
+  <div class="container-fluid container-padded">
+    <div class="alert alert-info">
+      We couldn't find any Admins here
+    </div>
+  </div>
+<% end %>

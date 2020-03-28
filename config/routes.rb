@@ -81,10 +81,7 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :admin_groups, only: %i(index destroy)
-
-      post "provision", to: "admin_groups#provision", as: "provision"
-      get "new_admin", to: "admin_groups#new_admin"
+      resources :admin_memberships, only: %i(index create destroy new)
     end
 
     # hotfix for PFDA-557
