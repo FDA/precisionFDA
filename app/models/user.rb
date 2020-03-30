@@ -179,9 +179,23 @@ class User < ApplicationRecord
   scope :pending, -> { where.not(last_login: nil) }
   scope :belongs_to_org, ->(org_id) { where(org_id: org_id) }
 
+  scope :site_admins, lambda {
+    joins(:admin_groups).where(admin_groups: { role: AdminGroup::ROLE_SITE_ADMIN })
+  }
+
   # Have the ability to create new review spaces and have full access to
   # activities available within reviewer and cooperative areas.
-  scope :review_space_admins, -> { where(dxuser: REVIEW_SPACE_ADMINS) }
+  scope :review_space_admins, lambda {
+    joins(:admin_groups).where(admin_groups: { role: AdminGroup::ROLE_REVIEW_SPACE_ADMIN })
+  }
+
+  scope :challenge_admins, lambda {
+    joins(:admin_groups).where(admin_groups: { role: AdminGroup::ROLE_CHALLENGE_ADMIN })
+  }
+
+  scope :challenge_evaluators, lambda {
+    joins(:admin_groups).where(admin_groups: { role: AdminGroup::ROLE_CHALLENGE_EVALUATOR })
+  }
 
   validates :first_name, length: { minimum: 2, message: "The first name must be at least two letters long." }, presence: true
   validates :last_name, length: { minimum: 2, message: "The last name must be at least two letters long." }, presence: true
