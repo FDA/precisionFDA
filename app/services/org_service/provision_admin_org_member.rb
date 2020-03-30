@@ -1,5 +1,5 @@
 module OrgService
-  # Provides user and org on the platform.
+  # Adds a user to precisionFDA admins org on the platform.
   class ProvisionAdminOrgMember
     attr_reader :admin_api
 
@@ -10,11 +10,9 @@ module OrgService
     end
 
     # Adds user to admin_org on the platform.
-    # @param username [String] User's name.
-    def call(username)
-      dxuserid = "user-#{username}"
-
-      @admin_api.org_invite(PFDA_ADMIN_ORG, dxuserid,
+    # @param dxid [String] User's dxid (ex: user-xxxx).
+    def call(dxid)
+      @admin_api.org_invite(PFDA_ADMIN_ORG, dxid,
                             level: DNAnexusAPI::ORG_MEMBERSHIP_MEMBER,
                             allowBillableActivities: false,
                             appAccess: true,

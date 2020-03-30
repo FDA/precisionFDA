@@ -298,13 +298,16 @@ class ChallengesController < ApplicationController
   # Returns a collection of Site admins and challenge admins
   # @return [Array<String>] dxids of Site admins and challenge admins
   def host_lead_dxusers
-    User::SITE_ADMINS + User::CHALLENGE_ADMINS
+    User.site_admins.or(User.challenge_admins).order(:dxuser).distinct.pluck(:dxuser)
   end
 
   # Returns a collection of Site admins, challenge evaluators and challenge admins
   # @return [Array<String>] dxids of Site admins, challenge evaluators and challenge admins
   def guest_lead_dxusers
-    host_lead_dxusers + User::CHALLENGE_EVALUATORS
+    User.site_admins.
+      or(User.challenge_admins).
+      or(User.challenge_evaluators).
+      order(:dxuser).distinct.pluck(:dxuser)
   end
 
   def find_editable_challenge
