@@ -9,7 +9,6 @@ x-shared:
     - RAILS_LOG_TO_STDOUT=1
     - RAILS_ENV=ui_test
     - NO_FIPS=1
-    - CUSTOM_SITE_ADMINS=precisionfda.admin_dev
     - REDIS_WORKER_URL=redis://redis:6379/0
 
 services:
