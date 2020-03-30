@@ -17,7 +17,7 @@ module Admin
     end
 
     def new
-      users = User.includes(:admin_groups)
+      users = User.real.includes(:admin_groups)
 
       @users_grid = initialize_grid(
         users,
@@ -54,18 +54,17 @@ module Admin
 
     def destroy
       membership = AdminMembership.find(params[:id])
-      admin_group = membership.admin_group
 
       membership.transaction do
         membership.destroy!
-        remove_user_from_org(membership.user.dxid) if admin_group.site?
+        remove_user_from_org(membership.user.dxid) if membership.site?
         flash[:alert] = "User has been removed."
       rescue StandardError
         flash[:error] = "User couldn't be removed!"
         raise ActiveRecord::Rollback
       end
 
-      fallback_location = admin_admin_memberships_path(group: admin_group.role)
+      fallback_location = admin_admin_memberships_path(group: membership.role)
 
       redirect_back(fallback_location: fallback_location)
     end

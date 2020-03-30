@@ -13,4 +13,6 @@
 class AdminMembership < ApplicationRecord
   belongs_to :user
   belongs_to :admin_group
+
+  delegate :role, :site?, :space?, :challenge_admin?, :challenge_eval?, to: :admin_group
 end
