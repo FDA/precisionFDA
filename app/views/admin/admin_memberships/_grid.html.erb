@@ -21,13 +21,17 @@
       admin_admin_memberships_path(user_id: user.id, group: AdminGroup::ROLE_SITE_ADMIN)
     end
 
-    link_to(
-      content_tag(:a, ""),
-      href: href,
-      method: user.can_administer_site? ? :delete : :post,
-      data: { confirm: confirm_text },
-    ) do
-      check_box_tag("", "site_admin", user.can_administer_site?)
+    if user.dxid != ADMIN_USER
+      link_to(
+        content_tag(:a, ""),
+        href: href,
+        method: user.can_administer_site? ? :delete : :post,
+        data: { confirm: confirm_text },
+      ) do
+        check_box_tag("", "site_admin", user.can_administer_site?)
+      end
+    else
+      check_box_tag("", "site_admin", user.can_administer_site?, disabled: true)
     end
   end
 

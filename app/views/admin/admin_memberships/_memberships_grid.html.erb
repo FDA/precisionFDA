@@ -8,12 +8,14 @@
   end
 
   g.column name: "Action" do |membership|
-    link_to(
-      "Remove",
-      admin_admin_membership_path(membership),
-      method: :delete,
-      data: { confirm: "Are you sure?" },
-    )
+    if !membership.site? || membership.user.dxid != ADMIN_USER
+      link_to(
+        "Remove",
+        admin_admin_membership_path(membership),
+        method: :delete,
+        data: { confirm: "Are you sure?" },
+      )
+    end
   end
 end
 %>
