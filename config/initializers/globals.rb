@@ -107,9 +107,7 @@ MAX_MINUTES_INACTIVITY = ENV.fetch("MAX_TIME_INACTIVITY", 30).to_i
 SESSIONS_LIMIT = ENV.fetch("SESSIONS_LIMIT", 2).to_i
 
 REVIEW_SPACE_ADMINS =
-  if ENV["REVIEW_SPACE_ADMINS"]
-    ENV["REVIEW_SPACE_ADMINS"].split(" ")
-  elsif ENV["DNANEXUS_BACKEND"] == "production"
+  if ENV["DNANEXUS_BACKEND"] == "production"
     %w(
       elaine.johanson
       john.didion
