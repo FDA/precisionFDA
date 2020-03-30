@@ -83,6 +83,7 @@ class User < ApplicationRecord
     pablo.kriscenia
     randall.ebert
     nainathangaraj.sitadmin
+    precisionfda.admin_dev
   ).freeze
 
   NON_PRODUCTION_ADMIN_ORGS = %w(
