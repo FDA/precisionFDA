@@ -111,14 +111,10 @@ class User < ApplicationRecord
 
   enum user_state: { enabled: 0, locked: 1, deactivated: 2 }
 
-  SITE_ADMINS = begin
-    if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
-      PRODUCTION_ADMINS
-    else
-      ENV.fetch("CUSTOM_SITE_ADMINS", "").split(" ").concat(
-        NON_PRODUCTION_ADMINS,
-      )
-    end
+  SITE_ADMINS = if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
+    PRODUCTION_ADMINS
+  else
+    NON_PRODUCTION_ADMINS
   end
 
   SITE_ADMIN_ORGS = ENV["DNANEXUS_BACKEND"] == "production" ? [] : NON_PRODUCTION_ADMIN_ORGS
