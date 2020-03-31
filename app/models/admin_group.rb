@@ -8,7 +8,7 @@
 #  updated_at :datetime         not null
 #
 
-# Responsible for admin group
+# Responsible for admin groups.
 class AdminGroup < ApplicationRecord
   has_many :admin_memberships, dependent: :destroy
   has_many :users, through: :admin_memberships
@@ -17,6 +17,13 @@ class AdminGroup < ApplicationRecord
   ROLE_REVIEW_SPACE_ADMIN = "space".freeze
   ROLE_CHALLENGE_ADMIN = "challenge_admin".freeze
   ROLE_CHALLENGE_EVALUATOR = "challenge_eval".freeze
+
+  ROLES = [
+    ROLE_SITE_ADMIN,
+    ROLE_REVIEW_SPACE_ADMIN,
+    ROLE_CHALLENGE_ADMIN,
+    ROLE_CHALLENGE_EVALUATOR,
+  ].freeze
 
   enum role: {
     ROLE_SITE_ADMIN => 0,

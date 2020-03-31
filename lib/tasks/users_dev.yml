@@ -4,6 +4,8 @@
   last_name: Johnlastname
   email: aabramenko-c+pfda_autotest1@dnanexus.com
   org_handle: autotestorg1
+  admin_roles:
+  - space
 - dxuser: pfda_autotest2
   first_name: Bill
   last_name: Billlastname
@@ -14,6 +16,8 @@
   last_name: Admin - Dev
   email: aabramenko-c+precisionfda.admin_dev@dnanexus.com
   org_handle: pamellaaccounttwo
+  admin_roles:
+  - site
 - dxuser: mmaltcev3
   first_name: Mikhail
   last_name: Maltcev
@@ -24,6 +28,8 @@
   last_name: Ebert
   email: aabramenko-c+testusertwenty@dnanexus.com
   org_handle: randall.ebert
+  admin_roles:
+  - site
 - dxuser: sirius.black
   first_name: Sirius
   last_name: Black

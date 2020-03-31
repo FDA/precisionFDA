@@ -1,6 +1,5 @@
 namespace :user do
-  desc "Generate a user"
-  task :generate,
+  def user_attrs
     %i(
       dxuser
       first_name
@@ -11,7 +10,12 @@ namespace :user do
       public_files_project
       private_comparisons_project
       public_comparisons_project
-    ) => :environment do |_, args|
+      admin_roles
+    )
+  end
+
+  desc "Generate a user"
+  task :generate, user_attrs => :environment do |_, args|
     ActiveRecord::Base.transaction do
       user = User.find_or_create_by!(dxuser: args.dxuser) do |u|
         u.schema_version = 1
@@ -25,6 +29,8 @@ namespace :user do
         u.public_comparisons_project = args.public_comparisons_project
         u.has_seen_guidelines = true
       end
+
+      user.admin_groups = AdminGroup.where(role: args.admin_roles) if args.admin_roles.present?
 
       user_org = Org.unscoped.find_or_create_by!(handle: args.org_handle) do |org|
         org.name = "#{args.last_name}'s org"
@@ -42,11 +48,11 @@ namespace :user do
 
   desc "Generate test users"
   task :generate_test_users do
-    file = File.expand_path("users.yml", __dir__)
+    file = File.expand_path("users_dev.yml", __dir__)
     users = YAML.load_file(file)
 
     users.each do |user|
-      Rake::Task["user:generate"].invoke(*user.values)
+      Rake::Task["user:generate"].invoke(*user.with_indifferent_access.values_at(*user_attrs))
       Rake::Task["user:generate"].reenable
     end
   end
