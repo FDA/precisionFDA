@@ -41,82 +41,13 @@ class User < ApplicationRecord
   # lower will get migrated.
   CURRENT_SCHEMA = 1
 
-  PRODUCTION_ADMINS = %w(
-    elaine.johanson
-    john.didion
-    ezekiel.maier.2
-    holly.stephens
-    pamella.tater.2
-    davis.feng
-    stanley.lan
-    sam.westreich
-    collin.lobb.3
-    alison.williams
-    brijesh.prajapati
-    ben.busby.3
-    linda.jackson
-  ).freeze
-
-  NON_PRODUCTION_ADMINS = %w(
-    Adam.Berger@fda.hhs.gov
-    zeke.maier
-    Zivana.Tezak@fda.hhs.gov
-    pamella.tater.2
-    ezekiel.maier
-    sam.westreich
-    min.yi
-    john.didion
-    holly.stephens
-    aabramenko.adminstage
-    alekadmin.suradmin
-    aleksandr.moroz.3
-    aleksei.ivanishchev
-    singularmasterr.singularmasterr
-    siteadmin.aabramenko
-    davis.feng
-    stanley.lan
-    sean.watford
-    mitchell.mello
-    xavier.autoteststagesiteadmin
-    collin.lobb
-    brijesh.prajapati
-    pablo.kriscenia
-    randall.ebert
-    nainathangaraj.sitadmin
-    precisionfda.admin_dev
-  ).freeze
-
   NON_PRODUCTION_ADMIN_ORGS = %w(
     precisionfda
     precisionfda_dev
     dnanexus
   ).freeze
 
-  CHALLENGE_EVALUATORS = %w(
-    elaine.johanson
-    ezekiel.maier.2
-    heike.sichtig
-    min.yi
-    sharon.liang
-    yi.yan
-    you.li
-    zivana.tezak
-    pamella.tater.2
-    mitchell.mello
-  ).freeze
-
-  CHALLENGE_ADMINS = %w(
-    ezekiel.maier
-    errol.strain
-  ).freeze
-
   enum user_state: { enabled: 0, locked: 1, deactivated: 2 }
-
-  SITE_ADMINS = if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
-    PRODUCTION_ADMINS
-  else
-    NON_PRODUCTION_ADMINS
-  end
 
   SITE_ADMIN_ORGS = ENV["DNANEXUS_BACKEND"] == "production" ? [] : NON_PRODUCTION_ADMIN_ORGS
 

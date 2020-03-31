@@ -3,94 +3,109 @@ require_relative "migrate/20180510104759_create_get_started_boxes"
 require_relative "migrate/20180629093507_create_participants"
 require_relative "migrate/20190212131903_create_countries.rb"
 
-first_name = ENV.fetch("PFDA_USER_FIRST_NAME", "Alice")
-last_name = ENV.fetch("PFDA_USER_LAST_NAME", "Black")
-email = ENV.fetch("PFDA_USER_EMAIL", "alice.black@alice.black.com")
-dxuser = ENV.fetch("PFDA_USER_DXUSER", "automationtestuser")
-org_handle = ENV.fetch("PFDA_USER_ORG_HANDLE", "automationtestinggmbh")
+module PrecisionFda
+  module Seeders
+    extend self
 
-# rubocop:disable Metrics/BlockLength
-ActiveRecord::Base.transaction do
-  user = User.create!(
-    dxuser: dxuser,
-    schema_version: 1,
-    first_name: first_name,
-    last_name: last_name,
-    email: email,
-    normalized_email: email,
-  )
+    def create_admin_groups!
+      AdminGroup::ROLES.each { |role| AdminGroup.create!(role: role) }
+    end
 
-  org = Org.create!(
-    handle: org_handle,
-    name: "#{last_name}'s org",
-    admin_id: user.id,
-    address: "703 Market",
-    duns: "",
-    phone: "",
-    state: "complete",
-    singular: false,
-  )
+    def create_user!
+      first_name = ENV.fetch("PFDA_USER_FIRST_NAME", "Alice")
+      last_name = ENV.fetch("PFDA_USER_LAST_NAME", "Black")
+      email = ENV.fetch("PFDA_USER_EMAIL", "alice.black@alice.black.com")
+      dxuser = ENV.fetch("PFDA_USER_DXUSER", "automationtestuser")
+      org_handle = ENV.fetch("PFDA_USER_ORG_HANDLE", "automationtestinggmbh")
 
-  user.update!(org_id: org.id)
+      user = User.create!(
+        dxuser: dxuser,
+        schema_version: 1,
+        first_name: first_name,
+        last_name: last_name,
+        email: email,
+        normalized_email: email,
+      )
 
-  challenge_note = Note.create!(
-    user: user,
-    title: "#{last_name}'s challenge note title",
-    scope: "public",
-    content: "#{last_name}'s challenge note content",
-  )
+      org = Org.create!(
+        handle: org_handle,
+        name: "#{last_name}'s org",
+        admin: user,
+        address: "703 Market",
+        duns: "",
+        phone: "",
+        state: "complete",
+        singular: false,
+      )
 
-  truth_note = Note.create!(
-    user: user,
-    title: "#{last_name}'s truth note title",
-    content: "#{last_name}'s truth note content",
-  )
+      user.update!(org: org)
+      user
+    end
 
-  consistency_note = Note.create!(
-    user: user,
-    title: "#{last_name}'s consistency note title",
-    content: "#{last_name}'s consistency note content",
-    scope: "public",
-  )
+    def create_challenge_bot!
+      User.create!(
+        dxuser: CHALLENGE_BOT_DX_USER,
+        private_files_project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
+        public_files_project: CHALLENGE_BOT_PUBLIC_FILES_PROJECT,
+        first_name: "Challenge",
+        last_name: "Bot",
+        email: "challengebot+123@dnanexus.com",
+      )
+    end
 
-  # Create discussions
-  Discussion.create!(
-    id: TRUTH_DISCUSSION_ID,
-    user: user,
-    note: truth_note,
-  )
+    def create_notes_and_discussions!(user)
+      challenge_note = Note.create!(
+        user: user,
+        title: "#{user.last_name}'s challenge note title",
+        scope: "public",
+        content: "#{user.last_name}'s challenge note content",
+      )
 
-  Discussion.create!(
-    id: CONSISTENCY_DISCUSSION_ID,
-    user: user,
-    note: consistency_note,
-  )
+      truth_note = Note.create!(
+        user: user,
+        title: "#{user.last_name}'s truth note title",
+        content: "#{user.last_name}'s truth note content",
+      )
 
-  Discussion.create!(
-    user: user,
-    note: challenge_note,
-  )
+      consistency_note = Note.create!(
+        user: user,
+        title: "#{user.last_name}'s consistency note title",
+        content: "#{user.last_name}'s consistency note content",
+        scope: "public",
+      )
 
-  MetaAppathon.create!(
-    handle: "app-a-thon-in-a-box",
-    name: "meta appathon title placeholder",
-    start_at: 2.weeks.ago,
-    end_at: 2.weeks.from_now,
-  )
+      Discussion.create!(id: TRUTH_DISCUSSION_ID, user: user, note: truth_note)
+      Discussion.create!(id: CONSISTENCY_DISCUSSION_ID, user: user, note: consistency_note)
+      Discussion.create!(user: user, note: challenge_note)
+    end
 
-  User.create!(
-    dxuser: CHALLENGE_BOT_DX_USER,
-    private_files_project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
-    public_files_project: CHALLENGE_BOT_PUBLIC_FILES_PROJECT,
-    first_name: "Challenge",
-    last_name: "Bot",
-    email: "challengebot+123@dnanexus.com",
-  )
+    def create_various_items!
+      MetaAppathon.create!(
+        handle: "app-a-thon-in-a-box",
+        name: "meta appathon title placeholder",
+        start_at: 2.weeks.ago,
+        end_at: 2.weeks.from_now,
+      )
+    end
 
-  # load articles generated from stuff.
-  SeedNewsItems.new.up
-  CreateGetStartedBoxes.new.up
-  CreateParticipants.new.migrate_data
-  CreateCountries.migrate_data unless Rails.env.test?
+    def load_migrations_data!
+      SeedNewsItems.new.up
+      CreateGetStartedBoxes.new.up
+      CreateParticipants.new.migrate_data
+      CreateCountries.migrate_data unless Rails.env.test?
+    end
+
+    def run_seed
+      ActiveRecord::Base.transaction do
+        create_admin_groups!
+        user = create_user!
+        create_notes_and_discussions!(user)
+        create_challenge_bot!
+        create_various_items!
+        load_migrations_data!
+      end
+    end
+  end
 end
-# rubocop:enable Metrics/BlockLength
+
+PrecisionFda::Seeders.run_seed

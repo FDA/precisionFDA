@@ -10,10 +10,10 @@ bundle check || bundle install
 
 if [ ! -d "/var/lib/mysql/precisionfda@002dui@002dtest" ]; then
   bundle exec rake db:setup
+else
+  bundle exec rake db:migrate
 fi
 
-bundle exec rake db:migrate
 bundle exec rake user:generate_test_users
-bundle exec rake admins:setup
 
 bundle exec thin --ssl --debug start
