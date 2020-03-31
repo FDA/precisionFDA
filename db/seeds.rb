@@ -97,7 +97,7 @@ module PrecisionFda
 
     def run_seed
       ActiveRecord::Base.transaction do
-        create_admin_groups!
+        create_admin_groups! unless Rails.env.test?
         user = create_user!
         create_notes_and_discussions!(user)
         create_challenge_bot!
