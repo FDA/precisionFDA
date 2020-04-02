@@ -106,39 +106,6 @@ ACTIVE_META_APPATHON = APPATHON_IN_A_BOX_HANDLE
 MAX_MINUTES_INACTIVITY = ENV.fetch("MAX_TIME_INACTIVITY", 30).to_i
 SESSIONS_LIMIT = ENV.fetch("SESSIONS_LIMIT", 2).to_i
 
-REVIEW_SPACE_ADMINS =
-  if ENV["DNANEXUS_BACKEND"] == "production"
-    %w(
-      elaine.johanson
-      john.didion
-      ezekiel.maier.2
-      holly.stephens
-      sam.westreich
-      pamella.tater.2
-      ben.busby.3
-      alison.williams
-      alexis.norris
-      linda.jackson
-    ).freeze
-  else
-    %w(
-      john.didion
-      aabramenko.adminstage
-      alekadmin.suradmin
-      alekone.surone
-      stagetestuser.lastname
-      ezekiel.maier
-      sam.westreich
-      hollystephens723
-      rsa.aabramenko
-      erik.barraza
-      nainathangaraj.spaceadmin
-      mitchell.mello
-      william.autoteststagersa
-      pavlos.krischenikos
-    ).freeze
-  end
-
 PFDA_ADMIN_ORG = ENV["PFDA_ADMIN_ORG"]
 
 # Remove X-Runtime
