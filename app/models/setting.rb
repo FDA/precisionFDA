@@ -4,7 +4,7 @@
 #
 #  id    :integer          not null, primary key
 #  key   :string(255)      not null
-#  value :string(255)      not null
+#  value :text(65535)      not null
 #
 
 # Implements simple key-value settings storage.
