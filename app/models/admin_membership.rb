@@ -3,8 +3,8 @@
 # Table name: admin_memberships
 #
 #  id             :bigint           not null, primary key
-#  user_id        :bigint
-#  admin_group_id :bigint
+#  user_id        :integer          not null
+#  admin_group_id :bigint           not null
 #  created_at     :datetime         not null
 #  updated_at     :datetime         not null
 #
