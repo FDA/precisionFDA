@@ -41,15 +41,7 @@ class User < ApplicationRecord
   # lower will get migrated.
   CURRENT_SCHEMA = 1
 
-  NON_PRODUCTION_ADMIN_ORGS = %w(
-    precisionfda
-    precisionfda_dev
-    dnanexus
-  ).freeze
-
   enum user_state: { enabled: 0, locked: 1, deactivated: 2 }
-
-  SITE_ADMIN_ORGS = ENV["DNANEXUS_BACKEND"] == "production" ? [] : NON_PRODUCTION_ADMIN_ORGS
 
   SYNC_EXCLUDED_FILE_STATES = [
     UserFile::STATE_CLOSED,
@@ -241,13 +233,7 @@ class User < ApplicationRecord
   end
 
   def can_administer_site?
-    if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
-      admin_groups.any?(&:site?)
-    else
-      NON_PRODUCTION_ADMIN_ORGS.include?(org.handle) &&
-        org.admin_id == id ||
-        admin_groups.any?(&:site?)
-    end
+    admin_groups.any?(&:site?)
   end
 
   def is_challenge_evaluator?

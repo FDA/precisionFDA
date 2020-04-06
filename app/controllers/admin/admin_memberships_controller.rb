@@ -17,7 +17,7 @@ module Admin
     end
 
     def new
-      users = User.real.includes(:admin_groups)
+      users = User.real.enabled.includes(:admin_groups)
 
       @users_grid = initialize_grid(
         users,
