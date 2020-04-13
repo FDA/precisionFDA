@@ -165,7 +165,7 @@ class ChallengesController < ApplicationController
                             49, 51, 79, 81, 89, 90, 96, 97, 98, 104, 110, 116, 120,
                             122, 124, 143, 147, 149, 150, 155, 156, 157]
         @headers = @csv.shift(7)
-        @keys = @headers.map { |c| c & :first }
+        @keys = @headers.map { |c| c.first }
         @csv_ids, @csv_names = @csv.map { |row| row.shift.split(" ", 2) }.
           map { |id, name| [id.to_i, name.to_s] }.transpose
         # @vaf_submissions is no longer an ActiveRecord relation, careful if you want to use wice_grid
