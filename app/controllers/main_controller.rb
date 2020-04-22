@@ -14,6 +14,7 @@ class MainController < ApplicationController
     presskit
     news
     mislabeling
+    truth_challenge_2
   )
 
   skip_before_action :require_login, only: %i(track ae_anomaly_detection)
@@ -500,7 +501,7 @@ class MainController < ApplicationController
     @graph = GraphDecorator.build(@context, @item)
   end
 
-  def ae_anomaly_detection; end
+  def truth_challenge_2; end
 
   def tokify
     @key = generate_auth_key
