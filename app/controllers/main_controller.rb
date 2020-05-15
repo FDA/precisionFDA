@@ -14,6 +14,7 @@ class MainController < ApplicationController
     presskit
     news
     mislabeling
+    covid
   )
 
   skip_before_action :require_login, only: %i(track ae_anomaly_detection)
@@ -499,6 +500,8 @@ class MainController < ApplicationController
     end
     @graph = GraphDecorator.build(@context, @item)
   end
+
+  def covid; end
 
   def tokify
     @key = generate_auth_key
