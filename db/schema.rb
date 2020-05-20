@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_03_13_123024) do
+ActiveRecord::Schema.define(version: 2020_05_20_102716) do
 
   create_table "accepted_licenses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -163,7 +163,7 @@ ActiveRecord::Schema.define(version: 2020_03_13_123024) do
     t.integer "app_owner_id"
     t.integer "app_id"
     t.text "description"
-    t.text "meta"
+    t.text "meta", limit: 16777215
     t.datetime "start_at"
     t.datetime "end_at"
     t.datetime "created_at", null: false
