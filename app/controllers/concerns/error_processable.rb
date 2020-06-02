@@ -8,7 +8,7 @@ module ErrorProcessable
   def render_error_method(error)
     json = { error: { type: "API Error", message: error.message } }
     json[:data] = error.data unless error.data.empty?
-    render json: json, status: 422
+    render json: json, status: :unprocessable_entity
   end
 
   def fail(msg, data = {})

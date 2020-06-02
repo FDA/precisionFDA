@@ -160,7 +160,7 @@ class AppsController < ApplicationController
     elsif @app.id != @app.app_series.latest_revision_app_id
       redirect_to edit_app_path(@app.app_series.latest_revision_app) && return
     else
-      attrs = %i(dxid name title version revision readme spec internal release)
+      attrs = %i(dxid name scope title version revision readme spec internal release)
       js(app: @app.slice(*attrs), ubuntu_releases: UBUNTU_RELEASES)
     end
   end
@@ -335,7 +335,7 @@ class AppsController < ApplicationController
   # @return [Hash]
   def js_info(app, challenges)
     app_attrs = app&.slice(
-      :id, :uid, :dxid, :title, :readme, :revision, :dev_group, :release
+      :id, :uid, :dxid, :scope, :title, :readme, :revision, :dev_group, :release
     )&.merge(link: app_path(app))
 
     challenges_attrs = if app
@@ -349,6 +349,7 @@ class AppsController < ApplicationController
           assign_link: assign_app_challenge_path(id: challenge.id, app_id: app.id),
           app: {
             id: ch_app&.dxid,
+            scope: ch_app&.scope,
             title: ch_app&.title,
             revision: ch_app&.revision,
             link: ch_app && app_path(ch_app),

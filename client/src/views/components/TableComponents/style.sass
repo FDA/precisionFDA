@@ -1,0 +1,41 @@
+@import "../../../styles/variables.sass"
+
+
+.pfda-table-components
+  width: 100%
+
+  thead
+    border: 2px solid #d8d8d8
+    border-right: none
+    border-left: none
+
+  td
+    padding: 10px
+
+  &__th
+    text-transform: uppercase
+    padding: 10px
+    color: $color-not-active-el
+    font-size: 16px
+
+    &--sortable
+      color: $color-info
+      cursor: pointer
+
+    &--sorted
+      color: $color-primary
+
+      .fa
+        margin-right: 5px
+
+
+.pfda-pagination
+  text-align: right
+  margin-top: 10px
+
+  &__page
+    margin-left: 5px
+    color: $color-not-active-el
+
+    &--active
+      color: $color-primary

@@ -17,7 +17,6 @@
 #  space_type           :integer          default("groups"), not null
 #  verified             :boolean          default(FALSE), not null
 #  sponsor_org_id       :integer
-#  space_template_id    :integer
 #  restrict_to_template :boolean          default(FALSE)
 #  inactivity_notified  :boolean          default(FALSE)
 #
@@ -29,6 +28,13 @@ FactoryBot.define do
     sequence(:host_dxorg) { |n| "host_dxorg-#{n}" }
     sequence(:guest_dxorg) { |n| "guest_dxorg-#{n}" }
     space_id { nil }
+
+    trait :confidential do
+      space_type { :review }
+    end
+
+    trait(:active) { state { Space::STATE_ACTIVE } }
+    trait(:locked) { state { Space::STATE_LOCKED } }
 
     trait :group do
       space_type { :groups }
@@ -76,15 +82,23 @@ FactoryBot.define do
 
       after(:create) do |space, evaluator|
         host_member = space.space_memberships.lead.host.create!(user_id: evaluator.host_lead_id)
-        guest_member = space.space_memberships.lead.guest.create!(user_id: evaluator.guest_lead_id)
-        space.space_memberships << host_member
-        space.space_memberships << guest_member
 
-        create(:space, :confidential, guest_dxorg: nil, host_dxorg: space.host_dxorg, space_id: space.id )
+        guest_user_id = evaluator.guest_lead_id || create(:user).id
+        space.space_memberships.lead.guest.create!(user_id: guest_user_id)
+
+        create(
+          :space,
+          :confidential,
+          guest_dxorg: nil,
+          host_dxorg: space.host_dxorg,
+          space_id: space.id,
+        )
       end
     end
 
     trait :accepted do
+      active
+
       host_project { 'project-01' }
       guest_project { 'project-02' }
 
@@ -97,10 +111,5 @@ FactoryBot.define do
         sponsor_confidential_space.space_memberships << space.guest_lead_member
       end
     end
-
-    trait :confidential do
-      space_type { :review }
-    end
-
   end
 end

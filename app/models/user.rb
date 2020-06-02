@@ -45,12 +45,13 @@ class User < ApplicationRecord
 
   SYNC_EXCLUDED_FILE_STATES = [
     UserFile::STATE_CLOSED,
-    UserFile::STATE_PUBLISHING,
+    UserFile::STATE_COPYING,
     UserFile::STATE_REMOVING,
   ].freeze
 
   has_many :uploaded_files, class_name: "UserFile", dependent: :restrict_with_exception, as: "parent"
   has_many :user_files
+  has_many :nodes
   has_many :assets
   has_many :comparisons
   has_many :notes
@@ -65,7 +66,6 @@ class User < ApplicationRecord
   has_many :admin_memberships, dependent: :destroy
   has_many :admin_groups, through: :admin_memberships
   has_many :space_memberships
-  has_many :space_templates
   has_many :spaces, -> { where("space_memberships.active = ?", true) }, through: :space_memberships
   has_one :appathon
   has_many :meta_appathons
@@ -179,21 +179,10 @@ class User < ApplicationRecord
     org.dxorg
   end
 
+  # Returns all accessible space scopes.
+  # @return [Array] Space scopes (UIDs).
   def space_uids
-    uids = []
-
-    select_query = Arel.sql("distinct concat('space-', spaces.id)")
-
-    if review_space_admin?
-      uids.concat(Space.reviewer.pluck(select_query))
-      uids.concat(Space.verification.pluck(select_query))
-    end
-    uids.concat(spaces.pluck(select_query))
-    uids.uniq
-  end
-
-  def active_spaces
-    spaces.active
+    Space.accessible_by(self).pluck(Arel.sql("concat('space-', spaces.id)"))
   end
 
   def activated?
@@ -236,6 +225,12 @@ class User < ApplicationRecord
     admin_groups.any?(&:site?)
   end
 
+  # Checks if a user can create spaces.
+  # @return [Boolean] Returns true if a user can create spaces, false otherwise.
+  def can_create_spaces?
+    can_administer_site? || review_space_admin?
+  end
+
   def is_challenge_evaluator?
     admin_groups.any?(&:challenge_eval?) || can_administer_site?
   end
@@ -251,10 +246,6 @@ class User < ApplicationRecord
   # @param time_zone [String] new time zone
   def update_time_zone(time_zone)
     update(time_zone: time_zone) if Time.find_zone(time_zone)
-  end
-
-  def root_folder
-    folders.find_by(scope: "private", parent_folder_id: nil)
   end
 
   def is_challenge_admin?
@@ -619,4 +610,6 @@ class User < ApplicationRecord
       end
     end
   end
+
+  alias_method :site_admin?, :can_administer_site?
 end

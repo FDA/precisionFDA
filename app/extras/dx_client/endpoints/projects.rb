@@ -45,10 +45,9 @@ module DXClient
       # @param project_dxid [String] Projects's dxid.
       # @param level [String] level of permission
       # @param user_dxid [String] User's dxid.
-      # @param opts [Hash] Additional options.
       # @return [Hash]
       def project_decrease_permissions(project_dxid, level, user_dxid)
-        call(project_dxid, "decreasePermissions", {"#{user_dxid}": level})
+        call(project_dxid, "decreasePermissions", user_dxid => level)
       end
 
       # Destroys project.

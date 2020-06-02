@@ -30,7 +30,7 @@ class FileCloner
     projects = {}
     files.uniq.each do |file|
 
-      unless [UserFile::STATE_CLOSED, UserFile::STATE_PUBLISHING].include?(file.state)
+      unless [UserFile::STATE_CLOSED, UserFile::STATE_COPYING].include?(file.state)
         raise "Unable to publish #{file.name} - file is not closed"
       end
 

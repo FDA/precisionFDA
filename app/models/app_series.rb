@@ -29,6 +29,8 @@ class AppSeries < ApplicationRecord
   acts_as_votable
   acts_as_taggable
 
+  alias_attribute :title, :name
+
   SUGGESTED_TAGS = [
     "QC/Statistics",
     "Benchmarking",
@@ -42,12 +44,14 @@ class AppSeries < ApplicationRecord
   ].freeze
 
   class << self
-    def construct_dxid(username, name)
-      "app-#{construct_dxname(username, name)}"
+    def construct_dxid(username, app_name, scope)
+      "app-#{construct_dxname(username, app_name, scope)}"
     end
 
-    def construct_dxname(username, name)
-      "-#{username}-#{name}"
+    def construct_dxname(username, app_name, scope)
+      return "#{scope}-#{app_name}" if scope && Space.valid_scope?(scope)
+
+      "-#{username}-#{app_name}"
     end
 
     def authorized_users_for_scope(scope)
@@ -131,10 +135,6 @@ class AppSeries < ApplicationRecord
 
   def klass
     "app-series"
-  end
-
-  def title
-    name
   end
 
   def describe_fields

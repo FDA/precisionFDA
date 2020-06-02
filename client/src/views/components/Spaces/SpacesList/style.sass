@@ -1,0 +1,82 @@
+@import "../../../../styles/variables.sass"
+
+$border-color: #b1b6af
+$border: 1px solid $border-color
+
+.spaces-list
+  width: 100%
+
+  &--card-view
+    display: flex
+    flex-wrap: wrap
+
+  /* table view item */
+  &-table
+
+    td
+      height: 50px
+      vertical-align: top
+
+    &__switcher-td
+      border-bottom: $border
+
+    td.spaces-list-table__switcher-td
+      vertical-align: middle
+      text-transform: uppercase
+
+    &__title
+      font-size: 16px
+      font-weight: bold
+
+    &__switcher
+      display: flex
+      justify-content: center
+      color: #333
+      &--active
+        color: $color-success
+      &--locked
+        color: $color-danger
+      &--unactivated
+        color: $color-warning
+      &--deleted
+        color: $color-danger
+
+      &-label
+        line-height: 34px
+
+
+    &__status
+      text-transform: uppercase
+
+    &__tags
+      border-bottom: $border
+
+    &__private-row
+      color: #fff
+      background-color: #333
+      a
+        color: #fff
+
+    &__shared-row
+      color: #333
+      background-color: $color-public
+      border-bottom: $border
+      a
+        color: #333
+
+    &__tr
+      border: $border
+
+      &--top
+        border-bottom: none
+      &--bottom
+        border-top: none
+
+      &--padding
+        border: none
+        td
+          height: 10px
+          padding: 0px
+        &:first-child
+          td
+            height: 20px

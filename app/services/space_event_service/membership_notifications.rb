@@ -16,6 +16,7 @@ module SpaceEventService
           "membership_added" => "added a new member",
           "membership_disabled" => "disabled a member",
           "membership_changed" => "changed role of member",
+          "membership_enabled" => "enabled member",
         }[event.activity_type]
       end
 

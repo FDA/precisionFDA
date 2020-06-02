@@ -1,6 +1,6 @@
 class NotificationsMailer < ApplicationMailer
   add_template_helper(SpacesHelper)
-  helper :application
+  helper :application, :client_url
 
   if ENV["DNANEXUS_BACKEND"] == "production"
     default  from: 'PrecisionFDA <PrecisionFDA@fda.hhs.gov>',

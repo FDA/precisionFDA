@@ -3,7 +3,9 @@ require 'rails_helper'
 RSpec.describe TasksController, type: :controller do
   let(:host_lead) { create(:user, dxuser: "user_1") }
   let(:guest_lead) { create(:user, dxuser: "user_2") }
-  let(:space) { create(:space, :group, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id) }
+  let(:space) do
+    create(:space, :group, :active, host_lead_id: host_lead.id, guest_lead_id: guest_lead.id)
+  end
   let(:task) { create(:task, space: space) }
   let(:task_params) do
     {

@@ -16,6 +16,7 @@ module SpaceMembershipService
       else
         SpaceMembershipService::Update.call(api, space, membership) unless membership.lead?
       end
+      membership
     end
 
     def self.create_event(space, member, admin_member)

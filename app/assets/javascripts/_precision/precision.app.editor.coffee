@@ -19,6 +19,7 @@ class AppEditorModel
         @name(name)
     )
 
+    @scope = ko.observable(app?.scope)
     @title = ko.observable(app?.title)
     @release = ko.observable(app?.release)
     @revision = ko.observable(app?.revision)
@@ -193,6 +194,7 @@ class AppEditorModel
     params =
       is_new: @isNewApp
       name: @name.peek()
+      scope: @scope.peek() ? "private"
       title: @title.peek()
       release: @release.peek()
       readme: @readme.peek() ? ""

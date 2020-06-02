@@ -12,7 +12,11 @@ module InternalUid
     def generate_uid
       return if persisted?
 
-      self.uid = "#{dxid}-#{self.class.where(dxid: dxid).count + 1}"
+      self.uid = "#{dxid}-#{max_uid_number + 1}"
+    end
+
+    def max_uid_number
+      self.class.where(dxid: dxid).pluck(:uid).map { |uid| uid[/(?<=-)\d+$/].to_i }.max.to_i
     end
   end
 end

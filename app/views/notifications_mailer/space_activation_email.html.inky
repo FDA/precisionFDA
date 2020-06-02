@@ -19,13 +19,13 @@
     <row>
       <columns>
         <p>
-          The space <strong><%= link_to @space.title, space_url(@space) %></strong> was provisioned and listed you as <%= "#{member_side(@space, @membership)} #{@membership.role}" %>.
+          The space <strong><%= link_to @space.title, _space_url(@space) %></strong> was provisioned and listed you as <%= "#{member_side(@space, @membership)} #{@membership.role}" %>.
         </p>
 
         <p>
           To start adding data to this space both <%= @space.review? ? 'reviewer and sponsor' : 'host and guest' %> lead admin's must accept the invitation. Please visit the space and click on "Accept space".
         </p>
-        <button class="radius" href="<%= space_url(@space) %>">View Space Invitation</button>
+        <button class="radius" href="<%= _space_url(@space) %>">View Space Invitation</button>
       </columns>
     </row>
   </container>

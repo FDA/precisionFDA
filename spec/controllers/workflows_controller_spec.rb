@@ -74,7 +74,7 @@ RSpec.describe WorkflowsController, type: :controller do
     }
   end
 
-  let(:workflow) { create(:workflow, :run_private, user_id: user.id, spec: workflow_spec) }
+  let(:workflow) { create(:workflow, user_id: user.id, spec: workflow_spec) }
 
   describe "GET output_folder_create" do
     let(:new_folder_name) { FFaker::Lorem.word }

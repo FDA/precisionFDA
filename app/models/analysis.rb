@@ -29,8 +29,10 @@ class Analysis < ApplicationRecord
     end
   end
 
-  def self.can_be_in_space?
-    false
+  def self.editable_by(context)
+    return none unless context.logged_in?
+
+    where(user: context.user)
   end
 
   def self.batch_hash(analyses)
@@ -48,7 +50,7 @@ class Analysis < ApplicationRecord
                  app_uid: batch_item.jobs.first.app.uid,
                  app_title: batch_item.jobs.first.app.title,
                  batch_id: batch_item.batch_id,
-                 duration: humanizeSeconds(batch_item.analysis_duration),
+                 duration: humanize_seconds(batch_item.analysis_duration),
                  created: batch_item.jobs.first.created_at.to_s(:db),
                 jobs: batch_item.jobs.map do |job|
               {
@@ -59,7 +61,7 @@ class Analysis < ApplicationRecord
                  app_uid: job.app.uid,
                  app_title: job.app.title,
                  batch_id: batch_item.batch_id,
-                 duration: humanizeSeconds(job.runtime),
+                 duration: humanize_seconds(job.runtime),
                  created: job.created_at.to_s(:db)
               }
             end
@@ -87,7 +89,7 @@ class Analysis < ApplicationRecord
           app_title: job.app.title,
           batch_id: analysis.batch_id,
           batch_children: options[:stop].nil? && analysis.batch_id.present? ? self.job_hash(analysis.batch_items, options.merge({stop: true})) : nil,
-          duration: humanizeSeconds(job.runtime),
+          duration: humanize_seconds(job.runtime),
           created: job.created_at.to_s(:db)
         }
         if job.public?

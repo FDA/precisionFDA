@@ -38,6 +38,10 @@ en:
   app_no_test_inputs: App doesn't contain any test inputs
   app_no_benchmark_inputs: App doesn't contain any benchmark inputs
   app_no_html_report_outputs: App doesn't contain any output html reports
+  space_created_waiting_for_activation: The space was created successfully, and will be activated
+    once both admin's accept it.
+  space_created_not_accessible: The space was created successfully, but is not currently
+    accessible by you.
 
   activerecord:
     attributes:

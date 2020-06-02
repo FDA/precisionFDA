@@ -24,10 +24,6 @@ class Answer < ApplicationRecord
   acts_as_votable
   acts_as_taggable
 
-  def self.can_be_in_space?
-    false
-  end
-
   def uid
     "answer-#{id}"
   end
@@ -78,6 +74,12 @@ class Answer < ApplicationRecord
 
   def self.accessible_by_space(space)
     joins(:note).where(notes: {scope: space.uid})
+  end
+
+  def self.editable_by(context)
+    return none unless context.logged_in?
+
+    where(user: context.user)
   end
 
   def publishable_by?(context, scope_to_publish_to = "public")

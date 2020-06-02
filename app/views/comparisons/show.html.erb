@@ -41,7 +41,7 @@
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Runtime</h5>
-      <p class="list-group-item-text"><%= humanizeSeconds(@meta["runtime_sec"]) %></p>
+      <p class="list-group-item-text"><%= humanize_seconds(@meta["runtime_sec"]) %></p>
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Created</h5>
@@ -93,7 +93,7 @@
       <% end %>
       <%= render "_partials/btn_publish", item: @comparison %>
 
-      <% if @comparison.in_space? && @comparison.space_object.contributor_permission(@context) %>
+      <% if @comparison.in_space? && @comparison.space_object.editable_by?(@context.user) %>
         <%= render "_partials/btn_copy_to_cooperative", item: @comparison %>
       <% end %>
 

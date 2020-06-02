@@ -302,7 +302,7 @@ class WorkflowsController < ApplicationController
     folders =
       if workflow.in_space?
         space = Space.from_scope(workflow.scope)
-        Folder.accessible_by_space(space)
+        space.folders
       else
         Folder.
           private_for(@context).

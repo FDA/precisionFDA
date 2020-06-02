@@ -11,6 +11,14 @@ module DXClient
         call("system", "describeDataObjects", opts.merge(objects: objects))
       end
 
+      # Finds data objects.
+      # @see https://documentation.dnanexus.com/developer/api/search#api-method-system-finddataobjects
+      # param opts [Hash] Additional options.
+      # @return [Hash] A response.
+      def system_find_data_objects(opts = {})
+        call("system", "findDataObjects", opts)
+      end
+
       # Finds jobs.
       # @see https://documentation.dnanexus.com/developer/api/search#api-method-system-findjobs
       # @param opts [Hash] Options used to find jobs.

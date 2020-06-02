@@ -90,7 +90,7 @@ RSpec.describe ApiController, type: :controller do
     }
   end
 
-  let(:workflow) { create(:workflow, :run_private, user_id: user.id, spec: workflow_spec) }
+  let(:workflow) { create(:workflow, user_id: user.id, spec: workflow_spec) }
 
   let(:params_inputs) do
     [

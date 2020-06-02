@@ -613,34 +613,6 @@ ActiveRecord::Schema.define(version: 2020_05_20_102716) do
     t.index ["space_membership_id"], name: "index_space_memberships_spaces_on_space_membership_id"
   end
 
-  create_table "space_template_nodes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
-    t.string "space_template_id"
-    t.integer "node_id"
-    t.string "node_type"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "space_id"
-    t.string "node_name"
-    t.index ["node_type", "node_id"], name: "index_space_template_nodes_on_node_type_and_node_id"
-  end
-
-  create_table "space_template_spaces", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
-    t.string "space_id"
-    t.string "space_template_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "space_name"
-  end
-
-  create_table "space_templates", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
-    t.string "name"
-    t.text "description"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.boolean "private", default: false, null: false
-    t.integer "user_id"
-  end
-
   create_table "spaces", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -656,7 +628,6 @@ ActiveRecord::Schema.define(version: 2020_05_20_102716) do
     t.integer "space_type", default: 0, null: false
     t.boolean "verified", default: false, null: false
     t.integer "sponsor_org_id"
-    t.integer "space_template_id"
     t.boolean "restrict_to_template", default: false
     t.boolean "inactivity_notified", default: false
   end

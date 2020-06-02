@@ -36,11 +36,15 @@ class CopyService
       copies.map(&:object)
     end
 
+    def concat(other)
+      copies.concat(other.copies)
+    end
+
     def first
       copies.first.object
     end
 
-    private
+    delegate :size, :select, :[], :empty?, to: :copies
 
     attr_reader :copies
   end

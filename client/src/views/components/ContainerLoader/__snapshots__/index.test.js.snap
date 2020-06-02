@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ContainerLoader matches snapshot 1`] = `
+<div
+  className="pfda-container-loader"
+>
+  <div
+    className="pfda-container-loader__container"
+  >
+    <div
+      className="pfda-container-loader__loader"
+    >
+      <Loader />
+    </div>
+  </div>
+</div>
+`;

@@ -1,7 +1,7 @@
 class SpaceInviteForm
   include ActiveModel::Model
 
-  attr_accessor :invitees_role, :space
+  attr_accessor :invitees_role, :space, :space_id
   attr_reader :invitees
 
   validates :invitees_role, presence: true, inclusion: { in: SpaceMembership.roles.keys }
@@ -12,18 +12,22 @@ class SpaceInviteForm
 
   # @param [SpaceMembership, #side, #user] membership
   def invite(membership, api)
+    # rubocop:disable Style/SymbolProc
     return if invalid?
 
     existing_users.find_each do |user|
       SpaceService::Invite.call(api, space, membership, user, invitees_role)
     end
 
+    existing_emails = existing_users.map { |user| user.email }
+
     # invite user from the outside of pFDA
     non_existing_emails.each do |email|
       SpaceService::InviteByEmail.call(space, email, membership, invitees_role)
     end
+    # rubocop:enable Style/SymbolProc
 
-    non_existing_emails
+    non_existing_emails + existing_emails
   end
 
   # @param [String] value Comma-separated list of invitees (emails or dxusers)
@@ -49,7 +53,7 @@ class SpaceInviteForm
   end
 
   def validate_invitees
-    errors.add(:invitees, "list is empty!") if invitees.values.flatten.blank?
+    errors.add(:invitees, "List of invitees is empty!") if invitees.values.flatten.blank?
   end
 
   def validate_dxusers
@@ -59,7 +63,7 @@ class SpaceInviteForm
 
     errors.add(
       :base,
-      "The following username's could not be invited because they do not exist: " \
+      "The following username's could not be added because they do not exist: " \
       "#{invalid_dxusers.to_sentence}",
     )
   end

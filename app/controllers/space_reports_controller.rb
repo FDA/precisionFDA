@@ -104,15 +104,15 @@ class SpaceReportsController < ApplicationController
   def generate_counters
     filters = filter_params
     filters[:user_id] = filters.delete(:users) if filters[:users]
-    files = UserFile.not_assets.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).count
-    jobs = Job.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).count
-    comparisons = Comparison.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).count
-    apps = App.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).count
-    workflows = Workflow.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).count
-    assets = Asset.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).count
-    notes = Note.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).count
+    files = @space.files.where(filters).where("created_at <= ?", end_date).count
+    jobs = @space.jobs.where(filters).where("created_at <= ?", end_date).count
+    comparisons = @space.comparisons.where(filters).where("created_at <= ?", end_date).count
+    apps = @space.apps.where(filters).where("created_at <= ?", end_date).count
+    workflows = @space.workflows.where(filters).where("created_at <= ?", end_date).count
+    assets = @space.assets.where(filters).where("created_at <= ?", end_date).count
+    notes = @space.notes.where(filters).where("created_at <= ?", end_date).count
     tasks = @space.tasks.where(filters).where("created_at <= ?", end_date).count
-    comments = Comment.where(commentable: @space).where(filters).where("created_at <= ?", end_date).count
+    comments = @space.comments.where(filters).where("created_at <= ?", end_date).count
 
     {
       files: files,
@@ -132,23 +132,23 @@ class SpaceReportsController < ApplicationController
     filters[:user_id] = filters.delete(:users) if filters[:users]
     case object_type
     when 'files'
-      UserFile.not_assets.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).order(created_at: sort)
+      @space.files.where(filters).where("created_at <= ?", end_date).order(created_at: sort)
     when 'jobs'
-      Job.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).order(created_at: sort)
+      @space.jobs.where(filters).where("created_at <= ?", end_date).order(created_at: sort)
     when 'comparisons'
-      Comparison.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).order(created_at: sort)
+      @space.comparisons.where(filters).where("created_at <= ?", end_date).order(created_at: sort)
     when 'apps'
-      App.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).order(created_at: sort)
+      @space.apps.where(filters).where("created_at <= ?", end_date).order(created_at: sort)
     when 'workflows'
-      Workflow.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).order(created_at: sort)
+      @space.workflows.where(filters).where("created_at <= ?", end_date).order(created_at: sort)
     when 'assets'
-      Asset.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).order(created_at: sort)
+      @space.assets.where(filters).where("created_at <= ?", end_date).order(created_at: sort)
     when 'notes'
-      Note.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).order(created_at: sort)
+      @space.notes.where(filters).where("created_at <= ?", end_date).order(created_at: sort)
     when 'tasks'
       @space.tasks.where(filters).where("created_at <= ?", end_date).order(created_at: sort)
     when 'comments'
-      Comment.where(commentable: @space).where(filters).where("created_at <= ?", end_date).order(created_at: sort)
+      @space.comments.where(filters).where("created_at <= ?", end_date).order(created_at: sort)
     end
   end
 
@@ -207,7 +207,7 @@ class SpaceReportsController < ApplicationController
       when "comments"
         []
       else
-        Comment.active.where(commentable: @space, content_object: object, parent_id: nil).includes(user: :org)
+        @space.comments.active.where(content_object: object, parent_id: nil).includes(user: :org)
       end
 
     list_comments(comments)
@@ -242,15 +242,20 @@ class SpaceReportsController < ApplicationController
     filters = filter_params
     filters[:user_id] = filters.delete(:users) if filters[:users]
 
-    files = UserFile.not_assets.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).includes(:user)
-    jobs = Job.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).includes(:user)
-    comparisons = Comparison.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).includes(:user)
-    apps = App.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).includes(:user)
-    workflows = Workflow.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).includes(:user)
-    assets = Asset.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).includes(:user)
-    notes = Note.accessible_by_space(@space).where(filters).where("created_at <= ?", end_date).includes(:user)
+    files = @space.files.where(filters).
+      where("created_at <= ?", end_date).
+      includes(:user)
+    jobs = @space.jobs.where(filters).where("created_at <= ?", end_date).includes(:user)
+    comparisons = @space.comparisons.
+      where(filters).where("created_at <= ?", end_date).
+      includes(:user)
+    apps = @space.apps.where(filters).where("created_at <= ?", end_date).includes(:user)
+    workflows = @space.workflows.where(filters).where("created_at <= ?", end_date).includes(:user)
+    assets = @space.assets.where(filters).where("created_at <= ?", end_date).includes(:user)
+    notes = @space.notes.where(filters).where("created_at <= ?", end_date).includes(:user)
     tasks = @space.tasks.where(filters).where("created_at <= ?", end_date).includes(:user)
-    comments = Comment.active.where(commentable: @space).where(filters).where("created_at <= ?", end_date).includes(:user)
+    comments = @space.comments.active.where(filters).where("created_at <= ?", end_date).
+      includes(:user)
 
     {
       files: describe_objects_for_export(files, "files"),
@@ -286,7 +291,7 @@ class SpaceReportsController < ApplicationController
   end
 
   def find_space
-    @space = Space.accessible_by(@context).find_by_id(unsafe_params[:space_id])
+    @space = Space.accessible_by(current_user).find_by(id: unsafe_params[:space_id])
     unless @space
       render json: []
       return

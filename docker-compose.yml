@@ -25,6 +25,15 @@ services:
     stdin_open: true
     tty: true
 
+  frontend:
+    image: node:12
+    volumes:
+      - type: bind
+        source: .
+        target: /precision-fda
+    working_dir: /precision-fda/client
+    command: bash -c "yarn && yarn watch"
+
   db:
     image: mysql:5.6
     volumes:

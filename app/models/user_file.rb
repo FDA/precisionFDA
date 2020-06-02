@@ -46,7 +46,6 @@
 class UserFile < Node
   include Licenses
   include InternalUid
-  include Scopes
 
   require "uri"
 
@@ -57,8 +56,8 @@ class UserFile < Node
   STATE_CLOSED = "closed".freeze
   STATE_OPEN = "open".freeze
 
-  # pFDA internal state, used for files that are being publishing by a worker.
-  STATE_PUBLISHING = "publishing".freeze
+  # pFDA internal state, used for files that are being copied by a worker.
+  STATE_COPYING = "copying".freeze
 
   PARENT_TYPE_COMPARISON = "Comparison".freeze
 
@@ -94,12 +93,14 @@ class UserFile < Node
 
   scope :open, -> { where(state: STATE_OPEN) }
   scope :not_removing, -> { where.not(state: STATE_REMOVING) }
-  scope :not_publishing, -> { where.not(state: STATE_PUBLISHING) }
-  scope :not_blocked, -> { not_removing.not_publishing }
+  scope :not_copying, -> { where.not(state: STATE_COPYING) }
+  scope :not_blocked, -> { not_removing.not_copying }
 
   scope :files_conditions, -> {
     where(state: "closed").where.not(parent_type: ["Comparison", nil]).includes(:taggings)
   }
+
+  scope :not_comparison_inputs, -> { includes(:comparisons).where(comparisons: { id: nil }) }
 
   class << self
     def model_name
@@ -125,8 +126,10 @@ class UserFile < Node
     def publication_project!(user, scope)
       # This is a class method for independent files.
       # For comparison files, use Comparison.publication_project!
-      if scope == UserFile::SCOPE_PUBLIC
+      if scope == SCOPE_PUBLIC
         user.public_files_project
+      elsif scope == SCOPE_PRIVATE
+        user.private_files_project
       else
         Space.from_scope(scope).project_for_user(user)
       end
@@ -218,7 +221,7 @@ class UserFile < Node
   end
 
   def blocked?
-    [STATE_REMOVING, STATE_PUBLISHING].include?(state)
+    [STATE_REMOVING, STATE_COPYING].include?(state)
   end
 
   def real_file?
@@ -374,26 +377,26 @@ class UserFile < Node
       (scope.in?([SCOPE_PUBLIC, SCOPE_PRIVATE]) || !(in_space? && space_object.verified?))
   end
 
-  # Check, whether file is piblishable, i.e. to be 'public'.
-  #   A file should have scope 'private' or in space.
-  # @param context [Context] a Context object, who is going to publish.
-  # @param scope_to_publish_to [String] a scope to be published to.
-  # @return [true, false] Returns true if a file can be published by a user,
-  #   false otherwise.
-  def publishable_by?(context, scope_to_publish_to = SCOPE_PUBLIC)
-    publishable?(context.user) &&
-      !parent_comparison? &&
-      [STATE_CLOSED, STATE_PUBLISHING].include?(state)
+  # Check, whether file is publishable. A file should be 'private' or in space.
+  # @param user [User] A user who is going to publish.
+  # @return [Boolean] Returns true if a file can be published by a user, false otherwise.
+  def publishable?(user)
+    user.present? && !public?
   end
 
-  def rename(new_name, description, context)
-    self.name = new_name
-    self.description = description
+  # Check, whether file is publishable. A file should be 'private' or in space.
+  # @param context [Context] a Context object, who is going to publish.
+  # @param scope_to_publish_to [String] a scope to be published to.
+  # @return [Boolean] Returns true if a file can be published by a user, false otherwise.
+  def publishable_by?(context, scope_to_publish_to = SCOPE_PUBLIC)
+    publishable?(context.user) && state == STATE_CLOSED
+  end
 
+  def rename(new_name, new_description)
     return false unless valid?
 
-    if DNAnexusAPI.new(context.token).call(dxid, "rename", { project: project, name: new_name })
-      update_attributes(name: new_name, description: description)
+    if DIContainer.resolve("api.user").file_rename(dxid, project, new_name)
+      update(name: new_name, description: new_description)
     else
       errors.add(:base, "File info could not be updated.")
       false
@@ -414,7 +417,7 @@ class UserFile < Node
       end
     elsif public?
       project == user.public_files_project
-    elsif ![STATE_CLOSED, STATE_PUBLISHING].include?(state)
+    elsif ![STATE_CLOSED, STATE_COPYING].include?(state)
       project == space_object.project_for_user(user)
     else
       true

@@ -1,0 +1,52 @@
+@import "../../../../../styles/variables"
+
+$title-text-fs: 20px
+$data-text-fs: 15px
+
+.space-member-row
+  margin-top: 10px
+  margin-left: 10px
+  margin-right: 10px
+
+.space-member-card
+  min-width: 300px
+  border: 2px solid #bce8f1
+  margin: 10px
+  display: flex
+  flex-direction: column
+  justify-content: space-between
+
+  &__inactive
+    color: #a4a4a4
+    border: 2px solid #eeeeee !important
+
+  &__header
+    display: flex
+    justify-content: space-between
+    background-color: #d9edf7
+    border-color: #bce8f1
+
+    &__inactive
+      background-color: #f5f5f5
+
+  &__title
+    color: $color-primary
+    font-size: $title-text-fs
+    display: flex
+    justify-content: space-between
+    margin: 10px
+
+  &__date
+    display: flex
+    justify-content: space-between
+    font-size: $data-text-fs
+    &-label
+      font-weight: bold
+    &-value
+      margin-left: 10px
+
+.img-circle
+  border-radius: 80%
+  vertical-align: middle
+  height: 40px
+  margin-right: 5px

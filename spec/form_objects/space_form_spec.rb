@@ -9,7 +9,7 @@
 #  cts                  :string(255)
 #  sponsor_org_handle   :string(255)
 #  sponsor_lead_dxuser  :string(255)
-#  space_template_id    :integer
+#  source_space_id      :integer
 #  restrict_to_template :boolean      default(FALSE)
 #
 require "rails_helper"

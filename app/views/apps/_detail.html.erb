@@ -152,7 +152,7 @@
           <span id="fda_text">Shared with FDA</span>
         </span>
       </script>
-      <% if !app.dev_group && app.scope != 'public' && !app.in_verificaiton_space?  %>
+      <% if !app.dev_group && app.scope != 'public' && !app.in_verification_space?  %>
         <!-- ko ifnot:shareSuccess -->
         <div class="btn-group">
           <button class="btn btn-primary" data-toggle="modal" data-target="#share_with_fda_modal">
@@ -222,9 +222,9 @@
     <%= link_to batch_app_app_path(app), class: "btn btn-primary" do %>
         <span class="fa fa-bolt"></span> Run Batch App&nbsp;&nbsp;<span class="badge"><%= app.version ? "v#{app.version}" : "rev#{app.revision}" %></span>
     <% end %>
-    <%= render "_partials/btn_publish", item: app %>
+    <%= render "_partials/btn_copy", item: app, url: copy_api_apps_path %>
 
-    <% if app.in_space? && app.space_object.contributor_permission(context) %>
+    <% if app.in_space? && app.space_object.editable_by?(context.user) %>
       <%= render "_partials/btn_copy_to_cooperative", item: app %>
     <% end %>
 

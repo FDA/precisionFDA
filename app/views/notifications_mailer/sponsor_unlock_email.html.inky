@@ -19,10 +19,10 @@
     <row>
       <columns>
         <p>
-          The space <strong><%= link_to @space.title, space_url(@space) %></strong> was unlocked.
+          The space <strong><%= link_to @space.title, _space_url(@space) %></strong> was unlocked.
         </p>
 
-        <button class="radius" href="<%= space_url(@space) %>">View Space Invitation</button>
+        <button class="radius" href="<%= _space_url(@space) %>">View Space Invitation</button>
       </columns>
     </row>
   </container>

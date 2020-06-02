@@ -99,7 +99,7 @@ class SpaceFeedController < ApplicationController
   end
 
   def find_space
-    @space = Space.accessible_by(@context).find_by_id(unsafe_params[:space_id])
+    @space = Space.accessible_by(current_user).find_by(id: unsafe_params[:space_id])
     unless @space
       render json: []
       return

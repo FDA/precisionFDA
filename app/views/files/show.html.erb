@@ -120,9 +120,9 @@
       </div>
     </div>
 
-    <%= render "_partials/btn_publish", item: @file %>
+    <%= render "_partials/btn_copy", item: @file, url: copy_api_files_path %>
 
-    <% if @file.in_space? && @file.space_object.contributor_permission(@context) %>
+    <% if @file.in_space? && @file.space_object.editable_by?(@context.user) %>
       <div class="btn-group">
         <%= render "_partials/btn_copy_to_cooperative", item: @file %>
       </div>

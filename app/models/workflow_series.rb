@@ -17,30 +17,31 @@ class WorkflowSeries < ApplicationRecord
   include Permissions
 
   has_many :workflows
-  belongs_to :latest_revision_workflow, class_name: 'Workflow'
+  belongs_to :latest_revision_workflow, class_name: "Workflow"
   belongs_to :user
 
   acts_as_taggable
   acts_as_votable
 
-  def uid
-    "workflow-series-#{id}"
+  alias_attribute :title, :name
+
+  class << self
+    # FIXME: double-dash dxid.. Why?
+    def construct_dxid(username, name)
+      "app-#{construct_dxname(username, name)}"
+    end
+
+    def construct_dxname(username, name)
+      "-#{username}-#{name}"
+    end
   end
 
   def klass
     "workflow-series"
   end
 
-  def title
-    name
-  end
-
-  def self.construct_dxid(username, name)
-    "app-#{construct_dxname(username, name)}"
-  end
-
-  def self.construct_dxname(username, name)
-    "-#{username}-#{name}"
+  def uid
+    "#{klass}-#{id}"
   end
 
   def accessible_revisions(context)

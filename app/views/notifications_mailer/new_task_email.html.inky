@@ -19,7 +19,7 @@
     <row>
       <columns>
         <p>
-          A task <strong><%= @task.name %></strong> in <%= link_to @task.space.title, space_url(@task.space) %> space was created and assigned to you.
+          A task <strong><%= @task.name %></strong> in <%= link_to @task.space.title, _space_url(@task.space) %> space was created and assigned to you.
         </p>
 
         <p>

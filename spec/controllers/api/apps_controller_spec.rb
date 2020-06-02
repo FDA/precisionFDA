@@ -12,6 +12,28 @@ RSpec.describe Api::AppsController, type: :controller do
     [{ name: "my_file", class:  "file", optional: false, label: "my_file", help: "my_file" }]
   end
 
+  describe "POST copy" do
+    let(:space) { create(:space, :review, :active, host_lead_id: user.id) }
+    let(:apps) { create_list(:app, 2, user: user) }
+    let(:copy_service) { instance_double(CopyService, copy: []) }
+
+    before do
+      authenticate!(user)
+
+      allow(CopyService).to receive(:new).and_return(copy_service)
+    end
+
+    it "copies apps" do
+      post :copy, params: { item_ids: apps.map(&:id), scope: space.scope }, format: :json
+
+      expect(response).to be_successful
+
+      apps.each do |app|
+        expect(copy_service).to have_received(:copy).with(app, space.scope).exactly(1).times
+      end
+    end
+  end
+
   describe "POST create" do
     before do
       authenticate!(user)
