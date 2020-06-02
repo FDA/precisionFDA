@@ -24,7 +24,7 @@
         <p>name: <%= @new_member.user.full_name %></p>
         <p>role: <%= @new_member.role %></p>
 
-        <button class="radius" href="<%= space_url(@space) %>">View Space</button>
+        <button class="radius" href="<%= _space_url(@space) %>">View Space</button>
       </columns>
     </row>
   </container>

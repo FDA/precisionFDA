@@ -14,5 +14,28 @@
 
 FactoryBot.define do
   factory :space_membership do
+    trait :host do
+      side { SpaceMembership::SIDE_HOST }
+    end
+
+    trait :guest do
+      side { SpaceMembership::SIDE_GUEST }
+    end
+
+    trait :viewer do
+      role { SpaceMembership::ROLE_VIEWER }
+    end
+
+    trait :contributor do
+      role { SpaceMembership::ROLE_CONTRIBUTOR }
+    end
+
+    trait :admin do
+      role { SpaceMembership::ROLE_ADMIN }
+    end
+
+    trait :lead do
+      role { SpaceMembership::ROLE_LEAD }
+    end
   end
 end

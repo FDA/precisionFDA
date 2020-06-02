@@ -1,0 +1,43 @@
+@import "../../../styles/animations"
+
+body.ReactModal__Body--open
+  overflow: hidden
+  padding-right: 15px
+
+.pfda-modal
+  width: 600px
+  margin: auto
+
+  &:focus
+    outline: none
+
+  &--loading
+    .modal-body, .modal-footer
+      visibility: hidden
+
+  &--no-padding
+    .modal-body
+      padding: 0px
+
+  &__content
+    position: relative
+
+  &__loader
+    text-align: center
+    top: 30%
+    position: absolute
+    width: 100%
+
+  &__overlay
+    position: fixed
+    top: 0
+    left: 0
+    width: 100%
+    height: 100%
+    background-color: rgba(51, 51, 51, 0.2)
+    z-index: 1050
+    animation: fade-in 0.3s ease-in
+
+  .modal-body
+    overflow: auto
+    max-height: 400px

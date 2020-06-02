@@ -24,6 +24,7 @@
       "**/?(*.)+(spec|test).(js|coffee)?(x)"
     ],
     "testPathIgnorePatterns": [
+      "<rootDir>/client",
       "<rootDir>/vendor"
     ],
     "transform": {

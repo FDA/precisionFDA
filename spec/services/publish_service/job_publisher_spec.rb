@@ -46,7 +46,7 @@ describe PublishService::JobPublisher do
       context "when scope is a space" do
         before do
           allow(DNAnexusAPI).to receive(:new).and_return(api)
-          allow(Space).to receive(:find_by!).and_return(space)
+          allow(Space).to receive(:find).and_return(space)
           publisher.publish([job], space_scope)
         end
 

@@ -193,8 +193,8 @@ class TasksController < ApplicationController
   end
 
   def copy
-    @space = Space.accessible_by(@context).find(unsafe_params[:space_id])
-    @membership = @space.space_memberships.find_by!(user_id: @context.user_id)
+    @space = Space.accessible_by(current_user).find(unsafe_params[:space_id])
+    @membership = @space.space_memberships.find_by!(user: current_user)
 
     attributes = @task.attributes.merge(assignee_id: @task.assignee.dxuser)
     attributes.delete(:response_time)
@@ -233,7 +233,7 @@ class TasksController < ApplicationController
   end
 
   def find_space_and_membership
-    @space = Space.accessible_by(@context).find(unsafe_params[:space_id])
+    @space = Space.accessible_by(current_user).find(unsafe_params[:space_id])
     @membership = fetch_membership
   end
 end

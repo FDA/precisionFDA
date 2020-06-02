@@ -80,6 +80,10 @@ class PlatformRack < BaseRack
    [200, {}, [{}.to_json]]
   end
 
+  def post_file_rename(_params)
+    [200, {}, [{}.to_json]]
+  end
+
   def post_project_decrease_permissions(_params)
     [200, {}, [{ 'user-1': "NONE" }.to_json]]
   end
@@ -123,6 +127,8 @@ class PlatformRack < BaseRack
         "file_new"
       when /.*\/close/
         "file_close"
+      when %r{file-.+/rename}
+        "file_rename"
       when %r{.*\/decreasePermissions}
         "project_decrease_permissions"
       else

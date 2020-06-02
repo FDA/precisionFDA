@@ -346,6 +346,7 @@ RSpec.describe UserFile, type: :model do
 
   describe "accessible_found_by" do
     before do
+      allow(context).to receive(:logged_in?).and_return(true)
       allow(context).to receive(:user_id).and_return(context.user_id)
       allow(context).to receive(:user).and_return(user)
     end
@@ -381,6 +382,8 @@ RSpec.describe UserFile, type: :model do
     context "when file is accessible by user context and exists" do
       before do
         allow(context).to receive(:user).and_return(user)
+        allow(context).to receive(:logged_in?).and_return(true)
+
         allow_any_instance_of(UserFile).
           to receive(:refresh_state).
           with(context).

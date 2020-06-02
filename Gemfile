@@ -25,6 +25,9 @@ gem "bootsnap", ">= 1.1.0", require: false
 # bundle exec rake doc:rails generates the API under doc/api.
 gem "sdoc", ">= 1.0.0", group: :doc
 
+# ActiveModelSerializers brings convention over configuration to your JSON generation.
+gem "active_model_serializers", "~> 0.10.0"
+
 # Support for bulk inserting data using ActiveRecord
 gem "activerecord-import"
 
@@ -111,13 +114,15 @@ group :development do
 
   gem "listen", ">= 3.0.5", "< 3.2"
 
-  # Automatic Ruby code checking tool
-  gem "rubocop", "=0.79.0", require: false
-  gem "rubocop-rails", require: false
-  gem "rubocop-rspec", require: false
+  # Automatic Ruby code checking tool.
+  # Bump versions to be along with GitHub pronto-actions.
+  gem "rubocop", "= 0.80.1", require: false
+  gem "rubocop-rails", "= 2.4.2", require: false
+  gem "rubocop-rspec", "= 1.38.1", require: false
 
-  gem "pronto", "~> 0.10.0"
-  gem "pronto-rubocop", require: false
+  gem "pronto", "= 0.10.0"
+  gem "pronto-rubocop", "= 0.10.0", require: false
+  gem "pronto-brakeman", "= 0.10.0", require: false
 
   gem "byebug", platforms: %i(mri mingw x64_mingw)
 

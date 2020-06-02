@@ -19,7 +19,7 @@
     <row>
       <columns>
         <p>
-          You were added to the space <strong><%= link_to @space.title, space_url(@space) %></strong> by <%= link_to @admin.user.full_name, user_url(@admin.user.username) %>.
+          You were added to the space <strong><%= link_to @space.title, _space_url(@space) %></strong> by <%= link_to @admin.user.full_name, user_url(@admin.user.username) %>.
         </p>
 
         <p>Role: <strong><%= @membership.role %></strong></p>
@@ -29,7 +29,7 @@
           Space's let you move data from your private area and share to the space members to access. You can then publish the data out of the space to the precisionFDA community.
         </p>
 
-        <button class="radius" href="<%= space_url(@space) %>">View Space</button>
+        <button class="radius" href="<%= _space_url(@space) %>">View Space</button>
       </columns>
     </row>
   </container>

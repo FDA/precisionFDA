@@ -115,4 +115,14 @@ RSpec.describe SpaceMembershipPolicy do
       end
     end
   end
+
+  describe "can_duplicate?" do
+    context "when space isn't active" do
+      pending "a user can't duplicate a space 1"
+    end
+
+    context "when a user isn't a review space admin" do
+      pending "a user can't duplicate a space 2"
+    end
+  end
 end

@@ -1,5 +1,5 @@
+# CopyService main class.
 class CopyService
-
   def initialize(api:, user:)
     @api = api
     @user = user
@@ -7,7 +7,7 @@ class CopyService
 
   def copy(entity, scope)
     Copies.wrap(
-      copier_class(entity).new(user: user, api: api).copy(entity, scope)
+      copier_class(Array(entity).first).new(user: user, api: api).copy(entity, scope),
     )
   end
 
@@ -27,5 +27,4 @@ class CopyService
       raise "'#{entity.class}' class is not supported yet"
     end
   end
-
 end

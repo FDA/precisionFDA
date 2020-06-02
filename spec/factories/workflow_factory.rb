@@ -22,14 +22,17 @@
 
 FactoryBot.define do
   factory :workflow do
-    sequence(:dxid) { |n| "workflow-#{SecureRandom.hex(12)}" }
+    workflow_series
 
-    trait :run_private do
-      title { "default_title" }
-      name { "default_name" }
-      scope { "private" }
-      project { "project-#{SecureRandom.hex(12)}" }
-      revision { 1 }
+    dxid { "workflow-#{SecureRandom.hex(12)}" }
+    project { "project-#{SecureRandom.hex(12)}" }
+    scope { Scopes::SCOPE_PRIVATE }
+    title { "default_title" }
+    name { "default_name" }
+    revision { 1 }
+
+    after(:create) do |workflow|
+      workflow.workflow_series.update!(latest_revision_workflow: workflow)
     end
   end
 end

@@ -33,6 +33,17 @@ class Workflow < ApplicationRecord
 
   acts_as_commentable
 
+  class << self
+    # TODO: this method looks similar to the same methods in other models.
+    def publication_project(user, scope)
+      if scope == Scopes::SCOPE_PUBLIC
+        user.public_files_project
+      else
+        Space.from_scope(scope).project_for_user(user)
+      end
+    end
+  end
+
   def stages
     input_spec["stages"]
   end

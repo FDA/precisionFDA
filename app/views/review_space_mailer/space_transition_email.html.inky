@@ -21,7 +21,7 @@
         <% if @action == 'deleted' %>
           <p>The space <strong><%= @space.title %></strong> was <%= @action %>.</p>
         <% else %>
-          <p>The space <strong><%= link_to @space.title, space_url(@space) %></strong> was <%= @action %>.</p>
+          <p>The space <strong><%= link_to @space.title, _space_url(@space) %></strong> was <%= @action %>.</p>
         <% end %>
       </columns>
     </row>

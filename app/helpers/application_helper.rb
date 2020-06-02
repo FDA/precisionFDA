@@ -7,7 +7,7 @@ module ApplicationHelper
     [content_for(:title), 'precisionFDA'].compact.join(separator).html_safe
   end
 
-  def bootstrap_class_for flash_type
+  def bootstrap_class_for(flash_type)
     case flash_type
     when "success"
         "alert-success"
@@ -22,7 +22,7 @@ module ApplicationHelper
     end
   end
 
-  def humanizeSeconds secs
+  def humanize_seconds(secs)
     secs = secs.to_i
     if secs <= 0
       return "N/A"

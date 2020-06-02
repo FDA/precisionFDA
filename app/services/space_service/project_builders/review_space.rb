@@ -25,19 +25,18 @@ module SpaceService
         contribute_org = shared_space.org_dxid(admin)
         space.set_org_dxid(admin, contribute_org)
 
-        project_dxid = api.call(
-          "project", "new",
-          name: "precisionfda-space-#{space.id}-#{admin.side.upcase}-PRIVATE",
+        project_dxid = api.project_new(
+          "precisionfda-space-#{space.id}-#{admin.side.upcase}-PRIVATE",
           billTo: admin.user.billto,
         )["id"]
 
         space.set_project_dxid(admin, project_dxid)
         space.save!
 
-        api.call(
-          project_dxid, "invite",
-          invitee: contribute_org,
-          level: "CONTRIBUTE",
+        api.project_invite(
+          project_dxid,
+          contribute_org,
+          DNAnexusAPI::PROJECT_ACCESS_CONTRIBUTE,
           suppressEmailNotification: true,
           suppressAllNotifications: true,
         )

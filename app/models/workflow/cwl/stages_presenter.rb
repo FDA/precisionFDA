@@ -61,7 +61,7 @@ class Workflow
             stage_object.asset = asset
             opts = App::CwlParser.parse(stage_object)
 
-            AppService.create_app(@context, opts)
+            AppService.create_app(@context.user, @context.api, opts)
           end
         end
       end

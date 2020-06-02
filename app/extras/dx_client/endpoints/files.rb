@@ -24,6 +24,16 @@ module DXClient
       def file_download(file_dxid, opts = {})
         call(file_dxid, "download", opts)
       end
+
+      # Renames file in specified project.
+      # @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-metadata/name#api-method-class-xxxx-rename
+      # @param file_dxid [String] File ID.
+      # @param project_dxid [String] Project containing the file.
+      # @param name [String] New file name.
+      # @return [Hash]
+      def file_rename(file_dxid, project_dxid, name)
+        call(file_dxid, "rename", { project: project_dxid, name: name })
+      end
     end
   end
 end

@@ -41,6 +41,26 @@ module DXClient
 
         call(full_dxid, "run", opts)
       end
+
+      # Adds authorized users (users and/or orgs) to the app.
+      # @see https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-xxxx-yyyy-addauthorizedusers
+      # @param app_dxid [String] App's dxid.
+      # @param authorized_users [Array<String>] List of user and/or org IDs to add to
+      # the access list.
+      # @return [Hash]
+      def app_add_authorized_users(app_dxid, authorized_users)
+        call(app_dxid, "addAuthorizedUsers", authorizedUsers: authorized_users)
+      end
+
+      # Adds developers (users and/or orgs) to the app.
+      # @see https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-xxxx-yyyy-adddevelopers
+      # @param app_dxid [String] App's dxid.
+      # @param developers [Array<String>] List of user and/or org IDs that will be
+      # added as developers.
+      # @return [Hash]
+      def app_add_developers(app_dxid, developers)
+        call(app_dxid, "addDevelopers", developers: developers)
+      end
     end
   end
 end

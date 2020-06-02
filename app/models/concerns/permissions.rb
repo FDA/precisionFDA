@@ -2,37 +2,33 @@ module Permissions
   extend ActiveSupport::Concern
 
   module ClassMethods
-    def can_be_in_space?
-      true
+    def accessible_by(context)
+      return accessible_by_public if context.guest?
+      return none unless context.logged_in?
+
+      accessible_by_user(context.user)
     end
 
-    def accessible_by(context)
-      if context.guest?
-        accessible_by_public
-      else
-        raise unless context.user_id.present? && context.user.present?
+    def accessible_by_user(user)
+      query = where(user: user, scope: Scopes::SCOPE_PRIVATE).
+        or(where(scope: Scopes::SCOPE_PUBLIC)).
+        or(where(scope: user.space_uids))
 
-        query = where(user_id: context.user_id, scope: "private").
-          or(where(scope: "public")).
-          or(where(scope: context.user.space_uids))
+      query = query.or(where(user: User.challenge_bot)) if user.is_challenge_evaluator?
 
-        query = query.or(where(user_id: User.challenge_bot.id)) if context.challenge_evaluator?
-
-        query
-      end
+      query
     end
 
     def editable_by(context)
-      if context.guest?
-        none
-      else
-        return false if try(:space_object).try(:verified?)
+      return none unless context.logged_in?
 
-        raise unless context.user_id.present?
-        records = where(user_id: context.user_id)
-        return records unless can_be_in_space?
-        records.where(scope: ["public", "private"] + context.user.space_uids)
-      end
+      editable_scopes = Space.editable_by(context).
+        pluck(Arel.sql("distinct concat('space-', spaces.id)"))
+
+      where(
+        user: context.user,
+        scope: [Scopes::SCOPE_PUBLIC, Scopes::SCOPE_PRIVATE],
+      ).or(where(scope: editable_scopes))
     end
 
     def editable_in_space(context, ids)
@@ -46,11 +42,11 @@ module Permissions
     end
 
     def accessible_by_public
-      where(scope: "public")
+      where(scope: Scopes::SCOPE_PUBLIC)
     end
 
     def accessible_by_private
-      where(scope: "private")
+      where(scope: Scopes::SCOPE_PRIVATE)
     end
 
     def accessible_by_space(space)
@@ -77,14 +73,11 @@ module Permissions
   end
 
   def editable_by?(context)
-    return false if context.guest?
-
-    return false if in_locked_verification_space?
+    return false if context.guest? || in_locked_verification_space?
 
     return user_id == context.user_id unless in_space?
 
-    return false unless context.user.space_uids.include?(scope)
-    SpaceMembershipPolicy.can_modify_content?(space_object, self, context.user)
+    space_object.editable_by?(context.user)
   end
 
   # Check if the object belongs to current user
@@ -97,28 +90,15 @@ module Permissions
 
   # Helper method, not to be called from outside the model
   def core_publishable_by?(context, scope_to_publish_to)
-    if context.guest?
-      false
-    else
-      return false unless user_id == context.user_id
-      core_publishable_by_user?(context.user, scope_to_publish_to)
-    end
+    return false if context.guest? || user_id != context.user_id
+
+    core_publishable_by_user?(context.user, scope_to_publish_to)
   end
 
-  def core_publishable_by_user?(user, scope_to_publish_to)
+  def core_publishable_by_user?(user, _scope_to_publish_to)
     return false unless user
+
     user_id == user.id && (private? || in_space?)
-  end
-
-  # Check, whether file is piblishable, i.e. to be 'public'.
-  #   A file should have scope 'private' or in space.
-  # @param user [User] a user object, who is going to publish
-  # @return [true, false] Returns true if a file can be published by a user,
-  #   false otherwise.
-  def publishable?(user)
-    return false unless user
-
-    private? || in_space?
   end
 
   def publishable_by?(context, scope_to_publish_to = "public")
@@ -148,23 +128,23 @@ module Permissions
   end
 
   def public?
-    scope == "public"
+    scope == Scopes::SCOPE_PUBLIC
   end
 
   def private?
-    scope == "private" || scope.nil?
+    scope.nil? || scope == Scopes::SCOPE_PRIVATE
   end
 
   def in_locked_verification_space?
     in_space? && space_object.verified?
   end
 
-  def in_verificaiton_space?
+  def in_verification_space?
     in_space? && space_object.verification?
   end
 
   def in_space?
-    !public? && !private?
+    Space.valid_scope?(scope)
   end
 
   def in_confidential_space?
@@ -172,7 +152,6 @@ module Permissions
   end
 
   def space_object
-    raise unless in_space?
     Space.from_scope(scope)
   end
 

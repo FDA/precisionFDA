@@ -46,3 +46,8 @@ To set up development environment please refer to [Development Setup](docs/DEVEL
 ## Using udocker
 
 To use udocker please refer to [udocker user manual](https://github.com/indigo-dc/udocker/blob/master/doc/user_manual.md).
+
+## React-based frontend development
+
+To get information about React-based development, please refer to
+[this manual](docs/REACT_FRONTEND_DEVELOPMENT.md).

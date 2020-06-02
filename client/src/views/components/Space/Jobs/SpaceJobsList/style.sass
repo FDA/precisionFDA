@@ -1,0 +1,19 @@
+@import "../../../../../styles/variables.sass"
+
+.space-jobs-list
+  width: 100%
+
+  .col-state
+    width: 100px
+
+    &__state-running, &__state-idle
+      color: $brand-running-color
+      background-color: $brand-running-bg
+
+    &__state-done
+      color: $brand-done-color
+      background-color: $brand-done-bg
+
+    &__state-failed, &__state-terminated
+      color: $brand-failed-color
+      background-color: $brand-failed-bg

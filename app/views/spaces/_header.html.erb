@@ -147,7 +147,7 @@
     <p class="lead"><span class='fa fa-warning' aria-hidden='true'></span> This Space has not yet been activated</p>
     <% if @space.review? %>
       <% if @space.confidential? %>
-        <p>Both reviewer and sponsor leads must click "Accept space" to activate the <%= link_to 'cooperative space', space_path(@space.shared_space) %>.</p>
+        <p>Both reviewer and sponsor leads must click "Accept space" to activate the <%= link_to 'cooperative space', _space_path(@space.shared_space) %>.</p>
       <% else %>
         <p>Both reviewer and sponsor leads must click "Accept space" to activate it.</p>
       <% end %>

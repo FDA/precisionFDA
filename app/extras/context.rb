@@ -57,8 +57,7 @@ class Context
   end
 
   def can_create_spaces?
-    return false unless logged_in?
-    user.can_administer_site? || review_space_admin?
+    logged_in? && user.can_create_spaces?
   end
 
   def can_administer_site?
@@ -75,14 +74,6 @@ class Context
 
   def logged_in_or_guest?
     return logged_in? || guest?
-  end
-
-  def valid_publish_targets_for(item)
-    targets = item.is_a?(Workflow) ? [] : ["public"]
-    if logged_in?
-      targets += @user.active_spaces.map(&:uid)
-    end
-    targets.select { |t| item.publishable_by?(self, t) }
   end
 
   def api

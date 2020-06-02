@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SpacesListPage test should render 1`] = `
+<DefaultLayout>
+  <div
+    className="pfda-padded-20 spaces-page-layout"
+  >
+    <div
+      className="row"
+    >
+      <div
+        className="pull-left pfda-mr-r30"
+      >
+        <Connect(SpacesListSwitcher) />
+      </div>
+      <div
+        className="pull-left"
+      >
+        <SpacesListSearch
+          filterSpacesHandler={[Function]}
+        />
+      </div>
+      <div
+        className="pull-right"
+      />
+    </div>
+    <div
+      className="pfda-padded-t40"
+    >
+      <Connect(SpacesList) />
+    </div>
+  </div>
+</DefaultLayout>
+`;

@@ -19,7 +19,7 @@
     <row>
       <columns>
         <p>
-          <%= @content.user.full_name %> deleted <%= @content.klass.downcase %> from space <%= link_to @space.title, space_url(@space) %>:
+          <%= @content.user.full_name %> deleted <%= @content.klass.downcase %> from space <%= link_to @space.title, _space_url(@space) %>:
         </p>
         <p>
           <%= link_to(@content.title, urlify(@content)) %>

@@ -119,6 +119,8 @@ Rails.application.routes.draw do
     namespace "api" do
       get "update_active", to: "base#update_active"
 
+      get :user, to: "users#show"
+
       namespace "activity_reports" do
         get "total"
         get "data_upload"
@@ -142,14 +144,74 @@ Rails.application.routes.draw do
 
       resources :apps, only: %w(create) do
         collection do
+          post "copy"
           post "import"
           get "accessible_apps"
         end
       end
 
-      resources :workflows, only: %w(create)
+      resources :spaces, only: %i(index show create update) do
+        collection do
+          get :editable_spaces
+          get :info
+        end
 
-      post "publish"
+        member do
+          get :apps
+          get :files
+          get :jobs
+          get :workflows
+          get :members
+          put :tags
+          post :accept
+          post :add_data
+
+          post :lock, controller: :space_requests
+          post :unlock, controller: :space_requests
+          post :delete, controller: :space_requests
+        end
+
+        scope module: :spaces do
+          resources :files, only: [] do
+            collection do
+              post :publish_files
+              post :move
+              post :remove
+              post :create_folder
+              get :subfolders
+            end
+
+            member do
+              put :rename_folder
+            end
+          end
+
+          resources :memberships, only: %(update) do
+            collection do
+              post :invite
+              get :can_change_role
+            end
+          end
+        end
+      end
+
+      resources :folders, only: [] do
+        get :children, on: :collection
+      end
+
+      resources :files, param: :uid, only: %i(update) do
+        get :download, on: :member
+
+        collection do
+          post :copy
+          post :download_list
+        end
+      end
+
+      resources :workflows, only: %w(create) do
+        post :copy, on: :collection
+      end
+
       post "related_to_publish"
       post "create_file"
       post "create_challenge_card_image"
@@ -371,47 +433,18 @@ Rails.application.routes.draw do
 
     resource :org, only: :update
 
-    resources :space_templates do
-      get "duplicate", on: :member
-    end
-
-    resources :spaces, except: :destroy do
+    resources :spaces, only: %i(index) do
       member do
-        get "members"
-        get "discuss"
         get "tasks"
         get "feed"
         get "reports"
         get "notes"
-        get "files"
-        get "apps"
-        get "jobs"
         get "comparisons"
         get "assets"
-        get "workflows"
-        post "verify"
-        post "accept"
-        post "rename"
+        get "discuss"
         post "invite"
-        post "move"
-        post "create_folder"
-        post "download_list"
-        post "publish_folder"
-        post "copy_folder_to_cooperative"
-        post "copy_file_to_cooperative"
-        post "copy_to_cooperative"
-        post "search_content"
-        post "remove_folder"
-        post "lock", controller: "space_requests"
-        post "unlock", controller: "space_requests"
-        post "delete", controller: "space_requests"
-      end
-
-      collection do
-        get "verified_space_list", controller: "space_templates"
-        get "unverified_apps", controller: "space_templates"
-        get "apps_and_files"
-        post "rename_folder"
+        post "copy_to_cooperative" # copy a single item to cooperative, used everywhere
+        post "search_content" # used in discuss only
       end
 
       resources :comments
@@ -443,15 +476,7 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :space_membership, only: [] do
-      member do
-        post :to_lead
-        post :to_admin
-        post :to_viewer
-        post :to_contributor
-        post :to_inactive
-      end
-    end
+    get "/spaces/*all", to: "spaces#index"
 
     resources :notification_preferences, only: [:index] do
       post "change", on: :collection

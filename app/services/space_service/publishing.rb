@@ -20,7 +20,7 @@ module SpaceService
         scope = "public"
       elsif scope.is_a?(String)
         if scope != "public"
-          raise "Publish route called with invalid scope #{scope}" unless scope =~ /^space-(\d+)$/
+          raise "Publish route called with invalid scope #{scope}" unless Space.valid_scope?(scope)
 
           space = Space.find_by(id: Regexp.last_match(1))
           useful_space = space.present? && space.active? && space.accessible_by?(context)

@@ -24,10 +24,6 @@ class Discussion < ApplicationRecord
   acts_as_followable
   acts_as_taggable
 
-  def self.can_be_in_space?
-    false
-  end
-
   def uid
     "discussion-#{id}"
   end
@@ -73,6 +69,12 @@ class Discussion < ApplicationRecord
   end
 
   # Override some permissions methods
+
+  def self.editable_by(context)
+    return none unless context.logged_in?
+
+    where(user: context.user)
+  end
 
   def self.accessible_by(context)
     if context.guest?

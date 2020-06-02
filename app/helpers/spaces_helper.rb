@@ -270,32 +270,46 @@ module SpacesHelper
 
     disable_button = nil
     if SpaceMembershipPolicy.can_disable?(@space, @membership, member)
-      disable_button = member_card_button('Disable', to_inactive_space_membership_path(member), 'minus-circle')
+      disable_button = member_card_button(
+        "Disable", to_inactive_api_space_membership_path(member), "minus-circle"
+      )
     end
 
     to_lead_button = nil
     if SpaceMembershipPolicy.can_lead?(@space, @membership, member)
-      to_lead_button = member_card_button('To lead', to_lead_space_membership_path(member), 'star')
+      to_lead_button = member_card_button(
+        "To lead", to_lead_api_space_membership_path(member), "star"
+      )
     end
 
     to_admin_button = nil
     if SpaceMembershipPolicy.can_admin?(@space, @membership, member)
-      to_admin_button = member_card_button('To admin', to_admin_space_membership_path(member), 'star')
+      to_admin_button = member_card_button(
+        "To admin", to_admin_api_space_membership_path(member), "star"
+      )
     end
 
     to_contributor_button = nil
 
     if SpaceMembershipPolicy.can_contributor?(@space, @membership, member)
-      to_contributor_button = member_card_button('To contributor', to_contributor_space_membership_path(member), 'star')
+      to_contributor_button = member_card_button(
+        "To contributor", to_contributor_api_space_membership_path(member), "star"
+      )
     end
 
     to_viewer_button = nil
     if SpaceMembershipPolicy.can_viewer?(@space, @membership, member)
-      to_viewer_button = member_card_button('To viewer', to_viewer_space_membership_path(member), 'star')
+      to_viewer_button = member_card_button(
+        "To viewer", to_viewer_api_space_membership_path(member), "star"
+      )
     end
 
     buttons = nil
-    if disable_button || to_lead_button || to_admin_button || to_contributor_button || to_viewer_button
+    if disable_button ||
+       to_lead_button ||
+       to_admin_button ||
+       to_contributor_button ||
+       to_viewer_button
       buttons = """
         <div class='member-card-row member-card-buttons'>
           #{disable_button}
@@ -339,4 +353,72 @@ module SpacesHelper
     """
   end
 
+  # Provide a node origin links to use on Space Files page
+  # @param node [Node] Node to get origin for.
+  # @return [String] - file link object node of type "UserFile"
+  def node_origin(node)
+    if node.klass == "folder"
+      nil
+    elsif node.parent_type == "Node" && node.parent.blank?
+      "Copied"
+    elsif node.parent_type != "User"
+      node_origin_link(unilinkfw(node.parent))
+    else
+      "Uploaded"
+    end
+  end
+
+  # Collects an object with a node origin link attributes -
+  #   to be used in /client Space Files page Table in a column 'origin'
+  # @param html_link [String] - html_link - of the following content:
+  #   <a href= "files path">
+  #     <span class= "fa class"> </span>
+  #     "file name"
+  #   </a>
+  # @return origin_link [Object] - of the following content:
+  #   { href: [String] - files path, fa: [String] - fa class, text: [String] - file name }
+  #
+  def node_origin_link(html_link)
+    parsed_html_link = Nokogiri::HTML(html_link)
+    parsed_a_element = parsed_html_link.at("a")
+    parsed_span_element = parsed_html_link.at("span")
+
+    origin_link = {}
+    origin_link[:href] = parsed_a_element["href"] if parsed_a_element
+    origin_link[:fa] = parsed_span_element.to_h["class"] if parsed_span_element
+    origin_link[:text] = parsed_html_link.text
+
+    origin_link
+  end
+
+  # Get a node, mapped to attributes, used in /client on Space Files page
+  # @param node [Node] Node to get origin for.
+  # @param space [Space] A space.
+  # @param current_user [User] A current_user.
+  # @return [Hash] An object of mapped node, to be used in /client
+  def client_file(node, space, current_user)
+    rename_path = if node.is_a?(UserFile)
+      api_file_path(node)
+    else
+      rename_folder_api_space_file_path(space, node)
+    end
+
+    {
+      id: node.id,
+      name: ERB::Util.h(node.name),
+      type: node.is_a?(UserFile) ? "File" : node.sti_type,
+      org: node.user ? node.user.org.handle : "-",
+      added_by: node.user.dxuser,
+      size: node.is_a?(UserFile) ? number_to_human_size(node.file_size) : "",
+      created: node.created_at.strftime("%m/%d/%Y"),
+      state: node.state,
+      tags: node.tag_list,
+      links: {}.tap do |links|
+        links[:filePath] = node.is_a?(UserFile) ? file_path(node) : ""
+        links[:user] = node.is_a?(UserFile) ? user_path(node.user.dxuser) : ""
+        links[:originPath] = node.is_a?(UserFile) ? node_origin(node) : ""
+        links[:renamePath] = rename_path if space.editable_by?(current_user)
+      end,
+    }
+  end
 end

@@ -208,6 +208,15 @@ Style/HashSyntax:
   UseHashRocketsWithSymbolValues: false
   PreferHashRocketsForNonAlnumEndingSymbols: false
 
+Style/HashEachMethods:
+  Enabled: true
+
+Style/HashTransformKeys:
+  Enabled: true
+
+Style/HashTransformValues:
+  Enabled: true
+
 Layout/IndentationConsistency:
   EnforcedStyle: normal
   SupportedStyles:
@@ -652,6 +661,12 @@ Rails/HttpPositionalArguments:
   Include:
   - spec/**/*
   - test/**/*
+
+Rails/HasManyOrHasOneDependent:
+  Enabled: false
+
+Rails/InverseOf:
+  Enabled: false
 
 Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: comma

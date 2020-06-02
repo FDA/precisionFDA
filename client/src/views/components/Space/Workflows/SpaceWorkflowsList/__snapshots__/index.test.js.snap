@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SpaceWorkflowsList test should render 1`] = `
+<div
+  className="text-center"
+>
+  No workflows found.
+</div>
+`;
