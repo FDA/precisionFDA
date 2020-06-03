@@ -11,19 +11,15 @@ class CopyService
     # @param scope [String] A destination scope.
     # return [CopyService::Copies] Object that includes a source and a new app.
     def copy(app, scope)
-      copies = Copies.new
-
       ActiveRecord::Base.transaction do
         opts = build_opts(app, scope)
 
         new_app = AppService.create_app(user, api, opts)
 
-        copies.push(object: new_app, source: app)
-
         authorize_users(new_app, scope)
-      end
 
-      copies
+        new_app
+      end
     end
 
     private

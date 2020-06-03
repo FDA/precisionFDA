@@ -3,10 +3,9 @@ class CopyService
   class WorkflowCopier
     class WorkflowCopyError < StandardError; end
 
-    def initialize(api:, user:, app_copier: nil)
+    def initialize(api:, user:)
       @api = api
       @user = user
-      @app_copier = app_copier || AppCopier.new(api: api, user: user)
     end
 
     def copy(workflow, scope)
@@ -56,12 +55,16 @@ class CopyService
 
     private
 
-    attr_reader :api, :user, :app_copier
+    attr_reader :api, :user
+
+    def copy_service
+      @copy_service ||= CopyService.new(api: api, user: user)
+    end
 
     def copy_dependencies(new_workflow, workflow, scope)
       stages = workflow.stages.map do |stage|
         source_app = App.find_by!(uid: stage["app_uid"])
-        new_app = app_copier.copy(source_app, scope)
+        new_app = copy_service.copy(source_app, scope).first
 
         stage["app_uid"] = new_app.uid
         stage["inputs"].map! do |input|
