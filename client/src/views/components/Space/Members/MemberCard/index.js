@@ -9,15 +9,6 @@ import GroupRoleUpdates from '../GroupRoleUpdates'
 
 
 const MemberCard = ({ member, updateRole, updateRoleData }) => {
-  const toRoleCheck = (changeRoleChecks, memberId, toRole) => {
-    if (typeof changeRoleChecks !== [] && changeRoleChecks.length > 0 ) {
-      const obj = changeRoleChecks.find(o => o.id === memberId)
-      if ( obj !== undefined && obj !== null) {
-        return Object.values(obj).find(o => o[toRole])
-      }
-    }
-  }
-
   const memberRole = (member) => {
     if (member.active) {
       return member.role
@@ -71,9 +62,8 @@ const MemberCard = ({ member, updateRole, updateRoleData }) => {
 
       <div className="space-member-row">
         <GroupRoleUpdates
-          memberId={member.id}
+          member={member}
           updateRole={updateRole}
-          toRoleCheck={toRoleCheck}
           updateRoleData={updateRoleData}
       />
       </div>

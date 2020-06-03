@@ -16,7 +16,6 @@ import SpaceLayout from '../../../../layouts/SpaceLayout'
 import {
   fetchMembers,
   showAddMembersModal,
-  checkMemberRoleChange,
 } from '../../../../../actions/spaces'
 import { inviteMembers } from '../../../../../actions/spaces/members'
 import SpaceMembersList from '../../../../components/Space/Members/SpaceMembersList'
@@ -159,7 +158,6 @@ const mapDispatchToProps = dispatch => ({
   addMembers: (spaceId, side, fieldsValues) => {
     dispatch(inviteMembers(spaceId, fieldsValues)).then((statusIsOk) => {
       if (statusIsOk) {
-        dispatch(checkMemberRoleChange(spaceId))
         dispatch(fetchMembers(spaceId, side))
       }
     })

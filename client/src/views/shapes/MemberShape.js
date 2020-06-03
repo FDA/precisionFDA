@@ -11,6 +11,7 @@ const MemberShape = {
   createdAt: PropTypes.string,
   active: PropTypes.bool,
   links: PropTypes.object,
+  availableRoles: PropTypes.array,
 }
 
 const mapToMember = (data) => {
@@ -24,6 +25,7 @@ const mapToMember = (data) => {
     createdAt: data.created_at,
     active: data.active,
     links: data.links,
+    availableRoles: data.to_roles || [],
   }
 }
 

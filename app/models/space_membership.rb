@@ -18,6 +18,9 @@ class SpaceMembership < ApplicationRecord
   SIDE_HOST = "host".freeze
   SIDE_GUEST = "guest".freeze
 
+  SIDE_HOST_ALIAS = "reviewer".freeze
+  SIDE_GUEST_ALIAS = "sponsor".freeze
+
   ROLE_LEAD   = "lead".freeze
   ROLE_ADMIN  = "admin".freeze
   ROLE_CONTRIBUTOR = "contributor".freeze

@@ -73,7 +73,6 @@ import {
 import {
   fetchMembers,
   inviteMembers,
-  checkMemberRoleChange,
   showAddMembersModal,
   hideAddMembersModal,
 } from './members'
@@ -133,7 +132,6 @@ export {
   fetchWorkflows,
   fetchMembers,
   inviteMembers,
-  checkMemberRoleChange,
   createSpace,
   fetchNewSpaceInfo,
   fetchApps,

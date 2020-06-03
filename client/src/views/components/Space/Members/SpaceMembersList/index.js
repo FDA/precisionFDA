@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import classNames from 'classnames/bind'
@@ -12,7 +12,6 @@ import {
 } from '../../../../../reducers/spaces/members/selectors'
 import { spaceDataSelector } from '../../../../../reducers/spaces/space/selectors'
 import './style.sass'
-import { checkMemberRoleChange } from '../../../../../actions/spaces/members'
 import MemberRoleChangeModal from '../MemberRoleChangeModal'
 import { showMemberRoleChangeModal } from '../../../../../actions/spaces/members'
 
@@ -22,12 +21,9 @@ const SpaceMembersList = (
     members,
     isFetching,
     spaceId,
-    checkRoleChangeAction,
     showRoleUpdateModalAction,
     updateRoleData,
   } ) => {
-
-  useEffect(() => { checkRoleChangeAction(spaceId) }, [])
 
   const updateRole = (updateRoleData) => showRoleUpdateModalAction(spaceId, updateRoleData)
 
@@ -80,7 +76,6 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  checkRoleChangeAction: (spaceId) => { dispatch(checkMemberRoleChange(spaceId)) },
   showRoleUpdateModalAction: (spaceId, updateRoleData) => { dispatch(showMemberRoleChangeModal(updateRoleData)) },
 })
 

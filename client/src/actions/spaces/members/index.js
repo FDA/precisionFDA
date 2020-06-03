@@ -7,7 +7,6 @@ import {
 } from '../types'
 import fetchMembers from './fetchMembers'
 import inviteMembers from './inviteMembers'
-import checkMemberRoleChange from './checkMemberRoleChange'
 import updateRole from './memberRoleUpdate'
 
 
@@ -23,7 +22,6 @@ export {
   inviteMembers,
   showAddMembersModal,
   hideAddMembersModal,
-  checkMemberRoleChange,
   showMemberRoleChangeModal,
   hideMemberRoleChangeModal,
   updateRole,

@@ -9,7 +9,7 @@ import {
 } from '../../types'
 import { showAlertAboveAllSuccess, showAlertAboveAll } from '../../../alertNotifications'
 import { spaceDataSelector } from '../../../../reducers/spaces/space/selectors'
-import { hideMemberRoleChangeModal } from '../index'
+import { fetchMembers, hideMemberRoleChangeModal } from '../index'
 
 
 const updateRoleStart = () => createAction(SPACE_MEMBERS_UPDATE_ROLE_START)
@@ -27,6 +27,7 @@ export default (spaceId, updateRoleData) => (
       const statusIsOk = response.status === httpStatusCodes.OK
       if (statusIsOk) {
         const payload = response.payload
+
         const successMessage = () => {
           if (payload.role === 'disable') {
              return `The member ${payload.member} was successfully disabled.`
@@ -36,8 +37,9 @@ export default (spaceId, updateRoleData) => (
             return `The role of member ${payload.member} was updated successfully to '${payload.role}'.`
           }
         }
-        dispatch(updateRoleSuccess())
 
+        dispatch(updateRoleSuccess())
+        dispatch(fetchMembers(spaceId))
         dispatch(showAlertAboveAllSuccess({ message: successMessage() }))
       } else if (response.status === httpStatusCodes.FORBIDDEN) {
         dispatch(hideMemberRoleChangeModal())
