@@ -188,7 +188,6 @@ Rails.application.routes.draw do
           resources :memberships, only: %(update) do
             collection do
               post :invite
-              get :can_change_role
             end
           end
         end

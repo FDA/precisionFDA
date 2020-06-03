@@ -10,6 +10,7 @@ class SpaceMembershipSerializer < ApplicationSerializer
     :org,
     :created_at,
     :links,
+    :to_roles,
   )
 
   # Returns a dxuser of a member user.
@@ -45,5 +46,34 @@ class SpaceMembershipSerializer < ApplicationSerializer
       links[:gravatar] = object.user.gravatar_url
       links[:user] = user_path(object.user.dxuser)
     end
+  end
+
+  def to_roles
+    return [] unless current_membership
+
+    all_roles.select do |role|
+      SpaceMembershipPolicy.can_change_role?(
+        space,
+        current_membership,
+        object,
+        role,
+      )
+    end
+  end
+
+  private
+
+  def space
+    @space ||= object.spaces.first
+  end
+
+  def current_membership
+    @current_membership ||= begin
+      current_user && space.space_memberships.active.find_by(user: current_user)
+    end
+  end
+
+  def all_roles
+    SpaceMembership::ROLES + [SpaceMembership::ENABLE, SpaceMembership::DISABLE]
   end
 end

@@ -10,9 +10,6 @@ import {
   SPACE_MEMBERS_HIDE_ADD_MEMBERS_MODAL,
   SPACE_MEMBERS_SHOW_ROLE_CHANGE_MODAL,
   SPACE_MEMBERS_HIDE_ROLE_CHANGE_MODAL,
-  SPACE_MEMBERS_CHECK_ROLE_CHANGE_START,
-  SPACE_MEMBERS_CHECK_ROLE_CHANGE_SUCCESS,
-  SPACE_MEMBERS_CHECK_ROLE_CHANGE_FAILURE,
   SPACE_MEMBERS_UPDATE_ROLE_START,
   SPACE_MEMBERS_UPDATE_ROLE_SUCCESS,
   SPACE_MEMBERS_UPDATE_ROLE_FAILURE,
@@ -164,40 +161,4 @@ describe('reducer actions processing', () => {
       },
     })
   })
-
-  it('SPACE_MEMBERS_CHECK_ROLE_CHANGE_START', () => {
-    const initialState = {}
-    const action = { type: SPACE_MEMBERS_CHECK_ROLE_CHANGE_START }
-
-    expect(reducer(initialState, action)).toEqual({
-      isCheking: true,
-    })
-  })
-
-  it('SPACE_MEMBERS_CHECK_ROLE_CHANGE_SUCCESS', () => {
-    const initialState = {}
-    const roleChangeChecks = [
-      { id: 13, checks: { lead: false, admin: false }},
-      { id: 15, checks: { lead: true, admin: true }},
-    ]
-    const action = { type: SPACE_MEMBERS_CHECK_ROLE_CHANGE_SUCCESS, payload: { roleChangeChecks }}
-
-    expect(reducer(initialState, action)).toEqual({
-      isCheking: false,
-      roleChangeChecks: [
-        { checks: { admin: false, lead: false }, id: 13 },
-        { checks: { admin: true, lead: true }, id: 15 },
-      ],
-    })
-  })
-
-  it('SPACE_MEMBERS_CHECK_ROLE_CHANGE_FAILURE', () => {
-    const initialState = {}
-    const action = { type: SPACE_MEMBERS_CHECK_ROLE_CHANGE_FAILURE }
-
-    expect(reducer(initialState, action)).toEqual({
-      isCheking: false,
-    })
-  })
-
 })

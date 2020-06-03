@@ -150,17 +150,18 @@ module Api
     # GET /api/spaces/:id/members
     # Fetches space members, according to filter value.
     def members
-      members =
+      side =
         case params[:side]
-        when "host", "reviewer"
-          @space.space_memberships.select { |member| member.side == "host" }
-        when "guest", "sponsor"
-          @space.space_memberships.select { |member| member.side == "guest" }
-        else
-          @space.space_memberships
+        when SpaceMembership::SIDE_HOST, SpaceMembership::SIDE_HOST_ALIAS
+          "host"
+        when SpaceMembership::SIDE_GUEST, SpaceMembership::SIDE_GUEST_ALIAS
+          "guest"
         end
 
-      render json: members, adapter: :json, root: "space_memberships"
+      members = @space.space_memberships
+      members = members.where(side: side) if side
+
+      render json: members, adapter: :json
     end
 
     # POST /api/spaces/:id/tags

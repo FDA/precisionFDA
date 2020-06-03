@@ -11,9 +11,6 @@ import {
   SPACE_MEMBERS_ADD_START,
   SPACE_MEMBERS_ADD_SUCCESS,
   SPACE_MEMBERS_ADD_FAILURE,
-  SPACE_MEMBERS_CHECK_ROLE_CHANGE_START,
-  SPACE_MEMBERS_CHECK_ROLE_CHANGE_SUCCESS,
-  SPACE_MEMBERS_CHECK_ROLE_CHANGE_FAILURE,
   SPACE_MEMBERS_UPDATE_ROLE_START,
   SPACE_MEMBERS_UPDATE_ROLE_SUCCESS,
   SPACE_MEMBERS_UPDATE_ROLE_FAILURE,
@@ -122,21 +119,5 @@ export default createReducer(initialState, {
       isOpen: true,
       isLoading: false,
     },
-  }),
-
-  [SPACE_MEMBERS_CHECK_ROLE_CHANGE_START]: state => ({
-    ...state,
-    isCheking: true,
-  }),
-
-  [SPACE_MEMBERS_CHECK_ROLE_CHANGE_SUCCESS]: (state, { roleChangeChecks } ) => ({
-    ...state,
-    isCheking: false,
-    roleChangeChecks: roleChangeChecks,
-  }),
-
-  [SPACE_MEMBERS_CHECK_ROLE_CHANGE_FAILURE]: state => ({
-    ...state,
-    isCheking: false,
   }),
 })

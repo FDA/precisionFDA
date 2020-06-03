@@ -5,17 +5,15 @@ module Api
     class MembershipsController < ApiController
       include SpaceConcern
 
-      before_action :role_valid?, except: %i(invite can_change_role)
-      before_action :can_change_membership?, except: %i(invite can_change_role)
-      before_action :space, :fetch_membership, only: %i(invite can_change_role)
       before_action :find_space, :can_edit?, only: %i(invite update)
+      before_action :role_valid?, :can_change_membership?, only: %i(update)
+      before_action :fetch_membership, only: %i(invite)
 
       # POST /api/spaces/:id/invite
       # Creates new space members.
       def invite
-        head(:forbidden) && return unless @membership
-
         space_invite_form = SpaceInviteForm.new(space_invite_params.merge(space: @space))
+
         if space_invite_form.valid?
           api = @membership.persisted? ? @context.api : DNAnexusAPI.for_admin
           begin
@@ -41,45 +39,21 @@ module Api
       # Update space member's role.
       def update
         member.with_lock do
-          unless membership_service.call(api, space, member, admin_member)
+          unless membership_service.call(api, @space, member, admin_member)
             raise ApiError, "Can't designate user #{member.user.full_name} as #{role}"
           end
         end
 
-        render json: { member: member.user.full_name, role: params[:role] }, adapter: :json
-      end
-
-      # Call action to determine the possibility of role changing action
-      def can_change_role
-        result =
-          @space.space_memberships.map do |membership|
-            checks = checks_list.each_with_object({}) do |role, all|
-              all[role] =
-                SpaceMembershipPolicy.can_change_role?(
-                  @space,
-                  @membership,
-                  membership,
-                  role,
-                )
-            end
-
-            { id: membership.id, checks: checks }
-          end
-
-        render json: result, adapter: :json
+        render json: { member: member.user.full_name, role: role }, adapter: :json
       end
 
       private
 
       # Fetch objects necessary for invite.
       def fetch_membership
-        @membership = @space.space_memberships.active.find_by(user_id: current_user.id)
+        @membership = @space.space_memberships.active.find_by(user: current_user)
 
-        if @membership.nil? && current_user.review_space_admin?
-          SpaceMembership.new_by_admin(current_user)
-        else
-          @membership
-        end
+        head(:forbidden) unless @membership
       end
 
       # Adds invitees attributes to fit SpaceInviteForm.
@@ -98,39 +72,35 @@ module Api
         errors.flatten.join("\n ") if errors.size.positive?
       end
 
-      def checks_list
+      def all_roles
         SpaceMembership::ROLES + [SpaceMembership::ENABLE, SpaceMembership::DISABLE]
       end
 
       def role
-        @role ||= (Array(params[:role]) & checks_list).first
+        @role ||= (Array(params[:role]) & all_roles).first
+      end
+
+      def role_valid?
+        raise ApiError, "Role '#{params[:role]}' is invalid!" unless role
       end
 
       def membership_service
         @membership_service ||= "SpaceMembershipService::To#{role.camelize}".constantize
       end
 
-      def space
-        @space ||= Space.find(params[:space_id])
-      end
-
       def admin_member
-        @admin_member ||= space.
+        @admin_member ||= @space.
           space_memberships.
           lead_or_admin.
           find_by(user: current_user)
       end
 
       def member
-        @member ||= space.space_memberships.find(params[:id])
+        @member ||= @space.space_memberships.find(params[:id])
       end
 
       def api
         @api ||= DIContainer.resolve("api.user")
-      end
-
-      def role_valid?
-        raise ApiError, "Role '#{params[:role]}' is invalid!" unless role
       end
 
       def can_change_membership?
