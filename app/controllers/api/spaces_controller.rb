@@ -185,7 +185,6 @@ module Api
 
     # TODO: split this route to separately handle different objects?
     # Copies files, apps or workflows from any accessible user scope to the current space.
-    # rubocop:disable Metrics/MethodLength
     def add_data
       head(:forbidden) && return unless @space.editable_by?(current_user)
 
@@ -221,25 +220,11 @@ module Api
         end
       end
 
-      copied_workflows =
-        workflows&.map { |workflow| copy_service.copy(workflow, @space.scope).first }
-      copied_apps = apps.map { |app| copy_service.copy(app, @space.scope).first }
+      workflows&.each { |workflow| copy_service.copy(workflow, @space.scope) }
+      apps.each { |app| copy_service.copy(app, @space.scope) }
 
-      # TODO: use serializer for files!
-      rendered_objects =
-        if copied_files.present?
-          {
-            json: {
-              files: copied_files.map { |file| helpers.client_file(file, @space, current_user) },
-            },
-          }
-        else
-          { json: copied_workflows.presence || copied_apps, adapter: :json }
-        end
-
-      render rendered_objects
+      head :ok
     end
-    # rubocop:enable Metrics/MethodLength
 
     private
 
