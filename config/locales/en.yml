@@ -21,6 +21,10 @@
 
 en:
   hello: "Hello world"
+  main:
+    header: A secure, collaborative, high-performance computing platform that builds a community
+            of experts around the analysis of biological datasets in order to advance precision
+            medicine, inform regulatory science, and enable improvements in health outcomes.
   email_taken: |
     Error. This email address is already being used for a %{side} account.
     Please choose a different email address for precisionFDA.
