@@ -97,7 +97,7 @@ class ApplicationController < ActionController::Base
     session[:token] = token
     session[:expiration] = expiration
     session[:org_id] = org_id
-    Session.create(user_id: user_id, key: session.id)
+    Session.create(user_id: user_id, key: session.id.private_id)
   end
 
   # Redirects user to login page if user is not logged in.
@@ -272,7 +272,7 @@ class ApplicationController < ActionController::Base
   def handle_session
     return unless session[:user_id]
 
-    ar_session = Session.find_by(key: session.id)
+    ar_session = Session.find_by(key: session.id.private_id)
 
     unless ar_session
       reset_session
