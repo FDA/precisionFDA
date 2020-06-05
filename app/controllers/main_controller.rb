@@ -128,7 +128,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       Auditor.perform_audit(action: "destroy", record_type: "Session", record: { message: "User #{session[:username]} logged out" })
     end
 
-    Session.where(key: session.id).delete_all
+    Session.where(key: session.id.private_id).delete_all
     DIContainer.shutdown
     reset_session
     flash[:success] = "You were successfully logged out of precisionFDA"
@@ -308,7 +308,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       if Session.limit_reached?(user)
         flash[:error] = "You have reached a limit for login. You can use only #{SESSIONS_LIMIT} active sessions."
       else
-        Session.where(key: session.id).delete_all
+        Session.where(key: session.id.private_id).delete_all
         reset_session
         save_session(user.id, username, token, expiration_time, user.org_id)
         log_session("User #{username} logged in")
