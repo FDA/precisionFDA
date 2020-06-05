@@ -146,7 +146,7 @@ group :test do
   gem "factory_bot_rails", "~> 4.8", ">= 4.8.2"
   gem "ffaker"
   gem "rails-controller-testing"
-  gem "rspec-rails", "~> 3.7", ">= 3.7.1"
+  gem "rspec-rails"
   gem "shoulda-matchers"
   gem "simplecov", ">= 0.18.5", require: false
   gem "webmock", "~> 3.1", ">= 3.1.1"
