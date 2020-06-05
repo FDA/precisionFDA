@@ -90,8 +90,7 @@ class CopyService
           next
         end
 
-        next unless file.state == UserFile::STATE_CLOSED
-        next if destination_project == file.project
+        next if file.state != UserFile::STATE_CLOSED || destination_project == file.project
 
         projects[file.project] ||= []
         projects[file.project].push(file)

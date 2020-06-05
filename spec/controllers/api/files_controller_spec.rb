@@ -130,8 +130,7 @@ RSpec.describe Api::FilesController, type: :controller do
       end
 
       it "copies files and folders" do
-        copies = instance_double(CopyService::Copies, select: [], all: [])
-        node_copier = instance_double(CopyService::NodeCopier, copy: copies)
+        node_copier = instance_double(CopyService::NodeCopier, copy: CopyService::Copies.new)
         allow(CopyService::NodeCopier).to receive(:new).and_return(node_copier)
 
         node_ids = [file_one.id, folder_one.id, file_two.id, file_other.id]
