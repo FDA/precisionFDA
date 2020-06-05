@@ -98,7 +98,8 @@ class CopyService
     # @return [CopyService::Copies] An object that contains copied and source files.
     def copy_file(file, scope, parent_folder = nil)
       copies = file_copier.copy(file, scope)
-      copies[0].object.update!(@parent_folder_col => parent_folder&.id) if copies[0].copied
+      file_copy = copies[0]
+      file_copy.object.update!(@parent_folder_col => parent_folder&.id) if file_copy&.copied
       copies
     end
   end
