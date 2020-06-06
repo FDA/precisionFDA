@@ -9,6 +9,7 @@
 
 class Country < ApplicationRecord
   UNITED_STATES = "United States".freeze
+  UNITED_STATES_AREA_CODE = "+1".freeze
 
   US_STATES_LIST = {
     "AL": "Alabama",
