@@ -118,11 +118,7 @@ class Invitation < ApplicationRecord
   end
 
   def usa_phone_code?
-    phone_country_code == "+1"
-  end
-
-  def usa?
-    country.name == "United States"
+    phone_country_code == Country::UNITED_STATES_AREA_CODE
   end
 
   def validate_email
@@ -144,4 +140,6 @@ class Invitation < ApplicationRecord
       errors.add(:state, "doesn't match postal code")
     end
   end
+
+  delegate :usa?, to: :country, allow_nil: true
 end
