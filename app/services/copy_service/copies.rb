@@ -44,13 +44,7 @@ class CopyService
       copies.first.object
     end
 
-    def method_missing(method, *args, &block)
-      copies.respond_to?(method) ? copies.send(method, *args, &block) : super
-    end
-
-    def respond_to_missing?(method, include_private = false)
-      copies.respond_to?(method) || super
-    end
+    delegate :size, :select, :[], :empty?, :present?, to: :copies
 
     attr_reader :copies
   end
