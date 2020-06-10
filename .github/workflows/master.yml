@@ -94,7 +94,7 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: "12.x"
+          node-version: "12.16.1"
 
       - name: Install
         run: yarn
@@ -110,7 +110,7 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: "12.x"
+          node-version: "12.16.1"
 
       - name: Install
         run: yarn --frozen-lockfile
