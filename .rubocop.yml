@@ -5,6 +5,7 @@ require:
 AllCops:
   Exclude:
   - 'db/schema.rb'
+  - 'vendor/**/*'
   DisplayCopNames: true
   StyleGuideCopsOnly: false
   TargetRubyVersion: 2.6.5
