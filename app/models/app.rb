@@ -119,6 +119,24 @@ class App < ApplicationRecord
     space_object.reviewer? || space_object.verification?
   end
 
+  # Checks if app is accessible by the user.
+  # @return [Boolean] Returns true if app is accessible by a user, false otherwise.
+  def accessible_by_user?(user)
+    public? ||
+      !in_space? && user_id == user.id ||
+      in_space? && user.space_uids.include?(scope)
+  end
+
+  def runnable_by?(user)
+    accessible_by_user?(user) && (
+      !in_space? ||
+      SpaceMembershipPolicy.can_run_apps?(
+        space_object,
+        space_object.space_memberships.find_by(user: user),
+      )
+    )
+  end
+
   def find_input(name)
     spec["input_spec"].select { |input| input["name"] == name }.first
   end
