@@ -1,5 +1,7 @@
 # Responsible for apps-related actions.
 class AppsController < ApplicationController
+  include ErrorProcessable
+
   skip_before_action :require_login, only: %i(index featured explore show fork new)
   before_action :require_login_or_guest, only: %i(index featured explore show fork new)
   before_action :validate_app_before_export, only: %i(export cwl_export wdl_export)
@@ -260,8 +262,10 @@ class AppsController < ApplicationController
     inputs = unsafe_params["inputs"]
     fail "Inputs should be a hash" unless inputs.is_a?(Hash)
 
-    # App should exist and be accessible
-    @app = App.accessible_by(@context).find_by!(uid: id)
+    # App should exist and be accessible and runnable by a user.
+    @app = App.find_by!(uid: id)
+
+    fail I18n.t("app_not_accessible_or_runnable") unless @app.runnable_by?(current_user)
 
     # Check if asset licenses have been accepted
     unless @app.assets.all? { |a| a.license.blank? || a.licensed_by?(@context) }

@@ -30,6 +30,8 @@ class AppSerializer < ApplicationSerializer
   # Returns a string with text explanation about previous runnnings of the app by current_user.
   # @return [String, nil] Text explanation or nil if app's space is locked.
   def run_by_you
+    return unless can_run?
+
     if run_by_you?
       "Yes"
     elsif app_ids.present?
@@ -60,13 +62,21 @@ class AppSerializer < ApplicationSerializer
       links[:show] = app_path(object)
       links[:user] = user_path(added_by)
 
-      if !run_by_you? && app_ids.empty? && !object.in_locked_space?
+      if can_run? && !run_by_you? && app_ids.empty? && !object.in_locked_space?
         links[:run_job] = new_app_job_path(object.app_series.latest_version_app)
       end
     end
   end
 
   private
+
+  # Checks if user has permissions to run the app.
+  # @return [Boolean] Returns true if a user can run the app, false otherwise.
+  def can_run?
+    return false unless current_user
+
+    object.runnable_by?(current_user)
+  end
 
   # Returns an array of apps ids which have jobs, runned by current_user.
   # @return [Array<Integer>] App IDs.

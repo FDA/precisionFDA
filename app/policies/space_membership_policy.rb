@@ -3,6 +3,13 @@
 #
 class SpaceMembershipPolicy
   class << self
+    def can_run_apps?(space, membership)
+      space.active? &&
+        membership.present? &&
+        membership.active? &&
+        membership.lead_or_admin_or_contributor?
+    end
+
     def can_move_content_by_user?(space, user)
       can_move_content?(
         space,
