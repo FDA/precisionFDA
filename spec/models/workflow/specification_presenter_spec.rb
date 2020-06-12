@@ -1,14 +1,15 @@
 require "rails_helper"
-include Imports::WorkflowHelper
-include Imports::WorkflowSpecificationHelper
 
-RSpec.describe Workflow::SpecificationPresenter, type: :model  do
+RSpec.describe Workflow::SpecificationPresenter, type: :model do
+  include Imports::WorkflowHelper
+  include Imports::WorkflowSpecificationHelper
+
   subject(:presenter) do
     described_class.new(workflow_presenter.params, context, workflow_presenter.slot_objects)
   end
 
   let(:user) { create(:user) }
-  let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, nil, nil) }
+  let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, 1.day.from_now, user.org) }
   let(:raw) { params }
   let(:subject_response) { presenter.build }
   let(:workflow_presenter) { Workflow::Presenter.new(raw, context) }
@@ -22,9 +23,9 @@ RSpec.describe Workflow::SpecificationPresenter, type: :model  do
   end
 
   before do
-    create(:app, dxid: raw["slots"].second["uid"].split("-1").first, user_id: user.id)
-    create(:app, dxid: raw["slots"].first["uid"].split("-1").first, user_id: user.id)
-    allow_any_instance_of(Context).to receive(:logged_in?).and_return(true)
+    raw["slots"][..1].each do |slot|
+      create(:app, dxid: slot["uid"].split("-1").first, user_id: user.id)
+    end
   end
 
   describe "#build" do
@@ -43,7 +44,7 @@ RSpec.describe Workflow::SpecificationPresenter, type: :model  do
 
     context "when a workflow is new" do
       it "creates workflow_series" do
-        expect { subject_response }.to change { WorkflowSeries.count }.by(1)
+        expect { subject_response }.to change(WorkflowSeries, :count).by(1)
       end
     end
 
@@ -55,7 +56,7 @@ RSpec.describe Workflow::SpecificationPresenter, type: :model  do
       end
 
       it "creates workflow_series" do
-        expect { subject_response }.not_to change { WorkflowSeries.count }
+        expect { subject_response }.not_to change(WorkflowSeries, :count)
       end
 
       it "increases revision by 1" do
@@ -86,8 +87,8 @@ RSpec.describe Workflow::SpecificationPresenter, type: :model  do
     end
 
     it "add errors for title attribute" do
-      expect(presenter.errors[:title])
-        .to include(I18n.t("title.non_empty_string", scope: locale_scope))
+      expect(presenter.errors[:title]).
+        to include(I18n.t("title.non_empty_string", scope: locale_scope))
     end
   end
 
@@ -110,8 +111,8 @@ RSpec.describe Workflow::SpecificationPresenter, type: :model  do
 
     it "add errors for workflow_series" do
       options = { scope: locale_scope, name: raw["workflow_name"] }
-      expect(presenter.errors[:workflow_series])
-        .to include(I18n.t("workflow_series.unique", options))
+      expect(presenter.errors[:workflow_series]).
+        to include(I18n.t("workflow_series.unique", **options))
     end
   end
 
@@ -123,8 +124,8 @@ RSpec.describe Workflow::SpecificationPresenter, type: :model  do
 
     it "add errors for workflow_series" do
       options = { scope: locale_scope, name: raw["workflow_name"] }
-      expect(presenter.errors[:workflow_series])
-        .to include(I18n.t("workflow_series.blank", options))
+      expect(presenter.errors[:workflow_series]).
+        to include(I18n.t("workflow_series.blank", **options))
     end
   end
 end

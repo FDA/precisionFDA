@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby "2.6.5"
+ruby "2.7.1"
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem "rails", "~> 5.2.4.3"
@@ -20,7 +20,7 @@ gem "turbolinks", "~> 5"
 gem "jbuilder", "~> 2.5"
 
 # Reduces boot times through caching; required in config/boot.rb
-gem "bootsnap", ">= 1.1.0", require: false
+gem "bootsnap", ">= 1.4.6", require: false
 
 # bundle exec rake doc:rails generates the API under doc/api.
 gem "sdoc", ">= 1.0.0", group: :doc
@@ -68,7 +68,7 @@ gem "kaminari"
 gem "local_time"
 
 # Add comments on any model
-gem "acts-as-taggable-on", "~> 6.0"
+gem "acts-as-taggable-on", "~> 6.5", github: "mbleigh/acts-as-taggable-on"
 gem "acts_as_commentable_with_threading"
 gem "acts_as_follower", github: "tcocca/acts_as_follower", branch: "master"
 gem "acts_as_votable"
@@ -83,7 +83,7 @@ gem "mysql2"
 
 gem "gretel"
 
-gem "rack-utf8_sanitizer", "~> 1.6"
+gem "rack-utf8_sanitizer", "~> 1.7"
 
 # View outgoing HTTP requests
 gem "httplog"
