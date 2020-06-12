@@ -5,7 +5,7 @@
       <span class="fa fa-globe"></span>
       Public
     <% elsif item.in_space? %>
-      <%= unilinkfw(item_from_uid(item.scope)) %>
+      <%= unilinkfw(item_from_uid(item.scope), data: { turbolinks: false }) %>
     <% else %>
       <span class="fa fa-lock"></span>
       Private

@@ -121,7 +121,9 @@ module ApplicationHelper
     end
 
     if item.accessible_by?(@context) || (item.try(:user).try(:dxuser) == CHALLENGE_BOT_DX_USER && @context.logged_in? && @context.user.is_challenge_evaluator?)
-      opts[:nolink] ? icon_span + item.title.to_s : link_to(icon_span + item.title.to_s, pathify(item), {class: opts[:title_class]})
+      html_opts = { class: opts[:title_class] }
+      html_opts[:data] = opts[:data] if opts[:data]
+      opts[:nolink] ? icon_span + item.title.to_s : link_to(icon_span + item.title.to_s, pathify(item), html_opts)
     else
       icon_span + item.uid
     end
