@@ -1,7 +1,8 @@
 require "rails_helper"
-include Imports::WorkflowHelper
 
 RSpec.describe Workflow::Stages::InputPresenter, type: :model do
+  include Imports::WorkflowHelper
+
   subject { presenter }
 
   let(:slot) { params["slots"].first }
@@ -25,10 +26,11 @@ RSpec.describe Workflow::Stages::InputPresenter, type: :model do
       input["name"] = ""
       presenter.valid?
     end
+
     it "add errors to the attribute" do
       options = { scope: locale_scope, slot_name: presenter.slot.name,
                   input_number: (presenter.input_number + 1).ordinalize }
-      expect(presenter.errors[:name]).to include(I18n.t("name.non_empty_string", options))
+      expect(presenter.errors[:name]).to include(I18n.t("name.non_empty_string", **options))
     end
   end
 
@@ -37,8 +39,9 @@ RSpec.describe Workflow::Stages::InputPresenter, type: :model do
       input["name"] = "007Input"
       presenter.valid?
     end
+
     it "add errors to the attribute" do
-      expect(presenter.errors[:name]).to include(I18n.t("name.format", locale_options))
+      expect(presenter.errors[:name]).to include(I18n.t("name.format", **locale_options))
     end
   end
 
@@ -47,8 +50,9 @@ RSpec.describe Workflow::Stages::InputPresenter, type: :model do
       slot["inputs"].second["name"] = slot["inputs"].first["name"]
       presenter.valid?
     end
+
     it "add errors to the attribute" do
-      expect(presenter.errors[:name]).to include(I18n.t("name.unique", locale_options))
+      expect(presenter.errors[:name]).to include(I18n.t("name.unique", **locale_options))
     end
   end
 
@@ -57,9 +61,10 @@ RSpec.describe Workflow::Stages::InputPresenter, type: :model do
       input["class"] = ""
       presenter.valid?
     end
+
     it "add errors to the attribute" do
-      expect(presenter.errors[:input_class])
-        .to include(I18n.t("input_class.non_empty_string", locale_options))
+      expect(presenter.errors[:input_class]).
+        to include(I18n.t("input_class.non_empty_string", **locale_options))
     end
   end
 
@@ -68,10 +73,11 @@ RSpec.describe Workflow::Stages::InputPresenter, type: :model do
       input["class"] = "object"
       presenter.valid?
     end
+
     it "add errors to the attribute" do
       options = locale_options.merge(types: App::VALID_IO_CLASSES.join(", "))
-      expect(presenter.errors[:input_class])
-        .to include(I18n.t("input_class.inclusion", options))
+      expect(presenter.errors[:input_class]).
+        to include(I18n.t("input_class.inclusion", **options))
     end
   end
 
@@ -80,9 +86,10 @@ RSpec.describe Workflow::Stages::InputPresenter, type: :model do
       input["optional"] = "string"
       presenter.valid?
     end
+
     it "add errors to the attribute" do
-      expect(presenter.errors[:optional])
-        .to include(I18n.t("optional.inclusion", locale_options))
+      expect(presenter.errors[:optional]).
+        to include(I18n.t("optional.inclusion", **locale_options))
     end
   end
 
@@ -91,9 +98,10 @@ RSpec.describe Workflow::Stages::InputPresenter, type: :model do
       input["label"] = nil
       presenter.valid?
     end
+
     it "add errors to the attribute" do
-      expect(presenter.errors[:label])
-        .to include(I18n.t("label.non_empty_string", locale_options))
+      expect(presenter.errors[:label]).
+        to include(I18n.t("label.non_empty_string", **locale_options))
     end
   end
 
@@ -102,9 +110,10 @@ RSpec.describe Workflow::Stages::InputPresenter, type: :model do
       input["requiredRunInput"] = "string"
       presenter.valid?
     end
+
     it "add errors to the attribute" do
-      expect(presenter.errors[:required_run_input])
-        .to include(I18n.t("required_run_input.inclusion", locale_options))
+      expect(presenter.errors[:required_run_input]).
+        to include(I18n.t("required_run_input.inclusion", **locale_options))
     end
   end
 
@@ -113,9 +122,10 @@ RSpec.describe Workflow::Stages::InputPresenter, type: :model do
       input["parent_slot"] = "wrong_id"
       presenter.valid?
     end
+
     it "add errors to the attribute" do
       options = locale_options.merge(parent_slot: presenter.parent_slot, slot_id: slot["slotId"])
-      expect(presenter.errors[:parent_slot]).to include(I18n.t("parent_slot.match", options))
+      expect(presenter.errors[:parent_slot]).to include(I18n.t("parent_slot.match", **options))
     end
   end
 
@@ -124,9 +134,10 @@ RSpec.describe Workflow::Stages::InputPresenter, type: :model do
       input["stageName"] = "wrong_stage_name"
       presenter.valid?
     end
+
     it "add errors to the attribute" do
       options = locale_options.merge(stage_name: slot["slotId"], expected_name: slot["name"])
-      expect(presenter.errors[:stage_name]).to include(I18n.t("stage_name.match", options))
+      expect(presenter.errors[:stage_name]).to include(I18n.t("stage_name.match", **options))
     end
   end
 
@@ -135,8 +146,9 @@ RSpec.describe Workflow::Stages::InputPresenter, type: :model do
       input["values"] = {}
       presenter.valid?
     end
+
     it "add errors to the attribute" do
-      expect(presenter.errors[:values]).to include(I18n.t("values.format", locale_options))
+      expect(presenter.errors[:values]).to include(I18n.t("values.format", **locale_options))
     end
   end
 end

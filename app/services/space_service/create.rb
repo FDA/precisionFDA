@@ -2,7 +2,7 @@ module SpaceService
   class Create
     # @param [SpaceForm] space_form
     def self.call(space_form, options = {})
-      new(options).call(space_form)
+      new(**options).call(space_form)
     end
 
     def initialize(user:, api:, notification_mailer: NotificationsMailer)

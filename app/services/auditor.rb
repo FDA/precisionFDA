@@ -67,7 +67,7 @@ module Auditor
   end
 
   def self.perform_audit(data)
-    msg = Auditor.prepare_data(data)
+    msg = Auditor.prepare_data(**data)
     Auditor.init!
     Auditor.file.write("#{msg.to_json},\n")
   end

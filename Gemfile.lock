@@ -1,4 +1,11 @@
 GIT
+  remote: https://github.com/mbleigh/acts-as-taggable-on.git
+  revision: 47da5036dea61cb971bfaf72de5fa93c85255307
+  specs:
+    acts-as-taggable-on (6.5.0)
+      activerecord (>= 5.0, < 6.1)
+
+GIT
   remote: https://github.com/tcocca/acts_as_follower.git
   revision: c5ac7b9601c4af01eb4d9112330b27be4d694ecc
   branch: master
@@ -57,8 +64,6 @@ GEM
       i18n (>= 0.7, < 2)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
-    acts-as-taggable-on (6.0.0)
-      activerecord (~> 5.0)
     acts_as_commentable_with_threading (2.0.1)
       activerecord (>= 4.0)
       activesupport (>= 4.0)
@@ -74,8 +79,8 @@ GEM
       rake (>= 10.4, < 13.0)
     arel (9.0.0)
     ast (2.4.0)
-    awesome_nested_set (3.1.4)
-      activerecord (>= 4.0.0, < 5.3)
+    awesome_nested_set (3.2.0)
+      activerecord (>= 4.0.0, < 7.0)
     aws-eventstream (1.0.3)
     aws-partitions (1.177.0)
     aws-sdk-core (3.56.0)
@@ -96,7 +101,7 @@ GEM
     bindex (0.7.0)
     binding_of_caller (0.8.0)
       debug_inspector (>= 0.0.1)
-    bootsnap (1.4.4)
+    bootsnap (1.4.6)
       msgpack (~> 1.0)
     bootstrap-kaminari-views (0.0.5)
       kaminari (>= 0.13)
@@ -131,14 +136,16 @@ GEM
     dotenv-rails (2.7.2)
       dotenv (= 2.7.2)
       railties (>= 3.2, < 6.1)
-    dry-configurable (0.8.3)
+    dry-configurable (0.11.5)
       concurrent-ruby (~> 1.0)
       dry-core (~> 0.4, >= 0.4.7)
+      dry-equalizer (~> 0.2)
     dry-container (0.7.2)
       concurrent-ruby (~> 1.0)
       dry-configurable (~> 0.1, >= 0.1.3)
     dry-core (0.4.9)
       concurrent-ruby (~> 1.0)
+    dry-equalizer (0.3.0)
     erubi (1.9.0)
     eventmachine (1.2.7)
     exception_notification (4.1.1)
@@ -153,7 +160,7 @@ GEM
     faraday (1.0.1)
       multipart-post (>= 1.2, < 3)
     ffaker (2.11.0)
-    ffi (1.11.1)
+    ffi (1.13.1)
     formatador (0.2.5)
     foundation_emails (2.2.1.0)
     gitlab (4.14.1)
@@ -241,7 +248,7 @@ GEM
     mini_mime (1.0.2)
     mini_portile2 (2.4.0)
     minitest (5.14.1)
-    msgpack (1.3.0)
+    msgpack (1.3.3)
     multi_xml (0.6.0)
     multipart-post (2.1.1)
     mysql2 (0.5.2)
@@ -304,7 +311,7 @@ GEM
       rack
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
-    rack-utf8_sanitizer (1.6.0)
+    rack-utf8_sanitizer (1.7.0)
       rack (>= 1.0, < 3.0)
     rails (5.2.4.3)
       actioncable (= 5.2.4.3)
@@ -338,8 +345,8 @@ GEM
     rainbow (3.0.0)
     raindrops (0.19.0)
     rake (12.3.3)
-    rb-fsevent (0.10.3)
-    rb-inotify (0.10.0)
+    rb-fsevent (0.10.4)
+    rb-inotify (0.10.1)
       ffi (~> 1.0)
     rdoc (6.2.1)
     recaptcha (5.5.0)
@@ -491,14 +498,14 @@ PLATFORMS
 DEPENDENCIES
   active_model_serializers (~> 0.10.0)
   activerecord-import
-  acts-as-taggable-on (~> 6.0)
+  acts-as-taggable-on (~> 6.5)!
   acts_as_commentable_with_threading
   acts_as_follower!
   acts_as_votable
   annotate
   aws-sdk-sns
   axlsx (= 3.0.0.pre)
-  bootsnap (>= 1.1.0)
+  bootsnap (>= 1.4.6)
   bootstrap-kaminari-views
   brakeman
   byebug
@@ -535,7 +542,7 @@ DEPENDENCIES
   pry-rails
   pry-remote
   pry-stack_explorer
-  rack-utf8_sanitizer (~> 1.6)
+  rack-utf8_sanitizer (~> 1.7)
   rails (~> 5.2.4.3)
   rails-controller-testing
   rails_param
@@ -566,7 +573,7 @@ DEPENDENCIES
   wice_grid
 
 RUBY VERSION
-   ruby 2.6.5p114
+   ruby 2.7.1p83
 
 BUNDLED WITH
    2.1.4

@@ -30,7 +30,7 @@ jobs:
   test-ruby:
     name: Test (Ruby)
     runs-on: ubuntu-latest
-    container: ruby:2.6.5
+    container: ruby:2.7.1
 
     services:
       mysql:
