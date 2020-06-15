@@ -15,6 +15,8 @@ module ErrorProcessable
     raise ApiError.new(msg, data)
   end
 
+  alias_method :raise_api_error, :fail
+
   def add_errors(attributes)
     first_name = attributes[:first_name]
     last_name = attributes[:last_name]

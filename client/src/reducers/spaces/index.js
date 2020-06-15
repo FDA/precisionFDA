@@ -8,6 +8,7 @@ import jobs from './jobs'
 import workflows from './workflows'
 import members from './members'
 import newSpace from './newSpace'
+import fileUpload from '../../features/space/fileUpload/reducer'
 
 
 export default combineReducers({
@@ -19,4 +20,5 @@ export default combineReducers({
   workflows,
   members,
   newSpace,
+  fileUpload,
 })
