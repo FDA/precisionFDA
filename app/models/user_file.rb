@@ -336,6 +336,10 @@ class UserFile < Node
     state == STATE_OPEN
   end
 
+  def closed?
+    state == STATE_CLOSED
+  end
+
   def independent?
     !parent_comparison?
   end
