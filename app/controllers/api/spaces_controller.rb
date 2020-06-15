@@ -20,6 +20,8 @@ module Api
                     workflows
                   )
 
+    before_action :sync_files, only: %i(files)
+
     # POST /api/spaces/:id/accept
     # Activates a space.
     def accept
@@ -228,6 +230,10 @@ module Api
     end
 
     private
+
+    def sync_files
+      User.sync_files!(@context)
+    end
 
     def copy_service
       @copy_service ||= CopyService.new(api: api, user: current_user)

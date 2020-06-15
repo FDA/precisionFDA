@@ -7,11 +7,11 @@ import Loader from '../Loader'
 import './style.sass'
 
 
-const Modal = ({ children, modalFooterContent, isOpen, isLoading, title, subTitle, noPadding, hideModalHandler }) => {
+const Modal = ({ children, className, modalFooterContent, isOpen, isLoading, title, subTitle, noPadding, hideModalHandler, ...rest }) => {
   const classes = classNames({
     'pfda-modal--loading': isLoading,
     'pfda-modal--no-padding': noPadding,
-  }, 'pfda-modal')
+  }, 'pfda-modal', className)
 
   const hideHandler = () => {
     if (isLoading) return false
@@ -25,6 +25,7 @@ const Modal = ({ children, modalFooterContent, isOpen, isLoading, title, subTitl
       overlayClassName='pfda-modal__overlay'
       ariaHideApp={false}
       onRequestClose={hideHandler}
+      {...rest}
     >
       <div className="modal-dialog">
         <div className="modal-content">
@@ -82,4 +83,5 @@ Modal.propTypes = {
   title: PropTypes.string,
   subTitle: PropTypes.string,
   hideModalHandler: PropTypes.func,
+  className: PropTypes.any,
 }

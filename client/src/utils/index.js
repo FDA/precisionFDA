@@ -25,3 +25,15 @@ export const debounce = (inner, ms = 0) => {
 }
 
 export const getQueryParam = (query, item) => (new URLSearchParams(query)).get(item)
+
+export const createSequenceGenerator = () => {
+  function *generator() {
+    let index = 0
+
+    while (true) {
+      yield index++
+    }
+  }
+
+  return generator()
+}

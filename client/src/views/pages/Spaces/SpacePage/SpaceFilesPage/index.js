@@ -13,7 +13,6 @@ import {
   resetSpaceFilesFilters,
   showFilesAddFolderModal,
 } from '../../../../../actions/spaces'
-import { showSpaceAddDataModal } from '../../../../../actions/spaces'
 import Button from '../../../../components/Button'
 import Icon from '../../../../components/Icon'
 import FilesTable from '../../../../components/Space/Files/FilesTable'
@@ -23,7 +22,10 @@ import MoveModal from '../../../../components/Space/Files/MoveModal'
 import ActionsDropdown from '../../../../components/Space/Files/ActionsDropdown'
 import { getQueryParam } from '../../../../../utils'
 import { getSpacePageTitle } from '../../../../../helpers/spaces'
-import { SPACE_ADD_DATA_TYPES } from '../../../../../constants'
+import { showSelectResourceTypeModal } from '../../../../../features/space/fileUpload/actions'
+import SelectResourceTypeModal
+  from '../../../../../features/space/fileUpload/SelectResourceTypeModal'
+import UploadModal from '../../../../../features/space/fileUpload/UploadModal'
 
 
 class SpaceFilesPage extends Component {
@@ -91,6 +93,8 @@ class SpaceFilesPage extends Component {
         <AddFolderModal loadFilesHandler={this.loadSpaceFiles} folderId={folderId} />
         <AddDataModal space={space} folderId={folderId} loadFilesHandler={this.loadSpaceFiles} />
         <MoveModal space={space} currentFolderId={folderId} />
+        <SelectResourceTypeModal />
+        <UploadModal />
       </SpaceLayout>
     )
   }
@@ -127,7 +131,7 @@ const mapDispatchToProps = dispatch => ({
   },
   resetFilters: () => dispatch(resetSpaceFilesFilters()),
   showAddFolderModal: () => dispatch(showFilesAddFolderModal()),
-  showAddFilesModal: () => dispatch(showSpaceAddDataModal(SPACE_ADD_DATA_TYPES.FILES)),
+  showAddFilesModal: () => dispatch(showSelectResourceTypeModal()),
 })
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(SpaceFilesPage))

@@ -7,6 +7,7 @@ import {
 } from '../actions/spaces/types'
 import { spaceDataSelector } from '../reducers/spaces/space/selectors'
 import { fetchSpace } from '../actions/spaces/fetchSpace'
+import { hideUploadModal } from '../features/space/fileUpload/actions'
 
 
 export const spacesMiddleware = ({ dispatch, getState }) => next => action => {
@@ -18,6 +19,7 @@ export const spacesMiddleware = ({ dispatch, getState }) => next => action => {
     case SPACE_PUBLISH_FILES_SUCCESS:
     case LOCK_SPACE_SUCCESS:
     case UNLOCK_SPACE_SUCCESS:
+    case hideUploadModal.type:
       dispatch(fetchSpace(spaceId))
     // eslint-disable-next-line no-fallthrough
     default:
