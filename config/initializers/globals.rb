@@ -127,3 +127,5 @@ BILLING_INFO = {
   country: "USA",
   phone: "(301) 706-1836",
 }.freeze
+
+SUPPORT_EMAIL = "precisionfda-support@dnanexus.com".freeze
