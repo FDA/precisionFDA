@@ -37,7 +37,7 @@ const acceptedLabel = isAccepted => isAccepted ? 'Accepted' : 'Pending'
 
 const hostLeadLabel = spaceType => `${spaceType === SPACE_REVIEW ? 'Reviewer' : 'Host'} Lead`
 
-const guestLeadLabel = spaceType => `${spaceType === SPACE_REVIEW ? 'Sponsor' : 'Guest'} Lead`
+const guestLeadLabel = spaceType => `${spaceType === SPACE_REVIEW ? 'Sponsor' : 'Space'} Lead`
 
 
 class Activation extends React.Component {
