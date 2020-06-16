@@ -6,6 +6,7 @@ import classNames from 'classnames/bind'
 import Counter from './Counter'
 import UserShape from '../../../../shapes/UserShape'
 import SpaceShape from '../../../../shapes/SpaceShape'
+import { SPACE_REVIEW } from '../../../../../constants'
 
 
 const UserLink = ({ user, helperText }) => (
@@ -36,9 +37,15 @@ const DataContainer = ({ space }) => {
       </div>
 
       <div className="spaces-list-card-data__leaders">
-        {(space.isPrivate && space.hostLead) && <UserLink user={space.hostLead} helperText="(Lead)" />}
-        {(!space.isPrivate && space.hostLead) && <UserLink user={space.hostLead} helperText="(Reviewer Lead)" />}
-        {(!space.isPrivate && space.guestLead) && <UserLink user={space.guestLead} helperText="(Sponsor Lead)" />}
+        { (space.isPrivate && space.hostLead) &&
+          <UserLink user={space.hostLead} helperText="(Lead)" />
+        }
+        { (!space.isPrivate && space.hostLead) &&
+          <UserLink user={space.hostLead} helperText={`(${space.type === SPACE_REVIEW ? 'Reviewer' : 'Host'} Lead)`} />
+        }
+        { (!space.isPrivate && space.guestLead) &&
+          <UserLink user={space.guestLead} helperText={`(${space.type === SPACE_REVIEW ? 'Sponsor' : 'Space'} Lead)`} />
+        }
       </div>
 
       <div className="spaces-list-card-data__counters">
