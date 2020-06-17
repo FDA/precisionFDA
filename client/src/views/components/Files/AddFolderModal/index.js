@@ -49,6 +49,7 @@ const AddFolderModal = ({ addFolderAction, hideAction, isOpen, isLoading }) => {
         value={folderName}
         onChange={changeFolderName}
         lg
+        autoFocus
       />
     </Modal>
   )
