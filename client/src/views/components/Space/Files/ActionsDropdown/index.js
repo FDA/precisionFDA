@@ -59,9 +59,7 @@ const ActionsDropdown = ({ loadFilesHandler }) => {
     [currentFile],
   )
 
-  if (!checkedFiles.length) {
-    return null
-  }
+  const isAnyFileChecked = checkedFiles.length > 0
 
   const disableRename = checkedFiles.length > 1 || !currentFile || !currentFile.links.renamePath
 
@@ -72,17 +70,23 @@ const ActionsDropdown = ({ loadFilesHandler }) => {
           <Icon icon="fa-cog" />
         </Button>
         <ul className="dropdown-menu dropdown-menu-right" aria-labelledby="space_files_actions">
-          <Item isDisabled={disableRename} icon="fa-pencil" text="Rename" handler={showRenameModal} />
+          <Item isDisabled={!isAnyFileChecked || disableRename}
+            icon="fa-pencil" text="Rename" handler={showRenameModal} />
           <Divider />
-          <Item isDisabled={!links.move} icon="fa-share" text="Move To Folder" handler={showFilesMoveModal}/>
+          <Item isDisabled={!isAnyFileChecked || !links.move}
+            icon="fa-share" text="Move To Folder" handler={showFilesMoveModal}/>
           <Divider />
-          <Item isDisabled={!links.copy} icon="fa-clone" text="Copy To Space" handler={showCopyModal} />
+          <Item isDisabled={!isAnyFileChecked || !links.copy}
+            icon="fa-clone" text="Copy To Space" handler={showCopyModal} />
           <Divider />
-          <Item isDisabled={!links.publish} icon="fa-bullhorn" text="Publish" handler={showPublishModal} />
+          <Item isDisabled={!isAnyFileChecked || !links.publish}
+            icon="fa-bullhorn" text="Publish" handler={showPublishModal} />
           <Divider />
-          <Item isDisabled={!links.remove} icon="fa-trash" text="Delete" handler={showDeleteModal} />
+          <Item isDisabled={!isAnyFileChecked || !links.remove}
+            icon="fa-trash" text="Delete" handler={showDeleteModal} />
           <Divider />
-          <Item icon="fa-download" text="Download" handler={showDownloadModal} />
+          <Item isDisabled={!isAnyFileChecked}
+            icon="fa-download" text="Download" handler={showDownloadModal} />
         </ul>
       </div>
       <ActionModal files={checkedFiles} loadFilesHandler={loadFilesHandler} />
