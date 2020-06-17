@@ -44,6 +44,7 @@ const RenameObjectModal = ({ renameAction, hideAction, isOpen, isLoading, defaul
         placeholder="Rename..."
         value={fileName}
         onChange={changeFileName}
+        autoFocus
         lg
       />
     </Modal>
