@@ -11,7 +11,6 @@ export const SORT_DESC = 'DESC'
 export const ALERT_ABOVE_ALL = 'ALERT_ABOVE_ALL'
 export const ALERT_TYPES = [ALERT_ABOVE_ALL]
 export const ALERT_STYLES = ['success', 'danger', 'warning', 'info']
-export const ALERT_MESSAGES_MAX_COUNT = 3
 
 export const FILES_TYPE_FOLDER = 'Folder'
 export const FILES_TYPE_FILE = 'UserFile'
