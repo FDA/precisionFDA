@@ -30,17 +30,17 @@ class Folder < Node
             presence: { message: "Name could not be blank" },
             length: {
               maximum: MAX_NAME_LENGTH,
-              too_long: "Name could not be longer than #{MAX_NAME_LENGTH} characters"
+              too_long: "Name could not be longer than #{MAX_NAME_LENGTH} characters."
             }
 
   validates_uniqueness_of :name,
                           scope: %i[user_id scope parent_folder_id],
-                          message: "A folder with this name '%{value}' already exists",
+                          message: "A folder with the name '%{value}' is already exist.",
                           if: lambda { private? }
 
   validates_uniqueness_of :name,
                           scope: %i[scope scoped_parent_folder_id],
-                          message: "A folder with this name '%{value}' already exists",
+                          message: "A folder with the name '%{value}' is already exist.",
                           unless: lambda { private? }
 
   scope :not_removing, -> { where.not(state: STATE_REMOVING).or(where(state: nil)) }
