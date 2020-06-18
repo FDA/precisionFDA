@@ -160,8 +160,8 @@ RSpec.describe WorkflowsController, type: :controller do
 
       it "returns a folder name uniqueness validation error message" do
         post :output_folder_create, params: params
-        expect(parsed_response["error_message"])
-          .to eq("A folder with this name '#{folder_name}' already exists")
+        expect(parsed_response["error_message"]).
+          to eq("A folder with the name '#{folder_name}' is already exist.")
       end
     end
   end
