@@ -123,9 +123,9 @@ class UserFile < Node
       where(state: "closed")
     end
 
+    # This is a class method for independent files.
+    # For comparison files, use Comparison.publication_project!
     def publication_project!(user, scope)
-      # This is a class method for independent files.
-      # For comparison files, use Comparison.publication_project!
       if scope == SCOPE_PUBLIC
         user.public_files_project
       elsif scope == SCOPE_PRIVATE
