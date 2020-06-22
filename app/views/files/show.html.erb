@@ -120,7 +120,7 @@
       </div>
     </div>
 
-    <%= render "_partials/btn_copy", item: @file, url: copy_api_files_path %>
+    <%= render "_partials/btn_copy", item: @file %>
 
     <% if @file.in_space? && @file.space_object.editable_by?(@context.user) %>
       <div class="btn-group">

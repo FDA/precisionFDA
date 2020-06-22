@@ -13,7 +13,7 @@ module Api
         # HTML-format response is used only for copying a single app to a space from App Page.
         format.html do
           redirect_to pathify(new_apps.first),
-                      success: "The app has been published successfully!"
+                      success: copy_success_message
         end
         format.json { render json: new_apps, root: "apps", adapter: :json }
       end
@@ -451,19 +451,36 @@ module Api
     def can_copy_to_scope?
       scope = params[:scope]
 
-      return if scope == Scopes::SCOPE_PUBLIC
+      is_pub_or_priv_scope = [Scopes::SCOPE_PUBLIC, Scopes::SCOPE_PRIVATE].include?(scope)
 
-      space = Space.from_scope(scope) if Space.valid_scope?(scope)
-
-      raise ApiError, "Scope parameter is incorrect (can be public or space-x)" unless space
+      if !is_pub_or_priv_scope && !Space.valid_scope?(scope)
+        raise ApiError, "Scope parameter is incorrect (can be public, private or space-xxx)"
+      end
 
       @apps = App.accessible_by(@context).where(id: params[:item_ids])
 
-      raise ApiError, "You have no permissions to copy the selected apps!" if @apps.empty?
+      raise ApiError, "You have no permissions to copy the selected apps!" unless @apps.exists?
+
+      return if is_pub_or_priv_scope
+
+      space = Space.from_scope(scope)
 
       return if space.editable_by?(current_user)
 
       raise ApiError, "You have no permissions to copy apps to the scope '#{scope}'"
+    end
+
+    # Build the copy success message.
+    # @return [String] The message.
+    def copy_success_message
+      case params[:scope]
+      when Scopes::SCOPE_PRIVATE
+        I18n.t("api.apps.copy.messages.publish_to_private")
+      when Scopes::SCOPE_PUBLIC
+        I18n.t("api.apps.copy.messages.publish")
+      else
+        I18n.t("api.apps.copy.messages.publish_to_space")
+      end
     end
   end
 end

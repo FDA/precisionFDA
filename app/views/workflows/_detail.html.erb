@@ -110,7 +110,7 @@
         <% end %>
       <% end %>
     <% end %>
-    <%= render "_partials/btn_copy", item: @workflow, url: copy_api_workflows_path %>
+    <%= render "_partials/btn_copy", item: @workflow %>
 
     <% if @workflow.in_space? && @workflow.space_object.editable_by?(@context.user) %>
       <%= render "_partials/btn_copy_to_cooperative", item: @workflow %>
