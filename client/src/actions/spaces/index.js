@@ -82,6 +82,7 @@ import fetchNewSpaceInfo from './fetchNewSpaceInfo'
 import editSpace from './editSpace'
 import fetchAccessibleSpaces from './fetchAccessibleSpaces'
 import copyToSpace from './copyToSpace'
+import copyToPrivate from './copyToPrivate'
 
 
 const switchListViewType = (viewType) => createAction(SPACES_SWITCH_LIST_VIEW_TYPE, viewType)
@@ -172,6 +173,7 @@ export {
   fetchAccessibleSpaces,
   selectAccessibleSpace,
   copyToSpace,
+  copyToPrivate,
   fetchAccessibleFiles,
   fetchAccessibleApps,
   fetchAccessibleWorkflows,
