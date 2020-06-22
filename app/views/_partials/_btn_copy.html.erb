@@ -50,6 +50,6 @@
 
 <% if can_be_private %>
   <%= link_to copy_url + "?" + { item_ids: [item.id], scope: Scopes::SCOPE_PRIVATE }.to_param, method: :post, class: "btn btn-warning" do %>
-    <span class="fa fa-lock"></span> Private
+    <span class="fa fa-lock"></span> Copy To Private
   <% end %>
 <% end %>

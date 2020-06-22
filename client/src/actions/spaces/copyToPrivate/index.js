@@ -1,11 +1,11 @@
 import httpStatusCodes from 'http-status-codes'
 
 import { createAction } from '../../../utils/redux'
-import * as API from '../../../api/files'
+import { postApiCall } from '../../../api/spaces'
 import {
-  COPY_OBJECTS_TO_SPACE_START,
-  COPY_OBJECTS_TO_SPACE_SUCCESS,
-  COPY_OBJECTS_TO_SPACE_FAILURE,
+  COPY_OBJECTS_TO_PRIVATE_START,
+  COPY_OBJECTS_TO_PRIVATE_SUCCESS,
+  COPY_OBJECTS_TO_PRIVATE_FAILURE,
 } from '../types'
 import {
   showAlertAboveAll,
@@ -14,23 +14,23 @@ import {
 } from '../../alertNotifications'
 
 
-const copyToSpaceStart = () => createAction(COPY_OBJECTS_TO_SPACE_START)
+const copyToPrivateStart = () => createAction(COPY_OBJECTS_TO_PRIVATE_START)
 
-const copyToSpaceSuccess = () => createAction(COPY_OBJECTS_TO_SPACE_SUCCESS)
+const copyToPrivateSuccess = () => createAction(COPY_OBJECTS_TO_PRIVATE_SUCCESS)
 
-const copyToSpaceFailure = () => createAction(COPY_OBJECTS_TO_SPACE_FAILURE)
+const copyToPrivateFailure = () => createAction(COPY_OBJECTS_TO_PRIVATE_FAILURE)
 
-export default (link, scope, ids) => (
+export default (link, ids) => (
   (dispatch) => {
-    dispatch(copyToSpaceStart())
-    return API.postApiCall(link, {
+    dispatch(copyToPrivateStart())
+    return postApiCall(link, {
       item_ids: ids,
-      scope,
+      scope: 'private',
     }).then(({ status, payload }) => {
       if (status === httpStatusCodes.OK) {
         const messages = payload.meta?.messages
 
-        dispatch(copyToSpaceSuccess())
+        dispatch(copyToPrivateSuccess())
 
         if (messages) {
           messages.forEach(message => {
@@ -41,7 +41,7 @@ export default (link, scope, ids) => (
           dispatch(showAlertAboveAllSuccess({ message: 'Objects are successfully copied.' }))
         }
       } else {
-        dispatch(copyToSpaceFailure())
+        dispatch(copyToPrivateFailure())
         if (payload?.error) {
           const { message } = payload.error
           dispatch(showAlertAboveAll({ message: message }))

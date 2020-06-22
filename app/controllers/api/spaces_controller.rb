@@ -302,7 +302,10 @@ module Api
 
     def apps_meta
       { links: {} }.tap do |meta|
+        # copy to space link
         meta[:links][:copy] = copy_api_apps_path if @space.editable_by?(current_user)
+        # copy to private area link
+        meta[:links][:copy_private] = copy_api_apps_path
       end
     end
 
