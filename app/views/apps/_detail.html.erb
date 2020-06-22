@@ -222,12 +222,11 @@
     <%= link_to batch_app_app_path(app), class: "btn btn-primary" do %>
         <span class="fa fa-bolt"></span> Run Batch App&nbsp;&nbsp;<span class="badge"><%= app.version ? "v#{app.version}" : "rev#{app.revision}" %></span>
     <% end %>
-    <%= render "_partials/btn_copy", item: app, url: copy_api_apps_path %>
+    <%= render "_partials/btn_copy", item: app %>
 
     <% if app.in_space? && app.space_object.editable_by?(context.user) %>
       <%= render "_partials/btn_copy_to_cooperative", item: app %>
     <% end %>
-
   </div>
 
   <% if context.logged_in? && app.user == context.user %>
