@@ -28,6 +28,7 @@ export const SPACE_FILES_ACTIONS = {
   PUBLISH: 'publish',
   DOWNLOAD: 'download',
   COPY: 'copy',
+  COPY_TO_PRIVATE: 'copy_to_private',
 }
 
 export const SPACE_ADD_DATA_TYPES = {

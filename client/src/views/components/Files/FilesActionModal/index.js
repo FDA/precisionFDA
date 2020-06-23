@@ -16,6 +16,8 @@ const switchTitle = (action) => {
       return 'Download'
     case SPACE_FILES_ACTIONS.DELETE:
       return 'Delete'
+    case SPACE_FILES_ACTIONS.COPY_TO_PRIVATE:
+      return 'Copy To Private'
     default:
       return 'Some Action'
   }
@@ -35,6 +37,13 @@ const SwitchFooter = ({ action, hideAction, modalAction }) => {
         <>
           <Button onClick={hideAction}>Cancel</Button>
           <Button type="danger" onClick={modalAction}>Delete</Button>
+        </>
+      )
+    case SPACE_FILES_ACTIONS.COPY_TO_PRIVATE:
+      return (
+        <>
+          <Button onClick={hideAction}>Cancel</Button>
+          <Button type="success" onClick={modalAction}>Copy</Button>
         </>
       )
     default:

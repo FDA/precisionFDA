@@ -11,6 +11,7 @@ module Api
     PUBLISH_ACTION = "publish".freeze
     DELETE_ACTION = "delete".freeze
     COPY_ACTION = "copy".freeze
+    COPY_TO_PRIVATE_ACTION = "copy_to_private".freeze
 
     # Updates file name and description.
     # PUT /api/files/:uid
@@ -58,7 +59,7 @@ module Api
       files = []
 
       case task
-      when DOWNLOAD_ACTION, COPY_ACTION
+      when DOWNLOAD_ACTION, COPY_ACTION, COPY_TO_PRIVATE_ACTION
         nodes = Node.accessible_by(@context).where(id: params[:ids])
         nodes.each { |node| files += node.is_a?(Folder) ? node.all_files : [node] }
       when PUBLISH_ACTION
