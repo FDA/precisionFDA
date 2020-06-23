@@ -276,6 +276,8 @@ module Api
       meta = {}
 
       meta[:links] = {}.tap do |links|
+        links[:copy_private] = copy_api_files_path
+
         if @space.editable_by?(current_user)
           links[:publish] = publish_files_api_space_files_path(@space)
           links[:move] = move_api_space_files_path(@space)

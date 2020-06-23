@@ -50,6 +50,9 @@ const ActionsDropdown = ({ loadFilesHandler }) => {
   const showPublishModal = () => dispatch(showFilesActionModal(SPACE_FILES_ACTIONS.PUBLISH))
   const showDownloadModal = () => dispatch(showFilesActionModal(SPACE_FILES_ACTIONS.DOWNLOAD))
   const showDeleteModal = () => dispatch(showFilesActionModal(SPACE_FILES_ACTIONS.DELETE))
+  const showCopyToPrivateModal = () => {
+    dispatch(showFilesActionModal(SPACE_FILES_ACTIONS.COPY_TO_PRIVATE))
+  }
   const showFilesMoveModal = () => dispatch(showMoveModal())
   const showCopyModal = () => dispatch(showFilesCopyModal())
   const showRenameModal = useCallback(
@@ -78,6 +81,9 @@ const ActionsDropdown = ({ loadFilesHandler }) => {
           <Divider />
           <Item isDisabled={!isAnyFileChecked || !links.copy}
             icon="fa-clone" text="Copy To Space" handler={showCopyModal} />
+          <Divider />
+          <Item isDisabled={!isAnyFileChecked || !links.copy_private}
+            icon="fa-lock" text="Copy To Private" handler={showCopyToPrivateModal} />
           <Divider />
           <Item isDisabled={!isAnyFileChecked || !links.publish}
             icon="fa-bullhorn" text="Publish" handler={showPublishModal} />

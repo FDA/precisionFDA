@@ -12,6 +12,7 @@ import {
   fetchFilesByAction,
   deleteFiles,
   publishFiles,
+  copyToPrivate,
 } from '../../../../../actions/spaces'
 import FilesActionModal from '../../../Files/FilesActionModal'
 import { SPACE_FILES_ACTIONS } from '../../../../../constants'
@@ -36,6 +37,8 @@ const ActionModal = ({ files, loadFilesHandler }) => {
         return dispatch(publishFiles(links.publish, modal.files)).then((statusIsOK) => {
           if (statusIsOK) loadFilesHandler()
         })
+      case SPACE_FILES_ACTIONS.COPY_TO_PRIVATE:
+        return dispatch(copyToPrivate(links.copy_private, ids))
       default:
         return false
     }
