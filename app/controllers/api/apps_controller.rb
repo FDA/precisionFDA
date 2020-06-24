@@ -4,18 +4,36 @@ module Api
 
     before_action :can_copy_to_scope?, only: %i(copy)
 
+    # TODO: this route needs to be refactored.
+    # TODO: change old UI to handle json-response!
     # Copies apps to another scope.
+    #   HTML-format response is used only for copying a single app to a space from App Page.
     def copy
       new_apps = @apps.map { |app| copy_service.copy(app, params[:scope]).first }
 
-      # TODO: change old UI to handle json-response!
       respond_to do |format|
-        # HTML-format response is used only for copying a single app to a space from App Page.
         format.html do
           redirect_to pathify(new_apps.first),
                       success: copy_success_message
         end
-        format.json { render json: new_apps, root: "apps", adapter: :json }
+        format.json do
+          render json: new_apps, root: "apps", adapter: :json,
+                 meta: {
+                   messages: [{ type: "success", message: copy_success_message }],
+                 }
+        end
+      end
+    rescue DXClient::Errors::ChargesMismatchError => e
+      respond_to do |format|
+        format.html { redirect_back(fallback_location: @apps.first, flash: { error: e.message }) }
+        format.json { raise ApiError, e.message }
+      end
+    rescue StandardError
+      respond_to do |format|
+        format.html do
+          redirect_back(fallback_location: @apps.first, flash: { error: I18n.t("error_default") })
+        end
+        format.json { raise ApiError, I18n.t("error_default") }
       end
     end
 
@@ -34,9 +52,9 @@ module Api
       render json: { id: app.uid }
     rescue DXClient::Errors::ChargesMismatchError => e
       render json: { error: { message: e.message } }, status: :unprocessable_entity
-    rescue => e
+    rescue StandardError => e
       logger.error([e.message, e.backtrace.join("\n")].join("\n"))
-      render json: { error: { message: "Something went wrong" } }, status: :unprocessable_entity
+      render json: { error: { message: I18n.t("error_default") } }, status: :unprocessable_entity
     end
 
     def import
@@ -65,10 +83,10 @@ module Api
       render json: { errors: ["CWL has incorrect format"] }, status: :unprocessable_entity
     rescue DXClient::Errors::ChargesMismatchError => e
       render json: { errors: [e.message] }, status: :unprocessable_entity
-    rescue => e
+    rescue StandardError => e
       logger.error e.message
       logger.error e.backtrace.join("\n")
-      render json: { errors: ["Something went wrong"] }, status: :unprocessable_entity
+      render json: { errors: [I18n.t("error_default")] }, status: :unprocessable_entity
     end
 
     # Inputs
