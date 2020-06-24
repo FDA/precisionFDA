@@ -335,10 +335,11 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       csv.each do |row|
         next unless row[0] == user.dxuser
 
-        file = UserFile.find_by(dxid: row[1])
+        file = UserFile.find_by(uid: (row[1] + "-2"))
         result = api.call(file.project,
                           "clone",
-                          "project": user.private_files_project, "objects": [row[1]])
+                          "project" => user.private_files_project,
+                          "objects" => [row[1]])
         next if result["exists"].include?(row[1])
 
         new_file = file.dup
