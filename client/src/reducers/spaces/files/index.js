@@ -34,9 +34,9 @@ import {
   COPY_OBJECTS_TO_SPACE_START,
   COPY_OBJECTS_TO_SPACE_SUCCESS,
   COPY_OBJECTS_TO_SPACE_FAILURE,
-  COPY_OBJECTS_TO_PRIVATE_START,
-  COPY_OBJECTS_TO_PRIVATE_SUCCESS,
-  COPY_OBJECTS_TO_PRIVATE_FAILURE,
+  COPY_FILES_TO_PRIVATE_START,
+  COPY_FILES_TO_PRIVATE_SUCCESS,
+  COPY_FILES_TO_PRIVATE_FAILURE,
   FETCH_ACCESSIBLE_SPACES_START,
   FETCH_ACCESSIBLE_SPACES_SUCCESS,
   FETCH_ACCESSIBLE_SPACES_FAILURE,
@@ -354,7 +354,7 @@ export default createReducer(initialState, {
     },
   }),
 
-  [COPY_OBJECTS_TO_PRIVATE_START]: (state) => ({
+  [COPY_FILES_TO_PRIVATE_START]: (state) => ({
     ...state,
     actionModal: {
       ...state.actionModal,
@@ -362,7 +362,7 @@ export default createReducer(initialState, {
     },
   }),
 
-  [COPY_OBJECTS_TO_PRIVATE_SUCCESS]: (state) => ({
+  [COPY_FILES_TO_PRIVATE_SUCCESS]: (state) => ({
     ...state,
     actionModal: {
       ...state.actionModal,
@@ -372,7 +372,7 @@ export default createReducer(initialState, {
     },
   }),
 
-  [COPY_OBJECTS_TO_PRIVATE_FAILURE]: (state) => ({
+  [COPY_FILES_TO_PRIVATE_FAILURE]: (state) => ({
     ...state,
     actionModal: {
       ...state.actionModal,

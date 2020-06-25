@@ -25,7 +25,7 @@ import SpaceAppsList from '../../../../components/Space/Apps/SpaceAppsList'
 import Button from '../../../../components/Button'
 import Icon from '../../../../components/Icon'
 import { getSpacePageTitle } from '../../../../../helpers/spaces'
-import { SPACE_ADD_DATA_TYPES } from '../../../../../constants'
+import { SPACE_ADD_DATA_TYPES, OBJECT_TYPES } from '../../../../../constants'
 
 
 class SpaceAppsPage extends Component {
@@ -141,7 +141,7 @@ const mapDispatchToProps = dispatch => ({
   resetFilters: () => dispatch(resetSpaceAppsFilters()),
   showAddAppsModal: () => dispatch(showSpaceAddDataModal(SPACE_ADD_DATA_TYPES.APPS)),
   showCopyModal: () => dispatch(showAppsCopyModal()),
-  copyToPrivate: (link, ids) => dispatch(copyToPrivate(link, ids)),
+  copyToPrivate: (link, ids) => dispatch(copyToPrivate(link, ids, OBJECT_TYPES.APP)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(SpaceAppsPage)
