@@ -38,6 +38,13 @@ export const SPACE_ADD_DATA_TYPES = {
   JOBS: 'JOBS',
 }
 
+export const OBJECT_TYPES = {
+  FILE: 'FILE',
+  APP: 'APP',
+  WORKFLOW: 'WORKFLOW',
+  JOB: 'JOB',
+}
+
 export const SPACE_MEMBERS_ROLES = [
   { value: 'admin', label: 'admin' },
   { value: 'contributor', label: 'contributor' },

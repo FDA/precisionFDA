@@ -16,9 +16,9 @@ import {
   COPY_OBJECTS_TO_SPACE_START,
   COPY_OBJECTS_TO_SPACE_SUCCESS,
   COPY_OBJECTS_TO_SPACE_FAILURE,
-  COPY_OBJECTS_TO_PRIVATE_START,
-  COPY_OBJECTS_TO_PRIVATE_SUCCESS,
-  COPY_OBJECTS_TO_PRIVATE_FAILURE,
+  COPY_APPS_TO_PRIVATE_START,
+  COPY_APPS_TO_PRIVATE_SUCCESS,
+  COPY_APPS_TO_PRIVATE_FAILURE,
 } from '../../../actions/spaces/types'
 import { isCheckedAllCheckboxes } from '../../../helpers'
 
@@ -143,7 +143,7 @@ export default createReducer(initialState, {
     },
   }),
 
-  [COPY_OBJECTS_TO_PRIVATE_START]: (state) => ({
+  [COPY_APPS_TO_PRIVATE_START]: (state) => ({
     ...state,
     copyToPrivate: {
       ...state.copyToPrivate,
@@ -151,7 +151,7 @@ export default createReducer(initialState, {
     },
   }),
 
-  [COPY_OBJECTS_TO_PRIVATE_SUCCESS]: (state) => ({
+  [COPY_APPS_TO_PRIVATE_SUCCESS]: (state) => ({
     ...state,
     copyToPrivate: {
       ...state.copyToPrivate,
@@ -159,7 +159,7 @@ export default createReducer(initialState, {
     },
   }),
 
-  [COPY_OBJECTS_TO_PRIVATE_FAILURE]: (state) => ({
+  [COPY_APPS_TO_PRIVATE_FAILURE]: (state) => ({
     ...state,
     copyToPrivate: {
       ...state.copyToPrivate,

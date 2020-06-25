@@ -15,7 +15,7 @@ import {
   copyToPrivate,
 } from '../../../../../actions/spaces'
 import FilesActionModal from '../../../Files/FilesActionModal'
-import { SPACE_FILES_ACTIONS } from '../../../../../constants'
+import { SPACE_FILES_ACTIONS, OBJECT_TYPES } from '../../../../../constants'
 
 
 const ActionModal = ({ files, loadFilesHandler }) => {
@@ -38,7 +38,7 @@ const ActionModal = ({ files, loadFilesHandler }) => {
           if (statusIsOK) loadFilesHandler()
         })
       case SPACE_FILES_ACTIONS.COPY_TO_PRIVATE:
-        return dispatch(copyToPrivate(links.copy_private, ids))
+        return dispatch(copyToPrivate(links.copy_private, ids, OBJECT_TYPES.FILE))
       default:
         return false
     }
