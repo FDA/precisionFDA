@@ -4,8 +4,6 @@
 # $variable_mappings = $variable_mapping_kv (',' $variable_mapping_kv)*
 # $variable_mapping_kv = $identifier $ws* '=' $ws* $expression
 
-require "wdl_object/workflow/input_mapping"
-
 class WDLObject
   class Workflow
     # Wrapper class for a WDL call statement

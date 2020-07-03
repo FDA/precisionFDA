@@ -36,11 +36,13 @@ class Folder < Node # :nodoc:
   # rubocop:disable Style/FormatStringToken
   validates :name,
             uniqueness: { scope: %i(user_id scope parent_folder_id),
+                          case_sensitive: true,
                           message: "A folder with the name '%{value}' already exists.",
                           if: -> { private? } }
 
   validates :name,
             uniqueness: { scope: %i(scope scoped_parent_folder_id),
+                          case_sensitive: true,
                           message: "A folder with the name '%{value}' already exists.",
                           unless: -> { private? } }
   # rubocop:enable Style/FormatStringToken

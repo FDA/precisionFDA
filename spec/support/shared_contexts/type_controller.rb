@@ -11,7 +11,7 @@ RSpec.shared_context "type_controller", type: :controller do
     context_attributes_for(user).each do |key, value|
       @request.session[key] = value
     end
-    Session.create(user_id: user.id, key: session.id)
+    Session.create(user_id: user.id, key: session.id.private_id)
   end
 
   def reset_session
@@ -27,7 +27,7 @@ RSpec.shared_context "type_controller", type: :controller do
   end
 
   def expire_session!
-    ar_session = Session.find_by(key: session.id)
+    ar_session = Session.find_by(key: session.id.private_id)
     ar_session.update(updated_at: MAX_MINUTES_INACTIVITY.minutes.ago) if ar_session
   end
 
