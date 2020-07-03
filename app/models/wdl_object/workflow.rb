@@ -20,10 +20,6 @@
 #  project            :string(255)
 #
 
-require "wdl_object/input"
-require "wdl_object/output"
-require "wdl_object/workflow/call"
-
 class WDLObject
   class Workflow
     include ActiveModel::Validations

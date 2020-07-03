@@ -1,7 +1,4 @@
-require "cwl_exporter/workflow"
-
 class CwlExporter
-
   def initialize(token)
     @token = token
   end
@@ -31,5 +28,4 @@ class CwlExporter
   private
 
   attr_reader :token
-
 end

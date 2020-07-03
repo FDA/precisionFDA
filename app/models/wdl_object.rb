@@ -1,7 +1,3 @@
-require "wdl_object/workflow"
-require "wdl_object/task"
-require "wdl_object/errors"
-
 # Wrapper class for a WDL
 class WDLObject # rubocop:disable Metrics/ClassLength
   # rubocop:disable Metrics/AbcSize

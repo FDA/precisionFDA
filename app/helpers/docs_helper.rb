@@ -1,6 +1,6 @@
 # Helper for rendering docs.
 module DocsHelper
-  include ::Concerns::OrgAdmin
+  include OrgAdmin
 
   # Returns menu depending on user's roles.
   # When a context user has no right to see the spaces docs - this section is taken away from menu

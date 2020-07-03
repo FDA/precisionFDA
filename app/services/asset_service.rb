@@ -164,7 +164,7 @@ class AssetService
 
     asset.reload
 
-    asset.update_attributes!(state: "closing") if asset.open?
+    asset.update!(state: "closing") if asset.open?
 
     asset
   end

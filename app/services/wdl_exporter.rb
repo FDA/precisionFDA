@@ -1,7 +1,4 @@
-require "wdl_exporter/workflow"
-
 class WdlExporter
-
   def initialize(token)
     @token = token
   end
@@ -29,5 +26,4 @@ class WdlExporter
   private
 
   attr_reader :token
-
 end
