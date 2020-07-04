@@ -17,20 +17,27 @@
 #  space_type           :integer          default("groups"), not null
 #  verified             :boolean          default(FALSE), not null
 #  sponsor_org_id       :integer
-#  space_template_id    :integer
 #  restrict_to_template :boolean          default(FALSE)
 #  inactivity_notified  :boolean          default(FALSE)
 #
 
 class Space < ActiveRecord::Base
-  # TODO: Items can be moved from private submitter/reviewer workspaces to a shared space.
-  include Auditor
+  paginates_per 25
 
-  TYPES = %i(groups review verification)
-  STATES = %i(unactivated active locked deleted)
+  include Auditor
+  include Scopes
+
+  STATE_UNACTIVATED = "unactivated".freeze
+  STATE_ACTIVE = "active".freeze
+  STATE_LOCKED = "locked".freeze
+  STATE_DELETED = "deleted".freeze
+
+  TYPES = %i(groups review verification).freeze
+  STATES = [STATE_UNACTIVATED, STATE_ACTIVE, STATE_LOCKED, STATE_DELETED].freeze
+
+  SCOPE_PATTERN = /^space-(\d+)$/.freeze
 
   belongs_to :space
-  belongs_to :space_template
   belongs_to :sponsor_org, class_name: "Org"
   has_one :challenge
 
@@ -42,12 +49,21 @@ class Space < ActiveRecord::Base
   has_many :space_events
   has_many :space_invitations
 
+  has_many :comments, as: :commentable
+
   acts_as_commentable
+  acts_as_taggable
 
   store :meta, accessors: [:cts], coder: JSON
 
   enum space_type: TYPES
-  enum state: STATES
+
+  enum state: {
+    STATE_UNACTIVATED => 0,
+    STATE_ACTIVE => 1,
+    STATE_LOCKED => 2,
+    STATE_DELETED => 3,
+  }
 
   alias_method :shared_space, :space
 
@@ -61,9 +77,121 @@ class Space < ActiveRecord::Base
   scope :confidential, -> { review.where.not(space_id: nil) }
   scope :reviewer, -> { review.where.not(host_dxorg: nil) }
   scope :sponsor, -> { review.where.not(guest_dxorg: nil) }
-  scope :all_verified, -> { where(verified: true) }
   scope :non_groups, -> { where.not(space_type: :groups) }
   scope :undeleted, -> { where.not(state: :deleted) }
+  scope :restricted, -> { confidential.where(restrict_to_template: true) }
+  scope :editable_by, lambda { |context|
+    return none unless context.logged_in?
+
+    query = active.where(
+      space_memberships: {
+        active: true,
+        user: context.user,
+        role: SpaceMembership::ROLES_CAN_EDIT,
+      },
+    ).where.not(id: restricted)
+
+    query.joins(:space_memberships).distinct
+  }
+
+  scope :accessible_by, lambda { |user|
+    where(
+      state: [STATE_ACTIVE, STATE_UNACTIVATED],
+      space_memberships: { user: user, active: true },
+    ).or(
+      locked.where(space_memberships: {
+        user: user,
+        active: true,
+        side: SpaceMembership::SIDE_HOST,
+      }),
+    ).joins(:space_memberships).distinct
+  }
+
+  scope :visible_by, lambda { |user|
+    where(
+      state: [STATE_ACTIVE, STATE_UNACTIVATED, STATE_LOCKED],
+      space_memberships: {
+        user: user,
+        active: true,
+      },
+    ).joins(:space_memberships).distinct
+  }
+
+  class << self
+    def scope_id(scope)
+      parsed = scope[SCOPE_PATTERN, 1]
+      parsed ? parsed.to_i : nil
+    end
+
+    def valid_scope?(scope)
+      (scope =~ SCOPE_PATTERN).present?
+    end
+
+    def from_scope(scope)
+      raise NotASpaceError, "Invalid scope #{scope} in Space.from_scope" unless valid_scope?(scope)
+
+      Space.find(scope_id(scope))
+    end
+
+    def spaces_members_ids(scopes)
+      ids = []
+
+      scopes.each do |scope|
+        ids += Space.space_members_ids(scope)
+      end
+
+      ids.uniq
+    end
+
+    def space_members_ids(scope)
+      space = Space.from_scope(scope)
+      space.space_memberships.map(&:user_id)
+    end
+  end
+
+  def apps
+    App.accessible_by_space(self)
+  end
+
+  def app_series
+    AppSeries.accessible_by_space(self)
+  end
+
+  def latest_revision_apps
+    App.where(id: app_series.pluck(:latest_version_app_id))
+  end
+
+  def files
+    UserFile.real_files.not_removing.accessible_by_space(self)
+  end
+
+  def folders
+    Folder.accessible_by_space(self)
+  end
+
+  def assets
+    Asset.accessible_by_space(self)
+  end
+
+  def nodes
+    Node.accessible_by_space(self)
+  end
+
+  def notes
+    Note.real_notes.accessible_by_space(self)
+  end
+
+  def jobs
+    Job.accessible_by_space(self)
+  end
+
+  def comparisons
+    Comparison.accessible_by_space(self)
+  end
+
+  def workflows
+    Workflow.accessible_by_space(self)
+  end
 
   def confidential_space(member)
     if member.host?
@@ -121,6 +249,8 @@ class Space < ActiveRecord::Base
     "space-#{id}"
   end
 
+  alias_method :scope, :uid
+
   def title
     if review?
       confidential? ? "#{name}(Confidential)" : "#{name}(Cooperative)"
@@ -136,11 +266,7 @@ class Space < ActiveRecord::Base
   end
 
   def project_dxid(member)
-    if member.host?
-      host_project
-    else
-      guest_project
-    end
+    member.host? ? host_project : guest_project
   end
 
   def set_project_dxid(member, value)
@@ -149,11 +275,7 @@ class Space < ActiveRecord::Base
   end
 
   def org_dxid(member)
-    if member.host?
-      host_dxorg
-    else
-      guest_dxorg
-    end
+    member.host? ? host_dxorg : guest_dxorg
   end
 
   def set_org_dxid(member, value)
@@ -162,35 +284,29 @@ class Space < ActiveRecord::Base
   end
 
   def opposite_org_dxid(member)
-    if member.host?
-      guest_dxorg
-    else
-      host_dxorg
-    end
+    member.host? ? guest_dxorg : host_dxorg
   end
 
   def project_for_user(user)
     member = space_memberships.find_by(user_id: user.id)
 
-    if user.review_space_admin?
-      member ||= SpaceMembership.new_by_admin(user)
-    end
+    member ||= SpaceMembership.new_by_admin(user) if user.review_space_admin? || user.challenge_bot?
 
     project_dxid(member)
   end
 
   # Determine, whether a user can run an app from current space.
-  # @param project [String or nil] - project id or nil.
-  # @param user [User] - current user.
-  # @return [true or false] - depends upon user'r role and project value
+  # @param project [String, nil] project id or nil.
+  # @param user [User] current user.
+  # @return [true, false] depends upon user'r role and project value
   def have_permission?(project, user)
     member = space_memberships.find_by(user: user)
     project.present? && member.lead_or_admin_or_contributor?
   end
 
   # Determines a space member by its user id.
-  # @param id [Integer] - user id.
-  # @return [SpaceMembership] - an Object with a user data, who is space member.
+  # @param id [Integer] user id.
+  # @return [SpaceMembership] an Object with a user data, who is space member.
   def member(id)
     space_memberships.find_by(user_id: id)
   end
@@ -198,29 +314,16 @@ class Space < ActiveRecord::Base
   # Determines whether a current space is confidential and if it's context member
   #   is a member of appropriate cooperative space also.
   # @param id [Integer] - user id.
-  # @return [true or false] - depends upon a user is a cooperative space member.
+  # @return [true, false] - depends upon a user is a cooperative space member.
   #   In case that current space is not confidential - returns false.
   def member_in_cooperative?(id)
-    return false unless self.confidential?
+    return false unless confidential?
 
-    Space.find(self.space_id).member(id).present?
-  end
-
-  # Determine, whether a space provide a contributor (non-viewer) permission for user actions.
-  # @param context [Context] - a context user
-  # @return [true or false] - depends upon user'r role, context accessibility to space and
-  #   possibility to move space content.
-  def contributor_permission(context)
-    accessible_by?(context) &&
-      SpaceMembershipPolicy.can_move_content?(self, member(context.user.id))
+    Space.find(space_id).member(id).present?
   end
 
   def describe_fields
     %w(title description state)
-  end
-
-  def created_at_in_ny
-    created_at.in_time_zone("America/New_York")
   end
 
   def to_param
@@ -231,16 +334,12 @@ class Space < ActiveRecord::Base
     end
   end
 
-  def rename(new_name, _context)
-    update_attributes(name: new_name)
-  end
-
   def leads
     space_memberships.lead
   end
 
   def host_lead
-    host_lead_member.user
+    host_lead_member&.user
   end
 
   def host_lead_member
@@ -254,7 +353,7 @@ class Space < ActiveRecord::Base
   end
 
   def guest_lead
-    guest_lead_member.user
+    guest_lead_member&.user
   end
 
   # Returns dxuser of guest_lead of the space.
@@ -271,35 +370,20 @@ class Space < ActiveRecord::Base
     [host_dxorg, guest_dxorg].compact
   end
 
-  def self.from_scope(scope)
-    if scope =~ /^space-(\d+)$/
-      Space.find_by!(id: Regexp.last_match(1).to_i)
-    else
-      raise NotASpaceError, "Invalid scope #{scope} in Space.from_scope"
-    end
+  def editable_by?(user)
+    active? &&
+      space_memberships.active.exists?(
+        user: user,
+        role: SpaceMembership::ROLES_CAN_EDIT,
+      ) &&
+      !(restrict_to_template? && confidential?)
   end
 
-  def self.spaces_members_ids(scopes)
-    ids = []
-    scopes.each do |scope|
-      ids=ids + Space.space_members_ids(scope)
-    end
-    ids.uniq
-  end
-
-  def self.space_members_ids(scope)
-    space = Space.from_scope(scope)
-    space.space_memberships.map(&:user_id)
-  end
-
-  def editable_by?(context)
-    return if context.guest?
-    return if verified?
-    raise unless context.user_id.present?
-
-    return true if context.review_space_admin? && reviewer?
-
-    space_memberships.active.lead_or_admin.exists?(user_id: context.user_id)
+  # Checks if user is able to update a space via Edit page.
+  # @return [Boolean] Returns true if user is able to update a space, false otherwise.
+  def updatable_by?(user)
+    active? && (user.review_space_admin? && reviewer? ||
+      space_memberships.active.lead_or_admin.exists?(user: user))
   end
 
   # Scopes of files that can be used to run an app.
@@ -309,64 +393,54 @@ class Space < ActiveRecord::Base
 
   # Scopes of content that can be moved to an space.
   def accessible_scopes_for_move
-    ["private"]
+    [SCOPE_PRIVATE].freeze
   end
 
-  # Determine, whether an object is accessible by context user in space.
-  #   A space provides a contributor (non-viewer) permission for user actions,
-  #   for ex.: to publish to space, to delete a not owned file, etc.
-  # @param context [Context] - project id or nil.
-  # @return [true or false] - depends upon user'r role and project value
+  # Determine, whether a space is accessible by a user.
+  # @param context [Context] A user context.
+  # @return [Boolean] Returns true if user has access to a space, false otherwise.
   def accessible_by?(context)
-    return if context.guest?
-    raise if context.user_id.blank?
+    return false unless context.logged_in?
 
-    return true if context.review_space_admin? && reviewer?
-    return true if context.review_space_admin? && verified?
-
-    space_memberships.active.exists?(user_id: context.user_id)
+    accessible_by_user?(context.user)
   end
 
-  def self.accessible_by(context)
-    return if context.guest?
+  def visible_by?(user)
+    user_membership = space_memberships.active.find_by(user: user)
 
-    raise unless context.user_id.present?
-
-    query = where(space_memberships: { active: true, user_id: context.user_id })
-
-    if context.review_space_admin?
-      query = query.or(where(id: reviewer.shared)).
-        or(where(id: reviewer.confidential.active)).
-        or(where(id: verification))
-    end
-
-    query = query.or(where(id: groups)) if context.can_administer_site?
-
-    query.joins(:space_memberships).distinct
+    user_membership.present? && (unactivated? || active? || locked?)
   end
 
+  # This method works as #accessible_by? but uses a user argument, not context.
+  def accessible_by_user?(user)
+    user_membership = space_memberships.active.find_by(user: user)
+
+    user_membership.present? && (unactivated? || active? || locked? && user_membership.host?)
+  end
+
+  # Used in discuss only
   def search_content(content_type, query)
     case content_type
     when "Note"
-      Note.real_notes.accessible_by_space(self).where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
+      notes.where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
         .map { |note| [note.id, note.title] }
     when "File"
-      UserFile.accessible_by_space(self).where("LOWER(name) LIKE LOWER(?)", "%#{query}%").where(parent_type: "User")
+      files.where("LOWER(name) LIKE LOWER(?)", "%#{query}%").where(parent_type: "User")
         .map { |file| [file.id, file.name] }
     when "Asset"
-      Asset.accessible_by_space(self).where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
+      assets.where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
         .map { |asset| [asset.id, asset.name] }
     when "Comparison"
-      Comparison.accessible_by_space(self).where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
+      comparisons.where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
         .map { |comparison| [comparison.id, comparison.name] }
     when "App"
-      App.accessible_by_space(self).where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
+      apps.where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
         .map { |app| [app.id, app.title] }
     when "Workflow"
-      Workflow.accessible_by_space(self).where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
+      workflows.where("LOWER(title) LIKE LOWER(?)", "%#{query}%")
         .map { |workflow| [workflow.id, workflow.title] }
     when "Job"
-      Job.accessible_by_space(self).where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
+      jobs.where("LOWER(name) LIKE LOWER(?)", "%#{query}%")
         .map { |job| [job.id, job.name] }
     else
       []
@@ -378,13 +452,6 @@ class Space < ActiveRecord::Base
   end
 
   def content_counters(user_id)
-    notes = Note.real_notes.accessible_by_space(self).count
-    files = UserFile.real_files.not_removing.accessible_by_space(self).count
-    apps = App.accessible_by_space(self).count
-    jobs = Job.accessible_by_space(self).count
-    comparisons = Comparison.accessible_by_space(self).count
-    assets = Asset.accessible_by_space(self).count
-
     tasks = self.tasks.where("user_id = :user_id or assignee_id = :user_id", user_id: user_id)
     open_tasks = tasks.open.count
     accepted_tasks = tasks.accepted_and_failed_deadline.count
@@ -397,13 +464,13 @@ class Space < ActiveRecord::Base
     {
       feed: feed,
       tasks: tasks,
-      notes: notes,
-      files: files,
-      apps: apps,
-      jobs: jobs,
-      comparisons: comparisons,
-      assets: assets,
-      workflows: Workflow.accessible_by_space(self).count,
+      notes: notes.count,
+      files: files.count,
+      apps: apps.count,
+      jobs: jobs.count,
+      comparisons: comparisons.count,
+      assets: assets.count,
+      workflows: workflows.count,
       open_tasks: open_tasks,
       accepted_tasks: accepted_tasks,
       declined_tasks: declined_tasks,

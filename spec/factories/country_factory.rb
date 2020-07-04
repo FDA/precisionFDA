@@ -9,7 +9,7 @@
 
 FactoryBot.define do
   factory :country do
-    name { FFaker::Address.country }
-    dial_code { FFaker::PhoneNumber.area_code }
+    name { Country::UNITED_STATES }
+    dial_code { Country::UNITED_STATES_AREA_CODE }
   end
 end

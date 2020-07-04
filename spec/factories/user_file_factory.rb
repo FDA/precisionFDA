@@ -25,8 +25,9 @@ FactoryBot.define do
   factory :user_file do
     user
 
-    sequence(:dxid) { |n| "file-F8Y8#{n}" }
+    sequence(:dxid) { "file-#{SecureRandom.hex(12)}" }
     sequence(:name) { |n| "file-#{n}" }
+    sequence(:project) { "project-#{SecureRandom.hex(12)}" }
 
     state { UserFile::STATE_CLOSED }
     parent_type { "User" }

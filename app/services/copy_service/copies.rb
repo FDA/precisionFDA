@@ -36,11 +36,21 @@ class CopyService
       copies.map(&:object)
     end
 
+    def concat(other)
+      copies.concat(other.copies)
+    end
+
     def first
       copies.first.object
     end
 
-    private
+    def method_missing(method, *args, &block)
+      copies.respond_to?(method) ? copies.send(method, *args, &block) : super
+    end
+
+    def respond_to_missing?(method, include_private = false)
+      copies.respond_to?(method) || super
+    end
 
     attr_reader :copies
   end

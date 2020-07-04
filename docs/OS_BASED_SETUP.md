@@ -20,7 +20,7 @@ look [here](https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/).
     * `\curl -sSL https://get.rvm.io | bash -s stable`
 
 * Install ruby
-    * `rvm install 2.6.5`
+    * `rvm install 2.7.1`
 
 * Move to project's root directory
     * `cd <wherever you've clonned project>`
@@ -70,6 +70,13 @@ To start rails server, run:
 
 * Point your browser to [https://localhost:3000](https://localhost:3000), if you're seeing
 index page, setup is done.
+
+## Test
+
+To run unit & integration tests, use the following commands
+* Rails (RSpec):  `rspec` or `bundle exec rspec`
+  * Note: some of these tests require a DB to be configured
+* CoffeeScript (Jest): `yarn test` or `yarn test:watch` for watch mode
 
 ### Issues
 

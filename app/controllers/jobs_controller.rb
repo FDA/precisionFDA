@@ -91,12 +91,13 @@ class JobsController < ApplicationController
   end
 
   def new
-    @app = App.accessible_by(@context).find_by_uid(unsafe_params[:app_id])
+    @app = App.find_by!(uid: unsafe_params[:app_id])
 
-    if @app.nil?
-      flash[:error] = "Sorry, this app does not exist or is not accessible by you"
-      redirect_to apps_path
-      return
+    unless @app.runnable_by?(current_user)
+      redirect_back(
+        fallback_location: apps_path,
+        flash: { error: I18n.t("app_not_accessible_or_runnable") },
+      ) && return
     end
 
     licenses_to_accept = []

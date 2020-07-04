@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Loader/> matches snapshot 1`] = `
+<Icon
+  cssClasses="pfda-loader"
+  icon="fa fa-spinner fa-spin"
+/>
+`;

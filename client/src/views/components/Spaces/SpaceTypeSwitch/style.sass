@@ -1,0 +1,60 @@
+@import "../../../../styles/variables.sass"
+
+.space-type-switch
+  position: relative
+
+  input[type="radio"]
+    position: absolute
+    left: 0
+    right: 0
+    top: 0
+    bottom: 0
+    opacity: 0
+    margin: 0
+    width: 100%
+    height: 100%
+
+  &__container
+    background-color: #f4f4f4
+    padding: 30px 20px
+
+    &--checked
+      background-color: #daeffb
+
+    &--disabled
+      background-color: #f4f4f4
+
+  &__radio
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 30px
+    height: 30px
+    border-radius: 50%
+    border: solid 1px #888888
+    position: relative
+    text-align: center
+    background-color: #ffffff
+    box-shadow: inset 0 0 5px 1px #cccccc
+
+  &__dot
+    width: 22px
+    height: 22px
+    border-radius: 50%
+    background-color: $color-info
+
+    &--disabled
+      background-color: #cccccc
+
+  &__label
+    font-weight: bold
+    font-size: 28px
+    margin-left: 10px
+    text-transform: capitalize
+
+    &--disabled
+      color: #555555
+
+  &__box
+    display: flex
+    align-items: center

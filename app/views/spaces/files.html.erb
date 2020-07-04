@@ -9,7 +9,7 @@
         <div class="panel-body">
           <% if !@space.verified? && !@space.restrict_to_template? %>
             <div class="spaces-files-buttons">
-              <% if @space.contributor_permission(@context) %>
+              <% if @space.editable_by?(@context.user) %>
                 <span class="btn btn-primary" data-toggle="modal" data-target="#create-folder-modal">
                   <span class="fa fa-plus-square fa-fw"></span> Add folder
                 </span>
@@ -55,16 +55,25 @@
             </div>
           <% end %>
 
-            <div class="spaces-files-table">
-              <% if @counts[:files] + @counts[:folders] > 0 %>
+          <div class="spaces-files-table">
+            <% if @counts[:files] + @counts[:folders] > 0 %>
+              <% if @folder&.in_space? && @folder.scoped_parent_folder_id %>
                 <% breadcrumb :folder, @folder %>
-                <%= breadcrumbs style: :bootstrap, class: "breadcrumb no-border" %>
+                  <%= breadcrumbs style: :bootstrap, class: "breadcrumb no-border" %>
               <% else %>
-                <div class="alert alert-info">
-                  No records found
-                </div>
+                <ul class="breadcrumb no-border">
+                  <li class="active">
+                    <%= @folder&.name %>
+                  </li>
+                </ul>
               <% end %>
-            </div>
+
+            <% else %>
+              <div class="alert alert-info">
+                No records found
+              </div>
+            <% end %>
+          </div>
 
           <%= render "files/grid",
                      files_grid: @files_grid,

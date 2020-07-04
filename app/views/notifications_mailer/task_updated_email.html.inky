@@ -20,13 +20,13 @@
       <columns>
         <p>
           <% if @action == 'created' %>
-            A task <strong><%= link_to @task.name, space_task_url(@task.space, @task) %></strong> in <%= link_to @task.space.title, space_url(@task.space) %> space was created by <%= @task_creator %> and assigned to <%= @task_assignee %>.
+            A task <strong><%= link_to @task.name, space_task_url(@task.space, @task) %></strong> in <%= link_to @task.space.title, _space_url(@task.space) %> space was created by <%= @task_creator %> and assigned to <%= @task_assignee %>.
           <% elsif @action == 'deleted' %>
-            A task <strong><%= @task.name %></strong> in <%= link_to @task.space.title, space_url(@task.space) %> space was deleted.
+            A task <strong><%= @task.name %></strong> in <%= link_to @task.space.title, _space_url(@task.space) %> space was deleted.
           <% elsif @action == 'reassigned' %>
-            A task <strong><%= link_to @task.name, space_task_url(@task.space, @task) %></strong> in <%= link_to @task.space.title, space_url(@task.space) %> space was <%= @action %> to <%= @task_assignee %>.
+            A task <strong><%= link_to @task.name, space_task_url(@task.space, @task) %></strong> in <%= link_to @task.space.title, _space_url(@task.space) %> space was <%= @action %> to <%= @task_assignee %>.
           <% else %>
-            A task <strong><%= link_to @task.name, space_task_url(@task.space, @task) %></strong> created by <%= @task_creator %> in <%= link_to @task.space.title, space_url(@task.space) %> space was <%= @action %>.
+            A task <strong><%= link_to @task.name, space_task_url(@task.space, @task) %></strong> created by <%= @task_creator %> in <%= link_to @task.space.title, _space_url(@task.space) %> space was <%= @action %>.
           <% end %>
         </p>
 

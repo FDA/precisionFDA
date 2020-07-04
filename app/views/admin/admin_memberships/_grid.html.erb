@@ -1,0 +1,104 @@
+<%= grid(users_grid, show_filters: defined?(show_filters) ? show_filters : :no, hide_csv_button: true) do |g|
+  confirm_text = "Are you certain about this action?"
+
+  g.column name:"Username", attribute: "dxuser" do |user|
+    link_to user.dxuser, user_path(user.dxuser)
+  end
+
+  g.column name:"Email ID", attribute: "email" do |user|
+    link_to user.email, user_path(user.dxuser)
+  end
+
+  g.column name:"Site Admin" do |user|
+    href = if user.can_administer_site?
+      membership =
+        user.admin_memberships.joins(:admin_group).where(
+          admin_groups: { role: AdminGroup::ROLE_SITE_ADMIN }
+        ).first
+
+      admin_admin_membership_path(membership)
+    else
+      admin_admin_memberships_path(user_id: user.id, group: AdminGroup::ROLE_SITE_ADMIN)
+    end
+
+    if user.dxid != ADMIN_USER
+      link_to(
+        content_tag(:a, ""),
+        href: href,
+        method: user.can_administer_site? ? :delete : :post,
+        data: { confirm: confirm_text },
+      ) do
+        check_box_tag("", "site_admin", user.can_administer_site?)
+      end
+    else
+      check_box_tag("", "site_admin", user.can_administer_site?, disabled: true)
+    end
+  end
+
+  g.column name:"Space Admin" do |user|
+    href = if user.review_space_admin?
+      membership =
+        user.admin_memberships.joins(:admin_group).where(
+          admin_groups: { role: AdminGroup::ROLE_REVIEW_SPACE_ADMIN }
+        ).first
+
+      admin_admin_membership_path(membership)
+    else
+      admin_admin_memberships_path(user_id: user.id, group: AdminGroup::ROLE_REVIEW_SPACE_ADMIN)
+    end
+
+    link_to(
+      content_tag(:a, ""),
+      href: href,
+      method: user.review_space_admin? ? :delete : :post,
+      data: { confirm: confirm_text },
+    ) do
+      check_box_tag("", "space_admin", user.review_space_admin?)
+    end
+  end
+
+  g.column name:"Challenge Admin" do |user|
+    href = if user.challenge_admin?
+      membership =
+        user.admin_memberships.joins(:admin_group).where(
+          admin_groups: { role: AdminGroup::ROLE_CHALLENGE_ADMIN }
+        ).first
+
+      admin_admin_membership_path(membership)
+    else
+      admin_admin_memberships_path(user_id: user.id, group: AdminGroup::ROLE_CHALLENGE_ADMIN)
+    end
+
+    link_to(
+      content_tag(:a, ""),
+      href: href,
+      method: user.challenge_admin? ? :delete : :post,
+      data: { confirm: confirm_text },
+    ) do
+      check_box_tag("", "challenge_admin", user.challenge_admin?)
+    end
+  end
+
+   g.column name:"Challenge Evaluator" do |user|
+    href = if user.challenge_eval?
+      membership =
+        user.admin_memberships.joins(:admin_group).where(
+          admin_groups: { role: AdminGroup::ROLE_CHALLENGE_EVALUATOR }
+        ).first
+
+      admin_admin_membership_path(membership)
+    else
+      admin_admin_memberships_path(user_id: user.id, group: AdminGroup::ROLE_CHALLENGE_EVALUATOR)
+    end
+
+    link_to(
+      content_tag(:a, ""),
+      href: href,
+      method: user.challenge_eval? ? :delete : :post,
+      data: { confirm: confirm_text },
+    ) do
+      check_box_tag("", "challenge_evaluator", user.challenge_eval?)
+    end
+  end
+end
+%>

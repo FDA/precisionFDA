@@ -57,7 +57,7 @@
         <%= render "_partials/btn_publish", item: @note %>
       </div>
 
-      <% if @note.in_space? && @note.space_object.contributor_permission(@context) %>
+      <% if @note.in_space? && @note.space_object.editable_by?(@context.user) %>
         <div class="btn-group">
           <%= render "_partials/btn_copy_to_cooperative", item: @note %>
         </div>

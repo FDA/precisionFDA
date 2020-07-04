@@ -28,7 +28,7 @@ class SpaceEvent < ApplicationRecord
     comparison
     workflow
     note
-  )
+  ).freeze
 
   ACTIVITY_TYPES = %i(
     membership_added
@@ -57,14 +57,15 @@ class SpaceEvent < ApplicationRecord
     space_deleted
     task_accepted
     task_reopened
-  )
+    membership_enabled
+  ).freeze
 
   ROLES = %i(
     admin
     contributor
     viewer
     lead
-  )
+  ).freeze
 
   DATA_ATTRIBUTES = {
     :comment    => %i(body),
@@ -77,7 +78,7 @@ class SpaceEvent < ApplicationRecord
     :asset      => %i(name uid),
     :comparison => %i(name),
     :workflow   => %i(name),
-  }
+  }.freeze
 
   belongs_to :user
   belongs_to :space

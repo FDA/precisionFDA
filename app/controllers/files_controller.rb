@@ -5,6 +5,7 @@ class FilesController < ApplicationController
   before_action :init_parent_folder,     only: [:index, :featured, :explore]
   before_action :check_file_state, only: %i(show)
 
+  include FilesConcern
   include VerifiedSpaceHelper
 
   def index
@@ -156,6 +157,7 @@ class FilesController < ApplicationController
   # Downloading file and show it in a browser tab.
   # Allow assets as well
   # Redirecting to a new tab by file url.
+  # TODO: the similar route exists in API Files Controller.
   def download
     @file = UserFile.exist_refresh_state(@context, params[:id])
     if @file.state != "closed"
@@ -189,7 +191,7 @@ class FilesController < ApplicationController
   end
 
   def rename
-    @file = UserFile.real_files.find_by_uid(unsafe_params[:id])
+    @file = UserFile.real_files.find_by(uid: params[:id])
 
     unless @file.present?
       flash[:error] = "File not found"
@@ -203,14 +205,10 @@ class FilesController < ApplicationController
     redirect_target = if unsafe_params[:source] == "list"
                         if parent_folder.present?
                           pathify_folder(parent_folder)
+                        elsif unsafe_params[:scope] == "public"
+                          explore_files_path
                         else
-                          if @file.in_space?
-                            files_space_path(Space.from_scope(@file.scope))
-                          elsif unsafe_params[:scope] == "public"
-                            explore_files_path
-                          else
-                            files_path
-                          end
+                          files_path
                         end
                       else
                         file_path(@file)
@@ -222,7 +220,7 @@ class FilesController < ApplicationController
       return
     end
 
-    if @file.rename(file_params[:name], description, @context)
+    if @file.rename(file_params[:name], description)
       flash[:success] = "File info successfully updated."
     else
       flash[:error] = @file.errors.messages.values.flatten
@@ -337,38 +335,42 @@ class FilesController < ApplicationController
     redirect_to redirect_target
   end
 
-  # TODO move to api
-  skip_before_action :require_login, only: :download_list
-  before_action :require_api_login, only: :download_list
+  # Responds with files list.
+  # TODO: the similar route exists in API Files Controller.
   def download_list
-    task = unsafe_params[:task]
+    task = params[:task]
     files = []
 
     case task
       when "download"
-        nodes = Node.accessible_by(@context).where(id: unsafe_params[:ids])
+        nodes = Node.accessible_by(@context).where(id: params[:ids])
         nodes.each { |node| files += node.is_a?(Folder) ? node.all_files : [node] }
       when "publish"
-        nodes = Node.editable_by(@context).where(id: unsafe_params[:ids]).where.not(scope: "public")
-        nodes.each { |node| files += node.is_a?(Folder) ? node.all_files(Node.where.not(scope: "public")) : [node] }
+        nodes = Node.editable_by(@context).where(id: params[:ids]).where.not(scope: "public")
+        nodes.each do |node|
+          files += node.is_a?(Folder) ? node.all_files(Node.where.not(scope: "public")) : [node]
+        end
       when "delete"
-        nodes = Node.editable_by(@context).where(id: unsafe_params[:ids]).to_a
+        nodes = Node.editable_by(@context).where(id: params[:ids]).to_a
         files += nodes
         nodes.each { |node| files += node.all_children if node.is_a?(Folder) }
     end
 
-    root_name = determine_scope_name(unsafe_params[:scope])
+    root_name = determine_scope_name(params[:scope])
 
     res = files.map do |file|
       info = {
         id: file.id,
         name: file.name,
         type: file.klass,
-        fsPath: ([root_name] + file.ancestors(unsafe_params[:scope]).map(&:name).reverse).compact.join(" / "),
+        fsPath: ([root_name] + file.ancestors(params[:scope]).map(&:name).reverse).
+          compact.join(" / "),
         viewURL: file.is_a?(UserFile) ? file_path(file) : pathify_folder(file)
       }
 
-      info.merge!(downloadURL: download_file_path(file)) if task == "download" && file.is_a?(UserFile)
+      if task == "download" && file.is_a?(UserFile)
+        info.merge!(downloadURL: download_file_path(file))
+      end
 
       info
     end
@@ -408,19 +410,6 @@ class FilesController < ApplicationController
 
   private
 
-  def determine_scope_name(scope)
-    case scope
-      when "private"
-        "My files"
-      when "public"
-        "Explore"
-      when "featured"
-        "Featured"
-      else
-        nil
-    end
-  end
-
   def private_folders(parent_folder_id = nil)
     Folder
       .private_for(@context)
@@ -450,7 +439,6 @@ class FilesController < ApplicationController
     }
   end
 
-
   def file_params
     params.require(:file).permit(:name, :description)
   end
@@ -468,7 +456,7 @@ class FilesController < ApplicationController
         memo[node.id] = render_node(node)
         memo
       end,
-      selectedListURL: download_list_files_path
+      selectedListURL: download_list_files_path,
     }
   end
 

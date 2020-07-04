@@ -109,7 +109,7 @@
       <% end %>
       <%= render "_partials/btn_publish", item: @asset %>
 
-      <% if @asset.in_space? && @asset.space_object.contributor_permission(@context) %>
+      <% if @asset.in_space? && @asset.space_object.editable_by?(@context.user) %>
         <%= render "_partials/btn_copy_to_cooperative", item: @asset %>
       <% end %>
     </div>

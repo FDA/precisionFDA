@@ -121,6 +121,21 @@ describe DNAnexusAPI do
     end
   end
 
+  describe "#file_rename" do
+    it_behaves_like "call" do
+      let(:file_dxid) { "some-file_dxid" }
+      let(:project_dxid) { "some-project_dxid" }
+      let(:name) { "some-name" }
+
+      let(:client_method) { :file_rename }
+      let(:client_method_args) { [file_dxid, project_dxid, name] }
+
+      let(:expected_subject) { file_dxid }
+      let(:expected_method) { "rename" }
+      let(:expected_payload) { { project: project_dxid, name: name } }
+    end
+  end
+
   describe "#org_invite" do
     it_behaves_like "call" do
       let(:org) { "some-org" }
@@ -283,20 +298,6 @@ describe DNAnexusAPI do
       let(:expected_subject) { project }
       let(:expected_method) { "destroy" }
       let(:expected_payload) { payload }
-    end
-  end
-
-  describe "#workflow_clone" do
-    it_behaves_like "call" do
-      let(:source_workflow) { "source-workflow" }
-      let(:destination_workflow) { "destination-workflow" }
-
-      let(:client_method) { :workflow_clone }
-      let(:client_method_args) { [source_workflow, destination_workflow, payload] }
-
-      let(:expected_subject) { source_workflow }
-      let(:expected_method) { "clone" }
-      let(:expected_payload) { payload.merge(project: destination_workflow) }
     end
   end
 

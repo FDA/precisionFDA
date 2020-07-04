@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<SpacesListSearch /> matches snapshot 1`] = `
+<div
+  className="spaces-list-search"
+>
+  <div
+    className="spaces-list-search__input"
+  >
+    <input
+      autoComplete="off"
+      className="form-control"
+      name="spacesListSearch"
+      onChange={[Function]}
+      placeholder="Filter by State, Name, Type or User..."
+      type="text"
+      value=""
+    />
+  </div>
+</div>
+`;

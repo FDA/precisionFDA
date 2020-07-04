@@ -34,6 +34,9 @@
       <a class="btn btn-default" rel="nofollow" href="<%= admin_users_path %>">
         <i class="fa fa-users" aria-hidden="true"></i> Users
       </a>
+      <a class="btn btn-default" rel="nofollow" href="<%= admin_admin_memberships_path(group: :site) %>">
+        <i class="fa fa-users" aria-hidden="true"></i> Admins
+      </a>
       <a class="btn btn-default" rel="nofollow" href="<%= admin_organizations_path %>">
         <i class="fa fa-users" aria-hidden="true"></i> Organizations
       </a>
@@ -41,13 +44,9 @@
       <a class="btn btn-default" rel="nofollow" href="<%= sidekiq_web_path %>" target="_blank">
         <i class="fa fa-bar-chart" aria-hidden="true"></i> Sidekiq
       </a>
-      <% if show_restore_comparison_app_button?(@context) %>
-        <span class="btn btn-default" data-toggle="modal" data-target="#restore_comparison_app_modal">
-          <i class="fa fa-recycle"></i>
-          Restore default comparison app
-        </span>
-        <%= render partial: "admin/_partials/restore_comparison_app_modal" %>
-      <% end %>
+      <a class="btn btn-default" rel="nofollow" href="<%= admin_comparator_settings_path %>">
+        <i class="fa fa-bullseye" aria-hidden="true"></i> Comparator Settings
+      </a>
     </div>
   </div>
 <% end %>

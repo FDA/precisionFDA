@@ -95,6 +95,18 @@ table.table-nowrap
 .container-padded, .pfda-padded
   padding: $padding-large-horizontal
 
+.pfda-padded-t20
+  padding-top: 20px
+
+.pfda-padded-b20
+  padding-bottom: 20px
+
+.pfda-padded-t10
+  padding-top: 10px
+
+.pfda-padded-b10
+  padding-bottom: 10px
+
 // YouTube video aspect ratio: 9/16 => 56.26%
 .embed-container
   position: relative
@@ -297,3 +309,16 @@ table.table-nowrap
 
 .pfda-no-pointer-events
   pointer-events: none
+
+.pfda-app-input-template
+  &.has-error
+    .btn-group
+      border: 1px solid $state-danger-text
+      border-radius: 3px
+  .spec-input-file-title
+    font-size: 11px
+    color: #fff
+    text-overflow: ellipsis
+    overflow: hidden
+    max-width: 200px
+    line-height: 24px

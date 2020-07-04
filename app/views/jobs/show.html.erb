@@ -44,7 +44,7 @@
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Duration</h5>
-      <p class="list-group-item-text"><%= humanizeSeconds(@job.runtime) %></p>
+      <p class="list-group-item-text"><%= humanize_seconds(@job.runtime) %></p>
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Energy Consumed</h5>
@@ -80,7 +80,7 @@
     <% end %>
     <%= render "_partials/btn_publish", item: @job %>
 
-    <% if @job.in_space? && @job.space_object.contributor_permission(@context) %>
+    <% if @job.in_space? && @job.space_object.editable_by?(@context.user) %>
       <%= render "_partials/btn_copy_to_cooperative", item: @job %>
     <% end %>
 

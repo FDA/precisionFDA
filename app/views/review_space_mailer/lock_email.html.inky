@@ -19,7 +19,7 @@
     <row>
       <columns>
         <p>
-          The space <strong><%= link_to @space.title, space_url(@space) %></strong> was locked.
+          The space <strong><%= link_to @space.title, _space_url(@space) %></strong> was locked.
         </p>
       </columns>
     </row>

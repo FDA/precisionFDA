@@ -68,18 +68,16 @@ class Note < ApplicationRecord
   end
 
   def to_param
-    if title.nil?
-      id.to_s
-    else
-      "#{id}-#{title.parameterize}"
-    end
+    return id.to_s unless title
+
+    "#{id}-#{title.parameterize}"
   end
 
   def real_note?
     note_type.nil?
   end
 
-  def publishable_by?(context, scope_to_publish_to = "public")
+  def publishable_by?(context, scope_to_publish_to = Scopes::SCOPE_PUBLIC)
     core_publishable_by?(context, scope_to_publish_to) && real_note?
   end
 
@@ -88,11 +86,11 @@ class Note < ApplicationRecord
   end
 
   def self.answer_notes
-    return where(note_type: 'Answer')
+    where(note_type: "Answer")
   end
 
   def self.discussion_notes
-    return where(note_type: 'Discussion')
+    where(note_type: "Discussion")
   end
 
   def self.answers
@@ -118,18 +116,17 @@ class Note < ApplicationRecord
         if note.publishable_by?(context, scope)
           note.update!(scope: scope)
           count += 1
-          if scope =~ /^space-(\d+)$/
-            SpaceEventService.call($1.to_i, context.user_id, nil, note, :note_added)
+          if Space.valid_scope?(scope)
+            SpaceEventService.call(Space.scope_id(scope), context.user_id, nil, note, :note_added)
           end
         end
       end
     end
 
-    return count
+    count
   end
 
   def copyable_to_cooperative?
     in_confidential_space?
   end
-
 end

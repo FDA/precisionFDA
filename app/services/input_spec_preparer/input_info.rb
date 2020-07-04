@@ -1,6 +1,6 @@
 class InputSpecPreparer::InputInfo
 
-  attr_reader :run_inputs, :dx_run_input
+  attr_reader :run_inputs, :dx_run_input, :files
 
   def initialize
     @files = []
@@ -28,9 +28,4 @@ class InputSpecPreparer::InputInfo
   def file_ids
     uniq_files.map(&:id)
   end
-
-  private
-
-  attr_reader :files
-
 end

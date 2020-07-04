@@ -1,0 +1,95 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<CardItem /> matches snapshot 1`] = `
+<div
+  className="spaces-list-card"
+>
+  <div
+    className="spaces-list-card__header"
+  >
+    <div
+      className="spaces-list-card__title"
+    >
+      <Link
+        to="/spaces/undefined"
+      >
+        some name
+      </Link>
+    </div>
+    <div>
+      <Switcher
+        space={
+          Object {
+            "isLocked": true,
+            "links": Object {
+              "show": "some link",
+              "unlock": "some link",
+            },
+            "name": "some name",
+          }
+        }
+      />
+    </div>
+  </div>
+  <div
+    className="spaces-list-card__desc"
+  >
+    <div
+      className="spaces-list-card__desc-text"
+    />
+    <div>
+      <TagsList
+        tags={Array []}
+      />
+    </div>
+  </div>
+  <div
+    className="row pfda-mr-t10"
+  >
+    <div
+      className="pull-right"
+    >
+      <div
+        className="spaces-list-card__date"
+      >
+        <div
+          className="spaces-list-card__date-label"
+        >
+          Created on:
+        </div>
+        <div
+          className="spaces-list-card__date-value"
+        />
+      </div>
+      <div
+        className="spaces-list-card__date"
+      >
+        <div
+          className="spaces-list-card__date-label"
+        >
+          Modified on:
+        </div>
+        <div
+          className="spaces-list-card__date-value"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="spaces-list-card__body"
+  >
+    <DataContainer
+      space={
+        Object {
+          "isLocked": true,
+          "links": Object {
+            "show": "some link",
+            "unlock": "some link",
+          },
+          "name": "some name",
+        }
+      }
+    />
+  </div>
+</div>
+`;

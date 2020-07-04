@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_02_16_060726) do
+ActiveRecord::Schema.define(version: 2020_05_20_102716) do
 
   create_table "accepted_licenses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -21,6 +21,23 @@ ActiveRecord::Schema.define(version: 2020_02_16_060726) do
     t.text "message"
     t.index ["license_id"], name: "index_accepted_licenses_on_license_id"
     t.index ["user_id"], name: "index_accepted_licenses_on_user_id"
+  end
+
+  create_table "admin_groups", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+    t.integer "role", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["role"], name: "index_admin_groups_on_role", unique: true
+  end
+
+  create_table "admin_memberships", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.bigint "admin_group_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_group_id"], name: "index_admin_memberships_on_admin_group_id"
+    t.index ["user_id", "admin_group_id"], name: "index_admin_memberships_on_user_id_and_admin_group_id", unique: true
+    t.index ["user_id"], name: "index_admin_memberships_on_user_id"
   end
 
   create_table "analyses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
@@ -146,7 +163,7 @@ ActiveRecord::Schema.define(version: 2020_02_16_060726) do
     t.integer "app_owner_id"
     t.integer "app_id"
     t.text "description"
-    t.text "meta"
+    t.text "meta", limit: 16777215
     t.datetime "start_at"
     t.datetime "end_at"
     t.datetime "created_at", null: false
@@ -156,6 +173,7 @@ ActiveRecord::Schema.define(version: 2020_02_16_060726) do
     t.string "card_image_url"
     t.string "card_image_id"
     t.integer "space_id"
+    t.integer "specified_order"
     t.index ["admin_id"], name: "index_challenges_on_admin_id"
     t.index ["app_id"], name: "index_challenges_on_app_id"
     t.index ["app_owner_id"], name: "index_challenges_on_app_owner_id"
@@ -202,6 +220,8 @@ ActiveRecord::Schema.define(version: 2020_02_16_060726) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "scope"
+    t.string "app_dxid", null: false
+    t.text "run_input"
     t.index ["scope"], name: "index_comparisons_on_scope"
     t.index ["state"], name: "index_comparisons_on_state"
     t.index ["user_id"], name: "index_comparisons_on_user_id"
@@ -545,7 +565,7 @@ ActiveRecord::Schema.define(version: 2020_02_16_060726) do
 
   create_table "settings", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "key", null: false
-    t.string "value", null: false
+    t.text "value", null: false
   end
 
   create_table "space_events", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
@@ -593,34 +613,6 @@ ActiveRecord::Schema.define(version: 2020_02_16_060726) do
     t.index ["space_membership_id"], name: "index_space_memberships_spaces_on_space_membership_id"
   end
 
-  create_table "space_template_nodes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
-    t.string "space_template_id"
-    t.integer "node_id"
-    t.string "node_type"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "space_id"
-    t.string "node_name"
-    t.index ["node_type", "node_id"], name: "index_space_template_nodes_on_node_type_and_node_id"
-  end
-
-  create_table "space_template_spaces", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
-    t.string "space_id"
-    t.string "space_template_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "space_name"
-  end
-
-  create_table "space_templates", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
-    t.string "name"
-    t.text "description"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.boolean "private", default: false, null: false
-    t.integer "user_id"
-  end
-
   create_table "spaces", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -636,7 +628,6 @@ ActiveRecord::Schema.define(version: 2020_02_16_060726) do
     t.integer "space_type", default: 0, null: false
     t.boolean "verified", default: false, null: false
     t.integer "sponsor_org_id"
-    t.integer "space_template_id"
     t.boolean "restrict_to_template", default: false
     t.boolean "inactivity_notified", default: false
   end
@@ -873,6 +864,8 @@ ActiveRecord::Schema.define(version: 2020_02_16_060726) do
 
   add_foreign_key "accepted_licenses", "licenses"
   add_foreign_key "accepted_licenses", "users"
+  add_foreign_key "admin_memberships", "admin_groups"
+  add_foreign_key "admin_memberships", "users"
   add_foreign_key "analyses", "workflows"
   add_foreign_key "answers", "discussions"
   add_foreign_key "answers", "notes"

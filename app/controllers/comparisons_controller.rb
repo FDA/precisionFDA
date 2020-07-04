@@ -1,45 +1,52 @@
-class ComparisonsController < ApplicationController
-  skip_before_action :require_login,     only: [:index, :featured, :explore, :show, :fhir_export, :fhir_index, :fhir_cap]
-  before_action :require_login_or_guest, only: [:index, :featured, :explore, :show]
+require "cgi"
 
-  require 'cgi'
+# Responsible for comparisons-related actions.
+# rubocop:disable Metrics/ClassLength
+class ComparisonsController < ApplicationController
+  skip_before_action :require_login, only: %i(
+    index
+    featured
+    explore
+    show
+    fhir_export
+    fhir_index
+    fhir_cap
+  )
+
+  before_action :require_login_or_guest, only: %i(index featured explore show)
+  before_action :redirect_guest, only: %i(index)
 
   def index
-    if @context.guest?
-      redirect_to explore_comparisons_path
-      return
-    end
-
     synchronizer = DIContainer.resolve("comparisons.sync.synchronizer")
     synchronizer.sync_comparisons!(@context.user)
+    comparisons = Comparison.editable_by(@context).includes(:taggings).order(created_at: :desc)
 
-    comparisons = Comparison.editable_by(@context).includes(:taggings)
-    @comparisons_grid = initialize_grid(comparisons, {
-      name: 'comparisons',
-      order: 'comparisons.id',
-      order_direction: 'desc',
+    @comparisons_grid = initialize_grid(
+      comparisons,
+      name: "comparisons",
+      order: "comparisons.id",
+      order_direction: "desc",
       per_page: 100,
-      include: [:user, {user: :org}, {taggings: :tag}]
-    })
-
+      include: [:user, { user: :org }, { taggings: :tag }],
+    )
   end
 
   def fhir_cap
     interaction = []
     interaction << {
-      "code" => "read"
+      "code" => "read",
     }
 
     resource = []
     resource << {
       "type" => "Sequence",
-      "interaction" => interaction
+      "interaction" => interaction,
     }
 
     rest = []
     rest << {
       "mode" => "server",
-      "resource" => resource
+      "resource" => resource,
     }
 
     cap = {
@@ -50,13 +57,13 @@ class ComparisonsController < ApplicationController
       "publisher" => "PrecisionFDA",
       "fhirVersion" => "v1.9.0",
       "acceptUnknown" => "no",
-      "format" => ["json", "xml"],
-      "rest" => rest
+      "format" => %w(json xml),
+      "rest" => rest,
     }
 
     if request.content_type =~ /xml/
       cap.delete("resourceType")
-      render xml: cap.to_xml(:root => "CapabilityStatement")
+      render xml: cap.to_xml(root: "CapabilityStatement")
     else
       render json: JSON.pretty_generate(JSON.parse(cap.to_json))
     end
@@ -78,9 +85,7 @@ class ComparisonsController < ApplicationController
         val = nil
         case key.downcase
         when "page"
-          if query_params[:page].to_i >= 1
-            page_number = query_params[:page].to_i
-          end
+          page_number = query_params[:page].to_i if query_params[:page].to_i >= 1
         when "name"
           val = query_params[:name].to_s
         when "id"
@@ -90,9 +95,7 @@ class ComparisonsController < ApplicationController
         else
           next
         end
-        if val
-          filtered_params[key] = val
-        end
+        filtered_params[key] = val if val
       end
       # find what range to display
       results = Comparison.accessible_by_public.where(filtered_params)
@@ -100,35 +103,31 @@ class ComparisonsController < ApplicationController
     end
 
     entry = []
-    if list
-      list.each do |c|
-        resource = generate_sequence(c)
-        entry << {
-          "resource" => resource
-        }
-      end
+    list&.each do |c|
+      resource = generate_sequence(c)
+      entry << {
+        "resource" => resource,
+      }
     end
 
     if results.count > page_number * page_size
       link = []
       link << {
         "relation" => "next",
-        "url" => request.base_url + request.path + "?" + filtered_params.map{|k,v|"#{CGI::escape(k.to_s)}=#{CGI::escape(v.to_s)};"}.join + "page=#{page_number+1}"
+        "url" => request.base_url + request.path + "?" + filtered_params.map { |k, v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v.to_s)};" }.join + "page=#{page_number + 1}",
       }
     end
 
     bundle = {
       "resourceType" => "Bundle",
       "type" => "searchset",
-      "total" => results.count
+      "total" => results.count,
     }
-    if link
-      bundle["link"] = link
-    end
+    bundle["link"] = link if link
     bundle["entry"] = entry
 
     if request.content_type =~ /xml/ || format =~ /xml/
-      render xml: bundle.to_xml(:root => "Bundle")
+      render xml: bundle.to_xml(root: "Bundle")
     else
       render json: JSON.pretty_generate(JSON.parse(bundle.to_json))
     end
@@ -137,139 +136,33 @@ class ComparisonsController < ApplicationController
   def fhir_export
     comparison = nil
     if unsafe_params[:id] =~ /^comparison-(\d+)$/
-      comparison = Comparison.accessible_by_public.find_by(id: $1)
+      comparison = Comparison.accessible_by_public.find_by(id: Regexp.last_match(1))
     end
 
     not_found! unless comparison
 
     sequence = generate_sequence(comparison)
     if request.content_type =~ /xml/
-      render xml: sequence.to_xml(:root => "Sequence")
+      render xml: sequence.to_xml(root: "Sequence")
     else
       render json: JSON.pretty_generate(JSON.parse(sequence.to_json))
     end
-  end
-
-  def generate_sequence(comparison)
-    identifier = []
-    identifier << {
-      "system" => "https://precision.fda.gov/fhir/Sequence/",
-      "value" => comparison.uid
-    }
-
-    coding = []
-    ["ref_vcf", "ref_bed"].each do |role|
-      input = comparison.input(role)
-      if input
-        coding << {
-          "system" => "https://precision.fda.gov/files",
-          "code" => input.user_file.dxid,
-          "display" => input.user_file.public? ? input.user_file.name : input.user_file.dxid
-        }
-      end
-    end
-    standardSequence = {
-      "coding" => coding
-    }
-
-    app = App.find_by(dxid: COMPARATOR_V1_APP_ID)
-    coding = []
-    if app
-      coding << {
-        "system" => "https://precision.fda.gov/apps",
-        "code" => app.dxid,
-        "display" => app.title,
-        "version" => app.revision.to_s
-      }
-    end
-    method = {
-      "coding" => coding
-    }
-
-    quality_data = {
-        "type" => "unknown",
-        "standardSequence" => standardSequence,
-        "method" => method,
-        "truthTP" => comparison.meta["true-pos"].to_i,
-        "truthFN" => comparison.meta["false-neg"].to_i,
-        "queryFP" => comparison.meta["false-pos"].to_i,
-        "precision" => comparison.meta["precision"].to_f,
-        "recall" => comparison.meta["recall"].to_f,
-        "fMeasure" => comparison.meta["f-measure"].to_f
-    }
-
-    # For ROC data points, convert them to floats before exporting
-    meta_roc = comparison.meta["weighted_roc"]
-
-    headers_map = {
-      "score" => "score",
-      "true_positives" => "numTP",
-      "false_positives" => "numFP",
-      "false_negatives" => "numFN",
-      "precision" => "precision",
-      "sensitivity" => "sensitivity",
-      "f_measure" => "fMeasure"
-    }
-
-    if meta_roc["data"].present?
-      headers = {}
-      meta_roc["header"].map.each_with_index do |h,i|
-        new_key = headers_map[h]
-
-        case h
-        when "score", "true_positives", "false_positives", "false_negatives"
-          headers[new_key] = meta_roc["data"].map do |d|
-            d[i].to_i
-          end
-        else
-          headers[new_key] = meta_roc["data"].map do |d|
-            d[i].to_f
-          end
-        end
-      end
-      quality_data["roc"] = headers
-    end
-
-    quality = []
-    quality << quality_data
-
-    repository = []
-    ["test_vcf", "test_bed"].each do |role|
-      input = comparison.input(role)
-      if input
-        file = {
-          "type" => "login",
-          "url" => "https://precision.fda.gov" + pathify(input.user_file),
-          "name" => "PrecisionFDA",
-          "variantsetId" => input.user_file.dxid
-        }
-        repository << file
-      end
-    end
-
-    sequence = {
-      "resourceType" => "Sequence",
-      "type" => "dna",
-      "coordinateSystem" => 1,
-      "identifier" => identifier,
-      "quality" => quality,
-      "repository" => repository
-    }
   end
 
   def featured
     org = Org.featured
 
     if org
-      comparisons = Comparison.accessible_by(@context).includes(:user, :taggings).where(:users => { :org_id => org.id })
+      comparisons = Comparison.accessible_by(@context).includes(:user, :taggings).
+        where(users: { org_id: org.id }).
+        order(created_at: :desc)
 
-      @comparisons_grid = initialize_grid(comparisons, {
-        name: 'comparisons',
-        order: 'comparisons.id',
-        order_direction: 'desc',
-        per_page: 100,
-        include: [:user, {user: :org}, {taggings: :tag}]
-      })
+      @comparisons_grid = initialize_grid(comparisons,
+                                          name: "comparisons",
+                                          order: "comparisons.id",
+                                          order_direction: "desc",
+                                          per_page: 100,
+                                          include: [:user, { user: :org }, { taggings: :tag }])
 
       js :index, comparisons_ids_with_descriptions(comparisons)
     end
@@ -277,15 +170,14 @@ class ComparisonsController < ApplicationController
   end
 
   def explore
-    comparisons = Comparison.accessible_by_public.includes(:taggings)
+    comparisons = Comparison.accessible_by_public.includes(:taggings).order(created_at: :desc)
 
-    @comparisons_grid = initialize_grid(comparisons, {
-      name: 'comparisons',
-      order: 'comparisons.id',
-      order_direction: 'desc',
-      per_page: 100,
-      include: [:user, {user: :org}, {taggings: :tag}]
-    })
+    @comparisons_grid = initialize_grid(comparisons,
+                                        name: "comparisons",
+                                        order: "comparisons.id",
+                                        order_direction: "desc",
+                                        per_page: 100,
+                                        include: [:user, { user: :org }, { taggings: :tag }])
 
     js :index, comparisons_ids_with_descriptions(comparisons)
     render :index
@@ -301,39 +193,92 @@ class ComparisonsController < ApplicationController
       @comparison.reload
     end
 
-    @meta = @comparison.meta
-
-    @test_vcf = @comparison.input("test_vcf").user_file
-    @test_bed = @comparison.input("test_bed").user_file if @comparison.input("test_bed")
-    @ref_vcf = @comparison.input("ref_vcf").user_file
-    @ref_bed = @comparison.input("ref_bed").user_file if @comparison.input("ref_bed")
-
-    if !@ref_vcf.feedback(@context).nil?
-      @feedback = @ref_vcf.feedback(@context)
-    elsif !@test_vcf.feedback(@context).nil?
-      @feedback = @test_vcf.feedback(@context)
+    @spec = if @comparison.app_dxid == DEFAULT_COMPARISON_APP
+      DefaultComparatorApp.input_spec
+    else
+      Comparisons::ComparatorProvider.call(@comparison.app_dxid)&.input_spec
     end
 
-    @outputs_grid = initialize_grid(@comparison.outputs, {
-      order: 'name',
-      order_direction: 'asc'
-    })
+    @meta = @comparison.meta
+
+    @test_set = @comparison.inputs.select do |file|
+      file.role.starts_with?("test_")
+    end
+
+    @benchmark_set = @comparison.inputs.select do |file|
+      file.role.starts_with?("benchmark_", "ref_")
+    end
+
+    @rest_files = @comparison.inputs.reject do |file|
+      file.role.starts_with?("test_", "benchmark_", "ref_")
+    end
+
+    # NOTE: This should be updated to work for non-default comparator as well.
+    if @comparison.app_dxid == DEFAULT_COMPARISON_APP
+      test_vcf = @comparison.input("test_vcf").user_file
+      ref_vcf = @comparison.input("ref_vcf").user_file
+
+      if !ref_vcf.feedback(@context).nil?
+        @feedback = ref_vcf.feedback(@context)
+      elsif !test_vcf.feedback(@context).nil?
+        @feedback = test_vcf.feedback(@context)
+      end
+    else
+      user_files = UserFile.arel_table
+      files = @comparison.outputs.where(user_files[:description].matches("%html_report"))
+
+      @output_files = files.map do |file|
+        { name: file.name, url: file.file_url(@context, "true", false) }
+      end
+    end
+
+    @outputs_grid = initialize_grid(
+      @comparison.outputs,
+      order: "name",
+      order_direction: "asc",
+    )
 
     @items_from_params = [@comparison]
     @item_path = pathify(@comparison)
     @item_comments_path = pathify_comments(@comparison)
-    if @comparison.in_space?
+
+    @comments = if @comparison.in_space?
       space = item_from_uid(@comparison.scope)
-      @comments = Comment.where(commentable: space, content_object: @comparison).order(id: :desc).page unsafe_params[:comments_page]
+      Comment.
+        where(commentable: space, content_object: @comparison).
+        order(id: :desc).
+        page(unsafe_params[:comments_page])
     else
-      @comments = @comparison.root_comments.order(id: :desc).page unsafe_params[:comments_page]
+      @comparison.root_comments.order(id: :desc).page(unsafe_params[:comments_page])
     end
 
-    @notes = @comparison.notes.real_notes.accessible_by(@context).order(id: :desc).page unsafe_params[:notes_page]
-    @answers = @comparison.notes.accessible_by(@context).answers.order(id: :desc).page unsafe_params[:answers_page]
-    @discussions = @comparison.notes.accessible_by(@context).discussions.order(id: :desc).page unsafe_params[:discussions_page]
+    @notes = @comparison.
+      notes.
+      real_notes.
+      accessible_by(@context).
+      order(id: :desc).
+      page(unsafe_params[:notes_page])
 
-    js id: @comparison.id, roc: @meta["weighted_roc"], state: @comparison.state
+    @answers = @comparison.
+      notes.
+      accessible_by(@context).
+      answers.
+      order(id: :desc).
+      page(unsafe_params[:answers_page])
+
+    @discussions = @comparison.
+      notes.
+      accessible_by(@context).
+      discussions.
+      order(id: :desc).
+      page(unsafe_params[:discussions_page])
+
+    js(
+      id: @comparison.id,
+      roc: @meta["weighted_roc"],
+      state: @comparison.state,
+      render: @comparison.app_dxid == DEFAULT_COMPARISON_APP,
+    )
   end
 
   def visualize
@@ -342,19 +287,21 @@ class ComparisonsController < ApplicationController
       flash[:error] = "You can only visualize comparisons in the 'done' state"
       redirect_to comparison_path(comparison.id)
       return
+    elsif comparison.app_dxid != DEFAULT_COMPARISON_APP
+      not_found!
     end
 
     api = DNAnexusAPI.new(@context.token)
     files = []
     comparison.outputs.each do |file|
       /(^f[pn]).vcf.gz(.tbi)?$/.match(file.name) do |matches|
-        if matches[1] == 'fp'
-          name = "FP (only in " + comparison.input("test_vcf").user_file.name + ")" + matches[2].to_s
+        name = if matches[1] == "fp"
+          "FP (only in " + comparison.input("test_vcf").user_file.name + ")" + matches[2].to_s
         else
-          name = "FN (only in " + comparison.input("ref_vcf").user_file.name + ")" + matches[2].to_s
+          "FN (only in " + comparison.input("ref_vcf").user_file.name + ")" + matches[2].to_s
         end
-        url = api.call(file.dxid, "download", {filename: file.name, project: file.project, preauthenticated: true})["url"]
-        files << {name: name, url: url}
+        url = api.call(file.dxid, "download", filename: file.name, project: file.project, preauthenticated: true)["url"]
+        files << { name: name, url: url }
       end
     end
     @files_json = files.to_json
@@ -363,63 +310,98 @@ class ComparisonsController < ApplicationController
   end
 
   def new
+    comparators = App.where(dxid: Setting.comparator_apps)
+
+    selectable_comparators = comparators.map do |app|
+      { value: app.dxid, label: app.title }
+    end
+
+    # Add global default comparison app to the list.
+    global_default_comparator = App.find_by(dxid: DEFAULT_COMPARISON_APP)
+    selectable_comparators << {
+      value: DEFAULT_COMPARISON_APP,
+      label: global_default_comparator&.title || DEFAULT_COMPARISON_APP,
+    }
+
+    selectable_comparators.sort_by! { |comp| comp[:label] }
+
+    js selectable_comparators: selectable_comparators.uniq,
+       default_comparator: Setting.comparison_app
   end
 
   # Creates new comparison.
+  # rubocop:disable Metrics/MethodLength
   def create
     param! :comparison, Hash do |c|
       c.param! :name, String, required: true
       c.param! :description, String, default: ""
-      c.param! :test_vcf_uid, String, required: true
-      c.param! :test_bed_uid, String
-      c.param! :ref_vcf_uid, String, required: true
-      c.param! :ref_bed_uid, String
+      c.param! :comparison_app, String
+      c.param! :inputs, Hash, required: true
     end
 
     comp_params = unsafe_params[:comparison]
-    files = {}
+    inputs = comp_params[:inputs]
+    app_dxid = CGI.unescape(comp_params[:comparison_app])
 
-    # Required files
-    %w(test_vcf ref_vcf).each do |role|
-      files[role] = accessible_real_file(comp_params["#{role}_uid"])
+    app = if app_dxid == DEFAULT_COMPARISON_APP
+      inputs = remap_inputs(inputs)
+      DefaultComparatorApp
+    else
+      Comparisons::ComparatorProvider.call(app_dxid)
     end
 
-    # Optional files
-    %w(test_bed ref_bed).each do |role|
-      next if comp_params["#{role}_uid"].blank?
-
-      files[role] = accessible_real_file(comp_params["#{role}_uid"])
+    if app.blank?
+      render_errors([I18n.t("invalid_comparator")])
+      return
     end
 
-    # Throw error if a file is not in a 'closed' state
-    files.each_key do |role|
-      file = files[role]
-
-      unless file[:state] == UserFile::STATE_CLOSED
-        flash[:error] = I18n.t("comparison_file_not_closed", file: file[:name])
-        redirect_to(new_comparison_path) && (return nil)
-      end
-    end
-
-    input = Hash[files.map { |k, v| [k, { "$dnanexus_link": { project: v.project, id: v.dxid } }] }]
     project = User.find(@context.user_id).private_comparisons_project
-    run_input = {
-      name: comp_params[:name],
-      project: project,
-      input: input,
-    }
+    input_spec_preparer = InputSpecPreparer.new(@context)
+    spec_inputs = input_spec_preparer.run(app, inputs)
+
+    unless input_spec_preparer.valid?
+      render_errors(input_spec_preparer.errors)
+      return
+    end
 
     api = DIContainer.resolve("api.user")
 
+    files_errors = []
+    spec_inputs.files.each do |file|
+      next if file.state == UserFile::STATE_CLOSED
+
+      files_errors << I18n.t("comparison_file_not_closed", file: file.name)
+    end
+
+    if files_errors.present?
+      render_errors(files_errors)
+      return
+    end
+
+    files = {}
+
+    spec_inputs.run_inputs.each do |input_name, value|
+      spec_inputs.files.each do |file|
+        next unless file.uid == value
+
+        files[input_name] = file
+      end
+    end
+
+    run_input = {
+      name: comp_params[:name],
+      project: project,
+      input: spec_inputs.dx_run_input,
+    }
+
     begin
-      job_id = api.app_run(Setting.comparison_app, nil, run_input)["id"]
-    rescue => e
+      job_id = api.app_run(app.dxid, nil, run_input)["id"]
+    rescue StandardError => e
       json_error = e.message.scan(/({"error".*)/).flatten.first
 
       raise e if json_error.blank?
 
-      flash[:error] = JSON.parse(json_error).dig("error", "message")
-      redirect_to new_comparison_path
+      render_errors([JSON.parse(json_error).dig("error", "message")])
       return
     end
 
@@ -432,17 +414,23 @@ class ComparisonsController < ApplicationController
       dxjobid: job_id,
       project: project,
       meta: {},
+      app_dxid: app.dxid,
+      run_input: spec_inputs.dx_run_input.reject do |input_name, _|
+        files.keys.include?(input_name)
+      end,
     }
 
     Comparison.transaction do
       comparison = Comparison.create!(opts)
-      files.each_key do |role|
-        comparison.inputs.create!(user_file_id: files[role].id, role: role)
+
+      files.each do |input_name, file|
+        comparison.inputs.create!(user_file_id: file.id, role: input_name)
       end
     end
 
-    redirect_to :comparisons
+    render json: { url: comparisons_path }
   end
+  # rubocop:enable Metrics/MethodLength
 
   def rename
     @comparison = Comparison.find_by!(id: unsafe_params[:id])
@@ -482,7 +470,7 @@ class ComparisonsController < ApplicationController
     end
 
     if file_ids.present?
-      DNAnexusAPI.new(@context.token).call(projects[0], "removeObjects", {objects: file_ids})
+      DNAnexusAPI.new(@context.token).call(projects[0], "removeObjects", objects: file_ids)
     end
 
     flash[:success] = "Comparison \"#{@comparison.name}\" has been successfully deleted"
@@ -490,6 +478,27 @@ class ComparisonsController < ApplicationController
   end
 
   private
+
+  # Renders array of errors returning bad request status.
+  # @param errors [Array<String>] Array of errors.
+  def render_errors(errors)
+    render json: errors, status: :bad_request
+  end
+
+  # Remaps inputs for default comparison app.
+  # @param inputs [Hash] Inputs to remap.
+  # @return [Hash] Remapped inputs.
+  def remap_inputs(inputs)
+    remapped = inputs.dup
+    remapped["ref_vcf"] = remapped.delete("benchmark_vcf") if remapped.key?("benchmark_vcf")
+    remapped["ref_bed"] = remapped.delete("benchmark_bed") if remapped.key?("benchmark_bed")
+    remapped
+  end
+
+  # Redirects guest to comparisons' root.
+  def redirect_guest
+    redirect_to explore_comparisons_path if @context.guest?
+  end
 
   # Tries to find real accessible by user file by file's UID.
   # @param uid [String] UID to try to find file by.
@@ -507,7 +516,123 @@ class ComparisonsController < ApplicationController
     params.permit(:id, :name, :page, :_format)
   end
 
+  # Returns hash containing ids of comparisons that have description.
+  # @param comparisons [ActiveRecord::Relation<Comparison>] Comparisons to process.
+  # @return [Hash]
   def comparisons_ids_with_descriptions(comparisons)
-    { comparisonsIdsWithDescription: comparisons.select { |comparison| comparison.description.present? }.collect(&:id) }
+    selected_ids = comparisons.select { |comparison| comparison.description.present? }.collect(&:id)
+
+    { comparisonsIdsWithDescription: selected_ids }
   end
+
+  # Generates sequence from given comparison.
+  # @param comparison [Comparison] Comparison to generate sequence from.
+  # @return [Hash] Generated sequence.
+  # rubocop:disable Metrics/MethodLength
+  def generate_sequence(comparison)
+    identifier = []
+    identifier << {
+      "system" => "https://precision.fda.gov/fhir/Sequence/",
+      "value" => comparison.uid,
+    }
+
+    coding = []
+    %w(ref_vcf ref_bed).each do |role|
+      input = comparison.input(role)
+      next if input.blank?
+
+      coding << {
+        "system" => "https://precision.fda.gov/files",
+        "code" => input.user_file.dxid,
+        "display" => input.user_file.public? ? input.user_file.name : input.user_file.dxid,
+      }
+    end
+
+    standard_sequence = { "coding" => coding }
+
+    app = App.find_by(dxid: COMPARATOR_V1_APP_ID)
+    coding = []
+
+    if app
+      coding << {
+        "system" => "https://precision.fda.gov/apps",
+        "code" => app.dxid,
+        "display" => app.title,
+        "version" => app.revision.to_s,
+      }
+    end
+
+    method = {
+      "coding" => coding,
+    }
+
+    quality_data = {
+      "type" => "unknown",
+      "standardSequence" => standard_sequence,
+      "method" => method,
+      "truthTP" => comparison.meta["true-pos"].to_i,
+      "truthFN" => comparison.meta["false-neg"].to_i,
+      "queryFP" => comparison.meta["false-pos"].to_i,
+      "precision" => comparison.meta["precision"].to_f,
+      "recall" => comparison.meta["recall"].to_f,
+      "fMeasure" => comparison.meta["f-measure"].to_f,
+    }
+
+    # For ROC data points, convert them to floats before exporting
+    meta_roc = comparison.meta["weighted_roc"]
+
+    headers_map = {
+      "score" => "score",
+      "true_positives" => "numTP",
+      "false_positives" => "numFP",
+      "false_negatives" => "numFN",
+      "precision" => "precision",
+      "sensitivity" => "sensitivity",
+      "f_measure" => "fMeasure",
+    }
+
+    if meta_roc["data"].present?
+      headers = {}
+
+      meta_roc["header"].map.each_with_index do |h, i|
+        new_key = headers_map[h]
+
+        case h
+        when "score", "true_positives", "false_positives", "false_negatives"
+          headers[new_key] = meta_roc["data"].map { |d| d[i].to_i }
+        else
+          headers[new_key] = meta_roc["data"].map { |d| d[i].to_f }
+        end
+      end
+
+      quality_data["roc"] = headers
+    end
+
+    quality = []
+    quality << quality_data
+    repository = []
+
+    %w(test_vcf test_bed).each do |role|
+      input = comparison.input(role)
+      next if input.blank?
+
+      repository << {
+        "type" => "login",
+        "url" => "https://precision.fda.gov#{pathify(input.user_file)}",
+        "name" => "PrecisionFDA",
+        "variantsetId" => input.user_file.dxid,
+      }
+    end
+
+    {
+      "resourceType" => "Sequence",
+      "type" => "dna",
+      "coordinateSystem" => 1,
+      "identifier" => identifier,
+      "quality" => quality,
+      "repository" => repository,
+    }
+  end
+  # rubocop:enable Metrics/MethodLength
 end
+# rubocop:enable Metrics/ClassLength

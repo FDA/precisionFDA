@@ -4,9 +4,9 @@ describe SyncService::Comparisons::ComparisonProcessor do
   let(:state_processor) { instance_double(SyncService::Comparisons::StateProcessor) }
   let(:comparison_updater) { class_double(SyncService::Comparisons::ComparisonUpdater) }
 
-  let(:user) { "some-user" }
-  let(:comparison) { "some-comparison" }
-  let(:job) { "some-job" }
+  let(:user) { build(:user) }
+  let(:comparison) { build(:comparison) }
+  let(:job) { build(:job) }
 
   before do
     allow(state_processor).to receive(:call)

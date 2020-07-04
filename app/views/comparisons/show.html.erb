@@ -41,12 +41,27 @@
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Runtime</h5>
-      <p class="list-group-item-text"><%= humanizeSeconds(@meta["runtime_sec"]) %></p>
+      <p class="list-group-item-text"><%= humanize_seconds(@meta["runtime_sec"]) %></p>
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Created</h5>
       <p class="list-group-item-text"><%= @comparison.created_at.to_s(:human) %></p>
     </li>
+    <%if @comparison.app_dxid != DEFAULT_COMPARISON_APP %>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Comparator App</h5>
+        <p class="list-group-item-text">
+          <%= link_to(App.find_by(dxid: @comparison.app_dxid).name, app_path(@comparison.app_dxid))  %>
+        </p>
+      </li>
+    <% else %>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Comparator App</h5>
+        <p class="list-group-item-text">
+          <%= @comparison.app_dxid %>
+        </p>
+      </li>
+    <% end %>
   </ul>
 </div>
 
@@ -71,14 +86,14 @@
     </div>
     <% end %>
     <div class="btn-group">
-      <% if @comparison.state == 'done' %>
+      <% if @comparison.state == "done" && @comparison.app_dxid == DEFAULT_COMPARISON_APP %>
         <%= link_to visualize_comparison_path(@comparison.id), class: "btn btn-primary" do %>
           <span class="fa fa-sliders"></span> Visualize
         <% end %>
       <% end %>
       <%= render "_partials/btn_publish", item: @comparison %>
 
-      <% if @comparison.in_space? && @comparison.space_object.contributor_permission(@context) %>
+      <% if @comparison.in_space? && @comparison.space_object.editable_by?(@context.user) %>
         <%= render "_partials/btn_copy_to_cooperative", item: @comparison %>
       <% end %>
 
@@ -162,10 +177,33 @@
     <div class="variants panel">
       <div class="variant-test">
         <div class="variant-title">Test Set</div>
-        <ul class="variant-inputs list-unstyled">
-          <%= render "_partials/variant_file", file: @test_vcf, title: "VCF", required: true, classes: "required active"  %>
-          <%= render "_partials/variant_file", file: @test_bed, title: "BED", required: false, classes: "active"  %>
-        </ul>
+        <table class="variant-inputs">
+          <tbody>
+            <% @spec.each do |spec| %>
+              <%
+                next if benchmark_spec?(spec)
+
+                required = !spec["optional"]
+                if spec["class"] == "file"
+                  file_set = test_set_spec?(spec) ? @test_set : @rest_files
+                  file = file_set.select { |f| spec["name"] == f.role }.first
+                  title = (spec["label"].present? ? spec["label"] : file&.role) || spec["name"]
+                else
+                  input = @comparison.run_input.select { |name, _| name == spec["name"] }.first
+                  title = spec["label"].present? ? spec["label"] : spec["name"]
+                end
+              %>
+              <%=
+                if spec["class"] == "file"
+                  render("_partials/variant_result", file: file&.user_file, title: title, required: required)
+                else
+                  render("_partials/variant_result", input: input, title: title, required: required)
+                end
+              %>
+            <% end %>
+          </tbody>
+        </table>
+
         <div class="variants-circle">
             <div class="variants-circle-with">
               with
@@ -175,14 +213,35 @@
 
       <div class="variant-ref">
         <div class="variant-title">Benchmark Set</div>
-        <ul class="variant-inputs list-unstyled">
-          <%= render "_partials/variant_file", file: @ref_vcf, title: "VCF", required: true, classes: "required active"  %>
-          <%= render "_partials/variant_file", file: @ref_bed, title: "BED", required: false, classes: "active"  %>
-        </ul>
+        <table class="variant-inputs">
+          <tbody>
+            <% @spec.each do |spec| %>
+              <%
+                next unless benchmark_spec?(spec)
+
+                required = !spec["optional"]
+                if spec["class"] == "file"
+                  file = @benchmark_set.select { |f| spec["name"] == f.role }.first
+                  title = (spec["label"].present? ? spec["label"] : file&.role) || spec["name"]
+                else
+                  input = @comparison.run_input.select { |name, _| name == spec["name"] }.first
+                  title = spec["label"].present? ? spec["label"] : spec["name"]
+                end
+              %>
+              <%=
+                if spec["class"] == "file"
+                  render("_partials/variant_result", file: file&.user_file, title: title, required: required)
+                else
+                  render("_partials/variant_result", input: input, title: title, required: required)
+                end
+              %>
+            <% end %>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <% if @comparison.state == 'done' %>
+    <% if @comparison.state == "done" && @comparison.app_dxid == DEFAULT_COMPARISON_APP %>
     <div class="row">
       <div class="col-sm-8 col-sm-offset-3 col-md-6 col-md-offset-5">
         <ul class="meta-stats list-group">
@@ -225,6 +284,19 @@
         <div class="svg-container"></div>
       </li>
     </ul>
+    <% elsif @comparison.state == "done" && @output_files.size.positive? %>
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          Please visit link(s) below to view comparison output
+        </div>
+        <div class="panel-body">
+          <% @output_files.each do |file| %>
+            <div>
+              <a href="<%= file[:url] %>" target="_blank"><%= file[:name] %></a>
+            </div>
+          <% end %>
+        </div>
+      </div>
     <% end %>
   </div>
 

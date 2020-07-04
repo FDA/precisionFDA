@@ -11,65 +11,9 @@ class ApiController < ApplicationController
   before_action :validate_create_asset, only: :create_asset
   before_action :validate_get_upload_url, only: :get_upload_url
 
-  before_action :check_space, :check_uids, :check_items, only: :publish
-
   rescue_from ApiError, with: :render_error_method
+
   # rubocop:disable Style/SignalException
-
-  # Inputs
-  #
-  # scope (string, optional): "public" or "space-123" (default is "public")
-  # uids (array of strings): one or more uids to publish to the scope
-  #
-  # Outputs
-  #
-  # message (string): result message
-  def publish
-    published_count = 0
-
-    files = @items.select { |item| item.klass == "file" || item.klass == "asset" }
-    comparisons = @items.select { |item| item.klass == "comparison" }
-    apps = @items.select { |item| item.klass == "app" }
-    jobs = @items.select { |item| item.klass == "job" }
-    notes = @items.select { |item| item.klass == "note" }
-    discussions = @items.select { |item| item.klass == "discussion" }
-    answers = @items.select { |item| item.klass == "answer" }
-    workflows = @items.select { |item| item.klass == "workflow" }
-
-    unless files.empty?
-      UserFile.transaction do
-        files.each { |file| file.update!(scope: @scope, state: UserFile::STATE_PUBLISHING ) }
-        FilePublishWorker.perform_async(@scope, files.map(&:id), session_auth_params)
-      end
-    end
-
-    published_count += Comparison.publish(comparisons, @context, @scope) unless comparisons.empty?
-
-    unless jobs.empty?
-      published_count += PublishService::JobPublisher.new(@context).publish(jobs, @scope)
-    end
-
-    published_count += Note.publish(notes, @context, @scope) unless notes.empty?
-    published_count += Discussion.publish(discussions, @context, @scope) unless discussions.empty?
-    published_count += Answer.publish(answers, @context, @scope) unless answers.empty?
-
-    unless workflows.empty?
-      PublishService::WorkflowPublisher.call(workflows, @context, @scope)
-      published_count += workflows.count
-
-      workflows.flat_map(&:apps).each do |app|
-        next if apps.include?(app) || app.public? || app.scope == @scope
-
-        apps << app
-      end
-    end
-
-    published_count += AppSeries.publish(apps, @context, @scope) unless apps.empty?
-
-    render json: {
-      published_count: published_count
-    }
-  end
 
   # Collects an Array of children for object in params.
   # @param uid [Object Id].
@@ -301,41 +245,42 @@ class ApiController < ApplicationController
   end
 
   # Return files array found by RegEx
-  # Inputs:
-  # @param [String] searchValue string
-  # @param [String] flagsValue string
-  # @param [Integer] page - current page number
-  # @param [Array] scopes (Array, optional): array of valid scopes e.g.
-  #   ["private", "public", "space-1234"] or leave blank for all
-  # @param [Nil or True] uids
-  #
-  # @return [Array of Hashes]
-  #  search_result: array of hashes, each of which has these fields:
+  # @param search_string [String] Search string.
+  # @param flag [String] Regex flag.
+  # @param page [Integer] Current page number.
+  # @param order_by_name [String] Order direction: 'asc' or 'desc'.
+  # @param uids [Nil, True] Uids of files checked.
+  # @return search_result [Array<Hash>]
+  #  array of hashes, each of which has these fields:
   #    id (integer): primary key of the file
   #    uid (strinf): string key of the file
   #    title (string): the file name
   #    path (string): a file path collected
+  #     search_result is a sorted array, according params[:order_by_name] value
+  #     It consists of folders part if any and a files part.
+  #     Files inside folders are also sorted.
   #  uids: array of all found file's uid values
   #
   # rubocop:disable Style/SignalException
   def files_regex_search
     page = params[:page].to_i.positive? ? params[:page] : 1
     files = user_real_files(params, @context).files_conditions
-
     begin
       regexp = Regexp.new(params[:search_string], params[:flag])
-      search_result = files.eager_load(:license, user: :org).order(id: :desc).map do |file|
-        describe_for_api(file) if file.name.scan(regexp).present?
-      end
-      result = search_result.compact.
+      direction = params[:order_by_name]
+
+      search_result = files.
+        eager_load(:license, user: :org).
+        order(name: direction.to_s).
         map do |file|
-        {
-          id: file[:id],
-          uid: file[:uid],
-          title: file["title"],
-          path: file[:file_path],
-        }
+          describe_for_api(file) if file.name.downcase.scan(regexp).present?
+        end
+
+      result = []
+      if search_result.compact.present?
+        result = UserFile.files_search_results(search_result, direction)
       end
+
       paginated_result = Kaminari.paginate_array(result).page(page).per(20)
       uids = params[:uids].present? && to_bool(params[:uids]) ? result.compact.pluck(:uid) : []
 
@@ -477,6 +422,9 @@ class ApiController < ApplicationController
     render json: result
   end
 
+  # Returns user accessible apps according to input filters.
+  #   Used in Notes 'Attach to Note' and Spaces 'Add Apps' dialogs.
+  #
   # Inputs
   #
   # scopes (Array, optional): array of valid scopes on the App e.g. ["private", "public", "space-1234"] or leave blank for all
@@ -496,20 +444,15 @@ class ApiController < ApplicationController
   # An array of hashes
   #
   def list_apps
-    app_series = if unsafe_params[:editable]
-      AppSeries.editable_by(@context).accessible_by_private
-    else
-      AppSeries.accessible_by(@context)
-    end
+    check_scope!
 
-    app_series = app_series.eager_load(:latest_revision_app, :latest_version_app).order(id: :desc)
-    apps = app_series.map { |series| series.latest_accessible(@context) }.compact
+    apps = App.accessible_by(@context).includes(:app_series).order(:title)
+    apps = apps.where(scope: params[:scopes]) if params[:scopes].present?
 
-    # The scope applies to the App and not the AppSeries
-    if unsafe_params[:scopes].present?
-      check_scope!
-      apps = apps.select { |app| unsafe_params[:scopes].include?(app.scope) }
-    end
+    # Filter by latest revisions or versions.
+    #   This is kinda tricky, but we need to handle the apps which revisions were moved to a space
+    #   before we migrated to the new way how app is published to a space.
+    apps = apps.select(&:latest_accessible_in_scope?)
 
     result = apps.map do |app|
       describe_for_api(app, unsafe_params[:describe])
@@ -1039,87 +982,6 @@ class ApiController < ApplicationController
 
   # Inputs
   #
-  # id (string, required): the dxid of the app to run
-  # name (string, required): the name of the job
-  # inputs (hash, required): the inputs
-  # instance_type (string, optional): override of the default instance type
-  #
-  # Outputs
-  #
-  # id (string): the dxid of the resulting job
-  #
-  def run_app
-    # rubocop:disable Style/SignalException
-    # Parameter 'id' should be of type String
-    id = unsafe_params[:id]
-    fail "App ID is not a string" unless id.is_a?(String) && id != ""
-
-    # Name should be a nonempty string
-    name = unsafe_params[:name]
-    fail "Name should be a non-empty string" unless name.is_a?(String) && name != ""
-
-    # Inputs should be a hash (more checks later)
-    inputs = unsafe_params["inputs"]
-    fail "Inputs should be a hash" unless inputs.is_a?(Hash)
-
-    # App should exist and be accessible
-    @app = App.accessible_by(@context).find_by_uid!(id)
-
-    # Check if asset licenses have been accepted
-    fail "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
-
-    space_id = unsafe_params[:space_id]
-    if space_id
-      fail "Invalid space_id" unless @app.can_run_in_space?(@context.user, space_id)
-    end
-    space = Space.find_by_id(space_id)
-    # Inputs should be compatible
-    # (The following also normalizes them)
-    input_info = input_spec_preparer.run(@app, inputs, space.try(:accessible_scopes))
-
-    fail input_spec_preparer.first_error unless input_spec_preparer.valid?
-
-    run_instance_type = unsafe_params[:instance_type]
-
-    # User can override the instance type
-    if run_instance_type
-      fail "Invalid instance type selected" unless Job::INSTANCE_TYPES.key?(unsafe_params["instance_type"]) # Checks also that it's a string
-    end
-
-    if space
-      project = space.project_for_user(@context.user)
-      permission = space.have_permission?(project, @context.user)
-      fail "You don't have permissions to run app in space #{space.name}" unless permission
-
-    else
-      project = @context.user.private_files_project
-    end
-
-    job_creator = JobCreator.new(
-      api: DNAnexusAPI.new(@context.token),
-      context: @context,
-      user: @context.user,
-      project: project
-    )
-
-    job = job_creator.create(
-      app: @app,
-      name: name,
-      input_info: input_info,
-      run_instance_type: run_instance_type,
-      scope: space.try(:uid),
-    )
-
-    if space && space.review?
-      SpaceEventService.call(space_id, @context.user_id, nil, job, :job_added)
-    end
-    # rubocop:enable Style/SignalException
-
-    render json: { id: job.uid }
-  end
-
-  # Inputs
-  #
   # app_id
   #
   # Outputs
@@ -1478,61 +1340,14 @@ class ApiController < ApplicationController
 
   protected
 
-  # Checks if scope is valid and space is accessible by a user.
-  # @raise [ApiError] If scope is invalid or space isn't accessible by a user.
-  def check_space
-    @scope = params[:scope] || "public"
-
-    return if @scope == "public"
-
-    unless @scope.is_a?(String)
-      fail "The optional 'scope' input must be a string (either 'public' or 'space-xxxx')"
-    end
-
-    # Check that scope is a valid scope:
-    # - must be of the form space-xxxx
-    # - must exist in the Space table
-    # - must be accessible by context
-    space_id = @scope[/^space-(\d+)$/, 1]
-
-    fail "Invalid scope (only 'public' or 'space-xxxx' are accepted)" unless space_id
-
-    space = Space.active.find_by(id: space_id)
-
-    fail "Invalid space" unless space&.accessible_by?(@context)
-  end
-
-  # Checks if uids is an array of strings.
-  # @raise [ApiError] If uids is not an array of strings.
-  def check_uids
-    @uids = params[:uids]
-
-    if !@uids.is_a?(Array) || @uids.any? { |uid| !uid.is_a?(String) }
-      fail "The input 'uids' must be an array of object ids (strings)"
-    end
-  end
-
-  # Checks if items are publishable by a user.
-  # @raise [ApiError] If any item isn't publishable by a user.
-  def check_items
-    @items = @uids.uniq.map { |uid| item_from_uid(uid) }.
-      reject { |item| item.public? || item.scope == @scope }
-
-    if @items.any? { |item| !item.publishable_by?(@context, @scope) }
-      fail "Unpublishable items detected"
-    end
-  end
-
-  def input_spec_preparer
-    @input_spec_preparer ||= InputSpecPreparer.new(@context)
-  end
-
   def check_scope!
-    scopes = unsafe_params[:scopes]
+    scopes = params[:scopes]
+
+    return if scopes.blank?
 
     condition = scopes.is_a?(Array) &&
       scopes.all? do |scope|
-        ["public", "private", nil].include?(scope) || scope =~ /^space-\d+$/
+        ["public", "private", nil].include?(scope) || Space.valid_scope?(scope)
       end
 
     fail(t('api.errors.invalid_scope')) unless condition

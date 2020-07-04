@@ -1,0 +1,43 @@
+<%= grid(comparators_grid, show_filters: true, hide_csv_button: true) do |g|
+  g.blank_slate partial: "_partials/empty_grid"
+
+  g.column name: "Title", attribute: "title" do |app|
+    link_to app.title, app_path(app)
+  end
+
+  g.column name: "Name", attribute: "name", assoc: :app_series do |app|
+    app.name
+  end
+
+  g.column name: "Revision", attribute: "revision", filter: false do |app|
+    app.revision
+  end
+
+  g.column name: "Org" do |app|
+    app.user.org.handle
+  end
+
+  g.column name: "Added by" do |app|
+    link_to app.user.dxuser, user_path(app.user.dxuser)
+  end
+
+  g.column name: "ID" do |app|
+    app.dxid
+  end
+
+  g.column name: "Created" do |app|
+    app.created_at.to_s(:human)
+  end
+
+  g.column name: "" do |app|
+    if default_comparator_app?(app)
+      content_tag(:span, 'default', class: 'label label-default')
+    else
+      raw """<button class='btn btn-xs btn-default' data-dxid='#{app.dxid}' data-bind='click: showSetAsDefaultModal'>Set as Default</button>"""
+    end
+  end
+
+  g.column name: "" do |app|
+    raw """<button class='btn btn-xs btn-danger' data-dxid='#{app.dxid}' data-bind='click: showRemoveFromComparatorsModal'>Remove</button>"""
+  end
+end %>

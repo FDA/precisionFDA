@@ -4,22 +4,22 @@ default: &default
   timeout: 5000
   host: db
   username: root
-  password: password
+  password: pswd
   variables:
     sql_mode: TRADITIONAL
 
 development:
   <<: *default
-  database: precision-fda
+  database: dev
 
 test:
   <<: *default
-  database: precisionfda-test
+  database: test
 
 ui_test:
   <<: *default
-  database: precisionfda-ui-test
+  database: ui-test
 
 production:
   <<: *default
-  database: precisionfda-production
+  database: prod

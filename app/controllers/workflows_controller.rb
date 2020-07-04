@@ -9,14 +9,14 @@ class WorkflowsController < ApplicationController
     private_app_series = app_series.where(scope: "private")
     public_app_series = app_series.where(scope: "public")
     js(
-      apps: { private_apps: private_app_series.map { |app_series| app_series.slice(:id, :name) },
-      public_apps: public_app_series.map { |app_series| app_series.slice(:id, :name) } },
-      scope: ["private"]
+      apps: { private_apps: private_app_series.map { |a_s| a_s.slice(:id, :name) },
+              public_apps: public_app_series.map { |a_s| a_s.slice(:id, :name) } },
+      scope: %w(private),
     )
   end
 
   def show
-    @workflow = Workflow.accessible_by(@context).find_by_uid(unsafe_params[:id])
+    @workflow = Workflow.accessible_by(@context).find_by(uid: unsafe_params[:id])
     if @workflow.nil?
       flash[:error] = "Sorry, this workflow does not exist or is not accessible by you"
       redirect_to workflows_path
@@ -30,21 +30,23 @@ class WorkflowsController < ApplicationController
 
     a = Analysis.arel_table
     batch_ids = ActiveRecord::Base.connection.execute("select min(id) from analyses where batch_id is not null group by batch_id").to_a.flatten
-    all_analyses = @workflow.analyses.editable_by(@context).where(a["batch_id"].eq(nil).or(a["id"].in(batch_ids)))
+    all_analyses = @workflow.analyses.editable_by(@context).
+      where(a["batch_id"].eq(nil).or(a["id"].in(batch_ids))).
+      order(created_at: :desc)
 
     batch_hash = Analysis.batch_hash(all_analyses.where("analyses.batch_id is not NULL"))
 
     @analyses_grid = initialize_grid(all_analyses,
-      name: 'analyses',
-      order: 'analyses.id',
-      order_direction: 'desc',
-      per_page: 100,)
+                                     name: "analyses",
+                                     order: "analyses.id",
+                                     order_direction: "desc",
+                                     per_page: 100)
 
     js analyses_jobs: Analysis.job_hash(all_analyses.where(batch_id: nil)), workflow: @workflow.slice(:id, :dxid, :uid, :readme, :spec), batches: batch_hash
   end
 
   def edit
-    @workflow = Workflow.editable_by(@context).find_by_uid(unsafe_params[:id])
+    @workflow = Workflow.editable_by(@context).find_by(uid: unsafe_params[:id])
     if @workflow.nil?
       flash[:error] = "Sorry, you do not have permissions to edit this workflow"
       redirect_to workflows_path
@@ -54,10 +56,10 @@ class WorkflowsController < ApplicationController
     private_app_series = app_series.where(scope: "private")
     public_app_series = app_series.where(scope: "public")
     js(
-      apps: { private_apps: private_app_series.map { |app_series| app_series.slice(:id, :name) },
-      public_apps: public_app_series.map { |app_series| app_series.slice(:id, :name) } },
+      apps: { private_apps: private_app_series.map { |a_s| a_s.slice(:id, :name) },
+              public_apps: public_app_series.map { |a_s| a_s.slice(:id, :name) } },
       scope: @workflow.accessible_scopes,
-      workflow: @workflow
+      workflow: @workflow,
     )
   end
 
@@ -66,7 +68,7 @@ class WorkflowsController < ApplicationController
     batch_json = {}
     @workflow = nil
     if unsafe_params[:id].present?
-      @workflow = Workflow.accessible_by(@context).find_by_uid(unsafe_params[:id])
+      @workflow = Workflow.accessible_by(@context).find_by(uid: unsafe_params[:id])
       if @workflow.nil?
         flash[:error] = "Sorry, this workflow does not exist or is not accessible by you"
         redirect_to workflows_path
@@ -85,8 +87,8 @@ class WorkflowsController < ApplicationController
     if @workflow.present?
       analysis_arel = Analysis.arel_table
       batch_ids = ActiveRecord::Base.connection.execute("select min(id) from analyses where batch_id is not null group by batch_id").to_a.flatten
-      analyses = @workflow.analyses.editable_by(@context)
-                     .where(analysis_arel["batch_id"].eq(nil).or(analysis_arel["id"].in(batch_ids)))
+      analyses = @workflow.analyses.editable_by(@context).
+        where(analysis_arel["batch_id"].eq(nil).or(analysis_arel["id"].in(batch_ids)))
 
       batches = Analysis.where(id: batch_ids)
       batches.each do |b|
@@ -100,9 +102,10 @@ class WorkflowsController < ApplicationController
       js_param[:analyses_jobs] = Analysis.job_hash(analyses.where(batch_id: nil), workflow_details: true, batches: batch_hash)
     else
       analysis_arel = Analysis.arel_table
-      batch_ids = ActiveRecord::Base.connection.execute("select min(id) from analyses where batch_id is not null group by batch_id").to_a.flatten
-      analyses = Analysis.editable_by(@context)
-                     .where(analysis_arel["batch_id"].eq(nil).or(analysis_arel["id"].in(batch_ids)))
+      batch_ids = ActiveRecord::Base.connection.
+          execute("select min(id) from analyses where batch_id is not null group by batch_id").to_a.flatten
+      analyses = Analysis.editable_by(@context).
+        where(analysis_arel["batch_id"].eq(nil).or(analysis_arel["id"].in(batch_ids))).order(created_at: :desc)
 
       batch_hash = Analysis.batch_hash(analyses.where("analyses.batch_id is not NULL"))
       js_param[:batch_hash] = batch_hash
@@ -110,25 +113,25 @@ class WorkflowsController < ApplicationController
     end
 
     @analyses_grid = initialize_grid(analyses.eager_load(:jobs),
-      name: 'analyses',
-      order: 'analyses.id',
-      order_direction: 'desc',
-      per_page: 100,)
+                                     name: "analyses",
+                                     order: "analyses.id",
+                                     order_direction: "desc",
+                                     per_page: 100)
 
-    @my_workflows = WorkflowSeries.includes(latest_revision_workflow: [user: :org])
-                      .editable_by(@context).order(name: :asc)
-                      .map { |series| series.latest_accessible(@context) }.compact
+    @my_workflows = WorkflowSeries.includes(latest_revision_workflow: [user: :org]).
+      editable_by(@context).order(created_at: :desc).
+      map { |series| series.latest_accessible(@context) }.compact
 
-    @run_workflows = WorkflowSeries.eager_load(latest_revision_workflow: [user: :org])
-                       .accessible_by(@context).order(name: :asc)
-                       .where.not(user_id: @context.user_id)
-                       .map { |series| series.latest_accessible(@context) }.compact
+    @run_workflows = WorkflowSeries.eager_load(latest_revision_workflow: [user: :org]).
+      accessible_by(@context).order(created_at: :desc).
+      where.not(user_id: @context.user_id).
+      map { |series| series.latest_accessible(@context) }.compact
 
     js js_param.merge(batches: batch_hash)
   end
 
   def fork
-    @workflow = Workflow.accessible_by(@context).find_by_uid(unsafe_params[:id])
+    @workflow = Workflow.accessible_by(@context).find_by(uid: unsafe_params[:id])
     if @workflow.nil?
       flash[:error] = "Sorry, you do not have permissions to fork this workflow"
       redirect_to workflows_path
@@ -143,7 +146,7 @@ class WorkflowsController < ApplicationController
         public_apps: public_app_series.map { |app_series| app_series.slice(:id, :name) },
       },
       scope: @workflow.accessible_scopes,
-      workflow: @workflow
+      workflow: @workflow,
     )
   end
 
@@ -156,7 +159,7 @@ class WorkflowsController < ApplicationController
   end
 
   def batch_workflow
-    @workflow = Workflow.accessible_by(@context).find_by_uid(unsafe_params[:id])
+    @workflow = Workflow.accessible_by(@context).find_by(uid: unsafe_params[:id])
 
     if @workflow.nil?
       flash[:error] = "Sorry, this workflow does not exist or is not accessible by you"
@@ -180,7 +183,7 @@ class WorkflowsController < ApplicationController
   end
 
   def run_batch
-    workflow_object = Workflow.find_by_uid(unsafe_params[:id])
+    workflow_object = Workflow.find_by(uid: unsafe_params[:id])
     folder = Folder.find(unsafe_params[:folder_id]) if unsafe_params[:folder_id].present?
 
     batch_id = workflow_object.dxid + "_" + Time.now.to_i.to_s
@@ -237,7 +240,7 @@ class WorkflowsController < ApplicationController
       to_run["api"] = workflow.dup
 
       analysis_dxid = run_workflow_once(to_run)
-      analysis = Analysis.find_by_dxid(analysis_dxid)
+      analysis = Analysis.find_by(dxid: analysis_dxid)
       analysis.batch_id = batch_id
       analysis.save
       list_analyses.unshift(analysis)
@@ -258,8 +261,8 @@ class WorkflowsController < ApplicationController
         dxid = DNAnexusAPI.new(@context.token).call(a.dxid, "terminate")
         terminated_analyses.append(dxid)
       end
-      if request.referrer.present?
-        redirect_to request.referrer
+      if request.referer.present?
+        redirect_to request.referer
       else
         redirect_to workflow_path(terminate_analyses.first.workflow.dxid)
       end
@@ -272,7 +275,7 @@ class WorkflowsController < ApplicationController
   def convert_file_with_strings
     file = unsafe_params[:file_field]
     file_content = file.tempfile.read
-    file_content = file_content.each_line.reject { |x| x.strip == "" }.join.force_encoding('utf-8')
+    file_content = file_content.each_line.reject { |x| x.strip == "" }.join.force_encoding("utf-8")
     size_of_inputs = file_content.each_line.first.split("\t").size
     content =
       if size_of_inputs > 1
@@ -295,16 +298,16 @@ class WorkflowsController < ApplicationController
   def output_folders_list
     parent_folder_id ||= unsafe_params[:parent_folder_id]
 
-    workflow = Workflow.find_by_uid(unsafe_params[:id])
+    workflow = Workflow.find_by(uid: unsafe_params[:id])
     folders =
       if workflow.in_space?
         space = Space.from_scope(workflow.scope)
-        Folder.accessible_by_space(space)
+        space.folders
       else
-        Folder
-          .private_for(@context)
-          .editable_by(@context)
-          .where(parent_folder_id: parent_folder_id)
+        Folder.
+          private_for(@context).
+          editable_by(@context).
+          where(parent_folder_id: parent_folder_id)
       end
     if folders.blank?
       result = { folders: [] }
@@ -318,10 +321,10 @@ class WorkflowsController < ApplicationController
   def output_folders_list_platform
     current_folder = unsafe_params[:current_folder] || "/"
     response = output_folder_service.list(current_folder)
-    if response['folders']
-      result = { folders: response['folders'] }
+    result = if response["folders"]
+      { folders: response["folders"] }
     else
-      result = JSON.parse(response.body)['error']
+      JSON.parse(response.body)["error"]
     end
 
     # render json: result
@@ -333,7 +336,7 @@ class WorkflowsController < ApplicationController
   # unsafe_params[:parent_folder_id] = nil
   # unsafe_params[:public] = false
   def output_folder_create
-    workflow = Workflow.find_by_uid(unsafe_params[:id])
+    workflow = Workflow.find_by(uid: unsafe_params[:id])
 
     is_public_folder = unsafe_params[:public] == "true"
 
@@ -360,7 +363,7 @@ class WorkflowsController < ApplicationController
     if result.failure?
       full_messages =
         result.value[:name] ? result.value[:name].join(". ") : "Error in create output folder"
-      render json: { error_message: full_messages }, status: 500
+      render json: { error_message: full_messages }, status: :internal_server_error
     else
       render json: { folders: { id: result.value.id, name: result.value.name } }
     end
@@ -369,11 +372,11 @@ class WorkflowsController < ApplicationController
   # usage on the platform
   def output_folder_create_platform
     response = output_folder_service.create(unsafe_params[:folder])
-    if response['id'] == @context.user.private_files_project || response['id'] == @context.user.public_files_project
-      result = { result: 'Status Update: 200' }
+    if response["id"] == @context.user.private_files_project || response["id"] == @context.user.public_files_project
+      result = { result: "Status Update: 200" }
       output_folder_update
     else
-      result = JSON.parse(response.body)['error']
+      result = JSON.parse(response.body)["error"]
 
       render json: result
     end
@@ -382,10 +385,10 @@ class WorkflowsController < ApplicationController
   # usage on the platform
   def output_folder_update_platform
     response = output_folder_service.update(@workflow, unsafe_params[:folder])
-    if response['id'] == @workflow.dxid
-      result = {result: 'Status Update: 200'}
+    result = if response["id"] == @workflow.dxid
+      { result: "Status Update: 200" }
     else
-      result = JSON.parse(response.body)['error']
+      JSON.parse(response.body)["error"]
     end
 
     render json: result
@@ -403,7 +406,7 @@ class WorkflowsController < ApplicationController
 
   def validate_workflow_before_export
     # App should exist and be accessible
-    @workflow = Workflow.accessible_by(@context).find_by_uid!(unsafe_params[:id])
+    @workflow = Workflow.accessible_by(@context).find_by!(uid: unsafe_params[:id])
 
     # Assets should be accessible and licenses accepted
     @workflow.apps.each do |app|
@@ -421,11 +424,9 @@ class WorkflowsController < ApplicationController
     @output_folder_service ||= OutputFolderService.new(
       api: DNAnexusAPI.new(@context.token),
       context: @context,
-      workflow: @workflow
+      workflow: @workflow,
     )
   end
-
-  private
 
   def comment_data
     @items_from_params = [@workflow]

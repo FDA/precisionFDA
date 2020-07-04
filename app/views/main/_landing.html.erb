@@ -14,7 +14,7 @@
       </div>
     </div>
     <div class="guest-actions">
-      <p class="lead">A community platform for NGS assay evaluation and regulatory science exploration.</p>
+      <p class="lead"><%= t('main.header') %></p>
       <%= render "_partials/guest_actions" %>
     </div>
   </div>
@@ -96,7 +96,7 @@
   <div class="pfda-participants">
     <% @participant_orgs.each do |participant| %>
       <div class="pfda-participant" title="<%= participant.title %>" data-toggle="tooltip">
-        <%= image_tag participant.image_url, alt: participant.title %>
+        <%= image_tag(participant.image_url, alt: participant.title) %>
       </div>
     <% end %>
   </div>
@@ -104,16 +104,21 @@
   <div class="pfda-participants">
     <% @participants.each do |participant| %>
       <div class="pfda-participant" title="<%= participant.title %>" data-toggle="tooltip">
-        <%= image_tag participant.image_url, alt: participant.title, class: "img-circle" %>
+        <%= image_tag(participant.image_url, alt: participant.title, class: "img-circle") %>
       </div>
     <% end %>
   </div>
   <hr>
   <div class="lead text-center">
-    The comparison framework uses open-source software by <%= image_tag "/participants/rtg.png", alt: "Real Time Genomics", title: "Real Time Genomics", height: "50px", "data-toggle": "tooltip" %>
+    The comparison framework uses open-source software by
+      <%=
+        image_tag(
+          "participants/rtg.png",
+          alt: "Real Time Genomics",
+          title: "Real Time Genomics",
+          height: "50px", "data-toggle": "tooltip"
+        )
+      %>
   </div>
   <hr>
-  <div class="lead text-center">
-    FISMA authorization <%= link_to "document", "/FISMA_docs/2018_FDA_OC_PrecisionFDA Decision Memo.pdf", target: "_blank" %>
-  </div>
 </div>

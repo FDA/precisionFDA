@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<ToggleSwitch /> matches snapshot 1`] = `
+<div
+  className="toggle-switch toggle-switch--vertical"
+  onClick={[Function]}
+  title="Unlock space"
+>
+  <span
+    className="toggle-switch__slider toggle-switch__slider--locked"
+  />
+</div>
+`;

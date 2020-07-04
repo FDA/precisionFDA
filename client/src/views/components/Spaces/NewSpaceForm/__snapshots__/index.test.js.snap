@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<NewSpaceForm/> matches snapshot 1`] = `
+<LoaderWrapper
+  onMount={[Function]}
+>
+  <span>
+    Loading space...
+  </span>
+</LoaderWrapper>
+`;

@@ -56,73 +56,20 @@ class SelectorModel
 
 ### Input Model ###
 
-extendFileInput = () ->
-  @clearFileValue = () => @value(null)
-  @fileTitle = ko.observable('')
-  @getFileTitle = ko.computed( =>
-    @valid(true)
-    if typeof @value() == 'string'
-      $.post('/api/describe', { uid: @value() }).then (fileInfo) =>
-        @fileTitle(fileInfo.title)
-    else
-      @fileTitle('')
-  )
-
-extendBooleanInput = () ->
-  @setBoolValueTrue = (value) => @value(true)
-  @setBoolValueFalse = (value) => @value(false)
-
-class InputModel
-  isEmpty: () ->
-    nullVals = [undefined, null]
-    return true if nullVals.indexOf(@value()) > -1
-    return true if typeof @value() == 'string' and !@value().trim().length
-    return false
-
+class InputModel extends Precision.appTemplate.InputTemplateModel
   validate: () ->
     if @batchOne() or @batchTwo()
       @valid(true)
       return true
-    if @required and @isEmpty()
-      @valid(false)
-      return false
-    if !@isEmpty() and @type == 'int' and isNaN(parseInt(@value()))
-      @valid(false)
-      return false
-    if !@isEmpty() and @type == 'float' and isNaN(parseFloat(@value()))
-      @valid(false)
-      return false
-    @valid(true)
-    return true
-
-  onChange: () ->
-    @valid(true)
+    @_validate()
 
   constructor: (input) ->
-    @id = "#{input.stageName}_#{input.name}"
-    @type = input.class
-    @name = input.name
-    @uniq_input_name = input.uniq_input_name
-    @label = input.label || input.name
-    @help = input.help
-    @required = !input.optional
-    @stageName = input.stageName
-    @value = ko.observable(input.default_workflow_value || input.defaultValues)
-    @defaultValue = input.defaultValues
+    super(input, 'batch_value_input')
     @batchOne = ko.observable(false)
     @batchTwo = ko.observable(false)
-    @disabled = ko.observable(false)
     @disabledBatchTwo = ko.observable(false)
     @_disabledBatchTwo = ko.computed( => @disabled() || @disabledBatchTwo())
-    @valid = ko.observable(true)
     @showBatchInput = input.allow_batch
-    @template = do () =>
-      switch @type
-        when 'file' then return 'file'
-        when 'boolean' then return 'boolean'
-        else return 'default'
-    extendBooleanInput.call(@) if @type == 'boolean'
-    extendFileInput.call(@) if @type == 'file'
 
 ### Input Model ###
 
@@ -145,11 +92,11 @@ extendBatchInputFilesSearch = () ->
   @fsSearchFilesData = {}
 
   ### SORT ###
-  @fsSortNameDirection = ko.observable(DESC)
+  @fsSortNameDirection = ko.observable(ASC)
   @fsSortNameArrow = ko.computed(() =>
     return if @fsSortNameDirection() == DESC then 'fa-long-arrow-up' else 'fa-long-arrow-down'
   )
-  @fsSortCheckedDirection = ko.observable(DESC)
+  @fsSortCheckedDirection = ko.observable(ASC)
   @fsSortCheckedArrow = ko.computed(() =>
     return if @fsSortCheckedDirection() == DESC then 'fa-long-arrow-up' else 'fa-long-arrow-down'
   )
@@ -249,7 +196,8 @@ extendBatchInputFilesSearch = () ->
         scopes: @batchWorkflowFileTree.folderTreeScope,
         search_string: searchValue,
         flag: flagsValue,
-        uids: true
+        uids: true,
+        order_by_name: @fsSortNameDirection
       }
       @fsIsLoading(true)
       $.post('/api/files_regex_search', @fsSearchFilesData).then(
@@ -258,7 +206,6 @@ extendBatchInputFilesSearch = () ->
           @fsSelectedFiles(data.uids)
           @fsIsLoading(false)
           $("""##{@name}_regexp_search_input""").focus()
-          @_fsSortByName()
         (errorData) ->
           if errorData and typeof errorData.error == 'string'
             Precision.alert.showAboveAll(errorData.error, null, 1000)
@@ -275,6 +222,7 @@ extendBatchInputFilesSearch = () ->
     _data = { page: @fsPage, scopes: @batchWorkflowFileTree.folderTreeScope, uids: false }
     data = Object.assign(@fsSearchFilesData, _data)
     @fsIsMoreLoading(true)
+
     $.post('/api/files_regex_search', data).then(
       (data) =>
         newFiles = @fsFiles()
@@ -387,6 +335,7 @@ class BatchInputModel
       return @value().split(/\r*\n/).length
     else
       return 0
+
   constructor: (type, title, @batchWorkflowFileTree) ->
     @type = ko.observable(type)
     @value = ko.observable(null)

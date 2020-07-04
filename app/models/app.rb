@@ -28,6 +28,8 @@ class App < ApplicationRecord
   include Scopes
 
   belongs_to :user
+  has_one :org, through: :user
+
   belongs_to :app_series
   has_many :jobs
   has_many :attachments, as: :item, dependent: :destroy
@@ -41,6 +43,7 @@ class App < ApplicationRecord
   store :internal, accessors: [ :ordered_assets, :packages, :code ], coder: JSON
 
   acts_as_commentable
+  acts_as_taggable
 
   VALID_IO_CLASSES = ["file", "string", "boolean", "int", "float"]
 
@@ -88,10 +91,6 @@ class App < ApplicationRecord
     available_job_spaces(user).where(id: space_id).exists?
   end
 
-  def name
-    app_series.name
-  end
-
   def klass
     "app"
   end
@@ -105,10 +104,12 @@ class App < ApplicationRecord
   end
 
   def publishable_by?(context, scope_to_publish_to = SCOPE_PUBLIC)
-    # App series must be private, otherwise must match scope
-    core_publishable_by?(context, scope_to_publish_to) && private? && (app_series.private? || (app_series.scope == scope_to_publish_to))
+    core_publishable_by?(context, scope_to_publish_to) &&
+      private? &&
+      (app_series.private? || (app_series.scope == scope_to_publish_to))
   end
 
+  # TODO: to be refactored.
   def accessible_by?(context)
     return true if super
 
@@ -116,6 +117,24 @@ class App < ApplicationRecord
     return false unless context.review_space_admin?
 
     space_object.reviewer? || space_object.verification?
+  end
+
+  # Checks if app is accessible by the user.
+  # @return [Boolean] Returns true if app is accessible by a user, false otherwise.
+  def accessible_by_user?(user)
+    public? ||
+      !in_space? && user_id == user.id ||
+      in_space? && user.space_uids.include?(scope)
+  end
+
+  def runnable_by?(user)
+    accessible_by_user?(user) && (
+      !in_space? ||
+      SpaceMembershipPolicy.can_run_apps?(
+        space_object,
+        space_object.space_memberships.find_by(user: user),
+      )
+    )
   end
 
   def find_input(name)
@@ -134,4 +153,21 @@ class App < ApplicationRecord
     exporter = DockerExporter.new(api, Rails.application.routes.url_helpers)
     exporter.call(self)
   end
+
+  # Get all input spec's default file uids.
+  # @return [Array<String>] File UIDs.
+  def default_input_files
+    input_spec.map { |input_spec| input_spec[:default] if input_spec[:class] == "file" }.compact
+  end
+
+  def in_locked_space?
+    in_space? && space_object.locked?
+  end
+
+  def latest_accessible_in_scope?
+    private? && self == app_series.latest_revision_app ||
+      (in_space? || public?) && self == app_series.latest_version_app
+  end
+
+  delegate :name, to: :app_series
 end

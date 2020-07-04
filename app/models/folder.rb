@@ -24,7 +24,7 @@
 class Folder < Node
   MAX_NAME_LENGTH = 255
 
-  scope :private_for, lambda { |context| where(user_id: context.user.id, scope: "private") }
+  scope :private_for, ->(context) { where(user_id: context.user.id, scope: SCOPE_PRIVATE) }
 
   validates :name,
             presence: { message: "Name could not be blank" },

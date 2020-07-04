@@ -41,13 +41,37 @@
     end
 
     g.column name: 'Test set' do |comparison|
-      file = comparison.input("test_vcf").user_file
-      unilinkfw(file)
+      content_tag(:div) do
+        [comparison.inputs.map do |file|
+          content_tag(:div) do
+            unilinkfw(file.user_file) unless benchmark?(file.role)
+          end
+        end,
+
+        comparison.run_input.select { |name, _| !benchmark?(name) }.map do |input|
+          content_tag(:div) do
+            content_tag(:span, "#{input[0]}:", class: "input-name") +
+            content_tag(:span, input[1])
+          end
+        end].flatten.compact.join.html_safe
+      end
     end
 
     g.column name: 'Benchmark set' do |comparison|
-      file = comparison.input("ref_vcf").user_file
-      unilinkfw(file)
+      content_tag(:div) do
+        [comparison.inputs.map do |file|
+          content_tag(:div) do
+            unilinkfw(file.user_file) if benchmark?(file.role)
+          end
+        end,
+
+        comparison.run_input.select { |name, _| benchmark?(name) }.map do |input|
+          content_tag(:div) do
+            content_tag(:span, "#{input[0]}:", class: "input-name") +
+            content_tag(:span, input[1])
+          end
+        end].flatten.compact.join.html_safe
+      end
     end
 
     g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |comparison|

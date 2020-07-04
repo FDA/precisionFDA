@@ -20,7 +20,7 @@
       <columns>
         <p>
           An error occurred during the removing of files in space
-          <%= link_to @space.title, space_url(@space) %>: <%= @error_message %>
+          <%= link_to @space.title, _space_url(@space) %>: <%= @error_message %>
         </p>
       </columns>
     </row>

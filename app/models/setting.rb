@@ -4,7 +4,7 @@
 #
 #  id    :integer          not null, primary key
 #  key   :string(255)      not null
-#  value :string(255)      not null
+#  value :text(65535)      not null
 #
 
 # Implements simple key-value settings storage.
@@ -14,6 +14,7 @@ class Setting < ApplicationRecord
   USAGE_METRICS_CUSTOM_RANGE_KEY = "usage_metrics_custom_range".freeze
   REVIEW_APP_DEVELOPERS_ORG_KEY = "review_app_org_key".freeze
   COMPARISON_APP = "comparison_app".freeze
+  COMPARATOR_APPS = "comparator_apps".freeze
 
   serialize :value, JSON
 
@@ -25,14 +26,16 @@ class Setting < ApplicationRecord
       find_by(key: key)&.value
     end
 
-    alias_method :get_value, :[]
-
     # Creates or updates setting with given key with given value.
     # @param key [String] Key to create/update.
     # @param value [String] Value to set for given key.
-    def set_value(key, value)
+    # @return [Boolean] Returns true if record was successfully created/updated, false otherwise.
+    def []=(key, value)
       find_or_initialize_by(key: key).update(value: value)
     end
+
+    alias_method :get_value, :[]
+    alias_method :set_value, :[]=
 
     # Sets aggregation period for usage metrics.
     # @param date_from [Time] Beginning of period.
@@ -69,6 +72,10 @@ class Setting < ApplicationRecord
     # @return [String] Comparison app's dxid.
     def comparison_app
       self[COMPARISON_APP] || DEFAULT_COMPARISON_APP
+    end
+
+    def comparator_apps
+      Array(self[COMPARATOR_APPS])
     end
   end
 end

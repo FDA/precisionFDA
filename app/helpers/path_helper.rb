@@ -1,4 +1,6 @@
 module PathHelper
+  include ClientUrlHelper
+
   def urlify_by_path(path)
     config = Rails.configuration.action_mailer.default_url_options
     URI::HTTPS.build(host: config[:host], port: config[:port], path: path).to_s
@@ -86,7 +88,7 @@ module PathHelper
     when "license"
       license_path(item)
     when "space"
-      space_path(item)
+      _space_path(item)
     when "task"
       space_task_path(item.space_id, item)
     when "meta-appathon"
@@ -118,7 +120,7 @@ module PathHelper
       explore_files_path(folder_id: folder.id)
     elsif folder.in_space?
       space = folder.space
-      files_space_path(id: space.id, folder_id: folder.id)
+      files_api_space_path(id: space.id, folder_id: folder.id)
     else
       raise "Unable to build folder's path"
     end
