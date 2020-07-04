@@ -1,14 +1,15 @@
 require "rails_helper"
-include Imports::WorkflowHelper
-include Imports::AppSpecHelper
 
 RSpec.describe Workflow::Cwl::StepParser, type: :model do
+  include Imports::WorkflowHelper
+  include Imports::AppSpecHelper
+
   subject { parser }
 
   let(:user) { create(:user) }
-  let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, nil, nil) }
+  let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, 1.day.from_now, user.org) }
   let(:raw) { IO.read(Rails.root.join("spec/support/files/workflow_import/workflow.cwl")) }
-  let(:cwl_parser){ Workflow::Cwl::Parser.new(raw, context) }
+  let(:cwl_parser) { Workflow::Cwl::Parser.new(raw, context) }
   let(:parser) { cwl_parser.steps_objects.first }
   let(:locale_scope) { "activemodel.errors.models.workflow/cwl/step_parser.attributes" }
   let!(:app) do
@@ -17,10 +18,6 @@ RSpec.describe Workflow::Cwl::StepParser, type: :model do
   end
   let(:locale_options) do
     { scope: locale_scope, name: parser.name }
-  end
-
-  before do
-    allow_any_instance_of(Context).to receive(:logged_in?).and_return(true)
   end
 
   context "when the input data is correct" do
@@ -32,8 +29,9 @@ RSpec.describe Workflow::Cwl::StepParser, type: :model do
       app.destroy
       parser.valid?
     end
+
     it "has appropriate cwl error" do
-      expect(parser.errors[:app]).to include(I18n.t("app.blank", locale_options))
+      expect(parser.errors[:app]).to include(I18n.t("app.blank", **locale_options))
     end
   end
 
@@ -42,8 +40,9 @@ RSpec.describe Workflow::Cwl::StepParser, type: :model do
       parser.step_json["run"] = "#{parser}.wdl"
       parser.valid?
     end
+
     it "has appropriate cwl error" do
-      expect(parser.errors[:run]).to include(I18n.t("run.format", locale_options))
+      expect(parser.errors[:run]).to include(I18n.t("run.format", **locale_options))
     end
   end
 
@@ -52,19 +51,24 @@ RSpec.describe Workflow::Cwl::StepParser, type: :model do
       cwl_parser.cwl_data["steps"]["wrong_name"] = cwl_parser.cwl_data["steps"].delete(app.title)
       parser.valid?
     end
+
     it "has appropriate cwl error" do
       options = locale_options.merge(step_number: parser.step_number)
-      expect(parser.errors[:name]).to include(I18n.t("name.format", options))
+      expect(parser.errors[:name]).to include(I18n.t("name.format", **options))
     end
   end
 
   context "when cwl raw has invalid outs" do
-    let(:raw) { IO.read(Rails.root.join("spec/support/files/workflow_import/invalid_workflow.cwl")) }
+    let(:raw) do
+      IO.read(Rails.root.join("spec/support/files/workflow_import/invalid_workflow.cwl"))
+    end
+
     before do
       parser.valid?
     end
+
     it "has appropriate cwl error" do
-      expect(parser.errors[:outputs]).to include(I18n.t("outputs.format", locale_options))
+      expect(parser.errors[:outputs]).to include(I18n.t("outputs.format", **locale_options))
     end
   end
 end

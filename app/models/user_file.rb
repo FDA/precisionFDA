@@ -46,7 +46,6 @@
 class UserFile < Node
   include Licenses
   include InternalUid
-  include Scopes
 
   require "uri"
 
@@ -57,8 +56,8 @@ class UserFile < Node
   STATE_CLOSED = "closed".freeze
   STATE_OPEN = "open".freeze
 
-  # pFDA internal state, used for files that are being publishing by a worker.
-  STATE_PUBLISHING = "publishing".freeze
+  # pFDA internal state, used for files that are being copied by a worker.
+  STATE_COPYING = "copying".freeze
 
   PARENT_TYPE_COMPARISON = "Comparison".freeze
 
@@ -68,6 +67,8 @@ class UserFile < Node
   has_many :comparisons, ->{ distinct },
            through: :comparison_inputs,
            dependent: :restrict_with_exception
+
+  has_many :participants, inverse_of: :file, foreign_key: :node_id, dependent: :destroy
 
   has_and_belongs_to_many :jobs_as_input, join_table: "job_inputs", class_name: "Job"
 
@@ -92,12 +93,14 @@ class UserFile < Node
 
   scope :open, -> { where(state: STATE_OPEN) }
   scope :not_removing, -> { where.not(state: STATE_REMOVING) }
-  scope :not_publishing, -> { where.not(state: STATE_PUBLISHING) }
-  scope :not_blocked, -> { not_removing.not_publishing }
+  scope :not_copying, -> { where.not(state: STATE_COPYING) }
+  scope :not_blocked, -> { not_removing.not_copying }
 
   scope :files_conditions, -> {
     where(state: "closed").where.not(parent_type: ["Comparison", nil]).includes(:taggings)
   }
+
+  scope :not_comparison_inputs, -> { includes(:comparisons).where(comparisons: { id: nil }) }
 
   class << self
     def model_name
@@ -123,8 +126,10 @@ class UserFile < Node
     def publication_project!(user, scope)
       # This is a class method for independent files.
       # For comparison files, use Comparison.publication_project!
-      if scope == UserFile::SCOPE_PUBLIC
+      if scope == SCOPE_PUBLIC
         user.public_files_project
+      elsif scope == SCOPE_PRIVATE
+        user.private_files_project
       else
         Space.from_scope(scope).project_for_user(user)
       end
@@ -171,10 +176,52 @@ class UserFile < Node
     def accessible_found_by(context, uid)
       accessible_by(context).find_by!(uid: uid)
     end
+
+    # Divide search results in Files into two parts:
+    #   first - files in folders, second - files in root folder.
+    #   Folders part is grouped by :path, case-sensitive.
+    #   Both parts are sorted by :path and :title, not case-sensitive.
+    # @param search_result [Array] An array of UserFile objects.
+    # @param direction [String] Order direction: 'asc' or 'desc'.
+    def files_search_results(search_result, direction)
+      files, files_in_folders = search_result.compact.partition { |v| v[:file_path] == "/" }
+
+      folders_result = files_map(files_in_folders)
+      sorted_folders = []
+      folders_result.
+        group_by { |k| [k[:path]] }.
+        sort_by { |k, _| k[0].downcase }.
+        each { |_, v| sorted_folders << v }
+      sorted_folders.flatten!
+
+      files_result = files_map(files)
+      sorted_files = files_result.sort_by { |k| k[:title].downcase }
+
+      if direction == "desc"
+        sorted_folders = sorted_folders.reverse
+        sorted_files = sorted_files.reverse
+      end
+      sorted_folders + sorted_files
+    end
+
+    # Collect an array of object, mapped to UserFile objects.
+    # @param files [Array] An array of UserFile objects.
+    # @return [Array] An array of mapped objects.
+    def files_map(files)
+      files.
+        map do |file|
+        {
+          id: file[:id],
+          uid: file[:uid],
+          title: file["title"],
+          path: file[:file_path],
+        }
+      end
+    end
   end
 
   def blocked?
-    [STATE_REMOVING, STATE_PUBLISHING].include?(state)
+    [STATE_REMOVING, STATE_COPYING].include?(state)
   end
 
   def real_file?
@@ -196,10 +243,11 @@ class UserFile < Node
   end
 
   # Get a file url with given params for current context user.
-  # @param [context] current user context.
-  # @param [inline] UI attribute to provide url redirection property.
+  # @param context [Context] current user context.
+  # @param inline [String] UI attribute to provide url redirection property.
+  # @param generate_event [true, false] Either to generate Event::FileDownloaded or not.
   # @return [url] a file url.
-  def file_url(context, inline)
+  def file_url(context, inline, generate_event = true)
     opts = {
       project: project,
       preauthenticated: true,
@@ -211,7 +259,7 @@ class UserFile < Node
     token = challenge_file? ? CHALLENGE_BOT_TOKEN : context.token
     api = DNAnexusAPI.new(token)
     url = api.file_download(dxid, opts)["url"] + inline_attribute
-    Event::FileDownloaded.create_for(self, context.user)
+    Event::FileDownloaded.create_for(self, context.user) if generate_event
 
     url
   end
@@ -329,26 +377,26 @@ class UserFile < Node
       (scope.in?([SCOPE_PUBLIC, SCOPE_PRIVATE]) || !(in_space? && space_object.verified?))
   end
 
-  # Check, whether file is piblishable, i.e. to be 'public'.
-  #   A file should have scope 'private' or in space.
-  # @param context [Context] a Context object, who is going to publish.
-  # @param scope_to_publish_to [String] a scope to be published to.
-  # @return [true, false] Returns true if a file can be published by a user,
-  #   false otherwise.
-  def publishable_by?(context, scope_to_publish_to = SCOPE_PUBLIC)
-    publishable?(context.user) &&
-      !parent_comparison? &&
-      [STATE_CLOSED, STATE_PUBLISHING].include?(state)
+  # Check, whether file is publishable. A file should be 'private' or in space.
+  # @param user [User] A user who is going to publish.
+  # @return [Boolean] Returns true if a file can be published by a user, false otherwise.
+  def publishable?(user)
+    user.present? && !public?
   end
 
-  def rename(new_name, description, context)
-    self.name = new_name
-    self.description = description
+  # Check, whether file is publishable. A file should be 'private' or in space.
+  # @param context [Context] a Context object, who is going to publish.
+  # @param scope_to_publish_to [String] a scope to be published to.
+  # @return [Boolean] Returns true if a file can be published by a user, false otherwise.
+  def publishable_by?(context, scope_to_publish_to = SCOPE_PUBLIC)
+    publishable?(context.user) && state == STATE_CLOSED
+  end
 
+  def rename(new_name, new_description)
     return false unless valid?
 
-    if DNAnexusAPI.new(context.token).call(dxid, "rename", { project: project, name: new_name })
-      update_attributes(name: new_name, description: description)
+    if DIContainer.resolve("api.user").file_rename(dxid, project, new_name)
+      update(name: new_name, description: new_description)
     else
       errors.add(:base, "File info could not be updated.")
       false
@@ -369,7 +417,7 @@ class UserFile < Node
       end
     elsif public?
       project == user.public_files_project
-    elsif ![STATE_CLOSED, STATE_PUBLISHING].include?(state)
+    elsif ![STATE_CLOSED, STATE_COPYING].include?(state)
       project == space_object.project_for_user(user)
     else
       true

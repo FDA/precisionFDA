@@ -1,11 +1,4 @@
-# Provide a new space template data on space creation with validations.
-# Validation methods create Active Model Validations +Errors+ objects.
-#   that holds all information about attribute.
-# According to Org deprecation:
-#   Sponsor Lead field in space form is implemented and
-#     requires a user ID rather than an org handle.
-#   Validation methods adjusted accordingly.
-#
+# Space Form model, used for space creation.
 class SpaceForm
   include ActiveModel::Model
 
@@ -18,7 +11,7 @@ class SpaceForm
     :cts,
     :sponsor_org_handle,
     :sponsor_lead_dxuser,
-    :space_template_id,
+    :source_space_id,
     :restrict_to_template,
   )
 
@@ -32,12 +25,10 @@ class SpaceForm
   validate :validate_guest_lead_dxuser, if: -> { space_type.in?([TYPE_GROUPS, TYPE_VERIFICATION]) }
   validate :validate_sponsor_lead_dxuser, if: -> { space_type == TYPE_REVIEW }
 
-  def self.model_name
-    Space.model_name
-  end
-
-  def space_templates(context)
-    SpaceTemplate.private_first(context)
+  class << self
+    def model_name
+      Space.model_name
+    end
   end
 
   def persist!(api, user)

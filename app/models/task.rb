@@ -21,6 +21,9 @@ class Task < ApplicationRecord
   belongs_to :user
   belongs_to :space
 
+  belongs_to :assignee, class_name: "User"
+  belongs_to :assigner, foreign_key: :user_id, class_name: "User"
+
   validates :assignee_id, presence: true
   validates :name, presence: true, length: { maximum: 255 }
 
@@ -33,14 +36,6 @@ class Task < ApplicationRecord
   scope :accepted_and_failed_deadline, -> { where(status: [1, 5]) }
 
   acts_as_commentable
-
-  def assigner
-    User.find(user_id)
-  end
-
-  def assignee
-    User.find(assignee_id)
-  end
 
   def klass
     "task"

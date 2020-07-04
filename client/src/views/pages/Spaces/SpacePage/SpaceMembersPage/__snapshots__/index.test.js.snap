@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SpaceMembersPage test should render 1`] = `
+<Router
+  history={
+    Object {
+      "action": "POP",
+      "block": [Function],
+      "createHref": [Function],
+      "go": [Function],
+      "goBack": [Function],
+      "goForward": [Function],
+      "length": 1,
+      "listen": [Function],
+      "location": Object {
+        "hash": "",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "push": [Function],
+      "replace": [Function],
+    }
+  }
+>
+  <SpaceMembersPage
+    addMembers={[Function]}
+    loadMembers={[Function]}
+    showAddMembersModal={[Function]}
+    space={
+      Object {
+        "isPrivate": true,
+      }
+    }
+  />
+</Router>
+`;

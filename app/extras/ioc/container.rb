@@ -19,14 +19,14 @@ module IOC
     private
 
     # Configures container by importing namespaces.
-    def configure
+    def configure # rubocop:todo Metrics/MethodLength
       container = self
 
       register("docker_exporter") do
         DockerExporter.new(
           container.resolve("api.user"),
           Rails.application.routes.url_helpers,
-          )
+        )
       end
 
       namespace "api" do
@@ -35,7 +35,7 @@ module IOC
         register("auth", memoize: true) { DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI) }
       end
 
-      namespace "orgs" do
+      namespace "orgs" do # rubocop:todo Metrics/BlockLength
         register("user_removal_policy") { UserRemovalPolicy }
         register("member_removal_policy") { MemberRemovalPolicy }
         register("org_dissolve_policy") { OrgDissolvePolicy }
@@ -79,6 +79,12 @@ module IOC
 
         register("provisioner") do
           OrgService::Provision.new(resolve("on_platform_provisioner"))
+        end
+
+        register("admin_member_provisioner") do
+          OrgService::ProvisionAdminOrgMember.new(
+            container.resolve("api.admin"),
+          )
         end
       end
 

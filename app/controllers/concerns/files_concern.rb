@@ -32,4 +32,12 @@ module FilesConcern
   def allowed?(state)
     %w(closed closing open).include?(state)
   end
+
+  def determine_scope_name(scope)
+    case scope
+    when "private" then "My files"
+    when "public" then "Explore"
+    when "featured" then "Featured"
+    end
+  end
 end

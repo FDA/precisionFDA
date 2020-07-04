@@ -2,7 +2,7 @@ module SpaceService
   class Create
     # @param [SpaceForm] space_form
     def self.call(space_form, options = {})
-      new(options).call(space_form)
+      new(**options).call(space_form)
     end
 
     def initialize(user:, api:, notification_mailer: NotificationsMailer)
@@ -50,7 +50,6 @@ module SpaceService
         host_dxorg: Org.construct_dxorg("space_host_#{uuid}"),
         space_type: space_form.space_type,
         cts: space_form.cts,
-        space_template_id: space_form.space_template_id,
         restrict_to_template: space_form.restrict_to_template,
       )
       space.guest_dxorg = guest_dx_org(uuid, space, space_form)
@@ -99,7 +98,7 @@ module SpaceService
     def remove_pfda_admin_user(orgs_dxs)
       return if user.dxid == ADMIN_USER
 
-      orgs_dxs.each { |dxorg| papi.call(dxorg, "removeMember", user: ADMIN_USER) }
+      orgs_dxs.each { |dxorg| papi.org_remove_member(dxorg, ADMIN_USER) }
     end
 
     # Send an activation email to all space leads
@@ -114,40 +113,39 @@ module SpaceService
     # @param [Space]
     def create_reviewer_cooperative_project(space)
       if ADMIN_USER != user.dxid
-        papi.call(
-          space.host_dxorg, "invite",
-          invitee: user.dxid,
-          level: "ADMIN",
-          suppressEmailNotification: true
+        papi.org_invite(
+          space.host_dxorg,
+          user.dxid,
+          level: DNAnexusAPI::ORG_MEMBERSHIP_ADMIN,
+          suppressEmailNotification: true,
         )
       end
 
-      project_dxid = api.call(
-        "project", "new",
-        name: "precisionfda-space-#{space.id}-HOST",
+      project_dxid = api.project_new(
+        "precisionfda-space-#{space.id}-HOST",
         billTo: user.billto,
       )["id"]
 
-      api.call(
-        project_dxid, "invite",
-        invitee: space.host_dxorg,
-        level: "CONTRIBUTE",
+      api.project_invite(
+        project_dxid,
+        space.host_dxorg,
+        DNAnexusAPI::PROJECT_ACCESS_CONTRIBUTE,
         suppressEmailNotification: true,
-        suppressAllNotifications: true
+        suppressAllNotifications: true,
       )
 
-      api.call(
-        project_dxid, "invite",
-        invitee: space.guest_dxorg,
-        level: "CONTRIBUTE",
+      api.project_invite(
+        project_dxid,
+        space.guest_dxorg,
+        DNAnexusAPI::PROJECT_ACCESS_CONTRIBUTE,
         suppressEmailNotification: true,
-        suppressAllNotifications: true
+        suppressAllNotifications: true,
       )
 
-      api.call(
-        project_dxid, "invite",
-        invitee: Setting.review_app_developers_org,
-        level: "CONTRIBUTE",
+      api.project_invite(
+        project_dxid,
+        Setting.review_app_developers_org,
+        DNAnexusAPI::PROJECT_ACCESS_CONTRIBUTE,
         suppressEmailNotification: true,
         suppressAllNotifications: true,
       )
@@ -170,63 +168,47 @@ module SpaceService
         restrict_to_template: space_form.restrict_to_template,
       )
 
-      project_dxid = api.call(
-        "project", "new",
-        name: "precisionfda-space-#{space.id}-REVIEWER-PRIVATE",
+      project_dxid = api.project_new(
+        "precisionfda-space-#{space.id}-REVIEWER-PRIVATE",
         billTo: user.billto,
       )["id"]
 
       space.host_project = project_dxid
       space.save!
 
-      api.call(
-        project_dxid, "invite",
-        invitee: space.host_dxorg,
-        level: "CONTRIBUTE",
+      api.project_invite(
+        project_dxid,
+        space.host_dxorg,
+        DNAnexusAPI::PROJECT_ACCESS_CONTRIBUTE,
         suppressEmailNotification: true,
         suppressAllNotifications: true,
       )
 
-      api.call(
-        project_dxid, "invite",
-        invitee: Setting.review_app_developers_org,
-        level: "CONTRIBUTE",
+      api.project_invite(
+        project_dxid,
+        Setting.review_app_developers_org,
+        DNAnexusAPI::PROJECT_ACCESS_CONTRIBUTE,
         suppressEmailNotification: true,
         suppressAllNotifications: true,
       )
 
-      apply_space_template(space)
+      duplicate_space(space, space_form.source_space_id)
     end
 
-    # TODO: to be refactored
-    # Apply space_template to the space if space_template exists
-    # @param [Space]
-    def apply_space_template(space)
-      parent_space = space.space
-      return if parent_space.blank?
+    # Duplicates source space's data: apps, workflows and files.
+    # @param space [Space] Reviewer private space.
+    # @param source_space_id [Integer] Duplicated space ID.
+    def duplicate_space(space, source_space_id)
+      return if source_space_id.nil?
 
-      template = parent_space.space_template
-      return if template.blank?
+      source_space = Space.find(source_space_id)
 
-      template.space_template_nodes.each do |n|
-        node = n.node
-        case node
-        when UserFile
-          copy_service.copy(node, space.uid)
-        when App
-          copy_service.copy(node, space.uid)
-        else
-          raise("Space template #{template.id} has Unexpected node #{n.id} of #{node.class} class")
-        end
-      end
+      space_copier = CopyService::SpaceCopier.new(api: api, user: user)
+      space_copier.copy(space, source_space)
     end
 
     def papi
-      @papi ||= DNAnexusAPI.for_admin
-    end
-
-    def copy_service
-      @copy_service ||= CopyService.new(api: api, user: user)
+      @papi ||= DIContainer.resolve("api.admin")
     end
 
     def guest_dx_org(uuid, space, space_form)

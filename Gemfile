@@ -1,10 +1,10 @@
 source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby "2.6.5"
+ruby "2.7.1"
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem "rails", "~> 5.2.3"
+gem "rails", "~> 5.2.4.3"
 # Use SCSS for stylesheets
 gem "sass-rails", "~> 5.0"
 # Use Uglifier as compressor for JavaScript assets
@@ -13,17 +13,20 @@ gem "uglifier", ">= 1.3.0"
 gem "coffee-rails", "~> 4.2"
 
 # Use jquery as the JavaScript library
-gem "jquery-rails", "~> 4.3", ">= 4.3.1"
+gem "jquery-rails", "~> 4.4"
 # Turbolinks makes navigating your web application faster
 gem "turbolinks", "~> 5"
 # Build JSON APIs with ease
 gem "jbuilder", "~> 2.5"
 
 # Reduces boot times through caching; required in config/boot.rb
-gem "bootsnap", ">= 1.1.0", require: false
+gem "bootsnap", ">= 1.4.6", require: false
 
 # bundle exec rake doc:rails generates the API under doc/api.
-gem "sdoc", group: :doc
+gem "sdoc", ">= 1.0.0", group: :doc
+
+# ActiveModelSerializers brings convention over configuration to your JSON generation.
+gem "active_model_serializers", "~> 0.10.0"
 
 # Support for bulk inserting data using ActiveRecord
 gem "activerecord-import"
@@ -45,11 +48,8 @@ gem "sprockets", ">= 3.7.2"
 
 gem "hashdiff", [">= 1.0.0.beta1", "< 2.0.0"]
 
-# Captcha
-gem "humanizer"
-
 # For reCaptcha
-gem "recaptcha", require: "recaptcha/rails"
+gem "recaptcha", ">= 5.5.0"
 
 # Excel spreadsheet generation
 gem "axlsx", "3.0.0.pre"
@@ -68,7 +68,7 @@ gem "kaminari"
 gem "local_time"
 
 # Add comments on any model
-gem "acts-as-taggable-on", "~> 6.0"
+gem "acts-as-taggable-on", "~> 6.5", github: "mbleigh/acts-as-taggable-on"
 gem "acts_as_commentable_with_threading"
 gem "acts_as_follower", github: "tcocca/acts_as_follower", branch: "master"
 gem "acts_as_votable"
@@ -83,7 +83,7 @@ gem "mysql2"
 
 gem "gretel"
 
-gem "rack-utf8_sanitizer", "~> 1.6"
+gem "rack-utf8_sanitizer", "~> 1.7"
 
 # View outgoing HTTP requests
 gem "httplog"
@@ -114,13 +114,15 @@ group :development do
 
   gem "listen", ">= 3.0.5", "< 3.2"
 
-  # Automatic Ruby code checking tool
-  gem "rubocop", "~> 0.71.0", require: false
-  gem "rubocop-rails", require: false
-  gem "rubocop-rspec", require: false
+  # Automatic Ruby code checking tool.
+  # Bump versions to be along with GitHub pronto-actions.
+  gem "rubocop", "= 0.80.1", require: false
+  gem "rubocop-rails", "= 2.4.2", require: false
+  gem "rubocop-rspec", "= 1.38.1", require: false
 
-  gem "pronto", "~> 0.10.0"
-  gem "pronto-rubocop", require: false
+  gem "pronto", "= 0.10.0"
+  gem "pronto-rubocop", "= 0.10.0", require: false
+  gem "pronto-brakeman", "= 0.10.0", require: false
 
   gem "byebug", platforms: %i(mri mingw x64_mingw)
 
@@ -144,9 +146,9 @@ group :test do
   gem "factory_bot_rails", "~> 4.8", ">= 4.8.2"
   gem "ffaker"
   gem "rails-controller-testing"
-  gem "rspec-rails", "~> 3.7", ">= 3.7.1"
+  gem "rspec-rails"
   gem "shoulda-matchers"
-  gem "simplecov", require: false
+  gem "simplecov", ">= 0.18.5", require: false
   gem "webmock", "~> 3.1", ">= 3.1.1"
 end
 

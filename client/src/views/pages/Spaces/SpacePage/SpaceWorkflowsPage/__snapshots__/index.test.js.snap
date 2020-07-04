@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SpaceWorkflowsPage test should render 1`] = `
+<Connect(SpaceLayout)
+  space={
+    Object {
+      "isPrivate": true,
+    }
+  }
+>
+  <div
+    className="space-page-layout__header-row"
+  >
+    <h2
+      className="space-page-layout__sub-title"
+    >
+      Private Area Workflows
+    </h2>
+    <div
+      className="space-page-layout__actions"
+    />
+  </div>
+  <div
+    className="pfda-padded-t20"
+  >
+    <Connect(SpaceWorkflowsList)
+      workflows={Array []}
+    />
+  </div>
+  <AddDataModal
+    loadDataHandler={[Function]}
+    space={
+      Object {
+        "isPrivate": true,
+      }
+    }
+  />
+  <CopyModal
+    loadFilesHandler={[Function]}
+    workflows={Array []}
+  />
+</Connect(SpaceLayout)>
+`;

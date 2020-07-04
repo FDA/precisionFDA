@@ -1,10 +1,13 @@
 class ChallengesController < ApplicationController
-  skip_before_action :require_login, {only: [:index, :consistency, :truth, :appathons, :join, :show]}
+  skip_before_action :require_login, only: %i(index consistency truth appathons join show)
   before_action :require_login_or_guest, only: []
   before_action :check_on_challenge_admin, only: %i(new create)
   before_action :find_editable_challenge, only: %i(edit update edit_page announce_result)
 
-  helper_method :app_owners_for_select, :host_lead_dxusers, :guest_lead_dxusers
+  helper_method :app_owners_for_select,
+                :challenge_order_for_select,
+                :host_lead_dxusers,
+                :guest_lead_dxusers
 
   def index
     @consistency_challenge = FixedChallenge.consistency(@context)
@@ -41,6 +44,7 @@ class ChallengesController < ApplicationController
     ActiveRecord::Base.transaction do
       if @challenge.update(update_challenge_params)
         @challenge.update_card_image_url!
+        @challenge.update_order(challenge_params["replacement_id"])
 
         unless @challenge.space
           @challenge.provision_space!(@context, challenge_params[:host_lead_dxuser], challenge_params[:guest_lead_dxuser])
@@ -114,17 +118,15 @@ class ChallengesController < ApplicationController
     # Refresh state of resource files, if needed
     User.sync_challenge_bot_files!(@context)
 
-    @resources_grid = initialize_grid(@challenge.challenge_resources, {
-      name: 'resources',
-      order: 'challenge_resources.created_at',
-      order_direction: 'desc',
-      per_page: 100,
-      include: [:user]
-    })
+    @resources_grid = initialize_grid(@challenge.challenge_resources,
+                                      name: "resources",
+                                      order: "challenge_resources.created_at",
+                                      order_direction: "desc",
+                                      per_page: 100,
+                                      include: [:user])
 
     js challenge: @challenge.slice(:id)
   end
-
 
   def show
     @challenge = Challenge.find_by(id: unsafe_params[:id])
@@ -158,13 +160,17 @@ class ChallengesController < ApplicationController
         @results = @challenge.completed_submissions
         @result_columns = @challenge.output_names
       else
-        @csv = CSV.open("#{Rails.root}/app/assets/csvs/treasure_hunt_warm_up_results.csv", encoding: 'bom|utf-8').read
-        @vaf_spotter_ids = [8,9,12,20,21,22,23,25,32,34,35,36,37,38,41,49,51,79,81,89,90,96,97,98,104,110,116,120,122,124,143,147,149,150,155,156,157]
+        @csv = CSV.open("#{Rails.root}/app/assets/csvs/treasure_hunt_warm_up_results.csv", encoding: "bom|utf-8").read
+        @vaf_spotter_ids = [8, 9, 12, 20, 21, 22, 23, 25, 32, 34, 35, 36, 37, 38, 41,
+                            49, 51, 79, 81, 89, 90, 96, 97, 98, 104, 110, 116, 120,
+                            122, 124, 143, 147, 149, 150, 155, 156, 157]
         @headers = @csv.shift(7)
-        @keys = @headers.map{|c| c.first}
-        @csv_ids, @csv_names = @csv.map{|row| row.shift.split(" ", 2)}.map{|id, name| [id.to_i, name.to_s]}.transpose
+        @keys = @headers.map { |c| c.first }
+        @csv_ids, @csv_names = @csv.map { |row| row.shift.split(" ", 2) }.
+          map { |id, name| [id.to_i, name.to_s] }.transpose
         # @vaf_submissions is no longer an ActiveRecord relation, careful if you want to use wice_grid
-        @vaf_results = @submissions.select{|s| @csv_ids.include?(s.id)}.sort_by{ |s| @csv_ids.index s.id }
+        @vaf_results = @submissions.select { |s| @csv_ids.include?(s.id) }.
+          sort_by { |s| @csv_ids.index s.id }
       end
     when "my_entries"
       @submissions = @challenge.submissions.editable_by(@context)
@@ -173,21 +179,19 @@ class ChallengesController < ApplicationController
       return
     end
 
-    @submissions_grid = initialize_grid(@submissions, {
-      name: 'submissions',
-      order: 'submissions.id',
-      order_direction: 'desc',
-      per_page: 100
-    })
+    @submissions_grid = initialize_grid(@submissions,
+                                        name: "submissions",
+                                        order: "submissions.id",
+                                        order_direction: "desc",
+                                        per_page: 100)
 
-    @resources_grid = initialize_grid(@challenge.challenge_resources, {
-      name: 'resources',
-      order: 'challenge_resources.updated_at',
-      order_direction: 'desc',
-      per_page: 100
-    })
+    @resources_grid = initialize_grid(@challenge.challenge_resources,
+                                      name: "resources",
+                                      order: "challenge_resources.updated_at",
+                                      order_direction: "desc",
+                                      per_page: 100)
 
-    js submissions: @submissions.map{|s| s.slice(:id, :name, :desc)}
+    js submissions: @submissions.map { |s| s.slice(:id, :name, :desc) }
   end
 
   # Challenge 1 - Consistency
@@ -196,12 +200,12 @@ class ChallengesController < ApplicationController
 
     @consistency_challenge = FixedChallenge.consistency(@context)
 
-    if DateTime.now.in_time_zone < @consistency_challenge[:end_date].months_ago(2)
-      @btn_class = "accessible-btn-success"
+    @btn_class = if DateTime.now.in_time_zone < @consistency_challenge[:end_date].months_ago(2)
+      "accessible-btn-success"
     elsif DateTime.now.in_time_zone < @consistency_challenge[:end_date].months_ago(1)
-      @btn_class = "accessible-btn-warning"
+      "accessible-btn-warning"
     else
-      @btn_class = "accessible-btn-danger"
+      "accessible-btn-danger"
     end
   end
 
@@ -211,12 +215,12 @@ class ChallengesController < ApplicationController
 
     @truth_challenge = FixedChallenge.truth(@context)
 
-    if DateTime.now.in_time_zone < @truth_challenge[:end_date].weeks_ago(2)
-      @btn_class = "accessible-btn-success"
+    @btn_class = if DateTime.now.in_time_zone < @truth_challenge[:end_date].weeks_ago(2)
+      "accessible-btn-success"
     elsif DateTime.now.in_time_zone < @truth_challenge[:end_date].weeks_ago(1)
-      @btn_class = "accessible-btn-warning"
+      "accessible-btn-warning"
     else
-      @btn_class = "accessible-btn-danger"
+      "accessible-btn-danger"
     end
 
     @tab = unsafe_params[:tab]
@@ -224,29 +228,29 @@ class ChallengesController < ApplicationController
     if @tab == "results-peek" || @tab == "results-explore-peek" || (@truth_challenge[:results_announced] && (@tab == "results" || @tab == "results-explore"))
 
       grid_params = {
-        name: 'truth_results',
-        order: 'entry',
-        order_direction: 'asc',
-        per_page: 50
+        name: "truth_results",
+        order: "entry",
+        order_direction: "asc",
+        per_page: 50,
       }
 
-      if !unsafe_params.has_key?(:truth_results)
-        if unsafe_params.has_key?(:query_id)
-          @saved_query = SavedQuery.find_by_id_and_grid_name(unsafe_params[:query_id], 'truth_results')
+      unless unsafe_params.key?(:truth_results)
+        if unsafe_params.key?(:query_id)
+          @saved_query = SavedQuery.find_by(id: unsafe_params[:query_id], grid_name: "truth_results")
           if !@saved_query.nil?
             unsafe_params[:truth_results] = JSON.parse(@saved_query.query)["truth_results"]
           else
-            redirect_to truth_challenges_path({tab: @tab})
+            redirect_to truth_challenges_path(tab: @tab)
           end
         else
           # "?truth_results[f][type][]=SNP&truth_results[f][subtype][]=*&truth_results[f][subset][]=*&truth_results[f][genotype][]=*"
           unsafe_params[:truth_results] = {
             f: {
-              type: ["SNP"],
+              type: %w(SNP),
               subtype: ["*"],
               subset: ["*"],
-              genotype: ["*"]
-            }
+              genotype: ["*"],
+            },
           }
         end
       end
@@ -255,10 +259,10 @@ class ChallengesController < ApplicationController
 
       if @tab == "results-explore-peek" || (@truth_challenge[:results_announced] && (@tab == "results-explore"))
         if @context.logged_in_or_guest?
-          @new_saved_query = SavedQuery.new({
+          @new_saved_query = SavedQuery.new(
             query: filter_and_order_state_as_hash(@results_grid).to_json,
-            grid_name: @results_grid.name
-          })
+            grid_name: @results_grid.name,
+          )
         end
         @query_list = SavedQuery.list(@results_grid.name, self)
       end
@@ -278,23 +282,32 @@ class ChallengesController < ApplicationController
     redirect_to challenges_path unless @context.challenge_admin?
   end
 
-  # Returns a collecttion of users-owners of apps for selection on challenge create or edit
+  # Returns a collection of users-owners of apps for selection on challenge create or edit
   # each User should be valid, i.e. to have an Org, otherwise skipped
   # @return [Array] Array<Array> of users info: user names with org name, user id
   def app_owners_for_select
     @app_owners_candidates = User.real.map { |u| [u.select_text, u.id] if u.org }.compact
   end
 
+  # Returns a collection of challenges for selection on challenge edit page
+  # @return  Array<Array> Array of challenges name + id
+  def challenge_order_for_select
+    Challenge.not_archived.all.map { |ch| [ch.name, ch.id] }
+  end
+
   # Returns a collection of Site admins and challenge admins
   # @return [Array<String>] dxids of Site admins and challenge admins
   def host_lead_dxusers
-    User::SITE_ADMINS + User::CHALLENGE_ADMINS
+    User.site_admins.or(User.challenge_admins).order(:dxuser).distinct.pluck(:dxuser)
   end
 
   # Returns a collection of Site admins, challenge evaluators and challenge admins
   # @return [Array<String>] dxids of Site admins, challenge evaluators and challenge admins
   def guest_lead_dxusers
-    host_lead_dxusers + User::CHALLENGE_EVALUATORS
+    User.site_admins.
+      or(User.challenge_admins).
+      or(User.challenge_evaluators).
+      order(:dxuser).distinct.pluck(:dxuser)
   end
 
   def find_editable_challenge
@@ -310,29 +323,45 @@ class ChallengesController < ApplicationController
   end
 
   def challenge_params
-    params.require(:challenge)
-      .permit(
-        :name, :description, :app_owner_id, :start_at, :end_at, :status,
-        :regions, :card_image_id, :card_image_url, :host_lead_dxuser, :guest_lead_dxuser
+    params.require(:challenge).
+      permit(
+        :name,
+        :description,
+        :app_owner_id,
+        :start_at,
+        :end_at,
+        :status,
+        :regions,
+        :card_image_id,
+        :card_image_url,
+        :replacement_id,
+        :host_lead_dxuser,
+        :guest_lead_dxuser,
       )
-
   end
 
   def update_challenge_params
-    params.require(:challenge)
-      .permit(
-        :name, :description, :app_owner_id, :start_at, :end_at, :status,
-        :card_image_id, :card_image_url
+    params.require(:challenge).
+      permit(
+        :name,
+        :description,
+        :app_owner_id,
+        :start_at,
+        :end_at,
+        :status,
+        :card_image_id,
+        :card_image_url,
+        :replacement_id,
       )
   end
 
   def filter_and_order_state_as_hash(grid)
     {
       grid.name => {
-        'f'               => grid.status[:f],
-        'order'           => grid.status[:order],
-        'order_direction' => grid.status[:order_direction]
-      }
+        "f" => grid.status[:f],
+        "order" => grid.status[:order],
+        "order_direction" => grid.status[:order_direction],
+      },
     }
   end
 

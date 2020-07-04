@@ -23,6 +23,8 @@
 
 class Node < ApplicationRecord
   include Auditor
+  extend Scopes
+  include Scopes
 
   self.inheritance_column = :sti_type
 
@@ -33,8 +35,11 @@ class Node < ApplicationRecord
 
   belongs_to :user, required: true
   belongs_to :parent, polymorphic: true
+  belongs_to :scoped_parent_folder, class_name: "Folder"
 
-  has_many :participants, dependent: :destroy
+  scope :files_and_folders, -> { where(sti_type: %w(Folder UserFile)) }
+  scope :files, -> { where(sti_type: %w(UserFile)) }
+  scope :folders, -> { where(sti_type: %w(Folder)) }
 
   acts_as_taggable
 
@@ -55,48 +60,12 @@ class Node < ApplicationRecord
   end
 
   class << self
-    # Select nodes ids, which are not comparison input files.
-    # Implemented to UserFile objexts only - folders are skipped.
-    # @param ids [Array] - an array of nodes ids.
-    # @return ids [Array] - an array of nodes ids, without comparison input files ids.
-    #   They are excluded, if they were in @param.
-    def sin_comparison_inputs(ids)
-      ids.reject do |id|
-        node = find(id)
-        node.is_a?(UserFile) && node.comparisons.present?
-      end
-    end
-
     def scope_column_name(scope)
-      ["private", "public"].include?(scope) ? :parent_folder_id : :scoped_parent_folder_id
+      [SCOPE_PRIVATE, SCOPE_PUBLIC].include?(scope) ? :parent_folder_id : :scoped_parent_folder_id
     end
 
     def folder_content(files, folders)
       Node.where(id: (files + folders).map(&:id))
-    end
-
-    # Selects nodes (files and folders), permitted to be accessible/editable in space
-    #   by current context user. A context permission level depends upon context role in space:
-    #   contributor vs viewer.
-    # @param space_context [Hash] of the following content:
-    #   nodes_ids: [Array] - an array of nodes ids.
-    #   context: [Context] - a context user object.
-    #   space: [Space] - a space object.
-    # @return nodes [Array] - an array of nodes objects, permitted for space context given.
-    def permitted_in_space_context(space_context)
-      context = space_context[:context]
-      space = space_context[:space]
-      nodes_ids = space_context[:nodes_ids]
-
-      nodes = Node.accessible_by_space(space).where(id: nodes_ids)
-
-      nodes = if space.contributor_permission(context)
-        nodes.accessible_by(context)
-      else
-        nodes.editable_by(context)
-      end
-
-      nodes.to_a
     end
   end
 

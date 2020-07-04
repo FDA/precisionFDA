@@ -13,6 +13,8 @@
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #  scope       :string(255)
+#  app_dxid    :string(255)      not null
+#  run_input   :text(65535)
 #
 
 class Comparison < ApplicationRecord
@@ -48,6 +50,7 @@ class Comparison < ApplicationRecord
   has_many :notes, through: :attachments
 
   store :meta, coder: JSON
+  store :run_input, coder: JSON
 
   acts_as_commentable
   acts_as_taggable

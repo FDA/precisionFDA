@@ -43,6 +43,7 @@ https://github.com/RealTimeGenomics/rtg-tools
 
 To set up development environment please refer to [Development Setup](docs/DEVELOPMENT_SETUP.md).
 
-## Using udocker
+## React-based frontend development
 
-To use udocker please refer to [udocker user manual](https://github.com/indigo-dc/udocker/blob/master/doc/user_manual.md).
+To get information about React-based development, please refer to
+[this manual](docs/REACT_FRONTEND_DEVELOPMENT.md).

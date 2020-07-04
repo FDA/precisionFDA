@@ -1,9 +1,11 @@
+# Submissions controller
 class SubmissionsController < ApplicationController
-  skip_before_action :require_login, {only: []}
+  skip_before_action :require_login, only: []
   before_action :require_login_or_guest, only: []
 
   def new
-    @challenge = Challenge.find_by_id!(unsafe_params[:challenge_id])
+    @challenge = Challenge.find(unsafe_params[:challenge_id])
+
     if @context.logged_in?
       unless @challenge.followed_by?(@context.user)
         flash[:warning] = "Please join the challenge to enter submissions."
@@ -32,20 +34,27 @@ class SubmissionsController < ApplicationController
 
     licenses_to_accept = []
     @app.assets.each do |asset|
-      if asset.license.present? && !asset.licensed_by?(@context)
-        licenses_to_accept << {
-          license: describe_for_api(asset.license),
-          user_license: asset.user_license(@context)
-        }
-      end
+      next unless asset.license.present? && !asset.licensed_by?(@context)
+
+      licenses_to_accept << {
+        license: describe_for_api(asset.license),
+        user_license: asset.user_license(@context),
+      }
     end
 
-    licenses_accepted = @context.user.accepted_licenses.map{|l| {id: l.license_id, pending: l.pending?, active: l.active?, unset: !l.pending? && !l.active?}}
+    licenses_accepted = @context.user.accepted_licenses.map do |l|
+      {
+        id: l.license_id,
+        pending: l.pending?,
+        active: l.active?,
+        unset: !l.pending? && !l.active?,
+      }
+    end
 
     js challenge_id: unsafe_params[:challenge_id],
        app: @app.slice(:dxid, :spec, :title),
        scopes_permitted: %w(public private),
-       licenses_to_accept: licenses_to_accept.uniq { |l| l.id },
+       licenses_to_accept: licenses_to_accept.uniq(&:id),
        licenses_accepted: licenses_accepted
   end
 
@@ -61,11 +70,11 @@ class SubmissionsController < ApplicationController
   end
 
   def create
-    if unsafe_params[:submission] && unsafe_params[:submission][:inputs]
-      submission_inputs = JSON.parse(unsafe_params[:submission][:inputs])
-    else
+    unless unsafe_params[:submission] && unsafe_params[:submission][:inputs]
       raise "Submission parameters not found in submission#create params."
     end
+
+    submission_inputs = JSON.parse(unsafe_params[:submission][:inputs])
 
     challenge = Challenge.find(unsafe_params[:challenge_id])
     raise "Challenge ID not found in submission#create params." unless challenge
@@ -83,7 +92,7 @@ class SubmissionsController < ApplicationController
 
     unless items.all? { |item| item.editable_by?(@context) }
       flash[:error] = "Item is not owned by you."
-      redirect_back(fallback_location: root_path) and return
+      redirect_back(fallback_location: root_path) && return
     end
 
     run_job_create_submission(unsafe_params, input_info)
@@ -98,90 +107,85 @@ class SubmissionsController < ApplicationController
 
     id = unsafe_params[:id]
     raise "Missing id in publish route" unless id.is_a?(String) && id.present?
+
     scope = "public"
 
     # Only applicable after selections have been made
-    if unsafe_params[:uids]
-      uids = unsafe_params[:uids]
-      raise "The object 'uids' must be a hash of object ids (strings) with value 'on'." unless uids.is_a?(Hash) && uids.all? { |uid, checked| uid.is_a?(String) && checked == "on" }
+    return unless unsafe_params[:uids]
 
-      items = ([id] + uids.keys).uniq.map { |uid| item_from_uid(uid) }.reject { |item| item.public? || item.scope == scope }
-      raise "Unpublishable items detected" unless items.all? { |item| item.publishable_by?(@context, scope) }
+    uids = unsafe_params[:uids]
 
-      # Files to publish:
-      # - All real_files selected by the user
-      # - All assets selected by the user
-      files = items.select { |item| item.klass == "file" || item.klass == "asset" }
-
-      # Comparisons
-      comparisons = items.select { |item| item.klass == "comparison" }
-
-      # Apps
-      apps = items.select { |item| item.klass == "app" }
-
-      # Jobs
-      jobs = items.select { |item| item.klass == "job" }
-
-      # Notes
-      notes = items.select { |item| item.klass == "note" }
-
-      # Discussions
-      discussions = items.select { |item| item.klass == "discussion" }
-
-      # Answers
-      answers = items.select { |item| item.klass == "answer" }
-
-      published_count = 0
-
-      # Files
-      if files.size > 0
-        published_count += UserFile.publish(files, @context, scope)
-      end
-
-      # Comparisons
-      if comparisons.size > 0
-        published_count += Comparison.publish(comparisons, @context, scope)
-      end
-
-      # Apps
-      if apps.size > 0
-        published_count += AppSeries.publish(apps, @context, scope)
-      end
-
-      # Jobs
-      if jobs.size > 0
-        published_count += PublishService::JobPublisher.new(@context).publish(jobs, scope)
-      end
-
-      # Notes
-      if notes.size > 0
-        published_count += Note.publish(notes, @context, scope)
-      end
-
-      # Discussions
-      if discussions.size > 0
-        published_count += Discussion.publish(discussions, @context, scope)
-      end
-
-      # Answers
-      if answers.size > 0
-        published_count += Answer.publish(answers, @context, scope)
-      end
-
-      message = "#{published_count}"
-      if published_count != items.count
-        message += " (out of #{items.count})"
-      end
-      if published_count == 1
-        message += " item has been published."
-      else
-        message += " items have been published."
-      end
-      flash[:success] = message
-      run_job_create_submission(sub_params)
-      redirect_to show_challenge_path(unsafe_params[:challenge_id], 'my_entries')
-      return
+    unless uids.is_a?(Hash) && uids.all? { |uid, checked| uid.is_a?(String) && checked == "on" }
+      raise "The object 'uids' must be a hash of object ids (strings) with value 'on'."
     end
+
+    items = ([id] + uids.keys).uniq.map { |uid| item_from_uid(uid) }
+    items = items.reject { |item| item.public? || item.scope == scope }
+
+    unless items.all? { |item| item.publishable_by?(@context, scope) }
+      raise "Unpublishable items detected"
+    end
+
+    # Files to publish:
+    # - All real_files selected by the user
+    # - All assets selected by the user
+    files = items.select { |item| item.klass == "file" || item.klass == "asset" }
+
+    # Comparisons
+    comparisons = items.select { |item| item.klass == "comparison" }
+
+    # Apps
+    apps = items.select { |item| item.klass == "app" }
+
+    # Jobs
+    jobs = items.select { |item| item.klass == "job" }
+
+    # Notes
+    notes = items.select { |item| item.klass == "note" }
+
+    # Discussions
+    discussions = items.select { |item| item.klass == "discussion" }
+
+    # Answers
+    answers = items.select { |item| item.klass == "answer" }
+
+    published_count = 0
+
+    # Files
+    published_count += UserFile.publish(files, @context, scope) unless files.empty?
+
+    # Comparisons
+    published_count += Comparison.publish(comparisons, @context, scope) unless comparisons.empty?
+
+    # Apps
+    published_count += AppSeries.publish(apps, @context, scope) unless apps.empty?
+
+    # Jobs
+    unless jobs.empty?
+      published_count += PublishService::JobPublisher.new(@context).publish(jobs, scope)
+    end
+
+    # Notes
+    published_count += Note.publish(notes, @context, scope) unless notes.empty?
+
+    # Discussions
+    published_count += Discussion.publish(discussions, @context, scope) unless discussions.empty?
+
+    # Answers
+    published_count += Answer.publish(answers, @context, scope) unless answers.empty?
+
+    message = published_count.to_s
+    message += " (out of #{items.count})" if published_count != items.count
+    message += if published_count == 1
+      " item has been published."
+    else
+      " items have been published."
+    end
+
+    flash[:success] = message
+    run_job_create_submission(sub_params)
+
+    redirect_to show_challenge_path(unsafe_params[:challenge_id], "my_entries")
   end
 
   def log
@@ -191,7 +195,7 @@ class SubmissionsController < ApplicationController
       redirect_to challenges_path
       return
     end
-    if !@submission.job.terminal?
+    unless @submission.job.terminal?
       User.sync_challenge_jobs!
       @submission.job.reload
     end
@@ -203,14 +207,24 @@ class SubmissionsController < ApplicationController
     raw_socket = TCPSocket.new(uri.host, uri.port)
     socket = OpenSSL::SSL::SSLSocket.new(raw_socket)
     socket.connect
-    handshake = WebSocket::Handshake::Client.new(url: "wss://#{uri.host}:#{uri.port}/#{@submission.job.dxid}/getLog/websocket")
+    handshake = WebSocket::Handshake::Client.new(
+      url: "wss://#{uri.host}:#{uri.port}/#{@submission.job.dxid}/getLog/websocket",
+    )
     socket.write(handshake.to_s)
 
-    while !handshake.finished?
-      handshake << socket.readline
-    end
+    handshake << socket.readline until handshake.finished?
     raise unless handshake.valid?
-    frame = WebSocket::Frame::Outgoing::Client.new(version: handshake.version, data: {access_token: CHALLENGE_BOT_TOKEN, token_type: "Bearer", tail: false}.to_json, type: :text).to_s
+
+    frame = WebSocket::Frame::Outgoing::Client.new(
+      version: handshake.version,
+      data: {
+        access_token: CHALLENGE_BOT_TOKEN,
+        token_type: "Bearer",
+        tail: false,
+      }.to_json,
+      type: :text,
+    ).to_s
+
     socket.write(frame)
 
     client = WebSocket::Frame::Incoming::Client.new(version: handshake.version)
@@ -218,16 +232,17 @@ class SubmissionsController < ApplicationController
     @log_times = []
     @log_levels = []
     @log_contents = []
-    while true do
+    loop do
       data = socket.getc
-      break if data.nil? || data.empty?
+      break if data.blank?
+
       client << data
-      while (msg = client.next) do
+      while (msg = client.next)
         msg = JSON.parse(msg.to_s)
-        # source, msg, timestamp, level, job, line|
-        # source=SYSTEM, msg=END_LOG
+
         raise if msg["code"]
         return if msg["source"] == "SYSTEM" && msg["msg"] == "END_LOG"
+
         @log_times << msg["timestamp"]
         @log_levels << msg["level"]
         @log_contents << msg["msg"]
@@ -267,7 +282,7 @@ class SubmissionsController < ApplicationController
 
     # Name should be a nonempty string
     desc = submission["desc"]
-    raise "Description should not be empty" unless desc.present?
+    raise "Description should not be empty" if desc.blank?
 
     # Inputs should be a hash (more checks later)
     @inputs = JSON.parse(submission["inputs"])
@@ -275,7 +290,9 @@ class SubmissionsController < ApplicationController
 
     # TODO: Does challengebot need to worry about licenses?
     # Check if asset licenses have been accepted
-    # raise "Asset licenses must be accepted" unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
+    # unless @app.assets.all? { |a| !a.license.present? || a.licensed_by?(@context) }
+    #   raise "Asset licenses must be accepted"
+    # end
 
     @app = App.find(@challenge.app_id)
 
@@ -286,7 +303,7 @@ class SubmissionsController < ApplicationController
     job = job_creator.create(
       app: @app,
       name: name,
-      input_info: input_info
+      input_info: input_info,
     )
 
     submission = Submission.create!(
@@ -294,7 +311,7 @@ class SubmissionsController < ApplicationController
       desc: desc,
       user_id: @context.user_id,
       challenge_id: @challenge.id,
-      _inputs: input_info.file_dxids
+      _inputs: input_info.file_dxids,
     )
 
     Event::SubmissionCreated.create_for(submission, @context.user)
@@ -309,7 +326,14 @@ class SubmissionsController < ApplicationController
   # Clones user's submission file into challenge space
   def clone_inputs_to_space
     api = DIContainer.resolve("api.user")
-    api.project_invite(@context.user.private_files_project, "user-#{CHALLENGE_BOT_DX_USER}", "VIEW", {suppressEmailNotification: true, suppressAllNotifications: true})
+    api.project_invite(
+      @context.user.private_files_project,
+      "user-#{CHALLENGE_BOT_DX_USER}",
+      "VIEW",
+      suppressEmailNotification: true,
+      suppressAllNotifications: true,
+    )
+
     files = @inputs.values.map { |v| UserFile.accessible_by(@context).find_by(uid: v) }.compact
 
     unless files.empty?
@@ -318,8 +342,12 @@ class SubmissionsController < ApplicationController
         file_cloner.publish(files, @challenge.space.uid)
       end
     end
-    
-    api.project_decrease_permissions(@context.user.private_files_project, "NONE", "user-#{CHALLENGE_BOT_DX_USER}")
+
+    api.project_decrease_permissions(
+      @context.user.private_files_project,
+      "NONE",
+      "user-#{CHALLENGE_BOT_DX_USER}",
+    )
   end
 
   def job_creator
@@ -327,12 +355,11 @@ class SubmissionsController < ApplicationController
       api: DNAnexusAPI.new(CHALLENGE_BOT_TOKEN),
       context: @context,
       user: challenge_bot,
-      project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT
+      project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
     )
   end
 
   def challenge_bot
     @challenge_bot ||= User.challenge_bot
   end
-
 end

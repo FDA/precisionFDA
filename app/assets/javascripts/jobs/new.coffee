@@ -88,22 +88,20 @@ class JobsNewView
 
       @busy(true)
       @running(true)
-      Precision.api('/api/run_app', params)
+      Precision.api('/apps/run', params)
         .done((rs) =>
           if !rs.error?
-            window.location = "/apps/#{@uid}/jobs"
+            window.location = if @spaceId() then "/spaces/#{@spaceId()}/jobs" else "/apps/#{@uid}/jobs"
           else
             @busy(false)
             @running(false)
-            alert "#{rs.error.type}: App could not be run due to: #{rs.error.message}"
-            console.error rs.error
+            alert rs.error.message
         )
         .fail((error) =>
           errorObject = JSON.parse error.responseText
           @busy(false)
           @running(false)
-          alert "#{errorObject.error.type}: App could not be run due to: #{errorObject.error.message}"
-          console.error error
+          alert errorObject.error.message
         )
 
 #########################################################

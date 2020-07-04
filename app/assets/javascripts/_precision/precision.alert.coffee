@@ -14,10 +14,10 @@ class AlertModel
       )
 
   #public
-  show: (text, style) ->
+  show: (text, style, delay = 5000) ->
     $container = createContainer(text, style)
     appendToPage($container)
-    @on($container)
+    @on($container, delay)
 
   #public
   showAboveAll: (text, style = 'alert-danger', delay = 10000) ->

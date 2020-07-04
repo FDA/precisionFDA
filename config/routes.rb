@@ -52,8 +52,16 @@ Rails.application.routes.draw do
       get "resend_activation_email", to: "users#resend_activation_email"
       get "edit_user", to: "users#edit"
       get "update_user", to: "users#update"
-      post "comparison_app", to: "apps#comparison_app"
-      post "restore_comparison_app", to: "apps#restore_comparison_app"
+
+      resources :apps, only: [], param: :uid do
+        collection do
+          post :set_comparison_app
+          post :remove_from_comparators
+          post :add_to_comparators
+        end
+      end
+
+      get "comparator_settings", to: "comparator_settings#index"
 
       resources :organizations, only: %i(index show create) do
         post :change_org_admin, on: :collection
@@ -72,12 +80,14 @@ Rails.application.routes.draw do
           put "approve", to: "org_requests#approve"
         end
       end
+
+      resources :admin_memberships, only: %i(index create destroy new)
     end
 
     # hotfix for PFDA-557
     get "/challenges/6" => redirect("/challenges/7")
     get "/mislabeling" => redirect("/challenges/5")
-    # Main controller
+    # Mains controller
     get "login" => "main#login"
     delete "logout" => "main#destroy"
     get "return_from_login" => "main#return_from_login"
@@ -108,6 +118,8 @@ Rails.application.routes.draw do
     namespace "api" do
       get "update_active", to: "base#update_active"
 
+      get :user, to: "users#show"
+
       namespace "activity_reports" do
         get "total"
         get "data_upload"
@@ -131,14 +143,73 @@ Rails.application.routes.draw do
 
       resources :apps, only: %w(create) do
         collection do
+          post "copy"
           post "import"
           get "accessible_apps"
         end
       end
 
-      resources :workflows, only: %w(create)
+      resources :spaces, only: %i(index show create update) do
+        collection do
+          get :editable_spaces
+          get :info
+        end
 
-      post "publish"
+        member do
+          get :apps
+          get :files
+          get :jobs
+          get :workflows
+          get :members
+          put :tags
+          post :accept
+          post :add_data
+
+          post :lock, controller: :space_requests
+          post :unlock, controller: :space_requests
+          post :delete, controller: :space_requests
+        end
+
+        scope module: :spaces do
+          resources :files, only: [] do
+            collection do
+              post :publish_files
+              post :move
+              post :remove
+              post :create_folder
+              get :subfolders
+            end
+
+            member do
+              put :rename_folder
+            end
+          end
+
+          resources :memberships, only: %(update) do
+            collection do
+              post :invite
+            end
+          end
+        end
+      end
+
+      resources :folders, only: [] do
+        get :children, on: :collection
+      end
+
+      resources :files, param: :uid, only: %i(update) do
+        get :download, on: :member
+
+        collection do
+          post :copy
+          post :download_list
+        end
+      end
+
+      resources :workflows, only: %w(create) do
+        post :copy, on: :collection
+      end
+
       post "related_to_publish"
       post "create_file"
       post "create_challenge_card_image"
@@ -159,7 +230,6 @@ Rails.application.routes.draw do
       post "list_workflows"
       post "describe_license"
       post "accept_licenses"
-      post "run_app"
       post "run_workflow"
       post "get_app_spec"
       post "get_app_script"
@@ -209,6 +279,7 @@ Rails.application.routes.draw do
       end
       get "featured", on: :collection, as: "featured"
       get "explore", on: :collection, as: "explore"
+      post "run", on: :collection
       resources :comments
     end
 
@@ -243,6 +314,12 @@ Rails.application.routes.draw do
       get "featured", on: :collection, as: "featured"
       get "explore", on: :collection, as: "explore"
       resources :comments
+    end
+
+    resources :comparators, only: [] do
+      collection do
+        get "/", to: "comparators#show"
+      end
     end
 
     resources :files do
@@ -354,47 +431,18 @@ Rails.application.routes.draw do
 
     resource :org, only: :update
 
-    resources :space_templates do
-      get "duplicate", on: :member
-    end
-
-    resources :spaces, except: :destroy do
+    resources :spaces, only: %i(index) do
       member do
-        get "members"
-        get "discuss"
         get "tasks"
         get "feed"
         get "reports"
         get "notes"
-        get "files"
-        get "apps"
-        get "jobs"
         get "comparisons"
         get "assets"
-        get "workflows"
-        post "verify"
-        post "accept"
-        post "rename"
+        get "discuss"
         post "invite"
-        post "move"
-        post "create_folder"
-        post "download_list"
-        post "publish_folder"
-        post "copy_folder_to_cooperative"
-        post "copy_file_to_cooperative"
-        post "copy_to_cooperative"
-        post "search_content"
-        post "remove_folder"
-        post "lock", controller: "space_requests"
-        post "unlock", controller: "space_requests"
-        post "delete", controller: "space_requests"
-      end
-
-      collection do
-        get "verified_space_list", controller: "space_templates"
-        get "unverified_apps", controller: "space_templates"
-        get "apps_and_files"
-        post "rename_folder"
+        post "copy_to_cooperative" # copy a single item to cooperative, used everywhere
+        post "search_content" # used in discuss only
       end
 
       resources :comments
@@ -426,15 +474,7 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :space_membership, only: [] do
-      member do
-        post :to_lead
-        post :to_admin
-        post :to_viewer
-        post :to_contributor
-        post :to_inactive
-      end
-    end
+    get "/spaces/*all", to: "spaces#index"
 
     resources :notification_preferences, only: [:index] do
       post "change", on: :collection

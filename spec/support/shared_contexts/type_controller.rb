@@ -1,11 +1,10 @@
 RSpec.shared_context "type_controller", type: :controller do
-
   before do
     rack = PlatformRack.new
     stub_request(:any, /^#{rack.path}/).to_rack(rack)
 
-    rack = PlatformAuthRack.new
-    stub_request(:any, /^#{rack.path}/).to_rack(rack)
+    auth_rack = PlatformAuthRack.new
+    stub_request(:any, /^#{auth_rack.path}/).to_rack(auth_rack)
   end
 
   def authenticate!(user)
@@ -61,8 +60,7 @@ RSpec.shared_context "type_controller", type: :controller do
       username: user.dxuser,
       token: "token",
       expiration: 1.day.since.to_i,
-      org_id: user.org_id
+      org_id: user.org_id,
     }
   end
-
 end

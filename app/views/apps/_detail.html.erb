@@ -1,41 +1,41 @@
-<% if @app.present? %>
+<% if app.present? %>
 <div class="metadata-section metadata-header">
   <ul class="list-group list-group-inline">
-    <%= render "_partials/metadata_access", item: @app %>
+    <%= render "_partials/metadata_access", item: app %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">name</h5>
-      <p class="list-group-item-text"><%= @app.name %></p>
+      <p class="list-group-item-text"><%= app.name %></p>
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Org</h5>
       <p class="list-group-item-text">
-        <%= @app.user.org.handle %>
+        <%= app.user.org.handle %>
       </p>
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Added by</h5>
       <p class="list-group-item-text">
-        <%= link_to(@app.user.dxuser, user_path(@app.user.dxuser)) %>
+        <%= link_to(app.user.dxuser, user_path(app.user.dxuser)) %>
       </p>
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">ID</h5>
-      <p class="list-group-item-text"><%= @app.dxid %></p>
+      <p class="list-group-item-text"><%= app.dxid %></p>
     </li>
-    <% if @app.title != @revisions.first.title %>
+    <% if app.title != revisions.first.title %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Revision Title</h5>
-      <p class="list-group-item-text"><%= @app.title %></p>
+      <p class="list-group-item-text"><%= app.title %></p>
     </li>
     <% end %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Created</h5>
-      <p class="list-group-item-text"><%= @app.created_at.to_s(:human) %></p>
+      <p class="list-group-item-text"><%= app.created_at.to_s(:human) %></p>
     </li>
   </ul>
 </div>
 
-<% if @app.release == UBUNTU_14 %>
+<% if app.release == UBUNTU_14 %>
   <div class="pfda-padded">
     <div class="alert alert-warning">
       <p><b>WARNING!</b></p>
@@ -46,7 +46,7 @@
   </div>
 <% end %>
 
-  <%= render "_partials/tags_metadata", item: @app.app_series, item_name: @app.title, tags_list: @app.app_series.all_tags_list, is_editable: @app.editable_by?(@context), suggested_tags: AppSeries::SUGGESTED_TAGS %>
+  <%= render "_partials/tags_metadata", item: app.app_series, item_name: app.title, tags_list: app.app_series.all_tags_list, is_editable: app.editable_by?(context), suggested_tags: AppSeries::SUGGESTED_TAGS %>
 
 <div class="pfda-toolbar">
   <div class="btn-group">
@@ -54,38 +54,38 @@
       <button type="button" class="btn btn-default btn-default-version dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <span class="fa fa-history" aria-hidden="true"></span>
         <span class="text-muted">Revision:</span>
-        <span class="app-revision"><%= @app.revision %></span>
-        <% if @app.versioned? %>
-          <% if @app.id == @revisions.first.id %>
-            <span class="app-label-version label label-success"><%= @app.version %></span>
+        <span class="app-revision"><%= app.revision %></span>
+        <% if app.versioned? %>
+          <% if app.id == revisions.first.id %>
+            <span class="app-label-version label label-success"><%= app.version %></span>
           <% else %>
-            <span class="app-label-version label label-default"><%= @app.version %></span>
+            <span class="app-label-version label label-default"><%= app.version %></span>
           <% end %>
         <% end %>
-        <% if @app.id == @revisions.first.id %>
+        <% if app.id == revisions.first.id %>
           <span class="app-label-latest label label-info">Latest</span>
         <% end %>
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu">
-        <% if @revisions.size == 0 # Should be impossible %>
+        <% if revisions.size == 0 # Should be impossible %>
           <li class="dropdown-header">
             None available
           </li>
         <% else %>
           <li class="dropdown-header">Revisions</li>
-          <% @revisions.each do |app| %>
-            <li class="<% if app.uid == params[:id] %>active<% end %>">
-              <a href="<%= action_name == 'index' ? app_jobs_path(app) : app_path(app) %>" class="clearfix">
-                <span class="app-revision"><%= app.revision %></span>
-                <% if @revisions.first.id == app.id %>
+          <% revisions.each do |revision| %>
+            <li class="<% if revision.uid == params[:id] %>active<% end %>">
+              <a href="<%= action_name == 'index' ? app_jobs_path(revision) : app_path(revision) %>" class="clearfix">
+                <span class="app-revision"><%= revision.revision %></span>
+                <% if revisions.first.id == revision.id %>
                   <span class="app-label-latest label label-info pull-right">Latest</span>
                 <% end %>
                 <% if app.versioned? %>
-                  <% if @revisions.first.id == app.id %>
-                    <span class="app-label-version label label-success pull-right"><%= app.version %></span>
+                  <% if revisions.first.id == revision.id %>
+                    <span class="app-label-version label label-success pull-right"><%= revision.version %></span>
                   <% else %>
-                    <span class="app-label-version label label-default pull-right"><%= app.version %></span>
+                    <span class="app-label-version label label-default pull-right"><%= revision.version %></span>
                   <% end %>
                 <% end %>
               </a>
@@ -94,14 +94,14 @@
         <% end %>
       </ul>
     </div>
-    <% if @app.editable_by?(@context) %>
-    <div class="btn-group" <% if @revisions.first.uid != @app.uid %>data-toggle="tooltip" data-placement="top" title="Only latest revision is editable"<% end %>>
-      <a class="btn btn-default <% if @revisions.first.uid != @app.uid %>disabled<% end %>" href="<%= edit_app_path(@revisions.first) %>">
+    <% if app.editable_by?(context) %>
+    <div class="btn-group" <% if revisions.first.uid != app.uid %>data-toggle="tooltip" data-placement="top" title="Only latest revision is editable"<% end %>>
+      <a class="btn btn-default <% if revisions.first.uid != app.uid %>disabled<% end %>" href="<%= edit_app_path(revisions.first) %>">
         <span class="fa fa-edit"></span> Edit
       </a>
     </div>
     <% end %>
-    <a class="btn btn-default" href="<%= fork_app_path(@app) %>">
+    <a class="btn btn-default" href="<%= fork_app_path(app) %>">
       <span class="fa fa-code-fork"></span> Fork
     </a>
     <div class="btn-group">
@@ -112,17 +112,17 @@
       <ul class="dropdown-menu">
         <li class="dropdown-header">Export To:</li>
         <li data-turbolinks="false">
-          <%= link_to export_app_path(@app), method: :post, data: { confirm: 'You are about to download a Dockerfile to run this app in a Docker container on your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+          <%= link_to export_app_path(app), method: :post, data: { confirm: 'You are about to download a Dockerfile to run this app in a Docker container on your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
             Docker Container
           <% end %>
         </li>
         <li data-turbolinks="false">
-          <%= link_to cwl_export_app_path(@app), data: { confirm: 'You are about to download a CWL Tool package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+          <%= link_to cwl_export_app_path(app), data: { confirm: 'You are about to download a CWL Tool package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
             CWL Tool
           <% end %>
         </li>
         <li data-turbolinks="false">
-          <%= link_to wdl_export_app_path(@app), data: { confirm: 'You are about to download a WDL Task package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
+          <%= link_to wdl_export_app_path(app), data: { confirm: 'You are about to download a WDL Task package to your local machine. For more information please consult the app export section in the precisionFDA docs.' } do %>
             WDL Task
           <% end %>
         </li>
@@ -132,76 +132,105 @@
 
   <div class="btn-group">
     <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to...</button>
-    <%= link_to track_path(id: @app.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
+    <%= link_to track_path(id: app.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
       <span class="fa fa-flip-vertical fa-sitemap"></span> Track
     <% end %>
   </div>
 
-  <% if show_swap_comparison_app_button?(@context, @app) %>
-    <div class="btn-group">
-      <button class="btn btn-default" data-toggle="modal" data-target="#set_comparison_app_modal">
-        Set this app as comparison default
-      </button>
-      <%= render partial: "apps/set_comparison_app_modal", locals: { app_id: @app.id } %>
-    </div>
-  <% end %>
-
-  <% if @app.verified? %>
+  <% if app.verified? %>
     <span>
       <span class="fa fa-check-circle" style="padding-left: 30px; color: #1F70B5"></span>
       Verified
     </span>
   <% else %>
 
-  <% if @app.editable_by?(@context) && (@context.user.dxuser == app.user.dxuser) %>
-    <script type="text/html" id="shared-template">
-      &nbsp;
-      <span class="text-success">
-        <i class="fa fa-check-circle"></i>
-        <span id="fda_text">Shared with FDA</span>
-      </span>
-    </script>
-    <% if !@app.dev_group && @app.scope != 'public' && !@app.in_verificaiton_space?  %>
-      <!-- ko ifnot:shareSuccess -->
-      <div class="btn-group">
-        <button class="btn btn-primary" data-toggle="modal" data-target="#share_with_fda_modal">
-          <i class="fa fa-copy"></i>&nbsp;
-          <span id="fda_text">Share with FDA</span>
-        </button>
-      </div>
-      <!-- /ko -->
-      <!-- ko if:shareSuccess -->
-      <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
-      <!-- /ko -->
-      <%= render partial: "apps/share_with_fda_modal" %>
-    <% elsif @app.dev_group %>
-      <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
-    <% end %>
-  <% else %>
-    <% if @app.dev_group %>
-      <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
+    <% if app.editable_by?(context) && (context.user.dxuser == app.user.dxuser) %>
+      <script type="text/html" id="shared-template">
+        &nbsp;
+        <span class="text-success">
+          <i class="fa fa-check-circle"></i>
+          <span id="fda_text">Shared with FDA</span>
+        </span>
+      </script>
+      <% if !app.dev_group && app.scope != 'public' && !app.in_verification_space?  %>
+        <!-- ko ifnot:shareSuccess -->
+        <div class="btn-group">
+          <button class="btn btn-primary" data-toggle="modal" data-target="#share_with_fda_modal">
+            <i class="fa fa-copy"></i>&nbsp;
+            <span id="fda_text">Share with FDA</span>
+          </button>
+        </div>
+        <!-- /ko -->
+        <!-- ko if:shareSuccess -->
+        <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
+        <!-- /ko -->
+        <%= render partial: "apps/share_with_fda_modal" %>
+      <% elsif app.dev_group %>
+        <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
+      <% end %>
+    <% else %>
+      <% if app.dev_group %>
+        <div class="btn-group" data-bind="template: { name: 'shared-template' }"></div>
+      <% end %>
     <% end %>
   <% end %>
+
+  <% if context.user.can_administer_site? and app.scope == 'public' %>
+    <div class="btn-group">
+      <button type="button" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fa fa-bullseye" aria-hidden="true"></i>&nbsp;Comparison
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+        <li class="dropdown-header">Actions:</li>
+        <% if show_swap_comparison_app_button?(context, app) %>
+          <li data-turbolinks="false">
+            <a href="#" data-toggle="modal" data-target="#set_comparison_app_modal">
+              Set this app as comparison default
+            </a>
+          </li>
+        <% end %>
+        <% unless global_comparison_app?(app) %>
+          <li data-turbolinks="false">
+            <% if app_added_to_comparators?(app) %>
+              <a href="#" data-toggle="modal" data-target="#remove_from_comparators_modal">
+                <i class="fa fa-trash"></i>&nbsp;
+                <span>Remove from Comparators</span>
+              </a href="#">
+            <% else %>
+              <a href="#" data-toggle="modal" data-target="#add_to_comparators_modal">
+                <i class="fa fa-bullseye"></i>&nbsp;
+                <span>Add to Comparators</span>
+              </a href="#">
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+
+      <%= render partial: "apps/set_comparison_app_modal", locals: { app: app } %>
+      <%= render "apps/add_to_comparators_modal" %>
+      <%= render "apps/remove_from_comparators_modal" %>
+    </div>
   <% end %>
 
   <div class="btn-group pull-right">
-    <%= render "_partials/btn_challenge_app", app: @app %>
+    <%= render "_partials/btn_challenge_app", app: app %>
 
-    <%= link_to new_app_job_path(@app), class: "btn btn-primary" do %>
-      <span class="fa fa-bolt"></span> Run App&nbsp;&nbsp;<span class="badge"><%= @app.version ? "v#{@app.version}" : "rev#{@app.revision}" %></span>
+    <%= link_to new_app_job_path(app), class: "btn btn-primary" do %>
+      <span class="fa fa-bolt"></span> Run App&nbsp;&nbsp;<span class="badge"><%= app.version ? "v#{app.version}" : "rev#{app.revision}" %></span>
     <% end %>
-    <%= link_to batch_app_app_path(@app), class: "btn btn-primary" do %>
-        <span class="fa fa-bolt"></span> Run Batch App&nbsp;&nbsp;<span class="badge"><%= @app.version ? "v#{@app.version}" : "rev#{@app.revision}" %></span>
+    <%= link_to batch_app_app_path(app), class: "btn btn-primary" do %>
+        <span class="fa fa-bolt"></span> Run Batch App&nbsp;&nbsp;<span class="badge"><%= app.version ? "v#{app.version}" : "rev#{app.revision}" %></span>
     <% end %>
-    <%= render "_partials/btn_publish", item: @app %>
+    <%= render "_partials/btn_copy", item: app, url: copy_api_apps_path %>
 
-    <% if @app.in_space? && @app.space_object.contributor_permission(@context) %>
-      <%= render "_partials/btn_copy_to_cooperative", item: @app %>
+    <% if app.in_space? && app.space_object.editable_by?(context.user) %>
+      <%= render "_partials/btn_copy_to_cooperative", item: app %>
     <% end %>
 
   </div>
 
-  <% if @context.logged_in? && app.user == @context.user %>
+  <% if context.logged_in? && app.user == context.user %>
     <% if @assigned_challenges.any? %>
       <h4 class="details-challenges">
         <% @assigned_challenges.each do |challenge| %>
@@ -215,19 +244,19 @@
 
 <!-- Nav tabs -->
 <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
-  <% if @jobs_grid.present? %>
+  <% if jobs_grid.present? %>
   <li role="presentation" class="active">
     <a href="#app-job" aria-controls="app-job" role="tab" data-toggle="tab"><span class="fa fa-fw fa-tasks"></span>
       <span class="tab-label">Jobs</span>
     </a>
   </li>
   <% end %>
-  <li role="presentation" class="<% if !@jobs_grid.present? %>active<% end %>">
+  <li role="presentation" class="<% if !jobs_grid.present? %>active<% end %>">
     <a href="#app-spec" aria-controls="app-spec" role="tab" data-toggle="tab"><span class="fa fa-fw fa-puzzle-piece"></span>
       <span class="tab-label">Spec</span>
     </a>
   </li>
-  <% if !@app.readme.blank? %>
+  <% if !app.readme.blank? %>
   <li role="presentation">
     <a href="#app-readme" aria-controls="app-readme" role="tab" data-toggle="tab"><span class="fa fa-fw fa-info"></span>
       <span class="tab-label">README</span>
@@ -237,10 +266,10 @@
   <li role="presentation">
     <a href="#tab-comments" aria-controls="tab-comments" role="tab" data-toggle="tab"><span class="fa fa-fw fa-comment"></span>
       <span class="tab-label">Comments <span class="badge">
-        <% if @app.in_space? %>
+        <% if app.in_space? %>
           <%= @comments.active.size %>
         <% else %>
-          <%= @app.comment_threads.size %>
+          <%= app.comment_threads.size %>
         <% end %>
       </span></span>
     </a>
@@ -271,17 +300,17 @@
 
 <!-- Tab panes -->
 <div class="tab-content">
-  <% if @jobs_grid.present? %>
+  <% if jobs_grid.present? %>
   <div role="tabpanel" class="tab-pane active" id="app-job">
     <div class="panel">
-      <% if @app.present? %>
-        <%= render "jobs/grid", jobs_grid: @jobs_grid, app: @app %>
+      <% if app.present? %>
+        <%= render "jobs/grid", jobs_grid: jobs_grid, app: app %>
       <% else %>
-        <%= render "jobs/grid", jobs_grid: @jobs_grid %>
+        <%= render "jobs/grid", jobs_grid: jobs_grid %>
       <% end %>
     </div>
   </div>
-  <% elsif !@app.present? %>
+  <% elsif !app.present? %>
     <div role="tabpanel" class="tab-pane tab-pane-padded active" id="app-job">
       <div class="alert alert-info">
         <span class="fa fa-info-circle"></span> When you run an <a href="<%= show_docs_path("apps") %>">app</a>, it will create a <a href="<%= show_docs_path("apps") %>#apps-run">job</a> that will show up here. Meanwhile, check out our <%= link_to "Featured Apps", featured_apps_path %> or <%= link_to "explore community contributions", explore_apps_path %>
@@ -289,16 +318,16 @@
     </div>
   <% end %>
 
-  <% if @app.present? %>
-    <div role="tabpanel" class="tab-pane tab-pane-padded <% if !@jobs_grid.present? %>active<% end %>" id="app-spec">
+  <% if app.present? %>
+    <div role="tabpanel" class="tab-pane tab-pane-padded <% if !jobs_grid.present? %>active<% end %>" id="app-spec">
       <div class="list-group list-group-inline">
         <li class="list-group-item">
           <h5 class="list-group-item-heading">Default instance type</h5>
-          <p class="list-group-item-text"><%= @app.instance_type %></p>
+          <p class="list-group-item-text"><%= app.instance_type %></p>
         </li>
         <li class="list-group-item">
           <h5 class="list-group-item-heading">Has Internet access</h5>
-          <p class="list-group-item-text"><%= @app.internet_access ? "Yes" : "No" %></p>
+          <p class="list-group-item-text"><%= app.internet_access ? "Yes" : "No" %></p>
         </li>
       </div>
       <div class="list-group">
@@ -309,7 +338,7 @@
                 <div class="spec-heading">Inputs</div>
                 <table class="table table-striped table-spec table-spec-input">
                   <tbody>
-                    <%= render "apps/spec_rows", spec: @app.spec[:input_spec] %>
+                    <%= render "apps/spec_rows", spec: app.spec[:input_spec] %>
                   </tbody>
                 </table>
               </div>
@@ -317,7 +346,7 @@
                 <div class="spec-heading">Outputs</div>
                 <table class="table table-striped table-spec table-spec-output">
                   <tbody>
-                    <%= render "apps/spec_rows", spec: @app.spec[:output_spec] %>
+                    <%= render "apps/spec_rows", spec: app.spec[:output_spec] %>
                   </tbody>
                 </table>
               </div>
@@ -327,7 +356,7 @@
       </div>
     </div>
 
-    <% if !@app.readme.blank? %>
+    <% if !app.readme.blank? %>
     <div role="tabpanel" class="tab-pane tab-pane-padded" id="app-readme">
       <div class="app-readme-display" data-bind="html: readmeDisplay"></div>
     </div>
@@ -336,7 +365,7 @@
     <div role="tabpanel" class="tab-pane" id="tab-comments">
       <div class="row">
         <div class="col-md-12">
-          <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @app %>
+          <%= render "comments/comments_wrapper", comments: comments, items_from_params: items_from_params, url: item_comments_path, object: app %>
         </div>
       </div>
     </div>

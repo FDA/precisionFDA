@@ -97,7 +97,7 @@ class ApplicationController < ActionController::Base
     session[:token] = token
     session[:expiration] = expiration
     session[:org_id] = org_id
-    Session.create(user_id: user_id, key: session.id)
+    Session.create(user_id: user_id, key: session_id)
   end
 
   # Redirects user to login page if user is not logged in.
@@ -134,6 +134,12 @@ class ApplicationController < ActionController::Base
     end
 
     render status: :unauthorized, json: { failure: "Authentication failure" }
+  end
+
+  # Redirects user to given URL if request isn't XHR.
+  # @param redirect [String] URL to redirect user to.
+  def require_xhr(redirect = root_path)
+    redirect_to(redirect) unless request.xhr?
   end
 
   # Tries to authorize user from Authentication header and to set application context.
@@ -266,7 +272,7 @@ class ApplicationController < ActionController::Base
   def handle_session
     return unless session[:user_id]
 
-    ar_session = Session.find_by(key: session.id)
+    ar_session = Session.find_by(key: session_id)
 
     unless ar_session
       reset_session
@@ -302,5 +308,17 @@ class ApplicationController < ActionController::Base
     response.headers["Cache-Control"] = "no-cache, no-store, max-age=0, must-revalidate, private"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
+  end
+
+  # Returns a session id.
+  # FIXME: We have to use a workaround here so that our controller tests work.
+  #   Rspec does not seem to be setting up controller specs with the new Rack::Session::SessionId.
+  # @see https://github.com/rails/rails/issues/38039
+  # @see https://github.com/rack/rack/issues/1432#issuecomment-571688819
+  # @return [String] Session ID.
+  def session_id
+    return session.id if Rails.env.test?
+
+    session.id&.private_id
   end
 end

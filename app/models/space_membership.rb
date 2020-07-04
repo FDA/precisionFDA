@@ -15,13 +15,23 @@
 class SpaceMembership < ApplicationRecord
   include Auditor
 
-  SIDE_HOST = 'host'
-  SIDE_GUEST = 'guest'
+  SIDE_HOST = "host".freeze
+  SIDE_GUEST = "guest".freeze
 
-  ROLE_LEAD   = 'lead'
-  ROLE_ADMIN  = 'admin'
-  ROLE_CONTRIBUTOR = 'contributor'
-  ROLE_VIEWER = 'viewer'
+  SIDE_HOST_ALIAS = "reviewer".freeze
+  SIDE_GUEST_ALIAS = "sponsor".freeze
+
+  ROLE_LEAD   = "lead".freeze
+  ROLE_ADMIN  = "admin".freeze
+  ROLE_CONTRIBUTOR = "contributor".freeze
+  ROLE_VIEWER = "viewer".freeze
+
+  DISABLE = "disable".freeze
+  ENABLE = "enable".freeze
+
+  ROLES = [ROLE_LEAD, ROLE_ADMIN, ROLE_CONTRIBUTOR, ROLE_VIEWER].freeze
+
+  ROLES_CAN_EDIT = [ROLE_LEAD, ROLE_ADMIN, ROLE_CONTRIBUTOR].freeze
 
   belongs_to :user
   has_one :notification_preference, through: :user
@@ -29,19 +39,29 @@ class SpaceMembership < ApplicationRecord
 
   store :meta, { coder: JSON }
 
-  enum role: [ROLE_ADMIN, ROLE_CONTRIBUTOR, ROLE_VIEWER, ROLE_LEAD]
+  enum role: {
+    ROLE_ADMIN => 0,
+    ROLE_CONTRIBUTOR => 1,
+    ROLE_VIEWER => 2,
+    ROLE_LEAD => 3,
+  }
+
   enum side: [SIDE_HOST, SIDE_GUEST]
 
   scope :active, -> { where(active: true) }
   scope :lead_or_admin, -> { where(role: [ROLE_LEAD, ROLE_ADMIN]) }
 
-  def self.new_by_admin(user)
-    new(side: SIDE_HOST, role: ROLE_ADMIN, user: user)
-  end
+  delegate :review_space_admin?, :site_admin?, to: :user
 
-  def self.subscribed_to(subscription)
-    includes(:notification_preference)
-      .select { |member| member.notification_preference.send(subscription) }
+  class << self
+    def new_by_admin(user)
+      new(side: SIDE_HOST, role: ROLE_ADMIN, user: user)
+    end
+
+    def subscribed_to(subscription)
+      includes(:notification_preference).
+        select { |member| member.notification_preference.send(subscription) }
+    end
   end
 
   def notification_preference

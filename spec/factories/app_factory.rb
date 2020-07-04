@@ -23,10 +23,11 @@
 
 FactoryBot.define do
   factory :app do
+    app_series
+
     title { "default_title" }
-    scope { "private" }
-    association :app_series
-    sequence(:dxid) { |n| "app-#{SecureRandom.hex(12)}" }
+    scope { App::SCOPE_PRIVATE }
+    dxid { "app-#{SecureRandom.hex(12)}" }
     release { UBUNTU_14 }
   end
 end

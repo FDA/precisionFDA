@@ -21,16 +21,6 @@ module DXClient
       def workflow_new(project_dxid, opts = {})
         call("workflow", "new", opts.merge(project: project_dxid))
       end
-
-      # Clones source workflow.
-      # @see https://documentation.dnanexus.com/developer/api/data-containers/cloning#api-method-class-xxxx-clone
-      # @param source_workflow_dxid [String] Workflow to copy objects from.
-      # @param destination_workflow_dxid [String] Workflow to copy objects to.
-      # @param opts [Hash] Additional options.
-      # @return [Hash]
-      def workflow_clone(source_workflow_dxid, destination_workflow_dxid, opts = {})
-        call(source_workflow_dxid, "clone", opts.merge(project: destination_workflow_dxid))
-      end
     end
   end
 end

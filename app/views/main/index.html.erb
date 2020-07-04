@@ -8,7 +8,7 @@
     <div class="jumbotron jumbotron-landing">
       <div class="container">
         <h1>WELCOME to precisionFDA</h1>
-        <p class="lead lead-bold">A community platform for NGS assay evaluation and regulatory science exploration.</p>
+        <p class="lead lead-bold"><%= t('main.header') %></p>
       </div>
     </div>
   <% else %>
@@ -72,13 +72,16 @@
 
     <div class="row">
       <div class="col-md-16">
-        <% if @experts.count > 0 %>
+          <% if @experts.count > 0 %>
           <div class="overview-header">
-            Expert Spotlight
+              Expert Spotlight
           </div>
           <%= render "experts/landing_cards", experts: @experts %>
-        <% end %>
+          <% end %>
+          
+          <%= render "main/stay_up_to_date" %>
       </div>
+
       <div class="col-md-7 col-md-offset-1">
         <div class="overview-header">Latest Activity</div>
           <%= render "_partials/feed", feed: @feed %>
@@ -87,9 +90,7 @@
     </div>
     <div class="row">
       <div class="overview-header">Learn More</div>
-    </div>
-    <div class="row">
-      <div class="pfda-cards pfda-cards-news">
+      <div class="main-section pfda-cards pfda-cards-news">
         <% @challenges.each do |challenge| %>
           <a class="pfda-card pfda-card-padded pfda-card-light pfda-card-rounded pfda-card-bordered" href="<%= challenge_path(challenge) %>">
             <div class="pfda-card-header lead text-center">
@@ -145,7 +146,7 @@
       </div>
     </div>
     <div class="row">
-      <div class="pfda-cards pfda-cards-news">
+      <div class="main-section pfda-cards pfda-cards-news">
         <%= render partial: "_partials/news_blocks", locals: { isAdmin: false } %>
       </div>
     </div>

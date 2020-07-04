@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 # == Schema Information
 #
 # Table name: users
@@ -42,48 +41,17 @@ class User < ApplicationRecord
   # lower will get migrated.
   CURRENT_SCHEMA = 1
 
-  PRODUCTION_ADMINS = %w(
-
-  ).freeze
-
-  NON_PRODUCTION_ADMINS = %w(
-
-  ).freeze
-
-  NON_PRODUCTION_ADMIN_ORGS = %w(
-
-  ).freeze
-
-  CHALLENGE_EVALUATORS = %w(
-
-  ).freeze
-
-  CHALLENGE_ADMINS = %w(
-
-  ).freeze
-
-  enum user_state: [:enabled, :locked, :deactivated]
-
-  SITE_ADMINS = begin
-    if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
-      PRODUCTION_ADMINS
-    else
-      ENV.fetch("CUSTOM_SITE_ADMINS", "").split(" ").concat(
-        NON_PRODUCTION_ADMINS
-      )
-    end
-  end
-
-  SITE_ADMIN_ORGS = ENV["DNANEXUS_BACKEND"] == "production" ? [] : NON_PRODUCTION_ADMIN_ORGS
+  enum user_state: { enabled: 0, locked: 1, deactivated: 2 }
 
   SYNC_EXCLUDED_FILE_STATES = [
     UserFile::STATE_CLOSED,
-    UserFile::STATE_PUBLISHING,
+    UserFile::STATE_COPYING,
     UserFile::STATE_REMOVING,
   ].freeze
 
   has_many :uploaded_files, class_name: "UserFile", dependent: :restrict_with_exception, as: "parent"
   has_many :user_files
+  has_many :nodes
   has_many :assets
   has_many :comparisons
   has_many :notes
@@ -95,12 +63,13 @@ class User < ApplicationRecord
   belongs_to :org
   has_many :licenses
   has_many :accepted_licenses
+  has_many :admin_memberships, dependent: :destroy
+  has_many :admin_groups, through: :admin_memberships
   has_many :space_memberships
-  has_many :space_templates
   has_many :spaces, -> { where("space_memberships.active = ?", true) }, through: :space_memberships
   has_one :appathon
   has_many :meta_appathons
-  has_one :expert
+  has_one :expert, dependent: :destroy
   has_many :challenge_app_owners, class_name: "Challenge", foreign_key: "app_owner_id"
   has_many :submissions
   has_many :challenge_resources
@@ -130,9 +99,23 @@ class User < ApplicationRecord
   scope :pending, -> { where.not(last_login: nil) }
   scope :belongs_to_org, ->(org_id) { where(org_id: org_id) }
 
+  scope :site_admins, lambda {
+    joins(:admin_groups).where(admin_groups: { role: AdminGroup::ROLE_SITE_ADMIN })
+  }
+
   # Have the ability to create new review spaces and have full access to
   # activities available within reviewer and cooperative areas.
-  scope :review_space_admins, -> { where(dxuser: REVIEW_SPACE_ADMINS) }
+  scope :review_space_admins, lambda {
+    joins(:admin_groups).where(admin_groups: { role: AdminGroup::ROLE_REVIEW_SPACE_ADMIN })
+  }
+
+  scope :challenge_admins, lambda {
+    joins(:admin_groups).where(admin_groups: { role: AdminGroup::ROLE_CHALLENGE_ADMIN })
+  }
+
+  scope :challenge_evaluators, lambda {
+    joins(:admin_groups).where(admin_groups: { role: AdminGroup::ROLE_CHALLENGE_EVALUATOR })
+  }
 
   validates :first_name, length: { minimum: 2, message: "The first name must be at least two letters long." }, presence: true
   validates :last_name, length: { minimum: 2, message: "The last name must be at least two letters long." }, presence: true
@@ -182,9 +165,7 @@ class User < ApplicationRecord
     challenge_bot? ? Org.new : super
   end
 
-  def real_files
-    user_files.real_files
-  end
+  delegate :real_files, to: :user_files
 
   def singular?
     org_id.blank? || org.singular
@@ -198,21 +179,10 @@ class User < ApplicationRecord
     org.dxorg
   end
 
+  # Returns all accessible space scopes.
+  # @return [Array] Space scopes (UIDs).
   def space_uids
-    uids = []
-
-    select_query = Arel.sql("distinct concat('space-', spaces.id)")
-
-    if review_space_admin?
-      uids.concat(Space.reviewer.pluck(select_query))
-      uids.concat(Space.verification.pluck(select_query))
-    end
-    uids.concat(spaces.pluck(select_query))
-    uids.uniq
-  end
-
-  def active_spaces
-    spaces.active
+    Space.accessible_by(self).pluck(Arel.sql("concat('space-', spaces.id)"))
   end
 
   def activated?
@@ -240,7 +210,9 @@ class User < ApplicationRecord
   end
 
   def logged_in?
-    !Session.find_by_user_id(id).expired? rescue false
+    !Session.find_by(user_id: id).expired?
+  rescue StandardError
+    false
   end
 
   def appathon_from_meta(meta_appathon)
@@ -250,21 +222,25 @@ class User < ApplicationRecord
   end
 
   def can_administer_site?
-    if Rails.env.production? && ENV["DNANEXUS_BACKEND"] == "production"
-      SITE_ADMINS.include?(dxuser)
-    else
-      NON_PRODUCTION_ADMIN_ORGS.include?(org.handle) &&
-        org.admin_id == id ||
-        SITE_ADMINS.include?(dxuser)
-    end
+    admin_groups.any?(&:site?)
+  end
+
+  # Checks if a user can create spaces.
+  # @return [Boolean] Returns true if a user can create spaces, false otherwise.
+  def can_create_spaces?
+    can_administer_site? || review_space_admin?
   end
 
   def is_challenge_evaluator?
-    CHALLENGE_EVALUATORS.include?(dxuser) || can_administer_site?
+    admin_groups.any?(&:challenge_eval?) || can_administer_site?
+  end
+
+  def challenge_eval?
+    admin_groups.any?(&:challenge_eval?)
   end
 
   def review_space_admin?
-    REVIEW_SPACE_ADMINS.include?(dxuser)
+    admin_groups.any?(&:space?)
   end
 
   # @param time_zone [String] new time zone
@@ -272,12 +248,12 @@ class User < ApplicationRecord
     update(time_zone: time_zone) if Time.find_zone(time_zone)
   end
 
-  def root_folder
-    folders.find_by(scope: "private", parent_folder_id: nil)
+  def is_challenge_admin?
+    can_administer_site? || admin_groups.any?(&:challenge_admin?)
   end
 
-  def is_challenge_admin?
-    can_administer_site? || CHALLENGE_ADMINS.include?(dxuser)
+  def challenge_admin?
+    admin_groups.any?(&:challenge_admin?)
   end
 
   # Selects users, according search string.
@@ -428,12 +404,12 @@ class User < ApplicationRecord
     job = user.jobs.find(job_id) # Re-check job id
     unless job.terminal?
       result = DNAnexusAPI.new(token).call("system", "findJobs",
-        includeSubjobs: false,
-        id: [job.dxid],
-        project: user.private_files_project,
-        parentJob: nil,
-        parentAnalysis: nil,
-        describe: true,)["results"][0]
+                                           includeSubjobs: false,
+                                           id: [job.dxid],
+                                           project: user.private_files_project,
+                                           parentJob: nil,
+                                           parentAnalysis: nil,
+                                           describe: true)["results"][0]
       sync_job_state(result, job, user, token)
     end
   end
@@ -447,12 +423,12 @@ class User < ApplicationRecord
     return if job.terminal?
 
     result = DNAnexusAPI.new(token).call("system", "findJobs",
-      includeSubjobs: false,
-      id: [job.dxid],
-      project:  job.project || user.private_files_project,
-      parentJob: nil,
-      parentAnalysis: job.analysis.try(:dxid),
-      describe: true,)["results"][0]
+                                         includeSubjobs: false,
+                                         id: [job.dxid],
+                                         project:  job.project || user.private_files_project,
+                                         parentJob: nil,
+                                         parentAnalysis: job.analysis.try(:dxid),
+                                         describe: true)["results"][0]
     return if result.blank?
 
     sync_job_state(result, job, user, token)
@@ -468,7 +444,7 @@ class User < ApplicationRecord
     jobs.where(user_id: user_id).where.not(state: Job::TERMINAL_STATES).limit(SYNC_JOBS_LIMIT).each_slice(1000) do |jobs_batch|
       jobs_hash = jobs_batch.map { |j| [j.dxid, j] }.to_h
       jobs_hash.keys.each do |job_dxid|
-        job_project = project ? project : Job.find_by(dxid: job_dxid).project
+        job_project = project || Job.find_by(dxid: job_dxid).project
 
         response = DNAnexusAPI.new(token).call(
           "system",
@@ -494,12 +470,12 @@ class User < ApplicationRecord
     Job.where(user_id: user.id).where.not(state: Job::TERMINAL_STATES).all.each_slice(1000) do |jobs|
       jobs_hash = jobs.map { |j| [j.dxid, j] }.to_h
       DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call("system", "findJobs",
-        includeSubjobs: false,
-        id: jobs_hash.keys,
-        project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
-        parentJob: nil,
-        parentAnalysis: nil,
-        describe: true,)["results"].each do |result|
+                                                includeSubjobs: false,
+                                                id: jobs_hash.keys,
+                                                project: CHALLENGE_BOT_PRIVATE_FILES_PROJECT,
+                                                parentJob: nil,
+                                                parentAnalysis: nil,
+                                                describe: true)["results"].each do |result|
         sync_job_state(result, jobs_hash[result["id"]], user, CHALLENGE_BOT_TOKEN)
       end
     end
@@ -634,4 +610,6 @@ class User < ApplicationRecord
       end
     end
   end
+
+  alias_method :site_admin?, :can_administer_site?
 end

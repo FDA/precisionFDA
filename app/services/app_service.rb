@@ -2,17 +2,19 @@
 class AppService
   class << self
     # Creates new app on the platform and stores it in the database.
-    # @param context [Context] Application context.
+    # @param user [User] Who creates an app.
     # @param options [Hash] Options to create app with.
-    def create_app(context, options)
-      new(context).create_app(options)
+    def create_app(user, api, options)
+      new(user, api).create_app(options)
     end
   end
 
   # Constructor.
-  # @param context [Context] Application context.
-  def initialize(context)
-    @context = context
+  # @param user [User] Who creates an app.
+  # @param api [DNAnexusAPI] API client.
+  def initialize(user, api)
+    @user = user
+    @api = api
   end
 
   # Creates new app on the platform and stores it in database.
@@ -20,21 +22,21 @@ class AppService
   # @return [App] Created app.
   def create_app(opts)
     app = nil
+    scope = opts[:scope] || Scopes::SCOPE_PRIVATE
 
-    assets = Asset.accessible_by(context).
+    assets = Asset.accessible_by_user(user).
       where(
         state: Asset::STATE_CLOSED,
         uid: opts[:ordered_assets],
       )
 
     App.transaction do
-      app_series = create_app_series(opts[:name])
+      app_series = create_app_series(opts[:name], scope)
       release = opts.fetch(:release, UBUNTU_16)
       revision = app_series.latest_revision_app.try(:revision).to_i + 1
 
       applet_dxid = new_applet(
         opts.slice(
-          :name,
           :input_spec,
           :output_spec,
           :code,
@@ -55,6 +57,7 @@ class AppService
           applet_dxid: applet_dxid,
           asset_dxids: assets.map(&:dxid),
           revision: revision,
+          scope: scope,
         ),
       )
 
@@ -66,8 +69,8 @@ class AppService
         revision: revision,
         title: opts[:title],
         readme: opts[:readme],
-        user: context.user,
-        scope: "private",
+        user: user,
+        scope: scope,
         app_series: app_series,
         input_spec: opts[:input_spec],
         output_spec: opts[:output_spec],
@@ -80,9 +83,10 @@ class AppService
         release: release,
       )
 
-      app_series.update!(latest_revision_app_id: app.id)
+      app_series.update!(latest_revision_app: app)
+      app_series.update!(latest_version_app: app) if Space.valid_scope?(scope)
 
-      Event::AppCreated.create_for(app, context.user)
+      Event::AppCreated.create_for(app, user)
     end
 
     app
@@ -117,7 +121,7 @@ class AppService
   def new_app(opts)
     api.app_new(
       applet: opts[:applet_dxid],
-      name: AppSeries.construct_dxname(context.username, opts[:name]),
+      name: AppSeries.construct_dxname(user.username, opts[:name], opts[:scope]),
       title: "#{opts[:title]} ",
       summary: " ",
       description: "#{opts[:readme]} ",
@@ -135,13 +139,13 @@ class AppService
   # Finds or creates new app series.
   # @param app_name [String] Name of app series to create with or to find by.
   # @return [AppSeries] Found or created app series.
-  def create_app_series(app_name)
-    app_series_dxid = AppSeries.construct_dxid(context.username, app_name)
+  def create_app_series(app_name, scope)
+    app_series_dxid = AppSeries.construct_dxid(user.username, app_name, scope)
 
     AppSeries.create_with(
       name: app_name,
-      user: context.user,
-      scope: "private",
+      user: user,
+      scope: scope,
     ).find_or_create_by(
       dxid: app_series_dxid,
     )
@@ -150,13 +154,13 @@ class AppService
   # Returns user's billTo.
   # @return [String] User's billTo.
   def bill_to
-    context.user.billto
+    user.billto
   end
 
   # Returns user's private files project.
   # @return [String] User private files project's dxid.
   def project
-    context.user.private_files_project
+    user.private_files_project
   end
 
   # Remaps the code.
@@ -171,11 +175,5 @@ class AppService
     END_OF_CODE
   end
 
-  # Returns user API instance.
-  # @return [DNAnexusAPI] User API instance.
-  def api
-    @api ||= DNAnexusAPI.new(context.token)
-  end
-
-  attr_reader :context
+  attr_reader :user, :api
 end

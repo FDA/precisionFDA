@@ -153,7 +153,7 @@ class BatchAppNewView
           params.inputs[inputModel.name] = data if data?
         @busy(true)
         @running(true)
-        Precision.api('/api/run_app', params)
+        Precision.api('/apps/run', params)
           .done((rs) =>
             if !rs.error?
               window.location = "/apps/#{@uid}"
@@ -200,7 +200,7 @@ class BatchAppNewView
         data = inputModel.getDataForRun()
         params.inputs[inputModel.name] = data if data?
 
-      Precision.api('/api/run_app', params)
+      Precision.api('/apps/run', params)
         .done((rs) ->
           if rs.error?
             alert "App could not be run on due to: #{rs.error.message}"

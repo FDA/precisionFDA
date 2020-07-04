@@ -2,6 +2,23 @@ module Api
   class AppsController < ApiController
     before_action :validate_app, only: :create
 
+    before_action :can_copy_to_scope?, only: %i(copy)
+
+    # Copies apps to another scope.
+    def copy
+      new_apps = @apps.map { |app| copy_service.copy(app, params[:scope]).first }
+
+      # TODO: change old UI to handle json-response!
+      respond_to do |format|
+        # HTML-format response is used only for copying a single app to a space from App Page.
+        format.html do
+          redirect_to pathify(new_apps.first),
+                      success: "The app has been published successfully!"
+        end
+        format.json { render json: new_apps, root: "apps", adapter: :json }
+      end
+    end
+
     # Inputs
     #
     # name, title, readme, input_spec, output_spec, internet_access,
@@ -107,7 +124,7 @@ module Api
     private
 
     def create_app(opts)
-      AppService.create_app(@context, opts)
+      AppService.create_app(current_user, @context.api, opts)
     end
 
     def presenter
@@ -425,6 +442,28 @@ module Api
       elsif klass == "string"
         value.is_a?(String)
       end
+    end
+
+    def copy_service
+      @copy_service ||= CopyService.new(api: @context.api, user: current_user)
+    end
+
+    def can_copy_to_scope?
+      scope = params[:scope]
+
+      return if scope == Scopes::SCOPE_PUBLIC
+
+      space = Space.from_scope(scope) if Space.valid_scope?(scope)
+
+      raise ApiError, "Scope parameter is incorrect (can be public or space-x)" unless space
+
+      @apps = App.accessible_by(@context).where(id: params[:item_ids])
+
+      raise ApiError, "You have no permissions to copy the selected apps!" if @apps.empty?
+
+      return if space.editable_by?(current_user)
+
+      raise ApiError, "You have no permissions to copy apps to the scope '#{scope}'"
     end
   end
 end

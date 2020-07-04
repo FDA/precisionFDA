@@ -1,19 +1,46 @@
 <% content_for :title do %>Comparator<% end %>
 
 <div class="page-header clearfix">
-  <div class="page-title"><span class="fa fa-area-chart fa-fw"></span><span data-bind="text: areAllInputsSet() ? 'Run' : 'Set up'"></span> your comparison</div>
+  <div class="page-title">
+    <i class="fa fa-area-chart fa-fw"></i>
+    <span data-bind="text: areAllInputsSet() ? 'Run' : 'Set up'"></span> your comparison
+  </div>
+</div>
+
+<div class="pfda-padded">
+  <label for="select_comparator_app">Comparator App:</label>
+  <div>
+    <select name="select_comparator_app"
+      id="select_comparator_app"
+      class="form-control"
+      data-bind="options: selectableComparators,
+                 optionsText: 'label',
+                 optionsValue: 'value',
+                 value: defaultComparator,
+                 disable: defaultComparatorIsLoading,
+                 event: { change: loadComparatorApp }">
+    </select>
+  </div>
 </div>
 
 <div class="container-fluid container-padded">
   <%= alert_help("Learn more about creating new comparisons", "#{show_docs_path('comparisons')}#comparisons-new") %>
-  <div class="affix-spacer">
+
+  <!-- ko if: defaultComparatorIsLoading -->
+    <div class="pfda-padded text-center">
+      <div class="pfda-padded">Loading Comparator...</div>
+      <div>
+        <i class="fa fa-spinner fa-spin fa-2x"></i>
+      </div>
+    </div>
+  <!-- /ko -->
+
+  <div class="affix-spacer hidden" data-bind="css: { 'hidden': defaultComparatorIsLoading }">
     <div class="affix-container affix-container-padded">
       <div class="variants">
         <div class="variant-test">
           <div class="variant-title">Test Set</div>
-          <ul class="variant-inputs list-unstyled" data-bind="foreach: testVariant.inputs">
-            <%= render "comparisons/input" %>
-          </ul>
+          <div data-bind="template: { name: 'comparisons_input_template', data: testVariant.inputs }"></div>
           <div class="variants-circle">
             <!-- ko if: areAllInputsSet -->
               <a class="variants-circle-compare" data-toggle="modal" data-target="#comparison-modal">
@@ -30,57 +57,16 @@
 
         <div class="variant-ref">
           <div class="variant-title">Benchmark Set</div>
-          <ul class="variant-inputs list-unstyled" data-bind="foreach: refVariant.inputs">
-            <%= render "comparisons/input" %>
-          </ul>
-          <br>
-          <h4>Suggestions</h4>
-          <ul class="list-unstyled" data-bind="foreach: challenges">
-            <li>
-              <span data-bind="text: title"></span>: <a data-bind="click: assignChallengeFiles"><span class="fa fa-files-o fa-fw"></span> <span data-bind="text: actionLabel"></span></a>
-            </li>
-          </ul>
+          <div data-bind="template: { name: 'comparisons_input_template', data: refVariant.inputs }"></div>
         </div>
-
 
       </div>
     </div>
   </div>
 
-  <div id="comparison-modal" class="modal fade">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">Confirm Comparison</h4>
-        </div>
-        <div class="modal-body">
-          <%= form_for :comparison, url: comparisons_path do |f| %>
-            <div class="form-group">
-              <input data-bind="textInput: name" type="text" class="form-control required input-lg" name="comparison[name]" placeholder="Name this comparison..." autofocus>
-            </div>
-            <div class="form-group">
-              <textarea data-bind="textInput: description" rows="3" class="form-control input-lg" name="comparison[description]" placeholder="Describe this comparison (optional)..."></textarea>
-            </div>
-            <!-- ko foreach: testVariant.inputs -->
-              <!-- ko if: value -->
-                <input type="hidden" data-bind="attr: {name: 'comparison[' + name + '_uid]'}, value: value().uid"/>
-              <!-- /ko -->
-            <!-- /ko -->
-            <!-- ko foreach: refVariant.inputs -->
-              <!-- ko if: value -->
-                <input type="hidden" data-bind="attr: {name: 'comparison[' + name + '_uid]'}, value: value().uid"/>
-              <!-- /ko -->
-            <!-- /ko -->
-          <% end %>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-          <button type="button" name="submit" class="btn btn-primary disabled" data-bind="disabled: !isFormReady() || busy(), css: {disabled: !isFormReady() || busy()}, click: submitForm"><span class="fa fa-area-chart"></span> Start Comparison</button>
-        </div>
-      </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-  </div><!-- /.modal -->
 </div>
 
+<%= render "/comparisons/inputs" %>
+<%= render "/comparisons/comparison_modal" %>
 <%= render "licenses/selector_modal" %>
+<%= render "/_partials/selector_modal" %>

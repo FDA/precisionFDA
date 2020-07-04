@@ -1,15 +1,16 @@
 require "rails_helper"
-include Imports::WorkflowHelper
-include Imports::StagesHelper
 
 RSpec.describe Workflow::Stages::SlotPresenter, type: :model do
+  include Imports::WorkflowHelper
+  include Imports::StagesHelper
+
   subject { presenter }
+
   let(:user) { create(:user) }
-  let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, nil, nil) }
+  let(:context) { Context.new(user.id, user.dxuser, SecureRandom.uuid, 1.day.from_now, user.org) }
   let(:slots) { params["slots"] }
   let(:slot) { slots.second }
   let(:slot_number) { 1 }
-  let!(:app) { create(:app, dxid: app_dxid, user_id: user.id) }
   let(:app_dxid) { params["slots"].second["uid"].split("-1").first }
   let(:stages_presenter) { Workflow::StagesPresenter.new(slots, context) }
   let(:presenter) { described_class.new(slot, slot_number, stages_presenter) }
@@ -19,7 +20,7 @@ RSpec.describe Workflow::Stages::SlotPresenter, type: :model do
   let(:subject_response) { presenter.build }
 
   before do
-    allow_any_instance_of(Context).to receive(:logged_in?).and_return(true)
+    create(:app, dxid: app_dxid, user_id: user.id)
   end
 
   describe ".build" do
@@ -51,9 +52,9 @@ RSpec.describe Workflow::Stages::SlotPresenter, type: :model do
         slot_name: presenter.name,
         input_name: slot["inputs"].second["name"],
       }
-      expect(presenter.errors[:inputs])
-        .to include(I18n.t("name.format", first_options),
-          I18n.t("name.format", second_options))
+      expect(presenter.errors[:inputs]).
+        to include(I18n.t("name.format", **first_options),
+                   I18n.t("name.format", **second_options))
     end
   end
 
@@ -64,7 +65,7 @@ RSpec.describe Workflow::Stages::SlotPresenter, type: :model do
     end
 
     it "add errors to the attribute" do
-      expect(presenter.errors[:slot_id]).to include(I18n.t("slot_id.unique", locale_options))
+      expect(presenter.errors[:slot_id]).to include(I18n.t("slot_id.unique", **locale_options))
     end
   end
 
@@ -73,9 +74,10 @@ RSpec.describe Workflow::Stages::SlotPresenter, type: :model do
       slot["name"] = ""
       presenter.valid?
     end
+
     it "add errors to the attribute" do
       options = { scope: locale_scope, number: (presenter.slot_number + 1).ordinalize }
-      expect(presenter.errors[:name]).to include(I18n.t("name.non_empty_string", options))
+      expect(presenter.errors[:name]).to include(I18n.t("name.non_empty_string", **options))
     end
   end
 
@@ -84,10 +86,11 @@ RSpec.describe Workflow::Stages::SlotPresenter, type: :model do
       slot["uid"] = ""
       presenter.valid?
     end
+
     it "add errors to the attribute" do
       options = { name: presenter.name, attribute: "uid" }
-      expect(presenter.errors[:uid])
-        .to include(I18n.t("errors.messages.non_empty_string", options))
+      expect(presenter.errors[:uid]).
+        to include(I18n.t("errors.messages.non_empty_string", **options))
     end
   end
 
@@ -96,10 +99,11 @@ RSpec.describe Workflow::Stages::SlotPresenter, type: :model do
       slot["slotId"] = ""
       presenter.valid?
     end
+
     it "add errors to the attribute" do
       options = { name: presenter.name, attribute: "slot_id" }
-      expect(presenter.errors[:slot_id])
-        .to include(I18n.t("errors.messages.non_empty_string", options))
+      expect(presenter.errors[:slot_id]).
+        to include(I18n.t("errors.messages.non_empty_string", **options))
     end
   end
 
@@ -108,8 +112,9 @@ RSpec.describe Workflow::Stages::SlotPresenter, type: :model do
       slot["uid"] = ""
       presenter.valid?
     end
+
     it "add errors to the attribute" do
-      expect(presenter.errors[:app]).to include(I18n.t("app.blank", locale_options))
+      expect(presenter.errors[:app]).to include(I18n.t("app.blank", **locale_options))
     end
   end
 
@@ -118,10 +123,11 @@ RSpec.describe Workflow::Stages::SlotPresenter, type: :model do
       slot["instanceType"] = ""
       presenter.valid?
     end
+
     it "add errors to the attribute" do
       options = { name: presenter.name, attribute: "instance_type" }
-      expect(presenter.errors[:instance_type])
-        .to include(I18n.t("errors.messages.non_empty_string", options))
+      expect(presenter.errors[:instance_type]).
+        to include(I18n.t("errors.messages.non_empty_string", **options))
     end
   end
 
@@ -130,9 +136,10 @@ RSpec.describe Workflow::Stages::SlotPresenter, type: :model do
       slot["instanceType"] = "wrong_type"
       presenter.valid?
     end
+
     it "add errors to the attribute" do
-      expect(presenter.errors[:instance_type])
-        .to include(I18n.t("instance_type.inclusion", locale_options))
+      expect(presenter.errors[:instance_type]).
+        to include(I18n.t("instance_type.inclusion", **locale_options))
     end
   end
 
@@ -142,15 +149,15 @@ RSpec.describe Workflow::Stages::SlotPresenter, type: :model do
       presenter.valid?
     end
 
-    context "and slot's prevSlot is expected" do
+    context "when it's expected" do
       it "add errors to the attribute" do
         options = { name: presenter.name, attribute: "prev_slot" }
-        expect(presenter.errors[:prev_slot])
-          .to include(I18n.t("errors.messages.non_empty_string", options))
+        expect(presenter.errors[:prev_slot]).
+          to include(I18n.t("errors.messages.non_empty_string", **options))
       end
     end
 
-    context "and slot's prevSlot is not expected" do
+    context "when it isn't expected" do
       let(:slot) { slots.first }
       let(:slot_number) { 0 }
 
@@ -166,17 +173,17 @@ RSpec.describe Workflow::Stages::SlotPresenter, type: :model do
       presenter.valid?
     end
 
-    context "and slot's nextSlot is expected" do
+    context "when it's expected" do
       let(:slot) { slots.first }
       let(:slot_number) { 0 }
 
       it "add errors to the attribute" do
-        expect(presenter.errors[:next_slot])
-          .to include(I18n.t("next_slot.non_empty_string", locale_options))
+        expect(presenter.errors[:next_slot]).
+          to include(I18n.t("next_slot.non_empty_string", **locale_options))
       end
     end
 
-    context "and slot's nextSlot is not expected" do
+    context "when it isn't expected" do
       it "doesn't add errors to the attribute" do
         expect(presenter.errors[:next_slot]).to be_empty
       end

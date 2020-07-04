@@ -1,4 +1,6 @@
 class WorkerMailer < ApplicationMailer
+  helper :client_url
+
   def remove_node_worker_email(email, space, error_message)
     @space = space
     @error_message = error_message
