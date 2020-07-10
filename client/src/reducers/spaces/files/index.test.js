@@ -34,6 +34,9 @@ import {
   COPY_OBJECTS_TO_SPACE_START,
   COPY_OBJECTS_TO_SPACE_SUCCESS,
   COPY_OBJECTS_TO_SPACE_FAILURE,
+  COPY_FILES_TO_PRIVATE_START,
+  COPY_FILES_TO_PRIVATE_SUCCESS,
+  COPY_FILES_TO_PRIVATE_FAILURE,
 } from '../../../actions/spaces/types'
 
 
@@ -417,6 +420,42 @@ describe('reducer actions processing', () => {
 
     expect(reducer(initialState, action)).toEqual({
       copyModal: {
+        isLoading: false,
+        isOpen: true,
+      },
+    })
+  })
+
+  it('COPY_FILES_TO_PRIVATE_START', () => {
+    const initialState = {}
+    const action = { type: COPY_FILES_TO_PRIVATE_START }
+
+    expect(reducer(initialState, action)).toEqual({
+      actionModal: {
+        isLoading: true,
+      },
+    })
+  })
+
+  it('COPY_FILES_TO_PRIVATE_SUCCESS', () => {
+    const initialState = {}
+    const action = { type: COPY_FILES_TO_PRIVATE_SUCCESS }
+
+    expect(reducer(initialState, action)).toEqual({
+      actionModal: {
+        isLoading: false,
+        isOpen: false,
+        files: [],
+      },
+    })
+  })
+
+  it('COPY_FILES_TO_PRIVATE_FAILURE', () => {
+    const initialState = {}
+    const action = { type: COPY_FILES_TO_PRIVATE_FAILURE }
+
+    expect(reducer(initialState, action)).toEqual({
+      actionModal: {
         isLoading: false,
         isOpen: true,
       },

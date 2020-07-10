@@ -32,6 +32,7 @@ module IOC
       namespace "api" do
         register("user", memoize: true) { DNAnexusAPI.new(config[:token]) }
         register("admin", memoize: true) { DNAnexusAPI.new(ADMIN_TOKEN) }
+        register("challenge_bot", memoize: true) { DNAnexusAPI.new(CHALLENGE_BOT_TOKEN) }
         register("auth", memoize: true) { DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI) }
       end
 

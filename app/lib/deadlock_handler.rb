@@ -14,7 +14,7 @@ module DeadlockHandler
     ].freeze
 
     def transaction(_options = {}, &block)
-      super
+      super(**_options, &block)
     rescue ActiveRecord::StatementInvalid => e
       raise unless DEADLOCK_ERROR_MESSAGES.any? { |msg| e.message =~ /#{Regexp.escape(msg)}/ }
 

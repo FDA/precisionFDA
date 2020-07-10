@@ -20,6 +20,8 @@ module Api
                     workflows
                   )
 
+    before_action :sync_files, only: %i(files)
+
     # POST /api/spaces/:id/accept
     # Activates a space.
     def accept
@@ -229,6 +231,10 @@ module Api
 
     private
 
+    def sync_files
+      User.sync_files!(@context)
+    end
+
     def copy_service
       @copy_service ||= CopyService.new(api: api, user: current_user)
     end
@@ -270,6 +276,8 @@ module Api
       meta = {}
 
       meta[:links] = {}.tap do |links|
+        links[:copy_private] = copy_api_files_path
+
         if @space.editable_by?(current_user)
           links[:publish] = publish_files_api_space_files_path(@space)
           links[:move] = move_api_space_files_path(@space)
@@ -296,7 +304,10 @@ module Api
 
     def apps_meta
       { links: {} }.tap do |meta|
+        # copy to space link
         meta[:links][:copy] = copy_api_apps_path if @space.editable_by?(current_user)
+        # copy to private area link
+        meta[:links][:copy_private] = copy_api_apps_path
       end
     end
 

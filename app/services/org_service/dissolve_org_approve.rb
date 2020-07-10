@@ -34,7 +34,7 @@ module OrgService
       end
     end
 
-    # Checks if leaving request is already exist.
+    # Checks if leaving request already exists.
     # @param user [User] User to check the request from.
     # @return [true, false] If request is exist, false otherwise.
     def pending_requests_exist?(user)

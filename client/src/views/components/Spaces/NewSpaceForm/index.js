@@ -215,7 +215,7 @@ class NewSpaceForm extends React.Component {
             name="guest_lead_dxuser"
             value={guest_lead_dxuser}
             disabled={isEditing}
-            label={`Guest Lead (${space_type === SPACE_VERIFICATION ? 'optional' : 'required'}):`}
+            label={`Space Lead (${space_type === SPACE_GROUPS ? 'required' : 'optional'}):`}
             status={errors.guest_lead_dxuser && 'error'}
             helpText={errors.guest_lead_dxuser && errors.guest_lead_dxuser[0]}
             onChange={this.filedChangeHandler}

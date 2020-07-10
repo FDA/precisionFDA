@@ -28,6 +28,7 @@ export const SPACE_FILES_ACTIONS = {
   PUBLISH: 'publish',
   DOWNLOAD: 'download',
   COPY: 'copy',
+  COPY_TO_PRIVATE: 'copy_to_private',
 }
 
 export const SPACE_ADD_DATA_TYPES = {
@@ -35,6 +36,13 @@ export const SPACE_ADD_DATA_TYPES = {
   APPS: 'APPS',
   WORKFLOWS: 'WORKFLOWS',
   JOBS: 'JOBS',
+}
+
+export const OBJECT_TYPES = {
+  FILE: 'FILE',
+  APP: 'APP',
+  WORKFLOW: 'WORKFLOW',
+  JOB: 'JOB',
 }
 
 export const SPACE_MEMBERS_ROLES = [

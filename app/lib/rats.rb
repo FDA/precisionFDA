@@ -1,5 +1,7 @@
 # Common code to deal with successes, failures, etc.
 module Rats
+  VERSION = "0.1.0".freeze
+
   def self.try
     Ok.new(yield)
   rescue StandardError => e

@@ -11,10 +11,10 @@ export default createReducer(initialState, {
   [ALERT_SHOW_ABOVE_ALL]: (state, alert) => ({
     ...state,
     messages: [
-      ...state.messages,
       mapToAlertNotification(alert),
     ],
   }),
+
   [ALERT_HIDE_MESSAGE]: (state, id) => ({
     ...state,
     messages: [...state.messages.filter((alert) => alert.id !== id)],

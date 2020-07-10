@@ -15,7 +15,7 @@ class Answer < ApplicationRecord
   # This includes permissions but many methods must be redefined
   # given that the real permissions are mandated by the note
   include Permissions
-  validates :discussion_id, uniqueness: {scope: :user_id}
+  validates :discussion_id, uniqueness: { scope: :user_id }
   belongs_to :user
   belongs_to :discussion
   belongs_to :note, dependent: :destroy
@@ -63,17 +63,18 @@ class Answer < ApplicationRecord
       accessible_by_public
     else
       raise unless context.user_id.present? && context.user.present?
+
       joins(:note).where(user_id: context.user_id).
-        or(joins(:note).where({ notes: { scope: "public" } }))
+        or(joins(:note).where({ notes: { scope: Scopes::SCOPE_PUBLIC } }))
     end
   end
 
   def self.accessible_by_public
-    joins(:note).where(notes: {scope: "public"})
+    joins(:note).where(notes: { scope: Scopes::SCOPE_PUBLIC })
   end
 
   def self.accessible_by_space(space)
-    joins(:note).where(notes: {scope: space.uid})
+    joins(:note).where(notes: { scope: space.uid })
   end
 
   def self.editable_by(context)
@@ -82,8 +83,10 @@ class Answer < ApplicationRecord
     where(user: context.user)
   end
 
-  def publishable_by?(context, scope_to_publish_to = "public")
-    core_publishable_by?(context, scope_to_publish_to) && scope_to_publish_to == "public" && discussion.public?
+  def publishable_by?(context, scope_to_publish_to = Scopes::SCOPE_PUBLIC)
+    core_publishable_by?(context) &&
+      scope_to_publish_to == Scopes::SCOPE_PUBLIC &&
+      discussion.public?
   end
 
   def self.publish(answers, context, scope)
@@ -97,6 +100,6 @@ class Answer < ApplicationRecord
       end
     end
 
-    return count
+    count
   end
 end

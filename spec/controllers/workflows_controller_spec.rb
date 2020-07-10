@@ -98,7 +98,7 @@ RSpec.describe WorkflowsController, type: :controller do
 
       it "returns a content_type 'json'" do
         post :output_folder_create, params: params
-        expect(response.content_type).to eq "application/json"
+        expect(response.media_type).to eq "application/json"
       end
 
       it "creates a new output folder" do
@@ -124,7 +124,7 @@ RSpec.describe WorkflowsController, type: :controller do
 
       it "returns a content_type 'json'" do
         post :output_folder_create, params: params
-        expect(response.content_type).to eq "application/json"
+        expect(response.media_type).to eq "application/json"
       end
 
       it "returns an error message" do
@@ -155,13 +155,13 @@ RSpec.describe WorkflowsController, type: :controller do
 
       it "returns a content_type 'json'" do
         post :output_folder_create, params: params
-        expect(response.content_type).to eq "application/json"
+        expect(response.media_type).to eq "application/json"
       end
 
       it "returns a folder name uniqueness validation error message" do
         post :output_folder_create, params: params
-        expect(parsed_response["error_message"])
-          .to eq("A folder with this name '#{folder_name}' already exists")
+        expect(parsed_response["error_message"]).
+          to eq("A folder with the name '#{folder_name}' already exists.")
       end
     end
   end

@@ -88,25 +88,18 @@ module Permissions
     user_id == context.user_id
   end
 
-  # Helper method, not to be called from outside the model
-  def core_publishable_by?(context, scope_to_publish_to)
+  def core_publishable_by?(context)
     return false if context.guest? || user_id != context.user_id
 
-    core_publishable_by_user?(context.user, scope_to_publish_to)
+    core_publishable_by_user?(context.user)
   end
 
-  def core_publishable_by_user?(user, _scope_to_publish_to)
-    return false unless user
-
-    user_id == user.id && (private? || in_space?)
+  def core_publishable_by_user?(user)
+    user.present? && user_id == user.id && (private? || in_space?)
   end
 
-  def publishable_by?(context, scope_to_publish_to = "public")
-    core_publishable_by?(context, scope_to_publish_to)
-  end
-
-  def publishable_by_user?(user, scope_to_publish_to = "public")
-    core_publishable_by_user?(user, scope_to_publish_to)
+  def publishable_by?(context, _scope_to_publish_to)
+    core_publishable_by?(context)
   end
 
   def copyable_to_cooperative_by?(context)

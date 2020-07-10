@@ -338,7 +338,8 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
         file = UserFile.find_by(uid: (row[1] + "-2"))
         result = api.call(file.project,
                           "clone",
-                          "project": user.private_files_project, "objects": [row[1]])
+                          "project" => user.private_files_project,
+                          "objects" => [row[1]])
         next if result["exists"].include?(row[1])
 
         new_file = file.dup

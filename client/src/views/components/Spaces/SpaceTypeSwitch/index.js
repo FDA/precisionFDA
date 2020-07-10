@@ -5,7 +5,7 @@ import classNames from 'classnames'
 import './style.sass'
 
 
-const SpaceTypeSwitch = ({ name, checked, disabled, label, ...rest }) => {
+const SpaceTypeSwitch = ({ name, checked, disabled, label, description, ...rest }) => {
   const containerClasses = classNames('space-type-switch__container', {
     'space-type-switch__container--checked': checked,
     'space-type-switch__container--disabled': disabled,
@@ -21,6 +21,11 @@ const SpaceTypeSwitch = ({ name, checked, disabled, label, ...rest }) => {
     'space-type-switch__label--disabled': disabled,
   }
 
+  const descriptionClasses = {
+    'space-type-switch__description': true,
+    'space-type-switch__description--disabled': disabled,
+  }
+
   return (
     <div className="space-type-switch">
       <div className={containerClasses}>
@@ -28,7 +33,10 @@ const SpaceTypeSwitch = ({ name, checked, disabled, label, ...rest }) => {
           <div className="space-type-switch__radio">
             {checked && <div className={classNames(dotClasses)} />}
           </div>
-          <span className={classNames(labelClasses)}>{label}</span>
+          <div>
+            <div className={classNames(labelClasses)}>{label}</div>
+            {description && <div className={classNames(descriptionClasses)}>{description}</div>}
+          </div>
         </div>
       </div>
       <input type="radio" checked={checked} disabled={disabled} name={name} {...rest} />
@@ -41,6 +49,7 @@ SpaceTypeSwitch.propTypes = {
   checked: PropTypes.bool,
   disabled: PropTypes.bool,
   label: PropTypes.string.isRequired,
+  description: PropTypes.any,
 }
 
 export default SpaceTypeSwitch

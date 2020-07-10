@@ -14,6 +14,9 @@ describe('selectors', () => {
     isOpen: false,
     isLoading: false,
   }
+  const copyToPrivate = {
+    isCopying: false,
+  }
   const links = {}
 
   const state = reducer({
@@ -27,6 +30,7 @@ describe('selectors', () => {
         accessibleApps,
         accessibleAppsLoading,
         copyModal,
+        copyToPrivate,
         links,
       },
     },
@@ -54,6 +58,10 @@ describe('selectors', () => {
 
   it('spaceAppsCopyModalSelector()', () => {
     expect(S.spaceAppsCopyModalSelector(state)).toEqual(copyModal)
+  })
+
+  it('spaceAppsCopyToPrivateSelector()', () => {
+    expect(S.spaceAppsCopyToPrivateSelector(state)).toEqual(copyToPrivate)
   })
 
   it('spaceAppsLinksSelector()', () => {

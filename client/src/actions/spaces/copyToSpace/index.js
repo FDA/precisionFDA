@@ -43,8 +43,8 @@ export default (link, scope, ids) => (
       } else {
         dispatch(copyToSpaceFailure())
         if (payload?.error) {
-          const { type, message } = payload.error
-          dispatch(showAlertAboveAll({ message: `${type}: ${message}` }))
+          const { message } = payload.error
+          dispatch(showAlertAboveAll({ message: message }))
         } else {
           dispatch(showAlertAboveAll({ message: 'Something went wrong!' }))
         }
