@@ -106,6 +106,8 @@ gem "rubyzip", "=1.3.0"
 
 gem "sidekiq"
 
+gem "whenever", require: false
+
 group :development do
   # Annotate models
   gem "annotate"
@@ -137,7 +139,6 @@ group :development do
   gem "guard"
   gem "guard-rspec", require: false
 
-  gem "whenever", require: false
 end
 
 group :development, :test, :ui_test do
