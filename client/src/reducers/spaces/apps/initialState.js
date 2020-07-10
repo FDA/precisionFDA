@@ -9,4 +9,7 @@ export default {
     isOpen: false,
     isLoading: false,
   },
+  copyToPrivate: {
+    isCopying: false,
+  },
 }

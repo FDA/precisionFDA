@@ -78,7 +78,7 @@ class Note < ApplicationRecord
   end
 
   def publishable_by?(context, scope_to_publish_to = Scopes::SCOPE_PUBLIC)
-    core_publishable_by?(context, scope_to_publish_to) && real_note?
+    core_publishable_by?(context) && real_note?
   end
 
   def self.real_notes

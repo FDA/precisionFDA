@@ -124,9 +124,9 @@ class AppsController < ApplicationController
     @item_comments_path = pathify_comments(@app)
 
     if @app.in_space?
-      space = item_from_uid(@app.scope)
+      @space = @app.space_object
       @comments = Comment.
-        where(commentable: space, content_object: @app).
+        where(commentable: @space, content_object: @app).
         order(id: :desc).
         page(unsafe_params[:comments_page])
     else

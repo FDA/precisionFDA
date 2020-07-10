@@ -21,7 +21,7 @@
 #  uid                     :string(255)
 #
 
-class Folder < Node
+class Folder < Node # :nodoc:
   MAX_NAME_LENGTH = 255
 
   scope :private_for, ->(context) { where(user_id: context.user.id, scope: SCOPE_PRIVATE) }
@@ -30,35 +30,39 @@ class Folder < Node
             presence: { message: "Name could not be blank" },
             length: {
               maximum: MAX_NAME_LENGTH,
-              too_long: "Name could not be longer than #{MAX_NAME_LENGTH} characters"
+              too_long: "Name could not be longer than #{MAX_NAME_LENGTH} characters.",
             }
 
-  validates_uniqueness_of :name,
-                          scope: %i[user_id scope parent_folder_id],
-                          message: "A folder with this name '%{value}' already exists",
-                          if: lambda { private? }
+  # rubocop:disable Style/FormatStringToken
+  validates :name,
+            uniqueness: { scope: %i(user_id scope parent_folder_id),
+                          case_sensitive: true,
+                          message: "A folder with the name '%{value}' already exists.",
+                          if: -> { private? } }
 
-  validates_uniqueness_of :name,
-                          scope: %i[scope scoped_parent_folder_id],
-                          message: "A folder with this name '%{value}' already exists",
-                          unless: lambda { private? }
+  validates :name,
+            uniqueness: { scope: %i(scope scoped_parent_folder_id),
+                          case_sensitive: true,
+                          message: "A folder with the name '%{value}' already exists.",
+                          unless: -> { private? } }
+  # rubocop:enable Style/FormatStringToken
 
   scope :not_removing, -> { where.not(state: STATE_REMOVING).or(where(state: nil)) }
 
   class << self
     def batch_private_folders(context, parent_folder_id = nil)
-      Folder
-        .private_for(context)
-        .where(parent_folder_id: parent_folder_id)
+      Folder.
+        private_for(context).
+        where(parent_folder_id: parent_folder_id)
     end
 
     def batch_space_folders(spaces_params)
-      Folder
-        .editable_in_space(spaces_params[:context], spaces_params[:spaces_members_ids])
-        .includes(:taggings)
-        .where(
+      Folder.
+        editable_in_space(spaces_params[:context], spaces_params[:spaces_members_ids]).
+        includes(:taggings).
+        where(
           scope: spaces_params[:scopes],
-          scoped_parent_folder_id: spaces_params[:scoped_parent_folder_id]
+          scoped_parent_folder_id: spaces_params[:scoped_parent_folder_id],
         )
     end
   end
@@ -90,7 +94,7 @@ class Folder < Node
 
   def children
     column = self.class.connection.quote_column_name(Node.scope_column_name(scope))
-    Node.where("#{column} = ?", self.id)
+    Node.where("#{column} = ?", id)
   end
 
   def sub_folders

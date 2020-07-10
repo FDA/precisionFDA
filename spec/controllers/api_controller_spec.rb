@@ -87,7 +87,7 @@ RSpec.describe ApiController, type: :controller do
 
       it "returns a content_type 'json'" do
         post :related_to_publish, params: params
-        expect(response.content_type).to eq "application/json"
+        expect(response.media_type).to eq "application/json"
       end
 
       it "returns a http_status 200" do
@@ -116,7 +116,7 @@ RSpec.describe ApiController, type: :controller do
 
       it "returns a content_type 'json'" do
         post :related_to_publish, params: params
-        expect(response.content_type).to eq "application/json"
+        expect(response.media_type).to eq "application/json"
       end
 
       it "returns a http_status 200" do
@@ -181,7 +181,7 @@ RSpec.describe ApiController, type: :controller do
     context "with js api" do
       it "returns a content_type 'json'" do
         post :folder_tree, params: params
-        expect(response.content_type).to eq "application/json"
+        expect(response.media_type).to eq "application/json"
       end
 
       it "returns a http_status 200" do
@@ -214,7 +214,7 @@ RSpec.describe ApiController, type: :controller do
     context "with js api" do
       it "returns a content_type 'json'" do
         post :folder_tree, params: params
-        expect(response.content_type).to eq "application/json"
+        expect(response.media_type).to eq "application/json"
       end
 
       it "returns a http_status 200" do
@@ -264,7 +264,7 @@ RSpec.describe ApiController, type: :controller do
 
         it "returns a content_type 'json'" do
           post :folder_tree, params: params
-          expect(response.content_type).to eq "application/json"
+          expect(response.media_type).to eq "application/json"
         end
 
         it "returns a tree of folder" do
@@ -321,7 +321,7 @@ RSpec.describe ApiController, type: :controller do
     context "js api" do
       it "returns a content_type 'json'" do
         post :folder_tree, params: params
-        expect(response.content_type).to eq "application/json"
+        expect(response.media_type).to eq "application/json"
       end
 
       it "returns a http_status 200" do
@@ -372,7 +372,7 @@ RSpec.describe ApiController, type: :controller do
       context "with js api" do
         it "returns a content_type 'json'" do
           post :create_challenge_card_image, params: params
-          expect(response.content_type).to eq "application/json"
+          expect(response.media_type).to eq "application/json"
         end
 
         it "returns a http_status 200" do
@@ -460,7 +460,7 @@ RSpec.describe ApiController, type: :controller do
     context "with js api" do
       it "returns a content_type 'json'" do
         post :folder_tree, params: params
-        expect(response.content_type).to eq "application/json"
+        expect(response.media_type).to eq "application/json"
       end
 
       it "returns a http_status 200" do
@@ -522,7 +522,7 @@ RSpec.describe ApiController, type: :controller do
     context "with js api" do
       it "returns a content_type 'json'" do
         post :folder_tree, params: params
-        expect(response.content_type).to eq "application/json"
+        expect(response.media_type).to eq "application/json"
       end
 
       it "returns a http_status 200" do
@@ -576,7 +576,7 @@ RSpec.describe ApiController, type: :controller do
       before { post :files_regex_search, params: params }
 
       it "returns a content_type 'json'" do
-        expect(response.content_type).to eq "application/json"
+        expect(response.media_type).to eq "application/json"
       end
 
       it "returns a http_status 200" do
@@ -598,7 +598,7 @@ RSpec.describe ApiController, type: :controller do
       before { post :files_regex_search, params: params }
 
       it "returns a content_type 'json'" do
-        expect(response.content_type).to eq "application/json"
+        expect(response.media_type).to eq "application/json"
       end
 
       it "returns a http_status 422" do
@@ -629,7 +629,7 @@ RSpec.describe ApiController, type: :controller do
 
       context "with js api" do
         it "returns a content_type 'json'" do
-          expect(response.content_type).to eq "application/json"
+          expect(response.media_type).to eq "application/json"
         end
 
         it "returns a http_status 200" do
@@ -674,7 +674,7 @@ RSpec.describe ApiController, type: :controller do
         let(:result) { parsed_response["search_result"] }
 
         it "returns a content_type 'json'" do
-          expect(response.content_type).to eq "application/json"
+          expect(response.media_type).to eq "application/json"
         end
 
         it "returns a http_status 200" do
@@ -714,7 +714,7 @@ RSpec.describe ApiController, type: :controller do
         end
 
         it "returns a content_type 'json' with http status 200" do
-          expect(response.content_type).to eq "application/json"
+          expect(response.media_type).to eq "application/json"
           expect(response).to have_http_status(200)
         end
 
@@ -736,7 +736,7 @@ RSpec.describe ApiController, type: :controller do
         end
 
         it "returns a content_type 'json' with http status 200" do
-          expect(response.content_type).to eq "application/json"
+          expect(response.media_type).to eq "application/json"
           expect(response).to have_http_status(200)
         end
 
@@ -782,7 +782,7 @@ RSpec.describe ApiController, type: :controller do
         let(:result) { parsed_response["search_result"] }
 
         it "returns a content_type 'json'" do
-          expect(response.content_type).to eq "application/json"
+          expect(response.media_type).to eq "application/json"
         end
 
         it "returns a http_status 200" do

@@ -47,6 +47,7 @@ en:
     once both admin's accept it.
   space_created_not_accessible: The space was created successfully, but is not currently
     accessible by you.
+  error_default: Something went wrong!
 
   activerecord:
     attributes:

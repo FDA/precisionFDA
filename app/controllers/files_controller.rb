@@ -125,9 +125,9 @@ class FilesController < ApplicationController
     @item_path = pathify(@file)
     @item_comments_path = pathify_comments(@file)
     if @file.in_space?
-      space = item_from_uid(@file.scope)
+      @space = @file.space_object
       @comments =
-        Comment.where(commentable: space, content_object: @file).
+        Comment.where(commentable: @space, content_object: @file).
           order(id: :desc).page(params[:comments_page])
     else
       @comments = @file.root_comments.order(id: :desc).page(params[:comments_page])

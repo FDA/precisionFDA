@@ -4,4 +4,5 @@ export const spaceAppsListSortTypeSelector = (state) => state.spaces.apps.sortTy
 export const spaceAppsListSortDirectionSelector = (state) => state.spaces.apps.sortDirection
 export const spaceAppsCheckedAllSelector = (state) => state.spaces.apps.isCheckedAll
 export const spaceAppsCopyModalSelector = (state) => state.spaces.apps.copyModal
+export const spaceAppsCopyToPrivateSelector = (state) => state.spaces.apps.copyToPrivate
 export const spaceAppsLinksSelector = (state) => state.spaces.apps.links

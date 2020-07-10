@@ -6,10 +6,9 @@ en:
           one: "%{count} item is copied successfully."
           other: "%{count} items are copied successfully."
         files_not_copied:
-          one: File %{files} isn't copied since it's already exist in the destination scope.
-          other: Files %{files} are not copied since they're already exist in the destination
+          one: File %{files} isn't copied since it already exists in the destination scope.
+          other: Files %{files} aren't copied since they already exist in the destination
                  scope.
         folders_not_copied:
-          one: Folder %{folders} is not copied since it's already exist in the destination scope.
-          other: Folders %{folders} are not copied since they're already exist in the destination
-                 scope.
+          one: Folder %{folders} isn't copied since it already exists in the destination scope.
+          other: Folders %{folders} aren't copied since they already exist in the destination scope.

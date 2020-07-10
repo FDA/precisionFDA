@@ -311,14 +311,8 @@ class ApplicationController < ActionController::Base
   end
 
   # Returns a session id.
-  # FIXME: We have to use a workaround here so that our controller tests work.
-  #   Rspec does not seem to be setting up controller specs with the new Rack::Session::SessionId.
-  # @see https://github.com/rails/rails/issues/38039
-  # @see https://github.com/rack/rack/issues/1432#issuecomment-571688819
   # @return [String] Session ID.
   def session_id
-    return session.id if Rails.env.test?
-
     session.id&.private_id
   end
 end

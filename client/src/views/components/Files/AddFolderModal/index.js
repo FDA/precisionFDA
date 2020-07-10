@@ -29,6 +29,10 @@ const AddFolderModal = ({ addFolderAction, hideAction, isOpen, isLoading }) => {
     [folderName],
   )
 
+  const enterKeyDownHandler = (e) => {
+    if(e.key === 'Enter') { addFolderHandler() }
+  }
+
   useEffect(() => {
     if (isOpen) setFolderName('')
   }, [isOpen])
@@ -48,7 +52,9 @@ const AddFolderModal = ({ addFolderAction, hideAction, isOpen, isLoading }) => {
         placeholder="Enter Name..."
         value={folderName}
         onChange={changeFolderName}
+        onKeyDown={enterKeyDownHandler}
         lg
+        autoFocus
       />
     </Modal>
   )

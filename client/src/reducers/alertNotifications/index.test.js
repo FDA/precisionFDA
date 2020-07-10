@@ -9,8 +9,16 @@ import {
 
 describe('alertNotifications reducer', () => {
   it('ALERT_SHOW_ABOVE_ALL', () => {
-    const message = 'some message'
-    const store = mockStore(reducer({}, showAlertAboveAll({ message })))
+    const message = 'message 2'
+    const initialState = {
+      alertNotifications: {
+        messages: [{ id: 1, message: 'message 1' }],
+      },
+    }
+
+    const store = mockStore(reducer(initialState, showAlertAboveAll({ message })))
+
+    expect(alertMessagesSelector(store.getState())).toHaveLength(1)
     expect(alertMessagesSelector(store.getState())[0].message).toBe(message)
   })
 

@@ -5,6 +5,7 @@ default: &default
   host: db
   username: root
   password: password
+  collation: utf8_unicode_ci
   variables:
     sql_mode: TRADITIONAL
 

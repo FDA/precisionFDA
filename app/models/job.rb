@@ -152,12 +152,8 @@ class Job < ApplicationRecord
     super && terminal?
   end
 
-  def publishable_by_user?(user, scope_to_publish_to = SCOPE_PUBLIC)
-    super && terminal?
-  end
-
-  def publish_by_user(user, scope = SCOPE_PUBLIC)
-    update!(scope: scope) if publishable_by_user?(user, scope)
+  def publishable_by_user?(user)
+    core_publishable_by_user?(user) && terminal?
   end
 
   def from_submission?

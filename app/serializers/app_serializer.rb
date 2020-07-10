@@ -63,7 +63,9 @@ class AppSerializer < ApplicationSerializer
       links[:user] = user_path(added_by)
 
       if can_run? && !run_by_you? && app_ids.empty? && !object.in_locked_space?
-        links[:run_job] = new_app_job_path(object.app_series.latest_version_app)
+        links[:run_job] = new_app_job_path(
+          object.app_series.latest_version_app || object.app_series.latest_revision_app,
+        )
       end
     end
   end
