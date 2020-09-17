@@ -114,9 +114,10 @@
           <!--</div>-->
         </div>
         <div class="form-group form-group-lg">
-          <%= f.label :phone, "Phone #", class: 'control-label col-sm-4 request_access_form_font_color' %>
+          <%= f.label :phone, "Phone #", class: 'control-label col-sm-4 request_access_form_font_color', id: 'phone_label' %>
+           
           <div class="col-sm-offset-1 col-sm-10">
-            <%= f.telephone_field :phone, class: 'form-control input-lg', required: 'required' %>
+            <%= f.telephone_field :phone, class: 'form-control input-lg', required: 'required', "aria-labelledby": 'phone_label' %>
             <input type="hidden" name="invitation[phone_confirmed]" id="invitation_phone_confirmed" value="true" />
           </div>
         </div>

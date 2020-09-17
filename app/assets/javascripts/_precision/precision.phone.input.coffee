@@ -18,7 +18,9 @@ class PhoneInput
     label = document.createElement('input')
     label.setAttribute 'type', 'text'
     label.classList.add 'pfda-phone-input-label'
-
+    label.setAttribute 'id', 'pfda-phone-input-label-id'
+    label.setAttribute 'aria-labelledby', 'phone_label'
+    
     @input.classList.forEach (value) -> label.classList.add value
     @input.classList.forEach (value) => @input.classList.remove value
     @input.classList.add 'pfda-phone-input-value'
