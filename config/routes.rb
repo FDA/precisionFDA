@@ -84,6 +84,9 @@ Rails.application.routes.draw do
       resources :admin_memberships, only: %i(index create destroy new)
     end
 
+    # My Home Redesign
+    get "my_home" => "my_home#index"
+
     # hotfix for PFDA-557
     get "/challenges/6" => redirect("/challenges/7")
     get "/mislabeling" => redirect("/challenges/5")
