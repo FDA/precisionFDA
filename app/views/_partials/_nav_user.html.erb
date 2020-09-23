@@ -28,5 +28,5 @@
       <li><%= link_to "Log out", logout_path, method: :delete, data: { no_turbolink: true } %></li>
     </ul>
   </li>
-  <li><%= link_to image_tag(@context.gravatar_url, class: 'img-circle', height: '48px'), profile_path %></li>
+  <li><%= link_to image_tag(@context.gravatar_url, class: 'img-circle', height: '48px', alt: "Profile page"), profile_path %></li>
 </ul>
