@@ -38,7 +38,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=password
     ports:
-      - 3306
+      - 32800:3306
 
   redis:
     image: redis:5.0
