@@ -34,7 +34,7 @@ module DocsHelper
 
   def video_iframe(url)
     content_tag :div, class: "embed-container" do
-      content_tag("iframe", nil, src: url, frameborder: 0, allowfullscreen: true)
+      content_tag("iframe", nil, src: url, frameborder: 0, allowfullscreen: true, title: "PrecisionFDA Introduction Video")
     end
   end
 end
