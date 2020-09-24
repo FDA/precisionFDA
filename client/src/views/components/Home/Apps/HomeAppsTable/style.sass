@@ -1,0 +1,62 @@
+.home-apps-table
+  width: 100%
+
+  table
+    table-layout: fixed;
+
+  th
+    padding: 10px
+    color: #555555
+    text-transform: uppercase
+    font-size: 12px
+    font-weight: 400
+
+    &:first-child
+      color: #272727
+      width: 40px
+
+  tr
+    border-bottom: 1px solid #DDDDDD
+
+  td
+    color: #272727
+    padding: 10px
+
+  .fa
+    font-size: 16px
+
+  &__checkbox
+    cursor: pointer
+
+  &__count
+    display: flex
+    justify-content: flex-end
+    align-items: center
+    height: 35px
+    border-bottom: 1px solid #DDDDDD
+    border-top: 1px solid #DDDDDD
+    color: #8198BC
+    font-size: 12px
+    padding-right: 10px
+
+  .pfda-pagination
+    display: flex
+
+    &__page
+      color: #1F70B5
+      border: 1px solid #1F70B5
+      border-right: none
+      height: 35px
+      width: 35px
+      display: flex
+      align-items: center
+      justify-content: center
+      cursor: pointer
+      margin: 0
+
+      &:last-child
+        border-right: 1px solid #1F70B5
+
+      &--active
+        color: #FFFFFF
+        background: #1F70B5
