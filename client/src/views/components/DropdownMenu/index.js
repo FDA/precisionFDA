@@ -59,14 +59,14 @@ const DropdownMenu = ({ icon, title, options }) => {
   return (
     <div className='btn-group'>
       <div className='dropdown'>
-        <Button type='primary' id='space_files_actions' data-toggle='dropdown'>
+        <Button type='primary' data-toggle='dropdown'>
           <>
             {icon && <Icon icon={icon} />}&nbsp;
             <span>{title}</span>&nbsp;
             <Icon icon='fa-angle-down' />
           </>
         </Button>
-        <ul className='dropdown-menu dropdown-menu-right' aria-labelledby='space_files_actions'>
+        <ul className='dropdown-menu dropdown-menu-right'>
           {list}
         </ul>
       </div>
