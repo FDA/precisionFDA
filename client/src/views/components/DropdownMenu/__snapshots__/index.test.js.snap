@@ -9,7 +9,6 @@ exports[`DropdownMenu matches snapshot 1`] = `
   >
     <Button
       data-toggle="dropdown"
-      id="space_files_actions"
       type="primary"
     >
        
@@ -20,7 +19,6 @@ exports[`DropdownMenu matches snapshot 1`] = `
       />
     </Button>
     <ul
-      aria-labelledby="space_files_actions"
       className="dropdown-menu dropdown-menu-right"
     >
       <Item

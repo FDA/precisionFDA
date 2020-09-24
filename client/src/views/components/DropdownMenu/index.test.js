@@ -9,6 +9,4 @@ describe('DropdownMenu', () => {
   
       expect(wrapper).toMatchSnapshot()
     })
-
-    
 })
