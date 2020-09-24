@@ -77,6 +77,9 @@ const Menu = ({ location }) => {
         {(!isHidden) && <Icon icon='fa-chevron-left' />}
         {(isHidden) && <Icon icon='fa-chevron-right' />}
       </div>
+      <div className='home-page-layout__bottom-area' onClick={() => setIsHidden(!isHidden)}>
+        {(!isHidden) && '<< Collapse sidebar'}
+      </div>
     </div>
   )
 }
