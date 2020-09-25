@@ -121,8 +121,6 @@ const FilterRow = () => {
     )
   })
 
-  console.log(filters)
-
   return (
     <tr className='home-apps-table__filters-row'>
       <td></td>
