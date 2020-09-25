@@ -6,6 +6,7 @@ import AppShape from '../../../../shapes/AppShape'
 import Loader from '../../../Loader'
 import TagsList from '../../../TagsList'
 import { Table, Thead, Tbody, Th } from '../../../TableComponents'
+import Input from '../../../FormComponents/Input'
 import Pagination from '../../../../components/TableComponents/Pagination'
 import './style.sass'
 import Icon from '../../../Icon'
@@ -54,14 +55,17 @@ const HomeAppsTable = ({ apps, isFetching }) => {
             <Th sortType={sortType} sortDir={sortDir} type='tags'>tags</Th>
           </Thead>
           <Tbody>
-            {apps.map((app) => <Row app={app} key={app.id} />)}
+            <>
+              <FilterRow />
+              {apps.map((app) => <Row app={app} key={app.id} />)}
+            </>
           </Tbody>
         </Table>
         <div className='home-apps-table__count'>
           1-2/2
         </div>
         <div className='pfda-padded-t20'>
-          <Pagination data={pagination}/>
+          <Pagination data={pagination} />
         </div>
       </div>
     )
@@ -100,6 +104,29 @@ const Row = ({ app }) => {
         {app.createdAt}
       </td>
       <td><TagsList tags={app.tags} /></td>
+    </tr>
+  )
+}
+
+const FilterRow = () => {
+  const filtersConfig = ['name', 'title', 'revision', 'addedBy', 'location', 'created', 'tags']
+  const filters = filtersConfig.map((e) => {
+    return (
+      <td key={e}>
+        <Input
+          name={e}
+          placeholder='--'
+        />
+      </td>
+    )
+  })
+
+  console.log(filters)
+
+  return (
+    <tr className='home-apps-table__filters-row'>
+      <td></td>
+      {filters}
     </tr>
   )
 }
