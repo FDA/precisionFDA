@@ -104,17 +104,6 @@ module Api
       render json: space, adapter: :json
     end
 
-    # GET /api/spaces/:id/apps
-    # Fetches space apps.
-    def apps
-      allowed_orderings = %w(created_at).freeze
-      order = order_query(params[:order_by], params[:order_dir], allowed_orderings)
-
-      apps = @space.latest_revision_apps.order(order)
-
-      render json: apps, meta: apps_meta, adapter: :json
-    end
-
     # GET /api/spaces/:id/files
     # Fetches space files.
     def files
