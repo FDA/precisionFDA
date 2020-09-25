@@ -9,7 +9,7 @@ exports[`HomeAppsPage test should render 1`] = `
       className="home-page-layout__actions"
     >
       <Link
-        to="/my_home/apps/me"
+        to="/home/apps/me"
       >
         <Button
           type="primary"
