@@ -20,19 +20,19 @@ const Tabs = ({ match }) => {
   return (
     <div className='home-page-layout__tabs'>
       <Tab
-        url={`/my_home/${page}`}
+        url={`/home/${page}`}
         text='Me'
       />
       <Tab
-        url={`/my_home/${page}/featured`}
+        url={`/home/${page}/featured`}
         text='Featured'
       />
       <Tab
-        url={`/my_home/${page}/everybody`}
+        url={`/home/${page}/everybody`}
         text='Everybody'
       />
       <Tab
-        url={`/my_home/${page}/spaces`}
+        url={`/home/${page}/spaces`}
         text='Spaces'
       />
     </div>
