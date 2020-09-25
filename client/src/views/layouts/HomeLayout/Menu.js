@@ -22,7 +22,7 @@ const MenuLink = ({ url, icon, text, counter }) => (
 
 const Menu = ({ match }) => {
   const [isHidden, setIsHidden] = useState(false)
-  
+
   const tab = match.params.tab ? `/${match.params.tab}` : ''
 
   const classes = classNames({
@@ -38,37 +38,37 @@ const Menu = ({ match }) => {
     <div className={classes}>
       <div className='home-page-layout__menu-items'>
         <MenuLink
-          url={`/my_home/files${tab}`}
+          url={`/home/files${tab}`}
           icon={'fa-files-o'}
           text='Files'
           counter={0}
         />
         <MenuLink
-          url={`/my_home/apps${tab}`}
+          url={`/home/apps${tab}`}
           icon={'fa-cube'}
           text='Apps'
           counter={0}
         />
         <MenuLink
-          url={`/my_home/assets${tab}`}
+          url={`/home/assets${tab}`}
           icon={'fa-cube'}
           text='Assets'
           counter={0}
         />
         <MenuLink
-          url={`/my_home/workflows${tab}`}
+          url={`/home/workflows${tab}`}
           icon={'fa-bolt'}
           text='Workflows'
           counter={0}
         />
         <MenuLink
-          url={`/my_home/executions${tab}`}
+          url={`/home/executions${tab}`}
           icon={'fa-cogs'}
           text='Executions'
           counter={0}
         />
         <MenuLink
-          url={`/my_home/notes${tab}`}
+          url={`/home/notes${tab}`}
           icon={'fa-sticky-note'}
           text='Notes'
           counter={0}
