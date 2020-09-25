@@ -20,9 +20,10 @@ const MenuLink = ({ url, icon, text, counter }) => (
   </NavLink>
 )
 
-const Menu = ({ location }) => {
+const Menu = ({ match }) => {
   const [isHidden, setIsHidden] = useState(false)
-  const tab = location.pathname.split('/')[3]
+  
+  const tab = match.params.tab ? `/${match.params.tab}` : ''
 
   const classes = classNames({
     'home-page-layout__menu': true,
@@ -37,37 +38,37 @@ const Menu = ({ location }) => {
     <div className={classes}>
       <div className='home-page-layout__menu-items'>
         <MenuLink
-          url={`/my_home/files/${tab}`}
+          url={`/my_home/files${tab}`}
           icon={'fa-files-o'}
           text='Files'
           counter={0}
         />
         <MenuLink
-          url={`/my_home/apps/${tab}`}
+          url={`/my_home/apps${tab}`}
           icon={'fa-cube'}
           text='Apps'
           counter={0}
         />
         <MenuLink
-          url={`/my_home/assets/${tab}`}
+          url={`/my_home/assets${tab}`}
           icon={'fa-cube'}
           text='Assets'
           counter={0}
         />
         <MenuLink
-          url={`/my_home/workflows/${tab}`}
+          url={`/my_home/workflows${tab}`}
           icon={'fa-bolt'}
           text='Workflows'
           counter={0}
         />
         <MenuLink
-          url={`/my_home/executions/${tab}`}
+          url={`/my_home/executions${tab}`}
           icon={'fa-cogs'}
           text='Executions'
           counter={0}
         />
         <MenuLink
-          url={`/my_home/notes/${tab}`}
+          url={`/my_home/notes${tab}`}
           icon={'fa-sticky-note'}
           text='Notes'
           counter={0}
@@ -85,7 +86,7 @@ const Menu = ({ location }) => {
 }
 
 Menu.propTypes = {
-  location: PropTypes.object,
+  match: PropTypes.object,
 }
 
 MenuLink.propTypes = {

@@ -5,6 +5,7 @@ import PropTypes from 'prop-types'
 
 const Tab = ({ url, text }) => (
   <NavLink
+    exact
     to={url}
     className="home-page-layout__tabs-item"
     activeClassName="home-page-layout__tabs-item--active"
@@ -13,13 +14,13 @@ const Tab = ({ url, text }) => (
   </NavLink>
 )
 
-const Tabs = ({ location }) => {
-  const page = location.pathname.split('/')[2]
+const Tabs = ({ match }) => {
+  const page = match.params.page
 
   return (
     <div className='home-page-layout__tabs'>
       <Tab
-        url={`/my_home/${page}/me`}
+        url={`/my_home/${page}`}
         text='Me'
       />
       <Tab
@@ -44,7 +45,7 @@ Tab.propTypes = {
 }
 
 Tabs.propTypes = {
-  location: PropTypes.object,
+  match: PropTypes.object,
 }
 
 export default withRouter(props => <Tabs {...props} />)
