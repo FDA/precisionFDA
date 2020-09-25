@@ -26,7 +26,7 @@ describe('fetchApps()', () => {
     const links = {}
 
     const store = mockStore(reducer({}, { type: undefined }))
-    const url = `/api/spaces/${spaceId}/apps`
+    const url = `/api/apps?space_id=${spaceId}`
     MAP.mapToApp = jest.fn((app) => (app))
 
     afterEach(() => {
