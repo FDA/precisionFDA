@@ -51,7 +51,7 @@ const HomeAppsPage = () => {
     <HomeLayout>
       <div className='home-page-layout__header-row'>
         <div className='home-page-layout__actions'>
-          <Link to='/my_home/apps/me'>
+          <Link to='/home/apps/me'>
             <Button type='primary' >
               <span>
                 <Icon icon='fa-cubes' />&nbsp;
