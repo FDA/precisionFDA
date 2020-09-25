@@ -9,7 +9,6 @@ import { Table, Thead, Tbody, Th } from '../../../TableComponents'
 import Pagination from '../../../../components/TableComponents/Pagination'
 import './style.sass'
 import Icon from '../../../Icon'
-import LinkTargetBlank from '../../../LinkTargetBlank'
 import { getSpacesIcon } from '../../../../../helpers/spaces'
 
 
@@ -47,11 +46,11 @@ const HomeAppsTable = ({ apps, isFetching }) => {
               <Icon icon={checkboxClasses} />
             </th>
             <Th sortType={sortType} sortDir={sortDir} type='name'>name</Th>
-            <Th sortType={sortType} sortDir={sortDir} type='location'>location</Th>
-            <Th sortType={sortType} sortDir={sortDir} type='added by'>added by</Th>
-            <Th sortType={sortType} sortDir={sortDir} type='size'>size</Th>
-            <Th sortType={sortType} sortDir={sortDir} type='created'>created</Th>
-            <Th sortType={sortType} sortDir={sortDir} type='origin'>origin</Th>
+            <Th sortType={sortType} sortDir={sortDir} type='location'>title</Th>
+            <Th sortType={sortType} sortDir={sortDir} type='added by'>revision</Th>
+            <Th sortType={sortType} sortDir={sortDir} type='size'>added by</Th>
+            <Th sortType={sortType} sortDir={sortDir} type='created'>location</Th>
+            <Th sortType={sortType} sortDir={sortDir} type='origin'>created</Th>
             <Th sortType={sortType} sortDir={sortDir} type='tags'>tags</Th>
           </Thead>
           <Tbody>
@@ -83,23 +82,23 @@ const Row = ({ app }) => {
       <td>
         <Icon icon={checkboxClasses} />
       </td>
+      <td>{app.name}</td>
       <td>
-        <LinkTargetBlank url={app.links.show}>
+        <a href={app.links.show}>
           <Icon icon={getSpacesIcon('apps')} fw />
           <span>{app.title}</span>
-        </LinkTargetBlank>
+        </a>
+      </td>
+      <td>{app.revision}</td>
+      <td>
+        <a href={app.links.user}>
+          <span>{app.addedBy}</span>
+        </a>
       </td>
       <td>{app.location}</td>
       <td>
-        <LinkTargetBlank url={app.links.user}>
-          <span>{app.addedBy}</span>
-        </LinkTargetBlank>
-      </td>
-      <td>{app.size}</td>
-      <td>
         {app.createdAt}
       </td>
-      <td>{app.origin}</td>
       <td><TagsList tags={app.tags} /></td>
     </tr>
   )
