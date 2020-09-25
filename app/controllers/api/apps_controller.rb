@@ -1,8 +1,39 @@
 module Api
+  # Home API controller.
+  # rubocop:disable Metrics/ClassLength
   class AppsController < ApiController
-    before_action :validate_app, only: :create
+    include SpaceConcern
+    include Paginationable
+    include Sortable
+    include ErrorProcessable
 
+    before_action :validate_app, only: :create
     before_action :can_copy_to_scope?, only: %i(copy)
+
+    # GET /api/apps
+    # A common Apps fetch method for space and home pages, depends upon @params[:space_id].
+    # @param space_id [Integer] Space id for apps fetch. When it is nil, then fetching for
+    #   all apps, editable by current user.
+    # @param order_by, order_dir [String] Params for ordering.
+    # @return apps [App] Array of Apps objects.
+    def index
+      if params[:space_id]
+        find_user_space
+        allowed_orderings = %w(created_at).freeze
+        order = order_query(params[:order_by], params[:order_dir], allowed_orderings)
+
+        apps = @space.latest_revision_apps.order(order)
+
+        render json: apps, meta: apps_meta, adapter: :json
+      else
+        apps = AppSeries.editable_by(@context).
+          eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org]).
+          order(created_at: :desc).
+          map { |series| series.latest_accessible(@context) }.compact
+
+        render json: apps, adapter: :json
+      end
+    end
 
     # TODO: this route needs to be refactored.
     # TODO: change old UI to handle json-response!
@@ -139,7 +170,42 @@ module Api
       render json: apps
     end
 
+    # Add Rdoc
+    def featured
+      org = Org.featured
+      apps = []
+      if org
+        apps = AppSeries.
+          accessible_by_public.
+          includes(:user, :taggings).
+          where(users: { org_id: org.id }).
+          order(created_at: :desc)
+      end
+
+      render json: apps
+    end
+
+    # Add Rdoc
+    def explore
+      apps = AppSeries.
+        accessible_by_public.
+        includes(:latest_version_app, :taggings).
+        order(created_at: :desc)
+
+      render json: apps
+    end
+
     private
+
+    # Add Rdoc
+    def apps_meta
+      { links: {} }.tap do |meta|
+        # copy to space link
+        meta[:links][:copy] = copy_api_apps_path if @space.editable_by?(current_user)
+        # copy to private area link
+        meta[:links][:copy_private] = copy_api_apps_path
+      end
+    end
 
     def create_app(opts)
       AppService.create_app(current_user, @context.api, opts)
@@ -501,4 +567,5 @@ module Api
       end
     end
   end
+  # rubocop:enable Metrics/ClassLength
 end
