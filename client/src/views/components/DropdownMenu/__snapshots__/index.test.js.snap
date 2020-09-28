@@ -1,0 +1,53 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DropdownMenu matches snapshot 1`] = `
+<div
+  className="btn-group"
+>
+  <div
+    className="dropdown"
+  >
+    <Button
+      data-toggle="dropdown"
+      type="primary"
+    >
+       
+      <span />
+       
+      <Icon
+        icon="fa-angle-down"
+      />
+    </Button>
+    <ul
+      className="dropdown-menu dropdown-menu-right"
+    >
+      <Item
+        isDisabled={false}
+        key="action1"
+        onClick={[Function]}
+        text="action1"
+      />
+      <Item
+        isDisabled={false}
+        key="action2"
+        text="action2"
+      />
+      <Item
+        isDisabled={false}
+        key="action3"
+        text="action3"
+      />
+      <Item
+        isDisabled={false}
+        key="action4"
+        text="action4"
+      />
+      <Item
+        isDisabled={false}
+        key="action5"
+        text="action5"
+      />
+    </ul>
+  </div>
+</div>
+`;
