@@ -186,7 +186,7 @@ module Api
     end
 
     # Add Rdoc
-    def explore
+    def everybody
       apps = AppSeries.
         accessible_by_public.
         includes(:latest_version_app, :taggings).
