@@ -1,7 +1,7 @@
 import React from 'react'
 import { shallow } from 'enzyme'
 
-import HomeAppsPage from './index'
+import { HomeAppsPage } from './index'
 
 
 describe('HomeAppsPage test', () => {
