@@ -109,7 +109,7 @@ const Row = ({ app, toggleAppCheckbox }) => {
       </td>
       <td>{app.location}</td>
       <td>
-        {app.createdAt}
+        {app.createdAtDateTime}
       </td>
       <td><TagsList tags={app.tags} /></td>
     </tr>
