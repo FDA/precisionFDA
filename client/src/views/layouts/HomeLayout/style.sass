@@ -19,7 +19,7 @@
 
     i
       margin-right: 5px
-    
+
     &:hover
       color: #272727
 
@@ -102,10 +102,12 @@
 
   &__header-row
     display: flex
-    justify-content: space-between
 
   &__actions
-    button 
+    &--right
+      margin-left: auto
+
+    button
       margin-right: 8px
 
   &__bottom-area
@@ -114,3 +116,72 @@
     left: 15px
     color: #F4F8FD
     cursor: pointer
+
+  &__data-table
+    .pfda-table-components
+      width: 100%
+      table-layout: fixed
+
+      th:first-child
+        color: #272727
+        width: 40px
+
+      &__th
+        padding: 10px
+        color: #555555
+        text-transform: uppercase
+        font-size: 12px
+        font-weight: 400
+
+        &:first-child
+          color: #272727
+          width: 40px
+
+    tr
+      border-bottom: 1px solid #DDDDDD
+
+      &:first-child
+        border-bottom: 2px solid #DDDDDD
+
+    td
+      color: #272727
+      padding: 10px
+
+    .fa
+      font-size: 16px
+
+    &_checkbox
+      cursor: pointer
+
+    &_count
+      display: flex
+      justify-content: flex-end
+      align-items: center
+      height: 35px
+      border-bottom: 1px solid #DDDDDD
+      border-top: 1px solid #DDDDDD
+      color: #8198BC
+      font-size: 12px
+      padding-right: 10px
+
+    .pfda-pagination
+      display: flex
+
+      &__page
+        color: #1F70B5
+        border: 1px solid #1F70B5
+        border-right: none
+        height: 35px
+        width: 35px
+        display: flex
+        align-items: center
+        justify-content: center
+        cursor: pointer
+        margin: 0
+
+        &:last-child
+          border-right: 1px solid #1F70B5
+
+        &--active
+          color: #FFFFFF
+          background: #1F70B5
