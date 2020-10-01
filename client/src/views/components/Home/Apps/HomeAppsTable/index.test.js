@@ -1,7 +1,7 @@
 import React from 'react'
 import { shallow } from 'enzyme'
 
-import HomeAppsTable from '.'
+import { HomeAppsTable } from '.'
 
 
 describe('HomeAppsTable test', () => {
