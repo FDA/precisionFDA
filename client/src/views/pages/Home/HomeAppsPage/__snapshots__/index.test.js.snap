@@ -24,7 +24,7 @@ exports[`HomeAppsPage test should render 1`] = `
       </Link>
     </div>
     <div
-      className="home-page-layout__actions"
+      className="home-page-layout__actions--right"
     >
       <DropdownMenu
         title="Actions"
@@ -34,49 +34,8 @@ exports[`HomeAppsPage test should render 1`] = `
   <div
     className="pfda-padded-t20"
   >
-    <HomeAppsTable
-      apps={
-        Array [
-          Object {
-            "addedBy": "pfda_autotest1",
-            "createdAt": "09/21/2020",
-            "explorers": 0,
-            "id": 36,
-            "links": Object {
-              "run_job": "/apps/app-FxZBPK80q284xk7047b2B92Q-1/jobs/new",
-              "show": "/apps/app-FxZBPK80q284xk7047b2B92Q-1",
-              "user": "/users/pfda_autotest1",
-            },
-            "name": "app_jonh_new_str",
-            "org": "autotestorg1",
-            "revision": 1,
-            "runByYou": "Try",
-            "tags": Array [],
-            "title": "app_jonh_new_str",
-          },
-          Object {
-            "addedBy": "pfda_autotest1",
-            "createdAt": "09/21/2020",
-            "explorers": 0,
-            "id": 37,
-            "links": Object {
-              "run_job": "/apps/app-FxZBPK80q284xk7047b2B92Q-1/jobs/new",
-              "show": "/apps/app-FxZBPK80q284xk7047b2B92Q-1",
-              "user": "/users/pfda_autotest1",
-            },
-            "name": "app_jonh_new_str",
-            "org": "autotestorg1",
-            "revision": 1,
-            "runByYou": "Try",
-            "tags": Array [],
-            "title": "app_jonh_new_str",
-          },
-        ]
-      }
-      isFetching={false}
-      sortHandler={[Function]}
-      toggleAllCheckboxes={[Function]}
-      toggleCheckbox={[Function]}
+    <Connect(HomeAppsTable)
+      apps={Array []}
     />
   </div>
 </HomeLayout>
