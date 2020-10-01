@@ -1,25 +1,31 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import { connect } from 'react-redux'
 import classNames from 'classnames/bind'
 
-import AppShape from '../../../../shapes/AppShape'
+import HomeAppShape from '../../../../shapes/HomeAppShape'
 import Loader from '../../../Loader'
 import TagsList from '../../../TagsList'
+import {
+  homeAppsIsFetchingSelector,
+  homeAppsIsCheckedAllSelector,
+} from '../../../../../reducers/home/apps/selectors'
+import {
+  toggleAllAppsCheckboxes,
+  toggleAppCheckbox,
+} from '../../../../../actions/home'
 import { Table, Thead, Tbody, Th } from '../../../TableComponents'
 import Input from '../../../FormComponents/Input'
 import Pagination from '../../../../components/TableComponents/Pagination'
-import './style.sass'
 import Icon from '../../../Icon'
 import { getSpacesIcon } from '../../../../../helpers/spaces'
 
 
-const HomeAppsTable = ({ apps, isFetching }) => {
-  const isCheckedAll = false
-
+const HomeAppsTable = ({ apps, isFetching, isCheckedAll, toggleAllAppsCheckboxes, toggleAppCheckbox }) => {
   const checkboxClasses = classNames({
     'fa-square-o': !isCheckedAll,
     'fa-check-square-o': isCheckedAll,
-  }, 'home-apps-table__checkbox')
+  }, 'home-page-layout__data-table_checkbox')
 
   if (isFetching) {
     return (
@@ -40,11 +46,11 @@ const HomeAppsTable = ({ apps, isFetching }) => {
 
   if (apps.length) {
     return (
-      <div className="home-apps-table">
+      <div className="home-page-layout__data-table">
         <Table>
           <Thead>
             <th className="pfda-padded-l10">
-              <Icon icon={checkboxClasses} />
+              <Icon onClick={toggleAllAppsCheckboxes} icon={checkboxClasses} />
             </th>
             <Th sortType={sortType} sortDir={sortDir} type='name'>name</Th>
             <Th sortType={sortType} sortDir={sortDir} type='location'>title</Th>
@@ -57,11 +63,11 @@ const HomeAppsTable = ({ apps, isFetching }) => {
           <Tbody>
             <>
               <FilterRow />
-              {apps.map((app) => <Row app={app} key={app.id} />)}
+              {apps.map((app) => <Row app={app} key={app.id} toggleAppCheckbox={toggleAppCheckbox} />)}
             </>
           </Tbody>
         </Table>
-        <div className='home-apps-table__count'>
+        <div className='home-page-layout__data-table_count'>
           1-2/2
         </div>
         <div className='pfda-padded-t20'>
@@ -74,17 +80,19 @@ const HomeAppsTable = ({ apps, isFetching }) => {
   return <div className='text-center'>No apps found.</div>
 }
 
-const Row = ({ app }) => {
-  app.isChecked = false
+const Row = ({ app, toggleAppCheckbox }) => {
   const checkboxClasses = classNames({
     'fa-square-o': !app.isChecked,
     'fa-check-square-o': app.isChecked,
-  }, 'home-apps-table__checkbox')
+  }, 'home-page-layout__data-table_checkbox')
 
   return (
     <tr>
       <td>
-        <Icon icon={checkboxClasses} />
+        <Icon
+          icon={checkboxClasses}
+          onClick={() => toggleAppCheckbox(app.id)}
+        />
       </td>
       <td>{app.name}</td>
       <td>
@@ -122,7 +130,7 @@ const FilterRow = () => {
   })
 
   return (
-    <tr className='home-apps-table__filters-row'>
+    <tr>
       <td></td>
       {filters}
     </tr>
@@ -131,19 +139,36 @@ const FilterRow = () => {
 
 HomeAppsTable.propTypes = {
   isFetching: PropTypes.bool,
-  apps: PropTypes.arrayOf(PropTypes.exact(AppShape)),
+  apps: PropTypes.arrayOf(PropTypes.exact(HomeAppShape)),
+  isCheckedAll: PropTypes.bool,
+  toggleAllAppsCheckboxes: PropTypes.func,
+  toggleAppCheckbox: PropTypes.func,
 }
 
 HomeAppsTable.defaultProps = {
   apps: [],
   sortHandler: () => { },
-  toggleCheckbox: () => { },
-  toggleAllCheckboxes: () => { },
-  isFetching: false,
+  toggleAppCheckbox: () => { },
+  toggleAllAppsCheckboxes: () => { },
 }
 
 Row.propTypes = {
-  app: PropTypes.exact(AppShape),
+  app: PropTypes.exact(HomeAppShape),
+  toggleAppCheckbox: PropTypes.func,
 }
 
-export default HomeAppsTable
+const mapStateToProps = (state) => ({
+  isFetching: homeAppsIsFetchingSelector(state),
+  isCheckedAll: homeAppsIsCheckedAllSelector(state),
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  toggleAllAppsCheckboxes: () => dispatch(toggleAllAppsCheckboxes()),
+  toggleAppCheckbox: (id) => dispatch(toggleAppCheckbox(id)),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(HomeAppsTable)
+
+export {
+  HomeAppsTable,
+}
