@@ -7,12 +7,12 @@ import HomeAppShape from '../../../../shapes/HomeAppShape'
 import Loader from '../../../Loader'
 import TagsList from '../../../TagsList'
 import {
-  homeAppsIsFetchingSelector,
-  homeAppsIsCheckedAllSelector,
+  homeAppsFeaturedIsFetchingSelector,
+  homeAppsFeaturedIsCheckedAllSelector,
 } from '../../../../../reducers/home/apps/selectors'
 import {
-  toggleAllAppsCheckboxes,
-  toggleAppCheckbox,
+  toggleAllAppsFeaturedCheckboxes,
+  toggleAppFeaturedCheckbox,
 } from '../../../../../actions/home'
 import { Table, Thead, Tbody, Th } from '../../../TableComponents'
 import Input from '../../../FormComponents/Input'
@@ -21,7 +21,7 @@ import Icon from '../../../Icon'
 import { getSpacesIcon } from '../../../../../helpers/spaces'
 
 
-const HomeAppsTable = ({ apps, isFetching, isCheckedAll, toggleAllAppsCheckboxes, toggleAppCheckbox }) => {
+const HomeAppsFeaturedTable = ({ apps, isFetching, isCheckedAll, toggleAllAppsCheckboxes, toggleAppCheckbox }) => {
   const checkboxClasses = classNames({
     'fa-square-o': !isCheckedAll,
     'fa-check-square-o': isCheckedAll,
@@ -137,7 +137,7 @@ const FilterRow = () => {
   )
 }
 
-HomeAppsTable.propTypes = {
+HomeAppsFeaturedTable.propTypes = {
   isFetching: PropTypes.bool,
   apps: PropTypes.arrayOf(PropTypes.exact(HomeAppShape)),
   isCheckedAll: PropTypes.bool,
@@ -145,7 +145,7 @@ HomeAppsTable.propTypes = {
   toggleAppCheckbox: PropTypes.func,
 }
 
-HomeAppsTable.defaultProps = {
+HomeAppsFeaturedTable.defaultProps = {
   apps: [],
   sortHandler: () => { },
   toggleAppCheckbox: () => { },
@@ -158,17 +158,17 @@ Row.propTypes = {
 }
 
 const mapStateToProps = (state) => ({
-  isFetching: homeAppsIsFetchingSelector(state),
-  isCheckedAll: homeAppsIsCheckedAllSelector(state),
+  isFetching: homeAppsFeaturedIsFetchingSelector(state),
+  isCheckedAll: homeAppsFeaturedIsCheckedAllSelector(state),
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  toggleAllAppsCheckboxes: () => dispatch(toggleAllAppsCheckboxes()),
-  toggleAppCheckbox: (id) => dispatch(toggleAppCheckbox(id)),
+  toggleAllAppsCheckboxes: () => dispatch(toggleAllAppsFeaturedCheckboxes()),
+  toggleAppCheckbox: (id) => dispatch(toggleAppFeaturedCheckbox(id)),
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(HomeAppsTable)
+export default connect(mapStateToProps, mapDispatchToProps)(HomeAppsFeaturedTable)
 
 export {
-  HomeAppsTable,
+  HomeAppsFeaturedTable,
 }
