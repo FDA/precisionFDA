@@ -7,5 +7,6 @@ describe('reducer', () => {
 
     expect(state.hasOwnProperty('context')).toBeTruthy()
     expect(state.hasOwnProperty('spaces')).toBeTruthy()
+    expect(state.hasOwnProperty('home')).toBeTruthy()
   })
 })
