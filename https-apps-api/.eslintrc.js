@@ -20,6 +20,7 @@ module.exports = {
         // imports are used to create types but eslint cannot process that
         '@typescript-eslint/no-unused-vars': 0,
         'import/no-unused-modules': 0,
+        'id-lenght': 0,
       },
     },
   ],
