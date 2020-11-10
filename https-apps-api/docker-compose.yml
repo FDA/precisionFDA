@@ -1,0 +1,8 @@
+# fixme:
+
+version: '3.7'
+
+networks:
+  precision-fda:
+    # hardcoded connection to the existing pfda stack
+    name: precision-fda_default
