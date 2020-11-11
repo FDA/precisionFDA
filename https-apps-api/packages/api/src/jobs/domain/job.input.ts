@@ -1,6 +1,6 @@
 import type { JSONSchema7 } from 'json-schema'
 import { config } from '@pfda/https-apps-shared'
-import { dxidProp } from '../../utils/validator'
+import { schemas } from '../../utils/validator'
 import { allowedFeatures, allowedInstanceTypes } from './job.enum'
 
 type DxIdInput = {
@@ -17,7 +17,7 @@ type RunAppInput = {
 }
 
 type DescribeJobInput = DxIdInput & {
-  appId: number
+  appId?: number
 }
 
 const runAppSchema: JSONSchema7 = {
@@ -39,8 +39,8 @@ const runAppSchema: JSONSchema7 = {
 const jobIdAppIdSchema: JSONSchema7 = {
   type: 'object',
   properties: {
-    dxid: dxidProp,
-    appDxId: dxidProp,
+    dxid: schemas.dxidProp,
+    appDxId: schemas.dxidProp,
   },
   required: ['dxid', 'appDxId'],
 }

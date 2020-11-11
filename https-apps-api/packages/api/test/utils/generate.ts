@@ -38,6 +38,7 @@ const job = {
       uid: `${dxid}-1`,
     }
   },
+  jobId: () => 'job-FyZg2z000B72xG6b3yVY5BBK',
 }
 
 export { random, user, job }

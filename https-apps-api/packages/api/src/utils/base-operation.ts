@@ -1,3 +1,5 @@
+export type DefaultInput = AnyObject
+
 export abstract class BaseOperation<IN, OUT> {
   protected ctx: Ops.OpsCtx
 
