@@ -1,5 +1,4 @@
 import { expect } from 'chai'
-import { repeat } from 'ramda'
 import { EntityManager } from '@mikro-orm/core'
 import { errors } from '@pfda/https-apps-shared'
 import supertest from 'supertest'
@@ -34,10 +33,7 @@ describe('POST /apps/:id/run', () => {
     const { body } = await supertest(api.getServer())
       .post(`/apps/${app.dxid}/run`)
       .query({ ...getDefaultQueryData(user) })
-      .send({
-        instanceType: 'baseline-2',
-        duration: 60,
-      })
+      .send(generate.app.runAppInput())
       .expect(201)
     expect(stripEntityDates(body)).to.deep.equal({
       id: 1,
@@ -46,8 +42,8 @@ describe('POST /apps/:id/run', () => {
       project: null,
       state: JOB_STATE.IDLE,
       scope: 'private',
-      provenance: {},
-      describe: {},
+      // provenance: {},
+      // describe: {},
       // todo: fix
       runData: { run_instance_type: 'foo', run_inputs: {}, run_outputs: {} },
     })
@@ -57,15 +53,22 @@ describe('POST /apps/:id/run', () => {
     await supertest(api.getServer())
       .post(`/apps/${app.dxid}/run`)
       .query({ ...getDefaultQueryData(user) })
-      .send({
-        instanceType: 'baseline-2',
-        duration: 60,
-      })
+      .send(generate.app.runAppInput())
       .expect(201)
     expect(fakes.client.jobCreateFake.calledOnce).to.be.true()
   })
 
   context('error states', () => {
-    // todo
+    it('throws 404 when user does not exist', async () => {
+      const { body } = await supertest(api.getServer())
+        .post(`/apps/${app.dxid}/run`)
+        .query({
+          ...getDefaultQueryData(user),
+          id: user.id + 1,
+        })
+        .send(generate.app.runAppInput())
+        .expect(404)
+      expect(body).to.have.property('code', errors.ErrorCodes.USER_NOT_FOUND)
+    })
   })
 })
