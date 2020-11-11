@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid'
 import { User } from '../../src/users'
 import { Job } from '../../src/jobs'
 import { JOB_STATE } from '../../src/jobs/domain/job.enum'
+import { APP_HTTPS_SUBTYPE } from '../../src/apps/domain/app.enum'
 
 const chance = new Chance()
 
@@ -24,6 +25,14 @@ const user = {
   }),
 }
 
+const app = {
+  runAppInput: (): AnyObject => ({
+    instanceType: 'baseline-2',
+    duration: 30,
+    httpsAppType: APP_HTTPS_SUBTYPE.JUPYTER,
+  }),
+}
+
 const job = {
   simple: (): Partial<Job> => {
     const dxid = `job-${random.dxstr()}`
@@ -41,4 +50,4 @@ const job = {
   jobId: () => 'job-FyZg2z000B72xG6b3yVY5BBK',
 }
 
-export { random, user, job }
+export { random, user, job, app }

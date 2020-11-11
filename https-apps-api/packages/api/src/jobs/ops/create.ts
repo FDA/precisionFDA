@@ -1,4 +1,4 @@
-import { client } from '@pfda/https-apps-shared'
+import { client, errors } from '@pfda/https-apps-shared'
 import type { RunAppInput } from '../domain/job.input'
 import { BaseOperation } from '../../utils'
 import { Job } from '../job.entity'
@@ -8,17 +8,15 @@ import { JOB_STATE, allowedFeatures, allowedInstanceTypes } from '../domain/job.
 
 export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
   async run(input: RunAppInput) {
-    // todo: test if user exists and can do this!
     const em = this.ctx.em
 
     // todo: how the app is gonna be referenced is not resolved
     const app = await em.findOne(App, { dxid: input.appDxId })
     const user = await em.findOne(User, { id: this.ctx.user.id })
-    // todo: PROJECT should be determined based on app type (subtype) -> maps to user.projects DB fields
-    const projectId = user.privateFilesProject
-    const runWithInstanceType = allowedInstanceTypes[input.instanceType]
-    // todo: this will differ -> 4 HTTPS app types
-    const runWithFeature = allowedFeatures[input.feature] || allowedFeatures.python
+
+    if (!user) {
+      throw new errors.UserNotFoundError()
+    }
 
     if (!app) {
       // cannot run the app -> there should be more business rules to it
@@ -26,8 +24,15 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
       console.log('app entry does not exist in our system')
     }
 
+    // todo: PROJECT should be determined based on app type (subtype) -> maps to user.projects DB fields
+    const projectId = user.privateFilesProject
+    const runWithInstanceType = allowedInstanceTypes[input.instanceType]
+    // todo: this will differ -> 4 HTTPS app types
+    const runWithFeature = allowedFeatures[input.feature] || allowedFeatures.python
+
     const repo = this.ctx.em.getRepository(Job)
 
+    // todo: handle optional input (.Notebook_snapshotss)
     const newJobClientRes = await client.jobCreate({
       project: projectId,
       name: input.name,
@@ -60,7 +65,7 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
       describe: {},
       // todo: add option and enum
       scope: 'private',
-      // fixme: build this, correct encoding in the DB
+      // fixme: build this
       runData: {
         run_instance_type: 'foo',
         run_inputs: {},
