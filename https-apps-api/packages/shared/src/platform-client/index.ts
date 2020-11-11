@@ -23,8 +23,20 @@ type JobCreateResponse = {
   id: string
 }
 
-// this response is super big
-// type JobDescribeResponse = {}
+// just basic types we are interested in at the moment
+type JobDescribeResponse = {
+  state: string
+  project: string
+  billTo: string
+  httpsApp: {
+    ports: number[]
+    shared_access: string
+    enabled: boolean
+    dns: {
+      url?: string
+    }
+  }
+} & AnyObject
 
 // tasks here:
 // auth handler
@@ -83,7 +95,7 @@ const jobCreate = async (params: JobCreateParams): Promise<JobCreateResponse> =>
   }
 }
 
-const jobDescribe = async (params: JobDescribeParams): Promise<AnyObject> => {
+const jobDescribe = async (params: JobDescribeParams): Promise<JobDescribeResponse> => {
   const url = `${config.platform.apiUrl}/${params.jobId}/describe`
   const options: AxiosRequestConfig = {
     method: 'POST',

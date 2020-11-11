@@ -25,10 +25,10 @@ export class Job extends BaseEntity {
   @Property()
   runData: string
 
-  @Property()
+  @Property({ hidden: true })
   describe: string
 
-  @Property()
+  @Property({ hidden: true })
   provenance: string
 
   @Property()
