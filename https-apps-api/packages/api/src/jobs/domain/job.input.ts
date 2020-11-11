@@ -2,6 +2,7 @@ import type { JSONSchema7 } from 'json-schema'
 import { config } from '@pfda/https-apps-shared'
 import { schemas } from '../../utils/validator'
 import { allowedFeatures, allowedInstanceTypes } from './job.enum'
+import { APP_HTTPS_SUBTYPE } from 'api/src/apps/domain/app.enum'
 
 type DxIdInput = {
   dxid: string
@@ -11,6 +12,7 @@ type RunAppInput = {
   projectId: string
   name?: string
   appDxId: string
+  httpsAppType: APP_HTTPS_SUBTYPE
   instanceType: string
   feature: string
   duration: number
@@ -23,6 +25,7 @@ type DescribeJobInput = DxIdInput & {
 const runAppSchema: JSONSchema7 = {
   type: 'object',
   properties: {
+    httpsAppType: { type: 'string', enum: Object.values(APP_HTTPS_SUBTYPE) },
     projectId: { type: 'string', maxLength: config.validation.maxStrLen },
     instanceType: { type: 'string', enum: Object.keys(allowedInstanceTypes) },
     // hours it can run
@@ -33,7 +36,7 @@ const runAppSchema: JSONSchema7 = {
       default: allowedFeatures.python,
     },
   },
-  required: ['instanceType', 'duration'],
+  required: ['instanceType', 'duration', 'httpsAppType'],
 }
 
 const jobIdAppIdSchema: JSONSchema7 = {
