@@ -24,6 +24,6 @@ $ make test-api
 
 ## Worker
 
-### Implementation notes
+## Implementation notes
 
 - worker-api communicates (on dev env) via HTTPS. It uses self-generated certificate. For staging/production a CA-authorized certificate should be provided.

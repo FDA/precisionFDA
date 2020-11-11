@@ -16,6 +16,7 @@ export enum ErrorCodes {
   // for specific situations
   USER_CONTEXT_QUERY_INVALID = 'E_USER_CONTEXT_QUERY_INVALID',
   JOB_NOT_FOUND = 'E_JOB_NOT_FOUND',
+  USER_NOT_FOUND = 'E_USER_NOT_FOUND',
   NEXUS_REQUEST_FAILED = 'E_DNANEXUS_PLATFORM_REQUEST_FAILED',
 }
 
@@ -71,6 +72,15 @@ export class JobNotFoundError extends NotFoundError {
   constructor(message = 'Job entity not found', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.JOB_NOT_FOUND,
+      ...props,
+    })
+  }
+}
+
+export class UserNotFoundError extends NotFoundError {
+  constructor(message = 'User entity not found', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.USER_NOT_FOUND,
       ...props,
     })
   }
