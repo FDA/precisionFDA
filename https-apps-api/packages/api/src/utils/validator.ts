@@ -39,4 +39,12 @@ const userContextSchema: JSONSchema7 = {
   required: ['id', 'accessToken', 'dxuser'],
 }
 
-export { ajv, idInputSchema, getDxidInputSchema, userContextSchema, idProp, dxidProp }
+const schemas = {
+  userContextSchema,
+  getDxidInputSchema,
+  idInputSchema,
+  idProp,
+  dxidProp,
+}
+
+export { ajv, schemas }
