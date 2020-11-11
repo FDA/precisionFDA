@@ -3,7 +3,6 @@ import { BaseOperation } from '../../utils'
 import { Job } from '..'
 import type { DescribeJobInput } from '../domain/job.input'
 import { TERMINAL_STATES } from '../domain/job.enum'
-import { App } from '../../apps'
 import { User } from '../../users'
 
 export class DescribeJobOperation extends BaseOperation<DescribeJobInput, Job> {
@@ -13,9 +12,7 @@ export class DescribeJobOperation extends BaseOperation<DescribeJobInput, Job> {
     const job = await jobRepo.findOne({
       dxid: input.dxid,
       // FIXME: JUPYTER APP JOBS DO NOT CURRENTLY HAVE THE APP ASSIGNED LOCALLY
-      // this breaks current tests also
-      app: null,
-      // app: em.getReference(App, input.appId),
+      // app: input.appId ? em.getReference(App, input.appId) : null,
       user: em.getReference(User, this.ctx.user.id),
     })
     if (!job) {
@@ -32,6 +29,7 @@ export class DescribeJobOperation extends BaseOperation<DescribeJobInput, Job> {
     // todo: updates:
     //  the describe field for istance
     //  status of the job if it differs
+    // the DNS entry - if found, should be PRESIGNED
     this.ctx.log.debug({ platformJobData }, 'JOB description object from the platform')
     return job
   }

@@ -1,5 +1,5 @@
 import { errors } from '@pfda/https-apps-shared'
-import { ajv, userContextSchema } from '../../utils'
+import { ajv, schemas } from '../../utils'
 
 /**
  * This middleware expects some user data in the query
@@ -8,7 +8,7 @@ import { ajv, userContextSchema } from '../../utils'
 export const makeUserContextMdw = () => {
   // validate the schema from ctx.request.query
   // store to the ctx
-  const validatorFn = ajv.compile(userContextSchema)
+  const validatorFn = ajv.compile(schemas.userContextSchema)
 
   return (ctx: Api.Ctx, next) => {
     const isValid = validatorFn(ctx.request.query)

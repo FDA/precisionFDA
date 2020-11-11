@@ -10,7 +10,9 @@ module.exports = {
       parserOptions: {
         project: './tsconfig.json',
       },
-      rules: {},
+      rules: {
+        '@typescript-eslint/naming-convention': 0,
+      },
     },
     {
       files: ['*.d.ts'],

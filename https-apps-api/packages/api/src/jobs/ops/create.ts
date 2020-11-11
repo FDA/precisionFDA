@@ -8,33 +8,26 @@ import { JOB_STATE, allowedFeatures, allowedInstanceTypes } from '../domain/job.
 
 export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
   async run(input: RunAppInput) {
-    console.log(input, this.ctx.user, '!')
     // todo: test if user exists and can do this!
     const em = this.ctx.em
-    // not sure if this is even needed
-    // const appRepo = em.getRepository(App)
-    // todo: use DB ids or platform uids? should decide ...
+
+    // todo: how the app is gonna be referenced is not resolved
     const app = await em.findOne(App, { dxid: input.appDxId })
     const user = await em.findOne(User, { id: this.ctx.user.id })
-    // todo: should check we can run under this project, if provided
-    const projectId = input.projectId || user.privateFilesProject
+    // todo: PROJECT should be determined based on app type (subtype) -> maps to user.projects DB fields
+    const projectId = user.privateFilesProject
     const runWithInstanceType = allowedInstanceTypes[input.instanceType]
+    // todo: this will differ -> 4 HTTPS app types
     const runWithFeature = allowedFeatures[input.feature] || allowedFeatures.python
-    console.log(app, user, '!')
-    console.log(projectId, runWithFeature, runWithInstanceType, 'DEBUG')
+
     if (!app) {
       // cannot run the app -> there should be more business rules to it
       // throw new Error('Jupyter labs app not found')
       console.log('app entry does not exist in our system')
     }
 
-    /**
-     * todo: output serializers
-     */
-
     const repo = this.ctx.em.getRepository(Job)
 
-    // todo: debug duration format
     const newJobClientRes = await client.jobCreate({
       project: projectId,
       name: input.name,
@@ -80,6 +73,8 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
     // todo: create Event entry -> low priority probably
     em.persist(job)
     await em.flush()
+
+    // todo: add task to a worker queue
 
     return job
   }

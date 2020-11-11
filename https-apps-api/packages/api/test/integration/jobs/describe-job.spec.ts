@@ -13,9 +13,9 @@ import { App } from '../../../src/apps'
 import { JOB_STATE } from '../../../src/jobs/domain/job.enum'
 import * as create from '../../utils/create'
 import { fakes } from '../../utils/mocks'
-import { stripEntityDates } from '../../utils/expect-helper'
+import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
 
-describe('GET /app/:id/jobs/:id', () => {
+describe('GET /jobs/:id', () => {
   let em: EntityManager
   let job: Job
   let user: User
@@ -31,13 +31,11 @@ describe('GET /app/:id/jobs/:id', () => {
     await em.flush()
   })
 
-  it.only('response shape', async () => {
+  it('response shape', async () => {
     const { body } = await supertest(api.getServer())
-      .get(`/apps/${app.dxid}/jobs/${job.dxid}`)
+      .get(`/jobs/${job.dxid}`)
       .query({
-        id: user.id,
-        dxuser: user.dxuser,
-        accessToken: 'token',
+        ...getDefaultQueryData(user),
       })
       .expect(200)
     // the best would be to remove them
@@ -70,11 +68,9 @@ describe('GET /app/:id/jobs/:id', () => {
   it('calls the describe endpoint', async () => {
     const jobDescribeFake = fakes.client.jobDescribeFake
     const { body } = await supertest(api.getServer())
-      .get(`/apps/${app.id}/jobs/${job.dxid}`)
+      .get(`/jobs/${job.dxid}`)
       .query({
-        id: user.id,
-        dxuser: user.dxuser,
-        accessToken: 'token',
+        ...getDefaultQueryData(user),
       })
       .expect(200)
     expect(body).to.have.property('dxid', job.dxid)
@@ -88,11 +84,9 @@ describe('GET /app/:id/jobs/:id', () => {
     await em.flush()
 
     const { body } = await supertest(api.getServer())
-      .get(`/apps/${app.id}/jobs/${activeJob.dxid}`)
+      .get(`/jobs/${activeJob.dxid}`)
       .query({
-        id: user.id,
-        dxuser: user.dxuser,
-        accessToken: 'token',
+        ...getDefaultQueryData(user),
       })
       .expect(200)
     expect(body).to.have.property('dxid', activeJob.dxid)
@@ -101,7 +95,7 @@ describe('GET /app/:id/jobs/:id', () => {
 
   context('error states', () => {
     it('returns 400 when query data is not provided', async () => {
-      const { body } = await supertest(api.getServer()).get(`/apps/1/jobs/${job.dxid}`).expect(400)
+      const { body } = await supertest(api.getServer()).get(`/jobs/${job.dxid}`).expect(400)
       expect(body).to.have.property('code', errors.ErrorCodes.USER_CONTEXT_QUERY_INVALID)
       expect(body.props).to.have.property('validationErrors')
     })
@@ -109,11 +103,9 @@ describe('GET /app/:id/jobs/:id', () => {
     it('returns 400 when jobId is invalid', async () => {
       const longString = repeat('a', 65).join('')
       const { body } = await supertest(api.getServer())
-        .get(`/apps/1/jobs/${longString}`)
+        .get(`/jobs/${longString}`)
         .query({
-          id: user.id,
-          dxuser: user.dxuser,
-          accessToken: 'token',
+          ...getDefaultQueryData(user),
         })
         .expect(400)
       expect(body).to.have.property('code', errors.ErrorCodes.VALIDATION)
@@ -122,23 +114,20 @@ describe('GET /app/:id/jobs/:id', () => {
 
     it('returns 404 when job does not belong to the given user', async () => {
       const { body } = await supertest(api.getServer())
-        .get(`/apps/${app.id.toString()}/jobs/${job.dxid}`)
+        .get(`/jobs/${job.dxid}`)
         .query({
+          ...getDefaultQueryData(user),
           id: user.id + 1,
-          dxuser: user.dxuser,
-          accessToken: 'token',
         })
         .expect(404)
       expect(body).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
     })
 
-    it('returns 404 when job does not belong to the given app', async () => {
+    it.skip('returns 404 when job does not belong to the given app', async () => {
       const { body } = await supertest(api.getServer())
         .get(`/apps/${(app.id + 1).toString()}/jobs/${job.dxid}`)
         .query({
-          id: user.id,
-          dxuser: user.dxuser,
-          accessToken: 'token',
+          ...getDefaultQueryData(user),
         })
         .expect(404)
       expect(body).to.have.property('code', errors.ErrorCodes.JOB_NOT_FOUND)
