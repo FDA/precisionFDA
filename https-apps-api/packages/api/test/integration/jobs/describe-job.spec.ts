@@ -29,6 +29,8 @@ describe('GET /jobs/:id', () => {
     app = create.appHelper.create(em, { user })
     job = create.jobHelper.create(em, { user, app }, { state: JOB_STATE.DONE })
     await em.flush()
+
+    fakes.client.jobDescribeFake.resetHistory()
   })
 
   it('response shape', async () => {
@@ -43,9 +45,9 @@ describe('GET /jobs/:id', () => {
       id: job.id,
       dxid: job.dxid,
       project: job.project,
-      provenance: null,
       runData: job.runData,
-      describe: job.describe,
+      // provenance: null,
+      // describe: job.describe,
       state: job.state,
       name: job.name,
       scope: job.scope,
@@ -65,7 +67,7 @@ describe('GET /jobs/:id', () => {
     // ).to.be.true()
   })
 
-  it('calls the describe endpoint', async () => {
+  it('will not call the platform client if the job is in terminated state', async () => {
     const jobDescribeFake = fakes.client.jobDescribeFake
     const { body } = await supertest(api.getServer())
       .get(`/jobs/${job.dxid}`)
@@ -80,7 +82,6 @@ describe('GET /jobs/:id', () => {
   it('will call the platform client if the job is still active', async () => {
     const jobDescribeFake = fakes.client.jobDescribeFake
     const activeJob = create.jobHelper.create(em, { user, app }, { state: JOB_STATE.IDLE })
-    em.persist(activeJob)
     await em.flush()
 
     const { body } = await supertest(api.getServer())
@@ -91,6 +92,34 @@ describe('GET /jobs/:id', () => {
       .expect(200)
     expect(body).to.have.property('dxid', activeJob.dxid)
     expect(jobDescribeFake.calledOnce).to.be.true()
+  })
+
+  it('updates DB state when changes in state are discovered', async () => {
+    const jobDescribeFake = fakes.client.jobDescribeFake
+    const anotherJob = create.jobHelper.create(em, { user, app }, { state: JOB_STATE.IDLE })
+    await em.flush()
+    const platformResponse = {
+      id: anotherJob.dxid,
+      state: JOB_STATE.TERMINATED,
+      anotherValue: 'foo',
+    }
+    jobDescribeFake.returns(platformResponse)
+
+    const { body } = await supertest(api.getServer())
+      .get(`/jobs/${anotherJob.dxid}`)
+      .query({
+        ...getDefaultQueryData(user),
+      })
+      .expect(200)
+    expect(jobDescribeFake.calledOnce).to.be.true()
+    expect(body).to.have.property('dxid', anotherJob.dxid)
+    expect(body).to.have.property('state', JOB_STATE.TERMINATED)
+    // check the db values
+    // we need a new IdentityMap -> the API call changed the mapped entity
+    // if we used original em, it would serve the result from cache
+    const afterCallEm = em.fork()
+    const anotherJobDb = await afterCallEm.findOne(Job, anotherJob.id)
+    expect(anotherJobDb).to.have.property('describe', JSON.stringify(platformResponse))
   })
 
   context('error states', () => {
