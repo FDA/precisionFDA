@@ -57,6 +57,9 @@ class Job < ApplicationRecord
 
   TERMINAL_STATES = [STATE_TERMINATED, STATE_DONE, STATE_FAILED].freeze
 
+  TYPE_REGULAR = "regular".freeze
+  TYPE_HTTPS = "https".freeze
+
   belongs_to :app
   belongs_to :user
   belongs_to :app_series
@@ -79,6 +82,11 @@ class Job < ApplicationRecord
 
   scope :done, -> { where(state: STATE_DONE) }
   scope :terminal, -> { where(state: [TERMINAL_STATES]) }
+
+  enum entity_type: {
+    TYPE_REGULAR => 0,
+    TYPE_HTTPS => 1,
+  }
 
   delegate :input_spec, :output_spec, to: :app
 
