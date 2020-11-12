@@ -64,6 +64,9 @@ class UserFile < Node
 
   PARENT_TYPE_COMPARISON = "Comparison".freeze
 
+  TYPE_REGULAR = "regular".freeze
+  TYPE_SNAPSHOT = "snapshot".freeze
+
   has_many :attachments, as: :item, dependent: :destroy
   has_many :notes, through: :attachments
   has_many :comparison_inputs
@@ -106,6 +109,11 @@ class UserFile < Node
   }
 
   scope :not_comparison_inputs, -> { includes(:comparisons).where(comparisons: { id: nil }) }
+
+  enum entity_type: {
+    TYPE_REGULAR => 0,
+    TYPE_SNAPSHOT => 1,
+  }
 
   class << self
     # Returns files count of user 'private' scope.

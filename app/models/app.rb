@@ -32,6 +32,9 @@ class App < ApplicationRecord
   include SoftRemovable
   include TagsContainer
 
+  TYPE_REGULAR = "regular".freeze
+  TYPE_HTTPS = "https".freeze
+
   belongs_to :user
   has_one :org, through: :user
 
@@ -55,6 +58,11 @@ class App < ApplicationRecord
   acts_as_commentable
 
   VALID_IO_CLASSES = %w(file string boolean int float).freeze
+
+  enum entity_type: {
+    TYPE_REGULAR => 0,
+    TYPE_HTTPS => 1,
+  }
 
   def to_param
     uid
