@@ -40,6 +40,9 @@ class App < ApplicationRecord
   HTTPS_TTYD = "ttyd".freeze
   HTTPS_RSHINY = "r_shiny".freeze
 
+  TYPE_REGULAR = "regular".freeze
+  TYPE_HTTPS = "https".freeze
+
   belongs_to :user
   has_one :org, through: :user
 
@@ -63,6 +66,11 @@ class App < ApplicationRecord
   acts_as_commentable
 
   VALID_IO_CLASSES = %w(file string boolean int float).freeze
+
+  enum entity_type: {
+    TYPE_REGULAR => 0,
+    TYPE_HTTPS => 1,
+  }
 
   enum entity_type: {
     TYPE_REGULAR => 0,
