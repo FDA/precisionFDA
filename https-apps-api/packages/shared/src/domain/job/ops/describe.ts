@@ -1,10 +1,12 @@
 import { wrap } from '@mikro-orm/core'
-import { client, errors } from '@pfda/https-apps-shared'
-import { BaseOperation } from '../../utils'
-import { Job } from '..'
-import type { DescribeJobInput } from '../domain/job.input'
-import { TERMINAL_STATES } from '../domain/job.enum'
-import { User } from '../../users'
+import * as client from '../../../platform-client'
+import * as errors from '../../../errors'
+import { addToQueue } from '../../../queue'
+import { BaseOperation } from '../../../utils'
+import { Job } from '../job.entity'
+import type { DescribeJobInput } from '../job.input'
+import { TERMINAL_STATES } from '../job.enum'
+import { User } from '../../user'
 
 export class DescribeJobOperation extends BaseOperation<DescribeJobInput, Job> {
   async run(input: DescribeJobInput) {
@@ -20,6 +22,9 @@ export class DescribeJobOperation extends BaseOperation<DescribeJobInput, Job> {
     if (!job) {
       throw new errors.JobNotFoundError()
     }
+
+    // TEST run something in the queue
+    await addToQueue({ foo: 'yep' })
 
     // if job is already finished (in our system), no need to synchronize
     if (job.state && Object.values(TERMINAL_STATES).includes(job.state)) {
@@ -40,6 +45,7 @@ export class DescribeJobOperation extends BaseOperation<DescribeJobInput, Job> {
       wrap(job).assign(
         {
           describe: JSON.stringify(platformJobData),
+          // todo: there are more states in the platform ("running" for example)
           state: platformJobData.state,
         },
         { em },

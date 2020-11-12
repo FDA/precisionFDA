@@ -1,5 +1,5 @@
-export { User } from './user.entity'
+// export { User } from './user.entity'
 
-export { router } from './user.routes'
+// export { router } from './user.routes'
 
-export * as userOps from './ops'
+// export * as userOps from './ops'

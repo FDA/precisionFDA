@@ -1,44 +1,44 @@
-import { Collection, Entity, OneToMany, PrimaryKey, Property } from '@mikro-orm/core'
-import { BaseEntity } from '../database/base-entity'
-import { Job } from '../jobs/job.entity'
+// import { Collection, Entity, OneToMany, PrimaryKey, Property } from '@mikro-orm/core'
+// import { BaseEntity } from '../../../shared/src/database/base-entity'
+// import { Job } from '../jobs/job.entity'
 
-// contains the bare minimum to work with the user instance
-// might need to add more fields in the time
-@Entity({ tableName: 'users' })
-export class User extends BaseEntity {
-  @PrimaryKey()
-  id: number
+// // contains the bare minimum to work with the user instance
+// // might need to add more fields in the time
+// @Entity({ tableName: 'users' })
+// export class User extends BaseEntity {
+//   @PrimaryKey()
+//   id: number
 
-  @Property()
-  dxuser: string
+//   @Property()
+//   dxuser: string
 
-  @Property()
-  privateFilesProject: string
+//   @Property()
+//   privateFilesProject: string
 
-  @Property()
-  publicFilesProject: string
+//   @Property()
+//   publicFilesProject: string
 
-  @Property()
-  schemaVersion: string
+//   @Property()
+//   schemaVersion: string
 
-  @Property()
-  orgId: string
+//   @Property()
+//   orgId: string
 
-  @Property()
-  firstName: string
+//   @Property()
+//   firstName: string
 
-  @Property()
-  lastName: string
+//   @Property()
+//   lastName: string
 
-  @Property()
-  email: string
+//   @Property()
+//   email: string
 
-  @Property()
-  normalizedEmail: string
+//   @Property()
+//   normalizedEmail: string
 
-  @Property({ hidden: true })
-  userState: number
+//   @Property({ hidden: true })
+//   userState: number
 
-  @OneToMany({ entity: () => Job, mappedBy: 'user' })
-  jobs = new Collection<Job>(this)
-}
+//   @OneToMany({ entity: () => Job, mappedBy: 'user' })
+//   jobs = new Collection<Job>(this)
+// }

@@ -8,10 +8,10 @@ import {
   Collection,
   OneToMany,
 } from '@mikro-orm/core'
-import { BaseEntity } from '../database/base-entity'
-import { Job } from '../jobs'
-import { User } from '../users'
-import { APP_HTTPS_SUBTYPE, APP_TYPE } from './domain/app.enum'
+import { BaseEntity } from '../../database/base-entity'
+import { Job } from '../job/job.entity'
+import { User } from '../user/user.entity'
+import { APP_HTTPS_SUBTYPE, APP_TYPE } from './app.enum'
 
 @Entity({ tableName: 'apps' })
 export class App extends BaseEntity {

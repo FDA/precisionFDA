@@ -27,7 +27,7 @@ const parseBooleanFromProcess = (value: string, defaultValue = false): boolean =
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 const env = (process.env.NODE_ENV ?? ENVS.LOCAL) as ENVS
 const defaultConfig = {
-  appName: 'foo-app-name',
+  appName: 'https-apps-worker',
   env,
   api: {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition

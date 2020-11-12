@@ -4,6 +4,9 @@
  * thus this workaround is in place.
  */
 
+import { EntityManager } from '@mikro-orm/core'
+import { Logger } from 'pino'
+
 declare type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends Array<infer U>
     ? Array<DeepPartial<U>>
@@ -17,4 +20,16 @@ declare type AnyObject = {
   [s: string]: any
 }
 
-export type { DeepPartial, AnyObject }
+interface UserCtx {
+  id: number
+  accessToken: string
+  dxuser: string
+}
+
+interface OpsCtx {
+  log: Logger
+  em: EntityManager
+  user: UserCtx
+}
+
+export type { DeepPartial, AnyObject, UserCtx, OpsCtx }

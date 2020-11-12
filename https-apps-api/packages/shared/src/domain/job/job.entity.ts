@@ -6,10 +6,10 @@ import {
   Property,
   Reference,
 } from '@mikro-orm/core'
-import { App } from '../apps'
-import { BaseEntity } from '../database/base-entity'
-import { User } from '../users'
-import { JOB_STATE } from './domain/job.enum'
+import { App } from '../app/app.entity'
+import { BaseEntity } from '../../database/base-entity'
+import { User } from '../user/user.entity'
+import { JOB_STATE } from './job.enum'
 
 @Entity({ tableName: 'jobs' })
 export class Job extends BaseEntity {

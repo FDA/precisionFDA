@@ -1,8 +1,8 @@
 import type { JSONSchema7 } from 'json-schema'
-import { config } from '@pfda/https-apps-shared'
-import { schemas } from '../../utils/validator'
+import { config } from '../../config'
+import { schemas } from '../../utils'
+import { APP_HTTPS_SUBTYPE } from '../app/app.enum'
 import { allowedFeatures, allowedInstanceTypes } from './job.enum'
-import { APP_HTTPS_SUBTYPE } from 'api/src/apps/domain/app.enum'
 
 type DxIdInput = {
   dxid: string

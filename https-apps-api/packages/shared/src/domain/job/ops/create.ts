@@ -1,10 +1,11 @@
-import { client, errors } from '@pfda/https-apps-shared'
-import type { RunAppInput } from '../domain/job.input'
-import { BaseOperation } from '../../utils'
+import * as client from '../../../platform-client'
+import * as errors from '../../../errors'
+import type { RunAppInput } from '../job.input'
+import { BaseOperation } from '../../../utils'
 import { Job } from '../job.entity'
-import { App } from '../../apps'
-import { User } from '../../users'
-import { JOB_STATE, allowedFeatures, allowedInstanceTypes } from '../domain/job.enum'
+import { App } from '../../app/app.entity'
+import { User } from '../../user/user.entity'
+import { JOB_STATE, allowedFeatures, allowedInstanceTypes } from '../job.enum'
 
 export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
   async run(input: RunAppInput) {
@@ -47,7 +48,9 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
       },
       accessToken: this.ctx.user.accessToken,
       // THIS IS HARDCODED JUPYTER LAB APP ID from the pfda_autotest1 user!
-      appId: 'app-FxfQ8J85KV59Vq705Jq5KgfP',
+      // appId: 'app-FxfQ8J85KV59Vq705Jq5KgfP',
+      // THIS IS USED IN THE PLATFORM IN PAYLOAD
+      appId: 'app-dxjupyterlab',
       // appId: input.appDxId,
     })
     // add all the data to the database

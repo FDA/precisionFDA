@@ -1,6 +1,6 @@
-import { User } from '../../users'
-import { App } from '..'
-import { BaseOperation, DefaultInput } from '../../utils'
+import { App } from '../app.entity'
+import { User } from '../../user'
+import { BaseOperation, DefaultInput } from '../../../utils'
 
 export class ListAppsOperation extends BaseOperation<DefaultInput, App[]> {
   async run() {

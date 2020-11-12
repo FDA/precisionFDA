@@ -1,0 +1,28 @@
+{
+  "name": "@pfda/https-apps-worker",
+  "version": "1.0.0",
+  "main": "dist/index",
+  "types": "dist/index",
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": "^14.13.0",
+    "npm": "^6.14.0"
+  },
+  "scripts": {
+    "build": "npm run clean && npm run compile",
+    "compile": "tsc -b tsconfig.build.json",
+    "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
+    "uninstall": "rm -rf ./node_modules"
+  },
+  "dependencies": {
+    "@mikro-orm/core": "^4.2.3",
+    "@pfda/https-apps-shared": "^1.0.0",
+    "bull": "^3.18.1"
+  },
+  "devDependencies": {
+    "@types/bull": "^3.14.4"
+  }
+}

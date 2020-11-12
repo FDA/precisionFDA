@@ -2,15 +2,12 @@ import { expect } from 'chai'
 import { DateTime } from 'luxon'
 import { repeat } from 'ramda'
 import { EntityManager } from '@mikro-orm/core'
-import { errors } from '@pfda/https-apps-shared'
+import { database, errors } from '@pfda/https-apps-shared'
+import { App, User, Job } from '@pfda/https-apps-shared/src/domain'
+import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import supertest from 'supertest'
-import { database } from '../../../src/database'
 import { api } from '../../../src/server'
 import { dropData } from '../../utils/db'
-import { User } from '../../../src/users'
-import { Job } from '../../../src/jobs'
-import { App } from '../../../src/apps'
-import { JOB_STATE } from '../../../src/jobs/domain/job.enum'
 import * as create from '../../utils/create'
 import { fakes } from '../../utils/mocks'
 import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
@@ -31,6 +28,7 @@ describe('GET /jobs/:id', () => {
     await em.flush()
 
     fakes.client.jobDescribeFake.resetHistory()
+    fakes.queue.addToQueueFake.resetHistory()
   })
 
   it('response shape', async () => {

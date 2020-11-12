@@ -9,4 +9,6 @@ const getLogger = (name = 'pino-logger-name'): pino.Logger =>
     // todo: serializers
   })
 
-export { getLogger }
+const defaultLogger = getLogger()
+
+export { getLogger, defaultLogger }
