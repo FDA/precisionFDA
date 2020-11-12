@@ -1,9 +1,8 @@
 import Chance from 'chance'
 import { nanoid } from 'nanoid'
-import { User } from '../../src/users'
-import { Job } from '../../src/jobs'
-import { JOB_STATE } from '../../src/jobs/domain/job.enum'
-import { APP_HTTPS_SUBTYPE } from '../../src/apps/domain/app.enum'
+import { User, Job } from '@pfda/https-apps-shared/src/domain'
+import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
+import { APP_HTTPS_SUBTYPE } from '@pfda/https-apps-shared/src/domain/app/app.enum'
 
 const chance = new Chance()
 
