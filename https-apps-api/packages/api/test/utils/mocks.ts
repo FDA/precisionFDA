@@ -1,5 +1,5 @@
 import sinon from 'sinon'
-import { client } from '@pfda/https-apps-shared'
+import { client, queue } from '@pfda/https-apps-shared'
 import * as generate from './generate'
 
 const sandbox = sinon.createSandbox()
@@ -13,12 +13,17 @@ const fakes = {
     // jobDescribeFake: sinon.fake.returns({ result: 'yep' }),
     jobCreateFake: sinon.stub().callsFake(() => ({ id: generate.job.jobId() })),
   },
+  queue: {
+    addToQueueFake: sinon.fake(),
+  },
 }
 
 const mocksSetup = () => {
   // client
   sandbox.replace(client, 'jobDescribe', fakes.client.jobDescribeFake)
   sandbox.replace(client, 'jobCreate', fakes.client.jobCreateFake)
+  // queue
+  sandbox.replace(queue, 'addToQueue', fakes.queue.addToQueueFake)
 }
 
 const mocksRestore = () => {

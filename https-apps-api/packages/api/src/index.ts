@@ -1,4 +1,4 @@
-import { database } from './database'
+import { database } from '@pfda/https-apps-shared'
 import { api } from './server'
 import { log } from './logger'
 

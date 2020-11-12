@@ -21,6 +21,9 @@ run-dist:
 run-dev:
 	$(bin)ts-node -r tsconfig-paths/register --files ./packages/api/src/index.ts
 
+run-worker-dev:
+	$(bin)ts-node -r tsconfig-paths/register --files ./packages/worker/src/index.ts
+
 watch:
 	$(bin)nodemon --watch ./packages/api/src --ext ts --exec make run-dev
 
@@ -43,4 +46,4 @@ pristine:
 	$(bin)lerna run uninstall
 	rm -rf ./temp && rm -rf ./node_modules
 
-.PHONY: node_modules install clean compile run-dist run-dev build watch test-api
+.PHONY: node_modules install clean compile run-dist run-dev run-worker-dev build watch test-api

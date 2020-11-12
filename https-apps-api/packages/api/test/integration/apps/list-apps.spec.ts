@@ -1,19 +1,15 @@
 import { expect } from 'chai'
 import { repeat } from 'ramda'
 import { EntityManager } from '@mikro-orm/core'
-import { errors } from '@pfda/https-apps-shared'
+import { errors, database } from '@pfda/https-apps-shared'
 import supertest from 'supertest'
-import { database } from '../../../src/database'
+import { App, User } from '@pfda/https-apps-shared/src/domain'
+import { APP_HTTPS_SUBTYPE, APP_TYPE } from '@pfda/https-apps-shared/src/domain/app/app.enum'
 import { api } from '../../../src/server'
 import { dropData } from '../../utils/db'
-import { User } from '../../../src/users'
-import { App } from '../../../src/apps'
-import { JOB_STATE } from '../../../src/jobs/domain/job.enum'
 import * as create from '../../utils/create'
-import * as generate from '../../utils/generate'
 import { fakes } from '../../utils/mocks'
 import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
-import { APP_HTTPS_SUBTYPE, APP_TYPE } from 'api/src/apps/domain/app.enum'
 
 describe('GET /apps', () => {
   let em: EntityManager

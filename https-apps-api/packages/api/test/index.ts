@@ -1,8 +1,8 @@
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import dirtyChai from 'dirty-chai'
+import { database } from '@pfda/https-apps-shared'
 import { api } from '../src/server'
-import { database } from '../src/database'
 import { initDeleteProcedure } from './utils/db'
 import { mocksRestore, mocksSetup } from './utils/mocks'
 

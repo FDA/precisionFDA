@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { omit } from 'ramda'
-import { BaseEntity } from '../../src/database/base-entity'
-import { User } from '../../src/users'
+import { User } from '@pfda/https-apps-shared/src/domain'
+import { BaseEntity } from '@pfda/https-apps-shared/src/database/base-entity'
 
 const serializeEntityDates = (entity: BaseEntity) => ({
   createdAt: DateTime.fromJSDate(entity.createdAt).setZone('utc').toISO(),

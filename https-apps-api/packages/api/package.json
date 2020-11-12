@@ -18,7 +18,7 @@
     "uninstall": "rm -rf ./node_modules"
   },
   "dependencies": {
-    "@mikro-orm/core": "^4.1.0",
+    "@mikro-orm/core": "^4.2.3",
     "@mikro-orm/mysql": "^4.1.0",
     "@mikro-orm/reflection": "^4.2.3",
     "@pfda/https-apps-shared": "^1.0.0",

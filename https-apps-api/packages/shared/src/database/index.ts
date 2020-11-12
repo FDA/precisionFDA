@@ -1,19 +1,17 @@
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection'
-import { MikroORM } from '@mikro-orm/core'
-import { config } from '@pfda/https-apps-shared'
-import { log } from '../logger'
-import { App } from '../apps'
-import { User } from '../users'
-import { Job } from '../jobs'
+import { Connection, MikroORM } from '@mikro-orm/core'
+import { config } from '..'
+import { defaultLogger as log } from '../logger'
+import { entities } from '../domain'
 import { BaseEntity } from './base-entity'
 
 let orm: MikroORM | null
 
-const start = async () => {
+const start = async (): Promise<void> => {
   try {
     orm = await MikroORM.init({
       metadataProvider: TsMorphMetadataProvider,
-      entities: [BaseEntity, App, User, Job],
+      entities: [BaseEntity, ...Object.values(entities)],
       type: 'mysql',
       dbName: config.database.dbName,
       clientUrl: config.database.clientUrl,
@@ -25,7 +23,6 @@ const start = async () => {
     })
     log.debug('Database: connection')
     await orm.em.getConnection().execute('SELECT 1+1 as foo;')
-    return orm
   } catch (err) {
     log.error({ err }, 'Database connection failed')
     // not suitable here, but good for tests
@@ -34,7 +31,7 @@ const start = async () => {
   }
 }
 
-const stop = async () => {
+const stop = async (): Promise<void> => {
   try {
     if (orm && (await orm.isConnected())) {
       await orm.close()
@@ -49,6 +46,6 @@ const stop = async () => {
 export const database = {
   start,
   stop,
-  orm: () => orm,
-  connection: () => orm.em.getConnection(),
+  orm: (): MikroORM => orm,
+  connection: (): Connection => orm.em.getConnection(),
 }

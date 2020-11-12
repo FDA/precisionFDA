@@ -1,10 +1,12 @@
+import type { AnyObject, OpsCtx } from '../types'
+
 export type DefaultInput = AnyObject
 
 export abstract class BaseOperation<IN, OUT> {
-  protected ctx: Ops.OpsCtx
+  protected ctx: OpsCtx
 
   // input context has to be provided by the server or the worker setup
-  constructor(inputCtx: Ops.OpsCtx) {
+  constructor(inputCtx: OpsCtx) {
     // build context
     this.ctx = {
       log: inputCtx.log,
