@@ -37,7 +37,7 @@ describe('GET /apps', () => {
       id: app.id,
       type: APP_TYPE.HTTPS,
       httpsSubtype: APP_HTTPS_SUBTYPE.JUPYTER,
-      dxid: null,
+      dxid: app.dxid,
       version: null,
       revision: null,
       title: null,
@@ -48,7 +48,7 @@ describe('GET /apps', () => {
       verified: false,
       uid: null,
       devGroup: null,
-      release: '',
+      release: app.release,
       userId: user.id,
     })
   })
