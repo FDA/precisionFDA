@@ -1,19 +1,50 @@
-import { config, database } from '@pfda/https-apps-shared'
-import { start } from './queues'
+import { database, queue } from '@pfda/https-apps-shared'
+import { setupHandlers } from './queues'
 import { log } from './utils'
 
-// PRODUCER - add to queue will be called from the operations
-// connects the API and the worker
-// figure out how to do it in SHARED context
+const handleFatalError = (err: Error): void => {
+  process.removeAllListeners('uncaughtException')
+  process.removeAllListeners('unhandledRejection')
+
+  log.fatal({ err }, 'Fatal error occured. Exiting the worker')
+}
+
+const stopWorker = async (): Promise<void> => {
+  log.info('worker closing')
+
+  process.removeAllListeners('SIGINT')
+  process.removeAllListeners('SIGTREM')
+
+  await queue.disconnectQueues()
+  await database.stop()
+}
+
+const startWorker = async (): Promise<void> => {
+  log.info('worker starting')
+  process.once('uncaughtException', err => {
+    log.error('Worker crash: Uncaught exception')
+    handleFatalError(err)
+  })
+
+  process.once('unhandledRejection', err => {
+    log.error('Worker crash: Unhandled rejection')
+    handleFatalError(err as Error)
+  })
+
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  process.once('SIGINT', () => stopWorker())
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  process.once('SIGTERM', () => stopWorker())
+
+  // start consuming queues
+
+  await database.start()
+  await setupHandlers()
+}
 
 Promise.resolve()
   .then(async () => {
-    // todo: better signals handling as in the API
-    // await database.start()
     // this is blocking, no other promise is resolved
-    await start()
+    await startWorker()
   })
-  .catch(err => {
-    log.error({ err }, 'failed to start the queue')
-    throw err
-  })
+  .catch(err => handleFatalError(err))

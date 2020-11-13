@@ -1,6 +1,25 @@
-export const handler = async job => {
-  // this will create a corresponding operation, create a context for it,
-  // and run it safely, something like "base-operation"
-  console.log('job is being processed', job.data)
-  return await Promise.resolve({ yay: true })
+import { path } from 'ramda'
+import { queue, errors } from '@pfda/https-apps-shared'
+import type { CheckStatusJob, Task } from '@pfda/https-apps-shared/src/queue/task.input'
+import { Job } from 'bull'
+import { log } from '../utils'
+import { jobStatusHandler } from './job-status-handler'
+
+export const handler = async (job: Job<Task>) => {
+  if (typeof path(['data', 'type'], job) === 'undefined') {
+    log.warn({ jobData: job.data }, 'Invalid job.data format')
+    throw new errors.WorkerError('Job data does not specify task type', { jobData: job.data })
+  }
+
+  switch (job.data.type) {
+    case queue.TASKS.SYNC_JOB_STATUS:
+      await jobStatusHandler(job.data as CheckStatusJob)
+      return await Promise.resolve({ yay: true })
+    case queue.TASKS.OTHER_TASK:
+      console.log('gonna do the other task')
+      return await Promise.resolve({ yay: true })
+    default:
+      log.warn({ jobData: job.data }, 'Trying to handle unsupported task')
+      throw new errors.WorkerError('Unsupported task', { jobData: job.data })
+  }
 }

@@ -4,13 +4,14 @@ import type { AnyObject } from '../types'
 
 type BaseErrorProps = AnyObject & {
   code: ErrorCodes
-  statusCode: number
+  statusCode?: number
   name?: string
 }
 type MaybeBaseErrorProps = Partial<BaseErrorProps>
 
 export enum ErrorCodes {
   GENERIC = 'E_INTERNAL',
+  WORKER = 'E_WORKER',
   VALIDATION = 'E_VALIDATION',
   NOT_FOUND = 'E_NOT_FOUND',
   // for specific situations
@@ -32,6 +33,15 @@ export class BaseError extends Error {
       ...props,
       name: this.name,
     }
+  }
+}
+
+export class WorkerError extends BaseError {
+  constructor(message = 'Worker processing failed', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.WORKER,
+      ...props,
+    })
   }
 }
 
