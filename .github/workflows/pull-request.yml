@@ -83,6 +83,8 @@ jobs:
         run: yarn test
 
   show-branch-name:
+    name: Just show branch name
+    runs-on: ubuntu-latest
     steps:
       - name: 'Just branch name'
         shell: bash
