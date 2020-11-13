@@ -90,10 +90,16 @@ jobs:
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch_name
+      - name: 'test'
+        env:
+          TEST: ${{ github.ref }}
+        shell: bash
+        run: echo $TEST
 
   test-nodejs-api:
     name: Test HTTPS Apps api
     runs-on: ubuntu-latest
+    container: ruby:2.7.1
 
     # run tests only on this specific branch for now
     # if: endsWith(github.ref, '/PFDA-1691_https_workstation')
@@ -106,16 +112,31 @@ jobs:
 
     env:
       NODE_ENV: test
-      DATABASE_TEST_URL: mysql://root:password@localhost:3306
+      DATABASE_TEST_URL: mysql://root:password@mysql
+      DATABASE_TEST_NAME: test_db
 
     steps:
       - uses: actions/checkout@v2
+      # we have to get the database to same state as for RoR app
+      - name: Install & Build
+        run: |
+          apt-get update
+          apt-get install -y cmake libssl-dev
+          gem install bundler -v 2.1.4
+          bundle install --jobs 4 --retry 3
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
-      # todo: setup database so it is migrated and so on
+      - name: Configure
+        env:
+          NO_FIPS: 1
+        run: |
+          cp config/database.yml.ci config/database.yml
+          bundle exec rake db:setup
+      - name: Install yarn
+        run: npm install -g yarn
       - run: cd ./https-apps-api && make install
-      - run: make test-api
+      - run: cd ./https-apps-api && make test-api
 
   react-app:
     name: React App
