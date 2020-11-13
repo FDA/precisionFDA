@@ -82,6 +82,32 @@ jobs:
       - name: Test
         run: yarn test
 
+  test-nodejs-api:
+    name: Test HTTPS Apps api
+    runs-on: ubuntu-latest
+
+    # run tests only on this specific branch for now
+    if: endsWith(github.ref, '/PFDA-1691_https_workstation')
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: password
+
+    env:
+      NODE_ENV: test
+      DATABASE_TEST_URL: mysql://root:password@localhost:3306
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      # todo: setup database so it is migrated and so on
+      - run: cd ./https-apps-api && make install
+      - run: make test-api
+
   react-app:
     name: React App
     runs-on: ubuntu-latest
