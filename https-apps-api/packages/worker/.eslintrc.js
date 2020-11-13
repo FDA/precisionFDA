@@ -5,6 +5,7 @@ module.exports = {
   rules: {
     '@typescript-eslint/explicit-function-return-type': 0,
     '@typescript-eslint/explicit-module-boundary-types': 0,
+    '@typescript-eslint/prefer-readonly-parameter-types': 0,
     // '@typescript-eslint/promise-function-async': 0,
     // '@typescript-eslint/restrict-template-expressions': 0,
     // 'new-cap': 0,
