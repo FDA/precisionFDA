@@ -1,6 +1,6 @@
 import Chance from 'chance'
 import { nanoid } from 'nanoid'
-import { User, Job } from '@pfda/https-apps-shared/src/domain'
+import { User, Job, App } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { APP_HTTPS_SUBTYPE } from '@pfda/https-apps-shared/src/domain/app/app.enum'
 
@@ -25,6 +25,13 @@ const user = {
 }
 
 const app = {
+  simple: (): Partial<App> => {
+    const dxid = `app-${random.dxstr()}`
+    return {
+      dxid,
+      release: 'default-release-value',
+    }
+  },
   runAppInput: (): AnyObject => ({
     instanceType: 'baseline-2',
     duration: 30,

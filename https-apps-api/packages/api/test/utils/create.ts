@@ -41,7 +41,9 @@ const appHelper = {
     references: { user: InstanceType<typeof entities.User> },
     data?: Partial<InstanceType<typeof entities.App>>,
   ) => {
+    const defaults = generate.app.simple()
     const input = {
+      ...defaults,
       ...data,
     }
     const app = wrap(new entities.App(references.user)).assign(input, { em })

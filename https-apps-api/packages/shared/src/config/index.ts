@@ -73,6 +73,9 @@ const defaultConfig = {
       repeatPattern: '*/1 * * * *',
     },
   },
+  redis: {
+    url: 'redis://localhost:6379',
+  },
 }
 
 // plug-in the overrides that are based on the NODE_ENV
