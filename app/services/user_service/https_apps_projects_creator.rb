@@ -20,15 +20,13 @@ module UserService
     # Calls a process for creation https apps projects for a user.
     def call
       updates =
-        PROJECT_NAMES.reduce({}) do |result, project_name|
+        PROJECT_NAMES.each_with_object({}) do |project_name, memo|
           project_dxid = user[project_name]
 
-          if (project_dxid && find_project(id: project_dxid)).blank?
-            project = find_project(name: project_name) || create_project(project_name)
-            result[project_name] = project["id"]
-          end
+          next if project_dxid && find_project(id: project_dxid).present?
 
-          result
+          project = find_project(name: project_name) || create_project(project_name)
+          memo[project_name] = project["id"]
         end
 
       user.update(updates)

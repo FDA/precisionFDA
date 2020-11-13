@@ -31,7 +31,7 @@ class LoginTasksProcessor
     Rails.logger.warn([
       "Can't create https apps projects for a user '#{user.dxuser}'",
       e.message,
-      e.backtrace.join("\n")
+      e.backtrace.join("\n"),
     ].join("\n"))
   end
 
