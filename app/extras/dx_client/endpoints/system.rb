@@ -26,6 +26,14 @@ module DXClient
       def system_find_jobs(opts = {})
         call("system", "findJobs", opts)
       end
+
+      # Finds projects.
+      # @see https://documentation.dnanexus.com/developer/api/search#api-method-system-findprojects
+      # @param opts [Hash] Options used to find projects.
+      # @return [Array]
+      def system_find_projects(opts = {})
+        call("system", "findProjects", opts)
+      end
     end
   end
 end

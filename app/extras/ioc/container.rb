@@ -36,6 +36,12 @@ module IOC
         register("auth", memoize: true) { DNAnexusAPI.new(ADMIN_TOKEN, DNANEXUS_AUTHSERVER_URI) }
       end
 
+      namespace "users" do
+        register("https_apps_projects_creator") do
+          UserService::HttpsAppsProjectsCreator.new(container.resolve("api.user"), config[:user])
+        end
+      end
+
       namespace "orgs" do # rubocop:todo Metrics/BlockLength
         register("user_removal_policy") { UserRemovalPolicy }
         register("member_removal_policy") { MemberRemovalPolicy }
@@ -56,7 +62,10 @@ module IOC
         end
 
         register("login_tasks_processor") do
-          LoginTasksProcessor.new(resolve("org_leave_processor"))
+          LoginTasksProcessor.new(
+            resolve("org_leave_processor"),
+            container.resolve("users.https_apps_projects_creator"),
+          )
         end
 
         register("leave_org_request_creator") do
