@@ -27,44 +27,44 @@ jobs:
           runner: brakeman
           commit: origin/${{ github.base_ref }}
 
-  test-ruby:
-    name: Test (Ruby)
-    runs-on: ubuntu-latest
-    container: ruby:2.7.1
+  # test-ruby:
+  #   name: Test (Ruby)
+  #   runs-on: ubuntu-latest
+  #   container: ruby:2.7.1
 
-    services:
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_ROOT_PASSWORD: password
+  #   services:
+  #     mysql:
+  #       image: mysql:5.7
+  #       env:
+  #         MYSQL_ROOT_PASSWORD: password
 
-    steps:
-      - uses: actions/checkout@v2
+  #   steps:
+  #     - uses: actions/checkout@v2
 
-      - name: Install & Build
-        run: |
-          apt-get update
-          apt-get install -y cmake libssl-dev
-          gem install bundler -v 2.1.4
-          bundle install --jobs 4 --retry 3
+  #     - name: Install & Build
+  #       run: |
+  #         apt-get update
+  #         apt-get install -y cmake libssl-dev
+  #         gem install bundler -v 2.1.4
+  #         bundle install --jobs 4 --retry 3
 
-      - name: Configure
-        env:
-          NO_FIPS: 1
-        run: |
-          cp config/database.yml.ci config/database.yml
-          bundle exec rake db:setup
+  #     - name: Configure
+  #       env:
+  #         NO_FIPS: 1
+  #       run: |
+  #         cp config/database.yml.ci config/database.yml
+  #         bundle exec rake db:setup
 
-      - name: Create fake bundles
-        run: |
-          mkdir app/assets/packs
-          touch app/assets/packs/bundle.js
-          touch app/assets/packs/bundle.css
+  #     - name: Create fake bundles
+  #       run: |
+  #         mkdir app/assets/packs
+  #         touch app/assets/packs/bundle.js
+  #         touch app/assets/packs/bundle.css
 
-      - name: Unit Tests
-        env:
-          NO_FIPS: 1
-        run: bundle exec rspec
+  #     - name: Unit Tests
+  #       env:
+  #         NO_FIPS: 1
+  #       run: bundle exec rspec
 
   test-js:
     name: Test (JS)
@@ -82,12 +82,19 @@ jobs:
       - name: Test
         run: yarn test
 
+  show-branch-name:
+    steps:
+      - name: 'Just branch name'
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch_name
+
   test-nodejs-api:
     name: Test HTTPS Apps api
     runs-on: ubuntu-latest
 
     # run tests only on this specific branch for now
-    if: endsWith(github.ref, '/PFDA-1691_https_workstation')
+    # if: endsWith(github.ref, '/PFDA-1691_https_workstation')
 
     services:
       mysql:
