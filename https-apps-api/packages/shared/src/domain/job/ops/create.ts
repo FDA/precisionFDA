@@ -6,9 +6,10 @@ import { Job } from '../job.entity'
 import { App } from '../../app/app.entity'
 import { User } from '../../user/user.entity'
 import { JOB_STATE, allowedFeatures, allowedInstanceTypes } from '../job.enum'
+import { createJobSyncTask } from '../../../queue'
 
 export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
-  async run(input: RunAppInput) {
+  async run(input: RunAppInput): Promise<Job> {
     const em = this.ctx.em
 
     // todo: how the app is gonna be referenced is not resolved
@@ -82,8 +83,7 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
     em.persist(job)
     await em.flush()
 
-    // todo: add task to a worker queue
-
+    await createJobSyncTask({ dxid: job.dxid }, this.ctx.user)
     return job
   }
 }

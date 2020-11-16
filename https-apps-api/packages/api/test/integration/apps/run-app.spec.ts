@@ -25,6 +25,7 @@ describe('POST /apps/:id/run', () => {
     await em.flush()
     // handle the stubs
     fakes.client.jobCreateFake.resetHistory()
+    fakes.queue.createJobSyncTaskFake.resetHistory()
   })
 
   it('response shape', async () => {
@@ -54,6 +55,24 @@ describe('POST /apps/:id/run', () => {
       .send(generate.app.runAppInput())
       .expect(201)
     expect(fakes.client.jobCreateFake.calledOnce).to.be.true()
+  })
+
+  it('calls queue helper', async () => {
+    const { body } = await supertest(api.getServer())
+      .post(`/apps/${app.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(generate.app.runAppInput())
+      .expect(201)
+    expect(fakes.queue.createJobSyncTaskFake.calledOnce).to.be.true()
+    const fakeCallArgs = fakes.queue.createJobSyncTaskFake.getCall(0).args
+    expect(fakeCallArgs[0]).to.deep.equal({
+      dxid: body.dxid,
+    })
+    expect(fakeCallArgs[1]).to.deep.equal({
+      id: user.id,
+      accessToken: 'fake-token',
+      dxuser: user.dxuser,
+    })
   })
 
   context('error states', () => {

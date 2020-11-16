@@ -28,7 +28,7 @@ describe('GET /jobs/:id', () => {
     await em.flush()
 
     fakes.client.jobDescribeFake.resetHistory()
-    fakes.queue.addToQueueFake.resetHistory()
+    fakes.queue.createJobSyncTaskFake.resetHistory()
   })
 
   it('response shape', async () => {

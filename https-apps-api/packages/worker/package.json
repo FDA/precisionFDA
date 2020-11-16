@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@types/bull": "^3.14.4",
-    "@types/ramda": "^0.27.32"
+    "@types/ramda": "^0.27.32",
+    "bull-repl": "^0.26.3"
   }
 }

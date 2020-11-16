@@ -5,6 +5,7 @@
  */
 
 import { EntityManager } from '@mikro-orm/core'
+import { Job } from 'bull'
 import { Logger } from 'pino'
 
 declare type DeepPartial<T> = {
@@ -32,4 +33,8 @@ interface OpsCtx {
   user: UserCtx
 }
 
-export type { DeepPartial, AnyObject, UserCtx, OpsCtx }
+interface WorkerOpsCtx extends OpsCtx {
+  job: Job
+}
+
+export type { DeepPartial, AnyObject, UserCtx, OpsCtx, WorkerOpsCtx }
