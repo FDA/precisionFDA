@@ -6,6 +6,14 @@ import { pickOpsCtx } from '../utils'
 
 const router = new Router<DefaultState, Api.Ctx>()
 
+router.get('/', makeValidationMdw({ query: utils.schemas.paginationSchema }), async ctx => {
+  const jobs = await new jobDomain.ListJobsOperation(pickOpsCtx(ctx)).execute({
+    page: ctx.query.page ?? 1,
+    limit: ctx.query.limit ?? 10,
+  })
+  ctx.body = jobs
+})
+
 router.get(
   '/:jobDxId',
   makeValidationMdw({ params: utils.schemas.getDxidInputSchema('jobDxId') }),

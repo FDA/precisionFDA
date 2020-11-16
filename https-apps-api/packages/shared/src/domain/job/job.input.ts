@@ -2,6 +2,7 @@ import type { JSONSchema7 } from 'json-schema'
 import { config } from '../../config'
 import { schemas } from '../../utils'
 import { APP_HTTPS_SUBTYPE } from '../app/app.enum'
+import { Job } from './job.entity'
 import { allowedFeatures, allowedInstanceTypes } from './job.enum'
 
 type DxIdInput = {
@@ -22,6 +23,21 @@ type DescribeJobInput = DxIdInput & {
   appId?: number
 }
 
+type ListJobsInput = {
+  page: number
+  limit: number
+}
+
+type PageJobs = {
+  data: Job[]
+  meta: {
+    currentPage: number
+    nextPage: number
+    totalCount: number
+    limit: number
+  }
+}
+
 const runAppSchema: JSONSchema7 = {
   type: 'object',
   properties: {
@@ -37,6 +53,7 @@ const runAppSchema: JSONSchema7 = {
     },
   },
   required: ['instanceType', 'duration', 'httpsAppType'],
+  additionalProperties: false,
 }
 
 const jobIdAppIdSchema: JSONSchema7 = {
@@ -46,6 +63,15 @@ const jobIdAppIdSchema: JSONSchema7 = {
     appDxId: schemas.dxidProp,
   },
   required: ['dxid', 'appDxId'],
+  additionalProperties: false,
 }
 
-export { runAppSchema, RunAppInput, jobIdAppIdSchema, DxIdInput, DescribeJobInput }
+export {
+  runAppSchema,
+  RunAppInput,
+  jobIdAppIdSchema,
+  DxIdInput,
+  DescribeJobInput,
+  ListJobsInput,
+  PageJobs,
+}

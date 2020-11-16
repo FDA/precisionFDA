@@ -1,5 +1,6 @@
 import Ajv from 'ajv'
 
-const ajv = new Ajv({ removeAdditional: 'all', coerceTypes: true })
+// removeAdditional is set on schema level
+const ajv = new Ajv({ removeAdditional: false, coerceTypes: true })
 
 export { ajv }
