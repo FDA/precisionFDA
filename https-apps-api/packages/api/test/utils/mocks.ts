@@ -14,7 +14,7 @@ const fakes = {
     jobCreateFake: sinon.stub().callsFake(() => ({ id: generate.job.jobId() })),
   },
   queue: {
-    addToQueueFake: sinon.fake(),
+    createJobSyncTaskFake: sinon.fake(),
   },
 }
 
@@ -23,7 +23,7 @@ const mocksSetup = () => {
   sandbox.replace(client, 'jobDescribe', fakes.client.jobDescribeFake)
   sandbox.replace(client, 'jobCreate', fakes.client.jobCreateFake)
   // queue
-  sandbox.replace(queue, 'addToQueue', fakes.queue.addToQueueFake)
+  sandbox.replace(queue, 'createJobSyncTask', fakes.queue.createJobSyncTaskFake)
 }
 
 const mocksRestore = () => {
