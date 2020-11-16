@@ -37,7 +37,8 @@ describe('POST /apps/:id/run', () => {
     expect(stripEntityDates(body)).to.deep.equal({
       id: 1,
       dxid: generate.job.jobId(),
-      userId: user.id,
+      user: user.id,
+      taggings: [],
       project: null,
       state: JOB_STATE.IDLE,
       scope: 'private',

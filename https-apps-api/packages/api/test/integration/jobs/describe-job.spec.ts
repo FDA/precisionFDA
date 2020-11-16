@@ -50,8 +50,8 @@ describe('GET /jobs/:id', () => {
       name: job.name,
       scope: job.scope,
       uid: job.uid,
-      userId: user.id,
-      appId: app.id,
+      user: user.id,
+      app: app.id,
     })
     // test timestamps separately, just to make sure timezones are ok
     expect(body).to.include.keys(['createdAt'])

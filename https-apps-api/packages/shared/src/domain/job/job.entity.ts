@@ -1,17 +1,22 @@
 import {
+  Collection,
   Entity,
+  EntityRepositoryType,
   IdentifiedReference,
   ManyToOne,
+  OneToMany,
   PrimaryKey,
   Property,
   Reference,
 } from '@mikro-orm/core'
-import { App } from '../app/app.entity'
+import { App } from '../app'
 import { BaseEntity } from '../../database/base-entity'
-import { User } from '../user/user.entity'
+import { User } from '../user'
+import { Tagging } from '../tagging'
 import { JOB_STATE } from './job.enum'
+import { JobRepository } from './job.repository'
 
-@Entity({ tableName: 'jobs' })
+@Entity({ tableName: 'jobs', customRepository: () => JobRepository })
 export class Job extends BaseEntity {
   @PrimaryKey()
   id: number
@@ -41,7 +46,9 @@ export class Job extends BaseEntity {
   scope: string
 
   @Property()
-  uid: string
+  uid: string;
+
+  [EntityRepositoryType]?: JobRepository
 
   // foreign keys -> not yet mapped
   // @Property()
@@ -51,12 +58,17 @@ export class Job extends BaseEntity {
   // analysisId: number
 
   // relations
-  // serialized name -> is it a good idea?
-  @ManyToOne({ serializedName: 'userId' })
+  @ManyToOne()
   user!: IdentifiedReference<User>
 
-  @ManyToOne({ serializedName: 'appId' })
+  @ManyToOne()
   app?: IdentifiedReference<App>
+
+  @OneToMany({
+    entity: () => Tagging,
+    mappedBy: t => t.job,
+  })
+  taggings = new Collection<Tagging>(this)
 
   constructor(user: User, app?: App) {
     super()
