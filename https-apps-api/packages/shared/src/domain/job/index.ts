@@ -7,3 +7,5 @@ export { Job } from './job.entity'
 export { CreateJobOperation } from './ops/create'
 
 export { DescribeJobOperation } from './ops/describe'
+
+export { SyncJobOperation } from './ops/synchronize'

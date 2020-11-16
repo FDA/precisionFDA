@@ -53,6 +53,17 @@ const defaultConfig = {
   redis: {
     url: 'redis://localhost:6379',
   },
+  workerJobs: {
+    queues: {
+      default: {
+        name: 'https-apps-worker-queue',
+      },
+    },
+    syncJob: {
+      // every two minutes
+      repeatPattern: '*/2 * * * *',
+    },
+  },
 }
 
 // plug-in the overrides that are based on the NODE_ENV

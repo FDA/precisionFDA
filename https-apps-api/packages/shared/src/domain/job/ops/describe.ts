@@ -1,7 +1,6 @@
 import { wrap } from '@mikro-orm/core'
 import * as client from '../../../platform-client'
 import * as errors from '../../../errors'
-import { addToQueue } from '../../../queue'
 import { BaseOperation } from '../../../utils'
 import { Job } from '../job.entity'
 import type { DescribeJobInput } from '../job.input'
@@ -9,7 +8,7 @@ import { TERMINAL_STATES } from '../job.enum'
 import { User } from '../../user'
 
 export class DescribeJobOperation extends BaseOperation<DescribeJobInput, Job> {
-  async run(input: DescribeJobInput) {
+  async run(input: DescribeJobInput): Promise<Job> {
     const em = this.ctx.em
     const jobRepo = em.getRepository(Job)
     const job = await jobRepo.findOne({
@@ -22,9 +21,6 @@ export class DescribeJobOperation extends BaseOperation<DescribeJobInput, Job> {
     if (!job) {
       throw new errors.JobNotFoundError()
     }
-
-    // TEST run something in the queue
-    await addToQueue({ foo: 'yep' })
 
     // if job is already finished (in our system), no need to synchronize
     if (job.state && Object.values(TERMINAL_STATES).includes(job.state)) {

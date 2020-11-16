@@ -1,5 +1,7 @@
+/* eslint-disable import/group-exports */
+/* eslint-disable max-classes-per-file */
 import { nanoid } from 'nanoid'
-import type { AnyObject, OpsCtx } from '../types'
+import type { AnyObject, OpsCtx, WorkerOpsCtx } from '../types'
 
 export type DefaultInput = AnyObject
 
@@ -35,4 +37,39 @@ export abstract class BaseOperation<IN, OUT> {
   }
 
   public abstract async run(props?: IN): Promise<OUT>
+}
+
+export abstract class WorkerBaseOperation<IN, OUT> extends BaseOperation<IN, OUT> {
+  protected ctx: WorkerOpsCtx
+
+  constructor(inputCtx: WorkerOpsCtx) {
+    super(inputCtx)
+    // adding one extra field
+    this.ctx.job = inputCtx.job
+  }
+
+  async execute(props?: IN): Promise<OUT> {
+    const startTime = Date.now()
+    this.ctx.log.info(
+      {
+        startTime,
+        id: this.id,
+        jobType: this.ctx.job.data?.type,
+        bullJobId: this.ctx.job.id,
+      },
+      'Worker operation started',
+    )
+    try {
+      // run the operation with context
+      const res = await this.run(props)
+      this.ctx.log.info({ id: this.id }, 'Worker operation finished')
+      return res
+    } catch (err) {
+      this.ctx.log.warn(
+        { executionTime: Date.now() - startTime, err, id: this.id },
+        'Operation failed',
+      )
+      throw err
+    }
+  }
 }

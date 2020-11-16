@@ -1,6 +1,6 @@
 import { path } from 'ramda'
 import { queue, errors } from '@pfda/https-apps-shared'
-import type { CheckStatusJob, Task } from '@pfda/https-apps-shared/src/queue/task.input'
+import type { Task } from '@pfda/https-apps-shared/src/queue/task.input'
 import { Job } from 'bull'
 import { log } from '../utils'
 import { jobStatusHandler } from './job-status-handler'
@@ -13,7 +13,7 @@ export const handler = async (job: Job<Task>) => {
 
   switch (job.data.type) {
     case queue.TASKS.SYNC_JOB_STATUS:
-      await jobStatusHandler(job.data as CheckStatusJob)
+      await jobStatusHandler(job)
       return await Promise.resolve({ yay: true })
     case queue.TASKS.OTHER_TASK:
       console.log('gonna do the other task')
