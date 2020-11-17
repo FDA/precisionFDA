@@ -1,0 +1,187 @@
+.home-page-layout
+  &__tabs
+    display: flex
+    justify-content: center
+    height: 40px
+
+  &__tabs-item
+    display: flex
+    padding: 0 9px
+    align-items: center
+    height: 100%
+    cursor: pointer
+    background: #F2F2F2
+    margin-right: 10px
+    border-radius: 5px 5px 0 0
+    color: #272727
+    font-weight: bold
+    font-size: 18px
+
+    i
+      margin-right: 5px
+
+    &:hover
+      color: #272727
+
+    &:focus
+      color: #272727
+
+    &--active
+      color: #fff
+      background: #454545
+
+      &:focus
+        color: #fff
+
+      &:hover
+        color: #fff
+
+  &__container
+    display: flex
+    border-top: 5px solid #454545
+
+  &__menu
+    background-color: #454545
+    height: calc(100vh - 134px)
+    min-height: 750px
+    min-width: 270px
+    position: relative
+    transition: all 300ms
+    width: 270px
+
+    &--hidden
+      width: 80px
+      min-width: 80px
+
+      .home-page-layout__menu-item-text
+        width: 0%
+
+  &__menu-switcher
+    position: absolute
+    top: 350px
+    right: -10px
+    color: #fff
+    background-color: #454545
+    font-size: 30px
+    padding: 10px
+    border-radius: 5px
+    z-index: 100
+    cursor: pointer
+
+  &__menu-item
+    color: #fff
+    font-size: 20px
+    font-weight: bold
+    padding: 15px 30px
+    display: flex
+    align-items: center
+    white-space: nowrap
+
+    &:hover
+      color: #fff
+
+    &:focus
+      color: #fff
+
+    &--active
+      background-color: #646464
+
+    i
+      margin-right: 10px
+
+  &__menu-item-text
+    width: 100%
+    overflow: hidden
+    display: flex
+    justify-content: space-between
+    transition: width 300ms
+
+  &__content
+    width: 100%
+    height: 100%
+
+  &__header-row
+    display: flex
+
+  &__actions
+    &--right
+      margin-left: auto
+
+    button
+      margin-right: 8px
+
+  &__bottom-area
+    position: absolute
+    bottom: 15px
+    left: 15px
+    color: #F4F8FD
+    cursor: pointer
+
+  &__data-table
+    .pfda-table-components
+      width: 100%
+      table-layout: fixed
+
+      th:first-child
+        color: #272727
+        width: 40px
+
+      &__th
+        padding: 10px
+        color: #555555
+        text-transform: uppercase
+        font-size: 12px
+        font-weight: 400
+
+        &:first-child
+          color: #272727
+          width: 40px
+
+    tr
+      border-bottom: 1px solid #DDDDDD
+
+      &:first-child
+        border-bottom: 2px solid #DDDDDD
+
+    td
+      color: #272727
+      padding: 10px
+
+    .fa
+      font-size: 16px
+
+    &_checkbox
+      cursor: pointer
+
+    &_count
+      display: flex
+      justify-content: flex-end
+      align-items: center
+      height: 35px
+      border-bottom: 1px solid #DDDDDD
+      border-top: 1px solid #DDDDDD
+      color: #8198BC
+      font-size: 12px
+      padding-right: 10px
+
+    .pfda-pagination
+      display: flex
+
+      &__page
+        color: #1F70B5
+        border: 1px solid #1F70B5
+        border-right: none
+        height: 35px
+        width: 35px
+        display: flex
+        align-items: center
+        justify-content: center
+        cursor: pointer
+        margin: 0
+
+        &:last-child
+          border-right: 1px solid #1F70B5
+
+        &--active
+          color: #FFFFFF
+          background: #1F70B5

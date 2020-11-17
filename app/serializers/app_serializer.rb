@@ -6,6 +6,7 @@ class AppSerializer < ApplicationSerializer
     :title,
     :added_by,
     :created_at,
+    :created_at_date_time,
     :revision,
     :run_by_you,
     :org,
@@ -51,6 +52,12 @@ class AppSerializer < ApplicationSerializer
   # @return [String] Formatted time.
   def created_at
     formatted_time(object.created_at)
+  end
+
+  # Returns formatted created_at time.
+  # @return [String] Formatted time.
+  def created_at_date_time
+    formatted_date_time(object.created_at)
   end
 
   # Builds links.

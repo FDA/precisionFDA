@@ -29,7 +29,7 @@
         <p>Once you click the "Run App" button on the upper right, the system will generate a new job that encapsulates that particular execution.</p>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(videos[:apps_run][:url]) %>
+        <%= video_iframe(videos[:apps_run][:url], videos[:apps_run][:title]) %>
       </div>
       <div id="apps-batch-run" class="h2">Batch running an app</div>
       <div class="bs-docs-section">
@@ -37,11 +37,11 @@
         <p>The system will launch separate jobs for each of the varying input values.</p>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(videos[:apps_batch_run][:url]) %>
+        <%= video_iframe(videos[:apps_batch_run][:url], videos[:apps_batch_run][:title]) %>
       </div>
       <div id="apps-export" class="h2">Exporting an app</div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("export_screenshot.png") %>
+        <%= image_tag("export_screenshot.png", alt: "Export an app to Docker Container, CWL Tool or WDL Task on Relevant Apps page") %>
       </div>
       <div class="bs-docs-section">
         <p>This feature allows you to export an app into a portable format (Docker container), so that you can run it on your own computer.</p>
@@ -57,7 +57,7 @@
         <p>This feature is currently in production. Please keep in mind that due to the nature of Linux container technology, the environment inside the container is not identical to the cloud environment. Moreover, certain configuration aspects of the app such as "Internet Access" or "Instance Type" are not reflected in the exported container. As always, we welcome your feedback and ideas on how to evolve this feature.</p>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(videos[:apps_export][:url]) %>
+        <%= video_iframe(videos[:apps_export][:url], videos[:apps_export][:title]) %>
       </div>
       <div id="cwl-export" class="h2">CWL export</div>
       <div class="bs-docs-section">
@@ -186,7 +186,7 @@ where inputs.json is a standard WDL input file definition (see https://software.
     <!-- SIDEBAR NAVIGATION -->
     <div class="col-sm-6">
       <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
-        <ul class="nav bs-docs-sidenav">
+        <ul class="nav bs-docs-sidenav right-sidebar-nav">
           <li><a href="#apps-overview">Overview &amp; Terminology</a></li>
           <li><a href="#apps-listing">Listing apps</a></li>
           <li><a href="#apps-run">Running an app</a></li>

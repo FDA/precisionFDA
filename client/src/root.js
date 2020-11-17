@@ -8,6 +8,7 @@ import SpacesListPage from './views/pages/Spaces/SpacesListPage'
 import SpacePage from './views/pages/Spaces/SpacePage'
 import NoFoundPage from './views/pages/NoFoundPage'
 import NewSpacePage from './views/pages/Spaces/NewSpacePage'
+import HomePage from './views/pages/Home'
 import { NEW_SPACE_PAGE_ACTIONS } from './constants'
 import ErrorWrapper from './views/components/ErrorWrapper'
 
@@ -17,6 +18,8 @@ const root = ({ store }) => (
     <Router history={history}>
       <ErrorWrapper>
         <Switch>
+          <Redirect exact from='/home' to='/home/apps' />
+          <Route path='/home/:page/:tab?' render={(props) => <HomePage {...props} />} />
           <Route exact path='/spaces'>
             <SpacesListPage />
           </Route>

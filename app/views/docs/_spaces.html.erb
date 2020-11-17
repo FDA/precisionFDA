@@ -8,7 +8,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/review_spaces/schema.png") %>
+        <%= image_tag("docs/review_spaces/schema.png", alt: "Review spaces schema with Sponsor-Private,Sponsor-Reviewer and Reviewer-Private areas") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -24,7 +24,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/review_spaces/creating.png") %>
+        <%= image_tag("docs/review_spaces/creating.png", alt: "Spaces page overview") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -32,7 +32,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/review_spaces/creating2.png") %>
+        <%= image_tag("docs/review_spaces/creating2.png", alt: "Create new space page with Type,Name,Description,Reviewe lead,Sponsor Org and CTS fields") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -43,7 +43,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/review_spaces/testing.png") %>
+        <%= image_tag("docs/review_spaces/testing.png", alt: "Inactive Test review space") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -59,7 +59,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/review_spaces/confidential.png") %>
+        <%= image_tag("docs/review_spaces/confidential.png", alt: "Active Confidential review space with Activity Summary and expanded filter options") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -81,7 +81,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/review_spaces/cooperative.png") %>
+        <%= image_tag("docs/review_spaces/cooperative.png", alt: "Navigation link to Cooperative review space above a Confidential review space") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -97,7 +97,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/review_spaces/transfer.png") %>
+        <%= image_tag("docs/review_spaces/transfer.png", alt: "Transferring data from private to cooperative space") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -122,7 +122,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/review_spaces/workflow_publish1.png") %>
+        <%= image_tag("docs/review_spaces/workflow_publish1.png", alt: "Workflows tab overview with highlighted Publish button") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -130,7 +130,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/review_spaces/workflow_publish2.png") %>
+        <%= image_tag("docs/review_spaces/workflow_publish2.png", alt: "Dropdown list of spaces to Publish") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -138,7 +138,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/review_spaces/workflow_publish3.png") %>
+        <%= image_tag("docs/review_spaces/workflow_publish3.png", alt: "Share workflow objects page") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -146,7 +146,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/review_spaces/workflow_publish4.png") %>
+        <%= image_tag("docs/review_spaces/workflow_publish4.png", alt: "Shared object resources with checkbox selected for Shared option") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -160,7 +160,7 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/review_spaces/workflow_moving1.png") %>
+        <%= image_tag("docs/review_spaces/workflow_moving1.png", alt: "Move data to space page overview with Workflows tab selected") %>
       </div>
       <div class="bs-docs-section">
         <p>
@@ -168,20 +168,20 @@
         </p>
       </div>
       <div class="bs-docs-section bs-docs-media-section bs-docs-media-img">
-        <%= image_tag("docs/review_spaces/workflow_moving2.png") %>
+        <%= image_tag("docs/review_spaces/workflow_moving2.png", alt: "Workflows tab overview on Spaces page") %>
       </div>
 
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(videos[:spaces][:url]) %>
+        <%= video_iframe(videos[:spaces][:url], videos[:spaces][:title]) %>
       </div>
       <div class="bs-docs-section bs-docs-media-section">
-        <%= video_iframe(videos[:review_spaces][:url]) %>
+        <%= video_iframe(videos[:review_spaces][:url], videos[:review_spaces][:title]) %>
       </div>
     </div>
     <!-- SIDEBAR NAVIGATION -->
     <div class="col-sm-6">
       <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
-        <ul class="nav bs-docs-sidenav">
+        <ul class="nav bs-docs-sidenav right-sidebar-nav">
           <li><a href="#review-spaces">Overview</a></li>
           <li><a href="#review-space-create">Creating the Review Space</a></li>
           <li><a href="#review-space-confidential">Using the Confidential Review Space</a></li>

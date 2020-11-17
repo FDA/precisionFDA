@@ -5,7 +5,7 @@
         <div class="row vertical-align">
           <div class="col-md-8">
             <div class="container-fluid expert-photo">
-              <%= image_tag(e.image, class: 'img-rounded img-responsive center-block', style: 'max-height:500px') %>
+              <%= image_tag(e.image, alt: 'Expert profile picture', class: 'img-rounded img-responsive center-block', style: 'max-height:500px') %>
             </div>
           </div>
           <div class="col-md-16">
@@ -13,7 +13,7 @@
               <div class="pfda-card-title lead">
                 <%= e._blog_title %>
               </div>
-              <span class="text-muted"><%= local_date(e.created_at, '%B %e, %Y') %></span>
+              <span class="text-dark"><%= local_date(e.created_at, '%B %e, %Y') %></span>
               <br/>
               <br/>
               <div class="expert-font strong">
