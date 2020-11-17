@@ -84,9 +84,19 @@ Rails.application.routes.draw do
       resources :admin_memberships, only: %i(index create destroy new)
     end
 
+    # My Home (Redesign)
+    get "home" => "home#index"
+    get "home/files", to: redirect(path: "home")
+    get "home/apps", to: redirect(path: "home")
+    get "home/assets", to: redirect(path: "home")
+    get "home/workflows", to: redirect(path: "home")
+    get "home/executions", to: redirect(path: "home")
+    get "home/notes", to: redirect(path: "home")
+
     # hotfix for PFDA-557
     get "/challenges/6" => redirect("/challenges/7")
     get "/mislabeling" => redirect("/challenges/5")
+    get "/challenges/12" => "main#covid"
     # Mains controller
     get "login" => "main#login"
     delete "logout" => "main#destroy"
@@ -141,11 +151,13 @@ Rails.application.routes.draw do
         post "save_editor_page", on: :member
       end
 
-      resources :apps, only: %w(create) do
+      resources :apps do
         collection do
           post "copy"
           post "import"
           get "accessible_apps"
+          get "featured"
+          get "everybody"
         end
       end
 
@@ -156,7 +168,6 @@ Rails.application.routes.draw do
         end
 
         member do
-          get :apps
           get :files
           get :jobs
           get :workflows

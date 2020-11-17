@@ -6,7 +6,7 @@
         <%- videos.each_value do |value| %>
           <div class="bs-docs-section bs-docs-media-section">
             <p><%= value[:title] %></p>
-            <%= video_iframe(value[:url]) %>
+            <%= video_iframe(value[:url],value[:title]) %>
           </div>
         <%- end %>
       </div>
