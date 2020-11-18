@@ -23,7 +23,7 @@ module UserService
         PROJECT_NAMES.each_with_object({}) do |project_name, memo|
           project_dxid = user[project_name]
 
-          next if project_dxid && find_project(id: project_dxid).present?
+          next if project_dxid && find_project(id: [project_dxid]).present?
 
           project = find_project(name: project_name) || create_project(project_name)
           memo[project_name] = project["id"]
