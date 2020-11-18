@@ -57,7 +57,8 @@ describe UserService::HttpsAppsProjectsCreator do
       context "when project doesn't exist on the platform" do
         before do
           UserService::HttpsAppsProjectsCreator::PROJECT_NAMES.each do |project_name|
-            allow(api).to receive(:system_find_projects).and_return({ "results" => [] })
+            allow(api).to receive(:system_find_projects).
+            and_return({ "results" => [] })
             allow(api).to receive(:project_new).with(project_name).
               and_return({ "id" => "project-#{project_name}" })
           end
@@ -77,7 +78,7 @@ describe UserService::HttpsAppsProjectsCreator do
         before do
           UserService::HttpsAppsProjectsCreator::PROJECT_NAMES.each do |project_name|
             allow(api).to receive(:system_find_projects).
-              with(id: "project-#{project_name}", limit: 1).
+              with(id: ["project-#{project_name}"], limit: 1).
               and_return({ "results" => [{ "id" => "project-#{project_name}" }] })
             allow(api).to receive(:project_new)
           end
