@@ -4,7 +4,7 @@ import type { RunAppInput } from '../job.input'
 import { BaseOperation } from '../../../utils'
 import { Job } from '../job.entity'
 import { App } from '../../app/app.entity'
-import { User } from '../../user/user.entity'
+import { User, helper as userHelper } from '../../user'
 import { JOB_STATE, allowedFeatures, allowedInstanceTypes } from '../job.enum'
 import { createJobSyncTask } from '../../../queue'
 
@@ -26,8 +26,9 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
       console.log('app entry does not exist in our system')
     }
 
-    // todo: PROJECT should be determined based on app type (subtype) -> maps to user.projects DB fields
-    const projectId = user.privateFilesProject
+    // appId will be hardcoded or taken from the database..
+    const appId = 'app-dxjupyterlab'
+    const projectId = userHelper.getProjectForAppType(user, input.httpsAppType)
     const runWithInstanceType = allowedInstanceTypes[input.instanceType]
     // todo: this will differ -> 4 HTTPS app types
     const runWithFeature = allowedFeatures[input.feature] || allowedFeatures.python
@@ -48,11 +49,7 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
         },
       },
       accessToken: this.ctx.user.accessToken,
-      // THIS IS HARDCODED JUPYTER LAB APP ID from the pfda_autotest1 user!
-      // appId: 'app-FxfQ8J85KV59Vq705Jq5KgfP',
-      // THIS IS USED IN THE PLATFORM IN PAYLOAD
-      appId: 'app-dxjupyterlab',
-      // appId: input.appDxId,
+      appId,
     })
     // add all the data to the database
     const job = repo.create({

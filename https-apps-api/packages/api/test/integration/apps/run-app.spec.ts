@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/core'
-import { errors, database } from '@pfda/https-apps-shared'
+import { errors, database, app as appDomain } from '@pfda/https-apps-shared'
 import supertest from 'supertest'
 import { App, User } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
@@ -39,7 +39,8 @@ describe('POST /apps/:id/run', () => {
       dxid: generate.job.jobId(),
       user: user.id,
       taggings: [],
-      project: null,
+      // default app type
+      project: user.jupyterProject,
       state: JOB_STATE.IDLE,
       scope: 'private',
       // provenance: {},
@@ -74,6 +75,20 @@ describe('POST /apps/:id/run', () => {
       accessToken: 'fake-token',
       dxuser: user.dxuser,
     })
+  })
+
+  it('uses correct project reference based on app type', async () => {
+    const { body } = await supertest(api.getServer())
+      .post(`/apps/${app.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send({
+        ...generate.app.runAppInput(),
+        httpsAppType: appDomain.enums.APP_HTTPS_SUBTYPE.TTYD,
+      })
+      .expect(201)
+    expect(body).to.have.property('project', user.ttydProject)
+    const fakeCallArgs = fakes.client.jobCreateFake.getCall(0).args[0]
+    expect(fakeCallArgs).to.have.property('project', user.ttydProject)
   })
 
   context('error states', () => {
