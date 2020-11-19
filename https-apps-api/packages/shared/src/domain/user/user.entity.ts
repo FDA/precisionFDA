@@ -19,6 +19,18 @@ export class User extends BaseEntity {
   publicFilesProject: string
 
   @Property()
+  jupyterProject: string
+
+  @Property()
+  ttydProject: string
+
+  @Property()
+  cloudWorkstationProject: string
+
+  @Property()
+  httpsProject: string
+
+  @Property()
   schemaVersion: string
 
   @Property()
