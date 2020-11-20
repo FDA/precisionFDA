@@ -113,4 +113,4 @@ const jobDescribe = async (params: JobDescribeParams): Promise<JobDescribeRespon
   }
 }
 
-export { jobDescribe, jobCreate }
+export { jobDescribe, jobCreate, JobDescribeResponse }

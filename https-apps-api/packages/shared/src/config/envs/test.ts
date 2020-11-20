@@ -9,4 +9,11 @@ export const config: ConfigOverride = {
     clientUrl: process.env.DATABASE_TEST_URL ?? 'mysql://root:password@localhost:3306',
     debug: false,
   },
+  workerJobs: {
+    queues: {
+      default: {
+        name: 'https-apps-worker-queue-tests',
+      },
+    },
+  },
 }

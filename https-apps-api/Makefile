@@ -27,8 +27,8 @@ run-dev:
 run-worker-dev:
 	$(bin)ts-node -r tsconfig-paths/register --files ./packages/worker/src/index.ts
 
-test-worker:
-	$(bin)ts-node -r tsconfig-paths/register --files ./packages/worker/src/test.ts
+# test-worker:
+# 	$(bin)ts-node -r tsconfig-paths/register --files ./packages/worker/src/test.ts
 
 watch:
 	$(bin)nodemon --watch ./packages/api/src --ext ts --exec make run-dev
@@ -46,6 +46,10 @@ run-worker-repl:
 test-api:
 	NODE_ENV=test $(bin)mocha --config ./packages/api/.mocharc.js \
 	--recursive "./packages/api/test/integration/**/*.spec.ts"
+
+test-worker:
+	NODE_ENV=test $(bin)mocha --config ./packages/worker/.mocharc.js \
+	--recursive "./packages/worker/test/integration/**/*.spec.ts"
 
 clean:
 	$(bin)lerna run clean

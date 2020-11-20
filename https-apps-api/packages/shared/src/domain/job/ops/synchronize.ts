@@ -15,6 +15,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
     if (!job) {
       this.ctx.log.warn({ input }, 'Job does not exist')
       await removeRepeatable(this.ctx.job)
+      return
     }
 
     // todo: check users ownership -> we should have a helper for it
@@ -24,15 +25,17 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       return
     }
     // we want to synchronize the job status if it is not yet terminated
-    let platformJobData
+    let platformJobData: client.JobDescribeResponse
     try {
       platformJobData = await client.jobDescribe({
         jobId: input.dxid,
         accessToken: this.ctx.user.accessToken,
       })
     } catch (err) {
+      // handle WORKER dirty state here
       // we could do more efficient error handling and also calls repetition here
       await removeRepeatable(this.ctx.job)
+      return
     }
     // fixme: the mapping is not perfect for the https apps
     const remoteState = platformJobData.state
@@ -46,7 +49,7 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       this.ctx.log.debug({ remoteState }, 'We will do lots of updates')
     }
     this.ctx.log.info({ jobId: input.dxid }, 'Updating job, state change discovered')
-    const newJob = wrap(job).assign(
+    const updatedJob = wrap(job).assign(
       {
         describe: JSON.stringify(platformJobData),
         state: platformJobData.state,
@@ -54,6 +57,6 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       { em },
     )
     await em.flush()
-    return newJob
+    return updatedJob
   }
 }

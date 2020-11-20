@@ -14,10 +14,10 @@ export const handler = async (job: Job<Task>) => {
   switch (job.data.type) {
     case queue.TASKS.SYNC_JOB_STATUS:
       await jobStatusHandler(job)
-      return await Promise.resolve({ yay: true })
+      return await Promise.resolve()
     case queue.TASKS.OTHER_TASK:
       console.log('gonna do the other task')
-      return await Promise.resolve({ yay: true })
+      return await Promise.resolve()
     default:
       log.warn({ jobData: job.data }, 'Trying to handle unsupported task')
       throw new errors.WorkerError('Unsupported task', { jobData: job.data })
