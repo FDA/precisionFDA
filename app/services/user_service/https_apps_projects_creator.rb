@@ -47,7 +47,7 @@ module UserService
     # @param inputs [String] Project name.
     # @return [Hash] Created project.
     def create_project(project_name)
-      api.project_new(project_name)
+      api.project_new(project_name, billTo: user.billto)
     end
   end
 end

@@ -12,7 +12,7 @@ describe UserService::HttpsAppsProjectsCreator do
         before do
           UserService::HttpsAppsProjectsCreator::PROJECT_NAMES.each do |project_name|
             allow(api).to receive(:system_find_projects).and_return({ "results" => [] })
-            allow(api).to receive(:project_new).with(project_name).
+            allow(api).to receive(:project_new).with(project_name, billTo: user.billto).
               and_return({ "id" => "project-#{project_name}" })
           end
         end
@@ -21,7 +21,7 @@ describe UserService::HttpsAppsProjectsCreator do
           projects_creator.call
 
           UserService::HttpsAppsProjectsCreator::PROJECT_NAMES.each do |project_name|
-            expect(api).to have_received(:project_new).with(project_name)
+            expect(api).to have_received(:project_new).with(project_name, billTo: user.billto)
             expect(user[project_name]).to eq("project-#{project_name}")
           end
         end
@@ -57,9 +57,8 @@ describe UserService::HttpsAppsProjectsCreator do
       context "when project doesn't exist on the platform" do
         before do
           UserService::HttpsAppsProjectsCreator::PROJECT_NAMES.each do |project_name|
-            allow(api).to receive(:system_find_projects).
-            and_return({ "results" => [] })
-            allow(api).to receive(:project_new).with(project_name).
+            allow(api).to receive(:system_find_projects).and_return({ "results" => [] })
+            allow(api).to receive(:project_new).with(project_name, billTo: user.billto).
               and_return({ "id" => "project-#{project_name}" })
           end
         end
@@ -68,7 +67,7 @@ describe UserService::HttpsAppsProjectsCreator do
           projects_creator.call
 
           UserService::HttpsAppsProjectsCreator::PROJECT_NAMES.each do |project_name|
-            expect(api).to have_received(:project_new).with(project_name)
+            expect(api).to have_received(:project_new).with(project_name, billTo: user.billto)
             expect(user[project_name]).to eq("project-#{project_name}")
           end
         end
