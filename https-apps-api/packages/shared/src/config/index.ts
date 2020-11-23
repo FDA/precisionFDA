@@ -38,9 +38,9 @@ const defaultConfig = {
     level: 'debug',
   },
   database: {
-    dbName: 'precision-fda',
-    clientUrl: 'mysql://root:password@localhost:3306',
-    debug: false,
+    dbName: process.env.DATABASE_NAME ?? 'precision-fda',
+    clientUrl: process.env.DATABASE_URL ?? 'mysql://root:password@localhost:3306',
+    debug: process.env.DATABASE_DEBUG ?? false,
   },
   validation: {
     maxStrLen: 255,
@@ -49,6 +49,11 @@ const defaultConfig = {
   platform: {
     apiUrl: 'https://stagingapi.dnanexus.com',
     authApiUrl: 'https://stagingauth.dnanexus.com',
+    appHandles: {
+      jupyter: 'app-dxjupyterlab',
+      cloudwatch: 'app-cloud_workstation',
+      ttyd: 'app-ttyd',
+    },
   },
   redis: {
     url: 'redis://localhost:6379',
