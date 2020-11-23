@@ -46,6 +46,19 @@ describe DNAnexusAPI do
     end
   end
 
+  describe "#app_describe" do
+    it_behaves_like "call" do
+      let(:app_dxid) { "some-app_dxid" }
+
+      let(:client_method) { :app_describe }
+      let(:client_method_args) { [app_dxid, payload] }
+
+      let(:expected_subject) { app_dxid }
+      let(:expected_method) { "describe" }
+      let(:expected_payload) { payload }
+    end
+  end
+
   describe "#app_new" do
     it_behaves_like "call" do
       let(:client_method) { :app_new }
@@ -411,6 +424,17 @@ describe DNAnexusAPI do
 
       let(:expected_subject) { "system" }
       let(:expected_method) { "findProjects" }
+      let(:expected_payload) { payload }
+    end
+  end
+
+  describe "#system_find_apps" do
+    it_behaves_like "call" do
+      let(:client_method) { :system_find_apps }
+      let(:client_method_args) { [payload] }
+
+      let(:expected_subject) { "system" }
+      let(:expected_method) { "findApps" }
       let(:expected_payload) { payload }
     end
   end

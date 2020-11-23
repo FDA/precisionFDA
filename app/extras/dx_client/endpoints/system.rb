@@ -34,6 +34,14 @@ module DXClient
       def system_find_projects(opts = {})
         call("system", "findProjects", opts)
       end
+
+      # Finds apps.
+      # @see https://documentation.dnanexus.com/developer/api/search#api-method-system-findapps
+      # @param opts [Hash] Options used to find apps.
+      # @return [Array]
+      def system_find_apps(opts = {})
+        call("system", "findApps", opts)
+      end
     end
   end
 end
