@@ -149,6 +149,19 @@ describe DNAnexusAPI do
     end
   end
 
+  describe "#file_describe" do
+    it_behaves_like "call" do
+      let(:file_dxid) { "some-file_dxid" }
+
+      let(:client_method) { :file_describe }
+      let(:client_method_args) { [file_dxid, payload] }
+
+      let(:expected_subject) { file_dxid }
+      let(:expected_method) { "describe" }
+      let(:expected_payload) { payload }
+    end
+  end
+
   describe "#org_invite" do
     it_behaves_like "call" do
       let(:org) { "some-org" }
@@ -380,15 +393,15 @@ describe DNAnexusAPI do
     end
   end
 
-  describe "#file_download" do
+  describe "#applet_describe" do
     it_behaves_like "call" do
-      let(:file) { "some-file" }
+      let(:applet_dxid) { "some-applet_dxid" }
 
-      let(:client_method) { :file_download }
-      let(:client_method_args) { [file, payload] }
+      let(:client_method) { :applet_describe }
+      let(:client_method_args) { [applet_dxid, payload] }
 
-      let(:expected_subject) { file }
-      let(:expected_method) { "download" }
+      let(:expected_subject) { applet_dxid }
+      let(:expected_method) { "describe" }
       let(:expected_payload) { payload }
     end
   end
