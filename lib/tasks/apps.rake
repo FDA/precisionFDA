@@ -1,3 +1,5 @@
+# rubocop:disable Metrics/BlockLength
+# rubocop:disable Metrics/MethodLength
 namespace :apps do
   INSTANCE_TYPES = {
     "baseline-4" => "mem1_ssd1_v2_x4",
@@ -12,7 +14,7 @@ namespace :apps do
 
     app_info = api.app_describe(app_dxid)
 
-    created_by = User.find_by(dxuser: app_info['createdBy'].sub(/^user-/, "")) ||
+    created_by = User.find_by(dxuser: app_info["createdBy"].sub(/^user-/, "")) ||
                  User.find_by(dxuser: ADMIN_USER.sub(/^user-/, ""))
 
     abort "Can't find createdBy user for the app" unless created_by
@@ -27,7 +29,7 @@ namespace :apps do
 
     input_spec = app_info["inputSpec"].select do |spec|
       is_supported = %w(string file int boolean float).include?(spec["class"])
-      p "Unhandler class '#{spec["class"]}'" unless is_supported
+      p "Unhandler class #{spec['class']}" unless is_supported
       is_supported
     end
 
@@ -36,7 +38,9 @@ namespace :apps do
     end
 
     packages = app_info.dig("runSpec", "execDepends").map do |package|
-      package["package_manager"].blank? && UBUNTU_PACKAGES[release].include?(package["name"]) ? package["name"] : nil
+      if package["package_manager"].blank? && UBUNTU_PACKAGES[release].include?(package["name"])
+        package["name"]
+      end
     end.compact
 
     ActiveRecord::Base.transaction do
@@ -85,7 +89,7 @@ namespace :apps do
         code: "", # TODO
         assets: assets,
         release: app_info.dig("runSpec", "release"),
-        entity_type: app_info["httpsApp"].present? ? App::TYPE_HTTPS : App::TYPE_REGULAR
+        entity_type: app_info["httpsApp"].present? ? App::TYPE_HTTPS : App::TYPE_REGULAR,
       )
 
       app_series.update!(latest_revision_app: app, latest_version_app: app)
@@ -112,3 +116,5 @@ namespace :apps do
     run(args.app_dxid)
   end
 end
+# rubocop:enable Metrics/BlockLength
+# rubocop:enable Metrics/MethodLength
