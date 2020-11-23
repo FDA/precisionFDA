@@ -40,7 +40,7 @@ const defaultConfig = {
   database: {
     dbName: process.env.DATABASE_NAME ?? 'precision-fda',
     clientUrl: process.env.DATABASE_URL ?? 'mysql://root:password@localhost:3306',
-    debug: process.env.DATABASE_DEBUG ?? false,
+    debug: parseBooleanFromProcess(process.env.DATABASE_DEBUG) ?? false,
   },
   validation: {
     maxStrLen: 255,
