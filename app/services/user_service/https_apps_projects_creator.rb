@@ -2,14 +2,10 @@ module UserService
   # Creates four https apps projects for a user during a login.
   #   - jupyter_project
   #   - ttyd_project
-  #   - cloud_workstation_project
-  #   - https_project
   class HttpsAppsProjectsCreator
     PROJECT_NAMES = %w(
       jupyter_project
       ttyd_project
-      cloud_workstation_project
-      https_project
     ).freeze
 
     def initialize(api, user)
