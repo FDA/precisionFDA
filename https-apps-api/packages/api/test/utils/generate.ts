@@ -23,8 +23,9 @@ const user = {
     dxuser: `user-${random.dxstr()}`,
     jupyterProject: `project-${random.dxstr()}`,
     ttydProject: `project-${random.dxstr()}`,
-    cloudWorkstationProject: `project-${random.dxstr()}`,
-    httpsProject: `project-${random.dxstr()}`,
+    // deprecated for now
+    // cloudWorkstationProject: `project-${random.dxstr()}`,
+    // httpsProject: `project-${random.dxstr()}`,
   }),
 }
 

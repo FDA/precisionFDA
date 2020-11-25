@@ -25,12 +25,6 @@ export class User extends BaseEntity {
   ttydProject: string
 
   @Property()
-  cloudWorkstationProject: string
-
-  @Property()
-  httpsProject: string
-
-  @Property()
   schemaVersion: string
 
   @Property()
