@@ -11,7 +11,7 @@ import * as create from '../../utils/create'
 import { fakes } from '../../utils/mocks'
 import { getDefaultQueryData, stripEntityDates } from '../../utils/expect-helper'
 
-describe('GET /apps', () => {
+describe.skip('GET /apps', () => {
   let em: EntityManager
   let user: User
   let app: App

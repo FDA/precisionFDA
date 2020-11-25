@@ -4,7 +4,7 @@ import { repeat } from 'ramda'
 import { EntityManager } from '@mikro-orm/core'
 import { database, errors } from '@pfda/https-apps-shared'
 import { App, User, Job } from '@pfda/https-apps-shared/src/domain'
-import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
+import { JOB_DB_ENTITY_TYPE, JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import supertest from 'supertest'
 import { api } from '../../../src/server'
 import { dropData } from '../../utils/db'
@@ -42,6 +42,8 @@ describe('GET /jobs/:id', () => {
     expect(stripEntityDates(body)).to.deep.equal({
       id: job.id,
       dxid: job.dxid,
+      appSeriesId: null,
+      entityType: JOB_DB_ENTITY_TYPE.HTTPS,
       project: job.project,
       runData: job.runData,
       // provenance: null,

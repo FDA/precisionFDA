@@ -1,14 +1,15 @@
-enum APP_TYPE {
-  HTTPS = 'https',
-  // all of the old "normal apps"
-  NORMAL = 'normal',
+enum ENTITY_TYPE {
+  NORMAL = 0,
+  HTTPS = 1,
 }
 
 enum APP_HTTPS_SUBTYPE {
   JUPYTER = 'jupyter',
   TTYD = 'ttyd',
-  CLOUDWS = 'cloud_workstation',
-  CUSTOM = 'custom',
+  SHINY = 'r_shiny',
+  // out of scope
+  // CLOUDWS = 'cloud_workstation',
+  // CUSTOM = 'custom',
 }
 
-export { APP_TYPE, APP_HTTPS_SUBTYPE }
+export { ENTITY_TYPE, APP_HTTPS_SUBTYPE }

@@ -3,7 +3,11 @@ import { EntityManager } from '@mikro-orm/core'
 import { errors, database, app as appDomain } from '@pfda/https-apps-shared'
 import supertest from 'supertest'
 import { App, User } from '@pfda/https-apps-shared/src/domain'
-import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
+import {
+  JOB_STATE,
+  JOB_DB_ENTITY_TYPE,
+  DEFAULT_INSTANCE_TYPE,
+} from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import { api } from '../../../src/server'
 import { dropData } from '../../utils/db'
 import * as create from '../../utils/create'
@@ -21,7 +25,7 @@ describe('POST /apps/:id/run', () => {
     // create DB mocks
     em = database.orm().em
     user = create.userHelper.create(em)
-    app = create.appHelper.create(em, { user })
+    app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
     await em.flush()
     // handle the stubs
     fakes.client.jobCreateFake.resetHistory()
@@ -36,19 +40,32 @@ describe('POST /apps/:id/run', () => {
       .expect(201)
     expect(stripEntityDates(body)).to.deep.equal({
       id: 1,
+      app: app.id,
+      appSeriesId: null,
+      name: app.title,
       dxid: generate.job.jobId(),
+      uid: `${generate.job.jobId()}-1`,
+      entityType: JOB_DB_ENTITY_TYPE.HTTPS,
       user: user.id,
       taggings: [],
       // default app type
       project: user.jupyterProject,
       state: JOB_STATE.IDLE,
-      scope: 'private',
+      scope: 'public',
+      // todo:
       // provenance: {},
-      // describe: {},
-      // todo: fix
-      runData: { run_instance_type: 'foo', run_inputs: {}, run_outputs: {} },
+      runData: {
+        run_instance_type: DEFAULT_INSTANCE_TYPE,
+        run_inputs: {
+          duration: generate.app.runAppInput().duration,
+          feature: 'PYTHON_R', // default from the specs
+        },
+        run_outputs: {},
+      },
     })
   })
+
+  // todo: test all default values and overrides
 
   it('calls the platform API', async () => {
     await supertest(api.getServer())

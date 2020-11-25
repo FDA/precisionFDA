@@ -46,16 +46,19 @@ export class Job extends BaseEntity {
   scope: string
 
   @Property()
-  uid: string;
+  uid: string
 
-  [EntityRepositoryType]?: JobRepository
+  @Property()
+  entityType: number
 
   // foreign keys -> not yet mapped
-  // @Property()
-  // appSeriesId: number
+  @Property()
+  appSeriesId: number;
 
   // @Property()
   // analysisId: number
+
+  [EntityRepositoryType]?: JobRepository
 
   // relations
   @ManyToOne()

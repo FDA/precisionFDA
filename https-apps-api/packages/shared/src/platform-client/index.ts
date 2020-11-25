@@ -14,9 +14,15 @@ type JobDescribeParams = BaseParams & { jobId: string }
 type JobCreateParams = BaseParams & {
   appId: string
   project: string
-  name: string
+  name?: string
   input: AnyObject
   systemRequirements: AnyObject
+  snapshot?: {
+    $dnanexus_link: {
+      project?: string
+      id: string
+    }
+  }
 }
 
 type JobCreateResponse = {
@@ -113,4 +119,4 @@ const jobDescribe = async (params: JobDescribeParams): Promise<JobDescribeRespon
   }
 }
 
-export { jobDescribe, jobCreate, JobDescribeResponse }
+export { jobDescribe, jobCreate, JobDescribeResponse, JobCreateParams }

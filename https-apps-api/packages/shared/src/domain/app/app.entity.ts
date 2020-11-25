@@ -7,11 +7,12 @@ import {
   Reference,
   Collection,
   OneToMany,
+  Enum,
 } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
 import { Job } from '../job/job.entity'
 import { User } from '../user/user.entity'
-import { APP_HTTPS_SUBTYPE, APP_TYPE } from './app.enum'
+import { APP_HTTPS_SUBTYPE, ENTITY_TYPE } from './app.enum'
 
 @Entity({ tableName: 'apps' })
 export class App extends BaseEntity {
@@ -55,8 +56,8 @@ export class App extends BaseEntity {
   release: string
 
   // foreign keys -> not yet mapped
-  // @Property()
-  // appSeriesId: numbers
+  @Property()
+  appSeriesId: number
 
   // references
   @ManyToOne({ serializedName: 'userId' })
@@ -65,18 +66,15 @@ export class App extends BaseEntity {
   @OneToMany({ entity: () => Job, mappedBy: 'app' })
   jobs = new Collection<Job>(this)
 
+  @Enum()
+  entityType: ENTITY_TYPE
+
   constructor(user: User) {
     super()
     this.user = Reference.create(user)
   }
 
   // dynamic fields - only temporary
-  @Property({ name: 'type' })
-  getType() {
-    // fixme: should be in the database later
-    return APP_TYPE.HTTPS
-  }
-
   @Property({ name: 'httpsSubtype', nullable: true })
   getSubType() {
     // fixme: should be in the database later
