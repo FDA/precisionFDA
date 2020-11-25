@@ -20,7 +20,6 @@ const parseIntFromProcess = (envVarName: string): Maybe<number> => {
   return isNaN(value) ? null : value
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const parseBooleanFromProcess = (value: string, defaultValue = false): boolean =>
   value ? value.toLowerCase() === 'true' : defaultValue
 
@@ -56,7 +55,7 @@ const defaultConfig = {
     },
   },
   redis: {
-    url: 'redis://localhost:6379',
+    url: process.env.REDIS_URL ?? 'redis://localhost:6379',
   },
   workerJobs: {
     queues: {

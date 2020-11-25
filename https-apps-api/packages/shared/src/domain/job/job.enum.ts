@@ -6,6 +6,11 @@ enum JOB_STATE {
   TERMINATING = 'terminating',
 }
 
+enum JOB_DB_ENTITY_TYPE {
+  REGULAR = 0,
+  HTTPS = 1,
+}
+
 const TERMINAL_STATES = [JOB_STATE.DONE, JOB_STATE.FAILED, JOB_STATE.TERMINATED]
 
 const allowedInstanceTypes = {
@@ -26,9 +31,18 @@ const allowedInstanceTypes = {
   'hidisk-36': 'mem1_ssd2_x36_fedramp',
 } as const
 
+const DEFAULT_INSTANCE_TYPE = allowedInstanceTypes['baseline-2']
+
 const allowedFeatures = {
   python: 'PYTHON_R',
   mlIp: 'ML_IP',
 }
 
-export { JOB_STATE, TERMINAL_STATES, allowedFeatures, allowedInstanceTypes }
+export {
+  JOB_STATE,
+  TERMINAL_STATES,
+  JOB_DB_ENTITY_TYPE,
+  DEFAULT_INSTANCE_TYPE,
+  allowedFeatures,
+  allowedInstanceTypes,
+}

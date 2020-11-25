@@ -22,7 +22,7 @@ const createSyncJobTask = async (
   })
 }
 
-describe.only('TASK: sync_job_status', () => {
+describe('TASK: sync_job_status', () => {
   let em: EntityManager
   let user: User
   let app: App

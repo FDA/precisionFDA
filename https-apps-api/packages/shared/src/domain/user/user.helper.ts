@@ -6,14 +6,17 @@ const getProjectForAppType = (user: User, appType: APP_HTTPS_SUBTYPE): string =>
   switch (appType) {
     case APP_HTTPS_SUBTYPE.JUPYTER:
       return user.jupyterProject
-    case APP_HTTPS_SUBTYPE.CLOUDWS:
+    case APP_HTTPS_SUBTYPE.SHINY:
+      // fixme:
       return user.cloudWorkstationProject
     case APP_HTTPS_SUBTYPE.TTYD:
       return user.ttydProject
-    case APP_HTTPS_SUBTYPE.CUSTOM:
-      return user.httpsProject
+    // case APP_HTTPS_SUBTYPE.CLOUDWS:
+    //   return user.cloudWorkstationProject
+    // case APP_HTTPS_SUBTYPE.CUSTOM:
+    //   return user.httpsProject
     default:
-      throw new InternalError(`sUnknown https app subtype ${appType}`)
+      throw new InternalError(`Unknown https app subtype ${appType}`)
   }
 }
 

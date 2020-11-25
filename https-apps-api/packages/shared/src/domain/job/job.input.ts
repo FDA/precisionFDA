@@ -11,12 +11,14 @@ type DxIdInput = {
 
 type RunAppInput = {
   projectId: string
+  scope: string
+  snapshotFileId: string
   name?: string
   appDxId: string
   httpsAppType: APP_HTTPS_SUBTYPE
-  instanceType: string
-  feature: string
-  duration: number
+  instanceType?: string
+  feature?: string
+  duration?: number
 }
 
 type DescribeJobInput = DxIdInput & {
@@ -42,8 +44,9 @@ const runAppSchema: JSONSchema7 = {
   type: 'object',
   properties: {
     httpsAppType: { type: 'string', enum: Object.values(APP_HTTPS_SUBTYPE) },
-    projectId: { type: 'string', maxLength: config.validation.maxStrLen },
     instanceType: { type: 'string', enum: Object.keys(allowedInstanceTypes) },
+    scope: { type: 'string', maxLength: config.validation.maxStrLen },
+    // fixme: specific only for the jupyter app
     // hours it can run
     duration: { type: 'integer', minimum: 30, maximum: 5 * 60 },
     feature: {
@@ -51,8 +54,9 @@ const runAppSchema: JSONSchema7 = {
       enum: Object.keys(allowedFeatures),
       default: allowedFeatures.python,
     },
+    snapshotFileId: { type: 'string', maxLength: config.validation.maxStrLen },
   },
-  required: ['instanceType', 'duration', 'httpsAppType'],
+  required: ['httpsAppType', 'scope'],
   additionalProperties: false,
 }
 
