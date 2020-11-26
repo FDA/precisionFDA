@@ -8,7 +8,7 @@ const getProjectForAppType = (user: User, appType: APP_HTTPS_SUBTYPE): string =>
       return user.jupyterProject
     case APP_HTTPS_SUBTYPE.SHINY:
       // fixme:
-      return user.cloudWorkstationProject
+      return user.ttydProject
     case APP_HTTPS_SUBTYPE.TTYD:
       return user.ttydProject
     // case APP_HTTPS_SUBTYPE.CLOUDWS:

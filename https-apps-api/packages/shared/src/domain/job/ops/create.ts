@@ -116,17 +116,20 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
       // const appSpec = app.spec
       // const inputSpec: any[] = prop('input_spec', JSON.parse(appSpec))
       // const findInputProp = (key: string) => inputSpec.find(entry => entry.name === key)
+      const jobSpecificInput = this.input.input
       const runInput = {
-        duration: this.input.duration
-          ? this.input.duration
-          : this.getDefaultSpecValue(app, 'duration'),
-        feature: this.input.feature
-          ? allowedFeatures[this.input.feature]
-          : this.getDefaultSpecValue(app, 'feature'),
+        duration:
+          jobSpecificInput && jobSpecificInput.duration
+            ? jobSpecificInput.duration
+            : this.getDefaultSpecValue(app, 'duration'),
+        feature:
+          jobSpecificInput && jobSpecificInput.feature
+            ? allowedFeatures[jobSpecificInput.feature]
+            : this.getDefaultSpecValue(app, 'feature'),
       }
-      if (this.input.snapshotFileId) {
-        // this is a file id -> plug in
-        runInput['snapshot'] = this.input.snapshotFileId
+      // todo: test if this
+      if (jobSpecificInput?.snapshot) {
+        runInput['snapshot'] = jobSpecificInput.snapshot
       }
       return runInput
     } else {
@@ -160,20 +163,21 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
     }
     // customizations based on app type
     if (this.input.httpsAppType === APP_HTTPS_SUBTYPE.JUPYTER) {
+      const jobInputs = this.input.input
       const feature =
-        this.input.feature && allowedFeatures[this.input.feature]
-          ? allowedFeatures[this.input.feature]
+        jobInputs?.feature && allowedFeatures[jobInputs.feature]
+          ? allowedFeatures[jobInputs.feature]
           : this.getDefaultSpecValue(app, 'feature')
-      const duration = this.input.duration ?? this.getDefaultSpecValue(app, 'duration')
+      const duration = jobInputs?.duration ?? this.getDefaultSpecValue(app, 'duration')
       // default jupyter values
       payload.input = {
         duration,
         feature,
       }
-      if (this.input.snapshotFileId) {
+      if (jobInputs?.snapshot) {
         payload.snapshot = {
           $dnanexus_link: {
-            id: this.input.snapshotFileId,
+            id: jobInputs.snapshot,
             project: this.projectId,
           },
         }

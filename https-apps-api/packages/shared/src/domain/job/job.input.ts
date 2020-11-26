@@ -10,15 +10,18 @@ type DxIdInput = {
 }
 
 type RunAppInput = {
-  projectId: string
   scope: string
-  snapshotFileId: string
-  name?: string
-  appDxId: string
   httpsAppType: APP_HTTPS_SUBTYPE
+  name?: string
   instanceType?: string
-  feature?: string
-  duration?: number
+  input?: {
+    snapshot: string
+    feature?: string
+    duration?: number
+    cmd?: string
+    imagename?: string
+  }
+  appDxId: string
 }
 
 type DescribeJobInput = DxIdInput & {
@@ -46,15 +49,22 @@ const runAppSchema: JSONSchema7 = {
     httpsAppType: { type: 'string', enum: Object.values(APP_HTTPS_SUBTYPE) },
     instanceType: { type: 'string', enum: Object.keys(allowedInstanceTypes) },
     scope: { type: 'string', maxLength: config.validation.maxStrLen },
-    // fixme: specific only for the jupyter app
-    // hours it can run
-    duration: { type: 'integer', minimum: 30, maximum: 5 * 60 },
-    feature: {
-      type: 'string',
-      enum: Object.keys(allowedFeatures),
-      default: allowedFeatures.python,
+    name: { type: 'string', maxLength: config.validation.maxStrLen },
+    input: {
+      type: 'object',
+      // these inputs are for jupyter app only
+      properties: {
+        duration: { type: 'integer', minimum: 30, maximum: 5 * 60 },
+        snapshot: { type: 'string', maxLength: config.validation.maxStrLen },
+        feature: {
+          type: 'string',
+          enum: Object.keys(allowedFeatures),
+          default: allowedFeatures.python,
+        },
+        imagename: { type: 'string', maxLength: config.validation.maxStrLen },
+        cmd: { type: 'string', maxLength: config.validation.maxStrLen },
+      },
     },
-    snapshotFileId: { type: 'string', maxLength: config.validation.maxStrLen },
   },
   required: ['httpsAppType', 'scope'],
   additionalProperties: false,

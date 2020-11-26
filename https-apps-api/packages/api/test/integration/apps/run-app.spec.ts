@@ -57,7 +57,7 @@ describe('POST /apps/:id/run', () => {
       runData: {
         run_instance_type: DEFAULT_INSTANCE_TYPE,
         run_inputs: {
-          duration: generate.app.runAppInput().duration,
+          duration: generate.app.runAppInput().input.duration,
           feature: 'PYTHON_R', // default from the specs
         },
         run_outputs: {},
