@@ -100,10 +100,12 @@ const app = {
       entityType: ENTITY_TYPE.HTTPS,
     }
   },
-  runAppInput: (): AnyObject => ({
-    duration: 30,
-    scope: 'public',
+  runAppInput: () => ({
     httpsAppType: APP_HTTPS_SUBTYPE.JUPYTER,
+    scope: 'public',
+    input: {
+      duration: 30,
+    },
   }),
 }
 
