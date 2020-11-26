@@ -25,8 +25,11 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
     this.input = input
     const em = this.ctx.em
 
-    const app = await em.findOne(App, { dxid: input.appDxId })
     const user = await em.findOne(User, { id: this.ctx.user.id })
+    const app = await em.findOne(App, {
+      dxid: input.appDxId,
+      user: em.getReference(User, this.ctx.user.id),
+    })
 
     if (!user) {
       throw new errors.UserNotFoundError()

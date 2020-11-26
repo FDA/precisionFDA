@@ -107,6 +107,11 @@ const app = {
       duration: 30,
     },
   }),
+  runTtydAppInput: () => ({
+    httpsAppType: APP_HTTPS_SUBTYPE.TTYD,
+    scope: 'public',
+    input: {},
+  }),
 }
 
 const job = {
