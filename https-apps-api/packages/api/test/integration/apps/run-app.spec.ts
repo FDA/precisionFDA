@@ -65,8 +65,37 @@ describe('POST /apps/:id/run', () => {
     })
   })
 
-  // todo: test all default values and overrides
+  it('response shape - ttyd app', async () => {
+    const { body } = await supertest(api.getServer())
+      .post(`/apps/${app.dxid}/run`)
+      .query({ ...getDefaultQueryData(user) })
+      .send(generate.app.runTtydAppInput())
+      .expect(201)
+    expect(stripEntityDates(body)).to.deep.equal({
+      id: 1,
+      app: app.id,
+      appSeriesId: null,
+      name: app.title,
+      dxid: generate.job.jobId(),
+      uid: `${generate.job.jobId()}-1`,
+      entityType: JOB_DB_ENTITY_TYPE.HTTPS,
+      user: user.id,
+      taggings: [],
+      // default app type
+      project: user.ttydProject,
+      state: JOB_STATE.IDLE,
+      scope: 'public',
+      // todo:
+      // provenance: {},
+      runData: {
+        run_instance_type: DEFAULT_INSTANCE_TYPE,
+        run_inputs: {},
+        run_outputs: {},
+      },
+    })
+  })
 
+  // todo: test all default values and overrides
   it('calls the platform API', async () => {
     await supertest(api.getServer())
       .post(`/apps/${app.dxid}/run`)
@@ -119,6 +148,20 @@ describe('POST /apps/:id/run', () => {
         .send(generate.app.runAppInput())
         .expect(404)
       expect(body).to.have.property('code', errors.ErrorCodes.USER_NOT_FOUND)
+    })
+
+    it('throws 401 when user does not own the app', async () => {
+      const anotherUser = create.userHelper.create(em)
+      const anotherApp = create.appHelper.create(em, { user: anotherUser })
+      await em.flush()
+      const { body } = await supertest(api.getServer())
+        .post(`/apps/${anotherApp.dxid}/run`)
+        .query({
+          ...getDefaultQueryData(user),
+        })
+        .send(generate.app.runAppInput())
+        .expect(404)
+      expect(body).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
     })
   })
 })
