@@ -15,7 +15,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
                                                destroy
                                                presskit
                                                news
-                                               covid
                                                mislabeling)
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
@@ -534,8 +533,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     end
     @graph = GraphDecorator.build(@context, @item)
   end
-
-  def covid; end
 
   def tokify
     @key = generate_auth_key
