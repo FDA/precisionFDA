@@ -3,8 +3,9 @@ import { Job } from './job/job.entity'
 import { User } from './user/user.entity'
 import { Tag } from './tag/tag.entity'
 import { Tagging } from './tagging/tagging.entity'
+import { UserFile } from './user-file/user-file.entity'
 
-const entities = { App, Job, User, Tag, Tagging }
+const entities = { App, Job, User, Tag, Tagging, UserFile }
 
 export * as app from './app'
 
@@ -16,4 +17,6 @@ export * as tag from './tag'
 
 export * as tagging from './tagging'
 
-export { entities, Job, App, User }
+export * as userFile from './user-file'
+
+export { entities, Job, App, User, UserFile }

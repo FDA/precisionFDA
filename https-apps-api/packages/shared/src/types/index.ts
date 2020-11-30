@@ -16,6 +16,8 @@ declare type DeepPartial<T> = {
     : DeepPartial<T[P]>
 }
 
+declare type Maybe<T> = T | undefined
+
 declare type AnyObject = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [s: string]: any
@@ -37,4 +39,4 @@ interface WorkerOpsCtx extends OpsCtx {
   job: Job
 }
 
-export type { DeepPartial, AnyObject, UserCtx, OpsCtx, WorkerOpsCtx }
+export type { DeepPartial, AnyObject, UserCtx, OpsCtx, WorkerOpsCtx, Maybe }
