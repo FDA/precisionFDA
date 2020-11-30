@@ -1,13 +1,20 @@
-import { EntityManager } from '@mikro-orm/core'
+import { EntityManager, wrap } from '@mikro-orm/core'
 import { database, queue } from '@pfda/https-apps-shared'
-import { App, User, Job } from '@pfda/https-apps-shared/src/domain'
+import { App, User, Job, UserFile } from '@pfda/https-apps-shared/src/domain'
 import { JOB_STATE } from '@pfda/https-apps-shared/src/domain/job/job.enum'
 import type { CheckStatusJob } from '@pfda/https-apps-shared/src/queue/task.input'
 import { expect } from 'chai'
+import {
+  FILE_STI_TYPE,
+  FILE_TYPE,
+  PARENT_TYPE,
+} from '@pfda/https-apps-shared/src/domain/user-file/user-file.enum'
 import { dropData } from '../utils/db'
 import * as create from '../utils/create'
 import * as generate from '../utils/generate'
 import { fakes } from '../utils/mocks'
+import { FILES_DESC_RES, FILES_LIST_RES } from '../utils/mock-responses'
+import { stripEntityDates } from '../utils/expect-helper'
 
 const createSyncJobTask = async (
   payload: CheckStatusJob['payload'],
@@ -32,12 +39,15 @@ describe('TASK: sync_job_status', () => {
     // await emptyDefaultQueue()
     await dropData(database.connection())
     em = database.orm().em
+    em.clear()
     user = create.userHelper.create(em)
     app = create.appHelper.create(em, { user })
     await em.flush()
     // reset fakes
     fakes.bull.addToQueueStub.resetHistory()
     fakes.client.jobDescribeFake.resetHistory()
+    fakes.client.filesListFake.resetHistory()
+    fakes.client.filesDescFake.resetHistory()
     fakes.queue.removeRepeatableFake.resetHistory()
   })
 
@@ -117,6 +127,85 @@ describe('TASK: sync_job_status', () => {
     const updatedJob = await afterEm.findOne(Job, job.id)
     expect(updatedJob).to.have.property('state', JOB_STATE.TERMINATED)
     expect(updatedJob).to.have.property('updatedAt').that.is.not.equal(job.updatedAt)
+  })
+
+  context('files sync', () => {
+    it('calls the listFiles and descFiles', async () => {
+      const job = create.jobHelper.create(
+        em,
+        { user, app },
+        { ...generate.job.simple, state: JOB_STATE.IDLE },
+      )
+      // first file in the response is already known to our system
+      const firstFileDxid = FILES_LIST_RES.results[0].id
+      const file = create.filesHelper.create(
+        em,
+        { user },
+        {
+          project: job.project,
+          parentId: job.id,
+          parentType: PARENT_TYPE.JOB,
+          dxid: firstFileDxid,
+        },
+      )
+      await em.flush()
+      await createSyncJobTask(
+        { dxid: job.dxid },
+        { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
+      )
+      expect(fakes.client.filesListFake.calledOnce).to.be.true()
+      expect(fakes.client.filesDescFake.calledOnce).to.be.true()
+      const descFilesCallArgs = fakes.client.filesDescFake.getCall(0).args[0]
+      expect(descFilesCallArgs)
+        .to.have.property('fileIds')
+        .that.has.members(FILES_DESC_RES.results.slice(1).map(fileMock => fileMock.describe.id))
+      // first file already exists so it is omitted from our system
+      expect(descFilesCallArgs).to.have.property('fileIds').that.not.have.members([file.id])
+    })
+
+    it('creates files in the database', async () => {
+      const job = create.jobHelper.create(
+        em,
+        { user, app },
+        { ...generate.job.simple, state: JOB_STATE.IDLE },
+      )
+      await em.flush()
+      // return only first entry so it is easier to test
+      const firstFileDxid = FILES_LIST_RES.results[0].id
+      fakes.client.filesListFake.returns({
+        results: [FILES_LIST_RES.results[0]],
+        next: null,
+      })
+      fakes.client.filesDescFake.returns({
+        results: [FILES_DESC_RES.results[0]],
+      })
+      await createSyncJobTask(
+        { dxid: job.dxid },
+        { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
+      )
+      const filesInDb = await em.find(UserFile, {}, { populate: false })
+      expect(filesInDb).to.be.an('array').with.lengthOf(1)
+      // converted to JSON to remove user reference
+      const resultFile = wrap(filesInDb[0]).toJSON()
+      expect(stripEntityDates(resultFile)).to.be.deep.equal({
+        id: 1,
+        dxid: firstFileDxid,
+        uid: `${firstFileDxid}-1`,
+        user: user.id,
+        project: job.project,
+        parentId: job.id,
+        parentType: PARENT_TYPE.JOB,
+        parentFolderId: null,
+        scopedParentFolderId: null,
+        description: null,
+        fileSize: FILES_DESC_RES.results[0].describe.size,
+        name: FILES_DESC_RES.results[0].describe.name,
+        state: 'closed',
+        scope: 'private',
+        entityType: FILE_TYPE.REGULAR,
+        stiType: FILE_STI_TYPE.USERFILE,
+      })
+    })
   })
 
   // test: check if removeRepeatable are called -> important

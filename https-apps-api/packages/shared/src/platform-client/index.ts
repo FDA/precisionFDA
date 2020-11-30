@@ -25,6 +25,34 @@ type JobCreateParams = BaseParams & {
   }
 }
 
+type ListFilesParams = BaseParams & {
+  project: string
+  folder?: string
+}
+
+type DescribeFilesParams = BaseParams & {
+  fileIds: string[]
+}
+
+type ListFilesResponse = {
+  results: Array<{
+    id: string
+    project: string
+  }>
+  next?: boolean
+}
+
+type DescribeFilesResponse = {
+  results: Array<{
+    describe: {
+      id: string
+      name: string
+      size: number
+      // add more here
+    }
+  }>
+}
+
 type JobCreateResponse = {
   id: string
 }
@@ -119,4 +147,40 @@ const jobDescribe = async (params: JobDescribeParams): Promise<JobDescribeRespon
   }
 }
 
-export { jobDescribe, jobCreate, JobDescribeResponse, JobCreateParams }
+const filesList = async (params: ListFilesParams): Promise<ListFilesResponse> => {
+  const url = `${config.platform.apiUrl}/system/findDataObjects`
+  const options: AxiosRequestConfig = {
+    method: 'POST',
+    data: { class: 'file', scope: { project: params.project } },
+    url,
+    headers: setupHeaders(params),
+  }
+  try {
+    log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
+    const res = await axios.request(options)
+    return res.data
+  } catch (err) {
+    log.warn({ requestOptions: options }, 'Failed request options')
+    return handleFailed(err)
+  }
+}
+
+const describeFiles = async (params: DescribeFilesParams): Promise<DescribeFilesResponse> => {
+  const url = `${config.platform.apiUrl}/system/describeDataObjects`
+  const options: AxiosRequestConfig = {
+    method: 'POST',
+    data: { objects: params.fileIds },
+    url,
+    headers: setupHeaders(params),
+  }
+  try {
+    log.info({ clientOptions: options, clientUrl: url }, 'Running DNANexus API request')
+    const res = await axios.request(options)
+    return res.data
+  } catch (err) {
+    log.warn({ requestOptions: options }, 'Failed request options')
+    return handleFailed(err)
+  }
+}
+
+export { jobDescribe, jobCreate, filesList, describeFiles, JobDescribeResponse, JobCreateParams }

@@ -53,7 +53,10 @@ export class Job extends BaseEntity {
 
   // foreign keys -> not yet mapped
   @Property()
-  appSeriesId: number;
+  appSeriesId: number
+
+  @Property()
+  localFolderId: number;
 
   // @Property()
   // analysisId: number

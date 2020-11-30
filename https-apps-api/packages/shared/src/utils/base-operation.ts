@@ -1,7 +1,7 @@
 /* eslint-disable import/group-exports */
 /* eslint-disable max-classes-per-file */
 import { nanoid } from 'nanoid'
-import type { AnyObject, OpsCtx, WorkerOpsCtx } from '../types'
+import type { AnyObject, OpsCtx, WorkerOpsCtx, Maybe } from '../types'
 
 export type DefaultInput = AnyObject
 
@@ -20,7 +20,7 @@ export abstract class BaseOperation<IN, OUT> {
     }
   }
 
-  async execute(props?: IN): Promise<OUT> {
+  async execute(props?: IN): Promise<Maybe<OUT>> {
     const startTime = Date.now()
     this.ctx.log.info({ startTime, id: this.id }, 'Operation started')
     try {
@@ -36,7 +36,7 @@ export abstract class BaseOperation<IN, OUT> {
     }
   }
 
-  public abstract async run(props?: IN): Promise<OUT>
+  public abstract async run(props?: IN): Promise<Maybe<OUT>>
 }
 
 export abstract class WorkerBaseOperation<IN, OUT> extends BaseOperation<IN, OUT> {
@@ -48,7 +48,7 @@ export abstract class WorkerBaseOperation<IN, OUT> extends BaseOperation<IN, OUT
     this.ctx.job = inputCtx.job
   }
 
-  async execute(props?: IN): Promise<OUT> {
+  async execute(props?: IN): Promise<Maybe<OUT>> {
     const startTime = Date.now()
     this.ctx.log.info(
       {
