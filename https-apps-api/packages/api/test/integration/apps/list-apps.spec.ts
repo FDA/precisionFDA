@@ -20,6 +20,7 @@ describe.skip('GET /apps', () => {
     await dropData(database.connection())
     // create DB mocks
     em = database.orm().em
+    em.clear()
     user = create.userHelper.create(em)
     app = create.appHelper.create(em, { user })
     await em.flush()

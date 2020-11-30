@@ -24,6 +24,7 @@ describe('POST /apps/:id/run', () => {
     await dropData(database.connection())
     // create DB mocks
     em = database.orm().em
+    em.clear()
     user = create.userHelper.create(em)
     app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
     await em.flush()
