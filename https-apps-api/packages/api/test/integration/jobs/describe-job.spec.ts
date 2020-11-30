@@ -22,6 +22,7 @@ describe('GET /jobs/:id', () => {
     await dropData(database.connection())
     // create DB mocks
     em = database.orm().em
+    em.clear()
     user = create.userHelper.create(em)
     app = create.appHelper.create(em, { user })
     job = create.jobHelper.create(em, { user, app }, { state: JOB_STATE.DONE })
@@ -46,6 +47,7 @@ describe('GET /jobs/:id', () => {
       entityType: JOB_DB_ENTITY_TYPE.HTTPS,
       project: job.project,
       runData: job.runData,
+      localFolderId: null,
       // provenance: null,
       // describe: job.describe,
       state: job.state,
