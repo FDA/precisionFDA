@@ -53,4 +53,21 @@ const appHelper = {
   },
 }
 
-export { userHelper, jobHelper, appHelper }
+const filesHelper = {
+  create: (
+    em: EntityManager,
+    references: { user: InstanceType<typeof entities.User> },
+    data?: Partial<InstanceType<typeof entities.UserFile>>,
+  ) => {
+    const defaults = generate.userFile.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const file = wrap(new entities.UserFile(references.user)).assign(input, { em })
+    em.persist(file)
+    return file
+  },
+}
+
+export { userHelper, jobHelper, appHelper, filesHelper }
