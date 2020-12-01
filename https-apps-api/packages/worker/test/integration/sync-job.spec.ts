@@ -149,6 +149,7 @@ describe('TASK: sync_job_status', () => {
         { user, app },
         { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
       )
+      fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       // first file in the response is already known to our system
       const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
       const file = create.filesHelper.create(
