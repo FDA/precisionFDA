@@ -52,7 +52,6 @@ export class CreateJobOperation extends BaseOperation<RunAppInput, Job> {
     const jobName = input.name ?? app.title
 
     const repo = this.ctx.em.getRepository(Job)
-    // todo: handle different inputs for different app types
     const newJobClientRes = await client.jobCreate(runDxInput)
     // todo: transaction (explicit? consider.. maybe with provenance later)
     // add all the data to the database

@@ -117,7 +117,7 @@ describe('TASK: sync_job_status', () => {
     const job = create.jobHelper.create(
       em,
       { user, app },
-      { ...generate.job.simple, state: JOB_STATE.IDLE },
+      { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
     )
     fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
     await em.flush()
@@ -138,7 +138,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
       )
       // first file in the response is already known to our system
       const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
@@ -184,7 +184,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
       )
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
@@ -229,7 +229,7 @@ describe('TASK: sync_job_status', () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
-        { ...generate.job.simple, state: JOB_STATE.IDLE },
+        { ...generate.job.simple, state: JOB_STATE.IDLE, project: user.jupyterProject },
       )
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })

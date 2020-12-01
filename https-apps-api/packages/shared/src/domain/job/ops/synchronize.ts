@@ -3,13 +3,14 @@ import { difference, map, prop } from 'ramda'
 import { CheckStatusJob } from '../../../queue/task.input'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { Job } from '../job.entity'
-import { isStateTerminal, shouldSyncStatus } from '../job.helper'
+import { getJobSubtype, isStateTerminal, shouldSyncStatus } from '../job.helper'
 import * as client from '../../../platform-client'
 import { removeRepeatable } from '../../../queue'
 import type { Maybe } from '../../../types'
 import { UserFile } from '../../user-file'
 import { User } from '../..'
 import { FILE_STATE, FILE_STI_TYPE, FILE_TYPE, PARENT_TYPE } from '../../user-file/user-file.enum'
+import { APP_HTTPS_SUBTYPE } from '../../app/app.enum'
 
 export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payload'], Job> {
   protected user: User
@@ -83,6 +84,13 @@ export class SyncJobOperation extends WorkerBaseOperation<CheckStatusJob['payloa
       const snapshotFileIds = map(prop('id'))(snapshotsInProject.results)
       const regularFileIds = difference(remoteFileIds, snapshotFileIds)
       this.ctx.log.info({ regularFileIds, snapshotFileIds }, 'Remote state file ids')
+
+      if (getJobSubtype(job, user) !== APP_HTTPS_SUBTYPE.JUPYTER && snapshotFileIds.length > 0) {
+        this.ctx.log.warn(
+          { jobId: job.id, jobType: getJobSubtype(job, user), snapshotFileIds },
+          'Job type is not Jupyter but snapshots were discovered on the platfrom',
+        )
+      }
 
       const localFileIds = map(prop('dxid'))(localfiles)
       const newRegularFileIds = difference(regularFileIds, localFileIds)
