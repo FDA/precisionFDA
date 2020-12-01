@@ -136,6 +136,7 @@ describe('TASK: sync_job_status', () => {
         { user, app },
         { ...generate.job.simple, state: JOB_STATE.IDLE },
       )
+      fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       // first file in the response is already known to our system
       const firstFileDxid = FILES_LIST_RES.results[0].id
       const file = create.filesHelper.create(
@@ -170,6 +171,7 @@ describe('TASK: sync_job_status', () => {
         { ...generate.job.simple, state: JOB_STATE.IDLE },
       )
       await em.flush()
+      fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       // return only first entry so it is easier to test
       const firstFileDxid = FILES_LIST_RES.results[0].id
       fakes.client.filesListFake.returns({
