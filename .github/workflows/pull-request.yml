@@ -120,6 +120,7 @@ jobs:
         run: npm install -g yarn
       - run: cd ./https-apps-api && make install
       - run: cd ./https-apps-api && make test-api
+      - run: cd ./https-apps-api && make test-worker
 
   react-app:
     name: React App
