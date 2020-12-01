@@ -13,7 +13,11 @@ import { dropData } from '../utils/db'
 import * as create from '../utils/create'
 import * as generate from '../utils/generate'
 import { fakes } from '../utils/mocks'
-import { FILES_DESC_RES, FILES_LIST_RES } from '../utils/mock-responses'
+import {
+  FILES_DESC_RES,
+  FILES_LIST_RES_ROOT,
+  FILES_LIST_RES_SNAPSHOT,
+} from '../utils/mock-responses'
 import { stripEntityDates } from '../utils/expect-helper'
 
 const createSyncJobTask = async (
@@ -136,9 +140,8 @@ describe('TASK: sync_job_status', () => {
         { user, app },
         { ...generate.job.simple, state: JOB_STATE.IDLE },
       )
-      fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       // first file in the response is already known to our system
-      const firstFileDxid = FILES_LIST_RES.results[0].id
+      const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
       const file = create.filesHelper.create(
         em,
         { user },
@@ -150,11 +153,24 @@ describe('TASK: sync_job_status', () => {
         },
       )
       await em.flush()
+      fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
+      // first call runs with "/" folder, second with "/.Notebook_snapshots"
+      fakes.client.filesListFake.onCall(0).returns(FILES_LIST_RES_ROOT)
+      fakes.client.filesListFake.onCall(1).returns(FILES_LIST_RES_SNAPSHOT)
       await createSyncJobTask(
         { dxid: job.dxid },
         { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
       )
-      expect(fakes.client.filesListFake.calledOnce).to.be.true()
+      // test diffs in both calls
+      // list files calls
+      expect(fakes.client.filesListFake.calledTwice).to.be.true()
+      const listAllCallArgs = fakes.client.filesListFake.getCall(0).args[0]
+      expect(listAllCallArgs).to.have.keys(['accessToken', 'project'])
+      const listSnapshotCallArgs = fakes.client.filesListFake.getCall(1).args[0]
+      expect(listSnapshotCallArgs).to.have.keys(['accessToken', 'project', 'folder'])
+      expect(listSnapshotCallArgs).to.have.property('folder', '/.Notebook_snapshots')
+
+      // describe file ids call
       expect(fakes.client.filesDescFake.calledOnce).to.be.true()
       const descFilesCallArgs = fakes.client.filesDescFake.getCall(0).args[0]
       expect(descFilesCallArgs)
@@ -164,7 +180,7 @@ describe('TASK: sync_job_status', () => {
       expect(descFilesCallArgs).to.have.property('fileIds').that.not.have.members([file.id])
     })
 
-    it('creates files in the database', async () => {
+    it('creates regular file in the database', async () => {
       const job = create.jobHelper.create(
         em,
         { user, app },
@@ -173,9 +189,9 @@ describe('TASK: sync_job_status', () => {
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       // return only first entry so it is easier to test
-      const firstFileDxid = FILES_LIST_RES.results[0].id
+      const firstFileDxid = FILES_LIST_RES_ROOT.results[0].id
       fakes.client.filesListFake.returns({
-        results: [FILES_LIST_RES.results[0]],
+        results: [FILES_LIST_RES_ROOT.results[0]],
         next: null,
       })
       fakes.client.filesDescFake.returns({
@@ -205,6 +221,51 @@ describe('TASK: sync_job_status', () => {
         state: 'closed',
         scope: 'private',
         entityType: FILE_TYPE.REGULAR,
+        stiType: FILE_STI_TYPE.USERFILE,
+      })
+    })
+
+    it('creates snapshot file in the database', async () => {
+      const job = create.jobHelper.create(
+        em,
+        { user, app },
+        { ...generate.job.simple, state: JOB_STATE.IDLE },
+      )
+      await em.flush()
+      fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
+      // return only first entry so it is easier to test
+      const firstFileDxid = FILES_LIST_RES_ROOT.results[5].id
+      fakes.client.filesListFake.returns({
+        results: [FILES_LIST_RES_ROOT.results[5]],
+        next: null,
+      })
+      fakes.client.filesDescFake.returns({
+        results: [FILES_DESC_RES.results[5]],
+      })
+      await createSyncJobTask(
+        { dxid: job.dxid },
+        { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
+      )
+      const filesInDb = await em.find(UserFile, {}, { populate: false })
+      expect(filesInDb).to.be.an('array').with.lengthOf(1)
+      // converted to JSON to remove user reference
+      const resultFile = wrap(filesInDb[0]).toJSON()
+      expect(stripEntityDates(resultFile)).to.be.deep.equal({
+        id: 1,
+        dxid: firstFileDxid,
+        uid: `${firstFileDxid}-1`,
+        user: user.id,
+        project: job.project,
+        parentId: job.id,
+        parentType: PARENT_TYPE.JOB,
+        parentFolderId: null,
+        scopedParentFolderId: null,
+        description: null,
+        fileSize: FILES_DESC_RES.results[0].describe.size,
+        name: FILES_DESC_RES.results[0].describe.name,
+        state: 'closed',
+        scope: 'private',
+        entityType: FILE_TYPE.SNAPSHOT,
         stiType: FILE_STI_TYPE.USERFILE,
       })
     })

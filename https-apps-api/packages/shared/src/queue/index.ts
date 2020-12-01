@@ -29,7 +29,7 @@ const addToQueue = async (task: AnyObject, options?: JobOptions): Promise<Job> =
   if (typeof statusQueue === 'undefined') {
     throw new Error('The queue was not started')
   }
-  console.log('adding a task to queue', task)
+  console.log('adding a task to queue', task, options)
   const job = await statusQueue.add(task, options)
   return job
 }

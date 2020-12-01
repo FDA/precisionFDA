@@ -148,10 +148,14 @@ const jobDescribe = async (params: JobDescribeParams): Promise<JobDescribeRespon
 }
 
 const filesList = async (params: ListFilesParams): Promise<ListFilesResponse> => {
+  const scope = {
+    project: params.project,
+    folder: params.folder ?? '/',
+  }
   const url = `${config.platform.apiUrl}/system/findDataObjects`
   const options: AxiosRequestConfig = {
     method: 'POST',
-    data: { class: 'file', scope: { project: params.project } },
+    data: { class: 'file', scope },
     url,
     headers: setupHeaders(params),
   }
@@ -165,7 +169,7 @@ const filesList = async (params: ListFilesParams): Promise<ListFilesResponse> =>
   }
 }
 
-const describeFiles = async (params: DescribeFilesParams): Promise<DescribeFilesResponse> => {
+const filesDescribe = async (params: DescribeFilesParams): Promise<DescribeFilesResponse> => {
   const url = `${config.platform.apiUrl}/system/describeDataObjects`
   const options: AxiosRequestConfig = {
     method: 'POST',
@@ -183,4 +187,4 @@ const describeFiles = async (params: DescribeFilesParams): Promise<DescribeFiles
   }
 }
 
-export { jobDescribe, jobCreate, filesList, describeFiles, JobDescribeResponse, JobCreateParams }
+export { jobDescribe, jobCreate, filesList, filesDescribe, JobDescribeResponse, JobCreateParams }
